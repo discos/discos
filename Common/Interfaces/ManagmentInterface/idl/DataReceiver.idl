@@ -1,0 +1,127 @@
+/* **************************************************************** */
+/* IRA Istituto di Radioastronomia                                  */
+/* $Id: DataReceiver.idl,v 1.3 2011-04-15 09:09:59 a.orlati Exp $                                                           */
+/*                                                                  */
+/* This code is under GNU General Public Licence (GPL)              */
+/*                                                                  */
+/* Who                                   when            What        */
+/* Andrea Orlati(a.orlati@ira.inaf.it)	 03/11/2010      Created	 */
+
+#ifndef DATARECEIVER_IDL_
+#define DATARECEIVER_IDL_
+
+#include <baci.idl>
+#include <ManagmentDefinitions.idl>
+#include <ComponentErrors.idl>
+#include <bulkDataReceiver.idl>
+
+
+#pragma prefix "alma"
+
+module Management { 
+	
+	/**
+	 * This is common interface of components that are able to receive and process data from a data sender through the ACS bulk data transfer protocol. 
+	 * Generally speaking a data sender is a backend whilest a receiver is a specific component that does something with data. The components that implement this interface
+	 * can saves the data into a file or could perform any sort run-time analisys. 
+	 * The <i>Scheduler</i> deals with data receivers component through this interface, any other specialization is not considered by the scheduler.
+	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ 	 * Istituto di Radioastronomia, Italia
+	 */ 
+	interface DataReceiver : bulkdata::BulkDataReceiver {
+		
+		/*
+		 *  Definition of file name that is currently written
+		 */
+		readonly attribute ACS::ROstring fileName;
+		
+		/**
+		 * Name of the project currently running
+		 */
+		readonly attribute ACS::ROstring projectName;
+		
+		/**
+		 * Name of the observer, it could be any string of characters
+		 */
+		readonly attribute ACS::ROstring observer;
+		
+		/**
+		 * Identifier of the scan currently running
+		 */
+		readonly attribute ACS::ROlong scanIdentifier;
+		
+		/**
+		 * Identifer of the device currently used as primary
+		 */
+		readonly attribute ACS::ROlong deviceID;
+		
+		/**
+		 * Stores the information about the axix along with the scan is taking place, since one axis at the time is allowed the antenna movment has the precedence over the 
+		 * ServoMinor. It may be that the telescope is not scanning or the telescope is simpy tracking, in that case <i>MNG_NO_AXIS</i> is reported. 
+		 */
+		readonly attribute Management::ROTScanAxis scanAxis;
+		
+		/**
+		 * Istantaneous Y data
+		 */
+		readonly attribute ACS::ROdouble dataY;
+		
+		/**
+		 * Istantaneous X data. This makes sense only if the scanAxis is not <i>MNG_NO_AXIS</i>
+		 */
+		readonly attribute ACS::ROdouble dataX;
+		
+		/**
+		 * all Y data from the beggining of the data acquisition
+		 */
+		readonly attribute ACS::ROdoubleSeq arrayDataY;
+		
+		/**
+		 * all X data from the beggining of the data acquisition. This makes sense only if the scanAxis is not <i>MNG_NO_AXIS</i>
+		 */ 
+		readonly attribute ACS::ROdoubleSeq arrayDataX;
+			
+		/**
+		 * Sets a new file name 
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 */
+		void setFileName (in string fileName) raises (ComponentErrors::ComponentErrorsEx);
+		
+		/**
+		 * Sets the name of the project that is currently runni.
+		 * The present projectName will be considered valid until a new string is provided.
+		 * @param projectName any combination of character
+		 * @throw ComponentErrors::ComponentErrorsEx 
+		 */
+		void setProjectName(in string projectName) raises (ComponentErrors::ComponentErrorsEx);
+
+		/**
+		 * Sets the name of the observer.
+		 * @param projectName any combination of character
+		 * @throw ComponentErrors::ComponentErrorsEx 
+		 */
+		void setObserverName(in string observer) raises (ComponentErrors::ComponentErrorsEx);
+		
+		/**
+		 * This command will set the scan identifier number. 
+		 * @param identifier any integer number
+		 * @throw ComponentErrors::ComponentErrorsEx 
+		 */
+		void setScanIdentifier(in long identifier) raises (ComponentErrors::ComponentErrorsEx);
+		
+		/**
+		 * Set the device identifier, this is the identification number of the backend section that has been elected as primary section.
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 */
+		void setDevice(in long deviceID) raises (ComponentErrors::ComponentErrorsEx);
+		
+		/**
+		 * Sets scan axis valus
+		*/
+		void setScanAxis(in TScanAxis scanAxis) raises (ComponentErrors::ComponentErrorsEx);
+		
+	};
+};
+
+
+#endif /*DATARECEIVER_IDL_*/

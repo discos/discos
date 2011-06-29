@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Authors: 
+        Marco Buttu, mbuttu@oa-cagliari.inaf.it
+        Andrea Orlati <a.orlati@ira.inaf.it>
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTKBandMF:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="urn:schemas-cosylab-com:SRTKBandMF:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+
+    <!-- RECEIVER COMPONENT -->
+    <xs:complexType name="SRTKBandMFReceiverType">
+
+        <!-- Properties -->
+        <xs:sequence>
+            <!-- Dewar vacuum (ROdouble) -->
+            <xs:element name="vacuum" type="baci:ROdouble" />
+            <!-- Dewar low cryogenic temperature (ROdouble) -->
+            <xs:element name="lowTemperature" type="baci:ROdouble" />
+            <!-- Dewar high cryogenic temperature (ROdouble) -->
+            <xs:element name="highTemperature" type="baci:ROdouble" />
+            <!-- Local Oscillator (ROdoubleSeq) -->
+            <xs:element name="LO" type="baci:ROdoubleSeq" />
+            <!-- Number of feeds (ROlong) -->
+            <xs:element name="feeds" type="baci:ROlong" />
+            <!-- Number of Intermediate Frequencies available for each feed (ROlong) -->
+            <xs:element name="IFs" type="baci:ROlong" />
+            <!-- The polarization configured in each IF available. (ROlongSeq) -->
+            <xs:element name="polarization" type="baci:ROlongSeq" />
+            <!-- Receiver Name (ROString) -->
+            <xs:element name="receiverName" type="baci:ROstring" />
+            <!-- Receiver status (ROpattern) -->
+            <xs:element name="status">
+                 <xs:complexType>
+                    <xs:complexContent>
+                        <xs:restriction base="baci:ROpattern">
+                            <xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="65535"/>
+                            <xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                                "CHO, CLA, VPO, VVO"/>
+                            <xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                                "3, 3, 3, 3"/>
+                            <xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+                                "0, 0, 0, 0"/>
+                        </xs:restriction>
+                    </xs:complexContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+
+        <!-- Attributes -->
+        <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
+        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
+        <!-- Receiver name (for instance: SRTKBandMF) -->
+        <xs:attribute name="receiver_name" type="xs:string" use="required" />
+        <xs:attribute name="number_of_feeds" type="xs:unsignedShort" use="required" />
+        <xs:attribute name="ip" type="xs:string" use="required" />
+        <xs:attribute name="port" type="xs:unsignedShort" use="required" />
+        <!-- timeout (microseconds) applied when trying to connect to the receiver board -->
+        <xs:attribute name="timeout" type="xs:unsignedLong" use="optional" />
+
+    </xs:complexType>
+    <xs:element name="SRTKBandMFReceiver" type="SRTKBandMFReceiverType"/>
+
+
+    <!-- FEED COMPONENT -->
+    <xs:complexType name="SRTKBandMFFeedType">
+
+        <xs:sequence>
+            <!-- Drain voltage of stage number 1 of LNA, left channel (ROdouble) -->
+            <xs:element name="Vdl_1" type="baci:ROdouble"/>
+            <!-- Drain voltage of stage number 1 of LNA, right channel (ROdouble) -->
+            <xs:element name="Vdr_1" type="baci:ROdouble"/>
+            <!-- Drain current of stage number 1 of LNA, left channel (ROdouble) -->
+            <xs:element name="Idl_1" type="baci:ROdouble"/>
+            <!-- Drain current of stage number 1 of LNA, rihgt channel (ROdouble) -->
+            <xs:element name="Idr_1" type="baci:ROdouble"/>
+            <!-- Gate voltage of stage number 1 of LNA, left channel (ROdouble) -->
+            <xs:element name="Vgl_1" type="baci:ROdouble"/>
+            <!-- Gate voltage of stage number 1 of LNA, right channel (ROdouble) -->
+            <xs:element name="Vgr_1" type="baci:ROdouble"/>
+
+            <xs:element name="Vdl_2" type="baci:ROdouble"/>
+            <xs:element name="Vdr_2" type="baci:ROdouble"/>
+            <xs:element name="Idl_2" type="baci:ROdouble"/>
+            <xs:element name="Idr_2" type="baci:ROdouble"/>
+            <xs:element name="Vgl_2" type="baci:ROdouble"/>
+            <xs:element name="Vgr_2" type="baci:ROdouble"/>
+
+            <xs:element name="Vdl_3" type="baci:ROdouble"/>
+            <xs:element name="Vdr_3" type="baci:ROdouble"/>
+            <xs:element name="Idl_3" type="baci:ROdouble"/>
+            <xs:element name="Idr_3" type="baci:ROdouble"/>
+            <xs:element name="Vgl_3" type="baci:ROdouble"/>
+            <xs:element name="Vgr_3" type="baci:ROdouble"/>
+
+            <xs:element name="Vdl_4" type="baci:ROdouble"/>
+            <xs:element name="Vdr_4" type="baci:ROdouble"/>
+            <xs:element name="Idl_4" type="baci:ROdouble"/>
+            <xs:element name="Idr_4" type="baci:ROdouble"/>
+            <xs:element name="Vgl_4" type="baci:ROdouble"/>
+            <xs:element name="Vgr_4" type="baci:ROdouble"/>
+
+            <xs:element name="Vdl_5" type="baci:ROdouble"/>
+            <xs:element name="Vdr_5" type="baci:ROdouble"/>
+            <xs:element name="Idl_5" type="baci:ROdouble"/>
+            <xs:element name="Idr_5" type="baci:ROdouble"/>
+            <xs:element name="Vgl_5" type="baci:ROdouble"/>
+            <xs:element name="Vgr_5" type="baci:ROdouble"/>
+        </xs:sequence>
+
+        <!-- Feed attributes -->
+        <!-- The feed number, an unsigned used as feed id -->
+        <xs:attribute name="id" type="xs:unsignedShort" use="required" />
+        <!-- The feed position, an array of double (x, y) -->
+        <xs:attribute name="position" type="xs:double" use="required" />
+        <xs:attribute name="ip" type="xs:string" use="required" />
+        <xs:attribute name="port" type="xs:unsignedShort" use="required" />
+        <!-- timeout (microseconds) applied when trying to connect to the board -->
+        <xs:attribute name="timeout" type="xs:unsignedLong" use="required" />
+        <!-- Expire time of data request in seconds. For instance: 0.001 for 1ms-->
+        <xs:attribute name="expire_time" type="xs:double" use="required" />
+
+    </xs:complexType>
+
+    <xs:element name="SRTKBandMFFeed" type="SRTKBandMFFeedType"/>
+
+</xs:schema>

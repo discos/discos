@@ -1,0 +1,21 @@
+1) I wonder why if I close the control Socket also the Status socket is automatically closed.
+2) why the command general structure requires a "Command Counter" and also the mode command or parameter command requires a command counter. The counter returned by 
+   the status message frame seems to be the one reported in the mode command or parameter command part of the message.
+3) the remote mode command "DriveTostow2 does not work for azimuth in the simulator!
+4) in the pointing status frame, the parameter command status structure should be offset by 115 bytes, instead the displacement is 121 bytes. What about the 6 bytes 
+   between 115 and 121? This justifies the difference between the documented size of status message frame and the effectively received bytes. 
+5) In parameter command set offsets, the range is declared to be 86400000 seconds that corresponds to 1000 days: quite exotic. Apparently the last significant decimal
+   digits is the third one. Sent 0.034356 the simulator displays 0.03400.    
+   
+6)  the "sectorSwitchAz" in Pointing Status reports 1 = upper sector active while the current azimuth is 1.5
+
+7) The position flag in motors status seems to report "position not reached, corresponding to UINT8 value 0. 
+
+8) In warning main axis the bit "StowPins_Extracted" has inverted logic: 0 means the pins are out.
+
+
+
+a) Il comando setDeltaTime imposta correttamente (sul simulatore) il valore per P.T. time offset, ma il component per l'attributo DUt1 ritorna sempre zero. Bug mio?
+b) voglio aggiungere il flag AXISACTIVE nello stato dell'asse.
+c) Implementare program track
+d) prendere valor idi configurazione dal CDB.

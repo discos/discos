@@ -1,0 +1,52 @@
+#ifndef _lan_IDL_
+#define _lan_IDL_
+/** 
+* $Id: lan.idl,v 1.1 2009-05-21 15:31:12 c.migoni Exp $
+*/
+
+#include <baci.idl>
+#include <ASErrors.idl>
+
+
+#pragma prefix "alma"
+
+
+module SRTActiveSurface 
+{
+   /** @interface lan
+     *  This interface rappresents the module converting comunications from serial to lan.
+     *  A chain of AS actuator device are linked toghether by a serial 485 line.The serial stream is converted to lan packets.
+     *  A chain rappresents a radius of paraboloid. 
+     *  the component is istantiated the first time is requested. The a pointer to itself is passed to all the subsequent USD requiring it.
+     */
+     interface lan : ACS::CharacteristicComponent
+	{
+	
+	    /**
+    	*	send a command to adressed USD. 
+    	*	@param cmd(in) the command.
+    	*	@param addr(in) the serial address.
+    	*	@param param(in) the optional parameters(max 4 byte).
+    	*	@param nBytes(in) the lenght of param.
+    	*
+    	*   @return a completion w/o the errors
+    	*/
+	    ACSErr::Completion sendUSDCmd(in long cmd,in long addr, in long param, in long nBytes);
+	    
+	    /**
+    	*	retrive a parameter from adressed USD. 
+    	*	@param cmd(in) the command.
+    	*	@param addr(in) the serial address.
+    	*	@param nBytes(in) the lenght of param.
+    	*	@param param(out) the optional parameters(max 4 byte).
+    	*
+    	*   @throw ASErrors::ASErrorsEx in case of error.
+    	*/
+	    void recUSDPar(in long cmd,in long addr,in long nBytes,out long param) raises (ASErrors::ASErrorsEx);
+	    
+	    readonly attribute ACS::RWdouble delay ;
+	    readonly attribute ACS::ROlong status;
+	};
+
+};
+#endif /* _lan_ */

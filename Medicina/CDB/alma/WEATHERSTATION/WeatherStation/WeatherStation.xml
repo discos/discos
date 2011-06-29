@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+    - History:
+    -->
+<MedWeatherStation
+xmlns="urn:schemas-cosylab-com:MedWeatherStation:1.0"
+	      xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	      xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	      IPAddress="192.167.189.43" port="5002">
+	
+	<temperature description="current temperature" />
+	<winddir description="instantaneous wind direction" />
+	<windspeed description="instantaneous wind direction" />
+	<humidity  description="Humidity" />	
+	<pressure description="pressure" />
+</MedWeatherStation>

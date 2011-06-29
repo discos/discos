@@ -1,0 +1,34 @@
+
+# The first field is the name of the procedure which must be unique in the file, then the name of the instance of the backend the 
+# procedure refers to. The open bracket must lie on the same line. Between the brakets the configuration commands of the backend. The commands must be compliant to what the
+# backend expects. The scheduler will not start the acquisition until the all configuration procedure is finished.
+# the brecketes inclosed instruction are hardware dependent and they may vary from case to case.
+STD:BACKENDS/TotalPower {
+	integration=40
+	calSwitch=0
+	setSection=0,-1,300.0,-1,-1,0.000025,-1
+	setSection=1,-1,300.0,-1,-1,0.000025,-1
+	setSection=2,-1,300.0,-1,-1,0.000025,-1
+	setSection=3,-1,300.0,-1,-1,0.000025,-1
+	setSection=4,-1,300.0,-1,-1,0.000025,-1
+	setSection=5,-1,300.0,-1,-1,0.000025,-1
+	setSection=6,-1,300.0,-1,-1,0.000025,-1
+	setSection=7,-1,300.0,-1,-1,0.000025,-1
+	setSection=8,-1,300.0,-1,-1,0.000025,-1
+	setSection=9,-1,300.0,-1,-1,0.000025,-1
+	setSection=10,-1,300.0,-1,-1,0.000025,-1
+	setSection=11,-1,300.0,-1,-1,0.000025,-1
+	setSection=12,-1,300.0,-1,-1,0.000025,-1
+	setSection=13,-1,300.0,-1,-1,0.000025,-1	
+	setAttenuation=1,15
+	enable=1,1,1,1,1,1,1,1,1,1,1,1,1,1
+}
+
+HIGH:BACKENDS/TotalPower {
+	integration=25
+	calSwitch=2
+	setSection=0,-1,2200.0,-1,-1,0.000025,-1
+	setSection=1,-1,2200.0,-1,-1,0.000025,-1
+	setAttenuation=1,9
+	enable=1,1,0,0,0,0,0,0,0,0,0,0,0,0
+}

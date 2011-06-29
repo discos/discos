@@ -1,0 +1,82 @@
+/* ***************************************************************************/
+/* INAF - Istituto Nazionale di AstroFisica                                  */
+/* IRA - Istituto di Radioastronomia                                         */
+/* OAC - Osservatorio Astronomico di Cagliari                                */
+/*                                                                           */
+/* $Id: SRTWeatherStation.idl,v 1.1 2011-04-06 13:59:01 spoppi Exp $           */
+/*                                                                           */
+/* This code is under GNU General Public Licence (GPL).                      */
+/*                                                                           */
+/* Who					When		What                 */
+/* Sergio Poppi				18/02/2010      Creation             */
+/*                                                                           */
+/* ***************************************************************************/
+
+#ifndef _SRTMETEOSTATION_IDL_
+
+#define _SRTMETEOSTATION_IDL_
+
+#include <baci.idl>
+//#include <AntennaErrors.idl>
+// #include <ComponentErrors.idl>
+#include "GenericWeatherStation.idl"
+
+#pragma prefix "alma"
+
+
+
+
+/**
+	 * This IDL module describes the CORBA interface of the Meteo Station.
+	 * @author <a href=mailto:spoppi@ca.astro.it> Sergio Poppi</a>
+	 * INAF - Istituto Nazionale di AstroFisica
+	 * OAC - Osservatorio Astronomico di Cagliari
+	 * <br> 
+	*/
+
+module Weather {
+	
+	/**
+	
+
+	*/
+
+
+ 
+
+
+	
+     
+
+	interface SRTStation :GenericWeatherStation {
+		/**
+		 
+		*/
+		
+		
+
+		/**
+		Get Parameters METEO STATION, for compatibility with the component 
+		working at the Medicina telescope
+
+		@return parameters
+
+		
+		*/
+//		parameters getData();
+		/**
+		Air Temperature
+		*/
+
+
+//		readonly attribute ACS::RWdouble temperature;	
+//		readonly attribute ACS::RWdouble winddir;
+//		readonly attribute ACS::RWdouble pressure;
+//		readonly attribute ACS::RWdouble windspeed;
+		readonly attribute ACS::RWdouble windspeedpeak;
+//		readonly attribute ACS::RWdouble humidity;
+
+						
+	};
+};
+#endif

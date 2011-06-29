@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!-- 
+ *  Author Infos
+ *  ============
+ *  Name:         Marco Buttu
+ *  E-mail:       mbuttu@oa-cagliari.inaf.it
+ *  Personal Web: http://www.pypeople.com/
+-->
+
+<!-- timeout in microseconds -->
+<SRTKBandMFReceiver
+    xmlns="urn:schemas-cosylab-com:SRTKBandMF:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    actionThreadStackSize="2048"
+    monitoringThreadStackSize="4096"
+
+    receiver_name="SRTKBandMF"
+    number_of_feeds="7"
+    ip="192.135.33.196"
+    port="8000"
+    timeout="2000000"
+>
+	<vacuum description="Dewar vacuum" units="unknown" graph_min="0" graph_max="600" />
+	<lowTemperature description="Dewar low cryogenic temperature" units="kelvin" graph_min="0" graph_max="30" />
+	<highTemperature description="Dewar high cryogenic temperature" units="kelvin" graph_min="50" graph_max="80" />
+	<LO description="Local Oscillator" units="unknown" graph_min="50" graph_max="80" />
+	<feeds description="Number of feeds" units="unknown" graph_min="50" graph_max="80" />
+	<IFs description="Intermediate Frequencies" units="unknown" graph_min="50" graph_max="80" />
+	<polarization description="Polarization" units="unknown" graph_min="50" graph_max="80" />
+	<receiverName description="Receiver Name" />
+	<status description="Receiver status" />
+
+</SRTKBandMFReceiver>

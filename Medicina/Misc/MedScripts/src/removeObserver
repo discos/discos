@@ -1,0 +1,58 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+# "@(#) $Id: removeObserver,v 1.1 2011-02-12 11:29:01 a.orlati Exp $"
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 12/02/2011      Creation                                  
+#************************************************************************
+#   NAME
+#		removeObserver
+# 
+#   SYNOPSIS
+# 
+#   DESCRIPTION
+#   This script removes a user for the observing system. It could be executed only by the system manager on the user server machine.
+#   The manager must have sudoers priviledges for bash commands userdel. For that reason it is recommended to create 
+#   the sudoers priviledges for manager on user server machine only.
+#	
+#   FILES
+#
+#   ENVIRONMENT
+#
+#   RETURN VALUES
+#
+#   CAUTIONS
+#
+#   EXAMPLES
+#
+#   SEE ALSO
+#
+#   BUGS     
+#
+
+function printUsage {
+   echo "Removes a user from the escs observing system"
+   echo ""
+        echo "Usage: `basename $0` userid  "
+}
+
+if [ ! -n "$1" ]
+then
+   printUsage
+   exit
+fi
+
+read -p "remove user "$1" and all its related files?" yn
+case $yn in
+	[Yy]* ) echo "removing.....";;
+	* ) echo "bye!"; exit;;
+esac
+sudo /usr/sbin/userdel -r $1
+rm -rf /archive/data/$1
+rm -rf /archive/schedules/$1
+sudo /usr/lib/yp/ypinit -m
+sudo /sbin/service ypserv restart
+echo "deleted!"

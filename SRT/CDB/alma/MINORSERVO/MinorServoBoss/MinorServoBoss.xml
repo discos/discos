@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   Authors: 
+       Marco Buttu, mbuttu@oa-cagliari.inaf.it
+       Andrea Orlati, aorlati@ira.inaf.it
+-->
+
+<!-- The order of axises of every minor servo have to be the same as MSCU one -->
+<MinorServoBoss
+    xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    actionThreadStackSize="2048"
+    monitoringThreadStackSize="4096"
+    
+    confA="
+        @ SRP: park;
+        @ PFP: LX = (2, 1, 0); LZ = (1, 1, 1); AZ = (1, 1, 1);
+        @ GFR: AZ = (1, 1, 1);
+        @ M3R: park;
+    "
+    confB="
+        @ PFP: LX = (1, 1, 1); LZ = (2, 2, 2); AZ = (3, 3, 3);
+        @ SRP: 
+             LX = (1, 1, 1);
+             LY = (1, 1, 1);
+             LZ = (1, 1, 1);
+             AX = (1, 1, 1);
+             AY = (1, 1, 1);
+             AZ = (1, 1, 1);
+        @ GFR: park; 
+        @ M3R: AZ = (1, 1, 1);
+    "
+
+    slaves="GFR, M3R, PFP, SRP"
+>
+    <!-- MinorServo Status -->
+	<status description="The summary status of MinorServoBoss"/>
+              
+    <!--
+   MinorServoBoss Verbose Status (ROpattern)
+    <verbose_status
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServoBoss verbose status" 
+        format="I don't know"
+        units="none"
+        resolution="65535"
+        alarm_mask="1"
+        alarm_trigger="0"
+        alarm_timer_trig="0"
+        bitDescription="Ok, Tracking, Configuring, Parking, Parked, Warning, Failure"
+        whenSet="3,3,3,3,3,3,3"
+        whenCleared="0,0,0,0,0,0,0"
+        archive_priority="1"
+        archive_min_int="1"
+        archive_max_int="1"
+        archive_delta="1"
+	/>
+    -->
+
+              
+</MinorServoBoss>

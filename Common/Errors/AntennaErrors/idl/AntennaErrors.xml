@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+   - $Id: AntennaErrors.xml,v 1.13 2011-06-03 12:31:52 a.orlati Exp $
+   - Author: Andrea Orlati
+   -
+   - History:
+   -   18-01-2005  Created
+   -   14-09-2005  Added error memebers
+   -   12-05-2008  Added TrackingNotStarted error code
+   -   09-05-2010  Added ScanError error code
+   -   08-09.2010  Added OffsetFrameNotSupported
+-->
+
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="Alma/ACSError" xsi:schemaLocation="Alma/ACSError ACSError.xsd"
+ name="AntennaErrors" type="2002" _prefix="alma">
+
+<Code name="NoError" shortDescription="No error" description="No error condition found"/>
+
+<ErrorCode name="Nak" shortDescription="ACU does not acknowledge" description="">
+	<Member name="Code" type="long" description="Code" />
+	<Member name="Message" type="string" description="Message" />
+</ErrorCode>
+
+<ErrorCode name="Connection" shortDescription="ACU is not reachable or disconnected" description=""/>
+
+<ErrorCode name="OperationNotPermitted" shortDescription="Operation is not allowed or not permitted under this configuration" description="">
+	<Member name="Reason" type="string" description="Reason" />
+</ErrorCode>
+
+<ErrorCode name="ReceiverNotFound" shortDescription="Requested configuration is not existent" description=""/>
+
+<ErrorCode name="AntennaBusy" shortDescription="Antenna is busy with other activities" description=""/>
+
+<ErrorCode name="StoppedByUser" shortDescription="A stop command was issued by a client" description=""/>
+
+<ErrorCode name="SourceNotFound" shortDescription="The requested source or coordinate is not found in the catalog" description="">
+	<Member name="SourceName" type="string" description="Name of the source"/>
+</ErrorCode>
+
+<ErrorCode name="RateTooHigh" shortDescription="The resulting rate is too high" description="">
+	<Member name="Axis" type="string" description="Frame axis which the rate is relative to"/>
+</ErrorCode>
+
+<ErrorCode name="ExceedingSlewingTime" shortDescription="Cannot reach destination in scheduled time" description=""/>
+
+<ErrorCode name="TrackingNotStarted" shortDescription="The tracking has not been started yet" description="" />
+
+<ErrorCode name="ScanError" shortDescription="Illegal scan parameter or configuration" description="">
+	<Member name="Reason" type="string" description="Description of the reason that generates the error"/>
+</ErrorCode>
+
+<ErrorCode name="SecondaryScanError" shortDescription="Illegal secondary scan parameter or configuration" description=""/>
+
+<ErrorCode name="LoadGeneratorError" shortDescription="Could not load the requested ephem generator" description=""/>
+
+<ErrorCode name="MissingTarget" shortDescription="A target must be commanded before doing the scan" description=""/>
+
+<ErrorCode name="OffsetFrameNotSupported" shortDescription="It is not allowed to set offset in the requested frame" description=""/>
+
+<ErrorCode name="TargetNotReachable" shortDescription="The target is not reachable" description=""/>
+
+</Type>

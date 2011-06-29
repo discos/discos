@@ -1,0 +1,60 @@
+/* ***************************************************************************/
+/* INAF - Istituto Nazionale di AstroFisica                                  */
+/* IRA - Istituto di Radioastronomia                                         */
+/* OAC - Osservatorio Astronomico di Cagliari                                */
+/*                                                                           */
+/*                                                                           */
+/* This code is under GNU General Public Licence (GPL).                      */
+/*                                                                           */
+/* Who					When		What                 */
+/* Sergio Poppi				18/02/2010      Creation             */
+/*                                                                           */
+/* ***************************************************************************/
+
+#ifndef _MEDICINAWSTATION_IDL_
+
+#define _MEDICINAWSTATION_IDL_
+
+#include <baci.idl>
+
+#pragma prefix "alma"
+#include "GenericWeatherStation.idl"
+
+module Weather{
+
+
+	interface MedWeatherStation : GenericWeatherStation
+	 {
+
+			
+		/**
+		* get the humidity
+		* @return double	
+		*
+		*  	
+		*	
+		*	
+		*/
+		double getHumidity();
+		/**
+		* get the temperature
+		* @return double	
+		*	
+		*	
+		*/
+		double getTemperature();
+		/**
+		* get the pressure
+		* @return double	
+		*	
+		*	
+		*/
+		double getWindspeed();
+
+		double getPressure();
+
+	 };
+
+};
+
+#endif

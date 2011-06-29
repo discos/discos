@@ -1,0 +1,13 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+# "@(#) $Id: antennaBossTui,v 1.3 2010-08-10 09:36:14 a.orlati Exp $"
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 08/05/2009      Creation                                  
+#************************************************************************
+
+
+xterm -geometry 82x31+0+0 +sb -title AntennaBoss -e /bin/bash --login -c _tui_AntennaBossTextClient &

@@ -1,0 +1,12 @@
+1) in order to build the whole system the TARGETSYS variable must point to either SRT or MED 
+2) The documentation will be produced to the location pointed by the varialbe DOCROOT, if the variable is not set the
+   default location $HOME/docroot is taken
+3) The variable ACS_CDB is required to be set.
+4) The variable SYSLOCATION is required to be set, the source will be dowloaded into this location, when executins the 'sources'
+   make target
+
+
+TODO:
+
+1) for the stat target: it would be nice if the statistics are run over the MODULES selected for the target system. One stat for the each module and the
+   grand total.

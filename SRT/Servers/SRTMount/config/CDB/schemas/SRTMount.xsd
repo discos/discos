@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: SRTMount.xsd,v 1.7 2011-06-01 18:24:44 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   29-11-2010  Created 
+-->
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:SRTMount:1.0"
+	xmlns="urn:schemas-cosylab-com:SRTMount:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:ant="urn:schemas-cosylab-com:Antenna:1.0"	
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+  	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Antenna.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+  	
+  	<xs:complexType name="GeneralStatusType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROpattern">
+				<xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="512"/>
+            	<xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                	"Message_Sync_Err,Status_Line_Err,Control_Line_Err,Remote_Disabled,Emergency,Power_Err,Time_Err,Program_Track_Err,Remote_Cmd_Err"/>
+				<xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                	"0, 0, 0, 0, 0, 0, 0, 1, 1"/>
+            	<xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+            		"2, 2, 2, 2, 2, 2, 2, 2, 2"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+  	<xs:complexType name="AxisStatusType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROpattern">
+				<xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="8192"/>
+            	<xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                	"Axis_Ready,Active,Low_Power_Mode,Stowed,Pin_Extracted,Prelimit_Up,Prelimit_Down,Finallimit_Up,Finallimit_Down,Rate_Limit,Encoder_Failure,Brake_Error,Servo_Error"/>
+				<xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                	"2, 2, 1, 3, 2, 1, 1, 0, 0, 1, 0, 0, 0"/>
+            	<xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+            		"3, 3, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+
+  	<xs:complexType name="MotorStatusType">
+		<xs:complexContent>
+			<xs:extension base="baci:ROlongSeq">
+            	<xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                	"selected,brake,power,active,servo,sensor,bus,pos"/>
+				<xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                	"2, 3, 0, 2, 0, 0, 0, 0"/>
+            	<xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+            		"3, 2, 2, 3, 2, 2, 2, 2"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	 
+	<xs:complexType name="SRTMountType">
+		<xs:sequence>
+			<xs:element name="azimuth" type="baci:ROdouble"/>
+			<xs:element name="elevation" type="baci:ROdouble"/>
+			<xs:element name="azimuthError" type="baci:ROdouble"/>
+			<xs:element name="elevationError" type="baci:ROdouble"/>
+			<xs:element name="azimuthTrackingError" type="baci:ROdouble"/>
+			<xs:element name="elevationTrackingError" type="baci:ROdouble"/>
+			<xs:element name="azimuthMode" type="ant:CommonModesType" />
+			<xs:element name="elevationMode" type="ant:CommonModesType" />
+			<xs:element name="time" type="baci:ROuLongLong" />
+			<xs:element name="controlLineStatus" type="ant:StatusType" />
+			<xs:element name="statusLineStatus" type="ant:StatusType" />
+			<xs:element name="programTrackPositions" type="baci:ROlong" />
+			<xs:element name="section" type="ant:SectionType" />	
+			<xs:element name="azimuthRate" type="baci:ROdouble"/>
+			<xs:element name="elevationRate" type="baci:ROdouble"/>
+			<xs:element name="azimuthOffset" type="baci:ROdouble" />
+			<xs:element name="elevationOffset" type="baci:ROdouble" />
+			<xs:element name="deltaTime" type="baci:ROdouble" />	
+			<xs:element name="commandedAzimuth" type="baci:ROdouble" />	
+			<xs:element name="commandedElevation" type="baci:ROdouble" />
+			<xs:element name="mountStatus" type="mng:SystemStatusType" />	
+			<xs:element name="commandedAzimuthRate" type="baci:ROdouble" />
+			<xs:element name="commandedElevationRate" type="baci:ROdouble" />
+			<xs:element name="commandedAzimuthOffset" type="baci:ROdouble" />
+			<xs:element name="commandedElevationOffset" type="baci:ROdouble" />
+			<xs:element name="cableWrapPosition" type="baci:ROdouble" />
+			<xs:element name="cableWrapTrackingError" type="baci:ROdouble" />
+			<xs:element name="cableWrapRate" type="baci:ROdouble" />
+			<xs:element name="generalStatus" type="GeneralStatusType" />
+			<xs:element name="azimuthStatus" type="AxisStatusType" />
+			<xs:element name="elevationStatus" type="AxisStatusType" />
+			<xs:element name="motorsPosition" type="baci:ROdoubleSeq" />
+			<xs:element name="motorsSpeed" type="baci:ROdoubleSeq" />
+			<xs:element name="motorsTorque" type="baci:ROdoubleSeq" />
+			<xs:element name="motorsUtilization" type="baci:ROdoubleSeq" />
+			<xs:element name="motorsStatus" type="MotorStatusType" />
+		</xs:sequence>
+		<xs:attribute name="ACUIPAddress" type="xs:string" use="required"/>
+		<xs:attribute name="CommandPort" type="xs:unsignedShort" use="required" />
+		<xs:attribute name="StatusPort" type="xs:unsignedShort" use="required" />
+		<!-- time out for stow procedure (microseconds) -->
+		<xs:attribute name="StowTimeout" type="xs:unsignedLong" use="required" />
+		<!-- time out for unstow procedure (microseconds) -->
+		<xs:attribute name="UnStowTimeout" type="xs:unsignedLong" use="required" />
+		<!-- WatchDog duty cycle(microseconds) -->
+		<xs:attribute name="WatchDogThreadPeriod" type="xs:unsignedLong" use="required" />
+		<!-- the cache time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
+		<!-- the expire time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
+		<!-- time allowed to a status frame message to be received (microseconds)-->
+		<xs:attribute name="StatusSocketTimeout" type="xs:unsignedLong" use="required" />
+		<!-- duty cycle or time resolution of the status socket (microseconds)-->
+		<xs:attribute name="StatusSocketDutyCycle" type="xs:unsignedLong" use="required" />
+		<!-- This time is the maximum allowed time to the control socket to respond (microseconds)-->
+		<xs:attribute name="ControlSocketResponseTime" type="xs:unsignedLong" use="required" />
+		<!-- duty cycle or time resolution of the control socket (microseconds)-->
+		<xs:attribute name="ControlSocketDutyCycle" type="xs:unsignedLong" use="required" />
+	</xs:complexType>
+  
+	<xs:element name="SRTMount" type="SRTMountType"/>
+</xs:schema>

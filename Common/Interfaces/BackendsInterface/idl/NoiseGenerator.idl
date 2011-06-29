@@ -1,0 +1,30 @@
+/* **************************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      	        */
+/* $Id: NoiseGenerator.idl,v 1.1 2011-03-14 14:54:11 a.orlati Exp $										                    */
+/*                                                                                                      	        */
+/* This code is under GNU General Public Licence (GPL).                                                 	        */
+/*                                                                                                      	        */
+/* Who                                 when            What                                              	        */
+/* Andrea Orlati(aorlati@ira.inaf.it)  11/09/2008      Creation                                          	        */
+
+#ifndef _NOISEGENERATOR_IDL_
+#define _NOISEGENERATOR_IDL_
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include "GenericBackend.idl"
+
+#pragma prefix "alma"
+
+module Backends {
+	
+	/**
+	 * The NoiseGenerator is a virtual backend that generates white noise signal. It can be configured in any manner as stated by the GenericBackend and it will output a data stream
+	 * according this configuration.
+	*/
+	interface NoiseGenerator : GenericBackend {				
+	};
+	
+};
+
+#endif

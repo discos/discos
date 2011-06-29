@@ -1,0 +1,6 @@
+rtai
+object
+lib
+.purifydir
+.idl-compilation-end
+.idl-compilation-start

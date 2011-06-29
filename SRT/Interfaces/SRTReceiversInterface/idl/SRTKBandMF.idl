@@ -1,0 +1,105 @@
+#ifndef __SRTKBANDMF_IDL__
+#define __SRTKBANDMF_IDL__
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Andrea Orlati <a.orlati@ira.inaf.it>
+\***************************************************************/
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include "GenericReceiver.idl"
+
+#pragma prefix "alma"
+
+/** 
+* This module defines the interface of the KBand Multi Feed Receiver (22GHz).
+* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
+*/
+module Receivers {
+
+    /// Interface of Receiver. The receiver has N feeds
+    interface SRTKBandMFReceiver : ACS::CharacteristicComponent, Receiver {
+
+        /** Set the receiver operating mode.
+         *
+         *  @param mode the operating mode of receiver. Possible values are:
+         *  <ul>
+         *    <li><em>SDISH</em>: Single Dish mode</li>
+         *    <li><em>VLBI</em>: VLBI mode</li>
+         *    <li>...</li>
+         *  </ul>
+         *  @throw ReceiversErrors::ConfigurationEx
+         */
+        // void setMode(in string mode) raises (ReceiversErrors::ConfigurationEx);
+
+
+        /** Return the receiver operating mode as a string.
+         *
+         *  @return the actual operating mode of receiver. Possible values are:
+         *  <ul>
+         *    <li><em>SDISH</em>: Single Dish mode</li>
+         *    <li><em>VLBI</em>: VLBI mode</li>
+         *  </ul>
+         */
+        string mode();
+
+
+        /***************************************************\
+         *           COMMON_RECEIVER_INTERFACE             *
+         ***************************************************
+
+        readonly attribute ACS::ROdoubleSeq LO;
+        
+        readonly attribute ACS::ROlong feeds;
+        
+        readonly attribute ACS::ROlong IFs;
+
+        readonly attribute ACS::ROlongSeq polarization;
+
+        void calOn() raises (ComponentErrors::ComponentErrorsEx);
+
+        void calOff() raises (ComponentErrors::ComponentErrorsEx);
+
+
+        void setLO(in ACS::doubleSeq lo1) raises (ComponentErrors::ComponentErrorsEx);
+
+        ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs) 
+           raises (ComponentErrors::ComponentErrorsEx);
+
+        long getFeeds(out ACS::doubleSeq X,out ACS::doubleSeq Y,out ACS::doubleSeq power) raises (ComponentErrors::ComponentErrorsEx);
+
+        double getTaper(in double freq,in double bandWidth,in long feed,in long ifNumber,out double waveLen) 
+            raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /***************************************************\
+         *               GENERIC_RECEIVER                  *
+         ***************************************************
+
+        readonly attribute ACS::ROdouble vacuum;
+
+        readonly attribute ACS::ROdouble lowTemperature;
+
+        readonly attribute ACS::ROdouble highTemperature;
+
+        readonly attribute ACS::ROpattern status;
+
+        void turnLNAOn(in unsigned long feed_mask, in unsigned long channel_mask);
+
+        void turnLNAOff(in unsigned long feed_mask, in unsigned long channel_mask);
+
+        \***************************************************/
+
+
+	};
+
+
+    /// Interface of Feed component
+    interface SRTKBandMFFeed : ACS::CharacteristicComponent, Feed {
+	};
+
+};
+
+#endif

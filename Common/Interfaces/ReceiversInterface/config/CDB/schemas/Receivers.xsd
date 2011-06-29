@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: Receivers.xsd,v 1.1 2010-10-26 14:32:50 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   17-07-2010  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:Receivers:1.0"
+	xmlns="urn:schemas-cosylab-com:Receivers:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+		
+	<xs:complexType name="PolarizationsType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="1" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default="LEFT,RIGHT"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>	
+	
+</xs:schema>

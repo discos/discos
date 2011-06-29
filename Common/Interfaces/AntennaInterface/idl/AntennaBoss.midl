@@ -1,0 +1,596 @@
+/* *********************************************************************** */
+/* IRA Istituto di Radioastronomia                                         */
+/* $Id: AntennaBoss.midl,v 1.26 2011-05-20 16:54:58 a.orlati Exp $										                           */
+/*                                                                         */
+/* This code is under GNU General Public Licence (GPL).                    */
+/*                                                                         */
+/* Who                                            when               what                */
+/* Andrea Orlati(aorlati@ira.inaf.it)  20/11/2007      Creation            */
+/* Andrea Orlati(aorlati@ira.inaf.it)  28/12/2008      Added the method checkSlewing      */
+/* Andrea Orlati(aorlati@ira.inaf.it)  06/04/2010      checkSlewing replaced by checkScan, starTracking removed and mapped into startScan    */
+/* Andrea Orlati(aorlati@ira.inaf.it)  09/04/2010      added the wrappers track(),moon(),elevationScan() and azimuthScan() */
+/* Andrea Orlati(aorlati@ira.inaf.it)  06/09/2010      reviewed the signature of the getObservedequtorial() and getObservedHorizontal() in order to provide integration */
+/* Andrea Orlati(aorlati@ira.inaf.it)  10/05/2011      subsystem now capable to perform scan starting from a previous scan (secondary) as central point, startScan() and checkScan() changed accordingly */
+
+#ifndef _ANTENNABOSS_IDL_
+
+#define _ANTENNABOSS_IDL_
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ManagmentDefinitions.idl>
+#include <ComponentErrors.idl>
+#include <AntennaErrors.idl>
+#include "AntennaDefinitions.idl"
+#include "EphemGenerator.idl"
+
+#pragma prefix "alma"
+
+module Antenna {
+	/**
+	 * This structure holds all the parameters required to initialize the subScan (<i>OTF</i>) component. 
+	 * It is passed as argument to the <i>startScan()</i>  routine. All coordinates are given in radians and are referred to
+	 * the <i>coordFrame</i>. If the equatorial frame is selected it is supposed to be J2000.
+	 * @sa <i>OTF</i> interface.
+    */
+	typedef struct SubScanSetup {
+		double lon1;
+		double lat1;
+		double  lon2;
+		double  lat2;
+		Antenna::TCoordinateFrame coordFrame;
+		Antenna::TsubScanGeometry geometry;
+		Antenna::TCoordinateFrame subScanFrame;
+		Antenna::TsubScanDescription description;
+		Antenna::TsubScanDirection direction;
+		ACS::TimeInterval subScanDuration;
+	} TSubScanParameters;
+	
+	/**
+	 * It defines the dimension of the tracking parameter vector
+	 */
+	const long ANTENNA_TRACKING_PARAMETER_NUMBER=10;
+	
+	/**
+	 * This structure is used to pass the tracking parameters to the <i>startTracking()</i> routine. The coordinates are supposed to be in radians 
+	 * and their meaning varies according to the <i>TGeneratorType</i> and <i>TCoordinateFrame</i>. 
+	*/
+	typedef  struct  TrackPoint {
+		/**
+		 * If significant this is the name or identifier of the target
+		 */
+		string targetName;
+		/**
+		 *  this field specifies the type of the generator, in particular it defines if a sidereal motion must be used in order to track the source or
+		 *  another kind of motion should be used. (@sa <i>TGeneratorType</i>)
+		 */
+		TGeneratorType type;
+		/**
+		 *  this vector is the list of parameters that defines the source, The parameters enlisted here  must be radians. For Example:
+		 * 1) frame=<i>ANT_EQUATORIAL</i>, type=<i>ANT_SIDEREAL<i> (@sa SkySource::setSourceFromEquatorial()</i>:
+		 * @arg \c 0	the right ascension of the source in radians
+		 * @arg \c 1 the declination of the source in radians
+		 * @arg \c 2 proper motion in right ascension in mas/year (milli seconds of arc year (tropical) if FK4 is used, per 
+		 *                year (julian) if Fk5 is used). dRA/dt*cos(DEC) is assumed
+		 * @arg \c 3 proper motion in declination in mas/year (milli seconds of arc per year (tropical) if FK4 is used, 
+		 * 	               per year (julian) if Fk5 is used)
+		 * @arg \c 4 parallax in milli arcseconds.
+		 * @arg \c 5 rvel radial velocity in Km/sec ( positive value means the source is moving away)
+		*/
+		double parameters[ANTENNA_TRACKING_PARAMETER_NUMBER];
+		/**
+		 * indicates how many significant parameters are stored in the <i>parameters</i> array.
+		*/
+		long paramNumber;
+		/**
+		 * it represents the frame the passed parameters/coordinates refers to.
+		*/
+		TCoordinateFrame frame;
+		/**
+		 * This field indicates the equinox of the equatorial coordinates, if other frames are used it is ignored. (@sa<i>TSystemEquinox</i>) 
+		*/
+		TSystemEquinox equinox;
+		/**
+		 * longitude offset in radians. 
+		 */
+		double longitudeOffset;
+		/**
+		 * latitude offset in radians
+		 */
+		double latitudeOffset;
+		/**
+		 * coordinate frame of the offset
+		 */
+		TCoordinateFrame offsetFrame;
+		/**
+		 * offsets have been provided or not. If provided they will replace the one given manually for the frame.
+		 */
+		boolean applyOffsets;
+		/**
+		 * Parameters in case the generator is a OTF
+		 */		
+		TSubScanParameters otf;
+		/**
+		 * Reports the preferred azimuth section
+		 */
+		TSections section;
+		/**
+		 * if true the track point will be joint with another track point in order to obtain a combination of both
+		 */
+		boolean secondary;
+	} TTrackingParameters;
+	
+	/** 
+	 * This is a notification channel name, it publishes information about the antenna subsystem that can be used to other
+	 * subsystems. Boss will be the data producer for this channel. Anyone interested in these information  must register
+	 *  to this channel as a consumer. Data will be published on this channel when one of the members of the
+	 *  <i>AntennaDataBlock</i> structure changes its value or when at least 1 second elapsed since last publication. 
+	 *  In case of errors and one second elapsed since last publication, the last known good data is published until   the error
+	 *  is fixed.
+	*/
+	const string ANTENNA_DATA_CHANNEL="AntennaData";
+	
+	/**
+     * Notification channel data structure. The boss informs all registered consumers when one of these members change 
+     * its status or value (not including time). In any case data are published at least once a second. In case there are problems 
+     * retrieving the information or other, the last available data are published until the problem is fixed. 
+	 * Time represents the number of 100 ns since 1582-10-15 00:00:00, it is defined in baci.idl and it is mapped over a
+	 *  longlong type.	 
+	*/
+	struct AntennaDataBlock {
+		ACS::Time timeMark;	  /*!< this is the absolute time mark that reportes exactly when the publised events occurred */
+		boolean tracking;			              /*!< true when the antenna is tracking the commanded trajectory */
+		Management::TSystemStatus status; /*!< this report the subsystem status. @sa the attribute <i>status</i> */
+	};
+	
+	/**
+	 * This component is the supervisor of the Antenna subsystem. Its first duty is to monitor all the subsystem to check if potential problems are
+	 * imminent. It is also the entry point that must be used in order to start any observation that involves the antenna movement. 
+	 * Due to the network latency and due to the way we use to command the mount (loading a certain ammount of the tracking curve in advance) 
+	 * all the coordinates exposed by this component are stored in buffers, each of them labelled with its time mark. As a result of this any 
+	 * coordinate request must be issued together with a timestamp. The returned coordinates come from the linear interpolation of the stored 
+	 * points versus time. The coordinate returned by the component attributes are computed using the current time as timestamp.   
+	 * @todo add comments about the component. Can be get from the "Antenna Notes Document".
+	 * @ todo add the description of the syntax of the human readable commands, once defined
+	 *        add a description to every property of the interface, included the units
+	 *        fill in the description field in the .xml file inside the implementation module.
+	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ 	 * Istituto di Radioastronomia, Italia
+ 	 * <br> 
+	*/ 
+	interface AntennaBoss: ACS::CharacteristicComponent, Management::CommandInterpreter, Management::Subsystem  {
+		/**
+		 *  This attribute reports the name or the identifier of the current target
+		*/
+		readonly attribute ACS::ROstring target;
+		/**
+		 * This attribute reports the right ascension (radians) of the currently tracked target. This coordinate refers to J2000 epoch.
+		 */
+		readonly attribute ACS::ROdouble targetRightAscension;
+		/**
+		 * This attribute reports the declination (radians) of the currently tracked target. This coordinate refers to J2000 epoch.
+		 */
+		readonly attribute ACS::ROdouble targetDeclination;
+		/**
+		 * This attribute reports about the radial velocity of the target, given in Km/s.
+		 */
+		readonly attribute ACS::ROdouble targetVlsr;
+		/**
+		 * This attribute reports the present user sky offset(radians) commanded for the azimuth. Offset can be reset by calling <i>setup</i> or esplicitly by calling the
+		 * <i>setHorizontalOffsets()</i> method. The offset can be laso changed by the <i>startScan()</i> method.
+		 */
+		readonly attribute ACS::ROdouble azimuthOffset;
+		/**
+		 * This attribute reports the present user offset(radians) commanded for the elevation.
+		 */		
+		readonly attribute ACS::ROdouble elevationOffset;
+		/**
+		 * This attribute reports the present user sky offset(radians) commanded for the rightAscension.
+		 */		
+		readonly attribute ACS::ROdouble rightAscensionOffset;
+		/**
+		 * This attribute reports the present user offset(radians) commanded for the declination.
+		 */		
+		readonly attribute ACS::ROdouble declinationOffset;
+		/**
+		 * This attribute reports the present user sky offset(radians) commanded for the galactic longitude.
+		 */		
+		readonly attribute ACS::ROdouble longitudeOffset;
+		/**
+		 * This attribute reports the present user offset(radians) commanded for the galactic latitude.
+		 */
+		readonly attribute ACS::ROdouble latitudeOffset;
+		/**
+		 * This attribute reports the raw azimuth in radians. Raw coordinates are coordinates with all the correction required as
+		 * the pointing model or refraction. The coordinate reported here refers to the current time.
+		*/
+		readonly attribute ACS::ROdouble rawAzimuth;
+		/**
+		 * This attribute reports the raw elevation in radians. Raw coordinates are coordinates with all the correction required as
+		 * the pointing model or refraction. The coordinate reported here refers to the current time.
+		*/
+		readonly attribute ACS::ROdouble rawElevation;
+		/**
+		 * This attribute reports the observed azimuth in radians. Observed coordinates comes from the encoders coordinates (@sa component moust)
+		 * depurated by instrumental effects like the the pointing model or refraction. The coordinate reported here refers to the current time.
+		*/
+		readonly attribute ACS::ROdouble observedAzimuth;
+		/**
+		 * This attribute reports the observed elevation in radians. Observed coordinates comes from the encoders coordinates (@sa component moust)
+		 * depurated by instrumental effects like the the pointing model or refraction. The coordinate reported here refers to the current time.
+		*/		
+		readonly attribute ACS::ROdouble observedElevation;
+		/**
+		 * This attribute reports the observed right ascension in radians. This coordinates come directly from the conversion of horizontal observed
+		 * coordinates. They are referred to J2000 equinox. The coordinate reported here refers to the current time.
+		*/
+		readonly attribute ACS::ROdouble observedRightAscension;
+		/**
+		 * This attribute reports the observed declination in radians. This coordinates come directly from the conversion of horizontal observed
+		 * coordinates. They are referred to J2000 equinox. The coordinate reported here refers to the current time.
+		*/
+		readonly attribute ACS::ROdouble observedDeclination;
+		/**
+		 * This attribute reports the observed galactic longitude in radians. This coordinates come directly from the conversion of equatorial observed
+		 * coordinates.The coordinate reported here refers to the current time.
+		*/
+		readonly attribute ACS::ROdouble observedGalLongitude;
+		/**
+		 * This attribute reports the observed galactic latitude in radians. This coordinates come directly from the conversion of euqtorial observed
+		 * coordinates.The coordinate reported here refers to the current time.
+		*/
+		readonly attribute ACS::ROdouble observedGalLatitude;
+		
+		/**
+		 * This attribute shows if the AntennaBoss component is enabled or not. Since this component is the subsystem leader and entry point,
+		 * enabling or disabling this component corresponds to enabling or disabling the large part of the functionality of the Antenna subsystem.
+		 * For example if not enable the component will not forwords any commands to the mount.
+		*/
+		readonly attribute Management::ROTBoolean enabled;
+		
+		/**
+		 * This attribute shows the correction for refraction and pointing model is on or off. If true (feature is on) when the
+		 *  component is loading a new position into the telescope will use the offsets coming from the <i>PoinintgModel</i> 
+		 * and <i>Refraction</i> components. If false (feature is off) the raw coordinates commanded to the mount are identical
+		 * to the apparent ones. 
+		 */
+		readonly attribute Management::ROTBoolean correctionEnabled;
+		
+		/**
+		 * This attribute reports the ephemeris generator that will be used to command the coordinates to the mount
+		*/
+		readonly attribute ROTGeneratorType generatorType; 
+		
+		/**
+		 * @copybrief Management::status
+		 * This attribute is a general flag that shows if the subsytem led by this component is ok or some problems 
+		 * happened. If the corresponding <i>mountStatus</i> flag of the <i>Mount</i> interface is not <i>MNG_OK</i>
+		 * this attributes reports the same value; otherwise it reports the internal staus of the boss. The boss status can be
+		 * altered by many situation, for example if an exception is found the <i>MNG_WARNING</i> is adopted. The internal
+		 * status will be valid for 3 seconds then, if not renewed,  it will be considered cleared. The boss status is not changed
+		 * to a lower level if the present status is not cleared.  If the the attribute <i>enabled</i> is false or the attribute <i>HPBW</i>
+		 *  is not set,  the status is always  <i>MNG_WARNING</i>. 
+		 * The meaning of the variuos status is the following:
+		 * @arg \c <i>MNG_OK</i> no errors everything is ok.
+		 * @arg \c <i>MNG_WARNING</i> a possible problem has been found, the obervation can continue but it would be better
+		 *               to investigate the problem.
+		 * @arg \c <i>MNG_FAILURE</i> a hard problem encoutered, the observation cannot be carried on. 
+		*/
+		
+		/**
+		 * This attribute reports the currently used Beam Width Half Maximum in radians. This value is used to check wether the 
+		 * telescope is tracking or not (@sa <i>AntennaDataBlock</i>). After component creation this value is zero, that means
+		 * the boss component will remain in the <i>MNG_WARNING</i> status until a new value is provided directly (<i>setHPBW()</i>) or indirectly
+		 * (<i>computeHPBW()</i>) 
+		 * (@sa <i>setHPBW</i>).  
+		 */
+		readonly attribute ACS::ROdouble BWHM;
+		
+		/**
+		 * This attribute reports the current azimuth offsets applied due to pointing model (in radians)
+		*/
+		readonly attribute ACS::ROdouble pointingAzimuthCorrection;
+		
+		/**
+		 * This attribute reports the current elevation offsets applied due to pointing model (in radians)
+		*/
+		readonly attribute ACS::ROdouble pointingElevationCorrection;
+		
+		/**
+		 * Rhis attribute reports the current correction to be applied to the elevation due to refraction (in radians)
+		 */
+		readonly attribute ACS::ROdouble refractionCorrection;
+		
+		/**
+		 * @copybrief Management::setup()
+		 * This method must be called in order to configure the mount and prepare tha antenna for the observation. It will unstow the antenna and
+		 * it will configure the proper working mode for the mount axis. Finally it will synchronizes the Antenna time with the host computer
+		 * system time. It resets the user offsets.
+		 * @param config code of the required configuration 
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ManagementErrors::ConfigurationErrorsEx
+		 * 		@arg \c ComponentErrors::CORBAProblemEx
+		 *		@arg \c ComponentErrors::CouldntCallOperationEx
+		 *		@arg \c ComponentErrors::UnexpectedEx
+		 */
+		
+		/** 
+		 * @copybrief Management::park()
+		 * This method immediately sends the antenna to stow.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ManagementErrors::ParkingErrorEx
+		 * 		@arg \c ComponentErrors::CORBAProblemEx
+		 *		@arg \c ComponentErrors::CouldntCallOperationEx
+		 *		@arg \c ComponentErrors::UnexpectedEx 
+		*/ 
+		
+		/**
+		 * This method immediately stops the tracking. In particular it stops the mount and the thread that is in charge of loading the tracking trajectory.
+		 * It also releases the ephemeris generator component. Since this operation will leave the mount axis in <i>ACU_STOP</i> mode, in order to
+		 * restart tracking the method <i>setup()</i> should be called again.
+		 * @throw CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * 		@arg \c ComponentErrors::UnexpectedEx
+		 * 		@arg \c ComponentErrors::CouldntCallOperationEx
+		 *		@arg \c ComponentErrors::CORBAProblemEx
+		 *		@arg \c ComponentErrors::CouldntReleaseComponentEx 
+		*/ 
+		void stop() raises (ComponentErrors::ComponentErrorsEx);
+		
+		/**
+		 * This method must be used to start a scan on a target. This target can be a normal radiosource (so that it can be tracked via
+		 * a sidereal pattern) or a Solar System Body or an artifical probe or it could be a On The Fly scan. The mode <i>PROGRMATRACK</i> must already be configured 
+		 * in the mount.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx 
+		 * @param startUT the exact time the scan is supposed to start, if negative or zero it must be started as soon as possible. In that case the argument could return back the computed
+		 *                effective start UT time.
+		 * @param parameters this stucture is the list of all parameters that are required by Boss to define the sub scan. The caller
+		 *               is responsible for the management of the structure.
+		 * @param secondary this stucture is identical to the previous one, in most cases it is ignored, only on particular cases it is used as a secondary trajectory generator. For example
+		 *               if the primary parameters define an OTF scan the secondary could be used to determine the center of the scan. The caller
+		 *               is responsible for the management of the structure.
+		*/ 
+		void startScan(inout ACS::Time startUT,in TTrackingParameters parameters,in TTrackingParameters secondary) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a sidereal traking over a catalog source.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx 
+		 * @param targetName name of the source to track, it must be known by the system
+		 */ 
+		void track(in string targetName) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a traking of the moon.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx 
+		 */ 
+		void moon() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
+		/**
+		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start tracking a given sidereal target given its equatorial coordinates. 
+		 * @param targetName name or identifier of the source
+		 * @param ra right ascension (radians)
+		 * @param dec declination (radians)
+		 * @param eq reference equinox of the equtorial coordinates
+		 * @param section It allows to force the preferred section of the azimuth axis.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx 
+		 */
+		void sidereal(in string targetName,in double ra,in double dec,in TSystemEquinox eq,in Antenna::TSections section) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
+		/*
+		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go offsource along a given frame. The offset is always done along longitude a part from a particular case.
+		 * If th eframe is horizontal and the current elevation is over the cut off threshold the movement is not done in azimuth but in elevation. A source or a target must already be commanded.
+		 * @param skyOffset this is the sky offset that to be applied(radians). 
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx 
+		 */
+		 void goOff(in Antenna::TCoordinateFrame frame,in double skyOffset) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a longitude On The Fly scan over the currently commanded target. If no target is commanded yet an error is
+		 * thrown. The current target is used as the central point of the scan (taken from the J2000 equatorial). If the target is not above the horizon a zero is returned otherwise the expected start
+		 * time is returned.
+		 * @param scanFrame this indicates the frame along which the scan is done  
+		 * @param span distance or lenght of the scan (radians)
+		 * @param duration duration of the scan in seconds, the combinaiton of duration and span gives the scan velocity
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx 
+		 * @return the expected start time, is zero the scan is not performed because the scan is not visible or the scan will cross the antenna limits.
+		 */ 
+		ACS::Time lonOTFScan(in Antenna::TCoordinateFrame scanFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a latitude On The Fly scan over the currently commanded target. If no target is commanded yet an error is
+		 * thrown. The current target is used as the central point of the scan (taken from the J2000 equatorial). If the target is not above the horizon a zero is returned otherwise the expected start
+		 * time is returned.
+		 * @param scanFrame this indicates the frame along which the scan is done  
+		 * @param span distance or lenght of the scan (radians)
+		 * @param duration duration of the scan in seconds, the combinaiton of duration and span gives the scan velocity
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx 
+		 * @return the expected start time, is zero the scan is not performed because the scan is not visible or the scan will cross the antenna limits.
+		 */ 
+		ACS::Time latOTFScan(in Antenna::TCoordinateFrame scanFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx); 
+					
+		/**
+		 * This method is only be used internally. Anyone that needs to know if the telescope
+		 * could perform a given scan before a given time, can call this. The computation is performed using the current position as starting position. The target position could be given 
+		 * in any of the supported frames.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx
+		 * @param startUt this is the time before which the telescope is supposed to reach the target, if negative the scan is checked only against 
+		 *        the elevation.
+		 * @param parameters structure that describes the scan to be performed.
+		 * @param secondary this stucture is identical to the previous one, in most cases it is ignored, only on particular cases it is used as a secondary trajectory generator in order to get
+		 *                  a combination of both of them.
+		 * @param slewingTime time that the telescope will take to reach the target position
+		 * @return true if the telescope will be in the target position before the given epoch expires, false if the
+		 * telescope will not be able to get there in time ( now+SlewTime>ut).
+		*/  
+		boolean checkScan(in ACS::Time startUt,in TTrackingParameters parameters,in TTrackingParameters secondary,out ACS::TimeInterval slewingTime) raises (
+				ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 *  This method can be called in order to disable the component. That means that the antenna subsystem cannot be commanded any more via the
+		 *  boss. The functionality of single component is not affected at all. By default the boss component comes up enabled. If the component is enabled
+		 *  or not, is reported by the property <i>enable</i>.
+		 * @throw CORBA::SystemException 
+		*/
+		void disable();
+		
+		/**
+		 *  This method can be called in order to enable the component. That means restore all the functionalities of the Antenna subsystem.
+		 *  By default the boss component comes up enabled. If the component is enabled or not, is reported by the property <i>enable</i>.
+		 * @throw CORBA::SystemException 
+		*/		
+		void enable();
+		
+		/**
+		 * This method will turn on  the <i>correctionEnabled</i>. 
+		 * @throw CORBA::SystemException 
+		 */
+		void correctionEnable();
+		
+		/**
+		 * This method will turn off  the <i>correctionEnabled</i>. 
+		 * @throw CORBA::SystemException 
+		 */
+		void correctionDisable();
+		
+		/**
+		 * This action is the setter method for the attribute <i>BWHM</i>. It should be called by the component responsable of
+		 * configuring the recevier before the observation. 
+		 * @throw CORBA::SystemException
+		 * @param value new value for the Half Power Beam Width in radians.
+		 */
+		void setBWHM(in double value);
+		
+		/**
+		 * This action sets the <i>HPBW</i> attribute as a result of the beam width computation. 
+		 * @throw CORBA::SystemException
+		 * @param taper taper value of the current receiver (db)
+		 * @param waveLength wave length of the sky frequency (meters)
+		 */		
+		void computeBWHM(in double taper,in double waveLength);
+		
+		/**
+		 * This action allows to force a particular vlsr for the current target. The current target vlsr could be read from property <i>targetVlsr</i> and it is usually set
+		 * when the <i>startScan</i> is issued. For example if the user asked to track a catalog source the vlsr is normally set from the catalog data. When this information could not
+		 * be retrived the property is left null so this methos allows to force a proper value.
+		 * @throw CORBA::SystemException 
+		 * @param value new vlsr for the current target (Km/s)
+		 */ 
+		void setVlsr(in double value);
+		
+		/**
+		 * copybrief Management::CommandInterpreter::command
+		 * This is the command line interpreter for the sub-system. All the attributes and all the methods exposed by the boss can be
+		 * called. That means a full set of operation for standard observation, but not full control of the system.
+		 * @param the string that contains the command line to be parsed
+		 * @return the string that contains the answer to the command issued by the input parameter. The caller is resposible to
+		 * free the returned string (@sa CORBA::string_free).
+		*/
+		
+		/**
+		 * This method is used to add user offset to the current pointing of the antenna. The offset will be added in the given frame. 
+		 * A call to <i>startScan</i> could overwrite the offset given by this command. In case a new tracking is started (either changing the generator or not) the offsets are not reset.
+		 * An offset given for a frame will also cause the offsets relatve to other frames to be cleared.
+		 * Depending on the particular generator the offsets could be ignored. In taht case ar error is thrown. The longitude is sky offset so it will be corrected for the cosine of latitude.
+		 * The values can be read back from the <i>azimuthOffset</i> , <i>elevationOffset</i>, <i>rightAscensionOffset</i>, <i>declinationOffset</i>, <i>longitudeOffset</i> and <i>latitudeOffset</i> 
+		 * attributes accordingly.
+		 * @throw CORBA::SystemException
+		 * @throw AntennaErrors::AntennaErrorsEx 
+		 * @throw ComponentErrors::ComponentErrorsEx  
+	     *    @arg \c ComponentErrors::UnexpectedEx
+	     *    @arg \c ComponentErrors::CORBAProblemEx 
+		 * @param lonOff new offset to be added to the azimuth (radians)
+		 * @param latOff new offset to be added to the elevation (radians)
+		 * @param frame frame the offesets refer to
+		 */
+		void setOffsets(in double lonOff,in double latOff,in TCoordinateFrame frame) raises (ComponentErrors::ComponentErrorsEx,
+				AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This method can be used by clients in order to get a reference to the generator currently in use within the boss.
+		 * @throw CORBA::SystemException 
+		 * @param type returns the type of the generator. 
+		 * @return the CURL of the currently active  ephem generator. If the string is empty, now generator is currently used. T
+		 *                he caller is in charge of deallocating the returned string.   
+		*/
+		string getGeneratorCURL(out TGeneratorType type);
+		
+		/**
+		 * This method should only be used internally to know the raw coordinates commanded to the mount. You must provide the timemark
+		 * your coordinates have to refer to.
+		 * @throw CORBA::SyStemException
+		 * @param time this indicates to the routine the time to which the coordinates refer
+		 * @param az the raw azimuth in radians
+		 * @param el the raw elevation in radians 
+		*/
+		void getRawCoordinates(in ACS::Time time,out double az,out double el);
+		
+		/** 
+		 * This method should only be used internally to know the observed equatorial coordinates. A timestamp to which the coordinates
+		 * referes to must be provided. It is highly probable that these cordinates are not "real" (directly read from the antenna) but they are the result of 
+		 * an interpolation. The equinox is J2000. They directly come from the observed in the horizontal frame.
+		 * In case duration is greter than the configured coordinate integration time, the returned coordinates are the result of the average over the duration inteval that starts
+		 * from <i>time</i>.
+		 * @throw CORBA::SystemExcpetion
+		 * @param time the input timestamp
+		 * @param duration duration of the integration, if greater than coordinate integration time the returned values are not instantaneous but are averaged over the provided interval.
+		 * @param ra the returned observed right ascension in radians 
+		 * @param dec the returned observed declination in radians
+		*/
+		void getObservedEquatorial(in ACS::Time time,in ACS::TimeInterval duration,out double ra,out double dec);
+		
+		/** 
+		 * This method should only be used internally to know the observed galactic coordinates. A timestamp to which the coordinates
+		 * referes to must be provided. It is highly probable that these cordinates are not "real" (directly read from the antenna) but they are the result of 
+		 * an interpolation. They are obtained by converting the corresponding J2000 observed equatorial coordinates.
+		 * @throw CORBA::SystemExcpetion
+		 * @param time the input timestamp
+		 * @param ra the returned observed galactic longitude in radians 
+		 * @param dec the returned observed galactic latitude in radians
+		*/
+		void getObservedGalactic(in ACS::Time time,out double longitude,out double latitude);
+		
+		/** 
+		 * This method should only be used internally to know the observed horizontal coordinates. A timestamp to which the coordinates
+		 * referes to must be provided. It is highly probable that these cordinates are not "real" (directly read from the antenna) but they are the result of 
+		 * an interpolation. They are obtained by the encoders coordinates depurated by instrumental effects..
+		 * @throw CORBA::SystemExcpetion
+		 * @param time the input timestamp
+		 * @param duration duration of the integration, if greater than coordinate integration time the returned values are not instantaneous but are averaged over the provided interval. 
+		 * @param ra the returned observed azimuth in radians 
+		 * @param dec the returned observed elevation in radians
+		*/		
+		void getObservedHorizontal(in ACS::Time time,in ACS::TimeInterval duration,out double az,out double el);
+		
+		/**
+		 * This method should only be used internally to know the user offsets currently commanded
+		 * @throw CORBA::SystemExcpetion
+		 * @param azOff user offset for the azimuth (radians)
+		 * @param elOff user offset for the elevation (radians)
+		 * @param raOff user offset for the right ascension (radians)
+		 * @param decOff user offset for the declination (radians)
+		 * @param lonOff user offset for the longitude (radians)
+		 * @param latOff user offset for the latitude (radians)
+		 */
+		void getAllOffsets(out double azOff,out double elOff,out double raOff,out double decOff,out double lonOff,out double latOff);
+		
+	};
+	
+};
+
+#endif

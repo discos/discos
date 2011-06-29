@@ -1,0 +1,15 @@
+
+# The first field is the name of the procedure which must be unique in the file. The open bracket must lie on the same line of the procedure name. 
+# Between the brakets the configuration commands must be provided one for each line. 
+STANDARDPRESCAN {
+	tsys
+}
+
+STANDARDPOSTSCAN {
+	wait=3.435
+}
+
+INITALL {
+	setLO=21964.0:21964.0
+}
+

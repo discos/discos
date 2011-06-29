@@ -1,0 +1,12 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+# "@(#) $Id: mountTui,v 1.1 2009-05-07 08:30:04 a.orlati Exp $"
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 07/05/2009      Creation                                  
+#************************************************************************
+
+xterm -geometry 72x30+0+0 +sb -title Mount -e /bin/bash --login -c _tui_MedicinaMountTextClient &

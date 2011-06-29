@@ -1,0 +1,137 @@
+#ifndef __COMMON_RECEIVER_INTERFACE_IDL__
+#define __COMMON_RECEIVER_INTERFACE_IDL__
+
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Andrea Orlati <a.orlati@ira.inaf.it>
+ *
+ *  Created: Thu Oct 21 14:30:26 CEST 2010
+\***************************************************************/
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include <ManagementErrors.idl>
+
+#pragma prefix "alma"
+
+/** 
+* This module defines the interfaces of receiver components.
+* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
+*/
+module Receivers { 
+    
+    /**
+     * <h2>Interface of a generic receiver</h2>
+     * <p>This CORBA interface exports properties and methods defined for a generic 
+     * <em>Receiver</em>.</p>
+     */
+    interface CommonReceiverInterface {
+ 
+        /** This attribute reports the current value of the local oscillator of the current receiver. Generally one LO for each IFs. */ 
+        readonly attribute ACS::ROdoubleSeq LO;
+        
+        /** This attribute reports the number of feeds of the current receiver */
+        readonly attribute ACS::ROlong feeds;
+        
+        /** This attribute reports the number of Intermediate Frequencies available for each feed */
+        readonly attribute ACS::ROlong IFs;
+
+        /**
+         * This attribute reports the polarization configured in each IF available. Since ACS does not support sequences of enum properties, 
+         * in order to be displayed it must be cast to the corresponding value of the <i>Receivers::TPolarization</i> enumeration.
+         */
+        readonly attribute ACS::ROlongSeq polarization;
+        
+        /**
+         * this attribute is a sequence of double values; each value corresponds to the start frequency (MHz) of IF of the receiver.
+         */
+        readonly attribute ACS::ROdoubleSeq initialFrequency;
+
+        /**
+         * this attribute is a sequence of double values; each value corresponds to the band width (MHz) of IF of the receiver.
+         */
+        readonly attribute ACS::ROdoubleSeq bandWidth;
+        
+
+        /** Start the calibration of every feed channel. */
+        void calOn() raises  (ComponentErrors::ComponentErrorsEx);
+        
+
+        /** Stop the calibration of every feed channel. */
+        void calOff() raises  (ComponentErrors::ComponentErrorsEx);
+
+    
+        /**
+         * If requirest by a particular receiver, this methos allows to setup particular operating mode. The mode must be a valid mode code, recognized by
+         * the receiver. 
+         */
+        void setMode(in string mode) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx);
+        
+        /**
+         * It allows to set the local oscillators of the current recevier. Generally this function alloes to give one value for each 
+         * supported IF, but in many cases the receiver does not support different LOs, so the asnwer of the system may vary from 
+         * receiver to receiver according the implementation.
+         * @param list of local oscillators values to be applied (MHz).
+         * @throw ComponentErrors::ComponentErrorsEx;
+         * @throw CORBA::SystemExcpetion  
+         */
+        void setLO(in ACS::doubleSeq lo1) raises (ComponentErrors::ComponentErrorsEx);
+  
+        /**
+         * It can be called when the value of the calibration diode is required. 
+         * It can process as many subbands at a  time, provided they belong to the current receiver.  
+         * The subbands are identified by giving 
+         * four coordinates....the feed, the polarization, the start frequency and the bandwidth.
+         * @param freqs this parameter is used to pass the start frequencies of the bands that are to be analyzed (MHz). This frequencies
+         * generally refers to detector start frequency, before any other computation the recevier correlate this value to the real start
+         * frequency of the receiver.
+         * @param bandwidths  this parameter is used to pass the bandwidth of the bands that are to be analyzed (MHz). This frequencies
+         * generally refers to detector bandwidth, before any other computation the recevier correlate this value to the real bandwidth
+         * of the receiver.
+         * @param feeds is a list that stores the corresponding feed of the subband we are asking for
+         * @param ifs is a list that identfies which IFs of the feed we are interested in, usually 0..1
+         * @return for each subband the list of the noise calibration values in Kelvin degrees. It must be freed by the caller.
+         * @throw ComponentErrors::ComponentErrorsEx;
+         * @throw CORBA::SystemException  
+         */
+        ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs) 
+            raises (ComponentErrors::ComponentErrorsEx);
+            
+        /**
+         * It can be called when the relative positions and power (with respect to the central beam) of each feed 
+         * of the currently configured receiver. 
+         * The first position of the sequences reports the data of the first feed and so on. The caller is responsable 
+         * to free the sequences passed as output parameters.
+         * @throw ComponentErrors::ComponentErrorsEx;
+         * @throw CORBA::SystemException   
+         * @param X distances of the feeds with respect to the central one along the X axis, given in radians  
+         * @param Y distances of the feeds with respect to the central one along the Y axis, given in radians
+         * @param power relative power with respect to te central one. the power of the central one is considered to be 1.
+         * @return the number of feeds of the receiver which in practice is the number of elements of the sequences 
+         */
+        long getFeeds(out ACS::doubleSeq X,out ACS::doubleSeq Y,out ACS::doubleSeq power) raises (ComponentErrors::ComponentErrorsEx);
+
+        /**
+         * It can be called to know the taper of the current receiver starting from the parameter of a detector. 
+         * The sky frequency is computed (LocalOscillator+Frequency+BW/2), after that
+         * the corresponding wave lenght is used the compute the taper value.
+         * @throw ComponentErrors::ComponentErrorsEx;
+         * @throw CORBA::SystemException   
+         * @param freq starting frequency of the detector in MHz. This value is correlated to the real start frequency of the receiver.
+         * @param bandWidth bandwidth of the detector in MHz. This value is correlated to the real bandwidth of the receiver.
+         * @param feed feed number the detector is attached to
+         * @param ifNumber IF identifier inside the feed 
+         * @param waveLen this returns back the exact wave length used for the taper computation (in meters).
+         * @return the value of the taper of the current receiver in db.
+         */
+        double getTaper(in double freq,in double bandWidth,in long feed,in long ifNumber,out double waveLen) 
+            raises (ComponentErrors::ComponentErrorsEx);
+        
+    };
+    
+    
+};
+
+#endif

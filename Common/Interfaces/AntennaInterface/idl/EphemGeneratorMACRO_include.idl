@@ -1,0 +1,40 @@
+/** @def DEFATTRIBUTES(NAME)
+ * 	@brief this macro can be used to defines exposed attributes by interfaces that inherits from EphemGenerator
+ *  @arg sourceID name or code of the pointed position
+ *	@arg rightAscension apparent right ascension of the pointed position,it includes the offsets, radians
+ *	@arg declination apparent declination of the pointed position,it includes the offsets, radians
+ *	@arg julianEpoch current time as julian epoch
+ *	@arg J2000RightAscension J2000 right ascension of the pointed position, radians 
+ *	@arg J2000Declination J2000 declination of the pointed position, radians
+ *	@arg azimuth current azimtuh,it includes the offsets, radians
+ *	@arg elevation current elevation,it includes the offsets, radians
+ *	@arg gLongitude galactic longitude of the pointed position radians	 
+ *	@arg gLatitude galactic latitude of the pointed position radians 	
+ *	@arg userAzimuthOffset 
+ *	@arg userElevationOffset
+ *	@arg userRightAscensionOffset
+ *	@arg userDeclinationOffset
+ *	@arg userLongitudeOffset
+ *	@arg userLatitudeOffset
+ *	@arg parallacticAngle
+*/
+#define	DEFATTRIBUTES(NAME) struct NAME { \
+	string sourceID; \
+	double rightAscension; \
+	double declination; \
+	double julianEpoch; \
+	double J2000RightAscension; \
+	double J2000Declination; \
+	double gLongitude; \
+	double gLatitude; \
+	double azimuth; \
+	double elevation; \
+	double userAzimuthOffset; \
+	double userElevationOffset; \
+	double userRightAscensionOffset; \
+	double userDeclinationOffset; \
+	double userLongitudeOffset; \
+	double userLatitudeOffset; \
+	double parallacticAngle;
+
+#define ENDDEFATTRIBUTES }

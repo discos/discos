@@ -1,0 +1,658 @@
+/*******************************************************************************\
+ *  Author Infos
+ *  ============
+ *  Name:         Marco Buttu
+ *  E-mail:       mbuttu@oa-cagliari.inaf.it
+ *  Personal Web: http://www.pypeople.com/
+\*******************************************************************************/
+
+#include <new>
+#include <baciDB.h>
+#include <ManagmentDefinitionsS.h>
+#include "WPServoImpl.h"
+#include "PdoubleSeqDevIO.h"
+#include "WPStatusDevIO.h"
+#include "macros.def"
+#include <pthread.h>
+#include <bitset>
+
+// Initialize the thread pointers. We want to instance them only once
+ThreadParameters WPServoImpl::m_thread_params;
+RequestScheduler* WPServoImpl::m_scheduler_ptr = NULL;
+SocketListener* WPServoImpl::m_listener_ptr = NULL;
+WPStatusUpdater* WPServoImpl::m_status_ptr = NULL;
+ExpireTime WPServoImpl::m_expire;
+map<int, WPServoTalker *> WPServoImpl::m_talkers;
+map<int, bool> WPServoImpl::m_status_thread_en;
+CSecureArea<unsigned short> *WPServoImpl::m_instance_counter = NULL;
+CSecureArea< map<int, vector<PositionItem> > >* WPServoImpl::m_cmdPos_list = \
+    new CSecureArea< map<int, vector<PositionItem> > >(new map<int, vector<PositionItem> >);
+
+static pthread_mutex_t const_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t destr_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t listener_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t scheduler_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t status_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+WPServoImpl::WPServoImpl(
+        const ACE_CString &CompName, maci::ContainerServices *containerServices
+        ) : 
+    CharacteristicComponentImpl(CompName, containerServices),
+    m_actPos(this),
+    m_cmdPos(this),
+    m_posDiff(this),
+    m_engTemperature(this),
+    m_counturingErr(this),
+    m_torquePerc(this),
+    m_engCurrent(this),
+    m_engVoltage(this),
+    m_driTemperature(this),
+    m_utilizationPerc(this),
+    m_dcTemperature(this),
+    m_driverStatus(this),
+    m_errorCode(this),
+    m_status(this)
+{   
+    AUTO_TRACE("WPServoImpl::WPServoImpl()");
+    try {
+        pthread_mutex_lock(&const_mutex); 
+        if(m_instance_counter == NULL) {
+            m_instance_counter = new CSecureArea<unsigned short>(new unsigned short);
+            CSecAreaResourceWrapper<unsigned short> secure_ptr = m_instance_counter->Get();
+            *secure_ptr = 1; // First instance
+            secure_ptr.Release();
+        }
+        else {
+            CSecAreaResourceWrapper<unsigned short> secure_ptr = m_instance_counter->Get();
+            (*secure_ptr)++; 
+            secure_ptr.Release();
+        }
+        pthread_mutex_unlock(&const_mutex); 
+    }
+    catch(...) {
+        pthread_mutex_unlock(&const_mutex); 
+        ACS_SHORT_LOG((LM_ERROR, "Some problem in WPServoImpl"));
+    }
+}
+
+
+WPServoImpl::~WPServoImpl() {
+    AUTO_TRACE("WPServoImpl::~WPServoImpl()"); 
+
+    try {
+        int status_par = -1;
+        pthread_mutex_lock(&destr_mutex); 
+        if(m_instance_counter != NULL) {
+            CSecAreaResourceWrapper<unsigned short> secure_ptr = m_instance_counter->Get();
+            --(*secure_ptr);
+            status_par = *secure_ptr;
+            if(!(*secure_ptr)) {
+                if(m_scheduler_ptr != NULL) {
+                    m_scheduler_ptr->suspend();
+                    m_scheduler_ptr->terminate();
+                    delete m_scheduler_ptr;
+                }
+                if(m_listener_ptr != NULL) {
+                    m_listener_ptr->suspend();
+                    m_listener_ptr->terminate();
+                    delete m_listener_ptr;
+                }
+                if(m_status_ptr != NULL) {
+                    m_status_ptr->suspend();
+                    m_status_ptr->terminate();
+                    delete m_status_ptr;
+                }
+            }
+            secure_ptr.Release();
+        }
+
+        if (m_cdb_ptr) {
+            m_cdb_ptr = NULL;
+            delete m_cdb_ptr;
+        }
+
+        if (m_wpServoTalker_ptr) {
+            m_wpServoTalker_ptr = NULL;
+            delete m_wpServoTalker_ptr;
+        }
+
+        pthread_mutex_unlock(&destr_mutex); 
+
+    }
+    catch(...) {
+        pthread_mutex_unlock(&destr_mutex); 
+        ACS_SHORT_LOG((LM_WARNING, "~WPServoImpl: Some problems releasing WPServoImpl"));
+    }
+}
+
+
+void WPServoImpl::initialize() throw (
+        ComponentErrors::CDBAccessExImpl, 
+        ComponentErrors::MemoryAllocationExImpl,
+        ComponentErrors::ThreadErrorExImpl)
+{
+    m_wpServoLink_ptr = NULL;
+    m_wpServoTalker_ptr = NULL;
+    try {
+        m_cdb_ptr = new CDBParameters;
+        // m_cmdPos_list = new CSecureArea< map<int, vector<PositionItem> > >(new map<int, vector<PositionItem> >);
+    }
+    catch (std::bad_alloc& ex)
+        THROW_EX(ComponentErrors, MemoryAllocationEx, "WPServoImpl::initialize(): 'new' failure", false);
+
+    AUTO_TRACE("WPServoImpl::initialize()");
+
+    //----  Retrieve MinorServo Attributes ----//
+
+    // Retrive the number_of_axis parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "number_of_axis", m_cdb_ptr->NUMBER_OF_AXIS))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'number_of_axis' from CDB", false);
+
+    // Retrive the number_of_slaves parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "number_of_slaves", m_cdb_ptr->NUMBER_OF_SLAVES))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'number_of_slaves' from CDB", false);
+    
+    // Retrive the scale_factor parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "scale_factor", m_cdb_ptr->SCALE_FACTOR))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'scale_factor' from CDB", false);
+    
+    // Retrive delta_max from CDB. |cmdPos - actPos| < delta_max => cmdPos achieved
+    if(!CIRATools::getDBValue(getContainerServices(), "delta_max", m_cdb_ptr->DELTA_MAX))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'delta_max' from CDB", false);
+    
+    // Retrive the scale_offset parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "scale_offset", m_cdb_ptr->SCALE_OFFSET))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'scale_offset' from CDB", false);
+    
+    // Retrive the server_ip parameter from CDB 
+    if(!CIRATools::getDBValue(getContainerServices(), "server_ip", m_cdb_ptr->SERVER_IP))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'server_ip' from CDB", false);
+    
+    // Retrive the server_port parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "server_port", m_cdb_ptr->SERVER_PORT))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'server_port' from CDB", false);
+    
+    // Retrive the timeout parameter from CDB (timeout of socket connection. optional)
+    if(!CIRATools::getDBValue(getContainerServices(), "timeout", m_cdb_ptr->SERVER_TIMEOUT))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'timeout' from CDB", false);
+    
+    // Retrive the servo_address parameter from CDB (address of single wpServo)
+    if(!CIRATools::getDBValue(getContainerServices(), "servo_address", m_cdb_ptr->SERVO_ADDRESS))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'servo_address' from CDB", false);
+    
+    // Retrive the  zero MinorServo parameter from CDB (zero reference)
+    if(!CIRATools::getDBValue(getContainerServices(), "zero", m_cdb_ptr->ZERO))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'zero' from CDB", false);
+    
+    // Retrive the park_position MinorServo parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "park_position", m_cdb_ptr->PARK_POSITION))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'park_position' from CDB", false);
+    
+    // Retrive the min_speed MinorServo parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "min_speed", m_cdb_ptr->MIN_SPEED))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'min_speed' from CDB", false);
+    
+    // Retrive the max_speed MinorServo parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "max_speed", m_cdb_ptr->MAX_SPEED))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'max_speed' from CDB", false);
+    
+    // Retrive the virtual_rs MinorServo parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "virtual_rs", m_cdb_ptr->VIRTUAL_RS))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'virtual_rs' from CDB", false);
+    
+    // Retrive the require_calibration MinorServo parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "require_calibration", m_cdb_ptr->REQUIRE_CALIBRATION))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'require_calibration' from CDB", false);
+    
+    // Retrive the expire_time MinorServo parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "expire_time", m_cdb_ptr->EXPIRE_TIME))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'expire_time' from CDB", false);
+    
+    // Retrive the tracking_delta MinorServo parameter from CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "tracking_delta", m_cdb_ptr->TRACKING_DELTA))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'tracking_delta' from CDB", false);
+
+    m_expire.timeLastActPos[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastCmdPos[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastPosDiff[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastEngTemperature[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastCounturingErr[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastTorquePerc[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastEngCurrent[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastEngVoltage[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastDriTemperature[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastUtilizationPerc[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastDcTemperature[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastDriverStatus[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastErrorCode[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastStatus[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastAppState[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastAppStatus[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastCabState[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.cmdPos[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.posDiff[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.engTemperature[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.counturingErr[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.torquePerc[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.engCurrent[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.engVoltage[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.driTemperature[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.utilizationPerc[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.dcTemperature[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.driverStatus[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.errorCode[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.status[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.appState[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.appStatus[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.cabState[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    // Set the length of sequences
+    m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
+    m_expire.cmdPos[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
+    m_expire.posDiff[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
+
+    try {
+        pthread_mutex_lock(&init_mutex); 
+        // The socket connection is shared among minor servos (singleton design pattern)
+        m_wpServoLink_ptr = WPServoSocket::getSingletonInstance(m_cdb_ptr, &m_expire);
+        m_wpServoTalker_ptr = new WPServoTalker(m_cdb_ptr, &m_expire, m_cmdPos_list);
+
+        if(m_talkers.count(m_cdb_ptr->SERVO_ADDRESS))
+            THROW_EX(ComponentErrors, ThreadErrorEx, "Attempting to set an existing key in m_talkers", false)
+        else
+            m_talkers[m_cdb_ptr->SERVO_ADDRESS] = m_wpServoTalker_ptr;
+
+        m_thread_params.socket_ptr = m_wpServoLink_ptr;
+        m_thread_params.map_of_talkers_ptr = &m_talkers;
+        m_thread_params.listener_mutex = &listener_mutex;
+        m_thread_params.scheduler_mutex = &scheduler_mutex;
+        m_thread_params.status_mutex = &status_mutex;
+        m_thread_params.expire_time = &m_expire;
+        m_thread_params.cmd_pos_list = m_cmdPos_list;
+        m_thread_params.status_thread_en = &m_status_thread_en;
+        m_thread_params.tracking_delta = m_cdb_ptr->TRACKING_DELTA;
+
+        try {
+            // m_scheduler_ptr = getContainerServices()->getThreadManager()->create<RequestScheduler, 
+            //     ThreadParameters>("RequestScheduler", m_thread_params);
+            // I create the threads whitout the aid of the manager because I don't want
+            // the menager kill them when I release the component that create the threads. 
+            // I want kill the threads just when I release the last component active.
+
+            if(m_scheduler_ptr == NULL)
+                m_scheduler_ptr = new RequestScheduler("RequestScheduler", m_thread_params);
+
+            if(m_listener_ptr == NULL)
+                m_listener_ptr = new SocketListener("SocketListener", m_thread_params);
+
+            if(m_status_ptr == NULL)
+                m_status_ptr = new WPStatusUpdater("WPStatusUpdater", m_thread_params);
+        }
+        catch (std::bad_alloc& ex)
+            THROW_EX(ComponentErrors, MemoryAllocationEx, "WPServoImpl::initialize(): error allocating the threads", false);
+
+        pthread_mutex_unlock(&init_mutex); 
+
+        // Start the listener thread
+        m_scheduler_ptr->resume();
+        m_listener_ptr->resume();
+        m_status_ptr->resume();
+        setStatusUpdating(true);
+	}
+	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
+        pthread_mutex_unlock(&init_mutex); 
+		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"WPServo::initialize()");
+		throw _dummy;
+	}
+	catch (...) {
+        pthread_mutex_unlock(&init_mutex); 
+        THROW_EX(ComponentErrors, UnexpectedEx, "WPServoImpl::initialize(): unexpected exception", false);
+    }
+}
+
+
+void WPServoImpl::execute() 
+    throw (
+            ComponentErrors::MemoryAllocationExImpl, 
+            ComponentErrors::SocketErrorExImpl
+    )
+{
+    AUTO_TRACE("WPServoImpl::execute()");
+    
+    try {       
+        // Actual Position
+        m_actPos = new ROdoubleSeq(
+                getContainerServices()->getName() + ":actPos", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::ACT_POS, m_cdb_ptr, &m_expire), true);
+        
+        // Commanded Position
+        m_cmdPos = new RWdoubleSeq(
+                getContainerServices()->getName() + ":cmdPos", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::CMD_POS, m_cdb_ptr, &m_expire), true);
+        
+        // Difference between commanded and actual position
+        m_posDiff = new ROdoubleSeq(
+                getContainerServices()->getName() + ":posDiff", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::POS_DIFF, m_cdb_ptr, &m_expire), true);
+
+        // Engine temperature
+        m_engTemperature = new ROdoubleSeq(
+                getContainerServices()->getName() + ":engTemperature", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::ENG_TEMPERATURE, m_cdb_ptr, &m_expire), true);
+
+        // Counturing Error
+        m_counturingErr= new ROdoubleSeq(
+                getContainerServices()->getName() + ":counturingErr", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::COUNTURING_ERR, m_cdb_ptr, &m_expire), true);
+
+        // Torque Percentage
+        m_torquePerc= new ROdoubleSeq(
+                getContainerServices()->getName() + ":torquePerc", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::TORQUE_PERC, m_cdb_ptr, &m_expire), true);
+
+        // Engine Current
+        m_engCurrent = new ROdoubleSeq(
+                getContainerServices()->getName() + ":engCurrent", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::ENG_CURRENT, m_cdb_ptr, &m_expire), true);
+
+        // Engine Voltage 
+        m_engVoltage = new ROdoubleSeq(
+                getContainerServices()->getName() + ":engVoltage", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::ENG_VOLTAGE, m_cdb_ptr, &m_expire), true);
+
+        // Driver Temperature
+        m_driTemperature = new ROdoubleSeq(
+                getContainerServices()->getName() + ":driTemperature", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::DRI_TEMPERATURE, m_cdb_ptr, &m_expire), true);
+
+        // Utilization Percentage
+        m_utilizationPerc= new ROdoubleSeq(
+                getContainerServices()->getName() + ":utilizationPerc", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::UTILIZATION_PERC, m_cdb_ptr, &m_expire), true);
+
+        // Drive Cabinet Temperature
+        m_dcTemperature= new ROdoubleSeq(
+                getContainerServices()->getName() + ":dcTemperature", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::DC_TEMPERATURE, m_cdb_ptr, &m_expire), true);
+
+        // Driver Status
+        m_driverStatus= new ROdoubleSeq(
+                getContainerServices()->getName() + ":driverStatus", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::DRIVER_STATUS, m_cdb_ptr, &m_expire), true);
+
+        // Error Code
+        m_errorCode= new ROdoubleSeq(
+                getContainerServices()->getName() + ":errorCode", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::ERROR_CODE, m_cdb_ptr, &m_expire), true);
+
+        // Status
+        m_status= new ROpattern(
+                getContainerServices()->getName() + ":status", 
+                getComponent(), 
+                new WPStatusDevIO<ACS::pattern>(m_wpServoTalker_ptr, WPStatusDevIO<ACS::pattern>::STATUS, m_cdb_ptr, &m_expire), true);
+    }
+    catch (std::bad_alloc& ex)
+        THROW_EX(ComponentErrors, MemoryAllocationEx, "WPServoImpl::execute(): 'new' failure", false);
+}
+
+
+void WPServoImpl::cleanUp() 
+{
+    AUTO_TRACE("WPServoImpl::cleanUp()");
+    stopPropertiesMonitoring();
+
+    try {
+        pthread_mutex_lock(&init_mutex); 
+        pthread_mutex_lock(&status_mutex); 
+        pthread_mutex_lock(&listener_mutex); 
+        pthread_mutex_lock(&scheduler_mutex); 
+        if (m_cdb_ptr && m_talkers.count(m_cdb_ptr->SERVO_ADDRESS))
+            m_talkers.erase(m_cdb_ptr->SERVO_ADDRESS);
+        setStatusUpdating(false);
+        pthread_mutex_unlock(&listener_mutex); 
+        pthread_mutex_unlock(&scheduler_mutex); 
+        pthread_mutex_unlock(&status_mutex); 
+        pthread_mutex_unlock(&init_mutex); 
+    }
+    catch(...) {
+        pthread_mutex_unlock(&listener_mutex); 
+        pthread_mutex_unlock(&scheduler_mutex); 
+        pthread_mutex_unlock(&status_mutex); 
+        pthread_mutex_unlock(&init_mutex); 
+        setStatusUpdating(false);
+    }
+
+    CharacteristicComponentImpl::cleanUp(); 
+}
+
+
+void WPServoImpl::aboutToAbort()
+{
+    AUTO_TRACE("WPServoImpl::aboutToAbort()");
+    stopPropertiesMonitoring();
+
+    try {
+        pthread_mutex_lock(&init_mutex); 
+        pthread_mutex_lock(&status_mutex); 
+        pthread_mutex_lock(&listener_mutex); 
+        pthread_mutex_lock(&scheduler_mutex); 
+        if (m_cdb_ptr && m_talkers.count(m_cdb_ptr->SERVO_ADDRESS))
+            m_talkers.erase(m_cdb_ptr->SERVO_ADDRESS);
+        setStatusUpdating(false);
+        pthread_mutex_unlock(&listener_mutex); 
+        pthread_mutex_unlock(&scheduler_mutex); 
+        pthread_mutex_unlock(&status_mutex); 
+        pthread_mutex_unlock(&init_mutex); 
+    }
+    catch(...) {
+        pthread_mutex_unlock(&listener_mutex); 
+        pthread_mutex_unlock(&scheduler_mutex); 
+        pthread_mutex_unlock(&status_mutex); 
+        pthread_mutex_unlock(&init_mutex); 
+        setStatusUpdating(false);
+    }
+
+    CharacteristicComponentImpl::aboutToAbort(); 
+}
+
+
+void WPServoImpl::setPosition(const ACS::doubleSeq &position, const ACS::Time exe_time) 
+    throw (MinorServoErrors::PositioningErrorEx, MinorServoErrors::CommunicationErrorEx) 
+{
+
+    AUTO_TRACE("WPServoImpl::setPosition()");
+    try {
+        if(position.length() != m_cdb_ptr->NUMBER_OF_AXIS)
+            THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set position: wrong number of axis", true);
+
+        // Set the position
+        ACS::Time timestamp = getTimeStamp();
+        m_wpServoTalker_ptr->setCmdPos(position, timestamp, exe_time);
+    }
+    catch(MinorServoErrors::PositioningErrorEx &ex) {
+        throw;
+    }
+    catch(...)
+        THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set position", true);
+
+}
+
+
+void WPServoImpl::setStatusUpdating(bool flag) { m_status_thread_en[m_cdb_ptr->SERVO_ADDRESS] = flag; }
+
+
+bool WPServoImpl::isStatusThreadEn() { 
+    if(m_status_thread_en.count(m_cdb_ptr->SERVO_ADDRESS))
+        return m_status_thread_en[m_cdb_ptr->SERVO_ADDRESS]; 
+    else
+        return false;
+}
+
+
+void WPServoImpl::setup(const ACS::Time exe_time) 
+    throw (MinorServoErrors::SetupErrorEx, MinorServoErrors::CommunicationErrorEx) 
+{
+
+    AUTO_TRACE("WPServoImpl::setup()");
+    try {
+        // The index code of setup command in Talk.cpp is 3
+        m_wpServoTalker_ptr->action(3, exe_time);
+    }
+    catch(...) {
+        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot make a minor servo setup", true);
+    }
+
+}
+
+
+bool WPServoImpl::isParked() 
+{
+    AUTO_TRACE("WPServoImpl::isParked()");
+    bitset<STATUS_WIDTH> status(m_expire.status[m_cdb_ptr->SERVO_ADDRESS]);
+    return status.test(STATUS_PARK); 
+}
+
+
+bool WPServoImpl::isTracking() 
+{
+    AUTO_TRACE("WPServoImpl::isTracking()");
+    bitset<STATUS_WIDTH> status(m_expire.status[m_cdb_ptr->SERVO_ADDRESS]);
+    return status.test(STATUS_TRACKING); 
+}
+
+
+bool WPServoImpl::isReady() 
+{
+    AUTO_TRACE("WPServoImpl::isReady()");
+    bitset<STATUS_WIDTH> status(m_expire.status[m_cdb_ptr->SERVO_ADDRESS]);
+    return status.test(STATUS_READY); 
+}
+
+
+bool WPServoImpl::isStarting() 
+{
+    AUTO_TRACE("WPServoImpl::isStarting()");
+    bitset<STATUS_WIDTH> status(m_expire.status[m_cdb_ptr->SERVO_ADDRESS]);
+    return status.test(STATUS_SETUP); 
+}
+
+
+void WPServoImpl::stow(const ACS::Time exe_time) 
+    throw (MinorServoErrors::StowErrorEx, MinorServoErrors::CommunicationErrorEx) 
+{
+
+    AUTO_TRACE("WPServoImpl::stow()");
+    try {
+        // The index code of stow command in Talk.cpp is 4
+        m_wpServoTalker_ptr->action(4, exe_time);
+    }
+    catch(...) {
+        THROW_EX(MinorServoErrors, StowErrorEx, "Cannot make a minor servo stow", true);
+    }
+
+}
+
+
+void WPServoImpl::calibrate(const ACS::Time exe_time) 
+    throw (MinorServoErrors::CalibrationErrorEx, MinorServoErrors::CommunicationErrorEx) 
+{
+
+    AUTO_TRACE("WPServoImpl::calibrate()");
+    if(m_cdb_ptr->REQUIRE_CALIBRATION) {
+        try {
+            // The index code of calibrate command in Talk.cpp is 5
+            m_wpServoTalker_ptr->action(5, exe_time);
+        }
+        catch(...)
+            THROW_EX(MinorServoErrors, CalibrationErrorEx, "Cannot make a minor servo calibration", true);
+    }
+
+}
+
+
+/*
+ * POS_LIMIT
+ * NEG_LIMIT
+ * ACCELERATION
+ * MAX_SPEED
+ */
+ACS::doubleSeq * WPServoImpl::getData(const char *data_name) throw (MinorServoErrors::CommunicationErrorEx) {
+    string dname(data_name);
+    ACS::Time timestamp;
+    ACS::doubleSeq data;
+
+    if(dname == "POS_LIMIT") {
+        m_wpServoTalker_ptr->getParameter(
+                data,
+                timestamp, // Passo il timestamp
+                POS_LIMIT_IDX,
+                POS_LIMIT_SUB
+        );
+    }
+    else if(dname == "NEG_LIMIT") {
+        m_wpServoTalker_ptr->getParameter(
+                data,
+                timestamp, // Passo il timestamp
+                NEG_LIMIT_IDX,
+                NEG_LIMIT_SUB
+        );
+    }
+    else if(dname == "ACCELERATION") {
+        m_wpServoTalker_ptr->getParameter(
+                data,
+                timestamp, // Passo il timestamp
+                ACCELERATION_IDX,
+                ACCELERATION_SUB
+        );
+    }
+    else if(dname == "MAX_SPEED") {
+        m_wpServoTalker_ptr->getParameter(
+                data,
+                timestamp, // Passo il timestamp
+                MAX_SPEED_IDX,
+                MAX_SPEED_SUB
+        );
+    }
+    else
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, ("Data " + dname + " does not exist").c_str(), true);
+
+    ACS::doubleSeq *data_ptr = new ACS::doubleSeq;
+    data_ptr->length(data.length());
+    for(size_t i = 0; i < data.length(); i++)
+        (*data_ptr)[i] = data[i];
+
+    return data_ptr;
+}
+
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_actPos, actPos);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::RWdoubleSeq, m_cmdPos, cmdPos);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_posDiff, posDiff);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_engTemperature, engTemperature);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_counturingErr, counturingErr);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_torquePerc, torquePerc);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_engCurrent, engCurrent);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_engVoltage, engVoltage);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_driTemperature, driTemperature);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_utilizationPerc, utilizationPerc);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_dcTemperature, dcTemperature);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_driverStatus, driverStatus);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_errorCode, errorCode);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROpattern, m_status, status);
+
+/* --------------- [ MACI DLL support functions ] -----------------*/
+#include <maciACSComponentDefines.h>
+MACI_DLL_SUPPORT_FUNCTIONS(WPServoImpl)

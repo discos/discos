@@ -1,0 +1,120 @@
+/* *********************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      	   */
+/* $Id: SkySource.midl,v 1.4 2008-04-24 14:03:59 a.orlati Exp $							   */
+/*                                                                                                      	   */
+/* This code is under GNU General Public Licence (GPL).                                                 	   */
+/*                                                                                                      	   */
+/* Who                                  when            What                                              	   */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  10/09/2007      Creation                                          	   */
+
+
+#ifndef _SKYSOURCE_IDL
+#define _SKYSOURCE_IDL
+
+#include <baci.idl>
+#include "EphemGenerator.idl"
+#include <AntennaErrors.idl>
+#include <ComponentErrors.idl>
+#include "AntennaDefinitions.idl"
+
+#pragma prefix "alma"
+
+module Antenna {
+	
+	/**
+	 * @struct SkySourceAttributes defines a structure that contains all the properties of the componet 
+	 * (inlcuded the inherited form the interface EpehemGenerator).
+	 * This interface will be mapped into an ACS dynamic componet so it can not expose properties in their classic definition. So the 
+	 * component attributes are read via their accesor method (<i>getAttributes()</i>).  
+	 * @arg ìnputRightAscension the right ascension of the source taken from the catalog in radians
+	 * @arg inputDeclination the declination of the source taken from the catalog in radians
+	 * @arg inputJEpoch the julian epoch the catalog RA and Dec refer to
+	 * @arg inputRaProperMotion the proper motion in right ascension (milli arcseconds per tropical year if FK4 is used, per julian year if Fk5 is used)
+	 * @arg inputDecProperMotion the proper motion in declination (milli arcseconds per tropical year if FK4 is used, per julian year if Fk5 is used)
+	 * @arg inputParallax the parallax in milli arcseconds.
+	 * @arg inputRadialVelocity the radial velocity in Km/sec ( positive value means the source is moving away) 
+	 * @arg inputGalacticLongitude the galactic longitude of the source in radians
+	 * @arg inputGalacticLatitude the galactic latitude of the source in radians
+	 * @arg J2000RightAscension the right ascension of the source at J2000
+	 * @arg J2000Declination the declination of the source at J2000 
+	*/
+	DEFATTRIBUTES(SkySourceAttributes)
+	double inputRightAscension;      /** the right ascension of the source taken from the catalog in radians*/
+	double inputDeclination;		 /** the declination of the source taken from the catalog in radians*/
+	double inputJEpoch;		         /** the julian epoch the catalog RA and Dec refer to */ 
+	double inputRaProperMotion;	     /** the proper motion in right ascension (milli arcseconds per tropical year if FK4 is used, per julian year if Fk5 is used)*/
+	double inputDecProperMotion;     /** the proper motion in declination (milli arcseconds per tropical year if FK4 is used, per julian year if Fk5 is used) */
+	double inputParallax;            /** the parallax in milli arcseconds. */
+	double inputRadialVelocity;      /** the radial velocity in Km/sec ( positive value means the source is moving away) */
+	double inputGalacticLongitude;   /** the galactic longitude of the source in radians */
+	double inputGalacticLatitude;    /** the galactic latitude of the source in radians*/
+	ENDDEFATTRIBUTES;
+	
+	/**
+	 * This is the interface of the component SkySource. This component can generates the horizontal 
+	 * coordinates that can be passed to the telescope in order to do a sidereal tracking. In all cases
+	 * these coordinates are apparent that means the instrumental effect of the telescope are not
+	 * considered. All the attributes exposed in this component can be accessed in one shot via the
+	 * <i>getAttributes()</i> method. 
+	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ 	 * Istituto di Radioastronomia, Italia
+ 	 * <br> 
+	*/ 
+	interface SkySource: EphemGenerator {
+		
+		/**
+		 * This method is the attributes accessor. The only way to read the properties externally
+		 * @throw CORBA::SystemException
+		 * @param att this parameter is used to return the structure that contains all the values for each attribute of this class.
+		 *        Caller must take care of free the parameter. 
+		 */
+		void getAttributes(out SkySourceAttributes att);
+		
+		/**
+		 * This operation try to load all the data required by a source form the configuration database.
+		 * @throw AntennaErrors::SourceNotFoundEx
+		 * @throw ComponentErrors:CDBFieldFormatEx
+		 * @throw CORBA::SystemException
+		 * @param sourceName this is the name of the source or the idintification code of the source. It is used to search the CDB.
+		*/
+		void loadSourceFromCatalog(in string sourceName) raises (ComponentErrors::ComponentErrorsEx,
+		    AntennaErrors::AntennaErrorsEx);
+		/**
+		 * Sets the source as fixedposition in the horizontal system
+		 * @throw CORBA::SystemException
+		 * @param az fixed azimuth position in radians
+		 * @param el fixed elevation position in radians
+		*/
+		void setFixedPoint(in double az,in double el);
+		
+		/**
+		 * This operation changes the current tracked source by givin its galactic coordinates.
+		 * @throw CORBA::SystemException
+		 * @param sourceName the name of the source
+		 * @param latitude galactic latitude of the source in radians
+		 * @param longitude galactic longitude of the source in radians 
+		*/
+		void setSourceFromGalactic(in string sourceName,in double longitude,in double latitude);
+		
+		/**
+		 * This operation changes the current tracked source by giving its equatorial coordinates.
+		 * @throw CORBA::SystemException
+		 * @param sourceName the name of the source
+		 * @param ra right ascension of the source in radians
+		 * @param dec declination of the source in radians
+		 * @param equinox equinox which the above coordinates refer to
+		 * @param dra proper motion in right ascension in mas/year (milli seconds of arc year (tropical) if FK4 is used, per 
+		 *        year (julian) if Fk5 is used). dRA/dt*cos(DEC) is assumed
+		 * @param ddec proper motion in declination in mas/year (milli seconds of arc per year (tropical) if FK4 is used, 
+		 * 	      per year (julian) if Fk5 is used)
+		 * @param parallax parallax in milli arcseconds.
+		 * @param rvel radial velocity in Km/sec ( positive value means the source is moving away)
+		*/
+		void setSourceFromEquatorial(in string sourceName,in double ra,in double dec,in TSystemEquinox equinox,in double dra,
+		   in double ddec,in double parallax,in double rvel);		 
+	};
+	
+};
+
+
+#endif

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+   - $Id: ManagementErrors.xml,v 1.12 2011-06-05 14:42:00 a.orlati Exp $
+   - Author: Andrea Orlati
+   -
+   - History:
+   -  22-12-2008  Created
+   -  24-11-2009  Added the entry Procedure Error
+   -  31-03-2010  Added ConfigurationError and ParkingError
+   -  09-05-2010  Added memeber reason to SubscanError
+   -  11-08-2010  Added ProcedureFileLoadingError
+-->
+
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="Alma/ACSError" xsi:schemaLocation="Alma/ACSError ACSError.xsd"
+ name="ManagementErrors" type="2006" _prefix="alma">
+
+<Code name="NoError" shortDescription="No error" description="No error condition found"/>
+
+<ErrorCode name="ScheduleError" shortDescription="The schedule contains errors" description="">
+	<Member name="Reason" type="string" description="Explanation of the cause of the problem" />
+	<Member name="LineNumber" type="long" description="Line number at which the problem has been found" />	
+</ErrorCode>
+
+<ErrorCode name="AlreadyRunning" shortDescription="A schedule is already running" description=""/>
+
+<ErrorCode name="NotAllowedDuringSchedule" shortDescription="The operation is not allowed during schedule execution" description=""/>
+
+<ErrorCode name="TargetIsNotVisible" shortDescription="The selected target is not visible" description=""/>
+
+<ErrorCode name="BackendNotAvailable" shortDescription="The selected backend is not avaiable" description=""/>
+
+<ErrorCode name="DataRecorderNotAvailable" shortDescription="The selected data recorder is not avaiable" description=""/>
+
+<ErrorCode name="DataTransferSetupError" shortDescription="The data transfer was not properly setup" description=""/>
+
+<ErrorCode name="TsysError" shortDescription="Error during System Temperature computation" description=""/>
+
+<ErrorCode name="AntennaScanError" shortDescription="Error while commanding a scan to the antenna" description=""/>
+
+<ErrorCode name="SubscanError" shortDescription="Error during the execution of a subscan" description="">
+	<Member name="SubScanID" type="long" description="Identifier of the scan" />
+	<Member name="Reason" type="string" description="Describes the cause of the error" />	
+</ErrorCode>
+
+<ErrorCode name="FitsCreationError" shortDescription="Fits file creation impossible" description="">
+	<Member name="Error" type="string" description="Explanation of the problem" />
+	<Member name="FileName" type="string" description="Name of the aborted file" />
+</ErrorCode>
+
+<ErrorCode name="CommandLineError" shortDescription="Error during the execution of a command line instruction" description="">
+	<Member name="Command" type="string" description="Reports the command that fails to execute" />
+	<Member name="ErrorMessage" type="string" description="Describes the cause of the error" />
+</ErrorCode>
+
+<ErrorCode name="ProcedureError" shortDescription="Error during the execution of complex procedure" description="">
+	<Member name="Procedure" type="string" description="Reports the name of the procedure that fails to execute" />
+	<Member name="ErrorMessage" type="string" description="Describes the cause of the error" />
+	<Member name="Command" type="string" description="Reports the command that fails to execute" />	
+	<Member name="Line" type="long" description="Stores the line number of the command that caused the procedure to fail" />
+</ErrorCode>
+
+<ErrorCode name="ConfigurationError" shortDescription="Error during subsystem configuration" description="">
+	<Member name="Subsystem" type="string" description="Reports the name of the subsystem that fails to configure" />
+	<Member name="Reason" type="string" description="Describes the cause of the error" />
+</ErrorCode>
+
+<ErrorCode name="ParkingError" shortDescription="The subsystem fails to park" description="">
+	<Member name="Subsystem" type="string" description="Reports the name of the subsystem that fails to park" />
+	<Member name="Reason" type="string" description="Describes the cause of the error" />
+</ErrorCode>
+
+<ErrorCode name="ProcedureFileLoadingError" shortDescription="Error occured while loading a procedure file" description="">
+	<Member name="FileName" type="string" description="report the name of the file" />
+</ErrorCode>
+
+
+</Type>
