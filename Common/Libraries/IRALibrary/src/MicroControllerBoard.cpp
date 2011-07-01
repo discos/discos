@@ -1,10 +1,13 @@
 #include "MicroControllerBoard.h"
 
 
-MicroControllerBoard::MicroControllerBoard(const BYTE master_address, const BYTE slave_address,
-        const std::string IP, const unsigned short port, DWORD timeout) throw (MicroControllerBoardEx) :
-    m_IP(IP), m_port(port), m_timeout(timeout), m_master_address(master_address), m_slave_address(slave_address),
-    m_socket(NULL), m_id(0), m_command_type(0x00)
+MicroControllerBoard::MicroControllerBoard(
+        const std::string IP, const unsigned short port,
+        const BYTE master_address, const BYTE slave_address, 
+        DWORD timeout) throw (MicroControllerBoardEx
+            ) : m_IP(IP), m_port(port), m_timeout(timeout), m_master_address(master_address), 
+                m_slave_address(slave_address),
+                m_socket(NULL), m_id(0), m_command_type(0x00)
 {
     try {
         m_socket = new CSocket::CSocket();

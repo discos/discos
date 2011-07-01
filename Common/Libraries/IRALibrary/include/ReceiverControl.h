@@ -14,7 +14,7 @@
 #include <IRA>
 #include "ReceiverControl.h"
 
-class ReceiverBoardEx {
+class ReceiverControlEx {
 
 public:
    ReceiverControlEx(const std::string& msg) : m_msg(msg) {}
@@ -24,8 +24,6 @@ public:
 private:
    const std::string m_msg;
 };
-
-
 
 
 /** 
@@ -40,11 +38,44 @@ private:
  * the feed LNAs (Low Noise Amplifier), and also allows to read the values
  * of VDs (drain voltage), IDs (drain current) and VGs (gate voltage).</p>
  * <p>The user of this class just have to know its interface without to see
- * what board perform the request or other low level details</p>
+ * which board perform the request or other low level details.</p>
  * <p>Once you instantiate the ReceiverControl, you can execute the
  * following operations:</p>
  * <ul>
- *     <li>...</li>
+ *     <li>doube vacuum(): return the vacuum value inside the dewar</li>
+ *     <li>double lowTemperature(): return the low cryogenic temperature value</li>
+ *     <li>double highTemperature(): return the high cryogenic temperature value</li>
+ *     <li>void setCoolHeadOn(): set to ON the cool head</li>
+ *     <li>void setCoolHeadOff(): set to OFF the cool head</li>
+ *     <li>bool isCoolHeadOn(): return true if the cool head is ON</li>
+ *     <li>void setVacuumSensorOn(): set to ON the vacuum sensor</li>
+ *     <li>void setVacuumSensorOff(): set to OFF the vacuum sensor</li>
+ *     <li>bool isVacuumSensorOn(): return true if the vacuum sensor is ON</li>
+ *     <li>bool isRemoteEnable(): return true if the remote command is enabled</li>
+ *     <li>void setVacuumPumpOn(): set to ON the vacuum pump</li>
+ *     <li>void setVacuumPumpOff(): set to OFF the vacuum pump</li>
+ *     <li>bool isVacuumPumpOn(): return true if the vacuum pump is ON</li>
+ *     <li>void setVacuumValveOn(): open the valve IMMEDIATELY</li>
+ *     <li>void setVacuumValveOff(): disable the valve</li>
+ *     <li>bool isVacuumValveOn(): return true if the vacuum valve is opened</li>
+ *     <li>void setCalibrationOn(): set the noise mark to ON</li>
+ *     <li>void setCalibrationOff(): set the noise mark to OFF</li>
+ *     <li>bool isCalibrationOn(): return true if the noise mark is sets to OFF</li>
+ *     <li>void setRemoteOn(): enable the remote command</li>
+ *     <li>void setRemoteOff(): disable the remote command</li>
+ *     <li>bool isRemoteEnable(): return true if the remote command is enable</li>
+ *     <li>void selectLO1(): select the Local Oscillator 1</li>
+ *     <li>void selectLO2(): select the Local Oscillator 2</li>
+ *     <li>void setReliableCommOn(): set the reliable communication to/from the 
+ *     board to ON</li>
+ *     <li>void setReliableCommOff(): set the reliable communication to/from the 
+ *     board to OFF</li>
+ *     <li>bool isReliableCommOn(): return true if the the communiaction to the
+ *     board is sets to be reliable</li>
+ *     <li>bool isLNABoardConnectionOK(): return true if the connection to the LNA
+ *     board is OK</li>
+ *     <li>bool isDewarBoardConnectionOK(): return true if the connection to the 
+ *     dewar board is OK</li>
  * </ul>
  * 
  */
@@ -58,6 +89,9 @@ public:
 	 * @param dewar_port the port of the dewar control board
 	 * @param lna_ip the IP address of the LNA control board
 	 * @param lna_port the port of the LNA control board
+     * @param reliable_comm when it is true then the communication
+     * to the board is reliable because there is a checksum field in
+     * both request and answer. It is true to default.
      * @throw ReceiverControlEx
 	*/
     ReceiverControl(
@@ -69,14 +103,43 @@ public:
             const BYTE dewar_sadd=0x7F, // Dewar board slave address
             const BYTE lna_madd=0x7D,   // LNA board master address
             const BYTE lna_sadd=0x7F,   // LNA board slave address
+            bool reliable_comm=true
     ) throw (ReceiverControlEx);
 
 
-	/** Destructor */
-    ~ReceiverControl();
+    /** Set the noise mark generator to ON 
+     *  @throw ReceiverControlEx
+     */
+    void setCalibrationOn() throw (ReceiverControlEx);
+
+
+    /** Set the noise mark generator to OFF
+     *  @throw ReceiverControlEx
+     */
+    void setCalibrationOff() throw (ReceiverControlEx);
+
+
+    /** Is the noise mark generator ON? */
+    bool isCalibrationOn();
+
+
+    // When do I convert the voltage values to the requested values? Inside this library
+    // or outside it?
+
 
 private:
-    // ...
+
+    /** If m_reliable_comm is true then a checksum byte is added to the request
+     *  and to the answer during the communication to and from the board.
+     *  So m_reliable_comm == true means we have a reliable communication.
+     */
+    bool m_reliable_comm;
+
+    /** LNA MicroControllerBoard */
+    MicroControllerBoard m_lna_board;
+
+    /** Dewar MicroControllerBoard */
+    MicroControllerBoard m_dewar_board;
 
 };
 

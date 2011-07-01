@@ -20,13 +20,13 @@ int main(int argc, char *argv[])
     unsigned int port = atoi(argv[2]);
     std::vector<BYTE> data;
 
-    MicroControllerBoard mcb = MicroControllerBoard(0xFF, 0xFE, IP, port);
+    MicroControllerBoard mcb = MicroControllerBoard(IP, port);
 
     // Test openConnection
     try {
         cout << "\nConnecting..." << endl;
         mcb.openConnection();
-        cout << "Connected!\n" << endl;
+        cout << "Connection to " << mcb.getIP() << ":" << mcb.getPort() << " done!" << endl << endl;
     }
     catch(MicroControllerBoardEx& ex)  {
         cout << ex.what() << endl;
