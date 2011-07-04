@@ -433,7 +433,7 @@ void CEngineThread::runLoop()
 
                 //sourceFlux_var = m_antennaBoss->sourceFlux();
                 //sourceFlux_val = sourceFlux_var->get_sync(completion.out());
-		sourceFlux_val = 300.0;
+		        sourceFlux_val = 300.0;
                 data->setSourceFlux(sourceFlux_val);
                     
                 tS.value(m_time);
