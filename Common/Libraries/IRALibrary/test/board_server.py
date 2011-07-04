@@ -82,9 +82,9 @@ class BoardServer:
         self.s.bind((self.host, self.port))
         self.s.listen(1)
         # Display a welcome message
-        print "*"*36
+        print "*"*40
         print "BoardServer - Waiting for connections..."
-        print "*"*36
+        print "*"*40
 
         # Number of connections counter
         counter = 0

@@ -1,11 +1,12 @@
 #include "MicroControllerBoard.h"
 
 
+
 MicroControllerBoard::MicroControllerBoard(
         const std::string IP, const unsigned short port,
         const BYTE master_address, const BYTE slave_address, 
-        DWORD timeout) throw (MicroControllerBoardEx
-            ) : m_IP(IP), m_port(port), m_timeout(timeout), m_master_address(master_address), 
+        const DWORD timeout) throw (MicroControllerBoardEx) : 
+                m_IP(IP), m_port(port), m_timeout(timeout), m_master_address(master_address), 
                 m_slave_address(slave_address),
                 m_socket(NULL), m_id(0), m_command_type(0x00)
 {
@@ -22,8 +23,8 @@ MicroControllerBoard::MicroControllerBoard(
 
 MicroControllerBoard::~MicroControllerBoard() {
     closeConnection();
-    if(m_socket != NULL)
-        delete(m_socket);
+    if(m_socket != NULL && m_socket->getStatus())
+         delete m_socket;
 }
 
 

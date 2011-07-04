@@ -6,13 +6,13 @@
  *  Personal Web: http://www.pypeople.com/
 \*******************************************************************************/
 
-#ifndef __RECEIVER_CONTROL__H
-#define __RECEIVER_CONTROL__H
+#ifndef m__RECEIVER_CONTROL__H
+#define m__RECEIVER_CONTROL__H
 
 #include <string>
 #include <vector>
 #include <IRA>
-#include "ReceiverControl.h"
+#include "MicroControllerBoard.h"
 
 class ReceiverControlEx {
 
@@ -60,7 +60,6 @@ private:
  *     <li>bool isVacuumValveOn(): return true if the vacuum valve is opened</li>
  *     <li>void setCalibrationOn(): set the noise mark to ON</li>
  *     <li>void setCalibrationOff(): set the noise mark to OFF</li>
- *     <li>bool isCalibrationOn(): return true if the noise mark is sets to OFF</li>
  *     <li>void setRemoteOn(): enable the remote command</li>
  *     <li>void setRemoteOff(): disable the remote command</li>
  *     <li>bool isRemoteEnable(): return true if the remote command is enable</li>
@@ -106,6 +105,10 @@ public:
             bool reliable_comm=true
     ) throw (ReceiverControlEx);
 
+    
+    /** Destructor */
+    ~ReceiverControl();
+
 
     /** Set the noise mark generator to ON 
      *  @throw ReceiverControlEx
@@ -119,15 +122,20 @@ public:
     void setCalibrationOff() throw (ReceiverControlEx);
 
 
-    /** Is the noise mark generator ON? */
-    bool isCalibrationOn();
-
-
     // When do I convert the voltage values to the requested values? Inside this library
     // or outside it?
 
 
 private:
+    
+	/** Send the request to the board and receive the answer
+	 * @param command the command code of the request
+	 * @param len the number of parameters to send
+	 * @param ... the parameters
+     * @return a vector of parameters, empty if there are not some
+     * @throw MicroControllerBoardEx
+	*/
+    std::vector<BYTE> makeRequest(const BYTE command, size_t len, ...) throw(MicroControllerBoardEx);
 
     /** If m_reliable_comm is true then a checksum byte is added to the request
      *  and to the answer during the communication to and from the board.
@@ -135,11 +143,11 @@ private:
      */
     bool m_reliable_comm;
 
-    /** LNA MicroControllerBoard */
-    MicroControllerBoard m_lna_board;
+    /** Dewar MicroControllerBoard pointer */
+    MicroControllerBoard *m_dewar_board_ptr;
 
-    /** Dewar MicroControllerBoard */
-    MicroControllerBoard m_dewar_board;
+    /** LNA MicroControllerBoard pointer */
+    MicroControllerBoard *m_lna_board_ptr;
 
 };
 
