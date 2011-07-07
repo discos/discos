@@ -139,7 +139,7 @@ QT_COMPILE_FILES = $(subst .cpp,,$(QT_UI_FILES_MOC) $(QT_UI_FILES_EXTERN_MOC_H) 
 MedicinaGeneralControlSystemGUIClient_OBJECTS   = $(QT_COMPILE_FILES) MedicinaGeneralControlSystemGUIui MedicinaGeneralControlSystem \
 												  MedicinaGeneralControlSystemClientEventLoop MedicinaGeneralControlSystemGUIClient
 MedicinaGeneralControlSystemGUIClient_LIBS      = IRALibrary ComponentErrors ClientErrors ManagementErrors AntennaErrors AntennaDefinitionsStubs \
-												  ManagmentDefinitionsStubs MountStubs AntennaBossStubs SiteInformationStubs
+												  ManagmentDefinitionsStubs MountStubs AntennaBossStubs
 
 $(PROG)_OBJECTS            = $(PROG)
 $(PROG)_LDFLAGS            =
