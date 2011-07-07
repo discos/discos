@@ -60,6 +60,13 @@ int main(int argc, char *argv[])
         cout << "Vacuum value: " << rc.vacuum() << endl;
         cout << "Done!\n" << endl;
 
+        // Test lna()
+        cout << "Test lna() with a reliable communication" << endl;
+        FetValues values = rc.lna(1, LEFT, 4);
+        cout << "LNA values: (VD=" << values.VD << ", ID=" << values.ID;
+        cout << ", VG=" << values.VG << ")" << endl;
+        cout << "Done!\n" << endl;
+
         // Test the isCalibrationOn()
         cout << "Test isCalibrationOn() with a reliable communication" << endl;
         cout << "It the noise mark generator ON? " << (rc.isCalibrationOn() == true ? "yes" : "no") << endl;

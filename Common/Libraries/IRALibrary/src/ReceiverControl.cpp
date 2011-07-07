@@ -7,12 +7,14 @@ ReceiverControl::ReceiverControl(
         const unsigned short dewar_port, 
         const std::string lna_ip, 
         const unsigned short lna_port, 
+        const unsigned short number_of_feeds,
         const BYTE dewar_madd,
         const BYTE dewar_sadd,
         const BYTE lna_madd,
         const BYTE lna_sadd,
         bool reliable_comm
 ) throw (ReceiverControlEx) : 
+    m_number_of_feeds(number_of_feeds),
     m_reliable_comm(reliable_comm), 
     m_dewar_board_ptr(NULL),
     m_lna_board_ptr(NULL)
@@ -128,6 +130,14 @@ double ReceiverControl::vacuum() throw (ReceiverControlEx)
         std::string error_msg = "ReceiverControl: error getting the vacuum.\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
+}
+
+
+FetValues ReceiverControl::lna(unsigned short feed_id, enum Channel channel, unsigned short stage_id)
+{
+    // TODO
+    FetValues dummy_values = {0};
+    return dummy_values;
 }
 
 

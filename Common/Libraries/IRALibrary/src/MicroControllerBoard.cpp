@@ -1,7 +1,6 @@
 #include "MicroControllerBoard.h"
 
 
-
 MicroControllerBoard::MicroControllerBoard(
         const std::string IP, const unsigned short port,
         const BYTE master_address, const BYTE slave_address, 

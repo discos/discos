@@ -27,6 +27,15 @@ private:
 };
 
 
+struct FetValues {
+    double VD; // Drain Voltage
+    double ID; // Drain Current
+    double VG; // Gate Voltage
+};
+
+enum Channel { LEFT, RIGHT };
+
+
 /** 
  * This class performs a high level library to comunicate via TCP/IP
  * to receivers controlled by the board designed in Medicina (BO, Italy) 
@@ -34,7 +43,7 @@ private:
  * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>,
  * INAF, Osservatorio Astronomico di Cagliari
  * <p>There are two board for each receiver: the first one allows to
- * commnicate to the dewar either reading the status bits and voltage values
+ * communicate to the dewar either reading the status bits and voltage values
  * or writing some configurations. The second one supplies the power to 
  * the feed LNAs (Low Noise Amplifier), and also allows to read the values
  * of VDs (drain voltage), IDs (drain current) and VGs (gate voltage).</p>
@@ -43,6 +52,7 @@ private:
  * <p>Once you instantiate the ReceiverControl, you can execute the
  * following operations:</p>
  * <ul>
+ *     <li>unsigned short numberOfFeeds(): return the number of feeds</li>
  *     <li>doube vacuum(): return the vacuum value inside the dewar</li>
  *     <li>double lowTemperature(): return the low cryogenic temperature value</li>
  *     <li>double highTemperature(): return the high cryogenic temperature value</li>
@@ -61,7 +71,7 @@ private:
  *     <li>bool isVacuumValveOn(): return true if the vacuum valve is opened</li>
  *     <li>void setCalibrationOn(): set the noise mark to ON</li>
  *     <li>void setCalibrationOff(): set the noise mark to OFF</li>
- *     <li>void isCalibrationOn(): is the noise mark generator sets to ON?</li>
+ *     <li>bool isCalibrationOn(): is the noise mark generator sets to ON?</li>
  *     <li>void setRemoteOn(): enable the remote command</li>
  *     <li>void setRemoteOff(): disable the remote command</li>
  *     <li>bool isRemoteEnable(): return true if the remote command is enable</li>
@@ -71,12 +81,15 @@ private:
  *     board to ON</li>
  *     <li>void setReliableCommOff(): set the reliable communication to/from the 
  *     board to OFF</li>
- *     <li>bool isReliableCommOn(): return true if the the communiaction to the
+ *     <li>bool isReliableCommOn(): return true if the communication to the
  *     board is sets to be reliable</li>
  *     <li>bool isLNABoardConnectionOK(): return true if the connection to the LNA
  *     board is OK</li>
  *     <li>bool isDewarBoardConnectionOK(): return true if the connection to the 
  *     dewar board is OK</li>
+ *     <li>FetValues lna(unsigned short feed_id, enum Chennel channel, unsigned short stage_id): 
+ *     return the FetValues (VD, ID, and VG) of the LNA of the feed `feed_id`, channel `channel` 
+ *     and stage `stage_id`</li>
  * </ul>
  * 
  */
@@ -90,6 +103,11 @@ public:
 	 * @param dewar_port the port of the dewar control board
 	 * @param lna_ip the IP address of the LNA control board
 	 * @param lna_port the port of the LNA control board
+     * @param number_of_feeds number of feeds (default 1)
+     * @params dewar_maddr the dewar board master address (default 0x7D)
+     * @params dewar_saddr the dewar board slave address (default 0x7F)
+     * @params lna_maddr the LNA board master address (default 0x7D)
+     * @params lna_saddr the LNA board slave address (default 0x7F)
      * @param reliable_comm when it is true then the communication
      * to the board is reliable because there is a checksum field in
      * both request and answer. It is true to default.
@@ -100,6 +118,7 @@ public:
             const unsigned short dewar_port, 
             const std::string lna_ip, 
             const unsigned short lna_port, 
+            const unsigned short number_of_feeds=1,
             const BYTE dewar_madd=0x7D, // Dewar board master address
             const BYTE dewar_sadd=0x7F, // Dewar board slave address
             const BYTE lna_madd=0x7D,   // LNA board master address
@@ -110,6 +129,9 @@ public:
     
     /** Destructor */
     ~ReceiverControl();
+
+    /** Return the number of feeds of the receiver */
+    unsigned short numberOfFeeds() { return m_number_of_feeds; }
 
 
     /** Set the noise mark generator to ON 
@@ -139,7 +161,7 @@ public:
     void setReliableCommOff() { m_reliable_comm = false; }
 
 
-    /** return true if the the communiaction to the board is sets to be reliable */
+    /** return true if the communication to the board is sets to be reliable */
     bool isReliableCommOn() { return m_reliable_comm; }
 
 
@@ -152,6 +174,16 @@ public:
      *  @throw ReceiverControlEx
      */
     double vacuum() throw (ReceiverControlEx);
+
+    
+    /** return the FetValues (VD, ID, and VG) of the LNA of the feed `feed_id`, channel `channel` 
+     *  and stage `stage_id`
+     *  @param feed_id the ID code of the feed
+     *  @param channel the channel, LEFT or RIGHT
+     *  @param stage_id the ID of the stage
+     *  @return the FetValues, a struct of three double members: VD, ID and VG
+     */
+    FetValues lna(unsigned short feed_id, enum Channel channel, unsigned short stage_id);
 
 
 private:
@@ -174,14 +206,20 @@ private:
     double get_value(const std::vector<BYTE> parameters, const size_t RAW_INDEX);
 
 
+    /** Number of feeds of the receiver */
+    const unsigned short m_number_of_feeds;
+
+
     /** If m_reliable_comm is true then a checksum byte is added to the request
      *  and to the answer during the communication to and from the board.
      *  So m_reliable_comm == true means we have a reliable communication.
      */
     bool m_reliable_comm;
 
+
     /** Dewar MicroControllerBoard pointer */
     MicroControllerBoard *m_dewar_board_ptr;
+
 
     /** LNA MicroControllerBoard pointer */
     MicroControllerBoard *m_lna_board_ptr;
