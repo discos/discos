@@ -1,0 +1,9 @@
+#ifndef __RECEIVER_CONVERSIONS__DEF__
+#define __RECEIVER_CONVERSIONS__DEF__
+
+
+// Get the vacuum value in mbar for a given voltage VALUE
+#define GET_VACUUM(VALUE) pow(10, 1.5 * VALUE - 12);
+
+
+#endif

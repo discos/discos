@@ -31,13 +31,38 @@ int main(int argc, char *argv[])
         cout << "Connection" << " done!" << endl << endl;
     
         // Test the setCalibrationOn()
+        cout << "Test setCalibrationOn() with a reliable communication" << endl;
+        rc.setCalibrationOn();
+        cout << "Done!\n" << endl;
+
+        // Test the setReliableCommOff()
+        cout << "Test setCalibrationOff()" << endl;
+        rc.setReliableCommOff();
+        cout << "Done!\n" << endl;
+    
+        // Test the setCalibrationOn()
         cout << "Test setCalibrationOn()" << endl;
         rc.setCalibrationOn();
         cout << "Done!\n" << endl;
 
+        // Test the setReliableCommOn()
+        cout << "Test setReliableCommOn()" << endl;
+        rc.setReliableCommOn();
+        cout << "Done!\n" << endl;
+
         // Test the setCalibrationOff()
-        cout << "Test setCalibrationOff()" << endl;
+        cout << "Test setCalibrationOff() with a reliable communication" << endl;
         rc.setCalibrationOff();
+        cout << "Done!\n" << endl;
+
+        // Test the vacuum()
+        cout << "Test vacuum() with a reliable communication" << endl;
+        cout << "Vacuum value: " << rc.vacuum() << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the isCalibrationOn()
+        cout << "Test isCalibrationOn() with a reliable communication" << endl;
+        cout << "It the noise mark generator ON? " << (rc.isCalibrationOn() == true ? "yes" : "no") << endl;
         cout << "Done!\n" << endl;
     }
     catch(ReceiverControlEx& ex) {

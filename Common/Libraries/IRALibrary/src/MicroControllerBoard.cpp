@@ -60,11 +60,11 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
     BYTE msg[MCB_BUFF_LIMIT] = {0x00};
     bool is_short_cmd = false, has_data_cmd = false;
     BYTE sh_command = 0x00; // Shifted command (command_type - MCB_CMD_TYPE_EXTENDED)
-    std::vector<BYTE> data;
+    std::vector<BYTE> data, clean_data;
     
     std::ostringstream msg_stream;
     
-    // Receive the response form the minorServo one byte at once 
+    // Receive the response one byte at once 
     for(size_t j = 0; j < MCB_HT_COUNTER; j++) {
         if(m_socket->Receive(m_Error, (void *)(&msg[0]), 1) == 1) {
             if(msg[0] == MCB_CMD_STX) // MCB_CMD_STX is the answer header
@@ -78,7 +78,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
     else {
         m_answer.clear();
         m_answer.push_back(msg[0]);
-        // Receive the response form the minorServo one byte at once 
+        // Receive the response one byte at once 
         // starting from the second byte (the first is the header already stored)
         // The first 6 bytes are the same for wide and short commands
         for(size_t i=1; i<MCB_BASE_ANSWER_LENGTH; i++) {
@@ -127,6 +127,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
         // If the answer shoud have data and there isn't any error, then continue the reception
         if(has_data_cmd) {
             data.clear();
+            clean_data.clear();
             if(m_socket->Receive(m_Error, (void *)(&msg[MCB_BASE_ANSWER_LENGTH]), 1) == 1) {
                 msg_stream.clear();
                 msg_stream.str("");
@@ -184,6 +185,23 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
         if(m_request[MCB_CMD_COMMAND_ID] != m_answer[MCB_CMD_COMMAND_ID])
             throw MicroControllerBoardEx("Mismatch between command id of request and answer.");
 
+        // Check if the request parameters are the same as those at the beginning of the answer parameters
+        if(!data.empty())
+            if(data.size() < m_parameters.size())
+                throw MicroControllerBoardEx("Mismatch between parameters size of answer and request.");
+            else {
+                for(std::vector<BYTE>::size_type idx=0; idx != m_parameters.size(); idx++)
+                    if(data[idx] != m_parameters[idx])
+                        throw MicroControllerBoardEx("Mismatch between request and answer parameters.");
+
+                // The parameters of the answer are composed by two parts: the first part stores the
+                // parameters sent by the request, and the second one stores just the parameters related
+                // to the answer. So in the following for cicle we push in clean_data just the parameters 
+                // related to the answer
+                for(std::vector<BYTE>::size_type idx=m_parameters.size(); idx != data.size(); idx++)
+                    clean_data.push_back(data[idx]);
+            }
+                    
         // Compute and verify the checksum
         std::vector<BYTE> base_checksum;
         for(std::vector<BYTE>::size_type idx = 0; idx <= m_answer.size() - 3; idx++)
@@ -195,7 +213,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
 
     }
 
-    return(data); // Return the parameters 
+    return(clean_data); // Return the just the answer parameters
 }
 
 void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters) throw (MicroControllerBoardEx) {
@@ -207,11 +225,15 @@ void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters
         m_request.push_back(m_master_address);
         m_request.push_back(m_command_type);
         m_request.push_back(++m_id);
+        m_parameters.clear();
         if(!parameters.empty()) {
             m_request.push_back(parameters.size());
-            for(std::vector<BYTE>::iterator iter = parameters.begin(); iter != parameters.end(); iter++)
+            for(std::vector<BYTE>::iterator iter = parameters.begin(); iter != parameters.end(); iter++) {
                 m_request.push_back(*iter);
+                m_parameters.push_back(*iter);
+            }
         }
+
         // If the command is extended, put the checksum in the request
         if(m_command_type <= MCB_CMD_TYPE_MAX_EXT) {
             m_request.push_back(computeChecksum(m_request));

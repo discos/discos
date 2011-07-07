@@ -20,6 +20,11 @@ int main(int argc, char *argv[])
     unsigned int port = atoi(argv[2]);
     std::vector<BYTE> data;
 
+    std::vector<BYTE> params;
+    params.push_back(0x01);
+    params.push_back(0x02);
+    params.push_back(0x03);
+
     MicroControllerBoard mcb = MicroControllerBoard(IP, port);
 
     // Test openConnection
@@ -188,14 +193,14 @@ int main(int argc, char *argv[])
     // Test the MCB_CMD_SET_ADDR extended and short commands
     try {
         cout << "Testing MCB_CMD_SET_ADDR......" << endl;
-        mcb.send(MCB_CMD_SET_ADDR);
+        mcb.send(MCB_CMD_SET_ADDR, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
                 cout << hex << int(*iter) << " " << flush;
         cout << "Done!\n" << endl;
         cout << "Testing MCB_CMD_SET_ADDR SHORT......" << endl;
-        mcb.send(MCB_CMD_SET_ADDR | MCB_CMD_TYPE_NOCHECKSUM);
+        mcb.send(MCB_CMD_SET_ADDR | MCB_CMD_TYPE_NOCHECKSUM, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
@@ -232,14 +237,14 @@ int main(int argc, char *argv[])
     // Test the MCB_CMD_SET_TIME extended and short commands
     try {
         cout << "Testing MCB_CMD_SET_TIME......" << endl;
-        mcb.send(MCB_CMD_SET_TIME);
+        mcb.send(MCB_CMD_SET_TIME, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
                 cout << hex << int(*iter) << " " << flush;
         cout << "Done!\n" << endl;
         cout << "Testing MCB_CMD_SET_TIME SHORT......" << endl;
-        mcb.send(MCB_CMD_SET_TIME | MCB_CMD_TYPE_NOCHECKSUM);
+        mcb.send(MCB_CMD_SET_TIME | MCB_CMD_TYPE_NOCHECKSUM, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
@@ -276,14 +281,14 @@ int main(int argc, char *argv[])
     // Test the MCB_CMD_SET_FRAME extended and short commands
     try {
         cout << "Testing MCB_CMD_SET_FRAME......" << endl;
-        mcb.send(MCB_CMD_SET_FRAME);
+        mcb.send(MCB_CMD_SET_FRAME, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
                 cout << hex << int(*iter) << " " << flush;
         cout << "Done!\n" << endl;
         cout << "Testing MCB_CMD_SET_FRAME SHORT......" << endl;
-        mcb.send(MCB_CMD_SET_FRAME | MCB_CMD_TYPE_NOCHECKSUM);
+        mcb.send(MCB_CMD_SET_FRAME | MCB_CMD_TYPE_NOCHECKSUM, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
@@ -298,14 +303,14 @@ int main(int argc, char *argv[])
     // Test the MCB_CMD_GET_PORT extended and short commands
     try {
         cout << "Testing MCB_CMD_GET_PORT......" << endl;
-        mcb.send(MCB_CMD_GET_PORT);
+        mcb.send(MCB_CMD_GET_PORT, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
                 cout << hex << int(*iter) << " " << flush;
         cout << "Done!\n" << endl;
         cout << "Testing MCB_CMD_GET_PORT SHORT......" << endl;
-        mcb.send(MCB_CMD_GET_PORT | MCB_CMD_TYPE_NOCHECKSUM);
+        mcb.send(MCB_CMD_GET_PORT | MCB_CMD_TYPE_NOCHECKSUM, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
@@ -320,14 +325,14 @@ int main(int argc, char *argv[])
     // Test the MCB_CMD_SET_PORT extended and short commands
     try {
         cout << "Testing MCB_CMD_SET_PORT......" << endl;
-        mcb.send(MCB_CMD_SET_PORT);
+        mcb.send(MCB_CMD_SET_PORT, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
                 cout << hex << int(*iter) << " " << flush;
         cout << "Done!\n" << endl;
         cout << "Testing MCB_CMD_SET_PORT SHORT......" << endl;
-        mcb.send(MCB_CMD_SET_PORT | MCB_CMD_TYPE_NOCHECKSUM);
+        mcb.send(MCB_CMD_SET_PORT | MCB_CMD_TYPE_NOCHECKSUM, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
@@ -342,14 +347,14 @@ int main(int argc, char *argv[])
     // Test the MCB_CMD_GET_DATA extended and short commands
     try {
         cout << "Testing MCB_CMD_GET_DATA......" << endl;
-        mcb.send(MCB_CMD_GET_DATA);
+        mcb.send(MCB_CMD_GET_DATA, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
                 cout << hex << int(*iter) << " " << flush;
         cout << "Done!\n" << endl;
         cout << "Testing MCB_CMD_GET_DATA SHORT......" << endl;
-        mcb.send(MCB_CMD_GET_DATA | MCB_CMD_TYPE_NOCHECKSUM);
+        mcb.send(MCB_CMD_GET_DATA | MCB_CMD_TYPE_NOCHECKSUM, params);
         data = mcb.receive();
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
@@ -364,11 +369,7 @@ int main(int argc, char *argv[])
     // Test the MCB_CMD_SET_DATA command
     try {
         cout << "Testing MCB_CMD_SET_DATA......" << endl;
-        std::vector<BYTE> params;
-        params.push_back(0x01);
-        params.push_back(0x02);
-        params.push_back(0x03);
-        mcb.send(0x4F, params);
+        mcb.send(MCB_CMD_SET_DATA, params);
         mcb.receive();
         cout << "Done!" << endl;
     }

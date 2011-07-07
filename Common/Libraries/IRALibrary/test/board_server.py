@@ -26,8 +26,11 @@ import socket, traceback, os, sys
 import binhex
 from random import randrange
 
-# Index of byte that store che command code
+# Index of the byte that stores che command code
 CMD_IDX = 3
+# Index of the byte that stores che parameters length
+PAR_LEN_IDX = 5
+
 # Commands
 CMD_INQUIRY = chr(0x41)  # Answer with data
 CMD_RESET = chr(0x42)
@@ -45,8 +48,11 @@ CMD_SET_PORT = chr(0x4D)
 CMD_GET_DATA = chr(0x4E)  # Answer with data
 CMD_SET_DATA = chr(0x4F)
 
-cmds_with_data = [CMD_INQUIRY, CMD_VERSION, CMD_GET_ADDR, CMD_GET_TIME, \
+answers_with_data = [CMD_INQUIRY, CMD_VERSION, CMD_GET_ADDR, CMD_GET_TIME, \
         CMD_GET_FRAME, CMD_GET_PORT, CMD_GET_DATA]
+
+requests_with_data = [CMD_SET_ADDR, CMD_SET_TIME, \
+        CMD_SET_FRAME, CMD_GET_PORT, CMD_SET_PORT, CMD_GET_DATA, CMD_SET_DATA]
 
 CMD_TYPE_MIN_EXT = CMD_INQUIRY
 CMD_TYPE_MAX_EXT = CMD_SET_DATA
@@ -145,8 +151,17 @@ class BoardServer:
                             answer = "".join([CMD_STX, data[2], data[1], data[3], data[4], chr(0x00)])
                             
                             data_list = list()
-                            if cmd in cmds_with_data:
-                                data_list = [item + 1 for item in range(randrange(1, 7))]
+                            if cmd in set(answers_with_data) & set(requests_with_data):
+                                par_len = ord(data[PAR_LEN_IDX]) # Length of the request parameters
+                                for item in data[PAR_LEN_IDX + 1:]:
+                                    if par_len == 0:
+                                        break
+                                    else:
+                                        data_list.append(ord(item))
+                                        par_len -= 1
+
+                            if cmd in answers_with_data:
+                                data_list += [item + 1 for item in range(randrange(1, 7))]
                                 answer += chr(len(data_list))
                                 for item in data_list:
                                     answer += chr(item)

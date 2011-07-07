@@ -139,6 +139,7 @@ private:
     BYTE m_command_type;
     std::vector<BYTE> m_request;
     std::vector<BYTE> m_answer;
+    std::vector<BYTE> m_parameters;
     /** @var contains error information */
     CError m_Error;
 

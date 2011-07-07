@@ -14,6 +14,7 @@
 #include <IRA>
 #include "MicroControllerBoard.h"
 
+
 class ReceiverControlEx {
 
 public:
@@ -60,6 +61,7 @@ private:
  *     <li>bool isVacuumValveOn(): return true if the vacuum valve is opened</li>
  *     <li>void setCalibrationOn(): set the noise mark to ON</li>
  *     <li>void setCalibrationOff(): set the noise mark to OFF</li>
+ *     <li>void isCalibrationOn(): is the noise mark generator sets to ON?</li>
  *     <li>void setRemoteOn(): enable the remote command</li>
  *     <li>void setRemoteOff(): disable the remote command</li>
  *     <li>bool isRemoteEnable(): return true if the remote command is enable</li>
@@ -122,8 +124,34 @@ public:
     void setCalibrationOff() throw (ReceiverControlEx);
 
 
-    // When do I convert the voltage values to the requested values? Inside this library
-    // or outside it?
+    /** Is the noise mark generator sets to ON?
+     *  @return true if the noise mark generator is set to ON
+     *  @throw ReceiverControlEx
+     */
+    bool isCalibrationOn() throw (ReceiverControlEx);
+
+
+    /** Set the reliable communication to/from the board to ON */
+    void setReliableCommOn() { m_reliable_comm = true; }
+
+
+    /** Set the reliable communication to/from the board to OFF */
+    void setReliableCommOff() { m_reliable_comm = false; }
+
+
+    /** return true if the the communiaction to the board is sets to be reliable */
+    bool isReliableCommOn() { return m_reliable_comm; }
+
+
+    /** Return the vacuum value inside the dewar in mbar
+     *  The formula to transorm from Volt to mbar is the following:
+     *
+     *      P[mbar] = 10 ** (1.5V - 12)
+     *
+     *  @return the vacuum inside the dewar in mbar
+     *  @throw ReceiverControlEx
+     */
+    double vacuum() throw (ReceiverControlEx);
 
 
 private:
@@ -136,6 +164,15 @@ private:
      * @throw MicroControllerBoardEx
 	*/
     std::vector<BYTE> makeRequest(const BYTE command, size_t len, ...) throw(MicroControllerBoardEx);
+
+    
+	/** Return the requested value computed from a vector<BYTE> of parameters
+	 * @param parameters a vector of BYTEs to join to compute the final value
+     * @param RAW_INDEX the index of the PORT (f.i. AD24) from which read the data
+     * @return a dobule value computed from a vector<BYTE> of parameters
+	*/
+    double get_value(const std::vector<BYTE> parameters, const size_t RAW_INDEX);
+
 
     /** If m_reliable_comm is true then a checksum byte is added to the request
      *  and to the answer during the communication to and from the board.

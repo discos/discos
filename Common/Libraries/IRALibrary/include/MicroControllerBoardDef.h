@@ -252,4 +252,6 @@ const BYTE MCB_PORT_NUMBER_93         =     0x5D; /* 0101 1101 */
 const BYTE MCB_PORT_NUMBER_94         =     0x5E; /* 0101 1110 */
 const BYTE MCB_PORT_NUMBER_95         =     0x5F; /* 0101 1111 */
 
+const BYTE MCB_PORT_RANGE_08_15       = 0x60;     // Port Number from 08 to 15
+
 #endif
