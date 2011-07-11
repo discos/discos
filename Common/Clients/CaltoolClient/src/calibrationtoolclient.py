@@ -21,7 +21,7 @@ __version__ = '$Id'
 
 
 '''
-@version $Id 
+@version $Id$
 '''
 
 
