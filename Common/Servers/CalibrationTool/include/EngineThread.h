@@ -67,6 +67,11 @@ public:
      virtual void runLoop();
      
      /**
+          * This method is used to initialize the thread.
+      */
+      virtual void initialize();
+
+     /**
       * It sets the slice of time the thread is allowed to run.
       * @param timeSlice time slice given in 100 ns  
       */

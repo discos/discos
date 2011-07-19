@@ -157,6 +157,7 @@ void CalibrationToolImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	m_workThread->setTimeSlice(m_config.getWorkingThreadTimeSlice());
 	m_workThread->setConfiguration(&m_config);
 	m_workThread->setServices(getContainerServices());
+	m_workThread->initialize();
 	m_workThread->resume();
 	m_collectThread->setSleepTime(m_config.getCollectorThreadTime());
 	m_collectThread->setConfiguration(&m_config);

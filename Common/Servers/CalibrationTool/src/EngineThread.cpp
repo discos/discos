@@ -97,6 +97,86 @@ void
 CEngineThread::onStart ()
 {
     AUTO_TRACE ("CEngineThread::onStart()");
+/*    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+
+    try
+    {
+	CCommonTools::getAntennaBoss (m_antennaBoss, m_service,
+				      m_config->getAntennaBossComponent (),
+				      antennaBossError);
+	m_antennaBoss->getAllOffsets (m_azOff, m_elOff, m_raOff, m_decOff,
+				      m_lonOff, m_latOff);
+    }
+    catch (ComponentErrors::CouldntGetComponentExImpl & ex)
+    {
+	_IRA_LOGFILTER_LOG_EXCEPTION (ex, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+    }
+    catch (CORBA::SystemException & ex)
+    {
+	_EXCPT (ComponentErrors::CORBAProblemExImpl, impl,
+		"CEngineThread::onStart()");
+	impl.setName (ex._name ());
+	impl.setMinor (ex.minor ());
+	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+	antennaBossError = true;
+    }
+    catch ( ...)
+    {
+	_EXCPT (ComponentErrors::UnexpectedExImpl, impl,
+		"CEngineThread::onStart()");
+	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+    }
+    try
+    {
+	CCommonTools::getObservatory (m_observatory, m_service,
+				      m_config->getObservatoryComponent (),
+				      observatoryError);
+    }
+    catch (ComponentErrors::CouldntGetComponentExImpl & ex)
+    {
+	_IRA_LOGFILTER_LOG_EXCEPTION (ex, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+    }
+    catch (CORBA::SystemException & ex)
+    {
+	_EXCPT (ComponentErrors::CORBAProblemExImpl, impl,
+		"CEngineThread::onStart()");
+	impl.setName (ex._name ());
+	impl.setMinor (ex.minor ());
+	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+	observatoryError = true;
+    }
+    catch ( ...)
+    {
+	_EXCPT (ComponentErrors::UnexpectedExImpl, impl,
+		"CEngineThread::onStart()");
+	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+    }
+    try
+    {
+	site = m_observatory->getSiteSummary ();
+    }
+    catch (CORBA::SystemException & ex)
+    {
+	_EXCPT (ComponentErrors::CORBAProblemExImpl, __dummy,
+		"CEngineThread::onStart()");
+	__dummy.setName (ex._name ());
+	__dummy.setMinor (ex.minor ());
+	throw __dummy;
+    }
+    m_site = CSite (site.out ());
+    */
+}
+
+void
+CEngineThread::initialize ()
+{
+    AUTO_TRACE ("CEngineThread::onStart()");
     CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
 
     try
@@ -203,27 +283,15 @@ bool CEngineThread::checkTimeSlot (const ACS::Time & slotStart)
 
 bool CEngineThread::processData ()
 {
-    char *
-	buffer;			//pointer to the buffer that contains the real data
-    char *
-	bufferCopy;		// pointer to the memory that has to be freed
-    bool
-	calOn;
-    long
-	buffSize;
-    double
-	ra,
-	dec;
-    double
-	az,
-	el;
-    double
-	lon,
-	lat;
-    bool
-	tracking;
-    double
-	offset = 0.0;
+    char * buffer;			//pointer to the buffer that contains the real data
+    char * bufferCopy;		// pointer to the memory that has to be freed
+    bool calOn;
+    long buffSize;
+    double ra, dec;
+    double az, el;
+    double lon, lat;
+    bool tracking;
+    double offset = 0.0;
     IRA::CString out;
     TIMEVALUE tS;
     ACSErr::Completion_var completion;
@@ -253,6 +321,7 @@ bool CEngineThread::processData ()
     m_device = data->getDevice ();
     data->setDataY (m_ptsys[m_device]);
     m_tsysDataSeq[m_dataSeqCounter] = m_ptsys[m_device];
+    printf("DEVICE: %d - TSYS: %lf\n",m_device,m_ptsys[m_device]);
 
     CSkySource CTskySource (targetRA, targetDEC, IRA::CSkySource::SS_J2000);
     CDateTime CTdateTime (tS);
@@ -381,6 +450,11 @@ bool CEngineThread::processData ()
 		    m_off[m_dataSeqCounter], m_tsysDataSeq[m_dataSeqCounter]);
     m_file << (const char *) out;
 
+    printf("CONTATORE: %d\n",m_dataSeqCounter);
+    printf("SECS: %f\n",m_secsFromMidnight[m_dataSeqCounter]);
+    printf("TSYS: %lf\n",m_tsysDataSeq[m_dataSeqCounter]);
+    printf("OFFS: %lf\n",m_off[m_dataSeqCounter]);
+
     m_dataSeqCounter++;
 
     delete[]bufferCopy;
@@ -394,10 +468,10 @@ CEngineThread::runLoop ()
     TIMEVALUE now;
     TIMEVALUE tS;
     IRA::CString out;
-    IRA::CString fileName = "";
-    IRA::CString sourceName = "";
-    IRA::CString projectName = "";
-    IRA::CString observerName = "";
+    IRA::CString fileName;
+    IRA::CString sourceName;
+    IRA::CString projectName;
+    IRA::CString observerName;
     ACS::ROstring_var targetRef;
     CORBA::String_var target;
     ACSErr::Completion_var completion;
@@ -451,7 +525,7 @@ CEngineThread::runLoop ()
 		if ((m_lonDone == 0) && (m_latDone == 0))
 		  {
 		      // Start writing file
-		      tS.value (now.value().value);
+		      /*tS.value (now.value().value);
 		      out.Format
 			  ("%04d.%03d.%02d:%02d:%02d.%03d#Calibration Tool Start \n",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
@@ -461,7 +535,7 @@ CEngineThread::runLoop ()
 		      // File Name
 		      tS.value (now.value().value);
 		      fileName = data->getFileName ();
-		      Len = fileName.GetLength ();
+		      //Len = fileName.GetLength ();
 		      for (i = 0; i < Len; i++)
 			{
 			    outBuffer[i] = fileName.CharAt (i);
@@ -470,7 +544,7 @@ CEngineThread::runLoop ()
 			  ("%04d.%03d.%02d:%02d:%02d.%03d#File Name: %s \n",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000., outBuffer);
+			   tS.microSecond () / 1000000., (const char *)fileName);
 		      m_file << (const char *) out;
 		      // Project Name
 		      tS.value (now.value().value);
@@ -484,7 +558,7 @@ CEngineThread::runLoop ()
 			  ("%04d.%03d.%02d:%02d:%02d.%03d#Project Name: %s \n",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000., outBuffer);
+			   tS.microSecond () / 1000000., (const char *)projectName);
 		      m_file << (const char *) out;
 		      // Observer Name
 		      tS.value (now.value().value);
@@ -498,7 +572,7 @@ CEngineThread::runLoop ()
 			  ("%04d.%03d.%02d:%02d:%02d.%03d#Observer Name: %s \n",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000., outBuffer);
+			   tS.microSecond () / 1000000., (const char *)observerName);
 		      m_file << (const char *) out;
 		      // Source Name
 		      targetRef = m_antennaBoss->target ();
@@ -531,7 +605,7 @@ CEngineThread::runLoop ()
 			   tS.minute (), tS.second (),
 			   tS.microSecond () / 1000000.,
 			   (const char *) target);
-		      m_file << (const char *) out;
+		      m_file << (const char *) out;*/
 
 		      //sourceFlux_var = m_antennaBoss->sourceFlux();
 		      //sourceFlux_val = sourceFlux_var->get_sync(completion.out());
@@ -619,17 +693,9 @@ CEngineThread::runLoop ()
 		      for (i = 0; i < m_dataSeqCounter; i++)
 			  m_ptsys2[i] = (float) m_tsysDataSeq[i];
 
-		      tmid =
-			  m_secsFromMidnight[((m_dataSeqCounter + 1) / 2) -
-					     1];
-		      m_Par[4] =
-			  (m_ptsys2[m_dataSeqCounter - 1] -
-			   m_ptsys2[0]) /
-			  (m_secsFromMidnight[m_dataSeqCounter - 1] -
-			   m_secsFromMidnight[0]);
-		      m_Par[3] =
-			  m_ptsys2[0] + m_Par[4] * (tmid -
-						    m_secsFromMidnight[0]);
+		      tmid = m_secsFromMidnight[((m_dataSeqCounter + 1) / 2) - 1];
+		      m_Par[4] = (m_ptsys2[m_dataSeqCounter - 1] - m_ptsys2[0]) / (m_secsFromMidnight[m_dataSeqCounter - 1] - m_secsFromMidnight[0]);
+		      m_Par[3] = m_ptsys2[0] + m_Par[4] * (tmid - m_secsFromMidnight[0]);
 		      if (m_dataSeqCounter < 5)
 			{
 			    m_Par[3] = m_Par[4] = (float) 0.;
@@ -637,17 +703,12 @@ CEngineThread::runLoop ()
 		      m_errPar[3] = m_errPar[4] = (float) 0.;
 
 		      m_secsFromMidnight[0] -= tmid;
-		      tmax =
-			  m_ptsys2[0] - (m_Par[3] +
-					 m_Par[4] * m_secsFromMidnight[0]);
+		      tmax = m_ptsys2[0] - (m_Par[3] + m_Par[4] * m_secsFromMidnight[0]);
 		      imax = 1;
 		      for (i = 2; i <= m_dataSeqCounter; ++i)
 			{
 			    m_secsFromMidnight[i - 1] -= tmid;
-			    ti = m_ptsys2[i - 1] - (m_Par[3] +
-						    m_Par[4] *
-						    m_secsFromMidnight[i -
-								       1]);
+			    ti = m_ptsys2[i - 1] - (m_Par[3] + m_Par[4] * m_secsFromMidnight[i - 1]);
 			    if (tmax >= ti)
 			      {
 				  goto gaussianFit;
@@ -667,10 +728,7 @@ CEngineThread::runLoop ()
 			{	// LAT scans
 			    m_Par[2] = BWHM_val;
 
-			    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par,
-				   m_errPar, &m_dataSeqCounter, &par, &tol,
-				   &ftry, (E_fp) fgaus_, &m_reducedCHI,
-				   &m_ierr);
+			    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par, m_errPar, &m_dataSeqCounter, &par, &tol, &ftry, (E_fp) fgaus_, &m_reducedCHI, &m_ierr);
 
 			    m_LatPos = (m_dataSeq[0] + m_dataSeq[m_dataSeqCounter - 1]) / 2.;
 			    m_LatOff = m_Par[1];
@@ -702,9 +760,7 @@ CEngineThread::runLoop ()
 			    data->setOffset (m_Par[3]);
 			    data->setSlope (m_Par[4]);
 
-			    if ((m_Par[1] > m_off[0])
-				&& (m_Par[1] < m_off[m_dataSeqCounter - 1])
-				&& (m_ierr > 0))
+			    if ((m_Par[1] > m_off[0]) && (m_Par[1] < m_off[m_dataSeqCounter - 1]) && (m_ierr > 0))
 			      {
 				  m_latResult = 1;
 				  /* if data fitting results are ok
