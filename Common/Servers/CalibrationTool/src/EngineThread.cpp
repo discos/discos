@@ -121,8 +121,8 @@ CEngineThread::initialize ()
 	CCommonTools::getAntennaBoss (m_antennaBoss, m_service,
 				      m_config->getAntennaBossComponent (),
 				      antennaBossError);
-	m_antennaBoss->getAllOffsets (m_azOff, m_elOff, m_raOff, m_decOff,
-				      m_lonOff, m_latOff);
+	m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff,
+				      m_lonUserOff, m_latUserOff);
     }
     catch (ComponentErrors::CouldntGetComponentExImpl & ex)
     {
@@ -285,7 +285,7 @@ bool CEngineThread::processData ()
 	  m_lastCoordinate = az;
 	  m_cosLat = cos (targetEL);
 	  m_CoordIndex = 0;	// LON
-	  m_lonOff = m_azOff;
+	  m_lonUserOff = m_azUserOff;
 	  break;
       case Management::MNG_HOR_LAT:
 	  CTskySource.process (CTdateTime, m_site);
@@ -294,7 +294,7 @@ bool CEngineThread::processData ()
 	  m_coordinate = el;
 	  offset = targetEL - m_coordinate;
 	  m_CoordIndex = 1;	// LAT
-	  m_latOff = m_elOff;
+	  m_latUserOff = m_elUserOff;
 	  break;
       case Management::MNG_EQ_LON:
 	  m_antennaBoss->getObservedEquatorial (m_time, data->getIntegrationTime () * 10000, ra, dec);
@@ -312,14 +312,14 @@ bool CEngineThread::processData ()
 	  m_lastCoordinate = ra;
 	  m_cosLat = cos (targetDEC);
 	  m_CoordIndex = 0;	// LON
-	  m_lonOff = m_raOff;
+	  m_lonUserOff = m_raUserOff;
 	  break;
       case Management::MNG_EQ_LAT:
 	  m_antennaBoss->getObservedEquatorial (m_time, data->getIntegrationTime () * 10000, ra, dec);
 	  m_coordinate = dec;
 	  offset = targetDEC - m_coordinate;
 	  m_CoordIndex = 1;	// LAT
-	  m_latOff = m_decOff;
+	  m_latUserOff = m_decUserOff;
 	  break;
       case Management::MNG_GAL_LON:
 	  CTskySource.process (CTdateTime, m_site);
@@ -458,9 +458,8 @@ CEngineThread::runLoop ()
 		if ((m_lonDone == 0) && (m_latDone == 0))
 		  {
 		      // Start writing file
-		      /*tS.value (now.value().value);
-		      out.Format
-			  ("%04d.%03d.%02d:%02d:%02d.%03d#Calibration Tool Start \n",
+		      tS.value (now.value().value);
+		      out.Format("%04d.%03d.%02d:%02d:%02d.%03d#Calibration Tool Start\n",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
 			   tS.microSecond () / 1000000.);
@@ -468,45 +467,29 @@ CEngineThread::runLoop ()
 		      // File Name
 		      tS.value (now.value().value);
 		      fileName = data->getFileName ();
-		      //Len = fileName.GetLength ();
-		      for (i = 0; i < Len; i++)
-			{
-			    outBuffer[i] = fileName.CharAt (i);
-			}
-		      out.Format
-			  ("%04d.%03d.%02d:%02d:%02d.%03d#File Name: %s \n",
-			   tS.year (), tS.dayOfYear (), tS.hour (),
-			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000., (const char *)fileName);
-		      m_file << (const char *) out;
+		      out.Format("%04d.%03d.%02d:%02d:%02d.%03d#File Name: ",
+				tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.);
+	              m_file << (const char *) out;
+                      m_file << (const char *) fileName << std::endl;
+		      
 		      // Project Name
 		      tS.value (now.value().value);
 		      projectName = data->getProjectName ();
-		      Len = projectName.GetLength ();
-		      for (i = 0; i < Len; i++)
-			{
-			    outBuffer[i] = projectName.CharAt (i);
-			}
-		      out.Format
-			  ("%04d.%03d.%02d:%02d:%02d.%03d#Project Name: %s \n",
+		      out.Format("%04d.%03d.%02d:%02d:%02d.%03d#Project Name: ",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000., (const char *)projectName);
+			   tS.microSecond () / 1000000.);
 		      m_file << (const char *) out;
+		      m_file << (const char *) projectName << std::endl;
 		      // Observer Name
 		      tS.value (now.value().value);
 		      observerName = data->getObserverName ();
-		      Len = observerName.GetLength ();
-		      for (i = 0; i < Len; i++)
-			{
-			    outBuffer[i] = observerName.CharAt (i);
-			}
-		      out.Format
-			  ("%04d.%03d.%02d:%02d:%02d.%03d#Observer Name: %s \n",
+		      out.Format("%04d.%03d.%02d:%02d:%02d.%03d#Observer Name: ",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000., (const char *)observerName);
+			   tS.microSecond () / 1000000.);
 		      m_file << (const char *) out;
+		      m_file << (const char *) observerName << std::endl;
 		      // Source Name
 		      targetRef = m_antennaBoss->target ();
 		      target = targetRef->get_sync (completion.out ());
@@ -518,10 +501,7 @@ CEngineThread::runLoop ()
 					    targetCompl,
 					    "CEngineThread::collectAntennaData()");
 			    impl.setAttributeName ("target");
-			    impl.
-				setComponentName ((const char *)
-						  m_config->getAntennaBossComponent
-						  ());
+			    impl.setComponentName ((const char *) m_config->getAntennaBossComponent());
 			    impl.log (LM_ERROR);
 			    data->setStatus (Management::MNG_WARNING);
 			    sourceName = "";
@@ -532,13 +512,13 @@ CEngineThread::runLoop ()
 			}
 		      data->setSourceName (sourceName);
 		      tS.value (now.value().value);
-		      out.Format
-			  ("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#source %s 000000.0 +000000 0000.0 0000.000.00:00:00 \n",
+		      out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#source ",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000.,
-			   (const char *) target);
-		      m_file << (const char *) out;*/
+			   tS.microSecond () / 1000000.);
+		      m_file << (const char *) out;
+		      m_file << (const char *) sourceName;
+		      m_file << " 000000.0 +000000 0000.0 0000.000.00:00:00" << std::endl;
 
 		      //sourceFlux_var = m_antennaBoss->sourceFlux();
 		      //sourceFlux_val = sourceFlux_var->get_sync(completion.out());
@@ -552,51 +532,45 @@ CEngineThread::runLoop ()
 			    break;
 			case Management::MNG_HOR_LON:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept azel 0 0 0  0 nn  0  0       %f \n",
+				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept azel 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.,
-				 sourceFlux_val);
+				 tS.microSecond () / 1000000.);
 			    break;
 			case Management::MNG_HOR_LAT:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept azel 0 0 0  0 nn  0  0       %f \n",
+				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept azel 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.,
-				 sourceFlux_val);
+				 tS.microSecond () / 1000000.);
 			    break;
 			case Management::MNG_EQ_LON:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept hadc 0 0 0  0 nn  0  0       %f \n",
+				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept hadc 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.,
-				 sourceFlux_val);
+				 tS.microSecond () / 1000000.);
 			    break;
 			case Management::MNG_EQ_LAT:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept hadc 0 0 0  0 nn  0  0       %f \n",
+				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept hadc 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.,
-				 sourceFlux_val);
+				 tS.microSecond () / 1000000.);
 			    break;
 			case Management::MNG_GAL_LON:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept gall 0 0 0  0 nn  0  0       %f \n",
+				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept gall 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.,
-				 sourceFlux_val);
+				 tS.microSecond () / 1000000.);
 			    break;
 			case Management::MNG_GAL_LAT:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept gall 0 0 0  0 nn  0  0       %f \n",
+				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept gall 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.,
-				 sourceFlux_val);
+				 tS.microSecond () / 1000000.);
 			    break;
 			case Management::MNG_SUBR_Z:
 			    break;
@@ -610,9 +584,8 @@ CEngineThread::runLoop ()
 			    break;
 			}
 		      m_file << (const char *) out;
-		      ACS_LOG (LM_FULL_INFO, "CEngineThread::runLoop()",
-			       (LM_NOTICE, "FILE_OPENED %s",
-				(const char *) data->getFileName ()));
+		      m_file << sourceFlux_val << std::endl;
+		      ACS_LOG (LM_FULL_INFO, "CEngineThread::runLoop()", (LM_NOTICE, "FILE_OPENED %s", (const char *) data->getFileName ()));
 		  }
 		data->startRunnigStage ();
 	    }			// if data->isStart()
@@ -686,34 +659,20 @@ CEngineThread::runLoop ()
 
 			    // latfit, laterr
 			    tS.value (now.value().value);
-			    //char latfit[13]="#fivpt#latfit ";
-			    sprintf(outStr,"%04d.%03d.%02d:%02d:%02d.%03d#fivpt#latfit %f %f %f %f %f %d \n",tS.year (), tS.dayOfYear (), tS.hour (),
-				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000., m_Par[1],
-				 m_Par[2], m_Par[0], m_Par[3], m_Par[4],
-				 m_ierr);
-			    /*out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#latfit %f %f %f %f %f %d \n",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#latfit ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000., m_Par[1],
-				 m_Par[2], m_Par[0], m_Par[3], m_Par[4],
-				 m_ierr);*/
-			    m_file << (const char *) outStr;
+				 tS.microSecond () / 1000000.);
+			    m_file << (const char *) out;
+			    m_file << m_Par[1] << m_Par[2] << m_Par[0] << m_Par[4] << m_ierr << std::endl;
+
 			    tS.value (now.value().value);
-			    sprintf(outStr,"%04d.%03d.%02d:%02d:%02d.%03d#fivpt#laterr %f %f %f %f %f %f \n",tS.year (), tS.dayOfYear (), tS.hour (),
-						 tS.minute (), tS.second (),
-						 tS.microSecond () / 1000000., m_errPar[1],
-						 m_errPar[2], m_errPar[0], m_errPar[3],
-						 m_errPar[4], m_reducedCHI);
-			    /*out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#laterr %f %f %f %f %f %f \n",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#laterr ",
 				tS.year (), tS.dayOfYear (), tS.hour (),
 				tS.minute (), tS.second (),
-				tS.microSecond () / 1000000., m_errPar[1],
-				m_errPar[2], m_errPar[0], m_errPar[3],
-				m_errPar[4], m_reducedCHI);*/
-			    m_file << (const char *) outStr;
+				tS.microSecond () / 1000000.);
+			    m_file << (const char *) out;
+			    m_file << m_errPar[1] << m_errPar[2] << m_errPar[0] << m_errPar[3] << m_errPar[4] << m_reducedCHI << std::endl;
 
 			    data->setAmplitude (m_Par[0]);
 			    data->setPeakOffset (m_Par[1]);
@@ -725,7 +684,6 @@ CEngineThread::runLoop ()
 				    (fabs(m_Par[1]) > m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0))
 			      {
 				  m_latResult = 1;
-					printf("lat fitting ok\n");
 				  /* if data fitting results are ok
 				   * sets new offsets in antenna
 				   */
@@ -735,27 +693,21 @@ CEngineThread::runLoop ()
 					break;
 				    case Management::MNG_HOR_LON:
 				    case Management::MNG_HOR_LAT:
-					m_antennaBoss->setOffsets (m_lonOff,
-								   m_LatOff +
-								   m_lastLatOff,
-								   Antenna::
-								   ANT_HORIZONTAL);
+					m_antennaBoss->setOffsets (m_lonUserOff + m_LonOff + m_lastLonOff,
+                                                m_latUserOff + m_LatOff + m_lastLatOff,
+                                                Antenna::ANT_HORIZONTAL);
 					break;
 				    case Management::MNG_EQ_LON:
 				    case Management::MNG_EQ_LAT:
-					m_antennaBoss->setOffsets (m_lonOff,
-								   m_LatOff +
-								   m_lastLatOff,
-								   Antenna::
-								   ANT_EQUATORIAL);
+					m_antennaBoss->setOffsets (m_lonUserOff + m_LonOff + m_lastLonOff,
+                                                m_latUserOff + m_LatOff + m_lastLatOff,
+								                Antenna::ANT_EQUATORIAL);
 					break;
 				    case Management::MNG_GAL_LON:
 				    case Management::MNG_GAL_LAT:
-					m_antennaBoss->setOffsets (m_lonOff,
-								   m_LatOff +
-								   m_lastLatOff,
-								   Antenna::
-								   ANT_GALACTIC);
+					m_antennaBoss->setOffsets (m_lonUserOff + m_LonOff + m_lastLonOff,
+                                                m_latUserOff + m_LatOff + m_lastLatOff,
+								                Antenna::ANT_GALACTIC);
 					break;
 				    case Management::MNG_SUBR_Z:
 					break;
@@ -782,7 +734,6 @@ CEngineThread::runLoop ()
 			}
 		      else if ((m_CoordIndex == 0) && (m_lonResult == 0))
 			{	// LON scans
-				printf("LON scans\n");
 			    m_Par[2] = BWHM_val / m_cosLat;
 
 			    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par,
@@ -798,33 +749,20 @@ CEngineThread::runLoop ()
 
 			    // lonfit, lonerr
 			    tS.value (now.value().value);
-			    sprintf(outStr,"%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonfit %f %f %f %f %f %d \n",tS.year (), tS.dayOfYear (), tS.hour (),
-			    				 tS.minute (), tS.second (),
-			    				 tS.microSecond () / 1000000., m_Par[1],
-			    				 m_Par[2], m_Par[0], m_Par[3], m_Par[4],
-			    				 m_ierr);
-			    /*out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonfit %f %f %f %f %f %d \n",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonfit ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000., m_Par[1],
-				 m_Par[2], m_Par[0], m_Par[3], m_Par[4],
-				 m_ierr);*/
-			    m_file << (const char *) outStr;
+				 tS.microSecond () / 1000000.);
+			    m_file << (const char *) out;
+			    m_file << m_Par[1] << m_Par[2] << m_Par[0] <<  m_Par[3] << m_Par[4] << m_ierr << << std::endl:
+
 			    tS.value (now.value().value);
-			    sprintf(outStr,"%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonerr %f %f %f %f %f %f \n",tS.year (), tS.dayOfYear (), tS.hour (),
-			    						 tS.minute (), tS.second (),
-			    						 tS.microSecond () / 1000000., m_errPar[1],
-			    						 m_errPar[2], m_errPar[0], m_errPar[3],
-			    						 m_errPar[4], m_reducedCHI);
-			    /*out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonerr %f %f %f %f %f %f \n",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonerr ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000., m_errPar[1],
-				 m_errPar[2], m_errPar[0], m_errPar[3],
-				 m_errPar[4], m_reducedCHI);*/
-			    m_file << (const char *) outStr;
+				 tS.microSecond () / 1000000.);
+			    m_file << (const char *) out;
+			    m_file << m_errPar[1] << m_errPar[2] << m_errPar[0] << m_errPar[3] << m_errPar[4] << m_reducedCHI << std::endl;
 
 			    data->setAmplitude (m_Par[0]);
 			    data->setPeakOffset (m_Par[1]);
@@ -836,7 +774,6 @@ CEngineThread::runLoop ()
 			    	(fabs(m_Par[1]) > m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0)	)
 			      {
 				  m_lonResult = 1;
-					printf("lon fitting ok\n");
 				  /* if data fitting results are ok
 				   * sets new offsets in antenna
 				   */
@@ -845,29 +782,23 @@ CEngineThread::runLoop ()
 				    case Management::MNG_NO_AXIS:
 					break;
 				    case Management::MNG_HOR_LON:
-					m_antennaBoss->setOffsets (m_LonOff +
-								   m_lastLonOff,
-								   m_latOff,
-								   Antenna::
-								   ANT_HORIZONTAL);
+					m_antennaBoss->setOffsets (m_lonUserOff + m_LonOff + m_lastLonOff,
+                                                m_latUserOff + m_LatOff + m_lastLatOff,
+                                                Antenna::ANT_HORIZONTAL);
 					break;
 				    case Management::MNG_HOR_LAT:
 					break;
 				    case Management::MNG_EQ_LON:
-					m_antennaBoss->setOffsets (m_LonOff +
-								   m_lastLonOff,
-								   m_latOff,
-								   Antenna::
-								   ANT_EQUATORIAL);
+					m_antennaBoss->setOffsets (m_lonUserOff + m_LonOff + m_lastLonOff,
+                                                m_latUserOff + m_LatOff + m_lastLatOff,
+                                                Antenna::ANT_EQUATORIAL);
 					break;
 				    case Management::MNG_EQ_LAT:
 					break;
 				    case Management::MNG_GAL_LON:
-					m_antennaBoss->setOffsets (m_LonOff +
-								   m_lastLonOff,
-								   m_latOff,
-								   Antenna::
-								   ANT_GALACTIC);
+					m_antennaBoss->setOffsets (m_lonUserOff + m_LonOff + m_lastLonOff,
+                                                m_latUserOff + m_LatOff + m_lastLatOff,
+                                                Antenna::ANT_GALACTIC);
 					break;
 				    case Management::MNG_GAL_LAT:
 					break;
@@ -898,29 +829,21 @@ CEngineThread::runLoop ()
 			{
 			    // offset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_lonResult, m_latResult 
 			    tS.value (now.value().value);
-			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#offset %f %f %f %f %d %d \n",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#offset ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.,
-				 m_LonPos * DR2D, m_LatPos * DR2D,
-				 m_LonOff * DR2D, m_LatOff * DR2D,
-				 m_lonResult, m_latResult);
+				 tS.microSecond () / 1000000.);
 			    m_file << (const char *) out;
+			    m_file << m_LonPos * DR2D <<  m_LatPos * DR2D << m_LonOff * DR2D << m_LatOff * DR2D << m_lonResult << m_latResult << std::endl;
+
 			    // xoffset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_LonErr, m_LatErr, m_lonResult, m_latResult
 			    tS.value (now.value().value);
-			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#xoffset %f %f %f %f %f %f %d %d \n",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#xoffset ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.,
-				 m_LonPos * DR2D, m_LatPos * DR2D,
-				 cos (m_LatPos) * m_LonOff * DR2D,
-				 m_LatOff * DR2D,
-				 cos (m_LatPos) * m_LonErr * DR2D,
-				 m_LatErr * DR2D, m_lonResult, m_latResult);
+				 tS.microSecond () / 1000000.);
 			    m_file << (const char *) out;
-
+			    m_file << m_LonPos * DR2D <<  m_LatPos * DR2D << cos (m_LatPos) * m_LonOff * DR2D << m_LatOff * DR2D << cos (m_LatPos) * m_LonErr * DR2D << 					m_LatErr * DR2D << m_lonResult << m_latResult << std::endl;
 			}
 		      if ((m_latDone == 1) && (m_lonDone == 1))
 			{
@@ -928,8 +851,7 @@ CEngineThread::runLoop ()
 			    m_fileOpened = false;
 			    m_latDone = m_lonDone = 0;
 			    m_lonResult = m_latResult = 0;
-			    ACS_LOG (LM_FULL_INFO, "CEngineThread::runLoop()",
-				     (LM_NOTICE, "FILE_FINALIZED"));
+			    ACS_LOG (LM_FULL_INFO, "CEngineThread::runLoop()", (LM_NOTICE, "FILE_FINALIZED"));
 			}
 		  }
 		data->haltStopStage ();

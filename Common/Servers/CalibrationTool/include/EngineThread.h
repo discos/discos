@@ -113,9 +113,9 @@ private:
     integer m_ierr;
     double m_cosLat;
     int m_CoordIndex;
-    double m_raOff, m_decOff;
-	double m_azOff, m_elOff;
-	double m_lonOff, m_latOff;
+    double m_raUserOff, m_decUserOff;
+	double m_azUserOff, m_elUserOff;
+	double m_lonUserOff, m_latUserOff;
 	int m_latResult, m_lonResult;
 	int m_lonDone, m_latDone;
 	ACS::Time m_time;
