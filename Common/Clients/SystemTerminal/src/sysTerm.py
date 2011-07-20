@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-# " $Id: sysTerm.py,v 1.2 2010-09-24 12:54:03 a.orlati Exp $ "
 # This is a python client that can be used as a terminal to the system, It issues the command
 # action of the connected sub-system boss.
 #who                                   when           what
@@ -9,6 +8,7 @@
 #andrea orlati(a.orlati@ira.inaf.it)   23/07/2010     If no component name is given it logs into the scheduler
 #andrea orlati(a.orlati@ira.inaf.it)   26/07/2010     Added support for command history
 #andrea orlati(a.orlati@ira.inaf.it)   24/09/2010     Exceptions coming from the component command are now logged as it should be by a client application
+#andrea orlati(a.orlati@ira.inaf.it)   20/07/2011     Logging exceptions now works also in ACS 8.2
 
 import getopt, sys
 import Acspy.Common.Err
@@ -79,7 +79,7 @@ def main():
         except Exception , ex:
             newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
             newEx.setComponentName(compType)
-            newEx.log(ACSLog.ACS_LOG_ERROR)
+            newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
             sys.exit(1)        
     else:
         compName = args[0]    
@@ -88,7 +88,7 @@ def main():
         except Exception , ex:
             newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
             newEx.setComponentName(compName)
-            newEx.log(ACSLog.ACS_LOG_ERROR)
+            newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
             sys.exit(1)
     
     if os.path.exists(HISTORY_FILENAME):
@@ -113,13 +113,13 @@ def main():
             except ManagementErrors.CommandLineErrorEx, cmdEx:
                 cmdError = ManagementErrorsImpl.CommandLineErrorExImpl(exception= cmdEx, create=0)
                 out=cmdError.getErrorMessage()
-                cmdError.log(ACSLog.ACS_LOG_ERROR)
+                cmdError.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
                 print out
             except Exception, ex:
                 newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
                 newEx.setAction("command()")
                 newEx.setReason("comunication error to component server")
-                newEx.log(ACSLog.ACS_LOG_ERROR) 
+                newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
     simpleClient.releaseComponent(compName)     
     simpleClient.disconnect()
     readline.write_history_file(HISTORY_FILENAME)            
