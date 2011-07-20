@@ -26,8 +26,6 @@ CEngineThread::CEngineThread(const ACE_CString& name,CSecureArea<CDataCollection
 	m_ptsys2=new float [DATATSYSSEQLENGTH];
 	m_antennaBoss=Antenna::AntennaBoss::_nil();
 	antennaBossError=false;
-	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-	m_device=data->getDevice();
 	m_dataSeq.length(DATACOORDINATESSEQLENGTH);
 	m_tsysDataSeq.length(DATATSYSSEQLENGTH);
 	m_dataSeqCounter=0;
@@ -84,59 +82,6 @@ CEngineThread::~CEngineThread()
 void CEngineThread::onStart()
 {
 	AUTO_TRACE("CEngineThread::onStart()");
-    	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-
-   	try {
-		//CCommonTools::getAntennaBoss(m_antennaBoss,m_service,m_config->getAntennaBossComponent(),antennaBossError);
-       		//m_antennaBoss->getAllOffsets(m_azOff,m_elOff,m_raOff,m_decOff,m_lonOff,m_latOff);
-	}
-	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
-		_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::onStart()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
-		antennaBossError=true;
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CEngineThread::onStart()");
-		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
-	}
-	try {
-		CCommonTools::getObservatory(m_observatory,m_service,m_config->getObservatoryComponent(),observatoryError);
-	}
-	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
-		_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::onStart()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
-		observatoryError=true;
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CEngineThread::onStart()");
-		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
-	}
-	try	{	
-		site = m_observatory->getSiteSummary();
-	}
-	catch (CORBA::SystemException& ex)	{
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,__dummy,"CEngineThread::onStart()");
-		__dummy.setName(ex._name());
-		__dummy.setMinor(ex.minor());
-		throw __dummy;
-	}
-	m_site=CSite(site.out());
 }
 
 void CEngineThread::onStop()
@@ -146,6 +91,85 @@ void CEngineThread::onStop()
         m_file.close();
 		m_fileOpened=false;
 	}
+}
+
+void
+CEngineThread::initialize ()
+{
+    AUTO_TRACE ("CEngineThread::initialize()");
+    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+
+    try
+    {
+	/*CCommonTools::getAntennaBoss (m_antennaBoss, m_service,
+				      m_config->getAntennaBossComponent (),
+				      antennaBossError);
+	m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff,
+				      m_lonUserOff, m_latUserOff);*/
+    }
+    catch (ComponentErrors::CouldntGetComponentExImpl & ex)
+    {
+	_IRA_LOGFILTER_LOG_EXCEPTION (ex, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+    }
+    catch (CORBA::SystemException & ex)
+    {
+	_EXCPT (ComponentErrors::CORBAProblemExImpl, impl,
+		"CEngineThread::initialize()");
+	impl.setName (ex._name ());
+	impl.setMinor (ex.minor ());
+	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+	antennaBossError = true;
+    }
+    catch ( ...)
+    {
+	_EXCPT (ComponentErrors::UnexpectedExImpl, impl,
+		"CEngineThread::initialize()");
+	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+    }
+    try
+    {
+	CCommonTools::getObservatory (m_observatory, m_service,
+				      m_config->getObservatoryComponent (),
+				      observatoryError);
+    }
+    catch (ComponentErrors::CouldntGetComponentExImpl & ex)
+    {
+	_IRA_LOGFILTER_LOG_EXCEPTION (ex, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+    }
+    catch (CORBA::SystemException & ex)
+    {
+	_EXCPT (ComponentErrors::CORBAProblemExImpl, impl,
+		"CEngineThread::initialize()");
+	impl.setName (ex._name ());
+	impl.setMinor (ex.minor ());
+	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+	observatoryError = true;
+    }
+    catch ( ...)
+    {
+	_EXCPT (ComponentErrors::UnexpectedExImpl, impl,
+		"CEngineThread::initialize()");
+	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
+	data->setStatus (Management::MNG_FAILURE);
+    }
+    try
+    {
+	site = m_observatory->getSiteSummary ();
+    }
+    catch (CORBA::SystemException & ex)
+    {
+	_EXCPT (ComponentErrors::CORBAProblemExImpl, __dummy,
+		"CEngineThread::initialize()");
+	__dummy.setName (ex._name ());
+	__dummy.setMinor (ex.minor ());
+	throw __dummy;
+    }
+    m_site = CSite (site.out ());
 }
  
 bool CEngineThread::checkTime(const ACS::Time& currentTime)
@@ -202,6 +226,7 @@ bool CEngineThread::processData()
 	CalibrationTool_private::getTsysFromBuffer(buffer,data->getInputsNumber(),m_ptsys);
 
 	// we need only the tsys related to the device setted
+    m_device = data->getDevice ();
     data->setDataY(m_ptsys[m_device]);
     m_tsysDataSeq[m_dataSeqCounter] = m_ptsys[m_device];
     	
@@ -227,7 +252,7 @@ bool CEngineThread::processData()
            	m_lastCoordinate = az;
            	m_cosLat = cos(targetEL);
            	m_CoordIndex = 0; // LON
-           	m_lonOff = m_azOff;
+           	m_lonUserOff = m_azUserOff;
            	break;
 		case Management::MNG_HOR_LAT:
 			CTskySource.process(CTdateTime,m_site);
@@ -236,7 +261,7 @@ bool CEngineThread::processData()
        		m_coordinate = el;
        		offset = targetEL - m_coordinate;
        		m_CoordIndex = 1; // LAT
-       		m_latOff = m_elOff;
+       		m_latUserOff = m_elUserOff;
        		break;
        	case Management::MNG_EQ_LON:
        		//m_antennaBoss->getObservedEquatorial(m_time,data->getIntegrationTime()*10000,ra,dec); 
@@ -252,14 +277,14 @@ bool CEngineThread::processData()
        		m_lastCoordinate = ra;
        		m_cosLat = cos(targetDEC);
        		m_CoordIndex = 0; // LON
-       		m_lonOff = m_raOff;
+       		m_lonUserOff = m_raUserOff;
        		break;
     	case Management::MNG_EQ_LAT:
        		//m_antennaBoss->getObservedEquatorial(m_time,data->getIntegrationTime()*10000,ra,dec); 
        		m_coordinate = dec;
        		offset = targetDEC - m_coordinate;
        		m_CoordIndex = 1; // LAT
-       		m_latOff = m_decOff;
+       		m_latUserOff = m_decUserOff;
        		break;
        	case Management::MNG_GAL_LON:
        		CTskySource.process(CTdateTime,m_site);
@@ -330,7 +355,7 @@ void CEngineThread::runLoop()
 	TIMEVALUE tS;
 	IRA::CString out;
 	IRA::CString fileName="";
-    IRA::CString sourceName="";
+    IRA::CString sourceName="pattagarru";
     IRA::CString projectName="";
     IRA::CString observerName="";
     ACS::ROstring_var targetRef;
@@ -376,12 +401,12 @@ void CEngineThread::runLoop()
 			}
 			if ((m_lonDone == 0) && (m_latDone == 0)) {
 				// Start writing file
-	            tS.value(m_time);
+	            tS.value(now.value().value);
 	            out.Format("%04d.%03d.%02d:%02d:%02d.%03d#Calibration Tool Start \n",
 				tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.);
 	            m_file << (const char *) out;
                 // File Name
-	            tS.value(m_time);
+	            tS.value(now.value().value);
                 fileName=data->getFileName();
                 Len = fileName.GetLength();
                 for (i = 0; i < Len; i++) {
@@ -391,7 +416,7 @@ void CEngineThread::runLoop()
 				tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000., outBuffer);
 	            m_file << (const char *) out;
                 // Project Name
-	            tS.value(m_time);
+	            tS.value(now.value().value);
                 projectName=data->getProjectName();
      			Len = projectName.GetLength();
     			for (i = 0; i < Len; i++) {
@@ -401,7 +426,7 @@ void CEngineThread::runLoop()
 				tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000., outBuffer);
 	            m_file << (const char *) out;
                 // Observer Name
-	            tS.value(m_time);
+	            tS.value(now.value().value);
                 observerName=data->getObserverName();
                 Len = observerName.GetLength();
                 for (i = 0; i < Len; i++) {
@@ -428,7 +453,7 @@ void CEngineThread::runLoop()
                 data->setSourceName(sourceName);
 	            tS.value(m_time);
 	            out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#source %s 000000.0 +000000 0000.0 0000.000.00:00:00 \n",
-	            			tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.,(const char *)target);
+	            			tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.,(const char *)sourceName);
 	            m_file << (const char *) out;
 
                 //sourceFlux_var = m_antennaBoss->sourceFlux();
@@ -436,7 +461,7 @@ void CEngineThread::runLoop()
 		        sourceFlux_val = 300.0;
                 data->setSourceFlux(sourceFlux_val);
                     
-                tS.value(m_time);
+                tS.value(now.value().value);
                 switch (data->getScanAxis()) {
                 	case Management::MNG_NO_AXIS:
                 		break;
@@ -486,7 +511,7 @@ void CEngineThread::runLoop()
 				while (processData());
                 // tsys array for fit2 function
                	for (i=0; i<m_dataSeqCounter; i++) {
-               		m_tsysDataSeq[i]=(double)(rand()/1000000.);
+               		m_tsysDataSeq[i]=(double)(i*5.);
                		m_ptsys2[i]=(float)m_tsysDataSeq[i];
 		}
 
@@ -537,6 +562,7 @@ gaussianFit:
 		BWHM_val = 0.0834;
                 		
                	if (m_CoordIndex == 1 && m_latResult == 0) { // LAT scans
+                    printf("LAT scans\n");
                		m_Par[2] = BWHM_val;
 
                		fit2_(m_off,m_ptsys2,m_secsFromMidnight,m_Par,m_errPar,&m_dataSeqCounter,&par,&tol,&ftry,(E_fp)fgaus_,&m_reducedCHI,&m_ierr);
@@ -546,11 +572,11 @@ gaussianFit:
                    	m_LatErr = m_errPar[1];
 
                    	// latfit, laterr
-	               	tS.value(m_time);
+	               	tS.value(now.value().value);
 	               	out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#latfit %f %f %f %f %f %d \n", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.,
                                                                                                     m_Par[1],m_Par[2],m_Par[0],m_Par[3],m_Par[4],m_ierr);
 					m_file << (const char *) out;
-                    tS.value(m_time);
+                    tS.value(now.value().value);
 	                out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#laterr %f %f %f %f %f %f \n", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.,
                                                                                                     m_errPar[1],m_errPar[2],m_errPar[0],m_errPar[3],m_errPar[4],m_reducedCHI);
 	                m_file << (const char *) out;
@@ -561,7 +587,9 @@ gaussianFit:
                     data->setOffset(m_Par[3]);
                     data->setSlope(m_Par[4]);
 
-                    if ((m_Par[1] > m_off[0]) && (m_Par[1] < m_off[m_dataSeqCounter-1]) && (m_ierr > 0)) {
+                    if ((fabs(m_Par[1]) < m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0) ||
+				    (fabs(m_Par[1]) > m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0))
+                       {
                         m_latResult = 1;
                         /* if data fitting results are ok
                      	* sets new offsets in antenna
@@ -606,8 +634,6 @@ gaussianFit:
                 }
                 else if ((m_CoordIndex == 0) && (m_lonResult == 0)) { // LON scans
                     m_Par[2] = BWHM_val/m_cosLat;
-                    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonfit %f %f %f %f %f %d \n", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.,
-                                                                                                    m_Par[1],m_Par[2],m_Par[0],m_Par[3],m_Par[4],m_ierr);
                     
                     fit2_(m_off,m_ptsys2,m_secsFromMidnight,m_Par,m_errPar,&m_dataSeqCounter,&par,&tol,&ftry,(E_fp)fgaus_,&m_reducedCHI,&m_ierr);
 
@@ -618,11 +644,11 @@ gaussianFit:
            			m_LonErr = m_errPar[1];
 
            			// lonfit, lonerr
-               		tS.value(m_time);
+               		tS.value(now.value().value);
                		out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonfit %f %f %f %f %f %d \n", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.,
                                                                                                     m_Par[1],m_Par[2],m_Par[0],m_Par[3],m_Par[4],m_ierr);
 	                m_file << (const char *) out;
-	                tS.value(m_time);
+	                tS.value(now.value().value);
 	                out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonerr %f %f %f %f %f %f \n", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.,
                                                                                                     m_errPar[1],m_errPar[2],m_errPar[0],m_errPar[3],m_errPar[4],m_reducedCHI);
 	               	m_file << (const char *) out;
@@ -633,8 +659,10 @@ gaussianFit:
                    	data->setOffset(m_Par[3]);
                    	data->setSlope(m_Par[4]);
 
-                   	if ((m_Par[1] > m_off[0]) && (m_Par[1] < m_off[m_dataSeqCounter-1]) && (m_ierr > 0)) {
-                   		m_lonResult = 1;
+                   	if ((fabs(m_Par[1]) < m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0) ||
+			    	(fabs(m_Par[1]) > m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0)	)
+                    {
+                        m_lonResult = 1;
                         /* if data fitting results are ok
                      	* sets new offsets in antenna
                      	*/
@@ -668,9 +696,9 @@ gaussianFit:
                             	break;
                     	}
 					}
-			m_dataSeq.length(m_dataSeqCounter);
+			        m_dataSeq.length(m_dataSeqCounter);
                     data->setArrayDataX(m_dataSeq);
-			m_tsysDataSeq.length(m_dataSeqCounter);
+			        m_tsysDataSeq.length(m_dataSeqCounter);
                     data->setArrayDataY(m_tsysDataSeq);
                     for (i = 0; i < m_dataSeqCounter; i++) {
                         m_dataSeq[i] = 0.0;
@@ -682,12 +710,12 @@ gaussianFit:
                 }
                 if ((m_latResult == 1) && (m_lonResult == 1)) {
                 	// offset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_lonResult, m_latResult 
-	            	tS.value(m_time);
+	            	tS.value(now.value().value);
 	            	out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#offset %f %f %f %f %d %d \n", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.,
                                                                                                     m_LonPos*DR2D,m_LatPos*DR2D,m_LonOff*DR2D,m_LatOff*DR2D,m_lonResult,m_latResult);
 	                m_file << (const char *) out;
                     // xoffset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_LonErr, m_LatErr, m_lonResult, m_latResult
-	                tS.value(m_time);
+	                tS.value(now.value().value);
 	                out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#xoffset %f %f %f %f %f %f %d %d \n", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.,
                                                                                                             m_LonPos*DR2D,m_LatPos*DR2D,cos(m_LatPos)*m_LonOff*DR2D,m_LatOff*DR2D,
                                                                                                             cos(m_LatPos)*m_LonErr*DR2D,m_LatErr*DR2D,m_lonResult,m_latResult);
@@ -712,4 +740,4 @@ gaussianFit:
 			}
 		}
 	}
-}
+}setM   
