@@ -97,80 +97,17 @@ void
 CEngineThread::onStart ()
 {
     AUTO_TRACE ("CEngineThread::onStart()");
-/*    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+}
 
-    try
-    {
-	CCommonTools::getAntennaBoss (m_antennaBoss, m_service,
-				      m_config->getAntennaBossComponent (),
-				      antennaBossError);
-	m_antennaBoss->getAllOffsets (m_azOff, m_elOff, m_raOff, m_decOff,
-				      m_lonOff, m_latOff);
-    }
-    catch (ComponentErrors::CouldntGetComponentExImpl & ex)
-    {
-	_IRA_LOGFILTER_LOG_EXCEPTION (ex, LM_ERROR);
-	data->setStatus (Management::MNG_FAILURE);
-    }
-    catch (CORBA::SystemException & ex)
-    {
-	_EXCPT (ComponentErrors::CORBAProblemExImpl, impl,
-		"CEngineThread::onStart()");
-	impl.setName (ex._name ());
-	impl.setMinor (ex.minor ());
-	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
-	data->setStatus (Management::MNG_FAILURE);
-	antennaBossError = true;
-    }
-    catch ( ...)
-    {
-	_EXCPT (ComponentErrors::UnexpectedExImpl, impl,
-		"CEngineThread::onStart()");
-	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
-	data->setStatus (Management::MNG_FAILURE);
-    }
-    try
-    {
-	CCommonTools::getObservatory (m_observatory, m_service,
-				      m_config->getObservatoryComponent (),
-				      observatoryError);
-    }
-    catch (ComponentErrors::CouldntGetComponentExImpl & ex)
-    {
-	_IRA_LOGFILTER_LOG_EXCEPTION (ex, LM_ERROR);
-	data->setStatus (Management::MNG_FAILURE);
-    }
-    catch (CORBA::SystemException & ex)
-    {
-	_EXCPT (ComponentErrors::CORBAProblemExImpl, impl,
-		"CEngineThread::onStart()");
-	impl.setName (ex._name ());
-	impl.setMinor (ex.minor ());
-	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
-	data->setStatus (Management::MNG_FAILURE);
-	observatoryError = true;
-    }
-    catch ( ...)
-    {
-	_EXCPT (ComponentErrors::UnexpectedExImpl, impl,
-		"CEngineThread::onStart()");
-	_IRA_LOGFILTER_LOG_EXCEPTION (impl, LM_ERROR);
-	data->setStatus (Management::MNG_FAILURE);
-    }
-    try
-    {
-	site = m_observatory->getSiteSummary ();
-    }
-    catch (CORBA::SystemException & ex)
-    {
-	_EXCPT (ComponentErrors::CORBAProblemExImpl, __dummy,
-		"CEngineThread::onStart()");
-	__dummy.setName (ex._name ());
-	__dummy.setMinor (ex.minor ());
-	throw __dummy;
-    }
-    m_site = CSite (site.out ());
-    */
+void
+CEngineThread::onStop ()
+{
+    AUTO_TRACE ("CEngineThread::onStop()");
+    if (m_fileOpened)
+      {
+	  m_file.close ();
+	  m_fileOpened = false;
+      }
 }
 
 void
@@ -252,17 +189,6 @@ CEngineThread::initialize ()
     m_site = CSite (site.out ());
 }
 
-void
-CEngineThread::onStop ()
-{
-    AUTO_TRACE ("CEngineThread::onStop()");
-    if (m_fileOpened)
-      {
-	  m_file.close ();
-	  m_fileOpened = false;
-      }
-}
-
 bool CEngineThread::checkTime (const ACS::Time & currentTime)
 {
     CSecAreaResourceWrapper < CDataCollection > m_data =
@@ -283,15 +209,27 @@ bool CEngineThread::checkTimeSlot (const ACS::Time & slotStart)
 
 bool CEngineThread::processData ()
 {
-    char * buffer;			//pointer to the buffer that contains the real data
-    char * bufferCopy;		// pointer to the memory that has to be freed
-    bool calOn;
-    long buffSize;
-    double ra, dec;
-    double az, el;
-    double lon, lat;
-    bool tracking;
-    double offset = 0.0;
+    char *
+	buffer;			//pointer to the buffer that contains the real data
+    char *
+	bufferCopy;		// pointer to the memory that has to be freed
+    bool
+	calOn;
+    long
+	buffSize;
+    double
+	ra,
+	dec;
+    double
+	az,
+	el;
+    double
+	lon,
+	lat;
+    bool
+	tracking;
+    double
+	offset = 0.0;
     IRA::CString out;
     TIMEVALUE tS;
     ACSErr::Completion_var completion;
@@ -321,7 +259,6 @@ bool CEngineThread::processData ()
     m_device = data->getDevice ();
     data->setDataY (m_ptsys[m_device]);
     m_tsysDataSeq[m_dataSeqCounter] = m_ptsys[m_device];
-    printf("DEVICE: %d - TSYS: %lf\n",m_device,m_ptsys[m_device]);
 
     CSkySource CTskySource (targetRA, targetDEC, IRA::CSkySource::SS_J2000);
     CDateTime CTdateTime (tS);
@@ -437,23 +374,18 @@ bool CEngineThread::processData ()
 	tS.microSecond () / 1000000.0;
 
     if (m_CoordIndex == 1)
-	out.Format ("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lat %d %f %f %f\n",
+	out.Format ("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lat %d %f %f %lf\n",
 		    tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (),
 		    tS.second (), tS.microSecond () / 1000000.,
 		    m_dataSeqCounter, m_secsFromMidnight[m_dataSeqCounter],
 		    m_off[m_dataSeqCounter], m_tsysDataSeq[m_dataSeqCounter]);
     if (m_CoordIndex == 0)
-	out.Format ("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lon %d %f %f %f\n",
+	out.Format ("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lon %d %f %f %lf\n",
 		    tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (),
 		    tS.second (), tS.microSecond () / 1000000.,
 		    m_dataSeqCounter, m_secsFromMidnight[m_dataSeqCounter],
 		    m_off[m_dataSeqCounter], m_tsysDataSeq[m_dataSeqCounter]);
     m_file << (const char *) out;
-
-    printf("CONTATORE: %d\n",m_dataSeqCounter);
-    printf("SECS: %f\n",m_secsFromMidnight[m_dataSeqCounter]);
-    printf("TSYS: %lf\n",m_tsysDataSeq[m_dataSeqCounter]);
-    printf("OFFS: %lf\n",m_off[m_dataSeqCounter]);
 
     m_dataSeqCounter++;
 
@@ -468,10 +400,10 @@ CEngineThread::runLoop ()
     TIMEVALUE now;
     TIMEVALUE tS;
     IRA::CString out;
-    IRA::CString fileName;
-    IRA::CString sourceName;
-    IRA::CString projectName;
-    IRA::CString observerName;
+    IRA::CString fileName = "";
+    IRA::CString sourceName = "";
+    IRA::CString projectName = "";
+    IRA::CString observerName = "";
     ACS::ROstring_var targetRef;
     CORBA::String_var target;
     ACSErr::Completion_var completion;
@@ -482,6 +414,7 @@ CEngineThread::runLoop ()
     int i;
     int Len;
     BYTE outBuffer[128];
+    char outStr[256];
 
     // fit2 function parameters
     static integer ftry = 20;
@@ -693,9 +626,17 @@ CEngineThread::runLoop ()
 		      for (i = 0; i < m_dataSeqCounter; i++)
 			  m_ptsys2[i] = (float) m_tsysDataSeq[i];
 
-		      tmid = m_secsFromMidnight[((m_dataSeqCounter + 1) / 2) - 1];
-		      m_Par[4] = (m_ptsys2[m_dataSeqCounter - 1] - m_ptsys2[0]) / (m_secsFromMidnight[m_dataSeqCounter - 1] - m_secsFromMidnight[0]);
-		      m_Par[3] = m_ptsys2[0] + m_Par[4] * (tmid - m_secsFromMidnight[0]);
+		      tmid =
+			  m_secsFromMidnight[((m_dataSeqCounter + 1) / 2) -
+					     1];
+		      m_Par[4] =
+			  (m_ptsys2[m_dataSeqCounter - 1] -
+			   m_ptsys2[0]) /
+			  (m_secsFromMidnight[m_dataSeqCounter - 1] -
+			   m_secsFromMidnight[0]);
+		      m_Par[3] =
+			  m_ptsys2[0] + m_Par[4] * (tmid -
+						    m_secsFromMidnight[0]);
 		      if (m_dataSeqCounter < 5)
 			{
 			    m_Par[3] = m_Par[4] = (float) 0.;
@@ -703,12 +644,17 @@ CEngineThread::runLoop ()
 		      m_errPar[3] = m_errPar[4] = (float) 0.;
 
 		      m_secsFromMidnight[0] -= tmid;
-		      tmax = m_ptsys2[0] - (m_Par[3] + m_Par[4] * m_secsFromMidnight[0]);
+		      tmax =
+			  m_ptsys2[0] - (m_Par[3] +
+					 m_Par[4] * m_secsFromMidnight[0]);
 		      imax = 1;
 		      for (i = 2; i <= m_dataSeqCounter; ++i)
 			{
 			    m_secsFromMidnight[i - 1] -= tmid;
-			    ti = m_ptsys2[i - 1] - (m_Par[3] + m_Par[4] * m_secsFromMidnight[i - 1]);
+			    ti = m_ptsys2[i - 1] - (m_Par[3] +
+						    m_Par[4] *
+						    m_secsFromMidnight[i -
+								       1]);
 			    if (tmax >= ti)
 			      {
 				  goto gaussianFit;
@@ -726,9 +672,13 @@ CEngineThread::runLoop ()
 
 		      if (m_CoordIndex == 1 && m_latResult == 0)
 			{	// LAT scans
+				printf("LAT scans\n");
 			    m_Par[2] = BWHM_val;
 
-			    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par, m_errPar, &m_dataSeqCounter, &par, &tol, &ftry, (E_fp) fgaus_, &m_reducedCHI, &m_ierr);
+			    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par,
+				   m_errPar, &m_dataSeqCounter, &par, &tol,
+				   &ftry, (E_fp) fgaus_, &m_reducedCHI,
+				   &m_ierr);
 
 			    m_LatPos = (m_dataSeq[0] + m_dataSeq[m_dataSeqCounter - 1]) / 2.;
 			    m_LatOff = m_Par[1];
@@ -736,23 +686,34 @@ CEngineThread::runLoop ()
 
 			    // latfit, laterr
 			    tS.value (now.value().value);
-			    out.Format
+			    //char latfit[13]="#fivpt#latfit ";
+			    sprintf(outStr,"%04d.%03d.%02d:%02d:%02d.%03d#fivpt#latfit %f %f %f %f %f %d \n",tS.year (), tS.dayOfYear (), tS.hour (),
+				 tS.minute (), tS.second (),
+				 tS.microSecond () / 1000000., m_Par[1],
+				 m_Par[2], m_Par[0], m_Par[3], m_Par[4],
+				 m_ierr);
+			    /*out.Format
 				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#latfit %f %f %f %f %f %d \n",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 tS.microSecond () / 1000000., m_Par[1],
 				 m_Par[2], m_Par[0], m_Par[3], m_Par[4],
-				 m_ierr);
-			    m_file << (const char *) out;
+				 m_ierr);*/
+			    m_file << (const char *) outStr;
 			    tS.value (now.value().value);
-			    out.Format
+			    sprintf(outStr,"%04d.%03d.%02d:%02d:%02d.%03d#fivpt#laterr %f %f %f %f %f %f \n",tS.year (), tS.dayOfYear (), tS.hour (),
+						 tS.minute (), tS.second (),
+						 tS.microSecond () / 1000000., m_errPar[1],
+						 m_errPar[2], m_errPar[0], m_errPar[3],
+						 m_errPar[4], m_reducedCHI);
+			    /*out.Format
 				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#laterr %f %f %f %f %f %f \n",
-				 tS.year (), tS.dayOfYear (), tS.hour (),
-				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000., m_errPar[1],
-				 m_errPar[2], m_errPar[0], m_errPar[3],
-				 m_errPar[4], m_reducedCHI);
-			    m_file << (const char *) out;
+				tS.year (), tS.dayOfYear (), tS.hour (),
+				tS.minute (), tS.second (),
+				tS.microSecond () / 1000000., m_errPar[1],
+				m_errPar[2], m_errPar[0], m_errPar[3],
+				m_errPar[4], m_reducedCHI);*/
+			    m_file << (const char *) outStr;
 
 			    data->setAmplitude (m_Par[0]);
 			    data->setPeakOffset (m_Par[1]);
@@ -760,9 +721,11 @@ CEngineThread::runLoop ()
 			    data->setOffset (m_Par[3]);
 			    data->setSlope (m_Par[4]);
 
-			    if ((m_Par[1] > m_off[0]) && (m_Par[1] < m_off[m_dataSeqCounter - 1]) && (m_ierr > 0))
+			    if ((fabs(m_Par[1]) < m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0) ||
+				    (fabs(m_Par[1]) > m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0))
 			      {
 				  m_latResult = 1;
+					printf("lat fitting ok\n");
 				  /* if data fitting results are ok
 				   * sets new offsets in antenna
 				   */
@@ -819,6 +782,7 @@ CEngineThread::runLoop ()
 			}
 		      else if ((m_CoordIndex == 0) && (m_lonResult == 0))
 			{	// LON scans
+				printf("LON scans\n");
 			    m_Par[2] = BWHM_val / m_cosLat;
 
 			    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par,
@@ -834,23 +798,33 @@ CEngineThread::runLoop ()
 
 			    // lonfit, lonerr
 			    tS.value (now.value().value);
-			    out.Format
+			    sprintf(outStr,"%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonfit %f %f %f %f %f %d \n",tS.year (), tS.dayOfYear (), tS.hour (),
+			    				 tS.minute (), tS.second (),
+			    				 tS.microSecond () / 1000000., m_Par[1],
+			    				 m_Par[2], m_Par[0], m_Par[3], m_Par[4],
+			    				 m_ierr);
+			    /*out.Format
 				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonfit %f %f %f %f %f %d \n",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 tS.microSecond () / 1000000., m_Par[1],
 				 m_Par[2], m_Par[0], m_Par[3], m_Par[4],
-				 m_ierr);
-			    m_file << (const char *) out;
+				 m_ierr);*/
+			    m_file << (const char *) outStr;
 			    tS.value (now.value().value);
-			    out.Format
+			    sprintf(outStr,"%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonerr %f %f %f %f %f %f \n",tS.year (), tS.dayOfYear (), tS.hour (),
+			    						 tS.minute (), tS.second (),
+			    						 tS.microSecond () / 1000000., m_errPar[1],
+			    						 m_errPar[2], m_errPar[0], m_errPar[3],
+			    						 m_errPar[4], m_reducedCHI);
+			    /*out.Format
 				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonerr %f %f %f %f %f %f \n",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 tS.microSecond () / 1000000., m_errPar[1],
 				 m_errPar[2], m_errPar[0], m_errPar[3],
-				 m_errPar[4], m_reducedCHI);
-			    m_file << (const char *) out;
+				 m_errPar[4], m_reducedCHI);*/
+			    m_file << (const char *) outStr;
 
 			    data->setAmplitude (m_Par[0]);
 			    data->setPeakOffset (m_Par[1]);
@@ -858,11 +832,11 @@ CEngineThread::runLoop ()
 			    data->setOffset (m_Par[3]);
 			    data->setSlope (m_Par[4]);
 
-			    if ((m_Par[1] > m_off[0])
-				&& (m_Par[1] < m_off[m_dataSeqCounter - 1])
-				&& (m_ierr > 0))
+			    if ((fabs(m_Par[1]) < m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0) ||
+			    	(fabs(m_Par[1]) > m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0)	)
 			      {
 				  m_lonResult = 1;
+					printf("lon fitting ok\n");
 				  /* if data fitting results are ok
 				   * sets new offsets in antenna
 				   */
