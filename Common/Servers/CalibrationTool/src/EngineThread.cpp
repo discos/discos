@@ -371,21 +371,22 @@ bool CEngineThread::processData ()
     // secs from midnight array for fit2 function
     m_secsFromMidnight[m_dataSeqCounter] =
 	tS.hour () * 3600.0 + tS.minute () * 60.0 + tS.second () +
-	tS.microSecond () / 1000000.0;
+	(long)(tS.microSecond () / 1000000.0);
 
-    if (m_CoordIndex == 1)
-	out.Format ("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lat %d %f %f %lf\n",
+    if (m_CoordIndex == 1) {
+        out.Format ("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lat ",
 		    tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (),
-		    tS.second (), tS.microSecond () / 1000000.,
-		    m_dataSeqCounter, m_secsFromMidnight[m_dataSeqCounter],
-		    m_off[m_dataSeqCounter], m_tsysDataSeq[m_dataSeqCounter]);
-    if (m_CoordIndex == 0)
-	out.Format ("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lon %d %f %f %lf\n",
+		    tS.second (), (long)(tS.microSecond () / 1000000.));
+        m_file << (const char *) out;
+    }
+    if (m_CoordIndex == 0) {
+        out.Format ("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lon ",
 		    tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (),
-		    tS.second (), tS.microSecond () / 1000000.,
-		    m_dataSeqCounter, m_secsFromMidnight[m_dataSeqCounter],
-		    m_off[m_dataSeqCounter], m_tsysDataSeq[m_dataSeqCounter]);
-    m_file << (const char *) out;
+		    tS.second (), (long)(tS.microSecond () / 1000000.));
+        m_file << (const char *) out;
+    }
+    m_file << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
+
 
     m_dataSeqCounter++;
 
@@ -413,8 +414,6 @@ CEngineThread::runLoop ()
     CORBA::Double sourceFlux_val;
     int i;
     int Len;
-    BYTE outBuffer[128];
-    char outStr[256];
 
     // fit2 function parameters
     static integer ftry = 20;
@@ -462,13 +461,13 @@ CEngineThread::runLoop ()
 		      out.Format("%04d.%03d.%02d:%02d:%02d.%03d#Calibration Tool Start\n",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000.);
+			   (long)(tS.microSecond () / 1000000.));
 		      m_file << (const char *) out;
 		      // File Name
 		      tS.value (now.value().value);
 		      fileName = data->getFileName ();
 		      out.Format("%04d.%03d.%02d:%02d:%02d.%03d#File Name: ",
-				tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),tS.microSecond()/1000000.);
+				tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),(long)(tS.microSecond()/1000000.));
 	              m_file << (const char *) out;
                       m_file << (const char *) fileName << std::endl;
 		      
@@ -478,7 +477,7 @@ CEngineThread::runLoop ()
 		      out.Format("%04d.%03d.%02d:%02d:%02d.%03d#Project Name: ",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000.);
+			   (long)(tS.microSecond () / 1000000.));
 		      m_file << (const char *) out;
 		      m_file << (const char *) projectName << std::endl;
 		      // Observer Name
@@ -487,7 +486,7 @@ CEngineThread::runLoop ()
 		      out.Format("%04d.%03d.%02d:%02d:%02d.%03d#Observer Name: ",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000.);
+			   (long)(tS.microSecond () / 1000000.));
 		      m_file << (const char *) out;
 		      m_file << (const char *) observerName << std::endl;
 		      // Source Name
@@ -515,7 +514,7 @@ CEngineThread::runLoop ()
 		      out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#source ",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
-			   tS.microSecond () / 1000000.);
+			   (long)(tS.microSecond () / 1000000.));
 		      m_file << (const char *) out;
 		      m_file << (const char *) sourceName;
 		      m_file << " 000000.0 +000000 0000.0 0000.000.00:00:00" << std::endl;
@@ -535,42 +534,42 @@ CEngineThread::runLoop ()
 				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept azel 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    break;
 			case Management::MNG_HOR_LAT:
 			    out.Format
 				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept azel 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    break;
 			case Management::MNG_EQ_LON:
 			    out.Format
 				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept hadc 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    break;
 			case Management::MNG_EQ_LAT:
 			    out.Format
 				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept hadc 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    break;
 			case Management::MNG_GAL_LON:
 			    out.Format
 				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept gall 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    break;
 			case Management::MNG_GAL_LAT:
 			    out.Format
 				("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#fivept gall 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    break;
 			case Management::MNG_SUBR_Z:
 			    break;
@@ -645,7 +644,6 @@ CEngineThread::runLoop ()
 
 		      if (m_CoordIndex == 1 && m_latResult == 0)
 			{	// LAT scans
-				printf("LAT scans\n");
 			    m_Par[2] = BWHM_val;
 
 			    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par,
@@ -662,18 +660,17 @@ CEngineThread::runLoop ()
 			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#latfit ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    m_file << (const char *) out;
-			    m_file << m_Par[1] << m_Par[2] << m_Par[0] << m_Par[4] << m_ierr << std::endl;
+			    m_file << m_Par[1] << " " << m_Par[2] << " " << m_Par[0] << " " << m_Par[4] << " " << m_ierr << std::endl;
 
 			    tS.value (now.value().value);
 			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#laterr ",
 				tS.year (), tS.dayOfYear (), tS.hour (),
 				tS.minute (), tS.second (),
-				tS.microSecond () / 1000000.);
+				(long)(tS.microSecond () / 1000000.));
 			    m_file << (const char *) out;
-			    m_file << m_errPar[1] << m_errPar[2] << m_errPar[0] << m_errPar[3] << m_errPar[4] << m_reducedCHI << std::endl;
-
+			    m_file << m_errPar[1] << " " << m_errPar[2] << " " << m_errPar[0] << " " << m_errPar[3] << " " << m_errPar[4] << " " << m_reducedCHI << std::endl;
 			    data->setAmplitude (m_Par[0]);
 			    data->setPeakOffset (m_Par[1]);
 			    data->setHPBW (m_Par[2]);
@@ -752,18 +749,16 @@ CEngineThread::runLoop ()
 			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonfit ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    m_file << (const char *) out;
-			    m_file << m_Par[1] << m_Par[2] << m_Par[0] <<  m_Par[3] << m_Par[4] << m_ierr << << std::endl:
-
+			    m_file << m_Par[1] << " " << m_Par[2] << " " << m_Par[0] << " " <<  m_Par[3] << " " << m_Par[4] << " " << m_ierr << std::endl;
 			    tS.value (now.value().value);
 			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#lonerr ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    m_file << (const char *) out;
-			    m_file << m_errPar[1] << m_errPar[2] << m_errPar[0] << m_errPar[3] << m_errPar[4] << m_reducedCHI << std::endl;
-
+			    m_file << m_errPar[1] << " " << m_errPar[2] << " " << m_errPar[0] << " " << m_errPar[3] << " " << m_errPar[4] << " " << m_reducedCHI << std::endl;
 			    data->setAmplitude (m_Par[0]);
 			    data->setPeakOffset (m_Par[1]);
 			    data->setHPBW (m_Par[2]);
@@ -832,18 +827,18 @@ CEngineThread::runLoop ()
 			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#offset ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    m_file << (const char *) out;
-			    m_file << m_LonPos * DR2D <<  m_LatPos * DR2D << m_LonOff * DR2D << m_LatOff * DR2D << m_lonResult << m_latResult << std::endl;
+			    m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << m_LonOff * DR2D << " " << m_LatOff * DR2D << " " << m_lonResult << " " << m_latResult << std::endl;
 
 			    // xoffset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_LonErr, m_LatErr, m_lonResult, m_latResult
 			    tS.value (now.value().value);
 			    out.Format("%04d.%03d.%02d:%02d:%02d.%03d#fivpt#xoffset ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
-				 tS.microSecond () / 1000000.);
+				 (long)(tS.microSecond () / 1000000.));
 			    m_file << (const char *) out;
-			    m_file << m_LonPos * DR2D <<  m_LatPos * DR2D << cos (m_LatPos) * m_LonOff * DR2D << m_LatOff * DR2D << cos (m_LatPos) * m_LonErr * DR2D << 					m_LatErr * DR2D << m_lonResult << m_latResult << std::endl;
+			    m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << cos (m_LatPos) * m_LonOff * DR2D << " " << m_LatOff * DR2D << " " << cos (m_LatPos) * m_LonErr * DR2D << " " << m_LatErr * DR2D << " " << m_lonResult << " " << m_latResult << std::endl;
 			}
 		      if ((m_latDone == 1) && (m_lonDone == 1))
 			{
