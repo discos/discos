@@ -123,7 +123,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
         if(msg[MCB_BASE_ANSWER_LENGTH])
             throw MicroControllerBoardEx("An error occurs. Error code: " + any2string(int(msg[MCB_BASE_ANSWER_LENGTH])));
 
-        // If the answer shoud have data and there isn't any error, then continue the reception
+        // If the answer shoud have data and there aren't any errors, then continue the reception
         if(has_data_cmd) {
             data.clear();
             clean_data.clear();
@@ -171,7 +171,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
             if(msg[idx] != MCB_CMD_ETX)
                 throw MicroControllerBoardEx("Answer terminator not found.");
         }
-
+        
         // Check if master and slave are the same for answer and request
         if(m_request[MCB_CMD_SLAVE] != m_answer[MCB_CMD_MASTER])
             throw MicroControllerBoardEx("Mismatch between master and slave addresses of request and answer.");
@@ -236,7 +236,7 @@ void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters
         // If the command is extended, put the checksum in the request
         if(m_command_type <= MCB_CMD_TYPE_MAX_EXT) {
             m_request.push_back(computeChecksum(m_request));
-            m_request.push_back(MCB_CMD_ETX);
+            m_request.push_back(MCB_CMD_EOT);
         }
     }
     else 

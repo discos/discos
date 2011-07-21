@@ -5,5 +5,23 @@
 // Get the vacuum value in mbar for a given voltage VALUE
 #define GET_VACUUM(VALUE) pow(10, 1.5 * VALUE - 12);
 
+// Get the low cryogenic temperature value in Kelvin for a given voltage VALUE
+#define GET_LOW_TEMPERATURE(VALUE) \
+    VALUE < 1.12 ? \
+        (660.549422889947 * pow(VALUE, 6)) - (2552.334255456860 * pow(VALUE, 5)) + (3742.529989384570 * pow(VALUE, 4)) \
+        - (2672.656926956470 * pow(VALUE, 3)) + (947.905578508975 * pow(VALUE, 2)) - 558.351002849576 * VALUE + 519.607622398508 \
+                 : \
+        (865.747519105672 * pow(VALUE, 6)) - (7271.931957100480 * pow(VALUE, 5)) + (24930.666241800500 * pow(VALUE, 4)) \
+        - (44623.988512320400 * pow(VALUE, 3)) + (43962.922216886600 * pow(VALUE, 2)) - 22642.245121997700 * VALUE + 4808.631312836750;
+
+// Get the VD value in Volt for a given voltage VALUE
+#define GET_VD(VALUE) 1 * VALUE;
+
+// Get the ID value in mA for a given voltage VALUE
+#define GET_ID(VALUE) 10 * VALUE;
+
+// Get the VG value in Volt for a given voltage VALUE
+#define GET_VG(VALUE) 1 * VALUE;
+
 
 #endif

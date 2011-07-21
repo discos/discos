@@ -6,14 +6,16 @@
  *  Personal Web: http://www.pypeople.com/
 \*******************************************************************************/
 
-#ifndef m__RECEIVER_CONTROL__H
-#define m__RECEIVER_CONTROL__H
+#ifndef __RECEIVER_CONTROL__H
+#define __RECEIVER_CONTROL__H
 
 #include <string>
 #include <vector>
+#include <bitset>
 #include <IRA>
 #include "MicroControllerBoard.h"
 
+const unsigned int GUARD_TIME = 250000; // 250000 us == 0.25 seconds
 
 class ReceiverControlEx {
 
@@ -28,12 +30,13 @@ private:
 
 
 struct FetValues {
-    double VD; // Drain Voltage
-    double ID; // Drain Current
-    double VG; // Gate Voltage
+    double VDL; // Drain Voltage, left channel  [V]
+    double IDL; // Drain Current, left channel  [mA]
+    double VGL; // Gate Voltage, left channel   [V]
+    double VDR; // Drain Voltage, right channel [V]
+    double IDR; // Drain Current, right channel [mA]
+    double VGR; // Gate Voltage, right channel  [V]
 };
-
-enum Channel { LEFT, RIGHT };
 
 
 /** 
@@ -87,9 +90,9 @@ enum Channel { LEFT, RIGHT };
  *     board is OK</li>
  *     <li>bool isDewarBoardConnectionOK(): return true if the connection to the 
  *     dewar board is OK</li>
- *     <li>FetValues lna(unsigned short feed_id, enum Chennel channel, unsigned short stage_id): 
- *     return the FetValues (VD, ID, and VG) of the LNA of the feed `feed_id`, channel `channel` 
- *     and stage `stage_id`</li>
+ *     <li>FetValues lna(unsigned short feed_number, unsigned short stage_number): 
+ *     return the FetValues (VDL, IDL, VGL, VDR, IDR and VGR) of the LNA of the feed `feed_number`, 
+       and stage `stage_id`</li>
  * </ul>
  * 
  */
@@ -119,10 +122,10 @@ public:
             const std::string lna_ip, 
             const unsigned short lna_port, 
             const unsigned short number_of_feeds=1,
-            const BYTE dewar_madd=0x7D, // Dewar board master address
-            const BYTE dewar_sadd=0x7F, // Dewar board slave address
-            const BYTE lna_madd=0x7D,   // LNA board master address
-            const BYTE lna_sadd=0x7F,   // LNA board slave address
+            const BYTE dewar_madd=0x7C, // Dewar board master address
+            const BYTE dewar_sadd=0x7D, // Dewar board slave address
+            const BYTE lna_madd=0x7C,   // LNA board master address
+            const BYTE lna_sadd=0x7D,   // LNA board slave address
             bool reliable_comm=true
     ) throw (ReceiverControlEx);
 
@@ -175,27 +178,64 @@ public:
      */
     double vacuum() throw (ReceiverControlEx);
 
-    
-    /** return the FetValues (VD, ID, and VG) of the LNA of the feed `feed_id`, channel `channel` 
-     *  and stage `stage_id`
-     *  @param feed_id the ID code of the feed
-     *  @param channel the channel, LEFT or RIGHT
-     *  @param stage_id the ID of the stage
-     *  @return the FetValues, a struct of three double members: VD, ID and VG
+
+    /** Return the low cryogenic temperature value
+     *
+     *  @return the low cryogenic temperature value
+     *  @throw ReceiverControlEx
      */
-    FetValues lna(unsigned short feed_id, enum Channel channel, unsigned short stage_id);
+    double lowTemperature() throw (ReceiverControlEx);
+
+
+    /** Return the high cryogenic temperature value
+     *
+     *  @return the high cryogenic temperature value
+     *  @throw ReceiverControlEx
+     */
+    double highTemperature() throw (ReceiverControlEx);
+
+    
+    /** Set to ON the cool head 
+     *  @throw ReceiverControlEx
+     */
+    void setCoolHeadOn() throw (ReceiverControlEx);
+
+    
+    /** Set to OFF the cool head 
+     *  @throw ReceiverControlEx
+     */
+    void setCoolHeadOff() throw (ReceiverControlEx);
+
+
+    /** Is the cool head opened?
+     *  @return true if the cool head is opened
+     *  @throw ReceiverControlEx
+     */
+    bool isCoolHeadOn() throw (ReceiverControlEx);
+
+    
+    /** return the FetValues (VDL, IDL, VGR, VDR, IDR and VGR) 
+     *  of the LNA of the feed `feed_number` and stage `stage_number`. The letter L means
+     *  that the value is referred to the left channel, the R if for the right one.
+     *  @param feed_number the ID code of the feed (from 0 to 15)
+     *  @param stage_number the stage number (from 1 to 5)
+     *  @return the FetValues, a struct of three double members: VD [V], ID [mA] and VG [V]
+     *  @throw ReceiverControlEx
+     */
+    FetValues lna(unsigned short feed_number, unsigned short stage_number) throw (ReceiverControlEx);
 
 
 private:
     
 	/** Send the request to the board and receive the answer
+     * @param board_ptr pointer to the board (dewar of LNA board)
 	 * @param command the command code of the request
 	 * @param len the number of parameters to send
 	 * @param ... the parameters
      * @return a vector of parameters, empty if there are not some
      * @throw MicroControllerBoardEx
 	*/
-    std::vector<BYTE> makeRequest(const BYTE command, size_t len, ...) throw(MicroControllerBoardEx);
+    std::vector<BYTE> makeRequest(MicroControllerBoard *board_ptr, const BYTE command, size_t len, ...) throw(MicroControllerBoardEx);
 
     
 	/** Return the requested value computed from a vector<BYTE> of parameters

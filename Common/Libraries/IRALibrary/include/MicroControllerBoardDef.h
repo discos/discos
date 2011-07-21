@@ -1,7 +1,7 @@
 #ifndef __MICRO_CONTROLLER_BOARD_DEF__H
 #define __MICRO_CONTROLLER_BOARD_DEF__H
 
-const unsigned MCB_TOUT = 200000; // 2 seconds
+const unsigned MCB_TOUT = 1500000; // 15 seconds
 const unsigned MCB_BUFF_LIMIT = 2048;
 // MCB_HT_COUNTER means Header or Terminator COUNTER
 const unsigned short MCB_HT_COUNTER = 10; // The maximum number of attempts we wait for a header or terminator
@@ -252,6 +252,27 @@ const BYTE MCB_PORT_NUMBER_93         =     0x5D; /* 0101 1101 */
 const BYTE MCB_PORT_NUMBER_94         =     0x5E; /* 0101 1110 */
 const BYTE MCB_PORT_NUMBER_95         =     0x5F; /* 0101 1111 */
 
-const BYTE MCB_PORT_RANGE_08_15       = 0x60;     // Port Number from 08 to 15
+const BYTE MCB_PORT_NUMBER_00_07      =     0x60; /* 0110 0000 */
+const BYTE MCB_PORT_NUMBER_08_15      =     0x61; /* 0110 0001 */
+const BYTE MCB_PORT_NUMBER_16_23      =     0x62; /* 0110 0010 */
+const BYTE MCB_PORT_NUMBER_24_31      =     0x63; /* 0110 0011 */
+const BYTE MCB_PORT_NUMBER_32_39      =     0x64; /* 0110 0100 */
+const BYTE MCB_PORT_NUMBER_40_47      =     0x65; /* 0110 0101 */
+const BYTE MCB_PORT_NUMBER_48_55      =     0x66; /* 0110 0110 */
+const BYTE MCB_PORT_NUMBER_56_63      =     0x67; /* 0110 0111 */
+const BYTE MCB_PORT_NUMBER_64_71      =     0x68; /* 0110 1000 */
+const BYTE MCB_PORT_NUMBER_72_79      =     0x69; /* 0110 1001 */
+const BYTE MCB_PORT_NUMBER_80_87      =     0x6A; /* 0110 1010 */
+const BYTE MCB_PORT_NUMBER_88_95      =     0x6B; /* 0110 1011 */
+const BYTE MCB_PORT_NUMBER_00_15      =     0x6C; /* 0110 1100 */
+const BYTE MCB_PORT_NUMBER_16_31      =     0x6D; /* 0110 1101 */
+const BYTE MCB_PORT_NUMBER_32_47      =     0x6E; /* 0110 1110 */
+const BYTE MCB_PORT_NUMBER_48_63      =     0x6F; /* 0110 1111 */
+const BYTE MCB_PORT_NUMBER_64_79      =     0x70; /* 0111 0000 */
+const BYTE MCB_PORT_NUMBER_80_95      =     0x71; /* 0111 0001 */
+const BYTE MCB_PORT_NUMBER_00_31      =     0x72; /* 0111 0010 */
+const BYTE MCB_PORT_NUMBER_32_63      =     0x73; /* 0111 0011 */
+const BYTE MCB_PORT_NUMBER_64_95      =     0x74; /* 0111 0100 */
+const BYTE MCB_PORT_NUMBER_00_95      =     0x75; /* 0111 0101 */
 
 #endif

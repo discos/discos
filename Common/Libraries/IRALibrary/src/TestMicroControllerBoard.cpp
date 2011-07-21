@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
                 cout << hex << int(*iter) << " " << flush;
+        sleep(5);
         cout << "Done!\n" << endl;
         cout << "Testing MCB_CMD_RESET SHORT......" << endl;
         mcb.send(MCB_CMD_RESET | MCB_CMD_TYPE_NOCHECKSUM);
@@ -95,6 +96,7 @@ int main(int argc, char *argv[])
         if(!data.empty())
             for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
                 cout << hex << int(*iter) << " " << flush;
+        sleep(5);
         cout << "Done!\n" << endl;
     }
     catch(MicroControllerBoardEx& ex) {
@@ -125,48 +127,48 @@ int main(int argc, char *argv[])
     }
 
     // Test the MCB_CMD_SAVE extended and short commands
-    try {
-        cout << "Testing MCB_CMD_SAVE......" << endl;
-        mcb.send(MCB_CMD_SAVE);
-        data = mcb.receive();
-        if(!data.empty())
-            for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
-                cout << hex << int(*iter) << " " << flush;
-        cout << "Done!\n" << endl;
-        cout << "Testing MCB_CMD_SAVE SHORT......" << endl;
-        mcb.send(MCB_CMD_SAVE | MCB_CMD_TYPE_NOCHECKSUM);
-        data = mcb.receive();
-        if(!data.empty())
-            for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
-                cout << hex << int(*iter) << " " << flush;
-        cout << "Done!\n" << endl;
-    }
-    catch(MicroControllerBoardEx& ex) {
-        cout << ex.what() << endl;
-        return 1;
-    }
+    // try {
+    //     cout << "Testing MCB_CMD_SAVE......" << endl;
+    //     mcb.send(MCB_CMD_SAVE);
+    //     data = mcb.receive();
+    //     if(!data.empty())
+    //         for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
+    //             cout << hex << int(*iter) << " " << flush;
+    //     cout << "Done!\n" << endl;
+    //     cout << "Testing MCB_CMD_SAVE SHORT......" << endl;
+    //     mcb.send(MCB_CMD_SAVE | MCB_CMD_TYPE_NOCHECKSUM);
+    //     data = mcb.receive();
+    //     if(!data.empty())
+    //         for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
+    //             cout << hex << int(*iter) << " " << flush;
+    //     cout << "Done!\n" << endl;
+    // }
+    // catch(MicroControllerBoardEx& ex) {
+    //     cout << ex.what() << endl;
+    //     return 1;
+    // }
 
     // Test the MCB_CMD_RESTORE extended and short commands
-    try {
-        cout << "Testing MCB_CMD_RESTORE......" << endl;
-        mcb.send(MCB_CMD_RESTORE);
-        data = mcb.receive();
-        if(!data.empty())
-            for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
-                cout << hex << int(*iter) << " " << flush;
-        cout << "Done!\n" << endl;
-        cout << "Testing MCB_CMD_RESTORE SHORT......" << endl;
-        mcb.send(MCB_CMD_RESTORE | MCB_CMD_TYPE_NOCHECKSUM);
-        data = mcb.receive();
-        if(!data.empty())
-            for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
-                cout << hex << int(*iter) << " " << flush;
-        cout << "Done!\n" << endl;
-    }
-    catch(MicroControllerBoardEx& ex) {
-        cout << ex.what() << endl;
-        return 1;
-    }
+    // try {
+    //     cout << "Testing MCB_CMD_RESTORE......" << endl;
+    //     mcb.send(MCB_CMD_RESTORE);
+    //     data = mcb.receive();
+    //     if(!data.empty())
+    //         for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
+    //             cout << hex << int(*iter) << " " << flush;
+    //     cout << "Done!\n" << endl;
+    //     cout << "Testing MCB_CMD_RESTORE SHORT......" << endl;
+    //     mcb.send(MCB_CMD_RESTORE | MCB_CMD_TYPE_NOCHECKSUM);
+    //     data = mcb.receive();
+    //     if(!data.empty())
+    //         for(std::vector<BYTE>::iterator iter=data.begin(); iter != data.end(); iter++)
+    //             cout << hex << int(*iter) << " " << flush;
+    //     cout << "Done!\n" << endl;
+    // }
+    // catch(MicroControllerBoardEx& ex) {
+    //     cout << ex.what() << endl;
+    //     return 1;
+    // }
 
     // Test the MCB_CMD_GET_ADDR extended and short commands
     try {

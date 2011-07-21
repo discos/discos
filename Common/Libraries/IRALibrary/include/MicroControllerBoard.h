@@ -6,8 +6,8 @@
  *  Personal Web: http://www.pypeople.com/
 \*******************************************************************************/
 
-#ifndef m__MICRO_CONTROLLER_BOARD__H
-#define m__MICRO_CONTROLLER_BOARD__H
+#ifndef __MICRO_CONTROLLER_BOARD__H
+#define __MICRO_CONTROLLER_BOARD__H
 
 #include <string>
 #include <vector>
@@ -48,7 +48,7 @@ public:
      * @throw MicroControllerBoardEx
 	*/
     MicroControllerBoard(std::string IP, unsigned short port=8000,
-            BYTE master_address=0x7D, BYTE slave_address=0x7F, 
+            BYTE master_address=0x7C, BYTE slave_address=0x7D, 
             DWORD timeout=MCB_TOUT
     ) throw (MicroControllerBoardEx);
      

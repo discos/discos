@@ -65,6 +65,7 @@ CMD_TYPE_MAX_ABB = chr(ord(CMD_TYPE_MAX_EXT) | ord(CMD_TYPE_NOCHECKSUM))
 # Anser header
 CMD_STX = chr(0x02)
 CMD_ETX = chr(0x03)
+CMD_EOT = chr(0x04)
 
 class BoardServer:
     """A simulator of Franco Fiocchi (Medicina) board."""

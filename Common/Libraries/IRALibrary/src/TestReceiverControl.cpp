@@ -35,14 +35,34 @@ int main(int argc, char *argv[])
         rc.setCalibrationOn();
         cout << "Done!\n" << endl;
 
+        // Test the isCalibrationOn()
+        cout << "Test isCalibrationOn() with a reliable communication" << endl;
+        cout << "It the noise mark generator ON? " << (rc.isCalibrationOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
         // Test the setReliableCommOff()
-        cout << "Test setCalibrationOff()" << endl;
+        cout << "Test setReliableCommOff()" << endl;
         rc.setReliableCommOff();
         cout << "Done!\n" << endl;
     
         // Test the setCalibrationOn()
         cout << "Test setCalibrationOn()" << endl;
         rc.setCalibrationOn();
+        cout << "Done!\n" << endl;
+
+        // Test the setCalibrationOff()
+        cout << "Test setCalibrationOff()" << endl;
+        rc.setCalibrationOff();
+        cout << "Done!\n" << endl;
+
+        // Test the isCalibrationOn()
+        cout << "Test isCalibrationOn() with a reliable communication" << endl;
+        cout << "It the noise mark generator ON? " << (rc.isCalibrationOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the vacuum()
+        cout << "Test vacuum()" << endl;
+        cout << "Vacuum value: " << rc.vacuum() << endl;
         cout << "Done!\n" << endl;
 
         // Test the setReliableCommOn()
@@ -60,11 +80,54 @@ int main(int argc, char *argv[])
         cout << "Vacuum value: " << rc.vacuum() << endl;
         cout << "Done!\n" << endl;
 
+        // Test the lowTemperature()
+        cout << "Test lowTemperature() with a reliable communication" << endl;
+        cout << "Low Cryogenic Temperature value: " << rc.lowTemperature() << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the highTemperature()
+        cout << "Test highTemperature() with a reliable communication" << endl;
+        cout << "High Cryogenic Temperature value: " << rc.highTemperature() << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the isCoolHeadOn()
+        cout << "Test isCoolHeadOn() with a reliable communication" << endl;
+        cout << "It the cool head ON? " << (rc.isCoolHeadOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the setCoolHeadOn()
+        cout << "Test setCoolHeadOn() with a reliable communication" << endl;
+        rc.setCoolHeadOn();
+        cout << "Done!\n" << endl;
+
+        // Test the isCoolHeadOn()
+        cout << "Test isCoolHeadOn() with a reliable communication" << endl;
+        cout << "It the cool head ON? " << (rc.isCoolHeadOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the setCoolHeadOff()
+        cout << "Test setCoolHeadOff() with a reliable communication" << endl;
+        rc.setCoolHeadOff();
+        cout << "Done!\n" << endl;
+
+        // Test the isCoolHeadOn()
+        cout << "Test isCoolHeadOn() with a reliable communication" << endl;
+        cout << "It the cool head ON? " << (rc.isCoolHeadOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
         // Test lna()
         cout << "Test lna() with a reliable communication" << endl;
-        FetValues values = rc.lna(1, LEFT, 4);
-        cout << "LNA values: (VD=" << values.VD << ", ID=" << values.ID;
-        cout << ", VG=" << values.VG << ")" << endl;
+        FetValues values = rc.lna(0, 4);
+        cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        cout << ", VGL=" << values.VGL << ")" << endl;
+        cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        cout << ", VGR=" << values.VGR << ")" << endl;
+        cout << endl;
+        values = rc.lna(1, 2);
+        cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        cout << ", VGL=" << values.VGL << ")" << endl;
+        cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        cout << ", VGR=" << values.VGR << ")" << endl;
         cout << "Done!\n" << endl;
 
         // Test the isCalibrationOn()
