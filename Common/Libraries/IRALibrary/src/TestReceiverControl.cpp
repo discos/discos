@@ -156,6 +156,72 @@ int main(int argc, char *argv[])
         cout << "Test isCalibrationOn() with a reliable communication" << endl;
         cout << "It the noise mark generator ON? " << (rc.isCalibrationOn() == true ? "yes" : "no") << endl;
         cout << "Done!\n" << endl;
+
+        // Test the setVacuumSensorOff()
+        cout << "Test setVacuumSensorOff() with a reliable communication" << endl;
+        rc.setVacuumSensorOff();
+        cout << "Done!\n" << endl;
+
+        // Test the isVacuumSensorOn()
+        cout << "Test isVacuumSensorOn() with a reliable communication" << endl;
+        cout << "It the vacuum sensor ON? " << (rc.isVacuumSensorOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the setVacuumSensorOn()
+        cout << "Test setVacuumSensorOn() with a reliable communication" << endl;
+        rc.setVacuumSensorOn();
+        cout << "Done!\n" << endl;
+
+        // Test the isVacuumSensorOn()
+        cout << "Test isVacuumSensorOn() with a reliable communication" << endl;
+        cout << "It the vacuum sensor ON? " << (rc.isVacuumSensorOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the setVacuumPumpOff()
+        cout << "Test setVacuumPumpOff() with a reliable communication" << endl;
+        rc.setVacuumPumpOff();
+        cout << "Done!\n" << endl;
+
+        // Test the isVacuumPumpOn()
+        cout << "Test isVacuumPumpOn() with a reliable communication" << endl;
+        cout << "It the vacuum pump ON? " << (rc.isVacuumPumpOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the setVacuumPumpOn()
+        cout << "Test setVacuumPumpOn() with a reliable communication" << endl;
+        rc.setVacuumPumpOn();
+        cout << "Done!\n" << endl;
+
+        // Test the isVacuumPumpOn()
+        cout << "Test isVacuumPumpOn() with a reliable communication" << endl;
+        cout << "It the vacuum pump ON? " << (rc.isVacuumPumpOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the setVacuumValveOff()
+        cout << "Test setVacuumValveOff() with a reliable communication" << endl;
+        rc.setVacuumValveOff();
+        cout << "Done!\n" << endl;
+
+        // Test the isVacuumValveOn()
+        cout << "Test isVacuumValveOn() with a reliable communication" << endl;
+        cout << "It the vacuum valve ON? " << (rc.isVacuumValveOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the setVacuumValveOn()
+        cout << "Test setVacuumValveOn() with a reliable communication" << endl;
+        rc.setVacuumValveOn();
+        cout << "Done!\n" << endl;
+
+        // Test the isVacuumValveOn()
+        cout << "Test isVacuumValveOn() with a reliable communication" << endl;
+        cout << "It the vacuum valve ON? " << (rc.isVacuumValveOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the isRemoteOn()
+        cout << "Test isRemoteOn() with a reliable communication" << endl;
+        cout << "It the remote command enable? " << (rc.isRemoteOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
     }
     catch(ReceiverControlEx& ex) {
         cout << ex.what() << endl;

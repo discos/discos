@@ -65,7 +65,6 @@ struct FetValues {
  *     <li>void setVacuumSensorOn(): set to ON the vacuum sensor</li>
  *     <li>void setVacuumSensorOff(): set to OFF the vacuum sensor</li>
  *     <li>bool isVacuumSensorOn(): return true if the vacuum sensor is ON</li>
- *     <li>bool isRemoteEnable(): return true if the remote command is enabled</li>
  *     <li>void setVacuumPumpOn(): set to ON the vacuum pump</li>
  *     <li>void setVacuumPumpOff(): set to OFF the vacuum pump</li>
  *     <li>bool isVacuumPumpOn(): return true if the vacuum pump is ON</li>
@@ -75,24 +74,24 @@ struct FetValues {
  *     <li>void setCalibrationOn(): set the noise mark to ON</li>
  *     <li>void setCalibrationOff(): set the noise mark to OFF</li>
  *     <li>bool isCalibrationOn(): is the noise mark generator sets to ON?</li>
- *     <li>void setRemoteOn(): enable the remote command</li>
- *     <li>void setRemoteOff(): disable the remote command</li>
- *     <li>bool isRemoteEnable(): return true if the remote command is enable</li>
- *     <li>void selectLO1(): select the Local Oscillator 1</li>
- *     <li>void selectLO2(): select the Local Oscillator 2</li>
+ *     <li>bool isRemoteOn(): return true if the remote command is enable</li>
+ **     <li>void selectLO1(): select the Local Oscillator 1</li>
+ **     <li>bool isLO1Select(): return true if the first Local Oscillator (LO1) is selected</li>
+ **     <li>void selectLO2(): select the Local Oscillator 2</li>
+ **     <li>bool isLO2Select(): return true if the second Local Oscillator (LO2) is selected</li>
  *     <li>void setReliableCommOn(): set the reliable communication to/from the 
  *     board to ON</li>
  *     <li>void setReliableCommOff(): set the reliable communication to/from the 
  *     board to OFF</li>
  *     <li>bool isReliableCommOn(): return true if the communication to the
  *     board is sets to be reliable</li>
- *     <li>bool isLNABoardConnectionOK(): return true if the connection to the LNA
+ **     <li>bool isLNABoardConnectionOK(): return true if the connection to the LNA
  *     board is OK</li>
- *     <li>bool isDewarBoardConnectionOK(): return true if the connection to the 
+ **     <li>bool isDewarBoardConnectionOK(): return true if the connection to the 
  *     dewar board is OK</li>
  *     <li>FetValues lna(unsigned short feed_number, unsigned short stage_number): 
  *     return the FetValues (VDL, IDL, VGL, VDR, IDR and VGR) of the LNA of the feed `feed_number`, 
-       and stage `stage_id`</li>
+ *     and stage `stage_id`</li>
  * </ul>
  * 
  */
@@ -216,11 +215,101 @@ public:
     void setCoolHeadOff() throw (ReceiverControlEx);
 
 
-    /** Is the cool head opened?
-     *  @return true if the cool head is opened
+    /** Is the cool head ON?
+     *  @return true if the cool head is ON
      *  @throw ReceiverControlEx
      */
     bool isCoolHeadOn() throw (ReceiverControlEx);
+
+
+    /** Set to ON the vacuum sensor
+     *  @throw ReceiverControlEx
+     */
+    void setVacuumSensorOn() throw (ReceiverControlEx);
+
+
+    /** Set to OFF the vacuum sensor
+     *  @throw ReceiverControlEx
+     */
+    void setVacuumSensorOff() throw (ReceiverControlEx);
+
+
+    /** Is the vacuum sensor ON?
+     *  @return true if the vacuum sensor is ON 
+     *  @throw ReceiverControlEx
+     */
+    bool isVacuumSensorOn() throw (ReceiverControlEx);
+
+
+    /** Set to ON the vacuum pump
+     *  @throw ReceiverControlEx
+     */
+    void setVacuumPumpOn() throw (ReceiverControlEx);
+
+
+    /** Set to OFF the vacuum pump
+     *  @throw ReceiverControlEx
+     */
+    void setVacuumPumpOff() throw (ReceiverControlEx);
+
+
+    /** Is the vacuum pump ON?
+     *  @return true if the vacuum pump is ON
+     *  @throw ReceiverControlEx
+     */
+    bool isVacuumPumpOn() throw (ReceiverControlEx);
+
+
+    /** Set to ON the vacuum valve
+     *  @throw ReceiverControlEx
+     */
+    void setVacuumValveOn() throw (ReceiverControlEx);
+
+
+    /** Set to OFF the vacuum valve
+     *  @throw ReceiverControlEx
+     */
+    void setVacuumValveOff() throw (ReceiverControlEx);
+
+
+    /** Is the vacuum valve ON?
+     *  @return true if the vacuum valve is ON
+     *  @throw ReceiverControlEx
+     */
+    bool isVacuumValveOn() throw (ReceiverControlEx);
+
+
+    /** Is the remote command enable?
+     *  @return true if the remote command is enable
+     *  @throw ReceiverControlEx
+     */
+    bool isRemoteOn() throw (ReceiverControlEx);
+
+
+    /** Select the first local oscillator (LO1)
+     *  @throw ReceiverControlEx
+     */
+    void selectLO1() throw (ReceiverControlEx);
+
+
+    /** Is LO1 selected?
+     *  @return true if the first local oscillator (LO1) is selected
+     *  @throw ReceiverControlEx
+     */
+    bool isLO1Selected() throw (ReceiverControlEx);
+
+
+    /** Select the second local oscillator (LO2)
+     *  @throw ReceiverControlEx
+     */
+    void selectLO2() throw (ReceiverControlEx);
+
+
+    /** Is LO2 selected?
+     *  @return true if the second local oscillator (LO2) is selected
+     *  @throw ReceiverControlEx
+     */
+    bool isLO2Selected() throw (ReceiverControlEx);
 
     
     /** return the FetValues (VDL, IDL, VGR, VDR, IDR and VGR) 

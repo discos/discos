@@ -30,7 +30,7 @@ private:
 
 /** 
  * This class implements the protocol to comunicate via TCP socket to the micro controller board
- * designed in Medicina (BO, Italy) by Franco Fiocchi <f.fiocchi@ira.inaf.it>.
+ * designed in Medicina (BO, Italy) by Franco Fiocchi <f.fiocchi@ira.inaf.it>. The library is thread safe.
  * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>,
  * INAF, Osservatorio Astronomico di Cagliari
  */

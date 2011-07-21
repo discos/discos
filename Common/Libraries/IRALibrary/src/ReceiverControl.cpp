@@ -254,6 +254,226 @@ bool ReceiverControl::isCoolHeadOn() throw (ReceiverControlEx)
 }
 
 
+void ReceiverControl::setVacuumSensorOn() throw (ReceiverControlEx) 
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_04,    // Port Number 04
+                0x01  // The value to set: 0x01 to set the vacuum sensor to ON
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setVacuumSensorOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::setVacuumSensorOff() throw (ReceiverControlEx) 
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_04,    // Port Number 04
+                0x00  // The value to set: 0x00 to set the vacuum sensor to OFF
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setVacuumSensorOff().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isVacuumSensorOn() throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_04     // Port Number 04
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isVacuumSensorOn(): wrong number of parameters.");
+
+        return parameters[0] == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isVacuumSensorOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::setVacuumPumpOn() throw (ReceiverControlEx) 
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_05,    // Port Number 05
+                0x01  // The value to set: 0x01 to set the vacuum pump to ON
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setVacuumPumpOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::setVacuumPumpOff() throw (ReceiverControlEx) 
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_05,    // Port Number 05
+                0x00  // The value to set: 0x00 to set the vacuum pump to OFF
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setVacuumPumpOff().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isVacuumPumpOn() throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_05     // Port Number 05
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isVacuumPumpOn(): wrong number of parameters.");
+
+        return parameters[0] == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isVacuumPumpOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::setVacuumValveOn() throw (ReceiverControlEx) 
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_07,    // Port Number 07
+                0x01  // The value to set: 0x01 opens the valve immediately
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setVacuumValveOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::setVacuumValveOff() throw (ReceiverControlEx) 
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_07,    // Port Number 07
+                0x00  // The value to set: 0x00 closes the valve
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setVacuumValveOff().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isVacuumValveOn() throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_07     // Port Number 07
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isVacuumValveOn(): wrong number of parameters.");
+
+        return parameters[0] == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isVacuumValveOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isRemoteOn() throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_26     // Port Number 26
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isRemoteOn(): wrong number of parameters.");
+
+        return parameters[0] == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isRemoteOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
 FetValues ReceiverControl::lna(
         unsigned short feed_number, 
         unsigned short stage_number,
@@ -265,7 +485,7 @@ FetValues ReceiverControl::lna(
     std::string vd_selector;               // A03: it allows to select the value requested for a given stadium
     std::string id_selector;               // A03: it allows to select the value requested for a given stadium
     std::string vg_selector;               // A03: it allows to select the value requested for a given stadium
-    size_t FEED_LIDX, FEED_RIDX;   // Indexes of the feed channels in the AD24 port, for a given colon
+    size_t FEED_LIDX, FEED_RIDX;           // Indexes of the feed channels in the AD24 port, for a given colon
     
     FetValues values;
 
@@ -369,16 +589,15 @@ FetValues ReceiverControl::lna(
     std::bitset<8> id_request(colon_selector + id_selector);
     std::bitset<8> vg_request(colon_selector + vg_selector);
 
-
     try {
 
         makeRequest(
                 m_lna_board_ptr,                           // Pointer to the LNA board socket
                 MCB_CMD_SET_DATA,                          // Command to send
                 5,                                         // Number of parameters
-                MCB_CMD_DATA_TYPE_U16,                     // Data type: unsigned 8 bit
+                MCB_CMD_DATA_TYPE_U16,                     // Data type: unsigned 16 bit
                 MCB_PORT_TYPE_DIO,                         // Port type: Digital IO
-                MCB_PORT_NUMBER_00_15,                     // Port Number from 00 to 07
+                MCB_PORT_NUMBER_00_15,                     // Port Number from 00 to 15
                 0x00,                                      // LNA ON
                 static_cast<BYTE>(vd_request.to_ulong())   // Value to set                   
         );
@@ -408,9 +627,9 @@ FetValues ReceiverControl::lna(
                 m_lna_board_ptr,                           // Pointer to the LNA board
                 MCB_CMD_SET_DATA,                          // Command to send
                 5,                                         // Number of parameters
-                MCB_CMD_DATA_TYPE_U16,                     // Data type: unsigned 8 bit
+                MCB_CMD_DATA_TYPE_U16,                     // Data type: unsigned 16 bit
                 MCB_PORT_TYPE_DIO,                         // Port type: Digital IO
-                MCB_PORT_NUMBER_00_15,                     // Port Number from 00 to 07
+                MCB_PORT_NUMBER_00_15,                     // Port Number from 00 to 15
                 0x00,                                      // LNA ON
                 static_cast<BYTE>(id_request.to_ulong())   // Value to set                   
         );
@@ -440,9 +659,9 @@ FetValues ReceiverControl::lna(
                 m_lna_board_ptr,                           // Pointer to the LNA board
                 MCB_CMD_SET_DATA,                          // Command to send
                 5,                                         // Number of parameters
-                MCB_CMD_DATA_TYPE_U16,                     // Data type: unsigned 8 bit
+                MCB_CMD_DATA_TYPE_U16,                     // Data type: unsigned 16 bit
                 MCB_PORT_TYPE_DIO,                         // Port type: Digital IO
-                MCB_PORT_NUMBER_00_15,                     // Port Number from 00 to 07
+                MCB_PORT_NUMBER_00_15,                     // Port Number from 00 to 15 
                 0x00,                                      // LNA ON
                 static_cast<BYTE>(vg_request.to_ulong())   // Value to set                   
         );
@@ -450,7 +669,7 @@ FetValues ReceiverControl::lna(
         usleep(GUARD_TIME);
 
         parameters = makeRequest(
-                m_lna_board_ptr,                           // Pointer to the LNA board
+                m_lna_board_ptr,        // Pointer to the LNA board
                 MCB_CMD_GET_DATA,       // Command to send
                 3,                      // Number of parameters
                 MCB_CMD_DATA_TYPE_F32,  // Data type: 32 bit floating point
@@ -477,7 +696,7 @@ FetValues ReceiverControl::lna(
 }
 
 
-std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, BYTE command, size_t len, ...) throw(MicroControllerBoardEx)
+std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, BYTE command, size_t len, ...) throw (MicroControllerBoardEx)
 {
     va_list parameters; // A place to store the list of arguments
     va_start(parameters, static_cast<BYTE>(len)); // Initializing arguments to store all values after len
