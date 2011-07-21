@@ -8,6 +8,28 @@ std::string any2string(T i) {
     return buffer.str();
 }
 
+/************************ CONVERSION FUNCTIONS **************************/
+// Convert the voltage value of the vacuum to mbar
+double voltage2mbar(double voltage) { return(pow(10, 1.5 * voltage - 12)); }
+
+// Convert the voltage value of the temperatures to Kelvin
+double voltage2Kelvin(double voltage) 
+{ 
+    return voltage < 1.12 ? \
+        (660.549422889947 * pow(voltage, 6)) - (2552.334255456860 * pow(voltage, 5)) + (3742.529989384570 * pow(voltage, 4)) \
+        - (2672.656926956470 * pow(voltage, 3)) + (947.905578508975 * pow(voltage, 2)) - 558.351002849576 * voltage + 519.607622398508 \
+                 : \
+        (865.747519105672 * pow(voltage, 6)) - (7271.931957100480 * pow(voltage, 5)) + (24930.666241800500 * pow(voltage, 4)) \
+        - (44623.988512320400 * pow(voltage, 3)) + (43962.922216886600 * pow(voltage, 2)) - 22642.245121997700 * voltage + 4808.631312836750;
+}
+
+// Convert the ID voltage value to the mA value
+double currentConverter(double voltage) { return(10 * voltage); }
+
+// Convert the VD and VG voltage values using a right scale factor
+double voltageConverter(double voltage) { return(voltage); }
+/************************** END CONVERSIONS ****************************/
+
 
 int main(int argc, char *argv[])
 {
@@ -60,9 +82,9 @@ int main(int argc, char *argv[])
         cout << "It the noise mark generator ON? " << (rc.isCalibrationOn() == true ? "yes" : "no") << endl;
         cout << "Done!\n" << endl;
 
-        // Test the vacuum()
+        // Test the vacuum() voltage value, without conversion
         cout << "Test vacuum()" << endl;
-        cout << "Vacuum value: " << rc.vacuum() << endl;
+        cout << "Vacuum value before conversion [Volt]: " << rc.vacuum() << endl;
         cout << "Done!\n" << endl;
 
         // Test the setReliableCommOn()
@@ -77,17 +99,17 @@ int main(int argc, char *argv[])
 
         // Test the vacuum()
         cout << "Test vacuum() with a reliable communication" << endl;
-        cout << "Vacuum value: " << rc.vacuum() << endl;
+        cout << "Vacuum value: " << rc.vacuum(voltage2mbar) << endl;
         cout << "Done!\n" << endl;
 
         // Test the lowTemperature()
         cout << "Test lowTemperature() with a reliable communication" << endl;
-        cout << "Low Cryogenic Temperature value: " << rc.lowTemperature() << endl;
+        cout << "Low Cryogenic Temperature value: " << rc.lowTemperature(voltage2Kelvin) << endl;
         cout << "Done!\n" << endl;
 
         // Test the highTemperature()
         cout << "Test highTemperature() with a reliable communication" << endl;
-        cout << "High Cryogenic Temperature value: " << rc.highTemperature() << endl;
+        cout << "High Cryogenic Temperature value: " << rc.highTemperature(voltage2Kelvin) << endl;
         cout << "Done!\n" << endl;
 
         // Test the isCoolHeadOn()
@@ -117,13 +139,13 @@ int main(int argc, char *argv[])
 
         // Test lna()
         cout << "Test lna() with a reliable communication" << endl;
-        FetValues values = rc.lna(0, 4);
+        FetValues values = rc.lna(0, 4, currentConverter, voltageConverter);
         cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
         cout << ", VGL=" << values.VGL << ")" << endl;
         cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
         cout << ", VGR=" << values.VGR << ")" << endl;
         cout << endl;
-        values = rc.lna(1, 2);
+        values = rc.lna(1, 2, currentConverter);
         cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
         cout << ", VGL=" << values.VGL << ")" << endl;
         cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;

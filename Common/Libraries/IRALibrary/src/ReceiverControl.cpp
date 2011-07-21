@@ -1,5 +1,4 @@
 #include "ReceiverControl.h"
-#include "ReceiverConversions.def"
 
 
 ReceiverControl::ReceiverControl(
@@ -113,12 +112,12 @@ bool ReceiverControl::isCalibrationOn() throw (ReceiverControlEx)
 }
 
 
-double ReceiverControl::vacuum() throw (ReceiverControlEx) 
+double ReceiverControl::vacuum(double (*converter)(double voltage)) throw (ReceiverControlEx) 
 {
     try {
 
         std::vector<BYTE> parameters = makeRequest(
-                m_dewar_board_ptr,     // Pointer to the dewar board
+                m_dewar_board_ptr,      // Pointer to the dewar board
                 MCB_CMD_GET_DATA,       // Command to send
                 3,                      // Number of parameters
                 MCB_CMD_DATA_TYPE_F32,  // Data type: 32 bit floating point
@@ -128,7 +127,8 @@ double ReceiverControl::vacuum() throw (ReceiverControlEx)
 
         const size_t VCM_SENSOR_RAW_IDX = 2; // Index of the vacuum in the AD24 port
         // Return the vacuum value in mbar for a given voltage VALUE
-        return GET_VACUUM(get_value(parameters, VCM_SENSOR_RAW_IDX));
+        return converter != NULL ? converter(get_value(parameters, VCM_SENSOR_RAW_IDX)) : \
+                            get_value(parameters, VCM_SENSOR_RAW_IDX);
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error getting the vacuum.\n";
@@ -137,7 +137,7 @@ double ReceiverControl::vacuum() throw (ReceiverControlEx)
 }
 
 
-double ReceiverControl::lowTemperature() throw (ReceiverControlEx) 
+double ReceiverControl::lowTemperature(double (*converter)(double voltage)) throw (ReceiverControlEx) 
 {
     try {
 
@@ -151,10 +151,10 @@ double ReceiverControl::lowTemperature() throw (ReceiverControlEx)
         );
 
         const size_t TEMP_CRYO_1_IDX = 0; // Index of the low cryogenic temperature in the AD24 port
-        // Return the temperature value in Kelvin for a given voltage VALUE
-        // TODO: REMOVE
-        cout << get_value(parameters, TEMP_CRYO_1_IDX) << endl;
-        return GET_LOW_TEMPERATURE(get_value(parameters, TEMP_CRYO_1_IDX));
+        // Return the temperature value in Kelvin for a given voltage VALUE if converter != NULL, the
+        // value in voltage (before the conversion) otherwise.
+        return converter != NULL ? converter(get_value(parameters, TEMP_CRYO_1_IDX)) : \
+                            get_value(parameters, TEMP_CRYO_1_IDX);
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error getting the low cryogenic temperature.\n";
@@ -163,7 +163,7 @@ double ReceiverControl::lowTemperature() throw (ReceiverControlEx)
 }
 
 
-double ReceiverControl::highTemperature() throw (ReceiverControlEx) 
+double ReceiverControl::highTemperature(double (*converter)(double voltage)) throw (ReceiverControlEx) 
 {
     try {
 
@@ -177,10 +177,10 @@ double ReceiverControl::highTemperature() throw (ReceiverControlEx)
         );
 
         const size_t TEMP_CRYO_2_IDX = 1; // Index of the high cryogenic temperature in the AD24 port
-        // Return the temperature value in Kelvin for a given voltage VALUE
-        // TODO: REMOVE
-        cout << get_value(parameters, TEMP_CRYO_2_IDX) << endl;
-        return GET_LOW_TEMPERATURE(get_value(parameters, TEMP_CRYO_2_IDX));
+        // Return the temperature value in Kelvin for a given voltage VALUE if converter != NULL, the
+        // value in voltage (before the conversion) otherwise.
+        return converter != NULL ? converter(get_value(parameters, TEMP_CRYO_2_IDX)) : \
+                            get_value(parameters, TEMP_CRYO_2_IDX);
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error getting the low cryogenic temperature.\n";
@@ -254,7 +254,12 @@ bool ReceiverControl::isCoolHeadOn() throw (ReceiverControlEx)
 }
 
 
-FetValues ReceiverControl::lna(unsigned short feed_number, unsigned short stage_number) throw (ReceiverControlEx)
+FetValues ReceiverControl::lna(
+        unsigned short feed_number, 
+        unsigned short stage_number,
+        double (*currentConverter)(double voltage),
+        double (*voltageConverter)(double voltage)
+        ) throw (ReceiverControlEx)
 {
     std::string colon_selector;            // EN03: the signal that addresses the colon multiplexing of AD24
     std::string vd_selector;               // A03: it allows to select the value requested for a given stadium
@@ -389,8 +394,15 @@ FetValues ReceiverControl::lna(unsigned short feed_number, unsigned short stage_
                 MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
         );
 
-        values.VDL = GET_VD(get_value(parameters, FEED_LIDX));
-        values.VDR = GET_VD(get_value(parameters, FEED_RIDX));
+        try {
+            values.VDL = voltageConverter != NULL ? voltageConverter(get_value(parameters, FEED_LIDX)) : \
+                                get_value(parameters, FEED_LIDX);
+            values.VDR = voltageConverter != NULL ? voltageConverter(get_value(parameters, FEED_RIDX)) : \
+                                get_value(parameters, FEED_RIDX);
+        }
+        catch(...) {
+            throw ReceiverControlEx("ReceiverControl error: unexpected exception occurs performing the VD conversion.");
+        }
 
         makeRequest(
                 m_lna_board_ptr,                           // Pointer to the LNA board
@@ -414,8 +426,15 @@ FetValues ReceiverControl::lna(unsigned short feed_number, unsigned short stage_
                 MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
         );
 
-        values.IDL = GET_ID(get_value(parameters, FEED_LIDX));
-        values.IDR = GET_ID(get_value(parameters, FEED_RIDX));
+        try {
+            values.IDL = currentConverter != NULL ? currentConverter(get_value(parameters, FEED_LIDX)) : \
+                                get_value(parameters, FEED_LIDX);
+            values.IDR = currentConverter != NULL ? currentConverter(get_value(parameters, FEED_RIDX)) : \
+                                get_value(parameters, FEED_RIDX);
+        }
+        catch(...) {
+            throw ReceiverControlEx("ReceiverControl error: unexpected exception occurs performing the ID conversion.");
+        }
 
         makeRequest(
                 m_lna_board_ptr,                           // Pointer to the LNA board
@@ -439,14 +458,16 @@ FetValues ReceiverControl::lna(unsigned short feed_number, unsigned short stage_
                 MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
         );
 
-        values.VGL = GET_VG(get_value(parameters, FEED_LIDX));
-        values.VGR = GET_VG(get_value(parameters, FEED_RIDX));
+        try {
+            values.VGL = voltageConverter != NULL ? voltageConverter(get_value(parameters, FEED_LIDX)) : \
+                                get_value(parameters, FEED_LIDX);
+            values.VGR = voltageConverter != NULL ? voltageConverter(get_value(parameters, FEED_RIDX)) : \
+                                get_value(parameters, FEED_RIDX);
+        }
+        catch(...) {
+            throw ReceiverControlEx("ReceiverControl error: unexpected exception occurs performing the VG conversion.");
+        }
 
-
-        // const size_t VCM_SENSOR_RAW_IDX = 2; // Index of the vacuum in the AD24 port
-        // Return the vacuum value in mbar for a given voltage VALUE
-        // TODO: Make a conversion!
-        // return GET_VACUUM(get_value(parameters, VCM_SENSOR_RAW_IDX));
         return values;
     }
     catch(MicroControllerBoardEx& ex) {

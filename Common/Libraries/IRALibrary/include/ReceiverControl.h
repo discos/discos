@@ -56,9 +56,9 @@ struct FetValues {
  * following operations:</p>
  * <ul>
  *     <li>unsigned short numberOfFeeds(): return the number of feeds</li>
- *     <li>doube vacuum(): return the vacuum value inside the dewar</li>
- *     <li>double lowTemperature(): return the low cryogenic temperature value</li>
- *     <li>double highTemperature(): return the high cryogenic temperature value</li>
+ *     <li>double vacuum(double (*converter)(double)): return the vacuum value inside the dewar</li>
+ *     <li>double lowTemperature(double (*converter)(double)): return the low cryogenic temperature value</li>
+ *     <li>double highTemperature(double (*converter)(double)): return the high cryogenic temperature value</li>
  *     <li>void setCoolHeadOn(): set to ON the cool head</li>
  *     <li>void setCoolHeadOff(): set to OFF the cool head</li>
  *     <li>bool isCoolHeadOn(): return true if the cool head is ON</li>
@@ -169,30 +169,39 @@ public:
 
 
     /** Return the vacuum value inside the dewar in mbar
-     *  The formula to transorm from Volt to mbar is the following:
      *
-     *      P[mbar] = 10 ** (1.5V - 12)
-     *
-     *  @return the vacuum inside the dewar in mbar
+     *  @param converter pointer to the function that performs the conversion from
+     *  voltage to vacumm unit [mbar]; default value is NULL, and in this case the value
+     *  returned by vacuum is the voltage value (the value before conversion).
+     *  @return the vacuum inside the dewar in mbar if converter != NULL, the value in voltage
+     *  (before conversion) otherwise.
      *  @throw ReceiverControlEx
      */
-    double vacuum() throw (ReceiverControlEx);
+    double vacuum(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
 
 
     /** Return the low cryogenic temperature value
      *
-     *  @return the low cryogenic temperature value
+     *  @param converter pointer to the function that performs the conversion from
+     *  voltage to Kelvin; default value is NULL, and in this case the value
+     *  returned by lowTemperature is the voltage value (the value before conversion).
+     *  @return the low cryogenic temperature in Kelvin if converter != NULL, the value in voltage
+     *  (before conversion) otherwise.
      *  @throw ReceiverControlEx
      */
-    double lowTemperature() throw (ReceiverControlEx);
+    double lowTemperature(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
 
 
     /** Return the high cryogenic temperature value
      *
-     *  @return the high cryogenic temperature value
+     *  @param converter pointer to the function that performs the conversion from
+     *  voltage to Kelvin; default value is NULL, and in this case the value
+     *  returned by highTemperature is the voltage value (the value before conversion).
+     *  @return the high cryogenic temperature in Kelvin if converter != NULL, the value in voltage
+     *  (before conversion) otherwise.
      *  @throw ReceiverControlEx
      */
-    double highTemperature() throw (ReceiverControlEx);
+    double highTemperature(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
 
     
     /** Set to ON the cool head 
@@ -219,10 +228,25 @@ public:
      *  that the value is referred to the left channel, the R if for the right one.
      *  @param feed_number the ID code of the feed (from 0 to 15)
      *  @param stage_number the stage number (from 1 to 5)
-     *  @return the FetValues, a struct of three double members: VD [V], ID [mA] and VG [V]
+     *  @param currentConverter pointer to the function that performs the conversion from
+     *  voltage to mA; default value is NULL, and in this case the value
+     *  of ID is the voltage value (the value before conversion).
+     *  @param voltageConverter pointer to the function that performs the conversion from
+     *  voltage to voltage; default value is NULL, and in this case the values
+     *  of VD and VG are the voltage values before the conversion.
+     *  @return the low cryogenic temperature in Kelvin if converter != NULL, the value in voltage
+     *  (before conversion) otherwise.
+     *  @return the FetValues, a struct of three double members: VD [V], ID [mA] and VG [V] after
+     *  the conversion if the function pointers are not NULL, the values before conversion (voltage)
+     *  if the pointers are NULL.
      *  @throw ReceiverControlEx
      */
-    FetValues lna(unsigned short feed_number, unsigned short stage_number) throw (ReceiverControlEx);
+    FetValues lna(
+            unsigned short feed_number, 
+            unsigned short stage_number,
+            double (*currentConverter)(double voltage) = NULL,
+            double (*voltageConverter)(double voltage) = NULL
+    ) throw (ReceiverControlEx);
 
 
 private:
