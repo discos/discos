@@ -222,6 +222,82 @@ int main(int argc, char *argv[])
         cout << "It the remote command enable? " << (rc.isRemoteOn() == true ? "yes" : "no") << endl;
         cout << "Done!\n" << endl;
 
+        // Test the selectLO1()
+        cout << "Test selectLO1() with a reliable communication" << endl;
+        rc.selectLO1();
+        cout << "Done!\n" << endl;
+
+        // Test the isLO1Selected()
+        cout << "Test isLO1Selected() with a reliable communication" << endl;
+        cout << "It the LO1 selected? " << (rc.isLO1Selected() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the isLO2Selected()
+        cout << "Test isLO2Selected() with a reliable communication" << endl;
+        cout << "It the LO2 selected? " << (rc.isLO2Selected() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the selectLO2()
+        cout << "Test selectLO2() with a reliable communication" << endl;
+        rc.selectLO2();
+        cout << "Done!\n" << endl;
+
+        // Test the isLO2Selected()
+        cout << "Test isLO2Selected() with a reliable communication" << endl;
+        cout << "It the LO2 selected? " << (rc.isLO2Selected() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the isLO1Selected()
+        cout << "Test isLO1Selected() with a reliable communication" << endl;
+        cout << "It the LO1 selected? " << (rc.isLO1Selected() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the isLO2Locked()
+        cout << "Test isLO2Locked() with a reliable communication" << endl;
+        cout << "It the LO2 locked? " << (rc.isLO2Locked() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the setSingleDishMode()
+        cout << "Test setSingleDishMode() with a reliable communication" << endl;
+        rc.setSingleDishMode();
+        cout << "Done!\n" << endl;
+
+        // Test the isSingleDishModeOn()
+        cout << "Test isSingleDishModeOn() with a reliable communication" << endl;
+        cout << "It the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the isVLBIModeOn()
+        cout << "Test isVLBIModeOn() with a reliable communication" << endl;
+        cout << "It the VLBI mode active? " << (rc.isVLBIModeOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the setVLBIMode()
+        cout << "Test setVLBIMode() with a reliable communication" << endl;
+        rc.setVLBIMode();
+        cout << "Done!\n" << endl;
+
+        // Test the isVLBIModeOn()
+        cout << "Test isVLBIModeOn() with a reliable communication" << endl;
+        cout << "It the VLBI mode active? " << (rc.isVLBIModeOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the isSingleDishModeOn()
+        cout << "Test isSingleDishModeOn() with a reliable communication" << endl;
+        cout << "It the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the isLNABoardConnectionOK()
+        cout << "Test isLNABoardConnectionOK() with a reliable communication" << endl;
+        cout << "It the connection to the LNA board OK? " << \
+             (rc.isLNABoardConnectionOK() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the isDewarBoardConnectionOK()
+        cout << "Test isDewarBoardConnectionOK() with a reliable communication" << endl;
+        cout << "It the connection to the dewar board OK? " << \
+             (rc.isDewarBoardConnectionOK() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
     }
     catch(ReceiverControlEx& ex) {
         cout << ex.what() << endl;

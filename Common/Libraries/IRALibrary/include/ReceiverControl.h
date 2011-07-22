@@ -73,21 +73,26 @@ struct FetValues {
  *     <li>bool isVacuumValveOn(): return true if the vacuum valve is opened</li>
  *     <li>void setCalibrationOn(): set the noise mark to ON</li>
  *     <li>void setCalibrationOff(): set the noise mark to OFF</li>
- *     <li>bool isCalibrationOn(): is the noise mark generator sets to ON?</li>
+ *     <li>bool isCalibrationOn(): is the noise mark generator set to ON?</li>
  *     <li>bool isRemoteOn(): return true if the remote command is enable</li>
- **     <li>void selectLO1(): select the Local Oscillator 1</li>
- **     <li>bool isLO1Select(): return true if the first Local Oscillator (LO1) is selected</li>
- **     <li>void selectLO2(): select the Local Oscillator 2</li>
- **     <li>bool isLO2Select(): return true if the second Local Oscillator (LO2) is selected</li>
+ *     <li>void selectLO1(): select the Local Oscillator 1</li>
+ *     <li>bool isLO1Selected(): return true if the first Local Oscillator (LO1) is selected</li>
+ *     <li>void selectLO2(): select the Local Oscillator 2</li>
+ *     <li>bool isLO2Selected(): return true if the second Local Oscillator (LO2) is selected</li>
+ *     <li>bool isLO2Locked(): return true if the second Local Oscillator (LO2) is locked</li>
+ *     <li>void setSingleDishMode(): set the single dish mode to ON</li>
+ *     <li>bool isSingleDishModeOn(): is the single dish mode set to ON?</li>
+ *     <li>void setVLBIMode(): set the VLBI mode</li>
+ *     <li>bool isVLBIModeOn(): is the VLBI mode set to ON?</li>
  *     <li>void setReliableCommOn(): set the reliable communication to/from the 
  *     board to ON</li>
  *     <li>void setReliableCommOff(): set the reliable communication to/from the 
  *     board to OFF</li>
  *     <li>bool isReliableCommOn(): return true if the communication to the
- *     board is sets to be reliable</li>
- **     <li>bool isLNABoardConnectionOK(): return true if the connection to the LNA
+ *     board is set to be reliable</li>
+ *     <li>bool isLNABoardConnectionOK(): return true if the connection to the LNA
  *     board is OK</li>
- **     <li>bool isDewarBoardConnectionOK(): return true if the connection to the 
+ *     <li>bool isDewarBoardConnectionOK(): return true if the connection to the 
  *     dewar board is OK</li>
  *     <li>FetValues lna(unsigned short feed_number, unsigned short stage_number): 
  *     return the FetValues (VDL, IDL, VGL, VDR, IDR and VGR) of the LNA of the feed `feed_number`, 
@@ -148,7 +153,7 @@ public:
     void setCalibrationOff() throw (ReceiverControlEx);
 
 
-    /** Is the noise mark generator sets to ON?
+    /** Is the noise mark generator set to ON?
      *  @return true if the noise mark generator is set to ON
      *  @throw ReceiverControlEx
      */
@@ -163,7 +168,7 @@ public:
     void setReliableCommOff() { m_reliable_comm = false; }
 
 
-    /** return true if the communication to the board is sets to be reliable */
+    /** return true if the communication to the board is set to be reliable */
     bool isReliableCommOn() { return m_reliable_comm; }
 
 
@@ -311,6 +316,39 @@ public:
      */
     bool isLO2Selected() throw (ReceiverControlEx);
 
+
+    /** Is LO2 locked?
+     *  @return true if the second local oscillator (LO2) is locked
+     *  @throw ReceiverControlEx
+     */
+    bool isLO2Locked() throw (ReceiverControlEx);
+
+
+    /** Set the single dish mode to ON. The VLBI mode will be turn OFF
+     *  @throw ReceiverControlEx
+     */
+    void setSingleDishMode() throw (ReceiverControlEx);
+
+
+    /** Is the single dish mode set to ON?
+     *  @return true if the single dish mode is active
+     *  @throw ReceiverControlEx
+     */
+    bool isSingleDishModeOn() throw (ReceiverControlEx);
+
+
+    /** Set the VLBI mode to ON. The SD mode will be turn OFF
+     *  @throw ReceiverControlEx
+     */
+    void setVLBIMode() throw (ReceiverControlEx);
+
+
+    /** Is the VLBI mode set to ON?
+     *  @return true if the VLBI mode is active
+     *  @throw ReceiverControlEx
+     */
+    bool isVLBIModeOn() throw (ReceiverControlEx);
+
     
     /** return the FetValues (VDL, IDL, VGR, VDR, IDR and VGR) 
      *  of the LNA of the feed `feed_number` and stage `stage_number`. The letter L means
@@ -336,6 +374,18 @@ public:
             double (*currentConverter)(double voltage) = NULL,
             double (*voltageConverter)(double voltage) = NULL
     ) throw (ReceiverControlEx);
+
+
+    /** Is the connection to the LNA board OK?
+     *  @return true if the connection to the LNA board is OK
+     */
+    bool isLNABoardConnectionOK();
+
+
+    /** Is the connection to the dewar board OK?
+     *  @return true if the connection to the dewar board is OK
+     */
+    bool isDewarBoardConnectionOK();
 
 
 private:

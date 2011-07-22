@@ -18,7 +18,6 @@ ReceiverControl::ReceiverControl(
     m_dewar_board_ptr(NULL),
     m_lna_board_ptr(NULL)
 {
-
     try {
         m_dewar_board_ptr = new MicroControllerBoard(dewar_ip, dewar_port, dewar_madd, dewar_sadd);
         m_dewar_board_ptr->openConnection();
@@ -471,6 +470,245 @@ bool ReceiverControl::isRemoteOn() throw (ReceiverControlEx)
         std::string error_msg = "ReceiverControl: error performing isRemoteOn().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
+}
+
+
+void ReceiverControl::selectLO1() throw (ReceiverControlEx) 
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_00,    // Port Number 00
+                0x00  // The value to set: 0x00 selects the LO1
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing selectLO1().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isLO1Selected() throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_16     // Port Number 16
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isLO1Selected(): wrong number of parameters.");
+
+        return parameters[0] == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isLO1Selected().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::selectLO2() throw (ReceiverControlEx) 
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_00,    // Port Number 00
+                0x01  // The value to set: 0x01 selects the LO2
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing selectLO2().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isLO2Selected() throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_17     // Port Number 17
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isLO2Selected(): wrong number of parameters.");
+
+        return parameters[0] == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isLO2Selected().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isLO2Locked() throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_18     // Port Number 18
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isLO2Locked(): wrong number of parameters.");
+
+        return parameters[0] == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isLO2Locked().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::setSingleDishMode() throw (ReceiverControlEx) 
+{
+    try {
+        // Turn OFF the VLBI mode on port number 14
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_14,    // Port Number 14
+                0x01  // The value to set: 0x01 to set the VLBI mode to OFF
+        );
+        // Turn ON the single dish mode on port number 13
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_13,    // Port Number 13
+                0x00  // The value to set: 0x00 to set the single dish mode to ON
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setSigleDishOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isSingleDishModeOn() throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_29     // Port Number 29 (IN13)
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isSingleDishModeOn(): wrong number of parameters.");
+
+        return parameters[0] == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isSingleDishModeOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::setVLBIMode() throw (ReceiverControlEx) 
+{
+    try {
+        // Turn OFF the single dish mode on port number 13
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_14,    // Port Number 14
+                0x01  // The value to set: 0x01 to set the single dish mode to OFF
+        );
+        // Turn ON the VLBI mode on port number 14
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_14,    // Port Number 14
+                0x00  // The value to set: 0x00 to set VLBI mode to ON
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setVLBIMode().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isVLBIModeOn() throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_30     // Port Number 30 (IN14)
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isVLBIModeOn(): wrong number of parameters.");
+
+        return parameters[0] == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isVLBIModeOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isLNABoardConnectionOK(void)
+{
+    return (m_lna_board_ptr->getConnectionStatus() == CSocket::NOTCREATED) ? false : true;
+}
+
+
+bool ReceiverControl::isDewarBoardConnectionOK(void)
+{
+    return (m_dewar_board_ptr->getConnectionStatus() == CSocket::NOTCREATED) ? false : true;
 }
 
 
