@@ -10,7 +10,7 @@ MAKE_PDF = ON
 CDB_SCHEMAS = Feeds Receivers
 
 # IDL Files and flags
-IDL_FILES = ReceiversDefinitions CommonReceiverInterface ReceiversBoss GenericReceiver
+IDL_FILES = ReceiversDefinitions CommonReceiverInterface ReceiversBoss GenericReceiver LocalOscillatorInterface
 
 # list of all possible C-sources (used to create automatic dependencies)
 CSOURCENAMES = \
