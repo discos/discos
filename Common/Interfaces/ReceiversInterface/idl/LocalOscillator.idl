@@ -1,0 +1,68 @@
+#ifndef __LOCALOSCILLATOR_IDL__
+#define __LOCALOSCILLATOR_IDL__
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include <ReceiversErrors.idl>
+
+#pragma prefix "alma"
+/** 
+* Local oscillator component.
+* @author <a href=mailto:spoppi@oa-cagliari.inaf.it>Sergio Poppi</a>
+*/
+
+module Receivers { 
+	/**
+	<h2>Local Oscillator Interface </h2>
+	@
+	*/
+
+
+	interface LocalOscillator: ACS::CharacteristicComponent {
+	/**
+
+	 LO frequency signal
+
+
+	*/
+        readonly attribute ACS::ROdouble frequency;
+	/**LO signal power	*/
+        readonly attribute ACS::ROdouble power;
+	/** check if actual values are equal to set ones */
+
+        readonly attribute ACS::ROlong isLocked;
+	/**
+	 set the LO parameters 
+	 
+	 @param rf_power signal power
+	 @param rf_freq	 signal frequency
+
+	*/
+	
+	void set(in double rf_power, in double rf_freq);
+	/**
+	 get the LO parameters 
+	 
+	 @param rf_power signal power
+	 @param rf_freq	 signal frequency
+
+	*/
+
+	void get(out double rf_power, out double rf_freq); // to be corrected with ;
+	/**
+	Turn the signal on
+	
+	*/
+
+	void rfon();
+	/**
+	Turn the signal off
+	
+	*/
+	void rfoff();
+	};
+
+};
+
+
+#endif
