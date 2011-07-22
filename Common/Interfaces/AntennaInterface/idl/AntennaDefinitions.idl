@@ -1,0 +1,166 @@
+/******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
+* DO NOT EDIT
+* Automatically generated from ../idl/AntennaDefinitions.midl
+* on Tue Apr 26 17:21:35 2011
+*******************************************************************************/
+#ifndef _AntennaDefinitions_midl_
+#define _AntennaDefinitions_midl_
+#ifndef _ACS_PREPROCESSED_
+#define _ACS_PREPROCESSED_
+#endif
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+
+#pragma prefix "alma"
+module Antenna {
+
+
+
+
+ enum TSystemEquinox {
+  ANT_B1950,
+  ANT_J2000,
+  ANT_APPARENT
+ };
+
+
+
+
+
+ enum TCoordinateFrame {
+  ANT_EQUATORIAL,
+  ANT_HORIZONTAL,
+  ANT_GALACTIC
+ };
+
+
+ typedef sequence<TCoordinateFrame> TCoordinateFrameSeq; interface CBTCoordinateFrame : ACS::Callback { oneway void working(in TCoordinateFrame value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TCoordinateFrame value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTCoordinateFrame TCoordinateFrameCB; interface AlarmTCoordinateFrame : ACS::Callback { oneway void alarm_raised(in TCoordinateFrame value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TCoordinateFrame value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTCoordinateFrame TCoordinateFrameAlarm; interface PTCoordinateFrame: ACS::TypelessProperty { TCoordinateFrame get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TCoordinateFrameSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TCoordinateFrame default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TCoordinateFrameSeq allStates; };
+ interface ROTCoordinateFrame: PTCoordinateFrame{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TCoordinateFrameSeq alarm_on; readonly attribute TCoordinateFrameSeq alarm_off; };
+ interface RWTCoordinateFrame: PTCoordinateFrame { ACSErr::Completion set_sync(in TCoordinateFrame value); void set_async(in TCoordinateFrame value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TCoordinateFrame value);};
+
+
+
+
+
+ enum TGeneratorType {
+  ANT_SIDEREAL,
+  ANT_SUN,
+  ANT_MOON,
+  ANT_SATELLITE,
+  ANT_SOLARSYTEMBODY,
+  ANT_OTF,
+  ANT_NONE
+ };
+
+
+ typedef sequence<TGeneratorType> TGeneratorTypeSeq; interface CBTGeneratorType : ACS::Callback { oneway void working(in TGeneratorType value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TGeneratorType value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTGeneratorType TGeneratorTypeCB; interface AlarmTGeneratorType : ACS::Callback { oneway void alarm_raised(in TGeneratorType value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TGeneratorType value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTGeneratorType TGeneratorTypeAlarm; interface PTGeneratorType: ACS::TypelessProperty { TGeneratorType get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TGeneratorTypeSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TGeneratorType default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TGeneratorTypeSeq allStates; };
+ interface ROTGeneratorType: PTGeneratorType{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TGeneratorTypeSeq alarm_on; readonly attribute TGeneratorTypeSeq alarm_off; };
+ interface RWTGeneratorType: PTGeneratorType { ACSErr::Completion set_sync(in TGeneratorType value); void set_async(in TGeneratorType value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TGeneratorType value);};
+
+
+
+
+
+ enum TGeodeticModel {
+  GEOID_WGS84,
+  GEOID_GRS80,
+  GEOID_MERIT83,
+  GEOID_OSU91A,
+  GEOID_SOVIET85
+ };
+
+
+ typedef sequence<TGeodeticModel> TGeodeticModelSeq; interface CBTGeodeticModel : ACS::Callback { oneway void working(in TGeodeticModel value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TGeodeticModel value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTGeodeticModel TGeodeticModelCB; interface AlarmTGeodeticModel : ACS::Callback { oneway void alarm_raised(in TGeodeticModel value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TGeodeticModel value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTGeodeticModel TGeodeticModelAlarm; interface PTGeodeticModel: ACS::TypelessProperty { TGeodeticModel get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TGeodeticModelSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TGeodeticModel default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TGeodeticModelSeq allStates; };
+ interface ROTGeodeticModel: PTGeodeticModel{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TGeodeticModelSeq alarm_on; readonly attribute TGeodeticModelSeq alarm_off; };
+ interface RWTGeodeticModel: PTGeodeticModel { ACSErr::Completion set_sync(in TGeodeticModel value); void set_async(in TGeodeticModel value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TGeodeticModel value);};
+
+
+
+ enum TCommonModes {
+  ACU_STANDBY,
+  ACU_STOP,
+  ACU_PRESET,
+  ACU_PROGRAMTRACK,
+  ACU_RATE,
+  ACU_STOW,
+  ACU_UNSTOW,
+  ACU_UNKNOWN
+ };
+
+
+ typedef sequence<TCommonModes> TCommonModesSeq; interface CBTCommonModes : ACS::Callback { oneway void working(in TCommonModes value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TCommonModes value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTCommonModes TCommonModesCB; interface AlarmTCommonModes : ACS::Callback { oneway void alarm_raised(in TCommonModes value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TCommonModes value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTCommonModes TCommonModesAlarm; interface PTCommonModes: ACS::TypelessProperty { TCommonModes get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TCommonModesSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TCommonModes default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TCommonModesSeq allStates; };
+ interface ROTCommonModes: PTCommonModes{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TCommonModesSeq alarm_on; readonly attribute TCommonModesSeq alarm_off; };
+ interface RWTCommonModes: PTCommonModes { ACSErr::Completion set_sync(in TCommonModes value); void set_async(in TCommonModes value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TCommonModes value);};
+
+
+
+ enum TStatus {
+  ACU_NOTCNTD,
+  ACU_CNTDING,
+  ACU_CNTD,
+  ACU_BSY
+ };
+
+
+ typedef sequence<TStatus> TStatusSeq; interface CBTStatus : ACS::Callback { oneway void working(in TStatus value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TStatus value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTStatus TStatusCB; interface AlarmTStatus : ACS::Callback { oneway void alarm_raised(in TStatus value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TStatus value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTStatus TStatusAlarm; interface PTStatus: ACS::TypelessProperty { TStatus get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TStatusSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TStatus default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TStatusSeq allStates; };
+ interface ROTStatus: PTStatus{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TStatusSeq alarm_on; readonly attribute TStatusSeq alarm_off; };
+ interface RWTStatus: PTStatus { ACSErr::Completion set_sync(in TStatus value); void set_async(in TStatus value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TStatus value);};
+
+
+
+ enum TSections {
+  ACU_CW,
+  ACU_CCW,
+  ACU_NEUTRAL
+
+ };
+
+
+ typedef sequence<TSections> TSectionsSeq; interface CBTSections : ACS::Callback { oneway void working(in TSections value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TSections value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTSections TSectionsCB; interface AlarmTSections : ACS::Callback { oneway void alarm_raised(in TSections value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TSections value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTSections TSectionsAlarm; interface PTSections: ACS::TypelessProperty { TSections get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TSectionsSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TSections default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TSectionsSeq allStates; };
+ interface ROTSections: PTSections{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TSectionsSeq alarm_on; readonly attribute TSectionsSeq alarm_off; };
+ interface RWTSections: PTSections { ACSErr::Completion set_sync(in TSections value); void set_async(in TSections value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TSections value);};
+
+
+
+
+
+ enum TsubScanGeometry {
+  SUBSCAN_GREATCIRCLE,
+  SUBSCAN_CONSTLON,
+  SUBSCAN_CONSTLAT
+ };
+
+
+
+
+
+ enum TsubScanDescription {
+  SUBSCAN_STARTSTOP,
+  SUBSCAN_CENTER
+ };
+
+
+
+
+
+ enum TsubScanDirection {
+  SUBSCAN_INCREASE,
+  SUBSCAN_DECREASE
+ };
+
+
+};
+
+#endif

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: Scheduler.xsd,v 1.6 2010-09-14 10:25:17 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   22-12-2008  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:Scheduler:1.0"
+	xmlns="urn:schemas-cosylab-com:Scheduler:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+	
+	<xs:complexType name="SchedulerType">
+		<xs:sequence>
+			<xs:element name="scheduleName" type="baci:ROstring"/>
+			<xs:element name="scanNumber" type="baci:ROlong" />
+			<xs:element name="status" type="mng:SystemStatusType" />
+			<xs:element name="tracking" type="mng:BooleanType" />	
+		</xs:sequence>
+		<!-- directory where to find the schedules -->
+		<xs:attribute name="SchedDir" type="xs:string" use="required" />
+		<!-- directory where to store data files -->
+		<xs:attribute name="DataDir" type="xs:string" use="required" />
+		<!-- Location inside the CDB where the component looks for the procedures files -->
+		<xs:attribute name="ProceduresLocation" type="xs:string" use="required" />
+		<!-- Name of the procedure file table (inside the CDB) that will be loaded at starp up -->
+		<xs:attribute name="DefaultProceduresFile" type="xs:string" use="required" />		
+		<!-- the cache time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
+		<!-- the expire time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
+		<!-- sleep time of the executor thread in microseconds -->
+		<xs:attribute name="ScheduleExecutorSleepTime" type="xs:unsignedLong" use="required" />
+		<!-- This the gap (microseconds) that the scheduler must respects for a transition of the calibration diode. Used in Tsys computation. -->
+		<xs:attribute name="TsysTransitionGap" type="xs:unsignedLong" use="required" />								
+		<!-- here a list of used component follows -->
+		<!-- the interface of the component that leads the Antenna subsystem -->
+		<xs:attribute name="AntennaBossInterface" type="xs:string" use="required" />
+		<!-- the interface of component that stores observatory information -->
+		<xs:attribute name="ObservatoryInterface" type="xs:string" use="required" />		
+		<!-- the interface of component that leads the receivers subsystem -->
+		<xs:attribute name="ReceiversBossInterface" type="xs:string" use="required" />
+		<!-- the instance of the default backend -->
+		<xs:attribute name="DefaultBackendInstance" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:element name="Scheduler" type="SchedulerType"/>
+	
+</xs:schema>

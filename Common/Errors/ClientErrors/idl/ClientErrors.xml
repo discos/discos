@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+   - $Id: ClientErrors.xml,v 1.3 2008-09-26 10:50:33 c.migoni Exp $
+   - Author: Andrea Orlati
+   -
+   - History:
+   -   03-11-2006  Created
+-->
+
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="Alma/ACSError" xsi:schemaLocation="Alma/ACSError ACSError.xsd"
+ name="ClientErrors" type="2101" _prefix="alma">
+
+<Code name="NoError" shortDescription="No error" description="No error condition found"/>
+
+<ErrorCode name="CouldntPerformAction" shortDescription="Action couldn't be performed" description="">
+	<Member name="Action" type="string" description="Action" />
+	<Member name="Reason" type="string" description="Reason" />
+</ErrorCode>	
+
+<ErrorCode name="CouldntLogManager" shortDescription="Manager couldn't be accessed" description=""/>
+
+<ErrorCode name="CouldntInit" shortDescription="Client could not be initialized" description=""/>
+
+<ErrorCode name="CouldntLogin" shortDescription="Client could not be logged" description=""/>
+
+<ErrorCode name="CouldntAccessProperty" shortDescription="Property couldn't be accessed" description="">
+	<Member name="PropertyName" type="string" description="PropertyName" />
+</ErrorCode>	
+
+<ErrorCode name="CouldntAccessComponent" shortDescription="Component couldn't be accessed" description="">
+	<Member name="ComponentName" type="string" description="ComponentName" />
+</ErrorCode>	
+
+<ErrorCode name="CORBAProblem" shortDescription="Caught CORBA system exception" description="">
+	<Member name="Name" type="string" description="Name" />
+	<Member name="Minor" type="long" description="Minor" />
+</ErrorCode>	
+
+<ErrorCode name="Unknown" shortDescription="Caught an unknown exception" description=""/>
+
+</Type>

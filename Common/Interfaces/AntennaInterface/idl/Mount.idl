@@ -1,0 +1,85 @@
+/******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
+* DO NOT EDIT
+* Automatically generated from ../idl/Mount.midl
+* on Tue Apr 26 17:21:35 2011
+*******************************************************************************/
+#ifndef _Mount_midl_
+#define _Mount_midl_
+#ifndef _ACS_PREPROCESSED_
+#define _ACS_PREPROCESSED_
+#endif
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ComponentErrors.idl>
+#include <AntennaErrors.idl>
+#include <ManagmentDefinitions.idl>
+#include "AntennaDefinitions.idl"
+
+#pragma prefix "alma"
+
+module Antenna {
+ interface Mount : ACS::CharacteristicComponent {
+
+  readonly attribute ACS::ROdouble azimuth;
+
+  readonly attribute ACS::ROdouble elevation;
+
+  readonly attribute ACS::ROdouble azimuthError;
+
+  readonly attribute ACS::ROdouble elevationError;
+
+  readonly attribute ROTCommonModes azimuthMode;
+
+  readonly attribute ROTCommonModes elevationMode;
+
+  readonly attribute ACS::ROuLongLong time;
+
+  readonly attribute ACS::ROdouble azimuthRate;
+
+  readonly attribute ACS::ROdouble elevationRate;
+
+  readonly attribute ROTSections section;
+
+  readonly attribute ACS::ROdouble azimuthOffset;
+
+  readonly attribute ACS::ROdouble elevationOffset;
+
+  readonly attribute ACS::ROdouble deltaTime;
+
+
+
+  readonly attribute ACS::ROdouble commandedAzimuth;
+
+
+
+  readonly attribute ACS::ROdouble commandedElevation;
+
+
+
+
+
+
+  readonly attribute Management::ROTSystemStatus mountStatus;
+  void preset(in double az,in double el) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void rates(in double azRate,in double elRate) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void programTrack(in double az,in double el,in ACS::Time time,in boolean restart) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void stop() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void stow(in ACS::CBvoid callBack,in ACS::CBDescIn desc);
+  void unstow(in ACS::CBvoid callBack,in ACS::CBDescIn desc);
+  void changeMode(in TCommonModes azMode,in TCommonModes elMode) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void setOffsets(in double azOff,in double elOff) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void setTime(in ACS::Time now) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void setDeltaTime(in double delta) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void getEncoderCoordinates(out ACS::Time time,out double azimuth,out double elevation,out double azOff,
+    out double elOff,out TSections section) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void getAntennaErrors(out ACS::Time time,out double azError,out double elError) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void forceSection(in TSections section);
+  double getHWAzimuth(in double destination,in TSections section);
+
+};
+
+
+
+};
+
+#endif

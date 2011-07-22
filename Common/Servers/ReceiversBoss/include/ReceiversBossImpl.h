@@ -1,0 +1,254 @@
+#ifndef RECEIVERSBOSSIMPL_H_
+#define RECEIVERSBOSSIMPL_H_
+
+/* ************************************************************************************************************* */
+/* IRA Istituto di Radioastronomia                                                                               */
+/* $Id: ReceiversBossImpl.h,v 1.10 2011-04-19 06:56:22 c.migoni Exp $										         */
+/*                                                                                                               */
+/* This code is under GNU General Public Licence (GPL).                                                          */
+/*                                                                                                               */
+/* Who                                                when                     What                                                       */
+/* Andrea Orlati(aorlati@ira.inaf.it) 19/11/2009       Creation                                                  */
+/* Andrea Orlati(aorlati@ira.inaf.it) 22/07/2010       Given implementation of command function                   */
+/* Andrea Orlati(aorlati@ira.inaf.it) 13/09/2010       Given implementation of new signature of getTaper() method  */
+
+
+#ifndef __cplusplus
+#error This is a C++ include file and cannot be used from plain C
+#endif
+
+#include <baciCharacteristicComponentImpl.h>
+#include <baciSmartPropertyPointer.h>
+#include <ReceiversBossS.h>
+#include <baciROdoubleSeq.h>
+#include <baciROlongSeq.h>
+#include <baciROstring.h>
+#include <baciROlong.h>
+#include <enumpropROImpl.h>
+#include <SP_parser.h>
+#include <IRA>
+#include "RecvBossCore.h"
+
+/** 
+ * @mainpage ReceiversBoss component Implementation 
+ * @date 28/02/2011
+ * @version 0.31.0 
+ * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
+ * @remarks Last compiled under ACS 7.0.2
+ * @remarks compiler version is 3.4.6
+*/
+
+using namespace baci;
+
+/**
+ * @author <a href=mailto:a.orlati@ira.inaf.it>Orlati Andrea</a>
+ * Istituto di Radioastronomia, Italia
+ * <br> 
+ */
+class ReceiversBossImpl: public CharacteristicComponentImpl,
+				       public virtual POA_Receivers::ReceiversBoss
+{
+public:
+	
+	/** 
+	* Constructor.
+	* @param CompName component's name. This is also the name that will be used to find the configuration data for the component in the Configuration Database.
+	* @param containerServices pointer to the class that exposes all services offered by container
+	*/
+	ReceiversBossImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices);
+
+	/**
+	 * Destructor.
+	*/
+	virtual ~ReceiversBossImpl(); 
+
+	/** 
+	 * Called to give the component time to initialize itself. The component reads in configuration files/parameters or 
+	 * builds up connection to devices or other components. 
+	 * Called before execute. It is implemented as a synchronous (blocking) call.
+	 * @throw ACSErr::ACSbaseExImpl
+	*/
+	virtual void initialize() throw (ACSErr::ACSbaseExImpl);
+
+	/**
+ 	 * Called after <i>initialize()</i> to tell the component that it has to be ready to accept incoming 
+ 	 * functional calls any time. 
+	 * Must be implemented as a synchronous (blocking) call. In this class the default implementation only 
+	 * logs the COMPSTATE_OPERATIONAL
+	 * @throw ACSErr::ACSbaseExImpl
+	*/
+	virtual void execute() throw (ACSErr::ACSbaseExImpl);
+	
+	/** 
+	 * Called by the container before destroying the server in a normal situation. This function takes charge of 
+	 * releasing all resources.
+	*/
+	virtual void cleanUp();
+	
+	/** 
+	 * Called by the container in case of error or emergency situation. This function tries to free all resources 
+	 * even though there is no warranty that the function is completely executed before the component is destroyed.
+	*/	
+	virtual void aboutToAbort();
+		
+	/**
+	 * This method is used to turn the calibration diode on.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx  
+	 */
+	void calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+
+	/**
+	 * This method is used to turn the calibration diode off.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx  
+	 */
+	void calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+	
+	/**
+	 * This method allows to set local oscillator. Depending on the curretly configured receiver one or more values are considered.
+	 * @param lo the list contains the values in MHz for the local oscillator
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 */
+	void setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+	
+	/**
+	 * This method will be used to configure a receiver given its mnemoci code
+	 * @param code string that contains the code of the receiver to be configured
+	 * @throw CORBA::SystemException
+	 * @throw ManagementErrors::ConfigurationErrorEx
+	 */
+	void setup(const char * code) throw (CORBA::SystemException,ManagementErrors::ConfigurationErrorEx);
+	
+	/**
+	 * This method allows to set the operating mode of the currently configured receiver. If no receiver has been configured or the mode is not valid for the current receiver,
+	 * an error is issued.
+	 * @param mode string identifer of the operating mode
+	 * @throw CORBA::SystemException
+	 * @throw ManagementErrors::ConfigurationErrorEx
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 */
+	void setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx);
+	
+	/**
+	 * This method puts the subsystem in idle. At the moment it does nothing that resetting the receiver code.
+	 */
+	void park() throw (CORBA::SystemException,ManagementErrors::ParkingErrorEx);
+	
+	/**
+	 * This method is called when the values of the calibration mark of the current receiver are required. A value is retruned for every subbands.
+	 * The subbands are defined by giving the feed numeber, the polarization the initial frequency and the bandwidth.
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @param freqs for each subband this is the list of the starting frequencies (in MHz). Correlated to the real initial frequency of the current receiver.
+	 * @param bandwidths for each subband this is the width in MHz. Correlated to the real bandwidth of the current receiver.
+	 * @param feeds for each subband this if the feed number
+	 * @param ifs for each subband this indicates the proper if, given the feed
+	 * @return the list of the noise calibration value in Kelvin degrees.
+	 */
+    virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs) throw (
+    		CORBA::SystemException,ComponentErrors::ComponentErrorsEx); 
+
+	/**
+	 * This method is called in order to know the geometry of the currently configured receiver. The geometry is given along the X and Y axis where the central feed is the origin
+	 * the axis. The relative power (normalized to one) with respect to the central feed is also given.    
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @param X the positions relative to the central beam of the feeds along the X axis (radians)
+	 * @param Y the positions relative to the central beam of the feeds along the Y axis (radians) 
+	 * @param power the relative power of the feeds
+	 * @return the number of feeds
+	 */    
+    virtual CORBA::Long getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+    
+	/**
+	 * This method is called in order to know the taper of the current receiver. 
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @param freq starting frequency of the detector in MHz. Correlated to the real initial frequency of the current receiver.
+	 * @param bandWidth bandwidth of the detector n MHz. Correlated to the real bandwidth of the current receiver.
+	 * @param feed feed id the detector is attached to
+	 * @param ifNumber Number of the IF, given the feed
+	 * @param waveLen corresponding wave length in meters
+	 * @return the value of the taper in db
+	 */        
+    virtual CORBA::Double getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+    
+	/**
+	 * This method implements the command line interpreter. The interpreter allows to ask for services or to issue commands
+	 * to the sub-system by human readable command lines.
+	 * @param cmd string that contains the command line
+	 * @return the string that contains the answer to the command if succesful. It must be freed by the caller.
+	 * @throw CORBA::SystemException
+	 * @throw ManagementErrors::CommandLineErrorEx Thrown when the command execution or parsing result in an error. It contains the error message
+	 */
+	virtual char *command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);	
+    
+	/**
+	 * Returns a reference to the LO property implementation of the IDL interface.
+	 * @return pointer to read-only double sequence property
+	*/	 
+	virtual ACS::ROdoubleSeq_ptr LO() throw (CORBA::SystemException);
+	
+	/**
+	 * Returns a reference to the receiverCode property implementation of the IDL interface.
+	 * @return pointer to read-only string  property
+	*/	 
+	virtual ACS::ROstring_ptr actualSetup() throw (CORBA::SystemException);
+	
+	/**
+	 * Returns a reference to the feeds property implementation of the IDL interface.
+	 * @return pointer to read-only long property
+	*/	 
+	virtual ACS::ROlong_ptr feeds() throw (CORBA::SystemException);
+
+	/**
+	 * Returns a reference to the IFs property implementation of the IDL interface.
+	 * @return pointer to read-only long property
+	*/	 	
+	virtual ACS::ROlong_ptr IFs() throw (CORBA::SystemException);
+	
+	/**
+	 * Returns a reference to the initialFrequency property implementation of the IDL interface.
+	 * @return pointer to read-only doubleSeq property
+	*/	 	
+	virtual ACS::ROdoubleSeq_ptr initialFrequency() throw (CORBA::SystemException);
+
+	/**
+	 * Returns a reference to the bandWidth property implementation of the IDL interface.
+	 * @return pointer to read-only doubleSeq property
+	*/	 	
+	virtual ACS::ROdoubleSeq_ptr bandWidth() throw (CORBA::SystemException);
+
+	/**
+	 * Returns a reference to the polarization property implementation of the IDL interface.
+	 * @return pointer to read-only long sequence property
+	*/	 
+	virtual ACS::ROlongSeq_ptr polarization() throw (CORBA::SystemException);	
+	
+	/**
+     * Returns a reference to the status property Implementation of IDL interface.
+	 * @return pointer to read-only ROTSystemStatus property status
+	*/
+	virtual Management::ROTSystemStatus_ptr status() throw (CORBA::SystemException);
+	
+	
+private:
+	SmartPropertyPointer<ROdoubleSeq> m_plocalOscillator;
+	SmartPropertyPointer<ROstring> m_pactualSetup;
+	SmartPropertyPointer<ROlong> m_pfeeds;
+	SmartPropertyPointer<ROlong> m_pIFs;
+	SmartPropertyPointer<ROdoubleSeq> m_pinitialFrequency;
+	SmartPropertyPointer<ROdoubleSeq> m_pbandWidth;
+	SmartPropertyPointer<ROlongSeq> m_ppolarization;
+	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),
+	  POA_Management::ROTSystemStatus> > m_pstatus;
+	
+	SimpleParser::CParser<CRecvBossCore> *m_parser;
+	CRecvBossCore *m_core;
+};
+
+
+
+#endif /*RECEIVERSBOSSIMPL_H_*/

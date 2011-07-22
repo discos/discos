@@ -1,0 +1,59 @@
+/******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
+* DO NOT EDIT
+* Automatically generated from ../idl/SkySource.midl
+* on Tue Apr 26 17:21:35 2011
+*******************************************************************************/
+#ifndef _SkySource_midl_
+#define _SkySource_midl_
+#ifndef _ACS_PREPROCESSED_
+#define _ACS_PREPROCESSED_
+#endif
+#include <baci.idl>
+#include "EphemGenerator.idl"
+#include <AntennaErrors.idl>
+#include <ComponentErrors.idl>
+#include "AntennaDefinitions.idl"
+
+
+#pragma prefix "alma"
+
+module Antenna {
+ struct SkySourceAttributes { string sourceID; double rightAscension; double declination; double julianEpoch; double J2000RightAscension; double J2000Declination; double azimuth; double elevation; double userAzimuthOffset; double userElevationOffset; double userRightAscensionOffset; double userDeclinationOffset; double userLongitudeOffset; double userLatitudeOffset; double parallacticAngle;
+ double inputRightAscension;
+ double inputDeclination;
+ double inputJEpoch;
+ double inputRaProperMotion;
+ double inputDecProperMotion;
+ double inputParallax;
+ double inputRadialVelocity;
+ double inputGalacticLongitude;
+ double inputGalacticLatitude;
+ };
+
+ interface SkySource: EphemGenerator {
+
+
+
+
+
+
+
+  void getAttributes(out SkySourceAttributes att);
+  void loadSourceFromCatalog(in string sourceName) raises (ComponentErrors::ComponentErrorsEx,
+      AntennaErrors::AntennaErrorsEx);
+
+
+
+
+
+
+  void setFixedPoint(in double az,in double el);
+  void setSourceFromGalactic(in string sourceName,in double longitude,in double latitude);
+  void setSourceFromEquatorial(in string sourceName,in double ra,in double dec,in TSystemEquinox equinox,in double dra,
+     in double ddec,in double parallax,in double rvel);
+ };
+
+
+};
+
+#endif

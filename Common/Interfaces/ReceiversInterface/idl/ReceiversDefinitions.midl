@@ -1,0 +1,34 @@
+#ifndef __RECEIVERSDEFINITIONS_IDL__
+#define __RECEIVERSDEFINITIONS_IDL__
+
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Andrea Orlati <a.orlati@ira.inaf.it>
+\***************************************************************/
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+
+
+#pragma prefix "alma"
+
+module Receivers {
+	
+	/// polarization of the input channel 
+	enum TPolarization {
+		RCV_LEFT,       /*!< the IF is left polarization  */     
+		RCV_RIGHT        /*!< the IF  is right polarization */
+	};
+	ACS_ENUM(TPolarization);
+
+    /// A couple of coordinates (x, y)
+    struct TPosition {
+        double x;
+        double y;
+    };
+
+
+};
+
+#endif

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: ProcedureFile.xsd,v 1.1 2010-09-14 08:12:35 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   10-08-2010  Created
+-->
+
+<xs:schema elementFormDefault="qualified" 
+	targetNamespace="urn:schemas-cosylab-com:ProcedureFile:1.0" 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0">
+	
+	
+	<xs:element name="ProcedureFile">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="Procedure"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Procedure">
+		<xs:complexType mixed="true">
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="body"/>
+			</xs:choice>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="body" type="xs:string"/>
+</xs:schema>

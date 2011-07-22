@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+   - $Id: AntennaErrors.xml,v 1.9 2010-09-14 07:55:59 a.orlati Exp $
+   - Author: Andrea Orlati
+   -
+   - History:
+   -   18-01-2005  Created
+   -   14-09-2005  Added error memebers
+   -   12-05-2008  Added TrackingNotStarted error code
+   -   09-05-2010  Added ScanError error code
+   -   08-09.2010  Added OffsetFrameNotSupported
+-->
+
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="Alma/ACSError" xsi:schemaLocation="Alma/ACSError ACSError.xsd"
+ name="AntennaErrors" type="2002" _prefix="alma">
+
+<Code name="NoError" shortDescription="No error" description="No error condition found"/>
+
+<ErrorCode name="Nak" shortDescription="ACU does not acknowledge" description="">
+	<Member name="Code" type="long" description="Code" />
+	<Member name="Message" type="string" description="Message" />
+</ErrorCode>
+
+<ErrorCode name="Connection" shortDescription="ACU is not reachable or disconnected" description=""/>
+
+<ErrorCode name="OperationNotPermitted" shortDescription="Operation is not allowed or not permitted under this configuration" description="">
+	<Member name="Reason" type="string" description="Reason" />
+</ErrorCode>
+
+<ErrorCode name="AntennaBusy" shortDescription="Antenna is busy with other activities" description=""/>
+
+<ErrorCode name="StoppedByUser" shortDescription="A stop command was issued by a client" description=""/>
+
+<ErrorCode name="SourceNotFound" shortDescription="The requested source or coordinate is not found in the catalog" description="">
+	<Member name="SourceName" type="string" description="Name of the source"/>
+</ErrorCode>
+
+<ErrorCode name="ReceiverNotFound" shortDescription="The requested receiver is not found in the table" description="">
+	<Member name="ReceiverCode" type="string" description="Code of the receiver"/>
+</ErrorCode>
+
+<ErrorCode name="RateTooHigh" shortDescription="The resulting rate is too high" description="">
+	<Member name="Axis" type="string" description="Frame axis which the rate is relative to"/>
+</ErrorCode>
+
+<ErrorCode name="ExceedingSlewingTime" shortDescription="Cannot reach destination in scheduled time" description=""/>
+
+<ErrorCode name="TrackingNotStarted" shortDescription="The tracking has not been started yet" description="" />
+
+<ErrorCode name="ScanError" shortDescription="Error during scan set up" description="">
+	<Member name="TargetName" type="string" description="Indication of the target of the scan"/>
+</ErrorCode>
+
+<ErrorCode name="OffsetFrameNotSupported" shortDescription="It is not allowd to set offset in the requested frame" description=""/>
+
+
+</Type>

@@ -1,0 +1,22 @@
+/** @def DEFATTRIBUTES(NAME)
+ * 	@brief this macro can be used to defines exposed attributes by interfaces that inherits from EphemGenerator
+*/
+#define	DEFATTRIBUTES(NAME) struct NAME { \
+	string sourceID; \
+	double rightAscension; \
+	double declination; \
+	double julianEpoch; \
+	double J2000RightAscension; \
+	double J2000Declination; \
+	double azimuth; \
+	double elevation; \
+	double userAzimuthOffset; \
+	double userElevationOffset; \
+	double userRightAscensionOffset; \
+	double userDeclinationOffset; \
+	double userLongitudeOffset; \
+	double userLatitudeOffset; \
+	double parallacticAngle;
+
+#define ENDDEFATTRIBUTES }
+

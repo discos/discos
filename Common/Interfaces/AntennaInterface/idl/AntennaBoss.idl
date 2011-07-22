@@ -1,0 +1,287 @@
+/******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
+* DO NOT EDIT
+* Automatically generated from ../idl/AntennaBoss.midl
+* on Tue Apr 26 17:21:36 2011
+*******************************************************************************/
+#ifndef _AntennaBoss_midl_
+#define _AntennaBoss_midl_
+#ifndef _ACS_PREPROCESSED_
+#define _ACS_PREPROCESSED_
+#endif
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ManagmentDefinitions.idl>
+#include <ComponentErrors.idl>
+#include <AntennaErrors.idl>
+#include "AntennaDefinitions.idl"
+#include "EphemGenerator.idl"
+
+#pragma prefix "alma"
+
+module Antenna {
+
+
+
+
+
+
+ typedef struct SubScanSetup {
+  double lon1;
+  double lat1;
+  double lon2;
+  double lat2;
+  Antenna::TCoordinateFrame coordFrame;
+  Antenna::TsubScanGeometry geometry;
+  Antenna::TCoordinateFrame subScanFrame;
+  Antenna::TsubScanDescription description;
+  Antenna::TsubScanDirection direction;
+  ACS::TimeInterval subScanDuration;
+ } TSubScanParameters;
+
+
+
+
+
+ typedef struct TrackPoint {
+
+
+
+
+  TGeneratorType type;
+  double parameters[10];
+
+
+
+  long paramNumber;
+
+
+
+  TCoordinateFrame frame;
+
+
+
+  TSystemEquinox equinox;
+
+
+
+  double longitudeOffset;
+
+
+
+  double latitudeOffset;
+
+
+
+  TCoordinateFrame offsetFrame;
+
+
+
+  boolean applyOffsets;
+
+
+
+  TSubScanParameters otf;
+
+
+
+  TSections section;
+ } TTrackingParameters;
+ const string ANTENNA_DATA_CHANNEL="AntennaData";
+ struct AntennaDataBlock {
+  ACS::Time timeMark;
+  boolean tracking;
+  Management::TSystemStatus status;
+ };
+
+ interface AntennaBoss: ACS::CharacteristicComponent, Management::CommandInterpreter, Management::Subsystem {
+
+
+
+  readonly attribute ACS::ROstring target;
+
+
+
+  readonly attribute ACS::ROdouble targetRightAscension;
+
+
+
+  readonly attribute ACS::ROdouble targetDeclination;
+
+
+
+  readonly attribute ACS::ROdouble targetVlsr;
+
+
+
+
+  readonly attribute ACS::ROdouble azimuthOffset;
+
+
+
+  readonly attribute ACS::ROdouble elevationOffset;
+
+
+
+  readonly attribute ACS::ROdouble rightAscensionOffset;
+
+
+
+  readonly attribute ACS::ROdouble declinationOffset;
+
+
+
+  readonly attribute ACS::ROdouble longitudeOffset;
+
+
+
+  readonly attribute ACS::ROdouble latitudeOffset;
+
+
+
+
+  readonly attribute ACS::ROdouble rawAzimuth;
+
+
+
+
+  readonly attribute ACS::ROdouble rawElevation;
+
+
+
+
+  readonly attribute ACS::ROdouble observedAzimuth;
+
+
+
+
+  readonly attribute ACS::ROdouble observedElevation;
+
+
+
+
+  readonly attribute ACS::ROdouble observedRightAscension;
+
+
+
+
+  readonly attribute ACS::ROdouble observedDeclination;
+
+
+
+
+  readonly attribute ACS::ROdouble observedGalLongitude;
+
+
+
+
+  readonly attribute ACS::ROdouble observedGalLatitude;
+
+
+
+
+
+
+  readonly attribute Management::ROTBoolean enabled;
+
+
+
+
+
+
+
+  readonly attribute Management::ROTBoolean correctionEnabled;
+
+
+
+
+  readonly attribute ROTGeneratorType generatorType;
+  readonly attribute ACS::ROdouble BWHM;
+
+
+
+
+  readonly attribute ACS::ROdouble pointingAzimuthCorrection;
+
+
+
+
+  readonly attribute ACS::ROdouble pointingElevationCorrection;
+
+
+
+
+  readonly attribute ACS::ROdouble refractionCorrection;
+  void stop() raises (ComponentErrors::ComponentErrorsEx);
+  void startScan(in string targetName,inout ACS::Time startUT,in TTrackingParameters parameters) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void track(in string targetName) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
+
+
+
+
+
+
+  void moon() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void elevationScan(in double cRA,in double cDec,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  void azimuthScan(in double cRA,in double cDec,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+  boolean checkScan(in string targetName,in ACS::Time startUt,in TTrackingParameters parameters,out ACS::TimeInterval slewingTime) raises (
+    ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
+
+
+
+
+
+
+  void disable();
+
+
+
+
+
+
+  void enable();
+
+
+
+
+
+  void correctionEnable();
+
+
+
+
+
+  void correctionDisable();
+
+
+
+
+
+
+
+  void setBWHM(in double value);
+
+
+
+
+
+
+
+  void computeBWHM(in double taper,in double waveLength);
+  void setVlsr(in double value);
+  void setOffsets(in double lonOff,in double latOff,in TCoordinateFrame frame) raises (ComponentErrors::ComponentErrorsEx,
+    AntennaErrors::AntennaErrorsEx);
+  string getGeneratorCURL(out TGeneratorType type);
+  void getRawCoordinates(in ACS::Time time,out double az,out double el);
+  void getObservedEquatorial(in ACS::Time time,in ACS::TimeInterval duration,out double ra,out double dec);
+  void getObservedGalactic(in ACS::Time time,out double longitude,out double latitude);
+  void getObservedHorizontal(in ACS::Time time,in ACS::TimeInterval duration,out double az,out double el);
+  void getAllOffsets(out double azOff,out double elOff,out double raOff,out double decOff,out double lonOff,out double latOff);
+
+ };
+
+
+};
+
+#endif

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: MedicinaMount.xsd,v 1.9 2010-10-14 12:08:28 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   18-01-2005  Created
+	-   03-03-2005  Added Port and IP Address attributes
+	-   22-07-2005  Added ControlThreadPeriod attribute
+	-   17-07-2005  Added TrackingPrecision attribute
+	-   21-08-2005  Added time property
+	-   19-09-2005  Added status property
+	-   02-11-2005  Added azimuth and elevation servo status
+	-   10-11-2006  Added servo system status	
+	-   14-11-2006  Added section and freeProgramTrackPosition
+	-   19-04-2007  Added azimuth and elevation offsets
+	-   01-02-2008  Excluded the validity time for each property, added one for all
+	-  18-07-2008  Removed the trackingpresision filed since it was not required any more 
+-->
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:MedicinaMount:1.0"
+	xmlns="urn:schemas-cosylab-com:MedicinaMount:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:ant="urn:schemas-cosylab-com:Antenna:1.0"	
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+  	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Antenna.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+  
+	<xs:complexType name="ServoStatusType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROpattern">
+				<xs:attribute name="resolution" type="xs:int" use="optional" default="65535"/>
+            	<xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                	"EMERGENCY LIMIT, LIMIT CCW/DOWN, LIMIT CW/UP, PRELIMIT CCW/DOWN, PRELIMIT CW/UP, STOW, STOW PIN INSERTED, STOW PIN RETRACTED
+					SERVO FAILURE, BRAKE FAILURE, ENCODER FAILURE, MOTION FAILURE, MOTOR OVERSPEED, AUX MODE, AXIS DISABLED, COMPUTER DISABLED"/>
+				<xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                	"3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3"/>
+            	<xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+            		"0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="ServoSystemStatusType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROpattern">
+				<xs:attribute name="resolution" type="xs:int" use="optional" default="127"/>
+            	<xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                	"DOOR INTERLOCK, SAFE, EMERGENCY OFF, TRANSFER ERROR, TIME ERROR, RF INHIBIT, REMOTE"/>
+				<xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                	"3, 3, 0, 3, 3, 3, 0"/>
+            	<xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+            		"0, 0, 3, 0, 0, 0, 3"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+			
+	<xs:complexType name="MedicinaMountType">
+		<xs:sequence>
+			<xs:element name="azimuth" type="baci:ROdouble"/>
+			<xs:element name="elevation" type="baci:ROdouble"/>
+			<xs:element name="azimuthError" type="baci:ROdouble"/>
+			<xs:element name="elevationError" type="baci:ROdouble"/>
+			<xs:element name="azimuthMode" type="ant:CommonModesType" />
+			<xs:element name="elevationMode" type="ant:CommonModesType" />
+			<xs:element name="time" type="baci:ROuLongLong" />
+			<xs:element name="status" type="ant:StatusType" />
+			<xs:element name="azimuthServoStatus" type="ServoStatusType" />
+			<xs:element name="elevationServoStatus" type="ServoStatusType" />			
+			<xs:element name="servoSystemStatus" type="ServoSystemStatusType" />
+			<xs:element name="freeProgramTrackPosition" type="baci:ROlong" />
+			<xs:element name="section" type="ant:SectionType" />	
+			<xs:element name="azimuthRate" type="baci:ROdouble"/>
+			<xs:element name="elevationRate" type="baci:ROdouble"/>
+			<xs:element name="azimuthOffset" type="baci:ROdouble" />
+			<xs:element name="elevationOffset" type="baci:ROdouble" />
+			<xs:element name="deltaTime" type="baci:ROdouble" />	
+			<xs:element name="commandedAzimuth" type="baci:ROdouble" />	
+			<xs:element name="commandedElevation" type="baci:ROdouble" />
+			<xs:element name="mountStatus" type="mng:SystemStatusType" />	
+		</xs:sequence>
+		<xs:attribute name="IPAddress" type="xs:string" use="required" />
+		<xs:attribute name="Port" type="xs:unsignedShort" use="required" />
+		<!-- timeout (microseconds) applied when trying to connect to the ACU -->
+		<xs:attribute name="ConnectTimeout" type="xs:unsignedLong" use="required" />
+		<!-- timeout (microseconds) applied when trying to receive data from the to the ACU -->
+		<xs:attribute name="ReceiveTimeout" type="xs:unsignedLong" use="required" />	 
+		<!-- the ACU is not enqueried to get new properti values until this time has elapsed (microseconds) -->
+		<xs:attribute name="PropertyRefreshTime" type="xs:unsignedLong" use="required" />
+		<!-- period of the watch dog thread (uSec), this is the thread that keeps data up to date -->		
+		<xs:attribute name="ControlThreadPeriod" type="xs:unsignedLong" use="required" />
+		<!-- the cache time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
+		<!-- the expire time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />	
+		<!-- the oscillation threshold as azimuth tracking error (degrees) -->
+		<xs:attribute name="OscillationThreshold" type="xs:double" use="required" />	
+		<!-- duration of the oscillation alarm window (microseconds) -->
+		<xs:attribute name="OscillationAlarmDuration" type="xs:unsignedLong" use="required" />	
+		<!-- number times the threshold is overcome during the alarm duration window in order to declare an oscillation -->
+		<xs:attribute name="OscillationNumberThreshold" type="xs:unsignedLong" use="required" />	
+		<!-- Time to wait, after a detection, before commanding again the previuos operating mode in the ACU.(microseconds) -->
+		<xs:attribute name="OscillationRecoverWaitTime" type="xs:unsignedLong" use="required" />		
+	</xs:complexType>
+  
+	<xs:element name="MedicinaMount" type="MedicinaMountType"/>
+</xs:schema>

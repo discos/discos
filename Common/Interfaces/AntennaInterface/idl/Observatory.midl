@@ -1,0 +1,178 @@
+/* *********************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      	   */
+/* $Id: Observatory.midl,v 1.5 2010-08-31 12:22:31 a.orlati Exp $										       															   */
+/*                                                                                                      	   */
+/* This code is under GNU General Public Licence (GPL).                                                 	   */
+/*                                                                                                      	   */
+/* Who                                  when            What                                              	   */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  16/01/2006      Creation                                          	   */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  08/01/2007      Ported to ACS 5.0.4                                	   */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  28/03/2007      Ported to ACS 6.0.2                                	   */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  25/10/2007      Added the Epehemeris interface hierarchy               */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  29/08/2010      added the attribute observatoryName               */
+
+#ifndef _OBSERVATORY_IDL
+#define _OBSERVATORY_IDL
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ComponentErrors.idl>
+#include <SiteInformation.idl>
+#include "AntennaDefinitions.idl"
+
+#pragma prefix "alma"
+
+module Antenna {
+	
+	/**
+ 	* This is the Observatory component interface. This component will be used as the "official" observatory time 
+ 	* distributor. It also stores site information that are required for time and coordinates computations/convertions. The site is
+ 	* stored as from cartesian coordinates to geodetic ones and viceversa. geodetic coordinates conversion depends on the choosen
+ 	* ellipsoid model. 
+ 	* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ 	* Istituto di Radioastronomia, Italia
+ 	* <br> 
+	*/ 
+	interface Observatory: ACS::CharacteristicComponent
+	{
+		/** 
+		 * This property is the name of the observatory. 
+		*/		
+		readonly attribute ACS::ROstring observatoryName;
+		
+		/** 
+		 * This property is the current observatory time. In practical this is the time reported by the local machine that runs the component.
+		 * This machine should be synchronized via NTP at the UTC time. It is represented as the number of 100 ns ticks since 1582-10-15 00:00:00 
+		*/
+		readonly attribute ACS::ROuLongLong universalTime;
+		
+		/**
+		 * This property is the current observatory time as a Julian day. In practical this is the time reported by the local machine that runs the component.
+		 * This machine should be synchronized via NTP at the UTC time.
+		*/
+		readonly attribute ACS::ROdouble julianDay;
+		
+		/**
+		 * This property is the Greenwich Apparent Sidereal Time for the current date.
+		 * Apparent GST is the MGST (Mean Greewich Sidereal Time) corrected for nutation shift of the ecliptic obliquity (due to Moon).
+		 * This machine should be synchronized via NTP at the UTC time. It is represented as the number of 100 ns ticks 
+		*/		
+		readonly attribute ACS::ROuLongLong GAST;
+	
+		/**
+		 * This property is the Local Apparent Sidereal Time for the current date and time.
+		 * This time if computed from the GAST by adding the site longitude and the current time (corrected for sidereal mean day).
+		 * This machine should be synchronized via NTP at the UTC time. It is represented as the number of 100 ns ticks 
+		*/						
+		readonly attribute ACS::ROuLongLong LST;
+		
+		/**
+		 * This property stores the current DUT1 in milliseconds, i.e. the difference between UTC and UT1. 
+		*/
+		readonly attribute ACS::ROdouble DUT1;
+		
+		/**
+		 * This property stores the geodetic north latitude (radians) of the observatory.
+		*/
+		readonly attribute ACS::ROdouble latitude;
+		
+		/**
+		 * This property stores the geodetic east longitude (radians) of the observatory
+		*/
+		readonly attribute ACS::ROdouble longitude;
+		
+		/**
+		 * This property stores the height over the ellipsoid (meters) of the observatory
+		*/		
+		readonly attribute ACS::ROdouble height;
+		
+		/**
+		 * Sets the X polar motion with respect to the IERS reference pole (motion angle along the Greenwich meridian in milliarcseconds). 
+		 * This information will be used to correct the site longitude and latitude for polar motion and compute the azimuth 
+		 * difference between celestial and terrestial poles. Information can be retrived from http://hpiers.obspm.fr/eop-pc/.  		
+		*/				
+		readonly attribute ACS::ROdouble yPolarMotion;
+
+		/*
+		 * Sets the Y polar motion with respect to the IERS reference pole (motion angle along the meridian 90° east in milliarcseconds). 
+		 * This information will be used to correct the site longitude and latitude for polar motion and compute the azimuth 
+		 * difference between celestial and terrestial poles. Information can be retrived from http://hpiers.obspm.fr/eop-pc/.  		
+		*/
+		readonly attribute ACS::ROdouble xPolarMotion;
+
+		/**
+		 * This property stores the X geodetic coordinate of the observatory (meters). X=0 is plane of the Greenwich meridian.
+		*/				
+		readonly attribute ACS::ROdouble xGeod;
+
+		/**
+		 * This property stores the X geodetic coordinate of the observatory (meters). Y=0 is plane of the meridian 90 
+		 * degrees east of the Greenwich meridian.
+		*/		
+		readonly attribute ACS::ROdouble yGeod;
+
+		/**
+		 * This property stores the X geodetic coordinate of the observatory (meters). Z=0 is plane of the equator. 
+		*/		
+		readonly attribute ACS::ROdouble zGeod;
+		
+		/**
+		 * This property reports the current model of geoid currently in use.
+		*/
+		readonly attribute ROTGeodeticModel geodeticModel;
+		
+		/**
+		 * This method is used to get the whole salient information about the site in a single shot. This avoids multiple 
+		 * acceses the the component in order to get all the information stored in the component.
+		 * @return a structure containing the following fields:
+		 *       @arg \c double longitude
+		 *       @arg \c double latitude
+		 *       @arg \c double height
+		 *       @arg \c double xP
+		 *       @arg \c double yP
+		 *       @arg \c long elipsoid
+		 *       @arg \c double DUT1
+		*/ 
+		IRAIDL::TSiteInformation getSiteSummary();
+		
+		/**
+		 * This method sets the current value of the DUT1 property. 
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentCommonErrors:ComponentCommonErrorsEx
+		 *        @arg \c ComponentCommonErrors::CDBAccess
+		 *        @arg \c ComponentCommonErrors::PropertyError 
+		 * @param val new DUT1 value in milliseconds.
+		 * @param save if true the value passed to this function will be saved into the CDB as the default value of DUT1
+		*/
+		void setDUT1(in double val,in boolean save) raises (ComponentErrors::ComponentErrorsEx);
+		
+		/**
+		 * This method changes the current model for the geoid, in other words it sets the value returned
+		 * by the property <i>geodeticModel</i>.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentCommonErrors:ComponentCommonErrorsEx
+		 *        @arg \c ComponentCommonErrors::CDBAccess
+		 *        @arg \c ComponentCommonErrors::PropertyError 
+		 * @param model the new model, it can be one of the symbols defined in the <i>TGeodeticModel</i> enumeration.
+		 * @param save if true the new model will be saved into the CDB and it will be the default value for the property 
+		 *        <i>geodeticModel</i> the next time the component is started.
+		*/
+		void setGeodeticModel(in TGeodeticModel model,in boolean save) raises (ComponentErrors::ComponentErrorsEx);
+		
+		/**
+		 * This method changes the current value for x/yPolatMotion properties. 
+		 * @throw CORBA::SystemException
+		 * @throw ComponentCommonErrors:ComponentCommonErrorsEx
+		 *        @arg \c ComponentCommonErrors::CDBAccess
+		 *        @arg \c ComponentCommonErrors::PropertyError
+		 * @param xP motion angle along the Greenwich meridian (milli arcseconds)
+		 * @param yP motion angle along the 90 east meridian (milli arcseconds)
+		 * @param save if true the values passed to this function will be saved into the CDB as the default value of xPolarMotion
+		 *        and yPolarMotion respectively.
+		*/
+		void setPoleMotion(in double xP,in double yP,in boolean save) raises (ComponentErrors::ComponentErrorsEx);
+							
+	};
+	
+};
+#endif

@@ -1,0 +1,83 @@
+/******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
+* DO NOT EDIT
+* Automatically generated from ../idl/OTF.midl
+* on Tue Apr 26 17:21:35 2011
+*******************************************************************************/
+#ifndef _OTF_midl_
+#define _OTF_midl_
+#ifndef _ACS_PREPROCESSED_
+#define _ACS_PREPROCESSED_
+#endif
+#include <baci.idl>
+#include "EphemGenerator.idl"
+#include <AntennaErrors.idl>
+#include <ComponentErrors.idl>
+#include "AntennaDefinitions.idl"
+
+
+#pragma prefix "alma"
+
+module Antenna {
+
+
+
+
+
+
+
+  struct OTFAttributes { string sourceID; double rightAscension; double declination; double julianEpoch; double J2000RightAscension; double J2000Declination; double azimuth; double elevation; double userAzimuthOffset; double userElevationOffset; double userRightAscensionOffset; double userDeclinationOffset; double userLongitudeOffset; double userLatitudeOffset; double parallacticAngle;
+  double startLon;
+
+  double startLat;
+
+  double stopLon;
+
+  double stopLat;
+
+  double centerLon;
+
+  double centerLat;
+
+  double centerRA;
+  double centerDec;
+  double lonSpan;
+  double latSpan;
+  double skySpan;
+  double lonRate;
+  double latRate;
+  double skyRate;
+  double subScanSpan;
+  double phiRate;
+   TCoordinateFrame coordFrame;
+  TsubScanGeometry geometry;
+  TCoordinateFrame subScanFrame;
+
+  TsubScanDescription description;
+  TsubScanDirection direction;
+
+  ACS::Time startUT;
+  ACS::TimeInterval subScanDuration;
+  double gLongitude;
+  double gLatitude;
+
+  };
+
+ interface OTF: EphemGenerator {
+
+
+
+
+
+
+
+  void getAttributes(out OTFAttributes att);
+  Antenna::TSections setSubScan(in double initAz, in TSections initSector, in double initEl, in ACS::Time initTime, in double lon1, in double lat1,
+            in double lon2, in double lat2, in TCoordinateFrame coordFrame,
+            in TsubScanGeometry geometry, in TCoordinateFrame subScanFrame, in TsubScanDescription description,
+            in TsubScanDirection direction, in ACS::Time startUT, in ACS::TimeInterval subScanDuration) raises (AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx);
+
+ };
+
+};
+
+#endif

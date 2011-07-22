@@ -1,0 +1,37 @@
+/******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
+* DO NOT EDIT
+* Automatically generated from ../idl/Moon.midl
+* on Tue Apr 26 17:21:36 2011
+*******************************************************************************/
+#ifndef _Moon_midl_
+#define _Moon_midl_
+#ifndef _ACS_PREPROCESSED_
+#define _ACS_PREPROCESSED_
+#endif
+#include "baci.idl"
+#include <enumpropMACRO.idl>
+#include <EphemGenerator.idl>
+
+#pragma prefix "alma"
+
+module Antenna {
+
+
+
+
+
+
+ struct MoonAttributes { string sourceID; double rightAscension; double declination; double julianEpoch; double J2000RightAscension; double J2000Declination; double azimuth; double elevation; double userAzimuthOffset; double userElevationOffset; double userRightAscensionOffset; double userDeclinationOffset; double userLongitudeOffset; double userLatitudeOffset; double parallacticAngle;
+ };
+
+
+
+ interface Moon: EphemGenerator {
+  void getAttributes(out MoonAttributes att);
+
+ };
+
+
+};
+
+#endif

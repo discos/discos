@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: TotalPowerSetup.xsd,v 1.1 2011-03-14 14:15:07 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   17-01-2011  Created 
+-->
+
+<xs:schema
+  targetNamespace="urn:schemas-cosylab-com:TotalPowerSetup:1.0"
+  xmlns="urn:schemas-cosylab-com:TotalPowerSetup:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+
+	<xs:simpleType name="EnabledType">
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="TRUE">
+				<xs:annotation><xs:documentation>
+					boolean true value
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="FALSE">
+	    		<xs:annotation><xs:documentation>
+	    			boolean flase value
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="SelectedPortType">
+		<xs:annotation><xs:documentation>
+			selects which port has to be selected for the present confuguration
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="PRIMARY">
+				<xs:annotation><xs:documentation>
+					the backend will selects input from primary focus
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="BWG">
+	    		<xs:annotation><xs:documentation>
+	    			the backend will selects input from Beam Wave Guide focus
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>
+	    	<xs:enumeration value="GREGORIAN">
+	    		<xs:annotation><xs:documentation>
+	    			the backend will selects input from Gregorian focus
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>	    	
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="TTableHeader">
+ 		<xs:sequence>
+ 		  <xs:element name="configurationID" type="xs:string">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		identifier of the configuration 
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 		  	
+ 		  <xs:element name="sections" type="xs:long">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		The number of sections exported for the present configuration
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="calSwitchingEnabled" type="EnabledType">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		true if the calibration mark switching could be used
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="inputPort" type="SelectedPortType">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		selects from which port the RF inputshas to be taken for the present configuration
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 		  
+ 		  <xs:element name="beams" type="xs:long">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		number of beams of the receiver attached to the backend
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="bandWidth" type="xs:double">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		this set the default bandwidth of the RF input  
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="attenuation" type="xs:double">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		this sets the default attenuation of the RF input  
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 		  	   		  
+ 		  <xs:element name="sections_inputs" type="xs:string">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		blank separated lists of inputs or sections (in the TP backend they coincide) 
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="polarizations" type="xs:string">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		for each sections indicates which polarizations the section is processing, blank separeted list  
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 		  
+ 		  <xs:element name="feed" type="xs:string">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		for each sections indicates which is the linked feed  
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="IF" type="xs:string">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		for each sections, given the feed, indicates which is the linked IF  
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		</xs:sequence>
+ 	</xs:complexType>
+  
+ 	<xs:complexType name="TTotalPowerSetup">
+		<xs:sequence>
+			<xs:element name="Configuration" type="TTableHeader" 
+			  minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+ 	</xs:complexType>
+  
+	<xs:element name="TotalPowerSetup" type="TTotalPowerSetup"/>
+  	
+</xs:schema>

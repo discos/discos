@@ -1,0 +1,118 @@
+/******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
+* DO NOT EDIT
+* Automatically generated from ../idl/Observatory.midl
+* on Tue Apr 26 17:21:35 2011
+*******************************************************************************/
+#ifndef _Observatory_midl_
+#define _Observatory_midl_
+#ifndef _ACS_PREPROCESSED_
+#define _ACS_PREPROCESSED_
+#endif
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ComponentErrors.idl>
+#include <SiteInformation.idl>
+#include "AntennaDefinitions.idl"
+
+
+#pragma prefix "alma"
+
+module Antenna {
+ interface Observatory: ACS::CharacteristicComponent
+ {
+
+
+
+  readonly attribute ACS::ROstring observatoryName;
+
+
+
+
+
+  readonly attribute ACS::ROuLongLong universalTime;
+
+
+
+
+
+  readonly attribute ACS::ROdouble julianDay;
+
+
+
+
+
+
+  readonly attribute ACS::ROuLongLong GAST;
+
+
+
+
+
+
+  readonly attribute ACS::ROuLongLong LST;
+
+
+
+
+  readonly attribute ACS::ROdouble DUT1;
+
+
+
+
+  readonly attribute ACS::ROdouble latitude;
+
+
+
+
+  readonly attribute ACS::ROdouble longitude;
+
+
+
+
+  readonly attribute ACS::ROdouble height;
+
+
+
+
+
+
+  readonly attribute ACS::ROdouble yPolarMotion;
+
+
+
+
+
+
+  readonly attribute ACS::ROdouble xPolarMotion;
+
+
+
+
+  readonly attribute ACS::ROdouble xGeod;
+
+
+
+
+
+  readonly attribute ACS::ROdouble yGeod;
+
+
+
+
+  readonly attribute ACS::ROdouble zGeod;
+
+
+
+
+  readonly attribute ROTGeodeticModel geodeticModel;
+  IRAIDL::TSiteInformation getSiteSummary();
+  void setDUT1(in double val,in boolean save) raises (ComponentErrors::ComponentErrorsEx);
+  void setGeodeticModel(in TGeodeticModel model,in boolean save) raises (ComponentErrors::ComponentErrorsEx);
+  void setPoleMotion(in double xP,in double yP,in boolean save) raises (ComponentErrors::ComponentErrorsEx);
+
+ };
+
+
+};
+
+#endif

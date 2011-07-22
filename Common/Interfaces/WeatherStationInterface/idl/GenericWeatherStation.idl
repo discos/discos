@@ -1,0 +1,102 @@
+/* ***************************************************************************/
+/* INAF - Istituto Nazionale di AstroFisica                                  */
+/* IRA - Istituto di Radioastronomia                                         */
+/* OAC - Osservatorio Astronomico di Cagliari                                */
+/*                                                                           */
+/*                                                                           */
+/* This code is under GNU General Public Licence (GPL).                      */
+/*                                                                           */
+/* Who					When		What                 */
+/* Sergio Poppi				18/02/2010      Creation             */
+/*                                                                           */
+/* ***************************************************************************/
+
+#ifndef _GENERICWSTATION_IDL_
+
+#define _GENERICWSTATION_IDL_
+
+#include <baci.idl>
+
+#pragma prefix "alma"
+
+
+
+
+/**
+	 * This IDL module describes the CORBA interface of the Meteo Station.
+	 * @author <a href=mailto:spoppi@ca.astro.it> Sergio Poppi</a>
+	 * INAF - Istituto Nazionale di AstroFisica
+	 * OAC - Osservatorio Astronomico di Cagliari
+	 * <br> 
+	*/
+
+module Weather {
+	
+	/**
+	
+
+	*/
+
+
+
+	struct parameters {
+		double temperature;
+		double humidity;
+		double pressure;
+		double wind;	
+/*		short doy;
+		short year;
+		short hh;
+		short mh;
+		short ss;*/
+	};
+
+
+	
+     
+
+	interface GenericWeatherStation : ACS::CharacteristicComponent {
+		/**
+		 
+		*/
+		
+		
+
+		/**
+		Get Parameters Weather STATION, for compatibility with the component 
+		working at the Medicina telescope
+
+		@return parameters
+
+		
+		*/
+		parameters getData();
+		/**
+		Air Temperature
+		*/
+
+
+		readonly attribute ACS::RWdouble temperature;	
+		/**
+		Wind Direction
+		*/
+		readonly attribute ACS::RWdouble winddir;
+		/**
+		Pressure
+		*/
+
+		readonly attribute ACS::RWdouble pressure;
+		/**
+		Wind Speed
+		*/
+
+		readonly attribute ACS::RWdouble windspeed;
+		/**
+		Relative Humidity
+		*/
+		readonly attribute ACS::RWdouble humidity;
+
+						
+	};
+};
+#endif

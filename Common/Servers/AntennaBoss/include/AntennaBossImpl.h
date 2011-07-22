@@ -1,0 +1,602 @@
+#ifndef _ANTENNABOSSIMPL_H
+#define _ANTENNABOSSIMPL_H
+
+/* ************************************************************************************************************* */
+/* IRA Istituto di Radioastronomia                                                                               */
+/* $Id: AntennaBossImpl.h,v 1.23 2011-04-15 09:09:11 a.orlati Exp $										         */
+/*                                                                                                               */
+/* This code is under GNU General Public Licence (GPL).                                                          */
+/*                                                                                                               */
+/* Who                                                when                     What                                                       */
+/* Andrea Orlati(aorlati@ira.inaf.it) 20/11/2007       Creation                                                  */
+/*  Andrea Orlati(aorlati@ira.inaf.it) 20/08/2008      Added the command line parsing                           */
+/*  Andrea Orlati(aorlati@ira.inaf.it) 09/04/2010      Added wrappers function: track, moon, elevationScan,azimuthScan                 */
+/*  Andrea Orlati(aorlati@ira.inaf.it) 13/09/2010      Major update during several weeks, compliant to all fetures of the IDL interface, and all capabilities implemented  */
+
+
+#ifndef __cplusplus
+#error This is a C++ include file and cannot be used from plain C
+#endif
+
+#include <baciCharacteristicComponentImpl.h>
+#include <baciSmartPropertyPointer.h>
+#include <baciROdouble.h>
+#include <baciROstring.h>
+#include <enumpropROImpl.h>
+#include <Definitions.h>
+#include <AntennaDefinitionsS.h>
+#include <AntennaBossS.h>
+#include <SP_parser.h>
+#include <ManagementErrors.h>
+#include "BossCore.h"
+#include <SecureArea.h>
+#include "WorkingThread.h"
+#include "WatchingThread.h"
+
+/** 
+ * @mainpage AntennaBoss component Implementation 
+ * @date 13/10/2010
+ * @version 1.41.0
+ * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
+ * @remarks Last compiled under ACS 7.0.2
+ * @remarks compiler version is 4.1.2
+*/
+
+using namespace baci;
+
+namespace SimpleParser {
+class SectionString {
+public:
+	static char *valToStr(Antenna::TSections& val) {
+		char *c=new char[16];
+		if (val==Antenna::ACU_CW) {
+			strcpy(c,"CW");
+		}
+		else if (val==Antenna::ACU_CCW) {
+			strcpy(c,"CCW");
+		}
+		else {
+			strcpy(c,"NEUTRAL");
+		}
+		return c;
+	}
+	static Antenna::TSections strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
+		IRA::CString strVal(str);
+		strVal.MakeUpper();
+		if (strVal=="CW") {
+			return Antenna::ACU_CW;
+		}
+		else if (strVal=="CCW") {
+			return Antenna::ACU_CCW;
+		}
+		else if (strVal=="NEUTRAL") {
+			return Antenna::ACU_NEUTRAL;
+		}
+		else if (strVal=="-1") {
+			return Antenna::ACU_NEUTRAL;
+		}
+		else {
+			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"SectionString::strToVal()");
+			throw ex;
+		}
+	}
+};
+
+class EquinoxString {
+public:
+	static char *valToStr(Antenna::TSystemEquinox& val) {
+		char *c=new char[16];
+		if (val==Antenna::ANT_B1950) {
+			strcpy(c,"B1950");
+		}
+		else if (val==Antenna::ANT_J2000) {
+			strcpy(c,"J2000");
+		}
+		else {
+			strcpy(c,"APPARENT");
+		}
+		return c;
+	}
+	static Antenna::TSystemEquinox strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
+		IRA::CString strVal(str);
+		strVal.MakeUpper();
+		if ((strVal=="1950") || (strVal=="1950.0") || (strVal=="B1950")) {
+			return Antenna::ANT_B1950;
+		}
+		else if ((strVal=="2000") || (strVal=="2000.0") || (strVal=="J2000")) {
+			return Antenna::ANT_J2000;
+		}
+		else if ((strVal=="APPARENT") || (strVal=="-1") ) {
+			return Antenna::ANT_APPARENT;
+		}
+		else {
+			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"EquinoxString::strToVal()");
+			throw ex;			
+		}
+	}
+};
+
+};
+
+
+/**
+ * This class is the implementation of the AntennaBoss component. This component is the manager of all the Antenna
+ * package and it is capable to lead a single subscan both in tracking and OnTheFly mode.  
+ * @author <a href=mailto:a.orlati@ira.inaf.it>Orlati Andrea</a>
+ * Istituto di Radioastronomia, Italia
+ * <br> 
+ */
+class AntennaBossImpl: public CharacteristicComponentImpl,
+				       public virtual POA_Antenna::AntennaBoss
+{
+public:
+	
+	/** 
+	* Constructor.
+	* @param CompName component's name. This is also the name that will be used to find the configuration data for the component in the Configuration Database.
+	* @param containerServices pointer to the class that exposes all services offered by container
+	*/
+	AntennaBossImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices);
+
+	/**
+	 * Destructor.
+	*/
+	virtual ~AntennaBossImpl(); 
+
+	/** 
+	 * Called to give the component time to initialize itself. The component reads in configuration files/parameters or 
+	 * builds up connection to devices or other components. 
+	 * Called before execute. It is implemented as a synchronous (blocking) call.
+	 * @throw ACSErr::ACSbaseExImpl
+	*/
+	virtual void initialize() throw (ACSErr::ACSbaseExImpl);
+
+	/**
+ 	 * Called after <i>initialize()</i> to tell the component that it has to be ready to accept incoming 
+ 	 * functional calls any time. 
+	 * Must be implemented as a synchronous (blocking) call. In this class the default implementation only 
+	 * logs the COMPSTATE_OPERATIONAL
+	 * @throw ACSErr::ACSbaseExImpl
+	*/
+	virtual void execute() throw (ACSErr::ACSbaseExImpl);
+	
+	/** 
+	 * Called by the container before destroying the server in a normal situation. This function takes charge of 
+	 * releasing all resources.
+	*/
+	virtual void cleanUp();
+	
+	/** 
+	 * Called by the container in case of error or emergency situation. This function tries to free all resources 
+	 * even though there is no warranty that the function is completely executed before the component is destroyed.
+	*/	
+	virtual void aboutToAbort();
+	
+	/**
+     * Returns a reference to the theoreticalAzimuth property Implementation of IDL interface.
+	 * @return pointer to read-only double property theoreticalAzimuth
+	*/
+	virtual ACS::ROdouble_ptr rawAzimuth() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the theoreticalElevation property Implementation of IDL interface.
+	 * @return pointer to read-only double property theoreticalElevation
+	*/
+	virtual ACS::ROdouble_ptr rawElevation() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the observedAzimuth property Implementation of IDL interface.
+	 * @return pointer to read-only double property observedAzimuth
+	*/
+	virtual ACS::ROdouble_ptr observedAzimuth() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the observedElevation property Implementation of IDL interface.
+	 * @return pointer to read-only double property observedElevation
+	*/
+	virtual ACS::ROdouble_ptr observedElevation() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the observedRightAscension property Implementation of IDL interface.
+	 * @return pointer to read-only double property observedRightAscension
+	*/
+	virtual ACS::ROdouble_ptr observedRightAscension() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the observedDeclination property Implementation of IDL interface.
+	 * @return pointer to read-only double property observedDeclination
+	*/
+	virtual ACS::ROdouble_ptr observedDeclination() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the observedGalLongitude property Implementation of IDL interface.
+	 * @return pointer to read-only double property observedGalLongitude
+	*/
+	virtual ACS::ROdouble_ptr observedGalLongitude() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the observedGalLatitude property Implementation of IDL interface.
+	 * @return pointer to read-only double property observedGalLatitude
+	*/
+	virtual ACS::ROdouble_ptr observedGalLatitude() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the target property Implementation of IDL interface.
+	 * @return pointer to read-only string property target
+	*/
+	virtual ACS::ROstring_ptr target() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the targetRightAscension property Implementation of IDL interface.
+	 * @return pointer to read-only double property targetRightAscension
+	*/	
+	virtual ACS::ROdouble_ptr targetRightAscension() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the targetRightAscension property Implementation of IDL interface.
+	 * @return pointer to read-only double property targetRightAscension
+	*/	
+	virtual ACS::ROdouble_ptr targetDeclination() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the targetVlsr property implementation of IDL interface.
+	 * @return pointer to read-only double property targetVlsr
+	*/	
+	virtual ACS::ROdouble_ptr targetVlsr() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the generatorType property Implementation of IDL interface.
+	 * @return pointer to read-only ROTGeneratorType property target
+	*/
+	virtual Antenna::ROTGeneratorType_ptr generatorType() throw (CORBA::SystemException); 
+	
+	/**
+     * Returns a reference to the status property Implementation of IDL interface.
+	 * @return pointer to read-only ROTSystemStatus property status
+	*/
+	virtual Management::ROTSystemStatus_ptr status() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the enable property implementation of IDL interface.
+	 * @return pointer to read-only ROTBoolean  property enabled
+	*/
+	virtual Management::ROTBoolean_ptr enabled() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the correctionEnabled property implementation of IDL interface.
+	 * @return pointer to read-only ROTBoolean  property correctionEnabled
+	*/
+	virtual Management::ROTBoolean_ptr correctionEnabled() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the pointingAzimuthCorrection property implementation of IDL interface.
+	 * @return pointer to read-only double property pointingAzimuthCorrection
+	*/
+	virtual ACS::ROdouble_ptr pointingAzimuthCorrection() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the pointingElevationCorrection property implementation of IDL interface.
+	 * @return pointer to read-only double property pointingElevationCorrection
+	*/
+	virtual ACS::ROdouble_ptr pointingElevationCorrection () throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the refractionCorrection property implementation of IDL interface.
+	 * @return pointer to read-only double property refractionCorrection
+	*/	
+	virtual ACS::ROdouble_ptr refractionCorrection() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the azimuthOffset property implementation of IDL interface.
+	 * @return pointer to read-only double property azimuthOffset
+	*/	
+	virtual ACS::ROdouble_ptr azimuthOffset() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the elevationOffset property implementation of IDL interface.
+	 * @return pointer to read-only double property elevationOffset
+	*/	
+	virtual ACS::ROdouble_ptr elevationOffset() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the rightAscensionOffset property implementation of IDL interface.
+	 * @return pointer to read-only double property rightAscensionOffset
+	*/	
+	virtual ACS::ROdouble_ptr rightAscensionOffset() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the declinationOffset property implementation of IDL interface.
+	 * @return pointer to read-only double property declinationOffset
+	*/	
+	virtual ACS::ROdouble_ptr declinationOffset() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the longitudeOffset property implementation of IDL interface.
+	 * @return pointer to read-only double property longitudeOffset
+	*/	
+	virtual ACS::ROdouble_ptr longitudeOffset() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the latitudeOffset property implementation of IDL interface.
+	 * @return pointer to read-only double property latitudeOffset
+	*/	
+	virtual ACS::ROdouble_ptr latitudeOffset() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the HPBW property implementation of IDL interface.
+	 * @return pointer to read-only double property HPBW
+	*/	
+	virtual ACS::ROdouble_ptr BWHM() throw (CORBA::SystemException);
+		
+	/**
+	 * This method is used to stow the antenna.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ManagementErrors::ParkingErrorEx  
+	 */
+	void park() throw (CORBA::SystemException,ManagementErrors::ParkingErrorEx);
+	
+	/**
+	 * This method will be used to configure the mount before starting an observation
+	 * param config mnemonic code of the required configuration
+	 * @throw CORBA::SystemException
+	 * @throw ManagementErrors::ConfigurationErrorEx
+	 */
+	void setup(const char *config) throw (CORBA::SystemException,ManagementErrors::ConfigurationErrorEx);
+	
+	/**
+	 * This method stops the mount. It also chease the any tracking activities of this component, if there are any. 
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	*/
+	void stop() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	
+	/**
+	 * This method causes the enable flag to be set in false, that means the component is not fully operational any more and many
+	 * functionalities will not be available.
+	 * @throw CORBA::SystemException 
+	*/
+	void disable() throw (CORBA::SystemException);
+	
+	/**
+	 * This method causes the enable flag to be set in true, that means the component is  fully operational.
+	 * @throw CORBA::SystemException 
+	*/	
+	void enable() throw (CORBA::SystemException);
+	
+	/**
+	 * This methods sets the attribute <i>correctionEnabled</i> to true. That means that the instrumental correction 
+	 * will be applied.
+	 * @throw CORBA::SystemException 
+	 */
+	void correctionEnable() throw (CORBA::SystemException);
+	
+	/**
+	 * This methods sets the attribute <i>correctionEnabled</i> to false. That means that the instrumental correction 
+	 * will not be applied.
+	 * @throw CORBA::SystemException 
+	 */	
+	void correctionDisable() throw (CORBA::SystemException);
+	
+	/**
+	 * This method sets the value for the HPBW.
+	 * @throw CORBA::SystemException
+	 * @param value the new value in radians.
+	 */
+	void setBWHM(CORBA::Double value) throw (CORBA::SystemException);
+	
+	/**
+	 * This method forse the <i>BWHM</i> to be computed starting from the current taper and sky frequency.
+	 * @throw CORBA::SystemException
+	 * @param taper current taper in db
+	 * @param waveLength current wave length of the sky frequency in meters. 
+	 */
+	void computeBWHM(CORBA::Double taper,CORBA::Double waveLength) throw (CORBA::SystemException);
+
+	/**
+	 * This method sets the value for the HPBW.
+	 * @throw CORBA::SystemException
+	 * @param value the new value in Km per seconds.
+	 */
+	void setVlsr(CORBA::Double value) throw (CORBA::SystemException);
+	
+	/**
+	 *  This method starts a new scan that could be any of the possible antenna movement.  It loads an ammount of coordinates into the mount and then it starts the thread that is 
+	 * in charge to keep the  tracking trajectory up to date. This method succeeds only if the mount has already 
+	 * been configured in PROGRAMTRACK mode.
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx
+	 * @param targetName string identifier of the target
+	 * @param startUt time from which the scan have to start. If negative the scan is started as soon as possible. In that case the argument could return back the computed effective start UT time.
+	 * @param parameters this structure stores the parameters required by the ephemeris generator to computes new coordinates.
+	*/	
+	void startScan(const char *targetName,ACS::Time& startUT,const Antenna::TTrackingParameters& parameters) throw (CORBA::SystemException,
+			AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx);
+	
+	/**
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a sidereal traking over a catalog source.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx 
+	 * @param targetName name of the source to track, it must be known by the system
+	*/ 
+	void track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
+			
+	/**
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a traking of the moon.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx 
+	*/ 
+	void moon() throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
+			
+	/**
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start an On The Fly scan over a central point. The central point is
+	 * given in J2000 equatorial frame and the scan is done along the elevation axis of the telescope.
+	 * @param cRa right ascension of the central point (radians)
+	 * @param cDec declination of the central point (radians)
+	 * @param span distance that the telescope travels during the scan
+	 * @param duration duration of the scan, the combinaiton of duration and span gives the scan velocity
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx 
+	 */ 
+	void elevationScan(CORBA::Double cRA,CORBA::Double cDec,CORBA::Double span,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,
+			CORBA::SystemException);
+			
+	/**
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start an On The Fly scan over a central point. The central point is
+	 * given in J2000 equatorial frame and the scan is done along the azimuth axis of the telescope.
+	 * @param cRa right ascension of the central point (radians)
+	 * @param cDec declination of the central point (radians)
+	 * @param span distance that the telescope travels during the scan
+	 * @param duration duration of the scan, the combinaiton of duration and span gives the scan velocity
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx 
+	 */ 
+	void azimuthScan(CORBA::Double cRA,CORBA::Double cDec,CORBA::Double span,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,
+			CORBA::SystemException); 
+	
+	/**
+	 * This function is used internally to compute the slewing time of the telescope starting from the 
+	 * current position to the target position.
+	 * @throw ComponentErrors::ComponentErrrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx
+	 * @throw CORBA::SystemException 
+	 * @param targetName name of the target of the scan 
+	 * @param startUt this is the time before which the telescope is supposed to reach the target
+	 * @param parameters this structure describes the target
+	 * @param slewingTime time that the telescope will take to reach the target position
+	 * @return true if the telescope will be in the target position before the given epoch expires and the target is above the horizon, false if the
+	 * telescope will not be able to get there.
+	 */ 
+	bool checkScan(const char* targetName,ACS::Time startUt,const Antenna::TTrackingParameters& parameters,ACS::TimeInterval_out slewingTime) throw (
+			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
+	
+	/**
+	 * This method implements the command line interpreter. the interpreter allows to ask for services or to issue commands
+	 * to the sub-system by human readable command lines.
+	 * @param cmd string that contains the command line
+	 * @return the string that contains the answer to the command if succesful. It must be freed by the caller.
+	 * @throw CORBA::SystemException
+	 * @throw ManagementErrors::CommandLineErrorEx Thrown when the command execution or parsing result in an error. It contains the error message
+	 * @todo to be implemented yet.
+	 */
+	virtual char * command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);
+	
+	/**
+	 * This method allows the user to set the offsets for the given frame. The offset are considered only if a tracking has already
+	 * been started, otherwise they are stored for next scan.  
+	 * The longitude offset will be corrected for the cosine of latitude.
+	 * @param lonOff new offsets for azimuth (radians)
+	 * @param latOff new offsets for elevation (radians)
+	 * @param frame reference frame
+	 * @throw CORBA::SystemException
+	 * @throw AntennaErrors::AntennaErrorsEx 
+     * @throw ComponentErrors::ComponentErrorsEx
+	 *    @arg  \c ComponentErrors::UnexpectedExImp
+	 *    @arg  \c ComponentErrors::CORBAProblemExImpl 
+	*/
+	virtual void setOffsets(CORBA::Double lonOff,CORBA::Double latOff,Antenna::TCoordinateFrame frame) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
+	/**
+	 * This function is used internally. It permits to access the generator currently used by the boss in order to produce new coordinates.
+	 * A client can read the computed (apparent) coordinates by getting the componet which has the returned CURL..
+	 * @throw CORBA::SystemException
+	 * @param type it indicates the type of the generator, useful when narrowing to the real generator.
+	 * @return the string that represents the CURL to the generator currently in use. It must be freed by the caller.  
+	*/
+	char *getGeneratorCURL(Antenna::TGeneratorType_out type) throw (CORBA::SystemException);
+	
+	/**
+	 * Is is used to return the raw coordinates commanded to the mount for the given timestamp.
+	 * @throw CORBA::SystemException
+	 * @param time the given timestamp to which the returned coordinates refer to
+	 * @param az the returned raw azimuth in radians
+	 * @param el the returned raw elevation in radians 
+	*/
+	void getRawCoordinates(ACS::Time time,CORBA::Double_out az,CORBA::Double_out el) throw (CORBA::SystemException);
+	
+	/**
+	 * It is used to return the observed  equatorial coordinates for the given timestamp and interval.
+	 * @throw CORBA::SystemException
+	 * @param time the given timestamp to which the returned coordinates refer to
+	 * @param duration time interaval over which the coordinates are averaged
+	 * @param ra the returned observed right ascension in radians
+	 * @param el the returned observed declination in radians 
+	*/
+	void getObservedEquatorial(ACS::Time time,ACS::TimeInterval duration,CORBA::Double_out ra,CORBA::Double_out dec) throw (CORBA::SystemException);
+
+	/**
+	 * It is used to return the observed  galactic coordinates for the given timestamp.
+	 * @throw CORBA::SystemException
+	 * @param time the given timestamp to which the returned coordinates refer to
+	 * @param longitude the returned observed longitude in radians
+	 * @param latitude the returned observed latitude in radians 
+	*/
+	void getObservedGalactic(ACS::Time time,CORBA::Double_out longitude,CORBA::Double_out latitude) throw (CORBA::SystemException);
+	
+	/**
+	 * It is used to returns the observed horizontal coordinates for the given timestamp.
+	 * @throw CORBA::SystemException
+	 * @param time the given timestamp to which the returned coordinates refer to
+	 * @param duration time interaval over which the coordinates are averaged
+	 * @param ra the returned observed azimuth in radians
+	 * @param el the returned observed elevation in radians 
+	*/
+	void getObservedHorizontal(ACS::Time time,ACS::TimeInterval duration,CORBA::Double_out az,CORBA::Double_out el) throw (CORBA::SystemException);
+	
+	/**
+	 * It is used internally to returns the user offsets in all supported frames
+	 * @throw CORBA::SystemException
+	 * @param raOff the returned offset azimuth in radians
+	 * @param elOff the returned offset elevation in radians
+	 * @param raOff the returned offset right ascension in radians
+	 * @param decOff the returned offset declination in radians
+	 * @param lonOff the returned offset longitude in radians
+	 * @param latOff the returned offset latitude in radians  
+	*/
+	void getAllOffsets(CORBA::Double_out azOff,CORBA::Double_out elOff,CORBA::Double_out raOff,CORBA::Double_out decOff,CORBA::Double_out lonOff,CORBA::Double_out latOff) throw (CORBA::SystemException);
+	
+		
+private:
+	SmartPropertyPointer<ROstring> m_ptarget;
+	SmartPropertyPointer<ROdouble> m_prawAzimuth;
+	SmartPropertyPointer<ROdouble> m_prawElevation;
+	SmartPropertyPointer<ROdouble> m_pobservedAzimuth;
+	SmartPropertyPointer<ROdouble> m_pobservedElevation;
+	SmartPropertyPointer<ROdouble> m_pobservedRightAscension;
+	SmartPropertyPointer<ROdouble> m_pobservedDeclination;
+	SmartPropertyPointer<ROdouble> m_pobservedGalLongitude;
+	SmartPropertyPointer<ROdouble> m_pobservedGalLatitude;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Antenna::TGeneratorType),
+	  POA_Antenna::ROTGeneratorType> > m_pgeneratorType;
+	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),
+	  POA_Management::ROTSystemStatus> > m_pstatus;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),
+	  POA_Management::ROTBoolean>  > m_penabled;
+	SmartPropertyPointer<ROdouble> m_ppointingAzimuthCorrection;
+	SmartPropertyPointer<ROdouble> m_ppointingElevationCorrection;
+	SmartPropertyPointer<ROdouble> m_prefractionCorrection;
+	SmartPropertyPointer<ROdouble> m_pBWHM;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),
+	  POA_Management::ROTBoolean>  > m_pcorrectionEnabled;
+	SmartPropertyPointer<ROdouble> m_ptargetRightAscension;
+	SmartPropertyPointer<ROdouble> m_ptargetDeclination;
+	SmartPropertyPointer<ROdouble> m_ptargetVlsr;
+	SmartPropertyPointer<ROdouble> m_pazimuthOffset;
+	SmartPropertyPointer<ROdouble> m_pelevationOffset;
+	SmartPropertyPointer<ROdouble> m_prightAscensionOffset;
+	SmartPropertyPointer<ROdouble> m_pdeclinationOffset;
+	SmartPropertyPointer<ROdouble> m_plongitudeOffset;
+	SmartPropertyPointer<ROdouble> m_platitudeOffset;
+	IRA::CSecureArea<CBossCore> *m_core;
+	CWorkingThread *m_workingThread;
+	CWatchingThread *m_watchingThread;
+	CConfiguration  m_config;
+	SimpleParser::CParser<CBossCore> *m_parser;
+};
+
+#endif /*!_H*/
+

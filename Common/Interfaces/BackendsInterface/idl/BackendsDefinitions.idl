@@ -1,0 +1,82 @@
+/******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
+* DO NOT EDIT
+* Automatically generated from ../idl/BackendsDefinitions.midl
+* on Tue Apr 26 17:22:26 2011
+*******************************************************************************/
+#ifndef _BackendsDefinitions_midl_
+#define _BackendsDefinitions_midl_
+#ifndef _ACS_PREPROCESSED_
+#define _ACS_PREPROCESSED_
+#endif
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+
+#pragma prefix "alma"
+module Backends {
+
+
+
+
+ enum TPolarization {
+  BKND_LCP,
+  BKND_RCP,
+  BKND_FULL_STOKES
+ };
+
+
+ typedef sequence<TPolarization> TPolarizationSeq; interface CBTPolarization : ACS::Callback { oneway void working(in TPolarization value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TPolarization value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTPolarization TPolarizationCB; interface AlarmTPolarization : ACS::Callback { oneway void alarm_raised(in TPolarization value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TPolarization value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTPolarization TPolarizationAlarm; interface PTPolarization: ACS::TypelessProperty { TPolarization get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TPolarizationSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TPolarization default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TPolarizationSeq allStates; };
+ interface ROTPolarization: PTPolarization{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TPolarizationSeq alarm_on; readonly attribute TPolarizationSeq alarm_off; };
+ interface RWTPolarization: PTPolarization { ACSErr::Completion set_sync(in TPolarization value); void set_async(in TPolarization value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TPolarization value);};
+
+
+
+
+
+
+
+
+ struct TSectionHeader {
+  long id;
+  long bins;
+  TPolarization polarization;
+  double bandWidth;
+  double frequency;
+  double attenuation[2];
+  double sampleRate;
+  long feed;
+  long inputs;
+  long IF[2];
+ };
+
+
+
+
+
+ struct TMainHeader {
+  long sections;
+
+  long beams;
+  long integration;
+  long sampleSize;
+ };
+
+
+
+
+
+
+
+
+ struct TDumpHeader {
+  ACS::Time time;
+  long dumpSize;
+
+  boolean calOn;
+ };
+
+
+};
+
+#endif

@@ -1,0 +1,110 @@
+/******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
+* DO NOT EDIT
+* Automatically generated from ../idl/ManagmentDefinitions.midl
+* on Tue Apr 26 17:20:39 2011
+*******************************************************************************/
+#ifndef _ManagmentDefinitions_midl_
+#define _ManagmentDefinitions_midl_
+#ifndef _ACS_PREPROCESSED_
+#define _ACS_PREPROCESSED_
+#endif
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ManagementErrors.idl>
+
+#pragma prefix "alma"
+module Management {
+ interface CommandInterpreter {
+
+
+
+
+
+
+
+  string command(in string command) raises (ManagementErrors::CommandLineErrorEx);
+ };
+
+
+
+ enum TSystemStatus {
+  MNG_OK,
+  MNG_WARNING,
+  MNG_FAILURE
+ } ;
+
+ typedef sequence<TSystemStatus> TSystemStatusSeq; interface CBTSystemStatus : ACS::Callback { oneway void working(in TSystemStatus value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TSystemStatus value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTSystemStatus TSystemStatusCB; interface AlarmTSystemStatus : ACS::Callback { oneway void alarm_raised(in TSystemStatus value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TSystemStatus value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTSystemStatus TSystemStatusAlarm; interface PTSystemStatus: ACS::TypelessProperty { TSystemStatus get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TSystemStatusSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TSystemStatus default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TSystemStatusSeq allStates; };
+ interface ROTSystemStatus: PTSystemStatus{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TSystemStatusSeq alarm_on; readonly attribute TSystemStatusSeq alarm_off; };
+ interface RWTSystemStatus: PTSystemStatus { ACSErr::Completion set_sync(in TSystemStatus value); void set_async(in TSystemStatus value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TSystemStatus value);};
+
+
+
+
+
+ enum TBoolean {
+  MNG_TRUE,
+  MNG_FALSE
+ };
+
+
+ typedef sequence<TBoolean> TBooleanSeq; interface CBTBoolean : ACS::Callback { oneway void working(in TBoolean value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TBoolean value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTBoolean TBooleanCB; interface AlarmTBoolean : ACS::Callback { oneway void alarm_raised(in TBoolean value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TBoolean value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTBoolean TBooleanAlarm; interface PTBoolean: ACS::TypelessProperty { TBoolean get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TBooleanSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TBoolean default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TBooleanSeq allStates; };
+ interface ROTBoolean: PTBoolean{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TBooleanSeq alarm_on; readonly attribute TBooleanSeq alarm_off; };
+ interface RWTBoolean: PTBoolean { ACSErr::Completion set_sync(in TBoolean value); void set_async(in TBoolean value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TBoolean value);};
+
+
+
+
+
+ enum TScanAxis {
+  MNG_NO_AXIS,
+  MNG_HOR_LON,
+  MNG_HOR_LAT,
+  MNG_EQ_LON,
+  MNG_EQ_LAT,
+  MNG_GAL_LON,
+  MNG_GAL_LAT,
+  MNG_SUBR_Z,
+  MNG_SUBR_X,
+  MNG_SUBR_Y,
+  MNG_PFP_Z,
+  MNG_PFP_Y
+ };
+
+
+ typedef sequence<TScanAxis> TScanAxisSeq; interface CBTScanAxis : ACS::Callback { oneway void working(in TScanAxis value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TScanAxis value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTScanAxis TScanAxisCB; interface AlarmTScanAxis : ACS::Callback { oneway void alarm_raised(in TScanAxis value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TScanAxis value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTScanAxis TScanAxisAlarm; interface PTScanAxis: ACS::TypelessProperty { TScanAxis get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TScanAxisSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TScanAxis default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TScanAxisSeq allStates; };
+ interface ROTScanAxis: PTScanAxis{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TScanAxisSeq alarm_on; readonly attribute TScanAxisSeq alarm_off; };
+ interface RWTScanAxis: PTScanAxis { ACSErr::Completion set_sync(in TScanAxis value); void set_async(in TScanAxis value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TScanAxis value);};
+
+ interface Subsystem {
+
+
+
+  readonly attribute Management::ROTSystemStatus status;
+
+
+
+
+
+
+
+  void setup(in string config) raises (ManagementErrors::ConfigurationErrorEx);
+
+
+
+
+
+
+
+  void park() raises (ManagementErrors::ParkingErrorEx);
+ };
+
+
+};
+
+#endif
