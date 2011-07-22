@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+   -   Wed Apr 13 15:18:03 UTC 2005 modified by Andrea Orlati
+-->
+<MedicinaMount xmlns="urn:schemas-cosylab-com:MedicinaMount:1.0" 
+               xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+               xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               IPAddress="192.167.189.5"
+               Port="8102"
+               ConnectTimeout="6000000"
+               ReceiveTimeout="3000000"
+               PropertyRefreshTime="100000"
+               ControlThreadPeriod="200000"
+               RepetitionCacheTime="2000000"
+               RepetitionExpireTime="5000000"
+			   OscillationThreshold="0.01"
+			   OscillationAlarmDuration="2000000"	
+			   OscillationNumberThreshold="4"	
+			   OscillationRecoverWaitTime="3000000">
+               
+	<azimuth description="Azimuth drive position" 
+	         units="degree"
+	         graph_min="-90"
+	         graph_max="450"
+	/>
+	<elevation description="Elevation drive position"
+	           units="degree"
+	           graph_min="0"
+	           graph_max="90"
+	/>
+	<azimuthError description="Azimuth position error"
+	              units="degree"
+	              graph_min="0"
+	              graph_max="360"
+	/>
+	<elevationError description="Elevation position error"
+	                units="degree"
+	                graph_min="0"
+	                graph_max="90"
+	/>
+	<azimuthMode description="Azimuth Mode" />
+	<elevationMode description="Elevation Mode" />
+	<time description="ACU current time"/>
+	<status description="The status of the mount component" />
+	<azimuthServoStatus description="Servo status of the azimuth axis" />
+	<elevationServoStatus description="Servo status of the elevation axis" />
+	<servoSystemStatus description="Servo system status word" />
+	<freeProgramTrackPosition description="Number of available time tagged program track positions" />
+	<section description="Section of the antenna travel range" />
+	<azimuthRate description="Azimuth rate"
+	             units="degree/sec"
+	             graph_min="-0.8"
+	             graph_max="0.8"
+	/>
+	<elevationRate description="Elevation rate"
+	               units="degree/sec"
+	               graph_min="-0.5"
+	               graph_max="0.5"
+	/>
+	<azimuthOffset description="Position offset in azimuth" />
+	<elevationOffset description="Position offset in elevation"	/>
+	<deltaTime description="Time offset" />
+	<commandedAzimuth description="Last commanded azimuth position" />
+	<commandedElevation description="Last commanded elevation position" />
+	<mountStatus description="The status of the mount" />
+</MedicinaMount>
