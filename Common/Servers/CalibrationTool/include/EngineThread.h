@@ -103,7 +103,6 @@ private:
     double m_lastCoordinate;
     double m_LatPos, m_LonPos;
     double m_LatOff, m_LonOff;
-    double m_lastLatOff, m_lastLonOff;
     double m_LatErr, m_LonErr;
     float *m_off;
     float *m_secsFromMidnight;
@@ -118,6 +117,7 @@ private:
 	double m_lonUserOff, m_latUserOff;
 	int m_latResult, m_lonResult;
 	int m_lonDone, m_latDone;
+    double * m_latPositions;
 	ACS::Time m_time;
 	/**
 	 * This object is in charge of storing the site information

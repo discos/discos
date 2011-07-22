@@ -41,7 +41,7 @@ CEngineThread::CEngineThread (const ACE_CString & name,
     observatoryError = false;
     m_lonDone = m_latDone = 0;
     m_LatOff = m_LonOff = 0.0;
-    m_lastLatOff = m_lastLonOff = 0.0;
+    m_latPositions = new double[DATACOORDINATESSEQLENGTH];
 }
 
 CEngineThread::~CEngineThread ()
@@ -67,6 +67,9 @@ CEngineThread::~CEngineThread ()
     }
     if (m_errPar) {
         delete[]m_errPar;
+    }
+    if (m_latPositions) {
+        delete [] m_latPositions;
     }
     try {
         CCommonTools::unloadAntennaBoss (m_antennaBoss, m_service);
@@ -234,6 +237,7 @@ bool CEngineThread::processData ()
 	    m_lastCoordinate = az;
 	    m_cosLat = cos (targetEL);
 	    m_CoordIndex = 0;	// LON
+        m_latPositions[m_dataSeqCounter] = el;
 	    break;
         case Management::MNG_HOR_LAT:
             CTskySource.process (CTdateTime, m_site);
@@ -257,6 +261,7 @@ bool CEngineThread::processData ()
 	        m_lastCoordinate = ra;
 	        m_cosLat = cos (targetDEC);
 	        m_CoordIndex = 0;	// LON
+            m_latPositions[m_dataSeqCounter] = dec;
 	    break;
         case Management::MNG_EQ_LAT:
 	        m_antennaBoss->getObservedEquatorial (m_time, data->getIntegrationTime () * 10000, ra, dec);
@@ -280,6 +285,7 @@ bool CEngineThread::processData ()
 	        m_lastCoordinate = lon;
 	        m_cosLat = cos (targetLAT);
 	        m_CoordIndex = 0;	// LON
+            m_latPositions[m_dataSeqCounter] = lat;
 	    break;
         case Management::MNG_GAL_LAT:
 	        CTskySource.process (CTdateTime, m_site);
@@ -501,7 +507,7 @@ void CEngineThread::runLoop ()
 			}
 		      m_file << (const char *) out;
 		      m_file << sourceFlux_val << std::endl;
-		      ACS_LOG (LM_FULL_INFO, "CEngineThread::runLoop()", (LM_NOTICE, "FILE_OPENED %s", (const char *) data->getFileName ()));
+		      ACS_LOG (LM_FULL_INFO, "CalibrationTool::CEngineThread::runLoop()", (LM_NOTICE, "FILE_OPENED %s", (const char *) data->getFileName ()));
 		  }
 		data->startRunnigStage ();
 	    }			// if data->isStart()
@@ -588,6 +594,7 @@ void CEngineThread::runLoop ()
 				(long)(tS.microSecond () / 1000.));
 			    m_file << (const char *) out;
 			    m_file << m_errPar[1] * DR2D << " " << m_errPar[2] * DR2D<< " " << m_errPar[0] << " " << m_errPar[3] << " " << m_errPar[4] << " " << m_reducedCHI << std::endl;
+
 			    data->setAmplitude (m_Par[0]);
 			    data->setPeakOffset (m_Par[1]);
 			    data->setHPBW (m_Par[2]);
@@ -610,19 +617,19 @@ void CEngineThread::runLoop ()
 				    case Management::MNG_HOR_LON:
 				    case Management::MNG_HOR_LAT:
 					m_antennaBoss->setOffsets (m_azUserOff,
-                                                m_elUserOff + m_LatOff + m_lastLatOff,
+                                                /*m_elUserOff + */m_LatOff,
                                                 Antenna::ANT_HORIZONTAL);
 					break;
 				    case Management::MNG_EQ_LON:
 				    case Management::MNG_EQ_LAT:
 					m_antennaBoss->setOffsets (m_raUserOff,
-                                                m_decUserOff + m_LatOff + m_lastLatOff,
+                                                /*m_decUserOff + */m_LatOff ,
 								                Antenna::ANT_EQUATORIAL);
 					break;
 				    case Management::MNG_GAL_LON:
 				    case Management::MNG_GAL_LAT:
 					m_antennaBoss->setOffsets (m_lonUserOff,
-                                                m_latUserOff + m_LatOff + m_lastLatOff,
+                                                /*m_latUserOff + */m_LatOff,
 								                Antenna::ANT_GALACTIC);
 					break;
 				    case Management::MNG_SUBR_Z:
@@ -646,7 +653,6 @@ void CEngineThread::runLoop ()
 			      }
 			    m_dataSeqCounter = 0;
 			    m_latDone = 1;
-			    m_lastLatOff = m_LatOff;
 			}
 		      else if ((m_CoordIndex == 0) && (m_lonResult == 0))
 			{	// LON scans
@@ -659,9 +665,12 @@ void CEngineThread::runLoop ()
 
 			    m_Par[2] *= m_cosLat;
 			    m_errPar[2] *= m_cosLat;
-			    m_LonPos = (m_dataSeq[0] + m_dataSeq[m_dataSeqCounter]) / 2.;
+			    m_LonPos = (m_dataSeq[0] + m_dataSeq[m_dataSeqCounter -1]) / 2.;
 			    m_LonOff = m_Par[1];
 			    m_LonErr = m_errPar[1];
+
+                // need to calculate here if the calibration starts with LON scans
+                m_LatPos = (m_latPositions[0] + m_latPositions[m_dataSeqCounter -1]) / 2.;
 
 			    // lonfit, lonerr
 			    tS.value (now.value().value);
@@ -699,21 +708,21 @@ void CEngineThread::runLoop ()
 				    case Management::MNG_NO_AXIS:
 					break;
 				    case Management::MNG_HOR_LON:
-					m_antennaBoss->setOffsets (m_azUserOff + m_LonOff + m_lastLonOff,
+					m_antennaBoss->setOffsets (/*m_azUserOff + */cos(m_LatPos) * m_LonOff ,
                                                 m_elUserOff,
                                                 Antenna::ANT_HORIZONTAL);
 					break;
 				    case Management::MNG_HOR_LAT:
 					break;
 				    case Management::MNG_EQ_LON:
-					m_antennaBoss->setOffsets (m_raUserOff + m_LonOff + m_lastLonOff,
+					m_antennaBoss->setOffsets (/*m_raUserOff + */cos(m_LatPos) * m_LonOff,
                                                 m_decUserOff,
                                                 Antenna::ANT_EQUATORIAL);
 					break;
 				    case Management::MNG_EQ_LAT:
 					break;
 				    case Management::MNG_GAL_LON:
-					m_antennaBoss->setOffsets (m_lonUserOff + m_LonOff + m_lastLonOff,
+					m_antennaBoss->setOffsets (/*m_lonUserOff + */cos(m_LatPos) * m_LonOff,
                                                 m_latUserOff,
                                                 Antenna::ANT_GALACTIC);
 					break;
@@ -740,9 +749,8 @@ void CEngineThread::runLoop ()
 			      }
 			    m_dataSeqCounter = 0;
 			    m_lonDone = 1;
-			    m_lastLonOff = m_LonOff;
 			}
-		      if ((m_latResult == 1) && (m_lonResult == 1))
+		      if ((m_latDone == 1) && (m_lonDone == 1))
 			{
 			    // offset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_lonResult, m_latResult 
 			    tS.value (now.value().value);
@@ -761,14 +769,14 @@ void CEngineThread::runLoop ()
 				 (long)(tS.microSecond () / 1000.));
 			    m_file << (const char *) out;
 			    m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << cos (m_LatPos) * m_LonOff * DR2D << " " << m_LatOff * DR2D << " " << cos (m_LatPos) * m_LonErr * DR2D << " " << m_LatErr * DR2D << " " << m_lonResult << " " << m_latResult << std::endl;
-			}
-		      if ((m_latDone == 1) && (m_lonDone == 1))
-			{
-			    m_file.close ();
-			    m_fileOpened = false;
+			    
 			    m_latDone = m_lonDone = 0;
 			    m_lonResult = m_latResult = 0;
-			    ACS_LOG (LM_FULL_INFO, "CEngineThread::runLoop()", (LM_NOTICE, "FILE_FINALIZED"));
+		      	    ACS_LOG (LM_FULL_INFO, "CalibrationTool::CEngineThread::runLoop()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %lf %d %d",
+					m_LonPos * DR2D, m_LatPos * DR2D, m_LonOff * DR2D, m_LatOff * DR2D, m_lonResult, m_latResult));
+		      	    ACS_LOG (LM_FULL_INFO, "CalibrationTool::CEngineThread::runLoop()", (LM_NOTICE, "XOFFSETS = %lf %lf %lf %lf %lf %lf %d %d",
+					m_LonPos * DR2D, m_LatPos * DR2D, cos (m_LatPos) * m_LonOff * DR2D, m_LatOff * DR2D, cos (m_LatPos) * m_LonErr * DR2D, m_LatErr * DR2D, m_lonResult, m_latResult));
+			    ACS_LOG (LM_FULL_INFO, "CalibrationTool::CEngineThread::runLoop()", (LM_NOTICE, "FILE_FINALIZED"));
 			}
 		  }
 		data->haltStopStage ();
