@@ -391,7 +391,7 @@ bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,
 
 bool CScanList::getScan(const DWORD& id,TRecord& rec)
 {
-	return getScan(id,rec.type,rec.primaryParameters,rec.primaryParameters/*,rec.target*/);
+	return getScan(id,rec.type,rec.primaryParameters,rec.secondaryParameters/*,rec.target*/);
 }
 
  bool CScanList::checkConsistency(DWORD& line)
@@ -788,9 +788,11 @@ bool CScanList::parseOTFC(const IRA::CString& val,Antenna::TTrackingParameters *
 		//span
 		if (scan->otf.geometry==Antenna::SUBSCAN_CONSTLON) {
 			if (!IRA::CIRATools::offsetToRad(span,scan->otf.lat2)) return false; //az span....no need of a check
+			scan->otf.lon2=0.0;
 		}
 		else {
-			if (!IRA::CIRATools::offsetToRad(span,scan->otf.lon2)) return false; //az span....no need of a check
+			if (!IRA::CIRATools::offsetToRad(span,scan->otf.lon2)) return false; //el span....no need of a check
+			scan->otf.lat2=0.0;
 		}
 		if (out==12) {
 			if (strcmp(offFrame,OFFFRAMEEQ)==0) {

@@ -26,7 +26,7 @@
 #include "Configuration.h"
 #include "Schedule.h"
 
-using namespace maci;
+//using namespace maci;
 
 class CScheduleExecutor;
 
@@ -44,7 +44,7 @@ public:
 	 * @param service pointer to the continaer services.
 	 * @param conf pointer to the class CConfiguration tat conatains all the configuration regarding the component
 	*/
-	CCore(ContainerServices *service,CConfiguration *conf);
+	CCore(maci::ContainerServices *service,CConfiguration *conf);
 
 	/** 
 	 * Destructor.
@@ -207,7 +207,7 @@ private:
 	/**
 	 * pointer to the container serivices
 	 */
-	ContainerServices * m_services;
+	maci::ContainerServices * m_services;
 	/**
 	 * Site information
 	 */

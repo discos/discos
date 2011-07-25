@@ -37,7 +37,7 @@
  * @remarks compiler version is 4.1.2
 */
 
-using namespace baci;
+//using namespace baci;
 
 /**
  * This class is the implementation of the Scheduler component.  
@@ -45,7 +45,7 @@ using namespace baci;
  * Istituto di Radioastronomia, Italia
  * <br> 
  */
-class SchedulerImpl: public CharacteristicComponentImpl,
+class SchedulerImpl: public baci::CharacteristicComponentImpl,
 				       public virtual POA_Management::Scheduler
 {
 
@@ -190,20 +190,20 @@ public:
 	virtual void chooseDefaultDataRecorder(const char *rcvInstance) throw (CORBA::SystemException);
 	
 	/**
-	 * This method stops the current runnig schedule, if any. In order to start a new schedule the current one must be stopped.
+	 * This method stops the current running schedule, if any. In order to start a new schedule the current one must be stopped.
 	 * @throw CORBA::SystemException
 	 **/
 	virtual void stopSchedule() throw (CORBA::SystemException);
 	
 	/**
-	 * This method halts the current runnig schedule, if any. The schedule is stopped after that the currently running scan is completed. 
+	 * This method halts the current running schedule, if any. The schedule is stopped after that the currently running scan is completed.
 	 * In order to start a new schedule the current one must be stopped.
 	 * @throw CORBA::SystemException
 	 **/
 	virtual void haltSchedule() throw (CORBA::SystemException);
 	
 	/**
-	 * This method will resetthe property <i>status</i> to MNG_OK.
+	 * This method will reset the property <i>status</i> to MNG_OK.
 	 * @throw CORBA::SystemException 
 	 */ 
 	virtual void clearStatus() throw (CORBA::SystemException);
@@ -211,7 +211,7 @@ public:
 	/**
 	 * This method will set the current device. The current device is a section of the currently used backend. When a new device is set some configuration are done.
 	 * first of all the configuration of the section is read, if everything works the new beamsize is computed.The current device is the backend section also used for calibration purposes.
-	 * By default the device (if not esplicitly set) is the number zero, but if this method is not called there is no guarantee that the backend configuration, the beamsize, the receiver configuration,
+	 * By default the device (if not explicitly set) is the number zero, but if this method is not called there is no guarantee that the backend configuration, the beamsize, the receiver configuration,
 	 * and the current device are coherent. the last set value can be read in the <i>currentDevice</i> attribute.
 	 * @param deviceID identifier of the section (of the current backend). The value is checked to be inside valid sections identifiers.  
 	 */
@@ -219,11 +219,11 @@ public:
 	
 	
 private:
-	SmartPropertyPointer<ROstring> m_pscheduleName;
-	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus> > m_pstatus;
-	SmartPropertyPointer<ROlong> m_pscanNumber;
-	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_ptracking;
-	SmartPropertyPointer<ROlong> m_pcurrentDevice;
+	baci::SmartPropertyPointer<baci::ROstring> m_pscheduleName;
+	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus> > m_pstatus;
+	baci::SmartPropertyPointer<baci::ROlong> m_pscanNumber;
+	baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_ptracking;
+	baci::SmartPropertyPointer<baci::ROlong> m_pcurrentDevice;
 	CConfiguration m_config;
 	CCore *m_core;
 };

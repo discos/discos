@@ -100,7 +100,7 @@ void CCore::doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TReco
 {
 	//No sync required, this is a private static method, called only by public method of this class and by the schedule executor.
 	/********************************************/
-	//This performs the scan from the Antennna point of view....when more apparatus will be involved we should think about it
+	//This performs the scan from the Antenna point of view....when more apparatus will be involved we should think about it
 	// here we'll have to put the code to command a different scans according the involved subsystem, for example subreflector instead of the antenna.
 	// the better way is to check the m_currentScanRec.type which should be changed from Antenna::TGeneratorType to something more generic
 	try {
@@ -368,7 +368,7 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
 }
 
 void CCore::setupDataTransfer(Management::DataReceiver_ptr writer,bool& writerError,const IRA::CString& obsName,const IRA::CString& prj,const long& scanId,const long& device,
-		const Management::TScanAxis& axis,const IRA::CString& fileName) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
+		const Management::TScanAxis& axis,const IRA::CString& fileName) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl)
 {
  	try {
  		if (!CORBA::is_nil(writer)) {
@@ -379,6 +379,10 @@ void CCore::setupDataTransfer(Management::DataReceiver_ptr writer,bool& writerEr
  			writer->setScanAxis(axis);
  			writer->setFileName((const char *)fileName);
  		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::setupDataTransfer()");
+			throw impl;
+		}
  	}
  	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setupDataTransfer()");
@@ -419,7 +423,7 @@ void CCore::stopDataTransfer(Backends::GenericBackend_ptr backend,bool& backendE
 }
 
 void CCore::startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendError,const ACS::Time& startTime,bool& streamStarted,bool& streamPrepared,bool& streamConnected) throw (
-		ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
+		ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
 {	
 	if (!CORBA::is_nil(backend)) {		
 		try {

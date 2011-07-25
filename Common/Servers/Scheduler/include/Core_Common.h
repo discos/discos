@@ -77,27 +77,27 @@ static void enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backen
  * @param fileName name of the file to be created
  */
 static void setupDataTransfer(Management::DataReceiver_ptr writer,bool& writerError,const IRA::CString& obsName,const IRA::CString& prj,const long& scanId,const long& device,
-		const Management::TScanAxis& axis,const IRA::CString& fileName) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
+		const Management::TScanAxis& axis,const IRA::CString& fileName) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl);
 
 /**
  * This static method starts the data transfer between the backend and the configured data recorder.
  * @param backend reference to the backend 
  * @param backendError will be returned back true if an error occurred in the communication to backend component
  * òparam startTime this is the exact time the data transfer should start
- * @param streamStarted this argument indicates that the data transfer has been started, on exit it is false if the closeup is succesful
- * @param streamPrepared this argument indicates that the data transfer has been setup, on exit it is false if the closeup is succesful
- * @param streamconnected this argument indicates that connection between the sender and receiver component was enstablished, on exit it is false if the closeup is succesful 
+ * @param streamStarted this argument indicates that the data transfer has been started, on exit it is false if the closeup is successful
+ * @param streamPrepared this argument indicates that the data transfer has been setup, on exit it is false if the closeup is successful
+ * @param streamconnected this argument indicates that connection between the sender and receiver component was established, on exit it is false if the closeup is successful
  */
 static void startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendError,const ACS::Time& startTime,bool& streamStarted,bool& streamPrepared,bool& streamConnected) throw (
-		ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl);
+		ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl);
 
 /**
  * This statci method dtops the data transfer between the backend and the configured data recorder.
  * @param backend reference to the backend 
  * @param backendError will be returned back true if an error occurred in the communication to backend component
- * @param streamStarted this argument indicates that the data transfer has been started, on exit it is false if the closeup is succesful
+ * @param streamStarted this argument indicates that the data transfer has been started, on exit it is false if the closeup is successful
  * @param streamPrepared this argument indicates that the data transfer has been setup, on exit it is false if the closeup is succesful
- * @param streamconnected this argument indicates that connection between the sender and receiver component was enstablished, on exit it is false if the closeup is succesful
+ * @param streamconnected this argument indicates that connection between the sender and receiver component was established, on exit it is false if the closeup is successful
  */ 
  static void stopDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,bool& streamStarted,bool& streamPrepared,bool& streamConnected) throw (ComponentErrors::OperationErrorExImpl,
 		ManagementErrors::BackendNotAvailableExImpl);

@@ -13,7 +13,7 @@
 /* Andrea Orlati(aorlati@ira.cnr.it)  16/08/2005      Added Init method to CSecureArea					*/ 
 
 
-// $Id: SecureArea.h,v 1.3 2011-06-03 18:02:37 a.orlati Exp $
+// $Id: SecureArea.h,v 1.4 2011-07-15 12:46:12 a.orlati Exp $
 
 #include <new>
 #include "baciThread.h"
@@ -23,7 +23,7 @@ namespace IRA {
 /**
  * This template class is used by the <i>CSecureArea</i> to make available the resource protected by a mutex mechanism.
  * This class is not intended to be used "stand-alone" and has been introduced in order to avoid deadlock if the mutex was not 
- * released. On object CSecureArea can be used as it is a pointer to the protected object (template typename). If the mutex is not 
+ * released. An object CSecureArea can be used as it is a pointer to the protected object (template typename). If the mutex is not 
  * released esplicitally it will be released when the <i>CSecAreaResourceWrapper</i> object get out of scope. For more information
  * see the <i>CSecureArea</i> documentation.
  * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,

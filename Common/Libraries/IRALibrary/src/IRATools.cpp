@@ -1,4 +1,4 @@
-// $Id: IRATools.cpp,v 1.14 2011-06-21 16:31:50 a.orlati Exp $
+// $Id: IRATools.cpp,v 1.15 2011-07-15 12:43:09 a.orlati Exp $
 
 #include <errno.h>
 #include "IRA"
@@ -86,8 +86,8 @@ bool CIRATools::getDBValue(maci::ContainerServices *Services,CString fieldName,d
 	if (name=="") fullName=Domain+Services->getName();
 	else fullName=Domain+name;
 	try {
-		CDB::DAL_ptr Dal_p=Services->getCDB();
-		CDB::DAO_ptr Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=Services->getCDB();
+		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
 		Val=Dao_p->get_double((const char *)fieldName);	
 	}
 	catch (...) {
@@ -102,8 +102,8 @@ bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,double &
 	fullName=Domain+name;
 	try {
 		CORBA::Object_var obj=client->getComponent("CDB",0,false);
-		CDB::DAL_ptr Dal_p=CDB::DAL::_narrow(obj);
-		CDB::DAO_ptr Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=CDB::DAL::_narrow(obj);
+		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
 		Val=Dao_p->get_double((const char *)fieldName);	
 	}
 	catch (...) {
@@ -118,8 +118,8 @@ bool CIRATools::getDBValue(maci::ContainerServices *Services,CString fieldName,l
 	if (name=="") fullName=Domain+Services->getName();
 	else fullName=Domain+name;
 	try {
-		CDB::DAL_ptr Dal_p=Services->getCDB();
-		CDB::DAO_ptr Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=Services->getCDB();
+		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
 		Val=Dao_p->get_long((const char *)fieldName);		
 	}
 	catch (...) {
@@ -134,8 +134,8 @@ bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,long &Va
 	fullName=Domain+name;
 	try {
 		CORBA::Object_var obj=client->getComponent("CDB",0,false);
-		CDB::DAL_ptr Dal_p=CDB::DAL::_narrow(obj);
-		CDB::DAO_ptr Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=CDB::DAL::_narrow(obj);
+		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
 		Val=Dao_p->get_long((const char *)fieldName);		
 	}
 	catch (...) {
@@ -151,8 +151,8 @@ bool CIRATools::getDBValue(maci::ContainerServices *Services,CString fieldName,D
 	if (name=="") fullName=Domain+Services->getName();
 	else fullName=Domain+name;
 	try {
-		CDB::DAL_ptr Dal_p=Services->getCDB();
-		CDB::DAO_ptr Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=Services->getCDB();
+		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
 		app=Dao_p->get_long((const char *)fieldName);		
 	}
 	catch (...) {
@@ -169,8 +169,8 @@ bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,DWORD &V
 	fullName=Domain+name;
 	try {
 		CORBA::Object_var obj=client->getComponent("CDB",0,false);
-		CDB::DAL_ptr Dal_p=CDB::DAL::_narrow(obj);
-		CDB::DAO_ptr Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=CDB::DAL::_narrow(obj);
+		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
 		app=Dao_p->get_long((const char *)fieldName);		
 	}
 	catch (...) {
@@ -186,8 +186,8 @@ bool CIRATools::getDBValue(maci::ContainerServices *Services,CString fieldName,C
 	if (name=="") fullName=Domain+Services->getName();
 	else fullName=Domain+name;
 	try {
-		CDB::DAL_ptr Dal_p=Services->getCDB();
-		CDB::DAO_ptr Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=Services->getCDB();
+		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
 		Val=CString(Dao_p->get_string((const char *)fieldName));		
 	}
 	catch (...) {
@@ -202,8 +202,8 @@ bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,CString 
 	fullName=Domain+name;
 	try {			
 		CORBA::Object_var obj=client->getComponent("CDB",0,false);
-		CDB::DAL_ptr Dal_p=CDB::DAL::_narrow(obj);
-		CDB::DAO_ptr Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
+		CDB::DAL_var Dal_p=CDB::DAL::_narrow(obj);
+		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
 		Val=CString(Dao_p->get_string((const char *)fieldName));
 	}
 	catch (...) {
@@ -218,9 +218,9 @@ bool CIRATools::setDBValue(maci::ContainerServices* Services,CString fieldName,c
 	if (name=="") fullName=Domain+Services->getName();
 	else fullName=Domain+name;
 	try {
-		CDB::DAL_ptr Dal_p=Services->getCDB();
-		CDB::WDAL_ptr wDal_p=CDB::WDAL::_narrow(Dal_p);
-		CDB::WDAO_ptr wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=Services->getCDB();
+		CDB::WDAL_var wDal_p=CDB::WDAL::_narrow(Dal_p);
+		CDB::WDAO_var wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);
 		wDao_p->set_double((const char *)fieldName,Val);		
 	}
 	catch (...) {
@@ -235,9 +235,9 @@ bool CIRATools::setDBValue(maci::ContainerServices* Services,CString fieldName,c
 	if (name=="") fullName=Domain+Services->getName();
 	else fullName=Domain+name;
 	try {
-		CDB::DAL_ptr Dal_p=Services->getCDB();
-		CDB::WDAL_ptr wDal_p=CDB::WDAL::_narrow(Dal_p);
-		CDB::WDAO_ptr wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=Services->getCDB();
+		CDB::WDAL_var wDal_p=CDB::WDAL::_narrow(Dal_p);
+		CDB::WDAO_var wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);
 		wDao_p->set_long((const char *)fieldName,Val);		
 	}
 	catch (...) {
@@ -252,9 +252,9 @@ bool CIRATools::setDBValue(maci::ContainerServices* Services,CString fieldName,c
 	if (name=="") fullName=Domain+Services->getName();
 	else fullName=Domain+name;
 	try {
-		CDB::DAL_ptr Dal_p=Services->getCDB();
-		CDB::WDAL_ptr wDal_p=CDB::WDAL::_narrow(Dal_p);
-		CDB::WDAO_ptr wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=Services->getCDB();
+		CDB::WDAL_var wDal_p=CDB::WDAL::_narrow(Dal_p);
+		CDB::WDAO_var wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);
 		wDao_p->set_long((const char *)fieldName,Val);		
 	}
 	catch (...) {
@@ -269,9 +269,9 @@ bool CIRATools::setDBValue(maci::ContainerServices* Services,CString fieldName,c
 	if (name=="") fullName=Domain+Services->getName();
 	else fullName=Domain+name;
 	try {
-		CDB::DAL_ptr Dal_p=Services->getCDB();
-		CDB::WDAL_ptr wDal_p=CDB::WDAL::_narrow(Dal_p);
-		CDB::WDAO_ptr wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);	
+		CDB::DAL_var Dal_p=Services->getCDB();
+		CDB::WDAL_var wDal_p=CDB::WDAL::_narrow(Dal_p);
+		CDB::WDAO_var wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);
 		wDao_p->set_string((const char *)fieldName,(const char*)Val);		
 	}
 	catch (...) {

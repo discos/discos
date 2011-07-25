@@ -282,8 +282,10 @@ private:
 	/**
 	 * Setup the commands to start data acquisition
 	 * @param rec structure that stores the selected schedule line
+	 * @param scanRec structure that contains the scan parameters
 	 */
-	void startRecording(const CSchedule::TRecord& rec) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+	void startRecording(const CSchedule::TRecord& rec,const Schedule::CScanList::TRecord& scanRec) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+			ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::ComponentNotActiveExImpl);
 	
 	/**
 	 * Stops the data recording. It sets the <i>m_scanDone</i> flag to true.
@@ -333,9 +335,9 @@ private:
 	
 	/**
 	 * This will start the data transfer from the backend to the receiver. It will takes all the required operation or nothing if the schedule does not
-	 * requires changes from the previuos scan
+	 * requires changes from the previous scan
 	 */
-	void prepareFileWriting(const CSchedule::TRecord& rec,const Schedule::CScanList::TRecord& scanRec) throw (ManagementErrors::ScheduleErrorExImpl,
+	void prepareFileWriting(const CSchedule::TRecord& rec) throw (ManagementErrors::ScheduleErrorExImpl,
 			ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl,
 			ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::CommandLineErrorExImpl,ManagementErrors::ProcedureErrorExImpl);
 	

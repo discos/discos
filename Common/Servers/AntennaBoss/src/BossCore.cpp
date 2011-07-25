@@ -1,4 +1,4 @@
-// $Id: BossCore.cpp,v 1.38 2011-06-21 16:38:02 a.orlati Exp $
+// $Id: BossCore.cpp,v 1.39 2011-07-25 10:02:41 a.orlati Exp $
 
 #include "BossCore.h"
 #include <ObservatoryS.h>
@@ -892,7 +892,7 @@ void CBossCore::publishData() throw (ComponentErrors::NotificationChannelErrorEx
 		try {
 			m_notificationChannel->publishData<Antenna::AntennaDataBlock>(prvData);
 		}
-		catch (ACSErrTypeCommon::CORBAProblemEx& ex) {
+		catch (acsncErrType::PublishEventFailureExImpl& ex) {
 			_ADD_BACKTRACE(ComponentErrors::NotificationChannelErrorExImpl,impl,ex,"CBossCore::publishData()");
 			changeBossStatus(Management::MNG_WARNING);
 			throw impl;

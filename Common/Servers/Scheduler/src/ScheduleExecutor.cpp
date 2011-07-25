@@ -4,6 +4,8 @@
 #include <LogFilter.h>
 #include <libgen.h>
 
+using namespace baci;
+
 CScheduleExecutor::CScheduleExecutor(const ACE_CString& name,CCore *param, 
 			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime)
 {
@@ -100,7 +102,7 @@ void CScheduleExecutor::runLoop()
 			 	}				
 			}
 			case SCAN_SELECTION: { //select the next scan to be done.....in case of errors the schedule is stopped.			
-				if (m_haltMe) { //asked to close at the end of the scan...so close exactly at the beggining of the next one
+				if (m_haltMe) { //asked to close at the end of the scan...so close exactly at the beginning of the next one
 					m_stopMe=true;
 					break;
 				}
@@ -119,7 +121,7 @@ void CScheduleExecutor::runLoop()
 				m_scanDone=false;
 				m_stage=SCAN_CHECK;
 			}
-			case SCAN_CHECK: {// checks the scan if it feasable to be done in time...if not the previous stage is executed again. In case of error the scan is aborted
+			case SCAN_CHECK: {// checks the scan if it feasible to be done in time...if not the previous stage is executed again. In case of error the scan is aborted
 				bool ok;
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"CHECKING_THE_SCAN"));
@@ -189,10 +191,10 @@ void CScheduleExecutor::runLoop()
 				m_core->clearTracking();
 				m_stage=WRITING_INITIALIZATION;
 			}
-			case WRITING_INITIALIZATION: { //prepare the data transfer, it configure the backend and the writer. In case of error the scan is aborted.
+			case WRITING_INITIALIZATION: { //prepare the data transfer, it configures the backend and the writer. In case of error the scan is aborted.
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PREPARE_DATA_ACQUISITION"));
-					prepareFileWriting(m_currentScan,m_currentScanRec); 
+					prepareFileWriting(m_currentScan);
 				}
 				catch (ACSErr::ACSbaseExImpl& Ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,Ex,"CScheduleExecutor::runLoop()");
@@ -268,7 +270,7 @@ void CScheduleExecutor::runLoop()
 				if (start) {
 					try {
 						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"STARTING_DATA_RECORDING"));
-						startRecording(m_currentScan);
+						startRecording(m_currentScan,m_currentScanRec);
 						m_scanStopError=false;
 					}
 					catch (ACSErr::ACSbaseExImpl& Ex) {
@@ -339,7 +341,7 @@ void CScheduleExecutor::runLoop()
 						if (m_currentScan.postScanBlocking) {
 							m_goAhead=false;
 							m_stage=SCAN_SELECTION;
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BLOCKING_POSTSCAN_PROCEDURE"))
+							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BLOCKING_POSTSCAN_PROCEDURE"));
 							try {
 								m_core->injectProcedure(m_currentScan.postScan,postProc,&procedureCallBack,this);
 								break; //procedure injection is ok.....wait for it to finish
@@ -463,7 +465,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const long& lineN
  		throw ex;
  	} 	
  	if (lineNumber<=0 || (DWORD)lineNumber>=m_schedule->getSchedLines()) {
- 		m_currentLine=0; // start from the beggining
+ 		m_currentLine=0; // start from the beginning
  	}
  	else {
  		m_currentLine=lineNumber-1;
@@ -560,7 +562,7 @@ void CScheduleExecutor::cleanScan()
 	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanScan()",(LM_NOTICE,"SCAN_ABORTED: %u",m_currentLine));
 	//now setup the timer to wake the thread up in order to try to start the next scan
 	if (m_schedule->getSchedMode()==CSchedule::LST) {
-		// in case of LST based schedule...we can proceeed directly to next scan selection because the next scan will never start before its time stamp
+		// in case of LST based schedule...we can proceed directly to next scan selection because the next scan will never start before its time stamp
 	}
 	else {
 		// in case of SEQ or TIMETTAGGED...in case of error we want to wait before going to the next scan, in order to give time to the system to recover from the
@@ -801,10 +803,9 @@ void CScheduleExecutor::configureBackend(const std::vector<IRA::CString>& proced
 	}
 }
 
-void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec,const Schedule::CScanList::TRecord& scanRec) throw (
+void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw (
 		ManagementErrors::ScheduleErrorExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::CommandLineErrorExImpl,ManagementErrors::ProcedureErrorExImpl)
- 		
 {
 	std::vector<IRA::CString> command;
  	IRA::CString bckInstance,outputFileName;
@@ -877,44 +878,14 @@ void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec,const S
  		//enableFileWriting();
  		m_currentBackendProcedure=rec.backendProc;
  	}
- 	/*************************************************************************************************************************/
- 	/*******************  Utilizzare il metodo statico presente in Core_Common  setupDataTransfer */
- 	/************************************************************************************************************************/
- 	try {
- 		if (!CORBA::is_nil(m_writer)) {
- 			m_writer->setObserverName((const char *)m_schedule->getObserverName());
- 			m_writer->setProjectName((const char *)m_schedule->getProjectName());
- 			m_writer->setScanIdentifier(m_schedule->getScanId()); //scan id is incremented at each step!!!!
- 			/*************************************************************************/
- 			/***** TEMPORARY  */
- 			/************************************/
- 			/*Antenna::TTrackingParameters *pars=(Antenna::TTrackingParameters *)scanRec.scanPar;
- 			if (pars->otf.geometry==Antenna::SUBSCAN_CONSTLON) {
- 				m_writer->setScanAxis(Management::MNG_HOR_LAT);
- 			}
- 			else if (pars->otf.geometry==Antenna::SUBSCAN_CONSTLAT) {
- 				m_writer->setScanAxis(Management::MNG_HOR_LON);
- 			}*/
- 		}
- 	}
- 	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CScheduleExecutor::prepareFileWriting()");
-		impl.setReason("cannot set auxiliary data on data recorder");
-		throw impl;
- 	}
- 	catch (CORBA::SystemException& ex) {
- 		m_writerError=true;
- 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CScheduleExecutor::prepareFileWriting()");
- 		impl.setName(ex._name());
- 		impl.setMinor(ex.minor());
- 		throw impl;
- 	}	
 }
 
-void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec,const Schedule::CScanList::TRecord& scanRec) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::ComponentNotActiveExImpl)
 {
 	IRA::CString outputFileName;
 	ACS::TimeInterval startLst;
+	Management::TScanAxis scanAxis;
 	if (rec.ut==0) {
 		TIMEVALUE now;
 		TIMEDIFFERENCE lst;
@@ -932,7 +903,7 @@ void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec) throw (Com
 	}
 	IRA::CString out;
 	IRA::CIRATools::timeToStr(m_startRecordTime,out);
-	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"RECORDING_START_TIME: %s",(const char *)out));
+	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_DEBUG,"RECORDING_START_TIME: %s",(const char *)out));
 	if (m_scheduleOwner!="") {
 		outputFileName=m_core->m_config->getDataDirectory()+m_scheduleOwner+"/"+CCore::computeOutputFileName(m_startRecordTime,startLst,m_schedule->getProjectName(),rec.suffix);
 		//outputFileName=m_scheduleOwner+"/"+outputFileName;
@@ -940,63 +911,44 @@ void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec) throw (Com
 	else {
 		outputFileName=m_core->m_config->getDataDirectory()+CCore::computeOutputFileName(m_startRecordTime,startLst,m_schedule->getProjectName(),rec.suffix);
 	}
-	if (!CORBA::is_nil(m_writer)) {			
-		try {
-			ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"SET_FILE_NAME: %s",(const char *)outputFileName));
-			m_writer->setFileName((const char*)outputFileName);
-		}
-		catch (ComponentErrors::ComponentErrorsEx& ex) {
-			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CScheduleExecutor::startRecording()");
-			impl.setReason("cannot set the file name");
-			throw impl;
-		}
-		catch (CORBA::SystemException& ex) {
-			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CScheduleExecutor::startRecording()");
-			impl.setName(ex._name());
-			impl.setMinor(ex.minor());
-			throw impl;
-		}
-		catch (...) {
-			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CScheduleExecutor::startRecording())");
-			throw impl;
-		}
-	}
-	if (!CORBA::is_nil(m_backend)) {		
-		try {
-			if (m_streamPrepared) {
-				if (rec.duration>0.0) { // data transfer is started only if the duration is bigger than zero.....
-					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_DEBUG,"START_RECORDING"));
-					m_backend->sendData(rec.ut);
-					m_streamStarted=true;
-					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_NOTICE,"RECORDING_STARTED"));
-				}
-				else {
-					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_NOTICE,"NO_RECORDING_REQUIRED"));
-				}
+	// compute the axis or direction along which the scan is performed
+	scanAxis=Management::MNG_NO_AXIS;
+	if ((scanRec.type==Management::MNG_OTF) || (scanRec.type==Management::MNG_OTFC)) {
+		Antenna::TTrackingParameters *pars=(Antenna::TTrackingParameters *)scanRec.primaryParameters;
+		if (pars->otf.geometry==Antenna::SUBSCAN_CONSTLON) {
+			if (pars->otf.subScanFrame==Antenna::ANT_EQUATORIAL) {
+				scanAxis=Management::MNG_EQ_LAT;
+			}
+			else if (pars->otf.subScanFrame==Antenna::ANT_HORIZONTAL) {
+				scanAxis=Management::MNG_HOR_LAT;
+			}
+			else if (pars->otf.subScanFrame==Antenna::ANT_GALACTIC) {
+				scanAxis=Management::MNG_GAL_LAT;
 			}
 		}
-		catch (BackendsErrors::BackendsErrorsEx& ex) {
-			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CScheduleExecutor::startRecording()");
-			impl.setReason("backend failed to send data to writer");
-			throw impl;
+		else if (pars->otf.geometry==Antenna::SUBSCAN_CONSTLAT) {
+			if (pars->otf.subScanFrame==Antenna::ANT_EQUATORIAL) {
+				scanAxis=Management::MNG_EQ_LON;
+			}
+			else if (pars->otf.subScanFrame==Antenna::ANT_HORIZONTAL) {
+				scanAxis=Management::MNG_HOR_LON;
+			}
+			else if (pars->otf.subScanFrame==Antenna::ANT_GALACTIC) {
+				scanAxis=Management::MNG_GAL_LON;
+			}
 		}
-		catch (ComponentErrors::ComponentErrorsEx& ex) {
-			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CScheduleExecutor::startRecording()");
-			impl.setReason("backend failed to send data to writer");
-			throw impl;
-		}
-		catch (CORBA::SystemException& ex) {
-			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CScheduleExecutor::startRecording()");
-			impl.setName(ex._name());
-			impl.setMinor(ex.minor());
-			m_backendError=true;
-			throw impl;
-		}
-		catch (...) {
-			m_backendError=true;
-			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CScheduleExecutor::startRecording()");
-			throw impl;
-		}
+	}
+	// *******************************
+	// I should consider all remaining scan types, not all scan types have a well defined scan axis....simple sidereal tracking for example!
+	// *******************************
+	CCore::setupDataTransfer(m_writer.in(),m_writerError,m_schedule->getObserverName(),m_schedule->getProjectName(),m_schedule->getScanId(),m_core->getCurrentDevice(),scanAxis,(const char *)outputFileName);
+	if (rec.duration>0.0) { // data transfer is started only if the duration is bigger than zero.....
+		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_DEBUG,"START_RECORDING"));
+		// throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
+		CCore::startDataTansfer(m_backend.in(),m_backendError,rec.ut,m_streamStarted,m_streamPrepared,m_streamConnected);
+	}
+	else {
+		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_NOTICE,"NO_RECORDING_REQUIRED"));
 	}
 }
 

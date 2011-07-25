@@ -8,23 +8,24 @@
 /*                                                                                                       */
 /*                                                                                                       */
 /* Who                                when            What                                               */
-/* Andrea Orlati(aorlati@ira.inaf.it)  11/10/2004	   Creation                                          */
-/* Andrea Orlati(aorlati@ira.inaf.it)  24/01/2004	   Added functionstimeDifference and timeCopy        */
-/* Andrea Orlati(aorlati@ira.inaf.it)  20/06/2005	   Modified methods getDBValue so that they make use */
-/*                                                     of class DBConnector no more  					 */
-/* Andrea Orlati(aorlati@ira.inaf.it)  21/08/2005	   added function to manage time through the ACS helper classes */
-/* Andrea Orlati(aorlati@ira.inaf.it)  24/05/2006	   added function to change values of CDB fields     */
-/* Andrea Orlati(aorlati@ira.inaf.it)  31/01/2008	  parameters of timeSubtract rouitne are now passed as const     */
+/* Andrea Orlati(aorlati@ira.inaf.it)  11/10/2004	  Creation                                          */
+/* Andrea Orlati(aorlati@ira.inaf.it)  24/01/2004	  Added functionstimeDifference and timeCopy        */
+/* Andrea Orlati(aorlati@ira.inaf.it)  20/06/2005	  Modified methods getDBValue so that they make use */
+/*                                                    of class DBConnector no more  					 */
+/* Andrea Orlati(aorlati@ira.inaf.it)  21/08/2005	  added function to manage time through the ACS helper classes */
+/* Andrea Orlati(aorlati@ira.inaf.it)  24/05/2006	  added function to change values of CDB fields     */
+/* Andrea Orlati(aorlati@ira.inaf.it)  31/01/2008	  parameters of timeSubtract routine are now passed as const     */
 /* Andrea Orlati(aorlati@ira.inaf.it)  04/06/2008	  getDBValue, setDBValue now accept an extra parameter: name     */
 /* Andrea Orlati(aorlati@ira.inaf.it)  15/10/2008	  added function getNextToken     */
-/* Andrea Orlati(aorlati@ira.inaf.it)  15/10/2008	  added overloaded function Wait, it now accept anly microseconds    */
+/* Andrea Orlati(aorlati@ira.inaf.it)  15/10/2008	  added overloaded function Wait, it now accept only microseconds    */
 /* Andrea Orlati(aorlati@ira.inaf.it)  05/05/2009	  added a template construct to choose a type based on the evaluation of a boolean expression    */
-/* Andrea Orlati(aorlati@ira.inaf.it)  29/07/2010	  added a serie of function to parse angles and time from user input   */
+/* Andrea Orlati(aorlati@ira.inaf.it)  29/07/2010	  added a set of functions to parse angles and time from user input   */
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/09/2010	  The parsing of right ascension is now also added with the support for sexagesimal format */
-/* Andrea Orlati(aorlati@ira.inaf.it)  13/09/2010	   added OffsetTorad() */
-/* Andrea Orlati(aorlati@ira.inaf.it)  28/02/2011	   methos skyFrequency() */
+/* Andrea Orlati(aorlati@ira.inaf.it)  13/09/2010	  added OffsetTorad() */
+/* Andrea Orlati(aorlati@ira.inaf.it)  28/02/2011	  methods skyFrequency() */
+/* Andrea Orlati(aorlati@ira.inaf.it)  15/07/2011	  reviewed the set orf CDB function to prevent a memory leakage */
 
-// $Id: IRATools.h,v 1.24 2011-06-21 16:31:50 a.orlati Exp $
+// $Id: IRATools.h,v 1.25 2011-07-15 12:43:09 a.orlati Exp $
 
 #include <time.h>
 #include <sys/time.h>
@@ -37,10 +38,10 @@
 
 /**
  * @mainpage IRALibrary API Documentation
- * @date 13/09/2010 
- * @version 2.96.0
+ * @date 15/07/2011
+ * @version 2.97.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.0.2
  * @remarks gcc version is 4.1.2
  *
  * This library is a collection of functions and classes that were assembled together in order to 

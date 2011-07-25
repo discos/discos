@@ -8,6 +8,7 @@
 #include <ACSBulkDataError.h>
 
 using namespace SimpleParser;
+using namespace maci;
 
 _IRA_LOGFILTER_IMPORT;
 
@@ -519,7 +520,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	// ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl
 	CCore::enableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamPrepared,m_streamConnected);
 	// LONGITUDE SCAN..............
-	// now lets go and check the lon scan....typically if a source was commanded before....and it is above the horizon and the scan could be perfomed
+	// now lets go and check the lon scan....typically if a source was commanded before....and it is above the horizon and the scan could be performed
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LONGITUDE_SCAN"));
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
@@ -578,12 +579,12 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	guard.acquire();
 	// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
 	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
-	// wait for a couple of seconds before start with the latitide scan
+	// wait for a couple of seconds before start with the latitude scan
 	guard.release();
 	IRA::CIRATools::Wait(2,0);
 	guard.acquire();
 	//LATITUDE SCAN.........................	
-	// now lets go and check the lon scan....typically if a source was commanded before....and it is above the horizon and the scan could be perfomed
+	// now lets go and check the lon scan....typically if a source was commanded before....and it is above the horizon and the scan could be performed
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LATITUDE_SCAN"));
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
@@ -660,7 +661,7 @@ void CCore::resetSchedulerStatus()
 
 void CCore::stopSchedule()
 {
-	//no need to get the mutex, because it is already done inside the Schedudle Executor thread
+	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
 		m_schedExecuter->stopSchedule(true);
 	}
@@ -668,7 +669,7 @@ void CCore::stopSchedule()
 
 void CCore::haltSchedule()
 {
-	//no need to get the mutex, because it is already done inside the Schedudle Executor thread
+	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
 		m_schedExecuter->stopSchedule(false);
 	}
@@ -753,6 +754,9 @@ void CCore::setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetCo
 			break;
 		}
 	}
+	//********************************
+	// in the case no iS[ii] corresponds to the device/section an error should be risen
+	//********************************
 	try {
 		inputs=backend->getInputs(freqs,bws,feeds,IFs);
 	}
@@ -815,7 +819,7 @@ void CCore::startSchedule(const char* scheduleFile,const long& lineNumber) throw
 		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,
 		ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
-	//no need to get the mutex, because ot is already done inside the Schedudle Executor thread
+	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
 		//throw ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl)
 		m_schedExecuter->startSchedule(scheduleFile,lineNumber);

@@ -4,7 +4,9 @@
            xmlns:log="urn:schemas-cosylab-com:LoggingConfig:1.0" 
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   Timeout="50.0"
-  ContainerPingInterval="30.0" >
+  ClientPingInterval="30.0"
+  ContainerPingInterval="30.0"
+  AdministratorPingInterval="20.0">
 
   <Startup>
   </Startup>
@@ -19,10 +21,10 @@
 	<cdb:_ string="CDB"/>
 	<cdb:_ string="ACSLogSvc"/>
 	<cdb:_ string="PDB"/>
+	<cdb:_ string="AcsAlarmService"/>
   </ServiceComponents>
 
   <ServiceDaemons>
-        <cdb:_ string="alma78.hq.eso.org"/>
   </ServiceDaemons>
 
   <LoggingConfig
