@@ -73,7 +73,7 @@ public:
 			sock->initParser(&mp);
 			sock->parse(rdata);
 // 			cout << "rec:" <<(const char*) rdata <<  endl;
-  			m_val=mp.sensorMap[COMMANDS[WINDSPEEDAVE]];
+  			m_val=mp.sensorMap[COMMANDS[WINDSPEEDMAX]];
 		
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
