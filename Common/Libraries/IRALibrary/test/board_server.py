@@ -60,6 +60,8 @@ CMD_TYPE_MAX_EXT = CMD_SET_DATA
 CMD_TYPE_NOCHECKSUM = chr(0x20)
 CMD_TYPE_MIN_ABB = chr(ord(CMD_TYPE_MIN_EXT) | ord(CMD_TYPE_NOCHECKSUM))
 CMD_TYPE_MAX_ABB = chr(ord(CMD_TYPE_MAX_EXT) | ord(CMD_TYPE_NOCHECKSUM))
+MCB_CMD_DATA_TYPE_B01 = chr(0x03)
+MCB_CMD_DATA_TYPE_F32 = chr(0x18)
 
 
 # Anser header
@@ -154,6 +156,7 @@ class BoardServer:
                             data_list = list()
                             if cmd in set(answers_with_data) & set(requests_with_data):
                                 par_len = ord(data[PAR_LEN_IDX]) # Length of the request parameters
+                                data_type =  data[PAR_LEN_IDX + 1]
                                 for item in data[PAR_LEN_IDX + 1:]:
                                     if par_len == 0:
                                         break
@@ -162,7 +165,13 @@ class BoardServer:
                                         par_len -= 1
 
                             if cmd in answers_with_data:
-                                data_list += [item + 1 for item in range(randrange(1, 7))]
+                                if data_type == MCB_CMD_DATA_TYPE_B01:
+                                    data_list += [randrange(0, 2)]
+                                elif data_type == MCB_CMD_DATA_TYPE_F32:
+                                    data_list += [156, 157, 158, 159] # Add four bytes
+                                    pass
+                                else:
+                                    data_list += [item + 1 for item in range(randrange(1, 7))]
                                 answer += chr(len(data_list))
                                 for item in data_list:
                                     answer += chr(item)
