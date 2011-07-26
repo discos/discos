@@ -13,6 +13,8 @@ SRTWeatherSocket::SRTWeatherSocket(CString addr, unsigned int port )
 	ADDRESS=addr;
 	PORT=port;
 
+
+
 }
 // 
 
