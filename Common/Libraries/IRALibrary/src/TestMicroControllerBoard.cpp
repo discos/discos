@@ -1,6 +1,8 @@
 #include "MicroControllerBoard.h"
 #include <cstdlib>
 
+using namespace IRA;
+
 template<class T>
 std::string any2string(T i) {
     std::ostringstream buffer;

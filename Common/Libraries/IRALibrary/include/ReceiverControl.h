@@ -13,9 +13,11 @@
 #include <vector>
 #include <bitset>
 #include <IRA>
+#include "Definitions.h"
 #include "MicroControllerBoard.h"
 
-const unsigned int GUARD_TIME = 250000; // 250000 us == 0.25 seconds
+
+namespace IRA {
 
 class ReceiverControlEx {
 
@@ -429,6 +431,6 @@ private:
 
 };
 
-
+}
 
 #endif

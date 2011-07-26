@@ -129,11 +129,8 @@ private:
    	void operator=(const CSecureArea& rSrc);  // no implementation given
 };
 
-}
 
-using namespace IRA;
-
-template <class X> CSecAreaResourceWrapper<X>::CSecAreaResourceWrapper(BACIMutex *Mutex,X *Res): m_pLockMutex(Mutex), m_pLockResource(Res), m_bReleased(true) {
+template <class X> IRA::CSecAreaResourceWrapper<X>::CSecAreaResourceWrapper(BACIMutex *Mutex,X *Res): m_pLockMutex(Mutex), m_pLockResource(Res), m_bReleased(true) {
 	m_pLockMutex->acquire();
 	m_bReleased=false;
 }
@@ -195,6 +192,8 @@ template <class T> void CSecureArea<T>::Init(T* Obj)
 template <class T> CSecAreaResourceWrapper<T> CSecureArea<T>::Get()
 {
 	return CSecAreaResourceWrapper<T>(&m_Mutex,m_pResource);
+}
+
 }
 
 #endif /* _SECUREAREA_H */

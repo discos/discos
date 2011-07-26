@@ -3,6 +3,8 @@
 
 static pthread_mutex_t socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+using namespace IRA;
+
 MicroControllerBoard::MicroControllerBoard(
         const std::string IP, const unsigned short port,
         const BYTE master_address, const BYTE slave_address, 

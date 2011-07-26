@@ -1,5 +1,11 @@
 #include "ReceiverControl.h"
 
+using IRA::ReceiverControl; 
+using IRA::ReceiverControlEx;
+using IRA::FetValues;
+
+const unsigned int GUARD_TIME = 250000; // 250000 us == 0.25 seconds
+
 
 ReceiverControl::ReceiverControl(
         const std::string dewar_ip,

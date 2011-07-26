@@ -3,6 +3,7 @@
 #include "DBTable.h"
 
 using namespace maci;
+using namespace IRA;
 
 int main(int argc, char *argv[])
 {

@@ -11,10 +11,12 @@
 
 #include <string>
 #include <vector>
-#include "Definitions.h"
 #include <IRA>
+#include "Definitions.h"
 #include "MicroControllerBoardDef.h"
 
+
+namespace IRA {
 
 class MicroControllerBoardEx {
 
@@ -145,6 +147,6 @@ private:
 
 };
 
-
+}
 
 #endif
