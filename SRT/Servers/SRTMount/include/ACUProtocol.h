@@ -155,7 +155,7 @@ public:
 	};
 	
 	/**
-	 * Enlist all possible subsystem identifer
+	 * Enlist all possible subsystem identifier
 	 */ 
 	enum TSubsystems {
 		SUBSYSTEM_ID_AZIMUTH=1,
@@ -420,12 +420,12 @@ public:
 		inline TErrorsTracking pointingErrors() const { return TErrorsTracking((TWORD)CACUProtocol::readStatusField<TWORD>(m_buffer,m_disp+97)); }
 		inline TINT32 timeOffset() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+99); }
 		/*******************************************************************/
-		inline TUINT16 pTTCurrentIndex() const { return CACUProtocol::readStatusField<TUINT16>(m_buffer,m_disp+109); }
-		inline TUINT16 pTTEndIndex() const { return CACUProtocol::readStatusField<TUINT16>(m_buffer,m_disp+111); }
-		inline TUINT16 pTTLength() const { return CACUProtocol::readStatusField<TUINT16>(m_buffer,m_disp+113); }
+		inline TUINT32 pTTCurrentIndex() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+109); }
+		inline TUINT32 pTTEndIndex() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+113); }
+		inline TUINT32 pTTLength() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+117); }
 		inline const TParameterCommandStatus& parameterCommandStatus() const {return m_parameterCommandStatus; }
 		enum TConstant {
-			SIZE=123
+			SIZE=129
 		};				
 	private:
 		BYTE *m_buffer;

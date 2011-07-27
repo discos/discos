@@ -576,9 +576,35 @@ public:
 	 * @throw AntennaErrors::AntennaErrorsEx
 	 * 		@arg \c AntennaErrors::Nak	 
 	 * 		@arg \c AntennaErrors::Connection 
+	 * 		@arg \c AntennaErrors::AntennaBusy
 	 */
 	void reset() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, AntennaErrors::AntennaErrorsEx);
 	
+
+	/**
+	 * This method activates the mount
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * 		@arg \c ComponentErrors::Timeout
+	 * 		@arg \c ComponentErrors::Socket</a>
+	 * @throw AntennaErrors::AntennaErrorsEx
+	 * 		@arg \c AntennaErrors::Nak
+	 * 		@arg \c AntennaErrors::Connection
+	 * 		@arg \c AntennaErrors::AntennaBusy
+	*/
+	void activate() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, AntennaErrors::AntennaErrorsEx);
+
+	/**
+	 * This method deactivates the mount, a deactivated axis cannot perform any action.
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * 		@arg \c ComponentErrors::Timeout
+	 * 		@arg \c ComponentErrors::Socket</a>
+	 * @throw AntennaErrors::AntennaErrorsEx
+	 * 		@arg \c AntennaErrors::Nak
+	 * 		@arg \c AntennaErrors::Connection
+	 * 		@arg \c AntennaErrors::AntennaBusy
+	*/
+	void deactivate() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, AntennaErrors::AntennaErrorsEx);
+
 private:
 	
 	/** Component shared store area */

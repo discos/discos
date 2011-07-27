@@ -64,6 +64,22 @@ void CCommandSocket::stop() throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExI
 	}
 }
 
+void CCommandSocket::activate() throw (ComponentErrors::TimeoutExImpl,ComponentErrors::SocketErrorExImpl,AntennaErrors::ConnectionExImpl,AntennaErrors::AntennaBusyExImpl,AntennaErrors::NakExImpl)
+{
+	if (!checkConnection()) {
+		_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::activate()");
+	}
+	if (checkIsBusy()) {
+		_THROW_EXCPT(AntennaBusyExImpl,"CCommandSocket::activate()");
+	}
+	IRA::CTimeoutSync guard(&m_syncMutex,m_pConfiguration->controlSocketResponseTime(),m_pConfiguration->controlSocketDutyCycle());
+	if (!guard.acquire()) {
+		_EXCPT(ComponentErrors::TimeoutExImpl,ex,"CCommandSocket::activate()");
+		throw ex;
+	}
+	activate_command();
+}
+
 void CCommandSocket::deactivate() throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,NakExImpl)
 {
 	if (!checkConnection()) {
@@ -197,13 +213,13 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 	}
 	if (data->isProgramTrackStackEmpty()) {
 		/********************************************************************************************/
-		// is it comprehnsive of the offsets? if so is that true also for preset?
+		// is it comprehensive of the offsets? if so is that true also for preset?
 		/*********************************************************************************************/
 		currentAz=data->azimuthStatus()->actualPosition();   //if no position commanded yet, the current azimuth is the hardware azimuth of the telescope
 	}
 	else {
 		/********************************************************************************************/
-		// at the moment this is not comprehnsive of the offsets
+		// at the moment this is not comprehensive of the offsets
 		/*********************************************************************************************/
 		data->getLastProgramTrackPoint(currentAz,dummy); // else we refer to the last commanded azimuth
 	}
@@ -234,7 +250,7 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 		finalEl=m_pConfiguration->elevationUpperLimit();
 	}
 	finalAz-=azOff;
-	finalEl=-elOff;
+	finalEl-=elOff;
 	data->setCommandedSector(Antenna::ACU_NEUTRAL);
 	
 	// add the point into the cache and to commanded point stack!

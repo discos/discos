@@ -461,6 +461,36 @@ void SRTMountImpl::reset() throw (CORBA::SystemException, ComponentErrors::Compo
 	}
 }
 
+void SRTMountImpl::activate() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, AntennaErrors::AntennaErrorsEx)
+{
+	try {
+		m_commandSocket.activate();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& E) {
+		E.log(LM_DEBUG);
+		throw E.getComponentErrorsEx();
+	}
+	catch (AntennaErrors::AntennaErrorsExImpl& E) {
+		E.log(LM_DEBUG);
+		throw E.getAntennaErrorsEx();
+	}
+}
+
+void SRTMountImpl::deactivate() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, AntennaErrors::AntennaErrorsEx)
+{
+	try {
+		m_commandSocket.deactivate();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& E) {
+		E.log(LM_DEBUG);
+		throw E.getComponentErrorsEx();
+	}
+	catch (AntennaErrors::AntennaErrorsExImpl& E) {
+		E.log(LM_DEBUG);
+		throw E.getAntennaErrorsEx();
+	}
+}
+
 void SRTMountImpl::changeMode(Antenna::TCommonModes azMode,Antenna::TCommonModes elMode) throw (CORBA::SystemException,ComponentErrorsEx,AntennaErrorsEx)
 {
 	try {

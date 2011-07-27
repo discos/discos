@@ -13,7 +13,7 @@
 
 #define MODE_COMMAND_ID 1
 #define PARAMETER_COMMAND_ID 2
-#define PROGRAMTRACK_COMMAND_ID 3
+#define PROGRAMTRACK_COMMAND_ID 4
 
 #define PROGRAMTRACK_TRACKING_MODE 1
 
@@ -46,16 +46,28 @@ WORD CACUProtocol::rate(const double& azRate,const double& elRate,BYTE *& buff,T
 		az=0.0;
 	}
 	else {
-		azFactor=1.0;
-		az=azRate;
+		if (azRate<0) {
+			azFactor=-1.0;
+            az=-azRate;
+        }
+        else {
+        	azFactor=1.0;
+        	az=azRate;
+        }
 	}
 	if (elRate==0.0) {
 		elFactor=0.0;
 		el=0.0;
 	}
 	else {
-		elFactor=1.0;
-		el=elRate;
+		if (elRate<0) {
+			elFactor=-1.0;
+            el=-elRate;
+        }
+        else {
+        	elFactor=1.0;
+        	el=elRate;
+        }
 	}
 	return modeCommand(MODE_RATE,MODE_RATE,azFactor,az,elFactor,el,buff,command,commNumber);
 }
@@ -137,14 +149,16 @@ WORD CACUProtocol::loadProgramTrack(const TProgramTrackPoint *seq,const WORD& si
 	ACS::Time startUt;
 	long timeDiff;
 	command=NULL;
+	commNumber=1;
 	if (newTable && (size<PROGRAMTRACK_TABLE_MINIMUM_LENGTH)) { // for a new table at least five points are required!
 		return 0;
 	}
 	copyData<TUINT16>(msg,PROGRAMTRACK_COMMAND_ID,len);
-	copyData<TUINT16>(msg,SUBSYSTEM_ID_TRACKING,len);
+	copyData<TUINT16>(msg,SUBSYSTEM_ID_POINTING,len);
 	counter=getMillisOfTheDay()+1;
 	copyData<TUINT32>(msg,counter,len);
 	copyData<TUINT16>(msg,PAR_PROGRAM_TRACK_TABLE,len);
+	copyData<TUINT16>(msg,4,len);
 	copyData<TUINT16>(msg,PROGRAMTRACK_TRACKING_MODE,len);  // tracking mode: azimuth/elevation
 	
 	if (newTable) {

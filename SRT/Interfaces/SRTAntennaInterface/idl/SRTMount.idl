@@ -157,6 +157,16 @@ module Antenna {
 		 **/
 		void reset() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 		
+		/**
+		 * This causes the axis of the mount to be activated. The control loop is closed, the brakes are open and the servo amplifier are enabled.
+		 */
+		void activate() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
+		/**
+		 * This causes the axis of the mount to be deactivated. The control loop is open, the brakes are closed and the servo amplifier are not enabled.
+		 */
+		void deactivate() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
 	};
 	
 };

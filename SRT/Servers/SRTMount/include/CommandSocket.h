@@ -61,16 +61,6 @@ public:
 	void connectSocket() throw (ComponentErrors::SocketErrorExImpl);
 		
 	/**
-	 * This method will deactivate both axis of the antenna. A deactive axis has the control loop open, the servo amplifier disalbled and the brakes closed.
-	 * @throw ComponentErrors::TimeoutExImpl
-	 * @throw ComponentErrors::SocketErrorExImpl
-	 * @thorw AntennaErrors::ConnectionExImpl
-	 * @throw AntennaErrors::AntennaBusyExImpl
-	 * @throw AntennaErrors::NakExImpl
-	*/
-	/*void deactivate() throw (ComponentErrors::TimeoutExImpl,ComponentErrors::SocketErrorExImpl,AntennaErrors::ConnectionExImpl,AntennaErrors::AntennaBusyExImpl,AntennaErrors::NakExImpl);*/
-	
-	/**
 	 * This method can be used to command the telescope to fixed position. Range check are performed before commanding, if a value is beyond the hardware limits of the telescope,
 	 * this value is forced inside. The azimuth coordinate commanded effectively to the ACU depands on the current position and on cable wrapping considerations.   
 	 * @param az azimuth position in degrees.
@@ -123,6 +113,17 @@ public:
 	 * @thorw AntennaErrors::NakExImpl
 	*/		
 	void deactivate() throw (ComponentErrors::TimeoutExImpl,ComponentErrors::SocketErrorExImpl,AntennaErrors::ConnectionExImpl,AntennaErrors::AntennaBusyExImpl,AntennaErrors::NakExImpl);
+
+	/**
+	 * This function can be used to explicitly activate the telescope axis, generally speaking it should not be necessary because any other action that requires an active axis will take care of
+	 * issuing an activate command before.
+	 * @thorw ComponentErrors::TimeoutExImpl
+	 * @thorw ComponentErrors::SocketErrorExImpl
+	 * @thorw AntennaErrors::ConnectionExImpl
+	 * @thorw AntennaErrors::AntennaBusyExImpl
+	 * @thorw AntennaErrors::NakExImpl
+	*/
+	void activate() throw (ComponentErrors::TimeoutExImpl,ComponentErrors::SocketErrorExImpl,AntennaErrors::ConnectionExImpl,AntennaErrors::AntennaBusyExImpl,AntennaErrors::NakExImpl);
 	
 	/**
 	 * This function can be used to reset the error condition on the axis.  
