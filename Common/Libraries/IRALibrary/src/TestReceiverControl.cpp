@@ -144,6 +144,8 @@ int main(int argc, char *argv[])
         rc.turnLeftLNAsOff();
         cout << "Done!\n" << endl;
 
+        sleep(3);
+
         // Test lna()
         cout << "Test lna() with a reliable communication" << endl;
         FetValues values = rc.lna(0, 4, currentConverter, voltageConverter);
@@ -158,6 +160,8 @@ int main(int argc, char *argv[])
         cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
         cout << ", VGR=" << values.VGR << ")" << endl;
         cout << "Done!\n" << endl;
+
+        sleep(3);
 
         // Test the turnLeftLNAsOn()
         cout << "Test turnLeftLNAsOn() with a reliable communication" << endl;

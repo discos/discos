@@ -838,11 +838,10 @@ FetValues ReceiverControl::lna(
         makeRequest(
                 m_lna_board_ptr,                           // Pointer to the LNA board socket
                 MCB_CMD_SET_DATA,                          // Command to send
-                5,                                         // Number of parameters
-                MCB_CMD_DATA_TYPE_U16,                     // Data type: unsigned 16 bit
+                4,                                         // Number of parameters
+                MCB_CMD_DATA_TYPE_U08,                     // Data type: unsigned 08 bit
                 MCB_PORT_TYPE_DIO,                         // Port type: Digital IO
-                MCB_PORT_NUMBER_00_15,                     // Port Number from 00 to 15
-                0x00,                                      // LNA ON
+                MCB_PORT_NUMBER_00_07,                     // Port Number from 00 to 07
                 static_cast<BYTE>(vd_request.to_ulong())   // Value to set                   
         );
 
@@ -870,11 +869,10 @@ FetValues ReceiverControl::lna(
         makeRequest(
                 m_lna_board_ptr,                           // Pointer to the LNA board
                 MCB_CMD_SET_DATA,                          // Command to send
-                5,                                         // Number of parameters
-                MCB_CMD_DATA_TYPE_U16,                     // Data type: unsigned 16 bit
+                4,                                         // Number of parameters
+                MCB_CMD_DATA_TYPE_U08,                     // Data type: unsigned 08 bit
                 MCB_PORT_TYPE_DIO,                         // Port type: Digital IO
-                MCB_PORT_NUMBER_00_15,                     // Port Number from 00 to 15
-                0x00,                                      // LNA ON
+                MCB_PORT_NUMBER_00_07,                     // Port Number from 00 to 07
                 static_cast<BYTE>(id_request.to_ulong())   // Value to set                   
         );
 
@@ -902,11 +900,10 @@ FetValues ReceiverControl::lna(
         makeRequest(
                 m_lna_board_ptr,                           // Pointer to the LNA board
                 MCB_CMD_SET_DATA,                          // Command to send
-                5,                                         // Number of parameters
-                MCB_CMD_DATA_TYPE_U16,                     // Data type: unsigned 16 bit
+                4,                                         // Number of parameters
+                MCB_CMD_DATA_TYPE_U08,                     // Data type: unsigned 08 bit
                 MCB_PORT_TYPE_DIO,                         // Port type: Digital IO
-                MCB_PORT_NUMBER_00_15,                     // Port Number from 00 to 15 
-                0x00,                                      // LNA ON
+                MCB_PORT_NUMBER_00_07,                     // Port Number from 00 to 07
                 static_cast<BYTE>(vg_request.to_ulong())   // Value to set                   
         );
 
@@ -950,7 +947,7 @@ void ReceiverControl::turnLeftLNAsOn() throw (ReceiverControlEx)
                 MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
                 MCB_PORT_TYPE_DIO,     // Port type: Digital IO
                 MCB_PORT_NUMBER_08,    // Port Number 08
-                0x01  // The value to set: 0x01 to turn the left LNAs ON
+                0x00  // The value to set: 0x00 to turn the left LNAs ON
         );
     }
     catch(MicroControllerBoardEx& ex) {
@@ -970,7 +967,7 @@ void ReceiverControl::turnLeftLNAsOff() throw (ReceiverControlEx)
                 MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
                 MCB_PORT_TYPE_DIO,     // Port type: Digital IO
                 MCB_PORT_NUMBER_08,    // Port Number 08
-                0x00  // The value to set: 0x01 to turn the left LNAs OFF
+                0x01  // The value to set: 0x01 to turn the left LNAs OFF
         );
     }
     catch(MicroControllerBoardEx& ex) {
@@ -990,7 +987,7 @@ void ReceiverControl::turnRightLNAsOn() throw (ReceiverControlEx)
                 MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
                 MCB_PORT_TYPE_DIO,     // Port type: Digital IO
                 MCB_PORT_NUMBER_09,    // Port Number 09
-                0x01  // The value to set: 0x01 to turn the right LNAs ON
+                0x00  // The value to set: 0x00 to turn the right LNAs ON
         );
     }
     catch(MicroControllerBoardEx& ex) {
@@ -1010,7 +1007,7 @@ void ReceiverControl::turnRightLNAsOff() throw (ReceiverControlEx)
                 MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
                 MCB_PORT_TYPE_DIO,     // Port type: Digital IO
                 MCB_PORT_NUMBER_09,    // Port Number 09
-                0x00  // The value to set: 0x01 to turn the right LNAs OFF
+                0x01  // The value to set: 0x01 to turn the right LNAs OFF
         );
     }
     catch(MicroControllerBoardEx& ex) {
