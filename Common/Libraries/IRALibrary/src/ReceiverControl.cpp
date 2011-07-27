@@ -940,7 +940,88 @@ FetValues ReceiverControl::lna(
 }
 
 
-std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, BYTE command, size_t len, ...) throw (MicroControllerBoardEx)
+void ReceiverControl::turnLeftLNAsOn() throw (ReceiverControlEx)
+{
+    try {
+        makeRequest(
+                m_lna_board_ptr,       // Pointer to the LNA board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_08,    // Port Number 08
+                0x01  // The value to set: 0x01 to turn the left LNAs ON
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing turnLeftLNAsOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::turnLeftLNAsOff() throw (ReceiverControlEx)
+{
+    try {
+        makeRequest(
+                m_lna_board_ptr,       // Pointer to the LNA board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_08,    // Port Number 08
+                0x00  // The value to set: 0x01 to turn the left LNAs OFF
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing turnLeftLNAsOff().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::turnRightLNAsOn() throw (ReceiverControlEx)
+{
+    try {
+        makeRequest(
+                m_lna_board_ptr,       // Pointer to the LNA board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_09,    // Port Number 09
+                0x01  // The value to set: 0x01 to turn the right LNAs ON
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing turnRightLNAsOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::turnRightLNAsOff() throw (ReceiverControlEx)
+{
+    try {
+        makeRequest(
+                m_lna_board_ptr,       // Pointer to the LNA board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
+                MCB_PORT_TYPE_DIO,     // Port type: Digital IO
+                MCB_PORT_NUMBER_09,    // Port Number 09
+                0x00  // The value to set: 0x01 to turn the right LNAs OFF
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing turnRightLNAsOff().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, BYTE command, size_t len, ...) 
+    throw (MicroControllerBoardEx)
 {
     va_list parameters; // A place to store the list of arguments
     va_start(parameters, static_cast<BYTE>(len)); // Initializing arguments to store all values after len

@@ -139,9 +139,34 @@ int main(int argc, char *argv[])
         cout << "It the cool head ON? " << (rc.isCoolHeadOn() == true ? "yes" : "no") << endl;
         cout << "Done!\n" << endl;
 
+        // Test the turnLeftLNAsOff()
+        cout << "Test turnLeftLNAsOff() with a reliable communication" << endl;
+        rc.turnLeftLNAsOff();
+        cout << "Done!\n" << endl;
+
         // Test lna()
         cout << "Test lna() with a reliable communication" << endl;
         FetValues values = rc.lna(0, 4, currentConverter, voltageConverter);
+        cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        cout << ", VGL=" << values.VGL << ")" << endl;
+        cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        cout << ", VGR=" << values.VGR << ")" << endl;
+        cout << endl;
+        values = rc.lna(1, 2, currentConverter);
+        cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        cout << ", VGL=" << values.VGL << ")" << endl;
+        cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        cout << ", VGR=" << values.VGR << ")" << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the turnLeftLNAsOn()
+        cout << "Test turnLeftLNAsOn() with a reliable communication" << endl;
+        rc.turnLeftLNAsOn();
+        cout << "Done!\n" << endl;
+
+        // Test lna()
+        cout << "Test lna() with a reliable communication" << endl;
+        values = rc.lna(0, 4, currentConverter, voltageConverter);
         cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
         cout << ", VGL=" << values.VGL << ")" << endl;
         cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;

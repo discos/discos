@@ -99,6 +99,10 @@ struct FetValues {
  *     <li>FetValues lna(unsigned short feed_number, unsigned short stage_number): 
  *     return the FetValues (VDL, IDL, VGL, VDR, IDR and VGR) of the LNA of the feed `feed_number`, 
  *     and stage `stage_id`</li>
+ *     <li>void turnLeftLNAsOn(): turn the the left LNAs ON</li>
+ *     <li>void turnLeftLNAsOff(): turn the the left LNAs OFF</li>
+ *     <li>void turnRightLNAsOn(): turn the the right LNAs ON</li>
+ *     <li>void turnRightLNAsOff(): turn the the right LNAs OFF</li>
  * </ul>
  * 
  */
@@ -376,6 +380,30 @@ public:
             double (*currentConverter)(double voltage) = NULL,
             double (*voltageConverter)(double voltage) = NULL
     ) throw (ReceiverControlEx);
+
+
+    /** Turn the LNAs of the left channels ON
+     *  @throw ReceiverControlEx
+     */
+    void turnLeftLNAsOn() throw (ReceiverControlEx);
+
+
+    /** Turn the LNAs of the left channels OFF
+     *  @throw ReceiverControlEx
+     */
+    void turnLeftLNAsOff() throw (ReceiverControlEx);
+
+
+    /** Turn the LNAs of the right channels ON
+     *  @throw ReceiverControlEx
+     */
+    void turnRightLNAsOn() throw (ReceiverControlEx);
+
+
+    /** Turn the LNAs of the right channels OFF
+     *  @throw ReceiverControlEx
+     */
+    void turnRightLNAsOff() throw (ReceiverControlEx);
 
 
     /** Is the connection to the LNA board OK?
