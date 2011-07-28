@@ -36,6 +36,8 @@
 //#define PROT_PACKET_LENGTH 64
 //#define PROT_TOTAL_DEVICES 14
 
+using namespace IRA;
+
 class CProtocol {
 public:
 	/**

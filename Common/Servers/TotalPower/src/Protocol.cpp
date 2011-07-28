@@ -3,7 +3,6 @@
 #include "Protocol.h"
 #include "Common.h"
 
-
 WORD CProtocol::setConfiguration_broadcast(char *sBuff,const TInputs& input,const double &att,const double& bw)
 {
 	strcpy(sBuff,PROT_SET_CONF_BROAD);
