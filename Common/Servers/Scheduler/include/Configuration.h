@@ -14,6 +14,8 @@
 #include <maciContainerServices.h>
 #include <ComponentErrors.h>
 
+using namespace IRA;
+
 /**
  * This class implements the component configurator. The data inside this class are initialized at the startup from the
  * configuration database and then are used (read) inside the component.

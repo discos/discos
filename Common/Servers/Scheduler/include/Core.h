@@ -27,6 +27,7 @@
 #include "Schedule.h"
 
 //using namespace maci;
+using namespace IRA;
 
 class CScheduleExecutor;
 

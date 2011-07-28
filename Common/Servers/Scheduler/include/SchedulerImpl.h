@@ -27,6 +27,7 @@
 #include <Definitions.h>
 #include "Configuration.h"
 #include "Core.h"
+#include <IRA>
 
 /** 
  * @mainpage Scheduler component Implementation 
@@ -38,7 +39,7 @@
 */
 
 //using namespace baci;
-
+using namespace IRA;
 /**
  * This class is the implementation of the Scheduler component.  
  * @author <a href=mailto:a.orlati@ira.inaf.it>Orlati Andrea</a>

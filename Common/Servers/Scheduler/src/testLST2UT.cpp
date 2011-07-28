@@ -5,6 +5,7 @@
 #include <DateTime.h>
 #include <slamac.h>
 
+using namespace IRA;
 
 ACS::Time getUTFromLST(const IRA::CDateTime& currentUT,const IRA::CDateTime& checkUT,const ACS::TimeInterval& lst,const IRA::CSite& site,const double& dut1)
 {

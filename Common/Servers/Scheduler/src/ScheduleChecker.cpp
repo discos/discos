@@ -4,6 +4,8 @@
 #include <getopt.h>
 #include <libgen.h>
 
+using namespace IRA;
+
 bool g_batch=false;
 
 void printMessage(const char *msg)
