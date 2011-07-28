@@ -34,6 +34,7 @@
 #define MAX_MODEL_PARAM 30
 
 using namespace acscomponent;
+using namespace IRA;
 
 /**
  * This class implements the Antenna::PointingModel CORBA interface and the ACS Component.  
