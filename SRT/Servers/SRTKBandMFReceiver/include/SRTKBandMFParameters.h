@@ -14,10 +14,10 @@
 /// A structure that holds receiver CDB parameters
 struct RCDBParameters {
     DWORD NUMBER_OF_FEEDS;
-    CString IP;
+    IRA::CString IP;
     DWORD PORT;
     DWORD TIMEOUT;
-    CString RECEIVER_NAME;
+    IRA::CString RECEIVER_NAME;
 };
 
 

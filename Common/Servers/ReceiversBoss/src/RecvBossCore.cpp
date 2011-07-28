@@ -41,19 +41,19 @@ void CRecvBossCore::initialize(maci::ContainerServices* services)
 
 void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl)
 {
-	CError error;
+    IRA::CError error;
 	m_KKCFeedTable=new IRA::CDBTable(m_services,"Feed","DataBlock/KKCReceiver/Feeds");
 	error.Reset();
-	if (!m_KKCFeedTable->addField(error,"feedCode",CDataField::LONGLONG)) {
+	if (!m_KKCFeedTable->addField(error,"feedCode",IRA::CDataField::LONGLONG)) {
 		error.setExtra("feedCode field not found",0);
  	}
-	else if (!m_KKCFeedTable->addField(error,"xOffset",CDataField::DOUBLE)) {
+	else if (!m_KKCFeedTable->addField(error,"xOffset",IRA::CDataField::DOUBLE)) {
 		error.setExtra("xOffset field not found",0);
  	}
-	else if (!m_KKCFeedTable->addField(error,"yOffset",CDataField::DOUBLE)) {
+	else if (!m_KKCFeedTable->addField(error,"yOffset",IRA::CDataField::DOUBLE)) {
 		error.setExtra("yOffset field not found",0);
  	}
-	else if (!m_KKCFeedTable->addField(error,"relativePower",CDataField::DOUBLE)) {
+	else if (!m_KKCFeedTable->addField(error,"relativePower",IRA::CDataField::DOUBLE)) {
 		error.setExtra("relativePower field not found",0);
  	}
 	if (!error.isNoError()) {

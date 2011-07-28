@@ -17,7 +17,7 @@ struct CDBParameters {
     double SCALE_FACTOR;
     double DELTA_MAX;
     double SCALE_OFFSET;
-    CString SERVER_IP; 
+    IRA::CString SERVER_IP; 
     DWORD SERVER_PORT; 
     DWORD SERVER_TIMEOUT;
     DWORD SERVO_ADDRESS;
