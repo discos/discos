@@ -35,6 +35,8 @@
 #include <AntennaErrors.h>
 #include <ComponentErrors.h>
 
+using namespace IRA;
+
 class SkySourceImpl: public virtual acscomponent::ACSComponentImpl,public virtual POA_Antenna::SkySource
 {
 public:
