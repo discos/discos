@@ -42,6 +42,7 @@
 
 using namespace baci;
 using namespace maci;
+using namespace IRA;
 
 /**
  * Data structure used as argument type for the DevIO.
