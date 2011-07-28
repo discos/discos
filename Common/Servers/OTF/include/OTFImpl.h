@@ -38,6 +38,7 @@
 
 
 using namespace baci;
+using namespace IRA;
 
 /**
  * Component returns the sequence of Az,El pointings to move along the subscan, 
