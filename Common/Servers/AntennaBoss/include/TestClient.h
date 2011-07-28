@@ -12,5 +12,6 @@
 #include <Definitions.h>
 #include <ClientErrors.h>
 
+using namespace IRA;
 
 #endif /*TESTCLIENT_H_*/
