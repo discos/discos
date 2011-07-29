@@ -15,6 +15,8 @@
 #include <QtGui/QLineEdit>
 #include <QtGui/QLabel>
 
+using namespace IRA;
+
 class SRTActiveSurfaceCore : public QThread
 {
     Q_OBJECT
