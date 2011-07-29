@@ -23,6 +23,7 @@ CLedDisplay::CLedDisplay(const WORD& num) : CFrameComponent(), m_ledNumber(num)
 	CFrameComponent::setHAlign(CFrameComponent::MIDDLE);
 	CFrameComponent::setWAlign(CFrameComponent::CENTER);
 	m_orientation=VERTICAL;
+	m_interleave=0;
 }
 
 CLedDisplay::~CLedDisplay()
@@ -76,8 +77,8 @@ WORD CLedDisplay::draw()
 	if (m_orientation==VERTICAL) dimension=CFrameComponent::getEffectiveWidth();
 	else dimension=CFrameComponent::getEffectiveHeight();
 	for (WORD i=0;i<dimension;i++) {
-		if (m_orientation==VERTICAL) newPosition=CPoint(i,0);
-		else newPosition=CPoint(0,i);
+		if (m_orientation==VERTICAL) newPosition=CPoint(i*(m_interleave+1),0);
+		else newPosition=CPoint(0,i*(m_interleave+1));
 		mask=(unsigned long long int)pow(2,i);
 		isOn=(value&mask)==mask;
 		if (isOn) {

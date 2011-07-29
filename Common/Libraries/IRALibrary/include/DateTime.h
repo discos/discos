@@ -363,7 +363,7 @@ public:
 			const int& month,const int& day,const double& dut1=0.0);
 		
 private:
-	// Private variable which holds the time of the Time object. Unit is milliseconds.
+	// Private variable which holds the time of the Time object
 	double m_jd;
 	int m_day,m_month,m_year;
 	long m_msecs;

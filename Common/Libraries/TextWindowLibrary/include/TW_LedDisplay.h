@@ -66,6 +66,12 @@ public:
 	*/
 	void setLedStyle(const WORD& pos,const CStyle& styleOn,const CStyle& styleOff,const char& chOn='@',const char& chOff='o');
 	
+	/**
+	 * Allows to set the spaces between tow leds. The Default is zero space.
+	 * @param interleave number of spaces between two leds.
+	 */
+	void setInterleave(const WORD& interleave) { m_interleave=interleave; }
+
 	using CFrameComponent::setPosition;
 	using CFrameComponent::getPosition;
 	using CFrameComponent::setTag;
@@ -96,6 +102,9 @@ protected:
 
 	/** Indicated the orientation of the component: vertical or horiziontal */
 	TOrientation m_orientation;
+
+	/** Indicates the interleave between two leds */
+	WORD m_interleave;
 
 	/**
 	 * This method implements the pure virtual method of the <i>CFrameComponent</i> base class. It must contain all the instruction required to
