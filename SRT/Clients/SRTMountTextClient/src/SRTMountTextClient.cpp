@@ -548,7 +548,7 @@ int main(int argc, char *argv[]) {
 		time_field->setFormatFunction(CFormatFunctions::dateTimeClockFormat,NULL);
 		// deltaTime_field
 		_TW_SET_COMPONENT(deltaTime_field,38,7,8,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		deltaTime_field->setFormatFunction(CFormatFunctions::floatingPointFormat,"%08.5lf");
+		deltaTime_field->setFormatFunction(CFormatFunctions::floatingPointFormat,"%5.0lf");
 		// section_box
 		_TW_SET_COMPONENT(section_box,57,5,8,1,BLACK_WHITE,CStyle::BOLD,output_label);
 		section_box->setStatusLook(Antenna::ACU_CW);
@@ -578,28 +578,28 @@ int main(int argc, char *argv[]) {
 		mountStatus_box->setStatusLook(Management::MNG_WARNING,CStyle(BLACK_YELLOW,CStyle::BOLD));
 		mountStatus_box->setStatusLook(Management::MNG_FAILURE,CStyle(BLACK_RED,CStyle::BOLD));	
 		//motorsPositions_text
-		_TW_SET_COMPONENT(motorsPosition_text,41,15,9,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(motorsPosition_text,41,17,9,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		motorsPosition_text->setHAlign(CFrameComponent::UP);
 		motorsPosition_text->setWAlign(CFrameComponent::LEFT);
-		motorsPosition_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%08.2lf");
+		motorsPosition_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%08.1lf");
 		//motorsSpeed_text
-		_TW_SET_COMPONENT(motorsSpeed_text,51,15,9,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(motorsSpeed_text,51,17,9,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		motorsSpeed_text->setHAlign(CFrameComponent::UP);
 		motorsSpeed_text->setWAlign(CFrameComponent::LEFT);
 		motorsSpeed_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%+08.2lf");
 		//motorsTorque_text
-		_TW_SET_COMPONENT(motorsTorque_text,61,15,7,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(motorsTorque_text,61,17,7,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		motorsTorque_text->setHAlign(CFrameComponent::UP);
 		motorsTorque_text->setWAlign(CFrameComponent::LEFT);
 		motorsTorque_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%+06.3lf");
 		// motorsUtilization_text
-		_TW_SET_COMPONENT(motorsUtilization_text,69,15,7,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(motorsUtilization_text,69,17,7,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		motorsUtilization_text->setHAlign(CFrameComponent::UP);
 		motorsUtilization_text->setWAlign(CFrameComponent::LEFT);
 		motorsUtilization_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%+06.1lf");
 		// motorsStatus_led
 		for (WORD j=0;j<MOTORS_NUMBER;j++) {
-			TW::CPoint pos(77,15+j);
+			TW::CPoint pos(77,17+j);
 			motorsStatus_led[j]->setPosition(pos);
 			motorsStatus_led[j]->setOrientation(TW::CLedDisplay::VERTICAL);
 		}
@@ -631,8 +631,8 @@ int main(int argc, char *argv[]) {
 				clearedStyle.setColorPair(CColorPair::WHITE_BLACK);
 			}				
 			for (WORD j=0;j<MOTORS_NUMBER;j++) {
-				motorsStatus_led[j]->setLedStyle(i,setStyle,clearedStyle,'o','o');
-				
+				motorsStatus_led[j]->setLedStyle(i,setStyle,clearedStyle,'O','O');
+				motorsStatus_led[j]->setInterleave(1);
 			}			
 		}
 		//freepTTPos_field
@@ -713,7 +713,7 @@ int main(int argc, char *argv[]) {
 		_TW_ADD_LABEL("Wrap",0,5,9,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Time",0,7,9,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("D ut1",32,7,9,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);		
-		_TW_ADD_LABEL("Az1Az2Az3Az4Az5Az6Az7Az8El1El2El3El4Wrp",36,15,3,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Az1Az2Az3Az4Az5Az6Az7Az8El1El2El3El4Wrp",36,17,3,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Ctrl socket",36,9,11,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Status socket",36,10,13,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Mount status",36,11,12,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
@@ -728,13 +728,13 @@ int main(int argc, char *argv[]) {
 		_TW_ADD_LABEL("Trk.Error",47,0,9,1,CColorPair::WHITE_BLACK,0,window);	
 		_TW_ADD_LABEL("Azimuth",18,8,7,1,CColorPair::WHITE_BLACK,0,window);
 		_TW_ADD_LABEL("Elevation",26,8,9,1,CColorPair::WHITE_BLACK,0,window);
-		_TW_ADD_LABEL("Pos[rot]  [rot/min] Torque  Use[%]",41,14,34,1,CColorPair::WHITE_BLACK,0,window);
+		_TW_ADD_LABEL("Pos[rot]  [rot/min] Torque  Use[%]",41,16,34,1,CColorPair::WHITE_BLACK,0,window);
 		
 		for (WORD j=0;j<motorsStatusDescription.length();j++) {
 			TW::CLabel *dummy=new TW::CLabel((const char *)motorsStatusDescription[j]);
 			dummy->setWidth(1);
-			dummy->setHeight(5);
-			dummy->setPosition(TW::CPoint(77+j,10));
+			dummy->setHeight(7);
+			dummy->setPosition(TW::CPoint(77+(j*2),10));
 			if ((j%2)==0) {
 				dummy->setStyle(TW::CStyle(CColorPair::WHITE_BLACK,TW::CStyle::BOLD));
 			}

@@ -166,6 +166,7 @@ void CStatusSocket::createSocket() throw (SocketErrorExImpl)
 		error.Reset();
 		_THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CStatusSocket::createSocket()");
 	}
+	setSleepTime(m_pConfiguration->statusSocketDutyCycle());
 	// register the event associated to the ready-to-receive event
 	if (EventSelect(error,E_RECEIVE,true,m_pConfiguration->statusSocketTimeout())==FAIL) {
 		_EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,error);
@@ -182,7 +183,6 @@ void CStatusSocket::createSocket() throw (SocketErrorExImpl)
 		error.Reset();
 		_THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CStatusSocket::createSocket()");
 	}
-	setSleepTime(m_pConfiguration->statusSocketDutyCycle());	
 }
 
 int CStatusSocket::receiveBuffer(BYTE *Msg,WORD Len,CError& err)

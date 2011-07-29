@@ -5,6 +5,8 @@
 #include "CommonData.h"
 #include <LogFilter.h>
 
+using namespace IRA;
+
 _IRA_LOGFILTER_DECLARE;
 
 
@@ -14,11 +16,14 @@ void binder(const CCommonData *data)
 	static ACS::Time pastTime=0;
 	ACS::Time currentTime;
 	ACS::TimeInterval diff;
+	IRA::CString strTime;
 	CACUProtocol::TGeneralStatus *generalStatus=data->generalStatus();
 	CACUProtocol::TAxisStatus *azimuthStatus=data->azimuthStatus();
 	CACUProtocol::TAxisStatus *elevationStatus=data->elevationStatus();
 	CACUProtocol::TPointingStatus * pointingStatus=data->pointingStatus();
 	currentTime=pointingStatus->actualTime();
+	IRA::CIRATools::timeToStr(currentTime,strTime);
+	printf("Time: %s\n",(const char *)strTime);
 	if (pastTime!=0) {
 		diff=currentTime-pastTime;
 		printf("status frame received in %lld msec\n",diff/10000);

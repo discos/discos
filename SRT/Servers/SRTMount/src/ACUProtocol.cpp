@@ -1,4 +1,3 @@
-// $Id: ACUProtocol.cpp,v 1.5 2011-06-01 18:24:44 a.orlati Exp $
 
 #include "ACUProtocol.h"
 //#include <acstimeEpochHelper.h>
@@ -11,11 +10,20 @@
 #define  STARTFLAG 0x1DFCCF1A   
 #define  ENDFLAG 0xA1FCCFD1
 
+#define TS_ACUTIME_NAME "ACU"
+#define TS_IRIGB_NAME "IRIG-B"
+#define TS_EXTERNAL_NAME "EXT"
+
+
+
 #define MODE_COMMAND_ID 1
 #define PARAMETER_COMMAND_ID 2
 #define PROGRAMTRACK_COMMAND_ID 4
 
+#define PROGRAMTRACK_INTERPOLATION_MODE 4
 #define PROGRAMTRACK_TRACKING_MODE 1
+#define PROGRAMTRACK_LOAD_MODE_NEW_TABLE 1
+#define PROGRAMTRACK_LOAD_MODE_APPEND_TABLE 2
 
 #define STATUS_BUFFER CACUProtocol::SOCKET_RECV_BUFFER*3
 
@@ -32,9 +40,9 @@ CACUProtocol::~CACUProtocol()
 	delete m_syncBuffer;
 }
 
-WORD CACUProtocol::preset(const double& azPos,const double& elPos,BYTE * & buff,TCommand *& command,WORD& commNumber)
+WORD CACUProtocol::preset(const double& azPos,const double& elPos,const double& azRate,const double& elRate,BYTE * & buff,TCommand *& command,WORD& commNumber)
 {	
-	return modeCommand(MODE_PRESET_ABS,MODE_PRESET_ABS,azPos,0.0,elPos,0.0,buff,command,commNumber);
+	return modeCommand(MODE_PRESET_ABS,MODE_PRESET_ABS,azPos,azRate,elPos,elRate,buff,command,commNumber);
 }
 
 WORD CACUProtocol::rate(const double& azRate,const double& elRate,BYTE *& buff,TCommand *& command,WORD& commNumber)
@@ -140,7 +148,7 @@ WORD CACUProtocol::positionOffsets(const double& azOff,const double& elOff,BYTE 
 	return packMessage(msg,len,commNumber,buff);
 }
 
-WORD CACUProtocol::loadProgramTrack(const TProgramTrackPoint *seq,const WORD& size,bool newTable,BYTE *& buff,TCommand *& command,WORD& commNumber)
+WORD CACUProtocol::loadProgramTrack(const TProgramTrackPoint *seq,const WORD& size,bool newTable,const double& azRate,const double& elRate,BYTE *& buff,TCommand *& command,WORD& commNumber)
 {
 	BYTE msg[CACUProtocol::SOCKET_SEND_BUFFER];
 	WORD len=0;
@@ -158,22 +166,20 @@ WORD CACUProtocol::loadProgramTrack(const TProgramTrackPoint *seq,const WORD& si
 	counter=getMillisOfTheDay()+1;
 	copyData<TUINT32>(msg,counter,len);
 	copyData<TUINT16>(msg,PAR_PROGRAM_TRACK_TABLE,len);
-	copyData<TUINT16>(msg,4,len);
+	copyData<TUINT16>(msg,PROGRAMTRACK_INTERPOLATION_MODE,len);
 	copyData<TUINT16>(msg,PROGRAMTRACK_TRACKING_MODE,len);  // tracking mode: azimuth/elevation
-	
 	if (newTable) {
-		copyData<TUINT16>(msg,1,len);  // load mode: start a new table
+		copyData<TUINT16>(msg,PROGRAMTRACK_LOAD_MODE_NEW_TABLE,len);  // load mode: start a new table
 	}
 	else {
-		copyData<TUINT16>(msg,2,len);  // load mode: new entries will be attached to the existing table
+		copyData<TUINT16>(msg,PROGRAMTRACK_LOAD_MODE_APPEND_TABLE,len);  // load mode: new entries will be attached to the existing table
 	}
 	copyData<TUINT16>(msg,size,len);  // sequence length
 	startUt=seq[0].timeMark;
 	mjd=time2MJD(startUt);
 	copyData<TREAL64>(msg,mjd,len);  // startTime as modified julian date
-	
-	copyData<TREAL64>(msg,0.0,len);  // max speed in azimuth...0.0 should use max speed  
-	copyData<TREAL64>(msg,0.0,len);  // max speed in elevation...0.0 should use max speed
+	copyData<TREAL64>(msg,azRate,len);  // max speed in azimuth..
+	copyData<TREAL64>(msg,elRate,len);  // max speed in elevation...
 	for (WORD i=0;i<size;i++) {
 		timeDiff=(seq[i].timeMark-startUt); // 100 ns
 		timeDiff=(long)(timeDiff/10000); // milliseconds
@@ -192,7 +198,7 @@ WORD CACUProtocol::loadProgramTrack(const TProgramTrackPoint *seq,const WORD& si
 	return packMessage(msg,len,commNumber,buff);	
 }
 
-WORD CACUProtocol::setTime(const ACS::Time& time,BYTE *& buff,TCommand *& command,WORD& commNumber)
+WORD CACUProtocol::setTime(const ACS::Time& time,const IRA::CString& timeSource,BYTE *& buff,TCommand *& command,WORD& commNumber)
 {
 	BYTE msg[CACUProtocol::SOCKET_SEND_BUFFER];
 	TIMEVALUE refTime(time);
@@ -200,7 +206,7 @@ WORD CACUProtocol::setTime(const ACS::Time& time,BYTE *& buff,TCommand *& comman
 	WORD len=0;
 	commNumber=1;
 	command=new TCommand;
-	len=parameterCommand(PAR_TIME_SOURCE,SUBSYSTEM_ID_POINTING,3.0,(double)dateTime.getMJD(),msg,command);	
+	len=parameterCommand(PAR_TIME_SOURCE,SUBSYSTEM_ID_POINTING,(double)str2TimeSource(timeSource),(double)dateTime.getMJD(),msg,command);
 	return packMessage(msg,len,commNumber,buff);
 }
 
@@ -324,6 +330,19 @@ double CACUProtocol::time2MJD(const ACS::Time& time)
 	TIMEVALUE timeVal(time);
 	IRA::CDateTime dt(timeVal); // dut1 is always zero...here want to convert a UT to a MJD;
 	return (double)dt.getMJD();
+}
+
+CACUProtocol::TTimeSources CACUProtocol::str2TimeSource(const IRA::CString ts)
+{
+	if (ts==TS_ACUTIME_NAME) {
+		return TS_ACUTIME;
+	}
+	else if (ts==TS_IRIGB_NAME) {
+		return TS_IRIGB;
+	}
+	else { // if (ts==TS_EXTERNAL_NAME) {
+		return TS_EXTERNAL;
+	}
 }
 
 WORD CACUProtocol::modeCommand(const TModes& azMode,const TModes& elMode,const double& azP1,const double& azP2,const double& elP1,const double& elP2,BYTE *& outBuff,TCommand *& command,WORD& commNumber) const

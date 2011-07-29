@@ -1,9 +1,9 @@
-// $Id: WatchDog.cpp,v 1.1 2010-12-28 19:07:55 a.orlati Exp $
-
 #include "StatusSocket.h"
 #include "CommandSocket.h"
 #include "WatchDog.h"
 #include <LogFilter.h>
+
+using namespace IRA;
 
 _IRA_LOGFILTER_IMPORT;
 

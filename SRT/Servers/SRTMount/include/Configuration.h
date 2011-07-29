@@ -3,21 +3,19 @@
 
 /* **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id: Configuration.h,v 1.3 2010-12-28 19:07:55 a.orlati Exp $		    									     */
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
 /* Who                                when            What                                              */
-/* Andrea Orlati(aorlati@ira.inaf.it)  30/09/2009      Creation                                         */
+/* Andrea Orlati(aorlati@ira.inaf.it)  30/09/2009     Creation                                         */
+/* Andrea Orlati(aorlati@ira.inaf.it)  27/07/2011     added the acquisition of time source attribute   */
 
 #include <IRA>
 #include <maciContainerServices.h>
 #include <ComponentErrors.h>
 
-using namespace IRA;
-
 /**
- * This class implements the component configurator. The data inside this class are initialized at the startup from the
+ * This class implements the component configuration. The data inside this class are initialized at the startup from the
  * configuration database and then are used (read) inside the component.
  * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
@@ -53,12 +51,12 @@ public:
 	inline double cwLimit() const { return m_cwLimit; }
 	
 	/** Gets ACU ip address */
-	inline CString ipAddress() const { return m_ACUAddress; }
+	inline IRA::CString ipAddress() const { return m_ACUAddress; }
 		
 	/** Gets the socket port to which the ACU is listening to commands */
 	inline WORD commandPort() const { return m_commandPort; }
 	
-	/** Gets the socket port from which nthe ACU is sending the status frame */
+	/** Gets the socket port from which the ACU is sending the status frame */
 	inline WORD statusPort() const { return m_statusPort; }
 		
 	/** Gets the connection timeout, which must be used when trying to connect to the ACU (microseconds)*/
@@ -100,6 +98,11 @@ public:
 	inline DDWORD unstowTimeout() const { return m_dwunstowTimeout; }
 	
 	/**
+	 * gets the name of the source used as time synchronization
+	 */
+	inline const IRA::CString& getTimeSource() const { return m_timeSource; }
+
+	/**
     * This member function is used to configure component by reading the configuration parameter from the CDB.
 	 * This must be the first call before using any other function of this class.
 	 * @throw ComponentErrors::CDBAccess
@@ -108,12 +111,12 @@ public:
 	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl);
 	
 	/**
-	 * This function willl load the configuration from hardcoded value. Used only for debug purposes
+	 * This function will load the configuration from hard coded value. Used only for debug purposes
 	 */
 	void init() throw (ComponentErrors::CDBAccessExImpl);
 private:
 	/** ACU ip address */	
-	CString m_ACUAddress;
+	IRA::CString m_ACUAddress;
 	/** ACU listening port */
 	WORD m_commandPort;
 	/** ACU status port */
@@ -122,7 +125,7 @@ private:
 	DDWORD m_statusSocketTimeout;
 	/** Receive status duty cycle */
 	DDWORD m_statusSocketDutyCycle;
-	/** Microsends allows to the control line to respond before declarint a timeout */
+	/** Microseconds allows to the control line to respond before declaring a timeout */
 	DDWORD m_controlSocketResponseTime;
 	/** send command duty cycle */
 	DDWORD m_controlSocketDutyCycle;
@@ -146,7 +149,7 @@ private:
 	double m_elevationRateLowerLimit;
 	double m_elevationRateUpperLimit;
 	double m_cwLimit;
-	
+	IRA::CString m_timeSource;
 };
 
 

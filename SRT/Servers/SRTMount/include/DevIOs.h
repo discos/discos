@@ -76,127 +76,127 @@ public:
 	{
 		switch (m_property) {
 			case AZIMUTH : {
-				m_propertyName=CString("Azimuth");
+				m_propertyName=IRA::CString("Azimuth");
 				break;
 			}
 			case ELEVATION : {
-				m_propertyName=CString("Elevation");
+				m_propertyName=IRA::CString("Elevation");
 				break;
 			}
 			case AZIMUTH_ERROR : {
-				m_propertyName=CString("Azimuth Error");
+				m_propertyName=IRA::CString("Azimuth Error");
 				break;
 			}
 			case ELEVATION_ERROR : {
-				m_propertyName=CString("Elevation Error");
+				m_propertyName=IRA::CString("Elevation Error");
 				break;
 			}
 			case AZIMUTH_TRACKERROR : {
-				m_propertyName=CString("Azimuth Tracking Error");
+				m_propertyName=IRA::CString("Azimuth Tracking Error");
 				break;
 			}
 			case ELEVATION_TRACKERROR : {
-				m_propertyName=CString("Elevation Tracking Error");
+				m_propertyName=IRA::CString("Elevation Tracking Error");
 				break;
 			}
     		case AZIMUTH_MODE: {
-    			m_propertyName=CString("Azimuth Mode");
+    			m_propertyName=IRA::CString("Azimuth Mode");
 				break;
 			}			
 			case ELEVATION_MODE: {
-				m_propertyName=CString("Elevation Mode");
+				m_propertyName=IRA::CString("Elevation Mode");
 				break;
 			}			
 			case TIME: {
-				m_propertyName=CString("Time");
+				m_propertyName=IRA::CString("Time");
 				break;
 			}			
 			case STATUSLINESTATUS: {
-				m_propertyName=CString("Status Line Status");
+				m_propertyName=IRA::CString("Status Line Status");
 				break;
 			}
 			case CONTROLLINESTATUS: {
-				m_propertyName=CString("Control Line Status");
+				m_propertyName=IRA::CString("Control Line Status");
 				break;
 			}							
 			case PROGRAM_TRACK_POS: {
-				m_propertyName=CString("Free Program Track Positions");
+				m_propertyName=IRA::CString("Free Program Track Positions");
 				break;
 			}
 			case SECTION: {
-				m_propertyName=CString("Section");
+				m_propertyName=IRA::CString("Section");
 				break;				
 			}	
 			case AZIMUTH_RATE : {
-				m_propertyName=CString("Azimuth Rate");
+				m_propertyName=IRA::CString("Azimuth Rate");
 				break;				
 			}
 			case ELEVATION_RATE : {
-				m_propertyName=CString("Elevation Rate");
+				m_propertyName=IRA::CString("Elevation Rate");
 				break;								
 			}
 			case ELEVATION_OFF : {
-				m_propertyName=CString("Elevation Offset");
+				m_propertyName=IRA::CString("Elevation Offset");
 				break;								
 			}
 			case AZIMUTH_OFF : {
-				m_propertyName=CString("Azimuth Offset");
+				m_propertyName=IRA::CString("Azimuth Offset");
 				break;								
 			}
 			case DELTA_TIME : {
-				m_propertyName=CString("Delta Time");
+				m_propertyName=IRA::CString("Delta Time");
 				break;								
 			}
 			case COMMANDED_AZ : {
-				m_propertyName=CString("Commanded Azimuth");
+				m_propertyName=IRA::CString("Commanded Azimuth");
 				break;								
 			}
 			case COMMANDED_EL : {
-				m_propertyName=CString("Commanded Elevation");
+				m_propertyName=IRA::CString("Commanded Elevation");
 				break;								
 			}
 			case COMMANDED_AZ_RATE: {
-				m_propertyName=CString("Commanded Azimuth Rate");
+				m_propertyName=IRA::CString("Commanded Azimuth Rate");
 				break;
 			}	
 			case COMMANDED_EL_RATE: {
-				m_propertyName=CString("Commanded Elevation Rate");
+				m_propertyName=IRA::CString("Commanded Elevation Rate");
 				break;
 			}	
 			case COMMANDED_AZ_OFFSET: {
-				m_propertyName=CString("Commanded Azimuth Offset");
+				m_propertyName=IRA::CString("Commanded Azimuth Offset");
 				break;
 			}	
 			case COMMANDED_EL_OFFSET: {
-				m_propertyName=CString("Commanded Elevation Offset");
+				m_propertyName=IRA::CString("Commanded Elevation Offset");
 				break;
 			}	
 			case CABLEWRAP_POSITION: {
-				m_propertyName=CString("Cable Wrap Position");
+				m_propertyName=IRA::CString("Cable Wrap Position");
 				break;
 			}	
 			case CABLEWRAP_TRACKERROR: {
-				m_propertyName=CString("Cable Wrap Error");
+				m_propertyName=IRA::CString("Cable Wrap Error");
 				break;
 			}	
 			case CABLEWRAP_RATE: {
-				m_propertyName=CString("Cable Wrap Rate");
+				m_propertyName=IRA::CString("Cable Wrap Rate");
 				break;
 			}	
 			case GENERAL_STATUS: {
-				m_propertyName=CString("General Status");
+				m_propertyName=IRA::CString("General Status");
 				break;
 			}	
 			case AZIMUTH_AXIS_STATUS: {
-				m_propertyName=CString("Azimuth Status");
+				m_propertyName=IRA::CString("Azimuth Status");
 				break;
 			}	
 			case ELEVATION_AXIS_STATUS: {
-				m_propertyName=CString("Elevation Status");
+				m_propertyName=IRA::CString("Elevation Status");
 				break;
 			}
 			case MOUNT_STATUS: {
-				m_propertyName=CString("Mount Status");
+				m_propertyName=IRA::CString("Mount Status");
 				break;
 			}	
 		}
@@ -229,7 +229,7 @@ public:
 	{
 		if (m_pdata) {
 			// get the ACU Socket.......
-			CSecAreaResourceWrapper<CCommonData> data=m_pdata->Get();
+			IRA::CSecAreaResourceWrapper<CCommonData> data=m_pdata->Get();
 			try {
 				switch (m_property) {
 					case AZIMUTH : {
@@ -311,7 +311,8 @@ public:
 						break;
 					}
 					case DELTA_TIME: {
-						m_value=(T)data->pointingStatus()->actualTimeOffset();
+						//m_value=(T)data->pointingStatus()->actualTimeOffset();
+						m_value=(T)data->pointingStatus()->pTTTimeOffset();
 						break;
 					}
 					case COMMANDED_AZ: {
@@ -410,14 +411,14 @@ public:
 	
 	/** 
 	 * Constructor
-	 * @param data pointer to a SecureArea that proctects a component common data area. This object must be already initialized and configured.
+	 * @param data pointer to a SecureArea that protects a component common data area. This object must be already initialized and configured.
 	 * @param property Indicates which property will make use of this DEVIO.
 	*/
 	ACUDevIO(IRA::CSecureArea<CCommonData>* data,TLinkedProperty property) :  m_pdata(data), m_property(property)
 	{
 		switch (m_property) {
 			case MOTORS_STATUS: {
-				m_propertyName=CString("Motors Status");
+				m_propertyName=IRA::CString("Motors Status");
 				break;
 			}				
 		}
@@ -450,7 +451,7 @@ public:
 	{
 		if (m_pdata) {
 			// get the ACU Socket.......
-			CSecAreaResourceWrapper<CCommonData> data=m_pdata->Get();
+			IRA::CSecAreaResourceWrapper<CCommonData> data=m_pdata->Get();
 			try {
 				switch (m_property) {
 					case MOTORS_STATUS: {
@@ -466,7 +467,7 @@ public:
 				throw dummy;
 			}
 		} 
-		timestamp=getTimeStamp();  //complition time
+		timestamp=getTimeStamp();  //Completion time
 		return m_value;
 	}
 	/**
@@ -507,19 +508,19 @@ public:
 	{
 		switch (m_property) {
 			case MOTORS_POSITION: {
-				m_propertyName=CString("Motors Position");
+				m_propertyName=IRA::CString("Motors Position");
 				break;
 			}	
 			case MOTORS_SPEED: {
-				m_propertyName=CString("Motors Speed");
+				m_propertyName=IRA::CString("Motors Speed");
 				break;
 			}	
 			case MOTORS_TORQUE: {
-				m_propertyName=CString("Motprs Torque");
+				m_propertyName=IRA::CString("Motprs Torque");
 				break;
 			}	
 			case MOTORS_UTILIZATION: {
-				m_propertyName=CString("Motors Utilization");
+				m_propertyName=IRA::CString("Motors Utilization");
 				break;
 			}	
 		}
@@ -552,7 +553,7 @@ public:
 	{
 		if (m_pdata) {
 			// get the ACU Socket.......
-			CSecAreaResourceWrapper<CCommonData> data=m_pdata->Get();
+			IRA::CSecAreaResourceWrapper<CCommonData> data=m_pdata->Get();
 			try {
 				switch (m_property) {
 					case MOTORS_POSITION: {

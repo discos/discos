@@ -75,7 +75,7 @@ def main():
     except Exception , ex:
         newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
         newEx.setComponentName(compType)
-        newEx.log(ACSLog.ACS_LOG_ERROR)
+        newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
         sys.exit(1)  
     
     try:
@@ -83,7 +83,7 @@ def main():
     except Exception , ex:
         newEx = ClientErrorsImpl.CouldntAccessPropertyExImpl( exception=ex, create=1 )
         newEx.setPropertyName("azimuth")
-        newEx.log(ACSLog.ACS_LOG_ERROR)
+        newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
         sys.exit(1)  
 
     try:
@@ -91,7 +91,7 @@ def main():
     except Exception , ex:
         newEx = ClientErrorsImpl.CouldntAccessPropertyExImpl( exception=ex, create=1 )
         newEx.setPropertyName("elevation")
-        newEx.log(ACSLog.ACS_LOG_ERROR)
+        newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
         sys.exit(1)  
     
     print "current azimuth and elevation: %lf %lf, wait for 10 seconds before starting" % (azimuth,elevation)
@@ -120,7 +120,7 @@ def main():
         except Exception , ex:
             newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
             newEx.setAction("programTrack")
-            newEx.log(ACSLog.ACS_LOG_ERROR)
+            newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
             sys.exit(1)
         time.sleep(gapS/2)
         

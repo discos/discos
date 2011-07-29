@@ -1,5 +1,3 @@
-// $Id: SRTMountImpl.cpp,v 1.7 2011-06-03 18:02:49 a.orlati Exp $
-
 #include <new>
 #include <baciDB.h>
 #include <ComponentErrors.h>
@@ -21,9 +19,11 @@
 	
 using namespace AntennaErrors;
 using namespace ComponentErrors;
+using namespace IRA;
 
-static char *rcsId="@(#) $Id: SRTMountImpl.cpp,v 1.7 2011-06-03 18:02:49 a.orlati Exp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
+
+/*static char *rcsId="@(#) $Id: SRTMountImpl.cpp,v 1.7 2011-06-03 18:02:49 a.orlati Exp $";
+static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);*/
 
 _IRA_LOGFILTER_DECLARE;
 

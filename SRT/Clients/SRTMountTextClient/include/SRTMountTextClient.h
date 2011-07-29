@@ -47,7 +47,7 @@
 #define BLACK_WHITE 7
 
 #define WINDOW_WIDTH 100      /*columns */
-#define WINDOW_HEIGHT 35     /* rows */  
+#define WINDOW_HEIGHT 37     /* rows */
 
 #define MODULE_NAME "SRTMountTextClient"   /* the name of this module (filename without .cpp) */
 

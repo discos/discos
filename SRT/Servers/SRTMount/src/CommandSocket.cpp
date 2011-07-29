@@ -1,5 +1,3 @@
-// $Id: CommandSocket.cpp,v 1.7 2011-01-14 18:07:52 a.orlati Exp $
-
 #include "CommandSocket.h"
 #include <LogFilter.h>
 #include <TimeoutSync.h>
@@ -211,26 +209,20 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 		m_lastScanEpoch=0;
 		data->clearProgramTrackStack();
 	}
+	data->getCommandedOffsets(azOff,elOff);
 	if (data->isProgramTrackStackEmpty()) {
-		/********************************************************************************************/
-		// is it comprehensive of the offsets? if so is that true also for preset?
-		/*********************************************************************************************/
 		currentAz=data->azimuthStatus()->actualPosition();   //if no position commanded yet, the current azimuth is the hardware azimuth of the telescope
+		// the offsets is included in the position read from encoders
 	}
 	else {
-		/********************************************************************************************/
 		// at the moment this is not comprehensive of the offsets
-		/*********************************************************************************************/
 		data->getLastProgramTrackPoint(currentAz,dummy); // else we refer to the last commanded azimuth
+		currentAz+=azOff;
 	}
-	/************************************************************************************/
-	// I HAVE TO ADD TO THE CURRENT COORDINATE THE OFFSETS IN ORDER TO CHECK THE LIMITS and to check the azimuth travel
-	azOff=elOff=0.0;
-	/***********************************************************************************/
+	// this is my target position
 	finalAz=az+azOff;
 	finalEl=el+elOff;
-	currentAz-=azOff; // depends if the POSITION IS OR IS NOT COMPREHNSIVE OF THE OFFSETS!!!!!
-	/************************************************************************************/
+	// transform the azimuth into a real azimuth..considering the wrap
 	if (data->getCommandedSector()==Antenna::ACU_CCW) section=-1;
 	else if (data->getCommandedSector()==Antenna::ACU_CW) section=1;
 	else section=0;
@@ -249,10 +241,10 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 	else if (finalEl>m_pConfiguration->elevationUpperLimit()) {
 		finalEl=m_pConfiguration->elevationUpperLimit();
 	}
+	// now get rid of the offsets
 	finalAz-=azOff;
 	finalEl-=elOff;
 	data->setCommandedSector(Antenna::ACU_NEUTRAL);
-	
 	// add the point into the cache and to commanded point stack!
 	m_ptTable[m_ptSize].azimuth=finalAz;
 	m_ptTable[m_ptSize].elevation=finalEl;
@@ -263,10 +255,10 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 		WORD size=m_ptSize;
 		m_ptSize=0; // in case we fail to load the data point the cache is cleared anyway...we loose the data points but at least next time we start from the scratch 
 		if (m_lastScanEpoch==0) {
-			len=m_protocol.loadProgramTrack(m_ptTable,size,true,message,command,commNum);
+			len=m_protocol.loadProgramTrack(m_ptTable,size,true,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),message,command,commNum);
 		}
 		else {
-			len=m_protocol.loadProgramTrack(m_ptTable,size,false,message,command,commNum);
+			len=m_protocol.loadProgramTrack(m_ptTable,size,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),false,message,command,commNum);
 		}
 		if (len==0) {
 			// ERRORE
@@ -430,7 +422,7 @@ void CCommandSocket::rates(const double& azRate,const double& elRate) throw (Tim
 	if (azRate<m_pConfiguration->azimuthRateLowerLimit()) az=m_pConfiguration->azimuthRateLowerLimit();
 	else if (azRate>m_pConfiguration->azimuthRateUpperLimit()) az=m_pConfiguration->azimuthRateUpperLimit();
 	else az=azRate;
-	if (elRate<m_pConfiguration->elevationRateLowerLimit()) el=m_pConfiguration->elevationLowerLimit();
+	if (elRate<m_pConfiguration->elevationRateLowerLimit()) el=m_pConfiguration->elevationRateLowerLimit();
 	else if (elRate>m_pConfiguration->elevationRateUpperLimit()) el=m_pConfiguration->elevationRateUpperLimit();
 	else el=elRate;
 	IRA::CTimeoutSync guard(&m_syncMutex,m_pConfiguration->controlSocketResponseTime(),m_pConfiguration->controlSocketDutyCycle());
@@ -708,7 +700,7 @@ void CCommandSocket::changeMode_command(const Antenna::TCommonModes& mode) throw
 	if (mode==Antenna::ACU_PRESET) {
 		az=data->azimuthStatus()->actualPosition();   //set the current values for az and el.
 		el=data->elevationStatus()->actualPosition();
-		len=m_protocol.preset(az,el,message,command,commNum);  // get the buffer to be sent!
+		len=m_protocol.preset(az,el,0.0,0.0,message,command,commNum);  // get the buffer to be sent!
 		modeName=CACUProtocol::modesIDL2String(Antenna::ACU_PRESET);
 	}
 	else if (mode==Antenna::ACU_RATE) {
@@ -775,7 +767,7 @@ void CCommandSocket::preset_command(const double& az,const double& el) throw (Ti
 	WORD commNum;
 	WORD len;
 	TIMEVALUE now;
-	len=m_protocol.preset(az,el,message,command,commNum);  // get the buffer to be sent!
+	len=m_protocol.preset(az,el,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateUpperLimit(),message,command,commNum);  // get the buffer to be sent!
 	CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
 	if (len==0) {
 	}
@@ -844,8 +836,9 @@ void CCommandSocket::setTime_command(const ACS::Time& time) throw (TimeoutExImpl
 	WORD commNum;
 	WORD len;
 	TIMEVALUE now;
+	IRA::CString timeSource=m_pConfiguration->getTimeSource();
 	CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
-	len=m_protocol.setTime(time,message,command,commNum);
+	len=m_protocol.setTime(time,timeSource,message,command,commNum);
 	if (len==0) {
 		// ERRORE
 	}

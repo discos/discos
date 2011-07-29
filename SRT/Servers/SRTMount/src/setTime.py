@@ -31,7 +31,7 @@ def main():
     except Exception , ex:
         newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
         newEx.setComponentName(compType)
-        newEx.log(ACSLog.ACS_LOG_ERROR)
+        newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
         sys.exit(1)  
        
     #get current time
@@ -41,7 +41,7 @@ def main():
     except Exception , ex:
         newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
         newEx.setAction("setTime")
-        newEx.log(ACSLog.ACS_LOG_ERROR)
+        newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
         sys.exit(1)
     
     print "time was successfully set"

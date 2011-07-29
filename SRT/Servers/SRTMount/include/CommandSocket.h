@@ -371,7 +371,7 @@ private:
 	 * @param error It will contain the error description in case the operation fails.
 	 * @return SUCCESS if the buffer was sent correctly, WOULDBLOCK if the send would block, FAIL in case of error, the parameter error is set accordingly.
 	*/
-	OperationResult sendBuffer(const BYTE *Msg,const WORD& Len,CError& error);
+	OperationResult sendBuffer(const BYTE *Msg,const WORD& Len,IRA::CError& error);
 	
 	/**
 	 * This methos will cycle to check is the ACU responded to the last command sent. There three possible scenarios:

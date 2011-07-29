@@ -3,6 +3,8 @@
 #include "CommonData.h"
 #include <LogFilter.h>
 
+using namespace IRA;
+
 _IRA_LOGFILTER_IMPORT;
 
 CCommonData::CCommonData() : m_statusBuffer(NULL), m_trackStack(CACUProtocol::PROGRAMTRACK_STACK_POSITIONS,false)

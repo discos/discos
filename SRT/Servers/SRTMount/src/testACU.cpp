@@ -6,6 +6,8 @@
 #include "StatusSocket.h"
 #include <LogFilter.h>
 
+using namespace IRA;
+
 _IRA_LOGFILTER_DECLARE;
 
 

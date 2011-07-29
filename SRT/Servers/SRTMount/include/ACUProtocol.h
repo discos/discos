@@ -3,7 +3,6 @@
 
 /* **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id: ACUProtocol.h,v 1.7 2011-06-03 18:02:49 a.orlati Exp $													  */
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
@@ -144,6 +143,12 @@ public:
 		MODE_DRIVETOSTOW=52             /*!< The telescope is driven to the prefixed stow position. The stow pin is engaged automatically */
 	};
 	
+	enum TTimeSources {
+		TS_ACUTIME=1,
+		TS_IRIGB=2,
+		TS_EXTERNAL=3
+	};
+
 	enum TParameters {
 		PAR_IGNORE=0,
 		PAR_ABS_POS_OFFSET=11,
@@ -183,11 +188,11 @@ public:
 	
 	enum TConstants {
 		ELEVATION_MOTORS=4,					  // number of elevation motors	
+		AZIMUTH_MOTORS=8,					  // number of azimuth motors
+		MESSAGE_FRAME_START_BYTE=12,          // this is the start byte, inside the status message frame, of the effective data
 		PROGRAMTRACK_TABLE_MINIMUM_LENGTH=5,  // the minimum number of points that have to loaded into the program track table
-		AZIMUTH_MOTORS=8,					  // number of azimtuh motors		
-		MESSAGE_FRAME_START_BYTE=12,          // this is the start byte, inside the status message frame, of the effective data	
 		SOCKET_SEND_BUFFER=512,			      // size in bytes if the sending buffer							
-		SOCKET_RECV_BUFFER=2048 ,              // size in bytes of the receiving buffer
+		SOCKET_RECV_BUFFER=1000 ,              // size in bytes of the receiving buffer
 		PROGRAMTRACK_STACK_POSITIONS=2500			  // number of free position of the stack of the program track mode
 	};
 	
@@ -370,7 +375,7 @@ public:
 		inline bool active() const { return (bool)CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+16); }
 		inline TUINT8 speedOfRotation() const { return CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+17); }
 		inline TUINT8 speedOfRotationOk() const { return CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+18); }
-		inline bool positionError() const { return !(bool)CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+19); } // the filed return 1 if the position has been reached...so negate
+		inline bool positionError() const { return CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+19)==0; } // the filed return 1 if the position has been reached...so negate
 		inline bool busError() const { return (bool)CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+20); }
 		inline bool servoError() const { return (bool)CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+21); }
 		inline bool sensorError() const { return (bool)CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+22); }
@@ -418,7 +423,7 @@ public:
 		inline TUINT16 second() const { return CACUProtocol::readStatusField<TUINT16>(m_buffer,m_disp+85); }
 		/***************************************************************/
 		inline TErrorsTracking pointingErrors() const { return TErrorsTracking((TWORD)CACUProtocol::readStatusField<TWORD>(m_buffer,m_disp+97)); }
-		inline TINT32 timeOffset() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+99); }
+		inline TINT32 pTTTimeOffset() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+99); }
 		/*******************************************************************/
 		inline TUINT32 pTTCurrentIndex() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+109); }
 		inline TUINT32 pTTEndIndex() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+113); }
@@ -479,12 +484,14 @@ public:
 	  * This will allow to prepare the message to command a preset mode and position to the antenna.
 	  * @param azPos new azimuth position of the telescope. It has to be in degrees.
 	  * @param elPos new elevation position of the telescope. It has to be in degrees.
+	  * @param azRate rate to be applied for azimuth. Degrees per second.
+	  * @param elRate rate to be applied for elevation. Degrees per second.
 	  * @param buff a reference to the buffer containing the command to be sent.
 	  * @param command return the basic information about the commands that can be used to check the answer from the status socket. It must be freed by caller.
 	  * @param commNumber number of elements of the command array
 	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed	
 	  */
-	 WORD preset(const double& azPos,const double& elPos,BYTE *& buff,TCommand *& command,WORD& commNumber);
+	 WORD preset(const double& azPos,const double& elPos,const double& azRate,const double& elRate,BYTE *& buff,TCommand *& command,WORD& commNumber);
 	 
 	 /**
 	  * This will allow to prepare the message to command a rate mode and velocity to the antenna.
@@ -549,19 +556,20 @@ public:
 	  * @param buff a reference to the buffer containing the command to be sent.
 	  * @param command return the basic information about the commands that can be used to check the answer from the status socket. It must be freed by caller.
 	  * @param commNumber number of elements of the command array
-	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed	
+	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain unpredictable results and need not to be freed
 	  */	 	 
 	 WORD positionOffsets(const double& azOff,const double& elOff,BYTE *& buff,TCommand *& command,WORD& commNumber);
 	 
 	 /**
-	  * This will allow to prepare the message to be sent to the ACU in order to set the servo system time source and sunchornize the ACU.
+	  * This will allow to prepare the message to be sent to the ACU in order to set the servo system time source and synchronize the ACU.
 	  * @param time reference time 
+	  * @param name of the time source to be used for synchronization
 	  * @param buff a reference to the buffer containing the command to be sent.
 	  * @param command return the basic information about the commands that can be used to check the answer from the status socket. It must be freed by caller.
 	  * @param commNumber number of elements of the command array
-	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed	
+	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain unpredictable results and need not to be freed
 	 */	 	 	 
-	 WORD setTime(const ACS::Time& time,BYTE *& buff,TCommand *& command,WORD& commNumber);
+	 WORD setTime(const ACS::Time& time,const IRA::CString& timeSource,BYTE *& buff,TCommand *& command,WORD& commNumber);
 	 
 	 /**
 	  * This will allow to prepare the message to be sent to the ACU in order to set the time offset used to shift the start time of program track mode
@@ -569,21 +577,23 @@ public:
 	  * @param buff a reference to the buffer containing the command to be sent.
 	  * @param command return the basic information about the commands that can be used to check the answer from the status socket. It must be freed by caller.
 	  * @param commNumber number of elements of the command array
-	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed	
+	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain unpredictable results and need not to be freed
 	 */	 	 	 
 	 WORD setTimeOffset(const double& seconds,BYTE *& buff,TCommand *& command,WORD& commNumber);
 	 
 	 /**
 	  * This will allow to prepare the message to be sent to the ACU in order to load the program track table into the ACU.
 	  * @param seq pointer to the sequence of program track points to be loaded into the ACU.
-	  * @param size number of points in the sequence above, if newTable is true the points list must have at least a minimum number of elements (acutally 5)
+	  * @param size number of points in the sequence above, if newTable is true the points list must have at least a minimum number of elements (actually 5)
 	  * @param newTable true if a new table has to be started, if false the new point is attached to the existing table
+	  * @param azRate maximum rate in azimuth (degrees per second)
+	  * @param elRate maximum rate in elevation (degrees per second)
 	  * @param buff a reference to the buffer containing the command to be sent.
 	  * @param command return the basic information about the commands that can be used to check the answer from the status socket. It must be freed by caller.
 	  * @param commNumber number of elements of the command array
-	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed	
+	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain unpredictable results and need not to be freed
 	 */	 	 	 	 
-	 WORD loadProgramTrack(const TProgramTrackPoint *seq,const WORD& size,bool newTable,BYTE *& buff,TCommand *& command,WORD& commNumber);
+	 WORD loadProgramTrack(const TProgramTrackPoint *seq,const WORD& size,bool newTable,const double& azRate,const double& elRate,BYTE *& buff,TCommand *& command,WORD& commNumber);
 	 
 	 /**
 	  * This method is used to check the status buffer sent by the ACU.
@@ -629,6 +639,8 @@ public:
 	 
 	 static double time2MJD(const ACS::Time& time);
 	 
+	 static TTimeSources str2TimeSource(const IRA::CString ts);
+
 	 template <class T> static T readStatusField(BYTE* statusBuffer,DWORD offset) {
 		BYTE *pos=statusBuffer+offset;
 		return (T) *((T *)pos);

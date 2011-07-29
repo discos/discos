@@ -9,4 +9,4 @@
 # Andrea Orlati(aorlati@ira.inaf.it) 07/05/2010      Creation                                  
 #************************************************************************
 
-xterm -geometry 100x35+0+0 +sb -title Mount -e /bin/bash --login -c _tui_SRTMountTextClient &
+xterm -geometry 100x37+0+0 +sb -title Mount -e /bin/bash --login -c _tui_SRTMountTextClient &

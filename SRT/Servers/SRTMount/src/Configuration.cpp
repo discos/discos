@@ -2,6 +2,8 @@
 
 #include "Configuration.h"
 
+using namespace IRA;
+
 #define _GET_DOUBLE_ATTRIBUTE(ATTRIB,DESCR,FIELD,NAME) { \
 	double tmpd; \
 	if (!CIRATools::getDBValue(Services,ATTRIB,tmpd,"alma/",NAME)) { \
@@ -65,6 +67,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DOUBLE_ATTRIBUTE("maxAzimuthRate","Azimuth rate(degrees/sec):",m_azimuthRateUpperLimit,"DataBlock/Mount");
 	m_azimuthRateLowerLimit=-m_azimuthRateUpperLimit;
 	_GET_DOUBLE_ATTRIBUTE("cw_ccw_limit","CW/CCW limit (degrees):",m_cwLimit,"DataBlock/Mount");
+	_GET_STRING_ATTRIBUTE("TimeSource","Time source:",m_timeSource,"");
 }
 
 void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
@@ -73,7 +76,7 @@ void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
 	m_commandPort=8000;
 	m_statusPort=8001;
 	m_statusSocketTimeout=250000;
-	m_statusSocketDutyCycle=30000;
+	m_statusSocketDutyCycle=25000;
 	m_controlSocketResponseTime=1000000; //one second
 	m_controlSocketDutyCycle=30000;
 	m_dwrepetitionCacheTime=7000000; // 7 seconds
@@ -85,9 +88,10 @@ void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
 	m_cwLimit=180.0;
 	m_azimuthRateLowerLimit=-0.4;
 	m_azimuthRateUpperLimit=0.4;
-	m_elevationRateLowerLimit=-0.2;
-	m_elevationRateUpperLimit=0.2;
+	m_elevationRateLowerLimit=-0.25;
+	m_elevationRateUpperLimit=0.25;
 	m_dwwatchDogThreadPeriod=500000; // half a second
-	m_dwstowTimeout=240000000; // four minutes...240 seconds
+	m_dwstowTimeout=360000000; // four minutes...240 seconds
 	m_dwunstowTimeout=30000000; // 30 seconds
+	m_timeSource="EXT";
 }
