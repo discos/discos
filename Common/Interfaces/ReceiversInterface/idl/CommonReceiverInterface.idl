@@ -64,10 +64,23 @@ module Receivers {
 
     
         /**
-         * If requirest by a particular receiver, this methos allows to setup particular operating mode. The mode must be a valid mode code, recognized by
-         * the receiver. 
+         * If requirest by a particular receiver, this methos allows to setup particular operating mode. 
+         * The mode must be a valid mode code, recognized by the receiver. 
          */
         void setMode(in string mode) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx);
+
+
+        /** Return the receiver operating mode as a string.
+         *
+         *  @return the actual operating mode of receiver. Possible values are:
+         *  <ul>
+         *    <li><em>SDISH</em>: Single Dish mode</li>
+         *    <li><em>VLBI</em>: VLBI mode</li>
+         *    <li>...</li>
+         *  </ul>
+         */
+        string mode();
+
         
         /**
          * It allows to set the local oscillators of the current recevier. Generally this function alloes to give one value for each 
