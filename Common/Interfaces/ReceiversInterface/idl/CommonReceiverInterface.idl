@@ -53,6 +53,9 @@ module Receivers {
          * this attribute is a sequence of double values; each value corresponds to the band width (MHz) of IF of the receiver.
          */
         readonly attribute ACS::ROdoubleSeq bandWidth;
+
+        /** The receiver operating mode */
+        readonly attribute ACS::ROstring mode;
         
 
         /** Start the calibration of every feed channel. */
@@ -68,18 +71,6 @@ module Receivers {
          * The mode must be a valid mode code, recognized by the receiver. 
          */
         void setMode(in string mode) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx);
-
-
-        /** Return the receiver operating mode as a string.
-         *
-         *  @return the actual operating mode of receiver. Possible values are:
-         *  <ul>
-         *    <li><em>SDISH</em>: Single Dish mode</li>
-         *    <li><em>VLBI</em>: VLBI mode</li>
-         *    <li>...</li>
-         *  </ul>
-         */
-        string mode();
 
         
         /**
