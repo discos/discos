@@ -3,8 +3,8 @@
 using IRA::ReceiverControl; 
 using IRA::ReceiverControlEx;
 using IRA::FetValues;
-
-const unsigned int GUARD_TIME = 250000; // 250000 us == 0.25 seconds
+using IRA::FetValue;
+using IRA::StageValues;
 
 
 ReceiverControl::ReceiverControl(
@@ -17,28 +17,24 @@ ReceiverControl::ReceiverControl(
         const BYTE dewar_sadd,
         const BYTE lna_madd,
         const BYTE lna_sadd,
-        bool reliable_comm
+        bool reliable_comm,
+        const unsigned int guard_time
 ) throw (ReceiverControlEx) : 
+    m_dewar_ip(dewar_ip),
+    m_dewar_port(dewar_port),
+    m_lna_ip(lna_ip),
+    m_lna_port(lna_port),
     m_number_of_feeds(number_of_feeds),
+    m_dewar_madd(dewar_madd),
+    m_dewar_sadd(dewar_sadd),
+    m_lna_madd(lna_madd),
+    m_lna_sadd(lna_sadd),
     m_reliable_comm(reliable_comm), 
     m_dewar_board_ptr(NULL),
-    m_lna_board_ptr(NULL)
+    m_lna_board_ptr(NULL),
+    m_guard_time(guard_time)
 {
-    try {
-        m_dewar_board_ptr = new MicroControllerBoard(dewar_ip, dewar_port, dewar_madd, dewar_sadd);
-        m_dewar_board_ptr->openConnection();
-    }
-    catch(MicroControllerBoardEx& ex) {
-        throw ReceiverControlEx("Dewar MicroControllerBoard error: " + ex.what());
-    }
-
-    try {
-        m_lna_board_ptr = new MicroControllerBoard(lna_ip, lna_port, lna_madd, lna_sadd);
-        m_lna_board_ptr->openConnection();
-    }
-    catch(MicroControllerBoardEx& ex) {
-        throw ReceiverControlEx("LNA MicroControllerBoard error: " + ex.what());
-    }
+    openConnection();
 }
 
 
@@ -706,6 +702,33 @@ bool ReceiverControl::isVLBIModeOn() throw (ReceiverControlEx)
 }
 
 
+void ReceiverControl::openConnection(void) throw (ReceiverControlEx)
+{
+    try {
+        m_dewar_board_ptr = new MicroControllerBoard(m_dewar_ip, m_dewar_port, m_dewar_madd, m_dewar_sadd);
+        m_dewar_board_ptr->openConnection();
+    }
+    catch(MicroControllerBoardEx& ex) {
+        throw ReceiverControlEx("Dewar MicroControllerBoard error: " + ex.what());
+    }
+
+    try {
+        m_lna_board_ptr = new MicroControllerBoard(m_lna_ip, m_lna_port, m_lna_madd, m_lna_sadd);
+        m_lna_board_ptr->openConnection();
+    }
+    catch(MicroControllerBoardEx& ex) {
+        throw ReceiverControlEx("LNA MicroControllerBoard error: " + ex.what());
+    }
+}
+
+
+void ReceiverControl::closeConnection(void)
+{
+        m_dewar_board_ptr->closeConnection();
+        m_lna_board_ptr->closeConnection();
+}
+
+
 bool ReceiverControl::isLNABoardConnectionOK(void)
 {
     return (m_lna_board_ptr->getConnectionStatus() == CSocket::NOTCREATED) ? false : true;
@@ -718,7 +741,7 @@ bool ReceiverControl::isDewarBoardConnectionOK(void)
 }
 
 
-FetValues ReceiverControl::lna(
+FetValues ReceiverControl::fetValues(
         unsigned short feed_number, 
         unsigned short stage_number,
         double (*currentConverter)(double voltage),
@@ -732,6 +755,9 @@ FetValues ReceiverControl::lna(
     size_t FEED_LIDX, FEED_RIDX;           // Indexes of the feed channels in the AD24 port, for a given colon
     
     FetValues values;
+
+    if(feed_number >= m_number_of_feeds)
+        throw ReceiverControlEx("ReceiverControl error: invalid feed number.");
 
     // Select the colon in which there is the given feed
     switch(feed_number) {
@@ -845,7 +871,7 @@ FetValues ReceiverControl::lna(
                 static_cast<BYTE>(vd_request.to_ulong())   // Value to set                   
         );
 
-        usleep(GUARD_TIME);
+        usleep(m_guard_time);
 
         std::vector<BYTE> parameters = makeRequest(
                 m_lna_board_ptr,        // Pointer to the LNA board
@@ -876,7 +902,7 @@ FetValues ReceiverControl::lna(
                 static_cast<BYTE>(id_request.to_ulong())   // Value to set                   
         );
 
-        usleep(GUARD_TIME);
+        usleep(m_guard_time);
 
         parameters = makeRequest(
                 m_lna_board_ptr,        // Pointer to the LNA
@@ -907,7 +933,7 @@ FetValues ReceiverControl::lna(
                 static_cast<BYTE>(vg_request.to_ulong())   // Value to set                   
         );
 
-        usleep(GUARD_TIME);
+        usleep(m_guard_time);
 
         parameters = makeRequest(
                 m_lna_board_ptr,        // Pointer to the LNA board
@@ -934,6 +960,95 @@ FetValues ReceiverControl::lna(
         std::string error_msg = "ReceiverControl: error getting LNA values.\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
+}
+
+
+StageValues ReceiverControl::stageValues(
+        FetValue quantity, 
+        unsigned short stage_number,
+        double (*converter)(double voltage)
+        ) throw (ReceiverControlEx)
+{
+
+    // Each item is a EN03 value: the signal that addresses the colon multiplexing of AD24
+    std::vector<std::string> colon_selectors;  
+    std::string vd_selector;               // A03: it allows to select the value requested for a given stadium
+    std::string id_selector;               // A03: it allows to select the value requested for a given stadium
+    std::string vg_selector;               // A03: it allows to select the value requested for a given stadium
+    
+    if(m_number_of_feeds == 1)
+        colon_selectors.push_back("0001");
+    else if(m_number_of_feeds <= 8)  {
+        colon_selectors.push_back("0001");
+        colon_selectors.push_back("0010");
+    }
+    else if(m_number_of_feeds == 9) {
+        colon_selectors.push_back("0001");
+        colon_selectors.push_back("0010");
+        colon_selectors.push_back("0011");
+    }
+    else if(m_number_of_feeds > 9) {
+        colon_selectors.push_back("0001");
+        colon_selectors.push_back("0010");
+        colon_selectors.push_back("0011");
+        colon_selectors.push_back("0100");
+    }
+
+    switch(stage_number) {
+        case 1:
+            vd_selector = "0000"; 
+            id_selector = "0001";
+            vg_selector = "0010";
+            break;
+        case 2:
+            vd_selector = "0011";
+            id_selector = "0100";
+            vg_selector = "0101";
+            break;
+        case 3:
+            vd_selector = "0110";
+            id_selector = "0111";
+            vg_selector = "1000";
+            break;
+        case 4:
+            vd_selector = "1001";
+            id_selector = "1010";
+            vg_selector = "1011";
+            break;
+        case 5:
+            vd_selector = "1100";
+            id_selector = "1101";
+            vg_selector = "1110";
+            break;
+        default:
+            throw ReceiverControlEx("ReceiverControl error: invalid stage number.");
+    }
+
+    // 3. faccio un numero di richieste pari al numero di colon_selectors, e dalle
+    //    grandezze lette prelevo solo la parte relativa al mio numero di feeds (solo
+    //    quelle dei feeds esistenti)
+
+    // The following is dummy code
+    std::vector<double> left, right;
+    StageValues values;
+    switch(quantity) {
+        case DRAIN_VOLTAGE:
+            values.left_channel = left; // TODO: assign the values of the quantity specified
+            values.right_channel = right; // TODO: assign the values of the quantity specified
+            break;
+        case DRAIN_CURRENT:
+            values.left_channel = left; // TODO: assign the values of the quantity specified
+            values.right_channel = right; // TODO: assign the values of the quantity specified
+            break;
+        case GATE_VOLTAGE:
+            values.left_channel = left; // TODO: assign the values of the quantity specified
+            values.right_channel = right; // TODO: assign the values of the quantity specified
+            break;
+        default:
+            throw ReceiverControlEx("ReceiverControl::stageValues(): the quantity requested does not exist.");
+    }
+
+    return values;
 }
 
 

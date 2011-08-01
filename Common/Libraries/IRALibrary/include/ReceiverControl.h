@@ -41,6 +41,20 @@ struct FetValues {
 };
 
 
+/**
+ * The left_channel member stores all the left channel values of a specific
+ * fet quantity (VD, ID or VG), and the right one stores the values for
+ * the right channel.
+ */
+struct StageValues {
+    std::vector<double> left_channel;
+    std::vector<double> right_channel;
+};
+
+
+enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
+
+
 /** 
  * This class performs a high level library to comunicate via TCP/IP
  * to receivers controlled by the board designed in Medicina (BO, Italy) 
@@ -96,9 +110,16 @@ struct FetValues {
  *     board is OK</li>
  *     <li>bool isDewarBoardConnectionOK(): return true if the connection to the 
  *     dewar board is OK</li>
- *     <li>FetValues lna(unsigned short feed_number, unsigned short stage_number): 
+ *     <li>FetValues fetValues(unsigned short feed_number, unsigned short stage_number,
+ *     double (*currentConverter)(double voltage), double (*voltageConverter)(double voltage).
  *     return the FetValues (VDL, IDL, VGL, VDR, IDR and VGR) of the LNA of the feed `feed_number`, 
  *     and stage `stage_id`</li>
+ *     <li>StageValues stageValues(FetValue quantity, unsigned short stage_number, 
+ *     double (*converter)(double voltage)=NULL)
+ *     return the StageValues for a given fet ``quantity`` and ``stage_number``. The StageValues
+ *     is a struct of two members std::vector<double>, one member for the left channel and one for 
+ *     the right one. That members contain the related quantities of all the feeds, that is an 
+ *     item of the std::vector<double> is the quantity value of a feed, for the stage requested.</li>
  *     <li>void turnLeftLNAsOn(): turn the the left LNAs ON</li>
  *     <li>void turnLeftLNAsOff(): turn the the left LNAs OFF</li>
  *     <li>void turnRightLNAsOn(): turn the the right LNAs ON</li>
@@ -136,7 +157,8 @@ public:
             const BYTE dewar_sadd=0x7D, // Dewar board slave address
             const BYTE lna_madd=0x7C,   // LNA board master address
             const BYTE lna_sadd=0x7D,   // LNA board slave address
-            bool reliable_comm=true
+            bool reliable_comm=true,
+            const unsigned int guard_time=250000  // 250000 us == 0.25 seconds
     ) throw (ReceiverControlEx);
 
     
@@ -374,11 +396,33 @@ public:
      *  if the pointers are NULL.
      *  @throw ReceiverControlEx
      */
-    FetValues lna(
+    FetValues fetValues(
             unsigned short feed_number, 
             unsigned short stage_number,
             double (*currentConverter)(double voltage) = NULL,
             double (*voltageConverter)(double voltage) = NULL
+    ) throw (ReceiverControlEx);
+
+
+    /** Return for each feed and channel the fet quantity value of a given stage. For
+     *  instance, if you want to get the VD values of all the feeds related to the amplifier stage N,
+     *  you must call the method like so: stageValues(DRAIN_VOLTAGE, N).
+     *
+     *  @param quantity a FetValue: DRAIN_VOLTAGE, DRAIN_CURRENT or GATE_CURRENT 
+     *  @param stage_number the stage number (from 1 to 5)
+     *  @param converter pointer to the function that performs the conversion from
+     *  voltage to the right unit or just with a scale factor; default value is NULL, and in this 
+     *  case the value returned is without conversion.
+     *  @return the StageValues for a given fet ``quantity`` and ``stage_number``. The StageValues
+     *  is a struct of two members std::vector<double>, one member for the left channel and one for 
+     *  the right one. That members contain the related quantities of all the feeds, that is an 
+     *  item of the std::vector<double> is the quantity value of a feed, for the stage requested.
+     *  @throw ReceiverControlEx
+     */
+     StageValues stageValues(
+             FetValue quantity, 
+             unsigned short stage_number, 
+             double (*converter)(double voltage)=NULL
     ) throw (ReceiverControlEx);
 
 
@@ -404,6 +448,16 @@ public:
      *  @throw ReceiverControlEx
      */
     void turnRightLNAsOff() throw (ReceiverControlEx);
+
+
+    /** Perform a TCP connection socket to the boards
+     *  @throw ReceiverControlEx
+     */
+    void openConnection(void) throw (ReceiverControlEx);
+
+
+    /** Close the TCP connection sockets to the boards */
+    void closeConnection(void);
 
 
     /** Is the connection to the LNA board OK?
@@ -439,8 +493,40 @@ private:
     double get_value(const std::vector<BYTE> parameters, const size_t RAW_INDEX);
 
 
+    /** The IP address of the dewar board */
+    const std::string m_dewar_ip;
+
+
+    /** The port address of the dewar board */
+    const unsigned short m_dewar_port; 
+    
+
+    /** The IP address of the LNA board */
+    const std::string m_lna_ip; 
+
+
+    /** The port address of the LNA board */
+    const unsigned short m_lna_port; 
+    
+
     /** Number of feeds of the receiver */
     const unsigned short m_number_of_feeds;
+
+
+    /** The master address of the dewar board */
+    const BYTE m_dewar_madd;
+
+
+    /** The slave address of the dewar board */
+    const BYTE m_dewar_sadd;
+
+
+    /** The master address of the LNA board */
+    const BYTE m_lna_madd;
+
+
+    /** The slave address of the LNA board */
+    const BYTE m_lna_sadd;
 
 
     /** If m_reliable_comm is true then a checksum byte is added to the request
@@ -456,6 +542,10 @@ private:
 
     /** LNA MicroControllerBoard pointer */
     MicroControllerBoard *m_lna_board_ptr;
+
+
+    /** Sleep time from a SET_DATA and a GET_DATA, needed to stabilize the output */
+    const unsigned int m_guard_time; 
 
 };
 

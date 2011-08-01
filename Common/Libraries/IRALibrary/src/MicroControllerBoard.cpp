@@ -1,7 +1,4 @@
 #include "MicroControllerBoard.h"
-#include <pthread.h>
-
-static pthread_mutex_t socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 using namespace IRA;
 
@@ -14,6 +11,7 @@ MicroControllerBoard::MicroControllerBoard(
                 m_socket(NULL), m_id(0), m_command_type(0x00)
 {
     try {
+        pthread_mutex_init(&m_socket_mutex, NULL);
         m_socket = new CSocket::CSocket();
     }
     catch (std::bad_alloc& ex) {
@@ -25,6 +23,7 @@ MicroControllerBoard::MicroControllerBoard(
 }
 
 MicroControllerBoard::~MicroControllerBoard() {
+    pthread_mutex_destroy(&m_socket_mutex);
     closeConnection();
     if(m_socket != NULL && m_socket->getStatus())
          delete m_socket;
@@ -48,7 +47,7 @@ void MicroControllerBoard::openConnection(void) throw (MicroControllerBoardEx) {
 CSocket::SocketStatus MicroControllerBoard::getConnectionStatus(void) { return(m_socket->getStatus()); }
 
 void MicroControllerBoard::closeConnection(void) { 
-    pthread_mutex_lock(&socket_mutex); 
+    pthread_mutex_lock(&m_socket_mutex); 
     if(m_socket != NULL && m_socket->getStatus()) {
         m_socket->Close(m_Error);
 
@@ -57,11 +56,11 @@ void MicroControllerBoard::closeConnection(void) {
         else
             std::cout << "Socket connection closed" << endl;
     }
-    pthread_mutex_unlock(&socket_mutex); 
+    pthread_mutex_unlock(&m_socket_mutex); 
 }
 
 std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoardEx) { 
-    pthread_mutex_lock(&socket_mutex); 
+    pthread_mutex_lock(&m_socket_mutex); 
     BYTE msg[MCB_BUFF_LIMIT] = {0x00};
     bool is_short_cmd = false, has_data_cmd = false;
     BYTE sh_command = 0x00; // Shifted command (command_type - MCB_CMD_TYPE_EXTENDED)
@@ -178,7 +177,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
                 if(msg[idx] != MCB_CMD_ETX)
                     throw MicroControllerBoardEx("Answer terminator not found.");
             }
-            pthread_mutex_unlock(&socket_mutex); 
+            pthread_mutex_unlock(&m_socket_mutex); 
             
             // Check if master and slave are the same for answer and request
             if(m_request[MCB_CMD_SLAVE] != m_answer[MCB_CMD_MASTER])
@@ -220,7 +219,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
         }
     }
     catch(...) {
-        pthread_mutex_unlock(&socket_mutex); 
+        pthread_mutex_unlock(&m_socket_mutex); 
         throw;
     }
 
@@ -228,7 +227,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
 }
 
 void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters) throw (MicroControllerBoardEx) {
-    pthread_mutex_lock(&socket_mutex); 
+    pthread_mutex_lock(&m_socket_mutex); 
     try {
         if(command >= MCB_CMD_TYPE_MIN_EXT && command <= MCB_CMD_TYPE_MAX_ABB) {
             m_request.clear();
@@ -270,13 +269,13 @@ void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters
                 break ;
             else sent_bytes += num_bytes;
         }
-        pthread_mutex_unlock(&socket_mutex); 
+        pthread_mutex_unlock(&m_socket_mutex); 
 
         if (sent_bytes != len)
             throw MicroControllerBoardEx("Not all bytes sent");
     }
     catch(...) {
-        pthread_mutex_unlock(&socket_mutex); 
+        pthread_mutex_unlock(&m_socket_mutex); 
         throw;
     }
 }

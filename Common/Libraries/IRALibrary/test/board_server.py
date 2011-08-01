@@ -154,6 +154,7 @@ class BoardServer:
                             answer = "".join([CMD_STX, data[2], data[1], data[3], data[4], chr(0x00)])
                             
                             data_list = list()
+                            data_type = chr(0x01)
                             if cmd in set(answers_with_data) & set(requests_with_data):
                                 par_len = ord(data[PAR_LEN_IDX]) # Length of the request parameters
                                 data_type =  data[PAR_LEN_IDX + 1]

@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <IRA>
+#include <pthread.h>
 #include "Definitions.h"
 #include "MicroControllerBoardDef.h"
 
@@ -139,6 +140,7 @@ private:
     IRA::CSocket *m_socket;
     unsigned long long m_id;
     BYTE m_command_type;
+    pthread_mutex_t m_socket_mutex;
     std::vector<BYTE> m_request;
     std::vector<BYTE> m_answer;
     std::vector<BYTE> m_parameters;
