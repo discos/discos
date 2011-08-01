@@ -38,7 +38,8 @@ SRTKBandMFReceiverImpl::SRTKBandMFReceiverImpl(
     m_feeds(this),
     m_IFs(this),
     m_polarization(this),
-    m_receiverName(this)
+    m_receiverName(this),
+    m_mode(this)
 {   
     AUTO_TRACE("SRTKBandMFReceiverImpl::SRTKBandMFReceiverImpl()");
     m_cdb_ptr = new RCDBParameters;
@@ -302,12 +303,6 @@ void SRTKBandMFReceiverImpl::setMode(const char *mode)
 }
 
 
-char * SRTKBandMFReceiverImpl::mode(void)
-{
-    AUTO_TRACE("SRTKBandMFReceiverImpl::mode()");
-    return CORBA::string_dup("unknown");
-}
-
 ACS::ROdoubleSeq_ptr SRTKBandMFReceiverImpl::initialFrequency()
 {
     AUTO_TRACE("SRTKBandMFReceiverImpl::initialFrequency()");
@@ -331,6 +326,7 @@ GET_PROPERTY_REFERENCE(SRTKBandMFReceiverImpl, ACS::ROlong, m_feeds, feeds);
 GET_PROPERTY_REFERENCE(SRTKBandMFReceiverImpl, ACS::ROlong, m_IFs, IFs);
 GET_PROPERTY_REFERENCE(SRTKBandMFReceiverImpl, ACS::ROlongSeq, m_polarization, polarization);
 GET_PROPERTY_REFERENCE(SRTKBandMFReceiverImpl, ACS::ROstring, m_receiverName, receiverName);
+GET_PROPERTY_REFERENCE(SRTKBandMFReceiverImpl, ACS::ROstring, m_mode, mode);
  
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

@@ -113,6 +113,10 @@ public:
     virtual ACS::ROstring_ptr receiverName() throw (CORBA::SystemException);
 
 
+    /// Return a reference to mode property (ROstring) 
+    virtual ACS::ROstring_ptr mode() throw (CORBA::SystemException);
+
+
     /**
      * This method is used to turn the calibration diode on.
      * @throw CORBA::SystemExcpetion
@@ -231,17 +235,6 @@ public:
      */
     virtual void setMode(const char *mode);
 
-
-    /** Return the receiver operating mode as a string.
-     *
-     *  @return the actual operating mode of receiver. Possible values are:
-     *  <ul>
-     *    <li><em>SDISH</em>: Single Dish mode</li>
-     *    <li><em>VLBI</em>: VLBI mode</li>
-     *  </ul>
-     */
-    virtual char * mode(void);
-
     virtual ACS::ROdoubleSeq_ptr initialFrequency();
 
     virtual ACS::ROdoubleSeq_ptr bandWidth();
@@ -274,6 +267,8 @@ private:
     SmartPropertyPointer<ROlongSeq> m_polarization;
     /** Receiver Name */
     SmartPropertyPointer<ROstring> m_receiverName;
+    /** Operation mode (VLBI, SDISH, ...) */
+    SmartPropertyPointer<ROstring> m_mode;
     
 
     void operator=(const SRTKBandMFReceiverImpl &);
