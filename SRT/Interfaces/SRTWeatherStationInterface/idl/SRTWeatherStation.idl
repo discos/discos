@@ -65,16 +65,42 @@ module Weather {
 		*/
 //		parameters getData();
 		/**
-		Air Temperature
+		Get  the average wind speed
+
 		*/
 
+		double getWindSpeedAverage();
+		/**
+		Gets  the peak wind speed
 
-//		readonly attribute ACS::RWdouble temperature;	
-//		readonly attribute ACS::RWdouble winddir;
-//		readonly attribute ACS::RWdouble pressure;
-//		readonly attribute ACS::RWdouble windspeed;
+		*/
+
+		double getWindspeedPeak();
+		/**
+		Gets  the   wind dir max
+
+		*/
+
+		double getWindDir();
+	 
+		/**
+		Gets  the relative humidity
+		*/
+		double getHumidity();
+		/**
+		Gets the air temperature
+
+		*/
+
+		double getTemperature();
+		/**
+		Gets the air pressure
+
+		*/
+		double getPressure();
+
+		/**/
 		readonly attribute ACS::RWdouble windspeedpeak;
-//		readonly attribute ACS::RWdouble humidity;
 
 						
 	};
