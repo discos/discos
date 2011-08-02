@@ -31,7 +31,7 @@ public:
 	 * Constructor
 	 * @param Socket pointer to a SecureArea that proctects a the  socket. This object must be already initialized and configured.
 	*/
-	DevIOHumidity(CSecureArea<SRTWeatherSocket>* socket):m_socket(socket)
+	DevIOHumidity(CSecureArea<SRTWeatherSocket>* socket):m_socket(socket) 
 	{		
  		m_initparser=false;
 		AUTO_TRACE("DevIOHumidity::DevIOHumidity()");		
@@ -66,12 +66,9 @@ public:
 			CError err;
 			CString rdata="";
 			CSecAreaResourceWrapper<SRTWeatherSocket> sock=m_socket->Get();
-			WeatherStationData mp;
-							sock->sendCMD(err,CString("r ")+CString(COMMANDS[RELHUM]));
-			sock->receiveData(err,rdata);
-			sock->initParser(&mp);
-			sock->parse(rdata);
-  			m_val=mp.sensorMap[COMMANDS[RELHUM]];
+			m_val=sock->getHumidity();
+			return m_val;
+
 
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
@@ -82,7 +79,6 @@ public:
 			throw dummy;
 		} 				
 		timestamp=getTimeStamp();  //complition time
-		return m_val;
 	}
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
@@ -95,6 +91,8 @@ public:
 	
 private:
 	CSecureArea<SRTWeatherSocket>* m_socket;
+	WeatherStationData m_wsdata; 
+
 	CORBA::Double m_val;
 	bool m_initparser;
  };
