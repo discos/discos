@@ -16,7 +16,7 @@
 #define _GENERICWSTATION_IDL_
 
 #include <baci.idl>
-
+#include <ManagmentDefinitions.idl>
 #pragma prefix "alma"
 
 
@@ -55,7 +55,7 @@ module Weather {
 	
      
 
-	interface GenericWeatherStation : ACS::CharacteristicComponent {
+	interface GenericWeatherStation : Management::CommandInterpreter, ACS::CharacteristicComponent {
 		/**
 		 
 		*/
