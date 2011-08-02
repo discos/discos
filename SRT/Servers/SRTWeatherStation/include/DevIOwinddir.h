@@ -31,7 +31,7 @@ public:
 	 * Constructor
 	 * @param Socket pointer to a SecureArea that proctects a the  socket. This object must be already initialized and configured.
 	*/
-	DevIOWinddir(CSecureArea<SRTWeatherSocket>* socket):m_socket(socket)
+	DevIOWinddir(CSecureArea<SRTWeatherSocket>* socket ):m_socket(socket) 
 	{		
  		m_initparser=false;
 		AUTO_TRACE("DevIOWinddir::DevIOWinddir()");		
@@ -66,12 +66,8 @@ public:
 			CError err;
 			CString rdata="";
 			CSecAreaResourceWrapper<SRTWeatherSocket> sock=m_socket->Get();
-			WeatherStationData mp;
-			sock->sendCMD(err,CString("r ")+CString(COMMANDS[WINDDIRAVE]));
-			sock->receiveData(err,rdata);
-			sock->initParser(&mp);
-			sock->parse(rdata);
-  			m_val=mp.sensorMap[COMMANDS[WINDDIRAVE]];
+ 			m_val=sock->getWinDir();
+
 		
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
@@ -96,6 +92,8 @@ public:
 private:
 	CSecureArea<SRTWeatherSocket>* m_socket;
 	CORBA::Double m_val;
+	WeatherStationData m_wsdata; 
+
 	bool m_initparser;
  };
 

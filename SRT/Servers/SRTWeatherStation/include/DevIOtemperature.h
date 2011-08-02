@@ -31,7 +31,7 @@ public:
 	 * Constructor
 	 * @param Socket pointer to a SecureArea that proctects a the  socket. This object must be already initialized and configured.
 	*/
-	DevIOTemperature(CSecureArea<SRTWeatherSocket>* socket):m_socket(socket)
+	DevIOTemperature(CSecureArea<SRTWeatherSocket>* socket ):m_socket(socket) 
 	{		
  		m_initparser=false;
 		AUTO_TRACE("DevIOTemperature::DevIOTemperature()");		
@@ -66,14 +66,9 @@ public:
 			CError err;
 			CString rdata="";
 			CSecAreaResourceWrapper<SRTWeatherSocket> sock=m_socket->Get();
-			WeatherStationData mp;
-			sock->sendCMD(err,CString("r ")+CString(COMMANDS[AIRTEMP]));
-			sock->receiveData(err,rdata);
-			sock->initParser(&mp);
-			sock->parse(rdata);
-// 			cout << "rec:" <<(const char*) rdata <<  endl;
-  			m_val=mp.sensorMap[COMMANDS[AIRTEMP]];
-		
+ 			m_val=sock->getTemperature();
+		        return m_val;
+
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOTemperature::read()");
@@ -96,6 +91,8 @@ public:
 	
 private:
 	CSecureArea<SRTWeatherSocket>* m_socket;
+	WeatherStationData m_wsdata; 
+
 	CORBA::Double m_val;
 	bool m_initparser;
  };

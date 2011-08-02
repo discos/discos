@@ -66,14 +66,7 @@ public:
 			CError err;
 			CString rdata="";
 			CSecAreaResourceWrapper<SRTWeatherSocket> sock=m_socket->Get();
-			WeatherStationData mp;
-			sock->sendCMD(err,CString("r ")+CString(COMMANDS[AIRPRESSURE]));
-			sock->receiveData(err,rdata);
-			sock->initParser(&mp);
-			sock->parse(rdata);
-/*			cout << "rec:" <<(const char*) rdata <<  endl;*/
-  			m_val=mp.sensorMap[COMMANDS[AIRPRESSURE]];
-		
+  			m_val=sock->getTemperature();
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOPressure::read()");
@@ -97,6 +90,8 @@ public:
 private:
 	CSecureArea<SRTWeatherSocket>* m_socket;
 	CORBA::Double m_val;
+	WeatherStationData m_wsdata; 
+
 	bool m_initparser;
  };
 

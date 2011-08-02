@@ -28,11 +28,11 @@ class DevIOWindspeedpeak : public DevIO<CORBA::Double>
 {
 public:
 	
- 	/** 
+ 	/** mp
 	 * Constructor
 	 * @param Socket pointer to a SecureArea that proctects a the  socket. This object must be already initialized and configured.
 	*/
-	DevIOWindspeedpeak(CSecureArea<SRTWeatherSocket>* socket):m_socket(socket)
+	DevIOWindspeedpeak(CSecureArea<SRTWeatherSocket>* socket ):m_socket(socket) 
 	{		
  		m_initparser=false;
 		AUTO_TRACE("DevIOWindspeed::DevIOWindspeed()");		
@@ -67,18 +67,11 @@ public:
 			CError err;
 			CString rdata="";
 			CSecAreaResourceWrapper<SRTWeatherSocket> sock=m_socket->Get();
-			WeatherStationData mp;
-			sock->sendCMD(err,CString("r ")+CString(COMMANDS[WINDSPEEDMAX]));
-			sock->receiveData(err,rdata);
-			sock->initParser(&mp);
-			sock->parse(rdata);
-// 			cout << "rec:" <<(const char*) rdata <<  endl;
-  			m_val=mp.sensorMap[COMMANDS[WINDSPEEDMAX]];
-		
+ 			m_val=sock->getWindSpeedPeak();
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
-			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOWindspeed::read()");
-			dummy.setPropertyName("systemTemperature");
+			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOWindspeedPeak::read()");
+			dummy.setPropertyName("DevIOWindspeedPeak");
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
@@ -97,6 +90,7 @@ public:
 	
 private:
 	CSecureArea<SRTWeatherSocket>* m_socket;
+	WeatherStationData m_wsdata; 
 	CORBA::Double m_val;
 	bool m_initparser;
  };
