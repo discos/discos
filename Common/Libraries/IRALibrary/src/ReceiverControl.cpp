@@ -138,7 +138,7 @@ double ReceiverControl::vacuum(double (*converter)(double voltage)) throw (Recei
 }
 
 
-double ReceiverControl::lowTemperature(double (*converter)(double voltage)) throw (ReceiverControlEx) 
+double ReceiverControl::cryoTemperature1(double (*converter)(double voltage)) throw (ReceiverControlEx) 
 {
     try {
 
@@ -151,20 +151,20 @@ double ReceiverControl::lowTemperature(double (*converter)(double voltage)) thro
                 MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
         );
 
-        const size_t TEMP_CRYO_1_IDX = 0; // Index of the low cryogenic temperature in the AD24 port
+        const size_t TEMP_CRYO_1_IDX = 0; // Index of the first cryogenic temperature in the AD24 port
         // Return the temperature value in Kelvin for a given voltage VALUE if converter != NULL, the
         // value in voltage (before the conversion) otherwise.
         return converter != NULL ? converter(get_value(parameters, TEMP_CRYO_1_IDX)) : \
                             get_value(parameters, TEMP_CRYO_1_IDX);
     }
     catch(MicroControllerBoardEx& ex) {
-        std::string error_msg = "ReceiverControl: error getting the low cryogenic temperature.\n";
+        std::string error_msg = "ReceiverControl: error getting the first cryogenic temperature.\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
 }
 
 
-double ReceiverControl::highTemperature(double (*converter)(double voltage)) throw (ReceiverControlEx) 
+double ReceiverControl::cryoTemperature2(double (*converter)(double voltage)) throw (ReceiverControlEx) 
 {
     try {
 
@@ -177,14 +177,66 @@ double ReceiverControl::highTemperature(double (*converter)(double voltage)) thr
                 MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
         );
 
-        const size_t TEMP_CRYO_2_IDX = 1; // Index of the high cryogenic temperature in the AD24 port
+        const size_t TEMP_CRYO_2_IDX = 1; // Index of the second cryogenic temperature in the AD24 port
         // Return the temperature value in Kelvin for a given voltage VALUE if converter != NULL, the
         // value in voltage (before the conversion) otherwise.
         return converter != NULL ? converter(get_value(parameters, TEMP_CRYO_2_IDX)) : \
                             get_value(parameters, TEMP_CRYO_2_IDX);
     }
     catch(MicroControllerBoardEx& ex) {
-        std::string error_msg = "ReceiverControl: error getting the low cryogenic temperature.\n";
+        std::string error_msg = "ReceiverControl: error getting the second cryogenic temperature.\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+double ReceiverControl::cryoTemperature3(double (*converter)(double voltage)) throw (ReceiverControlEx) 
+{
+    try {
+
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,      // Pointer to the dewar board
+                MCB_CMD_GET_DATA,       // Command to send
+                3,                      // Number of parameters
+                MCB_CMD_DATA_TYPE_F32,  // Data type: 32 bit floating point
+                MCB_PORT_TYPE_AD24,     // Port type: AD24
+                MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
+        );
+
+        const size_t TEMP_CRYO_3_IDX = 2; // Index of the third cryogenic temperature in the AD24 port
+        // Return the temperature value in Kelvin for a given voltage VALUE if converter != NULL, the
+        // value in voltage (before the conversion) otherwise.
+        return converter != NULL ? converter(get_value(parameters, TEMP_CRYO_3_IDX)) : \
+                            get_value(parameters, TEMP_CRYO_3_IDX);
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error getting the third cryogenic temperature.\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+double ReceiverControl::cryoTemperature4(double (*converter)(double voltage)) throw (ReceiverControlEx) 
+{
+    try {
+
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,      // Pointer to the dewar board
+                MCB_CMD_GET_DATA,       // Command to send
+                3,                      // Number of parameters
+                MCB_CMD_DATA_TYPE_F32,  // Data type: 32 bit floating point
+                MCB_PORT_TYPE_AD24,     // Port type: AD24
+                MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
+        );
+
+        const size_t TEMP_CRYO_4_IDX = 3; // Index of the fourth cryogenic temperature in the AD24 port
+        // Return the temperature value in Kelvin for a given voltage VALUE if converter != NULL, the
+        // value in voltage (before the conversion) otherwise.
+        return converter != NULL ? converter(get_value(parameters, TEMP_CRYO_4_IDX)) : \
+                            get_value(parameters, TEMP_CRYO_4_IDX);
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error getting the fourth cryogenic temperature.\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
 }
@@ -581,7 +633,7 @@ bool ReceiverControl::isLO2Locked() throw (ReceiverControlEx)
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isLO2Locked(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters[0] == 0 ? true : false;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isLO2Locked().\n";
@@ -656,7 +708,7 @@ void ReceiverControl::setVLBIMode() throw (ReceiverControlEx)
                 4,                     // Number of parameters
                 MCB_CMD_DATA_TYPE_B01, // Data type: 1 bit
                 MCB_PORT_TYPE_DIO,     // Port type: Digital IO
-                MCB_PORT_NUMBER_14,    // Port Number 14
+                MCB_PORT_NUMBER_13,    // Port Number 13
                 0x01  // The value to set: 0x01 to set the single dish mode to OFF
         );
         // Turn ON the VLBI mode on port number 14
@@ -691,9 +743,9 @@ bool ReceiverControl::isVLBIModeOn() throw (ReceiverControlEx)
 
         // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
         if(parameters.size() != 1)
-            throw ReceiverControlEx("RecieverControl::isVLBIModeOn(): wrong number of parameters.");
+            throw ReceiverControlEx("ReceiverControl::isVLBIModeOn(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters[0] == 1 ? true : false;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isVLBIModeOn().\n";
@@ -1024,9 +1076,9 @@ StageValues ReceiverControl::stageValues(
             throw ReceiverControlEx("ReceiverControl error: invalid stage number.");
     }
 
-    // 3. faccio un numero di richieste pari al numero di colon_selectors, e dalle
-    //    grandezze lette prelevo solo la parte relativa al mio numero di feeds (solo
-    //    quelle dei feeds esistenti)
+    // TODO: faccio un numero di richieste pari al numero di colon_selectors, e dalle
+    //       grandezze lette prelevo solo la parte relativa al mio numero di feeds (solo
+    //       quelle dei feeds esistenti)
 
     // The following is dummy code
     std::vector<double> left, right;

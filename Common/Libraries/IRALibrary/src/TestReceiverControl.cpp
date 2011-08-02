@@ -105,14 +105,24 @@ int main(int argc, char *argv[])
         cout << "Vacuum value: " << rc.vacuum(voltage2mbar) << endl;
         cout << "Done!\n" << endl;
 
-        // Test the lowTemperature()
-        cout << "Test lowTemperature() with a reliable communication" << endl;
-        cout << "Low Cryogenic Temperature value: " << rc.lowTemperature(voltage2Kelvin) << endl;
+        // Test the cryoTemperature1()
+        cout << "Test cryoTemperature1() with a reliable communication" << endl;
+        cout << "First Cryogenic Temperature value: " << rc.cryoTemperature1(voltage2Kelvin) << endl;
         cout << "Done!\n" << endl;
 
-        // Test the highTemperature()
-        cout << "Test highTemperature() with a reliable communication" << endl;
-        cout << "High Cryogenic Temperature value: " << rc.highTemperature(voltage2Kelvin) << endl;
+        // Test the cryoTemperature2()
+        cout << "Test cryoTemperature2() with a reliable communication" << endl;
+        cout << "Second Cryogenic Temperature value: " << rc.cryoTemperature2(voltage2Kelvin) << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the cryoTemperature3()
+        cout << "Test cryoTemperature3() with a reliable communication" << endl;
+        cout << "Third Cryogenic Temperature value: " << rc.cryoTemperature3(voltage2Kelvin) << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the cryoTemperature4()
+        cout << "Test cryoTemperature4() with a reliable communication" << endl;
+        cout << "Fouth Cryogenic Temperature value: " << rc.cryoTemperature4(voltage2Kelvin) << endl;
         cout << "Done!\n" << endl;
 
         // Test the isCoolHeadOn()
@@ -401,14 +411,9 @@ int main(int argc, char *argv[])
         rc.openConnection();
         cout << "Done!\n" << endl;
 
-        // Test the lowTemperature()
-        cout << "Test lowTemperature() with a reliable communication" << endl;
-        cout << "Low Cryogenic Temperature value: " << rc.lowTemperature(voltage2Kelvin) << endl;
-        cout << "Done!\n" << endl;
-
-        // Test the highTemperature()
-        cout << "Test highTemperature() with a reliable communication" << endl;
-        cout << "High Cryogenic Temperature value: " << rc.highTemperature(voltage2Kelvin) << endl;
+        // Test the cryoTemperature1()
+        cout << "Test cryoTemperature1() with a reliable communication" << endl;
+        cout << "First Cryogenic Temperature value: " << rc.cryoTemperature1(voltage2Kelvin) << endl;
         cout << "Done!\n" << endl;
 
         // Test the vacuum() voltage value, without conversion

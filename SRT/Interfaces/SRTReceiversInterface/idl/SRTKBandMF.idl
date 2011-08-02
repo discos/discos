@@ -216,9 +216,9 @@ module Receivers {
 
         readonly attribute ACS::ROpattern status;
 
-        void turnLNAOn(in unsigned long feed_mask, in unsigned long channel_mask);
+        void turnLNAsOn();
 
-        void turnLNAOff(in unsigned long feed_mask, in unsigned long channel_mask);
+        void turnLNAsOff();
 
         \***************************************************/
 

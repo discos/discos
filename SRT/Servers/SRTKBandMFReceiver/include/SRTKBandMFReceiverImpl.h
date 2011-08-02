@@ -195,32 +195,12 @@ public:
     ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
         
-   /** Turn on the LNAs of specified feeds and channels.
-    * 
-    * @param feed_mask must be converted to a biteset, where each bit is 
-    * related to a feed. The true value of a bit means the corresponding 
-    * feed is selected, so its LNAs are candidate to be turn on.
-    *
-    * @param channel_mask must be converted to a biteset. The true value 
-    * of a bit means the corresponding channel is selected, so its LNAs 
-    * will be turn on. In a dual channel representation, the bit of item 
-    * 0 is for the LEFT channel and the bit of item 1 is for the RIGHT one.
-    */
-    virtual void turnLNAOn(CORBA::ULong feed_mask, CORBA::ULong channel_mask);
+    /** Turn on the LNAs of every channel */
+    virtual void turnLNAsOn();
 
 
-    /** Turn off the LNAs of specified feeds and channels.
-     * 
-     * @param feed_mask must be converted to a biteset, where each bit is 
-     * related to a feed. The true value of a bit means the corresponding 
-     * feed is selected, so its LNAs are candidate to be turn off.
-     *
-     * @param channel_mask must be converted to a biteset. The true value 
-     * of a bit means the corresponding channel is selected, so its LNAs 
-     * will be turn off. In a dual channel representation, the bit of item 
-     * 0 is for the LEFT channel and the bit of item 1 is for the RIGHT one.
-     */
-     virtual void turnLNAOff(CORBA::ULong feed_mask, CORBA::ULong channel_mask);
+    /** Turn off the LNAs of every channels */
+    virtual void turnLNAsOff();
 
 
     /** Set the receiver operating mode.

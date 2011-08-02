@@ -277,15 +277,15 @@ CORBA::Double SRTKBandMFReceiverImpl::getTaper(
 // }
 
 
-void SRTKBandMFReceiverImpl::turnLNAOn(CORBA::ULong feed_mask, CORBA::ULong channel_mask)
+void SRTKBandMFReceiverImpl::turnLNAsOn()
 {
-    AUTO_TRACE("SRTKBandMFReceiverImpl::turnLNAOn()");
+    AUTO_TRACE("SRTKBandMFReceiverImpl::turnLNAsOn()");
 }
 
 
-void SRTKBandMFReceiverImpl::turnLNAOff(CORBA::ULong feed_mask, CORBA::ULong channel_mask)
+void SRTKBandMFReceiverImpl::turnLNAsOff()
 {
-    AUTO_TRACE("SRTKBandMFReceiverImpl::turnLNAOff()");
+    AUTO_TRACE("SRTKBandMFReceiverImpl::turnLNAsOff()");
 }
 
 

@@ -73,8 +73,10 @@ enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
  * <ul>
  *     <li>unsigned short numberOfFeeds(): return the number of feeds</li>
  *     <li>double vacuum(double (*converter)(double)): return the vacuum value inside the dewar</li>
- *     <li>double lowTemperature(double (*converter)(double)): return the low cryogenic temperature value</li>
- *     <li>double highTemperature(double (*converter)(double)): return the high cryogenic temperature value</li>
+ *     <li>double cryoTemperature1(double (*converter)(double)): return the first cryogenic temperature value</li>
+ *     <li>double cryoTemperature2(double (*converter)(double)): return the second cryogenic temperature value</li>
+ *     <li>double cryoTemperature3(double (*converter)(double)): return the third cryogenic temperature value</li>
+ *     <li>double cryoTemperature4(double (*converter)(double)): return the fourth cryogenic temperature value</li>
  *     <li>void setCoolHeadOn(): set to ON the cool head</li>
  *     <li>void setCoolHeadOff(): set to OFF the cool head</li>
  *     <li>bool isCoolHeadOn(): return true if the cool head is ON</li>
@@ -212,28 +214,52 @@ public:
     double vacuum(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
 
 
-    /** Return the low cryogenic temperature value
+    /** Return the first cryogenic temperature
      *
      *  @param converter pointer to the function that performs the conversion from
      *  voltage to Kelvin; default value is NULL, and in this case the value
-     *  returned by lowTemperature is the voltage value (the value before conversion).
-     *  @return the low cryogenic temperature in Kelvin if converter != NULL, the value in voltage
+     *  returned by cryoTemperature1 is the voltage value (the value before conversion).
+     *  @return the first cryogenic temperature in Kelvin if converter != NULL, the value in voltage
      *  (before conversion) otherwise.
      *  @throw ReceiverControlEx
      */
-    double lowTemperature(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
+    double cryoTemperature1(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
 
 
-    /** Return the high cryogenic temperature value
+    /** Return the second cryogenic temperature
      *
      *  @param converter pointer to the function that performs the conversion from
      *  voltage to Kelvin; default value is NULL, and in this case the value
-     *  returned by highTemperature is the voltage value (the value before conversion).
-     *  @return the high cryogenic temperature in Kelvin if converter != NULL, the value in voltage
+     *  returned by cryoTemperature2 is the voltage value (the value before conversion).
+     *  @return the second cryogenic temperature in Kelvin if converter != NULL, the value in voltage
      *  (before conversion) otherwise.
      *  @throw ReceiverControlEx
      */
-    double highTemperature(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
+    double cryoTemperature2(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
+
+
+    /** Return the third cryogenic temperature
+     *
+     *  @param converter pointer to the function that performs the conversion from
+     *  voltage to Kelvin; default value is NULL, and in this case the value
+     *  returned by cryoTemperature3 is the voltage value (the value before conversion).
+     *  @return the third cryogenic temperature in Kelvin if converter != NULL, the value in voltage
+     *  (before conversion) otherwise.
+     *  @throw ReceiverControlEx
+     */
+    double cryoTemperature3(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
+
+
+    /** Return the fourth cryogenic temperature
+     *
+     *  @param converter pointer to the function that performs the conversion from
+     *  voltage to Kelvin; default value is NULL, and in this case the value
+     *  returned by cryoTemperature4 is the voltage value (the value before conversion).
+     *  @return the fourth cryogenic temperature in Kelvin if converter != NULL, the value in voltage
+     *  (before conversion) otherwise.
+     *  @throw ReceiverControlEx
+     */
+    double cryoTemperature4(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
 
     
     /** Set to ON the cool head 

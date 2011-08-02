@@ -54,37 +54,12 @@ module Receivers {
         readonly attribute ACS::ROpattern status;
         
         
-        /***********\ 
-         * METHODS *
-        \***********/ 
-
-        
-        /** Turn on the LNAs of specified feeds and channels.
-         * 
-         * @param feed_mask must be converted to a biteset, where each bit is 
-         * related to a feed. The true value of a bit means the corresponding 
-         * feed is selected, so its LNAs are candidate to be turn on.
-         *
-         * @param channel_mask must be converted to a biteset. The true value 
-         * of a bit means the corresponding channel is selected, so its LNAs 
-         * will be turn on. In a dual channel representation, the bit of item 
-         * 0 is for the LEFT channel and the bit of item 1 is for the RIGHT one.
-         */
-        void turnLNAOn(in unsigned long feed_mask, in unsigned long channel_mask);
+        /** Turn the LNAs of every channel on */
+        void turnLNAsOn();
 
 
-        /** Turn off the LNAs of specified feeds and channels.
-         * 
-         * @param feed_mask must be converted to a biteset, where each bit is 
-         * related to a feed. The true value of a bit means the corresponding 
-         * feed is selected, so its LNAs are candidate to be turn off.
-         *
-         * @param channel_mask must be converted to a biteset. The true value 
-         * of a bit means the corresponding channel is selected, so its LNAs 
-         * will be turn off. In a dual channel representation, the bit of item 
-         * 0 is for the LEFT channel and the bit of item 1 is for the RIGHT one.
-         */
-        void turnLNAOff(in unsigned long feed_mask, in unsigned long channel_mask);
+        /** Turn the LNAs of every channel off */
+        void turnLNAsOff();
 
 
         /***************************************************\
@@ -117,133 +92,6 @@ module Receivers {
         
     };
 
-    /**
-     * <h2>Interface of a generic feed</h2>
-     *
-     * <p>This CORBA interface exports properties and methods defined for a generic 
-     * <em>Feed</em>.</p>
-     */
-    interface Feed {
-
-        /**************************\ 
-         * STAGE NUMBER 1 OF LNAs *
-        \**************************/ 
-        /// Drain voltage of stage number 1 of LNA, left channel
-        readonly attribute ACS::ROdouble Vdl_1;
-
-        /// Drain voltage of stage number 1 of LNA, right channel
-        readonly attribute ACS::ROdouble Vdr_1;
-
-        /// Drain current of stage number 1 of LNA, left channel
-        readonly attribute ACS::ROdouble Idl_1;
-
-        /// Drain current of stage number 1 of LNA, right channel
-        readonly attribute ACS::ROdouble Idr_1;
-
-        /// Gate voltage of stage number 1 of LNA, left channel
-        readonly attribute ACS::ROdouble Vgl_1;
-
-        /// Gate voltage of stage number 1 of LNA, right channel
-        readonly attribute ACS::ROdouble Vgr_1;
-
-
-        /**************************\ 
-         * STAGE NUMBER 2 OF LNAs *
-        \**************************/ 
-        readonly attribute ACS::ROdouble Vdl_2;
-
-        readonly attribute ACS::ROdouble Vdr_2;
-
-        readonly attribute ACS::ROdouble Idl_2;
-
-        readonly attribute ACS::ROdouble Idr_2;
-
-        readonly attribute ACS::ROdouble Vgl_2;
-
-        readonly attribute ACS::ROdouble Vgr_2;
-
-
-        /**************************\ 
-         * STAGE NUMBER 3 OF LNAs *
-        \**************************/ 
-        readonly attribute ACS::ROdouble Vdl_3;
-
-        readonly attribute ACS::ROdouble Vdr_3;
-
-        readonly attribute ACS::ROdouble Idl_3;
-
-        readonly attribute ACS::ROdouble Idr_3;
-
-        readonly attribute ACS::ROdouble Vgl_3;
-
-        readonly attribute ACS::ROdouble Vgr_3;
-
-
-        /**************************\ 
-         * STAGE NUMBER 4 OF LNAs *
-        \**************************/ 
-        readonly attribute ACS::ROdouble Vdl_4;
-
-        readonly attribute ACS::ROdouble Vdr_4;
-
-        readonly attribute ACS::ROdouble Idl_4;
-
-        readonly attribute ACS::ROdouble Idr_4;
-
-        readonly attribute ACS::ROdouble Vgl_4;
-
-        readonly attribute ACS::ROdouble Vgr_4;
-
-
-        /**************************\ 
-         * STAGE NUMBER 5 OF LNAs *
-        \**************************/ 
-        readonly attribute ACS::ROdouble Vdl_5;
-
-        readonly attribute ACS::ROdouble Vdr_5;
-
-        readonly attribute ACS::ROdouble Idl_5;
-
-        readonly attribute ACS::ROdouble Idr_5;
-
-        readonly attribute ACS::ROdouble Vgl_5;
-
-        readonly attribute ACS::ROdouble Vgr_5;
-
-
-        /***********\ 
-         * METHODS *
-        \***********/ 
-
-        /** Turn on the LNAs of specified channels.
-         * 
-         * @param channel_mask must be converted to a biteset. The true value 
-         * of a bit means the corresponding channel is selected, so its LNAs 
-         * will be turn on. In a dual channel representation, the bit of item 
-         * 0 is for the LEFT channel and the bit of item 1 is for the RIGHT one.
-         */
-        void turnLNAOn(in unsigned long channel_mask);
-
-        /** Turn off the LNAs of specified channels.
-         *
-         * @param channel_mask must be converted to a biteset. The true value 
-         * of a bit means the corresponding channel is selected, so its LNAs 
-         * will be turn off. In a dual channel representation, the bit of item 
-         * 0 is for the LEFT channel and the bit of item 1 is for the RIGHT one.
-         */
-        void turnLNAOff(in unsigned long channel_mask);
-
-
-        /// Return the feed number, an unsigned used as feed id.
-        unsigned short id();
-
-
-        /// Return the feed position as a struct of coordinates (x, y).
-        TPosition position();
-        
-    };
-    
-    
 };
 
 #endif
