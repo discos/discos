@@ -64,14 +64,16 @@ EXECUTABLES_L   =
 
 #
 # <brief description of xxxxx program>
-SRTWeatherStationImpl_OBJECTS   =	 SRTWeatherStationImpl    SRTWeatherSocket
+SRTWeatherStationImpl_OBJECTS   =	 SRTWeatherStationImpl    SRTWeatherSocket WindCheckerThread 
 #xxxxx_LDFLAGS   =
 SRTWeatherStationImpl_LIBS      =ComponentErrors \
 			SRTWeatherStationStubs\
 			IRALibrary\
 			ManagementErrors \
 			expat\
-			GenericWeatherStationStubs
+			GenericWeatherStationStubs\
+			ManagmentDefinitionsStubs\
+			ParserErrors
 
 
 #

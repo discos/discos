@@ -50,6 +50,15 @@ int SRTWeatherSocket::sendCMD(CError& err, CString cmd)
 //	CError err;
 	ACS_TRACE("SRTWeatherSocket::sendCMD");
     	Send(err,(const char *)cmd,cmd.GetLength());
+	if (!err.isNoError())
+	{
+		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"SRTWeatherSocket::sendCMD()- Create Socket");
+		ex.log(LM_DEBUG);
+		throw ex;
+		m_isConnected=false;
+		return -1;
+	} 
+	
 
 	ACS_DEBUG_PARAM("SRTWeatherSocket::sendCMD(CError& err, CString cmd)","sent:  %s", (const char *) cmd);
 
@@ -68,6 +77,16 @@ int  SRTWeatherSocket::receiveData(CError& err, CString& rdata)
 	bool done=false;
 	char buff[MAXSIZE];
 	n_received=Receive(err,buff,MAXSIZE);
+//	do {n_received=Receive(err,buff,MAXSIZE);} 
+//	while (n_received==-2);
+	if (!err.isNoError())
+	{
+		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"SRTWeatherSocket::sendCMD()- Create Socket");
+		ex.log(LM_DEBUG);
+		throw ex;
+		m_isConnected=false;
+		return -1;
+	} 
 	buff[n_received]=0;
     	rdata =CString(buff);  
 	ACS_DEBUG_PARAM("SRTWeatherSocket::sendCMD(CError& err, CString cmd)","received:  %s", (const char *) rdata);
@@ -79,6 +98,8 @@ CError SRTWeatherSocket::connect() throw (ACSErr::ACSbaseExImpl)
 
 {
 	OperationResult err ;
+//	CError Err;
+
 	err=Create(m_error,DGRAM);  
 	if (err==FAIL)
 	{
@@ -88,6 +109,12 @@ CError SRTWeatherSocket::connect() throw (ACSErr::ACSbaseExImpl)
 		m_isConnected=false;
 		return m_error;
 	} 
+		if (setSockMode(m_error,IRA::CSocket::NONBLOCKING)!=IRA::CSocket::SUCCESS) {
+		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_error);
+		dummy.setCode(m_error.getErrorCode());
+		dummy.setDescription((const char*)m_error.getDescription());		
+		throw dummy;
+	}
 
 	err=Connect(m_error,ADDRESS,PORT);
 	if (err==FAIL)
@@ -152,7 +179,6 @@ int SRTWeatherSocket::parse(CString meteo_string)
  	      XML_ErrorString(XML_GetErrorCode(p)));
 	}
 
-// 	cout << "temp:" <<i<<":"<< (const char *) meteo_string << endl;
 
 	return 0;
 
@@ -165,8 +191,7 @@ void SRTWeatherSocket::initParser(WeatherStationData *md)
  	 p= XML_ParserCreate(NULL);
          XML_SetElementHandler(p, start_hndl, end_hndl);
     	 XML_SetCharacterDataHandler(p,char_hndl);
-//	cout << "Creating xlm parser and handlers" << endl;
-   	 XML_SetUserData(p,m_meteodata);
+    	 XML_SetUserData(p,m_meteodata);
 
 
 }
@@ -175,16 +200,9 @@ void SRTWeatherSocket::start_hndl(void* data, const XML_Char* el, const XML_Char
 {
 int i;
     WeatherStationData* md=(WeatherStationData*) data;
-//    cout << "start handlers" << endl;
 
   for (i = 0; i < Depth; i++)
-//     printf("  ");
-
-//   printf("%s", el);
    md->setTag(string(el));
-//   for (i = 0; attr[i]; i += 2) {
-//      printf(" attributo %s='%s'", attr[i], attr[i + 1]);
-//   }
 
   printf("\n");
   Depth++;
@@ -281,4 +299,125 @@ len=strlen(buff);
 
  
 }
+double SRTWeatherSocket::getWind()
+{
+
+	CError err;
+	CString rdata="";
+	double m_val;
+
+	WeatherStationData mp;
+
+	CString command=CString("r ")+CString(COMMANDS[WINDSPEEDAVE]);
+         sendCMD(err,command);
+	IRA::CIRATools::Wait(0,500000);	
+			        
+	ACS_DEBUG_PARAM("SRTWeatherSocket::getWind()","sendCMD: %s",(const char *)command);
+	receiveData(err,rdata);
+
+
+	initParser(&mp);
+	parse(rdata);
+  	m_val=mp.sensorMap[COMMANDS[WINDSPEEDAVE]];
+	return m_val;
+	
+}
+
+
+double SRTWeatherSocket::getTemperature()
+{
  
+ 	CError err;
+	CString rdata="";
+	double m_val;
+	WeatherStationData mp;
+	sendCMD(err,CString("r ")+CString(COMMANDS[AIRTEMP]));
+	IRA::CIRATools::Wait(500000);	
+
+	receiveData(err,rdata);
+	if (rdata=="") 	receiveData(err,rdata);
+
+	cout << "mandato "<< CString("r ")+CString(COMMANDS[AIRTEMP])<<"-ricevuto "<< (const char *) rdata <<endl;
+	initParser(&mp);
+	parse(rdata);
+	m_val=mp.sensorMap[COMMANDS[AIRTEMP]];
+	return m_val;
+
+}
+
+double SRTWeatherSocket::getHumidity()
+{
+
+	CError err;
+	CString rdata="";
+	double m_val;
+	WeatherStationData mp;
+	sendCMD(err,CString("r ")+CString(COMMANDS[RELHUM]));
+	IRA::CIRATools::Wait(0,500000);	
+
+	receiveData(err,rdata);
+	initParser(&mp);
+	parse(rdata);
+	m_val=mp.sensorMap[COMMANDS[RELHUM]];
+	return m_val;
+
+}
+
+double SRTWeatherSocket::getPressure()
+{
+
+	CError err;
+	CString rdata="";
+	double m_val;
+	WeatherStationData mp;
+	sendCMD(err,CString("r ")+CString(COMMANDS[AIRPRESSURE]));
+	IRA::CIRATools::Wait(0,500000);	
+
+	receiveData(err,rdata);
+ 
+	initParser(&mp);
+	parse(rdata);
+	m_val=mp.sensorMap[COMMANDS[AIRPRESSURE]];
+	return m_val;
+
+}
+
+double SRTWeatherSocket::getWinDir()
+{
+
+	CError err;
+	CString rdata="";
+	double m_val;
+	WeatherStationData mp;
+	sendCMD(err,CString("r ")+CString(COMMANDS[WINDDIRAVE]));
+	IRA::CIRATools::Wait(0,500000);	
+
+	receiveData(err,rdata);
+ 
+	initParser(&mp);
+	parse(rdata);
+	m_val=mp.sensorMap[COMMANDS[WINDDIRAVE]];
+	return m_val;
+
+}
+double SRTWeatherSocket::getWindSpeedPeak()
+{
+
+	CError err;
+	CString rdata="";
+	double m_val;
+	WeatherStationData mp;
+	sendCMD(err,CString("r ")+CString(COMMANDS[WINDSPEEDMAX]));
+	IRA::CIRATools::Wait(0,500000);	
+
+	receiveData(err,rdata);
+	
+
+	initParser(&mp);
+	parse(rdata);
+	m_val=mp.sensorMap[COMMANDS[WINDSPEEDMAX]];
+	return m_val;
+
+}
+
+
