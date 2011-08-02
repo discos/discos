@@ -4,6 +4,7 @@
 #include <baci.h>
 #include <baciCharacteristicComponentImpl.h>
  
+ #include <IRA>
 
 
 ///CORBA generated servant stub
@@ -23,13 +24,17 @@
 #include "DevIOhumidity.h"
 ///Include the smart pointer for properties
 #include <baciSmartPropertyPointer.h>
+
 #include <ComponentErrors.h>
+#include <ManagementErrors.h>
+#include <SP_parser.h>
+
 #include "acstime.h"
- #include <IRA>
 #include <cstdlib>
 #include "SRTWeatherSocket.h"
 #include "WeatherStationData.h"
-
+// #include "WindCheckerThread.h"
+#include <acsThread.h>
 
 /*
 const CString ADDRESS="192.167.8.13"; //DEBUG
@@ -61,6 +66,30 @@ Not all the paramters from the station have been implemented.
 @todo add all the info returned by the HW
 */
 
+using ACS::ThreadBase;
+class SRTWeatherStationImpl;
+
+class CWindCheckerThread : public ACS::Thread
+{
+
+ public:
+	 CWindCheckerThread (const ACE_CString& name,
+			SRTWeatherStationImpl*   weatherStation,
+			const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
+			const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime) ;
+
+	 ~CWindCheckerThread() { ACS_TRACE("CWindCheckerThread::~CWindCheckerThread"); }
+	 virtual void onStop();
+	 virtual void onStart();
+	 virtual void runLoop();
+
+ private:
+		int loopCounter_m;
+		SRTWeatherStationImpl  * m_srtweatherstation_p;
+
+
+};
+
 
 
 
@@ -87,10 +116,32 @@ public:
 	*/
 	virtual ~SRTWeatherStationImpl(); 
 
+	/**
+	 * This method allows the client to interface the component by sending text commands. The command is parsed and executed according the
+	 * defined command syntax and grammar. This method is required to implement the <i>Managment::CommandInterpreter</i> interface.
+        * @throw CORBA::SystemException
+	 * @throw ManagementErrors::CommandLineErrorEx 
+	 * @param configCommand this string contains the string that will be executed
+	 * @return  answer  the string that reports the command execution results or in case, errors
+	 */
+        virtual char * command(const char *configCommand) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);    
+
+   
+	/**
+	*return  the all the data parameters formatted into a 
+	*meteoparameters structure
+	* @return  meteoparameters
+	*/
+
 
 	virtual Weather::parameters getData() throw (ACSErr::ACSbaseExImpl);
 
-
+	virtual double getWindSpeedAverage() throw (ACSErr::ACSbaseExImpl);
+	virtual double getWindspeedPeak() throw (ACSErr::ACSbaseExImpl);
+	virtual double getWindDir() throw (ACSErr::ACSbaseExImpl);
+	virtual double getHumidity() throw (ACSErr::ACSbaseExImpl);
+	virtual double getTemperature() throw (ACSErr::ACSbaseExImpl);
+	virtual double getPressure() throw (ACSErr::ACSbaseExImpl);
 
 	virtual void initialize() throw (ACSErr::ACSbaseExImpl);
 	virtual void	 cleanUp()throw (ACSErr::ACSbaseExImpl);
@@ -137,13 +188,8 @@ public:
 	*/
   	 virtual ACS::RWdouble_ptr  pressure ()
 	throw (CORBA::SystemException);
+	double getWind();
 
-   
-	/**
-	*return  the all the data parameters formatted into a 
-	*meteoparameters structure
-	* @return  meteoparameters
-	*/
  
 private:
 	
@@ -151,7 +197,8 @@ private:
  
 	void deleteAll();
 	CSecureArea<SRTWeatherSocket> *m_socket;
-
+	CWindCheckerThread *m_controlThread_p;
+	WeatherStationData m_wsdata;
 	CError err;
         CString ADDRESS;
 	unsigned int PORT;
@@ -161,7 +208,7 @@ private:
 	SmartPropertyPointer<RWdouble> m_windspeedpeak;
 	SmartPropertyPointer<RWdouble> m_humidity;
 	SmartPropertyPointer<RWdouble> m_pressure;
-
+	SimpleParser::CParser<SRTWeatherSocket> * m_parser;
     void operator=(const SRTWeatherStationImpl&);
 		
 };
