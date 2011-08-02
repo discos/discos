@@ -51,9 +51,9 @@ using namespace IRA;
 /** 
  * @mainpage SRT Meteo Station
  * @date 01/11/2010
- * @version 1.0.0
+ * @version 1.1.0
  * @author <a href=mailto:spoppi@oa-cagliari.inaf.it>Sergio Poppi</a>
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.2
  * @remarks compiler version is 4.1.2
 */
 
