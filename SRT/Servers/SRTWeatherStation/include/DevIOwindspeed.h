@@ -16,6 +16,8 @@
 #include <map>
 #include "SRTWeatherSocket.h"
 #include "WeatherStationData.h"
+#include <ComponentErrors.h>
+
 using namespace IRA;
 
 /**
@@ -63,27 +65,27 @@ public:
 	{
 		// get the CommandLine .......
 		try {
-			CError err;
-			CString rdata="";
 			CSecAreaResourceWrapper<SRTWeatherSocket> sock=m_socket->Get();
-			WeatherStationData mp;
-			sock->sendCMD(err,CString("r ")+CString(COMMANDS[WINDSPEEDAVE]));
-			sock->receiveData(err,rdata);
-			sock->initParser(&mp);
-			sock->parse(rdata);
-// 			cout << "rec:" <<(const char*) rdata <<  endl;
-  			m_val=mp.sensorMap[COMMANDS[WINDSPEEDAVE]];
-		
+
+			m_val=	sock->getWind();	
+
+			timestamp=getTimeStamp();  //complition time
+		return m_val;
 		}
+		catch (ComponentErrors::SocketErrorExImpl& E) {
+			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,dummy,E,"DevIOWindspeed::read()");
+			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
+			throw dummy;
+		} 				
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOWindspeed::read()");
-			dummy.setPropertyName("systemTemperature");
+			dummy.setPropertyName("WindSpeed");
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
 		} 				
-		timestamp=getTimeStamp();  //complition time
-		return m_val;
+
+
 	}
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
@@ -97,6 +99,7 @@ public:
 private:
 	CSecureArea<SRTWeatherSocket>* m_socket;
 	CORBA::Double m_val;
+	WeatherStationData m_wsdata; 
 	bool m_initparser;
  };
 
