@@ -36,33 +36,23 @@ module Receivers {
         /** Dewar vacuum. */
         readonly attribute ACS::ROdouble vacuum;
 
-        /** Dewar low cryogenic temperature. */
-        readonly attribute ACS::ROdouble lowTemperature;
-
-        /** Dewar high cryogenic temperature. */
-        readonly attribute ACS::ROdouble highTemperature;
-
         /** 
          *  This property reports the current Receiver status. The returned 
          *  pattern is a X bits field with the following meaning:
-         *
-         *  @arg \c 0 CHO: cool head status; 1 means it is not cooling (Cool Head Off)
-         *  @arg \c 1 CLA: calibration status; 1 means the calibration is active
-         *  @arg \c 2 VPO: vacuum pump status; 1 means the pump is opened
-         *  @arg \c 3 VVO: vacuum valve status; 1 means the valve is opened
          */
         readonly attribute ACS::ROpattern status;
         
         
         /** Turn the LNAs of every channel on */
-        void turnLNAsOn();
+        void turnLNAsOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 
         /** Turn the LNAs of every channel off */
-        void turnLNAsOff();
+        void turnLNAsOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 
-        /***************************************************\
+        /*
+         ***************************************************
          *           COMMON_RECEIVER_INTERFACE             *
          ***************************************************
 
@@ -73,22 +63,30 @@ module Receivers {
             readonly attribute ACS::ROlong IFs;
 
             readonly attribute ACS::ROlongSeq polarization;
+            
+            readonly attribute ACS::ROdoubleSeq initialFrequency;
 
-            void calOn() raises (ComponentErrors::ComponentErrorsEx);
+        	readonly attribute ACS::ROdoubleSeq bandWidth;
 
-            void calOff() raises (ComponentErrors::ComponentErrorsEx);
+        	readonly attribute ACS::ROstring mode;
 
-            void setLO(in ACS::doubleSeq lo1) raises (ComponentErrors::ComponentErrorsEx);
+            void calOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+
+            void calOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+
+            void setLO(in ACS::doubleSeq lo1) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 
             ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs) 
-               raises (ComponentErrors::ComponentErrorsEx);
+               raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
-            long getFeeds(out ACS::doubleSeq X,out ACS::doubleSeq Y,out ACS::doubleSeq power) raises (ComponentErrors::ComponentErrorsEx);
+            long getFeeds(out ACS::doubleSeq X,out ACS::doubleSeq Y,out ACS::doubleSeq power) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 
             double getTaper(in double freq,in double bandWidth,in long feed,in long ifNumber,out double waveLen) 
-                raises (ComponentErrors::ComponentErrorsEx);
+                raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+                
+            void setMode(in string mode) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx);    
 
-        \***************************************************/
+        ***************************************************/
         
     };
 

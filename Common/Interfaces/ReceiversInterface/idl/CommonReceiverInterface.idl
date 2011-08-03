@@ -12,6 +12,7 @@
 #include <baci.idl>
 #include <ComponentErrors.idl>
 #include <ManagementErrors.idl>
+#include <ReceiversErrors.idl>
 
 #pragma prefix "alma"
 
@@ -58,12 +59,22 @@ module Receivers {
         readonly attribute ACS::ROstring mode;
         
 
-        /** Start the calibration of every feed channel. */
-        void calOn() raises  (ComponentErrors::ComponentErrorsEx);
+        /** 
+         * Turns on the calibration diode
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw CORBA::SystemExcpetion    
+        */
+        void calOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
 
-        /** Stop the calibration of every feed channel. */
-        void calOff() raises  (ComponentErrors::ComponentErrorsEx);
+        /** 
+         * Turns off the calibration diode
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw CORBA::SystemExcpetion    
+        */
+        void calOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
     
         /**
@@ -78,10 +89,11 @@ module Receivers {
          * supported IF, but in many cases the receiver does not support different LOs, so the asnwer of the system may vary from 
          * receiver to receiver according the implementation.
          * @param list of local oscillators values to be applied (MHz).
-         * @throw ComponentErrors::ComponentErrorsEx;
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw CORBA::SystemExcpetion  
          */
-        void setLO(in ACS::doubleSeq lo1) raises (ComponentErrors::ComponentErrorsEx);
+        void setLO(in ACS::doubleSeq lo1) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
   
         /**
          * It can be called when the value of the calibration diode is required. 
@@ -97,31 +109,34 @@ module Receivers {
          * @param feeds is a list that stores the corresponding feed of the subband we are asking for
          * @param ifs is a list that identfies which IFs of the feed we are interested in, usually 0..1
          * @return for each subband the list of the noise calibration values in Kelvin degrees. It must be freed by the caller.
-         * @throw ComponentErrors::ComponentErrorsEx;
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw CORBA::SystemException  
          */
         ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs) 
-            raises (ComponentErrors::ComponentErrorsEx);
+            raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
             
         /**
          * It can be called when the relative positions and power (with respect to the central beam) of each feed 
          * of the currently configured receiver. 
          * The first position of the sequences reports the data of the first feed and so on. The caller is responsable 
          * to free the sequences passed as output parameters.
-         * @throw ComponentErrors::ComponentErrorsEx;
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw CORBA::SystemException   
          * @param X distances of the feeds with respect to the central one along the X axis, given in radians  
          * @param Y distances of the feeds with respect to the central one along the Y axis, given in radians
          * @param power relative power with respect to te central one. the power of the central one is considered to be 1.
          * @return the number of feeds of the receiver which in practice is the number of elements of the sequences 
          */
-        long getFeeds(out ACS::doubleSeq X,out ACS::doubleSeq Y,out ACS::doubleSeq power) raises (ComponentErrors::ComponentErrorsEx);
+        long getFeeds(out ACS::doubleSeq X,out ACS::doubleSeq Y,out ACS::doubleSeq power) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
         /**
          * It can be called to know the taper of the current receiver starting from the parameter of a detector. 
          * The sky frequency is computed (LocalOscillator+Frequency+BW/2), after that
          * the corresponding wave lenght is used the compute the taper value.
-         * @throw ComponentErrors::ComponentErrorsEx;
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw CORBA::SystemException   
          * @param freq starting frequency of the detector in MHz. This value is correlated to the real start frequency of the receiver.
          * @param bandWidth bandwidth of the detector in MHz. This value is correlated to the real bandwidth of the receiver.
@@ -131,7 +146,7 @@ module Receivers {
          * @return the value of the taper of the current receiver in db.
          */
         double getTaper(in double freq,in double bandWidth,in long feed,in long ifNumber,out double waveLen) 
-            raises (ComponentErrors::ComponentErrorsEx);
+            raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
     };
     
