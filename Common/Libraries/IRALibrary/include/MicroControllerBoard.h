@@ -119,18 +119,6 @@ private:
      */
     BYTE computeChecksum(std::vector<BYTE> message) throw (MicroControllerBoardEx);
 
-    
-    /** Return the any object as a string.
-     * @param i: a any object
-     * @return the given object as a string
-     */
-    template<class T>
-    std::string any2string(T i) {
-        std::ostringstream buffer;
-        buffer << i;
-        return buffer.str();
-    }
-
 
     const std::string m_IP;
     const unsigned short m_port;
@@ -148,6 +136,18 @@ private:
     CError m_Error;
 
 };
+
+    
+/** Return the any object as a string.
+ * @param i: a any object
+ * @return the given object as a string
+ */
+template<class T>
+std::string any2string(T i) {
+    std::ostringstream buffer;
+    buffer << i;
+    return buffer.str();
+}
 
 }
 

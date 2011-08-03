@@ -172,22 +172,47 @@ public:
 
 
     /** Set the noise mark generator to ON 
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 11
+     *  @param value the value to set; the default value is 0x01
      *  @throw ReceiverControlEx
      */
-    void setCalibrationOn() throw (ReceiverControlEx);
+    void setCalibrationOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_11, 
+            const BYTE value=0x01
+    ) throw (ReceiverControlEx);
 
 
     /** Set the noise mark generator to OFF
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 11
+     *  @param value the value to set; the default value is 0x00
      *  @throw ReceiverControlEx
      */
-    void setCalibrationOff() throw (ReceiverControlEx);
+    void setCalibrationOff(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_11, 
+            const BYTE value=0x00
+    ) throw (ReceiverControlEx);
 
 
     /** Is the noise mark generator set to ON?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 11
      *  @return true if the noise mark generator is set to ON
      *  @throw ReceiverControlEx
      */
-    bool isCalibrationOn() throw (ReceiverControlEx);
+    bool isCalibrationOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_11
+    ) throw (ReceiverControlEx);
 
 
     /** Set the reliable communication to/from the board to ON */
@@ -207,201 +232,382 @@ public:
      *  @param converter pointer to the function that performs the conversion from
      *  voltage to vacumm unit [mbar]; default value is NULL, and in this case the value
      *  returned by vacuum is the voltage value (the value before conversion).
+     *  @param data_type the type of the data; the default type is a 32 bit floating point
+     *  @param port_type the port type; the default port is the AD24
+     *  @param port_number the port number; the default value is a range of port numbers from
+     *  8 to 15.
+     *  @param raw_index the index that allows to get the vacuum value from the port_number range.
+     *  The default value is 2.
      *  @return the vacuum inside the dewar in mbar if converter != NULL, the value in voltage
      *  (before conversion) otherwise.
      *  @throw ReceiverControlEx
      */
-    double vacuum(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
+    double vacuum(
+            double (*converter)(double voltage)=NULL,
+            const BYTE data_type=MCB_CMD_DATA_TYPE_F32,     
+            const BYTE port_type=MCB_PORT_TYPE_AD24,       
+            const BYTE port_number=MCB_PORT_NUMBER_00_07,  
+            const size_t raw_index=2                      
+    ) throw (ReceiverControlEx);
 
 
-    /** Return the first cryogenic temperature
+    /** Return the cryogenic temperature
      *
+     *  @param temperature_id the id code of the temperature (1, 2, 3 or 4)
      *  @param converter pointer to the function that performs the conversion from
      *  voltage to Kelvin; default value is NULL, and in this case the value
-     *  returned by cryoTemperature1 is the voltage value (the value before conversion).
-     *  @return the first cryogenic temperature in Kelvin if converter != NULL, the value in voltage
+     *  returned by cryoTemperature is the voltage value (the value before conversion).
+     *  @param data_type the type of the data; the default type is a 32 bit floating point
+     *  @param port_type the port type; the default port is the AD24
+     *  @param port_number the port number; the default value is a range of port numbers from
+     *  8 to 15.
+     *  @return the cryogenic temperature in Kelvin if converter != NULL, the value in voltage
      *  (before conversion) otherwise.
      *  @throw ReceiverControlEx
      */
-    double cryoTemperature1(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
+    double cryoTemperature(
+            const short temperature_id,
+            double (*converter)(double voltage)=NULL,
+            const BYTE data_type=MCB_CMD_DATA_TYPE_F32,
+            const BYTE port_type=MCB_PORT_TYPE_AD24,  
+            const BYTE port_number=MCB_PORT_NUMBER_00_07
+    ) throw (ReceiverControlEx);
 
 
-    /** Return the second cryogenic temperature
-     *
-     *  @param converter pointer to the function that performs the conversion from
-     *  voltage to Kelvin; default value is NULL, and in this case the value
-     *  returned by cryoTemperature2 is the voltage value (the value before conversion).
-     *  @return the second cryogenic temperature in Kelvin if converter != NULL, the value in voltage
-     *  (before conversion) otherwise.
-     *  @throw ReceiverControlEx
-     */
-    double cryoTemperature2(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
-
-
-    /** Return the third cryogenic temperature
-     *
-     *  @param converter pointer to the function that performs the conversion from
-     *  voltage to Kelvin; default value is NULL, and in this case the value
-     *  returned by cryoTemperature3 is the voltage value (the value before conversion).
-     *  @return the third cryogenic temperature in Kelvin if converter != NULL, the value in voltage
-     *  (before conversion) otherwise.
-     *  @throw ReceiverControlEx
-     */
-    double cryoTemperature3(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
-
-
-    /** Return the fourth cryogenic temperature
-     *
-     *  @param converter pointer to the function that performs the conversion from
-     *  voltage to Kelvin; default value is NULL, and in this case the value
-     *  returned by cryoTemperature4 is the voltage value (the value before conversion).
-     *  @return the fourth cryogenic temperature in Kelvin if converter != NULL, the value in voltage
-     *  (before conversion) otherwise.
-     *  @throw ReceiverControlEx
-     */
-    double cryoTemperature4(double (*converter)(double voltage) = NULL) throw (ReceiverControlEx);
-
-    
     /** Set to ON the cool head 
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 08
+     *  @param value the value to set; the default value is 0x01
      *  @throw ReceiverControlEx
      */
-    void setCoolHeadOn() throw (ReceiverControlEx);
+    void setCoolHeadOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,   
+            const BYTE port_number=MCB_PORT_NUMBER_08,
+            const BYTE value=0x01
+    ) throw (ReceiverControlEx);
 
-    
+
     /** Set to OFF the cool head 
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 08
+     *  @param value the value to set; the default value is 0x00
      *  @throw ReceiverControlEx
      */
-    void setCoolHeadOff() throw (ReceiverControlEx);
+    void setCoolHeadOff(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,   
+            const BYTE port_number=MCB_PORT_NUMBER_08,
+            const BYTE value=0x00
+    ) throw (ReceiverControlEx);
 
 
     /** Is the cool head ON?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 08
      *  @return true if the cool head is ON
      *  @throw ReceiverControlEx
      */
-    bool isCoolHeadOn() throw (ReceiverControlEx);
+    bool isCoolHeadOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,   
+            const BYTE port_number=MCB_PORT_NUMBER_08
+    ) throw (ReceiverControlEx);
 
 
     /** Set to ON the vacuum sensor
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 04
+     *  @param value the value to set; the default value is 0x01
      *  @throw ReceiverControlEx
      */
-    void setVacuumSensorOn() throw (ReceiverControlEx);
+    void setVacuumSensorOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_04,
+            const BYTE value=0x01
+    ) throw (ReceiverControlEx);
 
 
     /** Set to OFF the vacuum sensor
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 04
+     *  @param value the value to set; the default value is 0x00
      *  @throw ReceiverControlEx
      */
-    void setVacuumSensorOff() throw (ReceiverControlEx);
+    void setVacuumSensorOff(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_04,
+            const BYTE value=0x00
+    ) throw (ReceiverControlEx);
 
 
     /** Is the vacuum sensor ON?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 04
      *  @return true if the vacuum sensor is ON 
      *  @throw ReceiverControlEx
      */
-    bool isVacuumSensorOn() throw (ReceiverControlEx);
+    bool isVacuumSensorOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_04
+    ) throw (ReceiverControlEx);
 
 
     /** Set to ON the vacuum pump
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 05
+     *  @param value the value to set; the default value is 0x01
      *  @throw ReceiverControlEx
      */
-    void setVacuumPumpOn() throw (ReceiverControlEx);
+    void setVacuumPumpOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_05,
+            const BYTE value=0x01
+    ) throw (ReceiverControlEx);
 
 
     /** Set to OFF the vacuum pump
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 05
+     *  @param value the value to set; the default value is 0x00
      *  @throw ReceiverControlEx
      */
-    void setVacuumPumpOff() throw (ReceiverControlEx);
+    void setVacuumPumpOff(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_05,
+            const BYTE value=0x00
+    ) throw (ReceiverControlEx);
 
 
     /** Is the vacuum pump ON?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 05
      *  @return true if the vacuum pump is ON
      *  @throw ReceiverControlEx
      */
-    bool isVacuumPumpOn() throw (ReceiverControlEx);
+    bool isVacuumPumpOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_05
+    ) throw (ReceiverControlEx);
 
 
     /** Set to ON the vacuum valve
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 07
+     *  @param value the value to set; the default value is 0x01
      *  @throw ReceiverControlEx
      */
-    void setVacuumValveOn() throw (ReceiverControlEx);
+    void setVacuumValveOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_07,
+            const BYTE value=0x01
+    ) throw (ReceiverControlEx);
 
 
     /** Set to OFF the vacuum valve
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 07
+     *  @param value the value to set; the default value is 0x00
      *  @throw ReceiverControlEx
      */
-    void setVacuumValveOff() throw (ReceiverControlEx);
+    void setVacuumValveOff(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_07,
+            const BYTE value=0x00
+    ) throw (ReceiverControlEx);
 
 
     /** Is the vacuum valve ON?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 07
      *  @return true if the vacuum valve is ON
      *  @throw ReceiverControlEx
      */
-    bool isVacuumValveOn() throw (ReceiverControlEx);
+    bool isVacuumValveOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_07
+    ) throw (ReceiverControlEx);
 
 
     /** Is the remote command enable?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 26
      *  @return true if the remote command is enable
      *  @throw ReceiverControlEx
      */
-    bool isRemoteOn() throw (ReceiverControlEx);
+    bool isRemoteOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_26
+    ) throw (ReceiverControlEx);
 
 
     /** Select the first local oscillator (LO1)
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 0
+     *  @param value the value to set; the default value is 0x00
      *  @throw ReceiverControlEx
      */
-    void selectLO1() throw (ReceiverControlEx);
+    void selectLO1(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_00,
+            const BYTE value=0x00
+    ) throw (ReceiverControlEx);
 
 
     /** Is LO1 selected?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 16
      *  @return true if the first local oscillator (LO1) is selected
      *  @throw ReceiverControlEx
      */
-    bool isLO1Selected() throw (ReceiverControlEx);
+    bool isLO1Selected(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,   
+            const BYTE port_number=MCB_PORT_NUMBER_16
+    ) throw (ReceiverControlEx);
 
 
     /** Select the second local oscillator (LO2)
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 0
+     *  @param value the value to set; the default value is 0x01
      *  @throw ReceiverControlEx
      */
-    void selectLO2() throw (ReceiverControlEx);
+    void selectLO2(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_00,
+            const BYTE value=0x01
+    ) throw (ReceiverControlEx);
 
 
     /** Is LO2 selected?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 17
      *  @return true if the second local oscillator (LO2) is selected
      *  @throw ReceiverControlEx
      */
-    bool isLO2Selected() throw (ReceiverControlEx);
+    bool isLO2Selected(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_17
+    ) throw (ReceiverControlEx);
 
 
     /** Is LO2 locked?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 18
      *  @return true if the second local oscillator (LO2) is locked
      *  @throw ReceiverControlEx
      */
-    bool isLO2Locked() throw (ReceiverControlEx);
+    bool isLO2Locked(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_18
+    ) throw (ReceiverControlEx);
 
 
     /** Set the single dish mode to ON. The VLBI mode will be turn OFF
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number_sd the port number of the single dish mode; 
+     *  the default port number is 0x13
+     *  @param port_number_vlbi the port number of the VLBI mode; 
+     *  the default port number is 0x14
+     *  @param value_sd the value to turn the single dish mode ON; default
+     *  value is 0x00
+     *  @param value_vlbi the value to turn the VLBI mode OFF; default
+     *  value is 0x01
      *  @throw ReceiverControlEx
      */
-    void setSingleDishMode() throw (ReceiverControlEx);
+    void setSingleDishMode(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number_sd=MCB_PORT_NUMBER_13,
+            const BYTE port_number_vlbi=MCB_PORT_NUMBER_14,
+            const BYTE value_sd=0x00,
+            const BYTE value_vlbi=0x01
+    ) throw (ReceiverControlEx);
 
 
     /** Is the single dish mode set to ON?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 29
      *  @return true if the single dish mode is active
      *  @throw ReceiverControlEx
      */
-    bool isSingleDishModeOn() throw (ReceiverControlEx);
+    bool isSingleDishModeOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_29
+    ) throw (ReceiverControlEx);
 
 
     /** Set the VLBI mode to ON. The SD mode will be turn OFF
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number_vlbi the port number of the VLBI mode; 
+     *  the default port number is 0x14
+     *  @param port_number_sd the port number of the single dish mode; 
+     *  the default port number is 0x13
+     *  @param value_vlbi the value to turn the VLBI mode ON; default
+     *  value is 0x00
+     *  @param value_sd the value to turn the single dish mode OFF; default
+     *  value is 0x01
      *  @throw ReceiverControlEx
      */
-    void setVLBIMode() throw (ReceiverControlEx);
+    void setVLBIMode(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number_vlbi=MCB_PORT_NUMBER_14,
+            const BYTE port_number_sd=MCB_PORT_NUMBER_13,
+            const BYTE value_vlbi=0x00,
+            const BYTE value_sd=0x01
+    ) throw (ReceiverControlEx);
 
 
     /** Is the VLBI mode set to ON?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 30
      *  @return true if the VLBI mode is active
      *  @throw ReceiverControlEx
      */
-    bool isVLBIModeOn() throw (ReceiverControlEx);
+    bool isVLBIModeOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_30
+    ) throw (ReceiverControlEx);
 
     
     /** return the FetValues (VDL, IDL, VGR, VDR, IDR and VGR) 
@@ -453,27 +659,63 @@ public:
 
 
     /** Turn the LNAs of the left channels ON
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 08
+     *  @param value the value to set; the default value is 0x00
      *  @throw ReceiverControlEx
      */
-    void turnLeftLNAsOn() throw (ReceiverControlEx);
+    void turnLeftLNAsOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_08,
+            const BYTE value=0x00
+    ) throw (ReceiverControlEx);
 
 
     /** Turn the LNAs of the left channels OFF
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 08
+     *  @param value the value to set; the default value is 0x01
      *  @throw ReceiverControlEx
      */
-    void turnLeftLNAsOff() throw (ReceiverControlEx);
+    void turnLeftLNAsOff(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_08,
+            const BYTE value=0x01
+    ) throw (ReceiverControlEx);
 
 
     /** Turn the LNAs of the right channels ON
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 09
+     *  @param value the value to set; the default value is 0x00
      *  @throw ReceiverControlEx
      */
-    void turnRightLNAsOn() throw (ReceiverControlEx);
+    void turnRightLNAsOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_09,
+            const BYTE value=0x00 
+    ) throw (ReceiverControlEx);
 
 
     /** Turn the LNAs of the right channels OFF
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 09
+     *  @param value the value to set; the default value is 0x01
      *  @throw ReceiverControlEx
      */
-    void turnRightLNAsOff() throw (ReceiverControlEx);
+    void turnRightLNAsOff(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_09,
+            const BYTE value=0x01
+    ) throw (ReceiverControlEx);
 
 
     /** Perform a TCP connection socket to the boards

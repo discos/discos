@@ -34,7 +34,7 @@ void MicroControllerBoard::openConnection(void) throw (MicroControllerBoardEx) {
 
     if (m_socket->Connect(m_Error, m_IP.c_str(), m_port) == CSocket::FAIL) {
         closeConnection();
-        throw MicroControllerBoardEx(std::string("Error connecting to ") + m_IP + ":" + MicroControllerBoard::any2string(m_port));
+        throw MicroControllerBoardEx(std::string("Error connecting to ") + m_IP + ":" + any2string(m_port));
     }
     else {
         if(m_socket->setSockMode(m_Error, CSocket::BLOCKINGTIMEO, m_timeout) != CSocket::SUCCESS) {
