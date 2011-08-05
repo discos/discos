@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   01-08-2011  Created 
+-->
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:SRT7GHzReceiver:1.0"
+	xmlns="urn:schemas-cosylab-com:SRT7GHzReceiver:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:rcv="urn:schemas-cosylab-com:Receivers:1.0"
+	
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+  	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Receivers.xsd"/>
+  	
+  	<xs:complexType name="SRT7GHzStatusType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROpattern">
+				<xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="1024"/>
+            	<xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                	"Remote,Vacuum_Sensor,Vacuum_Pump_Status,Vacuum_Pump_Fault,Vacuum_Valve_Open,Cool_Head_On,Noise_Mark,External_Mark_Enabled,
+                	Connection_Error,Unlocked"/>
+				<xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                	"0, 2, 2, 0, 2, 2, 2, 2, 0, 0"/>
+            	<xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+            		"2, 3, 3, 2, 3, 3, 3, 3, 2, 2"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	
+	<xs:complexType name="SRT7GHzReceiverType">
+		<xs:sequence>
+			<!-- Local Oscillator (ROdoubleSeq) -->
+			<xs:element name="LO" type="baci:ROdoubleSeq"/>
+			<!-- Number of receiver feeds -->
+			<xs:element name="feeds" type="baci:ROlong"/>
+			<!-- Intermediate Frequencies (ROlong) -->
+			<xs:element name="IFs" type="baci:ROlong"/>
+			<!-- Polarization (ROlongSeq) -->
+			<xs:element name="polarization" type="baci:ROlongSeq"/>	
+			<!-- initialFrequency (ROdoubleSeq) -->
+			<xs:element name="initialFrequency" type="baci:ROdoubleSeq"/>	
+			<!-- bandWidth (ROdoubleSeq) -->
+			<xs:element name="bandWidth" type="baci:ROdoubleSeq"/>
+			<!-- currently configured mode (ROstring) -->
+			<xs:element name="mode" type="baci:ROstring"/>
+			<!-- vacuum (ROdouble) -->
+			<xs:element name="vacuum" type="baci:ROdouble"/>
+			<!-- Subsystem status -->
+			<xs:element name="status" type="SRT7GHzStatusType" />	
+			<!-- Drain voltage for IF1 (ROdouble) -->
+			<xs:element name="Vd_1" type="baci:ROdouble"/>
+			<!-- Drain voltage for IF2 (ROdouble) -->
+			<xs:element name="Vd_2" type="baci:ROdouble"/>
+			<!-- Drain current for IF1 (ROdouble) -->
+			<xs:element name="Id_1" type="baci:ROdouble"/>
+			<!-- Drain current for IF2 (ROdouble) -->
+			<xs:element name="Id_2" type="baci:ROdouble"/>
+			<!-- Gate voltage for IF1 (ROdouble) -->
+			<xs:element name="Vg_1" type="baci:ROdouble"/>
+			<!-- Gate voltage for IF2 (ROdouble) -->
+			<xs:element name="Vg_2" type="baci:ROdouble"/>
+			<!-- cryogenic temp (K) (ROdouble) -->
+			<xs:element name="cryoTemperatureCoolHead" type="baci:ROdouble"/>
+			<!-- cryogenic temp (K) (ROdouble) -->
+			<xs:element name="cryoTemperatureCoolHeadWindow" type="baci:ROdouble"/>
+			<!-- cryogenic temp (K) (ROdouble) -->
+			<xs:element name="cryoTemperatureLNA" type="baci:ROdouble"/>
+			<!-- cryogenic temp (K) (ROdouble) -->
+			<xs:element name="cryoTemperatureLNAWindow" type="baci:ROdouble"/>
+			<!-- cryogenic temp (K) (ROdouble) -->
+			<xs:element name="environmentTemperature" type="baci:ROdouble"/>
+		</xs:sequence>
+		<xs:attribute name="DewarIPAddress" type="xs:string" use="required"/>
+		<xs:attribute name="DewarPort" type="xs:unsignedShort" use="required" />
+		<xs:attribute name="LNAIPAddress" type="xs:string" use="required"/>
+		<xs:attribute name="LNAPort" type="xs:unsignedShort" use="required" />
+		<!-- The WatchDog working time(microseconds) -->
+		<xs:attribute name="WatchDogResponseTime" type="xs:unsignedLong" use="required" />
+		<!-- The WatchDog sleep time(microseconds) -->
+		<xs:attribute name="WatchDogSleepTime" type="xs:unsignedLong" use="required" />
+		<!-- LNA sampling time (microseconds) -->
+		<xs:attribute name="LNASamplingTime" type="xs:unsignedLong" use="required" />
+		<!-- the cache time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
+		<!-- the expire time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
+		<!-- Instance of the associated device that will set the local oscillator -->
+		<xs:attribute name="LocalOscillatorInstance" type="xs:string" use="required" />
+	</xs:complexType>
+  
+	<xs:element name="SRT7GHzReceiver" type="SRT7GHzReceiverType"/>
+</xs:schema>

@@ -16,11 +16,6 @@
 
 #pragma prefix "alma"
 
-/** 
-* This module defines the interfaces of receiver components.
-* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
-* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
-*/
 module Receivers { 
     
     /**
@@ -58,7 +53,6 @@ module Receivers {
         /** The receiver operating mode */
         readonly attribute ACS::ROstring mode;
         
-
         /** 
          * Turns on the calibration diode
          * @throw ComponentErrors::ComponentErrorsEx
@@ -83,11 +77,10 @@ module Receivers {
          */
         void setMode(in string mode) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx);
 
-        
         /**
-         * It allows to set the local oscillators of the current recevier. Generally this function alloes to give one value for each 
+         * It allows to set the local oscillators of the current recevier. Generally this function allowes to give one value for each 
          * supported IF, but in many cases the receiver does not support different LOs, so the asnwer of the system may vary from 
-         * receiver to receiver according the implementation.
+         * receiver to receiver according the implementation. A -1 will be interpreted as "keep present value".
          * @param list of local oscillators values to be applied (MHz).
          * @throw ComponentErrors::ComponentErrorsEx
          * @throw ReceiversErrors::ReceiversErrorsEx

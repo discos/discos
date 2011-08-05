@@ -10,9 +10,23 @@
 #include <baci.idl>
 #include <enumpropMACRO.idl>
 
-
 #pragma prefix "alma"
 
+/** 
+ * @mainpage IDL Interface documentation of the receivers subsystem
+ * @date 05/08/2011
+ * @version 1.0.0
+ * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>, 
+ *                  <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a> 
+ * @remarks Last compiled under ACS 8.0.2
+*/
+
+/** 
+* This module defines the whole interfaces of receiver subsystem
+* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
+* <br>
+*/
 module Receivers {
 	
 	/// polarization of the input channel 

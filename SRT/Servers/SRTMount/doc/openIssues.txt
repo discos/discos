@@ -7,7 +7,7 @@
 6) IN TTPT la velocità massima cos'è? La velocità massima negli slewing o la velocità massima di tracking? quindi devo mettere MAXRate o MAXreliableRate? 
     Ancora una volta il segno ha importanza?
 7) Testato TTPT, sembra funzionare anche comandando più di 21 punti in una volta. Però non sembra assolutamente rispettare i tempi ne di partenza ne di arrivo,
-   anche se le coordinate finale della traiettoria comandata sono correte. La lettura del numero di punti caricati non funziona, leggo sempre zero. Anche la
+   anche se le coordinate finale della traiettoria comandata sono corrette. La lettura del numero di punti caricati non funziona, leggo sempre zero. Anche la
    Errors tracking status word riporta continuamente degli errori.
 8) In parameter command set time offsets, the range is declared to be 86400000 seconds that corresponds to 1000 days: quite exotic. Apparently the last significant decimal
    digits is the third one. Sent 0.034356 the simulator displays 0.03400.    

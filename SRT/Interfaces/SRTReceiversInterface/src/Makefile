@@ -10,7 +10,7 @@ MAKE_PDF = ON
 # CDB_SCHEMAS = KBandMF
 
 # IDL Files and flags
-IDL_FILES = SRTKBandMF
+IDL_FILES = SRTKBandMF SRT7GHz
 
 # list of all possible C-sources (used to create automatic dependencies)
 CSOURCENAMES = \

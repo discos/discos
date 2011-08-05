@@ -18,12 +18,6 @@
 
 #pragma prefix "alma"
 
-/** 
-* This module defines the interfaces of receiver components.
-* A Receiver is a component composed of one or more Feed components.
-* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
-* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
-*/
 module Receivers { 
     
     /**
