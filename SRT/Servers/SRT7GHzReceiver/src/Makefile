@@ -61,8 +61,8 @@ LIBRARIES_L     =
 
 #
 # <brief description of lllll library>
-SRT7GHzImpl_OBJECTS   =  Configuration SRT7GHzImpl ComponentCore
-SRT7GHzImpl_LIBS = IRALibrary SRT7GHzStubs ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs GenericReceiverStubs \
+SRT7GHzImpl_OBJECTS   =  Configuration SRT7GHzImpl ComponentCore MonitorThread
+SRT7GHzImpl_LIBS = IRALibrary ComponentErrors ReceiversErrors CommonReceiverInterfaceStubs GenericReceiverStubs SRT7GHzStubs \
                    LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs
 
 #

@@ -52,6 +52,14 @@ module Receivers {
 
         /** The receiver operating mode */
         readonly attribute ACS::ROstring mode;
+
+        /** 
+         * This method must called in order to setup everytnig for the receiver to become the currently used receiver. The dafault configuration and mode is loaded.
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw CORBA::SystemExcpetion    
+        */
+        void activate() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);        
         
         /** 
          * Turns on the calibration diode
@@ -60,7 +68,6 @@ module Receivers {
          * @throw CORBA::SystemExcpetion    
         */
         void calOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
-        
 
         /** 
          * Turns off the calibration diode
@@ -69,13 +76,12 @@ module Receivers {
          * @throw CORBA::SystemExcpetion    
         */
         void calOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
-
     
         /**
          * If requirest by a particular receiver, this methos allows to setup particular operating mode. 
          * The mode must be a valid mode code, recognized by the receiver. 
          */
-        void setMode(in string mode) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx);
+        void setMode(in string mode) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
         /**
          * It allows to set the local oscillators of the current recevier. Generally this function allowes to give one value for each 

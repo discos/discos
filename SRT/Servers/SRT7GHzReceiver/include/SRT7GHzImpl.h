@@ -27,7 +27,6 @@
 #include <SRT7GHzS.h>
 #include <ComponentErrors.h>
 #include <ReceiversErrors.h>
-#include <ManagementErrors.h>
 #include "ComponentCore.h"
 
 
@@ -38,6 +37,9 @@
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.0.2
  * @remarks compiler version is 3.4.6
+ * @todo in the taper computation the correct number4s for SRT telescope must be inserted, moreover we have to clarify if the taper lookup table is a property of the receiver or
+ *              it is a property of the focus.
+ *              The code to drive the synthesizer must be completed
 */
 
 /**
@@ -90,6 +92,15 @@ public:
 	 * even though there is no warranty that the function is completely executed before the component is destroyed.
 	*/	
 	virtual void aboutToAbort();
+
+	/**
+	 * It must be called to switch the receiver to operative mode. wnen called the default configuration and mode is loaded. Regarding this
+	 * implementation calling this method corresponds to a call to <i>setMode("NORMAL")</i>.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	 virtual void activate() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 		
 	/**
 	 * This method is used to turn the calibration diode on.
@@ -121,10 +132,10 @@ public:
 	 * will lead to Configuration exception.
 	 * @param mode string identifier of the operating mode
 	 * @throw CORBA::SystemException
-	 * @throw ManagementErrors::ConfigurationErrorEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 */
-	void setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx);
+	void setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 	
 	/**
 	 * This method is called when the values of the calibration mark of the receiver are required. A value is returned for every provided sub bands.

@@ -48,6 +48,7 @@ using namespace IRA;
 #define MARKTABLE_PATH CONFIG_PATH"/NoiseMark"
 #define NORMALMODE_PATH CONFIG_PATH"/NormalModeSetup"
 #define FEEDTABLE_PATH CONFIG_PATH"/Feeds"
+#define TAPERTABLE_PATH CONFIG_PATH"/Taper"
 
 
 CConfiguration::CConfiguration()
@@ -55,11 +56,15 @@ CConfiguration::CConfiguration()
 	m_markTable=m_loTable=NULL;
 	m_markVector=NULL;
 	m_markVectorLen=0;
+	m_loTable=NULL;
 	m_loVector=NULL;
 	m_loVectorLen=0;
 	m_polarizations=NULL;
 	m_feedsTable=NULL;
 	m_feedVector=NULL;
+	m_taperTable=NULL;
+	m_taperVector=NULL;
+	m_taperVectorLen=0;
 	m_RFMin=m_RFMax=m_IFMin=m_IFBandwidth=m_defaultLO=m_fixedLO2=m_LOMin=m_LOMax=NULL;
 }
 
@@ -74,11 +79,17 @@ CConfiguration::~CConfiguration()
 	if (m_feedsTable) {
 		delete m_feedsTable;
 	}
+	if (m_taperTable) {
+		delete m_taperTable;
+	}
 	if (m_markVector) {
 		delete [] m_markVector;
 	}
 	if (m_loVector) {
 		delete [] m_loVector;
+	}
+	if (m_taperVector) {
+		delete [] m_taperVector;
 	}
 	if (m_polarizations) {
 		delete [] m_polarizations;
@@ -131,6 +142,9 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter, expire time (uSec):",m_repetitionExpireTime,"");
 	_GET_STRING_ATTRIBUTE("LocalOscillatorInstance","Local oscillator instance:",m_localOscillatorInstance,"");
 	// now read the receiver configuration
+	_GET_STRING_ATTRIBUTE("Mode","mode name:",m_mode,NORMALMODE_PATH);
+	_GET_DWORD_ATTRIBUTE("Feeds","Number of feeds:",m_feeds,NORMALMODE_PATH);
+	_GET_DWORD_ATTRIBUTE("IFs","Number of IFs per feed:",m_IFs,NORMALMODE_PATH);
 	try {
 		m_polarizations=new Receivers::TPolarization[m_IFs];
 		m_RFMin=new double[m_IFs];
@@ -146,9 +160,6 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
 		throw dummy;
 	}
-	_GET_STRING_ATTRIBUTE("Mode","mode name:",m_mode,NORMALMODE_PATH);
-	_GET_DWORD_ATTRIBUTE("Feeds","Number of feeds:",m_feeds,NORMALMODE_PATH);
-	_GET_DWORD_ATTRIBUTE("IFs","Number of IFs per feed:",m_IFs,NORMALMODE_PATH);
 	_GET_STRING_ATTRIBUTE("Polarization","IF polarization:",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
@@ -215,17 +226,17 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	for (WORD k=0;k<m_IFs;k++) {
 		if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-			dummy.setFieldName("IFBandwidth");
+			dummy.setFieldName("DefaultLO");
 			throw dummy;
 		}
-		m_IFBandwidth[k]=token.ToDouble();
+		m_defaultLO[k]=token.ToDouble();
 	}
 	_GET_STRING_ATTRIBUTE("FixedLO2","Second fixed local oscillator value (MHz):",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
 		if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-			dummy.setFieldName("fixedLO2");
+			dummy.setFieldName("FixedLO2");
 			throw dummy;
 		}
 		m_fixedLO2[k]=token.ToDouble();
@@ -398,9 +409,53 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	m_feedsTable->closeTable();
 	delete m_feedsTable;
 	m_feedsTable=NULL;
+	//The taper.....
+	try {
+		m_taperTable=new IRA::CDBTable(Services,"TaperEntry",TAPERTABLE_PATH);
+	}
+	catch (std::bad_alloc& ex) {
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
+		throw dummy;
+	}
+	error.Reset();
+	if (!m_taperTable->addField(error,"Frequency",IRA::CDataField::DOUBLE)) {
+		field="Frequency";
+ 	}
+	else if (!m_taperTable->addField(error,"Taper",IRA::CDataField::DOUBLE)) {
+		field="OutputPower";
+ 	}
+	if (!error.isNoError()) {
+		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
+		dummy.setFieldName((const char *)field);
+		throw dummy;
+	}
+	if (!m_taperTable->openTable(error))	{
+		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+		throw dummy;
+	}
+	m_taperTable->First();
+	len=m_taperTable->recordCount();
+	try {
+		m_taperVector=new TTaperValue[len];
+	}
+	catch (std::bad_alloc& ex) {
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
+		throw dummy;
+	}
+	ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"TAPER_ENTRY_NUMBER: %d",len));
+	for (WORD i=0;i<len;i++) {
+		m_taperVector[i].frequency=(*m_taperTable)["Frequency"]->asDouble();
+		m_taperVector[i].taper=(*m_taperTable)["Taper"]->asDouble();
+		ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"SYNTH_VALUE_ENTRY: %lf %lf",m_taperVector[i].frequency,m_taperVector[i].taper));
+		m_taperTable->Next();
+	}
+	m_taperVectorLen=len;
+	m_taperTable->closeTable();
+	delete m_taperTable;
+	m_taperTable=NULL;
 }
 
-DWORD CConfiguration::getSynthesizerTable(double * freq,double *power) const
+DWORD CConfiguration::getSynthesizerTable(double * &freq,double *&power) const
 {
 	freq= new double [m_loVectorLen];
 	power=new double [m_loVectorLen];
@@ -411,20 +466,48 @@ DWORD CConfiguration::getSynthesizerTable(double * freq,double *power) const
 	return m_loVectorLen;
 }
 
-DWORD CConfiguration::getMarkTable(double *freq,double *markValue,Receivers::TPolarization *pol) const
+DWORD CConfiguration::getTaperTable(double * &freq,double *&taper) const
+{
+	freq= new double [m_taperVectorLen];
+	taper=new double [m_taperVectorLen];
+	for (DWORD j=0;j<m_taperVectorLen;j++) {
+		freq[j]=m_taperVector[j].frequency;
+		taper[j]=m_taperVector[j].taper;
+	}
+	return m_taperVectorLen;
+}
+
+DWORD CConfiguration::getLeftMarkTable(double *& freq,double *& markValue) const
 {
 	freq= new double [m_markVectorLen];
 	markValue=new double [m_markVectorLen];
-	pol=new Receivers::TPolarization[m_markVectorLen];
+	DWORD count=0;
 	for (DWORD j=0;j<m_markVectorLen;j++) {
-		freq[j]=m_markVector[j].skyFrequency;
-		markValue[j]=m_markVector[j].markValue;
-		pol[j]=m_markVector[j].polarization;
+		if (m_markVector[j].polarization==Receivers::RCV_LEFT) {
+			freq[count]=m_markVector[j].skyFrequency;
+			markValue[count]=m_markVector[j].markValue;
+			count++;
+		}
 	}
-	return m_markVectorLen;
+	return count;
 }
 
-DWORD CConfiguration::getFeedInfo(WORD * code,double * xOffset,double *yOffset,double *relativePower) const
+DWORD CConfiguration::getRightMarkTable(double *& freq,double *& markValue) const
+{
+	freq= new double [m_markVectorLen];
+	markValue=new double [m_markVectorLen];
+	DWORD count=0;
+	for (DWORD j=0;j<m_markVectorLen;j++) {
+		if (m_markVector[j].polarization==Receivers::RCV_RIGHT) {
+			freq[count]=m_markVector[j].skyFrequency;
+			markValue[count]=m_markVector[j].markValue;
+			count++;
+		}
+	}
+	return count;
+}
+
+DWORD CConfiguration::getFeedInfo(WORD *& code,double *& xOffset,double *& yOffset,double *& relativePower) const
 {
 	code=new WORD[m_feeds];
 	xOffset=new double [m_feeds];

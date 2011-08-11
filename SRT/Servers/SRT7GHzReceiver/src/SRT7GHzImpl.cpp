@@ -1,4 +1,13 @@
 #include "SRT7GHzImpl.h"
+#include "DevIOBandWidth.h"
+#include "DevIOInitialFrequency.h"
+#include "DevIOLocalOscillator.h"
+#include "DevIOPolarization.h"
+#include "DevIOMode.h"
+#include <LogFilter.h>
+
+
+_IRA_LOGFILTER_DECLARE;
 
 SRT7GHzImpl::SRT7GHzImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) :
 	CharacteristicComponentImpl(CompName,containerServices),
@@ -37,16 +46,26 @@ void SRT7GHzImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::initialize()",(LM_INFO,"SRT7GHzImpl::COMPSTATE_INITIALIZING"));
 	m_core.initialize(getContainerServices());
 	try {
-		/*m_plocalOscillator=new ROdoubleSeq(getContainerServices()->getName()+":LO",getComponent(),new DevIOLO(m_core),true);
-		m_pactualSetup=new ROstring(getContainerServices()->getName()+":actualSetup",getComponent(),new DevIORecvCode(m_core),true);
-		m_pstatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus> (getContainerServices()->getName()+":status",getComponent(),new DevIOStatus(m_core),true);
-		m_pfeeds=new ROlong(getContainerServices()->getName()+":feeds",getComponent(),new DevIOFeeds(m_core),true);
-		m_pIFs=new ROlong(getContainerServices()->getName()+":IFs",getComponent(),new DevIOIFs(m_core),true);
-		m_ppolarization=new ROlongSeq(getContainerServices()->getName()+":polarization",getComponent(),new DevIOPolarization(m_core),true);
-		
-		m_pinitialFrequency=new ROdoubleSeq(getContainerServices()->getName()+":initialFrequency",getComponent(),new DevIOInitialFrequency(m_core),true);
-		m_pbandWidth=new ROdoubleSeq(getContainerServices()->getName()+":bandWidth",getComponent(),new DevIOBandWidth(m_core),true);*/
-
+		m_plocalOscillator=new baci::ROdoubleSeq(getContainerServices()->getName()+":LO",getComponent(),new DevIOLocalOscillator(&m_core),true);
+		m_ppolarization=new baci::ROlongSeq(getContainerServices()->getName()+":polarization",getComponent(),new DevIOPolarization(&m_core),true);
+		m_pmode=new baci::ROstring(getContainerServices()->getName()+":mode",getComponent(),new DevIOMode(&m_core),true);
+		m_pinitialFrequency=new baci::ROdoubleSeq(getContainerServices()->getName()+":initialFrequency",getComponent(),new DevIOInitialFrequency(&m_core),true);
+		m_pbandWidth=new baci::ROdoubleSeq(getContainerServices()->getName()+":bandWidth",getComponent(),new DevIOBandWidth(&m_core),true);
+		m_pIFs=new baci::ROlong(getContainerServices()->getName()+":IFs",getComponent());
+		m_pfeeds=new baci::ROlong(getContainerServices()->getName()+":feeds",getComponent());
+		m_pvacuum=new baci::ROdouble(getContainerServices()->getName()+":vacuum",getComponent());
+		m_pVd_1=new baci::ROdouble(getContainerServices()->getName()+":Vd_1",getComponent());
+		m_pVd_2=new baci::ROdouble(getContainerServices()->getName()+":Vd_2",getComponent());
+		m_pId_1=new baci::ROdouble(getContainerServices()->getName()+":Id_1",getComponent());
+		m_pId_2=new baci::ROdouble(getContainerServices()->getName()+":Id_2",getComponent());
+		m_pVg_1=new baci::ROdouble(getContainerServices()->getName()+":Vg_1",getComponent());
+		m_pVg_2=new baci::ROdouble(getContainerServices()->getName()+":Vg_2",getComponent());
+		m_pcryoTemperatureCoolHead=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureCoolHead",getComponent());
+		m_pcryoTemperatureCoolHeadWindow=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureCoolHeadWindow",getComponent());
+		m_pcryoTemperatureLNA=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureLNA",getComponent());
+		m_pcryoTemperatureLNAWindow=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureLNAWindow",getComponent());
+		m_penvironmentTemperature=new baci::ROdouble(getContainerServices()->getName()+":environmentTemperature",getComponent());
+		m_pstatus=new baci::ROpattern(getContainerServices()->getName()+":status",getComponent());
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"SRT7GHzImpl::initialize()");
@@ -58,7 +77,16 @@ void SRT7GHzImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 void SRT7GHzImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("SRT7GHzImpl::execute()");
-	m_core.execute(); //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl)
+	ACS::Time timestamp;
+	const CConfiguration *config=m_core.execute(); //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl)
+
+	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::execute()",(LM_INFO,"ACTIVATING_LOG_REPETITION_FILTER"));
+	_IRA_LOGFILTER_ACTIVATE(config->getRepetitionCacheTime(),config->getRepetitionExpireTime());
+
+	// write some fixed values
+	m_pfeeds->getDevIO()->write(m_core.getFeeds(),timestamp);
+	m_pIFs->getDevIO()->write(m_core.getIFs(),timestamp);
+
 	try {
 		startPropertiesMonitoring();
 	}
@@ -78,6 +106,8 @@ void SRT7GHzImpl::cleanUp()
 	AUTO_TRACE("SRT7GHzImpl::cleanUp()");
 	stopPropertiesMonitoring();
 	m_core.cleanup();
+	_IRA_LOGFILTER_FLUSH;
+	_IRA_LOGFILTER_DESTROY;
 	CharacteristicComponentImpl::cleanUp();	
 }
 
@@ -85,6 +115,26 @@ void SRT7GHzImpl::aboutToAbort()
 {
 	AUTO_TRACE("SRT7GHzImpl::aboutToAbort()");
 	m_core.cleanup();
+}
+
+void SRT7GHzImpl::activate() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core.activate();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRT7GHzImpl::activate()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
 }
 
 void SRT7GHzImpl::calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
@@ -147,18 +197,23 @@ void SRT7GHzImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,
 	}
 }
 
-void SRT7GHzImpl::setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx)
+void SRT7GHzImpl::setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
-		//m_core->setMode(mode);
+		m_core.setMode(mode);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();
 	}
-	catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getConfigurationErrorEx();		
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRT7GHzImpl::setMode()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
 	}
 }
 
@@ -167,7 +222,7 @@ ACS::doubleSeq *SRT7GHzImpl::getCalibrationMark(const ACS::doubleSeq& freqs, con
 {
 	ACS::doubleSeq_var result=new ACS::doubleSeq;
 	try {
-		//m_core->getCalibrationMark(result,freqs,bandwidths,feeds,ifs);
+		m_core.getCalibrationMark(result.inout(),freqs,bandwidths,feeds,ifs);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -193,7 +248,7 @@ CORBA::Long SRT7GHzImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS:
 	ACS::doubleSeq_var tempPower=new ACS::doubleSeq;
 	long res;
 	try {
-		//res=m_core->getFeeds(tempX,tempY,tempPower);
+		res=m_core.getFeeds(tempX.inout(),tempY.inout(),tempPower.inout());
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -220,7 +275,7 @@ CORBA::Double SRT7GHzImpl::getTaper(CORBA::Double freq,CORBA::Double bandWidth,C
 	CORBA::Double res;
 	double wL;
 	try {
-		//res=(CORBA::Double)m_core->getTaper(freq,bandWidth,feed,ifNumber,wL);
+		res=(CORBA::Double)m_core.getTaper(freq,bandWidth,feed,ifNumber,wL);
 		waveLen=wL;
 		return res;
 	}

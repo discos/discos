@@ -283,33 +283,33 @@ public:
 	 * @param current represent the starting azimuth position of the antenna; where the antenna is at the moment (degrees, minAz..maxAz) 
 	 * @param dest that's the position we want to reach (degrees, 0..360)
 	 * @param minAz hardware lower limit of the azimuth axe (degrees, <=0.0)
-	 * @param maxAz hadrware upper limit of the azimuth axe (degrees, >=360.0)
-	 * @param section indicates wether there is a preferable section through which reaching the destination. If the destination azimuth is not
+	 * @param maxAz hardware upper limit of the azimuth axe (degrees, >=360.0)
+	 * @param section indicates whether there is a preferable section through which reaching the destination. If the destination azimuth is not
 	 *                reachable from that section the other is adopted. 0 means NEUTRAL (no preference), >0 Clockwise, <0 CounterClockwise.
-	 * @param cwLimit represents the limit beween cw and ccw (in degrees), cw is the sector in which the azimuth is greater than this parameter.
+	 * @param cwLimit represents the limit between cw and ccw (in degrees), cw is the sector in which the azimuth is greater than this parameter.
 	 * @return the converted coordinate in order to reflect the whole hardware range of the antenna (ex 280.0 could be converted into -80.0). 
 	*/
 	static double getHWAzimuth(const double& current,const double& dest,const double& minAz,const double& maxAz,const long& section,const double& cwLimit);
 	
 	/**
 	 * This function computes the intersection between two bands. Its use, for example, could be to compute the resulting band from the intersection between
-	 * an IF coming from a recevier and a filter applyed before a backend.
+	 * an IF coming from a receiver and a filter applied before a backend.
 	 * @param bf backend start frequency.
 	 * @param bbw backend bandwidth
 	 * @param rf receiver start frequency
 	 * @param rbw receiver band width
-	 * @param f start frequency of the resultin band
+	 * @param f start frequency of the resulting band
 	 * @param bw width of the resulting band
 	 * @return true if the two band produce a band (the intersection is not empty), false otherwise.
 	 */  
 	static bool skyFrequency(const double& bf,const double& bbw,const double& rf,const double& rbw,double& f,double& bw);
 	
 	/**
-	 * Use this function to devide a string into  separated tokens. The token delimiter can be specified.
-	 * @param str string to be devided into tokens
+	 * Use this function to divide a string into  separated tokens. The token delimiter can be specified.
+	 * @param str string to be divided into tokens
 	 * @param start position inside the string from which to start the next token, if a new token has been found
 	 *                it points to the character immediately after the localized token
-	 * @param delimiter this is the character that separetesd the token
+	 * @param delimiter this is the character that separates the token
 	 * @param it returns the next token in the string
 	 * @return true if a token has been found
 	 */
@@ -323,7 +323,7 @@ public:
 	 * @arg \c "12:55.1" is interpreted as 12 minutes and 55.1 seconds
 	 * @arg \c "1-3:20" is interpreted as 1 day, 3 hours and 20 minute
 	 * @param durationString string that contains the time interval
-	 * @param interval result of the conversion, the rapresentation is in 100ns units
+	 * @param interval result of the conversion, the representation is in 100ns units
 	 * @param complete if true the input string must contains exactly the expected fields, otherwise an error is declared. Days field remains optional.
 	 * @param dateDelimiter the char that has to be considered as the field separator for the date part of the time epoch 
 	 * @param timeDelimiter the char that has to be considered as field separator for the time interval format
@@ -333,8 +333,8 @@ public:
 
 	/**
 	 * Use this function to convert an ACS interval notation to a string(days-hh:mm:ss.ss).
-	 * @param interval the rapresentation in 100ns units of the time to be converted    
-	 * @param outString string that contains the time inteval as it is converted 
+	 * @param interval the representation in 100ns units of the time to be converted
+	 * @param outString string that contains the time interval as it is converted
 	 * @param dateDelimiter the char that has to be considered as the field separator for the date part of the time epoch 
 	 * @param timeDelimiter the char that has to be considered as field separator for the time interval format
 	 * @return the result of the conversion, true if the conversion could be done
@@ -344,10 +344,10 @@ public:
 	/**
 	 * Use this function to convert a string containing a time epoch (yyyy-ddd-hh:mm:ss.ss) into an ACS time notation. In case <i>complete</i> argument is not set, not all the expected fields 
 	 * have to be  included, the function will try to convert the string anyway. The missing fields are replaced with the corresponding fields of the current date and time. For example 
-	 * if the date is missing the year indication, the current year is taken; if the time part reports just one numebr it is intended as the hour value, minutes and seconds are considered zero. 
+	 * if the date is missing the year indication, the current year is taken; if the time part reports just one number it is intended as the hour value, minutes and seconds are considered zero.
 	 * @param timeString string that contains the time epoch to be converted
-	 * @param time result of the conversion, the rapresentation is in 100ns units
-	 * @param complete if true the input string must contains exactly the expected fields, otherwise an erro is declared. Year field remains optional. 
+	 * @param time result of the conversion, the representation is in 100ns units
+	 * @param complete if true the input string must contains exactly the expected fields, otherwise an error is declared. Year field remains optional.
 	 * @param dateDelimiter the char that has to be considered as the field separator for the date part of the time epoch
 	 * @param timeDelimiter the char that has to be considered as the field separator for the time part of the time epoch
 	 * @return the result of the conversion, true if the conversion could be done. All fields are checked to lie in the standard ranges.
@@ -356,7 +356,7 @@ public:
 	
 	/**
 	 * Use this function to convert an ACS time epoch notation to a string(yyyy-ddd-hh:mm:ss.ss).
-	 * @param time the rapresentation in 100ns units of the time epoch to be converted    
+	 * @param time the representation in 100ns units of the time epoch to be converted
 	 * @param outString string that contains the time as it is converted
 	 * @param dateDelimiter the char that has to be considered as the field separator for the date part of the time epoch
 	 * @param timeDelimiter the char that has to be considered as the field separator for the time part of the time epoch

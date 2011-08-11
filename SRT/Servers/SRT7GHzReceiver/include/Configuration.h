@@ -37,6 +37,11 @@ public:
 	} TLOValue;
 
 	typedef struct {
+		double frequency;
+		double taper;
+	} TTaperValue;
+
+	typedef struct {
 		WORD code;
 		double xOffset;
 		double yOffset;
@@ -48,6 +53,9 @@ public:
 	 */
 	CConfiguration();
 
+	/**
+	 * Destructor
+	 */
 	~CConfiguration();
 
 	/**
@@ -101,20 +109,36 @@ public:
 	inline const IRA::CString& getLocalOscillatorInstance() const { return m_localOscillatorInstance; }
 
 	/**
+	 * Allows to get the table of mark values relative to left polarization
 	 * @param freq vector containing the frequency value of the mark table. It must be freed by caller.
 	 * @param markValue vector of the value of the calibration diode. It must be freed by caller.
-	 * @param pol for each couple (frequency,mark value) determine the polarization they belong to. It must be freed by caller.
 	 * @param len used to return the length of the mark values array
 	 * @return the size of the output vectors
 	 */
-	DWORD getMarkTable(double *freq,double *markValue,Receivers::TPolarization *pol) const;
+	DWORD getLeftMarkTable(double *& freq,double *& markValuel) const;
+
+	/**
+	 * Allows to get the table of mark values relative to left polarization
+	 * @param freq vector containing the frequency value of the mark table. It must be freed by caller.
+	 * @param markValue vector of the value of the calibration diode. It must be freed by caller.
+	 * @param len used to return the length of the mark values array
+	 * @return the size of the output vectors
+	 */
+	DWORD getRightMarkTable(double *& freq,double *& markValue) const;
 
 	/**
 	 * @param freq vector with the synthesizer frequencies. It must be freed by caller.
 	 * @param power corresponding powers for the frequencies vector. It must be freed by caller.
 	 * @return the size of the output vectors
 	 */
-	DWORD getSynthesizerTable(double * freq,double *power) const;
+	DWORD getSynthesizerTable(double *& freq,double *& power) const;
+
+	/**
+	 * @param freq vector with the frequencies. It must be freed by caller.
+	 * @param taper corresponding taper  for the frequencies vector. It must be freed by caller.
+	 * @return the size of the output vectors
+	 */
+	DWORD getTaperTable(double * &freq,double *&taper) const;
 
 	/**
 	 * @param code feed identification codes. It must be freed by caller.
@@ -123,7 +147,7 @@ public:
 	  *@param relativePower expected percentage of variation of gain with respect to the central one. It must be freed by caller.
 	 * @return the size of the output vectors
 	 */
-	DWORD getFeedInfo(WORD * code,double * xOffset,double *yOffset,double *relativePower) const;
+	DWORD getFeedInfo(WORD *& code,double *& xOffset,double *& yOffset,double *& relativePower) const;
 
 	/**
 	 * @return mnemonic of the working mode of the receiver
@@ -220,12 +244,15 @@ private:
 
 	IRA::CDBTable *m_markTable;
 	IRA::CDBTable *m_loTable;
+	IRA::CDBTable *m_taperTable;
 	IRA::CDBTable *m_feedsTable;
 
 	TMarkValue *m_markVector;
 	DWORD m_markVectorLen;
 	TLOValue * m_loVector;
 	DWORD m_loVectorLen;
+	TTaperValue * m_taperVector;
+	DWORD m_taperVectorLen;
 	TFeedValue * m_feedVector; // length given by m_feeds
 };
 

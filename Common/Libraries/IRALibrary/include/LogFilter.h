@@ -24,7 +24,7 @@
 /**
  * This macro makes available (to the component or to the server) the filter. The visibility scope of this declaration should be global.  
 */
-#define _IRA_LOGFILTER_DECLARE CLogFilter __autoLogFilter_
+#define _IRA_LOGFILTER_DECLARE IRA::CLogFilter __autoLogFilter_
 
 /**
  *  This macros calls the <i>activate()</i> method to start the filter.
@@ -36,7 +36,7 @@
 /**
  * This macro is required to import the filter if this is declared in a module different form the current one. 
 */
-#define _IRA_LOGFILTER_IMPORT extern CLogFilter __autoLogFilter_
+#define _IRA_LOGFILTER_IMPORT extern IRA::CLogFilter __autoLogFilter_
 
 /**
  * This macro calls the <i>flush()</i> method to send all the pending logs.
@@ -91,7 +91,7 @@
  * @param NAME the CLogGuard object
  * @param TIME the time interval of the guard (microseconds) 
 */
-#define _IRA_LOGGUARD_DECLARE(NAME,TIME) CLogGuard NAME(TIME)
+#define _IRA_LOGGUARD_DECLARE(NAME,TIME) IRA::CLogGuard NAME(TIME)
 
 /**
  * This macro will log a normal log if the guard permits this. 
@@ -144,15 +144,15 @@ namespace IRA {
  * forwared togetther with additional information.
  * The additional information consists for both errors and normal logs in two fields:
  *     @arg \c RepeatCounter reports the number of times that event was repeated in the given period.
- *     @arg \c Period this is the first and the last time the event occured
+ *     @arg \c Period this is the first and the last time the event occurred
  * In case the event is an error an extra field is added:
  *     @arg \c ErrorTraceSize reports the depth of the error trace of the error
  * The great concern about this policy can be explained with a practical example: let's suppose a log request is issued twice; the first log is
- * forwared regularly, if the second one is issued before the time interval is alapsed will be ignored. That causes a loss of information.
+ * forwared regularly, if the second one is issued before the time interval is elapsed will be ignored. That causes a loss of information.
  * This class is NOT thread safe.
  * A typical call sequence could be:
  * <pre>
- * // declare the log guard with 1 sec of internval. 
+ * // declare the log guard with 1 sec of interval.
  * _IRA_LOGGUARD_DECALRE(guard,1000000);
  * ...................
  * for(int k=0;k<100;k++) {

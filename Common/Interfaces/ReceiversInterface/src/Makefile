@@ -7,7 +7,7 @@
 
 MAKE_PDF = ON
 
-CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable NoiseMarkLookUpTable
+CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable NoiseMarkLookUpTable TaperLookUpTable
 
 # IDL Files and flags
 IDL_FILES = ReceiversDefinitions CommonReceiverInterface ReceiversBoss GenericReceiver LocalOscillatorInterface
