@@ -17,6 +17,10 @@
     <ErrorCode name="ModeError" shortDescription="The mode is not supported or unknown" description=""/>
          
 	<ErrorCode name="LocalOscillatorError" shortDescription="Cannot set the local oscillator" description=""/>
+	
+	<ErrorCode name="ReceiverControlBoardError" shortDescription="Input/Output error while communicating to control board" description="">
+		<Member name="Details" type="string" description="more details from the board" />   
+	</ErrorCode>
          
 </Type>
 

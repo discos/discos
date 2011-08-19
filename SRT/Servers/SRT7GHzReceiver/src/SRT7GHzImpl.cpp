@@ -4,6 +4,13 @@
 #include "DevIOLocalOscillator.h"
 #include "DevIOPolarization.h"
 #include "DevIOMode.h"
+#include "DevIOVacuum.h"
+#include "DevIOCryoTemperatureCoolHead.h"
+#include "DevIOCryoTemperatureCoolHeadWindow.h"
+#include "DevIOCryoTemperatureLNA.h"
+#include "DevIOCryoTemperatureLNAWindow.h"
+#include "DevIOLNAControls.h"
+#include "DevIOStatus.h"
 #include <LogFilter.h>
 
 
@@ -53,24 +60,36 @@ void SRT7GHzImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_pbandWidth=new baci::ROdoubleSeq(getContainerServices()->getName()+":bandWidth",getComponent(),new DevIOBandWidth(&m_core),true);
 		m_pIFs=new baci::ROlong(getContainerServices()->getName()+":IFs",getComponent());
 		m_pfeeds=new baci::ROlong(getContainerServices()->getName()+":feeds",getComponent());
-		m_pvacuum=new baci::ROdouble(getContainerServices()->getName()+":vacuum",getComponent());
-		m_pVd_1=new baci::ROdouble(getContainerServices()->getName()+":Vd_1",getComponent());
-		m_pVd_2=new baci::ROdouble(getContainerServices()->getName()+":Vd_2",getComponent());
-		m_pId_1=new baci::ROdouble(getContainerServices()->getName()+":Id_1",getComponent());
-		m_pId_2=new baci::ROdouble(getContainerServices()->getName()+":Id_2",getComponent());
-		m_pVg_1=new baci::ROdouble(getContainerServices()->getName()+":Vg_1",getComponent());
-		m_pVg_2=new baci::ROdouble(getContainerServices()->getName()+":Vg_2",getComponent());
-		m_pcryoTemperatureCoolHead=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureCoolHead",getComponent());
-		m_pcryoTemperatureCoolHeadWindow=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureCoolHeadWindow",getComponent());
-		m_pcryoTemperatureLNA=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureLNA",getComponent());
-		m_pcryoTemperatureLNAWindow=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureLNAWindow",getComponent());
+		m_pvacuum=new baci::ROdouble(getContainerServices()->getName()+":vacuum",getComponent(),new DevIOVacuum(&m_core),true);
+		m_pVd_1=new baci::ROdouble(getContainerServices()->getName()+":Vd_1",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::DRAIN_VOLTAGE,0),true);
+		m_pVd_2=new baci::ROdouble(getContainerServices()->getName()+":Vd_2",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::DRAIN_VOLTAGE,1),true);
+		m_pId_1=new baci::ROdouble(getContainerServices()->getName()+":Id_1",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::DRAIN_CURRENT,0),true);
+		m_pId_2=new baci::ROdouble(getContainerServices()->getName()+":Id_2",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::DRAIN_CURRENT,1),true);
+		m_pVg_1=new baci::ROdouble(getContainerServices()->getName()+":Vg_1",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::GATE_VOLTAGE,0),true);
+		m_pVg_2=new baci::ROdouble(getContainerServices()->getName()+":Vg_2",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::GATE_VOLTAGE,1),true);
+		m_pcryoTemperatureCoolHead=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureCoolHead",getComponent(),
+				new DevIOCryoTemperatureCoolHead(&m_core),true);
+		m_pcryoTemperatureCoolHeadWindow=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureCoolHeadWindow",getComponent(),
+				new DevIOCryoTemperatureCoolHeadWin(&m_core),true);
+		m_pcryoTemperatureLNA=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureLNA",getComponent(),
+				new DevIOCryoTemperatureLNA(&m_core),true);
+		m_pcryoTemperatureLNAWindow=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureLNAWindow",getComponent(),
+				new DevIOCryoTemperatureLNAWin(&m_core),true);
 		m_penvironmentTemperature=new baci::ROdouble(getContainerServices()->getName()+":environmentTemperature",getComponent());
-		m_pstatus=new baci::ROpattern(getContainerServices()->getName()+":status",getComponent());
+		m_pstatus=new baci::ROpattern(getContainerServices()->getName()+":status",getComponent(),
+				new DevIOStatus(&m_core),true);
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"SRT7GHzImpl::initialize()");
 		throw dummy;
 	}
+	m_monitor=NULL;
 	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
@@ -78,7 +97,7 @@ void SRT7GHzImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("SRT7GHzImpl::execute()");
 	ACS::Time timestamp;
-	const CConfiguration *config=m_core.execute(); //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl)
+	const CConfiguration *config=m_core.execute(); //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
 
 	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::execute()",(LM_INFO,"ACTIVATING_LOG_REPETITION_FILTER"));
 	_IRA_LOGFILTER_ACTIVATE(config->getRepetitionCacheTime(),config->getRepetitionExpireTime());
@@ -87,6 +106,22 @@ void SRT7GHzImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	m_pfeeds->getDevIO()->write(m_core.getFeeds(),timestamp);
 	m_pIFs->getDevIO()->write(m_core.getIFs(),timestamp);
 
+
+	CComponentCore *temp=&m_core;
+	try {
+		m_monitor=getContainerServices()->getThreadManager()->create<CMonitorThread,CComponentCore*> (
+				"WHATCHDOG7GHZ",temp,config->getWarchDogResponseTime()*10,config->getWatchDogSleepTime()*10);
+	}
+	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRT7GHzImpl::execute()");
+		throw _dummy;
+	}
+	catch (...) {
+		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRT7GHzImpl::execute()");
+	}
+	m_monitor->setLNASamplingTime(config->getLNASamplingTime());
+	m_monitor->resume();
+	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::execute()",(LM_INFO,"WATCH_DOG_SPAWNED"));
 	try {
 		startPropertiesMonitoring();
 	}
@@ -105,6 +140,11 @@ void SRT7GHzImpl::cleanUp()
 {
 	AUTO_TRACE("SRT7GHzImpl::cleanUp()");
 	stopPropertiesMonitoring();
+	if (m_monitor!=NULL) {
+		m_monitor->suspend();
+		getContainerServices()->getThreadManager()->destroy(m_monitor);
+		m_monitor=NULL;
+	}
 	m_core.cleanup();
 	_IRA_LOGFILTER_FLUSH;
 	_IRA_LOGFILTER_DESTROY;
@@ -114,6 +154,9 @@ void SRT7GHzImpl::cleanUp()
 void SRT7GHzImpl::aboutToAbort()
 {
 	AUTO_TRACE("SRT7GHzImpl::aboutToAbort()");
+	if (m_monitor!=NULL) {
+		getContainerServices()->getThreadManager()->destroy(m_monitor);
+	}
 	m_core.cleanup();
 }
 
@@ -140,7 +183,7 @@ void SRT7GHzImpl::activate() throw (ComponentErrors::ComponentErrorsEx,Receivers
 void SRT7GHzImpl::calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {	
 	try {
-		//m_core->calOn();
+		m_core.calOn();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -160,7 +203,7 @@ void SRT7GHzImpl::calOn() throw (CORBA::SystemException,ComponentErrors::Compone
 void SRT7GHzImpl::calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
-		//m_core->calOff();
+		m_core.calOff();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

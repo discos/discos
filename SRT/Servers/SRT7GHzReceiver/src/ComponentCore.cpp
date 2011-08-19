@@ -18,15 +18,18 @@ void CComponentCore::initialize(maci::ContainerServices* services)
 	m_control=NULL;
 	m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
 	m_localOscillatorFault=false;
+	m_cryoCoolHead=m_cryoCoolHeadWin= m_cryoLNA=m_cryoLNAWin=m_vacuum=0.0;
+	m_fetValues.VDL=m_fetValues. IDL=m_fetValues.VGL=m_fetValues.VDR=m_fetValues.IDR=m_fetValues.VGR=0.0;
+	m_statusWord=0;
 }
 
-CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl)
+CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
 {
 	m_configuration.init(m_services);  //throw (ComponentErrors::CDBAccessExImpl);
 	try {
-
-		/*m_control=new IRA::ReceiverControl((const char *)m_configuration.getDewarIPAddress(),m_configuration.getDewarPort(),
-																					(const char *)m_configuration.getLNAIPAddress(),m_configuration.getLNAPort());*/
+		m_control=new IRA::ReceiverControl((const char *)m_configuration.getDewarIPAddress(),m_configuration.getDewarPort(),
+																					(const char *)m_configuration.getLNAIPAddress(),m_configuration.getLNAPort(),
+																					m_configuration.getFeeds(),0x7C,0x7D,0x7C,0x7D,false,m_configuration.getLNASamplingTime());
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CComponentCore::execute()");
@@ -54,7 +57,7 @@ void CComponentCore::cleanup()
 {
 	//make sure no one is using the object
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if (m_control!=NULL) {
+	if (m_control) {
 		delete m_control;
 	}
 }
@@ -149,6 +152,49 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
 	ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
 }
 
+void CComponentCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (m_setupMode=="") {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::calOn()");
+		impl.setReason("receiver not configured yet");
+		throw impl;
+	}
+	guard.release();
+	try {
+		m_control->setCalibrationOn();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOn()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+	guard.acquire();
+	setStatusBit(NOISEMARK);
+}
+
+void CComponentCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (m_setupMode=="") {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::calOff()");
+		impl.setReason("receiver not configured yet");
+		throw impl;
+	}
+	guard.release();
+	try {
+		m_control->setCalibrationOff();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOff()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+	guard.acquire();
+	clearStatusBit(NOISEMARK);
+}
+
+
 void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
 {
@@ -218,7 +264,6 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Val
 void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
 		const ACS::longSeq& ifs) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
 {
-	baci::ThreadSyncGuard guard(&m_mutex);
 	double realFreq,realBw;
 	double *tableLeftFreq=NULL;
 	double *tableLeftMark=NULL;
@@ -226,6 +271,7 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::double
 	double *tableRightMark=NULL;
 	DWORD sizeL=0;
 	DWORD sizeR=0;
+	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_setupMode=="") {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
 		impl.setReason("receiver not configured yet");
@@ -344,6 +390,193 @@ long CComponentCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq
 	if (yOffset) delete [] yOffset;
 	if (rPower) delete [] rPower;
 	return size;
+}
+
+double CComponentCore::getFetValue(const IRA::FetValue& control,const DWORD& ifs)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (ifs>=m_configuration.getIFs()) {
+		return 0.0;
+	}
+	else if (m_polarization[ifs]==(long)Receivers::RCV_LEFT) {
+		if (control==IRA::DRAIN_VOLTAGE) return m_fetValues.VDL;
+		else if (control==IRA::DRAIN_CURRENT) return m_fetValues.IDL;
+		else return m_fetValues.VGL;
+	}
+	else {
+		if (control==IRA::DRAIN_VOLTAGE) return m_fetValues.VDR;
+		else if (control==IRA::DRAIN_CURRENT) return m_fetValues.IDR;
+		else return m_fetValues.VGR;
+	}
+}
+
+void CComponentCore::updateVacuum() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	bool vacuumSensor;
+	try {
+		vacuumSensor=m_control->isVacuumSensorOn();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVacuum()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+	if (vacuumSensor) {
+		try {
+			m_vacuum=m_control->vacuum(CComponentCore::voltage2mbar);
+		}
+		catch (IRA::ReceiverControlEx& ex) {
+			_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVacuum()");
+			impl.setDetails(ex.what().c_str());
+			throw impl;
+		}
+	}
+	else {
+		//*************************************************************************
+		// RETURN THE DEFAULT VALUE
+		//*************************************************************************
+	}
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (!vacuumSensor) setStatusBit(VACUUMSENSOR);
+	else clearStatusBit(VACUUMSENSOR);
+}
+
+void CComponentCore::updateVacuumPump() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	bool answer;
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+		answer=m_control->isVacuumPumpOn();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateIsRemote()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (!answer) setStatusBit(VACUUMPUMPSTATUS);
+	else clearStatusBit(VACUUMPUMPSTATUS);
+	//**********************************************************************************/
+	// VACUUM PUMP STATUS MISSING
+	//************************************************************************************
+}
+
+void CComponentCore::updateVacuumValve() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	bool answer;
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+		answer=m_control->isVacuumValveOn();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVacuumValve()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (!answer) setStatusBit(VACUUMVALVEOPEN);
+	else clearStatusBit(VACUUMVALVEOPEN);
+}
+
+void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	bool answer;
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+		answer=m_control->isRemoteOn();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateIsRemote()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (!answer) setStatusBit(LOCAL);
+	else clearStatusBit(LOCAL);
+}
+
+void CComponentCore::updateCoolHead()  throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	bool answer;
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+		answer=m_control->isCoolHeadOn();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCoolHead()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (!answer) setStatusBit(COOLHEADON);
+	else clearStatusBit(COOLHEADON);
+}
+
+
+void CComponentCore::updateCryoCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+		m_cryoCoolHead=m_control->cryoTemperature(1,CComponentCore::voltage2Kelvin);
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHead()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+}
+
+void CComponentCore::updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+		m_cryoCoolHeadWin=m_control->cryoTemperature(2,CComponentCore::voltage2Kelvin);
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHeadWin()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+}
+
+void CComponentCore::updateCryoLNA() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+		m_cryoLNA=m_control->cryoTemperature(3,CComponentCore::voltage2Kelvin);
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNA()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+}
+
+void CComponentCore::updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+		m_cryoLNAWin=m_control->cryoTemperature(4,CComponentCore::voltage2Kelvin);
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNAWin()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
+}
+
+void CComponentCore::updateLNAControls() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+		m_fetValues=m_control->fetValues(0,1,CComponentCore::currentConverter, CComponentCore::voltageConverter);
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNAWin()");
+		impl.setDetails(ex.what().c_str());
+		throw impl;
+	}
 }
 
 void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetComponentExImpl)

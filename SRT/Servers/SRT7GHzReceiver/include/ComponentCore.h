@@ -42,7 +42,7 @@ public:
 	 * This method prepares the object for execution.
 	 * @return the pointer to the configuration class
 	 */
-	virtual CConfiguration const * const execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);
+	virtual CConfiguration const * const execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl);
 
 	/**
 	 * This function is responsible to free all allocated resources
@@ -96,6 +96,120 @@ public:
 	 */
 	double getTaper(const double& freq,const double& bw,const long& feed,const long& ifNumber,double& waveLen) throw (
 			ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
+
+	/**
+	 * It turns the calibration diode on.
+	 */
+	void calOn() throw (ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It turns the calibration diode off
+	 */
+	void calOff() throw (ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It reads and updates from the control board the current value of the vacuum
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+	void updateVacuum() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It check if the vacuum pump is on
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+	void updateVacuumPump() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It checks if the vacuum valve is opened or not
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+	void updateVacuumValve() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It reads and updates from the control board the current cryo temperature measured near the cool head
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+	void updateCryoCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It reads and updates from the control board the current cryo temperature measured near the cool head window
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+	void updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It reads and updates from the control board the current cryo temperature measured near the LNA
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+	void updateCryoLNA() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It reads and updates from the LNA control board the current values of current and voltage of gate and drain of the transistors
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+	void updateLNAControls() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It reads and updates from the control board the current cryo temperature measured near the LNA window
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+	void updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It checks if the Dewar power box is in remote or not
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+	void updateIsRemote() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It checks if the cool head is turned on or not
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+	void updateCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * This is getter method. No need to make it thread safe......
+	 * @return the current value of the vacuum in mbar
+	 */
+	double  getVacuum() const { return m_vacuum; }
+
+	/**
+	 * This is getter method. No need to make it thread safe......
+	 * @return the current value of the cryogenic temperature at cool head in °K
+	 */
+	double getCryoCoolHead() const { return m_cryoCoolHead; }
+
+	/**
+	 * This is getter method. No need to make it thread safe......
+	  * @return the current value of the cryogenic temperature at cool head window in °K
+	 */
+	double getCryoCoolHeadWin() const { return m_cryoCoolHeadWin; }
+
+	/**
+	 * This is getter method. No need to make it thread safe......
+	  * @return the current value of the cryogenic temperature at LNA in °K
+	 */
+	double getCryoLNA() const { return m_cryoLNA; }
+
+	/**
+	 * This is getter method. No need to make it thread safe......
+	 * @return the current value of the cryogenic temperature at LNA  window in °K
+	 */
+	double getCryoLNAWin() const { return m_cryoLNAWin; }
+
+	/**
+	 * This is getter method. No need to make it thread safe......
+	 * @return the current status word
+	 */
+	DWORD getStatusWord() const  { return  m_statusWord; }
+
+	/**
+	 * This is getter method. In this case, since it makes use of some class members that could be changed by other methods it is advisable to protect this method with the class mutex.
+	 * @param control name of the parameter that must be returned
+	 * @param ifs Intermediate frequency identifier, it permits to select which amplification chain we are interested in
+	 * @return a specific value of from the transistor control parameters
+	 */
+	double getFetValue(const IRA::FetValue& control,const DWORD& ifs);
 
 	/**
 	 * It returns the feed geometry of the receiver with respect to the central one. For this implementation it is just a placeholder since there is just one feed.
@@ -155,10 +269,24 @@ protected:
 	 */
 	void unloadLocalOscillator();
 private:
+	enum TStatusBit {
+		LOCAL=0,
+		VACUUMSENSOR=1,
+		VACUUMPUMPSTATUS=2,
+		VACUUMPUMPFAULT=3, //**/
+		VACUUMVALVEOPEN=4,
+		COOLHEADON=5,
+		NOISEMARK=6,
+		NOISEMARKERROR=7, //**/
+		EXTNOISEMARK=8, //**/
+		CONNECTIONERROR=9, /**/
+		UNLOCKED=10   //**/
+	};
+
 	CConfiguration m_configuration;
 	maci::ContainerServices* m_services;
 	BACIMutex m_mutex;
-	IRA::ReceiverControl *m_control;
+	IRA::ReceiverControl *m_control; // this object is thread safe
 	Receivers::LocalOscillator_var m_localOscillatorDevice;
 	bool m_localOscillatorFault;
 	double m_localOscillatorValue;
@@ -166,7 +294,44 @@ private:
 	ACS::doubleSeq m_bandwidth;
 	ACS::longSeq m_polarization;
 	IRA::CString m_setupMode;
+	double m_vacuum;
+	double m_cryoCoolHead;
+	double m_cryoCoolHeadWin;
+	double m_cryoLNA;
+	double m_cryoLNAWin;
+	IRA::FetValues m_fetValues;
+	DWORD m_statusWord;
+
+	/**
+	 * This function will set the a status bit
+	 */
+	inline void setStatusBit(TStatusBit bit) { m_statusWord |= 1 << bit; }
+
+	/**
+	 * This function will unset (clear) a status bit
+	 */
+	inline void clearStatusBit(TStatusBit  bit) { m_statusWord &= ~(1 << bit); }
+
+	/**
+	 * This function check is a bit is set or not
+	 */
+	inline bool checkStatusBit(TStatusBit bit) { return m_statusWord & (1 << bit); }
+
 	double linearFit(double *X,double *Y,const WORD& size,double x);
+	/************************ CONVERSION FUNCTIONS **************************/
+	// Convert the voltage value of the vacuum to mbar
+	static double voltage2mbar(double voltage) { return(pow(10, 1.5 * voltage - 12)); }
+	// Convert the voltage value of the temperatures to Kelvin
+	static double voltage2Kelvin(double voltage) {
+	    return voltage < 1.12 ?  (660.549422889947 * pow(voltage, 6)) - (2552.334255456860 * pow(voltage, 5)) + (3742.529989384570 * pow(voltage, 4))
+	        - (2672.656926956470 * pow(voltage, 3)) + (947.905578508975 * pow(voltage, 2)) - 558.351002849576 * voltage + 519.607622398508  :
+	        (865.747519105672 * pow(voltage, 6)) - (7271.931957100480 * pow(voltage, 5)) + (24930.666241800500 * pow(voltage, 4))
+	        - (44623.988512320400 * pow(voltage, 3)) + (43962.922216886600 * pow(voltage, 2)) - 22642.245121997700 * voltage + 4808.631312836750;
+	}
+	// Convert the ID voltage value to the mA value
+	static double currentConverter(double voltage) { return(10 * voltage); }
+	// Convert the VD and VG voltage values using a right scale factor
+	static double voltageConverter(double voltage) { return(voltage); }
 };
 
 

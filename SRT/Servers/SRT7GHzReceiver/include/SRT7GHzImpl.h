@@ -28,18 +28,27 @@
 #include <ComponentErrors.h>
 #include <ReceiversErrors.h>
 #include "ComponentCore.h"
+#include "MonitorThread.h"
 
 
 /** 
  * @mainpage 7GHz receiver component Implementation
- * @date 05/08/2011
- * @version 0.1.0
+ * @date 19/08/2011
+ * @version 0.2.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.0.2
  * @remarks compiler version is 3.4.6
- * @todo in the taper computation the correct number4s for SRT telescope must be inserted, moreover we have to clarify if the taper lookup table is a property of the receiver or
+ * @todo in the taper computation the correct numbers for SRT telescope must be inserted, moreover we have to clarify if the taper lookup table is a property of the receiver or
  *              it is a property of the focus.
  *              The code to drive the synthesizer must be completed
+ *              Ask Buttu to move the FetValue enum and structure into the ReceiverControl class definition
+ *              error recovery from receiverControl must be fully implemented
+ *              environmentTemperature must be implemented yet because the corresponding call in ReceiverControl class is missing, ask Buttu
+ *              vacuumPumpFault and EXT_MARK_ENABLE are missing as well, ask Buttu
+ *              Add in the Receivers interface the attribute componentStatus: Management::TSystemStatus that is a summary of the component status: Error,Warning, ok
+ *              Add turnVacuumSensorOn()....in case the vacuum sensor is off the readback of the corresponding attribute should be the default value
+ *              The LOCAL status should inhibit all command operation to the receiver, as well as the CONNECTIONERROR
+ *
 */
 
 /**
@@ -342,6 +351,7 @@ private:
 	baci::SmartPropertyPointer<baci::ROdouble> m_penvironmentTemperature;
 	baci::SmartPropertyPointer<baci::ROstring> m_pmode;
 	CComponentCore m_core;
+	CMonitorThread *m_monitor;
 };
 
 
