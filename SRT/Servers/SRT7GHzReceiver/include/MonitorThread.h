@@ -65,6 +65,8 @@ private:
     	 COOLHEAD,
     	 VACUUMPUMP,
     	 VACUUMVALVE,
+    	 NOISEMARK,
+    	 UNLOCKED,
     	 ENVTEMP
      };
      CComponentCore *m_core;

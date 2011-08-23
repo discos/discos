@@ -11,6 +11,7 @@
 #include "DevIOCryoTemperatureLNAWindow.h"
 #include "DevIOLNAControls.h"
 #include "DevIOStatus.h"
+#include "DevIOComponentStatus.h"
 #include <LogFilter.h>
 
 
@@ -37,7 +38,8 @@ SRT7GHzImpl::SRT7GHzImpl(const ACE_CString &CompName,maci::ContainerServices *co
 	m_pcryoTemperatureLNA(this),
 	m_pcryoTemperatureLNAWindow(this),
 	m_penvironmentTemperature(this),
-	m_pmode(this)
+	m_pmode(this),
+	m_preceiverStatus(this)
 {	
 	AUTO_TRACE("SRT7GHzImpl::SRT7GHzImpl()");
 }
@@ -52,6 +54,19 @@ void SRT7GHzImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	AUTO_TRACE("SRT7GHzImpl::initialize()");
 	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::initialize()",(LM_INFO,"SRT7GHzImpl::COMPSTATE_INITIALIZING"));
 	m_core.initialize(getContainerServices());
+	m_monitor=NULL;
+	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
+}
+
+void SRT7GHzImpl::execute() throw (ACSErr::ACSbaseExImpl)
+{
+	AUTO_TRACE("SRT7GHzImpl::execute()");
+	ACS::Time timestamp;
+	const CConfiguration *config=m_core.execute(); //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
+
+	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::execute()",(LM_INFO,"ACTIVATING_LOG_REPETITION_FILTER"));
+	_IRA_LOGFILTER_ACTIVATE(config->getRepetitionCacheTime(),config->getRepetitionExpireTime());
+
 	try {
 		m_plocalOscillator=new baci::ROdoubleSeq(getContainerServices()->getName()+":LO",getComponent(),new DevIOLocalOscillator(&m_core),true);
 		m_ppolarization=new baci::ROlongSeq(getContainerServices()->getName()+":polarization",getComponent(),new DevIOPolarization(&m_core),true);
@@ -84,28 +99,18 @@ void SRT7GHzImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_penvironmentTemperature=new baci::ROdouble(getContainerServices()->getName()+":environmentTemperature",getComponent());
 		m_pstatus=new baci::ROpattern(getContainerServices()->getName()+":status",getComponent(),
 				new DevIOStatus(&m_core),true);
+		m_preceiverStatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>
+				  (getContainerServices()->getName()+":receiverStatus",getComponent(),new DevIOComponentStatus(&m_core),true);
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"SRT7GHzImpl::initialize()");
 		throw dummy;
 	}
-	m_monitor=NULL;
-	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
-}
-
-void SRT7GHzImpl::execute() throw (ACSErr::ACSbaseExImpl)
-{
-	AUTO_TRACE("SRT7GHzImpl::execute()");
-	ACS::Time timestamp;
-	const CConfiguration *config=m_core.execute(); //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
-
-	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::execute()",(LM_INFO,"ACTIVATING_LOG_REPETITION_FILTER"));
-	_IRA_LOGFILTER_ACTIVATE(config->getRepetitionCacheTime(),config->getRepetitionExpireTime());
 
 	// write some fixed values
 	m_pfeeds->getDevIO()->write(m_core.getFeeds(),timestamp);
 	m_pIFs->getDevIO()->write(m_core.getIFs(),timestamp);
-
+	m_core.setVacuumDefault(m_pvacuum->default_value());
 
 	CComponentCore *temp=&m_core;
 	try {
@@ -337,9 +342,10 @@ CORBA::Double SRT7GHzImpl::getTaper(CORBA::Double freq,CORBA::Double bandWidth,C
 	}	
 }
 
-void SRT7GHzImpl::turnLNAsOn() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT7GHzImpl::turnLNAsOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
+		m_core.lnaOn();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -356,9 +362,10 @@ void SRT7GHzImpl::turnLNAsOn() throw (ComponentErrors::ComponentErrorsEx,Receive
 	}
 }
 
-void SRT7GHzImpl::turnLNAsOff() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT7GHzImpl::turnLNAsOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
+		m_core.lnaOff();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -374,6 +381,48 @@ void SRT7GHzImpl::turnLNAsOff() throw (ComponentErrors::ComponentErrorsEx,Receiv
 		throw impl.getComponentErrorsEx();
 	}
 }
+
+void SRT7GHzImpl::turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core.vacuumSensorOn();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRT7GHzImpl::turnVacuumSensorOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+
+void SRT7GHzImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core.vacuumSensorOff();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRT7GHzImpl::turnVacuumSensorOff()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
 
 _PROPERTY_REFERENCE_CPP(SRT7GHzImpl,ACS::ROdoubleSeq,m_plocalOscillator,LO);
 _PROPERTY_REFERENCE_CPP(SRT7GHzImpl,ACS::ROpattern,m_pstatus,status);
@@ -395,6 +444,7 @@ _PROPERTY_REFERENCE_CPP(SRT7GHzImpl,ACS::ROdouble,m_pcryoTemperatureLNA,cryoTemp
 _PROPERTY_REFERENCE_CPP(SRT7GHzImpl,ACS::ROdouble,m_pcryoTemperatureLNAWindow,cryoTemperatureLNAWindow);
 _PROPERTY_REFERENCE_CPP(SRT7GHzImpl,ACS::ROdouble,m_penvironmentTemperature,environmentTemperature);
 _PROPERTY_REFERENCE_CPP(SRT7GHzImpl,ACS::ROstring,m_pmode,mode);
+_PROPERTY_REFERENCE_CPP(SRT7GHzImpl,Management::ROTSystemStatus,m_preceiverStatus,receiverStatus);
 
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

@@ -26,7 +26,8 @@ ReceiversBossImpl::ReceiversBossImpl(const ACE_CString &CompName,maci::Container
 	m_pinitialFrequency(this),
 	m_pbandWidth(this),
 	m_ppolarization(this),
-	m_pstatus(this)
+	m_pstatus(this),
+	m_pmode(this)
 {	
 	AUTO_TRACE("ReceiversBossImpl::ReceiversBossImpl()");
 	m_core=NULL;
@@ -282,6 +283,7 @@ _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROlong,m_pIFs,IFs);
 
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdoubleSeq,m_pbandWidth,bandWidth);
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdoubleSeq,m_pinitialFrequency,initialFrequency);
+_PROPERTY_REFERENCE_CPP(SRT7GHzImpl,ACS::ROstring,m_pmode,mode);
 
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

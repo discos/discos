@@ -188,7 +188,7 @@ void AntennaBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		core->execute();
 	}
 	catch (ACSErr::ACSbaseExImpl& E) {
-		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"AntennaBoss::execute()");
+		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"AntennaBossImpl::execute()");
 		throw _dummy;
 	}
 	//starts the threads....
@@ -200,7 +200,7 @@ void AntennaBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		startPropertiesMonitoring();
 	}
 	catch (acsthreadErrType::CanNotStartThreadExImpl& E) {
-		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,__dummy,E,"AntennaBoss::execute()");
+		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,__dummy,E,"AntennaBossImpl::execute()");
 		throw __dummy;
 	}
 	catch (ACSErrTypeCommon::NullPointerExImpl& E) {

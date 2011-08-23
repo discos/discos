@@ -33,21 +33,23 @@
 
 /** 
  * @mainpage 7GHz receiver component Implementation
- * @date 19/08/2011
- * @version 0.2.0
+ * @date 23/08/2011
+ * @version 1.0.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.0.2
  * @remarks compiler version is 3.4.6
+ * @remarks the case there are connection problems with the control boards it is not very satisfactory and should be reviewed even if this implies a review as the receiverControl library is designed..
+ *                      At the moment the component does not react when a connection error is detected it just takes note of the event (changing the status word).  The component should be allowed to
+ *                      close the connection, delete the object and recreate it, but at the moment a lock is taken inside the library and the componeNT has no way to check is there sone one using the library at the moment,
+ *                      so a delete could lead to a segmentation-fault. The fact a ReceiverControl is protected by a inner lock instead of the component mutex iis due to the fact that some operation of the library
+ *                      could take much time and this could have caused critical delays on the component.
  * @todo in the taper computation the correct numbers for SRT telescope must be inserted, moreover we have to clarify if the taper lookup table is a property of the receiver or
  *              it is a property of the focus.
  *              The code to drive the synthesizer must be completed
  *              Ask Buttu to move the FetValue enum and structure into the ReceiverControl class definition
- *              error recovery from receiverControl must be fully implemented
  *              environmentTemperature must be implemented yet because the corresponding call in ReceiverControl class is missing, ask Buttu
  *              vacuumPumpFault and EXT_MARK_ENABLE are missing as well, ask Buttu
  *              Add in the Receivers interface the attribute componentStatus: Management::TSystemStatus that is a summary of the component status: Error,Warning, ok
- *              Add turnVacuumSensorOn()....in case the vacuum sensor is off the readback of the corresponding attribute should be the default value
- *              The LOCAL status should inhibit all command operation to the receiver, as well as the CONNECTIONERROR
  *
 */
 
@@ -198,7 +200,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-    virtual void turnLNAsOn() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void turnLNAsOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is called in order to turn the LNA Off.
@@ -206,7 +208,23 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-    virtual void turnLNAsOff() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void turnLNAsOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+    /**
+     * it turns the vacuum sensor on
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    virtual void turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+    /**
+     * it turns the vacuum sensor on
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    virtual void turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * Returns a reference to the mode property implementation of the IDL interface.
@@ -328,6 +346,11 @@ public:
 	*/
     virtual ACS::ROdouble_ptr environmentTemperature() throw (CORBA::SystemException);
 
+	/**
+     * Returns a reference to the status property Implementation of IDL interface.
+	 * @return pointer to read-only ROTSystemStatus property status
+	*/
+	virtual Management::ROTSystemStatus_ptr receiverStatus() throw (CORBA::SystemException);
 
 private:
 	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plocalOscillator;
@@ -350,6 +373,8 @@ private:
 	baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureLNAWindow;
 	baci::SmartPropertyPointer<baci::ROdouble> m_penvironmentTemperature;
 	baci::SmartPropertyPointer<baci::ROstring> m_pmode;
+	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_preceiverStatus;
+
 	CComponentCore m_core;
 	CMonitorThread *m_monitor;
 };

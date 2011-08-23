@@ -1,4 +1,7 @@
 #include "ComponentCore.h"
+#include <LogFilter.h>
+
+_IRA_LOGFILTER_IMPORT;
 
 // speed of light in meters per second
 #define LIGHTSPEED 299792458.0
@@ -58,6 +61,7 @@ void CComponentCore::cleanup()
 	//make sure no one is using the object
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_control) {
+		m_control->closeConnection();
 		delete m_control;
 	}
 }
@@ -110,6 +114,12 @@ const DWORD& CComponentCore::getIFs()
 	return m_configuration.getIFs();
 }
 
+const Management::TSystemStatus& CComponentCore::getComponentStatus()
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	return m_componentStatus;
+}
+
 const DWORD& CComponentCore::getFeeds()
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -117,12 +127,13 @@ const DWORD& CComponentCore::getFeeds()
 }
 
 void CComponentCore::activate() throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
+		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
+		ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	setMode("NORMAL"); // Throw ......
-	/******************************************/
-	//******* CALL TURN LNA ON ....AND THROW PROPER EXCEPTION */
+	setMode((const char *)m_configuration.getSetupMode()); // Throw ......
+	guard.release();
+	lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 }
 
 void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
@@ -152,7 +163,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
 	ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
 }
 
-void CComponentCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+void CComponentCore::calOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_setupMode=="") {
@@ -161,19 +172,24 @@ void CComponentCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Recei
 		throw impl;
 	}
 	guard.release();
+	if (checkStatusBit(LOCAL)) {
+		_EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOn()");
+		throw impl;
+	}
 	try {
 		m_control->setCalibrationOn();
 	}
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOn()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
-	guard.acquire();
 	setStatusBit(NOISEMARK);
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
-void CComponentCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+void CComponentCore::calOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_setupMode=="") {
@@ -182,18 +198,96 @@ void CComponentCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Rece
 		throw impl;
 	}
 	guard.release();
+	if (checkStatusBit(LOCAL)) {
+		_EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOff()");
+		throw impl;
+	}
 	try {
 		m_control->setCalibrationOff();
 	}
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOff()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
-	guard.acquire();
 	clearStatusBit(NOISEMARK);
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
+void CComponentCore::vacuumSensorOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	if (checkStatusBit(LOCAL)) {
+		_EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
+		throw impl;
+	}
+	try {
+		m_control->setVacuumSensorOff();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
+		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
+		throw impl;
+	}
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::vacuumSensorOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	if (checkStatusBit(LOCAL)) {
+		_EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumSensorOn()");
+		throw impl;
+	}
+	try {
+		m_control->setVacuumSensorOn();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumSensorOn()");
+		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
+		throw impl;
+	}
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::lnaOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	if (checkStatusBit(LOCAL)) {
+		_EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::lnaOff()");
+		throw impl;
+	}
+	try {
+		m_control-> turnRightLNAsOff();
+		m_control-> turnLeftLNAsOff();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::lnaOff()");
+		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
+		throw impl;
+	}
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::lnaOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	if (checkStatusBit(LOCAL)) {
+		_EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::lnaOn()");
+		throw impl;
+	}
+	try {
+		m_control-> turnRightLNAsOn();
+		m_control-> turnLeftLNAsOn();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::lnaOn()");
+		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
+		throw impl;
+	}
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
 
 void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
@@ -410,6 +504,68 @@ double CComponentCore::getFetValue(const IRA::FetValue& control,const DWORD& ifs
 	}
 }
 
+void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (m_setupMode=="") { // if the receiver is not configured the check makes no sense
+		return;
+	}
+	/***********************************************************************/
+	/****   COMMENT OUT when the local oscillator component will be available                 */
+	/***********************************************************************/
+	// make sure the synthesizer component is available
+	/*loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
+	ACSErr::Completion_var comp;
+	ACS::ROlong_var isLockedRef;
+	CORBA::Long isLocked;
+	try {
+		isLockedRef=m_localOscillatorDevice->isLocked();
+	}
+	catch (CORBA::SystemException& ex) {
+		m_localOscillatorFault=true;
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CComponentCore::checkLocalOscillator()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		throw impl;
+	}
+	isLocked=isLockedRef->get_sync(comp.out());
+	ACSErr::CompletionImpl complImpl(comp);
+	if (!complImpl.isErrorFree()) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,complImpl,"CComponentCore::checkLocalOscillator()");
+		impl.setAttributeName("isLocked");
+		impl.setComponentName((const char *)m_configuration.getLocalOscillatorInstance());
+		throw impl;
+	}
+	if (!isLocked) setStatusBit(UNLOCKED);
+	else clearStatusBit(UNLOCKED);*/
+}
+
+void CComponentCore::updateComponent()
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	m_componentStatus=Management::MNG_OK;
+	if (checkStatusBit(LOCAL)) {
+		setComponentStatus(Management::MNG_FAILURE);
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","RECEVER_NOT_REMOTELY_CONTROLLABLE");
+	}
+	if (checkStatusBit(VACUUMPUMPFAULT)) {
+		setComponentStatus(Management::MNG_WARNING);
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CComponentCore::updateComponent()","VACUUM_PUMP_FAILURE");
+	}
+	if (checkStatusBit(NOISEMARKERROR)) {
+		setComponentStatus(Management::MNG_FAILURE);
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","NOISE_MARK_ERROR");
+	}
+	if (checkStatusBit(CONNECTIONERROR)) {
+		setComponentStatus(Management::MNG_FAILURE);
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","RECEIVER_CONNECTION_ERROR");
+	}
+	if (checkStatusBit(UNLOCKED)) {
+		setComponentStatus(Management::MNG_FAILURE);
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","LOCAL_OSCILLATOR_NOT_LOCKED");
+	}
+}
+
 void CComponentCore::updateVacuum() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
 	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
@@ -420,6 +576,7 @@ void CComponentCore::updateVacuum() throw (ReceiversErrors::ReceiverControlBoard
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVacuum()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
 	if (vacuumSensor) {
@@ -429,17 +586,16 @@ void CComponentCore::updateVacuum() throw (ReceiversErrors::ReceiverControlBoard
 		catch (IRA::ReceiverControlEx& ex) {
 			_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVacuum()");
 			impl.setDetails(ex.what().c_str());
+			setStatusBit(CONNECTIONERROR);
 			throw impl;
 		}
 	}
 	else {
-		//*************************************************************************
-		// RETURN THE DEFAULT VALUE
-		//*************************************************************************
+		m_vacuum=m_vacuumDefault;
 	}
-	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!vacuumSensor) setStatusBit(VACUUMSENSOR);
 	else clearStatusBit(VACUUMSENSOR);
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
 void CComponentCore::updateVacuumPump() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -450,16 +606,39 @@ void CComponentCore::updateVacuumPump() throw (ReceiversErrors::ReceiverControlB
 		answer=m_control->isVacuumPumpOn();
 	}
 	catch (IRA::ReceiverControlEx& ex) {
-		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateIsRemote()");
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVacuumPump()");
 		impl.setDetails(ex.what().c_str());
+		baci::ThreadSyncGuard guard(&m_mutex);
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
-	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!answer) setStatusBit(VACUUMPUMPSTATUS);
 	else clearStatusBit(VACUUMPUMPSTATUS);
 	//**********************************************************************************/
-	// VACUUM PUMP STATUS MISSING
+	// VACUUM PUMP FAULT MISSING (VACUUMPUMPFAULT)
 	//************************************************************************************
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::updateNoiseMark() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	bool answer;
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+		answer=m_control->isCalibrationOn();
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateNoiseMark()");
+		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
+		throw impl;
+	}
+	if (answer!=checkStatusBit(NOISEMARK)) setStatusBit(NOISEMARKERROR);
+	else clearStatusBit(NOISEMARKERROR);
+	//*********************************************************************************************/
+	// EXTNOISEMARK is missing
+	/**********************************************************************************************/
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
 void CComponentCore::updateVacuumValve() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -472,11 +651,12 @@ void CComponentCore::updateVacuumValve() throw (ReceiversErrors::ReceiverControl
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVacuumValve()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
-	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!answer) setStatusBit(VACUUMVALVEOPEN);
 	else clearStatusBit(VACUUMVALVEOPEN);
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
 void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -489,11 +669,12 @@ void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoa
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateIsRemote()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
-	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!answer) setStatusBit(LOCAL);
 	else clearStatusBit(LOCAL);
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
 void CComponentCore::updateCoolHead()  throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -506,13 +687,13 @@ void CComponentCore::updateCoolHead()  throw (ReceiversErrors::ReceiverControlBo
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCoolHead()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
-	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!answer) setStatusBit(COOLHEADON);
 	else clearStatusBit(COOLHEADON);
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
-
 
 void CComponentCore::updateCryoCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
@@ -523,8 +704,10 @@ void CComponentCore::updateCryoCoolHead() throw (ReceiversErrors::ReceiverContro
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHead()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
 void CComponentCore::updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -536,8 +719,10 @@ void CComponentCore::updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverCon
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHeadWin()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
 void CComponentCore::updateCryoLNA() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -549,8 +734,10 @@ void CComponentCore::updateCryoLNA() throw (ReceiversErrors::ReceiverControlBoar
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNA()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
 void CComponentCore::updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -562,8 +749,10 @@ void CComponentCore::updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlB
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNAWin()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
 void CComponentCore::updateLNAControls() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -575,8 +764,10 @@ void CComponentCore::updateLNAControls() throw (ReceiversErrors::ReceiverControl
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNAWin()");
 		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
 void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetComponentExImpl)

@@ -14,6 +14,7 @@
 #include <ComponentErrors.idl>
 #include <ReceiversErrors.idl>
 #include "ReceiversDefinitions.idl"
+#include <ManagmentDefinitions.idl>
 #include "CommonReceiverInterface.idl"
 
 #pragma prefix "alma"
@@ -31,11 +32,14 @@ module Receivers {
         readonly attribute ACS::ROdouble vacuum;
 
         /** 
-         *  This property reports the current Receiver status. The returned 
-         *  pattern is a X bits field with the following meaning:
+         *  The returned pattern is a X bits field with a meaning depending on the implementation.
          */
         readonly attribute ACS::ROpattern status;
         
+        /**
+         * This property reports the current receiver status
+         */
+        readonly attribute Management::ROTSystemStatus receiverStatus;
         
         /** Turn the LNAs of every channel on */
         void turnLNAsOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
@@ -43,6 +47,14 @@ module Receivers {
 
         /** Turn the LNAs of every channel off */
         void turnLNAsOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        
+        /** 
+         * This method must called in order to setup everytnig for the receiver to become the currently used receiver. The dafault configuration and mode is loaded.
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw CORBA::SystemExcpetion    
+        */
+        void activate() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);   
 
 
         /*

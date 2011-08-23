@@ -13,6 +13,7 @@
 #include <ReceiverControl.h>
 #include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
+#include <ManagmentDefinitionsC.h>
 
 /**
  * This class contains the code of almost all the features  of the component
@@ -70,10 +71,11 @@ public:
 			ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
 
 	/**
-	 * It activate the receiver, in other words it allows to setup the default configuration, and to check is the LNA are turned on.
+	 * It activate the receiver, in other words it allows to setup the default configuration and to make sure the LNA are turned on.
 	 */
 	void activate() throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-			ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
+			ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
+			ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 	/**
 	 * It allows to compute the value of the calibration mark for any given sub bands in the IF space.
@@ -100,12 +102,32 @@ public:
 	/**
 	 * It turns the calibration diode on.
 	 */
-	void calOn() throw (ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+	void calOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 	/**
 	 * It turns the calibration diode off
 	 */
-	void calOff() throw (ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+	void calOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It turns on the sensor for vacuum measurement.
+	 */
+	void vacuumSensorOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It turns off the sensor for vacuum measurement.
+	 */
+	void vacuumSensorOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It allows to turn LNA on
+	 */
+	void lnaOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It allows to turn LNA off
+	 */
+	void lnaOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 	/**
 	 * It reads and updates from the control board the current value of the vacuum
@@ -114,7 +136,7 @@ public:
 	void updateVacuum() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 	/**
-	 * It check if the vacuum pump is on
+	 * It check if the vacuum pump is on and check is the status is fault or not (<i>VACUUMPUMPFAULT</i>)
 	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
 	 */
 	void updateVacuumPump() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
@@ -166,6 +188,22 @@ public:
 	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
 	 */
 	void updateCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * It checks is the status of the noise mark correspond to the commanded status, otherwise it sets the <i>NOISEMARKERROR</i> bit. It also check if the
+	 * external control of the noise mark has been enabled or not
+	 */
+	void updateNoiseMark() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
+	 * This method resumes the whole status of the component. It set the <i>componentStatus</i> member variable.
+	 */
+	void updateComponent();
+
+	/**
+	 * I checks if the local oscillator is locked properly
+	 */
+	void checkLocalOscillator() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl);
 
 	/**
 	 * This is getter method. No need to make it thread safe......
@@ -258,6 +296,17 @@ public:
 	 */
 	const DWORD& getFeeds();
 
+	/**
+	 * @return the status flag of the component
+	 */
+	const Management::TSystemStatus& getComponentStatus();
+
+	/**
+	 * Allows to set the "default_value" for the vacuum characteristic. In principle it is possible to read it directly from CDB, but I found it more
+	 * comfortable to get it directly from the characteristic itself.
+	 */
+	inline void setVacuumDefault(const double& val) { m_vacuumDefault=val; }
+
 protected:
 	/**
 	 * Obtain a valid reference to the local oscillator device
@@ -277,10 +326,10 @@ private:
 		VACUUMVALVEOPEN=4,
 		COOLHEADON=5,
 		NOISEMARK=6,
-		NOISEMARKERROR=7, //**/
+		NOISEMARKERROR=7,
 		EXTNOISEMARK=8, //**/
-		CONNECTIONERROR=9, /**/
-		UNLOCKED=10   //**/
+		CONNECTIONERROR=9,
+		UNLOCKED=10
 	};
 
 	CConfiguration m_configuration;
@@ -299,21 +348,25 @@ private:
 	double m_cryoCoolHeadWin;
 	double m_cryoLNA;
 	double m_cryoLNAWin;
+	double m_vacuumDefault;
 	IRA::FetValues m_fetValues;
 	DWORD m_statusWord;
+	Management::TSystemStatus m_componentStatus;
+
+	void setComponentStatus(const Management::TSystemStatus& status) { if (status>m_componentStatus) m_componentStatus=status;  }
 
 	/**
-	 * This function will set the a status bit
+	 * This function will set the a status bit. It may be considered thread safe due to its definition
 	 */
 	inline void setStatusBit(TStatusBit bit) { m_statusWord |= 1 << bit; }
 
 	/**
-	 * This function will unset (clear) a status bit
+	 * This function will unset (clear) a status bit. It may be considered thread safe due to its definition
 	 */
 	inline void clearStatusBit(TStatusBit  bit) { m_statusWord &= ~(1 << bit); }
 
 	/**
-	 * This function check is a bit is set or not
+	 * This function check is a bit is set or not. It may be considered thread safe due to its definition
 	 */
 	inline bool checkStatusBit(TStatusBit bit) { return m_statusWord & (1 << bit); }
 

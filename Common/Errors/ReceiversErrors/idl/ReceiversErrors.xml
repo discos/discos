@@ -21,6 +21,8 @@
 	<ErrorCode name="ReceiverControlBoardError" shortDescription="Input/Output error while communicating to control board" description="">
 		<Member name="Details" type="string" description="more details from the board" />   
 	</ErrorCode>
+	
+	<ErrorCode name="NoRemoteControlError" shortDescription="The receiver is not remotely controllable" description=""/>
          
 </Type>
 

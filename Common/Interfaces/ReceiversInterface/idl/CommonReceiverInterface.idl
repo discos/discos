@@ -51,15 +51,7 @@ module Receivers {
         readonly attribute ACS::ROdoubleSeq bandWidth;
 
         /** The receiver operating mode */
-        readonly attribute ACS::ROstring mode;
-
-        /** 
-         * This method must called in order to setup everytnig for the receiver to become the currently used receiver. The dafault configuration and mode is loaded.
-         * @throw ComponentErrors::ComponentErrorsEx
-         * @throw ReceiversErrors::ReceiversErrorsEx
-         * @throw CORBA::SystemExcpetion    
-        */
-        void activate() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);        
+        readonly attribute ACS::ROstring mode;     
         
         /** 
          * Turns on the calibration diode

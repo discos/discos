@@ -233,6 +233,12 @@ public:
 	*/
 	virtual Management::ROTSystemStatus_ptr status() throw (CORBA::SystemException);
 	
+	/**
+	 * Returns a reference to the mode property implementation of the IDL interface.
+	 * @return pointer to read-only string property
+	*/
+    virtual ACS::ROstring_ptr mode() throw (CORBA::SystemException);
+
 	
 private:
 	SmartPropertyPointer<ROdoubleSeq> m_plocalOscillator;
@@ -244,6 +250,7 @@ private:
 	SmartPropertyPointer<ROlongSeq> m_ppolarization;
 	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),
 	  POA_Management::ROTSystemStatus> > m_pstatus;
+	baci::SmartPropertyPointer<baci::ROstring> m_pmode;
 	
 	SimpleParser::CParser<CRecvBossCore> *m_parser;
 	CRecvBossCore *m_core;
