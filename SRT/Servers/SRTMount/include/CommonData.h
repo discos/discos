@@ -15,6 +15,8 @@
 #include <TimeTaggedCircularArray.h>
 #include "ACUProtocol.h"
 
+using namespace IRA;
+
 class CCommonData {
 public:
 	enum TStatusWordFields {

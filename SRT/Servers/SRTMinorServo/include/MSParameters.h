@@ -11,6 +11,8 @@
 #define NUMBER_OF_SERVOS 4
 #define STATUS_WIDTH 6
 
+using namespace IRA;
+
 struct CDBParameters {
     DWORD NUMBER_OF_AXIS;
     DWORD NUMBER_OF_SLAVES;

@@ -10,6 +10,7 @@
 
 #define BUFF_LIMIT 500
 
+using namespace IRA;
 
 /// A structure that holds receiver CDB parameters
 struct RCDBParameters {

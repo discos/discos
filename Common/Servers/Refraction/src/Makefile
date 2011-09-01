@@ -82,7 +82,7 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 RefractionImpl_OBJECTS = RefractionImpl RefractionCore RefractionWorkingThread
-RefractionImpl_LIBS = AntennaDefinitionsStubs RefractionStubs ObservatoryStubs GenericWeatherStationStubs ComponentErrors AntennaErrors IRALibrary SlaLibrary
+RefractionImpl_LIBS = ManagmentDefinitionsStubs AntennaDefinitionsStubs RefractionStubs ObservatoryStubs GenericWeatherStationStubs ManagementErrors ComponentErrors AntennaErrors IRALibrary SlaLibrary
 
 #
 # Scripts (public and local)

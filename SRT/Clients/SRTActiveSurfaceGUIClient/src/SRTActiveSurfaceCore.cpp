@@ -17,6 +17,8 @@
 #define STEP2MM 0.000714286
 //1step del driver = 0.000714286mm di corsa lineare Attuatore.
 
+using namespace IRA;
+
 /*
 void SRTActiveSurfaceCore::setGUI(SRTActiveSurfaceGUI* theGUI)
 {

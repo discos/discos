@@ -14,6 +14,8 @@
 // speed of light in meters per second
 #define LIGHTSPEED 299792458.0
 
+using namespace IRA;
+
 CRecvBossCore::CRecvBossCore()
 {
 	

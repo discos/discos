@@ -7,7 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-
+using namespace IRA;
 /**
  * This client is aimed at producing a schedule to perform on-the-fly
  * recursive horizontal scans, moving the antenna back and forth in azimuth only.  
