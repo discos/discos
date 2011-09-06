@@ -67,7 +67,7 @@ LIBRARIES_L     =
 SchedulerImpl_OBJECTS = Schedule SchedulerImpl Configuration Core ScheduleExecutor
 SchedulerImpl_LIBS = IRALibrary AntennaDefinitionsStubs ManagmentDefinitionsStubs SchedulerStubs acsnc \
 EphemGeneratorStubs AntennaBossStubs ObservatoryStubs FitsWriterStubs DataReceiverStubs\
-GenericBackendStubs ComponentErrors ManagementErrors AntennaErrors BackendsErrors ParserErrors\
+GenericBackendStubs ComponentErrors ManagementErrors AntennaErrors BackendsErrors ParserErrors ReceiversErrors\
 bulkDataStubs bulkDataReceiverStubs bulkDataCallback bulkDataSenderStubs CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs
 
 #

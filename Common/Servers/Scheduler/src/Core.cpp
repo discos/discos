@@ -263,6 +263,11 @@ void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCom
 		impl.setReason("Unable to get calibration diode values");
 		throw impl;
 	}
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get calibration diode values");
+		throw impl;
+	}
 	//wait for the calibration diode to settle......
 	/*guard.release();
 	IRA::CIRATools::Wait(m_config->getTsysGapTime());
@@ -322,6 +327,11 @@ void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCom
 		impl.setReason("Could not turn the calibration mark on");
 		throw impl;
 	}
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Could not turn the calibration mark on");
+		throw impl;
+	}
 	//wait for the calibration diode to switch on completely
 	guard.release();
 	IRA::CIRATools::Wait(m_config->getTsysGapTime());
@@ -358,6 +368,11 @@ void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCom
 		throw impl;
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Could not turn the calibration mark off");
+		throw impl;
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
 		impl.setReason("Could not turn the calibration mark off");
 		throw impl;
@@ -519,6 +534,71 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	loadDefaultDataReceiver(); //throw (ComponentErrors::CouldntGetComponentExImpl);
 	// ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl
 	CCore::enableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamPrepared,m_streamConnected);
+
+	//LATITUDE SCAN.........................
+	// now lets go and check the lon scan....typically if a source was commanded before....and it is above the horizon and the scan could be performed
+	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LATITUDE_SCAN"));
+	try {
+		if (!CORBA::is_nil(m_antennaBoss)) {
+			startTime=m_antennaBoss->latOTFScan(scanFrame,span,duration);
+		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::crossScan()");
+			throw impl;
+		}
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::crossScan()");
+		throw impl;
+	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::crossScan()");
+		throw impl;		
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::crossScan()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_antennaBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::crossScan()");
+		m_antennaBossError=true;
+		throw impl;
+	}
+	if (scanFrame==Antenna::ANT_HORIZONTAL) {
+		scanAxis=Management::MNG_HOR_LAT;
+	}
+	else if (scanFrame==Antenna::ANT_EQUATORIAL) {
+		scanAxis=Management::MNG_EQ_LAT;
+	}
+	else {
+		scanAxis=Management::MNG_GAL_LAT;
+	}
+	suffix=IRA::CString("latitude");
+	fileName=m_config->getSystemDataDirectory()+CCore::computeOutputFileName(startTime,prj,suffix);
+	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
+	CCore::setupDataTransfer(m_defaultDataReceiver.in(),m_defaultDataReceiverError,obsName,prj,scanId,m_currentDevice,scanAxis,fileName);
+	// start the recording or data transfer
+	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
+	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);
+	// now set the the data transfer stop
+	waitFor=startTime+duration; // this is the time at which the stop should be issued
+	waitMicro=(duration/10)/10000; // one tens of the total duration 
+	IRA::CIRATools::getTime(now);
+	guard.release();	
+	while (now.value().value<waitFor) {
+		IRA::CIRATools::Wait(waitMicro);
+		IRA::CIRATools::getTime(now);
+	}
+	guard.acquire();
+	// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
+	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
+	// wait for a couple of seconds before start with the latitide scan
+	guard.release();
+	IRA::CIRATools::Wait(2,0);
+	guard.acquire();
 	// LONGITUDE SCAN..............
 	// now lets go and check the lon scan....typically if a source was commanded before....and it is above the horizon and the scan could be performed
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LONGITUDE_SCAN"));
@@ -581,70 +661,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
 	// wait for a couple of seconds before start with the latitude scan
 	guard.release();
-	IRA::CIRATools::Wait(2,0);
-	guard.acquire();
-	//LATITUDE SCAN.........................	
-	// now lets go and check the lon scan....typically if a source was commanded before....and it is above the horizon and the scan could be performed
-	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LATITUDE_SCAN"));
-	try {
-		if (!CORBA::is_nil(m_antennaBoss)) {
-			startTime=m_antennaBoss->latOTFScan(scanFrame,span,duration);
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::crossScan()");
-			throw impl;
-		}
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::crossScan()");
-		throw impl;
-	}
-	catch (AntennaErrors::AntennaErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::crossScan()");
-		throw impl;		
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::crossScan()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_antennaBossError=true;
-		throw impl;
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::crossScan()");
-		m_antennaBossError=true;
-		throw impl;
-	}
-	if (scanFrame==Antenna::ANT_HORIZONTAL) {
-		scanAxis=Management::MNG_HOR_LAT;
-	}
-	else if (scanFrame==Antenna::ANT_EQUATORIAL) {
-		scanAxis=Management::MNG_EQ_LAT;
-	}
-	else {
-		scanAxis=Management::MNG_GAL_LAT;
-	}
-	suffix=IRA::CString("latitude");
-	fileName=m_config->getSystemDataDirectory()+CCore::computeOutputFileName(startTime,prj,suffix);
-	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
-	CCore::setupDataTransfer(m_defaultDataReceiver.in(),m_defaultDataReceiverError,obsName,prj,scanId,m_currentDevice,scanAxis,fileName);
-	// start the recording or data transfer
-	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
-	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);
-	// now set the the data transfer stop
-	waitFor=startTime+duration; // this is the time at which the stop should be issued
-	waitMicro=(duration/10)/10000; // one tens of the total duration 
-	IRA::CIRATools::getTime(now);
-	guard.release();	
-	while (now.value().value<waitFor) {
-		IRA::CIRATools::Wait(waitMicro);
-		IRA::CIRATools::getTime(now);
-	}
-	guard.acquire();
-	// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
-	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
-	// wait for a couple of seconds before start with the latitide scan
-	guard.release();
+
 	IRA::CIRATools::Wait(2,0);
 	guard.acquire();
 	////
@@ -796,6 +813,11 @@ void CCore::setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetCo
 		throw impl;
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setDevice()");
+		impl.setReason("Unable to get taper information from receivers boss");
+		throw impl;
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setDevice()");
 		impl.setReason("Unable to get taper information from receivers boss");
 		throw impl;

@@ -1,5 +1,3 @@
-// $Id: ReceiversBossImpl.cpp,v 1.8 2011-02-23 08:37:04 a.orlati Exp $
-
 #include "ReceiversBossImpl.h"
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
@@ -12,7 +10,7 @@
 #include "DevIOBandWidth.h"
  #include "DevIOInitialFrequency.h"
 
-static char *rcsId="@(#) $Id: ReceiversBossImpl.cpp,v 1.8 2011-02-23 08:37:04 a.orlati Exp $";
+static char *rcsId="@(#) $Id: ReceiversBossImpl.cpp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 using namespace SimpleParser;
@@ -283,7 +281,7 @@ _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROlong,m_pIFs,IFs);
 
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdoubleSeq,m_pbandWidth,bandWidth);
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdoubleSeq,m_pinitialFrequency,initialFrequency);
-_PROPERTY_REFERENCE_CPP(SRT7GHzImpl,ACS::ROstring,m_pmode,mode);
+_PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROstring,m_pmode,mode);
 
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

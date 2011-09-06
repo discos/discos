@@ -41,6 +41,11 @@ void MedWeatherStationImpl::cleanUp() throw (ACSErr::ACSbaseExImpl)
 }
 
 
+char * MedWeatherStationImpl::command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+{
+	IRA::CString out("Not implemented yet");
+	return CORBA::string_dup((const char *)out);
+}
 
 
 void MedWeatherStationImpl::deleteAll()

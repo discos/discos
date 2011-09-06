@@ -554,10 +554,10 @@ IRA::CString CCore::remoteCall(const IRA::CString& command,const IRA::CString& p
 				unwrappedCommand=command.Mid(pos,command.GetLength()-pos);
 			}			
 			try {
-				baci::ThreadSyncGuard guard(&m_mutex);  //loadReceiversBoss works on class data so it is safe to sync
+				baci::ThreadSyncGuard guard(&m_mutex);  //loadDefaultBackend works on class data so it is safe to sync
 				loadDefaultBackend(); 				
 			}
-			catch (ComponentErrors::CouldntGetComponentExImpl& err) { //this exception can be thrown by the loadReceiversBoss()
+			catch (ComponentErrors::CouldntGetComponentExImpl& err) { //this exception can be thrown by the loadDefaultBackend()
 				_ADD_BACKTRACE(ParserErrors::PackageErrorExImpl,impl,err,"CCore::remoteCall()");
 				impl.setPackageName((const char *)package);
 				throw impl;

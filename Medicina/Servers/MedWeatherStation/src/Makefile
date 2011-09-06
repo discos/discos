@@ -70,7 +70,7 @@ MedWeatherStationImpl_LIBS      =ComponentErrors \
 			IRALibrary\
 			ManagementErrors \
 			expat \
-			GenericWeatherStationStubs
+			GenericWeatherStationStubs ManagmentDefinitionsStubs
 
 
 #
