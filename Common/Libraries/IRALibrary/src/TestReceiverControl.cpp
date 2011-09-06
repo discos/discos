@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     unsigned int dewar_port = atoi(argv[2]);
     std::string lna_IP = std::string(argv[3]);
     unsigned int lna_port = atoi(argv[4]);
-    unsigned short feeds = 2;
+    unsigned short feeds = 2; // REMEMBER TO CHANGE THE NUMBER OF FEEDS IN BOARD_SERVER.PY
     std::vector<BYTE> data;
 
 

@@ -1085,6 +1085,7 @@ StageValues ReceiverControl::stageValues(
     std::string vd_selector;               // A03: it allows to select the value requested for a given stadium
     std::string id_selector;               // A03: it allows to select the value requested for a given stadium
     std::string vg_selector;               // A03: it allows to select the value requested for a given stadium
+    std::string quantity_selector;         // A03: it allows to select the value requested for a given stadium
     
     if(m_number_of_feeds == 1)
         colon_selectors.push_back("0001");
@@ -1134,28 +1135,114 @@ StageValues ReceiverControl::stageValues(
             throw ReceiverControlEx("ReceiverControl error: invalid stage number.");
     }
 
-    // TODO: faccio un numero di richieste pari al numero di colon_selectors, e dalle
-    //       grandezze lette prelevo solo la parte relativa al mio numero di feeds (solo
-    //       quelle dei feeds esistenti)
-
-    // The following is dummy code
-    std::vector<double> left, right;
-    StageValues values;
     switch(quantity) {
         case DRAIN_VOLTAGE:
-            values.left_channel = left; // TODO: assign the values of the quantity specified
-            values.right_channel = right; // TODO: assign the values of the quantity specified
+            quantity_selector = vd_selector;
             break;
         case DRAIN_CURRENT:
-            values.left_channel = left; // TODO: assign the values of the quantity specified
-            values.right_channel = right; // TODO: assign the values of the quantity specified
+            quantity_selector = id_selector;
             break;
         case GATE_VOLTAGE:
-            values.left_channel = left; // TODO: assign the values of the quantity specified
-            values.right_channel = right; // TODO: assign the values of the quantity specified
+            quantity_selector = vg_selector;
             break;
         default:
             throw ReceiverControlEx("ReceiverControl::stageValues(): the quantity requested does not exist.");
+    }
+
+    // Left channel values, right channel values, left channel disorderly values, right channel disorderly values
+    std::vector<double> lvalues, rvalues, ldvalues, rdvalues;
+    std::vector<double> ldvalues_first, rdvalues_first, ldvalues_second, rdvalues_second;
+    std::vector<BYTE> parameters;
+
+    for(std::vector<std::string>::iterator iter=colon_selectors.begin(); iter!=colon_selectors.end(); iter++) {
+        std::bitset<8> value(*iter + quantity_selector);
+        try {
+
+            makeRequest(
+                    m_lna_board_ptr,                           // Pointer to the LNA board socket
+                    MCB_CMD_SET_DATA,                          // Command to send
+                    4,                                         // Number of parameters
+                    MCB_CMD_DATA_TYPE_U08,                     // Data type: unsigned 08 bit
+                    MCB_PORT_TYPE_DIO,                         // Port type: Digital IO
+                    MCB_PORT_NUMBER_00_07,                     // Port Number from 00 to 07
+                    static_cast<BYTE>(value.to_ulong())        // Value to set                   
+            );
+
+            usleep(m_guard_time);
+
+            parameters = makeRequest(
+                    m_lna_board_ptr,        // Pointer to the LNA board
+                    MCB_CMD_GET_DATA,       // Command to send
+                    3,                      // Number of parameters
+                    MCB_CMD_DATA_TYPE_F32,  // Data type: 32 bit floating point
+                    MCB_PORT_TYPE_AD24,     // Port type: AD24
+                    MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
+            );
+
+            if(parameters.size() != AD24_LEN)
+                throw MicroControllerBoardEx("Error: wrong number of parameters received.");
+
+            for(std::vector<BYTE>::size_type idx=0; idx<AD24_LEN; idx+=2) {
+                ldvalues.push_back(get_value(parameters, idx));
+                rdvalues.push_back(get_value(parameters, idx+1));
+            }
+
+            if(ldvalues.empty() || rdvalues.empty())
+                throw MicroControllerBoardEx("Error: no data received.");
+        }
+        catch(MicroControllerBoardEx& ex) {
+            std::string error_msg = "ReceiverControl: error getting LNA values.\n";
+            throw ReceiverControlEx(error_msg + ex.what());
+        }
+    }
+
+    if(m_number_of_feeds == 1) { 
+        if(ldvalues.size() != 4 || rdvalues.size() != 4)  // Just one feed (the feed number 0) means just one colon 
+            throw ReceiverControlEx("Error: mismatch between number of feeds and number of parameters");
+        lvalues.push_back(ldvalues[0]);
+        rvalues.push_back(rdvalues[0]);
+    }
+    else // In this case we are sure we must add at least the first 8 items (2 colons)
+        for(std::vector<BYTE>::size_type idx=0; idx<=3; idx++) {
+            lvalues.push_back(ldvalues[idx]);
+            lvalues.push_back(ldvalues[idx+4]); // Add the item of the second colon
+            rvalues.push_back(rdvalues[idx]);
+            rvalues.push_back(rdvalues[idx+4]); // Add the item of the second colon
+        }
+
+    if(m_number_of_feeds == 9) { // Exactly nine feeds (number_of_feeds == 9)
+        if(ldvalues.size() != 12 || rdvalues.size() != 12)  // Nine feeds means three colons
+            throw ReceiverControlEx("Error: mismatch between number of feeds and number of parameters");
+        lvalues.push_back(ldvalues[8]);
+        rvalues.push_back(rdvalues[8]);
+    }
+    else 
+        if(ldvalues.size() > 9) {
+            if(ldvalues.size() != 16 || rdvalues.size() != 16)  // More than nine feeds means four colons
+                throw ReceiverControlEx("Error: mismatch between number of feeds and number of parameters");
+            std::vector<BYTE>::size_type offset=8;
+            for(std::vector<BYTE>::size_type idx=0; idx<=3; idx++) {
+                lvalues.push_back(ldvalues[offset+idx]);
+                lvalues.push_back(ldvalues[offset+idx+4]); // Add the item of the second colon
+                rvalues.push_back(rdvalues[offset+idx]);
+                rvalues.push_back(rdvalues[offset+idx+4]); // Add the item of the second colon
+            }
+        }
+    
+
+    if(lvalues.size() < m_number_of_feeds || rvalues.size() < m_number_of_feeds)
+        throw ReceiverControlEx("Error: the vector size doesn't match the number of feeds.");
+
+    // Add the first "number_of_feeds" converted items of lvalues and rvalues
+    StageValues values;
+    try {
+        for(size_t idx=0; idx<m_number_of_feeds; idx++) {
+            (values.left_channel).push_back(converter != NULL ? converter(lvalues[idx]) : lvalues[idx]);
+            (values.right_channel).push_back(converter != NULL ? converter(rvalues[idx]) : rvalues[idx]);
+        }
+    }
+    catch(...) {
+        throw ReceiverControlEx("ReceiverControl error: unexpected exception occurs performing the conversion.");
     }
 
     return values;
@@ -1285,21 +1372,19 @@ std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, 
 double ReceiverControl::get_value(const std::vector<BYTE> parameters, const size_t RAW_INDEX)
 {
 
-    // 32 bit floating point length
-    const size_t TYPE_LEN = 4; 
     union Bytes2Float {
         float value;
-        BYTE buff[TYPE_LEN];
+        BYTE buff[AD24_TYPE_LEN];
     } uvalue;
 
-    std::vector<BYTE>::size_type sidx = TYPE_LEN * RAW_INDEX; 
-    std::vector<BYTE>::size_type vidx = TYPE_LEN-1, idx = sidx;
+    std::vector<BYTE>::size_type sidx = AD24_TYPE_LEN * RAW_INDEX; 
+    std::vector<BYTE>::size_type vidx = AD24_TYPE_LEN-1, idx = sidx;
     // parameters[sidx] is the index of the first byte in the requested data.
     // For instance, we get the vacuum value from the AD24 port, at the port number AD10;
     // the vacuum data type is a 32 bit floating poing, so the data is stored in a range of 4 
     // bytes. The AD10 has index 2 in the AD24, so the first of the 4 bytes of our
     // value in the parameter vector has index RAW_INDEX * 4.
-    for( ; idx < sidx + TYPE_LEN; idx++) {
+    for( ; idx < sidx + AD24_TYPE_LEN; idx++) {
         uvalue.buff[vidx] = parameters[idx];
         --vidx;
     }
