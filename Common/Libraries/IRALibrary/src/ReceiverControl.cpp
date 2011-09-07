@@ -119,7 +119,7 @@ bool ReceiverControl::isCalibrationOn(
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isCalibrationOn(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters.front() == 0 ? false : true;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isCalibrationOn().\n";
@@ -266,7 +266,7 @@ bool ReceiverControl::isCoolHeadOn(
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isCoolHeadOn(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters.front() == 0 ? false : true;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isCoolHeadOn().\n";
@@ -345,7 +345,7 @@ bool ReceiverControl::isVacuumSensorOn(
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isVacuumSensorOn(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters.front() == 0 ? false : true;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isVacuumSensorOn().\n";
@@ -424,7 +424,7 @@ bool ReceiverControl::isVacuumPumpOn(
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isVacuumPumpOn(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters.front() == 0 ? false : true;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isVacuumPumpOn().\n";
@@ -503,7 +503,7 @@ bool ReceiverControl::isVacuumValveOn(
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isVacuumValveOn(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters.front() == 0 ? false : true;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isVacuumValveOn().\n";
@@ -532,7 +532,7 @@ bool ReceiverControl::isRemoteOn(
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isRemoteOn(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters.front() == 0 ? false : true;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isRemoteOn().\n";
@@ -586,7 +586,7 @@ bool ReceiverControl::isLO1Selected(
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isLO1Selected(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters.front() == 0 ? false : true;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isLO1Selected().\n";
@@ -640,7 +640,7 @@ bool ReceiverControl::isLO2Selected(
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isLO2Selected(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters.front() == 0 ? false : true;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isLO2Selected().\n";
@@ -669,7 +669,7 @@ bool ReceiverControl::isLO2Locked(
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isLO2Locked(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? true : false;
+        return parameters.front() == 0 ? true : false;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isLO2Locked().\n";
@@ -736,7 +736,7 @@ bool ReceiverControl::isSingleDishModeOn(
         if(parameters.size() != 1)
             throw ReceiverControlEx("RecieverControl::isSingleDishModeOn(): wrong number of parameters.");
 
-        return parameters[0] == 0 ? false : true;
+        return parameters.front() == 0 ? false : true;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isSingleDishModeOn().\n";
@@ -803,7 +803,7 @@ bool ReceiverControl::isVLBIModeOn(
         if(parameters.size() != 1)
             throw ReceiverControlEx("ReceiverControl::isVLBIModeOn(): wrong number of parameters.");
 
-        return parameters[0] == 1 ? true : false;
+        return parameters.front() == 1 ? true : false;
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isVLBIModeOn().\n";
@@ -1199,8 +1199,8 @@ StageValues ReceiverControl::stageValues(
     if(m_number_of_feeds == 1) { 
         if(ldvalues.size() != 4 || rdvalues.size() != 4)  // Just one feed (the feed number 0) means just one colon 
             throw ReceiverControlEx("Error: mismatch between number of feeds and number of parameters");
-        lvalues.push_back(ldvalues[0]);
-        rvalues.push_back(rdvalues[0]);
+        lvalues.push_back(ldvalues.front());
+        rvalues.push_back(rdvalues.front());
     }
     else // In this case we are sure we must add at least the first 8 items (2 colons)
         for(std::vector<BYTE>::size_type idx=0; idx<=3; idx++) {

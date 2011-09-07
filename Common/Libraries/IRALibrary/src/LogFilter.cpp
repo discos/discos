@@ -114,9 +114,9 @@ void CLogGuard::CErrorWrapper::log(ACE_Log_Priority priorty)
 {
 	ACSErr::ErrorTrace* c=m_errorTracePtr;
 	char uuidBuf[40];
-	// ACE_Utils::UUID* uuid=ACE_Utils::UUID_GENERATOR::instance()->generate_UUID();
+	ACE_Utils::UUID* uuid=ACE_Utils::UUID_GENERATOR::instance()->generate_UUID();
 	//use this with ACS version prior than ACS 8.0
-	ACE_Utils::UUID* uuid=ACE_Utils::UUID_GENERATOR::instance()->generateUUID();
+	// ACE_Utils::UUID* uuid=ACE_Utils::UUID_GENERATOR::instance()->generateUUID();
 	snprintf(uuidBuf,40,"%s",uuid->to_string()->c_str());
 	delete uuid;
 	if (!m_depth) return;
