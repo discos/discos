@@ -30,7 +30,7 @@ from random import randrange
 CMD_IDX = 3
 # Index of the byte that stores che parameters length
 PAR_LEN_IDX = 5
-NUMBER_OF_FEEDS = 2
+AD24_LEN = 8
 
 # Commands
 CMD_INQUIRY = chr(0x41)  # Answer with data
@@ -170,7 +170,7 @@ class BoardServer:
                                 if data_type == MCB_CMD_DATA_TYPE_B01:
                                     data_list += [randrange(0, 2)]
                                 elif data_type == MCB_CMD_DATA_TYPE_F32:
-                                    data_list += [156, 157, 158, 159] * NUMBER_OF_FEEDS # Add four bytes
+                                    data_list += [156, 157, 158, 159] * AD24_LEN # Add four bytes
                                     pass
                                 else:
                                     data_list += [item + 1 for item in range(randrange(1, 7))]

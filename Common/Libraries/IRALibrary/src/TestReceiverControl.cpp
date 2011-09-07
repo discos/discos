@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     unsigned int dewar_port = atoi(argv[2]);
     std::string lna_IP = std::string(argv[3]);
     unsigned int lna_port = atoi(argv[4]);
-    unsigned short feeds = 2; // REMEMBER TO CHANGE THE NUMBER OF FEEDS IN BOARD_SERVER.PY
+    unsigned short feeds = 2; 
     std::vector<BYTE> data;
 
 
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
         rc.turnLeftLNAsOff();
         cout << "Done!\n" << endl;
 
-        sleep(3);
+        sleep(5);
 
         // Test fetValues()
         cout << "Test fetValues() with a reliable communication" << endl;
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
         cout << ", VGR=" << values.VGR << ")" << endl;
         cout << "Done!\n" << endl;
 
-        sleep(3);
+        sleep(5);
 
         // Test the turnLeftLNAsOn()
         cout << "Test turnLeftLNAsOn() with a reliable communication" << endl;

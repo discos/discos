@@ -1179,7 +1179,7 @@ StageValues ReceiverControl::stageValues(
                     MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
             );
 
-            if(parameters.size() != AD24_LEN)
+            if(parameters.size() != AD24_LEN * AD24_TYPE_LEN)
                 throw MicroControllerBoardEx("Error: wrong number of parameters received.");
 
             for(std::vector<BYTE>::size_type idx=0; idx<AD24_LEN; idx+=2) {
