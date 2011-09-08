@@ -319,11 +319,11 @@ bool CEngineThread::processData ()
     m_secsFromMidnight[m_dataSeqCounter] = tS.hour () * 3600.0 + tS.minute () * 60.0 + tS.second () + (tS.microSecond () / 1000000.0);
 
     if (m_CoordIndex == 1) {
-        out.Format ("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#lat ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 1000.));
+        out.Format ("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#lat ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 1000.));
         m_file << (const char *) out;
     }
     if (m_CoordIndex == 0) {
-        out.Format ("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#lon ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 1000.));
+        out.Format ("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#lon ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 1000.));
         m_file << (const char *) out;
     }
     m_file << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
@@ -387,26 +387,26 @@ void CEngineThread::runLoop ()
             if ((m_lonDone == 0) && (m_latDone == 0)) {
                 // Start writing file
                 tS.value (now.value().value);
-                out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Calibration Tool Start\n", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (),
+                out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#Calibration Tool Start\n", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (),
                         (long)(tS.microSecond () / 1000.));
                 m_file << (const char *) out;
                 // File Name
                 tS.value (now.value().value);
                 fileName = data->getFileName ();
-                out.Format("%04d.%03d.%02d:%02d:%02d.%02d#File Name: ", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),(long)(tS.microSecond()/1000.));
+                out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#File Name: ", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),(long)(tS.microSecond()/1000.));
                 m_file << (const char *) out;
                 m_file << (const char *) fileName << std::endl;
 
                 // Project Name
                 tS.value (now.value().value);
                 projectName = data->getProjectName ();
-                out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Project Name: ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 1000.));
+                out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#Project Name: ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 1000.));
                 m_file << (const char *) out;
                 m_file << (const char *) projectName << std::endl;
                 // Observer Name
 		      tS.value (now.value().value);
 		      observerName = data->getObserverName ();
-		      out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Observer Name: ",
+		      out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#Observer Name: ",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
 			   (long)(tS.microSecond () / 1000.));
@@ -434,7 +434,7 @@ void CEngineThread::runLoop ()
 			}
 		      data->setSourceName (sourceName);
 		      tS.value (now.value().value);
-		      out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#source ",
+		      out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#source ",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
 			   (long)(tS.microSecond () / 1000.));
@@ -454,42 +454,42 @@ void CEngineThread::runLoop ()
 			    break;
 			case Management::MNG_HOR_LON:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#fivept azel 0 0 0  0 nn  0  0 ",
+				("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#fivept azel 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
 			    break;
 			case Management::MNG_HOR_LAT:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#fivept azel 0 0 0  0 nn  0  0 ",
+				("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#fivept azel 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
 			    break;
 			case Management::MNG_EQ_LON:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#fivept hadc 0 0 0  0 nn  0  0 ",
+				("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#fivept hadc 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
 			    break;
 			case Management::MNG_EQ_LAT:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#fivept hadc 0 0 0  0 nn  0  0 ",
+				("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#fivept hadc 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
 			    break;
 			case Management::MNG_GAL_LON:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#fivept gall 0 0 0  0 nn  0  0 ",
+				("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#fivept gall 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
 			    break;
 			case Management::MNG_GAL_LAT:
 			    out.Format
-				("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#fivept gall 0 0 0  0 nn  0  0 ",
+				("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#fivept gall 0 0 0  0 nn  0  0 ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
@@ -580,7 +580,7 @@ void CEngineThread::runLoop ()
 
 			    // latfit, laterr
 			    tS.value (now.value().value);
-			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#latfit ",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#latfit ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
@@ -588,7 +588,7 @@ void CEngineThread::runLoop ()
 			    m_file << m_Par[1] * DR2D << " " << m_Par[2] * DR2D << " " << m_Par[0] << " " << m_Par[3] << " " << m_Par[4] << " " << m_ierr << std::endl;
 
 			    tS.value (now.value().value);
-			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#laterr ",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#laterr ",
 				tS.year (), tS.dayOfYear (), tS.hour (),
 				tS.minute (), tS.second (),
 				(long)(tS.microSecond () / 1000.));
@@ -674,14 +674,14 @@ void CEngineThread::runLoop ()
 
 			    // lonfit, lonerr
 			    tS.value (now.value().value);
-			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#lonfit ",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#lonfit ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
 			    m_file << (const char *) out;
 			    m_file << m_Par[1] * DR2D << " " << m_Par[2] * DR2D << " " << m_Par[0] << " " <<  m_Par[3] << " " << m_Par[4] << " " << m_ierr << std::endl;
 			    tS.value (now.value().value);
-			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#lonerr ",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#lonerr ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
@@ -754,7 +754,7 @@ void CEngineThread::runLoop ()
 			{
 			    // offset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_lonResult, m_latResult 
 			    tS.value (now.value().value);
-			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#offset ",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#offset ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
@@ -763,7 +763,7 @@ void CEngineThread::runLoop ()
 
 			    // xoffset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_LonErr, m_LatErr, m_lonResult, m_latResult
 			    tS.value (now.value().value);
-			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#xoffset ",
+			    out.Format("%04d.%03d.%02d:%02d:%02d.%02d%s", "#fivpt#xoffset ",
 				 tS.year (), tS.dayOfYear (), tS.hour (),
 				 tS.minute (), tS.second (),
 				 (long)(tS.microSecond () / 1000.));
