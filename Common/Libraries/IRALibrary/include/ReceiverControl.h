@@ -647,7 +647,7 @@ public:
      *  case the value returned is without conversion.
      *  @return the StageValues for a given fet ``quantity`` and ``stage_number``. The StageValues
      *  is a struct of two members std::vector<double>, one member for the left channel and one for 
-     *  the right one. That members contain the related quantities of all the feeds, that is an 
+     *  the right one. That members contain the related quantities of all the feeds; that means each
      *  item of the std::vector<double> is the quantity value of a feed, for the stage requested.
      *  @throw ReceiverControlEx
      */

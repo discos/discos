@@ -858,42 +858,42 @@ FetValues ReceiverControl::fetValues(
         double (*voltageConverter)(double voltage)
         ) throw (ReceiverControlEx)
 {
-    std::string colon_selector;            // EN03: the signal that addresses the colon multiplexing of AD24
+    std::string column_selector;            // EN03: the signal that addresses the column multiplexing of AD24
     std::string vd_selector;               // A03: it allows to select the value requested for a given stadium
     std::string id_selector;               // A03: it allows to select the value requested for a given stadium
     std::string vg_selector;               // A03: it allows to select the value requested for a given stadium
-    size_t FEED_LIDX, FEED_RIDX;           // Indexes of the feed channels in the AD24 port, for a given colon
+    size_t FEED_LIDX, FEED_RIDX;           // Indexes of the feed channels in the AD24 port, for a given column
     
     FetValues values;
 
     if(feed_number >= m_number_of_feeds)
         throw ReceiverControlEx("ReceiverControl error: invalid feed number.");
 
-    // Select the colon in which there is the given feed
+    // Select the column in which there is the given feed
     switch(feed_number) {
         case 0:
         case 2:
         case 4:
         case 6:
-            colon_selector = "0001";
+            column_selector = "0001";
             break;
         case 1:
         case 3:
         case 5:
         case 7:
-            colon_selector = "0010";
+            column_selector = "0010";
             break;
         case 8:
         case 10:
         case 12:
         case 14:
-            colon_selector = "0011";
+            column_selector = "0011";
             break;
         case 9:
         case 11:
         case 13:
         case 15:
-            colon_selector = "0100";
+            column_selector = "0100";
             break;
         default:
             throw ReceiverControlEx("ReceiverControl error: invalid feed number.");
@@ -965,9 +965,9 @@ FetValues ReceiverControl::fetValues(
             throw ReceiverControlEx("ReceiverControl error: invalid stage number.");
     }
 
-    std::bitset<8> vd_request(colon_selector + vd_selector);
-    std::bitset<8> id_request(colon_selector + id_selector);
-    std::bitset<8> vg_request(colon_selector + vg_selector);
+    std::bitset<8> vd_request(column_selector + vd_selector);
+    std::bitset<8> id_request(column_selector + id_selector);
+    std::bitset<8> vg_request(column_selector + vg_selector);
 
     try {
 
@@ -1080,29 +1080,29 @@ StageValues ReceiverControl::stageValues(
         ) throw (ReceiverControlEx)
 {
 
-    // Each item is a EN03 value: the signal that addresses the colon multiplexing of AD24
-    std::vector<std::string> colon_selectors;  
+    // Each item is a EN03 value: the signal that addresses the column multiplexing of AD24
+    std::vector<std::string> column_selectors;  
     std::string vd_selector;               // A03: it allows to select the value requested for a given stadium
     std::string id_selector;               // A03: it allows to select the value requested for a given stadium
     std::string vg_selector;               // A03: it allows to select the value requested for a given stadium
     std::string quantity_selector;         // A03: it allows to select the value requested for a given stadium
     
     if(m_number_of_feeds == 1)
-        colon_selectors.push_back("0001");
+        column_selectors.push_back("0001");
     else if(m_number_of_feeds <= 8)  {
-        colon_selectors.push_back("0001");
-        colon_selectors.push_back("0010");
+        column_selectors.push_back("0001");
+        column_selectors.push_back("0010");
     }
     else if(m_number_of_feeds == 9) {
-        colon_selectors.push_back("0001");
-        colon_selectors.push_back("0010");
-        colon_selectors.push_back("0011");
+        column_selectors.push_back("0001");
+        column_selectors.push_back("0010");
+        column_selectors.push_back("0011");
     }
     else if(m_number_of_feeds > 9) {
-        colon_selectors.push_back("0001");
-        colon_selectors.push_back("0010");
-        colon_selectors.push_back("0011");
-        colon_selectors.push_back("0100");
+        column_selectors.push_back("0001");
+        column_selectors.push_back("0010");
+        column_selectors.push_back("0011");
+        column_selectors.push_back("0100");
     }
 
     switch(stage_number) {
@@ -1154,7 +1154,7 @@ StageValues ReceiverControl::stageValues(
     std::vector<double> ldvalues_first, rdvalues_first, ldvalues_second, rdvalues_second;
     std::vector<BYTE> parameters;
 
-    for(std::vector<std::string>::iterator iter=colon_selectors.begin(); iter!=colon_selectors.end(); iter++) {
+    for(std::vector<std::string>::iterator iter=column_selectors.begin(); iter!=column_selectors.end(); iter++) {
         std::bitset<8> value(*iter + quantity_selector);
         try {
 
@@ -1183,8 +1183,8 @@ StageValues ReceiverControl::stageValues(
                 throw MicroControllerBoardEx("Error: wrong number of parameters received.");
 
             for(std::vector<BYTE>::size_type idx=0; idx<AD24_LEN; idx+=2) {
-                ldvalues.push_back(get_value(parameters, idx));
-                rdvalues.push_back(get_value(parameters, idx+1));
+                ldvalues.push_back(get_value(parameters, idx));    // Push the left value channel
+                rdvalues.push_back(get_value(parameters, idx+1));  // Push the right value channel
             }
 
             if(ldvalues.empty() || rdvalues.empty())
@@ -1197,35 +1197,35 @@ StageValues ReceiverControl::stageValues(
     }
 
     if(m_number_of_feeds == 1) { 
-        if(ldvalues.size() != 4 || rdvalues.size() != 4)  // Just one feed (the feed number 0) means just one colon 
+        if(ldvalues.size() != 4 || rdvalues.size() != 4)  // Just one feed (the feed number 0) means just one column 
             throw ReceiverControlEx("Error: mismatch between number of feeds and number of parameters");
         lvalues.push_back(ldvalues.front());
         rvalues.push_back(rdvalues.front());
     }
-    else // In this case we are sure we must add at least the first 8 items (2 colons)
+    else // In this case we are sure we must add at least the first 8 items (2 columns)
         for(std::vector<BYTE>::size_type idx=0; idx<=3; idx++) {
-            lvalues.push_back(ldvalues[idx]);
-            lvalues.push_back(ldvalues[idx+4]); // Add the item of the second colon
-            rvalues.push_back(rdvalues[idx]);
-            rvalues.push_back(rdvalues[idx+4]); // Add the item of the second colon
+            lvalues.push_back(ldvalues[idx]);   // Add the item of the first column
+            lvalues.push_back(ldvalues[idx+4]); // Add the item of the second column
+            rvalues.push_back(rdvalues[idx]);   // Add the item of the first column
+            rvalues.push_back(rdvalues[idx+4]); // Add the item of the second column
         }
 
     if(m_number_of_feeds == 9) { // Exactly nine feeds (number_of_feeds == 9)
-        if(ldvalues.size() != 12 || rdvalues.size() != 12)  // Nine feeds means three colons
+        if(ldvalues.size() != 12 || rdvalues.size() != 12)  // Nine feeds means three columns
             throw ReceiverControlEx("Error: mismatch between number of feeds and number of parameters");
         lvalues.push_back(ldvalues[8]);
         rvalues.push_back(rdvalues[8]);
     }
     else 
         if(ldvalues.size() > 9) {
-            if(ldvalues.size() != 16 || rdvalues.size() != 16)  // More than nine feeds means four colons
+            if(ldvalues.size() != 16 || rdvalues.size() != 16)  // More than nine feeds means four columns
                 throw ReceiverControlEx("Error: mismatch between number of feeds and number of parameters");
             std::vector<BYTE>::size_type offset=8;
             for(std::vector<BYTE>::size_type idx=0; idx<=3; idx++) {
-                lvalues.push_back(ldvalues[offset+idx]);
-                lvalues.push_back(ldvalues[offset+idx+4]); // Add the item of the second colon
-                rvalues.push_back(rdvalues[offset+idx]);
-                rvalues.push_back(rdvalues[offset+idx+4]); // Add the item of the second colon
+                lvalues.push_back(ldvalues[offset+idx]);   // Add the item of the third column
+                lvalues.push_back(ldvalues[offset+idx+4]); // Add the item of the fourth column
+                rvalues.push_back(rdvalues[offset+idx]);   // Add the item of the third column
+                rvalues.push_back(rdvalues[offset+idx+4]); // Add the item of the fourth column
             }
         }
     
