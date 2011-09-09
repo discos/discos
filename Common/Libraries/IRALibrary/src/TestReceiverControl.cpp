@@ -74,6 +74,26 @@ int main(int argc, char *argv[])
         cout << "Test isCalibrationOn() with a reliable communication" << endl;
         cout << "Is the noise mark generator ON? " << (rc.isCalibrationOn() == true ? "yes" : "no") << endl;
         cout << "Done!\n" << endl;
+    
+        // Test the setExtCalibrationOn()
+        cout << "Test setExtCalibrationOn() with a reliable communication" << endl;
+        rc.setExtCalibrationOn();
+        cout << "Done!\n" << endl;
+
+        // Test the isExtCalibrationOn()
+        cout << "Test isExtCalibrationOn() with a reliable communication" << endl;
+        cout << "Is the external noise mark generator command enabled? " << (rc.isExtCalibrationOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+    
+        // Test the setExtCalibrationOff()
+        cout << "Test setExtCalibrationOff() with a reliable communication" << endl;
+        rc.setExtCalibrationOff();
+        cout << "Done!\n" << endl;
+
+        // Test the isExtCalibrationOff()
+        cout << "Test isExtCalibrationOn() with a reliable communication" << endl;
+        cout << "Is the external noise mark generator command enabled? " << (rc.isExtCalibrationOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
 
         // Test the setReliableCommOff()
         cout << "Test setReliableCommOff()" << endl;
@@ -83,6 +103,11 @@ int main(int argc, char *argv[])
         // Test the vacuum() voltage value, without conversion
         cout << "Test vacuum()" << endl;
         cout << "Vacuum value before conversion [Volt]: " << rc.vacuum() << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the vertexTemperature() voltage value, without conversion
+        cout << "Test vertexTemperature()" << endl;
+        cout << "Vertex temperature value before conversion [Volt]: " << rc.vertexTemperature() << endl;
         cout << "Done!\n" << endl;
 
         // Test the setReliableCommOn()
@@ -154,7 +179,7 @@ int main(int argc, char *argv[])
 
         // Test fetValues()
         cout << "Test fetValues() with a reliable communication" << endl;
-        FetValues values = rc.fetValues(0, 4, currentConverter, voltageConverter);
+        ReceiverControl::FetValues values = rc.fetValues(0, 4, currentConverter, voltageConverter);
         cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
         cout << ", VGL=" << values.VGL << ")" << endl;
         cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
@@ -193,7 +218,7 @@ int main(int argc, char *argv[])
 
         // Test stageValues()
         cout << "Test stageValues() with a reliable communication" << endl;
-        StageValues svalues = rc.stageValues(DRAIN_VOLTAGE, 4, voltageConverter);
+        ReceiverControl::StageValues svalues = rc.stageValues(ReceiverControl::DRAIN_VOLTAGE, 4, voltageConverter);
         cout << "Drain voltages for the stage number 4:\n" << endl;
         cout << "\tLeft channel:\n";
         std::vector<double>::iterator liter = (svalues.left_channel).begin();
@@ -250,6 +275,11 @@ int main(int argc, char *argv[])
         // Test the isVacuumPumpOn()
         cout << "Test isVacuumPumpOn() with a reliable communication" << endl;
         cout << "Is the vacuum pump ON? " << (rc.isVacuumPumpOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the hasVacuumPumpFault()
+        cout << "Test hasVacuumPumpFault() with a reliable communication" << endl;
+        cout << "Has the vacuum pump a fault? " << (rc.hasVacuumPumpFault() == true ? "yes" : "no") << endl;
         cout << "Done!\n" << endl;
 
         // Test the setVacuumValveOff()

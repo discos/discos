@@ -31,30 +31,6 @@ private:
 };
 
 
-struct FetValues {
-    double VDL; // Drain Voltage, left channel  [V]
-    double IDL; // Drain Current, left channel  [mA]
-    double VGL; // Gate Voltage, left channel   [V]
-    double VDR; // Drain Voltage, right channel [V]
-    double IDR; // Drain Current, right channel [mA]
-    double VGR; // Gate Voltage, right channel  [V]
-};
-
-
-/**
- * The left_channel member stores all the left channel values of a specific
- * fet quantity (VD, ID or VG), and the right one stores the values for
- * the right channel.
- */
-struct StageValues {
-    std::vector<double> left_channel;
-    std::vector<double> right_channel;
-};
-
-
-enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
-
-
 /** 
  * This class performs a high level library to comunicate via TCP/IP
  * to receivers controlled by the board designed in Medicina (BO, Italy) 
@@ -73,6 +49,7 @@ enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
  * <ul>
  *     <li>unsigned short numberOfFeeds(): return the number of feeds</li>
  *     <li>double vacuum(double (*converter)(double)): return the vacuum value inside the dewar</li>
+ *     <li>double vertexTemperature(double (*converter)(double)): return the vertex temperature value</li>
  *     <li>double cryoTemperature1(double (*converter)(double)): return the first cryogenic temperature value</li>
  *     <li>double cryoTemperature2(double (*converter)(double)): return the second cryogenic temperature value</li>
  *     <li>double cryoTemperature3(double (*converter)(double)): return the third cryogenic temperature value</li>
@@ -86,13 +63,17 @@ enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
  *     <li>void setVacuumPumpOn(): set to ON the vacuum pump</li>
  *     <li>void setVacuumPumpOff(): set to OFF the vacuum pump</li>
  *     <li>bool isVacuumPumpOn(): return true if the vacuum pump is ON</li>
+ *     <li>bool hasVacuumPumpFault(): return true if there is a fault on the vacuum pump</li>
  *     <li>void setVacuumValveOn(): open the valve IMMEDIATELY</li>
  *     <li>void setVacuumValveOff(): disable the valve</li>
  *     <li>bool isVacuumValveOn(): return true if the vacuum valve is opened</li>
  *     <li>void setCalibrationOn(): set the noise mark to ON</li>
  *     <li>void setCalibrationOff(): set the noise mark to OFF</li>
  *     <li>bool isCalibrationOn(): is the noise mark generator set to ON?</li>
- *     <li>bool isRemoteOn(): return true if the remote command is enable</li>
+ **     <li>void setExtCalibrationOn(): enable the external noise mark generator synchronous command</li>
+ **     <li>void setExtCalibrationOff(): disable the external noise mark generator synchronous command</li>
+ **     <li>bool isExtCalibrationOn(): is the external noise mark generator command enabled?</li>
+ *     <li>bool isRemoteOn(): return true if the remote command is enabled</li>
  *     <li>void selectLO1(): select the Local Oscillator 1</li>
  *     <li>bool isLO1Selected(): return true if the first Local Oscillator (LO1) is selected</li>
  *     <li>void selectLO2(): select the Local Oscillator 2</li>
@@ -122,16 +103,41 @@ enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
  *     is a struct of two members std::vector<double>, one member for the left channel and one for 
  *     the right one. That members contain the related quantities of all the feeds, that is an 
  *     item of the std::vector<double> is the quantity value of a feed, for the stage requested.</li>
- *     <li>void turnLeftLNAsOn(): turn the the left LNAs ON</li>
- *     <li>void turnLeftLNAsOff(): turn the the left LNAs OFF</li>
- *     <li>void turnRightLNAsOn(): turn the the right LNAs ON</li>
- *     <li>void turnRightLNAsOff(): turn the the right LNAs OFF</li>
+ *     <li>void turnLeftLNAsOn(): turn the left LNAs ON</li>
+ *     <li>void turnLeftLNAsOff(): turn the left LNAs OFF</li>
+ *     <li>void turnRightLNAsOn(): turn the right LNAs ON</li>
+ *     <li>void turnRightLNAsOff(): turn the right LNAs OFF</li>
  * </ul>
  * 
  */
 class ReceiverControl {
 
+
+
 public:
+
+struct FetValues {
+    double VDL; // Drain Voltage, left channel  [V]
+    double IDL; // Drain Current, left channel  [mA]
+    double VGL; // Gate Voltage, left channel   [V]
+    double VDR; // Drain Voltage, right channel [V]
+    double IDR; // Drain Current, right channel [mA]
+    double VGR; // Gate Voltage, right channel  [V]
+};
+
+
+/**
+ * The left_channel member stores all the left channel values of a specific
+ * fet quantity (VD, ID or VG), and the right one stores the values for
+ * the right channel.
+ */
+struct StageValues {
+    std::vector<double> left_channel;
+    std::vector<double> right_channel;
+};
+
+
+enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
 
 	/** 
 	 * Constructor
@@ -215,6 +221,50 @@ public:
     ) throw (ReceiverControlEx);
 
 
+    /** Enable the external noise mark generator synchronous command
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 12
+     *  @param value the value to set; the default value is 0x01
+     *  @throw ReceiverControlEx
+     */
+    void setExtCalibrationOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_12, 
+            const BYTE value=0x01
+    ) throw (ReceiverControlEx);
+
+
+    /** Disable the external noise mark generator synchronous command
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 12
+     *  @param value the value to set; the default value is 0x00
+     *  @throw ReceiverControlEx
+     */
+    void setExtCalibrationOff(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_12, 
+            const BYTE value=0x00
+    ) throw (ReceiverControlEx);
+
+
+    /** Is the external noise mark generator command enabled?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 12
+     *  @return true if the external noise mark generator command is enabled
+     *  @throw ReceiverControlEx
+     */
+    bool isExtCalibrationOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_12
+    ) throw (ReceiverControlEx);
+
+
     /** Set the reliable communication to/from the board to ON */
     void setReliableCommOn() { m_reliable_comm = true; }
 
@@ -248,6 +298,30 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_AD24,       
             const BYTE port_number=MCB_PORT_NUMBER_00_07,  
             const size_t raw_index=2                      
+    ) throw (ReceiverControlEx);
+
+
+    /** Return the vertex temperature
+     *
+     *  @param converter pointer to the function that performs the conversion from
+     *  voltage to Kelvin; default value is NULL, and in this case the value
+     *  returned by vertexTemperature is the voltage value (the value before conversion).
+     *  @param data_type the type of the data; the default type is a 32 bit floating point
+     *  @param port_type the port type; the default port is the AD24
+     *  @param port_number the port number; the default value is a range of port numbers from
+     *  8 to 15.
+     *  @param raw_index the index that allows to get the vertex temperature value from the 
+     *  port_number range. The default value is 6.
+     *  @return the vertex temperature in Kelvin if converter != NULL, the value in voltage
+     *  (before conversion) otherwise.
+     *  @throw ReceiverControlEx
+     */
+    double vertexTemperature(
+            double (*converter)(double voltage)=NULL,
+            const BYTE data_type=MCB_CMD_DATA_TYPE_F32,     
+            const BYTE port_type=MCB_PORT_TYPE_AD24,       
+            const BYTE port_number=MCB_PORT_NUMBER_00_07,  
+            const size_t raw_index=6                      
     ) throw (ReceiverControlEx);
 
 
@@ -403,6 +477,20 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_05
+    ) throw (ReceiverControlEx);
+
+
+    /** Has the vacuum pump a fault?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 06
+     *  @return true if the vacuum pump has a fault
+     *  @throw ReceiverControlEx
+     */
+    bool hasVacuumPumpFault(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,
+            const BYTE port_number=MCB_PORT_NUMBER_06
     ) throw (ReceiverControlEx);
 
 

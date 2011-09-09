@@ -2,9 +2,9 @@
 
 using IRA::ReceiverControl; 
 using IRA::ReceiverControlEx;
-using IRA::FetValues;
-using IRA::FetValue;
-using IRA::StageValues;
+// using IRA::ReceiverControl::FetValues;
+// using IRA::ReceiverControl::FetValue;
+// using IRA::ReceiverControl::StageValues;
 using IRA::any2string;
 
 
@@ -128,6 +128,85 @@ bool ReceiverControl::isCalibrationOn(
 }
 
 
+void ReceiverControl::setExtCalibrationOn(
+        const BYTE data_type, 
+        const BYTE port_type, 
+        const BYTE port_number, 
+        const BYTE value
+        ) throw (ReceiverControlEx)
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                data_type, 
+                port_type,  
+                port_number, 
+                value 
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setExtCalibrationOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::setExtCalibrationOff(
+        const BYTE data_type, 
+        const BYTE port_type, 
+        const BYTE port_number, 
+        const BYTE value
+        ) throw (ReceiverControlEx)
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                data_type, 
+                port_type,  
+                port_number, 
+                value 
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setExtCalibrationOff().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::isExtCalibrationOn(
+        const BYTE data_type, 
+        const BYTE port_type, 
+        const BYTE port_number
+        ) throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                data_type,
+                port_type, 
+                port_number 
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isExtCalibrationOn(): wrong number of parameters.");
+
+        return parameters.front() == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isExtCalibrationOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
 double ReceiverControl::vacuum(
         double (*converter)(double voltage),
         const BYTE data_type,     
@@ -153,6 +232,36 @@ double ReceiverControl::vacuum(
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error getting the vacuum.\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+double ReceiverControl::vertexTemperature(
+        double (*converter)(double voltage),
+        const BYTE data_type,     
+        const BYTE port_type,       
+        const BYTE port_number,  
+        const size_t raw_index                      
+        ) throw (ReceiverControlEx)
+{
+    try {
+
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,      // Pointer to the dewar board
+                MCB_CMD_GET_DATA,       // Command to send
+                3,                      // Number of parameters
+                data_type,
+                port_type,
+                port_number
+        );
+
+        // Return the vertex temperature in Kelvin for a given voltage VALUE
+        return converter != NULL ? converter(get_value(parameters, raw_index)) : \
+                            get_value(parameters, raw_index);
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error getting the vertex temperature.\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
 }
@@ -428,6 +537,35 @@ bool ReceiverControl::isVacuumPumpOn(
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing isVacuumPumpOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+bool ReceiverControl::hasVacuumPumpFault(
+        const BYTE data_type,
+        const BYTE port_type,
+        const BYTE port_number
+        ) throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::hasVacuumPumpFault(): wrong number of parameters.");
+
+        return parameters.front() == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing hasVacuumPumpFault().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
 }
@@ -851,7 +989,7 @@ bool ReceiverControl::isDewarBoardConnectionOK(void)
 }
 
 
-FetValues ReceiverControl::fetValues(
+ReceiverControl::FetValues ReceiverControl::fetValues(
         unsigned short feed_number, 
         unsigned short stage_number,
         double (*currentConverter)(double voltage),
@@ -1073,7 +1211,7 @@ FetValues ReceiverControl::fetValues(
 }
 
 
-StageValues ReceiverControl::stageValues(
+ReceiverControl::StageValues ReceiverControl::stageValues(
         FetValue quantity, 
         unsigned short stage_number,
         double (*converter)(double voltage)
