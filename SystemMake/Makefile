@@ -21,6 +21,7 @@ ifeq ($(TARGETSYS),SRT)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower NoiseGenerator DBBC SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation \
+		SRT7GHzReceiver
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient SystemTerminal \
 		SRTActiveSurfaceGUIClient SRTMountTextClient \
 		Plotter KStars Scripts \
@@ -39,7 +40,7 @@ ifeq ($(TARGETSYS),SRT)
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss SRTMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower NoiseGenerator
-	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver DBBC
+	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRT7GHzReceiver DBBC
 	WeatherStationImplementation_MODULES:=SRTWeatherStation
 	SRTActiveSurfaceImplementation_MODULES:=SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss 
 	MinorServoImplementation_MODULES:=SRTMinorServo

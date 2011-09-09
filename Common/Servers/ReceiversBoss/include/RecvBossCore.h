@@ -3,7 +3,6 @@
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: RecvBossCore.h,v 1.7 2011-06-21 16:39:30 a.orlati Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
@@ -11,14 +10,30 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  21/07/2010      Creation                                                  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  28/02/2011      For computation is now considered the real band, given by the receiver band and the backend filter */
 
+#ifdef COMPILE_TARGET_MED
+
 #include <ManagmentDefinitionsC.h>
-#include "ComponentErrors.h"
-#include "ManagementErrors.h"
+#include <ComponentErrors.h>
+#include <ManagementErrors.h>
+#include <ReceiversErrors.h>
 #include <ReceiversBossS.h>
 #include <ReceiversDefinitionsS.h>
 #include <IRA>
+#include "Configuration.h"
 
 #define _RECVBOSSCORE_MAX_IFS 4
+
+#else
+
+#include <ManagmentDefinitionsC.h>
+#include <GenericReceiverS.h>
+#include <ComponentErrors.h>
+#include <ManagementErrors.h>
+#include <ReceiversErrors.h>
+#include <IRA>
+#include "Configuration.h"
+
+#endif
 
 class CRecvBossCore {
 public:
@@ -45,7 +60,7 @@ public:
 	/**
 	 * This function initializes the boss core, all preliminary operation are performed here.
 	*/
-	virtual void initialize(maci::ContainerServices* services);
+	virtual void initialize(maci::ContainerServices* services,CConfiguration *config);
 	
 	/** 
 	 * This function performs all the clean up operation required to free al the resources allocated by the class
@@ -58,9 +73,13 @@ public:
 	
 	void setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl);
 	
-	void setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
-	
-	void setMode(const char * mode) throw (ComponentErrors::ValidationErrorExImpl,ManagementErrors::ConfigurationErrorExImpl);
+	/**
+	 * This method will configure the component that controls the receiver actually identified by the given code
+	 * @param code identifier code of the receiver
+	 */
+	void setupReceiver(const char * code) throw (ManagementErrors::ConfigurationErrorExImpl);
+
+	void setMode(const char * mode) throw (ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ModeErrorExImpl);
 	
 	void park();
 	
@@ -83,10 +102,20 @@ public:
 	
 	void getIFs(long& ifs);
 	
-	const IRA::CString& getRecvCode() const { return m_currentReceiver; }
+	const IRA::CString& getRecvCode() const;
 	
-	const Management::TSystemStatus& getStatus() const { return m_status; }
+	const IRA::CString& getOperativeMode() const;
+
+	const Management::TSystemStatus& getStatus() const;
 private:
+
+
+	Management::TSystemStatus m_status;
+	maci::ContainerServices* m_services;
+	CConfiguration *m_config;
+	BACIMutex m_mutex;
+
+#ifdef COMPILE_TARGET_MED
 	/**
 	 * Socket to the KBand Recevier
 	 */
@@ -99,9 +128,6 @@ private:
 	IRA::CSocket m_fsSocket;
 	bool m_recvOpened;
 	bool m_fsOpened;
-	IRA::CString m_currentReceiver;
-	IRA::CString m_currentOperativeMode;
-	Management::TSystemStatus m_status;
 	IRA::CDBTable *m_KKCFeedTable;
 	double m_LO[_RECVBOSSCORE_MAX_IFS];
 	long m_feeds;
@@ -109,8 +135,31 @@ private:
 	Receivers::TPolarization m_pols[_RECVBOSSCORE_MAX_IFS];
 	double m_startFreq[_RECVBOSSCORE_MAX_IFS];
 	double m_bandWidth[_RECVBOSSCORE_MAX_IFS];
-	maci::ContainerServices* m_services;
-	BACIMutex m_mutex;
+	IRA::CString m_currentReceiver;
+	IRA::CString m_currentOperativeMode;
+
+#else
+	Receivers::Receiver_var m_currentRecv;
+	bool m_currentRecvError;
+	IRA::CString m_currentRecvInstance;
+	Management::TSystemStatus m_bossStatus;
+	ACS::Time  m_lastStatusChange;
+
+
+	void loadReceiver(const IRA::CString instance) throw (ComponentErrors::CouldntGetComponentExImpl);
+	void unloadReceiver();
+	void changeBossStatus(const Management::TSystemStatus& status);
+
+
+#endif
+
+#ifdef COMPILE_TARGET_MED
+	void setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+#else
+	void setup(const char * code) throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl);
+#endif
+
 };
 
 #endif

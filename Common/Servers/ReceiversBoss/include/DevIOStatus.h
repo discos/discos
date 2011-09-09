@@ -3,7 +3,6 @@
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: DevIOStatus.h,v 1.1 2010-07-22 12:24:47 a.orlati Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
@@ -12,8 +11,6 @@
 
 #include <baciDevIO.h>
 #include <IRA>
-
-using namespace baci;
 
 /**
  * This  class is derived from the template DevIO. It is used by the  status property. 

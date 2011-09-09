@@ -3,7 +3,6 @@
 
 /** **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id: DevIOPolarization.h,v 1.1 2010-08-06 13:46:20 a.orlati Exp $									           */
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
@@ -13,8 +12,6 @@
 
 #include <baciDevIO.h>
 #include <IRA>
-
-using namespace IRA;
 
 /**
  * This class is derived from template DevIO and it is used by the polarization property  of the receiverBoss component. 

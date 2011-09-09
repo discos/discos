@@ -3,7 +3,6 @@
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: ReceiversBossImpl.h,v 1.10 2011-04-19 06:56:22 c.migoni Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
@@ -26,26 +25,26 @@
 #include <baciROlong.h>
 #include <enumpropROImpl.h>
 #include <SP_parser.h>
+#include <ReceiversErrors.h>
 #include <IRA>
+#include "Configuration.h"
 #include "RecvBossCore.h"
 
 /** 
  * @mainpage ReceiversBoss component Implementation 
- * @date 28/02/2011
- * @version 0.31.0 
+ * @date 09/09/2011
+ * @version 0.33.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.0.2
  * @remarks compiler version is 3.4.6
 */
-
-using namespace baci;
 
 /**
  * @author <a href=mailto:a.orlati@ira.inaf.it>Orlati Andrea</a>
  * Istituto di Radioastronomia, Italia
  * <br> 
  */
-class ReceiversBossImpl: public CharacteristicComponentImpl,
+class ReceiversBossImpl: public baci::CharacteristicComponentImpl,
 				       public virtual POA_Receivers::ReceiversBoss
 {
 public:
@@ -95,26 +94,29 @@ public:
 	 * This method is used to turn the calibration diode on.
 	 * @throw CORBA::SystemExcpetion
 	 * @throw ComponentErrors::ComponentErrorsEx  
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
 	 */
-	void calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+	void calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is used to turn the calibration diode off.
 	 * @throw CORBA::SystemExcpetion
 	 * @throw ComponentErrors::ComponentErrorsEx  
+	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	void calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+	void calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 	
 	/**
 	 * This method allows to set local oscillator. Depending on the curretly configured receiver one or more values are considered.
 	 * @param lo the list contains the values in MHz for the local oscillator
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
 	 */
-	void setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+	void setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 	
 	/**
-	 * This method will be used to configure a receiver given its mnemoci code
+	 * This method will be used to configure a receiver given its mnemonic code
 	 * @param code string that contains the code of the receiver to be configured
 	 * @throw CORBA::SystemException
 	 * @throw ManagementErrors::ConfigurationErrorEx
@@ -126,10 +128,10 @@ public:
 	 * an error is issued.
 	 * @param mode string identifer of the operating mode
 	 * @throw CORBA::SystemException
-	 * @throw ManagementErrors::ConfigurationErrorEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 */
-	void setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx);
+	void setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 	
 	/**
 	 * This method puts the subsystem in idle. At the moment it does nothing that resetting the receiver code.
@@ -141,6 +143,7 @@ public:
 	 * The subbands are defined by giving the feed numeber, the polarization the initial frequency and the bandwidth.
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
 	 * @param freqs for each subband this is the list of the starting frequencies (in MHz). Correlated to the real initial frequency of the current receiver.
 	 * @param bandwidths for each subband this is the width in MHz. Correlated to the real bandwidth of the current receiver.
 	 * @param feeds for each subband this if the feed number
@@ -148,24 +151,26 @@ public:
 	 * @return the list of the noise calibration value in Kelvin degrees.
 	 */
     virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs) throw (
-    		CORBA::SystemException,ComponentErrors::ComponentErrorsEx); 
+    		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is called in order to know the geometry of the currently configured receiver. The geometry is given along the X and Y axis where the central feed is the origin
 	 * the axis. The relative power (normalized to one) with respect to the central feed is also given.    
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
 	 * @param X the positions relative to the central beam of the feeds along the X axis (radians)
 	 * @param Y the positions relative to the central beam of the feeds along the Y axis (radians) 
 	 * @param power the relative power of the feeds
 	 * @return the number of feeds
 	 */    
-    virtual CORBA::Long getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+    virtual CORBA::Long getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
 	/**
 	 * This method is called in order to know the taper of the current receiver. 
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
 	 * @param freq starting frequency of the detector in MHz. Correlated to the real initial frequency of the current receiver.
 	 * @param bandWidth bandwidth of the detector n MHz. Correlated to the real bandwidth of the current receiver.
 	 * @param feed feed id the detector is attached to
@@ -173,7 +178,8 @@ public:
 	 * @param waveLen corresponding wave length in meters
 	 * @return the value of the taper in db
 	 */        
-    virtual CORBA::Double getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+    virtual CORBA::Double getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (CORBA::SystemException,
+    		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
 	/**
 	 * This method implements the command line interpreter. The interpreter allows to ask for services or to issue commands
@@ -241,19 +247,21 @@ public:
 
 	
 private:
-	SmartPropertyPointer<ROdoubleSeq> m_plocalOscillator;
-	SmartPropertyPointer<ROstring> m_pactualSetup;
-	SmartPropertyPointer<ROlong> m_pfeeds;
-	SmartPropertyPointer<ROlong> m_pIFs;
-	SmartPropertyPointer<ROdoubleSeq> m_pinitialFrequency;
-	SmartPropertyPointer<ROdoubleSeq> m_pbandWidth;
-	SmartPropertyPointer<ROlongSeq> m_ppolarization;
-	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plocalOscillator;
+	baci::SmartPropertyPointer<baci::ROstring> m_pactualSetup;
+	baci::SmartPropertyPointer<baci::ROlong> m_pfeeds;
+	baci::SmartPropertyPointer<baci::ROlong> m_pIFs;
+	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pinitialFrequency;
+	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pbandWidth;
+	baci::SmartPropertyPointer<baci::ROlongSeq> m_ppolarization;
+	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),
 	  POA_Management::ROTSystemStatus> > m_pstatus;
 	baci::SmartPropertyPointer<baci::ROstring> m_pmode;
 	
 	SimpleParser::CParser<CRecvBossCore> *m_parser;
 	CRecvBossCore *m_core;
+	CConfiguration m_config;
+
 };
 
 

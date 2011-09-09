@@ -8,12 +8,14 @@
 #include "DevIOIFs.h"
 #include "DevIOPolarization.h"
 #include "DevIOBandWidth.h"
- #include "DevIOInitialFrequency.h"
+#include "DevIOInitialFrequency.h"
+#include "DevIOMode.h"
 
 static char *rcsId="@(#) $Id: ReceiversBossImpl.cpp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 using namespace SimpleParser;
+using namespace baci;
 
 ReceiversBossImpl::ReceiversBossImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) : 
 	CharacteristicComponentImpl(CompName,containerServices),
@@ -40,6 +42,7 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("ReceiversBossImpl::initialize()");
 	ACS_LOG(LM_FULL_INFO,"ReceiversBossImpl::initialize()",(LM_INFO,"ReceiversBossImpl::COMPSTATE_INITIALIZING"));
+	m_config.init(getContainerServices()); // throw exceptions
 	try {
 		m_core=new CRecvBossCore();
 		m_plocalOscillator=new ROdoubleSeq(getContainerServices()->getName()+":LO",getComponent(),new DevIOLO(m_core),true);
@@ -48,10 +51,9 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_pfeeds=new ROlong(getContainerServices()->getName()+":feeds",getComponent(),new DevIOFeeds(m_core),true);
 		m_pIFs=new ROlong(getContainerServices()->getName()+":IFs",getComponent(),new DevIOIFs(m_core),true);
 		m_ppolarization=new ROlongSeq(getContainerServices()->getName()+":polarization",getComponent(),new DevIOPolarization(m_core),true);
-		
 		m_pinitialFrequency=new ROdoubleSeq(getContainerServices()->getName()+":initialFrequency",getComponent(),new DevIOInitialFrequency(m_core),true);
 		m_pbandWidth=new ROdoubleSeq(getContainerServices()->getName()+":bandWidth",getComponent(),new DevIOBandWidth(m_core),true);
-		
+		m_pmode=new ROstring(getContainerServices()->getName()+":mode",getComponent(),new DevIOMode(m_core),true);
 		// create the parser for command line execution
 		m_parser= new SimpleParser::CParser<CRecvBossCore>(m_core,10);
 	}
@@ -59,9 +61,9 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"ReceiversBossImpl::initialize()");
 		throw dummy;
 	}
-	m_core->initialize(getContainerServices());
+	m_core->initialize(getContainerServices(),&m_config);
 	m_parser->add<0>("receiversPark",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::park));
-	m_parser->add<1>("receiversSetup",new function1<CRecvBossCore,non_constant,void_type,I<string_type> >(m_core,&CRecvBossCore::setup));
+	m_parser->add<1>("receiversSetup",new function1<CRecvBossCore,non_constant,void_type,I<string_type> >(m_core,&CRecvBossCore::setupReceiver));
 	m_parser->add<1>("receiversMode",new function1<CRecvBossCore,non_constant,void_type,I<string_type> >(m_core,&CRecvBossCore::setMode));
 	m_parser->add<0>("calOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::calOn));
 	m_parser->add<0>("calOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::calOff));
@@ -105,7 +107,7 @@ void ReceiversBossImpl::aboutToAbort()
 	if (m_core) delete m_core;
 }
 
-void ReceiversBossImpl::calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx)
+void ReceiversBossImpl::calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {	
 	try {
 		m_core->calOn();
@@ -114,6 +116,10 @@ void ReceiversBossImpl::calOn() throw (CORBA::SystemException,ComponentErrors::C
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();		
 	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::calOn()");
 		impl.log(LM_DEBUG);
@@ -121,7 +127,7 @@ void ReceiversBossImpl::calOn() throw (CORBA::SystemException,ComponentErrors::C
 	}
 }
 
-void ReceiversBossImpl::calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx)
+void ReceiversBossImpl::calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		m_core->calOff();
@@ -130,6 +136,10 @@ void ReceiversBossImpl::calOff() throw (CORBA::SystemException,ComponentErrors::
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();		
 	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::calOff()");
 		impl.log(LM_DEBUG);
@@ -137,7 +147,7 @@ void ReceiversBossImpl::calOff() throw (CORBA::SystemException,ComponentErrors::
 	}
 }
 
-void ReceiversBossImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx)
+void ReceiversBossImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		m_core->setLO(lo);
@@ -145,6 +155,10 @@ void ReceiversBossImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemExce
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();		
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
 	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::setLO()");
@@ -156,20 +170,15 @@ void ReceiversBossImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemExce
 void ReceiversBossImpl::setup(const char * code) throw (CORBA::SystemException,ManagementErrors::ConfigurationErrorEx)
 {
 	try {
-		m_core->setup(code);
+		m_core->setupReceiver(code);
 	}
-	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+	catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getComponentErrorsEx();		
+		throw ex.getConfigurationErrorEx();
 	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::setup()");
-		impl.log(LM_DEBUG);
-		throw impl.getComponentErrorsEx();
-	}	
 }
 
-void ReceiversBossImpl::setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx)
+void ReceiversBossImpl::setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		m_core->setMode(mode); 
@@ -178,9 +187,14 @@ void ReceiversBossImpl::setMode(const char * mode) throw (CORBA::SystemException
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();
 	}
-	catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getConfigurationErrorEx();		
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::setMode()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
 	}
 }
 
@@ -190,7 +204,7 @@ void ReceiversBossImpl::park() throw (CORBA::SystemException,ManagementErrors::P
 }
 
 ACS::doubleSeq *ReceiversBossImpl::getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds,const ACS::longSeq& ifs) throw (CORBA::SystemException,
-	ComponentErrors::ComponentErrorsEx)
+	ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	ACS::doubleSeq_var result=new ACS::doubleSeq;
 	try {
@@ -200,6 +214,10 @@ ACS::doubleSeq *ReceiversBossImpl::getCalibrationMark(const ACS::doubleSeq& freq
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();		
 	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::getCalibrationMark()");
 		impl.log(LM_DEBUG);
@@ -208,7 +226,8 @@ ACS::doubleSeq *ReceiversBossImpl::getCalibrationMark(const ACS::doubleSeq& freq
 	return result._retn();
 }
 
-CORBA::Long ReceiversBossImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx)
+CORBA::Long ReceiversBossImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+		ReceiversErrors::ReceiversErrorsEx)
 {
 	ACS::doubleSeq_var tempX=new ACS::doubleSeq;
 	ACS::doubleSeq_var tempY=new ACS::doubleSeq;
@@ -221,6 +240,10 @@ CORBA::Long ReceiversBossImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out 
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();		
 	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::getFeeds()");
 		impl.log(LM_DEBUG);
@@ -232,7 +255,8 @@ CORBA::Long ReceiversBossImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out 
 	return res;
 }
 
-CORBA::Double ReceiversBossImpl::getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx)
+CORBA::Double ReceiversBossImpl::getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (CORBA::SystemException,
+		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	CORBA::Double res;
 	double wL;
@@ -244,6 +268,10 @@ CORBA::Double ReceiversBossImpl::getTaper(CORBA::Double freq,CORBA::Double bandW
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();		
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
 	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::getTaper()");

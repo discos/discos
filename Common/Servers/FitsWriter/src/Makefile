@@ -51,7 +51,7 @@ LIBRARIES_L     =
 # <brief description of lllll library>
 FitsWriterImpl_OBJECTS   = FitsWriterImpl ReceiverCallback DataCollection EngineThread Configuration CommonTools\
 FitsWriter CollectorThread
-FitsWriterImpl_LIBS = baci maci FitsWriterStubs DataReceiverStubs ComponentErrors ManagementErrors bulkDataReceiverStubs\
+FitsWriterImpl_LIBS = baci maci FitsWriterStubs DataReceiverStubs ComponentErrors ManagementErrors ReceiversErrors bulkDataReceiverStubs\
                  ManagmentDefinitionsStubs ACSBulkDataError bulkDataStubs IRALibrary\
                  bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs \
                  EphemGeneratorStubs BackendsDefinitionsStubs ObservatoryStubs \

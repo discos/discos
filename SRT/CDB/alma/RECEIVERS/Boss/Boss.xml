@@ -6,11 +6,10 @@
 <ReceiversBoss xmlns="urn:schemas-cosylab-com:ReceiversBoss:1.0" 
              xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
              xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              RepetitionCacheTime="7000000"
 			 RepetitionExpireTime="10000000"
-			 StatusPersistenceTime="4000000" 
-             > 
+			 StatusPersistenceTime="4000000"> 
 
 <LO/>
 <actualSetup/>
@@ -21,5 +20,9 @@
 <initialFrequency/>
 <bandWidth/>
 <mode/>
+
+<AvailableReceiver Code="CCG" Component="RECEIVERS/SRT7GHzReceiver"/>
+
+<AvailableReceiver Code="KKG" Component="RECEIVERS/SRTKbandMFReceiver"/>
 
 </ReceiversBoss>

@@ -19,7 +19,13 @@
 
 #
 # user definable C-compilation flags
-USER_CFLAGS = -D 'COMPILE_TARGET=$(TARGETSYS)'
+# a quick comment on this: in order to control receivers a t med the boss is in charge of doing much more things that it has to. So
+# different code is required until new specific component to control the receivers for Medicina are written
+ifeq ($(TARGETSYS),MED)
+	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -D 'COMPILE_TARGET_MED'
+else
+	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -D 'COMPILE_TARGET_STANDARD'
+endif
 
 #
 # additional include and library search paths
@@ -40,9 +46,9 @@ EXECUTABLES_L   =
 
 #
 # <brief description of xxxxx program>
-ReceiversBossImpl_OBJECTS   = ReceiversBossImpl	RecvBossCore
+ReceiversBossImpl_OBJECTS   = ReceiversBossImpl	RecvBossCore Configuration
 ReceiversBossImpl_LDFLAGS   =
-ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs \
+ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs GenericReceiverStubs \
 							  ManagmentDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors
 
 #

@@ -3,7 +3,6 @@
 
 /** **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id: DevIOBandWidth.h,v 1.1 2011-02-23 09:35:01 a.orlati Exp $									           */
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
@@ -13,8 +12,6 @@
 
 #include <baciDevIO.h>
 #include <IRA>
-
-using namespace IRA;
 
 /**
  * This class is derived from template DevIO and it is used by the bandWidth property of the receiverBoss component. 
