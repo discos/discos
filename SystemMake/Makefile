@@ -21,7 +21,7 @@ ifeq ($(TARGETSYS),SRT)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower NoiseGenerator DBBC SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation \
-		SRT7GHzReceiver
+		SRT7GHzReceiver \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient SystemTerminal \
 		SRTActiveSurfaceGUIClient SRTMountTextClient \
 		Plotter KStars Scripts \
