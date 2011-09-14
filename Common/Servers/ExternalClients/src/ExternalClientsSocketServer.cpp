@@ -56,7 +56,7 @@ void CExternalClientsSocketServer::initialize(CConfiguration *config) throw (Soc
 void CExternalClientsSocketServer::execute() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl)
 {
     if (getStatus() == ExternalClientSocketStatus_CNTD) {
-        m_Scheduler = Management::Scheduler::_nil();
+        //m_Scheduler = Management::Scheduler::_nil();
         CString sVisor = m_configuration->superVisor();
         if (sVisor.Compare("Gavino") == 0)
             strcpy (superVisorName, GAVINO);
@@ -64,7 +64,7 @@ void CExternalClientsSocketServer::execute() throw (ComponentErrors::CouldntGetC
             strcpy (superVisorName, PALMIRO);
 
         try {
-		    m_Scheduler = m_services->getComponent<Management::Scheduler>(superVisorName);
+		    //m_Scheduler = m_services->getComponent<Management::Scheduler>(superVisorName);
 	    }
         catch (maciErrType::CannotGetComponentExImpl& ex) {
 		    _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CExternalClientsSocketServer::execute()");
@@ -78,7 +78,7 @@ void CExternalClientsSocketServer::execute() throw (ComponentErrors::CouldntGetC
 void CExternalClientsSocketServer::cleanUp()
 {
     try {
-        m_services->releaseComponent((const char*)m_Scheduler->name());
+        //m_services->releaseComponent((const char*)m_Scheduler->name());
     }
     catch (maciErrType::CannotReleaseComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CExternalClientsSocketServer::cleanUp()");
@@ -117,7 +117,7 @@ void CExternalClientsSocketServer::cmdToScheduler()
     rBytes = receiveBuffer(inBuffer,BUFFERSIZE);
     if (rBytes > 0 ) {
         try {
-            ret_val = m_Scheduler->command((const char*)inBuffer);
+            //ret_val = m_Scheduler->command((const char*)inBuffer);
         }
         catch (ManagementErrors::CommandLineErrorExImpl& eX) {
             _EXCPT(ComponentErrors::OperationErrorExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
@@ -137,7 +137,7 @@ void CExternalClientsSocketServer::cmdToScheduler()
             ret_val = "System Error";
 	    }
         inBuffer[rBytes] = '\0';
-        //printf("Command received = %s\n", inBuffer);
+        printf("Command received = %s\n", inBuffer);
 
         if (strncmp ((const char*)inBuffer, "Closing communication", 21) == 0)
             ret_val = "bye bye";
@@ -149,7 +149,7 @@ void CExternalClientsSocketServer::cmdToScheduler()
             outBuffer[i] = out.CharAt(i);
         }
         outBuffer[Len]='\n';
-        //printf("Command returned = %s", outBuffer);
+        printf("Command returned = %s", outBuffer);
         Res = sendBuffer(outBuffer,Len+1);
         if (Res == WOULDBLOCK || Res == FAIL) {
             _EXCPT(SocketErrorExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
@@ -172,11 +172,11 @@ CExternalClientsSocketServer::OperationResult CExternalClientsSocketServer::send
 	while (BytesSent<Len) {
 		if ((NWrite = newExternalClientsSocketServer.Send(m_Error,(const void *)(Msg+BytesSent),Len-BytesSent))<0) {
 			if (NWrite==WOULDBLOCK) {
-				//setExternalClientSocketStatus(ExternalClientSocketStatus_NOTCNTD);
+				setExternalClientSocketStatus(ExternalClientSocketStatus_NOTCNTD);
 				return WOULDBLOCK;
 			}
 			else {
-				//setExternalClientSocketStatus(ExternalClientSocketStatus_NOTCNTD);
+				setExternalClientSocketStatus(ExternalClientSocketStatus_NOTCNTD);
 				return FAIL;
 			}
 		}
