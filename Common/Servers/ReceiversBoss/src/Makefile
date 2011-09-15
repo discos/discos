@@ -46,7 +46,7 @@ EXECUTABLES_L   =
 
 #
 # <brief description of xxxxx program>
-ReceiversBossImpl_OBJECTS   = ReceiversBossImpl	RecvBossCore Configuration
+ReceiversBossImpl_OBJECTS   = ReceiversBossImpl	RecvBossCore Configuration WatchingThread
 ReceiversBossImpl_LDFLAGS   =
 ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs GenericReceiverStubs \
 							  ManagmentDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors

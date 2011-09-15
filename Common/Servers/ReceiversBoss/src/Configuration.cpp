@@ -87,6 +87,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","RepetitionCacheTime (uSec):",m_repetitionCacheTime,"");
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","RepetitionExpireTime (uSec):",m_expireCacheTime,"");
 	_GET_DWORD_ATTRIBUTE("StatusPersistenceTime","StatusPersistenceTime (uSec):",m_statusPersistenceTime,"");
+	_GET_DWORD_ATTRIBUTE("PropertiesUpdateTime","PropertiesUpdateTime (uSec):",m_propertiesUpdateTime,"");
 }
 
 bool CConfiguration::getReceiver(const IRA::CString& code,IRA::CString& component) const

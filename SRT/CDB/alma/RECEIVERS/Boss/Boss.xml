@@ -9,7 +9,8 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              RepetitionCacheTime="7000000"
 			 RepetitionExpireTime="10000000"
-			 StatusPersistenceTime="4000000"> 
+			 StatusPersistenceTime="4000000"
+			 PropertiesUpdateTime="3000000"> 
 
 <LO/>
 <actualSetup/>

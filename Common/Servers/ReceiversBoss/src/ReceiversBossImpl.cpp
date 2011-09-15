@@ -1,6 +1,7 @@
 #include "ReceiversBossImpl.h"
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
+#include <LogFilter.h>
 #include "DevIOLO.h"
 #include "DevIORecvCode.h"
 #include "DevIOStatus.h"
@@ -16,6 +17,10 @@ static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 using namespace SimpleParser;
 using namespace baci;
+
+_IRA_LOGFILTER_DECLARE;
+
+#define WATCHING_THREAD_NAME "RECEIVERS_WATCHDOG"
 
 ReceiversBossImpl::ReceiversBossImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) : 
 	CharacteristicComponentImpl(CompName,containerServices),
@@ -74,7 +79,25 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 void ReceiversBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("ReceiversBossImpl::execute()");
+	_IRA_LOGFILTER_ACTIVATE(m_config.repetitionCacheTime(),m_config.expireCacheTime());
+	ACS_LOG(LM_FULL_INFO,"ReceiversBossImpl::cleanUp()",(LM_INFO,"LOG_FILTER_ACTIVATED"));
 	m_core->execute(); //could throw exceptions
+	try {
+		m_watcher=getContainerServices()->getThreadManager()->create<CWatchingThread,CRecvBossCore *>(WATCHING_THREAD_NAME,m_core);
+	}
+	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"ReceiversBossImpl::execute()");
+		throw _dummy;
+	}
+	catch (...) {
+		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"ReceiversBossImpl::execute()");
+	}
+	m_watcher->resume();
+	ACS_LOG(LM_FULL_INFO,"ReceiversBossImpl::cleanUp()",(LM_INFO,"THREAD_SPAWNED"));
+	/*m_schedExecuter->initialize(m_services,m_dut1,m_site); // throw (ComponentErrors::TimerErrorExImpl)
+	ACS::TimeInterval sleepTime=m_config->getScheduleExecutorSleepTime()*10;
+	m_schedExecuter->setSleepTime(sleepTime);*/
+
 	try {
 		startPropertiesMonitoring();
 	}
@@ -94,8 +117,18 @@ void ReceiversBossImpl::cleanUp()
 	AUTO_TRACE("ReceiversBossImpl::cleanUp()");
 	stopPropertiesMonitoring();
 	if (m_parser) delete m_parser;
-	m_core->cleanUp();
-	if (m_core) delete m_core;
+	if (m_core) {
+		m_core->cleanUp();
+		delete m_core;
+	}
+	if (m_watcher!=NULL) {
+		m_watcher->suspend();
+		getContainerServices()->getThreadManager()->destroy(m_watcher);
+	}
+	ACS_LOG(LM_FULL_INFO,"ReceiversBossImpl::cleanUp()",(LM_INFO,"THREAD_DESTROYED"));
+	_IRA_LOGFILTER_FLUSH;
+	ACS_LOG(LM_FULL_INFO,"ReceiversBossImpl::cleanUp()",(LM_INFO,"LOG_FILTER_FLUSHED"));
+	_IRA_LOGFILTER_DESTROY;
 	CharacteristicComponentImpl::cleanUp();	
 }
 
@@ -103,8 +136,12 @@ void ReceiversBossImpl::aboutToAbort()
 {
 	AUTO_TRACE("ReceiversBossImpl::aboutToAbort()");
 	if (m_parser) delete m_parser;
-	m_core->cleanUp();
-	if (m_core) delete m_core;
+	if (m_core) {
+		m_core->cleanUp();
+		delete m_core;
+	}
+	_IRA_LOGFILTER_FLUSH;
+	_IRA_LOGFILTER_DESTROY;
 }
 
 void ReceiversBossImpl::calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)

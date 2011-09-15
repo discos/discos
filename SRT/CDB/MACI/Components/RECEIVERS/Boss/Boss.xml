@@ -8,11 +8,11 @@
            xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-	Name="7GHzReceiver"
-	Code="SRT7GHzImpl"
-	Type="IDL:alma/Receivers/SRT7GHz:1.0"
-	Container="SRT7GHzContainer"
+	Name="Boss"
+	Code="ReceiversBossImpl"
+	Type="IDL:alma/Receivers/ReceiversBoss:1.0"
+	Container="ReceiversContainer"
+	Default="true"
 	KeepAliveTime="-1"
-	Default="false"
     ImplLang="cpp"
 />

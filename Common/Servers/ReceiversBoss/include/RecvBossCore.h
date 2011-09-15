@@ -67,11 +67,14 @@ public:
 	*/
 	virtual void cleanUp();
 	
-	void calOn() throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+	void calOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::UnexpectedExImpl);
 	
-	void calOff() throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+	void calOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::UnexpectedExImpl);
 	
-	void setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl);
+	void setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+			ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
 	
 	/**
 	 * This method will configure the component that controls the receiver actually identified by the given code
@@ -79,34 +82,41 @@ public:
 	 */
 	void setupReceiver(const char * code) throw (ManagementErrors::ConfigurationErrorExImpl);
 
-	void setMode(const char * mode) throw (ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ModeErrorExImpl);
+	void setMode(const char * mode) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::ModeErrorExImpl,
+			ComponentErrors::UnexpectedExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::CORBAProblemExImpl);
 	
 	void park();
 	
-	long getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) throw (ComponentErrors::ValidationErrorExImpl);
+	long getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) throw (ComponentErrors::ValidationErrorExImpl,
+			ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
 	
-	double getTaper(const double& freq,const double& bw,const long& feed,const long& ifNumber,double& waveLen) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
+	double getTaper(const double& freq,const double& bw,const long& feed,const long& ifNumber,double& waveLen) throw (ComponentErrors::ValidationErrorExImpl,
+			ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
 	
 	void getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,const ACS::longSeq& ifs) throw (
-			ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
+			ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::UnexpectedExImpl);
 	
-	void getLO(ACS::doubleSeq& lo);
+	void getLO(ACS::doubleSeq& lo) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 	
-	void getInitialFrequency(ACS::doubleSeq& iFreq);
+	void getInitialFrequency(ACS::doubleSeq& iFreq) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 	
-	void getBandWidth(ACS::doubleSeq& bw);
+	void getBandWidth(ACS::doubleSeq& bw) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 	
-	void getPolarization(ACS::longSeq& pol);
+	void getPolarization(ACS::longSeq& pol) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 	
-	void getFeeds(long& feeds);
+	void getFeeds(long& feeds) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 	
-	void getIFs(long& ifs);
+	void getIFs(long& ifs) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 	
-	const IRA::CString& getRecvCode() const;
+	const IRA::CString& getRecvCode();
 	
-	const IRA::CString& getOperativeMode() const;
+	const IRA::CString& getOperativeMode() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 
-	const Management::TSystemStatus& getStatus() const;
+	const Management::TSystemStatus& getStatus();
+
+	void  updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
+
 private:
 
 
@@ -114,6 +124,9 @@ private:
 	maci::ContainerServices* m_services;
 	CConfiguration *m_config;
 	BACIMutex m_mutex;
+	long m_feeds;
+	long m_IFs;
+	IRA::CString m_currentOperativeMode;
 
 #ifdef COMPILE_TARGET_MED
 	/**
@@ -130,23 +143,33 @@ private:
 	bool m_fsOpened;
 	IRA::CDBTable *m_KKCFeedTable;
 	double m_LO[_RECVBOSSCORE_MAX_IFS];
-	long m_feeds;
-	long m_IFs;
 	Receivers::TPolarization m_pols[_RECVBOSSCORE_MAX_IFS];
 	double m_startFreq[_RECVBOSSCORE_MAX_IFS];
 	double m_bandWidth[_RECVBOSSCORE_MAX_IFS];
 	IRA::CString m_currentReceiver;
-	IRA::CString m_currentOperativeMode;
 
 #else
 	Receivers::Receiver_var m_currentRecv;
 	bool m_currentRecvError;
 	IRA::CString m_currentRecvInstance;
+	IRA::CString m_currentRecvCode;
 	Management::TSystemStatus m_bossStatus;
 	ACS::Time  m_lastStatusChange;
+	ACS::doubleSeq m_lo;
+	ACS::Time m_loEpoch;
+	ACS::doubleSeq m_startFreq;
+	ACS::Time m_starFreqEpoch;
+	ACS::doubleSeq m_bandWidth;
+	ACS::Time m_bandWidthEpoch;
+	ACS::longSeq m_pol;
+	ACS::Time m_polEpoch;
+	ACS::Time m_feedsEpoch;
+	ACS::Time m_IFsEpoch;
+	ACS::Time m_modeEpoch;
+	Management::TSystemStatus m_recvStatus;
+	ACS::Time m_recvStatusEpoch;
 
-
-	void loadReceiver(const IRA::CString instance) throw (ComponentErrors::CouldntGetComponentExImpl);
+	void loadReceiver() throw (ComponentErrors::CouldntGetComponentExImpl);
 	void unloadReceiver();
 	void changeBossStatus(const Management::TSystemStatus& status);
 

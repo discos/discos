@@ -52,6 +52,9 @@
 		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
 		<!-- time after which an alarm is considered cleared if the condition does not happen anymore-->
 		<xs:attribute name="StatusPersistenceTime" type="xs:unsignedLong" use="required" />
+		<!-- This is the time a property is considered valid before refreshing it (microseconds)-->
+		<xs:attribute name="PropertiesUpdateTime" type="xs:unsignedLong" use="required" />
+		
 		
 	</xs:complexType>
 

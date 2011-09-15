@@ -29,11 +29,12 @@
 #include <IRA>
 #include "Configuration.h"
 #include "RecvBossCore.h"
+#include "WatchingThread.h"
 
 /** 
  * @mainpage ReceiversBoss component Implementation 
- * @date 09/09/2011
- * @version 0.33.0
+ * @date 15/09/2011
+ * @version 0.4.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.0.2
  * @remarks compiler version is 3.4.6
@@ -261,7 +262,7 @@ private:
 	SimpleParser::CParser<CRecvBossCore> *m_parser;
 	CRecvBossCore *m_core;
 	CConfiguration m_config;
-
+	CWatchingThread *m_watcher;
 };
 
 

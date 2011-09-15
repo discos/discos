@@ -67,12 +67,18 @@ public:
 	/** Gets the expire time for the logging repetition filter (microseconds) */
 	inline const DDWORD& expireCacheTime() const { return m_expireCacheTime; }
 
+	/**
+	 * Get the time before refreshing a property again (microseconds)
+	 */
+	inline const DDWORD& propertyUpdateTime() const { return m_propertiesUpdateTime;}
+
 private:
 	TReceiver * m_receiver;
 	WORD m_receiverNum;
 	DDWORD m_expireCacheTime;
 	DDWORD m_repetitionCacheTime;
 	DDWORD m_statusPersistenceTime;
+	DDWORD m_propertiesUpdateTime;
 };
 
 
