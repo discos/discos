@@ -117,6 +117,11 @@ private:
 	double m_lonUserOff, m_latUserOff;
 	int m_latResult, m_lonResult;
 	int m_lonDone, m_latDone;
+    /**
+     * This parameter is used to check if a Calibration starts in this
+     * sequence: before LAT scans, after LON scans
+     */
+    int m_checkScan;
     double * m_latPositions;
 	ACS::Time m_time;
 	/**
