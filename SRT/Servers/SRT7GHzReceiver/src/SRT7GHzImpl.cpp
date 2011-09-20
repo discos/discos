@@ -77,17 +77,17 @@ void SRT7GHzImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		m_pfeeds=new baci::ROlong(getContainerServices()->getName()+":feeds",getComponent());
 		m_pvacuum=new baci::ROdouble(getContainerServices()->getName()+":vacuum",getComponent(),new DevIOVacuum(&m_core),true);
 		m_pVd_1=new baci::ROdouble(getContainerServices()->getName()+":Vd_1",getComponent(),
-				new DevIOLNAControls(&m_core,IRA::DRAIN_VOLTAGE,0),true);
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::DRAIN_VOLTAGE,0),true);
 		m_pVd_2=new baci::ROdouble(getContainerServices()->getName()+":Vd_2",getComponent(),
-				new DevIOLNAControls(&m_core,IRA::DRAIN_VOLTAGE,1),true);
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::DRAIN_VOLTAGE,1),true);
 		m_pId_1=new baci::ROdouble(getContainerServices()->getName()+":Id_1",getComponent(),
-				new DevIOLNAControls(&m_core,IRA::DRAIN_CURRENT,0),true);
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::DRAIN_CURRENT,0),true);
 		m_pId_2=new baci::ROdouble(getContainerServices()->getName()+":Id_2",getComponent(),
-				new DevIOLNAControls(&m_core,IRA::DRAIN_CURRENT,1),true);
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::DRAIN_CURRENT,1),true);
 		m_pVg_1=new baci::ROdouble(getContainerServices()->getName()+":Vg_1",getComponent(),
-				new DevIOLNAControls(&m_core,IRA::GATE_VOLTAGE,0),true);
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::GATE_VOLTAGE,0),true);
 		m_pVg_2=new baci::ROdouble(getContainerServices()->getName()+":Vg_2",getComponent(),
-				new DevIOLNAControls(&m_core,IRA::GATE_VOLTAGE,1),true);
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::GATE_VOLTAGE,1),true);
 		m_pcryoTemperatureCoolHead=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureCoolHead",getComponent(),
 				new DevIOCryoTemperatureCoolHead(&m_core),true);
 		m_pcryoTemperatureCoolHeadWindow=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureCoolHeadWindow",getComponent(),

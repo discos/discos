@@ -247,7 +247,7 @@ public:
 	 * @param ifs Intermediate frequency identifier, it permits to select which amplification chain we are interested in
 	 * @return a specific value of from the transistor control parameters
 	 */
-	double getFetValue(const IRA::FetValue& control,const DWORD& ifs);
+	double getFetValue(const IRA::ReceiverControl::FetValue& control,const DWORD& ifs);
 
 	/**
 	 * It returns the feed geometry of the receiver with respect to the central one. For this implementation it is just a placeholder since there is just one feed.
@@ -349,7 +349,7 @@ private:
 	double m_cryoLNA;
 	double m_cryoLNAWin;
 	double m_vacuumDefault;
-	IRA::FetValues m_fetValues;
+	IRA::ReceiverControl::FetValues m_fetValues;
 	DWORD m_statusWord;
 	Management::TSystemStatus m_componentStatus;
 

@@ -486,20 +486,20 @@ long CComponentCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq
 	return size;
 }
 
-double CComponentCore::getFetValue(const IRA::FetValue& control,const DWORD& ifs)
+double CComponentCore::getFetValue(const IRA::ReceiverControl::FetValue& control,const DWORD& ifs)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (ifs>=m_configuration.getIFs()) {
 		return 0.0;
 	}
 	else if (m_polarization[ifs]==(long)Receivers::RCV_LEFT) {
-		if (control==IRA::DRAIN_VOLTAGE) return m_fetValues.VDL;
-		else if (control==IRA::DRAIN_CURRENT) return m_fetValues.IDL;
+		if (control==IRA::ReceiverControl::DRAIN_VOLTAGE) return m_fetValues.VDL;
+		else if (control==IRA::ReceiverControl::DRAIN_CURRENT) return m_fetValues.IDL;
 		else return m_fetValues.VGL;
 	}
 	else {
-		if (control==IRA::DRAIN_VOLTAGE) return m_fetValues.VDR;
-		else if (control==IRA::DRAIN_CURRENT) return m_fetValues.IDR;
+		if (control==IRA::ReceiverControl::DRAIN_VOLTAGE) return m_fetValues.VDR;
+		else if (control==IRA::ReceiverControl::DRAIN_CURRENT) return m_fetValues.IDR;
 		else return m_fetValues.VGR;
 	}
 }

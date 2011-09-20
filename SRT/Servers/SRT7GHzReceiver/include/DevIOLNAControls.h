@@ -27,7 +27,7 @@ public:
 	 * Constructor
 	 * @param core pointer to the boss core
 	*/
-	DevIOLNAControls(CComponentCore* core,const IRA::FetValue& control,const DWORD& ifs) :  m_pCore(core), m_control(control), m_ifs(ifs)
+	DevIOLNAControls(CComponentCore* core,const IRA::ReceiverControl::FetValue& control,const DWORD& ifs) :  m_pCore(core), m_control(control), m_ifs(ifs)
 	{
 		AUTO_TRACE("DevIOLNAControls::DevIOLNAControls()");
 	}
@@ -71,7 +71,7 @@ public:
 private:
 	CComponentCore* m_pCore;
 	double  m_val;
-	IRA::FetValue m_control;
+	IRA::ReceiverControl::FetValue m_control;
 	DWORD m_ifs;
 };
 
