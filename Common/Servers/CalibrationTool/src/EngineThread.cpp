@@ -42,6 +42,7 @@ CEngineThread::CEngineThread (const ACE_CString & name,
     m_lonDone = m_latDone = 0;
     m_LatOff = m_LonOff = 0.0;
     m_latPositions = new double[DATACOORDINATESSEQLENGTH];
+    m_checkScan = 0;
 }
 
 CEngineThread::~CEngineThread ()
@@ -384,7 +385,7 @@ void CEngineThread::runLoop ()
                 }
 		        m_fileOpened = true;
 		    }
-            if ((m_lonDone == 0) && (m_latDone == 0)) {
+            if ((m_lonDone == 0) && (m_latDone == 0) && (m_checkScan == 0)) {
                 // Start writing file
                 tS.value (now.value().value);
                 out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Calibration Tool Start\n", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (),
@@ -653,6 +654,7 @@ void CEngineThread::runLoop ()
 			      }
 			    m_dataSeqCounter = 0;
 			    m_latDone = 1;
+                m_checkScan = 1;
 			}
 		      else if ((m_CoordIndex == 0) && (m_lonResult == 0))
 			{	// LON scans
@@ -749,8 +751,9 @@ void CEngineThread::runLoop ()
 			      }
 			    m_dataSeqCounter = 0;
 			    m_lonDone = 1;
+                m_checkScan = 0;
 			}
-		      if ((m_latDone == 1) && (m_lonDone == 1))
+		      if ((m_latDone == 1) && (m_lonDone == 1) && (m_checkScan == 0))
 			{
 			    // offset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_lonResult, m_latResult 
 			    tS.value (now.value().value);
@@ -770,13 +773,13 @@ void CEngineThread::runLoop ()
 			    m_file << (const char *) out;
 			    m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << cos (m_LatPos) * m_LonOff * DR2D << " " << m_LatOff * DR2D << " " << cos (m_LatPos) * m_LonErr * DR2D << " " << m_LatErr * DR2D << " " << m_lonResult << " " << m_latResult << std::endl;
 			    
-			    m_latDone = m_lonDone = 0;
-			    m_lonResult = m_latResult = 0;
-		      	    ACS_LOG (LM_FULL_INFO, "CalibrationTool::CEngineThread::runLoop()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %lf %d %d",
+		      	ACS_LOG (LM_FULL_INFO, "CalibrationTool::CEngineThread::runLoop()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %lf %d %d",
 					m_LonPos * DR2D, m_LatPos * DR2D, m_LonOff * DR2D, m_LatOff * DR2D, m_lonResult, m_latResult));
-		      	    ACS_LOG (LM_FULL_INFO, "CalibrationTool::CEngineThread::runLoop()", (LM_NOTICE, "XOFFSETS = %lf %lf %lf %lf %lf %lf %d %d",
+		      	ACS_LOG (LM_FULL_INFO, "CalibrationTool::CEngineThread::runLoop()", (LM_NOTICE, "XOFFSETS = %lf %lf %lf %lf %lf %lf %d %d",
 					m_LonPos * DR2D, m_LatPos * DR2D, cos (m_LatPos) * m_LonOff * DR2D, m_LatOff * DR2D, cos (m_LatPos) * m_LonErr * DR2D, m_LatErr * DR2D, m_lonResult, m_latResult));
 			    ACS_LOG (LM_FULL_INFO, "CalibrationTool::CEngineThread::runLoop()", (LM_NOTICE, "FILE_FINALIZED"));
+			    m_latDone = m_lonDone = 0;
+			    m_lonResult = m_latResult = 0;
 			}
 		  }
 		data->haltStopStage ();
