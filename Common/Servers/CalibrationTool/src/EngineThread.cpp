@@ -384,13 +384,22 @@ void CEngineThread::runLoop ()
                     data->setStatus (Management::MNG_WARNING);
                 }
 		        m_fileOpened = true;
-		    }
-            if ((m_lonDone == 0) && (m_latDone == 0) && (m_checkScan == 0)) {
-                // Start writing file
+			// Start writing file
                 tS.value (now.value().value);
                 out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Calibration Tool Start\n", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (),
                         (long)(tS.microSecond () / 10000.));
                 m_file << (const char *) out;
+		    }
+
+		if (m_checkScan == 1)
+			m_checkScan = 0; // TBC!!!!!!!!!!!!!
+
+            if (/*(m_lonDone == 0) && (m_latDone == 0) && */(m_checkScan == 0)) {
+                /*// Start writing file
+                tS.value (now.value().value);
+                out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Calibration Tool Start\n", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (),
+                        (long)(tS.microSecond () / 10000.));
+                m_file << (const char *) out;*/
                 // File Name
                 tS.value (now.value().value);
                 fileName = data->getFileName ();
@@ -566,7 +575,7 @@ void CEngineThread::runLoop ()
 		      BWHM_var = m_antennaBoss->BWHM ();
 		      BWHM_val = BWHM_var->get_sync (completion.out ());
 
-		      if (m_CoordIndex == 1 && m_latResult == 0)
+		      if (m_CoordIndex == 1 /*&& m_latResult == 0*/)
 			{	// LAT scans
 			    m_Par[2] = BWHM_val;
 
@@ -656,7 +665,7 @@ void CEngineThread::runLoop ()
 			    m_latDone = 1;
                 m_checkScan = 1;
 			}
-		      else if ((m_CoordIndex == 0) && (m_lonResult == 0))
+		      else if ((m_CoordIndex == 0)/* && (m_lonResult == 0)*/)
 			{	// LON scans
 			    m_Par[2] = BWHM_val / m_cosLat;
 
