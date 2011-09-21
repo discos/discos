@@ -13,10 +13,8 @@
 
 #include <baciDevIO.h>
 #include <IRA>
-#include <map>
 #include "MeteoSocket.h"
-#include "MeteoData.h"
-using namespace IRA;
+ using namespace IRA;
 
 /**
  * This class is derived from template DevIO and it is used by the temperature  property  of the MeteoStation component
@@ -66,14 +64,7 @@ public:
 			CError err;
 			CString rdata="";
 			CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
-			MeteoData mp;
-			sock->sendCMD(err,CString("spettro\n"));
-			sock->receiveData(err,rdata);
-			sock->initParser(&mp);
-			sock->parse(rdata);
-/*			cout << "rec:" <<(const char*) rdata <<  endl;*/
-  			m_val=mp.sensorMap[COMMANDS[AIRPRESSURE]];
-		
+  			m_val=sock->getPressure();
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOPressure::read()");
@@ -97,6 +88,7 @@ public:
 private:
 	CSecureArea<MeteoSocket>* m_socket;
 	CORBA::Double m_val;
+
 	bool m_initparser;
  };
 

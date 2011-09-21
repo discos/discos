@@ -15,7 +15,6 @@
 #include <IRA>
 #include <map>
 #include "MeteoSocket.h"
-#include "MeteoData.h"
 using namespace IRA;
 
 /**
@@ -31,7 +30,7 @@ public:
 	 * Constructor
 	 * @param Socket pointer to a SecureArea that proctects a the  socket. This object must be already initialized and configured.
 	*/
-	DevIOWinddir(CSecureArea<MeteoSocket>* socket):m_socket(socket)
+	DevIOWinddir(CSecureArea<MeteoSocket>* socket ):m_socket(socket)
 	{		
  		m_initparser=false;
 		AUTO_TRACE("DevIOWinddir::DevIOWinddir()");		
@@ -66,12 +65,8 @@ public:
 			CError err;
 			CString rdata="";
 			CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
-			MeteoData mp;
-			sock->sendCMD(err,CString("spettro\n"));
-			sock->receiveData(err,rdata);
-			sock->initParser(&mp);
-			sock->parse(rdata);
-  			m_val=mp.sensorMap[COMMANDS[WINDDIRAVE]];
+ 			m_val=sock->getWindDir();
+
 		
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
@@ -96,6 +91,7 @@ public:
 private:
 	CSecureArea<MeteoSocket>* m_socket;
 	CORBA::Double m_val;
+
 	bool m_initparser;
  };
 

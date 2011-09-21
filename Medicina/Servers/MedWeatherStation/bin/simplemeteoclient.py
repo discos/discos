@@ -10,7 +10,7 @@ logger=getLogger()
 
 
 try:
-	meteo=simpleClient.getComponent("METROLOGY/WeatherStation")
+	meteo=simpleClient.getComponent("WEATHERSTATION/WeatherStation")
 	logger.logInfo('getting component METEO')
 	meteoparam=meteo.getData()
 #	print meteo.getHumidity()

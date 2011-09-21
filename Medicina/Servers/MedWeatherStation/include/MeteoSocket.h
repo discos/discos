@@ -9,6 +9,7 @@
 using namespace IRA;
 
 
+const static char WEATHERCMD[10] ="spettro\n";
 
 
 class MeteoSocket : public CSocket{
@@ -27,10 +28,12 @@ public:
 	void initParser(MeteoData *md);
 // 	void releaseParser(){ 	XML_ParserFree(p);};;
 
+     double getWindSpeed();  // Get Wind Speed
+     double getWindDir();    // Get Wind Direction (disabled)
+     double getTemperature();
+	 double getHumidity();
+     double getPressure();
 
-	int parse(const char* buff);
-	MeteoData *m_sensorData;
-	
 private:
 	
  	CString ADDRESS;//="192.167.8.4";  // to be put in the CDB
@@ -40,20 +43,18 @@ private:
 	bool m_isConnected;
 static int Depth;
 	char Buff[BUFFSIZE];
-/*	static void start_hndl(void* data, const XML_Char* el, const XML_Char** attr);
-	static void end_hndl(void *data, const XML_Char* el);
-
- 	static void char_hndl(void *data, const XML_Char *s, int len);
-	static void checkSensor(MeteoData *md, string xmlvalue, const string  label);
- 
-	XML_Parser p;*/
 	MeteoData *m_meteodata;
 	map<string,double> m_map;
-/*	string m_tagname; 
-	string m_tagdate;
-	double m_tagvalue;
-	string m_acttag; // actual tag;*/
 	
+	double m_windspeed;
+	double m_winddir;
+	double m_temperature;
+	double m_pressure;
+	double m_humidity;
+	int parse(const char* buff);
+//	MeteoData *m_sensorData;
+	 int updateParam();
+
 	
 	
 

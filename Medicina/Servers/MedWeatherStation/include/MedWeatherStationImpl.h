@@ -14,13 +14,14 @@
 #include <baciROdouble.h>
 #include <baciRWdouble.h>
 
-
+//*******DEVIOs*********************************************
 #include "DevIOtemperature.h"
 #include "DevIOwinddir.h"
 #include "DevIOpressure.h"
 #include "DevIOwindspeed.h"
-
 #include "DevIOhumidity.h"
+
+#include <SP_parser.h>
 ///Include the smart pointer for properties
 #include <baciSmartPropertyPointer.h>
 #include <ComponentErrors.h>
@@ -29,7 +30,7 @@
 #include <cstdlib>
 #include "MeteoSocket.h"
 #include "MeteoData.h"
-
+#include <ManagementErrors.h>
 
 /*
 const CString ADDRESS="192.167.8.13"; //DEBUG
@@ -44,17 +45,17 @@ using namespace IRA;
 
  
 /** 
- * @mainpage SRT Meteo Station
+ * @mainpage Medicina Meteo Station
  * @date 01/11/2010
- * @version 1.0.0
+ * @version 1.1.0
  * @author <a href=mailto:spoppi@oa-cagliari.inaf.it>Sergio Poppi</a>
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.2
  * @remarks compiler version is 4.1.2
 */
 
 
  /**
-The class implements the Srt Meteo Station.
+The class implements the Medicina Weather Station Station.
 Not all the paramters from the station have been implemented.
 
 
@@ -88,11 +89,12 @@ public:
 	virtual ~MedWeatherStationImpl(); 
 
 
-	virtual Weather::parameters getData() throw (ACSErr::ACSbaseExImpl);
-	virtual CORBA::Double getTemperature() throw (ACSErr::ACSbaseExImpl);
-	virtual	CORBA::Double getPressure() throw (ACSErr::ACSbaseExImpl);
-	virtual	CORBA::Double getHumidity() throw (ACSErr::ACSbaseExImpl);
-	virtual	CORBA::Double getWindspeed() throw (ACSErr::ACSbaseExImpl);
+	virtual Weather::parameters getData() throw (CORBA::SystemException);
+
+	virtual CORBA::Double getTemperature() throw (CORBA::SystemException);
+	virtual	CORBA::Double getPressure() throw (CORBA::SystemException);
+	virtual	CORBA::Double getHumidity() throw (CORBA::SystemException);
+	virtual	CORBA::Double getWindspeed() throw (CORBA::SystemException);
 
 
 	virtual char * command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);
@@ -159,6 +161,7 @@ private:
 	SmartPropertyPointer<RWdouble> m_windspeed;
 	SmartPropertyPointer<RWdouble> m_humidity;
 	SmartPropertyPointer<RWdouble> m_pressure;
+	SimpleParser::CParser<MeteoSocket> * m_parser;
 
     void operator=(const MedWeatherStationImpl&);
 		

@@ -15,7 +15,7 @@
 #include <IRA>
 #include <map>
 #include "MeteoSocket.h"
-#include "MeteoData.h"
+
 using namespace IRA;
 
 /**
@@ -66,12 +66,9 @@ public:
 			CError err;
 			CString rdata="";
 			CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
-			MeteoData mp;
-							sock->sendCMD(err,CString("spettro\n"));
-			sock->receiveData(err,rdata);
-			sock->initParser(&mp);
-			sock->parse(rdata);
-  			m_val=mp.sensorMap[COMMANDS[RELHUM]];
+			m_val=sock->getHumidity();
+			return m_val;
+
 
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
@@ -82,7 +79,6 @@ public:
 			throw dummy;
 		} 				
 		timestamp=getTimeStamp();  //complition time
-		return m_val;
 	}
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
@@ -95,6 +91,7 @@ public:
 	
 private:
 	CSecureArea<MeteoSocket>* m_socket;
+
 	CORBA::Double m_val;
 	bool m_initparser;
  };

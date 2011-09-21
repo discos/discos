@@ -2,6 +2,7 @@
 
 using namespace baci;
 
+using namespace SimpleParser;
 
 
 MedWeatherStationImpl::MedWeatherStationImpl(
@@ -34,7 +35,7 @@ MedWeatherStationImpl::~MedWeatherStationImpl()
 
 void MedWeatherStationImpl::cleanUp() throw (ACSErr::ACSbaseExImpl)
 {
-	CharacteristicComponentImpl::cleanUp();
+	    CharacteristicComponentImpl::cleanUp();
         AUTO_TRACE("MedWeatherStationImpl::cleanUp()");
 
 
@@ -43,36 +44,53 @@ void MedWeatherStationImpl::cleanUp() throw (ACSErr::ACSbaseExImpl)
 
 char * MedWeatherStationImpl::command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
 {
-	IRA::CString out("Not implemented yet");
-	return CORBA::string_dup((const char *)out);
+	{
+		AUTO_TRACE("MedWeatherStationImpl::command()");
+		IRA::CString out;
+		IRA::CString in;
+		CSecAreaResourceWrapper<MeteoSocket> line=m_socket->Get();
+		in=IRA::CString(cmd);
+		try {
+			m_parser->run(in,out);
+		}
+		catch (ParserErrors::ParserErrorsExImpl &ex) {
+			_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"MedWeatherStationImpl::command()");
+			impl.setCommand(cmd);
+			impl.setErrorMessage((const char *)out);
+			impl.log(LM_DEBUG);
+			throw impl.getCommandLineErrorEx();
+		}
+		return CORBA::string_dup((const char *)out);
+	}
+
 }
 
 
 void MedWeatherStationImpl::deleteAll()
 {
         AUTO_TRACE("MedWeatherStationImpl::deleteAll");
-//	CError err;
-//	delete m_socket;
-// 	try{
-// 	CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
-// 		if (sock->isConnected())
-// 		{
-// 			sock->disconnect();
-// 			delete m_socket;	
-// 		} 
-//  	
-// 	} catch (...)
-// 	{
-// 		cout << "unknown exception in closing component " << endl;
-// 
-// 	
-// 	}
-// 
-// 	ACS_LOG(LM_FULL_INFO,"MedWeatherStationImpl::deleteAll()",(LM_DEBUG,"Disconnecting from socket @%s  ",(const char *)err.getFullDescription()));
-// 
-// 	 
-// 
-// 
+   	CError err;
+ 	try{
+ 	CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
+ 		if (sock->isConnected())
+ 		{
+			sock->disconnect();
+ 			delete m_socket;
+ 		}
+
+ 	} catch (...)
+ 	{
+ 		cout << "unknown exception in closing component " << endl;
+
+
+ 	}
+
+	ACS_LOG(LM_FULL_INFO,"MedWeatherStationImpl::deleteAll()",(LM_DEBUG,"Disconnecting from socket @%s  ",(const char *)err.getFullDescription()));
+	//	delete m_socket;
+
+
+
+
  }
 
 
@@ -88,7 +106,7 @@ void MedWeatherStationImpl::deleteAll()
 }
 
 
-CORBA::Double MedWeatherStationImpl::getTemperature() throw (ACSErr::ACSbaseExImpl)
+CORBA::Double MedWeatherStationImpl::getTemperature() throw (CORBA::SystemException)
 {
         AUTO_TRACE("MedWeatherStationImpl::getTemperature");
 
@@ -101,7 +119,7 @@ CORBA::Double MedWeatherStationImpl::getTemperature() throw (ACSErr::ACSbaseExIm
 
 
 }
-CORBA::Double MedWeatherStationImpl::getWindspeed() throw (ACSErr::ACSbaseExImpl)
+CORBA::Double MedWeatherStationImpl::getWindspeed() throw (CORBA::SystemException)
 {
         AUTO_TRACE("MedWeatherStationImpl::getTemperature");
 
@@ -112,7 +130,7 @@ CORBA::Double MedWeatherStationImpl::getWindspeed() throw (ACSErr::ACSbaseExImpl
 	return windspeed;
 
 }
-CORBA::Double MedWeatherStationImpl::getPressure() throw (ACSErr::ACSbaseExImpl)
+CORBA::Double MedWeatherStationImpl::getPressure() throw (CORBA::SystemException)
 {
         AUTO_TRACE("MedWeatherStationImpl::getpressure()");
 
@@ -124,7 +142,7 @@ CORBA::Double MedWeatherStationImpl::getPressure() throw (ACSErr::ACSbaseExImpl)
 
 
 }
-CORBA::Double MedWeatherStationImpl::getHumidity() throw (ACSErr::ACSbaseExImpl)
+CORBA::Double MedWeatherStationImpl::getHumidity() throw (CORBA::SystemException)
 {
         AUTO_TRACE("MedWeatherStationImpl::getHumidity()");
 
@@ -137,7 +155,7 @@ CORBA::Double MedWeatherStationImpl::getHumidity() throw (ACSErr::ACSbaseExImpl)
 
 }
 
-Weather::parameters MedWeatherStationImpl::getData()throw (ACSErr::ACSbaseExImpl)
+Weather::parameters MedWeatherStationImpl::getData()throw (CORBA::SystemException)
 {
 	Weather::parameters mp;
         AUTO_TRACE("MedWeatherStationImpl::getData");
@@ -157,36 +175,36 @@ Weather::parameters MedWeatherStationImpl::getData()throw (ACSErr::ACSbaseExImpl
 
 	
 	ACSErr::Completion_var completion;
-	/*
+
 	temperature = m_temperature->get_sync(completion.out());
 	winddir     = m_winddir->get_sync(completion.out());
 	windspeed   = m_windspeed->get_sync(completion.out());
 	pressure    = m_pressure->get_sync(completion.out());
-	humidity    = m_humidity->get_sync(completion.out());*/
+	humidity    = m_humidity->get_sync(completion.out());
 	
 
 //  	cout <<"received"<< len << endl;
-	string ss;
-	string srecv;
-	srecv=string((const char*)rdata);
-	vector<string> vrecv;
-
-	istringstream  ist(srecv); // string stream
-	while (ist >> ss) vrecv.push_back(ss) ;// split the string
-	int ndata=vrecv.size();
-	if (ndata > 3)
-	
-	{
- 		temperature = atof(vrecv[ndata-3].c_str());
-		pressure = atof(vrecv[ndata-2].c_str());
-		humidity  = atof(vrecv[ndata-1].c_str());
-
-//		windspeed  = atof(vrecv[ndata-1].c_str());
-		  
-	} else
-	{
-		 ACS_LOG(LM_FULL_INFO,"MeteoSocket::update()",(LM_ERROR,"Not enough data from meteo server"));
-	}
+//	string ss;
+//	string srecv;
+//	srecv=string((const char*)rdata);
+//	vector<string> vrecv;
+//
+//	istringstream  ist(srecv); // string stream
+//	while (ist >> ss) vrecv.push_back(ss) ;// split the string
+//	int ndata=vrecv.size();
+//	if (ndata > 3)
+//
+//	{
+// 		temperature = atof(vrecv[ndata-3].c_str());
+//		pressure = atof(vrecv[ndata-2].c_str());
+//		humidity  = atof(vrecv[ndata-1].c_str());
+//
+////		windspeed  = atof(vrecv[ndata-1].c_str());
+//
+//	} else
+//	{
+//		 ACS_LOG(LM_FULL_INFO,"MeteoSocket::update()",(LM_ERROR,"Not enough data from meteo server"));
+//	}
 	
 
 	mp.temperature=temperature;
@@ -225,19 +243,28 @@ void MedWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_temperature=new RWdouble(getContainerServices()->getName()+":temperature", getComponent(), new DevIOTemperature(m_socket),true);
 		
 		m_winddir=new RWdouble(getContainerServices()->getName()+":winddir", getComponent(), new DevIOWinddir(m_socket),true);
-
 		m_windspeed=new RWdouble(getContainerServices()->getName()+":windspeed", getComponent(), new DevIOWindspeed(m_socket),true);
-
-// 
 		m_humidity=new RWdouble(getContainerServices()->getName()+":humidity", getComponent(), new DevIOHumidity(m_socket),true);
-
 		m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(m_socket),true);
+
+
+
+		m_parser=new CParser<MeteoSocket>(sock,10);
+		m_parser->add<0>("getWindSpeed",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getWindSpeed) );
+		m_parser->add<0>("getTemperature",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getTemperature) );
+		m_parser->add<0>("getHumidity",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getHumidity) );
+		m_parser->add<0>("getPressure",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getPressure) );
+
+
 
 
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"MedWeatherStationImpl::MedWeatherStationImpl()");
 		throw dummy;
+	}catch (ComponentErrors::ComponentErrorsExImpl& E) {
+		E.log(LM_DEBUG);
+		throw E.getComponentErrorsEx();
 	}
 
 
@@ -260,26 +287,7 @@ void MedWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 
         AUTO_TRACE("MedWeatherStationImpl::initialize");
-
-
-// 	// stop all threads 
-//  ACS_LOG(LM_FULL_INFO,"MedWeatherStationImplImpl::initialize()",(LM_INFO,"init METEO STATION "));
-// 	if (CIRATools::getDBValue(getContainerServices(),"IPAddress",ADDRESS) && CIRATools::getDBValue(getContainerServices(),"port",PORT))
-// 	{
-// 		ACS_LOG(LM_FULL_INFO,"MedWeatherStationImplImpl::initialize()",(LM_INFO,"IP address %s, Port %d ",(const char *) ADDRESS,PORT));
-// 
-// 
-// 	} else
-// 
-// 	{
-// 		 ACS_LOG(LM_FULL_INFO,"MedWeatherStationImplImpl::initialize()",(LM_ERROR,"Error getting IP address from CDB" ));
-// 	}
-
-
-
-
-
-;
+        ;
         
   
 
@@ -306,7 +314,6 @@ MedWeatherStationImpl::temperature ()
     ACS::RWdouble_var prop = ACS::RWdouble::_narrow(m_temperature->getCORBAReference());
     return prop._retn();
 }
-
 
 ACS::RWdouble_ptr
 MedWeatherStationImpl::winddir ()

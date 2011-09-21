@@ -51,6 +51,23 @@ int MeteoSocket::sendCMD(CError& err, CString cmd)
 
 }
 
+int MeteoSocket:: updateParam(){
+	    CError err;
+	    CString rdata="";
+	    sendCMD(err,CString(WEATHERCMD));
+		ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","sent:  %s", (const char *) WEATHERCMD);
+
+ 		IRA::CIRATools::Wait(0,100000);
+
+		receiveData(err,rdata);
+		ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","received:  %s", (const char *) rdata);
+
+ 		parse(rdata);
+ 		if (err.isNoError()) return 0;
+ 		else return -1;
+
+
+}
 
 int  MeteoSocket::receiveData(CError& err, CString& rdata)
 {
@@ -162,6 +179,62 @@ CError MeteoSocket::disconnect()throw (ACSErr::ACSbaseExImpl)
 	
 }
 
+double MeteoSocket::getWindSpeed()
+{
+//	if((updateParam()==-1)) cout <<"Error Reading Param"<< endl;
+	updateParam();
+
+	m_windspeed=-99; // windspeed disabled
+	ACS_LOG(LM_FULL_INFO,"MeteoSocket::getWindSpeed()",(LM_NOTICE,"Not yet implemented"));
+
+
+	//to be impemented
+	return m_windspeed;
+
+}
+double MeteoSocket::getWindDir()
+{
+//	if((updateParam()==-1)) cout <<"Error Reading Param"<< endl;
+//	updateParam();
+	ACS_LOG(LM_FULL_INFO,"MeteoSocket::getWindDir()",(LM_NOTICE,"Not yet implemented"));
+
+	m_winddir=-99;
+	return m_winddir;
+
+}
+double MeteoSocket::getTemperature()
+	{
+
+		if((updateParam()==-1)){
+			ACS_LOG(LM_FULL_INFO,"MeteoSocket::getTemperature()",(LM_ERROR,"Reading Temperature"));
+		}
+		return m_temperature;
+
+	}
+double MeteoSocket::getHumidity()	{
+		//to be impemented
+	if((updateParam()==-1)){
+		ACS_LOG(LM_FULL_INFO,"MeteoSocket::getHumidity()",(LM_ERROR,"Reading Humidity"));
+	}
+
+	return m_humidity;
+	}
+double MeteoSocket::getPressure()	{
+		//to be impemented
+	if((updateParam()==-1)){
+		ACS_LOG(LM_FULL_INFO,"MeteoSocket::getPressure()",(LM_ERROR,"Reading Pressure"));
+	}
+	return m_pressure;
+
+	}
+
+//double MeteoSocket::getWinDir()	{
+//		// to be implemented
+//		return -99;
+//
+//
+//}
+
 
 
 
@@ -172,6 +245,8 @@ void MeteoSocket::initParser(MeteoData *md)
 
 
 }
+
+
 
 
 
@@ -198,18 +273,20 @@ int MeteoSocket::parse(const char* recv)
 		hum  = atof(vrecv[ndata-1].c_str());
 		wind  = -99.;//  atof(vrecv[ndata-1].c_str());
 
-		m_meteodata->sensorMap[COMMANDS[AIRTEMP]]=temp;
-		m_meteodata->sensorMap[COMMANDS[AIRPRESSURE]]=pres;
-		m_meteodata->sensorMap[COMMANDS[RELHUM]]=hum;
-		m_meteodata->sensorMap[COMMANDS[WINDSPEEDAVE]]=wind;
+		m_temperature=temp;
+		m_pressure=pres;
+		m_humidity=hum;
+		m_windspeed=wind;
 		
-		cout <<temp <<":"<<pres<<":"<<hum <<endl;
+
 
 		 ACS_LOG(LM_FULL_INFO,"MeteoSocket::parse()",(LM_DEBUG," Meteoparms  %f %f %f",temp,pres,hum ));
 		  
 	} else
 	{
-		 ACS_LOG(LM_FULL_INFO,"MeteoSocket::update()",(LM_ERROR,"Not enough data from meteo server"));
+		 ACS_LOG(LM_FULL_INFO,"MeteoSocket::parse()",(LM_ERROR,"Not enough data from meteo server"));
+		 return -1;
+
 	}
 
 	return 0;
