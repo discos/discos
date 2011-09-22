@@ -55,6 +55,10 @@ using namespace IRA;
  * @author <a href=mailto:spoppi@oa-cagliari.inaf.it>Sergio Poppi</a>
  * @remarks Last compiled under ACS 8.2
  * @remarks compiler version is 4.1.2
+ * @todo:
+ * 			- patch the corba errors;
+ * 			- optimize the send/receive sequenze;
+ * 			- parametrize the send commands
 */
 
 
@@ -62,8 +66,6 @@ using namespace IRA;
 The class implements the Srt Meteo Station.
 Not all the paramters from the station have been implemented.
 
-
-@todo add all the info returned by the HW
 */
 
 using ACS::ThreadBase;

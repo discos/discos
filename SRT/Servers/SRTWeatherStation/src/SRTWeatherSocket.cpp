@@ -203,6 +203,9 @@ int i;
 
   for (i = 0; i < Depth; i++)
    md->setTag(string(el));
+   cout <<"TagName=" <<string(el)<<endl;
+
+  ACS_DEBUG_PARAM("SRTWeatherSocket::char_hndl()","TagName: %s",(const char *)el);
 
   printf("\n");
   Depth++;
@@ -234,20 +237,8 @@ void  SRTWeatherSocket::char_hndl(void *data, const XML_Char *s, int len)
     strncpy(temp,s,len);
     temp[len]=0;
     xmlvalue=string(temp);  //
+	ACS_DEBUG_PARAM("SRTWeatherSocket::char_hndl()","xmltag: %s",(const char *)xmlvalue.c_str());
 
-//      cout <<"char_hndl:"<< xmlvalue.c_str() << endl;
-
-    if (xmlvalue=="date") {
-	md->setSensorName(string(temp));
-	md->setTag(xmlvalue);
-       
-    }
-    if ((md->getSensorName()=="date") &&(md->getTag()=="Val")) {
-        md->setDate(xmlvalue);
-       md->setTag("");
-
-    }
-  
     for (int i=0; i < NSENSORS;i++) 
 	{ checkSensor(md,xmlvalue,COMMANDS[i]);
   	}
@@ -257,7 +248,7 @@ void  SRTWeatherSocket::char_hndl(void *data, const XML_Char *s, int len)
 
 void SRTWeatherSocket::checkSensor(WeatherStationData *md,string xmlvalue,const string sensorlabel)
 {
-    if ((md->getTag()=="Name") && (xmlvalue==sensorlabel))
+    if ((md->getTag()=="Id") && (xmlvalue==sensorlabel))
     {
 	md->setSensorName(xmlvalue);
 	md->setTag("");

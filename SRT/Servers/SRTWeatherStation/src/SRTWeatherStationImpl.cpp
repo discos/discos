@@ -146,23 +146,26 @@ Weather::parameters SRTWeatherStationImpl::getData()throw (ACSErr::ACSbaseExImpl
  
 CORBA::Double SRTWeatherStationImpl::getWindspeedPeak() throw (ACSErr::ACSbaseExImpl)
 {
-        AUTO_TRACE("SRTWeatherStationImpl::getTemperature");
+        AUTO_TRACE("SRTWeatherStationImpl::getWindspeedPeak");
 
-	double windspeed;
+	double val;
 	ACSErr::Completion_var completion;
-	windspeed = m_windspeed->get_sync(completion.out());
+	val = m_windspeedpeak->get_sync(completion.out());
 
-	return windspeed;
+	return val;
 
 }
 
 
 CORBA::Double SRTWeatherStationImpl::getWindSpeedAverage() throw (ACSErr::ACSbaseExImpl)
 {
-        AUTO_TRACE("SRTWeatherStationImpl::getWindspeed");
+        AUTO_TRACE("SRTWeatherStationImpl::getWindspeedAverage");
+        double windspeed;
+        ACSErr::Completion_var completion;
+        windspeed = m_windspeed->get_sync(completion.out());
 
-	 
-	return 0.;
+        return windspeed;
+
 
 }
  
@@ -171,11 +174,12 @@ CORBA::Double SRTWeatherStationImpl::getHumidity() throw (ACSErr::ACSbaseExImpl)
 {
 	
         AUTO_TRACE("SRTWeatherStationImpl::getHumidity");
+        double val;
+        ACSErr::Completion_var completion;
+        val = m_humidity->get_sync(completion.out());
 
+        return val;
 	 
-	return 0.;
-
-
 
 }
 
@@ -214,7 +218,6 @@ CORBA::Double SRTWeatherStationImpl::getPressure() throw (ACSErr::ACSbaseExImpl)
 		throw E.getComponentErrorsEx();		
 	}
 	return pressure;
-
 
 
 }
