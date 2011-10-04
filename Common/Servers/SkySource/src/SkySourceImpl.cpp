@@ -25,6 +25,7 @@ SkySourceImpl::SkySourceImpl(const ACE_CString &CompName,maci::ContainerServices
 	m_componentName=CString(CompName);
 	m_sourceName="";
 	m_sourceCatalog=NULL;
+    fluxParam.init = false;
 }
 
 SkySourceImpl::~SkySourceImpl()
@@ -108,6 +109,48 @@ void SkySourceImpl::execute() throw(ACSErr::ACSbaseExImpl)
 	}
 	else if (!m_sourceCatalog->addField(error, "radialVelocity",CDataField::DOUBLE)) {
 		error.setExtra("Error adding field radialVelocity", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "type",CDataField::STRING)) {
+		error.setExtra("Error adding field type", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "freqMin",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field freqMin", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "freqMax",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field freqMax", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "fluxCoeff1",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field fluxCoeff1", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "fluxCoeff2",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field fluxCoeff2", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "fluxCoeff3",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field fluxCoeff3", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "size",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field size", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "model",CDataField::STRING)) {
+		error.setExtra("Error adding field model", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "modelCoeff1",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field modelCoeff1", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "modelCoeff2",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field modelCoeff2", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "modelCoeff3",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field modelCoeff3", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "modelCoeff4",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field modelCoeff4", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "modelCoeff5",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field modelCoeff5", 0);
+	}
+    else if (!m_sourceCatalog->addField(error, "modelCoeff6",CDataField::DOUBLE)) {
+		error.setExtra("Error adding field modelCoeff6", 0);
 	}
 	if (!error.isNoError()) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,error);
@@ -233,7 +276,7 @@ void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::S
 		}
 		m_sourceCatalog->Next();
 	}
-	if (done) {
+    if (done) {
 		Antenna::TSystemEquinox eq=Antenna::ANT_J2000;
 		double ra=0.0, dec=0.0;
 		double ss=0.0;
@@ -277,14 +320,45 @@ void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::S
 		   (*m_sourceCatalog)["pmDec"]->asDouble(),
 		   (*m_sourceCatalog)["parallax"]->asDouble(),
 		   (*m_sourceCatalog)["radialVelocity"]->asDouble());
+
+        fluxParam.init = true;
+        int i;
+        for (i = 0; i < name.GetLength(); i++)
+            fluxParam.name[i] = name.CharAt(i);
+        CString sType = (const char*)((*m_sourceCatalog)["type"]->asString());
+        fluxParam.type = sType.CharAt(0);
+        fluxParam.fmin = (*m_sourceCatalog)["freqMin"]->asDouble();
+        fluxParam.fmax = (*m_sourceCatalog)["freqMax"]->asDouble();
+        fluxParam.fcoeff[0] = (*m_sourceCatalog)["fluxCoeff1"]->asDouble();
+        fluxParam.fcoeff[1] = (*m_sourceCatalog)["fluxCoeff2"]->asDouble();
+        fluxParam.fcoeff[2] = (*m_sourceCatalog)["fluxCoeff3"]->asDouble();
+        fluxParam.size = (*m_sourceCatalog)["size"]->asDouble();
+        CString sModel = (const char*)((*m_sourceCatalog)["model"]->asString());
+        for (i = 0; i < sModel.GetLength(); i++)
+            fluxParam.model[i] = sModel.CharAt(i);
+        fluxParam.mcoeff[0] = (*m_sourceCatalog)["modelCoeff1"]->asDouble();
+        fluxParam.mcoeff[1] = (*m_sourceCatalog)["modelCoeff2"]->asDouble();
+        fluxParam.mcoeff[2] = (*m_sourceCatalog)["modelCoeff3"]->asDouble();
+        fluxParam.mcoeff[3] = (*m_sourceCatalog)["modelCoeff4"]->asDouble();
+        fluxParam.mcoeff[4] = (*m_sourceCatalog)["modelCoeff5"]->asDouble();
+        fluxParam.mcoeff[5] = (*m_sourceCatalog)["modelCoeff6"]->asDouble();
+
 		ACS_LOG(LM_FULL_INFO,"SkySourceImpl::loadSourceFromCatalog()",(LM_INFO,"NEW_SOURCE_LOADED_FROM_CATALOG: %s",sourceName));
 	}
 	else {
+        fluxParam.init = false;
 		_EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SkySourceImpl::loadSourceFromCatalog()");
 		__dummy.setSourceName(sourceName);
 		__dummy.log(LM_DEBUG);
 		throw __dummy.getAntennaErrorsEx();
 	}
+    sourceFlux=CSourceFlux(fluxParam);
+}
+
+void SkySourceImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw(CORBA::SystemException)
+{
+    flux = sourceFlux.computeSourceFlux(freq, fwhm);
+    ACS_LOG(LM_FULL_INFO,"SkySourceImpl::computeFlux()", (LM_INFO,"FLUX: %f",flux));
 }
 
 void SkySourceImpl::setFixedPoint(CORBA::Double az, CORBA::Double el) throw(CORBA::SystemException)
