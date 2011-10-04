@@ -109,6 +109,16 @@ public:
 	virtual void setOffsets(CORBA::Double lon, CORBA::Double lat, Antenna::TCoordinateFrame frame)
 	throw(CORBA::SystemException, AntennaErrors::AntennaErrorsEx);
 
+    /**
+     * This method compute the flux of a source based on its flux and model
+     * parameters read from the CDB.
+     * @throw CORBA::SystemException
+     * @param freq frequency observed
+     * @param fwhm fwhm
+     * @param flux computed flux
+     */ 
+    void computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw (CORBA::SystemException) {};
+
 	
 private:
 	SubScan m_subScan;
