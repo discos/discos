@@ -1,12 +1,13 @@
-/* ************************************************************************************************************* */
-/* IRA Istituto di Radioastronomia                                                                    	        */
-/* $Id: EphemGenerator.idl,v 1.8 2010-09-14 08:02:10 a.orlati Exp $										                   */
-/*                                                                                                      	        */
-/* This code is under GNU General Public Licence (GPL).                                                 	        */
-/*                                                                                                      	        */
-/* Who                                                       When                  What                                              	        */
-/* Andrea Orlati(aorlati@ira.inaf.it)       10/09/2007      Creation                                              	     */
-/* Andrea Orlati(aorlati@ira.inaf.it)       15/05/2008       Added method checkTracking               */
+/* ************************************************************************************* */
+/* IRA Istituto di Radioastronomia                                                       */
+/* $Id: EphemGenerator.idl,v 1.8 2010-09-14 08:02:10 a.orlati Exp $						 */
+/*                                                                                       */
+/* This code is under GNU General Public Licence (GPL).                                  */
+/*                                                                                       */
+/* Who                                          When        What                         */
+/* Andrea Orlati(aorlati@ira.inaf.it)           10/09/2007  Creation                     */
+/* Andrea Orlati(aorlati@ira.inaf.it)           15/05/2008  Added method checkTracking   */
+/* Carlo Migoni (migoni@oa-cagliari.inaf.it)    04/10/2011  Added computeFlux() method   */
 
 #ifndef _EPHEMGENERATOR_IDL_
 
@@ -121,6 +122,12 @@ module Antenna {
      	 * @return true if the antenna is tracking, false in all other cases. 
 		*/
 		boolean checkTracking (in ACS::Time time,in double az,in double el,in double HPBW);
+
+        /**
+        * This method is used to calculate the flux of a source who's parameter
+        * are read from the SourceCatalog.xsd from CDB
+        */
+        void computeFlux(in double freq, in double fwhm, out double flux);
 	};
 };
 
