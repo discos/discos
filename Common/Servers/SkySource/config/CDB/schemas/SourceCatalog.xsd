@@ -83,6 +83,20 @@
  		  		radial velocity in Km/sec, a positive value means the source is moving away
  		  	</xs:documentation></xs:annotation>
  		  </xs:element> 		  
+          <xs:element name="type" type="xs:string"/>
+          <xs:element name="freqMin" type="xs:double" default="0.0"/>
+          <xs:element name="freqMax" type="xs:double" default="0.0"/>
+          <xs:element name="fluxCoeff1" type="xs:double" default="0.0"/>
+          <xs:element name="fluxCoeff2" type="xs:double" default="0.0"/>
+          <xs:element name="fluxCoeff3" type="xs:double" default="0.0"/>
+          <xs:element name="size" type="xs:double" default="0.0"/>
+          <xs:element name="model" type="xs:string"/>
+          <xs:element name="modelCoeff1" type="xs:double" default="0.0"/>
+          <xs:element name="modelCoeff2" type="xs:double" default="0.0"/>
+          <xs:element name="modelCoeff3" type="xs:double" default="0.0"/>
+          <xs:element name="modelCoeff4" type="xs:double" default="0.0"/>
+          <xs:element name="modelCoeff5" type="xs:double" default="0.0"/>
+          <xs:element name="modelCoeff6" type="xs:double" default="0.0"/>
  		</xs:sequence>
  	</xs:complexType>
   
