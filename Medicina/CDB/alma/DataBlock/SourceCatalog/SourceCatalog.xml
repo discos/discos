@@ -14,6 +14,20 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type>c</type>
+    <freqMin>500</freqMin>
+    <freqMax>23780</freqMax>
+    <fluxCoeff1>2.465</fluxCoeff1>
+    <fluxCoeff2>-0.004</fluxCoeff2>
+    <fluxCoeff3>-0.1251</fluxCoeff3>
+    <size>1.5</size>
+    <model>gauss</model>
+    <modelCoeff1>100</modelCoeff1>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -25,6 +39,20 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -36,6 +64,20 @@
 	<pmDec>17.98</pmDec>
 	<parallax>310.74</parallax>
 	<radialVelocity>15.5</radialVelocity>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -47,6 +89,20 @@
 	<pmDec>769.33</pmDec>
 	<parallax>772.33</parallax>
 	<radialVelocity></radialVelocity>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -58,6 +114,20 @@
 	<pmDec>-10337.77</pmDec>
 	<parallax>549.30</parallax>
 	<radialVelocity>-106.8</radialVelocity>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -69,6 +139,20 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -80,6 +164,20 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -91,6 +189,20 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -102,6 +214,20 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -113,6 +239,20 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -124,6 +264,20 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -135,6 +289,20 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -146,6 +314,20 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 
 <Source>
@@ -157,5 +339,19 @@
 	<pmDec/>
 	<parallax/>
 	<radialVelocity/>
+    <type/>
+    <freqMin/>
+    <freqMax/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
 </Source>
 </SourceCatalog>
