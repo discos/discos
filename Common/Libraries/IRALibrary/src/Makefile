@@ -34,7 +34,8 @@ USER_CFLAGS =
 # ---------------------------------
 INCLUDES = Definitions.h String.h IRATools.h Error.h SecureArea.h SerialPort.h Lecom.h \
  Socket.h DataField.h DBTable.h LogFilter.h Site.h DateTime.h SkySource.h TimeTaggedCircularArray.h \
- ScheduleTimer.h TimeoutSync.h MicroControllerBoard.h ReceiverControl.h MicroControllerBoardDef.h IRA
+ ScheduleTimer.h TimeoutSync.h MicroControllerBoard.h ReceiverControl.h MicroControllerBoardDef.h \
+ SourceFlux.h IRA
 
 #
 # Libraries (public and local)
@@ -43,7 +44,7 @@ LIBRARIES       = IRALibrary
 LIBRARIES_L     =
 IRALibrary_OBJECTS = String IRATools Error SerialPort Lecom Socket DataField DBTable LogFilter \
  Site DateTime SkySource TimeTaggedCircularArray ScheduleTimer TimeoutSync MicroControllerBoard \
- ReceiverControl
+ ReceiverControl SourceFlux
 IRALibrary_LIBS = acstime SlaLibrary maciClient
 
 EXECUTABLES     =
@@ -68,6 +69,9 @@ TestMicroControllerBoard_LIBS      = IRALibrary
 
 TestReceiverControl_OBJECTS   = TestReceiverControl
 TestReceiverControl_LIBS      = IRALibrary
+
+TestSourceFlux_OBJECTS = TestSourceFlux
+TestSourceFlux_LIBS = IRALibrary
 
 # 
 # IDL Files and flags
