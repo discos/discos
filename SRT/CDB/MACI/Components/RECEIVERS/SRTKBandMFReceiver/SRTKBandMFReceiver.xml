@@ -14,8 +14,9 @@
               
     Name="SRTKBandMFReceiver"    
     Code="SRTKBandMFReceiverImpl"
-    Type="IDL:alma/Receivers/SRTKBandMFReceiver:1.0"
+    Type="IDL:alma/Receivers/SRTKBandMF:1.0"
     Container="ReceiversContainer"
+	KeepAliveTime="-1"
+	Default="false"
     ImplLang="cpp"
-	Default="true"
 />

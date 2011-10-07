@@ -71,10 +71,12 @@ SRTKBandMFReceiverImpl::SRTKBandMFReceiverImpl(const ACE_CString &CompName,maci:
     AUTO_TRACE("SRTKBandMFReceiverImpl::SRTKBandMFReceiverImpl()");
 }
 
+
 SRTKBandMFReceiverImpl::~SRTKBandMFReceiverImpl()
 {
     AUTO_TRACE("SRTKBandMFReceiverImpl::~SRTKBandMFReceiverImpl()");
 }
+
 
 void SRTKBandMFReceiverImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
@@ -84,6 +86,7 @@ void SRTKBandMFReceiverImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     m_monitor = NULL;
     ACS_LOG(LM_FULL_INFO, "SRTKBandMFReceiverImpl::initialize()", (LM_INFO, "COMPSTATE_INITIALIZED"));
 }
+
 
 void SRTKBandMFReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentErrors::MemoryAllocationExImpl)
 {
@@ -130,6 +133,7 @@ void SRTKBandMFReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentEr
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, 5), true);
         m_pvdR5=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vdR5", getComponent(),
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, 5), true);
+
         // Drain Current
         m_pidL1=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idL1", getComponent(),
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, 1), true);
@@ -151,6 +155,7 @@ void SRTKBandMFReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentEr
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, 5), true);
         m_pidR5=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idR5", getComponent(),
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, 5), true);
+
         // Gate Voltage
         m_pvgL1=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgL1", getComponent(),
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, 1), true);
@@ -228,6 +233,7 @@ void SRTKBandMFReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentEr
     ACS_LOG(LM_FULL_INFO, "SRTKBandMFReceiverImpl::execute()", (LM_INFO, "COMPSTATE_OPERATIONAL"));
 }
 
+
 void SRTKBandMFReceiverImpl::cleanUp()
 {
     AUTO_TRACE("SRTKBandMFReceiverImpl::cleanUp()");
@@ -243,14 +249,18 @@ void SRTKBandMFReceiverImpl::cleanUp()
     CharacteristicComponentImpl::cleanUp(); 
 }
 
+
 void SRTKBandMFReceiverImpl::aboutToAbort()
 {
     AUTO_TRACE("SRTKBandMFReceiverImpl::aboutToAbort()");
+    stopPropertiesMonitoring();
     if (m_monitor != NULL) {
         getContainerServices()->getThreadManager()->destroy(m_monitor);
     }
     m_core.cleanup();
+    CharacteristicComponentImpl::aboutToAbort(); 
 }
+
 
 void SRTKBandMFReceiverImpl::activate() throw (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
 {
@@ -271,6 +281,7 @@ void SRTKBandMFReceiverImpl::activate() throw (ComponentErrors::ComponentErrorsE
         throw impl.getComponentErrorsEx();
     }
 }
+
 
 void SRTKBandMFReceiverImpl::calOn() throw (
         CORBA::SystemException,
@@ -296,6 +307,7 @@ void SRTKBandMFReceiverImpl::calOn() throw (
     }
 }
 
+
 void SRTKBandMFReceiverImpl::calOff() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
@@ -319,6 +331,7 @@ void SRTKBandMFReceiverImpl::calOff() throw (
         throw impl.getComponentErrorsEx();
     }
 }
+
 
 void SRTKBandMFReceiverImpl::setLO(const ACS::doubleSeq& lo) throw (
         CORBA::SystemException,
@@ -344,6 +357,7 @@ void SRTKBandMFReceiverImpl::setLO(const ACS::doubleSeq& lo) throw (
     }
 }
 
+
 void SRTKBandMFReceiverImpl::setMode(const char * mode) throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
@@ -367,6 +381,7 @@ void SRTKBandMFReceiverImpl::setMode(const char * mode) throw (
         throw impl.getComponentErrorsEx();
     }
 }
+
 
 ACS::doubleSeq *SRTKBandMFReceiverImpl::getCalibrationMark(
         const ACS::doubleSeq& freqs, 
@@ -398,6 +413,7 @@ ACS::doubleSeq *SRTKBandMFReceiverImpl::getCalibrationMark(
     }
     return result._retn();
 }
+
 
 CORBA::Long SRTKBandMFReceiverImpl::getFeeds(
         ACS::doubleSeq_out X,
@@ -435,6 +451,7 @@ CORBA::Long SRTKBandMFReceiverImpl::getFeeds(
     return res;
 }
 
+
 CORBA::Double SRTKBandMFReceiverImpl::getTaper(
         CORBA::Double freq,
         CORBA::Double bandWidth,
@@ -469,6 +486,7 @@ CORBA::Double SRTKBandMFReceiverImpl::getTaper(
     }   
 }
 
+
 void SRTKBandMFReceiverImpl::turnLNAsOn() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
@@ -493,6 +511,7 @@ void SRTKBandMFReceiverImpl::turnLNAsOn() throw (
     }
 }
 
+
 void SRTKBandMFReceiverImpl::turnLNAsOff() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
@@ -516,6 +535,7 @@ void SRTKBandMFReceiverImpl::turnLNAsOff() throw (
         throw impl.getComponentErrorsEx();
     }
 }
+
 
 void SRTKBandMFReceiverImpl::turnVacuumSensorOn() throw (
         CORBA::SystemException,
@@ -565,6 +585,7 @@ void SRTKBandMFReceiverImpl::turnVacuumSensorOff() throw (
         throw impl.getComponentErrorsEx();
     }
 }
+
 
 _PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_plocalOscillator, LO);
 _PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROpattern, m_pstatus, status);

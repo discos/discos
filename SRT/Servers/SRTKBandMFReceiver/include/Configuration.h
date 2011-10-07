@@ -1,18 +1,24 @@
-#ifndef CCONFIGURATION_H
-#define CCONFIGURATION_H
+#ifndef _BASECCONFIGURATION_H_
+#define _BASECCONFIGURATION_H_
 
-/* **************************************************************************************************** */
-/* IRA Istituto di Radioastronomia                                                                      */
-/*                                                                                                      */
-/* This code is under GNU General Public Licence (GPL).                                                 */
-/*                                                                                                      */
-/* Who                                when            What                                              */
-/* Andrea Orlati(aorlati@ira.inaf.it) 02/08/2011     Creation                                         */
+/*******************************************************************************\
+ IRA Istituto di Radioastronomia                                 
+ This code is under GNU General Public License (GPL).          
+                                                              
+ Andrea Orlati (aorlati@ira.inaf.it): Author
+ Marco Buttu (mbuttu@oa-cagliari.inaf.it): 
+     I made just some adaptings to use the same code with the SRTKBandMF 
+     receiver. I added the setMode method in order to change the configuration
+     when the operating mode of the receiver changes.
+     I also changed the init method, which now calls the setMode to load the
+     default configuration.
+\*******************************************************************************/
 
 
 #include <IRA>
 #include <maciContainerServices.h>
 #include <ComponentErrors.h>
+#include <ReceiversErrors.h>
 #include <ReceiversDefinitionsC.h>
 
 /**
@@ -154,6 +160,9 @@ public:
 	 */
 	inline const IRA::CString& getSetupMode() const { return m_mode; }
 
+
+    void setMode(const char * mode) throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl);
+
 	/**
 	 * @return the lower limit of the RF coming from the receiver (MHz)
 	 */
@@ -215,7 +224,11 @@ public:
 	 * @throw ComponentErrors::CDBAccess
 	 * @param Services pointer to the container services object
 	*/
-	void init(maci::ContainerServices *Services)  throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);
+	void init(maci::ContainerServices *Services)  throw (
+            ComponentErrors::CDBAccessExImpl,
+            ComponentErrors::MemoryAllocationExImpl,
+            ReceiversErrors::ModeErrorExImpl
+    );
 	
 private:
 	IRA::CString m_dewarIPAddress;
@@ -229,7 +242,10 @@ private:
 	DDWORD m_repetitionExpireTime;
 	IRA::CString m_localOscillatorInstance;
 
+    maci::ContainerServices* m_services;
+
 	IRA::CString m_mode;
+    std::vector<std::string> m_availableModes;
 	double *m_RFMin;
 	double *m_RFMax;
 	double *m_IFMin;

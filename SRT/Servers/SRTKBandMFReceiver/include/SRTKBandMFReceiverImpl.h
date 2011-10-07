@@ -33,13 +33,77 @@ using namespace baci;
 
 /** 
  * @mainpage 22GHz SRT KBand Multifeed receiver component Implementation
- * @date 19/09/2011
- * @version 1.0.0
+ * @date 07/10/2011
+ * @version 1.1.0
  * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>,
  * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>.
- * Interface Summary:
+ * <h1>Interface Summary</h1>
+ *
+ * <h2>Methods</h2>
  * <ul>
- *   <li> ... </li>
+ *     <li>void activate(): It must be called to switch the receiver to operative mode.</li>
+ *     <li>void calOn(): This method is used to turn the calibration diode ON.</li>
+ *     <li>void calOff(): This method is used to turn the calibration diode OFF.</li>
+ *     <li>void setLO(...): This method allows to set local oscillator. In this implementation 
+ *     only the first value is considered.</li>
+ *     <li>void setMode(...): This method allows to set the operating mode of the receiver.</li>
+ *     <li>ACS::doubleSeq * getCalibrationMark(...): This method is called when the values of 
+ *     the calibration mark of the receiver are required.</li>
+ *     <li>CORBA::Long getFeeds(...): This method is called in order to know the geometry of the receiver.</li>
+ *     <li>CORBA::Double getTaper(...): This method is called in order to know the taper of the receiver.</li>
+ *     <li>void turnLNAsOn(): This method is called in order to turn the LNAs ON.</li>
+ *     <li>void turnLNAsOff(): This method is called in order to turn the LNAs OFF.</li>
+ *     <li>void turnVacuumSensonOn(): It turns the vacuum sensor ON.</li>
+ *     <li>void turnVacuumSensonOff(): It turns the vacuum sensor OFF.</li>
+ * </ul>
+ *
+ * <h2>LNA Properties</h2>
+ * <p>We use the ROdoubleSeq, one sequence for each amplifier stage
+ * and channel. The first index is for the amplifier stage, and
+ * the second one is for the feed. The letters L and R mean Left 
+ * and Right. For a N feed receiver we have the following
+ * properties:</p><br />
+ * <br />
+ * idL1 (idL1_1, idL1_2, ...., idL1_N)<br />
+ * idR1 (idR1_1, idR1_2, ...., idR1_N)<br />
+ * idL2 (idL2_1, idL2_2, ...., idL2_N)<br />
+ * idR2 (idR2_1, idR2_2, ...., idR2_N)<br />
+ *        |                           <br />
+ * idL5 (idL5_1, idL5_2, ...., idL5_N)<br />
+ * idR5 (idR5_1, idR5_2, ...., idR5_N)
+ * <br />
+ * <br />
+ * vdL1 (vdL1_1, vdL1_2, ...., vdL1_N)<br />
+ * vdR1 (vdR1_1, vdR1_2, ...., vdR1_N)<br />
+ * vdL2 (vdL2_1, vdL2_2, ...., vdL2_N)<br />
+ * vdR2 (vdR2_1, vdR2_2, ...., vdR2_N)<br />
+ *        |                           <br />
+ * vdL5 (vdL5_1, vdL5_2, ...., vdL5_N)<br />
+ * vdR5 (vdR5_1, vdR5_2, ...., vdR5_N)
+ * <br />
+ * <br />
+ * vgL1 (vgL1_1, vgL1_2, ...., vgL1_N)<br />
+ * vgR1 (vgR1_1, vgR1_2, ...., vgR1_N)<br />
+ * vgL2 (vgL2_1, vgL2_2, ...., vgL2_N)<br />
+ * vgR2 (vgR2_1, vgR2_2, ...., vgR2_N)<br />
+ *        |                           <br />
+ * vgL5 (vgL5_1, vgL5_2, ...., vgL5_N)<br />
+ * vgR5 (vgR5_1, vgR5_2, ...., vgR5_N)
+ *
+ * <h2>Dewar Properties</h2>
+ * <ul>
+ *     <li>mode: the receiver operating mode</li>
+ *     <li>LO: reports the current value of the local oscillator of the current receiver. 
+ *     Generally one LO for each IFs.</li>
+ *     <li>feeds: reports the number of feeds of the current receiver</li>
+ *     <li>IFs: reports the number of Intermediate Frequencies available for each feed</li>
+ *     <li>initialFrequency: a sequence of double values; each value corresponds to the start 
+ *     frequency (MHz) of IF of the receiver</li>
+ *     <li>bandWidth: a sequence of double values; each value corresponds to the band width (MHz) 
+ *     of IF of the receiver</li>
+ *     <li>polarization: reports the polarization configured in each IF available.</li>
+ *     <li>status: a status pattern</li>
+ *     <li>vacuum: dewar vacuum</li>
  * </ul>
  */
 class SRTKBandMFReceiverImpl: public CharacteristicComponentImpl,  public virtual POA_Receivers::SRTKBandMF {

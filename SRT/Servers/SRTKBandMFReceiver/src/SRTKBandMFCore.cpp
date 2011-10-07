@@ -64,6 +64,64 @@ ACS::doubleSeq SRTKBandMFCore::getStageValues(const IRA::ReceiverControl::FetVal
 }
 
 
+void SRTKBandMFCore::setMode(const char * mode) throw (
+        ReceiversErrors::ModeErrorExImpl,
+        ReceiversErrors::ReceiverControlBoardErrorExImpl,
+        ComponentErrors::ValidationErrorExImpl,
+        ComponentErrors::ValueOutofRangeExImpl,
+        ComponentErrors::CouldntGetComponentExImpl,
+        ComponentErrors::CORBAProblemExImpl,
+        ReceiversErrors::LocalOscillatorErrorExImpl
+        )
+{
+    baci::ThreadSyncGuard guard(&m_mutex);
+    m_setupMode = ""; // If we don't reach the end of the method then the mode will be unknown
+    IRA::CString cmdMode(mode);
+	cmdMode.MakeUpper();
+
+    _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CConfiguration::setMode()");
+
+    // Set the operating mode to the board
+    if(cmdMode == "SINGLEDISH")
+            m_control->setSingleDishMode();
+    else
+        if(cmdMode == "VLBI")
+            m_control->setVLBIMode();
+        else 
+            throw impl; // If the mode is not supported, raise an exception
+
+    m_configuration.setMode(cmdMode);
+
+    for (WORD i=0;i<m_configuration.getIFs();i++) {
+        m_startFreq[i]=m_configuration.getIFMin()[i];
+        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
+        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
+    }
+    // The set the default LO for the default LO for the selected mode.....
+    ACS::doubleSeq lo;
+    lo.length(m_configuration.getIFs());
+    for (WORD i=0;i<m_configuration.getIFs();i++) {
+        lo[i]=m_configuration.getDefaultLO()[i];
+    }
+    // setLO throws:
+    //     ComponentErrors::ValidationErrorExImpl,
+    //     ComponentErrors::ValueOutofRangeExImpl,
+    //     ComponentErrors::CouldntGetComponentExImpl,
+    //     ComponentErrors::CORBAProblemExImpl,
+    //     ReceiversErrors::LocalOscillatorErrorExImpl
+    setLO(lo); 
+
+    // Verify the m_setupMode is the same mode active on the board
+    if((cmdMode == "SINGLEDISH" && !m_control->isSingleDishModeOn()) || (cmdMode == "VLBI" && !m_control->isVLBIModeOn())) {
+        m_setupMode = ""; // If m_setupMode doesn't match the mode active on the board, then set un unknown mode
+        throw impl;
+    }
+
+    m_setupMode = cmdMode;
+    ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
+}
+
+
 void SRTKBandMFCore::updateVdLNAControls() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
@@ -113,3 +171,4 @@ void SRTKBandMFCore::updateVgLNAControls() throw (ReceiversErrors::ReceiverContr
     }
     clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
 }
+
