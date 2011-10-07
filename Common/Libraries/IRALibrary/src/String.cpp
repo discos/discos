@@ -127,10 +127,11 @@ void CString::Empty()
 	m_iSize=0;
 }
 
-void CString::Concat(const CString & add)
+
+CString & CString::Concat(const CString & add)
 {
 	char *Tmp;
-	if (add.m_iSize==0) return;
+	if (add.m_iSize==0) return *this;
 	Tmp=(char *)new char[m_iSize+add.m_iSize+1];
 	assert(Tmp);
 	if (m_cpString) {
@@ -140,12 +141,13 @@ void CString::Concat(const CString & add)
 	strcat(Tmp,add.m_cpString);
 	m_cpString=Tmp;
 	m_iSize=strlen(m_cpString);
+    return *this;
 }
 
-void CString::Concat(const char *add)
+CString & CString::Concat(const char *add)
 {
 	char *Tmp;
-	if (!add) return;
+	if (!add) return *this;
 	Tmp=(char *)new char[m_iSize+strlen(add)+1];
 	assert(Tmp);
 	if (m_cpString) {
@@ -155,28 +157,32 @@ void CString::Concat(const char *add)
 	strcat(Tmp,add);
 	m_cpString=Tmp;
 	m_iSize=strlen(m_cpString);
+    return *this;
 }
 
-void CString::Concat(char add)
+CString & CString::Concat(char add)
 {
 	Concat(&add);
+    return *this;
 }
 
-void CString::Concat(int nValue)
+CString & CString::Concat(int nValue)
 {
 	char str[255];
 	snprintf((char*)str,255,"%d",nValue);
 	Concat(str);
+    return *this;
 }
 
-void CString::Concat(double dValue)
+CString & CString::Concat(double dValue)
 {
 	char str[1024];
 	snprintf((char*)str,1024,"%f",dValue);
 	Concat(str);
+    return *this;
 }
 
-void CString::Concat(double dValue,int digits)
+CString & CString::Concat(double dValue,int digits)
 {
 	char str[1024];
 	char frm[16];
@@ -188,16 +194,18 @@ void CString::Concat(double dValue,int digits)
 	strcat(frm,"f");
 	snprintf((char*)str,1024,frm,dValue);
 	Concat(str);
+    return *this;
 }
 
-void CString::Concat(long double dValue)
+CString & CString::Concat(long double dValue)
 {
 	char str[1024];
 	snprintf((char*)str,1024,"%Lf",dValue);
 	Concat(str);
+    return *this;
 }
 
-void CString::Concat(long double dValue,int digits)
+CString & CString::Concat(long double dValue,int digits)
 {
 	char str[1024];
 	char frm[16];
@@ -209,16 +217,18 @@ void CString::Concat(long double dValue,int digits)
 	strcat(frm,"Lf");
 	snprintf((char*)str,1024,frm,dValue);
 	Concat(str);
+    return *this;
 }
 
-void CString::Concat(float fValue)
+CString & CString::Concat(float fValue)
 {
 	char str[1024];
 	snprintf((char*)str,1024,"%f",fValue);
 	Concat(str);
+    return *this;
 }
 
-void CString::Concat(float fValue,int digits)
+CString & CString::Concat(float fValue,int digits)
 {
 	char str[1024];
 	char frm[16];
@@ -230,6 +240,7 @@ void CString::Concat(float fValue,int digits)
 	strcat(frm,"f");
 	snprintf((char*)str,1024,frm,fValue);
 	Concat(str);
+    return *this;
 }
 
 void CString::LTrim() 

@@ -96,56 +96,67 @@ public: // Operations
 	/**
 	 * Perform a string concatenation
 	 * @param add string to concatenate 
+	 * @return the object
 	*/ 
-	void Concat(const CString & add);
+	CString & Concat(const CString & add);
 	/**
 	 * Perform a string concatenation
 	 * @param add C string to concatenate
+	 * @return the object
 	*/ 
-	void Concat(const char *add);
+	CString & Concat(const char *add);
 	/**
 	 * Perform a string concatenation
 	 * @param add character to be added to the string
+	 * @return the object
 	*/ 
-	void Concat(char add);
+	CString & Concat(char add);
 	/**
 	 * Concatenate the alfanumeric rapresentation of an integer value
 	 * @param nValue integer value
+	 * @return the object
 	*/ 
-	void Concat(int nValue);
+	CString & Concat(int nValue);
 	/**
 	 * Concatenate the alfanumeric rapresentation of a floating point (max number of digits)
 	 * @param fValue floating point number
+	 * @return the object
 	*/ 
-	void Concat(float fValue);
+	CString & Concat(float fValue);
 	/**
 	 * Concatenate the alfanumeric rapresentation of a floating point
 	 * @param fValue floating point number
 	 * @param digits number of decimal digits to include
+	 * @return the object
+	 * @return the object
 	*/ 
-	void Concat(float fValue,int digits);
+	CString & Concat(float fValue,int digits);
 	/**
 	 * Concatenate the alfanumeric rapresentation of a double (max number of digits)
 	 * @param dValue double precision floating point number
+	 * @return the object
 	*/ 
-	void Concat(double dValue);
+	CString & Concat(double dValue);
 	/**
 	 * Concatenate the alfanumeric rapresentation of a double
 	 * @param dValue double precision floating point number
 	 * @param digits number of decimal digits to include
+	 * @return the object
 	*/ 
-	void Concat(double dValue,int digits);
+	CString & Concat(double dValue,int digits);
 	/**
 	 * Concatenate the alfanumeric rapresentation of a long double (max number of digits)
 	 * @param dValue double precision floating point number
+	 * @return the object
 	*/ 
-	void Concat(long double dValue);
+	CString & Concat(long double dValue);
 	/**
 	 * Concatenate the alfanumeric rapresentation of a long double
 	 * @param dValue double precision floating point number
 	 * @param digits number of decimal digits to include
+	 * @return the object
 	*/ 
-	void Concat(long double dValue,int digits);
+	CString & Concat(long double dValue,int digits);
 	/**
 	 * Format the string according to the specified Format string as printf does. If the string can't be
 	 * produced (format string and parameters doesn't match, for example) the string will be left unchanged.

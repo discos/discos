@@ -1,9 +1,8 @@
 /*******************************************************************************\
  *  Author Info
  *  ===========
- *  Name:         Marco Buttu
- *  E-mail:       mbuttu@oa-cagliari.inaf.it
- *  Personal Web: http://www.pypeople.com/
+ *  Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *  Andrea Orlati <orlati@ira.inaf.it>
 \*******************************************************************************/
 
 #ifndef __RECEIVER_CONTROL__H
@@ -36,24 +35,22 @@ private:
  * to receivers controlled by the board designed in Medicina (BO, Italy) 
  * by Franco Fiocchi <f.fiocchi@ira.inaf.it>
  * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>,
- * INAF, Osservatorio Astronomico di Cagliari
+ * @author <a href=mailto:orlati@ira.inaf.it>Andrea Orlati</a>.
  * <p>There are two board for each receiver: the first one allows to
  * communicate to the dewar either reading the status bits and voltage values
  * or writing some configurations. The second one supplies the power to 
  * the feed LNAs (Low Noise Amplifier), and also allows to read the values
  * of VDs (drain voltage), IDs (drain current) and VGs (gate voltage).</p>
  * <p>The user of this class just have to know its interface without to see
- * which board perform the request or other low level details.</p>
+ * which board performs the request or other low level details.</p>
  * <p>Once you instantiate the ReceiverControl, you can execute the
  * following operations:</p>
  * <ul>
  *     <li>unsigned short numberOfFeeds(): return the number of feeds</li>
  *     <li>double vacuum(double (*converter)(double)): return the vacuum value inside the dewar</li>
  *     <li>double vertexTemperature(double (*converter)(double)): return the vertex temperature value</li>
- *     <li>double cryoTemperature1(double (*converter)(double)): return the first cryogenic temperature value</li>
- *     <li>double cryoTemperature2(double (*converter)(double)): return the second cryogenic temperature value</li>
- *     <li>double cryoTemperature3(double (*converter)(double)): return the third cryogenic temperature value</li>
- *     <li>double cryoTemperature4(double (*converter)(double)): return the fourth cryogenic temperature value</li>
+ *     <li>double cryoTemperature(const short id, double (*converter)(double)): return the id 
+ *     cryogenic temperature value</li>
  *     <li>void setCoolHeadOn(): set to ON the cool head</li>
  *     <li>void setCoolHeadOff(): set to OFF the cool head</li>
  *     <li>bool isCoolHeadOn(): return true if the cool head is ON</li>
@@ -70,9 +67,9 @@ private:
  *     <li>void setCalibrationOn(): set the noise mark to ON</li>
  *     <li>void setCalibrationOff(): set the noise mark to OFF</li>
  *     <li>bool isCalibrationOn(): is the noise mark generator set to ON?</li>
- **     <li>void setExtCalibrationOn(): enable the external noise mark generator synchronous command</li>
- **     <li>void setExtCalibrationOff(): disable the external noise mark generator synchronous command</li>
- **     <li>bool isExtCalibrationOn(): is the external noise mark generator command enabled?</li>
+ *     <li>void setExtCalibrationOn(): enable the external noise mark generator synchronous command</li>
+ *     <li>void setExtCalibrationOff(): disable the external noise mark generator synchronous command</li>
+ *     <li>bool isExtCalibrationOn(): is the external noise mark generator command enabled?</li>
  *     <li>bool isRemoteOn(): return true if the remote command is enabled</li>
  *     <li>void selectLO1(): select the Local Oscillator 1</li>
  *     <li>bool isLO1Selected(): return true if the first Local Oscillator (LO1) is selected</li>
