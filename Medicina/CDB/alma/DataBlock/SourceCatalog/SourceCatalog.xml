@@ -7,8 +7,8 @@
 
 <Source>
 	<sourceName>3c48</sourceName>
-	<rightAscension>01:37:41.10</rightAscension>
-	<declination>+33:09:32.00</declination>
+	<rightAscension>01:37:41.297</rightAscension>
+	<declination>+33:09:35.12</declination>
 	<epoch>J2000</epoch>
 	<pmRA/>
 	<pmDec/>
@@ -283,7 +283,7 @@
 <Source>
 	<sourceName>proxima</sourceName>
 	<rightAscension>14:29:42.949</rightAscension>
-	<declination>-62:40:46.14</declination>
+	<declination>-62:40:46.16</declination>
 	<epoch>J2000</epoch>
 	<pmRA>-3775.4</pmRA>
 	<pmDec>769.33</pmDec>
@@ -307,12 +307,12 @@
 
 <Source>
 	<sourceName>barnard</sourceName>
-	<rightAscension>17:57:48.50</rightAscension>
-	<declination>+04:41:36.25</declination>
+	<rightAscension>17:57:48.498</rightAscension>
+	<declination>+04:41:36.21</declination>
 	<epoch>J2000</epoch>
-	<pmRA>-798.71</pmRA>
-	<pmDec>-10337.77</pmDec>
-	<parallax>549.30</parallax>
+	<pmRA>-798.58</pmRA>
+	<pmDec>-10328.12</pmDec>
+	<parallax>548.31</parallax>
 	<radialVelocity>-106.8</radialVelocity>
     <type/>
     <freqMin/>
@@ -332,8 +332,8 @@
 
 <Source>
 	<sourceName>3c295</sourceName>
-	<rightAscension>14:11:20.648</rightAscension>
-	<declination>+52:12:09.14</declination>
+	<rightAscension>14:11:20.516</rightAscension>
+	<declination>+52:12:09.86</declination>
 	<epoch>J2000</epoch>
 	<pmRA/>
 	<pmDec/>
@@ -357,8 +357,8 @@
 
 <Source>
 	<sourceName>3c309.1</sourceName>
-	<rightAscension>14:59:07.584</rightAscension>
-	<declination>+71:40:19.87</declination>
+	<rightAscension>14:59:07.578</rightAscension>
+	<declination>+71:40:19.85</declination>
 	<epoch>J2000</epoch>
 	<pmRA/>
 	<pmDec/>
@@ -407,8 +407,8 @@
 
 <Source>
 	<sourceName>3c286</sourceName>
-	<rightAscension>13:31:08.295</rightAscension>
-	<declination>+30:30:32.94</declination>
+	<rightAscension>13:31:08.286</rightAscension>
+	<declination>+30:30:32.92</declination>
 	<epoch>J2000</epoch>
 	<pmRA/>
 	<pmDec/>
@@ -457,8 +457,8 @@
 
 <Source>
 	<sourceName>kaus</sourceName>
-	<rightAscension>18:27:58.208</rightAscension>
-	<declination>-25:25:19.76</declination>
+	<rightAscension>18:24:10.318</rightAscension>
+	<declination>-34:23:04.62</declination>
 	<epoch>J2000</epoch>
 	<pmRA/>
 	<pmDec/>
@@ -532,8 +532,8 @@
 
 <Source>
 	<sourceName>dubhe</sourceName>
-	<rightAscension>11:03:43.502</rightAscension>
-	<declination>+61:45:03.39</declination>
+	<rightAscension>11:03:43.672</rightAscension>
+	<declination>+61:45:03.72</declination>
 	<epoch>J2000</epoch>
 	<pmRA/>
 	<pmDec/>
