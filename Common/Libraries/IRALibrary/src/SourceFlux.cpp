@@ -13,7 +13,7 @@ CSourceFlux::CSourceFlux()
 
 }
 
-CSourceFlux::CSourceFlux(const flux_ds flux)
+CSourceFlux::CSourceFlux(const flux_ds& flux)
 {
     m_flux = flux;
 } 
@@ -22,7 +22,7 @@ CSourceFlux::~CSourceFlux()
 {	
 }
 
-double CSourceFlux::computeSourceFlux(const double frequency, const double FWHM)
+double CSourceFlux::computeSourceFlux(const double&frequency, const double& FWHM)
 {
     double logfreq,logflux,fluxv;
     double fac0,fac1,fac2,fac4,fac5,fac;

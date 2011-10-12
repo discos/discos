@@ -47,6 +47,8 @@
 
 #define ABS(X,Y) (X>=Y)?X-Y:Y-X
 
+#define LIGHTSPEED_MS 299792458.0
+
 /** 
  * Creates an exception
  * @param TYPE exception type class

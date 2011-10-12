@@ -14,7 +14,7 @@ namespace IRA {
 
     /**
  * This class performs the flux computation of a source.
- * The conputation is based on the flux_val() routine of the Field System.
+ * The computation is based on the flux_val() routine of the Field System.
  * @author <a href=mailto:migoni@oa-cagliari.inaf.it>Carlo Migoni</a>,
  * OAC - Osservatorio Astronomico di Cagliari, Italia
  * <br> 
@@ -51,7 +51,7 @@ namespace IRA {
              * Constructor.
              * @param geometry flux parameter
             */
-            CSourceFlux(const flux_ds flux);
+            CSourceFlux(const flux_ds& flux);
 
             /**
              * Destructor.
@@ -64,7 +64,7 @@ namespace IRA {
              * @param FWHM Full Width Half Maximum
              * return flux
             */
-            double computeSourceFlux (const double frequency, const double FWHM);
+            double computeSourceFlux (const double& frequency, const double& FWHM);
 
         private:
 
