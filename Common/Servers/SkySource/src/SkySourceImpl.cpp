@@ -322,20 +322,23 @@ void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::S
 		   (*m_sourceCatalog)["radialVelocity"]->asDouble());
 
         fluxParam.init = true;
-        int i;
+        /*int i;
         for (i = 0; i < name.GetLength(); i++)
-            fluxParam.name[i] = name.CharAt(i);
-        CString sType = (const char*)((*m_sourceCatalog)["type"]->asString());
-        fluxParam.type = sType.CharAt(0);
+            fluxParam.name[i] = name.CharAt(i);*/
+        strncpy(fluxParam.name,(const char *)name,11);
+        /*CString sType = (const char*)((*m_sourceCatalog)["type"]->asString());
+        fluxParam.type = sType.CharAt(0);*/
+        fluxParam.type=((*m_sourceCatalog)["type"]->asString())[0];
         fluxParam.fmin = (*m_sourceCatalog)["freqMin"]->asDouble();
         fluxParam.fmax = (*m_sourceCatalog)["freqMax"]->asDouble();
         fluxParam.fcoeff[0] = (*m_sourceCatalog)["fluxCoeff1"]->asDouble();
         fluxParam.fcoeff[1] = (*m_sourceCatalog)["fluxCoeff2"]->asDouble();
         fluxParam.fcoeff[2] = (*m_sourceCatalog)["fluxCoeff3"]->asDouble();
         fluxParam.size = (*m_sourceCatalog)["size"]->asDouble();
-        CString sModel = (const char*)((*m_sourceCatalog)["model"]->asString());
+        /*CString sModel = (const char*)((*m_sourceCatalog)["model"]->asString());
         for (i = 0; i < sModel.GetLength(); i++)
-            fluxParam.model[i] = sModel.CharAt(i);
+            fluxParam.model[i] = sModel.CharAt(i);*/
+        strncpy(fluxParam.model,(const char*)((*m_sourceCatalog)["model"]->asString()),5);
         fluxParam.mcoeff[0] = (*m_sourceCatalog)["modelCoeff1"]->asDouble();
         fluxParam.mcoeff[1] = (*m_sourceCatalog)["modelCoeff2"]->asDouble();
         fluxParam.mcoeff[2] = (*m_sourceCatalog)["modelCoeff3"]->asDouble();
@@ -366,6 +369,8 @@ void SkySourceImpl::setFixedPoint(CORBA::Double az, CORBA::Double el) throw(CORB
 	AUTO_TRACE("SkySourceImpl::setFixedPoint()");
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_source.setInputHorizontal(az,el,m_site);
+	// in that case the flux computation is not available since the flux parameters are not known
+	fluxParam.init = false;
 	ACS_LOG(LM_FULL_INFO,"SkySourceImpl::setFixedPoint()",
 	   (LM_INFO,"NEW_FIXED_POSITION: %f,%f",az,el));
 }
@@ -377,6 +382,8 @@ void SkySourceImpl::setSourceFromGalactic(const char* sourceName,CORBA::Double l
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_source.setInputGalactic(longitude,latitude);
 	m_sourceName=CString(sourceName);
+	// in that case the flux computation is not available since the flux parameters are not known
+	fluxParam.init = false;
 	ACS_LOG(LM_FULL_INFO,"SkySourceImpl::setSourceFromGalactic()",
 	   (LM_INFO,"NEW_SOURCE_FROM_GALACTIC: %s,%f,%f",sourceName,longitude,latitude));
 }
@@ -389,6 +396,8 @@ void SkySourceImpl::setSourceFromEquatorial(const char *sourceName,
 	AUTO_TRACE("SkySourceImpl::setSourceFromEquatorial()");
 	baci::ThreadSyncGuard guard(&m_mutex);
 	setSource(sourceName,ra,dec,equinox,dra,ddec,parallax,rvel);
+	// in that case the flux computation is not available since the flux parameters are not known
+	fluxParam.init = false;
 	ACS_LOG(LM_FULL_INFO,"SkySourceImpl::setSourceFromEquatorial()",
 	   (LM_INFO,"NEW_SOURCE_FROM_EQUATORIAL: %s,%f,%f",sourceName,ra,dec));
 }
