@@ -671,8 +671,8 @@ long CRecvBossCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq&
 	}
 }
 
-void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,const ACS::longSeq& ifs) throw (
-		ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
+		const ACS::longSeq& ifs) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -683,7 +683,6 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleS
 		m_status=Management::MNG_WARNING;
 		throw impl;			
 	}
-	result.length(stdLen);
 	for (unsigned i=0;i<stdLen;i++) {
 		if ((ifs[i]>=m_IFs) || (ifs[i]<0)) {
 			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CRecvBossCore::getCalibrationMark()");
@@ -700,6 +699,9 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleS
 			throw impl;
 		}
 	}	
+	result.length(stdLen);
+	resFreq.length(stdLen);
+	resBw.length(stdLen);
 	if (m_currentReceiver=="KKC") {
 		double LeftMarkCoeff[7][4] = { {0.2912,-21.21,506.97,-3955.5}, {0.558,-40.436,961.81,-7472.1}, {0.8963,-63.274,1469.2,-11170.0}, 
 									 {0.5176,-37.47,889.81,-6895.8}, {0.662,-47.86,1136.2,-8809.9}, {0.3535,-25.63,609.53,-4727.4}, {0.2725,-19.926,478.05,-3737.9}  };
@@ -715,8 +717,9 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleS
 				if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandWidth[ifs[i]],realFreq,realBw)) {
 					realFreq=m_startFreq[ifs[i]];
 					realBw=0.0;
-				}				
-				f1=realFreq+m_LO[ifs[i]]; 
+				}
+				realFreq+=m_LO[ifs[i]];
+				f1=realFreq;
 				f2=f1+realBw;
 				f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
 				integral=(LeftMarkCoeff[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(LeftMarkCoeff[feeds[i]][1]/3)*(f2*f2*f2-f1*f1*f1)+(LeftMarkCoeff[feeds[i]][2]/2)*(f2*f2-f1*f1)+LeftMarkCoeff[feeds[i]][3]*(f2-f1);				
@@ -727,19 +730,28 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleS
 				if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandWidth[ifs[i]],realFreq,realBw)) {
 					realFreq=m_startFreq[ifs[i]];
 					realBw=0.0;
-				}								
-				f1=realFreq+m_LO[ifs[i]]; 
+				}
+				realFreq+=m_LO[ifs[i]];
+				f1= realFreq;
 				f2=f1+realBw;
 				f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
 				integral=(RightMarkCoeff[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(RightMarkCoeff[feeds[i]][1]/3)*(f2*f2*f2-f1*f1*f1)+(RightMarkCoeff[feeds[i]][2]/2)*(f2*f2-f1*f1)+RightMarkCoeff[feeds[i]][3]*(f2-f1);				
 				mark=integral/(f2-f1);
 			}
 			result[i]=mark;
+			resFreq[i]=realFreq;
+			resBw[i]=realBw;
 		}
 	}
 	else if (m_currentReceiver=="CCC") { 
-		result.length(stdLen);
 		for (unsigned i=0;i<stdLen;i++) {
+			double realFreq,realBw;
+			if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandWidth[ifs[i]],realFreq,realBw)) {
+				realFreq=m_startFreq[ifs[i]];
+				realBw=0.0;
+			}
+			resFreq[i]=realFreq+m_LO[ifs[i]];
+			resBw[i]=realBw;
 			if (m_pols[ifs[i]]==Receivers::RCV_LEFT) {
 				result[i]=5.88; //left
 			}
@@ -749,8 +761,14 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleS
 		}
 	}
 	else if (m_currentReceiver=="XXP") { 
-		result.length(stdLen);
 		for (unsigned i=0;i<stdLen;i++) {
+			double realFreq,realBw;
+			if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandWidth[ifs[i]],realFreq,realBw)) {
+				realFreq=m_startFreq[ifs[i]];
+				realBw=0.0;
+			}
+			resFreq[i]=realFreq+m_LO[ifs[i]];
+			resBw[i]=realBw;
 			if (m_pols[ifs[i]]==Receivers::RCV_LEFT) {
 				result[i]=8.8; //left
 			}
@@ -1165,9 +1183,9 @@ long CRecvBossCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq&
 	}
 }
 
-void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,const ACS::longSeq& ifs) throw (
-		ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
+void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,
+		const ACS::longSeq& feeds,const ACS::longSeq& ifs) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,
+				ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_currentRecvCode=="") {
@@ -1179,10 +1197,16 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleS
 	loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
 	try {
 		ACS::doubleSeq_var tempRes=new ACS::doubleSeq;
-		tempRes=m_currentRecv->getCalibrationMark(freqs,bandwidths,feeds,ifs);
+		ACS::doubleSeq_var tempFreq=new ACS::doubleSeq;
+		ACS::doubleSeq_var tempBw=new ACS::doubleSeq;
+		tempRes=m_currentRecv->getCalibrationMark(freqs,bandwidths,feeds,ifs,tempFreq.out(),tempBw.out());
 		result.length(tempRes->length());
+		resFreq.length(tempRes->length());
+		resBw.length(tempRes->length());
 		for (unsigned i=0;i<result.length();i++) {
 			result[i]=tempRes[i];
+			resFreq[i]=tempFreq[i];
+			resBw[i]=tempBw[i];
 		}
 	}
 	catch (CORBA::SystemException& ex) {

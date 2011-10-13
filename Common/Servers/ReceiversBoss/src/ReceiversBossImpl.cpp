@@ -240,12 +240,14 @@ void ReceiversBossImpl::park() throw (CORBA::SystemException,ManagementErrors::P
 	m_core->park();
 }
 
-ACS::doubleSeq *ReceiversBossImpl::getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds,const ACS::longSeq& ifs) throw (CORBA::SystemException,
-	ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+ACS::doubleSeq *ReceiversBossImpl::getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds,const ACS::longSeq& ifs,
+		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw) throw (CORBA::SystemException,	ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	ACS::doubleSeq_var result=new ACS::doubleSeq;
+	ACS::doubleSeq_var resFreq=new ACS::doubleSeq;
+	ACS::doubleSeq_var resBw=new ACS::doubleSeq;
 	try {
-		m_core->getCalibrationMark(result,freqs,bandwidths,feeds,ifs);
+		m_core->getCalibrationMark(result,resFreq,resBw,freqs,bandwidths,feeds,ifs);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -260,6 +262,8 @@ ACS::doubleSeq *ReceiversBossImpl::getCalibrationMark(const ACS::doubleSeq& freq
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
 	}
+	skyFreq=resFreq._retn();
+	skyBw=resBw._retn();
 	return result._retn();
 }
 

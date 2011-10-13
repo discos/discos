@@ -140,19 +140,21 @@ public:
 	void park() throw (CORBA::SystemException,ManagementErrors::ParkingErrorEx);
 	
 	/**
-	 * This method is called when the values of the calibration mark of the current receiver are required. A value is retruned for every subbands.
-	 * The subbands are defined by giving the feed numeber, the polarization the initial frequency and the bandwidth.
+	 * This method is called when the values of the calibration mark of the current receiver are required. A value is returned for every subbands.
+	 * The subbands are defined by giving the feed number, the polarization the initial frequency and the bandwidth.
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @thorw ReceiversErrors::ReceiversErrorsEx
 	 * @param freqs for each subband this is the list of the starting frequencies (in MHz). Correlated to the real initial frequency of the current receiver.
 	 * @param bandwidths for each subband this is the width in MHz. Correlated to the real bandwidth of the current receiver.
 	 * @param feeds for each subband this if the feed number
-	 * @param ifs for each subband this indicates the proper if, given the feed
+	 * @param ifs for each subband this indicates the proper IF, given the feed
+	 * @param skyFreq for each subband this indicates the corresponding frequency observed (MHz).
+	 * @param skyBw for each subband this indicates the resulting bandwidth (MHz)
 	 * @return the list of the noise calibration value in Kelvin degrees.
 	 */
-    virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs) throw (
-    		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs,
+    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is called in order to know the geometry of the currently configured receiver. The geometry is given along the X and Y axis where the central feed is the origin
