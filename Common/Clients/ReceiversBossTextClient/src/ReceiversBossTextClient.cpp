@@ -122,6 +122,7 @@ int main(int argc, char *argv[]) {
 	maci::SimpleClient client;
 	ACE_Time_Value tv(1);
 	IRA::CString fields[MAXFIELDNUMBER];
+	IRA::CString inputCommand;
 	maci::ComponentInfo_var info;
 	CORBA::Object_var obj;
 	// Component declaration 
@@ -364,6 +365,55 @@ int main(int argc, char *argv[]) {
 	// now it is possible to show the frame
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::START"));
 	window.showFrame();
+
+	for(;;)	{
+		if (userInput->readCommand(inputCommand)) {
+			if (inputCommand=="exit") break;
+			if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
+				try {
+					IRA::CString outputAnswer=component->command((const char *)inputCommand);
+					output_label->setValue(outputAnswer);
+					output_label->Refresh();
+				}
+				catch (ManagementErrors::CommandLineErrorEx& ex) {
+					ManagementErrors::CommandLineErrorExImpl impl(ex);
+					IRA::CString Message;
+					Message=impl.getErrorMessage();
+					output_label->setValue(Message);
+					output_label->Refresh();
+					impl.log(LM_ERROR);
+				}
+				catch (CORBA::SystemException& ex) {
+					_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"Main()");
+					impl.setName(ex._name());
+					impl.setMinor(ex.minor());
+					IRA::CString Message;
+					_EXCPT_TO_CSTRING(Message,impl);
+					output_label->setValue(Message);
+					output_label->Refresh();
+					impl.log(LM_ERROR);
+				}
+				catch(...) {
+					_EXCPT(ClientErrors::CouldntPerformActionExImpl,impl,"Main()");
+					impl.setAction("command()");
+					impl.setReason("communication error to component server");
+					IRA::CString Message;
+					_EXCPT_TO_CSTRING(Message,impl);
+					output_label->setValue(Message);
+					output_label->Refresh();
+	                impl.log(LM_ERROR);
+				}
+			}
+			else {
+				output_label->setValue("not enabled");
+				output_label->Refresh();
+			}
+		}
+		//sleep for the required ammount of time
+		tv.set(0,MAINTHREADSLEEPTIME*1000);
+		client.run(tv);
+	}
+
 	for(;;)	{
 		if ((fieldCounter=userInput->parseCommand(fields,MAXFIELDNUMBER))>0) {
 			fields[0].MakeUpper();
