@@ -144,103 +144,106 @@ public:
     virtual void aboutToAbort();
 
 
-	/**
-	 * It must be called to switch the receiver to operative mode. 
+    /**
+     * It must be called to switch the receiver to operative mode. 
      * When called the default configuration and mode is loaded. Regarding this
-	 * implementation calling this method corresponds to a call to <i>setMode("NORMAL")</i>.
-	 * @throw CORBA::SystemExcpetion
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 */
-	 virtual void activate() throw (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+     * implementation calling this method corresponds to a call to <i>setMode("NORMAL")</i>.
+     * @throw CORBA::SystemExcpetion
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+     virtual void activate() throw (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
 
-	/**
-	 * This method is used to turn the calibration diode on.
-	 * @throw CORBA::SystemExcpetion
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 */
-	void calOn() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+    /**
+     * This method is used to turn the calibration diode on.
+     * @throw CORBA::SystemExcpetion
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    void calOn() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
 
-	/**
-	 * This method is used to turn the calibration diode off.
-	 * @throw CORBA::SystemExcpetion
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 */
-	void calOff() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+    /**
+     * This method is used to turn the calibration diode off.
+     * @throw CORBA::SystemExcpetion
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    void calOff() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
 
-	/**
-	 * This method allows to set local oscillator. In this implementation only the first value is considered.
-	 * @param lo the list contains the values in MHz for the local oscillator
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 */
-	void setLO(const ACS::doubleSeq& lo) throw (
+    /**
+     * This method allows to set local oscillator. In this implementation only the first value is considered.
+     * @param lo the list contains the values in MHz for the local oscillator
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    void setLO(const ACS::doubleSeq& lo) throw (
             CORBA::SystemException,
             ComponentErrors::ComponentErrorsEx,
             ReceiversErrors::ReceiversErrorsEx
     );
 
-	
-	/**
-	 * This method allows to set the operating mode of the receiver. In that implementation the receiver 
+    
+    /**
+     * This method allows to set the operating mode of the receiver. In that implementation the receiver 
      * does not have special modes so a call to this method will lead to Configuration exception.
-	 * @param mode string identifier of the operating mode
-	 * @throw CORBA::SystemException
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 */
-	void setMode(const char * mode) throw (
+     * @param mode string identifier of the operating mode
+     * @throw CORBA::SystemException
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw ComponentErrors::ComponentErrorsEx
+     */
+    void setMode(const char * mode) throw (
             CORBA::SystemException,
             ComponentErrors::ComponentErrorsEx,
             ReceiversErrors::ReceiversErrorsEx
     );
-	
-	
-	/**
-	 * This method is called when the values of the calibration mark of the receiver are required. 
+    
+    
+    /**
+     * This method is called when the values of the calibration mark of the receiver are required. 
      * A value is returned for every provided sub bands. The sub bands are defined by giving the 
      * feed number, the polarization, the initial frequency and the bandwidth.
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 * @param freqs for each sub band this is the list of the starting frequencies (in MHz). 
+     * @param freqs for each sub band this is the list of the starting frequencies (in MHz). 
      * The value is compared and adjusted to the the real initial frequency of the receiver.
-	 * @param bandwidths for each sub band this is the width in MHz. The value is compared 
-     * and adjusted to the the real band width of the receiver.
-	 * @param feeds for each sub band this if the feed number. In that case zero is the only allowed value.
-	 * @param ifs for each sub band this indicates the proper IF
-	 * @return the list of the noise calibration value in Kelvin degrees.
-	 */
+     * @param bandwidths for each sub band this is the width in MHz. The value is compared and 
+     * adjusted to the the real band width of the receiver.
+     * @param feeds for each sub band this if the feed number. In that case zero is the only 
+     * allowed value.
+     * @param ifs for each sub band this indicates the proper IF
+     * @param skyFreq for each sub band it returns the real observed frequency(MHz), included 
+     * detector, receiver IF  and Local Oscillator.
+     * @param skyBw for each sub band it returns the real observed bandwidth(MHz), included 
+     * detector bandwidth , receiver IF bandwidth
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @return the list of the noise calibration value in Kelvin degrees.
+     */
     virtual ACS::doubleSeq * getCalibrationMark(
             const ACS::doubleSeq& freqs, 
             const ACS::doubleSeq& bandwidths, 
             const ACS::longSeq& feeds, 
-            const ACS::longSeq& ifs
-            ) throw (
-    		    CORBA::SystemException,
-                ComponentErrors::ComponentErrorsEx,
-                ReceiversErrors::ReceiversErrorsEx
-    );
+            const ACS::longSeq& ifs,
+            ACS::doubleSeq_out skyFreq,
+            ACS::doubleSeq_out skyBw
+    ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
 
-	/**
-	 * This method is called in order to know the geometry of the receiver. The geometry is given 
+    /**
+     * This method is called in order to know the geometry of the receiver. The geometry is given 
      * along the X and Y axis where the central feed is the origin of the axis. The relative power 
      * (normalized to one) with respect to the central feed is also given.
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 * @param X the positions relative to the central beam of the feeds along the X axis (radiants)
-	 * @param Y the positions relative to the central beam of the feeds along the Y axis (radiants) 
-	 * @param power the relative power of the feeds
-	 * @return the number of feeds
-	 */    
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @param X the positions relative to the central beam of the feeds along the X axis (radiants)
+     * @param Y the positions relative to the central beam of the feeds along the Y axis (radiants) 
+     * @param power the relative power of the feeds
+     * @return the number of feeds
+     */    
     virtual CORBA::Long getFeeds(
             ACS::doubleSeq_out X,
             ACS::doubleSeq_out Y,
@@ -252,20 +255,20 @@ public:
     );
 
     
-	/**
-	 * This method is called in order to know the taper of the receiver.
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 * @param freq starting frequency of the detector in MHz. The value is compared and adjusted 
+    /**
+     * This method is called in order to know the taper of the receiver.
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @param freq starting frequency of the detector in MHz. The value is compared and adjusted 
      * to the the real initial frequency of the receiver.
-	 * @param bandWidth bandwidth of the detector n MHz. The value is compared and adjusted to 
+     * @param bandWidth bandwidth of the detector n MHz. The value is compared and adjusted to 
      * the the real band width of the receiver.
-	 * @param feed feed id the detector is attached to
-	 * @param ifNumber Number of the IF, given the feed
-	 * @param waveLen corresponding wave length in meters
-	 * @return the value of the taper in db
-	 */        
+     * @param feed feed id the detector is attached to
+     * @param ifNumber Number of the IF, given the feed
+     * @param waveLen corresponding wave length in meters
+     * @return the value of the taper in db
+     */        
     virtual CORBA::Double getTaper(
             CORBA::Double freq,
             CORBA::Double bandWidth,
@@ -279,12 +282,12 @@ public:
     );
  
 
-	/**
-	 * This method is called in order to turn the LNAs On.
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 */
+    /**
+     * This method is called in order to turn the LNAs On.
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
     virtual void turnLNAsOn() throw (
             CORBA::SystemException,
             ComponentErrors::ComponentErrorsEx,
@@ -292,12 +295,12 @@ public:
     );
 
 
-	/**
-	 * This method is called in order to turn the LNAs Off.
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 */
+    /**
+     * This method is called in order to turn the LNAs Off.
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
     virtual void turnLNAsOff() throw (
             CORBA::SystemException,
             ComponentErrors::ComponentErrorsEx,
@@ -307,9 +310,9 @@ public:
 
     /**
      * It turns the vacuum sensor on
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
      */
     virtual void turnVacuumSensorOn() throw  (
             CORBA::SystemException,
@@ -320,9 +323,9 @@ public:
 
     /**
      * It turns the vacuum sensor on
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
      */
     virtual void turnVacuumSensorOff() throw  (
             CORBA::SystemException,
@@ -331,276 +334,276 @@ public:
     );
 
 
-	/**
-	 * Returns a reference to the mode property implementation of the IDL interface.
-	 * @return pointer to read-only string property
-	 */
+    /**
+     * Returns a reference to the mode property implementation of the IDL interface.
+     * @return pointer to read-only string property
+     */
     virtual ACS::ROstring_ptr mode() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the LO property implementation of the IDL interface.
-	 * @return pointer to read-only double sequence property
-	 */	 
-	virtual ACS::ROdoubleSeq_ptr LO() throw (CORBA::SystemException);
+    /**
+     * Returns a reference to the LO property implementation of the IDL interface.
+     * @return pointer to read-only double sequence property
+     */  
+    virtual ACS::ROdoubleSeq_ptr LO() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the feeds property implementation of the IDL interface.
-	 * @return pointer to read-only long property
-	 */	 
-	virtual ACS::ROlong_ptr feeds() throw (CORBA::SystemException);
+    /**
+     * Returns a reference to the feeds property implementation of the IDL interface.
+     * @return pointer to read-only long property
+     */  
+    virtual ACS::ROlong_ptr feeds() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the IFs property implementation of the IDL interface.
-	 * @return pointer to read-only long property
-	 */	 	
-	virtual ACS::ROlong_ptr IFs() throw (CORBA::SystemException);
+    /**
+     * Returns a reference to the IFs property implementation of the IDL interface.
+     * @return pointer to read-only long property
+     */     
+    virtual ACS::ROlong_ptr IFs() throw (CORBA::SystemException);
 
-	
-	/**
-	 * Returns a reference to the initialFrequency property implementation of the IDL interface.
-	 * @return pointer to read-only doubleSeq property
-	 */	 	
-	virtual ACS::ROdoubleSeq_ptr initialFrequency() throw (CORBA::SystemException);
-
-
-	/**
-	 * Returns a reference to the bandWidth property implementation of the IDL interface.
-	 * @return pointer to read-only doubleSeq property
-	 */	 	
-	virtual ACS::ROdoubleSeq_ptr bandWidth() throw (CORBA::SystemException);
+    
+    /**
+     * Returns a reference to the initialFrequency property implementation of the IDL interface.
+     * @return pointer to read-only doubleSeq property
+     */     
+    virtual ACS::ROdoubleSeq_ptr initialFrequency() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the polarization property implementation of the IDL interface.
-	 * @return pointer to read-only long sequence property
-	 */	 
-	virtual ACS::ROlongSeq_ptr polarization() throw (CORBA::SystemException);	
-	
+    /**
+     * Returns a reference to the bandWidth property implementation of the IDL interface.
+     * @return pointer to read-only doubleSeq property
+     */     
+    virtual ACS::ROdoubleSeq_ptr bandWidth() throw (CORBA::SystemException);
 
-	/**
+
+    /**
+     * Returns a reference to the polarization property implementation of the IDL interface.
+     * @return pointer to read-only long sequence property
+     */  
+    virtual ACS::ROlongSeq_ptr polarization() throw (CORBA::SystemException);   
+    
+
+    /**
      * Returns a reference to the status property Implementation of IDL interface.
-	 * @return pointer to read-only pattern property
-	 */
-	virtual ACS::ROpattern_ptr status() throw (CORBA::SystemException);
+     * @return pointer to read-only pattern property
+     */
+    virtual ACS::ROpattern_ptr status() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vacuum property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	 */
+    /**
+     * Returns a reference to the vacuum property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdouble_ptr vacuum() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vdL1 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vdL1 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vdL1() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vdR1 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vdR1 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vdR1() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vdL2 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vdL2 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vdL2() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vdR2 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vdR2 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vdR2() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vdL3 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vdL3 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vdL3() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vdR3 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vdR3 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vdR3() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vdL4 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vdL4 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vdL4() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vdR4 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vdR4 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vdR4() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vdL5 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vdL5 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vdL5() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vdR5 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vdR5 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vdR5() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the idL1 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the idL1 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr idL1() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the idR1 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the idR1 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr idR1() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the idL2 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the idL2 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr idL2() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the idR2 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the idR2 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr idR2() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the idL3 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the idL3 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr idL3() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the idR3 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the idR3 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr idR3() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the idL4 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the idL4 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr idL4() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the idR4 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the idR4 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr idR4() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the idL5 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the idL5 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr idL5() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the idR5 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the idR5 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr idR5() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vgL1 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vgL1 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vgL1() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vgR1 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vgR1 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vgR1() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vgL2 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vgL2 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vgL2() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vgR2 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vgR2 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vgR2() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vgL3 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vgL3 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vgL3() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vgR3 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vgR3 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vgR3() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vgL4 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vgL4 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vgL4() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vgR4 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vgR4 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vgR4() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vgL5 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vgL5 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vgL5() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the vgR5 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
- 	 */
+    /**
+     * Returns a reference to the vgR5 property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdoubleSeq_ptr vgR5() throw (CORBA::SystemException);
 
 
@@ -608,102 +611,102 @@ public:
     virtual ACS::ROstring_ptr receiverName() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the cryoTemperatureCoolHead property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	 */
+    /**
+     * Returns a reference to the cryoTemperatureCoolHead property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdouble_ptr cryoTemperatureCoolHead() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the cryoTemperatureCoolHeadWindow property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	 */
+    /**
+     * Returns a reference to the cryoTemperatureCoolHeadWindow property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdouble_ptr cryoTemperatureCoolHeadWindow() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the cryoTemperatureLNA property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	 */
+    /**
+     * Returns a reference to the cryoTemperatureLNA property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdouble_ptr cryoTemperatureLNA() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the cryoTemperatureLNAWindow property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	 */
+    /**
+     * Returns a reference to the cryoTemperatureLNAWindow property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdouble_ptr cryoTemperatureLNAWindow() throw (CORBA::SystemException);
 
 
-	/**
-	 * Returns a reference to the environmentTemperature property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	 */
+    /**
+     * Returns a reference to the environmentTemperature property implementation of the IDL interface.
+     * @return pointer to read-only double property
+     */
     virtual ACS::ROdouble_ptr environmentTemperature() throw (CORBA::SystemException);
 
 
-	/**
+    /**
      * Returns a reference to the status property Implementation of IDL interface.
-	 * @return pointer to read-only ROTSystemStatus property status
-	 */
-	virtual Management::ROTSystemStatus_ptr receiverStatus() throw (CORBA::SystemException);
+     * @return pointer to read-only ROTSystemStatus property status
+     */
+    virtual Management::ROTSystemStatus_ptr receiverStatus() throw (CORBA::SystemException);
 
     
 private:
  
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plocalOscillator;
-	baci::SmartPropertyPointer<baci::ROlong> m_pfeeds;
-	baci::SmartPropertyPointer<baci::ROlong> m_pIFs;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pinitialFrequency;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pbandWidth;
-	baci::SmartPropertyPointer<baci::ROlongSeq> m_ppolarization;
-	baci::SmartPropertyPointer<baci::ROpattern> m_pstatus;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pvacuum;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plocalOscillator;
+    baci::SmartPropertyPointer<baci::ROlong> m_pfeeds;
+    baci::SmartPropertyPointer<baci::ROlong> m_pIFs;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pinitialFrequency;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pbandWidth;
+    baci::SmartPropertyPointer<baci::ROlongSeq> m_ppolarization;
+    baci::SmartPropertyPointer<baci::ROpattern> m_pstatus;
+    baci::SmartPropertyPointer<baci::ROdouble> m_pvacuum;
 
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL1;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR1;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL2;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR2;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL3;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR3;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL4;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR4;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL5;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR5;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL1;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR1;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL2;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR2;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL3;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR3;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL4;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR4;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL5;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR5;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL1;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR1;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL2;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR2;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL3;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR3;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL4;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR4;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL5;
-	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR5;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL1;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR1;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL2;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR2;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL3;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR3;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL4;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR4;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL5;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR5;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL1;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR1;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL2;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR2;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL3;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR3;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL4;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR4;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL5;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR5;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL1;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR1;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL2;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR2;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL3;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR3;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL4;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR4;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL5;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR5;
 
-	baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureCoolHead;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureCoolHeadWindow;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureLNA;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureLNAWindow;
-	baci::SmartPropertyPointer<baci::ROdouble> m_penvironmentTemperature;
-	baci::SmartPropertyPointer<baci::ROstring> m_pmode;
-	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), \
+    baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureCoolHead;
+    baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureCoolHeadWindow;
+    baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureLNA;
+    baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureLNAWindow;
+    baci::SmartPropertyPointer<baci::ROdouble> m_penvironmentTemperature;
+    baci::SmartPropertyPointer<baci::ROstring> m_pmode;
+    baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), \
         POA_Management::ROTSystemStatus> > m_preceiverStatus;
     baci::SmartPropertyPointer<ROstring> m_preceiverName;
 
-	SRTKBandMFCore m_core;
-	CMonitorThread *m_monitor;
+    SRTKBandMFCore m_core;
+    CMonitorThread *m_monitor;
 
     void operator=(const SRTKBandMFReceiverImpl &);
 

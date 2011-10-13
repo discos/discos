@@ -164,7 +164,7 @@ void CComponentCore::activate() throw (
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     // Call the setMode of the derived class (setMode is pure virtual in ComponentCore).
-    this->setMode((const char *)m_configuration.getSetupMode()); 
+    setMode((const char *)m_configuration.getSetupMode()); 
     guard.release();
     lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 }
@@ -395,73 +395,81 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (
 
 void CComponentCore::getCalibrationMark(
         ACS::doubleSeq& result,
+        ACS::doubleSeq& resFreq,
+        ACS::doubleSeq& resBw,
         const ACS::doubleSeq& freqs,
         const ACS::doubleSeq& bandwidths,
-        const ACS::longSeq& feeds,
+        const ACS::longSeq& feeds, 
         const ACS::longSeq& ifs
-        ) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
+        ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
 {
-    double realFreq,realBw;
-    double *tableLeftFreq=NULL;
-    double *tableLeftMark=NULL;
-    double *tableRightFreq=NULL;
-    double *tableRightMark=NULL;
-    DWORD sizeL=0;
-    DWORD sizeR=0;
-    baci::ThreadSyncGuard guard(&m_mutex);
-    if (m_setupMode=="") {
-        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
-        impl.setReason("receiver not configured yet");
-        throw impl;
-    }
-    // Let's do some checks about input data
-    unsigned stdLen=freqs.length();
-    if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
-        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
-        impl.setReason("sub-bands definition is not consistent");
-        throw impl;
-    }
-    result.length(stdLen);
-    for (unsigned i=0;i<stdLen;i++) {
-        if ((ifs[i]>=(long)m_configuration.getIFs()) || (ifs[i]<0)) {
-            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
-            impl.setValueName("IF identifier");
-            throw impl;
-        }
-    }
-    for (unsigned i=0;i<stdLen;i++) {
-        if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
-            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
-            impl.setValueName("feed identifier");
-            throw impl;
-        }
-    }
-    // First get the calibration mark tables
-    sizeL=m_configuration.getLeftMarkTable(tableLeftFreq,tableLeftMark);
-    sizeR=m_configuration.getRightMarkTable(tableRightFreq,tableRightMark);
-    for (unsigned i=0;i<stdLen;i++) {
-        // Now computes the mark for each input band....considering the present mode and configuration of the receiver.
-        if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
-                realFreq=m_startFreq[ifs[i]];
-                realBw=0.0;
-        }
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"SUB_BAND %lf %lf",realFreq,realBw));
-        realFreq+=m_localOscillatorValue+realBw/2.0;
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
-        if (m_polarization[ifs[i]]==(long)Receivers::RCV_LEFT) {
-            result[i]=linearFit(tableLeftFreq,tableLeftMark,sizeL,realFreq);
-            ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
-        }
-        else {
-            result[i]=linearFit(tableRightFreq,tableRightMark,sizeR,realFreq);
-            ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"RIGHT_MARK_VALUE %lf",result[i]));
-        }
-    }
-    if (tableLeftFreq) delete [] tableLeftFreq;
-    if (tableLeftMark) delete [] tableLeftMark;
-    if (tableRightFreq) delete [] tableRightFreq;
-    if (tableRightMark) delete [] tableRightMark;
+	double realFreq,realBw;
+	double *tableLeftFreq=NULL;
+	double *tableLeftMark=NULL;
+	double *tableRightFreq=NULL;
+	double *tableRightMark=NULL;
+	DWORD sizeL=0;
+	DWORD sizeR=0;
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (m_setupMode=="") {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
+		impl.setReason("receiver not configured yet");
+		throw impl;
+	}
+	//let's do some checks about input data
+	unsigned stdLen=freqs.length();
+	if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
+		impl.setReason("sub-bands definition is not consistent");
+		throw impl;
+	}
+	for (unsigned i=0;i<stdLen;i++) {
+		if ((ifs[i]>=(long)m_configuration.getIFs()) || (ifs[i]<0)) {
+			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
+			impl.setValueName("IF identifier");
+			throw impl;
+		}
+	}
+	for (unsigned i=0;i<stdLen;i++) {
+		if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
+			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
+			impl.setValueName("feed identifier");
+			throw impl;
+		}
+	}
+	result.length(stdLen);
+	resFreq.length(stdLen);
+	resBw.length(stdLen);
+	// first get the calibration mark tables
+	sizeL=m_configuration.getLeftMarkTable(tableLeftFreq,tableLeftMark);
+	sizeR=m_configuration.getRightMarkTable(tableRightFreq,tableRightMark);
+	for (unsigned i=0;i<stdLen;i++) {
+		// now computes the mark for each input band....considering the present mode and configuration of the receiver.
+		if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
+				realFreq=m_startFreq[ifs[i]];
+				realBw=0.0;
+		}
+		ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"SUB_BAND %lf %lf",realFreq,realBw));
+		realFreq+=m_localOscillatorValue;
+		resFreq[i]=realFreq;
+		resBw[i]=realBw;
+		realFreq+=realBw/2.0;
+		ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
+		if (m_polarization[ifs[i]]==(long)Receivers::RCV_LEFT) {
+			result[i]=linearFit(tableLeftFreq,tableLeftMark,sizeL,realFreq);
+			ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
+		}
+		else {
+			result[i]=linearFit(tableRightFreq,tableRightMark,sizeR,realFreq);
+			ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"RIGHT_MARK_VALUE %lf",result[i]));
+		}
+	}
+	if (tableLeftFreq) delete [] tableLeftFreq;
+	if (tableLeftMark) delete [] tableLeftMark;
+	if (tableRightFreq) delete [] tableRightFreq;
+	if (tableRightMark) delete [] tableRightMark;
 }
+
 
 double CComponentCore::getTaper(
         const double& freq,

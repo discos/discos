@@ -383,20 +383,24 @@ void SRTKBandMFReceiverImpl::setMode(const char * mode) throw (
 }
 
 
-ACS::doubleSeq *SRTKBandMFReceiverImpl::getCalibrationMark(
+ACS::doubleSeq * SRTKBandMFReceiverImpl::getCalibrationMark(
         const ACS::doubleSeq& freqs, 
         const ACS::doubleSeq& bandwidths, 
         const ACS::longSeq& feeds,
-        const ACS::longSeq& ifs
+        const ACS::longSeq& ifs,
+        ACS::doubleSeq_out skyFreq,
+        ACS::doubleSeq_out skyBw
         ) throw (
-            CORBA::SystemException, 
+            CORBA::SystemException,
             ComponentErrors::ComponentErrorsEx,
             ReceiversErrors::ReceiversErrorsEx
-          )
+        )
 {
-    ACS::doubleSeq_var result=new ACS::doubleSeq;
+    ACS::doubleSeq_var result = new ACS::doubleSeq;
+    ACS::doubleSeq_var resFreq = new ACS::doubleSeq;
+    ACS::doubleSeq_var resBw = new ACS::doubleSeq;
     try {
-        m_core.getCalibrationMark(result.inout(), freqs,bandwidths, feeds, ifs);
+        m_core.getCalibrationMark(result.inout(), resFreq.inout(), resBw.inout(), freqs, bandwidths, feeds,ifs);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
         ex.log(LM_DEBUG);
@@ -407,10 +411,12 @@ ACS::doubleSeq *SRTKBandMFReceiverImpl::getCalibrationMark(
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::getCalibrationMark()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRTKBandReceiverImpl::getCalibrationMark()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
+    skyFreq = resFreq._retn();
+    skyBw = resBw._retn();
     return result._retn();
 }
 

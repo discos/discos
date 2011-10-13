@@ -100,21 +100,28 @@ public:
     /**
      * It allows to compute the value of the calibration mark for any given sub bands in 
      * the IF space.
-     * @param result this the sequence of computed mark values, first entry correspond to 
+     * @param result this the sequence of computed mark values, the first entry correspond to 
      * first sub band and so on....
+     * @param, resFreq the sequence reports the initial observed sky frequency (MHz), the  
+     * first entry correspond to first sub band and so on....
+     * @param resBw the sequence reports the real bandwidth observed (MHz), the  first entry 
+     * correspond to first sub band and so on....
      * @param freqs  list of start frequencies (MHz)
      * @param bandwidth list of the band widths (MHz)
-     * @param feeds list of feed identifier, it allows to specifies form which feed the 
-     * sub band comes from. In that case it is neglected since the receiver is a single feed
-     * @param ifs list of IF identifier, it allows to specifies from which receiver IF the sub band comes from.
+     * @param feeds list of feed identifier, it allows to specifies form which feed the sub 
+     * band comes from. In that case it is neglected since the receiver is a single feed
+     * @param ifs list of IF identifier, it allows to specifies from which receiver IF the 
+     * sub band comes from.
      */
     void getCalibrationMark(
             ACS::doubleSeq& result,
+            ACS::doubleSeq& resFreq,
+            ACS::doubleSeq& resBw,
             const ACS::doubleSeq& freqs,
             const ACS::doubleSeq& bandwidths,
             const ACS::longSeq& feeds,
             const ACS::longSeq& ifs
-    ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl);
+     ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl);
 
 
     /**
@@ -391,18 +398,18 @@ public:
     inline void setVacuumDefault(const double& val) { m_vacuumDefault=val; }
 
 
-	/** 
+    /** 
      * This is a pure virtual function, so you must write it in your derived class.
-	 * It allows to change the operating mode of the receiver. 
+     * It allows to change the operating mode of the receiver. 
      * If the mode does not correspond to a valid mode an error is thrown.
-	 * @param  mode mode code as a string
+     * @param  mode mode code as a string
      * @throw ReceiversErrors::ModeErrorExImpl,
      * @throw ComponentErrors::ValidationErrorExImpl,
      * @throw ComponentErrors::ValueOutofRangeExImpl,
      * @throw ComponentErrors::CouldntGetComponentExImpl,
      * @throw ComponentErrors::CORBAProblemExImpl,
      * @throw ReceiversErrors::LocalOscillatorErrorExImpl
-	 */
+     */
     virtual void setMode(const char * mode) throw (
             ReceiversErrors::ModeErrorExImpl,
             ReceiversErrors::ReceiverControlBoardErrorExImpl,
