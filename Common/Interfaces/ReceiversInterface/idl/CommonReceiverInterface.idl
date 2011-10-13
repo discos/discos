@@ -87,10 +87,9 @@ module Receivers {
         void setLO(in ACS::doubleSeq lo1) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
   
         /**
-         * It can be called when the value of the calibration diode is required. 
+         * It can be called when the value of the calibration diode is required.  
          * It can process as many subbands at a  time, provided they belong to the current receiver.  
-         * The subbands are identified by giving 
-         * four coordinates....the feed, the polarization, the start frequency and the bandwidth.
+         * The subbands are identified by giving  four coordinates....the feed, the polarization and the start frequency, the bandwidth of the detector. 
          * @param freqs this parameter is used to pass the start frequencies of the bands that are to be analyzed (MHz). This frequencies
          * generally refers to detector start frequency, before any other computation the recevier correlate this value to the real start
          * frequency of the receiver.
@@ -99,12 +98,14 @@ module Receivers {
          * of the receiver.
          * @param feeds is a list that stores the corresponding feed of the subband we are asking for
          * @param ifs is a list that identfies which IFs of the feed we are interested in, usually 0..1
+         * @param skyFreq used to return the resulting frequency whan comparing the detector subband and the receiver IF band, the band is the real observed frequency in fact the oscillator is also added (MHz)
+         * @param skyBw used to return the total observed bandwidth. (Mhz)
          * @return for each subband the list of the noise calibration values in Kelvin degrees. It must be freed by the caller.
          * @throw ComponentErrors::ComponentErrorsEx
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw CORBA::SystemException  
          */
-        ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs) 
+        ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs,out ACS::doubleSeq skyFreq,out ACS::doubleSeq skyBw) 
             raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
             
         /**
