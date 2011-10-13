@@ -355,8 +355,8 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Val
 	ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",m_localOscillatorValue));
 }
 
-void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-		const ACS::longSeq& ifs) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
+void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
+			const ACS::longSeq& ifs) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
 {
 	double realFreq,realBw;
 	double *tableLeftFreq=NULL;
@@ -378,7 +378,6 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::double
 		impl.setReason("sub-bands definition is not consistent");
 		throw impl;
 	}
-	result.length(stdLen);
 	for (unsigned i=0;i<stdLen;i++) {
 		if ((ifs[i]>=(long)m_configuration.getIFs()) || (ifs[i]<0)) {
 			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
@@ -393,6 +392,9 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::double
 			throw impl;
 		}
 	}
+	result.length(stdLen);
+	resFreq.length(stdLen);
+	resBw.length(stdLen);
 	// first get the calibration mark tables
 	sizeL=m_configuration.getLeftMarkTable(tableLeftFreq,tableLeftMark);
 	sizeR=m_configuration.getRightMarkTable(tableRightFreq,tableRightMark);
@@ -403,7 +405,10 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,const ACS::double
 				realBw=0.0;
 		}
 		ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"SUB_BAND %lf %lf",realFreq,realBw));
-		realFreq+=m_localOscillatorValue+realBw/2.0;
+		realFreq+=m_localOscillatorValue;
+		resFreq[i]=realFreq;
+		resBw[i]=realBw;
+		realFreq+=realBw/2.0;
 		ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
 		if (m_polarization[ifs[i]]==(long)Receivers::RCV_LEFT) {
 			result[i]=linearFit(tableLeftFreq,tableLeftMark,sizeL,realFreq);
@@ -783,7 +788,7 @@ void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetCom
 	if (CORBA::is_nil(m_localOscillatorDevice)) {  //only if it has not been retrieved yet
 		try {
 			m_localOscillatorDevice=m_services->getComponent<Receivers::LocalOscillator>((const char*)m_configuration.getLocalOscillatorInstance());
-			ACS_LOG(LM_FULL_INFO,"CCore::loadAntennaBoss()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"));
+			ACS_LOG(LM_FULL_INFO,"CCore::loadLocalOscillator()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"));
 			m_localOscillatorFault=false;
 		}
 		catch (maciErrType::CannotGetComponentExImpl& ex) {

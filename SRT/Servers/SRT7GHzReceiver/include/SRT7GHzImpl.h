@@ -160,10 +160,12 @@ public:
 	 *               band width of the receiver.
 	 * @param feeds for each sub band this if the feed number. In that case zero is the only allowed value.
 	 * @param ifs for each sub band this indicates the proper IF
+	 * @param skyFreq for each sub band it returns the real observed frequency(MHz), included detector, receiver IF  and Local Oscillator.
+	 * @param skyBw for each sub band it returns the real observed bandwidth(MHz), included detector bandwidth , receiver IF bandwidth
 	 * @return the list of the noise calibration value in Kelvin degrees.
 	 */
-    virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs) throw (
-    		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs,
+    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is called in order to know the geometry of the receiver. The geometry is given along the X and Y axis where the central feed is the origin
