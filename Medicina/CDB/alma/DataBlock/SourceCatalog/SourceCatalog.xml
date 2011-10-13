@@ -15,15 +15,15 @@
 	<parallax/>
 	<radialVelocity/>
     <type>c</type>
-    <freqMin>500</freqMin>
-    <freqMax>23780</freqMax>
+    <freqMin>500.0</freqMin>
+    <freqMax>23780.0</freqMax>
     <fluxCoeff1>2.465</fluxCoeff1>
     <fluxCoeff2>-0.004</fluxCoeff2>
     <fluxCoeff3>-0.1251</fluxCoeff3>
-    <size>1.5</size>
+    <size>0.000007272</size>
     <model>gauss</model>
-    <modelCoeff1>100</modelCoeff1>
-    <modelCoeff2/>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000004848</modelCoeff2>
     <modelCoeff3/>
     <modelCoeff4/>
     <modelCoeff5/>
@@ -40,15 +40,15 @@
 	<parallax/>
 	<radialVelocity/>
     <type>c</type>
-    <freqMin>500</freqMin>
-    <freqMax>10550</freqMax>
+    <freqMin>500.0</freqMin>
+    <freqMax>10550.0</freqMax>
     <fluxCoeff1>1.250</fluxCoeff1>
     <fluxCoeff2>0.726</fluxCoeff2>
     <fluxCoeff3>-0.2286</fluxCoeff3>
-    <size>3.0</size>
+    <size>0.000014544</size>
     <model>gauss</model>
-    <modelCoeff1>100</modelCoeff1>
-    <modelCoeff2/>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000014544</modelCoeff2>
     <modelCoeff3/>
     <modelCoeff4/>
     <modelCoeff5/>
@@ -140,16 +140,16 @@
 	<parallax/>
 	<radialVelocity/>
     <type>c</type>
-    <freqMin>500</freqMin>
-    <freqMax>10550</freqMax>
+    <freqMin>500.0</freqMin>
+    <freqMax>10550.0</freqMax>
     <fluxCoeff1>4.729</fluxCoeff1>
     <fluxCoeff2>-1.025</fluxCoeff2>
     <fluxCoeff3>0.0130</fluxCoeff3>
-    <size>47</size>
+    <size>0.000227862</size>
     <model>gauss</model>
-    <modelCoeff1>100</modelCoeff1>
-    <modelCoeff2/>
-    <modelCoeff3/>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000227862</modelCoeff2>
+    <modelCoeff3>0.000067874</modelCoeff3>
     <modelCoeff4/>
     <modelCoeff5/>
     <modelCoeff6/>
@@ -215,15 +215,15 @@
 	<parallax/>
 	<radialVelocity/>
     <type>c</type>
-    <freqMin>500</freqMin>
-    <freqMax>23780</freqMax>
+    <freqMin>500.</freqMin>
+    <freqMax>23780.0</freqMax>
     <fluxCoeff1>2.806</fluxCoeff1>
     <fluxCoeff2>-0.140</fluxCoeff2>
     <fluxCoeff3>-0.1031</fluxCoeff3>
-    <size>1.0</size>
+    <size>0.000004848</size>
     <model>gauss</model>
-    <modelCoeff1>100</modelCoeff1>
-    <modelCoeff2/>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000004848</modelCoeff2>
     <modelCoeff3/>
     <modelCoeff4/>
     <modelCoeff5/>
@@ -240,16 +240,16 @@
 	<parallax/>
 	<radialVelocity/>
     <type>c</type>
-    <freqMin>500</freqMin>
-    <freqMax>23780</freqMax>
+    <freqMin>500.o</freqMin>
+    <freqMax>23780.0</freqMax>
     <fluxCoeff1>2.525</fluxCoeff1>
     <fluxCoeff2>0.246</fluxCoeff2>
     <fluxCoeff3>-0.1638</fluxCoeff3>
-    <size>23</size>
+    <size>0.000111507</size>
     <model>gauss</model>
-    <modelCoeff1>100</modelCoeff1>
-    <modelCoeff2/>
-    <modelCoeff3/>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000111507</modelCoeff2>
+    <modelCoeff3>0.000024241</modelCoeff3>
     <modelCoeff4/>
     <modelCoeff5/>
     <modelCoeff6/>
