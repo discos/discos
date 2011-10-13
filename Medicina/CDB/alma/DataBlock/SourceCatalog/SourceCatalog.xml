@@ -240,7 +240,7 @@
 	<parallax/>
 	<radialVelocity/>
     <type>c</type>
-    <freqMin>500.o</freqMin>
+    <freqMin>500.0</freqMin>
     <freqMax>23780.0</freqMax>
     <fluxCoeff1>2.525</fluxCoeff1>
     <fluxCoeff2>0.246</fluxCoeff2>
