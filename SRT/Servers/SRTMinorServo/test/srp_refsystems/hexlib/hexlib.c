@@ -1,9 +1,9 @@
 /*
-  Osservatorio Astronomico di Cagliari
-  data: 26 ottobre 2005
-  rel: 0.6
+  INAF - Osservatorio Astronomico di Cagliari
+  data: 20 settembre 2011
+  rel: 0.8
   autore: Franco Buffa
-  e-mail: fbuffa@ca.astro.it
+  e-mail: fbuffa@oa-cagliari.inaf.it
   
   ATTENZIONE BISOGNA INSTALLARE LE LIB GSL 
   http://www.gnu.org/software/gsl/
@@ -12,7 +12,14 @@
   gcc foobar.c hexlib.c -lgsl -lgslcblas -lm -o foobar
   
   bugs & info: 
-   26 10 2005 - create nuove func. per implentare il goto
+
+   20 09 2011 - Piccole manutenzioni sui test0x.c
+   e introdotte le 2 rot. RZRYRX e RXRYRZ 
+
+   10 08 2010 - introdotte nuove coord. attuatori nel file hexdata,
+   la funzione init_p non è più da utilizzarsi 
+
+   26 10 2005 - create nuove func. per implementare il goto
 
    19 10 2005 - corr. bug che trasformava erroneamente gli angoli in rad
 
@@ -30,42 +37,58 @@
 
 #include "hexlib.h"
 
+static int rotation = RZRYRX;
+
 void rot(double *w,double *x, double *y)
 {
  int i,j;
  double r[3],x0[3],sum,cp,sp,ct,st,cf,sf,R[3][3];
  for (i=0;i<3;i++)
  {
-//x0[i]=x[i]+w[i];
   x0[i]=x[i];
-//  r[i]=w[i+3]*PI/180.0;
   r[i]=w[i+3];
  } 
-  
  cp=cos(r[0]);
  sp=sin(r[0]);
  ct=cos(r[1]);
  st=sin(r[1]);
  cf=cos(r[2]);
  sf=sin(r[2]);
- 
- R[0][0]=ct*cf;
- R[0][1]=sp*st*cf-cp*sf;
- R[0][2]=cp*st*cf+sp*sf;
- R[1][0]=ct*sf;
- R[1][1]=sp*st*sf+cp*cf;
- R[1][2]=cp*st*sf-sp*cf;
- R[2][0]=-st;
- R[2][1]=sp*ct;
- R[2][2]=cp*ct;
- 
+
+ if(rotation==RXRYRZ)
+ {
+// matrice di rotazione RX(RY(RZ(P)))
+  R[0][0]=ct*cf;
+  R[0][1]=-ct*sf;
+  R[0][2]=st;
+  R[1][0]=cp*sf+sp*st*cf;
+  R[1][1]=cp*cf-sp*st*sf;
+  R[1][2]=-sp*ct;
+  R[2][0]=sp*sf-cp*st*cf;
+  R[2][1]=sp*cf+cp*st*sf;
+  R[2][2]=cp*ct;
+ }
+ else
+ {
+// ** DEFAULT **
+// matrice di rotazione RZ(RY(RX(P)))
+  R[0][0]=ct*cf;
+  R[0][1]=sp*st*cf-cp*sf;
+  R[0][2]=cp*st*cf+sp*sf;
+  R[1][0]=ct*sf;
+  R[1][1]=sp*st*sf+cp*cf;
+  R[1][2]=cp*st*sf-sp*cf;
+  R[2][0]=-st;
+  R[2][1]=sp*ct;
+  R[2][2]=cp*ct;
+ }
+
  for(i=0;i<3;i++)
  {
   sum=0;
   for(j=0;j<3;j++) sum+=R[i][j]*x0[j];
-//y[i]=sum;
   y[i]=sum+w[i];
- }   
+ }
 }
 
 
@@ -73,10 +96,11 @@ void print_state (struct rparams *p)
 {
   int i;
   printf ("status = %s(%d)\n", gsl_strerror (p->status),p->status);
-  printf ("iter = %04u\nx =",p->iter);
-  for(i=0;i<_n;i++) printf ("%8.4f ", p->x[i]);
+  printf ("iter = %04u\n",p->iter);
+  printf ("x = ");
+  for(i=0;i<_n;i++) printf ("%12.8f ", p->x[i]);
   printf ("\nf =");
-  for(i=0;i<_n;i++) printf ("%8.4f ", p->y[i]);
+  for(i=0;i<_n;i++) printf ("%12.8f ", p->y[i]);
   printf ("\n");
 }
 
@@ -234,7 +258,7 @@ void inv(struct rparams *p)
   int status;
   size_t i, iter = 0;
   const size_t n = _n;
-  gsl_multiroot_function f = {&func_f, n, p};
+  gsl_multiroot_function f = {&func_f, n, (void *)p};
   gsl_vector *x = gsl_vector_alloc (n);
     
   for(i=0;i<n;i++) gsl_vector_set (x, i, 0.0);
@@ -333,27 +357,29 @@ int load_p(struct rparams *p,char *fname)
    return (0);
 }
 
-int eval_array(double *pos1, double *pos2, int nstp, h_array *x)
+int gotopos(struct rparams *p,double *pos1, double *pos2, int nstp, h_array *x)
 {
-   static struct rparams p;
    int i,j;
    double d1[_n],d2[_n],deltad[_n];
    if(nstp<2) return(-1);
-   init_p(&p);
-   for(i=0;i<_n;i++) p.x[i]=pos1[i];
-   dir(&p);
-   for(i=0;i<_n;i++) d1[i]=p.d[i];
-   for(i=0;i<_n;i++) p.x[i]=pos2[i];
-   dir(&p);
-   for(i=0;i<_n;i++) d2[i]=p.d[i];
+
+   for(i=0;i<_n;i++) p->x[i]=pos1[i];
+   dir(p);
+   for(i=0;i<_n;i++) d1[i]=p->d[i];
+
+   for(i=0;i<_n;i++) p->x[i]=pos2[i];
+   dir(p);
+   for(i=0;i<_n;i++) d2[i]=p->d[i];
+
    for(i=0;i<_n;i++) deltad[i]=(d2[i]-d1[i])/(double)(nstp-1);
+
    for(i=0;i<nstp;i++)
    {
-      for(j=0;j<_n;j++) p.d[j]=d1[j]+deltad[j]*(double)i;
-      inv(&p);
-      for(j=0;j<6;j++)  x[i*13+j]=p.x[j];
-      for(j=6;j<12;j++) x[i*13+j]=p.d[j-6];
-      x[i*13+12]=(double)p.status;
+      for(j=0;j<_n;j++) p->d[j]=d1[j]+deltad[j]*(double)i;
+      inv(p);
+      for(j=0;j<6;j++)  x[i*13+j]=p->x[j];
+      for(j=6;j<12;j++) x[i*13+j]=p->d[j-6];
+      x[i*13+12]=(double)p->status;
    }
    return (0);
 }
@@ -376,4 +402,17 @@ int get_array(int i, h_array *x, double *y)
 void free_array(h_array *x)
 {
   free(x);
+}
+
+int set_rot(int rot_s)
+{   
+   if(rot_s==RZRYRX)
+   {
+     rotation=RZRYRX;
+   }
+   else
+   {
+     rotation=RXRYRZ;
+   }
+   return GSL_SUCCESS;
 }
