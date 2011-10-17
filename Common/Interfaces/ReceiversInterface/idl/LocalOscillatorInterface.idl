@@ -39,27 +39,32 @@ module Receivers {
 
 	*/
 	
-	void set(in double rf_power, in double rf_freq);
+	void set(in double rf_power, in double rf_freq) raises (ReceiversErrors::ReceiversErrorsEx);
 	/**
 	 get the LO parameters 
 	 
 	 @param rf_power signal power
 	 @param rf_freq	 signal frequency
-
+    * @throw ReceiversErrors::ReceiversErrorsEx
+    * @throw CORBA::SystemExcpetion 
 	*/
 
-	void get(out double rf_power, out double rf_freq); // to be corrected with ;
+	void get(out double rf_power, out double rf_freq) raises (ReceiversErrors::ReceiversErrorsEx); // to be corrected with ;
 	/**
 	Turn the signal on
+    * @throw ReceiversErrors::ReceiversErrorsEx
+    * @throw CORBA::SystemExcpetion 
 	
 	*/
 
-	void rfon();
+	void rfon()raises (ReceiversErrors::ReceiversErrorsEx);
 	/**
 	Turn the signal off
+    * @throw ReceiversErrors::ReceiversErrorsEx
+    * @throw CORBA::SystemExcpetion 
 	
 	*/
-	void rfoff();
+	void rfoff()raises (ReceiversErrors::ReceiversErrorsEx);
 	};
 
 };
