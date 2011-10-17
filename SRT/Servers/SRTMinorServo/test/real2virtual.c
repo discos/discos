@@ -12,7 +12,13 @@ int main (int argc, char *argv[])
   if(argc < 7)
       return 1;
 
-  init_p(&p);
+  if(load_p(&p, "./hexdata.txt"))
+  {
+     printf("File hexdata.txt not found!\n");
+     exit(0);
+  }
+  set_rot(RZRYRX);
+
   for(i = 0; i < n; i++) 
       p.d[i] = atof(argv[i + 1]); 
 

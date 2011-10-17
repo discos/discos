@@ -301,52 +301,23 @@ int print_p(struct rparams *p)
    return GSL_SUCCESS;
 }
 
-int load_p(struct rparams *p,char *fname)
+int load_p(struct rparams *p, char *fname)
 {   
    int i;
-   float d1,d2,d3;
-   FILE *ptr;
-   if((ptr=fopen(fname,"r"))==NULL) return(1);
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->p1[0]=(double)d1,p->p1[1]=(double)d2,p->p1[2]=(double)d3;
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->p2[0]=(double)d1,p->p2[1]=(double)d2,p->p2[2]=(double)d3;
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->p3[0]=(double)d1,p->p3[1]=(double)d2,p->p3[2]=(double)d3;
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->p4[0]=(double)d1,p->p4[1]=(double)d2,p->p4[2]=(double)d3;
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->p5[0]=(double)d1,p->p5[1]=(double)d2,p->p5[2]=(double)d3;
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->p6[0]=(double)d1,p->p6[1]=(double)d2,p->p6[2]=(double)d3;
 
-// --------   
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->a1[0]=(double)d1,p->a1[1]=(double)d2,p->a1[2]=(double)d3;
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->a2[0]=(double)d1,p->a2[1]=(double)d2,p->a2[2]=(double)d3;
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->a3[0]=(double)d1,p->a3[1]=(double)d2,p->a3[2]=(double)d3;
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->a4[0]=(double)d1,p->a4[1]=(double)d2,p->a4[2]=(double)d3;
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->a5[0]=(double)d1,p->a5[1]=(double)d2,p->a5[2]=(double)d3;
-   
-   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-   p->a6[0]=(double)d1,p->a6[1]=(double)d2,p->a6[2]=(double)d3;
+   p->p1[0] = -1597.80;  p->p1[1] = 917.85;   p->p1[2] = -2276.10;
+   p->p2[0] = 1603.70;   p->p2[1] = 919.00;   p->p2[2] = -2271.85;
+   p->p3[0] = -0.20;     p->p3[1] = -1853.30; p->p3[2] = -2262.85;
+   p->p4[0] = -1474.75;  p->p4[1] = -8.90;    p->p4[2] = -1892.25;
+   p->p5[0] = -1598.25;  p->p5[1] = 1224.70;  p->p5[2] = -1893.35;
+   p->p6[0] = 1605.25;   p->p6[1] = 1225.65;  p->p6[2] = -1890.30;
 
-   fclose(ptr);
+   p->a1[0] = -1595.10;  p->a1[1] = 908.40;   p->a1[2] = -3845.80;
+   p->a2[0] = 1612.70;   p->a2[1] = 917.10;   p->a2[2] = -3841.10;
+   p->a3[0] = 16.85;     p->a3[1] = -1843.65; p->a3[2] = -3834.40;
+   p->a4[0] = -3044.75;  p->a4[1] = -8.90;    p->a4[2] = -1892.25;
+   p->a5[0] = -1595.75;  p->a5[1] = 2795.95;  p->a5[2] = -1885.55;
+   p->a6[0] = 1596.45;   p->a6[1] = 2797.20;  p->a6[2] = -1891.25;
 
    p->status=-999;
    p->iter=-999;
@@ -356,6 +327,63 @@ int load_p(struct rparams *p,char *fname)
 
    return (0);
 }
+
+// Original load_p (I prefere don't read from a file every time I need to get a position)
+// int load_p(rparams *p,char *fname)
+// {   
+//    int i;
+//    float d1,d2,d3;
+//    FILE *ptr;
+//    if((ptr=fopen(fname,"r"))==NULL) return(1);
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->p1[0]=(double)d1,p->p1[1]=(double)d2,p->p1[2]=(double)d3;
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->p2[0]=(double)d1,p->p2[1]=(double)d2,p->p2[2]=(double)d3;
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->p3[0]=(double)d1,p->p3[1]=(double)d2,p->p3[2]=(double)d3;
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->p4[0]=(double)d1,p->p4[1]=(double)d2,p->p4[2]=(double)d3;
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->p5[0]=(double)d1,p->p5[1]=(double)d2,p->p5[2]=(double)d3;
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->p6[0]=(double)d1,p->p6[1]=(double)d2,p->p6[2]=(double)d3;
+// 
+// // --------   
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->a1[0]=(double)d1,p->a1[1]=(double)d2,p->a1[2]=(double)d3;
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->a2[0]=(double)d1,p->a2[1]=(double)d2,p->a2[2]=(double)d3;
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->a3[0]=(double)d1,p->a3[1]=(double)d2,p->a3[2]=(double)d3;
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->a4[0]=(double)d1,p->a4[1]=(double)d2,p->a4[2]=(double)d3;
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->a5[0]=(double)d1,p->a5[1]=(double)d2,p->a5[2]=(double)d3;
+//    
+//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+//    p->a6[0]=(double)d1,p->a6[1]=(double)d2,p->a6[2]=(double)d3;
+// 
+//    fclose(ptr);
+// 
+//    p->status=-999;
+//    p->iter=-999;
+//    for (i=0;i<_n;i++) p->x[i]=0.0;
+//    for (i=0;i<_n;i++) p->y[i]=0.0;
+//    for (i=0;i<_n;i++) p->d[i]=0.0;
+// 
+//    return (0);
+// }
 
 int gotopos(struct rparams *p,double *pos1, double *pos2, int nstp, h_array *x)
 {
