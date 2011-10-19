@@ -23,9 +23,11 @@ namespace IRA {
         bool init;
         char name[11];
         char type;
-        double fmin;
-        double fmax;
-        double fcoeff[3];
+        int nFreqRange;
+        char freqRange[50];
+        char fluxCoeff1[50];
+        char fluxCoeff2[50];
+        char fluxCoeff3[50];
         double size;
         char model[5];
         double mcoeff[6];
