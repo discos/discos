@@ -113,19 +113,19 @@ void SkySourceImpl::execute() throw(ACSErr::ACSbaseExImpl)
     else if (!m_sourceCatalog->addField(error, "type",CDataField::STRING)) {
 		error.setExtra("Error adding field type", 0);
 	}
-    else if (!m_sourceCatalog->addField(error, "freqMin",CDataField::DOUBLE)) {
-		error.setExtra("Error adding field freqMin", 0);
+    else if (!m_sourceCatalog->addField(error, "nFreqRange",CDataField::LONGLONG)) {
+		error.setExtra("Error adding field nFreqRange", 0);
 	}
-    else if (!m_sourceCatalog->addField(error, "freqMax",CDataField::DOUBLE)) {
-		error.setExtra("Error adding field freqMax", 0);
+    else if (!m_sourceCatalog->addField(error, "freqRange",CDataField::STRING)) {
+		error.setExtra("Error adding field freqRange", 0);
 	}
-    else if (!m_sourceCatalog->addField(error, "fluxCoeff1",CDataField::DOUBLE)) {
+    else if (!m_sourceCatalog->addField(error, "fluxCoeff1",CDataField::STRING)) {
 		error.setExtra("Error adding field fluxCoeff1", 0);
 	}
-    else if (!m_sourceCatalog->addField(error, "fluxCoeff2",CDataField::DOUBLE)) {
+    else if (!m_sourceCatalog->addField(error, "fluxCoeff2",CDataField::STRING)) {
 		error.setExtra("Error adding field fluxCoeff2", 0);
 	}
-    else if (!m_sourceCatalog->addField(error, "fluxCoeff3",CDataField::DOUBLE)) {
+    else if (!m_sourceCatalog->addField(error, "fluxCoeff3",CDataField::STRING)) {
 		error.setExtra("Error adding field fluxCoeff3", 0);
 	}
     else if (!m_sourceCatalog->addField(error, "size",CDataField::DOUBLE)) {
@@ -322,22 +322,14 @@ void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::S
 		   (*m_sourceCatalog)["radialVelocity"]->asDouble());
 
         fluxParam.init = true;
-        /*int i;
-        for (i = 0; i < name.GetLength(); i++)
-            fluxParam.name[i] = name.CharAt(i);*/
         strncpy(fluxParam.name,(const char *)name,11);
-        /*CString sType = (const char*)((*m_sourceCatalog)["type"]->asString());
-        fluxParam.type = sType.CharAt(0);*/
         fluxParam.type=((*m_sourceCatalog)["type"]->asString())[0];
-        fluxParam.fmin = (*m_sourceCatalog)["freqMin"]->asDouble();
-        fluxParam.fmax = (*m_sourceCatalog)["freqMax"]->asDouble();
-        fluxParam.fcoeff[0] = (*m_sourceCatalog)["fluxCoeff1"]->asDouble();
-        fluxParam.fcoeff[1] = (*m_sourceCatalog)["fluxCoeff2"]->asDouble();
-        fluxParam.fcoeff[2] = (*m_sourceCatalog)["fluxCoeff3"]->asDouble();
+        fluxParam.nFreqRange = (int)((*m_sourceCatalog)["nFreqRange"]->asLongLong());
+        strncpy(fluxParam.freqRange, (const char*)((*m_sourceCatalog)["freqRange"]->asString()),50);
+        strncpy(fluxParam.fluxCoeff1, (const char*)((*m_sourceCatalog)["fluxCoeff1"]->asString()),50);
+        strncpy(fluxParam.fluxCoeff2, (const char*)((*m_sourceCatalog)["fluxCoeff2"]->asString()),50);
+        strncpy(fluxParam.fluxCoeff3, (const char*)((*m_sourceCatalog)["fluxCoeff3"]->asString()),50);
         fluxParam.size = (*m_sourceCatalog)["size"]->asDouble();
-        /*CString sModel = (const char*)((*m_sourceCatalog)["model"]->asString());
-        for (i = 0; i < sModel.GetLength(); i++)
-            fluxParam.model[i] = sModel.CharAt(i);*/
         strncpy(fluxParam.model,(const char*)((*m_sourceCatalog)["model"]->asString()),5);
         fluxParam.mcoeff[0] = (*m_sourceCatalog)["modelCoeff1"]->asDouble();
         fluxParam.mcoeff[1] = (*m_sourceCatalog)["modelCoeff2"]->asDouble();
