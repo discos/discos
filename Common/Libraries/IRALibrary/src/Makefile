@@ -70,9 +70,6 @@ TestMicroControllerBoard_LIBS      = IRALibrary
 TestReceiverControl_OBJECTS   = TestReceiverControl
 TestReceiverControl_LIBS      = IRALibrary
 
-TestSourceFlux_OBJECTS = TestSourceFlux
-TestSourceFlux_LIBS = IRALibrary
-
 # 
 # IDL Files and flags
 # 
