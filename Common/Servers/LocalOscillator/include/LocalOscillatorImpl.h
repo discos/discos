@@ -5,7 +5,7 @@
 #include <baciCharacteristicComponentImpl.h>
 #include <baciROdouble.h>
 #include <baciROlong.h>
-#include <LocalOscillatorS.h>
+#include <LocalOscillatorInterfaceS.h>
 #include <baciSmartPropertyPointer.h>
 #include <ComponentErrors.h>
 #include <ReceiversErrors.h>
