@@ -27,7 +27,7 @@ module Receivers {
 	*/
         readonly attribute ACS::ROdouble frequency;
 	/**LO signal power	*/
-        readonly attribute ACS::ROdouble power;
+        readonly attribute ACS::ROdouble amplitude;
 	/** check if actual values are equal to set ones */
 
         readonly attribute ACS::ROlong isLocked;
