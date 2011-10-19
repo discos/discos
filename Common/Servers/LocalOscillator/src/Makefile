@@ -65,7 +65,7 @@ EXECUTABLES_L   = testCommandLine
 # <brief description of xxxxx program>
 LocalOscillatorImpl_OBJECTS   =	 LocalOscillatorImpl CommandLine testCommandLine
 #xxxxx_LDFLAGS   =
-LocalOscillatorImpl_LIBS      = ReceiversErrors LocalOscillatorStubs IRALibrary 
+LocalOscillatorImpl_LIBS      = ReceiversErrors ComponentErrors LocalOscillatorInterfaceStubs IRALibrary 
 
 testCommandLine_OBJECTS    = CommandLine testCommandLine
 testCommandLine_LIBS    = 
