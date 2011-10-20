@@ -19,7 +19,7 @@ SRTWeatherStationImpl::SRTWeatherStationImpl(
 
 SRTWeatherStationImpl::~SRTWeatherStationImpl()
 {
-	ACS_DEBUG_PARAM("::FridgeControl::~FridgeControl", "Destroying %s...", getComponent()->getName());
+	ACS_DEBUG_PARAM("::SRTWeatherStationImpl::~SRTWeatherStationImpl", "Destroying %s...", getComponent()->getName());
 	if(m_controlThread_p!=0)
         getContainerServices()->getThreadManager()->destroy(m_controlThread_p);
 
