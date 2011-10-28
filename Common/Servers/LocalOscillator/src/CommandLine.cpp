@@ -84,8 +84,8 @@ static const int MAXLEN=255; // max len of the reply from a gpib quert
 
 static const string FREQCMD="FREQ ";
 static const string QUERYFREQ="FREQ? ";
-static const string QUERYPOWER="POW? ";
-static const string POWERCMD="POW ";
+static const string QUERYPOWER="POWER? ";
+static const string POWERCMD="POW";
 
 
 
@@ -180,11 +180,32 @@ int CommandLine::query(string cmd,string& reply) throw (GPIBException)
 
 
 }
-int CommandLine::disconnect()
+int CommandLine::disconnect() throw (GPIBException)
 {
+	ibonl(m_device,0);
+	if (ThreadIbsta()& ERR )
+		{
+			throw GPIBException("ibonl:"+GPIB_errors[ThreadIberr()]);
+		}
+
 	return 0;
 
 }
+
+int CommandLine::init(string& reply) throw (GPIBException)
+		{
+			try {
+				query("*IDN?",reply);
+				sendCMD("*RST"); // reset
+
+			}  	catch (GPIBException& ex)
+
+			{
+					throw ex;
+			}
+			return 0;
+
+		}
 
 
 
@@ -193,7 +214,7 @@ int CommandLine::setPower(double pow) throw (GPIBException)
 
 	try{
 		string cmd;
-		cmd="POWER " + stringify(pow);
+		cmd="POW " + stringify(pow)+"dbm";
 		sendCMD(cmd);
 
 	} catch (GPIBException& ex)
@@ -280,5 +301,7 @@ int CommandLine::sendCMD(string cmd) throw(GPIBException)
 	return 0;
 
 }
+
+
 
 /*___oOo___*/
