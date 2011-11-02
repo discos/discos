@@ -185,7 +185,7 @@ double MeteoSocket::getWindSpeed()
 	updateParam();
 
 	m_windspeed=-99; // windspeed disabled
-	ACS_LOG(LM_FULL_INFO,"MeteoSocket::getWindSpeed()",(LM_NOTICE,"Not yet implemented"));
+	ACS_LOG(LM_FULL_INFO,"MeteoSocket::getWindSpeed()",(LM_TRACE,"Not yet implemented"));
 
 
 	//to be impemented
@@ -196,7 +196,7 @@ double MeteoSocket::getWindDir()
 {
 //	if((updateParam()==-1)) cout <<"Error Reading Param"<< endl;
 //	updateParam();
-	ACS_LOG(LM_FULL_INFO,"MeteoSocket::getWindDir()",(LM_NOTICE,"Not yet implemented"));
+	ACS_LOG(LM_FULL_INFO,"MeteoSocket::getWindDir()",(LM_TRACE,"Not yet implemented"));
 
 	m_winddir=-99;
 	return m_winddir;
