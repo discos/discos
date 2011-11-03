@@ -12,16 +12,20 @@
 #include <cstdlib>
 #include <ni488.h>
 #include "CommandLine.h"
-#define GPIBBOARD 0
-#define PRIMARYADDRESS 10
-#define SECONDARYADDRESS 0 
-#define TIMEOUT T10s
 #include <Definitions.h>
+#include "DevIOfrequency.h"
+#include <IRA>
+
+//#define GPIBBOARD 0
+//#define PRIMARYADDRESS 10
+//#define SECONDARYADDRESS 0
+//#define TIMEOUT T10s
 
 
 
 using namespace baci;
 using namespace maci;
+using namespace IRA;
 
 
 class LocalOscillatorImpl : public CharacteristicComponentImpl, public virtual POA_Receivers::LocalOscillator
@@ -51,7 +55,11 @@ private:
 	SmartPropertyPointer<ROlong> m_isLocked;
 	int m_device; //GPIB Device
  	CommandLine* m_line;
- 	
+ 	CSecureArea<CommandLine> *m_commandLine;
+ 	bool m_gpibonline;
+ 	double m_freq;
+ 	double m_ampl;
+
 
 };
 

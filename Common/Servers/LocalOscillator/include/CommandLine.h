@@ -61,15 +61,17 @@ public:
 
 	CommandLine();
 	virtual ~CommandLine();
-	/**
-	 * @param boardID = Board id;
-	 * @param pad     = Primary addres
-	 * @param sad    = Secondary address
-	 * @param tmo	  = Timeout;
-	 * @param eot     =
-	 * @param eos     =
-	 */
 	 map<int, string> GPIB_errors;
+
+		/**
+		 * @param boardID = Board id;
+		 * @param pad     = Primary addres
+		 * @param sad    = Secondary address
+		 * @param tmo	  = Timeout;
+		 * @param eot     =
+		 * @param eos     =
+		 */
+
 
 	int configure(int boardID, int pad, int sad, int tmo, int eot, int eos) throw (GPIBException);
 
@@ -78,16 +80,33 @@ public:
 	 *
 	 */
 	int  connect(string& reply) ;
-	int disconnect();
-
+	int disconnect() throw (GPIBException);
+	/**
+	 * Set the @param Frequency
+	 *
+	 */
 	int setFreq(double) throw (GPIBException);
+//	int setFreq(double,string) throw (GPIBException);
+
+
+
 	int setPower(double) throw (GPIBException);
+	int setPower(double,string) throw (GPIBException);
+
 	int getPower (double&) throw (GPIBException);
 	int getFreq (double&) throw (GPIBException);
 
 
 	inline int getDevice() {return m_device;}
 
+	int init(string& ) throw (GPIBException);
+	/**
+	 * Query the hpib errors
+	 */
+	void queryErrors( string& reply )  throw (GPIBException);
+	int  parseSCPIErrors(string, string&);
+	int rfOn() throw (GPIBException);
+	int rfOff() throw (GPIBException);
 
 	int sendCMD(string cmd) throw (GPIBException);
 	int receiveData(string cmd)  throw (GPIBException);
@@ -97,6 +116,8 @@ public:
 		   throw GPIBException(GPIB_errors[ThreadIberr()]);
 		}
 ;
+
+
 	}
 private:
 

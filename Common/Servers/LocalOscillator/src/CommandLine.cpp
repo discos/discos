@@ -85,7 +85,11 @@ static const int MAXLEN=255; // max len of the reply from a gpib quert
 static const string FREQCMD="FREQ ";
 static const string QUERYFREQ="FREQ? ";
 static const string QUERYPOWER="POWER? ";
-static const string POWERCMD="POW";
+static const string POWERCMD="FREQ AMPL";
+static const string RFONCMD="OUTP:STAT ON";
+static const string RFOFFCMD="OUTP:STAT OFF";
+static const string QUERYRF="OUTP:STAT?";
+
 
 
 
@@ -197,7 +201,7 @@ int CommandLine::init(string& reply) throw (GPIBException)
 			try {
 				query("*IDN?",reply);
 				sendCMD("*RST"); // reset
-
+				sendCMD("POW:ALC:SOUR INT"); // enable internal leveling;
 			}  	catch (GPIBException& ex)
 
 			{
@@ -251,6 +255,7 @@ int CommandLine::getFreq(double & freq) throw (GPIBException)
 int CommandLine::setFreq(double freq) throw (GPIBException){
 
 	try{
+
 		string cmd;
 		cmd=FREQCMD+ stringify(freq);
 		sendCMD(cmd);
@@ -265,10 +270,10 @@ int CommandLine::setFreq(double freq) throw (GPIBException){
 	}
 
 
-
-
-
 	return 0;
+
+
+
 
 }
 
@@ -303,5 +308,80 @@ int CommandLine::sendCMD(string cmd) throw(GPIBException)
 }
 
 
+void CommandLine::queryErrors(string& reply) throw(GPIBException)
+{
+
+	try{
+	  //      string reply;
+			query("SYST:ERR?",reply);
+
+ 		}catch(GPIBException& ex){
+			throw ex;
+		}
+ }
+
+int CommandLine::parseSCPIErrors(string msg,string& reply)
+
+{
+
+	// the scpi errors, i.e. the internal errors queue, is
+	// made of   code,"message" pair
+	// e.g.   -113,"Undefined header"
+
+	int code;
+
+	size_t comma;
+	comma=msg.find(",") ; //
+	code =atoi( msg.substr(0,comma).c_str());
+	reply=msg.substr(comma+1);
+	return code;
+
+
+
+
+}
+
+int CommandLine::rfOn() throw (GPIBException)
+{
+	try{
+		string reply;
+		query(QUERYRF,reply);
+		if (reply == "OFF"){
+			sendCMD(RFONCMD);
+
+		} //  turn on only if is off.
+
+
+	} catch (GPIBException& ex)
+	{
+		throw ex;
+
+	}
+
+
+
+}
+
+int CommandLine::rfOff() throw (GPIBException)
+{
+
+	try{
+			string reply;
+			query(QUERYRF,reply);
+			if (reply == "ON"){
+				sendCMD(RFOFFCMD);
+
+			} //  turn on only if is off.
+
+
+		} catch (GPIBException& ex)
+		{
+			throw ex;
+
+		}
+
+
+
+}
 
 /*___oOo___*/
