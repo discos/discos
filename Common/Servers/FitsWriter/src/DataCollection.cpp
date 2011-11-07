@@ -16,10 +16,13 @@ using namespace FitsWriter_private;
 CDataCollection::CDataCollection()
 {
 	m_running=m_ready=m_start=m_stop=false;
+	m_scanHeader=m_subScanHeader=false;
+	m_reset=false;
 	m_sectionH=NULL;
-	m_fileName="";
+	m_fileName=m_basePath=m_fullPath="";
 	m_project="";
 	m_observer="";
+	m_scheduleName="";
 	m_status=Management::MNG_OK;
 	m_feeds=NULL;
 	m_feedNumber=0;
@@ -28,7 +31,10 @@ CDataCollection::CDataCollection()
 	m_sourceName="";
 	m_sourceRa=m_sourceDec=m_sourceVlsr=0.0;
 	m_pressure=m_temperature=m_humidity=0.0;
-	m_scanId=-1;
+	m_scanTag=-1;
+	m_deviceID=0;
+	m_scanAxis=Management::MNG_NO_AXIS;
+	m_scanID=m_subScanID=0;
 	//m_antennaBoss=Antenna::AntennaBoss::_nil();
 	//m_meteoData=Metrology::MeteoData::_nil();
 	//m_receiversBoss=Receivers::ReceiversBoss::_nil();
@@ -41,6 +47,10 @@ CDataCollection::CDataCollection()
 	m_calibrationMarks.length(0);
 	m_recBandWidth.length(0);
 	m_recInitialFrequency.length(0);
+	m_calibrationMarks.length(0);
+	m_sourceFlux.length(0);
+	m_skyFrequency.length(0);
+	m_skyBandwidth.length(0);
 }
 	
 CDataCollection::~CDataCollection()
@@ -54,6 +64,14 @@ CDataCollection::~CDataCollection()
 	//unloadReceiversBoss();
 	//unloadScheduler();
 	//unloadMeteo();
+}
+
+void CDataCollection::forceReset()
+{
+	m_running=m_ready=m_start=m_stop=false;
+	m_scanHeader=m_subScanHeader=false;
+	m_reset=true;
+	m_status=Management::MNG_OK;
 }
 
 void CDataCollection::saveMainHeaders(Backends::TMainHeader const * h,
@@ -145,6 +163,31 @@ void CDataCollection::getInputsConfiguration(ACS::longSeq& feeds,ACS::longSeq& i
 	}
 }
 
+void CDataCollection::setSkyFrequency(const ACS::doubleSeq& freq)
+{
+	long j=0;
+	unsigned inp=0;
+	m_skyFrequency.length(m_mainH.sections);
+	while (inp<freq.length() && (j<m_mainH.sections)) {
+		m_skyFrequency[j]=freq[inp];
+		j++;
+		inp+=m_sectionH[j].inputs;
+	}
+}
+
+void CDataCollection::setSkyBandwidth(const ACS::doubleSeq& bw)
+{
+	long j=0;
+	unsigned inp=0;
+	m_skyBandwidth.length(m_mainH.sections);
+	while (inp<bw.length() && (j<m_mainH.sections)) {
+		m_skyBandwidth[j]=bw[inp];
+		j++;
+		inp+=m_sectionH[j].inputs;
+	}
+}
+
+
 bool CDataCollection::getDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize)
 {
 	return m_dumpCollection.popDump(time,calOn,memory,buffer,tracking,buffSize);
@@ -157,6 +200,7 @@ void CDataCollection::startStopStage()
 
 void CDataCollection::startRunnigStage()
 {
+	m_subScanHeader=false;
 	m_running=true;
 	m_start=false;
 }
@@ -167,42 +211,88 @@ void CDataCollection::haltStopStage()
 	m_stop=false;
 }
 
+void CDataCollection::haltResetStage()
+{
+	m_reset=false;
+}
+
 void CDataCollection::getFileName(IRA::CString& fileName,IRA::CString& fullPath)
 {
-	TIMEVALUE now;
-	IRA::CString dateDir;
-	//here we'd like also to add a distributions of files based on date...
-	//...so get the present date and append a new directory to the path
-	IRA::CIRATools::getTime(now);
-	dateDir.Format("%04d%02d%02d",now.year(),now.month(),now.day());
-	fullPath=m_fullPath+"/"+dateDir+"/";
 	fileName=m_fileName;
+	fullPath=m_fullPath;
 }
 
 IRA::CString CDataCollection::getFileName()
 {
-	IRA::CString fn,fp;
-	getFileName(fn,fp);
-	return fp+fn;
+	return m_fullPath+m_fileName;
 }
 
-bool CDataCollection::setFileName(const IRA::CString& name)
+bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& recording,bool& inconsistent)
 {
-	if (m_start) {
+	if (m_start && m_running) {
+		recording=true;
+		inconsistent =false;
 		return false;
 	}
 	else {
-		// computes the real path and name.
-	 	char *passedArg=new char [name.GetLength()+1]; // make a copy beacuse the man pages states that the input string may be changed in functions basename() and dirname()
-	 	strcpy(passedArg,(const char *)name);
-	 	char *tmp=dirname(passedArg);
-	 	m_fullPath=IRA::CString(tmp);
-	 	strcpy(passedArg,(const char *)name);
-	 	tmp=basename(passedArg);
-	 	m_fileName=IRA::CString(tmp);
-	 	delete [] passedArg;
-	 	return true;
+		if (!m_scanHeader) {
+			m_project=setup.projectName;
+			m_scanTag=setup.scanTag;
+			m_deviceID=setup.device;
+			m_scanID=setup.scanId;
+			m_observer=setup.observerName;
+			m_scheduleName=setup.schedule;
+			m_basePath=setup.path;
+			m_scanHeader=true;
+			// setup.extraPath, setup.baseName, setup.scanLayout are not used
+			return true;
+		}
+		else {
+			recording=false;
+			inconsistent =true;
+			return false;
+		}
 	}
+}
+
+bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,bool& recording,bool& inconsistent)
+{
+	if (m_start && m_running) {
+		recording=true;
+		inconsistent =false;
+		return false;
+	}
+	else {
+		if (m_scanHeader && !m_subScanHeader) {
+			IRA::CString temp;
+			m_subScanID=setup.subScanId;
+			temp=setup.baseName;
+			m_fileName=temp+".fits";
+			temp=setup.extraPath;
+			if (temp!="") {
+				m_fullPath=m_basePath+temp;
+			}
+			else {
+				m_fullPath=m_basePath;
+			}
+			m_subScanHeader=true;
+			m_scanAxis=setup.axis;
+			//setup.startUt, is not used
+			return true;
+		}
+		else {
+			recording=false;
+			inconsistent =true;
+			return false;
+		}
+	}
+}
+
+bool CDataCollection::scanStop()
+{
+	m_ready=false;
+	m_scanHeader=false;
+	return true;
 }
 
 /*************** Private ***********************************************************/

@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 	}
 	if (sched.isComplete()) {
 		CString msg;
-		msg.Format("%u lines were succesfully parsed!\n",sched.getSchedLines());
+		msg.Format("%u subscans were succesfully parsed!\n",sched.getSubScansNumber());
 		printMessage((const char *)msg);
 		printMessage("Schedule is correct\n");
 		return 0;

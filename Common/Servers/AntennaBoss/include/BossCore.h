@@ -3,7 +3,6 @@
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: BossCore.h,v 1.30 2011-05-27 13:55:30 a.orlati Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
@@ -291,23 +290,31 @@ public:
 	void enable();
 	
 	/**
-	 * Sets the current value for the BWHM
+	 * Sets the current value for the FWHM
 	 * @param val new value in radians. 
+	 * @param waveLen corresponding waveLen (meters)
 	*/
-	void setBWHM(const double& val);
+	void setFWHM(const double& val,const double& waveLen);
 	
 	/**
-	 * Sets the current value for the BWHM, computing it from the taper and the wave length
-	 * @param taper taper of the current receiver
+	 * Sets the current value for the FWHM, computing it from the taper and the wave length
+	 * @param taper taper of the current receiver (db)
 	 * @param waveLen wave length of the sky frequency in meters
 	 */
-	void computeBWHM(const double& taper,const double& waveLen);
+	void computeFWHM(const double& taper,const double& waveLen);
 	
 	/**
 	 * Sets the current value for the vlsr. 
 	*/
 	void setVlsr(const double& val);	
 	
+	/**
+	 * It does an iterative computation of the fluxes corresponding to the given frequencies. The FWHM is required to be set otherwise 1.0 is returned.
+	 * @param freqs list of frequencies at which make the computation (MHz)
+	 * @param fluxes list of computed fluxes (Jy)
+	 */
+	void getFluxes(const ACS::doubleSeq& freqs,ACS::doubleSeq& fluxes) throw (ComponentErrors::CORBAProblemExImpl);
+
 	/**
 	 * Sets the <i>m_correctionEnable</i> flag to true, i.e. the component when commanding a tracking curve will apply 
 	 * the correction due to pointing model and refraction. Call <i>disableCorrection()</i< to disable this feature.
@@ -382,6 +389,11 @@ public:
 	 */
 	const double& getTargetDeclination() const { return m_targetDec; }
 	
+	/**
+	 * @return the flux of the target
+	 */
+	const double& getTargetFlux() const { return m_targetFlux; }
+
 	/**
 	 * @return the radial velocity of the target in km/s
 	 */
@@ -542,10 +554,10 @@ public:
 	inline const Management::TSystemStatus& getStatus() const { return m_status; }
 	
 	/**
-	 * @return the HPBW in radians currently in use. The default is zero, that means the component will be in <i>MNG_WARNING</i>
+	 * @return the FWHM in radians currently in use. The default is zero, that means the component will be in <i>MNG_WARNING</i>
 	 * status.  
 	 */
-	inline const double& getBWHM() const { return m_BWHM; }
+	inline const double& getFWHM() const { return m_FWHM; }
 	
 	void getAllattributes();
 	
@@ -609,13 +621,19 @@ private:
 	*/
 	Antenna::Mount_var m_mount;
 	/**
-	 * flag that indicates an error was relevated during communication to the mount
+	 * flag that indicates an error was rilevated during communication to the mount
 	 */
 	bool m_mountError;
 	/**
 	 * This is the reference to the object that incarnate the antenna ephem generator interface
 	*/
 	Antenna::EphemGenerator_var m_generator;
+
+	/**
+	 * This is the reference to the object that is in charge to compute the flux
+	 */
+	Antenna::EphemGenerator_var m_generatorFlux;
+
 	/**
 	 * This is the reference to the poiting model component
 	*/
@@ -714,8 +732,13 @@ private:
 	long m_integratedSamples; 
 	
 	/** The beam width at half power. Given in radians. it is used to check if the telescope is tracking or not. */
-	double m_BWHM;
+	double m_FWHM;
 	
+	/**
+	 * The current observing sky frequency, used for FWHM and flux computation (MHz)
+	 */
+	double m_currentObservingFrequency;
+
 	/** Reports the last encoder reads (horizontal coordinates) */ 
 	double m_lastEncoderAzimuth,m_lastEncoderElevation;
 	
@@ -775,6 +798,11 @@ private:
 	 */
 	double m_targetVlsr;
 	
+	/**
+	 * Store the estimated flux of the current target
+	 */
+	double m_targetFlux;
+
 	/**
 	 * Stores the parameters of the last commanded scan.
 	 */
@@ -969,17 +997,19 @@ private:
 	 * @param vlsr output radial velocity of the target, in Km/s
 	 * @param sourceName output parameter, name of the target
 	 * @param scanOffset returns the offset for the current scan
+	 * @param generatorFlux reference to the generator in charge of doing the flux computation
 	 * @return the reference of the current generator, the caller must free it
 	 */
 	Antenna::EphemGenerator_ptr prepareScan(bool useInternals,ACS::Time& startUT,const Antenna::TTrackingParameters& prim,const Antenna::TTrackingParameters& sec,
 			const TOffset& userOffset,Antenna::TGeneratorType& generatorType,Antenna::TTrackingParameters& lastPar,	Antenna::TSections& section,double& ra,double& dec,double& lon,
-			double& lat,double& vlsr,IRA::CString& sourceName,TOffset& scanOffset)  
+			double& lat,double& vlsr,IRA::CString& sourceName,TOffset& scanOffset,Antenna::EphemGenerator_out generatorFlux)
 			throw (ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,
 				   AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	
 	/** 
-	 * This private function is used internally by the <i>prepareScan()</i> in order to set up the secondary generator for OTF scans. The secondary generator is used to fix the centeral point
+	 * This private function is used internally by the <i>prepareScan()</i> in order to set up the secondary generator for OTF scans. The secondary generator is used to fix the central point
 	 * of the OTF scan. If the operation fails it will also cause the setup of the primary scan to fail.
+	 * @param useInternal true if the internal generators must be used, otherwise the primary ones are allocated
 	 * @param sec secondary scan parameters
 	 * @param ra output parameter, right ascension of the target,radians, J2000
 	 * @param dec output parameter declination of the target,radians, J2000
@@ -987,9 +1017,17 @@ private:
 	 * @param lat output parameter, the galactic latitude, radians
 	 * @param vlsr output radial velocity of the target, in Km/s
 	 * @param sourceName output parameter, name of the target
+	 * @param result reports the result of the operation, if true the generator could successfully be configured
+	 * @return the reference to the configured generator
 	 */
-	bool prepareOTFSecondary(const Antenna::TTrackingParameters& sec,IRA::CString& sourceName,double& ra,double& dec,double& lon,double& lat,double& vlsr);
+	Antenna::EphemGenerator_ptr prepareOTFSecondary(const bool& useInternal,const Antenna::TTrackingParameters& sec,IRA::CString& sourceName,double& ra,double& dec,double& lon,
+			double& lat,double& vlsr,bool& result);
 	
+	/**
+	 * This private member execute the computation of the current target flux
+	 */
+	void computeFlux();
+
 	void addOffsets(double &lon,double& lat,Antenna::TCoordinateFrame& frame,const TOffset& userOffset,const TOffset& scanOffset) const;
 	
 	void copyTrack(Antenna::TTrackingParameters& dest,const Antenna::TTrackingParameters& source,bool copyOffs=true) const;

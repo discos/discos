@@ -31,6 +31,7 @@
 <targetRightAscension/>
 <targetDeclination/>
 <targetVlsr/>
+<targetFlux/>
 <azimuthOffset/>
 <elevationOffset/>
 <rightAscensionOffset/>
@@ -52,6 +53,6 @@
 <pointingAzimuthCorrection/>
 <pointingElevationCorrection/>
 <refractionCorrection/>
-<BWHM/>
+<FWHM/>
 
 </AntennaBoss>

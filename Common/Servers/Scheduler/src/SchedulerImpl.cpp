@@ -1,4 +1,3 @@
-// $Id: SchedulerImpl.cpp,v 1.16 2011-06-21 16:39:52 a.orlati Exp $
 
 #include "SchedulerImpl.h"
 #include "Core.h"
@@ -6,9 +5,10 @@
 #include "DevIOScheduleName.h"
 #include "DevIOStatus.h"
 #include "DevIOTracking.h"
+#include "DevIOCurrentDevice.h"
 #include <LogFilter.h>
 
-static char *rcsId="@(#) $Id: SchedulerImpl.cpp,v 1.16 2011-06-21 16:39:52 a.orlati Exp $";
+static char *rcsId="@(#) schedulerImpl";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 _IRA_LOGFILTER_DECLARE;
@@ -17,7 +17,8 @@ SchedulerImpl::SchedulerImpl(const ACE_CString &CompName,maci::ContainerServices
 	CharacteristicComponentImpl(CompName,containerServices),
 	m_pscheduleName(this),
 	m_pstatus(this),
-	m_pscanNumber(this),
+	m_pscanID(this),
+	m_psubScanID(this),
 	m_ptracking(this),
 	m_pcurrentDevice(this)
 {	
@@ -46,10 +47,11 @@ void SchedulerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				new DevIOScheduleName(m_core),true);
 		m_pstatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>(getContainerServices()->getName()+":status",getComponent(),
 				new DevIOStatus(m_core),true);
-		m_pscanNumber=new ROlong(getContainerServices()->getName()+":scanNumber",getComponent(),
-				new DevIOScanNumber(m_core),true);
+		m_pscanID=new ROlong(getContainerServices()->getName()+":scanID",getComponent(),new DevIOScanNumber(m_core,DevIOScanNumber::SCANID),true);
+		m_psubScanID=new ROlong(getContainerServices()->getName()+":subScanID",getComponent(),new DevIOScanNumber(m_core,DevIOScanNumber::SUBSCANID),true);
 		m_ptracking=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>(getContainerServices()->getName()+":tracking",getComponent(),
 				new DevIOTracking(m_core),true);
+		m_pcurrentDevice=new ROlong(getContainerServices()->getName()+":currentDevice",getComponent(),new DevIOCurrentDevice(m_core),true);
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"SchedulerImpl::initialize()");
@@ -175,12 +177,12 @@ void SchedulerImpl::chooseDefaultDataRecorder(const char *rcvInstance) throw (CO
 	m_core->chooseDefaultDataRecorder(rcvInstance);	
 }
 
-void SchedulerImpl::startSchedule(const char * fileName,CORBA::Long startLine) throw (CORBA::SystemException,
+void SchedulerImpl::startSchedule(const char * fileName,const char *startSubScan) throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	AUTO_TRACE("SchedulerImpl::startSchedule()");
 	try {
-		m_core->startSchedule(fileName,startLine);
+		m_core->startSchedule(fileName,startSubScan);
 	}
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -250,7 +252,8 @@ void SchedulerImpl::setDevice(CORBA::Long deviceID) throw (CORBA::SystemExceptio
 
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,Management::ROTSystemStatus,m_pstatus,status);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pscheduleName,scheduleName);
-_PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pscanNumber,scanNumber);
+_PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pscanID,scanID);
+_PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_psubScanID,subScanID);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,Management::ROTBoolean,m_ptracking,tracking);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pcurrentDevice,currentDevice);
 

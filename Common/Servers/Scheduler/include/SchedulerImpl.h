@@ -107,11 +107,17 @@ public:
 	virtual ACS::ROstring_ptr scheduleName() throw (CORBA::SystemException);
 	
 	/**
-     * Returns a reference to the scheduleLine property implementation of IDL interface.
+     * Returns a reference to the scanID property implementation of IDL interface.
 	 * @return pointer to read-only ROlong property status
 	*/
-	virtual ACS::ROlong_ptr scanNumber() throw (CORBA::SystemException);
-	
+	virtual ACS::ROlong_ptr scanID() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the subscanID property implementation of IDL interface.
+	 * @return pointer to read-only ROlong property status
+	*/
+	virtual ACS::ROlong_ptr subScanID() throw (CORBA::SystemException);
+
 	/**
      * Returns a reference to the tracking property implementation of IDL interface.
 	 * @return pointer to read-only ROTBoolean property tracking
@@ -141,9 +147,9 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
 	 * @param fileName name of the file of the schedule
-	 * @param startLine line number to start from
+	 * @param startSubScan scan/subscan to start from
 	 */
-	virtual void startSchedule(const char * fileName,CORBA::Long startLine) throw (CORBA::SystemException,
+	virtual void startSchedule(const char * fileName,const char *startSubScan) throw (CORBA::SystemException,
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
 	/**
@@ -222,7 +228,8 @@ public:
 private:
 	baci::SmartPropertyPointer<baci::ROstring> m_pscheduleName;
 	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus> > m_pstatus;
-	baci::SmartPropertyPointer<baci::ROlong> m_pscanNumber;
+	baci::SmartPropertyPointer<baci::ROlong> m_pscanID;
+	baci::SmartPropertyPointer<baci::ROlong> m_psubScanID;
 	baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_ptracking;
 	baci::SmartPropertyPointer<baci::ROlong> m_pcurrentDevice;
 	CConfiguration m_config;

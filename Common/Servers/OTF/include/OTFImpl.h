@@ -78,6 +78,7 @@ public:
 	
 	/* Sets all the parameters which define the subscan */
 	virtual Antenna::TSections setSubScan(
+			const char * targetName,
 			CORBA::Double initAz,
 			Antenna::TSections initSteering,
 			CORBA::Double initEl,
@@ -110,14 +111,13 @@ public:
 	throw(CORBA::SystemException, AntennaErrors::AntennaErrorsEx);
 
     /**
-     * This method compute the flux of a source based on its flux and model
-     * parameters read from the CDB.
+     * This method is supposed to compute the  flux of the current target. For this component it is considered to be a place holder.
      * @throw CORBA::SystemException
      * @param freq frequency observed
      * @param fwhm fwhm
      * @param flux computed flux
      */ 
-    void computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw (CORBA::SystemException) {};
+    void computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw (CORBA::SystemException);
 
 	
 private:
@@ -126,6 +126,7 @@ private:
 	IRA::CSite m_site;
 	double m_dut1;
 	BACIMutex m_mutex;
+	IRA::CString m_targetName;
 };
 
 #endif /*OTFIMPL_H_*/

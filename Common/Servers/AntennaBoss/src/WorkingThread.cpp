@@ -1,5 +1,3 @@
-// $Id: WorkingThread.cpp,v 1.4 2008-04-14 08:39:11 a.orlati Exp $
-
 #include "WorkingThread.h"
 #include <LogFilter.h>
 

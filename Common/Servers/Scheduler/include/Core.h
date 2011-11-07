@@ -74,14 +74,14 @@ public:
 	 * This method loads a schedule file and starts the execution of the schedule form the given line.
 	 * This function is thread safe.
 	 * @param scheduleFile string that reports the file name of the schedule to load
-	 * @param lineNumber line inside the schedule to start from
+	 * @param startSubScan subscan of the schedule to start from
 	 * @throw ComponentErrors::MemoryAllocationExImpl
 	 * @throw ManagementErrors::ScheduleErrorExImpl
 	 * @throw ComponentErrors::AlreadyRunningExImpl
 	 * @throw ManagementErrors::SubscanErrorExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	*/
-	void startSchedule(const char* scheduleFile,const long& lineNumber) throw (ManagementErrors::ScheduleErrorExImpl,
+	void startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,
 			ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl);
 	
 	 /**
@@ -104,12 +104,19 @@ public:
 	void haltSchedule();	
 	
 	/**
-	 * This function reports about the scan number currently executed. This is not thread safe because
+	 * This function reports about the sub scan counter currently executed. This is not thread safe because
 	 * it is almost atomic.
-	 * @return the line (that corresponds to the scan ID) inside the main schedule file
+	 * @return the counter  of the currently executed subscan inside the main schedule file
 	 */
-	const DWORD& getScanNumber();
+	const DWORD& getScanCounter();
 	
+	/**
+	 * This function reports the identifiers of the current scan and subscan
+	 * @param scanID currently running scan
+	 * @param subScanID currently running subscan
+	 */
+	void getCurrentIdentifiers(DWORD& scanID,DWORD& subScanID);
+
 	/**
 	 * This function reports the name of the file of the running schedule. This is not thread safe because
 	 * it is almost atomic.

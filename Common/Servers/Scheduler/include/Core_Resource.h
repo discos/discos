@@ -11,7 +11,7 @@
 									m_isTracking=false; \
 									m_antennaBossError=m_receiversBossError=m_defaultBackendError=m_defaultDataReceiverError=false; \
 									m_currentDevice=0;\
-									m_streamStarted=m_streamPrepared=m_streamConnected=false;
+									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
 									
 #define RESOURCE_EXEC ACS_NEW_SIMPLE_CONSUMER(m_antennaNC,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,antennaNCHandler,static_cast<void*>(this)); \
 					  m_antennaNC->consumerReady(); \
@@ -98,6 +98,7 @@ bool m_defaultDataReceiverError;
 bool m_streamStarted;
 bool m_streamPrepared;
 bool m_streamConnected;
+bool m_scanStarted;
 /**
  * pointer to the antenna notification channel
 */
@@ -142,7 +143,7 @@ void unloadDefaultBackend();
 /**
  * used to get a reference to the default data receiver component. 
  */
-void loadDefaultDataReceiver() throw (ComponentErrors::CouldntGetComponentExImpl);
+void loadDefaultDataReceiver() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl);
 /**
  * used to free the reference to the default data receiver component
  */

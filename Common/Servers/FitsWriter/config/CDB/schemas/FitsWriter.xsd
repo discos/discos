@@ -26,7 +26,6 @@
 		<xs:element name="status" type="mng:SystemStatusType" />
 		<xs:element name="projectName" type="baci:ROstring"/>
 		<xs:element name="observer" type="baci:ROstring"/>
-		<xs:element name="scanIdentifier" type="baci:ROlong"/>
 		<xs:element name="deviceID" type="baci:ROlong"/>
 		<xs:element name="scanAxis" type="mng:ScanAxisType"/>
 		<xs:element name="dataX" type="baci:ROdouble"/>

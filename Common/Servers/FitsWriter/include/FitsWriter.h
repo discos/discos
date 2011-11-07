@@ -30,14 +30,16 @@
 #define FITS_VERSION1 "V. 0.8"
 #define FITS_VERSION2 "V.0.82"
 #define FITS_VERSION3 "V.0.9"
+#define FITS_VERSION4 "V.0.91"
 
-#define CURRENT_VERSION FITS_VERSION3
+#define CURRENT_VERSION FITS_VERSION4
 
 #define DEFAULT_COMMENT CURRENT_VERSION" Created by  S. Righini, M. Bartolini  & A. Orlati"
 
 #define HISTORY1 FITS_VERSION1" First output standard for Italian radiotelescopes"
 #define HISTORY2 FITS_VERSION2" The tsys column in data table raplaced with the Tant table, it reports the tsys measurement for each input of each section" 
 #define HISTORY3 FITS_VERSION3" The section table has been splitted into two tables: sections and rf inputs table"
+#define HISTORY4 FITS_VERSION4" Added the flux column in section table"
 
 /**
  * This class is very specific and it used to create a fits file from the data coming from backends that validates the <i>Backends::GenericBackends</i> interface
@@ -143,17 +145,18 @@ public:
 	
 	/**
 	 * It allows to add the sections and rfInput table to the fits file
-	 * @param pols for each RF input gives its polarization
+	 * @param pols for each receiver IF gives its polarization
 	 * @param los for IF gives its local oscillator value in MHz
-	 * @param recvFreq for each IF gives the value of the initial frequency of the band coming from the receiver (MHz)
-	 * @param recvBandWidth for each IF gives the value of the band width coming from the receiver (MHz)
+	 * @param skyFreq for each backend section it gives the resulting observed sky frequency (MHz)
+	 * @param skyBandWidth for each backend section it gives the value of the band width (MHz)
 	 * @param marks for each RF input gives the value of the noise calibration mark. (°K) 
+	 * @param sourceFlux for each backend section it reports the estimated source flux computed with section parameters
 	 * @param name name of the sections table
 	 * @param rfName name of the RF inputs table
-	 * @return false if the operation is not succesful
+	 * @return false if the operation is not successful
 	 */
-	bool addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq& los,const ACS::doubleSeq& recvFreq,const ACS::doubleSeq& recvBandWidth,const ACS::doubleSeq& marks,
-			const IRA::CString& name="SECTION TABLE",const IRA::CString& rfName="RF INPUTS");
+	bool addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq& los,const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,
+			const ACS::doubleSeq& sourceFlux,const IRA::CString& name="SECTION TABLE",const IRA::CString& rfName="RF INPUTS");
 	
 	/**
 	 * It allows to add data table to the fits file

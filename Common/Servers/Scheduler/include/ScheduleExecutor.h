@@ -3,7 +3,6 @@
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: ScheduleExecutor.h,v 1.10 2011-05-20 16:53:09 a.orlati Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
@@ -59,16 +58,16 @@ public:
      virtual void runLoop();
      
  	/**
- 	 * This method loads a schedule file and starts the execution of the schedule form the given line.
+ 	 * This method loads a schedule file and starts the execution of the schedule form the given subscan.
  	 * @param scheduleFile string that reports the file name of the schedule to load
- 	 * @param lineNumber line inside the schedule to start from
+ 	 * @param subScanidentifier identifies the subscan to start from
  	 * @throw ComponentErrors::MemoryAllocationExImpl
  	 * @throw ManagementErrors::ScheduleErrorExImpl
  	 * @throw ComponentErrors::AlreadyRunningExImpl
  	 * @throw ManagementErrors::SubscanErrorExImpl
  	 * @throw ComponentErrors::CouldntGetComponentExImpl
  	*/
-     void startSchedule(const char* scheduleFile,const long& lineNumber) throw (ManagementErrors::ScheduleErrorExImpl,
+     void startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (ManagementErrors::ScheduleErrorExImpl,
     		 ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl);
      
      /**
@@ -96,10 +95,15 @@ public:
      const IRA::CString& getScheduleOwner() { baci::ThreadSyncGuard guard(&m_mutex); return m_scheduleOwner; }     
      
      /**
-      * @return the currently executed schedule line
+      * @return the currently executed subscan
       */
-     const DWORD& getCurrentScheduleLine() {  baci::ThreadSyncGuard guard(&m_mutex); return m_currentLine; }
+     const DWORD& getCurrentScheduleCounter() {  baci::ThreadSyncGuard guard(&m_mutex); return m_scheduleCounter; }
      
+     /**
+      * @return the currently executed scan/subscan identifiers
+      */
+     void getCurrentScanIdentifers(DWORD& scanID,DWORD& subScanID);
+
      /**
       * @return true if a schedule is currently running
       */
@@ -140,7 +144,7 @@ private:
 	 */
 	BACIMutex m_mutex;
 	/**
-	 * pointer to the container serivices
+	 * pointer to the container services
 	 */
 	CCore* m_core;
 	/**
@@ -205,17 +209,25 @@ private:
 	 */
 	double m_dut1;
 	/**
-	 * true is there is a schedule runnig at present
+	 * true is there is a schedule running at present
 	 */
 	bool m_active;	
 	/**
 	 * schedule pointer
 	 */
-	DWORD m_currentLine;
+	DWORD m_scheduleCounter;
 	/**
 	 * This flags are used to free things up when the data transfer is started
 	 */
 	bool m_streamPrepared; bool m_streamStarted; bool m_streamConnected;
+	/**
+	 * true if the schedule is already in the middle of a scan
+	 */
+	 bool m_scanStarted;
+	 /**
+	  * true when the schedule has arrived to the end and it is restarted from the beginning, status is persistent through subscans
+	  */
+	 bool m_scheduleRewound;
 	/**
 	 * Scan informations
 	 */
@@ -225,17 +237,21 @@ private:
 	 */
 	Schedule::CScanList::TRecord m_currentScanRec;
 	/**
-	 * Stores the line number of the first scan selecteed by the scheduler
+	 * Stores the subscan selected as first one by the scheduler (not necessary equal to the one selected by the user)
 	 */
-	DWORD m_firstScan;
+	DWORD m_firstSubScan;
 	/**
-	 * Line number selected by the user as starting scan of the schedule
+	 * counter of the subscan selected by user as start point of the schedule
 	*/
-	DWORD m_startScan;
+	DWORD m_startSubScan;
 	/**
 	* This stores the number of scans completed during a repetition
 	*/
 	long m_scansCounter;
+	/**
+	 * identifier of the current scan
+	 */
+	DWORD m_lastScanID;
 	/**
 	 * stores the number of repetitions performed up to now
 	 */
@@ -254,9 +270,9 @@ private:
 	ACS::Time m_lastScheduledTime;
 	
 	/**
-	 * false if the scan is executing
+	 * false if the sub scan is executing
 	 */
-	bool m_scanDone;
+	bool m_subScanDone;
 	/**
 	 * true if an error was detected after the stop recording command was issued
 	 */
@@ -283,9 +299,11 @@ private:
 	 * Setup the commands to start data acquisition
 	 * @param rec structure that stores the selected schedule line
 	 * @param scanRec structure that contains the scan parameters
+	 * @param layoutProc configuration procedure for the scan layout, if zero it is ignored
 	 */
-	void startRecording(const CSchedule::TRecord& rec,const Schedule::CScanList::TRecord& scanRec) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-			ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::ComponentNotActiveExImpl);
+	void startRecording(const CSchedule::TRecord& rec,const Schedule::CScanList::TRecord& scanRec,const ACS::stringSeq& layoutProc) throw (
+			ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,
+			ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::ComponentNotActiveExImpl);
 	
 	/**
 	 * Stops the data recording. It sets the <i>m_scanDone</i> flag to true.
@@ -312,17 +330,6 @@ private:
 	*/
 	void closeBackend() throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 
-	/**
-	 * Enable the transfer between the backend and the receiver. In practice it connects the backend with the recevier and calls sendHeader().
-	 */
-	//void enableFileWriting() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
-	
-	/**
-	 * Close and frees the resources allocated to enabled the transmission between backend and recevier. In practice it calls backend sendStop(), terminate(),
-	 * disconnect() and receiver closeReceiver()
-	 */
-	//void disableFileWriting() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
-
 	/*
 	 * It forwards the whole configuration procedure to the backend, one command at a time
 	 * @param procedure sequence of commands contained by the configuration procedure
@@ -330,8 +337,8 @@ private:
 	 * @thorw ComponentErrors::CORBAProblemExImpl
 	 * @thorw ComponentErrors::UnexpectedExImpl
 	 */
-	void configureBackend(const std::vector<IRA::CString>& procedure) throw (ManagementErrors::ProcedureErrorExImpl,
-			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+	/*void configureBackend(const std::vector<IRA::CString>& procedure) throw (ManagementErrors::ProcedureErrorExImpl,
+			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);*/
 	
 	/**
 	 * This will start the data transfer from the backend to the receiver. It will takes all the required operation or nothing if the schedule does not

@@ -17,7 +17,7 @@ bool done;
 #define MIN_DURATION 2
 
 void printHelp() {
-	printf("Test fits writing throught the bulk data channel\n");
+	printf("Test fits writing through the bulk data channel\n");
 	printf("\n");
 	printf("testBulk [-h] -b backend [-w writer] [-f filename] [-p path] [-o observer] \n");
 	printf("\n");
@@ -38,12 +38,15 @@ int main(int argc, char *argv[])
 	Management::DataReceiver_var recv;
 	maci::SimpleClient client;
 	TIMEVALUE now;
+	Management::TScanSetup scanSetup;
+	Management::TSubScanSetup subScanSetup;
 	acstime::Duration gap;
 	int out;
-	CString nomeFile;
+	long ssID=1;
+	CString nomeFile="testBulk";
 	CString backend="";
 	CString writer="";
-	CString path="~";
+	CString path="~/";
 	CString observer="dummy";
 		
 	while ((out=getopt(argc,argv,"hb:w:f:p:o:"))!=-1) {
@@ -162,7 +165,14 @@ int main(int argc, char *argv[])
 	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"GOT_COMPONENENT: %s",(const char *)writer));
 	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"Reference is: %d",recv.ptr()));
 	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"ALL_COMPONENTS_RETRIEVED"));
-
+	try {
+		recv->reset();
+	}
+	catch (...) {
+		_EXCPT(ClientErrors::UnknownExImpl,impl,"::main()");
+		impl.log();
+		exit(-1);
+	}
 	ACE_OS::sleep(1);	
 	done=false;
 	//signal(SIGINT,handler);
@@ -173,7 +183,7 @@ int main(int argc, char *argv[])
 	/*tv.set(RUNNING_SEC,0);*/
 	try {
 		sender->connect(recv.in());
-		sender->sendHeader();
+		//sender->sendHeader();
 	}
 	catch (ACSBulkDataError::AVConnectErrorEx& ex) {
 		ACSBulkDataError::AVConnectErrorExImpl impl(ex);
@@ -183,22 +193,75 @@ int main(int argc, char *argv[])
 		_EXCPT(ClientErrors::UnknownExImpl,impl,"::main()");
 		impl.log();
 	}
-	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"WAITING_FOR_BACKENDS_TO_SETTLE"));
+	IRA::CIRATools::getTime(now);
+	fileName.Format("%s_%02d_%02d_%02d",(const char *)nomeFile,now.hour(),now.minute(),now.second());
+	scanSetup.scanTag=100;
+	scanSetup.scanId=1;
+	scanSetup.projectName=CORBA::string_dup("PrototypeProject");
+	scanSetup.observerName=CORBA::string_dup((const char *)observer);
+	scanSetup.path=CORBA::string_dup((const char *)path);
+	scanSetup.extraPath=CORBA::string_dup("");
+	scanSetup.baseName=CORBA::string_dup((const char *)fileName);
+	scanSetup.scanLayout=CORBA::string_dup("");
+	scanSetup.schedule=CORBA::string_dup("noSchedule");
+	scanSetup.device=0;
+	try {
+		recv->startScan(scanSetup);
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"::main()");
+		impl.log();
+	}
+	catch(ManagementErrors::ManagementErrorsEx& ex) {
+		_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,ex,"::main()");
+		impl.log();
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,ex,"::main()");
+		impl.log();
+	}
+	catch (...) {
+		_EXCPT(ClientErrors::UnknownExImpl,impl,"::main()");
+		impl.log();
+	}
+	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"WAITING_FOR_BACKEND_TO_SETTLE"));
 	IRA::CIRATools::Wait(GAP,0);
+	try {
+		sender->sendHeader();
+	}
+	catch (...) {
+		_EXCPT(ClientErrors::UnknownExImpl,impl,"::main()");
+		impl.log();
+	}
 	while (!done) {
 		printf ("> ");
 		scanf("%s",input);
 		if (strcmp(input,"start")==0) {
 			IRA::CIRATools::getTime(now);
 			now+=gap; // start gap seconds from now
-			fileName.Format("%s/%s_%02d_%02d_%02d.fits",(const char *)path,(const char *)nomeFile,now.hour(),now.minute(),now.second());
+			fileName.Format("%s_%02d_%02d_%02d",(const char *)nomeFile,now.hour(),now.minute(),now.second());
 			ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"NEW_FILE %s",(const char *)fileName));
 			tv.set(MIN_DURATION,0);
-			try {	
-				recv->setFileName((const char*)fileName);
-				recv->setProjectName("PrototypeProject");
-				recv->setObserverName((const char *)observer);
+			subScanSetup.startUt=now.value().value;
+			subScanSetup.subScanId=ssID++;
+			subScanSetup.axis=Management::MNG_NO_AXIS;
+			subScanSetup.extraPath=CORBA::string_dup("");
+			subScanSetup.baseName=CORBA::string_dup((const char *)fileName);
+			try {
+				recv->startSubScan(subScanSetup);
 				sender->sendData(now.value().value);
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"::main()");
+				impl.log();
+			}
+			catch(ManagementErrors::ManagementErrorsEx& ex) {
+				_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,ex,"::main()");
+				impl.log();
+			}
+			catch (ComponentErrors::ComponentErrorsEx& ex) {
+				_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,ex,"::main()");
+				impl.log();
 			}
 			catch (...) {
 				_EXCPT(ClientErrors::UnknownExImpl,impl,"::main()");
@@ -215,6 +278,15 @@ int main(int argc, char *argv[])
 				_EXCPT(ClientErrors::UnknownExImpl,impl,"::main()");
 				impl.log();
 			}
+			try {
+				while (recv->isRecording()) {
+					IRA::CIRATools::Wait(0,200000);
+				}
+			}
+			catch (...) {
+				_EXCPT(ClientErrors::UnknownExImpl,impl,"::main()");
+				impl.log();
+			}
 			ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"STOP"));
 		}
 		else if (strcmp(input,"quit")==0) {
@@ -225,6 +297,25 @@ int main(int argc, char *argv[])
 		}
 	}
 	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"TERMINATING"));
+	try {
+		recv->stopScan();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"::main()");
+		impl.log();
+	}
+	catch(ManagementErrors::ManagementErrorsEx& ex) {
+		_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,ex,"::main()");
+		impl.log();
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,ex,"::main()");
+		impl.log();
+	}
+	catch (...) {
+		_EXCPT(ClientErrors::UnknownExImpl,impl,"::main()");
+		impl.log();
+	}
 	ACE_OS::sleep(1);	
 	try {
 		sender->terminate();

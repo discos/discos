@@ -1,5 +1,3 @@
-// $Id: Core_Resource.i,v 1.9 2011-05-20 16:53:09 a.orlati Exp $
-
 
 void CCore::loadAntennaBoss(Antenna::AntennaBoss_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl)
 {
@@ -154,7 +152,7 @@ void CCore::unloadDefaultBackend()
 }
 
 
-void CCore::loadDefaultDataReceiver() throw (ComponentErrors::CouldntGetComponentExImpl)
+void CCore::loadDefaultDataReceiver() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	if ((!CORBA::is_nil(m_defaultDataReceiver)) && (m_defaultDataReceiverError)) { // if reference was already taken, but an error was found....dispose the reference
 		try {
@@ -167,6 +165,7 @@ void CCore::loadDefaultDataReceiver() throw (ComponentErrors::CouldntGetComponen
 	if (CORBA::is_nil(m_defaultDataReceiver)) {  //only if it has not been retrieved yet
 		try {  	
 			m_defaultDataReceiver=m_services->getComponent<Management::DataReceiver>((const char *)m_defaultDataReceiverInstance);
+			m_defaultDataReceiver->reset();
 			m_defaultDataReceiverError=false;
 			ACS_LOG(LM_FULL_INFO,"CCore::loadDefaultDataReceiver()",(LM_INFO,"DATARECEIVER_LOCATED"));
 		}
@@ -175,6 +174,10 @@ void CCore::loadDefaultDataReceiver() throw (ComponentErrors::CouldntGetComponen
 			Impl.setComponentName((const char*)m_defaultDataReceiverInstance);
 			changeSchedulerStatus(Management::MNG_FAILURE);
 			throw Impl;		
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::loadDefaultDataReceiver())");
+			throw impl;
 		}
 	}	
 }

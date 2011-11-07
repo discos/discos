@@ -1,9 +1,6 @@
 #ifndef _BOSS_CORE_STARTSCANWRAPPERS_I_
 #define _BOSS_CORE_STARTSCANWRAPPERS_I_
 
-// $Id: BossCore_startScanWrappers.i,v 1.9 2011-06-21 16:38:02 a.orlati Exp $
-
-
 void CBossCore::track(const char *targetName) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
 		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
@@ -35,7 +32,7 @@ void CBossCore::moon() throw (ComponentErrors::CouldntReleaseComponentExImpl,Com
 	second.paramNumber=0;
 	par.type=Antenna::ANT_MOON;
 	par.secondary=false;
-	par.targetName=CORBA::string_dup("moon");
+	par.targetName=CORBA::string_dup("Moon");
 	par.applyOffsets=false;
 	par.section=Antenna::ACU_NEUTRAL;
 	startScan(startUt,par,second); // could throw exceptions
@@ -118,8 +115,8 @@ ACS::Time CBossCore::lonOTFScan(const Antenna::TCoordinateFrame& scanFrame,const
 	prim.otf.lon2=span;
 	prim.otf.lat2=0.0;
 	prim.applyOffsets=false;  // no offset for this scan!
-	prim.secondary=true;  // force the engine to look for the seconday track, or if the secondary is not set (this case) to use the previosly commanded track
-	prim.targetName=CORBA::string_dup("otf"); // not strictly necessary as the system will take the last commaned name
+	prim.secondary=true;  // force the engine to look for the secondary track, or if the secondary is not set (this case) to use the previously commanded track
+	prim.targetName=CORBA::string_dup("otf"); // not strictly necessary as the system will take the last commanded name
 	prim.section=Antenna::ACU_NEUTRAL;
 	if (checkScan(startUt,prim,second,slewingTime)) {
 		startScan(startUt,prim,second);
@@ -158,8 +155,8 @@ ACS::Time CBossCore::latOTFScan(const Antenna::TCoordinateFrame& scanFrame,const
 	prim.otf.lon2=0.0;
 	prim.otf.lat2=span;
 	prim.applyOffsets=false;  // no offset for this scan!
-	prim.secondary=true;  // force the engine to look for the seconday track, or if the secondary is not set (this case) to use the previosly commanded track
-	prim.targetName=CORBA::string_dup("otf"); // not strictly necessary as the system will take the last commaned name
+	prim.secondary=true;  // force the engine to look for the secondary track, or if the secondary is not set (this case) to use the previously commanded track
+	prim.targetName=CORBA::string_dup("otf"); // not strictly necessary as the system will take the last commanded name
 	prim.section=Antenna::ACU_NEUTRAL;
 	if (checkScan(startUt,prim,second,slewingTime)) {
 		startScan(startUt,prim,second);

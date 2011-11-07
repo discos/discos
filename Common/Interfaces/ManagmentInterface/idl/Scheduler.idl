@@ -3,13 +3,13 @@
 
 /* **************************************************************** */
 /* IRA Istituto di Radioastronomia                                  */
-/* $Id: Scheduler.idl,v 1.11 2011-06-21 16:34:40 a.orlati Exp $                                                           */
 /*                                                                  */
 /* This code is under GNU General Public Licence (GPL)              */
 /*                                                                  */
 /* Who                                  	when            What        */
 /* Andrea Orlati(aorlati@ira.inaf.it)		18/12/2008      created     */
 /* Andrea Orlati(aorlati@ira.inaf.it)		03/09/2010      Added haltSchedule(), setDevice() and tracking attribute    */
+/* Andrea Orlati(aorlati@ira.inaf.it)		24/10/2011      modified the signature of startSchedule()  */
 
 #include <baci.idl>
 #include <ManagmentDefinitions.idl>
@@ -46,10 +46,10 @@ module Management {
 		 * 	   @arg \c ManagementErrors::ScheduleErrorEx
 		 *     @arg \c ManagementErrors::AlreadyRunningEx
 		 * @param fileName name of the schedule file
-		 * @param startLine line number to start from, depending on the schedule mode this might be ignored
+		 * @param startSubScan allows to give the subscan from which schedule should be started, format composed by two non negative integers separeted by an underscore: scanid_subscanid. 
+		 *                                             The second number could me optional.
 		 */
-		void startSchedule(in string fileName,in long startline) raises (ComponentErrors::ComponentErrorsEx,
-				ManagementErrors::ManagementErrorsEx);
+		void startSchedule(in string fileName,in string startSubScan) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
 		 * This command stops immediately the execution of current schedule. If no schedule is runnig this has no effect.
@@ -135,10 +135,14 @@ module Management {
 		void chooseDefaultDataRecorder(in string rcvInstance);
 		
 		/**
-		 * This attribute reports the current schedule line the scheduler is executing. If zero no schedule
-		 * is at the moment active.
+		 * This attribute reports the scan identifier currently played by the scheduler.
 		*/ 
-		readonly attribute ACS::ROlong scanNumber;
+		readonly attribute ACS::ROlong scanID;
+		
+		/**
+		 * This attribute reports the subscan identifier currently played by the scheduler
+		 */
+		readonly attribute ACS::ROlong subScanID;
 		
 		/** 
 		 * This attribute reports the current schedule file name that the scheduler is executing.

@@ -1,5 +1,5 @@
-#ifndef DEVIOFILENAME_H_
-#define DEVIOFILENAME_H_
+#ifndef DEVIOOBSERVER_H_
+#define DEVIOOBSERVER_H_
 
 /** ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
@@ -7,46 +7,46 @@
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
 /* Who                                            	when                    What                                                       */
-/* Andrea Orlati(aorlati@ira.inaf.it) 22/01/2009      Creation                                                  */
+/* Andrea Orlati(aorlati@ira.inaf.it) 03/11/2011      Creation                                                  */
 
 #include <baciDevIO.h>
 
 namespace FitsWriter_private {
 
 /**
- * This  class is derived from the template DevIO. It is used by the by the fileName property. 
+ * This  class is derived from the template DevIO. It is used by the by the observer property.
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia<br>
- */ 
-class DevIOFileName: public virtual DevIO<ACE_CString>
+ */
+class DevIOObserver: public virtual DevIO<ACE_CString>
 {
 public:
-	
-	DevIOFileName(CSecureArea<FitsWriter_private::CDataCollection>*data): m_data(data) { 
-		AUTO_TRACE("DevIOFileName::DevIOFileName()");
+
+	DevIOObserver(CSecureArea<FitsWriter_private::CDataCollection>*data): m_data(data) {
+		AUTO_TRACE("DevIOObserver::DevIOObserver()");
 	}
-	
-	~DevIOFileName() {
-		AUTO_TRACE("DevIOFileName::~DevIOFileName()");
+
+	~DevIOObserver() {
+		AUTO_TRACE("DevIOObserver::~DevIOObserver()");
 	}
-	
+
 	bool initializeValue(){
 		return false;
 	}
-	
+
 	ACE_CString read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
-		AUTO_TRACE("DevIOFileName::read()");
+		AUTO_TRACE("DevIOObserver::read()");
 		CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_data->Get();
 		timestamp=getTimeStamp();
-		m_val=(const char *)data->getFileName();
+		m_val=(const char *)data->getObserverName();
 		return m_val;
     }
-	
+
     void write(const ACE_CString &value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-    	AUTO_TRACE("DevIOFileName::write()");
+    	AUTO_TRACE("DevIOObserver::write()");
 	}
-    
+
 private:
 	CSecureArea<FitsWriter_private::CDataCollection> *m_data;
 	ACE_CString m_val;
@@ -54,4 +54,4 @@ private:
 
 };
 
-#endif /*DEVIOFILENAME_H_*/
+#endif /*DEVIOOBSERVER_H_*/

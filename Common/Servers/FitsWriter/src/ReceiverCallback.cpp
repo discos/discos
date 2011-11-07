@@ -34,6 +34,7 @@ int ReceiverCallback::cbStart(ACE_Message_Block * userParam_p)
 	channelH=(Backends::TSectionHeader *)userParam_p->rd_ptr();	
 	data->saveMainHeaders(mainH,channelH);
 	m_receivedBytes=0;
+	ACS_LOG(LM_FULL_INFO, "ReceiverCallback::cbStart()",(LM_DEBUG,"START_FROM_BACKEND" ));
 	return 0;
 }
 
@@ -82,6 +83,7 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 int ReceiverCallback::cbStop()
 {	
 	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataCollection->Get();
+	ACS_LOG(LM_FULL_INFO, "ReceiverCallback::cbStop()",(LM_DEBUG,"STOP_FROM_BACKEND" ));
 	data->startStopStage();
 	//data->setStatus(Management::MNG_WARNING,__LINE__);
 	return 0;

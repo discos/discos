@@ -26,6 +26,7 @@ static void *use_rcsId = ((void)&use_rcsId, (void *) &rcsId);
 OTFImpl::OTFImpl(const ACE_CString& CompName,maci::ContainerServices* containerServices) : 
 	acscomponent::ACSComponentImpl(CompName,containerServices){
 	m_componentName=CString(CompName);
+	m_targetName="otf";
 }
 
 OTFImpl::~OTFImpl(){
@@ -131,6 +132,11 @@ void OTFImpl::getHorizontalCoordinate (
 	el=outEl;
 }
 	
+void OTFImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw (CORBA::SystemException)
+{
+	flux=0.0;
+}
+
 void OTFImpl::getAttributes (Antenna::OTFAttributes_out att) throw (CORBA::SystemException) {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	AUTO_TRACE("OTFImpl::getAttributes()");
@@ -139,6 +145,7 @@ void OTFImpl::getAttributes (Antenna::OTFAttributes_out att) throw (CORBA::Syste
 	IRA::CIRATools::getTime(now);
 	m_subScan.computePointingForUT(now);*/
 	m_subScan.fillAllAttributes(att);
+	att->sourceID=CORBA::string_dup((const char *)m_targetName);
 }
 
 CORBA::Boolean OTFImpl::checkTracking(ACS::Time time, CORBA::Double az, CORBA::Double el, CORBA::Double HPBW
@@ -161,6 +168,7 @@ CORBA::Long OTFImpl::checkPath(ACS::Time time, CORBA::Double az, CORBA::Double e
 }
 
 Antenna::TSections OTFImpl::setSubScan(
+		const char *targetName,
 		CORBA::Double initAz,
 		Antenna::TSections initSector,
 		CORBA::Double initEl,
@@ -208,6 +216,7 @@ Antenna::TSections OTFImpl::setSubScan(
 			impl.log(LM_DEBUG);
 			throw impl.getComponentErrorsEx();
 		}
+		m_targetName=IRA::CString(targetName);
 		ACS_LOG(LM_FULL_INFO, "OTFImpl::setSubScan()", (LM_INFO,"NEW_SUBSCAN_COMMANDED"));
 		return steer;
 }

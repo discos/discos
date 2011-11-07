@@ -1,16 +1,18 @@
-# The project name, can be any combination of characters but spaces 
+# The project name, can be any combination of characters but spaces and blanks 
 PROJECT:	skySurvey
-# the name of the observer, can be any combination of characters but blank 
+# the name of the observer, can be any combination of characters but blanks 
 OBSERVER:	AndreaOrlati
 #the file that contains the parameters that defines the scans from the telescope positioning point of view. For
-#example sidereal tracking or On the fly scan, and so on...... Every scan is numerated
+#example sidereal tracking or On the fly scan, and so on...... Every scan is enumerated
 SCANLIST:	scan.tmpl
-#the file that contains the telescopes setups procedures (recevier, lofreq, subreflector....) that can be used during 
+#the file that contains the telescopes setups procedures (receiver, local oscillator, ....) that can be used during 
 #the observation. 
 PROCEDURELIST:	config.tmpl
-#file that contains the variuos backend configurations that are required during the observation. This section is not
-#mandatory provided that a -1 in the backend field fo the schedule is given
+#file that contains the backend configurations that are required during the observation. This section is not
+#mandatory provided that a NULL in the backend field of the schedule is given
 BACKENDLIST:	backend.tmpl
+#file that contains extra information that define the scan to be passed to the the data recorder. This field is not mandatory.
+SCANLAYOUT:	layoutfile.tmpl	
 #This defines the schedule mode.
 #In this example we have the LST based schedule. That means the various scans are
 #performed based on LST mark. The telescope will be driven on the next scan that can be reached on time. If the target is not reachable the scan is skipped.
@@ -20,60 +22,57 @@ BACKENDLIST:	backend.tmpl
 #repeat continuosly. A zero or null is not allowed.
 MODE:	LST	1
 #in this mode the single scans are performed sequentially in the order they appear in the schedule. In that
-#mode no timestamps are required. The target is checked top be above the horizon, if the test is failed the scan is skipped. The start tothe  acquisition is given when
+#mode no timestamps are required. The target is checked top be above the horizon, if the test is failed the scan is skipped. The start to the  acquisition is given when
 #the telescope is on target.  The stop time will be at effective start time plus the scheduled duration. In that mode the schedule is continuosly run.
 #The second argument, which is optional gives the start LST for the schedule.
 #MODE:	SEQ
 #MODE: SEQ	21:15:36.00
 #this field is used to enumerate the scans of the schedule. The first scan will be marked with the number reported here. 
-# The identifer will be incremented every scan....and stored into the output file. If negative, or not given (this field is not mandatory) the
+# The identifier will be incremented every scan....and stored into the output file. If negative, or not given (this field is not mandatory) the
 # enumeration capability is turned off.
-SCANID:	1024
+SCANTAG:	1024
 #This procedure will be executed once at the start of the schedule. It could be NULL, in that case nothing is done. If not present it is considered to be
-# NULL. The prcedure must be defined in the PROCEDURELIST file. It is always executed in blokcing mode, the schedule is started only when the procedure
+# NULL. The procedure must be defined in the PROCEDURELIST file. It is always executed in blocking mode, the schedule is started only when the procedure
 # has been done.
 INITPROC:	INITALL
 
 
-#The schedule itself, the fields are tab separeted
-#id is a progressive number that numerates the scans, every scan will produce an output file. It must start from 1 
-#startLST the local sidereal time to start the current scan, the format is hh:mm:ss.sss. The antenna is moved
+#The schedule itself, the fields are tab separated
+#the keyword SCAN identifies the beginning of a scan, a scan includes all the subscan enlisted before the next SCAN keyword or the end of the schedule.
+#SCAN scan_id	suffix	backend:writer	[layout]
+#scan_id is progressive number (zero is not allowed) (must be unique in the schedule) that identifies the current scan. 
+#suffix this is the suffix of the output file. The final name of the file will be composed by the date and time of observation then the local sidereal time 
+#       (if the schedule is LST) then the project name and at the end the suffix. 
+#backend this field reports about the definition (in BACKENDLIST file) to be used in the current scan. After the colon the scheduler
+#		 expects to find the instance of the data receiver to be used. The provided name could be composed by any litteral or numerical character. 
+#		 There is reserved string that has special meanings. "NULL" means that the scan must be done with no acquisition.
+#writer name of the writer instance in charge to store the data. There is reserved string that has special meanings.
+#		 "NULL" means that the data coming from the backend are not to be stored.  
+#layout	this is the label of the current layout to be used for the current scan. If provided the scan layout file must be given and the corresponding layout must
+#        exists in the file
+#The subscan definition match the following pattern:
+#subscan_id	[startLST]	duration scan PreScan PostScan
+#subscan_id is the identifier of the subscan. The format must be scanid_subscanid, where the scanid and subscanid are integers, the former must match the id of the above
+#			scan, the former can be any positive number (a part from zero) that cannot be repeated twice inside the same scan.
+#startLST if the schedule is a LST schedule this field stores the local sidereal time to start the current subscan, the format is hh:mm:ss.sss. The antenna is moved
 #         in the correct position in advance and the data acquisition is started. No time repetitions are allowed and
 #         the various times must be incrementally ordered. 00:00:00 could come after 23:59:59.
-#duration number of seconds that the scan is supposed to last. After that period the data recording is stopped.
+#duration number of seconds that the scan is supposed to perform data recording. After that period the data recording is stopped.
 #scan the scan number (inside the file given in SCANLIST section)
-#outputfile_suffix this is the suffix of the output file. The final name of the file will be composed
-#				   by the date and time of observation then the local sidereal time (if the schedule is LST) then the project name and
-#				    at the end the suffix. 
 #PreScan	A name of a procedure that must be executed before the scan starts. It may be NULL in that case nothing is done. It has to be reported in the procedure list file.
-#			The defualt behaviour is that the scheduler will wait for the procedure to finish before doing anything else. If this is not the desired approach a '@' must
+#			The default behavior is that the scheduler will wait for the procedure to finish before doing anything else. If this is not the desired approach a '@' must
 #           be appended to the procedure name,in that case the scheduler won't wait for the procedure completion. 
 #PostScan	A name of a procedure that must be executed at the end of the scan. It may be NULL in that case nothing is done. It has to be reported in the procedure list file.
-#			The async/sync execution mode is identical to the pre scan procedure.
-#backend this field will report about the definition (in BACKENDLIST file) to be used in the current scan. After the colon the schdeduler
-#		 expects to find the instance of the data receiver to be used. The provided name could be composed
-#        by any litteral or numerical character. There is reserved string that has special meanings.
-#		 "NULL" means that the scan must be done with no acquisition. 
-#writer name of the writer instance in charge to store the data. There is reserved string that has special meanings.
-#		 "NULL" means that the data coming from the backend are not to be stored. 
-#id outputfile_suffix	startLST duration scan PreScan PostScan backend 
-1	dr21	10:12:04.000	60.0	1	STANDARDPRESCAN@	STANDARDPOSTSCAN	STD:MANAGEMENT/Writer1
-2	3c123	10:16:10.500	60.0	2	STANDARDPRESCAN@	NULL	NULL
-3	scanOTF	10:21:14.000	300.0	3	STANDARDPRESCAN@	NULL	NULL
-4	unknown	10:30:14.000	300.0	4	STANDARDPRESCAN	NULL	NULL
-5	dummy	11:00:10.300	500.0	5	STANDARDPRESCAN@	NULL	STD:MANAGEMENT/FitsZilla
-6	foofoo	11:42:00.000	300.0	6	STANDARDPRESCAN@	NULL	HIGH:MANAGEMENT/FitsZilla
-7	w3oh	11:59:11.400	300.0	3	STANDARDPRESCAN	NULL	NULL
-8	test	13:10:11.200	15.0	9	NULL	NULL	NULL
+#			The async/sync execution mode is identical to the prescan procedure.
 
-#startUT has the format yyyy-doy-hh:mm:ss.sss. The scans must appear in chronological order.
-#id	startUT duration scan PreScan	PostScan backend writer
-#1	dr21	2008-301-09:12:04.000	60.0	1	STANDARDPRESCAN	NULL	STD:MANAGEMENT/FitsZilla
-#2	3c123	2008-301-10:16:10.500	60.0	2	STANDARDPRESCAN	NULL	STD:MANAGEMENT/FitsZilla
+SC:	1	dr21	STD:MANAGEMENT/MBFits	EQMAPLAYOUT
+1_1	10:12:04.000	60.0	1	STANDARDPRESCAN@	STANDARDPOSTSCAN
+1_10	10:14:04.000	60.0	1	STANDARDPRESCAN@	STANDARDPOSTSCAN
+
+SC:	2	mySource	HIGH:MANAGEMENT/MBFits
+2_1	10:30:14.000	300.0	4	STANDARDPRESCAN	NULL
 
 #id duration scan PreScan PostScan backend Writer
-#1	dr21	60.0	1	STANDARDPRESCAN	NULL	NULL
-#2	3c123	60.0	2	STANDARDPRESCAN	NULL	STD:MANAGEMENT/FitsZilla
-
-
-
+#SC:	1	dr21	STD::MANAGEMENT/FitsZilla
+#1_1	60.0	1	STANDARDPRESCAN	NULL
+#1_2	60.0	1	STANDARDPRESCAN	NULL

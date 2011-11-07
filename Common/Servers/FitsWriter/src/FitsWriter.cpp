@@ -21,7 +21,7 @@ using namespace Backends;
 #define _FITSW_SECTCOL_TYPE "type"
 #define _FITSW_SECTCOL_SR "sampleRate"
 #define _FITSW_SECTCOL_BINS "bins"
-
+#define _FITSW_SECTCOL_FLUX "flux"
 
 #define _FITSW_RFCOL_FEED "feed"
 #define _FITSW_RFCOL_IF "ifChain"
@@ -52,16 +52,19 @@ CFitsWriter::CFitsWriter()
 	SectColName.push_back(_FITSW_SECTCOL_TYPE);
 	SectColName.push_back(_FITSW_SECTCOL_SR);
 	SectColName.push_back(_FITSW_SECTCOL_BINS);
+	SectColName.push_back(_FITSW_SECTCOL_FLUX);
 
 	SectColForm.push_back("J");
 	SectColForm.push_back("6A");
 	SectColForm.push_back("D");
 	SectColForm.push_back("J");
+	SectColForm.push_back("D");
 
 	SectColUnit.push_back("");
 	SectColUnit.push_back("");
 	SectColUnit.push_back("MHz");
 	SectColUnit.push_back("");
+	SectColForm.push_back("Jy");
 	
 	rfColName.push_back(_FITSW_RFCOL_FEED);
 	rfColName.push_back(_FITSW_RFCOL_IF);
@@ -201,6 +204,7 @@ bool CFitsWriter::create()
 		pFits->pHDU().writeHistory(HISTORY1);
 		pFits->pHDU().writeHistory(HISTORY2);
 		pFits->pHDU().writeHistory(HISTORY3);
+		pFits->pHDU().writeHistory(HISTORY4);
 		pFits->pHDU().writeDate();
 	}
 	catch (CCfits::FitsException& ex) {
@@ -403,12 +407,13 @@ bool CFitsWriter::addFeedTable(const IRA::CString& name)
 	}
 };
 
-bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq& los,const ACS::doubleSeq& recvFreq,const ACS::doubleSeq& recvBandWidth,const ACS::doubleSeq& marks,
-		const IRA::CString& name,const IRA::CString& rfName)
+bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq& los,const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,
+		const ACS::doubleSeq& sourceFlux,const IRA::CString& name,const IRA::CString& rfName)
 {
 	std::vector<long> id;
 	std::vector<long> bins;
 	std::vector<double> sampleRate;
+	std::vector<double> flux;
 	std::vector<string> sect_type;	
 	std::vector<long> feed;
 	std::vector<long> ifChain;
@@ -420,7 +425,7 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq&
 	std::vector<double> calib;
 	std::vector<long> section;
 	long inputsNumber=0;
-	double skyFreq,skyBw;
+	//double skyFreq,skyBw;
 	
 	if (!pFits) {
 		m_lastError = "fits file is not created";
@@ -435,6 +440,9 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq&
 		id.push_back(m_channels[i].id);  // Section ID
 		bins.push_back(m_channels[i].bins); //Section Bins
 		sampleRate.push_back(m_channels[i].sampleRate); // section S.R.
+		if (i<(long)sourceFlux.length()) {
+			flux.push_back(sourceFlux[i]);// estimated source flux associated to the section parameters
+		}
 		// creation of the channels columns for the data table......
 		colName << "Ch" << m_channels[i].id;
 	    DataColName.push_back(colName.str());		
@@ -461,23 +469,16 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq&
 			else {
 				polarization.push_back("");
 			}
-			//compute the real observed frequency...resulting from the combination of receiver band and backend filter
-			
-			if ((ifNumber<recvFreq.length()) && (ifNumber<recvBandWidth.length())) {
-				if (IRA::CIRATools::skyFrequency(m_channels[i].frequency,m_channels[i].bandWidth,recvFreq[ifNumber],recvBandWidth[ifNumber],skyFreq,skyBw)) {
-					if (ifNumber<los.length()) {
-						skyFreq+=los[ifNumber];
-					}
-					frequency.push_back(skyFreq);
-					bandWidth.push_back(skyBw);
-				}
-				else {
-					frequency.push_back(DOUBLENULLVALUE);
-					bandWidth.push_back(DOUBLENULLVALUE);
-				}
+			if (i<(long)skyFreq.length()) {
+				frequency.push_back(skyFreq[i]);
 			}
 			else {
 				frequency.push_back(DOUBLENULLVALUE);
+			}
+			if (i<(long)skyBandWidth.length()) {
+				bandWidth.push_back(skyBandWidth[i]);
+			}
+			else {
 				bandWidth.push_back(DOUBLENULLVALUE);
 			}
 			if (ifNumber<los.length()) {
@@ -515,6 +516,7 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq&
 		section_table->column(_FITSW_SECTCOL_TYPE).write(sect_type,1);
 		section_table->column(_FITSW_SECTCOL_SR).write(sampleRate,1);		
 		section_table->column(_FITSW_SECTCOL_BINS).write(bins,1);
+		section_table->column(_FITSW_SECTCOL_FLUX).write(flux,1);
 	}
 	catch(FitsException& fe){
 		m_lastError = fe.message().c_str();

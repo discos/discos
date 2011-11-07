@@ -39,7 +39,8 @@ AntennaBossImpl::AntennaBossImpl(const ACE_CString &CompName,maci::ContainerServ
 	m_ppointingAzimuthCorrection(this),
 	m_ppointingElevationCorrection(this),
 	m_prefractionCorrection(this),
-	m_pBWHM(this),
+	m_pFWHM(this),
+	m_ptargetFlux(this),
 	m_pcorrectionEnabled(this),
 	m_ptargetRightAscension(this),
 	m_ptargetDeclination(this),
@@ -68,7 +69,7 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	CBossCore *boss;
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::initialize()",(LM_INFO,"AntennaBoss::COMPSTATE_INITIALIZING"));
 	try {
-		m_config.init(getContainerServices());    //thorw CDBAcessExImpl;
+		m_config.init(getContainerServices());    //throw CDBAcessExImpl;
 	}
 	catch (ACSErr::ACSbaseExImpl& E) {
 		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"AntennaBossImpl::initialize()");
@@ -106,7 +107,7 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				new DevIOCorrectionOffsets(m_core,DevIOCorrectionOffsets::POINTINGELEVATIONOFFSET),true);
 		m_prefractionCorrection=new ROdouble(getContainerServices()->getName()+":refractionCorrection",getComponent(),
 				new DevIOCorrectionOffsets(m_core,DevIOCorrectionOffsets::REFRACTIONOFFSET),true);
-		m_pBWHM=new ROdouble(getContainerServices()->getName()+":BWHM",getComponent(),
+		m_pFWHM=new ROdouble(getContainerServices()->getName()+":FWHM",getComponent(),
 				new DevIOHPBW(m_core),true);
 		m_pcorrectionEnabled=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
 		  (getContainerServices()->getName()+":correctionEnabled",getComponent(),new DevIOEnable(m_core,DevIOEnable::CORRECTION),true);
@@ -116,6 +117,8 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				new DevIOTargetCoordinate(m_core,DevIOTargetCoordinate::DECLINATION),true);
 		m_ptargetVlsr=new ROdouble(getContainerServices()->getName()+":targetVlsr",getComponent(),
 				new DevIOTargetCoordinate(m_core,DevIOTargetCoordinate::VLSR),true);
+		m_ptargetFlux=new ROdouble(getContainerServices()->getName()+":targetFlux",getComponent(),
+				new DevIOTargetCoordinate(m_core,DevIOTargetCoordinate::FLUX),true);
 		m_pazimuthOffset=new ROdouble(getContainerServices()->getName()+":azimuthOffset",getComponent(),
 				new DevIOOffsets(m_core,DevIOOffsets::AZIMUTHOFF),true);
 		m_pelevationOffset=new ROdouble(getContainerServices()->getName()+":elevationOffset",getComponent(),
@@ -169,7 +172,7 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add<3>("lonOTF",new function3<CBossCore,non_constant,time_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(boss,&CBossCore::lonOTFScan));
 	m_parser->add<3>("latOTF",new function3<CBossCore,non_constant,time_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(boss,&CBossCore::latOTFScan));
 	m_parser->add<1>("vlsr",new function1<CBossCore,non_constant,void_type,I<double_type> >(boss,&CBossCore::setVlsr));
-	m_parser->add<1>("bwhm",new function1<CBossCore,non_constant,void_type,I<angle_type<rad> > >(boss,&CBossCore::setBWHM));
+	m_parser->add<2>("fwhm",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >, I<double_type> >(boss,&CBossCore::setFWHM));
 	m_parser->add<1>("track",new function1<CBossCore,non_constant,void_type,I<string_type> >(boss,&CBossCore::track));
 	m_parser->add<2>("azelOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setHorizontalOffsets));
 	m_parser->add<2>("radecOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setEquatorialOffsets));
@@ -330,18 +333,18 @@ void AntennaBossImpl::disable() throw (CORBA::SystemException)
 	resource->disable();
 }
 
-void AntennaBossImpl::setBWHM(CORBA::Double value) throw (CORBA::SystemException)
+void AntennaBossImpl::setFWHM(CORBA::Double value,CORBA::Double waveLen) throw (CORBA::SystemException)
 {
-	AUTO_TRACE("AntennaBossImpl::setBWHM");
+	AUTO_TRACE("AntennaBossImpl::setFWHM");
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
-	resource->setBWHM(value);
+	resource->setFWHM(value,waveLen);
 }
 
-void AntennaBossImpl::computeBWHM(CORBA::Double taper,CORBA::Double waveLength) throw (CORBA::SystemException)
+void AntennaBossImpl::computeFWHM(CORBA::Double taper,CORBA::Double waveLength) throw (CORBA::SystemException)
 {
-	AUTO_TRACE("AntennaBossImpl::computeBWHM");
+	AUTO_TRACE("AntennaBossImpl::computeFWHM");
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
-	resource->computeBWHM(taper,waveLength);
+	resource->computeFWHM(taper,waveLength);
 }
 
 
@@ -357,6 +360,15 @@ void AntennaBossImpl::enable() throw (CORBA::SystemException)
 	AUTO_TRACE("AntennaBossImpl::enable()");
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 	resource->enable();	
+}
+
+void AntennaBossImpl::getFluxes (const ACS::doubleSeq& freqs,ACS::doubleSeq_out fluxes) throw (CORBA::SystemException)
+{
+	AUTO_TRACE("AntennaBossImpl::correctionEnable()");
+	ACS::doubleSeq_var outFlux =new ACS::doubleSeq;
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	resource->getFluxes(freqs,outFlux);
+	fluxes=outFlux._retn();
 }
 
 void AntennaBossImpl::correctionEnable() throw (CORBA::SystemException)
@@ -611,11 +623,12 @@ _PROPERTY_REFERENCE_CPP(AntennaBossImpl,Management::ROTBoolean,m_penabled,enable
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ppointingAzimuthCorrection,pointingAzimuthCorrection);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ppointingElevationCorrection,pointingElevationCorrection);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_prefractionCorrection,refractionCorrection);	
-_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pBWHM,BWHM);	
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pFWHM,FWHM);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,Management::ROTBoolean,m_pcorrectionEnabled,correctionEnabled);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetRightAscension,targetRightAscension);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetDeclination,targetDeclination);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetVlsr,targetVlsr);
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetFlux,targetFlux);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pazimuthOffset,azimuthOffset);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pelevationOffset,elevationOffset);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_prightAscensionOffset,rightAscensionOffset);

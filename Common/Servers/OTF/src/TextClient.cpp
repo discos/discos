@@ -71,7 +71,7 @@ bool parseTime(const IRA::CString& str,ACS::Time& time)
 	double ss;
 	double fract;
 	sscanf((const char*)str,"%d",&nil);
-	printf("Ho letto lo zero \n\n");
+	//printf("Ho letto lo zero \n\n");
 	if (nil==0) {
 		time=0;
 		printf("Time: %lld\n",time );
@@ -103,6 +103,7 @@ using namespace IRA;
 int main(int argc, char *argv[])
 {
 	bool loggedIn=false;
+	IRA::CString staticTargetName("otf");
 	char ch;
 	bool keyPressed;
 	TIMEDIFFERENCE tDiff;
@@ -570,7 +571,7 @@ int main(int argc, char *argv[])
 	signal(SIGINT,SIG_IGN);
 
 	try {
-		commandedSector=hwRef->setSubScan(initAz,initSector,initEl,initTime,lon1,lat1,lon2,lat2,coordFrame,geometry,subScanFrame,description,
+		commandedSector=hwRef->setSubScan((const char *)staticTargetName,initAz,initSector,initEl,initTime,lon1,lat1,lon2,lat2,coordFrame,geometry,subScanFrame,description,
 				direction,startUT,duration);
 	}
 	catch (CORBA::SystemException &C) { 

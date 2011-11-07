@@ -84,6 +84,7 @@ module Antenna {
 		
 		/** 
 		 * Sets all the subscan parameters. 
+		 * @param targetName allows to give a target name, it could be a real source name or just a place holder
 		 * @param initAz Azimuth position of antenna at subscan setup time 
 		 * @param initSector Azimuth section (CW or CCW) of init point 
 		 * @param initEl Elevation position of antenna at subscan setup time
@@ -109,7 +110,7 @@ module Antenna {
 		 * @throw AntennaErrors::AntennaErrorsEx
 	     * @throw ComponentErrors::ComponentErrorsEx
 		 */
-		Antenna::TSections setSubScan(in double initAz, in TSections initSector, in double initEl, in ACS::Time initTime, in double lon1, in double lat1, 
+		Antenna::TSections setSubScan(in string TargetName, in double initAz, in TSections initSector, in double initEl, in ACS::Time initTime, in double lon1, in double lat1, 
 				        in double lon2, in double lat2,  in TCoordinateFrame coordFrame, 
 				        in TsubScanGeometry geometry, in TCoordinateFrame subScanFrame, in TsubScanDescription description, 
 				        in TsubScanDirection direction, in ACS::Time startUT, in ACS::TimeInterval subScanDuration) raises (AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx);

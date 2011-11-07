@@ -971,7 +971,7 @@ void SubScan::fillAllAttributes (Antenna::OTFAttributes* att) {
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
 	computePointingForUT(now);
-	att->sourceID=CORBA::string_dup("OTF");
+	//att->sourceID=CORBA::string_dup("OTF");  it will be set by implementation class as it is just a place holder
 	att->rightAscension=appRa;
 	att->declination=appDec;
 	att->azimuth=slaDranrm(az);

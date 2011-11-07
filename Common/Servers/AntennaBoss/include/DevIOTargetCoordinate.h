@@ -28,7 +28,8 @@ public:
 	enum TLinkedAttribute {
 		RIGHTASCENSION,
 		DECLINATION,
-		VLSR
+		VLSR,
+		FLUX
 	};
 	
 	DevIOTargetCoordinate(IRA::CSecureArea<CBossCore>* core,const TLinkedAttribute& e): m_core(core), m_eq(e) { 
@@ -55,6 +56,9 @@ public:
 		}
 		else if (m_eq==VLSR) {
 			val=resource->getTargetVlsr();
+		}
+		else if (m_eq==FLUX) {
+			val=resource->getTargetFlux();
 		}
 		timestamp=getTimeStamp();
 		return (CORBA::Double)val;

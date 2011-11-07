@@ -3,7 +3,6 @@
 
 /** ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: DevIOScanNumber.h,v 1.2 2009-01-16 17:44:57 a.orlati Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
@@ -11,8 +10,6 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  30/12/2008      Creation                                                  */
 
 #include <baciDevIO.h>
-
-using namespace baci;
 
 /**
  * This  class is derived from the template DevIO. It is used by the by the scanNumber  property. 
@@ -23,7 +20,12 @@ class DevIOScanNumber: public virtual DevIO<CORBA::Long>
 {
 public:
 	
-	DevIOScanNumber(CCore* core): m_core(core) { 
+	enum TSelector {
+		SCANID,
+		SUBSCANID
+	};
+
+	DevIOScanNumber(CCore* core,const TSelector& ss): m_core(core), m_selector(ss) {
 		AUTO_TRACE("DevIOScanNumber::DevIOScanNumber()");
 	}
 	
@@ -37,9 +39,15 @@ public:
 	
 	CORBA::Long read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
 		AUTO_TRACE("DevIOScanNumber::read()");
-		DWORD  scanNumber=m_core->getScanNumber();
+		DWORD  scanID,subScanID;
+		m_core->getCurrentIdentifiers(scanID,subScanID);
+		if (m_selector==SCANID) {
+			m_val=(CORBA::Long)scanID;
+		}
+		else {
+			m_val=(CORBA::Long)subScanID;
+		}
 		timestamp=getTimeStamp();
-		m_val=(CORBA::Long) scanNumber;
 		return m_val;
     }
 	
@@ -49,6 +57,7 @@ public:
     
 private:
 	CCore *m_core;
+	TSelector m_selector;
 	CORBA::Long m_val;
 };
 

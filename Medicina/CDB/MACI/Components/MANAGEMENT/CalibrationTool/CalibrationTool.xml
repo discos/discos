@@ -13,6 +13,6 @@
 	Type="IDL:alma/Management/CalibrationTool:1.0"
 	Container="ManagementContainer"
 	Default="false"
-	KeepAliveTime="120"
+	KeepAliveTime="-1"
     ImplLang="cpp"
 />

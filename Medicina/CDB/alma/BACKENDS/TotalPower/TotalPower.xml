@@ -18,7 +18,7 @@
                RepetitionCacheTime="2000000"
                RepetitionExpireTime="5000000"
                DataPort="6001"
-               DataIPAddress="192.168.51.8"            	   
+               DataIPAddress="192.167.189.8"            	   
                DataLatency="3000000"
                SenderSleepTime="300000"
                SenderResponseTime="1000000"

@@ -20,7 +20,7 @@
 
 /**
  * @mainpage Moon Tracking component implementation documentation
- * @date 04/05/201
+ * @date 04/05/2001
  * @version 1.01.0
  * @author <a. href=mailto:r.verma@ira.inaf.it>Rashmi Verma</a>
  * @remarks Last complied under ACS 7.0.2
@@ -130,16 +130,13 @@ public:
 	bool checkTracking(ACS::Time time,CORBA::Double az,CORBA::Double el,CORBA::Double HPBW) throw (CORBA::SystemException);
 
     /**
-     * This method compute the flux of a source based on its flux and model
-     * parameters read from the CDB.
+     * This method is supposed to compute the flux of the moon. At present a 0.0 Jy is always returned.
      * @throw CORBA::SystemException
      * @param freq frequency observed
      * @param fwhm fwhm
-     * @param flux computed flux
+     * @param flux computed flux (Jy)
      */ 
-    void computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw (CORBA::SystemException) {};
-
-
+    void computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw (CORBA::SystemException);
 
 private:
 	

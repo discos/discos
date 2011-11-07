@@ -24,8 +24,9 @@
 >
              
 <scheduleName/>
-<scanNumber/>
+<scanID/>
+<subScanID/>
+<currentDevice/>
 <status/>
 <tracking/>
-
 </Scheduler>

@@ -126,6 +126,9 @@ module Antenna {
         /**
         * This method is used to calculate the flux of a source who's parameter
         * are read from the SourceCatalog.xsd from CDB
+        * @param freq sky frequency at which we'd like to compute the flux of the current target (MHz)
+        * @param fwhm Full Width Half Maximum (radians)
+        * @param flux computed flux  (Jy)
         */
         void computeFlux(in double freq, in double fwhm, out double flux);
 	};

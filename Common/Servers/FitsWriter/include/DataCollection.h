@@ -3,7 +3,6 @@
 
 /* ************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                                         */
-/* $Id: DataCollection.h,v 1.10 2011-04-22 18:51:48 a.orlati Exp $                                                                                                                                     */
 /*                                                                                                                                                */
 /* This code is under GNU General Public Licence (GPL).                                                    */
 /*                                                                                                                                                */
@@ -17,6 +16,7 @@
 #include <SchedulerC.h>
 #include <BackendsDefinitionsC.h>
 #include <ManagmentDefinitionsC.h>
+#include <DataReceiverS.h>
 #include <vector>
 #include <list>
 #include <Definitions.h>
@@ -177,13 +177,30 @@ public:
 	 * Destructor
 	 */
 	~CDataCollection();
+
 	/**
-	 * Change the name of the save file. 
-	 * @param name new file name
+	 * Change current scan information
+	 * @param setup scan setup structure
+	 * @param recording set in case of error, true if the method was called during recording
+	 * @param inconsistent set in case of error, true if the method was called when sun scan headers were not expected
 	 * @return false if the operation could not be done
 	 */
-	bool setFileName(const IRA::CString& name);
+	bool setScanSetup(const Management::TScanSetup& setup,bool& recording,bool& inconsistent);
+
+	/**
+	 * Change current sub scan information
+	 * @param setup sub scan setup structure
+	 * @param recording set in case of error, true if the method was called during recording
+	 * @param inconsistent set in case of error, true if the method was called when sun scan headers were not expected
+	 * @return false if the operation could not be done
+	 */
+	bool setSubScanSetup(const Management::TSubScanSetup& setup,bool& recording,bool& inconsistent);
 	
+	/**
+	 * Set the scan stage to STOP
+	 */
+	bool scanStop();
+
 	/**
 	 * Get the name and path of the current file
 	 * @param fileName of the file
@@ -198,35 +215,45 @@ public:
 	IRA::CString getFileName();
 	
 	/**
-	 * Set the name of the currently running project
-	 */
-	void setProjectName(const IRA::CString& projectName) { m_project=projectName; }
-	
-	/**
 	 * Get the name of the project
 	 */
 	const IRA::CString& getProjectName() const { return m_project; }
 	
 	/**
-	 * Sets the identifier number of the next scan
+	 * get the identifier number of the next scan
 	 */
-	void setScanId(const long& id) { m_scanId=id; }
+	const long& getScanTag() const { return m_scanTag; }
 	
 	/**
-	 * get the identifer number of the next scan
+	 * get default device identifier
 	 */
-	const long& getScanId() const { return m_scanId; }
-	
+	const long& getDeviceID() const { return m_deviceID; }
+
 	/**
-	 * Set the current observer name
+	 * get current subscan axis
 	 */
-	void setObserverName(const IRA::CString& observer) { m_observer=observer; }
-	
+	const Management::TScanAxis& getScanAxis() const { return m_scanAxis; }
+
 	/**
 	 * Get the name of the observer
 	 */
 	const IRA::CString& getObserverName() const { return m_observer; }
 	
+	/**
+	 * Get the name of the schedule file
+	 */
+	const IRA::CString& getScheduleName() const { return m_scheduleName; }
+
+	/**
+	 * Get the identifier of the current scan
+	 */
+	const long& getScanID() const { return m_scanID; }
+
+	/**
+	 * Get the identifier of the current sub scan
+	 */
+	const long& getSubScanID() const { return m_subScanID; }
+
 	/**
 	 * Get the dimension of the sample in bytes. 
 	 */  
@@ -253,14 +280,14 @@ public:
 	long getInputsNumber() const;
 	
 	/**
-	 * Gets the ipunts configuration from the backend
+	 * Gets the inputs configuration from the backend
 	 */
 	void getInputsConfiguration(ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts) const;
 	
 	/**
 	 * Get the inputs number of the given section
 	 */
-	long geSectionInputs(const long& ch) const { return m_sectionH[ch].inputs; }
+	long getSectionInputs(const long& ch) const { return m_sectionH[ch].inputs; }
 	
 	/**
 	 * Get polarization given the section number. 
@@ -350,7 +377,7 @@ public:
 	const double& getDut1() const { return m_dut1; }
 	
 	/**
-	 * @return the <i>m_ready</i> flag, that means the headers have been saved
+	 * @return the combination of  <i>m_ready</i> flag( that means the headers have been saved)
 	 */
 	bool isReady() const { return m_ready; }
 	
@@ -365,10 +392,25 @@ public:
 	bool isStop() const { return m_stop; }
 	
 	/**
-	 * @return the <i>m_start</i> flag, tham means the component is opening the file
+	 * @return the <i>m_start</i> flag, that means the component is opening the file
 	 */
 	bool isStart() const { return m_start; }
 	
+	/**
+	 *  @return the <i>m_reset</i> flag, that means the component must perform the actions required for a reset
+	 */
+	bool isReset() const { return m_reset; }
+
+	/**
+	 * @return <i>m_scanHeaders</i> flag, that means the startScan() has been called
+	 */
+	bool isScanHeaderReady() const { return m_scanHeader; }
+
+	/**
+	 * @return <i>m_subScanHeaders</i> flag, that means the startsubScan() has been called
+	 */
+	bool isSubScanHeaderReady() const { return m_subScanHeader; }
+
 	/**
 	 * It puts the component into the stop stage
 	 */
@@ -384,6 +426,11 @@ public:
 	 */
 	void haltStopStage();
 	
+	/**
+	 * acknowledge that the component has been reset
+	 */
+	void haltResetStage();
+
 	/*
 	 * It allows to set the current receiver code
 	 */
@@ -444,7 +491,7 @@ public:
 	void getReceiverPolarization(ACS::longSeq& pol) const { pol=m_receiverPolarization; }
 	
 	/**
-	 * It allows to set the current value for the calibraion mark; }
+	 * It allows to set the current value for the calibration mark; }
 	 **/
 	void setCalibrationMarks(const ACS::doubleSeq& mark) { m_calibrationMarks=mark; };
 	void setCalibrationMarks() {m_calibrationMarks.length(0); };
@@ -478,7 +525,43 @@ public:
 	void getAntennaOffsets(double& azOff,double& elOff,double& raOff,double& decOff,double& lonOff,double& latOff) const { 
 		azOff=m_azOff; elOff=m_elOff; raOff=m_raOff; decOff=m_decOff; lonOff=m_lonOff; latOff=m_latOff;
 	}
- 
+
+	/**
+	 * Stores the list of values corresponding to the estimated source flux of the source,
+	 * @param fl list of fluxes, one value is  given corresponding to each input, but just one for each section is taken
+	 */
+	void setSourceFlux(const ACS::doubleSeq& fl) { m_sourceFlux=fl; }
+	void setSourceFlux() { m_sourceFlux.length(0); }
+
+	/**
+	 * It returns the estimated source flux, one for each section.
+	 */
+	void getSourceFlux(ACS::doubleSeq& fl) const { fl=m_sourceFlux; }
+
+	/**
+	 * allows to set the sky frequencies. The input argument is expected to be of the same multiplicity as the number of inputs of the backend.
+	 * The number of stored values corresponds to the number of sections
+	 */
+	void setSkyFrequency(const ACS::doubleSeq& freq);
+	void setSkyFrequency() { m_skyFrequency.length(0); }
+
+	/**
+	 * @param freq used to return the number of frequencies, one value for each section
+	 */
+	void getSkyFrequency(ACS::doubleSeq& freq) const { freq=m_skyFrequency; }
+
+	/**
+	 * allows to set the sky bandwidth. The input argument is expected to be of the same multiplicity as the number of inputs of the backend.
+	 * The number of stored values corresponds to the number of sections
+	 */
+	void setSkyBandwidth(const ACS::doubleSeq& bw);
+	void setSkyBandwidth() { m_skyBandwidth.length(0); }
+
+	/**
+	 * @param freq used to return the number of bandwidths, one value for each section
+	 */
+	void getSkyBandwidth(ACS::doubleSeq& freq) const { freq=m_skyBandwidth; }
+
 	/**
 	 * it sets the meteo parameters
 	 */
@@ -505,6 +588,11 @@ public:
 		m_telecopeTacking=(tracking==Management::MNG_TRUE);
 		m_telescopeTrackingTime=time;
 	}
+
+	/**
+	 * Set the flags so that the component can reset itself
+	 */
+	void forceReset();
 		
 private:
 	/** the name of the file */
@@ -513,6 +601,7 @@ private:
 	 * the full path of the file in system disk
 	 */
 	IRA::CString m_fullPath;
+	IRA::CString m_basePath;
 	IRA::CString m_project;
 	IRA::CString m_observer;
 	/** the data block coming from the antenna */
@@ -536,6 +625,11 @@ private:
 	 */
 	Management::TSystemStatus m_status;
 	/**
+	 * true if the headers of scan and subscan have been received respectively
+	 */
+	bool m_scanHeader;
+	bool m_subScanHeader;
+	/**
 	 *  indicates if the component is saving...
 	 */
 	bool m_running;
@@ -552,7 +646,11 @@ private:
 	 */
 	bool m_start;
 	/**
-	 * stores the UT1-UT deifference
+	 * a reset request has been received
+	 */
+	bool m_reset;
+	/**
+	 * stores the UT1-UT difference
 	 */
 	double m_dut1;
 	/**
@@ -585,11 +683,27 @@ private:
 	 */
 	IRA::CString m_receiverCode;
 	/**
-	 * Scan identifier number
+	 * Stores the name of the schedule file, currently running
 	 */
-	long m_scanId;
+	IRA::CString m_scheduleName;
 	/**
-	 * array that contains the start values of bands cominig from the receiver 
+	 * Scan tag
+	 */
+	long m_scanTag;
+	/**
+	 * default device identifier
+	 */
+	long m_deviceID;
+	/**
+	 * determine which is the scan axis
+	 */
+	Management::TScanAxis m_scanAxis;
+	/**
+	 * scan and subscan identifiers
+	 */
+	long m_scanID,m_subScanID;
+	/**
+	 * array that contains the start values of bands coming from the receiver
 	*/	
 	ACS::doubleSeq m_recInitialFrequency;
 	/**
@@ -608,6 +722,18 @@ private:
 	 * stores the value of the calibration marks, for each inputs from the backend
 	 */
 	ACS::doubleSeq m_calibrationMarks;
+	/**
+	 * stores the  estimated source fluxes, one for each section.
+	 */
+	ACS::doubleSeq m_sourceFlux;
+	/**
+	 * stores the initial frequencies of the bands observed (projected to sky), one value for each section of the backend
+	 */
+	ACS::doubleSeq m_skyFrequency;
+	/**
+	 * stores the band width of the bands observed (projected to sky), one value for each section of the backend
+	 */
+	ACS::doubleSeq m_skyBandwidth;
 	/**
 	 * relative humidity
 	 */
@@ -632,14 +758,6 @@ private:
 	 * this stored the old telescope tracking flag
 	 */
 	bool m_prevTelescopeTracking;
-	/**
-	 * pointer to the configuration object
-	 */
-	//CConfiguration *m_config;
-	/**
-	 * pointer ot the tontainer services
-	 */
-	//maci::ContainerServices *m_services;
 };
 
 };

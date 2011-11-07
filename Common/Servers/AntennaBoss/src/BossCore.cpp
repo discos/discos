@@ -1,4 +1,3 @@
-// $Id: BossCore.cpp,v 1.39 2011-07-25 10:02:41 a.orlati Exp $
 
 #include "BossCore.h"
 #include <ObservatoryS.h>
@@ -62,7 +61,6 @@ void CBossCore::initialize() throw (ComponentErrors::UnexpectedExImpl)
 	m_observedGalactics.empty();
 	m_integratedObservedEquatorial.empty();
 	m_rawCoordinates.empty();
-	m_generator=Antenna::EphemGenerator::_nil();
 	m_generatorType=Antenna::ANT_NONE;
 	m_lastPointTime=0;
 	m_integrationStartTime=0;
@@ -70,8 +68,9 @@ void CBossCore::initialize() throw (ComponentErrors::UnexpectedExImpl)
 	m_correctionEnable=false;  ///by default the correction are not enabled....when the setup is called they enabled automatically
 	m_tracking=false;
 	m_newScanEpoch=0;
-	m_BWHM=0.0;
-	m_targetRA=m_targetDec=m_targetVlsr=0.0;
+	m_FWHM=0.0;
+	m_currentObservingFrequency=0.0;
+	m_targetRA=m_targetDec=m_targetVlsr=m_targetFlux=0.0;
 	m_pointingAzOffset=m_pointingElOffset=m_refractionOffset=0.0;
 	m_longitudeOffset=m_latitudeOffset=0.0;
 	m_offsetFrame=Antenna::ANT_HORIZONTAL;
@@ -96,10 +95,11 @@ void CBossCore::initialize() throw (ComponentErrors::UnexpectedExImpl)
 	catch (...) {
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CBossCore::initialize()");
 	}
-	m_generator=Antenna::EphemGenerator::_nil();
 	m_pointingModel=Antenna::PointingModel::_nil();
 	m_refraction=Antenna::Refraction::_nil();
 	m_mount=Antenna::Mount::_nil();
+	m_generator=Antenna::EphemGenerator::_nil();
+	m_generatorFlux=Antenna::EphemGenerator::_nil();
 	m_mountError=false;
 	m_siderealGenerator=m_otfGenerator=m_moonGenerator=m_sunGenerator=m_satelliteGenerator=m_solarBodyGenerator=Antenna::EphemGenerator::_nil();	
 }
@@ -282,6 +282,20 @@ void CBossCore::stow() throw (ManagementErrors::ParkingErrorExImpl)
 		managEx.setSubsystem("Antenna");
 		throw managEx;
 	}
+	m_workingThread->suspend();
+	m_generatorType=Antenna::ANT_NONE;
+	m_generator=Antenna::EphemGenerator::_nil(); // it also releases the previous reference.
+	m_generatorFlux=Antenna::EphemGenerator::_nil();
+	m_targetName=IRA::CString("none");
+	m_targetRA=m_targetDec=m_targetVlsr=m_targetFlux=0.0;
+	// clear all user and scan offsets
+	m_userOffset=TOffset(0.0,0.0,Antenna::ANT_HORIZONTAL);
+	m_scanOffset=TOffset(0.0,0.0,Antenna::ANT_HORIZONTAL);
+	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);
+	m_lastScanParameters.type=Antenna::ANT_NONE;
+	m_lastScanParameters.applyOffsets=false;
+	m_lastScanParameters.secondary=false;
+	m_lastScanParameters.paramNumber=0;
 }
 
 void CBossCore::setup(const char *config) throw (ManagementErrors::ConfigurationErrorExImpl)
@@ -410,6 +424,9 @@ void CBossCore::setup(const char *config) throw (ManagementErrors::Configuration
 	m_lastScanParameters.paramNumber=0;
 	m_longitudeOffset=m_latitudeOffset=0.0;  //reset offsets
 	m_offsetFrame=Antenna::ANT_HORIZONTAL;
+	m_FWHM=0.0;
+	m_currentObservingFrequency=0.0;
+	m_targetFlux=0.0;
 }
 
 void CBossCore::disable()
@@ -444,17 +461,47 @@ void CBossCore::disableCorrection()
 	}
 }
 
-void CBossCore::setBWHM(const double& val)
+void CBossCore::setFWHM(const double& val,const double& waveLen)
 { 
-	m_BWHM=val;
-	ACS_LOG(LM_FULL_INFO,"CBossCore::setBWHM()",(LM_NOTICE,"BWHM: %lf",val));		
+	m_FWHM=val;
+	m_currentObservingFrequency=LIGHTSPEED_MS/waveLen; // frequency in Hz
+	m_currentObservingFrequency/=1000000.0; // frequency in MHz
+	computeFlux();
+	ACS_LOG(LM_FULL_INFO,"CBossCore::setFWHM()",(LM_NOTICE,"FWHM: %lf",val));
 }
 
-void CBossCore::computeBWHM(const double& taper,const double& waveLen)
+void CBossCore::computeFWHM(const double& taper,const double& waveLen)
 {
 	double tp=fabs(taper);
-	m_BWHM=(1.02+0.0135*tp)*(waveLen/m_config->getDiameter());
-	ACS_LOG(LM_FULL_INFO,"CBossCore::setBWHM()",(LM_NOTICE,"BWHM: %lf",m_BWHM));
+	m_FWHM=(1.02+0.0135*tp)*(waveLen/m_config->getDiameter());
+	m_currentObservingFrequency=LIGHTSPEED_MS/waveLen;
+	m_currentObservingFrequency/=1000000.0; // frequency in MHz
+	computeFlux();
+	ACS_LOG(LM_FULL_INFO,"CBossCore::setFWHM()",(LM_NOTICE,"FWHM: %lf",m_FWHM));
+}
+
+void CBossCore::getFluxes(const ACS::doubleSeq& freqs,ACS::doubleSeq& fluxes) throw (ComponentErrors::CORBAProblemExImpl)
+{
+	fluxes.length(freqs.length());
+	if( (m_FWHM>0.0) && (!CORBA::is_nil(m_generatorFlux))){
+		for (unsigned i=0;i<freqs.length();i++) {
+			try {
+				m_generatorFlux->computeFlux(freqs[i],m_FWHM,fluxes[i]);
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::getFluxes()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				changeBossStatus(Management::MNG_WARNING);
+				throw impl;
+			}
+		}
+	}
+	else {
+		for (unsigned i=0;i<freqs.length();i++) {
+			fluxes[i]=1.0;
+		}
+	}
 }
 
 void CBossCore::setVlsr(const double& val)
@@ -536,21 +583,11 @@ void CBossCore::stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors:
 		ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	m_workingThread->suspend();
-	/*if (!is_nil(m_generator)) {
-		CString name=(const char *)m_generator->name();
-		try {
-			m_services->releaseComponent((const char*)name);
-		}
-		catch (maciErrType::CannotReleaseComponentExImpl& ex) {
-			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CBossCore::stop()");
-			Impl.setComponentName((const char *)name);
-			throw Impl;
-		}
-	}*/
 	m_generatorType=Antenna::ANT_NONE;
 	m_generator=Antenna::EphemGenerator::_nil(); // it also releases the previous reference.
+	m_generatorFlux=Antenna::EphemGenerator::_nil();
 	m_targetName=IRA::CString("none");	
-	m_targetRA=m_targetDec=m_targetVlsr=0.0;
+	m_targetRA=m_targetDec=m_targetVlsr=m_targetFlux=0.0;
 	// clear all user and scan offsets
 	m_userOffset=TOffset(0.0,0.0,Antenna::ANT_HORIZONTAL);
 	m_scanOffset=TOffset(0.0,0.0,Antenna::ANT_HORIZONTAL);
@@ -607,6 +644,7 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 	bool slew;
 	Antenna::TGeneratorType generatorType;
 	Antenna::EphemGenerator_var generator=Antenna::EphemGenerator::_nil();
+	Antenna::EphemGenerator_var generatorFlux=Antenna::EphemGenerator::_nil();
 	//the getHorizontal says where the antenna should be at the given time, even if the time is far before the start time, in that case the start point of the scan is given
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
@@ -620,7 +658,7 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 		Antenna::TTrackingParameters lastScan;
 		IRA::CString name;
 		copyTrack(lastScan,m_lastScanParameters);
-		generator=prepareScan(true,startTime,par,secondary,m_userOffset,generatorType,lastScan,section,ra,dec,lon,lat,vlsr,name,scanOff);
+		generator=prepareScan(true,startTime,par,secondary,m_userOffset,generatorType,lastScan,section,ra,dec,lon,lat,vlsr,name,scanOff,generatorFlux.out());
 		if (generatorType==Antenna::ANT_OTF) {
 			generator->getHorizontalCoordinate(inputTime,azimuth,elevation); //use inputTime (=now), in order to get the first point of the scan) 
 			generator->getHorizontalCoordinate(startTime+par.otf.subScanDuration,stopAzimuth,stopElevation); //this is the coordinate at the end of the scan
@@ -852,7 +890,7 @@ void CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		}
 		else {
 			try {
-				m_tracking=m_generator->checkTracking(time,az,el,m_BWHM);
+				m_tracking=m_generator->checkTracking(time,az,el,m_FWHM);
 			}
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::updateAttributes()");
@@ -1058,7 +1096,7 @@ void CBossCore::checkStatus() throw (ComponentErrors::CORBAProblemExImpl,Compone
 	Management::ROTSystemStatus_var mountStatus=Management::ROTSystemStatus::_nil();
 	Management::TSystemStatus st=Management::MNG_OK;
 	IRA::CIRATools::getTime(now);
-	if (m_BWHM==0.0) changeBossStatus(Management::MNG_WARNING);
+	if (m_FWHM==0.0) changeBossStatus(Management::MNG_WARNING);
 	if (IRA::CIRATools::timeDifference(lastExecution,now)>1000000) {
 		if (m_enable) {
 			loadMount(m_mount,m_mountError); // throw ComponentErrors::CouldntGetComponentExImpl
@@ -1342,7 +1380,6 @@ Antenna::EphemGenerator_ptr CBossCore::loadPrimaryGenerator(const Antenna::TGene
 	return ref._retn();
 }
 
-
 Antenna::EphemGenerator_ptr CBossCore::loadGenerator(const Antenna::TGeneratorType& type) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
@@ -1437,5 +1474,18 @@ void CBossCore::addOffsets(double &lon,double& lat,Antenna::TCoordinateFrame& fr
 	}
 	frame=scanOffset.frame;
 }
+
+void CBossCore::computeFlux()
+{
+	m_targetFlux=0.0;
+	if( (m_FWHM>0.0) && (!CORBA::is_nil(m_generatorFlux))){
+		try {
+			m_generatorFlux->computeFlux(m_currentObservingFrequency,m_FWHM,m_targetFlux);
+		}
+		catch (CORBA::SystemException& ex) {
+		}
+	}
+}
+
 
 

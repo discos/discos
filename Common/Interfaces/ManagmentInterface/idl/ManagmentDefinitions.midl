@@ -1,6 +1,5 @@
 /* ******************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                                                  */
-/* $Id: ManagmentDefinitions.midl,v 1.12 2011-06-15 15:00:09 a.orlati Exp $                                                                                                                                              */
 /*                                                                                                                                                         */
 /* This code is under GNU General Public Licence (GPL).                                                             */
 /*                                                                                                                                                         */
@@ -44,7 +43,7 @@ module Management  {
 		/**
 		 * This method can be used to execute a command or to setup a configuration The commands and configurations are given as strings.  
 		 * @throw CORBA::SystemException 
-		 * @thorw ManagementErrors::CommandLineErrorEx this error is issued when something goes wrong on the command execution. 
+		 * @throw ManagementErrors::CommandLineErrorEx this error is issued when something goes wrong on the command execution. 
 		 * @param command this string contains the instruction to be executed, the command and the sintax may vary from implementation to implementation
 		 * @return  the string that contains the answer or the result of the succefull command invokation. It must be freed by the caller. 
 		 */
@@ -62,7 +61,7 @@ module Management  {
 		MNG_SOLARSYTEMBODY,    /*!< tracks a body of the solar system */
 		MNG_OTF,			   /*!< perform a On the Fly Scan */
 		MNG_OTFC,              /*!< this is a wrapper of the otf, it allows the system to compute the center of the on-the-fly */  
-		MNG_FOCUS,             /*!< perform a focus measument */
+		MNG_FOCUS,             /*!< perform a focus measurement */
 		MNG_NONE               /*!< no action */
 	};
 	

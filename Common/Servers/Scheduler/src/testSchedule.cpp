@@ -2,6 +2,7 @@
 
 #include "Schedule.h"
 #include <slamac.h>
+#include <IRA>
 
 // this is a quick test for the class CSchedule, in order to test if it works and no memory leakage are behind the corner
 
@@ -52,16 +53,16 @@ IRA::CString toEquinox(const Antenna::TSystemEquinox& eq)
 
 int main(int argc, char *argv[]) 
 {
-	unsigned long long time;
-	double duration;
-	DWORD scan;
-	IRA::CString pre,post,bck,suffix,wrt,target;
-	bool preBlocking,postBlocking;
+	//DWORD scan;
+	IRA::CString pre,post,target,outString;
 	std::vector<IRA::CString> procedure;
 	Management::TScanTypes type;
 	void *scanPar;
 	void *secPar;
+	CSchedule::TRecord rec;
+	ACS::stringSeq layoutDef;
 	CSchedule sched("../templates/","schedule.tmpl");
+	//CSchedule sched("/archive/schedules/","calibrationSeq.scd");
 	
 	if (!sched.readAll(true)) {
 		printf("ERROR: %s\n",(const char *)sched.getLastError());
@@ -69,35 +70,36 @@ int main(int argc, char *argv[])
 	}
 	if (sched.isComplete()) {
 		printf("Main schedule done\n");
-		printf("Total lines: %u\n",sched.getSchedLines());
+		printf("Total lines: %u\n",sched.getSubScansNumber());
 	}
 	else {
 		printf("Main schedule is uncomplete\n");
 		return -1;
 	}
-	for (DWORD i=1;i<=sched.getSchedLines();i++) {
-		if (!sched.getLine(i,time,duration,scan,pre,preBlocking,post,postBlocking,bck,wrt,suffix)) {
-			printf("Schedule line %u is not present\n",i);
+	for (DWORD i=0;i<sched.getSubScansNumber();i++) {
+		if (!sched.getSubScan(i,rec)) {
+			printf("Schedule subscan %u is not present\n",i);
 			return -1;
 		}
 		else {
-			printf("%u %llu %lf %u %s %s %s %s %s\n",i,time,duration,scan,(const char *)pre,(const char *)post,(const char *)bck,(const char *)wrt,
-					(const char *)suffix);
-			if (!sched.getScanList()->getScan(scan,type,scanPar,secPar)) {
-				printf("Scan number %u is not present\n",scan);
+			IRA::CIRATools::intervalToStr(rec.lst,outString);
+			printf("%u %u %u %s %lf %u %s %s %s %s %s %s\n",rec.counter,rec.scanid,rec.subscanid,(const char *)outString,rec.duration,rec.scan,(const char *)rec.preScan,(const char *)rec.postScan,(const char *)rec.backendProc,
+					(const char *)rec.writerInstance,(const char *)rec.suffix,(const char *)rec.layout);
+			if (!sched.getScanList()->getScan(rec.scan,type,scanPar,secPar)) {
+				printf("Scan number %u is not present\n",rec.scan);
 				return -1;
 			}
 			else {
 				Antenna::TTrackingParameters *tmp=(Antenna::TTrackingParameters *)scanPar;
 				if (type==Management::MNG_OTF) {					
-					printf("%u OTF %lf %lf %lf %lf %s %s %s %s %s %lld\n",scan,tmp->otf.lon1*DR2D,tmp->otf.lat1*DR2D,tmp->otf.lon2*DR2D,
+					printf("%u OTF %s %lf %lf %lf %lf %s %s %s %s %s %lld\n",rec.scan,(const char *)tmp->targetName,tmp->otf.lon1*DR2D,tmp->otf.lat1*DR2D,tmp->otf.lon2*DR2D,
 							tmp->otf.lat2*DR2D,(const char *)toFrame(tmp->otf.coordFrame),
 							(const char *)toFrame(tmp->otf.subScanFrame),(const char *)toGeometry(tmp->otf.geometry),
 							(const char *)toDescription(tmp->otf.description),
 							(const char *)toDirection(tmp->otf.direction),tmp->otf.subScanDuration);
 				}
 				else if (type==Management::MNG_OTFC) {
-					printf("%u OTFC %lf %lf %lf %lf %s %s %s %s %s %lld\n",scan,tmp->otf.lon1*DR2D,tmp->otf.lat1*DR2D,tmp->otf.lon2*DR2D,
+					printf("%u OTFC %lf %lf %lf %lf %s %s %s %s %s %lld\n",rec.scan,tmp->otf.lon1*DR2D,tmp->otf.lat1*DR2D,tmp->otf.lon2*DR2D,
 							tmp->otf.lat2*DR2D,(const char *)toFrame(tmp->otf.coordFrame),
 							(const char *)toFrame(tmp->otf.subScanFrame),(const char *)toGeometry(tmp->otf.geometry),
 							(const char *)toDescription(tmp->otf.description),
@@ -105,11 +107,11 @@ int main(int argc, char *argv[])
 				}
 				else {
 					if (tmp->paramNumber==0) {
-						printf("%u %s %s \n",scan,(const char *)toType(type),(const char *)tmp->targetName);
+						printf("%u %s %s \n",rec.scan,(const char *)toType(type),(const char *)tmp->targetName);
 					}
 					else {
 						if (tmp->frame==Antenna::ANT_EQUATORIAL) {
-							printf("%u %s %s %s %lf %lf %s ",scan,(const char *)toType(type),(const char *)tmp->targetName,(const char *)toFrame(tmp->frame)
+							printf("%u %s %s %s %lf %lf %s ",rec.scan,(const char *)toType(type),(const char *)tmp->targetName,(const char *)toFrame(tmp->frame)
 								,tmp->parameters[0]*DR2D,tmp->parameters[1]*DR2D,(const char *)toEquinox(tmp->equinox));
 							for (int j=2;j<tmp->paramNumber;j++) {
 								printf("%lf ",tmp->parameters[j]);
@@ -117,7 +119,7 @@ int main(int argc, char *argv[])
 							printf("\n");
 						}
 						else {
-							printf("%u %s %s %s %lf %lf \n",scan,(const char *)toType(type),(const char *)tmp->targetName,(const char *)toFrame(tmp->frame),
+							printf("%u %s %s %s %lf %lf \n",rec.scan,(const char *)toType(type),(const char *)tmp->targetName,(const char *)toFrame(tmp->frame),
 								tmp->parameters[0]*DR2D,tmp->parameters[1]*DR2D);							
 						}
 					}
@@ -130,8 +132,8 @@ int main(int argc, char *argv[])
 				}
 			}
 			printf("\n");
-			if (!sched.getBackendList()->getBackend(bck,target,procedure)) {
-				printf("bakcend  %s is not present\n",(const char *)bck);
+			if (!sched.getBackendList()->getBackend(rec.backendProc,target,procedure)) {
+				printf("backend  %s is not present\n",(const char *)rec.backendProc);
 				return -1;
 			}
 			else {
@@ -139,6 +141,20 @@ int main(int argc, char *argv[])
 				std::vector<IRA::CString>::iterator k;
 				for (k=procedure.begin();k<procedure.end();k++) {
 					printf("\t%s",(const char *)(*k));
+				}
+				printf("\n");
+			}
+			if (sched.getLayoutList()) {
+				printf("layout name: %s\n",(const char *)rec.layout);
+				if (!sched.getLayoutList()->getScanLayout(rec.layout,layoutDef)) {
+					printf("layout  %s is not present\n",(const char *)rec.layout);
+					return -1;
+				}
+				else {
+					for (DWORD k=0;k<layoutDef.length();k++) {
+						printf("\t%s",(const char *)layoutDef[k]);
+					}
+					printf("\n");
 				}
 			}
 			printf("\n");

@@ -62,7 +62,7 @@ INCLUDES        =
 # Libraries (public and local)
 # ----------------------------
 LIBRARIES       = SchedulerImpl
-LIBRARIES_L     =
+#LIBRARIES_L     =
 
 SchedulerImpl_OBJECTS = Schedule SchedulerImpl Configuration Core ScheduleExecutor
 SchedulerImpl_LIBS = IRALibrary AntennaDefinitionsStubs ManagmentDefinitionsStubs SchedulerStubs acsnc \

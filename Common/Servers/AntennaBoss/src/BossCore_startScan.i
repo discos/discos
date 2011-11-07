@@ -1,8 +1,6 @@
 #ifndef _BOSS_CORE_STARTSCAN_I_
 #define _BOSS_CORE_STARTSCAN_I_
 
-// $Id: BossCore_startScan.i,v 1.9 2011-05-27 13:55:30 a.orlati Exp $
-
 void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary) throw(
 		ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
@@ -12,18 +10,21 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 	double ra,dec,vlsr,lon,lat;
 	IRA::CString name;
 	TIMEVALUE now;
-	//temporarly stop the working thread
+	//Temporarily stop the working thread
 	m_workingThread->suspend();
 	//make sure that scan offset are reset
 	m_scanOffset=TOffset(0.0,0.0,m_userOffset.frame);
 	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);
 	try {
-		m_generator=prepareScan(false,startUt,parameters,secondary,m_userOffset,m_generatorType,m_lastScanParameters,section,ra,dec,lon,lat,vlsr,name,m_scanOffset);
-		//computes the resultin offset, coming from the user and the scan
+		m_generatorType=Antenna::ANT_NONE;
+		m_generator=Antenna::EphemGenerator::_nil(); // it also releases the previous reference.
+		m_generatorFlux=Antenna::EphemGenerator::_nil(); // it also releases the previous reference.
+		m_generator=prepareScan(false,startUt,parameters,secondary,m_userOffset,m_generatorType,m_lastScanParameters,section,ra,dec,lon,lat,vlsr,name,m_scanOffset,m_generatorFlux.out());
+		//computes the resulting offset, coming from the user and the scan
 		addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);
 		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"TOTAL_OFFSETS: %lf %lf",m_longitudeOffset,m_latitudeOffset));
 	}
-	catch (ComponentErrors::CouldntCallOperationExImpl& ex) { //catched just to update the component status and to unload the generator!
+	catch (ComponentErrors::CouldntCallOperationExImpl& ex) { //catch just to update the component status and to unload the generator!
 		m_generatorType=Antenna::ANT_NONE;		
 		changeBossStatus(Management::MNG_FAILURE);
 		throw ex;
@@ -63,7 +64,7 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 		changeBossStatus(Management::MNG_FAILURE);
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CBossCore::startScan()");
 	}
-	loadMount(m_mount,m_mountError); // thorw ComponentErrors::CouldntGetComponentExImpl
+	loadMount(m_mount,m_mountError); // Throw ComponentErrors::CouldntGetComponentExImpl
 	try {
 		if (section!=Antenna::ACU_NEUTRAL) {
 			if (m_enable) {   // command to the mount only if the subsystem is enabled.
@@ -99,6 +100,7 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 	m_targetRA=ra;
 	m_targetDec=dec;
 	m_targetVlsr=vlsr;
+	computeFlux();
 	IRA::CIRATools::getTime(now);
 	m_newScanEpoch=now.value().value;	
 	// finally let's resume the working thread

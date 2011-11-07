@@ -1,4 +1,3 @@
-// $Id: Core_Common.i,v 1.4 2011-06-21 16:39:52 a.orlati Exp $
 
 bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,Antenna::AntennaBoss_ptr antBoss,bool& antBossError) 
 	throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl)
@@ -29,12 +28,12 @@ bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRec
 		}
 		catch (ComponentErrors::ComponentErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
-			impl.setReason("Could not enquery the antenna boss");
+			impl.setReason("Could not inquiry the antenna boss");
 			throw impl;
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
-			impl.setReason("Could not enquery the antenna boss");
+			impl.setReason("Could not inquiry the antenna boss");
 			throw impl;
 		}
 		catch (CORBA::SystemException& ex) {
@@ -68,12 +67,12 @@ bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRec
 		}
 		catch (ComponentErrors::ComponentErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
-			impl.setReason("Could not enquery the antenna boss");
+			impl.setReason("Could not inquiry the antenna boss");
 			throw impl;
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
-			impl.setReason("Could not enquery the antenna boss");
+			impl.setReason("Could not inquiry the antenna boss");
 			throw impl;
 		}
 		catch (CORBA::SystemException& ex) {
@@ -138,23 +137,25 @@ void CCore::doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TReco
 	}
 }
 
-IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const ACS::TimeInterval& lst,const IRA::CString& prj,const IRA::CString& suffix)
+IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const ACS::TimeInterval& lst,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra)
 {
 	IRA::CString out;
 	TIMEVALUE UT(ut);
 	TIMEDIFFERENCE LST(lst);
-	out.Format("%04d%02d%02d-%02d%02d%02d-%02d%02d%02d-%s_%s.fits",
+	out.Format("%04d%02d%02d-%02d%02d%02d-%02d%02d%02d-%s_%s",
 			UT.year(),UT.month(),UT.day(),UT.hour(),UT.minute(),UT.second(),
 			LST.hour(),LST.minute(),LST.second(),(const char *)prj,(const char *)suffix);
+	extra.Format("%04d%02d%02d/",UT.year(),UT.month(),UT.day());
 	return out;
 }
 
-IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const IRA::CString& prj,const IRA::CString& suffix)
+IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra)
 {
 	IRA::CString out;
 	TIMEVALUE UT(ut);
-	out.Format("%04d%02d%02d-%02d%02d%02d-%s_%s.fits",
-			UT.year(),UT.month(),UT.day(),UT.hour(),UT.minute(),UT.second(),(const char *)prj,(const char *)suffix);		
+	out.Format("%04d%02d%02d-%02d%02d%02d-%s_%s",
+			UT.year(),UT.month(),UT.day(),UT.hour(),UT.minute(),UT.second(),(const char *)prj,(const char *)suffix);
+	extra.Format("%04d%02d%02d/",UT.year(),UT.month(),UT.day());
 	return out;
 }
 
@@ -208,68 +209,81 @@ ACS::Time CCore::getUTFromLST(const IRA::CDateTime& currentUT,const IRA::CDateTi
 	}
 }
 
-void CCore::enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& writerError,bool& streamPrepared,bool& streamConnected) throw (
+void CCore::configureBackend(Backends::GenericBackend_ptr backend,bool& backendError,const std::vector<IRA::CString>& procedure) throw (ManagementErrors::ProcedureErrorExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+{
+	char *answer;
+	unsigned i;
+	if (!CORBA::is_nil(backend)) {
+		for (i=0;i<procedure.size();i++) {
+			try {
+				answer=backend->command((const char *)procedure[i]);
+				CORBA::string_free(answer);
+				ACS_STATIC_LOG(LM_FULL_INFO,"CCore::configureBackend()",(LM_NOTICE,"BACKEND_CONFIGURED"));
+			}
+			catch (ManagementErrors::CommandLineErrorEx& ex) {
+				ManagementErrors::CommandLineErrorExImpl exImpl(ex);
+				_ADD_BACKTRACE(ManagementErrors::ProcedureErrorExImpl,impl,ex,"CCore::configureBackend()");
+				impl.setCommand((const char *)procedure[i]);
+				impl.setLine(i);
+				impl.setProcedure("Backend Configuration");
+				impl.setErrorMessage(exImpl.getErrorMessage());
+				throw impl;
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::configureBackend()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				backendError=true;
+				throw impl;
+			}
+			catch (...) {
+				backendError=true;
+				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::configureBackend()");
+				throw impl;
+			}
+		}
+	}
+}
+
+void CCore::enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& streamConnected) throw (
 		ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	if ((!CORBA::is_nil(backend))  &&  (!CORBA::is_nil(writer))) {
 		try {
- 			backend->connect(writer);
- 			streamConnected=true;
- 		}
- 		catch (ACSBulkDataError::AVConnectErrorEx& ex) {
- 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::enableDataTransfer()");
- 			impl.setReason("backend could not be connected to writer");
- 			throw impl;
- 		}
- 		catch (CORBA::SystemException& ex) {
- 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::enableDataTransfer()");
- 			impl.setName(ex._name());
- 			impl.setMinor(ex.minor());
- 			backendError=true;
- 			throw impl;
- 		}	
- 		catch (...) {
- 			backendError=true;
- 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::enableDataTransfer()");
- 			throw impl;
- 		}
- 		try {
- 			backend->sendHeader();
- 			streamPrepared=true;
- 		}
- 		catch (BackendsErrors::BackendsErrorsEx& ex) {
- 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::enableDataTransfer()");
- 			impl.setReason("backend failed to send header to writer");
- 			throw impl;
- 		}
- 		catch (ComponentErrors::ComponentErrorsEx& ex) {
- 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::enableFileWriting()");
- 			impl.setReason("backend failed to send header to writer");
- 			throw impl;
- 		}
- 		catch (CORBA::SystemException& ex) {
- 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::enableDataTransfer()");
- 			impl.setName(ex._name());
- 			impl.setMinor(ex.minor());
- 			backendError=true;
- 			throw impl;
- 		}
- 		catch (...) {
- 			backendError=true;
- 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::enableDataTransfer()");
- 			throw impl;
- 		}
+			if (!streamConnected) {
+				backend->connect(writer);
+				streamConnected=true;
+			}
+		}
+		catch (ACSBulkDataError::AVConnectErrorEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::enableDataTransfer()");
+			impl.setReason("backend could not be connected to writer");
+			throw impl;
+	 	}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::enableDataTransfer()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			backendError=true;
+			throw impl;
+		}
+	 	catch (...) {
+	 		backendError=true;
+	 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::enableDataTransfer()");
+	 		throw impl;
+	 	}
 	}
 }
 
 void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& writerError,bool& streamStarted,bool& streamPrepared,
-		bool& streamConnected) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+		bool& streamConnected,bool& scanStarted) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	if (streamStarted) {
  		try {
  			if (!CORBA::is_nil(backend)) {
  				backend->sendStop();
- 			}	
+ 			}
  			streamStarted=false;
  		}
  		catch (BackendsErrors::BackendsErrorsEx& ex) {
@@ -293,7 +307,7 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
  			backendError=true;
  			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::disableDataTransfer())");
  			throw impl;
- 		}	
+ 		}
  	}
  	if (streamPrepared) {
  		try {
@@ -325,6 +339,36 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
  			throw impl;
  		}	
  	}
+	if (scanStarted) {
+		try {
+			if (!CORBA::is_nil(writer)) {
+				writer->stopScan();
+			}
+			scanStarted=false;
+		}
+ 		catch (ComponentErrors::ComponentErrorsEx& ex) {
+ 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::disableDataTransfer()");
+ 			impl.setReason("could not stop current scan");
+ 			throw impl;
+ 		}
+ 		catch (ManagementErrors::ManagementErrorsEx& ex) {
+ 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::disableDataTransfer()");
+ 			impl.setReason("could not stop current scan");
+ 			throw impl;
+ 		}
+ 		catch (CORBA::SystemException& ex) {
+ 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::disableDataTransfer()");
+ 			impl.setName(ex._name());
+ 			impl.setMinor(ex.minor());
+ 			writerError=true;
+ 			throw impl;
+ 		}
+ 		catch (...) {
+ 			writerError=true;
+ 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::disableDataTransfer())");
+ 			throw impl;
+ 		}
+	}
  	if (streamConnected) {
  		try {
  			if (!CORBA::is_nil(backend)) {
@@ -367,17 +411,50 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
  	}	
 }
 
-void CCore::setupDataTransfer(Management::DataReceiver_ptr writer,bool& writerError,const IRA::CString& obsName,const IRA::CString& prj,const long& scanId,const long& device,
-		const Management::TScanAxis& axis,const IRA::CString& fileName) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl)
+void CCore::setupDataTransfer(bool& scanStarted,
+																		 bool& streamPrepared,
+																		Management::DataReceiver_ptr writer,bool& writerError,
+																		Backends::GenericBackend_ptr backend,bool& backendError,
+																		const IRA::CString& obsName,
+																		const IRA::CString& prj,
+																		const IRA::CString& baseName,
+																		const IRA::CString& path,
+																		const IRA::CString& extraPath,
+																		const IRA::CString& schedule,
+																		const IRA::CString& layoutName,
+																		const ACS::stringSeq& layout,
+																		const long& scanTag,
+																		const long& device,
+																		const DWORD& scanID,
+																		const ACS::Time& startTime,
+																		const  DWORD& subScanID,
+																		const Management::TScanAxis& axis
+	) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl)
 {
  	try {
  		if (!CORBA::is_nil(writer)) {
- 			writer->setObserverName((const char *)obsName);
- 			writer->setProjectName((const char *)prj);
- 			writer->setScanIdentifier(scanId); //scan id is incremented at each step!!!!
- 			writer->setDevice(device);
- 			writer->setScanAxis(axis);
- 			writer->setFileName((const char *)fileName);
+ 			Management::TScanSetup setup;
+ 			if (!scanStarted) {
+ 				setup.scanTag=scanTag;
+ 				setup.scanId=scanID;
+ 				setup.projectName=CORBA::string_dup((const char *)prj);
+ 				setup.observerName=CORBA::string_dup((const char *)obsName);
+ 				setup.baseName=CORBA::string_dup((const char *)baseName);
+ 				setup.path=CORBA::string_dup((const char *)path);
+ 				setup.extraPath=CORBA::string_dup((const char *)extraPath);
+ 				setup.schedule=CORBA::string_dup((const char *)schedule);
+ 				setup.scanLayout=CORBA::string_dup((const char *)layoutName);
+ 				setup.device=device;
+ 				writer->startScan(setup);
+ 				scanStarted=true;
+ 				if (layout.length()>0) {
+ 					writer->setScanLayout(layout);
+ 					ACS_STATIC_LOG(LM_FULL_INFO,"CCore::setupDataTransfer()",(LM_DEBUG,"SCAN_LAYOUT_DEFINITION_DONE"));
+ 				}
+ 				else {
+ 					ACS_STATIC_LOG(LM_FULL_INFO,"CCore::setupDataTransfer()",(LM_DEBUG,"SCAN_LAYOUT_DEFINITION_EMPTY"));
+ 				}
+ 			}
  		}
 		else {
 			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::setupDataTransfer()");
@@ -386,7 +463,12 @@ void CCore::setupDataTransfer(Management::DataReceiver_ptr writer,bool& writerEr
  	}
  	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setupDataTransfer()");
-		impl.setReason("cannot set auxiliary data on data recorder");
+		impl.setReason("not able to pass extra scan information to data recorder");
+		throw impl;
+ 	}
+ 	catch (ManagementErrors::ManagementErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setupDataTransfer()");
+		impl.setReason("not able to pass extra scan information to data recorder");
 		throw impl;
  	}
  	catch (CORBA::SystemException& ex) {
@@ -396,6 +478,103 @@ void CCore::setupDataTransfer(Management::DataReceiver_ptr writer,bool& writerEr
  		impl.setMinor(ex.minor());
  		throw impl;
  	}
+	if (!CORBA::is_nil(backend)) {
+		try {
+			if (!streamPrepared) {
+				backend->sendHeader();
+				streamPrepared=true;
+			}
+		}
+		catch (BackendsErrors::BackendsErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setupDataTransfer()");
+			impl.setReason("backend failed to send header to writer");
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setupDataTransfer()");
+			impl.setReason("backend failed to send header to writer");
+			throw impl;
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::setupDataTransfer()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			backendError=true;
+			throw impl;
+		}
+		catch (...) {
+			backendError=true;
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::setupDataTransfer()");
+			throw impl;
+		}
+	}
+ 	try {
+ 		if (!CORBA::is_nil(writer)) {
+ 			Management::TSubScanSetup subSetup;
+ 			subSetup.startUt=startTime;
+ 			subSetup.subScanId=scanID;
+ 			subSetup.axis=axis;
+ 			subSetup.extraPath=CORBA::string_dup((const char *)extraPath);
+ 			subSetup.baseName=CORBA::string_dup((const char *)baseName);
+ 			writer->startSubScan(subSetup);
+ 		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::setupDataTransfer()");
+			throw impl;
+		}
+ 	}
+ 	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setupDataTransfer()");
+		impl.setReason("not able to pass extra subscan information to data recorder");
+		throw impl;
+ 	}
+ 	catch (ManagementErrors::ManagementErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setupDataTransfer()");
+		impl.setReason("not able to pass extra subscan information to data recorder");
+		throw impl;
+ 	}
+ 	catch (CORBA::SystemException& ex) {
+ 		writerError=true;
+ 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::setupDataTransfer()");
+ 		impl.setName(ex._name());
+ 		impl.setMinor(ex.minor());
+ 		throw impl;
+ 	}
+}
+
+void CCore::stopScan(Management::DataReceiver_ptr writer,bool& writerError,bool& scanStarted) throw (ComponentErrors::OperationErrorExImpl)
+{
+	if (!CORBA::is_nil(writer)) {
+		try {
+			if (scanStarted) {
+				writer->stopScan();
+			}
+			scanStarted=false;
+			ACS_STATIC_LOG(LM_FULL_INFO,"CCore::stopScan()",(LM_DEBUG,"SCAN_FINALIZED"));
+		}
+ 		catch (...) {
+ 			_EXCPT(ComponentErrors::OperationErrorExImpl,impl,"CCore::stopScan()");
+ 			impl.setReason("could not stop current scan");
+ 			writerError=true;
+ 			throw impl;
+ 		}
+	}
+}
+
+bool CCore::checkRecording(Management::DataReceiver_ptr writer,bool& writerError) throw (ComponentErrors::OperationErrorExImpl)
+{
+	if (!CORBA::is_nil(writer)) {
+		try {
+				return (bool)writer->isRecording();
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::OperationErrorExImpl,impl,"CCore::checkRecording()");
+			impl.setReason("could not check is recording is completed");
+			writerError=true;
+			throw impl;
+		}
+	}
+	return true;
 }
 
 void CCore::stopDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,bool& streamStarted,bool& streamPrepared,bool& streamConnected) throw (ComponentErrors::OperationErrorExImpl,

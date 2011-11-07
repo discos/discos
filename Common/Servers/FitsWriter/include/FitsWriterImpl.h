@@ -97,13 +97,7 @@ class FitsWriterImpl : public virtual BulkDataReceiverImpl<FitsWriter_private::R
 	 * @return pointer to read-only string property
 	*/
     virtual ACS::ROstring_ptr observer() throw(CORBA::SystemException);
-    
-    /**
-     * Returns a reference to the scanIdentifier property implementation of IDL interface.
-	 * @return pointer to read-only long property
-	*/
-    virtual ACS::ROlong_ptr scanIdentifier() throw(CORBA::SystemException);
-    
+
     /**
      * Returns a reference to the deviceID property implementation of IDL interface.
 	 * @return pointer to read-only long property
@@ -139,61 +133,64 @@ class FitsWriterImpl : public virtual BulkDataReceiverImpl<FitsWriter_private::R
 	 * @return pointer to read-only double sequence property
 	*/
 	virtual ACS::ROdoubleSeq_ptr arrayDataY() throw(CORBA::SystemException);
-		
+
 	/**
-	 * It allows to change the current file name and start a new scan acquisition
-	 * @param fileName name of the new file
+	 * called to inform the component that a new scan is going to start
+	 * @param  prm scan parameters structure
 	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx 
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
 	 */
-    virtual void setFileName(const char* fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
-    
+	virtual void startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+	/**
+	 * called to give extra information about scan layout. Not used by this component.
+	 * @param layout scan layout definition given as a sequence of strings
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void setScanLayout (const ACS::stringSeq & layout) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+	/**
+	 * called to inform the component that a new scan is going to be closed
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void stopScan() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+	/**
+	 * called to inform the component that a new subscan is going to start
+	 * @parm prm subscan parameters structure
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
     /**
-     * It allows to change the name of the current observer. The observer name will be added to the primary
-     * header of any fits file created.
-     * @param observer new observer name
-     * @thorw CORBA::SystemException
+     * Return the recording status of the component.
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
      */
-    virtual void setObserverName(const char *observer) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
-    
+    virtual CORBA::Boolean isRecording() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
     /**
-     * It allows to change the name of the project currently running. This information will be added to the primary
-     * header of any fits file created.
-     * @param observer new observer name
-     * @thorw CORBA::SystemException
-     * @throw ComponentErrors::ComponentErrorsEx 
-     */    
-    virtual void setProjectName(const char *projectName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
-    
-    /**
-     * It allows to change the value from which the scan numeration will start.
-     * @thorw CORBA::SystemException
-     * @throw ComponentErrors::ComponentErrorsEx  
+     * Called in order to reset component status and make sure it is ready for start a new data acquisition loop from the scratch.
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
      */
-    virtual void setScanIdentifier(CORBA::Long identifier) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
-    
-    /**
-      * It allows to change identifier of the device elected as primary device
-      * @param deviceID new device number
-      * @thorw CORBA::SystemException
-      * @throw ComponentErrors::ComponentErrorsEx  
-     */
-     virtual void setDevice(CORBA::Long deviceID) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
-      
-     /**
-       * It allows to change the current scan direction.
-       * @param scanAxis the numeric code of the involved axis during the present scan
-       * @thorw CORBA::SystemException
-       * @throw ComponentErrors::ComponentErrorsEx  
-      */
-      virtual void setScanAxis(Management::TScanAxis scanAxis) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
+    virtual void reset() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
         
 private:
 	SmartPropertyPointer<ROstring> m_pfileName;	
 	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus> > m_pstatus;
 	SmartPropertyPointer<ROstring> m_pprojectName;
 	SmartPropertyPointer<ROstring> m_pobserver;	
-	SmartPropertyPointer<ROlong> m_pscanIdentifier;	
+	//SmartPropertyPointer<ROlong> m_pscanIdentifier;
 	SmartPropertyPointer<ROlong> m_pdeviceID;	
 	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TScanAxis),POA_Management::ROTScanAxis> > m_pscanAxis;
 	SmartPropertyPointer<ROdouble> m_pdataX;

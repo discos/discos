@@ -27,7 +27,8 @@
 			<xs:element name="target" type="baci:ROstring"/>
 			<xs:element name="targetRightAscension" type="baci:ROdouble"/>
 			<xs:element name="targetDeclination" type="baci:ROdouble"/>
-			<xs:element name="targetVlsr" type="baci:ROdouble"/>			
+			<xs:element name="targetVlsr" type="baci:ROdouble"/>
+			<xs:element name="targetFlux" type="baci:ROdouble"/>			
 			<xs:element name="azimuthOffset" type="baci:ROdouble"/>
 			<xs:element name="elevationOffset" type="baci:ROdouble"/>
 			<xs:element name="rightAscensionOffset" type="baci:ROdouble"/>
@@ -49,7 +50,7 @@
 			<xs:element name="pointingAzimuthCorrection" type="baci:ROdouble"/>
 			<xs:element name="pointingElevationCorrection" type="baci:ROdouble"/>
 			<xs:element name="refractionCorrection" type="baci:ROdouble"/>
-			<xs:element name="BWHM" type="baci:ROdouble" />
+			<xs:element name="FWHM" type="baci:ROdouble" />
 		</xs:sequence>
 		<!-- sleep time of the watching thread (microseconds), this is the thread that keeps data up to date -->
 		<xs:attribute name="WatchingThreadTime" type="xs:unsignedLong" use="required" />

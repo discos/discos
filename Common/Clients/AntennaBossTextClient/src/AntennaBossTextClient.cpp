@@ -271,7 +271,8 @@ int main(int argc, char *argv[]) {
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *refractionCorrection_field;
 	TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> * status_box;
 	TW::CLedDisplay * tracking_display;
-	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *HPBW_field;	
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *FWHM_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *targetFlux_field;
 	TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * correctionEnabled_display;
 	
 	/* ******************************* */
@@ -390,7 +391,8 @@ int main(int argc, char *argv[]) {
 		_GET_ACS_PROPERTY(ACS::ROdouble,pointingElevationCorrection);
 		_GET_ACS_PROPERTY(ACS::ROdouble,refractionCorrection);
 		_GET_ACS_PROPERTY(Management::ROTSystemStatus,status);
-		_GET_ACS_PROPERTY(ACS::ROdouble,BWHM);
+		_GET_ACS_PROPERTY(ACS::ROdouble,FWHM);
+		_GET_ACS_PROPERTY(ACS::ROdouble,targetFlux);
 		
 		/* ********************************* */
 		ACE_OS::sleep(1);
@@ -422,7 +424,8 @@ int main(int argc, char *argv[]) {
 		pointingElevationCorrection_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(pointingElevationCorrection.in());
 		refractionCorrection_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(refractionCorrection.in());
 		status_box=new TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> (status.in(),Management::MNG_OK);
-		HPBW_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(BWHM.in());
+		FWHM_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(FWHM.in());
+		targetFlux_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(targetFlux.in());
 		extraLabel1=new CLabel("");
 		extraLabel2=new CLabel("");
 		extraLabel3=new CLabel("");
@@ -442,8 +445,9 @@ int main(int argc, char *argv[]) {
 		/** setting up the properties of the components of the frame controls */	
 		_TW_SET_COMPONENT(targetRA_field,22,1,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(targetDec_field,37,1,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(targetVlsr_field,52,1,11,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);		
-		_TW_SET_COMPONENT(target_field,64,1,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(targetVlsr_field,52,1,7,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(targetFlux_field,60,1,7,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(target_field,0,1,17,1,CColorPair::BLUE_BLACK,CStyle::UNDERLINE,output_label);
 		_TW_SET_COMPONENT(azOff_field,22,2,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(elOff_field,37,2,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(raOff_field,22,3,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
@@ -462,7 +466,7 @@ int main(int argc, char *argv[]) {
 		_TW_SET_COMPONENT(pointingAzimuthCorrection_field,22,10,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(pointingElevationCorrection_field,32,10,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(refractionCorrection_field,42,10,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(HPBW_field,22,11,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(FWHM_field,22,11,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		enabled_display->setPosition(CPoint(22,12));
 		tracking_display->setPosition(CPoint(22,13));
 		correctionEnabled_display->setPosition(CPoint(22,14));
@@ -484,6 +488,7 @@ int main(int argc, char *argv[]) {
 		targetRA_field->setFormatFunction(CFormatFunctions::angleFormat,static_cast<void *>(&targetRA_field));
 		targetDec_field->setFormatFunction(CFormatFunctions::angleFormat,NULL);
 		targetVlsr_field->setFormatFunction(CFormatFunctions::floatingPointFormat,NULL);
+		targetFlux_field->setFormatFunction(CFormatFunctions::floatingPointFormat,NULL);
 		azOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		elOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		raOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL); //format as hh.mm.ss.ss
@@ -508,7 +513,7 @@ int main(int argc, char *argv[]) {
 		status_box->setStatusLook(Management::MNG_FAILURE,CStyle(BLACK_RED,CStyle::BOLD));
 		tracking_display->setOrientation(TW::CLedDisplay::HORIZONTAL);
 		tracking_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
-		HPBW_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
+		FWHM_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		
 		// extra labels..........
 		extraLabel1->setWidth(WINDOW_WIDTH-2); extraLabel1->setHeight(1); extraLabel1->setPosition(TW::CPoint(0,18));
@@ -532,6 +537,7 @@ int main(int argc, char *argv[]) {
 		_INSTALL_MONITOR(targetRA_field,2000);
 		_INSTALL_MONITOR(targetDec_field,2000);
 		_INSTALL_MONITOR(targetVlsr_field,2000);
+		_INSTALL_MONITOR(targetFlux_field,2000);
 		_INSTALL_MONITOR(azOff_field,300);
 		_INSTALL_MONITOR(elOff_field,300);
 		_INSTALL_MONITOR(raOff_field,300);
@@ -557,8 +563,8 @@ int main(int argc, char *argv[]) {
 		correctionEnabled_display->setValueTrigger(1L,true);
 		_INSTALL_MONITOR(status_box,3000);
 		status_box->setValueTrigger(1L,true);
-		_INSTALL_MONITOR(HPBW_field,3000);
-		HPBW_field->setValueTrigger(0.001,true);
+		_INSTALL_MONITOR(FWHM_field,3000);
+		FWHM_field->setValueTrigger(0.001,true);
 		
 		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::NOTIFICATION_CHANNEL_SUBSCRIPTION"));
 		ACS_NEW_SIMPLE_CONSUMER(simpleConsumer,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,
@@ -569,7 +575,7 @@ int main(int argc, char *argv[]) {
 		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::DONE"));
 		
 		/* Add all the static labels */		
-		_TW_ADD_LABEL("Target            :",0,1,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		//_TW_ADD_LABEL(":",18,1,1,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Horiz. Offs       :",0,2,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Equat. Offs       :",0,3,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Galac. Offs       :",0,4,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
@@ -579,7 +585,7 @@ int main(int argc, char *argv[]) {
 		_TW_ADD_LABEL("Observed Galac.   :",0,8,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);		
 		_TW_ADD_LABEL("Generator Type    : ",0,9,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Corr.  az/el/ref     : ",0,10,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("BWHM                 : ",0,11,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);		
+		_TW_ADD_LABEL("FWHM                 : ",0,11,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Enabled               : ",0,12,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Tracking              : ",0,13,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Correction            : ",0,14,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);		
@@ -593,6 +599,7 @@ int main(int argc, char *argv[]) {
 		window.addComponent((CFrameComponent*)targetRA_field);
 		window.addComponent((CFrameComponent*)targetDec_field);
 		window.addComponent((CFrameComponent*)targetVlsr_field);		
+		window.addComponent((CFrameComponent*)targetFlux_field);
 		window.addComponent((CFrameComponent*)azOff_field);
 		window.addComponent((CFrameComponent*)elOff_field);
 		window.addComponent((CFrameComponent*)raOff_field);
@@ -615,7 +622,7 @@ int main(int argc, char *argv[]) {
 		window.addComponent((CFrameComponent*)refractionCorrection_field);
 		window.addComponent((CFrameComponent*)status_box);
 		window.addComponent((CFrameComponent*)tracking_display);
-		window.addComponent((CFrameComponent*)HPBW_field);		
+		window.addComponent((CFrameComponent*)FWHM_field);
 		window.addComponent((CFrameComponent*)extraLabel1); 
 		window.addComponent((CFrameComponent*)extraLabel2); 
 		window.addComponent((CFrameComponent*)extraLabel3); 
@@ -691,191 +698,6 @@ int main(int argc, char *argv[]) {
 				output_label->Refresh();				
 			}
 		}
-		/*if ((fieldCounter=userInput->parseCommand(fields,MAXFIELDNUMBER))>0) {
-			
-			fields[0].MakeUpper();
-			if (fields[0]=="EXIT") break;
-			else if (fields[0]=="SETUP") {
-				try {
-					component->setup((const char *)fields[1]);
-					output_label->setValue("Done!");
-					output_label->Refresh();
-				}
-				_CATCH_ALL(output_label,MODULE_NAME"::Main()",ManagementErrors::ConfigurationErrorEx)
-			}
-			else if (fields[0]=="PARK") {
-				try {
-					component->park();
-					output_label->setValue("Done!");
-					output_label->Refresh();					
-				}
-				_CATCH_ALL(output_label,MODULE_NAME"::Main()",ManagementErrors::ParkingErrorEx)
-			}
-			else if (fields[0]=="SETHORIZONTALOFFSETS") {
-				CORBA::Double azOff,elOff;
-				azOff=fields[1].ToDouble()*DD2R;
-				elOff=fields[2].ToDouble()*DD2R;
-				try {
-					component->setHorizontalOffsets(azOff,elOff);
-					output_label->setValue("Done!");
-					output_label->Refresh();										
-				}
-				_CATCH_ALL(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx)				
-			}
-			else if (fields[0]=="SETEQUATORIALOFFSETS") {
-				CORBA::Double raOff,decOff;
-				raOff=fields[1].ToDouble() * DD2R;
-				decOff=fields[2].ToDouble() * DD2R;
-				try {
-					component->setEquatorialOffsets(raOff,decOff);
-					output_label->setValue("Done!");
-					output_label->Refresh();										
-				}
-				_CATCH_ALL(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx)				
-			}
-			else if (fields[0]=="SETGALACTICOFFSETS") {
-				CORBA::Double lonOff,latOff;
-				lonOff=fields[1].ToDouble() * DD2R;
-				latOff=fields[2].ToDouble() * DD2R;
-				try {
-					component->setGalacticOffsets(lonOff,latOff);
-					output_label->setValue("Done!");
-					output_label->Refresh();										
-				}
-				_CATCH_ALL(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx)				
-			}			
-			else if (fields[0]=="DISABLE") {
-				try {
-					component->disable();
-					output_label->setValue("Done!");
-					output_label->Refresh();
-				}
-				_CATCH_ALL(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx)
-			}
-			else if (fields[0]=="ENABLE") {
-				try {
-					component->enable();
-					output_label->setValue("Done!");
-					output_label->Refresh();
-				}
-				_CATCH_ALL(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx)
-			}
-			else if (fields[0]=="CORRECTIONENABLE") {
-				try {
-					component->correctionEnable();
-					output_label->setValue("Done!");
-					output_label->Refresh();
-				}
-				_CATCH_ALL(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx)				
-			}
-			else if (fields[0]=="CORRECTIONDISABLE") {
-				try {
-					component->correctionDisable();
-					output_label->setValue("Done!");
-					output_label->Refresh();
-				}
-				_CATCH_ALL(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx)				
-			}
-			else if (fields[0]=="STOP") {
-				try {
-					component->stop();
-					output_label->setValue("Done!");
-					output_label->Refresh();
-				}
-				_CATCH_ALL(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx)
-			}			
-			else if (fields[0]=="TRACK") {
-				CString sourceName;
-				sourceName=fields[1];
-				try {
-					component->track((const char *)sourceName);
-					output_label->setValue("Done!");
-					output_label->Refresh();										
-				}
-				_CATCH_ALL2(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx)				
-			}
-			else if (fields[0]=="MOON") {
-				try {
-					component->moon();
-					output_label->setValue("Done!");
-					output_label->Refresh();										
-				}
-				_CATCH_ALL2(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx)		
-			}
-			else if (fields[0]=="ELEVATIONSCAN") {
-				bool ok=true;
-				double duration;
-				double span;
-				double ra,dec;
-				if (!parseRa(fields[1],ra)) {
-					ok=false;
-					#if USE_OUTPUT_FIELD >=1 
-					CString Message("Incorrect right ascension");
-					output_label->setValue(Message);
-					output_label->Refresh();
-					#endif	
-				}
-				else if (!parseDec(fields[2],dec)) {
-					ok=false;
-					#if USE_OUTPUT_FIELD >=1 
-					CString Message("Incorrect declination");
-					output_label->setValue(Message);
-					output_label->Refresh();
-					#endif	
-				}
-				duration=fields[4].ToDouble();
-				span=fields[3].ToDouble()*DD2R;
-				TIMEDIFFERENCE dur((long double)duration);
-				try {
-					if (ok) {
-						component->elevationScan(ra,dec,span,dur.value().value);
-						output_label->setValue("Done!");
-						output_label->Refresh();
-					}
-				}
-				_CATCH_ALL2(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx)		
-			}
-			else if (fields[0]=="AZIMUTHSCAN") {
-				bool ok=true;
-				double duration;
-				double span;
-				double ra,dec;
-				if (!parseRa(fields[1],ra)) {
-					ok=false;
-					#if USE_OUTPUT_FIELD >=1 
-					CString Message("Incorrect right ascension");
-					output_label->setValue(Message);
-					output_label->Refresh();
-					#endif	
-				}
-				else if (!parseDec(fields[2],dec)) {
-					ok=false;
-					#if USE_OUTPUT_FIELD >=1 
-					CString Message("Incorrect declination");
-					output_label->setValue(Message);
-					output_label->Refresh();
-					#endif	
-				}
-				duration=fields[4].ToDouble();
-				span=fields[3].ToDouble()*DD2R;
-				TIMEDIFFERENCE dur((long double)duration);
-				try {
-					if (ok) {
-						component->azimuthScan(ra,dec,span,dur.value().value);
-						output_label->setValue("Done!");
-						output_label->Refresh();
-					}
-				}
-				_CATCH_ALL2(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx)		
-			}			
-			else {
-				#if USE_OUTPUT_FIELD >=1 
-					CString Message("Unknown command");
-					output_label->setValue(Message);
-					output_label->Refresh();
-				#endif
-			}
-		}*/
 		// atomatic update of some controls.
 		updateGenerator(client,lastGeneratorType,lastGenerator);
 		//sleep for the required ammount of time

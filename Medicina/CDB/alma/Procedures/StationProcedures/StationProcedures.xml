@@ -20,7 +20,7 @@
 	antennaSetup=KKC
 	receiversSetup=KKC
 	bck=initialize=KKC
-	device=0
+	device=10
 	calOff
 </body>
 </Procedure>

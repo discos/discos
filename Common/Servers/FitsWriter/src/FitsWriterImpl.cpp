@@ -9,6 +9,10 @@
 #include <ObservatoryC.h>
 #include "DevIOStatus.h"
 #include "DevIOFileName.h"
+#include "DevIOProjectName.h"
+#include "DevIOObserver.h"
+#include "DevIODeviceID.h"
+#include "DevIOScanAxis.h"
 
 static char *rcsId="@(#) $Id: FitsWriterImpl.cpp,v 1.12 2011-06-21 16:38:41 a.orlati Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
@@ -44,7 +48,7 @@ FitsWriterImpl::FitsWriterImpl(const ACE_CString& name, maci::ContainerServices*
 	m_pstatus(this),
 	m_pprojectName(this),
 	m_pobserver(this),
-	m_pscanIdentifier(this),	
+	/*m_pscanIdentifier(this),*/
 	m_pdeviceID(this),
 	m_pscanAxis(this),
 	m_pdataX(this),
@@ -73,15 +77,14 @@ void FitsWriterImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	try {
 		data=new FitsWriter_private::CDataCollection();
 		m_dataWrapper=new CSecureArea<FitsWriter_private::CDataCollection>(data);
-		m_pfileName=new ROstring(getContainerServices()->getName()+":fileName",getComponent(),
-				new FitsWriter_private::DevIOFileName(m_dataWrapper),true);
+		m_pfileName=new ROstring(getContainerServices()->getName()+":fileName",getComponent(),new FitsWriter_private::DevIOFileName(m_dataWrapper),true);
 		m_pstatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>
 		  (getContainerServices()->getName()+":status",getComponent(),new FitsWriter_private::DevIOStatus(m_dataWrapper),true);
-		m_pprojectName=new ROstring(getContainerServices()->getName()+":projectName",getComponent());
-		m_pobserver=new ROstring(getContainerServices()->getName()+":observer",getComponent());
-		m_pscanIdentifier=new ROlong(getContainerServices()->getName()+":scanIdentifier",getComponent());
-		m_pdeviceID=new ROlong(getContainerServices()->getName()+":deviceID",getComponent());
-		m_pscanAxis=new ROEnumImpl<ACS_ENUM_T(Management::TScanAxis),POA_Management::ROTScanAxis>(getContainerServices()->getName()+":scanAxis",getComponent());
+		m_pprojectName=new ROstring(getContainerServices()->getName()+":projectName",getComponent(),new FitsWriter_private::DevIOProjectName(m_dataWrapper),true);
+		m_pobserver=new ROstring(getContainerServices()->getName()+":observer",getComponent(),new FitsWriter_private::DevIOObserver(m_dataWrapper),true);
+		m_pdeviceID=new ROlong(getContainerServices()->getName()+":deviceID",getComponent(),new FitsWriter_private::DevIODeviceID(m_dataWrapper),true);
+		m_pscanAxis=new ROEnumImpl<ACS_ENUM_T(Management::TScanAxis),POA_Management::ROTScanAxis>(getContainerServices()->getName()+":scanAxis",getComponent(),
+				new FitsWriter_private::DevIOScanAxis(m_dataWrapper),true);
 		m_pdataX=new ROdouble(getContainerServices()->getName()+":dataX",getComponent());
 		m_pdataY=new ROdouble(getContainerServices()->getName()+":dataY",getComponent());
 		m_parrayDataX=new ROdoubleSeq(getContainerServices()->getName()+":arrayDataX",getComponent());
@@ -220,7 +223,70 @@ void FitsWriterImpl::aboutToAbort()
 	delete m_dataWrapper;
 }
 
-void FitsWriterImpl::setFileName (const char* fileName) throw (CORBA::SystemException,
+void FitsWriterImpl::startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+{
+	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataWrapper->Get();
+	bool rec,inc;
+	if (!data->setScanSetup(prm,rec,inc)) {
+		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"FitsWriterImpl::startScan");
+		if (rec) {
+			impl.setReason("Could not start a new scan while recording");
+		}
+		else if (inc) {
+			impl.setReason("Could not start a new scan right now");
+		}
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+	ACS_LOG(LM_FULL_INFO,"FitsWriterImpl::startScan()",(LM_DEBUG,"START_SCAN_ISSUED"));
+}
+
+void FitsWriterImpl::setScanLayout (const ACS::stringSeq & layout) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+{
+	ACS_LOG(LM_FULL_INFO,"FitsWriterImpl::setScanLayout()",(LM_INFO,"LAYOUT_IGNORED"));
+}
+
+void FitsWriterImpl::stopScan() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+{
+	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataWrapper->Get();
+	data->scanStop();
+	ACS_LOG(LM_FULL_INFO,"FitsWriterImpl::stopScan()",(LM_DEBUG,"STOP_SCAN_ISSUED"));
+}
+
+void FitsWriterImpl::startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+{
+	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataWrapper->Get();
+	bool rec,inc;
+	if (!data->setSubScanSetup(prm,rec,inc)) {
+		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"FitsWriterImpl::startSubScan");
+		if (rec) {
+			impl.setReason("Could not start a new subscan while recording");
+		}
+		else if (inc) {
+			impl.setReason("Could not start a new subscan right now");
+		}
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+	ACS_LOG(LM_FULL_INFO,"FitsWriterImpl::startSubScan()",(LM_DEBUG,"START_SUBSCAN_ISSUED"));
+}
+
+CORBA::Boolean FitsWriterImpl::isRecording() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+{
+	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataWrapper->Get();
+	return (CORBA::Boolean)data->isRunning();
+}
+
+
+void FitsWriterImpl::reset() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+{
+	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataWrapper->Get();
+	data->forceReset();
+}
+
+
+
+/*void FitsWriterImpl::setFileName (const char* fileName) throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx)
 {
 	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataWrapper->Get();
@@ -256,13 +322,13 @@ void FitsWriterImpl::setDevice(CORBA::Long deviceID) throw (CORBA::SystemExcepti
    
 void FitsWriterImpl::setScanAxis(Management::TScanAxis scanAxis) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx)
 {
-}
+}*/
 
 _PROPERTY_REFERENCE_CPP(FitsWriterImpl,Management::ROTSystemStatus,m_pstatus,status);
 _PROPERTY_REFERENCE_CPP(FitsWriterImpl,ACS::ROstring,m_pfileName,fileName);
 _PROPERTY_REFERENCE_CPP(FitsWriterImpl,ACS::ROstring,m_pprojectName,projectName);
 _PROPERTY_REFERENCE_CPP(FitsWriterImpl,ACS::ROstring,m_pobserver,observer);
-_PROPERTY_REFERENCE_CPP(FitsWriterImpl,ACS::ROlong,m_pscanIdentifier,scanIdentifier);
+/*_PROPERTY_REFERENCE_CPP(FitsWriterImpl,ACS::ROlong,m_pscanIdentifier,scanIdentifier);*/
 _PROPERTY_REFERENCE_CPP(FitsWriterImpl,ACS::ROlong,m_pdeviceID,deviceID);
 _PROPERTY_REFERENCE_CPP(FitsWriterImpl,Management::ROTScanAxis,m_pscanAxis,scanAxis);
 _PROPERTY_REFERENCE_CPP(FitsWriterImpl,ACS::ROdouble,m_pdataX,dataX);

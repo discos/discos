@@ -42,7 +42,7 @@ public:
 		CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 		AUTO_TRACE("DevIOHPBW::read()");
 		timestamp=getTimeStamp();
-		return resource->getBWHM();
+		return resource->getFWHM();
     }
 	
     void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {

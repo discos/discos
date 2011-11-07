@@ -3,7 +3,7 @@
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: AntennaBossImpl.h,v 1.28 2011-06-05 14:44:40 a.orlati Exp $										         */
+/*  $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
@@ -12,6 +12,7 @@
 /*  Andrea Orlati(aorlati@ira.inaf.it) 20/08/2008      Added the command line parsing                           */
 /*  Andrea Orlati(aorlati@ira.inaf.it) 09/04/2010      Added wrappers function: track, moon, elevationScan,azimuthScan                 */
 /*  Andrea Orlati(aorlati@ira.inaf.it) 13/09/2010      Major update during several weeks, compliant to all fetures of the IDL interface, and all capabilities implemented  */
+/*  Andrea Orlati(aorlati@ira.inaf.it) 10/10/2011      Given implementation of the the method getFluxes() and attribute targetFlux*/
 
 
 #ifndef __cplusplus
@@ -35,122 +36,14 @@
 
 /** 
  * @mainpage AntennaBoss component Implementation 
- * @date 27/05/2011
- * @version 1.43.0
+ * @date 10/10/2011
+ * @version 1.44.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.0.2
  * @remarks compiler version is 4.1.2
 */
 
 using namespace baci;
-
-/*namespace SimpleParser {
-class SectionString {
-public:
-	static char *valToStr(Antenna::TSections& val) {
-		char *c=new char[16];
-		if (val==Antenna::ACU_CW) {
-			strcpy(c,"CW");
-		}
-		else if (val==Antenna::ACU_CCW) {
-			strcpy(c,"CCW");
-		}
-		else {
-			strcpy(c,"NEUTRAL");
-		}
-		return c;
-	}
-	static Antenna::TSections strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
-		IRA::CString strVal(str);
-		strVal.MakeUpper();
-		if (strVal=="CW") {
-			return Antenna::ACU_CW;
-		}
-		else if (strVal=="CCW") {
-			return Antenna::ACU_CCW;
-		}
-		else if (strVal=="NEUTRAL") {
-			return Antenna::ACU_NEUTRAL;
-		}
-		else if (strVal=="-1") {
-			return Antenna::ACU_NEUTRAL;
-		}
-		else {
-			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"SectionString::strToVal()");
-			throw ex;
-		}
-	}
-};
-
-class EquinoxString {
-public:
-	static char *valToStr(Antenna::TSystemEquinox& val) {
-		char *c=new char[16];
-		if (val==Antenna::ANT_B1950) {
-			strcpy(c,"B1950");
-		}
-		else if (val==Antenna::ANT_J2000) {
-			strcpy(c,"J2000");
-		}
-		else {
-			strcpy(c,"APPARENT");
-		}
-		return c;
-	}
-	static Antenna::TSystemEquinox strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
-		IRA::CString strVal(str);
-		strVal.MakeUpper();
-		if ((strVal=="1950") || (strVal=="1950.0") || (strVal=="B1950")) {
-			return Antenna::ANT_B1950;
-		}
-		else if ((strVal=="2000") || (strVal=="2000.0") || (strVal=="J2000")) {
-			return Antenna::ANT_J2000;
-		}
-		else if ((strVal=="APPARENT") || (strVal=="-1") ) {
-			return Antenna::ANT_APPARENT;
-		}
-		else {
-			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"EquinoxString::strToVal()");
-			throw ex;			
-		}
-	}
-};
-
-class FrameString {
-public:
-	static char *valToStr(Antenna::TCoordinateFrame& val) {
-		char *c=new char[16];
-		if (val==Antenna::ANT_EQUATORIAL) {
-			strcpy(c,"EQ");
-		}
-		else if (val==Antenna::ANT_GALACTIC) {
-			strcpy(c,"GAL");
-		}
-		else {
-			strcpy(c,"HOR");
-		}
-		return c;
-	}
-	static Antenna::TCoordinateFrame strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
-		IRA::CString strVal(str);
-		strVal.MakeUpper();
-		if (strVal=="EQ") {
-			return Antenna::ANT_EQUATORIAL;
-		}
-		else if (strVal=="GAL") {
-			return Antenna::ANT_GALACTIC;
-		}
-		else if (strVal=="HOR") {
-			return Antenna::ANT_HORIZONTAL;
-		}
-		else {
-			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"EquinoxString::strToVal()");
-			throw ex;			
-		}
-	}
-};
-
-};*/
 
 
 /**
@@ -279,6 +172,12 @@ public:
 	virtual ACS::ROdouble_ptr targetVlsr() throw (CORBA::SystemException);
 
 	/**
+     * Returns a reference to the targetFlux property implementation of IDL interface.
+	 * @return pointer to read-only double property targetFlux
+	*/
+	virtual ACS::ROdouble_ptr targetFlux() throw (CORBA::SystemException);
+
+	/**
      * Returns a reference to the generatorType property Implementation of IDL interface.
 	 * @return pointer to read-only ROTGeneratorType property target
 	*/
@@ -357,10 +256,10 @@ public:
 	virtual ACS::ROdouble_ptr latitudeOffset() throw (CORBA::SystemException);
 
 	/**
-     * Returns a reference to the HPBW property implementation of IDL interface.
-	 * @return pointer to read-only double property HPBW
+     * Returns a reference to the FWHM property implementation of IDL interface.
+	 * @return pointer to read-only double property FWHM
 	*/	
-	virtual ACS::ROdouble_ptr BWHM() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr FWHM() throw (CORBA::SystemException);
 		
 	/**
 	 * This method is used to stow the antenna.
@@ -412,19 +311,28 @@ public:
 	void correctionDisable() throw (CORBA::SystemException);
 	
 	/**
-	 * This method sets the value for the HPBW.
+	 * This method sets the value for the FWHM.
 	 * @throw CORBA::SystemException
 	 * @param value the new value in radians.
+	 * òparam waveLen corresponding wave length in meters
 	 */
-	void setBWHM(CORBA::Double value) throw (CORBA::SystemException);
+	void setFWHM(CORBA::Double value,CORBA::Double waveLen) throw (CORBA::SystemException);
 	
 	/**
-	 * This method forse the <i>BWHM</i> to be computed starting from the current taper and sky frequency.
+	 * This method force the <i>FWHM</i> to be computed starting from the current taper and sky frequency.
 	 * @throw CORBA::SystemException
 	 * @param taper current taper in db
 	 * @param waveLength current wave length of the sky frequency in meters. 
 	 */
-	void computeBWHM(CORBA::Double taper,CORBA::Double waveLength) throw (CORBA::SystemException);
+	void computeFWHM(CORBA::Double taper,CORBA::Double waveLength) throw (CORBA::SystemException);
+
+	/**
+	 * This method allows to compute the flux based on observing frequency multiple times. The FWHM must be set in order to perform the computation.
+	 * Also the current generator must be able to estimate the flux of the current target.
+	 * @param freqs list of observing frequencies
+	 *  @param fluxes list of the fluxes corresponding to the given frequencies. If the computation could not be done, for some reasons, 1.0 is returned
+	 */
+    void getFluxes (const ACS::doubleSeq& freqs,ACS::doubleSeq_out fluxes) throw (CORBA::SystemException);
 
 	/**
 	 * This method sets the value for the HPBW.
@@ -464,7 +372,6 @@ public:
 	*/ 
 	virtual void moon() throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 		
-	
 	/**
 	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a traking of a sidereal source, given its equatorial coordinates
 	 * @param targetName name or identifier of the source
@@ -667,7 +574,8 @@ private:
 	SmartPropertyPointer<ROdouble> m_ppointingAzimuthCorrection;
 	SmartPropertyPointer<ROdouble> m_ppointingElevationCorrection;
 	SmartPropertyPointer<ROdouble> m_prefractionCorrection;
-	SmartPropertyPointer<ROdouble> m_pBWHM;
+	SmartPropertyPointer<ROdouble> m_pFWHM;
+	SmartPropertyPointer<ROdouble> m_ptargetFlux;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),
 	  POA_Management::ROTBoolean>  > m_pcorrectionEnabled;
 	SmartPropertyPointer<ROdouble> m_ptargetRightAscension;

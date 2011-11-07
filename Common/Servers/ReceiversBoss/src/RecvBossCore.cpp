@@ -421,7 +421,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_bandWidth[0]=2000.0;
 		m_bandWidth[1]=2000.0;
 		m_currentReceiver="KKC";
-		m_currentOperativeMode="";
+		m_currentOperativeMode="NORMAL";
 	}
 	else if (rec=="CCC") {
 #ifndef RB_DEBUG		
@@ -485,7 +485,8 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}	
-		 fsBuffer=IRA::CString("sxkl=send%0068033f\n");
+		 //fsBuffer=IRA::CString("sxkl=send%0068033f\n");
+		fsBuffer=IRA::CString("xxpmode\n");
 		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
 			dummy.setCode(err.getErrorCode());
@@ -507,7 +508,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_bandWidth[0]=800.0;
 		m_bandWidth[1]=800.0;		
 		m_currentReceiver="XXP";
-		m_currentOperativeMode="";
+		m_currentOperativeMode="NORMAL";
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setup()");

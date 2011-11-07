@@ -3,7 +3,7 @@
 
 /* *********************************************************************** */
 /* IRA Istituto di Radioastronomia                                         */
-/* $Id: AntennaDefinitions.midl,v 1.14 2011-06-21 16:32:35 a.orlati Exp $										                           */
+/* */
 /*                                                                         */
 /* This code is under GNU General Public Licence (GPL).                    */
 /*                                                                         */
@@ -17,12 +17,12 @@
 
 /** 
  * @mainpage IDL Interface documentation of the antenna subsystem
- * @date 10/05/2011
- * @version 1.12.0
+ * @date 10/10/2011
+ * @version 1.13.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>, 
  *                 <a href=mailto:c.migoni@ira.inaf.it>Carlo Migoni</a>,
  *                 <a href=mailto:righin_s@ira.inaf.it>Simona Righini</a>, 
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.0.2
 */
 
 

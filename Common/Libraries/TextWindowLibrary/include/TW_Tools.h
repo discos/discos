@@ -231,6 +231,10 @@ private:
 	int m_y;
 };
 
+CPoint operator +(const CPoint& s1,const CPoint& s2);
+
+CPoint operator -(const CPoint& s1,const CPoint& s2);
+
 /** 
  * This class describes how each single character will be drawn. It is possible to define the color pair (foreground and background) and
  * the attributes. For example if the character will be bolded or underlined. Each single attribute can be toggled on or off.

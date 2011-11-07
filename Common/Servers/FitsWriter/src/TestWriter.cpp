@@ -5,7 +5,7 @@
 #include <IRA>
 #include <DateTime.h>
 
-#define CHANNELS 14
+#define SECTIONS 14
 #define FEEDS 7
 #define BINS 256
 #define POLS 4
@@ -19,14 +19,15 @@ int main(int argc, char *argv[])
 	ACS::longSeq pols;
 	ACS::doubleSeq calib;
 	ACS::doubleSeq los;
-	ACS::doubleSeq recvFreq;
-	ACS::doubleSeq recvBw;
+	ACS::doubleSeq skyFreq;
+	ACS::doubleSeq skyBw;
+	ACS::doubleSeq flux;
 	CFitsWriter *file;
 	IRA::CString fileName;
 	TIMEVALUE now;
 	Backends::TMainHeader mH;
-	Backends::TSectionHeader cH[CHANNELS];
-	double tsys[CHANNELS];
+	Backends::TSectionHeader cH[SECTIONS];
+	double *tsys;
 	CFitsWriter::TFeedHeader fH[FEEDS];
 	CFitsWriter::TDataHeader tdh;
 	IRA::CIRATools::getTime(now);
@@ -39,12 +40,14 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 	//create the header dataset
-	mH.sections=CHANNELS;				
+	mH.sections=SECTIONS;
 	mH.beams=FEEDS;
 	mH.integration=0;
 	mH.sampleSize=sizeof(DATA_TYPE);
-	
-	for (int i=0;i<CHANNELS;i++) {
+	skyFreq.length(SECTIONS);
+	skyBw.length(SECTIONS);
+	flux.length(SECTIONS);
+	for (int i=0;i<SECTIONS;i++) {
 		cH[i].id=i;  
 		cH[i].bins=BINS;
 		cH[i].polarization=Backends::BKND_FULL_STOKES;  
@@ -58,7 +61,9 @@ int main(int argc, char *argv[])
 		cH[i].IF[1]=1;
 		cH[i].sampleRate=0.000025;              
 		cH[i].feed=i/2;
-		tsys[i]=100.0+i;
+		skyFreq[i]=8180.0;
+		skyBw[i]=800;
+		flux[i]=1.66;
 	}
 	for (int i=0;i<FEEDS;i++) {
 		fH[i].id=i;
@@ -68,20 +73,23 @@ int main(int argc, char *argv[])
 	}
 	los.length(2);
 	los[0]=8080.0;
-	los[1]=2020.0;
+	los[1]=8080.0;
 	calib.length(inputsNumber);
+	tsys=new double[inputsNumber];
 	for (unsigned k=0;k<inputsNumber;k++) {
 		calib[k]=32.56+k;
+		tsys[k]=((DATA_TYPE)random()/(DATA_TYPE)RAND_MAX)*calib[k];
 	}
 	pols.length(2);
 	pols[0]=Receivers::RCV_LEFT;
-	pols[1]=Receivers::RCV_RIGHT;	
-	recvFreq.length(2);
-	recvFreq[0]=100.0;
-	recvFreq[1]=100.0;
+	pols[1]=Receivers::RCV_RIGHT;
+
+	/*recvFreq.length(2);
+	recvFreq[0]=100.0+los[0];
+	recvFreq[1]=100.0+los[1];
 	recvBw.length(2);
 	recvBw[0]=800.0;
-	recvBw[1]=800.0;
+	recvBw[1]=800.0;*/
 	if (!file->saveMainHeader(mH)) {
 		printf("FITS Error: %s\n",(const char *)file->getLastError());
 		exit(-1);
@@ -102,7 +110,7 @@ int main(int argc, char *argv[])
 		printf("FITS Error: %s\n",(const char *)file->getLastError());
 		exit(-1);
 	}
-	if (!file->addSectionTable(pols,los,recvFreq,recvBw,calib)) {
+	if (!file->addSectionTable(pols,los,skyFreq,skyBw,calib,flux)) {
 		printf("FITS Error: %s\n",(const char *)file->getLastError());
 		exit(-1);
 	}
@@ -143,7 +151,7 @@ int main(int argc, char *argv[])
 	    	printf("FITS Error: %s\n",(const char *)file->getLastError());
 	    	exit(-1);
 	    }
-	    for (int i=0;i<CHANNELS;i++) {
+	    for (int i=0;i<SECTIONS;i++) {
 			DATA_TYPE channel[BINS*POLS];
 			int counter=0;
 			for (int k=0;k<POLS;k++) {
@@ -160,5 +168,6 @@ int main(int argc, char *argv[])
 	    file->add_row();
 	}
 	delete file;
+	delete []tsys;
 	printf("Done!\n");
 }

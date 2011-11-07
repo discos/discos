@@ -100,6 +100,11 @@ void MoonImpl::aboutToAbort()
 }
 
 
+void MoonImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw (CORBA::SystemException)
+{
+	flux=0.0;
+}
+
 void MoonImpl::getAttributes(Antenna::MoonAttributes_out att) throw(CORBA::SystemException)
 {
 	

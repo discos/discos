@@ -52,7 +52,7 @@ void CCollectorThread::onStop()
 
 void CCollectorThread::runLoop()
 {
-	if (!checkReadyFlag()) {  //it does not make sense to run this thread when the data trnasfer is not set up yet.
+	if (!checkReadyFlag()) {  //it does not make sense to run this thread when the data transfer is not set up yet.
 		return;
 	}
 	TIMEVALUE now;
