@@ -1,7 +1,0 @@
-STD:BACKENDS/TotalPower {
-	integration=40
-	setSection=0,-1,300.0,-1,-1,0.000025,-1
-	setSection=1,-1,300.0,-1,-1,0.000025,-1
-	setAttenuation=0,3
-	setAttenuation=1,3
-}
