@@ -52,7 +52,7 @@ public:
 	 * @param targetEl elevation coordinate than should be checked.
 	 * @return true if the elevation is inside the limits
 	 */
-	bool checkLimit(const double targetEl);
+	bool checkLimit(const double& targetEl);
 	
 	/**
 	 * Method converts the input longitude and latitude - which can be given in

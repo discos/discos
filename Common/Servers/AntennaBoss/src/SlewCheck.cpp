@@ -27,7 +27,7 @@ void CSlewCheck::initMount(const double& AzRate,const double& ElRate,const doubl
 	m_maxElevationAcceleration=maxElAcc;
 }
 
-bool CSlewCheck::checkLimit(const double targetEl)
+bool CSlewCheck::checkLimit(const double& targetEl)
 {
 	if ((targetEl>m_maxElevation)||(targetEl<m_minElevation)) return false;
 	else return true;

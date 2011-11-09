@@ -113,16 +113,19 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			if (secondary.type!=Antenna::ANT_NONE) { // the secondary track takes the precedence
 				bool result;
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_ON_SECONDARY_TRACK"));
-				currentGeneratorFlux=prepareOTFSecondary(useInternals,lastPar,secSourceName,secRa,secDec,secLon,secLat,secVlsr,result);
+				currentGeneratorFlux=prepareOTFSecondary(useInternals,secondary,secSourceName,secRa,secDec,secLon,secLat,secVlsr,result);
+				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"GENERATORE %u",currentGeneratorFlux.in()));
 				if (!result) {
 					_EXCPT(AntennaErrors::SecondaryScanErrorExImpl,ex,"CBossCore::prepareScan()");
 					throw ex;
 				}
 				if (primary.otf.coordFrame==Antenna::ANT_EQUATORIAL) {
+					ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"UTILIZZO_COORDINATE_EQUATORIALI"));
 					primary.otf.lon1=secRa;
 					primary.otf.lat1=secDec;
 				}
 				else if (primary.otf.coordFrame==Antenna::ANT_GALACTIC) {
+					ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"UTILIZZO_COORDINATE_GALATTICHE"));
 					primary.otf.lon1=secLon;
 					primary.otf.lat1=secLat;
 				}
@@ -133,15 +136,18 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 				bool result;
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_ON_LAST_COMMANDED_TRACK"));
 				currentGeneratorFlux=prepareOTFSecondary(useInternals,lastPar,secSourceName,secRa,secDec,secLon,secLat,secVlsr,result);
+				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"GENERATORE %u",currentGeneratorFlux.in()));
 				if (!result) {
 					_EXCPT(AntennaErrors::SecondaryScanErrorExImpl,ex,"CBossCore::prepareScan()");
 					throw ex;
 				}
 				if (primary.otf.coordFrame==Antenna::ANT_EQUATORIAL) {
+					ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"UTILIZZO_COORDINATE_EQUATORIALI"));
 					primary.otf.lon1=secRa;
 					primary.otf.lat1=secDec;
 				}
 				else if (primary.otf.coordFrame==Antenna::ANT_GALACTIC) {
+					ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"UTILIZZO_COORDINATE_GALATTICHE"));
 					primary.otf.lon1=secLon;
 					primary.otf.lat1=secLat;
 				}
@@ -160,10 +166,12 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		if (!useInternals) {
 			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"LOADING_REQUIRED_PRIMARY_GENERATOR"));
 			currentGenerator=loadPrimaryGenerator(generatorType);
+			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"PRIMARY_GENERATOR_IS: %x",currentGenerator.in()));
 		}
 		else {
 			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"LOADING_REQUIRED_INTERNAL_GENERATOR"));
 			currentGenerator=loadInternalGenerator(generatorType);
+			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"INTERNAL_GENERATOR_IS: %x",currentGenerator.in()));
 		}
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
@@ -252,6 +260,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			dec=att->J2000Declination;
 			lon=att->gLongitude;
 			lat=att->gLatitude;
+			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"SKYSOURCE RA_DEC LAT_LON %lf %lf %lf %lf",ra,dec,lat,lon));
 			vlsr=att->inputRadialVelocity;
 			sourceName=IRA::CString(att->sourceID);
 			currentGeneratorFlux=currentGenerator; // the flux computer is the sky source generator itself...make a deep copy
@@ -292,7 +301,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		Antenna::OTF_var tracker;
 		tracker=Antenna::OTF::_narrow(currentGenerator);
 		try {
-			//for otf the section reported in par structure is ovecome by the one computed by the OTF generator....
+			//for otf the section reported in par structure is overcome by the one computed by the OTF generator....
 			// if startUT==0 (start as soon as possible) the component will set back the estimated startUT.
 			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_LON_LAT: %lf %lf %lf %lf",primary.otf.lon1,primary.otf.lat1,primary.otf.lon2,primary.otf.lat2));
 			double roundAz=slaDranrm(m_lastEncoderAzimuth);
@@ -331,6 +340,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			dec=att->centerDec;
 			lon=att->centerGLon;
 			lat=att->centerGLat;
+			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_CENTER_RA_DEC LAT_LON %lf %lf %lf %lf",ra,dec,lat,lon));
 			if (secondaryActive||lastActive) { // in case of a secondary track....it is possible that vlsr and flux are computable
 				vlsr=secVlsr;
 				sourceName=secSourceName;
@@ -389,17 +399,21 @@ Antenna::EphemGenerator_ptr CBossCore::prepareOTFSecondary(const bool& useIntern
 	IRA::CIRATools::getTime(now);
 	inputTime=now.value().value;
 
+	result=true;
 	/***************************************************************************/
 	// in order to fine tune this should be a two steps algorithm: in the first step compute the position...then compute the estimated arrival time (of the telescope)
 	// then recompute the position using that time. This is to optimize in case of object with fast proper motion, like satellites or planets
 	/******************************************************************************/
+
 	try {
+		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareOTFSecondary()",(LM_DEBUG,"PREPARE_SECONDARY_FOR OTF"));
 		tmp=prepareScan(useInternal,inputTime,sec,nullScan,m_userOffset,genType,lastScan,section,ra,dec,lon,lat,vlsr,sourceName,scanOff,tmpFlux.out());
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_DEBUG);
+		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareOTFSecondary()",(LM_DEBUG,"ERROR_ON_PREPARATION_OF_SECONDARY_OTF"));
 		result=false;
 	}
-	result=true;
 	return tmp._retn();
 }
 

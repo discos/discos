@@ -670,7 +670,7 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_AZ_EL: %lf %lf",azimuth,elevation));
 		}
 	}
-	catch (ComponentErrors::CouldntCallOperationExImpl& ex) { //catched just to update the component status
+	catch (ComponentErrors::CouldntCallOperationExImpl& ex) { //caught  just to update the component status
 		changeBossStatus(Management::MNG_WARNING);
 		throw ex;
 	}
