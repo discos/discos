@@ -1,0 +1,5 @@
+STD:BACKENDS/TotalPower {
+	setAttenuation=0,7
+	setAttenuation=1,8
+	getTpi
+}
