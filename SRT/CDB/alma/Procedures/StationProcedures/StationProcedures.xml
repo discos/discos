@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Procedure name="setupCCC">
+<body>
+	antennaSetup=CCC
+	receiversSetup=CCC
+	bck=initialize=CCC
+	bck=setSection=0,*,730.0,*,*,*,*
+	bck=setSection=1,*,730.0,*,*,*,*
+	device=0
+	calOff
+</body>	
+</Procedure>
+
+<Procedure name="setupKKC">
+<body>
+	antennaSetup=KKC
+	receiversSetup=KKC
+	receiversMode=SINGLEDISH
+	bck=initialize=KKC
+	device=10
+	calOff
+</body>
+</Procedure>
+
+</ProcedureFile>
