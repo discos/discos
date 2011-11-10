@@ -390,13 +390,9 @@ language=C++,
 \renewindex{default}{idx}{ind}{\indexname} %equivalent to \makeindex
 \newindex{aut}{adx}{and}{Indice dei nomi} % \index[aut]{Marco Buttu}
 %
-%% This is a sample file for index.sty.  To run the sample, save the
-%% following in a file derotator.tex.  Then execute the following commands:
-%%
-%% latex derotator.tex
-%% costruzione->compila->crea indice
-%% makeindex -o derotator.and derotator.adx -s index.ist
-%% latex derotator.tex
+%% latex receiver_library.tex
+%% makeindex receiver_library.idx -s index.sty
+%% latex receiver_library.tex
 %
 %
 %***************************************************************************************************
@@ -448,7 +444,7 @@ Località Poggio dei Pini, Strada 54, 09012 Capoterra (CA) - Italy
 \begin{flushright}
 Autore: \textbf{Marco Buttu}\\
 Email: \texttt{mbuttu@oa-cagliari.inaf.it} \\
-Versione 1.0, \today
+Versione 1.0.1, \today
 \end{flushright}
 \end{titlepage}
 %
@@ -457,17 +453,17 @@ Versione 1.0, \today
 %***************************************************************************************************
 %
 %
-% \newpage
-% \thispagestyle{empty}
-% \null
-% %
-% \include{intro/intro} % introduzione 
+\newpage
+\thispagestyle{empty}
+\null
+%
+\include{intro/intro} % introduzione 
 %***************************************************************************************************
 %
-% \null
-% \newpage
-% \thispagestyle{empty}
-% \pagestyle{fancy}
+\null
+\newpage
+\thispagestyle{empty}
+\pagestyle{fancy}
 % %
 %
 \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
@@ -504,7 +500,7 @@ Versione 1.0, \today
 %***************************************************************************************************
 %
 \include{chapters/cha1/cha1}
-% \include{chapters/cha2/cha2}
+\include{chapters/cha2/cha2}
 % \include{chapters/cha3/cha3}
 % \include{chapters/cha4/cha4}
 % %
@@ -532,11 +528,11 @@ Versione 1.0, \today
 % BIBLIOGRAFIA
 %***************************************************************************************************
 %
-% \cleardoublepage
-% \nocite{*}  % Include tutte le opere, anche quelle non citate
-% \bibliographystyle{plain_ita}
-% \bibliography{bibliography/bibliography}
-% \addcontentsline{toc}{chapter}{\numberline{}Bibliografia}
+\cleardoublepage
+\nocite{*}  % Include tutte le opere, anche quelle non citate
+\bibliographystyle{plain_ita}
+\bibliography{bibliography/bibliography}
+\addcontentsline{toc}{chapter}{\numberline{}Bibliografia}
 % %
 %***************************************************************************************************
 % END BIBLIOGRAFIA
@@ -545,9 +541,9 @@ Versione 1.0, \today
 %
 %
 %
-% \cleardoublepage
-% \lstlistoflistings
-% \addcontentsline{toc}{chapter}{\numberline{}Elenco dei listati}
+\cleardoublepage
+\lstlistoflistings
+\addcontentsline{toc}{chapter}{\numberline{}Elenco dei listati}
 % \cleardoublepage
 % \listoffigures
 % \addcontentsline{toc}{chapter}{\numberline{}Elenco delle figure}
@@ -560,9 +556,9 @@ Versione 1.0, \today
 %***************************************************************************************************
 %
 %
-% \cleardoublepage
-% \printindex % Stampa Indice analitico
-% \addcontentsline{toc}{chapter}{\numberline{}Indice analitico}
+\cleardoublepage
+\printindex % Stampa Indice analitico
+\addcontentsline{toc}{chapter}{\numberline{}Indice analitico}
 % \cleardoublepage
 % \printindex[aut] % Stampa indice dei nomi
 % \addcontentsline{toc}{chapter}{\numberline{}Indice dei nomi}
