@@ -21,12 +21,10 @@ bool done;
 void printHelp() {
 	printf("Saves observed Ra/Dec and Az/El in a file\n");
 	printf("\n");
-	printf("CoordinateGrabber [-h] [-s sample] -b bossInstance -o observatoryInstance FileName \n");
+	printf("CoordinateGrabber [-h] [-s sample] FileName \n");
 	printf("\n");
 	printf("[-h] prints this help\n");
-	printf("[-s sample] set the sample interval in milliseconds. It must be included between 10 and 999.\n");
-	printf("-b  bossInstance select the name of the Antenna Boss instance to be used. This switch is mandatory.\n");
-	printf("-o  observatoryInstance select the name of the Observatory instance to be used. This switch is mandatory.\n");
+	printf("[-s sample] set the sample interval in milliseconds. It must be included between 10 and 999. Default is 200\n");
 	printf("\n");
 }
 
@@ -39,7 +37,6 @@ int main(int argc, char *argv[])
 {
 	int out;
 	maci::SimpleClient client;
-	CString name,observ;
 	ofstream file;
 	ACE_Time_Value tv(3);
 	Antenna::AntennaBoss_var boss;
@@ -48,6 +45,7 @@ int main(int argc, char *argv[])
 	CString fileName;
 	char output[512];
 	TIMEVALUE now,last,lst;
+	maci::ComponentInfo_var info;
 	double az,el;
 	double ra,decl;
 	double lon,lat;
@@ -60,20 +58,11 @@ int main(int argc, char *argv[])
 		printHelp();
 		exit(-1);
 	}
-	name="";
-	while ((out=getopt(argc,argv,"hb:o:s:"))!=-1) {
+	while ((out=getopt(argc,argv,"hs:"))!=-1) {
 		switch (out) {
 			case 'h': {
 				printHelp();
 				exit(0);
-			}
-			case 'b': {
-				name=CString(optarg);
-				break;
-			}
-			case 'o': {
-				observ=CString(optarg);
-				break;
 			}
 			case 's': {
 				if (sscanf(optarg,"%ld",&sampleInterval) !=1) {
@@ -98,16 +87,6 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	if (name=="") {
-		printf("Antenna Boss instance must be provided...\n\n");
-		printHelp();
-		exit(-1);
-	}
-	if (observ=="") {
-		printf("Observatory instance must be provided...\n\n");
-		printHelp();
-		exit(-1);		
-	}
 	fileName=CString(argv[optind]);
 	try {
 		if (client.init(argc,argv)==0) {
@@ -130,62 +109,46 @@ int main(int argc, char *argv[])
 	}
 	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"LOGGED_IN"));	
 	try {
-		boss=client.getComponent<Antenna::AntennaBoss>((const char *)name,0,true);
-		if (CORBA::is_nil(boss.in())==true) {
-			_EXCPT(ClientErrors::CouldntAccessComponentExImpl,impl,"coordinateGrabber::main()");
-			impl.setComponentName((const char *)name);
-			impl.log();
-			exit(-1);
-		}
+		info=client.manager()->get_default_component(client.handle(),"IDL:alma/Antenna/AntennaBoss:1.0");
+		boss=Antenna::AntennaBoss::_narrow(info->reference);
 	}
-	catch(CORBA::SystemException &E) {
-		_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"coordinateGrabber::main()");
-		impl.setName(E._name());
-		impl.setMinor(E.minor());
-		impl.log();
-		exit(-1);
+	catch (maciErrType::CannotGetComponentExImpl& ex) {
+		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,Impl,ex,"coordinateGrabber::main()");
+		Impl.setComponentName("IDL:alma/Antenna/AntennaBoss:1.0");
+		throw Impl;
 	}
-	catch (maciErrType::CannotGetComponentExImpl& E) {
-		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,impl,E,"coordinateGrabber::main()");
-		impl.setComponentName((const char *)name);
-		impl.log();
-		exit(-1);
-	}	
-	catch(...) {
-		_EXCPT(ClientErrors::UnknownExImpl,impl,"coordinateGrabber::main()");
-		impl.log();
-		exit(-1);
+	catch (maciErrType::NoPermissionExImpl& ex) {
+		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,Impl,ex,"coordinateGrabber::main()");
+		Impl.setComponentName("IDL:alma/Antenna/AntennaBoss:1.0");
+		throw Impl;
 	}
-	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"GOT_COMPONENENT: %s",(const char *)name));
+	catch (maciErrType::NoDefaultComponentExImpl& ex) {
+		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,Impl,ex,"coordinateGrabber::main()");
+		Impl.setComponentName("IDL:alma/Antenna/AntennaBoss:1.0");
+		throw Impl;
+	}
+	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"GOT_COMPONENENT_ANTENNABOSS"));
 	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_DEBUG,"Reference is: %d",boss.ptr()));
 	try {
-		observatory=client.getComponent<Antenna::Observatory>((const char*)observ,0,true);
-		if (CORBA::is_nil(observatory.in())==true) {
-			_EXCPT(ClientErrors::CouldntAccessComponentExImpl,impl,"coordinateGrabber::main()");
-			impl.setComponentName((const char *)observ);
-			impl.log();
-			exit(-1);
-		}
+		info=client.manager()->get_default_component(client.handle(),"IDL:alma/Antenna/Observatory:1.0");
+		observatory=Antenna::Observatory::_narrow(info->reference);
 	}
-	catch(CORBA::SystemException &E) {
-		_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"coordinateGrabber::main()");
-		impl.setName(E._name());
-		impl.setMinor(E.minor());
-		impl.log();
-		exit(-1);
+	catch (maciErrType::CannotGetComponentExImpl& ex) {
+		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,Impl,ex,"coordinateGrabber::main()");
+		Impl.setComponentName("IDL:alma/Antenna/Observatory:1.0");
+		throw Impl;
 	}
-	catch (maciErrType::CannotGetComponentExImpl& E) {
-		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,impl,E,"coordinateGrabber::main()");
-		impl.setComponentName((const char *)observ);
-		impl.log();
-		exit(-1);
-	}	
-	catch(...) {
-		_EXCPT(ClientErrors::UnknownExImpl,impl,"coordinateGrabber::main()");
-		impl.log();
-		exit(-1);
-	}	
-	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"GOT_COMPONENENT: %s",(const char *)observ));
+	catch (maciErrType::NoPermissionExImpl& ex) {
+		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,Impl,ex,"coordinateGrabber::main()");
+		Impl.setComponentName("IDL:alma/Antenna/Observatory:1.0");
+		throw Impl;
+	}
+	catch (maciErrType::NoDefaultComponentExImpl& ex) {
+		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,Impl,ex,"coordinateGrabber::main()");
+		Impl.setComponentName("IDL:alma/Antenna/Observatory:1.0");
+		throw Impl;
+	}
+	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"GOT_COMPONENENT_OBSERVATORY"));
 	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_DEBUG,"Reference is: %d",observatory.ptr()));
 	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"ALL_COMPONENTS_RETRIEVED"));
 	ACE_OS::sleep(1);	
@@ -252,8 +215,8 @@ int main(int argc, char *argv[])
 	}
 	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"TERMINATING"));
 	try {
-		client.releaseComponent((const char *)name);
-		client.releaseComponent((const char *)observ);
+		client.releaseComponent(observatory->name());
+		client.releaseComponent(boss->name());
 	}
 	catch (maciErrType::CannotReleaseComponentExImpl& E) {
 		E.log();

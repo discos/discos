@@ -37,17 +37,17 @@
 # special compilation flags for single c sources
 #yyyyy_CFLAGS   = 
 
-EXECUTABLES	= CoordinateGrabber
-EXECUTABLES_L = SlewTimeCheck
+EXECUTABLES	= coordinateGrabber
+EXECUTABLES_L = slewTimeCheck
 
-CoordinateGrabber_OBJECTS = coordinateGrabber
-CoordinateGrabber_LIBS = AntennaDefinitionsStubs AntennaBossStubs EphemGeneratorStubs \
+coordinateGrabber_OBJECTS = coordinateGrabber
+coordinateGrabber_LIBS = AntennaDefinitionsStubs AntennaBossStubs EphemGeneratorStubs \
 	ObservatoryStubs ManagmentDefinitionsStubs \
 	IRALibrary ComponentErrors ClientErrors AntennaErrors ManagementErrors\
 	baci maci maciClient acserr loki ACSErrTypeCommon
 
-SlewTimeCheck_OBJECTS   =	TestClient SlewCheck
-SlewTimeCheck_LIBS      = IRALibrary 
+slewTimeCheck_OBJECTS   =	TestClient SlewCheck
+slewTimeCheck_LIBS      = IRALibrary 
 
 #
 # Includes (.h) files (public only)

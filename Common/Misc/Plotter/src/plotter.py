@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-# " $Id: plotter.py,v 1.6 2009-01-24 14:19:50 a.orlati Exp $ "
 # This is a python client that can be used to display value read from properties of a given 
 # component
 #who                                   when           what
