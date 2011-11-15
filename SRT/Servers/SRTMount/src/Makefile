@@ -73,7 +73,7 @@ CDB_SCHEMAS = SRTMount
 # Python stuff (public and local)
 # ----------------------------
 PY_SCRIPTS         =
-PY_SCRIPTS_L       = testTracking setTime
+PY_SCRIPTS_L       = testTracking setTime stressTest
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
