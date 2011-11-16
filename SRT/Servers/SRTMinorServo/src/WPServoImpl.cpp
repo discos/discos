@@ -157,10 +157,6 @@ void WPServoImpl::initialize() throw (
     if(!CIRATools::getDBValue(getContainerServices(), "scale_factor", m_cdb_ptr->SCALE_FACTOR))
         THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'scale_factor' from CDB", false);
     
-    // Retrive delta_max from CDB. |cmdPos - actPos| < delta_max => cmdPos achieved
-    if(!CIRATools::getDBValue(getContainerServices(), "delta_max", m_cdb_ptr->DELTA_MAX))
-        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'delta_max' from CDB", false);
-    
     // Retrive the scale_offset parameter from CDB
     if(!CIRATools::getDBValue(getContainerServices(), "scale_offset", m_cdb_ptr->SCALE_OFFSET))
         THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'scale_offset' from CDB", false);

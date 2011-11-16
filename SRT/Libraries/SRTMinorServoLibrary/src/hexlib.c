@@ -301,7 +301,7 @@ int print_p(struct rparams *p)
    return GSL_SUCCESS;
 }
 
-int load_p(struct rparams *p, char *fname)
+int load_p(struct rparams *p)
 {   
    int i;
 

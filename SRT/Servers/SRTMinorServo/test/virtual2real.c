@@ -12,7 +12,7 @@ int main (int argc, char *argv[])
   if(argc < 7)
       return 1;
 
-  if(load_p(&p, "./hexdata.txt"))
+  if(load_p(&p))
   {
      printf("File hexdata.txt not found!\n");
      exit(0);

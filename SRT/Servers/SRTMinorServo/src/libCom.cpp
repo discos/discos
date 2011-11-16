@@ -343,7 +343,7 @@ void real2virtual(ACS::doubleSeq &positions, DWORD servo_address) {
         // Subreflector Positioner
         case 1: {
             struct rparams p;
-            init_p(&p);
+            load_p(&p);
 
             for (vector<string>::size_type idx = 0; idx != positions.length(); ++idx)
                 p.d[idx] = positions[idx]; 
@@ -369,7 +369,7 @@ void virtual2real(ACS::doubleSeq &positions, DWORD servo_address) {
         // Subreflector Positioner
         case 1: {
             struct rparams p;
-            init_p(&p);
+            load_p(&p);
 
             for (vector<string>::size_type idx = 0; idx != positions.length(); ++idx)
                 p.x[idx] = positions[idx]; 

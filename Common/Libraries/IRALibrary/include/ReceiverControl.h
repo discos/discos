@@ -109,32 +109,30 @@ private:
  */
 class ReceiverControl {
 
-
-
 public:
 
-struct FetValues {
-    double VDL; // Drain Voltage, left channel  [V]
-    double IDL; // Drain Current, left channel  [mA]
-    double VGL; // Gate Voltage, left channel   [V]
-    double VDR; // Drain Voltage, right channel [V]
-    double IDR; // Drain Current, right channel [mA]
-    double VGR; // Gate Voltage, right channel  [V]
-};
+    struct FetValues {
+        double VDL; // Drain Voltage, left channel  [V]
+        double IDL; // Drain Current, left channel  [mA]
+        double VGL; // Gate Voltage, left channel   [V]
+        double VDR; // Drain Voltage, right channel [V]
+        double IDR; // Drain Current, right channel [mA]
+        double VGR; // Gate Voltage, right channel  [V]
+    };
 
 
-/**
- * The left_channel member stores all the left channel values of a specific
- * fet quantity (VD, ID or VG), and the right one stores the values for
- * the right channel.
- */
-struct StageValues {
-    std::vector<double> left_channel;
-    std::vector<double> right_channel;
-};
+    /**
+     * The left_channel member stores all the left channel values of a specific
+     * fet quantity (VD, ID or VG), and the right one stores the values for
+     * the right channel.
+     */
+    struct StageValues {
+        std::vector<double> left_channel;
+        std::vector<double> right_channel;
+    };
 
 
-enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
+    enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
 
 	/** 
 	 * Constructor
@@ -150,6 +148,8 @@ enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
      * @param reliable_comm when it is true then the communication
      * to the board is reliable because there is a checksum field in
      * both request and answer. It is true to default.
+     * @param guard_time the time in useconds we need to wait between a request and an
+     * answer to the LNA board
      * @throw ReceiverControlEx
 	*/
     ReceiverControl(

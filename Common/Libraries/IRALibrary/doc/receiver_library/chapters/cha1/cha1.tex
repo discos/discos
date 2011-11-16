@@ -6,7 +6,7 @@ La libreria \texttt{MicroControllerBoard} consente di comunicare con le schede a
 sviluppate nella stazione radioastronomica di Medicina (Bologna)\footnote{Il protocollo di comunicazione 
 \`e descritto in dettaglio nel documento interno IRA n.358/04 (F.Fiocchi, G.Macaferri, A.Oralti, M.Morsiani). 
 Il firmware che controlla le schede \`e stato realizzato da Franco Fiocchi mentre dell'hardware se ne sono 
-occupati Sandro Cattani ed Andrea Maccaferri.}.
+occupati Alessandro Cattani ed Andrea Maccaferri.}.
 
 In questo capitolo non ci occuperemo esclusivamente della libreria dal punto di vista software,
 ma tratteremo anche aspetti di pi\`u basso livello e nascosti dalla libreria,  come il protocollo di comunicazione e l'architettura
@@ -22,9 +22,9 @@ un dispositivo definito \emph{master}\index{master} ed uno \emph{slave}\index{sl
 \item \emph{slave}: dispositivo che riconosce il pacchetto di dati a lui indirizzato e, se richiesto, manda
 al dispositivo chiamante un pacchetto di dati in risposta.
 \end{itemize}
-Il protocollo sviluppato \`e del tipo \emph{multi-master}\index{multi-master}, in quanto permette la realizzazione di reti ad
-architettura semplice, come quella del tipo \emph{master-slave}\index{master-slave}, oppure complessa come quella \emph{multi-master}
-dove il controllo pu\`o essere ridondante o dove dispositivi diversi possono condividere le medesime risorse.
+Il protocollo permette la realizzazione di reti ad architettura semplice, come quella del tipo 
+\emph{master-slave}\index{master-slave}, ed in questo caso vi saranno dei campi di controllo ridondanti, 
+oppure complessa come quella \emph{multi-master}\index{multi-master}, dove dispositivi diversi possono condividere le medesime risorse.
 
 La trasmissione di pacchetti consistenti di dati posono mettere in difficolt\`a i dispositivi di elaborazione dotati di
 micro-controllori, in quanto normalmente dotati di ristretti buffer di comunicazione. Nel protocollo \`e stato
@@ -43,7 +43,7 @@ il carattere terminatore.
 Entrambi i gruppi contengono i medesimi comandi (contraddistinti con identificativi diversi che ne determinano l'appartentenza),
 elencati di seguito:
 \begin{itemize}
-\item \texttt{CMD\_INQUIRY}\index{comando!inquiry}: chiede allo slave di ritornare l'identificativo e 
+\item \texttt{CMD\_INQUIRY}\index{comando!inquiry}: chiede allo slave di restituire l'identificativo e 
 l'esito dell'ultimo comando eseguito,
 insieme alla data e all'ora di esecuzione. Pu\`o essere utilizzato, per esempio, dopo un comando indirizzato a tutti gli 
 slave che non preveda la risopsta, al fine di conoscere l'esito di uno slave specifico. Se come indicativo dell'ultimo
@@ -53,7 +53,7 @@ compare mai come identificativo dell'ultimo comando eseguito.
 \item \texttt{CMD\_RESET}\index{comando!reset}: forza lo slave a terminare ogni attivit\`a che ha in coda d'esecuzione ed a ricominiciare da
 capo l'esecuzione del suo programma applicativo; questo equivale a riportare il dispositivo nella stessa condizione iniziale,
 quando gli viene applicata l'alimentazione.
-\item \texttt{CMD\_VERSION}\index{comando!version}: chiede allo slave di ritornare il codice identificativo. Il codice ritornato dipende dall'hardware
+\item \texttt{CMD\_VERSION}\index{comando!version}: chiede allo slave di restituire il codice identificativo. Il codice restituito dipende dall'hardware
 del dispositivo slave e dall'applicativo su di esso sviluppato. In generale \`e composto da tre sezioni riportanti un
 identificativo della scheda (primi quattro caratteri), la versione del firmware (i due caratteri seguenti) e la relativa revisione
 (ultimi due caratteri).
@@ -64,28 +64,28 @@ impostazioni di default, ovvero quelle caricate al momento dell'alimentazione de
 questi dipendono dall'hardware del dispositivo e dall'applicativo su di esso sviluppato. Dopo il recupero della configurazione,
 il dispositivo slave esegue un reset a caldo in modo da rendere operativa la nuova configurazione, che utilizzer\`a tutte le volte
 che verr\`a alimentato.
-\item \texttt{CMD\_GET\_ADDR}\index{comando!get address}: chiede allo slave di ritornare il suo indirizzo di protocollo.
+\item \texttt{CMD\_GET\_ADDR}\index{comando!get address}: chiede allo slave di restituire il suo indirizzo di protocollo.
 \item \texttt{CMD\_SET\_ADDR}\index{comando!set address}: comunica il nuovo indirizzo di protocollo che lo slave deve utilizzare; la riposta al comando
 viene data col vecchio indirizzo, dopodich\`e il dispositivo riposnder\`a solo ai comandi inviati al nuovo indirizzo. 
 L'impostazione viene persa se viene a mancare l'alimentazione allo slave; per salvarla in modo non volatile \`e 
 necessario inviare allo slave (al suo nuovo indirizzo) un comando \texttt{CMD\_SAVE}.
-\item \texttt{CMD\_GET\_TIME}\index{comando!get time}: chiede allo slave di ritornare la data e l'orario del suo orologio interno nella seguente
+\item \texttt{CMD\_GET\_TIME}\index{comando!get time}: chiede allo slave di restituire la data e l'orario del suo orologio interno nella seguente
 sequenza: secolo, anno, mese, giorno, ora, minuti, secondi e centesimi di secondo.
 \item \texttt{CMD\_SET\_TIME}\index{comando!set time}: chiede allo slave di impostare l'orario e la data del suo orologio interno nella seguente
 sequenza: secolo, anno, mese, giorno, ora, minuti, secondi e centesimi di secondo.
-\item \texttt{CMD\_GET\_FRAME}\index{comando!get frame}: chiede allo slave di ritornare la dimensione massima del campo PARAMETER (per i comandi)
+\item \texttt{CMD\_GET\_FRAME}\index{comando!get frame}: chiede allo slave di restituire la dimensione massima del campo PARAMETER (per i comandi)
 e DATA (per le risposte); questa dimensione dipende dall'hardware del dispositivo e dall'applicativo su di esso
 sviluppato.
 \item \texttt{CMD\_SET\_FRAME}\index{comando!set frame}: chiede allo slave di limitare la dimensione massima del campo PARAMETER (per i comandi)
 e DATA (per le risposte); questa dimensione dipende dall'hardware del dispositivo e dall'applicativo su di esso sviluppato.
-\item \texttt{CMD\_GET\_PORT}\index{comando!get port}: chiede allo slave di ritornare l'impostazione della porta, ovvero i parametri di configurazione
+\item \texttt{CMD\_GET\_PORT}\index{comando!get port}: chiede allo slave di restituire l'impostazione della porta, ovvero i parametri di configurazione
 necessari a definire il funzionamento; una porta parallela, ad esempio, necessita la configurazione della direzione 
 (ingresso/uscita) dei vari bit che costituiscono la parola.
 \item \texttt{CMD\_SET\_PORT}\index{comando!set port}: chiede allo slave di modificare l'impostazione della porta, ovvero i parametri di configurazione
 necessari a definire il funzionamento; una porta parallela, ad esempio, necessita la configurazione della direzione 
 (ingresso/uscita) dei vari bit che costituiscono la parola.
-\item \texttt{CMD\_GET\_DATA}\index{comando!get data}: chiede allo slave di ritornare i dati presenti sulla porta; per una porta parallela, ad esempio,
-ritorna lo stato dei vari bit che costituiscono la parola.
+\item \texttt{CMD\_GET\_DATA}\index{comando!get data}: chiede allo slave di restituire i dati presenti sulla porta; per una porta parallela, ad esempio,
+restituisce lo stato dei vari bit che costituiscono la parola.
 \item \texttt{CMD\_SET\_DATA}\index{comando!set data}:  chiede allo slave di modificare i dati presenti sulla porta; per una porta parallela, ad esempio,
 imposta lo stato dei vari bit che costituiscono la parola.
 \end{itemize}
@@ -295,7 +295,7 @@ e~\cite{dewar-controls}.
 
 
 \section{Utilizzo della Libreria}
-La \texttt{MicroControllerBoard} \`e una libreria thread-safe composta da~3 file: 
+La \texttt{MicroControllerBoard} \`e una libreria \emph{thread-safe}\index{thread safe} composta da~3 file: 
 \emph{MicroControllerBoard.h} e \emph{MicroControllerBoard.cpp} nei quali viene rispettivamente
 dichiarata e definita la classe \texttt{MicroControllerBoard}, ed il file \emph{MicroControllerBoardDef.h}
 nel quale sono definiti tutti i parametri, come i \emph{tipi di dato}\index{tipo di dato}, le porte ed i numeri di porta.
@@ -364,5 +364,5 @@ richiesta;
 \item risposta e richiesta devono avere lo stesso codice del comando;
 \item l'identificativo (ID) della risposta deve essere lo stesso della richiesta;
 \item il numero di parametri deve essere corretto;
-\item il checksum\emph{checksum} (se richiesto) deve essere corretto.
+\item il \emph{checksum}\index{checksum} (se richiesto) deve essere corretto.
 \end{itemize}

@@ -1039,44 +1039,6 @@ char * MinorServoBossImpl::getCommandedSetup() {
 }
 
 
-bool MinorServoBossImpl::isDynamic(string comp_name) {
-    bool is_dynamic(false);
-    if(slave_exists(comp_name) && m_thread_params.is_initialized) {
-        string config_str(m_config);
-        vector<string> actions = split(config_str, actions_separator);
-        vector<string> vaules;
-        for(vector<string>::iterator iter = actions.begin(); iter != actions.end(); iter++) {
-            // Split the action in items.
-            vector<string> items = split(*iter, items_separator);
-            // Set the name of component to move from a string
-            string cname = get_component_name(items.front());
-            string token(items.back());
-            strip(token);
-            if(!startswith(token, park_token)) {
-                vector<string> items = split(token, coeffs_separator);
-                vector<string> values;
-                for(vector<string>::iterator viter = items.begin(); viter != items.end(); viter++) {
-                    vector<string> labels = split(*viter, coeffs_id);
-                    if(cname == comp_name) {
-                        string coeffs = labels.back();
-                        strip(coeffs);
-
-                        for(string::size_type idx = 0; idx != boundary_tokens.size(); idx++)
-                            strip(coeffs, char2string(boundary_tokens[idx]));
-
-                        values = split(coeffs, pos_separator);
-                        // If there is more than one coefficient then the position is elevation dependent
-                        is_dynamic = (values.size() > 1) ? true : false;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    return is_dynamic;
-}
-
-
 string get_component_name(string token) 
 {
     strip(token);
@@ -1089,7 +1051,7 @@ ACS::doubleSeq get_positions(string comp_name, string token, const MSThreadParam
     ACS::doubleSeq positions;
     try {
         // Dummy elevation
-        double el(2); // Get a reference of AntennaBoss and retrieve the actual elevation
+        double el(2); // Get a reference to AntennaBoss and retrieve the actual elevation
         vector<string> vaules;
         vector<double> position_values;
         strip(token);
@@ -1108,10 +1070,12 @@ ACS::doubleSeq get_positions(string comp_name, string token, const MSThreadParam
                     strip(coeffs, char2string(boundary_tokens[idx]));
 
                 values = split(coeffs, pos_separator);
+
                 double axis_value(0);
-                // Pay attention: inverse indexes for a visual correspondence with polynomial coefficients
-                for(vector<string>::size_type idx = values.size(); idx != 0; --idx)
-                    axis_value += str2double(values[idx-1]) * pow(el, values.size()-idx);
+                // For instance if we have the following values: [C0, C1, C2], the axis value will be:
+                // C0 + C1*E + C2*E^2
+                for(vector<string>::size_type idx = 0; idx != values.size(); idx++)
+                    axis_value += str2double(values[idx]) * pow(el, idx);
 
                 positions[position_idx] = axis_value;
                 position_idx++;

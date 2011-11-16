@@ -48,7 +48,7 @@ void dir(struct rparams *p);
 int init_p(struct rparams *p);
 void inv(struct rparams *p);
 int print_p(struct rparams *p);
-int load_p(struct rparams *p,char *fname);
+int load_p(struct rparams *p);
 double *new_array(int m);
 void free_array(h_array *x);
 int get_array(int i, h_array *x, double *y);

@@ -123,7 +123,7 @@ public:
 
     /**
      * Turn the elevation tracking of minor servos off
-     * @throw CompomentErrors::ValidationErrorEx, ManagementErrors::ConfigurationErrorEx
+     * @throw ManagementErrors::ConfigurationErrorEx
      */
     void turnTrackingOff() throw (ManagementErrors::ConfigurationErrorEx);
 
@@ -266,8 +266,6 @@ private:
 	/** This is the pointer to the notification channel */
 	nc::SimpleSupplier *m_nchannel;
 
-    bool isDynamic(string comp_name);
-    
     bool slave_exists(string sname);
     
     bool isParked() throw (ManagementErrors::ConfigurationErrorEx);

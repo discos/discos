@@ -77,8 +77,6 @@
         <xs:attribute name="number_of_axis" type="xs:unsignedShort" use="required" />
         <xs:attribute name="number_of_slaves" type="xs:unsignedShort" use="required" />
         <xs:attribute name="scale_factor" type="xs:double" use="required" />
-        <!-- if |cmdPos – actPos| < delta_max, then the axis is not in running state -->
-        <xs:attribute name="delta_max" type="xs:double" use="required" />
         <xs:attribute name="scale_offset" type="xs:double" use="required" />
         <xs:attribute name="server_ip" type="xs:string" use="required" />
         <xs:attribute name="server_port" type="xs:unsignedShort" use="required" />
@@ -99,6 +97,7 @@
         <!-- Expire time of data request in seconds. For instance: 0.001 for 1ms-->
         <xs:attribute name="expire_time" type="xs:double" use="required" />
         <!-- Maximum value allowed for the difference of two corresponding axis coordinates (mm) -->
+        <!-- if |cmdPos – actPos| < tracking_delta, then the axis is following the commanded position -->
         <xs:attribute name="tracking_delta" type="xs:double" use="required" />
 
     </xs:complexType>

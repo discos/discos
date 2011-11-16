@@ -10,7 +10,7 @@ sar\`a trasparente per l'utilizzatore della classe.
 
 La libreria inoltre \`e \emph{thread-safe}\index{thread safe} in quanto per comunicare con 
 le schede si appoggia alla \texttt{MicroControllerBoard}
-(come detto nel capitolo precedente, la \texttt{MicroControllerBoard} \`e thread-safe.
+(come detto nel capitolo precedente, la \texttt{MicroControllerBoard} \`e thread-safe).
 
 
 \section{Interfaccia}
@@ -1196,6 +1196,7 @@ label=lst:receiver-library,mathescape]
 
 using namespace IRA;
 
+// Funzioni di conversione utilizzate solo a titolo esemplificativo:
 // Converte un valore di tensione in temperatura (Kelvin)
 double voltage2Kelvin(double voltage) { return voltage * 2 }
 // Converte un valore di tensione in un valore di corrente (mA)
