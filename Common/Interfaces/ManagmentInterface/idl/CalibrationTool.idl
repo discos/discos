@@ -27,6 +27,10 @@ module Management {
 	 */ 
 	interface CalibrationTool: DataReceiver {
 
+        /**
+		 * Current status of the component
+		 */
+		readonly attribute Management::ROTSystemStatus status;
 		/**
 		 * Half power beam width (radians), resulting from the fitting routine
 		 */
@@ -51,10 +55,6 @@ module Management {
 		 * flux of the source currently scanned (Jy)
 		 */
 		readonly attribute ACS::ROdouble sourceFlux;
-		/**
-		 *  name of the source currently scanned
-		 */
-		readonly attribute ACS::ROstring sourceName;
 	};
 };
 
