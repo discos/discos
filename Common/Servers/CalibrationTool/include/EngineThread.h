@@ -120,6 +120,8 @@ private:
     /**
      * This parameter is used to check if a Calibration starts in this
      * sequence: before LAT scans, after LON scans
+     * m_checkScan = 1 means LAT scans done
+     * m_checkScan = 0 means LON scans done or that is starting a new calibration tool session
      */
     int m_checkScan;
     double * m_latPositions;

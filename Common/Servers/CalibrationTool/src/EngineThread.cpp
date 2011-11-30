@@ -341,10 +341,10 @@ void CEngineThread::runLoop ()
     TIMEVALUE now;
     TIMEVALUE tS;
     IRA::CString out;
-    IRA::CString fileName = "";
-    IRA::CString sourceName = "";
-    IRA::CString projectName = "";
-    IRA::CString observerName = "";
+    IRA::CString fileName;
+    IRA::CString sourceName;
+    IRA::CString projectName;
+    IRA::CString observerName;
     ACS::ROstring_var targetRef;
     CORBA::String_var target;
     ACSErr::Completion_var completion;
@@ -365,17 +365,32 @@ void CEngineThread::runLoop ()
     CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
     IRA::CIRATools::getTime (now);	// it marks the start of the activity job
 
+    if (data->isReset()) {
+		if (m_fileOpened) {
+			m_file.close();
+			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"FILE_CLOSED"));
+			m_fileOpened=false;
+		}
+		data->haltResetStage();
+		return;
+	}
     if (data->isReady ()) {     //main headers are already saved
         if (data->isStart ()) {     //file has to be opened
             if (!m_fileOpened) {
                 data->setStatus (Management::MNG_OK);
-                // create the file
-		        fileName = data->getFileName ();
-		        Len = fileName.GetLength ();
-		        if (Len == 0) {
-                    fileName.Format ("CalibrationTool-%02d_%02d_%02d.log", now.hour (), now.minute (), now.second ());
-                    data->setFileName (fileName);
+                // create the file with a combination of
+                // calibration tool string and
+                // project name string
+		        projectName = data->getProjectName ();
+		        Len = projectName.GetLength ();
+		        if (Len) {
+                    fileName.Format ("CalibrationTool-%s_%02d_%02d_%02d.log", (const char *) projectName, now.hour (), now.minute (), now.second ());
                 }
+                else {
+                    fileName.Format ("CalibrationTool-%02d_%02d_%02d.log", now.hour (), now.minute (), now.second ());
+                }
+                data->setFileName (fileName);
+
 		        m_file.open ((const char *) fileName, ios_base::out | ios_base::app);
                 if (!m_file.is_open ()) {
                     _EXCPT (ComponentErrors::FileIOErrorExImpl, impl, "CEngineThread::runLoop()");
@@ -384,15 +399,21 @@ void CEngineThread::runLoop ()
                     data->setStatus (Management::MNG_WARNING);
                 }
 		        m_fileOpened = true;
-			// Start writing file
+			    // Start writing file
                 tS.value (now.value().value);
                 out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Calibration Tool Start\n", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (),
                         (long)(tS.microSecond () / 10000.));
                 m_file << (const char *) out;
 		    }
 
-		if (m_checkScan == 1)
-			m_checkScan = 0; // TBC!!!!!!!!!!!!!
+            /* if at this level this parameter is 1 it means that a LON
+             * scan is missed and then all the LAT-LON sequence must be
+             * discarded and restarted with a new one LAT-LON sequence
+             */
+            if (m_checkScan == 1) {
+                    ACS_LOG (LM_FULL_INFO, "CalibrationTool::CEngineThread::runLoop()", (LM_NOTICE, "LON SCAN MISSED, RESTART WITH A NEW LAT-LON SEQUENCE"));
+                    m_checkScan = 0;
+            }
 
             if (/*(m_lonDone == 0) && (m_latDone == 0) && */(m_checkScan == 0)) {
                 /*// Start writing file
@@ -402,7 +423,7 @@ void CEngineThread::runLoop ()
                 m_file << (const char *) out;*/
                 // File Name
                 tS.value (now.value().value);
-                fileName = data->getFileName ();
+                fileName = data->getFileName();
                 out.Format("%04d.%03d.%02d:%02d:%02d.%02d#File Name: ", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),(long)(tS.microSecond()/10000.));
                 m_file << (const char *) out;
                 m_file << (const char *) fileName << std::endl;
@@ -414,34 +435,30 @@ void CEngineThread::runLoop ()
                 m_file << (const char *) out;
                 m_file << (const char *) projectName << std::endl;
                 // Observer Name
-		      tS.value (now.value().value);
-		      observerName = data->getObserverName ();
-		      out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Observer Name: ",
+		        tS.value (now.value().value);
+		        observerName = data->getObserverName ();
+		        out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Observer Name: ",
 			   tS.year (), tS.dayOfYear (), tS.hour (),
 			   tS.minute (), tS.second (),
 			   (long)(tS.microSecond () / 10000.));
-		      m_file << (const char *) out;
-		      m_file << (const char *) observerName << std::endl;
+		        m_file << (const char *) out;
+		        m_file << (const char *) observerName << std::endl;
 		      // Source Name
 		      targetRef = m_antennaBoss->target ();
 		      target = targetRef->get_sync (completion.out ());
 		      ACSErr::CompletionImpl targetCompl (completion);
-		      if (!targetCompl.isErrorFree ())
-			{
-			    _ADD_BACKTRACE (ComponentErrors::
-					    CouldntGetAttributeExImpl, impl,
+		      if (!targetCompl.isErrorFree ()) {
+                  _ADD_BACKTRACE (ComponentErrors::CouldntGetAttributeExImpl, impl,
 					    targetCompl,
 					    "CEngineThread::collectAntennaData()");
-			    impl.setAttributeName ("target");
-			    impl.setComponentName ((const char *) m_config->getAntennaBossComponent());
-			    impl.log (LM_ERROR);
-			    data->setStatus (Management::MNG_WARNING);
-			    sourceName = "";
-			}
+                  impl.setAttributeName ("target");
+                  impl.setComponentName ((const char *) m_config->getAntennaBossComponent());
+                  impl.log (LM_ERROR);
+                  data->setStatus (Management::MNG_WARNING);
+                  sourceName = "";
+              }
 		      else
-			{
-			    sourceName = (const char *) target;
-			}
+                  sourceName = (const char *) target;
 		      data->setSourceName (sourceName);
 		      tS.value (now.value().value);
 		      out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#source ",
@@ -452,9 +469,8 @@ void CEngineThread::runLoop ()
 		      m_file << (const char *) sourceName;
 		      m_file << " 000000.0 +000000 0000.0 0000.000.00:00:00" << std::endl;
 
-		      //sourceFlux_var = m_antennaBoss->sourceFlux();
-		      //sourceFlux_val = sourceFlux_var->get_sync(completion.out());
-		      sourceFlux_val = 1.0;
+		      sourceFlux_var = m_antennaBoss->targetFlux();
+		      sourceFlux_val = sourceFlux_var->get_sync(completion.out());
 		      data->setSourceFlux (sourceFlux_val);
 
 		      tS.value (now.value().value);
@@ -572,11 +588,10 @@ void CEngineThread::runLoop ()
 		      m_Par[0] = tmax;
 		      m_Par[1] = m_off[imax - 1];
 
-		      BWHM_var = m_antennaBoss->BWHM ();
+		      BWHM_var = m_antennaBoss->FWHM ();
 		      BWHM_val = BWHM_var->get_sync (completion.out ());
 
-		      if (m_CoordIndex == 1 /*&& m_latResult == 0*/)
-			{	// LAT scans
+		      if (m_CoordIndex == 1 /*&& m_latResult == 0*/) {	// LAT scans
 			    m_Par[2] = BWHM_val;
 
 			    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par,

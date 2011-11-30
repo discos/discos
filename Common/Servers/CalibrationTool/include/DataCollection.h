@@ -20,6 +20,7 @@
 #include <Definitions.h>
 #include <acsContainerServices.h>
 #include "Configuration.h"
+#include <DataReceiverS.h>
 
 
 // number of dumps in the cache
@@ -189,16 +190,6 @@ public:
 	const IRA::CString& getProjectName() const { return m_projectName; }
 	
 	/**
-	 * Sets the identifier number of the next scan
-	 */
-	void setScanId(const long& id) { m_scanId=id; }
-	
-	/**
-	 * get the identifer number of the next scan
-	 */
-	const long& getScanId() const { return m_scanId; }
-
-	/**
 	 * Sets the identifier number of the device
 	 */
 	void setDevice(const long& deviceID) { m_deviceID=deviceID; }
@@ -211,12 +202,12 @@ public:
 	/**
 	 * Set the current observer name
 	 */
-	void setObserverName(const IRA::CString& observer) { m_observer=observer; }
+	void setObserverName(const IRA::CString& observerName) { m_observerName=observerName; }
 	
 	/**
 	 * Get the name of the observer
 	 */
-	const IRA::CString& getObserverName() const { return m_observer; }
+	const IRA::CString& getObserverName() const { return m_observerName; }
 	
 	/**
 	 * Set the current source name
@@ -313,6 +304,11 @@ public:
 	 * @return the <i>m_start</i> flag, tham means the component is opening the file
 	 */
 	bool isStart() const { return m_start; }
+
+    /**
+	 *  @return the <i>m_reset</i> flag, that means the component must perform the actions required for a reset
+	 */
+	bool isReset() const { return m_reset; }
 	
 	/**
 	 * It puts the component into the stop stage
@@ -328,6 +324,11 @@ public:
 	 * If puts the component into the initial situation halting the stop stage
 	 */
 	void haltStopStage();
+
+    /**
+	 * acknowledge that the component has been reset
+	 */
+	void haltResetStage();
 	
 	/**
 	 * allows to set the current tracking flag from the telescope
@@ -437,12 +438,40 @@ public:
      * sets arrayDataX value
      */
     void setArrayDataX(ACS::doubleSeq arrayDataX) {m_arrayDataX=arrayDataX;}
+
+    /**
+	 * Change current scan information
+	 * @param setup scan setup structure
+	 * @param recording set in case of error, true if the method was called during recording
+	 * @param inconsistent set in case of error, true if the method was called when sun scan headers were not expected
+	 * @return false if the operation could not be done
+	 */
+	bool setScanSetup(const Management::TScanSetup& setup,bool& recording,bool& inconsistent);
+
+    /**
+	 * Change current sub scan information
+	 * @param setup sub scan setup structure
+	 * @param recording set in case of error, true if the method was called during recording
+	 * @param inconsistent set in case of error, true if the method was called when sun scan headers were not expected
+	 * @return false if the operation could not be done
+	 */
+	bool setSubScanSetup(const Management::TSubScanSetup& setup,bool& recording,bool& inconsistent);
 		
+    /**
+	 * Set the scan stage to STOP
+	 */
+	bool scanStop();
+
+    /**
+	 * Set the flags so that the component can reset itself
+	 */
+	void forceReset();
+
 private:
 	/** the name of the file */
 	IRA::CString m_fileName;
 	IRA::CString m_projectName;
-	IRA::CString m_observer;
+	IRA::CString m_observerName;
 	/** the data block coming from the antenna */
 	//Antenna::AntennaDataBlock m_antennaData;
 	/** the data block coming from the antenna the previous one */
@@ -471,6 +500,11 @@ private:
 	 *  indicates if the component is saving...
 	 */
 	bool m_running;
+    /**
+	 * true if the headers of scan and subscan have been received respectively
+	 */
+	bool m_scanHeader;
+	bool m_subScanHeader;
 	/**
 	 * indicates that headers have been received
 	 */
@@ -483,14 +517,14 @@ private:
 	 * indicates that the file has to be opened
 	 */
 	bool m_start;
+    /**
+	 * a reset request has been received
+	 */
+	bool m_reset;
 	/**
 	 * Name of the currently observed source
 	 */
 	IRA::CString m_sourceName;
-	/**
-	 * Scan identifier number
-	 */
-	long m_scanId;
 	/**
 	 * Device number
 	 */

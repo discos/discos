@@ -9,7 +9,6 @@
 #include "DevIOFileName.h"
 #include "DevIOProjectName.h"
 #include "DevIOObserver.h"
-#include "DevIOScanIdentifier.h"
 #include "DevIODeviceID.h"
 #include "DevIOScanAxis.h"
 #include "DevIODataY.h"
@@ -22,7 +21,6 @@
 #include "DevIOSlope.h"
 #include "DevIOOffset.h"
 #include "DevIOSourceFlux.h"
-#include "DevIOSourceName.h"
 
 
 static char *rcsId="@(#) $Id: CalibrationToolImpl.cpp,v 1.5 2011-03-11 12:27:21 c.migoni Exp $";
@@ -56,7 +54,6 @@ CalibrationToolImpl::CalibrationToolImpl(const ACE_CString& name, maci::Containe
 	m_pfileName(this),
     m_pprojectName(this),
     m_pobserver(this),
-    m_pscanIdentifier(this),
     m_pdeviceID(this),
     m_pscanAxis(this),
     m_pdataY(this),
@@ -68,8 +65,7 @@ CalibrationToolImpl::CalibrationToolImpl(const ACE_CString& name, maci::Containe
     m_ppeakOffset(this),
     m_pslope(this),
     m_poffset(this),
-    m_psourceFlux(this),
-    m_psourceName(this)
+    m_psourceFlux(this)
 { 
 }
 
@@ -100,8 +96,6 @@ void CalibrationToolImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				new CalibrationTool_private::DevIOProjectName(m_dataWrapper),true);
 		m_pobserver=new ROstring(getContainerServices()->getName()+":observer",getComponent(),
 				new CalibrationTool_private::DevIOObserver(m_dataWrapper),true);
-		m_pscanIdentifier=new ROlong(getContainerServices()->getName()+":scanIdentifier",getComponent(),
-				new CalibrationTool_private::DevIOScanIdentifier(m_dataWrapper),true);
 		m_pdeviceID=new ROlong(getContainerServices()->getName()+":deviceID",getComponent(),
 				new CalibrationTool_private::DevIODeviceID(m_dataWrapper),true);
 		m_pscanAxis=new ROEnumImpl<ACS_ENUM_T(Management::TScanAxis),POA_Management::ROTScanAxis>
@@ -126,8 +120,6 @@ void CalibrationToolImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				new CalibrationTool_private::DevIOOffset(m_dataWrapper),true);
 		m_psourceFlux=new ROdouble(getContainerServices()->getName()+":sourceFlux",getComponent(),
 				new CalibrationTool_private::DevIOSourceFlux(m_dataWrapper),true);
-		m_psourceName=new ROstring(getContainerServices()->getName()+":sourceName",getComponent(),
-				new CalibrationTool_private::DevIOSourceName(m_dataWrapper),true);
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CalibrationToolImpl::initialize()");
@@ -211,55 +203,71 @@ void CalibrationToolImpl::aboutToAbort()
 	delete m_dataWrapper;
 }
 
-void CalibrationToolImpl::setFileName (const char* fileName) throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx)
+void CalibrationToolImpl::startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_dataWrapper->Get();
-	/*if (!data->setFileName(IRA::CString(fileName))) {
-		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CalibrationToolImpl::setFileName");
-		impl.setReason("Could not change file name while recording");
+	bool rec,inc;
+	if (!data->setScanSetup(prm,rec,inc)) {
+		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CalibrationToolImpl::startScan");
+		if (rec) {
+			impl.setReason("Could not start a new scan while recording");
+		}
+		else if (inc) {
+			impl.setReason("Could not start a new scan right now");
+		}
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
-	}*/
-	data->setFileName(fileName);
+	}
+	ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::startScan()",(LM_DEBUG,"START_SCAN_ISSUED"));
 }
 
-void CalibrationToolImpl::setObserverName(const char *observer) throw (CORBA::SystemException)
+void CalibrationToolImpl::startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_dataWrapper->Get();
-	data->setObserverName(observer);
+	bool rec,inc;
+	if (!data->setSubScanSetup(prm,rec,inc)) {
+		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CalibrationTool::startSubScan");
+		if (rec) {
+			impl.setReason("Could not start a new subscan while recording");
+		}
+		else if (inc) {
+			impl.setReason("Could not start a new subscan right now");
+		}
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+	ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::startSubScan()",(LM_DEBUG,"START_SUBSCAN_ISSUED"));
 }
 
-void CalibrationToolImpl::setProjectName(const char *projectName) throw (CORBA::SystemException)
+void CalibrationToolImpl::stopScan() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_dataWrapper->Get();
-	data->setProjectName(projectName);
+	data->scanStop();
+	ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::stopScan()",(LM_DEBUG,"STOP_SCAN_ISSUED"));
 }
 
-void CalibrationToolImpl::setScanIdentifier(CORBA::Long identifier) throw (CORBA::SystemException)
+CORBA::Boolean CalibrationToolImpl::isRecording() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_dataWrapper->Get();
-	data->setScanId(identifier);	
+	return (CORBA::Boolean)data->isRunning();
 }
 
-void CalibrationToolImpl::setDevice(CORBA::Long deviceID) throw (CORBA::SystemException)
+
+void CalibrationToolImpl::reset() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_dataWrapper->Get();
-	data->setDevice(deviceID);	
+	data->forceReset();
 }
 
-void CalibrationToolImpl::setScanAxis(Management::TScanAxis scanAxis) throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx)
+void CalibrationToolImpl::setScanLayout (const ACS::stringSeq & layout) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
-	CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_dataWrapper->Get();
-	data->setScanAxis(scanAxis);
+    ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::setScanLayout()",(LM_DEBUG,"SET_SCAN_LAYOUT"));
 }
 
 _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,Management::ROTSystemStatus,m_pstatus,status);
 _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROstring,m_pfileName,fileName);
 _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROstring,m_pprojectName,projectName);
 _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROstring,m_pobserver,observer);
-_PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROlong,m_pscanIdentifier,scanIdentifier);
 _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROlong,m_pdeviceID,deviceID);
 _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,Management::ROTScanAxis,m_pscanAxis,scanAxis);
 _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROdouble,m_pdataY,dataY);
@@ -272,7 +280,6 @@ _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROdouble,m_ppeakOffset,peakOffs
 _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROdouble,m_pslope,slope);
 _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROdouble,m_poffset,offset);
 _PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROdouble,m_psourceFlux,sourceFlux);
-_PROPERTY_REFERENCE_CPP(CalibrationToolImpl,ACS::ROstring,m_psourceName,sourceName);
 
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>
