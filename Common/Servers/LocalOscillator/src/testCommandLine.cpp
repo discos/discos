@@ -13,32 +13,42 @@ int main(int argv, char** argc)
 	double freq;
 
 	try{
-		cl->configure(0,10,0,T10s,1,0);
-
+		cl->configure(1,19,0,T10s,1,0);
+		cout <<"configured" <<endl;
 		cl->query("*IDN?",reply);
+		cout << "sent *IDN?" << endl;
 
-		cout <<reply.c_str() << endl;
 
 		cl->sendCMD("*RST");
  		cout <<reply.c_str() << endl;
+		cl->query("SYST:ERR?",reply);
 
-		cl->setFreq(1.2345);// set 1 MHz.
+		cl->setFreq(50);// set 1 MHz.
 		cl->query("SYST:ERR?",reply);
 		cout <<reply.c_str() << endl;
 
-		cl->query("FREQ?",reply);
+		cout << cl->getFreq(freq) <<endl;
+		cout << "FREQ:" << freq <<endl;
+//		cl->query("FREQ?",reply);
+		cl->query("SYST:ERR?",reply);
 		cout <<reply.c_str() << endl;
+
+		cl->setPower(-1.1);
+
 //		FREQ:CW 1234.567MHZ
-//		cl->query("POW AMPL?",reply);
-		cl->sendCMD("POW 1.1dBM");
+//		cl->query("POW?",reply);
+//		cl->sendCMD("POW -1.1dBM");
 		cl->queryErrors(reply);
 		int code;
-
 		code= cl->parseSCPIErrors(reply,reply);
 		cout <<reply.c_str() << code << endl;
 		cl->getFreq(freq);
+
 		cout <<"freq:" <<freq <<endl;
-	    cout <<"freq:" <<freq <<endl;
+		double pow;
+		cl->getPower(pow);
+
+	    cout <<"pow:" <<pow <<endl;
 	    cl->disconnect();
 
 //		int configure(int boardID, int pad, int sad, int tmo, int eot, int eos) throw (GPIBException);

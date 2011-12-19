@@ -89,7 +89,8 @@ static const string POWERCMD="FREQ AMPL";
 static const string RFONCMD="OUTP:STAT ON";
 static const string RFOFFCMD="OUTP:STAT OFF";
 static const string QUERYRF="OUTP:STAT?";
-
+static const string FREQUNIT=" MHZ";
+static const string POWERUNIT=" dBM";
 
 
 
@@ -218,13 +219,12 @@ int CommandLine::setPower(double pow) throw (GPIBException)
 
 	try{
 		string cmd;
-		cmd="POW " + stringify(pow)+"dbm";
+		cmd="POW " + stringify(pow)+POWERUNIT;
 		sendCMD(cmd);
 
 	} catch (GPIBException& ex)
 
 	{
-
 
 		throw;
 
@@ -239,7 +239,9 @@ int CommandLine::getFreq(double & freq) throw (GPIBException)
 	try {
 		string reply;
 		query(QUERYFREQ,reply);
+		cout << "commandline freq:" <<reply << endl;
 		freq=atof(reply.c_str());
+		return 0;
 
 	}  	catch (GPIBException& ex)
 
@@ -247,6 +249,7 @@ int CommandLine::getFreq(double & freq) throw (GPIBException)
 
 
 			throw ex;
+			return -1;
 
 	}
 }
@@ -257,7 +260,7 @@ int CommandLine::setFreq(double freq) throw (GPIBException){
 	try{
 
 		string cmd;
-		cmd=FREQCMD+ stringify(freq);
+		cmd=FREQCMD+ stringify(freq)+FREQUNIT;
 		sendCMD(cmd);
 
 	} catch (GPIBException& ex)
@@ -345,8 +348,11 @@ int CommandLine::rfOn() throw (GPIBException)
 {
 	try{
 		string reply;
+		int iReply;
+
 		query(QUERYRF,reply);
-		if (reply == "OFF"){
+		iReply=atof(reply.c_str());
+		if (iReply == 0){
 			sendCMD(RFONCMD);
 
 		} //  turn on only if is off.
@@ -367,8 +373,11 @@ int CommandLine::rfOff() throw (GPIBException)
 
 	try{
 			string reply;
+			int iReply;
 			query(QUERYRF,reply);
-			if (reply == "ON"){
+			iReply=atof(reply.c_str());
+
+			if (iReply == 1){
 				sendCMD(RFOFFCMD);
 
 			} //  turn on only if is off.

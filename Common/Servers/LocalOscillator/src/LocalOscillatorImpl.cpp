@@ -121,17 +121,17 @@ void LocalOscillatorImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 			  		  throw dummy;
 		  	  }
 
-		CString tmps;
+//		CString tmps;
 //		CIRATools::getDBValue(getContainerServices(),getContainerServices()->getName()+":frequency.units",tmps);
 //		CDB::DAL_ptr dal_p = getContainerServices()->getCDB();
 //		CDB::DAO_ptr dao_p = dal_p->get_DAO_Servant("alma/RECEIVERS/LO");
 //		tmps=CString(dao_p->get_string("frequency/units"));
 
- 		CIRATools //	cout << "name:" <<name.c_str() << endl;
-::getDBValue(getContainerServices(),"frequency/units",tmps);
+ 	//	CIRATools //	cout << "name:" <<name.c_str() << endl;
+// 		CIRATools::getDBValue(getContainerServices(),"frequency/units",tmps);
 
 
-		cout << (const char *) tmps << endl;
+//		cout << (const char *) tmps << endl;
 
 
 	   CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
