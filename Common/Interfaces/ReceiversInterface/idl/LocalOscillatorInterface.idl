@@ -34,17 +34,20 @@ module Receivers {
 	/**
 	 set the LO parameters 
 	 
-	 @param rf_power signal power
-	 @param rf_freq	 signal frequency
-
+	 @param rf_power signal power (Units: dBM)
+	 @param rf_freq	 signal frequency (Units: MHz )
+    * @throw ReceiversErrors::ReceiversErrorsEx
+    * @throw CORBA::SystemExcpetion 
 	*/
+
 	
 	void set(in double rf_power, in double rf_freq) raises (ReceiversErrors::ReceiversErrorsEx);
 	/**
 	 get the LO parameters 
 	 
-	 @param rf_power signal power
-	 @param rf_freq	 signal frequency
+	 
+	 @param rf_power signal power (Units: dBM)
+	 @param rf_freq	 signal frequency (Units: MHz )
     * @throw ReceiversErrors::ReceiversErrorsEx
     * @throw CORBA::SystemExcpetion 
 	*/
@@ -66,6 +69,8 @@ module Receivers {
 	*/
 	void rfoff()raises (ReceiversErrors::ReceiversErrorsEx);
 	};
+
+
 
 };
 
