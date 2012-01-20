@@ -2,7 +2,7 @@
 <AcsCommandCenterProject xmlns="Alma/Acs/AcsCommandCenterProject"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     creator="acc-v7.0" xsi:type="AcsCommandCenterProject">
-    <mode>remote</mode>
+    <mode>remote_daemon</mode>
     <servicesLocalJavaRoot>/alma/ACS-7.0/acsdata/config/defaultCDB</servicesLocalJavaRoot>
     <scriptBase>0</scriptBase>
     <remoteHost>192.168.1.104</remoteHost>
@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>0</select>
+        <select>8</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -26,7 +26,6 @@
             <scriptBase>0</scriptBase>
             <remoteHost>192.168.1.104</remoteHost>
             <remoteAccount></remoteAccount>
-            <remotePassword></remotePassword>
         </container>
         <container>
             <name>MountContainer</name>
@@ -35,7 +34,6 @@
             <scriptBase>0</scriptBase>
             <remoteHost>192.168.1.104</remoteHost>
             <remoteAccount></remoteAccount>
-            <remotePassword></remotePassword>
         </container>
         <container>
             <name>AntennaContainer</name>
@@ -44,7 +42,6 @@
             <scriptBase>0</scriptBase>
             <remoteHost>192.168.1.104</remoteHost>
             <remoteAccount></remoteAccount>
-            <remotePassword></remotePassword>
         </container>
         <container>
             <name>ReceiversContainer</name>
@@ -53,7 +50,6 @@
             <scriptBase>0</scriptBase>
             <remoteHost>192.168.1.104</remoteHost>
             <remoteAccount></remoteAccount>
-            <remotePassword></remotePassword>
         </container>
         <container>
             <name>TotalPowerContainer</name>
@@ -62,7 +58,6 @@
             <scriptBase>0</scriptBase>
             <remoteHost>192.168.1.104</remoteHost>
             <remoteAccount></remoteAccount>
-            <remotePassword></remotePassword>
         </container>
         <container>
             <name>NoiseGeneratorContainer</name>
@@ -71,7 +66,6 @@
             <scriptBase>0</scriptBase>
             <remoteHost>192.168.1.104</remoteHost>
             <remoteAccount></remoteAccount>
-            <remotePassword></remotePassword>
         </container>
         <container>
             <name>ManagementContainer</name>
@@ -80,7 +74,6 @@
             <scriptBase>0</scriptBase>
             <remoteHost>192.168.1.104</remoteHost>
             <remoteAccount></remoteAccount>
-            <remotePassword></remotePassword>
         </container>
         <container>
             <name>FitsZillaContainer</name>
@@ -89,7 +82,15 @@
             <scriptBase>0</scriptBase>
             <remoteHost>192.168.1.104</remoteHost>
             <remoteAccount></remoteAccount>
-            <remotePassword></remotePassword>
+        </container>
+        <container>
+            <name>CalibrationToolContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>192.168.1.104</remoteHost>
+            <remoteAccount></remoteAccount>
         </container>
     </containers>
 </AcsCommandCenterProject>

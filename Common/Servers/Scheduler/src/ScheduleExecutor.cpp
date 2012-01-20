@@ -961,7 +961,7 @@ void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec,const Sched
 	IRA::CString outputFileName;
 	ACS::TimeInterval startLst;
 	Management::TScanAxis scanAxis;
-	IRA::CString baseName,path,extraPath,layoutName;
+	IRA::CString baseName,path,extraPath/*,layoutName*/,targetID;
 	if (rec.ut==0) {
 		TIMEVALUE now;
 		TIMEDIFFERENCE lst;
@@ -988,6 +988,9 @@ void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec,const Sched
 		path=m_core->m_config->getDataDirectory();
 	}
 	baseName=CCore::computeOutputFileName(m_startRecordTime,startLst,m_schedule->getProjectName(),rec.suffix,extraPath);
+
+	Antenna::TTrackingParameters *prim=static_cast<Antenna::TTrackingParameters *>(scanRec.primaryParameters);
+	targetID=(const char *)prim->targetName;
 	//**************************************************************
 	//  It would be better to have a function that computes the below algorithm  in order to share it with  the cross scan code.....
 	//**************************************************************
@@ -1023,7 +1026,7 @@ void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec,const Sched
 	// *******************************
 	if ((rec.backendProc!=_SCHED_NULLTARGET) && (rec.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
 		CCore::setupDataTransfer(m_scanStarted,m_streamPrepared,m_writer.in(),m_writerError,m_backend.in(),m_backendError,m_schedule->getObserverName(),
-				m_schedule->getProjectName(),baseName,path,extraPath,m_schedule->getFileName(),layoutName,layoutProc,m_schedule->getScanTag(),m_core->getCurrentDevice(),
+				m_schedule->getProjectName(),baseName,path,extraPath,m_schedule->getFileName(),targetID,rec.layout,layoutProc,m_schedule->getScanTag(),m_core->getCurrentDevice(),
 				rec.scanid,m_startRecordTime ,rec.subscanid,scanAxis);
 		// throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
 		CCore::startDataTansfer(m_backend.in(),m_backendError,rec.ut,m_streamStarted,m_streamPrepared,m_streamConnected);

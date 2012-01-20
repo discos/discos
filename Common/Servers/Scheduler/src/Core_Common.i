@@ -421,6 +421,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
 																		const IRA::CString& path,
 																		const IRA::CString& extraPath,
 																		const IRA::CString& schedule,
+																		const IRA::CString& targetID,
 																		const IRA::CString& layoutName,
 																		const ACS::stringSeq& layout,
 																		const long& scanTag,
@@ -443,7 +444,12 @@ void CCore::setupDataTransfer(bool& scanStarted,
  				setup.path=CORBA::string_dup((const char *)path);
  				setup.extraPath=CORBA::string_dup((const char *)extraPath);
  				setup.schedule=CORBA::string_dup((const char *)schedule);
- 				setup.scanLayout=CORBA::string_dup((const char *)layoutName);
+ 				if (layoutName!=_SCHED_NULLTARGET) {
+ 					setup.scanLayout=CORBA::string_dup((const char *)layoutName);
+ 				}
+ 				else {
+ 					setup.scanLayout=CORBA::string_dup((const char *)"");
+ 				}
  				setup.device=device;
  				writer->startScan(setup);
  				scanStarted=true;
@@ -516,6 +522,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
  			subSetup.axis=axis;
  			subSetup.extraPath=CORBA::string_dup((const char *)extraPath);
  			subSetup.baseName=CORBA::string_dup((const char *)baseName);
+ 			subSetup.targetID=CORBA::string_dup((const char *)targetID);
  			writer->startSubScan(subSetup);
  		}
 		else {

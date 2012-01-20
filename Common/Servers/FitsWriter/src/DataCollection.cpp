@@ -277,7 +277,7 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 			}
 			m_subScanHeader=true;
 			m_scanAxis=setup.axis;
-			//setup.startUt, is not used
+			//setup.startUt and setup.targetID are not used
 			return true;
 		}
 		else {

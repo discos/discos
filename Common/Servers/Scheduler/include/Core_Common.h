@@ -88,6 +88,7 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
  * @param path path to the file that has to be created
  * @param extraPath indicates the extra folder that has to be created (from basePath) in order to contain the file
  * @param schedule name of the schedule file
+ * @param targetID identifier of the target of the subscan
  * @param layoutName name of the layout configuration
  * @param layout layout of the scan
  * @param scanTag numerical label to be attached to the scan
@@ -95,9 +96,9 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
  * @param axis indicates which axis is currently used by the telescope.
  */
 static void setupDataTransfer(bool& scanStarted,bool& streamPrepared,Management::DataReceiver_ptr writer,bool& writerError,Backends::GenericBackend_ptr backend,bool& backendError,
-		const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& layoutName,
-		const ACS::stringSeq& layout,const long& scanTag,const long& device,const DWORD& scanID,const ACS::Time& startTime,const  DWORD& subScanID,const Management::TScanAxis& axis) throw (
-				ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl);
+		const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& targetID,
+		const IRA::CString& layoutName,const ACS::stringSeq& layout,const long& scanTag,const long& device,const DWORD& scanID,const ACS::Time& startTime,const  DWORD& subScanID,
+		const Management::TScanAxis& axis) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl);
 
 /**
  * This static method starts the data transfer between the backend and the configured data recorder.

@@ -447,7 +447,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	CORBA::Double offset;
 	Management::TScanAxis scanAxis;
 	IRA::CString obsName,prj,suffix,path,extraPath,baseName;
-	IRA::CString layoutName,schedule;
+	IRA::CString layoutName,schedule,targetID;
 	ACS::stringSeq layout;
 	long scanTag=0;
 	long scanID=1,subScanID;
@@ -461,6 +461,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	layout.length(0);
 	layoutName=_SCHED_NULLTARGET;
 	schedule="crossScan";
+	targetID="crossScanTarget";
 	
 	// now take the mutex
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -475,6 +476,15 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 			ACSErr::CompletionImpl compImpl(comp);
 			if (compImpl.isErrorFree()) {
 				bwhm=tmp;
+			}
+		}
+		ACS::ROstring_var targetRef=m_antennaBoss->target();
+		if (!CORBA::is_nil(targetRef)) {
+			CORBA::String_var  tmp;
+			tmp=targetRef->get_sync(comp.out());
+			ACSErr::CompletionImpl compImpl(comp);
+			if (compImpl.isErrorFree()) {
+				targetID=(const char *)tmp;
 			}
 		}
 	}
@@ -587,7 +597,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	subScanID=1;
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
 	CCore::setupDataTransfer(m_scanStarted,m_streamPrepared,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
-			obsName,prj,baseName,path,extraPath,schedule,layoutName,layout,scanTag,m_currentDevice,scanID,startTime,subScanID,scanAxis);
+			obsName,prj,baseName,path,extraPath,schedule,targetID,layoutName,layout,scanTag,m_currentDevice,scanID,startTime,subScanID,scanAxis);
 	// start the recording or data transfer
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
 	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);
@@ -655,7 +665,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	subScanID=2;
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
 	CCore::setupDataTransfer(m_scanStarted,m_streamPrepared,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
-			obsName,prj,baseName,path,extraPath,schedule,layoutName,layout,scanTag,m_currentDevice,scanID,startTime,subScanID,scanAxis);
+			obsName,prj,baseName,path,extraPath,schedule,targetID,layoutName,layout,scanTag,m_currentDevice,scanID,startTime,subScanID,scanAxis);
 	// start the recording or data transfer
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
 	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);

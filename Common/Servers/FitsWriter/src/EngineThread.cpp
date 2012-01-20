@@ -627,7 +627,7 @@ void CEngineThread::collectAntennaData()
 		try { //get the target name and parameters
 			ACS::ROstring_var targetRef;
 			CORBA::String_var target;
-			ACS::ROdouble_var raRef,decRef,vlsrRef;	
+			ACS::ROdouble_var raRef,decRef,vlsrRef;
 			ACS::ROdouble_var raOffRef,decOffRef,azOffRef,elOffRef,lonOffRef,latOffRef;
 			//let's take the references to the attributes
 			targetRef=m_antennaBoss->target();

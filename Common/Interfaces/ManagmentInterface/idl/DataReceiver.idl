@@ -43,6 +43,7 @@ module Management {
 		ACS::Time startUt;
 		long subScanId;
 		TScanAxis axis;
+		string targetID;
 		string extraPath;
 		string baseName;  //name of the file
 	} TSubScanSetup;

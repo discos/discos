@@ -975,7 +975,7 @@ bool CScanList::parseOTFC(const IRA::CString& val,Antenna::TTrackingParameters *
 	double duration;
 	Antenna::TCoordinateFrame frame;
 	long out;
-	scan->targetName=CORBA::string_dup("");
+	//scan->targetName=CORBA::string_dup("");
 	scan->paramNumber=0;
 	scan->latitudeOffset=scan->longitudeOffset=0.0;
 	scan->applyOffsets=false;
@@ -1087,6 +1087,7 @@ bool CScanList::parseOTFC(const IRA::CString& val,Antenna::TTrackingParameters *
 	}
 	Antenna::TTrackingParameters *tmp=static_cast<Antenna::TTrackingParameters *>(rec.primaryParameters);
 	secScan->targetName=CORBA::string_dup(tmp->targetName);
+	scan->targetName=CORBA::string_dup(tmp->targetName);
 	secScan->type=tmp->type;
 	for (long k=0;k<Antenna::ANTENNA_TRACKING_PARAMETER_NUMBER;k++) secScan->parameters[k]=tmp->parameters[k];
 	secScan->paramNumber=tmp->paramNumber;
