@@ -80,9 +80,9 @@ WORD CACUProtocol::rate(const double& azRate,const double& elRate,BYTE *& buff,T
 	return modeCommand(MODE_RATE,MODE_RATE,azFactor,az,elFactor,el,buff,command,commNumber);
 }
 
-WORD CACUProtocol::programTrack(BYTE *& buff,TCommand *& command,WORD& commNumber)
+WORD CACUProtocol::programTrack(const double& azMaxRate,const double& elMaxRate,BYTE *& buff,TCommand *& command,WORD& commNumber)
 {
-	return modeCommand(MODE_PROGRAMTRACK,MODE_PROGRAMTRACK,0.0,0.0,0.0,0.0,buff,command,commNumber);
+	return modeCommand(MODE_PROGRAMTRACK,MODE_PROGRAMTRACK,0.0,azMaxRate,0.0,elMaxRate,buff,command,commNumber);
 }
 
 WORD CACUProtocol::activate(bool azimuth,bool elevation,BYTE *& buff,TCommand *& command,WORD& commNumber)
@@ -120,12 +120,13 @@ WORD CACUProtocol::stop(BYTE *& buff,TCommand *& command,WORD& commNumber)
 
 WORD CACUProtocol::resetErrors(BYTE *& buff,TCommand *& command,WORD& commNumber)
 {
-	return modeCommand(MODE_RESET,MODE_RESET,0.0,0.0,0.0,0.0,buff,command,commNumber);
+	//return modeCommand(MODE_RESET,MODE_RESET,0.0,0.0,0.0,0.0,buff,command,commNumber);
+	return modeCommand(buff,command,commNumber);
 }
 
-WORD CACUProtocol::stow(BYTE *& buff,TCommand *& command,WORD& commNumber)
+WORD CACUProtocol::stow(const double& stowSpeed,BYTE *& buff,TCommand *& command,WORD& commNumber)
 {
-	return modeCommand(MODE_IGNORE,MODE_DRIVETOSTOW,0.0,0.0,0.0,0.0,buff,command,commNumber);
+	return modeCommand(MODE_IGNORE,MODE_DRIVETOSTOW,0.0,0.0,0.0,stowSpeed*0.5,buff,command,commNumber);
 }
 
 WORD CACUProtocol::unstow(BYTE *& buff,TCommand *& command,WORD& commNumber)
@@ -148,13 +149,13 @@ WORD CACUProtocol::positionOffsets(const double& azOff,const double& elOff,BYTE 
 	return packMessage(msg,len,commNumber,buff);
 }
 
-WORD CACUProtocol::loadProgramTrack(const TProgramTrackPoint *seq,const WORD& size,bool newTable,const double& azRate,const double& elRate,BYTE *& buff,TCommand *& command,WORD& commNumber)
+WORD CACUProtocol::loadProgramTrack(const ACS::Time& startEpoch,const TProgramTrackPoint *seq,const WORD& size,bool newTable,const double& azRate,const double& elRate,BYTE *& buff,TCommand *& command,WORD& commNumber)
 {
 	BYTE msg[CACUProtocol::SOCKET_SEND_BUFFER];
 	WORD len=0;
 	TUINT32 counter;
 	double mjd;
-	ACS::Time startUt;
+	//ACS::Time startUt;
 	long timeDiff;
 	command=NULL;
 	commNumber=1;
@@ -175,15 +176,15 @@ WORD CACUProtocol::loadProgramTrack(const TProgramTrackPoint *seq,const WORD& si
 		copyData<TUINT16>(msg,PROGRAMTRACK_LOAD_MODE_APPEND_TABLE,len);  // load mode: new entries will be attached to the existing table
 	}
 	copyData<TUINT16>(msg,size,len);  // sequence length
-	startUt=seq[0].timeMark;
-	mjd=time2MJD(startUt);
+	//startUt=seq[0].timeMark;
+	mjd=time2MJD(startEpoch);
 	copyData<TREAL64>(msg,mjd,len);  // startTime as modified julian date
 	copyData<TREAL64>(msg,azRate,len);  // max speed in azimuth..
 	copyData<TREAL64>(msg,elRate,len);  // max speed in elevation...
 	for (WORD i=0;i<size;i++) {
-		timeDiff=(seq[i].timeMark-startUt); // 100 ns
+		timeDiff=(seq[i].timeMark-startEpoch); // 100 ns
 		timeDiff=(long)(timeDiff/10000); // milliseconds
-		copyData<TINT32>(msg,timeDiff,len);  
+		copyData<TINT32>(msg,timeDiff,len);
 		copyData<TREAL64>(msg,seq[i].azimuth,len);
 		copyData<TREAL64>(msg,seq[i].elevation,len);
 	}
@@ -344,6 +345,33 @@ CACUProtocol::TTimeSources CACUProtocol::str2TimeSource(const IRA::CString ts)
 		return TS_EXTERNAL;
 	}
 }
+
+
+WORD CACUProtocol::modeCommand(BYTE *& outBuff,TCommand *& command,WORD& commNumber) const
+{
+	BYTE msg[CACUProtocol::SOCKET_SEND_BUFFER];
+	WORD len=0;
+	TUINT32 counter;
+	commNumber=1;
+	command=NULL;
+	command=new TCommand[commNumber];
+	copyData<TUINT16>(msg,3,len);
+	copyData<TUINT16>(msg,4,len);
+	counter=getMillisOfTheDay()+1;
+	copyData<TUINT32>(msg,counter,len);
+	copyData<TUINT16>(msg,9,len);
+	copyData<TREAL64>(msg,0,len);
+	copyData<TREAL64>(msg,0,len);	
+	command[0].subsystem=4;
+	command[0].command=3;
+	command[0].counter=counter;
+	command[0].answer=NO_COMMAND;
+	command[0].parameterCommand=false;
+	command[0].error=false;
+	command[0].executed=false;
+	return packMessage(msg,len,commNumber,outBuff);
+}
+
 
 WORD CACUProtocol::modeCommand(const TModes& azMode,const TModes& elMode,const double& azP1,const double& azP2,const double& elP1,const double& elP2,BYTE *& outBuff,TCommand *& command,WORD& commNumber) const
 {

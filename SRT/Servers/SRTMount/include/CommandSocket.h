@@ -280,6 +280,8 @@ private:
 	WORD m_ptSize;
 	
 	ACS::Time m_lastScanEpoch;
+
+	ACS::Time m_currentScanStartEpoch;
 	
 	/**
 	 * This methods will check is the axis of the telescope are active, if not it will activate them. 

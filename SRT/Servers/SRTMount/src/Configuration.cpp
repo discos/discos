@@ -72,9 +72,9 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 
 void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
 {
-	m_ACUAddress="192.167.189.130";
-	m_commandPort=8000;
-	m_statusPort=8001;
+	m_ACUAddress="192.168.200.2";
+	m_commandPort=9000;
+	m_statusPort=9001;
 	m_statusSocketTimeout=250000;
 	m_statusSocketDutyCycle=25000;
 	m_controlSocketResponseTime=1000000; //one second

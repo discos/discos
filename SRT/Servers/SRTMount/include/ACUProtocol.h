@@ -506,12 +506,14 @@ public:
 	 
 	 /**
 	  * This will allow to prepare the message to command a program track mode to the antenna
+	  * @param azMaxRate maximum allowed azimuth speed during program track (degrees/sec)
+	  * @param elMaxRate maximum allowed elation speed during program track (degrees/sec)
 	  * @param buff a reference to the buffer containing the command to be sent.
 	  * @param command return the basic information about the commands that can be used to check the answer from the status socket. It must be freed by caller.
 	  * @param commNumber number of elements of the command array
 	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed	
 	  */
-	 WORD programTrack(BYTE *& buff,TCommand *& command,WORD& commNumber);
+	 WORD programTrack(const double& azMaxRate,const double& elMaxRate,BYTE *& buff,TCommand *& command,WORD& commNumber);
 	 
 	 /*
 	 * It creates a buffer to be sent to the ACU in order to stop the telescope motion.  
@@ -524,12 +526,13 @@ public:
 
 	 /**
 	  * This will allow to prepare the message to be sent to the ACU in order to park the antenna.
+	  * @param stowSpeed speed of the antenna during slewing to stow position (degrees/sec)	
 	  * @param buff a reference to the buffer containing the command to be sent.
 	  * @param command return the basic information about the commands that can be used to check the answer from the status socket. It must be freed by caller.
 	  * @param commNumber number of elements of the command array
 	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed	
 	  */	 
-	 WORD stow(BYTE *& buff,TCommand *& command,WORD& commNumber);
+	 WORD stow(const double& stowSpeed,BYTE *& buff,TCommand *& command,WORD& commNumber);
 
 	 /**
 	  * This will allow to prepare the message to be sent to the ACU in order to extract the stow pins.
@@ -583,6 +586,7 @@ public:
 	 
 	 /**
 	  * This will allow to prepare the message to be sent to the ACU in order to load the program track table into the ACU.
+	  * @param sartEpoch reprsent the time of the first point in the tracking curve
 	  * @param seq pointer to the sequence of program track points to be loaded into the ACU.
 	  * @param size number of points in the sequence above, if newTable is true the points list must have at least a minimum number of elements (actually 5)
 	  * @param newTable true if a new table has to be started, if false the new point is attached to the existing table
@@ -593,7 +597,7 @@ public:
 	  * @param commNumber number of elements of the command array
 	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain unpredictable results and need not to be freed
 	 */	 	 	 	 
-	 WORD loadProgramTrack(const TProgramTrackPoint *seq,const WORD& size,bool newTable,const double& azRate,const double& elRate,BYTE *& buff,TCommand *& command,WORD& commNumber);
+	 WORD loadProgramTrack(const ACS::Time& startEpoch,const TProgramTrackPoint *seq,const WORD& size,bool newTable,const double& azRate,const double& elRate,BYTE *& buff,TCommand *& command,WORD& commNumber);
 	 
 	 /**
 	  * This method is used to check the status buffer sent by the ACU.
@@ -694,6 +698,15 @@ private:
 	 * @return the length in bytes of the message, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed	   
 	 */
 	WORD modeCommand(const TModes& azMode,const TModes& elMode,const double& azP1,const double& azP2,const double& elP1,const double& elP2,BYTE *& outBuff,TCommand *& command,WORD& commNumber) const;
+
+	/**
+	 * This method prepares a message that contains a mode command.
+	 * @param outBuff buffer that stores the message to the ACU. It must be freed.
+	 * @param command return the basic information about the commands that can be used to check the answer from the status socket. It must be freed by caller.
+	 * @param commNumber number of elements of the command array
+	 * @return the length in bytes of the message, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed
+	 */
+	WORD modeCommand(BYTE *& outBuff,TCommand *& command,WORD& commNumber) const;
 	
 	/**
 	 * This method fills a parameter command.

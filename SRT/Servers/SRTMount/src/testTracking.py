@@ -23,20 +23,22 @@ import time
 
 
 def usage():
-    print "testTracking [-h|--help] [-g|--gap=] [-n|--points=] [-a|--amplitude=] [-t|--period=]"
+    print "testTracking [-h|--help] [-g|--gap=] [-n|--points=] [-a|--amplitude=] [-t|--period=] [-o|off=]"
     print ""
     print "[-h|--help]        displays this help"
     print "[-g|--gap=]        allows to give the gap, in microseconds, between each point of the table [default 100000]"
+    print "[-o|--off=]        allows to give the offset from the current coordinate from which start the tracking"
     print "[-n|--points=]     allows to give how many points will be added to the table [default 500]"
     print "[-a|--amplitude]   allows to give the amplitude of the sine curve [default 2 degrees]"
     print "[-t|--period=]     allows to provide the period of the sine curve [default 30 seconds]"
+    print "[-o|off=]          allows to add offset to the current position in order to calculate the starting point"
     
 def main():
     
     MAXSPEED=0.5
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"hg:n:a:t:",["help","gap=","points=","amplitude","period"])
+        opts, args = getopt.getopt(sys.argv[1:],"hg:n:a:t:o:",["help","gap=","points=","amplitude","period","off"])
     except getopt.GetoptError, err:
         print str(err)
         usage()
@@ -46,6 +48,7 @@ def main():
     points=500
     amplitude=2.0
     period=30.0
+    offset=0.0
             
     for o, a in opts:
         if o in ("-h", "--help"):
@@ -59,6 +62,8 @@ def main():
             amplitude = string.atof(a)
         elif o in ("-t", "--period"):
             period = string.atof(a)
+	elif o in ("-o", "--offset"):
+	    offset = string.atof(a)
             
     if (amplitude>(MAXSPEED*period/(2*math.pi))):
         print "resulting speed will be too high"
@@ -98,19 +103,22 @@ def main():
     
     #get current time
     ctime=getTimeStamp().value
+    ctH=EpochHelper(ctime)
+    print "current time: %02d:%02d:%02d.%06d\t" % (ctH.hour(),ctH.minute(),ctH.second(),ctH.microSecond())
+    #sys.exit(0)
     #take 10 seconds before stating
     ctime=ctime+100000000;
     #convert the gap from microseconds to seconds
     gapS=gap/1000000.0;
     step=0
-    
+   
     for index in range(points):
         j=amplitude*math.sin(2*math.pi*step/period)
         ctime=ctime+gap*10;
         step=step+gapS
         tH=EpochHelper(ctime)
-        y=elevation+j
-        x=azimuth+j
+        y=elevation+j+offset
+        x=azimuth+j+offset
         print "%02d:%02d:%02d.%06d\t\t%lf\t%lf" % (tH.hour(),tH.minute(),tH.second(),tH.microSecond(),x,y)
         try:
             if (index==0):
@@ -122,7 +130,7 @@ def main():
             newEx.setAction("programTrack")
             newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
             sys.exit(1)
-        time.sleep(gapS/2)
+        time.sleep(gapS/4)
         
     if not (compName==""):
         simpleClient.releaseComponent(compName)     

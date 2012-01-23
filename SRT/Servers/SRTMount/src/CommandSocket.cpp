@@ -41,6 +41,7 @@ void CCommandSocket::init(CConfiguration *config,IRA::CSecureArea<CCommonData> *
 	connectSocket(); // throw (SocketErrorExImpl)
 	m_ptSize=0;
 	m_lastScanEpoch=0;
+	m_currentScanStartEpoch=0;
 }
 
 void CCommandSocket::stop() throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,NakExImpl)
@@ -255,10 +256,11 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 		WORD size=m_ptSize;
 		m_ptSize=0; // in case we fail to load the data point the cache is cleared anyway...we loose the data points but at least next time we start from the scratch 
 		if (m_lastScanEpoch==0) {
-			len=m_protocol.loadProgramTrack(m_ptTable,size,true,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),message,command,commNum);
+			m_currentScanStartEpoch=m_ptTable[0].timeMark;
+			len=m_protocol.loadProgramTrack(m_currentScanStartEpoch,m_ptTable,size,true,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),message,command,commNum);
 		}
 		else {
-			len=m_protocol.loadProgramTrack(m_ptTable,size,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),false,message,command,commNum);
+			len=m_protocol.loadProgramTrack(m_currentScanStartEpoch,m_ptTable,size,false,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),message,command,commNum);
 		}
 		if (len==0) {
 			// ERRORE
@@ -568,7 +570,7 @@ void CCommandSocket::stow_command() throw (TimeoutExImpl,SocketErrorExImpl,NakEx
 	WORD commNum;
 	WORD len;
 	TIMEVALUE now;
-	len=m_protocol.stow(message,command,commNum);  // get the buffer to be sent!
+	len=m_protocol.stow(m_pConfiguration->elevationRateUpperLimit(),message,command,commNum);  // get the buffer to be sent!
 	CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
 	if (len==0) {
 	}
@@ -700,7 +702,7 @@ void CCommandSocket::changeMode_command(const Antenna::TCommonModes& mode) throw
 	if (mode==Antenna::ACU_PRESET) {
 		az=data->azimuthStatus()->actualPosition();   //set the current values for az and el.
 		el=data->elevationStatus()->actualPosition();
-		len=m_protocol.preset(az,el,0.0,0.0,message,command,commNum);  // get the buffer to be sent!
+		len=m_protocol.preset(az,el,0.0001,0.0001,message,command,commNum);  // get the buffer to be sent!     
 		modeName=CACUProtocol::modesIDL2String(Antenna::ACU_PRESET);
 	}
 	else if (mode==Antenna::ACU_RATE) {
@@ -708,7 +710,7 @@ void CCommandSocket::changeMode_command(const Antenna::TCommonModes& mode) throw
 		modeName=CACUProtocol::modesIDL2String(Antenna::ACU_RATE);
 	}
 	else if (mode==Antenna::ACU_PROGRAMTRACK){ // programTrack
-		len=m_protocol.programTrack(message,command,commNum);
+		len=m_protocol.programTrack(m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateUpperLimit(),message,command,commNum);
 		modeName=CACUProtocol::modesIDL2String(Antenna::ACU_PROGRAMTRACK);
 	}
 	else if (mode==Antenna::ACU_STOP) {
@@ -718,7 +720,7 @@ void CCommandSocket::changeMode_command(const Antenna::TCommonModes& mode) throw
 		
 	}
 	else if (mode==Antenna::ACU_STOW) {
-		len=m_protocol.stow(message,command,commNum);
+		len=m_protocol.stow(m_pConfiguration->elevationRateUpperLimit(),message,command,commNum);
 		modeName=CACUProtocol::modesIDL2String(Antenna::ACU_STOW);
 	}
 	if (len==0) {

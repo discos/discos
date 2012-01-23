@@ -23,8 +23,6 @@ import readline
 import os
 from Acspy.Clients.SimpleClient import PySimpleClient
 
-HISTORY_FILENAME = '/tmp/oprin_cmd.hist'
-
 def usage():
     print "systerm [-h|--help] [ComponentName]"
     print "ComponentName         The name of a component that implements the CommandInterpreter interface"
@@ -91,8 +89,15 @@ def main():
             newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
             sys.exit(1)
     
-    if os.path.exists(HISTORY_FILENAME):
-        readline.read_history_file(HISTORY_FILENAME)
+    userHome = os.getenv('HOME')
+    historyFile = None
+    if userHome == None:
+        historyFile = '/tmp/.oprin_cmd.hist'
+    else:
+        historyFile = userHome+'/.oprin_cmd.hist'
+    
+    if os.path.exists(historyFile):
+        readline.read_history_file(historyFile)
         
     readline.set_completer(HistoryCompleter().complete)
     readline.parse_and_bind('tab: complete')
@@ -122,7 +127,7 @@ def main():
                 newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
     simpleClient.releaseComponent(compName)     
     simpleClient.disconnect()
-    readline.write_history_file(HISTORY_FILENAME)            
+    readline.write_history_file(historyFile)            
             
 if __name__=="__main__":
    main()
