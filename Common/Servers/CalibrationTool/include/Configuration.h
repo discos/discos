@@ -87,7 +87,12 @@ public:
 	 * @return the name of the interface of the observatory component.
 	*/	
 	const IRA::CString& getObservatoryComponent() const { return m_observatoryComp; }
-	
+
+    /**
+	 * @return the flag that allows to control the file generation
+	*/
+	bool outputFile() const { return (m_generateFile==1); }
+
 private:
 	long m_workingThreadTime;
 	long m_workingThreadTimeSlice;
@@ -95,9 +100,10 @@ private:
 	long m_repetitionCacheTime;
 	long m_repetitionExpireTime;
 	long m_trackingFlagDutyCycle;
+	long m_generateFile;
 	IRA::CString m_antennaBossComp;
 	IRA::CString m_schedulerComp;
-    	IRA::CString m_observatoryComp;
+    IRA::CString m_observatoryComp;
 };
 
 };

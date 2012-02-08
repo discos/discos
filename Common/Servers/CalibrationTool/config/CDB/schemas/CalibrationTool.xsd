@@ -60,6 +60,8 @@
     <xs:attribute name="SchedulerInterface" type="xs:string" use="required" />
     <!-- the interface of the component that leads the Observatory system -->
     <xs:attribute name="ObservatoryInterface" type="xs:string" use="required" />
+    <!-- This allow to control if the component should produce an output file of not -->
+    <xs:attribute name="GenerateFile" type="xs:boolean" use="required" />    
   </xs:complexType>
   <xs:element name="CalibrationTool" type="CalibrationToolType"/>
 </xs:schema>

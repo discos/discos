@@ -69,7 +69,7 @@ public:
      /**
           * This method is used to initialize the thread.
       */
-      virtual void initialize();
+      virtual void initialize() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl);
 
      /**
       * It sets the slice of time the thread is allowed to run.
@@ -96,10 +96,20 @@ private:
 	bool checkTime(const ACS::Time& currentTime);
 	bool checkTimeSlot(const ACS::Time& slotStart);
 	bool processData();
+
+	bool DirectoryExists(const IRA::CString& path);
+	bool makeDirectory(const IRA::CString& dirName);
+	void prepareFile(const ACS::Time& now);
+	void writeFileHeaders(const ACS::Time& now);
+	void gaussFit(const ACS::Time& now);
+	void setAxisOffsets();
+	void getAntennaData();
+
+
     integer m_dataSeqCounter;
     ACS::doubleSeq m_dataSeq;
     ACS::doubleSeq m_tsysDataSeq;
-    double m_coordinate;
+    //double m_coordinate;
     double m_lastCoordinate;
     double m_LatPos, m_LonPos;
     double m_LatOff, m_LonOff;
@@ -111,21 +121,17 @@ private:
     float m_reducedCHI;
     integer m_ierr;
     double m_cosLat;
-    int m_CoordIndex;
+    //int m_CoordIndex;
     double m_raUserOff, m_decUserOff;
 	double m_azUserOff, m_elUserOff;
 	double m_lonUserOff, m_latUserOff;
 	int m_latResult, m_lonResult;
-	int m_lonDone, m_latDone;
-    /**
-     * This parameter is used to check if a Calibration starts in this
-     * sequence: before LAT scans, after LON scans
-     * m_checkScan = 1 means LAT scans done
-     * m_checkScan = 0 means LON scans done or that is starting a new calibration tool session
-     */
-    int m_checkScan;
+	double m_fwhm;
+	double m_targetRa;
+	double m_targetDec;
+
     double * m_latPositions;
-	ACS::Time m_time;
+	//ACS::Time m_time;
 	/**
 	 * This object is in charge of storing the site information
 	*/

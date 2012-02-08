@@ -457,10 +457,10 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	ACS::Time startTime;
 		
 	obsName=IRA::CString("system");
-	prj=obsName;
+	prj=IRA::CString("pointingCrossScan");
 	layout.length(0);
 	layoutName=_SCHED_NULLTARGET;
-	schedule="crossScan";
+	schedule="none";
 	targetID="crossScanTarget";
 	
 	// now take the mutex
@@ -592,7 +592,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		scanAxis=Management::MNG_GAL_LAT;
 	}
 	path=m_config->getSystemDataDirectory();
-	suffix=IRA::CString("latitude");
+	suffix=IRA::CString("");
 	baseName=CCore::computeOutputFileName(startTime,prj,suffix,extraPath);
 	subScanID=1;
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
@@ -660,7 +660,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	else {
 		scanAxis=Management::MNG_GAL_LON;
 	}
-	suffix=IRA::CString("longitude");
+	suffix=IRA::CString("");
 	baseName=CCore::computeOutputFileName(startTime,prj,suffix,extraPath);
 	subScanID=2;
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
@@ -681,14 +681,15 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	guard.acquire();
 	// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
 	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
-	// throw (ComponentErrors::OperationErrorExImpl)
-	CCore::stopScan(m_defaultDataReceiver.in(), m_defaultDataReceiverError,m_scanStarted);
 	// wait for a couple of seconds before start with the latitude scan
 	guard.release();
+	//bool check=checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError);
 	while (checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError)) {
 		IRA::CIRATools::Wait(0,250000); // 0.25 seconds
 	}
 	guard.acquire();
+	// throw (ComponentErrors::OperationErrorExImpl)
+	CCore::stopScan(m_defaultDataReceiver.in(), m_defaultDataReceiverError,m_scanStarted);
 	CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"CROSSSCAN_DONE"));
 }

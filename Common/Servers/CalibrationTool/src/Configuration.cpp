@@ -63,6 +63,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_STRING_ATTRIBUTE("AntennaBossInterface","Antenna Boss component interface is ",m_antennaBossComp);
 	_GET_STRING_ATTRIBUTE("SchedulerInterface","Scheduler component interface is ",m_schedulerComp);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component interface is ",m_observatoryComp);
+	_GET_DWORD_ATTRIBUTE("GenerateFile","File generation enabled ",m_generateFile);
 	m_workingThreadTime*=10;
 	m_workingThreadTimeSlice*=10;
 	m_collectorThreadTime*=10;

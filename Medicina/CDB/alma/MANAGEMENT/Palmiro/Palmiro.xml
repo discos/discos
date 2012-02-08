@@ -20,7 +20,7 @@
              ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
 	     	 ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
 	     	 DefaultBackendInstance="BACKENDS/TotalPower"
-	     	 DefaultDataReceiverInstance="MANAGEMENT/CalibrationTool"
+	     	 DefaultDataReceiverInstance="MANAGEMENT/Point"
 >
              
 <scheduleName/>

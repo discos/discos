@@ -172,28 +172,24 @@ public:
 	 * @param name new file name
 	 * @return false if the operation could not be done
 	 */
-	bool setFileName(const IRA::CString& name);
+	/*bool setFileName(const IRA::CString& name);*/
 	
 	/**
 	 * Get the name if the current file 
 	 */
-	const IRA::CString& getFileName() const { return m_fileName; }
+	/*const IRA::CString& getFileName() const { return m_fileName; }*/
 	
-	/**
-	 * Set the name of the currently running project
-	 */
-	void setProjectName(const IRA::CString& projectName) { m_projectName=projectName; }
-	
+	/*AA**********************************************************************************************************************************************************************/
+	void getFileName(IRA::CString& fileName,IRA::CString& fullPath) const;
+
+	IRA::CString getFileName() const;
+	/*AA**********************************************************************************************************************************************************************/
+
 	/**
 	 * Get the name of the project
 	 */
 	const IRA::CString& getProjectName() const { return m_projectName; }
-	
-	/**
-	 * Sets the identifier number of the device
-	 */
-	void setDevice(const long& deviceID) { m_deviceID=deviceID; }
-	
+
 	/**
 	 * get the identifer number of the device
 	 */
@@ -208,12 +204,12 @@ public:
 	 * Get the name of the observer
 	 */
 	const IRA::CString& getObserverName() const { return m_observerName; }
-	
+
 	/**
 	 * Set the current source name
 	 */
 	void setSourceName(const IRA::CString& sourceName) { m_sourceName=sourceName; }
-	
+
 	/**
 	 * Get the name of the source name
 	 */
@@ -278,7 +274,7 @@ public:
 	/**
 	 * @sets the scan axis value  of the component.
 	 */
-	void setScanAxis(Management::TScanAxis& scanAxis) {m_scanAxis=scanAxis;}
+	//void setScanAxis(Management::TScanAxis& scanAxis) {m_scanAxis=scanAxis;}
 
 	/**
 	 * @return the scan axis value  of the component.
@@ -310,6 +306,12 @@ public:
 	 */
 	bool isReset() const { return m_reset; }
 	
+	/*AA**********************************************************************************************************************************************************************/
+	bool isScanHeaderReady() const { return m_scanHeader; }
+
+	bool isSubScanHeaderReady() const { return m_subScanHeader; }
+	/*AA**********************************************************************************************************************************************************************/
+
 	/**
 	 * It puts the component into the stop stage
 	 */
@@ -432,12 +434,12 @@ public:
     /**
      * sets arrayDataY value
      */
-    void setArrayDataY(ACS::doubleSeq arrayDataY) {m_arrayDataY=arrayDataY;}
+    void setArrayDataY(const ACS::doubleSeq& arrayDataY,const long& dim) {m_arrayDataY.length(dim); for(long i=0;i<dim; m_arrayDataY[i]=arrayDataY[i],i++);}
 		
     /**
      * sets arrayDataX value
      */
-    void setArrayDataX(ACS::doubleSeq arrayDataX) {m_arrayDataX=arrayDataX;}
+    void setArrayDataX(const ACS::doubleSeq& arrayDataX,const long& dim) {m_arrayDataX.length(dim);  for(long i=0;i<dim; m_arrayDataX[i]=arrayDataX[i],i++); }
 
     /**
 	 * Change current scan information
@@ -467,9 +469,40 @@ public:
 	 */
 	void forceReset();
 
+	/**
+	 * @return if the latitude scan has been performed
+	 */
+	bool isLatDone() const { return m_latDone; }
+
+	/**
+	 * @return if the longitude scan has been performed
+	 */
+	bool isLonDone() const { return m_lonDone; }
+
+	/**
+	 * marks the latitude scan done
+	 */
+	void setLatDone() { m_latDone=true; }
+
+	/**
+	 * marks the longitude scan done
+	 */
+	void setLonDone() { m_lonDone=true; }
+
+	/**
+	 * marks the longitude and latitude scans undone, that means the current scan has been completed and a new one can be started
+	 */
+	void setCrossScanDone() { m_lonDone=m_latDone=false; }
+
+	int getCoordIndex() const { return m_coordIndex; }
+
 private:
 	/** the name of the file */
 	IRA::CString m_fileName;
+	/*AA**********************************************************************************************************************************************************************/
+	IRA::CString m_fullPath;
+	IRA::CString m_basePath;
+	/*AA**********************************************************************************************************************************************************************/
 	IRA::CString m_projectName;
 	IRA::CString m_observerName;
 	/** the data block coming from the antenna */
@@ -505,6 +538,18 @@ private:
 	 */
 	bool m_scanHeader;
 	bool m_subScanHeader;
+	/**
+	 * true is the lat and lon scan have been done respectively
+	 */
+	bool m_lonDone,m_latDone;
+	/**
+	 * 1 = LAT; 0=LON
+	 */
+	int m_coordIndex;
+	/**
+	 * Stores the last target ID, it is used to avoid to mix lon and lat scan taken over different sources
+	 */
+	IRA::CString m_lastTarget;
 	/**
 	 * indicates that headers have been received
 	 */
@@ -545,6 +590,10 @@ private:
     double m_dataY, m_dataX;
 	ACS::doubleSeq m_arrayDataY, m_arrayDataX;
     double m_HPBW, m_amplitude, m_peakOffset, m_offSet, m_slope, m_sourceFlux;
+    /**
+     * sets the memeber <i>m_coordIndex</i> given the <i>m_scanAxis</i>
+     */
+    void setCoordIndex();
 };
 
 };

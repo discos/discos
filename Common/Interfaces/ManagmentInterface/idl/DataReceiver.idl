@@ -153,6 +153,14 @@ module Management {
 		void startSubScan(in TSubScanSetup prm) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
+		 * Called in order to issue the end of the schedule
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 * @thorw ManagementErrors::ManagementErrorsEx
+		 * @thorw CORBA::SystemExcpetion
+		 */		
+		//void endSchedule()  raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
 		 * This method can be called to check if the component is receiving data or not.
 		 * @thorw ComponentErrors::ComponentErrorsEx
 		 * @thorw ManagementErrors::ManagementErrorsEx

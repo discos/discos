@@ -11,7 +11,7 @@
 	Name="CalibrationTool"
 	Code="CalibrationToolImpl"
 	Type="IDL:alma/Management/CalibrationTool:1.0"
-	Container="ManagementContainer"
+	Container="CalibrationToolContainer"
 	Default="false"
 	KeepAliveTime="-1"
     ImplLang="cpp"

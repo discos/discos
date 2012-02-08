@@ -17,7 +17,7 @@
                AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
                SchedulerInterface="IDL:alma/Management/Scheduler:1.0"
                ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
-               GenerateFile="1">
+               GenerateFile="0">
 	<status/>
 	<fileName/>
 	<projectName/>
