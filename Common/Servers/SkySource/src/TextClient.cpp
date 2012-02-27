@@ -10,7 +10,7 @@ void printHelp() {
 	printf("\n");
 	printf("SkySourceTextDisplay -h|--help \n");
 	printf("SkySourceTextDisplay -e|--equatorial SourceName RightAscension Declination Epoch [pmRa] [pmDec] [plx] [rvel]\n");
-	printf("SkySourceTextDisplay -g|--galactic SourceName RightAscension Declination Epoch \n");
+	printf("SkySourceTextDisplay -g|--galactic SourceName RightAscension Declination \n");
 	printf("SkySourceTextDisplay -o|--horizontal Azimuth Elevation\n");
 	printf("SkySourceTextDisplay -c|--catalog SourceName \n");
 	printf("\n");
@@ -85,6 +85,8 @@ int main(int argc, char *argv[])
 	CText *Epoch1_text;
 	CText *galLong0_text;
 	CText *galLat0_text;
+	CText *galLong2_text;
+	CText * galLat2_text;
 	CText *Az_text;
 	CText *El_text;
 	CText *pAngle_text;
@@ -203,7 +205,7 @@ int main(int argc, char *argv[])
 	}
 		
 	/* Window initialization */
-	CFrame window(CPoint(0,0),CPoint(97,12),'|','|','-','-'); 
+	CFrame window(CPoint(0,0),CPoint(97,13),'|','|','-','-');
 	window.initFrame();
 	window.setTitle(CString("SkySource text display"));
 	window.setTitleStyle(CStyle(CColorPair::RED_BLACK,CStyle::BOLD)); 
@@ -219,6 +221,8 @@ int main(int argc, char *argv[])
 	DEC_text=new CText();
 	galLong0_text=new CText();
 	galLat0_text=new CText();
+	galLong2_text=new CText();
+	galLat2_text=new CText();
 	RA1_text=new CText();
 	DEC1_text=new CText();
 	Epoch1_text=new CText();
@@ -247,15 +251,17 @@ int main(int argc, char *argv[])
 	_TW_SET_COMPONENT(RA1_text,24,4,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
 	_TW_SET_COMPONENT(DEC1_text,37,4,13,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
 	_TW_SET_COMPONENT(Epoch1_text,51,4,8,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
-	_TW_SET_COMPONENT(Az_text,24,5,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
-	_TW_SET_COMPONENT(El_text,37,5,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
-	_TW_SET_COMPONENT(pAngle_text,24,6,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
-	_TW_SET_COMPONENT(userAzOff_text,24,7,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
-	_TW_SET_COMPONENT(userElOff_text,37,7,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
-	_TW_SET_COMPONENT(userRaOff_text,24,8,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
-	_TW_SET_COMPONENT(userDecOff_text,37,8,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
-	_TW_SET_COMPONENT(userLonOff_text,24,9,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
-	_TW_SET_COMPONENT(userLatOff_text,37,9,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(galLong2_text,24,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(galLat2_text,39,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(Az_text,24,6,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(El_text,37,6,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(pAngle_text,24,7,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(userAzOff_text,24,8,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(userElOff_text,37,8,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(userRaOff_text,24,9,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(userDecOff_text,37,9,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(userLonOff_text,24,10,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
+	_TW_SET_COMPONENT(userLatOff_text,37,10,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,NULL);
 	
 	window.addComponent((CFrameComponent*)sourceName_text);
 	window.addComponent((CFrameComponent*)RA0_text);
@@ -267,6 +273,8 @@ int main(int argc, char *argv[])
 	window.addComponent((CFrameComponent*)RVel0_text);
 	window.addComponent((CFrameComponent*)galLong0_text);
 	window.addComponent((CFrameComponent*)galLat0_text);
+	window.addComponent((CFrameComponent*)galLong2_text);
+	window.addComponent((CFrameComponent*)galLat2_text);
 	window.addComponent((CFrameComponent*)RA_text);
 	window.addComponent((CFrameComponent*)DEC_text);	
 	window.addComponent((CFrameComponent*)RA1_text);
@@ -286,12 +294,13 @@ int main(int argc, char *argv[])
 	_TW_ADD_LABEL("Input Equat. Coord    :",0,1,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 	_TW_ADD_LABEL("Input Galac. Coord    :",0,2,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 	_TW_ADD_LABEL("J2000 Equat. Coord    :",0,3,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);	
-	_TW_ADD_LABEL("Apparent Equat. Coord :",0,4,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);	
-	_TW_ADD_LABEL("Apparent Horiz. Coord :",0,5,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);	
-	_TW_ADD_LABEL("Parallactic Angle     :",0,6,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-	_TW_ADD_LABEL("User Topoc. Offsets   :",0,7,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);	
-	_TW_ADD_LABEL("User Equat. Offsets   :",0,8,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-	_TW_ADD_LABEL("User Galactic. Offsets  :",0,9,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+	_TW_ADD_LABEL("Apparent Equat. Coord :",0,4,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+	_TW_ADD_LABEL("Apparent Gal. Coord :",0,5,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+	_TW_ADD_LABEL("Apparent Horiz. Coord :",0,6,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+	_TW_ADD_LABEL("Parallactic Angle     :",0,7,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+	_TW_ADD_LABEL("User Horiz. Offsets   :",0,8,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+	_TW_ADD_LABEL("User Equat. Offsets   :",0,9,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+	_TW_ADD_LABEL("User Galactic. Offsets  :",0,10,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 
 		
 	ACS_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::MANAGER_LOGGING"));
@@ -478,6 +487,10 @@ int main(int argc, char *argv[])
 		//DEC1_text->setValue(CFormatFunctions::floatingPointFormat(bValue,NULL));
 		bValue.setValue((CORBA::Double)att->julianEpoch);
 		Epoch1_text->setValue(CFormatFunctions::floatingPointFormat(bValue,NULL));
+		bValue.setValue((CORBA::Double)(att->gLatitude*DR2D));
+		galLat2_text->setValue(CFormatFunctions::floatingPointFormat(bValue,NULL));
+		bValue.setValue((CORBA::Double)(att->gLongitude*DR2D));
+		galLong2_text->setValue(CFormatFunctions::floatingPointFormat(bValue,NULL));
 		bValue.setValue((CORBA::Double)(att->azimuth*DR2D));	
 		Az_text->setValue(CFormatFunctions::floatingPointFormat(bValue,NULL));
 		bValue.setValue((CORBA::Double)(att->elevation*DR2D));	

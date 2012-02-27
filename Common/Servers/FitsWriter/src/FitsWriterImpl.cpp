@@ -249,7 +249,7 @@ void FitsWriterImpl::setScanLayout (const ACS::stringSeq & layout) throw (CORBA:
 void FitsWriterImpl::stopScan() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataWrapper->Get();
-	data->scanStop();
+	data->stopScan();
 	ACS_LOG(LM_FULL_INFO,"FitsWriterImpl::stopScan()",(LM_DEBUG,"STOP_SCAN_ISSUED"));
 }
 

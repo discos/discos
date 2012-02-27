@@ -13,6 +13,7 @@
 /*  Andrea Orlati(aorlati@ira.inaf.it) 09/04/2010      Added wrappers function: track, moon, elevationScan,azimuthScan                 */
 /*  Andrea Orlati(aorlati@ira.inaf.it) 13/09/2010      Major update during several weeks, compliant to all fetures of the IDL interface, and all capabilities implemented  */
 /*  Andrea Orlati(aorlati@ira.inaf.it) 10/10/2011      Given implementation of the the method getFluxes() and attribute targetFlux*/
+/*  Andrea Orlati(aorlati@ira.inaf.it) 15/02/2012      Given implementation of the the method getApparentCoordinates */
 
 
 #ifndef __cplusplus
@@ -514,10 +515,25 @@ public:
 	void getRawCoordinates(ACS::Time time,CORBA::Double_out az,CORBA::Double_out el) throw (CORBA::SystemException);
 	
 	/**
+	 * called to get apparent coordinates as they come from ephemeris generators.
+	 * @throw CORBA::SystemException
+	 * @param time the given timestamp  the returned coordinates refer to
+	 * @param az apparent azimuth in radians
+	 * @param el apparent elevation in radians
+	 * @param ra apparent right ascension in radians
+	 * @param dec apparent declination in radians
+	 * @param jepoch julian epoch the equatorial position refers to
+	 * @parm lon galactic longitude converted from the returned apparent equatorial position
+	 * @parm lat galactic latitude converted from the returned apparent equatorial position
+	 */
+	void getApparentCoordinates (ACS::Time time,CORBA::Double_out az,CORBA::Double_out el,CORBA::Double_out ra,CORBA::Double_out dec,CORBA::Double_out jepoch,CORBA::Double_out lon,
+			CORBA::Double_out lat) throw (CORBA::SystemException);
+
+	/**
 	 * It is used to return the observed  equatorial coordinates for the given timestamp and interval.
 	 * @throw CORBA::SystemException
 	 * @param time the given timestamp to which the returned coordinates refer to
-	 * @param duration time interaval over which the coordinates are averaged
+	 * @param duration time interval over which the coordinates are averaged
 	 * @param ra the returned observed right ascension in radians
 	 * @param el the returned observed declination in radians 
 	*/
@@ -527,16 +543,17 @@ public:
 	 * It is used to return the observed  galactic coordinates for the given timestamp.
 	 * @throw CORBA::SystemException
 	 * @param time the given timestamp to which the returned coordinates refer to
+	 * @param duration time interval over which the coordinates are averaged
 	 * @param longitude the returned observed longitude in radians
 	 * @param latitude the returned observed latitude in radians 
 	*/
-	void getObservedGalactic(ACS::Time time,CORBA::Double_out longitude,CORBA::Double_out latitude) throw (CORBA::SystemException);
+	void getObservedGalactic(ACS::Time time,ACS::TimeInterval duration,CORBA::Double_out longitude,CORBA::Double_out latitude) throw (CORBA::SystemException);
 	
 	/**
 	 * It is used to returns the observed horizontal coordinates for the given timestamp.
 	 * @throw CORBA::SystemException
 	 * @param time the given timestamp to which the returned coordinates refer to
-	 * @param duration time interaval over which the coordinates are averaged
+	 * @param duration time interval over which the coordinates are averaged
 	 * @param ra the returned observed azimuth in radians
 	 * @param el the returned observed elevation in radians 
 	*/

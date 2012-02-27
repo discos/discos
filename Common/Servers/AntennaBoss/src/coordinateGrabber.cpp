@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
 		try {
 			boss->getObservedHorizontal(now.value().value,0,az,el);
 			boss->getObservedEquatorial(now.value().value,0,ra,decl);
-			boss->getObservedGalactic(now.value().value,lon,lat);
+			boss->getObservedGalactic(now.value().value,0,lon,lat);
 		}
 		catch (ACSErr::ACSbaseExImpl& ex) {
 			_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,ex,"coordinateGrabber::main()"); 

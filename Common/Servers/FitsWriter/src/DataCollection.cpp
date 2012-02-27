@@ -288,7 +288,7 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 	}
 }
 
-bool CDataCollection::scanStop()
+bool CDataCollection::stopScan()
 {
 	m_ready=false;
 	m_scanHeader=false;

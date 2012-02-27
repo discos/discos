@@ -15,7 +15,7 @@ SubScan::SubScan() {}
 SubScan::~SubScan() {}
 
 IRA::CSite site;
-//global attributes initialisation
+//global attributes initialization
 double az =0.0;
 double el =0.0; 
 double ra =0.0; 
@@ -28,7 +28,7 @@ double glat =0.0;
 double pAngle =0.0;
 
 /**
- * Initialisation of site parameters
+ * Initialization of site parameters
  **/
 void SubScan::initSite(const IRA::CSite& s)
 {
@@ -36,7 +36,7 @@ void SubScan::initSite(const IRA::CSite& s)
 }
 
 /**
- * Initialisation of antenna mount parameters
+ * Initialization of antenna mount parameters
  **/
 void SubScan::initAzElRanges(const double& AzRate, const double& ElRate, 
 		const double& rAzRate, const double& rElRate, const double& AzAcc, 
@@ -205,6 +205,8 @@ void SubScan::ScanComputer(
 	m_centerGLon=m_centerGLat=0.0;
 	m_isPointingScan=(m_coordFrame==Antenna::ANT_EQUATORIAL)&&(m_subScanFrame==Antenna::ANT_HORIZONTAL);
 
+	m_origCenterRA=m_origCenterDec=m_origCenterGLon=m_origCenterGLat=m_origCenterAz=m_origCenterEl=0.0;
+
 	reachOk=true;
 	
 	
@@ -264,6 +266,16 @@ void SubScan::ScanComputer(
 	else {
 		if (description==Antenna::SUBSCAN_STARTSTOP) {
 			double midlat = (lat1+lat2)/2;
+			double midlon=(lon1+lon2)/2;
+
+			coordConvert(midlon, midlat, m_coordFrame,m_midUT ,m_dut1, site);
+			m_origCenterRA=ra;
+			m_origCenterDec=decl;
+			m_origCenterGLon=glon;
+			m_origCenterGLat=glat;
+			m_origCenterAz=az;
+			m_origCenterEl=el;
+
 			m_startLon=lon1+m_lonoff/cos(midlat);
 			m_startLat=lat1+m_latoff;
 			m_stopLon=lon2+m_lonoff/cos(midlat);
@@ -389,6 +401,15 @@ void SubScan::ScanComputer(
 		
 		}
 		else if (m_description==Antenna::SUBSCAN_CENTER) {
+
+			coordConvert(lon1, lat1, m_coordFrame,m_midUT,m_dut1, site);
+			m_origCenterRA=ra;
+			m_origCenterDec=decl;
+			m_origCenterGLon=glon;
+			m_origCenterGLat=glat;
+			m_origCenterAz=az;
+			m_origCenterEl=el;
+
 			m_centerLon=lon1+m_lonoff/cos(lat1);
 			m_centerLat=lat1+m_latoff;
 			m_lonSpan=lon2/cos(lat1);
@@ -402,8 +423,10 @@ void SubScan::ScanComputer(
 					m_latSpan=0;
 					if (fabs(m_stopLon-m_startLon)<DPI) {
 						m_lonRate=(m_stopLon-m_startLon)/(IRA::CIRATools::timeMicroSeconds(m_subScanDuration)/1000000.0);
+						m_skyRate=m_lonRate*cos(m_centerLat);
 					} else {
 						m_lonRate=(D2PI-fabs(m_stopLon-m_startLon))/(IRA::CIRATools::timeMicroSeconds(m_subScanDuration)/1000000.0);
+						m_skyRate=m_lonRate*cos(m_centerLat);
 					}
 					m_latRate=0.0;
 				}
@@ -414,6 +437,7 @@ void SubScan::ScanComputer(
 					m_stopLat=m_centerLat+(m_latSpan/2);
 					m_lonSpan=0;
 					m_latRate=((m_stopLat-m_startLat)/(IRA::CIRATools::timeMicroSeconds(m_subScanDuration)/1000000.0));
+					m_skyRate=m_latRate;
 					m_lonRate=0.0;
 				}
 			}
@@ -426,8 +450,10 @@ void SubScan::ScanComputer(
 					m_latSpan=0;
 					if (fabs(m_stopLon-m_startLon)<DPI) {
 						m_lonRate=(m_stopLon-m_startLon)/(IRA::CIRATools::timeMicroSeconds(m_subScanDuration)/1000000.0);
+						m_skyRate=m_lonRate*cos(m_centerLat);
 					} else {
 						m_lonRate= -(D2PI-fabs(m_stopLon-m_startLon))/(IRA::CIRATools::timeMicroSeconds(m_subScanDuration)/1000000.0);
+						m_skyRate=m_lonRate*cos(m_centerLat);
 					}
 					m_latRate=0.0;
 				}
@@ -438,6 +464,7 @@ void SubScan::ScanComputer(
 					m_stopLat=m_centerLat-(m_latSpan/2);
 					m_lonSpan=0;
 					m_latRate=((m_stopLat-m_startLat)/(IRA::CIRATools::timeMicroSeconds(m_subScanDuration)/1000000.0));
+					m_skyRate=m_latRate;
 					m_lonRate=0.0;
 				}
 			}
@@ -894,7 +921,7 @@ void SubScan::checkPointingForUT (const TIMEVALUE& time, const double& actAz,
 	double el2;
 	if (m_isPointingScan) { //this is a pointing scan.....so ramp coords are given in subscan frame (Horizontal)
 		coordConvert(m_startLon, m_startLat, m_subScanFrame, m_startUT, m_dut1, site);
-		az1=az;
+		az1=az;  // no need to considered ranged 0..2PI angles because the coordConvert already return that kind of angles.
 		el1=el;
 		coordConvert(m_stopLon, m_stopLat, m_subScanFrame, m_stopUT, m_dut1, site);
 		az2=az;
@@ -941,7 +968,8 @@ void SubScan::checkPointingForUT (const TIMEVALUE& time, const double& actAz,
  **/
 void SubScan::checkPathSection (const TIMEVALUE& time, const double& actAz,
 		const double& actEl, long& flag){
-	// Checking if position is within start and stop points
+		// Checking if position is within start and stop points
+	 	 // no need to considered ranged 0..2PI angles because the coordConvert already return that kind of angles.
 		coordConvert(m_startLon, m_startLat, m_coordFrame, m_startUT, m_dut1, site);
 		double az1=az;
 		double el1=el;
@@ -963,6 +991,16 @@ void SubScan::checkPathSection (const TIMEVALUE& time, const double& actAz,
 		}
 }
 
+void SubScan::fillApparent(double& outAz,double& outEl,double& outRa,double& outDec,double& outJepoch,double& outLon,double& outLat)
+{
+	outAz=slaDranrm(az);
+	outEl=IRA::CIRATools::latRangeRad(el);
+	outRa=slaDranrm(appRa);
+	outDec=IRA::CIRATools::latRangeRad(appDec);
+	outJepoch=epoch;
+	outLon=slaDranrm(glon);
+	outLat=IRA::CIRATools::latRangeRad(glat);
+}
 
 /* Method fills all the attributes in order to make them
  * readable by the OTF component */
@@ -972,11 +1010,16 @@ void SubScan::fillAllAttributes (Antenna::OTFAttributes* att) {
 	IRA::CIRATools::getTime(now);
 	computePointingForUT(now);
 	//att->sourceID=CORBA::string_dup("OTF");  it will be set by implementation class as it is just a place holder
-	att->rightAscension=appRa;
-	att->declination=appDec;
-	att->azimuth=slaDranrm(az);
-	att->elevation=el;
+	att->rightAscension=slaDranrm(appRa);
+	att->declination=IRA::CIRATools::latRangeRad(appDec);
 	att->julianEpoch=epoch;
+	att->azimuth=slaDranrm(az);
+	att->elevation=IRA::CIRATools::latRangeRad(el);
+	att->gLongitude=slaDranrm(glon);
+	att->gLatitude=IRA::CIRATools::latRangeRad(glat);
+	att->parallacticAngle=pAngle;
+	att->J2000RightAscension=slaDranrm(m_origCenterRA);
+	att->J2000Declination=IRA::CIRATools::latRangeRad(m_origCenterDec);
 	if (m_offFrame==Antenna::ANT_EQUATORIAL){
 		att->userAzimuthOffset=0.0;
 		att->userElevationOffset=0.0;
@@ -999,25 +1042,25 @@ void SubScan::fillAllAttributes (Antenna::OTFAttributes* att) {
 		att->userLongitudeOffset=m_lonoff;
 		att->userLatitudeOffset=m_latoff;
 	}
-	att->parallacticAngle=pAngle;
-	att->J2000RightAscension=ra;
-	att->J2000Declination=decl;
-	att->startLon=m_startLon;
-	att->startLat=m_startLat;
-	att->stopLon=m_stopLon;
-	att->stopLat=m_stopLat;
+	att->startLon=slaDranrm(m_startLon);
+	att->startLat=IRA::CIRATools::latRangeRad(m_startLat);
+	att->stopLon=slaDranrm(m_stopLon);
+	att->stopLat=IRA::CIRATools::latRangeRad(m_stopLat);
 	if (m_isPointingScan) {
-		att->centerLon=m_targetAz;
-		att->centerLat=m_targetEl;
+		att->centerLon=slaDranrm(m_targetAz);
+		att->centerLat=IRA::CIRATools::latRangeRad(m_targetEl);
 	}
 	else {
-		att->centerLon=m_centerLon;
-		att->centerLat=m_centerLat;
+		att->centerLon=slaDranrm(m_centerLon);
+		att->centerLat=IRA::CIRATools::latRangeRad(m_centerLat);
 	}
-	att->centerRA=m_centerRA;
-	att->centerDec=m_centerDec;
-	att->centerGLon=m_centerGLon;
-	att->centerGLat=m_centerGLat;
+
+	att->centerRA=slaDranrm(m_origCenterRA);
+	att->centerDec=IRA::CIRATools::latRangeRad(m_origCenterDec);
+	att->centerGLon=slaDranrm(m_origCenterGLon);
+	att->centerGLat=IRA::CIRATools::latRangeRad(m_origCenterGLat);
+	att->centerAz=slaDranrm(m_origCenterAz);
+	att->centerEl=IRA::CIRATools::latRangeRad(m_origCenterEl);
 	att->lonSpan=m_lonSpan;
 	att->latSpan=m_latSpan;
 	att->skySpan=m_skySpan;
@@ -1033,18 +1076,16 @@ void SubScan::fillAllAttributes (Antenna::OTFAttributes* att) {
 	att->direction=m_direction;
 	att->startUT=m_startUT.value().value;
 	att->subScanDuration=m_subScanDuration.value().value;
-	att->gLongitude=glon;
-	att->gLatitude=glat;
 }
 
 // This fills the horizontal coordinates attributes only
 void SubScan::fillAzEl (double& outAz,double& outEl) const {
 	outAz=slaDranrm(az);
-	outEl=el;
+	outEl=IRA::CIRATools::latRangeRad(el);
 }
 
 
-/* Method convertd a given pair of coordinates in all the other
+/* Method converts a given pair of coordinates in all the other
  * supported frames*/
 void SubScan::coordConvert(const double& lon, const double& lat, 
     		const Antenna::TCoordinateFrame& coordFrame, const TIMEVALUE& UT, 
@@ -1103,11 +1144,17 @@ void SubScan::setPointingScan() throw (AntennaErrors::RateTooHighExImpl)
 	//printf("Central Time: %lf\n",(double)m_centralTime.value().value);
 	m_centerRA=m_centerLon;
 	m_centerDec=m_centerLat;
+	m_origCenterRA=m_centerRA;
+	m_origCenterDec=m_centerDec;
 	coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_midUT, m_dut1, site);
+	m_origCenterAz=az;
+	m_origCenterEl=el;
 	m_targetEl=el+m_latoff;
 	m_targetAz=az+m_lonoff/cos(m_targetEl);
 	m_centerGLon=glon;
 	m_centerGLat=glat;
+	m_origCenterGLon=glon;
+	m_origCenterGLat=glat;
 	//printf("Target AZ at mid-scan: %lf\n",m_targetAz);
 	//printf("Target EL at mid-scan: %lf\n",m_targetEl);
 	if (m_geometry==Antenna::SUBSCAN_CONSTLAT){

@@ -148,6 +148,15 @@ void OTFImpl::getAttributes (Antenna::OTFAttributes_out att) throw (CORBA::Syste
 	att->sourceID=CORBA::string_dup((const char *)m_targetName);
 }
 
+void OTFImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,CORBA::Double_out el,CORBA::Double_out ra,CORBA::Double_out dec,CORBA::Double_out jepoch,CORBA::Double_out lon,
+		CORBA::Double_out lat) throw (CORBA::SystemException)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	TIMEVALUE UT(time);
+	m_subScan.computePointingForUT(UT);
+	m_subScan.fillApparent(az,el,ra,dec,jepoch,lon,lat);
+}
+
 CORBA::Boolean OTFImpl::checkTracking(ACS::Time time, CORBA::Double az, CORBA::Double el, CORBA::Double HPBW
 		 ) throw (CORBA::SystemException) {
 	baci::ThreadSyncGuard guard(&m_mutex);

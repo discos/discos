@@ -400,7 +400,7 @@ public:
 	const double& getTargetVlsr() const { return m_targetVlsr; }
 		
 	/**
-	 * This funtions can be called to get the observed  equatorial J2000 coordinates at any given time. This coordinates are computed starting from the 
+	 * This function can be called to get the observed  equatorial J2000 coordinates at any given time. This coordinates are computed starting from the
 	 * observed horizontal coordinates (@sa <i>setObservedCoordinates()</i>) 
 	 * There are two cases: if the duration is smaller than the coordinate integration time (parameter from the CDB), the retruned coordinate is istantaneous, 
 	 * otherwise the coordinate is the average over the duration time.
@@ -423,6 +423,17 @@ public:
 	void getObservedHorizontal(TIMEVALUE& time,TIMEDIFFERENCE& duration,double& az,double& el) const;
 	
 	/**
+	 * This function can be called to get the observed  coordinates at any given time. This coordinates are computed starting from the
+	 * observed equatorial coordinates at J2000 (@sa <i>setObservedCoordinates()</i>). If the particular time is not present in the buffer the returned point is the
+	 * result of a linear interpolation between the two nearest points.
+	 * @param time the epoch which the observed horizontal coordinates (where the equatorial ones come from) refers to.
+	 * @param duration in conjunction with <i>time</i> identifies a period over which the returned coordinate in integrated.
+	 * @param lng  the requested galactic longitude coordinate.
+	 * @param lat the requested galactic latitude coordinate.
+	*/
+	void getObservedGalactic(TIMEVALUE& time,TIMEDIFFERENCE& duration,double &lng,double& lat) const;
+
+	/**
 	 * This function is called in order to get the raw horizontal coordinates at a given epoch. If the epoch is not present in the buffer the returned point is the
 	 * result of a linear interpolation between the two nearest points. 
 	 * @param time the epoch which the horizontal coordinates refers to
@@ -430,17 +441,20 @@ public:
 	 * @param el the reqeusted elevation coordinate
 	 */ 
 	void getRawHorizontal(const TIMEVALUE& time,double& az,double& el) const;
-
-	/**
-	 * This function can be called to get the observed  coordinates at any given time. This coordinates are computed starting from the 
-	 * observed equatorial coordinates at J2000 (@sa <i>setObservedCoordinates()</i>). If the particular time is not present in the buffer the returned point is the
-	 * result of a linear interpolation between the two nearest points.
-	 * @param time the epoch which the observed horizontal coordinates (whiere the equatorial ones come from) refers to.
-	 * @param lng  the requested galactic longitude coordinate.
-	 * @param lat the reqeusted galactic latitude coordinate.
-	*/
-	void getObservedGalactic(const TIMEVALUE& time,double &lng,double& lat) const;
 	
+	/**
+	 * called to get apparent coordinates as they come from ephemeris generators.
+	 * @param time the given timestamp  the returned coordinates refer to
+	 * @param az apparent azimuth in radians
+	 * @param el apparent elevation in radians
+	 * @param ra apparent right ascension in radians
+	 * @param dec apparent declination in radians
+	 * @param jepoch julian epoch of the equatorial point
+	 * @parm lon galactic longitude converted from the returned apparent equatorial position
+	 * @parm lat galactic latitude converted from the returned apparent equatorial position
+	 */
+	void getApparent(const ACS::Time& time,double& az,double& el,double& ra, double& dec,double& jepoch,double& lon,double& lat);
+
 	/**
 	 * This function will compute the slewing time of the telescope starting from the current position to the
 	 * target position. The target is described giving the tracking parameters as it was a norma scan start.

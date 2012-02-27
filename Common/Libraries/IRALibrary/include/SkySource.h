@@ -48,6 +48,16 @@ public:
 		SS_J2000=1,      /*!< equinox at julian epoch J2000 (FK5 catalog) */
 		SS_APPARENT=2    /*!< coordinates are already apparent, they do not need precession */
 	};
+
+	/**
+	 * list of supported frames
+	*/
+	enum TFrame {
+		SS_EQ=0,    /*!< equatorial frame*/
+		SS_HOR=1, /*!< horizontal frame */
+		SS_GAL=2,  /*!<  galactic frame*/
+		SS_NONE=3  /*!< none  */
+	};
 	
 	/**
 	 * Constructor.
@@ -144,7 +154,14 @@ public:
 	 * @param eph julian epoch the returned coordinates refer to 
 	 */
 	void getApparentEquatorial(double& ra,double& dec,double& eph);
-	
+
+	/**
+	 * Read the galactic coordinates of the sky source as converted directly from apparent equatorial
+	 * @param lon galactic longitude
+	 * @param lat galactic latitude
+	 */
+	void getApparentGalactic(double &lon,double& lat);
+
 	/**
 	 * Read the horizontal coordinates of the sky source as they come out from the <i>apparentToHorizontal()</i>. 
 	 * @param az azimuth in radians
@@ -204,7 +221,7 @@ public:
 	 * @param azOff new azimuth offset in radians
 	 * @param elOff new elevation offset in radians 
 	*/
-	void setHorizontalOffsets(const double& azOff,const double& elOff) { m_azOff=azOff; m_elOff=elOff; }
+	void setHorizontalOffsets(const double& azOff,const double& elOff);
 	
 	/**
 	 * I gets the current offset for the horizontal system
@@ -219,7 +236,7 @@ public:
 	 * @param raOff new right ascension offset in radians
 	 * @param decOff new declination offset in radians 
 	*/
-	void setEquatorialOffsets(const double& raOff,const double& decOff) { m_raOff=raOff; m_decOff=decOff; }
+	void setEquatorialOffsets(const double& raOff,const double& decOff);
 	
 	/**
 	 * It gets the current offset for the equatorial  system.
@@ -329,8 +346,10 @@ private:
 	TEquinox m_equinox1;
 	/** J2000 coordinates of the source, not affected by offsets */
 	double m_raj2000,m_decj2000;
-	/** Apparent equatorial coordiantes */
-	double m_ra2,m_dec2,m_julianEpoch2;	
+	/** Apparent equatorial coordinates */
+	double m_ra2,m_dec2,m_julianEpoch2;
+	/** galactic coordinates, included galactic offsets */
+	double m_galLong2,m_galLat2;
 	/** Horizontal coordinates */
 	double m_az,m_el;
 	/** Parallactic angle */
@@ -341,12 +360,20 @@ private:
 	double m_raOff,m_decOff;
 	/** Galactic Offsets in radians */
 	double m_longOff,m_latOff;
-	/* if true the source was a fixed point in the horizontal frame */
+	/** if true the source was a fixed point in the horizontal frame */
 	bool m_fixed;
+	/* frame of the input coordinates */
+	TFrame m_inputFrame;
+	/** frame of the offsets */
+	TFrame m_offsetsFrame;
 	/**
-	 * Tansform the input coordinates to FK5 J2000 system (current epoch)
+	 * Transform the input coordinates to FK5 J2000 system (current epoch)
 	*/	
 	void inputToFK5(const CDateTime& time);
+	/**
+	 * reinitialize the object when new offsets are commanded
+	 */
+	void setOffsets();
 };
 
 }

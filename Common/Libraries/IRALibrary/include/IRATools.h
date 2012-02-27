@@ -23,7 +23,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/09/2010	  The parsing of right ascension is now also added with the support for sexagesimal format */
 /* Andrea Orlati(aorlati@ira.inaf.it)  13/09/2010	  added OffsetTorad() */
 /* Andrea Orlati(aorlati@ira.inaf.it)  28/02/2011	  methods skyFrequency() */
-/* Andrea Orlati(aorlati@ira.inaf.it)  15/07/2011	  reviewed the set orf CDB function to prevent a memory leakage */
+/* Andrea Orlati(aorlati@ira.inaf.it)  15/07/2011	      reviewed the set of CDB function to prevent a memory leakage */
 
 // $Id: IRATools.h,v 1.25 2011-07-15 12:43:09 a.orlati Exp $
 
@@ -315,6 +315,33 @@ public:
 	 */
 	static bool getNextToken(const IRA::CString& str,int &start,char delimiter,IRA::CString &ret);
 	
+	/**
+	 * Computes the normalized (+/-PI) difference between two angles expressed in radians(a-b). For example 359°-1°=-2°,1°-359°=2°, 179°-360°=179° and so on.
+	 *  @param a first angle in radians
+	 *  @param b second angle in radians
+	 *  @return the resulting angle in the range +/-PI.
+	 */
+	static double differenceBetweenAnglesRad(const double& a,const double& b);
+
+	/**
+	 * Computes the normalized (+/-180.0) difference between two angles expressed in degrees(a-b). For example 359°-1°=-2°,1°-359°=2°, 179°-360°=179° and so on.
+	 *  @param a first angle in degrees
+	 *  @param b second angle in degrees
+	 *  @return the resulting angle in the range +/-180.
+	 */
+	static double differenceBetweenAnglesDeg(const double& a,const double& b);
+
+	/**
+	 * Puts an angle (radians) in the range +/-PI/2.
+	 */
+	static double latRangeRad(const double& lat);
+
+	/**
+	 * Puts an angle (degrees) in the range +/-90°.
+	 */
+	static double latRangeDeg(const double& lat);
+
+
 	/**
 	 * Use this function to convert a string containing a time interval (days-hh:mm:ss.ss) into an ACS interval notation. If <i>complete</i> argument is not set, not all the expected fields 
 	 * have to be  included, the function will try to convert the string anyway. Some examples:

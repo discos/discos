@@ -199,7 +199,7 @@ public:
 	/**
 	 * Set the scan stage to STOP
 	 */
-	bool scanStop();
+	bool stopScan();
 
 	/**
 	 * Get the name and path of the current file

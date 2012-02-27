@@ -28,22 +28,18 @@ module Antenna {
 		 * component attributes are read via their accesor method (<i>getAttributes()</i>).  
 	     */
 		DEFATTRIBUTES(OTFAttributes)
-		double startLon;                 /** longitude of the subscan starting point (radians), 
-		                                     if RA it must be J2000*/
-		double startLat;		         /** latitude of the subscan starting point (radians), 
-		                                     if Dec it must be J2000*/
-		double stopLon;		             /** longitude of the subscan ending point (radians), 
-		                                     if RA it must be J2000*/ 
-		double stopLat;	                 /** latitude of the subscan ending point (radians), 
-		                                     if Dec it must be J2000*/
-		double centerLon;                /** longitude of the subscan central point (radians),
-		                                     if RA it must be J2000*/
-		double centerLat;                /** latitude of the subscan central point (radians),
-		                                     if Dec it must be J2000*/
-		double centerGLon;				 /** longitude relative to glactic frame of the central point (radians) */
-		double centerGLat;               /** latitude relative to glactic frame of the central point (radians) */
-		double centerRA;                 /** RAJ2000 of the subscan central point (radians)*/
-		double centerDec;                /** DecJ2000 of the subscan central point (radians)*/
+		double startLon;                 /** longitude of the subscan starting point (radians),  if RA it must be J2000, offset included*/
+		double startLat;		         /** latitude of the subscan starting point (radians), if Dec it must be J2000, offset included*/
+		double stopLon;		             /** longitude of the subscan ending point (radians),  if RA it must be J2000, offset included*/
+		double stopLat;	                 /** latitude of the subscan ending point (radians),  if Dec it must be J2000, offset included*/
+		double centerLon;                /** longitude of the subscan central point (radians), if RA it must be J2000, offset included*/
+		double centerLat;                /** latitude of the subscan central point (radians),  if Dec it must be J2000, offset included*/
+		double centerGLon;				 /** longitude relative to glactic frame of the central point (radians), offsets are not included */
+		double centerGLat;               /** latitude relative to glactic frame of the central point (radians), offsets are not included */
+		double centerRA;                 /** RAJ2000 of the subscan central point (radians), offsets are not included*/
+		double centerDec;                /** DecJ2000 of the subscan central point (radians), offsets are not included*/
+		double centerAz;                 /** azimuth of the subscan central point (radians), offsets are not included */
+		double centerEl;                  /** elevation of the subscan central point (radians), offsets are not included */
 		double lonSpan;                  /** total length of the subscan along longitude axis (radians)*/
 		double latSpan;                  /** total length of the subscan along latitude axis (radians)*/
 		double skySpan;					 /** absolute amplitude of subscan (radians)*/

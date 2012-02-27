@@ -1,6 +1,5 @@
 /* ************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                       */
-/* $Id: EphemGenerator.idl,v 1.8 2010-09-14 08:02:10 a.orlati Exp $						 */
 /*                                                                                       */
 /* This code is under GNU General Public Licence (GPL).                                  */
 /*                                                                                       */
@@ -8,6 +7,8 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)           10/09/2007  Creation                     */
 /* Andrea Orlati(aorlati@ira.inaf.it)           15/05/2008  Added method checkTracking   */
 /* Carlo Migoni (migoni@oa-cagliari.inaf.it)    04/10/2011  Added computeFlux() method   */
+/* Andrea Orlati(aorlati@ira.inaf.it)    15/02/2012  Added getAllCoordinates() method   */
+
 
 #ifndef _EPHEMGENERATOR_IDL_
 
@@ -84,7 +85,7 @@ module Antenna {
 		/**
 		 * This method is used to apply new offsets for the selected frame. Longitude will be corrected for the cosine of the latitude before use, so they are sky offsets. 
 		 * If the offset are not pertinent or cannot be applied for the given generator an error is thrown. 
-		 * If the new offset are legal, any other previous offsets in other frames are cleared. If the genrator is re-initialized, the offsets are kept.
+		 * If the new offset are legal, any other previous offsets in other frames are cleared. If the generator is re-initialized, the offsets are kept.
 		 * @throw CORBA::SystemException
 		 * @throw AntennaErrors::AntennaErrorsEx
 		 * @param lon new offset in longitude in radians 
@@ -102,6 +103,20 @@ module Antenna {
 		 * @param el that's the returned value in radians of the elevation for the requested time.
 		*/
 		void getHorizontalCoordinate(in ACS::Time time, out double az,out double el);
+		
+		/**
+		 * This method should only be used internally to know the apparent coordinates in all frames.
+		 * @throw CORBA::SyStemException
+		 * @param time this indicates the time the coordinates refer to
+		 * @param az the apparent  azimuth in radians
+		 * @param el the apparent elevation in radians
+		 * @param ra apparent right ascension in radinas
+		 * @param  dec apparent declination in radians
+		 * @param jepoch julian epoch the equtorial coordinates refer to 
+		 * @param lon galactic longitude corresponding to the apparent equatorial
+		 * @param lat galactic latitude corresponding to the apparent equatorial
+		*/
+		void getAllCoordinates(in ACS::Time time,out double az,out double el, out double ra,out double dec,out double jepoch,out double lon,out double lat);
 		
 		/**
      	 * This method is called internally to know if the telescope is tracking the right position or not. The generator will subtract the

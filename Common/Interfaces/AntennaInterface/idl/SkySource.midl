@@ -22,10 +22,10 @@
 module Antenna {
 	
 	/**
-	 * @struct SkySourceAttributes defines a structure that contains all the properties of the componet 
+	 * @struct SkySourceAttributes defines a structure that contains all the properties of the component 
 	 * (inlcuded the inherited form the interface EpehemGenerator).
-	 * This interface will be mapped into an ACS dynamic componet so it can not expose properties in their classic definition. So the 
-	 * component attributes are read via their accesor method (<i>getAttributes()</i>).  
+	 * This interface will be mapped into an ACS dynamic component so it can not expose properties in their classic definition. So the 
+	 * component attributes are read via their accessor method (<i>getAttributes()</i>).  
 	 * @arg ìnputRightAscension the right ascension of the source taken from the catalog in radians
 	 * @arg inputDeclination the declination of the source taken from the catalog in radians
 	 * @arg inputJEpoch the julian epoch the catalog RA and Dec refer to

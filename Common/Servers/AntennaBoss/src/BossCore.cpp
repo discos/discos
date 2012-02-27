@@ -235,14 +235,39 @@ void CBossCore::getObservedEquatorial(TIMEVALUE& time,TIMEDIFFERENCE& duration,d
 	}
 }
 
-void CBossCore::getObservedGalactic(const TIMEVALUE& time,double &lng,double& lat) const
+void CBossCore::getObservedGalactic(TIMEVALUE& time,TIMEDIFFERENCE& duration,double &lng,double& lat) const
 {
-	m_observedGalactics.selectPoint(time,lng,lat);
+	if (duration.value().value>m_config->getCoordinateIntegrationPeriod()) {
+		double ra,dec;
+		IRA::CSkySource converter;
+		TIMEVALUE stopTime(time.value());
+		stopTime+=duration.value();
+		m_integratedObservedEquatorial.averagePoint(time,stopTime,ra,dec);
+		IRA::CSkySource::equatorialToGalactic(ra,dec,lng,lat);
+	}
+	else {
+		m_observedGalactics.selectPoint(time,lng,lat);
+	}
 }
 
 void CBossCore::getRawHorizontal(const TIMEVALUE& time,double& az,double& el) const
 {
 	m_rawCoordinates.selectPoint(time,az,el);
+}
+
+void CBossCore::getApparent(const ACS::Time& time,double& az,double& el,double& ra, double& dec,double& jepoch,double& lon,double& lat)
+{
+	if ((!CORBA::is_nil(m_generator)) && (m_generatorType!=Antenna::ANT_NONE)) {
+		try {
+			m_generator->getAllCoordinates(time,az,el,ra,dec,jepoch,lon,lat);
+		}
+		catch (...) {
+			az=el=ra=dec=jepoch=lon=lat=0.0;
+		}
+	}
+	else {
+		az=el=ra=dec=jepoch=lon=lat=0.0;
+	}
 }
 
 void CBossCore::stow() throw (ManagementErrors::ParkingErrorExImpl)
@@ -1175,7 +1200,7 @@ void CBossCore::loadMount(Antenna::Mount_var& ref,bool& errorDetected) const thr
 	}
 	if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
 		try {  
-			// no defualt component because we use the parents interface Antenna::Mount not the site specific interface Antenna::MedicinaMount or Antenna::SRTMount
+			// no default component because we use the parents interface Antenna::Mount not the site specific interface Antenna::MedicinaMount or Antenna::SRTMount
 			ref=m_services->getComponent<Antenna::Mount>((const char*)m_config->getMountInstance());
 			ACS_LOG(LM_FULL_INFO,"CBossCore::loadMount()",(LM_INFO,"MOUNT_LOCATED"));
 			errorDetected=false;

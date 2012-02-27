@@ -125,20 +125,20 @@ void MoonImpl::getAttributes(Antenna::MoonAttributes_out att) throw(CORBA::Syste
 	att=new Antenna::MoonAttributes;
 	
 	att->sourceID=CORBA::string_dup("MOON");
-	att-> rightAscension = m_ra;
-	att-> declination = m_dec ;
-	att-> azimuth = m_az;
-	att-> elevation = m_el;
+	att->J2000RightAscension=slaDranrm(m_ra2000);
+	att->J2000Declination=IRA::CIRATools::latRangeRad(m_dec2000);
+	att-> rightAscension = slaDranrm(m_ra);
+	att-> declination = IRA::CIRATools::latRangeRad(m_dec) ;
+	att-> azimuth = slaDranrm(m_az);
+	att-> elevation = IRA::CIRATools::latRangeRad(m_el);
 	att-> julianEpoch = JulianEpoch;
 	att-> parallacticAngle = m_parallacticAngle;
 	att-> userAzimuthOffset = az_off;
 	att-> userElevationOffset = el_off;
 	att-> userRightAscensionOffset = ra_off;
 	att-> userDeclinationOffset = dec_off;
-	att->J2000RightAscension=m_ra2000;
-	att->J2000Declination=m_dec2000;
-	att->gLongitude=m_glon;
-	att->gLatitude=m_glat;
+	att->gLongitude=slaDranrm(m_glon);
+	att->gLatitude=IRA::CIRATools::latRangeRad(m_glat);
 	att->userLatitudeOffset=att->userLongitudeOffset=0.0;
 }
 
@@ -162,14 +162,26 @@ void MoonImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna::TCoordina
 	}
 }
 
-
 void MoonImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_out az, CORBA::Double_out el) throw (CORBA::SystemException)
 {
 	AUTO_TRACE("MoonImpl::getHorizontalCoordinate()");
 	TIMEVALUE val(time);
 	Moon_position(val);
-	az= m_az;
-	el=m_el;
+	az=slaDranrm(m_az);
+	el=IRA::CIRATools::latRangeRad(m_el);
+}
+
+void MoonImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,CORBA::Double_out el,CORBA::Double_out ra,CORBA::Double_out dec,CORBA::Double_out jepoch,CORBA::Double_out lon,
+		CORBA::Double_out lat) throw (CORBA::SystemException)
+{
+	TIMEVALUE val(time);
+	double JulianEpoch;
+	Moon_position(val);
+	IRA::CDateTime currentTime(val,m_dut1);
+	JulianEpoch = currentTime.getJulianEpoch();
+	az=slaDranrm(m_az); el=IRA::CIRATools::latRangeRad(m_el);
+	ra=slaDranrm(m_ra); dec=IRA::CIRATools::latRangeRad(m_dec); jepoch=JulianEpoch;
+	lon=slaDranrm(m_glon); lat=IRA::CIRATools::latRangeRad(m_glat);
 }
 
  bool MoonImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::Double el,CORBA::Double HPBW) throw (CORBA::SystemException)
@@ -180,8 +192,8 @@ void MoonImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_out az, COR
  	
  	double az_Err,el_Err, delta;
  	bool track;
- 	az_Err = (az - m_az)*cos(m_el);
- 	el_Err = el - m_el;
+ 	az_Err = (az - slaDranrm(m_az))*cos(IRA::CIRATools::latRangeRad(m_el));
+ 	el_Err = el - IRA::CIRATools::latRangeRad(m_el);
  	delta = sqrt( az_Err*az_Err + el_Err*el_Err );
  	if (delta <=  HPBW*0.1) {
  		track=true;
@@ -275,13 +287,14 @@ void MoonImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_out az, COR
 	slaDcc2s ( pv_rot, &m_ra, &m_dec ); 
 	/* now compute the corresponding galactic coordinates, J2000, e paralacticAngle...*/
 	IRA::CSkySource::apparentToJ2000(m_ra,m_dec,date,m_ra2000,m_dec2000);
-	// now computes the corresponding galactic coordinate
-	IRA::CSkySource::equatorialToGalactic(m_ra2000,m_dec2000,m_glon,m_glat);
 	
 	// add the offsets.......
 	
 	m_dec += dec_off;
-	m_ra += ra_off/cos(m_dec);	
+	m_ra += ra_off/cos(m_dec);
+
+	// now computes the corresponding galactic coordinate...offsets are included
+	IRA::CSkySource::equatorialToGalactic(m_ra2000,m_dec2000,m_glon,m_glat);
 	
 /* Converting an angle (m_ra) in radians to hours, minutes, seconds, fraction ( double precision ) */
 		
@@ -291,7 +304,7 @@ void MoonImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_out az, COR
 
 	
 /*  Calculating the HA and Dec  */
-    slaDranrm ( LST - m_ra );    
+    //slaDranrm ( LST - m_ra );
 		
 	/* 2 is the  no of decimal places of seconds
 	 * slaDranrm (stl-ra), this call normalize an angle (stl - ra) into the range  0-360 (double precision) 

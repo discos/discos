@@ -417,7 +417,7 @@ int main(int argc, char *argv[])
 	_TW_ADD_LABEL("Parallactic Angle           :",0,4,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 	_TW_ADD_LABEL("Start/stop lon/lat          :",0,5,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 	_TW_ADD_LABEL("Scan center                 :",0,6,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-	_TW_ADD_LABEL("Scan lon/lat rates          :",0,7,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+	_TW_ADD_LABEL("Scan lon/lat/sky rates       :",0,7,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 	_TW_ADD_LABEL("GC span & phi_rate          :",0,8,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 	_TW_ADD_LABEL("Start UT/Duration           :",0,9,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 	_TW_ADD_LABEL("CW/CCW Section              :",0,12,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
@@ -620,7 +620,7 @@ int main(int argc, char *argv[])
 			impl.log(); 
 		}
 		
-		bValue.setValue((CORBA::Double)att->J2000RightAscension*DR2D);		
+		bValue.setValue((CORBA::Double)att->J2000RightAscension*DR2D);
 		J2000Ra_text->setValue(CFormatFunctions::floatingPointFormat(bValue,"%08.4lf"));
 		bValue.setValue((CORBA::Double)att->J2000Declination*DR2D);		
 		J2000Dec_text->setValue(CFormatFunctions::floatingPointFormat(bValue,"%08.4lf"));
@@ -645,7 +645,7 @@ int main(int argc, char *argv[])
 		sub1_text->setValue(outString);
 		outString.Format("%08.4lf  %08.4lf",att->centerLon*DR2D,att->centerLat*DR2D);
 		sub2_text->setValue(outString);
-		outString.Format("%08.4lf  %08.4lf",att->lonRate*DR2D*60.0,att->latRate*DR2D*60.0);
+		outString.Format("%08.4lf  %08.4lf %08.4lf",att->lonRate*DR2D*60.0,att->latRate*DR2D*60.0,att->skyRate*DR2D*60.0);
 		sub3_text->setValue(outString);
 		outString.Format("%08.4lf  %08.4lf",att->subScanSpan*DR2D,att->phiRate*DR2D*60.0);
 		sub4_text->setValue(outString);	

@@ -194,22 +194,21 @@ void SkySourceImpl::getAttributes(Antenna::SkySourceAttributes_out att) throw(CO
 	now.setCurrentDateTime(m_dut1);
 	m_source.process(now,m_site);
 	att=new Antenna::SkySourceAttributes;
+	att->sourceID=CORBA::string_dup((const char *)m_sourceName);
+	m_source.getJ2000Equatorial(att->J2000RightAscension,att->J2000Declination,jepoch,pmRa,pmDec,prlx,rvel);
+	m_source.getApparentEquatorial(att->rightAscension,att->declination,att->julianEpoch);
+	m_source.getApparentGalactic(att->gLongitude,att->gLatitude);
+	m_source.getApparentHorizontal(att->azimuth,att->elevation);
+	att->parallacticAngle=m_source.getParallacticAngle();
+	m_source.getHorizontalOffsets(att->userAzimuthOffset,att->userElevationOffset);
+	m_source.getEquatorialOffsets(att->userRightAscensionOffset,att->userDeclinationOffset);
+	m_source.getGalacticOffsets(att->userLongitudeOffset,att->userLatitudeOffset);
 	m_source.getInputEquatorial(att->inputRightAscension,
 			att->inputDeclination,att->inputJEpoch,
 			att->inputRaProperMotion,att->inputDecProperMotion,
 			att->inputParallax,att->inputRadialVelocity);
 	att->inputRaProperMotion*=cos((double)att->inputDeclination);
-	m_source.getJ2000Equatorial(att->J2000RightAscension,att->J2000Declination,jepoch,pmRa,pmDec,prlx,rvel);
 	m_source.getInputGalactic(att->inputGalacticLongitude,att->inputGalacticLatitude);
-	att->gLongitude=att->inputGalacticLongitude;
-	att->gLatitude=att->inputGalacticLatitude;
-	att->sourceID=CORBA::string_dup((const char *)m_sourceName);
-	m_source.getApparentEquatorial(att->rightAscension,att->declination,att->julianEpoch);
-	m_source.getApparentHorizontal(att->azimuth,att->elevation);
-	m_source.getHorizontalOffsets(att->userAzimuthOffset,att->userElevationOffset);
-	m_source.getEquatorialOffsets(att->userRightAscensionOffset,att->userDeclinationOffset);
-	m_source.getGalacticOffsets(att->userLongitudeOffset,att->userLatitudeOffset);
-	att->parallacticAngle=m_source.getParallacticAngle();
 }
 
 CORBA::Boolean SkySourceImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::Double el,
@@ -233,17 +232,17 @@ void SkySourceImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna::TCoo
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (frame==Antenna::ANT_GALACTIC) {
 		m_source.setGalacticOffsets(lon,lat);
-		m_source.setEquatorialOffsets(0.0,0.0);
-		m_source.setHorizontalOffsets(0.0,0.0);
+		//m_source.setEquatorialOffsets(0.0,0.0);
+		//m_source.setHorizontalOffsets(0.0,0.0);
 	}
 	else if (frame==Antenna::ANT_EQUATORIAL) {
-		m_source.setGalacticOffsets(0.0,0.0);
+		//m_source.setGalacticOffsets(0.0,0.0);
 		m_source.setEquatorialOffsets(lon,lat);
-		m_source.setHorizontalOffsets(0.0,0.0);
+		//m_source.setHorizontalOffsets(0.0,0.0);
 	}
 	else if (frame==Antenna::ANT_HORIZONTAL) {
-		m_source.setGalacticOffsets(0.0,0.0);
-		m_source.setEquatorialOffsets(0.0,0.0);
+		//m_source.setGalacticOffsets(0.0,0.0);
+		//m_source.setEquatorialOffsets(0.0,0.0);
 		m_source.setHorizontalOffsets(lon,lat);		
 	}
 }
@@ -258,6 +257,22 @@ void SkySourceImpl::getHorizontalCoordinate(ACS::Time time,CORBA::Double_out az,
 	m_source.process(ctime,m_site);
 	m_source.getApparentHorizontal(azi,ele);
 	az=azi; el=ele;
+}
+
+void SkySourceImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,CORBA::Double_out el,CORBA::Double_out ra,CORBA::Double_out dec,CORBA::Double_out jepoch,CORBA::Double_out lon,
+		CORBA::Double_out lat) throw (CORBA::SystemException)
+{
+	TIMEVALUE val(time);
+	double azi,ele,rae,dece,lone,late,jepoche;
+	IRA::CDateTime ctime(val,m_dut1);
+	baci::ThreadSyncGuard guard(&m_mutex);
+	m_source.process(ctime,m_site);
+	m_source.getApparentHorizontal(azi,ele);
+	m_source.getApparentEquatorial(rae,dece,jepoche);
+	m_source.getApparentGalactic(lone,late);
+	az=azi; el=ele;
+	ra=rae; dec=dece; jepoch=jepoch;
+	lon=lone; lat=late;
 }
 
 void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::SystemException,

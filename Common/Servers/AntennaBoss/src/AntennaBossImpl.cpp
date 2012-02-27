@@ -551,12 +551,19 @@ void AntennaBossImpl::getRawCoordinates(ACS::Time time,CORBA::Double_out az,CORB
 	el=(CORBA::Double)El;
 }
 
+void AntennaBossImpl::getApparentCoordinates (ACS::Time time,CORBA::Double_out az,CORBA::Double_out el,CORBA::Double_out ra,CORBA::Double_out dec,CORBA::Double_out jepoch,
+		CORBA::Double_out lon,CORBA::Double_out lat) throw (CORBA::SystemException)
+{
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	resource->getApparent(time,az,el,ra,dec,jepoch,lon,lat);
+}
+
 void AntennaBossImpl::getObservedEquatorial(ACS::Time time,ACS::TimeInterval duration,CORBA::Double_out ra,CORBA::Double_out dec) throw (
 		CORBA::SystemException)
 {
 	double Ra=0.0;
 	double Dec=0.0;
-	//workaround for strange behaviour: this method seems so be called at startup before initialize() completes
+	//workaround for strange behavior: this method seems so be called at startup before initialize() completes
 	//this result in a segmentation fault because m_core is not created yet. Has it something to do with the
 	//CoordinateGrabber? it strangely uses the methods that are affected by this problem.
 	if (!m_core) return;  
@@ -568,14 +575,16 @@ void AntennaBossImpl::getObservedEquatorial(ACS::Time time,ACS::TimeInterval dur
 	dec=(CORBA::Double)Dec;
 }
 
-void AntennaBossImpl::getObservedGalactic(ACS::Time time,CORBA::Double_out longitude,CORBA::Double_out latitude) throw (
+void AntennaBossImpl::getObservedGalactic(ACS::Time time,ACS::TimeInterval duration,CORBA::Double_out longitude,CORBA::Double_out latitude) throw (
 		CORBA::SystemException)
 {
 	double Long=0.0;
 	double Lat=0.0;
+	if (!m_core) return;
 	TIMEVALUE requestTime(time);
+	TIMEDIFFERENCE requestedDuration(duration);
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
-	resource->getObservedGalactic(requestTime,Long,Lat);
+	resource->getObservedGalactic(requestTime,requestedDuration,Long,Lat);
 	longitude=(CORBA::Double)Long;
 	latitude=(CORBA::Double)Lat;
 }

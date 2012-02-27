@@ -172,6 +172,9 @@ public:
 	// This fills the horizontal coordinates attributes only
 	void fillAzEl (double& outAz,double& outEl) const;
 	
+	// fill the apparent coordinates in all supported frames
+	void fillApparent(double& outAz,double& outEl,double& outRa,double& outDec,double& outJepoch,double& outLon,double& outLat);
+
 	/* Method computes the Az,El position to be commanded to the antenna
 	 * for the given time, if a "pointing calibration scan" is being
 	 * performed.*/
@@ -240,6 +243,13 @@ private:
 	double m_latoff; //latitude offset (radians)
 	Antenna::TCoordinateFrame m_offFrame; // reference frame for offsets
 	bool m_isPointingScan;
+	// scan center coordinates without any offset
+	double m_origCenterRA;
+	double m_origCenterDec;
+	double m_origCenterGLon;
+	double m_origCenterGLat;
+	double m_origCenterAz;
+	double m_origCenterEl;
 
 	
 	/* Method computes the start and stop positions for the peculiar

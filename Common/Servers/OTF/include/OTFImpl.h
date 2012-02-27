@@ -76,6 +76,9 @@ public:
 	virtual void getAttributes (Antenna::OTFAttributes_out att)
 	throw (CORBA::SystemException);
 	
+	virtual void getAllCoordinates(ACS::Time time,CORBA::Double_out az,CORBA::Double_out el,CORBA::Double_out ra,CORBA::Double_out dec,CORBA::Double_out jepoch,CORBA::Double_out lon,
+			CORBA::Double_out lat) throw (CORBA::SystemException);
+
 	/* Sets all the parameters which define the subscan */
 	virtual Antenna::TSections setSubScan(
 			const char * targetName,

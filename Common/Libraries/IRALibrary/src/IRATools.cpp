@@ -392,6 +392,37 @@ bool CIRATools::getNextToken(const IRA::CString& str,int &start,char delimiter,I
 		else return true;
 }
 
+double CIRATools::differenceBetweenAnglesRad(const double& a,const double& b)
+{
+	double diff=a-b;
+	while(diff<-DPI) diff+=D2PI;
+	while (diff>DPI) diff-=D2PI;
+	return diff;
+}
+
+double CIRATools::differenceBetweenAnglesDeg(const double& a,const double& b)
+{
+	double diff=a-b;
+	while(diff<-180.0) diff+=360.0;
+	while (diff>180.0) diff-=360.0;
+	return diff;
+}
+
+double CIRATools::latRangeRad(const double& lat)
+{
+	double res=lat;
+	while (res<-DPIBY2) res+=DPIBY2;
+	while (res>DPIBY2) res-=DPIBY2;
+	return res;
+}
+
+double CIRATools::latRangeDeg(const double& lat)
+{
+	double res=lat;
+	while (res<-90.0)  res+=90;
+	while (res>90.0)  res-=90;
+	return res;
+}
 
 bool CIRATools::strToInterval(const IRA::CString& durationString,ACS::TimeInterval& interval,bool complete,char dateDelimiter,char timeDelimiter)
 {

@@ -518,7 +518,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
  		if (!CORBA::is_nil(writer)) {
  			Management::TSubScanSetup subSetup;
  			subSetup.startUt=startTime;
- 			subSetup.subScanId=scanID;
+ 			subSetup.subScanId=subScanID;
  			subSetup.axis=axis;
  			subSetup.extraPath=CORBA::string_dup((const char *)extraPath);
  			subSetup.baseName=CORBA::string_dup((const char *)baseName);
