@@ -180,6 +180,29 @@ def stow(cmd_num, app_num, response_type, *params):
     return response_list('stow', cmd_num, app_num, expected_ack, mixed, response_type)
 
 
+def clean(cmd_num, app_num, response_type, *params):
+    """This function make an answer for a setup request.
+
+    Parameters:
+
+    - `cmd_num`: the command identification number
+    - `app_num`: the application number (minor servo address)
+    - `response_type`: the type of response: expected_ack, mixed
+
+    Return a list of answers.
+    """
+    expected_ack = '@' + 'clean' + ':%d=%d' % (cmd_num, app_num)
+    for param in params:
+        expected_ack += ",%s" %param
+    mixed = []
+    mixed.append('?' + 'stow' + ':0=%d> 0' %random.randrange(0,5))
+    mixed.append('?' + 'clean' + ':0=%d> 0' %app_num)
+
+    return response_list('clean', cmd_num, app_num, expected_ack, mixed, response_type)
+
+
+
+
 def getspar(cmd_num, app_num, response_type, *params):
     """This function make an answer all the getspar requestes.
 

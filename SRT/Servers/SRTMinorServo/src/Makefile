@@ -13,7 +13,7 @@ CDB_SCHEMAS = MinorServo
 # ----------------------------
 LIBRARIES = WPServoImpl DerotatorImpl MinorServoBossImpl
 
-WPServoImpl_OBJECTS = WPServoImpl WPServoSocket WPServoTalker RequestScheduler WPStatusUpdater SocketListener utils libCom WPUtils
+WPServoImpl_OBJECTS = WPServoImpl WPServoSocket WPServoTalker RequestDispatcher WPStatusUpdater SocketListener utils libCom WPUtils
 WPServoImpl_LIBS = MinorServoStubs IRALibrary ComponentErrors SRTMinorServoLibrary MinorServoErrors
 
 DerotatorImpl_OBJECTS = DerotatorImpl sensorSocket icdSocket utils

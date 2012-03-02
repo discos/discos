@@ -35,8 +35,9 @@
 WPServoTalker::WPServoTalker(
         const CDBParameters *const cdb_ptr, 
         ExpireTime *const expire_ptr,
-        CSecureArea< map<int, vector<PositionItem> > > *cmdPos_list
-        ) throw (ComponentErrors::MemoryAllocationExImpl): m_cdb_ptr(cdb_ptr), m_cmdPos_list(cmdPos_list)
+        CSecureArea< map<int, vector<PositionItem> > > *cmdPos_list,
+        const Offsets *const offsets
+        ) throw (ComponentErrors::MemoryAllocationExImpl): m_cdb_ptr(cdb_ptr), m_offsets(offsets), m_cmdPos_list(cmdPos_list)
 {
     AUTO_TRACE("WPServoTalker::WPServoTalker();");
 
@@ -87,6 +88,7 @@ void WPServoTalker::getActPos(
     CSecAreaResourceWrapper<vector<string> > secure_requests = m_requests->Get();
     secure_requests->push_back(request);
     secure_requests.Release();
+    // If you want to use this method you must subtract the system offset to the positions
     timestamp = look_for_a_response(get_request_id(request), starting_time, 0, true, &positions);
 
     if(positions.length() != m_cdb_ptr->NUMBER_OF_AXIS)
@@ -95,7 +97,7 @@ void WPServoTalker::getActPos(
 
 
 void WPServoTalker::setCmdPos(
-        const ACS::doubleSeq &positions, 
+        const ACS::doubleSeq &cmd_positions, 
         ACS::Time &timestamp,
         const ACS::Time exe_time
         ) throw (
@@ -109,10 +111,15 @@ void WPServoTalker::setCmdPos(
     gettimeofday(&now, NULL);
     double starting_time = now.tv_sec + now.tv_usec / TIME_SF;
 
-    if(positions.length() != m_cdb_ptr->NUMBER_OF_AXIS)
+    if(cmd_positions.length() != m_cdb_ptr->NUMBER_OF_AXIS)
         THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set minor servo position: wrong number of axis", true);
 
-    ACS::doubleSeq positions_cp = positions;
+    CSecAreaResourceWrapper<map<int, vector<PositionItem> > > lst_secure_requests = m_cmdPos_list->Get(); 
+    ACS::doubleSeq positions = cmd_positions;
+    // Add the offsets to the positions
+    for(size_t i=0; i<positions.length(); i++)
+        positions[i] += (m_offsets->user)[i] + (m_offsets->system)[i];
+    // ACS::doubleSeq positions_cp = positions;
     
     // The first argument is the index of a vector of commands
     string request = make_request(2, m_cdb_ptr, m_cmd_number, -1, -1, -1, exe_time, &positions);
@@ -125,12 +132,16 @@ void WPServoTalker::setCmdPos(
 
     // Set the position in the vector list when look_for_a_response found the response
     PositionItem item;
-    item.timestamp = exe_time;
-    (item.position).length(positions_cp.length());
-    for(size_t idx = 0; idx != positions_cp.length(); idx++)
-        (item.position)[idx] = positions_cp[idx];
+    item.exe_time = exe_time;
+    (item.position).length(cmd_positions.length());
+    ((item.offsets).user).length(cmd_positions.length());
+    ((item.offsets).system).length(cmd_positions.length());
+    for(size_t idx = 0; idx != cmd_positions.length(); idx++) {
+        (item.position)[idx] = cmd_positions[idx];
+        ((item.offsets).user)[idx] = (m_offsets->user)[idx];
+        ((item.offsets).system)[idx] = (m_offsets->system)[idx];
+    }
     
-    CSecAreaResourceWrapper<map<int, vector< PositionItem> > > lst_secure_requests = m_cmdPos_list->Get(); 
     try {
         vector<PositionItem>::size_type idx = findPositionIndex(lst_secure_requests, exe_time, m_cdb_ptr->SERVO_ADDRESS);
         ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).insert(

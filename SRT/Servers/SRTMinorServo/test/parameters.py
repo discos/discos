@@ -20,6 +20,7 @@ commands = (
         'getspar',
         'getappstatus',
         'getstatus',
+        'clean',
 )
 
 # Available properties

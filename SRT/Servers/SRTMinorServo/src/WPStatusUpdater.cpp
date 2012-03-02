@@ -54,7 +54,7 @@ void WPStatusUpdater::runLoop()
                 ((*m_params->map_of_talkers_ptr)[address])->getStatus(status_par, timestamp);
                 bitset<STATUS_WIDTH> status_bset((m_params->expire_time)->status[address]);
 
-                ACS::Time act_pos_time = (status_par.actual_pos).timestamp;
+                ACS::Time act_pos_time = (status_par.actual_pos).exe_time;
                 ACS::Time diff = abs_diff(act_pos_time, getTimeStamp());
                 /**
                  * The value of application state (appstate) reports the machine state condition of the application.
@@ -150,27 +150,32 @@ void WPStatusUpdater::runLoop()
                     ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: abs(actual_time - actual_pos_time) = %llu", diff));
                 }
                 else {
-                    // Updating of the actual position property
-                    for(size_t i=0; i != ((status_par.actual_pos).position).length(); i++)
-                        ((m_params->expire_time)->actPos[address])[i] = ((status_par.actual_pos).position)[i];
-
                     CSecAreaResourceWrapper<map<int, vector< PositionItem> > > lst_secure_requests = (m_params->cmd_pos_list)->Get();
                     if((*lst_secure_requests).count(address)) {
                         ACS::doubleSeq cmd_pos;
                         try {
                             vector<PositionItem>::size_type idx = findPositionIndex(lst_secure_requests, act_pos_time, address, true);
-                            (m_params->expire_time)->cmdPos[address] = (((*lst_secure_requests)[address])[idx]).position;
-                            for(size_t i = 0; i != ((status_par.actual_pos).position).length(); i++)
-                                (m_params->expire_time)->cmdPos[address][i] = ((status_par.actual_pos).position)[i];
+                            // Updating of the actual position property
+                            for(size_t i=0; i != ((status_par.actual_pos).position).length(); i++)
+                                    ((m_params->expire_time)->actPos[address])[i] = \
+                                        ((status_par.actual_pos).position)[i] - \
+                                        ((((*lst_secure_requests)[address])[idx]).offsets).system[i];
 
-                            for(unsigned int idx = 0; idx < ((status_par.actual_pos).position).length(); idx++)
-                                ((m_params->expire_time)->posDiff[address])[idx] = \
-                                    ((m_params->expire_time)->cmdPos[address])[idx] \
-                                    - ((m_params->expire_time)->actPos[address])[idx];
+                            // Updating of the commanded position property
+                            // The commanded position is updated adding a the position in the list of PositionItems
+                            // the user offset. The system offset is unknown by the user
+                            for(size_t i = 0; i != ((status_par.actual_pos).position).length(); i++)
+                                (m_params->expire_time)->cmdPos[address][i] = (((*lst_secure_requests)[address])[idx]).position[i];
+
+                            for(unsigned int i = 0; i < ((status_par.actual_pos).position).length(); i++)
+                                ((m_params->expire_time)->posDiff[address])[i] = \
+                                    ((m_params->expire_time)->cmdPos[address])[i] - \
+                                    ((m_params->expire_time)->actPos[address])[i] + \
+                                    (((((*lst_secure_requests)[address])[idx]).offsets).user)[i];
 
                             is_tracking = true;
-                            for(unsigned int idx = 0; idx < ((status_par.actual_pos).position).length(); idx++)
-                                if(((m_params->expire_time)->posDiff[address])[idx] > m_params->tracking_delta) {
+                            for(unsigned int i = 0; i < ((status_par.actual_pos).position).length(); i++)
+                                if(((m_params->expire_time)->posDiff[address])[i] > m_params->tracking_delta) {
                                     is_tracking = false;
                                     break;
                                 }

@@ -120,7 +120,13 @@ string make_request(
             request = req_header + commands[cmd_idx] + ":" + cmd_number + "=" + app_number + message_closer;
             break;
         }
-
+                
+        // clean (data channel, high speed)
+        case 8: {
+            // The syntax: "#clean:<cmd_number>=<app_number>\r"
+            request = req_header + commands[cmd_idx] + ":" + cmd_number + "=" + app_number + message_closer;
+            break;
+        }
 
         default:
             request = "";
@@ -255,7 +261,7 @@ void process(
 
            // getstatus
            case 7: {
-               (status_par->actual_pos).timestamp = timestamp;
+               (status_par->actual_pos).exe_time = timestamp;
                // Erase the element of index 0
                parameters.erase(parameters.begin());
                status_par->appState = str2int(parameters[0]);

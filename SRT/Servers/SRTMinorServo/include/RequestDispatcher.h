@@ -30,18 +30,18 @@ struct ThreadParameters {
 };
 
 // This class takes care of getting requests from minor servos and send them. 
-class RequestScheduler : public ACS::Thread
+class RequestDispatcher : public ACS::Thread
 {
 public:
 
-	RequestScheduler(
+	RequestDispatcher(
             const ACE_CString& name, 
             ThreadParameters& params,
             const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
             const ACS::TimeInterval& sleepTime=scheduler_sleep_time
     );
 
-    ~RequestScheduler();
+    ~RequestDispatcher();
 
     /// This method is executed once when the thread starts.
     virtual void onStart();

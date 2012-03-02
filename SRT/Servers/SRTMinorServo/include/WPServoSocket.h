@@ -27,7 +27,7 @@ using namespace IRA;
 class WPServoSocket: public CSocket {
 
 friend class WPServoTalker;
-friend class RequestScheduler;
+friend class RequestDispatcher;
 friend class SocketListener;
     
 public:

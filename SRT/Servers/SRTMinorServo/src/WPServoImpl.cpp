@@ -18,7 +18,7 @@
 
 // Initialize the thread pointers. We want to instance them only once
 ThreadParameters WPServoImpl::m_thread_params;
-RequestScheduler* WPServoImpl::m_scheduler_ptr = NULL;
+RequestDispatcher* WPServoImpl::m_dispatcher_ptr = NULL;
 SocketListener* WPServoImpl::m_listener_ptr = NULL;
 WPStatusUpdater* WPServoImpl::m_status_ptr = NULL;
 ExpireTime WPServoImpl::m_expire;
@@ -34,6 +34,7 @@ static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t listener_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t scheduler_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t status_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t offset_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 WPServoImpl::WPServoImpl(
         const ACE_CString &CompName, maci::ContainerServices *containerServices
@@ -88,10 +89,10 @@ WPServoImpl::~WPServoImpl() {
             --(*secure_ptr);
             status_par = *secure_ptr;
             if(!(*secure_ptr)) {
-                if(m_scheduler_ptr != NULL) {
-                    m_scheduler_ptr->suspend();
-                    m_scheduler_ptr->terminate();
-                    delete m_scheduler_ptr;
+                if(m_dispatcher_ptr != NULL) {
+                    m_dispatcher_ptr->suspend();
+                    m_dispatcher_ptr->terminate();
+                    delete m_dispatcher_ptr;
                 }
                 if(m_listener_ptr != NULL) {
                     m_listener_ptr->suspend();
@@ -136,7 +137,6 @@ void WPServoImpl::initialize() throw (
     m_wpServoTalker_ptr = NULL;
     try {
         m_cdb_ptr = new CDBParameters;
-        // m_cmdPos_list = new CSecureArea< map<int, vector<PositionItem> > >(new map<int, vector<PositionItem> >);
     }
     catch (std::bad_alloc& ex)
         THROW_EX(ComponentErrors, MemoryAllocationEx, "WPServoImpl::initialize(): 'new' failure", false);
@@ -248,11 +248,19 @@ void WPServoImpl::initialize() throw (
     m_expire.cmdPos[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
     m_expire.posDiff[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
 
+    // Offsets initialization
+    (m_offsets.user).length(m_cdb_ptr->NUMBER_OF_AXIS);
+    (m_offsets.system).length(m_cdb_ptr->NUMBER_OF_AXIS);
+    for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++) {
+        (m_offsets.user)[i] = 0;
+        (m_offsets.system)[i] = 0;
+    }
+
     try {
         pthread_mutex_lock(&init_mutex); 
         // The socket connection is shared among minor servos (singleton design pattern)
         m_wpServoLink_ptr = WPServoSocket::getSingletonInstance(m_cdb_ptr, &m_expire);
-        m_wpServoTalker_ptr = new WPServoTalker(m_cdb_ptr, &m_expire, m_cmdPos_list);
+        m_wpServoTalker_ptr = new WPServoTalker(m_cdb_ptr, &m_expire, m_cmdPos_list, &m_offsets);
 
         if(m_talkers.count(m_cdb_ptr->SERVO_ADDRESS))
             THROW_EX(ComponentErrors, ThreadErrorEx, "Attempting to set an existing key in m_talkers", false)
@@ -270,14 +278,12 @@ void WPServoImpl::initialize() throw (
         m_thread_params.tracking_delta = m_cdb_ptr->TRACKING_DELTA;
 
         try {
-            // m_scheduler_ptr = getContainerServices()->getThreadManager()->create<RequestScheduler, 
-            //     ThreadParameters>("RequestScheduler", m_thread_params);
-            // I create the threads whitout the aid of the manager because I don't want
-            // the menager kill them when I release the component that create the threads. 
-            // I want kill the threads just when I release the last component active.
+            // I'll create the threads whitout the aid of the manager because I don't want
+            // it kills them when I'll release the component whose has created them. 
+            // I want kill the threads only when I'll release the last component active.
 
-            if(m_scheduler_ptr == NULL)
-                m_scheduler_ptr = new RequestScheduler("RequestScheduler", m_thread_params);
+            if(m_dispatcher_ptr == NULL)
+                m_dispatcher_ptr = new RequestDispatcher("RequestDispatcher", m_thread_params);
 
             if(m_listener_ptr == NULL)
                 m_listener_ptr = new SocketListener("SocketListener", m_thread_params);
@@ -291,17 +297,17 @@ void WPServoImpl::initialize() throw (
         pthread_mutex_unlock(&init_mutex); 
 
         // Start the listener thread
-        m_scheduler_ptr->resume();
+        m_dispatcher_ptr->resume();
         m_listener_ptr->resume();
         m_status_ptr->resume();
         setStatusUpdating(true);
-	}
-	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
+    }
+    catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
         pthread_mutex_unlock(&init_mutex); 
-		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"WPServo::initialize()");
-		throw _dummy;
-	}
-	catch (...) {
+        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"WPServo::initialize()");
+        throw _dummy;
+    }
+    catch (...) {
         pthread_mutex_unlock(&init_mutex); 
         THROW_EX(ComponentErrors, UnexpectedEx, "WPServoImpl::initialize(): unexpected exception", false);
     }
@@ -488,6 +494,146 @@ void WPServoImpl::setPosition(const ACS::doubleSeq &position, const ACS::Time ex
 }
 
 
+void WPServoImpl::clearUserOffset() 
+{
+    AUTO_TRACE("WPServoImpl::clearUserOffset()");
+    ACS::doubleSeq offset;
+    offset.length(m_cdb_ptr->NUMBER_OF_AXIS);
+    for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+        offset[i] = 0;
+    setUserOffset(offset);
+}
+
+
+
+
+
+void WPServoImpl::setUserOffset(const ACS::doubleSeq &offset) 
+    throw (MinorServoErrors::OperationNotPermittedEx)
+{
+    AUTO_TRACE("WPServoImpl::setUserOffset()");
+    if(offset.length() != m_cdb_ptr->NUMBER_OF_AXIS)  {
+        THROW_EX(MinorServoErrors, OperationNotPermittedEx, "Cannot set the user offset: wrong number of axis", true);
+    }
+    setOffset(offset, m_offsets.user);
+}
+
+
+
+ACS::doubleSeq * WPServoImpl::getUserOffset(void) 
+{
+    ACS::doubleSeq_var offset = new ACS::doubleSeq;
+    offset->length((m_offsets.user).length());
+    pthread_mutex_lock(&offset_mutex); 
+    for(size_t i=0; i<(m_offsets.user).length(); i++)
+        offset[i] = (m_offsets.user)[i];
+    pthread_mutex_unlock(&offset_mutex); 
+    return offset._retn();
+}
+
+
+void WPServoImpl::clearSystemOffset() 
+{
+    AUTO_TRACE("WPServoImpl::clearSystemOffset()");
+    ACS::doubleSeq offset;
+    offset.length(m_cdb_ptr->NUMBER_OF_AXIS);
+    for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+        offset[i] = 0;
+    setSystemOffset(offset);
+}
+
+
+void WPServoImpl::setSystemOffset(const ACS::doubleSeq &offset) 
+    throw (MinorServoErrors::OperationNotPermittedEx)
+{
+    AUTO_TRACE("WPServoImpl::setSystemOffset()");
+    if(offset.length() != m_cdb_ptr->NUMBER_OF_AXIS)  {
+        THROW_EX(MinorServoErrors, OperationNotPermittedEx, "Cannot set the system offset: wrong number of axis", true);
+    }
+    setOffset(offset, m_offsets.system);
+}
+
+
+ACS::doubleSeq * WPServoImpl::getSystemOffset(void) 
+{
+    ACS::doubleSeq_var offset = new ACS::doubleSeq;
+    offset->length((m_offsets.system).length());
+    pthread_mutex_lock(&offset_mutex); 
+    for(size_t i=0; i<(m_offsets.system).length(); i++)
+        offset[i] = (m_offsets.system)[i];
+    pthread_mutex_unlock(&offset_mutex); 
+    return offset._retn();
+}
+
+
+void WPServoImpl::setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target) throw (MinorServoErrors::OperationNotPermittedEx)
+{
+    pthread_mutex_lock(&offset_mutex); 
+    try {
+        CSecAreaResourceWrapper<map<int, vector<PositionItem> > > lst_secure_requests = m_cmdPos_list->Get(); 
+        
+            bool is_changed = false;
+            for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+                if(target[i] != offset[i]) {
+                    target[i] = offset[i];
+                    is_changed = true;
+                }
+            if(!is_changed) {
+                lst_secure_requests.Release();
+                pthread_mutex_unlock(&offset_mutex); 
+                return;
+            }
+
+            // This vector will be a copy of PositionItems vector
+            vector<PositionItem> vitem;
+            try {
+                TIMEVALUE now(0.0L);
+                IRA::CIRATools::getTime(now);
+                vector<PositionItem>::size_type idx = findPositionIndex(
+                        lst_secure_requests,
+                        now.value().value, 
+                        m_cdb_ptr->SERVO_ADDRESS
+                );
+                // For every item in PositionItem
+                for( ; idx < ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).size(); idx++) {
+                    PositionItem item;
+                    item.exe_time = (((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS])[idx]).exe_time;
+                    (item.position).length(m_cdb_ptr->NUMBER_OF_AXIS);
+                    for(size_t i = 0; i < m_cdb_ptr->NUMBER_OF_AXIS; i++)
+                        (item.position)[i] = ((((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS])[idx]).position)[i];
+                    vitem.push_back(item);
+                }
+            }
+            catch(PosNotFoundEx) {
+                // Put the actual position in the queue, so it will be commanded with the offset
+                PositionItem item;
+                item.exe_time = getTimeStamp();
+                (item.position).length(m_cdb_ptr->NUMBER_OF_AXIS);
+                // for(size_t i = 0; i < (item.position).length(); i++)
+                //     (item.position)[i] = m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS][i];
+                item.position = m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS];
+                vitem.push_back(item);
+            }
+            ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).clear();
+            lst_secure_requests.Release();
+            cleanPositionsQueue();
+            ACS::Time timestamp;
+            // Set the positions: the new offsets will be added in the setCmdPos method
+            for(vector<PositionItem>::iterator iter = vitem.begin(); iter != vitem.end(); iter++) {
+                timestamp = getTimeStamp();
+                m_wpServoTalker_ptr->setCmdPos((*iter).position, timestamp, (*iter).exe_time);
+            }
+    }
+    catch(...) {
+        pthread_mutex_unlock(&offset_mutex); 
+        throw;
+    }
+        
+    pthread_mutex_unlock(&offset_mutex); 
+}
+
+
+
 void WPServoImpl::setStatusUpdating(bool flag) { m_status_thread_en[m_cdb_ptr->SERVO_ADDRESS] = flag; }
 
 
@@ -515,10 +661,33 @@ void WPServoImpl::setup(const ACS::Time exe_time)
 }
 
 
+void WPServoImpl::cleanPositionsQueue() throw (MinorServoErrors::CommunicationErrorEx) 
+{
+
+    AUTO_TRACE("WPServoImpl::cleanPositionsQueue()");
+    try {
+        m_wpServoTalker_ptr->action(8);
+    }
+    catch(...) {
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, "Cannot clean the MSCU positions queue", true);
+    }
+
+}
+
+
 bool WPServoImpl::isParked() 
 {
+    cout << "isParked..." << endl;
     AUTO_TRACE("WPServoImpl::isParked()");
     bitset<STATUS_WIDTH> status(m_expire.status[m_cdb_ptr->SERVO_ADDRESS]);
+
+    cout << " User offset: " << endl;
+    for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+        cout << (m_offsets.user)[i] << endl;
+    cout << "System offset: " << endl;
+    for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+        cout << (m_offsets.system)[i] << endl;
+
     return status.test(STATUS_PARK); 
 }
 
@@ -626,12 +795,12 @@ ACS::doubleSeq * WPServoImpl::getData(const char *data_name) throw (MinorServoEr
     else
         THROW_EX(MinorServoErrors, CommunicationErrorEx, ("Data " + dname + " does not exist").c_str(), true);
 
-    ACS::doubleSeq *data_ptr = new ACS::doubleSeq;
+    ACS::doubleSeq_var data_ptr = new ACS::doubleSeq;
     data_ptr->length(data.length());
     for(size_t i = 0; i < data.length(); i++)
-        (*data_ptr)[i] = data[i];
+        data_ptr[i] = data[i];
 
-    return data_ptr;
+    return data_ptr._retn();
 }
 
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_actPos, actPos);

@@ -15,9 +15,9 @@ vector<PositionItem>::size_type findPositionIndex(
     if((*vptr).count(address)) {
         cmd_list = (*vptr)[address];
         for(; idx != cmd_list.size(); idx++) {
-            if((cmd_list[idx]).timestamp <= exe_time) {
+            if((cmd_list[idx]).exe_time <= exe_time) {
                 if(idx + 1 < cmd_list.size()) {
-                    if((cmd_list[idx + 1]).timestamp > exe_time) {
+                    if((cmd_list[idx + 1]).exe_time > exe_time) {
                         found = true;
                         break;
                     }

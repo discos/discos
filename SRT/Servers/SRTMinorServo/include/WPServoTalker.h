@@ -24,7 +24,7 @@
 using namespace IRA;
 
 class WPServoSocket;
-class RequestScheduler;
+class RequestDispatcher;
 class SocketListener;
 
 
@@ -32,7 +32,7 @@ class SocketListener;
 class WPServoTalker {
     
 friend class WPServoSocket;
-friend class RequestScheduler;
+friend class RequestDispatcher;
 friend class SocketListener;
 
 public:
@@ -45,12 +45,13 @@ public:
     * @param cdb_ptr pointer to struct of CDB parameters
     * @param expire_ptr pointer to the ExpireTime structure
     * @param cmd_list pointer to a list of vectors of commanded positions.
-    *
+    * @param offsets pointer to a struct of vectors whose items will add to the commanded position.
     */
     WPServoTalker(
             const CDBParameters *const cdb_ptr, 
             ExpireTime *const expire_ptr, 
-            CSecureArea< map<int, vector<PositionItem> > > *cmd_list
+            CSecureArea< map<int, vector<PositionItem> > > *cmd_list,
+            const Offsets *const offsets
     ) throw (ComponentErrors::MemoryAllocationExImpl);
 
 
@@ -116,6 +117,7 @@ public:
         ComponentErrors::SocketErrorExImpl, 
         MinorServoErrors::CommunicationErrorEx
         );
+
 
     /**
      * This member function sets a generic action request
@@ -183,6 +185,9 @@ private:
     
     /** @var pointer to struct of CDB parameters. */
     const CDBParameters *const m_cdb_ptr;
+
+    /** @var pointer to struct of offsets to add to the commanded position */
+    const Offsets *const m_offsets;
 
     CSecureArea< map<int, vector<PositionItem> > > *m_cmdPos_list;
 

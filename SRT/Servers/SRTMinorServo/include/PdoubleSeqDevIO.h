@@ -151,11 +151,11 @@ public:
             switch (m_Property) {
 
                 case ACT_POS: {
-                    if(!isValueUpToDate()) {
-                        m_wpServoTalk->getActPos(m_expire_ptr->actPos[m_cdb_ptr->SERVO_ADDRESS], timestamp);
-                        gettimeofday(&now, NULL);
-                        m_expire_ptr->timeLastActPos[m_cdb_ptr->SERVO_ADDRESS] = now.tv_sec + now.tv_usec / 1000000.0;
-                    }
+                    // if(!isValueUpToDate()) {
+                    //     m_wpServoTalk->getActPos(m_expire_ptr->actPos[m_cdb_ptr->SERVO_ADDRESS], timestamp);
+                    //     gettimeofday(&now, NULL);
+                    //     m_expire_ptr->timeLastActPos[m_cdb_ptr->SERVO_ADDRESS] = now.tv_sec + now.tv_usec / 1000000.0;
+                    // }
                     m_value = m_expire_ptr->actPos[m_cdb_ptr->SERVO_ADDRESS];
                     break;
                 }
@@ -165,7 +165,7 @@ public:
                     break;
                 }
 
-                // Tha pos_diff is not filtered by isValueUpToDate and sets the LastActPos time
+                // The pos_diff is not filtered by isValueUpToDate and sets the LastActPos time
                 case POS_DIFF: {
                     m_value = m_expire_ptr->posDiff[m_cdb_ptr->SERVO_ADDRESS];
                     break;

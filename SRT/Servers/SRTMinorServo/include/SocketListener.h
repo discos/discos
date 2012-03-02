@@ -12,7 +12,7 @@
 #include <LogFilter.h>
 #include <IRA>
 #include "MSParameters.h"
-#include "RequestScheduler.h"
+#include "RequestDispatcher.h"
 
 // This class accomplishes a routing of messages from MSCU to minor servos. 
 class SocketListener : public ACS::Thread

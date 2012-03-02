@@ -27,7 +27,7 @@
 #include <ComponentErrors.h>
 #include <MinorServoErrors.h>
 #include <MinorServoS.h>
-#include "RequestScheduler.h"
+#include "RequestDispatcher.h"
 #include "SocketListener.h"
 #include "WPStatusUpdater.h"
 #include "MSParameters.h"
@@ -35,12 +35,12 @@
 
 using namespace baci;
 
-// Use the following declarations to avoid a forward declaration
+// The following declarations avoids a forward declaration
 struct ThreadParameters;
 class WPServoTalker;
 class WPServoSocket;
 
-class WPServoImpl: public CharacteristicComponentImpl,  public virtual POA_MinorServo::WPServo {
+class WPServoImpl: public CharacteristicComponentImpl, public virtual POA_MinorServo::WPServo {
 
 public:
     
@@ -271,6 +271,44 @@ public:
 
 
     /**
+     * Set an user offset to the position.
+     * 
+     * @arg doubleSeq offset sequence of user offsets to add to the position;
+     * one offset for each axis
+     * @throw MinorServoErrors::OperationNotPermittedEx
+     */ 
+     virtual void setUserOffset(const ACS::doubleSeq &offset) 
+         throw (MinorServoErrors::OperationNotPermittedEx);
+
+
+    /** Return the user offset of the position */ 
+     virtual ACS::doubleSeq * getUserOffset(void); 
+
+
+    /** Clear the position user offset */ 
+     virtual void clearUserOffset(void);
+
+
+    /**
+     * Set a system offset to the position.
+     * 
+     * @arg doubleSeq offset sequence of system offsets to add to the position;
+     * one offset for each axis
+     * @throw MinorServoErrors::OperationNotPermittedEx
+     */ 
+     virtual void setSystemOffset(const ACS::doubleSeq &offset) 
+         throw (MinorServoErrors::OperationNotPermittedEx);
+
+
+    /** Return the system offset of the position */ 
+     virtual ACS::doubleSeq * getSystemOffset(void);
+
+
+    /** Clear the position system offset */ 
+     virtual void clearSystemOffset(void);
+
+
+    /**
      * Accomplish a setup of minor servo.
      * 
      * @arg long  exe_time execution time
@@ -279,17 +317,18 @@ public:
      */ 
      virtual void setup(const ACS::Time exe_time) 
          throw (MinorServoErrors::SetupErrorEx, MinorServoErrors::CommunicationErrorEx);
-     
-     
-     virtual void setStatusUpdating(bool flag);
-     
-     virtual bool isStatusThreadEn();
 
+    /**
+     * Clean the MSCU positions queue
+     * 
+     * @throw MinorServoErrors::CommunicationErrorEx
+     */ 
+     virtual void cleanPositionsQueue() throw (MinorServoErrors::CommunicationErrorEx);
 
     /**
      * Accomplish a stow of minor servo.
      * 
-     * @arg long  exe_time execution time
+     * @arg long exe_time execution time
      * @throw MinorServoErrors::StowErrorEx
      * @throw MinorServoErrors::CommunicationErrorEx
      */ 
@@ -300,7 +339,7 @@ public:
     /**
      * Accomplish a calibration of minor servo.
      * 
-     * @arg long  exe_time execution time
+     * @arg long exe_time execution time
      * @throw MinorServoErrors::CalibrationErrorEx
      * @throw MinorServoErrors::CommunicationErrorEx
      */ 
@@ -350,7 +389,7 @@ private:
     /** Structure containing the CDB parameters */
     CDBParameters *m_cdb_ptr;
 
-    /* A list of vectors of commanded positions. The item are indexed by servo address */
+    /* A list of vectors of commanded positions. The item are indexed by the servo address */
     static CSecureArea< map<int, vector<PositionItem> > > *m_cmdPos_list;
 
     /** Structure containing the ExpireTime values */
@@ -367,6 +406,9 @@ private:
 
     /** Position difference property */
     SmartPropertyPointer<ROdoubleSeq> m_posDiff;
+
+    /** Offsets to add to the input positions */
+    Offsets m_offsets;
 
     /** Engine Temperature property */
     SmartPropertyPointer<ROdoubleSeq> m_engTemperature;
@@ -402,7 +444,7 @@ private:
     SmartPropertyPointer<ROpattern> m_status;
 
     /** @var static pointer to scheduler thread */
-    static RequestScheduler *m_scheduler_ptr;
+    static RequestDispatcher *m_dispatcher_ptr;
 
     /** @var static pointer to listener thread */
     static SocketListener *m_listener_ptr;
@@ -423,6 +465,12 @@ private:
 
     /** @var Instance counter  */
     static CSecureArea<unsigned short> *m_instance_counter;
+     
+    void setStatusUpdating(bool flag);
+
+    void setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target) throw (MinorServoErrors::OperationNotPermittedEx);
+     
+    virtual bool isStatusThreadEn();
 
     void operator=(const WPServoImpl &);
 

@@ -8,32 +8,32 @@
 
 #include <ManagmentDefinitionsS.h>
 #include <ComponentErrors.h>
-#include "RequestScheduler.h"
+#include "RequestDispatcher.h"
 #include <pthread.h>
 #include <time.h>
 
 
-RequestScheduler::RequestScheduler(
+RequestDispatcher::RequestDispatcher(
         const ACE_CString& name, 
         ThreadParameters& params,
         const ACS::TimeInterval& responseTime,
         const ACS::TimeInterval& sleepTime
         ) : ACS::Thread(name, responseTime, sleepTime), m_params(&params)
 {
-    AUTO_TRACE("RequestScheduler::RequestScheduler()");
+    AUTO_TRACE("RequestDispatcher::RequestDispatcher()");
 }
 
-RequestScheduler::~RequestScheduler() { 
-    AUTO_TRACE("RequestScheduler::~RequestScheduler()"); 
+RequestDispatcher::~RequestDispatcher() { 
+    AUTO_TRACE("RequestDispatcher::~RequestDispatcher()"); 
 }
 
-void RequestScheduler::onStart() { AUTO_TRACE("RequestScheduler::onStart()"); }
+void RequestDispatcher::onStart() { AUTO_TRACE("RequestDispatcher::onStart()"); }
 
-void RequestScheduler::onStop() { AUTO_TRACE("RequestScheduler::onStop()"); }
+void RequestDispatcher::onStop() { AUTO_TRACE("RequestDispatcher::onStop()"); }
 
-void RequestScheduler::runLoop()
+void RequestDispatcher::runLoop()
 {
-    // A smarter policy than round robin should be to iterate only on active servos.
+    // A smarter policy than round robin could be to iterate only on active servos.
     try {
         pthread_mutex_lock(m_params->scheduler_mutex); 
         map<int, WPServoTalker *>::iterator map_it = (m_params->map_of_talkers_ptr)->begin();
@@ -51,7 +51,7 @@ void RequestScheduler::runLoop()
     }
     catch(...) {
         pthread_mutex_unlock(m_params->scheduler_mutex); 
-        ACS_SHORT_LOG((LM_ERROR, "Unexpected error in RequestScheduler"));
+        ACS_SHORT_LOG((LM_ERROR, "Unexpected error in RequestDispatcher"));
     }
 }
  

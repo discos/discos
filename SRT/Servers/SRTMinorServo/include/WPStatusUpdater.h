@@ -12,7 +12,7 @@
 #include <LogFilter.h>
 #include <IRA>
 #include "MSParameters.h"
-#include "RequestScheduler.h"
+#include "RequestDispatcher.h"
  
 const ACS::Time MAX_TIME_DIFF = 1000000; // One second
 

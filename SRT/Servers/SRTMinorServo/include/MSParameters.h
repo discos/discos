@@ -71,9 +71,17 @@ struct ExpireTime {
     double timeLastCabState[NUMBER_OF_SERVOS];
 };
 
+
+struct Offsets {
+    ACS::doubleSeq user;
+    ACS::doubleSeq system;
+};
+
+
 struct PositionItem {
+    ACS::Time exe_time;
     ACS::doubleSeq position;
-    ACS::Time timestamp;
+    Offsets offsets;
 };
 
 
