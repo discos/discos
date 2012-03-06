@@ -24,7 +24,6 @@ int main (int argc, char *argv[])
     
   dir(&p);
   // Direct: 
-  printf("\nDirect (from virtual positions to real elongations)\n");
   for (i = 0; i < n; i++)
       printf("d(%d) = %f\n", i, p.d[i]);
 

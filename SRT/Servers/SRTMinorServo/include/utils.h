@@ -17,6 +17,8 @@
 #define BYTE unsigned char
 #define NEXT_FUTURE_DELTA 100000 // In one hundred ns (10ms)
 
+#define __UTILS_STREAM_PREC__ 16
+
 using namespace std;
 
 typedef string::size_type (string::*find_t)(const string &delim, string::size_type offset) const;
@@ -117,6 +119,7 @@ string char2string(const char c);
 template<class T>
 string number2str(T num) {
     ostringstream ostr;
+    ostr.precision(__UTILS_STREAM_PREC__);
     ostr.str("");
     ostr << num;
     return ostr.str();

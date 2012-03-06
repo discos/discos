@@ -10,6 +10,7 @@
 
 #define NUMBER_OF_SERVOS 4
 #define STATUS_WIDTH 6
+#define STREAM_PRECISION 16
 
 using namespace IRA;
 

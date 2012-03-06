@@ -9,6 +9,7 @@
 #include <ManagmentDefinitionsS.h>
 #include <ComponentErrors.h>
 #include "WPStatusUpdater.h"
+#include "libCom.h"
 #include <pthread.h>
 #include <time.h>
 #include <bitset>
@@ -51,9 +52,12 @@ void WPStatusUpdater::runLoop()
                     && (*m_params->status_thread_en)[address]) 
             {
                 StatusParameters status_par;
+                // The position returned by getStatus is alredy converted to virtual
                 ((*m_params->map_of_talkers_ptr)[address])->getStatus(status_par, timestamp);
                 bitset<STATUS_WIDTH> status_bset((m_params->expire_time)->status[address]);
 
+                // Retrieve and eventually convert the actual position
+                ACS::doubleSeq act_pos = (status_par.actual_pos).position;
                 ACS::Time act_pos_time = (status_par.actual_pos).exe_time;
                 ACS::Time diff = abs_diff(act_pos_time, getTimeStamp());
                 /**
@@ -152,33 +156,36 @@ void WPStatusUpdater::runLoop()
                 else {
                     CSecAreaResourceWrapper<map<int, vector< PositionItem> > > lst_secure_requests = (m_params->cmd_pos_list)->Get();
                     if((*lst_secure_requests).count(address)) {
-                        ACS::doubleSeq cmd_pos;
                         try {
                             vector<PositionItem>::size_type idx = findPositionIndex(lst_secure_requests, act_pos_time, address, true);
-                            // Updating of the actual position property
-                            for(size_t i=0; i != ((status_par.actual_pos).position).length(); i++)
-                                    ((m_params->expire_time)->actPos[address])[i] = \
-                                        ((status_par.actual_pos).position)[i] - \
-                                        ((((*lst_secure_requests)[address])[idx]).offsets).system[i];
 
                             // Updating of the commanded position property
-                            // The commanded position is updated adding a the position in the list of PositionItems
+                            // The commanded position is updated adding to the position in the list of PositionItems
                             // the user offset. The system offset is unknown by the user
-                            for(size_t i = 0; i != ((status_par.actual_pos).position).length(); i++)
-                                (m_params->expire_time)->cmdPos[address][i] = (((*lst_secure_requests)[address])[idx]).position[i];
+                            (m_params->expire_time)->cmdPos[address] = (((*lst_secure_requests)[address])[idx]).position;
 
-                            for(unsigned int i = 0; i < ((status_par.actual_pos).position).length(); i++)
-                                ((m_params->expire_time)->posDiff[address])[i] = \
-                                    ((m_params->expire_time)->cmdPos[address])[i] - \
-                                    ((m_params->expire_time)->actPos[address])[i] + \
-                                    (((((*lst_secure_requests)[address])[idx]).offsets).user)[i];
+                            if(act_pos.length() != ((m_params->expire_time)->cmdPos[address]).length()) {
+                                ACS_SHORT_LOG((LM_ERROR, "@%d: Wrong number of axes in the actual position.", getTimeStamp()));
+                            } 
+                            else { 
+                                // Updating of actual position property
+                                for(size_t i=0; i != act_pos.length(); i++)
+                                        ((m_params->expire_time)->actPos[address])[i] = \
+                                            act_pos[i] - ((((*lst_secure_requests)[address])[idx]).offsets).system[i];
 
-                            is_tracking = true;
-                            for(unsigned int i = 0; i < ((status_par.actual_pos).position).length(); i++)
-                                if(((m_params->expire_time)->posDiff[address])[i] > m_params->tracking_delta) {
-                                    is_tracking = false;
-                                    break;
-                                }
+                                for(unsigned int i = 0; i < act_pos.length(); i++)
+                                    ((m_params->expire_time)->posDiff[address])[i] = \
+                                        ((m_params->expire_time)->cmdPos[address])[i] - \
+                                        ((m_params->expire_time)->actPos[address])[i] + \
+                                        (((((*lst_secure_requests)[address])[idx]).offsets).user)[i];
+
+                                is_tracking = true;
+                                for(unsigned int i = 0; i < act_pos.length(); i++)
+                                    if(((m_params->expire_time)->posDiff[address])[i] > m_params->tracking_delta) {
+                                        is_tracking = false;
+                                        break;
+                                    }
+                            }
                         }
                         catch(PosNotFoundEx) {
                             ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: cmd position at @%llu not found!", act_pos_time));

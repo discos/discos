@@ -34,6 +34,7 @@ class WPServoTalker {
 friend class WPServoSocket;
 friend class RequestDispatcher;
 friend class SocketListener;
+friend class WPStatusUpdater;
 
 public:
 

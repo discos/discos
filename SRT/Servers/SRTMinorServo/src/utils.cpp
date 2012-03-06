@@ -78,6 +78,7 @@ int str2int(const string &s) {
     string s_copy(s);
     strip(s_copy);
     istringstream istm;
+    istm.precision(__UTILS_STREAM_PREC__);
     istm.clear();
     istm.str("");
     int num;
@@ -91,6 +92,7 @@ double str2double(const string &s) {
     string s_copy(s);
     strip(s_copy);
     istringstream istm;
+    istm.precision(__UTILS_STREAM_PREC__);
     istm.clear();
     istm.str("");
     double num;

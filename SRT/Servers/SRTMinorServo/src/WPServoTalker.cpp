@@ -116,12 +116,11 @@ void WPServoTalker::setCmdPos(
 
     CSecAreaResourceWrapper<map<int, vector<PositionItem> > > lst_secure_requests = m_cmdPos_list->Get(); 
     ACS::doubleSeq positions = cmd_positions;
-    // Add the offsets to the positions
+    // Add the offsets to the positions before make_request (so positions and offsets are both in virtual coordinate)
     for(size_t i=0; i<positions.length(); i++)
         positions[i] += (m_offsets->user)[i] + (m_offsets->system)[i];
-    // ACS::doubleSeq positions_cp = positions;
-    
-    // The first argument is the index of a vector of commands
+
+    // The first argument is the index of a vector of commands; make_request converts the position to virtual
     string request = make_request(2, m_cdb_ptr, m_cmd_number, -1, -1, -1, exe_time, &positions);
     // Schedule a position setting
     CSecAreaResourceWrapper<vector<string> > secure_requests = m_requests->Get();
@@ -131,6 +130,8 @@ void WPServoTalker::setCmdPos(
     timestamp = look_for_a_response(get_request_id(request), starting_time, 2);
 
     // Set the position in the vector list when look_for_a_response found the response
+    // We must use the cmd_positions insead of positinos because make_request(...) modifies the positions making 
+    // a virtual2real transformation
     PositionItem item;
     item.exe_time = exe_time;
     (item.position).length(cmd_positions.length());

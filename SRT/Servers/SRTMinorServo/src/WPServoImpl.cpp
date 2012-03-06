@@ -677,17 +677,8 @@ void WPServoImpl::cleanPositionsQueue() throw (MinorServoErrors::CommunicationEr
 
 bool WPServoImpl::isParked() 
 {
-    cout << "isParked..." << endl;
     AUTO_TRACE("WPServoImpl::isParked()");
     bitset<STATUS_WIDTH> status(m_expire.status[m_cdb_ptr->SERVO_ADDRESS]);
-
-    cout << " User offset: " << endl;
-    for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
-        cout << (m_offsets.user)[i] << endl;
-    cout << "System offset: " << endl;
-    for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
-        cout << (m_offsets.system)[i] << endl;
-
     return status.test(STATUS_PARK); 
 }
 

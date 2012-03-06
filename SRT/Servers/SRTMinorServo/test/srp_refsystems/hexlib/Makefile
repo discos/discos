@@ -1,4 +1,4 @@
-CC	=	gcc
+CC	=	g++
 CFL	=	-W -lgsl -lgslcblas -lm
 
 default:	all

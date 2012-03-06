@@ -164,6 +164,7 @@ void process(
    ) throw (ComponentErrors::SocketErrorExImpl) 
 {
    istringstream istm;
+   istm.precision(__UTILS_STREAM_PREC__);
    try {
 
        // ``sections`` are the two sections of the answer: 
@@ -350,13 +351,14 @@ void real2virtual(ACS::doubleSeq &positions, DWORD servo_address) {
         case 1: {
             struct rparams p;
             load_p(&p);
+            set_rot(RZRYRX);
 
-            for (vector<string>::size_type idx = 0; idx != positions.length(); ++idx)
+            for(size_t idx = 0; idx < positions.length(); ++idx)
                 p.d[idx] = positions[idx]; 
 
             inv(&p);
 
-            for (vector<string>::size_type idx = 0; idx != positions.length(); ++idx)
+            for (size_t idx = 0; idx < positions.length(); ++idx)
                 positions[idx] = p.x[idx]; 
         }
 
@@ -376,13 +378,14 @@ void virtual2real(ACS::doubleSeq &positions, DWORD servo_address) {
         case 1: {
             struct rparams p;
             load_p(&p);
+            set_rot(RZRYRX);
 
-            for (vector<string>::size_type idx = 0; idx != positions.length(); ++idx)
+            for (size_t idx = 0; idx != positions.length(); ++idx)
                 p.x[idx] = positions[idx]; 
 
             dir(&p);
 
-            for (vector<string>::size_type idx = 0; idx != positions.length(); ++idx)
+            for (size_t idx = 0; idx != positions.length(); ++idx)
                 positions[idx] = p.d[idx]; 
         }
 

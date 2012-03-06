@@ -142,6 +142,7 @@ void WPServoSocket::receiveBuffer(string & answer, string closer, string headers
 
     BYTE msg[BUFF_LIMIT] = {0x00};
     ostringstream msg_stream;
+    msg_stream.precision(__UTILS_STREAM_PREC__);
     string header;
     
     // Receive the response form the minorServo one byte at once 
