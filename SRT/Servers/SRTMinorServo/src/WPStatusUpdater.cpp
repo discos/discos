@@ -52,11 +52,10 @@ void WPStatusUpdater::runLoop()
                     && (*m_params->status_thread_en)[address]) 
             {
                 StatusParameters status_par;
-                // The position returned by getStatus is alredy converted to virtual
                 ((*m_params->map_of_talkers_ptr)[address])->getStatus(status_par, timestamp);
                 bitset<STATUS_WIDTH> status_bset((m_params->expire_time)->status[address]);
 
-                // Retrieve and eventually convert the actual position
+                // The position retrieved by getStatus is alredy converted to virtual
                 ACS::doubleSeq act_pos = (status_par.actual_pos).position;
                 ACS::Time act_pos_time = (status_par.actual_pos).exe_time;
                 ACS::Time diff = abs_diff(act_pos_time, getTimeStamp());
@@ -161,7 +160,7 @@ void WPStatusUpdater::runLoop()
 
                             // Updating of the commanded position property
                             // The commanded position is updated adding to the position in the list of PositionItems
-                            // the user offset. The system offset is unknown by the user
+                            // The system offset is unknown by the user
                             (m_params->expire_time)->cmdPos[address] = (((*lst_secure_requests)[address])[idx]).position;
 
                             if(act_pos.length() != ((m_params->expire_time)->cmdPos[address]).length()) {

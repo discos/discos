@@ -95,6 +95,7 @@ class NackEx(Exception):
 
 class TestProperties(unittest.TestCase):
     """Test the minor servo properties."""
+
     def setUp(self):
         """Get a reference to every minor servo component."""
         # Direct connection used to match the property values
@@ -107,7 +108,8 @@ class TestProperties(unittest.TestCase):
         for servo_type in app_nr.values():
             self.__dict__[servo_type] = self.pyclient.getComponent("MINORSERVO/" + servo_type)
 
-    def tearDown(self):
+    def _tearDownClass():
+        print "in tearDown"
         self.sockobj.close()
         for servo_type in app_nr.values():
             self.pyclient.releaseComponent("MINORSERVO/" + servo_type)

@@ -171,7 +171,7 @@ void WPServoTalker::getAppStatus(
     double starting_time = now.tv_sec + now.tv_usec / TIME_SF;
     string request = make_request(6, m_cdb_ptr, m_cmd_number);
     
-    // Schedule a position request
+    // Insert the request in the queue
     CSecAreaResourceWrapper<vector<string> > secure_requests = m_requests->Get();
     secure_requests->push_back(request);
     secure_requests.Release();
@@ -205,12 +205,11 @@ void WPServoTalker::getStatus(
     double starting_time = now.tv_sec + now.tv_usec / TIME_SF;
     string request = make_request(7, m_cdb_ptr, m_cmd_number);
     
-    // Schedule a position request
+    // Insert the request in the queue
     CSecAreaResourceWrapper<vector<string> > secure_requests = m_requests->Get();
     secure_requests->push_back(request);
     secure_requests.Release();
-    look_for_a_response(get_request_id(request), starting_time, 7, true, NULL, NULL, -1, &status_par);
-    timestamp = getTimeStamp();
+    timestamp = look_for_a_response(get_request_id(request), starting_time, 7, true, NULL, NULL, -1, &status_par);
 }   
 
 
@@ -302,7 +301,7 @@ ACS::Time WPServoTalker::look_for_a_response(
     string answer;
     timeval now;
     gettimeofday(&now, NULL);
-    ACS::Time timestamp = 0;
+    ACS::Time timestamp = getTimeStamp();
     bool found = false;
 
     while(((now.tv_sec + now.tv_usec / TIME_SF + GUARD_TIME) - starting_time) < m_cdb_ptr->SERVER_TIMEOUT / TIME_SF) {
