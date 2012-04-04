@@ -144,7 +144,7 @@ bool CEngineThread::processData ()
     double offset = 0.0;
     IRA::CString out;
     TIMEVALUE tS;
-    double targetRA, targetDEC;
+    //double targetRA, targetDEC;
     double  targetAZ, targetEL;
     double  targetLON, targetLAT;
     double coordinate=0.0;
@@ -175,13 +175,15 @@ bool CEngineThread::processData ()
 	        CTskySource.getApparentHorizontal (targetAZ, targetEL);
 	        m_antennaBoss->getObservedHorizontal (time, data->getIntegrationTime () * 10000, az, el);
 	        coordinate = az;
-	        if (az * DR2D > 0.0 && m_lastCoordinate * DR2D > 359.0) { // CCW near 0 position
+	        /*if (az * DR2D > 0.0 && m_lastCoordinate * DR2D > 359.0) { // CCW near 0 position
                 offset = coordinate;
 	        }
 	        else if (az * DR2D < 0.0 && m_lastCoordinate * DR2D < 1.0) { // CW near 0 position
                 offset = -coordinate;
 	        }
-	        else offset = targetAZ - coordinate;
+	        //else offset = targetAZ - coordinate;
+	        else offset = coordinate - targetAZ ;*/
+	        offset=IRA::CIRATools::differenceBetweenAnglesRad(az,targetAZ);
 	        m_lastCoordinate = az;
 	        m_cosLat = cos (targetEL);
 	        //m_CoordIndex = 0;	// LON
@@ -192,43 +194,47 @@ bool CEngineThread::processData ()
             CTskySource.getApparentHorizontal (targetAZ, targetEL);
             m_antennaBoss->getObservedHorizontal (time, data->getIntegrationTime () * 10000, az, el);
 	        coordinate = el;
-	        offset = targetEL - coordinate;
+	        //offset = targetEL - coordinate;
+	        offset =  el - targetEL ;
 	        //m_CoordIndex = 1;	// LAT
 	        break;
         case Management::MNG_EQ_LON:
             m_antennaBoss->getObservedEquatorial (time, data->getIntegrationTime () * 10000, ra, dec);
             coordinate = ra;
-            if (ra * DR2D > 0.0 && m_lastCoordinate * DR2D > 359.0) {			// CCW near 0 position
+            /*if (ra * DR2D > 0.0 && m_lastCoordinate * DR2D > 359.0) {			// CCW near 0 position
                 offset = coordinate;
             }
             else if (ra * DR2D < 0.0 && m_lastCoordinate * DR2D < 1.0) {			// CW near 0 position
 		        offset = -coordinate;
 	        }
-	        else offset = targetRA - coordinate;
+	        else offset = targetRA - coordinate;*/
+            offset=IRA::CIRATools::differenceBetweenAnglesRad(ra,m_targetRa);
 	        m_lastCoordinate = ra;
-	        m_cosLat = cos (targetDEC);
+	        m_cosLat = cos (m_targetDec);
 	        //m_CoordIndex = 0;	// LON
             m_latPositions[m_dataSeqCounter] = dec;
             break;
         case Management::MNG_EQ_LAT:
 	        m_antennaBoss->getObservedEquatorial (time, data->getIntegrationTime () * 10000, ra, dec);
 	        coordinate = dec;
-	        offset = targetDEC - coordinate;
+	        //offset = targetDEC - coordinate;
+	        offset=dec - m_targetDec;
 	        //m_CoordIndex = 1;	// LAT
 	    break;
         case Management::MNG_GAL_LON:
 	        CTskySource.process (CTdateTime, m_site);
-	        CTskySource.equatorialToGalactic (targetRA, targetDEC, targetLON, targetLAT);
-	        m_antennaBoss->getObservedGalactic (time, lon, lat);
+	        IRA::CSkySource::equatorialToGalactic (m_targetRa,m_targetDec, targetLON, targetLAT);
+	        m_antennaBoss->getObservedGalactic (time,data->getIntegrationTime () * 10000,lon, lat);
 	        coordinate = lon;
-	        if (lon * DR2D > 0.0 && m_lastCoordinate * DR2D > 359.0) {			// CCW near 0 position
+	        /*if (lon * DR2D > 0.0 && m_lastCoordinate * DR2D > 359.0) {			// CCW near 0 position
                 offset = coordinate;
 	        }
 	        else if (lon * DR2D < 0.0 && m_lastCoordinate * DR2D < 1.0) {			// CW near 0 position
                 offset = -coordinate;
 	        }
 	        else
-	            offset = targetLON - coordinate;
+	            offset = targetLON - coordinate;*/
+	        offset=IRA::CIRATools::differenceBetweenAnglesRad(lon,targetLON);
 	        m_lastCoordinate = lon;
 	        m_cosLat = cos (targetLAT);
 	        //m_CoordIndex = 0;	// LON
@@ -236,10 +242,10 @@ bool CEngineThread::processData ()
 	    break;
         case Management::MNG_GAL_LAT:
 	        CTskySource.process (CTdateTime, m_site);
-	        CTskySource.equatorialToGalactic (targetRA, targetDEC, targetLON, targetLAT);
-	        m_antennaBoss->getObservedGalactic (time, lon, lat);
+	        IRA::CSkySource::equatorialToGalactic (m_targetRa, m_targetDec, targetLON, targetLAT);
+	        m_antennaBoss->getObservedGalactic (time, data->getIntegrationTime () * 10000,lon, lat);
 	        coordinate = lat;
-	        offset = targetLAT - coordinate;
+	        offset = lat - targetLAT;
 	        //m_CoordIndex = 1;	// LAT
         break;
         case Management::MNG_SUBR_Z:
@@ -274,7 +280,7 @@ bool CEngineThread::processData ()
     		out.Format ("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#lon ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     		m_file << (const char *) out;
     	}
-    	m_file << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
+    	m_file << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter]*DR2D << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
     }
 
     m_dataSeqCounter++;
@@ -346,6 +352,10 @@ void CEngineThread::runLoop ()
 		  while (processData());
 		  gaussFit(now.value().value);
 		  setAxisOffsets();
+		  if ((data->isLatDone()) && (data->isLonDone())) {
+			  data->setCrossScanDone();
+			  m_lonResult = m_latResult = 0;
+		  }
 		  data->haltStopStage ();
 	  }
 	  else if (data->isRunning ()) {
@@ -613,8 +623,6 @@ void CEngineThread::gaussFit(const ACS::Time& now)
     	ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XOFFSETS = %lf %lf %lf %lf %lf %lf %d %d",
 			m_LonPos * DR2D, m_LatPos * DR2D, cos (m_LatPos) * m_LonOff * DR2D, m_LatOff * DR2D, cos (m_LatPos) * m_LonErr * DR2D, m_LatErr * DR2D, m_lonResult, m_latResult));
 	    //ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FILE_FINALIZED"));
-	    data->setCrossScanDone();
-	    m_lonResult = m_latResult = 0;
 	}
 }
 
@@ -636,8 +644,10 @@ void CEngineThread::setAxisOffsets()
 	   	case Management::MNG_HOR_LON:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
-	   				m_antennaBoss->setOffsets (cos(m_LatPos) * m_LonOff , m_elUserOff, Antenna::ANT_HORIZONTAL);
+	   				if ((data->isLonDone()) && (m_lonResult)) {
+	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
+	   					m_antennaBoss->setOffsets (cos(m_LatPos) * m_LonOff , m_elUserOff, Antenna::ANT_HORIZONTAL);
+	   				}
 	   			}
 	   		}
 			catch (CORBA::SystemException& ex) {
@@ -666,8 +676,10 @@ void CEngineThread::setAxisOffsets()
 	   	case Management::MNG_HOR_LAT:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
-	   				m_antennaBoss->setOffsets (m_azUserOff, /*m_elUserOff + */m_LatOff, Antenna::ANT_HORIZONTAL);
+	   				if ((data->isLatDone()) && (m_latResult)) {
+	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
+	   					m_antennaBoss->setOffsets (m_azUserOff, /*m_elUserOff + */m_LatOff, Antenna::ANT_HORIZONTAL);
+	   				}
 	   			}
 	   		}
 			catch (CORBA::SystemException& ex) {
@@ -696,8 +708,10 @@ void CEngineThread::setAxisOffsets()
 	   	case Management::MNG_EQ_LON:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
-	   				m_antennaBoss->setOffsets (cos(m_LatPos) * m_LonOff, m_decUserOff, Antenna::ANT_EQUATORIAL);
+	   				if ((data->isLonDone()) && (m_lonResult)) {
+	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
+	   					m_antennaBoss->setOffsets (cos(m_LatPos) * m_LonOff, m_decUserOff, Antenna::ANT_EQUATORIAL);
+	   				}
 	   			}
 	   		}
 			catch (CORBA::SystemException& ex) {
@@ -726,8 +740,10 @@ void CEngineThread::setAxisOffsets()
 	   	case Management::MNG_EQ_LAT:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
-	   				m_antennaBoss->setOffsets (m_raUserOff, /*m_decUserOff + */m_LatOff , Antenna::ANT_EQUATORIAL);
+	   				if ((data->isLatDone()) && (m_latResult)) {
+	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
+	   					m_antennaBoss->setOffsets (m_raUserOff, /*m_decUserOff + */m_LatOff , Antenna::ANT_EQUATORIAL);
+	   				}
 	   			}
 	   		}
 			catch (CORBA::SystemException& ex) {
@@ -756,8 +772,10 @@ void CEngineThread::setAxisOffsets()
 	   	case Management::MNG_GAL_LON:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
-   					m_antennaBoss->setOffsets (cos(m_LatPos) * m_LonOff,m_latUserOff, Antenna::ANT_GALACTIC);
+	   				if ((data->isLonDone()) && (m_lonResult)) {
+	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
+	   					m_antennaBoss->setOffsets (cos(m_LatPos) * m_LonOff,m_latUserOff, Antenna::ANT_GALACTIC);
+	   				}
    				}
 	   		}
 			catch (CORBA::SystemException& ex) {
@@ -786,8 +804,10 @@ void CEngineThread::setAxisOffsets()
 	   	case Management::MNG_GAL_LAT:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
-	   				m_antennaBoss->setOffsets (m_lonUserOff, /*m_latUserOff + */m_LatOff, Antenna::ANT_GALACTIC);
+	   				if ((data->isLatDone()) && (m_latResult)) {
+	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
+	   					m_antennaBoss->setOffsets (m_lonUserOff, /*m_latUserOff + */m_LatOff, Antenna::ANT_GALACTIC);
+	   				}
 	   			}
 	   		}
 			catch (CORBA::SystemException& ex) {
@@ -927,5 +947,3 @@ bool CEngineThread::makeDirectory(const IRA::CString& dirName)
 	return (result==0);
 }
 
-
-/*AA**********************************************************************************************************************************************************************/

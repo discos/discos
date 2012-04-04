@@ -1,25 +1,17 @@
-1) Non è chiaro quale saranno i numeri di porte d'ascolto dell'ACU. Nel manuale è specificato 8000 ed 8001, i lsimulatore funziona così. Però durante l'ACU accept test
-   ho dovuto usare 9000 e 9001
-2) Nel manuale la descrizione del program track non è stata aggiornata, subsystem id e command id riportano ancora i valori sbagliati.
-3) Manca una descrizione particolareggiata di tutti gli stati ed in particolare di tutti i bit delle control words.
-4) Nel comando PRESET il segno della velocità è significativo o basta dare il valore assoluto?
-5) Nel comando SETPOSITIONOFFSETS se nel rampTime metto 0.0 secondi è OK? ci va con la massima velocità?
-6) IN TTPT la velocità massima cos'è? La velocità massima negli slewing o la velocità massima di tracking? quindi devo mettere MAXRate o MAXreliableRate? 
-    Ancora una volta il segno ha importanza?
-7) Testato TTPT, sembra funzionare anche comandando più di 21 punti in una volta. Però non sembra assolutamente rispettare i tempi ne di partenza ne di arrivo,
-   anche se le coordinate finale della traiettoria comandata sono corrette. La lettura del numero di punti caricati non funziona, leggo sempre zero. Anche la
-   Errors tracking status word riporta continuamente degli errori.
-8) In parameter command set time offsets, the range is declared to be 86400000 seconds that corresponds to 1000 days: quite exotic. Apparently the last significant decimal
-   digits is the third one. Sent 0.034356 the simulator displays 0.03400.    
-9) controllato il cycle time di due status frame a 50ms, sembra a posto, vedi test50ms.out dentro doc.
-da controllare:
-10) The position flag in motors status seems always (in the simulator) to report "position not reached, corresponding to UINT8 value 0.
-11) con lo status framte cycle settato a 50 ms a volte il comando chengeMode e/o setOffsets vanno in timeout, anche se poi il comando è effetivamente eseguito.
-    Probabilmente si perde il frame con la risposta....oppure questa è splittatain due risposte.
+1) With 50ms as gap between status frames, the commands tend to timeout even if the command is executed effectively. I suspect that the frame with the command answer is lost or
+   splitted into two consecutive answers.Some investigation are due, for example printing the frame counter to see if one or more is missing. 
+2) The position flag in motors status seems always (in the simulator) to report "position not reached, corresponding to UINT8 value 0.To fix apparently the field is not used.
+   See issue 5.1 of the MTM manual. 
+3) In the GUI the format of motor torque must be fixed.
+4) Reset failure is a special command that does not imply an answer from the ACU, this case must be dealt with.
+5) Sometimes the activate command, called indirectly by other commands, does not recognize that the axis is already activated and so an error is issued. Operation after the reset?
+6) The component must explicitly deactivate the axis after a stow command  
 
+7) In CCommonData::Bind() roll back modification included in order to the debug the program track issue: 
+   a) commented out: //_IRA_LOGFILTER_LOG(
+   b) printfs
+    
 
--) verificare stati motore
--) sistemare interfaccia TUI
    
  
 

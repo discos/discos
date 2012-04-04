@@ -12,7 +12,7 @@ MicroControllerBoard::MicroControllerBoard(
 {
     try {
         pthread_mutex_init(&m_socket_mutex, NULL);
-        m_socket = new CSocket::CSocket();
+        m_socket = new CSocket();
     }
     catch (std::bad_alloc& ex) {
         throw MicroControllerBoardEx("Memory allocation error");

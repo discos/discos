@@ -462,7 +462,7 @@ public:
     /**
 	 * Set the scan stage to STOP
 	 */
-	bool scanStop();
+	bool stopScan();
 
     /**
 	 * Set the flags so that the component can reset itself
