@@ -197,8 +197,71 @@ public:
      
      
      void stopScan() throw (ManagementErrors::SubscanErrorEx);
-    
+     
 
+     /** 
+      * Clear the user offset of a servo (or all servos)
+      *
+      * @param servo a string:
+      *     * the servo name 
+      *     * "ALL" to clear the user offset of all servos
+      * @throw MinorServoErrors::OperationNotPermittedEx
+      */
+     void clearUserOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
+     
+
+     /** 
+      * Set the user offset of the servo
+      *
+      * @param servo the servo name
+      * @param doubleSeq offset sequence of user offsets to add to the position;
+      * one offset for each axis
+      * @throw MinorServoErrors::OperationNotPermittedEx
+      */
+     void setUserOffset(const char *servo, const ACS::doubleSeq &offset) throw (MinorServoErrors::OperationNotPermittedEx);
+     
+
+     /**
+      * Return the user offset of a servo
+      *
+      * @param servo the servo name
+      * @return offset the user offset of the servo
+      * @throw MinorServoErrors::OperationNotPermittedEx
+      */
+     ACS::doubleSeq * getUserOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
+ 
+
+     /** 
+      * Clear the system offset of a servo (or all servos)
+      *
+      * @param servo a string:
+      *     * the servo name 
+      *     * "ALL" to clear the system offset of all servos
+      * @throw MinorServoErrors::OperationNotPermittedEx
+      */
+     void clearSystemOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
+     
+
+     /** 
+      * Set the system offset of the servo
+      *
+      * @param servo the servo name
+      * @param doubleSeq offset sequence of system offsets to add to the position;
+      * one offset for each axis
+      * @throw MinorServoErrors::OperationNotPermittedEx
+      */
+     void setSystemOffset(const char *servo, const ACS::doubleSeq &offset) throw (MinorServoErrors::OperationNotPermittedEx);
+     
+
+     /**
+      * Return the system offset of a servo
+      *
+      * @param servo the servo name
+      * @return offset the system offset of the servo
+      * @throw MinorServoErrors::OperationNotPermittedEx
+      */
+     ACS::doubleSeq * getSystemOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
+    
 private:
 
 	ContainerServices *m_services;
@@ -269,6 +332,14 @@ private:
     bool slave_exists(string sname);
     
     bool isParked() throw (ManagementErrors::ConfigurationErrorEx);
+    
+    void clearOffset(const char *servo, string offset_type) throw (MinorServoErrors::OperationNotPermittedEx);
+
+    void setOffset(const char *servo, const ACS::doubleSeq &offset, string offset_type)
+        throw (MinorServoErrors::OperationNotPermittedEx);
+
+    ACS::doubleSeq * getOffset(const char *servo, string offset_type) 
+        throw (MinorServoErrors::OperationNotPermittedEx);
 
     void operator=(const MinorServoBossImpl &);
 };

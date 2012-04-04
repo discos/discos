@@ -47,9 +47,16 @@ module MinorServo {
      * <h3>Synchronous Methods and Callbacks</h3>:
      * <ul>
      *     <li><em>setPosition(position, exe_time)</em>: set the position of WPServo at some time.</li>
+     *     <li><em>setUserOffset(offset)</em>: set an user offset to the position.</li>
+     *     <li><em>clearUserOffset(offset)</em>: clear the user offset of the position.</li>
+     *     <li><em>getUserOffset(offset)</em>: get the user offset of the position.</li>
+     *     <li><em>setSystemOffset(offset)</em>: set a system offset to the position.</li>
+     *     <li><em>clearSystemOffset(offset)</em>: clear the system offset of the position.</li>
+     *     <li><em>getSystemOffset(offset)</em>: get the system offset of the position.</li>
      *     <li><em>setup(exe_time)</em>: accomplish a setup at some time.</li>
      *     <li><em>stow(exe_time)</em>: accomplish a stow at some time.</li>
      *     <li><em>calibrate(exe_time)</em>: accomplish a calibration at some time.</li>
+     *     <li><em>cleanPositionsQueue()</em>: clean the MSCU positions queue.</li>
      * </ul> 
      */
     interface WPServo : ACS::CharacteristicComponent {
@@ -297,11 +304,49 @@ module MinorServo {
          * @throw MinorServoErrors::PositioningErrorEx,
          * @throw MinorServoErrors::CommunicationErrorEx
          */
-        void setPosition(in ACS::doubleSeq position, in ACS::Time exe_time)
+         void setPosition(in ACS::doubleSeq position, in ACS::Time exe_time)
             raises (
                 MinorServoErrors::PositioningErrorEx,
                 MinorServoErrors::CommunicationErrorEx
             );
+
+
+        /**
+         * Set an user offset to the position.
+         * 
+         * @arg doubleSeq offset sequence of user offsets to add to the position;
+         * one offset for each axis
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */ 
+         void setUserOffset(in ACS::doubleSeq offset) 
+             raises (MinorServoErrors::OperationNotPermittedEx);
+
+
+        /** Return the user offset of the position */
+         ACS::doubleSeq getUserOffset();
+
+
+        /** Clear the position user offset */ 
+         void clearUserOffset();
+
+
+        /**
+         * Set a system offset to the position.
+         * 
+         * @arg doubleSeq offset sequence of position system offsets;
+         * one offset for each axis
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */ 
+         void setSystemOffset(in ACS::doubleSeq offset) 
+             raises (MinorServoErrors::OperationNotPermittedEx);
+
+
+        /** Return the system offset of the position */
+         ACS::doubleSeq getSystemOffset();
+
+
+        /** Clear the position system offset */ 
+         void clearSystemOffset();
 
 
         /**
@@ -316,6 +361,14 @@ module MinorServo {
                 MinorServoErrors::SetupErrorEx,
                 MinorServoErrors::CommunicationErrorEx
             );
+
+
+        /**
+         * Clean the MSCU positions queue
+         * 
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */
+        void cleanPositionsQueue() raises (MinorServoErrors::CommunicationErrorEx);
 
 
         /**
@@ -346,6 +399,10 @@ module MinorServo {
             );
 
 
+        /** Return minor servo number of axes */
+        short numberOfAxes();
+
+
         /** Return true when the minor servo is parked */
         boolean isParked();
 
@@ -363,7 +420,7 @@ module MinorServo {
 
 
         /** Set the flag used by the StatusUpdater to enable the servo status updating */
-        void setStatusUpdating(in boolean flag);
+        // void setStatusUpdating(in boolean flag);
 
       
         /** Return true if the StatusUpdater thread is updating the status */

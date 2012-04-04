@@ -377,6 +377,10 @@ public:
       */
      virtual ACS::doubleSeq * getData(const char *data_name) throw (MinorServoErrors::CommunicationErrorEx);
 
+     
+     /** Return the minor servo number of axes */
+     virtual short int numberOfAxes() {return m_cdb_ptr->NUMBER_OF_AXIS;}; 
+
 
 private:
 

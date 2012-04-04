@@ -9,10 +9,10 @@
 
     <Startup>
         <!--
-        <cdb:_ string="MinorServo/GFR"/> 
-        <cdb:_ string="MinorServo/M3R"/>
-        <cdb:_ string="MinorServo/PFP"/>
-        <cdb:_ string="MinorServo/SRP"/>
+        <cdb:_ string="MINORSERVO/GFR"/> 
+        <cdb:_ string="MINORSERVO/M3R"/>
+        <cdb:_ string="MINORSERVO/PFP"/>
+        <cdb:_ string="MINORSERVO/SRP"/>
         -->
     </Startup>
 

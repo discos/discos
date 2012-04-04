@@ -45,7 +45,9 @@ public:
 	bool initializeValue()
 	{
 		AUTO_TRACE("DevIOCryoTemperatureLNA::initializeValue()");
-		return true; // initialize with the default in order to avoid the alarm system when the component start and the value has not been read at least once
+        // initialize with the default in order to avoid the alarm system 
+        // when the component start and the value has not been read at least once
+		return true; 
 	}
 
 	/**

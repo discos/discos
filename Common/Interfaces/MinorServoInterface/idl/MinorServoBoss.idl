@@ -11,6 +11,7 @@
 #include <baci.idl>
 #include <ComponentErrors.idl>
 #include <ManagmentDefinitions.idl>
+#include <MinorServoErrors.idl>
 
 #pragma prefix "alma"
 
@@ -118,6 +119,76 @@ module MinorServo {
 
 
         void stopScan() raises (ManagementErrors::SubscanErrorEx);
+
+ 
+        /** 
+         * Clear the user offset of a servo (or all servos)
+         *
+         * @param servo a string:
+         *     * the servo name 
+         *     * "ALL" to clear the user offset of all servos
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+        void clearUserOffset(
+                in string servo
+        ) raises (MinorServoErrors::OperationNotPermittedEx);
+
+ 
+        /** 
+         * Set the user offset of the servo
+         *
+         * @param servo the servo name
+         * @param doubleSeq offset sequence of user offsets to add to the position;
+         * one offset for each axis
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+        void setUserOffset(
+                in string servo,
+                in ACS::doubleSeq offset
+        ) raises (MinorServoErrors::OperationNotPermittedEx);
+
+
+        /** Return the user offset of a servo
+         * @param servo the servo name
+         * @return offset the user offset of the servo
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+         ACS::doubleSeq getUserOffset(in string servo)  raises (MinorServoErrors::OperationNotPermittedEx);
+
+ 
+        /** 
+         * Clear the system offset of a servo (or all servos)
+         *
+         * @param servo a string:
+         *     * the servo name 
+         *     * "ALL" to clear the system offset of all servos
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+        void clearSystemOffset(
+                in string servo
+        ) raises (MinorServoErrors::OperationNotPermittedEx);
+
+ 
+        /** 
+         * Set the system offset of the servo
+         *
+         * @param servo the servo name
+         * @param doubleSeq offset sequence of system offsets to add to the position;
+         * one offset for each axis
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+        void setSystemOffset(
+                in string servo,
+                in ACS::doubleSeq offset
+        ) raises (MinorServoErrors::OperationNotPermittedEx);
+
+
+        /** Return the system offset of a servo
+         * @param servo the servo name
+         * @return offset the system offset of the servo
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+         ACS::doubleSeq getSystemOffset(in string servo)  raises (MinorServoErrors::OperationNotPermittedEx);
             
     };
 

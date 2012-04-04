@@ -427,7 +427,7 @@ void MinorServoBossImpl::stopScan() throw (ManagementErrors::SubscanErrorEx)
         if(m_scan_active == false)
             THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan: scanning not active", true);
 
-    usleep(2000000); // Wait for 2 second
+    usleep(SCAN_STOP_TIME_GUARD); // Wait a bit
 
     if(m_is_tracking_en)
         turnTrackingOn();
@@ -1018,6 +1018,227 @@ void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::Configuratio
         ACS_SHORT_LOG((LM_ERROR, "Exception in turnTrackingOff"));
         throw;
     }
+}
+
+
+void MinorServoBossImpl::clearUserOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx){
+
+    clearOffset(servo, "user");
+}
+
+
+void MinorServoBossImpl::clearSystemOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx){
+
+    clearOffset(servo, "system");
+}
+
+void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) throw (MinorServoErrors::OperationNotPermittedEx){
+
+    string comp_name = get_component_name(string(servo));
+    MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+    if(comp_name == "ALL") {
+        vector<string> slaves = get_slaves();
+        for(vector<string>::iterator iter = slaves.begin(); iter != slaves.end(); iter++) {
+            if(m_component_refs.count(*iter)) {
+                component_ref = MinorServo::WPServo::_nil();
+                component_ref = m_component_refs[*iter];
+                if(!CORBA::is_nil(component_ref))
+                    if(offset_type == "user")
+                        component_ref->clearUserOffset();
+                    else
+                        if(offset_type == "system")
+                            component_ref->clearSystemOffset();
+                        else {
+                            THROW_EX(
+                                    MinorServoErrors, 
+                                    OperationNotPermittedEx, 
+                                    string("The offset ") + offset_type + string(" doesn't exist"), 
+                                    true
+                            );
+                        }
+            }
+        }
+    }
+    else {
+        if(!slave_exists(comp_name)) {
+            THROW_EX(
+                    MinorServoErrors, 
+                    OperationNotPermittedEx, 
+                    string("The component ") + comp_name + string(" doesn't exist"), 
+                    true
+            );
+        }
+        if(m_component_refs.count(comp_name)) {
+            component_ref = m_component_refs[comp_name];
+            if(!CORBA::is_nil(component_ref)) {
+                    if(offset_type == "user")
+                        component_ref->clearUserOffset();
+                    else
+                        if(offset_type == "system")
+                            component_ref->clearSystemOffset();
+                        else {
+                            THROW_EX(
+                                    MinorServoErrors, 
+                                    OperationNotPermittedEx, 
+                                    string("The offset ") + offset_type + string(" doesn't exist"), 
+                                    true
+                            );
+                        }
+            }
+            else {
+                THROW_EX(
+                        MinorServoErrors, 
+                        OperationNotPermittedEx, 
+                        string("The reference to component ") + comp_name + string(" is NULL"), 
+                        true
+                );
+            }
+        }
+        else {
+            THROW_EX(
+                    MinorServoErrors, 
+                    OperationNotPermittedEx, 
+                    string("The component ") + comp_name + string(" is not active"), 
+                    true
+            );
+        }
+    }
+}
+
+
+void MinorServoBossImpl::setUserOffset(const char *servo, const ACS::doubleSeq &offset) 
+    throw (MinorServoErrors::OperationNotPermittedEx){
+
+    setOffset(servo, offset, "user");
+
+}
+
+
+void MinorServoBossImpl::setSystemOffset(const char *servo, const ACS::doubleSeq &offset)
+    throw (MinorServoErrors::OperationNotPermittedEx){
+
+    setOffset(servo, offset, "system");
+
+}
+
+
+void MinorServoBossImpl::setOffset(const char *servo, const ACS::doubleSeq &offset, string offset_type) 
+    throw (MinorServoErrors::OperationNotPermittedEx)
+{
+    string comp_name = get_component_name(string(servo));
+    MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+
+    if(!slave_exists(comp_name)) {
+        THROW_EX(
+                MinorServoErrors, 
+                OperationNotPermittedEx, 
+                string("The component ") + comp_name + string(" doesn't exist"), 
+                true
+        );
+    }
+
+    if(m_component_refs.count(comp_name)) {
+        component_ref = m_component_refs[comp_name];
+        if(!CORBA::is_nil(component_ref)) {
+            if(offset_type == "user")
+                component_ref->setUserOffset(offset);
+            else
+                if(offset_type == "system")
+                    component_ref->setSystemOffset(offset);
+                else {
+                    THROW_EX(
+                            MinorServoErrors, 
+                            OperationNotPermittedEx, 
+                            string("The offset ") + offset_type + string(" doesn't exist"), 
+                            true
+                    );
+                }
+        }
+        else {
+            THROW_EX(
+                    MinorServoErrors, 
+                    OperationNotPermittedEx, 
+                    string("The reference to component ") + comp_name + string(" is NULL"), 
+                    true
+            );
+        }
+    }
+    else {
+        THROW_EX(
+                MinorServoErrors, 
+                OperationNotPermittedEx, 
+                string("The component ") + comp_name + string(" is not active"), 
+                true
+        );
+    }
+}
+
+
+ACS::doubleSeq * MinorServoBossImpl::getUserOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx) {
+    ACS::doubleSeq_var offset = new ACS::doubleSeq;
+    offset = getOffset(servo, "user");
+    return offset._retn();
+}
+
+
+ACS::doubleSeq * MinorServoBossImpl::getSystemOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx) {
+    ACS::doubleSeq_var offset = new ACS::doubleSeq;
+    offset = getOffset(servo, "system");
+    return offset._retn();
+}
+
+
+ACS::doubleSeq * MinorServoBossImpl::getOffset(const char *servo, string offset_type) 
+    throw (MinorServoErrors::OperationNotPermittedEx)
+{   
+    ACS::doubleSeq_var offset = new ACS::doubleSeq;
+    string comp_name = get_component_name(string(servo));
+    MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+
+    if(!slave_exists(comp_name)) {
+        THROW_EX(
+                MinorServoErrors, 
+                OperationNotPermittedEx, 
+                string("The component ") + comp_name + string(" doesn't exist"), 
+                true
+        );
+    }
+
+    if(m_component_refs.count(comp_name)) {
+        component_ref = m_component_refs[comp_name];
+        if(!CORBA::is_nil(component_ref)) {
+            if(offset_type == "user")
+                offset = component_ref->getUserOffset();
+            else
+                if(offset_type == "system")
+                    offset = component_ref->getSystemOffset();
+                else {
+                    THROW_EX(
+                            MinorServoErrors, 
+                            OperationNotPermittedEx, 
+                            string("The offset ") + offset_type + string(" doesn't exist"), 
+                            true
+                    );
+                }
+        }
+        else {
+            THROW_EX(
+                    MinorServoErrors, 
+                    OperationNotPermittedEx, 
+                    string("The reference to component ") + comp_name + string(" is NULL"), 
+                    true
+            );
+        }
+    }
+    else {
+        THROW_EX(
+                MinorServoErrors, 
+                OperationNotPermittedEx, 
+                string("The component ") + comp_name + string(" is not active"), 
+                true
+        );
+    }
+    return offset._retn();
 }
 
 

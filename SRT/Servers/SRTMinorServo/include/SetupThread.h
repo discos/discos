@@ -21,12 +21,13 @@
 
 using namespace maci;
 
-#define ITER_SLEEP_TIME 5000000 // Iteration sleep time: 0.5 seconds
-#define INCR_SLEEP_TIME 20000000 // Increment sleep time: 2 seconds
-#define MAX_PARK_TIME 80000000 // Maximum park time: 8 seconds
-#define MAX_SETUP_TIME 80000000 // Maximum setup time: 8 seconds
+const unsigned int ITER_SLEEP_TIME = 5000000; // Iteration sleep time: 0.5 seconds
+const unsigned int INCR_SLEEP_TIME = 20000000; // Increment sleep time: 2 seconds
+const unsigned int MAX_PARK_TIME = 80000000; // Maximum park time: 8 seconds
+const unsigned int MAX_SETUP_TIME = 80000000; // Maximum setup time: 8 seconds
 // Time in 100ns: 10000000 == 1sec
 const unsigned int SCAN_SHIFT_TIME = 50000000;
+const unsigned int SCAN_STOP_TIME_GUARD = 2000000; // 2 second
 
 struct TrackingThread;
 struct MSBossPublisher;

@@ -6,8 +6,15 @@
 -->
 
 <!-- The order of axises of every minor servo have to be the same as MSCU one -->
-<!-- For instance if we have the following values: [C0, C1, C2], the axis value will be:
-C0 + C1*E + C2*E^2 
+<!-- 
+     For instance if we have the following values: (C0, C1, C2), the axis value will be:
+
+         C0 + C1*E + C2*E^2 
+
+     Let's suppose the PFP LX  is (2.222, 1.111, 0), we'll have the following value for
+     the PFP x axis:
+         
+         x = 2.222 + 1.111*E + 0*E
 -->
 <MinorServoBoss
     xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
