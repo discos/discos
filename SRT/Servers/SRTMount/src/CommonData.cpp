@@ -548,7 +548,8 @@ void CCommonData::reBind()
 	}
 	else index=0;
 
-	printf("%s \t %d \t %d \t %d \t %d",(const char *)ptAnswer,m_pointingStatus-> pTTCurrentIndex(),m_pointingStatus-> pTTEndIndex(),m_pointingStatus-> pTTLength(),index);
+	printf("%s \t %d \t %d \t %d \t %d \t",(const char *)ptAnswer,m_pointingStatus-> pTTCurrentIndex(),m_pointingStatus-> pTTEndIndex(),m_pointingStatus-> pTTLength(),index);
+	printf("%d \t %d \t %d \n",m_pointingStatus->pointingErrors().dataOverflow(),m_pointingStatus->pointingErrors().timeDistanceFault(),m_pointingStatus->pointingErrors().noDataAvailable());
 
 
 	/******************************************************************************************/
