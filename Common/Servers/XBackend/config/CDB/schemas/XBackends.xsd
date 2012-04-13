@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: XBackends.xsd,
+	- Author: Liliana Branciforti
+	-
+	- History:
+	-   30-07-2009  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:XBackends:1.0"
+	xmlns="urn:schemas-cosylab-com:XBackends:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:bcknd="urn:schemas-cosylab-com:GenericBackend:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:GenericBackend:1.0" schemaLocation="GenericBackend.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+	
+	<xs:simpleType name="TBkndConfiguration">
+		<xs:annotation><xs:documentation>
+			Enlist all possible configuration for the backend. many parameters can change for example the number of inputs,
+			the input type (BWG,Gregorian....) the used devices and so on. All the configuration are hard coded in the component,
+			so in order to add a configuration a piece of code in the component shoud reflect the addition.
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="22GHzMultiFeed">
+				<xs:annotation><xs:documentation>
+					the backend is connected to the 14 inputs of the secondary focus 22Ghz 7 feeds receiver 
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="5GHz">
+				<xs:annotation><xs:documentation>
+					the backend is connected to the 2 inputs of the secondary focus 5Ghz receiver, LCP and RCP are reported respectively 
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>	      	
+		</xs:restriction>
+	</xs:simpleType>	
+	
+	<xs:complexType name="BackendStatusType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROpattern">
+				<xs:attribute name="resolution" type="xs:int" use="optional" default="64"/>
+            	<xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                	"hw,setting,active,abort,dataReady,overflowData"/>
+				<xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                	"2, 2, 2, 2, 2, 0"/>
+            	<xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+            		"3, 3, 3, 3, 3, 3"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>	
+		
+	<xs:complexType name="XBackendsType">
+		<xs:complexContent>
+			<xs:extension base="bcknd:GenericBackendType">
+				<xs:sequence>
+					<xs:element name="time" type="baci:ROuLongLong" />
+					<xs:element name="backendName" type="baci:ROstring" />
+					<xs:element name="bandWidth" type="baci:ROdoubleSeq" />
+					<xs:element name="frequency" type="baci:ROdoubleSeq" />
+					<xs:element name="sampleRate" type="baci:ROdoubleSeq" />
+					<xs:element name="attenuation" type="baci:ROdoubleSeq" />
+					<xs:element name="polarization" type="baci:ROlongSeq" />
+					<xs:element name="bins" type="baci:ROlongSeq"/>	
+					<xs:element name="feed" type="baci:ROlongSeq" />
+					<xs:element name="systemTemperature" type="baci:ROdoubleSeq"/>						
+					<xs:element name="inputSection" type="baci:ROlongSeq" />
+					<xs:element name="inputsNumber" type="baci:ROlong" />
+					<xs:element name="sectionsNumber" type="baci:ROlong" />
+					<xs:element name="integration" type="baci:ROlong" />
+					<xs:element name="status" type="BackendStatusType" />
+					<xs:element name="busy" type="mng:BooleanType" />	
+					<xs:element name="mode8bit" type="mng:BooleanType" />		
+					<xs:element name="fileName" type="baci:ROstring" />
+				</xs:sequence>
+				<xs:attribute name="IPAddress" type="xs:string" use="required" />
+				<xs:attribute name="Port" type="xs:unsignedShort" use="required" />
+				<xs:attribute name="Configuration" type="TBkndConfiguration" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:element name="XBackends" type="XBackendsType"/>
+	
+</xs:schema>

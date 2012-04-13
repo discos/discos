@@ -1,0 +1,5 @@
+LA struttura CDB... non viene creata automaticamente dal comando:
+	getTemplate 
+	createWS_MODROOT
+l'ho inclusa per avere copia dei file necessari a far funzionare
+il Component

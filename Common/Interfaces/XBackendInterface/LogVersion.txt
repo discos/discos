@@ -1,0 +1,22 @@
+GenericBackend
+
+Aggiunto:
+feed
+setSection()
+setXchannel()
+GetData()
+
+fileName
+
+setFileName()
+
+DD_XINTERFACE_08_DOPPIO (04 - feb -2010)
+
+Aggiornamento cvs a medicina
+
+DD_XINTERFACE_09_DOPPIO (03 - mar -2010)
+
+AGGIORNAMENTO DOVUTO AL CVS IBRIDO
+
+ADD_XINTERFACE_10_DOPPIO (04 - mar -2010)
+

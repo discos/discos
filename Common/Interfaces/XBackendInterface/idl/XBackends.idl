@@ -1,0 +1,43 @@
+/* **************************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      	        */
+/* $Id:XarcosBackends.idl																							*/
+/*                                                                                                      	        */
+/* This code is under GNU General Public Licence (GPL).                                                 	        */
+/*                                                                                                      	        */
+/* Who                                 when            What                                              	        */
+/* Liliana Branciforti(bliliana@arcetri.astro.it)  30/07/2008      Creation                                          	        						*/
+
+
+
+#ifndef _XBACKENDS_IDL_
+#define _XBACKENDS_IDL_
+
+#include <baci.idl>
+#include <enumpropMACRO.idl> 
+#include "GenericBackend.idl"
+
+#pragma prefix "alma"
+
+module Backends {		
+	interface XBackends : GenericBackend {
+		/**
+		 * This attribute reports if the HW is setting on Mode8Bit.
+		 */
+		readonly attribute Management::ROTBoolean mode8bit;
+	
+		/**
+		 * This attribute reports the number of fileName used by the backend to save data. 
+		 */		
+		readonly attribute ACS::ROstring fileName;
+		void setFileName (in string fileName) raises (ComponentErrors::ComponentErrorsEx);
+		void setInputsNumber(in long inputsNumber) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		void setSectionsNumber(in long SectionsNumber) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		void visualSpecific()raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);		
+		void visualData()raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);		
+		void visualACS()raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);	
+		void setMode8bit(in boolean mode)raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);	
+	};
+	
+};
+
+#endif

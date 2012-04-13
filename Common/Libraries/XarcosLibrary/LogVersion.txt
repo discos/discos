@@ -1,0 +1,10 @@
+Compilata per ACS:XBackends 
+	lib/libXarcos.a
+	lib/libXarcos.so
+invocare il make da src/	
+
+Compilata per la mascherina xarcos
+	Debug/libXarcos.a
+	Debug/libXarcos.so
+invocare il make da Debug/	
+
