@@ -757,7 +757,7 @@ void XBackendsImpl::setAttenuation(CORBA::Long input,CORBA::Double att)
 }
 
 CORBA::Long XBackendsImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,
-		ACS::longSeq_out feed,Receivers::TPolarizationSeq_out polarization) 
+		ACS::longSeq_out feed,ACS::longSeq_out ifNumber/*Receivers::TPolarizationSeq_out polarization*/) 
 	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
 {
 	AUTO_TRACE("XBackendsImpl::getInputs()");
@@ -765,8 +765,9 @@ CORBA::Long XBackendsImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out 
 	freq=new ACS::doubleSeq;
 	bandWidth=new ACS::doubleSeq;
 	feed=new ACS::longSeq;
-	polarization=new Receivers::TPolarizationSeq;
-	return line->getInputsConfiguration(*freq,*bandWidth,*feed,*polarization);
+	//polarization=new Receivers::TPolarizationSeq;
+    ifNumber=new ACS::longSeq;
+	return line->getInputsConfiguration(*freq,*bandWidth,*feed,*ifNumber/**polarization*/);
 }
 
 void XBackendsImpl::setInputsNumber(CORBA::Long inputsNumber) 

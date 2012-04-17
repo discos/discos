@@ -87,6 +87,11 @@ public:
 	 * Call this function in order to get the sample rate for each input. 
 	 */	
 	void getSampleRate(ACS::doubleSeq& sr) const;
+
+    /**
+	 * Call this function in order to get the IF connected to each input.
+	 */	
+	void getIFs(ACS::longSeq& ifs) const;
 	
 	/**
 	 * Call this function in order to know which section an input is attached to.
@@ -114,7 +119,7 @@ public:
 	/**
 	 * Call this function to obtain the exact configuration of each input of the backend in one shot 
 	 */ 
-	long getInputsConfiguration(ACS::doubleSeq& freq,ACS::doubleSeq& bandWidth,ACS::longSeq& feed,Receivers::TPolarizationSeq& polarization);
+	long getInputsConfiguration(ACS::doubleSeq& freq,ACS::doubleSeq& bandWidth,ACS::longSeq& feed,ACS::longSeq& ifs/*Receivers::TPolarizationSeq& polarization*/);
 
 	/**
 	 * Call this function in order to get the last measure of the system temperature.
@@ -530,6 +535,12 @@ private:
 	 * It stores the last available tsys measurment 
 	 */
 	double m_tsys[MAX_INPUT_NUMBER];	
+
+    /**
+	 * Indicates the if number (relative to the feed) the input is attached to.
+	 */
+	long m_ifNumber[MAX_INPUT_NUMBER];
+
 	
 	/** 
 	 * the name of the file 

@@ -37,6 +37,7 @@
 
 using namespace baci;
 using namespace IRA;
+using namespace ACSBulkDataError;
 
 /**
  * This class implements the Backends::XBackends CORBA interface.  
@@ -265,7 +266,7 @@ public:
       * @return the number of inputs, in other words is the lenght of the returned sequences
       */
      virtual CORBA::Long getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,
-    		 ACS::longSeq_out feed,Receivers::TPolarizationSeq_out polarization) 
+    		 ACS::longSeq_out feed,ACS::longSeq_out ifNumber/*Receivers::TPolarizationSeq_out polarization*/) 
      	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
      
      /**

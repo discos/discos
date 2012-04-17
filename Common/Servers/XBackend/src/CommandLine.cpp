@@ -737,6 +737,13 @@ void CCommandLine::getBandWidth(ACS::doubleSeq& bw) const
 	}
 }
 
+void CCommandLine::getIFs(ACS::longSeq& ifs) const
+{
+	ifs.length(m_inputsNumber);
+	for (int i=0;i<m_inputsNumber;i++) {
+		ifs[i]=m_ifNumber[i];
+	}	
+}
 
 void CCommandLine::getBackendStatus(DWORD& status) 
 {
@@ -766,7 +773,7 @@ void CCommandLine::getTime(ACS::Time& tt) const
 	//ACS_DEBUG_PARAM("CCommandLine::getTime()","timeString = %s",(const char*)timeString.c_str());
 }
 
-long CCommandLine::getInputsConfiguration(ACS::doubleSeq& freq,ACS::doubleSeq& bandWidth,ACS::longSeq& feed,Receivers::TPolarizationSeq& polarization)
+long CCommandLine::getInputsConfiguration(ACS::doubleSeq& freq,ACS::doubleSeq& bandWidth,ACS::longSeq& feed,ACS::longSeq& ifs/*Receivers::TPolarizationSeq& polarization*/)
 {
 	long inputs;
 	ACS::longSeq pol;
@@ -775,6 +782,8 @@ long CCommandLine::getInputsConfiguration(ACS::doubleSeq& freq,ACS::doubleSeq& b
 	getFrequency(freq);
 	getInputsNumber(inputs);
 	getBandWidth(bandWidth);
+    getIFs(ifs);
+    /*
 	getPolarization(pol);
 	polarization.length(pol.length());
 	for (unsigned i=0;i<pol.length();i++) {
@@ -785,6 +794,7 @@ long CCommandLine::getInputsConfiguration(ACS::doubleSeq& freq,ACS::doubleSeq& b
 			polarization[i]=Receivers::RCV_RCP;
 		}
 	}
+    */
 	return inputs;
 }
 
