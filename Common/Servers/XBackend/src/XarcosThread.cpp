@@ -477,7 +477,7 @@ void XarcosThread::SaveFileTxt(double * buff, int size, int sizetp)
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now); // it marks the start of the activity job
 	m_fileOpened=false;
-	FileName.Format("/home/Manager/OutXarcos/XOut_%02d_%02d_%02d.txt",now.hour(),now.minute(),now.second());
+	FileName.Format("/alma/XOut_%02d_%02d_%02d.txt",now.hour(),now.minute(),now.second());
 	if (!m_fileOpened) {
 		// create the file and save main headers
 		t_file.open((const char *)FileName,ios_base::out|ios_base::trunc);
@@ -565,7 +565,7 @@ void XarcosThread::SaveFileFits()
 		m_file = new CFitsWriter();
 		TIMEVALUE now;
 		IRA::CIRATools::getTime(now); // it marks the start of the activity job
-		m_file->setBasePath("/home/Manager/OutXarcos/");	
+		m_file->setBasePath("/alma/");	
 		fileName->Format("XOut_%02d_%02d_%02d.fits",now.hour(),now.minute(),now.second());
 		m_file->setFileName((const char*)*fileName);			
 		ACS_DEBUG("XarcosThread::SaveFileFits()"," create() MBFits ");
