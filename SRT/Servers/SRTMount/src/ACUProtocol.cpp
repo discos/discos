@@ -33,11 +33,18 @@ CACUProtocol::CACUProtocol()
 {
 	m_syncBuffer=new CCircularArray(STATUS_BUFFER);
 	m_bbufferStarted=false;
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	outputFile.open("PPTOutFile.dat",ios_base::out|ios_base::trunc);
+	outputFile << "CommandID\tSubsystemID\tCounter\tParameterID\tInterpolationMode\tTrackingMode\tLoadMode\tLength\tStartTime\n";
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 CACUProtocol::~CACUProtocol()
 {
 	delete m_syncBuffer;
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	outputFile.close();
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 WORD CACUProtocol::preset(const double& azPos,const double& elPos,const double& azRate,const double& elRate,BYTE * & buff,TCommand *& command,WORD& commNumber)
@@ -160,30 +167,88 @@ WORD CACUProtocol::loadProgramTrack(const ACS::Time& startEpoch,const TProgramTr
 	command=NULL;
 	commNumber=1;
 	if (newTable && (size<PROGRAMTRACK_TABLE_MINIMUM_LENGTH)) { // for a new table at least five points are required!
+		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		outputFile << "Sequence too short\n";
+		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 		return 0;
 	}
 	copyData<TUINT16>(msg,PROGRAMTRACK_COMMAND_ID,len);
+
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	outputFile << PROGRAMTRACK_COMMAND_ID << "\t";
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	copyData<TUINT16>(msg,SUBSYSTEM_ID_POINTING,len);
+
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	outputFile << SUBSYSTEM_ID_POINTING << "\t";
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	counter=getMillisOfTheDay()+1;
 	copyData<TUINT32>(msg,counter,len);
+
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	outputFile << counter << "\t";
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	copyData<TUINT16>(msg,PAR_PROGRAM_TRACK_TABLE,len);
+
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	outputFile << PAR_PROGRAM_TRACK_TABLE << "\t";
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	copyData<TUINT16>(msg,PROGRAMTRACK_INTERPOLATION_MODE,len);
+
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	outputFile << PROGRAMTRACK_INTERPOLATION_MODE << "\t";
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	copyData<TUINT16>(msg,PROGRAMTRACK_TRACKING_MODE,len);  // tracking mode: azimuth/elevation
+
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	outputFile << PROGRAMTRACK_INTERPOLATION_MODE << "\t";
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	if (newTable) {
 		copyData<TUINT16>(msg,PROGRAMTRACK_LOAD_MODE_NEW_TABLE,len);  // load mode: start a new table
+
+		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		outputFile << PROGRAMTRACK_LOAD_MODE_NEW_TABLE << "\t";
+		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	}
 	else {
 		copyData<TUINT16>(msg,PROGRAMTRACK_LOAD_MODE_APPEND_TABLE,len);  // load mode: new entries will be attached to the existing table
+
+		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		outputFile << PROGRAMTRACK_LOAD_MODE_APPEND_TABLE << "\t";
+		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	}
 	copyData<TUINT16>(msg,size,len);  // sequence length
+
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	outputFile << size << "\t";
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	//startUt=seq[0].timeMark;
 	mjd=time2MJD(startEpoch);
 	copyData<TREAL64>(msg,mjd,len);  // startTime as modified julian date
+
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	outputFile << mjd << "\n";
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	copyData<TREAL64>(msg,azRate,len);  // max speed in azimuth..
 	copyData<TREAL64>(msg,elRate,len);  // max speed in elevation...
 	for (WORD i=0;i<size;i++) {
 		timeDiff=(seq[i].timeMark-startEpoch); // 100 ns
 		timeDiff=(long)(timeDiff/10000); // milliseconds
+
+		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		outputFile << timeDiff << "\t" << seq[i].azimuth << seq[i].elevation << "\n";
+		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 		copyData<TINT32>(msg,timeDiff,len);
 		copyData<TREAL64>(msg,seq[i].azimuth,len);
 		copyData<TREAL64>(msg,seq[i].elevation,len);

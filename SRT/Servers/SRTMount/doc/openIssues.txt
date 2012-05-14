@@ -10,9 +10,14 @@
 7) In CCommonData::Bind() roll back modification included in order to the debug the program track issue: 
    a) commented out: //_IRA_LOGFILTER_LOG(
    b) printfs
+   
+8) The LOG messages are printed (on standard output) with the strange dictionary couple Reason="program track ...." it seems that a previous key=value has
+   not been cleared. The same in jlog? 
+   2012-04-20T08:57:05.929 [MountContainer-GL - CCommandSocket::changeMode_command()] NEW_ACU_MODE PROGRAM_TRACK Code="5" Reason="program track mode not configured" Message="INVALID ARGUMENTS"
+   
     
 
-   
+9) in class Cprotocol rollback all modifications to store ppt positions, they are marked with //$$$$$$$$$$$$$$$$$$$$$$$$$$$
  
 
 

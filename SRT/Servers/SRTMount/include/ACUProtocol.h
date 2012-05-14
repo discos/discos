@@ -13,6 +13,10 @@
 #include <IRA>
 #include <DateTime.h>
 #include <bitset>
+// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#include <iostream>
+#include <fstream>
+// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 #define TUINT32     unsigned int
 #define TUINT16     unsigned short int
@@ -661,6 +665,10 @@ private:
 	 */
 	bool m_bbufferStarted;
 	
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	ofstream outputFile;
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 	/**
 	 * Try to localize the start flag inside the internal sync buffer.
 	 * @param start position from which the search is started, in case of success it returns the index of the starting byte of the start flag, otherwise the
