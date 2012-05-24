@@ -15,5 +15,6 @@
 #include "DBTable.h"
 //#include "LogFilter.h"
 #include "TimeTaggedCircularArray.h"
+#include "CustomLoggerUtils.h"
 
 #endif

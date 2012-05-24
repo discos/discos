@@ -8,6 +8,7 @@
 /* Andrea Orlati(a.orlati@ira.inaf.it) 19/02/2008     Added the Boolean enum interface        */ 
 /* Andrea Orlati(a.orlati@ira.inaf.it) 24/11/2009     Added the CommandInterpreter Interface   */
 /* Andrea Orlati, Marco Buttu          30/03/2010     Added the Subsystem Interface   */
+/* Marco Bartolini                     24/05/2012     Added the LogLevel enum interface   */
 
 #ifndef _MANAGMENTDEFINITIONS_IDL_
 
@@ -95,6 +96,23 @@ module Management  {
 	
 	ACS_ENUM(TBoolean);
 	
+        /*
+         * Log level definitions for ACS custom logging utilization
+        */
+        enum LogLevel{
+		C_TRACE,
+		C_DEBUG,
+		C_INFO,
+		C_NOTICE,
+		C_WARNING,
+		C_ERROR,
+		C_CRITICAL,
+		C_ALERT,
+		C_EMERGENCY
+	};
+
+        ACS_ENUM(LogLevel);
+
 	/**
 	 * This enumerates all the possible axis along with the control system is able to perform scans, the axis may involve the primary servo system (Antenna) or the secondary servo system (ServoMinor).
 	 */ 

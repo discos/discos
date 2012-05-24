@@ -5,6 +5,7 @@
 	-
 	- History:
 	-   24-01-2008  Created
+        -   24-05-2012  Marco Bartolini added LogLevelType
 -->
 
 <xs:schema
@@ -39,6 +40,18 @@
 			</xs:restriction>
 		</xs:complexContent>
 	</xs:complexType>
+
+	  <xs:complexType name="LogLevelType">
+			<xs:complexContent>
+				<xs:restriction base="baci:ROEnum">
+					<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+					<xs:attribute name="graph_max" type="xs:int" use="optional" default="8" />
+					<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
+							"C_TRACE, C_DEBUG, C_INFO, C_NOTICE, C_WARNING, C_ERROR, C_CRITICAL, C_ALERT, C_EMERGENCY"/>
+				</xs:restriction>
+			</xs:complexContent>
+	  </xs:complexType>
+
 
 	<xs:complexType name="ScanAxisType">
 		<xs:complexContent>
