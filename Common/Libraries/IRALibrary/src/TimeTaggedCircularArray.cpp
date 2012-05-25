@@ -96,7 +96,7 @@ void CTimeTaggedCircularArray::addOffsets(const double& azOff,const double& elOf
 	unsigned pp=0;
 	for (unsigned i=0;i<ss;i++) {
 		pp=(m_head+i)%m_size;
-		if (time>=m_array[pp].time) { m_array[pp].azimuth+=azOff; m_array[pp].elevation+=elOff; }
+		if (time<m_array[pp].time) { m_array[pp].azimuth+=azOff; m_array[pp].elevation+=elOff; }
 	}
 }
 

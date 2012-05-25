@@ -228,8 +228,8 @@ void CMedicinaMountSocket::getEncodersCoordinates(double& az,double& el,double& 
 		time=tm.value().value;
 		az=m_Data.azimuth();
 		el=m_Data.elevation();
-		azOff=m_Data.getElevationOffset();
-		elOff=m_Data.getAzimuthOffset();
+		elOff=m_Data.getElevationOffset();
+		azOff=m_Data.getAzimuthOffset();
 		section=m_Data.getSection();
 	}
 	_CHECK_ERRORS("CMedicinaMountSocket::getEncodersCoordinates()");
@@ -471,7 +471,6 @@ void CMedicinaMountSocket::setPositionOffsets(const double& azOff,const double& 
 				el=(long)(elevation*1000000.0);
 				dayTime=(((now.hour()*60LL+now.minute())*60+now.second())*1000+now.microSecond()/1000);	
 				yearDay=(short)now.dayOfYear();
-				pos++;
 				if (pos==0) {
 					m_lastScanEpoch=now.value().value;
 					Len=CACUInterface::getProgramTrackBuffer(sBuffer,az,el,0,0,dayTime,yearDay,true,true); //first point...clear the stack
@@ -479,6 +478,7 @@ void CMedicinaMountSocket::setPositionOffsets(const double& azOff,const double& 
 				else {
 					Len=CACUInterface::getProgramTrackBuffer(sBuffer,az,el,0,0,dayTime,yearDay,true,false);
 				}
+				pos++;
 				_LAUNCH_BUFFER(sBuffer,Len,"CMedicinaMountSocket::setPositionOffsets()");											
 			}				
 		}
