@@ -1,0 +1,68 @@
+#ifndef _CUSTOMLOGGER_IDL
+#define _CUSTOMLOGGER_IDL
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include <ManagmentDefinitions.idl>
+
+#pragma prefix "alma"
+
+module Management{
+
+        interface CustomLogger: ACS::CharacteristicComponent
+        {
+                /*
+                * Filename of the custom logging file
+                */
+                readonly attribute ACS::ROstring filename;
+                readonly attribute ACS::ROlong nevents;
+                /*
+                * True if logging functionalities are active
+                */
+                readonly attribute ROTBoolean isLogging;
+                /*
+                * Minimum log level for filtered log messages
+                */
+                readonly attribute ROLogLevel minLevel;
+                /*
+                * Maximum log level for filtered log messages
+                */
+                readonly attribute ROLogLevel maxLevel;
+                /*
+                * Close the actual log files and open two new ones for logging.
+                * Directories are created if not found.
+                * @param base_path_log: the directory name for the custom log file
+                * @param base_path_full_log: the directory name for the full log file
+                * @param filename_log: the file name for the custom log file
+                * @param filename_full_log: the file name for the full log file
+                */
+                void setLogfile(in string base_path_log, in string base_path_full_log,
+                                    in string filename_log, in string filename_full_log);
+                /*
+                * Emits a INFO level custom logging message
+                * @param msg: the logging message
+                */
+                void emitLog(in string msg, in LogLevel level);
+                /*
+                * Close the actual log files and stops logging.
+                */
+                void closeLogfile();
+                /*
+                * Set the minimum logging level to be included in custom log files
+                * @param level: the logging level
+                */
+                void setMinLevel(in LogLevel level);
+                /*
+                * Set the maximum level to be included in custom log files
+                * @param level: the logging level
+                */
+                void setMaxLevel(in LogLevel level);
+                /*
+                * Flushes the log events queued by the LoggingProxy and writes to 
+                * custom log files
+                */
+                void flush();
+        };
+};
+
+#endif
