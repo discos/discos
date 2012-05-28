@@ -140,7 +140,7 @@ CustomLoggerImpl::initialize()
 	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogDir", _c_path) &&
 	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogFile", _c_file)
      ){
-	setLogfile(_a_path, _a_file, _c_path, _c_path);
+	setLogfile(_c_path, _a_path, _c_file, _a_file);
      }
      //TODO: else ERROR
      setMinLevel(C_TRACE);
