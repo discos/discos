@@ -29,6 +29,7 @@
 #include <string>
 #include <algorithm>
 
+#include <IRA>
 #include <expat_log_parsing.h>
 
 typedef CosNotification::StructuredEvent CustomLoggingEvent;

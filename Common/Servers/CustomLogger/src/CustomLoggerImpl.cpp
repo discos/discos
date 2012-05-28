@@ -130,8 +130,21 @@ CustomLoggerImpl::initialize()
     consumer_admin_->subscription_change (added, removed);
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : Initializing EXPAT for xml parsing"));
     log_parser = init_log_parsing();
-    //_min_level = Logging::ace2acsPriority(LM_SHUTDOWN);
-    //_max_level = Logging::ace2acsPriority(LM_EMERGENCY);
+
+    /* LOGGING INITIALIZATION
+     ========================*/
+     IRA::CString _c_path, _c_file, _a_path, _a_file;
+     if(
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogDir", _a_path) &&
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogFile", _a_file) &&
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogDir", _c_path) &&
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogFile", _c_file)
+     ){
+	setLogfile(_a_path, _a_file, _c_path, _c_path);
+     }
+     //TODO: else ERROR
+     setMinLevel(C_TRACE);
+     setMaxLevel(C_EMERGENCY);
 };
 
 void 
@@ -199,9 +212,9 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
     ACS::Time ts;
     //Creates directories if do not exist
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : create log directory: %s", base_path_log));
-    mkdir(base_path_log, S_IRWXO);
+    mkdir(base_path_log, S_IRWXO|S_IRWXG|S_IRWXU);
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : create log directory: %s", base_path_full_log));
-    mkdir(base_path_full_log, S_IRWXO);
+    mkdir(base_path_full_log, S_IRWXO|S_IRWXG|S_IRWXU);
     //TODO: Error check
     //Creating CUSTOM_LOG FILE NAME
     std::string base_path(base_path_log);
@@ -209,7 +222,6 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
        base_path.append("/");
     base_path.append(filename_log);
     std::string custom_path(base_path);
-    custom_path.append(CUSTOM_LOGGING_EXTENSION);
     m_filename_sp->getDevIO()->write(custom_path.c_str(), ts);
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : custom log file: %s", custom_path.c_str()));
     //Creating FULL_LOG FILE NAME
@@ -217,7 +229,6 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
     if(full_path.at(full_path.size() - 1) != '/')
        full_path.append("/");
     full_path.append(filename_full_log);
-    full_path.append(FULL_LOGGING_EXTENSION);
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : full log file: %s", full_path.c_str()));
     _custom_log.open(custom_path.c_str(), std::ofstream::app);
     //TODO: Error check
