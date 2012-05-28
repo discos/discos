@@ -19,6 +19,7 @@
     <xs:sequence>
       <xs:element name="filename" type="baci:ROstring"/>
       <xs:element name="nevents" type="baci:ROlong"/>
+      <xs:element name="isLogging" type="mng:BooleanType"/>
       <xs:element name="minLevel" type="mng:LogLevelType"/>
       <xs:element name="maxLevel" type="mng:LogLevelType"/>
     </xs:sequence>

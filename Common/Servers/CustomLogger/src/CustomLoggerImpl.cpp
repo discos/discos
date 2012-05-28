@@ -7,7 +7,8 @@ CustomLoggerImpl::CustomLoggerImpl(const ACE_CString& CompName,
     m_filename_sp(this),
     m_nevents_sp(this),
     m_min_level_sp(this),
-    m_max_level_sp(this)
+    m_max_level_sp(this),
+    m_isLogging_sp(this)
 {   
     m_filename_sp = new baci::ROstring(
                                             CompName + ":filename",
@@ -23,6 +24,10 @@ CustomLoggerImpl::CustomLoggerImpl(const ACE_CString& CompName,
                                             );
     m_max_level_sp = new ROEnumImpl<ACS_ENUM_T(LogLevel), POA_Management::ROLogLevel>(
                                             CompName + ":maxLevel",
+                                            getComponent()
+                                            );
+    m_isLogging_sp = new ROEnumImpl<ACS_ENUM_T(TBoolean), POA_Management::ROTBoolean>(
+                                            CompName + ":isLogging",
                                             getComponent()
                                             );
 }
@@ -71,6 +76,17 @@ CustomLoggerImpl::maxLevel()
     return prop._retn();
 }
 
+ROTBoolean_ptr 
+CustomLoggerImpl::isLogging()
+{   
+    if (m_isLogging_sp==0)
+        return ROTBoolean::_nil();
+    ROTBoolean_var prop = ROTBoolean::_narrow(
+                                     m_isLogging_sp->getCORBAReference()
+                                     );
+    return prop._retn();
+}
+
 void
 CustomLoggerImpl::setMinLevel(LogLevel level)
 {
@@ -95,8 +111,8 @@ CustomLoggerImpl::setMaxLevel(LogLevel level)
 void 
 CustomLoggerImpl::initialize()
 {
-    _is_logging = false;
     ACS::Time _timestamp;
+    setLogging(false);
     CosNaming::Name name(1);
     name.length(1);
     name[0].id = CORBA::string_dup(CUSTOM_LOGGING_CHANNEL);
@@ -184,7 +200,7 @@ void
 CustomLoggerImpl::flush()
 {
     maci::ContainerImpl::getLoggerProxy()->flush();
-    if(_is_logging)
+    if(checkLogging())
     {
         _custom_log.flush();
         _full_log.flush();
@@ -195,12 +211,12 @@ void
 CustomLoggerImpl::closeLogfile()
 {
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : closing logfile"));
-    if(_is_logging)
+    if(checkLogging())
     {
         flush();
         _custom_log.close();
         _full_log.close();
-        _is_logging = false;
+        setLogging(false);
     }
 };
 
@@ -210,32 +226,40 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
 {
     closeLogfile();
     ACS::Time ts;
-    //Creates directories if do not exist
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : create log directory: %s", base_path_log));
-    mkdir(base_path_log, S_IRWXO|S_IRWXG|S_IRWXU);
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : create log directory: %s", base_path_full_log));
-    mkdir(base_path_full_log, S_IRWXO|S_IRWXG|S_IRWXU);
-    //TODO: Error check
-    //Creating CUSTOM_LOG FILE NAME
-    std::string base_path(base_path_log);
-    if(base_path.at(base_path.size() - 1) != '/')
-       base_path.append("/");
-    base_path.append(filename_log);
-    std::string custom_path(base_path);
-    m_filename_sp->getDevIO()->write(custom_path.c_str(), ts);
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : custom log file: %s", custom_path.c_str()));
-    //Creating FULL_LOG FILE NAME
-    std::string full_path(base_path_full_log);
-    if(full_path.at(full_path.size() - 1) != '/')
-       full_path.append("/");
-    full_path.append(filename_full_log);
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : full log file: %s", full_path.c_str()));
-    _custom_log.open(custom_path.c_str(), std::ofstream::app);
-    //TODO: Error check
-    _full_log.open(full_path.c_str(), std::ofstream::app);
-    //TODO: Error check
-    _is_logging = true;
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : logging"));
+    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : custom log directory: %s", base_path_log));
+    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : acs log directory: %s", base_path_full_log));
+    if(((mkdir(base_path_log, S_IRWXO|S_IRWXG|S_IRWXU) == 0) &&
+      (mkdir(base_path_full_log, S_IRWXO|S_IRWXG|S_IRWXU) == 0)) ||
+      (errno == EEXIST)) //good failure only if one directory already exists
+    {
+	    std::string base_path(base_path_log);
+	    if(base_path.at(base_path.size() - 1) != '/')
+	       base_path.append("/");
+	    base_path.append(filename_log);
+	    std::string custom_path(base_path);
+	    m_filename_sp->getDevIO()->write(custom_path.c_str(), ts);
+	    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : custom log file: %s", custom_path.c_str()));
+	    std::string full_path(base_path_full_log);
+	    if(full_path.at(full_path.size() - 1) != '/')
+	       full_path.append("/");
+	    full_path.append(filename_full_log);
+	    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : full log file: %s", full_path.c_str()));
+            _custom_log.clear();
+            _full_log.clear();
+	    _custom_log.open(custom_path.c_str(), std::ofstream::app);
+	    _full_log.open(full_path.c_str(), std::ofstream::app);
+            if((_custom_log.rdstate() == std::ofstream::goodbit)&&
+               (_full_log.rdstate() == std::ofstream::goodbit))
+	    {
+                setLogging(true);
+	    	ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : logging"));
+	    }else{
+		ACS_SHORT_LOG((LM_ERROR, "CustomLoggerImpl: cannot open log file"));
+		closeLogfile();
+	    }
+    }else{
+	ACS_SHORT_LOG((LM_ERROR, "CustomLoggerImpl: cannot create dir: %s", strerror(errno)));
+    }
 };
 
 /*
@@ -265,17 +289,43 @@ CustomLoggerImpl::filter(LogRecord& log_record)
     return filtered;
 };
 
+void
+CustomLoggerImpl::setLogging(bool val)
+{
+    ACS::Time ts;
+    if(val)
+	m_isLogging_sp->getDevIO()->write(MNG_TRUE, ts);
+    else
+	m_isLogging_sp->getDevIO()->write(MNG_FALSE, ts);
+};
+
+bool
+CustomLoggerImpl::checkLogging()
+{
+    ACS::Time ts;
+    if(m_isLogging_sp->getDevIO()->read(ts) == MNG_TRUE)
+        return true;
+    else
+	return false;
+};
+
 /*
 * Handle a log record. 
 */
 void 
 CustomLoggerImpl::handle(boost::shared_ptr<LogRecord> log_record)
 {
-    if(_is_logging)
+    ACS::Time ts;
+    long _nevents;
+    if(checkLogging())
     {
         _full_log << log_record->xml_text << '\n';
         if(filter(*log_record))
+        {
+            _nevents = m_nevents_sp->getDevIO()->read(ts);
             _custom_log << log_to_string(*log_record) << '\n';
+            m_nevents_sp->getDevIO()->write(_nevents + 1, ts);
+        };
     }
 };
 

@@ -24,6 +24,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -48,6 +49,7 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         virtual ACS::ROlong_ptr nevents();
         virtual ROLogLevel_ptr minLevel();
         virtual ROLogLevel_ptr maxLevel();
+        virtual ROTBoolean_ptr isLogging();
         virtual void initialize();
         virtual void cleanUp();
         virtual void setMinLevel(LogLevel level);
@@ -64,13 +66,15 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         baci::SmartPropertyPointer<baci::ROlong> m_nevents_sp;
         baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(LogLevel), POA_Management::ROLogLevel> > m_min_level_sp;
         baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(LogLevel), POA_Management::ROLogLevel> > m_max_level_sp;
+        baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(TBoolean), POA_Management::ROTBoolean> > m_isLogging_sp;
         CosNaming::NamingContext_var namingContext_m;
         CosNotifyChannelAdmin::EventChannel_var ec_;
         CosNotifyChannelAdmin::InterFilterGroupOperator ifgop_;
         CosNotifyChannelAdmin::ConsumerAdmin_var consumer_admin_;
         CustomStructuredPushConsumer* consumer_;
         virtual bool filter(LogRecord& log_record);
-        bool _is_logging;
+        void setLogging(bool val);
+        bool checkLogging();
         std::ofstream _custom_log, _full_log;
 };
 
