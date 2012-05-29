@@ -3,6 +3,7 @@
 
 #include <baci.idl>
 #include <ComponentErrors.idl>
+#include <ManagementErrors.idl>
 #include <ManagmentDefinitions.idl>
 
 #pragma prefix "alma"
@@ -30,14 +31,14 @@ module Management{
                 readonly attribute ROLogLevel maxLevel;
                 /*
                 * Close the actual log files and open two new ones for logging.
-                * Directories are created if not found.
+                * Tries to create the necessary directory.
                 * @param base_path_log: the directory name for the custom log file
                 * @param base_path_full_log: the directory name for the full log file
                 * @param filename_log: the file name for the custom log file
                 * @param filename_full_log: the file name for the full log file
                 */
                 void setLogfile(in string base_path_log, in string base_path_full_log,
-                                    in string filename_log, in string filename_full_log);
+                                    in string filename_log, in string filename_full_log) raises (ManagementErrors::ManagementErrorsEx);
                 /*
                 * Emits a INFO level custom logging message
                 * @param msg: the logging message
@@ -46,7 +47,7 @@ module Management{
                 /*
                 * Close the actual log files and stops logging.
                 */
-                void closeLogfile();
+                void closeLogfile() raises (ManagementErrors::ManagementErrorsEx);
                 /*
                 * Set the minimum logging level to be included in custom log files
                 * @param level: the logging level

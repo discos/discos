@@ -12,6 +12,7 @@
 #include "logging_idlC.h"
 #include <CustomLoggerS.h>
 #include <ManagmentDefinitionsS.h>
+#include <ManagementErrors.h>
 #include <CustomLoggerUtils.h>
 #include <ComponentErrors.h>
 #include <baciCharacteristicComponentImpl.h>
@@ -45,22 +46,23 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
     public:
         CustomLoggerImpl(const ACE_CString &CompName, maci::ContainerServices *containerServices);
         virtual ~CustomLoggerImpl();
-        virtual ACS::ROstring_ptr filename();
-        virtual ACS::ROlong_ptr nevents();
-        virtual ROLogLevel_ptr minLevel();
-        virtual ROLogLevel_ptr maxLevel();
-        virtual ROTBoolean_ptr isLogging();
-        virtual void initialize();
+        virtual ACS::ROstring_ptr filename() throw (CORBA::SystemException);
+        virtual ACS::ROlong_ptr nevents() throw (CORBA::SystemException);
+        virtual ROLogLevel_ptr minLevel() throw (CORBA::SystemException);
+        virtual ROLogLevel_ptr maxLevel() throw (CORBA::SystemException);
+        virtual ROTBoolean_ptr isLogging() throw (CORBA::SystemException);
+        virtual void initialize() throw (ACSErr::ACSbaseExImpl);
         virtual void cleanUp();
-        virtual void setMinLevel(LogLevel level);
-        virtual void setMaxLevel(LogLevel level);
+        virtual void setMinLevel(LogLevel level) throw (CORBA::SystemException);
+        virtual void setMaxLevel(LogLevel level) throw (CORBA::SystemException);
         XML_Parser log_parser;
         void handle(boost::shared_ptr<LogRecord> log_record);
         virtual void setLogfile(const char *base_path_log, const char *base_path_full_log,  
-                                    const char *filename_log, const char *filename_full_log);
-        virtual void closeLogfile();
-        virtual void emitLog(const char *msg, LogLevel level);
-        virtual void flush();
+                                    const char *filename_log, const char *filename_full_log) 
+                                throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
+        virtual void closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
+        virtual void emitLog(const char *msg, LogLevel level) throw (CORBA::SystemException);
+        virtual void flush() throw (CORBA::SystemException);
     private:
         baci::SmartPropertyPointer<baci::ROstring> m_filename_sp;
         baci::SmartPropertyPointer<baci::ROlong> m_nevents_sp;

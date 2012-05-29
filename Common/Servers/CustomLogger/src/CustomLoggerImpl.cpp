@@ -34,7 +34,7 @@ CustomLoggerImpl::CustomLoggerImpl(const ACE_CString& CompName,
 
 CustomLoggerImpl::~CustomLoggerImpl(){}
 
-ACS::ROstring_ptr CustomLoggerImpl::filename()
+ACS::ROstring_ptr CustomLoggerImpl::filename() throw (CORBA::SystemException)
 {   
     if (m_filename_sp==0)
         return ACS::ROstring::_nil();
@@ -44,7 +44,7 @@ ACS::ROstring_ptr CustomLoggerImpl::filename()
     return prop._retn();
 }
 
-ACS::ROlong_ptr CustomLoggerImpl::nevents()
+ACS::ROlong_ptr CustomLoggerImpl::nevents() throw (CORBA::SystemException)
 {   
     if (m_nevents_sp==0)
         return ACS::ROlong::_nil();
@@ -55,7 +55,7 @@ ACS::ROlong_ptr CustomLoggerImpl::nevents()
 }
 
 ROLogLevel_ptr 
-CustomLoggerImpl::minLevel()
+CustomLoggerImpl::minLevel() throw (CORBA::SystemException)
 {   
     if (m_min_level_sp==0)
         return ROLogLevel::_nil();
@@ -66,7 +66,7 @@ CustomLoggerImpl::minLevel()
 }
 
 ROLogLevel_ptr 
-CustomLoggerImpl::maxLevel()
+CustomLoggerImpl::maxLevel() throw (CORBA::SystemException)
 {   
     if (m_max_level_sp==0)
         return ROLogLevel::_nil();
@@ -77,7 +77,7 @@ CustomLoggerImpl::maxLevel()
 }
 
 ROTBoolean_ptr 
-CustomLoggerImpl::isLogging()
+CustomLoggerImpl::isLogging() throw (CORBA::SystemException)
 {   
     if (m_isLogging_sp==0)
         return ROTBoolean::_nil();
@@ -88,7 +88,7 @@ CustomLoggerImpl::isLogging()
 }
 
 void
-CustomLoggerImpl::setMinLevel(LogLevel level)
+CustomLoggerImpl::setMinLevel(LogLevel level) throw (CORBA::SystemException)
 {
     ACS::Time ts;
     m_min_level_sp->getDevIO()->write(level, ts);
@@ -97,7 +97,7 @@ CustomLoggerImpl::setMinLevel(LogLevel level)
 };
 
 void
-CustomLoggerImpl::setMaxLevel(LogLevel level)
+CustomLoggerImpl::setMaxLevel(LogLevel level) throw (CORBA::SystemException)
 {
     ACS::Time ts;
     m_max_level_sp->getDevIO()->write(level, ts);
@@ -109,7 +109,7 @@ CustomLoggerImpl::setMaxLevel(LogLevel level)
 * Resolve the naming service and subscribe to the logging channel
 */
 void 
-CustomLoggerImpl::initialize()
+CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
     ACS::Time _timestamp;
     setLogging(false);
@@ -187,7 +187,7 @@ Used for debugging purpose, emits a custom log event with the given message and 
 @param level: the CustomLogger::LogLevel level
 */
 void
-CustomLoggerImpl::emitLog(const char *msg, LogLevel level)
+CustomLoggerImpl::emitLog(const char *msg, LogLevel level) throw (CORBA::SystemException)
 {
     CUSTOM_LOG(LM_FULL_INFO, "CustomLoggerImpl::emit_log", (IRA::CustomLoggerUtils::custom2aceLogLevel(level), msg));
 };
@@ -197,7 +197,7 @@ CustomLoggerImpl::emitLog(const char *msg, LogLevel level)
 * get all the queued messages
 */
 void
-CustomLoggerImpl::flush()
+CustomLoggerImpl::flush() throw (CORBA::SystemException)
 {
     maci::ContainerImpl::getLoggerProxy()->flush();
     if(checkLogging())
@@ -208,58 +208,95 @@ CustomLoggerImpl::flush()
 };
 
 void 
-CustomLoggerImpl::closeLogfile()
+CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx)
 {
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : closing logfile"));
     if(checkLogging())
     {
-        flush();
-        _custom_log.close();
-        _full_log.close();
         setLogging(false);
+        flush();
+        _custom_log.clear();
+        _custom_log.close();
+        if(_custom_log.rdstate() == std::ofstream::failbit)
+        {
+            _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, dummy, "CustomLoggerImpl::closeLogfile"); 
+            dummy.setReason("error closing custom logfile");
+            dummy.log(LM_DEBUG);
+            throw dummy.getManagementErrorsEx();
+	}
+        _full_log.clear();
+        _full_log.close();
+        if(_full_log.rdstate() == std::ofstream::failbit)
+        {
+            _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, _dummy, "CustomLoggerImpl::closeLogfile"); 
+            _dummy.setReason("error closing acs logfile");
+            _dummy.log(LM_DEBUG);
+            throw _dummy.getManagementErrorsEx();
+	}
     }
 };
 
 void 
 CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_full_log,
-                                 const char *filename_log, const char *filename_full_log)
+                             const char *filename_log, const char *filename_full_log) 
+                             throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx)
 {
     closeLogfile();
     ACS::Time ts;
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : custom log directory: %s", base_path_log));
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : acs log directory: %s", base_path_full_log));
-    if(((mkdir(base_path_log, S_IRWXO|S_IRWXG|S_IRWXU) == 0) &&
-      (mkdir(base_path_full_log, S_IRWXO|S_IRWXG|S_IRWXU) == 0)) ||
-      (errno == EEXIST)) //good failure only if one directory already exists
-    {
-	    std::string base_path(base_path_log);
-	    if(base_path.at(base_path.size() - 1) != '/')
-	       base_path.append("/");
-	    base_path.append(filename_log);
-	    std::string custom_path(base_path);
-	    m_filename_sp->getDevIO()->write(custom_path.c_str(), ts);
-	    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : custom log file: %s", custom_path.c_str()));
-	    std::string full_path(base_path_full_log);
-	    if(full_path.at(full_path.size() - 1) != '/')
-	       full_path.append("/");
-	    full_path.append(filename_full_log);
-	    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : full log file: %s", full_path.c_str()));
-            _custom_log.clear();
-            _full_log.clear();
-	    _custom_log.open(custom_path.c_str(), std::ofstream::app);
-	    _full_log.open(full_path.c_str(), std::ofstream::app);
-            if((_custom_log.rdstate() == std::ofstream::goodbit)&&
-               (_full_log.rdstate() == std::ofstream::goodbit))
-	    {
-                setLogging(true);
-	    	ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : logging"));
-	    }else{
-		ACS_SHORT_LOG((LM_ERROR, "CustomLoggerImpl: cannot open log file"));
-		closeLogfile();
-	    }
-    }else{
-	ACS_SHORT_LOG((LM_ERROR, "CustomLoggerImpl: cannot create dir: %s", strerror(errno)));
+    if((mkdir(base_path_log, S_IRWXO|S_IRWXG|S_IRWXU) != 0) && (errno != EEXIST)){
+        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, dummy, "CustomLoggerImpl::setLogfile"); 
+        dummy.setReason("cannot create custom log directory");
+        dummy.setPath(base_path_log);
+        dummy.log(LM_DEBUG);
+        throw dummy.getManagementErrorsEx();
     }
+    if((mkdir(base_path_full_log, S_IRWXO|S_IRWXG|S_IRWXU) != 0) && (errno != EEXIST)){
+        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, _dummy, "CustomLoggerImpl::setLogfile"); 
+        _dummy.setReason("cannot create acs log directory");
+        _dummy.setPath(base_path_full_log);
+        _dummy.log(LM_DEBUG);
+        throw _dummy.getManagementErrorsEx();
+    }
+    /*
+     * Here logging dirs have been created
+     */
+    std::string base_path(base_path_log);
+    if(base_path.at(base_path.size() - 1) != '/')
+       base_path.append("/");
+    base_path.append(filename_log);
+    std::string custom_path(base_path);
+    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : custom log file: %s", custom_path.c_str()));
+    std::string full_path(base_path_full_log);
+    if(full_path.at(full_path.size() - 1) != '/')
+       full_path.append("/");
+    full_path.append(filename_full_log);
+    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : full log file: %s", full_path.c_str()));
+    _custom_log.clear();
+    _full_log.clear();
+    _custom_log.open(custom_path.c_str(), std::ofstream::app);
+    if(_custom_log.rdstate() != std::ofstream::goodbit){
+        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, __dummy, "CustomLoggerImpl::setLogfile"); 
+        __dummy.setReason("cannot open custom log file");
+        __dummy.setPath(custom_path.c_str());
+        __dummy.log(LM_DEBUG);
+        throw __dummy.getManagementErrorsEx();
+    }
+    _full_log.open(full_path.c_str(), std::ofstream::app);
+    if(_full_log.rdstate() != std::ofstream::goodbit){
+        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, ___dummy, "CustomLoggerImpl::setLogfile"); 
+        ___dummy.setReason("cannot open acs log file");
+        ___dummy.setPath(full_path.c_str());
+        ___dummy.log(LM_DEBUG);
+        throw ___dummy.getManagementErrorsEx();
+    }
+    /*
+     * Here logging files have been opened
+     */
+    setLogging(true);
+    m_filename_sp->getDevIO()->write(custom_path.c_str(), ts);
+    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : logging"));
 };
 
 /*
