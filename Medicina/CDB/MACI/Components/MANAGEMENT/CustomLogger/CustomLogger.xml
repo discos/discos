@@ -11,9 +11,9 @@
         Name="CustomLogger"
         Code="CustomLoggerImpl"
         Type="IDL:alma/Management/CustomLogger:1.0"
-        Container="bilboContainer"
+        Container="LoggerContainer"
         Default="true"
-        KeepAliveTime="30"
-    ImplLang="cpp"
+        KeepAliveTime="-1"
+        ImplLang="cpp"
 />
 

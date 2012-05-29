@@ -6,14 +6,14 @@
               xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
               xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              DefaultACSLogDir="/system/introot/logfiles"
+              DefaultACSLogDir="/archive/events"
               DefaultACSLogFile="acs.log"
-              DefaultCustomLogDir="/system/introot/logfiles"
-              DefaultCustomLogFile="custom.log"
+              DefaultCustomLogDir="/archive/logs"
+              DefaultCustomLogFile="station.log"
               >
         <filename description="the log file base name"/>
         <nevents description="number of logged events"/>
-        <isLogging description="wether logging functionalities are active"/>
+        <isLogging description="whether logging functionalities are active"/>
         <minLevel description="minimum log level" />
         <maxLevel description="minimum log level" />
 </CustomLogger>
