@@ -86,10 +86,12 @@ bool CParser::parse(CBaseSchedule* unit,DWORD& line,IRA::CString& errorMsg)
 
 //CBaseSchedule
 
-CBaseSchedule::CBaseSchedule(const IRA::CString& path,const IRA::CString& fileName) : m_lines(0), m_fileName(""), m_filePath(path), m_lastError("") 
+CBaseSchedule::CBaseSchedule(const IRA::CString& path,const IRA::CString& fileName) : m_lines(0), m_fileName(""), m_filePath(path), m_baseName(""),m_lastError("")
 {
 	m_parser=new CParser;
 	m_fileName=m_filePath+fileName;
+	int pos=fileName.Find('.');
+	m_baseName=fileName.Mid(0,pos);
 }
 
 CBaseSchedule::~CBaseSchedule()

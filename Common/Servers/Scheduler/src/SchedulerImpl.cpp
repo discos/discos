@@ -107,6 +107,21 @@ void SchedulerImpl::aboutToAbort()
 	_IRA_LOGFILTER_FLUSH;
 }
 
+void SchedulerImpl::changeLogFile(const char *fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+{
+	try {
+		m_core->changeLogFile(fileName);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
 ACS::doubleSeq *SchedulerImpl::systemTemperature() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	AUTO_TRACE("SchedulerImpl::systemTemperature()");

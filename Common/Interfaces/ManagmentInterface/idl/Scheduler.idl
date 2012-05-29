@@ -10,6 +10,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)		18/12/2008      created     */
 /* Andrea Orlati(aorlati@ira.inaf.it)		03/09/2010      Added haltSchedule(), setDevice() and tracking attribute    */
 /* Andrea Orlati(aorlati@ira.inaf.it)		24/10/2011      modified the signature of startSchedule()  */
+/* Andrea Orlati(aorlati@ira.inaf.it)     29/05/2012      method  changeLogFile */
 
 #include <baci.idl>
 #include <ManagmentDefinitions.idl>
@@ -81,6 +82,15 @@ module Management {
 		 * @throw CORBA::SystemExcpetion
 		*/
 		void clearStatus();
+		
+		/**
+		 * Chages the current log file name
+		 * @param fileName name of the file without extension, the directory path is decided by configuration DB. 
+		 * @throw CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void changeLogFile(in string fileName) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
 		 * Performs the computation of the system temperature. The operation is executed by using the currently in use backend and the currently configured frontend. It could also be the default one.

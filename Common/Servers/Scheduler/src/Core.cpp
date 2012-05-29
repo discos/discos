@@ -102,6 +102,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add<1>("chooseRecorder",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::chooseDefaultDataRecorder));
 	m_parser->add<3>("crossScan",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >,
 			I<interval_type> >(this,&CCore::crossScan));
+	m_parser->add<1>("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::changeLogFile));
 	
 	//add remote commands ************  should be loaded from a CDB table............................**********/
 	// antenna subsystem
@@ -145,6 +146,7 @@ void CCore::cleanUp()
 	RESOURCE_CLEANUP;
 	unloadAntennaBoss(m_antennaBoss);
 	unloadReceiversBoss(m_receiversBoss);
+	unloadCustomLogger(m_customLogger);
 	unloadDefaultBackend();
 	unloadDefaultDataReceiver();
 	if (m_schedExecuter!=NULL) m_schedExecuter->suspend();
@@ -191,6 +193,36 @@ void CCore::chooseDefaultDataRecorder(const char *rcvInstance)
 	if (m_defaultDataReceiverInstance!=instance) {
 		m_defaultDataReceiverInstance=instance;
 		m_defaultDataReceiverError=true;  // this is tricky...in order to force to unload the preset data recorder and then reload the new one the next time the default data recroder is required 
+	}
+}
+
+void CCore::changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
+	IRA::CString fullName,fullSysName;
+	IRA::CString logName(fileName);
+	fullName=logName+".log";
+	fullSysName=logName+".xml";
+	ACS_LOG(LM_FULL_INFO,"CCore::changeLogFile()",(LM_NOTICE,"NEW_LOG_FILE: %s",(const char *)fullName));
+	try {
+		m_customLogger->flush();
+		m_customLogger->setLogfile((const char *)m_config->getLogDirectory(),
+																	 (const char *)m_config->getSystemLogDirectory(),
+																	 (const char *)fullName,
+																	 (const char *)fullSysName);
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::changeLogFile()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_customLoggerError=true;
+		throw impl;
+	}
+	catch (ManagementErrors::ManagementErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::LogFileErrorExImpl,impl,ex,"CCore::changeLogFile()");
+		impl.setFileName((const char *)fullName);
+		throw impl;
 	}
 }
 

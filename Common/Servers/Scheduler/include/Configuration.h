@@ -67,6 +67,10 @@ public:
 	*/
 	const IRA::CString& getReceiversBossComponent() const { return m_receiversBossComp; }
 	/**
+	 * @return the name of the interface of the custom logger component.
+	*/
+	const IRA::CString& getCustomLoggerComponent() const { return m_custoLoggerComp; }
+	/**
 	 * @return the name of the instance of the default backend component.
 	*/	
 	const IRA::CString& getDefaultBackendInstance() const { return m_defaultBackendInst; }
@@ -88,17 +92,22 @@ public:
 	 * @return the path to the directory that stores the schedule files.
 	 */
 	const IRA::CString& getScheduleDirectory() const { return m_schedDir; }
-	
 	/**
 	 * @return the path to the directory where to store the data files.
 	 */
 	const IRA::CString& getDataDirectory() const { return m_dataDir; }
-	
 	/**
-	 * @return the path to the directory where to store the systema data file or auxiliary data or files not coming from a schedule
+	 * @return the path to the directory where to store the system data file or auxiliary data or files not coming from a schedule
 	 */
 	const IRA::CString& getSystemDataDirectory() const { return m_systemDataDir; }
-
+	/**
+	 * @return the path to the directory where to store the system stores the log files
+	 */
+	const IRA::CString& getLogDirectory() const { return m_logDir; }
+	/**
+	 * @return the path to the directory where to store the system stores the system log files
+	 */
+	const IRA::CString& getSystemLogDirectory() const { return m_systemLogDir; }
 	/**
 	 * @return the sleep time between two execution of the schedule executor thread (microseconds)
 	 */ 
@@ -128,6 +137,9 @@ private:
 	IRA::CString m_receiversBossComp;
 	IRA::CString m_defaultBackendInst;
 	IRA::CString m_defaultDataReceiverInst;
+	IRA::CString m_logDir;
+	IRA::CString m_systemLogDir;
+	IRA::CString m_custoLoggerComp;
 	long m_repetitionCacheTime;
 	long m_repetitionExpireTime;
 	long m_scheduleExecutorSleepTime;

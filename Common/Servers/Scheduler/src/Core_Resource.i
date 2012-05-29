@@ -89,7 +89,8 @@ void CCore::loadReceiversBoss(Receivers::ReceiversBoss_var& ref,bool& errorDetec
 	}
 }
 
-void CCore::unloadReceiversBoss(Receivers::ReceiversBoss_var& ref) const {
+void CCore::unloadReceiversBoss(Receivers::ReceiversBoss_var& ref) const
+{
 	if (!CORBA::is_nil(ref)) {
 		try {
 			m_services->releaseComponent((const char*)ref->name());
@@ -104,6 +105,59 @@ void CCore::unloadReceiversBoss(Receivers::ReceiversBoss_var& ref) const {
 			impl.log(LM_WARNING);
 		}
 		ref=Receivers::ReceiversBoss::_nil();
+	}
+}
+
+void CCore::loadCustomLogger(Management::CustomLogger_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl)
+{
+	if ((!CORBA::is_nil(ref)) && (errorDetected)) { // if reference was already taken, but an error was found....dispose the reference
+		try {
+			m_services->releaseComponent((const char*)ref->name());
+		}
+		catch (...) { //dispose silently...if an error...no matter
+		}
+		ref=Management::CustomLogger::_nil();
+	}
+	if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
+		try {
+			ref=m_services->getDefaultComponent<Management::CustomLogger>((const char*)m_config->getCustomLoggerComponent());
+			errorDetected=false;
+			ACS_LOG(LM_FULL_INFO,"CCore::loadCustomLogger()",(LM_INFO,"CUSTOMLOGGER_LOCATED"));
+		}
+		catch (maciErrType::CannotGetComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadCustomLogger()");
+			Impl.setComponentName((const char*)m_config->getCustomLoggerComponent());
+			throw Impl;
+		}
+		catch (maciErrType::NoPermissionExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadCustomLogger()");
+			Impl.setComponentName((const char*)m_config->getCustomLoggerComponent());
+			throw Impl;
+		}
+		catch (maciErrType::NoDefaultComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadCustomLogger()");
+			Impl.setComponentName((const char*)m_config->getCustomLoggerComponent());
+			throw Impl;
+		}
+	}
+}
+
+void CCore::unloadCustomLogger(Management::CustomLogger_var& ref) const
+{
+	if (!CORBA::is_nil(ref)) {
+		try {
+			m_services->releaseComponent((const char*)ref->name());
+		}
+		catch (maciErrType::CannotReleaseComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CCore::unloadCustomLogger()");
+			Impl.setComponentName((const char *)m_config->getCustomLoggerComponent());
+			Impl.log(LM_WARNING);
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::unloadCustomLogger())");
+			impl.log(LM_WARNING);
+		}
+		ref=Management::CustomLogger::_nil();
 	}
 }
 

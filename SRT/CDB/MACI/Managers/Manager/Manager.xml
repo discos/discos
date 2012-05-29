@@ -14,6 +14,7 @@
         <cdb:_ string="MINORSERVO/PFP"/>
         <cdb:_ string="MINORSERVO/SRP"/>
         -->
+        <cdb:_ string="MANAGEMENT/CustomLogger"/>
     </Startup>
 
     <ServiceComponents>

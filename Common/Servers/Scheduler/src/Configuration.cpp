@@ -80,13 +80,16 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 {
 	_GET_STRING_ATTRIBUTE("AntennaBossInterface","Antenna Boss component interface is ",m_antennaBossComp);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component interface is ",m_observatoryComp);
-	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Reveicers Boss component interface is ",m_receiversBossComp);
+	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);
+	_GET_STRING_ATTRIBUTE("CustomLoggerInterface","Custom logger component interface is ",m_custoLoggerComp);
 	_GET_STRING_ATTRIBUTE("DefaultBackendInstance","Deafult backend component instance is ",m_defaultBackendInst);
 	_GET_STRING_ATTRIBUTE("DefaultDataReceiverInstance","Deafult data receiver component instance is ",m_defaultDataReceiverInst);
 	_GET_STRING_ATTRIBUTE("SchedDir","Schedule files path is ",m_schedDir);
 	_GET_STRING_ATTRIBUTE("DataDir","Data files path is ",m_dataDir);
 	_GET_STRING_ATTRIBUTE("SystemDataDir","System data files path is ",m_systemDataDir);
-	_GET_DWORD_ATTRIBUTE("TsysTransitionGap","Gap time between mark switchi on/off (uSec) ",m_TsysGapTime);
+	_GET_STRING_ATTRIBUTE("LogDir","Log files path is ",m_logDir);
+	_GET_STRING_ATTRIBUTE("SystemLogDir","System log files path is ",m_systemLogDir);
+	_GET_DWORD_ATTRIBUTE("TsysTransitionGap","Gap time between mark switch on/off (uSec) ",m_TsysGapTime);
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter cache time (uSec) ",m_repetitionCacheTime);
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter expire time (uSec) ",m_repetitionExpireTime);
 	_GET_DWORD_ATTRIBUTE("ScheduleExecutorSleepTime","Schedule executor sleep time (uSec) ",m_scheduleExecutorSleepTime);

@@ -9,6 +9,7 @@
 /*                                                                                                               */
 /* Who                                                when                     What                                                       */
 /* Andrea Orlati(aorlati@ira.inaf.it) 18/12/2008       Creation                                                  */
+/* Andrea Orlati(aorlati@ira.inaf.it)  29/05/2012      Added command changeLogFile */
 
 
 #ifndef __cplusplus
@@ -140,6 +141,15 @@ public:
 	 */
 	virtual char * command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);
 	
+	/**
+	 * This method allow to change the name of the current log file.
+	 * @param fileName new file name
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+	virtual void changeLogFile(const char *fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
 	/**
 	 * This method can load a new schedule file. After a succesfull parse of the schedule the itself is started
 	 * from the specified line

@@ -442,7 +442,8 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 }
  
 void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (
- 		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl)
+ 		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
+ 		ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
 {
  	baci::ThreadSyncGuard guard(&m_mutex);
  	if (m_active) {
@@ -500,6 +501,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		throw ex;
  	}
  	m_scheduleCounter=m_schedule->getSubScanCounter(subScanidentifier)-1; //need to point before the first scan in the schedule, the first scan has counter==1
+ 	m_core->changeLogFile((const char *)m_schedule->getBaseName()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
  	m_active=true;
 	//save the scan number selected by user as start scan
  	m_startSubScan=m_scheduleCounter+1;

@@ -9,7 +9,9 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              SchedDir="/archive/schedules/"
              DataDir="/archive/data/"
-	     SystemDataDir="/archive/auxiliary/"
+	     	 SystemDataDir="/archive/auxiliary/"
+	     	 LogDir="/archive/logs/"
+	     	 SystemLogDir="/archive/events/"
              ProceduresLocation="Procedures"
              DefaultProceduresFile="StationProcedures"
              RepetitionCacheTime="2000000"
@@ -19,6 +21,7 @@
              AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
              ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
 	     	 ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
+	     	 CustomLoggerInterface="IDL:alma/Receivers/CustomLogger:1.0"
 	     	 DefaultBackendInstance="BACKENDS/TotalPower"
 	     	 DefaultDataReceiverInstance="MANAGEMENT/Point"
 >

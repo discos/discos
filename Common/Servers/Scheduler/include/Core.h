@@ -11,6 +11,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  22/12/2008      Creation                                                  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  18/11/2009      Added the implementation of procedrure "command"                                                  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  20/09/2010      Added command waitOnSource */
+/* Andrea Orlati(aorlati@ira.inaf.it)  29/05/2012      Added command changeLogFile */
 
 #include <acsContainerServices.h>
 #include <ManagementErrors.h>
@@ -18,6 +19,7 @@
 #include <FitsWriterC.h>
 #include <ReceiversBossC.h>
 #include <GenericBackendC.h>
+#include <CustomLoggerC.h>
 #include <ScheduleTimer.h>
 #include <Site.h>
 #include <DateTime.h>
@@ -129,6 +131,15 @@ public:
 	 */
 	const Management::TSystemStatus& getStatus() const { return m_schedulerStatus; }
 	
+	/**
+	 * Allows to change the name of the current log file.
+	 * @param fileName new file name.
+	 * @param ComponentErrors::CouldntGetComponentExImpl
+	 * @param ComponentErrors::CORBAProblemExImpl
+	 * @param ManagementErrors::LogFileErrorExImpl
+	 */
+	void changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
+
 	/**
 	 * It computes the system temperature.
 	 * @param ComponentErrors::CouldntGetComponentExImpl

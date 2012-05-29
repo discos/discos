@@ -7,8 +7,9 @@
    -  22-12-2008  Created
    -  24-11-2009  Added the entry Procedure Error
    -  31-03-2010  Added ConfigurationError and ParkingError
-   -  09-05-2010  Added memeber reason to SubscanError
+   -  09-05-2010  Added member reason to SubscanError
    -  11-08-2010  Added ProcedureFileLoadingError
+   -  29-05-2012  Added CustomLoggerIOError and LogFileError
 -->
 
 <Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -28,9 +29,9 @@
 
 <ErrorCode name="TargetIsNotVisible" shortDescription="The selected target is not visible" description=""/>
 
-<ErrorCode name="BackendNotAvailable" shortDescription="The selected backend is not avaiable" description=""/>
+<ErrorCode name="BackendNotAvailable" shortDescription="The selected backend is not available" description=""/>
 
-<ErrorCode name="DataRecorderNotAvailable" shortDescription="The selected data recorder is not avaiable" description=""/>
+<ErrorCode name="DataRecorderNotAvailable" shortDescription="The selected data recorder is not available" description=""/>
 
 <ErrorCode name="DataTransferSetupError" shortDescription="The data transfer was not properly setup" description=""/>
 
@@ -70,13 +71,17 @@
 	<Member name="Reason" type="string" description="Describes the cause of the error" />
 </ErrorCode>
 
-<ErrorCode name="ProcedureFileLoadingError" shortDescription="Error occured while loading a procedure file" description="">
+<ErrorCode name="ProcedureFileLoadingError" shortDescription="Error occurred while loading a procedure file" description="">
 	<Member name="FileName" type="string" description="report the name of the file" />
 </ErrorCode>
 
 <ErrorCode name="CustomLoggerIOError" shortDescription="Error on logging I/O" description="">
 	<Member name="Reason" type="string" description="Describes the cause of the error" />
 	<Member name="Path" type="string" description="report the path element involved (file or dir)" />
+</ErrorCode>
+
+<ErrorCode name="LogFileError" shortDescription="cannot open the log file" description="">
+	<Member name="FileName" type="string" description="Name of the log file" />
 </ErrorCode>
 
 </Type>

@@ -64,6 +64,11 @@ public:
 	const IRA::CString& getFileName() const { return m_fileName; }
 	
 	/**
+	 * @return the name (no extension) of the file of the schedule
+	 */
+	const IRA::CString& getBaseName() const { return m_baseName;}
+
+	/**
 	 * @return the message relative to the last error
 	 */
 	const IRA::CString& getLastError() const { return m_lastError; }
@@ -81,6 +86,10 @@ protected:
 	 * path to the file
 	 */
 	IRA::CString m_filePath;
+	/**
+	 * base name of the file
+	 */
+	IRA::CString m_baseName;
 	/**
 	 * Reports the message relative to the  last error
 	 */ 

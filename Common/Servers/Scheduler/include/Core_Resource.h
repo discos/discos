@@ -7,9 +7,10 @@
 									m_receiversBoss=Receivers::ReceiversBoss::_nil();	\
 									m_defaultBackend=Backends::GenericBackend::_nil(); \
 									m_defaultDataReceiver=Management::DataReceiver::_nil(); \
+									m_customLogger=Management::CustomLogger::_nil(); \
 									m_antennaNC=NULL; \
 									m_isTracking=false; \
-									m_antennaBossError=m_receiversBossError=m_defaultBackendError=m_defaultDataReceiverError=false; \
+									m_antennaBossError=m_receiversBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=false; \
 									m_currentDevice=0;\
 									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
 									
@@ -68,6 +69,14 @@ Receivers::ReceiversBoss_var m_receiversBoss;
  * true if an error was detected when communicating to the receivers boss
  */
 bool m_receiversBossError;
+/**
+ * CustomLogger reference
+ */
+Management::CustomLogger_var m_customLogger;
+/**
+ * true if an error is detected during custom logger communication
+ */
+bool m_customLoggerError;
 /**
  * Name of the instance of the backend currently loaded as default backend
  */
@@ -132,6 +141,16 @@ void loadReceiversBoss(Receivers::ReceiversBoss_var& ref,bool& errorDetected) co
  * used to free the reference to the receivers boss component
  */
 void unloadReceiversBoss(Receivers::ReceiversBoss_var& ref) const;
+/**
+ * used to get a reference to the custom logger component.
+ * @param ref reference to the custom logger component
+ * @param errorDetected this flag is true if the reference seems not valid any more and the reference should not be considered valid any more
+*/
+void loadCustomLogger(Management::CustomLogger_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl);
+/**
+ * used to free the reference to the custom logger component
+ */
+void unloadCustomLogger(Management::CustomLogger_var& ref) const;
 /**
  * used to get a reference to the default backend component. 
  */

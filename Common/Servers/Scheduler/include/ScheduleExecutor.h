@@ -9,6 +9,7 @@
 /* Who                                            when             What                                                       */
 /* Andrea Orlati(aorlati@ira.inaf.it)  13/04/2010      Creation                                                  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  20/09/2010      StartRecording not done if scan duration is 0.0                                                  */
+/* Andrea Orlati(aorlati@ira.inaf.it)  29/05/2012       the start of a schedule now cause the opening of a new log file*/
 
 #include <acsThread.h>
 #include <IRA>
@@ -66,9 +67,11 @@ public:
  	 * @throw ComponentErrors::AlreadyRunningExImpl
  	 * @throw ManagementErrors::SubscanErrorExImpl
  	 * @throw ComponentErrors::CouldntGetComponentExImpl
+ 	 * @throw ComponentErrors::CORBAProblemExImpl
+ 	 * @throw ManagementErrors::LogFileErrorExImpl
  	*/
      void startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (ManagementErrors::ScheduleErrorExImpl,
-    		 ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl);
+    		 ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
      
      /**
       * initialize the schedule executor.
