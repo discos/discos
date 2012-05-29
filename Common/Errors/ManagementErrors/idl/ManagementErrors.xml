@@ -74,5 +74,9 @@
 	<Member name="FileName" type="string" description="report the name of the file" />
 </ErrorCode>
 
+<ErrorCode name="CustomLoggerIOError" shortDescription="Error on logging I/O" description="">
+	<Member name="Reason" type="string" description="Describes the cause of the error" />
+	<Member name="Path" type="string" description="report the path element involved (file or dir)" />
+</ErrorCode>
 
 </Type>
