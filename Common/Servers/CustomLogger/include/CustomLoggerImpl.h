@@ -85,7 +85,7 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         LogRecordQueue _log_queue;
         BACIMutex _log_queue_mutex;
         CustomLogWriterThread *_writer;
-        ACS::Time _log_max_age;
+        ACS::TimeInterval _log_max_age;
         /* Synchronized methods */
         void setLogging(bool val);
         bool checkLogging();

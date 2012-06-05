@@ -33,7 +33,7 @@ LogRecord_sp get_log_record(XML_Parser log_parser, const char *xml_text);
 ACS::Time parse_timestamp(const char* ts);
 std::string trim_date(const std::string& str);
 std::string log_to_string(const LogRecord& log_record);
-ACS::Time log_age(const LogRecord& log_record);
+ACS::TimeInterval log_age(const LogRecord& log_record);
 
 // Used for "Data" xml field
 typedef std::map<std::string, std::string> KVMap;

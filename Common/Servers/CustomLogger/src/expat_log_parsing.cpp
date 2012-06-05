@@ -32,7 +32,7 @@ LogRecord::get_data(std::string key)
 /* Log Record Comparator */
 bool LogRecordComparator::operator()(const LogRecord_sp& lhr, const LogRecord_sp& rhr)
 {
-    return lhr->timestamp < rhr->timestamp;
+    return lhr->timestamp > rhr->timestamp;
 };
 
 /*
@@ -100,12 +100,14 @@ log_to_string(const LogRecord& log_record)
     return res.str();
 };
 
-ACS::Time
+ACS::TimeInterval
 log_age(const LogRecord& log_record)
 {
     TIMEVALUE tv;
     IRA::CIRATools::getTime(tv);
-    return tv.value().value - log_record.timestamp;
+    ACS::TimeInterval ti(tv.value().value - log_record.timestamp);
+    ACS_SHORT_LOG((LM_DEBUG, "expat parsing : log age %lld", ti));
+    return ti;
 };
 
 void

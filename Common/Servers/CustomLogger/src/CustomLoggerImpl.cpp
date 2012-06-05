@@ -161,29 +161,32 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
      //TODO: else ERROR
      IRA::CString _a_age;
      if(IRA::CIRATools::getDBValue(getContainerServices(), "LogMaxAge", _a_age))
-         _log_max_age = boost::lexical_cast<long long>(_a_age);
+         _log_max_age = ACS::TimeInterval(boost::lexical_cast<long long>(_a_age));
      else
-         _log_max_age = 0;
+         _log_max_age = ACS::TimeInterval(0);
      setMinLevel(C_TRACE);
      setMaxLevel(C_EMERGENCY);
      
      // Create LogWriterThread
      CustomLoggerImpl *tmp = this;
      _writer = getContainerServices()->getThreadManager()->create<CustomLogWriterThread, CustomLoggerImpl *>(WRITER_THREAD_NAME, tmp);
+     //_writer->setResponseTime(10000000);
+     _writer->setSleepTime(ACS::TimeInterval(100000000)); //10 seconds
 };
 
 void 
 CustomLoggerImpl::execute()
 {
-    _writer->resume();
+    _writer->resume(); //needed to start the thread
 };
 
 void 
 CustomLoggerImpl::cleanUp()
 {
-    baci::ThreadSyncGuard guard(&_log_queue_mutex);
+    //baci::ThreadSyncGuard guard(&_log_queue_mutex);
     closeLogfile();
-    getContainerServices()->getThreadManager()->terminate(WRITER_THREAD_NAME);
+    //getContainerServices()->getThreadManager()->terminate(WRITER_THREAD_NAME);
+    _writer->terminate();
     free_log_parsing(log_parser);
     CosNotification::EventTypeSeq added(0);
     CosNotification::EventTypeSeq removed (1);
@@ -216,13 +219,7 @@ CustomLoggerImpl::emitLog(const char *msg, LogLevel level) throw (CORBA::SystemE
 void
 CustomLoggerImpl::flush() throw (CORBA::SystemException)
 {
-    baci::ThreadSyncGuard guard(&_log_queue_mutex);
     maci::ContainerImpl::getLoggerProxy()->flush();
-    if(checkLogging())
-    {
-        _custom_log.flush();
-        _full_log.flush();
-    }
 };
 
 void 
@@ -378,6 +375,7 @@ CustomLoggerImpl::handle(LogRecord_sp log_record)
     if(checkLogging())
     {
         _full_log << log_record->xml_text << '\n';
+        _full_log.flush();
         if(filter(*log_record))
         {
             addToLoggingQueue(log_record);
@@ -408,22 +406,26 @@ void
 CustomLoggerImpl::writeLoggingQueue(bool age_check)
 {
     LogRecord_sp _log_record;
+    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : writeLoggingQueue"));
     baci::ThreadSyncGuard guard(&_log_queue_mutex);
+    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : writeLoggingQueue mutex acquired"));
     if(age_check) //write the queue to file up to a certain log age
-	    while((!_log_queue.empty()) &&
-		 (log_age(*_log_queue.top()) < _log_max_age))
-	    {
+        while((!_log_queue.empty()) &&
+             (log_age(*_log_queue.top()) > _log_max_age))
+	     {
 		_log_record = _log_queue.top();
 		_custom_log << log_to_string(*_log_record) << '\n';
+                _custom_log.flush();
 		_log_queue.pop();
-	    }
-   else //write the whole log queue to file
-       while(!_log_queue.empty())
-	    {
+	     }
+    else //write the whole log queue to file
+        while(!_log_queue.empty())
+	     {
 		_log_record = _log_queue.top();
 		_custom_log << log_to_string(*_log_record) << '\n';
+                _custom_log.flush();
 		_log_queue.pop();
-	    };
+	     };
 };
 
 CustomStructuredPushConsumer::CustomStructuredPushConsumer(CustomLoggerImpl* logger) : 
