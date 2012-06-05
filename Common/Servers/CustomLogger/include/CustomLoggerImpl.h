@@ -22,6 +22,7 @@
 #include <enumpropROImpl.h>
 #include <maciContainerImpl.h>
 #include <ACSErrTypeCommon.h>
+#include <acsThread.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,11 +35,14 @@
 #include <IRA>
 #include <expat_log_parsing.h>
 
+#define WRITER_THREAD_NAME "logwriter"
+
 typedef CosNotification::StructuredEvent CustomLoggingEvent;
 
 using namespace Management; //LogLevel definition
 
 class CustomStructuredPushConsumer; //fwd decl
+class CustomLogWriterThread; //fwd decl
 
 class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
                           public virtual POA_Management::CustomLogger
@@ -52,17 +56,19 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         virtual ROLogLevel_ptr maxLevel() throw (CORBA::SystemException);
         virtual ROTBoolean_ptr isLogging() throw (CORBA::SystemException);
         virtual void initialize() throw (ACSErr::ACSbaseExImpl);
+        virtual void execute();
         virtual void cleanUp();
         virtual void setMinLevel(LogLevel level) throw (CORBA::SystemException);
         virtual void setMaxLevel(LogLevel level) throw (CORBA::SystemException);
         XML_Parser log_parser;
-        void handle(boost::shared_ptr<LogRecord> log_record);
+        void handle(LogRecord_sp log_record);
         virtual void setLogfile(const char *base_path_log, const char *base_path_full_log,  
                                     const char *filename_log, const char *filename_full_log) 
                                 throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void emitLog(const char *msg, LogLevel level) throw (CORBA::SystemException);
         virtual void flush() throw (CORBA::SystemException);
+        void writeLoggingQueue(bool age_check=true); //invoked by writer thread
     private:
         baci::SmartPropertyPointer<baci::ROstring> m_filename_sp;
         baci::SmartPropertyPointer<baci::ROlong> m_nevents_sp;
@@ -75,9 +81,15 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         CosNotifyChannelAdmin::ConsumerAdmin_var consumer_admin_;
         CustomStructuredPushConsumer* consumer_;
         virtual bool filter(LogRecord& log_record);
+        std::ofstream _custom_log, _full_log;
+        LogRecordQueue _log_queue;
+        BACIMutex _log_queue_mutex;
+        CustomLogWriterThread *_writer;
+        ACS::Time _log_max_age;
+        /* Synchronized methods */
         void setLogging(bool val);
         bool checkLogging();
-        std::ofstream _custom_log, _full_log;
+        void addToLoggingQueue(LogRecord_sp log_record);
 };
 
 class CustomStructuredPushConsumer : public POA_CosNotifyComm::StructuredPushConsumer,
@@ -98,5 +110,16 @@ class CustomStructuredPushConsumer : public POA_CosNotifyComm::StructuredPushCon
         virtual void push_structured_event (const CosNotification::StructuredEvent & notification);
         virtual void disconnect_structured_push_consumer ();
 };
+
+class CustomLogWriterThread : public ACS::Thread
+{
+    public:
+        CustomLogWriterThread(const ACE_CString& name, CustomLoggerImpl *logger); 
+        virtual ~CustomLogWriterThread();
+        virtual void runLoop();
+    private:
+        CustomLoggerImpl *_logger;
+};
+
 #endif
 

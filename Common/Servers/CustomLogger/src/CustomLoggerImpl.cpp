@@ -144,12 +144,12 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     added[0].domain_name =  CORBA::string_dup ("*");
     added[0].type_name = CORBA::string_dup ("*");
     consumer_admin_->subscription_change (added, removed);
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : Initializing EXPAT for xml parsing"));
-    log_parser = init_log_parsing();
 
     /* LOGGING INITIALIZATION
      ========================*/
-     IRA::CString _c_path, _c_file, _a_path, _a_file;
+    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : Initializing EXPAT for xml parsing"));
+    log_parser = init_log_parsing();
+    IRA::CString _c_path, _c_file, _a_path, _a_file;
      if(
 	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogDir", _a_path) &&
 	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogFile", _a_file) &&
@@ -159,14 +159,31 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	setLogfile(_c_path, _a_path, _c_file, _a_file);
      }
      //TODO: else ERROR
+     IRA::CString _a_age;
+     if(IRA::CIRATools::getDBValue(getContainerServices(), "LogMaxAge", _a_age))
+         _log_max_age = boost::lexical_cast<long long>(_a_age);
+     else
+         _log_max_age = 0;
      setMinLevel(C_TRACE);
      setMaxLevel(C_EMERGENCY);
+     
+     // Create LogWriterThread
+     CustomLoggerImpl *tmp = this;
+     _writer = getContainerServices()->getThreadManager()->create<CustomLogWriterThread, CustomLoggerImpl *>(WRITER_THREAD_NAME, tmp);
+};
+
+void 
+CustomLoggerImpl::execute()
+{
+    _writer->resume();
 };
 
 void 
 CustomLoggerImpl::cleanUp()
 {
+    baci::ThreadSyncGuard guard(&_log_queue_mutex);
     closeLogfile();
+    getContainerServices()->getThreadManager()->terminate(WRITER_THREAD_NAME);
     free_log_parsing(log_parser);
     CosNotification::EventTypeSeq added(0);
     CosNotification::EventTypeSeq removed (1);
@@ -199,6 +216,7 @@ CustomLoggerImpl::emitLog(const char *msg, LogLevel level) throw (CORBA::SystemE
 void
 CustomLoggerImpl::flush() throw (CORBA::SystemException)
 {
+    baci::ThreadSyncGuard guard(&_log_queue_mutex);
     maci::ContainerImpl::getLoggerProxy()->flush();
     if(checkLogging())
     {
@@ -211,10 +229,12 @@ void
 CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx)
 {
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : closing logfile"));
+    baci::ThreadSyncGuard guard(&_log_queue_mutex);
     if(checkLogging())
     {
         setLogging(false);
         flush();
+        writeLoggingQueue(false); //empty the logging queue
         _custom_log.clear();
         _custom_log.close();
         if(_custom_log.rdstate() == std::ofstream::failbit)
@@ -241,6 +261,7 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
                              const char *filename_log, const char *filename_full_log) 
                              throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx)
 {
+    baci::ThreadSyncGuard guard(&_log_queue_mutex);
     closeLogfile();
     ACS::Time ts;
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : custom log directory: %s", base_path_log));
@@ -330,6 +351,7 @@ void
 CustomLoggerImpl::setLogging(bool val)
 {
     ACS::Time ts;
+    baci::ThreadSyncGuard guard(&_log_queue_mutex);
     if(val)
 	m_isLogging_sp->getDevIO()->write(MNG_TRUE, ts);
     else
@@ -340,6 +362,7 @@ bool
 CustomLoggerImpl::checkLogging()
 {
     ACS::Time ts;
+    baci::ThreadSyncGuard guard(&_log_queue_mutex);
     if(m_isLogging_sp->getDevIO()->read(ts) == MNG_TRUE)
         return true;
     else
@@ -350,20 +373,57 @@ CustomLoggerImpl::checkLogging()
 * Handle a log record. 
 */
 void 
-CustomLoggerImpl::handle(boost::shared_ptr<LogRecord> log_record)
+CustomLoggerImpl::handle(LogRecord_sp log_record)
 {
-    ACS::Time ts;
-    long _nevents;
     if(checkLogging())
     {
         _full_log << log_record->xml_text << '\n';
         if(filter(*log_record))
         {
-            _nevents = m_nevents_sp->getDevIO()->read(ts);
-            _custom_log << log_to_string(*log_record) << '\n';
-            m_nevents_sp->getDevIO()->write(_nevents + 1, ts);
-        };
+            addToLoggingQueue(log_record);
+        }
     }
+};
+
+/*
+ * Synchronized method which adds a LogRecord to the queue and increments the number of
+ * events successfully logged.
+ */ 
+void 
+CustomLoggerImpl::addToLoggingQueue(LogRecord_sp log_record)
+{
+    long _nevents;
+    ACS::Time ts;
+    baci::ThreadSyncGuard guard(&_log_queue_mutex);
+    _nevents = m_nevents_sp->getDevIO()->read(ts);
+    _log_queue.push(log_record);
+    m_nevents_sp->getDevIO()->write(_nevents + 1, ts);
+};
+
+/*
+ * Synchronized method called by the log writer thread
+ * Pulls log records out of the queue and writes to file.
+ */
+void 
+CustomLoggerImpl::writeLoggingQueue(bool age_check)
+{
+    LogRecord_sp _log_record;
+    baci::ThreadSyncGuard guard(&_log_queue_mutex);
+    if(age_check) //write the queue to file up to a certain log age
+	    while((!_log_queue.empty()) &&
+		 (log_age(*_log_queue.top()) < _log_max_age))
+	    {
+		_log_record = _log_queue.top();
+		_custom_log << log_to_string(*_log_record) << '\n';
+		_log_queue.pop();
+	    }
+   else //write the whole log queue to file
+       while(!_log_queue.empty())
+	    {
+		_log_record = _log_queue.top();
+		_custom_log << log_to_string(*_log_record) << '\n';
+		_log_queue.pop();
+	    };
 };
 
 CustomStructuredPushConsumer::CustomStructuredPushConsumer(CustomLoggerImpl* logger) : 
@@ -414,13 +474,13 @@ CustomStructuredPushConsumer::get_proxy_supplier (void)
 
 void CustomStructuredPushConsumer::push_structured_event (const CosNotification::StructuredEvent & notification)
 {
-    const char *domain_name = notification.header.fixed_header.event_type.domain_name;
-    const char *type_name = notification.header.fixed_header.event_type.type_name;
+    /*const char *domain_name = notification.header.fixed_header.event_type.domain_name;
+    const char *type_name = notification.header.fixed_header.event_type.type_name;*/
     const char *xmlLog;
     notification.remainder_of_body >>= xmlLog;
     Logging::XmlLogRecordSeq *reclist;
     notification.remainder_of_body >>= reclist;
-    boost::shared_ptr<LogRecord> lr;
+    LogRecord_sp lr;
     if(xmlLog)
     {
         //parse the xml to a LogRecord
@@ -435,6 +495,23 @@ void CustomStructuredPushConsumer::push_structured_event (const CosNotification:
             lr = get_log_record(logger_->log_parser, xmlLog);
             logger_->handle(lr);
         }
+};
+
+/*
+ * Constructor 
+*/
+CustomLogWriterThread::CustomLogWriterThread(const ACE_CString& name, CustomLoggerImpl *logger) :
+    ACS::Thread(name)
+{
+    _logger = logger;
+};
+
+CustomLogWriterThread::~CustomLogWriterThread(){};
+
+void
+CustomLogWriterThread::runLoop()
+{
+    _logger->writeLoggingQueue();
 };
 
 #include <maciACSComponentDefines.h>

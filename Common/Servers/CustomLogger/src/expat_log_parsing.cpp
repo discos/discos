@@ -29,6 +29,12 @@ LogRecord::get_data(std::string key)
         return NULL;
 };
 
+/* Log Record Comparator */
+bool LogRecordComparator::operator()(const LogRecord_sp& lhr, const LogRecord_sp& rhr)
+{
+    return lhr->timestamp < rhr->timestamp;
+};
+
 /*
 * Gets a const char* timestamp as extracted from the xml log record
 * and returns a string without '-' and ':' characters.
@@ -92,6 +98,14 @@ log_to_string(const LogRecord& log_record)
     res << log_record.log_level_name << " ";
     res << log_record.message;
     return res.str();
+};
+
+ACS::Time
+log_age(const LogRecord& log_record)
+{
+    TIMEVALUE tv;
+    IRA::CIRATools::getTime(tv);
+    return tv.value().value - log_record.timestamp;
 };
 
 void
@@ -181,10 +195,10 @@ free_log_parsing(XML_Parser log_parser)
     XML_ParserFree(log_parser);
 };
 
-boost::shared_ptr<LogRecord> 
+LogRecord_sp
 get_log_record(XML_Parser log_parser, const char *xml_text)
 {
-    boost::shared_ptr<LogRecord> log_record(new LogRecord);
+    LogRecord_sp log_record(new LogRecord);
     log_record->xml_text.assign(xml_text);
     XML_SetUserData(log_parser, log_record.get());
     if(!XML_Parse(log_parser, xml_text, std::strlen(xml_text), false))

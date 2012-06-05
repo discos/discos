@@ -27,6 +27,7 @@
     <xs:attribute name="DefaultACSLogFile" type="xs:string" use="required" />
     <xs:attribute name="DefaultCustomLogDir" type="xs:string" use="required" />
     <xs:attribute name="DefaultCustomLogFile" type="xs:string" use="required" />
+    <xs:attribute name="LogMaxAge" type="xs:string" use="required" />
     <!--</xs:extension>
   </xs:complexContent>-->
   </xs:complexType>
