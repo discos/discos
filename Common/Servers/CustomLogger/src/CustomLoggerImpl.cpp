@@ -159,9 +159,9 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	setLogfile(_c_path, _a_path, _c_file, _a_file);
      }
      //TODO: else ERROR
-     IRA::CString _a_age;
-     if(IRA::CIRATools::getDBValue(getContainerServices(), "LogMaxAge", _a_age))
-         _log_max_age = ACS::TimeInterval(boost::lexical_cast<long long>(_a_age));
+     long _a_age;
+     if(IRA::CIRATools::getDBValue(getContainerServices(), "LogMaxAgeMillis", _a_age))
+         _log_max_age = ACS::TimeInterval(_a_age * 10000);
      else
          _log_max_age = ACS::TimeInterval(0);
      setMinLevel(C_TRACE);
@@ -171,7 +171,7 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
      CustomLoggerImpl *tmp = this;
      _writer = getContainerServices()->getThreadManager()->create<CustomLogWriterThread, CustomLoggerImpl *>(WRITER_THREAD_NAME, tmp);
      //_writer->setResponseTime(10000000);
-     _writer->setSleepTime(ACS::TimeInterval(100000000)); //10 seconds
+     _writer->setSleepTime(ACS::TimeInterval(1000 * 10000)); //1 sec = 1000ms
 };
 
 void 
@@ -187,6 +187,12 @@ CustomLoggerImpl::cleanUp()
     closeLogfile();
     //getContainerServices()->getThreadManager()->terminate(WRITER_THREAD_NAME);
     _writer->terminate();
+    while(_writer->isAlive())
+    {
+       //never executes
+       ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl:cleanUp waiting for writer thread to stop"));
+       sleep(ACS::TimeInterval(100 * 10000)); // 0.1sec.
+    }
     free_log_parsing(log_parser);
     CosNotification::EventTypeSeq added(0);
     CosNotification::EventTypeSeq removed (1);
@@ -197,7 +203,7 @@ CustomLoggerImpl::cleanUp()
     consumer_admin_->subscription_change (added, removed);
     added.length(0);
     removed.length(0);
-    consumer_->disconnect ();
+    consumer_->disconnect();
     consumer_admin_->destroy();
 };
 
@@ -253,6 +259,14 @@ CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors
     }
 };
 
+/*
+ * Close the currently open log files if exist and tries to open two new ones.
+ * @param base_path_log: directory where our custom log files will be stored
+ * @param base_path_full_log: directory where acs xml log files will be stored
+ * @param filename_log: file name of our custom log file
+ * @param filename_full_log: file name of acs xml log file
+ * @throw ManagementErrors::CustomLoggerIOErrorEx: if cannot create directory or open the files
+ */
 void 
 CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_full_log,
                              const char *filename_log, const char *filename_full_log) 
@@ -355,6 +369,9 @@ CustomLoggerImpl::setLogging(bool val)
 	m_isLogging_sp->getDevIO()->write(MNG_FALSE, ts);
 };
 
+/*
+ * @return: true if logger is recording to a file.
+ */
 bool
 CustomLoggerImpl::checkLogging()
 {

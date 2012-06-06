@@ -97,6 +97,7 @@ class CustomStructuredPushConsumer : public POA_CosNotifyComm::StructuredPushCon
 {
     public:
         CustomStructuredPushConsumer(CustomLoggerImpl* logger);
+        virtual ~CustomStructuredPushConsumer (void);
         void connect(CosNotifyChannelAdmin::ConsumerAdmin_ptr consumer_admin);
         virtual void disconnect();
         CosNotifyChannelAdmin::StructuredProxyPushSupplier_ptr get_proxy_supplier (void);
@@ -104,7 +105,6 @@ class CustomStructuredPushConsumer : public POA_CosNotifyComm::StructuredPushCon
         CosNotifyChannelAdmin::StructuredProxyPushSupplier_var proxy_supplier_;
         CosNotifyChannelAdmin::ProxyID proxy_supplier_id_;
         CustomLoggerImpl* logger_;
-        virtual ~CustomStructuredPushConsumer (void);
         virtual void offer_change(const CosNotification::EventTypeSeq & added,
 			      const CosNotification::EventTypeSeq & removed);
         virtual void push_structured_event (const CosNotification::StructuredEvent & notification);
