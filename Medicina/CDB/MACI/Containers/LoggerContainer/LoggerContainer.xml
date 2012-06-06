@@ -18,8 +18,8 @@
 
 	<LoggingConfig
 		centralizedLogger="Log"
-		minLogLevel="5"
-		minLogLevelLocal="5"
+		minLogLevel="2"
+		minLogLevelLocal="2"
 		dispatchPacketSize="10"
 		immediateDispatchLevel="4">
 	</LoggingConfig>

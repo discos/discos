@@ -10,7 +10,7 @@
               DefaultACSLogFile="acs.log"
               DefaultCustomLogDir="/archive/logs"
               DefaultCustomLogFile="station.log"
-              LogMaxAge="600000"
+              LogMaxAgeMillis="60000"
               >
         <filename description="the log file base name"/>
         <nevents description="number of logged events"/>
