@@ -21,7 +21,13 @@
 
 class LogRecord; //fwd dec
 class LogRecordComparator; //fwd dec
+
 typedef boost::shared_ptr<LogRecord> LogRecord_sp;
+// Used for "Data" xml field
+typedef std::map<std::string, std::string> KVMap;
+// Used for storing LogRecord events in batches
+typedef std::priority_queue<LogRecord_sp, std::vector<LogRecord_sp>, LogRecordComparator> LogRecordQueue;
+
 void start_parsing_element(void* data, const char *el, const char **attr); 
 void end_parsing_element(void *data, const char *el); 
 void start_parsing_cdata_element(void *data); 
@@ -35,10 +41,6 @@ std::string trim_date(const std::string& str);
 std::string log_to_string(const LogRecord& log_record);
 ACS::TimeInterval log_age(const LogRecord& log_record);
 
-// Used for "Data" xml field
-typedef std::map<std::string, std::string> KVMap;
-// Used for storing LogRecord events in batches
-typedef std::priority_queue<LogRecord_sp, std::vector<LogRecord_sp>, LogRecordComparator> LogRecordQueue;
 
 /*
 Class used to representing a log record and the necessary information
