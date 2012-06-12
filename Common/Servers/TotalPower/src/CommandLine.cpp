@@ -2,6 +2,9 @@
 
 #include <LogFilter.h>
 #include "CommandLine.h"
+/*****************************************************************************************************************************/
+#include <CustomLoggerUtils.h>
+/*****************************************************************************************************************************/
 
 #define _CHECK_ERRORS(ROUTINE) \
 	else if (res==FAIL) { \
@@ -397,6 +400,9 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setAttenuation()");
 		} 
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::setAttenuation()",(LM_NOTICE,"INPUT_CONFIGURED %ld,ATT=%lf",inputId,newAtt));
+		/***********************************************************************************************************************************/
+		/***********************************************************************************************************************************/
+		CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setAttenuation()",(LM_NOTICE,"INPUT_CONFIGURED %ld,ATT=%lf",inputId,newAtt));
 		m_attenuation[inputId]=newAtt;
 	}
 	else if (res==FAIL) {
