@@ -13,6 +13,13 @@ class SortedQueue(object):
         self._data = []
         self.size = 0
 
+    def pop(self):
+        if not self.empty():
+            self.size -= 1
+            return self._data.pop(0)
+        else:
+            return None
+
     def push(self, item):
         index = bisect.bisect(self._data, item)
         self._data.insert(index, item)
@@ -37,8 +44,7 @@ class BoundedSortedQueue(SortedQueue):
 
     def push(self, item):
         if self.full():
-           self._data.pop(0)
-           self.size -= 1
+           self.pop()
            popped = True
         else:
            popped = False
