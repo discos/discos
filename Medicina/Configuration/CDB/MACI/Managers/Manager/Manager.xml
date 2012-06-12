@@ -4,7 +4,9 @@
            xmlns:log="urn:schemas-cosylab-com:LoggingConfig:1.0" 
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   Timeout="50.0"
-  ContainerPingInterval="30.0" >
+  ClientPingInterval="30.0"
+  ContainerPingInterval="30.0"
+  AdministratorPingInterval="20.0">
 
   <Startup>
   	<cdb:_ string="ANTENNA/Mount" />
@@ -12,6 +14,7 @@
   	<cdb:_ string="ANTENNA/Boss"/>
   	<cdb:_ string="RECEIVERS/Boss"/>
   	<cdb:_ string="MANAGEMENT/Palmiro"/>
+  	<cdb:_ string="MANAGEMENT/CustomLogger"/>
   </Startup>
 
   <ServiceComponents>
@@ -29,8 +32,9 @@
   <LoggingConfig
   	minLogLevel="5"
   	minLogLevelLocal="5"
-  	dispatchPacketSize="10"
-  	immediateDispatchLevel="8">
+  	dispatchPacketSize="0"
+  	immediateDispatchLevel="8"
+  >
 	<log:_ Name="jacorb@Manager" minLogLevel="5" minLogLevelLocal="5" />
   </LoggingConfig>
 
