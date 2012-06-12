@@ -12,4 +12,7 @@
 	Code="NoiseGeneratorImpl"
 	Type="IDL:alma/Backends/NoiseGenerator:1.0"
 	Container="NoiseGeneratorContainer"	
+	Default="false"
+	KeepAliveTime="-1"
+    ImplLang="cpp"
 />

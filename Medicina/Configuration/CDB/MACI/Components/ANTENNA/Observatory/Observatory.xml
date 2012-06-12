@@ -13,5 +13,6 @@
 	Type="IDL:alma/Antenna/Observatory:1.0"
 	Container="AntennaContainer"
 	Default="true"
-	KeepAliveTime="30"	
+	KeepAliveTime="30"
+	ImplLang="cpp"
 />

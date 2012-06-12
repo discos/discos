@@ -15,4 +15,5 @@
 	Container="AntennaContainer"
 	Default="false"
 	KeepAliveTime="30"
+	ImplLang="cpp"
 />

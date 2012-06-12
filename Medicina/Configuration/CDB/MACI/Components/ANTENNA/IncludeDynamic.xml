@@ -6,13 +6,16 @@
      <_ Name="*"	    
         Code="SkySourceImpl"	  
         Type="IDL:alma/Antenna/SkySource:1.0"
-        Container="AntennaContainer"/>
+        Container="AntennaContainer"
+        ImplLang="cpp"/>
      <_ Name="*"	    
         Code="OTFImpl"	  
         Type="IDL:alma/Antenna/OTF:1.0"
-        Container="AntennaContainer"/>
+        Container="AntennaContainer"
+        ImplLang="cpp"/>
      <_ Name="*"	    
         Code="MoonImpl"	  
         Type="IDL:alma/Antenna/Moon:1.0"
-        Container="AntennaContainer"/>     
+        Container="AntennaContainer"
+        ImplLang="cpp"/>     
 </Components>

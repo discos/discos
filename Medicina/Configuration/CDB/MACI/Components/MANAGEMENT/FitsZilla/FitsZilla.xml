@@ -13,5 +13,6 @@
 	Type="IDL:alma/Management/FitsWriter:1.0"
 	Container="FitsZillaContainer"
 	Default="false"
-	KeepAliveTime="120"
+	KeepAliveTime="-1"
+	ImplLang="cpp"
 />

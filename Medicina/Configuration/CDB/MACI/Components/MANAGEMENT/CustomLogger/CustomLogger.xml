@@ -8,11 +8,12 @@
            xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-	Name="Palmiro"
-	Code="SchedulerImpl"
-	Type="IDL:alma/Management/Scheduler:1.0"
-	Container="ManagementContainer"
-	Default="true"
-	KeepAliveTime="-1"
-	ImplLang="cpp"
+        Name="CustomLogger"
+        Code="CustomLoggerImpl"
+        Type="IDL:alma/Management/CustomLogger:1.0"
+        Container="LoggerContainer"
+        Default="true"
+        KeepAliveTime="-1"
+        ImplLang="cpp"
 />
+
