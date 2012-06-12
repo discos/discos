@@ -20,8 +20,11 @@
 		centralizedLogger="Log"
 		minLogLevel="5"
 		minLogLevelLocal="5"
-		dispatchPacketSize="10"
-		immediateDispatchLevel="8">
+		dispatchPacketSize="0"
+		immediateDispatchLevel="8"
+		flushPeriodSeconds="1"
+	>
 	</LoggingConfig>
+	
 </Container>
 
