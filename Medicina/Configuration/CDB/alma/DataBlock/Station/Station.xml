@@ -13,7 +13,7 @@
 	DUT1="0.0" 
 	latitude="44.52048889"
 	longitude="11.64693056"
-	height="28"
-	yPolarMotion="479.93"
-	xPolarMotion="231.94"
-	geodeticModel="0"/>
+	height="28.0"
+	yPolarMotion="0.0"
+	xPolarMotion="0.0"
+	geodeticModel="0" />

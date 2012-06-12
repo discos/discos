@@ -54,7 +54,7 @@
  	<inputPort>GREGORIAN</inputPort>
  	<beams>1</beams>
  	<bandWidth>1250.0</bandWidth>
- 	<attenuation>7.0</attenuation>	 	 	
+ 	<attenuation>8.0</attenuation>	 	 	
  	<sections_inputs>0 1</sections_inputs>
  	<polarizations>R L</polarizations>
  	<feed>0 0</feed>
