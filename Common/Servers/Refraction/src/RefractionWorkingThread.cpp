@@ -1,5 +1,6 @@
 #include "RefractionWorkingThread.h"
 
+
 CRefractionWorkingThread::CRefractionWorkingThread(const ACE_CString& name,IRA::CSecureArea<CRefractionCore>  *param, 
 			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime), m_core(param)
 {
@@ -24,7 +25,6 @@ void CRefractionWorkingThread::onStop()
 void CRefractionWorkingThread::runLoop()
 {
 	 IRA::CSecAreaResourceWrapper<CRefractionCore> resource=m_core->Get();
-	
-     if (resource->m_byebye == false)
-	    resource->getMeteoParameters();
+	if (resource->m_byebye == false)
+		resource->getMeteoParameters();
 }

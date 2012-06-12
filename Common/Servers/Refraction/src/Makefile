@@ -128,7 +128,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS =
+CDB_SCHEMAS = Refraction
 
 # 
 # IDL Files and flags

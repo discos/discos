@@ -20,6 +20,7 @@
 #include <ReceiversBossC.h>
 #include <GenericBackendC.h>
 #include <CustomLoggerC.h>
+#include <GenericWeatherStationC.h>
 #include <ScheduleTimer.h>
 #include <Site.h>
 #include <DateTime.h>
@@ -141,6 +142,14 @@ public:
 	void changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
 
 	/**
+	 * Allows to read out from weather station.
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ManagementErrors::WeatherStationErrorExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 */
+	void getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind)  throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
+
+	/**
 	 * It computes the system temperature.
 	 * @param ComponentErrors::CouldntGetComponentExImpl
 	 * @param ComponentErrors::CORBAProblemExImpl
@@ -255,6 +264,16 @@ private:
 	 */
 	IRA::CString m_currentProceduresFile;
 	
+	/**
+	 * @var last weather station readout
+	 */
+	Weather::parameters m_weatherPar;
+
+	/**
+	 * @var last time the weather station was enquired
+	 */
+	ACS::Time m_lastWeatherTime;
+
 	
 	#include "Core_Common.h"
 		

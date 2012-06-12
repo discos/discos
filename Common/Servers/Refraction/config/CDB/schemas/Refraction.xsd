@@ -11,4 +11,12 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	
+	<xs:complexType name="RefractionType">
+		<xs:attribute name="ObservatoryInterface" type="xs:string" use="required" />
+		<xs:attribute name="WeatherStationInterface" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:element name="Refraction" type="RefractionType"/>
+	
+	
 </xs:schema>

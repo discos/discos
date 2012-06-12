@@ -82,8 +82,9 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component interface is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);
 	_GET_STRING_ATTRIBUTE("CustomLoggerInterface","Custom logger component interface is ",m_custoLoggerComp);
-	_GET_STRING_ATTRIBUTE("DefaultBackendInstance","Deafult backend component instance is ",m_defaultBackendInst);
-	_GET_STRING_ATTRIBUTE("DefaultDataReceiverInstance","Deafult data receiver component instance is ",m_defaultDataReceiverInst);
+	_GET_STRING_ATTRIBUTE("WeatherStationInstance","Weather station component interface is ",m_weatherComp);
+	_GET_STRING_ATTRIBUTE("DefaultBackendInstance","Default backend component instance is ",m_defaultBackendInst);
+	_GET_STRING_ATTRIBUTE("DefaultDataReceiverInstance","Default data receiver component instance is ",m_defaultDataReceiverInst);
 	_GET_STRING_ATTRIBUTE("SchedDir","Schedule files path is ",m_schedDir);
 	_GET_STRING_ATTRIBUTE("DataDir","Data files path is ",m_dataDir);
 	_GET_STRING_ATTRIBUTE("SystemDataDir","System data files path is ",m_systemDataDir);

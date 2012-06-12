@@ -31,7 +31,7 @@ void RefractionImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"RefractionImpl::initialize()");
 		throw dummy;
 	}
-    boss->initialize();
+    boss->initialize(getContainerServices());
     try {
 		m_workingThread=getContainerServices()->getThreadManager()->create<CRefractionWorkingThread,CSecureArea<CRefractionCore> *>
 		  ("REFRACTIONBOSSWORKER",m_core);

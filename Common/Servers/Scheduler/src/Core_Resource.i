@@ -161,6 +161,59 @@ void CCore::unloadCustomLogger(Management::CustomLogger_var& ref) const
 	}
 }
 
+void CCore::loadWeatherStation(Weather::GenericWeatherStation_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl)
+{
+	if ((!CORBA::is_nil(ref)) && (errorDetected)) { // if reference was already taken, but an error was found....dispose the reference
+		try {
+			m_services->releaseComponent((const char*)ref->name());
+		}
+		catch (...) { //dispose silently...if an error...no matter
+		}
+		ref=Weather::GenericWeatherStation::_nil();
+	}
+	if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
+		try {
+			ref=m_services->getDefaultComponent<Weather::GenericWeatherStation>((const char*)m_config->getWeatherStationComponent());
+			errorDetected=false;
+			ACS_LOG(LM_FULL_INFO,"CCore::loadCustomLogger()",(LM_INFO,"CUSTOMLOGGER_LOCATED"));
+		}
+		catch (maciErrType::CannotGetComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::getWeatherStationComponent()");
+			Impl.setComponentName((const char*)m_config->getWeatherStationComponent());
+			throw Impl;
+		}
+		catch (maciErrType::NoPermissionExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::getWeatherStationComponent()");
+			Impl.setComponentName((const char*)m_config->getWeatherStationComponent());
+			throw Impl;
+		}
+		catch (maciErrType::NoDefaultComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::getWeatherStationComponent()");
+			Impl.setComponentName((const char*)m_config->getWeatherStationComponent());
+			throw Impl;
+		}
+	}
+}
+
+void CCore::unloadWeatherStation(Weather::GenericWeatherStation_var& ref) const
+{
+	if (!CORBA::is_nil(ref)) {
+		try {
+			m_services->releaseComponent((const char*)ref->name());
+		}
+		catch (maciErrType::CannotReleaseComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CCore::unloadWeatherStation()");
+			Impl.setComponentName((const char *)m_config->getWeatherStationComponent());
+			Impl.log(LM_WARNING);
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::unloadWeatherStation())");
+			impl.log(LM_WARNING);
+		}
+		ref=Weather::GenericWeatherStation::_nil();
+	}
+}
+
 void CCore::loadDefaultBackend() throw (ComponentErrors::CouldntGetComponentExImpl)
 {
 	if ((!CORBA::is_nil(m_defaultBackend)) && (m_defaultBackendError)) { // if reference was already taken, but an error was found....dispose the reference

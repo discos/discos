@@ -2,6 +2,19 @@
 #include <slalib.h>
 #include "RefractionCore.h"
 
+#define _GET_STRING_ATTRIBUTE(ATTRIB,DESCR,FIELD) { \
+	CString tmps; \
+	if (!CIRATools::getDBValue(Services,ATTRIB,tmps)) { \
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CRefractionCore::initialize()"); \
+		dummy.setFieldName(ATTRIB); \
+		throw dummy; \
+	} \
+	else { \
+		FIELD=tmps; \
+		ACS_DEBUG_PARAM("CRefractionCore::initialize()",DESCR" %s",(const char*)tmps); \
+	} \
+}
+
 CRefractionCore::CRefractionCore(ContainerServices *service,acscomponent::ACSComponentImpl *me) : 
 	m_services(service)
 {
@@ -11,23 +24,35 @@ CRefractionCore::~CRefractionCore()
 {
 }
 
-void CRefractionCore::initialize()
+void CRefractionCore::initialize(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
 {
     m_byebye = false;
+	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory interface is ",m_observatoryComp);
+	_GET_STRING_ATTRIBUTE("WeatherStationInterface","Weather station interface is ",m_weatherComp);
 	ACS_LOG(LM_FULL_INFO,"CRefractionCore::initialize()",(LM_INFO,"CRefractionCore::initialize"));	
 }
 
 void CRefractionCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl)
 {
 	Antenna::TSiteInformation_var site;
-
 	m_observatory=Antenna::Observatory::_nil();
+
 	try {
-		m_observatory=m_services->getComponent<Antenna::Observatory>("ANTENNA/Observatory");
+		m_observatory=m_services->getDefaultComponent<Antenna::Observatory>((const char*)m_observatoryComp);
 	}
 	catch (maciErrType::CannotGetComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CRefractionCore::execute()");
-		Impl.setComponentName("ANTENNA/Observatory");
+		Impl.setComponentName((const char*)m_observatoryComp);
+		throw Impl;
+	}
+	catch (maciErrType::NoPermissionExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CRefractionCore::execute()");
+		Impl.setComponentName((const char*)m_observatoryComp);
+		throw Impl;
+	}
+	catch (maciErrType::NoDefaultComponentExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CRefractionCore::execute()");
+		Impl.setComponentName((const char*)m_observatoryComp);
 		throw Impl;
 	}
 	ACS_LOG(LM_FULL_INFO,"CRefractionCore::execute()",(LM_INFO,"CRefractionCore::OBSERVATORY_LOCATED"));
@@ -50,16 +75,27 @@ void CRefractionCore::execute() throw (ComponentErrors::CouldntGetComponentExImp
 		Impl.setComponentName((const char*)m_observatory->name());
 		throw Impl;
 	}
-    m_meteodata = Weather::GenericWeatherStation::_nil();
-    try {
-		m_meteodata = m_services->getComponent<Weather::GenericWeatherStation>("WEATHERSTATION/WeatherStation");
+	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"OBSERVATORY_RELEASED"));
+	m_meteodata = Weather::GenericWeatherStation::_nil();
+	try {
+		m_meteodata=m_services->getDefaultComponent<Weather::GenericWeatherStation>((const char *)m_weatherComp);
 	}
 	catch (maciErrType::CannotGetComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CRefractionCore::execute()");
-		Impl.setComponentName("METROLOGY/Meteo");
+		Impl.setComponentName((const char*)m_weatherComp);
 		throw Impl;
 	}
-	ACS_LOG(LM_FULL_INFO, "CRefractionCore::execute()", (LM_INFO,"CRefractionCore::WEATHERSTATION_LOCATED"));
+	catch (maciErrType::NoPermissionExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CRefractionCore::execute()");
+		Impl.setComponentName((const char*)m_weatherComp);
+		throw Impl;
+	}
+	catch (maciErrType::NoDefaultComponentExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CRefractionCore::execute()");
+		Impl.setComponentName((const char*)m_weatherComp);
+		throw Impl;
+	}
+	ACS_LOG(LM_FULL_INFO, "CRefractionCore::execute()", (LM_INFO,"WEATHERSTATION_LOCATED"));
 }
 
 void CRefractionCore::cleanUp()
@@ -97,6 +133,9 @@ void CRefractionCore::getCorrection(double obsZenithDistance, double *corZenithD
 void CRefractionCore::getMeteoParameters()
 {
     AUTO_TRACE("CRefractionCore::getMeteoParameters()");
+	m_temperature=0.0;
+	m_humidity=0.5;
+	m_pressure=1000;
     Weather::parameters pars;
     try {
         pars=m_meteodata->getData();

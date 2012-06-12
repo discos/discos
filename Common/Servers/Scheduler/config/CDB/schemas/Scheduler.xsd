@@ -60,11 +60,13 @@
 		<xs:attribute name="ReceiversBossInterface" type="xs:string" use="required" />
 		<!-- the interface of component that is in charge of log file creation -->
 		<xs:attribute name="CustomLoggerInterface" type="xs:string" use="required" />
+		<!-- the interface of weather station -->
+		<xs:attribute name="WeatherStationInstance" type="xs:string" use="required" />
 		<!-- the instance of the default backend -->
 		<xs:attribute name="DefaultBackendInstance" type="xs:string" use="required" />
 		<!-- the instance of the default data receiver -->
 		<xs:attribute name="DefaultDataReceiverInstance" type="xs:string" use="required" />
-		
+				
 	</xs:complexType>
 
 	<xs:element name="Scheduler" type="SchedulerType"/>

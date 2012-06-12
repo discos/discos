@@ -8,9 +8,10 @@
 									m_defaultBackend=Backends::GenericBackend::_nil(); \
 									m_defaultDataReceiver=Management::DataReceiver::_nil(); \
 									m_customLogger=Management::CustomLogger::_nil(); \
+									m_weatherStation=Weather::GenericWeatherStation::_nil(); \
 									m_antennaNC=NULL; \
 									m_isTracking=false; \
-									m_antennaBossError=m_receiversBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=false; \
+									m_antennaBossError=m_receiversBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=m_weatherStationError=false; \
 									m_currentDevice=0;\
 									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
 									
@@ -77,6 +78,14 @@ Management::CustomLogger_var m_customLogger;
  * true if an error is detected during custom logger communication
  */
 bool m_customLoggerError;
+/**
+ * Generic weather station reference
+ */
+Weather::GenericWeatherStation_var m_weatherStation;
+/**
+ * true if an error is detected during weather station communication
+ */
+bool m_weatherStationError;
 /**
  * Name of the instance of the backend currently loaded as default backend
  */
@@ -151,6 +160,16 @@ void loadCustomLogger(Management::CustomLogger_var& ref,bool& errorDetected) con
  * used to free the reference to the custom logger component
  */
 void unloadCustomLogger(Management::CustomLogger_var& ref) const;
+/**
+ * used to get a reference to the custom weather station component.
+ * @param ref reference to the custom logger component
+ * @param errorDetected this flag is true if the reference seems not valid any more and the reference should not be considered valid any more
+*/
+void loadWeatherStation(Weather::GenericWeatherStation_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl);
+/**
+ * used to free the reference to the weather station component
+ */
+void unloadWeatherStation(Weather::GenericWeatherStation_var& ref) const;
 /**
  * used to get a reference to the default backend component. 
  */

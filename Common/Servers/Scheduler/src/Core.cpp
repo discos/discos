@@ -26,6 +26,7 @@ void CCore::initialize()
 	RESOURCE_INIT;
 	resetSchedulerStatus();
 	m_currentProceduresFile="";
+	m_lastWeatherTime=0;
 }
 
 void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::ProcedureFileLoadingErrorExImpl)
@@ -103,7 +104,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add<3>("crossScan",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >,
 			I<interval_type> >(this,&CCore::crossScan));
 	m_parser->add<1>("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::changeLogFile));
-	
+	m_parser->add<0>("wx",new function4<CCore,non_constant,void_type,O<double_type>,O<double_type>,O<double_type>,O<double_type> >(this,&CCore::getWeatherStationParameters));
+
 	//add remote commands ************  should be loaded from a CDB table............................**********/
 	// antenna subsystem
 	m_parser->add("antennaDisable","antenna",1,&CCore::remoteCall);
@@ -147,6 +149,7 @@ void CCore::cleanUp()
 	unloadAntennaBoss(m_antennaBoss);
 	unloadReceiversBoss(m_receiversBoss);
 	unloadCustomLogger(m_customLogger);
+	unloadWeatherStation(m_weatherStation);
 	unloadDefaultBackend();
 	unloadDefaultDataReceiver();
 	if (m_schedExecuter!=NULL) m_schedExecuter->suspend();
@@ -224,6 +227,35 @@ void CCore::changeLogFile(const char *fileName) throw (ComponentErrors::CouldntG
 		impl.setFileName((const char *)fullName);
 		throw impl;
 	}
+}
+
+void CCore::getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind) throw (ComponentErrors::CouldntGetComponentExImpl,
+		ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	loadWeatherStation(m_weatherStation,m_weatherStationError); // throw ComponentErrors::CouldntGetComponentExImpl
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	try {
+		if (now.value().value>m_lastWeatherTime+100000000) {  // hard coded for now...ten seconds
+			m_weatherPar=m_weatherStation->getData();
+		}
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::getWeatherStationParameters()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_weatherStationError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ManagementErrors::WeatherStationErrorExImpl,impl,"CCore::getWeatherStationParameters()");
+		throw impl;
+	}
+	temp=m_weatherPar.temperature;
+	hum=m_weatherPar.humidity;
+	pres=m_weatherPar.pressure;
+	wind=m_weatherPar.wind;
 }
 
 void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,

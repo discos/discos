@@ -151,6 +151,18 @@ public:
 	virtual void changeLogFile(const char *fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
 	/**
+	 * This method reports back the weather parameter read out from the weather station.
+	 * @param temperature value of the external temperature (°C)
+	 * @param humidity relative humidity
+	 * @param pressure value of the pressure (mBar)
+	 * @param wind speed of wind (no direction) in Km/s
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+	virtual void weatherParamenters (CORBA::Double_out temperature,CORBA::Double_out humidity,CORBA::Double_out pressure,CORBA::Double_out wind);
+
+	/**
 	 * This method can load a new schedule file. After a succesfull parse of the schedule the itself is started
 	 * from the specified line
 	 * @throw CORBA::SystemException

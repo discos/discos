@@ -107,6 +107,21 @@ void SchedulerImpl::aboutToAbort()
 	_IRA_LOGFILTER_FLUSH;
 }
 
+void SchedulerImpl::weatherParamenters (CORBA::Double_out temperature,CORBA::Double_out humidity,CORBA::Double_out pressure,CORBA::Double_out wind)
+{
+	try {
+		m_core->getWeatherStationParameters(temperature,humidity,pressure,wind) ;
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
 void SchedulerImpl::changeLogFile(const char *fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	try {

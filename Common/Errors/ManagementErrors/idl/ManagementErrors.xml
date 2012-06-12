@@ -80,8 +80,10 @@
 	<Member name="Path" type="string" description="report the path element involved (file or dir)" />
 </ErrorCode>
 
-<ErrorCode name="LogFileError" shortDescription="cannot open the log file" description="">
+<ErrorCode name="LogFileError" shortDescription="Cannot open the log file" description="">
 	<Member name="FileName" type="string" description="Name of the log file" />
 </ErrorCode>
+
+<ErrorCode name="WeatherStationError" shortDescription="Cannot read parameters from weather station" description=""/>
 
 </Type>

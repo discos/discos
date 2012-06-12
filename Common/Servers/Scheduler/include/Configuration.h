@@ -71,6 +71,10 @@ public:
 	*/
 	const IRA::CString& getCustomLoggerComponent() const { return m_custoLoggerComp; }
 	/**
+	 * @return the name of the interface of the weather station component.
+	*/
+	const IRA::CString& getWeatherStationComponent() const { return m_weatherComp; }
+	/**
 	 * @return the name of the instance of the default backend component.
 	*/	
 	const IRA::CString& getDefaultBackendInstance() const { return m_defaultBackendInst; }
@@ -82,12 +86,10 @@ public:
 	 * @return the number of microseconds that the log filter will cache a log message
 	*/
 	long getRepetitionCacheTime() const { return m_repetitionCacheTime; }
-	
 	/**
 	 * @return the number of microseconds that the log filter will take as expiration time for a log message
 	*/
 	long getRepetitionExpireTime() const { return m_repetitionExpireTime; }
-
 	/**
 	 * @return the path to the directory that stores the schedule files.
 	 */
@@ -140,6 +142,7 @@ private:
 	IRA::CString m_logDir;
 	IRA::CString m_systemLogDir;
 	IRA::CString m_custoLoggerComp;
+	IRA::CString m_weatherComp;
 	long m_repetitionCacheTime;
 	long m_repetitionExpireTime;
 	long m_scheduleExecutorSleepTime;

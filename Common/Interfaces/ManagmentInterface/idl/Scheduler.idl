@@ -93,6 +93,18 @@ module Management {
 		void changeLogFile(in string fileName) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
+		 * Return the fundamental weather parameters
+		 * @param temerature external temperature in °C
+		 * @param humidity relative humidity (0..100)
+		 * @param pressure atmospheric pressure (mbar)
+		 * @param wind wind speed (Km/s) 
+		 * @throw CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */		
+		void weatherParamenters(out double temperature, out double humidity,out double pressure,out double wind)  raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
 		 * Performs the computation of the system temperature. The operation is executed by using the currently in use backend and the currently configured frontend. It could also be the default one.
 		 * The measure is done for each of the sections of the backend. Each result is the returned as a sequence of doubles. The results are also published in the log file.
 		 * This operation will also computes the ratio kelvin over counts for each backend section, this ratio is then set in the backend. This ratio can be used by the backend to convert the current TPI measure into a Tsys.

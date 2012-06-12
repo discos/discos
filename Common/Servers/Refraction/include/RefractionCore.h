@@ -48,7 +48,7 @@ public:
 	/**
 	 * This function initializes the boss core, all preliminary operation are performed here.
 	*/
-	virtual void initialize();
+	virtual void initialize(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl);
 
 	/**
 	 * This function starts the boss core  so that it will available to accept operations and requests.
@@ -98,6 +98,9 @@ private:
 	 */
 	Antenna::Observatory_var m_observatory;
 	
+	IRA::CString m_weatherComp;
+	IRA::CString m_observatoryComp;
+
     double m_temperature;
     double m_humidity;
     double m_pressure;
