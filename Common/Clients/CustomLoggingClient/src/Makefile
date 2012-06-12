@@ -78,8 +78,8 @@ TCL_SCRIPTS_L   =
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         =
-PY_SCRIPTS_L       =  CustomLoggingClient
+PY_SCRIPTS         = CustomLoggingClient
+PY_SCRIPTS_L       =  
 
 PY_MODULES         =
 PY_MODULES_L       =
