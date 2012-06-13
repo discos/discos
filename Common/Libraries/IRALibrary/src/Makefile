@@ -48,6 +48,8 @@ IRALibrary_OBJECTS = String IRATools Error SerialPort Lecom Socket DataField DBT
  ReceiverControl SourceFlux CustomLoggerUtils
 IRALibrary_LIBS = acstime SlaLibrary maciClient
 
+PY_PACKAGES  = IRAPy
+
 EXECUTABLES     =
 EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl
 
