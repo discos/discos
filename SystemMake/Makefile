@@ -1,6 +1,5 @@
 #*******************************************************************************
 #
-# "@(#) $Id: Makefile,v 1.67 2011-06-24 08:14:23 c.migoni Exp $"
 #
 # Makefile 
 #
@@ -9,6 +8,7 @@
 # Andrea O. 26/10/07  created
 # Andrea O. 21/03/09  added the target cdb in order to checkout the runtime database
 # Andrea O. 15/04/11  match now the present status of the cvs
+# Andrea O. 13/06/12  installation procedure now ported to svn, environment variable SVNUSER now required
 
 ifeq ($(TARGETSYS),SRT)
 	#Add all modules included in the SRT system  in this sequence
@@ -45,8 +45,9 @@ ifeq ($(TARGETSYS),SRT)
 	SRTActiveSurfaceImplementation_MODULES:=SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss 
 	MinorServoImplementation_MODULES:=SRTMinorServo
 	
-	CDB_LOCAL_LOCATION="SRT/CDB"
-	SYSTEM_CVS_MODULES=Common SRT 
+	CDB_SVN_LOCATION="SRT/Configuration/CDB"
+	SYSTEM_SVN_MODULES=Common SRT
+	SYSTEM_SVN_TAG=nuraghe-0.1
 else 
 ifeq ($(TARGETSYS),MED)
 	#Add all modules included in the Medicina system in this sequence
@@ -78,8 +79,9 @@ ifeq ($(TARGETSYS),MED)
 	ReceiversImplementation_MODULES:=ReceiversBoss
 	WeatherStationImplementation_MODULES:=MedWeatherStation Metrology
 	
-	CDB_LOCAL_LOCATION="Medicina/CDB"
-	SYSTEM_CVS_MODULES=Common Medicina
+	CDB_SVN_LOCATION="Medicina/Configuration/CDB"
+	SYSTEM_SVN_MODULES=Common Medicina
+	SYSTEM_SVN_TAG=escs-0.2
 else
 	RESULT:=$(error TARGETSYS variable is not set correctly!)	
 endif
@@ -104,9 +106,14 @@ ifndef ACS_CDB
 	RESULT:=$(error ACS_CDB variable is not set!)
 endif
 
-#if the ACS_CDB variable is not set the make process is stopped
+#if the SYSLOCATION variable is not set the make process is stopped
 ifndef SYSLOCATION
 	RESULT:=$(error SYSLOCATION variable is not set!)
+endif
+
+#if the SVNUSER variable is not set the make process is stopped
+ifndef SVNUSER
+	RESULT:=$(error SVNUSER variable is not set!)
 endif
 
 #set up the Modules file for each IDL and CPP documentation
@@ -146,11 +153,11 @@ install:
 	done
 
 cdb:
-	@cd $(ACS_CDB); cvs -d $(CVSROOT) co -P -d "CDB" -r "RUNTIME" $(CDB_LOCAL_LOCATION)
+	@cd $(ACS_CDB); svn checkout svn+ssh://$(SVNUSER)@belzebu.oa-cagliari.inaf.it/repos/ACS/tags/$(SYSTEM_SVN_TAG)/$(CDB_SVN_LOCATION)
 
 sources:
-	@cd $(SYSLOCATION) ; for i in $(SYSTEM_CVS_MODULES) ; do \
-		cvs -d $(CVSROOT) -r co -P $${i} ; \
+	@cd $(SYSLOCATION) ; for i in $(SYSTEM_SVN_MODULES) ; do \
+		svn checkout svn+ssh://$(SVNUSER)@belzebu.oa-cagliari.inaf.it/repos/ACS/tags/$(SYSTEM_SVN_TAG)/$${i} ;\
 	done
 
 man:
