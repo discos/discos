@@ -6,6 +6,7 @@
 #endif
 
 #include <acsutil.h>
+#include <acsncSimpleSupplier.h>
 #include <orbsvcs/CosNamingC.h>
 #include <orbsvcs/CosNotifyChannelAdminS.h>
 #include <orbsvcs/CosNotifyCommC.h>
@@ -67,6 +68,7 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
                                 throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void emitLog(const char *msg, LogLevel level) throw (CORBA::SystemException);
+        virtual void emitExceptionLog();
         virtual void flush() throw (CORBA::SystemException);
         void writeLoggingQueue(bool age_check=true); //invoked by writer thread
     private:
@@ -75,6 +77,7 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(LogLevel), POA_Management::ROLogLevel> > m_min_level_sp;
         baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(LogLevel), POA_Management::ROLogLevel> > m_max_level_sp;
         baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(TBoolean), POA_Management::ROTBoolean> > m_isLogging_sp;
+        nc::SimpleSupplier *m_loggingSupplier;
         CosNaming::NamingContext_var namingContext_m;
         CosNotifyChannelAdmin::EventChannel_var ec_;
         CosNotifyChannelAdmin::InterFilterGroupOperator ifgop_;

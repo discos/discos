@@ -8,7 +8,8 @@ CustomLoggerImpl::CustomLoggerImpl(const ACE_CString& CompName,
     m_nevents_sp(this),
     m_min_level_sp(this),
     m_max_level_sp(this),
-    m_isLogging_sp(this)
+    m_isLogging_sp(this),
+    m_loggingSupplier(NULL)
 {   
     m_filename_sp = new baci::ROstring(
                                             CompName + ":filename",
@@ -167,11 +168,20 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
      setMinLevel(C_TRACE);
      setMaxLevel(C_EMERGENCY);
      
-     // Create LogWriterThread
+     /* FILE OUTPUT THREAD INITIALIZATION
+     ====================================*/
      CustomLoggerImpl *tmp = this;
      _writer = getContainerServices()->getThreadManager()->create<CustomLogWriterThread, CustomLoggerImpl *>(WRITER_THREAD_NAME, tmp);
-     //_writer->setResponseTime(10000000);
-     _writer->setSleepTime(ACS::TimeInterval(1000 * 10000)); //1 sec = 1000ms
+     _writer->setSleepTime(ACS::TimeInterval(1000 * 10000)); //looks for new events each 1 second
+
+     /* NOTIFY CHANNEL OUTPUT INITIALIZATION
+     =======================================*/
+     try{
+         m_loggingSupplier = new nc::SimpleSupplier(Management::CUSTOM_LOGGING_CHANNEL_NAME, tmp);
+     }
+     catch (...) {
+         _THROW_EXCPT(ComponentErrors::UnexpectedExImpl, "CustomLoggerImpl::initialize()");
+     }
 };
 
 void 
@@ -192,6 +202,10 @@ CustomLoggerImpl::cleanUp()
        //never executes
        ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl:cleanUp waiting for writer thread to stop"));
        sleep(ACS::TimeInterval(100 * 10000)); // 0.1sec.
+    }
+    if(m_loggingSupplier!=NULL){
+        m_loggingSupplier->disconnect();
+        m_loggingSupplier = NULL;
     }
     free_log_parsing(log_parser);
     CosNotification::EventTypeSeq added(0);
@@ -216,6 +230,14 @@ void
 CustomLoggerImpl::emitLog(const char *msg, LogLevel level) throw (CORBA::SystemException)
 {
     CUSTOM_LOG(LM_FULL_INFO, "CustomLoggerImpl::emit_log", (IRA::CustomLoggerUtils::custom2aceLogLevel(level), msg));
+};
+
+void
+CustomLoggerImpl::emitExceptionLog()
+{
+    _EXCPT(ManagementErrors::LogFileErrorExImpl, _dummy, "CustomLoggerImpl::emitExceptionLog");
+    _ADD_BACKTRACE(ManagementErrors::CustomLoggerIOErrorExImpl, __dummy, _dummy, "CustomLoggerImpl::emitExceptionLog2");
+    CUSTOM_EXCPT_LOG(__dummy);
 };
 
 /*
@@ -391,10 +413,20 @@ CustomLoggerImpl::handle(LogRecord_sp log_record)
 {
     if(checkLogging())
     {
+        //Write the log record to syslog file
         _full_log << log_record->xml_text << '\n';
         _full_log.flush();
         if(filter(*log_record))
         {
+            //publish the log record to the notification channel
+            Management::TCustomLoggingData loggingData={log_record->timestamp, log_record->log_level, log_to_string(*log_record).c_str()};
+            try{
+                m_loggingSupplier->publishData<Management::TCustomLoggingData>(loggingData);
+            }catch (acsncErrType::PublishEventFailureExImpl& ex) {
+                  _ADD_BACKTRACE(ComponentErrors::NotificationChannelErrorExImpl, impl, ex, "CustomLoggerImpl::handle()");
+                  throw impl;
+            }
+            //schedule the log record for later output to file
             addToLoggingQueue(log_record);
         }
     }
@@ -423,9 +455,9 @@ void
 CustomLoggerImpl::writeLoggingQueue(bool age_check)
 {
     LogRecord_sp _log_record;
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : writeLoggingQueue"));
+    //ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : writeLoggingQueue"));
     baci::ThreadSyncGuard guard(&_log_queue_mutex);
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : writeLoggingQueue mutex acquired"));
+    //ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : writeLoggingQueue mutex acquired"));
     if(age_check) //write the queue to file up to a certain log age
         while((!_log_queue.empty()) &&
              (log_age(*_log_queue.top()) > _log_max_age))

@@ -14,7 +14,7 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 CustomLoggerImpl_OBJECTS   = CustomLoggerImpl expat_log_parsing
-CustomLoggerImpl_LIBS   = CustomLoggerStubs baci acsnc IRALibrary ManagmentDefinitionsStubs ManagementErrors
+CustomLoggerImpl_LIBS   = CustomLoggerStubs baci acsnc IRALibrary ManagmentDefinitionsStubs ManagementErrors ComponentErrors
 
 #
 # Configuration Database Files

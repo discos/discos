@@ -106,7 +106,7 @@ log_age(const LogRecord& log_record)
     TIMEVALUE tv;
     IRA::CIRATools::getTime(tv);
     ACS::TimeInterval ti(tv.value().value - log_record.timestamp);
-    ACS_SHORT_LOG((LM_DEBUG, "expat parsing : log age %lld", ti));
+    //ACS_SHORT_LOG((LM_DEBUG, "expat parsing : log age %lld", ti));
     return ti;
 };
 
