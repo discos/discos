@@ -19,6 +19,12 @@
     LOG(tStruct.priority, routine, tStruct.message); \
 } 
 
+#define CUSTOM_EXCPT_LOG(EX) \
+{ \
+    _ADD_EXTRA(EX, "source", "custom"); \
+    EX.log(); \
+}
+
 /********************************************/
 /*              EXAMPLE USAGE               */
 /********************************************/
