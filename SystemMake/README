@@ -2,8 +2,9 @@
 2) The documentation will be produced to the location pointed by the varialbe DOCROOT, if the variable is not set the
    default location $HOME/docroot is taken
 3) The variable ACS_CDB is required to be set.
-4) The variable SYSLOCATION is required to be set, the source will be dowloaded into this location, when executins the 'sources'
+4) The variable SYSLOCATION is required to be set, the source will be dowloaded into this location, when executing the 'sources'
    make target
+5) The variable SVNUSER is required in order to log into the SVN server
 
 
 TODO:

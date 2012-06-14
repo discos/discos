@@ -21,8 +21,8 @@ ifeq ($(TARGETSYS),SRT)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower NoiseGenerator DBBC SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation \
-		SRT7GHzReceiver \
-		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal \
+		SRT7GHzReceiver CustomLogger\
+		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CustomLoggingClient\
 		SRTActiveSurfaceGUIClient SRTMountTextClient \
 		Plotter KStars Scripts \
 
@@ -58,9 +58,9 @@ ifeq ($(TARGETSYS),MED)
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		Metrology TotalPower NoiseGenerator HolographyBackend DBBC MedicinaMount MedWeatherStation \
+		Metrology TotalPower NoiseGenerator HolographyBackend DBBC MedicinaMount MedWeatherStation CustomLogger\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal \
-		MedicinaMountTextClient MedicinaMountGUIClient MedicinaGeneralControlSystemGUIClient \
+		MedicinaMountTextClient MedicinaMountGUIClient MedicinaGeneralControlSystemGUIClient CustomLoggingClient\
 		Plotter KStars Scripts \
 		MedScripts
 

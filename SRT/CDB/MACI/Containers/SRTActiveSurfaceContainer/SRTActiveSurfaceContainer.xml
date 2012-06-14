@@ -19,7 +19,10 @@
 		minLogLevel="5"
 		minLogLevelLocal="5"
 		dispatchPacketSize="10"
-		immediateDispatchLevel="10">
+		immediateDispatchLevel="10"
+		flushPeriodSeconds="1"
+	>
 	</LoggingConfig>
+	
 </Container>
 

@@ -15,6 +15,7 @@
              MaxPointNumber="1000"
              GapTime="200000"
 	     	 CoordinateIntegration="1000000"
+	     	 CutOffElevation="70.0"
              MountInstance="ANTENNA/Mount"
              ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0" 
              PointingModelInstance="ANTENNA/PointingModel"
@@ -30,6 +31,7 @@
 <targetRightAscension/>
 <targetDeclination/>
 <targetVlsr/>
+<targetFlux/>
 <azimuthOffset/>
 <elevationOffset/>
 <rightAscensionOffset/>
@@ -51,6 +53,6 @@
 <pointingAzimuthCorrection/>
 <pointingElevationCorrection/>
 <refractionCorrection/>
-<BWHM/>
+<FWHM/>
 
 </AntennaBoss>
