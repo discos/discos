@@ -12,7 +12,7 @@ import logging
 import bisect
 import functools
 import Tkinter as tk
-from bsqueue import BoundedSortedQueue
+from IRAPy.bsqueue import BoundedSortedQueue
 
 #DEFINE LOGGING RECORDS TOTAL ORDERING RULES
 Management.CustomLoggingData.__eq__ = lambda self, other: self.timeStamp == other.timeStamp
