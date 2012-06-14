@@ -81,7 +81,7 @@ TCL_SCRIPTS_L   =
 PY_SCRIPTS         = CustomLoggingClient
 PY_SCRIPTS_L       =  
 
-PY_MODULES         = bsqueue
+PY_MODULES         =
 PY_MODULES_L       =
 
 PY_PACKAGES        =
