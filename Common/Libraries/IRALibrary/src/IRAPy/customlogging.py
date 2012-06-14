@@ -1,12 +1,14 @@
 """
-This module is intended to replace the ACS Logging module in 
-our python code. 
-Basically just substitute the getLogger call to the one contained in this module 
-to make logging effective for our custom syntax.
+This module is intended to replace the ACS Logging module in our python code. 
+This is necessary as our logging events contain a key-value pair of extra data used to distinguish them 
+from the ACS system log.
 """
 from Acspy.Common import Log
 import logging
 
+"""
+Key-Value pair distinguishing our custom logging.
+"""
 CUSTOM_ENV = dict(source="custom")
 CUSTOM_DATA = dict(data=CUSTOM_ENV)
 CUSTOM_EXTRA = dict(extra=CUSTOM_DATA)

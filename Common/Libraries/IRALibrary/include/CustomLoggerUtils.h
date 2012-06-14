@@ -7,9 +7,12 @@
 #define CUSTOM_LOGGING_DATA_NAME "source"
 #define CUSTOM_LOGGING_DATA_VALUE "custom"
 #define CUSTOM_LOGGING_CHANNEL acscommon::LOGGING_CHANNEL_XML_NAME
-#define CUSTOM_LOGGING_EXTENSION ".log"
-#define FULL_LOGGING_EXTENSION ".fullog"
 
+/**
+ * Use this macro to make a logging event interceptable by our custom logging system.
+ * the synthax is equal to ACS LOG macro but it automatically adds a Key-Value pair to
+ * the log record.
+ */
 #define CUSTOM_LOG(flags, routine, X) \
 { \
     ACS_CHECK_LOGGER; \
@@ -19,6 +22,10 @@
     LOG(tStruct.priority, routine, tStruct.message); \
 } 
 
+/**
+ * Use this macro to log an exception in the custom logging system.
+ * @param EX: an Exception
+ */
 #define CUSTOM_EXCPT_LOG(EX) \
 { \
     _ADD_EXTRA(EX, "source", "custom"); \
@@ -34,10 +41,26 @@
 
 namespace IRA{
 
+/**
+ * Static utilities to manipulate Custom Logging Events.
+ */
 class CustomLoggerUtils
 {
     public:
+        /**
+         * Convert a capitalized string to the corresponding log level as defined in Management interface.
+         * i.e. "Trace" is converted to Management::C_TRACE , and so on.
+         * The method does not throw exceptions and use C_INFO as default Logging Level for what it cannot interpret.
+         * @param str: the capitalized string representing a log leve
+         * @return a Management log level 
+         */
 	static Management::LogLevel string2customLogLevel(const char *str);
+        /**
+         * Conversion function between our Logging levels and the ones defined in ACE
+         * This method does not throw an exception but uses default conversion to LM_INFO level.
+         * @param level: a log level as defined in Management
+         * @return: the ACE log level
+         */
 	static ACE_Log_Priority custom2aceLogLevel(Management::LogLevel level);
     private:
         CustomLoggerUtils();
