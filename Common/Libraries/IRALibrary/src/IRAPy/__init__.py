@@ -10,3 +10,5 @@ list of modules:
 """
 import customlogging
 logger = customlogging.getLogger("IRA_CUSTOM_LOGGER")
+customlogging.Log.setCapacity(1)
+customlogging.Log.setBatchSize(1)
