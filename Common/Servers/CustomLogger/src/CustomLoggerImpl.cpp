@@ -110,7 +110,7 @@ CustomLoggerImpl::setMaxLevel(LogLevel level) throw (CORBA::SystemException)
 * Resolve the naming service and subscribe to the logging channel
 */
 void 
-CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
+CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl, ComponentErrors::ComponentErrorsEx)
 {
     ACS::Time _timestamp;
     setLogging(false);
@@ -124,13 +124,12 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     namingContext_m = maci::ContainerImpl::getContainer()->getService<CosNaming::NamingContext>(acscommon::NAMING_SERVICE_NAME, 0, true); 
     if(CORBA::is_nil(namingContext_m))
     {
-            ACS_SHORT_LOG((LM_ERROR, "CutomLoggerImpl unable to resolve name service"));
-            ACSErrTypeCommon::CORBAProblemExImpl err = ACSErrTypeCommon::CORBAProblemExImpl(__FILE__,__LINE__,"CustomLoggerImpl::initialize");
-            throw err.getCORBAProblemEx();
+            _EXCPT(ComponentErrors::CORBAProblemExImpl, _dummy, "CustomLoggerImpl::initialize");
+            CUSTOM_EXCPT_LOG(_dummy);
+            throw _dummy.getComponentErrorsEx();
     }
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : resolving logging channel name"));
     CORBA::Object_var obj = namingContext_m -> resolve(name);  
-//TODO: obj != NULL
     ec_ = CosNotifyChannelAdmin::EventChannel::_narrow(obj.in());
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : subscribing to the logging channel"));
     CosNotifyChannelAdmin::AdminID adminid;
@@ -158,8 +157,11 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogFile", _c_file)
      ){
 	setLogfile(_c_path, _a_path, _c_file, _a_file);
+     }else{
+        _EXCPT(ComponentErrors::CDBAccessExImpl, __dummy, "CustomLoggerImpl::initialize");
+        CUSTOM_EXCPT_LOG(__dummy);
+        throw __dummy.getComponentErrorsEx();
      }
-     //TODO: else ERROR
      long _a_age;
      if(IRA::CIRATools::getDBValue(getContainerServices(), "LogMaxAgeMillis", _a_age))
          _log_max_age = ACS::TimeInterval(_a_age * 10000);
@@ -180,7 +182,9 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
          m_loggingSupplier = new nc::SimpleSupplier(Management::CUSTOM_LOGGING_CHANNEL_NAME, tmp);
      }
      catch (...) {
-         _THROW_EXCPT(ComponentErrors::UnexpectedExImpl, "CustomLoggerImpl::initialize()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, ___dummy, "CustomLoggerImpl::initialize");
+        CUSTOM_EXCPT_LOG(___dummy);
+        throw ___dummy.getComponentErrorsEx();
      }
 };
 
@@ -266,8 +270,8 @@ CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors
         {
             _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, dummy, "CustomLoggerImpl::closeLogfile"); 
             dummy.setReason("error closing custom logfile");
-            dummy.log(LM_DEBUG);
-            throw dummy.getManagementErrorsEx();
+            CUSTOM_EXCPT_LOG(dummy);
+            throw dummy.getCustomLoggerIOErrorEx();
 	}
         _full_log.clear();
         _full_log.close();
@@ -275,8 +279,7 @@ CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors
         {
             _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, _dummy, "CustomLoggerImpl::closeLogfile"); 
             _dummy.setReason("error closing acs logfile");
-            _dummy.log(LM_DEBUG);
-            throw _dummy.getManagementErrorsEx();
+            throw _dummy.getCustomLoggerIOErrorEx();
 	}
     }
 };
@@ -405,9 +408,9 @@ CustomLoggerImpl::checkLogging()
 	return false;
 };
 
-/*
-* Handle a log record. 
-*/
+/**
+ * Handle a log record. 
+ */
 void 
 CustomLoggerImpl::handle(LogRecord_sp log_record)
 {
