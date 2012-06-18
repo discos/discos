@@ -14,6 +14,9 @@ CUSTOM_DATA = dict(data=CUSTOM_ENV)
 CUSTOM_EXTRA = dict(extra=CUSTOM_DATA)
 
 class CustomLogger(Log.Logger):
+    """This class replaces the standard logging functionalities by overloading the log method. 
+    Each log event now will have additional custom key-value data pairs.
+    """
     def __init__(self, name):
         Log.Logger.__init__(self, name)
 
@@ -21,6 +24,8 @@ class CustomLogger(Log.Logger):
         return self._Logger__formatMessage(msg)
 
     def log(self, *args, **kwargs):
+        """Add key-value custom data to the LogRecord structure
+        """
         if 'extra' in kwargs:
             if 'data' in kwargs['extra']:
                 kwargs['extra']['data'].update(CUSTOM_ENV)
@@ -34,8 +39,14 @@ logging.setLoggerClass(CustomLogger)
 logging.root.setLevel(logging.NOTSET)
 
 def getLogger(name=None):
+    """Get our custom logger form the system
+    """
     return logging.getLogger(str(name))
 
 if __name__ == '__main__':
     logger = getLogger("Custom Logger")
-    logger.logDebug("messaggio di prova")
+    logger.logDebug("Custom DEBUG message")
+    logger.logWarning("Custom WARNING message")
+    logger.logInfo("Custom INFO message")
+    logger.logAlert("Custom ALERT message")
+    logger.logCritical("Custom CRITICAL message")

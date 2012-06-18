@@ -11,8 +11,7 @@ classes:
 import bisect
 
 class SortedQueue(object):
-    """
-    Priority queue implemented on top of a standard python list.    
+    """Priority queue implemented on top of a standard python list.    
     The queue mantains informations about its size and can be checked for emptiness.
     Items can be pushed int the queue, and pop method always returns the less prioritized element.
 
@@ -37,9 +36,9 @@ class SortedQueue(object):
         self.size = 0
 
     def pop(self):
-        """
-        Extracts the lesser element from the queue and decrements its size
+        """Extracts the lesser element from the queue and decrements its size
         @return: the extracted item
+
         """
         if not self.empty():
             self.size -= 1
@@ -48,10 +47,10 @@ class SortedQueue(object):
             return None
 
     def push(self, item):
-        """
-        Insert a new item in the queue in the correct position. Insertion index is searched
+        """Insert a new item in the queue in the correct position. Insertion index is searched
         using the bisect module in o(log(size)) 
         @return: the insertion index
+
         """
         index = bisect.bisect(self._data, item)
         self._data.insert(index, item)
@@ -65,8 +64,7 @@ class SortedQueue(object):
         return res
 
 class BoundedSortedQueue(SortedQueue):
-    """
-    Bounded version of the SortedQueue. 
+    """Bounded version of the SortedQueue. 
     This Queue has a max_size attrtibute so that it cannot grow indefinitely.
     When the queue is full a call to push means pop + push.
 
