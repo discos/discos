@@ -96,9 +96,9 @@ module Management  {
 	
 	ACS_ENUM(TBoolean);
 	
-        /*
+        /**
          * Log level definitions for ACS custom logging utilization
-        */
+         */
         enum LogLevel{
 		C_TRACE,
 		C_DEBUG,

@@ -23,12 +23,21 @@
 } 
 
 /**
+ * @TODO: test this function!!!
+ */
+#define CUSTOM_STATIC_LOG(priority, routine, text) \
+{ \
+    LoggingProxy::AddData(CUSTOM_LOGGING_DATA_NAME, CUSTOM_LOGGING_DATA_VALUE); \
+    Logging::Logger::getStaticLogger()->log(priority, text, __FILE__, __LINE__, routine); \
+}
+
+/**
  * Use this macro to log an exception in the custom logging system.
  * @param EX: an Exception
  */
 #define CUSTOM_EXCPT_LOG(EX) \
 { \
-    _ADD_EXTRA(EX, "source", "custom"); \
+    _ADD_EXTRA(EX, CUSTOM_LOGGING_DATA_NAME, CUSTOM_LOGGING_DATA_VALUE); \
     EX.log(); \
 }
 
