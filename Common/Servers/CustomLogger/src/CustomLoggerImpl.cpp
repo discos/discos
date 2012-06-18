@@ -356,12 +356,6 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : logging"));
 };
 
-/*
-* Filter the log messages,
-* this filter shuold return true for all the messages produced by ESCS and false for every ACS 
-* message.
-* @return True if the log record must be processed further; False if the log has to be discarded 
-*/
 bool 
 CustomLoggerImpl::filter(LogRecord& log_record)
 {
