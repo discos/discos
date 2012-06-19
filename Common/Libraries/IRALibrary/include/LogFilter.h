@@ -10,7 +10,7 @@
 /* Who                                when            What                                              */
 /* Andrea Orlati(aorlati@ira.inaf.it) 25/01/2007      Creation                                          */
 /* Andrea Orlati(aorlati@ira.inaf.it) 01/09/2007      Added a thread that caches the repeated logs      */
-/* Andrea Orlati(aorlati@ira.inaf.it) 17/03/2008      Fixed a bug in ErrorWrapper taht causes the component to crash      */
+/* Andrea Orlati(aorlati@ira.inaf.it) 17/03/2008      Fixed a bug in ErrorWrapper that  causes the component to crash      */
 /* Andrea Orlati(aorlati@ira.inaf.it) 12/02/2010      Added the destroy method that should guarantee a smoother close up      */
 
 #include "Definitions.h"
@@ -141,14 +141,14 @@ namespace IRA {
 /**
  * This class allows to prevent log duplication based on time intervals. The working of the guard is very simple: the first time a log request
  * is issued the request is forwarded, then all other requests are ignored until the time interval is elapsed. in the latter case the log is 
- * forwared togetther with additional information.
+ * forwarded together with additional information.
  * The additional information consists for both errors and normal logs in two fields:
  *     @arg \c RepeatCounter reports the number of times that event was repeated in the given period.
  *     @arg \c Period this is the first and the last time the event occurred
  * In case the event is an error an extra field is added:
  *     @arg \c ErrorTraceSize reports the depth of the error trace of the error
  * The great concern about this policy can be explained with a practical example: let's suppose a log request is issued twice; the first log is
- * forwared regularly, if the second one is issued before the time interval is elapsed will be ignored. That causes a loss of information.
+ * forwarded regularly, if the second one is issued before the time interval is elapsed will be ignored. That causes a loss of information.
  * This class is NOT thread safe.
  * A typical call sequence could be:
  * <pre>
@@ -188,14 +188,14 @@ public:
 	virtual ~CLogGuard() { }
 	
 	/** 
-	 * This function should be used to log a message. The message will be effectively logged the first time or after hte time interval has elapsed. 
+	 * This function should be used to log a message. The message will be effectively logged the first time or after the time interval has elapsed.
 	 * @param logger that's the logger object that should be used to log the message
 	 * @param prior the log priority
 	 * @param msg the log text 
 	 * @param fn the file name of the source file that generates the log message
-	 * @param ln the line number inside the file name given before. The pair (filename,linenumber) will be the way the filter recognizes the log.
+	 * @param ln the line number inside the file name given before. The pair (filename,line number) will be the way the filter recognizes the log.
 	 * @param rtn the name of the routine that generates the log message
-	 * @param flg sets the flags that will aplly to the log entry that will be submitted
+	 * @param flg sets the flags that will apply to the log entry that will be submitted
 	 */
 	virtual void log(Logging::Logger::LoggerSmartPtr& logger,const Logging::BaseLog::Priority& prior,const CString& msg,const CString& fn,
 	  const DDWORD& ln,const CString& rtn,const unsigned flg);
@@ -345,10 +345,11 @@ private:
 };
 
 /**
+ * @attention This class is deprecated and should be replaced by <i>CLogDike</i> instead.
  * This class can be used to keep track of the number of logs published toward the ACS centralized log in order
  * to avoid to flood the service and the network. The logs are identified by the pair (file name,line number) of the
  * source code that wants to log a messages. This class is very rudimental and allows to filter out log messages and errors based just on time.
- * In order to ease the deplyment of this class a set of macros are supplied; typically if we consider a single module a sequence of calls could
+ * In order to ease the deployment of this class a set of macros are supplied; typically if we consider a single module a sequence of calls could
  * be: 
  * <pre>
  * // declare the log filter. 

@@ -46,7 +46,7 @@ class HistoryCompleter(object):
             if text:
                 self.matches=sorted(h for h in history_values if h and h.startswith(text))
             else:
-                sERRORelf.matches=[]
+                self.matches=[]
         try:
             response=self.matches[state]
         except IndexError:

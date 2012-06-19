@@ -36,7 +36,7 @@ USER_CFLAGS =
 INCLUDES = Definitions.h String.h IRATools.h Error.h SecureArea.h SerialPort.h Lecom.h \
  Socket.h DataField.h DBTable.h LogFilter.h Site.h DateTime.h SkySource.h TimeTaggedCircularArray.h \
  ScheduleTimer.h TimeoutSync.h MicroControllerBoard.h ReceiverControl.h MicroControllerBoardDef.h \
- SourceFlux.h CustomLoggerUtils.h IRA
+ SourceFlux.h CustomLoggerUtils.h LogDike.h IRA
 
 #
 # Libraries (public and local)
@@ -45,13 +45,13 @@ LIBRARIES       = IRALibrary
 LIBRARIES_L     =
 IRALibrary_OBJECTS = String IRATools Error SerialPort Lecom Socket DataField DBTable LogFilter \
  Site DateTime SkySource TimeTaggedCircularArray ScheduleTimer TimeoutSync MicroControllerBoard \
- ReceiverControl SourceFlux CustomLoggerUtils
+ ReceiverControl SourceFlux CustomLoggerUtils LogDike
 IRALibrary_LIBS = acstime SlaLibrary maciClient
 
 PY_PACKAGES  = IRAPy
 
 EXECUTABLES     =
-EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl
+EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike
 
 #
 # <brief description of xxxxx program>
@@ -72,6 +72,9 @@ TestMicroControllerBoard_LIBS      = IRALibrary
 
 TestReceiverControl_OBJECTS   = TestReceiverControl
 TestReceiverControl_LIBS      = IRALibrary
+
+TestLogDike_OBJECTS = TestDike
+TestLogDike_LIBS      = IRALibrary ClientErrors
 
 # 
 # IDL Files and flags
