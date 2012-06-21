@@ -3,7 +3,6 @@
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: MedicinaMountImpl.h,v 1.16 2010-12-06 12:49:42 a.orlati Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
@@ -24,6 +23,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 18/07/2008   removed the notification channel  */
 /* Andrea Orlati(aorlati@ira.inaf.it) 02/04/2010   implemented the getHWAzimuth method  */
 /* Andrea Orlati(aorlati@ira.inaf.it) 04/08/2010   fixed a bug that caused the container (SEGFAULT)to crash on exit  */
+/* Andrea Orlati(aorlati@ira.inaf.it)  21/07/2012   ACS_LOG replaced with CUSTIM_LOG macros		 */
 
 
 #ifndef __cplusplus

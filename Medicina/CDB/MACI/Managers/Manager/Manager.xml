@@ -9,6 +9,7 @@
   AdministratorPingInterval="20.0">
 
   <Startup>
+  	<cdb:_ string="MANAGEMENT/CustomLogger"/>
   </Startup>
 
   <ServiceComponents>

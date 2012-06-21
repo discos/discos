@@ -16,6 +16,12 @@ CLogDike::~CLogDike()
 	destroy();
 }
 
+void CLogDike::changeTimeSettings(const long& cacheTime,const long& expireTime)
+{
+	m_expireTime=expireTime*10; // transform micro seconds to 100 nano
+	m_cacheTime=cacheTime*10; // transform micro seconds to 100 nano
+}
+
 CLogDike::CEvent *CLogDike::findEvent(const CString& fileName,const DDWORD& lineNumber)
 {
 	TIterator i;

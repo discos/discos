@@ -3,7 +3,6 @@
 
 /* **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id: MedicinaMountSocket.h,v 1.11 2010-10-14 12:08:28 a.orlati Exp $																								*/
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
@@ -15,6 +14,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  25/01/2008     added the function getAbsTime                              */
 /* Andrea Orlati(aorlati@ira.inaf.it)  17/07/2008     added getAntennaErrors                             */
 /* Andrea Orlati(aorlati@ira.inaf.it)  02/04/2010     added getHWAzimuth method							 */
+/* Andrea Orlati(aorlati@ira.inaf.it)  21/07/2012     LogFilter class replaced with LogDike, ACS_LOG replaced with CUSTIM_LOG macros		 */
 
 #include <IRA>
 #include <MedicinaMountS.h>
@@ -25,8 +25,8 @@
 #include <ComponentErrors.h>
 #include <TimeTaggedCircularArray.h>
 #include "Configuration.h"
+#include <LogDike.h>
 
-using namespace IRA;
 
 #define UNSTOW_ACTION 1
 #define STOW_ACTION 2
@@ -553,6 +553,10 @@ protected:
 	*/
 	void onTimeout(WORD EventMask);
 private:
+	/**
+	 * Log filtering object
+	 */
+	IRA::CLogDike m_logDike;
 	/** ACU data structure */
 	CACUData m_Data;
 	/** Connection status */
@@ -571,7 +575,7 @@ private:
 	CTimeTaggedCircularArray *m_trackStack;
 	/** This member stores the section that must be used to reach the next commanded position in azimuth */
 	CACUInterface::TAntennaSection m_commandSection;
-	// memeber user to manage the oscillation problem
+	// member user to manage the oscillation problem
 	/**
 	 * direction of the tracking error with respect to the zero error
 	 */

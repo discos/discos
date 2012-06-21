@@ -35,10 +35,10 @@
  * Use this macro to log an exception in the custom logging system.
  * @param EX: an Exception
  */
-#define CUSTOM_EXCPT_LOG(EX) \
+#define CUSTOM_EXCPT_LOG(EX,priority) \
 { \
     _ADD_EXTRA(EX, CUSTOM_LOGGING_DATA_NAME, CUSTOM_LOGGING_DATA_VALUE); \
-    EX.log(); \
+    EX.log(priority); \
 }
 
 /********************************************/

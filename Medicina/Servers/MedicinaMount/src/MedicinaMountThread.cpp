@@ -49,8 +49,9 @@ void CMedicinaMountControlThread::runLoop()
 	currentJobID=currentJob->jobID;
 	currentJob.Release(); // this is important in order to avoid possible deadlock.
 	CSecAreaResourceWrapper<CMedicinaMountSocket> socket=m_pACUControl->Get();
-	socket->updateComponent();
-	socket->detectOscillation();
+	socket->updateComponent();  // before commenting out or deleting consider that inside this method the flushing of pending event of the log dike object is called
+	// oscillation detection disabled as it seems the effect disappeared after tuning of servo system parameters
+	//socket->detectOscillation();
 	if (currentJobID!=0) {
 		ACSErr::Completion_var comp;
 		if (socket->updateLongJobs(currentJobID,comp.out())) {

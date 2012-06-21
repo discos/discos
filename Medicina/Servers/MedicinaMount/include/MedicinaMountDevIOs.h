@@ -3,7 +3,6 @@
 
 /* **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id: MedicinaMountDevIOs.h,v 1.4 2010-08-04 13:10:10 a.orlati Exp $									           */
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
@@ -26,8 +25,6 @@
 #include <AntennaErrors.h>
 #include <ComponentErrors.h>
 #include <LogFilter.h>
-
-using namespace IRA;
 
 /**
  * This template class is derived from DevIO and it is used by the azimuth, elevation, azimuth error and elevation error and so on properties 

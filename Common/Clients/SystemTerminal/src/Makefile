@@ -20,7 +20,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = sysTerm
+PY_SCRIPTS         = _tui_SysTerm
 PY_SCRIPTS_L       =
 
 PY_MODULES         =

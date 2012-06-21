@@ -21,7 +21,6 @@ using namespace ComponentErrors;
 static char *rcsId="@(#) $Id: MedicinaMountImpl.cpp,v 1.17 2011-04-22 17:15:07 a.orlati Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
-//_IRA_LOGFILTER_DECLARE;
 
 MedicinaMountImpl::MedicinaMountImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) : 
 	CharacteristicComponentImpl(CompName,containerServices),
@@ -58,12 +57,12 @@ MedicinaMountImpl::~MedicinaMountImpl()
 void MedicinaMountImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("MedicinaMountImpl::initialize()");
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::initialize()",(LM_INFO,"MedicinaMount::COMPSTATE_INITIALIZING"));
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::initialize()",(LM_INFO,"MedicinaMount::COMPSTATE_INITIALIZING"));
 	CMedicinaMountSocket *ACUSocket=NULL;
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::initialize()",(LM_INFO,"MedicinaMount::READING_CONFIGURATION"));
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::initialize()",(LM_INFO,"MedicinaMount::READING_CONFIGURATION"));
 	// this could throw an exception.....	
 	m_CompConfiguration.Init(getContainerServices());
-	ACS_LOG(LM_FULL_INFO,"MedicinaMount::initialize()",(LM_INFO,"MedicinaMount::CONFIGURATION_DONE"));	
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMount::initialize()",(LM_INFO,"MedicinaMount::CONFIGURATION_DONE"));
 	DDWORD tm=m_CompConfiguration.repetitionCacheTime();
 	try {
 		ACUSocket=new CMedicinaMountSocket();
@@ -121,26 +120,21 @@ void MedicinaMountImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_EXCPT(MemoryAllocationExImpl,dummy,"MedicinaMountImpl::initialize()");
 		throw dummy;
 	}
-	//ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::initialize()",(LM_INFO,"MedicinaMount::NOTIFICATION_CHANNEL_CONNECTING"));	
-	//m_ACUDataSupplier=new nc::SimpleSupplier(Antenna::MOUNT_DATA_CHANNEL,this);
-	//ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::initialize()",(LM_INFO,"MedicinaMount::NOTIFICATION_CHANNEL_CONNECTED"));		
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::initialize()",(LM_INFO,"MedicinaMount::COMPSTATE_INITIALIZED"));
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::initialize()",(LM_INFO,"MedicinaMount::COMPSTATE_INITIALIZED"));
 }
 
 void MedicinaMountImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
 	DWORD timeSlice;
 	AUTO_TRACE("MedicinaMountImpl::execute()");
-	//initialize the log filter
-	//_IRA_LOGFILTER_ACTIVATE(m_CompConfiguration.repetitionCacheTime(),m_CompConfiguration.expireCacheTime());
-	ACS_LOG(LM_FULL_INFO,"MedicinaMount::execute()",(LM_INFO,"MedicinaMount::LOGGING_REPETITION_FILTER_ACTIVATED"));		
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMount::execute()",(LM_INFO,"MedicinaMount::LOGGING_REPETITION_FILTER_ACTIVATED"));
 	CSecAreaResourceWrapper<CMedicinaMountSocket> Socket=m_ACULink->Get();
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::ACU_SOCKET_CONNECTING"));
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::ACU_SOCKET_CONNECTING"));
 	// this could throw an exception.....
 	Socket->Init(&m_CompConfiguration);
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::ACU_SOCKET_CONNECTED"));
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::ACU_SOCKET_CONNECTED"));
 	timeSlice=m_CompConfiguration.controlThreadPeriod();
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::CONTROL_THREAD_STARTING"));	
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::CONTROL_THREAD_STARTING"));
 	try {
 		if(m_pcontrolLoop==NULL) {
 			m_pcontrolLoop=getContainerServices()->getThreadManager()->create<CMedicinaMountControlThread,CSecureArea<CMedicinaMountSocket> *>("MedicinaMountControl",m_ACULink);
@@ -151,7 +145,7 @@ void MedicinaMountImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	catch (...) {
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"MedicinaMountImpl::execute()");
 	}
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::CONTROL_THREAD_STARTED"));	
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::CONTROL_THREAD_STARTED"));
 	try {
 		startPropertiesMonitoring();
 	}
@@ -163,7 +157,7 @@ void MedicinaMountImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,__dummy,E,"MedicinaMountImpl::execute");
 		throw __dummy;		
 	}
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::COMPSTATE_OPERATIONAL"));
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::COMPSTATE_OPERATIONAL"));
 }
 
 void MedicinaMountImpl::cleanUp()
@@ -174,12 +168,12 @@ void MedicinaMountImpl::cleanUp()
 		m_pcontrolLoop->suspend();
 		getContainerServices()->getThreadManager()->destroy(m_pcontrolLoop);
 	}
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::cleanUp()",(LM_INFO,"MedicinaMount::CONTROL_THREAD_TERMINATED"));	
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::cleanUp()",(LM_INFO,"MedicinaMount::CONTROL_THREAD_TERMINATED"));
 	/*if (m_ACUDataSupplier!=0) {
 		m_ACUDataSupplier->disconnect();
 		m_ACUDataSupplier=0;
 	}
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::cleanUp()",(LM_INFO,"MedicinaMount::NOTIFICATION_CHANNEL_DISCONNECTED"));*/	
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::cleanUp()",(LM_INFO,"MedicinaMount::NOTIFICATION_CHANNEL_DISCONNECTED"));*/
 	// the protected object is destoyed by the secure area destructor
 	if (m_ACULink) {
 		CSecAreaResourceWrapper<CMedicinaMountSocket> Socket=m_ACULink->Get();
@@ -188,7 +182,7 @@ void MedicinaMountImpl::cleanUp()
 		delete m_ACULink;
 		m_ACULink=NULL;
 	}
-	ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::cleanUp()",(LM_INFO,"MedicinaMount::ACU_SOCKET_CLOSED"));
+	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::cleanUp()",(LM_INFO,"MedicinaMount::ACU_SOCKET_CLOSED"));
 	CharacteristicComponentImpl::cleanUp();	
 }
 
@@ -282,14 +276,14 @@ void MedicinaMountImpl::stop() throw (CORBA::SystemException,ComponentErrorsEx,A
 		CSecAreaResourceWrapper<CMedicinaMountSocket> Socket=m_ACULink->Get();
 		try {
 			Socket->Stop();
-			ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::stop()",(LM_NOTICE,"MedicinaMount::ANTENNA_STOPPED"));		
+			CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::stop()",(LM_NOTICE,"MedicinaMount::ANTENNA_STOPPED"));
 		}
 		catch (ComponentErrors::ComponentErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getComponentErrorsEx();		
 		}
 		catch (AntennaErrors::AntennaErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getAntennaErrorsEx();		
 		}
 	}
@@ -306,13 +300,12 @@ void MedicinaMountImpl::unstow(ACS::CBvoid_ptr cb,const ACS::CBDescIn &desc) thr
 		CSecAreaResourceWrapper<CMedicinaMountSocket> Socket=m_ACULink->Get();
 		try {
 			Socket->Mode(CACUInterface::UNSTOW,CACUInterface::UNSTOW);
-			ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::unstow()",(LM_NOTICE,"MedicinaMount::UNSTOW_COMMAND"));		
+			CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::unstow()",(LM_NOTICE,"MedicinaMount::UNSTOW_COMMAND"));
 		}		
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_COMPL_FROM_EXCPT(OperationErrorCompletion,dummy,E,"MedicinaMountImpl::unstow()");
 			dummy.setReason("Mode could not be changed");
-			//_IRA_LOGFILTER_LOG_COMPLETION(dummy,LM_DEBUG);
-			dummy.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(dummy,LM_DEBUG);
 			try {
 				cb->done(dummy,Dout);
 			}
@@ -340,13 +333,12 @@ void MedicinaMountImpl::stow(ACS::CBvoid_ptr cb,const ACS::CBDescIn &desc) throw
 		CSecAreaResourceWrapper<CMedicinaMountSocket> Socket=m_ACULink->Get();
 		try {
 			Socket->Mode(CACUInterface::STOW,CACUInterface::STOW);
-			ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::stow()",(LM_NOTICE,"MedicinaMount::STOW_COMMAND"));				
+			CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::stow()",(LM_NOTICE,"MedicinaMount::STOW_COMMAND"));
 		}		
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_COMPL_FROM_EXCPT(OperationErrorCompletion,dummy,E,"MedicinaMountImpl::stow()");
 			dummy.setReason("Mode could not be changed");
-			//_IRA_LOGFILTER_LOG_COMPLETION(dummy,LM_DEBUG);
-			dummy.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(dummy,LM_DEBUG);
 			try {
 				cb->done(dummy,Dout);
 			}
@@ -374,11 +366,11 @@ void MedicinaMountImpl::preset(CORBA::Double az,CORBA::Double el) throw (CORBA::
 			Socket->Preset(az,el);
 		}
 		catch (ComponentErrors::ComponentErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getComponentErrorsEx();		
 		}
 		catch (AntennaErrors::AntennaErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getAntennaErrorsEx();		
 		}		
 	}
@@ -396,11 +388,11 @@ void MedicinaMountImpl::programTrack(CORBA::Double az,CORBA::Double el,ACS::Time
  			Socket->programTrack(az,el,timeData,restart);
  		}
 		catch (ComponentErrors::ComponentErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getComponentErrorsEx();		
 		}
 		catch (AntennaErrors::AntennaErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getAntennaErrorsEx();		
 		}	 		
  	}
@@ -416,11 +408,11 @@ void MedicinaMountImpl::rates(CORBA::Double azRate,CORBA::Double elRate) throw (
 			Socket->Rate(azRate,elRate);
 		}
 		catch (ComponentErrors::ComponentErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getComponentErrorsEx();		
 		}
 		catch (AntennaErrors::AntennaErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getAntennaErrorsEx();		
 		}
 	}
@@ -433,13 +425,12 @@ void MedicinaMountImpl::resetFailures() throw (CORBA::SystemException, Component
 		CSecAreaResourceWrapper<CMedicinaMountSocket> Socket=m_ACULink->Get();	
 		try {
 			Socket->failureReset();
-			ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::resetFailures()",(LM_NOTICE,"MedicinaMount::FAILURES_CLEARED"));		
+			CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::resetFailures()",(LM_NOTICE,"MedicinaMount::FAILURES_CLEARED"));
 		}		
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(OperationErrorExImpl,dummy,E,"MedicinaMountImpl::failureReset()");
 			dummy.setReason("servo failure could not be cleared");
-			//_IRA_LOGFILTER_LOG_EXCEPTION(dummy,LM_DEBUG);
-			dummy.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw dummy.getComponentErrorsEx();		
 		}
 	}
@@ -456,8 +447,7 @@ void MedicinaMountImpl::changeMode(Antenna::TCommonModes azMode,Antenna::TCommon
 			dummy.setReason((const char *)msg);
 			_ADD_BACKTRACE(ValidationErrorExImpl,foo,dummy,"MedicinaMountImpl::changeMode()");
 			foo.setReason("Azimuth mode is not allowed");
-			//_IRA_LOGFILTER_LOG_EXCEPTION(foo,LM_DEBUG);
-			foo.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(foo,LM_DEBUG);
 			throw foo.getComponentErrorsEx();		
 		}
 		if ((elMode!=Antenna::ACU_PRESET) && (elMode!=Antenna::ACU_PROGRAMTRACK) && (elMode!=Antenna::ACU_RATE)) {
@@ -467,8 +457,7 @@ void MedicinaMountImpl::changeMode(Antenna::TCommonModes azMode,Antenna::TCommon
 			dummy.setReason((const char *)msg);
 			_ADD_BACKTRACE(ValidationErrorExImpl,foo,dummy,"MedicinaMountImpl::changeMode()");
 			foo.setReason("Elevation mode is not allowed");
-			//_IRA_LOGFILTER_LOG_EXCEPTION(dummy,LM_DEBUG);
-			foo.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(foo,LM_DEBUG);
 			throw foo.getComponentErrorsEx();	  
 		}
 		CSecAreaResourceWrapper<CMedicinaMountSocket> Socket=m_ACULink->Get();
@@ -480,14 +469,14 @@ void MedicinaMountImpl::changeMode(Antenna::TCommonModes azMode,Antenna::TCommon
 			IRA::CString azName,elName;
 			azName=CACUInterface::messageFromMode(az);
 			elName=CACUInterface::messageFromMode(el);
-			ACS_LOG(LM_FULL_INFO,"MedicinaACU::changeMode()",(LM_NOTICE,"MedicinaACU::MODE_CHANGED az=%s el=%s",(const char*)azName,(const char *)elName));		
+			CUSTOM_LOG(LM_FULL_INFO,"MedicinaACU::changeMode()",(LM_NOTICE,"MedicinaACU::MODE_CHANGED az=%s el=%s",(const char*)azName,(const char *)elName));
 		}
 		catch (ComponentErrors::ComponentErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getComponentErrorsEx();		
 		}
 		catch (AntennaErrors::AntennaErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getAntennaErrorsEx();		
 		}
 	}
@@ -501,14 +490,14 @@ void MedicinaMountImpl::setTime(ACS::Time now) throw (CORBA::SystemException, Co
 		CSecAreaResourceWrapper<CMedicinaMountSocket> Socket=m_ACULink->Get();	
 		try {
 			Socket->timeTransfer(timeData);
-			ACS_LOG(LM_FULL_INFO,"MedicinaMountImpl::setTime()",(LM_NOTICE,"MedicinaMount:ACU_TIME_CHANGED"));
+			CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::setTime()",(LM_NOTICE,"MedicinaMount:ACU_TIME_CHANGED"));
 		}		
 		catch (ComponentErrors::ComponentErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getComponentErrorsEx();		
 		}
 		catch (AntennaErrors::AntennaErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getAntennaErrorsEx();		
 		}			
 	}
@@ -526,11 +515,11 @@ void MedicinaMountImpl::getEncoderCoordinates(ACS::Time_out time,CORBA::Double_o
 			section=CMedicinaMountSocket::acuSection2IDL(tmp);
 		}
 		catch (ComponentErrors::ComponentErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getComponentErrorsEx();		
 		}
 		catch (AntennaErrors::AntennaErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getAntennaErrorsEx();		
 		}		
 	}
@@ -546,11 +535,11 @@ void MedicinaMountImpl::getAntennaErrors(ACS::Time_out time,CORBA::Double_out az
 			Socket->getAntennaErrors(azError,elError,time);
 		}
 		catch (ComponentErrors::ComponentErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getComponentErrorsEx();		
 		}
 		catch (AntennaErrors::AntennaErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getAntennaErrorsEx();		
 		}
 	}
@@ -588,11 +577,11 @@ void MedicinaMountImpl::setOffsets(CORBA::Double azOff,CORBA::Double elOff) thro
 			Socket->setPositionOffsets(az,el);
 		}
 		catch (ComponentErrors::ComponentErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getComponentErrorsEx();		
 		}
 		catch (AntennaErrors::AntennaErrorsExImpl& E) {
-			E.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(E,LM_DEBUG);
 			throw E.getAntennaErrorsEx();		
 		}
 	}

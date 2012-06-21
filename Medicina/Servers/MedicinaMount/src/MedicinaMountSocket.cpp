@@ -1,10 +1,10 @@
-// $Id: MedicinaMountSocket.cpp,v 1.16 2011-03-28 10:12:15 a.orlati Exp $
-#include <LogFilter.h>
+
+
+//#include <LogFilter.h>
 #include "MedicinaMountSocket.h"
 #include <IRATools.h>
 
 #define _STACKSIZE 2500
-
 
 #define _LAUNCH_BUFFER(BUFFER,LENGTH,ROUTINE) { \
 	int Res; \
@@ -50,10 +50,9 @@
 
 using namespace AntennaErrors;
 using namespace ComponentErrors;
+using namespace IRA;
 
-_IRA_LOGFILTER_DECLARE;
-
-CMedicinaMountSocket::CMedicinaMountSocket(): CSocket()
+CMedicinaMountSocket::CMedicinaMountSocket(): CSocket() , m_logDike(_IRA_LOGDIKE_GETLOGGER)
 {
 	AUTO_TRACE("CMedicinaMountSocket::CMedicinaMountSocket()");
 	setStatus(Antenna::ACU_NOTCNTD);
@@ -74,15 +73,14 @@ void CMedicinaMountSocket::cleanUp()
 {
 	Close(m_Error);
 	if (m_trackStack!=NULL) delete m_trackStack;
-	_IRA_LOGFILTER_FLUSH;
-	_IRA_LOGFILTER_DESTROY;	
+	_IRA_LOGDIKE_DESTROY(m_logDike);
 }
 
 void CMedicinaMountSocket::Init(CConfiguration *config) throw (SocketErrorExImpl)
 {
 	AUTO_TRACE("CMedicinaMountSocket::Init()");
 	m_configuration=config;
-	_IRA_LOGFILTER_ACTIVATE(m_configuration->repetitionCacheTime(),m_configuration->expireCacheTime());
+	_IRA_LOGDIKE_CONFIGURE(m_logDike,m_configuration->repetitionCacheTime(),m_configuration->expireCacheTime());
 	// this will create the socket in blocking mode.....
 	if (Create(m_Error,STREAM)==FAIL) {
 		_EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,m_Error);
@@ -849,7 +847,7 @@ void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErr
 	CACUInterface::TAxeModes mode=m_Data.getLastCommandedMode();
 	if (m_oscStop) { // if the oscillation has been detected.....during previuos iteration
 		if (now.value().value>=m_oscStopTime+m_configuration->oscillationRecoveryTime()) { // the time to wait for trying to recover has elapsed.....
-			ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::detectOscillation()",(LM_NOTICE,"OSCILLATION_RECOVERY"));
+			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::detectOscillation()",(LM_NOTICE,"OSCILLATION_RECOVERY"));
 			Mode(m_oscMode,m_oscMode); // throw (TimeoutExImpl,NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
 			m_oscStop=false;
 			m_oscAlarm=false; // clear the oscillation detection.....
@@ -913,7 +911,7 @@ void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErr
 		}	
 	}
 	if (m_oscStop) { // if the oscillation has been detected durint current iteration.....stop the antenna
-		ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::detectOscillation()",(LM_CRITICAL,"OSCILLATION_DETECTED"));
+		CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::detectOscillation()",(LM_CRITICAL,"OSCILLATION_DETECTED"));
 		m_oscMode=mode; ///store the current mode, in order to recommand it for ascillation recovery;
 		m_oscStopTime=now.value().value;
 		Stop(); //throw (TimeoutExImpl,NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
@@ -941,7 +939,7 @@ bool CMedicinaMountSocket::updateLongJobs(WORD job,ACSErr::Completion_out comp)
 		setStopped(false);
 		_COMPL(StoppedByUserCompletion,dummy,"CMedicinaMountSocket::updateLongJobs()");
 		comp=dummy.outCompletion();
-		ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::updateLongJobs()",(LM_NOTICE,"CURRENT_ACTION_STOPPED"));
+		CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::updateLongJobs()",(LM_NOTICE,"CURRENT_ACTION_STOPPED"));
 		return true;
 	}
 	switch (job) {
@@ -952,8 +950,7 @@ bool CMedicinaMountSocket::updateLongJobs(WORD job,ACSErr::Completion_out comp)
 			catch (ACSErr::ACSbaseExImpl& E) {
 				_COMPL_FROM_EXCPT(OperationErrorCompletion,__dummy,E,"CMedicinaMountSocket::updateLongJobs()");
 				__dummy.setReason("Could not read azimuth servo status");
-				_IRA_LOGFILTER_LOG_COMPLETION(__dummy,LM_DEBUG);
-				//__dummy.log(LM_DEBUG);
+				_IRA_LOGDIKE_COMPLETION(m_logDike,__dummy,LM_DEBUG);
 				comp=__dummy.outCompletion();
 				return true;
 			}
@@ -963,8 +960,7 @@ bool CMedicinaMountSocket::updateLongJobs(WORD job,ACSErr::Completion_out comp)
 			catch (ACSErr::ACSbaseExImpl& E) {
 				_COMPL_FROM_EXCPT(OperationErrorCompletion,__dummy,E,"CMedicinaMountSocket::updateLongJobs()");
 				__dummy.setReason("Could not read elevation servo status");
-				_IRA_LOGFILTER_LOG_COMPLETION(__dummy,LM_DEBUG);
-				//__dummy.log(LM_DEBUG);
+				_IRA_LOGDIKE_COMPLETION(m_logDike,__dummy,LM_DEBUG);
 				comp=__dummy.outCompletion();
 				return true;
 			}			
@@ -973,7 +969,7 @@ bool CMedicinaMountSocket::updateLongJobs(WORD job,ACSErr::Completion_out comp)
 	  		  ((elStatus&CACUInterface::STOWPINRETRACTED)==CACUInterface::STOWPINRETRACTED)) {
 				ComponentErrors::NoErrorCompletion dummy;
 				comp=dummy.outCompletion();
-				ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::updateLongJobs()",(LM_NOTICE,"ANTENNA_UNSTOWED"));		
+				CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::updateLongJobs()",(LM_NOTICE,"ANTENNA_UNSTOWED"));
 				return true;
 			}			
 			return false;
@@ -985,8 +981,7 @@ bool CMedicinaMountSocket::updateLongJobs(WORD job,ACSErr::Completion_out comp)
 			catch (ACSErr::ACSbaseExImpl& E) {
 				_COMPL_FROM_EXCPT(OperationErrorCompletion,__dummy,E,"CMedicinaMountSocket::updateLongJobs()");
 				__dummy.setReason("Could not read azimuth servo status");
-				_IRA_LOGFILTER_LOG_COMPLETION(__dummy,LM_DEBUG);
-				//__dummy.log(LM_DEBUG);
+				_IRA_LOGDIKE_COMPLETION(m_logDike,__dummy,LM_DEBUG);
 				comp=__dummy.outCompletion();
 				return true;
 			}
@@ -996,8 +991,7 @@ bool CMedicinaMountSocket::updateLongJobs(WORD job,ACSErr::Completion_out comp)
 			catch (ACSErr::ACSbaseExImpl& E) {
 				_COMPL_FROM_EXCPT(OperationErrorCompletion,__dummy,E,"CMedicinaMountSocket::updateLongJobs()");
 				__dummy.setReason("Could not read elevation servo status");
-				_IRA_LOGFILTER_LOG_COMPLETION(__dummy,LM_DEBUG);
-				//__dummy.log(LM_DEBUG);
+				_IRA_LOGDIKE_COMPLETION(m_logDike,__dummy,LM_DEBUG);
 				comp=__dummy.outCompletion();
 				return true;
 			}			
@@ -1006,7 +1000,7 @@ bool CMedicinaMountSocket::updateLongJobs(WORD job,ACSErr::Completion_out comp)
 	  		  ((elStatus&CACUInterface::STOWPININSERTED)==CACUInterface::STOWPININSERTED)) {
 				ComponentErrors::NoErrorCompletion dummy;
 				comp=dummy.outCompletion();
-				ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::updateLongJobs()",(LM_NOTICE,"ANTENNA_STOWED"));						  
+				CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::updateLongJobs()",(LM_NOTICE,"ANTENNA_STOWED"));
 				return true;
 			}			
 			return false;		
@@ -1023,18 +1017,19 @@ void CMedicinaMountSocket::updateComponent()
 		try {
 			Management::TSystemStatus st=getMountStatus();
 			if (st==Management::MNG_FAILURE) {
-				_IRA_LOGFILTER_LOG(LM_CRITICAL,"CMedicinaMountSocket::updateComponent()","HW_FAILURE");
+				_IRA_LOGDIKE_LOG(m_logDike,LM_CRITICAL,"CMedicinaMountSocket::updateComponent()","HW_FAILURE");
 			}
 			else if (st==Management::MNG_WARNING) {
-				_IRA_LOGFILTER_LOG(LM_WARNING,"CMedicinaMountSocket::updateComponent()","HW_WARNING");
+				_IRA_LOGDIKE_LOG(m_logDike,LM_WARNING,"CMedicinaMountSocket::updateComponent()","HW_WARNING");
 			}			     
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(WatchDogErrorExImpl,dummy,E,"CMedicinaMountSocket::updateComponent()");
 			dummy.setReason("Can't get mount status information");
-			_IRA_LOGFILTER_LOG_EXCEPTION(dummy,LM_ERROR);
+			_IRA_LOGDIKE_EXCEPTION(m_logDike,dummy,LM_ERROR);
 		}		
 	}
+	_IRA_LOGDIKE_CHECK(m_logDike); // performs the logging of pending events
 }
 
 // Protected Methods
@@ -1047,8 +1042,7 @@ void CMedicinaMountSocket::onConnect(int ErrorCode)
 			if (EventSelect(Tmp,E_CONNECT,false)==SUCCESS) {
 				if (isBusy()) setStatus(Antenna::ACU_BSY);
 				else setStatus(Antenna::ACU_CNTD);
-				_IRA_LOGFILTER_LOG(LM_NOTICE,"CMedicinaMountSocket::onConnect()","MedicinaMount::SOCKET_RECONNECTED");
-				//ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::onConnect()",(LM_NOTICE,"MedicinaMount::SOCKET_RECONNECTED"));			
+				_IRA_LOGDIKE_LOG(m_logDike,LM_NOTICE,"CMedicinaMountSocket::onConnect()","SOCKET_RECONNECTED");
 			}
 		}
 		else {
@@ -1076,16 +1070,14 @@ CMedicinaMountSocket::OperationResult CMedicinaMountSocket::sendBuffer(BYTE *Msg
 		if ((NWrite=Send(m_Error,(const void *)(Msg+BytesSent),Len-BytesSent))<0) {
 			if (NWrite==WOULDBLOCK) {
 				setStatus(Antenna::ACU_NOTCNTD);
-				_IRA_LOGFILTER_LOG(LM_CRITICAL,"CMedicinaMountSocket::sendBuffer()","MedicinaMount::SOCKET_DISCONNECTED - remote side shutdown");
-				//ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::sendBuffer()",(LM_CRITICAL,"MedicinaMount::SOCKET_DISCONNECTED - remote side shutdown"));			
+				_IRA_LOGDIKE_LOG(m_logDike,LM_CRITICAL,"CMedicinaMountSocket::sendBuffer()","SOCKET_DISCONNECTED - remote side shutdown");
 				return WOULDBLOCK;
 			}
 			else {
 				setStatus(Antenna::ACU_NOTCNTD);
 				CString app;
-				app.Format("MedicinaMount::SOCKET_DISCONNECTED - %s",(const char *)m_Error.getFullDescription());
-				_IRA_LOGFILTER_LOG(LM_CRITICAL,"CMedicinaMountSocket::sendBuffer()",(const char*)app);
-				//ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::sendBuffer()",(LM_CRITICAL,"MedicinaMount::SOCKET_DISCONNECTED - %s",(const char *)m_Error.getFullDescription()));
+				app.Format("SOCKET_DISCONNECTED - %s",(const char *)m_Error.getFullDescription());
+				_IRA_LOGDIKE_LOG(m_logDike,LM_CRITICAL,"CMedicinaMountSocket::sendBuffer()",(const char*)app);
 				return FAIL;
 			}
 		}
@@ -1124,15 +1116,13 @@ int CMedicinaMountSocket::receiveBuffer(BYTE *Msg,WORD Len)
 		else if (nRead==FAIL) { 
 			setStatus(Antenna::ACU_NOTCNTD);
 			CString app;
-			app.Format("MedicinaMount::SOCKET_DISCONNECTED - %s",(const char *)m_Error.getFullDescription());
-			_IRA_LOGFILTER_LOG(LM_CRITICAL,"CMedicinaMountSocket::receiveBuffer()",(const char*)app);
-			//ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::receiveBuffer()",(LM_CRITICAL,"MedicinaMount::SOCKET_DISCONNECTED - %s",(const char *)m_Error.getFullDescription()));
+			app.Format("SOCKET_DISCONNECTED - %s",(const char *)m_Error.getFullDescription());
+			_IRA_LOGDIKE_LOG(m_logDike,LM_CRITICAL,"CMedicinaMountSocket::receiveBuffer()",(const char*)app);
 			return nRead;
 		}
 		else if (nRead==0) {
 			setStatus(Antenna::ACU_NOTCNTD);
-			_IRA_LOGFILTER_LOG(LM_CRITICAL,"CMedicinaMountSocket::receiveBuffer()","MedicinaMount::SOCKET_DISCONNECTED - remote side shutdown");
-			//ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::receiveBuffer()",(LM_CRITICAL,"MedicinaMount::SOCKET_DISCONNECTED - remote side shutdown"));			
+			_IRA_LOGDIKE_LOG(m_logDike,LM_CRITICAL,"CMedicinaMountSocket::receiveBuffer()","SOCKET_DISCONNECTED - remote side shutdown");
 			return nRead;
 		}
 		else return nRead;
@@ -1187,9 +1177,8 @@ bool CMedicinaMountSocket::checkConnection()
 	if (m_bTimedout) {
 		rBytes=receiveBuffer(sBuffer,ACU_BUFFERSIZE);
 		if (rBytes==WOULDBLOCK) {
-			setStatus(Antenna::ACU_NOTCNTD);	// another timeout! something has happend
-			_IRA_LOGFILTER_LOG(LM_CRITICAL,"CMedicinaMountSocket::checkConnection()","MedicinaMount::SOCKET_DISCONNECTED - timeout expired");
-			//ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkConnection()",(LM_CRITICAL,"MedicinaMount::SOCKET_DISCONNECTED - timeout expired"));
+			setStatus(Antenna::ACU_NOTCNTD);	// another timeout! something has happened
+			_IRA_LOGDIKE_LOG(m_logDike,LM_CRITICAL,"CMedicinaMountSocket::checkConnection()","SOCKET_DISCONNECTED - timeout expired");
 		}
 		else if (rBytes==FAIL) {
 			// Nothing to do, this error will be handled below....
@@ -1225,8 +1214,7 @@ bool CMedicinaMountSocket::checkConnection()
 				else if (Res==SUCCESS) {
 					if (isBusy()) setStatus(Antenna::ACU_BSY);
 					else setStatus(Antenna::ACU_CNTD);
-					_IRA_LOGFILTER_LOG(LM_NOTICE,"CMedicinaMountSocket::checkConnection()","MedicinaMount::SOCKET_RECONNECTED");
-					//ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkConnection()",(LM_NOTICE,"MedicinaMount::SOCKET_RECONNECTED"));						
+					_IRA_LOGDIKE_LOG(m_logDike,LM_NOTICE,"CMedicinaMountSocket::checkConnection()","SOCKET_RECONNECTED");
 					return true;
 				}
 			}

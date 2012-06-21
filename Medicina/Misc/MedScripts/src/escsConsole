@@ -1,7 +1,6 @@
 #! /bin/bash
 # ********************************************************************************************* 
 # IRA Istituto di Radioastronomia                                                                      
-# "@(#) $Id: escsConsole,v 1.2 2010-09-14 10:26:09 a.orlati Exp $"
 #
 # This code is under GNU General Public Licence (GPL).                                              
 #                                                                                                     
@@ -82,6 +81,8 @@ sleep 0.5s
 xterm -geometry 130x25+200+200 -sb -title OperatorInput -e /bin/bash --login -c sysTerm &
 sleep 0.5s
 receiversBossTui
+sleep 0.5s
+loggingDisplay
 
 
 #

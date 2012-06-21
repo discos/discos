@@ -56,6 +56,20 @@
 */
 #define _IRA_LOGDIKE_COMPLETION(DIKE,CMP,PRIORITY) DIKE.log(*CMP.getErrorTraceHelper(),__FILE__,__LINE__,PRIORITY)
 
+/**
+ * Flushes the object cache and prepare for its destruction
+ * @param DIKE LogDike object
+ */
+#define _IRA_LOGDIKE_DESTROY(DIKE) DIKE.destroy()
+
+/*
+ * allows the configuration of object parameters
+ * @param DIKE LogDike object
+ * @param CACHETIME caching time of the object (microseconds)
+ * @param EXPIRETIME expire time of the object (microseconds)
+ */
+#define _IRA_LOGDIKE_CONFIGURE(DIKE,CACHETIME,EXPIRETIME) DIKE.changeTimeSettings(CACHETIME,EXPIRETIME)
+
 namespace IRA {
 
 /**
@@ -118,6 +132,13 @@ public:
 	 * The user must take care of calling it with appropriate frequency.
 	 */
 	void openDike();
+
+	/**
+	 * This method allows to reset the cache and the expire time in order to configure the filtering policy of the class.
+	 * @param cacheTime new cache time in microseconds
+	 * @param expireTime new expire time in microseconds
+	 */
+	void changeTimeSettings(const long& cacheTime,const long& expireTime);
 
 	/**
 	 * This function should be used to log a message with a preferred logger. The message will be effectively logged only if the filter conditions are matched, otherwise
