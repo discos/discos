@@ -36,7 +36,7 @@ SkySourceImpl::~SkySourceImpl()
 void SkySourceImpl::initialize() throw(ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("SkySourceImpl::initialize()");
-	ACS_LOG(LM_FULL_INFO, "SkySourceImpl::initialize()", (LM_INFO,"COMPSTATE_INITIALIZING"));
+	CUSTOM_LOG(LM_FULL_INFO, "SkySourceImpl::initialize()", (LM_INFO,"COMPSTATE_INITIALIZING"));
 	try {
 		m_sourceCatalog=(CDBTable *)new CDBTable(getContainerServices(),"Source","DataBlock/SourceCatalog");
 	}
@@ -45,7 +45,7 @@ void SkySourceImpl::initialize() throw(ACSErr::ACSbaseExImpl)
 		throw dummy;
 	}
 	// initialization 
-	ACS_LOG(LM_FULL_INFO, "SkySourceImpl::initialize()", (LM_INFO,"COMPSTATE_INITIALIZED"));
+	CUSTOM_LOG(LM_FULL_INFO, "SkySourceImpl::initialize()", (LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
 void SkySourceImpl::execute() throw(ACSErr::ACSbaseExImpl)
@@ -63,7 +63,7 @@ void SkySourceImpl::execute() throw(ACSErr::ACSbaseExImpl)
 		Impl.setComponentName("ANTENNA/Observatory");
 		throw Impl;
 	}
-	ACS_LOG(LM_FULL_INFO,"SkySourceImpl::execute()",(LM_INFO,
+	CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::execute()",(LM_INFO,
 			(const char *)CString(m_componentName+"::OBSERVATORY_LOCATED")));
 	try	{
 		site=observatory->getSiteSummary();
@@ -74,7 +74,7 @@ void SkySourceImpl::execute() throw(ACSErr::ACSbaseExImpl)
 		__dummy.setMinor(ex.minor());
 		throw __dummy;
 	}
-	ACS_LOG(LM_FULL_INFO, "SkySourceImpl::execute()", (LM_INFO,"SITE_INITIALIZED"));
+	CUSTOM_LOG(LM_FULL_INFO, "SkySourceImpl::execute()", (LM_INFO,"SITE_INITIALIZED"));
 	m_site=CSite(site.out());
 	m_dut1=site->DUT1;
 	try {
@@ -162,8 +162,8 @@ void SkySourceImpl::execute() throw(ACSErr::ACSbaseExImpl)
 		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
 		throw dummy;
 	}
-	ACS_LOG(LM_FULL_INFO, "SkySourceImpl::execute()",(LM_INFO,"SOURCE_CATALOG_OPENED"));
-	ACS_LOG(LM_FULL_INFO, "SkySourceImpl::execute()",(LM_INFO,"COMPSTATE_OPERATIONAL"));
+	CUSTOM_LOG(LM_FULL_INFO, "SkySourceImpl::execute()",(LM_INFO,"SOURCE_CATALOG_OPENED"));
+	CUSTOM_LOG(LM_FULL_INFO, "SkySourceImpl::execute()",(LM_INFO,"COMPSTATE_OPERATIONAL"));
 }
 
 void SkySourceImpl::cleanUp()
@@ -300,7 +300,7 @@ void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::S
 		if (sscanf((const char *)(*m_sourceCatalog)["rightAscension"]->asString(),"%d:%d:%lf",&hh,&mm,&ss)!=3) {
 			_EXCPT(ComponentErrors::CDBFieldFormatExImpl,__dummy,"SkySourceImpl::loadSourceFromCatalog()");
 			__dummy.setFieldName("rightAscension");
-			__dummy.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
 			throw __dummy.getComponentErrorsEx();
 		}
 		ra=hh+mm/60.0+ss/3600.0; // convert ra to radians.
@@ -308,7 +308,7 @@ void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::S
 		if (sscanf((const char *)(*m_sourceCatalog)["declination"]->asString(),"%d:%d:%lf",&dd,&mm,&ss)!=3) {
 			_EXCPT(ComponentErrors::CDBFieldFormatExImpl,__dummy,"SkySourceImpl::loadSourceFromCatalog()");
 			__dummy.setFieldName("declination");
-			__dummy.log(LM_DEBUG);
+			CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
 			throw __dummy.getComponentErrorsEx();
 		}
 		if (dd<0) {
@@ -353,13 +353,13 @@ void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::S
         fluxParam.mcoeff[4] = (*m_sourceCatalog)["modelCoeff5"]->asDouble();
         fluxParam.mcoeff[5] = (*m_sourceCatalog)["modelCoeff6"]->asDouble();
 
-		ACS_LOG(LM_FULL_INFO,"SkySourceImpl::loadSourceFromCatalog()",(LM_INFO,"NEW_SOURCE_LOADED_FROM_CATALOG: %s",sourceName));
+		CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::loadSourceFromCatalog()",(LM_INFO,"NEW_SOURCE_LOADED_FROM_CATALOG: %s",sourceName));
 	}
 	else {
         fluxParam.init = false;
 		_EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SkySourceImpl::loadSourceFromCatalog()");
 		__dummy.setSourceName(sourceName);
-		__dummy.log(LM_DEBUG);
+		CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
 		throw __dummy.getAntennaErrorsEx();
 	}
     sourceFlux=CSourceFlux(fluxParam);
@@ -368,7 +368,7 @@ void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::S
 void SkySourceImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw(CORBA::SystemException)
 {
     flux = sourceFlux.computeSourceFlux(freq, fwhm);
-    ACS_LOG(LM_FULL_INFO,"SkySourceImpl::computeFlux()", (LM_INFO,"FLUX: %f",flux));
+    CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::computeFlux()", (LM_INFO,"FLUX: %f",flux));
 }
 
 void SkySourceImpl::setFixedPoint(CORBA::Double az, CORBA::Double el) throw(CORBA::SystemException)
@@ -378,7 +378,7 @@ void SkySourceImpl::setFixedPoint(CORBA::Double az, CORBA::Double el) throw(CORB
 	m_source.setInputHorizontal(az,el,m_site);
 	// in that case the flux computation is not available since the flux parameters are not known
 	fluxParam.init = false;
-	ACS_LOG(LM_FULL_INFO,"SkySourceImpl::setFixedPoint()",
+	CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::setFixedPoint()",
 	   (LM_INFO,"NEW_FIXED_POSITION: %f,%f",az,el));
 }
 
@@ -391,7 +391,7 @@ void SkySourceImpl::setSourceFromGalactic(const char* sourceName,CORBA::Double l
 	m_sourceName=CString(sourceName);
 	// in that case the flux computation is not available since the flux parameters are not known
 	fluxParam.init = false;
-	ACS_LOG(LM_FULL_INFO,"SkySourceImpl::setSourceFromGalactic()",
+	CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::setSourceFromGalactic()",
 	   (LM_INFO,"NEW_SOURCE_FROM_GALACTIC: %s,%f,%f",sourceName,longitude,latitude));
 }
 
@@ -405,7 +405,7 @@ void SkySourceImpl::setSourceFromEquatorial(const char *sourceName,
 	setSource(sourceName,ra,dec,equinox,dra,ddec,parallax,rvel);
 	// in that case the flux computation is not available since the flux parameters are not known
 	fluxParam.init = false;
-	ACS_LOG(LM_FULL_INFO,"SkySourceImpl::setSourceFromEquatorial()",
+	CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::setSourceFromEquatorial()",
 	   (LM_INFO,"NEW_SOURCE_FROM_EQUATORIAL: %s,%f,%f",sourceName,ra,dec));
 }
 

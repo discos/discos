@@ -1,7 +1,5 @@
-// $id: $
-
-
 #include "TextClient.h"
+#include <CustomLoggerUtils.h>
 
 using namespace maci;
 
@@ -303,16 +301,16 @@ int main(int argc, char *argv[])
 	_TW_ADD_LABEL("User Galactic. Offsets  :",0,10,23,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 
 		
-	ACS_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::MANAGER_LOGGING"));
+	CUSTOM_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::MANAGER_LOGGING"));
 	if (client.init(argc,argv)==0) {
 		_EXCPT(ClientErrors::CouldntInitExImpl,impl,"SkySourceDisplay::Main()");
-		impl.log();		
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	else {
 		if (client.login()==0) {
 			_EXCPT(ClientErrors::CouldntLoginExImpl,impl,"SkySourceDisplay::Main()");
-			impl.log();		
+			CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 			goto ErrorLabel;
 		}
 	}
@@ -327,12 +325,12 @@ int main(int argc, char *argv[])
 		hwRef=Antenna::SkySource::_narrow(cInfo->reference.in());
 		//Ensure it's a valid reference
 		if (CORBA::is_nil(hwRef.in())==false) {
-			ACS_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_DEBUG,"OK, reference is: %d",hwRef.ptr()));
+			CUSTOM_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_DEBUG,"OK, reference is: %d",hwRef.ptr()));
 		}
 		else {
 			_EXCPT(ClientErrors::CouldntAccessComponentExImpl,impl,"SkySourceDisplay::Main()");
 			impl.setComponentName((const char *)cInfo->name);
-			impl.log();
+			CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 			goto ErrorLabel;	
 		}
 	}
@@ -340,26 +338,26 @@ int main(int argc, char *argv[])
 	catch( maciErrType::IncompleteComponentSpecEx &E)  {
 		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,impl,E,"SkySourceDisplay::Main()");
 		impl.setComponentName((const char *)cInfo->name);
-		impl.log();
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	catch( maciErrType::InvalidComponentSpecEx &E) {
 		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,impl,E,"SkySourceDisplay::Main()");
 		impl.setComponentName((const char *)cInfo->name);
-		impl.log();
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	catch( maciErrType::ComponentSpecIncompatibleWithActiveComponentEx &E) {
 		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,impl,E,"SkySourceDisplay::Main()");
 		impl.setComponentName((const char *)cInfo->name);
-		impl.log();
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	catch( maciErrType::CannotGetComponentEx &E) // can be thrown by get_dynamic_component
 	{
 		_ADD_BACKTRACE(ClientErrors::CouldntAccessComponentExImpl,impl,E,"SkySourceDisplay::Main()");
 		impl.setComponentName((const char *)cInfo->name);
-		impl.log();
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	catch( CORBA::SystemException &E)  // ... than CORBA system exception
@@ -367,12 +365,12 @@ int main(int argc, char *argv[])
 		_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SkySourceDisplay::Main()");
 		impl.setName(E._name());
 		impl.setMinor(E.minor());
-		impl.log();
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	catch(...) {
 		_EXCPT(ClientErrors::UnknownExImpl,impl,"SkySourceDisplay::Main()");
-		impl.log();
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}//try-catch*/
 	
@@ -404,22 +402,22 @@ int main(int argc, char *argv[])
 		_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SkySourceDisplay::Main()"); 
 		impl.setName(C._name()); 
 		impl.setMinor(C.minor()); 
-		impl.log(); 
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	} 
 	catch (ComponentErrors::ComponentErrorsEx& E) {
 		_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,E,"SkySourceDisplay::Main()");
-		impl.log();
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	catch (AntennaErrors::AntennaErrorsEx& E) {
 		_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,E,"SkySourceDisplay::Main()");
-		impl.log();
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	catch (...) { 
 		_EXCPT(ClientErrors::UnknownExImpl,impl,"SkySourceDisplay::Main()"); 
-		impl.log(); 
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	try {
@@ -429,12 +427,12 @@ int main(int argc, char *argv[])
 		_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SkySourceDisplay::Main()"); 
 		impl.setName(E._name()); 
 		impl.setMinor(E.minor()); 
-		impl.log(); 
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	catch (...) { 
 		_EXCPT(ClientErrors::UnknownExImpl,impl,"SkySourceDisplay::Main()"); 
-		impl.log(); 
+		CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		goto ErrorLabel;
 	}
 	sourceName_text->setValue(CString(att->sourceID));
@@ -470,11 +468,11 @@ int main(int argc, char *argv[])
 			_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SkySourceDisplay::Main()"); 
 			impl.setName(E._name()); 
 			impl.setMinor(E.minor()); 
-			impl.log(); 			
+			CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		}
 		catch (...) { 
 			_EXCPT(ClientErrors::UnknownExImpl,impl,"SkySourceDisplay::Main()"); 
-			impl.log(); 
+			CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 		}
 		bValue.setValue((CORBA::Double)att->J2000RightAscension);
 		RA_text->setValue(CFormatFunctions::angleFormat(bValue,static_cast<void *>(&bValue)));
@@ -532,11 +530,11 @@ int main(int argc, char *argv[])
 					_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SkySourceDisplay::Main()"); 
 					impl.setName(E._name()); 
 					impl.setMinor(E.minor()); 
-					impl.log(); 			
+					CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 				}
 				catch (...) { 
 					_EXCPT(ClientErrors::UnknownExImpl,impl,"SkySourceDisplay::Main()"); 
-					impl.log(); 
+					CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 				}
 		}
 		if ((ch=='a') || (ch=='A') || (ch=='e') || (ch=='E')) {
@@ -557,11 +555,11 @@ int main(int argc, char *argv[])
 				_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SkySourceDisplay::Main()"); 
 				impl.setName(E._name()); 
 				impl.setMinor(E.minor()); 
-				impl.log(); 			
+				CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 			}
 			catch (...) { 
 				_EXCPT(ClientErrors::UnknownExImpl,impl,"SkySourceDisplay::Main()"); 
-				impl.log(); 
+				CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 			}
 		}
 		if ((ch=='r') || (ch=='R') || (ch=='d') || (ch=='D')) {
@@ -582,34 +580,34 @@ int main(int argc, char *argv[])
 				_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SkySourceDisplay::Main()"); 
 				impl.setName(E._name()); 
 				impl.setMinor(E.minor()); 
-				impl.log(); 			
+				CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 			}
 			catch (...) { 
 				_EXCPT(ClientErrors::UnknownExImpl,impl,"SkySourceDisplay::Main()"); 
-				impl.log(); 
+				CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 			}
 		}
 		CIRATools::Wait(0,400000);
 	}
 	window.closeFrame();
-	ACS_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::RELEASING"));
+	CUSTOM_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::RELEASING"));
 	goto CloseLabel;
 	
 ErrorLabel:
-		ACS_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::ABORTING"));	
+		CUSTOM_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::ABORTING"));
 CloseLabel:
 		window.Destroy();
-		ACS_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::FRAME_CLOSED"));	
+		CUSTOM_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::FRAME_CLOSED"));
 		ACE_OS::sleep(1);	
 		try {
 			client.releaseComponent((const char*) cInfo->name);
 		}
 		catch (maciErrType::CannotReleaseComponentExImpl& E) {
-			E.log();
+			CUSTOM_EXCPT_LOG(E,LM_ERROR);
 		}
-		ACS_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::COMPONENT_RELEASED"));
+		CUSTOM_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::COMPONENT_RELEASED"));
 		if (loggedIn) client.logout();
-		ACS_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::SHUTTING_DOWN"));		
+		CUSTOM_LOG(LM_FULL_INFO,"SkySourceDisplay::Main()",(LM_INFO,"SkySourceDisplay::SHUTTING_DOWN"));
 		signal(SIGINT,SIG_DFL);
 		ACE_OS::sleep(1);	
 		return 0;	
