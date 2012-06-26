@@ -26,9 +26,14 @@ Management.CustomLoggingData.__repr__ = lambda self: self.msg
 
 # Maximum size for log messages display
 """
-The number of logging events visualized in the window and kept in memory
+The number of logging events kept in memory
 """
-MAX_SIZE = 30
+MAX_QUEUE_SIZE = 200
+
+"""
+The number of logging events displayed in the window
+"""
+MAX_WINDOW_SIZE = 30
 
 """
 Handle a log_event adding it to a BoundedSortedQueue in memory and to the 
@@ -39,27 +44,37 @@ corresponding GUI representation (in Tkinter this sould be a Listbox).
 @param gui_queue: a Tkinter widget.
 @type gui_queue: Tkinter.Listbox
 """
-def handle_log_event(log_event, memory_queue, gui_queue):
-    index, popped = memory_queue.push(log_event)
-    if popped:
-        gui_queue.delete(0)
-    gui_queue.insert(index, log_event.msg)
 
 class App:
     """Tkinter GUI application
     """
     def __init__(self, master):
         """Constructor."""
-        self.record_list = BoundedSortedQueue(max_size=MAX_SIZE)
-        frame = tk.Frame(master) #frame will be accessible via master
-        frame.pack()
-        self.list_box = tk.Listbox(frame, width=80, height=MAX_SIZE)
-        self.list_box.pack(expand=True, fill=tk.BOTH)
+        self.record_list = BoundedSortedQueue(max_size=MAX_QUEUE_SIZE)
+        frame = master
+        self.yscrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL)
+        self.yscrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.list_box = tk.Listbox(frame, 
+                                   width=80, 
+                                   height=MAX_WINDOW_SIZE, 
+                                   yscrollcommand=self.yscrollbar.set)
         self.clear_button = tk.Button(frame, text="clear", command=self.clear)
-        self.clear_button.pack(side=tk.LEFT)
-        #define the log event handler
-        self.handler = functools.partial(handle_log_event, memory_queue=self.record_list, gui_queue=self.list_box)
-   
+        self.clear_button.pack(side=tk.BOTTOM, anchor=tk.SW)
+        self.list_box.pack(expand=True, side=tk.LEFT, fill=tk.BOTH)
+        self.yscrollbar.config(command=self.list_box.yview)
+  
+    def handler(self, event):
+	"""
+	Handle a log_event adding it to a BoundedSortedQueue in memory and to the 
+	corresponding GUI representation (in Tkinter this sould be a Listbox).
+	@param event: the logging event.
+	"""
+        index, popped = self.record_list.push(event)
+        if popped:
+            self.list_box.delete(0)
+        self.list_box.insert(index, event.msg)
+        self.list_box.yview(tk.END) # Listbox autoscroll
+
     def clear(self):
         """Empty the event list."""
         self.record_list.clear()
@@ -70,6 +85,7 @@ if __name__ == '__main__':
     try:
         root = tk.Tk()
         root.wm_title("ACS custom logging client")
+        root.resizable(tk.YES, tk.YES)
         app = App(root)
         consumer = Consumer(Management.CUSTOM_LOGGING_CHANNEL_NAME)
         consumer.addSubscription(Management.CustomLoggingData, app.handler)
