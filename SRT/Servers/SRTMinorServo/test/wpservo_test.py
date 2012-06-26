@@ -100,7 +100,7 @@ class TestProperties(unittest.TestCase):
         """Get a reference to every minor servo component."""
         # Direct connection used to match the property values
         self.sockobj = socket(AF_INET, SOCK_STREAM)
-        self.sockobj.settimeout(3.0)
+        self.sockobj.settimeout(socket_timeout)
         # Connect to the selected server
         self.sockobj.connect(server) 
         self.pyclient = PySimpleClient()
