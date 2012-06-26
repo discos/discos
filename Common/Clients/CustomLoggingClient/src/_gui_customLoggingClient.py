@@ -35,16 +35,6 @@ The number of logging events displayed in the window
 """
 MAX_WINDOW_SIZE = 30
 
-"""
-Handle a log_event adding it to a BoundedSortedQueue in memory and to the 
-corresponding GUI representation (in Tkinter this sould be a Listbox).
-@param log_event: the logging event.
-@param memory_queue: a bounded sorted queue
-@type memory_queue: IRAPy.bsqueue.BoundedSortedQueue
-@param gui_queue: a Tkinter widget.
-@type gui_queue: Tkinter.Listbox
-"""
-
 class App:
     """Tkinter GUI application
     """
