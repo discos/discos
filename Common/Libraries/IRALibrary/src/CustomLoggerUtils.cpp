@@ -26,6 +26,44 @@ CustomLoggerUtils::string2customLogLevel(const char *str)
     return Management::C_INFO; //defaults to INFO
 };
 
+const char* 
+CustomLoggerUtils::customLogLevel2string(Management::LogLevel level)
+{
+    switch(level)
+    {
+        case(Management::C_TRACE):
+            return "Trace";
+            break;
+        case(Management::C_DEBUG):
+            return "Debug";
+            break;
+        case(Management::C_INFO):
+            return "Info";
+            break;
+        case(Management::C_NOTICE):
+            return "Notice";
+            break;
+        case(Management::C_WARNING):
+            return "Warning";
+            break;
+        case(Management::C_ERROR):
+            return "Error";
+            break;
+        case(Management::C_CRITICAL):
+            return "Critical";
+            break;
+        case(Management::C_ALERT):
+            return "Alert";
+            break;
+        case(Management::C_EMERGENCY):
+            return "Emergency";
+            break;
+        default:
+            return "Info"; //defaults to Info
+            break;
+    }
+}
+
 ACE_Log_Priority 
 CustomLoggerUtils::custom2aceLogLevel(Management::LogLevel level)
 {

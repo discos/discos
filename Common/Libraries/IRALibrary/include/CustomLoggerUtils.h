@@ -34,8 +34,9 @@
 /**
  * Use this macro to log an exception in the custom logging system.
  * @param EX: an Exception
+ * @param priority: The priority of the exception LOG, used to set DEBUG instead of ERROR.
  */
-#define CUSTOM_EXCPT_LOG(EX,priority) \
+#define CUSTOM_EXCPT_LOG(EX, priority) \
 { \
     _ADD_EXTRA(EX, CUSTOM_LOGGING_DATA_NAME, CUSTOM_LOGGING_DATA_VALUE); \
     EX.log(priority); \
@@ -64,6 +65,12 @@ class CustomLoggerUtils
          * @return a Management log level 
          */
 	static Management::LogLevel string2customLogLevel(const char *str);
+        /**
+         * Converts a Custom log level to its character representation
+         * C_TRACE -> "Trace" ...
+         * @param level the custom log level
+         */
+        static const char* customLogLevel2string(Management::LogLevel level);
         /**
          * Conversion function between our Logging levels and the ones defined in ACE
          * This method does not throw an exception but uses default conversion to LM_INFO level.
