@@ -57,9 +57,16 @@ void free_log_parsing(XML_Parser log_parser);
 /**
  * Main parsing functionality, implementing RAII pattern for LogRecord objects.
  * Extracts a LogRecord from an xml string.
- * @return the newly constructed LogRecord
+ * @return the newly constructed LogRecord in a smart pointer
  */
 LogRecord_sp get_log_record(XML_Parser log_parser, const char *xml_text);
+/**
+ * Programattically create a custom log record.
+ * @param msg the log message
+ * @param level the log level
+ * @return the newly constructed LogRecrod in a smart pointer
+ */
+LogRecord_sp get_log_record(const char *msg, Management::LogLevel level);
 ACS::Time parse_timestamp(const char* ts);
 std::string trim_date(const std::string& str);
 std::string log_to_string(const LogRecord& log_record);

@@ -10,6 +10,8 @@ CustomLoggerImpl::CustomLoggerImpl(const ACE_CString& CompName,
     m_max_level_sp(this),
     m_isLogging_sp(this),
     m_loggingSupplier(NULL)
+    //consumer_(NULL)
+    //_writer(NULL)
 {   
     m_filename_sp = new baci::ROstring(
                                             CompName + ":filename",
@@ -110,7 +112,7 @@ CustomLoggerImpl::setMaxLevel(LogLevel level) throw (CORBA::SystemException)
 * Resolve the naming service and subscribe to the logging channel
 */
 void 
-CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl, ComponentErrors::ComponentErrorsEx)
+CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
     ACS::Time _timestamp;
     setLogging(false);
@@ -125,8 +127,8 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl, ComponentErrors::Co
     if(CORBA::is_nil(namingContext_m))
     {
             _EXCPT(ComponentErrors::CORBAProblemExImpl, _dummy, "CustomLoggerImpl::initialize");
-            CUSTOM_EXCPT_LOG(_dummy);
-            throw _dummy.getComponentErrorsEx();
+            //CUSTOM_EXCPT_LOG(_dummy);
+            throw _dummy;
     }
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : resolving logging channel name"));
     CORBA::Object_var obj = namingContext_m -> resolve(name);  
@@ -149,19 +151,6 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl, ComponentErrors::Co
      ========================*/
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : Initializing EXPAT for xml parsing"));
     log_parser = init_log_parsing();
-    IRA::CString _c_path, _c_file, _a_path, _a_file;
-     if(
-	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogDir", _a_path) &&
-	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogFile", _a_file) &&
-	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogDir", _c_path) &&
-	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogFile", _c_file)
-     ){
-	setLogfile(_c_path, _a_path, _c_file, _a_file);
-     }else{
-        _EXCPT(ComponentErrors::CDBAccessExImpl, __dummy, "CustomLoggerImpl::initialize");
-        CUSTOM_EXCPT_LOG(__dummy);
-        throw __dummy.getComponentErrorsEx();
-     }
      long _a_age;
      if(IRA::CIRATools::getDBValue(getContainerServices(), "LogMaxAgeMillis", _a_age))
          _log_max_age = ACS::TimeInterval(_a_age * 10000);
@@ -183,8 +172,24 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl, ComponentErrors::Co
      }
      catch (...) {
         _EXCPT(ComponentErrors::UnexpectedExImpl, ___dummy, "CustomLoggerImpl::initialize");
-        CUSTOM_EXCPT_LOG(___dummy);
+        CUSTOM_EXCPT_LOG(___dummy, LM_DEBUG);
         throw ___dummy.getComponentErrorsEx();
+     }
+
+     /* OPEN DEFAULT LOG FILES AND BEGINS LOGGING
+     ============================================*/
+    IRA::CString _c_path, _c_file, _a_path, _a_file;
+     if(
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogDir", _a_path) &&
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogFile", _a_file) &&
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogDir", _c_path) &&
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogFile", _c_file)
+     ){
+	setLogfile(_c_path, _a_path, _c_file, _a_file);
+     }else{
+        _EXCPT(ComponentErrors::CDBAccessExImpl, __dummy, "CustomLoggerImpl::initialize");
+        CUSTOM_EXCPT_LOG(__dummy, LM_DEBUG);
+        throw __dummy.getComponentErrorsEx();
      }
 };
 
@@ -209,7 +214,7 @@ CustomLoggerImpl::cleanUp()
     }
     if(m_loggingSupplier!=NULL){
         m_loggingSupplier->disconnect();
-        m_loggingSupplier = NULL;
+        //m_loggingSupplier = NULL;
     }
     free_log_parsing(log_parser);
     CosNotification::EventTypeSeq added(0);
@@ -237,11 +242,23 @@ CustomLoggerImpl::emitLog(const char *msg, LogLevel level) throw (CORBA::SystemE
 };
 
 void
+CustomLoggerImpl::emitStaticLog(const char *msg, LogLevel level) throw (CORBA::SystemException)
+{
+    _emitStaticLog(msg, level);
+};
+
+void 
+CustomLoggerImpl::_emitStaticLog(const char *msg, LogLevel level)
+{
+    CUSTOM_STATIC_LOG((Logging::BaseLog::Priority)IRA::CustomLoggerUtils::custom2aceLogLevel(level), "CustomLoggerImpl::emitStaticLog", msg);
+};
+
+void
 CustomLoggerImpl::emitExceptionLog()
 {
     _EXCPT(ManagementErrors::LogFileErrorExImpl, _dummy, "CustomLoggerImpl::emitExceptionLog");
     _ADD_BACKTRACE(ManagementErrors::CustomLoggerIOErrorExImpl, __dummy, _dummy, "CustomLoggerImpl::emitExceptionLog2");
-    CUSTOM_EXCPT_LOG(__dummy);
+    CUSTOM_EXCPT_LOG(__dummy, LM_ERROR);
 };
 
 /*
@@ -257,7 +274,7 @@ CustomLoggerImpl::flush() throw (CORBA::SystemException)
 void 
 CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx)
 {
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : closing logfile"));
+    //ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : closing logfile"));
     baci::ThreadSyncGuard guard(&_log_queue_mutex);
     if(checkLogging())
     {
@@ -270,7 +287,7 @@ CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors
         {
             _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, dummy, "CustomLoggerImpl::closeLogfile"); 
             dummy.setReason("error closing custom logfile");
-            CUSTOM_EXCPT_LOG(dummy);
+            CUSTOM_EXCPT_LOG(dummy, LM_DEBUG);
             throw dummy.getCustomLoggerIOErrorEx();
 	}
         _full_log.clear();
@@ -297,8 +314,11 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
                              const char *filename_log, const char *filename_full_log) 
                              throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx)
 {
+    //Acquire log mutex
     baci::ThreadSyncGuard guard(&_log_queue_mutex);
-    closeLogfile();
+    /*
+     * Create Necessary files and directories
+     */
     ACS::Time ts;
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : custom log directory: %s", base_path_log));
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : acs log directory: %s", base_path_full_log));
@@ -330,6 +350,10 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
        full_path.append("/");
     full_path.append(filename_full_log);
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : full log file: %s", full_path.c_str()));
+    //Writing last message on last opened log files
+    handle(get_log_record((std::string("Custom log file changing to: ") + custom_path).c_str(), C_NOTICE)); 
+    handle(get_log_record((std::string("Full log file changing to: ") + full_path).c_str(), C_NOTICE)); 
+    closeLogfile();
     _custom_log.clear();
     _full_log.clear();
     _custom_log.open(custom_path.c_str(), std::ofstream::app);

@@ -63,7 +63,7 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         virtual ROLogLevel_ptr minLevel() throw (CORBA::SystemException);
         virtual ROLogLevel_ptr maxLevel() throw (CORBA::SystemException);
         virtual ROTBoolean_ptr isLogging() throw (CORBA::SystemException);
-        virtual void initialize() throw (ACSErr::ACSbaseExImpl, ComponentErrors::ComponentErrorsEx);
+        virtual void initialize() throw (ACSErr::ACSbaseExImpl);
         virtual void execute();
         virtual void cleanUp();
         virtual void setMinLevel(LogLevel level) throw (CORBA::SystemException);
@@ -85,6 +85,7 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
                                 throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void emitLog(const char *msg, LogLevel level) throw (CORBA::SystemException);
+        virtual void emitStaticLog(const char *msg, LogLevel level) throw (CORBA::SystemException);
         virtual void emitExceptionLog();
         virtual void flush() throw (CORBA::SystemException);
         void writeLoggingQueue(bool age_check=true); //invoked by writer thread
@@ -107,6 +108,7 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
 	* @return True if the log record is a custom one.
 	*/
         virtual bool filter(LogRecord& log_record);
+        static void _emitStaticLog(const char *msg, LogLevel level); 
         /**
          * Log files.
          */ 

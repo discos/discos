@@ -207,3 +207,19 @@ get_log_record(XML_Parser log_parser, const char *xml_text)
         ACE_ERROR ((LM_ERROR, XML_ErrorString(XML_GetErrorCode(log_parser))));
     return log_record;
 };
+
+LogRecord_sp
+get_log_record(const char *msg, Management::LogLevel level)
+{
+    EpochHelper _eh;
+    LogRecord_sp log_record(new LogRecord);
+    log_record->message.assign(msg);
+    IRA::CIRATools::getTime(_eh);
+    log_record->timestamp = _eh.value().value;
+    log_record->log_level_name.assign(IRA::CustomLoggerUtils::customLogLevel2string(level));
+    log_record->add_data(CUSTOM_LOGGING_DATA_NAME, CUSTOM_LOGGING_DATA_VALUE);
+    log_record->_finished = true;
+    log_record->log_level = level;
+    log_record->xml_text.assign(log_to_string(*log_record).c_str());
+    return log_record;
+};
