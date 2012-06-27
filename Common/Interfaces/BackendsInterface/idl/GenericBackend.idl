@@ -30,38 +30,38 @@ module Backends {
 	/**
 	 * This is the interface of the component GenericBackend. Any backend inherits from this interface
 	 * so that they can be commanded through a common and known interface. This interface must expose all the
-	 * methods required to deal with a backend. In that way the specific hardware dependence is bypassed.
+	 * methods required to deal with a backend. In that way the specific hardware dependency is bypassed.
 	 * The idea is that any backend has general characteristics, for example the integration time, the number of bins or
 	 * the bandwidth wether we are talking about polarimeters or total power detectors or spectrometers. All these 
 	 * characteristics are grouped in this interface.
-	 * This interface is based on the concept of section. A section is one of the section that the backedn is devided into. The section produces a stream of data
-	 * resulting of the sampling and the elaboration of a certain portion of the input  from the receiver. According to the nature of the backend (polarimeter, totalpower, spectrometer...) this stream can
-	 * be different but  always compliant to a certain protocol. The number of section, as well as the properties of the section can varies from case to case.
-	 * A section is characterized by some properties (they could be under user control or not according the hardware and/or software of the backend:
-	 * @arg Feed: The feed identifier the section is attached to. Usefull in case of multifeed receivers
+	 * This interface is based on the concept of section. A section is one of the sections that the backend is devided into. The section produces a stream of data
+	 * resulting from the sampling and the elaboration of a certain portion of the input  from the receiver. According to the nature of the backend (polarimeter, totalpower, spectrometer...) this stream can
+	 * be different but  always compliant to a certain protocol. The number of section, as well as the properties of the section can vary from case to case.
+	 * A section is characterized by some properties (they could be under user control or not according to the hardware and/or software of the backend:
+	 * @arg Feed: The feed identifier the section is attached to. Useful in case of multifeed receivers
 	 * @arg Polarization: It indicates the polarization coming from the receiver the section is attached to. It could be left, right or full stokes. In that case the section is able to export 4 different flows (the Stokes parameters) along with the data stream. 
-	 * @arg Bins: If the section is able to compute a Fourier Transform, this indicates the number of bins the section is operating
+	 * @arg Bins: If the section is able to compute a frequency channelization (i.e. Fourier Transform), this indicates the number of bins the section is operating
 	 * @arg BandWidth: It indicates the band width of the input signal of the section (MHz). No matter if the input is analog or digital
 	 * @arg Frequency: It indicates the start frequency of the input signal (MHz). 
 	 * @arg SampleRate: It gives the sampling rate of the section (MHz). For a common sampler it is the  Nyquist  frequency, for a simple total power could be the number of measure done per seconds.
 	 * @arg inputs: the number of inputs attached to section.  This number can be 1 or two depending on the polarization.
 	 * One fundamental attribute of the backend is the <i>sectionsNumber</i>, it indicates the number of sections and it could be fixed of configurable. It gives the moltiplicity of the attibutes like <i>feed</i>, <i>frequency</i> and so on......
-	 * The <i>inputsNumber</i> indicated the total number of inputs virtual connected to the backend; it is the sum of hte inputs of all sections. Typically if the backend is not polarimetric, <i>sectionNumber</i> and <i> inputsNumber</i> match. 
+	 * The <i>inputsNumber</i> indicates the total number of inputs virtually connected to the backend; it is the sum of the inputs of all sections. Typically if the backend is not polarimetric, <i>sectionNumber</i> and <i> inputsNumber</i> match. 
 	 * For every input it is possible to give an attenuation value (DB).
 	 * The backend component transfers data to the data receivers via the ACS Bulk Data service ( similar to the notification channel
 	 * but based on TCP Out Of Bound and semantically a point-to-point connection). The data stream is started by calling the method <i>sendHeader()</i>, this will cause the backend to send a <i>TMainHeader</i> and as many <i>TSectionHeader<i>s as the
-	 * number of available sections. The when the acquisitions is started the backend will send a a sequential stream of data that refers to a single integration. A <i>TDumpHeader</i> is sent, then the tsys measurmens (one for each virtual input, then a  mix of 4 data flows, 
+	 * number of available sections. When the acquisitions is started the backend will send a sequential stream of data that refers to a single integration. A <i>TDumpHeader</i> is sent, then the tsys measurmens (one for each virtual input, then a  mix of 4 data flows, 
 	 *  Left/Right data, Stokes U and Q rispectively. This flows are transferend starting from the first section. Of course if the backend is not a polarimeter the Stokes U and Q are not sent.    
 	 * The transfering of the data could be set up by a sequence of calls that could be:
 	 * <pre>
 	 *		backend->connect(receiver); // connect to the data receiver
 	 *		backend->configure(config); // configure the backend
-	 * 	backend->sendHeader();  // transfer the data header...no configuration are allowed
+	 * 	        backend->sendHeader();  // transfer the data header...no configuration are allowed
 	 *		backend->sendData(startTime);  // starts the data transfer.....if the start time is not yet elapsed it waits for the start time
 	 *		backend->sendStop(); // stops the data transfer....but keeps the transfer job up.
-	 *   	backend->sendData(startTime);  // starts again the data transfer.....
+	 *   	        backend->sendData(startTime);  // starts again the data transfer.....
 	 *		backend->sendStop(); // stops the data transfer...  
-	 *     backend->terminate();           // teminates the transfer job....now new configuration is allowed
+	 *              backend->terminate();           // teminates the transfer job....now new configuration is allowed
 	 *		backend->disconnect();
 	 *		receiver->closeReceiver();
 	 *</pre>
