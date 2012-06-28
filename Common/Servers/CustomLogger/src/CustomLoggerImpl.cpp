@@ -391,10 +391,12 @@ CustomLoggerImpl::filter(LogRecord& log_record)
        (m_min_level_sp->getDevIO()->read(ts) <= log_record.log_level) && 
        (m_max_level_sp->getDevIO()->read(ts) >= log_record.log_level))
     {
-        if(!log_record.kwargs.empty())
+        if(log_record.process_name == CUSTOM_PYTHON_LOGGING_PROCESS){ //if the log record has been produced by IRAPy logger
+            filtered = true; 
+        }else if(!log_record.kwargs.empty())
         {
             result = log_record.get_data(std::string(CUSTOM_LOGGING_DATA_NAME));
-            if(result == CUSTOM_LOGGING_DATA_VALUE)
+            if(result == CUSTOM_LOGGING_DATA_VALUE) //if the log record has been produced by C++ IRA Log MACROS
                 filtered = true;
         }
     }

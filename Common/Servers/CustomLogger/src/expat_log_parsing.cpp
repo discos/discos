@@ -126,7 +126,9 @@ start_parsing_element(void *data, const char *el, const char **attr)
 	            if (strcmp(attr[i], "TimeStamp") == 0)
 		    {
 			lr->timestamp = parse_timestamp(attr[i+1]);   
-		    }
+		    }else if(strcmp(attr[i], "Process") == 0){
+                        lr->process_name.assign(attr[i+1]);
+                    }
 		lr->_initialized = true;
             }else if(strcmp(el, "Data") == 0)
                 for(int i = 0; attr[i]; i += 2)

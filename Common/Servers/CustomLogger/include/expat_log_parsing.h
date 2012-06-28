@@ -92,7 +92,7 @@ public:
      * The log level of this record.
      */
     Management::LogLevel log_level;
-    std::string log_level_name, message, _element, xml_text, _data_name;
+    std::string log_level_name, message, process_name, _element, xml_text, _data_name;
     /**
      * the timestamp of the logging event, extracted from the ACSLogRecord.
      */
