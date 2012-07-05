@@ -44,6 +44,7 @@ void WPStatusUpdater::runLoop()
     // A smarter policy than round robin should be to iterate only on active servos.
     try {
         pthread_mutex_lock(m_params->status_mutex); 
+        cout << "In status updater...." << endl;
         if(!(m_params->map_of_talkers_ptr)->empty()) {
             // The servo address
             unsigned long address = m_counter % NUMBER_OF_SERVOS;
@@ -147,15 +148,25 @@ void WPStatusUpdater::runLoop()
                     status_bset.set(STATUS_FAILURE);
                 else
                     status_bset.reset(STATUS_FAILURE);
+                
+                // TODO : REMOVE
+                cout << "After status_bset..." << endl;
 
 
                 if(diff > MAX_TIME_DIFF) {
                     ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: abs(actual_time - actual_pos_time) = %llu", diff));
+                    cout << "MAX_TIME_DIFF" << endl;
                 }
                 else {
                     CSecAreaResourceWrapper<map<int, vector< PositionItem> > > lst_secure_requests = (m_params->cmd_pos_list)->Get();
+                    cout << "Before lst secure_request." << " Address: " << address << endl;
+                    // TODO: ORIGINALE: questo non viene verificato perche' la lista inizialmente e' vuota e quindi non si entra
+                    // mai in questo if 
                     if((*lst_secure_requests).count(address)) {
+                    // if(true) {
                         try {
+                            // TODO : REMOVE
+                            cout << "Dentro try" << endl;
                             vector<PositionItem>::size_type idx = findPositionIndex(lst_secure_requests, act_pos_time, address, true);
 
                             // Updating of the commanded position property
@@ -168,9 +179,12 @@ void WPStatusUpdater::runLoop()
                             } 
                             else { 
                                 // Updating of actual position property
-                                for(size_t i=0; i != act_pos.length(); i++)
+                                for(size_t i=0; i != act_pos.length(); i++) {
                                         ((m_params->expire_time)->actPos[address])[i] = \
                                             act_pos[i] - ((((*lst_secure_requests)[address])[idx]).offsets).system[i];
+                                        // TODO: REMOVE
+                                        cout << "act_pos[i] = " << act_pos[i] << endl;
+                                }
 
                                 for(unsigned int i = 0; i < act_pos.length(); i++)
                                     ((m_params->expire_time)->posDiff[address])[i] = \
@@ -190,6 +204,15 @@ void WPStatusUpdater::runLoop()
                             ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: cmd position at @%llu not found!", act_pos_time));
                         }
                     }
+                    else {
+                        // Fare in modo che venga letta la posizione direttamente:
+                        //     ((*m_params->map_of_talkers_ptr)[address])->getActPos(act_pos, timestamp);
+                        // e vanga assegnata a:
+                        //     (m_params->expire_time)->cmdPos[address] = 
+                        // Leggi la positione attuale con getActPos
+                        // Aggiorna la posizione comandata con la actPos
+                        // metti la diff di posizione a 0
+                    }
                     lst_secure_requests.Release();
                 }
                 // Set the TRACKING bit of status pattern
@@ -200,7 +223,6 @@ void WPStatusUpdater::runLoop()
                 
                 // Update the status pattern
                 (m_params->expire_time)->status[address] = status_bset.to_ulong();
-
             }  
         }
         pthread_mutex_unlock(m_params->status_mutex); 

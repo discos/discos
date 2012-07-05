@@ -309,15 +309,21 @@ ACS::Time WPServoTalker::look_for_a_response(
         try {
             if((m_responses->Get())->count(request_id)) {
                 answer = (*(m_responses->Get()))[request_id];
-                // Raise an exception if the answer is a NAK
-                verify(answer);
-                if(process_enabled) process(answer, parameters, udata, status_par, cmd_idx, m_cdb_ptr, timestamp, slave);
-                // Delete the answer from the map of responses
-                CSecAreaResourceWrapper<map<int, string> > secure_responses = m_responses->Get();
-                secure_responses->erase(request_id);
-                secure_responses.Release();
-                found = true;
-                break;
+                // TODO: questo if e' stato aggiunto dopo, e' da rivedere!!!
+                if(startswith(answer, "?setup")) {
+                    cout << "Inizia con ?setup" << endl;
+                }
+                else{
+                    // Raise an exception if the answer is a NAK
+                    verify(answer);
+                    if(process_enabled) process(answer, parameters, udata, status_par, cmd_idx, m_cdb_ptr, timestamp, slave);
+                    // Delete the answer from the map of responses
+                    CSecAreaResourceWrapper<map<int, string> > secure_responses = m_responses->Get();
+                    secure_responses->erase(request_id);
+                    secure_responses.Release();
+                    found = true;
+                    break;
+                }
             }
             usleep(USLEEP_TIME);
             gettimeofday(&now, NULL);

@@ -653,6 +653,7 @@ void WPServoImpl::setup(const ACS::Time exe_time)
     try {
         // The index code of setup command in Talk.cpp is 3
         m_wpServoTalker_ptr->action(3, exe_time);
+        cout << "Exiting from setup" << endl;
     }
     catch(...) {
         THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot make a minor servo setup", true);

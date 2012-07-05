@@ -66,7 +66,7 @@ class MSCU:
     from clients and make and send responses.
     """
 
-    def __init__(self, host='', port=8000, response_type='expected_ack'):
+    def __init__(self, host='', port=10000, response_type='expected_ack'):
         """
         Initialize a `MSCU` object.
 
