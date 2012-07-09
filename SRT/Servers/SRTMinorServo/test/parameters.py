@@ -78,8 +78,8 @@ response_types = (
 
 # Available servers
 servers = {
-        'MSCUSimulator': ('192.168.150.163', 8000), # gavino4SRT
-        'MSCU': ('192.168.3.14', 8000)
+        'MSCUSimulator': ('192.135.33.196', 10000), # gavino4SRT
+        'MSCU': ('192.168.3.14', 10000)
 }
 
 time_stamp = 134770759071750080 # Completion timestamp

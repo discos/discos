@@ -96,6 +96,8 @@ public:
      * @param positions reference to doubleSeq positions
      * @param timestamp reference to positions timestamp
      * @param exe_time execution time
+     * @param is_dummy true if want to insert the position in the
+     * commanded position list, but without command it to the MSCU
      *
      * @throw ComponentErrors::SocketErrorExImpl, MinorServoErrors::PositioningErrorEx,
      * MinorServoErrors::CommunicationErrorEx
@@ -103,7 +105,8 @@ public:
     void setCmdPos(
             const ACS::doubleSeq &positions, 
             ACS::Time &timestamp,
-            const ACS::Time exe_time=0
+            const ACS::Time exe_time=0,
+            const bool is_dummy=false
     ) throw (
         ComponentErrors::SocketErrorExImpl, 
         MinorServoErrors::PositioningErrorEx, 

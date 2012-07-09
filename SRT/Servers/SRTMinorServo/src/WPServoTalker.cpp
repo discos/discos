@@ -99,7 +99,8 @@ void WPServoTalker::getActPos(
 void WPServoTalker::setCmdPos(
         const ACS::doubleSeq &cmd_positions, 
         ACS::Time &timestamp,
-        const ACS::Time exe_time
+        const ACS::Time exe_time,
+        const bool is_dummy
         ) throw (
             ComponentErrors::SocketErrorExImpl, 
             MinorServoErrors::PositioningErrorEx, 
@@ -115,22 +116,25 @@ void WPServoTalker::setCmdPos(
         THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set minor servo position: wrong number of axis", true);
 
     CSecAreaResourceWrapper<map<int, vector<PositionItem> > > lst_secure_requests = m_cmdPos_list->Get(); 
-    ACS::doubleSeq positions = cmd_positions;
-    // Add the offsets to the positions before make_request (so positions and offsets are both in virtual coordinate)
-    for(size_t i=0; i<positions.length(); i++)
-        positions[i] += (m_offsets->user)[i] + (m_offsets->system)[i];
 
-    // The first argument is the index of a vector of commands; make_request converts the position to virtual
-    string request = make_request(2, m_cdb_ptr, m_cmd_number, -1, -1, -1, exe_time, &positions);
-    // Schedule a position setting
-    CSecAreaResourceWrapper<vector<string> > secure_requests = m_requests->Get();
-    secure_requests->push_back(request);
-    secure_requests.Release();
+    if(!is_dummy) { // If we really want to command the position to the MSCU
+        ACS::doubleSeq positions = cmd_positions;
+        // Add the offsets to the positions before make_request (so positions and offsets are both in virtual coordinate)
+        for(size_t i=0; i<positions.length(); i++)
+            positions[i] += (m_offsets->user)[i] + (m_offsets->system)[i];
 
-    timestamp = look_for_a_response(get_request_id(request), starting_time, 2);
+        // The first argument is the index of a vector of commands; make_request converts the position to virtual
+        string request = make_request(2, m_cdb_ptr, m_cmd_number, -1, -1, -1, exe_time, &positions);
+        // Schedule a position setting
+        CSecAreaResourceWrapper<vector<string> > secure_requests = m_requests->Get();
+        secure_requests->push_back(request);
+        secure_requests.Release();
+
+        timestamp = look_for_a_response(get_request_id(request), starting_time, 2);
+    }
 
     // Set the position in the vector list when look_for_a_response found the response
-    // We must use the cmd_positions insead of positinos because make_request(...) modifies the positions making 
+    // We must use the cmd_positions insead of positions because make_request(...) modifies the positions making 
     // a virtual2real transformation
     PositionItem item;
     item.exe_time = exe_time;
@@ -310,7 +314,7 @@ ACS::Time WPServoTalker::look_for_a_response(
             if((m_responses->Get())->count(request_id)) {
                 answer = (*(m_responses->Get()))[request_id];
                 // TODO: questo if e' stato aggiunto dopo, e' da rivedere!!!
-                if(startswith(answer, "?setup")) {
+                if(startswith(answer, "?setup") || startswith(answer, "?stow")) {
                     cout << "Inizia con ?setup" << endl;
                 }
                 else{
