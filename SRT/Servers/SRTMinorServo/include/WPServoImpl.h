@@ -390,6 +390,12 @@ private:
      */
     static map<int, bool> m_status_thread_en;
 
+    // Flag to use for indicating the system is executing a setup 
+    bool m_is_setup_exe;
+
+    // Flag to use for indicating the system is executing a stow 
+    bool m_is_stow_exe;
+
     /** Structure containing the CDB parameters */
     CDBParameters *m_cdb_ptr;
 

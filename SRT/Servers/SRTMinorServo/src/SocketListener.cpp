@@ -49,6 +49,7 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
             try {
                 vector<string> sec, tmp;
                 sec = split(rec_answer, answer_separators);
+
                 // The first section of the answer, generally the sent command
                 if(rec_answer.find(command_separators) != string::npos)
                     tmp = split(sec[0], command_separators); // <comando, cmd_num=app_num>

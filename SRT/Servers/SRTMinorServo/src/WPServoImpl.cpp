@@ -276,6 +276,8 @@ void WPServoImpl::initialize() throw (
         m_thread_params.cmd_pos_list = m_cmdPos_list;
         m_thread_params.status_thread_en = &m_status_thread_en;
         m_thread_params.tracking_delta = m_cdb_ptr->TRACKING_DELTA;
+        m_thread_params.is_setup_exe_ptr = &m_is_setup_exe;
+        m_thread_params.is_stow_exe_ptr = &m_is_stow_exe;
 
         try {
             // I'll create the threads whitout the aid of the manager because I don't want
