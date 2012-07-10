@@ -1,0 +1,163 @@
+from Acspy.Clients.SimpleClient import PySimpleClient # Import the acspy.PySimpleClient class
+import ACS, ACS__POA                                  # Import the Python CORBA stubs for BACI
+from   omniORB.CORBA import TRUE, FALSE
+from time import sleep
+
+from PyQt4 import Qt
+import PyQt4.Qwt5 as Qwt
+import sys
+def enumList(enum, sentinel):
+    '''
+    '''
+    return [enum(i) for i in range(sentinel)]
+
+colorGroupList = enumList(
+    Qt.QPalette.ColorGroup, Qt.QPalette.NColorGroups)
+colorRoleList = enumList(
+    Qt.QPalette.ColorRole, Qt.QPalette.NColorRoles)
+handList  = enumList(
+    Qwt.QwtAnalogClock.Hand, Qwt.QwtAnalogClock.NHands)
+
+
+
+class WindMonitor(ACS__POA.CBdouble):
+    #------------------------------------------------------------------------------
+    '''
+    This class defines the method(s) that will be invoked asynchronously by the
+    mount device for any monitors we may create.
+    '''
+    #------------------------------------------------------------------------------
+    def __init__ (self,compass, propName = None,*args): 
+        '''
+        If the propertys name is specified, it is printed to STDOUT later on.
+        '''
+        self.count = 0
+        if propName != None:
+            self.propName = propName
+        else:
+            self.propName = "NoName"
+	
+		
+	self.compass = compass
+        
+
+
+
+        
+
+    #------------------------------------------------------------------------------
+    def __del__(self):
+        '''
+        Do nothing
+        '''
+    #------------------------------------------------------------------------------
+    def working (self, value, completion, desc):
+        '''
+        Really this is the method that does all the work and the developer should
+        be concerned with.
+        Parameters: value = the double we are interested in
+                    completion = completion structure
+                    desc = callback struct description
+        '''
+        #self.count = self.count + 1
+        #if self.count <= 5:
+        print "Working: ", str(self.propName), " is ", str(value)
+	self.compass.setValue(float(str(value)))
+
+    #------------------------------------------------------------------------------
+    def done (self, value, completion, desc):
+        '''
+        Invoked asynchronously when the DO has finished.  Normally this is invoked
+        just before a monitor is destroyed.
+        Parameters: value = the final value of the double we are interested in
+                    completion = completion structure
+                    desc = callback struct description
+        '''
+        print "Done: ", str(self.propName), " is ", str(value)
+        self.compass.setValue(float(value))
+
+    #------------------------------------------------------------------------------
+    def negotiate (self, time_to_transmit, desc):
+        '''
+        For simplicitys sake, we always return true.  If you want more detailed,
+        information on this method, please see the BACI specs.
+        Parameters: See the BACI specs.
+        '''
+        return TRUE
+#------------------------------------------------------------------------------
+
+class myCompass(Qwt.QwtCompass):
+
+    def __init(self,*args):
+ 	print "ZAAA"
+   
+        Qwt.QwtCompass.__init(self,*args)
+
+        
+#	self.__createCompass()
+	    
+ #   def __createCompass(self):
+      
+#        self.setLabelMap({0.0: "N",90.0: "E",180.0: "S",270.0: "W"})
+        self.rose = Qwt.QwtSimpleCompassRose(4, 1)
+        self.setRose(rose)
+        self.setNeedle(Qwt.QwtCompassWindArrow(Qwt.QwtCompassWindArrow.Style2))
+        
+	
+    
+    def __del__(self):
+	''' none'''
+		      
+
+
+
+class ShowMeteo():
+	
+
+      def __init__(self):
+        self.simpleClient = PySimpleClient()
+	self.simpleClient.getLogger().logInfo("We can directly manipulate a device once we get it, which is easy!!")
+	meteo = self.simpleClient.getComponent("METEO/station")
+	
+	windProperty = meteo._get_winddir()
+	palette = Qt.QPalette()
+        palette.setColor(Qt.QPalette.Foreground, Qt.Qt.lightGray)
+
+	self.windWidget=Qt.QWidget()
+	compass=Qwt.QwtCompass(self.windWidget)
+	compass.setPalette(palette)
+
+	newPalette = compass.palette()
+	rose=Qwt.QwtSimpleCompassRose(8,1)
+	compass.setRose(rose)
+	compass.setNeedle(Qwt.QwtCompassWindArrow(Qwt.QwtCompassWindArrow.Style2))	
+	layout = Qt.QVBoxLayout(self.windWidget)
+	layout.addWidget(compass)
+	windMon = WindMonitor(compass,"winddir")
+ 	cbMonServant = self.simpleClient.activateOffShoot(windMon)
+	desc = ACS.CBDescIn(0L, 0L, 0L)
+	self.actMon = windProperty.create_monitor(cbMonServant, desc)
+	self.actMon.set_timer_trigger(10000000)
+      def run(self):
+        self.windWidget.resize(200,200)
+        self.windWidget.show()
+	return self.windWidget
+      def __del__(self):
+ 	self.actMon.destroy()
+ 	self.simpleClient.releaseComponent("METEO/station")
+	self.simpleClient.disconnect()
+	print "The end __oOo__"
+	
+
+ 
+def main(args):
+
+	
+	app = Qt.QApplication(args)
+	my=ShowMeteo()
+	
+	w = my.run()
+    	sys.exit(app.exec_())
+
+if __name__=='__main__':
+	main(sys.argv)
