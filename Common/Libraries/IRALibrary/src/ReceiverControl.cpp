@@ -7,6 +7,9 @@ using IRA::ReceiverControlEx;
 // using IRA::ReceiverControl::StageValues;
 using IRA::any2string;
 
+// This is the time to wait until the bit commutation is stable
+const unsigned int SETMODE_SLEEP_TIME = 100000; // 0.1 seconds
+
 
 ReceiverControl::ReceiverControl(
         const std::string dewar_ip,
@@ -836,6 +839,22 @@ void ReceiverControl::setSingleDishMode(
                 port_number_vlbi,
                 value_vlbi
         );
+                
+        // Turn OFF the single dish mode on port number 13
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number_sd,
+                !value_sd
+        );
+
+        // Now the bits 13 and 14 are set to 1
+        // We need to set the bit 13 to 0, wait a bit and set it to 1
+        
+        usleep(SETMODE_SLEEP_TIME);
         // Turn ON the single dish mode on port number 13
         makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -846,6 +865,20 @@ void ReceiverControl::setSingleDishMode(
                 port_number_sd,
                 value_sd
         );
+        
+        usleep(3 * SETMODE_SLEEP_TIME);
+        // Turn OFF the single dish mode on port number 13
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number_sd,
+                !value_sd
+        );
+
+        // Now the bits 13 and 14 are set, respectively, to 0 and 1
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing setSigleDishOn().\n";
@@ -903,6 +936,22 @@ void ReceiverControl::setVLBIMode(
                 port_number_sd,
                 value_sd
         );
+        // Turn OFF the VLBI mode on port number 14
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number_vlbi,
+                !value_vlbi
+        );
+
+        // Now the bits 13 and 14 are set to 1
+        // We need to set the bit 13 to 1, wait a bit and set again it to 0
+        
+        usleep(SETMODE_SLEEP_TIME);
+        
         // Turn ON the VLBI mode on port number 14
         makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -913,6 +962,19 @@ void ReceiverControl::setVLBIMode(
                 port_number_vlbi,
                 value_vlbi
         );
+       
+        usleep(3 * SETMODE_SLEEP_TIME);
+        // Turn OFF the VLBI mode on port number 14
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number_vlbi,
+                !value_vlbi
+        );
+
     }
     catch(MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing setVLBIMode().\n";

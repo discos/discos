@@ -73,7 +73,7 @@ CMD_EOT = chr(0x04)
 class BoardServer:
     """A simulator of Franco Fiocchi (Medicina) board."""
 
-    def __init__(self, host='', port=8000):
+    def __init__(self, host='', port=10000):
         """Initialize a `Listener` object.
 
         Parameters:
