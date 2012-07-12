@@ -63,7 +63,7 @@ public:
 		// get the CommandLine .......
 		CSecAreaResourceWrapper<CommandLine> line=m_pLink->Get();
 		try {
-			line->getFreq(m_val);
+			line->getPower(m_val);
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOamplitude::read()");

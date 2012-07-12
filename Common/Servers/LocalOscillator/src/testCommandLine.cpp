@@ -13,7 +13,7 @@ int main(int argv, char** argc)
 	double freq;
 
 	try{
-		cl->configure(1,19,0,T10s,1,0);
+		cl->configure(0,19,0,T10s,1,0);
 		cout <<"configured" <<endl;
 		cl->query("*IDN?",reply);
 		cout << "sent *IDN?" << endl;

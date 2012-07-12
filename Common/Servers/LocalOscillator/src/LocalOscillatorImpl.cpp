@@ -208,8 +208,8 @@ void LocalOscillatorImpl::get(CORBA::Double& rf_ampl, CORBA::Double& rf_freq) th
  	try
  	{
      		CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
- 	 		line->getFreq(rf_freq); // set frequency
- 	 		line->getPower(rf_ampl); // set  amplitude
+ 	 		line->getFreq(rf_freq); // get frequency
+ 	 		line->getPower(rf_ampl); // get  amplitude
  	 		if (rf_freq !=m_freq)
  	 		{
  	 		    ACS::Time timestamp;
