@@ -127,11 +127,11 @@ void WPStatusUpdater::runLoop()
                 else
                     status_bset.reset(STATUS_SETUP);
                 
-                // Set the PARK bit of the status pattern
+                // Set the PARKED bit of the status pattern
                 if(status_par.cabState == CAB_DISABLED_FROM_AIF_IN)
-                    status_bset.set(STATUS_PARK);
+                    status_bset.set(STATUS_PARKED);
                 else
-                    status_bset.reset(STATUS_PARK);
+                    status_bset.reset(STATUS_PARKED);
 
 
                 // Set the WARNING bit of the status pattern

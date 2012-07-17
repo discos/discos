@@ -24,6 +24,7 @@ WPStatusUpdater* WPServoImpl::m_status_ptr = NULL;
 ExpireTime WPServoImpl::m_expire;
 map<int, WPServoTalker *> WPServoImpl::m_talkers;
 map<int, bool> WPServoImpl::m_status_thread_en;
+map<int, bool> WPServoImpl::m_stow_state;
 CSecureArea<unsigned short> *WPServoImpl::m_instance_counter = NULL;
 CSecureArea< map<int, vector<PositionItem> > >* WPServoImpl::m_cmdPos_list = \
     new CSecureArea< map<int, vector<PositionItem> > >(new map<int, vector<PositionItem> >);
@@ -276,8 +277,7 @@ void WPServoImpl::initialize() throw (
         m_thread_params.cmd_pos_list = m_cmdPos_list;
         m_thread_params.status_thread_en = &m_status_thread_en;
         m_thread_params.tracking_delta = m_cdb_ptr->TRACKING_DELTA;
-        m_thread_params.is_setup_exe_ptr = &m_is_setup_exe;
-        m_thread_params.is_stow_exe_ptr = &m_is_stow_exe;
+        m_thread_params.stow_state = &m_stow_state;
 
         try {
             // I'll create the threads whitout the aid of the manager because I don't want
@@ -699,7 +699,7 @@ bool WPServoImpl::isParked()
 {
     AUTO_TRACE("WPServoImpl::isParked()");
     bitset<STATUS_WIDTH> status(m_expire.status[m_cdb_ptr->SERVO_ADDRESS]);
-    return status.test(STATUS_PARK); 
+    return status.test(STATUS_PARKED); 
 }
 
 
@@ -724,6 +724,13 @@ bool WPServoImpl::isStarting()
     AUTO_TRACE("WPServoImpl::isStarting()");
     bitset<STATUS_WIDTH> status(m_expire.status[m_cdb_ptr->SERVO_ADDRESS]);
     return status.test(STATUS_SETUP); 
+}
+
+
+bool WPServoImpl::isParking() 
+{
+    AUTO_TRACE("WPServoImpl::isParking()");
+    return m_stow_state[m_cdb_ptr->SERVO_ADDRESS];
 }
 
 

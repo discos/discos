@@ -25,8 +25,7 @@ struct ThreadParameters {
     CSecureArea< map<int, vector<PositionItem> > > *cmd_pos_list;
     map<int, bool> *status_thread_en;
     double tracking_delta;
-    bool *is_setup_exe_ptr;
-    bool *is_stow_exe_ptr;
+    map<int, bool> *stow_state;
 };
 
 // This class takes care of getting requests from minor servos and send them. 

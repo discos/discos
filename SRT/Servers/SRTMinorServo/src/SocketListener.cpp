@@ -91,7 +91,6 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
 
                 // If the answer is a NAK_setup turn the setup-bit off and delete the item from the map
                 if(startswith(rec_answer, "NAK_setup")) {
-                    *(m_params->is_setup_exe_ptr) = false;
                     if(m_setup_counter.count(key))
                         m_setup_counter.erase(key);
                     return;
@@ -99,7 +98,7 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
                 
                 // If the answer is a NAK_stow turn the stow-bit off and delete the item from the map
                 if(startswith(rec_answer, "NAK_stow")) {
-                    *(m_params->is_stow_exe_ptr) = false;
+                    (*m_params->stow_state)[saddress] = false;
                     if(m_stow_counter.count(key))
                         m_stow_counter.erase(key);
                     return;
@@ -109,10 +108,10 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
                 if(startswith(rec_answer, "setup")) {
                     if(m_setup_counter.count(key)) {
                         m_setup_counter.erase(key);
-                        *(m_params->is_setup_exe_ptr) = false;
                     } 
-                    else
+                    else {
                         m_setup_counter[key] = 1;
+                    }
                     return;
                 }
                
@@ -120,10 +119,12 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
                 if(startswith(rec_answer, "stow")) {
                     if(m_stow_counter.count(key)) {
                         m_stow_counter.erase(key);
-                        *(m_params->is_stow_exe_ptr) = false;
+                        (*m_params->stow_state)[saddress] = false;
                     } 
-                    else
+                    else {
                         m_stow_counter[key] = 1;
+                        (*m_params->stow_state)[saddress] = true;
+                    }
                     return;
                 }
 

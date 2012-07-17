@@ -361,6 +361,10 @@ public:
      
      /** Return true when the minor servo is starting */
      virtual bool isStarting(); 
+ 
+
+     /** Return true when the minor servo is parking */
+     virtual bool isParking(); 
 
      /**
       * Return the data required as a sequence, each item is related to the corresponding axis
@@ -390,11 +394,11 @@ private:
      */
     static map<int, bool> m_status_thread_en;
 
-    // Flag to use for indicating the system is executing a setup 
-    bool m_is_setup_exe;
-
-    // Flag to use for indicating the system is executing a stow 
-    bool m_is_stow_exe;
+    /** Flag to use for indicating the system is executing a stow.
+     * This attribute is a map of flags used by the StatusUpdater to enable the `system in stow state` status bit.
+     * The key is the servo address and the value is the corresponding flag. 
+     */
+    static map<int, bool> m_stow_state;
 
     /** Structure containing the CDB parameters */
     CDBParameters *m_cdb_ptr;

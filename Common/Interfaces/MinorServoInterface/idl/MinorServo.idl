@@ -288,7 +288,7 @@ module MinorServo {
          *  @arg \c 1 Warning: 1 means there is an abnormal condition that should not affect the observation
          *  @arg \c 2 Failure: 1 means there is a failure condition, the observation will not be succesful
          *  #arg \c 3 Setup: 1 means the MinorServo is on startup state
-         *  #arg \c 4 Park: 1 means the MinorServo is parked
+         *  #arg \c 4 Parked: 1 means the MinorServo is parked
          *  @arg \c 5 Tracking: 1 means the MinorServo is tracking the commanded position
          */
          readonly attribute ACS::ROpattern status;
@@ -417,6 +417,10 @@ module MinorServo {
 
         /** Return true when the minor servo is starting */
         boolean isStarting();
+
+
+        /** Return true when the minor servo is parking */
+        boolean isParking();
 
 
         /** Set the flag used by the StatusUpdater to enable the servo status updating */
