@@ -7,7 +7,7 @@ using IRA::ReceiverControlEx;
 // using IRA::ReceiverControl::StageValues;
 using IRA::any2string;
 
-// This is the time to wait until the bit commutation is stable
+// SETMODE_SLEEP_TIME is the time to wait until the bit commutation is stable
 const unsigned int SETMODE_SLEEP_TIME = 100000; // 0.1 seconds
 
 
@@ -278,12 +278,14 @@ double ReceiverControl::cryoTemperature(
         const BYTE port_number
         ) throw (ReceiverControlEx) 
 {
+
     const size_t raw_index = temperature_id;
+
     try {
 
-        if(temperature_id < 1 || temperature_id > 4)
+        // AD8 (id=0), AD9 (id=1), AD11 (id=3), AD12 (id=4)
+        if(temperature_id < 0 || temperature_id > 4) 
             throw ReceiverControlEx("Invalid temperature_id: " + any2string(temperature_id));
-
 
         std::vector<BYTE> parameters = makeRequest(
                 m_dewar_board_ptr,      // Pointer to the dewar board

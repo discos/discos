@@ -324,7 +324,7 @@ public:
 
     /** Return the cryogenic temperature
      *
-     *  @param temperature_id the id code of the temperature (1, 2, 3 or 4)
+     *  @param temperature_id the id code of the temperature (0, 1, 3 or 4)
      *  @param converter pointer to the function that performs the conversion from
      *  voltage to Kelvin; default value is NULL, and in this case the value
      *  returned by cryoTemperature is the voltage value (the value before conversion).

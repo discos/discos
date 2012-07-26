@@ -14,7 +14,7 @@ std::string any2string(T i) {
 // Convert the voltage value of the vacuum to mbar
 double voltage2mbar(double voltage) { return(pow(10, 1.5 * voltage - 12)); }
 
-// Convert the voltage value of the temperatures to Kelvin
+// Convert the voltage value of the temperatures to Kelvin (Sensor LAKE SHORE)
 double voltage2Kelvin(double voltage) 
 { 
     return voltage < 1.12 ? \
@@ -25,11 +25,20 @@ double voltage2Kelvin(double voltage)
         - (44623.988512320400 * pow(voltage, 3)) + (43962.922216886600 * pow(voltage, 2)) - 22642.245121997700 * voltage + 4808.631312836750;
 }
 
+// Convert the voltage value of the temperatures to Celsius (Sensor B57703-10K)
+double voltage2Celsius(double voltage) 
+{ return -5.9931 * pow(voltage, 5) + 40.392 * pow(voltage, 4) - 115.41 * pow(voltage, 3) + 174.67 * pow(voltage, 2) - 174.23 * voltage + 112.79; }
+ 
+
 // Convert the ID voltage value to the mA value
 double currentConverter(double voltage) { return(10 * voltage); }
 
 // Convert the VD and VG voltage values using a right scale factor
 double voltageConverter(double voltage) { return(voltage); }
+
+
+
+
 /************************** END CONVERSIONS ****************************/
 
 
@@ -99,16 +108,24 @@ int main(int argc, char *argv[])
         // cout << "Test setReliableCommOff()" << endl;
         // rc.setReliableCommOff();
         // cout << "Done!\n" << endl;
+        
+        // // Test the setVacuumSensorOn()
+        cout << "Test setVacuumSensorOn() with a reliable communication" << endl;
+        rc.setVacuumSensorOn();
+        cout << "Done!\n" << endl;
+        
+        sleep(1);
 
-        // // Test the vacuum() voltage value, without conversion
-        // cout << "Test vacuum()" << endl;
-        // cout << "Vacuum value before conversion [Volt]: " << rc.vacuum() << endl;
-        // cout << "Done!\n" << endl;
+        // Test the isVacuumSensorOn()
+        cout << "Test isVacuumSensorOn() with a reliable communication" << endl;
+        cout << "Is the vacuum sensor ON? " << (rc.isVacuumSensorOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
 
-        // // Test the vertexTemperature() voltage value, without conversion
-        // cout << "Test vertexTemperature()" << endl;
-        // cout << "Vertex temperature value before conversion [Volt]: " << rc.vertexTemperature() << endl;
-        // cout << "Done!\n" << endl;
+
+        // Test the vacuum() voltage value, without conversion
+        cout << "Test vacuum()" << endl;
+        cout << "Vacuum value before conversion [Volt]: " << rc.vacuum() << endl;
+        cout << "Done!\n" << endl;
 
         // // Test the setReliableCommOn()
         // cout << "Test setReliableCommOn()" << endl;
@@ -120,30 +137,49 @@ int main(int argc, char *argv[])
         // // rc.setCalibrationOff();
         // // cout << "Done!\n" << endl;
 
-        // // Test the vacuum()
-        // cout << "Test vacuum() with a reliable communication" << endl;
-        // cout << "Vacuum value: " << rc.vacuum(voltage2mbar) << endl;
-        // cout << "Done!\n" << endl;
+        // Test the vacuum()
+        cout << "Test vacuum() with a reliable communication" << endl;
+        cout << "Vacuum value: " << rc.vacuum(voltage2mbar) << endl;
+        cout << "Done!\n" << endl;
+ 
+        // // Test the setVacuumSensorOff()
+        cout << "Test setVacuumSensorOn() with a reliable communication" << endl;
+        rc.setVacuumSensorOff();
+        cout << "Done!\n" << endl;
+
+        // Test the isVacuumSensorOn()
+        cout << "Test isVacuumSensorOn() with a reliable communication" << endl;
+        cout << "Is the vacuum sensor ON? " << (rc.isVacuumSensorOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // // Test the vertexTemperature() voltage value, without conversion
+        cout << "Test vertexTemperature()" << endl;
+        cout << "Vertex temperature value before conversion [Volt]: " << rc.vertexTemperature(voltage2Celsius) << endl;
+        cout << "Done!\n" << endl;
+
+        // Test the cryoTemperature(0)
+        cout << "Test cryoTemperature(0) with a reliable communication" << endl;
+        cout << "First Cryogenic Temperature value (mbar): " << rc.cryoTemperature(0, voltage2Kelvin) << endl;
+        cout << "First Cryogenic Temperature value (Volt): " << rc.cryoTemperature(0) << endl;
+        cout << "Done!\n" << endl;
 
         // // Test the cryoTemperature(1)
-        // cout << "Test cryoTemperature(1) with a reliable communication" << endl;
-        // cout << "First Cryogenic Temperature value: " << rc.cryoTemperature(1, voltage2Kelvin) << endl;
-        // cout << "Done!\n" << endl;
-
-        // // Test the cryoTemperature(2)
-        // cout << "Test cryoTemperature(2) with a reliable communication" << endl;
-        // cout << "Second Cryogenic Temperature value: " << rc.cryoTemperature(2, voltage2Kelvin) << endl;
-        // cout << "Done!\n" << endl;
+        cout << "Test cryoTemperature(1) with a reliable communication" << endl;
+        cout << "Second Cryogenic Temperature value (mbar): " << rc.cryoTemperature(1, voltage2Kelvin) << endl;
+        cout << "Second Cryogenic Temperature value (Volt): " << rc.cryoTemperature(1) << endl;
+        cout << "Done!\n" << endl;
 
         // // Test the cryoTemperature(3)
-        // cout << "Test cryoTemperature(3) with a reliable communication" << endl;
-        // cout << "Third Cryogenic Temperature value: " << rc.cryoTemperature(3, voltage2Kelvin) << endl;
-        // cout << "Done!\n" << endl;
+        cout << "Test cryoTemperature(3) with a reliable communication" << endl;
+        cout << "Third Cryogenic Temperature value (mbar): " << rc.cryoTemperature(3, voltage2Kelvin) << endl;
+        cout << "Third Cryogenic Temperature value (volt): " << rc.cryoTemperature(3) << endl;
+        cout << "Done!\n" << endl;
 
         // // Test the cryoTemperature(4)
-        // cout << "Test cryoTemperature(4) with a reliable communication" << endl;
-        // cout << "Fouth Cryogenic Temperature value: " << rc.cryoTemperature(4, voltage2Kelvin) << endl;
-        // cout << "Done!\n" << endl;
+        cout << "Test cryoTemperature(4) with a reliable communication" << endl;
+        cout << "Fouth Cryogenic Temperature value (mbar): " << rc.cryoTemperature(4, voltage2Kelvin) << endl;
+        cout << "Fouth Cryogenic Temperature value (volt): " << rc.cryoTemperature(4) << endl;
+        cout << "Done!\n" << endl;
 
         // // Test the isCoolHeadOn()
         // cout << "Test isCoolHeadOn() with a reliable communication" << endl;
@@ -302,7 +338,7 @@ int main(int argc, char *argv[])
         // cout << "Is the vacuum valve ON? " << (rc.isVacuumValveOn() == true ? "yes" : "no") << endl;
         // cout << "Done!\n" << endl;
 
-        // // Test the isRemoteOn()
+        // Test the isRemoteOn()
         // cout << "Test isRemoteOn() with a reliable communication" << endl;
         // cout << "Is the remote command enable? " << (rc.isRemoteOn() == true ? "yes" : "no") << endl;
         // cout << "Done!\n" << endl;
@@ -342,35 +378,35 @@ int main(int argc, char *argv[])
         // cout << "Is the LO2 locked? " << (rc.isLO2Locked() == true ? "yes" : "no") << endl;
         // cout << "Done!\n" << endl;
 
-        // Test the setSingleDishMode()
-        cout << "Test setSingleDishMode() with a reliable communication" << endl;
-        rc.setSingleDishMode();
-        cout << "Done!\n" << endl;
+        // // Test the setSingleDishMode()
+        // cout << "Test setSingleDishMode() with a reliable communication" << endl;
+        // rc.setSingleDishMode();
+        // cout << "Done!\n" << endl;
 
-        // Test the isSingleDishModeOn()
-        cout << "Test isSingleDishModeOn() with a reliable communication" << endl;
-        cout << "Is the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
-        cout << "Done!\n" << endl;
+        // // Test the isSingleDishModeOn()
+        // cout << "Test isSingleDishModeOn() with a reliable communication" << endl;
+        // cout << "Is the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
+        // cout << "Done!\n" << endl;
+
+        // // // Test the isVLBIModeOn()
+        // cout << "Test isVLBIModeOn() with a reliable communication" << endl;
+        // cout << "Is the VLBI mode active? " << (rc.isVLBIModeOn() == true ? "yes" : "no") << endl;
+        // cout << "Done!\n" << endl;
+
+        // // // Test the setVLBIMode()
+        // cout << "Test setVLBIMode() with a reliable communication" << endl;
+        // rc.setVLBIMode();
+        // cout << "Done!\n" << endl;
 
         // // Test the isVLBIModeOn()
-        cout << "Test isVLBIModeOn() with a reliable communication" << endl;
-        cout << "Is the VLBI mode active? " << (rc.isVLBIModeOn() == true ? "yes" : "no") << endl;
-        cout << "Done!\n" << endl;
+        // cout << "Test isVLBIModeOn() with a reliable communication" << endl;
+        // cout << "Is the VLBI mode active? " << (rc.isVLBIModeOn() == true ? "yes" : "no") << endl;
+        // cout << "Done!\n" << endl;
 
-        // // Test the setVLBIMode()
-        cout << "Test setVLBIMode() with a reliable communication" << endl;
-        rc.setVLBIMode();
-        cout << "Done!\n" << endl;
-
-        // Test the isVLBIModeOn()
-        cout << "Test isVLBIModeOn() with a reliable communication" << endl;
-        cout << "Is the VLBI mode active? " << (rc.isVLBIModeOn() == true ? "yes" : "no") << endl;
-        cout << "Done!\n" << endl;
-
-        // Test the isSingleDishModeOn()
-        cout << "Test isSingleDishModeOn() with a reliable communication" << endl;
-        cout << "Is the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
-        cout << "Done!\n" << endl;
+        // // Test the isSingleDishModeOn()
+        // cout << "Test isSingleDishModeOn() with a reliable communication" << endl;
+        // cout << "Is the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
+        // cout << "Done!\n" << endl;
         // 
         // // Test the setSingleDishMode()
         // cout << "Test setSingleDishMode() with a reliable communication" << endl;
