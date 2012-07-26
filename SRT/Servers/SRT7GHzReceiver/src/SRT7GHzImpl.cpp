@@ -9,6 +9,7 @@
 #include "DevIOCryoTemperatureCoolHeadWindow.h"
 #include "DevIOCryoTemperatureLNA.h"
 #include "DevIOCryoTemperatureLNAWindow.h"
+#include "DevIOEnvTemperature.h"
 #include "DevIOLNAControls.h"
 #include "DevIOStatus.h"
 #include "DevIOComponentStatus.h"
@@ -97,6 +98,7 @@ void SRT7GHzImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		m_pcryoTemperatureLNAWindow=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureLNAWindow",getComponent(),
 				new DevIOCryoTemperatureLNAWin(&m_core),true);
 		m_penvironmentTemperature=new baci::ROdouble(getContainerServices()->getName()+":environmentTemperature",getComponent());
+				// new DevIOEnvTemperature(&m_core),true); // Is there a sensor?
 		m_pstatus=new baci::ROpattern(getContainerServices()->getName()+":status",getComponent(),
 				new DevIOStatus(&m_core),true);
 		m_preceiverStatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>

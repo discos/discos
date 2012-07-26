@@ -180,6 +180,12 @@ public:
 	void updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 	/**
+	 * It reads and updates from the control board the current vertex temperature
+	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+    void updateEnvironmentTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	/**
 	 * It checks if the Dewar power box is in remote or not
 	 * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
 	 */
@@ -236,6 +242,12 @@ public:
 	 * @return the current value of the cryogenic temperature at LNA  window in °K
 	 */
 	double getCryoLNAWin() const { return m_cryoLNAWin; }
+
+	/**
+	 * This is getter method. No need to make it thread safe......
+	 * @return the current value of the vertex temperature
+	 */
+	double getEnvironmentTemperature() const { return m_environmentTemperature; }
 
 	/**
 	 * This is getter method. No need to make it thread safe......
@@ -351,6 +363,7 @@ private:
 	double m_cryoLNA;
 	double m_cryoLNAWin;
 	double m_vacuumDefault;
+	double m_environmentTemperature;
 	IRA::ReceiverControl::FetValues m_fetValues;
 	DWORD m_statusWord;
 	Management::TSystemStatus m_componentStatus;
@@ -383,6 +396,9 @@ private:
 	        (865.747519105672 * pow(voltage, 6)) - (7271.931957100480 * pow(voltage, 5)) + (24930.666241800500 * pow(voltage, 4))
 	        - (44623.988512320400 * pow(voltage, 3)) + (43962.922216886600 * pow(voltage, 2)) - 22642.245121997700 * voltage + 4808.631312836750;
 	}
+    // Convert the voltage value of the temperatures to Celsius (Sensor B57703-10K)
+    static double voltage2Celsius(double voltage) 
+    { return -5.9931 * pow(voltage, 5) + 40.392 * pow(voltage, 4) - 115.41 * pow(voltage, 3) + 174.67 * pow(voltage, 2) - 174.23 * voltage + 112.79; }
 	// Convert the ID voltage value to the mA value
 	static double currentConverter(double voltage) { return(10 * voltage); }
 	// Convert the VD and VG voltage values using a right scale factor

@@ -101,7 +101,7 @@ void CMonitorThread::onStart()
 	 		 break;
 	 	 }
 	 	case CTEMPLNAW: {
-	 		m_currentStage=REMOTE;
+	 		m_currentStage=ENVTEMP;
 	 		 try {
 	 			 m_core->updateCryoLNAWin();
 	 		 }
@@ -111,6 +111,17 @@ void CMonitorThread::onStart()
 	 		 }
 	 		 break;
 	 	}
+	 	case ENVTEMP: {
+	 		m_currentStage=REMOTE;
+	 		 try {
+	 			 m_core->updateEnvironmentTemperature();
+	 		 }
+	 		 catch (ACSErr::ACSbaseExImpl& ex) {
+	 			 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CMonitorThread::runLoop");
+	 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+	 		 }
+	 		 break;
+	 	 }
 	 	case REMOTE: {
 	 		m_currentStage=COOLHEAD;
 	 		try {
@@ -167,7 +178,7 @@ void CMonitorThread::onStart()
 	 		break;
 	 	}
 	 	case UNLOCKED: {
-	 		m_currentStage=ENVTEMP;
+	 		m_currentStage=VACUUM;
 	 		try {
 	 			m_core->checkLocalOscillator();
 	 		}
@@ -177,9 +188,5 @@ void CMonitorThread::onStart()
 	 		}
 	 		break;
 	 	}
-	 	case ENVTEMP: {
-	 		m_currentStage=VACUUM;
-	 		 break;
-	 	 }
 	 }
 }

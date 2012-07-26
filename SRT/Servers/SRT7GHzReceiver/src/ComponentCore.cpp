@@ -704,7 +704,7 @@ void CComponentCore::updateCryoCoolHead() throw (ReceiversErrors::ReceiverContro
 {
 	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
 	try {
-		m_cryoCoolHead=m_control->cryoTemperature(1,CComponentCore::voltage2Kelvin);
+		m_cryoCoolHead=m_control->cryoTemperature(0,CComponentCore::voltage2Kelvin);
 	}
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHead()");
@@ -719,7 +719,7 @@ void CComponentCore::updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverCon
 {
 	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
 	try {
-		m_cryoCoolHeadWin=m_control->cryoTemperature(2,CComponentCore::voltage2Kelvin);
+		m_cryoCoolHeadWin=m_control->cryoTemperature(1,CComponentCore::voltage2Kelvin);
 	}
 	catch (IRA::ReceiverControlEx& ex) {
 		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHeadWin()");
@@ -759,6 +759,22 @@ void CComponentCore::updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlB
 	}
 	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
+
+void CComponentCore::updateEnvironmentTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	// not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+	try {
+        m_environmentTemperature = m_control->vertexTemperature(CComponentCore::voltage2Celsius);
+	}
+	catch (IRA::ReceiverControlEx& ex) {
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateEnvironmentTemperature()");
+		impl.setDetails(ex.what().c_str());
+		setStatusBit(CONNECTIONERROR);
+		throw impl;
+	}
+	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
 
 void CComponentCore::updateLNAControls() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
