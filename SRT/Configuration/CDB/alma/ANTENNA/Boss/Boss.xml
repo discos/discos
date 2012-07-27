@@ -12,7 +12,7 @@
              RepetitionCacheTime="2000000"
              RepetitionExpireTime="5000000"
              MinPointNumber="20"
-             MaxPointNumber="1000"
+             MaxPointNumber="200"
              GapTime="200000"
 	     	 CoordinateIntegration="1000000"
 	     	 CutOffElevation="70.0"

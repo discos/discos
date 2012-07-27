@@ -19,7 +19,7 @@
 		StatusSocketDutyCycle="30000"
 		ControlSocketResponseTime="1000000"
 		ControlSocketDutyCycle="30000"
-		TimeSource="EXT">
+		TimeSource="IRIG-B">
 	               
 	<azimuth description="Azimuth drive position" 
 	         units="degree"
