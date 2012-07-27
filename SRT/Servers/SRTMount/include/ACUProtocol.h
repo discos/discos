@@ -416,6 +416,14 @@ public:
 			double ut=(double)CACUProtocol::readStatusField<TREAL64>(m_buffer,m_disp+65);
 			return ut*DT_MSECSPERDAY;
 		}
+		TUINT32 pTTFreePositions() const {
+			TUINT32 ptActIndex=pTTCurrentIndex();
+			TUINT32 ptEndIndex=pTTEndIndex();
+			TUINT32 actIndexCtrl=ptEndIndex/500;
+			TUINT32 actIndexTrack=actIndexCtrl*500+ptActIndex;
+			if (actIndexTrack>ptEndIndex) actIndexTrack=(actIndexCtrl-1)*500+ptActIndex;
+			return ptEndIndex-actIndexTrack;
+		}
 		/***********************************************************/
 		inline bool clockOnLine() const { return (CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+73)==1); }
 		inline bool clockOK() const { return (CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+74)==1); }

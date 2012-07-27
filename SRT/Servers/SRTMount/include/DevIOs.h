@@ -287,7 +287,8 @@ public:
 						break;
 					}					
 					case PROGRAM_TRACK_POS: {
-						m_value=(T)data->pointingStatus()->pTTLength();
+						//m_value=(T)data->pointingStatus()->pTTLength();
+						m_value=(T)data->pointingStatus()->pTTFreePositions();
 						break;
 					}
 					case SECTION: {

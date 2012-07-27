@@ -163,7 +163,8 @@ WORD CACUProtocol::loadProgramTrack(const ACS::Time& startEpoch,const TProgramTr
 	TUINT32 counter;
 	double mjd;
 	//ACS::Time startUt;
-	long timeDiff;
+	long long timeDiff;
+	long castTimeDiff;
 	command=NULL;
 	commNumber=1;
 	if (newTable && (size<PROGRAMTRACK_TABLE_MINIMUM_LENGTH)) { // for a new table at least five points are required!
@@ -243,13 +244,13 @@ WORD CACUProtocol::loadProgramTrack(const ACS::Time& startEpoch,const TProgramTr
 	copyData<TREAL64>(msg,elRate,len);  // max speed in elevation...
 	for (WORD i=0;i<size;i++) {
 		timeDiff=(seq[i].timeMark-startEpoch); // 100 ns
-		timeDiff=(long)(timeDiff/10000); // milliseconds
-
+		timeDiff=(timeDiff/10000); // milliseconds
+		castTimeDiff=(long)timeDiff;
 		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 		outputFile << timeDiff << "\t" << seq[i].azimuth << seq[i].elevation << "\n";
 		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-		copyData<TINT32>(msg,timeDiff,len);
+		copyData<TINT32>(msg,castTimeDiff,len);
 		copyData<TREAL64>(msg,seq[i].azimuth,len);
 		copyData<TREAL64>(msg,seq[i].elevation,len);
 	}
