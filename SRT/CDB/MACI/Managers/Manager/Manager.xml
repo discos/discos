@@ -31,7 +31,6 @@
     </ServiceComponents>
 
     <ServiceDaemons>
-        <cdb:_ string="alma78.hq.eso.org"/>
     </ServiceDaemons>
 
 
