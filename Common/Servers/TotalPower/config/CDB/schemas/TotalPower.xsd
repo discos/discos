@@ -43,7 +43,13 @@
 				<xs:annotation><xs:documentation>
 					the backend is connected to the 2 inputs of the primary focus 8GHz receiver, RCP and LCP are reported respectively 
 				</xs:documentation></xs:annotation>	
-	      	</xs:enumeration>	      		      		      	
+	      	</xs:enumeration>
+		<xs:enumeration value="CCG">
+			<xs:annotation><xs:documentation>
+					the backend is connected to the 2 inputs of the 7GHz receiver of SRT, RCP and LCP are reported respectively 
+				</xs:documentation></xs:annotation>	
+		</xs:enumeration>
+
 		</xs:restriction>
 	</xs:simpleType>
 	
