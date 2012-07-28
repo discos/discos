@@ -12,7 +12,7 @@
 	maxAzimuth="450.0"
 	minAzimuth="-90.0"
 	maxElevation="90.0"
-	minElevation="5.0"
+	minElevation="5.5"
 	diameter="64.0"
 	maxAzimuthRate="0.4"
 	maxElevationRate="0.25"
