@@ -272,8 +272,8 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 			data.Release(); // this is fundamental in order to avoid starvation of other thread......
 			// waits for the ACU to respond....or eventually raise a timeout
 			waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+			m_lastScanEpoch=now.value().value;
 		}
-		m_lastScanEpoch=now.value().value;
 	}
 	catch (AntennaErrors::AntennaErrorsExImpl& ex) { // in case of error we need to start the tracking from the scatch in order to avoid different time gaps
 		//clear
@@ -700,7 +700,7 @@ void CCommandSocket::activate_command() throw (TimeoutExImpl,SocketErrorExImpl,N
 	data.Release(); // this is fundamental in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
 	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
-	IRA::CIRATools::Wait(3,500000); // wait for the real completion of the activate operation
+	IRA::CIRATools::Wait(5,500000); // wait for the real completion of the activate operation
 	ACS_LOG(LM_FULL_INFO,"CStatusSocket::activate_command()",(LM_NOTICE,"AXIS_ARE_NOW_ACTIVE"));
 }
 
