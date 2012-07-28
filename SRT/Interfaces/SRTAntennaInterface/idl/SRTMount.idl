@@ -143,7 +143,6 @@ module Antenna {
 		 * @arg \c 4 set if the servo failed: Error
 		 * @arg \c 5 set if the motor sensors failed: Error
 		 * @arg \c 6 set if the bus failed: Error
-		 * @arg \c 7 set if the motor is not traking the right position: Error
 		 */
 		readonly attribute ACS::ROlongSeq motorsStatus;
 		
