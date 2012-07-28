@@ -137,8 +137,8 @@ module Antenna {
 		 * This procedure succeeds only if the antenna is not in <i>ACU_BSY</i> status and the mode is <i>ACU_PROGRAMTRACK</i>. It allows to 
 		 * transfer a time stamp and the required position of one particular spot of the trajectory. The time values must continuosly 
 		 * increase otherwise the point will be discarded. After one or more data points (According to the interpolation algorithm and the 
-		 * function oder) are loaded, the ACU interpolates the points in order to draw the curve. Rage checks garantee the elevation and the azimuth are 
-		 * always inside the limits configured inside the CDB. Tthe decision wether use the CW or CCW sector is made automatically, if the <i>forceSection()</i> has not been issued.
+		 * function oder) are loaded, the ACU interpolates the points in order to draw the curve. Rnage checks garantee the elevation and the azimuth are 
+		 * always inside the limits configured inside the CDB. The decision wether use the CW or CCW sector is made automatically, if the <i>forceSection()</i> has not been issued.
 	 	 * @throw ComponentErrors::ComponentErrorsEx 
 		 * @throw CORBA::SystemException		 
 		 * @param az azimuth of the data point that will be transfered (degrees)
