@@ -12,6 +12,7 @@
         Code="SRTWeatherStationImpl"
         Type="IDL:alma/Weather/SRTStation:1.0"
         Container="WeatherStationContainer"
+	Default="true"
         ImplLang="cpp"
 />
 
