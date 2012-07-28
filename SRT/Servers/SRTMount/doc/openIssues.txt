@@ -1,23 +1,9 @@
 1) With 50ms as gap between status frames, the commands tend to timeout even if the command is executed effectively. I suspect that the frame with the command answer is lost or
    splitted into two consecutive answers.Some investigation are due, for example printing the frame counter to see if one or more is missing. 
-2) The position flag in motors status seems always (in the simulator) to report "position not reached, corresponding to UINT8 value 0.To fix apparently the field is not used.
-   See issue 5.1 of the MTM manual. 
-3) In the GUI the format of motor torque must be fixed.
-4) Reset failure is a special command that does not imply an answer from the ACU, this case must be dealt with.
-5) Sometimes the activate command, called indirectly by other commands, does not recognize that the axis is already activated and so an error is issued. Operation after the reset?
-6) The component must explicitly deactivate the axis after a stow command  
-
-7) In CCommonData::Bind() roll back modification included in order to the debug the program track issue: 
-   a) commented out: //_IRA_LOGFILTER_LOG(
-   b) printfs
-   
 8) The LOG messages are printed (on standard output) with the strange dictionary couple Reason="program track ...." it seems that a previous key=value has
    not been cleared. The same in jlog? 
    2012-04-20T08:57:05.929 [MountContainer-GL - CCommandSocket::changeMode_command()] NEW_ACU_MODE PROGRAM_TRACK Code="5" Reason="program track mode not configured" Message="INVALID ARGUMENTS"
-   
-    
 
-9) in class Cprotocol rollback all modifications to store ppt positions, they are marked with //$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 10) contollare iterazione tra Boss e mount in caso di errore di trasmissione di un pacchetto dati. Il boss fallisce di aggiornare il tempo dell'ultima coordinata comandata
     ed il ciclo successivo sbaglia a calcolare il tempo.  Nel caso il mount fallisca di mandare il pacchetto occorre "resettare" il tracking.

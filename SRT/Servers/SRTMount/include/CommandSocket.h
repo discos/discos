@@ -75,9 +75,19 @@ public:
 	void preset(const double& az,const double& el) throw (ComponentErrors::TimeoutExImpl,ComponentErrors::SocketErrorExImpl,AntennaErrors::ConnectionExImpl,
 			AntennaErrors::AntennaBusyExImpl,AntennaErrors::NakExImpl,AntennaErrors::OperationNotPermittedExImpl);
 	
-	
-	void programTrack(const double& az,const double& el,const ACS::Time& time,bool clear) throw (AntennaErrors::NakExImpl,AntennaErrors::ConnectionExImpl,AntennaErrors::AntennaBusyExImpl,
-			ComponentErrors::TimeoutExImpl,AntennaErrors::OperationNotPermittedExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+	/**
+	 * This method can be used to command the telescope to program track position. Range check are performed before commanding, if a value is beyond the hardware limits of the telescope,
+	 * this value is forced inside. The azimuth coordinate commanded effectively to the ACU depands on the current position and on cable wrapping considerations.   
+	 * @param az azimuth position in degrees.
+	 * @param el elevation positions in degrees. 
+	 * @param time timestamp 
+	 * @param clear true if the previous stack of position must be cleared
+	 * @throw ComponentErrors::ComponentErrorsExImpl
+	 * @thorw AntennaErrors::AntennaErrorsExImpl
+	*/
+	void programTrack(const double& az,const double& el,const ACS::Time& time,bool clear) throw (ComponentErrors::ComponentErrorsExImpl,AntennaErrors::AntennaErrorsExImpl); 
+	//throw (AntennaErrors::NakExImpl,AntennaErrors::ConnectionExImpl,AntennaErrors::AntennaBusyExImpl,
+	//		ComponentErrors::TimeoutExImpl,AntennaErrors::OperationNotPermittedExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
 	
 	/**
 	 * This function can be used to command new axis mode to the ACU. Even if the methods allows for different mode for elevation and azimuth it fails if the modes are not the same.

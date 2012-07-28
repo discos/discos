@@ -19,6 +19,7 @@
 #define MODE_COMMAND_ID 1
 #define PARAMETER_COMMAND_ID 2
 #define PROGRAMTRACK_COMMAND_ID 4
+#define SYSTEM_COMMAND_ID 3
 
 #define PROGRAMTRACK_INTERPOLATION_MODE 4
 #define PROGRAMTRACK_TRACKING_MODE 1
@@ -33,18 +34,11 @@ CACUProtocol::CACUProtocol()
 {
 	m_syncBuffer=new CCircularArray(STATUS_BUFFER);
 	m_bbufferStarted=false;
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	outputFile.open("PPTOutFile.dat",ios_base::out|ios_base::trunc);
-	outputFile << "CommandID\tSubsystemID\tCounter\tParameterID\tInterpolationMode\tTrackingMode\tLoadMode\tLength\tStartTime\n";
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 CACUProtocol::~CACUProtocol()
 {
 	delete m_syncBuffer;
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	outputFile.close();
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 WORD CACUProtocol::preset(const double& azPos,const double& elPos,const double& azRate,const double& elRate,BYTE * & buff,TCommand *& command,WORD& commNumber)
@@ -125,10 +119,10 @@ WORD CACUProtocol::stop(BYTE *& buff,TCommand *& command,WORD& commNumber)
 	return modeCommand(MODE_STOP,MODE_STOP,0.0,0.0,0.0,0.0,buff,command,commNumber);
 }
 
-WORD CACUProtocol::resetErrors(BYTE *& buff,TCommand *& command,WORD& commNumber)
+WORD CACUProtocol::resetErrors(BYTE *& buff)
 {
 	//return modeCommand(MODE_RESET,MODE_RESET,0.0,0.0,0.0,0.0,buff,command,commNumber);
-	return modeCommand(buff,command,commNumber);
+	return systemCommand(buff);
 }
 
 WORD CACUProtocol::stow(const double& stowSpeed,BYTE *& buff,TCommand *& command,WORD& commNumber)
@@ -168,88 +162,31 @@ WORD CACUProtocol::loadProgramTrack(const ACS::Time& startEpoch,const TProgramTr
 	command=NULL;
 	commNumber=1;
 	if (newTable && (size<PROGRAMTRACK_TABLE_MINIMUM_LENGTH)) { // for a new table at least five points are required!
-		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-		outputFile << "Sequence too short\n";
-		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 		return 0;
 	}
 	copyData<TUINT16>(msg,PROGRAMTRACK_COMMAND_ID,len);
-
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	outputFile << PROGRAMTRACK_COMMAND_ID << "\t";
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 	copyData<TUINT16>(msg,SUBSYSTEM_ID_POINTING,len);
-
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	outputFile << SUBSYSTEM_ID_POINTING << "\t";
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 	counter=getMillisOfTheDay()+1;
 	copyData<TUINT32>(msg,counter,len);
-
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	outputFile << counter << "\t";
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 	copyData<TUINT16>(msg,PAR_PROGRAM_TRACK_TABLE,len);
-
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	outputFile << PAR_PROGRAM_TRACK_TABLE << "\t";
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 	copyData<TUINT16>(msg,PROGRAMTRACK_INTERPOLATION_MODE,len);
-
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	outputFile << PROGRAMTRACK_INTERPOLATION_MODE << "\t";
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 	copyData<TUINT16>(msg,PROGRAMTRACK_TRACKING_MODE,len);  // tracking mode: azimuth/elevation
-
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	outputFile << PROGRAMTRACK_INTERPOLATION_MODE << "\t";
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 	if (newTable) {
 		copyData<TUINT16>(msg,PROGRAMTRACK_LOAD_MODE_NEW_TABLE,len);  // load mode: start a new table
-
-		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-		outputFile << PROGRAMTRACK_LOAD_MODE_NEW_TABLE << "\t";
-		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 	}
 	else {
 		copyData<TUINT16>(msg,PROGRAMTRACK_LOAD_MODE_APPEND_TABLE,len);  // load mode: new entries will be attached to the existing table
-
-		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-		outputFile << PROGRAMTRACK_LOAD_MODE_APPEND_TABLE << "\t";
-		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 	}
 	copyData<TUINT16>(msg,size,len);  // sequence length
-
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	outputFile << size << "\t";
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 	//startUt=seq[0].timeMark;
 	mjd=time2MJD(startEpoch);
 	copyData<TREAL64>(msg,mjd,len);  // startTime as modified julian date
-
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	outputFile << mjd << "\n";
-	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 	copyData<TREAL64>(msg,azRate,len);  // max speed in azimuth..
 	copyData<TREAL64>(msg,elRate,len);  // max speed in elevation...
 	for (WORD i=0;i<size;i++) {
 		timeDiff=(seq[i].timeMark-startEpoch); // 100 ns
 		timeDiff=(timeDiff/10000); // milliseconds
 		castTimeDiff=(long)timeDiff;
-		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-		outputFile << timeDiff << "\t" << seq[i].azimuth << seq[i].elevation << "\n";
-		// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 		copyData<TINT32>(msg,castTimeDiff,len);
 		copyData<TREAL64>(msg,seq[i].azimuth,len);
 		copyData<TREAL64>(msg,seq[i].elevation,len);
@@ -412,29 +349,19 @@ CACUProtocol::TTimeSources CACUProtocol::str2TimeSource(const IRA::CString ts)
 	}
 }
 
-
-WORD CACUProtocol::modeCommand(BYTE *& outBuff,TCommand *& command,WORD& commNumber) const
+WORD CACUProtocol::systemCommand(BYTE *& outBuff) const
 {
 	BYTE msg[CACUProtocol::SOCKET_SEND_BUFFER];
 	WORD len=0;
 	TUINT32 counter;
-	commNumber=1;
-	command=NULL;
-	command=new TCommand[commNumber];
-	copyData<TUINT16>(msg,3,len);
+	WORD commNumber=1;
+	copyData<TUINT16>(msg,SYSTEM_COMMAND_ID,len);
 	copyData<TUINT16>(msg,4,len);
 	counter=getMillisOfTheDay()+1;
 	copyData<TUINT32>(msg,counter,len);
 	copyData<TUINT16>(msg,9,len);
 	copyData<TREAL64>(msg,0,len);
 	copyData<TREAL64>(msg,0,len);	
-	command[0].subsystem=4;
-	command[0].command=3;
-	command[0].counter=counter;
-	command[0].answer=NO_COMMAND;
-	command[0].parameterCommand=false;
-	command[0].error=false;
-	command[0].executed=false;
 	return packMessage(msg,len,commNumber,outBuff);
 }
 

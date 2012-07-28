@@ -174,8 +174,7 @@ void CCommandSocket::setTimeOffset(const double& seconds) throw (ComponentErrors
 	setTimeOffset_command(seconds);	
 }
 
-void CCommandSocket::programTrack(const double& az,const double& el,const ACS::Time& time,bool clear) throw (NakExImpl,ConnectionExImpl,AntennaBusyExImpl,TimeoutExImpl,
-		OperationNotPermittedExImpl,SocketErrorExImpl,ValidationErrorExImpl)
+void CCommandSocket::programTrack(const double& az,const double& el,const ACS::Time& time,bool clear) throw (ComponentErrors::ComponentErrorsExImpl,AntennaErrors::AntennaErrorsExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -187,94 +186,109 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 	double finalAz,finalEl;
 	long section;
 	Antenna::TCommonModes azMode,elMode;
-	if (!checkConnection()) {
-		_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::programTrack()");
-	}
-	if (checkIsBusy()) {
-		_THROW_EXCPT(AntennaBusyExImpl,"CCommandSocket::programTrack()");
-	}
-	IRA::CTimeoutSync guard(&m_syncMutex,m_pConfiguration->controlSocketResponseTime(),m_pConfiguration->controlSocketDutyCycle());
-	if (!guard.acquire()) {
-		_EXCPT(ComponentErrors::TimeoutExImpl,ex,"CCommandSocket::programTrack()");
-		throw ex;
-	}
 	CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
-	data->getActualMode(azMode,elMode);
-	if ((azMode!=Antenna::ACU_PROGRAMTRACK) || (elMode!=Antenna::ACU_PROGRAMTRACK)) {
-		_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"CCommandSocket::programTrack()");
-		impl.setReason("program track mode not configured");
-		throw impl;
+	try {
+		if (!checkConnection()) {
+			_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::programTrack()");
+		}
+		if (checkIsBusy()) {
+			_THROW_EXCPT(AntennaBusyExImpl,"CCommandSocket::programTrack()");
+		}
+		IRA::CTimeoutSync guard(&m_syncMutex,m_pConfiguration->controlSocketResponseTime(),m_pConfiguration->controlSocketDutyCycle());
+		if (!guard.acquire()) {
+			_EXCPT(ComponentErrors::TimeoutExImpl,ex,"CCommandSocket::programTrack()");
+			throw ex;
+		}
+		data->getActualMode(azMode,elMode);
+		if ((azMode!=Antenna::ACU_PROGRAMTRACK) || (elMode!=Antenna::ACU_PROGRAMTRACK)) {
+			_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"CCommandSocket::programTrack()");
+			impl.setReason("program track mode not configured");
+			throw impl;
+		}
+		if (clear) {  //new scan!!!!
+			m_ptSize=0;
+			m_lastScanEpoch=0;
+			data->clearProgramTrackStack();
+		}
+		data->getCommandedOffsets(azOff,elOff);
+		if (data->isProgramTrackStackEmpty()) {
+			currentAz=data->azimuthStatus()->actualPosition();   //if no position commanded yet, the current azimuth is the hardware azimuth of the telescope
+			// the offsets is included in the position read from encoders
+		}
+		else {
+			// at the moment this is not comprehensive of the offsets
+			data->getLastProgramTrackPoint(currentAz,dummy); // else we refer to the last commanded azimuth
+			currentAz+=azOff;
+		}
+		// this is my target position
+		finalAz=az+azOff;
+		finalEl=el+elOff;
+		// transform the azimuth into a real azimuth..considering the wrap
+		if (data->getCommandedSector()==Antenna::ACU_CCW) section=-1;
+		else if (data->getCommandedSector()==Antenna::ACU_CW) section=1;
+		else section=0;
+		finalAz=IRA::CIRATools::getHWAzimuth(currentAz,finalAz,m_pConfiguration->azimuthLowerLimit(),m_pConfiguration->azimuthUpperLimit(),section,m_pConfiguration->cwLimit());
+	
+		// check that the position are inside the hardware limits
+		if (finalAz<m_pConfiguration->azimuthLowerLimit()) {
+			finalAz=m_pConfiguration->azimuthLowerLimit();
+		}
+		else if (finalAz>m_pConfiguration->azimuthUpperLimit()) {
+		finalAz=m_pConfiguration->azimuthUpperLimit();
+		}
+		if (finalEl<m_pConfiguration->elevationLowerLimit()) {
+			finalEl=m_pConfiguration->elevationLowerLimit();
+		}
+		else if (finalEl>m_pConfiguration->elevationUpperLimit()) {
+			finalEl=m_pConfiguration->elevationUpperLimit();
+		}
+		// now get rid of the offsets
+		finalAz-=azOff;
+		finalEl-=elOff;
+		data->setCommandedSector(Antenna::ACU_NEUTRAL);
+		// add the point into the cache and to commanded point stack!
+		m_ptTable[m_ptSize].azimuth=finalAz;
+		m_ptTable[m_ptSize].elevation=finalEl;
+		m_ptTable[m_ptSize].timeMark=time;
+		data->addProgramTrackStackPoint(m_ptTable[m_ptSize].azimuth,m_ptTable[m_ptSize].elevation,m_ptTable[m_ptSize].timeMark); // add commanded points to stack
+		m_ptSize++;	
+		if (m_ptSize>=CACUProtocol::PROGRAMTRACK_TABLE_MINIMUM_LENGTH) { // the cache is full...time to send data points to the ACU
+			if (m_lastScanEpoch==0) {
+				m_currentScanStartEpoch=m_ptTable[0].timeMark;
+				len=m_protocol.loadProgramTrack(m_currentScanStartEpoch,m_ptTable,m_ptSize,true,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),message,command,commNum);
+			}
+			else {
+				len=m_protocol.loadProgramTrack(m_currentScanStartEpoch,m_ptTable,m_ptSize,false,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),message,command,commNum);
+			}
+			m_ptSize=0; // clear the cache
+			if (len==0) {
+				// ERRORE
+			}
+			else {
+				sendCommand(message,len); // throw TimeoutExImpl,SocketErrorExImpl;
+				data->storeLastCommand(command,commNum);
+				IRA::CIRATools::getTime(now);
+			}
+			data.Release(); // this is fundamental in order to avoid starvation of other thread......
+			// waits for the ACU to respond....or eventually raise a timeout
+			waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+		}
+		m_lastScanEpoch=now.value().value;
 	}
-	if (clear) {  //new scan!!!!
+	catch (AntennaErrors::AntennaErrorsExImpl& ex) { // in case of error we need to start the tracking from the scatch in order to avoid different time gaps
+		//clear
 		m_ptSize=0;
 		m_lastScanEpoch=0;
 		data->clearProgramTrackStack();
+		throw ex; // let the exception go up....
 	}
-	data->getCommandedOffsets(azOff,elOff);
-	if (data->isProgramTrackStackEmpty()) {
-		currentAz=data->azimuthStatus()->actualPosition();   //if no position commanded yet, the current azimuth is the hardware azimuth of the telescope
-		// the offsets is included in the position read from encoders
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		//clear
+		m_ptSize=0;
+		m_lastScanEpoch=0;
+		data->clearProgramTrackStack();
+		throw ex; // let the exception go up....
 	}
-	else {
-		// at the moment this is not comprehensive of the offsets
-		data->getLastProgramTrackPoint(currentAz,dummy); // else we refer to the last commanded azimuth
-		currentAz+=azOff;
-	}
-	// this is my target position
-	finalAz=az+azOff;
-	finalEl=el+elOff;
-	// transform the azimuth into a real azimuth..considering the wrap
-	if (data->getCommandedSector()==Antenna::ACU_CCW) section=-1;
-	else if (data->getCommandedSector()==Antenna::ACU_CW) section=1;
-	else section=0;
-	finalAz=IRA::CIRATools::getHWAzimuth(currentAz,finalAz,m_pConfiguration->azimuthLowerLimit(),m_pConfiguration->azimuthUpperLimit(),section,m_pConfiguration->cwLimit());
-	
-	// check that the position are inside the hardware limits
-	if (finalAz<m_pConfiguration->azimuthLowerLimit()) {
-		finalAz=m_pConfiguration->azimuthLowerLimit();
-	}
-	else if (finalAz>m_pConfiguration->azimuthUpperLimit()) {
-		finalAz=m_pConfiguration->azimuthUpperLimit();
-	}
-	if (finalEl<m_pConfiguration->elevationLowerLimit()) {
-		finalEl=m_pConfiguration->elevationLowerLimit();
-	}
-	else if (finalEl>m_pConfiguration->elevationUpperLimit()) {
-		finalEl=m_pConfiguration->elevationUpperLimit();
-	}
-	// now get rid of the offsets
-	finalAz-=azOff;
-	finalEl-=elOff;
-	data->setCommandedSector(Antenna::ACU_NEUTRAL);
-	// add the point into the cache and to commanded point stack!
-	m_ptTable[m_ptSize].azimuth=finalAz;
-	m_ptTable[m_ptSize].elevation=finalEl;
-	m_ptTable[m_ptSize].timeMark=time;
-	data->addProgramTrackStackPoint(m_ptTable[m_ptSize].azimuth,m_ptTable[m_ptSize].elevation,m_ptTable[m_ptSize].timeMark); // add commanded points to stack
-	m_ptSize++;	
-	if (m_ptSize>=CACUProtocol::PROGRAMTRACK_TABLE_MINIMUM_LENGTH) { // the cache is full...time to send data points to the ACU
-		WORD size=m_ptSize;
-		m_ptSize=0; // in case we fail to load the data point the cache is cleared anyway...we loose the data points but at least next time we start from the scratch 
-		if (m_lastScanEpoch==0) {
-			m_currentScanStartEpoch=m_ptTable[0].timeMark;
-			len=m_protocol.loadProgramTrack(m_currentScanStartEpoch,m_ptTable,size,true,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),message,command,commNum);
-		}
-		else {
-			len=m_protocol.loadProgramTrack(m_currentScanStartEpoch,m_ptTable,size,false,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),message,command,commNum);
-		}
-		if (len==0) {
-			// ERRORE
-		}
-		else {
-			sendCommand(message,len); // throw TimeoutExImpl,SocketErrorExImpl;
-			data->storeLastCommand(command,commNum);
-			IRA::CIRATools::getTime(now);
-		}
-		data.Release(); // this is fundamental in order to avoid starvation of other thread......
-		// waits for the ACU to respond....or eventually raise a timeout
-		waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
-		m_lastScanEpoch=now.value().value;
-	}	
 }
 
 void CCommandSocket::changeMode(const Antenna::TCommonModes& azMode,const Antenna::TCommonModes& elMode) throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,
@@ -349,7 +363,7 @@ void CCommandSocket::unstow() throw (ComponentErrors::TimeoutExImpl,ComponentErr
 		_EXCPT(ComponentErrors::TimeoutExImpl,ex,"CCommandSocket::unstow()");
 		throw ex;
 	}
-	activate_command(); //make sure the axis are active.....
+	//activate_command(); //make sure the axis are active.....
 	unstow_command();	
 }
 
@@ -670,7 +684,7 @@ void CCommandSocket::activate_command() throw (TimeoutExImpl,SocketErrorExImpl,N
 		activeEl=((elMode==Antenna::ACU_STANDBY) || (elMode==Antenna::ACU_UNKNOWN));
 	}*/
 	if (activeAz || activeEl) {
-		len=m_protocol.activate(activeAz,activeEl,message,command,commNum);  
+		len=m_protocol.activate(activeAz,activeEl,message,command,commNum);
 	}
 	else {
 		return; // nothing to do
@@ -686,6 +700,7 @@ void CCommandSocket::activate_command() throw (TimeoutExImpl,SocketErrorExImpl,N
 	data.Release(); // this is fundamental in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
 	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	IRA::CIRATools::Wait(3,500000); // wait for the real completion of the activate operation
 	ACS_LOG(LM_FULL_INFO,"CStatusSocket::activate_command()",(LM_NOTICE,"AXIS_ARE_NOW_ACTIVE"));
 }
 
@@ -811,23 +826,22 @@ void CCommandSocket::stop_command() throw (TimeoutExImpl,SocketErrorExImpl,NakEx
 void CCommandSocket::resetErrors_command() throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
-	autoArray<CACUProtocol::TCommand> command;
-	WORD commNum;
 	WORD len;
 	TIMEVALUE now;
-	CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
-	len=m_protocol.resetErrors(message,command,commNum);
+	//CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
+	len=m_protocol.resetErrors(message);
 	if (len==0) {
 		// ERRORE
 	}
 	else {
 		sendCommand(message,len); // throw TimeoutExImpl,SocketErrorExImpl;
-		data->storeLastCommand(command,commNum);
-		IRA::CIRATools::getTime(now);
+		//data->storeLastCommand(command,commNum);
+		//IRA::CIRATools::getTime(now);
 	}
-	data.Release(); // this is crucial in order to avoid starvation of other thread......
+	// This command does not expect an answer from the ACU, so we do not wait
+	//data.Release(); // this is crucial in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	//waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
 	ACS_LOG(LM_FULL_INFO,"CCommandSocket::resetErrors_command()",(LM_NOTICE,"MOUNT_ERRORS_ACKNOWLEGDED"));
 }
 

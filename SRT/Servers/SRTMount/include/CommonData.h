@@ -55,7 +55,6 @@ public:
 		MOTOR_SERVO_ERROR=4,					/*!< set if the servo failed: Error */
 		SENSOR_ERROR=5,                         /*!< set if the motor sensors failed: Error */
 		BUS_ERROR=6,                            /*!< set if the bus failed: Error */
-		POSITION_ERROR=7                        /*!< set if the motor is not traking the right position: Error */
 	};
 		
 	/**

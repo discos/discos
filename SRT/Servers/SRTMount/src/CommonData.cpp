@@ -219,7 +219,7 @@ bool CCommonData::checkIsUnstowed() const
 {
 	//We just check the elevation since SRT can stow and park only the elevation axis
 	// if the telescope stowpins are extracted......
-	return m_elevationStatus->warnings().stowPinExtracted();
+	return m_elevationStatus->warnings().stowPinExtracted();	
 }
 
 					
@@ -255,9 +255,6 @@ void CCommonData::getEncodersCoordinates(double& az,double& el,double& azOff,dou
 						
 void CCommonData::reBind()
 {
-	/*************************************************************************************/
-	static long iter=0;
-	/*************************************************************************************/
 	//* Azimith Mode command status
 	CACUProtocol::matchCommandAnswer(m_lastCommand,m_lastCommandSize,CACUProtocol::SUBSYSTEM_ID_AZIMUTH,
 																	 m_azimuthStatus->modeCommandStatus().recvModeCommand(),
@@ -372,7 +369,7 @@ void CCommonData::reBind()
 		setMotorsStatusWord(i,MOTOR_SERVO_ERROR,m_azimuthMotors[i]->servoError());
 		setMotorsStatusWord(i,SENSOR_ERROR,m_azimuthMotors[i]->sensorError());
 		setMotorsStatusWord(i,BUS_ERROR,m_azimuthMotors[i]->busError());
-		setMotorsStatusWord(i,POSITION_ERROR,m_azimuthMotors[i]->positionError());
+		//setMotorsStatusWord(i,POSITION_ERROR,m_azimuthMotors[i]->positionError());
 	}
 	motorSelection=m_elevationStatus->motorSelection();
 	brakesOpen=m_elevationStatus->brakesOpen();
@@ -385,7 +382,7 @@ void CCommonData::reBind()
 		setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+i,MOTOR_SERVO_ERROR,m_elevationMotors[i]->servoError());
 		setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+i,SENSOR_ERROR,m_elevationMotors[i]->sensorError());
 		setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+i,BUS_ERROR,m_elevationMotors[i]->busError());
-		setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+i,POSITION_ERROR,m_elevationMotors[i]->positionError());
+		//setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+i,POSITION_ERROR,m_elevationMotors[i]->positionError());
 	}
 	motorSelection=m_cableWrap->motorSelection();
 	brakesOpen=m_cableWrap->brakesOpen();
@@ -397,7 +394,7 @@ void CCommonData::reBind()
 	setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+CACUProtocol::ELEVATION_MOTORS,MOTOR_SERVO_ERROR,m_cableWrapMotor->servoError());
 	setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+CACUProtocol::ELEVATION_MOTORS,SENSOR_ERROR,m_cableWrapMotor->sensorError());
 	setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+CACUProtocol::ELEVATION_MOTORS,BUS_ERROR,m_cableWrapMotor->busError());
-	setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+CACUProtocol::ELEVATION_MOTORS,POSITION_ERROR,m_cableWrapMotor->positionError());
+	//setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+CACUProtocol::ELEVATION_MOTORS,POSITION_ERROR,m_cableWrapMotor->positionError());
 	//now let's compose the overall status..get it from : 
 	// m_statusSocketState;
 	// m_controlSocketState;
@@ -413,145 +410,110 @@ void CCommonData::reBind()
 	}	
 	if (m_statusWord & (1 << STATUS_MESSAGE_SYNC_ERROR)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","CANNOT_SYNC_STATUS_MESSAGE");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","CANNOT_SYNC_STATUS_MESSAGE");
 	}
 	if (m_statusWord & (1 << STATUS_LINE_ERROR)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","STATUS_SOCKET_ERROR");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","STATUS_SOCKET_ERROR");
 	}
 	if (m_statusWord & (1 << CONTROL_LINE_ERROR)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","CONTROL_SOCKET_ERROR");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","CONTROL_SOCKET_ERROR");
 	}
 	if (m_statusWord & (1 << REMOTE_CONTROL_DISABLED)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ACU_REMOTE_CONTROL_DISABLED");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ACU_REMOTE_CONTROL_DISABLED");
 	}
 	if (m_statusWord & (1 << EMERGENCY_STOP)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","EMERGENCY_STOP");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","EMERGENCY_STOP");
 	}
 	if (m_statusWord & (1 << MAIN_POWER_ERROR)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","MAIN_POWER_ERROR");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","MAIN_POWER_ERROR");
 	}
 	if (m_statusWord & (1 << TIME_ERROR)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","TIME_ERROR");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","TIME_ERROR");
 	}
 	if (m_statusWord & (1 << PROGRAM_TRACK_DATA_ERROR)) {
 		setMountStatus(Management::MNG_WARNING);
-		//_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","ERROR_IN_PROGRAM_TRACK_DATA");
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","ERROR_IN_PROGRAM_TRACK_DATA");
 	}
 	if (m_statusWord & (1 << REMOTE_COMMAND_ERROR)) {
 		setMountStatus(Management::MNG_WARNING);
-		//_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","REMOTE_COMMAND_ERROR");
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","REMOTE_COMMAND_ERROR");
 	}
 	if (m_azimuthStatusWord & (1 << LOW_POWER_MODE)) {
 		setMountStatus(Management::MNG_WARNING);
-		//_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","AZIMUTH_LOW_POWER_MODE");
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","AZIMUTH_LOW_POWER_MODE");
 	}
 	if (m_azimuthStatusWord & (1 << PRELIMIT_UP)) {
 		setMountStatus(Management::MNG_WARNING);
-		//_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","AZIMUTH_AGAINST_UPPER_PRELIMIT");
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","AZIMUTH_AGAINST_UPPER_PRELIMIT");
 	}
 	if (m_azimuthStatusWord & (1 << PRELIMIT_DOWN)) {
 		setMountStatus(Management::MNG_WARNING);
-		//_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","AZIMUTH_AGAINST_LOWER_PRELIMIT");
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","AZIMUTH_AGAINST_LOWER_PRELIMIT");
 	}
 	if (m_azimuthStatusWord & (1 << FINAL_LIMIT_UP)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","AZIMUTH_AGAINST_UPPER_FINALLIMIT");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","AZIMUTH_AGAINST_UPPER_FINALLIMIT");
 	}
 	if (m_azimuthStatusWord & (1 << FINAL_LIMIT_DOWN)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","AZIMUTH_AGAINST_LOWER_FINALLIMIT");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","AZIMUTH_AGAINST_LOWER_FINALLIMIT");
 	}
 	if (m_azimuthStatusWord & (1 << RATE_LIMIT)) {
 		setMountStatus(Management::MNG_WARNING);
-		//_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","AZIMUTH_BEYOUND_RATE_LIMIT");
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","AZIMUTH_BEYOUND_RATE_LIMIT");
 	}
 	if (m_azimuthStatusWord & (1 << ENCODER_FAILURE)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","AZIMUTH_ENCODER_FAILURE");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","AZIMUTH_ENCODER_FAILURE");
 	}
 	if (m_azimuthStatusWord & (1 << BRAKE_ERROR)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","AZIMUTH_BRAKES_FAILURE");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","AZIMUTH_BRAKES_FAILURE");
 	}
 	if (m_azimuthStatusWord & (1 << SERVO_ERROR)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","AZIMUTH_SERVO_FAILURE");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","AZIMUTH_SERVO_FAILURE");
 	}
 	if (m_elevationStatusWord & (1 << LOW_POWER_MODE)) {
 		setMountStatus(Management::MNG_WARNING);
-		//_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","ELEVATION_LOW_POWER_MODE");
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","ELEVATION_LOW_POWER_MODE");
 	}
-	if (m_elevationStatusWord & (1 << PRELIMIT_UP)) {
+	if ((m_elevationStatusWord & (1 << PRELIMIT_UP)) && !checkIsStowed()) { //the ACU raise this warning also when the Antenna is stowed so we want to avoid to do the same
 		setMountStatus(Management::MNG_WARNING);
-		//_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","ELEVATION_AGAINST_UPPER_PRELIMIT");
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","ELEVATION_AGAINST_UPPER_PRELIMIT");
 	}
 	if (m_elevationStatusWord & (1 << PRELIMIT_DOWN)) {
 		setMountStatus(Management::MNG_WARNING);
-		//_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","ELEVATION_AGAINST_LOWER_PRELIMIT");
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","ELEVATION_AGAINST_LOWER_PRELIMIT");
 	}
 	if (m_elevationStatusWord & (1 << FINAL_LIMIT_UP)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_AGAINST_UPPER_FINALLIMIT");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_AGAINST_UPPER_FINALLIMIT");
 	}
 	if (m_elevationStatusWord & (1 << FINAL_LIMIT_DOWN)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_AGAINST_LOWER_FINALLIMIT");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_AGAINST_LOWER_FINALLIMIT");
 	}
 	if (m_elevationStatusWord & (1 << RATE_LIMIT)) {
 		setMountStatus(Management::MNG_WARNING);
-		//_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","ELEVATION_BEYOUND_RATE_LIMIT");
+		_IRA_LOGFILTER_LOG(LM_WARNING,"CCommonData::reBind()","ELEVATION_BEYOUND_RATE_LIMIT");
 	}
 	if (m_elevationStatusWord & (1 << ENCODER_FAILURE)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_ENCODER_FAILURE");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_ENCODER_FAILURE");
 	}
 	if (m_elevationStatusWord & (1 << BRAKE_ERROR)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_BRAKES_FAILURE");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_BRAKES_FAILURE");
 	}
 	if (m_azimuthStatusWord & (1 << SERVO_ERROR)) {
 		setMountStatus(Management::MNG_FAILURE);
-		//_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_SERVO_FAILURE");
+		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_SERVO_FAILURE");
 	}
-	/******************************************************************************************/
-	if ((iter>=10)==0) {
-		iter=0;
-		printf("ptCommandAnswer \t ptActTableIndex \t ptEndTableIndex \t ptTableLength \t queueLength \n");
-	}
-	else {
-		iter++;
-	}
-	IRA::CString ptAnswer;
-	unsigned actValue,index;
-
-	if (m_pointingStatus->parameterCommandStatus().parameterCommandAnswer()==CACUProtocol::COMMAND_IN_WRONG_MODE) {
-		ptAnswer="WRONG_MODE";
-	}
-	else if  (m_pointingStatus->parameterCommandStatus().parameterCommandAnswer()==CACUProtocol::COMMAND_INVALID_PARAMETERS) {
-		ptAnswer="INVALID_PARAMETERS";
-	}
-	else ptAnswer="OK";
-
-	actValue=m_pointingStatus-> pTTLength()%500;
-	if (actValue==0) actValue=500;
-	if (actValue<m_pointingStatus->pTTCurrentIndex()) {
-		index=500-m_pointingStatus->pTTCurrentIndex()+actValue;
-	}
-	else if (actValue>m_pointingStatus->pTTCurrentIndex()) {
-		index=m_pointingStatus->pTTCurrentIndex()/*-actValue*/;
-	}
-	else index=0;
-
-	printf("%s \t %d \t %d \t %d \t %d \t",(const char *)ptAnswer,m_pointingStatus-> pTTCurrentIndex(),m_pointingStatus-> pTTEndIndex(),m_pointingStatus-> pTTLength(),
-	  m_pointingStatus-> pTTFreePositions());
-	printf("%d \t %d \t %d \n",m_pointingStatus->pointingErrors().dataOverflow(),m_pointingStatus->pointingErrors().timeDistanceFault(),m_pointingStatus->pointingErrors().noDataAvailable());
-
-
-	/******************************************************************************************/
 }

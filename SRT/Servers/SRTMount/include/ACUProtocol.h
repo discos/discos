@@ -13,10 +13,6 @@
 #include <IRA>
 #include <DateTime.h>
 #include <bitset>
-// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#include <iostream>
-#include <fstream>
-// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 #define TUINT32     unsigned int
 #define TUINT16     unsigned short int
@@ -194,8 +190,8 @@ public:
 		ELEVATION_MOTORS=4,					  // number of elevation motors	
 		AZIMUTH_MOTORS=8,					  // number of azimuth motors
 		MESSAGE_FRAME_START_BYTE=12,          // this is the start byte, inside the status message frame, of the effective data
-		PROGRAMTRACK_TABLE_MINIMUM_LENGTH=5,  // the minimum number of points that have to loaded into the program track table
-		SOCKET_SEND_BUFFER=512,			      // size in bytes if the sending buffer							
+		PROGRAMTRACK_TABLE_MINIMUM_LENGTH=10,  // the minimum number of points that have to loaded into the program track table
+		SOCKET_SEND_BUFFER=1024,			      // size in bytes if the sending buffer							
 		SOCKET_RECV_BUFFER=1000 ,              // size in bytes of the receiving buffer
 		PROGRAMTRACK_STACK_POSITIONS=2500			  // number of free position of the stack of the program track mode
 	};
@@ -379,7 +375,7 @@ public:
 		inline bool active() const { return (bool)CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+16); }
 		inline TUINT8 speedOfRotation() const { return CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+17); }
 		inline TUINT8 speedOfRotationOk() const { return CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+18); }
-		inline bool positionError() const { return CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+19)==0; } // the filed return 1 if the position has been reached...so negate
+		//inline bool positionError() const { return CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+19)==0; } // not used
 		inline bool busError() const { return (bool)CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+20); }
 		inline bool servoError() const { return (bool)CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+21); }
 		inline bool sensorError() const { return (bool)CACUProtocol::readStatusField<TUINT8>(m_buffer,m_disp+22); }
@@ -556,13 +552,13 @@ public:
 	 WORD unstow(BYTE *& buff,TCommand *& command,WORD& commNumber);
 
 	 /**
-	  * This will allow to prepare the message to be sent to the ACU in order to reset all active errors on axis
+	  * This will allow to prepare the message to be sent to the ACU in order to reset all active errors on ACU
 	  * @param buff a reference to the buffer containing the command to be sent.
 	  * @param command return the basic information about the commands that can be used to check the answer from the status socket. It must be freed by caller.
 	  * @param commNumber number of elements of the command array
 	  * @return the length in bytes of the buffer, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed	
 	  */	 	 
-	 WORD resetErrors(BYTE *& buff,TCommand *& command,WORD& commNumber);
+	 WORD resetErrors(BYTE *& buff);
 	 
 	 /**
 	  * This will allow to prepare the message to be sent to the ACU in order to set the position offsets in both axis.
@@ -716,13 +712,11 @@ private:
 	WORD modeCommand(const TModes& azMode,const TModes& elMode,const double& azP1,const double& azP2,const double& elP1,const double& elP2,BYTE *& outBuff,TCommand *& command,WORD& commNumber) const;
 
 	/**
-	 * This method prepares a message that contains a mode command.
+	 * This method prepares a message that contains a system command. A sstem command does not imply an answer from the ACU.
 	 * @param outBuff buffer that stores the message to the ACU. It must be freed.
-	 * @param command return the basic information about the commands that can be used to check the answer from the status socket. It must be freed by caller.
-	 * @param commNumber number of elements of the command array
 	 * @return the length in bytes of the message, if zero an error occurred and the <i>outBuffer</i> argument could contain impredictable results and need not to be freed
 	 */
-	WORD modeCommand(BYTE *& outBuff,TCommand *& command,WORD& commNumber) const;
+	WORD systemCommand(BYTE *& outBuff) const;
 	
 	/**
 	 * This method fills a parameter command.

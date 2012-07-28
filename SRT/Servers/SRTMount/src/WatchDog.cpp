@@ -37,13 +37,5 @@ void CWatchDog::runLoop()
 		_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CWatchDog::runLoop()");
 		impl.setReason("Cannot connect command socket");
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-	}
-	try {
-		m_param->statusSocket->connectSocket();
-	}
-	catch (ComponentErrors::SocketErrorExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CWatchDog::runLoop()");
-		impl.setReason("Cannot connect status socket");
-		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 	}	 
 }
