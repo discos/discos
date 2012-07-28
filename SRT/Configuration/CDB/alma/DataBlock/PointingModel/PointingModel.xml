@@ -8,7 +8,7 @@
                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <Receiver>
-	<receiverCode>CCC</receiverCode>
+	<receiverCode>CCG</receiverCode>
         <phi>90.0</phi>
         <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0 </coefficientVal00>
         <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
@@ -43,7 +43,7 @@
 </Receiver>
 
 <Receiver>
-	<receiverCode>KKC</receiverCode>
+	<receiverCode>KKG</receiverCode>
         <phi>90.0</phi>
         <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0 </coefficientVal00>
         <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
