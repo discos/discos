@@ -588,18 +588,18 @@ int main(int argc, char *argv[]) {
 		motorsSpeed_text->setWAlign(CFrameComponent::LEFT);
 		motorsSpeed_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%+08.2lf");
 		//motorsTorque_text
-		_TW_SET_COMPONENT(motorsTorque_text,61,17,7,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(motorsTorque_text,61,17,8,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		motorsTorque_text->setHAlign(CFrameComponent::UP);
 		motorsTorque_text->setWAlign(CFrameComponent::LEFT);
-		motorsTorque_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%+06.3lf");
+		motorsTorque_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%+07.2lf");
 		// motorsUtilization_text
-		_TW_SET_COMPONENT(motorsUtilization_text,69,17,7,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(motorsUtilization_text,70,17,7,MOTORS_NUMBER,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		motorsUtilization_text->setHAlign(CFrameComponent::UP);
 		motorsUtilization_text->setWAlign(CFrameComponent::LEFT);
 		motorsUtilization_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%+06.1lf");
 		// motorsStatus_led
 		for (WORD j=0;j<MOTORS_NUMBER;j++) {
-			TW::CPoint pos(77,17+j);
+			TW::CPoint pos(78,17+j);
 			motorsStatus_led[j]->setPosition(pos);
 			motorsStatus_led[j]->setOrientation(TW::CLedDisplay::VERTICAL);
 		}
@@ -728,13 +728,13 @@ int main(int argc, char *argv[]) {
 		_TW_ADD_LABEL("Trk.Error",47,0,9,1,CColorPair::WHITE_BLACK,0,window);	
 		_TW_ADD_LABEL("Azimuth",18,8,7,1,CColorPair::WHITE_BLACK,0,window);
 		_TW_ADD_LABEL("Elevation",26,8,9,1,CColorPair::WHITE_BLACK,0,window);
-		_TW_ADD_LABEL("Pos[rot]  [rot/min] Torque  Use[%]",41,16,34,1,CColorPair::WHITE_BLACK,0,window);
+		_TW_ADD_LABEL("Pos[rot]  [rot/min] Torque   Use[%]",41,16,34,1,CColorPair::WHITE_BLACK,0,window);
 		
 		for (WORD j=0;j<motorsStatusDescription.length();j++) {
 			TW::CLabel *dummy=new TW::CLabel((const char *)motorsStatusDescription[j]);
 			dummy->setWidth(1);
 			dummy->setHeight(7);
-			dummy->setPosition(TW::CPoint(77+(j*2),10));
+			dummy->setPosition(TW::CPoint(78+(j*2),10));
 			if ((j%2)==0) {
 				dummy->setStyle(TW::CStyle(CColorPair::WHITE_BLACK,TW::CStyle::BOLD));
 			}
