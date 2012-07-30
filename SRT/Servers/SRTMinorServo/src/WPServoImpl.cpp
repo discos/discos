@@ -303,19 +303,33 @@ void WPServoImpl::initialize() throw (
         m_listener_ptr->resume();
         m_status_ptr->resume();
 
-        // Initialize the commanded position with the actual one
         ACS::doubleSeq dummy_cmd_pos;
         dummy_cmd_pos.length(m_cdb_ptr->NUMBER_OF_AXIS);
         ACS::Time timestamp = getTimeStamp();
-        m_wpServoTalker_ptr->getActPos(dummy_cmd_pos, timestamp);
-        for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++) {
-            dummy_cmd_pos[i] -= (m_offsets.user)[i];
+        try {
+            // Initialize the commanded position with the actual one
+            m_wpServoTalker_ptr->getActPos(dummy_cmd_pos, timestamp);
+            for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++) {
+                dummy_cmd_pos[i] -= (m_offsets.user)[i];
+            }
         }
-        // We put the position in the commanded position list, without
-        // to command it to the MSCU (parameter is_dummy=true)
-        // In fact the WPStatusUpdater thread needs a position in the 
-        // commanded position list to complete its updating
-        m_wpServoTalker_ptr->setCmdPos(dummy_cmd_pos, timestamp, 0, true);
+        catch(MinorServoErrors::CommunicationErrorEx& ex) {
+            _ADD_BACKTRACE(MinorServoErrors::CommunicationErrorExImpl, _dummy, ex, "WPServo::initialize()");
+        }
+        catch(ComponentErrors::SocketErrorExImpl& ex) {
+            _ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl, _dummy, ex, "WPServo::initialize()");
+        }
+        
+        try {
+            // We put the position in the commanded position list, without
+            // to command it to the MSCU (parameter is_dummy=true)
+            // In fact the WPStatusUpdater thread needs a position in the 
+            // commanded position list to complete its updating
+            m_wpServoTalker_ptr->setCmdPos(dummy_cmd_pos, timestamp, 0, true);
+        }
+        catch(MinorServoErrors::PositioningErrorEx& ex) {
+            _ADD_BACKTRACE(MinorServoErrors::PositioningErrorExImpl, _dummy, ex, "WPServo::initialize()");
+        }
 
         // Now the status thread is ready to update the positions
         setStatusUpdating(true);
@@ -499,7 +513,7 @@ void WPServoImpl::setPosition(const ACS::doubleSeq &position, const ACS::Time ex
     try {
         if(position.length() != m_cdb_ptr->NUMBER_OF_AXIS)
             THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set position: wrong number of axis", true);
-
+        
         // Set the position
         ACS::Time timestamp = getTimeStamp();
         m_wpServoTalker_ptr->setCmdPos(position, timestamp, exe_time);

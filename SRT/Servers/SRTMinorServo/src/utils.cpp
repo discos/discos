@@ -215,6 +215,6 @@ DDWORD getNextTime(unsigned long seconds, unsigned long mseconds) {
     if(seconds) duration.second(seconds);
     if(mseconds) duration.microSecond(mseconds * 1000);
     if(seconds || mseconds) now.add(duration.value());
-    return (now.value()).value;
+    return seconds + mseconds ? (now.value()).value : 0; // Return 0 if seconds + mseconds == 0
 }
 
