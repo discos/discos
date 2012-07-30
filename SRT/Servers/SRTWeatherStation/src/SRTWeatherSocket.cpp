@@ -177,6 +177,8 @@ int SRTWeatherSocket::parse(CString meteo_string)
        fprintf(stderr, "Parse error at line %d:\n%s\n",
  	      XML_GetCurrentLineNumber(p),
  	      XML_ErrorString(XML_GetErrorCode(p)));
+       return -1;
+
 	}
 
 
@@ -301,7 +303,7 @@ double SRTWeatherSocket::getWind()
 
 	CString command=CString("r ")+CString(COMMANDS[WINDSPEEDAVE]);
          sendCMD(err,command);
-	IRA::CIRATools::Wait(0,500000);	
+// speedup	IRA::CIRATools::Wait(0,500000);
 			        
 	ACS_DEBUG_PARAM("SRTWeatherSocket::getWind()","sendCMD: %s",(const char *)command);
 	receiveData(err,rdata);
@@ -344,7 +346,7 @@ double SRTWeatherSocket::getHumidity()
 	double m_val;
 	WeatherStationData mp;
 	sendCMD(err,CString("r ")+CString(COMMANDS[RELHUM]));
-	IRA::CIRATools::Wait(0,500000);	
+// speedup 	IRA::CIRATools::Wait(0,500000);
 
 	receiveData(err,rdata);
 	initParser(&mp);
@@ -362,7 +364,7 @@ double SRTWeatherSocket::getPressure()
 	double m_val;
 	WeatherStationData mp;
 	sendCMD(err,CString("r ")+CString(COMMANDS[AIRPRESSURE]));
-	IRA::CIRATools::Wait(0,500000);	
+// speedup 	IRA::CIRATools::Wait(0,500000);
 
 	receiveData(err,rdata);
  
@@ -381,7 +383,7 @@ double SRTWeatherSocket::getWinDir()
 	double m_val;
 	WeatherStationData mp;
 	sendCMD(err,CString("r ")+CString(COMMANDS[WINDDIRAVE]));
-	IRA::CIRATools::Wait(0,500000);	
+// speedup 	IRA::CIRATools::Wait(0,500000);
 
 	receiveData(err,rdata);
  
@@ -399,7 +401,7 @@ double SRTWeatherSocket::getWindSpeedPeak()
 	double m_val;
 	WeatherStationData mp;
 	sendCMD(err,CString("r ")+CString(COMMANDS[WINDSPEEDMAX]));
-	IRA::CIRATools::Wait(0,500000);	
+// speedup 	IRA::CIRATools::Wait(0,500000);
 
 	receiveData(err,rdata);
 	
