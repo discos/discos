@@ -7,7 +7,7 @@
 
 MAKE_PDF = ON
 
-# CDB_SCHEMAS = KBandMF
+CDB_SCHEMAS = MarkCoefficientsKBandLookUpTable
 
 # IDL Files and flags
 IDL_FILES = SRTKBandMF SRT7GHz

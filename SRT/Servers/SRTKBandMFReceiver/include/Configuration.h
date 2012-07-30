@@ -20,6 +20,7 @@
 #include <ComponentErrors.h>
 #include <ReceiversErrors.h>
 #include <ReceiversDefinitionsC.h>
+#include "utils.h"
 
 /**
  * This class implements the component configuration. The data inside this class are initialized at the startup from the
@@ -32,8 +33,8 @@ class CConfiguration {
 public:
 
 	typedef struct {
-		double skyFrequency;
-		double markValue;
+		long long feed; 
+        std::vector<double> coefficients;
 		Receivers::TPolarization polarization;
 	} TMarkValue;
 
@@ -115,24 +116,6 @@ public:
 	inline const IRA::CString& getLocalOscillatorInstance() const { return m_localOscillatorInstance; }
 
 	/**
-	 * Allows to get the table of mark values relative to left polarization
-	 * @param freq vector containing the frequency value of the mark table. It must be freed by caller.
-	 * @param markValue vector of the value of the calibration diode. It must be freed by caller.
-	 * @param len used to return the length of the mark values array
-	 * @return the size of the output vectors
-	 */
-	DWORD getLeftMarkTable(double *& freq,double *& markValuel) const;
-
-	/**
-	 * Allows to get the table of mark values relative to left polarization
-	 * @param freq vector containing the frequency value of the mark table. It must be freed by caller.
-	 * @param markValue vector of the value of the calibration diode. It must be freed by caller.
-	 * @param len used to return the length of the mark values array
-	 * @return the size of the output vectors
-	 */
-	DWORD getRightMarkTable(double *& freq,double *& markValue) const;
-
-	/**
 	 * @param freq vector with the synthesizer frequencies. It must be freed by caller.
 	 * @param power corresponding powers for the frequencies vector. It must be freed by caller.
 	 * @return the size of the output vectors
@@ -159,6 +142,13 @@ public:
 	 * @return mnemonic of the working mode of the receiver
 	 */
 	inline const IRA::CString& getSetupMode() const { return m_mode; }
+
+    /**
+     * @return the markVector
+     */
+    inline const TMarkValue * getMarkVector() const { return m_markVector; }
+
+    inline const DWORD getMarkVectorLen() const { return m_markVectorLen; }
 
 
     void setMode(const char * mode) throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl);

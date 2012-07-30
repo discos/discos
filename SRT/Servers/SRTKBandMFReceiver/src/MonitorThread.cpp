@@ -209,7 +209,7 @@ void CMonitorThread::onStart()
         case ENVTEMP: {
             m_currentStage = VACUUM;
             try {
-                m_core->getVertexTemperature();
+                m_core->updateVertexTemperature();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");

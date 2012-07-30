@@ -1,5 +1,6 @@
 #include "ComponentCore.h"
 #include <LogFilter.h>
+#include "utils.h"
 
 _IRA_LOGFILTER_IMPORT;
 
@@ -197,6 +198,7 @@ void CComponentCore::calOn() throw (
     }
     m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
     clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
+
 }
 
 
@@ -403,71 +405,132 @@ void CComponentCore::getCalibrationMark(
         const ACS::longSeq& ifs
         ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
 {
-	double realFreq,realBw;
-	double *tableLeftFreq=NULL;
-	double *tableLeftMark=NULL;
-	double *tableRightFreq=NULL;
-	double *tableRightMark=NULL;
-	DWORD sizeL=0;
-	DWORD sizeR=0;
-	baci::ThreadSyncGuard guard(&m_mutex);
-	if (m_setupMode=="") {
-		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
-		impl.setReason("receiver not configured yet");
-		throw impl;
-	}
-	//let's do some checks about input data
-	unsigned stdLen=freqs.length();
-	if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
-		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
-		impl.setReason("sub-bands definition is not consistent");
-		throw impl;
-	}
-	for (unsigned i=0;i<stdLen;i++) {
-		if ((ifs[i]>=(long)m_configuration.getIFs()) || (ifs[i]<0)) {
-			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
-			impl.setValueName("IF identifier");
-			throw impl;
-		}
-	}
-	for (unsigned i=0;i<stdLen;i++) {
-		if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
-			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
-			impl.setValueName("feed identifier");
-			throw impl;
-		}
-	}
-	result.length(stdLen);
-	resFreq.length(stdLen);
-	resBw.length(stdLen);
-	// first get the calibration mark tables
-	sizeL=m_configuration.getLeftMarkTable(tableLeftFreq,tableLeftMark);
-	sizeR=m_configuration.getRightMarkTable(tableRightFreq,tableRightMark);
-	for (unsigned i=0;i<stdLen;i++) {
-		// now computes the mark for each input band....considering the present mode and configuration of the receiver.
-		if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
-				realFreq=m_startFreq[ifs[i]];
-				realBw=0.0;
-		}
-		ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"SUB_BAND %lf %lf",realFreq,realBw));
-		realFreq+=m_localOscillatorValue;
-		resFreq[i]=realFreq;
-		resBw[i]=realBw;
-		realFreq+=realBw/2.0;
-		ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
-		if (m_polarization[ifs[i]]==(long)Receivers::RCV_LEFT) {
-			result[i]=linearFit(tableLeftFreq,tableLeftMark,sizeL,realFreq);
-			ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
-		}
-		else {
-			result[i]=linearFit(tableRightFreq,tableRightMark,sizeR,realFreq);
-			ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"RIGHT_MARK_VALUE %lf",result[i]));
-		}
-	}
-	if (tableLeftFreq) delete [] tableLeftFreq;
-	if (tableLeftMark) delete [] tableLeftMark;
-	if (tableRightFreq) delete [] tableRightFreq;
-	if (tableRightMark) delete [] tableRightMark;
+    double realFreq,realBw;
+    double *tableLeftFreq=NULL;
+    double *tableLeftMark=NULL;
+    double *tableRightFreq=NULL;
+    double *tableRightMark=NULL;
+    baci::ThreadSyncGuard guard(&m_mutex);
+    if (m_setupMode=="") {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
+        impl.setReason("receiver not configured yet");
+        throw impl;
+    }
+    //let's do some checks about input data
+    unsigned stdLen=freqs.length();
+    if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
+        impl.setReason("sub-bands definition is not consistent");
+        throw impl;
+    }
+    for (unsigned i=0;i<stdLen;i++) {
+        if ((ifs[i]>=(long)m_configuration.getIFs()) || (ifs[i]<0)) {
+            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
+            impl.setValueName("IF identifier");
+            throw impl;
+        }
+    }
+    for (unsigned i=0;i<stdLen;i++) {
+        if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
+            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
+            impl.setValueName("feed identifier");
+            throw impl;
+        }
+    }
+        
+    result.length(stdLen);
+    resFreq.length(stdLen);
+    resBw.length(stdLen);
+
+    // DWORD sizeL=0;
+    // DWORD sizeR=0;
+    // // first get the calibration mark tables
+    // sizeL=m_configuration.getLeftMarkTable(tableLeftFreq,tableLeftMark); // To insert in the CDB
+    // sizeR=m_configuration.getRightMarkTable(tableRightFreq,tableRightMark); // To insert in the CDB
+
+
+    
+    /*
+    double LeftMarkCoeff[7][4] = { {0.2912,-21.21,506.97,-3955.5}, {0.558,-40.436,961.81,-7472.1}, {0.8963,-63.274,1469.2,-11170.0}, 
+                                 {0.5176,-37.47,889.81,-6895.8}, {0.662,-47.86,1136.2,-8809.9}, {0.3535,-25.63,609.53,-4727.4}, {0.2725,-19.926,478.05,-3737.9}  };
+    double RightMarkCoeff[7][4] = { {0.2141,-15.771,379.96,-2976.8}, {0.523,-37.88,899.74,-6974.4}, {0.8572,-60.324,1396.3,-10581.0}, 
+                                 {0.5173,-37.339,884.31,-6838.1}, {0.7267,-52.213,1231.4,-9486.9}, {0.3955,-28.468,672.77,-5192.0}, {0.201,-15.761,398.52,-3237.7} };
+    */
+
+    vector< vector<double> > leftMarkCoeffs;
+    vector< vector<double> > rightMarkCoeffs;
+    const CConfiguration::TMarkValue *const markVector = m_configuration.getMarkVector();
+    if(markVector == NULL) {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
+        impl.setReason("The markVector pointer is NULL");
+        throw impl;
+    }
+    for(DWORD i=0; i<m_configuration.getMarkVectorLen(); i++) {
+        if(markVector[i].polarization==Receivers::RCV_LEFT)
+            leftMarkCoeffs.push_back(markVector[i].coefficients);
+        else if(markVector[i].polarization==Receivers::RCV_RIGHT)
+            rightMarkCoeffs.push_back(markVector[i].coefficients);
+        else {
+            _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
+            impl.setReason("Polarization unknown");
+            throw impl;
+        }
+    }
+    if(leftMarkCoeffs.size() != rightMarkCoeffs.size() || leftMarkCoeffs.size() != m_configuration.getFeeds()) {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
+        impl.setReason("The mark coefficients length is inconsistent");
+        throw impl;
+    }
+
+    double f1,f2;
+    double integral;
+    double mark=0;
+    for (unsigned i=0;i<stdLen;i++) {
+        if (m_polarization[ifs[i]]==(long)Receivers::RCV_LEFT) {
+            // take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
+            if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
+                realFreq=m_startFreq[ifs[i]];
+                realBw=0.0;
+            }
+            // realFreq+=m_LO[ifs[i]]; Questo era nel Boss. Quindi devo fare un: (?)
+            // ACS::doubleSeq lo;
+            // getLO(lo);
+            // realFreq += lo[ifs[i]];
+            realFreq+=m_localOscillatorValue; // Questo e' quanto c'era nel mio component. Devo fare come sopra per allinearlo al RecvBossCore?
+            // resFreq[i]=realFreq;
+            // resBw[i]=realBw;
+            // realFreq+=realBw/2.0;
+            f1=realFreq;
+            f2=f1+realBw;
+            f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
+            integral=(leftMarkCoeffs[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(leftMarkCoeffs[feeds[i]][1]/3) * \
+                     (f2*f2*f2-f1*f1*f1)+(leftMarkCoeffs[feeds[i]][2]/2)*(f2*f2-f1*f1)+leftMarkCoeffs[feeds[i]][3]*(f2-f1);               
+            mark=integral/(f2-f1);              
+        }
+        else if (m_polarization[ifs[i]]==(long)Receivers::RCV_RIGHT) {
+            // take the real observed bandwidth....the correlation between detectro device and the band provided by the receiver
+            if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
+                realFreq=m_startFreq[ifs[i]];
+                realBw=0.0;
+            }
+            // realFreq+=m_LO[ifs[i]]; // STESSO DISCORSO DI SOPRA?
+            realFreq+=m_localOscillatorValue; // Questo e' quanto c'era nel mio component. Devo fare come sopra per allinearlo al RecvBossCore?
+            f1= realFreq;
+            f2=f1+realBw;
+            f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
+            integral=(rightMarkCoeffs[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(rightMarkCoeffs[feeds[i]][1]/3) * \
+                     (f2*f2*f2-f1*f1*f1)+(rightMarkCoeffs[feeds[i]][2]/2)*(f2*f2-f1*f1)+rightMarkCoeffs[feeds[i]][3]*(f2-f1);             
+            mark=integral/(f2-f1);
+        }
+        result[i]=mark;
+        resFreq[i]=realFreq;
+        resBw[i]=realBw;
+    }
+
+    if (tableLeftFreq) delete [] tableLeftFreq;
+    if (tableLeftMark) delete [] tableLeftMark;
+    if (tableRightFreq) delete [] tableRightFreq;
+    if (tableRightMark) delete [] tableRightMark;
 }
 
 
@@ -568,6 +631,7 @@ void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblem
     if (m_setupMode=="") { // if the receiver is not configured the check makes no sense
         return;
     }
+
     /***********************************************************************/
     /****   COMMENT OUT when the local oscillator component will be available                 */
     /***********************************************************************/
@@ -763,7 +827,7 @@ void CComponentCore::updateCryoCoolHead() throw (ReceiversErrors::ReceiverContro
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoCoolHead=m_control->cryoTemperature(1,CComponentCore::voltage2Kelvin);
+        m_cryoCoolHead=m_control->cryoTemperature(0,CComponentCore::voltage2Kelvin);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHead()");
@@ -779,7 +843,7 @@ void CComponentCore::updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverCon
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoCoolHeadWin=m_control->cryoTemperature(2,CComponentCore::voltage2Kelvin);
+        m_cryoCoolHeadWin=m_control->cryoTemperature(1,CComponentCore::voltage2Kelvin);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHeadWin()");
@@ -827,7 +891,7 @@ void CComponentCore::updateVertexTemperature() throw (ReceiversErrors::ReceiverC
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_envTemperature = m_control->vertexTemperature(CComponentCore::voltage2Kelvin);
+        m_envTemperature = m_control->vertexTemperature(CComponentCore::voltage2Celsius);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVertexTemperature()");

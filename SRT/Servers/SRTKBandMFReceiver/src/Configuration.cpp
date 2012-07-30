@@ -46,7 +46,7 @@ using namespace IRA;
 
 #define CONFIG_PATH "DataBlock/SRTKBandMFReceiver"
 #define LOTABLE_PATH CONFIG_PATH"/Synthesizer"
-#define MARKTABLE_PATH CONFIG_PATH"/NoiseMark"
+#define MARKTABLE_PATH CONFIG_PATH"/MarkCoefficients"
 #define FEEDTABLE_PATH CONFIG_PATH"/Feeds"
 #define TAPERTABLE_PATH CONFIG_PATH"/Taper"
 #define DEFAULTMODE "SINGLEDISH"
@@ -173,21 +173,21 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
 
     // The noise mark
     try {
-        m_markTable=new IRA::CDBTable(Services,"MarkEntry", MARKTABLE_PATH);
+        m_markTable = new IRA::CDBTable(Services,"MarkEntry", MARKTABLE_PATH);
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy, "CConfiguration::init()");
         throw dummy;
     }
     error.Reset();
-    if (!m_markTable->addField(error,"Polarization",IRA::CDataField::STRING)) {
+    if (!m_markTable->addField(error,"Feed",IRA::CDataField::LONGLONG)) {
+        field="Feed";
+    }
+    else if (!m_markTable->addField(error,"Polarization",IRA::CDataField::STRING)) {
         field="Polarization";
     }
-    else if (!m_markTable->addField(error,"SkyFrequency",IRA::CDataField::DOUBLE)) {
-        field="SkyFrequency";
-    }
-    else if (!m_markTable->addField(error,"NoiseMark",IRA::CDataField::DOUBLE)) {
-        field="NoiseMark";
+    else if (!m_markTable->addField(error,"Coefficients",IRA::CDataField::STRING)) {
+        field="Coefficients";
     }
     if (!error.isNoError()) {
         _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
@@ -198,28 +198,37 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
         _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
         throw dummy;
     }
+
     m_markTable->First();
-    len=m_markTable->recordCount();
+    len = m_markTable->recordCount();
+    if(len != m_feeds * 2) { // Two channels per feed
+        _EXCPT(ComponentErrors::CDBAccessExImpl, dummy, "CConfiguration::init()");
+        dummy.setFieldName("MarkCoefficients table size");
+        throw dummy;
+    }
     try {
-        m_markVector=new TMarkValue[len];
+        m_markVector = new TMarkValue[len];
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
         throw dummy;
     }
-    ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"MARK_VALUE_ENTRY_NUMBER: %d",len));
-    for (WORD i=0;i<len;i++) {
-        m_markVector[i].skyFrequency=(*m_markTable)["SkyFrequency"]->asDouble();
-        m_markVector[i].markValue=(*m_markTable)["NoiseMark"]->asDouble();
+    for (WORD i=0; i<len; i++) {
+        m_markVector[i].feed=(*m_markTable)["Feed"]->asLongLong();
         m_markVector[i].polarization=(*m_markTable)["Polarization"]->asString()=="LEFT"?Receivers::RCV_LEFT:Receivers::RCV_RIGHT;
-        ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"MARK_VALUE_ENTRY: %d %lf %lf",m_markVector[i].polarization,m_markVector[i].skyFrequency,
-                m_markVector[i].markValue));
+
+        std::vector<std::string> marks_str = split(std::string((*m_markTable)["Coefficients"]->asString()), std::string(","));
+
+        // Vector of coefficients (double)
+        for(std::vector<std::string>::iterator iter = marks_str.begin(); iter != marks_str.end(); iter++)
+            (m_markVector[i].coefficients).push_back(str2double(*iter));
         m_markTable->Next();
     }
     m_markVectorLen=len;
     m_markTable->closeTable();
     delete m_markTable;
     m_markTable=NULL;
+
     // The synthesizer
     try {
         m_loTable=new IRA::CDBTable(Services,"SynthesizerEntry",LOTABLE_PATH);
@@ -363,6 +372,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
     m_taperTable->closeTable();
     delete m_taperTable;
     m_taperTable=NULL;
+
 }
 
 void CConfiguration::setMode(const char * mode) throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl) 
@@ -506,36 +516,6 @@ DWORD CConfiguration::getTaperTable(double * &freq,double *&taper) const
         taper[j]=m_taperVector[j].taper;
     }
     return m_taperVectorLen;
-}
-
-DWORD CConfiguration::getLeftMarkTable(double *& freq,double *& markValue) const
-{
-    freq= new double [m_markVectorLen];
-    markValue=new double [m_markVectorLen];
-    DWORD count=0;
-    for (DWORD j=0;j<m_markVectorLen;j++) {
-        if (m_markVector[j].polarization==Receivers::RCV_LEFT) {
-            freq[count]=m_markVector[j].skyFrequency;
-            markValue[count]=m_markVector[j].markValue;
-            count++;
-        }
-    }
-    return count;
-}
-
-DWORD CConfiguration::getRightMarkTable(double *& freq,double *& markValue) const
-{
-    freq= new double [m_markVectorLen];
-    markValue=new double [m_markVectorLen];
-    DWORD count=0;
-    for (DWORD j=0;j<m_markVectorLen;j++) {
-        if (m_markVector[j].polarization==Receivers::RCV_RIGHT) {
-            freq[count]=m_markVector[j].skyFrequency;
-            markValue[count]=m_markVector[j].markValue;
-            count++;
-        }
-    }
-    return count;
 }
 
 DWORD CConfiguration::getFeedInfo(WORD *& code,double *& xOffset,double *& yOffset,double *& relativePower) const

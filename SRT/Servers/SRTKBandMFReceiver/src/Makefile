@@ -61,7 +61,7 @@ LIBRARIES_L     =
 
 #
 # <brief description of lllll library>
-SRTKBandMFReceiverImpl_OBJECTS   =  Configuration SRTKBandMFReceiverImpl ComponentCore SRTKBandMFCore MonitorThread
+SRTKBandMFReceiverImpl_OBJECTS   =  Configuration SRTKBandMFReceiverImpl ComponentCore SRTKBandMFCore MonitorThread utils
 SRTKBandMFReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs \
 							  GenericReceiverStubs SRTKBandMFStubs \
                    LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs

@@ -20,6 +20,7 @@
 #include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
 #include <ManagmentDefinitionsC.h>
+#include "utils.h"
 
 /**
  * This class contains the code of almost all the features  of the component
@@ -450,6 +451,10 @@ protected:
                   pow(voltage, 2)) - 22642.245121997700 * voltage + 4808.631312836750;
     }
 
+
+    // Convert the voltage value of the temperatures to Celsius (Sensor B57703-10K)
+    static double voltage2Celsius(double voltage) 
+    { return -5.9931 * pow(voltage, 5) + 40.392 * pow(voltage, 4) - 115.41 * pow(voltage, 3) + 174.67 * pow(voltage, 2) - 174.23 * voltage + 112.79; }
 
     // Convert the ID voltage value to the mA value
     static double currentConverter(double voltage) { return(10 * voltage); }

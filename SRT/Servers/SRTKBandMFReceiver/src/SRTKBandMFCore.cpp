@@ -80,7 +80,7 @@ void SRTKBandMFCore::setMode(const char * mode) throw (
 	cmdMode.MakeUpper();
 
     _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CConfiguration::setMode()");
-
+    
     // Set the operating mode to the board
     if(cmdMode == "SINGLEDISH")
             m_control->setSingleDishMode();
