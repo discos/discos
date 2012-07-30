@@ -105,6 +105,11 @@ private:
     double m_humidity;
     double m_pressure;
 
+	/**
+	 * Thread sync mutex
+	 */
+	BACIMutex m_mutex;
+
 };
 
 #endif /*REFRACTIONBOSSCORE_H_*/

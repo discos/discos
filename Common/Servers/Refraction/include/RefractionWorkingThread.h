@@ -26,7 +26,9 @@ public:
      * @param responseTime thread's heartbeat response time in 100ns unit. Default value is 1s.
      * @param sleepTime thread's sleep time in 100ns unit. Default value is 100ms.
     */
-	CRefractionWorkingThread(const ACE_CString& name,IRA::CSecureArea<CRefractionCore>  *param, 
+	//CRefractionWorkingThread(const ACE_CString& name,IRA::CSecureArea<CRefractionCore>  *param, 
+	//		const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime);
+	CRefractionWorkingThread(const ACE_CString& name,CRefractionCore *param, 
 			const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime);
 
 	/**
@@ -53,6 +55,7 @@ public:
 private:
 
 	IRA::CSecureArea<CRefractionCore> *m_core;
+	CRefractionCore *boss;
 };
 
 #endif /*REFRACTIONWORKINGTHREAD_H_*/

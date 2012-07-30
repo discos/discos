@@ -21,11 +21,11 @@ RefractionImpl::~RefractionImpl()
 void RefractionImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("RefractionImpl::initialize()");
-    CRefractionCore *boss;
-    ACS_LOG(LM_FULL_INFO,"RefractionImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZING"));
+	//CRefractionCore *boss;
+    	ACS_LOG(LM_FULL_INFO,"RefractionImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZING"));
 	try {
 		boss=(CRefractionCore *)new CRefractionCore(getContainerServices(),this);
-		m_core=new IRA::CSecureArea<CRefractionCore>(boss);
+		//m_core=new IRA::CSecureArea<CRefractionCore>(boss);
     }
     catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"RefractionImpl::initialize()");
@@ -33,8 +33,10 @@ void RefractionImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	}
     boss->initialize(getContainerServices());
     try {
-		m_workingThread=getContainerServices()->getThreadManager()->create<CRefractionWorkingThread,CSecureArea<CRefractionCore> *>
-		  ("REFRACTIONBOSSWORKER",m_core);
+		//m_workingThread=getContainerServices()->getThreadManager()->create<CRefractionWorkingThread,CSecureArea<CRefractionCore> *>
+		//  ("REFRACTIONBOSSWORKER",m_core);
+		m_workingThread=getContainerServices()->getThreadManager()->create<CRefractionWorkingThread,CRefractionCore *>
+		  ("REFRACTIONBOSSWORKER",boss);
 	}
 	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"Refraction::initialize()");
@@ -49,9 +51,10 @@ void RefractionImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 void RefractionImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("RefractionImpl::execute()");
-	CSecAreaResourceWrapper<CRefractionCore>  core=m_core->Get();
-    try {
-		core->execute();
+	//CSecAreaResourceWrapper<CRefractionCore>  core=m_core->Get();
+    	try {
+		//core->execute();
+		boss->execute();
 	}
 	catch (ACSErr::ACSbaseExImpl& E) {
 		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"Refraction::execute()");
@@ -67,12 +70,15 @@ void RefractionImpl::execute() throw (ACSErr::ACSbaseExImpl)
 void RefractionImpl::cleanUp()
 {
 	AUTO_TRACE("RefractionImpl::cleanUp()");
-    CSecAreaResourceWrapper<CRefractionCore>  core=m_core->Get();
-    core->byebye();
-    if (m_workingThread!=NULL) m_workingThread->suspend();
-    getContainerServices()->getThreadManager()->destroy(m_workingThread);
-    ACS_LOG(LM_FULL_INFO,"RefractionImpl::cleanUp()",(LM_INFO,"Refraction::THREADS_TERMINATED"));
-	core->cleanUp();
+    	//CSecAreaResourceWrapper<CRefractionCore>  core=m_core->Get();
+    	//core->byebye();
+    	boss->byebye();
+    	if (m_workingThread!=NULL)
+		m_workingThread->suspend();
+    	getContainerServices()->getThreadManager()->destroy(m_workingThread);
+    	ACS_LOG(LM_FULL_INFO,"RefractionImpl::cleanUp()",(LM_INFO,"Refraction::THREADS_TERMINATED"));
+	//core->cleanUp();
+	boss->cleanUp();
 	ACS_LOG(LM_FULL_INFO,"RefractionImpl::cleanUp()",(LM_INFO,"Refraction::BOSS_CORE_FREED"));
 	ACSComponentImpl::cleanUp();
 }
@@ -80,19 +86,21 @@ void RefractionImpl::cleanUp()
 void RefractionImpl::aboutToAbort()
 {
 	AUTO_TRACE("RefractionImpl::aboutToAbort()");
-    if (m_workingThread!=NULL) m_workingThread->suspend();
-    getContainerServices()->getThreadManager()->destroy(m_workingThread);
-	CSecAreaResourceWrapper<CRefractionCore>  core=m_core->Get(); 
-	core->cleanUp();
+    	if (m_workingThread!=NULL) m_workingThread->suspend();
+    	getContainerServices()->getThreadManager()->destroy(m_workingThread);
+	//CSecAreaResourceWrapper<CRefractionCore>  core=m_core->Get(); 
+	//core->cleanUp();
+	boss->cleanUp();
 }
 
 void RefractionImpl::getCorrection (CORBA::Double obsZenithDistance, CORBA::Double_out corZenithDistance) throw (CORBA::SystemException)
 {
 	AUTO_TRACE("RefractionImpl::getCorrection()");
 
-    CSecAreaResourceWrapper<CRefractionCore> resource=m_core->Get();
+    	//CSecAreaResourceWrapper<CRefractionCore> resource=m_core->Get();
 
-	resource->getCorrection(obsZenithDistance, &corZenithDistance);	
+	//resource->getCorrection(obsZenithDistance, &corZenithDistance);	
+	boss->getCorrection(obsZenithDistance, &corZenithDistance);	
 }
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

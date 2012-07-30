@@ -94,7 +94,8 @@ class RefractionImpl: public virtual acscomponent::ACSComponentImpl, public virt
 
 	private:
     
-    IRA::CSecureArea<CRefractionCore> *m_core;
+    	IRA::CSecureArea<CRefractionCore> *m_core;
+	CRefractionCore *boss;
 
 	CRefractionWorkingThread *m_workingThread;
 };

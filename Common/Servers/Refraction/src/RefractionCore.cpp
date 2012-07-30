@@ -137,7 +137,12 @@ void CRefractionCore::getMeteoParameters()
 	m_humidity=0.5;
 	m_pressure=1000;
     Weather::parameters pars;
+
+
     try {
+	// keep the mutex for thread execution to avoid long waits
+	// before to call the getData function from meteo component
+	baci::ThreadSyncGuard guard(&m_mutex);
         pars=m_meteodata->getData();
     	//m_temperature = m_meteodata->getTemperature();
     	//m_humidity = (m_meteodata->getHumidity())/100.0; // because slaRefro needs humidity value beetwen 0.0 and 1.0
