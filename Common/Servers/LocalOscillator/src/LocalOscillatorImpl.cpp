@@ -24,7 +24,7 @@
 	return tmp._retn(); \
 } 
 
-LocalOscillatorImpl::LocalOscillatorImpl(const ACE_CString &name,			     maci::ContainerServices * containerServices) :
+LocalOscillatorImpl::LocalOscillatorImpl(const ACE_CString &name,maci::ContainerServices * containerServices) :
 			CharacteristicComponentImpl(name,containerServices),
 		m_frequency(this),m_amplitude(this),m_isLocked(this)
 {
@@ -84,11 +84,11 @@ void LocalOscillatorImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	AUTO_TRACE("LocalOscillatorImpl::initialize()");
 	try {
 
-			line=new CommandLine();
+		 line=new CommandLine();
 	     m_commandLine=new CSecureArea<CommandLine>(line);
 	     m_frequency= new  ROdouble(getContainerServices()->getName()+":frequency",getComponent(),new DevIOfrequency(m_commandLine),true);
-	     m_amplitude= new ROdouble(getContainerServices()->getName()+":amplitude",getComponent(),new DevIOfrequency(m_commandLine),true);
-	     m_isLocked= new ROlong(getContainerServices()->getName()+":isLocked",getComponent());
+	     m_amplitude= new ROdouble(getContainerServices()->getName()+":amplitude",getComponent(),new DevIOamplitude(m_commandLine),true);
+	     m_isLocked= new ROlong(getContainerServices()->getName()+":isLocked",getComponent(),new DevIOislocked(m_commandLine,this),true);
 	}
 	 catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"LocalOscillatorImpl::initialize()");
@@ -121,17 +121,6 @@ void LocalOscillatorImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 			  		  throw dummy;
 		  	  }
 
-//		CString tmps;
-//		CIRATools::getDBValue(getContainerServices(),getContainerServices()->getName()+":frequency.units",tmps);
-//		CDB::DAL_ptr dal_p = getContainerServices()->getCDB();
-//		CDB::DAO_ptr dao_p = dal_p->get_DAO_Servant("alma/RECEIVERS/LO");
-//		tmps=CString(dao_p->get_string("frequency/units"));
-
- 	//	CIRATools //	cout << "name:" <<name.c_str() << endl;
-// 		CIRATools::getDBValue(getContainerServices(),"frequency/units",tmps);
-
-
-//		cout << (const char *) tmps << endl;
 
 
 	   CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
@@ -139,6 +128,9 @@ void LocalOscillatorImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	   line->init(reply); // get the identification string from the device.
 	   ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::initialize()",(LM_INFO,"GPIB Device %s",reply.c_str()));
 	   m_gpibonline=true;
+	   //				sendCMD("*RST"); // reset
+//	   	 line->sendCMD("POW:ALC:SOUR INT"); // enable internal leveling;
+
 
 
 	 } catch (GPIBException& ex)
@@ -184,6 +176,11 @@ void LocalOscillatorImpl::set(CORBA::Double rf_ampl, CORBA::Double rf_freq) thro
 
     	 line->setFreq(rf_freq); // set frequency
  		 line->setPower(rf_ampl); // set  amplitude
+ 		 cout << "LO: frequency set to " << rf_freq << endl;
+ 		 cout << "LO: power set to " << rf_ampl << endl;
+		ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::set()",(LM_DEBUG,"LO SET to freq: %f power:%f ",rf_freq,rf_ampl));
+
+
  		 m_freq=rf_freq;
  		 m_ampl=rf_ampl;
 
@@ -210,17 +207,17 @@ void LocalOscillatorImpl::get(CORBA::Double& rf_ampl, CORBA::Double& rf_freq) th
      		CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
  	 		line->getFreq(rf_freq); // get frequency
  	 		line->getPower(rf_ampl); // get  amplitude
- 	 		if (rf_freq !=m_freq)
- 	 		{
- 	 		    ACS::Time timestamp;
- 	 			m_isLocked->getDevIO()->write(1,timestamp);
-
- 	 		} else
- 	 		{
-	 		    ACS::Time timestamp;
- 	 			m_isLocked->getDevIO()->write(0,timestamp); //
- 	 			ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_WARNING,"LocalOscillatorImpl read %f, expected %f",rf_freq,m_freq));
- 	 		}
+// 	 		if (rf_freq !=m_freq)
+// 	 		{
+// 	 		    ACS::Time timestamp;
+// 	 			m_isLocked->getDevIO()->write(1,timestamp);
+//
+// 	 		} else
+// 	 		{
+//	 		    ACS::Time timestamp;
+// 	 			m_isLocked->getDevIO()->write(0,timestamp); //
+// 	 			ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_WARNING,"LocalOscillatorImpl read %f, expected %f",rf_freq,));
+// 	 		}
 
  	 } catch (GPIBException& ex)
  	 {

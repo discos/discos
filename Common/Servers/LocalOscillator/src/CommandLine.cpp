@@ -150,7 +150,14 @@ int CommandLine::configure(int bid,int pad,int sat,int tmo, int eot, int eos) th
 		{
 						   throw GPIBException("ibdev:"+GPIB_errors[ThreadIberr()]);
 		}
+
+	string unitcmd="UNIT:FREQ"+FREQUNIT;
+
+	sendCMD(unitcmd); // set uniti to FREQUNIT
+
 	return 0;
+
+
 
 }
 
@@ -201,8 +208,8 @@ int CommandLine::init(string& reply) throw (GPIBException)
 		{
 			try {
 				query("*IDN?",reply);
-				sendCMD("*RST"); // reset
-				sendCMD("POW:ALC:SOUR INT"); // enable internal leveling;
+//				sendCMD("*RST"); // reset
+//				sendCMD("POW:ALC:SOUR INT"); // enable internal leveling;
 			}  	catch (GPIBException& ex)
 
 			{

@@ -14,6 +14,8 @@
 #include "CommandLine.h"
 #include <Definitions.h>
 #include "DevIOfrequency.h"
+#include "DevIOamplitude.h"
+
 #include <IRA>
 
 //#define GPIBBOARD 0
@@ -44,11 +46,13 @@ class LocalOscillatorImpl : public CharacteristicComponentImpl, public virtual P
 	virtual void get (CORBA::Double& rf_ampl, CORBA::Double& rf_freq)  throw (CORBA::SystemException,ReceiversErrors::ReceiversErrorsEx);
  	virtual void rfon ()  throw (CORBA::SystemException,ReceiversErrors::ReceiversErrorsEx);
 	virtual void rfoff ()  throw (CORBA::SystemException,ReceiversErrors::ReceiversErrorsEx);
-  
+
     virtual ACS::ROdouble_ptr  frequency ()	throw (CORBA::SystemException);
 	virtual ACS::ROdouble_ptr  amplitude ()	throw (CORBA::SystemException);
 	virtual ACS::ROlong_ptr  isLocked () throw (CORBA::SystemException);
 	
+	inline void getStoredValue(double& pow,double& rf) { rf=m_freq;pow=m_ampl; };
+
 private:
 	SmartPropertyPointer<ROdouble> m_frequency;
 	SmartPropertyPointer<ROdouble> m_amplitude;
@@ -63,6 +67,7 @@ private:
 
 };
 
+#include "DevIOislocked.h"
 
 #endif
 
