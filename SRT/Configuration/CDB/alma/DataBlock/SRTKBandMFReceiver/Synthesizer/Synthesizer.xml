@@ -5,12 +5,18 @@
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<SynthesizerEntry><Frequency>9700.0</Frequency><OutputPower>7</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>12000.0</Frequency><OutputPower>-7.7</OutputPower></SynthesizerEntry>
 
-<SynthesizerEntry><Frequency>10000.0</Frequency><OutputPower>8</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>13000.0</Frequency><OutputPower>-6.8</OutputPower></SynthesizerEntry>
 
-<SynthesizerEntry><Frequency>10500.0</Frequency><OutputPower>9</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>14000.0</Frequency><OutputPower>-6</OutputPower></SynthesizerEntry>
 
-<SynthesizerEntry><Frequency>11000.0</Frequency><OutputPower>9</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>15000.0</Frequency><OutputPower>-6.5</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>16000.0</Frequency><OutputPower>-3.8</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>17000.0</Frequency><OutputPower>-1.5</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>18000.0</Frequency><OutputPower>-0.7</OutputPower></SynthesizerEntry>
 
 </LocalOscillatorLookUpTable>

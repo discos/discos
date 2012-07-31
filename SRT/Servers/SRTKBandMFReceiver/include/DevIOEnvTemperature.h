@@ -5,8 +5,8 @@
  *  Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 \*******************************************************************************/
 
-#ifndef _DEVIOENVTEMPERATURE_H_
-#define _DEVIOENVTEMPERATURE_H_
+#ifndef _KBANDDEVIOENVTEMPERATURE_H_
+#define _KBANDDEVIOENVTEMPERATURE_H_
 
 #include <baciDevIO.h>
 #include <IRA>

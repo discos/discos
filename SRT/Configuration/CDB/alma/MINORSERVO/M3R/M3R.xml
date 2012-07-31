@@ -20,8 +20,8 @@
     number_of_slaves="3"
     scale_factor="1"
     scale_offset="0"
-    server_ip="192.135.33.196"
-    server_port="8000"
+    server_ip="192.168.200.16"
+    server_port="10000"
     timeout="2000000"
     servo_address="3"
     zero="0"
@@ -66,8 +66,8 @@
         graph_min="0"
         graph_max="0"
         min_step="0"
-        min_value="-25"
-        max_value="25"
+        min_value="-945"
+        max_value="945"
 	/>
               
     <!-- Position Difference (ROdoubleSeq) -->
