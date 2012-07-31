@@ -24,6 +24,6 @@
 
 <AvailableReceiver Code="CCG" Component="RECEIVERS/SRT7GHzReceiver"/>
 
-<AvailableReceiver Code="KKG" Component="RECEIVERS/SRTKbandMFReceiver"/>
+<AvailableReceiver Code="KKG" Component="RECEIVERS/SRTKBandMFReceiver"/>
 
 </ReceiversBoss>

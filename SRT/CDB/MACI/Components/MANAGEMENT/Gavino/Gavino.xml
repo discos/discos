@@ -12,5 +12,6 @@
 	Code="SchedulerImpl"
 	Type="IDL:alma/Management/Scheduler:1.0"
 	Container="ManagementContainer"
+	Default="false"
     ImplLang="cpp"
 />

@@ -196,8 +196,16 @@ void CComponentCore::calOn() throw (
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
+    try {
     m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
     clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
+    }    
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOn()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
 
 }
 
@@ -228,8 +236,16 @@ void CComponentCore::calOff() throw (
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
-    m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
-    clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
+    try {
+        m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
+        clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOff()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
 }
 
 
@@ -739,9 +755,16 @@ void CComponentCore::updateVacuumPump() throw (ReceiversErrors::ReceiverControlB
     }
     if (!answer) setStatusBit(VACUUMPUMPSTATUS);
     else clearStatusBit(VACUUMPUMPSTATUS);
-
-    m_control->hasVacuumPumpFault() ? setStatusBit(VACUUMPUMPFAULT): clearStatusBit(VACUUMPUMPFAULT);
-    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+    try {
+    	m_control->hasVacuumPumpFault() ? setStatusBit(VACUUMPUMPFAULT): clearStatusBit(VACUUMPUMPFAULT);
+    	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVacuumPump()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
 }
 
 
@@ -760,9 +783,16 @@ void CComponentCore::updateNoiseMark() throw (ReceiversErrors::ReceiverControlBo
     }
     if (answer!=checkStatusBit(NOISEMARK)) setStatusBit(NOISEMARKERROR);
     else clearStatusBit(NOISEMARKERROR);
-
-    m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
-    m_control->isExtCalibrationOn() ? setStatusBit(EXTNOISEMARK) : clearStatusBit(EXTNOISEMARK);
+    try {
+    	m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
+    	m_control->isExtCalibrationOn() ? setStatusBit(EXTNOISEMARK) : clearStatusBit(EXTNOISEMARK);
+    }	
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateNoiseMark()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
