@@ -230,7 +230,7 @@ const string status_messages[16] = {
 // Set the sleep_time in useconds: for instance 2 * 10 means 2 useconds
 const unsigned long scheduler_sleep_time = 20 * 10;
 const unsigned long listener_sleep_time = 2 * 10;
-const unsigned long status_sleep_time = 200000 * 10; // 
+const unsigned long status_sleep_time = 100000 * 10; // 100 ms
 const unsigned long status_response_time = status_sleep_time;
 
 // WPServoTalker parameters

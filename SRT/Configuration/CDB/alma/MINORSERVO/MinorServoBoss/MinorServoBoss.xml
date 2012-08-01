@@ -24,10 +24,16 @@
     actionThreadStackSize="2048"
     monitoringThreadStackSize="4096"
     
-    confA="
+    conf7GHz="
         @ SRP: park;
-        @ PFP: LX = (2.222, 1.111, 0); LZ = (1.111, 1.111, 1); AZ = (1.3333, 1.3333, 1.4444);
-        @ GFR: AZ = (1);
+        @ PFP: park;
+        @ GFR: AZ = (-567.8);
+        @ M3R: park;
+    "
+    conf22GHz="
+        @ SRP: park;
+        @ PFP: park;
+        @ GFR: AZ = (1323.5);
         @ M3R: park;
     "
     confB="

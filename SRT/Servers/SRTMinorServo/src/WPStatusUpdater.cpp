@@ -152,9 +152,7 @@ void WPStatusUpdater::runLoop()
                 else
                     status_bset.reset(STATUS_FAILURE);
 
-                // TODO: la differenza di tempo e' troppo grande per passare il test nella MSCU reale
-                // if(diff > MAX_TIME_DIFF) {
-                if(false) {
+                if(diff > MAX_TIME_DIFF) {
                     ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: abs(actual_time - actual_pos_time) = %llu", diff));
                     cout << "MAX_TIME_DIFF" << endl;
                 }
@@ -214,7 +212,7 @@ void WPStatusUpdater::runLoop()
     }
     catch (...) {
         pthread_mutex_unlock(m_params->status_mutex); 
-        ACS_SHORT_LOG((LM_ERROR, "@%d: unexpected error updating the status.", timestamp));
+        ACS_SHORT_LOG((LM_ERROR, "@%ll: unexpected error updating the status.", timestamp));
     }
 }
  
