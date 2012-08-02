@@ -50,7 +50,7 @@ public:
 	 */
 	virtual void cleanup();
 
-	/*
+	/**
 	 * It sets the local oscillator. Only the first value is considered in this case, since the receiver has just one synthesizer. Before commanding the new value some check are done. The the correspnding signal
 	 * amplitude is computed.
 	 * @param lo lists of values for the local oscillator (MHz), one for each IF. In that case just the first one is significant. In a -1 is passed the present value is kept

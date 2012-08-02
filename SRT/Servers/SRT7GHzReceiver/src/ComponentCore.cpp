@@ -47,11 +47,11 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
 	m_bandwidth.length(m_configuration.getIFs());
 	m_polarization.length(m_configuration.getIFs());
 	for (WORD i=0;i<m_configuration.getIFs();i++) {
-		m_startFreq[i]=0.0;
-		m_bandwidth[i]=0.0;
-		m_polarization[i]=0;
+		m_startFreq[i]=m_configuration.getIFMin()[i];
+		m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
+		m_polarization[i]=(long)m_configuration.getPolarizations()[i];
+		m_localOscillatorValue=m_configuration.getDefaultLO()[i];
 	}
-	m_localOscillatorValue=0.0;
 	m_setupMode="";
 	return &m_configuration;
 }
@@ -327,24 +327,22 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Val
 	if (power) delete [] power;
 	if (freq) delete [] freq;
 	ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_DEBUG,"SYNTHESIZER_VALUES %lf %lf",trueValue,amp));
-	/***********************************************************************/
-	/****   COMMENT OUT when the local oscillator component will be available                 */
-	/***********************************************************************/
 	// make sure the synthesizer component is available
-	/*loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
+	loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
 	try {
 		m_localOscillatorDevice->set(amp,trueValue);
 	}
-	catch (CORBA::SystemException) {
+	catch (CORBA::SystemException& ex) {
 		m_localOscillatorFault=true;
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CScheduleExecutor::configureBackend()");
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CComponentCore::setLO()");
 		impl.setName(ex._name());
 		impl.setMinor(ex.minor());
 		throw impl;
 	}
-	catch () { //  ********************* AT the moment no except is thrown...... ASK clarification *************************************
-	_EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CScheduleExecutor::configureBackend()");
-	}*/
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) { 
+		_ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"CComponentCore::setLO()");
+		throw impl;
+	}
 	// now that the local oscillator has been properly set...let's do some easy computations
 	m_localOscillatorValue=lo[0];
 	for (WORD i=0;i<m_configuration.getIFs();i++) {
@@ -515,11 +513,8 @@ void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblem
 	if (m_setupMode=="") { // if the receiver is not configured the check makes no sense
 		return;
 	}
-	/***********************************************************************/
-	/****   COMMENT OUT when the local oscillator component will be available                 */
-	/***********************************************************************/
 	// make sure the synthesizer component is available
-	/*loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
+	loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
 	ACSErr::Completion_var comp;
 	ACS::ROlong_var isLockedRef;
 	CORBA::Long isLocked;
@@ -542,7 +537,7 @@ void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblem
 		throw impl;
 	}
 	if (!isLocked) setStatusBit(UNLOCKED);
-	else clearStatusBit(UNLOCKED);*/
+	else clearStatusBit(UNLOCKED);
 }
 
 void CComponentCore::updateComponent()
