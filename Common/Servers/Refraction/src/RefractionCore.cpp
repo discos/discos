@@ -100,6 +100,7 @@ void CRefractionCore::execute() throw (ComponentErrors::CouldntGetComponentExImp
 
 void CRefractionCore::cleanUp()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
     try {
 		m_services->releaseComponent((const char*)m_meteodata->name());
 	}
@@ -114,7 +115,7 @@ void CRefractionCore::getCorrection(double obsZenithDistance, double *corZenithD
 {
     AUTO_TRACE("CRefractionCore::getCorrection()");
 	double elevation;
-	
+	baci::ThreadSyncGuard guard(&m_mutex);
 	elevation = 90.0 - obsZenithDistance*DR2D;
 	if (elevation >= 0.0 && elevation <= 90.0) {
 		double hm = m_site.getHeight(); // meters
@@ -137,7 +138,6 @@ void CRefractionCore::getMeteoParameters()
 	m_humidity=0.5;
 	m_pressure=1000;
     Weather::parameters pars;
-
 
     try {
 	// keep the mutex for thread execution to avoid long waits
