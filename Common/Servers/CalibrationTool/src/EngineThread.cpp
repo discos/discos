@@ -540,8 +540,9 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    data->setOffset (m_Par[3]);
 	    data->setSlope (m_Par[4]);
 
-	    if ((fabs(m_Par[1]) < m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0) ||
-	    		(fabs(m_Par[1]) > m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0)) {
+	    /*if ((fabs(m_Par[1]) < m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0) ||
+	    		(fabs(m_Par[1]) > m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0)) {*/
+	    if ((m_Par[1]>m_off[0]) && (m_Par[1]<m_off[m_dataSeqCounter-1]) && (m_ierr > 0)) {
 	    	/* if data fitting results are ok, sets new offsets in antenna */
 	    	m_latResult = 1;
 	    }
@@ -589,9 +590,10 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    data->setOffset (m_Par[3]);
 	    data->setSlope (m_Par[4]);
 
-	    if ((fabs(m_Par[1]) < m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0) ||
-	    	(fabs(m_Par[1]) > m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0)	) {
+	    /*if ((fabs(m_Par[1]) < m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0) ||
+	    	(fabs(m_Par[1]) > m_off[0]) && (fabs(m_Par[1]) < fabs(m_off[m_dataSeqCounter - 1])) && (m_ierr > 0)	) {*/
 	    	/* if data fitting results are ok, sets new offsets in antenna */
+	    if ((m_Par[1]>m_off[0]) && (m_Par[1]<m_off[m_dataSeqCounter-1]) && (m_ierr > 0)) {
 	    	m_lonResult = 1;
 	    }
 	    data->setArrayDataX (m_dataSeq,m_dataSeqCounter);
