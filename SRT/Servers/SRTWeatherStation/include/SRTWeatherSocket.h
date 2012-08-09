@@ -67,6 +67,7 @@ static int Depth;
  
 	XML_Parser p;
 	WeatherStationData *m_meteodata;
+	WeatherStationData m_weatherdata;
 	map<string,double> m_map;
 	string m_tagname; 
 	string m_tagdate;

@@ -25,7 +25,7 @@ CWindCheckerThread::runLoop()
  	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
 
-     wdata = m_srtweatherstation_p->getData();
+//     wdata = m_srtweatherstation_p->getData();
      wind=wdata.wind*3.6; // converts wind speed from m/s to km/h	
      cout << "wind:" << wdata.wind << std::endl;
      AUTO_TRACE("WindCheckerThread::runLoop()");
