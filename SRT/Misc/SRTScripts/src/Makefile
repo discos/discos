@@ -68,7 +68,7 @@ lllll_OBJECTS   =
 #
 # Scripts (public and local)
 # ----------------------------
-SCRIPTS         =
+SCRIPTS         = nuragheConsole nuraghe
 SCRIPTS_L       =
 
 #
@@ -164,7 +164,7 @@ ASCII_TO_MIF =
 #
 # other files to be installed
 #----------------------------
-INSTALL_FILES =
+INSTALL_FILES = ../app-defaults/nuragheStartup.xml
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
@@ -203,6 +203,8 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@chmod 764 $(INTROOT)/bin/nuraghe
+	@chmod 764 $(INTROOT)/app-defaults/nuragheStartup.xml
 	@echo " . . . installation done"
 
 

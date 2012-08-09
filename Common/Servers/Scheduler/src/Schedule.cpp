@@ -1282,7 +1282,7 @@ bool CScanList::parseOTF(const IRA::CString& val,Antenna::TTrackingParameters *s
 			errMsg="invalid on the fly scan direction";
 			return false;
 		}
-		if (out==15) {
+		if (out==16) {
 			if (strcmp(offFrame,OFFFRAMEEQ)==0) {
 				scan->offsetFrame=Antenna::ANT_EQUATORIAL;
 				if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {

@@ -1,0 +1,89 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 08/08/2012      Creation                                  
+#************************************************************************
+#   NAME
+# 
+#   SYNOPSIS
+# 
+#   DESCRIPTION
+#
+#   FILES
+#
+#   ENVIRONMENT
+#
+#   RETURN VALUES
+#
+#   CAUTIONS
+#
+#   EXAMPLES
+#
+#   SEE ALSO
+#
+#   BUGS     
+#
+
+LONGOPTS=help
+SHORTOPTS=h
+CL_HELP=
+
+function printUsage {
+   echo "Start interactive console for the ESCS system"
+   echo ""
+        echo "Usage: `basename $0` [OPTIONS]  "
+        echo "Options: "
+        echo "   -h | --help    prints this help"
+}
+
+# This simply checks for the correctness of the command line
+export POSIXLY_CORRECT=1
+
+getopt -n `basename $0` -Q -u -a -l $LONGOPTS $SHORTOPTS "$@" || {
+   printUsage
+   exit
+}
+
+# Now let's parse the command line
+set -- `getopt -u -a -l $LONGOPTS $SHORTOPTS "$@"`
+
+for i
+do
+	case "$i" in
+		-h) CL_HELP=true ;;
+		--help) CL_HELP=true ;;
+		--)  break;;
+	esac
+	shift
+done
+
+# restore
+export POSIXLY_CORRECT=
+unset POSIXLY_CORRECT
+
+if [ "$CL_HELP" ] ; then
+   printUsage
+   exit
+fi
+
+xterm -geometry 72x30+300+0 +sb -title Mount -e /bin/bash --login -c _tui_SRTMountTextClient &
+sleep 0.5s
+xterm -geometry 69x16+0+0 +sb -title Observatory -e /bin/bash --login -c _tui_ObservatoryTextClient &
+sleep 0.5s
+xterm -geometry 82x31+0+0 +sb -title AntennaBoss -e /bin/bash --login -c _tui_AntennaBossTextClient &
+sleep 0.5s
+xterm -geometry 101x28+0+0 +sb -title GenericBackend -e /bin/bash --login -c "_tui_GenericBackendTextClient BACKENDS/TotalPower" &
+sleep 0.5s
+xterm -geometry 130x25+200+200 -sb -title OperatorInput -e /bin/bash --login -c sysTerm &
+sleep 0.5s
+receiversBossTui
+sleep 0.5s
+#loggingDisplay
+
+
+#
+# ___oOo___
