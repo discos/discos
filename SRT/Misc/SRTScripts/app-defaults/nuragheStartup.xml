@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>11</select>
+        <select>13</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -70,6 +70,14 @@
         </container>
         <container>
             <name>LoggerContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>PointContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>CalibationToolContainer</name>
             <type>cpp</type>
         </container>
     </containers>
