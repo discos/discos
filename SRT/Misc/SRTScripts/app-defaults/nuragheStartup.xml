@@ -77,7 +77,7 @@
             <type>cpp</type>
         </container>
         <container>
-            <name>CalibationToolContainer</name>
+            <name>CalibrationToolContainer</name>
             <type>cpp</type>
         </container>
     </containers>
