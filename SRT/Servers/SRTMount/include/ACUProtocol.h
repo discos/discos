@@ -397,7 +397,7 @@ public:
 		inline TINT32 encoderAzimuth() const { return CACUProtocol::readStatusField<TINT32>(m_buffer,m_disp+9); }
 		Antenna::TSections azimuthSector() const { 
 			TBOOL sector=CACUProtocol::readStatusField<TBOOL>(m_buffer,m_disp+27);
-			return (sector==0)?Antenna::ACU_CW:Antenna::ACU_CCW;
+			return (sector==0)?Antenna::ACU_CW:Antenna::ACU_CW;
 		}
 		/**********************************************************/
 		inline TINT32 encoderElevation() const { return CACUProtocol::readStatusField<TINT32>(m_buffer,m_disp+28); }
