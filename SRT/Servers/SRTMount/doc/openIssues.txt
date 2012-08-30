@@ -7,6 +7,8 @@
 
 10) contollare iterazione tra Boss e mount in caso di errore di trasmissione di un pacchetto dati. Il boss fallisce di aggiornare il tempo dell'ultima coordinata comandata
     ed il ciclo successivo sbaglia a calcolare il tempo.  Nel caso il mount fallisca di mandare il pacchetto occorre "resettare" il tracking.
+
+11) Il campo azimuth sector, letto dal bit ritornato dall'ACU (Pointing status) non funziona, fatto workaround.
  
 
 
