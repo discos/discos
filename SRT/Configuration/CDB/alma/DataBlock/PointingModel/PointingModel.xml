@@ -10,14 +10,14 @@
 <Receiver>
 	<receiverCode>CCG</receiverCode>
         <phi>90.0</phi>
-        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0 </coefficientVal00>
-        <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
-        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> 0 </coefficientVal02>
-        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> 0 </coefficientVal03>
-        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> 0 </coefficientVal04>
-        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> 0 </coefficientVal05>
-        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0 </coefficientVal06>
-        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> 0 </coefficientVal07>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> -2.3054382801 </coefficientVal00>
+        <coefficientNum01> 1 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
+        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> -0.0285158958 </coefficientVal02>
+        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> -0.0395809449 </coefficientVal03>
+        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0007936232 </coefficientVal04>
+        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> -0.0007916708 </coefficientVal05>
+        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.2443536222 </coefficientVal06>
+        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> -0.1628989279 </coefficientVal07>
         <coefficientNum08> 0 </coefficientNum08> <coefficientVal08> 0 </coefficientVal08>
         <coefficientNum09> 0 </coefficientNum09> <coefficientVal09> 0 </coefficientVal09>
         <coefficientNum10> 0 </coefficientNum10> <coefficientVal10> 0 </coefficientVal10>
