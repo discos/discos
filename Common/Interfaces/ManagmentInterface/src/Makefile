@@ -22,12 +22,12 @@
 # ----------------------------
 CDB_SCHEMAS = Managment ProcedureFile
 
-# 
+#
 # IDL Files and flags
-# 
-IDL_FILES = ManagmentDefinitions DataReceiver FitsWriter Scheduler ExternalClients CalibrationTool CustomLogger
+#
+IDL_FILES = ManagmentDefinitions DataReceiver FitsWriter MBFitsWriter Scheduler ExternalClients CalibrationTool CustomLogger
 IDL_TAO_FLAGS =
-USER_IDL = 
+USER_IDL =
 
 #
 # other files to be installed
@@ -59,15 +59,15 @@ endif
 # TARGETS
 # -------
 all:	do_all
-	@echo " . . . 'all' done" 
+	@echo " . . . 'all' done"
 
-clean : clean_all 
+clean : clean_all
 	@echo " . . . clean done"
 
-clean_dist : clean_all clean_dist_all 
+clean_dist : clean_all clean_dist_all
 	@echo " . . . clean_dist done"
 
-man   : do_man 
+man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
