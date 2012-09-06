@@ -2399,7 +2399,7 @@ CDBTable* EngineThread::loadTimeData() const {
 		IRA::CError error;
 		error.Reset();
 
-		timeData_p = new IRA::CDBTable(m_containerServices_p, "TimeParameters", "MANAGEMENT/TimeData");
+		timeData_p = new IRA::CDBTable(m_containerServices_p, "TimeParameters", "DataBlock/TimeData");
 
 		for ( MBFitsManager::String_ci_v_t field_ci = fields.begin(); field_ci != fields.end(); ++field_ci ) {
 			EngineThread::StringFieldType_ci_m_t fieldType_ci = fieldsTypes.find(*field_ci);
@@ -2495,7 +2495,7 @@ CDBTable* EngineThread::loadAntennaParameters() const {
 		IRA::CError error;
 		error.Reset();
 
-		bandsParameters_p = new IRA::CDBTable(m_containerServices_p, "BandParameters", "MANAGEMENT/AntennaParameters");
+		bandsParameters_p = new IRA::CDBTable(m_containerServices_p, "BandParameters", "DataBlock/AntennaParameters");
 
 		for ( MBFitsManager::String_ci_v_t field_ci = fields.begin(); field_ci != fields.end(); ++field_ci ) {
 			EngineThread::StringFieldType_ci_m_t fieldType_ci = fieldsTypes.find(*field_ci);
@@ -2759,7 +2759,7 @@ CDBTable* EngineThread::loadPointingModelCoefficients() const {
 		IRA::CError error;
 		error.Reset();
 
-		pointingModelCoefficients = new IRA::CDBTable(m_containerServices_p, "PointingCoefficients", "MANAGEMENT/PointingParameters");
+		pointingModelCoefficients = new IRA::CDBTable(m_containerServices_p, "PointingCoefficients", "DataBlock/PointingParameters");
 
 		for ( MBFitsManager::String_ci_v_t field_ci = fields.begin(); field_ci != fields.end(); ++field_ci ) {
 			EngineThread::StringFieldType_ci_m_t fieldType_ci = fieldsTypes.find(*field_ci);

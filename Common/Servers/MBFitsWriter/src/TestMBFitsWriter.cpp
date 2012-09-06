@@ -82,9 +82,9 @@ try {
 	client.init(argc, argv);
 	client.login();
 
-//	bandsParameters_p = new IRA::CDBTable(&containerServices, "BandsParameters", "MANAGEMENT/BandsParameters");
-//	bandsParameters_p = new IRA::CDBTable(&containerServices, "BandsParameters_2", "MANAGEMENT/BandsParameters");
-	bandsParameters_p = new IRA::CDBTable(&client, "BandParameters_2", "MANAGEMENT/AntennaParameters");
+//	bandsParameters_p = new IRA::CDBTable(&containerServices, "BandsParameters", "DataBlock/BandsParameters");
+//	bandsParameters_p = new IRA::CDBTable(&containerServices, "BandsParameters_2", "DataBlock/BandsParameters");
+	bandsParameters_p = new IRA::CDBTable(&client, "BandParameters_2", "DataBlock/AntennaParameters");
 
 	for ( vector<string>::const_iterator field_ci = fields.begin(); field_ci != fields.end(); ++field_ci ) {
 		map<string, CDataField::TFieldType>::const_iterator fieldType_ci = fieldsTypes.find(*field_ci);
