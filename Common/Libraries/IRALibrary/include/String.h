@@ -7,14 +7,13 @@
 /* This code is under GNU General Public Licence (GPL).                                                */
 /*                                                                                                     */
 /* Who                                when            What                                             */
-/* Andrea Orlati(aorlati@ira.cnr.it)  09/07/2004	  Creation                                          */
+/* Andrea Orlati(aorlati@ira.inaf.it)  09/07/2004	  Creation                                          */
 /* Andrea Orlati                      14/07/2004      Added Format Method                              */
 /* Andrea Orlati                      29/08/2006      Fixed a bug in Format method                     */
 /* Andrea Orlati                      27/11/2006      Added a new constructor that behaves like the format function  */
 /* Andrea Orlati                      21/10/2008     Added modifiers 'const' to ToLong, ToDouble,  */
 /* Andrea Orlati                      20/09/2008     fixed a bug in RTrim and LTrim function  */
-
-// $Id: String.h,v 1.4 2010-09-20 11:48:20 a.orlati Exp $
+/* Andrea Orlati						 04/09/2012	  added functions RFind() */
 
 #include <String_Base.h>
 #include <SStringfwd.h>
@@ -214,35 +213,55 @@ public: // Operations
 	 * Makes lower all letter of the string
 	*/	
 	void MakeLower();
+
 	/**
-	 * Looks for a substring inside the string.
+	 * Looks for a character  inside the string starting from a given position and going from the end to the beginning of the string
 	 * @param ch character to match
-	 * @return the position of the first letter of the matching pattern
+	 * @param start start from this position
+	 * @return the position of the first character of the matching pattern, -1 if not found
+	*/
+	int RFind(char ch,int start) const;
+
+	/**
+	 * Looks for a character inside the string starting from the end of the string.
+	 * @param ch character to match
+	 * @return the position of the first character in the string, -1 if not found
+	*/
+	int RFind(char ch) const;
+
+	/**
+	 * Looks for a character inside the string.
+	 * @param ch character to match
+	 * @return the position of the first character in the string, -1 if not found
 	*/ 
 	int Find(char ch) const;
+
 	/**
 	 * Looks for a substring inside the string.
 	 * @param str string to match
-	 * @return the position of the first letter of the matching pattern
+	 * @return the position of the first character that corresponds to the matching pattern, -1 if not found
 	*/ 	
 	int Find(const char *str) const;
+
 	/**
-	 * Looks for a substring inside the string starting from a position.
+	 * Looks for a character  inside the string starting from a position.
 	 * @param ch character to match
 	 * @param start start from this position
-	 * @return the position of the first letter of the matching pattern
+	 * @return the position of the first character in the matching  pattern, -1 if not found
 	*/ 	
 	int Find(char ch,int start) const;
+
 	/**
 	 * Looks for a substring inside the string starting from a position.
 	 * @param str string to match
 	 * @param start start from this position
-	 * @return the position of the first letter of the matching pattern
+	 * @return the position of the first character in the matching pattern, -1 if not found
 	*/ 		
 	int Find(const char *str, int start) const;
+
 	/**
-	 * Replace all occurences of a character with another one, starting from a position.
-	 * @param ch1 charatecter to replace
+	 * Replace all occurrences of a character with another one, starting from a position.
+	 * @param ch1 character to replace
 	 * @param ch2 replacing character
 	 * @param start index of the first character
 	 * @return the number of replaced characters

@@ -19,7 +19,7 @@ CDataCollection::CDataCollection()
 	m_scanHeader=m_subScanHeader=false;
 	m_reset=false;
 	m_sectionH=NULL;
-	m_fileName=m_basePath=m_fullPath="";
+	m_fileName=m_fullPath="";
 	m_project="";
 	m_observer="";
 	m_scheduleName="";
@@ -236,15 +236,26 @@ bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& rec
 	}
 	else {
 		if (!m_scanHeader) {
+			IRA::CString basePath;
+			IRA::CString extraPath;
+			IRA::CString baseName;
 			m_project=setup.projectName;
 			m_scanTag=setup.scanTag;
 			m_deviceID=setup.device;
 			m_scanID=setup.scanId;
 			m_observer=setup.observerName;
 			m_scheduleName=setup.schedule;
-			m_basePath=setup.path;
+			basePath=setup.path;
+			extraPath=setup.extraPath;
+			baseName=setup.baseName;
 			m_scanHeader=true;
-			// setup.extraPath, setup.baseName, setup.scanLayout are not used
+			if (extraPath!="") {
+				m_fullPath=basePath+extraPath+baseName+"/";
+			}
+			else {
+				m_fullPath=basePath+baseName+"/";
+			}
+			//setup.scanLayout is not used
 			return true;
 		}
 		else {
@@ -265,16 +276,11 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 	else {
 		if (m_scanHeader && !m_subScanHeader) {
 			IRA::CString temp;
+			IRA::CString baseName;
 			m_subScanID=setup.subScanId;
-			temp=setup.baseName;
-			m_fileName=temp+".fits";
-			temp=setup.extraPath;
-			if (temp!="") {
-				m_fullPath=m_basePath+temp;
-			}
-			else {
-				m_fullPath=m_basePath;
-			}
+			baseName=setup.baseName;
+			temp.Format("_%03d_%03d",m_scanID,m_subScanID);
+			m_fileName=baseName+temp+".fits";
 			m_subScanHeader=true;
 			m_scanAxis=setup.axis;
 			//setup.startUt and setup.targetID are not used

@@ -129,7 +129,7 @@ bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& rec
             m_basePath=setup.path;
         	IRA::CString temp;
         	temp=setup.baseName;
-        	m_fileName=temp+".log";
+        	m_fileName=temp+".dat";
         	temp=setup.extraPath;
         	if (temp!="") {
         		m_fullPath=m_basePath+temp;

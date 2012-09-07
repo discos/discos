@@ -347,4 +347,12 @@ bool CDateTime::sidereal2UT(CDateTime& ut1,CDateTime& ut2,const double& lst,cons
 	return true;
 }
 
+ void CDateTime::UT2Sidereal(TIMEDIFFERENCE& lst,TIMEVALUE& ut,const CSite& site,const double& dut1)
+ {
+	 CDateTime currentUT;
+	 currentUT.setDateTime(ut,dut1);  // transform the current time in a CDateTime object
+	 currentUT.LST(site).getDateTime(lst);
+	 lst.day(0);
+ }
+
 

@@ -1,10 +1,11 @@
-// $Id: IRATools.cpp,v 1.15 2011-07-15 12:43:09 a.orlati Exp $
 
 #include <errno.h>
 #include "IRA"
 #include "DateTime.h"
 #include <slamac.h>
 #include <slalib.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 using namespace IRA;
 
@@ -912,3 +913,39 @@ bool CIRATools::strToEquinox(const IRA::CString& str,Antenna::TSystemEquinox& ep
 	}
 	return true;
 }
+
+bool CIRATools::makeDirectory(const IRA::CString& pathName)
+{
+	if (mkdir((const char *)pathName,0777) < 0) {
+		if (errno==ENOENT) {
+			int slash=pathName.RFind('/'); // look for the trailing slash
+			if (slash!=-1) {  //
+				IRA::CString subPath=pathName.Left(slash);
+				if (!makeDirectory(subPath)) return false;
+				if (mkdir((const char *)pathName,0777)<0) {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CIRATools::directoryExists(const IRA::CString& path)
+{
+	DIR *dir;
+    bool exists=false;
+    dir=opendir((const char *)path);
+    if (dir!=NULL) {
+    	exists=true;
+    	closedir(dir);
+    }
+    return exists;
+}
+

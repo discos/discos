@@ -137,6 +137,42 @@ void CCore::doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TReco
 	}
 }
 
+Management::TScanAxis CCore::computeScanAxis(const Management::TScanTypes& type,const Schedule::CScanList::TRecord& scanRec)
+{
+	Management::TScanAxis scanAxis;
+	// compute the axis or direction along which the scan is performed
+	scanAxis=Management::MNG_NO_AXIS;
+	if ((type==Management::MNG_OTF) || (type==Management::MNG_OTFC)) {
+		Antenna::TTrackingParameters *pars=(Antenna::TTrackingParameters *)scanRec.primaryParameters;
+		if (pars->otf.geometry==Antenna::SUBSCAN_CONSTLON) {
+			if (pars->otf.subScanFrame==Antenna::ANT_EQUATORIAL) {
+				scanAxis=Management::MNG_EQ_LAT;
+			}
+			else if (pars->otf.subScanFrame==Antenna::ANT_HORIZONTAL) {
+				scanAxis=Management::MNG_HOR_LAT;
+			}
+			else if (pars->otf.subScanFrame==Antenna::ANT_GALACTIC) {
+				scanAxis=Management::MNG_GAL_LAT;
+			}
+		}
+		else if (pars->otf.geometry==Antenna::SUBSCAN_CONSTLAT) {
+			if (pars->otf.subScanFrame==Antenna::ANT_EQUATORIAL) {
+				scanAxis=Management::MNG_EQ_LON;
+			}
+			else if (pars->otf.subScanFrame==Antenna::ANT_HORIZONTAL) {
+				scanAxis=Management::MNG_HOR_LON;
+			}
+			else if (pars->otf.subScanFrame==Antenna::ANT_GALACTIC) {
+				scanAxis=Management::MNG_GAL_LON;
+			}
+		}
+	}
+	return scanAxis;
+	// *******************************
+	// I should consider all remaining scan types, not all scan types have a well defined scan axis....simple sidereal tracking for example!
+	// *******************************
+}
+
 IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const ACS::TimeInterval& lst,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra)
 {
 	IRA::CString out;
@@ -149,10 +185,12 @@ IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const ACS::TimeInt
 	return out;
 }
 
-IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra)
+IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const IRA::CSite& site,const double& dut1,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra)
 {
 	IRA::CString out;
 	TIMEVALUE UT(ut);
+	TIMEDIFFERENCE LST;
+	IRA::CDateTime::UT2Sidereal(LST,UT,site,dut1);
 	out.Format("%04d%02d%02d-%02d%02d%02d-%s_%s",
 			UT.year(),UT.month(),UT.day(),UT.hour(),UT.minute(),UT.second(),(const char *)prj,(const char *)suffix);
 	extra.Format("%04d%02d%02d/",UT.year(),UT.month(),UT.day());
@@ -219,7 +257,6 @@ void CCore::configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
 			try {
 				answer=backend->command((const char *)procedure[i]);
 				CORBA::string_free(answer);
-				ACS_STATIC_LOG(LM_FULL_INFO,"CCore::configureBackend()",(LM_NOTICE,"BACKEND_CONFIGURED"));
 			}
 			catch (ManagementErrors::CommandLineErrorEx& ex) {
 				ManagementErrors::CommandLineErrorExImpl exImpl(ex);
@@ -243,6 +280,7 @@ void CCore::configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
 				throw impl;
 			}
 		}
+		ACS_STATIC_LOG(LM_FULL_INFO,"CCore::configureBackend()",(LM_NOTICE,"BACKEND_CONFIGURED"));
 	}
 }
 
@@ -726,8 +764,9 @@ IRA::CString CCore::remoteCall(const IRA::CString& command,const IRA::CString& p
 			}
 			break;	
 		}
-		case 3: { // default backend...bck wrapper 
-			IRA::CString unwrappedCommand;
+		case 3: { // default backend..
+			Backends::GenericBackend_var backend;
+			/*IRA::CString unwrappedCommand;
 			int pos;
 			pos=command.Find(m_parser->getCommandDelimiter());
 			if ((pos<0) || (pos==command.GetLength()-1)) {
@@ -738,18 +777,27 @@ IRA::CString CCore::remoteCall(const IRA::CString& command,const IRA::CString& p
 			else {
 				pos++;
 				unwrappedCommand=command.Mid(pos,command.GetLength()-pos);
-			}			
+			}*/
+			backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
 			try {
+				baci::ThreadSyncGuard guard(&m_mutex);
+				if (CORBA::is_nil(backend)) {
+					loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
+					backend=m_defaultBackend;
+				}
+			}
+			/*try {
 				baci::ThreadSyncGuard guard(&m_mutex);  //loadDefaultBackend works on class data so it is safe to sync
 				loadDefaultBackend(); 				
-			}
+			}*/
 			catch (ComponentErrors::CouldntGetComponentExImpl& err) { //this exception can be thrown by the loadDefaultBackend()
 				_ADD_BACKTRACE(ParserErrors::PackageErrorExImpl,impl,err,"CCore::remoteCall()");
 				impl.setPackageName((const char *)package);
 				throw impl;
 			}
 			try {
-				ret_val=m_defaultBackend->command((const char *)unwrappedCommand);
+				//ret_val=m_defaultBackend->command((const char *)unwrappedCommand);
+				ret_val=backend->command((const char *)command);
 				out=IRA::CString(ret_val);
 				CORBA::string_free(ret_val);
 				return out;				

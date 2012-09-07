@@ -347,7 +347,7 @@ public:
 	 * the UT day in a particular case (UT across midnight) there could be two UT time corresponding to one sidereal time. In that case both the UT times are
 	 * reported.
 	 * @param ut1 output argument, the ut date and time corresponding to the given sidereal time
-	 * @param ut2 output argument, the second ut date and time correpsonding to the given sidereal time. It is significant only if
+	 * @param ut2 output argument, the second ut date and time corresponding to the given sidereal time. It is significant only if
 	 *                       the function returns false.
 	 * @param lst input local sidereal time as radians.
 	 * @param site information about the site
@@ -361,6 +361,15 @@ public:
 	*/
 	static bool sidereal2UT(CDateTime& ut1,CDateTime& ut2,const double& lst,const CSite& site,const int& year,
 			const int& month,const int& day,const double& dut1=0.0);
+
+	/**
+	 * Convert a UT Time to the corresponding LST.
+	 * @param lst computed lst value
+	 * @param ut  Universal Time to be converted
+	 * @param site object that contains site information
+	 * @param dut1 the difference between UT1 and UTC in milliseconds.
+	 */
+	static void UT2Sidereal(TIMEDIFFERENCE& lst,TIMEVALUE& ut,const CSite& site,const double& dut1=0.0);
 		
 private:
 	// Private variable which holds the time of the Time object

@@ -24,8 +24,8 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  13/09/2010	  added OffsetTorad() */
 /* Andrea Orlati(aorlati@ira.inaf.it)  28/02/2011	  methods skyFrequency() */
 /* Andrea Orlati(aorlati@ira.inaf.it)  15/07/2011	      reviewed the set of CDB function to prevent a memory leakage */
+/* Andrea Orlati(aorlati@ira.inaf.it)  04/09/2012	   added function makeDirectory() and directoryExists() */
 
-// $Id: IRATools.h,v 1.25 2011-07-15 12:43:09 a.orlati Exp $
 
 #include <time.h>
 #include <sys/time.h>
@@ -578,6 +578,19 @@ public:
 	  * @return true if conversion was successful 
 	  */	 
 	 static bool strToEquinox(const IRA::CString& str,Antenna::TSystemEquinox& ep);
+
+	 /**
+	  * It creates a path of directories in local file system. All the path is recursively created, exactly as "mkdir -p" does.
+	  * @param pathName path to be created
+	  * @return true if the creation was completed, false otherwise.
+	  */
+	 static bool makeDirectory(const IRA::CString& pathName);
+
+	 /**
+	  * Check if a directory exists on the local file system.
+	  * @return true if the directory exists, false otherwise
+	  */
+	 static bool directoryExists(const IRA::CString& path);
 };
 	
 }

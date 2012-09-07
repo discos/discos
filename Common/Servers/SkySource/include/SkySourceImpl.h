@@ -7,13 +7,14 @@
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
 /* Who                                          when        What                                              */
-/* Andrea Orlati(aorlati@ira.inaf.it)           13/09/2007  Creation                                         */
-/* Andrea Orlati(aorlati@ira.inaf.it)           06/02/2008  Fixed a bug: the dut1 was not loaded into the CDateTime objects       */
-/* Andrea Orlati(aorlati@ira.inaf.it)           15/05/2008  Added the implemantation of checkTracking */
-/* Andrea Orlati(aorlati@ira.inaf.it)           30/08/2010  Added generic method setOffsets in place of specific methods setHorizontalOffsets().*/
-/* Andrea Orlati(aorlati@ira.inaf.it)           18/02/2011  Fixed a bug, the source catalog table was not freed when the component closeup */
+/* Andrea Orlati(a.orlati@ira.inaf.it)           13/09/2007  Creation                                         */
+/* Andrea Orlati(a.orlati@ira.inaf.it)           06/02/2008  Fixed a bug: the dut1 was not loaded into the CDateTime objects       */
+/* Andrea Orlati(a.orlati@ira.inaf.it)           15/05/2008  Added the implemantation of checkTracking */
+/* Andrea Orlati(a.orlati@ira.inaf.it)           30/08/2010  Added generic method setOffsets in place of specific methods setHorizontalOffsets().*/
+/* Andrea Orlati(a.orlati@ira.inaf.it)           18/02/2011  Fixed a bug, the source catalog table was not freed when the component closeup */
 /* Carlo Migoni (migoni@oa-cagliari.inaf.it)    04/10/2011  Added computeFlux() method */
-/* Andrea Orlati(aorlati@ira.inaf.it)           15/02/2012  implementation of getAllCoordinates() method */
+/* Andrea Orlati(a.orlati@ira.inaf.it)           15/02/2012  implementation of getAllCoordinates() method */
+/* Andrea Orlati(a.orlati@ira.inaf.it)           07/09/2012  fixed a bug when reading negative declination '-00' from source catalog*/
 
 #ifndef __cplusplus
 #error This is a C++ include file and cannot be used from plain C

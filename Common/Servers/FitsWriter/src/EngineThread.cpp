@@ -7,8 +7,6 @@
 #include <ManagementErrors.h>
 #include <DateTime.h>
 #include <SkySource.h>
-#include <dirent.h>
-#include <sys/stat.h>
 #include "CommonTools.h"
 
 using namespace IRA;
@@ -268,15 +266,15 @@ void CEngineThread::runLoop()
 			data->setStatus(Management::MNG_OK);
 			// create the file and save main headers
 			data->getFileName(fileName,filePath);
-			if (!DirectoryExists(filePath)) {
-				if (!makeDirectory(filePath)) {
+			if (!IRA::CIRATools::directoryExists(filePath)) {
+				if (!IRA::CIRATools::makeDirectory(filePath)) {
 					_EXCPT(ComponentErrors::FileIOErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)filePath);
 					impl.log(LM_ERROR);
 					data->setStatus(Management::MNG_FAILURE);
 				}
 				else {
-					ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"DATA_FOLDER_CREATED: %s",(const char *)filePath));
+					ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"NEW_SCAN_FOLDER_CREATED: %s",(const char *)filePath));
 				}
 			}
 #ifdef FW_DEBUG
@@ -885,7 +883,10 @@ void CEngineThread::collectReceiversData()
 			}
 			else {
 				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
-				impl.setAttributeName("initialFrequency");
+				impl.setAttributeName("initialFrequency");	/**
+				 * check if a directory exists
+				 */
+				bool DirectoryExists(const IRA::CString& path);
 				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 				impl.log(LM_ERROR);
 				data->setStatus(Management::MNG_WARNING);
@@ -998,22 +999,4 @@ void CEngineThread::collectReceiversData()
 		data->saveFeedHeader(NULL,0);
 		data->setCalibrationMarks();
 	}
-}
-
-bool CEngineThread::DirectoryExists(const IRA::CString& path)
-{
-	DIR *dir;
-    bool exists=false;
-    dir=opendir((const char *)path);
-    if (dir!=NULL) {
-    	exists=true;    
-    	closedir(dir);
-    }
-    return exists;
-}
-
-bool CEngineThread::makeDirectory(const IRA::CString& dirName)
-{
-	int result=mkdir((const char *)dirName,0777);
-	return (result==0);
 }

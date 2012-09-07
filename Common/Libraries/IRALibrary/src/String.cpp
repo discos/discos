@@ -1,4 +1,3 @@
-// $Id: String.cpp,v 1.4 2010-09-20 11:48:20 a.orlati Exp $
 
 #include <ctype.h>
 #include <string.h>
@@ -381,6 +380,21 @@ void CString::MakeLower()
 {
 	register int i;
 	for (i=0;i<m_iSize; i++) m_cpString[i]=tolower(m_cpString[i]);
+}
+
+int CString::RFind(char ch,int start) const
+{
+	if (start>=m_iSize) start=m_iSize-1;
+	if (start<0) return -1;
+	for (int i=start;i>=0;i--) {
+		if (m_cpString[i]==ch) return i;
+	}
+	return -1;
+}
+
+int CString::RFind(char ch) const
+{
+	return RFind(ch,m_iSize-1);
 }
 
 int CString::Find(char ch,int start) const

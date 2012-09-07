@@ -315,8 +315,8 @@ void CEngineThread::runLoop ()
     	data->setStatus (Management::MNG_OK);
     	if (!m_fileOpened && m_config->outputFile()) {
     		data->getFileName(fileName,filePath);
-    		if (!DirectoryExists(filePath)) {
-    			if (!makeDirectory(filePath)) {
+    		if (!IRA::CIRATools::directoryExists(filePath)) {
+    			if (!IRA::CIRATools::makeDirectory(filePath)) {
     				_EXCPT(ComponentErrors::FileIOErrorExImpl,impl,"CEngineThread::runLoop()");
     				impl.setFileName((const char *)filePath);
     				impl.log(LM_ERROR);
@@ -929,23 +929,5 @@ void CEngineThread::writeFileHeaders(const ACS::Time& now)
     }
     m_file << (const char *) out;
     m_file << sourceFlux << std::endl;
-}
-
-bool CEngineThread::DirectoryExists(const IRA::CString& path)
-{
-	DIR *dir;
-    bool exists=false;
-    dir=opendir((const char *)path);
-    if (dir!=NULL) {
-    	exists=true;
-    	closedir(dir);
-    }
-    return exists;
-}
-
-bool CEngineThread::makeDirectory(const IRA::CString& dirName)
-{
-	int result=mkdir((const char *)dirName,0777);
-	return (result==0);
 }
 

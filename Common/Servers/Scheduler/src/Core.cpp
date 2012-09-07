@@ -135,8 +135,16 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("calOn","receivers",2,&CCore::remoteCall);
 	m_parser->add("calOff","receivers",2,&CCore::remoteCall);
 	m_parser->add("setLO","receivers",2,&CCore::remoteCall);
-	// backend wrapper function
-	m_parser->add("bck","backends",3,&CCore::remoteCall);
+	// backend
+	//m_parser->add("bck","backends",3,&CCore::remoteCall);
+
+	m_parser->add("integration","backend",3,&CCore::remoteCall);
+	m_parser->add("setSection","backend",3,&CCore::remoteCall);
+	m_parser->add("setAttenuation","backend",3,&CCore::remoteCall);
+	m_parser->add("getTpi","backend",3,&CCore::remoteCall);
+	m_parser->add("getZero","backend",3,&CCore::remoteCall);
+	m_parser->add("initialize","backend",3,&CCore::remoteCall);
+	// procedures
 	loadProcedures(m_config->getDefaultProceduresFile()); // throws ManagementErrors::ProcedureFileLoadingErrorExImpl
 }
 
@@ -507,7 +515,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		}
 	}
 	// let's create the scans.....filling up the required fields :-)
-	CORBA::Double bwhm=0.017453; // one degree in rad
+	CORBA::Double bwhm=0.017453; // one degree in radians
 	CORBA::Double offset;
 	Management::TScanAxis scanAxis;
 	IRA::CString obsName,prj,suffix,path,extraPath,baseName;
@@ -610,6 +618,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		// keep it up, no need to give up now......
 	}
 	//now load the Backend and the dataReceiver	
+	// we always load the default backend because this method could not be called when a schedule is running so, for sure, there will not be a schedule backend
 	loadDefaultBackend(); //throw (ComponentErrors::CouldntGetComponentExImpl);
 	loadDefaultDataReceiver(); //throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
 	// ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl
@@ -656,8 +665,8 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		scanAxis=Management::MNG_GAL_LAT;
 	}
 	path=m_config->getSystemDataDirectory();
-	suffix=IRA::CString("");
-	baseName=CCore::computeOutputFileName(startTime,prj,suffix,extraPath);
+	suffix=targetID;
+	baseName=CCore::computeOutputFileName(startTime,m_site,m_dut1,prj,suffix,extraPath);
 	subScanID=1;
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
 	CCore::setupDataTransfer(m_scanStarted,m_streamPrepared,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
@@ -724,8 +733,8 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	else {
 		scanAxis=Management::MNG_GAL_LON;
 	}
-	suffix=IRA::CString("");
-	baseName=CCore::computeOutputFileName(startTime,prj,suffix,extraPath);
+	suffix=targetID;
+	baseName=CCore::computeOutputFileName(startTime,m_site,m_dut1,prj,suffix,extraPath);
 	subScanID=2;
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
 	CCore::setupDataTransfer(m_scanStarted,m_streamPrepared,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,

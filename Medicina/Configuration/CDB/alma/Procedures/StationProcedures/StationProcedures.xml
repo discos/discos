@@ -7,9 +7,9 @@
 <body>
 	antennaSetup=CCC
 	receiversSetup=CCC
-	bck=initialize=CCC
-	bck=setSection=0,*,730.0,*,*,*,*
-	bck=setSection=1,*,730.0,*,*,*,*
+	initialize=CCC
+	setSection=0,*,730.0,*,*,*,*
+	setSection=1,*,730.0,*,*,*,*
 	device=0
 	calOff
 </body>	
@@ -19,7 +19,7 @@
 <body>
 	antennaSetup=KKC
 	receiversSetup=KKC
-	bck=initialize=KKC
+	initialize=KKC
 	device=10
 	calOff
 </body>
@@ -29,9 +29,9 @@
 <body>
 	antennaSetup=XXP
 	receiversSetup=XXP
-	bck=initialize=XXP
-	bck=setSection=0,*,730.0,*,*,*,*
-	bck=setSection=1,*,730.0,*,*,*,*
+	initialize=XXP
+	setSection=0,*,730.0,*,*,*,*
+	setSection=1,*,730.0,*,*,*,*
 	device=0
 	calOff
 </body>
@@ -42,9 +42,9 @@
 	antennaSetup=CCC
 	receiversSetup=CCC
 	receiversMode=NARROWBANDWIDTH
-	bck=initialize=CCCL
-	bck=setSection=0,*,300.0,*,*,*,*
-	bck=setSection=1,*,300.0,*,*,*,*
+	initialize=CCCL
+	setSection=0,*,300.0,*,*,*,*
+	setSection=1,*,300.0,*,*,*,*
 	device=0
 	calOff
 </body>

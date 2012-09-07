@@ -7,7 +7,7 @@
 <body>
 	antennaSetup=CCG
 	receiversSetup=CCG
-	bck=initialize=CCG
+	initialize=CCG
 	device=0
 	calOff
 </body>	
@@ -18,7 +18,7 @@
 	antennaSetup=KKG
 	receiversSetup=KKG
 	receiversMode=SINGLEDISH
-	bck=initialize=KKG
+	initialize=KKG
 	device=0
 	calOff
 </body>

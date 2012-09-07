@@ -101,16 +101,7 @@ private:
 	 * It gets and updates the all the required data from the antenna subsystem 
 	 */
 	void collectAntennaData();
-	
-	/**
-	 * check if a directory exists
-	 */
-	bool DirectoryExists(const IRA::CString& path);
-	/**
-	 * create a new directory
-	 * @return true is the operation was done, false if ti failed
-	 */
-	bool makeDirectory(const IRA::CString& dirName);
+
 };
 
 };

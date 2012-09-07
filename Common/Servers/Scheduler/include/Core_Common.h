@@ -154,7 +154,7 @@ static ACS::Time getUTFromLST(const IRA::CDateTime& currentUT,const IRA::CDateTi
 /**
  * Computes the name of the output file, including the lst time
  * @param ut universal time
- * @param lst localsidereal time
+ * @param lst local sidereal time
  * @param prj name of the project
  * @param suffix string that will be appended to the end of file name
  * @param extra return the extra path
@@ -163,15 +163,24 @@ static ACS::Time getUTFromLST(const IRA::CDateTime& currentUT,const IRA::CDateTi
 static IRA::CString computeOutputFileName(const ACS::Time& ut,const ACS::TimeInterval& lst,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra);
 
 /**
- * Computes the name of the output file, not including the lst time
+ * computes the scan axis starting form the scan parameters
+ * @param type type of the scan
+ * @param scanRec structure that contains all the scan parameters
+ * @return the scanning axis according to the definition of the management interface
+ */
+static Management::TScanAxis computeScanAxis(const Management::TScanTypes& type,const Schedule::CScanList::TRecord& scanRec);
+
+/**
+ * Computes the name of the output file, lst time is derived from provided ut time
  * @param ut universal time
- * @param lst local sidereal time
+ * @param site information in order to compute local sidereal time
+ * @param dut1 difference UT-UT1 in order to compute local sidereal time
  * @param prj name of the project
  * @param suffix string that will be appended to the end of file name
  * @param extra return the extra path
  * @return the name of the file to be created
 */	
-static IRA::CString computeOutputFileName(const ACS::Time& ut,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra);
+static IRA::CString computeOutputFileName(const ACS::Time& ut,const IRA::CSite& site,const double& dut1,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra);
 
 /**
  * This is the handler of the events coming from the notification channel published by the Antenna subsystem

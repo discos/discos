@@ -601,7 +601,6 @@ private:
 	 * the full path of the file in system disk
 	 */
 	IRA::CString m_fullPath;
-	IRA::CString m_basePath;
 	IRA::CString m_project;
 	IRA::CString m_observer;
 	/** the data block coming from the antenna */

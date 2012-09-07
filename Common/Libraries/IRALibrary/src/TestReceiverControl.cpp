@@ -427,14 +427,14 @@ int main(int argc, char *argv[])
 
         // // Test the isLNABoardConnectionOK()
         // cout << "Test isLNABoardConnectionOK() with a reliable communication" << endl;
-        // cout << "Is the connection to the LNA board OK? " << \
-        //      (rc.isLNABoardConnectionOK() == true ? "yes" : "no") << endl;
+        /* cout << "Is the connection to the LNA board OK? " << \
+              (rc.isLNABoardConnectionOK() == true ? "yes" : "no") << endl; */
         // cout << "Done!\n" << endl;
 
         // // Test the isDewarBoardConnectionOK()
         // cout << "Test isDewarBoardConnectionOK() with a reliable communication" << endl;
-        // cout << "Is the connection to the dewar board OK? " << \
-        //      (rc.isDewarBoardConnectionOK() == true ? "yes" : "no") << endl;
+        /* cout << "Is the connection to the dewar board OK? " << \
+              (rc.isDewarBoardConnectionOK() == true ? "yes" : "no") << endl;*/
         // cout << "Done!\n" << endl;
 
         // // Test closeConnection()
@@ -444,14 +444,14 @@ int main(int argc, char *argv[])
 
         // // Test the isLNABoardConnectionOK()
         // cout << "Test isLNABoardConnectionOK() with a reliable communication" << endl;
-        // cout << "Is the connection to the LNA board OK? " << \
-        //      (rc.isLNABoardConnectionOK() == true ? "yes" : "no") << endl;
+        /* cout << "Is the connection to the LNA board OK? " << \
+              (rc.isLNABoardConnectionOK() == true ? "yes" : "no") << endl; */
         // cout << "Done!\n" << endl;
 
         // // Test the isDewarBoardConnectionOK()
         // cout << "Test isDewarBoardConnectionOK() with a reliable communication" << endl;
-        // cout << "Is the connection to the dewar board OK? " << \
-        //      (rc.isDewarBoardConnectionOK() == true ? "yes" : "no") << endl;
+        /* cout << "Is the connection to the dewar board OK? " << \
+              (rc.isDewarBoardConnectionOK() == true ? "yes" : "no") << endl;*/
         // cout << "Done!\n" << endl;
 
         // try {

@@ -993,39 +993,8 @@ void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec,const Sched
 
 	Antenna::TTrackingParameters *prim=static_cast<Antenna::TTrackingParameters *>(scanRec.primaryParameters);
 	targetID=(const char *)prim->targetName;
-	//**************************************************************
-	//  It would be better to have a function that computes the below algorithm  in order to share it with  the cross scan code.....
-	//**************************************************************
 	// compute the axis or direction along which the scan is performed
-	scanAxis=Management::MNG_NO_AXIS;
-	if ((scanRec.type==Management::MNG_OTF) || (scanRec.type==Management::MNG_OTFC)) {
-		Antenna::TTrackingParameters *pars=(Antenna::TTrackingParameters *)scanRec.primaryParameters;
-		if (pars->otf.geometry==Antenna::SUBSCAN_CONSTLON) {
-			if (pars->otf.subScanFrame==Antenna::ANT_EQUATORIAL) {
-				scanAxis=Management::MNG_EQ_LAT;
-			}
-			else if (pars->otf.subScanFrame==Antenna::ANT_HORIZONTAL) {
-				scanAxis=Management::MNG_HOR_LAT;
-			}
-			else if (pars->otf.subScanFrame==Antenna::ANT_GALACTIC) {
-				scanAxis=Management::MNG_GAL_LAT;
-			}
-		}
-		else if (pars->otf.geometry==Antenna::SUBSCAN_CONSTLAT) {
-			if (pars->otf.subScanFrame==Antenna::ANT_EQUATORIAL) {
-				scanAxis=Management::MNG_EQ_LON;
-			}
-			else if (pars->otf.subScanFrame==Antenna::ANT_HORIZONTAL) {
-				scanAxis=Management::MNG_HOR_LON;
-			}
-			else if (pars->otf.subScanFrame==Antenna::ANT_GALACTIC) {
-				scanAxis=Management::MNG_GAL_LON;
-			}
-		}
-	}
-	// *******************************
-	// I should consider all remaining scan types, not all scan types have a well defined scan axis....simple sidereal tracking for example!
-	// *******************************
+	scanAxis=CCore::computeScanAxis(scanRec.type,scanRec);
 	if ((rec.backendProc!=_SCHED_NULLTARGET) && (rec.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
 		CCore::setupDataTransfer(m_scanStarted,m_streamPrepared,m_writer.in(),m_writerError,m_backend.in(),m_backendError,m_schedule->getObserverName(),
 				m_schedule->getProjectName(),baseName,path,extraPath,m_schedule->getFileName(),targetID,rec.layout,layoutProc,m_schedule->getScanTag(),m_core->getCurrentDevice(),

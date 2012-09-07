@@ -3,25 +3,23 @@
 <ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<Procedure name="setupCCC">
+<Procedure name="setupCCG">
 <body>
-	antennaSetup=CCC
-	receiversSetup=CCC
-	bck=initialize=CCC
-	bck=setSection=0,*,730.0,*,*,*,*
-	bck=setSection=1,*,730.0,*,*,*,*
+	antennaSetup=CCG
+	receiversSetup=CCG
+	initialize=CCG
 	device=0
 	calOff
 </body>	
 </Procedure>
 
-<Procedure name="setupKKC">
+<Procedure name="setupKKG">
 <body>
-	antennaSetup=KKC
-	receiversSetup=KKC
+	antennaSetup=KKG
+	receiversSetup=KKG
 	receiversMode=SINGLEDISH
-	bck=initialize=KKC
-	device=10
+	initialize=KKG
+	device=0
 	calOff
 </body>
 </Procedure>
