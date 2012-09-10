@@ -259,7 +259,7 @@ void EngineThread::runLoop() {
 
 					m_mbFitsManager_p->setPath(path);
 
-					Backends::TMainHeader						mainHeader		= data_p->getMainHeader();
+//					Backends::TMainHeader						mainHeader		= data_p->getMainHeader();
 					Backends::TSectionHeader const*	sectionHeader	= data_p->getSectionHeader();
 
 					IRA::CSite			site;
@@ -368,7 +368,7 @@ for ( MBFitsManager::String_ci_v_t frontendBackendName_ci = frontendBackendNames
 					const double	ra	= sourceRightAscension;
 					const double	dec	= sourceDeclination;
 
-CSkySource::TEquinox equinox_e = CSkySource::SS_J2000;	// TODO - Sw
+//CSkySource::TEquinox equinox_e = CSkySource::SS_J2000;
 const string	radeSys("FK5");								// TODO - File
 const float		equinox(2000.0);							// TODO - File
 					const double	exptime(0.0);
@@ -410,16 +410,16 @@ const float		equinox(2000.0);							// TODO - File
 
 					string	cType1(8, '-');
 					string	cType2(8, '-');
-					for ( int index = 0; (index < 4) && (index < basisFrameCType1.size()); ++index ) {
+					for ( unsigned int index = 0; (index < 4) && (index < basisFrameCType1.size()); ++index ) {
 						cType1[index] = basisFrameCType1[index];
 					}
-					for ( int index = 0; (index < 3) && (index < basisProjectionCType1.size()); ++index ) {
+					for ( unsigned int index = 0; (index < 3) && (index < basisProjectionCType1.size()); ++index ) {
 						cType1[5 + index] = basisProjectionCType1[index];
 					}
-					for ( int index = 0; (index < 4) && (index < basisFrameCType2.size()); ++index ) {
+					for ( unsigned int index = 0; (index < 4) && (index < basisFrameCType2.size()); ++index ) {
 						cType2[index] = basisFrameCType2[index];
 					}
-					for ( int index = 0; (index < 3) && (index < basisProjectionCType2.size()); ++index ) {
+					for ( unsigned int index = 0; (index < 3) && (index < basisProjectionCType2.size()); ++index ) {
 						cType2[5 + index] = basisProjectionCType2[index];
 					}
 
@@ -435,16 +435,16 @@ const float		equinox(2000.0);							// TODO - File
 
 					string	cType1n(8, '-');
 					string	cType2n(8, '-');
-					for ( int index = 0; (index < 4) && (index < nativeFrameCType1.size()); ++index ) {
+					for ( unsigned int index = 0; (index < 4) && (index < nativeFrameCType1.size()); ++index ) {
 						cType1n[index] = nativeFrameCType1[index];
 					}
-					for ( int index = 0; (index < 3) && (index < nativeProjectionCType1.size()); ++index ) {
+					for ( unsigned int index = 0; (index < 3) && (index < nativeProjectionCType1.size()); ++index ) {
 						cType1n[5 + index] = nativeProjectionCType1[index];
 					}
-					for ( int index = 0; (index < 4) && (index < nativeFrameCType2.size()); ++index ) {
+					for ( unsigned int index = 0; (index < 4) && (index < nativeFrameCType2.size()); ++index ) {
 						cType2n[index] = nativeFrameCType2[index];
 					}
-					for ( int index = 0; (index < 3) && (index < nativeProjectionCType2.size()); ++index ) {
+					for ( unsigned int index = 0; (index < 3) && (index < nativeProjectionCType2.size()); ++index ) {
 						cType2n[5 + index] = nativeProjectionCType2[index];
 					}
 
@@ -1358,7 +1358,7 @@ string rxHor_80(rxHor.substr(40, 80));
 					data_p->getSkyBandwidth(skyBandwidths);
 
 					// TODO - sarebbe bello assegnare i valori come attributi delle basebands, è un po' complicato visto il meccanismo di identificazione di basebands simili
-					for ( int indexBandwidth = 0; indexBandwidth < skyBandwidths.length(); ++indexBandwidth ) {
+					for ( unsigned int indexBandwidth = 0; indexBandwidth < skyBandwidths.length(); ++indexBandwidth ) {
 						bandwidths.push_back(skyBandwidths[indexBandwidth]);
 					}
 
@@ -1494,7 +1494,8 @@ const double		skyFreq		= 0.0;		// TODO - Get
 					const string		sideBand("USB");		// TODO - CDB
 const double		sbSep			= 0.0;		// TODO - Get
 
-					const string		_2ctyp2("‘PIX-INDX’");
+//					const string		_2ctyp2("‘PIX-INDX’");
+					const string		_2ctyp2("PIX-INDX");
 					const int				_2crpx2		= 1;
 					const int				_2crvl2		= 1;
 					const int				_21cd2a		= 1;

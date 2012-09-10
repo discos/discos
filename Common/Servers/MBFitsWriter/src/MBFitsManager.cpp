@@ -694,6 +694,7 @@ void MBFitsManager::startSubScan( const MBFitsManager::FeBe_v_t&	febeNames_,
 																	const float						_1vsou2r_,
 																	const float						_1vsys2r_ ) {
 	stringstream subPath;
+
 	subPath << getPath() << setw(4) << setfill('0') << subsNum_ << "/";
 
 	m_monitorTable_p = new CMBFitsWriterTable(m_primaryHeaderGroupingTable_p, CMBFitsWriter::Monitor);
@@ -718,7 +719,7 @@ void MBFitsManager::startSubScan( const MBFitsManager::FeBe_v_t&	febeNames_,
 
 	CMBFitsWriterTable* dataParTable_p		= NULL;
 	CMBFitsWriterTable* arrayDataTable_p	= NULL;
-	Baseband::Baseband_ci_s_t baseBand_ci = baseBands_.begin();
+
 	for ( MBFitsManager::FeBe_ci_v_t febeName_ci = febeNames_.begin(); febeName_ci != febeNames_.end(); ++febeName_ci ) {
 		dataParTable_p = new CMBFitsWriterTable(m_primaryHeaderGroupingTable_p, CMBFitsWriter::DataPar);
 		dataParTable_p->setFileName(subPath.str() + *febeName_ci + string("-") + string("DATAPAR") + string(".fits"));
@@ -1006,6 +1007,7 @@ void MBFitsManager::createPrimaryHeader( const string&										telescop_,
 	CMBFitsWriter* const primaryHeaderGroupingTable_p = static_cast<CMBFitsWriter*>(m_primaryHeaderGroupingTable_p);
 
 	primaryHeaderGroupingTable_p->setKeywordValue(CMBFitsWriter::Primary, string("TELESCOP"),											telescop_								);
+
 	primaryHeaderGroupingTable_p->setKeywordValue(CMBFitsWriter::Primary, string("ORIGIN"),												origin_									);
 	primaryHeaderGroupingTable_p->setKeywordValue(CMBFitsWriter::Primary, string("CREATOR"),											creator_								);
 	primaryHeaderGroupingTable_p->setKeywordValue(CMBFitsWriter::Primary, string("MBFTSVER"),											mbftsVer_								);
@@ -1074,7 +1076,7 @@ void MBFitsManager::createPrimaryHeader( const string&										telescop_,
 		m_primaryHeaderGroupingTable_p->setKeywordValue(string("SCANNUM"),	scanNum_);
 		m_primaryHeaderGroupingTable_p->setKeywordValue(string("DATE-OBS"), dateObs_);
 
-		m_primaryHeaderGroupingTable_p->setKeywordValue(string("MBFITS"),		m_datasetName);
+		primaryHeaderGroupingTable_p->setKeywordValue(CMBFitsWriter::Primary,	string("MBFITS"),	m_datasetName);
 	}
 }
 
@@ -1350,7 +1352,8 @@ void MBFitsManager::createScanHeader( const string&											telescop_,
   m_scanTable_p->setKeywordValue(string("FOCPHASE"),	MBFitsManager::rad2Deg(focPhase_)				);
 
 	if ( m_isGrouping ) {
-		m_scanTable_p->setKeywordValue(string("MBFITS"), m_datasetName);
+		CMBFitsWriter* const primaryHeaderScanTable_p = static_cast<CMBFitsWriter*>(m_scanTable_p);
+		primaryHeaderScanTable_p->setKeywordValue(CMBFitsWriter::Primary,	string("MBFITS"),	m_datasetName);
 	}
 }
 
@@ -1502,7 +1505,8 @@ void MBFitsManager::createFebeParHeader( CMBFitsWriterTable* const febeParTable_
   febeParTable_p_->setKeywordValue(string("RXHOR_80"),	rxHor_80_												);
 
 	if ( m_isGrouping ) {
-		febeParTable_p_->setKeywordValue(string("MBFITS"), m_datasetName);
+		CMBFitsWriter* const primaryHeaderFebeParTable_p = static_cast<CMBFitsWriter*>(febeParTable_p_);
+		primaryHeaderFebeParTable_p->setKeywordValue(CMBFitsWriter::Primary,	string("MBFITS"),	m_datasetName);
 	}
 }
 
@@ -1618,19 +1622,15 @@ void MBFitsManager::createDataParHeader( CMBFitsWriterTable* const dataParTable_
 //  dataParTable_p_->setKeywordValue(string("OBSTYPE"),		obsType_	);
 
 	if ( scan_.getType()				!= scanReference_.getType()				) {
-		printf("SCANTYPE: %d %d\n", scanReference_.getType(), scan_.getType());
 		dataParTable_p_->setKeywordValue(string("SCANTYPE"),	Scan::getType(scan_.getType())				);
 	}
 	if ( scan_.getMode()				!= scanReference_.getMode()				) {
-		printf("SCANMODE: %d %d\n", scanReference_.getMode(), scan_.getMode());
 		dataParTable_p_->setKeywordValue(string("SCANMODE"),	Scan::getMode(scan_.getMode())				);
 	}
 	if ( scan_.getGeometry()		!= scanReference_.getGeometry() 	) {
-		printf("SCANGEOM: %d %d\n", scanReference_.getGeometry(), scan_.getGeometry());
 		dataParTable_p_->setKeywordValue(string("SCANGEOM"),	Scan::getGeometry(scan_.getGeometry()));
 	}
 	if ( scan_.getDirection()		!= scanReference_.getDirection()	) {
-		printf("SCANDIR: %d %d\n", scanReference_.getDirection(), scan_.getDirection());
 		dataParTable_p_->setKeywordValue(string("SCANDIR"),	Scan::getDirection(scan_.getDirection()));
 	}
 	if ( scan_.getLine()				!= scanReference_.getLine()				) {
@@ -1640,15 +1640,12 @@ void MBFitsManager::createDataParHeader( CMBFitsWriterTable* const dataParTable_
 		dataParTable_p_->setKeywordValue(string("SCANRPTS"),	scan_.getRepeats()										);
 	}
 	if ( scan_.getLength()			!= scanReference_.getLength()			) {
-		printf("SCANLEN: %f %f\n", scanReference_.getLength(), scan_.getLength());
 		dataParTable_p_->setKeywordValue(string("SCANLEN"),	scan_.getLength()												);
 	}
 	if ( scan_.getXVelocity()		!= scanReference_.getXVelocity()	) {
 		dataParTable_p_->setKeywordValue(string("SCANXVEL"),	scan_.getXVelocity()									);
-		printf("SCANXVEL: %f %f\n", scanReference_.getXVelocity(), scan_.getXVelocity());
 	}
 	if ( scan_.getTime()				!= scanReference_.getTime()				) {
-		printf("SCANTIME: %f %f\n", scanReference_.getTime(), scan_.getTime());
 		dataParTable_p_->setKeywordValue(string("SCANTIME"),	scan_.getTime()												);
 	}
 	if ( scan_.getXSpace()			!= scanReference_.getXSpace()			) {
@@ -1671,7 +1668,6 @@ void MBFitsManager::createDataParHeader( CMBFitsWriterTable* const dataParTable_
 		dataParTable_p_->setKeywordValue(string("CTYPE1N"),		scan_.getCType1N()										);
 	}
 	if ( scan_.getCType2N()			!= scanReference_.getCType2N()		) {
-		printf("CTYPE2N: %s %s\n", scanReference_.getCType2N().c_str(), scan_.getCType2N().c_str());
 		dataParTable_p_->setKeywordValue(string("CTYPE2N"),		scan_.getCType2N()										);
 	}
 
@@ -1694,7 +1690,8 @@ void MBFitsManager::createDataParHeader( CMBFitsWriterTable* const dataParTable_
   dataParTable_p_->setKeywordValue(string("DEWEXTRA"),	dewExtra_	);
 
 	if ( m_isGrouping ) {
-		dataParTable_p_->setKeywordValue(string("MBFITS"), m_datasetName);
+		CMBFitsWriter* const primaryHeaderDataParTable_p = static_cast<CMBFitsWriter*>(dataParTable_p_);
+		primaryHeaderDataParTable_p->setKeywordValue(CMBFitsWriter::Primary,	string("MBFITS"),	m_datasetName);
 	}
 }
 
@@ -1874,7 +1871,8 @@ void MBFitsManager::saveArrayDataBinTableData( CMBFitsWriterTable* const				arra
 	arrayDataTable_p_->setRowIndex(arrayDataTable_p_->getRowIndex() + 1);
 
 	if ( m_isGrouping ) {
-		arrayDataTable_p_->setKeywordValue(string("MBFITS"), m_datasetName);
+		CMBFitsWriter* const primaryHeaderArrayDataTable_p = static_cast<CMBFitsWriter*>(arrayDataTable_p_);
+		primaryHeaderArrayDataTable_p->setKeywordValue(CMBFitsWriter::Primary,	string("MBFITS"),	m_datasetName);
 	}
 }
 

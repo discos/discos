@@ -206,7 +206,7 @@ void CMBFitsWriter::initialize() {
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("FOCFREQ"),											string("1E") ));	// New in 1.63
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("FOCPHASE"),											string("1E") ));	// New in 1.63
 
-		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
+//		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
 
 		tablesKeywordsFormats_insert = CMBFitsWriter::m_tablesKeywordsFormats.insert(CMBFitsWriter::TableKeywordFormat_m_t::value_type(FebePar,		CMBFitsWriter::KeywordFormat_m_t()));
 		tablesKeywordsFormats_i			 = tablesKeywordsFormats_insert.first;
@@ -288,7 +288,7 @@ void CMBFitsWriter::initialize() {
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("RXHOR_40"),											string("40A")));	// For Effelsberg Toolbox
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("RXHOR_80"),											string("40A")));	// For Effelsberg Toolbox
 
-		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
+//		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
 
 		tablesKeywordsFormats_insert = CMBFitsWriter::m_tablesKeywordsFormats.insert(CMBFitsWriter::TableKeywordFormat_m_t::value_type(ArrayData,	CMBFitsWriter::KeywordFormat_m_t()));
 		tablesKeywordsFormats_i			 = tablesKeywordsFormats_insert.first;
@@ -362,7 +362,7 @@ void CMBFitsWriter::initialize() {
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("1VSOU2R"),											string("1E") ));
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("1VSYS2R"),											string("1E") ));
 
-		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
+//		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
 
 		tablesKeywordsFormats_insert = CMBFitsWriter::m_tablesKeywordsFormats.insert(CMBFitsWriter::TableKeywordFormat_m_t::value_type(Monitor,		CMBFitsWriter::KeywordFormat_m_t()));
 		tablesKeywordsFormats_i			 = tablesKeywordsFormats_insert.first;
@@ -373,7 +373,7 @@ void CMBFitsWriter::initialize() {
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("DATE-OBS"),											string("23A")));
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("USRFRAME"),											string("20A")));
 
-		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
+//		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
 
 		tablesKeywordsFormats_insert = CMBFitsWriter::m_tablesKeywordsFormats.insert(CMBFitsWriter::TableKeywordFormat_m_t::value_type(DataPar,		CMBFitsWriter::KeywordFormat_m_t()));
 		tablesKeywordsFormats_i			 = tablesKeywordsFormats_insert.first;
@@ -414,13 +414,15 @@ void CMBFitsWriter::initialize() {
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("DEWANG"),												string("1E") ));
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("DEWEXTRA"),											string("1E") ));
 
-		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
+//		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
 
 		tablesKeywordsFormats_insert = CMBFitsWriter::m_tablesKeywordsFormats.insert(CMBFitsWriter::TableKeywordFormat_m_t::value_type(Grouping,	CMBFitsWriter::KeywordFormat_m_t()));
 		tablesKeywordsFormats_i			 = tablesKeywordsFormats_insert.first;
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("EXTNAME"),											string("20A")));
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("SCANNUM"),											string("1J") ));
 		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("DATE-OBS"),											string("23A")));
+
+//		tablesKeywordsFormats_i->second.insert(CMBFitsWriter::KeywordFormat_m_t::value_type(string("MBFITS"),												string("40A")));
 	}
 
 	if ( CMBFitsWriter::m_keywords.empty() ) {
