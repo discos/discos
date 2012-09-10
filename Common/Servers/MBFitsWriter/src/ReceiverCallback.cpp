@@ -70,7 +70,7 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 		dumpH=(Backends::TDumpHeader *)m_buffer;
 		if (m_bufferPointer>dumpH->dumpSize) {
 			CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataCollection->Get();
-printf("PL - ReceiverCallback::cbReceive: %d\n", frame_p->total_length());
+printf("PL - ReceiverCallback::cbReceive: %d; %d; %d\n", frame_p->length(), frame_p->total_length(), m_bufferLen);
 			if (!data->saveDump(m_buffer)) { ///this will delete the buffer automatically!!!!!
 				//_IRA_LOGFILTER_LOG(LM_WARNING,"ReceiverCallback::cbReceive()","CANT_KEEP_THROTTLE");
 				printf("CANT_KEEP_THROTTLE\n");
