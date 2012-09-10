@@ -816,6 +816,10 @@ void CMBFitsWriter::close() {
 	if ( m_mbFits_p ) { m_mbFits_p->destroy(); m_mbFits_p = NULL; }
 }
 
+void CMBFitsWriter::flush() {
+	if ( m_mbFits_p ) { m_mbFits_p->flush(); }
+}
+
 void CMBFitsWriter::addTable( const CMBFitsWriter::Table_e table_e_ ) {
 	if ( !m_mbFits_p ) throw exception();
 
