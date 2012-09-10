@@ -101,6 +101,11 @@ class CMBFitsWriter {
 		 */
 		virtual void close();
 
+		/**
+		 * flush buffer contents to disk
+		 */
+		virtual void flush();
+
 		virtual void addTable( const CMBFitsWriter::Table_e table_e_ );
 		virtual void addTableColumns( const CMBFitsWriter::Table_e table_e_,
 																	const int iteration_ = 0 );
@@ -502,7 +507,6 @@ void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,
 		    // TODO
         values.clear();
 
-        printf("setColumnValue - 1: %s, %s\n", extName.c_str(), columnName_.c_str());
         throw exception();
 		  } else {
         m_mbFits_p->extension(extName).column(columnName_).write(values, tableRowIndex_ci->second);
@@ -510,7 +514,6 @@ void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,
 		} catch( FitsException& exception_ ) {
 			values.clear();
 
-			printf("setColumnValue - 2: %s, %s\n", extName.c_str(), columnName_.c_str());
 			throw exception_;
 		}
 
@@ -539,7 +542,6 @@ void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,
 		    // TODO
         vectorLengths.clear();
 
-        printf("setColumnValue - 3: %d, %s\n", table_e_, columnName_.c_str());
         throw exception();
 		  } else {
 		  	if ( (0 > m_mbFits_p->extension(tableName_ci->second).column(columnName_).type()) ||
@@ -552,7 +554,6 @@ void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,
 		} catch( FitsException& exception_ ) {
 			vectorLengths.clear();
 
-       printf("setColumnValue - 4: %d, %s\n", table_e_, columnName_.c_str());
 			throw exception_;
 		}
 
