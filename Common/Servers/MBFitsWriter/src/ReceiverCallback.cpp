@@ -62,6 +62,7 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 			m_bufferLen+=frame_p->total_length();  //update the buffer length;
 			m_buffer=newBuff;  // now keep track of the buffer pointer;
 		}
+printf("PL - ReceiverCallback::cbReceive: %d; %d; %d\n", frame_p->length(), frame_p->total_length(), m_bufferLen);
 		while (frame_p!=NULL) {
 			memcpy(m_buffer+m_bufferPointer,frame_p->rd_ptr(),frame_p->length());
 			m_bufferPointer+=frame_p->length();
@@ -70,7 +71,6 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 		dumpH=(Backends::TDumpHeader *)m_buffer;
 		if (m_bufferPointer>dumpH->dumpSize) {
 			CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataCollection->Get();
-printf("PL - ReceiverCallback::cbReceive: %d; %d; %d\n", frame_p->length(), frame_p->total_length(), m_bufferLen);
 			if (!data->saveDump(m_buffer)) { ///this will delete the buffer automatically!!!!!
 				//_IRA_LOGFILTER_LOG(LM_WARNING,"ReceiverCallback::cbReceive()","CANT_KEEP_THROTTLE");
 				printf("CANT_KEEP_THROTTLE\n");
