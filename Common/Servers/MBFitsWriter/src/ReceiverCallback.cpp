@@ -19,7 +19,7 @@ ReceiverCallback::ReceiverCallback() : BulkDataCallback()
 	ACE_Time_Value	sleepTime(sec, usec);
 	setSleepTime(sleepTime);
 
-	setSafeTimeout(10000);
+	setSafeTimeout(1000);
 	m_receivedBytes=0;
 	m_buffer=NULL;
 	m_bufferLen=m_bufferPointer=0;
