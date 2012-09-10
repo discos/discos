@@ -859,7 +859,7 @@ for ( int	indexFebeFeed = 0; indexFebeFeed < febeFeed; ++indexFebeFeed ) {
 							for ( Baseband::Baseband_ci_s_t baseband_ci = baseBands.begin();
 										baseband_ci != baseBands.end(); ++baseband_ci ) {
 								// TODO - 20110106: esiste un unico valore, mentre sembra piu' appropriato avere un valore legato al setup dei feed
-
+printf("PL: m_antennaBoss_p->FWHM()\n");
 								hpbwReference = m_antennaBoss_p->FWHM();
 
 								hpbw = hpbwReference->get_sync(completion.out());
@@ -1767,22 +1767,31 @@ void EngineThread::collectAntennaData() {
 		ACS::ROdouble_var latitudeOffsetReference;
 
 		// let's take the references to the attributes
+printf("PL: m_antennaBoss_p->target()\n");
 		targetReference								= m_antennaBoss_p->target();
 
+printf("PL: m_antennaBoss_p->targetRightAscension()\n");
 		rightAscensionReference				= m_antennaBoss_p->targetRightAscension();
+printf("PL: m_antennaBoss_p->targetDeclination()\n");
 		declinationReference					= m_antennaBoss_p->targetDeclination();
 
+printf("PL: m_antennaBoss_p->targetVlsr()\n");
 		vlsrReference									= m_antennaBoss_p->targetVlsr();
 
+printf("PL: m_antennaBoss_p->azimuthOffset()\n");
 		azimuthOffsetReference				= m_antennaBoss_p->azimuthOffset();
+printf("PL: m_antennaBoss_p->elevationOffset()\n");
 		elevationOffsetReference			= m_antennaBoss_p->elevationOffset();
 
+printf("PL: m_antennaBoss_p->rightAscensionOffset()\n");
 		rightAscensionOffsetReference	= m_antennaBoss_p->rightAscensionOffset();
+printf("PL: m_antennaBoss_p->declinationOffset()\n");
 		declinationOffsetReference		= m_antennaBoss_p->declinationOffset();
 
+printf("PL: m_antennaBoss_p->longitudeOffset()\n");
 		longitudeOffsetReference			= m_antennaBoss_p->longitudeOffset();
+printf("PL: m_antennaBoss_p->latitudeOffset()\n");
 		latitudeOffsetReference				= m_antennaBoss_p->latitudeOffset();
-
 
 		ACSErr::Completion_var completion;
 
@@ -2199,11 +2208,15 @@ bool EngineThread::processData( const Baseband::Baseband_s_t& baseBands_,
 		bool antennaBossError = false;
 		CCommonTools::getAntennaBoss(m_antennaBoss_p, m_containerServices_p, m_configuration_p->getAntennaBossComponent(), antennaBossError);
 
+printf("PL: m_antennaBoss_p->getApparentCoordinates()\n");
 		m_antennaBoss_p->getApparentCoordinates(time, apparentAz, apparentEl, apparentRa, apparentDec, apparentEpoch, apparentLon, apparentLat);
 
 		// integration is multiplied by 10000 because internally we have the value in millesec while the methods requires 100ns.
+printf("PL: m_antennaBoss_p->getObservedEquatorial()\n");
 		m_antennaBoss_p->getObservedEquatorial(time,	data_p->getIntegrationTime() * 10000, ra,				dec);
+printf("PL: m_antennaBoss_p->getObservedGalactic()\n");
 		m_antennaBoss_p->getObservedGalactic(time,		data_p->getIntegrationTime() * 10000, lon,			lat);
+printf("PL: m_antennaBoss_p->getObservedHorizontal()\n");
 		m_antennaBoss_p->getObservedHorizontal(time,	data_p->getIntegrationTime() * 10000, azimuth,	elevatio);
 	} catch( ComponentErrors::CouldntGetComponentExImpl& exception_ ) {
 //		_IRA_LOGFILTER_LOG_EXCEPTION(exception_, LM_ERROR);
