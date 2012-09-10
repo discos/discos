@@ -564,18 +564,19 @@ ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "lonPole e latPole: 
 					}
 
 					// TODO - per avere le coordinate nel sistema native non sarebbe corretto sottrarre le coordinate CRVAL1,CRVAL2?
-//					if ( string("RA/DEC") == nativeFrameCType ) {
-//						longObj	= apparentRa;
-//						latObj	= apparentDec;
-//					} else if ( string("GLON/GLAT") == nativeFrameCType ) {
-//						longObj	= apparentLon;
-//						latObj	= apparentLat;
-//					} else if ( string("ALON/ALAT") == nativeFrameCType ) {
-//						longObj	= apparentAz;
-//						latObj	= apparentEl;
-//					} else {
-//						//... non gestito ...
-//					}
+					if ( string("RA/DEC") == nativeFrameCType ) {
+						longObj	= sourceRightAscension;
+						latObj	= sourceDeclination;
+					} else if ( string("GLON/GLAT") == nativeFrameCType ) {
+						CSkySource::equatorialToGalactic(sourceRightAscension, sourceDeclination, longObj, latObj);
+					} else if ( string("ALON/ALAT") == nativeFrameCType ) {
+						layoutValue = layout_p->find("LONGOBJ");
+						longObj		= atof(layoutValue.c_str());
+						layoutValue = layout_p->find("LATOBJ");
+						latObj			= atof(layoutValue.c_str());
+					} else {
+						//... non gestito ...
+					}
 
 const double	patLong		= 0.0;								// TODO - verificare correttezza
 const double	patLat		= 0.0;								// TODO - verificare correttezza
