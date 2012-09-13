@@ -84,6 +84,7 @@ public:
 	inline	double getSensorValue(){return m_sensorvalue;}
 	inline map<string,double> getSensorMap() {return sensorMap;}
 	map<string,double> sensorMap;
+	map<string,string> sensorDate;
 
 
 	
