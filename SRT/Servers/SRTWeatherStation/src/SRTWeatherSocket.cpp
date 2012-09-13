@@ -251,7 +251,15 @@ void  SRTWeatherSocket::char_hndl(void *data, const XML_Char *s, int len)
 
 void SRTWeatherSocket::checkSensor(WeatherStationData *md,string xmlvalue,const string sensorlabel)
 {
-    if ((md->getTag()=="Id") && (xmlvalue==sensorlabel))
+/**
+ * To do ...
+ * è necessario che non ci siano vincoli al controllo del nome del sensore.
+ * se invio r ta01 e la stringa restituisce sm01, aggiorno il campo sm01.
+ *
+ *
+ */
+
+	if ((md->getTag()=="Id") && (xmlvalue==sensorlabel))
     {
 	md->setSensorName(xmlvalue);
 	md->setTag("");
@@ -268,6 +276,17 @@ void SRTWeatherSocket::checkSensor(WeatherStationData *md,string xmlvalue,const 
 	//md->setSensorName(string(sSensor));
 	md->setTag("");
 	md->sensorMap[name]=value;
+// 	cout <<name <<":" <<value<<endl;
+    }
+    if ((md->getTag()=="Date") && (md->getSensorName()==sensorlabel))
+    {
+	double value;
+	string name;
+	name=md->getSensorName();
+//	value=atof(xmlvalue.c_str());
+	//md->setSensorName(string(sSensor));
+	md->setTag("");
+	md->sensorDate[name]=xmlvalue;
 // 	cout <<name <<":" <<value<<endl;
     }
 
@@ -305,7 +324,9 @@ double SRTWeatherSocket::getWind()
 	CString command=CString("r ")+CString(COMMANDS[WINDSPEEDAVE]);
          sendCMD(err,command);
 // speedup	IRA::CIRATools::Wait(0,500000);
-			        
+//         IRA::CIRATools::Wait(0,500000);
+       	IRA::CIRATools::Wait(100000);
+
 	ACS_DEBUG_PARAM("SRTWeatherSocket::getWind()","sendCMD: %s",(const char *)command);
 	receiveData(err,rdata);
 
@@ -313,7 +334,7 @@ double SRTWeatherSocket::getWind()
 	initParser(&mp);
 	parse(rdata);
   	m_val=mp.sensorMap[COMMANDS[WINDSPEEDAVE]];
-	return m_val;
+	return m_val*3.6;
 	
 }
 
@@ -326,7 +347,7 @@ double SRTWeatherSocket::getTemperature()
 	double m_val;
 //	WeatherStationData mp;
 	sendCMD(err,CString("r ")+CString(COMMANDS[AIRTEMP]));
-// 	IRA::CIRATools::Wait(500000);
+  	IRA::CIRATools::Wait(100000);
 
 	receiveData(err,rdata);
 	if (rdata=="") 	receiveData(err,rdata);
@@ -336,6 +357,7 @@ double SRTWeatherSocket::getTemperature()
 	parse(rdata);
 	m_val=m_weatherdata.sensorMap[COMMANDS[AIRTEMP]];
 	cout << "read temp:" << m_val <<endl;
+	cout << "epoch value:" << m_weatherdata.sensorDate[COMMANDS[AIRTEMP]] <<endl;
 	return m_val;
 
 }
@@ -348,7 +370,7 @@ double SRTWeatherSocket::getHumidity()
 	double m_val;
 	WeatherStationData mp;
 	sendCMD(err,CString("r ")+CString(COMMANDS[RELHUM]));
-// speedup 	IRA::CIRATools::Wait(0,500000);
+	IRA::CIRATools::Wait(0,100000);
 
 	receiveData(err,rdata);
 	initParser(&m_weatherdata);
@@ -366,7 +388,7 @@ double SRTWeatherSocket::getPressure()
 	double m_val;
 	WeatherStationData mp;
 	sendCMD(err,CString("r ")+CString(COMMANDS[AIRPRESSURE]));
-// speedup 	IRA::CIRATools::Wait(0,500000);
+    IRA::CIRATools::Wait(0,100000);
 
 	receiveData(err,rdata);
  
@@ -385,7 +407,7 @@ double SRTWeatherSocket::getWinDir()
 	double m_val;
 	WeatherStationData mp;
 	sendCMD(err,CString("r ")+CString(COMMANDS[WINDDIRAVE]));
-// speedup 	IRA::CIRATools::Wait(0,500000);
+    IRA::CIRATools::Wait(0,100000);
 
 	receiveData(err,rdata);
  
@@ -403,15 +425,17 @@ double SRTWeatherSocket::getWindSpeedPeak()
 	double m_val;
 	WeatherStationData mp;
 	sendCMD(err,CString("r ")+CString(COMMANDS[WINDSPEEDMAX]));
-// speedup 	IRA::CIRATools::Wait(0,500000);
+    IRA::CIRATools::Wait(0,100000);
 
 	receiveData(err,rdata);
 	
 
 	initParser(&m_weatherdata);
 	parse(rdata);
+
 	m_val=m_weatherdata.sensorMap[COMMANDS[WINDSPEEDMAX]];
-	return m_val;
+	return m_val*3.6; //converts from m/s to Km/h
+
 
 }
 
