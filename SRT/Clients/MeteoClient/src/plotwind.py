@@ -36,6 +36,9 @@ handList  = enumList(
 BUFFER = 3600 #  number of points for plot
 
 TIMESTEP=5 # seconds
+HISTORY=500 #
+
+
 
 class PropertyMonitor(ACS__POA.CBdouble,Qt.QObject):
     #------------------------------------------------------------------------------
@@ -124,10 +127,10 @@ class TimeScaleDraw(Qwt.QwtScaleDraw):
     # __init__()
 
     def label(self, value):
-        upTime = self.baseTime.addSecs(int(value))
+        upTime = self.baseTime.addSecs(int(value)*TIMESTEP)
         return Qwt.QwtText(upTime.toString())
 	
-HISTORY=300
+
 
 
 
@@ -206,7 +209,7 @@ class myPlot(Qwt.QwtPlot):
 		currTime.addSecs(-HISTORY*TIMESTEP);
 		
 		self.setAxisScaleDraw( Qwt.QwtPlot.xBottom, TimeScaleDraw(currTime))
-                self.setAxisScale(Qwt.QwtPlot.xBottom, 0, HISTORY)
+                self.setAxisScale(Qwt.QwtPlot.xBottom, 0, HISTORY*TIMESTEP)
   		self.setAxisLabelRotation(Qwt.QwtPlot.xBottom, -50.0)
 		self.curve.attach(self)
                 self.curveWSpeedPeak.attach(self)		
@@ -224,7 +227,7 @@ class myPlot(Qwt.QwtPlot):
 #		     self.y2[0]=self.y[self.indice]
 		
 	def setWindSpeedPeak(self,val):
-                     self.timeData += 1.0*TIMESTEP;
+                     self.timeData += 1.0;
                      
 
                      self.setAxisScale(Qwt.QwtPlot.xBottom,self.timeData[-1],self.timeData[0])
