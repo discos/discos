@@ -82,7 +82,7 @@ class PropertyMonitor(ACS__POA.CBdouble,Qt.QObject):
 	try:
         	print "Working: ", str(self.propName), " is ", str(value)
 	#	self.widget.setVal(float(str(value)))
-		value=float(str(value))
+		value=float(str(value))*3.6
 		self.emit(Qt.SIGNAL("PropertyChanghed(float)"),value)
 		
 	except:            
@@ -221,7 +221,7 @@ class PlotProperty(Qt.QObject):
 #	windProperty = meteo._get_winddir()
 #	wspeedPr     = meteo._get_windspeed()
 	desc = ACS.CBDescIn(0L, 0L, 0L)
-	timestep=1;	
+	timestep=5; 	
 	
 	propMonitor = PropertyMonitor(self.plotwidget,self.propertyname)
  	
@@ -246,12 +246,12 @@ def make(args):
     app = Qt.QApplication(args)
 	
     demo = Qt.QWidget()
-    demo.setWindowTitle("METEO/station")
+    demo.setWindowTitle("WEATHERSTATION/WeatherStation")
     
     plot = myPlot(demo)
     plot.setTitle("History")
     plot.setMargin(5)
-    my=PlotProperty(plot,"METEO/station","windspeed")
+    my=PlotProperty(plot,"WEATHERSTATION/WeatherStation","windspeed")
     
 #    label = Qt.QLabel("Press the legend to en/disable a curve", demo)
     

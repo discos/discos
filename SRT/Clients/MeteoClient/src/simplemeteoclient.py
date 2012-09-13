@@ -17,7 +17,7 @@ simpleClient.getLogger().logInfo("We can directly manipulate a device once we ge
 
 try:
 	
-	meteo = simpleClient.getComponent("METEO/station")
+	meteo = simpleClient.getComponent("WEATHERSTATION/WeatherStation")
 	temperatureProperty = meteo._get_temperature()
 	(temp,compl)=temperatureProperty.get_sync()
 	simpleClient.getLogger().logInfo("Meteo temperature: " + str(temp))
@@ -25,7 +25,7 @@ try:
 	
 	
 	
-	simpleClient.releaseComponent("METEO/station")
+	simpleClient.releaseComponent("WEATHERSTATION/WeatherStation")
 except Exception, e:
 	simpleClient.getLogger().logCritical("Sorry, I expected there to be a Mount in the system and there isn't.")
     	simpleClient.getLogger().logDebug("The exception was:" + str(e)) 

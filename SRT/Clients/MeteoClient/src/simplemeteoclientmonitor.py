@@ -26,7 +26,7 @@ handList  = enumList(
 
 
 
-class WindMonitor(ACS__POA.CBdouble):
+class SensorMonitor(ACS__POA.CBdouble):
     #------------------------------------------------------------------------------
     '''
     This class defines the method(s) that will be invoked asynchronously by the
@@ -140,7 +140,7 @@ class SpeedoMeter(Qwt.QwtDial):
         painter.setPen(self.palette().color(Qt.QPalette.Text))
         painter.drawText(rect, Qt.Qt.AlignBottom | Qt.Qt.AlignHCenter, self.__label)
     def setVal(self,value=0.):
-	self.setValue(value*3.6)
+	self.setValue(value)
     # drawScaleContents
 
 # class SpeedoMeter
@@ -155,12 +155,12 @@ class WindWidget(Qt.QWidget):
    	#w=parent.width()
   	#h=parent.heigth()
 	
-	self.compass=Qwt.QwtCompass()
- 	self.lcd=Qt.QLCDNumber()        
+	self.compass=Qwt.QwtCompass(self)
+ 	self.lcd=Qt.QLCDNumber(self)        
 
 	
 	palette = Qt.QPalette( )
-        palette.setColor(Qt.QPalette.Foreground,Qt.Qt.lightGray)
+        palette.setColor(Qt.QPalette.Foreground,Qt.Qt.black)
 	newPalette = self.compass.palette()
 	rose=Qwt.QwtSimpleCompassRose(4,1)
 	self.compass.setRose(rose)
@@ -180,14 +180,26 @@ class WindWidget(Qt.QWidget):
 	
 class WindSpeed(Qt.QWidget):
     def __init__ (self,parent=None):
-	self.speed=SpeedoMeter()
+   	Qt.QWidget.__init__(self,parent)	
+	
+        self.speed=SpeedoMeter(self)
 	self.speed.setRange(0.0,120.0)
 	self.speed.setReadOnly(True)
 	     
     def setVal(self,value=0.):
-	self.setValue(value)
+	self.speed.setValue(value)
 	
+        
+class Temperature(Qt.QWidget):
+      def __init__ (self,parent=None):
+           Qt.QWidget.__init__(self,parent)
+           self.thermo = Qwt.QwtThermo(self)
+           self.thermo.setRange(-5., 50.0)
+           self.thermo.setFillColor(Qt.Qt.red)
+      def setVal(self,value=0.):
+           self.thermo.setValue(value)
 	
+    
 
 
 class ShowMeteo():
@@ -198,6 +210,8 @@ class ShowMeteo():
 	self.simpleClient.getLogger().logInfo("We can directly manipulate a device once we get it, which is easy!!")
 	self.winddirw= WindWidget()
 	self.windspeedw = SpeedoMeter()
+        self.temperature =Temperature()
+        
       def run(self):
         
 	frame  = Qt.QFrame()
@@ -205,11 +219,12 @@ class ShowMeteo():
 	layout = Qt.QGridLayout(frame)
 	layout.addWidget(self.winddirw, 0, 0)
 	layout.addWidget(self.windspeedw, 0, 1)
+	layout.addWidget(self.temperature, 0, 2)
  	
 
 	
 	frame.resize(600,200)
-	frame.show()
+        frame.show()
 	self.monitor()
 
 	return frame
@@ -222,28 +237,34 @@ class ShowMeteo():
 	meteo = self.simpleClient.getComponent("WEATHERSTATION/WeatherStation")	
 	windProperty = meteo._get_winddir()
 	wspeedPr     = meteo._get_windspeed()
-	desc = ACS.CBDescIn(0L, 0L, 0L)
+	tempPr       = meteo._get_temperature()
+        desc = ACS.CBDescIn(0L, 0L, 0L)
 	
 	
-	windMon = WindMonitor(self.winddirw,"winddir")
+	windMon = SensorMonitor(self.winddirw,"winddir")
  	cbMonServant = self.simpleClient.activateOffShoot(windMon)
 	self.actMon = windProperty.create_monitor(cbMonServant, desc)
 	self.actMon.set_timer_trigger(10000000)
 	
-	windSpeedMon =WindMonitor(self.windspeedw,"windspeed")
+	windSpeedMon =SensorMonitor(self.windspeedw,"windspeed")
 
         cbMonServant2 = self.simpleClient.activateOffShoot(windSpeedMon)
 	self.actMonwspeed = wspeedPr.create_monitor(cbMonServant2, desc)
-	self.actMonwspeed.set_timer_trigger(20000000)
+	self.actMonwspeed.set_timer_trigger(10000000)
 	
 	
-	
-	      
-	      
+        	
+        temperatureMon =SensorMonitor(self.temperature,"temperature")
+
+        cbMonServant3 = self.simpleClient.activateOffShoot(temperatureMon)
+	self.actMonwspeed = tempPr.create_monitor(cbMonServant3, desc)
+	self.actMonwspeed.set_timer_trigger(10000000)
+      
       def __del__(self):
+        
  	self.actMon.destroy()
  	self.actMonwspeed.destroy()
-	self.simpleClient.releaseComponent("METEO/station")
+	self.simpleClient.releaseComponent("WEATHERSTATION/WeatherStation")
 	self.simpleClient.disconnect()
 	print "The end __oOo__"
 	
