@@ -3,7 +3,7 @@
 #include "Configuration.h"
 
 using namespace IRA;
-using namespace FitsWriter_private;
+using namespace MBFitsWriter_private;
 
 #define _GET_DWORD_ATTRIBUTE(ATTRIB,DESCR,FIELD) { \
 	DWORD tmpw; \
@@ -55,7 +55,7 @@ CConfiguration::~CConfiguration()
 void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
 {
 	_GET_DWORD_ATTRIBUTE("WorkingThreadTime","Sleep time of working thread (uSec)",m_workingThreadTime);
-	_GET_DWORD_ATTRIBUTE("CollectorThreadTime","Sleep time of collector thread (uSec)",m_collectorThreadTime);	
+	_GET_DWORD_ATTRIBUTE("CollectorThreadTime","Sleep time of collector thread (uSec)",m_collectorThreadTime);
 	_GET_DWORD_ATTRIBUTE("WorkingThreadTimeSlice","Time slice of working thread (uSec)",m_workingThreadTimeSlice);
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter cache time (uSec)",m_repetitionCacheTime);
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter expire time  (uSec)",m_repetitionExpireTime);
@@ -65,7 +65,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Reveicers Boss component interface is ",m_receiversBossComp);
 	_GET_STRING_ATTRIBUTE("SchedulerInterface","Scheduler component interface is ",m_schedulerComp);
-	_GET_STRING_ATTRIBUTE("MeteoInstance","Meteo component instance is ",m_meteoInstance);	
+	_GET_STRING_ATTRIBUTE("MeteoInstance","Meteo component instance is ",m_meteoInstance);
 	m_workingThreadTime*=10;
 	m_workingThreadTimeSlice*=10;
 	m_collectorThreadTime*=10;

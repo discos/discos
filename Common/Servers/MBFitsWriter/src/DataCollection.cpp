@@ -4,14 +4,14 @@
 #include <SecureArea.h>
 #include <libgen.h>
 
-void FitsWriter_private::getTsysFromBuffer(char *& buffer,const DWORD& channels ,double *tsys) {
+void MBFitsWriter_private::getTsysFromBuffer(char *& buffer,const DWORD& channels ,double *tsys) {
 	for (DWORD i=0;i<channels;i++) {
 		tsys[i]=*((double *)buffer);
 		buffer+=sizeof(double);
 	}
 }
 
-using namespace FitsWriter_private;
+using namespace MBFitsWriter_private;
 
 CDataCollection::CDataCollection()
 {
@@ -248,7 +248,6 @@ bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& rec
 			return true;
 		}
 		else {
-printf("CDataCollection::setScanSetup - inconsistent\n");
 			recording=false;
 			inconsistent =true;
 			return false;
@@ -282,7 +281,6 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 			return true;
 		}
 		else {
-printf("CDataCollection::setSubScanSetup - inconsistent\n");
 			recording=false;
 			inconsistent =true;
 			return false;

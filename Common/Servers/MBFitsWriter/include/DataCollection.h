@@ -33,7 +33,7 @@
 #define BYTE4_TYPE float
 #define BYTE8_TYPE double
 
-namespace FitsWriter_private {
+namespace MBFitsWriter_private {
 
 template <class SAMPLETYPE> void getChannelFromBuffer(const DWORD& index,
 		const long& pol,const long& bins,char *& buffer,std::vector<SAMPLETYPE>& channel)  {
@@ -619,7 +619,7 @@ private:
 	/**
 	 * This will stores the data damps as they are coming from the backend, waiting to be saved in the file
 	 */
-	FitsWriter_private::CDumpCollection m_dumpCollection;
+	MBFitsWriter_private::CDumpCollection m_dumpCollection;
 	/**
 	 * Reports about the status of the backend
 	 */

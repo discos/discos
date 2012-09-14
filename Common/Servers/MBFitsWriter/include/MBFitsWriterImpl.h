@@ -29,7 +29,7 @@ using baci::SmartPropertyPointer;
 
 using maci::ContainerServices;
 
-class MBFitsWriterImpl : public virtual BulkDataReceiverImpl<FitsWriter_private::ReceiverCallback>,
+class MBFitsWriterImpl : public virtual BulkDataReceiverImpl<MBFitsWriter_private::ReceiverCallback>,
 												 public virtual POA_Management::MBFitsWriter {
 	public:
 		MBFitsWriterImpl( const ACE_CString& name_,
@@ -186,8 +186,8 @@ class MBFitsWriterImpl : public virtual BulkDataReceiverImpl<FitsWriter_private:
 
 		SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> >	m_status_p;
 
-		FitsWriter_private::CConfiguration*											m_configuration_p;
-		IRA::CSecureArea<FitsWriter_private::CDataCollection>*	m_dataWrapper_p;
+		MBFitsWriter_private::CConfiguration*											m_configuration_p;
+		IRA::CSecureArea<MBFitsWriter_private::CDataCollection>*	m_dataWrapper_p;
 		MBFitsWriter_private::EngineThread*											m_workThread_p;
 		MBFitsWriter_private::CCollectorThread*									m_collectThread_p;
 };

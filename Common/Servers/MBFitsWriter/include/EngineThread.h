@@ -8,13 +8,12 @@
 
 #include "Baseband.h"
 #include "LayoutCollection.h"
-
-class MBFitsManager;
+#include "MBFitsManager.h"
 
 using MBFitsWriter_private::CCollectorThread;
 
-using FitsWriter_private::CConfiguration;
-using FitsWriter_private::CDataCollection;
+using MBFitsWriter_private::CConfiguration;
+using MBFitsWriter_private::CDataCollection;
 
 using IRA::CSecureArea;
 using IRA::CString;
@@ -106,7 +105,8 @@ namespace MBFitsWriter_private {
 			 */
 			void collectReceiversData();
 
-			bool processData( const Baseband::Baseband_s_t& baseBands_,
+			bool processData( const MBFitsManager::FeBe_v_t& frontendBackendNames_,
+												const Baseband::Baseband_s_t& baseBands_,
 												const string basisFrameCType_,
 												const double longObj_,
 												const double latObj_ );

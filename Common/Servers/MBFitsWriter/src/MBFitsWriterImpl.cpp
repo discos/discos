@@ -26,7 +26,7 @@ try { \
 } \
 
 /*	// Not implemented
-MBFitsWriterImpl::MBFitsWriterImpl() : BulkDataReceiverImpl<FitsWriter_private::ReceiverCallback>(),
+MBFitsWriterImpl::MBFitsWriterImpl() : BulkDataReceiverImpl<MBFitsWriter_private::ReceiverCallback>(),
 																			 m_fileName_p(this),
 																			 m_projectName_p(this),
 																			 m_observer_p(this),
@@ -46,7 +46,7 @@ MBFitsWriterImpl::MBFitsWriterImpl() : BulkDataReceiverImpl<FitsWriter_private::
 */
 
 /*	// Not implemented
-MBFitsWriterImpl::MBFitsWriterImpl( const MBFitsWriterImpl& mbFitsWriter_ ) : BulkDataReceiverImpl<FitsWriter_private::ReceiverCallback>(mbFitsWriter_),
+MBFitsWriterImpl::MBFitsWriterImpl( const MBFitsWriterImpl& mbFitsWriter_ ) : BulkDataReceiverImpl<MBFitsWriter_private::ReceiverCallback>(mbFitsWriter_),
 																																							m_fileName_p(mbFitsWriter_.m_fileName_p),
 																																							m_projectName_p(mbFitsWriter_.m_projectName_p),
 																																							m_observer_p(mbFitsWriter_.m_observer_p),
@@ -66,7 +66,7 @@ MBFitsWriterImpl::MBFitsWriterImpl( const MBFitsWriterImpl& mbFitsWriter_ ) : Bu
 */
 
 MBFitsWriterImpl::MBFitsWriterImpl( const ACE_CString& name_,
-																		ContainerServices* containerServices_p_ ) : BulkDataReceiverImpl<FitsWriter_private::ReceiverCallback>(name_, containerServices_p_),
+																		ContainerServices* containerServices_p_ ) : BulkDataReceiverImpl<MBFitsWriter_private::ReceiverCallback>(name_, containerServices_p_),
 																																								m_fileName_p(this),
 																																								m_projectName_p(this),
 																																								m_observer_p(this),
@@ -90,7 +90,7 @@ MBFitsWriterImpl::~MBFitsWriterImpl() {
 
 /*	// Not implemented
 bool MBFitsWriterImpl::operator==( const MBFitsWriterImpl& mbFitsWriter_ ) const {
-	return ( BulkDataReceiverImpl<FitsWriter_private::ReceiverCallback>::operator==(mbFitsWriter_) &&
+	return ( BulkDataReceiverImpl<MBFitsWriter_private::ReceiverCallback>::operator==(mbFitsWriter_) &&
 					 ((m_fileName_p				== mbFitsWriter_.m_fileName_p				) &&
 						(m_projectName_p		== mbFitsWriter_.m_projectName_p		) &&
 						(m_observer_p				== mbFitsWriter_.m_observer_p				) &&
@@ -128,7 +128,7 @@ bool MBFitsWriterImpl::operator!=( const MBFitsWriterImpl& mbFitsWriter_ ) const
 /*	// Not implemented
 MBFitsWriterImpl& MBFitsWriterImpl::operator=( const MBFitsWriterImpl& mbFitsWriter_ ) {
 	if ( *this != mbFitsWriter ) {	// handle self assignment
-		BulkDataReceiverImpl<FitsWriter_private::ReceiverCallback>::operator=(mbFitsWriter_);
+		BulkDataReceiverImpl<MBFitsWriter_private::ReceiverCallback>::operator=(mbFitsWriter_);
 
 		m_fileName_p				= mbFitsWriter_.m_fileName_p;
 		m_projectName_p			= mbFitsWriter_.m_projectName_p;
@@ -161,23 +161,23 @@ void MBFitsWriterImpl::initialize() throw (ACSErr::ACSbaseExImpl) {
 	Scan::initialize();
 
 	try {
-		m_configuration_p = new FitsWriter_private::CConfiguration();
+		m_configuration_p = new MBFitsWriter_private::CConfiguration();
 		m_configuration_p->init(getContainerServices());    // throw CDBAcessExImpl;
 	} catch( ACSErr::ACSbaseExImpl& exception_ ) {
 		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl, _dummy, exception_, "MBFitsWriterImpl::initialize()");
 		throw _dummy;
 	}
 
-	FitsWriter_private::CDataCollection* data_p = NULL;
+	MBFitsWriter_private::CDataCollection* data_p = NULL;
 
 	try {
-		data_p					= new FitsWriter_private::CDataCollection();
-		m_dataWrapper_p	= new CSecureArea<FitsWriter_private::CDataCollection>(data_p);
+		data_p					= new MBFitsWriter_private::CDataCollection();
+		m_dataWrapper_p	= new CSecureArea<MBFitsWriter_private::CDataCollection>(data_p);
 
 		const ACE_CString	containerServicesName(getContainerServices()->getName());
 		BACIComponent*		component_p = getComponent();
 
-		m_fileName_p		= new ROstring(containerServicesName		+ ":fileName",				component_p, new FitsWriter_private::DevIOFileName(m_dataWrapper_p), true);
+		m_fileName_p		= new ROstring(containerServicesName		+ ":fileName",				component_p, new MBFitsWriter_private::DevIOFileName(m_dataWrapper_p), true);
 		m_projectName_p	= new ROstring(containerServicesName		+ ":projectName",			component_p);
 		m_observer_p		= new ROstring(containerServicesName		+ ":observer",				component_p);
 		m_scanID_p			= new ROlong(containerServicesName			+ ":scanIdentifier",	component_p);
@@ -190,7 +190,7 @@ void MBFitsWriterImpl::initialize() throw (ACSErr::ACSbaseExImpl) {
 		m_arrayDataY_p	= new ROdoubleSeq(containerServicesName	+ ":arrayDataY",			component_p);
 
 		m_status_p			= new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus>(containerServicesName	+ ":status",		component_p,
-																																																						 new FitsWriter_private::DevIOStatus(m_dataWrapper_p), true);
+																																																						 new MBFitsWriter_private::DevIOStatus(m_dataWrapper_p), true);
 	} catch( std::bad_alloc& exception_ ) {
 		if ( data_p ) { delete data_p; data_p = NULL; }
 
@@ -198,13 +198,13 @@ void MBFitsWriterImpl::initialize() throw (ACSErr::ACSbaseExImpl) {
 		throw _dummy;
 	}
 
-	FitsWriter_private::ReceiverCallback::m_dataCollection = m_dataWrapper_p;
+	MBFitsWriter_private::ReceiverCallback::m_dataCollection = m_dataWrapper_p;
 
 	try {
 		ACS::ThreadManager* const threadManager_p = getContainerServices()->getThreadManager();
 
-		m_workThread_p		= dynamic_cast<MBFitsWriter_private::EngineThread *>(threadManager_p->create<MBFitsWriter_private::EngineThread, CSecureArea<FitsWriter_private::CDataCollection> *>(workThreadName.c_str(), m_dataWrapper_p));
-		m_collectThread_p	= dynamic_cast<MBFitsWriter_private::CCollectorThread *>(threadManager_p->create<MBFitsWriter_private::CCollectorThread, CSecureArea<FitsWriter_private::CDataCollection> *>(collectorThreadName.c_str(), m_dataWrapper_p));
+		m_workThread_p		= dynamic_cast<MBFitsWriter_private::EngineThread *>(threadManager_p->create<MBFitsWriter_private::EngineThread, CSecureArea<MBFitsWriter_private::CDataCollection> *>(workThreadName.c_str(), m_dataWrapper_p));
+		m_collectThread_p	= dynamic_cast<MBFitsWriter_private::CCollectorThread *>(threadManager_p->create<MBFitsWriter_private::CCollectorThread, CSecureArea<MBFitsWriter_private::CDataCollection> *>(collectorThreadName.c_str(), m_dataWrapper_p));
 		m_workThread_p->setCollectorThread(m_collectThread_p);
 	} catch( acsthreadErrType::acsthreadErrTypeExImpl& exception_ ) {
 		if ( data_p ) { delete data_p; data_p = NULL; }
@@ -259,7 +259,7 @@ void MBFitsWriterImpl::execute() throw (ACSErr::ACSbaseExImpl) {
 		const IRA::CSite siteInfo	= CSite(site.out());
 		const double		 dut1			= site->DUT1;
 
-		CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data_p = m_dataWrapper_p->Get();
+		CSecAreaResourceWrapper<MBFitsWriter_private::CDataCollection> data_p = m_dataWrapper_p->Get();
 		data_p->setSite(siteInfo, dut1, static_cast<const char *>(siteName));
 	} catch( CORBA::SystemException& exception_ )	{
 		_EXCPT(ComponentErrors::CORBAProblemExImpl, __dummy, "MBFitsWriterImpl::execute()");
@@ -441,7 +441,7 @@ _PROPERTY_REFERENCE_CPP(MBFitsWriterImpl, Management::ROTSystemStatus,	m_status_
 
 /*
 void MBFitsWriterImpl::setFileName( const char* fileName_ ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx) {
-	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data_p = m_dataWrapper_p->Get();
+	CSecAreaResourceWrapper<MBFitsWriter_private::CDataCollection> data_p = m_dataWrapper_p->Get();
 
 	if ( !data_p->setFileName(IRA::CString(fileName_)) ) {
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl, "MBFitsWriterImpl::setFileName");
@@ -453,17 +453,17 @@ void MBFitsWriterImpl::setFileName( const char* fileName_ ) throw (CORBA::System
 }
 
 void MBFitsWriterImpl::setProjectName( const char *projectName_ ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx) {
-	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data_p = m_dataWrapper_p->Get();
+	CSecAreaResourceWrapper<MBFitsWriter_private::CDataCollection> data_p = m_dataWrapper_p->Get();
 	data_p->setProjectName(projectName_);
 }
 
 void MBFitsWriterImpl::setObserverName( const char *observerName_ ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx) {
-	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data_p = m_dataWrapper_p->Get();
+	CSecAreaResourceWrapper<MBFitsWriter_private::CDataCollection> data_p = m_dataWrapper_p->Get();
 	data_p->setObserverName(observerName_);
 }
 
 void MBFitsWriterImpl::setScanIdentifier( CORBA::Long scanID_ ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx) {
-	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data_p = m_dataWrapper_p->Get();
+	CSecAreaResourceWrapper<MBFitsWriter_private::CDataCollection> data_p = m_dataWrapper_p->Get();
 	data_p->setScanId(scanID_);
 }
 

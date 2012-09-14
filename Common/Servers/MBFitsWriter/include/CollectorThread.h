@@ -18,8 +18,8 @@
 class MBFitsManager;
 
 using IRA::CSecureArea;
-using FitsWriter_private::CConfiguration;
-using FitsWriter_private::CDataCollection;
+using MBFitsWriter_private::CConfiguration;
+using MBFitsWriter_private::CDataCollection;
 
 using maci::ContainerServices;
 

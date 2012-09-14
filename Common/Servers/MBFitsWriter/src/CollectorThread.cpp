@@ -12,7 +12,6 @@
 using namespace IRA;
 
 using MBFitsWriter_private::CCollectorThread;
-//using namespace FitsWriter_private;
 
 //_IRA_LOGFILTER_IMPORT;
 
@@ -90,10 +89,9 @@ void CCollectorThread::runLoop() {
 		processTracking	= true;
 	}
 
-	// TODO - elaborare dati solo per gli elementi che sono aggiornati
-//	if ( processMeteo || processTracking ) {	// TODO - commentato A solo scopo di test
+	if ( processMeteo || processTracking ) {
 		processData();
-//	}																					// TODO - commentato A solo scopo di test
+	}
 }
 
 bool CCollectorThread::checkReadyFlag() {
@@ -131,9 +129,6 @@ void CCollectorThread::processData() {
 	data_p->getMeteo(humidity, temperature, pressure);
 
 	double mjd = EpochHelper(m_meteoTime).toMJDseconds() / (24 * 60 *60);
-//ACS_LOG(LM_FULL_INFO, "CCollectorThread::processData()", (LM_NOTICE, "Meteo Time 1: %f", m_meteoTime));
-//ACS_LOG(LM_FULL_INFO, "CCollectorThread::processData()", (LM_NOTICE, "Meteo Time 2: %f", EpochHelper(m_meteoTime).toMJDseconds()));
-//ACS_LOG(LM_FULL_INFO, "CCollectorThread::processData()", (LM_NOTICE, "Meteo Time 3: %f", mjd));
 
 	MBFitsManager::Double_v_t	tAmb_p_humid;
 	tAmb_p_humid.push_back(temperature);

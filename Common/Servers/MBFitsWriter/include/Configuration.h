@@ -16,22 +16,22 @@
 
 using namespace IRA;
 
-namespace FitsWriter_private {
+namespace MBFitsWriter_private {
 
 /**
  * This class implements the component configurator. The data inside this class are initialized at the startup from the
  * configuration database and then are used (read) inside the component.
  * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
- * <br> 
+ * <br>
   */
 class CConfiguration {
-public:	
+public:
 	/**
-	 * Constructor 
+	 * Constructor
 	*/
 	CConfiguration();
-	
+
 	/**
 	 * Destructor
 	*/
@@ -43,27 +43,27 @@ public:
 	 * @param Services pointer to the container services object
 	*/
 	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl);
-	
+
 	/**
 	 * @return the sleep time of the working thread (in 100 ns)
 	 */
 	const long& getWorkingThreadTime() const { return m_workingThreadTime; }
-	
+
 	/**
 	 * @return the sleep time of the collector thread (in 100 ns)
 	 */
 	const long& getCollectorThreadTime() const { return m_collectorThreadTime; }
-	
+
 	/**
 	 * @return the  time slice of the working thread (in 100 ns))
-	 */	
+	 */
 	const long& getWorkingThreadTimeSlice() const { return m_workingThreadTimeSlice; }
-	
+
 	/**
 	 * @return the number of microseconds that the log filter will cache a log message
 	*/
 	const long& getRepetitionCacheTime() const { return m_repetitionCacheTime; }
-	
+
 	/**
 	 * @return the number of microseconds that the log filter will take as expiration time for a log message
 	*/
@@ -73,12 +73,12 @@ public:
 	 * @return the number of microseconds that will used as gap between two meteo parameters refreshes
 	*/
 	const long& getMeteoParameterDutyCycle() const { return m_meteoParameterDutyCycle; }
-	
+
 	/**
 	 * @return the number of microseconds that will used as gap between two tracking flag refreshes
 	*/
 	const long& getTrackingFlagDutyCycle() const { return m_trackingFlagDutyCycle; }
-	
+
 	/**
 	 * @return the name of the interface of the antenna boss component
 	*/
@@ -93,14 +93,14 @@ public:
 	const IRA::CString& getReceiversBossComponent() const { return m_receiversBossComp; }
 	/**
 	 * @return the name of the interface of the scheduler component.
-	*/	
-	const IRA::CString& getSchedulerComponent() const { return m_schedulerComp; }	
+	*/
+	const IRA::CString& getSchedulerComponent() const { return m_schedulerComp; }
 	/**
 	 * @return the name of the instance of the meteo station component
-	*/	
-	const IRA::CString& getMeteoInstance() const { return m_meteoInstance; }	
-	
-	
+	*/
+	const IRA::CString& getMeteoInstance() const { return m_meteoInstance; }
+
+
 private:
 	long m_workingThreadTime;
 	long m_workingThreadTimeSlice;

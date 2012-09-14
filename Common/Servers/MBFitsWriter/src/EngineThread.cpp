@@ -246,7 +246,10 @@ void EngineThread::runLoop() {
 					frontendBackendNames.clear();
 
 					stringstream frontendBackendName;
-					frontendBackendName << setw(8) << setfill(' ') << receiverCode
+//					frontendBackendName << setw(8) << setfill(' ') << receiverCode
+//															<< '-'
+//															<< string("Backend");
+					frontendBackendName << receiverCode
 															<< '-'
 															<< string("Backend");
 					frontendBackendNames.push_back(frontendBackendName.str());
@@ -859,7 +862,7 @@ for ( int	indexFebeFeed = 0; indexFebeFeed < febeFeed; ++indexFebeFeed ) {
 							for ( Baseband::Baseband_ci_s_t baseband_ci = baseBands.begin();
 										baseband_ci != baseBands.end(); ++baseband_ci ) {
 								// TODO - 20110106: esiste un unico valore, mentre sembra piu' appropriato avere un valore legato al setup dei feed
-printf("PL: m_antennaBoss_p->FWHM()\n");
+
 								hpbwReference = m_antennaBoss_p->FWHM();
 
 								hpbw = hpbwReference->get_sync(completion.out());
@@ -1327,8 +1330,7 @@ string rxHor_80(rxHor.substr(40, 80));
 					m_collectThread_p->setMBFitsManager(NULL);
 					if ( m_mbFitsManager_p ) { delete m_mbFitsManager_p; m_mbFitsManager_p = NULL; }
 
-					ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "Unexpected exception while writing to MBFits file!"));
-					ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "Trying to startScan"));
+					ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "Unexpected exception while writing to MBFits file! Trying to startScan"));
 
 					return;
 				}
@@ -1617,8 +1619,7 @@ const float			_1vsys2r	= 0.0;		// TODO - Get
 					m_collectThread_p->setMBFitsManager(NULL);
 					if ( m_mbFitsManager_p ) { delete m_mbFitsManager_p; m_mbFitsManager_p = NULL; }
 
-					ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "Unexpected exception while writing to MBFits file!"));
-					ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "Trying to startSubScan"));
+					ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "Unexpected exception while writing to MBFits file! Trying to startSubScan"));
 
 					return;
 				}
@@ -1634,53 +1635,61 @@ const float			_1vsys2r	= 0.0;		// TODO - Get
         ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()", (LM_NOTICE, "SUBSCAN STARTED"));
       }
     } else if ( data_p->isRunning() ) {		// file was already created... then saves the data into it until there is somthing to process and there is still time available...
-			if ( !subScanStop ) {
-				if ( m_mbFitsManager_p ) {
-					while ( checkTime(currentUTC.value().value) &&
-									checkTimeSlot(currentUTC.value().value) &&
-									processData(baseBands, basisFrameCType, longObj, latObj) );
+			try {
+				if ( !subScanStop ) {
+					if ( m_mbFitsManager_p ) {
+						while ( checkTime(currentUTC.value().value) &&
+										checkTimeSlot(currentUTC.value().value) &&
+										processData(frontendBackendNames, baseBands, basisFrameCType, longObj, latObj) );
+					}
+
+					if ( data_p->isStop() ) {
+						// save all the data in the buffer an then finalize the file
+						if ( m_mbFitsManager_p ) {
+							while( processData(frontendBackendNames, baseBands, basisFrameCType, longObj, latObj) );
+						}
+
+						/* TODO - invocare queste procedure può generare un problema: se nel corso di queste invocazioni le stesse funzioni vengono invocate
+						 * tramite il timer del thread, allora le istruzioni si intersecano e non è chiaro il risultato complessivo.
+						 * Possibile che il caso peggiore sia di scrivere due volte i medesimi valori, ma questo passaggio ha bisogno di ulteriori analisi
+						 * e forse va implementato in modo differente */
+						if ( m_mbFitsManager_p ) {
+							m_collectThread_p->collectMeteo();
+							m_collectThread_p->collectTracking();
+							m_collectThread_p->processData();
+						}
+
+						m_collectThread_p->setMBFitsManager(NULL);
+
+						if ( m_mbFitsManager_p ) {
+							m_mbFitsManager_p->endSubScan(frontendBackendNames);
+						}
+
+						baseBands.clear();
+						subScanStop = true;
+
+						ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_NOTICE, "SUBSCAN_FILES_FINALIZED"));
+
+						data_p->haltStopStage();
+					}
 				}
-
-				if ( data_p->isStop() ) {
-					// save all the data in the buffer an then finalize the file
-					if ( m_mbFitsManager_p ) {
-						while( processData(baseBands, basisFrameCType, longObj, latObj) );
-					}
-
-					/* TODO - invocare queste procedure può generare un problema: se nel corso di queste invocazioni le stesse funzioni vengono invocate
-					 * tramite il timer del thread, allora le istruzioni si intersecano e non è chiaro il risultato complessivo.
-					 * Possibile che il caso peggiore sia di scrivere due volte i medesimi valori, ma questo passaggio ha bisogno di ulteriori analisi
-					 * e forse va implementato in modo differente */
-					if ( m_mbFitsManager_p ) {
-						m_collectThread_p->collectMeteo();
-						m_collectThread_p->collectTracking();
-						m_collectThread_p->processData();
-					}
-
-					m_collectThread_p->setMBFitsManager(NULL);
-
-					if ( m_mbFitsManager_p ) {
-						m_mbFitsManager_p->endSubScan(frontendBackendNames);
-					}
-
-					baseBands.clear();
-					subScanStop = true;
-
-					ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_NOTICE, "SUBSCAN_FILES_FINALIZED"));
-
-					data_p->haltStopStage();
-				}
+			} catch( ... ) {
+				ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "Unexpected exception trying to stopSubScan!"));
 			}
     }
   } else {
-		if ( m_mbFitsManager_p ) {
-			m_mbFitsManager_p->endScan();
-			if ( m_mbFitsManager_p ) { delete m_mbFitsManager_p; m_mbFitsManager_p = NULL; }
+		try {
+			if ( m_mbFitsManager_p ) {
+				m_mbFitsManager_p->endScan();
+				if ( m_mbFitsManager_p ) { delete m_mbFitsManager_p; m_mbFitsManager_p = NULL; }
 
-			// TODO - valutare se e quali flag vanno impostati su DataCollection
-			// data_p->haltStopStage();
+				// TODO - valutare se e quali flag vanno impostati su DataCollection
+				// data_p->haltStopStage();
 
-			ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_NOTICE, "SCAN_FILES_FINALIZED"));
+				ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_NOTICE, "SCAN_FILES_FINALIZED"));
+			}
+		} catch( ... ) {
+			ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "Unexpected exception trying to stopScan!"));
 		}
 	}
 }
@@ -1767,30 +1776,20 @@ void EngineThread::collectAntennaData() {
 		ACS::ROdouble_var latitudeOffsetReference;
 
 		// let's take the references to the attributes
-printf("PL: m_antennaBoss_p->target()\n");
 		targetReference								= m_antennaBoss_p->target();
 
-printf("PL: m_antennaBoss_p->targetRightAscension()\n");
 		rightAscensionReference				= m_antennaBoss_p->targetRightAscension();
-printf("PL: m_antennaBoss_p->targetDeclination()\n");
 		declinationReference					= m_antennaBoss_p->targetDeclination();
 
-printf("PL: m_antennaBoss_p->targetVlsr()\n");
 		vlsrReference									= m_antennaBoss_p->targetVlsr();
 
-printf("PL: m_antennaBoss_p->azimuthOffset()\n");
 		azimuthOffsetReference				= m_antennaBoss_p->azimuthOffset();
-printf("PL: m_antennaBoss_p->elevationOffset()\n");
 		elevationOffsetReference			= m_antennaBoss_p->elevationOffset();
 
-printf("PL: m_antennaBoss_p->rightAscensionOffset()\n");
 		rightAscensionOffsetReference	= m_antennaBoss_p->rightAscensionOffset();
-printf("PL: m_antennaBoss_p->declinationOffset()\n");
 		declinationOffsetReference		= m_antennaBoss_p->declinationOffset();
 
-printf("PL: m_antennaBoss_p->longitudeOffset()\n");
 		longitudeOffsetReference			= m_antennaBoss_p->longitudeOffset();
-printf("PL: m_antennaBoss_p->latitudeOffset()\n");
 		latitudeOffsetReference				= m_antennaBoss_p->latitudeOffset();
 
 		ACSErr::Completion_var completion;
@@ -2122,7 +2121,8 @@ void EngineThread::collectReceiversData() {
 	}
 }
 
-bool EngineThread::processData( const Baseband::Baseband_s_t& baseBands_,
+bool EngineThread::processData( const MBFitsManager::FeBe_v_t& frontendBackendNames_,
+																const Baseband::Baseband_s_t& baseBands_,
 																const string basisFrameCType_,
 																const double longObj_,
 																const double latObj_ ) {
@@ -2132,16 +2132,19 @@ bool EngineThread::processData( const Baseband::Baseband_s_t& baseBands_,
 	// TODO - verificare la necessità di aggiornamento anche dei dati Antenna
 	// get data from receivers boss
 	collectReceiversData();
-
+/*
 	MBFitsManager::FeBe_v_t frontendBackendNames;
 	stringstream frontendBackendName;
 	// TODO - con il valore "Frontedn-Backend" si verificava un segmentation fault, non ho indagato per capire esattamente dove, sarebbe da fare l'analisi
-	frontendBackendName << setw(8) << setfill(' ') << string(data_p->getReceiverCode())
+//	frontendBackendName << setw(8) << setfill(' ') << string(data_p->getReceiverCode())
+//											<< '-'
+//											<< string("Backend");
+	frontendBackendName << string(data_p->getReceiverCode())
 											<< '-'
 											<< string("Backend");
 	frontendBackendNames.push_back(frontendBackendName.str());
 	frontendBackendName.str(string());
-
+*/
 //	TIMEVALUE				currentUTC;
 //	IRA::CIRATools::getTime(currentUTC);				// get the current time
 //	const double		mjd		= IRA::CDateTime(currentUTC, data_p->getDut1()).getMJD();
@@ -2165,7 +2168,7 @@ bool EngineThread::processData( const Baseband::Baseband_s_t& baseBands_,
 
 	const long inputs_n = data_p->getInputsNumber();
 	double		 tsys[inputs_n];
-	FitsWriter_private::getTsysFromBuffer(buffer_p, inputs_n, tsys);
+	MBFitsWriter_private::getTsysFromBuffer(buffer_p, inputs_n, tsys);
 
 	double				apparentAz		= 0.0;
 	double				apparentEl		= 0.0;
@@ -2205,19 +2208,17 @@ bool EngineThread::processData( const Baseband::Baseband_s_t& baseBands_,
 	const double	wobDisLT	= 0.0;	// TODO - Get
 
 	try {
+printf("EngineThread::processData - collecting coordinates\n");
 		bool antennaBossError = false;
 		CCommonTools::getAntennaBoss(m_antennaBoss_p, m_containerServices_p, m_configuration_p->getAntennaBossComponent(), antennaBossError);
 
-printf("PL: m_antennaBoss_p->getApparentCoordinates()\n");
 		m_antennaBoss_p->getApparentCoordinates(time, apparentAz, apparentEl, apparentRa, apparentDec, apparentEpoch, apparentLon, apparentLat);
 
 		// integration is multiplied by 10000 because internally we have the value in millesec while the methods requires 100ns.
-printf("PL: m_antennaBoss_p->getObservedEquatorial()\n");
 		m_antennaBoss_p->getObservedEquatorial(time,	data_p->getIntegrationTime() * 10000, ra,				dec);
-printf("PL: m_antennaBoss_p->getObservedGalactic()\n");
 		m_antennaBoss_p->getObservedGalactic(time,		data_p->getIntegrationTime() * 10000, lon,			lat);
-printf("PL: m_antennaBoss_p->getObservedHorizontal()\n");
 		m_antennaBoss_p->getObservedHorizontal(time,	data_p->getIntegrationTime() * 10000, azimuth,	elevatio);
+printf("EngineThread::processData - collected coordinates\n");
 	} catch( ComponentErrors::CouldntGetComponentExImpl& exception_ ) {
 //		_IRA_LOGFILTER_LOG_EXCEPTION(exception_, LM_ERROR);
 
@@ -2269,8 +2270,9 @@ printf("PL: m_antennaBoss_p->getObservedHorizontal()\n");
 	TIMEDIFFERENCE lstData;
 	IRA::CDateTime(timeValue, data_p->getDut1()).LST(data_p->getSite()).getDateTime(lstData);  // get the LST time
 
-	for ( MBFitsManager::FeBe_ci_v_t frontendBackendName_ci = frontendBackendNames.begin();
-				frontendBackendName_ci != frontendBackendNames.end(); ++frontendBackendName_ci ) {
+	for ( MBFitsManager::FeBe_ci_v_t frontendBackendName_ci = frontendBackendNames_.begin();
+				frontendBackendName_ci != frontendBackendNames_.end(); ++frontendBackendName_ci ) {
+printf("EngineThread::processData - integrationParameters: %s\n", frontendBackendName_ci->c_str());
 		try {
 			m_mbFitsManager_p->integrationParameters(*frontendBackendName_ci,
 //																							 mjd,
@@ -2312,6 +2314,8 @@ printf("PL: m_antennaBoss_p->getObservedHorizontal()\n");
 //		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 
 			data_p->setStatus(Management::MNG_FAILURE);
+
+			return false;
 		}
 
 		long indexBaseband = 0;
@@ -2335,19 +2339,19 @@ printf("PL: m_antennaBoss_p->getObservedHorizontal()\n");
 				switch( data_p->getSampleSize() ) {
 					case sizeof(BYTE2_TYPE): {
 							BYTE2_TYPE channel[channels_n];
-							FitsWriter_private::getChannelFromBuffer<BYTE2_TYPE>(sectionID, polarizations_n, bins_n, buffer_p, channel);
+							MBFitsWriter_private::getChannelFromBuffer<BYTE2_TYPE>(sectionID, polarizations_n, bins_n, buffer_p, channel);
 							for ( long indexChannel = 0; indexChannel < channels_n; ++indexChannel ) { basebandData.push_back(channel[indexChannel]); }
 						}
 						break;
 					case sizeof(BYTE4_TYPE): {
 							BYTE4_TYPE channel[channels_n];
-							FitsWriter_private::getChannelFromBuffer<BYTE4_TYPE>(sectionID, polarizations_n, bins_n, buffer_p, channel);
+							MBFitsWriter_private::getChannelFromBuffer<BYTE4_TYPE>(sectionID, polarizations_n, bins_n, buffer_p, channel);
 							for ( long indexChannel = 0; indexChannel < channels_n; ++indexChannel ) { basebandData.push_back(channel[indexChannel]); }
 						}
 						break;
 					case sizeof(BYTE8_TYPE): {
 							BYTE8_TYPE channel[channels_n];
-							FitsWriter_private::getChannelFromBuffer<BYTE8_TYPE>(sectionID, polarizations_n, bins_n, buffer_p, channel);
+							MBFitsWriter_private::getChannelFromBuffer<BYTE8_TYPE>(sectionID, polarizations_n, bins_n, buffer_p, channel);
 							for ( long indexChannel = 0; indexChannel < channels_n; ++indexChannel ) { basebandData.push_back(channel[indexChannel]); }
 						}
 						break;
@@ -2357,6 +2361,7 @@ printf("PL: m_antennaBoss_p->getObservedHorizontal()\n");
 			sections.clear();
 
 			try {
+printf("EngineThread::processData - integration: %s\n", frontendBackendName_ci->c_str());
 				m_mbFitsManager_p->integration(*frontendBackendName_ci,
 																			 indexBaseband,
 																			 mjdData,
@@ -2370,6 +2375,10 @@ printf("PL: m_antennaBoss_p->getObservedHorizontal()\n");
 	//		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 
 				data_p->setStatus(Management::MNG_FAILURE);
+
+				basebandData.clear();
+
+				return false;
 			}
 
 			basebandData.clear();
@@ -2377,7 +2386,6 @@ printf("PL: m_antennaBoss_p->getObservedHorizontal()\n");
 	}
 
 	if ( bufferCopy_p ) { delete[] bufferCopy_p; bufferCopy_p = NULL; }
-	frontendBackendNames.clear();
 
 	return true;
 }
