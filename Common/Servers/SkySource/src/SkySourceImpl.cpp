@@ -292,18 +292,18 @@ void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::S
     if (done) {
 		Antenna::TSystemEquinox eq=Antenna::ANT_J2000;
 		double ra=0.0, dec=0.0;
-		//double ss=0.0;
-		//unsigned hh=0, mm=0;
+		double ss=0.0;
+		unsigned hh=0, mm=0;
 		//int dd;
-		if (!IRA::CIRATools::rightAscensionToRad((*m_sourceCatalog)["rightAscension"]->asString(),ra,true)) {
-		//if (sscanf((const char *)(*m_sourceCatalog)["rightAscension"]->asString(),"%d:%d:%lf",&hh,&mm,&ss)!=3) {
+		//if (!IRA::CIRATools::rightAscensionToRad((*m_sourceCatalog)["rightAscension"]->asString(),ra,true)) {
+		if (sscanf((const char *)(*m_sourceCatalog)["rightAscension"]->asString(),"%d:%d:%lf",&hh,&mm,&ss)!=3) {
 			_EXCPT(ComponentErrors::CDBFieldFormatExImpl,__dummy,"SkySourceImpl::loadSourceFromCatalog()");
 			__dummy.setFieldName("rightAscension");
 			CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
 			throw __dummy.getComponentErrorsEx();
 		}
-		/*ra=hh+mm/60.0+ss/3600.0; // convert ra to radians.
-		ra*=(DPI/12.0);*/
+		ra=hh+mm/60.0+ss/3600.0; // convert ra to radians.
+		ra*=(DPI/12.0);
 
 		if(!IRA::CIRATools::declinationToRad((*m_sourceCatalog)["declination"]->asString(),dec,true)) {
 		//if (sscanf((const char *)(*m_sourceCatalog)["declination"]->asString(),"%d:%d:%lf",&dd,&mm,&ss)!=3) {
