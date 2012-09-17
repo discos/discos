@@ -71,13 +71,14 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
 	def __init__(self,compname,parent=None):
 		Qt.QDialog.__init__(self)
 		self.componentname = compname
-                self 
-		print self.componentname
+ 		print self.componentname
 		self.simpleClient = PySimpleClient()
 		try:
 			component= self.simpleClient.getComponent(self.componentname)
      			self.thread=MyWorker(component)
 			self.setupUi(self)
+			self.setWindowTitle(self.componentname)
+
 			self.connect(self.thread,Qt.SIGNAL("arrayDataX"),self.qwtPlot_datax.setVal)
     	 		self.connect(self.thread,Qt.SIGNAL("arrayDataY"),self.qwtPlot_datay.setVal)
 		except  Exception,ex:
@@ -128,7 +129,7 @@ def main(args):
               sys.exit()
         
         if len(args)==0:
-            componentname="CalSim"
+            componentname="MANAGEMENT/Point"
         else:
             componentname=args[0]
          
