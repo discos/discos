@@ -2279,7 +2279,7 @@ printf("EngineThread::processData - integrationParameters: %s\n", frontendBacken
 																							 mjdData,
 //																							 currentLST.toSeconds(),
 																							 lstData.toSeconds(),
-																							 data_p->getIntegrationTime() * 1000,	// internally we have the value of integration in millesec
+																							 data_p->getIntegrationTime() / 1000,	// internally we have the value of integration in millesec
 																							 phase,
 																							 longOff,
 																							 latOff,
