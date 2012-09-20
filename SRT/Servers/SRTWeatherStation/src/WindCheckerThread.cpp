@@ -25,11 +25,12 @@ CWindCheckerThread::runLoop()
  	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
 
-//     wdata = m_srtweatherstation_p->getData();
-     wind=wdata.wind*3.6; // converts wind speed from m/s to km/h	
-     cout << "wind:" << wdata.wind << std::endl;
+    wdata = m_srtweatherstation_p->getData();
+    wind=wdata.wind; // converts wind speed from m/s to km/h
      AUTO_TRACE("WindCheckerThread::runLoop()");
-     ACS_LOG(LM_FULL_INFO,"SRTWeatherStationImpl::initialize()",(LM_WARNING,"WINDSPEED=%f ", wdata.wind));
+     if (wind > 40.0){
+         ACS_LOG(LM_FULL_INFO,"SRTWeatherStationImpl::initialize()",(LM_WARNING,"WINDSPEED=%f ", wdata.wind));
+     }
 
 }
 
