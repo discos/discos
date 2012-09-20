@@ -114,6 +114,10 @@ private:
     double m_LatPos, m_LonPos;
     double m_LatOff, m_LonOff;
     double m_LatErr, m_LonErr;
+    double m_latAmp, m_lonAmp;
+    double m_latAmpErr, m_lonAmpErr;
+    double m_latFwhm, m_lonFwhm;
+    double m_latFwhmErr, m_lonFwhmErr;
     float *m_off;
     float *m_secsFromMidnight;
     float *m_Par;
