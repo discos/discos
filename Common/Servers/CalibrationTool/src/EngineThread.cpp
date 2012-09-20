@@ -630,7 +630,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
     		m_file << (const char *) out;
     		m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << cos (m_LatPos) * m_LonOff * DR2D << " " << m_LatOff * DR2D << " " << cos (m_LatPos) * m_LonErr * DR2D << " " << m_LatErr * DR2D << " " << m_lonResult << " " << m_latResult << std::endl;
 		out="#xgain#";
-		m_file << (const char *) out << " " << (const char *)data->getSourceName();
+		m_file << (const char *) out << " " << (const char *)data->getSourceName() << " ";
     		m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << m_lonAmp << " " << m_lonAmpErr << " " << m_latAmp << " " << m_latAmpErr << " " << m_lonFwhm * DR2D << " " << m_lonFwhmErr * DR2D << " " << m_latFwhm * DR2D << " " << m_latFwhmErr * DR2D \
 		  << " " << data->getSourceFlux() << " " << m_lonResult << " " << m_latResult << std::endl;
     	}
