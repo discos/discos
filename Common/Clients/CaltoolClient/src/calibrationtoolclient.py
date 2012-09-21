@@ -87,7 +87,7 @@ class MyWorker(QThread):
                         (amplitude,compl10)=self.amplitude.get_sync()
                         self.emit(Qt.SIGNAL("amplitude"),"%5.3f" % amplitude)
                         (peakOffset,compl11)=self.peakOffset.get_sync()
-                        self.emit(Qt.SIGNAL("peakOffset"),"%5.3f" % (peakOffset/math.pi*180*60))
+                        self.emit(Qt.SIGNAL("peakOffset"),"%5.3f" % (peakOffset/math.pi*180))
                         (slope,compl12)=self.slope.get_sync()
                         
                         self.emit(Qt.SIGNAL("slope"),"%5.3f" %slope)
