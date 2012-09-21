@@ -78,10 +78,10 @@ TCL_SCRIPTS_L   =
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         =
-PY_SCRIPTS_L       =  customwidgets calibrationtool_ui calibrationtoolclient
+PY_SCRIPTS         =  calibrationtoolclient
+PY_SCRIPTS_L       =  
 
-PY_MODULES         =
+PY_MODULES         = customwidgets calibrationtool_ui 
 PY_MODULES_L       =
 
 PY_PACKAGES        =

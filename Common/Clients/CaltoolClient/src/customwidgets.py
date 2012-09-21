@@ -15,7 +15,7 @@ Custom widgets classes.
 
 class PlotProperty(Qwt.QwtPlot):
       
-      def __init__(self,propertyname,parent,*args):
+      def __init__(self,parent,*args):
 	Qwt.QwtPlot.__init__(self,parent,*args) # you must initialize the superclass
 	self.timeData= [i for i in range (1000)]
 	
@@ -44,7 +44,23 @@ class PlotProperty(Qwt.QwtPlot):
  	      		value_decimated[i] =val[i*step-1]
 		self.curve.setData(self.timeData,value_decimated)	
 		self.replot()
-   
+      @pyqtSlot(Qt.QObject,name="setX")  # decorator for the slot
+      
+      def setX(self,val):
+                self.timeData=[i for i in val]
+      def setDataY(self,val):
+                value_decimated=[0 for i in range (1000)]
+                
+                step=len(val)/1000
+                if step<1:
+                        step=1  #step 0 not allowed
+                for i in  range(0,min(len(val),1000)):
+                        value_decimated[i] =val[i*step-1]
+                self.curve.setData(self.timeData,value_decimated)       
+                self.replot()
+      def setDataX(self,val):
+        
+             pass
       def __del__(self):
 # 	self.actMonwspeed.destroy()
 	print "The end __oOo__"
