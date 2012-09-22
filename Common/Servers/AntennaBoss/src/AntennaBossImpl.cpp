@@ -158,6 +158,8 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	// configure the parser.....
 	m_parser->add<0>("antennaDisable",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::disable));
 	m_parser->add<0>("antennaEnable",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::enable));
+	m_parser->add<0>("antennaCorrectionOn",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::enableCorrection));
+	m_parser->add<0>("antennaCorrectionOff",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::disableCorrection));
 	m_parser->add<0>("antennaPark",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::stow));
 	m_parser->add<0>("antennaStop",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::stop));
 	m_parser->add<0>("antennaAzEl",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::setPreset));

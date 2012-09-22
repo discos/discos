@@ -151,7 +151,7 @@ void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
 		site=observatory->getSiteSummary();  //throw CORBA::SYSTEMEXCEPTION
 	}
 	catch (CORBA::SystemException& ex)	{
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,__dummy,"CBossCore::updateSite()");
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,__dummy,"CBossCore::execute()");
 		__dummy.setName(ex._name());
 		__dummy.setMinor(ex.minor());
 		throw __dummy;
