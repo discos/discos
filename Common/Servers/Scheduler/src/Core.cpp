@@ -110,6 +110,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	// antenna subsystem
 	m_parser->add("antennaDisable","antenna",1,&CCore::remoteCall);
 	m_parser->add("antennaEnable","antenna",1,&CCore::remoteCall);
+	m_parser->add("antennaCorrectionOn","antenna",1,&CCore::remoteCall);
+	m_parser->add("antennaCorrectionOff","antenna",1,&CCore::remoteCall);
 	m_parser->add("antennaPark","antenna",1,&CCore::remoteCall);
 	m_parser->add("antennaAzEl","antenna",1,&CCore::remoteCall);
 	m_parser->add("antennaTrack","antenna",1,&CCore::remoteCall);
