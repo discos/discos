@@ -856,7 +856,7 @@ void ReceiverControl::setSingleDishMode(
         // Now the bits 13 and 14 are set to 1
         // We need to set the bit 13 to 0, wait a bit and set it to 1
         
-        usleep(SETMODE_SLEEP_TIME);
+        usleep(3 * SETMODE_SLEEP_TIME);
         // Turn ON the single dish mode on port number 13
         makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -952,7 +952,7 @@ void ReceiverControl::setVLBIMode(
         // Now the bits 13 and 14 are set to 1
         // We need to set the bit 13 to 1, wait a bit and set again it to 0
         
-        usleep(SETMODE_SLEEP_TIME);
+        usleep(3 * SETMODE_SLEEP_TIME);
         
         // Turn ON the VLBI mode on port number 14
         makeRequest(
