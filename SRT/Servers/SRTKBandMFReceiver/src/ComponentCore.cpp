@@ -197,8 +197,8 @@ void CComponentCore::calOn() throw (
         throw impl;
     }
     try {
-    m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
-    clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
+        m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
+        clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
     }    
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOn()");
@@ -781,8 +781,10 @@ void CComponentCore::updateNoiseMark() throw (ReceiversErrors::ReceiverControlBo
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
-    if (answer!=checkStatusBit(NOISEMARK)) setStatusBit(NOISEMARKERROR);
-    else clearStatusBit(NOISEMARKERROR);
+    if (answer!=checkStatusBit(NOISEMARK)) 
+        setStatusBit(NOISEMARKERROR);
+    else 
+        clearStatusBit(NOISEMARKERROR);
     try {
     	m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
     	m_control->isExtCalibrationOn() ? setStatusBit(EXTNOISEMARK) : clearStatusBit(EXTNOISEMARK);

@@ -82,13 +82,21 @@ void SRTKBandMFCore::setMode(const char * mode) throw (
     _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CConfiguration::setMode()");
     
     // Set the operating mode to the board
-    if(cmdMode == "SINGLEDISH")
-            m_control->setSingleDishMode();
-    else
-        if(cmdMode == "VLBI")
-            m_control->setVLBIMode();
-        else 
-            throw impl; // If the mode is not supported, raise an exception
+    try {
+        if(cmdMode == "SINGLEDISH")
+                m_control->setSingleDishMode();
+        else
+            if(cmdMode == "VLBI")
+                m_control->setVLBIMode();
+            else 
+                throw impl; // If the mode is not supported, raise an exception
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl, "SRTKBandMFCore::setMode()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
 
     m_configuration.setMode(cmdMode);
 
@@ -112,7 +120,18 @@ void SRTKBandMFCore::setMode(const char * mode) throw (
     setLO(lo); 
 
     // Verify the m_setupMode is the same mode active on the board
-    if((cmdMode == "SINGLEDISH" && !m_control->isSingleDishModeOn()) || (cmdMode == "VLBI" && !m_control->isVLBIModeOn())) {
+    bool isSingleDishModeOn, isVLBIModeOn;
+    try {
+        isSingleDishModeOn = m_control->isSingleDishModeOn();
+        isVLBIModeOn = m_control->isVLBIModeOn();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl, "SRTKBandMFCore::setMode()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    if((cmdMode == "SINGLEDISH" && !isSingleDishModeOn) || (cmdMode == "VLBI" && !isVLBIModeOn)) {
         m_setupMode = ""; // If m_setupMode doesn't match the mode active on the board, then set un unknown mode
         throw impl;
     }
