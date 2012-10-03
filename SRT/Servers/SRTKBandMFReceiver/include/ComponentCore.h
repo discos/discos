@@ -471,11 +471,12 @@ protected:
         VACUUMPUMPFAULT=3,
         VACUUMVALVEOPEN=4,
         COOLHEADON=5,
-        NOISEMARK=6,
-        NOISEMARKERROR=7,
-        EXTNOISEMARK=8,
-        CONNECTIONERROR=9,
-        UNLOCKED=10
+        COMPRESSORFAULT=6,
+        NOISEMARK=7,
+        NOISEMARKERROR=8,
+        EXTNOISEMARK=9,
+        CONNECTIONERROR=10,
+        UNLOCKED=11
     };
 
 

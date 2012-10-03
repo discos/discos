@@ -207,7 +207,7 @@ void SRTKBandMFReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentEr
     SRTKBandMFCore *temp = &m_core;
     try {
          m_monitor = getContainerServices()->getThreadManager()->create<CMonitorThread, SRTKBandMFCore*> (
-                 "WHATCHDOKBANDMF", temp, config->getWarchDogResponseTime()*10, config->getWatchDogSleepTime()*10);
+                 "WHATCHDOKBANDMF", temp, config->getWarchDogResponseTime(), config->getWatchDogSleepTime());
     }
     catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
         _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl, _dummy, ex, "SRTKBandMFReceiverImpl::execute()");
