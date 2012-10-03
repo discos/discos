@@ -53,7 +53,8 @@ private:
  *     cryogenic temperature value</li>
  *     <li>void setCoolHeadOn(): set to ON the cool head</li>
  *     <li>void setCoolHeadOff(): set to OFF the cool head</li>
- *     <li>bool isCoolHeadOn(): return true if the cool head is ON</li>
+ *     <li>bool isCoolHeadSetOn(): return true if the cool head is set ON</li>
+ *     <li>bool isCoolHeadOn(): return true if the cool head status bit is ON</li>
  *     <li>void setVacuumSensorOn(): set to ON the vacuum sensor</li>
  *     <li>void setVacuumSensorOff(): set to OFF the vacuum sensor</li>
  *     <li>bool isVacuumSensorOn(): return true if the vacuum sensor is ON</li>
@@ -360,7 +361,7 @@ public:
     ) throw (ReceiverControlEx);
 
 
-    /** Set to OFF the cool head 
+    /** Set to OFF the cool head
      *  @param data_type the type of the data; the default type is 1 bit
      *  @param port_type the port type; the default port is the Digital IO
      *  @param port_number the port number; the default port number is 08
@@ -374,18 +375,31 @@ public:
             const BYTE value=0x00
     ) throw (ReceiverControlEx);
 
-
-    /** Is the cool head ON?
+    /** Is the cool head set ON?
      *  @param data_type the type of the data; the default type is 1 bit
      *  @param port_type the port type; the default port is the Digital IO
      *  @param port_number the port number; the default port number is 08
      *  @return true if the cool head is ON
      *  @throw ReceiverControlEx
      */
-    bool isCoolHeadOn(
+    bool isCoolHeadSetOn(
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,   
             const BYTE port_number=MCB_PORT_NUMBER_08
+    ) throw (ReceiverControlEx);
+
+
+    /** Is the cool head status ON?
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 24
+     *  @return true if the cool head is ON
+     *  @throw ReceiverControlEx
+     */
+    bool isCoolHeadOn(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
+            const BYTE port_type=MCB_PORT_TYPE_DIO,   
+            const BYTE port_number=MCB_PORT_NUMBER_24
     ) throw (ReceiverControlEx);
 
 

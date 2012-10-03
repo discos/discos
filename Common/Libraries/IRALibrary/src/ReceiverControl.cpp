@@ -359,6 +359,34 @@ void ReceiverControl::setCoolHeadOff(
 }
 
 
+bool ReceiverControl::isCoolHeadSetOn(
+            const BYTE data_type,
+            const BYTE port_type,
+            const BYTE port_number
+            ) throw (ReceiverControlEx)
+{
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number
+        );
+
+        // In that case makeRequest should return just one parameter (1 bit: ON, OFF)
+        if(parameters.size() != 1)
+            throw ReceiverControlEx("RecieverControl::isCoolHeadSetOn(): wrong number of parameters.");
+
+        return parameters.front() == 0 ? false : true;
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing isCoolHeadSetOn().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
 
 bool ReceiverControl::isCoolHeadOn(
             const BYTE data_type,

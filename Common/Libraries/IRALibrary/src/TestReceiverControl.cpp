@@ -213,60 +213,60 @@ int main(int argc, char *argv[])
 
         // sleep(5);
 
-        // // Test fetValues()
-        // cout << "Test fetValues() with a reliable communication" << endl;
-        // ReceiverControl::FetValues values = rc.fetValues(0, 4, currentConverter, voltageConverter);
-        // cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
-        // cout << ", VGL=" << values.VGL << ")" << endl;
-        // cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
-        // cout << ", VGR=" << values.VGR << ")" << endl;
-        // cout << endl;
-        // values = rc.fetValues(1, 2, currentConverter);
-        // cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
-        // cout << ", VGL=" << values.VGL << ")" << endl;
-        // cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
-        // cout << ", VGR=" << values.VGR << ")" << endl;
-        // cout << "Done!\n" << endl;
+        // Test fetValues()
+        cout << "Test fetValues() with a reliable communication" << endl;
+        ReceiverControl::FetValues values = rc.fetValues(0, 4, currentConverter, voltageConverter);
+        cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        cout << ", VGL=" << values.VGL << ")" << endl;
+        cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        cout << ", VGR=" << values.VGR << ")" << endl;
+        cout << endl;
+        values = rc.fetValues(1, 2, currentConverter);
+        cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        cout << ", VGL=" << values.VGL << ")" << endl;
+        cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        cout << ", VGR=" << values.VGR << ")" << endl;
+        cout << "Done!\n" << endl;
 
-        // sleep(5);
+        sleep(5);
 
-        // // Test the turnLeftLNAsOn()
-        // cout << "Test turnLeftLNAsOn() with a reliable communication" << endl;
-        // rc.turnLeftLNAsOn();
-        // cout << "Done!\n" << endl;
+        // Test the turnLeftLNAsOn()
+        cout << "Test turnLeftLNAsOn() with a reliable communication" << endl;
+        rc.turnLeftLNAsOn();
+        cout << "Done!\n" << endl;
 
-        // // Test fetValues()
-        // cout << "Test fetValues() with a reliable communication" << endl;
-        // values = rc.fetValues(0, 4, currentConverter, voltageConverter);
-        // cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
-        // cout << ", VGL=" << values.VGL << ")" << endl;
-        // cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
-        // cout << ", VGR=" << values.VGR << ")" << endl;
-        // cout << endl;
-        // values = rc.fetValues(1, 2, currentConverter);
-        // cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
-        // cout << ", VGL=" << values.VGL << ")" << endl;
-        // cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
-        // cout << ", VGR=" << values.VGR << ")" << endl;
-        // cout << "Done!\n" << endl;
+        // Test fetValues()
+        cout << "Test fetValues() with a reliable communication" << endl;
+        values = rc.fetValues(0, 4, currentConverter, voltageConverter);
+        cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        cout << ", VGL=" << values.VGL << ")" << endl;
+        cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        cout << ", VGR=" << values.VGR << ")" << endl;
+        cout << endl;
+        values = rc.fetValues(1, 2, currentConverter);
+        cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        cout << ", VGL=" << values.VGL << ")" << endl;
+        cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        cout << ", VGR=" << values.VGR << ")" << endl;
+        cout << "Done!\n" << endl;
 
-        // sleep(3);
+        sleep(3);
 
         // // Test stageValues()
-        // cout << "Test stageValues() with a reliable communication" << endl;
-        // ReceiverControl::StageValues svalues = rc.stageValues(ReceiverControl::DRAIN_VOLTAGE, 4, voltageConverter);
-        // cout << "Drain voltages for the stage number 4:\n" << endl;
-        // cout << "\tLeft channel:\n";
-        // std::vector<double>::iterator liter = (svalues.left_channel).begin();
-        // std::vector<double>::iterator lend = (svalues.left_channel).end();
-        // for(int idx=0; liter != lend; liter++, idx++) 
-        //     cout << "Item " << idx << ": " << *liter << endl;
-        // cout << "\tRight channel:\n";
-        // std::vector<double>::iterator riter = (svalues.right_channel).begin();
-        // std::vector<double>::iterator rend = (svalues.right_channel).end();
-        // for(int idx = 0; riter != rend; riter++, idx++) 
-        //     cout << "Item " << idx << ": " << *riter << endl;
-        // cout << "Done!\n" << endl;
+        cout << "Test stageValues() with a reliable communication" << endl;
+        ReceiverControl::StageValues svalues = rc.stageValues(ReceiverControl::DRAIN_VOLTAGE, 4, voltageConverter);
+        cout << "Drain voltages for the stage number 4:\n" << endl;
+        cout << "\tLeft channel:\n";
+        std::vector<double>::iterator liter = (svalues.left_channel).begin();
+        std::vector<double>::iterator lend = (svalues.left_channel).end();
+        for(int idx=0; liter != lend; liter++, idx++) 
+            cout << "Item " << idx << ": " << *liter << endl;
+        cout << "\tRight channel:\n";
+        std::vector<double>::iterator riter = (svalues.right_channel).begin();
+        std::vector<double>::iterator rend = (svalues.right_channel).end();
+        for(int idx = 0; riter != rend; riter++, idx++) 
+            cout << "Item " << idx << ": " << *riter << endl;
+        cout << "Done!\n" << endl;
 
         // // Test the isCalibrationOn()
         // cout << "Test isCalibrationOn() with a reliable communication" << endl;
