@@ -20,22 +20,21 @@
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
   	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Receivers.xsd"/>
-  	
-  	<xs:complexType name="SRT7GHzStatusType">
+  	  	
+  	<xs:complexType name="SRTKBandMFStatusType">
 		<xs:complexContent>
 			<xs:restriction base="baci:ROpattern">
 				<xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="2048"/>
             	<xs:attribute name="bitDescription" type="xs:string" use="optional" default=
-                	"Local,Vacuum_Sensor,Vacuum_Pump_Status,Vacuum_Pump_Fault,Vacuum_Valve_Open,Cool_Head_On,Noise_Mark,Noise_Mark_Error,
-                	External_Mark_Enabled,Connection_Error,Unlocked"/>
+                    "Local,Vacuum_Sensor,Vacuum_Pump_Status,Vacuum_Pump_Fault,Vacuum_Valve_Open,Cool_Head_On,Compressor_Fault,
+                    Noise_Mark,Noise_Mark_Error, External_Mark_Enabled,Connection_Error,Unlocked"/>
 				<xs:attribute name="whenSet" type="xs:string" use="optional" default=
-                	"0, 2, 2, 1, 2, 2, 2, 0, 2, 0, 0"/>
+                	"0, 2, 2, 1, 2, 2, 0, 2, 0, 2, 0, 0"/>
             	<xs:attribute name="whenCleared" type="xs:string" use="optional" default=
-            		"2, 3, 3, 2, 3, 3, 3, 2, 3, 2, 2"/>
+            		"2, 3, 3, 2, 3, 3, 2, 3, 2, 3, 2, 2"/>
 			</xs:restriction>
 		</xs:complexContent>
 	</xs:complexType>
-	
 	
 	<xs:complexType name="SRT7GHzReceiverType">
 		<xs:sequence>

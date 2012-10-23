@@ -685,14 +685,31 @@ void CComponentCore::updateCoolHead()  throw (ReceiversErrors::ReceiverControlBo
 		answer=m_control->isCoolHeadOn();
 	}
 	catch (IRA::ReceiverControlEx& ex) {
-		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCoolHead()");
+		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCoolHead()->isCoolHeadOn()");
 		impl.setDetails(ex.what().c_str());
 		setStatusBit(CONNECTIONERROR);
 		throw impl;
 	}
-	if (!answer) setStatusBit(COOLHEADON);
-	else clearStatusBit(COOLHEADON);
-	clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+    if (!answer) {
+        setStatusBit(COOLHEADON);
+        try {
+            answer=m_control->isCoolHeadSetOn();
+        }
+        catch (IRA::ReceiverControlEx& ex) {
+            _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCoolHead() - isCoolHeadSetOn()");
+            impl.setDetails(ex.what().c_str());
+            setStatusBit(CONNECTIONERROR);
+            throw impl;
+        }
+        if(!answer)
+            setStatusBit(COMPRESSORFAULT);
+        else
+            clearStatusBit(COMPRESSORFAULT);
+    }
+    else 
+        clearStatusBit(COOLHEADON);
+
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
 void CComponentCore::updateCryoCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)

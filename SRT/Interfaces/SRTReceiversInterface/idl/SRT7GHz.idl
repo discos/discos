@@ -11,10 +11,9 @@
 module Receivers {
 
 	/**
-	* This module defines the interface of the 7 GHZ receiver installed in the SRT.
-	* This is single feed receiver, in which we can monitor just one stage of amplification.
-	* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+	* This module defines the interface of the 22GHz Multifeed receiver installed in the SRT.
 	* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
+	* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
     * <br>
 	* @copybrief Receivers::Receiver::status
 	* the single bits of the status word assumed the following meaning:
@@ -24,13 +23,13 @@ module Receivers {
 	* @arg \c 3 VACUUMPUMPFAULT, set if the vacuum pump is in fault state, warning
 	* @arg \c 4 VACUUMVALVEOPEN, set if the vacuum valve i sopen, status
 	* @arg \c 5 COOLHEADON, set if the cool head is turned on, status
-	* @arg \c 6 NOISEMARK, set is the calibration diode is on, status
-	* @arg \c 7 NOISEMARKERROR, set if the calibration mark should be and it is not, or viceversa, error
-	* @arg \c 8 EXTNOISEMARK, set if the control of the calibration diode from external source is enabled, status
-	* @arg \c 9 CONNECTIONERROR, set if an error was found during the comunication from/to the receiver, error
-	* @arg \c 10 UNLOCKED, set if at least one of the local oscillator is not locked, error
+	* @arg \c 6 COMPRESSORFAULT, set if the compressor is in fault state is turned on, error
+	* @arg \c 7 NOISEMARK, set is the calibration diode is on, status
+	* @arg \c 8 NOISEMARKERROR, set if the calibration mark should be and it is not, or viceversa, error
+	* @arg \c 9 EXTNOISEMARK, set if the control of the calibration diode from external source is enabled, status
+	* @arg \c 10 CONNECTIONERROR, set if an error was found during the comunication from/to the receiver, error
+	* @arg \c 11 UNLOCKED, set if at least one of the local oscillator is not locked, error
 	* @copybrief Receivers::CommonReceiverInterface::setLO 
-	* In this implementation just one Local osccilator value is supported and so only the first provided value will be considered
 	*/
     interface SRT7GHz : ACS::CharacteristicComponent, Receiver {
 
