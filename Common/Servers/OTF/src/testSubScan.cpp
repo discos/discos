@@ -1,10 +1,11 @@
 #include "SubScan.h"
 #include <slamac.h>
+#include <IRATools.h>
 
 
-#define INIT_AZ 56.0 * DD2R
+#define INIT_AZ 18.0 * DD2R
 #define INIT_SECTOR Antenna::ACU_CCW
-#define INIT_EL 21.0 * DD2R
+#define INIT_EL 45.0 * DD2R
 
 /*#define INIT_TIME_Y 2011
 #define INIT_TIME_M 1
@@ -14,19 +15,19 @@
 #define INIT_TIME_SS 00
 #define INIT_TIME_MS 000000*/
 
-#define LON1  69.2682300 * DD2R 
-#define LAT1  29.6705050 * DD2R
-#define LON2  1.0 * DD2R
-#define LAT2  0.000 * DD2R
+#define LON1  202.7845 * DD2R
+#define LAT1  30.5092 * DD2R
+#define LON2  0.0 * DD2R
+#define LAT2  0.7 * DD2R
 
 #define COORD_FRAME Antenna::ANT_EQUATORIAL
-#define GEOMETRY Antenna::SUBSCAN_CONSTLAT
-#define SUBSCAN_FRAME Antenna::ANT_EQUATORIAL
+#define GEOMETRY Antenna::SUBSCAN_CONSTLON
+#define SUBSCAN_FRAME Antenna::ANT_HORIZONTAL
 #define DESCRIPTION Antenna::SUBSCAN_CENTER
 #define DIRECTION Antenna::SUBSCAN_INCREASE
 /*#define DELAY 0.0  // secondi tra tempo di inizializzazione e startUT*/
 #define DUT1 0.0
-#define DURATION 15.0
+#define DURATION 14.0
 
 int main() {
 	IRA::CSite site;
@@ -77,6 +78,78 @@ int main() {
 		else printf("Sector is CCW\n");
 		Antenna::OTFAttributes att;
 		scan.fillAllAttributes(&att);
+		/*
+		 * HERE FOLLOWS WHAT HAPPENS IN fillAllAttributes:
+		att->rightAscension=slaDranrm(appRa);
+		att->declination=IRA::CIRATools::latRangeRad(appDec);
+		att->julianEpoch=epoch;
+		att->azimuth=slaDranrm(az);
+		att->elevation=IRA::CIRATools::latRangeRad(el);
+		att->gLongitude=slaDranrm(glon);
+		att->gLatitude=IRA::CIRATools::latRangeRad(glat);
+		att->parallacticAngle=pAngle;
+		att->J2000RightAscension=slaDranrm(m_origCenterRA);
+		att->J2000Declination=IRA::CIRATools::latRangeRad(m_origCenterDec);
+		if (m_offFrame==Antenna::ANT_EQUATORIAL){
+			att->userAzimuthOffset=0.0;
+			att->userElevationOffset=0.0;
+			att->userRightAscensionOffset=m_lonoff;
+			att->userDeclinationOffset=m_latoff;
+			att->userLongitudeOffset=0.0;
+			att->userLatitudeOffset=0.0;
+		} else if (m_offFrame==Antenna::ANT_HORIZONTAL){
+			att->userAzimuthOffset=m_lonoff;
+			att->userElevationOffset=m_latoff;
+			att->userRightAscensionOffset=0.0;
+			att->userDeclinationOffset=0.0;
+			att->userLongitudeOffset=0.0;
+			att->userLatitudeOffset=0.0;
+		} else if (m_offFrame==Antenna::ANT_GALACTIC){
+			att->userAzimuthOffset=0.0;
+			att->userElevationOffset=0.0;
+			att->userRightAscensionOffset=0.0;
+			att->userDeclinationOffset=0.0;
+			att->userLongitudeOffset=m_lonoff;
+			att->userLatitudeOffset=m_latoff;
+		}
+		att->startLon=slaDranrm(m_startLon);
+		att->startLat=IRA::CIRATools::latRangeRad(m_startLat);
+		att->stopLon=slaDranrm(m_stopLon);
+		att->stopLat=IRA::CIRATools::latRangeRad(m_stopLat);
+		if (m_isPointingScan) {
+			att->centerLon=slaDranrm(m_targetAz);
+			att->centerLat=IRA::CIRATools::latRangeRad(m_targetEl);
+		}
+		else {
+			att->centerLon=slaDranrm(m_centerLon);
+			att->centerLat=IRA::CIRATools::latRangeRad(m_centerLat);
+		}
+
+		att->centerRA=slaDranrm(m_origCenterRA);
+		att->centerDec=IRA::CIRATools::latRangeRad(m_origCenterDec);
+		att->centerGLon=slaDranrm(m_origCenterGLon);
+		att->centerGLat=IRA::CIRATools::latRangeRad(m_origCenterGLat);
+		att->centerAz=slaDranrm(m_origCenterAz);
+		att->centerEl=IRA::CIRATools::latRangeRad(m_origCenterEl);
+		att->lonSpan=m_lonSpan;
+		att->latSpan=m_latSpan;
+		att->skySpan=m_skySpan;
+		att->lonRate=m_lonRate;
+		att->latRate=m_latRate;
+		att->skyRate=m_skyRate;
+		att->subScanSpan=m_subScanSpan;
+		att->phiRate=m_phiRate;
+		att->coordFrame=m_coordFrame;
+		att->geometry=m_geometry;
+		att->subScanFrame=m_subScanFrame;
+		att->description=m_description;
+		att->direction=m_direction;
+		att->startUT=m_startUT.value().value;
+		att->subScanDuration=m_subScanDuration.value().value;
+		*/
+
+
+
 		printf("rightAscension %lf \n",att.rightAscension);
 		printf("declination %lf \n",att.declination);
 		printf("azimuth %lf \n",att.azimuth);
@@ -95,6 +168,10 @@ int main() {
 		printf("centerDec %lf \n",att.centerDec);
 		printf("lonSpan %lf \n",att.lonSpan);
 		printf("latSpan %lf \n",att.latSpan);
+		printf("lonRate %lf \n",att.lonRate);
+		printf("latRate %lf \n",att.latRate);
+		printf("subScanSpan %lf \n",att.subScanSpan);
+
 	}
 	catch (ComponentErrors::ValidationErrorExImpl& ex) {
 		ex.log();
