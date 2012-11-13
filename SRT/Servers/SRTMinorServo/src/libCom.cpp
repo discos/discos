@@ -263,6 +263,7 @@ void process(
            // getstatus
            case 7: {
                (status_par->actual_pos).exe_time = timestamp;
+               (status_par->actual_elongation).exe_time = timestamp;
                // Erase the element of index 0
                parameters.erase(parameters.begin());
                status_par->appState = str2int(parameters[0]);
@@ -281,6 +282,7 @@ void process(
 
                    // Set the length of DoubleSeq
                    (status_par->actual_pos).position.length(cdb_ptr->NUMBER_OF_AXIS);
+                   (status_par->actual_elongation).position.length(cdb_ptr->NUMBER_OF_AXIS);
                    for (vector<string>::size_type idx = 0; idx != parameters.size(); ++idx) {
                        // Clear the stream
                        istm.clear();
@@ -289,6 +291,9 @@ void process(
                        istm.str(parameters[idx]);
                        // Redirect the stream into ``position[idx]`` (#idx item of DoubleSeq)
                        istm >> ((status_par->actual_pos).position)[idx];
+                   }
+                   for (vector<string>::size_type idx = 0; idx != parameters.size(); ++idx) {
+                       ((status_par->actual_elongation).position)[idx] = ((status_par->actual_pos).position)[idx];
                    }
 
                    if(cdb_ptr->VIRTUAL_RS == 1)

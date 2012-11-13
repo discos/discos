@@ -32,6 +32,7 @@ module MinorServo {
      *     <li><em>actPos</em>: actual position (ROdoubleSeq)</li>
      *     <li><em>cmdPos</em>: commanded position (RWdoubleSeq)</li>
      *     <li><em>posDiff</em>: difference between commanded and actual position (ROdoubleSeq)</li>
+     *     <li><em>actElongation</em>: actuators elongation (ROdoubleSeq)</li>
      *     <li><em>engTemperature</em>: engine temperature (ROdoubleSeq)</li>
      *     <li><em>driTemperature</em>: driver temperature (ROdoubleSeq)</li>
      *     <li><em>counturingErr</em>: counturing error (ROdoubleSeq)</li>
@@ -92,6 +93,15 @@ module MinorServo {
          * @throw ComponentErrors::SocketErrorExImpl
          */
         readonly attribute ACS::ROdoubleSeq posDiff;
+
+        /**
+         * Actual Elongation Property (ROdoubleSeq).
+         * The WPServo actual elongation. Every sequence item is a "real" coordinate,
+         * that is the coordinate related to the physical axes (actuator elongations for the SRP).
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq actElongation;
 
         /**
          * Engine temperatures Property (ROdoubleSeq).

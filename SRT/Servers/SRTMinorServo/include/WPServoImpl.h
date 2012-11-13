@@ -127,7 +127,20 @@ public:
      * @throw CORBA::SystemException
      */
      virtual ACS::ROdoubleSeq_ptr posDiff() throw (CORBA::SystemException);
+ 
     
+    /** 
+     * Return a reference to actElongation property (actual elongation, ROdoubleSeq) 
+     *
+     * The actElongation property is a ROdoubleSeq of coordinates. The reference
+     * system of coordinates is real one, that corresponds to the actuator elongations.
+     *
+     * @return pointer to ROdoubleSeq actElongation property
+     * @throw CORBA::SystemException
+     */
+     virtual ACS::ROdoubleSeq_ptr actElongation() throw (CORBA::SystemException);
+
+   
 
     /** 
      * Return a reference to engTemperature property (ROdoubleSeq) 
@@ -420,6 +433,9 @@ private:
 
     /** Position difference property */
     SmartPropertyPointer<ROdoubleSeq> m_posDiff;
+
+    /** Actual elongation property */
+    SmartPropertyPointer<ROdoubleSeq> m_actElongation;
 
     /** Offsets to add to the input positions */
     Offsets m_offsets;

@@ -44,6 +44,7 @@ WPServoImpl::WPServoImpl(
     m_actPos(this),
     m_cmdPos(this),
     m_posDiff(this),
+    m_actElongation(this),
     m_engTemperature(this),
     m_counturingErr(this),
     m_torquePerc(this),
@@ -213,6 +214,7 @@ void WPServoImpl::initialize() throw (
     m_expire.timeLastActPos[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastCmdPos[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastPosDiff[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastActElongation[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastEngTemperature[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastCounturingErr[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastTorquePerc[m_cdb_ptr->SERVO_ADDRESS] = -100;
@@ -230,6 +232,7 @@ void WPServoImpl::initialize() throw (
     m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.cmdPos[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.posDiff[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.actElongation[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.engTemperature[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.counturingErr[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.torquePerc[m_cdb_ptr->SERVO_ADDRESS] = 0;
@@ -248,6 +251,7 @@ void WPServoImpl::initialize() throw (
     m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
     m_expire.cmdPos[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
     m_expire.posDiff[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
+    m_expire.actElongation[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
 
     // Offsets initialization
     (m_offsets.user).length(m_cdb_ptr->NUMBER_OF_AXIS);
@@ -372,6 +376,12 @@ void WPServoImpl::execute()
                 getContainerServices()->getName() + ":posDiff", 
                 getComponent(), 
                 new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::POS_DIFF, m_cdb_ptr, &m_expire), true);
+        
+        // Actual Elongation
+        m_actElongation = new ROdoubleSeq(
+                getContainerServices()->getName() + ":actElongation", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::ACT_ELONGATION, m_cdb_ptr, &m_expire), true);
 
         // Engine temperature
         m_engTemperature = new ROdoubleSeq(
@@ -837,6 +847,7 @@ ACS::doubleSeq * WPServoImpl::getData(const char *data_name) throw (MinorServoEr
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_actPos, actPos);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::RWdoubleSeq, m_cmdPos, cmdPos);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_posDiff, posDiff);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_actElongation, actElongation);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_engTemperature, engTemperature);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_counturingErr, counturingErr);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_torquePerc, torquePerc);

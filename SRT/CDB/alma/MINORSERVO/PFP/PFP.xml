@@ -21,7 +21,7 @@
     scale_factor="1"
     scale_offset="0"
     server_ip="192.135.33.196"
-    server_port="8000"
+    server_port="10000"
     timeout="2000000"
     servo_address="0"
     zero="0"
@@ -88,7 +88,26 @@
         min_step="0"
         alarm_timer_trig="0"
 	/>
-              
+     
+    <!-- Actual Elongation (ROdoubleSeq) -->
+    <actElongation
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo actual elongation" 
+        units="mm"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+         
     <!-- Engine Temperature (ROdoubleSeq) -->
     <engTemperature
         default_timer_trig="0"

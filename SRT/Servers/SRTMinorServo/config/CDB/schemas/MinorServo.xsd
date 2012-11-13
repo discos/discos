@@ -32,6 +32,8 @@
             <xs:element name="cmdPos" type="baci:RWdoubleSeq" />
             <!-- Difference between commanded and actual position (ROdoubleSeq) -->
             <xs:element name="posDiff" type="baci:ROdoubleSeq" />
+            <!-- MinorServo actual elongation (ROdoubleSeq) -->
+            <xs:element name="actElongation" type="baci:ROdoubleSeq" />
             <!-- Temperature of slave engine (ROdoubleSeq) -->
             <xs:element name="engTemperature" type="baci:ROdoubleSeq" />
             <!-- Counturing Error of slaves (ROdoubleSeq) -->

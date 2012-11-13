@@ -42,6 +42,8 @@ struct ExpireTime {
     double timeLastCmdPos[NUMBER_OF_SERVOS];
 	ACS::doubleSeq posDiff[NUMBER_OF_SERVOS];
     double timeLastPosDiff[NUMBER_OF_SERVOS];
+	ACS::doubleSeq actElongation[NUMBER_OF_SERVOS];
+    double timeLastActElongation[NUMBER_OF_SERVOS];
 	ACS::doubleSeq engTemperature[NUMBER_OF_SERVOS];
     double timeLastEngTemperature[NUMBER_OF_SERVOS];
 	ACS::doubleSeq counturingErr[NUMBER_OF_SERVOS];
@@ -88,6 +90,7 @@ struct PositionItem {
 
 struct StatusParameters {
     PositionItem actual_pos;
+    PositionItem actual_elongation;
     unsigned short appState;
     unsigned long appStatus;
     unsigned short cabState;

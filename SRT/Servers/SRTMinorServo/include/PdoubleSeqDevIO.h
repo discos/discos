@@ -32,6 +32,7 @@ public:
         ACT_POS,           /*!< the devio will be used to read the  actPos */
         CMD_POS,           /*!< the devio will be used to set the  cmdPos */
         POS_DIFF,          /*!< the devio will be used to read the  posDiff */
+        ACT_ELONGATION,    /*!< the devio will be used to read the  actElongation */
         ENG_TEMPERATURE,   /*!< the devio will be used to read the  engTemperature */
         COUNTURING_ERR,    /*!< the devio will be used to read the  counturingErr */
         TORQUE_PERC,       /*!< the devio will be used to read the  torquePerce */
@@ -69,6 +70,10 @@ public:
             }
             case POS_DIFF: {
                 m_PropertyName=CString("Position Difference");
+                break;
+            }
+            case ACT_ELONGATION: {
+                m_PropertyName=CString("Actual Elongation");
                 break;
             }
             case ENG_TEMPERATURE: {
@@ -168,6 +173,16 @@ public:
                 // The pos_diff is not filtered by isValueUpToDate and sets the LastActPos time
                 case POS_DIFF: {
                     m_value = m_expire_ptr->posDiff[m_cdb_ptr->SERVO_ADDRESS];
+                    break;
+                }
+
+                case ACT_ELONGATION: {
+                    // if(!isValueUpToDate()) {
+                    //     m_wpServoTalk->getActElongation(m_expire_ptr->actPos[m_cdb_ptr->SERVO_ADDRESS], timestamp);
+                    //     gettimeofday(&now, NULL);
+                    //     m_expire_ptr->timeLastActPos[m_cdb_ptr->SERVO_ADDRESS] = now.tv_sec + now.tv_usec / 1000000.0;
+                    // }
+                    m_value = m_expire_ptr->actElongation[m_cdb_ptr->SERVO_ADDRESS];
                     break;
                 }
 
