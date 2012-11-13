@@ -45,7 +45,7 @@ class App:
         self.yscrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL)
         self.yscrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.list_box = tk.Listbox(frame, 
-                                   width=80, 
+                                   width=160, 
                                    height=MAX_WINDOW_SIZE, 
                                    yscrollcommand=self.yscrollbar.set)
         self.clear_button = tk.Button(frame, text="clear", command=self.clear)
