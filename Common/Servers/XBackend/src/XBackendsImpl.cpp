@@ -14,7 +14,6 @@
 #include "DevIOInputsNumber.h"
 #include "DevIOSampleRate.h"
 #include "DevIOBins.h"
-#include "DevIOFileName.h"
 #include "DevIOFeed.h"
 #include "DevIOIntegration.h"
 #include "DevIOStatus.h"
@@ -24,6 +23,7 @@
 #include "DevIOSectionsNumber.h"
 #include "DevIOInputSection.h"
 #include "Timer.h"
+
 static char *rcsId="@(#) $Id: XBackendsImpl.cpp,v 1.39 2010/08/26 13:29:34 bliliana Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
@@ -47,7 +47,6 @@ XBackendsImpl::XBackendsImpl(const ACE_CString &CompName,maci::ContainerServices
 	m_pstatus(this),
 	m_pfeed(this),
 	m_ptsys(this),
-	m_pfileName(this),		
 	m_pbusy(this),
 	m_pmode8bit(this),
 	m_pcontrolLoop(NULL)	
@@ -62,7 +61,6 @@ XBackendsImpl::XBackendsImpl(const ACE_CString &CompName,maci::ContainerServices
 	groupS=NULL;
 	m_parser=NULL;
 	m_pcontrolLoop=NULL;
-	
 }
 
 XBackendsImpl::~XBackendsImpl() 
@@ -117,8 +115,6 @@ void XBackendsImpl::initialize()
 		m_ptime=new ROuLongLong(getContainerServices()->getName()+":time",getComponent(),
 				new DevIOTime(m_commandLine),true);
 		m_pbackendName=new ROstring(getContainerServices()->getName()+":backendName",getComponent());
-		m_pfileName=new ROstring(getContainerServices()->getName()+":fileName",getComponent(),
-				new DevIOFileName(m_commandLine),true);
 		m_pbandWidth=new ROdoubleSeq(getContainerServices()->getName()+":bandWidth",getComponent(),
 				new DevIOBandWidth(m_commandLine),true);
 		m_pfrequency=new ROdoubleSeq(getContainerServices()->getName()+":frequency",getComponent(),
@@ -161,14 +157,14 @@ void XBackendsImpl::initialize()
 					(commandL,&CCommandLine::setConfiguration) );
 	m_parser->add<2>("setAttenuation", new function2<CCommandLine,non_constant,void_type,I<long_type>,I<double_type> >(commandL,&CCommandLine::setAttenuation) );
 	m_parser->add<1>("enable",new function1<CCommandLine,non_constant,void_type,I<longSeq_type> >(commandL,&CCommandLine::setEnabled) );
-	m_parser->add<1>("getIntegration",new function1<CCommandLine,constant,void_type,O<long_type> >(commandL,&CCommandLine::getIntegration) );
-	m_parser->add<1>("getFrequency",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getFrequency) );
-	m_parser->add<1>("getSampleRate",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getSampleRate) );
-	m_parser->add<1>("getBins",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(commandL,&CCommandLine::getBins) );
-	m_parser->add<1>("getPolarization",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(commandL,&CCommandLine::getPolarization) );
-	m_parser->add<1>("getBandWidth",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getBandWidth) );
-	m_parser->add<1>("getAttenuation",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getAttenuation) );
-	m_parser->add<1>("getTime",new function1<CCommandLine,constant,void_type,O<time_type> >(commandL,&CCommandLine::getTime) );
+	m_parser->add<0>("getIntegration",new function1<CCommandLine,constant,void_type,O<long_type> >(commandL,&CCommandLine::getIntegration) );
+	m_parser->add<0>("getFrequency",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getFrequency) );
+	m_parser->add<0>("getSampleRate",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getSampleRate) );
+	m_parser->add<0>("getBins",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(commandL,&CCommandLine::getBins) );
+	m_parser->add<0>("getPolarization",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(commandL,&CCommandLine::getPolarization) );
+	m_parser->add<0>("getBandWidth",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getBandWidth) );
+	m_parser->add<0>("getAttenuation",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getAttenuation) );
+	m_parser->add<0>("getTime",new function1<CCommandLine,constant,void_type,O<time_type> >(commandL,&CCommandLine::getTime) );
 	m_parser->add<1>("initialize",new function1<CCommandLine,non_constant,void_type,I<string_type> >(commandL,&CCommandLine::setup) );
 	
 	m_initialized=true;
@@ -214,7 +210,7 @@ void XBackendsImpl::execute()
 		throw impl;
 	}
 //	_IRA_LOGFILTER_ACTIVATE(m_configuration.getRepetitionCacheTime(),m_configuration.getRepetitionExpireTime());
-	ACS_LOG(LM_FULL_INFO,"XBackendsImpl::execute()",(LM_INFO,"SOCKET_CONNECTING"));
+	//ACS_LOG(LM_FULL_INFO,"XBackendsImpl::execute()",(LM_INFO,"SOCKET_CONNECTING"));
 	try {
 		line->InitConf(&m_configuration);  	// this could throw an ACS exception.....
 	}	
@@ -908,18 +904,6 @@ void XBackendsImpl::visualACS()
 	ACS_DEBUG("XBackendsImpl::VisualSpecific()"," ");	
 }
 
-void XBackendsImpl::setFileName (const char* fileName) 
-	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx)
-{
-	CSecAreaResourceWrapper<CCommandLine> data=m_commandLine->Get();
-	if (!data->setFileName(IRA::CString(fileName))) {
-		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"XBackendsImpl::setFileName");
-		impl.setReason("Could not change file name while recording");
-		impl.log(LM_DEBUG);
-		throw impl.getComponentErrorsEx();
-	}
-}
-
 void XBackendsImpl::setMode8bit(CORBA::Boolean mode)
  	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
  {
@@ -963,7 +947,6 @@ _PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROlong,m_pintegration,integration);
 _PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROpattern,m_pstatus,status);
 _PROPERTY_REFERENCE_CPP(XBackendsImpl,Management::ROTBoolean,m_pbusy,busy);
 _PROPERTY_REFERENCE_CPP(XBackendsImpl,Management::ROTBoolean,m_pmode8bit,mode8bit);
-_PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROstring,m_pfileName,fileName);
 _PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROlongSeq,m_pinputSection,inputSection);
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

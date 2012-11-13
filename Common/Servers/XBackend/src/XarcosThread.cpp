@@ -17,7 +17,7 @@ XarcosThread::XarcosThread(const ACE_CString& name,TSenderParameter  *par,
 	ACS_DEBUG("XarcosThread::XarcosThread()"," control thread starts");
 	Timer::TimerParameter timerPar;
 	ACS::Time timeTp=(ACS::ThreadBase::defaultSleepTime)*2-300000;//<200 millisecond
-	ACS::Time timeInt=(ACS::ThreadBase::defaultSleepTime)*100;//=10 second
+	ACS::Time timeInt=(ACS::ThreadBase::defaultSleepTime)*100;//=10 seconu
 	long idTp=0;
 	long idInt=0;	
 	tpTimer=NULL;
@@ -328,11 +328,11 @@ void XarcosThread::runLoop()
 			sample=preprocessData(&sizedata,&sizetp);	
 //				ACS_DEBUG("XarcosThread::runLoop()"," Provo a salvare ");
 #ifdef BKD_DEBUG 
-			SaveFileTxt(sample,sizedata,sizetp);
-			SaveFileFits();
+			//SaveFileTxt(sample,sizedata,sizetp);
+			//SaveFileFits();
 #else 					
-			SaveFileTxt(sample,sizedata,sizetp);
-			SaveFileFits();		
+			//SaveFileTxt(sample,sizedata,sizetp);
+			//SaveFileFits();		
 			SAMPLETYPE buf[sizedata];
 			double tsys[sizetp];//m_dataHeader.channels
 			Backends::TDumpHeader hd;
@@ -540,15 +540,6 @@ void XarcosThread::SaveFileTxt(double * buff, int size, int sizetp)
 		//save all the data in the buffer an then finalize the file
 	t_file.close();
 	m_fileOpened=false;
-	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	try{
-		line->setFileName(FileName);//Modifico l'attributo di ACS
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"XarcosThread::SaveFileTxt()");
-		impl.log(LM_DEBUG);
-		throw impl.getComponentErrorsEx();
-	}	
 	ACS_LOG(LM_FULL_INFO, "CEngineThread::SaveFileTxt()",(LM_NOTICE,"FILE_FINALIZED"));
 
 }

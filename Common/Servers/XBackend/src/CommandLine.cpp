@@ -19,7 +19,6 @@ m_GroupSpectrometer(groupS)
 	m_Error.Reset();
 	m_configuration=NULL;
 	m_backendStatus=0;
-	m_fileName.Format("xxx");
 	setStatus(CNTD);//NOTCNTD
 	m_busy=false;
 	m_pcontrolLoop=NULL;
@@ -62,15 +61,6 @@ void CCommandLine::getInputSection(ACS::longSeq& inpSection) const
 		inpSection[i]=m_inputSection[i];
 	}
 }
-
-bool CCommandLine::setFileName(const IRA::CString& name)
-{	
-	//sets the property defaults....some of them cannot be changed any more (hardware dependent) 
-	m_fileName=name;
-	return true;
-}
-
-
 
 void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
 		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,
@@ -308,19 +298,28 @@ void CCommandLine::setConfiguration(const long& secId,const double& freq,const d
 		if (secId>=0) newBW=m_bandWidth[secId];
 		else newBW=bw;
 	}
-	if (sr>=0) {// the user ask for a new value
-		_THROW_EXCPT(XBackendsErrors::ErrorConfigurationExImpl,"CCommandLine::setConfiguration()");
+    if (sr>=0) {// the user ask for a new value
+		if (sr>DEFAULT_SAMPLERATE) {
+			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+			impl.setValueName("sampleRate");
+			impl.setValueLimit(DEFAULT_SAMPLERATE);
+			throw impl;			
+		}
+		newSR=sr;
 	}
 	else {
-		if (secId>=0) newSR=m_sampleRate[secId];
-		else if(newBW!=-1){
+		if (secId>=0) {
+            newSR=m_sampleRate[secId];
+            ACS_DEBUG("CCommandLine::setConfiguration()","SAMPLE_RATE no change");
+        }
+		if(newBW!=-1){
 			newSR=2*newBW;
 			ACS_DEBUG("CCommandLine::setConfiguration()","newSR=2*newBW");
-			}
-			else {
-				newSR=-1;
-				ACS_DEBUG("CCommandLine::setConfiguration()","SAMPLE_RATE no change");
-			}
+		}
+		else {
+			newSR=-1;
+			ACS_DEBUG("CCommandLine::setConfiguration()","SAMPLE_RATE no change");
+		}
 	}
 	if (fd>=0) { // the user ask for a new value
 		if (fd>=m_beams) {
@@ -507,10 +506,12 @@ void CCommandLine::setDefaultConfiguration()
 	groupS->Xspec.SetNCicli(0);
 	c=0;
 	int chIn;
-	for(long i=0;i<m_sectionsNumber;i++,c++){			
+	for(long i=0;i<m_sectionsNumber;i++){			
 		temp.SetBanda(m_bandWidth[i]*1e6);
-		if(m_bandWidth[i]==MAX_BANDWIDTH)temp.SetFlo(0);
-		else temp.SetFlo((m_frequency[i]-MIN_FREQUENCY+m_bandWidth[i]*0.5)*1e6-62.5e6);
+		if(m_bandWidth[i]==MAX_BANDWIDTH)
+            temp.SetFlo(0);
+		else 
+            temp.SetFlo((m_frequency[i]-MIN_FREQUENCY+m_bandWidth[i]*0.5)*1e6-62.5e6);
 		if (m_polarization[i]==Backends::BKND_FULL_STOKES){
 			temp.SetModoPol(true);				
 			chIn=searchChIn(m_feedNumber[i]);
@@ -549,10 +550,10 @@ void CCommandLine::setDefaultConfiguration()
 	}
 	m_inputsNumber=c;
 	m_pcontrolLoop->Init();//Configuro Specifiche nell'HW		
-	if(groupS->section!=m_sectionsNumber){
+	//if(groupS->section!=m_sectionsNumber){
 		//m_sectionsNumber=groupS->section;
-		ACS_DEBUG_PARAM("CCommandLine::setSectionsNumber()"," section %i ",groupS->section);;
-	}
+	//	ACS_DEBUG_PARAM("CCommandLine::setSectionsNumber()"," section %i ",groupS->section);;
+	//}
 
 }
 
@@ -1030,7 +1031,9 @@ long CCommandLine::searchChIn(long feed)
 
 long CCommandLine::searchFeed(long ChIn)
 {
-	if((ChIn<0)&&(ChIn>=MAX_ADC_NUMBER)) return -1;
+	if((ChIn<0)&&(ChIn>=MAX_ADC_NUMBER)) {
+        return -1;
+    }
 	return m_ChIn[ChIn];
 }
 
@@ -1044,7 +1047,11 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 		m_tsys[i]=0.0;	
 		m_tpiZero[i]=0.0;	
 	}
-	for( i=0;i<MAX_SECTION_NUMBER;i++) {
+    m_sectionsNumber=DEFAULT_SECTION_NUMBER;
+    if (!DEFAULT_POLARIZATION)
+        m_sectionsNumber=DEFAULT_SECTION_NUMBER*2;
+
+	for( i=0;i<m_sectionsNumber;i++) {
 		m_bandWidth[i]= DEFAULT_BANDWIDTH;
 		m_frequency[i]=DEFAULT_FREQUENCY;
 		m_sampleRate[i]=DEFAULT_SAMPLERATE;
@@ -1057,7 +1064,9 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 
 	m_integration=DEFAULT_INTEGRATION;
 	m_inputsNumber=DEFAULT_SECTION_NUMBER*2;
-	m_sectionsNumber=DEFAULT_SECTION_NUMBER;
+	//m_sectionsNumber=DEFAULT_SECTION_NUMBER;
+    //if (!DEFAULT_POLARIZATION)
+        //m_sectionsNumber=DEFAULT_SECTION_NUMBER*2;
 	m_beams=MAX_DEFAULT_BEAM;
 	m_sampleSize=SAMPLESIZE;	
 	
@@ -1080,7 +1089,8 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 	}	
 	int j=0;
 	i=0;
-	while(i<DEFAULT_SECTION_NUMBER){
+	//while(i<DEFAULT_SECTION_NUMBER){
+	while(i<m_sectionsNumber){
 		do{
 			while(!(m_adc[j])) j++;
 			m_feedNumber[i]=searchFeed(j);
@@ -1090,7 +1100,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 		if(j==MAX_ADC_NUMBER) j=0;
 		else j++;
 	}
-
+    //printf("initialize configuration end\n");
 //	if (config=="22GHzMultiFeed") { //in order to add a new configuration add an other if
 
 	return true;
