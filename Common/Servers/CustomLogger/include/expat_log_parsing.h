@@ -13,6 +13,7 @@
 #include <acstime.h>
 #include <IRA>
 #include <ManagmentDefinitionsS.h>
+#include <CustomLoggerUtils.h>
 
 #define START_TAG "<root>"
 #define START_TAG_LEN 6
@@ -30,6 +31,7 @@ typedef boost::shared_ptr<LogRecord> LogRecord_sp;
  * Key-Value string map, used to store extra data in the LogRecord
  */
 typedef std::map<std::string, std::string> KVMap;
+typedef std::map<std::string, std::string>::iterator KVIterator;
 /**
  * Priority queue used to store LogRecords in timestamp order, as defined by LogReecordComparator.
  */
@@ -115,6 +117,11 @@ public:
      * @return the associated value if key is found, NULL otherwise.
      */
     std::string get_data(std::string key);
+    /**
+     * Get a string representation of the extra data of this log record.
+     * @return the string representation as "[key1=value1, key2=value2 .... ]"
+     */
+    std::string get_extra_data_string();
 };
 
 /**

@@ -29,6 +29,35 @@ LogRecord::get_data(std::string key)
         return NULL;
 };
 
+std::string
+LogRecord::get_extra_data_string()
+{
+    KVMap::iterator iter;
+    std::stringstream res;
+    int _extra_data = 0;
+    // ADD EXTRA DATA TO THE LOG MESSAGE AS "[k1=v1, k2=v2 ... ]"
+    if(kwargs.size() > 1)
+    {
+        res << "[";
+        for(iter = kwargs.begin();
+            iter != kwargs.end();
+            ++iter)
+	{
+            if(iter->first != CUSTOM_LOGGING_DATA_NAME)
+	    {
+                if(_extra_data > 0)
+                    res << ",";
+	        res << iter->first;
+                res << "=";
+                res << iter->second;	
+                ++_extra_data;
+            }
+	}
+        res << "]";
+    } 
+    return res.str();
+};
+
 /* Log Record Comparator */
 bool LogRecordComparator::operator()(const LogRecord_sp& lhr, const LogRecord_sp& rhr)
 {
@@ -97,6 +126,7 @@ log_to_string(const LogRecord& log_record)
     res << (const char*)timestamp << " ";
     res << log_record.log_level_name << " ";
     res << log_record.message;
+    res << log_record.get_extra_data_string();
     return res.str();
 };
 
