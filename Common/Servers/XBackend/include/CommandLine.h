@@ -349,17 +349,6 @@ public:
 	 * @param size size of the input vector, used to avoid to exceed the vector limits
 	 */
 	void fillChannelHeader(Backends::TSectionHeader *chHr,const long& size);
-	/**
-	 * Change the name of the save file. 
-	 * @param name new file name
-	 * @return false if the operation could not be done
-	 */
-	bool setFileName(const IRA::CString& name);
-	
-	/**
-	 * Get the name if the current file 
-	 */
-	IRA::CString getFileName() const { return m_fileName; }
 	
 	void setControlThread(XarcosThread * controlLoop);
 	/**
@@ -541,18 +530,12 @@ private:
 	 */
 	long m_ifNumber[MAX_INPUT_NUMBER];
 
-	
-	/** 
-	 * the name of the file 
-	 */
-	IRA::CString m_fileName;	
-
 	/**
-	 * indeicates the bit number  
+	 * indicates the bit number  
 	 */
 	bool m_mode8bit;
 	/**
-	 * inpt type for the initial configuration
+	 * input type for the initial configuration
 	 */
 	TInputs m_defaultInput;
 //

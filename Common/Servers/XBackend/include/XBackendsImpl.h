@@ -432,14 +432,6 @@ public:
 	virtual ACS::ROlongSeq_ptr inputSection() 
 		throw (CORBA::SystemException);
 	
-	/** 
-	 * Returns a reference to the inputSection  property Implementation of IDL interface.
-	 * @return pointer to read-only long property fileName 
-	*/
-	virtual ACS::ROstring_ptr fileName() 
-		throw (CORBA::SystemException); 
-
- 
     /**
      * This method is used to tune the attenuation level of each of the virtual input of the system.
      * @throw CORBA::SystemException
@@ -451,15 +443,6 @@ public:
     virtual void setAttenuation(CORBA::Long input,CORBA::Double att) 
     	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
     
-    /**
-     * This method is used to set the name of file used by component to storege data.
-     * @throw CORBA::SystemException
-     * @throw ComponentErrors::ComponentErrorsEx
-     * @param input is the identifier number of the input that we want to configure.
-     */
-    virtual void setFileName (const char* fileName) 
-    	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
-   
     /**
      * This method is used to show the HW data setting.
      * @throw CORBA::SystemException
@@ -523,7 +506,6 @@ private:
 	SmartPropertyPointer<ROpattern> m_pstatus;
 	SmartPropertyPointer<ROlongSeq> m_pfeed;
 	SmartPropertyPointer<ROdoubleSeq> m_ptsys;
-	SmartPropertyPointer<ROstring> m_pfileName;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>  > m_pbusy;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>  > m_pmode8bit;
 	/** This is the socket that allows to send requests to the backends throught its command line*/
