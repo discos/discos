@@ -25,11 +25,6 @@ module Backends {
 		 */
 		readonly attribute Management::ROTBoolean mode8bit;
 	
-		/**
-		 * This attribute reports the number of fileName used by the backend to save data. 
-		 */		
-		readonly attribute ACS::ROstring fileName;
-		void setFileName (in string fileName) raises (ComponentErrors::ComponentErrorsEx);
 		void setInputsNumber(in long inputsNumber) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 		void setSectionsNumber(in long SectionsNumber) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 		void visualSpecific()raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);		
