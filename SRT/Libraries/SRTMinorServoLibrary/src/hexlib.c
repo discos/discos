@@ -1,7 +1,7 @@
 /*
   INAF - Osservatorio Astronomico di Cagliari
   data: 20 settembre 2011
-  rel: 0.8
+  rel: 0.9
   autore: Franco Buffa
   e-mail: fbuffa@oa-cagliari.inaf.it
   
@@ -13,7 +13,11 @@
   
   bugs & info: 
 
-   20 09 2011 - Piccole manutenzioni sui test0x.c
+   15 11 2012 - modifica init_p
+   
+   14 10 2011 - corretti alcuni warning
+
+   20 09 2011 - piccole manutenzioni sui test0x.c
    e introdotte le 2 rot. RZRYRX e RXRYRZ 
 
    10 08 2010 - introdotte nuove coord. attuatori nel file hexdata,
@@ -33,6 +37,7 @@
    10 Maggio 2004 - corretto un baco in test2 che
    impediva la compilazione con vecchie versioni 
    di gcc + alcune modifiche minori
+
 */
 
 #include "hexlib.h"
@@ -57,7 +62,8 @@ void rot(double *w,double *x, double *y)
 
  if(rotation==RXRYRZ)
  {
-// matrice di rotazione RX(RY(RZ(P)))
+// matrice di rotazione RXRYRZ
+// convenzione usata da Paluszek
   R[0][0]=ct*cf;
   R[0][1]=-ct*sf;
   R[0][2]=st;
@@ -71,7 +77,7 @@ void rot(double *w,double *x, double *y)
  else
  {
 // ** DEFAULT **
-// matrice di rotazione RZ(RY(RX(P)))
+// matrice di rotazione RZRYRX
   R[0][0]=ct*cf;
   R[0][1]=sp*st*cf-cp*sf;
   R[0][2]=cp*st*cf+sp*sf;
@@ -92,11 +98,11 @@ void rot(double *w,double *x, double *y)
 }
 
 
-void print_state (struct rparams *p)
+void print_state (rparams *p)
 {
   int i;
   printf ("status = %s(%d)\n", gsl_strerror (p->status),p->status);
-  printf ("iter = %04u\n",p->iter);
+  printf ("iter = %04d\n",(int)p->iter);
   printf ("x = ");
   for(i=0;i<_n;i++) printf ("%12.8f ", p->x[i]);
   printf ("\nf =");
@@ -104,7 +110,7 @@ void print_state (struct rparams *p)
   printf ("\n");
 }
 
-void dir(struct rparams *p)
+void dir(rparams *p)
 {
   int i;
   double xx[_n];
@@ -152,7 +158,7 @@ int func_f (const gsl_vector * x, void *params, gsl_vector * f)
   double xx1[3],xx2[3],xx3[3],xx4[3],xx5[3],xx6[3];
   double xx[_n],y[_n],dd[_n];
   
-  struct rparams *p=(struct rparams *) params;
+  rparams *p=(rparams *) params;
   
   for (i=0;i<_n;i++) xx[i] = gsl_vector_get (x, i);
   for (i=0;i<_n;i++) dd[i]=p->d[i];
@@ -190,7 +196,7 @@ int func_f (const gsl_vector * x, void *params, gsl_vector * f)
   return GSL_SUCCESS;
 }
 
-int init_p(struct rparams *p)
+int init_p(rparams *p)
 {
    double l,h;
    double da0,da1[3],da2[3],da3[3],da4[3],da5[3],da6[3];
@@ -226,21 +232,24 @@ int init_p(struct rparams *p)
    t3[0]= ver[0];                  t3[1]=-2./3.*h+ver[1]; t3[2]=ver[2];
    t4[0]=-2./3.*h/sqrt(3.)+ver[0]; t4[1]=ver[1];          t4[2]=ver[2];
 
-// coord punti di attacco sul triangolo (zzzxyy)
+// coord punti di attacco sul triangolo (zzzyyx) mod. nov. 2012
    for(i=0;i<3;i++) p->p1[i]=t1[i]+dp1[i];
    for(i=0;i<3;i++) p->p2[i]=t2[i]+dp2[i];
    for(i=0;i<3;i++) p->p3[i]=t3[i]+dp3[i];
-   for(i=0;i<3;i++) p->p4[i]=t4[i]+dp4[i];
-   for(i=0;i<3;i++) p->p5[i]=t1[i]+dp5[i];
-   for(i=0;i<3;i++) p->p6[i]=t2[i]+dp6[i];
 
-// coord punti di attacco sulla struttura (zzzxyy)
+   for(i=0;i<3;i++) p->p6[i]=t4[i]+dp4[i];
+   for(i=0;i<3;i++) p->p4[i]=t1[i]+dp5[i];
+   for(i=0;i<3;i++) p->p5[i]=t2[i]+dp6[i];
+   
+   
+// coord punti di attacco sulla struttura (zzzyyx) mod. nov. 2012
    for(i=0;i<3;i++) p->a1[i]=p->p1[i]+da1[i];
    for(i=0;i<3;i++) p->a2[i]=p->p2[i]+da2[i];
    for(i=0;i<3;i++) p->a3[i]=p->p3[i]+da3[i];
-   for(i=0;i<3;i++) p->a4[i]=p->p4[i]+da4[i];
-   for(i=0;i<3;i++) p->a5[i]=p->p5[i]+da5[i];
-   for(i=0;i<3;i++) p->a6[i]=p->p6[i]+da6[i];
+
+   for(i=0;i<3;i++) p->a6[i]=p->p6[i]+da4[i];
+   for(i=0;i<3;i++) p->a4[i]=p->p4[i]+da5[i];
+   for(i=0;i<3;i++) p->a5[i]=p->p5[i]+da6[i];
  
    p->status=-999;
    p->iter=-999;
@@ -251,7 +260,7 @@ int init_p(struct rparams *p)
    return GSL_SUCCESS;
 }
 
-void inv(struct rparams *p)  
+void inv(rparams *p)  
 {
   gsl_multiroot_fsolver *s;
   const gsl_multiroot_fsolver_type *T;  
@@ -282,7 +291,7 @@ void inv(struct rparams *p)
   gsl_vector_free (x);
 }
 
-int print_p(struct rparams *p)
+int print_p(rparams *p)
 {   
    printf("%8.3f\t%8.3f\t%8.3f\n",p->p1[0],p->p1[1],p->p1[2]);
    printf("%8.3f\t%8.3f\t%8.3f\n",p->p2[0],p->p2[1],p->p2[2]);
@@ -301,23 +310,52 @@ int print_p(struct rparams *p)
    return GSL_SUCCESS;
 }
 
-int load_p(struct rparams *p)
+int load_p(rparams *p,char *fname)
 {   
    int i;
+   float d1,d2,d3;
+   FILE *ptr;
+   if((ptr=fopen(fname,"r"))==NULL) return(1);
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->p1[0]=(double)d1,p->p1[1]=(double)d2,p->p1[2]=(double)d3;
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->p2[0]=(double)d1,p->p2[1]=(double)d2,p->p2[2]=(double)d3;
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->p3[0]=(double)d1,p->p3[1]=(double)d2,p->p3[2]=(double)d3;
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->p4[0]=(double)d1,p->p4[1]=(double)d2,p->p4[2]=(double)d3;
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->p5[0]=(double)d1,p->p5[1]=(double)d2,p->p5[2]=(double)d3;
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->p6[0]=(double)d1,p->p6[1]=(double)d2,p->p6[2]=(double)d3;
 
-   p->p1[0] = -1597.80;  p->p1[1] = 917.85;   p->p1[2] = -2276.10;
-   p->p2[0] = 1603.70;   p->p2[1] = 919.00;   p->p2[2] = -2271.85;
-   p->p3[0] = -0.20;     p->p3[1] = -1853.30; p->p3[2] = -2262.85;
-   p->p4[0] = -1474.75;  p->p4[1] = -8.90;    p->p4[2] = -1892.25;
-   p->p5[0] = -1598.25;  p->p5[1] = 1224.70;  p->p5[2] = -1893.35;
-   p->p6[0] = 1605.25;   p->p6[1] = 1225.65;  p->p6[2] = -1890.30;
+// --------   
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->a1[0]=(double)d1,p->a1[1]=(double)d2,p->a1[2]=(double)d3;
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->a2[0]=(double)d1,p->a2[1]=(double)d2,p->a2[2]=(double)d3;
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->a3[0]=(double)d1,p->a3[1]=(double)d2,p->a3[2]=(double)d3;
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->a4[0]=(double)d1,p->a4[1]=(double)d2,p->a4[2]=(double)d3;
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->a5[0]=(double)d1,p->a5[1]=(double)d2,p->a5[2]=(double)d3;
+   
+   fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
+   p->a6[0]=(double)d1,p->a6[1]=(double)d2,p->a6[2]=(double)d3;
 
-   p->a1[0] = -1595.10;  p->a1[1] = 908.40;   p->a1[2] = -3845.80;
-   p->a2[0] = 1612.70;   p->a2[1] = 917.10;   p->a2[2] = -3841.10;
-   p->a3[0] = 16.85;     p->a3[1] = -1843.65; p->a3[2] = -3834.40;
-   p->a4[0] = -3044.75;  p->a4[1] = -8.90;    p->a4[2] = -1892.25;
-   p->a5[0] = -1595.75;  p->a5[1] = 2795.95;  p->a5[2] = -1885.55;
-   p->a6[0] = 1596.45;   p->a6[1] = 2797.20;  p->a6[2] = -1891.25;
+   fclose(ptr);
 
    p->status=-999;
    p->iter=-999;
@@ -328,64 +366,7 @@ int load_p(struct rparams *p)
    return (0);
 }
 
-// Original load_p (I prefere don't read from a file every time I need to get a position)
-// int load_p(rparams *p,char *fname)
-// {   
-//    int i;
-//    float d1,d2,d3;
-//    FILE *ptr;
-//    if((ptr=fopen(fname,"r"))==NULL) return(1);
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->p1[0]=(double)d1,p->p1[1]=(double)d2,p->p1[2]=(double)d3;
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->p2[0]=(double)d1,p->p2[1]=(double)d2,p->p2[2]=(double)d3;
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->p3[0]=(double)d1,p->p3[1]=(double)d2,p->p3[2]=(double)d3;
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->p4[0]=(double)d1,p->p4[1]=(double)d2,p->p4[2]=(double)d3;
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->p5[0]=(double)d1,p->p5[1]=(double)d2,p->p5[2]=(double)d3;
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->p6[0]=(double)d1,p->p6[1]=(double)d2,p->p6[2]=(double)d3;
-// 
-// // --------   
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->a1[0]=(double)d1,p->a1[1]=(double)d2,p->a1[2]=(double)d3;
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->a2[0]=(double)d1,p->a2[1]=(double)d2,p->a2[2]=(double)d3;
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->a3[0]=(double)d1,p->a3[1]=(double)d2,p->a3[2]=(double)d3;
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->a4[0]=(double)d1,p->a4[1]=(double)d2,p->a4[2]=(double)d3;
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->a5[0]=(double)d1,p->a5[1]=(double)d2,p->a5[2]=(double)d3;
-//    
-//    fscanf(ptr,"%f%f%f",&d1,&d2,&d3);
-//    p->a6[0]=(double)d1,p->a6[1]=(double)d2,p->a6[2]=(double)d3;
-// 
-//    fclose(ptr);
-// 
-//    p->status=-999;
-//    p->iter=-999;
-//    for (i=0;i<_n;i++) p->x[i]=0.0;
-//    for (i=0;i<_n;i++) p->y[i]=0.0;
-//    for (i=0;i<_n;i++) p->d[i]=0.0;
-// 
-//    return (0);
-// }
-
-int gotopos(struct rparams *p,double *pos1, double *pos2, int nstp, h_array *x)
+int gotopos(rparams *p,double *pos1, double *pos2, int nstp, h_array *x)
 {
    int i,j;
    double d1[_n],d2[_n],deltad[_n];

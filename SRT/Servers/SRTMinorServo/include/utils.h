@@ -275,6 +275,17 @@ bool startswith(const string & s, const string & token);
  */
 bool endswith(const string & s, const string & token);
 
+/** Return the any object as a string.
+ * @param i: a any object
+ * @return the given object as a string
+ */
+template<class T>
+std::string any2string(T i) {
+    std::ostringstream buffer;
+    buffer << i;
+    return buffer.str();
+}
+
 
 DDWORD getNextTime(unsigned long seconds=0, unsigned long mseconds=0);
 

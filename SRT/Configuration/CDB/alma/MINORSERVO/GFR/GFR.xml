@@ -41,7 +41,7 @@
         initialize_devio="0"
         default_value="0"
         description="MinorServo actual position" 
-        units="mm or degree"
+        units="mm"
         resolution="65535"
         alarm_low_on="0"
         alarm_high_on="0"
@@ -60,7 +60,7 @@
         initialize_devio="0"
         default_value="0"
         description="MinorServo commanded position" 
-        units="mm or degree"
+        units="mm"
         resolution="65535"
         graph_min="0"
         graph_max="0"
@@ -76,7 +76,7 @@
         initialize_devio="0"
         default_value="0"
         description="MinorServo position difference" 
-        units="mm or degree"
+        units="mm"
         resolution="65535"
         alarm_low_on="0"
         alarm_high_on="0"
@@ -87,7 +87,26 @@
         min_step="0"
         alarm_timer_trig="0"
 	/>
-              
+     
+    <!-- Actual Elongation (ROdoubleSeq) -->
+    <actElongation
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo actual elongation" 
+        units="mm"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+         
     <!-- Engine Temperature (ROdoubleSeq) -->
     <engTemperature
         default_timer_trig="0"

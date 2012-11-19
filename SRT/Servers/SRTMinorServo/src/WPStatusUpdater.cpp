@@ -57,6 +57,7 @@ void WPStatusUpdater::runLoop()
 
                 // The position retrieved by getStatus is alredy converted to virtual
                 ACS::doubleSeq act_pos = (status_par.actual_pos).position;
+                ACS::Time act_pos_time = (status_par.actual_pos).exe_time;
                 ACS::Time diff = abs_diff(act_pos_time, getTimeStamp());
                 // TODO: REMOVE
                 // cout << "acs_pos_time: " << act_pos_time << endl;
@@ -65,7 +66,6 @@ void WPStatusUpdater::runLoop()
 
                 // Update the actual elongation (it is just the actual position for the GFR, PFP and M3R)
                 ACS::doubleSeq act_elongation = (status_par.actual_elongation).position;
-                ACS::Time act_elongation_time = (status_par.actual_elongation).exe_time;
                 for(size_t i=0; i != act_elongation.length(); i++) {
                     ((m_params->expire_time)->actElongation[address])[i] = act_elongation[i]; 
                 }

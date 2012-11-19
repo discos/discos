@@ -524,6 +524,7 @@ bool MinorServoBossImpl::checkScan(
                     long number_of_axis = dao_p->get_long("number_of_axis");
                     bool virtual_rs = dao_p->get_long("virtual_rs");
                     long servo_address = dao_p->get_long("servo_address");
+                    double zero = dao_p->get_double("zero");
                     if(axis > number_of_axis - 1) {
                         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - axis %d does not exist", axis));
                         if(mutex_res == 0)
@@ -602,8 +603,8 @@ bool MinorServoBossImpl::checkScan(
                         // If the component has a virtual reference system
                         if(virtual_rs) {
                             // Conversion from Virtual reference system to the Real one
-                            virtual2real(positions_left, servo_address);
-                            virtual2real(positions_right, servo_address);
+                            virtual2real(positions_left, servo_address, zero);
+                            virtual2real(positions_right, servo_address, zero);
                             ACS::doubleSeq diff;
                             diff.length(positions_seq.length());
 
@@ -618,7 +619,7 @@ bool MinorServoBossImpl::checkScan(
                             range = max_diff;
 
                             // Conversion from Virtual reference system to the Real one
-                            virtual2real(act_pos, servo_address);
+                            virtual2real(act_pos, servo_address, zero);
                             ACS::doubleSeq diff_left, diff_right;
                             diff_left.length(positions_seq.length());
                             diff_right.length(positions_seq.length());
@@ -769,6 +770,7 @@ void MinorServoBossImpl::startScan(
                 long number_of_axis = dao_p->get_long("number_of_axis");
                 bool virtual_rs = dao_p->get_long("virtual_rs");
                 long servo_address = dao_p->get_long("servo_address");
+                double zero = dao_p->get_double("zero");
                 if(axis > number_of_axis - 1) {
                     if(mutex_res == 0)
                         pthread_mutex_unlock(&setup_mutex); 
@@ -841,11 +843,11 @@ void MinorServoBossImpl::startScan(
                         // If the component has a virtual reference system
                         if(virtual_rs) {
                             // Conversion from Virtual reference system to the Real one
-                            virtual2real(positions_left, servo_address);
-                            virtual2real(positions_right, servo_address);
+                            virtual2real(positions_left, servo_address, zero);
+                            virtual2real(positions_right, servo_address, zero);
 
                             // Conversion from Virtual reference system to the Real one
-                            virtual2real(act_pos, servo_address);
+                            virtual2real(act_pos, servo_address, zero);
                             ACS::doubleSeq diff_left, diff_right;
                             diff_left.length(positions.length());
                             diff_right.length(positions.length());

@@ -19,7 +19,8 @@
 #include <iostream>
 #include "macros.def"
 #include <cctype>
-
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 string make_request(
         const unsigned int cmd_idx, 
@@ -70,7 +71,7 @@ string make_request(
             // Convert from virtual to real positions
             ACS::doubleSeq positions_seq = *positions;
             if(cdb_ptr->VIRTUAL_RS == 1)
-                virtual2real(positions_seq, cdb_ptr->SERVO_ADDRESS);
+                virtual2real(positions_seq, cdb_ptr->SERVO_ADDRESS, cdb_ptr->ZERO);
 
             // The syntax: "#setpos:<cmd_number>=<app_number>,<time>,<no slave>,<exe_mode>,<pos1>,...,<posN>\r"
             request = req_header + commands[cmd_idx] + ":" + cmd_number + "=" + app_number + "," + exe_time_str;
@@ -207,7 +208,7 @@ void process(
                    }
 
                    if(cdb_ptr->VIRTUAL_RS == 1)
-                       real2virtual(*data, cdb_ptr->SERVO_ADDRESS);
+                       real2virtual(*data, cdb_ptr->SERVO_ADDRESS, cdb_ptr->ZERO);
                }
                else
                    // If the number of positions is unexpected raise an exception
@@ -297,7 +298,7 @@ void process(
                    }
 
                    if(cdb_ptr->VIRTUAL_RS == 1)
-                       real2virtual((status_par->actual_pos).position, cdb_ptr->SERVO_ADDRESS);
+                       real2virtual((status_par->actual_pos).position, cdb_ptr->SERVO_ADDRESS, cdb_ptr->ZERO);
                }
                else
                    // If the number of positions is unexpected raise an exception
@@ -348,56 +349,57 @@ unsigned short get_msaddrs(const string message)
 }
 
 
-void real2virtual(ACS::doubleSeq &positions, DWORD servo_address) {
+void real2virtual(ACS::doubleSeq &positions, DWORD servo_address, const double zero) {
 
     switch(servo_address) {
 
         // Subreflector Positioner
         case 1: {
-            struct rparams p;
-            load_p(&p);
-            set_rot(RZRYRX);
+            // struct rparams p;
+            rparams p;
+            init_p(&p);
+            set_rot(RXRYRZ);
 
             for(size_t idx = 0; idx < positions.length(); ++idx)
-                p.d[idx] = positions[idx]; 
+                p.d[idx] = positions[idx] + zero; 
 
             inv(&p);
 
             for (size_t idx = 0; idx < positions.length(); ++idx)
-                positions[idx] = p.x[idx]; 
+                positions[idx] = idx < 3 ? p.x[idx] : p.x[idx] * 180 / M_PI; // Conversion from radians to degrees for the last 3 pos
         }
 
         // GFR, M3R, PFP
         default:
             break;
     }
-
 }
 
 
-void virtual2real(ACS::doubleSeq &positions, DWORD servo_address) {
+void virtual2real(ACS::doubleSeq &positions, DWORD servo_address, const double zero) {
 
     switch(servo_address) {
 
         // Subreflector Positioner
         case 1: {
-            struct rparams p;
-            load_p(&p);
-            set_rot(RZRYRX);
+            // struct rparams p;
+            rparams p;
+            init_p(&p);
+            set_rot(RXRYRZ);
 
             for (size_t idx = 0; idx != positions.length(); ++idx)
-                p.x[idx] = positions[idx]; 
+                p.x[idx] = idx < 3 ? positions[idx] : positions[idx] * M_PI / 180; // Conversion from degrees to radians for the last 3 pos
 
             dir(&p);
 
             for (size_t idx = 0; idx != positions.length(); ++idx)
-                positions[idx] = p.d[idx]; 
+                positions[idx] = p.d[idx] - zero; 
         }
 
         // GFR, M3R, PFP
         default:
             break;
-    }
 
+    }
 }
 

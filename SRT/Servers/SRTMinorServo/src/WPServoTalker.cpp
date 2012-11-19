@@ -168,7 +168,6 @@ void WPServoTalker::getAppStatus(
             MinorServoErrors::CommunicationErrorEx
             )
 {
-    
     AUTO_TRACE("WPServoTalker::getAppStatus()");
     timeval now;
     gettimeofday(&now, NULL);

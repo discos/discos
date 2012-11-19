@@ -41,7 +41,7 @@ properties = (
 )
 
 filtered = ( 
-        # 'getstatus',
+        'getstatus',
         'foo'
 )
 
@@ -78,7 +78,7 @@ response_types = (
 
 # Available servers
 servers = {
-        'MSCUSimulator': ('192.135.33.196', 10000), # gavino4SRT
+        'MSCUSimulator': ('192.168.200.201', 10000), # gavino4SRT
         'MSCU': ('192.168.3.14', 10000)
 }
 

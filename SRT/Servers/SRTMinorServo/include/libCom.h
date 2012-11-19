@@ -133,15 +133,17 @@ string make_request(
  * This member function convert the real positions to virtual positions.
  * @param positions reference to doubleSeq positions
  * @param servo_address address of minor servo
+ * @param zero the zero of the real reference system
  */
-void real2virtual(ACS::doubleSeq &positions, DWORD servo_address);
+void real2virtual(ACS::doubleSeq &positions, DWORD servo_address, const double zero);
 
 /**
  * This member function convert the virtual positions to real positions.
  * @param positions reference to doubleSeq positions
  * @param servo_address address of minor servo
+ * @param zero the zero of the real reference system
  */
-void virtual2real(ACS::doubleSeq &positions, DWORD servo_address);
+void virtual2real(ACS::doubleSeq &positions, DWORD servo_address, const double zero);
 
 
 #endif

@@ -58,7 +58,7 @@ INCLUDES        = hexlib.h
 LIBRARIES       = SRTMinorServoLibrary
 LIBRARIES_L     =
 SRTMinorServoLibrary_OBJECTS = hexlib
-SRTMinorServoLibrary_LIBS =
+SRTMinorServoLibrary_LIBS = 
 
 #
 # <brief description of lllll library>
