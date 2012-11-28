@@ -537,6 +537,20 @@ void WPServoImpl::setPosition(const ACS::doubleSeq &position, const ACS::Time ex
 }
 
 
+void WPServoImpl::disable(const ACS::Time exe_time) throw (MinorServoErrors::CommunicationErrorEx) 
+{
+    AUTO_TRACE("WPServoImpl::disable()");
+    try {
+        // The index code of disable command in Talk.cpp is 9
+        m_wpServoTalker_ptr->action(9, exe_time);
+    }
+    catch(...) {
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, "Cannot brake the servo", true);
+    }
+
+}
+
+
 void WPServoImpl::clearUserOffset() 
 {
     AUTO_TRACE("WPServoImpl::clearUserOffset()");

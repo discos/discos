@@ -128,6 +128,14 @@ string make_request(
             request = req_header + commands[cmd_idx] + ":" + cmd_number + "=" + app_number + message_closer;
             break;
         }
+         
+        // disable (data channel, high speed)
+        case 9: {
+            // The syntax: "#disable:<cmd_number>=<app_number>,<exe_time>\r"
+            request = req_header + commands[cmd_idx] + ":" + cmd_number + "=" + app_number + "," + exe_time_str;
+            request += message_closer;
+            break;
+        }
 
         default:
             request = "";

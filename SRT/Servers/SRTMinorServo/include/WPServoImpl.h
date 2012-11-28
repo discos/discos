@@ -284,6 +284,16 @@ public:
 
 
     /**
+     * Brake the MinorServo. 
+     * 
+     * @arg long  exe_time execution time
+     * @throw MinorServoErrors::CommunicationErrorEx
+     */ 
+     virtual void disable(const ACS::Time exe_time) throw (MinorServoErrors::CommunicationErrorEx);
+
+
+
+    /**
      * Set an user offset to the position.
      * 
      * @arg doubleSeq offset sequence of user offsets to add to the position;

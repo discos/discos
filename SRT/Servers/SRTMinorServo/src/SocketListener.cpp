@@ -104,6 +104,13 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
                     return;
                 }
 
+                // If the answer is a NAK_disable delete the item from the map
+                if(startswith(rec_answer, "NAK_disable")) {
+                    if(m_disable_counter.count(key))
+                        m_disable_counter.erase(key);
+                    return;
+                }
+
                 // If the answer is the second setup turn the setup-bit off and delete the item from the map
                 if(startswith(rec_answer, "setup")) {
                     if(m_setup_counter.count(key)) {
@@ -124,6 +131,17 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
                     else {
                         m_stow_counter[key] = 1;
                         (*m_params->stow_state)[saddress] = true;
+                    }
+                    return;
+                }
+
+                // If the answer is the second disable delete the item from the map
+                if(startswith(rec_answer, "disable")) {
+                    if(m_disable_counter.count(key)) {
+                        m_disable_counter.erase(key);
+                    } 
+                    else {
+                        m_disable_counter[key] = 1;
                     }
                     return;
                 }

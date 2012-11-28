@@ -56,6 +56,12 @@ private:
      */
     map<string, unsigned short> m_stow_counter;
 
+    /** 
+     * The key is a string that identify the command: "cmd_num=app_num".
+     * The value is a counter of stow answers of a command with the identifier used as a key.
+     */
+    map<string, unsigned short> m_disable_counter;
+
 };
 
 #endif 

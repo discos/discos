@@ -49,6 +49,7 @@ module MinorServo {
      * <ul>
      *     <li><em>setPosition(position, exe_time)</em>: set the position of WPServo at some time.</li>
      *     <li><em>setUserOffset(offset)</em>: set an user offset to the position.</li>
+     *     <li><em>disable(exe_time)</em>: brake the servo.</li>
      *     <li><em>clearUserOffset(offset)</em>: clear the user offset of the position.</li>
      *     <li><em>getUserOffset(offset)</em>: get the user offset of the position.</li>
      *     <li><em>setSystemOffset(offset)</em>: set a system offset to the position.</li>
@@ -357,6 +358,15 @@ module MinorServo {
 
         /** Clear the position system offset */ 
          void clearSystemOffset();
+       
+       
+       /**
+         * Brake the servo. A setup enables the servo.
+         * 
+         * @arg long  exe_time execution time
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */
+         void disable(in ACS::Time exe_time) raises (MinorServoErrors::CommunicationErrorEx);
 
 
         /**
