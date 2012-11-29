@@ -33,6 +33,7 @@
     require_calibration = "0"
     expire_time = "0.05000"
     tracking_delta = "2"
+    limits="(-1, 77); (-1490, 1490); (-200, 50)"
 >
               
     <!-- Actual Position (ROdoubleSeq) -->

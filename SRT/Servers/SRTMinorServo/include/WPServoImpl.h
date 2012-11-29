@@ -429,6 +429,9 @@ private:
     /* A list of vectors of commanded positions. The item are indexed by the servo address */
     static CSecureArea< map<int, vector<PositionItem> > > *m_cmdPos_list;
 
+    /* A list of Limits. Each limit is a couple (min, max) of limits for the correpondig axis. */
+    vector<Limits> m_limits;
+
     /** Structure containing the ExpireTime values */
     static ExpireTime m_expire;
 
@@ -507,6 +510,8 @@ private:
     static CSecureArea<unsigned short> *m_instance_counter;
      
     void setStatusUpdating(bool flag);
+    
+    void setLimits(IRA::CString limits);
 
     void setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target) throw (MinorServoErrors::OperationNotPermittedEx);
      

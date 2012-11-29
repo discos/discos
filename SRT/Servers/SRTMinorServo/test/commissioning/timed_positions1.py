@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # Author: Marco Buttu <m.buttu@oa-cagliari.inaf.it>
 # Copyright: This module has been placed in the public domain.
-"""Use this module to test the minor servo setPosition() method, with `exe_time != 0`."""
+"""Use this module to test the minor servo setPosition() method, with `exe_time != 0`.
+   The positions are commanded one each `sdelay` seconds."""
 
 import unittest
 import threading
@@ -64,7 +65,7 @@ class TestPositioning(unittest.TestCase):
             for cpi, api in zip(cmd_pos, act_pos):
                 self.assertAlmostEqual(cpi, api, places=1)
 
-            cmd_pos = (rr(-3, 4), rr(-3, 4), rr(-3, 4), rr(-5, 5) / 100.0, rr(-5, 5) / 100.0, rr(-5, 5)/ 100.0)
+            cmd_pos = (rr(-5, 6), rr(-5, 6), rr(-5, 6), rr(-5, 6) / 100.0, rr(-5, 6) / 100.0, rr(-5, 6)/ 100.0)
 
 
 if __name__ == "__main__":

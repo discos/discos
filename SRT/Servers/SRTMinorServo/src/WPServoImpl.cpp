@@ -210,6 +210,11 @@ void WPServoImpl::initialize() throw (
     // Retrive the tracking_delta MinorServo parameter from CDB
     if(!CIRATools::getDBValue(getContainerServices(), "tracking_delta", m_cdb_ptr->TRACKING_DELTA))
         THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'tracking_delta' from CDB", false);
+    
+    // Retrive the position limits from the CDB
+    if(!CIRATools::getDBValue(getContainerServices(), "limits", m_cdb_ptr->LIMITS))
+        THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'limits' from CDB", false);
+    setLimits(m_cdb_ptr->LIMITS);
 
     m_expire.timeLastActPos[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastCmdPos[m_cdb_ptr->SERVO_ADDRESS] = -100;
@@ -265,7 +270,7 @@ void WPServoImpl::initialize() throw (
         pthread_mutex_lock(&init_mutex); 
         // The socket connection is shared among minor servos (singleton design pattern)
         m_wpServoLink_ptr = WPServoSocket::getSingletonInstance(m_cdb_ptr, &m_expire);
-        m_wpServoTalker_ptr = new WPServoTalker(m_cdb_ptr, &m_expire, m_cmdPos_list, &m_offsets);
+        m_wpServoTalker_ptr = new WPServoTalker(m_cdb_ptr, &m_expire, m_cmdPos_list, &m_offsets, m_limits);
 
         if(m_talkers.count(m_cdb_ptr->SERVO_ADDRESS))
             THROW_EX(ComponentErrors, ThreadErrorEx, "Attempting to set an existing key in m_talkers", false)
@@ -856,6 +861,20 @@ ACS::doubleSeq * WPServoImpl::getData(const char *data_name) throw (MinorServoEr
         data_ptr[i] = data[i];
 
     return data_ptr._retn();
+}
+
+void WPServoImpl::setLimits(IRA::CString limits) {
+    // Split the action in items.
+    vector<string> items = split(string(limits), ";");
+    for(vector<string>::iterator iter = items.begin(); iter != items.end(); iter++) {
+        vector<string> tuple = split(*iter, ",");
+        string min = remove(tuple[0], '(');
+        string max = remove(tuple[1], ')');
+        Limits lim;
+        lim.min = str2double(min);
+        lim.max = str2double(max);
+        m_limits.push_back(lim);
+    }
 }
 
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_actPos, actPos);

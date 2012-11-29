@@ -195,7 +195,6 @@ bool startswith(const string & s, const string & token) {
 }
 
 
-
 bool endswith(const string & s, const string & token) {
     if(s.size() < token.size())
         return false;
@@ -205,6 +204,24 @@ bool endswith(const string & s, const string & token) {
             return false;
 
     return true;
+}
+
+
+string remove(string str, const char c) {
+    stringstream ss;
+    string token;
+    ss << c;
+    ss >> token;
+    string result("");
+    for(vector<string>::size_type idx = 0; idx != str.size(); ++idx) {
+        string item;
+        ss.clear();
+        ss << str[idx];
+        ss >> item;
+        if(item != token)
+            result += item;
+    }
+    return result;
 }
     
 

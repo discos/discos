@@ -36,8 +36,9 @@ WPServoTalker::WPServoTalker(
         const CDBParameters *const cdb_ptr, 
         ExpireTime *const expire_ptr,
         CSecureArea< map<int, vector<PositionItem> > > *cmdPos_list,
-        const Offsets *const offsets
-        ) throw (ComponentErrors::MemoryAllocationExImpl): m_cdb_ptr(cdb_ptr), m_offsets(offsets), m_cmdPos_list(cmdPos_list)
+        const Offsets *const offsets,
+        const vector<Limits> limits
+        ) throw (ComponentErrors::MemoryAllocationExImpl): m_cdb_ptr(cdb_ptr), m_offsets(offsets), m_limits(limits), m_cmdPos_list(cmdPos_list)
 {
     AUTO_TRACE("WPServoTalker::WPServoTalker();");
 
@@ -120,8 +121,17 @@ void WPServoTalker::setCmdPos(
     if(!is_dummy) { // If we really want to command the position to the MSCU
         ACS::doubleSeq positions = cmd_positions;
         // Add the offsets to the positions before make_request (so positions and offsets are both in virtual coordinate)
-        for(size_t i=0; i<positions.length(); i++)
+        for(size_t i=0; i<positions.length(); i++) {
             positions[i] += (m_offsets->user)[i] + (m_offsets->system)[i];
+            if(positions[i] <= m_limits[i].min || positions[i] >= m_limits[i].max)
+                THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set minor servo position: position not allowed", true);
+        }
+
+        // Check the limits
+        for(size_t i=0; i<positions.length(); i++) {
+            positions[i] += (m_offsets->user)[i] + (m_offsets->system)[i];
+        }
+        
 
         // The first argument is the index of a vector of commands; make_request converts the position to virtual
         string request = make_request(2, m_cdb_ptr, m_cmd_number, -1, -1, -1, exe_time, &positions);

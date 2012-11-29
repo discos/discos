@@ -45,9 +45,7 @@ while(True):
                         if ':%d=' %cmd_num in data:
                             found = True
                             print 'r> %r' %data
-                            if data.startswith('?'):
-                                break
-                            if data.startswith('!NAK_setpos') or data.startswith('!NAK_stow') or data.startswith('!NAK_disable'):
+                            if data.startswith('?') or data.startswith('!NAK'):
                                 break
                             else:
                                 data = ""

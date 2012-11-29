@@ -101,6 +101,8 @@
         <!-- Maximum value allowed for the difference of two corresponding axis coordinates (mm) -->
         <!-- if |cmdPos – actPos| < tracking_delta, then the axis is following the commanded position -->
         <xs:attribute name="tracking_delta" type="xs:double" use="required" />
+        <!-- limits = "(neg1, pos1), (neg2, pos2), ..., (negN, posN)" -->
+        <xs:attribute name="limits" type="xs:string" use="required" />
 
     </xs:complexType>
 

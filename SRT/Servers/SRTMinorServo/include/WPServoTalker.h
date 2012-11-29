@@ -52,7 +52,8 @@ public:
             const CDBParameters *const cdb_ptr, 
             ExpireTime *const expire_ptr, 
             CSecureArea< map<int, vector<PositionItem> > > *cmd_list,
-            const Offsets *const offsets
+            const Offsets *const offsets,
+            const vector<Limits> limits
     ) throw (ComponentErrors::MemoryAllocationExImpl);
 
 
@@ -192,6 +193,9 @@ private:
 
     /** @var pointer to struct of offsets to add to the commanded position */
     const Offsets *const m_offsets;
+
+    /** @var limits of the (virtual) axes **/
+    const vector<Limits> m_limits;
 
     CSecureArea< map<int, vector<PositionItem> > > *m_cmdPos_list;
 

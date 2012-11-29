@@ -275,6 +275,15 @@ bool startswith(const string & s, const string & token);
  */
 bool endswith(const string & s, const string & token);
 
+
+/** Remove every occurrence of a char from a string.
+ * @param str the original string
+ * @param c the character to remove
+ * @return the string without  the occurences of the character
+ */
+string remove(string str, const char c);
+
+
 /** Return the any object as a string.
  * @param i: a any object
  * @return the given object as a string

@@ -32,6 +32,7 @@ struct CDBParameters {
     DWORD REQUIRE_CALIBRATION;
     double EXPIRE_TIME;
     double TRACKING_DELTA;
+    IRA::CString LIMITS; 
 };
 
 // Time of the last values in `second.useconds`  */
@@ -85,6 +86,12 @@ struct PositionItem {
     ACS::Time exe_time;
     ACS::doubleSeq position;
     Offsets offsets;
+};
+
+// Axis limits  */
+struct Limits {
+    double min;
+    double max;
 };
 
 
