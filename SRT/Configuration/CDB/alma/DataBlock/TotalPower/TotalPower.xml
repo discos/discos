@@ -9,7 +9,7 @@
 	<configurationID>KKG</configurationID>
 	<sections>14</sections>
 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
-	<inputPort>BWG</inputPort>
+	<inputPort>GREGORIAN</inputPort>
 	<beams>7</beams>
  	<bandWidth>2350.0</bandWidth>
  	<attenuation>7.0</attenuation>		
@@ -20,10 +20,10 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>CCG</configurationID>
+	<configurationID>CCB</configurationID>
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
- 	<inputPort>GREGORIAN</inputPort>
+ 	<inputPort>BWG</inputPort>
  	<beams>1</beams>
  	<bandWidth>1250.0</bandWidth>
  	<attenuation>10.0</attenuation>	 	

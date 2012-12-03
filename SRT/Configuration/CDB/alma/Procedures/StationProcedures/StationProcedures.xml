@@ -3,11 +3,11 @@
 <ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<Procedure name="setupCCG">
+<Procedure name="setupCCB">
 <body>
-	antennaSetup=CCG
-	receiversSetup=CCG
-	initialize=CCG
+	antennaSetup=CCB
+	receiversSetup=CCB
+	initialize=CCB
 	device=0
 	calOff
 </body>	

@@ -13,7 +13,7 @@
                CommandLineTimeout="3500000"
                ConnectTimeout="3000000"
                PropertyRefreshTime="1000000"
-               Configuration="CCG"
+               Configuration="CCB"
                TimeTollerance="250000"
                RepetitionCacheTime="2000000"
                RepetitionExpireTime="5000000"
