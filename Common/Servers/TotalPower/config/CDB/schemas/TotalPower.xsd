@@ -22,6 +22,7 @@
 	<xs:import namespace="urn:schemas-cosylab-com:GenericBackend:1.0" schemaLocation="GenericBackend.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
 	
+<!--
 	<xs:simpleType name="TBkndConfiguration">
 		<xs:annotation><xs:documentation>
 			Enlist all possible configuration for the backend. many parameters can change for example the number of inputs,
@@ -52,6 +53,7 @@
 
 		</xs:restriction>
 	</xs:simpleType>
+-->
 	
 	<xs:complexType name="BackendStatusType">
 		<xs:complexContent>
@@ -98,7 +100,7 @@
 				         again the hardware -->
 				<xs:attribute name="PropertyRefreshTime" type="xs:unsignedLong" use="required"/>	
 				<!-- indicates the default configuration of the backend -->
-				<xs:attribute name="Configuration" type="TBkndConfiguration" use="required" />
+				<xs:attribute name="Configuration" type="xs:string" use="required" />
 				<!-- Tollerance used when dealing with time synchronization and checks, in particular to deal with jitter beween backend and host computer and with network latencies -->
 				<xs:attribute name="TimeTollerance" type="xs:unsignedLong" use="required" />				
 				<!-- the cache time (microseconds) for logging repetition filter -->
