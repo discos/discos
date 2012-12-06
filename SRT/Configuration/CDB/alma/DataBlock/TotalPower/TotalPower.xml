@@ -26,7 +26,7 @@
  	<inputPort>BWG</inputPort>
  	<beams>1</beams>
  	<bandWidth>1250.0</bandWidth>
- 	<attenuation>10.0</attenuation>	 	
+ 	<attenuation>9.0</attenuation>	 	
  	<sections_inputs>0 1</sections_inputs>
  	<polarizations>L R</polarizations>
  	<feed>0 0</feed>
