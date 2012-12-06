@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'calibrationToolClient.ui'
 #
-# Created: Fri Sep 21 03:37:11 2012
+# Created: Wed Dec  5 18:26:02 2012
 #      by: PyQt4 UI code generator 4.8.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,9 +18,9 @@ except AttributeError:
 class Ui_CalibrationToolDialog(object):
     def setupUi(self, CalibrationToolDialog):
         CalibrationToolDialog.setObjectName(_fromUtf8("CalibrationToolDialog"))
-        CalibrationToolDialog.resize(910, 661)
+        CalibrationToolDialog.resize(912, 632)
         self.buttonBox = QtGui.QDialogButtonBox(CalibrationToolDialog)
-        self.buttonBox.setGeometry(QtCore.QRect(710, 590, 81, 31))
+        self.buttonBox.setGeometry(QtCore.QRect(700, 590, 85, 34))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
@@ -118,7 +118,7 @@ class Ui_CalibrationToolDialog(object):
         self.scanIdLabel_2.setObjectName(_fromUtf8("scanIdLabel_2"))
         self.formLayout_2.setWidget(11, QtGui.QFormLayout.FieldRole, self.scanIdLabel_2)
         self.frame = QtGui.QFrame(CalibrationToolDialog)
-        self.frame.setGeometry(QtCore.QRect(710, 360, 191, 201))
+        self.frame.setGeometry(QtCore.QRect(710, 340, 191, 201))
         self.frame.setFrameShape(QtGui.QFrame.Box)
         self.frame.setObjectName(_fromUtf8("frame"))
         self.formLayout_3 = QtGui.QFormLayout(self.frame)
@@ -166,6 +166,20 @@ class Ui_CalibrationToolDialog(object):
         self.offsetLineEdit.setReadOnly(True)
         self.offsetLineEdit.setObjectName(_fromUtf8("offsetLineEdit"))
         self.formLayout_3.setWidget(6, QtGui.QFormLayout.LabelRole, self.offsetLineEdit)
+        self.recording = QtGui.QLineEdit(CalibrationToolDialog)
+        self.recording.setGeometry(QtCore.QRect(800, 550, 91, 26))
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.recording.sizePolicy().hasHeightForWidth())
+        self.recording.setSizePolicy(sizePolicy)
+        self.recording.setMinimumSize(QtCore.QSize(0, 0))
+        self.recording.setAlignment(QtCore.Qt.AlignCenter)
+        self.recording.setObjectName(_fromUtf8("recording"))
+        self.recordingLabel = QtGui.QLabel(CalibrationToolDialog)
+        self.recordingLabel.setGeometry(QtCore.QRect(705, 550, 64, 21))
+        self.recordingLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.recordingLabel.setObjectName(_fromUtf8("recordingLabel"))
 
         self.retranslateUi(CalibrationToolDialog)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), CalibrationToolDialog.accept)
@@ -188,5 +202,7 @@ class Ui_CalibrationToolDialog(object):
         self.label_7.setText(QtGui.QApplication.translate("CalibrationToolDialog", "Slope", None, QtGui.QApplication.UnicodeUTF8))
         self.label_8.setText(QtGui.QApplication.translate("CalibrationToolDialog", "Offset", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("CalibrationToolDialog", "Amplitude", None, QtGui.QApplication.UnicodeUTF8))
+        self.recording.setText(QtGui.QApplication.translate("CalibrationToolDialog", "OFF", None, QtGui.QApplication.UnicodeUTF8))
+        self.recordingLabel.setText(QtGui.QApplication.translate("CalibrationToolDialog", "Recording", None, QtGui.QApplication.UnicodeUTF8))
 
 from PyQt4 import Qwt5

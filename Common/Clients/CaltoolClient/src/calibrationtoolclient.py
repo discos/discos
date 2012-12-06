@@ -57,6 +57,13 @@ class MyWorker(QThread):
                 self.offset       =self.caltool._get_offset()
                 self.name        =self.boss._get_target()
                 self.device      =self.caltool._get_deviceID()
+                self.oldscan=0L
+                self.newscan=0L
+                self.oldsubscan=0L
+                self.newsubscan=0L
+                self.oldrecordingstatus=False
+                self.newrecordingstatus=False
+                
                 
                 
         def run (self):
@@ -67,11 +74,15 @@ class MyWorker(QThread):
 	           while self.run:
  
         		(arraydatax,compl)=self.arrayDataX.get_sync()		
+                        arraydatax[:]=[x /math.pi*180. for x in arraydatax]
+
 	         	self.emit(Qt.SIGNAL("arrayDataX"),arraydatax)
                         (arraydatay,compl2)=self.arrayDataY.get_sync()
+                        
                         self.emit(Qt.SIGNAL("arrayDataY"),arraydatay)
                         (datay,compl3)=self.dataY.get_sync()
                         (datax,compl3)=self.dataX.get_sync()
+                        datax=datax/math.pi*180.
                         (projectname,compl4)=self.projectname.get_sync()
                         self.emit(Qt.SIGNAL("projectname"),projectname)
                         (observername,compl5)=self.observer.get_sync()
@@ -97,16 +108,32 @@ class MyWorker(QThread):
                         self.emit(Qt.SIGNAL("target"),target)
                         (device,compl13)=self.device.get_sync()
                         self.emit(Qt.SIGNAL("device"),str(device))
+                        rec= self.caltool.isRecording()
+                        if rec==True:  
+                           self.datay_tmp.append(datay)
+                           self.datax_tmp.append(datax)
+                           self.emit(Qt.SIGNAL("DataY"),self.datay_tmp)
+                           self.emit(Qt.SIGNAL("DataX"),self.datax_tmp)
+                        
+                        self.emit(Qt.SIGNAL("isRecording"),rec)
+
+ #                       print rec
+#                        if (subscanid!=self.oldsubscan and scanid !=self.oldscanid):
+#                                print "scan changed",self.oldsubscan,subscanid
+#                                self.oldsubscan=subscanid
+#                                self.subscan=subscanid
+#                                self.datax_tmp=[]
+#                                self.datay_tmp=[]
+                                
+
+                        if (rec!=self.oldrecordingstatus):
+                               self.oldrecordingstatus=rec
+                               self.datax_tmp=[]
+                               self.datay_tmp=[]
+
 
                         
-                        
-
-
-#                        self.datay_tmp.append(datay)
-#                        self.datax_tmp.append(datax)
-#                        self.emit(Qt.SIGNAL("DataY_array"),arraydatay)
-                        
-		        QThread.msleep(100)
+		        QThread.msleep(200)
                    print "Exited from thread"
                    
 	      except Exception,ex:
@@ -128,6 +155,7 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
  
 	def __init__(self,compname,parent=None):
 		Qt.QDialog.__init__(self)
+
 		self.componentname = compname
  		print self.componentname
 		self.simpleClient = PySimpleClient()
@@ -139,10 +167,24 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
 
      			self.thread=MyWorker([component,scheduler,antennaBoss,self.simpleClient])
 			self.setupUi(self)
+#                        self.qwtPlot_datax.setAxisScale(Qwt.QwtPlot.xBottom, 0,1000)
+                        self.qwtPlot_datax.setAxisAutoScale(Qwt.QwtPlot. yLeft) 
 			self.setWindowTitle(self.componentname)
+                        self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
+                        self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
+                        self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.xBottom, "Direction (Deg)")
+                        self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.xBottom, "Direction (Deg)")
+
+
+
+
 
 			self.connect(self.thread,Qt.SIGNAL("arrayDataX"),self.qwtPlot_datay.setX)
     	 		self.connect(self.thread,Qt.SIGNAL("arrayDataY"),self.qwtPlot_datay.setVal)
+                        
+                        self.connect(self.thread,Qt.SIGNAL("DataX"),self.qwtPlot_datax.setX)
+                        self.connect(self.thread,Qt.SIGNAL("DataY"),self.qwtPlot_datax.setVal)
+                        
                         self.connect(self.thread,Qt.SIGNAL("projectname"),self.plainTextEdit_project.setPlainText)
                         self.connect(self.thread,Qt.SIGNAL("observer"),self.plainTextEdit_observer.setPlainText)
                         self.connect(self.thread,Qt.SIGNAL("filename"),self.plainTextEdit_filename.setPlainText)
@@ -155,6 +197,8 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
                         self.connect(self.thread,Qt.SIGNAL("offset"),self.offsetLineEdit.setText)
                         self.connect(self.thread,Qt.SIGNAL("target"),self.fluxLineEdit.setText)
                         self.connect(self.thread,Qt.SIGNAL("device"),self.deviceIdLineEdit.setText)
+                        self.connect(self.thread,Qt.SIGNAL("isRecording"),self.isRecording)
+                        
 
 
 		except  Exception,ex:
@@ -164,12 +208,26 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
         		newEx.log(self.simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
         		self.simpleClient.disconnect()
         		sys.exit(-1)	
- 	 
+ 	@pyqtSlot(Qt.QObject,name="isRecording")
+        def isRecording(self,rec):
+          if rec==False:
+              self.recording.setText("OFF")
+              palette = self.recording.palette()
+              role = self.recording.backgroundRole()
+              palette.setColor(role, Qt.QColor('gray'))
+              self.recording.setPalette(palette)
+          if rec==True:
+              self.recording.setText("ON")
+              palette = self.recording.palette()
+              role = self.recording.backgroundRole()
+              palette.setColor(role, Qt.QColor('green'))
+              self.recording.setPalette(palette)
+            
 
 
         @pyqtSlot(Qt.QObject,name="scalePlots")  # decorator for the slot
         def scalePlots(self,val):
-	        self.qwtPlotdatax.setAxisScale(QwtPlot.xBottom, min(val), max(val))		
+	        self.qwtPlot_datay.setAxisScale(QwtPlot.xBottom, min(val), max(val))		
 	def run(self):
 		self.thread.start()
 					

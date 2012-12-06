@@ -37,12 +37,13 @@ class PlotProperty(Qwt.QwtPlot):
       def setVal(self,val):
 	      	value_decimated=[0 for i in range (len(val))]
 	      	
-                step=len(val)/1000
+                step=len(val)/1000.
                 if step<1:
 			step=1  #step 0 not allowed
 		for i in  range(0,min(len(val),1000)):
  	      		value_decimated[i] =val[i*step-1]
-		self.curve.setData(self.timeData,value_decimated)	
+#                self.curve.setData(self.timeData,value_decimated)       
+                self.curve.setData(self.timeData,val)       
 		self.replot()
       @pyqtSlot(Qt.QObject,name="setX")  # decorator for the slot
       
@@ -51,12 +52,14 @@ class PlotProperty(Qwt.QwtPlot):
       def setDataY(self,val):
                 value_decimated=[0 for i in range (1000)]
                 
-                step=len(val)/1000
+                step=len(val)/1000.
                 if step<1:
                         step=1  #step 0 not allowed
                 for i in  range(0,min(len(val),1000)):
                         value_decimated[i] =val[i*step-1]
-                self.curve.setData(self.timeData,value_decimated)       
+#                self.curve.setData(self.timeData,value_decimated)       
+                self.curve.setData(self.timeData,val)       
+                
                 self.replot()
       def setDataX(self,val):
         
