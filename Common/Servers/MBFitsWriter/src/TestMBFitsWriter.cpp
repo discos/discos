@@ -2,6 +2,9 @@
 
 #include "MBFitsManager.h"
 
+#include <DateTime.h>
+#include <SkySource.h>
+
 #define PI 3.141592653589793238462643383279502884197169399375105820974944592
 
 double rad2Deg( const double value_ ) {
@@ -518,11 +521,14 @@ void startSubScan( MBFitsManager& mbFitsManager_,
 									 const int nUseBand_ ) {
 	Baseband::Baseband_s_t		baseBands;
 	for ( int indexBaseband = 0; indexBaseband < nUseBand_; ++indexBaseband ) {
-		const double frequency			= 0.0;
-		const double bandWidth			= 150.0;
-		const long	 IFPolarization	= indexBaseband;
+		const double bandwidth				= 300.0;
+		const double frequency				= 4900.0;
+//		const long	 IFPolarization	= indexBaseband;
 
-		Baseband baseband(frequency, bandWidth, IFPolarization);
+		const double skyBandwidth			= 150.0;
+		const double skyFrequency			= 5000.0;
+
+		Baseband baseband(bandwidth, frequency * 1000000, skyBandwidth, skyFrequency * 1000000);
 
 		baseBands.insert(baseband);
 	}
@@ -569,15 +575,10 @@ void startSubScan( MBFitsManager& mbFitsManager_,
 	const int							channels	= 1;
 	const double					freqRes		= 0.0;
 
-	MBFitsManager::Double_v_t	bandwidths;
-	for ( int indexBaseband = 0; indexBaseband < nUseBand_; ++indexBaseband ) {
-		bandwidths.push_back(150.0);
-	}
-
 	const string					molecule;
 	const string					transiti;
-	const double					restFreq	= 5000000000;
-	const double					skyFreq		= 5000000000;
+	const double					restFreq	= 5000000000.0;
+
 	const string					sideBand("USB");
 	const double					sbSep			= 0.0;
 	const string					_2ctyp2("PIX-INDX");
@@ -656,11 +657,9 @@ const SpectralAxis spectralAxisRestFrameVelocity(string(),
 
 															channels,
 															freqRes,
-															bandwidths,
 															molecule,
 															transiti,
 															restFreq,
-															skyFreq,
 															sideBand,
 															sbSep,
 															_2ctyp2,
@@ -691,12 +690,53 @@ int main( int argc, char** argv ) {
 
 	try {
 		int												nUseBand = 0;
-
+/*
 		startScan(mbFitsManager, febes, nUseBand);
 
 		startSubScan(mbFitsManager, febes, nUseBand);
-
+*/
 		febes.clear();
+
+		double mjd								= atof(argv[1]);
+		IRA::CDateTime dateTime(mjd + 2400000.5);
+
+		Antenna::TSiteInformation siteInformation;
+		siteInformation.longitude = deg2Rad(11.64693056);
+		siteInformation.latitude	= deg2Rad(44.52048889);
+		siteInformation.height		= 28.0;
+		siteInformation.xP				= 0.0;
+		siteInformation.yP				= 0.0;
+		siteInformation.elipsoid	= 0;
+
+		IRA::CSite site(siteInformation);
+
+//		double azimuth						= deg2Rad(55.4527361762891);
+//		double elevation					= deg2Rad(46.9777207996893);
+		double azimuth						= 0.0;
+		double elevation					= 0.0;
+
+		double rightAscension			= deg2Rad(atof(argv[2]));
+		double declination				= deg2Rad(atof(argv[3]));
+
+		IRA::CSkySource skySource;
+		skySource.setInputEquatorial(rightAscension, declination, IRA::CSkySource::SS_J2000);
+		skySource.process(dateTime, site);
+		skySource.getApparentHorizontal(azimuth, elevation);
+		printf("%f %f\n", azimuth, elevation);
+//		printf("%f %f\n", rad2Deg(azimuth), rad2Deg(elevation));
+
+/*
+		double ra, dec, eph, dra, ddec, parallax, rvel;
+		skySource.getJ2000Equatorial(ra, dec, eph, dra, ddec, parallax, rvel);
+		printf("%f %f\n", rad2Deg(ra), rad2Deg(dec));
+*/
+/*
+		double parallatticAngle = deg2Rad(-72.7110306728735);
+		IRA::CSkySource::horizontalToEquatorial(dateTime, site, azimuth, elevation, rightAscension, declination, parallatticAngle);
+		printf("%f %f\n", rad2Deg(rightAscension), rad2Deg(declination));
+		IRA::CSkySource::apparentToJ2000(rightAscension, declination, dateTime, rightAscension, declination);
+		printf("%f %f\n", rad2Deg(rightAscension), rad2Deg(declination));
+*/
 	} catch(...) {
 		febes.clear();
 

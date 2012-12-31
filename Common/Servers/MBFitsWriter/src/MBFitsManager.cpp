@@ -671,11 +671,9 @@ void MBFitsManager::startSubScan( const MBFitsManager::FeBe_v_t&	febeNames_,
 
 																	const int							channels_,
 																	const double					freqRes_,
-																	const MBFitsManager::Double_v_t&	bandwidths_,
 																	const string&					molecule_,
 																	const string&					transiti_,
 																	const double					restFreq_,
-																	const double					skyFreq_,
 																	const string&					sideBand_,
 																	const double					sbSep_,
 																	const string&					_2ctyp2_,
@@ -800,12 +798,12 @@ void MBFitsManager::startSubScan( const MBFitsManager::FeBe_v_t&	febeNames_,
 														channels_,
 														nUseFeed,
 														freqRes_,
-														bandwidths_.at(indexBaseband),
+														baseBand_ci->getSkyBandwidth(),
 
 														molecule_,
 														transiti_,
 														restFreq_,
-														skyFreq_,
+														baseBand_ci->getSkyFrequency(),
 														sideBand_,
 														sbSep_,
 														_2ctyp2_,
@@ -962,6 +960,10 @@ void MBFitsManager::monitor( const double	mjd_,
 	monitorTable_p->setColumnUnits(CMBFitsWriter::Monitor, referenceKeyword_);
 
 	m_monitorTable_p->setRowIndex(m_monitorTable_p->getRowIndex() + 1);
+}
+
+double MBFitsManager::deg2Rad( const double value_ ) {
+	return (value_ * PI / 180.0);
 }
 
 double MBFitsManager::rad2Deg( const double value_ ) {
@@ -1235,7 +1237,7 @@ void MBFitsManager::createScanHeader( const string&											telescop_,
   m_scanTable_p->setKeywordValue(string("OBSID"),			obsID_																	);
   m_scanTable_p->setKeywordValue(string("SCANNUM"),		scanNum_																);
   m_scanTable_p->setKeywordValue(string("TIMESYS"),		timeSys_																);
-  m_scanTable_p->setKeywordValue(string("DATE-OBS"),	dateObs_																);	// TODO - [day]
+  m_scanTable_p->setKeywordValue(string("DATE-OBS"),	dateObs_																);
   m_scanTable_p->setKeywordValue(string("MJD"),				mjd_																		);
   m_scanTable_p->setKeywordValue(string("LST"),				lst_																		);
   m_scanTable_p->setKeywordValue(string("NOBS"),			nObs_																		);
@@ -1264,15 +1266,15 @@ void MBFitsManager::createScanHeader( const string&											telescop_,
   m_scanTable_p->setKeywordValue(string("PATLAT"),		MBFitsManager::rad2Deg(patLat_)					);
   m_scanTable_p->setKeywordValue(string("CALCODE"),		calCode_																);
   m_scanTable_p->setKeywordValue(string("MOVEFRAM"),	moveFram_																);
-  m_scanTable_p->setKeywordValue(string("PERIDATE"),	periDate_																);	// TODO - [Julian days]
-  m_scanTable_p->setKeywordValue(string("PERIDIST"),	periDist_																);	// TODO - [AU]
+  m_scanTable_p->setKeywordValue(string("PERIDATE"),	periDate_																);
+  m_scanTable_p->setKeywordValue(string("PERIDIST"),	periDist_																);
   m_scanTable_p->setKeywordValue(string("LONGASC"),		MBFitsManager::rad2Deg(longAsc_)				);
   m_scanTable_p->setKeywordValue(string("OMEGA"),			MBFitsManager::rad2Deg(omega_)					);
   m_scanTable_p->setKeywordValue(string("INCLINAT"),	MBFitsManager::rad2Deg(inclinat_)				);
   m_scanTable_p->setKeywordValue(string("ECCENTR"),		eccentr_																);
-  m_scanTable_p->setKeywordValue(string("ORBEPOCH"),	orbEpoch_																);	// TODO - [Julian days]
-  m_scanTable_p->setKeywordValue(string("ORBEQNOX"),	orbEqnox_																);	// TODO - [years]
-  m_scanTable_p->setKeywordValue(string("DISTANCE"),	distance_																);	// TODO - [AU]
+  m_scanTable_p->setKeywordValue(string("ORBEPOCH"),	orbEpoch_																);
+  m_scanTable_p->setKeywordValue(string("ORBEQNOX"),	orbEqnox_																);
+  m_scanTable_p->setKeywordValue(string("DISTANCE"),	distance_																);
 
   m_scanTable_p->setKeywordValue(string("SCANTYPE"),	Scan::getType(scan_.getType())					);
   m_scanTable_p->setKeywordValue(string("SCANMODE"),	Scan::getMode(scan_.getMode())					);

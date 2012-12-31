@@ -24,7 +24,9 @@ class Baseband {
 
 				Section( const Section& section_ );
 				Section( const Backends::TSectionHeader& sectionHeader_,
-								 const long indexInput_ );
+								 const long indexInput_,
+								 const double skyBandwidth_,
+								 const double skyFrequency_ );
 				virtual ~Section();
 
 				virtual bool operator==( const Section& section_ ) const;
@@ -39,11 +41,16 @@ class Baseband {
 
 				long getIDFeed() const;
 
+				double getSkyBandwidth() const;
+				double getSkyFrequency() const;
+
 			private:
 				Section();	// Not implemented
 
 				Backends::TSectionHeader	m_sectionHeader;
 				long											m_indexInput;
+				double										m_skyBandwidth;
+				double										m_skyFrequency;
 		};
 
 		typedef set<Baseband>									Baseband_s_t;
@@ -51,9 +58,10 @@ class Baseband {
 		typedef Baseband_s_t::const_iterator	Baseband_ci_s_t;
 
 		Baseband( const Baseband& baseband_ );
-		Baseband( const double frequency_,
-							const double bandWidth_,
-							const long	 IFPolarization_ );
+		Baseband( const double bandWidth_,
+							const double frequency_,
+							const double skyBandwidth_,
+							const double skyFrequency_ );
 		virtual ~Baseband();
 
 		virtual bool operator==( const Baseband& baseband_ ) const;
@@ -66,15 +74,18 @@ class Baseband {
 
 		void insert( const Baseband::Section& section_ );
 
-		double getBandWidth() const;
+		double getSkyBandwidth() const;
+		double getSkyFrequency() const;
+
 		void getSections( Baseband::Section::Section_v_t& sections_ ) const;
 
 	private:
 		Baseband();		// Not implemented
 
-		double			m_frequency;
-		double			m_bandWidth;
-		long				m_IFPolarization;
+		double	m_bandWidth;
+		double	m_frequency;
+		double	m_skyBandwidth;
+		double	m_skyFrequency;
 
 		Baseband::Section::Section_v_t m_sections;
 };

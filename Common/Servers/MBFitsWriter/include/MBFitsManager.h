@@ -40,6 +40,7 @@ class MBFitsManager {
 		typedef String_v_t::iterator				String_i_v_t;
 		typedef String_v_t::const_iterator	String_ci_v_t;
 
+		static double deg2Rad( const double value_ );
 		static double rad2Deg( const double value_ );
 
 		static string	getLastVersion();
@@ -300,11 +301,9 @@ class MBFitsManager {
 
 											 const int							channels_,
 											 const double						freqRes_,
-											 const MBFitsManager::Double_v_t&	bandwidths_,
 											 const string&					molecule_,
 											 const string&					transiti_,
 											 const double						restFreq_,
-											 const double						skyFreq_,
 											 const string&					sideBand_,
 											 const double						sbSep_,
 											 const string&					_2ctyp2_,

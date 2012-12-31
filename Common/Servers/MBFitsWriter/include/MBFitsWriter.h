@@ -299,7 +299,7 @@ void CMBFitsWriter::setKeywordValue( const CMBFitsWriter::Table_e table_e_,
 		try {
 			string format(!referenceKeyword_.empty() ? CMBFitsWriter::getKeywordFormat(table_e_, referenceKeyword_)
 																							 : (!format_.empty() ? format_ : CMBFitsWriter::getKeywordFormat(table_e_, keyword_)));
-			// TODO - segnalare correttamente l'errore - gestire il caso di nuove keyword non previste dallo standard
+			// segnalare correttamente l'errore - gestire il caso di nuove keyword non previste dallo standard
 			if ( format.empty() ) throw exception();
 
       int		 typeCode = 0;
@@ -313,22 +313,22 @@ void CMBFitsWriter::setKeywordValue( const CMBFitsWriter::Table_e table_e_,
 			// The negative of the value indicates a variable length array column.
 			switch( typeCode ) {
 				case   1: {		// X - bit
-						// TODO - set value of correct type
-						// TODO - se utilizzo mask per ottenere il valore di un singolo bit ATTENZIONE a low-order/high-order -> non voglio che il codice dipenda dall'architettura in modo statico
-						// TODO - warn for incorrect type passed as argument
+						// set value of correct type
+						// se utilizzo mask per ottenere il valore di un singolo bit ATTENZIONE a low-order/high-order -> non voglio che il codice dipenda dall'architettura in modo statico
+						// warn for incorrect type passed as argument
 						setKeyword(table_e_, keyword_, value_, comment_);
 					}
 					break;
 				case  11: {		// B - byte
-						// TODO - set value of correct type
-						// TODO - se utilizzo mask per ottenere il valore di un singolo byte ATTENZIONE a low-order/high-order -> non voglio che il codice dipenda dall'architettura in modo statico
-						// TODO - warn for incorrect type passed as argument
+						// set value of correct type
+						// se utilizzo mask per ottenere il valore di un singolo byte ATTENZIONE a low-order/high-order -> non voglio che il codice dipenda dall'architettura in modo statico
+						// warn for incorrect type passed as argument
 						setKeyword(table_e_, keyword_, value_, comment_);
 					}
 					break;
 				case  14: {		// L - logical
-						// TODO - set value of correct type
-						// TODO - warn for incorrect type passed as argument
+						// set value of correct type
+						// warn for incorrect type passed as argument
 						setKeyword(table_e_, keyword_, value_, comment_);
 					}
 					break;
@@ -337,45 +337,47 @@ void CMBFitsWriter::setKeywordValue( const CMBFitsWriter::Table_e table_e_,
 						valueStr << value_;
 						string value(valueStr.str().substr(0, repeat));
 
-						// TODO - warn for incorrect type passed as argument
-						if ( value != valueStr.str() ) { /* TODO */ }
+						// warn for incorrect type passed as argument
+						if ( value != valueStr.str() ) {
+							throw exception();
+						}
 
 						setKeyword(table_e_, keyword_, value, comment_);
 					}
 					break;
 				case  21: {		// I - short integer
-						// TODO - set value of correct type
-						// TODO - warn for incorrect type passed as argument
+						// set value of correct type
+						// warn for incorrect type passed as argument
 						setKeyword(table_e_, keyword_, value_, comment_);
 					}
 					break;
 				case  41: {		// J - integer
-						// TODO - set value of correct type
-						// TODO - warn for incorrect type passed as argument
+						// set value of correct type
+						// warn for incorrect type passed as argument
 						setKeyword(table_e_, keyword_, value_, comment_);
 					}
 					break;
 				case  42: {		// E - real
-						// TODO - set value of correct type
-						// TODO - warn for incorrect type passed as argument
+						// set value of correct type
+						// warn for incorrect type passed as argument
 						setKeyword(table_e_, keyword_, value_, comment_);
 					}
 					break;
 				case  82: {		// D - double precision
-						// TODO - set value of correct type
-						// TODO - warn for incorrect type passed as argument
+						// set value of correct type
+						// warn for incorrect type passed as argument
 						setKeyword(table_e_, keyword_, value_, comment_);
 					}
 					break;
 				case  83: {		// C - complex
-						// TODO - set value of correct type
-						// TODO - warn for incorrect type passed as argument
+						// set value of correct type
+						// warn for incorrect type passed as argument
 						setKeyword(table_e_, keyword_, value_, comment_);
 					}
 					break;
 				case 163: {		// M - double complex
-						// TODO - set value of correct type
-						// TODO - warn for incorrect type passed as argument
+						// set value of correct type
+						// warn for incorrect type passed as argument
 						setKeyword(table_e_, keyword_, value_, comment_);
 					}
 					break;
@@ -418,8 +420,6 @@ void CMBFitsWriter::getColumnValue( const CMBFitsWriter::Table_e table_e_,
 
 		try {
 		  if ( Primary == table_e_ ) {
-		    // TODO
-
         throw exception();
 		  } else {
         m_mbFits_p->extension(extName).column(columnName_).read(value_, rowIndex_, rowIndex_ + 1);
@@ -446,8 +446,6 @@ void CMBFitsWriter::getColumnValue( const CMBFitsWriter::Table_e table_e_,
 
 		try {
 		  if ( Primary == table_e_ ) {
-		    // TODO
-
         throw exception();
 		  } else {
         m_mbFits_p->extension(extName).column(columnName_).read(values, rowIndex_);
@@ -471,8 +469,6 @@ void CMBFitsWriter::getColumnValue( const CMBFitsWriter::Table_e table_e_,
 
 		try {
 		  if ( Primary == table_e_ ) {
-		    // TODO
-
         throw exception();
 		  } else {
 		  	if ( (0 > m_mbFits_p->extension(extName).column(columnName_).type()) ||
@@ -504,7 +500,6 @@ void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,
 			values.push_back(value_);
 
 		  if ( Primary == table_e_ ) {
-		    // TODO
         values.clear();
 
         throw exception();
@@ -525,7 +520,7 @@ template<typename T>
 void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,
 																	  const string& columnName_,
 																	  const vector<T>& value_ ) {
-	// TODO - gestire eccezione in caso di elenco di valori empty
+	// gestire eccezione in caso di elenco di valori empty
 	if ( CMBFitsWriter::Undefined != table_e_ ) {
 		CMBFitsWriter::TableName_ci_m_t			tableName_ci		 = CMBFitsWriter::m_tablesNames.find(table_e_);
 		if ( tableName_ci			== CMBFitsWriter::m_tablesNames.end() ) throw exception();
@@ -539,7 +534,6 @@ void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,
 			vectorLengths.push_back(value_.size());
 
 		  if ( Primary == table_e_ ) {
-		    // TODO
         vectorLengths.clear();
 
         throw exception();

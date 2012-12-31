@@ -107,9 +107,11 @@ namespace MBFitsWriter_private {
 
 			bool processData( const MBFitsManager::FeBe_v_t& frontendBackendNames_,
 												const Baseband::Baseband_s_t& baseBands_,
-												const string basisFrameCType_,
-												const double longObj_,
-												const double latObj_ );
+												const string& basisFrameCType_,
+												const string& nativeFrameCType_,
+												const bool	 moveFrame_,
+												double longObj_,
+												double latObj_ );
 
 			CDBTable* loadTimeData() const;
 			CDBTable* loadAntennaParameters() const;

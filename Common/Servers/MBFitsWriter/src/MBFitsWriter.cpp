@@ -634,7 +634,6 @@ bool CMBFitsWriter::operator==( const CMBFitsWriter& mbFitsWriter_ ) const {
 	return false;
 
 /*	// Not implemented
-	// TODO: implement correct evaluation
 	return ( ((!m_mbFits_p.get() && !mbFitsWriter_.m_mbFits_p.get()) ||
 						( m_mbFits_p.get() &&  mbFitsWriter_.m_mbFits_p.get() && (*m_mbFits_p == *mbFitsWriter_.m_mbFits_p))) &&
 					 (m_fileName == mbFitsWriter_.m_fileName) &&
@@ -796,8 +795,8 @@ void CMBFitsWriter::open() {
 	// the datatype of the primary image.
 	// bitpix may be one of the following CFITSIO constants: BYTE_IMG, SHORT_IMG, LONG_IMG, FLOAT_IMG, DOUBLE_IMG, USHORT_IMG, ULONG_IMG.
 	// Note that if you send in a bitpix of USHORT_IMG or ULONG_IMG, CCfits will set HDU::bitpix() to its signed equivalent (SHORT_IMG or LONG_IMG), and then set BZERO to 2^15 or 2^31.
-	// TODO - va impostato il valore di bitpix nel file FITS? Serve per alcuni costruttori, non per tutti
-	int  	m_bitpix	= BYTE_IMG;		// TODO - si riesce ad ottenere da qualche componente di ESCS?
+	// va impostato il valore di bitpix nel file FITS? Serve per alcuni costruttori, non per tutti
+	int  	m_bitpix	= BYTE_IMG;		// si riesce ad ottenere da qualche componente di ESCS?
 
 	vector<String> primaryKeys;
 
@@ -913,7 +912,7 @@ void CMBFitsWriter::setRowIndex( const CMBFitsWriter::Table_e table_e_,
 																 const unsigned int rowIndex_ ) {
   if ( CMBFitsWriter::Primary == table_e_ ) throw exception();
 
-  // TODO - il numero memorizzato potrebbe non essere sincronizzato con il valore in tabella - attenzione ai punti di modifica del valore in tabella e i memoria
+  // il numero memorizzato potrebbe non essere sincronizzato con il valore in tabella - attenzione ai punti di modifica del valore in tabella e i memoria
 	CMBFitsWriter::TableRowIndex_i_m_t	 tableRowIndex_i	 = m_tablesRowIndices.find(table_e_);
 	if ( tableRowIndex_i == m_tablesRowIndices.end()	 ) throw exception();
 
@@ -925,11 +924,11 @@ void CMBFitsWriter::insertRows( const CMBFitsWriter::Table_e table_e_,
 																const unsigned int rows_n_ ) {
   if ( CMBFitsWriter::Primary == table_e_ ) throw exception();
 
-  // TODO - il numero memorizzato potrebbe non essere sincronizzato con il valore in tabella - attenzione ai punti di modifica del valore in tabella e i memoria
+  // il numero memorizzato potrebbe non essere sincronizzato con il valore in tabella - attenzione ai punti di modifica del valore in tabella e i memoria
 	CMBFitsWriter::TableRowIndex_i_m_t	 tableRowIndex_i	 = m_tablesRowIndices.find(table_e_);
 	if ( tableRowIndex_i == m_tablesRowIndices.end()	 ) throw exception();
 
-	// TODO - verificare che il valore di rowIndexStart_ sia compatibile con il numero di righe esistente in tabella - potrebbe farlo CCFits e sollevare eventualmente eccezioni
+	// verificare che il valore di rowIndexStart_ sia compatibile con il numero di righe esistente in tabella - potrebbe farlo CCFits e sollevare eventualmente eccezioni
 
   try {
 		Table* table_p = m_tablesTables.find(table_e_)->second;
@@ -967,7 +966,6 @@ void CMBFitsWriter::getColumns( const CMBFitsWriter::Table_e table_e_,
 			break;
 
 		case CMBFitsWriter::Primary:
-      // TODO
 			throw exception();
 			break;
 

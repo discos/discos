@@ -166,8 +166,10 @@ void EngineThread::runLoop() {
 	static bool											subScanStop = true;
 	static Baseband::Baseband_s_t		baseBands;
 	static string										basisFrameCType;
-	static double longObj	= 0.0;
-	static double latObj	= 0.0;
+	static string										nativeFrameCType;
+	static bool		moveFram	= false;
+	static double longObj		= 0.0;
+	static double latObj		= 0.0;
 
   // Blocking call - CDataCollection instance is owned until released
 	CSecAreaResourceWrapper<CDataCollection> data_p = m_dataWrapper_p->Get();
@@ -178,7 +180,7 @@ void EngineThread::runLoop() {
 	if ( data_p->isReset() ) {
 	  //ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()", (LM_NOTICE, "FILE_CLOSED"));
 
-	  // TODO - chiudere i file se risultano aperti
+	  // chiudere i file se risultano aperti
 	  if ( m_mbFitsManager_p ) { delete m_mbFitsManager_p; m_mbFitsManager_p = NULL; }
 
 		data_p->haltResetStage();
@@ -246,9 +248,6 @@ void EngineThread::runLoop() {
 					frontendBackendNames.clear();
 
 					stringstream frontendBackendName;
-//					frontendBackendName << setw(8) << setfill(' ') << receiverCode
-//															<< '-'
-//															<< string("Backend");
 					frontendBackendName << receiverCode
 															<< '-'
 															<< string("Backend");
@@ -274,6 +273,7 @@ void EngineThread::runLoop() {
 					ACS::doubleSeq	receiversInitialFrequency;
 					ACS::doubleSeq	calibrationMarks;
 					ACS::longSeq		polarizations;
+					ACS::doubleSeq	skyBandwidths;
 					ACS::doubleSeq	skyFrequencies;
 
 					CString	sourceName;
@@ -294,6 +294,7 @@ void EngineThread::runLoop() {
 					data_p->getReceiverInitialFrequency(receiversInitialFrequency);
 					data_p->getCalibrationMarks(calibrationMarks);
 					data_p->getReceiverPolarization(polarizations);
+					data_p->getSkyBandwidth(skyBandwidths);
 					data_p->getSkyFrequency(skyFrequencies);
 					data_p->getSource(sourceName, sourceRightAscension, sourceDeclination, sourceVlsr);
 					data_p->getAntennaOffsets(azimuthOffset, elevationOffset,
@@ -328,14 +329,16 @@ void EngineThread::runLoop() {
 
 					for ( int indexSection = 0; indexSection < data_p->getSectionsNumber(); ++indexSection ) {
 						for ( long indexInput = 0; indexInput < sectionHeader[indexSection].inputs; ++indexInput ) {
-							Baseband::Section section(sectionHeader[indexSection], indexInput);
+							Baseband::Section section(sectionHeader[indexSection], indexInput,
+																				skyBandwidths[indexSection], skyFrequencies[indexSection] * 1000000);
 
-							Baseband baseBand(sectionHeader[indexSection].frequency, sectionHeader[indexSection].bandWidth, polarizations[sectionHeader[indexSection].IF[indexInput]]);
+							Baseband baseBand(sectionHeader[indexSection].bandWidth, sectionHeader[indexSection].frequency,
+																skyBandwidths[indexSection], skyFrequencies[indexSection] * 1000000);
 
 							Baseband::Baseband_i_s_t baseBand_i = baseBands.begin();
 							for ( ; baseBand_i != baseBands.end(); ++baseBand_i ) {
 								if ( baseBand_i->isSimilar(baseBand) ) {
-									baseBand_i->insert(section);	// TODO - warning: passing ‘const Baseband’ as ‘this’ argument of ‘void Baseband::insert(const Baseband::Section&)’ discards qualifiers
+									baseBand_i->insert(section);	// warning: passing ‘const Baseband’ as ‘this’ argument of ‘void Baseband::insert(const Baseband::Section&)’ discards qualifiers
 									break;
 								}
 							}
@@ -352,28 +355,27 @@ void EngineThread::runLoop() {
 					timeData_p = loadTimeData();
 					timeData_p->First();
 
-					const string		timeSys((*timeData_p)["timeSys"]->asString());
+					const string	timeSys((*timeData_p)["timeSys"]->asString());
 
-					const double		mjd = currentDatetime.getMJD();
+					const double	mjd = currentDatetime.getMJD();
 
 					const string	telescop(siteName);
-const string	origin("IRA- INAF");	// TODO - CDB
-const string	creator("ESCS 0.3");	// TODO - CDB
-const string	instrume("MEDHET");		// TODO - CDB
+					const string	origin("IRA- INAF");
+					const string	creator("ESCS 0.3");
+					const string	instrume("MEDHET");
 
 for ( MBFitsManager::String_ci_v_t frontendBackendName_ci = frontendBackendNames.begin();
 			frontendBackendName_ci != frontendBackendNames.end(); ++frontendBackendName_ci ) {
-	restFreqencies.push_back(0.0);		// TODO - Get
-	lines.push_back(string());				// TODO - Get
+	restFreqencies.push_back(0.0);
+	lines.push_back(string());
 }
 
 					const string  object(sourceName);
 					const double	ra	= sourceRightAscension;
 					const double	dec	= sourceDeclination;
 
-//CSkySource::TEquinox equinox_e = CSkySource::SS_J2000;
-const string	radeSys("FK5");								// TODO - File
-const float		equinox(2000.0);							// TODO - File
+					const string	radeSys("FK5");
+					const float		equinox(2000.0);
 					const double	exptime(0.0);
 
 					string origFile(static_cast<const char*>(data_p->getFileName()));
@@ -427,7 +429,7 @@ const float		equinox(2000.0);							// TODO - File
 					}
 
 					layoutValue = layout_p->find("CTYPEN");
-					const string nativeFrameCType(layoutValue);
+					nativeFrameCType = layoutValue;
 					const string nativeFrameCType1(nativeFrameCType.substr(0, nativeFrameCType.find('/')));
 					const string nativeFrameCType2(nativeFrameCType.substr(nativeFrameCType.find('/') + 1, nativeFrameCType.length() - nativeFrameCType.find('/')));
 
@@ -546,8 +548,10 @@ ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "tempCoord e latPole
 
 ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "lonPole e latPole: %3.2f %3.2f", lonPole, latPole));
 */
-					const double lonPole = atan2(sin(0.0) * cos(crVal2), sin(crVal2));
-					const double latPole = asin(cos(0.0) * cos(crVal2));
+					layoutValue = layout_p->find("SCANROT");
+					const double scanRot = MBFitsManager::deg2Rad(atof(layoutValue.c_str()));
+					const double lonPole = atan2(sin(scanRot) * cos(crVal2), sin(crVal2));
+					const double latPole = asin(cos(scanRot) * cos(crVal2));
 
 					double bLongObj	= 0.0;
 					double bLatObj	= 0.0;
@@ -566,51 +570,52 @@ ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_ERROR, "lonPole e latPole: 
 						//... non gestito ...
 					}
 
-					// TODO - per avere le coordinate nel sistema native non sarebbe corretto sottrarre le coordinate CRVAL1,CRVAL2?
+					// per avere le coordinate nel sistema native non sarebbe corretto sottrarre le coordinate CRVAL1,CRVAL2?
 					if ( string("RA/DEC") == nativeFrameCType ) {
 						longObj	= sourceRightAscension;
 						latObj	= sourceDeclination;
 					} else if ( string("GLON/GLAT") == nativeFrameCType ) {
 						CSkySource::equatorialToGalactic(sourceRightAscension, sourceDeclination, longObj, latObj);
 					} else if ( string("ALON/ALAT") == nativeFrameCType ) {
-						layoutValue = layout_p->find("LONGOBJ");
-						longObj		= atof(layoutValue.c_str());
-						layoutValue = layout_p->find("LATOBJ");
-						latObj			= atof(layoutValue.c_str());
+						if ( string("ALON/ALAT") == basisFrameCType ) {
+							moveFram		= false;
+
+							layoutValue = layout_p->find("BLONGOBJ");
+							longObj			= atof(layoutValue.c_str());
+							layoutValue = layout_p->find("BLATOBJ");
+							latObj			= atof(layoutValue.c_str());
+						} else {
+							moveFram		= true;
+
+							longObj			= sourceRightAscension;
+							latObj			= sourceDeclination;
+						}
 					} else {
 						//... non gestito ...
 					}
 
-const double	patLong		= 0.0;								// TODO - verificare correttezza
-const double	patLat		= 0.0;								// TODO - verificare correttezza
+const double	patLong		= 0.0;
+const double	patLat		= 0.0;
 
-const string	calCode;												// TODO - File
+const string	calCode;
 
-const bool		moveFram	= false;							// TODO - File
-const double	periDate	= 0.0;								// TODO - File
-const double	periDist	= 0.0;								// TODO - File
-const double	longAsc		= 0.0;								// TODO - File
-const double	omega			= 0.0;								// TODO - File
-const double	inclinat	= 0.0;								// TODO - File
-const double	eccentr		= 0.0;								// TODO - File
-const double	orbEpoch	= 0.0;								// TODO - File
-const double	orbEqnox	= 0.0;								// TODO - File
-const double	distance	= 0.0;								// TODO - File
+const double	periDate	= 0.0;
+const double	periDist	= 0.0;
+const double	longAsc		= 0.0;
+const double	omega			= 0.0;
+const double	inclinat	= 0.0;
+const double	eccentr		= 0.0;
+const double	orbEpoch	= 0.0;
+const double	orbEqnox	= 0.0;
+const double	distance	= 0.0;
 
 					Scan scan;
 					scan.setLayout(*layout_p);
 
-const double	tranDist	= 0.0;								// TODO - File
-const double	tranFreq	= 0.0;								// TODO - File
-const double	tranFocu	= 0.0;								// TODO - File
-/*
-const bool		wobUsed		= false;							// TODO - File
-const double	wobThrow	= 0.0;								// TODO - File
-const string	wobDir;													// TODO - File
-const float		wobCycle	= 0.0;								// TODO - File
-const string	wobMode;												// TODO - File
-const string	wobPatt;												// TODO - File
-*/
+const double	tranDist	= 0.0;
+const double	tranFreq	= 0.0;
+const double	tranFocu	= 0.0;
+
 					layoutValue = layout_p->find("WOBUSED");
 					const bool		wobUsed		= (string("1") == layoutValue);
 					layoutValue = layout_p->find("WOBTHROW");
@@ -624,18 +629,18 @@ const string	wobPatt;												// TODO - File
 					layoutValue = layout_p->find("WOBPATT");
 					const string	wobPatt		= layoutValue;
 
-const int			nPhases		= 1;					// TODO - File
+const int			nPhases		= 1;
 for ( int indexPhase = 0; indexPhase < nPhases; ++indexPhase ) {
-	phases.push_back(string("TOTP"));		// TODO - CDB
+	phases.push_back(string("NONE"));
 }
 					const int			nFebe = frontendBackendNames.size();
 
-const float		pDeltaIA	= 0.0;	// TODO - Get
-const float		pDeltaCA	= 0.0;	// TODO - Get
-const float		pDeltaIE	= 0.0;	// TODO - Get
-const float		fDeltaIA	= 0.0;	// TODO - Get
-const float		fDeltaCA	= 0.0;	// TODO - Get
-const float		fDeltaIE	= 0.0;	// TODO - Get
+const float		pDeltaIA	= 0.0;
+const float		pDeltaCA	= 0.0;
+const float		pDeltaIE	= 0.0;
+const float		fDeltaIA	= 0.0;
+const float		fDeltaCA	= 0.0;
+const float		fDeltaIE	= 0.0;
 
 					pointingModelCoefficients_p = loadPointingModelCoefficients();
 					pointingModelCoefficients_p->First();
@@ -685,24 +690,25 @@ const float		fDeltaIE	= 0.0;	// TODO - Get
 					const double	focFreq		= (*pointingModelCoefficients_p)["focFreq"]->asDouble();
 					const double	focPhase	= (*pointingModelCoefficients_p)["focPhase"]->asDouble();
 
-const string	dewCabin;					// TODO - Get
-const string	dewRtMod;					// TODO - Get
-const float		dewUser		= 0.0;	// TODO - Get
-const float		dewZero		= 0.0;	// TODO - Get
-const string	location;					// TODO - Get
-const string	optPath;					// TODO - Get
-const int			nOptRefl	= 0;		// TODO - Get
-const int			febeBand	= 2;		// TODO - Get
-const int			febeFeed	= 2;		// TODO - Get
+const string	dewCabin;
+const string	dewRtMod;
+const float		dewUser		= 0.0;
+const float		dewZero		= 0.0;
+const string	location;
+const string	optPath;
+const int			nOptRefl	= 0;
+const int			febeBand	= 2;
+const int			febeFeed	= 2;
 
-const string	fdTypCod("3: UNKNOWN");		// TODO - Get
-const float		feGain		= 0.0;					// TODO - Get
-const string	swtchMod;									// TODO - File
+const string	fdTypCod("3: UNKNOWN");
+const float		feGain		= 0.0;
+					layoutValue = layout_p->find("SWTCHMOD");	
+					const string	swtchMod(layoutValue);
 
-const float		frThrwLo	= 0.0;	// TODO - Get
-const float		frThrwHi	= 0.0;	// TODO - Get
-const float		tBlank		= 0.0;	// TODO - Get
-const float		tSync			= 0.0;	// TODO - Get
+const float		frThrwLo	= 0.0;
+const float		frThrwHi	= 0.0;
+const float		tBlank		= 0.0;
+const float		tSync			= 0.0;
 
 					const float iaRx		= (*pointingModelCoefficients_p)["iaRx"]->asDouble();
 					const float ieRx		= (*pointingModelCoefficients_p)["ieRx"]->asDouble();
@@ -734,10 +740,10 @@ const float		tSync			= 0.0;	// TODO - Get
 					const float nRxRx		= (*pointingModelCoefficients_p)["nRxRx"]->asDouble();
 					const float nRyRx		= (*pointingModelCoefficients_p)["nRyRx"]->asDouble();
 
-const string	sigOnln;					// TODO - ???
-const string	refOnln;					// TODO - ???
-const string	sigPol;						// TODO - ???
-const string	refPol;						// TODO - ???
+const string	sigOnln;
+const string	refOnln;
+const string	sigPol;
+const string	refPol;
 
 					for ( int	indexUseBand = 0; indexUseBand < nUseBand; ++indexUseBand ) {
 						useBand.push_back(indexUseBand + 1);
@@ -757,7 +763,10 @@ const string	refPol;						// TODO - ???
 					for ( int indexSection = 0; indexSection < data_p->getSectionsNumber(); ++indexSection ) {
 						for ( long indexInput = 0; indexInput < sectionHeader[indexSection].inputs; ++indexInput ) {
 							IntFeedHeader_ci_m_t idFeedHeader_ci = idsFeeds.find(sectionHeader[indexSection].feed);
-							if ( idFeedHeader_ci == idsFeeds.end() ) throw exception();
+							if ( idFeedHeader_ci == idsFeeds.end() ) {
+								ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()", (LM_NOTICE, "feed Header not found! Index section: %d, feed: %d", indexSection, sectionHeader[indexSection].feed));
+								throw exception();
+							}
 
 							++indexFeed;
 							indicesFeeds.insert(EngineThread::IntFeedHeader_m_t::value_type(indexFeed, idFeedHeader_ci->second));
@@ -783,7 +792,7 @@ for ( Baseband::Baseband_ci_s_t baseband_ci = baseBands.begin();
 			useFeed.push_back(value);
 
 			beSects.push_back(indexBaseband);
-			feedType.push_back(3);											// TODO - Get
+			feedType.push_back(3);
 		}
 	}
 
@@ -792,7 +801,7 @@ for ( Baseband::Baseband_ci_s_t baseband_ci = baseBands.begin();
 	nUseFeed.push_back(inputs_n);
 }
 
-const int									refFeed	= 1;	// TODO - CDB
+const int									refFeed	= 1;
 					string										polTy;
 
 					for ( EngineThread::IntFeedHeader_ci_m_t indexFeed_ci = indicesFeeds.begin();
@@ -805,13 +814,13 @@ const int									refFeed	= 1;	// TODO - CDB
 
 						switch( idPolarization_ci->second ) {
 							case Backends::BKND_LCP:
-								polTy += "L";										// TODO - CDB
+								polTy += "L";
 								break;
 							case Backends::BKND_RCP:
-								polTy += "R";										// TODO - CDB
+								polTy += "R";
 								break;
 							case Backends::BKND_FULL_STOKES:
-								polTy += "S";										// TODO - CDB
+								polTy += "S";
 								break;
 							default:
 								throw exception();
@@ -820,7 +829,7 @@ const int									refFeed	= 1;	// TODO - CDB
 					}
 
 for ( int	indexFebeFeed = 0; indexFebeFeed < febeFeed; ++indexFebeFeed ) {
-	polA.push_back(0.0);									// TODO - Get
+	polA.push_back(0.0);
 }
 
 					bandsParameters_p = loadAntennaParameters();
@@ -831,7 +840,7 @@ for ( int	indexFebeFeed = 0; indexFebeFeed < febeFeed; ++indexFebeFeed ) {
 					for ( int index = 0; index < bandsParameters_p->recordCount(); ++index ) {
 						CString id((*bandsParameters_p)["band"]->asString());
 
-						// TODO - potrebbe esistere più di un elemento associato allo stesso ricevitore
+						// potrebbe esistere più di un elemento associato allo stesso ricevitore
 						// dovrei considerare anche la frequenza e prendere l'elemento più vicino
 						if ( receiverCode == string(id) ) {
 							bandParametersFound = true;
@@ -856,12 +865,12 @@ for ( int	indexFebeFeed = 0; indexFebeFeed < febeFeed; ++indexFebeFeed ) {
 						ACSErr::Completion_var completion;
 						CORBA::Double hpbw = 0.0;
 
-						// TODO - capire l'utilita' di memorizzare valori per ogni feed per ogni baseband
+						// capire l'utilita' di memorizzare valori per ogni feed per ogni baseband
 						for ( EngineThread::IntFeedHeader_ci_m_t indexFeed_ci = indicesFeeds.begin();
 									indexFeed_ci != indicesFeeds.end(); ++indexFeed_ci ) {
 							for ( Baseband::Baseband_ci_s_t baseband_ci = baseBands.begin();
 										baseband_ci != baseBands.end(); ++baseband_ci ) {
-								// TODO - 20110106: esiste un unico valore, mentre sembra piu' appropriato avere un valore legato al setup dei feed
+								// 20110106: esiste un unico valore, mentre sembra piu' appropriato avere un valore legato al setup dei feed
 
 								hpbwReference = m_antennaBoss_p->FWHM();
 
@@ -892,20 +901,16 @@ for ( int	indexFebeFeed = 0; indexFebeFeed < febeFeed; ++indexFebeFeed ) {
 for ( MBFitsManager::Long_ci_v_t useFeed_ci = useFeed.begin(); useFeed_ci != useFeed.end(); ++useFeed_ci ) {
 	for ( int	indexFeed = 0; indexFeed < *useFeed_ci; ++indexFeed ) {
 		if ( bandParametersFound ) {
-			tCal.push_back(0.0);								// TODO - Get
+			tCal.push_back(0.0);
 		//tCal.push_back((*bandsParameters_p)[""]->asDouble());
 		} else {
-			tCal.push_back(0.0);								// TODO - Get
+			tCal.push_back(0.0);
 		}
 	}
 }
 
-idsPolarizations.clear();
-indicesFeeds.clear();
-idsFeeds.clear();
-
 for ( int	indexUseBand = 0; indexUseBand < nUseBand; ++indexUseBand ) {
-	bolCalFc.push_back(0.0);							// TODO - Get
+	bolCalFc.push_back(0.0);
 }
 
 					try{
@@ -931,12 +936,12 @@ for ( int	indexUseBand = 0; indexUseBand < nUseBand; ++indexUseBand ) {
 
 for ( int	indexUseBand = 0; indexUseBand < nUseBand; ++indexUseBand ) {
 	for ( MBFitsManager::Long_ci_v_t useFeed_ci = useFeed.begin(); useFeed_ci != useFeed.end(); ++useFeed_ci ) {
-		flatFiel.push_back(1.0);						// TODO - Get
+		flatFiel.push_back(1.0);
 	}
 }
 for ( int	indexUseBand = 0; indexUseBand < nUseBand; ++indexUseBand ) {
 	for ( MBFitsManager::Long_ci_v_t useFeed_ci = useFeed.begin(); useFeed_ci != useFeed.end(); ++useFeed_ci ) {
-		boldCoff.push_back(1.0);						// TODO - Get
+		boldCoff.push_back(1.0);
 	}
 }
 
@@ -947,10 +952,10 @@ for ( int	indexUseBand = 0; indexUseBand < nUseBand; ++indexUseBand ) {
 					}
 
 for ( int	indexUseBand = 0; indexUseBand < nUseBand; ++indexUseBand ) {
-	gainEle1.push_back(1.0);							// TODO - Get
+	gainEle1.push_back(1.0);
 }
 for ( int	indexUseBand = 0; indexUseBand < nUseBand; ++indexUseBand ) {
-	gainEle2.push_back(1.0);							// TODO - Get
+	gainEle2.push_back(1.0);
 }
 
 string rxBa(80, '-');
@@ -967,27 +972,31 @@ for ( EngineThread::IntFeedHeader_ci_m_t indexFeed_ci = indicesFeeds.begin();
 	EngineThread::IntPolarization_ci_m_t	idPolarization_ci = idsPolarizations.find(indexFeed_ci->second.id);
 	if ( idPolarization_ci == idsPolarizations.end() ) throw exception();
 
-	rxBa[indexRx]		= 'P';	// TODO - Get
+	rxBa[indexRx]		= 'P';
 
 	switch( idPolarization_ci->second ) {
 		case Backends::BKND_LCP:
-			rxCh[indexRx]		= 'L';					// TODO - CDB
+			rxCh[indexRx]		= 'L';
 			break;
 		case Backends::BKND_RCP:
-			rxCh[indexRx]		= 'R';					// TODO - CDB
+			rxCh[indexRx]		= 'R';
 			break;
 		case Backends::BKND_FULL_STOKES:
-			rxCh[indexRx]		= 'T';					// TODO - CDB
+			rxCh[indexRx]		= 'T';
 			break;
 		default:
 			throw exception();
 			break;
 	}
 
-	rxHor[indexRx]	= '1';	// TODO - Get
+	rxHor[indexRx]	= indexFeed_ci->first;
 
 	++indexRx;
 }
+
+idsPolarizations.clear();
+indicesFeeds.clear();
+idsFeeds.clear();
 
 string rxBa_40(rxBa.substr( 0, 40));
 string rxBa_80(rxBa.substr(40, 80));
@@ -1005,8 +1014,8 @@ string rxHor_80(rxHor.substr(40, 80));
 																			 instrume,
 																			 frontendBackendNames,
 																			 restFreqencies,
-																			 lines,				// TODO - il valore va aggiornato successivamente poiché dipende dai valori nei subscan
-																			 bandwidths,	// TODO - il valore va aggiornato successivamente poiché dipende dai valori nei subscan
+																			 lines,
+																			 bandwidths,
 																			 object,
 																			 timeSys,
 																			 mjd,
@@ -1340,7 +1349,6 @@ string rxHor_80(rxHor.substr(40, 80));
 
       if ( m_mbFitsManager_p && m_mbFitsManager_p->isScanStarted() && data_p->isSubScanHeaderReady() ) {
 				MBFitsManager::String_v_t	phaseN;
-				MBFitsManager::Double_v_t	bandwidths;
 
 				try {
 					Backends::TSectionHeader const*	sectionHeader	= data_p->getSectionHeader();
@@ -1350,30 +1358,30 @@ string rxHor_80(rxHor.substr(40, 80));
 
 					baseBands.clear();
 
-					ACS::doubleSeq			skyBandwidths;
+					ACS::doubleSeq	skyBandwidths;
+					ACS::doubleSeq	skyFrequencies;
 
-					// TODO - verificare la necessità di questo aggiornamento
-					//				- risulta necessario per poter fare data_p->getSkyBandwidth, valutare se serve anche ad altro
-					// TODO - verificare la necessità di aggiornamento anche dei dati Antenna
+					// verificare la necessità di questo aggiornamento
+					// - risulta necessario per poter fare data_p->getSkyBandwidth, valutare se serve anche ad altro
+					// verificare la necessità di aggiornamento anche dei dati Antenna
 					// get data from receivers boss
 					collectReceiversData();
 
 					data_p->getSkyBandwidth(skyBandwidths);
-
-					// TODO - sarebbe bello assegnare i valori come attributi delle basebands, è un po' complicato visto il meccanismo di identificazione di basebands simili
-					for ( unsigned int indexBandwidth = 0; indexBandwidth < skyBandwidths.length(); ++indexBandwidth ) {
-						bandwidths.push_back(skyBandwidths[indexBandwidth]);
-					}
+					data_p->getSkyFrequency(skyFrequencies);
 
 					for ( int indexSection = 0; indexSection < data_p->getSectionsNumber(); ++indexSection ) {
 						for ( long indexInput = 0; indexInput < sectionHeader[indexSection].inputs; ++indexInput ) {
-							Baseband::Section section(sectionHeader[indexSection], indexInput);
-							Baseband baseBand(sectionHeader[indexSection].frequency, sectionHeader[indexSection].bandWidth, sectionHeader[indexSection].IF[indexInput]);
+							Baseband::Section section(sectionHeader[indexSection], indexInput,
+																				skyBandwidths[indexSection], skyFrequencies[indexSection] * 1000000);
+
+							Baseband baseBand(sectionHeader[indexSection].bandWidth, sectionHeader[indexSection].frequency,
+																skyBandwidths[indexSection], skyFrequencies[indexSection] * 1000000);
 
 							Baseband::Baseband_i_s_t baseBand_i = baseBands.begin();
 							for ( ; baseBand_i != baseBands.end(); ++baseBand_i ) {
 								if ( baseBand_i->isSimilar(baseBand) ) {
-									baseBand_i->insert(section);	// TODO - warning: passing ‘const Baseband’ as ‘this’ argument of ‘void Baseband::insert(const Baseband::Section&)’ discards qualifiers
+									baseBand_i->insert(section);	// warning: passing ‘const Baseband’ as ‘this’ argument of ‘void Baseband::insert(const Baseband::Section&)’ discards qualifiers
 									break;
 								}
 							}
@@ -1408,7 +1416,7 @@ string rxHor_80(rxHor.substr(40, 80));
 					TIMEDIFFERENCE currentLST;
 					currentDatetime.LST(site).getDateTime(currentLST);  // get the current LST time
 
-const string		subsType;						// TODO - Get
+const string		subsType;
 
 					const Layout* const layoutScan_p = m_layoutCollection.find("SCAN");
 
@@ -1478,78 +1486,77 @@ const string		subsType;						// TODO - Get
 						usrFrame << "--";
 					}
 
-//const string		cType1n;						// TODO - Get
-//const string		cType2n;						// TODO - Get
+const bool			dpBlock		= false;
+const int 			nInts			= 1;
+const bool			wobCoord	= false;
+const float			dewAng		= 0.0;
+const float			dewExtra	= 0.0;
 
-const bool			dpBlock		= false;	// TODO - Get
-const int 			nInts			= 1;			// TODO - Get
-const bool			wobCoord	= false;	// TODO - Get
-const float			dewAng		= 0.0;		// TODO - Get
-const float			dewExtra	= 0.0;		// TODO - Get
+const int				channels	= 1;			// Nch: number of spectral channels for this baseband. This is reserved for spectral channels - in continuum data it is set to 1
 
-const int				channels	= 1;			// Nch: number of spectral channels for this baseband. This is reserved for spectral channels - in continuum data it is set to 1	// TODO - Get
+const double		freqRes		= 0.0;
+const string		molecule;	
+const string		transiti;
 
-const double		freqRes		= 0.0;		// TODO - Get
-const string		molecule;						// TODO - Get
-const string		transiti;						// TODO - Get
-const double		restFreq	= 0.0;		// TODO - Get
-const double		skyFreq		= 0.0;		// TODO - Get
-					const string		sideBand("USB");		// TODO - CDB
-const double		sbSep			= 0.0;		// TODO - Get
+					double		restFreq	= 0.0;
+					layoutValue = layoutScan_p->find("RESTFREQ");
+					if ( !layoutValue.empty() ) restFreq = atof(layoutValue.c_str());
 
-//					const string		_2ctyp2("‘PIX-INDX’");
+					const string		sideBand("USB");
+const double		sbSep			= 0.0;
+
 					const string		_2ctyp2("PIX-INDX");
 					const int				_2crpx2		= 1;
 					const int				_2crvl2		= 1;
 					const int				_21cd2a		= 1;
 
-SpectralAxis spectralAxisRestFrameMainSideband(string(),									// TODO - Get
+SpectralAxis spectralAxisRestFrameMainSideband(string(),
 																							 string("FREQ    "),
-																							 static_cast<float>(1.0),		// TODO - Get
-																							 0.0,												// TODO - Get
-																							 0.0,												// TODO - Get
+																							 static_cast<float>(1.0),
+																							 0.0,	
+																							 0.0,	
 																							 string("Hz"),
-																							 string(),									// TODO - Get
+																							 string(),
 																							 string("TOPOCENT"));
 
-SpectralAxis spectralAxisRestFrameImageSideband(string(),									// TODO - Get
+SpectralAxis spectralAxisRestFrameImageSideband(string(),
 																								string("FREQ    "),
-																								static_cast<float>(1.0),	// TODO - Get
-																								0.0,											// TODO - Get
-																								0.0,											// TODO - Get
+																								static_cast<float>(1.0),
+																								0.0,
+																								0.0,
 																								string("Hz"),
-																								string(),									// TODO - Get
+																								string(),
 																								string("TOPOCENT"));
 
-SpectralAxis spectralAxisSkyFrameMainSideband(string(),										// TODO - Get
+SpectralAxis spectralAxisSkyFrameMainSideband(string(),
 																							string("FREQ    "),
-																							static_cast<float>(1.0),		// TODO - Get
-																							0.0,												// TODO - Get
-																							0.0,												// TODO - Get
+																							static_cast<float>(1.0),
+																							0.0,
+																							0.0,
 																							string("Hz"),
-																							string(),										// TODO - Get
+																							string(),
 																							string("TOPOCENT"));
 
-SpectralAxis spectralAxisSkyFrameImageSideband(string(),									// TODO - Get
+SpectralAxis spectralAxisSkyFrameImageSideband(string(),
 																							 string("FREQ    "),
-																							 static_cast<float>(1.0),		// TODO - Get
-																							 0.0,												// TODO - Get
-																							 0.0,												// TODO - Get
+																							 static_cast<float>(1.0),
+																							 0.0,
+																							 0.0,
 																							 string("Hz"),
-																							 string(),									// TODO - Get
+																							 string(),
 																							 string("TOPOCENT"));
 
-SpectralAxis spectralAxisRestFrameVelocity(string(),											// TODO - Get
+SpectralAxis spectralAxisRestFrameVelocity(string(),
 																					 string("VRAD    "),
-																					 static_cast<float>(1.0),				// TODO - Get
-																					 0.0,														// TODO - Get
-																					 0.0,														// TODO - Get
+																					 static_cast<float>(1.0),
+																					 0.0,
+																					 0.0,
 																					 string("km/s"),
-																					 string(),											// TODO - Get
+																					 string(),
 																					 string("TOPOCENT"));
 
-const float			_1vsou2r	= 0.0;		// TODO - Get
-const float			_1vsys2r	= 0.0;		// TODO - Get
+const float			_1vsou2r	= 0.0;
+const float			_1vsys2r	= 0.0;
 
 					m_mbFitsManager_p->startSubScan(frontendBackendNames,
 																					baseBands,
@@ -1561,9 +1568,6 @@ const float			_1vsys2r	= 0.0;		// TODO - Get
 																					subsType,
 																					scan,
 
-//																					cType1n,
-//																					cType2n,
-
 																					dpBlock,
 																					nInts,
 																					wobCoord,
@@ -1573,11 +1577,9 @@ const float			_1vsys2r	= 0.0;		// TODO - Get
 
 																					channels,
 																					freqRes,
-																					bandwidths,
 																					molecule,
 																					transiti,
 																					restFreq,
-																					skyFreq,
 																					sideBand,
 																					sbSep,
 																					_2ctyp2,
@@ -1595,14 +1597,12 @@ const float			_1vsys2r	= 0.0;		// TODO - Get
 																					_1vsys2r);
 
 					phaseN.clear();
-					bandwidths.clear();
 
 					subScanStop = false;
 				} catch( bad_alloc& exception_ ) {
 					data_p->setStatus(Management::MNG_FAILURE);
 
 					phaseN.clear();
-					bandwidths.clear();
 
 					m_collectThread_p->setMBFitsManager(NULL);
 					if ( m_mbFitsManager_p ) { delete m_mbFitsManager_p; m_mbFitsManager_p = NULL; }
@@ -1614,7 +1614,6 @@ const float			_1vsys2r	= 0.0;		// TODO - Get
 					data_p->setStatus(Management::MNG_FAILURE);
 
 					phaseN.clear();
-					bandwidths.clear();
 
 					m_collectThread_p->setMBFitsManager(NULL);
 					if ( m_mbFitsManager_p ) { delete m_mbFitsManager_p; m_mbFitsManager_p = NULL; }
@@ -1640,19 +1639,15 @@ const float			_1vsys2r	= 0.0;		// TODO - Get
 					if ( m_mbFitsManager_p ) {
 						while ( checkTime(currentUTC.value().value) &&
 										checkTimeSlot(currentUTC.value().value) &&
-										processData(frontendBackendNames, baseBands, basisFrameCType, longObj, latObj) );
+										processData(frontendBackendNames, baseBands, basisFrameCType, nativeFrameCType, moveFram, longObj, latObj) );
 					}
 
 					if ( data_p->isStop() ) {
 						// save all the data in the buffer an then finalize the file
 						if ( m_mbFitsManager_p ) {
-							while( processData(frontendBackendNames, baseBands, basisFrameCType, longObj, latObj) );
+							while( processData(frontendBackendNames, baseBands, basisFrameCType, nativeFrameCType, moveFram, longObj, latObj) );
 						}
 
-						/* TODO - invocare queste procedure può generare un problema: se nel corso di queste invocazioni le stesse funzioni vengono invocate
-						 * tramite il timer del thread, allora le istruzioni si intersecano e non è chiaro il risultato complessivo.
-						 * Possibile che il caso peggiore sia di scrivere due volte i medesimi valori, ma questo passaggio ha bisogno di ulteriori analisi
-						 * e forse va implementato in modo differente */
 						if ( m_mbFitsManager_p ) {
 							m_collectThread_p->collectMeteo();
 							m_collectThread_p->collectTracking();
@@ -1683,7 +1678,6 @@ const float			_1vsys2r	= 0.0;		// TODO - Get
 				m_mbFitsManager_p->endScan();
 				if ( m_mbFitsManager_p ) { delete m_mbFitsManager_p; m_mbFitsManager_p = NULL; }
 
-				// TODO - valutare se e quali flag vanno impostati su DataCollection
 				// data_p->haltStopStage();
 
 				ACS_LOG(LM_FULL_INFO, "EngineThread::runLoop()", (LM_NOTICE, "SCAN_FILES_FINALIZED"));
@@ -2123,33 +2117,19 @@ void EngineThread::collectReceiversData() {
 
 bool EngineThread::processData( const MBFitsManager::FeBe_v_t& frontendBackendNames_,
 																const Baseband::Baseband_s_t& baseBands_,
-																const string basisFrameCType_,
-																const double longObj_,
-																const double latObj_ ) {
+																const string& basisFrameCType_,
+																const string& nativeFrameCType_,
+																const bool	 moveFram_,
+																double longObj_,
+																double latObj_ ) {
 	CSecAreaResourceWrapper<CDataCollection> data_p = m_dataWrapper_p->Get();
 
-	// TODO - verificare la necessità di questo aggiornamento
-	// TODO - verificare la necessità di aggiornamento anche dei dati Antenna
+	// verificare la necessità di questo aggiornamento
+	// verificare la necessità di aggiornamento anche dei dati Antenna
 	// get data from receivers boss
 	collectReceiversData();
-/*
-	MBFitsManager::FeBe_v_t frontendBackendNames;
-	stringstream frontendBackendName;
-	// TODO - con il valore "Frontedn-Backend" si verificava un segmentation fault, non ho indagato per capire esattamente dove, sarebbe da fare l'analisi
-//	frontendBackendName << setw(8) << setfill(' ') << string(data_p->getReceiverCode())
-//											<< '-'
-//											<< string("Backend");
-	frontendBackendName << string(data_p->getReceiverCode())
-											<< '-'
-											<< string("Backend");
-	frontendBackendNames.push_back(frontendBackendName.str());
-	frontendBackendName.str(string());
-*/
-//	TIMEVALUE				currentUTC;
-//	IRA::CIRATools::getTime(currentUTC);				// get the current time
-//	const double		mjd		= IRA::CDateTime(currentUTC, data_p->getDut1()).getMJD();
 
-	// TODO - verificare chi pulisce i buffer seguenti
+	// verificare chi pulisce i buffer seguenti
 	ACS::Time time;
 	bool			calOn					= false;
 	char*			bufferCopy_p	= NULL;		// pointer to the memory that has to be freed
@@ -2163,8 +2143,8 @@ bool EngineThread::processData( const MBFitsManager::FeBe_v_t& frontendBackendNa
 	timeValue.value(time);
 //	CFitsWriter::TDataHeader dataHeader;
 //	dataHeader.time = CDateTime(timeValue, data_p->getDut1()).getMJD();
-	IRA::CDateTime datetime(timeValue, data_p->getDut1());
-	const double	 mjdData = datetime.getMJD();
+	IRA::CDateTime dateTime(timeValue, data_p->getDut1());
+	const double	 mjdData = dateTime.getMJD();
 
 	const long inputs_n = data_p->getInputsNumber();
 	double		 tsys[inputs_n];
@@ -2178,7 +2158,7 @@ bool EngineThread::processData( const MBFitsManager::FeBe_v_t& frontendBackendNa
 	double				apparentLon		= 0.0;
 	double				apparentLat		= 0.0;
 
-	const int			phase			= 1;		// TODO - Get
+	const int			phase			= 1;
 	double				longOff		= 0.0;
 	double				latOff		= 0.0;
 	double				azimuth		= 0.0;
@@ -2191,24 +2171,23 @@ bool EngineThread::processData( const MBFitsManager::FeBe_v_t& frontendBackendNa
 	double				cBasLong	= 0.0;
 	double				cBasLat		= 0.0;
 
-	const double	basLong		= 0.0;	// TODO - Get
-	const double	basLat		= 0.0;	// TODO - Get
-	const double	rotAngle	= 0.0;	// TODO - Get
-	const double	mCRVal1		= 0.0;	// TODO - Get
-	const double	mCRVal2		= 0.0;	// TODO - Get
-	const double	mLonPole	= 0.0;	// TODO - Get
-	const double	mLatPole	= 0.0;	// TODO - Get
-	const double	dFocus_x	= 0.0;	// TODO - Get
-	const double	dFocus_y	= 0.0;	// TODO - Get
-	const double	dFocus_z	= 0.0;	// TODO - Get
-	const double	dPhi_x		= 0.0;	// TODO - Get
-	const double	dPhi_y		= 0.0;	// TODO - Get
-	const double	dPhi_z		= 0.0;	// TODO - Get
-	const double	wobDisLN	= 0.0;	// TODO - Get
-	const double	wobDisLT	= 0.0;	// TODO - Get
+	const double	basLong		= 0.0;
+	const double	basLat		= 0.0;
+	const double	rotAngle	= 0.0;
+	const double	mCRVal1		= 0.0;
+	const double	mCRVal2		= 0.0;
+	const double	mLonPole	= 0.0;
+	const double	mLatPole	= 0.0;
+	const double	dFocus_x	= 0.0;
+	const double	dFocus_y	= 0.0;
+	const double	dFocus_z	= 0.0;
+	const double	dPhi_x		= 0.0;
+	const double	dPhi_y		= 0.0;
+	const double	dPhi_z		= 0.0;
+	const double	wobDisLN	= 0.0;
+	const double	wobDisLT	= 0.0;
 
 	try {
-printf("EngineThread::processData - collecting coordinates\n");
 		bool antennaBossError = false;
 		CCommonTools::getAntennaBoss(m_antennaBoss_p, m_containerServices_p, m_configuration_p->getAntennaBossComponent(), antennaBossError);
 
@@ -2218,7 +2197,6 @@ printf("EngineThread::processData - collecting coordinates\n");
 		m_antennaBoss_p->getObservedEquatorial(time,	data_p->getIntegrationTime() * 10000, ra,				dec);
 		m_antennaBoss_p->getObservedGalactic(time,		data_p->getIntegrationTime() * 10000, lon,			lat);
 		m_antennaBoss_p->getObservedHorizontal(time,	data_p->getIntegrationTime() * 10000, azimuth,	elevatio);
-printf("EngineThread::processData - collected coordinates\n");
 	} catch( ComponentErrors::CouldntGetComponentExImpl& exception_ ) {
 //		_IRA_LOGFILTER_LOG_EXCEPTION(exception_, LM_ERROR);
 
@@ -2238,46 +2216,56 @@ printf("EngineThread::processData - collected coordinates\n");
 	}
 
 	if ( string("RA/DEC") == basisFrameCType_ ) {
-		longOff		= longObj_ - ra;
-		latOff		= latObj_	 - dec;
-
 		double raJ2000	= 0.0;
 		double decJ2000	= 0.0;
-		CSkySource::apparentToJ2000(apparentRa, apparentDec, datetime, raJ2000, decJ2000);
+		CSkySource::apparentToJ2000(apparentRa, apparentDec, dateTime, raJ2000, decJ2000);
 
 		cBasLong	= raJ2000;
 		cBasLat		= decJ2000;
 	} else if ( string("GLON/GLAT") == basisFrameCType_ ) {
-		longOff		= longObj_ - lon;
-		latOff		= latObj_	 - lat;
-
 		cBasLong	= apparentLon;
 		cBasLat		= apparentLat;
 	} else if ( string("ALON/ALAT") == basisFrameCType_ ) {
-		longOff		= longObj_ - azimuth;
-		latOff		= latObj_	 - elevatio;
-
 		cBasLong	= apparentAz;
 		cBasLat		= apparentEl;
 	} else {
 		//... non gestito ...
 	}
 
-	const double parAngle = IRA::CSkySource::paralacticAngle(datetime, data_p->getSite(), azimuth, elevatio);
+	if ( string("RA/DEC") == nativeFrameCType_ ) {
+		longOff		= ra	- longObj_;
+		latOff		= dec	- latObj_;
+	} else if ( string("GLON/GLAT") == nativeFrameCType_ ) {
+		longOff		= lon	- longObj_;
+		latOff		= lat	- latObj_;
+	} else if ( string("ALON/ALAT") == nativeFrameCType_ ) {
+		if ( moveFram_ ) {
+			IRA::CDateTime dateTime(timeValue, data_p->getDut1());
 
-//	TIMEDIFFERENCE currentLST;
-//	IRA::CDateTime(currentUTC, data_p->getDut1()).LST(data_p->getSite()).getDateTime(currentLST);  // get the current LST time
+			IRA::CSkySource skySource;
+			skySource.setInputEquatorial(longObj_, latObj_, IRA::CSkySource::SS_J2000);
+			skySource.process(dateTime, data_p->getSite());
+			skySource.getApparentHorizontal(longObj_, latObj_);
+		}
+
+		longOff		= azimuth		- longObj_;
+		latOff		= elevatio	- latObj_;
+	} else {
+		//... non gestito ...
+	}
+
+	longOff = longOff * cos(latObj_);
+
+	const double parAngle = IRA::CSkySource::paralacticAngle(dateTime, data_p->getSite(), azimuth, elevatio);
+
 	TIMEDIFFERENCE lstData;
 	IRA::CDateTime(timeValue, data_p->getDut1()).LST(data_p->getSite()).getDateTime(lstData);  // get the LST time
 
 	for ( MBFitsManager::FeBe_ci_v_t frontendBackendName_ci = frontendBackendNames_.begin();
 				frontendBackendName_ci != frontendBackendNames_.end(); ++frontendBackendName_ci ) {
-printf("EngineThread::processData - integrationParameters: %s\n", frontendBackendName_ci->c_str());
 		try {
 			m_mbFitsManager_p->integrationParameters(*frontendBackendName_ci,
-//																							 mjd,
 																							 mjdData,
-//																							 currentLST.toSeconds(),
 																							 lstData.toSeconds(),
 																							 data_p->getIntegrationTime() / 1000,	// internally we have the value of integration in millesec
 																							 phase,
@@ -2328,7 +2316,6 @@ printf("EngineThread::processData - integrationParameters: %s\n", frontendBacken
 
 			vector<float> basebandData;
 
-			//for ( int indexSection = 0; indexSection < data_p->getSectionsNumber(); ++indexSection ) {
 			for ( Baseband::Section::Section_ci_v_t section_ci = sections.begin(); section_ci != sections.end(); ++section_ci ) {
 				const long sectionID				= section_ci->getID();
 
@@ -2361,7 +2348,6 @@ printf("EngineThread::processData - integrationParameters: %s\n", frontendBacken
 			sections.clear();
 
 			try {
-printf("EngineThread::processData - integration: %s\n", frontendBackendName_ci->c_str());
 				m_mbFitsManager_p->integration(*frontendBackendName_ci,
 																			 indexBaseband,
 																			 mjdData,
@@ -2382,6 +2368,21 @@ printf("EngineThread::processData - integration: %s\n", frontendBackendName_ci->
 			}
 
 			basebandData.clear();
+
+			stringstream tsysKeyword;
+			tsysKeyword << "TSYS" << "_" << *frontendBackendName_ci << "_" << indexBaseband;
+
+			MBFitsManager::Double_v_t tsysFeBeBaseband;
+			for ( Baseband::Section::Section_ci_v_t section_ci = sections.begin(); section_ci != sections.end(); ++section_ci ) {
+				tsysFeBeBaseband.push_back(tsys[section_ci->getID()]);
+			}
+
+			m_mbFitsManager_p->monitor(mjdData,
+																 tsysKeyword.str(),
+																 tsysFeBeBaseband);
+
+			tsysFeBeBaseband.clear();
+			tsysKeyword.str(string());
 		}
 	}
 
@@ -2391,8 +2392,6 @@ printf("EngineThread::processData - integration: %s\n", frontendBackendName_ci->
 }
 
 CDBTable* EngineThread::loadTimeData() const {
-	// TODO - potrei creare questi insiemi alla creazione del thread e svuotarli alla sua distruzione
-
 	MBFitsManager::String_v_t					fields;
 	EngineThread::StringFieldType_m_t	fieldsTypes;
 
@@ -2427,7 +2426,6 @@ CDBTable* EngineThread::loadTimeData() const {
 		for ( MBFitsManager::String_ci_v_t field_ci = fields.begin(); field_ci != fields.end(); ++field_ci ) {
 			EngineThread::StringFieldType_ci_m_t fieldType_ci = fieldsTypes.find(*field_ci);
 			if ( fieldType_ci == fieldsTypes.end() ) {
-				// TODO - add exception messag
 				throw exception();
 			}
 
@@ -2451,17 +2449,11 @@ CDBTable* EngineThread::loadTimeData() const {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl, dummy, "EngineThread::runLoop()");
 		throw dummy;
 	}
-/*
-int count = timeData_p->recordCount();
-timeData_p->First();
-string timeSys((*timeData_p)["timeSys"]->asString());
-*/
+
 	return timeData_p;
 }
 
 CDBTable* EngineThread::loadAntennaParameters() const {
-	// TODO - potrei creare questi insiemi alla creazione del thread e svuotarli alla sua distruzione
-
 	MBFitsManager::String_v_t					fields;
 	EngineThread::StringFieldType_m_t	fieldsTypes;
 
@@ -2523,7 +2515,6 @@ CDBTable* EngineThread::loadAntennaParameters() const {
 		for ( MBFitsManager::String_ci_v_t field_ci = fields.begin(); field_ci != fields.end(); ++field_ci ) {
 			EngineThread::StringFieldType_ci_m_t fieldType_ci = fieldsTypes.find(*field_ci);
 			if ( fieldType_ci == fieldsTypes.end() ) {
-				// TODO - add exception messag
 				throw exception();
 			}
 
@@ -2552,8 +2543,6 @@ CDBTable* EngineThread::loadAntennaParameters() const {
 }
 
 CDBTable* EngineThread::loadPointingModelCoefficients() const {
-	// TODO - potrei creare questi insiemi alla creazione del thread e svuotarli alla sua distruzione
-
 	MBFitsManager::String_v_t					fields;
 	EngineThread::StringFieldType_m_t	fieldsTypes;
 
@@ -2787,7 +2776,6 @@ CDBTable* EngineThread::loadPointingModelCoefficients() const {
 		for ( MBFitsManager::String_ci_v_t field_ci = fields.begin(); field_ci != fields.end(); ++field_ci ) {
 			EngineThread::StringFieldType_ci_m_t fieldType_ci = fieldsTypes.find(*field_ci);
 			if ( fieldType_ci == fieldsTypes.end() ) {
-				// TODO - add exception messag
 				throw exception();
 			}
 
