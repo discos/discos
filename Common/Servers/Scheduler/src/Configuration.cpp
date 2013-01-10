@@ -78,6 +78,7 @@ void CConfiguration::readProcedures(maci::ContainerServices *services,const IRA:
 
 void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
 {
+	IRA::CString check;
 	_GET_STRING_ATTRIBUTE("AntennaBossInterface","Antenna Boss component interface is ",m_antennaBossComp);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component interface is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);
@@ -96,6 +97,15 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("ScheduleExecutorSleepTime","Schedule executor sleep time (uSec) ",m_scheduleExecutorSleepTime);
 	_GET_STRING_ATTRIBUTE("ProceduresLocation","The CDB location of procedures is",m_proceduresLocation);
 	_GET_STRING_ATTRIBUTE("DefaultProceduresFile","The default procedures file is ",m_defaultProceduresFile);
+	_GET_STRING_ATTRIBUTE("DefaultProjectCode","The default project code is ",m_defaultProjectCode);
+	_GET_STRING_ATTRIBUTE("CheckProjectCode","Check new project codes: ",check);
+	check.MakeUpper();
+	if (check=="TRUE") {
+		m_checkProjectCode=true;
+	}
+	else {
+		m_checkProjectCode=false;
+	}
 }
 
 void CConfiguration::extractBody(const IRA::CString& body,ACS::stringSeq& commands)
@@ -103,7 +113,7 @@ void CConfiguration::extractBody(const IRA::CString& body,ACS::stringSeq& comman
 	long len=0;
 	int start=0;
 	IRA::CString token;
-	//this methods is not really efficient...I use a double pass alghoritm but since I do not know the length of commnds I prefer doing that way insted of
+	//this methods is not really efficient...I use a double pass algorithm but since I do not know the length of commands I prefer doing that way instead of
 	// allocating and deallocating the commands size once each iteration....
 	//computes the number of commands inside the body.....
 	while (CIRATools::getNextToken(body,start,'\n',token)) {

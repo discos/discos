@@ -83,7 +83,7 @@ public:
      
      /**
       * Called to stop the schedule execution.
-      * @param if forse is true the schedule is immediately stopped; if flase the schedule is stopped as soon as the current scan is completed.
+      * @param if force is true the schedule is immediately stopped; if flase the schedule is stopped as soon as the current scan is completed.
       */
      void stopSchedule(bool force);
      
@@ -93,14 +93,20 @@ public:
      const IRA::CString& getScheduleName() { baci::ThreadSyncGuard guard(&m_mutex); return m_scheduleName; }
      
      /**
-      * @return the schedule name
+      * @return the code of the project
      */
-     const IRA::CString& getScheduleOwner() { baci::ThreadSyncGuard guard(&m_mutex); return m_scheduleOwner; }     
+     const IRA::CString& getProjectCode() { baci::ThreadSyncGuard guard(&m_mutex); return m_projectCode; }
      
      /**
+      * Set the current project code, the code could be overridden by a call to startSchedule
+      */
+     void setProjectCode(const IRA::CString& code) { baci::ThreadSyncGuard guard(&m_mutex); m_projectCode=code;	 }
+
+     /**
+      * Method is almost atomic, no sync required
       * @return the currently executed subscan
       */
-     const DWORD& getCurrentScheduleCounter() {  baci::ThreadSyncGuard guard(&m_mutex); return m_scheduleCounter; }
+     const DWORD& getCurrentScheduleCounter() {  /*baci::ThreadSyncGuard guard(&m_mutex);*/ return m_scheduleCounter; }
      
      /**
       * @return the currently executed scan/subscan identifiers
@@ -108,9 +114,10 @@ public:
      void getCurrentScanIdentifers(DWORD& scanID,DWORD& subScanID);
 
      /**
+      * Method is almost atomic, no sync required
       * @return true if a schedule is currently running
       */
-     const bool& isScheduleActive() { baci::ThreadSyncGuard guard(&m_mutex); return m_active; }
+     const bool& isScheduleActive() { /*baci::ThreadSyncGuard guard(&m_mutex);*/ return m_active; }
      
      /**
       * Get a reference to the backend used by the schedule. Attention must be payed to the fact that the currently used backend may change without advice.
@@ -160,11 +167,11 @@ private:
 	IRA::CString m_scheduleName;
 	
 	/**
-	 * Name of the owner of the current schedule
+	 * The name of the current running project
 	 */
-	IRA::CString m_scheduleOwner;
+	IRA::CString m_projectCode;
 	/**
-	 * true if the schedule has been loaded succesfully
+	 * true if the schedule has been loaded successfully
 	 */
 	bool m_scheduleLoaded;
 	/**
@@ -337,8 +344,8 @@ private:
 	 * It forwards the whole configuration procedure to the backend, one command at a time
 	 * @param procedure sequence of commands contained by the configuration procedure
 	 * @throw ManagementErrors::ProcedureErrorExImpl
-	 * @thorw ComponentErrors::CORBAProblemExImpl
-	 * @thorw ComponentErrors::UnexpectedExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 * @throw ComponentErrors::UnexpectedExImpl
 	 */
 	/*void configureBackend(const std::vector<IRA::CString>& procedure) throw (ManagementErrors::ProcedureErrorExImpl,
 			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);*/

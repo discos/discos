@@ -132,6 +132,12 @@ public:
 	virtual ACS::ROlong_ptr currentDevice() throw (CORBA::SystemException);
 	
 	/**
+     * Returns a reference to the projectCode property Implementation of IDL interface.
+	 * @return pointer to read-only string property target
+	*/
+	virtual ACS::ROstring_ptr projectCode() throw (CORBA::SystemException);
+
+	/**
 	 * This method implements the command line interpreter. The interpreter allows to ask for services or to issue commands
 	 * to the control system by human readable command lines.
 	 * @throw CORBA::SystemException
@@ -246,14 +252,25 @@ public:
 	 */
 	virtual void setDevice(CORBA::Long deviceID) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
+	/**
+	 * This method  allows to set the current running project code. The code will be used to locate schedules files and to store data files on system disks. If the project is not present/registered in the
+	 * system an error is thrown.
+	 * @param code new project code. If an empty string is given the default code is adopted, the default code is part of the component configuration.
+	 * @throw CORBA::SystemException
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+	virtual void setProjectCode(const char *code) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx);
+
 	
 private:
+
 	baci::SmartPropertyPointer<baci::ROstring> m_pscheduleName;
 	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus> > m_pstatus;
 	baci::SmartPropertyPointer<baci::ROlong> m_pscanID;
 	baci::SmartPropertyPointer<baci::ROlong> m_psubScanID;
 	baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_ptracking;
 	baci::SmartPropertyPointer<baci::ROlong> m_pcurrentDevice;
+	baci::SmartPropertyPointer<baci::ROstring> m_pprojectCode;
 	CConfiguration m_config;
 	CCore *m_core;
 };

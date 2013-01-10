@@ -105,6 +105,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 			I<interval_type> >(this,&CCore::crossScan));
 	m_parser->add<1>("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::changeLogFile));
 	m_parser->add<0>("wx",new function4<CCore,non_constant,void_type,O<double_type>,O<double_type>,O<double_type>,O<double_type> >(this,&CCore::getWeatherStationParameters));
+	m_parser->add<1>("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::setProjectCode));
 
 	//add remote commands ************  should be loaded from a CDB table............................**********/
 	// antenna subsystem
@@ -531,7 +532,8 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	ACS::Time startTime;
 		
 	obsName=IRA::CString("system");
-	prj=IRA::CString("pointingCrossScan");
+	/*prj=IRA::CString("pointingCrossScan");*/
+	getProjectCode(prj);
 	layout.length(0);
 	layoutName=_SCHED_NULLTARGET;
 	schedule="none";
@@ -666,7 +668,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	else {
 		scanAxis=Management::MNG_GAL_LAT;
 	}
-	path=m_config->getSystemDataDirectory();
+	path=m_config->getSystemDataDirectory()+prj+"/";
 	suffix=targetID;
 	baseName=CCore::computeOutputFileName(startTime,m_site,m_dut1,prj,suffix,extraPath);
 	subScanID=1;
@@ -789,6 +791,25 @@ void CCore::haltSchedule()
 	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
 		m_schedExecuter->stopSchedule(false);
+	}
+}
+
+void CCore::setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
+{
+	IRA::CString newCode(code);
+	if (newCode=="''") { // if '' given...maps to default user
+		newCode=m_config->getDefaultProjectCode();
+	}
+	if (m_config->getCheckProjectCode()) {
+		IRA::CString path=m_config->getScheduleDirectory()+newCode;
+			if (!IRA::CIRATools::directoryExists(path)) {
+				_EXCPT(ManagementErrors::UnkownProjectCodeErrorExImpl,impl,"CCore::setProjectCode()");
+				throw impl;
+			}
+	}
+	//no need to get the mutex, because it is already done inside the Schedule Executor thread
+	if (m_schedExecuter) {
+		m_schedExecuter->setProjectCode(newCode);
 	}
 }
 
@@ -963,19 +984,30 @@ IRA::CString CCore::command(const IRA::CString& line) throw (ManagementErrors::C
 	}	
 }
 
-const DWORD& CCore::getScanCounter()
+void CCore::getScanCounter(DWORD& cc)
 {
-	return m_schedExecuter->getCurrentScheduleCounter();
+	if (m_schedExecuter) cc= m_schedExecuter->getCurrentScheduleCounter();
+	else cc=0;
 }
 
 void CCore::getCurrentIdentifiers(DWORD& scanID,DWORD& subScanID)
 {
-	m_schedExecuter->getCurrentScanIdentifers(scanID,subScanID);
+	if (m_schedExecuter) m_schedExecuter->getCurrentScanIdentifers(scanID,subScanID);
+	else {
+		scanID=subScanID=0;
+	}
 }
 	
-const IRA::CString& CCore::getScheduleName()
+void CCore::getScheduleName(IRA::CString& name)
 {
-	return m_schedExecuter->getScheduleName();
+	if (m_schedExecuter) name=m_schedExecuter->getScheduleName();
+	else name="";
+}
+
+void CCore::getProjectCode(IRA::CString& code)
+{
+	if (m_schedExecuter) code=m_schedExecuter->getProjectCode();
+	else code="";
 }
 
 /////// PRIVATES

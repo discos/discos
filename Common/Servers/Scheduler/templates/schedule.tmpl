@@ -1,4 +1,6 @@
-# The project name, can be any combination of characters but spaces and blanks 
+# A project string,it can be any combination of characters but spaces and blanks, it is not the project code which is used to compose the output 
+# file name but it can be used to distinguish between various activities during the project, for example A1245-Map and A1245-Calib. It is used
+# to add a keyword in the file
 PROJECT:	skySurvey
 # the name of the observer, can be any combination of characters but blanks 
 OBSERVER:	AndreaOrlati
@@ -19,11 +21,11 @@ SCANLAYOUT:	layoutfile.tmpl
 #The recording will start at exactly at the time mark given for the scan. The stop recording command will be issued at the time which is the result of scheduled start time plus
 #the scheduled duration. 
 #The second parameter is the number of repetitions, it means the times the schedule is repeated. A -1 means
-#repeat continuosly. A zero or null is not allowed.
+#repeat continuously. A zero or null is not allowed.
 MODE:	LST	1
 #in this mode the single scans are performed sequentially in the order they appear in the schedule. In that
 #mode no timestamps are required. The target is checked top be above the horizon, if the test is failed the scan is skipped. The start to the  acquisition is given when
-#the telescope is on target.  The stop time will be at effective start time plus the scheduled duration. In that mode the schedule is continuosly run.
+#the telescope is on target.  The stop time will be at effective start time plus the scheduled duration. In that mode the schedule is continuously run.
 #The second argument, which is optional gives the start LST for the schedule.
 #MODE:	SEQ
 #MODE: SEQ	21:15:36.00

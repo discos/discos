@@ -178,7 +178,11 @@ IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const ACS::TimeInt
 	IRA::CString out;
 	TIMEVALUE UT(ut);
 	TIMEDIFFERENCE LST(lst);
-	out.Format("%04d%02d%02d-%02d%02d%02d-%02d%02d%02d-%s_%s",
+	/*out.Format("%04d%02d%02d-%02d%02d%02d-%02d%02d%02d-%s_%s",
+			UT.year(),UT.month(),UT.day(),UT.hour(),UT.minute(),UT.second(),
+			LST.hour(),LST.minute(),LST.second(),(const char *)prj,(const char *)suffix);*/
+	/* The LST removed from the name of the output file */
+	out.Format("%04d%02d%02d-%02d%02d%02d-%s-%s",
 			UT.year(),UT.month(),UT.day(),UT.hour(),UT.minute(),UT.second(),
 			LST.hour(),LST.minute(),LST.second(),(const char *)prj,(const char *)suffix);
 	extra.Format("%04d%02d%02d/",UT.year(),UT.month(),UT.day());
@@ -190,8 +194,9 @@ IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const IRA::CSite& 
 	IRA::CString out;
 	TIMEVALUE UT(ut);
 	TIMEDIFFERENCE LST;
-	IRA::CDateTime::UT2Sidereal(LST,UT,site,dut1);
-	out.Format("%04d%02d%02d-%02d%02d%02d-%s_%s",
+	/* The LST removed from the name of the output file */
+	/*IRA::CDateTime::UT2Sidereal(LST,UT,site,dut1);*/
+	out.Format("%04d%02d%02d-%02d%02d%02d-%s-%s",
 			UT.year(),UT.month(),UT.day(),UT.hour(),UT.minute(),UT.second(),(const char *)prj,(const char *)suffix);
 	extra.Format("%04d%02d%02d/",UT.year(),UT.month(),UT.day());
 	return out;

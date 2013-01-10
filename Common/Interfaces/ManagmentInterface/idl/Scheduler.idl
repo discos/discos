@@ -157,6 +157,14 @@ module Management {
 		void chooseDefaultDataRecorder(in string rcvInstance);
 		
 		/**
+		 * This method sets the current project code. If the project does not exists an error is thrown.
+		 * @param code code of the project, if blank the selected code will be default one 
+		 * @throw ManagementErrors::ManagementErrorsEx 
+		 * @throw CORBA::SystemExcpetion 
+		 */
+		void setProjectCode(in string code) raises (ManagementErrors::ManagementErrorsEx);
+		
+		/**
 		 * This attribute reports the scan identifier currently played by the scheduler.
 		*/ 
 		readonly attribute ACS::ROlong scanID;
@@ -186,6 +194,11 @@ module Management {
 		 * This attribute reports the device id currently in use. This value can be changed by calling <i>setDevice()</i>
 		 */
 		readonly attribute ACS::ROlong currentDevice;
+		
+		/**
+		 * This attribute reports the currently running project code, this code will be used for foutput files name, paths and to collect schedules 
+		 */
+		readonly attribute ACS::ROstring projectCode;
 	};
 };
 

@@ -1,34 +1,32 @@
-#ifndef DEVIOSCHEDULENAME_H_
-#define DEVIOSCHEDULENAME_H_
+#ifndef DEVIOPROJECTCODE_H_
+#define DEVIOPROJECTCODE_H_
 
 /** ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: DevIOScheduleName.h,v 1.1 2009-01-16 17:44:57 a.orlati Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
 /* Who                                            	when                    What                                                       */
-/* Andrea Orlati(aorlati@ira.inaf.it) 12/01/2009      Creation                                                  */
+/* Andrea Orlati(aorlati@ira.inaf.it) 09/01/2013      Creation                                                  */
 
 #include <baciDevIO.h>
 
-using namespace baci;
 
 /**
  * This  class is derived from the template DevIO. It is used by the by the scheduleName property. 
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia<br>
  */ 
-class DevIOScheduleName: public virtual DevIO<ACE_CString>
+class DevIOProjectCode: public virtual DevIO<ACE_CString>
 {
 public:
 	
-	DevIOScheduleName(CCore* core): m_core(core) { 
-		AUTO_TRACE("DevIOScheduleName::DevIOScheduleName()");
+	DevIOProjectCode(CCore* core): m_core(core) {
+		AUTO_TRACE("DevIOProjectCode::DevIOProjectCode()");
 	}
 	
-	~DevIOScheduleName() {
-		AUTO_TRACE("DevIOScheduleName::~DevIOScheduleName()");
+	~DevIOProjectCode() {
+		AUTO_TRACE("DevIOProjectCode::~DevIOProjectCode()");
 	}
 	
 	bool initializeValue(){
@@ -36,16 +34,16 @@ public:
 	}
 	
 	ACE_CString read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-		AUTO_TRACE("DevIOScheduleName::read()");
-		IRA::CString name;
+		AUTO_TRACE("DevIOProjectCode::read()");
+		IRA::CString code;
 		timestamp=getTimeStamp();
-		m_core->getScheduleName(name);
-		m_val=(const char *)name;
+		m_core->getProjectCode(code);
+		m_val=(const char *)code;
 		return m_val;
     }
 	
     void write(const ACE_CString &value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-    	AUTO_TRACE("DevIOScanNumber::write()");
+    	AUTO_TRACE("DevIOProjectCode::write()");
 	}
     
 private:
@@ -55,4 +53,4 @@ private:
 
 
 
-#endif /*DEVIOSCHEDULENAME_H_*/
+#endif /*DEVIOPROJECTCODE_H_*/

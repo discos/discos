@@ -126,9 +126,21 @@ public:
 	const IRA::CString& getProceduresLocation() const { return m_proceduresLocation; }
 
 	/**
-	 * @return the default procedures file that will be loaded at the component statup up
+	 * @return the default procedures file that will be loaded at the component startup
 	 */ 		
 	const IRA::CString& getDefaultProceduresFile() const { return m_defaultProceduresFile; }
+
+	/**
+	 * @return the default project code
+	 */
+	const IRA::CString& getDefaultProjectCode() const { return m_defaultProjectCode; }
+
+	/**
+	 * @return if the new project code has to be checked for existance or not
+	 */
+	const bool getCheckProjectCode() const { return m_checkProjectCode; }
+
+
 	                                           
 private:
 	IRA::CString m_schedDir;
@@ -149,6 +161,8 @@ private:
 	long m_TsysGapTime;
 	IRA::CString m_proceduresLocation;
 	IRA::CString m_defaultProceduresFile;
+	IRA::CString m_defaultProjectCode;
+	bool m_checkProjectCode;
 	
 	/**
 	 * Pointer to the DB table used to load the station procedures from the CDB 

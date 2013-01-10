@@ -25,6 +25,8 @@
 	     	 WeatherStationInstance="IDL:alma/Weather/MedWeatherStation:1.0"	         
 	         DefaultBackendInstance="BACKENDS/TotalPower"
 	         DefaultDataReceiverInstance="MANAGEMENT/Point"
+	         DefaultProjectCode="maintenance"
+	         CheckProjectCode="true"
 >
 
 <scheduleName/>
@@ -33,4 +35,5 @@
 <currentDevice/>
 <status/>
 <tracking/>
+<projectCode/>
 </Scheduler>

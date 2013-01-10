@@ -425,7 +425,8 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 	 m_dut1=dut1;
 	 m_active=false;
 	 m_scheduleLoaded=false;
-	 m_scheduleName=m_scheduleOwner="";
+	 m_scheduleName="";
+	 m_projectCode=m_core->m_config->getDefaultProjectCode();
 	 m_scheduleCounter=0;
 	 m_lastScanID=0;
 	 m_goAhead=true;
@@ -453,17 +454,17 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	char *passedSchedule=new char [strlen(scheduleFile)+1]; // make a copy because the man pages states that the input string may be changed in functions basename() and dirname()
  	strcpy(passedSchedule,scheduleFile);
  	char *tmp=dirname(passedSchedule);
- 	IRA::CString userName=IRA::CString(tmp);
+ 	IRA::CString projectCode=IRA::CString(tmp);
  	strcpy(passedSchedule,scheduleFile);
  	tmp=basename(passedSchedule);
  	IRA::CString schedule=IRA::CString(tmp);
  	delete [] passedSchedule;
  	IRA::CString fullPath;
- 	if (userName==".") { //no user given....
- 		fullPath=m_core->m_config->getScheduleDirectory();
+ 	if (projectCode==".") { //no project given......use the current project code
+ 		fullPath=m_core->m_config->getScheduleDirectory()+m_projectCode+"/";
  	}
  	else {
- 		fullPath=m_core->m_config->getScheduleDirectory()+userName+"/";
+ 		fullPath=m_core->m_config->getScheduleDirectory()+projectCode+"/";
  	}
  	try {
  		m_schedule=new CSchedule(fullPath,schedule);
@@ -507,12 +508,9 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	m_startSubScan=m_scheduleCounter+1;
 	m_scansCounter=-1;
  	m_scheduleName=schedule;
- 	if (userName!=".") {
- 		m_scheduleOwner=userName;
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"SCHEUDLE_OWNER: %s",(const char *)m_scheduleOwner));
- 	}
- 	else {
- 		m_scheduleOwner="";
+ 	if (projectCode!=".") {
+ 		m_projectCode=projectCode;
+ 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"PROJECT: %s",(const char *)m_projectCode));
  	}
  	// if the schedule is properly started the status of the scheduler is considered now to be ok.
  	m_core->resetSchedulerStatus();
@@ -983,13 +981,13 @@ void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec,const Sched
 	IRA::CIRATools::timeToStr(m_startRecordTime,out);
 	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_DEBUG,"RECORDING_START_TIME: %s",(const char *)out));
 
-	if (m_scheduleOwner!="") {
-		path=m_core->m_config->getDataDirectory()+m_scheduleOwner+"/";
-	}
+	/*if (m_projectCode!="") {*/
+		path=m_core->m_config->getDataDirectory()+m_projectCode+"/";
+	/*}
 	else {
 		path=m_core->m_config->getDataDirectory();
-	}
-	baseName=CCore::computeOutputFileName(m_startRecordTime,startLst,m_schedule->getProjectName(),rec.suffix,extraPath);
+	}*/
+	baseName=CCore::computeOutputFileName(m_startRecordTime,startLst,/*m_schedule->getProjectName()*/m_projectCode,rec.suffix,extraPath);
 
 	Antenna::TTrackingParameters *prim=static_cast<Antenna::TTrackingParameters *>(scanRec.primaryParameters);
 	targetID=(const char *)prim->targetName;

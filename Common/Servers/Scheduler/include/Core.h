@@ -108,10 +108,9 @@ public:
 	
 	/**
 	 * This function reports about the sub scan counter currently executed. This is not thread safe because
-	 * it is almost atomic.
-	 * @return the counter  of the currently executed subscan inside the main schedule file
+	 * @param cc the counter  of the currently executed subscan inside the main schedule file
 	 */
-	const DWORD& getScanCounter();
+	void getScanCounter(DWORD& cc);
 	
 	/**
 	 * This function reports the identifiers of the current scan and subscan
@@ -121,10 +120,16 @@ public:
 	void getCurrentIdentifiers(DWORD& scanID,DWORD& subScanID);
 
 	/**
-	 * This function reports the name of the file of the running schedule. This is not thread safe because
-	 * it is almost atomic.
+	 * This function reports the name of the file of the running schedule.
+	 * @param name name of the schedule
 	 */ 
-	const IRA::CString& getScheduleName();
+	void getScheduleName(IRA::CString& name);
+
+	/**
+	 * This function reports the code of the running project
+	 * @param code project code
+	 */
+	void getProjectCode(IRA::CString& code);
 	
 	/**
 	 * This function reports the current status of the component. This is not thread safe but is 
@@ -183,6 +188,14 @@ public:
 	void setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,
 			ComponentErrors::OperationErrorExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 	
+	/**
+	 * It allows to set a new project code. If requested by the component configuration (<i>CheckProjectCode</i>)  the project is checked to be registered in the system.
+	 * If not present an error is thrown. The check consist in verifying a folder named "code" exists in <i>SchedDir</i> of the configuration.
+	 * @param code new project code
+	 * @throw ManagementErrors::UnkownProjectCodeErrorExImpl
+	 */
+	void setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl);
+
 	/**
 	 * It allows to change the backend elected as default backend, the default backend is the device used for all operation (for example tsys) when a schedule is not running.
 	 * @param bckInstance name of the instance of the backend that has to be placed as default backend 

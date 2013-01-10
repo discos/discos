@@ -6,6 +6,7 @@
 #include "DevIOStatus.h"
 #include "DevIOTracking.h"
 #include "DevIOCurrentDevice.h"
+#include "DevIOProjectCode.h"
 #include <LogFilter.h>
 
 static char *rcsId="@(#) schedulerImpl";
@@ -20,7 +21,8 @@ SchedulerImpl::SchedulerImpl(const ACE_CString &CompName,maci::ContainerServices
 	m_pscanID(this),
 	m_psubScanID(this),
 	m_ptracking(this),
-	m_pcurrentDevice(this)
+	m_pcurrentDevice(this),
+	m_pprojectCode(this)
 {	
 	AUTO_TRACE("SchedulerImpl::SchedulerImpl()");
 }
@@ -52,6 +54,8 @@ void SchedulerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_ptracking=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>(getContainerServices()->getName()+":tracking",getComponent(),
 				new DevIOTracking(m_core),true);
 		m_pcurrentDevice=new ROlong(getContainerServices()->getName()+":currentDevice",getComponent(),new DevIOCurrentDevice(m_core),true);
+		m_pprojectCode=new ROstring(getContainerServices()->getName()+":projectCode",getComponent(),
+				new DevIOProjectCode(m_core),true);
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"SchedulerImpl::initialize()");
@@ -280,12 +284,24 @@ void SchedulerImpl::setDevice(CORBA::Long deviceID) throw (CORBA::SystemExceptio
 	}	
 }
 
+void SchedulerImpl::setProjectCode(const char *code) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx)
+{
+	try {
+		m_core->setProjectCode(code);
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,Management::ROTSystemStatus,m_pstatus,status);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pscheduleName,scheduleName);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pscanID,scanID);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_psubScanID,subScanID);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,Management::ROTBoolean,m_ptracking,tracking);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pcurrentDevice,currentDevice);
+_PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pprojectCode,projectCode);
 
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

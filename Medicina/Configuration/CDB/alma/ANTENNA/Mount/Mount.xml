@@ -7,7 +7,7 @@
                xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
                xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               IPAddress="192.167.189.5"
+               IPAddress="192.168.51.5"
                Port="8102"
                ConnectTimeout="6000000"
                ReceiveTimeout="3000000"
