@@ -29,7 +29,7 @@
 		
 			timestamp=getTimeStamp();
 			if(m_cmd==APOS) value>>=USxS;														// ustep to step position conversion
-			else if(m_cmd==FMIN || m_cmd==FMAX) value=long(value*m_pusd->m_step_res);		// velocity conversion in step
+			else if(m_cmd==FMIN || m_cmd==FMAX) value=long(value);		// velocity 
 			else if(m_cmd==STAT ) {
 				m_pusd->m_calibrate ? value|=CAL : value&=~CAL;		// status CAL integration
 				m_pusd->m_ploop ? value|=PAUT : value&=~PAUT;		// status  PAUT integration
@@ -58,7 +58,7 @@
 		  if (m_pusd->m_available) {
 			
 			  if(m_cmd==CPOS||m_cmd==RPOS) par=value<<USxS; // step to ustep position conversion
-			  else if(m_cmd==FMIN || m_cmd==FMAX) par=long(value);			// velocity conversion
+			  else if(m_cmd==FMIN || m_cmd==FMAX) par=long(value);	// velocity
 			  else par=value;
 			
 			  CompletionImpl

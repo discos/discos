@@ -8,6 +8,8 @@
 * who       when      what
 * --------  --------  ----------------------------------------------
 * GMM       jul 2005   creation				   
+* CM	    jan 2013  ACS 8.0.1 adaptions
+* CM	    jan 2013  All code revised and adapted to be used from SRTActiveSurfaceBoss component
 */
 
 
@@ -62,7 +64,7 @@
 #define	USDT	0x14
 #define CPOS	0x30
 #define RPOS	0x31
-#define GO		0x32
+#define GO	0x32
 
 // specific macro
   /** 	@#define _ADD_MEMBER(OBJ,MEMB)
@@ -122,7 +124,7 @@
 }
 
  /** 	@#define _SET_CDB(PROP,LVAL,ROUTINE) throw (ASErrors::CDBAccessErrorExImpl)
-     *  Set a CDB property or attribute.
+     *  Set a long CDB property or attribute.
      *	@param PROP property to be setted
 		 *	@param LVAL the value 
      *	@param ROUTINE the calling routine 
@@ -130,6 +132,20 @@
 #define _SET_CDB(PROP,LVAL,ROUTINE) {	\
 	maci::ContainerServices* cs=getContainerServices();\
 		if (!CIRATools::setDBValue(cs,#PROP,(const long&) LVAL)) \
+		{ ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,ROUTINE); \
+			exImpl.setFieldName(#PROP); throw exImpl; \
+		} \
+}
+
+ /** 	@#define _SET_CDB_D(PROP,LVAL,ROUTINE) throw (ASErrors::CDBAccessErrorExImpl)
+     *  Set a double CDB property or attribute.
+     *	@param PROP property to be setted
+		 *	@param LVAL the value 
+     *	@param ROUTINE the calling routine 
+     */
+#define _SET_CDB_D(PROP,LVAL,ROUTINE) {	\
+	maci::ContainerServices* cs=getContainerServices();\
+		if (!CIRATools::setDBValue(cs,#PROP,(const double&) LVAL)) \
 		{ ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,ROUTINE); \
 			exImpl.setFieldName(#PROP); throw exImpl; \
 		} \
@@ -358,7 +374,8 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSu
 		 * Finally move USD in camma central zone, load on USD counter the zeroRef value, moves the USD to 0 position and mark it as calibrated.
 		 * @return 
 		 */
-		virtual ACSErr::Completion* calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
+		//virtual ACSErr::Completion* calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
+		void calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
 	
 		 /**
 		 * Calibration verification. USD already must be already calibrated.
@@ -369,7 +386,8 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSu
 		 * Be aware that other nearest usd are at middle scale, to avoid mechanical stresses
 		 * @return 
 		*/
-		 virtual ACSErr::Completion* calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx) ;
+		 //virtual ACSErr::Completion* calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx) ;
+		 void calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
 			 
      /**
      * home. bring the USD to zero reference position.

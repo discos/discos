@@ -6,7 +6,9 @@
    -
    - History:
    -   2005-04-13  GM  Created
-   -   2005-11-16  GM added some entry
+   -   2005-11-16  GM  added some entry
+   -   2013-01-11  CM  step_giro corrected to 200
+   -   2013-01-11  CM  cammaLen and cammaPos converted to double
   -->
 <xs:schema
   targetNamespace="urn:schemas-cosylab-com:usd:1.0"
@@ -47,16 +49,16 @@
       <xs:element name="type"   				type="baci:ROlong"/>
     </xs:sequence>
 	
-		<xs:attribute name="sector" 				type="xs:unsignedByte" 	use="required" />
-		<xs:attribute name="lan" 						type="xs:unsignedByte" 	use="required" />
-    <xs:attribute name="serialAddress" 	type="xs:unsignedByte" 	use="required" />
-    <xs:attribute name="cammaLen" 			type="xs:int" 					use="required" />
-    <xs:attribute name="cammaPos" 			type="xs:int" 					use="required" />
-    <xs:attribute name="calibrate" 			type="xs:unsignedByte" 	use="required" />
-    <xs:attribute name="fullRange"			type="xs:int" 					use="optional" default="-42000"/>
-    <xs:attribute name="zeroRef" 				type="xs:int" 					use="optional" default="-21000"/>
-    <xs:attribute name="step_giro" 			type="xs:int" 					use="optional" default="100"/>
-    <xs:attribute name="step_res" 			type="xs:unsignedByte" 	use="optional" default="1"/>
+    <xs:attribute name="sector" 	type="xs:unsignedByte" 	use="required" />
+    <xs:attribute name="lan"		type="xs:unsignedByte" 	use="required" />
+    <xs:attribute name="serialAddress"	type="xs:unsignedByte" 	use="required" />
+    <xs:attribute name="cammaLen" 	type="xs:double"	use="required" />
+    <xs:attribute name="cammaPos" 	type="xs:double"	use="required" />
+    <xs:attribute name="calibrate" 	type="xs:unsignedByte" 	use="required" />
+    <xs:attribute name="fullRange"	type="xs:int"		use="optional" default="-42000"/>
+    <xs:attribute name="zeroRef" 	type="xs:int"		use="optional" default="-21000"/>
+    <xs:attribute name="step_giro" 	type="xs:int"		use="optional" default="200"/>
+    <xs:attribute name="step_res" 	type="xs:unsignedByte" 	use="optional" default="1"/>
 
   </xs:complexType>
   

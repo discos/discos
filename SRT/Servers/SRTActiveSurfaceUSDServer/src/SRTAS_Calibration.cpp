@@ -11,10 +11,12 @@
 #include <fstream>
 #include <cstdlib>
 #include <cstring>
-#define MAINTHREADSLEEPTIME 150
+#define MAINTHREADSLEEPTIME 15
+
 using namespace std;
 using namespace maci;
 using namespace ASErrors;
+using namespace IRA;
 
 void checkAScompletionerrors (char *str, int circle, int actuator,
 			      CompletionImpl comp);
@@ -33,15 +35,17 @@ main (int argc, char *argv[])
   char serial_usd[23];
   char graf[6], mecc[4];
   int lanIndex, circleIndex, usdCircleIndex;
-  SRTActiveSurface::USD_var usd;
+  SRTActiveSurface::USD_var usd[3];
   int i, loop;
+
     ACE_Time_Value tv(1);
-  value = "/home/almamgr/SRT/CDB/alma/AS/tab_convUSD.txt\0";
-  ifstream usdTable (value);
-  if (!usdTable) {
-      ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
-      exit (-1);
-    }
+
+//  value = "/home/almamgr/SRT/CDB/alma/AS/tab_convUSD.txt\0";
+//  ifstream usdTable (value);
+//  if (!usdTable) {
+//      ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+//      exit (-1);
+//    }
 
   try {
       if (client->init (argc, argv) == 0) {
@@ -66,11 +70,15 @@ main (int argc, char *argv[])
 
 //  for (;;) {
 // Get reference to usd components
-//  for (i = 1; i <= 2; i++) {
+  for (i = 1; i <= 2; i++) {
 //      usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
       try {
-          usd = client->getComponent < SRTActiveSurface::USD > ("AS/SECTOR01/LAN07/USD02", 0, true);
-          if (CORBA::is_nil (usd.in ()) == true) {
+	if (i==1)
+          usd[i] = client->getComponent < SRTActiveSurface::USD > ("AS/SECTOR05/LAN01/USD14", 0, true);
+	if (i==2)
+          usd[i] = client->getComponent < SRTActiveSurface::USD > ("AS/SECTOR05/LAN01/USD16", 0, true);
+          //usd = client->getComponent < SRTActiveSurface::USD > ("AS/SECTOR06/LAN03/USD16", 0, true);
+          if (CORBA::is_nil (usd[i].in ()) == true) {
               _EXCPT (ClientErrors::CouldntAccessComponentExImpl, impl, "SRTActiveSurfaceTextClient::Main()");
               impl.setComponentName (serial_usd);
               impl.log ();
@@ -90,44 +98,59 @@ main (int argc, char *argv[])
           _EXCPT (ClientErrors::UnknownExImpl, impl, "TestClient::Main()");
           impl.log ();
       }
+}
+	printf("tutto su\n");
       loop = 1;
-      for (loop = 1; loop <= 1; loop++) {
-          printf("measure n.: %d\n", loop);
-        printf("wait 2 seconds before reset\n");
-        ACE_OS::sleep (2);
-        usd->reset ();
-        printf("reset.......\n");
+      for (loop = 1; loop <= 2; loop++) {
+          //printf("measure n.: %d\n", loop);
         try {
-            printf("wait 2 seconds before top\n");
-            ACE_OS::sleep (2);
-            usd->top ();
-            printf("top.......\n");
-            printf("wait 45 seconds before calibration\n");
-            ACE_OS::sleep (45);
-            CompletionImpl comp = usd->calibrate ();
-            printf("calibration.......\n");
-            if (comp.isErrorFree () == false)
-                checkAScompletionerrors ("usd", 2, 2, comp);
+	    //CIRATools::Wait(0,250000);	// 0.5 secs
+	    //usd[loop]->reset();
+            usd[loop]->up();
+	    /*actPos_var = usd->actPos ();
+	    while ((actPos_val = actPos_var->get_sync (completion.out ())) != 21000) {
+		ACE_OS::sleep (1);
+		printf("waiting to reach top position...\n");
+	    }
+            printf("top position reached.......\n");*/
         }
         catch (ASErrors::ASErrorsEx & Ex) {
             checkASerrors ("actuator", 2, 2, Ex);
         }
-        printf("wait 5 seconds before calibration verification\n");
-        ACE_OS::sleep (5);
-        printf ("calibration verification......\n");
+       }
+	ACE_OS::sleep (90);
+
+
+	printf("calibration.......\n");
+	loop = 1;
+	for (loop = 1; loop <= 2; loop++) {
+	try {
+		CIRATools::Wait(0,250000);	// 0.5 secs per usd = 279 secs
+                usd[loop]->calibrate ();
+	}
+        catch (ASErrors::ASErrorsEx & Ex) {
+            checkASerrors ("actuator", 2, 2, Ex);
+        }
+	}
+	ACE_OS::sleep (30);
+
+	printf ("calibration verification......\n");
+	loop = 1;
+	for (loop = 1; loop <= 2; loop++) {
         try {
-            CompletionImpl comp = usd->calVer ();
-            if (comp.isErrorFree () == false)
-                checkAScompletionerrors ("usd", 2, 2, comp);
+		CIRATools::Wait(0,250000);	// 0.5 secs per usd = 279 secs
+                usd[loop]->calVer ();
 	    }
         catch (ASErrors::ASErrorsEx & Ex) {
             checkASerrors ("actuator", 2, 2, Ex);
         }
         }
-    //}
+	ACE_OS::sleep (200);
+//	i++;
     client->run(tv);
-    tv.set(0,MAINTHREADSLEEPTIME*10);
-    //}
+    tv.set(0,MAINTHREADSLEEPTIME);
+	i=loop=1;
+//    }
 	// Releasing client
 if (loggedIn)
   {
