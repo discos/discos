@@ -6,7 +6,10 @@
 *
 * who       when      what
 * --------  --------  ----------------------------------------------
-* GMM       sept 2005   creation				   
+* GMM       sept 2005   creation	
+* CM	    jan 2013  ACS 8.0.1 adaptions
+* CM	    jan 2013  All code revised and adapted to be used from SRTActiveSurfaceBoss component
+* CM	    jan 2013  calibrate and calVer routines transformed to oneway
 */
 
 #include <baci.idl>
@@ -128,14 +131,16 @@ module SRTActiveSurface
     	*	makes the scale calibration. USD must be against the upper edge. 
     	*	@return 
     	*/
-    	ACSErr::Completion calibrate() raises (ASErrors::ASErrorsEx);
+    	//ACSErr::Completion calibrate() raises (ASErrors::ASErrorsEx);
+    	oneway void calibrate();
 
 		/**
     	*	makes the scale verification. 
     	*	@return a completion with the result of verification
 			*	@throw  ASErrors::USDUnavailableEx or ASErrors::USDunCalibratedEx if the USD is not available or calibrated.
     	*/
-		ACSErr::Completion calVer() raises (ASErrors::ASErrorsEx);
+	//ACSErr::Completion calVer() raises (ASErrors::ASErrorsEx);
+	oneway void calVer();
 
 		/**
     	*	go to reference position. 
