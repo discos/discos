@@ -1,12 +1,12 @@
 #! /bin/bash
 # ********************************************************************************************* 
 # IRA Istituto di Radioastronomia                                                                      
-# "@(#) $Id: addObserver,v 1.6 2011-04-20 12:01:49 a.orlati Exp $"
 #
 # This code is under GNU General Public Licence (GPL).                                              
 #                                                                                                     
 # Who                                when            What                                             
-# Andrea Orlati(aorlati@ira.inaf.it) 12/02/2011      Creation                                  
+# Andrea Orlati(aorlati@ira.inaf.it) 12/02/2011      Creation           
+# Andrea Orlati(aorlati@ira.inaf.it) 11/01/2013      Adapted to environment of escs 0.3                        
 #************************************************************************
 #   NAME
 #               addObserver
@@ -15,9 +15,9 @@
 # 
 #   DESCRIPTION
 #   This script creates a user for the observing system. It could be executed only by the system manager on the user server machine.
-#   The manager must have sudoers priviledges for bash commands useradd and usermod. For that reason it is recommended to create 
-#   the sudoers priviledges for manager on user server machine only.
-#   The group escs must exists (gid=335)
+#   The manager must have sudoers grants for bash commands useradd and usermod. For that reason it is recommended to create 
+#   the sudoers grants for manager on user server machine only.
+#   The group observers must exist
 #       
 #   FILES
 #
@@ -36,22 +36,21 @@
 
 
 function printUsage {
-   echo "Creates a new user for the escs observing system"
+   echo "Creates a new user/project for the ESCS observing system, it creates all the required directory structures"
    echo ""
-   echo "Usage: `basename $0` -u|--user username [--tree|-t]"
+   echo "Usage: `basename $0` -u|--user username]"
    echo ""
    echo "-u|--user allows to give the name of the observer"
-   echo "-t|--tree the script  will create the directory tree required by the observer in order to use the system"
 }
 
 CL_HELP=
-CL_TREE=
+#CL_TREE=
 CL_USER=
 
-LONGOPTS=help,tree,user:
-SHORTOPTS=htu:
+LONGOPTS=help,user:
+SHORTOPTS=hu:
 
-SERVERACCOUNT=manager@192.168.1.104
+#SERVERACCOUNT=manager@192.168.1.104
 
 getopt -n `basename $0` -Q -u -a -l $LONGOPTS $SHORTOPTS "$@" || {
    printUsage
@@ -66,8 +65,6 @@ set -- `getopt -u -a -l $LONGOPTS $SHORTOPTS "$@"`
 while : 
 do
         case "$1" in
-	--tree)             CL_TREE=true ;;
-        -t)                 CL_TREE=true ;;
         --help)             CL_HELP=true ;; 
         -h)                 CL_HELP=true ;;
 	--user)             CL_USER=$2 ; shift ;;
@@ -91,25 +88,30 @@ then
    exit
 fi
 
-if [ "$CL_TREE" ] ; then
-   mkdir /archive/schedules/$CL_USER
-   setfacl -m u:$CL_USER:rwx /archive/schedules/$CL_USER
-   setfacl -m d:u:manager:rwx /archive/schedules/$CL_USER 
-   mkdir /archive/data/$CL_USER
-   setfacl -m u:$CL_USER:r-x /archive/data/$CL_USER
-   setfacl -m d:u:manager:rwx /archive/data/$CL_USER 
-   setfacl -m d:u:$CL_USER:r-x /archive/data/$CL_USER
-   exit
-fi
 
 echo "adding new user......"
-sudo /usr/sbin/useradd -g escs -G escs,users -m -n -s /bin/bash $CL_USER 
+sudo /usr/sbin/useradd -g observers -G observers,users -m -n -s /bin/bash $CL_USER 
 sudo /usr/sbin/usermod -U $CL_USER
+echo "done"
+echo "please choose a password......"
 sudo passwd $CL_USER
+echo "directory structures......"
+mkdir /archive/schedules/$CL_USER
+setfacl -m u:$CL_USER:rwx /archive/schedules/$CL_USER
+setfacl -m d:u:manager:rwx /archive/schedules/$CL_USER 
+mkdir /archive/data/$CL_USER
+setfacl -m u:$CL_USER:r-x /archive/data/$CL_USER
+setfacl -m d:u:manager:rwx /archive/data/$CL_USER 
+setfacl -m d:u:$CL_USER:r-x /archive/data/$CL_USER
+mkdir /archive/extraData/$CL_USER
+setfacl -m u:$CL_USER:r-x /archive/extraData/$CL_USER
+setfacl -m d:u:manager:rwx /archive/extraData/$CL_USER 
+setfacl -m d:u:$CL_USER:r-x /archive/extraData/$CL_USER
+echo "done"
+echo "update yellow pages......"
 sudo /usr/lib/yp/ypinit -m
 sudo /sbin/service ypserv restart
-ssh $SERVERACCOUNT addObserver --user $CL_USER --tree
-echo "user $CL_USER added as observer"
+echo "project $CL_USER added as registered project"
 
 
 #

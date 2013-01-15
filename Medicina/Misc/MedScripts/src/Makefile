@@ -30,7 +30,7 @@
 # Python stuff (public and local)
 # script setupkkc, setupccc and medsubr are deprecated and listed for removal
 # ----------------------------
-PY_SCRIPTS         = addObserver removeObserver
+PY_SCRIPTS         = 
 PY_SCRIPTS_L       = setupkkc setupccc medsubr
 
 PY_MODULES         =
@@ -40,8 +40,9 @@ PY_PACKAGES        =
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 
+#scripts addObserver and removeObserver removed from repository control as the are strictly related to the server machines configuration
 SCRIPTS         = escs escsConsole
-SCRIPTS_L       =
+SCRIPTS_L       = addObserver removeObserver
 
 INSTALL_FILES      = ../app-defaults/escsStartup.xml
 
@@ -82,10 +83,8 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
-	@chmod 764 $(INTROOT)/bin/escs
-	@chmod 764 $(INTROOT)/bin/addObserver
-	@chmod 764 $(INTROOT)/bin/removeObserver
-	@chmod 764 $(INTROOT)/app-defaults/escsStartup.xml
+	@chmod 744 $(INTROOT)/bin/escs
+	@chmod 744 $(INTROOT)/app-defaults/escsStartup.xml
 	@echo " . . . installation done"
 
 

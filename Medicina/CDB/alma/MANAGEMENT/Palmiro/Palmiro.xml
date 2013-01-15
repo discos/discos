@@ -9,7 +9,7 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              SchedDir="/archive/schedules/"
              DataDir="/archive/data/"
-	     	 SystemDataDir="/archive/auxiliary/"
+	     	 SystemDataDir="/archive/extraData/"
 	     	 LogDir="/archive/logs/"
 	     	 SystemLogDir="/archive/events/"
              ProceduresLocation="Procedures"

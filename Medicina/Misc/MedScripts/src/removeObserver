@@ -1,12 +1,12 @@
 #! /bin/bash
 # ********************************************************************************************* 
 # IRA Istituto di Radioastronomia                                                                      
-# "@(#) $Id: removeObserver,v 1.1 2011-02-12 11:29:01 a.orlati Exp $"
 #
 # This code is under GNU General Public Licence (GPL).                                              
 #                                                                                                     
 # Who                                when            What                                             
-# Andrea Orlati(aorlati@ira.inaf.it) 12/02/2011      Creation                                  
+# Andrea Orlati(aorlati@ira.inaf.it) 12/02/2011      Creation                
+# Andrea Orlati(aorlati@ira.inaf.it) 11/01/2013      Adapted to environment of escs 0.3                  
 #************************************************************************
 #   NAME
 #		removeObserver
@@ -15,8 +15,8 @@
 # 
 #   DESCRIPTION
 #   This script removes a user for the observing system. It could be executed only by the system manager on the user server machine.
-#   The manager must have sudoers priviledges for bash commands userdel. For that reason it is recommended to create 
-#   the sudoers priviledges for manager on user server machine only.
+#   The manager must have sudoers grants for bash commands userdel. For that reason it is recommended to create 
+#   the sudoers grants for manager on user server machine only.
 #	
 #   FILES
 #
@@ -34,7 +34,7 @@
 #
 
 function printUsage {
-   echo "Removes a user from the escs observing system"
+   echo "Removes a user/project from the ESCS observing system"
    echo ""
         echo "Usage: `basename $0` userid  "
 }
@@ -45,7 +45,7 @@ then
    exit
 fi
 
-read -p "remove user "$1" and all its related files?" yn
+read -p "remove project "$1" and all its related files?" yn
 case $yn in
 	[Yy]* ) echo "removing.....";;
 	* ) echo "bye!"; exit;;
@@ -53,6 +53,9 @@ esac
 sudo /usr/sbin/userdel -r $1
 rm -rf /archive/data/$1
 rm -rf /archive/schedules/$1
+rm -rf /archive/extraData/$1
+echo "done!"
+echo "update yellow pages......"
 sudo /usr/lib/yp/ypinit -m
 sudo /sbin/service ypserv restart
 echo "deleted!"

@@ -9,6 +9,7 @@
 # Andrea O. 21/03/09  added the target cdb in order to checkout the runtime database
 # Andrea O. 15/04/11  match now the present status of the cvs
 # Andrea O. 13/06/12  installation procedure now ported to svn, environment variable SVNUSER now required
+# Andrea O. 13/01/13  environment variable SYSTEM_SVN_TAG now required to control which TAG has to be downloaded from svn
 
 ifeq ($(TARGETSYS),SRT)
 	#Add all modules included in the SRT system  in this sequence
@@ -19,7 +20,7 @@ ifeq ($(TARGETSYS),SRT)
 		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface \
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary \
-		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
+		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower NoiseGenerator DBBC SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation \
 		SRT7GHzReceiver CustomLogger\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CustomLoggingClient\
@@ -47,7 +48,6 @@ ifeq ($(TARGETSYS),SRT)
 	
 	CDB_SVN_LOCATION="SRT/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common SRT
-	SYSTEM_SVN_TAG=nuraghe-0.1
 else 
 ifeq ($(TARGETSYS),MED)
 	#Add all modules included in the Medicina system in this sequence
@@ -81,7 +81,6 @@ ifeq ($(TARGETSYS),MED)
 	
 	CDB_SVN_LOCATION="Medicina/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina
-	SYSTEM_SVN_TAG=escs-0.2
 else
 	RESULT:=$(error TARGETSYS variable is not set correctly!)	
 endif
@@ -114,6 +113,11 @@ endif
 #if the SVNUSER variable is not set the make process is stopped
 ifndef SVNUSER
 	RESULT:=$(error SVNUSER variable is not set!)
+endif
+
+#if the SYSTEM_SVN_TAG variable is not set the make process is stopped
+ifndef SYSTEM_SVN_TAG
+	RESULT:=$(error SYSTEM_SVN_TAG variable is not set!)
 endif
 
 #set up the Modules file for each IDL and CPP documentation
