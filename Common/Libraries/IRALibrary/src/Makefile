@@ -51,7 +51,7 @@ IRALibrary_LIBS = acstime SlaLibrary maciClient
 PY_PACKAGES  = IRAPy
 
 EXECUTABLES     =
-EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike
+EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike TestTimeTaggedCircularArray
 
 #
 # <brief description of xxxxx program>
@@ -75,6 +75,9 @@ TestReceiverControl_LIBS      = IRALibrary
 
 TestLogDike_OBJECTS = TestDike
 TestLogDike_LIBS      = IRALibrary ClientErrors
+
+TestTimeTaggedCircularArray_OBJECTS = TestTTCArray
+TestTimeTaggedCircularArray_LIBS = IRALibrary
 
 # 
 # IDL Files and flags

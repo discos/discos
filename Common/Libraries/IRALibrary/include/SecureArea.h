@@ -116,15 +116,26 @@ public:
 	void Init(T* Obj);
 	/**
     * Call this member function to be granted the possibility to access the resource. If the lock of the resource is already
-    * allocated this function will wait util it is released. 
+    * allocated this function will wait until it is released.
     * @return the resource wrapper that permits the developer to make use of the property.
 	*/
 	CSecAreaResourceWrapper<T> Get();
+
+	/**
+	* This method has been added for debugging purposes. The semantics is the same of the standard <i>Get</i> method but it also prints some information about the mutex and its owner.
+    * Call this member function to be granted the possibility to access the resource. If the lock of the resource is already
+    * allocated this function will wait until it is released.
+    * @param owner string identifier of the mutex owner
+    * @return the resource wrapper that permits the developer to make use of the property.
+	*/
+	CSecAreaResourceWrapper<T>Get(IRA::CString owner,bool show=false);
+
 private:
 	/** Mutex used to lock/unlock the resource */
 	BACIMutex m_Mutex;
    	/** Pointer to the resource */
 	T *m_pResource;
+	IRA::CString m_resourceOwner;
 	CSecureArea(const CSecureArea& rSrc); // no implementation given
    	void operator=(const CSecureArea& rSrc);  // no implementation given
 };
@@ -157,11 +168,11 @@ template <class X> X& CSecAreaResourceWrapper<X>::operator*() {
 	return *m_pLockResource;
 }
 
-template <class T> CSecureArea<T>::CSecureArea(T* Obj): m_pResource(Obj)
+template <class T> CSecureArea<T>::CSecureArea(T* Obj): m_pResource(Obj), m_resourceOwner("")
 {
 }
 
-template <class T> CSecureArea<T>::CSecureArea(bool Alloc): m_pResource(NULL)
+template <class T> CSecureArea<T>::CSecureArea(bool Alloc): m_pResource(NULL), m_resourceOwner("")
 {
 	if (Alloc) {
 		try {
@@ -193,6 +204,23 @@ template <class T> CSecAreaResourceWrapper<T> CSecureArea<T>::Get()
 {
 	return CSecAreaResourceWrapper<T>(&m_Mutex,m_pResource);
 }
+
+template <class T> CSecAreaResourceWrapper<T> CSecureArea<T>::Get(IRA::CString owner,bool show)
+{
+	if (show) {
+		if (m_resourceOwner=="") {
+			printf("%s is locking mutex, previous owner was none",(const char *)owner);
+		}
+		else {
+			printf("%s is locking mutex, previous owner was %s",(const char *)owner,(const char *)m_resourceOwner);
+		}
+	}
+	CSecAreaResourceWrapper<T> lock(&m_Mutex,m_pResource);
+	m_resourceOwner=owner;
+	if (show) printf ("......done!\n");
+	return lock;
+}
+
 
 }
 

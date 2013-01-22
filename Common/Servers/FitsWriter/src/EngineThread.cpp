@@ -103,13 +103,28 @@ bool CEngineThread::processData()
 #endif
 	try {
 		CCommonTools::getAntennaBoss(m_antennaBoss,m_service,m_config->getAntennaBossComponent(),antennaBossError);
-		//integration is multiplied by 10000 because internally we have the value in millesec while the methos requires 100ns.
-		m_antennaBoss->getObservedEquatorial(time,data->getIntegrationTime()*10000,ra,dec); 
-		m_antennaBoss->getObservedHorizontal(time,data->getIntegrationTime()*10000,az,el);
 	}
 	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 		_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
 		data->setStatus(Management::MNG_FAILURE);
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+		data->setStatus(Management::MNG_FAILURE);
+		antennaBossError=true;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CEngineThread::processData()");
+		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+		data->setStatus(Management::MNG_FAILURE);
+	}
+	try {
+		//integration is multiplied by 10000 because internally we have the value in millesec while the method requires 100ns.
+		m_antennaBoss->getObservedEquatorial(time,data->getIntegrationTime()*10000,ra,dec);
+		m_antennaBoss->getObservedHorizontal(time,data->getIntegrationTime()*10000,az,el);
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");

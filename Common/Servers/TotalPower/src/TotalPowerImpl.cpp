@@ -428,9 +428,10 @@ void TotalPowerImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException
 {
 	AUTO_TRACE("TotalPowerImpl::sendData()");
 	TIMEVALUE now;
+	ACS::Time expectedStartTime;
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
-		line->resumeDataAcquisition(startTime); 
+		expectedStartTime=line->resumeDataAcquisition(startTime);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -447,15 +448,9 @@ void TotalPowerImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException
 	}
 	//m_senderThread->setStop(false);
 	// if the resume succeeds....than set the start time accordingly.
-	if (startTime!=0) {
-		IRA::CIRATools::getTime(now);
-		if (startTime<=now.value().value) {
-			ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::sendData()",(LM_WARNING,"START_TIME_ALREADY_ELAPSED"));
-		}
-	}
-	//I explicity release the mutex before accesing the sender thread because it also make use of the command line...just to make sure to avoid deadlock
+	//I explicitly release the mutex before accessing the sender thread because it also make use of the command line...just to make sure to avoid deadlock
 	line.Release();
-	m_senderThread->saveStartTime(startTime);
+	m_senderThread->saveStartTime(expectedStartTime);
 	m_senderThread->resumeTransfer();
 }
 

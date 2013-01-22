@@ -29,7 +29,7 @@ CSenderThread::CSenderThread(const ACE_CString& name,TSenderParameter  *par,
 	clearIntegration(m_cal);
 	m_lastReceiveEpoch.reset();
 	m_stop=m_go=m_sending=false;
-	m_immediateStart=false;
+	//m_immediateStart=false;
 }
 
 CSenderThread::~CSenderThread()
@@ -167,13 +167,13 @@ void CSenderThread::saveDataHeader(Backends::TMainHeader* mH,Backends::TSectionH
 
 void CSenderThread::saveStartTime(const ACS::Time& time)
 {
-	if (time!=0) {
+	/*if (time!=0) {*/
 		m_startTime.value(time);
-		m_immediateStart=false;
+		/*m_immediateStart=false;
 	} 
 	else {
 		m_immediateStart=true;
-	}
+	}*/
 }
 
 /*void CSenderThread::setKelvinCountsRatio(const ACS::doubleSeq& ratio)
@@ -207,7 +207,7 @@ void CSenderThread::processData(DWORD dataSize)
 				sampleTime,counter,status,data);
 		bufferCounter+=m_configuration->getDataBufferSize();
 		if (!CProtocol::isNewStream(m_previousStatus,m_previousCounter,counter)) { //the first sample is discarded
-			if ((m_startTime<=sampleTime.value()) || (m_immediateStart)) { //if the start time is elapsed than start processing
+			if  (m_startTime<=sampleTime.value())/* || (m_immediateStart)) */{ //if the start time is elapsed than start processing
 				for (int i=0;i<MAX_INPUT_NUMBER;i++) { // subtract the zero level
 					if (data[i]>m_zeroBuffer[i]) {
 						data[i]-=m_zeroBuffer[i];

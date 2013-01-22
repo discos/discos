@@ -301,8 +301,9 @@ public:
 	 * @throw BackendsErrors::NakExImpl
 	 * @throw ComponentErrors::NotAllowedExImpl
 	 * @param startT epoch at which the acquisition is supposed to start
+	 * @return the epoch of the real expected start time.
 	 */
-	void resumeDataAcquisition(const ACS::Time& startT) throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
+	ACS::Time resumeDataAcquisition(const ACS::Time& startT) throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
 		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl);
 	
 	/**

@@ -157,7 +157,7 @@ install:
 	done
 
 cdb:
-	@cd $(ACS_CDB); svn checkout svn+ssh://$(SVNUSER)@belzebu.oa-cagliari.inaf.it/repos/ACS/tags/$(SYSTEM_SVN_TAG)/$(CDB_SVN_LOCATION)
+	@cd $(ACS_CDB); ln -s $(SYSLOCATION)/$(CDB_SVN_LOCATION) CDB
 
 sources:
 	@cd $(SYSLOCATION) ; for i in $(SYSTEM_SVN_MODULES) ; do \

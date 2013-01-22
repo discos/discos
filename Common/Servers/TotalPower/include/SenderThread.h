@@ -135,7 +135,7 @@ private:
 	WORD m_previousStatus;
 	WORD m_previousCounter;
 	TIMEVALUE m_startTime;
-	bool m_immediateStart;
+	//bool m_immediateStart;
 	TSampleRecord m_tpi; //data regarding the normal data
 	TSampleRecord m_cal; // data regarding the calibration diode on data
 	TIMEVALUE m_lastReceiveEpoch;

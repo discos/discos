@@ -245,16 +245,18 @@ void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExIm
 	}
 }
 
-void CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
+ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
 		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
 {
 	int res;
 	WORD len;
+	TIMEVALUE now;
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
 	TIMEVALUE epoch;
 	long waitSec,waitMicro;
 	DDWORD diff;
+	ACS::Time expectedTime;
 	AUTO_TRACE("CCommandLine::resumeDataAcquisition()");
 	if ( !(m_backendStatus & (1 << SUSPEND)) || !getIsBusy()) {
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::resumeDataAcquisition()");
@@ -267,14 +269,24 @@ void CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Backend
 	}
 	else {
 		epoch.value(startT);
+		IRA::CIRATools::getTime(now);
+		if (startT<=now.value().value) {
+			ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::sendData()",(LM_WARNING,"START_TIME_ALREADY_ELAPSED"));
+		}
 	}
 	diff=IRA::CIRATools::timeDifference(epoch,m_acquisitionStartEpoch);
 	if (diff<m_configuration->getDataLatency()) { //wait until the latency time is elapsed......
+		double waitTime;
 		waitMicro=m_configuration->getDataLatency()-diff;
-		waitSec=(long)(waitMicro/1000000);
+		waitTime=((double)waitMicro/1000000.0);
+		waitSec=(long)waitTime;
 		waitMicro%=1000000;
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::resumeDataAcquisition()",(LM_WARNING,"BACKEND_LATENCY_NOT_MATCHED,WAITING..."));
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::resumeDataAcquisition()",(LM_WARNING,"BACKEND_LATENCY_NOT_MATCHED,WAITING %3.2lf usec",waitTime));
 		IRA::CIRATools::Wait(waitSec,waitMicro);
+		expectedTime=m_acquisitionStartEpoch.value().value+m_configuration->getDataLatency()*10;
+	}
+	else {
+		expectedTime=epoch.value().value;
 	}
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::resumeDataAcquisition()");
@@ -303,6 +315,7 @@ void CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Backend
 	else {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::resumeDataAcquisition()");
 	}
+	return expectedTime;
 }
 
 void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,

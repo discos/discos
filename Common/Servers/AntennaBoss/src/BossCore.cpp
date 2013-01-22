@@ -180,7 +180,7 @@ void CBossCore::cleanUp()
 		m_notificationChannel=NULL;
 	}
 	try {
-		//freeGenerator(m_generator.inout()); ///no need to free it...the realseComponet i scalled by the corresponding primary generator and teh memory if freed by the _var object
+		//freeGenerator(m_generator.inout()); ///no need to free it...the realseComponet is called by the corresponding primary generator and the memory if freed by the _var object
 		freeGenerator(m_siderealGenerator.inout());
 		freeGenerator(m_otfGenerator.inout());
 		freeGenerator(m_moonGenerator.inout());

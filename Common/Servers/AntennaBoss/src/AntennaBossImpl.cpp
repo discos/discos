@@ -1,4 +1,3 @@
-// $Id: AntennaBossImpl.cpp,v 1.29 2011-06-05 14:44:40 a.orlati Exp $
 
 #include <new>
 #include <ComponentErrors.h>
@@ -188,7 +187,7 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 void AntennaBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("AntennaBossImpl::execute()");
-	CSecAreaResourceWrapper<CBossCore>  core=m_core->Get(); 
+	CSecAreaResourceWrapper<CBossCore>  core=m_core->Get();
 	try {
 		core->execute();
 	}
@@ -230,7 +229,7 @@ void AntennaBossImpl::cleanUp()
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::cleanUp()",(LM_INFO,"AntennaBoss::THREADS_TERMINATED"));
 	if (m_parser!=NULL) delete m_parser;
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::cleanUp()",(LM_INFO,"AntennaBoss::PARSER_FREED"));
-	CSecAreaResourceWrapper<CBossCore>  core=m_core->Get(); 
+	CSecAreaResourceWrapper<CBossCore>  core=m_core->Get();
 	core->cleanUp();
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::cleanUp()",(LM_INFO,"AntennaBoss::BOSS_CORE_FREED"));
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::cleanUp()",(LM_INFO,"AntennaBoss::LOG_FLUSHED"));	
@@ -244,7 +243,7 @@ void AntennaBossImpl::aboutToAbort()
 	if (m_workingThread!=NULL) m_workingThread->suspend();
 	getContainerServices()->getThreadManager()->destroy(m_watchingThread);
 	getContainerServices()->getThreadManager()->destroy(m_workingThread);
-	CSecAreaResourceWrapper<CBossCore>  core=m_core->Get(); 
+	CSecAreaResourceWrapper<CBossCore>  core=m_core->Get();
 	core->cleanUp();
 	if (m_parser!=NULL) delete m_parser;
 }
@@ -280,7 +279,7 @@ char * AntennaBossImpl::command(const char *cmd) throw (CORBA::SystemException,M
 	AUTO_TRACE("AntennaBossImpl::command()");
 	IRA::CString out;
 	IRA::CString in;
-	//taking the mutex before execution is a workround for thread safeness that works only because the parser is configured for only synchronous calls.
+	//taking the mutex before execution is a workaround for thread safeness that works only because the parser is configured for only synchronous calls.
 	//If this condition is not true anymore, the mutex acquisition will have to be done directly inside the procedure body.
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 	in=IRA::CString(cmd);
@@ -366,7 +365,6 @@ void AntennaBossImpl::enable() throw (CORBA::SystemException)
 
 void AntennaBossImpl::getFluxes (const ACS::doubleSeq& freqs,ACS::doubleSeq_out fluxes) throw (CORBA::SystemException)
 {
-	AUTO_TRACE("AntennaBossImpl::correctionEnable()");
 	ACS::doubleSeq_var outFlux =new ACS::doubleSeq;
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 	resource->getFluxes(freqs,outFlux);

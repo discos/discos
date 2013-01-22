@@ -103,6 +103,11 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 	computeFlux();
 	IRA::CIRATools::getTime(now);
 	m_newScanEpoch=now.value().value;	
+	//Reset observed coordinates arrays
+	m_observedHorizontals.empty();
+	m_observedEquatorials.empty();
+	m_observedGalactics.empty();
+	m_integratedObservedEquatorial.empty();
 	// finally let's resume the working thread
 	m_workingThread->resume();
 }

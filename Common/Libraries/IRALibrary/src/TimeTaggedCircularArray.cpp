@@ -107,9 +107,10 @@ void CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time,double& azimuth
 	TArrayRecord m1,m2;
 	long long dx1,dx2;
 	double slope;
-	unsigned i;
+	int  i;
 	double maxEdge=360.0-_TOLLERENCE;
 	double minEdge=_TOLLERENCE;
+
 	if (ss<=1) {
 		azimuth=m_lastAzimuth;
 		elevation=m_lastElevation;
@@ -119,16 +120,16 @@ void CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time,double& azimuth
 		pp=(m_head+i)%m_size;
 		if (time==m_array[pp].time) { //the requested time is there
 			azimuth=m_array[pp].azimuth; 
-			elevation=m_array[pp].elevation; 
+			elevation=m_array[pp].elevation;
 			return;
 		}
 		else if (time>m_array[pp].time) {
-			if (i==ss-1) {  // the requested time is greater than all other entries in the array
+			if ((unsigned)i==ss-1) {  // the requested time is greater than all other entries in the array
 				m2=m_array[(m_head+ss-1)%m_size];
 				m1=m_array[(m_head+ss-2)%m_size];
 				break;
 			}
-			else { // the requested time is inbetween two entries
+			else { // the requested time is in between two entries
 				m1=m_array[pp];
 				m2=m_array[(m_head+i+1)%m_size];
 				break;
@@ -137,8 +138,11 @@ void CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time,double& azimuth
 	}
 	// in that case the requested time is smaller than all other points in the vector
 	if (pp==m_head) {
-		m1=m_array[m_head];
-		m2=m_array[(m_head+1)%m_size];
+		/*m1=m_array[m_head];
+		m2=m_array[(m_head+1)%m_size];*/
+		azimuth=m_array[m_head].azimuth;
+		elevation=m_array[m_head].elevation;
+		return;
 	}
 	// now compute the linear fit
 	TIMEVALUE second(m2.time);
@@ -187,7 +191,7 @@ void CTimeTaggedCircularArray::averagePoint(const TIMEVALUE& startTime,const TIM
 		elevation=m_lastElevation;
 		return;
 	}
-	for (unsigned i=elem-1;i>=0;i--) { //at least two elements are present
+	for (int  i=elem-1;i>=0;i--) { //at least two elements are present
 		scroller=(m_head+i)%m_size;
 		if ((startTime<=m_array[scroller].time) && (stopTime>=m_array[scroller].time)) {
 			samples++;
@@ -199,7 +203,7 @@ void CTimeTaggedCircularArray::averagePoint(const TIMEVALUE& startTime,const TIM
 		azimuth=avgAz/(double)samples;
 		elevation=avgEl/(double)samples;
 	}
-	else { //the data set could not be selected.....the requested interva is
+	else { //the data set could not be selected.....the requested interval is
 		if (startTime>m_array[(m_head+elem-1)%m_size].time) { //....later then use the last know point
 			azimuth=m_array[(m_head+elem-1)%m_size].azimuth;
 			elevation=m_array[(m_head+elem-1)%m_size].elevation;
