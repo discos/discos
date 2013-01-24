@@ -97,6 +97,11 @@ public:
             ReceiversErrors::ReceiverControlBoardErrorExImpl
     );
 
+    /**
+     * It deactivates the receiver.
+     */
+    void deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
 
     /**
      * It allows to compute the value of the calibration mark for any given sub bands in 
@@ -113,6 +118,7 @@ public:
      * band comes from. In that case it is neglected since the receiver is a single feed
      * @param ifs list of IF identifier, it allows to specifies from which receiver IF the 
      * sub band comes from.
+     * @param scale value to scale tsys measurement
      */
     void getCalibrationMark(
             ACS::doubleSeq& result,
@@ -121,7 +127,8 @@ public:
             const ACS::doubleSeq& freqs,
             const ACS::doubleSeq& bandwidths,
             const ACS::longSeq& feeds,
-            const ACS::longSeq& ifs
+            const ACS::longSeq& ifs,
+            double &scale
      ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl);
 
 

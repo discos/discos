@@ -81,8 +81,8 @@ int main(int argc, char *argv[])
 		tsys[k]=((DATA_TYPE)random()/(DATA_TYPE)RAND_MAX)*calib[k];
 	}
 	pols.length(2);
-	pols[0]=Receivers::RCV_LEFT;
-	pols[1]=Receivers::RCV_RIGHT;
+	pols[0]=Receivers::RCV_LCP;
+	pols[1]=Receivers::RCV_RCP;
 
 	/*recvFreq.length(2);
 	recvFreq[0]=100.0+los[0];

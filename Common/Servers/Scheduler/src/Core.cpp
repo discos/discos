@@ -138,6 +138,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("calOn","receivers",2,&CCore::remoteCall);
 	m_parser->add("calOff","receivers",2,&CCore::remoteCall);
 	m_parser->add("setLO","receivers",2,&CCore::remoteCall);
+	m_parser->add("antennaUnitOn","receivers",2,&CCore::remoteCall);
+	m_parser->add("antennaUnitOff","receivers",2,&CCore::remoteCall);
 	// backend
 	//m_parser->add("bck","backends",3,&CCore::remoteCall);
 
@@ -281,6 +283,7 @@ void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCom
 	ACS::doubleSeq ratio;
 	ACS::doubleSeq_var mark,tpi,zero,tpiCal;
 	ACS::longSeq_var IFs;
+	double scaleFactor;
 	long inputs;
 	IRA::CString outLog;
 	IRA::CString backendName;
@@ -324,7 +327,7 @@ void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCom
 	}
 	// call the receivers boss in order to get the calibration diode values......
 	try {
-		mark=m_receiversBoss->getCalibrationMark(freq,bandWidth,feed,IFs,skyFreq.out(),skyBw.out());
+		mark=m_receiversBoss->getCalibrationMark(freq,bandWidth,feed,IFs,skyFreq.out(),skyBw.out(),scaleFactor);
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
@@ -459,6 +462,7 @@ void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCom
 		if ((mark[i]>0.0) && (tpiCal[i]>tpi[i])) {
 			//ratio[i]=(tpiCal[i]-tpi[i])/mark[i];
 			ratio[i]=mark[i]/(tpiCal[i]-tpi[i]);
+			ratio[i]*=scaleFactor;
 			tsys[i]=(tpi[i]-zero[i])*ratio[i];
 		}
 		else {
@@ -493,7 +497,7 @@ void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCom
 	for (int i=0;i<inputs;i++) {
 		outLog.Format("DEVICE/%d Feed: %d, IF: %d, Freq: %lf, Bw: %lf/",i,feed[i],IFs[i],freq[i],bandWidth[i]);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("CALTEMP/%d %lf",i,mark[i]);
+		outLog.Format("CALTEMP/%d %lf(%lf)",i,mark[i],scaleFactor);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));		
 		outLog.Format("TPICAL/%d %lf",i,tpiCal[i]);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));

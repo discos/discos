@@ -170,10 +170,10 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		token.MakeUpper();
 		if (token=="L") {
-			m_polarizations[k]=Receivers::RCV_LEFT;
+			m_polarizations[k]=Receivers::RCV_LCP;
 		}
 		else if (token=="R") {
-			m_polarizations[k]=Receivers::RCV_RIGHT;
+			m_polarizations[k]=Receivers::RCV_RCP;
 		}
 		else {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
@@ -301,7 +301,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	for (WORD i=0;i<len;i++) {
 		m_markVector[i].skyFrequency=(*m_markTable)["SkyFrequency"]->asDouble();
 		m_markVector[i].markValue=(*m_markTable)["NoiseMark"]->asDouble();
-		m_markVector[i].polarization=(*m_markTable)["Polarization"]->asString()=="LEFT"?Receivers::RCV_LEFT:Receivers::RCV_RIGHT;
+		m_markVector[i].polarization=(*m_markTable)["Polarization"]->asString()=="LEFT"?Receivers::RCV_LCP:Receivers::RCV_RCP;
 		ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"MARK_VALUE_ENTRY: %d %lf %lf",m_markVector[i].polarization,m_markVector[i].skyFrequency,
 				m_markVector[i].markValue));
 		m_markTable->Next();
@@ -483,7 +483,7 @@ DWORD CConfiguration::getLeftMarkTable(double *& freq,double *& markValue) const
 	markValue=new double [m_markVectorLen];
 	DWORD count=0;
 	for (DWORD j=0;j<m_markVectorLen;j++) {
-		if (m_markVector[j].polarization==Receivers::RCV_LEFT) {
+		if (m_markVector[j].polarization==Receivers::RCV_LCP) {
 			freq[count]=m_markVector[j].skyFrequency;
 			markValue[count]=m_markVector[j].markValue;
 			count++;
@@ -498,7 +498,7 @@ DWORD CConfiguration::getRightMarkTable(double *& freq,double *& markValue) cons
 	markValue=new double [m_markVectorLen];
 	DWORD count=0;
 	for (DWORD j=0;j<m_markVectorLen;j++) {
-		if (m_markVector[j].polarization==Receivers::RCV_RIGHT) {
+		if (m_markVector[j].polarization==Receivers::RCV_RCP) {
 			freq[count]=m_markVector[j].skyFrequency;
 			markValue[count]=m_markVector[j].markValue;
 			count++;

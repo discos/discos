@@ -2082,10 +2082,11 @@ void EngineThread::collectReceiversData() {
 		ACS::longSeq				initialFrequencies;
 		ACS::doubleSeq_var	skyFrequencies;
 		ACS::doubleSeq_var	skyBandwidths;
+		double scale;
 
 		data_p->getInputsConfiguration(feeds, initialFrequencies, frequencies, bandwidths, attenuations);
 
-		calibrationMarks = m_receiversBoss_p->getCalibrationMark(frequencies, bandwidths, feeds, initialFrequencies, skyFrequencies.out(), skyBandwidths.out());
+		calibrationMarks = m_receiversBoss_p->getCalibrationMark(frequencies, bandwidths, feeds, initialFrequencies, skyFrequencies.out(), skyBandwidths.out(),scale);
 
 		data_p->setCalibrationMarks(calibrationMarks.in());
 		data_p->setSkyFrequency(skyFrequencies.in());

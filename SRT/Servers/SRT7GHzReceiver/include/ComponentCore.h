@@ -78,6 +78,11 @@ public:
             ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
     /**
+     * It deactivates the receiver.
+     */
+    void deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+    /**
      * It allows to compute the value of the calibration mark for any given sub bands in the IF space.
      * @param result this the sequence of computed mark values, the first entry correspond to first sub band and so on....
      * @param, resFreq the sequence reports the initial observed sky frequency (MHz), the  first entry correspond to first sub band and so on....
@@ -88,7 +93,7 @@ public:
      * @param ifs list of IF identifier, it allows to specifies from which receiver IF the sub band comes from.
      */
     void getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-            const ACS::longSeq& ifs) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
+            const ACS::longSeq& ifs,double& scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
 
     /**
      * It computes the taper given a reference band.

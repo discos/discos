@@ -55,6 +55,14 @@ module Receivers {
          * @throw CORBA::SystemExcpetion    
         */
         void activate() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);   
+        
+        /**
+         * This method puts the receiver in stand-by, all the operation required for "park" the receiver (when not used anymore) are included here.
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw CORBA::SystemExcpetion    
+         */
+        void deactivate() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 
         /*

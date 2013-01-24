@@ -136,6 +136,13 @@ void CComponentCore::activate() throw (ReceiversErrors::ModeErrorExImpl,Componen
 	lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 }
 
+void CComponentCore::deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	// no guard needed.
+	lnaOff(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+}
+
+
 void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
 {
@@ -354,7 +361,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Val
 }
 
 void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-			const ACS::longSeq& ifs) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
+			const ACS::longSeq& ifs,double &scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
 {
 	double realFreq,realBw;
 	double *tableLeftFreq=NULL;
@@ -408,15 +415,16 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& r
 		resBw[i]=realBw;
 		realFreq+=realBw/2.0;
 		ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
-		if (m_polarization[ifs[i]]==(long)Receivers::RCV_LEFT) {
+		if (m_polarization[ifs[i]]==(long)Receivers::RCV_LCP) {
 			result[i]=linearFit(tableLeftFreq,tableLeftMark,sizeL,realFreq);
 			ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
 		}
-		else {
+		else { //RCV_RCP
 			result[i]=linearFit(tableRightFreq,tableRightMark,sizeR,realFreq);
 			ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"RIGHT_MARK_VALUE %lf",result[i]));
 		}
 	}
+	scaleFactor=1.0;
 	if (tableLeftFreq) delete [] tableLeftFreq;
 	if (tableLeftMark) delete [] tableLeftMark;
 	if (tableRightFreq) delete [] tableRightFreq;
@@ -495,12 +503,12 @@ double CComponentCore::getFetValue(const IRA::ReceiverControl::FetValue& control
 	if (ifs>=m_configuration.getIFs()) {
 		return 0.0;
 	}
-	else if (m_polarization[ifs]==(long)Receivers::RCV_LEFT) {
+	else if (m_polarization[ifs]==(long)Receivers::RCV_LCP) {
 		if (control==IRA::ReceiverControl::DRAIN_VOLTAGE) return m_fetValues.VDL;
 		else if (control==IRA::ReceiverControl::DRAIN_CURRENT) return m_fetValues.IDL;
 		else return m_fetValues.VGL;
 	}
-	else {
+	else { //RCV_RCP
 		if (control==IRA::ReceiverControl::DRAIN_VOLTAGE) return m_fetValues.VDR;
 		else if (control==IRA::ReceiverControl::DRAIN_CURRENT) return m_fetValues.IDR;
 		else return m_fetValues.VGR;

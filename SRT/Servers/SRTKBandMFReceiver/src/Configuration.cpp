@@ -215,7 +215,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
     }
     for (WORD i=0; i<len; i++) {
         m_markVector[i].feed=(*m_markTable)["Feed"]->asLongLong();
-        m_markVector[i].polarization=(*m_markTable)["Polarization"]->asString()=="LEFT"?Receivers::RCV_LEFT:Receivers::RCV_RIGHT;
+        m_markVector[i].polarization=(*m_markTable)["Polarization"]->asString()=="LEFT"?Receivers::RCV_LCP:Receivers::RCV_RCP;
 
         std::vector<std::string> marks_str = split(std::string((*m_markTable)["Coefficients"]->asString()), std::string(","));
 
@@ -400,10 +400,10 @@ void CConfiguration::setMode(const char * mode) throw (ComponentErrors::CDBAcces
         }
         token.MakeUpper();
         if (token=="L") {
-            m_polarizations[k]=Receivers::RCV_LEFT;
+            m_polarizations[k]=Receivers::RCV_LCP;
         }
         else if (token=="R") {
-            m_polarizations[k]=Receivers::RCV_RIGHT;
+            m_polarizations[k]=Receivers::RCV_RCP;
         }
         else {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);

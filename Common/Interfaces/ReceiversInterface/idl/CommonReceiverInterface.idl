@@ -100,13 +100,14 @@ module Receivers {
          * @param ifs is a list that identfies which IFs of the feed we are interested in, usually 0..1
          * @param skyFreq used to return the resulting frequency whan comparing the detector subband and the receiver IF band, the band is the real observed frequency in fact the oscillator is also added (MHz)
          * @param skyBw used to return the total observed bandwidth. (Mhz)
+         * @param scaleFactor this value is used as a weight during system temperature computation in order to scale to a real tsys value. 
          * @return for each subband the list of the noise calibration values in Kelvin degrees. It must be freed by the caller.
          * @throw ComponentErrors::ComponentErrorsEx
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw CORBA::SystemException  
          */
-        ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs,out ACS::doubleSeq skyFreq,out ACS::doubleSeq skyBw) 
-            raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs,out ACS::doubleSeq skyFreq,out ACS::doubleSeq skyBw,
+        		out double scaleFactor)    raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
             
         /**
          * It can be called when the relative positions and power (with respect to the central beam) of each feed 
@@ -140,6 +141,15 @@ module Receivers {
         double getTaper(in double freq,in double bandWidth,in long feed,in long ifNumber,out double waveLen) 
             raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
+        /**
+         * It turns off the antenna unit of the receiver 
+         */
+        void turnAntennaUnitOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        
+        /**
+         * It turns on the antenna unit of the receiver
+         */
+        void turnAntennaUnitOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     };
     
     

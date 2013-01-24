@@ -144,17 +144,18 @@ public:
 	 * The subbands are defined by giving the feed number, the polarization the initial frequency and the bandwidth.
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @thorw ReceiversErrors::ReceiversErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 * @param freqs for each subband this is the list of the starting frequencies (in MHz). Correlated to the real initial frequency of the current receiver.
 	 * @param bandwidths for each subband this is the width in MHz. Correlated to the real bandwidth of the current receiver.
 	 * @param feeds for each subband this if the feed number
 	 * @param ifs for each subband this indicates the proper IF, given the feed
 	 * @param skyFreq for each subband this indicates the corresponding frequency observed (MHz).
 	 * @param skyBw for each subband this indicates the resulting bandwidth (MHz)
+	 * @param slaceFactor scaling value to be used when computing system temperature
 	 * @return the list of the noise calibration value in Kelvin degrees.
 	 */
     virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs,
-    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is called in order to know the geometry of the currently configured receiver. The geometry is given along the X and Y axis where the central feed is the origin
@@ -173,7 +174,7 @@ public:
 	 * This method is called in order to know the taper of the current receiver. 
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @thorw ReceiversErrors::ReceiversErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 * @param freq starting frequency of the detector in MHz. Correlated to the real initial frequency of the current receiver.
 	 * @param bandWidth bandwidth of the detector n MHz. Correlated to the real bandwidth of the current receiver.
 	 * @param feed feed id the detector is attached to
@@ -193,6 +194,22 @@ public:
 	 * @throw ManagementErrors::CommandLineErrorEx Thrown when the command execution or parsing result in an error. It contains the error message
 	 */
 	virtual char *command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);	
+
+	/**
+	 * It allows to turn the antenna unit on
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	virtual void turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 *  It allows to turn the antenna unit off
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
 	/**
 	 * Returns a reference to the LO property implementation of the IDL interface.

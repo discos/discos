@@ -152,8 +152,15 @@ public:
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw ReceiversErrors::ReceiversErrorsEx
      */
-     virtual void activate() throw (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+     virtual void activate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
+     /**
+      * It must be called to switch off the receiver
+      * @throw CORBA::SystemExcpetion
+      * @throw ComponentErrors::ComponentErrorsEx
+      * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+     virtual void deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
     /**
      * This method is used to turn the calibration diode on.
@@ -217,6 +224,7 @@ public:
      * detector, receiver IF  and Local Oscillator.
      * @param skyBw for each sub band it returns the real observed bandwidth(MHz), included 
      * detector bandwidth , receiver IF bandwidth
+     * @param scaleFactor multiplication factor for tsys computation
      * @throw CORBA::SystemException
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw ReceiversErrors::ReceiversErrorsEx
@@ -228,7 +236,8 @@ public:
             const ACS::longSeq& feeds, 
             const ACS::longSeq& ifs,
             ACS::doubleSeq_out skyFreq,
-            ACS::doubleSeq_out skyBw
+            ACS::doubleSeq_out skyBw,
+            CORBA::Double_out scaleFactor
     ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
 
@@ -332,6 +341,22 @@ public:
             ComponentErrors::ComponentErrorsEx,
             ReceiversErrors::ReceiversErrorsEx
     );
+
+	/**
+	 * It allows to turn the antenna unit on
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	virtual void turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 *  It allows to turn the antenna unit off
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 
     /**

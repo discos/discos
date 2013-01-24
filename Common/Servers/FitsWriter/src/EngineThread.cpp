@@ -982,8 +982,9 @@ void CEngineThread::collectReceiversData()
 			ACS::longSeq feeds,ifs;
 			ACS::doubleSeq_var skyFreq;
 			ACS::doubleSeq_var skyBw;
+			double scale;
 			data->getInputsConfiguration(feeds,ifs,freqs,bws,atts);
-			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out());
+			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),scale);
 			data->setCalibrationMarks(calMarks.in());
 			data->setSkyFrequency(skyFreq.in());
 			data->setSkyBandwidth(skyBw.in());

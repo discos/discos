@@ -170,6 +170,12 @@ void CComponentCore::activate() throw (
     lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 }
 
+void CComponentCore::deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	// no guard needed.
+	lnaOff(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+}
+
 void CComponentCore::calOn() throw (
         ReceiversErrors::NoRemoteControlErrorExImpl,
         ComponentErrors::ValidationErrorExImpl,
@@ -419,7 +425,8 @@ void CComponentCore::getCalibrationMark(
         const ACS::doubleSeq& freqs,
         const ACS::doubleSeq& bandwidths,
         const ACS::longSeq& feeds, 
-        const ACS::longSeq& ifs
+        const ACS::longSeq& ifs,
+        double& scale
         ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
 {
     double realFreq,realBw;
@@ -483,9 +490,9 @@ void CComponentCore::getCalibrationMark(
         throw impl;
     }
     for(DWORD i=0; i<m_configuration.getMarkVectorLen(); i++) {
-        if(markVector[i].polarization==Receivers::RCV_LEFT)
+        if(markVector[i].polarization==Receivers::RCV_LCP)
             leftMarkCoeffs.push_back(markVector[i].coefficients);
-        else if(markVector[i].polarization==Receivers::RCV_RIGHT)
+        else if(markVector[i].polarization==Receivers::RCV_RCP)
             rightMarkCoeffs.push_back(markVector[i].coefficients);
         else {
             _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
@@ -503,7 +510,7 @@ void CComponentCore::getCalibrationMark(
     double integral;
     double mark=0;
     for (unsigned i=0;i<stdLen;i++) {
-        if (m_polarization[ifs[i]]==(long)Receivers::RCV_LEFT) {
+        if (m_polarization[ifs[i]]==(long)Receivers::RCV_LCP) {
             // take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
             if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
                 realFreq=m_startFreq[ifs[i]];
@@ -524,7 +531,7 @@ void CComponentCore::getCalibrationMark(
                      (f2*f2*f2-f1*f1*f1)+(leftMarkCoeffs[feeds[i]][2]/2)*(f2*f2-f1*f1)+leftMarkCoeffs[feeds[i]][3]*(f2-f1);               
             mark=integral/(f2-f1);              
         }
-        else if (m_polarization[ifs[i]]==(long)Receivers::RCV_RIGHT) {
+        else if (m_polarization[ifs[i]]==(long)Receivers::RCV_RCP) {
             // take the real observed bandwidth....the correlation between detectro device and the band provided by the receiver
             if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
                 realFreq=m_startFreq[ifs[i]];
@@ -543,7 +550,7 @@ void CComponentCore::getCalibrationMark(
         resFreq[i]=realFreq;
         resBw[i]=realBw;
     }
-
+    scale=1.0;
     if (tableLeftFreq) delete [] tableLeftFreq;
     if (tableLeftMark) delete [] tableLeftMark;
     if (tableRightFreq) delete [] tableRightFreq;
@@ -629,7 +636,7 @@ double CComponentCore::getFetValue(const IRA::ReceiverControl::FetValue& control
     if (ifs>=m_configuration.getIFs()) {
         return 0.0;
     }
-    else if (m_polarization[ifs]==(long)Receivers::RCV_LEFT) {
+    else if (m_polarization[ifs]==(long)Receivers::RCV_LCP) {
         if (control==IRA::ReceiverControl::DRAIN_VOLTAGE) return m_fetValues.VDL;
         else if (control==IRA::ReceiverControl::DRAIN_CURRENT) return m_fetValues.IDL;
         else return m_fetValues.VGL;

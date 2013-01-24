@@ -73,6 +73,8 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add<0>("calOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::calOn));
 	m_parser->add<0>("calOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::calOff));
 	m_parser->add<1>("setLO",new function1<CRecvBossCore,non_constant,void_type,I<doubleSeq_type> >(m_core,&CRecvBossCore::setLO));	
+	m_parser->add<0>("antennaUnitOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOn));
+	m_parser->add<0>("antennaUnitOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOff));
 	ACS_LOG(LM_FULL_INFO,"ReceiversBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
@@ -241,13 +243,13 @@ void ReceiversBossImpl::park() throw (CORBA::SystemException,ManagementErrors::P
 }
 
 ACS::doubleSeq *ReceiversBossImpl::getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds,const ACS::longSeq& ifs,
-		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw) throw (CORBA::SystemException,	ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,	ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	ACS::doubleSeq_var result=new ACS::doubleSeq;
 	ACS::doubleSeq_var resFreq=new ACS::doubleSeq;
 	ACS::doubleSeq_var resBw=new ACS::doubleSeq;
 	try {
-		m_core->getCalibrationMark(result,resFreq,resBw,freqs,bandwidths,feeds,ifs);
+		m_core->getCalibrationMark(result,resFreq,resBw,freqs,bandwidths,feeds,ifs,scaleFactor);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -338,6 +340,47 @@ char *ReceiversBossImpl::command(const char *cmd) throw (CORBA::SystemException,
 		throw impl.getCommandLineErrorEx();
 	}
 	return CORBA::string_dup((const char *)out);	
+}
+
+
+void ReceiversBossImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core->AUOn();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::turnAntennaUnitOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void ReceiversBossImpl::turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core->AUOff();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::turnAntennaUnitOff()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
 }
 
 

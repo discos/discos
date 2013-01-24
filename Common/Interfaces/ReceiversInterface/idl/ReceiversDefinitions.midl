@@ -31,8 +31,10 @@ module Receivers {
 	
 	/// polarization of the input channel 
 	enum TPolarization {
-		RCV_LEFT,       /*!< the IF is left polarization  */     
-		RCV_RIGHT        /*!< the IF  is right polarization */
+		RCV_LCP,       /*!< the IF is left circular polarization  */
+		RCV_RCP,        /*!< the IF  is right circular polarization */
+		RCV_VLP,		/*!<the IF is vertical linear polarization */
+		RCV_HLP	   /*!<the IF is horizontal linear polarization */
 	};
 	ACS_ENUM(TPolarization);
 

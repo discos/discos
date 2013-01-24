@@ -96,11 +96,17 @@ using namespace TW;
 
 IRA::CString polarizationFormat(const baci::BACIValue& value,const void* arg)
 {
-	if (value.longValue()==Receivers::RCV_LEFT) {
-		return IRA::CString("LEFT   ");
+	if (value.longValue()==Receivers::RCV_LCP)  {
+		return IRA::CString("LCP    ");
 	}
-	else  { //Receivers::RCV_LEFT)
-		return IRA::CString("RIGHT  ");
+	else  if (value.longValue()==Receivers::RCV_RCP)  {
+		return IRA::CString("RCP    ");
+	}
+	else  if (value.longValue()==Receivers::RCV_VLP)  {
+		return IRA::CString("VLP    ");
+	}
+	else { // Receivers::RCV_HLP)
+		return IRA::CString("HLP    ");
 	}
 }
 

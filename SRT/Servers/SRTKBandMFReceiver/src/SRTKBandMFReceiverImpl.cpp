@@ -262,7 +262,7 @@ void SRTKBandMFReceiverImpl::aboutToAbort()
 }
 
 
-void SRTKBandMFReceiverImpl::activate() throw (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
+void SRTKBandMFReceiverImpl::activate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
 {
     try {
         m_core.activate();
@@ -282,6 +282,25 @@ void SRTKBandMFReceiverImpl::activate() throw (ComponentErrors::ComponentErrorsE
     }
 }
 
+void SRTKBandMFReceiverImpl::deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core.deactivate();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRTKBandMFReceiverImpl::deactivate()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
 
 void SRTKBandMFReceiverImpl::calOn() throw (
         CORBA::SystemException,
@@ -389,7 +408,8 @@ ACS::doubleSeq * SRTKBandMFReceiverImpl::getCalibrationMark(
         const ACS::longSeq& feeds,
         const ACS::longSeq& ifs,
         ACS::doubleSeq_out skyFreq,
-        ACS::doubleSeq_out skyBw
+        ACS::doubleSeq_out skyBw,
+        CORBA::Double_out scaleFactor
         ) throw (
             CORBA::SystemException,
             ComponentErrors::ComponentErrorsEx,
@@ -400,7 +420,7 @@ ACS::doubleSeq * SRTKBandMFReceiverImpl::getCalibrationMark(
     ACS::doubleSeq_var resFreq = new ACS::doubleSeq;
     ACS::doubleSeq_var resBw = new ACS::doubleSeq;
     try {
-        m_core.getCalibrationMark(result.inout(), resFreq.inout(), resBw.inout(), freqs, bandwidths, feeds,ifs);
+        m_core.getCalibrationMark(result.inout(), resFreq.inout(), resBw.inout(), freqs, bandwidths, feeds,ifs,scaleFactor);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
         ex.log(LM_DEBUG);
@@ -542,7 +562,6 @@ void SRTKBandMFReceiverImpl::turnLNAsOff() throw (
     }
 }
 
-
 void SRTKBandMFReceiverImpl::turnVacuumSensorOn() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
@@ -590,6 +609,18 @@ void SRTKBandMFReceiverImpl::turnVacuumSensorOff() throw (
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
+}
+
+void SRTKBandMFReceiverImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	//has it to be implemented?
+	ACS_LOG(LM_FULL_INFO,"SRTKBandMFReceiverImpl::turnAntennaUnitOn()",(LM_NOTICE,"KBAND_ANTENNA_UNIT_ON"));
+}
+
+void SRTKBandMFReceiverImpl::turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	//has it to be implemented?
+	ACS_LOG(LM_FULL_INFO,"SRTKBandMFReceiverImpl::turnAntennaUnitOff()",(LM_NOTICE,"KBAND_ANTENNA_UNIT_OFF"));
 }
 
 

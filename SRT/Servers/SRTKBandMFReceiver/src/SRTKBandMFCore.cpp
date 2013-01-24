@@ -29,7 +29,7 @@ ACS::doubleSeq SRTKBandMFCore::getStageValues(const IRA::ReceiverControl::FetVal
         return values;
 
     // Left Channel
-    if(m_polarization[ifs] == (long)Receivers::RCV_LEFT) {
+    if(m_polarization[ifs] == (long)Receivers::RCV_LCP) {
         if (control == IRA::ReceiverControl::DRAIN_VOLTAGE) {
             for(size_t i=0; i<getFeeds(); i++)
                 values[i] = (m_vdStageValues[stage-1]).left_channel[i];
@@ -47,7 +47,7 @@ ACS::doubleSeq SRTKBandMFCore::getStageValues(const IRA::ReceiverControl::FetVal
     }
 
     // Right Channel
-    if (m_polarization[ifs] == (long)Receivers::RCV_RIGHT) {
+    if (m_polarization[ifs] == (long)Receivers::RCV_RCP) {
         if (control==IRA::ReceiverControl::DRAIN_VOLTAGE)
             for(size_t i=0; i<getFeeds(); i++)
                 values[i] = (m_vdStageValues[stage-1]).right_channel[i];

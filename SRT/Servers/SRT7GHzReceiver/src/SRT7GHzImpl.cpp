@@ -167,7 +167,7 @@ void SRT7GHzImpl::aboutToAbort()
 	m_core.cleanup();
 }
 
-void SRT7GHzImpl::activate() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT7GHzImpl::activate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		m_core.activate();
@@ -182,6 +182,26 @@ void SRT7GHzImpl::activate() throw (ComponentErrors::ComponentErrorsEx,Receivers
 	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRT7GHzImpl::activate()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void SRT7GHzImpl::deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core.deactivate();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRT7GHzImpl::deactivate()");
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
 	}
@@ -268,13 +288,13 @@ void SRT7GHzImpl::setMode(const char * mode) throw (CORBA::SystemException,Compo
 }
 
 ACS::doubleSeq *SRT7GHzImpl::getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds,const ACS::longSeq& ifs,
-		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	ACS::doubleSeq_var result=new ACS::doubleSeq;
 	ACS::doubleSeq_var resFreq=new ACS::doubleSeq;
 	ACS::doubleSeq_var resBw=new ACS::doubleSeq;
 	try {
-		m_core.getCalibrationMark(result.inout(),resFreq.inout(),resBw.inout(),freqs,bandwidths,feeds,ifs);
+		m_core.getCalibrationMark(result.inout(),resFreq.inout(),resBw.inout(),freqs,bandwidths,feeds,ifs,scaleFactor);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -408,7 +428,6 @@ void SRT7GHzImpl::turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentE
 	}
 }
 
-
 void SRT7GHzImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
@@ -429,6 +448,17 @@ void SRT7GHzImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,Component
 	}
 }
 
+void SRT7GHzImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	//has it to be implemented?
+	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::turnAntennaUnitOn()",(LM_NOTICE,"CBAND_ANTENNA_UNIT_ON"));
+}
+
+void SRT7GHzImpl::turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	//has it to be implemented?
+	ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::turnAntennaUnitOff()",(LM_NOTICE,"CBAND_ANTENNA_UNIT_OFF"));
+}
 
 _PROPERTY_REFERENCE_CPP(SRT7GHzImpl,ACS::ROdoubleSeq,m_plocalOscillator,LO);
 _PROPERTY_REFERENCE_CPP(SRT7GHzImpl,ACS::ROpattern,m_pstatus,status);

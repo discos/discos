@@ -105,13 +105,21 @@ public:
 	virtual void aboutToAbort();
 
 	/**
-	 * It must be called to switch the receiver to operative mode. wnen called the default configuration and mode is loaded. Regarding this
+	 * It must be called to switch the receiver to operative mode. when called the default configuration and mode is loaded. Regarding this
 	 * implementation calling this method corresponds to a call to <i>setMode("NORMAL")</i>.
 	 * @throw CORBA::SystemExcpetion
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	 virtual void activate() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	 virtual void activate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 * It must be called to switch off the receiver.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	 virtual void deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 		
 	/**
 	 * This method is used to turn the calibration diode on.
@@ -162,10 +170,11 @@ public:
 	 * @param ifs for each sub band this indicates the proper IF
 	 * @param skyFreq for each sub band it returns the real observed frequency(MHz), included detector, receiver IF  and Local Oscillator.
 	 * @param skyBw for each sub band it returns the real observed bandwidth(MHz), included detector bandwidth , receiver IF bandwidth
+	 * @param scaleFactor this is a value to be applied as scale factor during system temperature computation
 	 * @return the list of the noise calibration value in Kelvin degrees.
 	 */
     virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs,
-    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is called in order to know the geometry of the receiver. The geometry is given along the X and Y axis where the central feed is the origin
@@ -227,6 +236,22 @@ public:
 	 * @throw ReceiversErrors::ReceiversErrorsEx
      */
     virtual void turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 * It allows to turn the antenna unit on
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	virtual void turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 *  It allows to turn the antenna unit off
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * Returns a reference to the mode property implementation of the IDL interface.

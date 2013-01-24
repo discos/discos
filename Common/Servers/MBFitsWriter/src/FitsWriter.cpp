@@ -455,8 +455,11 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq&
 			ifChain.push_back(ifNumber);
 			feed.push_back(m_channels[i].feed);
 			if (ifNumber<pols.length()) { // in this case the polarizations are given one for each receiver IF
-				if (pols[ifNumber]==Receivers::RCV_LEFT) polarization.push_back("left");
-				else polarization.push_back("right");
+				if (pols[ifNumber]==Receivers::RCV_LCP) polarization.push_back("LCP");
+				else if (pols[ifNumber]==Receivers::RCV_RCP) polarization.push_back("RCP");
+				else if (pols[ifNumber]==Receivers::RCV_VLP) polarization.push_back("VLP");
+				else if (pols[ifNumber]==Receivers::RCV_HLP) polarization.push_back("HLP");
+				else polarization.push_back("");
 			}
 			else {
 				polarization.push_back("");
