@@ -16,7 +16,8 @@ XarcosThread::XarcosThread(const ACE_CString& name,TSenderParameter  *par,
 	AUTO_TRACE("XarcosThread::XarcosThread()");
 	ACS_DEBUG("XarcosThread::XarcosThread()"," control thread starts");
 	Timer::TimerParameter timerPar;
-	ACS::Time timeTp=(ACS::ThreadBase::defaultSleepTime)*2-300000;//<200 millisecond
+	//ACS::Time timeTp=(ACS::ThreadBase::defaultSleepTime)*2-300000;//<200 millisecond  modifica 30/11/2012
+        ACS::Time timeTp=(ACS::ThreadBase::defaultSleepTime)*5;//<mezzo secondo
 	ACS::Time timeInt=(ACS::ThreadBase::defaultSleepTime)*100;//=10 seconu
 	long idTp=0;
 	long idInt=0;	
@@ -28,7 +29,9 @@ XarcosThread::XarcosThread(const ACE_CString& name,TSenderParameter  *par,
     commandL=par->command;
     m_GroupSpectrometer=par->groupSpectrometer;
     timerPar.sender=this;
-    timerPar.interval=2000000;//200 millisecond
+    //timerPar.interval=2000000;//200 millisecond  modifica 30/11/2012
+    timerPar.interval=5000000; //mezzo secondo
+
     timerPar.tp=true;
     Timer::TimerParameter *tmp=&timerPar;
     tpTimer=getThreadManager()->create<Timer,Timer::TimerParameter *>("TpTimer",tmp,timeTp,timeTp);//=200 millisecond
@@ -304,9 +307,12 @@ void XarcosThread::runLoop()
 	if(INT){
 		if(groupS->Xspec.GetNCicli()!=0){
 			if(tpTimer->event){
-				tpTimer->event=false;				
-			    groupS->GetDataTp(false);
-			    groupS->countTp++;
+			    tpTimer->event=false;
+                            if (data->StartSemTp.CondWait(1)) {				
+			        groupS->GetDataTp(false);
+			        groupS->countTp++;
+			        data->StartSemTp.release(1);
+			    }
 			}
 			if(intTimer->event){
 				intTimer->event=false;

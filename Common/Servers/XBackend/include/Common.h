@@ -33,10 +33,10 @@
 #define SAMPLETYPE double
 #define SAMPLESIZE sizeof(SAMPLETYPE)  //
 
-#define DEFAULT_MODE8BIT false // CDB
+#define DEFAULT_MODE8BIT true // CDB
 
 #define DEFAULT_GAIN 30.0//Gain is in hardware units
-#define DEFAULT_BANDWIDTH 62.5 //62.5 //MHz // CDB
+#define DEFAULT_BANDWIDTH 125.0 //62.5 //MHz // CDB
 #define DEFAULT_FREQUENCY 0.0 //MHz // CDB
 
 #define DEFAULT_INTEGRATION 10  //10 seconds integration // CDB

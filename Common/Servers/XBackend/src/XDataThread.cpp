@@ -6,6 +6,7 @@ using namespace IRA;
 
 XDataThread::XDataThread(const ACE_CString& name,DataParameter *par,
   const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime)
+  : StartSemTp(1)
 {
 	AUTO_TRACE("XDataThread::XDataThread()");
 	m_sender=par->sender;
@@ -37,8 +38,10 @@ void XDataThread::run()
 {
 	while(ciclo){
 		StartSem.acquire(1);
+                StartSemTp.acquire(1);
 		groupS->GetData(groupS->Xspec.GetNCicli());
 		groupS->countInt++;
-		if(groupS->Xspec.GetNCicli()==0) StopSem.release(1);	
+		if(groupS->Xspec.GetNCicli()==0) StopSem.release(1);
+                StartSemTp.release(1);	
 	}
 }

@@ -341,7 +341,8 @@ void CCommandLine::setConfiguration(const long& secId,const double& freq,const d
 		}
 	}
 	if (bins>=0) { // the user ask for a new value
-		if (bins>=DEFAULT_BINS) {
+		//if (bins>=DEFAULT_BINS) {
+		if (bins>DEFAULT_BINS) {
 			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
 			impl.setValueName("attenuation");
 			impl.setValueLimit(DEFAULT_BINS);
@@ -613,7 +614,8 @@ void CCommandLine::setSectionsNumber(const long& sectionsNumber)
 	throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl)
 {
 	AUTO_TRACE("CCommandLine::setSectionsNumber()");	
-	int old=0,i=0,j=0;
+	int old=0,i=0;
+	long j=0;
 	HeadResult temp;
 
 	CSecAreaResourceWrapper<GroupSpectrometer> groupS=m_pLink->Get();
@@ -621,14 +623,15 @@ void CCommandLine::setSectionsNumber(const long& sectionsNumber)
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setSectionsNumber()");
 		throw impl;
 	}		
-	if ((sectionsNumber<=0)&&(sectionsNumber>MAX_SECTION_NUMBER)) {
+	//if ((sectionsNumber<=0)&&(sectionsNumber>MAX_SECTION_NUMBER)) {
+	if ((sectionsNumber<=0)||(sectionsNumber>MAX_SECTION_NUMBER)) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setSectionsNumber()");
 		impl.setReason("the sectionsNumber identifier is out of range");
 		throw impl;
 	}
 	if (sectionsNumber>0){
 		old=groupS->Xspec.GetNSezioni();
-		j=searchChIn(m_feedNumber[old-1]+1);
+		j=searchChIn(m_feedNumber[old-1]/*+1*/); //TBC!!!!!
 		j--;
 		if (sectionsNumber>m_sectionsNumber){			
 			for(i=m_sectionsNumber;i<sectionsNumber;i++){
@@ -646,7 +649,7 @@ void CCommandLine::setSectionsNumber(const long& sectionsNumber)
 				do{									
 					j++;
 					while(!(m_adc[j])){
-						j++;	
+						j++;
 						if(j>=MAX_ADC_NUMBER) j=0;
 					}
 					m_feedNumber[i]=searchFeed(j);
@@ -938,8 +941,10 @@ int CCommandLine::getConfiguration()
 		if(Htmp.Getindex()!=-1){
 			if(Htmp.GetGain()!=0) m_attenuation[i]=gainToAttenuation(Htmp.GetGain());
 			else m_attenuation[i]=50;
-			if(Htmp.GetBanda()==125e6)	m_frequency[i]=MIN_FREQUENCY;
-			else m_frequency[i]=MIN_FREQUENCY+(62.5e6+Htmp.GetFlo()-(Htmp.GetBanda())*0.5)*1e-6;
+			if(Htmp.GetBanda()==125e6)
+				m_frequency[i]=MIN_FREQUENCY;
+			else 
+				m_frequency[i]=MIN_FREQUENCY+(62.5e6+Htmp.GetFlo()-(Htmp.GetBanda())*0.5)*1e-6;
 			m_bandWidth[i]=(Htmp.GetBanda())*1e-6;
 			if(Htmp.GetModoPol()) {
 				m_polarization[i]=Backends::BKND_FULL_STOKES;
@@ -1071,22 +1076,39 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 	m_sampleSize=SAMPLESIZE;	
 	
 	if(m_beams*2>MAX_ADC_NUMBER) m_beams=MAX_ADC_NUMBER/2;
-	for( i=0;i<m_beams*2;i++) m_ChIn[i]=(long)(i/2);//{0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,-1,-1};//Mapping Feed to ChIn
+	for( i=0;i<m_beams*2;i++) { 
+		m_ChIn[i]=(long)(i/2);//{0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,-1,-1};//Mapping Feed to ChIn
+	}
 	for( i=(m_beams)*2;i<(MAX_ADC_NUMBER);i++) m_ChIn[i]=-1;//-1 non è connesso
 	if (DEFAULT_MODE8BIT){
 		m_mode8bit=true;
 #ifdef DOPPIO 
-		for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;
-		m_adc[0]=m_adc[1]=m_adc[8]=m_adc[9]=false;
+		for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;  //CDB  Decidere li quali ADC abilitare o meno
+	//	m_adc[0]=m_adc[1]=m_adc[8]=m_adc[9]=false;     // 
 #else 
-		for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;
-		m_adc[0]=m_adc[1]=false;
+		for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;  //
+	//	m_adc[0]=m_adc[1]=false;                       //
 #endif 	
 	}
 	else {
 		m_mode8bit=false;
 		for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;
-	}	
+	}
+
+
+// AGGIUNGO MOMENTANEAMENTE
+        bool ottobit=DEFAULT_MODE8BIT;
+        CSecAreaResourceWrapper<GroupSpectrometer> groupS=m_pLink->Get();
+	//oldMode=groupS->Xspec.GetModo8bit();
+	//if(oldMode!=mode){     // TENTATIVO 4 DIC 2012
+        //if (ottobit=true) { //AGGIUNTO 05/12/12
+		groupS->Xspec.SetModo8bit(ottobit);
+		groupS->AdcSetMode(groupS->Xspec.GetModo8bit());//Cambio la distribuzione 
+        //} //AGGIUNTO 05/12/12
+	//}	
+	//else return;	
+
+// *********************
 	int j=0;
 	i=0;
 	//while(i<DEFAULT_SECTION_NUMBER){
@@ -1100,7 +1122,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 		if(j==MAX_ADC_NUMBER) j=0;
 		else j++;
 	}
-    //printf("initialize configuration end\n");
+
 //	if (config=="22GHzMultiFeed") { //in order to add a new configuration add an other if
 
 	return true;
@@ -1266,11 +1288,11 @@ void CCommandLine::setMode8bit(bool mode)
 	}	
 	CSecAreaResourceWrapper<GroupSpectrometer> groupS=m_pLink->Get();
 	oldMode=groupS->Xspec.GetModo8bit();
-	if(oldMode!=mode){
+	if(oldMode!=mode){     
 		groupS->Xspec.SetModo8bit(mode);
 		groupS->AdcSetMode(groupS->Xspec.GetModo8bit());//Cambio la distribuzione 
 	}	
-	else return;
+	else return;  
 	if (mode){
 		m_mode8bit=true;
 #ifdef DOPPIO 

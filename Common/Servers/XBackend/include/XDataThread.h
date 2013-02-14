@@ -59,7 +59,7 @@ public:
 	*/
     void run();
 
-	Semaphore StartSem,StopSem;
+	Semaphore StartSem, StopSem, StartSemTp;
 	
 protected:
 	bool ciclo;
