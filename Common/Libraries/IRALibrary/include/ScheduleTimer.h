@@ -56,10 +56,10 @@ public:
 	bool init();
 	
 	/**
-	 * This command will schedule a new timeout event based on a absolut time (oneshot) or based an absolut time
+	 * This command will schedule a new timeout event based on a absolute time (one-shot) or based an absolute time
 	 * and an interval.
 	 * @param callBack pointer to the function that should be called back to handle the event
-	 * @param timeMark absolut time mark, if zero and interval is zero a failure is returned, if interval is not zero it is considered to be "now".
+	 * @param timeMark absolute time mark, if zero and interval is zero a failure is returned, if interval is not zero it is considered to be "now".
 	 * @param interval if non zero the event, after the first time is re-scheduled with this interval
 	 * @param param parameter that is passed to the event handler
 	 * @param cleanup if not null the function will be called when the parameter is not needed any more. The argument of the function is the pointer to the parameter. This allows the user to free
@@ -71,23 +71,40 @@ public:
 	/**
 	 * This command cancel an event based on its start time. If two or more events have the same time
 	 * it will be canceled the first scheduled. 
-	 * @param time time stamp that describe the event.
-	 * @return true if the operation was succesful
+	 * @param time time stamp that describes the event.
+	 * @return true if the operation was successful
 	 */
 	bool cancel(const ACS::Time& time);
+
+	/**
+	 * This command cancel an event based on its position inside the scheduled events queue.
+	 * @param pos position of the event inside the queue, first element is the zero
+	 * @return true if the operation was successful
+	 */
+	bool cancel(const unsigned& pos);
 		
 	/**
 	 * This command cancel all the events.
-	 * @return true if the operation was succesful
+	 * @return true if the operation was successful
 	 */
 	bool cancelAll();
 	
+	/**
+	 * This command allows to scroll the scheduled events.
+	 * @param index indicates the position of the event that must be returned, on exit it will point to the next element
+	 * @param time  epoch of the event
+	 * @param interval gap between two execution of the event
+	 * @param parameter information of the event
+	 * @return true if the event could be found
+	 */
+	bool getNextEvent(unsigned &index,ACS::Time& time,ACS::TimeInterval &interval,const void *&parameter);
+
 private:
 	/**
 	 * This class implements the method <i>handle_timeout()</i> that will be called by the timer when the
 	 * events is issued.
 	 */
-	class EventHandler: virtual public ACE_Event_Handler {
+	class EventHandler:  public ACE_Event_Handler {
 	public:
 		/**
 		 * Constructor
@@ -101,7 +118,7 @@ private:
 		 */
 		~EventHandler();
 		/**
-		 * Called when a timeout has to handled
+		 * Called when a timeout has to be handled
 		 * @param time current time
 		 * @param param extra parameter from the schedule timer.
 		 */

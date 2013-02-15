@@ -217,13 +217,13 @@ public:
 
 	/**
 	 * This method allows the client to interface the component by sending text commands. The command is parsed and executed according the
-	 * defined command syntax and grammar. This method is required to implement the <i>Managment::CommandInterpreter</i> interface.
+	 * defined command syntax and grammar. This method is required to implement the <i>Management::CommandInterpreter</i> interface.
      * @throw CORBA::SystemException
-	 * @throw ManagementErrors::CommandLineErrorEx 
-	 * @param configCommand this string contains the string that will be executed
-	 * @return  answer  the string that reports the command execution results or in case, errors
+	 * @param cmd this string contains the string that will be executed
+	 * @param  answer  the string that reports the command execution results or in case, errors
+	 * @return true if the command was executed correctly, false otherwise
 	 */
-    virtual char * command(const char *configCommand) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);    
+    virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
     
     /**
      * Call this function to set the current time (from the local computer) into the backend. 

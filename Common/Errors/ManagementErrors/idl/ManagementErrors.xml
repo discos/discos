@@ -49,16 +49,13 @@
 	<Member name="FileName" type="string" description="Name of the aborted file" />
 </ErrorCode>
 
-<ErrorCode name="CommandLineError" shortDescription="Error during the execution of a command line instruction" description="">
-	<Member name="Command" type="string" description="Reports the command that fails to execute" />
-	<Member name="ErrorMessage" type="string" description="Describes the cause of the error" />
+<ErrorCode name="ScheduleProcedureError" shortDescription="A procedure could not be completed" description="">
+	<Member name="Procedure" type="string" description="Reports the name of the procedure that fails to execute" />
 </ErrorCode>
 
-<ErrorCode name="ProcedureError" shortDescription="Error during the execution of complex procedure" description="">
+<ErrorCode name="BackendProcedureError" shortDescription="A backend configuration procedure could not be completed" description="">
 	<Member name="Procedure" type="string" description="Reports the name of the procedure that fails to execute" />
-	<Member name="ErrorMessage" type="string" description="Describes the cause of the error" />
-	<Member name="Command" type="string" description="Reports the command that fails to execute" />	
-	<Member name="Line" type="long" description="Stores the line number of the command that caused the procedure to fail" />
+	<Member name="Message" type="string" description="The associated error message" />
 </ErrorCode>
 
 <ErrorCode name="ConfigurationError" shortDescription="Error during subsystem configuration" description="">
@@ -73,6 +70,7 @@
 
 <ErrorCode name="ProcedureFileLoadingError" shortDescription="Error occurred while loading a procedure file" description="">
 	<Member name="FileName" type="string" description="report the name of the file" />
+	<Member name="Reason" type="string" description="report the reason of the error" />
 </ErrorCode>
 
 <ErrorCode name="CustomLoggerIOError" shortDescription="Error on logging I/O" description="">

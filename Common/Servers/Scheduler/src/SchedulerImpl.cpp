@@ -171,14 +171,13 @@ ACS::doubleSeq *SchedulerImpl::systemTemperature() throw (CORBA::SystemException
 	return out;
  }
  
-char * SchedulerImpl::command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean SchedulerImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
 {
-	try {
-		return CORBA::string_dup((const char *)m_core->command(cmd)); 
-	}
-	catch (ManagementErrors::CommandLineErrorExImpl& ex) {
-		throw ex.getCommandLineErrorEx();
-	}
+	IRA::CString out;
+	bool res;
+	res=m_core->command(cmd,out);
+	answer=CORBA::string_dup((const char *)out);
+	return res;
 }
 
 void SchedulerImpl::stopSchedule() throw (CORBA::SystemException)

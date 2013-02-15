@@ -17,7 +17,6 @@ namespace SimpleParser {
 template<class OBJ,_sp_const_function CONST_SPEC,class RT,class A0,class A1,class A2> class function3: public _SP_FUNCTOR
 {
 public:
-	enum {arity=3};
 	typedef typename RET<RT>::return_type return_type;
 	typedef typename RET<RT>::argument return_argument;
 	typedef typename A0::argument arg0;
@@ -30,7 +29,7 @@ public:
 	typedef return_type (OBJ::*const_func_type)(param0,param1,param2) const;
 	typedef typename conditional<CONST_SPEC,const_func_type,normal_func_type>::type func_type;
 	
-	function3(OBJ *object, func_type func) : _SP_FUNCTOR(object),m_func(func) {};
+	function3(OBJ *object, func_type func) : _SP_FUNCTOR(object,3),m_func(func) {};
 	return_type operator()(arg0& pp0,arg1& pp1,arg2& pp2) const throw (ACSErr::ACSbaseExImpl) {
 		return (*_SP_FUNCTOR::m_obj.*m_func)( pp0,pp1,pp2 ); //can throw a generic exception
 	}
@@ -94,7 +93,6 @@ protected:
 template<class OBJ,_sp_const_function CONST_SPEC,class A0,class A1,class A2> class function3<OBJ,CONST_SPEC,void_type,A0,A1,A2>: public _SP_FUNCTOR
 {
 public:
-	enum {arity=3};
 	typedef typename RET<void_type>::return_type return_type;
 	typedef typename RET<void_type>::argument return_argument;
 	typedef typename A0::argument arg0;
@@ -107,7 +105,7 @@ public:
 	typedef return_type (OBJ::*const_func_type)(param0,param1,param2) const;
 	typedef typename conditional<CONST_SPEC,const_func_type,normal_func_type>::type func_type;
 	
-	function3(OBJ *object, func_type func) : _SP_FUNCTOR(object),m_func(func) {};
+	function3(OBJ *object, func_type func) : _SP_FUNCTOR(object,3),m_func(func) {};
 	void  operator()(arg0& pp0,arg1& pp1,arg2& pp2) const throw (ACSErr::ACSbaseExImpl) {
 		(*_SP_FUNCTOR::m_obj.*m_func)( pp0,pp1,pp2 ); //can throw a generic exception
 	}

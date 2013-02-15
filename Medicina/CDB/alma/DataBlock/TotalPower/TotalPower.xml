@@ -13,10 +13,10 @@
 	<beams>7</beams>
  	<bandWidth>2350.0</bandWidth>
  	<attenuation>10.0</attenuation>		
-	<sections_inputs>0 1 2 3 4 5 6 7 8 9 10 11 12 13</sections_inputs>
-	<polarizations>L R L R L R L R L R L R L R</polarizations>
-	<feed>2 2 3 3 4 4 5 5 6 6 0 0 1 1</feed>
-	<IF>0 1 0 1 0 1 0 1 0 1 0 1 0 1</IF>
+	<sections_inputs>0 1 2 3</sections_inputs>
+	<polarizations>L R L R</polarizations>
+	<feed>0 0 1 1</feed>
+	<IF>0 1 0 1</IF>
 </Configuration>
 
 <Configuration>

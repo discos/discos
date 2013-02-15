@@ -3,7 +3,6 @@
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: SchedulerImpl.h,v 1.20 2011-06-21 16:39:52 a.orlati Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
@@ -141,11 +140,11 @@ public:
 	 * This method implements the command line interpreter. The interpreter allows to ask for services or to issue commands
 	 * to the control system by human readable command lines.
 	 * @throw CORBA::SystemException
-	 * @throw ManagementErrors::CommandLineErrorEx
 	 * @param cmd string that contains the command line
-	 * @return the string that contains the answer to the command.
+	 * @param answer contains the answer to the command
+	 * @return the result of the command execution
 	 */
-	virtual char * command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);
+	virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
 	
 	/**
 	 * This method allow to change the name of the current log file.

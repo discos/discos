@@ -12,6 +12,10 @@ using namespace Schedule;
 #define PROCEDURE_SEPARATOR ':'
 #define PROCEDURE_START '{'
 #define PROCEDURE_STOP '}'
+#define PROCEDURE_ARG_OPEN '('
+#define PROCEDURE_ARG_CLOSE ')'
+#define PROCEDURE_NAME_ARG_SEPARATOR '='
+#define PROCEDURE_ARGS_SEPARATOR  ','
 #define PROJECT "PROJECT:"
 #define OBSERVER "OBSERVER:"
 #define SCANLAYOUT "SCANLAYOUT:"
@@ -343,11 +347,12 @@ bool CLayoutList::getScanLayout(const IRA::CString& layoutName,ACS::stringSeq& l
 CProcedureList::CProcedureList(const IRA::CString& path,const IRA::CString& fileName) : CBaseSchedule(path,fileName)
 {
 	m_procedure.clear();
-	TRecord *tmp=new TRecord;
+	/*TRecord *tmp=new TRecord;
 	// add the NULL procedure.........in order to allow for the nil
 	tmp->procName=_SCHED_NULLTARGET;
 	tmp->proc.clear();
-	m_procedure.push_back(tmp);
+	tmp->args=0;
+	m_procedure.push_back(tmp);*/
 	m_started=false;
 	m_currentRecord=NULL;	
 }
@@ -373,7 +378,8 @@ bool CProcedureList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IR
 	IRA::CString workLine=line;
 	workLine.RTrim();
 	workLine.LTrim();
-	IRA::CString proc;
+	IRA::CString orig,proc;
+	WORD args;
 	if (m_started) { // if the procedure is started
 		if (workLine.Find(PROCEDURE_STOP)>=0) { // if the end bracket is found...close the procedure parsing
 			m_procedure.push_back(m_currentRecord);
@@ -386,21 +392,46 @@ bool CProcedureList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IR
 	}
 	else {
 		int start=0;
-		if (!IRA::CIRATools::getNextToken(workLine,start,PROCEDURE_START,proc)) {  // get the procedure name
+		if (!IRA::CIRATools::getNextToken(workLine,start,PROCEDURE_START,orig)) {  // get the procedure name
 			errorMsg="name of the procedure missing or incorrect";
 			return false;
 		}
 		if (workLine[workLine.GetLength()-1]!=PROCEDURE_START) { // check the presence of open bracket
 			errorMsg="could not find the procedure start symbol (open bracket)";
 			return false;
-		}	
+		}
+		orig.RTrim();
+		if (!extractArgument(orig,proc,args,errorMsg)) return false;
 		m_currentRecord=new TRecord;
 		m_started=true;
-		proc.RTrim();
 		m_currentRecord->line=lnNumber;
 		m_currentRecord->procName=proc;
+		m_currentRecord->args=args;
 	}
 	return true;	
+}
+
+bool CProcedureList::extractArgument(const IRA::CString& orig,IRA::CString& proc,WORD& args,IRA::CString& errorMsg)
+{
+	int start;
+	int stop=0;
+	IRA::CString temp;
+	args=0;
+	if ((start=orig.Find(PROCEDURE_ARG_OPEN))<0) {
+		proc=orig;
+		return true;
+	}
+	else 	{
+		if ((stop=orig.Find(PROCEDURE_ARG_CLOSE))<0) {
+			proc=orig;
+			errorMsg="bracket not matched in procedure argument";
+			return false;
+		}
+		temp=orig.Mid(start+1,stop-(start+1));
+		args=temp.ToLong();
+		proc=orig.Left(start);
+		return true;
+	}
 }
 
 bool CProcedureList::checkConsistency(DWORD& line,IRA::CString& errMsg)
@@ -418,12 +449,13 @@ bool CProcedureList::checkConsistency(DWORD& line,IRA::CString& errMsg)
 	 return true;
 }
 
-bool CProcedureList::getProcedure(const IRA::CString& conf,std::vector<IRA::CString>& proc)
+bool CProcedureList::getProcedure(const IRA::CString& conf,std::vector<IRA::CString>& proc,WORD& args)
 {	
 	TIterator p;
 	for(p=m_procedure.begin();p<m_procedure.end();p++) {
 		if ((*p)->procName==conf) {
 			proc=(*p)->proc;
+			args=(*p)->args;
 			return true;
 		}
 	}
@@ -431,7 +463,7 @@ bool CProcedureList::getProcedure(const IRA::CString& conf,std::vector<IRA::CStr
 	return false;
 }
 
-bool CProcedureList::getProcedure(const IRA::CString& conf,ACS::stringSeq& proc)
+bool CProcedureList::getProcedure(const IRA::CString& conf,ACS::stringSeq& proc,WORD& args)
 {
 	TIterator p;
 	for(p=m_procedure.begin();p<m_procedure.end();p++) {
@@ -441,6 +473,7 @@ bool CProcedureList::getProcedure(const IRA::CString& conf,ACS::stringSeq& proc)
 			for (WORD s=0;s<procLen;s++) {
 				proc[s]=(*p)->proc[s];
 			}
+			args=(*p)->args;
 			return true;
 		}
 	}
@@ -448,15 +481,39 @@ bool CProcedureList::getProcedure(const IRA::CString& conf,ACS::stringSeq& proc)
 	return false;	
 }
 
-bool CProcedureList::checkProcedure(const IRA::CString& conf)
+bool CProcedureList::getProcedure(const WORD& pos,IRA::CString& conf,ACS::stringSeq& proc,WORD& args)
 {
-	TIterator i;	
+	if (pos>m_procedure.size()) {
+		m_lastError.Format("Procedure does not exist %d",pos);
+		return false;
+	}
+	TIterator p=m_procedure.begin()+pos;
+	WORD procLen=(*p)->proc.size();
+	proc.length(procLen);
+	for (WORD s=0;s<procLen;s++) {
+		proc[s]=(*p)->proc[s];
+	}
+	conf=(*p)->procName;
+	args=(*p)->args;
+	return true;
+}
+
+
+bool CProcedureList::checkProcedure(const IRA::CString& conf,WORD args)
+{
+	TIterator i;
+	IRA::CString token;
+	int start=0;
+	IRA::CIRATools::getNextToken(conf,start,PROCEDURE_NAME_ARG_SEPARATOR,token);
 	for (i=m_procedure.begin();i<m_procedure.end();i++) {
-		if ((*i)->procName==conf) {
-			return true;
+		if ((*i)->procName==token) {
+			if (args==(*i)->args) {
+				return true;
+			}
+			else return false;
 		}
 	}
-	return false;	
+	return true;
 }
 //*****************************************************************************************************************************************************
 
@@ -753,7 +810,7 @@ bool CScanList::parseSidereal(const IRA::CString& val,Antenna::TTrackingParamete
 		else if ((frame==Antenna::ANT_GALACTIC) && (ok)) {
 			if (frameOpen || offFrameOpen) {
 				errMsg="wrong galactic format";
-				return false;  // if the frame has allready been expressed, raise an error;
+				return false;  // if the frame has already been expressed, raise an error;
 			}
 			scan->frame=Antenna::ANT_GALACTIC;
 			frameOpen=true;
@@ -1378,7 +1435,7 @@ bool CScanList::string2ScanType(const IRA::CString& val,Management::TScanTypes& 
 
 CSchedule::CSchedule(const IRA::CString& path,const IRA::CString& fileName) : CBaseSchedule(path,fileName),m_projectName(""),m_observer(""),
 	m_scanList(""),m_configList(""),m_backendList(""),m_layoutFile(""),m_scanListUnit(NULL),m_preScanUnit(NULL),m_postScanUnit(NULL),m_backendListUnit(NULL),m_layoutListUnit(NULL),
-	m_mode(LST),m_repetitions(0),m_scanTag(-1),m_modeDone(false),m_initProc(_SCHED_NULLTARGET)
+	m_mode(LST),m_repetitions(0),m_scanTag(-1),m_modeDone(false),m_initProc(_SCHED_NULLTARGET),m_initProcArgs(0)
 {
 	m_schedule.clear();
 	m_currentScanDef.valid=false;
@@ -1448,17 +1505,17 @@ bool CSchedule::readAll(bool check)
 	return true;
 }
 
-bool CSchedule::getInitProc(IRA::CString& procName,ACS::stringSeq& proc)
+bool CSchedule::getInitProc(IRA::CString& procName)
 {
 	procName=m_initProc;
-	if (m_initProc==_SCHED_NULLTARGET) {
+	/*if (m_initProc==_SCHED_NULLTARGET) {
 		proc.length(0);
 		return true;
 	}
-	if (!m_preScanUnit->getProcedure(m_initProc,proc)) {		
+	if (!m_preScanUnit->getProcedure(m_initProc,proc,args)) {
 		m_lastError.Format("Unknown procedure %s",(const char *)m_initProc);
 		return false;
-	}
+	}*/
 	return true;
 }
 
@@ -1532,8 +1589,8 @@ IRA::CString CSchedule::getIdentifiers(const DWORD& counter)
 	return scan;
 }
 
-bool CSchedule::getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,double& duration,DWORD& scan,IRA::CString& pre,bool& preBlocking,IRA::CString& post,bool& postBlocking,
-		IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool& rewind)
+bool CSchedule::getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,double& duration,DWORD& scan,IRA::CString& pre,bool& preBlocking,WORD& preArgs,IRA::CString& post,
+		bool& postBlocking,WORD& postArgs,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool& rewind)
 {
 	if ((m_mode!=SEQ) && (m_mode!=TIMETAGGED)) {
 		m_lastError.Format("The current is not a sequence schedule");
@@ -1554,6 +1611,8 @@ bool CSchedule::getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,dou
 			post=(*p)->postScan;
 			preBlocking=(*p)->preScanBlocking;
 			postBlocking=(*p)->postScanBlocking;
+			preArgs=(*p)->preScanArgs;
+			postArgs=(*p)->postScanArgs;
 			bckProc=(*p)->backendProc;
 			wrtInstance=(*p)->writerInstance;
 			suffix=(*p)->suffix;
@@ -1572,6 +1631,8 @@ bool CSchedule::getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,dou
 	post=(*p)->postScan;
 	preBlocking=(*p)->preScanBlocking;
 	postBlocking=(*p)->postScanBlocking;
+	preArgs=(*p)->preScanArgs;
+	postArgs=(*p)->postScanArgs;
 	bckProc=(*p)->backendProc;
 	wrtInstance=(*p)->writerInstance;
 	suffix=(*p)->suffix;
@@ -1583,12 +1644,12 @@ bool CSchedule::getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,dou
 
 bool CSchedule::getSubScan_SEQ(TRecord& rec)
 {
-	return getSubScan_SEQ(rec.counter,rec.scanid,rec.subscanid,rec.duration,rec.scan,rec.preScan,rec.preScanBlocking,rec.postScan,rec.postScanBlocking,rec.backendProc,rec.writerInstance,rec.suffix,
+	return getSubScan_SEQ(rec.counter,rec.scanid,rec.subscanid,rec.duration,rec.scan,rec.preScan,rec.preScanBlocking,rec.preScanArgs,rec.postScan,rec.postScanBlocking,rec.postScanArgs,rec.backendProc,rec.writerInstance,rec.suffix,
 			rec.layout,rec.rewind);
 }
 
 bool CSchedule::getSubScan_LST(ACS::TimeInterval& lst,DWORD& counter,DWORD&scanid,DWORD& subscanid,double& duration,DWORD& scan,
-		IRA::CString& pre,bool& preBlocking,IRA::CString& post,bool& postBlocking,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool& rewind)
+		IRA::CString& pre,bool& preBlocking,WORD& preArgs,IRA::CString& post,bool& postBlocking,WORD& postArgs,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool& rewind)
 {
 	if (m_mode!=LST) {
 		m_lastError.Format("The current schedule is not LST based");
@@ -1612,6 +1673,8 @@ bool CSchedule::getSubScan_LST(ACS::TimeInterval& lst,DWORD& counter,DWORD&scani
 				post=(*p)->postScan;
 				preBlocking=(*p)->preScanBlocking;
 				postBlocking=(*p)->postScanBlocking;
+				preArgs=(*p)->preScanArgs;
+				postArgs=(*p)->postScanArgs;
 				bckProc=(*p)->backendProc;
 				wrtInstance=(*p)->writerInstance;
 				suffix=(*p)->suffix;
@@ -1639,6 +1702,8 @@ bool CSchedule::getSubScan_LST(ACS::TimeInterval& lst,DWORD& counter,DWORD&scani
 	post=(*p)->postScan;
 	preBlocking=(*p)->preScanBlocking;
 	postBlocking=(*p)->postScanBlocking;	
+	preArgs=(*p)->preScanArgs;
+	postArgs=(*p)->postScanArgs;
 	bckProc=(*p)->backendProc;
 	wrtInstance=(*p)->writerInstance;	
 	suffix=(*p)->suffix;
@@ -1649,8 +1714,8 @@ bool CSchedule::getSubScan_LST(ACS::TimeInterval& lst,DWORD& counter,DWORD&scani
 
 bool CSchedule::getSubScan_LST(TRecord& rec)
 {
-	return getSubScan_LST(rec.lst,rec.counter,rec.scanid,rec.subscanid,rec.duration,rec.scan,rec.preScan,rec.preScanBlocking,rec.postScan,rec.postScanBlocking,rec.backendProc,rec.writerInstance,rec.suffix,
-			rec.layout,rec.rewind);
+	return getSubScan_LST(rec.lst,rec.counter,rec.scanid,rec.subscanid,rec.duration,rec.scan,rec.preScan,rec.preScanBlocking,rec.preScanArgs,rec.postScan,rec.postScanBlocking,rec.preScanArgs,
+			rec.backendProc,rec.writerInstance,rec.suffix,rec.layout,rec.rewind);
 }
 
 bool CSchedule::checkConsistency(DWORD& line,IRA::CString& errMsg)
@@ -1658,7 +1723,7 @@ bool CSchedule::checkConsistency(DWORD& line,IRA::CString& errMsg)
 	ACS::TimeInterval lst=0;
 	TIterator p,i;
 	// check that the initialization procedure has been defined
-	if (!m_postScanUnit->checkProcedure(m_initProc)) {
+	if (!m_postScanUnit->checkProcedure(m_initProc,m_initProcArgs)) {
 		line=0;
 		errMsg.Format("schedule initialization procedure %s is not defined",(const char *)m_initProc);
 		return false;
@@ -1687,14 +1752,14 @@ bool CSchedule::checkConsistency(DWORD& line,IRA::CString& errMsg)
 			errMsg.Format("scan %d is not defined",(*p)->scan);
 			return false;
 		}
-		if (!m_preScanUnit->checkProcedure((*p)->preScan)) {
+		if (!m_preScanUnit->checkProcedure((*p)->preScan,(*p)->preScanArgs)) {
 			line=(*p)->line;
-			errMsg.Format("pre scan procedure %s is not defined",(const char *)(*p)->preScan);
+			errMsg.Format("arguments number does not match in pre scan procedure %s",(const char *)(*p)->preScan);
 			return false;
 		}
-		if (!m_postScanUnit->checkProcedure((*p)->postScan)) {
+		if (!m_postScanUnit->checkProcedure((*p)->postScan,(*p)->postScanArgs)) {
 			line=(*p)->line;
-			errMsg.Format("post scan procedure %s is not defined",(const char *)(*p)->postScan);
+			errMsg.Format("arguments number does not match in post scan procedure %s",(const char *)(*p)->postScan);
 			return false;
 		}
 		if (!m_backendListUnit->checkBackend((*p)->backendProc)) {
@@ -1829,7 +1894,10 @@ bool CSchedule::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 				errorMsg="cannot parse schedule initialization procedure";
 				return false;
 			}
-			else return true;
+			else {
+				m_initProcArgs=getProcedureArgs(m_initProc);
+				return true;
+			}
 		}
 		else { // check the schedule
 			return parseScans(line,lnNumber,errorMsg);
@@ -1953,8 +2021,10 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 			p->duration=duration;
 			p->preScanBlocking=isSync(pre);
 			p->preScan=IRA::CString(pre);
+			p->preScanArgs=getProcedureArgs(p->preScan);
 			p->postScanBlocking=isSync(post);
 			p->postScan=IRA::CString(post);
+			p->postScanArgs=getProcedureArgs(p->postScan);
 			p->backendProc=m_currentScanDef.backendProc;
 			p->writerInstance=m_currentScanDef.writerInstance;
 			p->layout=m_currentScanDef.layout;
@@ -1989,8 +2059,10 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 			p->duration=duration;
 			p->preScanBlocking=isSync(pre);
 			p->preScan=IRA::CString(pre);
+			p->preScanArgs=getProcedureArgs(p->preScan);
 			p->postScanBlocking=isSync(post);
 			p->postScan=IRA::CString(post);
+			p->postScanArgs=getProcedureArgs(p->postScan);
 			p->backendProc=m_currentScanDef.backendProc;
 			p->writerInstance=m_currentScanDef.writerInstance;
 			p->layout=m_currentScanDef.layout;
@@ -2012,6 +2084,19 @@ bool CSchedule::isComplete()
 		m_lastError.Format("Some mandatory keywords of the schedule are missing");
 		return false;
 	}
+}
+
+WORD CSchedule::getProcedureArgs(const IRA::CString& proc)
+{
+	IRA::CString temp;
+	WORD args=0;
+	int start=proc.Find(PROCEDURE_NAME_ARG_SEPARATOR);
+	if (start<0) return 0;
+	start++;
+	while (IRA::CIRATools::getNextToken(proc,start,PROCEDURE_ARGS_SEPARATOR,temp)) {
+		args++;
+	}
+	return args;
 }
 
 bool CSchedule::isSync(char *procName) 

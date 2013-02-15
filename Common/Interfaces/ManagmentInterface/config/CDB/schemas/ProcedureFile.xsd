@@ -26,6 +26,7 @@
 				<xs:element ref="body"/>
 			</xs:choice>
 			<xs:attribute name="name" type="xs:string" use="required"/>
+			<xs:attribute name="args" type="xs:int" use="optional" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="body" type="xs:string"/>

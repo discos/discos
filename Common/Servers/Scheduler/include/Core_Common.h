@@ -65,14 +65,14 @@ static void enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backen
  * It allows to send a configuration procedure to a backend.
  * @param backend reference to the backend
  * @param backendError will be returned back true if an error occurred in the communication to backend component
+ * @param name name of the procedure
  * @param procedure sequence of commands contained by the configuration procedure
- * @throw ManagementErrors::ProcedureErrorExImpl
+ * @throw ManagementErrors::BackendProcedureErrorExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
  * @throw ComponentErrors::UnexpectedExImpl
  */
-static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendError,const std::vector<IRA::CString>& procedure) throw (ManagementErrors::ProcedureErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
-
+static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendError,const IRA::CString& name, const std::vector<IRA::CString>& procedure) throw (
+		ManagementErrors::BackendProcedureErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
 
 /**
  * This command set up the data receiver with some parameters.
@@ -190,7 +190,8 @@ static void antennaNCHandler(Antenna::AntennaDataBlock antennaData,void *handler
 /**
  * used as wrapper to function that are in charge of forwarding commands to other packages  
 */
-IRA::CString remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par) throw (ParserErrors::ExecutionErrorExImpl,ParserErrors::PackageErrorExImpl); 
+bool remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl);
+
 
 
 #endif /*CORE_COMMON_H_*/

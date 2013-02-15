@@ -50,6 +50,7 @@
 }
 
 using namespace ComponentErrors;
+using namespace IRA;
 
 static char *rcsId="@(#) $Id: ObservatoryImpl.cpp,v 1.6 2011-06-21 16:39:05 a.orlati Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);

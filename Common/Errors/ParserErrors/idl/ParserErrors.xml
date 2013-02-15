@@ -30,8 +30,12 @@
 
 <ErrorCode name="TooManyParameters" shortDescription="The function does not requires so many parameters" description=""/>
 
-<ErrorCode name="ExecutionError" shortDescription="Error during command execution" description="">
-	<Member name="Command" type="string" description="The command that caused the error" />
+<ErrorCode name="SystemCommandError" shortDescription="System command could not be executed" description="">
+	<Member name="SystemCommand" type="string" description="The command that caused the error" />
+</ErrorCode>
+
+<ErrorCode name="RemoteCommandError" shortDescription="Remote command could not be completed" description="">
+	<Member name="RemoteCommandMessage" type="string" description="The error message associated to the error" />
 </ErrorCode>
 
 <ErrorCode name="ProcedureError" shortDescription="Error during procedure execution" description="">

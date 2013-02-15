@@ -3,7 +3,7 @@
 <ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<Procedure name="setupCCC">
+<Procedure name="setupCCC" args="0">
 <body>
 	antennaSetup=CCC
 	receiversSetup=CCC
@@ -15,7 +15,7 @@
 </body>	
 </Procedure>
 
-<Procedure name="setupKKC">
+<Procedure name="setupKKC" args="0">
 <body>
 	antennaSetup=KKC
 	receiversSetup=KKC
@@ -25,7 +25,7 @@
 </body>
 </Procedure>
 
-<Procedure name="setupXXP">
+<Procedure name="setupXXP" args="0">
 <body>
 	antennaSetup=XXP
 	receiversSetup=XXP
@@ -37,7 +37,7 @@
 </body>
 </Procedure>
 
-<Procedure name="setupCCCL">
+<Procedure name="setupCCCL" args="0">
 <body>
 	antennaSetup=CCC
 	receiversSetup=CCC

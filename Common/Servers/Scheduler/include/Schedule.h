@@ -179,7 +179,6 @@ protected:
 	virtual bool parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CString& errorMsg);
 };
 
-
 class CProcedureList: public virtual CBaseSchedule
 {
 public:
@@ -198,27 +197,38 @@ public:
 	/**
 	 * This method is called to get a procedure.
 	 * @param conf the name of the procedure.
-	 * @param proc vector of string containing one command each. if the array is empty, no
-	 *                configuration is required.
+	 * @param proc vector of string containing one command each. if the array is empty, no configuration is required.
+	 * @param args number of arguments required by the configuration procedure
 	 * @return false if the procedure could not be found.
 	 */
-	virtual bool getProcedure(const IRA::CString& conf,std::vector<IRA::CString>& proc);
+	virtual bool getProcedure(const IRA::CString& conf,std::vector<IRA::CString>& proc,WORD& args);
 	
 	/**
 	 * This method is called to get a procedure.
 	 * @param conf the name of the procedure.
 	 * @param proc sequence of string containing one command each. if the string sequence is empty, no
 	 *                configuration is required.
+	 * @param args number of arguments required by the configuration procedure
 	 * @return false if the procedure could not be found.
 	 */	
-	virtual bool getProcedure(const IRA::CString& conf,ACS::stringSeq& proc);
+	virtual bool getProcedure(const IRA::CString& conf,ACS::stringSeq& proc,WORD& args);
 	
 	/**
-	 * Checks the existence of a procedure
-	 * @param conf configuration we are checking
-	 * @return true if the scan exists, false if it doesn't.
+	 * This method is called to get the procedure at a given position
+	 * @param pos position of the procedure
+	 * @param conf name of the procedure
+	 * @param args number of arguments required by the configuration procedure
+	 * @param proc sequence of string containing one command each.
 	 */
-	virtual bool checkProcedure(const IRA::CString& conf);
+	virtual bool getProcedure(const WORD& pos,IRA::CString& conf,ACS::stringSeq& proc,WORD& args);
+
+	/**
+	 * Checks the procedure, if the procedure exists the number of arguments is checked to coherent .
+	 * @param conf procedure to be checked
+	 * @param args number of expected arguments
+	 * @return true if the procedure exists and the number of argument is ok, or if the procedure does not exist. False otherwise
+	 */
+	virtual bool checkProcedure(const IRA::CString& conf,WORD args);
 	
 protected:
 	
@@ -226,6 +236,7 @@ protected:
 		DWORD line;
 		IRA::CString procName;
 		std::vector<IRA::CString> proc;
+		WORD args; // number of arguments required by the procedure
 	};
 	
 	bool m_started;
@@ -251,6 +262,16 @@ protected:
 	 * @return false if the line contains parsing errors
 	 */
 	virtual bool parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CString& errorMsg);
+
+	/**
+	 * Called to extract the number of expected arguments from the name of the procedure
+	 * @param orig original name of the procedure
+	 * @param proc name of the procedure without the arguments indication
+	 * @param args number of arguments
+	 * @param errorMsg error message in case the operation has failed
+	 * @return false it the
+	 */
+	virtual bool extractArgument(const IRA::CString& orig,IRA::CString& proc,WORD& args,IRA::CString& errorMsg);
 };
 
 class CBackendList: public virtual CBaseSchedule
@@ -513,8 +534,10 @@ public:
 		IRA::CString layout;					/*!< name of macro that defines the scan layout, the name must be present in the layoutfile */
 		DWORD scan;                             /*!< index to the scan list that identifies the scan parameters */
 		IRA::CString preScan;              /*!< prescan procedure name */
+		WORD preScanArgs;               /*!< number of prescan procedure expected arguments */
 		bool preScanBlocking;         /*!< true if the prescan procedure as to be blocking */
 		IRA::CString postScan;            /*!< post scan procedure name */
+		WORD postScanArgs;            /*!< number of postcan procedure expected arguments */
 		bool postScanBlocking;       /*!< true if the postscan procedure has to be blocking */
 		IRA::CString backendProc;    /*!< name of the configuration procedure of the backend */
 		IRA::CString writerInstance; /*!< name of the component in charge of receiving the data from the backend */
@@ -573,10 +596,9 @@ public:
 	
 	/**
 	 * Called to retrieve the initialization procedure
-	 * @param procName name of the procedure
-	 * @param proc sequence of strings that stores the procedure, one command each
+	 * @param procName name of the procedure, included the parameter list
 	 */
-	bool getInitProc(IRA::CString& procName,ACS::stringSeq& proc);
+	bool getInitProc(IRA::CString& procName);
 	
 	/**
 	 * Used to retrieve the desired  subscan number.
@@ -625,8 +647,10 @@ public:
 	 * @param scan identifier of the scan (inside the scan list) of the current line (output)
 	 * @param pre identifier of the procedure inside the procedure file to be executed before that scan (output)
 	 * @param preBlocking this flag is true if the end of the pre scan procedure must be waited for (output)
+	 * @param preArgs number of expected parameter of the pre scan procedure
 	 * @param post identifier of the procedure inside the procedure file to be executed after that scan (output)
-	 * @param postBlocking this flag is true if the end of the post scan procedure must be waited for (output) 
+	 * @param postBlocking this flag is true if the end of the post scan procedure must be waited for (output)
+	 * @param postArgs number of expected parameter of the post scan procedure
 	 * @param bckProc identifier of the backend configuration procedure inside the backend file (output)
 	 * @param wrtInstance name of the instance of the storage to be used (output) 
 	 * @param suffix string that will be appended at the end of the file name(output)
@@ -634,8 +658,8 @@ public:
 	 * @param rewind is the scan the first one after a schedule rewind? (output)
 	 * @return true if the line can be returned 
 	 */
-	bool getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,double& duration,DWORD& scan,IRA::CString& pre,bool& preBlocking,IRA::CString& post,bool& postBlocking,
-			IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool &rewind);
+	bool getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,double& duration,DWORD& scan,IRA::CString& pre,bool& preBlocking,WORD& preArgs,IRA::CString& post,bool& postBlocking,
+			WORD& postArgs,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool &rewind);
 	
 	/**
 	 * Used to retrive the desired scan number. This method is a wrapper of the previuos method used to retrieve the informations using a structure.
@@ -656,9 +680,11 @@ public:
 	 * @param duration duration of the returned schedule line (output)
 	 * @param scan identifier of the scan (inside the scan list) of the current line (output)
 	 * @param pre identifier of the procedure inside the procedure file to be executed before that scan (output)
-	 * @param preBlocking this flag is true if the end of the pre scan procedure must be waited for (output) 
+	 * @param preBlocking this flag is true if the end of the pre scan procedure must be waited for (output)
+	 * @param preArgs number of expected parameter of the pre scan procedure
 	 * @param post identifier of the procedure inside the procedure file to be executed after that scan (output)
-	 * @param postBlocking this flag is true if the end of the post scan procedure must be waited for (output) 
+	 * @param postBlocking this flag is true if the end of the post scan procedure must be waited for (output)
+	 * @param postArgs number of expected parameter of the post scan procedure
 	 * @param bck identifier of the backend conf procedure inside the backend file (output)
 	 * @param wrtInstance name of the instance of the storage to be used (output)
 	 * @param suffix string that will be appended at the end of the file name (output)
@@ -667,7 +693,7 @@ public:
 	 * @return true if the line can be returned 
 	 */
 	bool getSubScan_LST(ACS::TimeInterval& lst,DWORD& counter,DWORD&scanid,DWORD& subscanid,double& duration,DWORD& scan,
-			IRA::CString& pre,bool& preBlocking,IRA::CString& post,bool& postBlocking,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool& rewind);
+			IRA::CString& pre,bool& preBlocking,WORD& preArgs,IRA::CString& post,bool& postBlocking,WORD& postArgs,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool& rewind);
 
 	/**
 	 * Used to retrive the desired  line based on start LST. This method is a wrapper of the previuos method used to retrieve the informations using a structure.
@@ -730,6 +756,7 @@ private:
 	long m_scanTag;
 	bool m_modeDone;
 	IRA::CString m_initProc;
+	WORD m_initProcArgs;
 	TSchedule m_schedule;
 	struct {
 		bool valid;
@@ -746,6 +773,12 @@ private:
 	bool parseLST(const IRA::CString& val,ACS::TimeInterval& lst);
 	bool parseUT(const IRA::CString& val,ACS::Time& ut);
 	
+	/**
+	 * @param proc procedure
+	 * @return the number of arguments of a procedure
+	 */
+	WORD getProcedureArgs(const IRA::CString& proc);
+
 	/**
 	 * it checks if the procedure must be executed asynchronously or not. The async character is also cut from the name.
 	 */

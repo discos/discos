@@ -22,10 +22,10 @@
 
 /** 
  * @mainpage IDL Interface documentation of the managment subsystem
- * @date 13/09/2010
- * @version 0.5.0
+ * @date 04/02/2013
+ * @version 0.5.1
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>, 
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.2.0
 */
 
 /**
@@ -35,20 +35,22 @@ module Management  {
 	
 	/**
 	 * This is the interface defines how a command line interpreter looks like. 
-	 * Any component, able to interpret and executes human readable commands, must have implements this interface. 
+	 * Any component, able to interpret and executes human readable commands, must have implemented this interface.
 	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
  	 * Istituto di Radioastronomia, Italia
  	 * <br> 
  	*/
 	interface CommandInterpreter  {
 		/**
-		 * This method can be used to execute a command or to setup a configuration The commands and configurations are given as strings.  
+		 * This method can be used to execute a command or to setup a configuration The commands and configurations are given as strings.
+		 * @attention the implmentation of this method must take care of logging the errors deriving from the execution of the command.
 		 * @throw CORBA::SystemException 
-		 * @throw ManagementErrors::CommandLineErrorEx this error is issued when something goes wrong on the command execution. 
-		 * @param command this string contains the instruction to be executed, the command and the sintax may vary from implementation to implementation
-		 * @return  the string that contains the answer or the result of the succefull command invokation. It must be freed by the caller. 
+		 * @param command this string contains the instruction to be executed, the command and the syntax may vary from implementation to implementation
+		 * @param answer this string contains the answer of the system to the incoming command. It must frred by the caller
+		 * @return  the result of the command, true after a succesful command invokation. false otherwise.
 		 */
-		string  command(in string command) raises (ManagementErrors::CommandLineErrorEx);
+		//string  command(in string command) raises (ManagementErrors::CommandLineErrorEx);
+		boolean command (in string command,out string answer);
 	};	
 	
 	/**

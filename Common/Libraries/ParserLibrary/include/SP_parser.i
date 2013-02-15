@@ -1,10 +1,9 @@
-/* $Id: SP_parser.i,v 1.15 2011-03-28 10:06:40 a.orlati Exp $											*/
-
 #define _SP_MAXLENGTH 20
 #define TIMERIDENTIFIER '!'
+#define PROCEDUREPARAMETER '$'
 
 template <class OBJ>
-void  CParser<OBJ>::run(const IRA::CString& command,IRA::CString& out) throw (ParserErrors::ParserErrorsExImpl)
+void  CParser<OBJ>::run(const IRA::CString& command,IRA::CString& out) throw (ParserErrors::ParserErrorsExImpl,ACSErr::ACSbaseExImpl)
 {
 	IRA::CString instr; 
 	if ((command=="") || (command=="\n")) {
@@ -14,23 +13,48 @@ void  CParser<OBJ>::run(const IRA::CString& command,IRA::CString& out) throw (Pa
 	try {
 		out=executeCommand(command,instr);
 	}
+	catch (ParserErrors::RemoteCommandErrorExImpl& ex) { // note: this is the case an error is found when a remote call is done...the exception is used to signal the error and to transport the corresponding error message
+		out=ex.getRemoteCommandMessage();
+		throw ex;
+	}
 	catch (ParserErrors::ParserErrorsExImpl& ex) {
 		IRA::CString msg;
 		_EXCPT_TO_CSTRING(msg,ex);
 		out=instr+m_errorDelimiter+msg;
 		throw ex;
 	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		IRA::CString msg;
+		_EXCPT_TO_CSTRING(msg,ex);
+		out=instr+m_errorDelimiter+msg;
+		throw ex;
+	}
 }
+
 template <class OBJ>
-void CParser<OBJ>::inject(const IRA::CString& name,const ACS::stringSeq& procedure,_SP_CALLBACK(callBack),const void * callBackParam) throw (ParserErrors::ProcedureErrorExImpl)
+void CParser<OBJ>::runAsync(const IRA::CString& command,_SP_CALLBACK(callBack),const void * callBackParam)  throw (ParserErrors::ParserErrorsExImpl)
 {
-	pushProcedure(name,procedure,callBack,callBackParam);
+	TRule *elem;
+	bool timeTagged;
+	WORD parNum;
+	IRA::CString timeCommand;
+	ACS::Time execTime;
+	ACS::TimeInterval execInterval;
+	IRA::CString inParams[_SP_MAXLENGTH];
+	IRA::CString instr;
+	elem=checkCommand(command,instr,inParams,parNum,timeTagged,timeCommand,execTime,execInterval); // throws exceptions
+	if (elem->m_type==PROCEDURE){
+		pushProcedure(instr,elem->m_procedure,inParams,parNum,callBack,callBackParam); // throws ProcedureErrorExImpl
+	}
+	else {
+		pushCommand(command,elem->m_package,callBack,callBackParam);
+	}
 }
 
 template<class OBJ>
 IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CString& instr) throw (ParserErrors::SyntaxErrorExImpl,ParserErrors::CommandNotFoundExImpl,
-		ParserErrors::NotEnoughParametersExImpl,ParserErrors::ExecutionErrorExImpl,ParserErrors::ProcedureErrorExImpl,ParserErrors::TimeFormatErrorExImpl,ParserErrors::ParserTimerErrorExImpl,
-		ParserErrors::NotSupportedErrorExImpl,ParserErrors::TooManyParametersExImpl)
+		ParserErrors::NotEnoughParametersExImpl,ParserErrors::SystemCommandErrorExImpl,ParserErrors::ProcedureErrorExImpl,ParserErrors::TimeFormatErrorExImpl,ParserErrors::ParserTimerErrorExImpl,
+		ParserErrors::NotSupportedErrorExImpl,ParserErrors::TooManyParametersExImpl,ParserErrors::ConversionErrorExImpl,ParserErrors::PackageErrorExImpl,ParserErrors::RemoteCommandErrorExImpl,ACSErr::ACSbaseExImpl)
 {
 	TRule *elem;
 	WORD outNumber;
@@ -44,20 +68,14 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 	elem=checkCommand(command,instr,inParams,parNum,timeTagged,timeCommand,execTime,execInterval); // throws exceptions
 	if (!timeTagged) {   //sync operations
 		if (elem->m_type==PROCEDURE){
-			pushProcedure(instr,elem->m_procedure); // throws ProcedureErrorExImpl
+			pushProcedure(instr,elem->m_procedure,inParams,parNum); // throws ProcedureErrorExImpl
 			return instr+m_answerDelimiter;  //it informs that the procedure seems to be correct and it will be executed 
 		}	
 		else if (elem->m_type==COMMAND) {
 			// polimorphic cast...allowed because the CFunctor derives from CBaseFunction
 			CFunctor<OBJ> * function = dynamic_cast<CFunctor<OBJ> *>(elem->m_func);
-			try {
-				function->call(inParams,parNum);
-			}
-			catch (ACSErr::ACSbaseExImpl& ex) {
-				_ADD_BACKTRACE(ParserErrors::ExecutionErrorExImpl,err,ex,"CParser::executeCommand()");
-				err.setCommand((const char *)command);
-				throw err;
-			}
+			//try {
+			function->call(inParams,parNum);  //throw ConversionErrorExImpl, ACSbaseExImpl
 			outNumber=function->get(outParams);
 			IRA::CString answer("");
 			if (outNumber>0) {
@@ -68,16 +86,58 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 			}
 			return instr+m_answerDelimiter+answer;
 		}
+		else if (elem->m_type==SYSTEMCALL) {
+			IRA::CString composeCall;
+			composeCall=elem->m_syscall;
+			for (WORD k=0;k<parNum;k++) {
+				composeCall+=" ";
+				composeCall+=inParams[k];
+			}
+			if (system((const char *)composeCall)<0) {
+				_EXCPT(ParserErrors::SystemCommandErrorExImpl,err,"CParser::executeCommand()");
+				err.setSystemCommand((const char *)composeCall);
+				throw err;
+			}
+			return instr+m_answerDelimiter;
+		}
+		else if (elem->m_type==KEYCOMMAND) {
+			if (instr==_SP_TIMETAGGEDQUEUE) {
+				return instr+m_answerDelimiter+showTimeBasedCommands();
+			}
+			if (instr==_SP_TIMETAGGEDQUEUECLEAR) {
+				int pos=inParams[0].ToInt();
+				if (pos<0) {
+					_EXCPT(ParserErrors::ConversionErrorExImpl,impl,"CParser::executeCommand()");
+					throw impl;
+				}
+				if ((pos==0) && (inParams[0]!="0")) {
+					_EXCPT(ParserErrors::ConversionErrorExImpl,impl,"CParser::executeCommand()");
+					throw impl;
+				}
+				flushTimeBasedCommands(pos);
+				return instr+m_answerDelimiter;
+			}
+			if (instr==_SP_TIMETAGGEDQUEUECLEARALL) {
+				flushTimeBasedCommands(-1);
+				return instr+m_answerDelimiter;
+			}
+			else {
+				_EXCPT(ParserErrors::CommandNotFoundExImpl,impl,"CParser::executeCommand()");
+				throw impl;
+			}
+		}
 		else { //REMOTECOMMAND
-			try {
-				_SP_REMOTECALL(pointer)=elem->m_remoteFunc;
-				return (*m_object.*pointer)(command,elem->m_package,elem->m_param);
+			_SP_REMOTECALL(pointer)=elem->m_remoteFunc;
+			IRA::CString answer;
+			bool res=(*m_object.*pointer)(command,elem->m_package,elem->m_param,answer); //throw ParserErrors::PackageErrorExImpl
+			if (res) {
+				return answer;
 			}
-			catch (ParserErrors::ExecutionErrorExImpl& ex) {
-				throw ex;
-			}
-			catch (ParserErrors::PackageErrorExImpl& ex) {
-				throw ex;
+			else {
+				//this is a cheat to pass to the run function the message coming from the remote command execution in case of error and inform the error occurred
+				_EXCPT(ParserErrors::RemoteCommandErrorExImpl,impl,"CParser::executeCommand()");
+				impl.setRemoteCommandMessage((const char *)answer);
+				throw impl;
 			}
 		}
 	}
@@ -91,6 +151,9 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 					_EXCPT(ParserErrors::ParserTimerErrorExImpl,err,"CParser::executeCommand()");
 					throw err;
 				}
+				else {
+					m_timerInitialized=true;
+				}
 			}
 			TTimerJob *job=new TTimerJob(this,timeCommand);  //freed by the timer
 			if (!m_timer.schedule(&timerHandler,execTime,0,job,&timerCleanup)) {
@@ -98,11 +161,14 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 				throw err;
 			}
 		}
-		else if (execInterval!=0) {  //continuos operation
+		else if (execInterval!=0) {  //continuous operation
 			if (!m_timerInitialized) {
 				if (!m_timer.init()) {
 					_EXCPT(ParserErrors::ParserTimerErrorExImpl,err,"CParser::executeCommand()");
 					throw err;
+				}
+				else {
+					m_timerInitialized=true;
 				}
 			}
 			TIMEVALUE now;
@@ -119,7 +185,7 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 
 template<class OBJ>
 typename CParser<OBJ>::TRule *CParser<OBJ>::checkCommand(const IRA::CString& line,IRA::CString& instr,IRA::CString* inParams,WORD& parNum,bool& timeTagged,IRA::CString& timeCommand,ACS::Time& execTime,
-		ACS::TimeInterval& execInterval) const throw (ParserErrors::SyntaxErrorExImpl,ParserErrors::CommandNotFoundExImpl,ParserErrors::NotEnoughParametersExImpl,ParserErrors::TimeFormatErrorExImpl,
+		ACS::TimeInterval& execInterval)  throw (ParserErrors::SyntaxErrorExImpl,ParserErrors::CommandNotFoundExImpl,ParserErrors::NotEnoughParametersExImpl,ParserErrors::TimeFormatErrorExImpl,
 		ParserErrors::NotSupportedErrorExImpl,ParserErrors::TooManyParametersExImpl)
 {
 	IRA::CString timeMark;
@@ -129,7 +195,7 @@ typename CParser<OBJ>::TRule *CParser<OBJ>::checkCommand(const IRA::CString& lin
 		_EXCPT(ParserErrors::SyntaxErrorExImpl,err,"CParser::checkCommand()");
 		throw err;
 	}
-	if ((timeTagged) && (!m_asyncSupport)) {
+	if ((timeTagged) && (!m_levelTwoSupport)) {
 		_EXCPT(ParserErrors::NotSupportedErrorExImpl,err,"CParser::checkCommand()");
 		throw err;
 	}
@@ -139,18 +205,22 @@ typename CParser<OBJ>::TRule *CParser<OBJ>::checkCommand(const IRA::CString& lin
 		_EXCPT(ParserErrors::CommandNotFoundExImpl,err,"CParser::checkCommand()");
 		throw err;
 	}
+	if ((elem->m_type==KEYCOMMAND) && (!m_levelTwoSupport)) {
+		_EXCPT(ParserErrors::NotSupportedErrorExImpl,err,"CParser::checkCommand()");
+		throw err;
+	}
 	if (timeTagged) {
 		if (!parseTime(timeMark,execTime,execInterval)) {
 			_EXCPT(ParserErrors::TimeFormatErrorExImpl,err,"CParser::checkCommand()");
 			throw err;
 		}
 	}
-	if (elem->m_type==COMMAND) {
-		if (result<elem->m_arity) {
+	if ((elem->m_type==COMMAND) || (elem->m_type==PROCEDURE) || (elem->m_type==SYSTEMCALL) || (elem->m_type==KEYCOMMAND)) {
+		if (result<elem->m_inputParametersNumber) {
 			_EXCPT(ParserErrors::NotEnoughParametersExImpl,err,"CParser::checkCommand()");
 			throw err;
 		}
-		if (result>elem->m_arity) {
+		if (result>elem->m_inputParametersNumber) {
 			_EXCPT(ParserErrors::TooManyParametersExImpl,err,"CParser::checkCommand()");
 			throw err;			
 		}
@@ -159,10 +229,16 @@ typename CParser<OBJ>::TRule *CParser<OBJ>::checkCommand(const IRA::CString& lin
 }
 
 template <class OBJ>
-typename CParser<OBJ>::TRule * CParser<OBJ>::locate(const IRA::CString& instr) const
+typename CParser<OBJ>::TRule * CParser<OBJ>::locate(const IRA::CString& instr)
 {
 	typename TRuleSet::const_iterator it;
 	for(it=m_ruleSet.begin(); it!=m_ruleSet.end();it++) {
+		if ((*it)->m_name==instr) {
+			return *it;
+		}
+	}
+	baci::ThreadSyncGuard guard(&m_extraRuleSetMutex);
+	for(it=m_extraRuleSet.begin(); it!=m_extraRuleSet.end();it++) {
 		if ((*it)->m_name==instr) {
 			return *it;
 		}
@@ -192,12 +268,17 @@ void CParser<OBJ>::worker(void *threadParam)
 		if (myself->isSuspended()==false) {
 			run=true;
 			IRA::CIRATools::getTime(start);
-			while (run && data->popCommand(elem)) {  // if run if false the popCommand is not executed so the next command in the list is not taken out
+			while (run && data->popCommand(elem)) {  // if run is false the popCommand is not executed so the next command in the list is not taken out
 				_SP_CALLBACK(cb)=elem->m_callBack;
 				try {	
 					data->executeCommand(elem->m_command,instr);
 				}
 				catch (ParserErrors::ParserErrorsExImpl& ex) {
+					if (cb!=NULL) (*cb)(elem->m_parameter,elem->m_name,false);
+					// the error related to the parser are not logged, they just appears as error messages to the user operator input. In that case the command is asynchronous, so nothing is returned to the user
+					//ex.log(LM_ERROR);
+				}
+				catch (ACSErr::ACSbaseExImpl& ex) {
 					if (cb!=NULL) (*cb)(elem->m_parameter,elem->m_name,false);
 					ex.log(LM_ERROR);
 				}
@@ -226,8 +307,11 @@ void CParser<OBJ>::timerHandler(const ACS::Time& time,const void * par)
 		exec->m_parser->executeCommand(exec->m_command,instr);
 	}
 	catch (ParserErrors::ParserErrorsExImpl& ex) {
-		ex.log(LM_ERROR);
+		//ex.log(LM_ERROR); // no logging.....
 	}	
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_ERROR);
+	}
 }
 
 template <class OBJ>
@@ -240,7 +324,8 @@ void CParser<OBJ>::timerCleanup(const void * par)
 }
 
 template <class OBJ>
-void CParser<OBJ>::pushProcedure(const IRA::CString& name,const ACS::stringSeq& procedure,_SP_CALLBACK(callBack),const void* parameter) throw (ParserErrors::ParserErrorsExImpl)
+void CParser<OBJ>::pushProcedure(const IRA::CString& name,const ACS::stringSeq& procedure,IRA::CString *procPrm,WORD& parNumber,
+		_SP_CALLBACK(callBack),const void* parameter) throw (ParserErrors::ProcedureErrorExImpl)
 {
 	TRule *elem;
 	IRA::CString instr;
@@ -254,9 +339,16 @@ void CParser<OBJ>::pushProcedure(const IRA::CString& name,const ACS::stringSeq& 
 		if (callBack!=NULL) (*callBack)(parameter,name,true);
 		return;
 	}
-	for(unsigned i=0;i<procedure.length();i++) {  //check procedure correcteness
+	for(unsigned i=0;i<procedure.length();i++) {  //check procedure correctness
+		//replace the place holders with the procedure arguments
+		IRA::CString line((const char *)procedure[i]);
+		for (WORD j=0;j<parNumber;j++) {
+			IRA::CString pp;
+			pp.Format("%c%d",PROCEDUREPARAMETER,j);
+			line.ReplaceAll((const char *)pp,procPrm[j]);
+		}
 		try {
-			elem=checkCommand((const char *)procedure[i],instr,inParams,parNum,timeTagged,timeCommand,execTime,execInterval);
+			elem=checkCommand((const char *)line,instr,inParams,parNum,timeTagged,timeCommand,execTime,execInterval);
 		}
 		catch (ParserErrors::ParserErrorsExImpl& ex) {
 			_ADD_BACKTRACE(ParserErrors::ProcedureErrorExImpl,impl,ex,"CParser::pushProcedure()");
@@ -267,14 +359,14 @@ void CParser<OBJ>::pushProcedure(const IRA::CString& name,const ACS::stringSeq& 
 			throw impl;
 		}
 		if (elem->m_type==PROCEDURE) {
-			pushProcedure(instr,elem->m_procedure,callBack,parameter); // throws an exception
+			pushProcedure(instr,elem->m_procedure,inParams,parNum,callBack,parameter); // throws an exception
 		}
 		else {
-			if (i==procedure.length()-1) {  /// the call back is propageted only for the last operation
-				pushCommand((const char *)procedure[i],name,callBack,parameter);
+			if (i==procedure.length()-1) {  /// the call back is propagated only for the last operation
+				pushCommand((const char *)line,name,callBack,parameter);
 			}
 			else {
-				pushCommand((const char *)procedure[i],name);
+				pushCommand((const char *)line,name);
 			}
 		}
 	}
@@ -283,14 +375,14 @@ void CParser<OBJ>::pushProcedure(const IRA::CString& name,const ACS::stringSeq& 
 template <class OBJ>
 void CParser<OBJ>::pushCommand(const IRA::CString& line,const IRA::CString& package,_SP_CALLBACK(callBack),const void* parameter)
 {
-	baci::ThreadSyncGuard guard(&m_localMutex);
+	baci::ThreadSyncGuard guard(&m_exeListMutex);
 	m_executionList.push_back(new TExecutionUnit(line,package,callBack,parameter));
 }
 
 template <class OBJ>
 bool CParser<OBJ>::popCommand(TExecutionUnit *& cmd)
 {
-	baci::ThreadSyncGuard guard(&m_localMutex);
+	baci::ThreadSyncGuard guard(&m_exeListMutex);
 	if (m_executionList.empty()) {
 		return false;
 	}
@@ -299,6 +391,42 @@ bool CParser<OBJ>::popCommand(TExecutionUnit *& cmd)
 		m_executionList.pop_front();
 		return true;
 	}	
+}
+
+template <class OBJ>
+IRA::CString CParser<OBJ>::showTimeBasedCommands()
+{
+	unsigned iterator=0;
+	ACS::Time time;
+	ACS::TimeInterval interval;
+	const void *param;
+	IRA::CString out(""),position;
+	IRA::CString timeStr,intervalStr;
+	TTimerJob* job;
+	while (m_timer.getNextEvent(iterator,time,interval,param)) {
+		job=(TTimerJob *)param;
+		if (time!=0) {
+			IRA::CIRATools::timeToStr(time,timeStr);
+		}
+		else timeStr="0000-000-00:00:00.00";
+		IRA::CIRATools::intervalToStr(interval,intervalStr);
+		timeStr=IRA::CString(m_timeDelimiter)+timeStr;
+		intervalStr=IRA::CString(TIMERIDENTIFIER)+intervalStr;
+		position.Format("%u",iterator-1);
+		out+="\n"+position+" "+timeStr+" "+intervalStr+" "+job->m_command;
+	}
+	return out;
+}
+
+template <class OBJ>
+void CParser<OBJ>::flushTimeBasedCommands(const int& pos)
+{
+	if (pos<0) {
+		m_timer.cancelAll();
+	}
+	else {
+		m_timer.cancel((unsigned)pos);
+	}
 }
 
 template <class OBJ>
@@ -365,7 +493,7 @@ int CParser<OBJ>::parseCommand(const IRA::CString& line,IRA::CString& instr,IRA:
 	bool ok=false;
 	int i=0,n=0;
 	if (line.Find(m_timeDelimiter,0)>0) {
-		if (getNextToken(line,i,m_timeDelimiter,token)) { //chek if the time delimiter is present
+		if (getNextToken(line,i,m_timeDelimiter,token)) { //check if the time delimiter is present
 			timeTagged=true;
 			if (i!=line.GetLength()) {  // the timeCommand has no time mark, so the command is executed async, as soon as possible
 				timeMark=line.Right(line.GetLength()-i);
@@ -390,7 +518,9 @@ int CParser<OBJ>::parseCommand(const IRA::CString& line,IRA::CString& instr,IRA:
 		instr=token;
 		ok=true;
 	}
-	else return -1;
+	else {
+		return 0;  //if no command delimiter is present, the command is considered to be the whole line
+	}
 	while (getNextToken(newLine,i,m_delimiter,token)) {
 		ok=true;
 		if (token==m_jollyChar) {

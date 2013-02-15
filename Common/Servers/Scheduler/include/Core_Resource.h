@@ -187,9 +187,34 @@ void loadDefaultDataReceiver() throw (ComponentErrors::CouldntGetComponentExImpl
  */
 void unloadDefaultDataReceiver();
 /**
- * This method is a wrapper of the inject method of the internal parser. It is used to inject a procedure into the parser for its execution
+ * This method is a wrapper of the runAsync method of the internal parser. It is used to execute a procedure.
+ * @param name name of the procedure to be executed
+ * @param callBack function to executed as soon as the procedure completes
+ * @param param parameter to be passed to the call back as argument
+ * @throw ManagementErrors::ScheduleProcedureErrorExImpl
 */
-void injectProcedure(const IRA::CString& name,const ACS::stringSeq& proc,_SP_CALLBACK(callBack),const void *param) throw (ManagementErrors::ProcedureErrorExImpl);
+void executeProcedure(const IRA::CString& name,_SP_CALLBACK(callBack),const void *param) throw (ManagementErrors::ScheduleProcedureErrorExImpl);
+
+/**
+ * This function loads new procedures from the CDB. The parser is directly informed on the new procedures.
+ * @param proceduresFile name of the table that stores the procedures to be loaded
+ * @throw ManagementErrors::ProcedureFileLoadingErrorExImpl
+*/
+void loadProcedures(const IRA::CString& proceduresFile) throw (ManagementErrors::ProcedureFileLoadingErrorExImpl);
+
+/**
+ * This function loads a new procedures from a given file. The parser is directly loaded with the new procedures. The file must exists on a disk reachable by the component.
+ * @param path path of the file
+ * @param file name of the procedure file
+ * @throw ManagementErrors::ProcedureFileLoadingErrorExImpl
+*/
+void loadProceduresFile(const IRA::CString path,const IRA::CString file) throw (ManagementErrors::ProcedureFileLoadingErrorExImpl);
+
+/**
+ * This function loads a new procedures from a given file. The parser is directly loaded with the new procedures.
+ * @param loader pointer to the class that is in charge of reading the file, the object must be already initialized.
+*/
+void loadProceduresFile(Schedule::CProcedureList *loader);
 
 /**
  * Allows to schedule an event at a precise time using the internal timer

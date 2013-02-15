@@ -6,7 +6,7 @@ using namespace IRA;
 
 //#define RB_DEBUG
 
-#define KKC_ADDRESS "192.168.51.4" // this is the PortServer installed directly in the MF
+#define KKC_ADDRESS "192.168.51.13" // this is the PortServer installed directly in the MF
 #define KKC_PORT 2101 // first port...please notice that this works only if the port is configuread as "real Port"
 #define RECV_ADDRESS "192.167.189.2"
 #define RECV_PORT 2096
@@ -226,7 +226,7 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 	IRA::CString msg;
 	WORD len;
 	double trueValue;
-	double loAmp[4]={62.444,-12.311,0.7323,-0.0118};
+	double loAmp[4]={-55.245,11.413,-0.7944,0.0189};
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (lo.length()==0) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setLO()");
@@ -280,6 +280,7 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 	}
 	m_recvSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
 	if (m_currentReceiver=="KKC") {
+		trueValue/=1000;
 		double amplitude=loAmp[0]+loAmp[1]*trueValue+loAmp[2]*trueValue*trueValue+loAmp[3]*trueValue*trueValue*trueValue;
 		msg.Format("set loamp %lf\n",(double)amplitude);
 		len=msg.GetLength();

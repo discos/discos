@@ -17,14 +17,13 @@ namespace SimpleParser {
 template<class OBJ,_sp_const_function CONST_SPEC,class RT> class function0: public _SP_FUNCTOR
 {
 public:
-	enum {arity=0};
 	typedef typename RET<RT>::return_type return_type;
 	typedef typename RET<RT>::argument return_argument;
 	typedef return_type (OBJ::*const_func_type)() const;
 	typedef return_type (OBJ::*normal_func_type)();
 	typedef typename conditional<CONST_SPEC,const_func_type,normal_func_type>::type func_type;
 	
-	function0(OBJ *object, func_type func) : _SP_FUNCTOR(object),m_func(func) {};
+	function0(OBJ *object, func_type func) : _SP_FUNCTOR(object,0), m_func(func) {};
 	return_type operator()() const throw (ACSErr::ACSbaseExImpl) {
 		return (*_SP_FUNCTOR::m_obj.*m_func)( ); //can throw a generic exception
 	}
@@ -44,14 +43,13 @@ protected:
 template<class OBJ,_sp_const_function CONST_SPEC> class function0<OBJ,CONST_SPEC,void_type>: public _SP_FUNCTOR
 {
 public:
-	enum {arity=0};
 	typedef typename RET<void_type>::return_type return_type;
 	typedef typename RET<void_type>::argument return_argument;
 	typedef return_type (OBJ::*normal_func_type)();
 	typedef return_type (OBJ::*const_func_type)() const;
 	typedef typename conditional<CONST_SPEC,const_func_type,normal_func_type>::type func_type;
 	
-	function0(OBJ *object, func_type func) : _SP_FUNCTOR(object),m_func(func) {};
+	function0(OBJ *object, func_type func) : _SP_FUNCTOR(object,0), m_func(func) { };
 	void  operator()() const throw (ACSErr::ACSbaseExImpl) {
 		(*_SP_FUNCTOR::m_obj.*m_func)(); //can throw a generic exception
 	}

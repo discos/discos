@@ -84,21 +84,51 @@ bool CScheduleTimer::cancel(const ACS::Time& time)
 	return false;
 }
 
+bool CScheduleTimer::cancel(const unsigned& pos)
+{
+	long id;
+	if (pos>=m_events.size()) {
+		return false;
+	}
+	id=m_events[pos]->id;
+	if (m_timerQueue->cancel(id)!=0) { //remove the event from the queue
+		delete m_events[pos]->handler;
+		delete m_events[pos];
+		m_events.erase(m_events.begin()+pos);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 bool CScheduleTimer::cancelAll()
 {
 	bool ok=true;
 	TEventsIterator i;
 	for(i=m_events.begin();i<m_events.end();i++) { 
 		if (m_timerQueue->cancel((*i)->id)!=0) { //remove the event from the queue
-			delete (*i)->handler;
-			delete (*i);
-			m_events.erase(i);
 		}
 		else {
 			ok=false;
 		}
+		delete (*i)->handler;
+		delete (*i);
 	}
+	m_events.clear();
 	return ok;	
+}
+
+bool CScheduleTimer::getNextEvent(unsigned &index,ACS::Time& time,ACS::TimeInterval &interval,const void *&parameter)
+{
+	if  (index>=m_events.size()) {
+		return false;
+	}
+	parameter=m_events[index]->parameter;
+	interval=m_events[index]->interval;
+	time=m_events[index]->time;
+	index++;
+	return true;
 }
 
 bool CScheduleTimer::schedule(TCallBack callBack,const ACS::Time& timeMark,const ACS::TimeInterval& interval,const void* param,TCleanupFunction cleanup)

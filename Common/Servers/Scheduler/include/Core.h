@@ -174,11 +174,11 @@ public:
 	
 	/**
 	 * It parses a human readable command and executes it
-	 * @throw ManagementErrors::CommandLineErrorExImpl 
 	 * @param cmd command to be executed
-	 * @return the string with command answer
+	 * @param answer string that contains the answer to the command
+	 * @return the result of the command execution
 	 */ 
-	IRA::CString command(const IRA::CString& cmd) throw (ManagementErrors::CommandLineErrorExImpl);
+	bool command(const IRA::CString& cmd,IRA::CString& answer);
 	
 	/**
 	 * It changes the current device, first it checks if the corresponding section is existent in the current backend (default backend if no schedule is running, the schedule backend if a schedule runs).
@@ -232,13 +232,6 @@ public:
 	 */
 	inline long getCurrentDevice() const { return m_currentDevice; }
 	
-	/**
-	 * This function loads a new procedures file from the CDB. The parser is directly informed on the new procedures.
-	 * @param proceduresFile name of the table that stores the procedures to be loaded
-	 * @throw ManagementErrors::ProcedureFileLoadingErrorExImpl
-	*/
-	void loadProcedures(const IRA::CString& proceduresFile) throw (ManagementErrors::ProcedureFileLoadingErrorExImpl);
-
 private:
 
 	/**

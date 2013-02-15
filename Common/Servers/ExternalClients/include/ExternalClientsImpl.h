@@ -95,11 +95,10 @@ class ExternalClientsImpl: public CharacteristicComponentImpl,
 	 * This method implements the command line interpreter. The interpreter allows to ask for services or to issue commands
 	 * to the control system by human readable command lines.
 	 * @throw CORBA::SystemException
-	 * @throw ManagementErrors::CommandLineErrorEx
 	 * @param cmd string that contains the command line
-	 * @return the string that contains the answer to the command.
+	 * @param answer the string that contains the answer to the command.
 	 */
-	virtual char * command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);
+	virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
 
 private:
 	

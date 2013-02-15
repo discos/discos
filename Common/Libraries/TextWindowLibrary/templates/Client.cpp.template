@@ -269,44 +269,40 @@ int main(int argc, char *argv[]) {
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::START"));
 	window.showFrame();
 	for(;;)	{
-		if ((fieldCounter=userInput->parseCommand(fields,MAXFIELDNUMBER))>0) {
-			fields[0].MakeUpper();
-			if (fields[0]=="EXIT") break;
-			/* Manage the call for all required component method, one block for each method */
-			else if (fields[0]=="SETDUT1") {
-				if (fieldCounter>=2) {
-					CORBA::Double dut1;
-					CORBA::Boolean save;
-					dut1=fields[1].ToDouble();
-					fields[2].MakeUpper();
-					if (fields[2]=="TRUE") {
-						save=true;
-					}
-					else {
-						save=false;
-					}
-					try {
-						component->setDUT1(dut1,save);
-						output_label->setValue("Done!");
-						output_label->Refresh();
-					}
-					_CATCH_ALL(output_label,MODULE_NAME"::Main()",ComponentErrors::ComponentErrorsEx)
+		if (userInput->readCommand(inputCommand)) {
+			if (inputCommand=="exit") break;
+			if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
+				try {
+					char * outputAnswer;
+					component->command((const char *)inputCommand,outputAnswer);
+					output_label->setValue(outputAnswer);
+					CORBA::string_free(outputAnswer);
+					output_label->Refresh();
 				}
-				else {
-					#if USE_OUTPUT_FIELD >=1 
-						CString Message("Wrong number of parameters");
-						output_label->setValue(Message);
-						output_label->Refresh();
-					#endif
+				catch (CORBA::SystemException& ex) {
+					_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"Main()");
+					impl.setName(ex._name());
+					impl.setMinor(ex.minor());
+					IRA::CString Message;
+					_EXCPT_TO_CSTRING(Message,impl);
+					output_label->setValue(Message);
+					output_label->Refresh();					
+					impl.log(LM_ERROR);
 				}
-			}
-			/* ************************************************************************* */
-			else {
-				#if USE_OUTPUT_FIELD >=1 
-					CString Message("Unknown command");
+				catch(...) {
+					_EXCPT(ClientErrors::CouldntPerformActionExImpl,impl,"Main()");
+					impl.setAction("command()");
+					impl.setReason("communication error to component server");
+					IRA::CString Message;
+					_EXCPT_TO_CSTRING(Message,impl);
 					output_label->setValue(Message);
 					output_label->Refresh();
-				#endif
+	                impl.log(LM_ERROR); 					
+				}
+			}
+			else {
+				output_label->setValue("not enabled");
+				output_label->Refresh();				
 			}
 		}
 		client.run(tv);

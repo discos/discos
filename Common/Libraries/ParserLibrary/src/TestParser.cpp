@@ -121,15 +121,18 @@ void wait(const long& sec) const
 	IRA::CIRATools::Wait(sec,0);
 }
 
-IRA::CString remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par) throw (ParserErrors::ExecutionErrorExImpl,ParserErrors::PackageErrorExImpl)
+bool remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl)
 {
 	if (par==0) {
-		IRA::CString out;
-		out.Format("Eseguito: %s of package %s \n",(const char *)command,(const char *)package);
-		return out;
+		out.Format("%s/ eseguito con successo nel package %s \n",(const char *)command,(const char *)package);
+		return true;
+	}
+	else if (par==1) {
+		out.Format("%s?Errorre nel package %s\n",(const char *)command,(const char *)package);
+		return false;
 	}
 	else {
-		ParserErrors::ExecutionErrorExImpl err(__FILE__,__LINE__,"remoteCall()");
+		ParserErrors::PackageErrorExImpl err(__FILE__,__LINE__,"remoteCall()");
 		throw err;
 	}
 }
@@ -138,7 +141,7 @@ static void callBack(const void *param,const IRA::CString& name,const bool& resu
 {
 	CTest *tst=(CTest *)param;
 	IRA::CString msg;
-	msg.Format("%s injected done! Result is %d\n",(const char *)name,result);
+	msg.Format("%s async call done! Result is %d\n",(const char *)name,result);
 	tst->stampa((const char *)msg);
 }
 
@@ -150,50 +153,53 @@ int main(int argc, char *argv[])
 	CParser<CTest> parser(&test,8,true);
 	char input[128];
 	IRA::CString out;
-	ACS::stringSeq proc1,proc2,proc3,proc4,proc5,proc6,proc7;
+	ACS::stringSeq proc1,proc2,proc3,proc4,proc5,proc6,proc7,proc8;
 	IRA::CString inStr,outCommand,outCommandLine;
 	
-	parser.add<1>("positivo",new function2<CTest,non_constant,void_type,I<long_type>,O<enum_type<BoolsString,TBools> > >(&test,&CTest::positivo));
-	parser.add<1>("stampa",new function1<CTest,non_constant,void_type,I<string_type> >(&test,&CTest::stampa));
-	parser.add<2>("somma",new function2<CTest,non_constant,int_type,I<int_type>,I<int_type> >(&test,&CTest::somma));
-	parser.add<2>("modulo",new function2<CTest,non_constant,double_type,I<double_type>,I<double_type> >(&test,&CTest::modulo));
-	parser.add<1>("errore",new function1<CTest,non_constant,void_type,I<int_type> >(&test,&CTest::errore));
-	parser.add<0>("random",new function1<CTest,non_constant,void_type,O<int_type> >(&test,&CTest::random));
-	parser.add<0>("ora",new function0<CTest,constant,time_type >(&test,&CTest::ora));
-	parser.add<1>("doppio", new function2<CTest,non_constant,int_type,O<double_type>,I<double_type> >(&test,&CTest::doppio));
-	parser.add<1>("square", new function1<CTest,non_constant,void_type,IO<double_type> >(&test,&CTest::square));
-	parser.add<4>("mult",new function4<CTest,constant,long_type,I<long_type>,I<long_type>,I<long_type>,I<long_type> > (&test,&CTest::mult));
-	parser.add<5>("sum",new function5<CTest,non_constant,long_type,I<long_type>,I<long_type>,I<long_type>,I<long_type>,I<long_type> > (&test,&CTest::sum));	
-	parser.add<6>("sub",new function6<CTest,constant,long_type,I<long_type>,I<long_type>,I<long_type>,I<long_type>,I<long_type>,I<long_type> > (&test,&CTest::sub));
+	parser.add("positivo",new function2<CTest,non_constant,void_type,I<long_type>,O<enum_type<BoolsString,TBools> > >(&test,&CTest::positivo),1);
+	parser.add("stampa",new function1<CTest,non_constant,void_type,I<string_type> >(&test,&CTest::stampa),1);
+	parser.add("somma",new function2<CTest,non_constant,int_type,I<int_type>,I<int_type> >(&test,&CTest::somma),2);
+	parser.add("modulo",new function2<CTest,non_constant,double_type,I<double_type>,I<double_type> >(&test,&CTest::modulo),2);
+	parser.add("errore",new function1<CTest,non_constant,void_type,I<int_type> >(&test,&CTest::errore),1);
+	parser.add("random",new function1<CTest,non_constant,void_type,O<int_type> >(&test,&CTest::random),0);
+	parser.add("ora",new function0<CTest,constant,time_type >(&test,&CTest::ora),0);
+	parser.add("doppio", new function2<CTest,non_constant,int_type,O<double_type>,I<double_type> >(&test,&CTest::doppio),1);
+	parser.add("square", new function1<CTest,non_constant,void_type,IO<double_type> >(&test,&CTest::square),1);
+	parser.add("mult",new function4<CTest,constant,long_type,I<long_type>,I<long_type>,I<long_type>,I<long_type> > (&test,&CTest::mult),4);
+	parser.add("sum",new function5<CTest,non_constant,long_type,I<long_type>,I<long_type>,I<long_type>,I<long_type>,I<long_type> > (&test,&CTest::sum),5);
+	parser.add("sub",new function6<CTest,constant,long_type,I<long_type>,I<long_type>,I<long_type>,I<long_type>,I<long_type>,I<long_type> > (&test,&CTest::sub),6);
 	function7<CTest,constant,void_type,I<long_type>, I<long_type>, I<long_type>, I<long_type>, I<long_type>, I<long_type>, I<double_type> > *p;
 	p=new function7<CTest,constant,void_type,I<long_type>,I<long_type>,I<long_type>,I<long_type>,I<long_type>,I<long_type>,I<double_type> > (&test,&CTest::exp);
-	parser.add<7>("exp",p);
-	parser.add<1>("sumSeq",new function1<CTest,non_constant,double_type,I<doubleSeq_type> >(&test,&CTest::sumSeq));
-	parser.add<1>("sequence",new function2<CTest,constant,void_type,O<longSeq_type>,I<long_type> >(&test,&CTest::sequence));
-	parser.add<1>("wait",new function1<CTest,constant,void_type,I<long_type> >(&test,&CTest::wait));
+	parser.add("exp",p,7);
+	parser.add("sumSeq",new function1<CTest,non_constant,double_type,I<doubleSeq_type> >(&test,&CTest::sumSeq),1);
+	parser.add("sequence",new function2<CTest,constant,void_type,O<longSeq_type>,I<long_type> >(&test,&CTest::sequence),1);
+	parser.add("wait",new function1<CTest,constant,void_type,I<long_type> >(&test,&CTest::wait),1);
+
+	parser.add("naviga","firefox",1);
+
 	parser.add("remoteok","extern",0,&CTest::remoteCall);
 	parser.add("remotefail","extern",1,&CTest::remoteCall);
+	parser.add("remoteerror","extern",2,&CTest::remoteCall);
 	
 	proc1.length(3);
-	proc1[0]="wait=8";
-	//proc1[1]="stampa=hello";
-	proc1[1]="somma=10,5";
+	proc1[0]="wait=3";
+	proc1[1]="somma=10";
 	proc1[2]="stampa=ciao everybody";
-	parser.add("procHello","procedureFile",proc1);  //add a procedure that takes long to complete
+	parser.add("procHello","procedureFile",proc1,0);  //add a procedure that takes long to complete
 	
 	proc2.length(2);
 	proc2[0]="stampa=eccezione in arrivo!";
 	proc2[1]="errore=0";
-	parser.add("procError","procedureFile",proc2);
+	parser.add("procError","procedureFile",proc2,0);
 	
 	proc3.length(1);
 	proc3[0]="somma=100";   
-	parser.add("procSyntax","procedureFile",proc3);  //add a procedure that contains a syntax error
+	parser.add("procSyntax","procedureFile",proc3,0);  //add a procedure that contains a syntax error
 	
 	proc4.length(2);
 	proc4[0]="stampa=chiamo procedura remota";
 	proc4[1]="remotefail";
-	parser.add("procRemote","procedureFile",proc4);
+	parser.add("procRemote","procedureFile",proc4,0);
 	
 	//parser.inject("salutoIniziale",proc1);
 	
@@ -201,24 +207,30 @@ int main(int argc, char *argv[])
 	proc5[0]="wait=8@";
 	proc5[1]="stampa=stampa circa dopo 8 secondi@";
 	proc5[2]="stampa=prima stampa....!!!!!";
-	parser.add("procAsync","procedureFile",proc5);
+	parser.add("procAsync","procedureFile",proc5,0);
 	
 	proc6.length(3);
 	proc6[0]="stampa=nested procedure";
-	proc6[1]="procHello";
+	proc6[1]="procStampa=$0";
 	proc6[2]="stampa=cosa succede";
-	parser.add("nestedProc","procedureFile",proc6);
+	parser.add("nestedProc","procedureFile",proc6,1);
 	
 	proc7.length(4);
-	proc7[0]="stampa=injected procedure";
+	proc7[0]="stampa=extra procedure";
 	proc7[1]="stampa=second statement";
-	proc7[2]="wait=8";
+	proc7[2]="wait=$0";
 	proc7[3]="stampa=eseguito alle 22 e un quarto@22:15:30";
+	//add as extra procedure!!!!!
+	parser.addExtraProcedure("extraProc","procedureFile",proc7,1);
 	
+	proc8.length(1);
+	proc8[0]="stampa=$0";
+	parser.add("procStampa","procedureFile",proc8,1);
+
 	try {
-		parser.inject("injectedProc",proc7,&CTest::callBack);
+		parser.runAsync("extraProc=5",&CTest::callBack,NULL);
 	}
-	catch (ParserErrors::ProcedureErrorExImpl& ex) {
+	catch (ParserErrors::ParserErrorsExImpl& ex) {
 		printf("errore nell'inject\n");
 	}
 	

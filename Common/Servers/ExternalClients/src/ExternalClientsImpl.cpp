@@ -157,9 +157,10 @@ void ExternalClientsImpl::aboutToAbort()
 	}		
 }
 
-char * ExternalClientsImpl::command (const char * cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean ExternalClientsImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
 {
-    return (char*)cmd;
+	answer=CORBA::string_dup((const char *)cmd);
+	return true;
 }
 
 GET_PROPERTY_REFERENCE(Management::ROTSystemStatus,m_pStatus,status);

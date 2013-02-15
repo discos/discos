@@ -308,24 +308,77 @@ void CCore::unloadDefaultDataReceiver()
 	}	
 }
 
-
-void CCore::injectProcedure(const IRA::CString& name,const ACS::stringSeq& proc,_SP_CALLBACK(callBack),const void *param) throw (ManagementErrors::ProcedureErrorExImpl)
+void CCore::loadProcedures(const IRA::CString& proceduresFile) throw (ManagementErrors::ProcedureFileLoadingErrorExImpl)
 {
-	// no need to protect this beacuse the parser is already thread-safe
+	//baci::ThreadSyncGuard guard(&m_mutex); not required....the parser is thread safe.
+	ACS::stringSeq names;
+	ACS::longSeq args;
+	ACS::stringSeq *commands=NULL;
 	try {
-		m_parser->inject(name,proc,callBack,param);
+		m_config->readProcedures(m_services,proceduresFile,names,args,commands);
 	}
-	catch (ParserErrors::ProcedureErrorExImpl& ex) {
-		_ADD_BACKTRACE(ManagementErrors::ProcedureErrorExImpl,impl,ex,"CCore::injectProcedure()");
-		impl.setCommand(ex.getCommand());
-		impl.setProcedure((const char *)name);
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		_ADD_BACKTRACE(ManagementErrors::ProcedureFileLoadingErrorExImpl,impl,ex,"CCore::loadProcedures()");
+		impl.setFileName((const char *)proceduresFile);
 		throw impl;
-		//ex.log(LM_WARNING);
-		//return false;
 	}
-	//return true;
+	for (unsigned i=0;i<names.length();i++) {
+		IRA::CString name(names[i]);
+		m_parser->add(name,proceduresFile,commands[i],args[i]);
+	}
+	if (commands) delete[] commands;
+	m_currentProceduresFile=proceduresFile;
+	ACS_LOG(LM_FULL_INFO,"CCore::loadProcedures()",(LM_NOTICE,"PROCEDURES_LOADED: %s",(const char *)proceduresFile));
 }
 
+void CCore::loadProceduresFile(const IRA::CString path,const IRA::CString file) throw (ManagementErrors::ProcedureFileLoadingErrorExImpl)
+{
+	//baci::ThreadSyncGuard guard(&m_mutex); not required....the parser is thread safe.
+	IRA::CString full=path+file;
+	Schedule::CProcedureList loader(path,file);
+	if (loader.readAll(true)) {
+		_EXCPT(ManagementErrors::ProcedureFileLoadingErrorExImpl,impl,"CCore::loadProceduresFile()");
+		impl.setFileName((const char *)full);
+		impl.setReason((const char *)loader.getLastError());
+	}
+	m_parser->clearExtraProcedures();
+	WORD pos=0;
+	WORD args;
+	ACS::stringSeq proc;
+	IRA::CString name;
+	while(loader.getProcedure(pos,name,proc,args)) {
+		m_parser->addExtraProcedure(name,full,proc,args);
+		pos++;
+	}
+}
+
+void CCore::loadProceduresFile(Schedule::CProcedureList *loader)
+{
+	//baci::ThreadSyncGuard guard(&m_mutex); not required....the parser is thread safe.
+	m_parser->clearExtraProcedures();
+	WORD pos=0;
+	WORD args;
+	ACS::stringSeq proc;
+	IRA::CString name;
+	while(loader->getProcedure(pos,name,proc,args)) {
+		m_parser->addExtraProcedure(name,loader->getFileName(),proc,args);
+		pos++;
+	}
+}
+
+void CCore::executeProcedure(const IRA::CString& name,_SP_CALLBACK(callBack),const void *param) throw (ManagementErrors::ScheduleProcedureErrorExImpl)
+{
+	// no need to protect this because the parser is already thread-safe
+	try {
+		//m_parser->inject(name,proc,callBack,param);
+		m_parser->runAsync(name,callBack,param);
+	}
+	catch (ParserErrors::ParserErrorsExImpl& ex) {
+		_ADD_BACKTRACE(ManagementErrors::ScheduleProcedureErrorExImpl,impl,ex,"CCore::executeProcedure()");
+		impl.setProcedure((const char *)name);
+		throw impl;
+	}
+}
 
 bool CCore::addTimerEvent(const ACS::Time& time,IRA::CScheduleTimer::TCallBack handler,void *parameter)
 {

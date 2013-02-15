@@ -66,15 +66,14 @@ module Management {
 		void haltSchedule();
 		
 		/**
-		 * @copyBrief CommandInterpreter::command 
-		 * This is the command line interpreter. All the attributes and all the methods exposed by this component can be
-		 * called. Morover it can forward the other operation to other sub-systems boss.
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ManagementErrors::commandLineErrorEx
-		 * @param the string that contains the command line to be parsed
-		 * @return the string that contains the answer to the command issued by the input parameter. The caller is resposible to
-		 * free the returned string (@sa CORBA::string_free).
-		*/
+		 * @copyBrief CommandInterpreter::command
+		 * This method can be used to execute a command or to setup a configuration The commands and configurations are given as strings.
+		 * @attention the implmentation of this method must take care of logging the errors deriving from the execution of the command.
+		 * @throw CORBA::SystemException 
+		 * @param command this string contains the instruction to be executed, the command and the syntax may vary from implementation to implementation
+		 * @param answer this string contains the answer of the system to the incoming command. It must frred by the caller
+		 * @return  the result of the command, true after a succesful command invokation. false otherwise.
+		 */
 		
 		/**
 		 * This command will allow a client to acknwledge an error by resetting the <i>status</i> property. If <i>status</i> is already MNG_OK, then it does not do
@@ -163,7 +162,7 @@ module Management {
 		 * @throw CORBA::SystemExcpetion 
 		 */
 		void setProjectCode(in string code) raises (ManagementErrors::ManagementErrorsEx);
-		
+			
 		/**
 		 * This attribute reports the scan identifier currently played by the scheduler.
 		*/ 
@@ -199,6 +198,7 @@ module Management {
 		 * This attribute reports the currently running project code, this code will be used for foutput files name, paths and to collect schedules 
 		 */
 		readonly attribute ACS::ROstring projectCode;
+
 	};
 };
 

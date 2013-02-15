@@ -119,11 +119,6 @@ void CExternalClientsSocketServer::cmdToScheduler()
         try {
             //ret_val = m_Scheduler->command((const char*)inBuffer);
         }
-        catch (ManagementErrors::CommandLineErrorExImpl& eX) {
-            _EXCPT(ComponentErrors::OperationErrorExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
-            impl.log(LM_ERROR);
-            ret_val = "Command Error";
-        }
         catch (CORBA::SystemException& ex) {
             _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
 		    impl.setName(ex._name());

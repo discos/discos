@@ -155,32 +155,29 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	// inform the boss core of the thread in charge of trajectory update
 	boss->setWorkingThread(m_workingThread);
 	// configure the parser.....
-	m_parser->add<0>("antennaDisable",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::disable));
-	m_parser->add<0>("antennaEnable",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::enable));
-	m_parser->add<0>("antennaCorrectionOn",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::enableCorrection));
-	m_parser->add<0>("antennaCorrectionOff",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::disableCorrection));
-	m_parser->add<0>("antennaPark",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::stow));
-	m_parser->add<0>("antennaStop",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::stop));
-	m_parser->add<0>("antennaAzEl",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::setPreset));
-	m_parser->add<0>("antennaTrack",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::setProgramTrack));
-	m_parser->add<0>("antennaUnstow",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::unstow));
-	m_parser->add<1>("antennaSetup",new function1<CBossCore,non_constant,void_type,I<string_type> >(boss,&CBossCore::setup));
-	m_parser->add<2>("preset",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >,I<angle_type<rad> > >(boss,&CBossCore::preset));
-	m_parser->add<0>("moon",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::moon));
-	m_parser->add<5>("sidereal",new function5<CBossCore,non_constant,void_type,I<string_type>,I<rightAscension_type<rad,true> >,
-			I<declination_type<rad,true> >,I<enum_type<AntennaEquinox2String,Antenna::TSystemEquinox > >,I<enum_type<AntennaSection2String,Antenna::TSections> > >(boss,&CBossCore::sidereal));
-	m_parser->add<2>("goOff",new function2<CBossCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> > >(boss,&CBossCore::goOff));
-	m_parser->add<3>("lonOTF",new function3<CBossCore,non_constant,time_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(boss,&CBossCore::lonOTFScan));
-	m_parser->add<3>("latOTF",new function3<CBossCore,non_constant,time_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(boss,&CBossCore::latOTFScan));
-	m_parser->add<1>("vlsr",new function1<CBossCore,non_constant,void_type,I<double_type> >(boss,&CBossCore::setVlsr));
-	m_parser->add<2>("fwhm",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >, I<double_type> >(boss,&CBossCore::setFWHM));
-	m_parser->add<1>("track",new function1<CBossCore,non_constant,void_type,I<string_type> >(boss,&CBossCore::track));
-	m_parser->add<2>("azelOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setHorizontalOffsets));
-	m_parser->add<2>("radecOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setEquatorialOffsets));
-	m_parser->add<2>("lonlatOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setGalacticOffsets));	
-	//m_parser->add<3>("lonOTF",new function3<CBossCore,non_constant,tyme_type,I<rightAscension_type<rad,true> >,I<declination_type<rad,true> >,I<angleOffset_type<rad> >,I<interval_type> >(boss,&CBossCore::elevationScan));
-	
-	//m_parser->add<4>("azimuthScan",new function4<CBossCore,non_constant,void_type,I<rightAscension_type<rad,true> >,I<declination_type<rad,true> >,I<angleOffset_type<rad> >,I<interval_type> >(boss,&CBossCore::azimuthScan));*/
+	m_parser->add("antennaDisable",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::disable),0);
+	m_parser->add("antennaEnable",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::enable),0);
+	m_parser->add("antennaCorrectionOn",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::enableCorrection),0);
+	m_parser->add("antennaCorrectionOff",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::disableCorrection),0);
+	m_parser->add("antennaPark",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::stow),0);
+	m_parser->add("antennaStop",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::stop),0);
+	m_parser->add("antennaAzEl",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::setPreset),0);
+	m_parser->add("antennaTrack",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::setProgramTrack),0);
+	m_parser->add("antennaUnstow",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::unstow),0);
+	m_parser->add("antennaSetup",new function1<CBossCore,non_constant,void_type,I<string_type> >(boss,&CBossCore::setup),1);
+	m_parser->add("preset",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >,I<angle_type<rad> > >(boss,&CBossCore::preset),2);
+	m_parser->add("moon",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::moon),0);
+	m_parser->add("sidereal",new function5<CBossCore,non_constant,void_type,I<string_type>,I<rightAscension_type<rad,true> >,
+			I<declination_type<rad,true> >,I<enum_type<AntennaEquinox2String,Antenna::TSystemEquinox > >,I<enum_type<AntennaSection2String,Antenna::TSections> > >(boss,&CBossCore::sidereal),5);
+	m_parser->add("goOff",new function2<CBossCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> > >(boss,&CBossCore::goOff),2);
+	m_parser->add("lonOTF",new function3<CBossCore,non_constant,time_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(boss,&CBossCore::lonOTFScan),3);
+	m_parser->add("latOTF",new function3<CBossCore,non_constant,time_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(boss,&CBossCore::latOTFScan),3);
+	m_parser->add("vlsr",new function1<CBossCore,non_constant,void_type,I<double_type> >(boss,&CBossCore::setVlsr),1);
+	m_parser->add("fwhm",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >, I<double_type> >(boss,&CBossCore::setFWHM),2);
+	m_parser->add("track",new function1<CBossCore,non_constant,void_type,I<string_type> >(boss,&CBossCore::track),1);
+	m_parser->add("azelOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setHorizontalOffsets),2);
+	m_parser->add("radecOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setEquatorialOffsets),2);
+	m_parser->add("lonlatOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setGalacticOffsets),2);
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
@@ -274,26 +271,27 @@ void AntennaBossImpl::setup(const char *config) throw (CORBA::SystemException,Ma
 	}
 }
 
-char * AntennaBossImpl::command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean AntennaBossImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
+//char * AntennaBossImpl::command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
 {
-	AUTO_TRACE("AntennaBossImpl::command()");
 	IRA::CString out;
-	IRA::CString in;
+	bool res;
 	//taking the mutex before execution is a workaround for thread safeness that works only because the parser is configured for only synchronous calls.
 	//If this condition is not true anymore, the mutex acquisition will have to be done directly inside the procedure body.
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
-	in=IRA::CString(cmd);
 	try {
-		m_parser->run(in,out);
+		m_parser->run(cmd,out);
+		res=true;
 	}
 	catch (ParserErrors::ParserErrorsExImpl &ex) {
-		_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"AntennaBossImpl::command()");
-		impl.setCommand(cmd);
-		impl.setErrorMessage((const char *)out);
-		impl.log(LM_DEBUG);
-		throw impl.getCommandLineErrorEx();
+		res=false;
 	}
-	return CORBA::string_dup((const char *)out);		
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_ERROR); // the errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface, while the parser errors are never logged.
+		res=false;
+	}
+	answer=CORBA::string_dup((const char *)out);
+	return res;
 }
 
 void AntennaBossImpl::setOffsets(CORBA::Double lonOff,CORBA::Double latOff,Antenna::TCoordinateFrame frame) throw (

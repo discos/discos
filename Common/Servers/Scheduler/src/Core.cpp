@@ -90,22 +90,22 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_schedExecuter->setSleepTime(sleepTime);
 
 	//add local commands
-	m_parser->add<0>("tsys",new function1<CCore,non_constant,void_type,O<doubleSeq_type> >(this,&CCore::callTSys));
-	m_parser->add<1>("wait",new function1<CCore,constant,void_type,I<double_type> >(this,&CCore::wait));
-	m_parser->add<0>("nop",new function0<CCore,constant,void_type >(this,&CCore::nop));
-	m_parser->add<0>("waitOnSource",new function0<CCore,constant,void_type >(this,&CCore::waitOnSource));
-	m_parser->add<0>("status",new function0<CCore,constant,int_type >(this,&CCore::status));
-	m_parser->add<0>("haltSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::haltSchedule));
-	m_parser->add<0>("stopSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::stopSchedule));
-	m_parser->add<2>("startSchedule",new function2<CCore,non_constant,void_type,I<string_type>,I<string_type> >(this,&CCore::startSchedule));
-	m_parser->add<1>("device",new function1<CCore,non_constant,void_type,I<long_type> >(this,&CCore::setDevice));
-	m_parser->add<1>("chooseBackend",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::chooseDefaultBackend));
-	m_parser->add<1>("chooseRecorder",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::chooseDefaultDataRecorder));
-	m_parser->add<3>("crossScan",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >,
-			I<interval_type> >(this,&CCore::crossScan));
-	m_parser->add<1>("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::changeLogFile));
-	m_parser->add<0>("wx",new function4<CCore,non_constant,void_type,O<double_type>,O<double_type>,O<double_type>,O<double_type> >(this,&CCore::getWeatherStationParameters));
-	m_parser->add<1>("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::setProjectCode));
+	m_parser->add("tsys",new function1<CCore,non_constant,void_type,O<doubleSeq_type> >(this,&CCore::callTSys),0);
+	m_parser->add("wait",new function1<CCore,constant,void_type,I<double_type> >(this,&CCore::wait),1);
+	m_parser->add("nop",new function0<CCore,constant,void_type >(this,&CCore::nop),0);
+	m_parser->add("waitOnSource",new function0<CCore,constant,void_type >(this,&CCore::waitOnSource),0);
+	m_parser->add("status",new function0<CCore,constant,int_type >(this,&CCore::status),0);
+	m_parser->add("haltSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::haltSchedule),0);
+	m_parser->add("stopSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::stopSchedule),0);
+	m_parser->add("startSchedule",new function2<CCore,non_constant,void_type,I<string_type>,I<string_type> >(this,&CCore::startSchedule),2);
+	m_parser->add("device",new function1<CCore,non_constant,void_type,I<long_type> >(this,&CCore::setDevice),1);
+	m_parser->add("chooseBackend",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::chooseDefaultBackend),1);
+	m_parser->add("chooseRecorder",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::chooseDefaultDataRecorder),1);
+	m_parser->add("crossScan",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >,
+			I<interval_type> >(this,&CCore::crossScan),3);
+	m_parser->add("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::changeLogFile),1);
+	m_parser->add("wx",new function4<CCore,non_constant,void_type,O<double_type>,O<double_type>,O<double_type>,O<double_type> >(this,&CCore::getWeatherStationParameters),0);
+	m_parser->add("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::setProjectCode),1);
 
 	//add remote commands ************  should be loaded from a CDB table............................**********/
 	// antenna subsystem
@@ -168,28 +168,6 @@ void CCore::cleanUp()
 	if (m_schedExecuter!=NULL) m_schedExecuter->suspend();
 	m_services->getThreadManager()->destroy(m_schedExecuter);
 	ACS_LOG(LM_FULL_INFO,"CCore::cleanUp()",(LM_INFO,"THREAD_DESTROYED"));
-}
-
-void CCore::loadProcedures(const IRA::CString& proceduresFile) throw (ManagementErrors::ProcedureFileLoadingErrorExImpl)
-{
-	baci::ThreadSyncGuard guard(&m_mutex);
-	ACS::stringSeq names;
-	ACS::stringSeq *commands=NULL;
-	try {
-		m_config->readProcedures(m_services,proceduresFile,names,commands);
-	}
-	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		_ADD_BACKTRACE(ManagementErrors::ProcedureFileLoadingErrorExImpl,impl,ex,"CCore::loadProcedures()");
-		impl.setFileName((const char *)proceduresFile);
-		throw impl;
-	}
-	for (unsigned i=0;i<names.length();i++) {
-		IRA::CString name(names[i]);
-		m_parser->add(name,proceduresFile,commands[i]);
-	}
-	if (commands) delete[] commands;
-	m_currentProceduresFile=proceduresFile;
-	ACS_LOG(LM_FULL_INFO,"CCore::loadProcedures()",(LM_NOTICE,"PROCEDURES_FILE_LOADED: %s",(const char *)proceduresFile));
 }
 
 void CCore::chooseDefaultBackend(const char *bckInstance)
@@ -973,19 +951,19 @@ void CCore::startSchedule(const char* scheduleFile,const char * startSubScan) th
 	}
 }
 
-IRA::CString CCore::command(const IRA::CString& line) throw (ManagementErrors::CommandLineErrorExImpl)
+bool CCore::command(const IRA::CString& cmd,IRA::CString& answer)
 {
-	IRA::CString out;
 	try {
-		m_parser->run(line,out); //parser is already thread safe.....
-		return out;
+		m_parser->run(cmd,answer); //parser is already thread safe.....
+		return true;
 	}
 	catch (ParserErrors::ParserErrorsExImpl &ex) {
-		_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"CCore::command()");
-		impl.setCommand((const char *)line);
-		impl.setErrorMessage((const char *)out);
-		throw impl;
-	}	
+		return false;
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_ERROR); // the errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface, while the parser errors are never logged.
+		return false;
+	}
 }
 
 void CCore::getScanCounter(DWORD& cc)

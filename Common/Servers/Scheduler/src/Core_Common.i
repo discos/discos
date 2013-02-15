@@ -251,25 +251,25 @@ ACS::Time CCore::getUTFromLST(const IRA::CDateTime& currentUT,const IRA::CDateTi
 	}
 }
 
-void CCore::configureBackend(Backends::GenericBackend_ptr backend,bool& backendError,const std::vector<IRA::CString>& procedure) throw (ManagementErrors::ProcedureErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+void CCore::configureBackend(Backends::GenericBackend_ptr backend,bool& backendError,const IRA::CString& name, const std::vector<IRA::CString>& procedure) throw (
+		ManagementErrors::BackendProcedureErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	char *answer;
 	unsigned i;
+	CORBA::Boolean res;
+	IRA::CString message;
 	if (!CORBA::is_nil(backend)) {
 		for (i=0;i<procedure.size();i++) {
 			try {
-				answer=backend->command((const char *)procedure[i]);
+				res=backend->command((const char *)procedure[i],answer);
+				message=answer;
 				CORBA::string_free(answer);
-			}
-			catch (ManagementErrors::CommandLineErrorEx& ex) {
-				ManagementErrors::CommandLineErrorExImpl exImpl(ex);
-				_ADD_BACKTRACE(ManagementErrors::ProcedureErrorExImpl,impl,ex,"CCore::configureBackend()");
-				impl.setCommand((const char *)procedure[i]);
-				impl.setLine(i);
-				impl.setProcedure("Backend Configuration");
-				impl.setErrorMessage(exImpl.getErrorMessage());
-				throw impl;
+				if (!res) {
+					_EXCPT(ManagementErrors::BackendProcedureErrorExImpl,impl,"CCore::configureBackend()");
+					impl.setMessage((const char*)message);
+					impl.setProcedure((const char *)name);
+					throw impl;
+				}
 			}
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::configureBackend()");
@@ -705,10 +705,10 @@ void CCore::antennaNCHandler(Antenna::AntennaDataBlock antennaData,void *handler
 	}
 }
 
-IRA::CString CCore::remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par) throw (ParserErrors::ExecutionErrorExImpl,ParserErrors::PackageErrorExImpl)
+bool CCore::remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl)
 {
 	char * ret_val;
-	IRA::CString out;
+	CORBA::Boolean res;
 	switch (par) {
 		case 1: { //antenna package
 			try {
@@ -721,19 +721,14 @@ IRA::CString CCore::remoteCall(const IRA::CString& command,const IRA::CString& p
 				throw impl;
 			}
 			try {
-				ret_val=m_antennaBoss->command((const char *)command);
+				res=m_antennaBoss->command((const char *)command,ret_val); // throw CORBA::SystemException
 				out=IRA::CString(ret_val);
 				CORBA::string_free(ret_val);
-				return out;
-			}
-			catch (ManagementErrors::CommandLineErrorEx& err) {				
-				_ADD_BACKTRACE(ParserErrors::ExecutionErrorExImpl,impl,err,"CCore::remoteCall()");
-				impl.setCommand((const char *)command);
-				throw impl;
+				return res;
 			}
 			catch (CORBA::SystemException& err) {
-				_EXCPT(ParserErrors::ExecutionErrorExImpl,impl,"CCore::command()");
-				impl.setCommand((const char *)command);
+				_EXCPT(ParserErrors::PackageErrorExImpl,impl,"CCore::command()");
+				impl.setPackageName((const char *)package);
 				m_antennaBossError=true;
 				throw impl;
 			}
@@ -750,19 +745,14 @@ IRA::CString CCore::remoteCall(const IRA::CString& command,const IRA::CString& p
 				throw impl;
 			}
 			try {
-				ret_val=m_receiversBoss->command((const char *)command);
+				res=m_receiversBoss->command((const char *)command,ret_val); // throw CORBA::SystemException
 				out=IRA::CString(ret_val);
 				CORBA::string_free(ret_val);
-				return out;				
-			}
-			catch (ManagementErrors::CommandLineErrorEx& err) {				
-				_ADD_BACKTRACE(ParserErrors::ExecutionErrorExImpl,impl,err,"CCore::remoteCall()");
-				impl.setCommand((const char *)command);
-				throw impl;
+				return res;
 			}
 			catch (CORBA::SystemException& err) {
-				_EXCPT(ParserErrors::ExecutionErrorExImpl,impl,"CCore::command()");
-				impl.setCommand((const char *)command);
+				_EXCPT(ParserErrors::PackageErrorExImpl,impl,"CCore::command()");
+				impl.setPackageName((const char *)package);
 				m_receiversBossError=true;
 				throw impl;
 			}
@@ -770,18 +760,6 @@ IRA::CString CCore::remoteCall(const IRA::CString& command,const IRA::CString& p
 		}
 		case 3: { // default backend..
 			Backends::GenericBackend_var backend;
-			/*IRA::CString unwrappedCommand;
-			int pos;
-			pos=command.Find(m_parser->getCommandDelimiter());
-			if ((pos<0) || (pos==command.GetLength()-1)) {
-				_EXCPT(ParserErrors::ExecutionErrorExImpl,impl,"CCore::command()");
-				impl.setCommand((const char *)command);				
-				throw impl;
-			}
-			else {
-				pos++;
-				unwrappedCommand=command.Mid(pos,command.GetLength()-pos);
-			}*/
 			backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
 			try {
 				baci::ThreadSyncGuard guard(&m_mutex);
@@ -790,30 +768,20 @@ IRA::CString CCore::remoteCall(const IRA::CString& command,const IRA::CString& p
 					backend=m_defaultBackend;
 				}
 			}
-			/*try {
-				baci::ThreadSyncGuard guard(&m_mutex);  //loadDefaultBackend works on class data so it is safe to sync
-				loadDefaultBackend(); 				
-			}*/
 			catch (ComponentErrors::CouldntGetComponentExImpl& err) { //this exception can be thrown by the loadDefaultBackend()
 				_ADD_BACKTRACE(ParserErrors::PackageErrorExImpl,impl,err,"CCore::remoteCall()");
 				impl.setPackageName((const char *)package);
 				throw impl;
 			}
 			try {
-				//ret_val=m_defaultBackend->command((const char *)unwrappedCommand);
-				ret_val=backend->command((const char *)command);
+				res=backend->command((const char *)command,ret_val); // throw CORBA::SystemException
 				out=IRA::CString(ret_val);
 				CORBA::string_free(ret_val);
-				return out;				
-			}
-			catch (ManagementErrors::CommandLineErrorEx& err) {				
-				_ADD_BACKTRACE(ParserErrors::ExecutionErrorExImpl,impl,err,"CCore::remoteCall()");
-				impl.setCommand((const char *)command);
-				throw impl;
+				return res;
 			}
 			catch (CORBA::SystemException& err) {
-				_EXCPT(ParserErrors::ExecutionErrorExImpl,impl,"CCore::command()");
-				impl.setCommand((const char *)command);	
+				_EXCPT(ParserErrors::PackageErrorExImpl,impl,"CCore::command()");
+				impl.setPackageName((const char *)package);
 				m_defaultBackendError=true;
 				throw impl;
 			}			

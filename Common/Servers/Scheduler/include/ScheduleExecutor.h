@@ -340,23 +340,14 @@ private:
 	*/
 	void closeBackend() throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 
-	/*
-	 * It forwards the whole configuration procedure to the backend, one command at a time
-	 * @param procedure sequence of commands contained by the configuration procedure
-	 * @throw ManagementErrors::ProcedureErrorExImpl
-	 * @throw ComponentErrors::CORBAProblemExImpl
-	 * @throw ComponentErrors::UnexpectedExImpl
-	 */
-	/*void configureBackend(const std::vector<IRA::CString>& procedure) throw (ManagementErrors::ProcedureErrorExImpl,
-			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);*/
-	
+
 	/**
 	 * This will start the data transfer from the backend to the receiver. It will takes all the required operation or nothing if the schedule does not
 	 * requires changes from the previous scan
 	 */
 	void prepareFileWriting(const CSchedule::TRecord& rec) throw (ManagementErrors::ScheduleErrorExImpl,
 			ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl,
-			ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::CommandLineErrorExImpl,ManagementErrors::ProcedureErrorExImpl);
+			ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::BackendProcedureErrorExImpl);
 	
 	/**
 	 * This method will abort the current scan and force the executor to start from the next one

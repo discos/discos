@@ -377,17 +377,11 @@ int main(int argc, char *argv[]) {
 			if (inputCommand=="exit") break;
 			if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
 				try {
-					IRA::CString outputAnswer=component->command((const char *)inputCommand);
+					char * outputAnswer;
+					component->command((const char *)inputCommand,outputAnswer);
 					output_label->setValue(outputAnswer);
+					CORBA::string_free(outputAnswer);
 					output_label->Refresh();
-				}
-				catch (ManagementErrors::CommandLineErrorEx& ex) {
-					ManagementErrors::CommandLineErrorExImpl impl(ex);
-					IRA::CString Message;
-					Message=impl.getErrorMessage();
-					output_label->setValue(Message);
-					output_label->Refresh();
-					impl.log(LM_ERROR);
 				}
 				catch (CORBA::SystemException& ex) {
 					_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"Main()");

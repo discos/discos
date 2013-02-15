@@ -47,8 +47,7 @@ void CScheduleExecutor::runLoop()
 		switch (m_stage) {
 			case INIT: { // run once at schedule start, it runs the init procedure, in case of errors..schedule execution is continued
 				IRA::CString procName;
-				ACS::stringSeq proc;
-				if (!m_schedule->getInitProc(procName,proc)) { //get the procedure
+				if (!m_schedule->getInitProc(procName)) { //get the procedure
 					//if init proc fails...warn but go ahead
 					_EXCPT(ManagementErrors::ScheduleErrorExImpl,dummy,"CScheduleExecutor::runLoop()");
 					dummy.setReason((const char *)m_schedule->getLastError());
@@ -58,11 +57,11 @@ void CScheduleExecutor::runLoop()
 				else if (procName!=_SCHED_NULLTARGET) {  
 					m_goAhead=false;
 					try {
-						m_core->injectProcedure(procName,proc,&procedureCallBack,this);
+						m_core->executeProcedure(procName,&procedureCallBack,this);
 						m_stage=STARTTIME_WAIT;
 						break; // if the injection was correct we need to wait for the procedure termination...so exit from the cycle.
 					}
-					catch (ManagementErrors::ProcedureErrorExImpl& ex) {
+					catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
 						ex.log(LM_WARNING);
 						m_core->changeSchedulerStatus(Management::MNG_WARNING); 
 						// m_goAhead=true; the callback procedure should be called anyway, also in case of errors
@@ -211,9 +210,10 @@ void CScheduleExecutor::runLoop()
 			}
 			case PRE_SCAN_PROC: { // It executed the pre scan procedure. In case of error the scheduled is continued	
 				ACS::stringSeq preProc;
+				WORD preProcArgs;
 				if (m_currentScan.preScan!=_SCHED_NULLTARGET) {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PRESCAN_PROCEDURE_IS_NOT_NULL"));
-					if (!m_schedule->getPreScanProcedureList()->getProcedure(m_currentScan.preScan,preProc)) {
+					if (!m_schedule->getPreScanProcedureList()->getProcedure(m_currentScan.preScan,preProc,preProcArgs)) {
 						_EXCPT(ManagementErrors::ScheduleErrorExImpl,dummy,"CScheduleExecutor::runLoop()");
 						dummy.setReason((const char *)m_schedule->getLastError());
 						m_core->changeSchedulerStatus(Management::MNG_WARNING);
@@ -229,10 +229,10 @@ void CScheduleExecutor::runLoop()
 							m_goAhead=false;
 							m_stage=SCAN_START;
 							try {
-								m_core->injectProcedure(m_currentScan.preScan,preProc,&procedureCallBack,this);
+								m_core->executeProcedure(m_currentScan.preScan,&procedureCallBack,this);
 								break; //procedure injection is ok.....wait for it to finish
 							}
-							catch (ManagementErrors::ProcedureErrorExImpl& ex) {
+							catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
 								ex.log(LM_WARNING);
 								m_core->changeSchedulerStatus(Management::MNG_WARNING); 
 								// m_goAhead=true; the callback procedure should be called anyway, also in case of errors
@@ -241,9 +241,9 @@ void CScheduleExecutor::runLoop()
 						else {  // scheduler is not asked to wait for the procedure termination...inject the procedure and go on.
 							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"NON-BLOCKING_PRESCAN_PROCEDURE"));
 							try {
-								m_core->injectProcedure(m_currentScan.preScan,preProc,&procedureCallBack,this);
+								m_core->executeProcedure(m_currentScan.preScan,&procedureCallBack,this);
 							}
-							catch (ManagementErrors::ProcedureErrorExImpl& ex) {
+							catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
 								ex.log(LM_WARNING);
 								m_core->changeSchedulerStatus(Management::MNG_WARNING); 
 							}
@@ -346,9 +346,10 @@ void CScheduleExecutor::runLoop()
 			}
 			case POST_SCAN_PROC: { //Executes the post scan procedure..in case of error nothing is done. We try to keep it up.
 				ACS::stringSeq postProc;
+				WORD postProcArgs;
 				if (m_currentScan.postScan!=_SCHED_NULLTARGET) {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"POSTSCAN_PROCEDURE_IS_NOT_NULL"));
-					if (!m_schedule->getPostScanProcedureList()->getProcedure(m_currentScan.postScan,postProc)) {
+					if (!m_schedule->getPostScanProcedureList()->getProcedure(m_currentScan.postScan,postProc,postProcArgs)) {
 						_EXCPT(ManagementErrors::ScheduleErrorExImpl,dummy,"CScheduleExecutor::runLoop()");
 						dummy.setReason((const char *)m_schedule->getLastError());
 						m_core->changeSchedulerStatus(Management::MNG_WARNING);
@@ -364,10 +365,10 @@ void CScheduleExecutor::runLoop()
 							m_stage=SCAN_SELECTION;
 							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BLOCKING_POSTSCAN_PROCEDURE"));
 							try {
-								m_core->injectProcedure(m_currentScan.postScan,postProc,&procedureCallBack,this);
+								m_core->executeProcedure(m_currentScan.postScan,&procedureCallBack,this);
 								break; //procedure injection is ok.....wait for it to finish
 							}
-							catch (ManagementErrors::ProcedureErrorExImpl& ex) {
+							catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
 								ex.log(LM_WARNING);
 								m_core->changeSchedulerStatus(Management::MNG_WARNING); 
 								// m_goAhead=true; the callback procedure should be called anyway, also in case of errors
@@ -376,9 +377,9 @@ void CScheduleExecutor::runLoop()
 						else {  // scheduler is not asked to wait for the procedure termination...inject the procedure and go on.
 							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"NON-BLOCKING_PRESCAN_PROCEDURE"));
 							try {
-								m_core->injectProcedure(m_currentScan.postScan,postProc,&procedureCallBack,this);
+								m_core->executeProcedure(m_currentScan.postScan,&procedureCallBack,this);
 							}
-							catch (ManagementErrors::ProcedureErrorExImpl& ex) {
+							catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
 								ex.log(LM_WARNING);
 								m_core->changeSchedulerStatus(Management::MNG_WARNING); 
 							}							
@@ -503,6 +504,8 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	}
  	m_scheduleCounter=m_schedule->getSubScanCounter(subScanidentifier)-1; //need to point before the first scan in the schedule, the first scan has counter==1
  	m_core->changeLogFile((const char *)m_schedule->getBaseName()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
+ 	// load the procedures associated to the schedule
+ 	m_core->loadProceduresFile(m_schedule->getPreScanProcedureList());
  	m_active=true;
 	//save the scan number selected by user as start scan
  	m_startSubScan=m_scheduleCounter+1;
@@ -801,45 +804,9 @@ void CScheduleExecutor::closeBackend() throw (ComponentErrors::CouldntReleaseCom
  	}
 }
 
-/*void CScheduleExecutor::configureBackend(const std::vector<IRA::CString>& procedure) throw (ManagementErrors::ProcedureErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	char *answer;
-	unsigned i;
-	if (!CORBA::is_nil(m_backend)) {
-		for (i=0;i<procedure.size();i++) {
-			try {
-				answer=m_backend->command((const char *)procedure[i]);
-				CORBA::string_free(answer);
-			}
-			catch (ManagementErrors::CommandLineErrorEx& ex) {
-				ManagementErrors::CommandLineErrorExImpl exImpl(ex);
-				_ADD_BACKTRACE(ManagementErrors::ProcedureErrorExImpl,impl,ex,"CScheduleExecutor::configureBackend()");
-				impl.setCommand((const char *)procedure[i]);
-				impl.setLine(i);
-				impl.setProcedure("Backend Configuration");				
-				impl.setErrorMessage(exImpl.getErrorMessage());				
-				throw impl;
-			}
-			catch (CORBA::SystemException& ex) {
-				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CScheduleExecutor::configureBackend()");
-				impl.setName(ex._name());
-				impl.setMinor(ex.minor());
-				m_backendError=true;
-				throw impl;
-			}
-			catch (...) {
-				m_backendError=true;
-				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CScheduleExecutor::configureBackend()");
-				throw impl;
-			}			
-		}
-	}
-}*/
-
 void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw (
 		ManagementErrors::ScheduleErrorExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::CommandLineErrorExImpl,ManagementErrors::ProcedureErrorExImpl)
+		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::BackendProcedureErrorExImpl)
 {
 	std::vector<IRA::CString> command;
  	IRA::CString bckInstance,outputFileName;
@@ -873,7 +840,7 @@ void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw 
  	// we have 4 cases: 1) start of a scan 2) first scan 3) first iteration after an error 4) middle of a scan.
  	// cases 2 and 3 are the same as the scheduler is reset, so the procedure (if not NULL) is retrieved, the components loaded, the backend configured and the transfer enabled
  	// case 1 : the transfer is disabled, the procedure (if not NULL) retrieved, if it is different from the previous one , component are loaded(if necessary), bck configured and transfer enabled again
- 	// case 4: we are in this case if the currentBackendProcedure is the same of the current subscan...so notghing to do
+ 	// case 4: we are in this case if the currentBackendProcedure is the same of the current subscan...so nothing to do
  	if (m_lastScanID!=0) {  //if this is the first scan...nothing to do
 		// otherwise if current scanid is different from the previous one, or the current scan is consequence of a schedule rewind (to deal with the case just one scan is present in the schedule and it will be executed continuously)
 		if ((m_lastScanID!=m_currentScan.scanid) || (rec.rewind)) {
@@ -891,7 +858,8 @@ void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw 
  	 		}
  	 		openBackend(bckInstance); // if the case it also close the current one, otherwise it does nothing
  	 		openWriter(rec.writerInstance); // if the case it also close the current one, otherwise it does nothing
- 	 		CCore::configureBackend(m_backend.in(),m_backendError,command);
+ 	 		//throw ManagementErrors::BackendProcedureErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl
+ 	 		CCore::configureBackend(m_backend.in(),m_backendError,rec.backendProc, command);
  	 		m_currentBackendProcedure=rec.backendProc;
  	 	}
  	 	CCore::enableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_streamConnected);

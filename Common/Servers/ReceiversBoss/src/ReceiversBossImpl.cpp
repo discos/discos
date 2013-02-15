@@ -67,14 +67,14 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		throw dummy;
 	}
 	m_core->initialize(getContainerServices(),&m_config);
-	m_parser->add<0>("receiversPark",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::park));
-	m_parser->add<1>("receiversSetup",new function1<CRecvBossCore,non_constant,void_type,I<string_type> >(m_core,&CRecvBossCore::setupReceiver));
-	m_parser->add<1>("receiversMode",new function1<CRecvBossCore,non_constant,void_type,I<string_type> >(m_core,&CRecvBossCore::setMode));
-	m_parser->add<0>("calOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::calOn));
-	m_parser->add<0>("calOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::calOff));
-	m_parser->add<1>("setLO",new function1<CRecvBossCore,non_constant,void_type,I<doubleSeq_type> >(m_core,&CRecvBossCore::setLO));	
-	m_parser->add<0>("antennaUnitOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOn));
-	m_parser->add<0>("antennaUnitOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOff));
+	m_parser->add("receiversPark",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::park),0);
+	m_parser->add("receiversSetup",new function1<CRecvBossCore,non_constant,void_type,I<string_type> >(m_core,&CRecvBossCore::setupReceiver),1);
+	m_parser->add("receiversMode",new function1<CRecvBossCore,non_constant,void_type,I<string_type> >(m_core,&CRecvBossCore::setMode),1);
+	m_parser->add("calOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::calOn),0);
+	m_parser->add("calOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::calOff),0);
+	m_parser->add("setLO",new function1<CRecvBossCore,non_constant,void_type,I<doubleSeq_type> >(m_core,&CRecvBossCore::setLO),1);
+	m_parser->add("antennaUnitOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOn),0);
+	m_parser->add("antennaUnitOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOff),0);
 	ACS_LOG(LM_FULL_INFO,"ReceiversBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
@@ -323,23 +323,23 @@ CORBA::Double ReceiversBossImpl::getTaper(CORBA::Double freq,CORBA::Double bandW
 	}	
 }
 
-char *ReceiversBossImpl::command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean ReceiversBossImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
 {
-	AUTO_TRACE("ReceiversBossImpl::command()");
 	IRA::CString out;
-	IRA::CString in;
-	in=IRA::CString(cmd);
+	bool res;
 	try {
-		m_parser->run(in,out);
+		m_parser->run(cmd,out);
+		res=true;
 	}
 	catch (ParserErrors::ParserErrorsExImpl &ex) {
-		_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"ReceiversBossImpl::command()");
-		impl.setCommand(cmd);
-		impl.setErrorMessage((const char *)out);
-		impl.log(LM_DEBUG);
-		throw impl.getCommandLineErrorEx();
+		res=false;
 	}
-	return CORBA::string_dup((const char *)out);	
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_ERROR); // the errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface, while the parser errors are never logged.
+		res=false;
+	}
+	answer=CORBA::string_dup((const char *)out);
+	return res;
 }
 
 

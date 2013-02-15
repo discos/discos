@@ -1,4 +1,3 @@
-// $Id: BackendClient.cpp,v 1.4 2010-06-16 10:27:51 a.orlati Exp $
 
 #include "BackendClient.h"
 #include <ManagementErrors.h>
@@ -466,17 +465,11 @@ int main(int argc, char *argv[]) {
 			if (inputCommand=="exit") break;
 			if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
 				try {
-					IRA::CString outputAnswer=component->command((const char *)inputCommand);
+					char * outputAnswer;
+					component->command((const char *)inputCommand,outputAnswer);
 					output_label->setValue(outputAnswer);
+					CORBA::string_free(outputAnswer);
 					output_label->Refresh();
-				}
-				catch (ManagementErrors::CommandLineErrorEx& ex) {
-					ManagementErrors::CommandLineErrorExImpl impl(ex);
-					IRA::CString Message;
-					Message=impl.getErrorMessage();
-					output_label->setValue(Message);
-					output_label->Refresh();
-					impl.log(LM_ERROR);
 				}
 				catch (CORBA::SystemException& ex) {
 					_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"Main()");
@@ -491,7 +484,7 @@ int main(int argc, char *argv[]) {
 				catch(...) {
 					_EXCPT(ClientErrors::CouldntPerformActionExImpl,impl,"Main()");
 					impl.setAction("command()");
-					impl.setReason("comunication error to component server");
+					impl.setReason("communication error to component server");
 					IRA::CString Message;
 					_EXCPT_TO_CSTRING(Message,impl);
 					output_label->setValue(Message);

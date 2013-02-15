@@ -260,13 +260,39 @@ public: // Operations
 	int Find(const char *str, int start) const;
 
 	/**
-	 * Replace all occurrences of a character with another one, starting from a position.
+	 * Replace the first occurrence of a character with another one, starting from a position.
 	 * @param ch1 character to replace
 	 * @param ch2 replacing character
 	 * @param start index of the first character
-	 * @return the number of replaced characters
+	 * @return the index of the replaced character, -1 if not substitutions were possible
 	*/
 	int Replace(char ch1,char ch2,int start=0);
+
+	/**
+	 * Replace the first occurrence of a token in the string with another one.
+	 * @param str1 original sub string
+	 * @param str2 new substring
+	 * return true if a substitution has been made
+	 */
+	bool  Replace(const char *str1,const char *str2);
+
+	/**
+	 * Replace the all occurrences of a character with another one, starting from a position.
+	 * @param ch1 character to replace
+	 * @param ch2 replacing character
+	 * @param start index of the first character
+	 * @return the number of the replaced characters
+	*/
+	int ReplaceAll(char ch1,char ch2,int start=0);
+
+	/**
+	 * Replace the all occurrences of a token in the string with another one.
+	 * @param str1 original sub string
+	 * @param str2 new substring
+	 * return the number of replaced tokens
+	 */
+	int  ReplaceAll(const char *str1,const char *str2);
+
 	/**
 	 * Removes all the leading spaces of the string.
 	 */

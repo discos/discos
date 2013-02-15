@@ -434,14 +434,45 @@ int CString::Replace(char ch1,char ch2,int start)
 	if (ch1==ch2) return -1;
 	if (!m_cpString) return -1;
 	if (start<0) start = 0;
-	int FirstPos=-1;
 	for (int i=start;i<m_iSize;i++) {
 		if (m_cpString[i]==ch1) {
 			m_cpString[i]=ch2;
-			if (FirstPos<0) FirstPos=i;
+			return i;
 		}
 	}
-	return FirstPos;
+	return -1;
+}
+
+bool  CString::Replace(const char *str1,const char *str2)
+{
+	char *p;
+	char *buffer;
+	if(!(p = strstr(m_cpString,str1)))  return false;
+	buffer=(char*) new char[m_iSize+strlen(str2)-strlen(str1)+1];
+	strncpy(buffer,m_cpString,p-m_cpString);
+	buffer[p-m_cpString]=0;
+	sprintf(buffer+(p-m_cpString), "%s%s", str2, p+strlen(str1));
+	delete []m_cpString;
+	m_cpString=buffer;
+	m_iSize=strlen(m_cpString);
+	return true;
+}
+
+int CString::ReplaceAll(char ch1,char ch2,int start)
+{
+	int i=0;
+	int st=start;
+	while ((st=Replace(ch1,ch2,st))>0) {
+		i++;
+	}
+	return i;
+}
+
+int  CString::ReplaceAll(const char *str1,const char *str2)
+{
+	int i=0;
+	while (Replace(str1,str2)) { i++; }
+	return i;
 }
 
 int CString::ToInt() const

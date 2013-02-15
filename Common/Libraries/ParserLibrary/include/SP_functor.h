@@ -28,7 +28,7 @@ template<typename ifConst,typename ifNonConst> struct conditional<non_constant,i
 };
 
 /**
- * This template is used to specilize types into output or input/output parameters
+ * This template is used to specialize types into output or input/output parameters
  */
 template <class TYPE> class O
 {
@@ -44,7 +44,7 @@ public:
 };
 
 /**
- * This template is used to specilize type into input parameters
+ * This template is used to specialize type into input parameters
  */
 template <class TYPE> class I
 {
@@ -60,7 +60,7 @@ public:
 };
 
 /**
- * This template is used to specilize type into input/output parameters
+ * This template is used to specialize type into input/output parameters
  */
 template <class TYPE> class IO
 {
@@ -76,7 +76,7 @@ public:
 };
 
 /**
- * This template is used to specilize type into input parameters
+ * This template is used to specialize type into input parameters
  */
 template <class TYPE> class RET
 {
@@ -91,23 +91,30 @@ public:
 class CBaseFunction
 {
 public:
-	CBaseFunction() { }
+	CBaseFunction(WORD ar) : m_arity(ar) {  }
+
 	virtual ~CBaseFunction() { }
+	/**
+	 * This function returns back the total number of parameters (output/input) that the function can manage.
+	 */
+	WORD arity() const { return m_arity; }
+protected:
+	WORD m_arity;
 };
 
 /**
- * This is the special fuction wrapper that contains the method to execute the function.
+ * This is the special function wrapper that contains the method to execute the function.
  */
-template<class OBJ> class CFunctor : public virtual CBaseFunction
+template<class OBJ> class CFunctor : public  CBaseFunction
 {
 public:
-	CFunctor(OBJ *object): CBaseFunction(), m_obj(object) { };
+	CFunctor(OBJ *object,WORD ar):   CBaseFunction(ar) , m_obj(object) { };
 	virtual ~CFunctor() { };
 	/**
 	 * This pure virtual method allows the owner of this class to call the function without knowing the details and the signature of the
 	 * function itself.
-	 * @param params parameters of the function as strings, hte numebr is not fixed but depends on the particular implementation of
-	 * @param parLen nuumber of string parameters 
+	 * @param params parameters of the function as strings, the number is not fixed but depends on the particular implementation of
+	 * @param parLen number of string parameters
 	 * the function. 
 	*/
 	virtual void call(IRA::CString *params,const WORD& parLen)=0;
@@ -119,6 +126,7 @@ public:
 	 * @return the number of value returned.
 	 */
 	virtual WORD get(IRA::CString *params)=0;
+
 protected:
 	OBJ *m_obj;
 };

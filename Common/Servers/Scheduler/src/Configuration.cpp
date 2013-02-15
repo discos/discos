@@ -37,7 +37,7 @@ CConfiguration::~CConfiguration()
 {
 }
 
-void CConfiguration::readProcedures(maci::ContainerServices *services,const IRA::CString& procedureFile,ACS::stringSeq& names,ACS::stringSeq *&bodies) throw (
+void CConfiguration::readProcedures(maci::ContainerServices *services,const IRA::CString& procedureFile,ACS::stringSeq& names,ACS::longSeq& args,ACS::stringSeq *&bodies) throw (
 		ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl)
 {
 	IRA::CError err;
@@ -45,6 +45,9 @@ void CConfiguration::readProcedures(maci::ContainerServices *services,const IRA:
 	m_procTable=new IRA::CDBTable(services,"Procedure",m_proceduresLocation+"/"+procedureFile);
 	if (!m_procTable->addField(err,"name",CDataField::STRING)) {
 		err.setExtra("Error adding field name",0);
+	}
+	if (!m_procTable->addField(err,"args",CDataField::LONGLONG)) {
+		err.setExtra("Error adding field args",0);
 	}
 	else if (!m_procTable->addField(err,"body",CDataField::STRING)) {
 		err.setExtra("Error adding field body",0);
@@ -66,8 +69,10 @@ void CConfiguration::readProcedures(maci::ContainerServices *services,const IRA:
 	m_procTable->First();
 	bodies=new ACS::stringSeq[m_procTable->recordCount()];
 	names.length(m_procTable->recordCount());
+	args.length(m_procTable->recordCount());
 	for (unsigned i=0;i<m_procTable->recordCount();i++) {
 		names[i]=(const char*)((*m_procTable)["name"]->asString());
+		args[i]=(long)((*m_procTable)["args"]->asLongLong());
 		extractBody((*m_procTable)["body"]->asString(),bodies[i]);
 		m_procTable->Next();
 	}
@@ -127,7 +132,7 @@ void CConfiguration::extractBody(const IRA::CString& body,ACS::stringSeq& comman
 	len=0;
 	while (CIRATools::getNextToken(body,start,'\n',token)) {
 		if (token.GetLength()>0) {
-			token.Replace('\t',' ');
+			token.ReplaceAll('\t',' ');
 			token.RTrim();
 			token.LTrim();
 			commands[len]=(const char *)token;

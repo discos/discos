@@ -46,12 +46,13 @@ public:
 	 * This function is called in order to read a table in the CDB that stores a procedure file. 
 	 * @param procedureFile file name, inside the CDB, that must be loaded
 	 * @param names list of the procedures names (output)
+	 * @param args for each procedure, indicates the number of arguments of the procedure (output)
 	 * @param bodies this array stores the list of commands for each procedure. The Nth position contains the commands of the Nth procedure name. It must be freed by the caller.
 	 * @param services pointer to the container services object
 	 * @throw ComponentErrors::CDBAccessExImpl
 	 * @throw ComponentErrors::IRALibraryResourceExImpl
 	*/
-	void readProcedures(maci::ContainerServices *services,const IRA::CString& procedureFile,ACS::stringSeq& names,ACS::stringSeq *&bodies) throw (
+	void readProcedures(maci::ContainerServices *services,const IRA::CString& procedureFile,ACS::stringSeq& names,ACS::longSeq& args,ACS::stringSeq *&bodies) throw (
 			ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl);
 	
 	/**
@@ -140,8 +141,6 @@ public:
 	 */
 	const bool getCheckProjectCode() const { return m_checkProjectCode; }
 
-
-	                                           
 private:
 	IRA::CString m_schedDir;
 	IRA::CString m_dataDir;

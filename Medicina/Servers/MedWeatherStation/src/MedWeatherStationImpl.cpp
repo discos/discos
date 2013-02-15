@@ -15,11 +15,6 @@ MedWeatherStationImpl::MedWeatherStationImpl(
 		       m_pressure(this)
 {	
         AUTO_TRACE("MedWeatherStationImpl::MedWeatherStationImpl");
-
-
-
-	 
-
 }
 
 MedWeatherStationImpl::~MedWeatherStationImpl()
@@ -27,9 +22,6 @@ MedWeatherStationImpl::~MedWeatherStationImpl()
 
         AUTO_TRACE("MedWeatherStationImpl::~MedWeatherStationImpl");
 //	deleteAll();
-
-    
-
 }
 
 
@@ -37,32 +29,27 @@ void MedWeatherStationImpl::cleanUp() throw (ACSErr::ACSbaseExImpl)
 {
 	    CharacteristicComponentImpl::cleanUp();
         AUTO_TRACE("MedWeatherStationImpl::cleanUp()");
-
-
 }
 
 
-char * MedWeatherStationImpl::command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean MedWeatherStationImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
 {
-	{
-		AUTO_TRACE("MedWeatherStationImpl::command()");
-		IRA::CString out;
-		IRA::CString in;
-		CSecAreaResourceWrapper<MeteoSocket> line=m_socket->Get();
-		in=IRA::CString(cmd);
-		try {
-			m_parser->run(in,out);
-		}
-		catch (ParserErrors::ParserErrorsExImpl &ex) {
-			_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"MedWeatherStationImpl::command()");
-			impl.setCommand(cmd);
-			impl.setErrorMessage((const char *)out);
-			impl.log(LM_DEBUG);
-			throw impl.getCommandLineErrorEx();
-		}
-		return CORBA::string_dup((const char *)out);
+	IRA::CString out;
+	bool res;
+	CSecAreaResourceWrapper<MeteoSocket> line=m_socket->Get();
+	try {
+		m_parser->run(cmd,out);
+		res=true;
 	}
-
+	catch (ParserErrors::ParserErrorsExImpl &ex) {
+		res=false;
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_ERROR); // the errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface, while the parser errors are never logged.
+		res=false;
+	}
+	answer=CORBA::string_dup((const char *)out);
+	return res;
 }
 
 
@@ -250,10 +237,10 @@ void MedWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 
 		m_parser=new CParser<MeteoSocket>(sock,10);
-		m_parser->add<0>("getWindSpeed",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getWindSpeed) );
-		m_parser->add<0>("getTemperature",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getTemperature) );
-		m_parser->add<0>("getHumidity",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getHumidity) );
-		m_parser->add<0>("getPressure",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getPressure) );
+		m_parser->add("getWindSpeed",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getWindSpeed),0 );
+		m_parser->add("getTemperature",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getTemperature),0 );
+		m_parser->add("getHumidity",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getHumidity),0 );
+		m_parser->add("getPressure",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getPressure),0 );
 
 
 

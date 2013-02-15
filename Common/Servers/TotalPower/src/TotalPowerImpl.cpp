@@ -160,24 +160,24 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		throw dummy;
 	}
 	// command parser configuration
-	m_parser->add<1>("integration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(line,&CCommandLine::setIntegration) );
-	m_parser->add<1>("calSwitch",new function1<CCommandLine,non_constant,void_type,I<long_type> >(line,&CCommandLine::activateCalSwitching) );
-	m_parser->add<7>("setSection",
+	m_parser->add("integration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(line,&CCommandLine::setIntegration),1);
+	m_parser->add("calSwitch",new function1<CCommandLine,non_constant,void_type,I<long_type> >(line,&CCommandLine::activateCalSwitching),1 );
+	m_parser->add("setSection",
 			new function7<CCommandLine,non_constant,void_type,I<long_type>,I<double_type>,I<double_type>,I<long_type>,I<enum_type<PolarizationToString> >,I<double_type>,I<long_type> >
-			(line,&CCommandLine::setConfiguration) );
-	m_parser->add<2>("setAttenuation", new function2<CCommandLine,non_constant,void_type,I<long_type>,I<double_type> >(line,&CCommandLine::setAttenuation) );
-	m_parser->add<1>("enable",new function1<CCommandLine,non_constant,void_type,I<longSeq_type> >(line,&CCommandLine::setEnabled) );
-	m_parser->add<0>("getIntegration",new function1<CCommandLine,constant,void_type,O<long_type> >(line,&CCommandLine::getIntegration) );
-	m_parser->add<0>("getFrequency",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getFrequency) );
-	m_parser->add<0>("getSampleRate",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getSampleRate) );
-	m_parser->add<0>("getBins",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(line,&CCommandLine::getBins) );
-	m_parser->add<0>("getPolarization",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(line,&CCommandLine::getPolarization) );
-	m_parser->add<0>("getBandWidth",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getBandWidth) );
-	m_parser->add<0>("getAttenuation",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getAttenuation) );	
-	m_parser->add<0>("getTpi",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getTpi) );
-	m_parser->add<0>("getZero",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getZero) );
-	m_parser->add<0>("getTime",new function1<CCommandLine,non_constant,void_type,O<time_type> >(line,&CCommandLine::getTime) );
-	m_parser->add<1>("initialize",new function1<CCommandLine,non_constant,void_type,I<string_type> >(line,&CCommandLine::setup) );
+			(line,&CCommandLine::setConfiguration),7 );
+	m_parser->add("setAttenuation", new function2<CCommandLine,non_constant,void_type,I<long_type>,I<double_type> >(line,&CCommandLine::setAttenuation),2 );
+	m_parser->add("enable",new function1<CCommandLine,non_constant,void_type,I<longSeq_type> >(line,&CCommandLine::setEnabled),1 );
+	m_parser->add("getIntegration",new function1<CCommandLine,constant,void_type,O<long_type> >(line,&CCommandLine::getIntegration),0 );
+	m_parser->add("getFrequency",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getFrequency),0 );
+	m_parser->add("getSampleRate",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getSampleRate),0 );
+	m_parser->add("getBins",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(line,&CCommandLine::getBins),0 );
+	m_parser->add("getPolarization",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(line,&CCommandLine::getPolarization),0 );
+	m_parser->add("getBandWidth",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getBandWidth),0 );
+	m_parser->add("getAttenuation",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getAttenuation),0 );
+	m_parser->add("getTpi",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getTpi),0 );
+	m_parser->add("getZero",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getZero),0 );
+	m_parser->add("getTime",new function1<CCommandLine,non_constant,void_type,O<time_type> >(line,&CCommandLine::getTime),0 );
+	m_parser->add("initialize",new function1<CCommandLine,non_constant,void_type,I<string_type> >(line,&CCommandLine::setup),1 );
 		
 	threadPar.sender=this;
 	threadPar.command=m_commandLine;
@@ -759,24 +759,25 @@ void TotalPowerImpl::setIntegration(CORBA::Long Integration) throw (CORBA::Syste
 	}		
 }
 
-char * TotalPowerImpl::command(const char *configCommand)  throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean TotalPowerImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
 {
 	AUTO_TRACE("TotalPowerImpl::command()");
+
 	IRA::CString out;
-	IRA::CString in;
-	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	in=IRA::CString(configCommand);
+	bool res;
 	try {
-		m_parser->run(in,out);
+		m_parser->run(cmd,out);
+		res=true;
 	}
 	catch (ParserErrors::ParserErrorsExImpl &ex) {
-		_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"TotalPowerImpl::command()");
-		impl.setCommand(configCommand);
-		impl.setErrorMessage((const char *)out);
-		impl.log(LM_DEBUG);
-		throw impl.getCommandLineErrorEx();
+		res=false;
 	}
-	return CORBA::string_dup((const char *)out);	
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_ERROR); // the errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface, while the parser errors are never logged.
+		res=false;
+	}
+	answer=CORBA::string_dup((const char *)out);
+	return res;
 }
 
 _PROPERTY_REFERENCE_CPP(TotalPowerImpl,ACS::ROuLongLong,m_ptime,time);

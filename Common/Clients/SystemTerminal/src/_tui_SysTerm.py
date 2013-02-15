@@ -111,15 +111,8 @@ def main():
             stop=True
         elif cmd:
             try:
-                out=component.command(cmd)
-                print out
-                # this is thrown in case an error occurs during parsing or command execution, we do not want to do nothing since 
-                # the error is reported to the user throught the returned string
-            except ManagementErrors.CommandLineErrorEx, cmdEx:
-                cmdError = ManagementErrorsImpl.CommandLineErrorExImpl(exception= cmdEx, create=0)
-                out=cmdError.getErrorMessage()
-                cmdError.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
-                print out
+                res=component.command(cmd)
+                print res[1]
             except Exception, ex:
                 newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
                 newEx.setAction("command()")

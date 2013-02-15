@@ -9,6 +9,8 @@
 /*                                                                                                               */
 /* Who                                when            What                                                       */
 /* Andrea Orlati(a.orlati@ira.inaf.it)  11/09/2008      Creation                                                  */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  1101/2013       changed command method according new CommandInterpreter interface                  */
+
 
 #ifndef __cplusplus
 #error This is a C++ include file and cannot be used from plain C
@@ -76,10 +78,10 @@ using namespace baci;
 
 /** 
  * @mainpage Medicina total power backend component documentation
- * @date 18/02/2011
- * @version 1.6.0
+ * @date 12/02/2013
+ * @version 1.61.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.0.2
  * @remarks compiler version is 3.4.6 
 */
 
@@ -249,13 +251,13 @@ public:
 
 	/**
 	 * This method allows the client to interface the component by sending text commands. The command is parsed and executed according the
-	 * defined command syntax and grammar. This method is required to implement the <i>Managment::CommandInterpreter</i> interface.
+	 * defined command syntax and grammar. This method is required to implement the <i>Management::CommandInterpreter</i> interface.
      * @throw CORBA::SystemException
-	 * @throw ManagementErrors::CommandLineErrorEx 
-	 * @param configCommand this string contains the string that will be executed
-	 * @return  answer  the string that reports the command execution results or in case, errors
+	 * @param cmd string contains the string that will be executed
+	 * @param answer  the string that reports the command execution results or in case, errors messages
+	 * @return true if the command was executed correctly
 	 */
-    virtual char * command(const char *configCommand) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);    
+    virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
     
     /**
      * Call this function to set the current time (from the local computer) into the backend. 

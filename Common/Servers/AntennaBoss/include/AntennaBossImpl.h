@@ -14,6 +14,7 @@
 /*  Andrea Orlati(aorlati@ira.inaf.it) 13/09/2010      Major update during several weeks, compliant to all fetures of the IDL interface, and all capabilities implemented  */
 /*  Andrea Orlati(aorlati@ira.inaf.it) 10/10/2011      Given implementation of the the method getFluxes() and attribute targetFlux*/
 /*  Andrea Orlati(aorlati@ira.inaf.it) 15/02/2012      Given implementation of the the method getApparentCoordinates */
+/*  Andrea Orlati(aorlati@ira.inaf.it) 08/02/2013     implemented again the  command method*/
 
 
 #ifndef __cplusplus
@@ -37,10 +38,10 @@
 
 /** 
  * @mainpage AntennaBoss component Implementation 
- * @date 10/10/2011
- * @version 1.44.0
+ * @date 08/02/2013
+ * @version 1.5.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
- * @remarks Last compiled under ACS 8.0.2
+ * @remarks Last compiled under ACS 8.2.0
  * @remarks compiler version is 4.1.2
 */
 
@@ -474,12 +475,12 @@ public:
 	 * This method implements the command line interpreter. the interpreter allows to ask for services or to issue commands
 	 * to the sub-system by human readable command lines.
 	 * @param cmd string that contains the command line
-	 * @return the string that contains the answer to the command if succesful. It must be freed by the caller.
+	 * @param answer string that contains the answer to the command.
+	 * @return true if the operation is successful, false otherwise
 	 * @throw CORBA::SystemException
-	 * @throw ManagementErrors::CommandLineErrorEx Thrown when the command execution or parsing result in an error. It contains the error message
-	 * @todo to be implemented yet.
 	 */
-	virtual char * command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);
+	virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
+	//virtual char * command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);
 	
 	/**
 	 * This method allows the user to set the offsets for the given frame. The offset are considered only if a tracking has already

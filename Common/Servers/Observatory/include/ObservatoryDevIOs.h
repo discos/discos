@@ -56,65 +56,65 @@ public:
 	{
 		switch (m_Property) {
 			case UNIVERSALTIME : {
-				m_PropertyName=CString("Current Time");
+				m_PropertyName=IRA::CString("Current Time");
 				break;
 			}
 			case JULIANDAY : {
-				m_PropertyName=CString("Julian Day");
+				m_PropertyName=IRA::CString("Julian Day");
 				break;
 			}
 			case GAST : {
-				m_PropertyName=CString("Apparent GST");
+				m_PropertyName=IRA::CString("Apparent GST");
 				break;
 			}
 			case LST : {
-				m_PropertyName=CString("Local Sidereal Time");
+				m_PropertyName=IRA::CString("Local Sidereal Time");
 				break;
 			}			
 			case GEOMODEL : {
-				m_PropertyName=CString("Geodetic Model");
+				m_PropertyName=IRA::CString("Geodetic Model");
 				break;
 			}
 			case LONGITUDE : {
-				m_PropertyName=CString("Site Longitude");
+				m_PropertyName=IRA::CString("Site Longitude");
 				break;
 			}
 			case LATITUDE : {
-				m_PropertyName=CString("Site Latitude");
+				m_PropertyName=IRA::CString("Site Latitude");
 				break;
 			}
 			case HEIGHT : {
-				m_PropertyName=CString("Site Height");
+				m_PropertyName=IRA::CString("Site Height");
 				break;
 			}
 			case XGEOD : {
-				m_PropertyName=CString("X geodetic coordinate");
+				m_PropertyName=IRA::CString("X geodetic coordinate");
 				break;
 			}
 			case YGEOD : {
-				m_PropertyName=CString("Y geodetic coordinate");
+				m_PropertyName=IRA::CString("Y geodetic coordinate");
 				break;
 			}
 			case ZGEOD : {
-				m_PropertyName=CString("Z geodetic coordinate");
+				m_PropertyName=IRA::CString("Z geodetic coordinate");
 				break;
 			}
 			case YPOLAR : {
-				m_PropertyName=CString("Y polar motion angle");
+				m_PropertyName=IRA::CString("Y polar motion angle");
 				break;
 			}
 			case XPOLAR : {
-				m_PropertyName=CString("X polar motion angle");
+				m_PropertyName=IRA::CString("X polar motion angle");
 				break;
 			}				
 			case DUT1 : {
-				m_PropertyName=CString("Delta UT1");
+				m_PropertyName=IRA::CString("Delta UT1");
 				break;
 			}			
 		}
 		IRA::CString trace("ObsDevIO::ObsDevIO() ");
 		trace+=m_PropertyName;
-		m_data=static_cast<CSecureArea<T_DevDataBlock>* >(data);
+		m_data=static_cast<IRA::CSecureArea<T_DevDataBlock>* >(data);
 		AUTO_TRACE((const char*)trace);
 	}
 
@@ -141,7 +141,7 @@ public:
 	
 	/**
 	 * Used to read the property value.
-	 * @param timestamp epoch of the complitions of the operation
+	 * @param timestamp epoch of the completions of the operation
 	*/ 
 	T read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
@@ -152,7 +152,7 @@ public:
 		switch (m_Property) {
 			case UNIVERSALTIME : {
 				TIMEVALUE now;
-				CDateTime clock;
+				IRA::CDateTime clock;
 				clock.setCurrentDateTime();
 				clock.getDateTime(now);
 				m_Value=(T)now.value().value;
@@ -161,18 +161,18 @@ public:
 			case JULIANDAY : {
 				TIMEVALUE now;
 				IRA::CIRATools::getTime(now);
-				CDateTime clock(now);
+				IRA::CDateTime clock(now);
 				m_Value=(T)clock.getJD();
 				break;				
 			}
 			case GAST : {
 				TIMEDIFFERENCE now;
-				CDateTime clock;
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+				IRA::CDateTime clock;
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				clock.setDut1(data->dut1);
 				clock.setCurrentDateTime();
 				// get the CDateTime object that contains the Greenwich sidereal time
-				CDateTime nGST=clock.GST((data->site));
+				IRA::CDateTime nGST=clock.GST((data->site));
 				// get the corrisponding TIMEVALUE 
 				nGST.getDateTime(now);
 				m_Value=(T)now.value().value;
@@ -180,63 +180,63 @@ public:
 			}
 			case LST : {
 				TIMEDIFFERENCE now;
-				CDateTime clock;
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+				IRA::CDateTime clock;
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				clock.setDut1(data->dut1);
 				clock.setCurrentDateTime();
 				// get the CDateTime object that contains the Greenwich sidereal time
-				CDateTime LST=clock.LST((data->site));
+				IRA::CDateTime LST=clock.LST((data->site));
 				LST.getDateTime(now);
 				m_Value=(T)now.value().value;								
 				break;
 			}			
 			case GEOMODEL : {				
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				m_Value=(T)ObservatoryImpl::GeodeticModel2IDL((data->site).getEllipsoid());
 				break;				
 			}
 			case LONGITUDE : {
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				m_Value=(T)(data->site.getLongitude()*DR2D);
 				break;
 			}
 			case LATITUDE : {
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();				
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				m_Value=(T)(data->site.getLatitude()*DR2D);				
 				break;
 			}
 			case HEIGHT : {
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();				
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				m_Value=(T)(data->site.getHeight());				
 				break;
 			}
 			case XGEOD : {
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();				
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				m_Value=(T)(data->site.getXPos());							
 				break;
 			}
 			case YGEOD : {
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();				
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				m_Value=(T)(data->site.getYPos());							
 				break;
 			}
 			case ZGEOD : {
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();				
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				m_Value=(T)(data->site.getZPos());							
 				break;
 			}
 			case YPOLAR : {
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				m_Value=(T)(data->site.getYPoleMotion());	
 				break;
 			}
 			case XPOLAR : {
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				m_Value=(T)(data->site.getXPoleMotion());					
 				break;
 			}
 			case DUT1 : {
-				CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+				IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 				m_Value=(T)data->dut1;
 				break;
 			}														
@@ -255,37 +255,37 @@ public:
 		trace+=m_PropertyName;
 		AUTO_TRACE((const char*)trace);
 		if (m_Property==LONGITUDE) { 
-			CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+			IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 			m_Value=value;  
 			data->site.setLongitude(m_Value*DD2R);
 		}
 		else if (m_Property==LATITUDE) {
-			CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+			IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 			m_Value=value;				
 			data->site.setLatitude(m_Value*DD2R);				
 		}
 		else if (m_Property==HEIGHT) {
-			CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();				
+			IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 			m_Value=value;
 			data->site.setHeight(m_Value);				
 		} 
 		else if (m_Property==GEOMODEL) {
-			CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();				
+			IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 			m_Value=value;
 			data->site.setEllipsoid(ObservatoryImpl::IDL2GeodeticModel((Antenna::TGeodeticModel)value));		
 		}	
 		else if (m_Property==DUT1) {
-			CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();				
+			IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 			m_Value=value;
 			data->dut1=m_Value;			
 		}
 		else if (m_Property==XPOLAR) {
-			CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+			IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 			m_Value=value;
 			data->site.setXPoleMotion(m_Value);
 		}
 		else if (m_Property==YPOLAR) {
-			CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
+			IRA::CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();
 			m_Value=value;
 			data->site.setYPoleMotion(m_Value);
 		}	
@@ -296,8 +296,8 @@ public:
 private:
 	T m_Value;
 	TLinkedProperty m_Property;
-	CString m_PropertyName;
-	CSecureArea<T_DevDataBlock>* m_data;
+	IRA::CString m_PropertyName;
+	IRA::CSecureArea<T_DevDataBlock>* m_data;
 };
 
 #endif /*!_H*/

@@ -3,7 +3,6 @@
 
 /* **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id: ObservatoryImpl.h,v 1.9 2011-06-21 16:39:05 a.orlati Exp $                                                                                                 */
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
@@ -22,10 +21,10 @@
 
 /** 
  * @mainpage Observatory component documentation
- * @date 13/09/2010
- * @version 1.0.0
+ * @date 06/02/2013
+ * @version 1.01.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.2.0
  * @remarks compiler version is 4.1.2
 */
 #include <ObservatoryS.h>
@@ -36,19 +35,19 @@
 #include <baciROdouble.h>
 #include <baciROstring.h>
 #include <enumpropROImpl.h>
+#include <String.h>
 #include <SecureArea.h>
 #include <Site.h>
 #include <DateTime.h>
 
 using namespace baci;
 using namespace maci;
-using namespace IRA;
 
 /**
  * Data structure used as argument type for the DevIO.
 */
 typedef struct {
-	CSite site;           /*!< site information  */
+	IRA::CSite site;           /*!< site information  */
 	double dut1;          /*!< difference between utc and ut1 */
 } T_DevDataBlock;
 
@@ -226,14 +225,14 @@ public:
 	 * @param model local rapresentation
 	 * @return the remote rapresentation of the model
 	*/
-	static Antenna::TGeodeticModel GeodeticModel2IDL(const CSite::TGeodeticEllipsoid& model);
+	static Antenna::TGeodeticModel GeodeticModel2IDL(const IRA::CSite::TGeodeticEllipsoid& model);
 
 	/**
 	 * It converts from the remote rappresentation of the geoid model to the local one
 	 * @param model remote rapresentation (IDL file)
 	 * @return the local rapresentation of the model
 	*/	
-	static CSite::TGeodeticEllipsoid IDL2GeodeticModel(const Antenna::TGeodeticModel& model); 
+	static IRA::CSite::TGeodeticEllipsoid IDL2GeodeticModel(const Antenna::TGeodeticModel& model);
 
 
 private:
@@ -268,7 +267,7 @@ private:
 	/** geodeticModel property */
 	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Antenna::TGeodeticModel),POA_Antenna::ROTGeodeticModel> > m_pgeodeticModel;
 	/** Data structure, made thread safe */
-	CSecureArea<T_DevDataBlock>* m_data;
+	IRA::CSecureArea<T_DevDataBlock>* m_data;
 };
 
 #endif

@@ -97,7 +97,7 @@ public:
 	virtual	CORBA::Double getWindspeed() throw (CORBA::SystemException);
 
 
-	virtual char * command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);
+	virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
 
 
 	virtual void initialize() throw (ACSErr::ACSbaseExImpl);

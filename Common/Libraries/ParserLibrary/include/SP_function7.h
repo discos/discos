@@ -18,7 +18,6 @@ template<class OBJ,_sp_const_function CONST_SPEC,class RT,class A0,class A1,clas
 class function7: public _SP_FUNCTOR
 {
 public:
-	enum {arity=7};
 	typedef typename RET<RT>::return_type return_type;
 	typedef typename RET<RT>::argument return_argument;
 	typedef typename A0::argument arg0;
@@ -40,7 +39,7 @@ public:
 	typedef return_type (OBJ::*const_func_type)(param0,param1,param2,param3,param4,param5,param6) const;
 	typedef typename conditional<CONST_SPEC,const_func_type,normal_func_type>::type func_type;
 	
-	function7(OBJ *object, func_type func) : _SP_FUNCTOR(object),m_func(func) {};
+	function7(OBJ *object, func_type func) : _SP_FUNCTOR(object,7),m_func(func) {};
 	return_type operator()(arg0& pp0,arg1& pp1,arg2& pp2,arg3& pp3,arg4& pp4,arg5& pp5,arg6& pp6) const throw (ACSErr::ACSbaseExImpl) {
 		return (*_SP_FUNCTOR::m_obj.*m_func)( pp0,pp1,pp2,pp3,pp4,pp5,pp6); //can throw a generic exception
 	}
@@ -148,7 +147,6 @@ template<class OBJ,_sp_const_function CONST_SPEC,class A0,class A1,class A2,clas
 class function7<OBJ,CONST_SPEC,void_type,A0,A1,A2,A3,A4,A5,A6>: public _SP_FUNCTOR
 {
 public:
-	enum {arity=7};
 	typedef typename RET<void_type>::return_type return_type;
 	typedef typename RET<void_type>::argument return_argument;
 	typedef typename A0::argument arg0;
@@ -170,7 +168,7 @@ public:
 	typedef return_type (OBJ::*const_func_type)(param0,param1,param2,param3,param4,param5,param6) const;
 	typedef typename conditional<CONST_SPEC,const_func_type,normal_func_type>::type func_type;
 	
-	function7(OBJ *object, func_type func) : _SP_FUNCTOR(object),m_func(func) {};
+	function7(OBJ *object, func_type func) : _SP_FUNCTOR(object,7),m_func(func) {};
 	void  operator()(arg0& pp0,arg1& pp1,arg2& pp2,arg3& pp3,arg4& pp4,arg5& pp5,arg6& pp6) const throw (ACSErr::ACSbaseExImpl) {
 		(*_SP_FUNCTOR::m_obj.*m_func)( pp0,pp1,pp2,pp3,pp4,pp5,pp6); //can throw a generic exception
 	}

@@ -5,6 +5,40 @@
 #include <ComponentErrors.h>
 #include <IRATools.h>
 
+/*class A
+{
+public:
+	A(int  ar) : m_arity(ar) { printf ("A(ar)\n");   }
+	A() : m_arity(0) { printf ("A()\n");  }
+	virtual ~A() { }
+	int arity() const { return m_arity; }
+protected:
+	int m_arity;
+};
+
+template<class N> class B : public   A
+{
+public:
+	B() { printf ("B\n"); };
+	B(N object, int ar):  A(ar) , m_obj(object) { printf ("B(N,int)\n"); };
+	virtual ~B() { };
+	virtual void gino() { printf("arity is: %d\n",A::arity()); };
+protected:
+	N m_obj;
+};
+
+template <class NN,class HH>class C: public  virtual B<NN>
+{
+public:
+	C() { }
+	C(NN n, HH h): B<NN>(n,5),  m_h(h) { printf ("C\n"); }
+	virtual ~C() { }
+	void gino() { printf("arity is: %d\n",A::arity()); }
+protected:
+	HH m_h;
+};*/
+
+
 using namespace SimpleParser; 
 
 class CProva {
@@ -48,6 +82,10 @@ void testDegDeclination(double& dec) {
 };
 
 int main(int argc, char *argv[]) {
+
+/*	int i = 0;
+	C<double, double> uno(3.0, 10.0);
+	B<double> due(3.0,9);*/
 	CProva cl;
 	WORD pos;
 	IRA::CString params[3] = { "4", "ciao!!", "12.44" };
@@ -56,6 +94,9 @@ int main(int argc, char *argv[]) {
 	int_type intVal("4");
 	string_type strVal("ciao!!");
 	double_type dblVal("12.44");
+
+	/*uno.gino();
+	due.gino();*/
 
 	//
 	function1<CProva,non_constant,int_type,I<int_type> > funA(&cl,&CProva::stampa);

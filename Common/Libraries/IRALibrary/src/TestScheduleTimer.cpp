@@ -27,6 +27,12 @@ void oneShotCallBack(const ACS::Time& time,const void *par)
 	Runit=false;
 }
 
+
+void cleanUp(const void * par)
+{
+	printf("event cleanup called\n");
+}
+
 int main(int argc, char *argv[]) 
 {
 	char parameter[128];
@@ -60,11 +66,11 @@ int main(int argc, char *argv[])
 	}
 	// saves the current time
 	copy.value(now.value().value);
-	now.second(now.second()+15); // take 15 seconds from now
+	now.second(now.second()+7); // take 15 seconds from now
 	now.microSecond(300000); // and sets 300 millisecond to check the resolution of the timer
 	// ask the one shot event
 	sprintf(parameter,"command asked for %02d:%02d:%02d.%d",now.hour(),now.minute(),now.second(),now.microSecond()/1000);
-	if (!timer.schedule(&oneShotCallBack,now.value().value,0,parameter)) {
+	if (!timer.schedule(&oneShotCallBack,now.value().value,0,parameter,cleanUp)) {
 		printf("Error scheduling the one shot event\n");
 		return -1;
 	}
