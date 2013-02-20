@@ -161,8 +161,8 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
 		self.simpleClient = PySimpleClient()
 		try:
 			component= self.simpleClient.getComponent(self.componentname)
-                        scheduler= self.simpleClient.getComponent("MANAGEMENT/Gavino")
-                        antennaBoss =self.simpleClient.getComponent("ANTENNA/Boss")
+                        scheduler= self.simpleClient.getDefaultComponent("IDL:alma/Management/Scheduler:1.0")
+                        antennaBoss =self.simpleClient.getDefaultComponent("IDL:alma/Antenna/AntennaBoss:1.0")
 
 
      			self.thread=MyWorker([component,scheduler,antennaBoss,self.simpleClient])

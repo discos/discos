@@ -7,7 +7,7 @@
 
 <Configuration>
 	<configurationID>KKC</configurationID>
-	<sections>14</sections>
+	<sections>4</sections>
 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<beams>7</beams>

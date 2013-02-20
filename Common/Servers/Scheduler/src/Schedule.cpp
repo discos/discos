@@ -483,7 +483,7 @@ bool CProcedureList::getProcedure(const IRA::CString& conf,ACS::stringSeq& proc,
 
 bool CProcedureList::getProcedure(const WORD& pos,IRA::CString& conf,ACS::stringSeq& proc,WORD& args)
 {
-	if (pos>m_procedure.size()) {
+	if (pos>=m_procedure.size()) {
 		m_lastError.Format("Procedure does not exist %d",pos);
 		return false;
 	}

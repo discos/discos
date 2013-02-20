@@ -762,9 +762,10 @@ void TotalPowerImpl::setIntegration(CORBA::Long Integration) throw (CORBA::Syste
 CORBA::Boolean TotalPowerImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
 {
 	AUTO_TRACE("TotalPowerImpl::command()");
-
 	IRA::CString out;
 	bool res;
+	// this is a cheat....it forces the acquisition of the mutex before the parser. It works only because the parser has no async behaviour  configured
+	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
 		m_parser->run(cmd,out);
 		res=true;

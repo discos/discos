@@ -76,6 +76,18 @@ int main(int argc, char *argv[])
 		printf("Main schedule is uncomplete\n");
 		return -1;
 	}
+
+	/*WORD pospos=0;
+	IRA::CString namename;
+	ACS::stringSeq procproc;
+	WORD argsargs;
+	while(sched.getPostScanProcedureList()->getProcedure(pospos,namename,procproc,argsargs)) {
+		//m_parser->addExtraProcedure(name,loader->getFileName(),proc,args);
+		printf("%s, %d, %d\n",(const char *)namename,argsargs,procproc.length());
+		pospos++;
+	}*/
+
+
 	for (DWORD i=0;i<sched.getSubScansNumber();i++) {
 		if (!sched.getSubScan(i,rec)) {
 			printf("Schedule subscan %u is not present\n",i);
