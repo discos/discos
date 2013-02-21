@@ -629,12 +629,11 @@ void CEngineThread::gaussFit(const ACS::Time& now)
     		out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#xoffset ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     		m_file << (const char *) out;
     		m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << cos (m_LatPos) * m_LonOff * DR2D << " " << m_LatOff * DR2D << " " << cos (m_LatPos) * m_LonErr * DR2D << " " << m_LatErr * DR2D << " " << m_lonResult << " " << m_latResult << std::endl;
-		out="#xgain#";
-		m_file << (const char *) out << " " << (const char *)data->getSourceName() << " ";
-    		m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << m_lonAmp << " " << m_lonAmpErr << " " << m_latAmp << " " << m_latAmpErr << " " << m_lonFwhm * DR2D << " " << m_lonFwhmErr * DR2D << " " << m_latFwhm * DR2D << " " << m_latFwhmErr * DR2D \
-		  << " " << data->getSourceFlux() << " " << m_lonResult << " " << m_latResult << std::endl;
+    		out.Format("%04d.%03d.%02d:%02d:%02d.%02d#xgain", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+    		m_file << (const char *) out << " " << (const char *)data->getSourceName() << " ";
+    		m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << m_lonAmp << " " << m_lonAmpErr << " " << m_latAmp << " " << m_latAmpErr << " " << m_lonFwhm * DR2D << " " << m_lonFwhmErr * DR2D << " " \
+    				<< m_latFwhm * DR2D << " " << m_latFwhmErr * DR2D 	<< " " << data->getSourceFlux() << " " << m_lonResult << " " << m_latResult << std::endl;
     	}
-
     	ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %lf %d %d",
 			m_LonPos * DR2D, m_LatPos * DR2D, m_LonOff * DR2D, m_LatOff * DR2D, m_lonResult, m_latResult));
     	ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XOFFSETS = %lf %lf %lf %lf %lf %lf %d %d",
