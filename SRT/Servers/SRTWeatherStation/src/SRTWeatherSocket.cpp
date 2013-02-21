@@ -206,11 +206,11 @@ int i;
 
   for (i = 0; i < Depth; i++)
    md->setTag(string(el));
-   cout <<"TagName=" <<string(el)<<endl;
+//   cout <<"TagName=" <<string(el)<<endl;
 
   ACS_DEBUG_PARAM("SRTWeatherSocket::char_hndl()","TagName: %s",(const char *)el);
 
-  printf("\n");
+  //printf("\n");
   Depth++;
 
 
@@ -352,12 +352,12 @@ double SRTWeatherSocket::getTemperature()
 	receiveData(err,rdata);
 	if (rdata=="") 	receiveData(err,rdata);
 
-	cout << "mandato "<< CString("r ")+CString(COMMANDS[AIRTEMP])<<"-ricevuto "<< (const char *) rdata <<endl;
+//	cout << "mandato "<< CString("r ")+CString(COMMANDS[AIRTEMP])<<"-ricevuto "<< (const char *) rdata <<endl;
 	initParser(&m_weatherdata);
 	parse(rdata);
 	m_val=m_weatherdata.sensorMap[COMMANDS[AIRTEMP]];
-	cout << "read temp:" << m_val <<endl;
-	cout << "epoch value:" << m_weatherdata.sensorDate[COMMANDS[AIRTEMP]] <<endl;
+//	cout << "read temp:" << m_val <<endl;
+//	cout << "epoch value:" << m_weatherdata.sensorDate[COMMANDS[AIRTEMP]] <<endl;
 	return m_val;
 
 }

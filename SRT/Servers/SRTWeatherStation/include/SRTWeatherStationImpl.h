@@ -126,7 +126,7 @@ public:
 	 * @param configCommand this string contains the string that will be executed
 	 * @return  answer  the string that reports the command execution results or in case, errors
 	 */
-        virtual char * command(const char *configCommand) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);    
+        virtual CORBA::Boolean  command(const char *cmd,CORBA::String_out answer)   throw (CORBA::SystemException);
 
    
 	/**

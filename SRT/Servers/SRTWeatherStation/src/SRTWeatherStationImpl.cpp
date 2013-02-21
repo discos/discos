@@ -38,25 +38,36 @@ void SRTWeatherStationImpl::cleanUp() throw (ACSErr::ACSbaseExImpl)
 
 }
 
-char *  SRTWeatherStationImpl::command(const char *configCommand)  throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean  SRTWeatherStationImpl::command(const char *cmd,CORBA::String_out answer)   throw (CORBA::SystemException)
 {
 	AUTO_TRACE("SRTWeatherStationImpl::command()");
 	IRA::CString out;
 	IRA::CString in;
 	CSecAreaResourceWrapper<SRTWeatherSocket> line=m_socket->Get();
-	in=IRA::CString(configCommand);
+	//in=IRA::CString(configCommand);
+	bool res;
+
 	try {
-		m_parser->run(in,out);
+		m_parser->run(cmd,out);
+		res=true;
+
 	}
 	catch (ParserErrors::ParserErrorsExImpl &ex) {
-		_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"SRTWeatherStationImpl::command()");
-		impl.setCommand(configCommand);
-		impl.setErrorMessage((const char *)out);
-		impl.log(LM_DEBUG);
-		throw impl.getCommandLineErrorEx();
+		res=false;
+
+//		_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"SRTWeatherStationImpl::command()");
+//		impl.setCommand(configCommand);
+//		impl.setErrorMessage((const char *)out);
+//		impl.log(LM_DEBUG);
+//		throw impl.getCommandLineErrorEx();
+
 	}
-	return CORBA::string_dup((const char *)out);	
-}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+			ex.log(LM_ERROR); // the errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface, while the parser errors are never logged.
+			res=false;
+		}
+	answer=CORBA::string_dup((const char *)out);
+	return res;}
 
 
 
@@ -280,12 +291,13 @@ void SRTWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 //		m_controlThread_p->setResponseTime(60*1000000);
 		m_controlThread_p->resume();
 		m_parser=new CParser<SRTWeatherSocket>(sock,10); 
-		m_parser->add<0>("getWindSpeedAverage",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getWind) );
-		m_parser->add<0>("getTemperature",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getTemperature) );
-		m_parser->add<0>("getHumidity",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getHumidity) );
-		m_parser->add<0>("getPressure",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getPressure) );
-		m_parser->add<0>("getWinDir",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getWinDir) );
-		m_parser->add<0>("getWindSpeedPeak",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getWindSpeedPeak) );
+		m_parser->add("getWindSpeedAverage",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getWind),0 );
+//		m_parser->add<0>("getTemperature",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getTemperature) );
+
+		m_parser->add("getHumidity",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getHumidity),0 );
+		m_parser->add("getPressure",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getPressure),0 );
+		m_parser->add("getWinDir",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getWinDir),0 );
+		m_parser->add("getWindSpeedPeak",new function0<SRTWeatherSocket,non_constant,double_type >(sock,&SRTWeatherSocket::getWindSpeedPeak),0 );
 
 
 
