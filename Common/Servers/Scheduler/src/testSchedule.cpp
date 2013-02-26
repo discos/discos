@@ -54,6 +54,7 @@ IRA::CString toEquinox(const Antenna::TSystemEquinox& eq)
 int main(int argc, char *argv[]) 
 {
 	//DWORD scan;
+	double minEl,maxEl;
 	IRA::CString pre,post,target,outString;
 	std::vector<IRA::CString> procedure;
 	Management::TScanTypes type;
@@ -87,6 +88,8 @@ int main(int argc, char *argv[])
 		pospos++;
 	}*/
 
+	sched.getElevationLimits(minEl,maxEl);
+	printf("elevation limits are %lf,%lf\n",minEl,maxEl);
 
 	for (DWORD i=0;i<sched.getSubScansNumber();i++) {
 		if (!sched.getSubScan(i,rec)) {

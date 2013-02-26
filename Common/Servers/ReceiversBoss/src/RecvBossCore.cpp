@@ -226,7 +226,7 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 	IRA::CString msg;
 	WORD len;
 	double trueValue;
-	double loAmp[4]={-55.245,11.413,-0.7944,0.0189};
+	double loAmp[4]={-55.24524,11.41288,-0.79437,0.01894};
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (lo.length()==0) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setLO()");
@@ -246,6 +246,9 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 		trueValue=lo[0]-5900.0;
 		m_LO[0]=m_LO[1]=lo[0];
 		ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR: %lf",m_LO[0]));
+		//trueValue/=1000;
+		//double amplitude=loAmp[0]+loAmp[1]*trueValue+loAmp[2]*trueValue*trueValue+loAmp[3]*trueValue*trueValue*trueValue;
+		//printf("trueValue, amp: %lf %lf\n",trueValue,amplitude);
 	}
 	else if (m_currentReceiver=="CCC") {
 		//no difference between IFs so take just the first value
@@ -723,7 +726,7 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 		double RightMarkCoeff[7][4] = { {0.2141,-15.771,379.96,-2976.8}, {0.523,-37.88,899.74,-6974.4}, {0.8572,-60.324,1396.3,-10581.0},
 									 {0.5173,-37.339,884.31,-6838.1}, {0.7267,-52.213,1231.4,-9486.9}, {0.3955,-28.468,672.77,-5192.0}, {0.201,-15.761,398.52,-3237.7} };*/
 
-		double LeftMarkCoeff[2][4] = { {0.35539,-25.57141,603.90321,-4656.81229}, {0.18548,-14.13379,349.77806,-2795.5471} };
+		double LeftMarkCoeff[2][4] = { {0.35539,-25.57141,603.90321,-4656.81229}, {0.18548,-14.13379,349.77806,-2795.54717} };
 		double RightMarkCoeff[2][4] = { {0.36656,-26.16018,613.14727,-4697.37959}, {0.32624,-23.20331,	542.14083,-4141.29465} };
 
 		double f1,f2;
@@ -748,6 +751,7 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 				f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
 				integral=(LeftMarkCoeff[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(LeftMarkCoeff[feeds[i]][1]/3)*(f2*f2*f2-f1*f1*f1)+(LeftMarkCoeff[feeds[i]][2]/2)*(f2*f2-f1*f1)+LeftMarkCoeff[feeds[i]][3]*(f2-f1);				
 				mark=integral/(f2-f1);
+				//printf("f1,f2,mark,realFreq: %lf %lf %lf %lf\n",f1,f2,mark,realFreq);
 			}
 			else if (m_pols[ifs[i]]==Receivers::RCV_RCP) {
 				// take the real observed bandwidth....the correlation between detectro device and the band provided by the receiver

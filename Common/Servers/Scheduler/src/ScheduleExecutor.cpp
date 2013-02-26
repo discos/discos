@@ -122,10 +122,12 @@ void CScheduleExecutor::runLoop()
 				m_stage=SCAN_CHECK;
 			}
 			case SCAN_CHECK: {// checks the scan if it feasible to be done in time...if not the previous stage is executed again. In case of error the scan is aborted
+				double minEl,maxEl;
 				bool ok;
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"CHECKING_THE_SCAN"));
-					ok=CCore::checkScan(m_schedule->getSchedMode(),m_currentScan,m_currentScanRec,m_antennaBoss.in(),m_antennaBossError);
+					m_schedule->getElevationLimits(minEl,maxEl);
+					ok=CCore::checkScan(m_schedule->getSchedMode(),m_currentScan,m_currentScanRec,minEl,maxEl,m_antennaBoss.in(),m_antennaBossError);
 				}
 				catch (ACSErr::ACSbaseExImpl& ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,ex,"CScheduleExecutor::runLoop()");

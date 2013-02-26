@@ -18,19 +18,32 @@ void CSlewCheck::initSite(IRA::CSite& s,const double& d1)
 	m_dut1=d1;
 }
 
-void CSlewCheck::initMount(const double& AzRate,const double& ElRate,const double& minEl,const double& maxEl,const double& maxAzAcc,const double& maxElAcc) {
+
+void CSlewCheck::initMount(const double& AzRate,const double& ElRate,const double& minEl,const double& maxEl,const double& maxAzAcc,const double& maxElAcc,const double& lowerEl,const double& upperEl)
+{
 	m_maxAzimuthRate=AzRate;
 	m_maxElevationRate=ElRate;
 	m_minElevation=minEl;
 	m_maxElevation=maxEl;
 	m_maxAzimuthAcceleration=maxAzAcc;
 	m_maxElevationAcceleration=maxElAcc;
+	m_minSuggestedEl=lowerEl;
+	m_maxSuggestedEl=upperEl;
 }
 
-bool CSlewCheck::checkLimit(const double& targetEl)
+
+CSlewCheck::TCheckResult CSlewCheck::checkLimit(const double& targetEl,const double& minEl,const double& maxEl)
 {
-	if ((targetEl>m_maxElevation)||(targetEl<m_minElevation)) return false;
-	else return true;
+	double lower, upper;
+	if (minEl<0) lower=m_minSuggestedEl;
+	else lower=minEl;
+	if (maxEl<0) upper=m_maxSuggestedEl;
+	else upper=maxEl;
+	if ((targetEl>m_maxElevation)||(targetEl<m_minElevation)) return NOT_VISIBLE;
+	else {
+		if ((targetEl>upper)||(targetEl<lower)) return AVOIDANCE;
+		else return VISIBLE;
+	}
 }
 
 bool CSlewCheck::checkSlewing(const double& startAz,const double& startEl,const ACS::Time& initTime,const double& targetAz,const double targetEl,

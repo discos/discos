@@ -13,6 +13,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  10/05/2011      subsystem now capable to perform scan starting from a previous scan (secondary) as central point, startScan() and checkScan() changed accordingly */
 /* Andrea Orlati(a.orlati@ira.inaf.it) 10/10/2011      Added attribute targetFlux, that reports the expected source flux */
 /* Andrea Orlati(a.orlati@ira.inaf.it) 15/02/2012      added getApparentCoordinates() method */
+/* Andrea Orlati(a.orlati@ira.inaf.it) 22/02/2013     the check slewing method also check the target agains limits given by the caller*/
 
 #ifndef _ANTENNABOSS_IDL_
 
@@ -441,10 +442,12 @@ module Antenna {
 		 * @param secondary this stucture is identical to the previous one, in most cases it is ignored, only on particular cases it is used as a secondary trajectory generator in order to get
 		 *                  a combination of both of them.
 		 * @param slewingTime time that the telescope will take to reach the target position
+		 * @param lowerElLimit defines the lower limit in elevation to be checked: the target must lay beyound that limit (radians). A negative value forces the check against default value
+		 * @param upper ElLimit defines the upper limit in elevation to be checked: the target must lay below that limit (radians). A negative value forces the check against default value
 		 * @return true if the telescope will be in the target position before the given epoch expires, false if the
 		 * telescope will not be able to get there in time ( now+SlewTime>ut).
 		*/  
-		boolean checkScan(in ACS::Time startUt,in TTrackingParameters parameters,in TTrackingParameters secondary,out ACS::TimeInterval slewingTime) raises (
+		boolean checkScan(in ACS::Time startUt,in TTrackingParameters parameters,in TTrackingParameters secondary,out ACS::TimeInterval slewingTime,in double lowerElLimit,in double upperElLimit) raises (
 				ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 		
 		/**

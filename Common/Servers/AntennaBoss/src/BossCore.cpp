@@ -170,7 +170,7 @@ void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
 	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::OBSERVATORY_RELEASED"));
 	m_slewCheck.initSite(m_site,m_dut1);
 	m_slewCheck.initMount(m_config->getMaxAzimuthRate(),m_config->getMaxElevationRate(),m_config->getMinElevation(),m_config->getMaxElevation(),
-			m_config->getMaxAzimuthAcceleration(),m_config->getMaxElevationAcceleration());
+			m_config->getMaxAzimuthAcceleration(),m_config->getMaxElevationAcceleration(),m_config->getMinSuggestedElevation(),m_config->getMaxSuggestedElevation());
 }
 
 void CBossCore::cleanUp()
@@ -657,7 +657,7 @@ void CBossCore::stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors:
 	m_rawCoordinates.empty();
 }
 
-bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParameters& par,const Antenna::TTrackingParameters& secondary,ACS::TimeInterval& slewingTime) throw (
+bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParameters& par,const Antenna::TTrackingParameters& secondary,ACS::TimeInterval& slewingTime,double minElLimit,double maxElLimit) throw (
 		ComponentErrors::CouldntGetComponentExImpl,AntennaErrors::ScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,
 		AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
 {
@@ -665,7 +665,7 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 	ACS::Time inputTime;
 	Antenna::TSections section;
 	ACS::Time startTime=startUt; //it can be changed in the prepareScan routine
-	bool visible;
+	CSlewCheck::TCheckResult visible;
 	bool slew;
 	Antenna::TGeneratorType generatorType;
 	Antenna::EphemGenerator_var generator=Antenna::EphemGenerator::_nil();
@@ -743,27 +743,35 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 	}
 	//check the elevation limit.....if the generator is OTF take into consideration also the stopElevation otherwise we consider just the elevation
 	if (generatorType==Antenna::ANT_OTF) {
-		visible=m_slewCheck.checkLimit(elevation)&&m_slewCheck.checkLimit(stopElevation);
+		CSlewCheck::TCheckResult v1,v2;
+		v1=m_slewCheck.checkLimit(elevation,minElLimit,maxElLimit);
+		v2=m_slewCheck.checkLimit(stopElevation,minElLimit,maxElLimit);
+		visible=GETMIN(v1,v2);   // the result of visibility check is the minimum of both checks: NOT_VISIBLE<AVOIDANCE<VISIBLE, i.e. target is visible only if both checks result in VISIBLE
+		//visible=m_slewCheck.checkLimit(elevation)&&m_slewCheck.checkLimit(stopElevation);
 	}
 	else {
-		visible=m_slewCheck.checkLimit(elevation);
+		visible=m_slewCheck.checkLimit(elevation,minElLimit,maxElLimit);
 	}
-	if (visible) {
-		ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_NOTICE,"TARGET_IS_ABOVE_THE_HORIZON"));
-		// if startUt==0 no slewing checks are done...the answer is always true but the slewingtime is computed anyway
+	if (visible==CSlewCheck::VISIBLE) {
+		ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_NOTICE,"TARGET_INSIDE_ELEVATION_RANGE"));
+		// if startUt==0 no slewing checks are done...the answer is always true but the slewing time is computed anyway
 		// don't use startTime because it could have been changed (by OTF) and want to keep track of the startUt==0 in any case.
 		slew=m_slewCheck.checkSlewing(m_lastEncoderAzimuth,m_lastEncoderElevation,m_lastEncoderRead,hwAzimuth,elevation,startUt,slewingTime);
 		if (slew) {
-			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_IS_ON_TIME"));
+			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_REACHABLE_ON_TIME"));
 		}
 		else {
-			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_IS_OFF_TIME"));
+			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_NOT_REACHABLE_ON_TIME"));
 		}
 		return slew;
 	}
-	else {
-		ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_NOTICE,"TARGET_IS_DOWN_THE_HORIZON"));
-		return visible;
+	else if (visible==CSlewCheck::AVOIDANCE) {
+		ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_NOTICE,"TARGET_OUTSIDE_ELEVATION_RANGE"));
+		return false;
+	}
+	else { //NOT_VISIBLE
+		ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_NOTICE,"TARGET_IS_SET"));
+		return false;
 	}
 }
 

@@ -1,5 +1,5 @@
 
-bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,Antenna::AntennaBoss_ptr antBoss,bool& antBossError) 
+bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,const double& minEl,const double& maxEl,Antenna::AntennaBoss_ptr antBoss,bool& antBossError)
 	throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl)
 {
 	//No sync required, this is a private static method, called only by public method of this class and by the schedule executor. 
@@ -17,7 +17,7 @@ bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRec
 		//Antenna::TTrackingParameters * param=(Antenna::TTrackingParameters *)scanRec.scanPar;  //get the definitions of the 		
 		try {
 			if (!CORBA::is_nil(antBoss)) {
-				answer=antBoss->checkScan(scanInfo.ut,*prim,*sec,slewTime);
+				answer=antBoss->checkScan(scanInfo.ut,*prim,*sec,slewTime,minEl,maxEl);
 				ACS_STATIC_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %lld :",slewTime));
 				return answer;
 			}
@@ -56,7 +56,7 @@ bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRec
 		try {
 			if (!CORBA::is_nil(antBoss)) {
 				ACS::Time timeTemp=0;
-				answer=antBoss->checkScan(timeTemp,*prim,*sec,slewTime);   // for SEQ schedule the position is not check against the time (ut=0)
+				answer=antBoss->checkScan(timeTemp,*prim,*sec,slewTime,minEl,maxEl);   // for SEQ schedule the position is not check against the time (ut=0)
 				ACS_STATIC_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %lld :",slewTime));
 				return answer;
 			}

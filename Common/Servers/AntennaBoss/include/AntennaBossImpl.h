@@ -15,6 +15,7 @@
 /*  Andrea Orlati(aorlati@ira.inaf.it) 10/10/2011      Given implementation of the the method getFluxes() and attribute targetFlux*/
 /*  Andrea Orlati(aorlati@ira.inaf.it) 15/02/2012      Given implementation of the the method getApparentCoordinates */
 /*  Andrea Orlati(aorlati@ira.inaf.it) 08/02/2013     implemented again the  command method*/
+/*  Andrea Orlati(aorlati@ira.inaf.it) 22/02/2013     new implementation of checkScan()  method */
 
 
 #ifndef __cplusplus
@@ -38,8 +39,8 @@
 
 /** 
  * @mainpage AntennaBoss component Implementation 
- * @date 08/02/2013
- * @version 1.5.0
+ * @date 22/02/2013
+ * @version 1.51.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.2.0
  * @remarks compiler version is 4.1.2
@@ -463,12 +464,14 @@ public:
 	 * @param targetName name of the target of the scan 
 	 * @param startUt this is the time before which the telescope is supposed to reach the target
 	 * @param parameters this structure describes the target
-	 * @param secondary this the secondary tracking structure. It may be used according to the generaor given with the primary structure.
+	 * @param secondary this the secondary tracking structure. It may be used according to the generator given with the primary structure.
 	 * @param slewingTime time that the telescope will take to reach the target position
+	 * @param minElLimit  elevation lower limit to check the visibility of the target
+	 * @param maxElLimit elevation upper  limit to check the visibility of the target
 	 * @return true if the telescope will be in the target position before the given epoch expires and the target is above the horizon, false if the
 	 * telescope will not be able to get there.
 	 */ 
-	bool checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary,ACS::TimeInterval_out slewingTime) throw (
+	bool checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary,ACS::TimeInterval_out slewingTime,CORBA::Double minElLimit,CORBA::Double maxElLimit) throw (
 			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 	
 	/**

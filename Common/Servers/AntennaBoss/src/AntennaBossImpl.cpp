@@ -502,13 +502,13 @@ ACS::Time AntennaBossImpl::latOTFScan(Antenna::TCoordinateFrame scanFrame,CORBA:
 	}			
 }
 
-bool AntennaBossImpl::checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary,ACS::TimeInterval_out slewingTime) throw (
+bool AntennaBossImpl::checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary,ACS::TimeInterval_out slewingTime,CORBA::Double minElLimit,CORBA::Double maxElLimit) throw (
 		ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
 	AUTO_TRACE("AntennaBossImpl::checkScan()");
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 	try {
-		return resource->checkScan(startUt,parameters,secondary,slewingTime); 
+		return resource->checkScan(startUt,parameters,secondary,slewingTime,minElLimit,maxElLimit);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

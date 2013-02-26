@@ -172,6 +172,17 @@ public:
 	*/
 	const double& getCutOffElevation() const { return m_cutOffElevation; }
 	
+	/**
+	 * @return the lower suggested limit in elevation to decide a source can be observed or not (rad)
+	 */
+	const double& getMinSuggestedElevation() const { return m_minElevationAvoidance; }
+
+	/**
+	 * @return the upper suggested limit in elevation to decide a source can be observed or not (rad.)
+	 */
+	const double& getMaxSuggestedElevation() const { return m_maxElevationAvoidance; }
+
+
 private:
 	CString m_mountInstance;
 	CString m_observatoryComp;
@@ -199,6 +210,8 @@ private:
 	double m_diameter;
 	double m_cutOffElevation;
 	long m_coordinateIntegration;
+	double m_minElevationAvoidance;
+	double m_maxElevationAvoidance;
 };
 
 #endif /*CONFIGURATION_H_*/

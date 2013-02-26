@@ -89,7 +89,9 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DOUBLE_ATTRIBUTE_E("maxElevation","Upper elevation limit (degrees):",m_maxElevation,"DataBlock/Mount");
 	_GET_DOUBLE_ATTRIBUTE_E("maxAzimuthAcceleration","Max value for Az acceleration (degrees/s^2):",m_maxAzimuthAccelaration,"DataBlock/Mount");
 	_GET_DOUBLE_ATTRIBUTE_E("maxElevationAcceleration","Max value for El acceleration (degrees/s^2):",m_maxElevationAcceleration,"DataBlock/Mount");
-	_GET_DOUBLE_ATTRIBUTE_E("diameter","Telescope dish diameter (meters):",m_diameter,"DataBlock/Mount");	
+	_GET_DOUBLE_ATTRIBUTE_E("diameter","Telescope dish diameter (meters):",m_diameter,"DataBlock/Mount");
+	_GET_DOUBLE_ATTRIBUTE_E("MinElevationAvoidance","Suggested lower elevation limit  for source observation(degrees):",m_minElevationAvoidance,"DataBlock/Mount");
+	_GET_DOUBLE_ATTRIBUTE_E("MaxElevationAvoidance","Suggested upper elevation limit  for source observation(degrees):",m_maxElevationAvoidance,"DataBlock/Mount");
 	_GET_DOUBLE_ATTRIBUTE("CutOffElevation","The cut off elevation is (degrees):",m_cutOffElevation);
 	
 	m_maxElevation*=DD2R;
@@ -98,6 +100,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	m_maxElevationRate*=DD2R;
 	m_maxAzimuthAccelaration*=DD2R;
 	m_maxElevationAcceleration*=DD2R;
+	m_minElevationAvoidance*=DD2R;
+	m_maxElevationAvoidance*=DD2R;
 	m_coordinateIntegration*=10;
 	m_cutOffElevation*=DD2R;
 }

@@ -1,7 +1,3 @@
-/** 
- * $Id: TestClient.cpp,v 1.4 2010-10-14 12:23:36 a.orlati Exp $
-*/
-
 #include "TestClient.h"
 #include <getopt.h>
 #include <iostream>
@@ -196,7 +192,7 @@ int main(int argc, char *argv[])
 	double azimuth,elevation;
 	
 	test.initSite(site,0.0);
-	test.initMount(azSpeed,elSpeed,3.0,88.0,0.4*DD2R,0.4*DD2R);
+	test.initMount(azSpeed,elSpeed,3.0,88.0,0.4*DD2R,0.4*DD2R,10*DD2R,80*DD2R);
 	TIMEVALUE UT(initTime);
 	test.coordConvert(lon,lat,coordFrame,Antenna::ANT_J2000,UT,azimuth,elevation);
 	printf("coordinates are (%lf %lf)\n\n\n",(double)azimuth*DR2D,(double)elevation*DR2D);

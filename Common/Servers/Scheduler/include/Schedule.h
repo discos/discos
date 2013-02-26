@@ -736,6 +736,13 @@ public:
 	 * @return the name of the observer
 	 */ 
 	const IRA::CString& getObserverName() const { return m_observer; }
+
+	/**
+	 * used to retrieve the elevation limit configured by the schedule in radians.
+	 * @param lower return back the lower  value of the range, a negative means use system default
+	 * @param upper return back the upper value of the range, a negative means use system default
+	 */
+	void getElevationLimits(double&lower, double&upper) const { lower=m_lowerElevationLimit; upper=m_upperElevationLimit; }
 private:
 	typedef std::vector<TRecord *> TSchedule;
 	typedef TSchedule::iterator TIterator;
@@ -752,6 +759,7 @@ private:
 	Schedule::CLayoutList *m_layoutListUnit;
 	TScheduleMode m_mode;
 	long m_repetitions;
+	double m_lowerElevationLimit,m_upperElevationLimit;
 	ACS::TimeInterval m_startLST;
 	long m_scanTag;
 	bool m_modeDone;

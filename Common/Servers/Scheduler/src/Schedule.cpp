@@ -25,6 +25,7 @@ using namespace Schedule;
 #define BACKENDLIST "BACKENDLIST:"
 #define MODE "MODE:"
 #define SCANTAG "SCANTAG:"
+#define ELEVATIONLIMITS "ELEVATIONLIMITS"
 #define INITPROC "INITPROC:"
 #define SCAN_START "SC:"
 
@@ -1435,7 +1436,7 @@ bool CScanList::string2ScanType(const IRA::CString& val,Management::TScanTypes& 
 
 CSchedule::CSchedule(const IRA::CString& path,const IRA::CString& fileName) : CBaseSchedule(path,fileName),m_projectName(""),m_observer(""),
 	m_scanList(""),m_configList(""),m_backendList(""),m_layoutFile(""),m_scanListUnit(NULL),m_preScanUnit(NULL),m_postScanUnit(NULL),m_backendListUnit(NULL),m_layoutListUnit(NULL),
-	m_mode(LST),m_repetitions(0),m_scanTag(-1),m_modeDone(false),m_initProc(_SCHED_NULLTARGET),m_initProcArgs(0)
+	m_mode(LST),m_repetitions(0),m_lowerElevationLimit(-1.0),m_upperElevationLimit(-1.0),m_scanTag(-1),m_modeDone(false),m_initProc(_SCHED_NULLTARGET),m_initProcArgs(0)
 {
 	m_schedule.clear();
 	m_currentScanDef.valid=false;
@@ -1873,10 +1874,38 @@ bool CSchedule::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 					}
 				}
 				else {
-					errorMsg="unknow schedule mode";
+					errorMsg="unknown schedule mode";
 					return false;
 				}
 			}
+		}
+		else if (ret==ELEVATIONLIMITS) {
+			IRA::CString minEl,maxEl;
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,minEl)) {
+				errorMsg="elevation lower limit missing or not correct";
+				return false;
+			}
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,maxEl)) {
+				errorMsg="elevation upper limit missing or not correct";
+				return false;
+			}
+			m_lowerElevationLimit=minEl.ToDouble();
+			if ((m_lowerElevationLimit<0) || (m_lowerElevationLimit>90.0)) {
+				errorMsg="elevation limits are outside the expected ranges";
+				return false;
+			}
+			m_upperElevationLimit=maxEl.ToDouble();
+			if ((m_upperElevationLimit<0) || (m_upperElevationLimit>90.0)) {
+				errorMsg="elevation limits are outside the expected ranges";
+				return false;
+			}
+			if (m_lowerElevationLimit>=m_upperElevationLimit) {
+				errorMsg="lower elevation limit could not be greater than upper one";
+				return false;
+			}
+			m_lowerElevationLimit*=DD2R;
+			m_upperElevationLimit*=DD2R;
+			return true;
 		}
 		else if (ret==SCANTAG) {
 			IRA::CString scanTag;

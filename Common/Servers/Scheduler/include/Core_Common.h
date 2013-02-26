@@ -8,15 +8,17 @@
  * @param mode schedule mode
  * @param rec structure that stores the selected schedule line
  * @param scanRec structure that contains the scan parameters
+ * @param minEl elevation lower limit
+ * @param maxEl elevation upper limit
  * @param antBoss reference to the antenna boss
  * @param antBossErr flags the status of the antenna boss reference
  * @throw ComponentErrors::UnexpectedExImpl
  * @throw ComponentErrors::OperationErrorExImpl
  * @throw ComponentErrors::ComponentNotActiveExImpl
  * @thorw ComponentErrors::CORBAProblemExImpl
- * @return true if the scan has been checked succesfully
+ * @return true if the scan has been checked successfully
  */ 	
-static bool checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,Antenna::AntennaBoss_ptr antBoss,bool& antBossError) 
+static bool checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,const double& minEl,const double& maxEl,Antenna::AntennaBoss_ptr antBoss,bool& antBossError)
 	throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl);
 
 

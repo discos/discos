@@ -43,7 +43,11 @@
 	<xs:attribute name="accScaleFactor" type="xs:double" use="required"/>
 	<!-- This number is the separation between clockwise an counterclockwise section in the azimuth travel range.
 	         Clockwise starts when the azimuth is greater than that number (degrees) -->
-	<xs:attribute name="cw_ccw_limit" type="xs:double" use="required" />	
+	<xs:attribute name="cw_ccw_limit" type="xs:double" use="required" />
+	<!-- This is the elevation lower limit below which the system will not observe a source, it is could be overridden by the user-->
+	<xs:attribute name="MinElevationAvoidance" type="xs:double" use="required" />
+	<!-- This is the elevation upper limit beyond which the system will not observe a source, it is could be overridden by the user-->
+	<xs:attribute name="MaxElevationAvoidance" type="xs:double" use="required" />		
 </xs:complexType>
 
 <xs:element name="Mount" type="MountType"/>

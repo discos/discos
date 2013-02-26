@@ -37,6 +37,9 @@ SCANTAG:	1024
 # NULL. The procedure must be defined in the PROCEDURELIST file. It is always executed in blocking mode, the schedule is started only when the procedure
 # has been done.
 INITPROC:	INITALL
+#This is an optional field which allows to control which targets are observed or not based on elevation limits. The two values are degrees and are the lower and the upper limit
+#respectively. If the keyword is not provided the default values will be kept by the system 
+ELEVATIONLIMITS	15.0	80.0
 
 
 #The schedule itself, the fields are tab separated
