@@ -21,7 +21,7 @@
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
   	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Receivers.xsd"/>
   	  	
-  	<xs:complexType name="SRTKBandMFStatusType">
+  	<xs:complexType name="SRT7GHzStatusType">
 		<xs:complexContent>
 			<xs:restriction base="baci:ROpattern">
 				<xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="2048"/>
