@@ -31,7 +31,7 @@
     </ServiceComponents>
 
     <ServiceDaemons>
-        <!-- <cdb:_ string="alma78.hq.eso.org"/> -->
+        <cdb:_ string="nuraghe-mng.srt.inaf.it"/> 
     </ServiceDaemons>
 
 
