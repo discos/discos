@@ -96,7 +96,7 @@ public:
 	unsigned elements() const;
 	
 	/**
-	 * This method takes charge of purge samples that have a time mark older than tha one specified as argument.
+	 * This method takes charge of purge samples that have a time mark older than the one specified as argument.
 	 * @param time time threshold, if a point in the array is earlier than that value is removed 
 	*/
 	void purge(const TIMEVALUE& time);
@@ -123,7 +123,7 @@ public:
 	/**
 	 * This method can be used to get a point given two marks of time. The point is the result of the average of all points included between the two marks.
 	 * If  one or less point is present it is returned  the last inserted point.
-	 * If a dateset of points could not be selected (beacuse the no times were included inside the given time range) the nearer known point is returned.
+	 * If a dataset of points could not be selected (because the no times were included inside the given time range) the nearer known point is returned.
 	 * @param startTime the mark of time used to select the beggining of the point set to be averaged
 	 * @param stopTime the mark of time used to select the end of the point set to be averaged  
 	 * @param azimuth resulting longitude point
@@ -149,7 +149,7 @@ protected:
 	double m_lastAzimuth;
 	double m_lastElevation;
 	TIMEVALUE m_lastTime;
-	bool m_isRad;;
+	bool m_isRad;
 	/**
 	 * Adds one element to the array and updates the counters. if the array is full the first element will be replaced by the new one.
 	*/
