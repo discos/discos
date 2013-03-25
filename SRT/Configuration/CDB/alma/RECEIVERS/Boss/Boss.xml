@@ -22,7 +22,7 @@
 <bandWidth/>
 <mode/>
 
-<AvailableReceiver Code="CCG" Component="RECEIVERS/SRT7GHzReceiver"/>
+<AvailableReceiver Code="CCB" Component="RECEIVERS/SRT7GHzReceiver"/>
 
 <AvailableReceiver Code="KKG" Component="RECEIVERS/SRTKBandMFReceiver"/>
 
