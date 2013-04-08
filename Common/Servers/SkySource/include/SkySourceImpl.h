@@ -147,10 +147,11 @@ public:
 	/**
 	 * Sets the source as fixed position in the topocentric system
 	 * @throw CORBA::SystemException 
+	 * @param sourceName target identifier
 	 * @param az fixed azimuth position in radians
 	 * @param el fixed elevation position in radians
 	*/
-	void setFixedPoint(CORBA::Double az,CORBA::Double el) throw (CORBA::SystemException);
+	void setFixedPoint(const char* sourceName,CORBA::Double az,CORBA::Double el) throw (CORBA::SystemException);
 		
 	/** 
 	 * This method allows to setup a new source by giving its galactic coordinates. 

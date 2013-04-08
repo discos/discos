@@ -666,7 +666,10 @@ CMBFitsWriter& CMBFitsWriter::operator=( const CMBFitsWriter& mbFitsWriter_ ) {
 
 string CMBFitsWriter::getExtName( const CMBFitsWriter::Table_e table_e_ ) {
 	const CMBFitsWriter::TableName_ci_m_t tableName_ci = CMBFitsWriter::m_tablesNames.find(table_e_);
-	if ( tableName_ci == CMBFitsWriter::m_tablesNames.end() ) throw exception();
+	if ( tableName_ci == CMBFitsWriter::m_tablesNames.end() ) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	return tableName_ci->second;
 }
@@ -746,6 +749,7 @@ cout << "EROFS: " << EROFS << endl;
 	EPERM					The filesystem containing pathname does not support the creation of directories.
 	EROFS					pathname refers to a file on a read-only filesystem.
 */
+		printf("ex : %s %d\n",__FILE__,__LINE__);
 		throw exception();
 	}
 }
@@ -755,7 +759,10 @@ bool CMBFitsWriter::directoryExists() const {
 }
 
 void CMBFitsWriter::makeDirectory() const {
-	if ( getPath().empty() ) throw exception();
+	if ( getPath().empty() ) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	string path = getPath();
 	const string separators("\\/");
@@ -804,7 +811,7 @@ void CMBFitsWriter::open() {
 		m_mbFits_p = new FITS(getFullName(), Write, false, primaryKeys);
 	} catch( FITS::CantCreate& exception_ ) {
 		primaryKeys.clear();
-
+		printf("ex : %s %d\n",__FILE__,__LINE__);
 		throw exception_;
 	}
 
@@ -820,9 +827,15 @@ void CMBFitsWriter::flush() {
 }
 
 void CMBFitsWriter::addTable( const CMBFitsWriter::Table_e table_e_ ) {
-	if ( !m_mbFits_p ) throw exception();
+	if ( !m_mbFits_p ) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
-  if ( CMBFitsWriter::Primary == table_e_ ) throw exception();
+  if ( CMBFitsWriter::Primary == table_e_ ) {
+	  printf("ex : %s %d\n",__FILE__,__LINE__);
+	  throw exception();
+  }
 
 	if ( CMBFitsWriter::Undefined != table_e_ ) {
 		const string extName(CMBFitsWriter::getExtName(table_e_));
@@ -843,7 +856,7 @@ void CMBFitsWriter::addTable( const CMBFitsWriter::Table_e table_e_ ) {
 //			columnNames.clear();
 //			columnFormats.clear();
 //			columnUnits.clear();
-
+			printf("ex : %s %d\n",__FILE__,__LINE__);
 			throw exception_;
 		}
 
@@ -858,9 +871,15 @@ void CMBFitsWriter::addTable( const CMBFitsWriter::Table_e table_e_ ) {
 //using std::endl;
 void CMBFitsWriter::addTableColumns( const CMBFitsWriter::Table_e table_e_,
 																		 const int iteration_ ) {
-	if ( !m_mbFits_p ) throw exception();
+	if ( !m_mbFits_p ) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
-  if ( CMBFitsWriter::Primary == table_e_ ) throw exception();
+  if ( CMBFitsWriter::Primary == table_e_ ) {
+	  printf("ex : %s %d\n",__FILE__,__LINE__);
+	  throw exception();
+  }
 
 	if ( CMBFitsWriter::Undefined != table_e_ ) {
 		const string extName(CMBFitsWriter::getExtName(table_e_));
@@ -889,7 +908,7 @@ void CMBFitsWriter::addTableColumns( const CMBFitsWriter::Table_e table_e_,
 			columnNames.clear();
 			columnFormats.clear();
 			columnUnits.clear();
-
+			printf("ex : %s %d\n",__FILE__,__LINE__);
 			throw exception_;
 		}
 
@@ -900,21 +919,33 @@ void CMBFitsWriter::addTableColumns( const CMBFitsWriter::Table_e table_e_,
 }
 
 unsigned int CMBFitsWriter::getRowIndex( const CMBFitsWriter::Table_e table_e_ ) const {
-  if ( CMBFitsWriter::Primary == table_e_ ) throw exception();
+  if ( CMBFitsWriter::Primary == table_e_ ) {
+	  printf("ex : %s %d\n",__FILE__,__LINE__);
+	  throw exception();
+  }
 
 	CMBFitsWriter::TableRowIndex_ci_m_t tableRowIndex_ci = m_tablesRowIndices.find(table_e_);
-	if ( tableRowIndex_ci == m_tablesRowIndices.end()	 ) throw exception();
+	if ( tableRowIndex_ci == m_tablesRowIndices.end()	 ) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	return tableRowIndex_ci->second;
 }
 
 void CMBFitsWriter::setRowIndex( const CMBFitsWriter::Table_e table_e_,
 																 const unsigned int rowIndex_ ) {
-  if ( CMBFitsWriter::Primary == table_e_ ) throw exception();
+  if ( CMBFitsWriter::Primary == table_e_ ) {
+	  printf("ex : %s %d\n",__FILE__,__LINE__);
+	  throw exception();
+  }
 
   // il numero memorizzato potrebbe non essere sincronizzato con il valore in tabella - attenzione ai punti di modifica del valore in tabella e i memoria
 	CMBFitsWriter::TableRowIndex_i_m_t	 tableRowIndex_i	 = m_tablesRowIndices.find(table_e_);
-	if ( tableRowIndex_i == m_tablesRowIndices.end()	 ) throw exception();
+	if ( tableRowIndex_i == m_tablesRowIndices.end()	 ) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	tableRowIndex_i->second = rowIndex_;
 }
@@ -922,11 +953,17 @@ void CMBFitsWriter::setRowIndex( const CMBFitsWriter::Table_e table_e_,
 void CMBFitsWriter::insertRows( const CMBFitsWriter::Table_e table_e_,
 																const unsigned int rowIndexStart_,
 																const unsigned int rows_n_ ) {
-  if ( CMBFitsWriter::Primary == table_e_ ) throw exception();
+  if ( CMBFitsWriter::Primary == table_e_ ) {
+	  printf("ex : %s %d\n",__FILE__,__LINE__);
+	  throw exception();
+  }
 
   // il numero memorizzato potrebbe non essere sincronizzato con il valore in tabella - attenzione ai punti di modifica del valore in tabella e i memoria
 	CMBFitsWriter::TableRowIndex_i_m_t	 tableRowIndex_i	 = m_tablesRowIndices.find(table_e_);
-	if ( tableRowIndex_i == m_tablesRowIndices.end()	 ) throw exception();
+	if ( tableRowIndex_i == m_tablesRowIndices.end()	 ){
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	// verificare che il valore di rowIndexStart_ sia compatibile con il numero di righe esistente in tabella - potrebbe farlo CCFits e sollevare eventualmente eccezioni
 
@@ -940,6 +977,7 @@ void CMBFitsWriter::insertRows( const CMBFitsWriter::Table_e table_e_,
 //    table_p->insertRows(1);
 //cout << "I did it!" << endl;
   } catch( FitsException& exception_ ) {
+	  printf("ex : %s %d\n",__FILE__,__LINE__);
     throw exception_;
   }
 }
@@ -947,10 +985,16 @@ void CMBFitsWriter::insertRows( const CMBFitsWriter::Table_e table_e_,
 string CMBFitsWriter::getKeywordFormat( const CMBFitsWriter::Table_e table_e_,
 																				const string& keyword_ ) {
 	const CMBFitsWriter::TableKeywordFormat_ci_m_t tableKeywordFormat_ci = CMBFitsWriter::m_tablesKeywordsFormats.find(table_e_);
-	if ( tableKeywordFormat_ci == m_tablesKeywordsFormats.end()				) throw exception();
+	if ( tableKeywordFormat_ci == m_tablesKeywordsFormats.end()				) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	const CMBFitsWriter::KeywordFormat_ci_m_t			 keywordFormat_ci			 = tableKeywordFormat_ci->second.find(keyword_);
-	if ( keywordFormat_ci			 == tableKeywordFormat_ci->second.end() ) throw exception();
+	if ( keywordFormat_ci			 == tableKeywordFormat_ci->second.end() ) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	return keywordFormat_ci->second;
 }
@@ -962,10 +1006,12 @@ void CMBFitsWriter::getColumns( const CMBFitsWriter::Table_e table_e_,
 															  const unsigned int iteration_ ) {
 	switch( table_e_ ) {
 		case CMBFitsWriter::Undefined:
+			printf("ex : %s %d\n",__FILE__,__LINE__);
 			throw exception();
 			break;
 
 		case CMBFitsWriter::Primary:
+			printf("ex : %s %d\n",__FILE__,__LINE__);
 			throw exception();
 			break;
 
@@ -1309,7 +1355,10 @@ void CMBFitsWriter::setColumnUnits( const CMBFitsWriter::Table_e table_e_,
 																		const string& keyword_ ) {
 	if ( CMBFitsWriter::Monitor == table_e_ ) {
 		CMBFitsWriter::Keyword::KeywordKeyword_ci_m_t keywordKeyword_ci = CMBFitsWriter::m_keywords.find(keyword_);
-		if ( keywordKeyword_ci == CMBFitsWriter::m_keywords.end() ) throw exception();
+		if ( keywordKeyword_ci == CMBFitsWriter::m_keywords.end() ) {
+			printf("ex : setColumnUnits, keyword %s, %s %d\n",keyword_.c_str(),__FILE__,__LINE__);
+			throw exception();
+		}
 
 		setColumnValue(table_e_, string("MONUNITS"), keywordKeyword_ci->second.getUnits());
 	}

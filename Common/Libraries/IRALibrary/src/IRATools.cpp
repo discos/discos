@@ -411,18 +411,34 @@ double CIRATools::differenceBetweenAnglesDeg(const double& a,const double& b)
 
 double CIRATools::latRangeRad(const double& lat)
 {
-	double res=lat;
+	/*double res=lat;
 	while (res<-DPIBY2) res+=DPIBY2;
 	while (res>DPIBY2) res-=DPIBY2;
-	return res;
+	return res;*/
+	/*double w;
+	w= slaDrange(lat);
+	if (w<-DPIBY2) return -(DPI+w);
+	else if (w>DPIBY2) return DPI-w;
+	else return w;*/
+	if (lat>DPIBY2) return DPIBY2;
+	else if (lat<-DPIBY2) return -DPIBY2;
+	else return lat;
 }
 
 double CIRATools::latRangeDeg(const double& lat)
 {
-	double res=lat;
+	/*double w;
+	w=slaDrange(lat*DD2R)*DR2D;
+	if (w<-90.0) return -(180.0+w);
+	else if (w>90.0) return 180.0-w;
+	else return w;*/
+	/*double res=lat;
 	while (res<-90.0)  res+=90;
 	while (res>90.0)  res-=90;
-	return res;
+	return res;*/
+	if (lat>90.0) return 90.0;
+	else if (lat<-90.0) return -90.0;
+	else return lat;
 }
 
 bool CIRATools::strToInterval(const IRA::CString& durationString,ACS::TimeInterval& interval,bool complete,char dateDelimiter,char timeDelimiter)

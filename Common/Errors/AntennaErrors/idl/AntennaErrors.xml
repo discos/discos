@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
-   - $Id: AntennaErrors.xml,v 1.13 2011-06-03 12:31:52 a.orlati Exp $
    - Author: Andrea Orlati
    -
    - History:
@@ -57,7 +56,5 @@
 <ErrorCode name="MissingTarget" shortDescription="A target must be commanded before doing the scan" description=""/>
 
 <ErrorCode name="OffsetFrameNotSupported" shortDescription="It is not allowed to set offset in the requested frame" description=""/>
-
-<ErrorCode name="TargetNotReachable" shortDescription="The target is not reachable" description=""/>
 
 </Type>

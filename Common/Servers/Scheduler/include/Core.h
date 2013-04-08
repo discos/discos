@@ -12,6 +12,10 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  18/11/2009      Added the implementation of procedrure "command"                                                  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  20/09/2010      Added command waitOnSource */
 /* Andrea Orlati(aorlati@ira.inaf.it)  29/05/2012      Added command changeLogFile */
+/* Andrea Orlati(aorlati@ira.inaf.it)  08/04/2014     computeScanAxis() re-implemented, it now relies of AntennaBoss.*/
+/* Andrea Orlati(aorlati@ira.inaf.it)  08/04/2014     added initRecording(), StartRecording(), StopRecording and TerminateRecording().*/
+/* Andrea Orlati(aorlati@ira.inaf.it)  08/04/2014     implemented the skidip scan.*/
+
 
 #include <acsContainerServices.h>
 #include <ManagementErrors.h>
@@ -170,8 +174,17 @@ public:
 	 */
 	void crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
 			ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
-			ManagementErrors::TargetIsNotVisibleExImpl,ManagementErrors::TsysErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::AntennaScanErrorExImpl);
+			ManagementErrors::TargetIsNotVisibleExImpl,ManagementErrors::TsysErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
+			ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl);
 	
+	/**
+	 * this is a macro operation, it performs a skydip scan from the current azimuth position
+	 */
+	void skydip(const double& el1,const double& el2,const ACS::TimeInterval& duration)  throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
+			ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl, ComponentErrors::CORBAProblemExImpl,
+			ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
+			ComponentErrors::TimerErrorExImpl);
+
 	/**
 	 * It parses a human readable command and executes it
 	 * @param cmd command to be executed
@@ -227,7 +240,7 @@ public:
 	inline void clearTracking() { m_isTracking=false; }
 	
 	/**
-	 * This is not thread sape but it is almost atomic.
+	 * This is not thread safe but it is almost atomic.
 	 * @return the current active device
 	 */
 	inline long getCurrentDevice() const { return m_currentDevice; }
@@ -239,7 +252,7 @@ private:
 	 */
 	CConfiguration* m_config;
 	/**
-	 * pointer to the container serivices
+	 * pointer to the container services
 	 */
 	maci::ContainerServices * m_services;
 	/**

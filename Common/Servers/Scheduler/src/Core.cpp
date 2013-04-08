@@ -24,6 +24,7 @@ CCore::~CCore()
 void CCore::initialize()
 {
 	RESOURCE_INIT;
+	EXTRA_INIT;
 	resetSchedulerStatus();
 	m_currentProceduresFile="";
 	m_lastWeatherTime=0;
@@ -106,6 +107,10 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::changeLogFile),1);
 	m_parser->add("wx",new function4<CCore,non_constant,void_type,O<double_type>,O<double_type>,O<double_type>,O<double_type> >(this,&CCore::getWeatherStationParameters),0);
 	m_parser->add("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::setProjectCode),1);
+	// no range checks because * is allowed
+	m_parser->add("skydip",new function3<CCore,non_constant,void_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(this,&CCore::skydip),3);
+
+
 
 	//add remote commands ************  should be loaded from a CDB table............................**********/
 	// antenna subsystem
@@ -124,6 +129,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("lonOTF","antenna",1,&CCore::remoteCall);
 	m_parser->add("latOTF","antenna",1,&CCore::remoteCall);
 	m_parser->add("goOff","antenna",1,&CCore::remoteCall);
+	m_parser->add("goTo","antenna",1,&CCore::remoteCall);
+	m_parser->add("skydipOTF","antenna",1,&CCore::remoteCall);
 	m_parser->add("sidereal","antenna",1,&CCore::remoteCall);
 	m_parser->add("vlsr","antenna",1,&CCore::remoteCall);
 	m_parser->add("bwhm","antenna",1,&CCore::remoteCall);
@@ -131,6 +138,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("azelOffsets","antenna",1,&CCore::remoteCall);
 	m_parser->add("radecOffsets","antenna",1,&CCore::remoteCall);
 	m_parser->add("lonlatOffsets","antenna",1,&CCore::remoteCall);	
+
 	// receivers subsystem
 	m_parser->add("receiversPark","receivers",2,&CCore::remoteCall);
 	m_parser->add("receiversSetup","receivers",2,&CCore::remoteCall);
@@ -488,10 +496,127 @@ void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCom
 	}
 }
 
+void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
+		ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl, ComponentErrors::CORBAProblemExImpl,
+		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
+		ComponentErrors::TimerErrorExImpl)
+{
+	//no need to get the mutex, because it is already done inside the executor object
+	if (m_schedExecuter) {
+		if (m_schedExecuter->isScheduleActive()) {
+			_THROW_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,"CCore::skydip()");
+		}
+	}
+	IRA::CString obsName,prj,suffix,path,extraPath,baseName;
+	IRA::CString layoutName,schedule/*,targetID*/;
+	ACS::stringSeq layout;
+	TIMEVALUE now;
+	ACS::Time waitFor;
+	ACS::Time startTime;
+	// now take the mutex
+	baci::ThreadSyncGuard guard(&m_mutex);
+	//make sure the antenna is available.
+	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
+
+	// TSYS SCAN
+	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"TSYS_COMPUTATION"));
+	try {
+		if (!CORBA::is_nil(m_antennaBoss)) {
+			m_antennaBoss->goOff(Antenna::ANT_HORIZONTAL,-1.0);
+		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::skydip()");
+			throw impl;
+		}
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::skydip()");
+		throw impl;
+	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::skydip()");
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::skydip()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_antennaBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::skydip()");
+		m_antennaBossError=true;
+		throw impl;
+	}
+	clearTracking();
+	guard.release();
+	waitOnSource();
+	try {
+		ACS::doubleSeq tsys;
+		callTSys(tsys);
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		_ADD_BACKTRACE(ManagementErrors::TsysErrorExImpl,impl,ex,"CCore::skydip()");
+		throw impl;
+	}
+	IRA::CIRATools::Wait(2,0);
+	guard.acquire();
+
+	// throw  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
+	// ComponentErrors::CORBAProblemExImpl)
+	initRecording(1);
+
+	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"SKYDIP_SCAN"));
+	try {
+		if (!CORBA::is_nil(m_antennaBoss)) {
+			startTime=m_antennaBoss->skydipScan(el1,el2,duration);
+		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::skydip()");
+			throw impl;
+		}
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::skydip()");
+		throw impl;
+	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::skydip()");
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::skydip()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_antennaBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::skydip()");
+		m_antennaBossError=true;
+		throw impl;
+	}
+	// throw  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
+	//ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
+	//ManagementErrors::DataTransferSetupErrorExImpl)
+	startRecording(startTime,1);
+	// now set the the data transfer stop
+	waitFor=startTime+duration; // this is the time at which the stop should be issued
+	guard.release();
+	waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl
+	//throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl, ComponentErrors::OperationErrorExImpl)
+	stopRecording();
+	guard.acquire();
+	//throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+	terminateRecording();
+	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"SKYDIP_DONE"));
+}
+
 void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
 		ManagementErrors::TargetIsNotVisibleExImpl,ManagementErrors::TsysErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
-		ManagementErrors::AntennaScanErrorExImpl)
+		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl)
 {
 	//no need to get the mutex, because it is already done inside the executor object 
 	if (m_schedExecuter) {
@@ -502,24 +627,24 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	// let's create the scans.....filling up the required fields :-)
 	CORBA::Double bwhm=0.017453; // one degree in radians
 	CORBA::Double offset;
-	Management::TScanAxis scanAxis;
+	//Management::TScanAxis scanAxis;
 	IRA::CString obsName,prj,suffix,path,extraPath,baseName;
-	IRA::CString layoutName,schedule,targetID;
+	IRA::CString layoutName,schedule/*,targetID*/;
 	ACS::stringSeq layout;
-	long scanTag=0;
-	long scanID=1,subScanID;
+	//long scanTag=0;
+	//long scanID=1,subScanID;
 	TIMEVALUE now;
 	ACS::Time waitFor;
-	long long waitMicro;
+	//long long waitMicro;
 	ACS::Time startTime;
 		
-	obsName=IRA::CString("system");
+	//obsName=IRA::CString("system");
 	/*prj=IRA::CString("pointingCrossScan");*/
-	getProjectCode(prj);
-	layout.length(0);
-	layoutName=_SCHED_NULLTARGET;
-	schedule="none";
-	targetID="crossScanTarget";
+	//getProjectCode(prj);
+	//layout.length(0);
+	//layoutName=_SCHED_NULLTARGET;
+	//schedule="none";
+	//targetID="crossScanTarget";
 	
 	// now take the mutex
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -536,7 +661,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 				bwhm=tmp;
 			}
 		}
-		ACS::ROstring_var targetRef=m_antennaBoss->target();
+		/*ACS::ROstring_var targetRef=m_antennaBoss->target();
 		if (!CORBA::is_nil(targetRef)) {
 			CORBA::String_var  tmp;
 			tmp=targetRef->get_sync(comp.out());
@@ -544,7 +669,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 			if (compImpl.isErrorFree()) {
 				targetID=(const char *)tmp;
 			}
-		}
+		}*/
 	}
 	catch (...) {
 		//in this case we do not want to to do nothing.....it is an error but we can survive
@@ -594,23 +719,9 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	}
 	IRA::CIRATools::Wait(2,0);
 	guard.acquire();
-		
-	//make sure the communication was not already there
-	try {
-		CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
-	}
-	catch (...) {
-		m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
-		// keep it up, no need to give up now......
-	}
-	//now load the Backend and the dataReceiver	
-	// we always load the default backend because this method could not be called when a schedule is running so, for sure, there will not be a schedule backend
-	loadDefaultBackend(); //throw (ComponentErrors::CouldntGetComponentExImpl);
-	loadDefaultDataReceiver(); //throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
-	// ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl
-	CCore::enableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_streamConnected);
-	//LATITUDE SCAN.........................
-	// now lets go and check the lon scan....typically if a source was commanded before....and it is above the horizon and the scan could be performed
+
+	initRecording(1);
+
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LATITUDE_SCAN"));
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
@@ -641,7 +752,12 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		m_antennaBossError=true;
 		throw impl;
 	}
-	if (scanFrame==Antenna::ANT_HORIZONTAL) {
+	// throw  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
+	//ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
+	//ManagementErrors::DataTransferSetupErrorExImpl)
+
+	startRecording(startTime,1);
+	/*if (scanFrame==Antenna::ANT_HORIZONTAL) {
 		scanAxis=Management::MNG_HOR_LAT;
 	}
 	else if (scanFrame==Antenna::ANT_EQUATORIAL) {
@@ -655,28 +771,31 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	baseName=CCore::computeOutputFileName(startTime,m_site,m_dut1,prj,suffix,extraPath);
 	subScanID=1;
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
-	CCore::setupDataTransfer(m_scanStarted,m_streamPrepared,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
+	CCore::setupDataTransfer(m_scanStarted,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
 			obsName,prj,baseName,path,extraPath,schedule,targetID,layoutName,layout,scanTag,m_currentDevice,scanID,startTime,subScanID,scanAxis);
 	// start the recording or data transfer
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
-	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);
+	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);*/
 	// now set the the data transfer stop
 	waitFor=startTime+duration; // this is the time at which the stop should be issued
-	waitMicro=(duration/10)/10000; // one tens of the total duration 
-	IRA::CIRATools::getTime(now);
-	guard.release();	
-	while (now.value().value<waitFor) {
+	//waitMicro=(duration/10)/10000; // one tens of the total duration
+	//IRA::CIRATools::getTime(now);
+	guard.release();
+	waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl
+	/*while (now.value().value<waitFor) {
 		IRA::CIRATools::Wait(waitMicro);
 		IRA::CIRATools::getTime(now);
-	}
-	guard.acquire();
-	// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
+	}*/
+	//guard.acquire();
+	stopRecording();
+
+	/*// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
 	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
 	// wait for a data transfer to complete before start with the latitude scan
 	guard.release();
 	while (checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError)) {
 		IRA::CIRATools::Wait(0,250000); // 0.25 seconds
-	}
+	}*/
 	guard.acquire();
 	// LONGITUDE SCAN..............
 	// now lets go and check the lon scan....typically if a source was commanded before....and it is above the horizon and the scan could be performed
@@ -710,7 +829,8 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		m_antennaBossError=true;
 		throw impl;
 	}
-	if (scanFrame==Antenna::ANT_HORIZONTAL) {
+	startRecording(startTime,2);
+	/*if (scanFrame==Antenna::ANT_HORIZONTAL) {
 		scanAxis=Management::MNG_HOR_LON;
 	}
 	else if (scanFrame==Antenna::ANT_EQUATORIAL) {
@@ -723,33 +843,37 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	baseName=CCore::computeOutputFileName(startTime,m_site,m_dut1,prj,suffix,extraPath);
 	subScanID=2;
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
-	CCore::setupDataTransfer(m_scanStarted,m_streamPrepared,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
+	CCore::setupDataTransfer(m_scanStarted,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
 			obsName,prj,baseName,path,extraPath,schedule,targetID,layoutName,layout,scanTag,m_currentDevice,scanID,startTime,subScanID,scanAxis);
 	// start the recording or data transfer
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
-	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);
+	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);*/
 	// now set the the data transfer stop
 	waitFor=startTime+duration; // this is the time at which the stop should be issued
-	waitMicro=(duration/10)/10000; // one tens of the total duration 
-	IRA::CIRATools::getTime(now);
+	//waitMicro=(duration/10)/10000; // one tens of the total duration
+	//IRA::CIRATools::getTime(now);
 	guard.release();	
-	while (now.value().value<waitFor) {
+	waitUntil(waitFor);
+	/*while (now.value().value<waitFor) {
 		IRA::CIRATools::Wait(waitMicro);
 		IRA::CIRATools::getTime(now);
-	}
-	guard.acquire();
-	// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
+	}*/
+	//guard.acquire();
+	stopRecording();
+	/*// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
 	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
 	// wait for a couple of seconds before start with the latitude scan
 	guard.release();
 	//bool check=checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError);
 	while (checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError)) {
 		IRA::CIRATools::Wait(0,250000); // 0.25 seconds
-	}
+	}*/
 	guard.acquire();
-	// throw (ComponentErrors::OperationErrorExImpl)
+
+	/*// throw (ComponentErrors::OperationErrorExImpl)
 	CCore::stopScan(m_defaultDataReceiver.in(), m_defaultDataReceiverError,m_scanStarted);
-	CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
+	CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);*/
+	terminateRecording();
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"CROSSSCAN_DONE"));
 }
 

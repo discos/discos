@@ -17,8 +17,8 @@
 
 /** 
  * @mainpage IDL Interface documentation of the antenna subsystem
- * @date 10/10/2011
- * @version 1.13.0
+ * @date 08/04/2013
+ * @version 1.14.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>, 
  *                 <a href=mailto:c.migoni@ira.inaf.it>Carlo Migoni</a>,
  *                 <a href=mailto:righin_s@ira.inaf.it>Simona Righini</a>, 

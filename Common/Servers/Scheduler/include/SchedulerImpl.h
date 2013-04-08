@@ -31,10 +31,10 @@
 
 /** 
  * @mainpage Scheduler component Implementation 
- * @date 13/10/2010
- * @version 1.12.0
+ * @date 08/04/2013
+ * @version 1.13.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.2.0
  * @remarks compiler version is 4.1.2
 */
 
@@ -198,7 +198,7 @@ public:
 	
 	/**
 	 * This method implements the cross scan operation. The cross scan is done around a previously commanded target (prerequisite) using the main drives of the telescope and 
-	 * the Antenna subsystem. The operation consists of a tsys measurment and the the lon/lat On-The-Fly scans.
+	 * the Antenna subsystem. The operation consists of a tsys measurement and the the lon/lat On-The-Fly scans.
  	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
@@ -209,6 +209,19 @@ public:
 	virtual void crossScan(Management::TCoordinateFrame coordFrame,CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
+	/**
+	 * This method performs a skydip with the antenna. The scan is done across the current azimuth between the two elevation limits. A system temperature measurement is
+	 * done at the higher elevation limit.
+ 	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 * @param elevation1 represent2 the first limit of the elevation range to be covered
+	 * @param elevation2 represent2 the second limit of the elevation range to be covered
+	 * @param duration how much time the skydip has to take
+	 */
+	virtual void skydip(CORBA::Double elevation1,CORBA::Double elevation2,ACS::TimeInterval duration)  throw (CORBA::SystemException,
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
 	/**
 	 * It allows to change the name of the instance of the current default backend
 	 * @throw CORBA::SystemException 

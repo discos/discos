@@ -1,8 +1,6 @@
 #ifndef _BOSS_CORE_EXTRA_I_
 #define _BOSS_CORE_EXTRA_I_
 
-// $Id: BossCore_extra.i,v 1.2 2010-12-06 11:36:10 a.orlati Exp $
-
 
 void CBossCore::setProgramTrack() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntCallOperationExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)

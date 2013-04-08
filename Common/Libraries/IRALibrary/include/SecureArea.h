@@ -13,12 +13,12 @@
 /* Andrea Orlati(aorlati@ira.cnr.it)  16/08/2005      Added Init method to CSecureArea					*/ 
 
 
-// $Id: SecureArea.h,v 1.4 2011-07-15 12:46:12 a.orlati Exp $
-
 #include <new>
 #include "baciThread.h"
 
 namespace IRA {
+
+template <class >class CSecureArea;
 
 /**
  * This template class is used by the <i>CSecureArea</i> to make available the resource protected by a mutex mechanism.
@@ -32,12 +32,11 @@ namespace IRA {
 */	
 template <class X> class CSecAreaResourceWrapper {
 public:
+	friend class CSecureArea<X>;
 	/**
-	 * Constructor. 
-	 * @param Mutex pointer to the mutex that must be allocated in order to synchronize the resource.
-	 * @param Res pointer to the resource
-	*/
-	CSecAreaResourceWrapper(BACIMutex *Mutex,X *Res);
+	 * Copy constructor
+	 */
+	CSecAreaResourceWrapper(const CSecAreaResourceWrapper& rSrc);
    /**
 	 * Destructor
    */
@@ -46,6 +45,7 @@ public:
 	 * Releases esplicitally the lock if it is still acquired, otherwise it does nothing.
 	*/
 	void Release();
+
 	/**
 	 * @return the pointer of the protected resource. If the lock is already released that means that
 	 *         th program has a bug and the process is terminated (assert)
@@ -72,7 +72,16 @@ private:
 	X* m_pLockResource;
    /** Indicates if the lock has been released or not */
 	bool m_bReleased;
-   void operator=(const CSecAreaResourceWrapper& rSrc);  // no implementation given	
+	/**
+	 * Constructor.
+	 * @param Mutex pointer to the mutex that must be allocated in order to synchronize the resource.
+	 * @param Res pointer to the resource
+	*/
+	CSecAreaResourceWrapper(BACIMutex *Mutex,X *Res);
+	/**
+	 * Copy operator
+	 */
+	CSecAreaResourceWrapper<X>& operator=(const CSecAreaResourceWrapper& rSrc); // no implementation
 };
 
 /**
@@ -137,11 +146,19 @@ private:
 	T *m_pResource;
 	IRA::CString m_resourceOwner;
 	CSecureArea(const CSecureArea& rSrc); // no implementation given
-   	void operator=(const CSecureArea& rSrc);  // no implementation given
+	CSecureArea<T>& operator=(const CSecureArea& rSrc);  // no implementation given
 };
 
-
 template <class X> IRA::CSecAreaResourceWrapper<X>::CSecAreaResourceWrapper(BACIMutex *Mutex,X *Res): m_pLockMutex(Mutex), m_pLockResource(Res), m_bReleased(true) {
+	m_pLockMutex->acquire();
+	m_bReleased=false;
+}
+
+//copy constructor
+template <class X> IRA::CSecAreaResourceWrapper<X>::CSecAreaResourceWrapper(const CSecAreaResourceWrapper& rSrc ) {
+	m_pLockMutex=rSrc.m_pLockMutex;
+	m_pLockResource=rSrc.m_pLockResource;
+	m_bReleased=true;
 	m_pLockMutex->acquire();
 	m_bReleased=false;
 }

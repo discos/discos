@@ -13,7 +13,8 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  10/05/2011      subsystem now capable to perform scan starting from a previous scan (secondary) as central point, startScan() and checkScan() changed accordingly */
 /* Andrea Orlati(a.orlati@ira.inaf.it) 10/10/2011      Added attribute targetFlux, that reports the expected source flux */
 /* Andrea Orlati(a.orlati@ira.inaf.it) 15/02/2012      added getApparentCoordinates() method */
-/* Andrea Orlati(a.orlati@ira.inaf.it) 22/02/2013     the check slewing method also check the target agains limits given by the caller*/
+/* Andrea Orlati(a.orlati@ira.inaf.it) 22/02/2013     the check slewing method also check the target against limits given by the caller*/
+/* Andrea Orlati(a.orlati@ira.inaf.it) 08/04/2013    added methods goTo() and skydipScan(). The tracking parameter structure has a new fied that allows to control the pointing corrections during the scan*/
 
 #ifndef _ANTENNABOSS_IDL_
 
@@ -121,6 +122,10 @@ module Antenna {
 		 * if true the track point will be joint with another track point in order to obtain a combination of both
 		 */
 		boolean secondary;
+		/**
+		 * enable/disable the poinintg corrections....refraction, pointign model. Just for the current scan.
+		 */
+		boolean enableCorrection;
 	} TTrackingParameters;
 	
 	/** 
@@ -379,6 +384,17 @@ module Antenna {
 		void moon() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 
 		/**
+		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a skydip from the prsent azimuth position.
+		 * @param el1 sets the first edge of the elevation range, a negative means take the default value
+		 * @param el2 sets the second edge of the elevation range, a negative means take the default value
+		 * @param duration allows to select how much time the scan will take to complete
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx
+		 */
+		ACS::Time skydipScan(in double el1,in double el2,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
+		/**
 		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start tracking a given sidereal target given its equatorial coordinates. 
 		 * @param targetName name or identifier of the source
 		 * @param ra right ascension (radians)
@@ -400,6 +416,16 @@ module Antenna {
 		 * @throw AntennaErrors::AntennaErrorsEx 
 		 */
 		 void goOff(in Antenna::TCoordinateFrame frame,in double skyOffset) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
+		 /**
+		  * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go to a fixed horizontal position.
+		  * @param az azimuth in radians
+		  * @param el elevation in radians
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx
+		  */
+		 void goTo(in double az,in double el);
 		
 		/**
 		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a longitude On The Fly scan over the currently commanded target. If no target is commanded yet an error is
@@ -627,6 +653,12 @@ module Antenna {
 		 */
 		void getAllOffsets(out double azOff,out double elOff,out double raOff,out double decOff,out double lonOff,out double latOff);
 		
+		/**
+		 * This method is used internally to know the scan axis/direction os the presently commanded scan
+		 * @param axis indicates which axis is currently involved by the present scan
+		 */
+		void getScanAxis(out Management::TScanAxis axis);
+
 	};
 	
 };

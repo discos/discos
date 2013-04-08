@@ -41,7 +41,7 @@ EXECUTABLES_L = test_moon
 #lllll_OBJECTS   =
 MoonImpl_OBJECTS = MoonImpl
 MoonImpl_LIBS = EphemGeneratorStubs MoonStubs baci maci IRALibrary SlaLibrary ObservatoryStubs   \
-                 ComponentErrors AntennaErrors AntennaDefinitionsStubs
+                 ComponentErrors AntennaErrors AntennaDefinitionsStubs ManagmentDefinitionsStubs ManagementErrors
 
 test_moon_OBJECTS = test_moon
 test_moon_LIBS = baci IRALibrary SlaLibrary EphemGeneratorStubs ComponentErrors AntennaErrors   \

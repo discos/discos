@@ -10,6 +10,9 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  24/01/2008      Creation                                                  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  30/12/2008      Fixed a bug in getObservedEquatorials */
 /* Andrea Orlati(aorlati@ira.inaf.it)  09/04/2010      added some wrappers of the function startScan */
+/* Andrea Orlati(aorlati@ira.inaf.it)  08/04/2013      added support for skydip, goTo, correction during scans and scanAxis handling*/
+
+
 
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
@@ -81,15 +84,15 @@ public:
 	virtual void initialize() throw (ComponentErrors::UnexpectedExImpl);
 	
 	/** 
-	 * This function performs all the clean up operation required to free al the resources allocated by the class
+	 * This function performs all the clean up operation required to free all the resources allocated by the class
 	*/
 	virtual void cleanUp();
 	
 	/**
-	 * This functions starts a new scan given its parameters. It loads an ammount of coordinates into the mount and then it allows 
+	 * This functions starts a new scan given its parameters. It loads an amount of coordinates into the mount and then it allows
 	 * for the routine that is in charge to keep the trajectory up to date. This method succeeds only if the mount has
 	 * already been configured in PROGRAMTRACK mode.
-	 * @thorw ComponentErrors::CouldntReleaseComponentExImpl
+	 * @throw ComponentErrors::CouldntReleaseComponentExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	 * @throw ComponentErrors::CORBAProblemExImpl
 	 * @throw ComponentErrors::UnexpectedExImp
@@ -99,7 +102,7 @@ public:
 	 * @throw AntennaErrors::SecondaryScanErrorExImpl 
 	 * @throw AntennaErrors::MissingTargetExImp
 	 * @throw AntennaErrors::LoadGeneratorErrorExImpl
-	 * @param startUT time at which the stat is supposed to start, if zero or negative the scan must start as soon as possible. In that case the value could be returned back with
+	 * @param startUT time at which the scan is supposed to start, if zero or negative the scan must start as soon as possible. In that case the value could be returned back with
 	 *        the expected (computed) start time.
 	 * @param parameters this structure stores the parameters required by the coordinate generator to compute the next coordinates.
 	 * @param secondary this structure is the secondary set of parameters, it could be used by the primary generator in order to compute a trajectory as composition of both 
@@ -110,7 +113,7 @@ public:
 			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	
 	/**
-	 * This function immediately starts a sidereal tracking over a source from the interna source catalog. Internally it calls the <i>setScan()</i> method.
+	 * This function immediately starts a sidereal tracking over a source from the internal source catalog. Internally it calls the <i>startScan()</i> method.
 	 * @param targetName identifier of the source
 	 * @thorw ComponentErrors::CouldntReleaseComponentExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
@@ -128,7 +131,7 @@ public:
 			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	
 	/**
-	 * This function immediately starts a the tracking of the moon. Internally it calls the <i>setScan()</i> method.
+	 * This function immediately starts a the tracking of the moon. Internally it calls the <i>startScan()</i> method.
 	 * @thorw ComponentErrors::CouldntReleaseComponentExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	 * @throw ComponentErrors::CORBAProblemExImpl
@@ -146,13 +149,13 @@ public:
 	
 	/**
 	 * This function immediately starts a sidereal tracking over a source given its equatorial coordinates.
-	 * Internally it calls the <i>setScan()</i> method.
+	 * Internally it calls the <i>startScan()</i> method.
 	 * @param targetName name of the source.
 	 * @param ra right ascension in radians
 	 * @param dec declination in radians
 	 * @param eq epoch of the equatorial coordinate ("ANT_J2000 or ANT_B1950 or ANT_APPARENT")
 	 * @param section azimuth section (ACU_CW or ACU_CCW or ACU_NEUTRAL) 
-	 * @thorw ComponentErrors::CouldntReleaseComponentExImpl
+	 * @throw ComponentErrors::CouldntReleaseComponentExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	 * @throw ComponentErrors::CORBAProblemExImpl
 	 * @throw ComponentErrors::UnexpectedExImp
@@ -168,6 +171,28 @@ public:
 			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,
 			AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	
+	/**
+	 * This function immediately starts a skydip scan starting from the current azimuth position.
+	 * Internally it calls the <i>startScan()</i> method.
+	 * @param duration time taken by the scan
+	 * @param el1 first elevation range limit, if negative the default value is used
+	 * @param el2 second elevation range limit, if negative the default value is used
+	 * @return the expected start time, if zero the scan will not be done
+	 * @throw ComponentErrors::CouldntReleaseComponentExImpl
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 * @throw ComponentErrors::UnexpectedExImp
+	 * @throw ComponentErrors::CouldntCallOperationExImpl
+	 * @throw ComponentErrors::OperationErrorExImpl
+	 * @throw AntennaErrors::ScanErrorExImpl
+	 * @throw AntennaErrors::SecondaryScanErrorExImpl
+	 * @throw AntennaErrors::MissingTargetExImp
+	 * @throw AntennaErrors::LoadGeneratorErrorExImpl
+	*/
+	ACS::Time skydip(const double& el1, const double& el2,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
+			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
+
 	/**
 	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go offsource along a given frame. The Offset is always done in longitude a part the case
 	 * of horizontal frame. In that case if the elevation is above a cut off limit the offset is done in latitude.
@@ -188,11 +213,29 @@ public:
 			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
 			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	
+	/**
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go a fixed horizontal position
+	 * @param az azimuth position (rad)
+	 * @param el elevation position (rad)
+	 * @thorw ComponentErrors::CouldntReleaseComponentExImpl
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 * @throw ComponentErrors::UnexpectedExImp
+	 * @throw ComponentErrors::CouldntCallOperationExImpl
+	 * @throw ComponentErrors::OperationErrorExImpl
+	 * @throw AntennaErrors::ScanErrorExImpl
+	 * @throw AntennaErrors::SecondaryScanErrorExImpl
+	 * @throw AntennaErrors::MissingTargetExImp
+	 * @throw AntennaErrors::LoadGeneratorErrorExImpl
+	 */
+    void goTo(const double& az,const double& el) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
+			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 
 	/**
 	 * This function immediately starts a longitude On the Fly scan taking as scan center the  previously commanded position. A source or a target must be commanded before calling this method,
 	 * the center position is determined by taking the J2000 coordinates. 
-	 * Internally it calls the <i>setScan()</i> method.
+	 * Internally it calls the <i>startScan()</i> method.
 	 * @param scanFrame gives the frame involved during the scan movement
 	 * @param span lenght of the scan in radians
 	 * @param duration number of seconds that the scan takes
@@ -207,17 +250,16 @@ public:
 	 * @throw AntennaErrors::SecondaryScanErrorExImpl 
 	 * @throw AntennaErrors::MissingTargetExImp
 	 * @throw AntennaErrors::LoadGeneratorErrorExImpl
-	 * @throw AntennaErrors::TargetNotReachableExImpl
 	*/
     ACS::Time lonOTFScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
     		ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
     		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,
-    		AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::TargetNotReachableExImpl);
+    		AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 
 	/**
 	 * This function immediately starts a latitude On the Fly scan taking as scan center the  previously commanded position. A source or a target must be commanded before calling this method,
 	 * the center position is determined by taking the J2000 coordinates. 
-	 * Internally it calls the <i>setScan()</i> method.
+	 * Internally it calls the <i>startScan()</i> method.
 	 * @param scanFrame gives the frame involved during the scan movement
 	 * @param span lenght of the scan in radians
 	 * @param duration number of seconds that the scan takes
@@ -232,12 +274,11 @@ public:
 	 * @throw AntennaErrors::SecondaryScanErrorExImpl 
 	 * @throw AntennaErrors::MissingTargetExImp
 	 * @throw AntennaErrors::LoadGeneratorErrorExImpl
-	 * @thorw AntennaErrors::TargetNotReachableExImpl
 	*/    
 	ACS::Time latOTFScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
 			ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,
-			AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::TargetNotReachableExImpl);
+			AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	
 	/**
 	 * Immediately stops the antenna tracking and stops the mount, the ephemeris generator is also released.
@@ -496,9 +537,9 @@ public:
 	inline bool getEnable() const { return m_enable; } 
 	
 	/**
-	 * @return a boolean value that indicates wether the refraction/pointing model corrections are anabled or not
+	 * @return a boolean value that indicates whether the refraction/pointing model corrections are enabled or not
 	 */
-	inline bool getCorrectionEnable() const { return m_correctionEnable; }
+	inline bool getCorrectionEnable() const { return (m_correctionEnable && m_correctionEnable_scan); }
 	
 	/**
 	 * This function returns the value of the last offset, coming from pointing model, applied to the encoders coordinate in order to get
@@ -598,6 +639,10 @@ public:
 	 */
 	void setGalacticOffsets(const double& lonOff,const double& latOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl);
 	
+	/**
+	 *  @return can be called to retrieve the axis of the current scan
+	 */
+	Management::TScanAxis getCurrentAxis() const  { return m_currentAxis; }
 	
 private:
 	class TOffset {
@@ -665,7 +710,7 @@ private:
 	/**
 	 * if this flag is true the correction due to pointing model or refraction are not taken.
 	*/
-	bool m_correctionEnable;
+	bool m_correctionEnable,m_correctionEnable_scan;
 	/**
 	 * this field reports the last applied offset to the azimuth due to pointing model
 	*/
@@ -750,6 +795,11 @@ private:
 	/** The beam width at half power. Given in radians. it is used to check if the telescope is tracking or not. */
 	double m_FWHM;
 	
+	/**
+	 * axis for the current scan
+	 */
+	Management::TScanAxis m_currentAxis;
+
 	/**
 	 * The current observing sky frequency, used for FWHM and flux computation (MHz)
 	 */
@@ -1013,12 +1063,13 @@ private:
 	 * @param vlsr output radial velocity of the target, in Km/s
 	 * @param sourceName output parameter, name of the target
 	 * @param scanOffset returns the offset for the current scan
+	 * @param axis movement axis of the prepared scan
 	 * @param generatorFlux reference to the generator in charge of doing the flux computation
 	 * @return the reference of the current generator, the caller must free it
 	 */
 	Antenna::EphemGenerator_ptr prepareScan(bool useInternals,ACS::Time& startUT,const Antenna::TTrackingParameters& prim,const Antenna::TTrackingParameters& sec,
-			const TOffset& userOffset,Antenna::TGeneratorType& generatorType,Antenna::TTrackingParameters& lastPar,	Antenna::TSections& section,double& ra,double& dec,double& lon,
-			double& lat,double& vlsr,IRA::CString& sourceName,TOffset& scanOffset,Antenna::EphemGenerator_out generatorFlux)
+			const TOffset& userOffset,Antenna::TGeneratorType& generatorType,Antenna::TTrackingParameters& lastPar,Antenna::TSections& section,double& ra,double& dec,double& lon,
+			double& lat,double& vlsr,IRA::CString& sourceName,TOffset& scanOffset,Management::TScanAxis& axis,Antenna::EphemGenerator_out generatorFlux)
 			throw (ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,
 				   AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	

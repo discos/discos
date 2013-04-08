@@ -79,7 +79,8 @@ ACS::Time CSlewCheck::computeSlewingTime(const double& start,const double& stop,
 	return time;
 }
 
-void CSlewCheck::coordConvert(const double& lon,const double& lat,const Antenna::TCoordinateFrame& coordFrame,const Antenna::TSystemEquinox& equinox,const TIMEVALUE& UT,double& az,double& el)
+void CSlewCheck::coordConvert(const double& lon,const double& lat,const Antenna::TCoordinateFrame& coordFrame,const Antenna::TSystemEquinox& equinox,const TIMEVALUE& UT,
+		double& az,double& el) const
 {
 	IRA::CDateTime time(const_cast<TIMEVALUE&>(UT),m_dut1);	
 	if (coordFrame==Antenna::ANT_EQUATORIAL){

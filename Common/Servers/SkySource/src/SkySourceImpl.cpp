@@ -207,6 +207,8 @@ void SkySourceImpl::getAttributes(Antenna::SkySourceAttributes_out att) throw(CO
 			att->inputParallax,att->inputRadialVelocity);
 	att->inputRaProperMotion*=cos((double)att->inputDeclination);
 	m_source.getInputGalactic(att->inputGalacticLongitude,att->inputGalacticLatitude);
+	if (m_source.isBeamPark()) att->axis=Management::MNG_BEAMPARK;
+	else att->axis=Management::MNG_TRACK;
 }
 
 CORBA::Boolean SkySourceImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::Double el,
@@ -372,15 +374,15 @@ void SkySourceImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::D
     CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::computeFlux()", (LM_INFO,"FLUX: %f",flux));
 }
 
-void SkySourceImpl::setFixedPoint(CORBA::Double az, CORBA::Double el) throw(CORBA::SystemException)
+void SkySourceImpl::setFixedPoint(const char *sourceName,CORBA::Double az, CORBA::Double el) throw(CORBA::SystemException)
 {
 	AUTO_TRACE("SkySourceImpl::setFixedPoint()");
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_source.setInputHorizontal(az,el,m_site);
+	m_sourceName=CString(sourceName);
 	// in that case the flux computation is not available since the flux parameters are not known
 	fluxParam.init = false;
-	CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::setFixedPoint()",
-	   (LM_INFO,"NEW_FIXED_POSITION: %f,%f",az,el));
+	CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::setFixedPoint()", (LM_INFO,"NEW_FIXED_POSITION: %f,%f",az,el));
 }
 
 void SkySourceImpl::setSourceFromGalactic(const char* sourceName,CORBA::Double longitude, CORBA::Double latitude) throw
@@ -392,8 +394,7 @@ void SkySourceImpl::setSourceFromGalactic(const char* sourceName,CORBA::Double l
 	m_sourceName=CString(sourceName);
 	// in that case the flux computation is not available since the flux parameters are not known
 	fluxParam.init = false;
-	CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::setSourceFromGalactic()",
-	   (LM_INFO,"NEW_SOURCE_FROM_GALACTIC: %s,%f,%f",sourceName,longitude,latitude));
+	CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::setSourceFromGalactic()", (LM_INFO,"NEW_SOURCE_FROM_GALACTIC: %s,%f,%f",sourceName,longitude,latitude));
 }
 
 void SkySourceImpl::setSourceFromEquatorial(const char *sourceName,

@@ -9,6 +9,7 @@
 /* Who                                            when             What                                          */
 /* Andrea Orlati(aorlati@ira.inaf.it)  21/07/2010      Creation                                                  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  28/02/2011      For computation is now considered the real band, given by the receiver band and the backend filter */
+/* Andrea Orlati(aorlati@ira.inaf.it)  8/04/2013       changes to fit the new K band, dual feed in Medicina  */
 
 #ifdef COMPILE_TARGET_MED
 

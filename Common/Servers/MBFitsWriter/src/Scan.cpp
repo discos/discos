@@ -55,28 +55,40 @@ void Scan::terminate() {
 
 string Scan::getType( const Scan::Type_e type_ ) {
 	Scan::TypeType_ci_m_t typeType_ci											= Scan::m_typesTypes.find(type_);
-	if ( typeType_ci						== Scan::m_typesTypes.end()						) throw exception();
+	if ( typeType_ci						== Scan::m_typesTypes.end()						)  {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	return typeType_ci->second;
 }
 
 string Scan::getMode( const Scan::Mode_e mode_ ) {
 	Scan::ModeMode_ci_m_t modeMode_ci											= Scan::m_modesModes.find(mode_);
-	if ( modeMode_ci						== Scan::m_modesModes.end()						) throw exception();
+	if ( modeMode_ci						== Scan::m_modesModes.end()						) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	return modeMode_ci->second;
 }
 
 string Scan::getGeometry( const Scan::Geometry_e geometry_ ) {
 	Scan::GeometryGeometry_ci_m_t geometryGeometry_ci			= Scan::m_geometriesGeometries.find(geometry_);
-	if ( geometryGeometry_ci		== Scan::m_geometriesGeometries.end()	) throw exception();
+	if ( geometryGeometry_ci		== Scan::m_geometriesGeometries.end()	) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	return geometryGeometry_ci->second;
 }
 
 string Scan::getDirection( const Scan::Direction_e direction_ ) {
 	Scan::DirectionDirection_ci_m_t directionDirection_ci	= Scan::m_directionsDirections.find(direction_);
-	if ( directionDirection_ci	== Scan::m_directionsDirections.end()	) throw exception();
+	if ( directionDirection_ci	== Scan::m_directionsDirections.end()	) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	return directionDirection_ci->second;
 }
@@ -403,7 +415,7 @@ void Scan::setLayout( const Layout& layout_ ) {
 
 			default:
 				labels.clear();
-
+				printf("ex : %s %d\n",__FILE__,__LINE__);
 				throw exception();
 		}
 	}

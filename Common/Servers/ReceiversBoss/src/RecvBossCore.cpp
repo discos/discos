@@ -282,10 +282,12 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 		throw impl;
 	}
 	m_recvSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
+	IRA::CIRATools::Wait(0,500000);  //wait half a second to settle things down
 	if (m_currentReceiver=="KKC") {
 		trueValue/=1000;
 		double amplitude=loAmp[0]+loAmp[1]*trueValue+loAmp[2]*trueValue*trueValue+loAmp[3]*trueValue*trueValue*trueValue;
 		msg.Format("set loamp %lf\n",(double)amplitude);
+		//printf("MANDO: %s\n",(const char *)msg);
 		len=msg.GetLength();
 		if (m_recvSocket.Send(err,(const void *)msg,len)!=len) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
@@ -297,6 +299,7 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 			throw impl;
 		}
 		m_recvSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly		
+		//printf("RICEVO: %s\n",buff);
 	}
 #endif	
 }
@@ -429,7 +432,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_LO[0]=21964.0;
 		m_LO[1]=21964.0;
 		m_IFs=2;
-		m_feeds=7;
+		m_feeds=2;
 		m_pols[0]=Receivers::RCV_LCP;
 		m_pols[1]=Receivers::RCV_RCP;
 		m_startFreq[0]=100.0;
@@ -584,7 +587,7 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 	double primaryFreq[5]= { 1.4, 1.65, 2.28, 8.6, 23.0 };
 	double primaryTaper[5]= { -24, -29, -19, -23, -25 };
 	double secondaryFreq[7]= { 4.3, 5.05, 5.8, 6.3, 18, 22, 26 };
-	double secondaryTaper[7]= { -9.5, -12, -14, -9.9, -3.2, -5.3, -7.7 };
+	double secondaryTaper[7]= { -9.5, -12, -14, -9.9, -7.1, -12.6, -18.9};
 	double *ff,*tt;
 	long max,p1=0,p2=0,i;
 	double realFreq,realBw;

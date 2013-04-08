@@ -21,10 +21,10 @@
 
 /** 
  * @mainpage Header file of "OTF" module
- * @date 19/03/2008
- * @version 0.1.0
+ * @date 08/04/2013
+ * @version 0.15.0
  * @author <a href=mailto:righin_s@ira.inaf.it>Simona Righini</a>, 
- * @remarks Last compiled under ACS 6.0.4
+ * @remarks Last compiled under ACS 8.2.0
  */
 
 #include <baci.h>

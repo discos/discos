@@ -65,6 +65,7 @@ CConfiguration::~CConfiguration()
 
 void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
 {
+	IRA::CString temp;
 	_GET_STRING_ATTRIBUTE("MountInstance","Mount instance is ",m_mountInstance);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory interface is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("PointingModelInstance","Pointing model instance is ",m_pointingInstance);
@@ -93,7 +94,15 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DOUBLE_ATTRIBUTE_E("MinElevationAvoidance","Suggested lower elevation limit  for source observation(degrees):",m_minElevationAvoidance,"DataBlock/Mount");
 	_GET_DOUBLE_ATTRIBUTE_E("MaxElevationAvoidance","Suggested upper elevation limit  for source observation(degrees):",m_maxElevationAvoidance,"DataBlock/Mount");
 	_GET_DOUBLE_ATTRIBUTE("CutOffElevation","The cut off elevation is (degrees):",m_cutOffElevation);
-	
+	_GET_STRING_ATTRIBUTE("SkydipElevationRange","The skydip elevation range is (degrees):",temp);
+
+	if (sscanf((const char *)temp,"%lf-%lf",&m_skydipElDown,&m_skydipElUp)!=2) {
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
+		dummy.setFieldName("SkydipElevationRange");
+		throw dummy;
+	}
+	m_skydipElDown*=DD2R;
+	m_skydipElUp*=DD2R;
 	m_maxElevation*=DD2R;
 	m_minElevation*=DD2R;
 	m_maxAzimuthRate*=DD2R;

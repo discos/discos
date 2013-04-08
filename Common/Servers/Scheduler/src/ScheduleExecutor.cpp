@@ -351,6 +351,7 @@ void CScheduleExecutor::runLoop()
 				WORD postProcArgs;
 				if (m_currentScan.postScan!=_SCHED_NULLTARGET) {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"POSTSCAN_PROCEDURE_IS_NOT_NULL"));
+					printf("CERCO LA PROCEDURA: %s \n",(const char *)m_currentScan.postScan);
 					if (!m_schedule->getPostScanProcedureList()->getProcedure(m_currentScan.postScan,postProc,postProcArgs)) {
 						_EXCPT(ManagementErrors::ScheduleErrorExImpl,dummy,"CScheduleExecutor::runLoop()");
 						dummy.setReason((const char *)m_schedule->getLastError());
@@ -864,7 +865,7 @@ void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw 
  	 		CCore::configureBackend(m_backend.in(),m_backendError,rec.backendProc, command);
  	 		m_currentBackendProcedure=rec.backendProc;
  	 	}
- 	 	CCore::enableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_streamConnected);
+ 	 	CCore::enableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_streamConnected,m_streamPrepared);
  	}
  	else {
  		m_currentBackendProcedure=_SCHED_NULLTARGET;
@@ -962,9 +963,10 @@ void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec,const Sched
 	Antenna::TTrackingParameters *prim=static_cast<Antenna::TTrackingParameters *>(scanRec.primaryParameters);
 	targetID=(const char *)prim->targetName;
 	// compute the axis or direction along which the scan is performed
-	scanAxis=CCore::computeScanAxis(scanRec.type,scanRec);
+	//scanAxis=CCore::computeScanAxis(scanRec.type,scanRec);
+	scanAxis=CCore::computeScanAxis(m_antennaBoss,m_antennaBossError); //  throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 	if ((rec.backendProc!=_SCHED_NULLTARGET) && (rec.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
-		CCore::setupDataTransfer(m_scanStarted,m_streamPrepared,m_writer.in(),m_writerError,m_backend.in(),m_backendError,m_schedule->getObserverName(),
+		CCore::setupDataTransfer(m_scanStarted,m_writer.in(),m_writerError,m_backend.in(),m_backendError,m_schedule->getObserverName(),
 				m_schedule->getProjectName(),baseName,path,extraPath,m_schedule->getFileName(),targetID,rec.layout,layoutProc,m_schedule->getScanTag(),m_core->getCurrentDevice(),
 				rec.scanid,m_startRecordTime ,rec.subscanid,scanAxis);
 		// throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl

@@ -1,6 +1,5 @@
 /* **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id: SkySource.h,v 1.9 2011-05-06 09:53:59 a.orlati Exp $									                                                            */
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
@@ -13,6 +12,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  27/01/2009	  added the static function paralacticAngle */
 /* Andrea Orlati(aorlati@ira.inaf.it)  22/07/2010	  fixed a bug in correction for cosine of elevation in the offsets computation*/ 
 /* Andrea Orlati(aorlati@ira.inaf.it)  06/05/2011	  fixed an issue, when galactic offsets were commanded the J2000 coordinates did not correspond to the source any more*/
+/* Andrea Orlati(aorlati@ira.inaf.it)  08/04/2013	 added is BeamPark() method*/
 
 #ifndef SKYSOURCE_H_
 #define SKYSOURCE_H_
@@ -182,6 +182,12 @@ public:
 	*/
 	void process(const CDateTime& now,const CSite& site);
 	
+	/**
+	 * check if the trajectory is resulting in a fixed horizontal position (no antenna movement required).
+	 * @return true if the telescope will not be moved
+	 */
+	bool  isBeamPark() const { return m_fixed; }
+
 	/**
 	 * Precess the current FK5 J2000 equatorial coordiantes to geocentric apparent one.
 	 * This routine takes into account the light deflection, annual aberration, precession and nutation.

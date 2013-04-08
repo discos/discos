@@ -15,7 +15,7 @@
  * @throw ComponentErrors::UnexpectedExImpl
  * @throw ComponentErrors::OperationErrorExImpl
  * @throw ComponentErrors::ComponentNotActiveExImpl
- * @thorw ComponentErrors::CORBAProblemExImpl
+ * @throw ComponentErrors::CORBAProblemExImpl
  * @return true if the scan has been checked successfully
  */ 	
 static bool checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,const double& minEl,const double& maxEl,Antenna::AntennaBoss_ptr antBoss,bool& antBossError)
@@ -24,7 +24,7 @@ static bool checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRec
 
 /**
  * Send to the antenna boss the commands required to start scan.
- * @thorw ComponentErrors::OperationErrorExImpl
+ * @throw ComponentErrors::OperationErrorExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
  * @throw ComponentErrors::UnexpectedExImpl
  * @throw ComponentErrors::ComponentNotActiveExImpl
@@ -39,7 +39,7 @@ static void doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TReco
 
 
 /**
- * This method will close (if necessary) the enstablished connection between a backend and a data receiver.It closes and frees the resources allocated to enable the trasmission. In practice it calls sendStop()
+ * This method will close (if necessary) the established connection between a backend and a data receiver.It closes and frees the resources allocated to enable the trasmission. In practice it calls sendStop()
  * terminate(), disconnect() and closeReceiver()
  * @param backend reference to the backend 
  * @param backendError will be returned back true if an error occurred in the communication to backend component
@@ -47,20 +47,21 @@ static void doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TReco
  * @param writerError will be returned back true if an error occurred in the communication to writer component
  * @param streamStarted this argument indicates that the data transfer has been started, on exit it is false if the closeup is succesful
  * @param streamPrepared this argument indicates that the data transfer has been setup, on exit it is false if the closeup is succesful
- * @param streamconnected this argument indicates that connection between the sender and receiver component was enstablished, on exit it is false if the closeup is succesful
+ * @param streamConnected this argument indicates that connection between the sender and receiver component was enstablished, on exit it is false if the closeup is succesful
  * @param scanStarted this argument indicates that the system has already started a scan,in that case it closes it,  on exit it is false
  */
 static void disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& writerError,bool& streamStarted,bool& streamPrepared,
 		bool& streamConnected,bool& scanStarted) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
 
 /**
- * Enable the transfer between the backend and the receiver. In practice it connects the backend with the recevier itself
+ * Enable the transfer between the backend and the receiver. In practice it connects the backend with the receiver itself
  * @param backend reference to the backend 
  * @param backendError will be returned back true if an error occurred in the communication to backend component
  * @param writer reference to the writer or data recorder or data dealer 
- * @param streamconnected this argument indicates that connection between the sender and receiver component was enstablished, on exit it is false if the closeup is succesful  
+ * @param streamconnected this argument indicates that connection between the sender and receiver component was established, on exit it is false if the closeup is successful
+ * @param streamPrepared if false the backend is given command to send headers to the writer, then it is set to true
  */
-static void enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& streamConnected) throw (
+static void enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& streamConnected,bool& streamPrepared) throw (
 		ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
 
 /**
@@ -79,7 +80,6 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
 /**
  * This command set up the data receiver with some parameters.
  * @param scanStarted if false the method will setup the start of the scan (a set it to true), otherwise it is ignored
- * @param streamPrepared if false the backend is given command to send headers to the writer, then it is set to true
  * @param writer reference to the writer or data recorder or data dealer 
  * @param writerError will be returned back true if an error occurred in the communication to writer component
  * @param backend reference to the backend
@@ -97,7 +97,7 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
  * @param device identifier of the device currently in use
  * @param axis indicates which axis is currently used by the telescope.
  */
-static void setupDataTransfer(bool& scanStarted,bool& streamPrepared,Management::DataReceiver_ptr writer,bool& writerError,Backends::GenericBackend_ptr backend,bool& backendError,
+static void setupDataTransfer(bool& scanStarted,/*bool& streamPrepared,*/Management::DataReceiver_ptr writer,bool& writerError,Backends::GenericBackend_ptr backend,bool& backendError,
 		const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& targetID,
 		const IRA::CString& layoutName,const ACS::stringSeq& layout,const long& scanTag,const long& device,const DWORD& scanID,const ACS::Time& startTime,const  DWORD& subScanID,
 		const Management::TScanAxis& axis) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl);
@@ -106,10 +106,10 @@ static void setupDataTransfer(bool& scanStarted,bool& streamPrepared,Management:
  * This static method starts the data transfer between the backend and the configured data recorder.
  * @param backend reference to the backend 
  * @param backendError will be returned back true if an error occurred in the communication to backend component
- * òparam startTime this is the exact time the data transfer should start
+ * @param startTime this is the exact time the data transfer should start
  * @param streamStarted this argument indicates that the data transfer has been started, on exit it is false if the closeup is successful
  * @param streamPrepared this argument indicates that the data transfer has been setup, on exit it is false if the closeup is successful
- * @param streamconnected this argument indicates that connection between the sender and receiver component was established, on exit it is false if the closeup is successful
+ * @param streamConnected this argument indicates that connection between the sender and receiver component was established, on exit it is false if the closeup is successful
  */
 static void startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendError,const ACS::Time& startTime,bool& streamStarted,bool& streamPrepared,bool& streamConnected) throw (
 		ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl);
@@ -120,7 +120,7 @@ static void startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendE
  * @param backendError will be returned back true if an error occurred in the communication to backend component
  * @param streamStarted this argument indicates that the data transfer has been started, on exit it is false if the closeup is successful
  * @param streamPrepared this argument indicates that the data transfer has been setup, on exit it is false if the closeup is succesful
- * @param streamconnected this argument indicates that connection between the sender and receiver component was established, on exit it is false if the closeup is successful
+ * @param streamConnected this argument indicates that connection between the sender and receiver component was established, on exit it is false if the closeup is successful
  */ 
  static void stopDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,bool& streamStarted,bool& streamPrepared,bool& streamConnected) throw (ComponentErrors::OperationErrorExImpl,
 		ManagementErrors::BackendNotAvailableExImpl);
@@ -170,7 +170,18 @@ static IRA::CString computeOutputFileName(const ACS::Time& ut,const ACS::TimeInt
  * @param scanRec structure that contains all the scan parameters
  * @return the scanning axis according to the definition of the management interface
  */
-static Management::TScanAxis computeScanAxis(const Management::TScanTypes& type,const Schedule::CScanList::TRecord& scanRec);
+/*static Management::TScanAxis computeScanAxis(const Management::TScanTypes& type,const Schedule::CScanList::TRecord& scanRec);*/
+
+/**
+ * Computes the scan axis starting from the configuration of involved sub system bosses.
+ * @param antBoss reference to the antenna boss
+ * @param antBossErr flags the status of the antenna boss reference
+ * @throw ComponentErrors::ComponentNotActiveExImpl
+ * @throw ComponentErrors::CORBAProblemExImpl
+ * @throw ComponentErrors::UnexpectedExImpl
+ */
+static Management::TScanAxis computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError) throw (ComponentErrors::ComponentNotActiveExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
 
 /**
  * Computes the name of the output file, lst time is derived from provided ut time

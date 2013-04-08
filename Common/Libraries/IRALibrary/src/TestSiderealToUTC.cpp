@@ -39,4 +39,35 @@ int main(int argc, char *argv[])
 		printf("\n\n");
 		CIRATools::Wait(5,0);
 	}
+	/*IRA::CSecureArea<int> area(true);
+	{
+		IRA::CSecAreaResourceWrapper<int> p=area.Get();
+		IRA::CSecAreaResourceWrapper<int> q=p;
+		IRA::CSecAreaResourceWrapper<int> k(p);
+		*k=10;
+	}
+	IRA::CSecAreaResourceWrapper<int> p=area.Get();
+	printf("valore: %d\n",*p);*/
+
+	/*double ang=-95;
+	printf("angolo: %lf  - Risultato: %lf\n",ang,IRA::CIRATools::latRangeRad(ang*DD2R)*DR2D);
+	ang=95;
+	printf("angolo: %lf  - Risultato: %lf\n",ang,IRA::CIRATools::latRangeRad(ang*DD2R)*DR2D);
+	ang=88;
+	printf("angolo: %lf  - Risultato: %lf\n",ang,IRA::CIRATools::latRangeRad(ang*DD2R)*DR2D);
+	ang=-88;
+	printf("angolo: %lf  - Risultato: %lf\n",ang,IRA::CIRATools::latRangeRad(ang*DD2R)*DR2D);
+	ang=-100;
+	printf("angolo: %lf  - Risultato: %lf\n",ang,IRA::CIRATools::latRangeRad(ang*DD2R)*DR2D);
+	ang=232;
+	printf("angolo: %lf  - Risultato: %lf\n",ang,IRA::CIRATools::latRangeRad(ang*DD2R)*DR2D);
+	ang=-1;
+	printf("angolo: %lf  - Risultato: %lf\n",ang,IRA::CIRATools::latRangeRad(ang*DD2R)*DR2D);
+	ang=1;
+	printf("angolo: %lf  - Risultato: %lf\n",ang,IRA::CIRATools::latRangeRad(ang*DD2R)*DR2D);
+	ang=180;
+	printf("angolo: %lf  - Risultato: %lf\n",ang,IRA::CIRATools::latRangeRad(ang*DD2R)*DR2D);
+	ang=-180;
+	printf("angolo: %lf  - Risultato: %lf\n",ang,IRA::CIRATools::latRangeRad(ang*DD2R)*DR2D);*/
+
 }

@@ -61,7 +61,6 @@
 		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
 		<!-- the expire time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
-	
 		<!-- here follows the configuration for the tracking curve loader -->
 		<!-- This is the minimum number of points that must be loaded initially,
 		     the number of points loaded into the mount must never goes down this limit  -->
@@ -75,6 +74,8 @@
 		<xs:attribute name="CoordinateIntegration" type="xs:unsignedLong" use="required" />
 		<!-- this setup the cutoff elevation for off-source movement, over this limit the off source is done in elevation, under is done in azimuth(degrees) -->
 		<xs:attribute name="CutOffElevation" type="xs:double" use="required" />
+		<!-- Provides the elevation limits in which the skydip scans are performed. the expected form is MinEl-MaxEl (degrees) -->
+		<xs:attribute name="SkydipElevationRange" type="xs:string" use="required" />		
 		<!-- here a list of used component follows -->
 		<xs:attribute name="MountInstance" type="xs:string" use="required" />
 		<xs:attribute name="ObservatoryInterface" type="xs:string" use="required" />

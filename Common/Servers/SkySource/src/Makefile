@@ -52,7 +52,7 @@ SkySourceTextDisplay_OBJECTS = TextClient
 #xxxxx_LDFLAGS   =
 SkySourceTextDisplay_LIBS = EphemGeneratorStubs SkySourceStubs IRALibrary \
     TextWindowLibrary ComponentErrors AntennaErrors ClientErrors \
-    AntennaDefinitionsStubs
+    AntennaDefinitionsStubs ManagmentDefinitionsStubs ManagementErrors
 #
 # special compilation flags for single c sources
 #yyyyy_CFLAGS   = 
@@ -73,7 +73,7 @@ LIBRARIES       = SkySourceImpl
 SkySourceImpl_OBJECTS   = SkySourceImpl
 SkySourceImpl_LIBS = EphemGeneratorStubs SkySourceStubs ObservatoryStubs \
 					 IRALibrary ComponentErrors \
-					 AntennaErrors AntennaDefinitionsStubs
+					 AntennaErrors AntennaDefinitionsStubs ManagmentDefinitionsStubs ManagementErrors
 
 
 #

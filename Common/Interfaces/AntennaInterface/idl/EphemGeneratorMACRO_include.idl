@@ -1,3 +1,5 @@
+#include <ManagmentDefinitions.idl>
+
 /** @def DEFATTRIBUTES(NAME)
  * 	@brief this macro can be used to defines exposed attributes by interfaces that inherits from EphemGenerator
  *    @arg sourceID name or code of the pointed position
@@ -36,6 +38,7 @@
 	double userDeclinationOffset; \
 	double userLongitudeOffset; \
 	double userLatitudeOffset; \
+	Management::TScanAxis axis; \
 
 
 #define ENDDEFATTRIBUTES }

@@ -14,7 +14,7 @@
 /* Simona Righini						02/02/2009		bug fixing*/
 /* Simona Righini						06/09/2010      offsets handling added*/
 /* Simona Righini                       06/09/2010      0-azimuth bug fixing*/
-
+/* Simona Righini                       08/04/2013      support for computation of ScanAxis*/
 
 #ifndef SUBSCAN_H_
 #define SUBSCAN_H_
@@ -250,6 +250,7 @@ private:
 	double m_origCenterGLat;
 	double m_origCenterAz;
 	double m_origCenterEl;
+	Management::TScanAxis m_scanType; //code for Scan Type
 
 	
 	/* Method computes the start and stop positions for the peculiar

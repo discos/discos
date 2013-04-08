@@ -206,6 +206,7 @@ void SubScan::ScanComputer(
 	m_isPointingScan=(m_coordFrame==Antenna::ANT_EQUATORIAL)&&(m_subScanFrame==Antenna::ANT_HORIZONTAL);
 
 	m_origCenterRA=m_origCenterDec=m_origCenterGLon=m_origCenterGLat=m_origCenterAz=m_origCenterEl=0.0;
+	m_scanType=Management::MNG_NO_AXIS;
 
 	reachOk=true;
 	
@@ -214,10 +215,47 @@ void SubScan::ScanComputer(
 	 * Setting the subscan parameters in accordance to the selected
 	 * geometry and mode.
 	**/
+
+	//Determining the scantype code to be returned
+	if (m_subScanFrame==Antenna::ANT_EQUATORIAL) {
+		if (m_geometry==Antenna::SUBSCAN_CONSTLON) {
+			m_scanType=Management::MNG_EQ_LAT;
+		} else if (m_geometry==Antenna::SUBSCAN_CONSTLAT){
+			m_scanType=Management::MNG_EQ_LON;
+		} else if (m_geometry==Antenna::SUBSCAN_GREATCIRCLE) {
+			m_scanType=Management::MNG_GCIRCLE;
+		} else {
+			m_scanType=Management::MNG_NO_AXIS;
+		}
+	}
+	if (m_subScanFrame==Antenna::ANT_GALACTIC) {
+		if (m_geometry==Antenna::SUBSCAN_CONSTLON) {
+			m_scanType=Management::MNG_GAL_LAT;
+		} else if (m_geometry==Antenna::SUBSCAN_CONSTLAT){
+			m_scanType=Management::MNG_GAL_LON;
+		} else if (m_geometry==Antenna::SUBSCAN_GREATCIRCLE) {
+			m_scanType=Management::MNG_GCIRCLE;
+		} else {
+			m_scanType=Management::MNG_NO_AXIS;
+		}
+	}
+	if (m_subScanFrame==Antenna::ANT_HORIZONTAL) {
+		if (m_geometry==Antenna::SUBSCAN_CONSTLON) {
+			m_scanType=Management::MNG_HOR_LAT;
+		} else if (m_geometry==Antenna::SUBSCAN_CONSTLAT){
+			m_scanType=Management::MNG_HOR_LON;
+		} else if (m_geometry==Antenna::SUBSCAN_GREATCIRCLE) {
+			m_scanType=Management::MNG_GCIRCLE;
+		} else {
+			m_scanType=Management::MNG_NO_AXIS;
+		}
+	}
+
+    // Checking for the so-called pointing scans
 	if (coordFrame!=subScanFrame){
 		if (m_isPointingScan) {
 			if ((m_geometry==Antenna::SUBSCAN_CONSTLON)||(m_geometry==Antenna::SUBSCAN_CONSTLAT)){
-				/* This is a scan for pointing calibrations.
+				/* This is a scan usually employed for pointing calibrations.
 				 * It can only be a center+span subscan, centered on a sidereal
 				 * source - identified by means of J2000.0 equatorial coordinates -
 				 * and performing the scans along the horizontal coordinates axes */
@@ -1076,6 +1114,7 @@ void SubScan::fillAllAttributes (Antenna::OTFAttributes* att) {
 	att->direction=m_direction;
 	att->startUT=m_startUT.value().value;
 	att->subScanDuration=m_subScanDuration.value().value;
+	att->axis=m_scanType;
 }
 
 // This fills the horizontal coordinates attributes only

@@ -13,7 +13,7 @@
 									m_isTracking=false; \
 									m_antennaBossError=m_receiversBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=m_weatherStationError=false; \
 									m_currentDevice=0;\
-									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
+									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false; \
 									
 #define RESOURCE_EXEC ACS_NEW_SIMPLE_CONSUMER(m_antennaNC,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,antennaNCHandler,static_cast<void*>(this)); \
 					  m_antennaNC->consumerReady(); \

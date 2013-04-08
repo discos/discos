@@ -17,6 +17,7 @@ void CBossCore::copyTrack(Antenna::TTrackingParameters& dest,const Antenna::TTra
 	}
 	dest.section=source.section;
 	dest.secondary=source.secondary;
+	dest.enableCorrection=source.enableCorrection;
 	dest.otf.lon1=source.otf.lon1;
 	dest.otf.lat1=source.otf.lat1;
 	dest.otf.lon2=source.otf.lon2;
@@ -45,6 +46,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		double& vlsr,
 		IRA::CString& sourceName,
 		TOffset& scanOffset,
+		Management::TScanAxis& axis,
 		Antenna::EphemGenerator_out generatorFlux)
 		throw (ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,
 			   AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
@@ -65,7 +67,8 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 	copyTrack(primary,prim);
 	copyTrack(secondary,sec); 
 	secondary.applyOffsets=false; //the offsets of the secondary track are always ignored as well as the secondary bit
-	secondary.secondary=false;		
+	secondary.secondary=false;
+	secondary.enableCorrection=true;
 	
 	// some preliminary checks and initializations
 	if (primary.type==Antenna::ANT_NONE) {
@@ -90,21 +93,36 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 	else if (primary.secondary) { // // support for secondary scan.......primary.type must be different from NONE
 		if (primary.type==Antenna::ANT_OTF) {  // if it is OTF some special check are due
 			if ((secondary.type!=Antenna::ANT_NONE)||(lastPar.type!=Antenna::ANT_NONE)) {  //check if the secondary scan is given or the lastScan has been commanded
-				if (primary.otf.description!=Antenna::SUBSCAN_CENTER) {
+				//supported combination are : A) description: Center, frame: EQ or GAL B) description: StartStop, frame: HOR
+				if (primary.otf.geometry==Antenna::SUBSCAN_GREATCIRCLE) {  // great circle is never supported
+					_EXCPT(AntennaErrors::ScanErrorExImpl,impl,"CBossCore::prepareScan()");
+					impl.setReason("The geometry of the OTF cannot be GREATCIRCLE in this configuration");
+					throw impl;
+				}
+				if (primary.otf.description==Antenna::SUBSCAN_CENTER) { // if the subscan is center
+					if ((primary.otf.coordFrame!=Antenna::ANT_EQUATORIAL)&&(primary.otf.coordFrame!=Antenna::ANT_GALACTIC)) { //... the coordinate frame must be EQ or GAL
+						_EXCPT(AntennaErrors::ScanErrorExImpl,impl,"CBossCore::prepareScan()");
+						impl.setReason("This OTF configuration support only galactic or equatorial frame");
+						throw impl;
+					}
+				}
+				else if (primary.otf.description==Antenna::SUBSCAN_STARTSTOP) { // if the subscan is Start Stop
+					if ((primary.otf.coordFrame!=Antenna::ANT_HORIZONTAL)) { //... the coordinate frame must be EQ or GAL
+						_EXCPT(AntennaErrors::ScanErrorExImpl,impl,"CBossCore::prepareScan()");
+						impl.setReason("This OTF configuration support only horizontal frame");
+						throw impl;
+					}
+				}
+				/*if (primary.otf.description!=Antenna::SUBSCAN_CENTER) {
 					_EXCPT(AntennaErrors::ScanErrorExImpl,impl,"CBossCore::prepareScan()");
 					impl.setReason("The description of the OTF can be only CENTER in this configuration");
 					throw impl;
-				}
-				if (primary.otf.geometry==Antenna::SUBSCAN_GREATCIRCLE) {
-					_EXCPT(AntennaErrors::ScanErrorExImpl,impl,"CBossCore::prepareScan()");
-					impl.setReason("The geometry of the OTF cannot be GREATCIRCLE in this configuration");
-					throw impl;				
 				}
 				if ((primary.otf.coordFrame!=Antenna::ANT_EQUATORIAL)&&(primary.otf.coordFrame==Antenna::ANT_GALACTIC)) {
 					_EXCPT(AntennaErrors::ScanErrorExImpl,impl,"CBossCore::prepareScan()");
 					impl.setReason("This OTF configuration support only galactic or equatorial frame");
 					throw impl;									
-				}
+				}*/
 			}
 			else { // if primary.secondary==true and neither secondary.type!=NONE lastPar.type!=NONE
 				_EXCPT(AntennaErrors::MissingTargetExImpl,impl,"CBossCore::prepareScan()");
@@ -119,15 +137,31 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 					_EXCPT(AntennaErrors::SecondaryScanErrorExImpl,ex,"CBossCore::prepareScan()");
 					throw ex;
 				}
-				if (primary.otf.coordFrame==Antenna::ANT_EQUATORIAL) {
+				if (primary.otf.coordFrame==Antenna::ANT_EQUATORIAL) {     // this is description==CENTER
 					ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"UTILIZZO_COORDINATE_EQUATORIALI"));
 					primary.otf.lon1=secRa;
 					primary.otf.lat1=secDec;
 				}
-				else if (primary.otf.coordFrame==Antenna::ANT_GALACTIC) {
+				else if (primary.otf.coordFrame==Antenna::ANT_GALACTIC) { // this is description==CENTER
 					ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"UTILIZZO_COORDINATE_GALATTICHE"));
 					primary.otf.lon1=secLon;
 					primary.otf.lat1=secLat;
+				}
+				else if (primary.otf.coordFrame==Antenna::ANT_HORIZONTAL) { // this is description==STARTSTOP
+					ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"UTILIZZO_COORDINATE_ORRIZZONTALI"));
+					TIMEVALUE timeNow;
+					double presentAz,presentEl;
+					IRA::CIRATools::getTime(timeNow);
+					m_slewCheck.coordConvert(secLon,secLat,Antenna::ANT_GALACTIC,Antenna::ANT_J2000,timeNow,presentAz,presentEl);
+					if (primary.otf.geometry==Antenna::SUBSCAN_CONSTLON) {
+						primary.otf.lon1=presentAz;
+						primary.otf.lon2=presentAz;
+					}
+					else if (primary.otf.geometry==Antenna::SUBSCAN_CONSTLAT) {
+						primary.otf.lat1=presentEl;
+						primary.otf.lat2=presentEl;
+					}
+					// GREATCIRCLE is signaled as error in the control code above.....
 				}
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_SECONDARY_PREPARED_ON_LONLAT %lf %lf",primary.otf.lon1,primary.otf.lat1));
 				secondaryActive=true;
@@ -141,15 +175,31 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 					_EXCPT(AntennaErrors::SecondaryScanErrorExImpl,ex,"CBossCore::prepareScan()");
 					throw ex;
 				}
-				if (primary.otf.coordFrame==Antenna::ANT_EQUATORIAL) {
+				if (primary.otf.coordFrame==Antenna::ANT_EQUATORIAL) { // this is description==CENTER
 					ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"UTILIZZO_COORDINATE_EQUATORIALI"));
 					primary.otf.lon1=secRa;
 					primary.otf.lat1=secDec;
 				}
-				else if (primary.otf.coordFrame==Antenna::ANT_GALACTIC) {
+				else if (primary.otf.coordFrame==Antenna::ANT_GALACTIC) { // this is description==CENTER
 					ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"UTILIZZO_COORDINATE_GALATTICHE"));
 					primary.otf.lon1=secLon;
 					primary.otf.lat1=secLat;
+				}
+				else if (primary.otf.coordFrame==Antenna::ANT_HORIZONTAL) { // this is description==STARTSTOP
+					ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"UTILIZZO_COORDINATE_ORRIZZONTALI"));
+					TIMEVALUE timeNow;
+					double presentAz,presentEl;
+					IRA::CIRATools::getTime(timeNow);
+					m_slewCheck.coordConvert(secLon,secLat,Antenna::ANT_GALACTIC,Antenna::ANT_J2000,timeNow,presentAz,presentEl);
+					if (primary.otf.geometry==Antenna::SUBSCAN_CONSTLON) {
+						primary.otf.lon1=presentAz;
+						primary.otf.lon2=presentAz;
+					}
+					else if (primary.otf.geometry==Antenna::SUBSCAN_CONSTLAT) {
+						primary.otf.lat1=presentEl;
+						primary.otf.lat2=presentEl;
+					}
+					// GREATCIRCLE is signaled as error in the control code above.....
 				}
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_LAST_TRACK_PREPARED_ON_LONLAT %lf %lf",primary.otf.lon1,primary.otf.lat1));
 				lastActive=true;
@@ -233,7 +283,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			}
 			else if (primary.frame==Antenna::ANT_HORIZONTAL) {
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"SOURCE_AZ_EL: %lf %lf",primary.parameters[0],primary.parameters[1]));
-				tracker->setFixedPoint(primary.parameters[0],primary.parameters[1]);
+				tracker->setFixedPoint(primary.targetName,primary.parameters[0],primary.parameters[1]);
 			}
 			//copy the current track and store it
 			copyTrack(lastPar,primary);
@@ -263,11 +313,14 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"SKYSOURCE RA_DEC LAT_LON %lf %lf %lf %lf",ra,dec,lat,lon));
 			vlsr=att->inputRadialVelocity;
 			sourceName=IRA::CString(att->sourceID);
+			axis=att->axis;
 			currentGeneratorFlux=currentGenerator; // the flux computer is the sky source generator itself...make a deep copy
 		}
 		catch (CORBA::SystemException& ex) {
 			sourceName=IRA::CString("????");
 			ra=dec=0.0; // in that case I do not want to rise an error
+			lon=lat=0.0;
+			axis=Management::MNG_NO_AXIS;
 		}		
 	}
 	else if (primary.type==Antenna::ANT_MOON) {
@@ -287,6 +340,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			lon=att->gLongitude;
 			lat=att->gLatitude;
 			vlsr=0.0; 
+			axis=att->axis;
 			sourceName=IRA::CString(att->sourceID);
 			currentGeneratorFlux=currentGenerator; // the flux computer is the moon generator itself...make a deep copy
 		}
@@ -294,6 +348,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			sourceName=IRA::CString("????");
 			ra=dec=0.0; // in that case I do not want to rise an error
 			vlsr=0.0;
+			axis=Management::MNG_NO_AXIS;
 		}
 	}
 	else if (primary.type==Antenna::ANT_OTF) {
@@ -340,6 +395,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			dec=att->centerDec;
 			lon=att->centerGLon;
 			lat=att->centerGLat;
+			axis=att->axis;
 			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_CENTER_RA_DEC LAT_LON %lf %lf %lf %lf",ra,dec,lat,lon));
 			if (secondaryActive||lastActive) { // in case of a secondary track....it is possible that vlsr and flux are computable
 				vlsr=secVlsr;
@@ -355,7 +411,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		catch (CORBA::SystemException& ex) {
 			sourceName=IRA::CString("????");
 			ra=dec=0.0; // in that case I do not want to rise an error
+			lon=lat=0.0;
 			vlsr=0.0;
+			axis=Management::MNG_NO_AXIS;
 		}
 	}
 	else if (primary.type==Antenna::ANT_SATELLITE) {
@@ -395,6 +453,8 @@ Antenna::EphemGenerator_ptr CBossCore::prepareOTFSecondary(const bool& useIntern
 	lastScan.secondary=false;
 	lastScan.applyOffsets=false;
 	
+	Management::TScanAxis axis;
+
 	// get current Time
 	IRA::CIRATools::getTime(now);
 	inputTime=now.value().value;
@@ -407,7 +467,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareOTFSecondary(const bool& useIntern
 
 	try {
 		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareOTFSecondary()",(LM_DEBUG,"PREPARE_SECONDARY_FOR OTF"));
-		tmp=prepareScan(useInternal,inputTime,sec,nullScan,m_userOffset,genType,lastScan,section,ra,dec,lon,lat,vlsr,sourceName,scanOff,tmpFlux.out());
+		tmp=prepareScan(useInternal,inputTime,sec,nullScan,m_userOffset,genType,lastScan,section,ra,dec,lon,lat,vlsr,sourceName,scanOff,axis,tmpFlux.out());
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		ex.log(LM_DEBUG);

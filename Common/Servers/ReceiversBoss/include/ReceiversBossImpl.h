@@ -13,6 +13,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 12/02/2013       Changed the method command as new commandInterpreter interface requires  */
 
 
+
 #ifndef __cplusplus
 #error This is a C++ include file and cannot be used from plain C
 #endif
@@ -34,11 +35,11 @@
 
 /** 
  * @mainpage ReceiversBoss component Implementation 
- * @date 12/02/2013
- * @version 0.4.0
+ * @date 08/04/2013
+ * @version 0.41.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.2.0
- * @remarks compiler version is 3.4.6
+ * @remarks compiler version is 4.1.2
 */
 
 /**

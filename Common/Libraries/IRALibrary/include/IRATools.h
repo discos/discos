@@ -38,8 +38,8 @@
 
 /**
  * @mainpage IRALibrary API Documentation
- * @date 15/07/2011
- * @version 2.97.0
+ * @date 08/04/2013
+ * @version 2.98.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.0.2
  * @remarks gcc version is 4.1.2

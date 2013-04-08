@@ -3,7 +3,6 @@
 
 /* **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id: AntennaBossTextClient.h,v 1.10 2011-05-26 14:18:34 a.orlati Exp $                                                 */
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
@@ -12,6 +11,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)         01/04/2010      Modified according the new AntennaBoss interface          */
 /* Andrea Orlati(aorlati@ira.inaf.it)         09/04/2010      added the calls for the new wrappers methods of the boss    */
 /* Andrea Orlati(aorlati@ira.inaf.it)         26/05/2011      review the code that displays the generators output    */
+/* Andrea Orlati(aorlati@ira.inaf.it)         08/04/2013      changed the color of the led when correction are disabled from red to yellow  */
 
 
 /* Add the component skeleton header file */

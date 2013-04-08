@@ -39,8 +39,8 @@
 
 /** 
  * @mainpage AntennaBoss component Implementation 
- * @date 22/02/2013
- * @version 1.51.0
+ * @date 08/04/2013
+ * @version 1.52.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.2.0
  * @remarks compiler version is 4.1.2
@@ -368,12 +368,24 @@ public:
 	virtual void track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 			
 	/**
-	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a traking of the moon.
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a tracking of the moon.
 	 * @throw CORBA::SystemExcpetion
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw AntennaErrors::AntennaErrorsEx 
 	*/ 
 	virtual void moon() throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
+
+	/**
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a skydip scan
+	 * @param el1 sets the first edge of the elevation range, a negative means take the default value
+	 * @param el2 sets the second edge of the elevation range, a negative means take the default value
+	 * @param duration duration of the scan
+	 * @return the expected start time of the scan, if a the target is not visible a zero is returned
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx
+	*/
+	virtual ACS::Time skydipScan(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 		
 	/**
 	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a traking of a sidereal source, given its equatorial coordinates
@@ -399,6 +411,16 @@ public:
 	 * @throw AntennaErrors::AntennaErrorsEx  
 	 */
     virtual void goOff(Antenna::TCoordinateFrame frame,CORBA::Double skyOffset) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
+
+	/**
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go to a fixed horizontal position.
+	 * @param az azimuth in radians
+	 * @param el elevation in radians
+ 	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx
+	 */
+    virtual void goTo(CORBA::Double az,CORBA::Double el) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 
 	/**
 	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start an OTF scan along the longitude axis of the given frame. A visible and observable source must be already commanded
@@ -575,6 +597,11 @@ public:
 	*/
 	void getAllOffsets(CORBA::Double_out azOff,CORBA::Double_out elOff,CORBA::Double_out raOff,CORBA::Double_out decOff,CORBA::Double_out lonOff,CORBA::Double_out latOff) throw (CORBA::SystemException);
 	
+	/**
+	 * It can be called to know which is the axis the antenna is currently performing the scan
+	 * @param axis returned identfier of the axis
+	 */
+	void getScanAxis (Management::TScanAxis_out axis) throw (CORBA::SystemException);
 		
 private:
 	SmartPropertyPointer<ROstring> m_ptarget;

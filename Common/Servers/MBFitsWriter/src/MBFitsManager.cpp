@@ -359,6 +359,8 @@ void MBFitsManager::startScan( const string&										telescop_,
 	m_primaryHeaderGroupingTable_p->setFileName(getPath() + string("GROUPING") + string(".fits"));
 	m_primaryHeaderGroupingTable_p->open();
 
+	printf("createPrimaryHeader()\n");
+
 	createPrimaryHeader(telescop_,
 											origin_,
 											creator_,
@@ -402,6 +404,8 @@ void MBFitsManager::startScan( const string&										telescop_,
 	m_scanTable_p->setFileName(getPath() + string("SCAN") + string(".fits"));
 	m_scanTable_p->open();
 
+	printf("saveGroupingBinTableData()\n");
+
 	saveGroupingBinTableData(m_scanTable_p->getFullName(),
 													 string("URL"),
 													 m_scanTable_p->getExtName(),
@@ -411,6 +415,8 @@ void MBFitsManager::startScan( const string&										telescop_,
 
 	const long	nObs	= 0;
 	const long	nSubs	= 0;
+
+	printf("createScanHeader()\n");
 
 	createScanHeader(telescop_,
 									 siteLong_,
@@ -526,6 +532,8 @@ void MBFitsManager::startScan( const string&										telescop_,
 		febeParTable_p->setFileName(getPath() + *febe_ci + string("-") + string("FEBEPAR") + string(".fits"));
 		febeParTable_p->open();
 
+		printf("saveGroupingBinTableData()\n");
+
 		saveGroupingBinTableData(febeParTable_p->getFullName(),
 														 string("URL"),
 														 febeParTable_p->getExtName(),
@@ -535,7 +543,11 @@ void MBFitsManager::startScan( const string&										telescop_,
 
 		m_febeParTables.insert(MBFitsManager::FeBe_MBFitsWriter_p_m_t::value_type(*febe_ci, febeParTable_p));
 
+		printf("saveScanBinTableData()\n");
+
 		saveScanBinTableData(*febe_ci);
+
+		printf("createFebeParHeader()\n");
 
 		createFebeParHeader(febeParTable_p,
 											  *febe_ci,
@@ -599,6 +611,8 @@ void MBFitsManager::startScan( const string&										telescop_,
 												rxHor_80_);
 
 		febeParTable_p->addTableColumns();
+
+		printf("saveFebeParBinTableData()\n");
 
 		saveFebeParBinTableData(febeParTable_p,
 														useBand_,
@@ -838,7 +852,10 @@ void MBFitsManager::endSubScan( MBFitsManager::FeBe_v_t frontendBackendNames_ ) 
 	for ( MBFitsManager::FeBe_ci_v_t frontendBackendName_ci = frontendBackendNames_.begin();
 				frontendBackendName_ci != frontendBackendNames_.end(); ++frontendBackendName_ci ) {
 		MBFitsManager::FeBe_MBFitsWriter_p_i_m_t dataParTable_i = m_dataParTables.find(*frontendBackendName_ci);
-		if ( m_dataParTables.end() == dataParTable_i ) throw exception();
+		if ( m_dataParTables.end() == dataParTable_i ) {
+			printf("ex : %s %d\n",__FILE__,__LINE__);
+			throw exception();
+		}
 
 		updateDataParHeader(dataParTable_i->second,
 												obStatus);
@@ -873,10 +890,16 @@ void MBFitsManager::integration( const string&										febeName_,
 																 const double											mjd_,
 																 const MBFitsManager::Float_v_t&	data_ ) {
 	MBFitsManager::FeBe_Baseband_MBFitsWriter_p_i_m_t	febeArrayDataTable_i	= m_arrayDataTables.find(febeName_);
-	if ( m_arrayDataTables.end()						== febeArrayDataTable_i ) throw exception();
+	if ( m_arrayDataTables.end()						== febeArrayDataTable_i ) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	MBFitsManager::Baseband_MBFitsWriter_p_i_m_t				arrayDataTable_i			= febeArrayDataTable_i->second.find(basebandID_);
-	if ( febeArrayDataTable_i->second.end() == arrayDataTable_i			) throw exception();
+	if ( febeArrayDataTable_i->second.end() == arrayDataTable_i			) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	saveArrayDataBinTableData(arrayDataTable_i->second,
 														mjd_,
@@ -913,7 +936,10 @@ void MBFitsManager::integrationParameters( const string&	febeName_,
 																					 const double		wobDisLN_,
 																					 const double		wobDisLT_ ) {
 	MBFitsManager::FeBe_MBFitsWriter_p_i_m_t dataParTable_i = m_dataParTables.find(febeName_);
-	if ( m_dataParTables.end() == dataParTable_i ) throw exception();
+	if ( m_dataParTables.end() == dataParTable_i ) {
+		printf("ex : %s %d\n",__FILE__,__LINE__);
+		throw exception();
+	}
 
 	saveDataParBinTableData(dataParTable_i->second,
 													mjd_,

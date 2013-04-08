@@ -12,6 +12,7 @@
 /* Paolo Libardi																				26/05/2011								 Creation											 */
 /* ************************************************************************************************************* */
 
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -383,6 +384,7 @@ void CMBFitsWriter::setKeywordValue( const CMBFitsWriter::Table_e table_e_,
 					break;
 			}
 		} catch( FitsException& exception_ ) {
+			printf("ex : %s %d, keyword %s\n",__FILE__,__LINE__,keyword_.c_str());
 			throw exception_;
 		}
 	}
@@ -403,6 +405,7 @@ void CMBFitsWriter::setKeyword( const CMBFitsWriter::Table_e table_e_,
 				m_mbFits_p->extension(extName).addKey(keyword_, value_, comment_);
 			}
 		} catch( FitsException& exception_ ) {
+			printf("fits error: %s\n",exception_.message().c_str());
 			throw exception_;
 		}
 	}
@@ -485,72 +488,73 @@ void CMBFitsWriter::getColumnValue( const CMBFitsWriter::Table_e table_e_,
 }
 
 template<typename T>
-void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,
-																	  const string& columnName_,
-																	  const T value_ ) {
+void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,const string& columnName_, const T value_ )
+{
 	if ( CMBFitsWriter::Undefined != table_e_ ) {
 		const string extName(CMBFitsWriter::getExtName(table_e_));
-
 		CMBFitsWriter::TableRowIndex_ci_m_t	tableRowIndex_ci = m_tablesRowIndices.find(table_e_);
-		if ( tableRowIndex_ci == m_tablesRowIndices.end()					 ) throw exception();
-
+		if ( tableRowIndex_ci == m_tablesRowIndices.end()) {
+			printf("ex : %s %d, column %s\n",__FILE__,__LINE__,columnName_.c_str());
+			throw exception();
+		}
 		vector<T> values;
-
 		try {
 			values.push_back(value_);
-
-		  if ( Primary == table_e_ ) {
-        values.clear();
-
-        throw exception();
-		  } else {
-        m_mbFits_p->extension(extName).column(columnName_).write(values, tableRowIndex_ci->second);
-		  }
-		} catch( FitsException& exception_ ) {
+			if ( Primary == table_e_ ) {
+				values.clear();
+				printf("ex : %s %d, column %s\n",__FILE__,__LINE__,columnName_.c_str());
+				throw exception();
+			}
+			else {
+				m_mbFits_p->extension(extName).column(columnName_).write(values, tableRowIndex_ci->second);
+			}
+		}
+		catch(FitsException& exception_ ) {
 			values.clear();
-
+			printf("column %s, fits error: %s\n",columnName_.c_str(),exception_.message().c_str());
 			throw exception_;
 		}
-
 		values.clear();
 	}
 }
 
 template<typename T>
-void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,
-																	  const string& columnName_,
-																	  const vector<T>& value_ ) {
+void CMBFitsWriter::setColumnValue( const CMBFitsWriter::Table_e table_e_,const string& columnName_, const vector<T>& value_ )
+{
 	// gestire eccezione in caso di elenco di valori empty
 	if ( CMBFitsWriter::Undefined != table_e_ ) {
-		CMBFitsWriter::TableName_ci_m_t			tableName_ci		 = CMBFitsWriter::m_tablesNames.find(table_e_);
-		if ( tableName_ci			== CMBFitsWriter::m_tablesNames.end() ) throw exception();
-
+		CMBFitsWriter::TableName_ci_m_t	tableName_ci	 = CMBFitsWriter::m_tablesNames.find(table_e_);
+		if ( tableName_ci			== CMBFitsWriter::m_tablesNames.end() ) {
+			printf("ex : %s %d, column %s\n",__FILE__,__LINE__,columnName_.c_str());
+			throw exception();
+		}
 		CMBFitsWriter::TableRowIndex_ci_m_t	tableRowIndex_ci = m_tablesRowIndices.find(table_e_);
-		if ( tableRowIndex_ci == m_tablesRowIndices.end()						) throw exception();
-
+		if ( tableRowIndex_ci == m_tablesRowIndices.end()) {
+			printf("ex : %s %d, column %s\n",__FILE__,__LINE__,columnName_.c_str());
+			throw exception();
+		}
 		std::vector<long> vectorLengths;
-
 		try {
 			vectorLengths.push_back(value_.size());
-
-		  if ( Primary == table_e_ ) {
-        vectorLengths.clear();
-
-        throw exception();
-		  } else {
-		  	if ( (0 > m_mbFits_p->extension(tableName_ci->second).column(columnName_).type()) ||
-						 (1 < m_mbFits_p->extension(tableName_ci->second).column(columnName_).repeat() ) ) {
+			if ( Primary == table_e_ ) {
+				vectorLengths.clear();
+				printf("ex : %s %d, column %s\n",__FILE__,__LINE__,columnName_.c_str());
+				throw exception();
+			}
+			else {
+				if ( (0 > m_mbFits_p->extension(tableName_ci->second).column(columnName_).type()) || (1 < m_mbFits_p->extension(tableName_ci->second).column(columnName_).repeat() ) ) {
 					m_mbFits_p->extension(tableName_ci->second).column(columnName_).write(value_, vectorLengths, tableRowIndex_ci->second);
-				} else {
+				}
+				else {
 					setColumnValue(table_e_, columnName_, value_.front());
 				}
 		  }
-		} catch( FitsException& exception_ ) {
+		}
+		catch( FitsException& exception_ ) {
 			vectorLengths.clear();
-
+			printf("column %s, fits error: %s\n",columnName_.c_str(),exception_.message().c_str());
 			throw exception_;
 		}
-
 		vectorLengths.clear();
 	}
 }

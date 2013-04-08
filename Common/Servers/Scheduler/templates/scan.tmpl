@@ -45,6 +45,12 @@
 #h) [plx] parallax in milli arcseconds. Not required.
 #i) [rvel] radial velocity in Km/sec ( positive value means the source is moving away). Not required.
 
+#for SKYDIP scans: allows to perform a scan along elevation at a fixed azimuth allowing the calibration of the airmass, the scan will be done at 
+# decreasing elevation positions
+#a) directionScan gives the identifier of the scan that has to be adopted to compute the azimuth (direction) of the scan
+#b) elevationLowerLimit 
+#c) elevationUpperLimit   
+#e) duration  duration of the scan in seconds 
 
 #ID type startLon startLat stopLon stopLat frame subscanframe geometry description direction duration
 1	OTF	mySource	165.7530324d	67.750017d	00:00:50	00:00:00	EQ	HOR	LAT	CEN	INC	60.0	-EQOFFS	0.455d	0.0d
@@ -63,3 +69,9 @@
 #ID	type	centerScan	span	frame	subscanFrame geometry	direction	duration
 9	OTFC	3	2.0d	EQ	HOR	LAT	INC	15.0
 10	OTFC	5	5.0d	EQ	HOR	LON	INC	30.0	-EQOFFS	0.5d	0.5d
+
+11	SIDEREAL	3c123
+12	SKYDIP	11	15.0d	90.0d	300.0	-HOROFFS	0.5d	0.0d
+
+13	SIDEREAL	dr21
+14	SKYDIP	13	15.0d	90.0d	300.0

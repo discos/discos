@@ -9,6 +9,7 @@
 /* Who                                 when           What                                              */
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/12/2008     Creation                                          */
 /* Andrea Orlati(aorlati@ira.inaf.it)  15/10/2011      Added support for auxiliary file: scan layout                                          */
+/* Andrea Orlati(aorlati@ira.inaf.it)  08/04/2013     support for the new SKYDIP scan type.*/
 
 #include <IRA>
 #include <iostream>
@@ -425,7 +426,18 @@ private:
 	 * @return the result of the parse
 	 */	
 	bool parseOTFC(const IRA::CString& val,Antenna::TTrackingParameters *scan,Antenna::TTrackingParameters *secScan,DWORD& id,IRA::CString& errMsg);
-	
+
+	/**
+	 * parse the list of parameters of a SKYDIP scan.
+	 * @param val line to parse
+	 * @param scan structure containing the OTF parameters
+	 * @param scanSec structure containing the parameters of the secondary scan which is the scan used to compute the center of the scan
+	 * @param id numeral identifier of the scan
+	 * @param errMsg error specification string in case of unsuccessful operation
+	 * @return the result of the parse
+	 */
+	bool parseSKYDIP(const IRA::CString& val,Antenna::TTrackingParameters *scan,Antenna::TTrackingParameters *secScan,DWORD& id,IRA::CString& errMsg);
+
 	/**
 	 * Parse the list of parameters of sidereal tracking.
 	 * @param val line to parse

@@ -185,6 +185,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	else if ((strcmp(argv[1],"-o")==0) || (strcmp(argv[1],"--horizontal")==0)) {
+		name="fixed";
 		frame=3;
 		if (sscanf(argv[2],"%lf",&ss)!=1) {
 			printHelp();
@@ -395,7 +396,7 @@ int main(int argc, char *argv[])
 		else if (frame==3) {
 			CORBA::Double Az,El;
 			Az=ra,El=dec;
-			hwRef->setFixedPoint(Az,El);
+			hwRef->setFixedPoint((const char *)name,Az,El);
 		}
 	}
 	catch (CORBA::SystemException &C) { 

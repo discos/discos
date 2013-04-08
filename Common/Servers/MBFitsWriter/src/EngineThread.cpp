@@ -964,15 +964,26 @@ string rxHor(80, '-');
 
 int indexRx = 0;
 
-for ( EngineThread::IntFeedHeader_ci_m_t indexFeed_ci = indicesFeeds.begin();
-			indexFeed_ci != indicesFeeds.end(); ++indexFeed_ci ) {
-	feedOffX.push_back(indexFeed_ci->second.xOffset);
-	feedOffY.push_back(indexFeed_ci->second.yOffset);
 
-	EngineThread::IntPolarization_ci_m_t	idPolarization_ci = idsPolarizations.find(indexFeed_ci->second.id);
-	if ( idPolarization_ci == idsPolarizations.end() ) throw exception();
+/************************************************************************/
+/******* Da sistemare, mettere sopra dove vengono compilate le mappe idsPolarizations */
+/******************************************************************************  */
+for ( EngineThread::IntFeedHeader_ci_m_t indexFeed_ci = indicesFeeds.begin();indexFeed_ci != indicesFeeds.end(); ++indexFeed_ci ) {
+	/****** AO */
+	// repetition
+	//feedOffX.push_back(indexFeed_ci->second.xOffset);
+	//feedOffY.push_back(indexFeed_ci->second.yOffset);
+	/**************/
+	/*** AO */
+	//EngineThread::IntPolarization_ci_m_t	idPolarization_ci = idsPolarizations.find(indexFeed_ci->second.id);
+	EngineThread::IntPolarization_ci_m_t	idPolarization_ci = idsPolarizations.find(indexFeed_ci->first);
+	/****/
+	if ( idPolarization_ci == idsPolarizations.end() ) {
+		throw exception();
+	}
 
 	rxBa[indexRx]		= 'P';
+
 
 	switch( idPolarization_ci->second ) {
 		case Backends::BKND_LCP:
@@ -988,11 +999,16 @@ for ( EngineThread::IntFeedHeader_ci_m_t indexFeed_ci = indicesFeeds.begin();
 			throw exception();
 			break;
 	}
-
-	rxHor[indexRx]	= indexFeed_ci->first;
+	/************ AO */
+	// Bisogna capire cosa si intende per questa keyword.
+	//rxHor[indexRx]	= indexFeed_ci->first;
+	/***************************************/
 
 	++indexRx;
+
 }
+
+
 
 idsPolarizations.clear();
 indicesFeeds.clear();
@@ -1005,8 +1021,13 @@ string rxCh_80(rxCh.substr(40, 80));
 string rxHor_40(rxHor.substr( 0, 40));
 string rxHor_80(rxHor.substr(40, 80));
 
+	/*printf("rxBa_40, rxBa_80: %s %s\n ",rxBa_40.c_str(),rxBa_80.c_str());
+	printf("rxCh_40, rxCh_80: %s %s\n ",rxCh_40.c_str(),rxCh_80.c_str());
+	printf("rxHor_40, rxHor_80: %s %s\n ",rxHor_40.c_str(),rxHor_80.c_str());*/
+
 					if ( bandsParameters_p ) bandsParameters_p->closeTable();
 					if ( bandsParameters_p ) { delete bandsParameters_p; bandsParameters_p = NULL; }
+
 
 					m_mbFitsManager_p->startScan(telescop,
 																			 origin,
@@ -1213,6 +1234,7 @@ string rxHor_80(rxHor.substr(40, 80));
 																			 rxCh_80,
 																			 rxHor_40,
 																			 rxHor_80);
+
 
 					sections.clear();
 					baseBands.clear();
@@ -1558,6 +1580,7 @@ SpectralAxis spectralAxisRestFrameVelocity(string(),
 const float			_1vsou2r	= 0.0;
 const float			_1vsys2r	= 0.0;
 
+			printf ("startSubScan \n");
 					m_mbFitsManager_p->startSubScan(frontendBackendNames,
 																					baseBands,
 																					scanNum,
@@ -1595,6 +1618,7 @@ const float			_1vsys2r	= 0.0;
 
 																					_1vsou2r,
 																					_1vsys2r);
+					printf ("finito ! startScan \n");
 
 					phaseN.clear();
 
@@ -2371,16 +2395,21 @@ bool EngineThread::processData( const MBFitsManager::FeBe_v_t& frontendBackendNa
 			basebandData.clear();
 
 			stringstream tsysKeyword;
-			tsysKeyword << "TSYS" << "_" << *frontendBackendName_ci << "_" << indexBaseband;
+			//**** AO */
+			// Componentdo così la stringa va in errore perchè non esiste nell'elenco delle keywords
+			//tsysKeyword << "TSYS" << "_" << *frontendBackendName_ci << "_" << indexBaseband;
+
 
 			MBFitsManager::Double_v_t tsysFeBeBaseband;
 			for ( Baseband::Section::Section_ci_v_t section_ci = sections.begin(); section_ci != sections.end(); ++section_ci ) {
 				tsysFeBeBaseband.push_back(tsys[section_ci->getID()]);
 			}
 
-			m_mbFitsManager_p->monitor(mjdData,
+			//**** AO */
+			/*m_mbFitsManager_p->monitor(mjdData,
 																 tsysKeyword.str(),
-																 tsysFeBeBaseband);
+																 tsysFeBeBaseband);*/
+			//***********************/
 
 			tsysFeBeBaseband.clear();
 			tsysKeyword.str(string());

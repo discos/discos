@@ -182,6 +182,12 @@ public:
 	 */
 	const double& getMaxSuggestedElevation() const { return m_maxElevationAvoidance; }
 
+	/*
+	 * @param down return the elevation range for the skydip scan. This is the lower limit (rad)
+	 * @param up return the elevation range for the skydip scan. This is the upper limit (rad)
+	 */
+	void getSkydipRange(double& down,double& up) const { down=m_skydipElDown; up=m_skydipElUp; }
+
 
 private:
 	CString m_mountInstance;
@@ -212,6 +218,8 @@ private:
 	long m_coordinateIntegration;
 	double m_minElevationAvoidance;
 	double m_maxElevationAvoidance;
+	double m_skydipElDown;
+	double m_skydipElUp;
 };
 
 #endif /*CONFIGURATION_H_*/

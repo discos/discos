@@ -1,11 +1,11 @@
 /* *********************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      	   */
-/* $Id: SkySource.midl,v 1.4 2008-04-24 14:03:59 a.orlati Exp $							   */
 /*                                                                                                      	   */
 /* This code is under GNU General Public Licence (GPL).                                                 	   */
 /*                                                                                                      	   */
 /* Who                                  when            What                                              	   */
 /* Andrea Orlati(a.orlati@ira.inaf.it)  10/09/2007      Creation                                          	   */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  08/04/2013     setFixedPoint() has a new argument that allows to give a target id*/
 
 
 #ifndef _SKYSOURCE_IDL
@@ -82,10 +82,11 @@ module Antenna {
 		/**
 		 * Sets the source as fixedposition in the horizontal system
 		 * @throw CORBA::SystemException
+		 * @param identifier of the target
 		 * @param az fixed azimuth position in radians
 		 * @param el fixed elevation position in radians
 		*/
-		void setFixedPoint(in double az,in double el);
+		void setFixedPoint(in string sourceName,in double az,in double el);
 		
 		/**
 		 * This operation changes the current tracked source by givin its galactic coordinates.

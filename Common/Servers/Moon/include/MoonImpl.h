@@ -3,7 +3,6 @@
 
 /* **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id:*/
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
@@ -13,6 +12,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 	  30/08/2010              Added generic method setOffsets in place of specific methods setHorizontalOffsets().... */
 /* Andrea Orlati(aorlati@ira.inaf.it) 	  04/05/2011              Now the component computes all the attributes that were required such as galactic longitude and latitude */
 /* Andrea Orlati(aorlati@ira.inaf.it)           15/02/2012  implementation of getAllCoordinates() method */
+/* Andrea Orlati(aorlati@ira.inaf.it)           08/04/2013 support for computation of ScanAxis*/
 
 
 #ifndef __cplusplus
@@ -21,10 +21,10 @@
 
 /**
  * @mainpage Moon Tracking component implementation documentation
- * @date 04/05/2001
- * @version 1.01.0
+ * @date 08/04/2013
+ * @version 1.02.0
  * @author <a. href=mailto:r.verma@ira.inaf.it>Rashmi Verma</a>
- * @remarks Last complied under ACS 7.0.2
+ * @remarks Last complied under ACS 8.0.2
  */
 
 #include <baci.h>

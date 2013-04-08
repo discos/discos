@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
 	CSchedule::TRecord rec;
 	ACS::stringSeq layoutDef;
 	CSchedule sched("../templates/","schedule.tmpl");
+	//CSchedule sched("/archive/schedules/maintenance/","mbfitstest-CrossEQEQ.scd");
 	//CSchedule sched("/archive/schedules/","calibrationSeq.scd");
 	
 	if (!sched.readAll(true)) {
@@ -115,6 +116,13 @@ int main(int argc, char *argv[])
 				}
 				else if (type==Management::MNG_OTFC) {
 					printf("%u OTFC %lf %lf %lf %lf %s %s %s %s %s %lld\n",rec.scan,tmp->otf.lon1*DR2D,tmp->otf.lat1*DR2D,tmp->otf.lon2*DR2D,
+							tmp->otf.lat2*DR2D,(const char *)toFrame(tmp->otf.coordFrame),
+							(const char *)toFrame(tmp->otf.subScanFrame),(const char *)toGeometry(tmp->otf.geometry),
+							(const char *)toDescription(tmp->otf.description),
+							(const char *)toDirection(tmp->otf.direction),tmp->otf.subScanDuration);
+				}
+				else if (type==Management::MNG_SKYDIP) {
+					printf("%u SKYDIP %lf %lf %lf %lf %s %s %s %s %s %lld\n",rec.scan,tmp->otf.lon1*DR2D,tmp->otf.lat1*DR2D,tmp->otf.lon2*DR2D,
 							tmp->otf.lat2*DR2D,(const char *)toFrame(tmp->otf.coordFrame),
 							(const char *)toFrame(tmp->otf.subScanFrame),(const char *)toGeometry(tmp->otf.geometry),
 							(const char *)toDescription(tmp->otf.description),

@@ -137,7 +137,7 @@ void CCore::doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TReco
 	}
 }
 
-Management::TScanAxis CCore::computeScanAxis(const Management::TScanTypes& type,const Schedule::CScanList::TRecord& scanRec)
+/*Management::TScanAxis CCore::computeScanAxis(const Management::TScanTypes& type,const Schedule::CScanList::TRecord& scanRec)
 {
 	Management::TScanAxis scanAxis;
 	// compute the axis or direction along which the scan is performed
@@ -170,6 +170,38 @@ Management::TScanAxis CCore::computeScanAxis(const Management::TScanTypes& type,
 	return scanAxis;
 	// *******************************
 	// I should consider all remaining scan types, not all scan types have a well defined scan axis....simple sidereal tracking for example!
+	// *******************************
+}*/
+
+Management::TScanAxis CCore::computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError) throw (ComponentErrors::ComponentNotActiveExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+{
+	Management::TScanAxis scanAxis;
+	scanAxis=Management::MNG_NO_AXIS;
+	try {
+		if (!CORBA::is_nil(antBoss)) {
+			antBoss->getScanAxis(scanAxis);
+		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::computeScanAxis()");
+			throw impl;
+		}
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::computeScanAxis()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		antBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::computeScanAxis()");
+		antBossError=true;
+		throw impl;
+	}
+	return scanAxis;
+	// *******************************
+	// At the moment I just return back the value coming from AntennaBoss but It should be considered the one coming from Servo minor and the result is a combination of both
 	// *******************************
 }
 
@@ -288,7 +320,7 @@ void CCore::configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
 	}
 }
 
-void CCore::enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& streamConnected) throw (
+void CCore::enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& streamConnected,bool& streamPrepared) throw (
 		ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	if ((!CORBA::is_nil(backend))  &&  (!CORBA::is_nil(writer))) {
@@ -315,6 +347,36 @@ void CCore::enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backen
 	 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::enableDataTransfer()");
 	 		throw impl;
 	 	}
+	}
+	if (!CORBA::is_nil(backend)) {
+		try {
+			if (!streamPrepared) {
+				backend->sendHeader();
+				streamPrepared=true;
+			}
+		}
+		catch (BackendsErrors::BackendsErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::enableDataTransfer()");
+			impl.setReason("backend failed to send header to writer");
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::enableDataTransfer()");
+			impl.setReason("backend failed to send header to writer");
+			throw impl;
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::enableDataTransfer()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			backendError=true;
+			throw impl;
+		}
+		catch (...) {
+			backendError=true;
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::enableDataTransfer()");
+			throw impl;
+		}
 	}
 }
 
@@ -454,7 +516,7 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
 }
 
 void CCore::setupDataTransfer(bool& scanStarted,
-																		 bool& streamPrepared,
+																		 /*bool& streamPrepared,*/
 																		Management::DataReceiver_ptr writer,bool& writerError,
 																		Backends::GenericBackend_ptr backend,bool& backendError,
 																		const IRA::CString& obsName,
@@ -526,7 +588,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
  		impl.setMinor(ex.minor());
  		throw impl;
  	}
-	if (!CORBA::is_nil(backend)) {
+	/*if (!CORBA::is_nil(backend)) {
 		try {
 			if (!streamPrepared) {
 				backend->sendHeader();
@@ -555,7 +617,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::setupDataTransfer()");
 			throw impl;
 		}
-	}
+	}*/
  	try {
  		if (!CORBA::is_nil(writer)) {
  			Management::TSubScanSetup subSetup;
@@ -618,7 +680,7 @@ bool CCore::checkRecording(Management::DataReceiver_ptr writer,bool& writerError
 		}
 		catch (...) {
 			_EXCPT(ComponentErrors::OperationErrorExImpl,impl,"CCore::checkRecording()");
-			impl.setReason("could not check is recording is completed");
+			impl.setReason("could not check if recording is completed");
 			writerError=true;
 			throw impl;
 		}
@@ -658,7 +720,14 @@ void CCore::startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendE
 			if ((streamPrepared) && (!streamStarted)) {
 				backend->sendData(startTime);
 				streamStarted=true;
-				ACS_STATIC_LOG(LM_FULL_INFO,"CCore::startDataTansfer()",(LM_NOTICE,"RECORDING_STARTED"));
+				if (startTime==0) {
+					ACS_STATIC_LOG(LM_FULL_INFO,"CCore::startDataTansfer()",(LM_NOTICE,"RECORDING_STARTED"));
+				}
+				else {
+					IRA::CString out;
+					IRA::CIRATools::timeToStr(startTime,out);
+					ACS_STATIC_LOG(LM_FULL_INFO,"CCore::startDataTansfer()",(LM_NOTICE,"RECORDING_STARTS_AT: %s",(const char *)out));
+				}
 			}
 			else {
 				_EXCPT(ManagementErrors::DataTransferSetupErrorExImpl,impl,"CCore::startDataTansfer()");

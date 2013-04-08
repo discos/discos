@@ -16,6 +16,7 @@
              GapTime="200000"
 	     	 CoordinateIntegration="1000000"
 	     	 CutOffElevation="70.0"
+	     	 SkydipElevationRange="15.0-90.0"
              MountInstance="ANTENNA/Mount"
              ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0" 
              PointingModelInstance="ANTENNA/PointingModel"

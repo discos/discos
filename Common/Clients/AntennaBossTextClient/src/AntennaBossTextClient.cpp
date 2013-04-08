@@ -477,7 +477,7 @@ int main(int argc, char *argv[]) {
 		enabled_display->setLedStyle(0,TW::CStyle(CColorPair::RED_BLACK,0),TW::CStyle(CColorPair::GREEN_BLACK,0),'o','@');
 		correctionEnabled_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
 		correctionEnabled_display->setOutputComponent((CFrameComponent*) output_label);
-		correctionEnabled_display->setLedStyle(0,TW::CStyle(CColorPair::RED_BLACK,0),TW::CStyle(CColorPair::GREEN_BLACK,0),'o','@');
+		correctionEnabled_display->setLedStyle(0,TW::CStyle(CColorPair::YELLOW_BLACK,0),TW::CStyle(CColorPair::GREEN_BLACK,0),'o','@');
 		rawAzimuth_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		rawElevation_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		observedAzimuth_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);

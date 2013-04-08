@@ -66,7 +66,7 @@ EXECUTABLES_L   = testSubScan OTFDisplay TimeConverter
 testSubScan_OBJECTS   = testSubScan	SubScan GreatCircle
 xxxxx_LDFLAGS   =
 testSubScan_LIBS      = IRALibrary ComponentErrors AntennaErrors AntennaDefinitionsStubs \
-OTFStubs EphemGeneratorStubs
+OTFStubs EphemGeneratorStubs ManagementErrors ManagmentDefinitionsStubs
 
 OTFDisplay_OBJECTS = TextClient
 OTFDisplay_LIBS = IRALibrary TextWindowLibrary ComponentErrors AntennaErrors AntennaDefinitionsStubs \
@@ -95,7 +95,7 @@ LIBRARIES_L     =
 OTFImpl_OBJECTS   = OTFImpl SubScan GreatCircle
 OTFImpl_LIBS = OTFStubs baci maci EphemGeneratorStubs \
 ComponentErrors AntennaErrors AntennaDefinitionsStubs \
-IRALibrary ObservatoryStubs
+IRALibrary ObservatoryStubs ManagmentDefinitionsStubs ManagementErrors
 #
 # Scripts (public and local)
 # ----------------------------

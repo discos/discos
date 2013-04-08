@@ -20,7 +20,7 @@
 	maxReliableElevationRate="0.250"
 	maxAzimuthAcceleration="0.4"
 	maxElevationAcceleration="0.25"
-	accScaleFactor="15.0"
+	accScaleFactor="10.0"
 	cw_ccw_limit="180.0"
 	MinElevationAvoidance="10"
 	MaxElevationAvoidance="82"

@@ -6,6 +6,7 @@
 	- History:
 	-   24-01-2008  Created
         -   24-05-2012  Marco Bartolini added LogLevelType
+        -	08-04-2013	Andrea Orlati expanded definitions of ScanAxisType
 -->
 
 <xs:schema
@@ -57,10 +58,10 @@
 		<xs:complexContent>
 			<xs:restriction base="baci:ROEnum">
 				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
-				<xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="14" />
 				<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
 						"NONE,HORIZONTAL_LONGITUDE,HORIZONTAL_LATITUDE,EQUATORIAL_LONGITUDE,EQUATORIAL_LATITUDE,GALACTIC_LONGITUDE,GALACTIC_LATITUDE,SUBREFLECTOR_Z,
-						SUBREFLECTOR_X,SUBREFLECTORY,PRIMARYFOCUS_Z,PRIMARYFOCUS_Y"/>
+						SUBREFLECTOR_X,SUBREFLECTORY,PRIMARYFOCUS_Z,PRIMARYFOCUS_Y,BEAMPARK,SIDEREAL_TRACK,GREATCIRCLE"/>
 			</xs:restriction>
 		</xs:complexContent>
 	</xs:complexType>	

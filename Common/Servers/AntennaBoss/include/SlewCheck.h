@@ -73,7 +73,7 @@ public:
 	 * @param az output azimuth in radians
 	 * @param el output elevation in radians
 	*/
-	void coordConvert(const double& lon,const double& lat,const Antenna::TCoordinateFrame& coordFrame,const Antenna::TSystemEquinox& equinox,const TIMEVALUE& UT,double& az,double& el);
+	void coordConvert(const double& lon,const double& lat,const Antenna::TCoordinateFrame& coordFrame,const Antenna::TSystemEquinox& equinox,const TIMEVALUE& UT,double& az,double& el) const;
 	
 private:
 	IRA::CSite m_site;

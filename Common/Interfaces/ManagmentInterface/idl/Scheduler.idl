@@ -11,6 +11,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)		03/09/2010      Added haltSchedule(), setDevice() and tracking attribute    */
 /* Andrea Orlati(aorlati@ira.inaf.it)		24/10/2011      modified the signature of startSchedule()  */
 /* Andrea Orlati(aorlati@ira.inaf.it)     29/05/2012      method  changeLogFile */
+/* Andrea Orlati(aorlati@ira.inaf.it)     08/04/2013      added method skydip */
 
 #include <baci.idl>
 #include <ManagmentDefinitions.idl>
@@ -127,6 +128,19 @@ module Management {
 		 * @param duration this determine how long the single scan has to take.
 		 */ 
 		void crossScan(in TCoordinateFrame coordFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * Performs a skydip using the main drives of the telescope. The scan is done at the current azimuth position and consists of moving the antenna between two elevation  positions. A system temperature measurment
+		 * is perfomed at the higher specified elevation. The movement is done from the greater elevation toword the lower. 
+		 * The default backend and the defautl data recorder are used as data source and destination respectively.
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx 
+		 * @throw CORBA::SystemExcpetion 
+		 * @param coordFrame it gives the frame in which the cross cran is performed. 
+		 * @param span this is the overall length of the single scans (radians)
+		 * @param duration this determine how long the single scan has to take.
+		 */ 		
+		void skydip(in double elevation1,in double elevation2,in ACS::TimeInterval duration);
 		
 		/**
 		 * Given the default backend. This methods allows to configure the default device. This device is used for calibration purposes and for the computation of the beamwidth, so calling

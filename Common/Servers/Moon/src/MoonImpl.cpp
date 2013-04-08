@@ -140,6 +140,7 @@ void MoonImpl::getAttributes(Antenna::MoonAttributes_out att) throw(CORBA::Syste
 	att->gLongitude=slaDranrm(m_glon);
 	att->gLatitude=IRA::CIRATools::latRangeRad(m_glat);
 	att->userLatitudeOffset=att->userLongitudeOffset=0.0;
+	att->axis=Management::MNG_TRACK;
 }
 
 void MoonImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna::TCoordinateFrame frame) throw (CORBA::SystemException,AntennaErrors::AntennaErrorsEx)

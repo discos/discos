@@ -417,7 +417,7 @@ public:
 	void startStopStage(); 
 	
 	/**
-	 * It puts the component into the runnig stage
+	 * It puts the component into the running stage
 	 */
 	void startRunnigStage();
 	
