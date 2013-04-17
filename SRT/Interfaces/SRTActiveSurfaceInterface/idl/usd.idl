@@ -142,6 +142,11 @@ module SRTActiveSurface
 	//ACSErr::Completion calVer() raises (ASErrors::ASErrorsEx);
 	oneway void calVer();
 
+	/**
+	* writes calibration results into CDB
+	*/
+	void writeCalibration(out double cammaLenD, out double cammaPosD, out boolean calibrate) raises (ASErrors::ASErrorsEx);
+
 		/**
     	*	go to reference position. 
     	*	@return 

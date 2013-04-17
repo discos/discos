@@ -116,7 +116,7 @@ module SRTActiveSurface {
 
         void refPos (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
 
-        void update (in long elevation) raises (ComponentErrors::ComponentErrorsEx);
+        void update (in double elevation) raises (ComponentErrors::ComponentErrorsEx);
 
         void move (in long circle, in long actuator, in long radius, in long incr) raises (ComponentErrors::ComponentErrorsEx);
 
@@ -143,7 +143,7 @@ module SRTActiveSurface {
 
         void recoverUSD(in long circle, in long actuator) raises (ComponentErrors::ComponentErrorsEx);
 
-        void calibrate (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+        oneway void calibrate (in long circle, in long actuator, in long radius);
 
         void calVer (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
 
