@@ -91,6 +91,8 @@ private:
  *     board is OK</li>
  *     <li>bool isDewarBoardConnectionOK(): return true if the connection to the 
  *     dewar board is OK</li>
+ *     <li>bool isSwitchBoardConnectionOK(): return true if the connection to the 
+ *     switches board is OK</li>
  *     <li>FetValues fetValues(unsigned short feed_number, unsigned short stage_number,
  *     double (*currentConverter)(double voltage), double (*voltageConverter)(double voltage).
  *     return the FetValues (VDL, IDL, VGL, VDR, IDR and VGR) of the LNA of the feed `feed_number`, 
@@ -105,6 +107,9 @@ private:
  *     <li>void turnLeftLNAsOff(): turn the left LNAs OFF</li>
  *     <li>void turnRightLNAsOn(): turn the right LNAs ON</li>
  *     <li>void turnRightLNAsOff(): turn the right LNAs OFF</li>
+ *     <li>void setPath(): set the a generic path through some switches</li>
+ *     <li>void setColdLoadPath(): set the RF path to the cold load</li>
+ *     <li>void setSkyPath(): set the RF path to the sky</li>
  * </ul>
  * 
  */
@@ -141,15 +146,19 @@ public:
 	 * @param dewar_port the port of the dewar control board
 	 * @param lna_ip the IP address of the LNA control board
 	 * @param lna_port the port of the LNA control board
+     * @param guard_time the time in useconds we need to wait between a request and an
      * @param number_of_feeds number of feeds (default 1)
+	 * @param switch_ip the IP address of the switches control board
+	 * @param switch_port the port of the switches control board
      * @params dewar_maddr the dewar board master address (default 0x7D)
      * @params dewar_saddr the dewar board slave address (default 0x7F)
      * @params lna_maddr the LNA board master address (default 0x7D)
      * @params lna_saddr the LNA board slave address (default 0x7F)
+     * @params switch_maddr the switches board master address (default 0x7D)
+     * @params switch_saddr the switches board slave address (default 0x7F)
      * @param reliable_comm when it is true then the communication
      * to the board is reliable because there is a checksum field in
      * both request and answer. It is true to default.
-     * @param guard_time the time in useconds we need to wait between a request and an
      * answer to the LNA board
      * @throw ReceiverControlEx
 	*/
@@ -158,13 +167,17 @@ public:
             const unsigned short dewar_port, 
             const std::string lna_ip, 
             const unsigned short lna_port, 
+            const unsigned int guard_time=250000,  // 250000 us == 0.25 seconds
             const unsigned short number_of_feeds=1,
+            const std::string switch_ip="", 
+            const unsigned short switch_port=0, 
             const BYTE dewar_madd=0x7C, // Dewar board master address
             const BYTE dewar_sadd=0x7D, // Dewar board slave address
             const BYTE lna_madd=0x7C,   // LNA board master address
             const BYTE lna_sadd=0x7D,   // LNA board slave address
-            bool reliable_comm=true,
-            const unsigned int guard_time=250000  // 250000 us == 0.25 seconds
+            const BYTE switch_madd=0x7C,   // Switch board master address
+            const BYTE switch_sadd=0x7D,   // Switch board slave address
+            bool reliable_comm=false
     ) throw (ReceiverControlEx);
 
     
@@ -839,6 +852,62 @@ public:
     bool isDewarBoardConnectionOK();
 
 
+    /** Is the connection to the switches board OK?
+     *  @return true if the connection to the switches board is OK
+     */
+    bool isSwitchBoardConnectionOK();
+
+
+    /** Set the path of the switches in order to select the filters and/or the polarization
+     *  @param feed_id the feed identification number
+     *  @param filter_id the filter identification number
+     *  @param data_type the type of the data
+     *  @param port_type the port type
+     *  @param port_number the port number
+     *  @param number_of_requests the number of commands to send
+     *  @param width the number of parameters for `address`, `board` and `command`"
+     *  @param parameters a vector of parameters
+     *  @throw ReceiverControlEx
+     */
+    void setPath( 
+            const BYTE data_type, 
+            const BYTE port_type, 
+            const BYTE port_number, 
+            const size_t width,
+            const std::vector<BYTE> parameters
+    ) throw (ReceiverControlEx);
+
+
+    /** Set the RF path to the cold load
+     *  @param feed_id the feed number
+     *  @param data_type the type of the data; the default type is unsigned 16 bits
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 0->15
+     *  @throw ReceiverControlEx
+     */
+    void setColdLoadPath(
+            unsigned short feed_id,
+            const BYTE data_type=MCB_CMD_DATA_TYPE_U16, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_00_15
+    ) throw (ReceiverControlEx);
+
+
+    /** Set the RF path to the sky
+     *  @param feed_id the feed number
+     *  @param data_type the type of the data; the default type is unsigned 16 bits
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 0->15
+     *  @throw ReceiverControlEx
+     */
+    void setSkyPath(
+            unsigned short feed_id,
+            const BYTE data_type=MCB_CMD_DATA_TYPE_U16, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_00_15
+    ) throw (ReceiverControlEx);
+
+
 private:
     
 	/** Send the request to the board and receive the answer
@@ -849,7 +918,10 @@ private:
      * @return a vector of parameters, empty if there are not some
      * @throw MicroControllerBoardEx
 	*/
-    std::vector<BYTE> makeRequest(MicroControllerBoard *board_ptr, const BYTE command, size_t len, ...) throw(MicroControllerBoardEx);
+    std::vector<BYTE> makeRequest(
+            MicroControllerBoard *board_ptr, 
+            const BYTE command, size_t len, ...
+    ) throw(MicroControllerBoardEx);
 
     
 	/** Return the requested value computed from a vector<BYTE> of parameters
@@ -874,10 +946,22 @@ private:
 
     /** The port address of the LNA board */
     const unsigned short m_lna_port; 
-    
+
+
+    /** Sleep time from a SET_DATA and a GET_DATA, needed to stabilize the output */
+    const unsigned int m_guard_time; 
+
 
     /** Number of feeds of the receiver */
     const unsigned short m_number_of_feeds;
+     
+
+    /** The IP address of the switches board */
+    const std::string m_switch_ip; 
+
+
+    /** The port address of the switches board */
+    const unsigned short m_switch_port; 
 
 
     /** The master address of the dewar board */
@@ -896,6 +980,14 @@ private:
     const BYTE m_lna_sadd;
 
 
+    /** The master address of the switches board */
+    const BYTE m_switch_madd;
+
+
+    /** The slave address of the switches board */
+    const BYTE m_switch_sadd;
+
+
     /** If m_reliable_comm is true then a checksum byte is added to the request
      *  and to the answer during the communication to and from the board.
      *  So m_reliable_comm == true means we have a reliable communication.
@@ -911,9 +1003,8 @@ private:
     MicroControllerBoard *m_lna_board_ptr;
 
 
-    /** Sleep time from a SET_DATA and a GET_DATA, needed to stabilize the output */
-    const unsigned int m_guard_time; 
-
+    /** Switches MicroControllerBoard pointer */
+    MicroControllerBoard *m_switch_board_ptr;
 };
 
 }

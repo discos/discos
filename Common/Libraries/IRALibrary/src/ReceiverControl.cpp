@@ -9,6 +9,7 @@ using IRA::any2string;
 
 // SETMODE_SLEEP_TIME is the time to wait until the bit commutation is stable
 const unsigned int SETMODE_SLEEP_TIME = 100000; // 0.1 seconds
+const unsigned int SWITCH_SLEEP_TIME = 100000; // 0.1 seconds
 
 
 ReceiverControl::ReceiverControl(
@@ -16,27 +17,36 @@ ReceiverControl::ReceiverControl(
         const unsigned short dewar_port, 
         const std::string lna_ip, 
         const unsigned short lna_port, 
+        const unsigned int guard_time,
         const unsigned short number_of_feeds,
+        const std::string switch_ip, 
+        const unsigned short switch_port, 
         const BYTE dewar_madd,
         const BYTE dewar_sadd,
         const BYTE lna_madd,
         const BYTE lna_sadd,
-        bool reliable_comm,
-        const unsigned int guard_time
+        const BYTE switch_madd,
+        const BYTE switch_sadd,
+        bool reliable_comm
 ) throw (ReceiverControlEx) : 
     m_dewar_ip(dewar_ip),
     m_dewar_port(dewar_port),
     m_lna_ip(lna_ip),
     m_lna_port(lna_port),
+    m_guard_time(guard_time),
     m_number_of_feeds(number_of_feeds),
+    m_switch_ip(switch_ip),
+    m_switch_port(switch_port),
     m_dewar_madd(dewar_madd),
     m_dewar_sadd(dewar_sadd),
     m_lna_madd(lna_madd),
     m_lna_sadd(lna_sadd),
+    m_switch_madd(switch_madd),
+    m_switch_sadd(switch_sadd),
     m_reliable_comm(reliable_comm), 
     m_dewar_board_ptr(NULL),
     m_lna_board_ptr(NULL),
-    m_guard_time(guard_time)
+    m_switch_board_ptr(NULL)
 {
     openConnection();
 }
@@ -49,6 +59,10 @@ ReceiverControl::~ReceiverControl()
 
     if(m_lna_board_ptr != NULL)
         delete m_lna_board_ptr;
+
+    if(m_switch_board_ptr != NULL)
+        delete m_switch_board_ptr;
+
 }
 
 
@@ -1059,6 +1073,16 @@ void ReceiverControl::openConnection(void) throw (ReceiverControlEx)
     catch(MicroControllerBoardEx& ex) {
         throw ReceiverControlEx("LNA MicroControllerBoard error: " + ex.what());
     }
+
+    if(!m_switch_ip.empty() && m_switch_port != 0)
+        try {
+            m_switch_board_ptr = new MicroControllerBoard(m_switch_ip, m_switch_port, m_switch_madd, m_switch_sadd);
+            m_switch_board_ptr->openConnection();
+        }
+        catch(MicroControllerBoardEx& ex) {
+            throw ReceiverControlEx("Switches MicroControllerBoard error: " + ex.what());
+        }
+
 }
 
 
@@ -1066,6 +1090,8 @@ void ReceiverControl::closeConnection(void)
 {
         m_dewar_board_ptr->closeConnection();
         m_lna_board_ptr->closeConnection();
+        if(m_switch_board_ptr != NULL)
+            m_switch_board_ptr->closeConnection();
 }
 
 
@@ -1078,6 +1104,12 @@ bool ReceiverControl::isLNABoardConnectionOK(void)
 bool ReceiverControl::isDewarBoardConnectionOK(void)
 {
     return (m_dewar_board_ptr->getConnectionStatus() == CSocket::NOTCREATED) ? false : true;
+}
+
+
+bool ReceiverControl::isSwitchBoardConnectionOK(void)
+{
+    return (m_switch_board_ptr != NULL && m_switch_board_ptr->getConnectionStatus() == CSocket::NOTCREATED) ? false : true;
 }
 
 
@@ -1578,6 +1610,162 @@ void ReceiverControl::turnRightLNAsOff(
     }
 }
 
+void ReceiverControl::setPath( 
+        const BYTE data_type, 
+        const BYTE port_type, 
+        const BYTE port_number, 
+        const size_t width,
+        const std::vector<BYTE> parameters
+        ) throw (ReceiverControlEx)
+{
+    if(parameters.size() % width != 0)
+        throw ReceiverControlEx("ReceiverControl: wrong number of parameters.\n");
+
+    for(size_t i=0; i < parameters.size() / width; i++) {
+        try {
+            makeRequest(
+                    m_switch_board_ptr,      // Pointer to the board
+                    MCB_CMD_SET_DATA,        // Command to send
+                    3 + width,               // Total number of parameters
+                    data_type,
+                    port_type,
+                    port_number,
+                    parameters[0 + width*i], // Address MSB
+                    parameters[1 + width*i], // Address LSB
+                    parameters[2 + width*i], // Board MSB
+                    parameters[3 + width*i], // Board LSB
+                    parameters[4 + width*i], // Command MSB
+                    parameters[5 + width*i]  // Command LSB
+            );
+            usleep(2 * SWITCH_SLEEP_TIME);
+        }
+        catch(MicroControllerBoardEx& ex) {
+            std::string error_msg = "ReceiverControl: error performing setPath().\n";
+            throw ReceiverControlEx(error_msg + ex.what());
+        }
+    }
+}
+
+
+void ReceiverControl::setColdLoadPath(
+        unsigned short feed_id,
+        const BYTE data_type, 
+        const BYTE port_type, 
+        const BYTE port_number
+        ) throw (ReceiverControlEx) 
+{
+    try {
+        const BYTE two_high_bits = 0x03; // Binary value 11
+        const BYTE value = (two_high_bits << feed_id * 2); // Move the bits to the feed
+
+        // Set the cool load path
+        makeRequest(
+                m_switch_board_ptr,    // Pointer to the switch board
+                MCB_CMD_SET_DATA,      // Command to send
+                5,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number,
+                0x00,
+                0x10
+        );
+                
+        usleep(2 * SWITCH_SLEEP_TIME);
+
+        // Set the link to the two channels of the feed
+        makeRequest(
+                m_switch_board_ptr,    // Pointer to the switch board
+                MCB_CMD_SET_DATA,      // Command to send
+                5,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number,
+                0x00,
+                value + 0x10
+        );
+                
+        usleep(2 * SWITCH_SLEEP_TIME);
+        
+        // Set again the cool load path
+        makeRequest(
+                m_switch_board_ptr,    // Pointer to the switch board
+                MCB_CMD_SET_DATA,      // Command to send
+                5,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number,
+                0x00,
+                0x10
+        );
+                
+        usleep(2 * SWITCH_SLEEP_TIME);
+
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setColdLoadPath().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
+void ReceiverControl::setSkyPath(
+        unsigned short feed_id,
+        const BYTE data_type, 
+        const BYTE port_type, 
+        const BYTE port_number
+        ) throw (ReceiverControlEx) 
+{
+    try {
+        const BYTE two_high_bits = 0x03; // Binary value 11
+        const BYTE value = (two_high_bits << feed_id * 2); // Move the bits to the feed
+
+        // Set the sky path
+        makeRequest(
+                m_switch_board_ptr,    // Pointer to the switch board
+                MCB_CMD_SET_DATA,      // Command to send
+                5,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number,
+                0x00,
+                0x00
+        );
+                
+        usleep(2 * SWITCH_SLEEP_TIME);
+
+        // Set the link to the two channels of the feed
+        makeRequest(
+                m_switch_board_ptr,    // Pointer to the switch board
+                MCB_CMD_SET_DATA,      // Command to send
+                5,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number,
+                0x00,
+                value
+        );
+                
+        usleep(2 * SWITCH_SLEEP_TIME);
+        
+        // Set again the sky path
+        makeRequest(
+                m_switch_board_ptr,    // Pointer to the switch board
+                MCB_CMD_SET_DATA,      // Command to send
+                5,                     // Number of parameters
+                data_type,
+                port_type,
+                port_number,
+                0x00,
+                0x00
+        );
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setColdLoadPath().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}
+
+
 
 std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, BYTE command, size_t len, ...) 
     throw (MicroControllerBoardEx)
@@ -1592,6 +1780,7 @@ std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, 
 
     m_reliable_comm ? board_ptr->send(command, vparams) \
                     : board_ptr->send(command | MCB_CMD_TYPE_NOCHECKSUM, vparams);
+
     vparams.clear();
     vparams = board_ptr->receive();
 

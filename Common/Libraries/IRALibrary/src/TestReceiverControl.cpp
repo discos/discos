@@ -44,9 +44,9 @@ double voltageConverter(double voltage) { return(voltage); }
 
 int main(int argc, char *argv[])
 {
-    if(argc != 5) {
+    if(argc != 7) {
         cerr << "\nWrong number of parameters. ";
-        cerr << "Usage:\n\tTestReceiverControl dewar_IP dewar_port LNA_IP LNA_port\n" << endl;
+        cerr << "Usage:\n\tTestReceiverControl dewar_IP dewar_port LNA_IP LNA_port, SW_IP SW_port\n" << endl;
         return 1;
     }
 
@@ -54,6 +54,8 @@ int main(int argc, char *argv[])
     unsigned int dewar_port = atoi(argv[2]);
     std::string lna_IP = std::string(argv[3]);
     unsigned int lna_port = atoi(argv[4]);
+    std::string switch_IP = std::string(argv[5]);
+    unsigned int switch_port = atoi(argv[6]);
     unsigned short feeds = 2; 
     std::vector<BYTE> data;
 
@@ -61,9 +63,24 @@ int main(int argc, char *argv[])
     // Test the constructor 
     try {
         cout << "\nConnecting to the boards (LNA and deward)..." << endl;
-        ReceiverControl rc = ReceiverControl(dewar_IP, dewar_port, lna_IP, lna_port, feeds);
+        ReceiverControl rc = ReceiverControl(
+                dewar_IP, 
+                dewar_port, 
+                lna_IP, 
+                lna_port, 
+                250000, 
+                feeds,
+                switch_IP,
+                switch_port,
+                0x7C,
+                0x01,
+                0x7C,
+                0x7D,
+                0x7C,
+                0x01
+        );
         cout << "Connection" << " done!" << endl << endl;
-    
+        
         // // Test the setCalibrationOn()
         // cout << "Test setCalibrationOn() with a reliable communication" << endl;
         // rc.setCalibrationOn();
@@ -109,7 +126,7 @@ int main(int argc, char *argv[])
         // rc.setReliableCommOff();
         // cout << "Done!\n" << endl;
         
-        // // Test the setVacuumSensorOn()
+        // Test the setVacuumSensorOn()
         cout << "Test setVacuumSensorOn() with a reliable communication" << endl;
         rc.setVacuumSensorOn();
         cout << "Done!\n" << endl;
@@ -117,14 +134,15 @@ int main(int argc, char *argv[])
         sleep(1);
 
         // Test the isVacuumSensorOn()
-        cout << "Test isVacuumSensorOn() with a reliable communication" << endl;
-        cout << "Is the vacuum sensor ON? " << (rc.isVacuumSensorOn() == true ? "yes" : "no") << endl;
-        cout << "Done!\n" << endl;
+        // cout << "Test isVacuumSensorOn() with a reliable communication" << endl;
+        // cout << "Is the vacuum sensor ON? " << (rc.isVacuumSensorOn() == true ? "yes" : "no") << endl;
+        // cout << "Done!\n" << endl;
 
 
         // Test the vacuum() voltage value, without conversion
         cout << "Test vacuum()" << endl;
         cout << "Vacuum value before conversion [Volt]: " << rc.vacuum() << endl;
+        cout << "Vacuum value after conversion: " << rc.vacuum(voltage2mbar) << endl;
         cout << "Done!\n" << endl;
 
         // // Test the setReliableCommOn()
@@ -137,22 +155,22 @@ int main(int argc, char *argv[])
         // // rc.setCalibrationOff();
         // // cout << "Done!\n" << endl;
 
-        // Test the vacuum()
-        cout << "Test vacuum() with a reliable communication" << endl;
-        cout << "Vacuum value: " << rc.vacuum(voltage2mbar) << endl;
-        cout << "Done!\n" << endl;
+        // // Test the vacuum()
+        // cout << "Test vacuum() with a reliable communication" << endl;
+        // cout << "Vacuum value: " << rc.vacuum(voltage2mbar) << endl;
+        // cout << "Done!\n" << endl;
  
         // // Test the setVacuumSensorOff()
-        cout << "Test setVacuumSensorOn() with a reliable communication" << endl;
-        rc.setVacuumSensorOff();
-        cout << "Done!\n" << endl;
+        // cout << "Test setVacuumSensorOn() with a reliable communication" << endl;
+        // rc.setVacuumSensorOff();
+        // cout << "Done!\n" << endl;
 
         // Test the isVacuumSensorOn()
-        cout << "Test isVacuumSensorOn() with a reliable communication" << endl;
-        cout << "Is the vacuum sensor ON? " << (rc.isVacuumSensorOn() == true ? "yes" : "no") << endl;
-        cout << "Done!\n" << endl;
+        // cout << "Test isVacuumSensorOn() with a reliable communication" << endl;
+        // cout << "Is the vacuum sensor ON? " << (rc.isVacuumSensorOn() == true ? "yes" : "no") << endl;
+        // cout << "Done!\n" << endl;
 
-        // // Test the vertexTemperature() voltage value, without conversion
+        // Test the vertexTemperature() voltage value, without conversion
         cout << "Test vertexTemperature()" << endl;
         cout << "Vertex temperature value before conversion [Volt]: " << rc.vertexTemperature(voltage2Celsius) << endl;
         cout << "Done!\n" << endl;
@@ -163,13 +181,13 @@ int main(int argc, char *argv[])
         cout << "First Cryogenic Temperature value (Volt): " << rc.cryoTemperature(0) << endl;
         cout << "Done!\n" << endl;
 
-        // // Test the cryoTemperature(1)
+        // Test the cryoTemperature(1)
         cout << "Test cryoTemperature(1) with a reliable communication" << endl;
         cout << "Second Cryogenic Temperature value (mbar): " << rc.cryoTemperature(1, voltage2Kelvin) << endl;
         cout << "Second Cryogenic Temperature value (Volt): " << rc.cryoTemperature(1) << endl;
         cout << "Done!\n" << endl;
 
-        // // Test the cryoTemperature(3)
+        // Test the cryoTemperature(3)
         cout << "Test cryoTemperature(3) with a reliable communication" << endl;
         cout << "Third Cryogenic Temperature value (mbar): " << rc.cryoTemperature(3, voltage2Kelvin) << endl;
         cout << "Third Cryogenic Temperature value (volt): " << rc.cryoTemperature(3) << endl;
@@ -214,59 +232,59 @@ int main(int argc, char *argv[])
         // sleep(5);
 
         // Test fetValues()
-        cout << "Test fetValues() with a reliable communication" << endl;
-        ReceiverControl::FetValues values = rc.fetValues(0, 4, currentConverter, voltageConverter);
-        cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
-        cout << ", VGL=" << values.VGL << ")" << endl;
-        cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
-        cout << ", VGR=" << values.VGR << ")" << endl;
-        cout << endl;
-        values = rc.fetValues(1, 2, currentConverter);
-        cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
-        cout << ", VGL=" << values.VGL << ")" << endl;
-        cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
-        cout << ", VGR=" << values.VGR << ")" << endl;
-        cout << "Done!\n" << endl;
+        // cout << "Test fetValues() with a reliable communication" << endl;
+        // ReceiverControl::FetValues values = rc.fetValues(0, 4, currentConverter, voltageConverter);
+        // cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        // cout << ", VGL=" << values.VGL << ")" << endl;
+        // cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        // cout << ", VGR=" << values.VGR << ")" << endl;
+        // cout << endl;
+        // values = rc.fetValues(1, 2, currentConverter);
+        // cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        // cout << ", VGL=" << values.VGL << ")" << endl;
+        // cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        // cout << ", VGR=" << values.VGR << ")" << endl;
+        // cout << "Done!\n" << endl;
 
-        sleep(5);
+        // sleep(5);
 
-        // Test the turnLeftLNAsOn()
-        cout << "Test turnLeftLNAsOn() with a reliable communication" << endl;
-        rc.turnLeftLNAsOn();
-        cout << "Done!\n" << endl;
+        // // Test the turnLeftLNAsOn()
+        // cout << "Test turnLeftLNAsOn() with a reliable communication" << endl;
+        // rc.turnLeftLNAsOn();
+        // cout << "Done!\n" << endl;
 
-        // Test fetValues()
-        cout << "Test fetValues() with a reliable communication" << endl;
-        values = rc.fetValues(0, 4, currentConverter, voltageConverter);
-        cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
-        cout << ", VGL=" << values.VGL << ")" << endl;
-        cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
-        cout << ", VGR=" << values.VGR << ")" << endl;
-        cout << endl;
-        values = rc.fetValues(1, 2, currentConverter);
-        cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
-        cout << ", VGL=" << values.VGL << ")" << endl;
-        cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
-        cout << ", VGR=" << values.VGR << ")" << endl;
-        cout << "Done!\n" << endl;
+        // // Test fetValues()
+        // cout << "Test fetValues() with a reliable communication" << endl;
+        // values = rc.fetValues(0, 4, currentConverter, voltageConverter);
+        // cout << "LNA left values of feed 0, stage 4: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        // cout << ", VGL=" << values.VGL << ")" << endl;
+        // cout << "LNA right values of feed 0, stage 4: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        // cout << ", VGR=" << values.VGR << ")" << endl;
+        // cout << endl;
+        // values = rc.fetValues(1, 2, currentConverter);
+        // cout << "LNA left values of feed 1, stage 2: (VDL=" << values.VDL << ", IDL=" << values.IDL;
+        // cout << ", VGL=" << values.VGL << ")" << endl;
+        // cout << "LNA right values of feed 1, stage 2: (VDR=" << values.VDR << ", IDR=" << values.IDR;
+        // cout << ", VGR=" << values.VGR << ")" << endl;
+        // cout << "Done!\n" << endl;
 
-        sleep(3);
+        // sleep(3);
 
-        // // Test stageValues()
-        cout << "Test stageValues() with a reliable communication" << endl;
-        ReceiverControl::StageValues svalues = rc.stageValues(ReceiverControl::DRAIN_VOLTAGE, 4, voltageConverter);
-        cout << "Drain voltages for the stage number 4:\n" << endl;
-        cout << "\tLeft channel:\n";
-        std::vector<double>::iterator liter = (svalues.left_channel).begin();
-        std::vector<double>::iterator lend = (svalues.left_channel).end();
-        for(int idx=0; liter != lend; liter++, idx++) 
-            cout << "Item " << idx << ": " << *liter << endl;
-        cout << "\tRight channel:\n";
-        std::vector<double>::iterator riter = (svalues.right_channel).begin();
-        std::vector<double>::iterator rend = (svalues.right_channel).end();
-        for(int idx = 0; riter != rend; riter++, idx++) 
-            cout << "Item " << idx << ": " << *riter << endl;
-        cout << "Done!\n" << endl;
+        // // // Test stageValues()
+        // cout << "Test stageValues() with a reliable communication" << endl;
+        // ReceiverControl::StageValues svalues = rc.stageValues(ReceiverControl::DRAIN_VOLTAGE, 4, voltageConverter);
+        // cout << "Drain voltages for the stage number 4:\n" << endl;
+        // cout << "\tLeft channel:\n";
+        // std::vector<double>::iterator liter = (svalues.left_channel).begin();
+        // std::vector<double>::iterator lend = (svalues.left_channel).end();
+        // for(int idx=0; liter != lend; liter++, idx++) 
+        //     cout << "Item " << idx << ": " << *liter << endl;
+        // cout << "\tRight channel:\n";
+        // std::vector<double>::iterator riter = (svalues.right_channel).begin();
+        // std::vector<double>::iterator rend = (svalues.right_channel).end();
+        // for(int idx = 0; riter != rend; riter++, idx++) 
+        //     cout << "Item " << idx << ": " << *riter << endl;
+        // cout << "Done!\n" << endl;
 
         // // Test the isCalibrationOn()
         // cout << "Test isCalibrationOn() with a reliable communication" << endl;
@@ -339,9 +357,9 @@ int main(int argc, char *argv[])
         // cout << "Done!\n" << endl;
 
         // Test the isRemoteOn()
-        // cout << "Test isRemoteOn() with a reliable communication" << endl;
-        // cout << "Is the remote command enable? " << (rc.isRemoteOn() == true ? "yes" : "no") << endl;
-        // cout << "Done!\n" << endl;
+        cout << "Test isRemoteOn() with a reliable communication" << endl;
+        cout << "Is the remote command enable? " << (rc.isRemoteOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
 
         // // Test the selectLO1()
         // cout << "Test selectLO1() with a reliable communication" << endl;
@@ -503,6 +521,9 @@ int main(int argc, char *argv[])
         // cout << "Test vacuum() with a reliable communication" << endl;
         // cout << "Vacuum value: " << rc.vacuum(voltage2mbar) << endl;
         // cout << "Done!\n" << endl;
+
+        // cout << "Test rc.setColdLoadPath() with a reliable communication" << endl;
+        // rc.setColdLoadPath();
     }
     catch(ReceiverControlEx& ex) {
         cout << ex.what() << endl;

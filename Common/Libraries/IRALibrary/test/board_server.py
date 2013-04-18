@@ -73,7 +73,7 @@ CMD_EOT = chr(0x04)
 class BoardServer:
     """A simulator of Franco Fiocchi (Medicina) board."""
 
-    def __init__(self, host='', port=10000):
+    def __init__(self, host='', port=5002):
         """Initialize a `Listener` object.
 
         Parameters:
@@ -133,8 +133,12 @@ class BoardServer:
                         is_short = False
                         cmd = chr(0x00)
                         if(data):
-                            print "\nReceived message from %s: %r" % (connection.getpeername(), 
-                                    binhex.binascii.hexlify(data))
+                            if len(data) > 10:
+                                for c in data:
+                                    print hex(ord(c)),
+                                print
+                            # print "\nReceived message from %s: %r" % (connection.getpeername(), 
+                            # binhex.binascii.hexlify(data))
                             # Initialize the answer with a wrong message
                             answer = "".join([CMD_STX, data[2], data[1], data[3], data[4], 
                                 chr(0x00), chr(0x02), chr(0x22), chr(0x22), chr(0x33), CMD_ETX])
@@ -142,7 +146,7 @@ class BoardServer:
                             if CMD_TYPE_MIN_EXT > data[CMD_IDX] or data[CMD_IDX] > CMD_TYPE_MAX_ABB:
                                 # The last byte, 0x01, is the execution result of an "unknow command"
                                 answer = "".join([CMD_STX, data[2], data[1], data[3], data[4], chr(0x01)])
-                                print "Sending message: %r" %binhex.binascii.hexlify(answer)
+                                # print "Sending message: %r" %binhex.binascii.hexlify(answer)
                                 connection.send(answer)
                                 continue
                             elif data[CMD_IDX] >= CMD_TYPE_MIN_ABB:
@@ -186,7 +190,7 @@ class BoardServer:
                                 answer += chr(checksum)
                                 answer += CMD_ETX
                             
-                            print "Sending message: %r" %binhex.binascii.hexlify(answer)
+                            # print "Sending message: %r" %binhex.binascii.hexlify(answer)
                             connection.send(answer)
                 except:
                     raise
