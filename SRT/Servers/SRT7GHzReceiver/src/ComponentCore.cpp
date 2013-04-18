@@ -30,9 +30,14 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
 {
 	m_configuration.init(m_services);  //throw (ComponentErrors::CDBAccessExImpl);
 	try {
-		m_control=new IRA::ReceiverControl((const char *)m_configuration.getDewarIPAddress(),m_configuration.getDewarPort(),
-																					(const char *)m_configuration.getLNAIPAddress(),m_configuration.getLNAPort(),
-																					m_configuration.getFeeds(),0x7C,0x7D,0x7C,0x7D,false,m_configuration.getLNASamplingTime());
+		m_control=new IRA::ReceiverControl(
+                (const char *)m_configuration.getDewarIPAddress(),
+                m_configuration.getDewarPort(),
+                (const char *)m_configuration.getLNAIPAddress(),
+                m_configuration.getLNAPort(),
+                m_configuration.getLNASamplingTime(),
+                m_configuration.getFeeds()
+        );
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CComponentCore::execute()");
