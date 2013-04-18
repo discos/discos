@@ -66,6 +66,8 @@
 #define RPOS	0x31
 #define GO	0x32
 
+#define ASCALIBRATION "/CDB/alma/AS/AScalibration.txt"
+
 // specific macro
   /** 	@#define _ADD_MEMBER(OBJ,MEMB)
      *  This macro add extra data to an error/compl. object. MEMB must be real variable or constant
@@ -388,6 +390,8 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSu
 		*/
 		 //virtual ACSErr::Completion* calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx) ;
 		 void calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
+
+	void writeCalibration(CORBA::Double_out cammaLenD, CORBA::Double_out cammaPosD, CORBA::Boolean_out calibrate) throw (CORBA::SystemException,ASErrors::ASErrorsEx);
 			 
      /**
      * home. bring the USD to zero reference position.
@@ -553,6 +557,14 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSu
     */	
 	int m_cammaPos;
 
+        int m_cammaEnd;
+
+	/**
+	* camma len and camma pos in degrees
+	*/
+	double m_cammaLenD;
+	double m_cammaPosD;
+
     /**                                         
     * 	usefull range in step
     */	
@@ -640,7 +652,6 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSu
 	*/
 	ContainerServices* cs;
 
-
   protected:
     SmartPropertyPointer<RWlong> m_delay_sp;
     SmartPropertyPointer<RWlong> m_cmdPos_sp;
@@ -655,11 +666,6 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSu
     SmartPropertyPointer<ROlong> m_type_sp;
     SmartPropertyPointer<RWdouble> m_gravCorr_sp;
     SmartPropertyPointer<RWdouble> m_userOffset_sp;
-
-	
-
-
-
 };
 
 #endif /*!USDImpl_H*/
