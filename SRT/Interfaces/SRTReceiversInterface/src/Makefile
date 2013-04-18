@@ -7,10 +7,10 @@
 
 MAKE_PDF = ON
 
-CDB_SCHEMAS = MarkCoefficientsKBandLookUpTable
+CDB_SCHEMAS = MarkCoefficientsLPBandLookUpTable SRTLPBandReceiverModeSetup
 
 # IDL Files and flags
-IDL_FILES = SRTKBandMF SRT7GHz
+IDL_FILES = SRTKBandMF SRT7GHz SRTLPBand
 
 # list of all possible C-sources (used to create automatic dependencies)
 CSOURCENAMES = \

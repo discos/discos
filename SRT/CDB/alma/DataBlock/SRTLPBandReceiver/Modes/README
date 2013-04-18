@@ -1,0 +1,22 @@
+Each mode is composed by 4 characters, that indicate respectively the:
+
+    - L band polarization (*, L, C)
+    - L band filter ID (1, 2, 3, 4, 5)
+    - P band polarization (*, L, C)
+    - P band filter ID (1, 2, 3, 4, 5)
+
+For instance, the code C1L2 means:
+
+    - Circular polarization of the L band
+    - Filter n.1 of the L band 
+    - Linear polarization of the P band
+    - Filter n.2 of the P band
+
+The * character means the corresponding value should not change. For instance, the
+code *1** means:
+
+    - Do not change the polarization of the L band
+    - Filter n.1 of the L band
+    - Do not change the polarization of the P band
+    - Do not change the filter of the P band
+

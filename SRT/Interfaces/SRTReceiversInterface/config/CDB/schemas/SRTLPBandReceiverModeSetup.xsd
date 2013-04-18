@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    - Author: Andrea Orlati
+    -
+    - History:
+    -   04-08-2011  Created
+-->
+
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTLPBandReceiverModeSetup:1.0"
+    xmlns="urn:schemas-cosylab-com:SRTLPBandReceiverModeSetup:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"   
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+<xs:complexType name="SRTLPBandReceiverModeType">
+    <!-- Mode name or mode mnemonic code -->
+    <xs:attribute name="Mode" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the sky radio frequency band of the L band receiver (0..IFs) -->
+    <xs:attribute name="LBandRFMin" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the sky radio frequency band of the P band receiver (0..IFs) -->
+    <xs:attribute name="PBandRFMin" type="xs:string" use="required"/>
+    <!-- represent the upper value (MHZ) of the sky radio frequency band of the L band receiver (0..IFs)-->
+    <xs:attribute name="LBandRFMax" type="xs:string" use="required"/>
+    <!-- represent the upper value (MHZ) of the sky radio frequency band of the P band receiver (0..IFs)-->
+    <xs:attribute name="PBandRFMax" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the Intermediate Frequency band of the L band receiver (0..IFs)-->
+    <xs:attribute name="LBandIFMin" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the Intermediate Frequency band of the P band receiver (0..IFs)-->
+    <xs:attribute name="PBandIFMin" type="xs:string" use="required"/>
+    <!-- number of feeds -->
+    <xs:attribute name="Feeds" type="xs:unsignedLong" use="required"/>
+    <!-- number of IFs for each feed-->
+    <xs:attribute name="IFs" type="xs:unsignedLong" use="required"/>
+    <!-- blank separated list of the polarization relative to the IF of the L band receiver-->
+    <!-- the first entry is relative to IF 0. Accepted character are L or R  -->
+    <xs:attribute name="LBandPolarization" type="xs:string" use="required"/>
+    <!-- blank separated list of the polarization relative to the IF of the P band receiver-->
+    <!-- the first entry is relative to IF 0. Accepted character are L or R  -->
+    <xs:attribute name="PBandPolarization" type="xs:string" use="required"/>
+</xs:complexType>
+
+<xs:element name="SRTLPBandReceiverModeSetup" type="SRTLPBandReceiverModeType"/>
+
+</xs:schema>
