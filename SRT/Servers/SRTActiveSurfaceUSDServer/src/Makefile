@@ -63,7 +63,7 @@ EXECUTABLES_L   =
 #
 # <brief description of xxxxx program>
 SRTAS_Calibration_OBJECTS = SRTAS_Calibration
-SRTAS_Calibration_LIBS = IRALibrary usdImpl ASErrors ClientErrors
+SRTAS_Calibration_LIBS = IRALibrary SRTActiveSurfaceBossStubs ManagmentDefinitionsStubs ASErrors ClientErrors ComponentErrors ManagementErrors
 
 # xxxxx_LDFLAGS   =
 

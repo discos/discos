@@ -121,8 +121,17 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	try {
 		stop();			// terminate any ongoing movement
 		_GET_PROP(status,m_status,"usdImpl::initialize()")
-		if(!(m_calibrate && m_status&ENBL))
+		if(!(m_calibrate && m_status&ENBL)) {
             		reset(); // load the default params.
+		}
+		else {
+			//* restore defaults *//
+        		_SET_LDEF(delay,"USDImpl::reset()");
+    			_SET_LDEF(Fmax,"USDImpl::reset()");
+    			_SET_LDEF(Fmin,"USDImpl::reset()");
+    			_SET_LDEF(acc,"USDImpl::reset()");
+			_SET_LDEF(uBits,"USDImpl::reset()");
+		}
 	}
 	catch (ASErrors::ASErrorsEx& ex)
 	{
@@ -137,10 +146,16 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		ACS_DEBUG("::usdImpl::initialize","Not captuerd exception!"); 
 	}
 	//////////////////////////////////////////
-	_SET_PROP(Fmin,100,"usdImpl::initialize()")
-	_SET_PROP(Fmax,500,"usdImpl::initialize()")
-	_SET_PROP(delay,5,"usdImpl::initialize()")
-	_SET_PROP(acc,50,"usdImpl::initialize()")
+	/*try {
+		_SET_PROP(Fmin,100,"usdImpl::initialize()")
+		_SET_PROP(Fmax,500,"usdImpl::initialize()")
+		_SET_PROP(delay,5,"usdImpl::initialize()")
+		_SET_PROP(acc,50,"usdImpl::initialize()")
+	}
+	_CATCH_EXCP_THROW_EX(CORBA::SystemException,corbaError,"::usdImpl::initialize()",m_addr)
+	_CATCH_EXCP_THROW_EX(ASErrors::DevIOErrorEx,DevIOError,"::usdImpl::initialize()",m_addr)		// for _GET_PROP
+	_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"::usdImpl::initialize()",m_addr)	// for local USD excp
+	*/
 	//////////////////////////////////////////
 }
 
@@ -305,12 +320,12 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 	ACSErr::Completion_var cp_sp; 
 	int ifp=0;
 	long cammaBegin=0, cammaEnd=0;
-	double cammaLenD, cammaPosD;
+	//double cammaLenD, cammaPosD;
 		
 	m_calibrate=false;
 	m_cammaLen=m_cammaPos=-1;
 	
-	_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate");
+	//_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate");
 
 	try {
 		action(STOP);
@@ -341,7 +356,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		
 		_GET_PROP(actPos,cammaBegin,"usdImpl::calibrate()")
 		ACS_DEBUG_PARAM("::usdImpl::calibrate","Camma begin at:%d",cammaBegin);
-		//printf("cammaBegin = %ld\n", cammaBegin);
+		printf("cammaBegin = %ld\n", cammaBegin);
 		
 		action(HSTOP,1,1);  					 // sets the stop @ camma off
 		ACS_DEBUG("::usdImpl::calibrate","hard stop to 0");
@@ -352,30 +367,37 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		ifp=2;
 		CIRATools::Wait(3,0);
 		_GET_PROP(status,m_status,"usdImpl::calibrate()")
+		printf("before if\n");
 		if(m_status&MRUN) {
 			ACS_DEBUG("::usdImpl::calibrate","camma end not found!");
+			printf("inside if\n");
 			_THROW_EX(USDStillRunning,"::usdImpl::calibrate()",ifp);
+			printf("inside if\n");
 			action(STOP);
 		}
+		printf("after if\n");
 
 		_GET_PROP(actPos,cammaEnd,"usdImpl::calibrate()")
 		ACS_DEBUG_PARAM("::usdImpl::calibrate","Camma end at:%d",cammaEnd);
-		//printf("cammaEnd = %ld\n", cammaEnd);
+		printf("cammaEnd = %ld\n", cammaEnd);
  
+		//m_cammaEnd = cammaEnd;
 		m_cammaLen=cammaBegin-cammaEnd;
 		m_cammaPos=cammaEnd+m_cammaLen/2;
 
-		cammaLenD = (double)(m_cammaLen*m_step2deg);
-		cammaPosD = (double)((m_step_giro-cammaEnd-m_cammaLen/2)*m_step2deg);
-		//printf("cammaLen = %d, cammaLenD = %f\n", m_cammaLen, cammaLenD);
-		//printf("cammaPos = %d, cammaPosD = %f\n", m_cammaPos, cammaPosD);
+		m_cammaLenD = (double)(m_cammaLen*m_step2deg);
+		m_cammaPosD = (double)((m_step_giro-cammaEnd-m_cammaLen/2)*m_step2deg);
+		//printf("cammaLen = %f\n", cammaLenD);
+		//printf("cammaPos = %f\n", cammaPosD);
  		ACS_DEBUG_PARAM("::usdImpl::calibrate","cammaLen:%d(step)",m_cammaLen);
  		ACS_DEBUG_PARAM("::usdImpl::calibrate","cammaPos:%d(step)",m_cammaPos);
 
 		action(HSTOP,0,1); // disable HW stop 
 		ACS_DEBUG("::usdImpl::calibrate","hstop disabled!");
 
+		//CIRATools::Wait(0,250000);
 		_SET_PROP(Fmax,500,"usdImpl::calibrate()")
+		//CIRATools::Wait(0,250000);
 		_SET_PROP(cmdPos,m_cammaPos,"usdImpl::calibrate()")
 
 		CIRATools::Wait(1,0); // 1 sec
@@ -387,9 +409,17 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 	_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"::usdImpl::calibrate()",ifp)	// for local USD excp
 
 	m_calibrate=true;
-	_SET_CDB_D(cammaLen,cammaLenD,"::usdImpl::calibrate()");
-	_SET_CDB_D(cammaPos,cammaPosD,"::usdImpl::calibrate()");
-	_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
+	//CIRATools::Wait(0,250000);
+	//ThreadSyncGuard guard1(&m_mutex);
+	//_SET_CDB_D(cammaLen,cammaLenD,"::usdImpl::calibrate()");
+	//CIRATools::Wait(0,250000);
+	//ThreadSyncGuard guard2(&m_mutex);
+	//_SET_CDB_D(cammaPos,cammaPosD,"::usdImpl::calibrate()");
+	//CIRATools::Wait(0,250000);
+	//ThreadSyncGuard guard3(&m_mutex);
+	//_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
+	//CIRATools::Wait(0,250000);
+	//printf("baci::ThreadSyncGuard guard(&m_mutex);\n");
 	
 /*	ASErrors::USDCalibratedCompletion* cIp=new  ASErrors::USDCalibratedCompletion(__FILE__,__LINE__,"::usdImpl::calibrate()");
 	cIp->setCammaLen(m_cammaLen*m_step2deg);
@@ -402,6 +432,15 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 {
 	ACS_TRACE("::USDImpl::calVer()");
+
+	//fstream ASCalibration("/archive/SRT-AS-Calibration.txt");
+	//ASCalibration.open ("/archive/SRT-AS-Calibration.txt", ios_base::out | ios_base::app);
+
+	//double cammaLenD = (double)(m_cammaLen*m_step2deg);
+	//double cammaPosD = (double)((m_step_giro-m_cammaEnd-m_cammaLen/2)*m_step2deg);
+	//printf("cammaLen = %f in calVer\n", cammaLenD);
+	//printf("cammaPos = %f in calVer\n", cammaPosD);
+	//ASCalibration << cammaLenD << " " << cammaPosD;
 
 	int ifp=0;
 	_VAR_CHK_EX(m_available,USDUnavailable,"::usdImpl::calver()");
@@ -418,8 +457,9 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		}
 		if (!chkCal()) {
 			m_calibrate = false;
-			_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
+			//_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
 			//printf("ifp = %d\n", ifp);
+			//ASCalibration << m_calibrate << std::endl;
                 	_THROW_EX(USDunCalibrated,"::usdImpl::calver()",ifp);
 		}
 		//if (!chkCal())
@@ -432,8 +472,9 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 
 		if (!chkCal()) {
 			m_calibrate = false;
-			_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
+			//_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
 			//printf("ifp = %d\n", ifp);
+			//ASCalibration << m_calibrate << std::endl;
                 	_THROW_EX(USDunCalibrated,"::usdImpl::calver()",ifp);
 		}
 		//if (!chkCal())
@@ -445,13 +486,15 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 			
 		if(stillRunning(m_bottom)) {	
 			action(STOP);
+			//ASCalibration << m_calibrate << std::endl;
 			_THROW_EX(USDStillRunning,"::usdImpl::calver()",ifp);
 		}
 			
 		if (!chkCal()) {
 			m_calibrate = false;
-			_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
+			//_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
 			//printf("ifp = %d\n", ifp);
+			//ASCalibration << m_calibrate << std::endl;
                 	_THROW_EX(USDunCalibrated,"::usdImpl::calver()",ifp);
 		}
 		//if (!chkCal())
@@ -463,13 +506,15 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 			
 		if(stillRunning(0)) 	{	
 			action(STOP);
+			//ASCalibration << m_calibrate << std::endl;
 			_THROW_EX(USDStillRunning,"::usdImpl::calver()",ifp);
 		}
 			
 		if (!chkCal()) {
 			m_calibrate = false;
-			_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
+			//_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
 			//printf("ifp = %d\n", ifp);
+			//ASCalibration << m_calibrate << std::endl;
                 	_THROW_EX(USDunCalibrated,"::usdImpl::calver()",ifp);
 		}
 		//if (!chkCal())
@@ -483,6 +528,17 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 	
 	//CompletionImpl* cp=new  ASErrors::NoErrorCompletion();
 	//return cp->returnCompletion();
+}
+
+void USDImpl:: writeCalibration(CORBA::Double_out cammaLenD, CORBA::Double_out cammaPosD, CORBA::Boolean_out calibrate) throw (CORBA::SystemException,ASErrors::ASErrorsEx)
+{
+	_SET_CDB_D(cammaLen,m_cammaLenD,"::usdImpl::calibrate()");
+	_SET_CDB_D(cammaPos,m_cammaPosD,"::usdImpl::calibrate()");
+	_SET_CDB(calibrate,m_calibrate,"::usdImpl::calibrate()");
+	
+	cammaLenD = m_cammaLenD;
+	cammaPosD = m_cammaPosD;
+	calibrate = m_calibrate;
 }
 
 void USDImpl::exImplCheck(ASErrors::ASErrorsExImpl ex)
