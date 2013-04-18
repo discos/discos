@@ -41,13 +41,8 @@ CConfiguration const * const  CComponentCore::execute() throw (
                 m_configuration.getDewarPort(),
                 (const char *)m_configuration.getLNAIPAddress(),
                 m_configuration.getLNAPort(),
-                m_configuration.getFeeds(),
-                0x7C,
-                0x7D,
-                0x7C,
-                0x7D,
-                false,
-                m_configuration.getLNASamplingTime()
+                m_configuration.getLNASamplingTime(),
+                m_configuration.getFeeds()
         );
     }
     catch (std::bad_alloc& ex) {
