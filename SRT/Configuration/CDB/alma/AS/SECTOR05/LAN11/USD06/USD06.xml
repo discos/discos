@@ -53,6 +53,37 @@
    -   Mon Oct 06 09:29:02 UTC 2008 modified by jDAL
    -   Thu Oct 09 09:21:58 UTC 2008 modified by jDAL
    -   Thu Oct 09 11:33:47 UTC 2008 modified by jDAL
+   -   Mon Feb 04 14:28:59 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:03:05 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:44:11 UTC 2013 modified by jDAL
+   -   Fri Feb 08 10:30:37 UTC 2013 modified by jDAL
+   -   Mon Feb 25 11:22:02 UTC 2013 modified by jDAL
+   -   Tue Feb 26 11:37:18 UTC 2013 modified by jDAL
+   -   Tue Mar 05 10:43:30 UTC 2013 modified by jDAL
+   -   Tue Mar 05 11:46:25 UTC 2013 modified by jDAL
+   -   Tue Mar 05 13:08:02 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:10:03 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:47:46 UTC 2013 modified by jDAL
+   -   Thu Mar 07 11:35:50 UTC 2013 modified by jDAL
+   -   Fri Mar 08 10:08:23 UTC 2013 modified by jDAL
+   -   Fri Mar 08 11:05:36 UTC 2013 modified by jDAL
+   -   Fri Mar 08 13:13:34 UTC 2013 modified by jDAL
+   -   Mon Mar 11 16:00:14 UTC 2013 modified by jDAL
+   -   Tue Mar 12 08:53:15 UTC 2013 modified by jDAL
+   -   Tue Mar 12 09:31:20 UTC 2013 modified by jDAL
+   -   Wed Mar 20 10:27:35 UTC 2013 modified by jDAL
+   -   Thu Mar 21 08:49:08 UTC 2013 modified by jDAL
+   -   Mon Mar 25 14:24:26 UTC 2013 modified by jDAL
+   -   Mon Mar 25 15:24:16 UTC 2013 modified by jDAL
+   -   Wed Mar 27 12:13:57 UTC 2013 modified by jDAL
+   -   Wed Mar 27 15:28:06 UTC 2013 modified by jDAL
+   -   Wed Apr 03 09:28:51 UTC 2013 modified by jDAL
+   -   Wed Apr 03 10:27:32 UTC 2013 modified by jDAL
+   -   Wed Apr 03 14:15:59 UTC 2013 modified by jDAL
+   -   Fri Apr 12 08:58:10 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:11:26 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:48:39 UTC 2013 modified by jDAL
+   -   Wed Apr 17 14:00:44 UTC 2013 modified by jDAL
 -->
 <usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="5" lan="11" serialAddress="6" cammaLen="0" cammaPos="0" calibrate="0">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />

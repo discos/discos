@@ -54,6 +54,41 @@
    -   Mon Oct 06 09:34:37 UTC 2008 modified by jDAL
    -   Thu Oct 09 09:27:25 UTC 2008 modified by jDAL
    -   Thu Oct 09 11:32:36 UTC 2008 modified by jDAL
+   -   Mon Feb 04 14:01:52 UTC 2013 modified by jDAL
+   -   Mon Feb 04 14:13:32 UTC 2013 modified by jDAL
+   -   Mon Feb 04 16:19:55 UTC 2013 modified by jDAL
+   -   Wed Feb 06 10:59:37 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:40:44 UTC 2013 modified by jDAL
+   -   Fri Feb 08 10:27:10 UTC 2013 modified by jDAL
+   -   Mon Feb 25 14:52:39 UTC 2013 modified by jDAL
+   -   Mon Feb 25 15:09:48 UTC 2013 modified by jDAL
+   -   Mon Feb 25 15:35:22 UTC 2013 modified by jDAL
+   -   Mon Mar 04 12:33:14 UTC 2013 modified by jDAL
+   -   Tue Mar 05 10:39:25 UTC 2013 modified by jDAL
+   -   Tue Mar 05 11:43:02 UTC 2013 modified by jDAL
+   -   Tue Mar 05 13:04:40 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:07:11 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:44:54 UTC 2013 modified by jDAL
+   -   Thu Mar 07 11:32:59 UTC 2013 modified by jDAL
+   -   Fri Mar 08 10:05:32 UTC 2013 modified by jDAL
+   -   Fri Mar 08 11:02:46 UTC 2013 modified by jDAL
+   -   Fri Mar 08 13:10:43 UTC 2013 modified by jDAL
+   -   Mon Mar 11 15:57:08 UTC 2013 modified by jDAL
+   -   Tue Mar 12 08:50:21 UTC 2013 modified by jDAL
+   -   Tue Mar 12 09:28:30 UTC 2013 modified by jDAL
+   -   Wed Mar 20 10:24:45 UTC 2013 modified by jDAL
+   -   Thu Mar 21 08:45:46 UTC 2013 modified by jDAL
+   -   Mon Mar 25 14:20:55 UTC 2013 modified by jDAL
+   -   Mon Mar 25 15:20:53 UTC 2013 modified by jDAL
+   -   Wed Mar 27 12:10:30 UTC 2013 modified by jDAL
+   -   Wed Mar 27 15:24:43 UTC 2013 modified by jDAL
+   -   Wed Apr 03 09:25:18 UTC 2013 modified by jDAL
+   -   Wed Apr 03 10:24:09 UTC 2013 modified by jDAL
+   -   Wed Apr 03 14:12:35 UTC 2013 modified by jDAL
+   -   Fri Apr 12 08:55:10 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:08:26 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:45:39 UTC 2013 modified by jDAL
+   -   Wed Apr 17 13:57:43 UTC 2013 modified by jDAL
 -->
 <usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="4" lan="11" serialAddress="13" cammaLen="0" cammaPos="0" calibrate="0">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />

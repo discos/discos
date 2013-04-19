@@ -51,6 +51,40 @@
    -   Mon Oct 06 09:31:21 UTC 2008 modified by jDAL
    -   Thu Oct 09 09:24:16 UTC 2008 modified by jDAL
    -   Thu Oct 09 11:32:38 UTC 2008 modified by jDAL
+   -   Mon Feb 04 14:02:00 UTC 2013 modified by jDAL
+   -   Mon Feb 04 14:13:56 UTC 2013 modified by jDAL
+   -   Mon Feb 04 16:20:02 UTC 2013 modified by jDAL
+   -   Wed Feb 06 10:59:44 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:40:50 UTC 2013 modified by jDAL
+   -   Fri Feb 08 10:27:17 UTC 2013 modified by jDAL
+   -   Mon Feb 25 15:09:56 UTC 2013 modified by jDAL
+   -   Mon Feb 25 15:35:25 UTC 2013 modified by jDAL
+   -   Mon Mar 04 12:33:22 UTC 2013 modified by jDAL
+   -   Tue Mar 05 10:39:31 UTC 2013 modified by jDAL
+   -   Tue Mar 05 11:43:08 UTC 2013 modified by jDAL
+   -   Tue Mar 05 13:04:46 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:07:18 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:45:00 UTC 2013 modified by jDAL
+   -   Thu Mar 07 11:33:05 UTC 2013 modified by jDAL
+   -   Fri Mar 08 10:05:39 UTC 2013 modified by jDAL
+   -   Fri Mar 08 11:02:53 UTC 2013 modified by jDAL
+   -   Fri Mar 08 13:10:49 UTC 2013 modified by jDAL
+   -   Mon Mar 11 15:57:18 UTC 2013 modified by jDAL
+   -   Tue Mar 12 08:50:32 UTC 2013 modified by jDAL
+   -   Tue Mar 12 09:28:36 UTC 2013 modified by jDAL
+   -   Wed Mar 20 10:24:51 UTC 2013 modified by jDAL
+   -   Thu Mar 21 08:45:54 UTC 2013 modified by jDAL
+   -   Mon Mar 25 14:21:02 UTC 2013 modified by jDAL
+   -   Mon Mar 25 15:21:01 UTC 2013 modified by jDAL
+   -   Wed Mar 27 12:10:38 UTC 2013 modified by jDAL
+   -   Wed Mar 27 15:24:50 UTC 2013 modified by jDAL
+   -   Wed Apr 03 09:25:26 UTC 2013 modified by jDAL
+   -   Wed Apr 03 10:24:16 UTC 2013 modified by jDAL
+   -   Wed Apr 03 14:12:43 UTC 2013 modified by jDAL
+   -   Fri Apr 12 08:55:17 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:08:33 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:45:46 UTC 2013 modified by jDAL
+   -   Wed Apr 17 13:57:50 UTC 2013 modified by jDAL
 -->
 <usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="4" lan="12" serialAddress="9" cammaLen="0" cammaPos="0" calibrate="0">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />

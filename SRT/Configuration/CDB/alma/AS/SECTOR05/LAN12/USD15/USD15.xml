@@ -52,6 +52,37 @@
    -   Mon Oct 06 09:36:24 UTC 2008 modified by jDAL
    -   Thu Oct 09 09:29:13 UTC 2008 modified by jDAL
    -   Thu Oct 09 11:33:57 UTC 2008 modified by jDAL
+   -   Mon Feb 04 14:29:19 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:03:31 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:44:37 UTC 2013 modified by jDAL
+   -   Fri Feb 08 10:31:02 UTC 2013 modified by jDAL
+   -   Mon Feb 25 11:22:34 UTC 2013 modified by jDAL
+   -   Tue Feb 26 11:37:41 UTC 2013 modified by jDAL
+   -   Tue Mar 05 10:44:01 UTC 2013 modified by jDAL
+   -   Tue Mar 05 11:46:49 UTC 2013 modified by jDAL
+   -   Tue Mar 05 13:08:27 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:10:31 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:48:12 UTC 2013 modified by jDAL
+   -   Thu Mar 07 11:36:16 UTC 2013 modified by jDAL
+   -   Fri Mar 08 10:08:50 UTC 2013 modified by jDAL
+   -   Fri Mar 08 11:06:03 UTC 2013 modified by jDAL
+   -   Fri Mar 08 13:14:01 UTC 2013 modified by jDAL
+   -   Mon Mar 11 16:00:47 UTC 2013 modified by jDAL
+   -   Tue Mar 12 08:53:41 UTC 2013 modified by jDAL
+   -   Tue Mar 12 09:31:47 UTC 2013 modified by jDAL
+   -   Wed Mar 20 10:28:02 UTC 2013 modified by jDAL
+   -   Thu Mar 21 08:49:39 UTC 2013 modified by jDAL
+   -   Mon Mar 25 14:24:56 UTC 2013 modified by jDAL
+   -   Mon Mar 25 15:24:48 UTC 2013 modified by jDAL
+   -   Wed Mar 27 12:14:28 UTC 2013 modified by jDAL
+   -   Wed Mar 27 15:28:37 UTC 2013 modified by jDAL
+   -   Wed Apr 03 09:29:29 UTC 2013 modified by jDAL
+   -   Wed Apr 03 10:28:04 UTC 2013 modified by jDAL
+   -   Wed Apr 03 14:16:30 UTC 2013 modified by jDAL
+   -   Fri Apr 12 08:58:38 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:11:53 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:49:05 UTC 2013 modified by jDAL
+   -   Wed Apr 17 14:01:11 UTC 2013 modified by jDAL
 -->
 <usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="5" lan="12" serialAddress="15" cammaLen="0" cammaPos="0" calibrate="0">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />

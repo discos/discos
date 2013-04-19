@@ -48,6 +48,38 @@
    -   Mon Oct 06 09:33:11 UTC 2008 modified by jDAL
    -   Thu Oct 09 09:26:06 UTC 2008 modified by jDAL
    -   Thu Oct 09 11:36:08 UTC 2008 modified by jDAL
+   -   Mon Feb 04 14:56:18 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:12:04 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:53:09 UTC 2013 modified by jDAL
+   -   Fri Feb 08 10:39:41 UTC 2013 modified by jDAL
+   -   Tue Mar 05 10:53:29 UTC 2013 modified by jDAL
+   -   Tue Mar 05 11:55:37 UTC 2013 modified by jDAL
+   -   Tue Mar 05 13:17:12 UTC 2013 modified by jDAL
+   -   Wed Mar 06 08:44:49 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:19:25 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:57:03 UTC 2013 modified by jDAL
+   -   Thu Mar 07 11:45:03 UTC 2013 modified by jDAL
+   -   Fri Mar 08 10:17:43 UTC 2013 modified by jDAL
+   -   Fri Mar 08 11:14:54 UTC 2013 modified by jDAL
+   -   Fri Mar 08 13:22:56 UTC 2013 modified by jDAL
+   -   Mon Mar 11 16:10:28 UTC 2013 modified by jDAL
+   -   Tue Mar 12 09:02:26 UTC 2013 modified by jDAL
+   -   Tue Mar 12 09:40:36 UTC 2013 modified by jDAL
+   -   Wed Mar 20 10:36:53 UTC 2013 modified by jDAL
+   -   Thu Mar 21 08:59:19 UTC 2013 modified by jDAL
+   -   Mon Mar 25 14:33:35 UTC 2013 modified by jDAL
+   -   Mon Mar 25 15:32:34 UTC 2013 modified by jDAL
+   -   Wed Mar 27 12:22:15 UTC 2013 modified by jDAL
+   -   Wed Mar 27 15:36:24 UTC 2013 modified by jDAL
+   -   Wed Apr 03 09:37:53 UTC 2013 modified by jDAL
+   -   Wed Apr 03 10:35:52 UTC 2013 modified by jDAL
+   -   Wed Apr 03 14:24:16 UTC 2013 modified by jDAL
+   -   Fri Apr 05 07:36:48 UTC 2013 modified by jDAL
+   -   Fri Apr 05 07:47:03 UTC 2013 modified by jDAL
+   -   Fri Apr 12 09:05:25 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:18:46 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:55:56 UTC 2013 modified by jDAL
+   -   Wed Apr 17 14:08:06 UTC 2013 modified by jDAL
 -->
 <usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="7" lan="8" serialAddress="11" cammaLen="0" cammaPos="0" calibrate="0">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />

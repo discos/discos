@@ -46,6 +46,39 @@
    -   Mon Oct 06 09:33:07 UTC 2008 modified by jDAL
    -   Thu Oct 09 09:26:02 UTC 2008 modified by jDAL
    -   Thu Oct 09 11:35:17 UTC 2008 modified by jDAL
+   -   Mon Feb 04 14:45:40 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:08:51 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:49:55 UTC 2013 modified by jDAL
+   -   Fri Feb 08 10:36:22 UTC 2013 modified by jDAL
+   -   Mon Feb 25 16:18:59 UTC 2013 modified by jDAL
+   -   Tue Feb 26 09:44:28 UTC 2013 modified by jDAL
+   -   Tue Feb 26 11:42:28 UTC 2013 modified by jDAL
+   -   Tue Mar 05 10:03:52 UTC 2013 modified by jDAL
+   -   Tue Mar 05 10:49:54 UTC 2013 modified by jDAL
+   -   Tue Mar 05 11:52:21 UTC 2013 modified by jDAL
+   -   Tue Mar 05 13:13:57 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:16:06 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:53:46 UTC 2013 modified by jDAL
+   -   Thu Mar 07 11:41:47 UTC 2013 modified by jDAL
+   -   Fri Mar 08 10:14:27 UTC 2013 modified by jDAL
+   -   Fri Mar 08 11:11:38 UTC 2013 modified by jDAL
+   -   Fri Mar 08 13:19:35 UTC 2013 modified by jDAL
+   -   Mon Mar 11 16:06:43 UTC 2013 modified by jDAL
+   -   Tue Mar 12 08:59:13 UTC 2013 modified by jDAL
+   -   Tue Mar 12 09:37:21 UTC 2013 modified by jDAL
+   -   Wed Mar 20 10:33:36 UTC 2013 modified by jDAL
+   -   Thu Mar 21 08:55:42 UTC 2013 modified by jDAL
+   -   Mon Mar 25 14:29:54 UTC 2013 modified by jDAL
+   -   Mon Mar 25 15:29:27 UTC 2013 modified by jDAL
+   -   Wed Mar 27 12:19:07 UTC 2013 modified by jDAL
+   -   Wed Mar 27 15:33:15 UTC 2013 modified by jDAL
+   -   Wed Apr 03 09:34:27 UTC 2013 modified by jDAL
+   -   Wed Apr 03 10:32:45 UTC 2013 modified by jDAL
+   -   Wed Apr 03 14:21:08 UTC 2013 modified by jDAL
+   -   Fri Apr 12 09:02:39 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:15:53 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:53:05 UTC 2013 modified by jDAL
+   -   Wed Apr 17 14:05:10 UTC 2013 modified by jDAL
 -->
 <usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="6" lan="12" serialAddress="11" cammaLen="0" cammaPos="0" calibrate="0">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />
