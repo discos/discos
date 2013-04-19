@@ -82,10 +82,10 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	}
 
     	// configure the parser.....
-	m_parser->add<0>("setup",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::setupAS) );
-	m_parser->add<0>("start",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::startAS) );
-	m_parser->add<0>("stop",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::stopAS) );
-	m_parser->add<0>("stow",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::stowAS) );
+	m_parser->add("setup",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::setupAS),0);
+	m_parser->add("start",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::startAS),0);
+	m_parser->add("stop",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::stopAS),0);
+	m_parser->add("stow",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::stowAS),0);
 
     ACS_LOG(LM_FULL_INFO, "SRTActiveSurfaceBossImpl::initialize()", (LM_INFO,"COMPSTATE_INITIALIZED"));
 }
@@ -417,24 +417,34 @@ void SRTActiveSurfaceBossImpl::disableAutoUpdate() throw (CORBA::SystemException
 	resource->disableAutoUpdate();
 }
 
-char *SRTActiveSurfaceBossImpl::command(const char *cmd) throw (CORBA::SystemException, ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean SRTActiveSurfaceBossImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
+//char *SRTActiveSurfaceBossImpl::command(const char *cmd) throw (CORBA::SystemException, ManagementErrors::CommandLineErrorEx)
 {
 	AUTO_TRACE("AntennaBossImpl::command()");
 	IRA::CString out;
-	IRA::CString in;
+	bool res;
+	//IRA::CString in;
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-	in=IRA::CString(cmd);
+	//in=IRA::CString(cmd);
 	try {
-		m_parser->run(in,out);
+		m_parser->run(cmd,out);
+		res = true;
 	}
 	catch (ParserErrors::ParserErrorsExImpl &ex) {
-		_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"SRTActiveSurfaceBossImpl::command()");
+		/*_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"SRTActiveSurfaceBossImpl::command()");
 		impl.setCommand(cmd);
 		impl.setErrorMessage((const char *)out);
 		impl.log(LM_DEBUG);
-		throw impl.getCommandLineErrorEx();
+		throw impl.getCommandLineErrorEx();*/
+		res = false;
 	}
-	return CORBA::string_dup((const char *)out);
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_ERROR); // the errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface, while the parser errors are never logged.
+		res=false;
+	}
+	answer=CORBA::string_dup((const char *)out);
+	return res;
+	//return CORBA::string_dup((const char *)out);
 }
 
 _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTSystemStatus,m_pstatus,status);

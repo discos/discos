@@ -137,7 +137,8 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	 * free the returned string (@sa CORBA::string_free).
 	 * @todo provide e full description of the syntax and protocol (to be decided yet)
 	*/
-	virtual char * command(const char *cmd) throw (CORBA::SystemException, ManagementErrors::CommandLineErrorEx);
+	virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
+	//virtual char * command(const char *cmd) throw (CORBA::SystemException, ManagementErrors::CommandLineErrorEx);
 
     void stop ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
