@@ -6343,14 +6343,14 @@ void SRTActiveSurfaceGUI::correction()
 void SRTActiveSurfaceGUI::update()
 {
     QString str, str1;
-    long int elev;
+    double elev;
     
     str = ActuatorUpdatelineEdit->text();
     if (str.length()==0)
-	    elev = 0;
+	    elev = 0.0;
     else
-	    elev = str.toLong();
-    if (elev <0 || elev >90) {
+	    elev = str.toDouble();
+    if (elev < 0.0 || elev > 90.0) {
 	    ManagerLabel->clear();
 	    //ManagerLabel->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 0, 0);"));
 	    str1 = QString("%1").arg("Elevation out of range");

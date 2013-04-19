@@ -14,6 +14,7 @@
 #include <QtGui/QColor>
 #include <QtGui/QLineEdit>
 #include <QtGui/QLabel>
+#include <QtGui/QApplication>
 
 using namespace IRA;
 
@@ -47,7 +48,7 @@ class SRTActiveSurfaceCore : public QThread
 	    void move(int circle, int actuator, int radius, long incr);
 	    void setProfile(long int profile);
 	    void correction(int circle, int actuator, int radius, double correction);
-	    void update(long int elev);
+	    void update(double elev);
 	    void clearactuatorslineedit();
         void enableAutoUpdate();
         void disableAutoUpdate();

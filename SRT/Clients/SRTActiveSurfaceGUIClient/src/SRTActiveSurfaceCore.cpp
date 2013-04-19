@@ -133,6 +133,7 @@ void SRTActiveSurfaceCore::run(void)
             tASBoss->usdStatus4GUIClient(i,l,status);
             if ((status & ENBL) == 0)  {// usd not enabled
                 //ActuatorStatus_color.setRgb( 255, 0, 0 );
+		//printf("usd %d_%d not enabled\n", i, l);
                 theActuatorStatusColorString = "background-color: rgb(255, 0, 0);";
             }
             else {
@@ -166,8 +167,9 @@ void SRTActiveSurfaceCore::run(void)
             //fromRun = false;
             _EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::run()");
             impl.setName(sysEx._name());
-		    impl.setMinor(sysEx.minor());
-		    impl.log();
+		impl.setMinor(sysEx.minor());
+		impl.log();
+		//printf("usd %d_%d corba ex\n", i, l);
         }
         catch (...) {
 			//ActuatorStatus_color.setRgb( 255, 0, 0 );
@@ -179,6 +181,7 @@ void SRTActiveSurfaceCore::run(void)
             //fromRun = false;
             _EXCPT(ClientErrors::UnknownExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::run()");
             impl.log();
+		//printf("usd %d_%d unknown ex\n", i, l);
         }
 		
 		totalactuators++;
@@ -391,7 +394,7 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
 
 void SRTActiveSurfaceCore::recoverUSD(int circle, int actuator)
 {
-	callfromfunction = true;
+/*	callfromfunction = true;
 
     try {
         tASBoss->recoverUSD(circle, actuator);
@@ -412,7 +415,7 @@ void SRTActiveSurfaceCore::recoverUSD(int circle, int actuator)
 
     setactuator(circle,actuator);
 
-    callfromfunction = false;
+    callfromfunction = false; */
 }
 
 void SRTActiveSurfaceCore::stopUSD(int circle, int actuator, int radius)
@@ -637,23 +640,10 @@ void SRTActiveSurfaceCore::bottom(int circle, int actuator, int radius)
 void SRTActiveSurfaceCore::calibrate(int circle, int actuator, int radius)
 {
 	callfromfunction = true;
+	char str[28];
 
-    try {
-        tASBoss->calibrate(circle, actuator, radius);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-	    ex.log(LM_DEBUG);
-    }
-    catch (CORBA::SystemException& sysEx) {
-        _EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::run()");
-        impl.setName(sysEx._name());
-        impl.setMinor(sysEx.minor());
-        impl.log();
-    }
-    catch (...) {
-        _EXCPT(ClientErrors::UnknownExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::calibrate()");
-        impl.log();
-    }
+	sprintf(str,"SRTAS_Calibration %d %d %d &", circle, actuator, radius);
+	system(str); // external SRTAS_Calibration tool 
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
@@ -672,7 +662,7 @@ void SRTActiveSurfaceCore::calibrate(int circle, int actuator, int radius)
 
 void SRTActiveSurfaceCore::calVer(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
+/*	callfromfunction = true;
 
     try {
         tASBoss->calVer(circle, actuator, radius);
@@ -703,7 +693,7 @@ void SRTActiveSurfaceCore::calVer(int circle, int actuator, int radius)
     else
         setactuator(circle,actuator);
 
-    callfromfunction = false;
+    callfromfunction = false;*/
 }
 
 void SRTActiveSurfaceCore::stow(int circle, int actuator, int radius)
@@ -823,7 +813,7 @@ void SRTActiveSurfaceCore::correction(int circle, int actuator, int radius, doub
     callfromfunction = false;
 }
 
-void SRTActiveSurfaceCore::update(long int elevation)
+void SRTActiveSurfaceCore::update(double elevation)
 {
 	callfromfunction = true;
 
