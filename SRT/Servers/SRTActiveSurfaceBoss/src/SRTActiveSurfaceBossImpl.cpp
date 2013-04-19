@@ -27,39 +27,28 @@ SRTActiveSurfaceBossImpl::~SRTActiveSurfaceBossImpl()
 void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::initialize()");
-    cs = getContainerServices();
-    CSRTActiveSurfaceBossCore *boss;
-    ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZING"));
+    	cs = getContainerServices();
+    	CSRTActiveSurfaceBossCore *boss;
+    	ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZING"));
 	try {
 		boss=(CSRTActiveSurfaceBossCore *)new CSRTActiveSurfaceBossCore(getContainerServices(),this);
 		m_core=new IRA::CSecureArea<CSRTActiveSurfaceBossCore>(boss);
-        m_pstatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>
+        	m_pstatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>
 		  (getContainerServices()->getName()+":status",getComponent(),new SRTActiveSurfaceBossImplDevIOStatus(m_core),true);	
 		m_penabled=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
 		  (getContainerServices()->getName()+":enabled",getComponent(),new SRTActiveSurfaceBossImplDevIOEnable(m_core),true);
 
-        // create the parser for command line execution
+        	// create the parser for command line execution
 		m_parser =  new SimpleParser::CParser<CSRTActiveSurfaceBossCore>(boss,10);
-    }
-    catch (std::bad_alloc& ex) {
+    	}
+    	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"SRTActiveSurfaceBossImpl::initialize()");
 		throw dummy;
 	}
-    boss->initialize();
-    try {
+    	boss->initialize();
+    	try {
 		m_watchingThread=getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossWatchingThread,CSecureArea<CSRTActiveSurfaceBossCore> *>
-		  ("SRTACTIVESURFACEBOSSBOSSWATCHER",m_core);
-	}
-	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTActiveSurfaceBossImpl::initialize()");
-		throw _dummy;
-	}
-	catch (...) {
-		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTActiveSurfaceBossImpl::initialize()");
-	}
-    try {
-		m_workingThread=getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossWorkingThread,CSecureArea<CSRTActiveSurfaceBossCore> *>
-		  ("SRTACTIVESURFACEBOSSBOSSWORKER",m_core);
+		  ("SRTACTIVESURFACEBOSSWATCHER",m_core);
 	}
 	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTActiveSurfaceBossImpl::initialize()");
@@ -69,7 +58,19 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTActiveSurfaceBossImpl::initialize()");
 	}
 
-    if (CIRATools::getDBValue(cs,"profile",(long&)m_profile))
+	try {
+		m_workingThread=getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossWorkingThread,CSecureArea<CSRTActiveSurfaceBossCore> *>
+		  ("SRTACTIVESURFACEBOSSWORKER",m_core);
+	}
+	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTActiveSurfaceBossImpl::initialize()");
+		throw _dummy;
+	}
+	catch (...) {
+		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTActiveSurfaceBossImpl::initialize()");
+	}
+
+    	if (CIRATools::getDBValue(cs,"profile",(long&)m_profile))
 	{
 		ACS_SHORT_LOG((LM_INFO,"SRTActiveSurfaceBoss: CDB %d profile parameter read", m_profile));
 	}
@@ -80,7 +81,7 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl,__FILE__,__LINE__,"USDImpl::initialize()");
 	}
 
-    // configure the parser.....
+    	// configure the parser.....
 	m_parser->add<0>("setup",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::setupAS) );
 	m_parser->add<0>("start",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::startAS) );
 	m_parser->add<0>("stop",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::stopAS) );
@@ -94,9 +95,9 @@ void SRTActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::execute()");
 
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore>  core=m_core->Get();
-    core->m_profile = m_profile;
+    	core->m_profile = m_profile;
 
-    try {
+    	try {
 		core->execute();
 	}
 	catch (ACSErr::ACSbaseExImpl& E) {
@@ -106,6 +107,7 @@ void SRTActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	//starts the loop status thread....
 	m_watchingThread->resume();
 	m_watchingThread->setSleepTime(LOOPSTATUSTIME);
+
 	//starts the loop working thread....
 	m_workingThread->resume();
 	m_workingThread->setSleepTime(LOOPWORKINGTIME);
@@ -116,15 +118,15 @@ void SRTActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 void SRTActiveSurfaceBossImpl::cleanUp()
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::cleanUp()");
-    CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore>  core=m_core->Get();
-    if (m_workingThread!=NULL) m_workingThread->suspend();
-    if (m_watchingThread!=NULL) m_watchingThread->suspend();
-    getContainerServices()->getThreadManager()->destroy(m_workingThread);
-    getContainerServices()->getThreadManager()->destroy(m_watchingThread);
-    ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::THREADS_TERMINATED"));
+    	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore>  core=m_core->Get();
+   	if (m_workingThread!=NULL) m_workingThread->suspend();
+   	if (m_watchingThread!=NULL) m_watchingThread->suspend();
+    	getContainerServices()->getThreadManager()->destroy(m_workingThread);
+    	getContainerServices()->getThreadManager()->destroy(m_watchingThread);
+    	ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::THREADS_TERMINATED"));
 	core->cleanUp();
 	ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::BOSS_CORE_FREED"));
-    if (m_parser!=NULL) delete m_parser;
+    	if (m_parser!=NULL) delete m_parser;
 	ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::PARSER_FREED"));
 	CharacteristicComponentImpl::cleanUp();
 }
@@ -132,13 +134,13 @@ void SRTActiveSurfaceBossImpl::cleanUp()
 void SRTActiveSurfaceBossImpl::aboutToAbort()
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::aboutToAbort()");
-    if (m_workingThread!=NULL) m_workingThread->suspend();
-    if (m_watchingThread!=NULL) m_watchingThread->suspend();
-    getContainerServices()->getThreadManager()->destroy(m_workingThread);
-    getContainerServices()->getThreadManager()->destroy(m_watchingThread);
+    	if (m_workingThread!=NULL) m_workingThread->suspend();
+    	if (m_watchingThread!=NULL) m_watchingThread->suspend();
+    	getContainerServices()->getThreadManager()->destroy(m_workingThread);
+    	getContainerServices()->getThreadManager()->destroy(m_watchingThread);
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore>  core=m_core->Get(); 
 	core->cleanUp();
-    if (m_parser!=NULL) delete m_parser;
+    	if (m_parser!=NULL) delete m_parser;
 }
 
 void SRTActiveSurfaceBossImpl::stop (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
@@ -197,7 +199,7 @@ void SRTActiveSurfaceBossImpl::refPos (CORBA::Long circle, CORBA::Long actuator,
 	}
 }
 
-void SRTActiveSurfaceBossImpl::update (CORBA::Long elevation) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
+void SRTActiveSurfaceBossImpl::update (CORBA::Double elevation) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::update()");
 
@@ -393,7 +395,7 @@ void SRTActiveSurfaceBossImpl::recoverUSD (CORBA::Long circle, CORBA::Long actua
 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        resource->recoverUSD(circle, actuator);
+        //resource->recoverUSD(circle, actuator); TBC!!
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

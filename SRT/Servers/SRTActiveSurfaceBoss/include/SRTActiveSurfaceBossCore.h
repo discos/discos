@@ -14,6 +14,7 @@
 #include <maciContainerServices.h>
 #include <acsThread.h>
 #include <baci.h>
+#include <DateTime.h>
 #include <usdC.h>
 #include <lanC.h>
 #include <AntennaBossC.h>
@@ -28,15 +29,19 @@
 #define CIRCLES 17
 #define ACTUATORS 96
 #define firstUSD 1
-#define lastUSD 139 // TEST ONLY
-//#define lastUSD 1116 // TEST ONLY, all actuators are 1116
-#define LOOPTIME 1000 // 1 msec
-#define USDTABLE "/home/almamgr/SRT/CDB/alma/AS/tab_convUSD.txt\0"
-#define USDTABLECORRECTIONS "/home/almamgr/SRT/CDB/alma/AS/actuatorsCorrections.txt\0"
+//#define lastUSD 139
+#define lastUSD 1116
+//#define LOOPTIME 250000 // 0,25 sec
+#define LOOPTIME 100000 // 0,10 sec
+//#define USDTABLE "/CDB/alma/AS/tab_convUSD_S1.txt\0"
+#define USDTABLE "/CDB/alma/AS/tab_convUSD.txt\0"
+#define USDTABLECORRECTIONS "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/actuatorsCorrections.txt\0"
+#define ASCALIBRATION "/CDB/alma/AS/AScalibration.txt\0"
 #define MM2HSTEP	350 //(10500 HSTEP / 30 MM)
-#define MM2STEP	1400 //(42000 HSTEP / 30 MM)
+#define MM2STEP	1400 //(42000 STEP / 30 MM)
 #define WARNINGUSDPERCENT 0.95
 #define ERRORUSDPERCENT 0.90
+#define THRESHOLDPOS 16 // 12 micron in step
 
 // mask pattern for status 
 #define MRUN	0x000080
@@ -53,6 +58,7 @@ using namespace std;
 
 class SRTActiveSurfaceBossImpl;
 class CSRTActiveSurfaceBossWatchingThread;
+class CSRTActiveSurfaceBossWorkingThread;
 
 /**
  * This class models the SRTActiveSurfaceBoss datasets and functionalities. 
@@ -63,6 +69,7 @@ class CSRTActiveSurfaceBossWatchingThread;
 class CSRTActiveSurfaceBossCore {
 	friend class SRTActiveSurfaceBossImpl;
 	friend class CSRTActiveSurfaceBossWatchingThread;
+	friend class CSRTActiveSurfaceBossWorkingThread;
 public:
 	/**
 	 * Constructor. Default Constructor.
@@ -99,7 +106,7 @@ public:
 
     void calVer(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl);
 
-    void onewayAction(SRTActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, CORBA::Long elevation, double correction, long incr, SRTActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
+    void onewayAction(SRTActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, double elevation, double correction, long incr, SRTActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
 
@@ -153,10 +160,14 @@ private:
 
 	SRTActiveSurface::USD_var lanradius[CIRCLES+1][ACTUATORS+1];
 
+	SRTActiveSurface::lan_var lan[9][13];
+
+	IRA::CString lanCobName;
+
 	int usdCounter;
 	int lanIndex, circleIndex, usdCircleIndex;
-    int actuatorcounter, circlecounter, totacts;
-    double actuatorsCorrections[100440];
+    	int actuatorcounter, circlecounter, totacts;
+    	double actuatorsCorrections[100440];
 
     /** pointer to the component itself */
 	acscomponent::ACSComponentImpl *m_thisIsMe;
@@ -181,6 +192,8 @@ private:
     Antenna::AntennaBoss_var m_antennaBoss;
 
     SRTActiveSurface::TASProfile m_profile;
+
+	char *s_usdTable;
 };
 
 #endif /*SRTACTIVESURFACEBOSSCORE_H_*/

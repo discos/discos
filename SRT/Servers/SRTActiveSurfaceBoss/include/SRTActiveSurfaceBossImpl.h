@@ -34,7 +34,7 @@
 #include <SP_parser.h>
 
 #define LOOPSTATUSTIME 5000000 // 0.5 second
-#define LOOPWORKINGTIME 5000000 // 0.5 seconds
+#define LOOPWORKINGTIME 1000000 // 0.1 seconds
 
 #define _SET_CDB(PROP,LVAL,ROUTINE) {	\
 	maci::ContainerServices* cs=getContainerServices();\
@@ -147,7 +147,7 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 
     void refPos ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void update ( CORBA::Long elevation) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+    void update ( CORBA::Double elevation) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
     void move ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius, CORBA::Long incr) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
