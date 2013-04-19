@@ -103,7 +103,8 @@ module SRTActiveSurface {
 		 * free the returned string (@sa CORBA::string_free).
 		 * @todo provide e full description of the syntax and protocol (to be decided yet)
 		*/
-		string command(in string cmd) raises (ComponentErrors::ComponentErrorsEx);
+		boolean command (in string command,out string answer);
+		//string command(in string cmd) raises (ComponentErrors::ComponentErrorsEx);
 
         /**
         * All this function are used in observation and maintenance situation
