@@ -873,6 +873,7 @@ void ReceiverControl::setSingleDishMode(
             ) throw (ReceiverControlEx) 
 {
     try {
+        pthread_mutex_lock(&m_dewar_mutex); 
         // Turn OFF the VLBI mode on port number 14
         makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -921,10 +922,12 @@ void ReceiverControl::setSingleDishMode(
                 port_number_sd,
                 !value_sd
         );
+        pthread_mutex_unlock(&m_dewar_mutex); 
 
         // Now the bits 13 and 14 are set, respectively, to 0 and 1
     }
     catch(MicroControllerBoardEx& ex) {
+        pthread_mutex_unlock(&m_dewar_mutex); 
         std::string error_msg = "ReceiverControl: error performing setSigleDishOn().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
@@ -970,6 +973,7 @@ void ReceiverControl::setVLBIMode(
             ) throw (ReceiverControlEx) 
 {
     try {
+        pthread_mutex_lock(&m_dewar_mutex); 
         // Turn OFF the single dish mode on port number 13
         makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -1018,9 +1022,11 @@ void ReceiverControl::setVLBIMode(
                 port_number_vlbi,
                 !value_vlbi
         );
+        pthread_mutex_unlock(&m_dewar_mutex); 
 
     }
     catch(MicroControllerBoardEx& ex) {
+        pthread_mutex_unlock(&m_dewar_mutex); 
         std::string error_msg = "ReceiverControl: error performing setVLBIMode().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
@@ -1061,6 +1067,7 @@ void ReceiverControl::openConnection(void) throw (ReceiverControlEx)
     try {
         m_dewar_board_ptr = new MicroControllerBoard(m_dewar_ip, m_dewar_port, m_dewar_madd, m_dewar_sadd);
         m_dewar_board_ptr->openConnection();
+        pthread_mutex_init(&m_dewar_mutex, NULL);
     }
     catch(MicroControllerBoardEx& ex) {
         throw ReceiverControlEx("Dewar MicroControllerBoard error: " + ex.what());
@@ -1069,6 +1076,7 @@ void ReceiverControl::openConnection(void) throw (ReceiverControlEx)
     try {
         m_lna_board_ptr = new MicroControllerBoard(m_lna_ip, m_lna_port, m_lna_madd, m_lna_sadd);
         m_lna_board_ptr->openConnection();
+        pthread_mutex_init(&m_lna_mutex, NULL);
     }
     catch(MicroControllerBoardEx& ex) {
         throw ReceiverControlEx("LNA MicroControllerBoard error: " + ex.what());
@@ -1078,6 +1086,7 @@ void ReceiverControl::openConnection(void) throw (ReceiverControlEx)
         try {
             m_switch_board_ptr = new MicroControllerBoard(m_switch_ip, m_switch_port, m_switch_madd, m_switch_sadd);
             m_switch_board_ptr->openConnection();
+            pthread_mutex_init(&m_switch_mutex, NULL);
         }
         catch(MicroControllerBoardEx& ex) {
             throw ReceiverControlEx("Switches MicroControllerBoard error: " + ex.what());
@@ -1089,9 +1098,15 @@ void ReceiverControl::openConnection(void) throw (ReceiverControlEx)
 void ReceiverControl::closeConnection(void)
 {
         m_dewar_board_ptr->closeConnection();
+        pthread_mutex_destroy(&m_dewar_mutex);
+
         m_lna_board_ptr->closeConnection();
-        if(m_switch_board_ptr != NULL)
+        pthread_mutex_destroy(&m_lna_mutex);
+
+        if(m_switch_board_ptr != NULL) {
             m_switch_board_ptr->closeConnection();
+            pthread_mutex_destroy(&m_switch_mutex);
+        }
 }
 
 
@@ -1120,7 +1135,7 @@ ReceiverControl::FetValues ReceiverControl::fetValues(
         double (*voltageConverter)(double voltage)
         ) throw (ReceiverControlEx)
 {
-    std::string column_selector;            // EN03: the signal that addresses the column multiplexing of AD24
+    std::string column_selector;           // EN03: the signal that addresses the column multiplexing of AD24
     std::string vd_selector;               // A03: it allows to select the value requested for a given stadium
     std::string id_selector;               // A03: it allows to select the value requested for a given stadium
     std::string vg_selector;               // A03: it allows to select the value requested for a given stadium
@@ -1233,6 +1248,7 @@ ReceiverControl::FetValues ReceiverControl::fetValues(
 
     try {
 
+        pthread_mutex_lock(&m_lna_mutex); 
         makeRequest(
                 m_lna_board_ptr,                           // Pointer to the LNA board socket
                 MCB_CMD_SET_DATA,                          // Command to send
@@ -1315,6 +1331,7 @@ ReceiverControl::FetValues ReceiverControl::fetValues(
                 MCB_PORT_TYPE_AD24,     // Port type: AD24
                 MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
         );
+        pthread_mutex_unlock(&m_lna_mutex); 
 
         try {
             values.VGL = voltageConverter != NULL ? voltageConverter(get_value(parameters, FEED_LIDX)) : \
@@ -1329,6 +1346,7 @@ ReceiverControl::FetValues ReceiverControl::fetValues(
         return values;
     }
     catch(MicroControllerBoardEx& ex) {
+        pthread_mutex_unlock(&m_lna_mutex); 
         std::string error_msg = "ReceiverControl: error getting LNA values.\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
@@ -1416,9 +1434,10 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
     std::vector<double> ldvalues_first, rdvalues_first, ldvalues_second, rdvalues_second;
     std::vector<BYTE> parameters;
 
-    for(std::vector<std::string>::iterator iter=column_selectors.begin(); iter!=column_selectors.end(); iter++) {
-        std::bitset<8> value(*iter + quantity_selector);
-        try {
+    try {
+        pthread_mutex_lock(&m_lna_mutex); 
+        for(std::vector<std::string>::iterator iter=column_selectors.begin(); iter!=column_selectors.end(); iter++) {
+            std::bitset<8> value(*iter + quantity_selector);
 
             makeRequest(
                     m_lna_board_ptr,                           // Pointer to the LNA board socket
@@ -1440,6 +1459,7 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
                     MCB_PORT_TYPE_AD24,     // Port type: AD24
                     MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
             );
+            pthread_mutex_unlock(&m_lna_mutex); 
 
             if(parameters.size() != AD24_LEN * AD24_TYPE_LEN)
                 throw MicroControllerBoardEx("Error: wrong number of parameters received.");
@@ -1452,10 +1472,12 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
             if(ldvalues.empty() || rdvalues.empty())
                 throw MicroControllerBoardEx("Error: no data received.");
         }
-        catch(MicroControllerBoardEx& ex) {
-            std::string error_msg = "ReceiverControl: error getting LNA values.\n";
-            throw ReceiverControlEx(error_msg + ex.what());
-        }
+        pthread_mutex_unlock(&m_lna_mutex); 
+    }
+    catch(MicroControllerBoardEx& ex) {
+        pthread_mutex_unlock(&m_lna_mutex); 
+        std::string error_msg = "ReceiverControl: error getting LNA values.\n";
+        throw ReceiverControlEx(error_msg + ex.what());
     }
 
     if(m_number_of_feeds == 1) { 
@@ -1621,8 +1643,9 @@ void ReceiverControl::setPath(
     if(parameters.size() % width != 0)
         throw ReceiverControlEx("ReceiverControl: wrong number of parameters.\n");
 
-    for(size_t i=0; i < parameters.size() / width; i++) {
-        try {
+    try {
+        pthread_mutex_lock(&m_switch_mutex); 
+        for(size_t i=0; i < parameters.size() / width; i++) {
             makeRequest(
                     m_switch_board_ptr,      // Pointer to the board
                     MCB_CMD_SET_DATA,        // Command to send
@@ -1639,10 +1662,12 @@ void ReceiverControl::setPath(
             );
             usleep(2 * SWITCH_SLEEP_TIME);
         }
-        catch(MicroControllerBoardEx& ex) {
-            std::string error_msg = "ReceiverControl: error performing setPath().\n";
-            throw ReceiverControlEx(error_msg + ex.what());
-        }
+        pthread_mutex_unlock(&m_switch_mutex); 
+    }
+    catch(MicroControllerBoardEx& ex) {
+        pthread_mutex_unlock(&m_switch_mutex); 
+        std::string error_msg = "ReceiverControl: error performing setPath().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
     }
 }
 
@@ -1658,6 +1683,7 @@ void ReceiverControl::setColdLoadPath(
         const BYTE two_high_bits = 0x03; // Binary value 11
         const BYTE value = (two_high_bits << feed_id * 2); // Move the bits to the feed
 
+        pthread_mutex_lock(&m_switch_mutex); 
         // Set the cool load path
         makeRequest(
                 m_switch_board_ptr,    // Pointer to the switch board
@@ -1698,10 +1724,10 @@ void ReceiverControl::setColdLoadPath(
                 0x10
         );
                 
-        usleep(2 * SWITCH_SLEEP_TIME);
-
+        pthread_mutex_unlock(&m_switch_mutex); 
     }
     catch(MicroControllerBoardEx& ex) {
+        pthread_mutex_unlock(&m_switch_mutex); 
         std::string error_msg = "ReceiverControl: error performing setColdLoadPath().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
@@ -1719,6 +1745,7 @@ void ReceiverControl::setSkyPath(
         const BYTE two_high_bits = 0x03; // Binary value 11
         const BYTE value = (two_high_bits << feed_id * 2); // Move the bits to the feed
 
+        pthread_mutex_lock(&m_switch_mutex); 
         // Set the sky path
         makeRequest(
                 m_switch_board_ptr,    // Pointer to the switch board
@@ -1758,8 +1785,10 @@ void ReceiverControl::setSkyPath(
                 0x00,
                 0x00
         );
+        pthread_mutex_unlock(&m_switch_mutex); 
     }
     catch(MicroControllerBoardEx& ex) {
+        pthread_mutex_unlock(&m_switch_mutex); 
         std::string error_msg = "ReceiverControl: error performing setColdLoadPath().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }

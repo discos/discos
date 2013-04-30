@@ -14,6 +14,7 @@
 #include <IRA>
 #include "Definitions.h"
 #include "MicroControllerBoard.h"
+#include <pthread.h>
 
 
 namespace IRA {
@@ -1005,6 +1006,10 @@ private:
 
     /** Switches MicroControllerBoard pointer */
     MicroControllerBoard *m_switch_board_ptr;
+
+    pthread_mutex_t m_lna_mutex;
+    pthread_mutex_t m_dewar_mutex;
+    pthread_mutex_t m_switch_mutex;
 };
 
 }
