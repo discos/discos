@@ -21,7 +21,7 @@
     <fluxCoeff2>-0.004</fluxCoeff2>
     <fluxCoeff3>-0.1251</fluxCoeff3>
     <size>0.000007272</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000004848</modelCoeff2>
     <modelCoeff3>0.000004848</modelCoeff3>
@@ -46,7 +46,7 @@
     <fluxCoeff2>0.246</fluxCoeff2>
     <fluxCoeff3>-0.1638</fluxCoeff3>
     <size>0.000111507</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000111507</modelCoeff2>
     <modelCoeff3>0.000024241</modelCoeff3>
@@ -71,7 +71,7 @@
     <fluxCoeff2>-0.140</fluxCoeff2>
     <fluxCoeff3>-0.1031</fluxCoeff3>
     <size>0.000004848</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000004848</modelCoeff2>
     <modelCoeff3>0.000004848</modelCoeff3>
@@ -96,7 +96,7 @@
     <fluxCoeff2>0.726</fluxCoeff2>
     <fluxCoeff3>-0.2286</fluxCoeff3>
     <size>0.000014544</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000014544</modelCoeff2>
     <modelCoeff3>0.000014544</modelCoeff3>
@@ -121,7 +121,7 @@
     <fluxCoeff2>-1.025</fluxCoeff2>
     <fluxCoeff3>0.0130</fluxCoeff3>
     <size>0.000227862</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000227862</modelCoeff2>
     <modelCoeff3>0.000067874</modelCoeff3>
@@ -146,7 +146,7 @@
     <fluxCoeff2>-2.801</fluxCoeff2>
     <fluxCoeff3>0.2969</fluxCoeff3>
     <size>0.000969627</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000969627</modelCoeff2>
     <modelCoeff3>0.000242407</modelCoeff3>
@@ -171,7 +171,7 @@
     <fluxCoeff2>-2.801</fluxCoeff2>
     <fluxCoeff3>-0.0404</fluxCoeff3>
     <size>0.000072722</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000072722</modelCoeff2>
     <modelCoeff3>0.000072722</modelCoeff3>
@@ -196,7 +196,7 @@
     <fluxCoeff2>0.584</fluxCoeff2>
     <fluxCoeff3>-0.1644</fluxCoeff3>
     <size>0.000007272</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000004848</modelCoeff2>
     <modelCoeff3>0.000004848</modelCoeff3>
@@ -221,7 +221,7 @@
     <fluxCoeff2>0.756</fluxCoeff2>
     <fluxCoeff3>-0.2545</fluxCoeff3>
     <size>0.000024241</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000024241</modelCoeff2>
     <modelCoeff3>0.000004848</modelCoeff3>
@@ -246,7 +246,7 @@
     <fluxCoeff2>-0.437</fluxCoeff2>
     <fluxCoeff3>-0.0373</fluxCoeff3>
     <size>0.000007272</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000007272</modelCoeff2>
     <modelCoeff3>0.000007272</modelCoeff3>
@@ -271,7 +271,7 @@
     <fluxCoeff2>-0.361</fluxCoeff2>
     <fluxCoeff3>-0.1053</fluxCoeff3>
     <size>0.000824183</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000824183</modelCoeff2>
     <modelCoeff3>0.000121203</modelCoeff3>
@@ -296,7 +296,7 @@
     <fluxCoeff2>-0.157</fluxCoeff2>
     <fluxCoeff3>-0.0911</fluxCoeff3>
     <size>0.001018109</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.001018109</modelCoeff2>
     <modelCoeff3>0.000290888</modelCoeff3>
@@ -321,7 +321,7 @@
     <fluxCoeff2>-0.134</fluxCoeff2>
     <fluxCoeff3>0.0</fluxCoeff3>
     <size>0.000048481</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000033937</modelCoeff2>
     <modelCoeff3>0.000048481</modelCoeff3>
@@ -346,7 +346,7 @@
     <fluxCoeff2>0.000</fluxCoeff2>
     <fluxCoeff3>0.0</fluxCoeff3>
     <size>0.000096963</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000096963</modelCoeff2>
     <modelCoeff3>0.000096963</modelCoeff3>
@@ -371,7 +371,7 @@
     <fluxCoeff2>-0.299</fluxCoeff2>
     <fluxCoeff3>0.0</fluxCoeff3>
     <size>0.001454441</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.00122173</modelCoeff2>
     <modelCoeff3>0.000756309</modelCoeff3>
@@ -396,7 +396,7 @@
     <fluxCoeff2>-0.760</fluxCoeff2>
     <fluxCoeff3>0.0</fluxCoeff3>
     <size>0.001163553</size>
-    <model>disk</model>
+    <model>DISK</model>
     <modelCoeff1>0.001163553</modelCoeff1>
     <modelCoeff2>0.0</modelCoeff2>
     <modelCoeff3>0.0</modelCoeff3>
@@ -421,7 +421,7 @@
     <fluxCoeff2>0.085,-1.244</fluxCoeff2>
     <fluxCoeff3>-0.178,0.0</fluxCoeff3>
     <size>0.000557536</size>
-    <model>2pts</model>
+    <model>DISK</model>
     <modelCoeff1>0.000557536</modelCoeff1>
     <modelCoeff2>0.0</modelCoeff2>
     <modelCoeff3>0.0</modelCoeff3>
@@ -446,7 +446,7 @@
     <fluxCoeff2>0.0,0.0</fluxCoeff2>
     <fluxCoeff3>0.0,0.0</fluxCoeff3>
     <size>0.000004848</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000004848</modelCoeff2>
     <modelCoeff3>0.000004848</modelCoeff3>
@@ -471,7 +471,7 @@
     <fluxCoeff2>-0.603,-0.603</fluxCoeff2>
     <fluxCoeff3>-0.0280,-0.0280</fluxCoeff3>
     <size>0.000969627</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>0.808</modelCoeff1>
     <modelCoeff2>0.000193925</modelCoeff2>
     <modelCoeff3>0.000096963</modelCoeff3>
@@ -496,7 +496,7 @@
     <fluxCoeff2>0.0,0.0</fluxCoeff2>
     <fluxCoeff3>0.0,0.0</fluxCoeff3>
     <size>0.001308997</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.001308997</modelCoeff2>
     <modelCoeff3>0.001308997</modelCoeff3>
@@ -521,7 +521,7 @@
     <fluxCoeff2>0.0,0.0</fluxCoeff2>
     <fluxCoeff3>0.0,0.0</fluxCoeff3>
     <size>0.000004848</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.000004848</modelCoeff2>
     <modelCoeff3>0.000004848</modelCoeff3>
@@ -546,7 +546,7 @@
     <fluxCoeff2>0.0,0.0</fluxCoeff2>
     <fluxCoeff3>0.0,0.0</fluxCoeff3>
     <size>0.001163553</size>
-    <model>gauss</model>
+    <model>GAUSS</model>
     <modelCoeff1>1.0</modelCoeff1>
     <modelCoeff2>0.001163553</modelCoeff2>
     <modelCoeff3>0.001163553</modelCoeff3>

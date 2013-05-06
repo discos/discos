@@ -48,6 +48,35 @@
 		</xs:restriction>
 	</xs:simpleType>
 	
+	<xs:simpleType name="TSourceModelType">
+		<xs:annotation><xs:documentation>
+			lists all the supported source models used to compute fluxes
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="GAUSS">
+				<xs:annotation><xs:documentation>
+					the source has a gaussian brightness distrubution
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="2PTS">
+	    		<xs:annotation><xs:documentation>
+	    			the source is a 2 points source
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>
+	    	<xs:enumeration value="DISK">
+	    		<xs:annotation><xs:documentation>
+	    			the source has a disk-like brightness distrubution
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>
+	       	<xs:enumeration value="NO_MODEL">
+	    		<xs:annotation><xs:documentation>
+	    			no model the provided flux is used as is, no convolution with beam shape performed
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	
 	<xs:complexType name="TTableHeader">
  		<xs:sequence>
  		  <xs:element name="sourceName" type="xs:string"/>
@@ -118,9 +147,9 @@
  		  		source size, radians
  		  	</xs:documentation></xs:annotation>
  		  </xs:element> 	
-          <xs:element name="model" type="xs:string">
+          <xs:element name="model" type="TSourceModelType" default="NO_MODEL">
             <xs:annotation><xs:documentation>
- 		  		source model (gauss, disk, 2pts)
+ 		  		source model (gauss, disk, 2pts, no_model)
  		  	</xs:documentation></xs:annotation>
  		  </xs:element> 	
           <xs:element name="modelCoeff1" type="xs:double" default="0.0">

@@ -348,7 +348,7 @@ void SkySourceImpl::loadSourceFromCatalog(const char* sourceName) throw(CORBA::S
         strncpy(fluxParam.fluxCoeff2, (const char*)((*m_sourceCatalog)["fluxCoeff2"]->asString()),50);
         strncpy(fluxParam.fluxCoeff3, (const char*)((*m_sourceCatalog)["fluxCoeff3"]->asString()),50);
         fluxParam.size = (*m_sourceCatalog)["size"]->asDouble();
-        strncpy(fluxParam.model,(const char*)((*m_sourceCatalog)["model"]->asString()),5);
+        strncpy(fluxParam.model,(const char*)((*m_sourceCatalog)["model"]->asString()),10);
         fluxParam.mcoeff[0] = (*m_sourceCatalog)["modelCoeff1"]->asDouble();
         fluxParam.mcoeff[1] = (*m_sourceCatalog)["modelCoeff2"]->asDouble();
         fluxParam.mcoeff[2] = (*m_sourceCatalog)["modelCoeff3"]->asDouble();

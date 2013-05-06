@@ -8,6 +8,11 @@
 
 using namespace IRA;
 
+#define BRIGHTNESS_MODEL_DISK "DISK"
+#define BRIGHTNESS_MODEL_2PTS "2PTS"
+#define BRIGHTNESS_MODEL_GAUSS "GAUSS"
+#define BRIGHTNESS_NO_MODEL "NO_MODEL"
+
 CSourceFlux::CSourceFlux()
 {
 
@@ -100,7 +105,7 @@ double CSourceFlux::computeSourceFlux(const double&frequency, const double& FWHM
                 fluxv*= pow(10.0,(epoch-2006.0)*log10(dflux));
             }
         }
-        if((strcmp("gauss",m_flux.model)==0)) {
+        if((strcmp(BRIGHTNESS_MODEL_GAUSS,m_flux.model)==0)) {
             if ((strcmp("virgoa",m_flux.model)==0) && (frequency >= fMinRange[1] && frequency <= fMaxRange[1])) {
                 m_flux.mcoeff[0]=0.973;
                 m_flux.mcoeff[3]=0.027;
@@ -110,14 +115,14 @@ double CSourceFlux::computeSourceFlux(const double&frequency, const double& FWHM
             fac4=m_flux.mcoeff[4]/FWHM;
             fac5=m_flux.mcoeff[5]/FWHM;
             corr=m_flux.mcoeff[0]*sqrt((1.0+fac1*fac1)*(1.0+fac2*fac2))+m_flux.mcoeff[3]*sqrt((1.0+fac4*fac4)*(1.0+fac5*fac5));
-        } else if((strcmp("disk",m_flux.model)==0)) {
+        } else if((strcmp(BRIGHTNESS_MODEL_DISK,m_flux.model)==0)) {
             fac0=m_flux.mcoeff[0]/FWHM;
             fac=log(2.0)*fac0*fac0;
             corr=fac/(1.-exp(-fac));
-        } else if((strcmp("2pts",m_flux.model)==0)) {
+        } else if((strcmp(BRIGHTNESS_MODEL_2PTS,m_flux.model)==0)) {
             fac0=(m_flux.mcoeff[0]*.5)/FWHM;
             corr=exp(4.0*log(2.0)*fac0*fac0);
-        } else
+        } else  // NO_MODEL
 	        corr=1.0;
         
         m_SourceFlux = fluxv / corr;

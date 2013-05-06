@@ -29,7 +29,7 @@ namespace IRA {
         char fluxCoeff2[50];
         char fluxCoeff3[50];
         double size;
-        char model[5];
+        char model[10];
         double mcoeff[6];
     };
 
