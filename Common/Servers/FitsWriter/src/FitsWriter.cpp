@@ -205,6 +205,7 @@ bool CFitsWriter::create()
 		pFits->pHDU().writeHistory(HISTORY2);
 		pFits->pHDU().writeHistory(HISTORY3);
 		pFits->pHDU().writeHistory(HISTORY4);
+		pFits->pHDU().writeHistory(HISTORY5);
 		pFits->pHDU().writeDate();
 	}
 	catch (CCfits::FitsException& ex) {

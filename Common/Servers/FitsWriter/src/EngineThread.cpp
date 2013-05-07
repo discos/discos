@@ -531,6 +531,13 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					data->setStatus(Management::MNG_FAILURE);
 				}
+				else if(!m_file->setPrimaryHeaderKey("SubScanType",(const char *)data->getSubScanType(),"describes the scan type based on telescope movement")) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)data->getFileName());
+					impl.setError(m_file->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					data->setStatus(Management::MNG_FAILURE);
+				}
 				if (scanTag>=0) {
 					if(!m_file->setPrimaryHeaderKey("Scan Tag",scanTag,"Scan tag identifier")) {
 						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");

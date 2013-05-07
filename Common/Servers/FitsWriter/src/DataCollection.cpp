@@ -128,6 +128,58 @@ long CDataCollection::getInputsNumber() const
 	return sum;
 }
 
+IRA::CString CDataCollection::getSubScanType() const
+{
+	if (m_scanAxis==Management::MNG_HOR_LON) {
+		return "AZ";
+	}
+	else if (m_scanAxis==Management::MNG_HOR_LAT) {
+		return "EL";
+	}
+	else if (m_scanAxis==Management::MNG_EQ_LON) {
+		return "RA";
+	}
+	else if (m_scanAxis==Management::MNG_EQ_LAT) {
+		return "DEC";
+	}
+	else if (m_scanAxis==Management::MNG_GAL_LON) {
+		return "GLON";
+	}
+	else if (m_scanAxis==Management::MNG_GAL_LAT) {
+		return "GLAT";
+	}
+	else if (m_scanAxis==Management::MNG_BEAMPARK) {
+		return "BEAMPARK";
+	}
+	else if (m_scanAxis==Management::MNG_TRACK) {
+		return "TRACKING";
+	}
+	else if (m_scanAxis==Management::MNG_GCIRCLE) {
+		return "GCIRCLE";
+	}
+	else if (m_scanAxis==Management::MNG_PFP_Y) {
+		return "PFP_Y";
+	}
+	else if (m_scanAxis==Management::MNG_PFP_Z) {
+		return "FOCUSING";
+	}
+	else if (m_scanAxis==Management::MNG_SUBR_Z) {
+		return "FOCUSING";
+	}
+	else if (m_scanAxis==Management::MNG_SUBR_X) {
+		return "SUBR_X";
+	}
+	else if (m_scanAxis==Management::MNG_SUBR_Y) {
+		return "SUB_Y";
+	}
+	else if (m_scanAxis==Management::MNG_NO_AXIS) {
+		return "UNKNOWN";
+	}
+	else {
+		return "UNKNOWN";
+	}
+}
+
 void CDataCollection::getInputsConfiguration(ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts) const
 {
 	long inputs=0;

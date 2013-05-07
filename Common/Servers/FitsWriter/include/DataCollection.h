@@ -235,6 +235,12 @@ public:
 	const Management::TScanAxis& getScanAxis() const { return m_scanAxis; }
 
 	/**
+	 * computes the subscan type (based on the ScanAxis) and returns it as string
+	 * @return the value of the keyword subScantype
+	 */
+	IRA::CString getSubScanType() const;
+
+	/**
 	 * Get the name of the observer
 	 */
 	const IRA::CString& getObserverName() const { return m_observer; }
