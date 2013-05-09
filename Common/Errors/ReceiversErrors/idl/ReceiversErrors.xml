@@ -14,7 +14,9 @@
          shortDescription="Error configuring the receiver" 
          description="Cannot perform the receiver configuration"/>
          
-    <ErrorCode name="ModeError" shortDescription="The mode is not supported or unknown" description=""/>
+    <ErrorCode name="ModeError" shortDescription="The mode is not supported or unknown" description="">
+		<Member name="Details" type="string" description="more details about the mode usage" />   
+	</ErrorCode>
          
 	<ErrorCode name="LocalOscillatorError" shortDescription="Cannot set the local oscillator" description=""/>
 	
