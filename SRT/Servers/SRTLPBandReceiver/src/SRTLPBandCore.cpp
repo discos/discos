@@ -70,83 +70,32 @@ ACS::doubleSeq SRTLPBandCore::getStageValues(const IRA::ReceiverControl::FetValu
 
 void SRTLPBandCore::setMode(const char * mode) throw (
         ReceiversErrors::ModeErrorExImpl,
-        ReceiversErrors::ReceiverControlBoardErrorExImpl,
         ComponentErrors::ValidationErrorExImpl,
         ComponentErrors::ValueOutofRangeExImpl,
         ComponentErrors::CouldntGetComponentExImpl,
         ComponentErrors::CORBAProblemExImpl,
         ReceiversErrors::LocalOscillatorErrorExImpl
-        )
+    )
 {
-    baci::ThreadSyncGuard guard(&m_mutex);
-    m_setupMode = ""; // If we don't reach the end of the method then the mode will be unknown
-    IRA::CString cmdMode(mode);
-	cmdMode.MakeUpper();
-
-    _EXCPT(ReceiversErrors::ModeErrorExImpl, impl, "CConfiguration::setMode()");
-    
-    /*
-    // Set the operating mode to the board
     try {
-        if(cmdMode == "SINGLEDISH")
-                m_control->setSingleDishMode();
-        else
-            if(cmdMode == "VLBI")
-                m_control->setVLBIMode();
-            else 
-                throw impl; // If the mode is not supported, raise an exception
-    }
-    catch (IRA::ReceiverControlEx& ex) {
-        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl, "SRTLPBandCore::setMode()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
-    }
-    */
+        baci::ThreadSyncGuard guard(&m_mutex);
+        IRA::CString cmdMode(mode);
+        cmdMode.MakeUpper();
 
-    m_configuration.setMode(cmdMode);
-
-    /* TODO! Fix the code below
-
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        m_startFreq[i]=m_configuration.getIFMin()[i];
-        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
-        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
+        m_configuration.setMode(cmdMode);
+            
+        setLBandFilter(m_configuration.getLBandFilterID());
+        setPBandFilter(m_configuration.getPBandFilterID());
+        setLBandPolarization(m_configuration.getLBandPolarization());
+        setPBandPolarization(m_configuration.getPBandPolarization());
+            
+        m_setupMode = cmdMode;
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
     }
-    // The set the default LO for the default LO for the selected mode.....
-    ACS::doubleSeq lo;
-    lo.length(m_configuration.getIFs());
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        lo[i]=m_configuration.getDefaultLO()[i];
+    catch (...) {
+        m_setupMode = ""; // If we don't reach the end of the method then the mode will be unknown
+        _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode()");
     }
-    // setLO throws:
-    //     ComponentErrors::ValidationErrorExImpl,
-    //     ComponentErrors::ValueOutofRangeExImpl,
-    //     ComponentErrors::CouldntGetComponentExImpl,
-    //     ComponentErrors::CORBAProblemExImpl,
-    //     ReceiversErrors::LocalOscillatorErrorExImpl
-    // setLO(lo); 
-
-    // Verify the m_setupMode is the same mode active on the board
-    bool isSingleDishModeOn, isVLBIModeOn;
-    try {
-        isSingleDishModeOn = m_control->isSingleDishModeOn();
-        isVLBIModeOn = m_control->isVLBIModeOn();
-    }
-    catch (IRA::ReceiverControlEx& ex) {
-        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl, "SRTLPBandCore::setMode()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
-    }
-    if((cmdMode == "SINGLEDISH" && !isSingleDishModeOn) || (cmdMode == "VLBI" && !isVLBIModeOn)) {
-        m_setupMode = ""; // If m_setupMode doesn't match the mode active on the board, then set un unknown mode
-        throw impl;
-    }
-
-    m_setupMode = cmdMode;
-    ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
-    */
 }
 
 
@@ -207,11 +156,11 @@ void SRTLPBandCore::setLBandFilter(long filter_id) throw (
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 {
-    // TODO: decomment this code when we will use the real receiver
-    // if (checkStatusBit(LOCAL)) {
-    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
-    //     throw impl;
-    // }
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
+        throw impl;
+    }
+
     try {
         std::vector<BYTE> parameters;
         switch (filter_id) {
@@ -384,11 +333,11 @@ void SRTLPBandCore::setPBandFilter(long filter_id) throw (
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 {
-    // TODO: decomment this code when we will use the real receiver
-    // if (checkStatusBit(LOCAL)) {
-    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
-    //     throw impl;
-    // }
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
+        throw impl;
+    }
+
     try {
         std::vector<BYTE> parameters;
         switch (filter_id) {
@@ -503,15 +452,14 @@ void SRTLPBandCore::setLBandPolarization(const char * p) throw (
         )
 {
 
-    // TODO: decomment this code when we will use the real receiver
-    // if (checkStatusBit(LOCAL)) {
-    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
-    //     throw impl;
-    // }
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
+        throw impl;
+    }
     
 
     IRA::CString polarization(p);
-	polarization.MakeUpper();
+    polarization.MakeUpper();
 
     try {
         std::vector<BYTE> parameters;
@@ -597,15 +545,14 @@ void SRTLPBandCore::setPBandPolarization(const char * p) throw (
         )
 {
 
-    // TODO: decomment this code when we will use the real receiver
-    // if (checkStatusBit(LOCAL)) {
-    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
-    //     throw impl;
-    // }
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
+        throw impl;
+    }
     
 
     IRA::CString polarization(p);
-	polarization.MakeUpper();
+    polarization.MakeUpper();
 
     try {
         std::vector<BYTE> parameters;
@@ -689,11 +636,10 @@ void SRTLPBandCore::setLBandColdLoadPath() throw (
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 {
-    // TODO: decomment this code when we will use the real receiver
-    // if (checkStatusBit(LOCAL)) {
-    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
-    //     throw impl;
-    // }
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
+        throw impl;
+    }
     
     try {
         m_control->setColdLoadPath(0); // The L band feed has ID 0
@@ -713,11 +659,10 @@ void SRTLPBandCore::setPBandColdLoadPath() throw (
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 {
-    // TODO: decomment this code when we will use the real receiver
-    // if (checkStatusBit(LOCAL)) {
-    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
-    //     throw impl;
-    // }
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
+        throw impl;
+    }
     
     try {
         m_control->setColdLoadPath(1); // The P band feed has ID 1
@@ -737,11 +682,10 @@ void SRTLPBandCore::setLBandSkyPath() throw (
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 {
-    // TODO: decomment this code when we will use the real receiver
-    // if (checkStatusBit(LOCAL)) {
-    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
-    //     throw impl;
-    // }
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
+        throw impl;
+    }
     
     try {
         m_control->setSkyPath(0); // The L band feed has ID 0
@@ -762,11 +706,10 @@ void SRTLPBandCore::setPBandSkyPath() throw (
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 {
-    // TODO: decomment this code when we will use the real receiver
-    // if (checkStatusBit(LOCAL)) {
-    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
-    //     throw impl;
-    // }
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl, impl, "SRTLPBandComponentCore::setLBandFilter()");
+        throw impl;
+    }
     
     try {
         m_control->setSkyPath(1); // The P band feed has ID 1

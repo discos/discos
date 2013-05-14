@@ -70,13 +70,13 @@ CConfiguration const * const  CComponentCore::execute() throw (
     m_PBandPolarization.length(m_configuration.getIFs());
 
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-		m_LBandStartFreq[i] = m_configuration.getLBandIFMin()[i];
-		m_LBandPolarization[i] = (long)m_configuration.getLBandPolarizations()[i];
+        m_LBandStartFreq[i] = m_configuration.getLBandIFMin()[i];
+        m_LBandPolarization[i] = (long)m_configuration.getLBandPolarizations()[i];
     }
 
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-		m_PBandStartFreq[i] = m_configuration.getPBandIFMin()[i];
-		m_PBandPolarization[i] = (long)m_configuration.getPBandPolarizations()[i];
+        m_PBandStartFreq[i] = m_configuration.getPBandIFMin()[i];
+        m_PBandPolarization[i] = (long)m_configuration.getPBandPolarizations()[i];
     }
 
     m_setupMode="";
@@ -538,12 +538,12 @@ double CComponentCore::getTaper(
         ) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
 {
     double taper;
-    /*
-    double centralFreq;
-    double realFreq,realBw;
-    double *freqVec=NULL;
-    double *taperVec=NULL;
+    double centralFreq, startFreq, bandwidth;
+    double realFreq, realBw;
+    double *freqVec = NULL;
+    double *taperVec = NULL;
     DWORD size;
+    ACS::doubleSeq lo;
 
     baci::ThreadSyncGuard guard(&m_mutex);
     if (m_setupMode=="") {
@@ -561,24 +561,27 @@ double CComponentCore::getTaper(
         impl.setValueName("feed identifier");
         throw impl;
     }
+
+    startFreq = (feed == 0) ? m_LBandStartFreq[ifNumber] : m_PBandStartFreq[ifNumber];
+    bandwidth = (feed == 0) ? m_configuration.getLBandIFBandwidth()[ifNumber] :  m_configuration.getPBandIFBandwidth()[ifNumber];
+    (feed == 0) ? getLBandLO(lo) : getPBandLO(lo);
+
     // take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
-    if (!IRA::CIRATools::skyFrequency(freq,bw,m_startFreq[ifNumber],m_bandwidth[ifNumber],realFreq,realBw)) {
-        realFreq=m_startFreq[ifNumber];
-        realBw=0.0;
+    if (!IRA::CIRATools::skyFrequency(freq, bw, startFreq, bandwidth, realFreq, realBw)) {
+        realFreq = startFreq;
+        realBw = 0.0;
     }
-    centralFreq=realFreq+m_localOscillatorValue+realBw/2.0;
-    ACS_LOG(LM_FULL_INFO,"CComponentCore::getTaper()",(LM_DEBUG,"CENTRAL_FREQUENCY %lf",centralFreq));
-    waveLen=LIGHTSPEED/(centralFreq*1000000);
-    ACS_LOG(LM_FULL_INFO,"CComponentCore::getTaper()",(LM_DEBUG,"WAVELENGTH %lf",waveLen));
-    size=m_configuration.getTaperTable(freqVec,taperVec);
-    taper=linearFit(freqVec,taperVec,size,centralFreq);
-    ACS_LOG(LM_FULL_INFO,"CComponentCore::getTaper()",(LM_DEBUG,"TAPER %lf",taper));
+    
+    centralFreq = realFreq + lo[ifNumber] + realBw/2.0;
+    ACS_LOG(LM_FULL_INFO, "CComponentCore::getTaper()", (LM_DEBUG,"CENTRAL_FREQUENCY %lf", centralFreq));
+    waveLen = LIGHTSPEED / (centralFreq * 1000000);
+    ACS_LOG(LM_FULL_INFO, "CComponentCore::getTaper()", (LM_DEBUG, "WAVELENGTH %lf", waveLen));
+    size = m_configuration.getTaperTable(freqVec, taperVec);
+    taper = linearFit(freqVec, taperVec, size, centralFreq);
+    ACS_LOG(LM_FULL_INFO, "CComponentCore::getTaper()", (LM_DEBUG,"TAPER %lf", taper));
     if (freqVec) delete [] freqVec;
     if (taperVec) delete [] taperVec;
 
-    return taper;
-    */
-    taper = 0.0;
     return taper;
 }
 
@@ -605,64 +608,6 @@ long CComponentCore::getFeeds(ACS::doubleSeq& X, ACS::doubleSeq& Y, ACS::doubleS
     if (rPower) delete [] rPower;
     return size;
 }
-
-double CComponentCore::getFetValue(const IRA::ReceiverControl::FetValue& control, const DWORD& ifs)
-{
-    /* TODO!
-    baci::ThreadSyncGuard guard(&m_mutex);
-    if (ifs>=m_configuration.getIFs()) {
-        return 0.0;
-    }
-    else if (m_polarization[ifs]==(long)Receivers::RCV_LCP) {
-        if (control==IRA::ReceiverControl::DRAIN_VOLTAGE) return m_fetValues.VDL;
-        else if (control==IRA::ReceiverControl::DRAIN_CURRENT) return m_fetValues.IDL;
-        else return m_fetValues.VGL;
-    }
-    else {
-        if (control==IRA::ReceiverControl::DRAIN_VOLTAGE) return m_fetValues.VDR;
-        else if (control==IRA::ReceiverControl::DRAIN_CURRENT) return m_fetValues.IDR;
-        else return m_fetValues.VGR;
-    }
-    */
-    return 0.0;
-}
-
-
-/*
-void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl)
-{
-    baci::ThreadSyncGuard guard(&m_mutex);
-    if (m_setupMode=="") { // if the receiver is not configured the check makes no sense
-        return;
-    }
-
-    // make sure the synthesizer component is available
-    loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
-    ACSErr::Completion_var comp;
-    ACS::ROlong_var isLockedRef;
-    CORBA::Long isLocked;
-    try {
-        isLockedRef=m_localOscillatorDevice->isLocked();
-    }
-    catch (CORBA::SystemException& ex) {
-        m_localOscillatorFault=true;
-        _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CComponentCore::checkLocalOscillator()");
-        impl.setName(ex._name());
-        impl.setMinor(ex.minor());
-        throw impl;
-    }
-    isLocked=isLockedRef->get_sync(comp.out()); 
-    ACSErr::CompletionImpl complImpl(comp);
-    if (!complImpl.isErrorFree()) {
-        _ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,complImpl,"CComponentCore::checkLocalOscillator()");
-        impl.setAttributeName("isLocked");
-        impl.setComponentName((const char *)m_configuration.getLocalOscillatorInstance());
-        throw impl;
-    }
-    if (!isLocked) setStatusBit(UNLOCKED);
-    else clearStatusBit(UNLOCKED);
-}
-*/
 
 
 void CComponentCore::updateComponent()
@@ -936,71 +881,6 @@ void CComponentCore::updateVertexTemperature() throw (ReceiversErrors::ReceiverC
     }
     clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
 }
-
-
-/*
-void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetComponentExImpl)
-{
-    // If reference was already taken, but an error was found....dispose the reference
-    if ((!CORBA::is_nil(m_localOscillatorDevice)) && (m_localOscillatorFault)) { 
-        try {
-            m_services->releaseComponent((const char*)m_localOscillatorDevice->name());
-        }
-        catch (...) { // Dispose silently...if an error...no matter
-        }
-        m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
-    }
-    if (CORBA::is_nil(m_localOscillatorDevice)) {  // Only if it has not been retrieved yet
-        try {
-            m_localOscillatorDevice=m_services->getComponent<Receivers::LocalOscillator>(
-                    (const char*)m_configuration.getLocalOscillatorInstance()
-            );
-            ACS_LOG(LM_FULL_INFO,"CCore::loadAntennaBoss()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"))
-            m_localOscillatorFault=false;
-        }
-        catch (maciErrType::CannotGetComponentExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
-            Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
-            m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
-            throw Impl;
-        }
-        catch (maciErrType::NoPermissionExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
-            Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
-            m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
-            throw Impl;
-        }
-        catch (maciErrType::NoDefaultComponentExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
-            Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
-            m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
-            throw Impl;
-        }
-    }
-}
-*/
-
-
-/*
-void CComponentCore::unloadLocalOscillator()
-{
-    if (!CORBA::is_nil(m_localOscillatorDevice)) {
-        try {
-            m_services->releaseComponent((const char*)m_localOscillatorDevice->name());
-        }
-        catch (maciErrType::CannotReleaseComponentExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CComponentCore::unloadLocalOscillator()");
-            Impl.setComponentName((const char *)m_configuration.getLocalOscillatorInstance());
-            Impl.log(LM_WARNING);
-        }
-        catch (...) {
-            _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CComponentCore::unloadLocalOscillator()");
-            impl.log(LM_WARNING);
-        }
-        m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
-    }
-}
-*/
 
 
 double CComponentCore::linearFit(double *X, double *Y, const WORD& size, double x)

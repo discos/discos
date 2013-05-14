@@ -11,27 +11,27 @@
 
 module Receivers {
 
-	/**
-	* This module defines the interface of the LP bands receiver installed in the SRT.
-	* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
-	* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
+    /**
+    * This module defines the interface of the LP bands receiver installed in the SRT.
+    * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+    * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
     * <br>
-	* @copybrief Receivers::Receiver::status
-	* the single bits of the status word assumed the following meaning:
-	* @arg \c 0 LOCAL, set if the receiver is in remote and can be controlled remotely, error
-	* @arg \c 1 VACUUMSENSOR, set if the vacuum sensor is turned on, status
-	* @arg \c 2 VACUUMPUMPSTATUS, set if the vacuum pump is on, status
-	* @arg \c 3 VACUUMPUMPFAULT, set if the vacuum pump is in fault state, warning
-	* @arg \c 4 VACUUMVALVEOPEN, set if the vacuum valve i sopen, status
-	* @arg \c 5 COOLHEADON, set if the cool head is turned on, status
-	* @arg \c 6 COMPRESSORFAULT, set if the compressor is in fault state is turned on, error
-	* @arg \c 7 NOISEMARK, set is the calibration diode is on, status
-	* @arg \c 8 NOISEMARKERROR, set if the calibration mark should be and it is not, or viceversa, error
-	* @arg \c 9 EXTNOISEMARK, set if the control of the calibration diode from external source is enabled, status
-	* @arg \c 10 CONNECTIONERROR, set if an error was found during the comunication from/to the receiver, error
-	* @arg \c 11 UNLOCKED, set if at least one of the local oscillator is not locked, error
-	* @copybrief Receivers::CommonReceiverInterface::setLO 
-	*/
+    * @copybrief Receivers::Receiver::status
+    * the single bits of the status word assumed the following meaning:
+    * @arg \c 0 LOCAL, set if the receiver is in remote and can be controlled remotely, error
+    * @arg \c 1 VACUUMSENSOR, set if the vacuum sensor is turned on, status
+    * @arg \c 2 VACUUMPUMPSTATUS, set if the vacuum pump is on, status
+    * @arg \c 3 VACUUMPUMPFAULT, set if the vacuum pump is in fault state, warning
+    * @arg \c 4 VACUUMVALVEOPEN, set if the vacuum valve i sopen, status
+    * @arg \c 5 COOLHEADON, set if the cool head is turned on, status
+    * @arg \c 6 COMPRESSORFAULT, set if the compressor is in fault state is turned on, error
+    * @arg \c 7 NOISEMARK, set is the calibration diode is on, status
+    * @arg \c 8 NOISEMARKERROR, set if the calibration mark should be and it is not, or viceversa, error
+    * @arg \c 9 EXTNOISEMARK, set if the control of the calibration diode from external source is enabled, status
+    * @arg \c 10 CONNECTIONERROR, set if an error was found during the comunication from/to the receiver, error
+    * @arg \c 11 UNLOCKED, set if at least one of the local oscillator is not locked, error
+    * @copybrief Receivers::CommonReceiverInterface::setLO 
+    */
     interface SRTLPBand : ACS::CharacteristicComponent, Receiver {
 
         /***************************************************\
@@ -78,13 +78,11 @@ module Receivers {
          * idL3 (idL3_1, idL3_2)
          * idR3 (idR3_1, idR3_2)
          * 
-         * 
          * vdL1 (vdL1_1, vdL1_2)
          * vdR1 (vdR1_1, vdR1_2)
          *     |
          * vdL3 (vdL2_1, vdL2_2)
          * vdR3 (vdR2_1, vdR2_2)
-         * 
          * 
          * vgL1 (vgL1_1, vgL1_2)
          * vgR1 (vgR1_1, vgR1_2)
@@ -114,7 +112,6 @@ module Receivers {
 
         /// LNA Drain voltage: stage number 3, right channel
         readonly attribute ACS::ROdoubleSeq vdR3;
-
 
         /**************************\ 
          *      DRAIN CURRENT     *
@@ -178,12 +175,14 @@ module Receivers {
         /** Receiver Name */
         readonly attribute ACS::ROstring receiverName;
 
+
         /** 
          * It allows to turn the vacuum sensor on. The vacuum sensor is necessary to have a correct 
          * measurment of the vacuum characteristic. 
          * If the vacuum sensor is not working the dafult_value for the  vacuum characteristic is always reported.  
          */
         void turnVacuumSensorOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
 
         /** 
          * It allows to turn the vacuum sensor off. The vacuum sensor is necessary to have a correct 
@@ -192,25 +191,59 @@ module Receivers {
          */
         void turnVacuumSensorOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
+
+        /** 
+         * It sets the filter of the L band feed. Possible values are:
+         *   - 1 -> all band filter, 1300-1800 no filter
+         *   - 2 -> 1320-1780 MHz
+         *   - 3 -> 1350-1450 MHz (VLBI)
+         *   - 4 -> 1300-1800 MHz (band-pass)
+         *   - 5 -> 1625-1715 MHz (VLBI)
+         */
         void setLBandFilter(in long filter_id) raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
+
+        /** 
+         * It sets the filter of the P band feed. Possible values are:
+         *   - 1 -> all band filter, 305-410 no filter
+         *   - 2 -> 310-350 MHz
+         *   - 3 -> 305-410 MHz (band-pass filter)
+         */
         void setPBandFilter(in long filter_id) raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
+
+        /** 
+         * It sets the polarization of the L band feed. Possible values are:
+         *   - "L" -> Linear polarization
+         *   - "C" -> Circular polarization
+         */
         void setLBandPolarization(in string p) raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
+
+        /** 
+         * It sets the polarization of the P band feed. Possible values are:
+         *   - "L" -> Linear polarization
+         *   - "C" -> Circular polarization
+         */
         void setPBandPolarization(in string p) raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
+
+        /** It sets the RF path of the L band feed to the cold load */
         void setLBandColdLoadPath() raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
+
+        /** It sets the RF path of the P band feed to the cold load */
         void setPBandColdLoadPath() raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
+
+        /** It sets the RF path of the L band feed to the sky */
         void setLBandSkyPath() raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
+
+        /** It sets the RF path of the P band feed to the sky */
         void setPBandSkyPath() raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
-
          
-	};
-
+    };
 
 };
 

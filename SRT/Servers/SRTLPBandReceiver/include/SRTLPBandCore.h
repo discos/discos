@@ -1,8 +1,8 @@
 /*******************************************************************************\
  *  Author Info
  *  ===========
- *  Andrea Orlati <orlati@ira.inaf.it>
  *  Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *  Andrea Orlati <orlati@ira.inaf.it>
 \*******************************************************************************/
 
 #ifndef _SRTKBANDMFCORE_H_
@@ -11,13 +11,13 @@
 #include "ComponentCore.h"
 
 /**
- * This class inherits from CComponentCore and so contains the code of almost 
+ * This class inherits from CComponentCore, so it contains the code of almost 
  * all the features  of the component.
- * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>.
  * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>,
+ * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>.
  * <h1>Interface Summary</h1>
  *
- * <h2>Methods defined in this class</h2>
+ * <h2>Methods</h2>
  * <ul>
  *      <li>virtual void initialize(...): it initializes the object</li>
  *      <li>ACS::doubleSeq getStageValues(...): it returns for each feed the fet quantity value 
@@ -34,7 +34,7 @@
  *      <li>void setLBandSkyPath(): it sets the L band RF path to the sky</li>
  *      <li>void setPBandSkyPath(): it sets the P band RF path to the sky</li>
  *
- * <h2>Methods defined in the base class CComponentCore</h2>
+ * <h2>Methods inherited from the class CComponentCore</h2>
  * <ul>
  *      <li>void initialize(...)</li>
  *      <li>virtual CConfiguration const * const execute()</li>
@@ -68,7 +68,6 @@
  *      <li>double getCryoLNAWin()</li> 
  *      <li>double getVertexTemperature()</li>
  *      <li>DWORD getStatusWord()</li>
- *      <li>double getFetValue(...)</li>
  *      <li>long getFeeds(...)</li>
  *      <li>void getLO(...)</li>
  *      <li>void getBandwidth(...)</li>
@@ -114,7 +113,6 @@ public:
      */
     void setMode(const char * mode) throw (
             ReceiversErrors::ModeErrorExImpl,
-            ReceiversErrors::ReceiverControlBoardErrorExImpl,
             ComponentErrors::ValidationErrorExImpl,
             ComponentErrors::ValueOutofRangeExImpl,
             ComponentErrors::CouldntGetComponentExImpl,
@@ -143,9 +141,17 @@ public:
      */
     void updateVgLNAControls() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
-
+ 
     /**
-     * ...
+     * This method is called in order to set the L band filter.
+     * @param filter_id the ID of the filter:
+     *     ID 1 -> all band filter, 1300-1800 no filter
+     *     ID 2 -> 1320-1780 MHz
+     *     ID 3 -> 1350-1450 MHz (VLBI)
+     *     ID 4 -> 1300-1800 MHz (band-pass)
+     *     ID 5 -> 1625-1715 MHz (VLBI)
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl,
+     * @throw ComponentErrors::ValidationErrorExImpl,
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
     void setLBandFilter(long filter_id) throw (
@@ -156,7 +162,13 @@ public:
 
 
     /**
-     * ...
+     * This method is called in order to se the P band filter.
+     * @param filter_id the ID of the filter:
+     *     ID 1 -> all band filter, 305-410 no filter
+     *     ID 2 -> 310-350 MHz
+     *     ID 3 -> 305-410 MHz (band-pass filter)
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl,
+     * @throw ComponentErrors::ValidationErrorExImpl,
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
     void setPBandFilter(long filter_id) throw (
@@ -167,9 +179,12 @@ public:
 
 
     /**
-     * ...
+     * This method is called in order to set the L band polarization.
+     * @param polarization "L" for Linear, "C" for Circular
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl,
+     * @throw ComponentErrors::ValidationErrorExImpl,
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
-     */
+     */ 
     void setLBandPolarization(const char * polarization) throw (
         ReceiversErrors::NoRemoteControlErrorExImpl,
         ComponentErrors::ValidationErrorExImpl,
@@ -178,9 +193,12 @@ public:
 
 
     /**
-     * ...
+     * This method is called in order to set the L band polarization.
+     * @param polarization "L" for Linear, "C" for Circular
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl,
+     * @throw ComponentErrors::ValidationErrorExImpl,
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
-     */
+     */ 
     void setPBandPolarization(const char * polarization) throw (
         ReceiversErrors::NoRemoteControlErrorExImpl,
         ComponentErrors::ValidationErrorExImpl,

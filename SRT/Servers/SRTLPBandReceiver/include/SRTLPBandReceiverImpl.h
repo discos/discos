@@ -58,6 +58,10 @@ using namespace baci;
  *     <li>void setPBandFilter(id): It sets the P band filter. The id must be in range 1..3.</li>
  *     <li>void setLBandPolarization(p): It sets the L band polarization (p must be "L" or "C")</li>
  *     <li>void setPBandPolarization(p): It sets the P band polarization (p must be "L" or "C")</li>
+ *     <li>void setLBandColdLoadPath(): It sets the RF path of the L band feed to the cold load</li>
+ *     <li>void setPBandColdLoadPath(): It sets the RF path of the P band feed to the cold load</li>
+ *     <li>void setLBandColdLoadPath(): If sets the RF path of the L band feed to the sky</li>
+ *     <li>void setPBandColdLoadPath(): If sets the RF path of the P band feed to the sky</li>
  * </ul>
  *
  * <h2>LNA Properties</h2>
@@ -185,6 +189,8 @@ public:
      * @throw ReceiversErrors::ReceiversErrorsEx
      */
     void setLO(const ACS::doubleSeq& lo) throw (
+            CORBA::SystemException,
+            ComponentErrors::ComponentErrorsEx,
             ReceiversErrors::ReceiversErrorsEx
     );
 
@@ -354,16 +360,16 @@ public:
 	virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
     /**
-     * This method is called in order to ...
-     * @throw CORBA::SystemException
-     * @throw ComponentErrors::ComponentErrorsEx
-     * @throw ManagementErrors::ConfigurationErrorEx
-     * @param filter_id ... 
+     * This method is called in order to se the L band filter.
+     * @param filter_id the filter ID:
      *     ID 1 -> all band filter, 1300-1800 no filter
      *     ID 2 -> 1320-1780 MHz
      *     ID 3 -> 1350-1450 MHz (VLBI)
      *     ID 4 -> 1300-1800 MHz (band-pass)
      *     ID 5 -> 1625-1715 MHz (VLBI)
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ManagementErrors::ConfigurationErrorEx
      */    
     virtual void setLBandFilter(CORBA::Long filter_id) throw (
             CORBA::SystemException,
@@ -373,14 +379,14 @@ public:
 
 
     /**
-     * This method is called in order to ...
-     * @throw CORBA::SystemException
-     * @throw ComponentErrors::ComponentErrorsEx
-     * @throw ManagementErrors::ConfigurationErrorEx
-     * @param filter_id ... 
+     * This method is called in order to se the P band filter.
+     * @param filter_id the filter ID:
      *     ID 1 -> all band filter, 305-410 no filter
      *     ID 2 -> 310-350 MHz
      *     ID 3 -> 305-410 MHz (band-pass filter)
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ManagementErrors::ConfigurationErrorEx
      */    
     virtual void setPBandFilter(CORBA::Long filter_id) throw (
             CORBA::SystemException,
@@ -390,11 +396,11 @@ public:
 
 
     /**
-     * This method is called in order to ...
+     * This method is called in order to set the L band polarization.
+     * @param polarization "L" for Linear, "C" for Circular
      * @throw CORBA::SystemException
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw ManagementErrors::ConfigurationErrorEx
-     * @param polarization "L" for Linear, "C" for Circular
      */    
     virtual void setLBandPolarization(const char * polarization) throw (
             CORBA::SystemException,
@@ -404,12 +410,12 @@ public:
 
 
     /**
-     * This method is called in order to ...
+     * This method is called in order to set the P band polarization.
+     * @param polarization "L" for Linear, "C" for Circular
      * @throw CORBA::SystemException
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw ManagementErrors::ConfigurationErrorEx
-     * @param polarization "L" for Linear, "C" for Circular
-     */    
+     */ 
     virtual void setPBandPolarization(const char * polarization) throw (
             CORBA::SystemException,
             ComponentErrors::ComponentErrorsEx,

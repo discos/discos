@@ -350,10 +350,11 @@ void SRTLPBandReceiverImpl::calOff() throw (
 }
 
 void SRTLPBandReceiverImpl::setLO(const ACS::doubleSeq& lo) throw (
-        ReceiversErrors::ReceiversErrorsEx
-        )
+        CORBA::SystemException,
+        ComponentErrors::ComponentErrorsEx,
+        ReceiversErrors::ReceiversErrorsEx)
 {
-    // Raise an exeption; TODO: vedi lancio eccezione in setMode() di SRTLPBandCore.cpp
+    // TODO: m_core.setLO(), catch the exception ad re-raise the exception like the 7GHz does. 
 }
 
 

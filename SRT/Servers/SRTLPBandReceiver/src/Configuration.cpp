@@ -48,8 +48,6 @@ using namespace IRA;
 #define MARKTABLE_PATH CONFIG_PATH"/MarkCoefficients"
 #define FEEDTABLE_PATH CONFIG_PATH"/Feeds"
 #define TAPERTABLE_PATH CONFIG_PATH"/Taper"
-#define DEFAULTMODE "L1L1"
-#define DEFAULTMODE_PATH CONFIG_PATH"/Modes/"DEFAULTMODE
 
 
 CConfiguration::CConfiguration()
@@ -133,21 +131,27 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
     IRA::CString field;
     WORD len;
     // read component configuration
-    _GET_STRING_ATTRIBUTE("DewarIPAddress","Dewar IP address:",m_dewarIPAddress,"");
-    _GET_STRING_ATTRIBUTE("LNAIPAddress","LNA IP address:",m_LNAIPAddress,"");
-    _GET_STRING_ATTRIBUTE("SwitchIPAddress","Switch board IP address:",m_switchIPAddress,"");
-    _GET_DWORD_ATTRIBUTE("DewarPort","Dewar port:",m_dewarPort,"");
-    _GET_DWORD_ATTRIBUTE("LNAPort","LNA port:",m_LNAPort,"");
-    _GET_DWORD_ATTRIBUTE("SwitchPort","Switch board port:",m_switchPort,"");
-    _GET_DWORD_ATTRIBUTE("WatchDogResponseTime","Response time of watch dog thread (uSec):",m_watchDogResponseTime,"");
-    _GET_DWORD_ATTRIBUTE("WatchDogSleepTime","Sleep time of the watch dog thread (uSec):",m_watchDogSleepTime,"");
-    _GET_DWORD_ATTRIBUTE("LNASamplingTime","Time needed to collect LNA information from control boards (uSec):",m_LNASamplingTime,"");
-    _GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter, caching time (uSec):",m_repetitionCacheTime,"");
-    _GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter, expire time (uSec):",m_repetitionExpireTime,"");
+    _GET_STRING_ATTRIBUTE("DewarIPAddress", "Dewar IP address:", m_dewarIPAddress,"");
+    _GET_STRING_ATTRIBUTE("LNAIPAddress", "LNA IP address:", m_LNAIPAddress,"");
+    _GET_STRING_ATTRIBUTE("SwitchIPAddress", "Switch board IP address:", m_switchIPAddress,"");
+    _GET_DWORD_ATTRIBUTE("DewarPort", "Dewar port:", m_dewarPort,"");
+    _GET_DWORD_ATTRIBUTE("LNAPort", "LNA port:", m_LNAPort,"");
+    _GET_DWORD_ATTRIBUTE("SwitchPort", "Switch board port:", m_switchPort,"");
+    _GET_DWORD_ATTRIBUTE("WatchDogResponseTime", "Response time of watch dog thread (uSec):", m_watchDogResponseTime,"");
+    _GET_DWORD_ATTRIBUTE("WatchDogSleepTime", "Sleep time of the watch dog thread (uSec):", m_watchDogSleepTime,"");
+    _GET_DWORD_ATTRIBUTE("LNASamplingTime", "Time needed to collect LNA information from control boards (uSec):", m_LNASamplingTime,"");
+    _GET_DWORD_ATTRIBUTE("RepetitionCacheTime", "Log repetition filter, caching time (uSec):", m_repetitionCacheTime,"");
+    _GET_DWORD_ATTRIBUTE("RepetitionExpireTime", "Log repetition filter, expire time (uSec):", m_repetitionExpireTime,"");
+    _GET_STRING_ATTRIBUTE("DefaultMode", "Default operating mode:", m_mode,"");
+
+    const IRA::CString DEFAULTMODE_PATH = CONFIG_PATH"/Modes/" + m_mode;
     // now read the receiver configuration
+
     _GET_STRING_ATTRIBUTE("Mode","mode name:", m_mode, DEFAULTMODE_PATH);
     _GET_DWORD_ATTRIBUTE("Feeds","Number of feeds:", m_feeds, DEFAULTMODE_PATH);
     _GET_DWORD_ATTRIBUTE("IFs","Number of IFs for each feed:", m_IFs, DEFAULTMODE_PATH);
+    _GET_DWORD_ATTRIBUTE("LBandFilterID","L band filter ID:", m_LBandFilterID, DEFAULTMODE_PATH);
+    _GET_DWORD_ATTRIBUTE("PBandFilterID","P band filter ID:", m_PBandFilterID, DEFAULTMODE_PATH);
 
     try {
         m_LBandPolarizations = new Receivers::TPolarization[m_IFs];
@@ -174,7 +178,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
     }
 
     // Set the default operating mode
-    setMode(DEFAULTMODE); 
+    setMode(m_mode); 
 
     // The noise mark
     try {
@@ -365,19 +369,31 @@ void CConfiguration::setMode(const char * mode) throw (
         ReceiversErrors::ModeErrorExImpl
         ) 
 {
-	IRA::CString cmdMode(mode);
-	cmdMode.MakeUpper();
-
-    CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
     IRA::CString value, token;
     IRA::CError error;
+    IRA::CString cmdMode(mode);
+    cmdMode.MakeUpper();
+    CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
+
+    if(!m_mode.IsEmpty()){
+        if(cmdMode.GetLength() != m_mode.GetLength()) {
+            _EXCPT(ReceiversErrors::ModeErrorExImpl, impl, 
+                    "CConfiguration::setMode(): Wrong number of characters in the commanded mode."
+            );
+            ACS_LOG(LM_FULL_INFO, "CConfiguration::init()", (LM_DEBUG, "Wrong number of characters in " + m_mode));
+
+            throw impl; 
+        }
+    }
+
+    if(cmdMode.Find('*') != -1) {
+        for (WORD k=0; k<m_mode.GetLength(); k++) {
+            if(cmdMode[k] == '*')
+                cmdMode.SetAt(k, m_mode[k]); // Don not change this configuration
+        }
+    }
 
     maci::ContainerServices* Services = m_services;
-    m_mode = "";
-    // TODO: E inoltre, sostituire gli asterisco con il valore attuale mode attuale
-
-    // _GET_DWORD_ATTRIBUTE("Feeds","Number of feeds:", m_feeds, MODE_PATH);
-    // _GET_DWORD_ATTRIBUTE("LBandIFs","Number of IFs per feed:", m_IFs, MODE_PATH);
 
     _GET_STRING_ATTRIBUTE("LBandPolarization", "LBand IF polarization:", value, MODE_PATH);
     int start = 0;
@@ -390,15 +406,19 @@ void CConfiguration::setMode(const char * mode) throw (
         token.MakeUpper();
         if (token == "L") {
             m_LBandPolarizations[k] = Receivers::RCV_LCP;
+            m_LBandPolarization = "C"; 
         }
         else if (token == "R") {
             m_LBandPolarizations[k] = Receivers::RCV_RCP;
+            m_LBandPolarization = "C"; 
         }
         else if (token == "V") {
             m_LBandPolarizations[k] = Receivers::RCV_VLP;
+            m_LBandPolarization = "L"; 
         }
         else if (token == "H") {
             m_LBandPolarizations[k] = Receivers::RCV_HLP;
+            m_LBandPolarization = "L"; 
         }
         else {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
@@ -418,15 +438,19 @@ void CConfiguration::setMode(const char * mode) throw (
         token.MakeUpper();
         if (token == "L") {
             m_PBandPolarizations[k] = Receivers::RCV_LCP;
+            m_PBandPolarization = "C"; 
         }
         else if (token == "R") {
             m_PBandPolarizations[k] = Receivers::RCV_RCP;
+            m_PBandPolarization = "C"; 
         }
         else if (token == "V") {
             m_PBandPolarizations[k] = Receivers::RCV_VLP;
+            m_PBandPolarization = "L"; 
         }
         else if (token == "H") {
             m_PBandPolarizations[k] = Receivers::RCV_HLP;
+            m_PBandPolarization = "L"; 
         }
         else {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
@@ -445,6 +469,7 @@ void CConfiguration::setMode(const char * mode) throw (
         }
         m_LBandRFMin[k] = token.ToDouble();
     }
+
     _GET_STRING_ATTRIBUTE("LBandRFMax", "L band RF upper limit (MHz):", value, MODE_PATH);
     start = 0;
     for (WORD k=0; k<m_IFs; k++) {
@@ -459,7 +484,6 @@ void CConfiguration::setMode(const char * mode) throw (
     for (WORD k=0; k<m_IFs; k++)
         m_LBandIFBandwidth[k] = m_LBandRFMax[k] - m_LBandRFMin[k];
     
-
     _GET_STRING_ATTRIBUTE("PBandRFMin", "P band RF lower limit (MHz):", value, MODE_PATH);
     start = 0;
     for (WORD k=0; k<m_IFs; k++) {
@@ -470,6 +494,7 @@ void CConfiguration::setMode(const char * mode) throw (
         }
         m_PBandRFMin[k] = token.ToDouble();
     }
+
     _GET_STRING_ATTRIBUTE("PBandRFMax", "P band RF upper limit (MHz):", value, MODE_PATH);
     start = 0;
     for (WORD k=0; k<m_IFs; k++) {
@@ -512,8 +537,9 @@ void CConfiguration::setMode(const char * mode) throw (
     for (WORD k=0; k<m_IFs; k++)
         m_PBandLO[k] = m_PBandRFMin[k] - m_PBandIFMin[k];
 
-    // TODO: Impostare il filtro chiamando il corrispondente metodo della receiver Library
-    // TODO: Impostare la polarizzazione, con metodo della ReceiverLibrary
+
+    _GET_DWORD_ATTRIBUTE("LBandFilterID", "L band filter ID:", m_LBandFilterID, MODE_PATH);
+    _GET_DWORD_ATTRIBUTE("PBandFilterID", "P band filter ID:", m_PBandFilterID, MODE_PATH);
 
     m_mode = cmdMode;
 }

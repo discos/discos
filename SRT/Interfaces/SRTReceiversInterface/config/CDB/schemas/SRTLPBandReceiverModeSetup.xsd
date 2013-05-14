@@ -34,6 +34,10 @@
     <xs:attribute name="Feeds" type="xs:unsignedLong" use="required"/>
     <!-- number of IFs for each feed-->
     <xs:attribute name="IFs" type="xs:unsignedLong" use="required"/>
+    <!-- L band filter ID -->
+    <xs:attribute name="LBandFilterID" type="xs:unsignedLong" use="required"/>
+    <!-- P band filter ID -->
+    <xs:attribute name="PBandFilterID" type="xs:unsignedLong" use="required"/>
     <!-- blank separated list of the polarization relative to the IF of the L band receiver-->
     <!-- the first entry is relative to IF 0. Accepted character are L or R  -->
     <xs:attribute name="LBandPolarization" type="xs:string" use="required"/>

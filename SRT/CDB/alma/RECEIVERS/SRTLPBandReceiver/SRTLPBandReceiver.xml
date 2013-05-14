@@ -26,6 +26,7 @@
     RepetitionCacheTime="7000000"
     RepetitionExpireTime="10000000"
     ReceiverName="SRTLPBand"
+    DefaultMode="C1C1"
 >
     <LO description="Sequence of local oscillator values for each IF chain" />
     <feeds description="Number of feeds of the receiver" />

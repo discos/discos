@@ -7,9 +7,9 @@
                                                               
  Andrea Orlati (aorlati@ira.inaf.it): Author
  Marco Buttu (mbuttu@oa-cagliari.inaf.it): 
-     I made just some changes in order to use the same code with the 
+     I made just some changes in order to use this file also with the 
      SRTLPBand receiver. This code is inherited by SRTLPBandCore, so I 
-     made the  setMode function pure virtual and I removed the updateLNA() 
+     made the setMode() function pure virtual and I removed the updateLNA() 
      method, which now must be implemented in derived class.
      I also changed the access label of some methods and attributes from
      private to protected in order to use them in the derived class.
@@ -251,12 +251,6 @@ public:
     void updateComponent();
 
 
-    /** I checks if the local oscillator is locked properly */
-    /* void checkLocalOscillator() throw 
-       (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl);
-    */
-
-
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current value of the vacuum in mbar
@@ -304,17 +298,6 @@ public:
      * @return the current status word
      */
     DWORD getStatusWord() const  { return  m_statusWord; }
-
-
-    /**
-     * This is getter method. In this case, since it makes use of some class members that 
-     * could be changed by other methods it is advisable to protect this method with the class mutex.
-     * @param control name of the parameter that must be returned
-     * @param ifs Intermediate frequency identifier, it permits to select which amplification chain 
-     * we are interested in
-     * @return a specific value of from the transistor control parameters
-     */
-    double getFetValue(const IRA::ReceiverControl::FetValue& control, const DWORD& ifs);
 
 
     /**
@@ -509,6 +492,8 @@ protected:
 
     ACS::doubleSeq m_LBandStartFreq;
     ACS::doubleSeq m_PBandStartFreq;
+    ACS::doubleSeq m_LBandBandwidth;
+    ACS::doubleSeq m_PBandBandwidth;
     IRA::CString m_setupMode;
 
 

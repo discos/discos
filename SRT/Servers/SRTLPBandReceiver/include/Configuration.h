@@ -220,6 +220,17 @@ public:
 
 
 	/**
+	 * @return the L band filter ID
+	 */
+	inline const  DWORD& getLBandFilterID() const { return m_LBandFilterID; }
+
+
+	/**
+	 * @return the P band filter ID
+	 */
+	inline const  DWORD& getPBandFilterID() const { return m_PBandFilterID; }
+
+	/**
 	 * @return the pointer to the L band polarizations array; the first element corresponds 
      * to the first IF and so on.
 	 */
@@ -231,6 +242,10 @@ public:
      * to the first IF and so on.
 	 */
 	inline Receivers::TPolarization const * const getPBandPolarizations() const { return m_PBandPolarizations; }
+
+	inline IRA::CString getLBandPolarization() const { return m_LBandPolarization; }
+
+	inline IRA::CString getPBandPolarization() const { return m_PBandPolarization; }
 
 
 	/**
@@ -267,7 +282,7 @@ private:
 	IRA::CString m_localOscillatorInstance;
     maci::ContainerServices* m_services;
 	IRA::CString m_mode;
-    std::vector<std::string> m_availableModes;
+    // std::vector<std::string> m_availableModes;
 	double *m_LBandRFMin;
 	double *m_LBandRFMax;
 	double *m_PBandRFMin;
@@ -277,8 +292,12 @@ private:
 	double *m_LBandIFBandwidth;
 	double *m_PBandIFBandwidth;
 	DWORD m_IFs;
+	DWORD m_LBandFilterID;
+	DWORD m_PBandFilterID;
 	Receivers::TPolarization *m_LBandPolarizations;
 	Receivers::TPolarization *m_PBandPolarizations;
+    IRA::CString m_LBandPolarization;
+    IRA::CString m_PBandPolarization;
 	DWORD m_feeds;
 	double *m_LBandLO;
 	double *m_PBandLO;
