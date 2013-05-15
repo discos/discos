@@ -373,7 +373,6 @@ void CConfiguration::setMode(const char * mode) throw (
     IRA::CError error;
     IRA::CString cmdMode(mode);
     cmdMode.MakeUpper();
-    CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
 
     if(!m_mode.IsEmpty()){
         if(cmdMode.GetLength() != m_mode.GetLength()) {
@@ -388,10 +387,13 @@ void CConfiguration::setMode(const char * mode) throw (
 
     if(cmdMode.Find('*') != -1) {
         for (WORD k=0; k<m_mode.GetLength(); k++) {
-            if(cmdMode[k] == '*')
+            if(cmdMode[k] == '*') {
                 cmdMode.SetAt(k, m_mode[k]); // Don not change this configuration
+            }
         }
     }
+
+    CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
 
     maci::ContainerServices* Services = m_services;
 
@@ -541,6 +543,8 @@ void CConfiguration::setMode(const char * mode) throw (
     _GET_DWORD_ATTRIBUTE("LBandFilterID", "L band filter ID:", m_LBandFilterID, MODE_PATH);
     _GET_DWORD_ATTRIBUTE("PBandFilterID", "P band filter ID:", m_PBandFilterID, MODE_PATH);
 
+    // for (WORD k=0; k<cmdMode.GetLength(); k++)
+    //     m_mode.SetAt(k, cmdMode[k]); 
     m_mode = cmdMode;
 }
 

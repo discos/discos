@@ -89,8 +89,8 @@ void SRTLPBandCore::setMode(const char * mode) throw (
         setLBandPolarization(m_configuration.getLBandPolarization());
         setPBandPolarization(m_configuration.getPBandPolarization());
             
-        m_setupMode = cmdMode;
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
+        m_setupMode = m_configuration.getSetupMode();
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s", string(m_setupMode).c_str()));
     }
     catch (...) {
         m_setupMode = ""; // If we don't reach the end of the method then the mode will be unknown
