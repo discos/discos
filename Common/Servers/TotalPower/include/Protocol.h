@@ -53,15 +53,15 @@ public:
 	/** 
 	 * Prepare a buffer to be sent to the backend in order to request the backend configuration
 	 * @param sBuff pointer to the buffer that contains the message. the buffer must be allocated by the caller.
-	 * @return the lenght of the message
+	 * @return the length of the message
 	 */ 
 	static WORD askBackendConfiguration(char *sBuff);
 	
 	/**
-	 * Prepare a buffer to be sent to the acu in order to configure all the inputs in one shot.
+	 * Prepare a buffer to be sent to the backend in order to configure all the inputs in one shot.
 	 * @param sBuff pointer to the buffer that contains the message. the buffer must be allocated by the caller.
 	 * @param input allows to set up the input type
-	 * @param att allow to indicate the attenuatio level
+	 * @param att allow to indicate the attenuation level
 	 * @param bw allows to set up the bandwidth
 	 * @return the length of the message
 	 */
@@ -70,18 +70,19 @@ public:
 	/**
 	 * Prepare a buffer to be sent to the backend in order to configure one input at a time.
 	 * @param sBuff pointer to the buffer that contains the message. the buffer must be allocated by the caller.
-	 * @parm id numerical identifier of the input
+	 * @param id numerical identifier of the section
 	 * @param input allows to set up the input type
-	 * @param att allow to indicate the attenuatio level
+	 * @param att allow to indicate the attenuation level
 	 * @param bw allows to set up the bandwidth
+	 * @param boards gives the mapping of section over boards, if null the mapping is flat: section 0 on board 0 and so on....
 	 * @return the length of the message
 	 */
-	static  WORD setConfiguration(char *sBuff,long id,const TInputs& input,const double &att,const double& bw);
+	static  WORD setConfiguration(char *sBuff,long id,const TInputs& input,const double &att,const double& bw,long *boards=NULL);
 	
 	/**
 	 * Prepare a buffer to be sent to the backend in order to sync  the time. The time is taken from the clock of the host machine.
 	 * Since the message to the backend must arrive between 300th and 700th milliseconds of each second, if the current time
-	 * does not lie in that window, this method could suspend execution for the required ammount of time. 
+	 * does not lie in that window, this method could suspend execution for the required amount of time.
 	 * @param sBuff pointer to the buffer that contains the message. the buffer must be allocated by the caller.
 	 * @return the length of the message
 	 */
@@ -162,70 +163,73 @@ public:
 	/**
 	 * Decodes the answer of the backend when asked about its configuration. The vectors must already allocated.
 	 * @param rBuff buffer that contains the backend answer
-	 * @param inputsNumber this is to inform the function aboud how many inputs are expected
-	 * @param att this vector reports the attenutaion values for each of the backend inputs (db)
+	 * @param inputsNumber this is to inform the function about how many section are expected (size of output arrays)
+	 * @param boardNumber number of installed boards, this dimensions the size of the answer from the backend
+	 * @param att this vector reports the attenuation values for each of the backend inputs (db)
 	 * @param bw this vector reports the band width for each of the backend inputs (Mhz)
 	 * @param in this vector reports about which analog source the input is connected to.
 	 * @param tm reports the current time of the backend FPGA.
-	 * @param currentSR reports the sample rate currenlty used in the backend (milliseconds)
+	 * @param currentSR reports the sample rate currently used in the backend (milliseconds)
+	  *@param boards gives the mapping of section over boards, if null the mapping is flat: section 0 on board 0 and so on....
 	 * @return true if the answer is correct and could be parsed 
 	 */
-	static bool decodeBackendConfiguration(const char *rBuff,long inputsNumber,double *att,double *bw,TInputs *in,TIMEVALUE& tm,
-			long& currentSR);
+	static bool decodeBackendConfiguration(const char *rBuff,const long& sectionNumber,const DWORD& boardsNumber,double *att,double *bw,TInputs *in,TIMEVALUE& tm,long& currentSR,long * boards);
 	
 	/**
 	 * Decodes the answer of the backend after it has been commanded a new time. 
 	 * @param rBuff buffer that contains the backend answer
-	 * @param res this parameter can be used to check if the backend has properly syncronized its clock. True in that case.
-	 * @return true if the aswer is correct and could be parsed.
+	 * @param res this parameter can be used to check if the backend has properly synchronized its clock. True in that case.
+	 * @return true if the answer is correct and could be parsed.
 	 */
 	static bool decodeBackendTime(const char *rBuff,bool& res);
 	
 	/**
 	 * Decodes the answer of the backend after it has been commanded a check time operations. 
 	 * @param rBuff buffer that contains the backend answer
-	 * @param res this parameter can be used to check if the backend is properly syncronized. True in that case.
+	 * @param res this parameter can be used to check if the backend is properly synchronized. True in that case.
 	 * @return true if the aswer is correct and could be parsed regularly.
 	 */	
 	static bool checkBackendTime(const char * rBuff,const long threshold,bool& res);
 	
 	/**
-	 * Check if the backend answer is an acknoledge or not
+	 * Check if the backend answer is an acknowledge or not
 	 * @param rBuff backend answer
-	 * @return true if the backend aknowledges
+	 * @return true if the backend acknowledges
 	 */
 	static bool isAck(const char *rBuff);
 	
 	/**
 	 * This method is used to decode the data contained in the backend data packet. 
-	 * @param buff pointer to the buffer that containes the data
-	 * @param sampleRate current value of the sample rate, used by hte backend to sample the data
+	 * @param buff pointer to the buffer that contains the data
+	 * @param sampleRate current value of the sample rate, used by the  backend to sample the data
 	 * @param prevStatus stores the status of the previous sample
 	 * @param prevCounter stores the numeral counter of the previous sample
-	 * @param tm data and time mark of the data (returned)
+	 * @param tm date and time mark of the data (returned)
 	 * @param counter sample counter 
 	 * @param flag this is a bit pattern that reports some information about the data
-	 * @param data this will point to the starting poisition from which the real data can be found. This will point a position inside
-	 *                the original buffer (<i>buff</i>) 
+	 * @param data this will contain the real data can be found. The size is given b <i>sectionNumber</i>
+	 *@param boards gives the mapping of section over boards, if null the mapping is flat: section 0 on board 0 and so on....
 	 */
 	static void decodeData(BYTE *buff,const double& sampleRate,const WORD& prevStatus,const WORD& prevCounter,
-			TIMEVALUE& tm,WORD& counter,WORD& flag,DWORD *&data);
+			TIMEVALUE& tm,WORD& counter,WORD& flag,DWORD *data,const long& sectionNumber,long *boards=NULL);
 	
 	/**
 	 * This method is used to decode the data coming from the backend when asked for slow mode acquisition
-	 * @param buff pointer to the buffer that containes the data
+	 * @param buff pointer to the buffer that contains the data
 	 * @param data this will point to an array of elements (must be allocated by the caller) that contains the total power measure of
-	 *                each channel 
+	 *                each section the size is given by the <i>sectionNumber</i> argument
 	 * @param boardsNumber the number of installed boards
+	 * @param sectionNumber number of supported section, the size of the data array
+	 * @param boards map a section into a board (its size is <i>sectionNumber</i>), if null the mapping is flat: section 0 on board 0 and so on....
 	 * @return true if the backend answer could be decoded, false otherwise.
 	 */
-	static bool decodeData(const char* rBuff,DWORD *data,const DWORD& boardsNumber);
+	static bool decodeData(const char* rBuff,DWORD *data,const DWORD& boardsNumber,const long& sectionNumber,long *boards=NULL);
 	
 	/**
 	 * This function takes in input the backend flag (given together with the data and check if the data packet is taken when the
 	 * cal diode is off
 	 * @param flag backend flag, bit pattern
-	 * @return true if the data refers to normal measurment
+	 * @return true if the data refers to normal measurement
 	 */
 	static bool isTpi(const WORD& flag);
 
@@ -233,7 +237,7 @@ public:
 	 * This function takes in input the backend flag (given together with the data and check if the data packet is taken when the
 	 * cal diode is on
 	 * @param flag backend flag, bit pattern
-	 * @return true if the data refers to calibration diode on measurment
+	 * @return true if the data refers to calibration diode on measurement
 	 */
 	static bool isCal(const WORD& flag);
 	
@@ -275,7 +279,7 @@ private:
 	static bool decodeFPGATime(const DWORD& clock,const double& sampleRate,const WORD& counter,TIMEVALUE& tm);
 	
 	/**
-	 * This method can be used to translate the backend answer regarding the attenuation level to its correspondig
+	 * This method can be used to translate the backend answer regarding the attenuation level to its corresponding
 	 * double value (db)
 	 * @param str string that contains the attenuation level
 	 * @param val corresponding attenuation level
@@ -291,7 +295,7 @@ private:
 	static IRA::CString encodeAttenuationLevel(const double& att);
 	
 	/**
-	 * This method can be used to translate the backend answer regarding the current input source  to its correspondig
+	 * This method can be used to translate the backend answer regarding the current input source  to its corresponding
 	 * symbolic value.
 	 * @param str string that contains the backend answerl
 	 * @param vall corresponding input 
@@ -307,7 +311,7 @@ private:
 	static IRA::CString encodeInput(const TInputs& in);
 	
 	/**
-	 * This method can be used to translate the backend answer regarding the configured bandWidth  to its correspondig
+	 * This method can be used to translate the backend answer regarding the configured bandWidth  to its corresponding
 	 * double value (MHz)
 	 * @param str string that contains the band width information
 	 * @param val corresponding attenuation level
@@ -316,7 +320,7 @@ private:
 	static bool decodeBandWidth(const IRA::CString& str,double& val);
 	
 	/**
-	 * This method is used to encode bandiwdth value in MHz  into the backend representation
+	 * This method is used to encode bandwidth value in MHz  into the backend representation
 	 * @param in bw double value to be translated
 	 * @return a string that contains the backend representation of the given badn width
 	 */

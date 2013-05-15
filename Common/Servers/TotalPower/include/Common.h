@@ -24,7 +24,8 @@
 #define SENDBUFFERSIZE 100
 #define RECBUFFERSIZE 512
 #define DATABUFFERSIZE 64000
-#define MAX_INPUT_NUMBER 14
+#define MAX_SECTION_NUMBER 14
+#define MAX_BOARDS_NUMBER 14
 
 #define DEFAULT_SAMPLE_RATE 0.000025   //one sample every 40 milliseconds
 //#define DEFAULT_SAMPLE_RATE 0.001   //one sample every 1 milliseconds

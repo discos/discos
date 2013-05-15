@@ -121,8 +121,8 @@
 				<xs:attribute name="ControlSleepTime" type="xs:unsignedLong" use="required" />
 				<!-- Control thread response time (microseconds), hart beat time -->
 				<xs:attribute name="ControlResponseTime" type="xs:unsignedLong" use="required" />
-				<!-- Total numer of devices installed -->
-				<xs:attribute name="DeviceNumber" type="xs:unsignedLong" use="required" />
+				<!-- Total number of installed boards-->
+				<xs:attribute name="BoardsNumber" type="xs:unsignedLong" use="required" />
 				<!-- The size of the data buffer (bytes) -->
 				<xs:attribute name="DataBufferSize" type="xs:unsignedLong" use="required" />
 			</xs:extension>

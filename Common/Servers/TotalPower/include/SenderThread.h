@@ -28,7 +28,7 @@ public:
 	struct 	TTransferParameter {
 		long channels;           /*!< number of channels involved */
 		long integration;       /*<! integration time in milli seconds, it applies to all channels */
-		long id[MAX_INPUT_NUMBER];                                 /*!< channel identifier, generally 0..channels-1  */  
+		long id[MAX_SECTION_NUMBER];                                 /*!< channel identifier, generally 0..sections-1  */
 		double sampleRate;              /*!< sample rate in MHz */
 		long sampleSize;                   /*!< sample size in bytes */
 		double normalization;         /*!<normalization factor, depends on integration and sample rate */
@@ -115,11 +115,11 @@ private:
 		bool started;
 		DWORD counts;
 		DWORD accumulations;
-		SAMPLETYPE tpi[MAX_INPUT_NUMBER];
+		SAMPLETYPE tpi[MAX_SECTION_NUMBER];
 	};
 	struct TDumpRecord {
 		Backends::TDumpHeader hd;
-		SAMPLETYPE sample[MAX_INPUT_NUMBER];
+		SAMPLETYPE sample[MAX_SECTION_NUMBER];
 	};
 	IRA::CSocket *m_dataLine;
 	TotalPowerImpl *m_sender;
@@ -145,9 +145,9 @@ private:
 	/* It stores the conversion factor  from counts to Kelvin for each of the inputs */ 
 	ACS::doubleSeq m_KCountsRatio;
 	/**
-	 * This method is called by the thread in order to process and ship tha data
+	 * This method is called by the thread in order to process and ship the data
 	 */
-	void processData(DWORD dataSize);
+	void processData(DWORD dataSize,const long& sectionNumber,long *boards);
 	
 	/** 
 	 * it clears of the temporary data related to one integration

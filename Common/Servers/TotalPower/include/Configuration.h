@@ -34,10 +34,10 @@ public:
 		bool calSwitchEnabled;
 		CProtocol::TInputs inputPort;
 		long beams;
-		long sections_inputs[MAX_INPUT_NUMBER];
-		Backends::TPolarization polarizations[MAX_INPUT_NUMBER];
-		long feed[MAX_INPUT_NUMBER];
-		long ifs[MAX_INPUT_NUMBER];
+		long section_boards[MAX_SECTION_NUMBER];
+		Backends::TPolarization polarizations[MAX_SECTION_NUMBER];
+		long feed[MAX_SECTION_NUMBER];
+		long ifs[MAX_SECTION_NUMBER];
 		double bandWidth;
 		double attenuation;
 	} TBackendSetup;
@@ -144,7 +144,7 @@ public:
 	/**
 	 * @return the number of boards installed ion the backend
 	 */
-	inline const DWORD& getDeviceNumber() const { return m_dwDeviceNumber; }
+	inline const DWORD& getBoardsNumber() const { return m_dwBoardsNumber; }
 	
 	/**
 	 * @return the size of data packet from the backend  in bytes
@@ -176,7 +176,7 @@ private:
 	DWORD m_dwTimeTollerance;
 	DWORD m_dwControlSleepTime;
 	DWORD m_dwControlResponseTime;	
-	DWORD m_dwDeviceNumber;
+	DWORD m_dwBoardsNumber;
 	DWORD m_dwDataBufferSize;
 	/**
 	 * This is the table used to load from the CDB the backend configurations 

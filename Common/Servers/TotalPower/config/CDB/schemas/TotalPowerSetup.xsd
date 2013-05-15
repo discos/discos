@@ -75,7 +75,7 @@
  		  </xs:element>
  		  <xs:element name="inputPort" type="SelectedPortType">
  		  	<xs:annotation><xs:documentation>
- 		  		selects from which port the RF inputshas to be taken for the present configuration
+ 		  		selects from which port the RF inputs has to be taken for the present configuration
  		  	</xs:documentation></xs:annotation>
  		  </xs:element> 		  
  		  <xs:element name="beams" type="xs:long">
@@ -90,17 +90,17 @@
  		  </xs:element>
  		  <xs:element name="attenuation" type="xs:double">
  		  	<xs:annotation><xs:documentation>
- 		  		this sets the default attenuation of the RF input  
+ 		  		this sets the default attenuation of all the RF input  
  		  	</xs:documentation></xs:annotation>
  		  </xs:element> 		  	   		  
- 		  <xs:element name="sections_inputs" type="xs:string">
+ 		  <xs:element name="section_boards" type="xs:string">
  		  	<xs:annotation><xs:documentation>
- 		  		blank separated lists of inputs or sections (in the TP backend they coincide) 
+ 		  		blank separated lists of boards implementing the section  
  		  	</xs:documentation></xs:annotation>
  		  </xs:element>
  		  <xs:element name="polarizations" type="xs:string">
  		  	<xs:annotation><xs:documentation>
- 		  		for each sections indicates which polarizations the section is processing, blank separeted list  
+ 		  		for each section indicates which polarizations the section is processing, blank separated list  
  		  	</xs:documentation></xs:annotation>
  		  </xs:element> 		  
  		  <xs:element name="feed" type="xs:string">
@@ -110,7 +110,7 @@
  		  </xs:element>
  		  <xs:element name="IF" type="xs:string">
  		  	<xs:annotation><xs:documentation>
- 		  		for each sections, given the feed, indicates which is the linked IF  
+ 		  		for each section, given the feed, indicates which is the linked IF  
  		  	</xs:documentation></xs:annotation>
  		  </xs:element>
  		</xs:sequence>

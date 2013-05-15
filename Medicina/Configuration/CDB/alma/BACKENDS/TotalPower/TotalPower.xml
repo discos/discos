@@ -24,7 +24,7 @@
                SenderResponseTime="1000000"
                ControlSleepTime="900000"
                ControlResponseTime="1000000"
-               DeviceNumber="4"
+               BoardsNumber="4"
                DataBufferSize="64">            	   
 	<time/>
 	<backendName/>

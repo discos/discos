@@ -46,7 +46,7 @@ CCommandLine::~CCommandLine()
 {
 	AUTO_TRACE("CMedicinaMountSocket::~CMedicinaMountSocket()");
 	m_Error.Reset();
-	// if the backend is transfering data...make a try to inform the backend before closing the connection
+	// if the backend is transferring data...make a try to inform the backend before closing the connection
 	if (getIsBusy()) {
 		WORD len;
 		char sBuff[SENDBUFFERSIZE];
@@ -404,7 +404,7 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 		newAtt=m_attenuation[inputId];
 	}
 	newBW=m_bandWidth[inputId];
-	len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW); // get the buffer
+	len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW,m_boards); // get the buffer
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
@@ -415,7 +415,7 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::setAttenuation()",(LM_NOTICE,"INPUT_CONFIGURED %ld,ATT=%lf",inputId,newAtt));
 		/***********************************************************************************************************************************/
 		/***********************************************************************************************************************************/
-		CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setAttenuation()",(LM_NOTICE,"INPUT_CONFIGURED %ld,ATT=%lf",inputId,newAtt));
+		//CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setAttenuation()",(LM_NOTICE,"INPUT_CONFIGURED %ld,ATT=%lf",inputId,newAtt));
 		m_attenuation[inputId]=newAtt;
 	}
 	else if (res==FAIL) {
@@ -494,7 +494,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setConfiguration()");
 	}
-	len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW); // get the buffer
+	len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW,m_boards); // get the buffer
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
@@ -568,7 +568,7 @@ void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,
 		// do nothing
 	}
 	_CHECK_ERRORS("CommandLine::getZeroTPI()");
-	//if the requested integration is not equal to the current samplerate (given is milliseconds as a sample period)
+	//if the requested integration is not equal to the current sample rate (given is milliseconds as a sample period)
 	// or the integration time must be forced...and the backend is not busy. Then set the correct sample rate....
 	if ((integration!=m_currentSampleRate) || (m_setTpiIntegration)) {
 		len=CProtocol::setIntegrationTime(sBuff,integration); // get the buffer
@@ -627,7 +627,7 @@ void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		if (!CProtocol::decodeData(rBuff,tpi,m_configuration->getDeviceNumber())) {
+		if (!CProtocol::decodeData(rBuff,tpi,m_configuration->getBoardsNumber(),m_inputsNumber,m_boards)) {
 			_THROW_EXCPT(BackendsErrors::MalformedAnswerExImpl,"CCommandLine::getZeroTPI()");
 		}
 		for (int j=0;j<m_inputsNumber;j++) {
@@ -778,8 +778,8 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		DWORD data[MAX_INPUT_NUMBER];
-		if (!CProtocol::decodeData(rBuff,data,m_configuration->getDeviceNumber())) {
+		DWORD data[MAX_SECTION_NUMBER];
+		if (!CProtocol::decodeData(rBuff,data,m_configuration->getBoardsNumber(),m_inputsNumber,m_boards)) {
 			_THROW_EXCPT(BackendsErrors::MalformedAnswerExImpl,"CCommandLine::getSample()");
 		}
 		tpi.length(m_inputsNumber);
@@ -1376,14 +1376,14 @@ int CCommandLine::getConfiguration()
 		if ((Res=sendBuffer(sBuff,len))==SUCCESS) {
 			rBytes=receiveBuffer(rBuff,RECBUFFERSIZE);
 			if (rBytes>0) {
-				if (CProtocol::decodeBackendConfiguration(rBuff,m_inputsNumber,m_attenuation,m_bandWidth,m_input,m_backendTime,m_currentSampleRate)) {
+				if (CProtocol::decodeBackendConfiguration(rBuff,m_inputsNumber,m_configuration->getBoardsNumber(),m_attenuation,m_bandWidth,m_input,m_backendTime,m_currentSampleRate,m_boards)) {
 					CIRATools::getTime(m_lastUpdate);
 				}
 				else {
 					return DECODE_ERROR;
 				}
 			}
-			// this could be 0 (comunication fell down), FAIL error (m_Error set accordingly) , WOULDBLOCK timeout, >0 ok
+			// this could be 0 (communication fell down), FAIL error (m_Error set accordingly) , WOULDBLOCK timeout, >0 ok
 			return rBytes;
 		}
 		else {  // send fails....m_Error already set by sendBuffer
@@ -1470,6 +1470,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 			m_ifNumber[i]=setup.ifs[i];
 			m_feedNumber[i]=setup.feed[i];
 			m_inputSection[i]=i; // input 0 belongs to section 0 and so on.....
+			m_boards[i]=setup.section_boards[i];
 			m_attenuation[i]=setup.attenuation;
 			m_bandWidth[i]=setup.bandWidth;
 		}		

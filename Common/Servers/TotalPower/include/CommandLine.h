@@ -19,8 +19,8 @@
 #include "Configuration.h"
 
 /**
- * This class is inherited from the IRA::CSocket class. It takes charge of setting the configuration to thebackend. 
- *  if the remote side risconnects or a problem affects the comunication line, this class try to reconnect to the backend
+ * This class is inherited from the IRA::CSocket class. It takes charge of setting the configuration to the backend.
+ *  if the remote side disconnects or a problem affects the communication line, this class try to reconnect to the backend
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
  * <br> 
@@ -388,7 +388,7 @@ public:
 	 *  @throw BackendsErrors::BackendBusyExImpl
 	 *  @throw ComponentErrors::ValidationErrorExImpl
 	 *  @throw ComponentErrors::ValueOutofRangeExImpl
-	 *  @thorw BackendsErrors::NakExImpl,
+	 *  @throw BackendsErrors::NakExImpl,
 	 *	@throw ComponentErrors::SocketErrorExImpl
 	 *		 @arg \c ComponentErrors::IRALibraryResource
 	 *	@throw ComponentErrors::TimeoutExImpl
@@ -408,18 +408,25 @@ public:
 	/**
 	 * Called to fill the sequence of the <i>Backends:channelHeader</i> with the proper information. Only the enabled channel
 	 * are reported.
-	 * @param chHr pointer to a (caller allocated) vector that will containes the information section by sectionl
+	 * @param chHr pointer to a (caller allocated) vector that will contains the information section by section
 	 * @param size size of the input vector, used to avoid to exceed the vector limits
 	 */
 	void fillChannelHeader(Backends::TSectionHeader *chHr,const long& size);
 	
 	/**
 	 * Called by the implementation of the interface to inform the component of the last tsys measurement and the Kelvin/counts ratio.
-	 * @param tsys suquence of doubles with the tsys for each input. 
+	 * @param tsys sequence of doubles with the tsys for each input.
 	 * @param ration ratio between Kelvin and counts as determined during the last tsys measurement
 	 */
 	void saveTsys(const ACS::doubleSeq& tsys,const ACS::doubleSeq& ratio);
 	
+	/**
+	 * return the array  that contains the mapping of sections over boards.
+	 */
+	long *boardsMapping() { return m_boards; }
+
+	long sectionNumber() { return m_inputsNumber; }
+
 	
 protected:
 	/**
@@ -463,19 +470,19 @@ private:
 	/** 
 	 * attenuator value for each backend input
 	*/
-	double m_attenuation[MAX_INPUT_NUMBER];
+	double m_attenuation[MAX_SECTION_NUMBER];
 	/**
 	 *  bandwidth value for each backend input
 	 */
-	double m_bandWidth[MAX_INPUT_NUMBER];
+	double m_bandWidth[MAX_SECTION_NUMBER];
 	/**
 	 * frequency value for each backend input
 	 */
-	double m_frequency[MAX_INPUT_NUMBER];
+	double m_frequency[MAX_SECTION_NUMBER];
 	/**
 	 * the sample rate associated to each input
 	 */
-	double m_sampleRate[MAX_INPUT_NUMBER];
+	double m_sampleRate[MAX_SECTION_NUMBER];
 	/**
 	 * The sample rate currently configured in the backend, given as sample period in milliseconds
 	 */
@@ -485,35 +492,39 @@ private:
 	 */
 	double m_commonSampleRate;
 	/**
+	 * allows to link a section to its proper board number
+	 */
+	long m_boards[MAX_SECTION_NUMBER];
+	/**
 	 * the polarization of each backend input 
 	 */
-	Backends::TPolarization m_polarization[MAX_INPUT_NUMBER];
+	Backends::TPolarization m_polarization[MAX_SECTION_NUMBER];
 	/**
 	 * the number of bins that each input will deliver
 	 */
-	long m_bins[MAX_INPUT_NUMBER];
+	long m_bins[MAX_SECTION_NUMBER];
 	/**
 	 * input type for each backend input
 	 */
-	CProtocol::TInputs m_input[MAX_INPUT_NUMBER];
+	CProtocol::TInputs m_input[MAX_SECTION_NUMBER];
 	/**
 	 * Indicates if the input is enabled or not. A disabled input will not produce output data
 	 */
-	bool m_enabled[MAX_INPUT_NUMBER];
+	bool m_enabled[MAX_SECTION_NUMBER];
 	/**
-	 * indicates the feed  number the input is connected to. Configuration dependant
+	 * indicates the feed  number the input is connected to. Configuration dependent
 	 */
-	long m_feedNumber[MAX_INPUT_NUMBER];
+	long m_feedNumber[MAX_SECTION_NUMBER];
 	/**
 	 * Indicates the if number (relative to the feed) the input is attached to.
 	 */
-	long m_ifNumber[MAX_INPUT_NUMBER];
+	long m_ifNumber[MAX_SECTION_NUMBER];
 	/**
 	 * indicates which section the input belongs to.
 	 */
-	long m_inputSection[MAX_INPUT_NUMBER];
+	long m_inputSection[MAX_SECTION_NUMBER];
 	/**
-	 * inpt type for the initial configuration
+	 * input type for the initial configuration
 	 */
 	CProtocol::TInputs m_defaultInput;
 	/**
@@ -568,24 +579,24 @@ private:
 	IRA::CString m_hostAddress;
 	
 	/**
-	 * It stores the last available tsys measurment 
+	 * It stores the last available tsys measurement
 	 */
-	double m_tsys[MAX_INPUT_NUMBER];
+	double m_tsys[MAX_SECTION_NUMBER];
 	
 	/**
-	 * It stores the last avilable ration Kelvin/counts
+	 * It stores the last available ration Kelvin/counts
 	 */
-	double m_KCratio[MAX_INPUT_NUMBER];
+	double m_KCratio[MAX_SECTION_NUMBER];
 	
 	/**
-	 * It stores the last available total power measurment
+	 * It stores the last available total power measurement
 	 */
-	//double m_tpi[MAX_INPUT_NUMBER];
+	//double m_tpi[MAX_SECTION_NUMBER];
 	
 	/**
 	 * It stores the last measure of zero TPI
 	 */
-	double m_tpiZero[MAX_INPUT_NUMBER];
+	double m_tpiZero[MAX_SECTION_NUMBER];
 	
 	/**
 	 * Pointer to the configuration table, every record of the table stores a possible backend setup.

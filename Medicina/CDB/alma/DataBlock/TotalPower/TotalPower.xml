@@ -13,7 +13,7 @@
 	<beams>7</beams>
  	<bandWidth>2350.0</bandWidth>
  	<attenuation>10.0</attenuation>		
-	<sections_inputs>0 1 2 3</sections_inputs>
+	<section_boards>0 1 2 3</section_boards>
 	<polarizations>L R L R</polarizations>
 	<feed>0 0 1 1</feed>
 	<IF>0 1 0 1</IF>
@@ -27,7 +27,7 @@
  	<beams>1</beams>
  	<bandWidth>1250.0</bandWidth>
  	<attenuation>10.0</attenuation>	 	
- 	<sections_inputs>0 1</sections_inputs>
+ 	<section_boards>0 1</section_boards>
  	<polarizations>L R</polarizations>
  	<feed>0 0</feed>
  	<IF>0 1</IF>
@@ -41,7 +41,7 @@
  	<beams>1</beams>
  	<bandWidth>300.0</bandWidth>
  	<attenuation>6.0</attenuation>	 	
- 	<sections_inputs>0 1</sections_inputs>
+ 	<section_boards>0 1</section_boards>
  	<polarizations>L R</polarizations>
  	<feed>0 0</feed>
  	<IF>0 1</IF>
@@ -55,7 +55,7 @@
  	<beams>1</beams>
  	<bandWidth>1250.0</bandWidth>
  	<attenuation>8.0</attenuation>	 	 	
- 	<sections_inputs>0 1</sections_inputs>
+ 	<section_boards>0 1</section_boards>
  	<polarizations>R L</polarizations>
  	<feed>0 0</feed>
  	<IF>0 1</IF>

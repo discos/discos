@@ -19,9 +19,9 @@ CSenderThread::CSenderThread(const ACE_CString& name,TSenderParameter  *par,
 	m_inputBuffer=new BYTE[DATABUFFERSIZE];
 	m_tempBuffer=new BYTE[DATABUFFERSIZE*2];
 	m_tempBufferPointer=0;
-	m_zeroBuffer=new DWORD[MAX_INPUT_NUMBER];
-	m_KCountsRatio.length(MAX_INPUT_NUMBER);
-	for (int i=0;i<MAX_INPUT_NUMBER;i++) {
+	m_zeroBuffer=new DWORD[MAX_SECTION_NUMBER];
+	m_KCountsRatio.length(MAX_SECTION_NUMBER);
+	for (int i=0;i<MAX_SECTION_NUMBER;i++) {
 		m_zeroBuffer[i]=0;
 		m_KCountsRatio[i]=1.0;
 	}
@@ -120,12 +120,16 @@ void CSenderThread::runLoop()
 			} 
 		}
 		else { // receive was ok and res is the number of bytes that are read
+			long *boards;
+			long sectionNumber;
 			IRA::CIRATools::getTime(m_lastReceiveEpoch);
 			IRA::CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+			boards=line->boardsMapping();
+			sectionNumber=line->sectionNumber();
 			line->setStatusField(CCommandLine::SAMPLING);
 			line->clearStatusField(CCommandLine::DATALINERROR);
 			line->getKCRatio(m_KCountsRatio); // get the K/C ratio
-			processData((DWORD)res);
+			processData((DWORD)res,sectionNumber,boards);
 		}
 	}
 	if (m_stop) { // we were asked to stop the data transfer.....
@@ -185,15 +189,16 @@ void CSenderThread::saveStartTime(const ACS::Time& time)
 
 void CSenderThread::saveZero(DWORD *zeros)
 {
-	for (int i=0;i<MAX_INPUT_NUMBER;i++) {
+	for (int i=0;i<MAX_SECTION_NUMBER;i++) {
 		m_zeroBuffer[i]=zeros[i];
 	}
 }
 
-void CSenderThread::processData(DWORD dataSize)
+void CSenderThread::processData(DWORD dataSize,const long& sectionNumber,long *boards)
 {
 	BYTE *currentPointer;
-	DWORD *data;
+	//DWORD *data;
+	DWORD data[MAX_SECTION_NUMBER];
 	WORD counter;
 	WORD status;
 	TIMEVALUE sampleTime;
@@ -203,12 +208,11 @@ void CSenderThread::processData(DWORD dataSize)
 	currentPointer=m_tempBuffer;
 	while (bufferCounter+m_configuration->getDataBufferSize()<=m_tempBufferPointer) {
 		currentPointer=m_tempBuffer+bufferCounter;
-		CProtocol::decodeData(currentPointer,m_dataHeader.sampleRate,m_previousStatus,m_previousCounter,
-				sampleTime,counter,status,data);
+		CProtocol::decodeData(currentPointer,m_dataHeader.sampleRate,m_previousStatus,m_previousCounter,sampleTime,counter,status,data,sectionNumber,boards);
 		bufferCounter+=m_configuration->getDataBufferSize();
 		if (!CProtocol::isNewStream(m_previousStatus,m_previousCounter,counter)) { //the first sample is discarded
 			if  (m_startTime<=sampleTime.value())/* || (m_immediateStart)) */{ //if the start time is elapsed than start processing
-				for (int i=0;i<MAX_INPUT_NUMBER;i++) { // subtract the zero level
+				for (int i=0;i<MAX_SECTION_NUMBER;i++) { // subtract the zero level
 					if (data[i]>m_zeroBuffer[i]) {
 						data[i]-=m_zeroBuffer[i];
 					}
@@ -249,7 +253,7 @@ void CSenderThread::initTransfer()
 void CSenderThread::clearIntegration(TSampleRecord& samp)
 {
 	samp.started=false;
-	for (int i=0;i<MAX_INPUT_NUMBER;i++) samp.tpi[i]=0;
+	for (int i=0;i<MAX_SECTION_NUMBER;i++) samp.tpi[i]=0;
 	samp.start.reset();
 	samp.counts=0;
 	samp.accumulations=0;
@@ -265,7 +269,7 @@ void CSenderThread::computeSample(TSampleRecord& samp,TIMEVALUE& sampleTime,DWOR
 		samp.accumulations=(DWORD)round(accTemp); //computes the number of integrations
 		if (samp.accumulations<1) samp.accumulations=1; //at least one accumulation is needed
 	}
-	for (int i=0;i<MAX_INPUT_NUMBER;i++) { // computes the new data....
+	for (int i=0;i<MAX_SECTION_NUMBER;i++) { // computes the new data....
 		samp.tpi[i]+=(SAMPLETYPE)(double(data[i])/(m_dataHeader.normalization*(double)samp.accumulations));
 	}
 	samp.counts++; //increase the number of accumulations
@@ -274,8 +278,8 @@ void CSenderThread::computeSample(TSampleRecord& samp,TIMEVALUE& sampleTime,DWOR
 		ACS::Time diff=samp.start.value().value+(sampleTime.value().value-samp.start.value().value)/2;
 		samp.start.value(diff);
 		// now send the data		
-		SAMPLETYPE sample[MAX_INPUT_NUMBER];
-		double  tsys[MAX_INPUT_NUMBER],allTsys[MAX_INPUT_NUMBER];
+		SAMPLETYPE sample[MAX_SECTION_NUMBER];
+		double  tsys[MAX_SECTION_NUMBER],allTsys[MAX_SECTION_NUMBER];
 		Backends::TDumpHeader hd;
 		//TDumpRecord *buffer=(TDumpRecord *)new char[sizeof(TDumprecord)];
 		//char buffer[sizeof(SAMPLETYPE)*MAX_INPUT_NUMBER+sizeof(Backends::TDumpHeader)];
@@ -285,7 +289,7 @@ void CSenderThread::computeSample(TSampleRecord& samp,TIMEVALUE& sampleTime,DWOR
 		hd.dumpSize+=sizeof(double)*m_dataHeader.channels; // add data size required for tsys trasmission
 		ACE_Message_Block buffer(hd.dumpSize+sizeof(Backends::TDumpHeader));
 		//memcpy(buffer,&hd,sizeof(Backends::TDumpHeader));
-		for (long jj=0;jj<MAX_INPUT_NUMBER;jj++) {  //computes the system temperatures for all inputs
+		for (long jj=0;jj<MAX_SECTION_NUMBER;jj++) {  //computes the system temperatures for all inputs
 			allTsys[jj]=(double)samp.tpi[jj]*m_KCountsRatio[jj];
 		}
 		for (long i=0;i<m_dataHeader.channels;i++) {

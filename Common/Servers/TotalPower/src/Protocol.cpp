@@ -1,4 +1,3 @@
-// $Id: Protocol.cpp,v 1.4 2011-05-12 14:27:54 a.orlati Exp $
 
 #include "Protocol.h"
 #include "Common.h"
@@ -16,13 +15,18 @@ WORD CProtocol::setConfiguration_broadcast(char *sBuff,const TInputs& input,cons
 	return strlen (sBuff);
 }
 
-WORD CProtocol::setConfiguration(char *sBuff,long id,const TInputs& input,const double &att,const double& bw)
+WORD CProtocol::setConfiguration(char *sBuff,long id,const TInputs& input,const double &att,const double& bw,long *boards)
 {
 	char tempBuff[128];
 	strcpy(sBuff,PROT_SET_CONF);
 	strcat(sBuff,PROT_SEPARATOR);
-	sprintf(tempBuff,"%ld",id+1); //the inner numeration goes from 0 to INPUTSNUMBER-1, 
-														// in the backend goes from 1 to INPUTSNUMBER
+	if (boards==NULL) {
+		sprintf(tempBuff,"%ld",id+1); //the inner enumeration goes from 0 to SECTIONNUMBER-1,
+														// in the backend goes from 1 to BOARDNUMBER
+	}
+	else {
+		sprintf(tempBuff,"%ld",boards[id]+1); //the inner enumeration goes from 0 to SECTIONNUMBER-1,
+	}
 	strcat(sBuff,tempBuff);
 	strcat(sBuff,PROT_SEPARATOR);
 	strcat(sBuff,(const char *)encodeInput(input));
@@ -171,12 +175,13 @@ WORD CProtocol::setZeroInput(char *sBuff,bool activate)
 	 *word=p;
  }
  
-bool CProtocol::decodeBackendConfiguration(const char *rBuff,long inputsNumber,double *att,double *bw,TInputs *in,TIMEVALUE& tm,
-		long& currentSR)
+bool CProtocol::decodeBackendConfiguration(const char *rBuff,const long& sectionNumber,const DWORD& boardsNumber,double *att,double *bw,TInputs *in,TIMEVALUE& tm,long& currentSR,long * boards)
 {
 	IRA::CString str(rBuff);
 	IRA::CString ret;
 	int start=0;
+	double boardBw[MAX_BOARDS_NUMBER],boardAtt[MAX_BOARDS_NUMBER];
+	TInputs boardIn[MAX_BOARDS_NUMBER];
 	// get fox cpu time (seconds)...not used yet
 	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
 		return false;
@@ -213,13 +218,13 @@ bool CProtocol::decodeBackendConfiguration(const char *rBuff,long inputsNumber,d
 	}
 	else {
 	}
-	for (int i=0;i<inputsNumber;i++) {
+	for (DWORD i=0;i<boardsNumber;i++) {
 		// read the input source.....
 		if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
 			return false;
 		}
 		else {
-			if (!decodeInput(ret,in[i])) {
+			if (!decodeInput(ret,boardIn[i])) {
 				return false;
 			}
 		}
@@ -228,7 +233,7 @@ bool CProtocol::decodeBackendConfiguration(const char *rBuff,long inputsNumber,d
 			return false;
 		}
 		else {
-			if (!decodeAttenuationLevel(ret,att[i])) {
+			if (!decodeAttenuationLevel(ret,boardAtt[i])) {
 				return false;
 			}
 		}
@@ -237,9 +242,22 @@ bool CProtocol::decodeBackendConfiguration(const char *rBuff,long inputsNumber,d
 			return false;
 		}
 		else {
-			if (!decodeBandWidth(ret,bw[i])) {
+			if (!decodeBandWidth(ret,boardBw[i])) {
 				return false;
 			}
+		}
+	}
+	// now I will build the output arrays
+	for (long j=0;j<sectionNumber;j++) {
+		if (boards==NULL) {
+			att[j]=boardAtt[j];
+			in[j]=boardIn[j];
+			bw[j]=boardBw[j];
+		}
+		else {
+			att[j]=boardAtt[boards[j]];
+			in[j]=boardIn[boards[j]];
+			bw[j]=boardBw[boards[j]];
 		}
 	}
 	return true;
@@ -323,11 +341,12 @@ bool CProtocol::isNewStream(const WORD& previousStatus,const WORD& previousCount
 	else return false;
 }
 
-bool CProtocol::decodeData(const char *rBuff,DWORD *data,const DWORD& boardsNumber)
+bool CProtocol::decodeData(const char *rBuff,DWORD *data,const DWORD& boardsNumber,const long& sectionNumber,long *boards)
 {
 	IRA::CString str(rBuff);
 	IRA::CString ret;
 	int start=0;
+	DWORD boardOutput[MAX_BOARDS_NUMBER];
 	// get fox cpu time (seconds)...not used yet
 	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
 		return false;
@@ -340,21 +359,30 @@ bool CProtocol::decodeData(const char *rBuff,DWORD *data,const DWORD& boardsNumb
 	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
 		return false;
 	}
-	for (DWORD j=0;j<boardsNumber;j++) {
+	for (DWORD  j=0;j<boardsNumber;j++) {
 		if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
 			return false;
 		}
-		data[j]=ret.ToLong();
+		boardOutput[j]=ret.ToLong();
+	}
+	for (long  k=0;k<sectionNumber;k++) {
+		if (boards==NULL) {
+			data[k]=boardOutput[k];
+		}
+		else {
+			data[k]=boardOutput[boards[k]];
+		}
 	}
 	return true;
 }
 
 void CProtocol::decodeData(BYTE *buff,const double& sampleRate,const WORD& prevStatus,const WORD& prevCounter,
-		TIMEVALUE& tm,WORD& counter,WORD& flag,DWORD *&data)
+		TIMEVALUE& tm,WORD& counter,WORD& flag,DWORD *data,const long& sectionNumber,long *boards)
 {
 	static DWORD previousClock=0;
 	static WORD sampleCounter=0;
 	DWORD clock;
+	DWORD *boardData;
 	//CProtocol::swap((DWORD *)buff);
 	counter=*((WORD*)(buff+4));
 	flag=*((WORD*)(buff+6));
@@ -372,10 +400,15 @@ void CProtocol::decodeData(BYTE *buff,const double& sampleRate,const WORD& prevS
 	}
 	previousClock=clock;
 	decodeFPGATime(clock,sampleRate,sampleCounter,tm);
-	data=(DWORD *)(buff+8);
-	/*for (int j=0;j<PROT_TOTAL_DEVICES;j++) { //swaps the channels 
-		swap(data+j);
-	}*/
+	boardData=(DWORD *)(buff+8);
+	for(long k=0;k<sectionNumber;k++) {
+		if (boards==NULL) {
+			data[k]=boardData[k];
+		}
+		else {
+			data[k]=boardData[boards[k]];
+		}
+	}
 }	
 
 bool CProtocol::decodeAttenuationLevel(const IRA::CString& str,double& val)

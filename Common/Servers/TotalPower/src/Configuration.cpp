@@ -56,7 +56,7 @@ bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& se
 	if (done) {
 		setup.setupID=(*m_configurationTable)["configurationID"]->asString();
 		setup.sections=(*m_configurationTable)["sections"]->asLongLong();
-		if (setup.sections>MAX_INPUT_NUMBER) {
+		if (setup.sections>MAX_SECTION_NUMBER) {
 			return false;
 		}
 		if ((*m_configurationTable)["calSwitchingEnabled"]->asString()=="TRUE") {
@@ -78,14 +78,15 @@ bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& se
 		setup.bandWidth=(*m_configurationTable)["bandWidth"]->asDouble();
 		setup.attenuation=(*m_configurationTable)["attenuation"]->asDouble();
 		int start_si=0,start_pol=0,start_feed=0,start_ifs=0;
-		IRA::CString sections_inputs((*m_configurationTable)["sections_inputs"]->asString());
+		IRA::CString section_boards((*m_configurationTable)["section_boards"]->asString());
 		IRA::CString polarizations((*m_configurationTable)["polarizations"]->asString());
 		IRA::CString feed((*m_configurationTable)["feed"]->asString());
 		IRA::CString ifs((*m_configurationTable)["IF"]->asString());
 		IRA::CString ret;
 		for(int i=0;i<setup.sections;i++) {
-			if (!IRA::CIRATools::getNextToken(sections_inputs,start_si,' ',ret)) return false;
-			setup.sections_inputs[i]=ret.ToLong();
+			if (!IRA::CIRATools::getNextToken(section_boards,start_si,' ',ret)) return false;
+			setup.section_boards[i]=ret.ToLong();
+			if ((setup.section_boards[i]>=(long)m_dwBoardsNumber) || (setup.section_boards[i]<0)) return false;
 			if (!IRA::CIRATools::getNextToken(polarizations,start_pol,' ',ret)) return false;
 			if (ret=="L") {
 				setup.polarizations[i]=Backends::BKND_LCP;
@@ -97,7 +98,7 @@ bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& se
 			setup.feed[i]=ret.ToLong();
 			if (!IRA::CIRATools::getNextToken(ifs,start_ifs,' ',ret)) return false;
 			setup.ifs[i]=ret.ToLong();
-			ACS_LOG(LM_FULL_INFO,"CConfiguration::getSetupFromID()",(LM_DEBUG,"Sections: %d - Polarization: %d - Feed: %d - Ifs: %d",setup.sections_inputs[i],setup.polarizations[i],setup.feed[i],setup.ifs[i]));	
+			ACS_LOG(LM_FULL_INFO,"CConfiguration::getSetupFromID()",(LM_DEBUG,"Sections: %d - Board: %d - Polarization: %d - Feed: %d - Ifs: %d",i,setup.section_boards[i],setup.polarizations[i],setup.feed[i],setup.ifs[i]));
 		}
 		return true;
 	}
@@ -124,9 +125,11 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("SenderResponseTime","The sender thread response time is (uSec)",m_dwSenderResponseTime);
 	_GET_DWORD_ATTRIBUTE("ControlSleepTime","The control thread sleep time is (uSec)",m_dwControlSleepTime);
 	_GET_DWORD_ATTRIBUTE("ControlResponseTime","The control thread response time is (uSec)",m_dwControlResponseTime);
-	_GET_DWORD_ATTRIBUTE("DeviceNumber","The number of installed boards is ",m_dwDeviceNumber);
+	_GET_DWORD_ATTRIBUTE("BoardsNumber","The number of installed boards is ",m_dwBoardsNumber);
 	_GET_DWORD_ATTRIBUTE("DataBufferSize","Size of data packet is (bytes)",m_dwDataBufferSize);
 	
+	if (m_dwBoardsNumber>MAX_BOARDS_NUMBER) m_dwBoardsNumber=MAX_BOARDS_NUMBER;
+
 	// read the configurations
 	IRA::CError error;
 	try {
@@ -158,7 +161,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	else if (!m_configurationTable->addField(error,"attenuation",CDataField::DOUBLE)) {
 		error.setExtra("Error adding field attenuation", 0);
 	}
-	else if (!m_configurationTable->addField(error,"sections_inputs", CDataField::STRING)) {
+	else if (!m_configurationTable->addField(error,"section_boards", CDataField::STRING)) {
 		error.setExtra("Error adding field sections_inputs", 0);
 	}
 	else if (!m_configurationTable->addField(error,"polarizations", CDataField::STRING))	{

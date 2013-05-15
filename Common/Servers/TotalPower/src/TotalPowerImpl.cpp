@@ -302,10 +302,10 @@ void TotalPowerImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 	//Backends::TMainHeader header;
 	//Backends::TChannelHeader chHeader[MAX_INPUT_NUMBER];
 	THeaderRecord buffer;
-	DWORD tpi[MAX_INPUT_NUMBER];
+	DWORD tpi[MAX_SECTION_NUMBER];
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	line->fillMainHeader(buffer.header);
-	line->fillChannelHeader(buffer.chHeader,MAX_INPUT_NUMBER);
+	line->fillChannelHeader(buffer.chHeader,MAX_SECTION_NUMBER);
 	try {
 		line->setTime();
 	}
