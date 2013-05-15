@@ -116,7 +116,6 @@
             <!-- Physical ICD position (degrees) -->
             <xs:element name="icd_position" type="baci:RWdouble"/>
 
-            <!--
             <xs:element name="icd_verbose_status">
                  <xs:complexType>
                     <xs:complexContent>
@@ -135,7 +134,6 @@
                     </xs:complexContent>
                 </xs:complexType>
             </xs:element>
-            -->
 
             <xs:element name="icd_summary_status">
                  <xs:complexType>

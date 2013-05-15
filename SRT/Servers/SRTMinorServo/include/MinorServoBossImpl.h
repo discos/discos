@@ -85,15 +85,15 @@ public:
 
 	
 	/**
-	 * This method implements the command line interpreter. the interpreter allows to ask for services or to issue commands
+	 * This method implements the command line interpreter. The interpreter allows to ask for services or to issue commands
 	 * to the sub-system by human readable command lines.
 	 * @param cmd string that contains the command line
-	 * @return the string that contains the answer to the command if succesful. It must be freed by the caller.
+	 * @param answer string containing the answer to the command
+	 * @return the result of the command : true if successful
 	 * @throw CORBA::SystemException
-	 * @throw ManagementErrors::CommandLineErrorEx Thrown when the command execution or parsing result in an error. 
-     * It contains the error message
 	 */
-	virtual char * command(const char *cmd) throw (CORBA::SystemException, ManagementErrors::CommandLineErrorEx);
+    virtual CORBA::Boolean command(const char *cmd, CORBA::String_out answer) throw (CORBA::SystemException);
+
 		
 	/**
 	 * This method is used to stow the antenna.

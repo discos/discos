@@ -370,10 +370,10 @@ void MinorServoBossImpl::park() throw (CORBA::SystemException, ManagementErrors:
 }
 
 
-char * MinorServoBossImpl::command(const char *cmd) throw (CORBA::SystemException, ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean MinorServoBossImpl::command(const char *cmd, CORBA::String_out answer) throw (CORBA::SystemException)
 {
 	AUTO_TRACE("MinorServoBossImpl::command()");
-	return CORBA::string_dup("command foo");		
+	return true;
 }
 
 

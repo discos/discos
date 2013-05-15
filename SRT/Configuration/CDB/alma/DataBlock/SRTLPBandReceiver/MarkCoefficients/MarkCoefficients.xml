@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<MarkCoefficientsLPBandLookUpTable xmlns="urn:schemas-cosylab-com:MarkCoefficientsLPBandLookUpTable:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <MarkEntry><Feed>0</Feed><Polarization>LEFT</Polarization><Coefficients>0, 1, 2, 3</Coefficients></MarkEntry>
+    <MarkEntry><Feed>0</Feed><Polarization>RIGHT</Polarization><Coefficients>0, 1, 2, 3</Coefficients></MarkEntry>
+    <MarkEntry><Feed>1</Feed><Polarization>LEFT</Polarization><Coefficients>0, 1, 2, 3</Coefficients></MarkEntry>
+    <MarkEntry><Feed>1</Feed><Polarization>RIGHT</Polarization><Coefficients>0, 1, 2, 3</Coefficients></MarkEntry>
+</MarkCoefficientsLPBandLookUpTable>
