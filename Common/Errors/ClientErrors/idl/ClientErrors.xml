@@ -39,4 +39,6 @@
 
 <ErrorCode name="Unknown" shortDescription="Caught an unknown exception" description=""/>
 
+<ErrorCode name="InvalidArgument" shortDescription="An invalid argument was given" description=""/>
+
 </Type>

@@ -110,6 +110,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	// no range checks because * is allowed
 	m_parser->add("skydip",new function3<CCore,non_constant,void_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(this,&CCore::skydip),3);
 
+	m_parser->add("agc","_tp_agc",2);
+
 
 
 	//add remote commands ************  should be loaded from a CDB table............................**********/

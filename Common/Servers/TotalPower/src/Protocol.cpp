@@ -124,7 +124,7 @@ WORD CProtocol::AutoGainControl(char *sBuff,const WORD& channels,const WORD& lev
 	 char tempBuff[200];
 	 strcpy(sBuff,PROT_AUTO_GAIN);
 	 strcat(sBuff,PROT_SEPARATOR);
-	 sprintf(tempBuff,"%d%d%c",channels,level,PROT_SEPARATOR_CH); 
+	 sprintf(tempBuff,"%d%c%d%c",channels,PROT_SEPARATOR_CH,level,PROT_SEPARATOR_CH);
 	 strcat(sBuff,tempBuff);
 	 strcat(sBuff,PROT_TERMINATOR);
 	 return strlen(sBuff);

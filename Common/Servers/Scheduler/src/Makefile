@@ -89,7 +89,7 @@ TCL_SCRIPTS_L   =
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         =
+PY_SCRIPTS         = _tp_agc
 PY_SCRIPTS_L       =
 
 PY_MODULES         =

@@ -356,9 +356,9 @@
 </Source>
 
 <Source>
-	<sourceName>taurusa</sourceName>
-	<rightAscension>04:41:00.00</rightAscension>
-	<declination>+25:52:00.00</declination>
+	<sourceName>taua</sourceName>
+	<rightAscension>05:34:31.94</rightAscension>
+	<declination>+22:00:52.20</declination>
 	<epoch>J2000</epoch>
 	<pmRA/>
 	<pmDec/>
@@ -406,7 +406,7 @@
 </Source>
 
 <Source>
-	<sourceName>cygnusa</sourceName>
+	<sourceName>cyga</sourceName>
 	<rightAscension>19:59:28.357</rightAscension>
 	<declination>+40:44:02.10</declination>
 	<epoch>J2000</epoch>
@@ -456,7 +456,7 @@
 </Source>
 
 <Source>
-	<sourceName>virgoa</sourceName>
+	<sourceName>vira</sourceName>
 	<rightAscension>12:30:49.423</rightAscension>
 	<declination>+12:23:28.04</declination>
 	<epoch>J2000</epoch>
@@ -531,7 +531,7 @@
 </Source>
 
 <Source>
-	<sourceName>oriona</sourceName>
+	<sourceName>oria</sourceName>
 	<rightAscension>05:35:17.3</rightAscension>
 	<declination>-05:23:28.00</declination>
 	<epoch>J2000</epoch>
