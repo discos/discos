@@ -741,12 +741,12 @@ void GroupSpectrometer::AdcReset(
 
 }
 
-void GroupSpectrometer::AdcSetMode(
-		bool modo)//modo=true Setto l'ADC al funzionamento a 8 Bit
+void GroupSpectrometer::AdcSetMode(bool modo)//modo=true Setto l'ADC al funzionamento a 8 Bit
 				  //modo=false Setto l'ADC al funzionamento a 6 Bit
 {
 	AdcConditioner *AdcTmp;
-	int distr[]={0x20,0x60,0xa0,0xe0};//Configurazione per la Distribuzione dei Bit su backplane
+	int distr[]={0x20,0x60,0xa0,0xe0,
+                     0x20,0x60,0xa0,0xe0 };//Configurazione per la Distribuzione dei Bit su backplane
 
 	int func=Xspec.GetFunctionAdc();
 	if(func==5) func=0x0a;

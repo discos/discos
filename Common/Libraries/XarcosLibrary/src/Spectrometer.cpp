@@ -42,7 +42,10 @@ int Spectrometer::Start() 		// Start integration
 	//t1=ResetStatus();
 	if ((err = Set()) != 0) return err;
 	t1 = HardwareBlock::Status(); 	// clear all bits in control
-	Control(t1 & 0x70);			//	except resolution
+	t1 = t1 & 0x70;      //	except resolution
+        Control(t1);
+        Control(t1 | 0x0c);
+        Control(t1);       // Clear pending overflow and data ready			
 	return 0;
 }
 
@@ -65,8 +68,8 @@ bool Spectrometer::DataReady()		// Check if new data are ready
   bool ret = false;
   if (t1 & 0x4) {
     ret = true;
-    err = Control(t1 &0x7);
-    err = Control(t1 &0x3);
+    err = Control(t1 &0x77);
+    err = Control(t1 &0x73);
   }
   return ret;
 }
@@ -78,8 +81,8 @@ bool Spectrometer::Overflow()		// Check if overflow occurred
   bool ret = false;
   if (t1 & 0x8) {
     ret = true;
-    err = Control(t1 &0xb);
-    err = Control(t1 &0x3);
+    err = Control(t1 &0x7b);
+    err = Control(t1 &0x73);
   }
   return ret;
 }
@@ -99,12 +102,12 @@ int Spectrometer::Status()		// polls status bits
   int err = 0;
   int t1 = HardwareBlock::Status();
   if (t1 & 0x8) {
-    err = Control(t1 &0xb);
-    err = Control(t1 &0x3);
+    err = Control(t1 &0x7b);
+    err = Control(t1 &0x73);
   }
   if (t1 & 0x4) {
-    err = Control(t1 &0x7);
-    err = Control(t1 &0x3);
+    err = Control(t1 &0x77);
+    err = Control(t1 &0x73);
   }
   return t1;
 }
