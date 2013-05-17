@@ -212,10 +212,10 @@ void CScheduleExecutor::runLoop()
 			}
 			case PRE_SCAN_PROC: { // It executed the pre scan procedure. In case of error the scheduled is continued	
 				ACS::stringSeq preProc;
-				WORD preProcArgs;
+				//WORD preProcArgs;
 				if (m_currentScan.preScan!=_SCHED_NULLTARGET) {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PRESCAN_PROCEDURE_IS_NOT_NULL"));
-					if (!m_schedule->getPreScanProcedureList()->getProcedure(m_currentScan.preScan,preProc,preProcArgs)) {
+					/*if (!m_schedule->getPreScanProcedureList()->getProcedure(m_currentScan.preScan,preProc,preProcArgs)) {
 						_EXCPT(ManagementErrors::ScheduleErrorExImpl,dummy,"CScheduleExecutor::runLoop()");
 						dummy.setReason((const char *)m_schedule->getLastError());
 						m_core->changeSchedulerStatus(Management::MNG_WARNING);
@@ -225,32 +225,32 @@ void CScheduleExecutor::runLoop()
 						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PRESCAN_PROCEDURE_IS_EMPTY"));
 						m_stage=SCAN_START;
 					}
-					else {
-						if (m_currentScan.preScanBlocking) {
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BLOCKING_PRESCAN_PROCEDURE"));
-							m_goAhead=false;
-							m_stage=SCAN_START;
-							try {
-								m_core->executeProcedure(m_currentScan.preScan,&procedureCallBack,this);
-								break; //procedure injection is ok.....wait for it to finish
-							}
-							catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
-								ex.log(LM_WARNING);
-								m_core->changeSchedulerStatus(Management::MNG_WARNING); 
-								// m_goAhead=true; the callback procedure should be called anyway, also in case of errors
-							}
+					else {*/
+					if (m_currentScan.preScanBlocking) {
+						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BLOCKING_PRESCAN_PROCEDURE"));
+						m_goAhead=false;
+						m_stage=SCAN_START;
+						try {
+							m_core->executeProcedure(m_currentScan.preScan,&procedureCallBack,this);
+							break; //procedure injection is ok.....wait for it to finish
 						}
-						else {  // scheduler is not asked to wait for the procedure termination...inject the procedure and go on.
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"NON-BLOCKING_PRESCAN_PROCEDURE"));
-							try {
-								m_core->executeProcedure(m_currentScan.preScan,&procedureCallBack,this);
-							}
-							catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
-								ex.log(LM_WARNING);
-								m_core->changeSchedulerStatus(Management::MNG_WARNING); 
-							}
-							m_stage=SCAN_START;
+						catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
+							ex.log(LM_WARNING);
+							m_core->changeSchedulerStatus(Management::MNG_WARNING);
+							// m_goAhead=true; the callback procedure should be called anyway, also in case of errors
 						}
+					}
+					else {  // scheduler is not asked to wait for the procedure termination...inject the procedure and go on.
+						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"NON-BLOCKING_PRESCAN_PROCEDURE"));
+						try {
+							m_core->executeProcedure(m_currentScan.preScan,&procedureCallBack,this);
+						}
+						catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
+							ex.log(LM_WARNING);
+							m_core->changeSchedulerStatus(Management::MNG_WARNING);
+						}
+						m_stage=SCAN_START;
+						/*}*/
 					}
 				}
 				else {
@@ -347,12 +347,12 @@ void CScheduleExecutor::runLoop()
 				m_stage=POST_SCAN_PROC;
 			}
 			case POST_SCAN_PROC: { //Executes the post scan procedure..in case of error nothing is done. We try to keep it up.
-				ACS::stringSeq postProc;
-				WORD postProcArgs;
+				//ACS::stringSeq postProc;
+				//WORD postProcArgs;
 				if (m_currentScan.postScan!=_SCHED_NULLTARGET) {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"POSTSCAN_PROCEDURE_IS_NOT_NULL"));
-					printf("CERCO LA PROCEDURA: %s \n",(const char *)m_currentScan.postScan);
-					if (!m_schedule->getPostScanProcedureList()->getProcedure(m_currentScan.postScan,postProc,postProcArgs)) {
+					//printf("CERCO LA PROCEDURA: %s \n",(const char *)m_currentScan.postScan);
+					/*if (!m_schedule->getPostScanProcedureList()->getProcedure(m_currentScan.postScan,postProc,postProcArgs)) {
 						_EXCPT(ManagementErrors::ScheduleErrorExImpl,dummy,"CScheduleExecutor::runLoop()");
 						dummy.setReason((const char *)m_schedule->getLastError());
 						m_core->changeSchedulerStatus(Management::MNG_WARNING);
@@ -361,33 +361,33 @@ void CScheduleExecutor::runLoop()
 					else if (postProc.length()==0) { //if the procedure is empty...no need to execute it.
 						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"POSTSCAN_PROCEDURE_IS_EMPTY"));
 						m_stage=SCAN_SELECTION;
-					}
-					else {
-						if (m_currentScan.postScanBlocking) {
-							m_goAhead=false;
-							m_stage=SCAN_SELECTION;
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BLOCKING_POSTSCAN_PROCEDURE"));
-							try {
-								m_core->executeProcedure(m_currentScan.postScan,&procedureCallBack,this);
-								break; //procedure injection is ok.....wait for it to finish
-							}
-							catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
-								ex.log(LM_WARNING);
-								m_core->changeSchedulerStatus(Management::MNG_WARNING); 
-								// m_goAhead=true; the callback procedure should be called anyway, also in case of errors
-							}
+					}*/
+					/*else {*/
+					if (m_currentScan.postScanBlocking) {
+						m_goAhead=false;
+						m_stage=SCAN_SELECTION;
+						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BLOCKING_POSTSCAN_PROCEDURE"));
+						try {
+							m_core->executeProcedure(m_currentScan.postScan,&procedureCallBack,this);
+							break; //procedure injection is ok.....wait for it to finish
 						}
-						else {  // scheduler is not asked to wait for the procedure termination...inject the procedure and go on.
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"NON-BLOCKING_PRESCAN_PROCEDURE"));
-							try {
-								m_core->executeProcedure(m_currentScan.postScan,&procedureCallBack,this);
-							}
-							catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
-								ex.log(LM_WARNING);
-								m_core->changeSchedulerStatus(Management::MNG_WARNING); 
-							}							
+						catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
+							ex.log(LM_WARNING);
+							m_core->changeSchedulerStatus(Management::MNG_WARNING);
+							// m_goAhead=true; the callback procedure should be called anyway, also in case of errors
 						}
 					}
+					else {  // scheduler is not asked to wait for the procedure termination...inject the procedure and go on.
+						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"NON-BLOCKING_PRESCAN_PROCEDURE"));
+						try {
+							m_core->executeProcedure(m_currentScan.postScan,&procedureCallBack,this);
+						}
+						catch (ManagementErrors::ScheduleProcedureErrorExImpl& ex) {
+							ex.log(LM_WARNING);
+							m_core->changeSchedulerStatus(Management::MNG_WARNING);
+						}
+					}
+					/*}*/
 				}
 				m_stage=SCAN_SELECTION;				
 				break;
