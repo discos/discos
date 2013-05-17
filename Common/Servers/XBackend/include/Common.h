@@ -40,7 +40,7 @@
 #define DEFAULT_FREQUENCY 0.0 //MHz // CDB
 
 #define DEFAULT_INTEGRATION 10  //10 seconds integration // CDB
-#define DEFAULT_POLARIZATION false // CDB
+#define DEFAULT_POLARIZATION true // CDB
 
 #define MAX_BANDWIDTH 125.0 //MHz
 #define MIN_BANDWIDTH 0.488 //MHz

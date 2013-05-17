@@ -145,27 +145,27 @@ void XBackendsImpl::initialize()
 		  (getContainerServices()->getName()+":mode8bit",getComponent(), new DevIOMode8bit(m_commandLine),true);		
 		m_pinputSection=new ROlongSeq(getContainerServices()->getName()+":inputSection",getComponent(),
 				new DevIOInputSection(m_commandLine),true);	
-		m_parser=new CParser<CCommandLine>(commandL,10);  
+		m_parser=new SimpleParser::CParser<CCommandLine>(commandL,10);  
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"XBackendsImpl::initialize()");
 		throw dummy;
 	}
 	// command parser configuration	
-	m_parser->add<1>("setIntegration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(commandL,&CCommandLine::setIntegration) );
-	m_parser->add<7>("setSection",new function7<CCommandLine,non_constant,void_type,I<long_type>,I<double_type>,I<double_type>,I<long_type>,I<long_type>,I<double_type>,I<long_type> >
-					(commandL,&CCommandLine::setConfiguration) );
-	m_parser->add<2>("setAttenuation", new function2<CCommandLine,non_constant,void_type,I<long_type>,I<double_type> >(commandL,&CCommandLine::setAttenuation) );
-	m_parser->add<1>("enable",new function1<CCommandLine,non_constant,void_type,I<longSeq_type> >(commandL,&CCommandLine::setEnabled) );
-	m_parser->add<0>("getIntegration",new function1<CCommandLine,constant,void_type,O<long_type> >(commandL,&CCommandLine::getIntegration) );
-	m_parser->add<0>("getFrequency",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getFrequency) );
-	m_parser->add<0>("getSampleRate",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getSampleRate) );
-	m_parser->add<0>("getBins",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(commandL,&CCommandLine::getBins) );
-	m_parser->add<0>("getPolarization",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(commandL,&CCommandLine::getPolarization) );
-	m_parser->add<0>("getBandWidth",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getBandWidth) );
-	m_parser->add<0>("getAttenuation",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getAttenuation) );
-	m_parser->add<0>("getTime",new function1<CCommandLine,constant,void_type,O<time_type> >(commandL,&CCommandLine::getTime) );
-	m_parser->add<1>("initialize",new function1<CCommandLine,non_constant,void_type,I<string_type> >(commandL,&CCommandLine::setup) );
+	m_parser->add("setIntegration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(commandL,&CCommandLine::setIntegration),1 );
+	m_parser->add("setSection",new function7<CCommandLine,non_constant,void_type,I<long_type>,I<double_type>,I<double_type>,I<long_type>,I<long_type>,I<double_type>,I<long_type> >
+					(commandL,&CCommandLine::setConfiguration),7 );
+	m_parser->add("setAttenuation", new function2<CCommandLine,non_constant,void_type,I<long_type>,I<double_type> >(commandL,&CCommandLine::setAttenuation),2 );
+	m_parser->add("enable",new function1<CCommandLine,non_constant,void_type,I<longSeq_type> >(commandL,&CCommandLine::setEnabled),1 );
+	m_parser->add("getIntegration",new function1<CCommandLine,constant,void_type,O<long_type> >(commandL,&CCommandLine::getIntegration),0 );
+	m_parser->add("getFrequency",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getFrequency),0 );
+	m_parser->add("getSampleRate",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getSampleRate),0 );
+	m_parser->add("getBins",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(commandL,&CCommandLine::getBins),0 );
+	m_parser->add("getPolarization",new function1<CCommandLine,constant,void_type,O<longSeq_type> >(commandL,&CCommandLine::getPolarization),0 );
+	m_parser->add("getBandWidth",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getBandWidth),0 );
+	m_parser->add("getAttenuation",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getAttenuation),0 );
+	m_parser->add("getTime",new function1<CCommandLine,constant,void_type,O<time_type> >(commandL,&CCommandLine::getTime),0 );
+	m_parser->add("initialize",new function1<CCommandLine,non_constant,void_type,I<string_type> >(commandL,&CCommandLine::setup),1 );
 	
 	m_initialized=true;
 	ACS_LOG(LM_FULL_INFO,"XBackendsImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
@@ -701,25 +701,34 @@ void XBackendsImpl::setIntegration(CORBA::Long Integration)
 	}		
 }
 
-char *XBackendsImpl::command(const char *configCommand) 
-	throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean XBackendsImpl::command(const char *configCommand, CORBA::String_out answer) 
+	throw (CORBA::SystemException)
 {
 	AUTO_TRACE("XBackendsImpl::command()");
-	IRA::CString out("");
-	IRA::CString in("");
+	IRA::CString out;
+	//IRA::CString in("");
+	bool res;
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	in=IRA::CString(configCommand);
+	//in=IRA::CString(configCommand);
 	try {
-		m_parser->run(in,out);
+		m_parser->run(configCommand,out);
+		res = true;
 	}
 	catch (ParserErrors::ParserErrorsExImpl &ex) {
-		_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"XBackendsImpl::command()");
+		/*_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"XBackendsImpl::command()");
 		impl.setCommand(configCommand);
 		impl.setErrorMessage((const char *)out);
 		impl.log(LM_DEBUG);
-		throw impl.getCommandLineErrorEx();
+		throw impl.getCommandLineErrorEx();*/
+		res = false;
 	}
-	return CORBA::string_dup((const char *)out);
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_ERROR); // the errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface, while the parser errors are never logged.
+		res=false;
+	}
+	answer=CORBA::string_dup((const char *)out);
+	return res;
+	//return CORBA::string_dup((const char *)out);
 }
 
 
