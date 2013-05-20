@@ -199,7 +199,8 @@
         <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
         <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
         <xs:attribute name="slaves" type="xs:string" use="required" />
-        <xs:attribute name="confA" type="xs:string" use="required" />
+        <xs:attribute name="conf7GHz" type="xs:string" use="required" />
+        <xs:attribute name="conf22GHz" type="xs:string" use="required" />
         <xs:attribute name="confB" type="xs:string" use="required" />
         <!--    <xs:attribute name="confC" type="xs:string" use="required" />
         <xs:attribute name="confD" type="xs:string" use="required" />
