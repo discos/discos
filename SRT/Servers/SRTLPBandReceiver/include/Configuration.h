@@ -28,9 +28,10 @@ class CConfiguration {
 public:
 
 	typedef struct {
+		double skyFrequency;
 		long long feed; 
-        std::vector<double> coefficients;
 		Receivers::TPolarization polarization;
+		double markValue;
 	} TMarkValue;
 
 	typedef struct {
@@ -39,6 +40,7 @@ public:
 	} TLOValue;
 
 	typedef struct {
+		long long feed; 
 		double frequency;
 		double taper;
 	} TTaperValue;
@@ -118,6 +120,24 @@ public:
 	inline const DDWORD& getRepetitionExpireTime() const { return m_repetitionExpireTime; }
 
 	/**
+	 * Allows to get the table of mark values relative to left polarization
+	 * @param freq vector containing the frequency value of the mark table. It must be freed by caller.
+	 * @param markValue vector of the value of the calibration diode. It must be freed by caller.
+	 * @param len used to return the length of the mark values array
+	 * @return the size of the output vectors
+	 */
+	DWORD getLeftMarkTable(double *& freq,double *& markValuel, short feed) const;
+
+	/**
+	 * Allows to get the table of mark values relative to left polarization
+	 * @param freq vector containing the frequency value of the mark table. It must be freed by caller.
+	 * @param markValue vector of the value of the calibration diode. It must be freed by caller.
+	 * @param len used to return the length of the mark values array
+	 * @return the size of the output vectors
+	 */
+	DWORD getRightMarkTable(double *& freq,double *& markValue, short feed) const;
+
+	/**
 	 * @return the instance of the local oscillator component  that the receiver will use to drive the set its LO
 	 */
 	inline const IRA::CString& getLocalOscillatorInstance() const { return m_localOscillatorInstance; }
@@ -128,7 +148,7 @@ public:
 	 * @param taper corresponding taper  for the frequencies vector. It must be freed by caller.
 	 * @return the size of the output vectors
 	 */
-	DWORD getTaperTable(double * &freq,double *&taper) const;
+	DWORD getTaperTable(double * &freq,double *&taper, short feed) const;
 
 	/**
 	 * @param code feed identification codes. It must be freed by caller.

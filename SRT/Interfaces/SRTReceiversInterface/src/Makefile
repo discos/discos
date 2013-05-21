@@ -7,8 +7,7 @@
 
 MAKE_PDF = ON
 
-CDB_SCHEMAS = MarkCoefficientsLPBandLookUpTable SRTLPBandReceiverModeSetup \
-              MarkCoefficientsKBandLookUpTable
+CDB_SCHEMAS = SRTLPBandNoiseMarkLookUpTable SRTLPBandReceiverModeSetup MarkCoefficientsKBandLookUpTable SRTLPBandTaperLookUpTable
 
 # IDL Files and flags
 IDL_FILES = SRTKBandMF SRT7GHz SRTLPBand

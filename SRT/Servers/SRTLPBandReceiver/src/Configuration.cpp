@@ -45,7 +45,7 @@ using namespace IRA;
 }
 
 #define CONFIG_PATH "DataBlock/SRTLPBandReceiver"
-#define MARKTABLE_PATH CONFIG_PATH"/MarkCoefficients"
+#define MARKTABLE_PATH CONFIG_PATH"/NoiseMark"
 #define FEEDTABLE_PATH CONFIG_PATH"/Feeds"
 #define TAPERTABLE_PATH CONFIG_PATH"/Taper"
 
@@ -189,17 +189,17 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
         throw dummy;
     }
     error.Reset();
-    // TODO: add the filed of the LP mark table. Inoltre la tabella per il ric LP deve avere per ogni
-    // feed tutte e quatto le polarizzazioni, quindi oltre a quelle circolari (L e R) anche quelle lineari
-    // (V e H)
     if (!m_markTable->addField(error, "Feed", IRA::CDataField::LONGLONG)) {
         field = "Feed";
     }
     else if (!m_markTable->addField(error, "Polarization", IRA::CDataField::STRING)) {
         field="Polarization";
     }
-    else if (!m_markTable->addField(error, "Coefficients", IRA::CDataField::STRING)) {
-        field = "Coefficients";
+    else if (!m_markTable->addField(error,"SkyFrequency",IRA::CDataField::DOUBLE)) {
+        field="SkyFrequency";
+    }
+    else if (!m_markTable->addField(error,"NoiseMark",IRA::CDataField::DOUBLE)) {
+        field="NoiseMark";
     }
     if (!error.isNoError()) {
         _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
@@ -213,11 +213,6 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
 
     m_markTable->First();
     len = m_markTable->recordCount();
-    if(len != m_feeds * 2) { // Two channels per feed
-        _EXCPT(ComponentErrors::CDBAccessExImpl, dummy, "CConfiguration::init()");
-        dummy.setFieldName("MarkCoefficients table size");
-        throw dummy;
-    }
     try {
         m_markVector = new TMarkValue[len];
     }
@@ -225,89 +220,21 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
         _EXCPT(ComponentErrors::MemoryAllocationExImpl, dummy, "CConfiguration::init()");
         throw dummy;
     }
-    for (WORD i=0; i<len; i++) {
+    for (WORD i=0;i<len;i++) {
+        m_markVector[i].skyFrequency=(*m_markTable)["SkyFrequency"]->asDouble();
         m_markVector[i].feed = (*m_markTable)["Feed"]->asLongLong();
-        m_markVector[i].polarization = \
-            (*m_markTable)["Polarization"]->asString() == "LEFT" ? Receivers::RCV_LCP:Receivers::RCV_RCP;
-
-        std::vector<std::string> marks_str = \
-            split(std::string((*m_markTable)["Coefficients"]->asString()), std::string(","));
-
-        // Vector of coefficients (double)
-        for(std::vector<std::string>::iterator iter = marks_str.begin(); iter != marks_str.end(); iter++)
-            (m_markVector[i].coefficients).push_back(str2double(*iter));
+        m_markVector[i].markValue=(*m_markTable)["NoiseMark"]->asDouble();
+        m_markVector[i].polarization=(*m_markTable)["Polarization"]->asString()=="LEFT"?Receivers::RCV_LCP:Receivers::RCV_RCP;
+        ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",
+                (LM_DEBUG,"MARK_VALUE_ENTRY: %d %lf %lf",m_markVector[i].polarization,m_markVector[i].skyFrequency,
+        m_markVector[i].markValue));
         m_markTable->Next();
     }
+    
     m_markVectorLen = len;
     m_markTable->closeTable();
     delete m_markTable;
     m_markTable = NULL;
-
-    // The feeds
-    try {
-        m_feedsTable = new IRA::CDBTable(Services, "Feed", FEEDTABLE_PATH);
-    }
-    catch (std::bad_alloc& ex) {
-        _EXCPT(ComponentErrors::MemoryAllocationExImpl, dummy, "CConfiguration::init()");
-        throw dummy;
-    }
-    error.Reset();
-    if (!m_feedsTable->addField(error, "feedCode", IRA::CDataField::LONGLONG)) {
-        field = "feedCode";
-    }
-    else if (!m_feedsTable->addField(error, "xOffset", IRA::CDataField::DOUBLE)) {
-        field = "xOffset";
-    }
-    else if (!m_feedsTable->addField(error, "yOffset", IRA::CDataField::DOUBLE)) {
-        field = "yOffset";
-    }
-    else if (!m_feedsTable->addField(error, "relativePower", IRA::CDataField::DOUBLE)) {
-        field = "relativePower";
-    }
-    if (!error.isNoError()) {
-        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-        dummy.setFieldName((const char *)field);
-        throw dummy;
-    }
-    if (!m_feedsTable->openTable(error))    {
-        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-        throw dummy;
-    }
-    m_feedsTable->First();
-    if (m_feeds != m_feedsTable->recordCount()) {
-        _EXCPT(ComponentErrors::CDBAccessExImpl, dummy, "CConfiguration::init()");
-        dummy.setFieldName("feed table size");
-        throw dummy;
-    }
-    len = m_feeds;
-    try {
-        m_feedVector = new TFeedValue[len];
-    }
-    catch (std::bad_alloc& ex) {
-        _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
-        throw dummy;
-    }
-    for (WORD i=0; i<len; i++) {
-        m_feedVector[i].xOffset = (*m_feedsTable)["xOffset"]->asDouble();
-        m_feedVector[i].yOffset = (*m_feedsTable)["yOffset"]->asDouble();
-        m_feedVector[i].relativePower = (*m_feedsTable)["relativePower"]->asDouble();
-        m_feedVector[i].code = (WORD)(*m_feedsTable)["feedCode"]->asLongLong();
-        ACS_LOG(LM_FULL_INFO,
-                "CConfiguration::init()",
-                (
-                     LM_DEBUG, 
-                     "FEED_VALUE_ENTRY: %d %lf %lf %lf", 
-                     m_feedVector[i].code,
-                     m_feedVector[i].xOffset,
-                     m_feedVector[i].yOffset,
-                     m_feedVector[i].relativePower
-                 )
-        );
-        m_feedsTable->Next();
-    }
-    m_feedsTable->closeTable();
-    delete m_feedsTable;
-    m_feedsTable = NULL;
 
     //The taper.....
     try {
@@ -318,12 +245,16 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
         throw dummy;
     }
     error.Reset();
-    if (!m_taperTable->addField(error, "Frequency", IRA::CDataField::DOUBLE)) {
+    if (!m_taperTable->addField(error, "Feed", IRA::CDataField::LONGLONG)) {
+        field = "Feed";
+    }
+    else if (!m_taperTable->addField(error, "Frequency", IRA::CDataField::DOUBLE)) {
         field = "Frequency";
     }
     else if (!m_taperTable->addField(error, "Taper", IRA::CDataField::DOUBLE)) {
         field = "OutputPower";
     }
+
     if (!error.isNoError()) {
         _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
         dummy.setFieldName((const char *)field);
@@ -344,13 +275,15 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
     }
     ACS_LOG(LM_FULL_INFO, "CConfiguration::init()", (LM_DEBUG, "TAPER_ENTRY_NUMBER: %d", len));
     for (WORD i=0; i<len; i++) {
+        m_taperVector[i].feed = (*m_taperTable)["Feed"]->asLongLong();
         m_taperVector[i].frequency = (*m_taperTable)["Frequency"]->asDouble();
         m_taperVector[i].taper = (*m_taperTable)["Taper"]->asDouble();
         ACS_LOG(LM_FULL_INFO, 
                 "CConfiguration::init()",
                 (
                      LM_DEBUG,
-                     "SYNTH_VALUE_ENTRY: %lf %lf",
+                     "SYNTH_VALUE_ENTRY: %lf %lf %ld",
+                     m_taperVector[i].feed,
                      m_taperVector[i].frequency,
                      m_taperVector[i].taper
                  )
@@ -549,16 +482,52 @@ void CConfiguration::setMode(const char * mode) throw (
 }
 
 
-DWORD CConfiguration::getTaperTable(double * &freq,double *&taper) const
+DWORD CConfiguration::getTaperTable(double * &freq,double *&taper, short feed) const
 {
     freq = new double [m_taperVectorLen];
     taper = new double [m_taperVectorLen];
+	DWORD count=0;
     for (DWORD j=0; j<m_taperVectorLen; j++) {
-        freq[j] = m_taperVector[j].frequency;
-        taper[j] = m_taperVector[j].taper;
+		if (m_taperVector[j].feed==feed) {
+            freq[count] = m_taperVector[j].frequency;
+            taper[count] = m_taperVector[j].taper;
+			count++;
+        }
     }
     return m_taperVectorLen;
 }
+
+DWORD CConfiguration::getLeftMarkTable(double *& freq, double *& markValue, short feed) const
+{
+	freq = new double [m_markVectorLen];
+	markValue = new double [m_markVectorLen];
+	DWORD count=0;
+	for (DWORD j=0;j<m_markVectorLen;j++) {
+		if (m_markVector[j].polarization==Receivers::RCV_LCP && m_markVector[j].feed==feed) {
+			freq[count]=m_markVector[j].skyFrequency;
+			markValue[count]=m_markVector[j].markValue;
+			count++;
+		}
+	}
+	return count;
+}
+
+DWORD CConfiguration::getRightMarkTable(double *& freq,double *& markValue, short feed) const
+{
+	freq= new double [m_markVectorLen];
+	markValue=new double [m_markVectorLen];
+	DWORD count=0;
+	for (DWORD j=0;j<m_markVectorLen;j++) {
+		if (m_markVector[j].polarization==Receivers::RCV_RCP && m_markVector[j].feed==feed) {
+			freq[count]=m_markVector[j].skyFrequency;
+			markValue[count]=m_markVector[j].markValue;
+			count++;
+		}
+	}
+	return count;
+}
+
+
 
 DWORD CConfiguration::getFeedInfo(
         WORD *& code,

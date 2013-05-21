@@ -407,18 +407,23 @@ void CComponentCore::getCalibrationMark(
         double& scale
         ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
 {
-    /*
     double realFreq,realBw;
     double *tableLeftFreq=NULL;
     double *tableLeftMark=NULL;
     double *tableRightFreq=NULL;
     double *tableRightMark=NULL;
+    DWORD sizeL=0;
+    DWORD sizeR=0;
+    ACS::doubleSeq lo;
+    short polarization;
+
     baci::ThreadSyncGuard guard(&m_mutex);
     if (m_setupMode=="") {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
         impl.setReason("receiver not configured yet");
         throw impl;
     }
+    cout << "some checks" << endl;
     //let's do some checks about input data
     unsigned stdLen=freqs.length();
     if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
@@ -440,92 +445,84 @@ void CComponentCore::getCalibrationMark(
             throw impl;
         }
     }
-        
     result.length(stdLen);
     resFreq.length(stdLen);
     resBw.length(stdLen);
 
-    // DWORD sizeL=0;
-    // DWORD sizeR=0;
-    // // first get the calibration mark tables
-    // sizeL=m_configuration.getLeftMarkTable(tableLeftFreq,tableLeftMark); // To insert in the CDB
-    // sizeR=m_configuration.getRightMarkTable(tableRightFreq,tableRightMark); // To insert in the CDB
-
-    vector< vector<double> > leftMarkCoeffs;
-    vector< vector<double> > rightMarkCoeffs;
-    const CConfiguration::TMarkValue *const markVector = m_configuration.getMarkVector();
-    if(markVector == NULL) {
-        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
-        impl.setReason("The markVector pointer is NULL");
-        throw impl;
-    }
-    for(DWORD i=0; i<m_configuration.getMarkVectorLen(); i++) {
-        if(markVector[i].polarization==Receivers::RCV_LCP)
-            leftMarkCoeffs.push_back(markVector[i].coefficients);
-        else if(markVector[i].polarization==Receivers::RCV_RCP)
-            rightMarkCoeffs.push_back(markVector[i].coefficients);
-        else {
-            _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
-            impl.setReason("Polarization unknown");
-            throw impl;
-        }
-    }
-    if(leftMarkCoeffs.size() != rightMarkCoeffs.size() || leftMarkCoeffs.size() != m_configuration.getFeeds()) {
-        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
-        impl.setReason("The mark coefficients length is inconsistent");
-        throw impl;
-    }
-
-    double f1,f2;
-    double integral;
-    double mark=0;
+    double startFreq, bandwidth = 1.0;
+    cout << "before for" << endl;
     for (unsigned i=0;i<stdLen;i++) {
-        if (m_polarization[ifs[i]]==(long)Receivers::RCV_LCP) {
-            // take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
-            if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
-                realFreq=m_startFreq[ifs[i]];
-                realBw=0.0;
-            }
-            // realFreq+=m_LO[ifs[i]]; Questo era nel Boss. Quindi devo fare un: (?)
-            // ACS::doubleSeq lo;
-            // getLO(lo);
-            // realFreq += lo[ifs[i]];
-            realFreq+=m_localOscillatorValue; // Questo e' quanto c'era nel mio component. Devo fare come sopra per allinearlo al RecvBossCore?
-            // resFreq[i]=realFreq;
-            // resBw[i]=realBw;
-            // realFreq+=realBw/2.0;
-            f1=realFreq;
-            f2=f1+realBw;
-            f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
-            integral=(leftMarkCoeffs[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(leftMarkCoeffs[feeds[i]][1]/3) * \
-                     (f2*f2*f2-f1*f1*f1)+(leftMarkCoeffs[feeds[i]][2]/2)*(f2*f2-f1*f1)+leftMarkCoeffs[feeds[i]][3]*(f2-f1);               
-            mark=integral/(f2-f1);              
+        startFreq = (feeds[i] == 0) ? m_LBandStartFreq[ifs[i]] : m_PBandStartFreq[ifs[i]];
+        bandwidth = (feeds[i] == 0) ? m_configuration.getLBandIFBandwidth()[ifs[i]] : m_configuration.getPBandIFBandwidth()[ifs[i]];
+        polarization = (feeds[i] == 0) ? m_configuration.getLBandPolarization()[ifs[i]] : m_configuration.getPBandPolarization()[ifs[i]];
+        (feeds[i] == 0) ? getLBandLO(lo) : getPBandLO(lo);
+        tableLeftFreq = NULL;
+        tableLeftMark = NULL;
+        tableRightFreq = NULL;
+        tableRightMark = NULL;
+        cout << "tables NULL, i = " << i << endl;
+
+        // Get the calibration mark tables
+        sizeL = m_configuration.getLeftMarkTable(tableLeftFreq, tableLeftMark, feeds[i]);
+        sizeR = m_configuration.getRightMarkTable(tableRightFreq, tableRightMark, feeds[i]);
+        cout << "sizeL: " << sizeL << endl;
+        cout << "sizeR: " << sizeR << endl;
+        
+        // Now computes the mark for each input band, considering the present mode and configuration of the receiver.
+        if (!IRA::CIRATools::skyFrequency(
+                freqs[i],
+                bandwidths[i],
+                startFreq,
+                bandwidth,
+                realFreq,
+                realBw
+                )
+        ) 
+        {
+            realFreq = startFreq;
+            realBw = 0.0;
         }
-        else if (m_polarization[ifs[i]]==(long)Receivers::RCV_RCP) {
-            // take the real observed bandwidth....the correlation between detectro device and the band provided by the receiver
-            if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
-                realFreq=m_startFreq[ifs[i]];
-                realBw=0.0;
-            }
-            // realFreq+=m_LO[ifs[i]]; // STESSO DISCORSO DI SOPRA?
-            realFreq+=m_localOscillatorValue; // Questo e' quanto c'era nel mio component. Devo fare come sopra per allinearlo al RecvBossCore?
-            f1= realFreq;
-            f2=f1+realBw;
-            f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
-            integral=(rightMarkCoeffs[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(rightMarkCoeffs[feeds[i]][1]/3) * \
-                     (f2*f2*f2-f1*f1*f1)+(rightMarkCoeffs[feeds[i]][2]/2)*(f2*f2-f1*f1)+rightMarkCoeffs[feeds[i]][3]*(f2-f1);             
-            mark=integral/(f2-f1);
+
+        cout << "skyFrequ :)" << endl;
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"SUB_BAND %lf %lf", realFreq, realBw));
+        realFreq += lo[ifs[i]];
+        resFreq[i] = realFreq;
+        resBw[i] = realBw;
+        realFreq += realBw / 2.0;
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
+
+        cout << "lo[" << i << "]: " << lo[i] << endl;
+        cout << "realFreq: " << realFreq << endl;
+
+        cout << "ifs[" << i << "]: " << ifs[i] << endl;
+        for(size_t j=0; j<sizeL; j++)
+            cout << "tableLeftFreq" << tableLeftFreq[j] << endl;
+        for(size_t j=0; j<sizeL; j++)
+            cout << "tableLeftMark" << tableLeftMark[j] << endl;
+        for(size_t j=0; j<sizeR; j++)
+            cout << "tableRigthFreq" << tableRightFreq[j] << endl;
+        for(size_t j=0; j<sizeR; j++)
+            cout << "tableRigthMark" << tableRightMark[j] << endl;
+
+        if (polarization==(long)Receivers::RCV_LCP) {
+            cout << "RCV_LCP" << endl;
+            result[i]=linearFit(tableLeftFreq, tableLeftMark, sizeL, realFreq);
+            ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
         }
-        result[i]=mark;
-        resFreq[i]=realFreq;
-        resBw[i]=realBw;
+        else { //RCV_RCP
+            cout << "RCV_RCP" << endl;
+            result[i]=linearFit(tableRightFreq,tableRightMark,sizeR,realFreq);
+            ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"RIGHT_MARK_VALUE %lf",result[i]));
+        }
+        cout << "end pola:)" << endl;
     }
-    scale=1.0;
+
     if (tableLeftFreq) delete [] tableLeftFreq;
     if (tableLeftMark) delete [] tableLeftMark;
     if (tableRightFreq) delete [] tableRightFreq;
     if (tableRightMark) delete [] tableRightMark;
-    */
+    scale = 1.0;
+
 }
 
 
@@ -576,7 +573,7 @@ double CComponentCore::getTaper(
     ACS_LOG(LM_FULL_INFO, "CComponentCore::getTaper()", (LM_DEBUG,"CENTRAL_FREQUENCY %lf", centralFreq));
     waveLen = LIGHTSPEED / (centralFreq * 1000000);
     ACS_LOG(LM_FULL_INFO, "CComponentCore::getTaper()", (LM_DEBUG, "WAVELENGTH %lf", waveLen));
-    size = m_configuration.getTaperTable(freqVec, taperVec);
+    size = m_configuration.getTaperTable(freqVec, taperVec, feed);
     taper = linearFit(freqVec, taperVec, size, centralFreq);
     ACS_LOG(LM_FULL_INFO, "CComponentCore::getTaper()", (LM_DEBUG,"TAPER %lf", taper));
     if (freqVec) delete [] freqVec;

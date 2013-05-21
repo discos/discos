@@ -488,6 +488,9 @@ protected:
     IRA::ReceiverControl *m_control; // This object is thread safe
     ACS::longSeq m_LBandPolarization;
     ACS::longSeq m_PBandPolarization;
+    ACS::doubleSeq m_startFreq;
+    ACS::doubleSeq m_bandwidth;
+    ACS::longSeq m_polarization;
     BACIMutex m_mutex;
 
     ACS::doubleSeq m_LBandStartFreq;
