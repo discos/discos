@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>13</select>
+        <select>7</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -50,6 +50,10 @@
         </container>
         <container>
             <name>SRT7GHzContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>SRTLPBandContainer</name>
             <type>cpp</type>
         </container>
         <container>
