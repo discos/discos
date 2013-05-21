@@ -26,4 +26,10 @@
 
 <AvailableReceiver Code="KKG" Component="RECEIVERS/SRTKBandMFReceiver"/>
 
+<AvailableReceiver Code="LLP" Component="RECEIVERS/SRTLPBandReceiver"/>
+
+<AvailableReceiver Code="PPP" Component="RECEIVERS/SRTLPBandReceiver"/>
+
+<AvailableReceiver Code="LPP" Component="RECEIVERS/SRTLPBandReceiver"/>
+
 </ReceiversBoss>

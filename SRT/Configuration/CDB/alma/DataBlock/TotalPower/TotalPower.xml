@@ -41,7 +41,7 @@
  	<beams>1</beams>
  	<bandWidth>300.0</bandWidth>
  	<attenuation>10.0</attenuation>	 	
- 	<section_boards>0 1</section_boards>
+ 	<section_boards>2 3</section_boards>
  	<polarizations>L R</polarizations>
  	<feed>0 0</feed>
  	<IF>0 1</IF>
@@ -57,8 +57,22 @@
  	<attenuation>10.0</attenuation>	 	
  	<section_boards>2 3</section_boards>
  	<polarizations>L R</polarizations>
- 	<feed>0 0</feed>
+ 	<feed>1 1</feed>
  	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>PLP</configurationID>
+ 	<sections>4</sections>
+ 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<inputPort>PRIMARY</inputPort>
+ 	<beams>2</beams>
+ 	<bandWidth>300.0</bandWidth>
+ 	<attenuation>10.0</attenuation>	 	
+ 	<section_boards>0 1 2 3</section_boards>
+ 	<polarizations>L R L R</polarizations>
+ 	<feed>0 0 1 1</feed>
+ 	<IF>0 1 0 1</IF>
 </Configuration>
 
 </TotalPowerSetup>

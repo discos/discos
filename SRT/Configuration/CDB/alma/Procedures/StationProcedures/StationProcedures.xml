@@ -24,4 +24,38 @@
 </body>
 </Procedure>
 
+<Procedure name="setupLLP" args="0">
+<body>
+	antennaSetup=LP
+	receiversSetup=LLP
+	receiversMode=C1C1
+	initialize=LLP
+	device=0
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupPPP" args="0">
+<body>
+	antennaSetup=LP
+	receiversSetup=PPP
+	receiversMode=C1C1
+	initialize=PPP
+	device=0
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupPLP" args="0">
+<body>
+	antennaSetup=LP
+	receiversSetup=LPP
+	receiversMode=C1C1
+	initialize=PLP
+	device=0
+	calOff
+</body>
+</Procedure>
+
+
 </ProcedureFile>
