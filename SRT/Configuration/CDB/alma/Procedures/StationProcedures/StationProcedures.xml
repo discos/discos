@@ -28,7 +28,7 @@
 <body>
 	antennaSetup=LP
 	receiversSetup=LLP
-	receiversMode=C1C1
+	receiversMode=C4**
 	initialize=LLP
 	device=0
 	calOff
@@ -39,7 +39,7 @@
 <body>
 	antennaSetup=LP
 	receiversSetup=PPP
-	receiversMode=C1C1
+	receiversMode=**C3
 	initialize=PPP
 	device=0
 	calOff
@@ -50,7 +50,7 @@
 <body>
 	antennaSetup=LP
 	receiversSetup=LPP
-	receiversMode=C1C1
+	receiversMode=C4C3
 	initialize=PLP
 	device=0
 	calOff

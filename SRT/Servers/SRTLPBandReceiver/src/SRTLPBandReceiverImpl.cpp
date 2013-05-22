@@ -194,7 +194,7 @@ void SRTLPBandReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentErr
     // Write some fixed values
     m_preceiverName->getDevIO()->write(getComponent()->getName(), timestamp);
     m_pfeeds->getDevIO()->write(m_core.getFeeds(), timestamp);
-    m_pIFs->getDevIO()->write(m_core.getIFs(), timestamp);
+    m_pIFs->getDevIO()->write(m_core.getIFs() * m_core.getFeeds(), timestamp);
     m_core.setVacuumDefault(m_pvacuum->default_value());
 
     SRTLPBandCore *temp = &m_core;

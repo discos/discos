@@ -235,6 +235,62 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
     m_markTable->closeTable();
     delete m_markTable;
     m_markTable = NULL;
+    
+    // The feeds
+	try {
+		m_feedsTable=new IRA::CDBTable(Services,"Feed", FEEDTABLE_PATH);
+	}
+	catch (std::bad_alloc& ex) {
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
+		throw dummy;
+	}
+	error.Reset();
+	if (!m_feedsTable->addField(error,"feedCode",IRA::CDataField::LONGLONG)) {
+		field="feedCode";
+ 	}
+	else if (!m_feedsTable->addField(error,"xOffset",IRA::CDataField::DOUBLE)) {
+		field="xOffset";
+ 	}
+	else if (!m_feedsTable->addField(error,"yOffset",IRA::CDataField::DOUBLE)) {
+		field="yOffset";
+ 	}
+	else if (!m_feedsTable->addField(error,"relativePower",IRA::CDataField::DOUBLE)) {
+		field="relativePower";
+ 	}
+	if (!error.isNoError()) {
+		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
+		dummy.setFieldName((const char *)field);
+		throw dummy;
+	}
+	if (!m_feedsTable->openTable(error))	{
+		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+		throw dummy;
+	}
+	m_feedsTable->First();
+	if (m_feeds!=m_feedsTable->recordCount()) {
+		_EXCPT(ComponentErrors::CDBAccessExImpl, dummy, "CConfiguration::init()");
+		dummy.setFieldName("feed table size");
+		throw dummy;
+	}
+	len=m_feeds;
+	try {
+		m_feedVector=new TFeedValue[len];
+	}
+	catch (std::bad_alloc& ex) {
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
+		throw dummy;
+	}
+	for (WORD i=0;i<len;i++) {
+		m_feedVector[i].xOffset=(*m_feedsTable)["xOffset"]->asDouble();
+		m_feedVector[i].yOffset=(*m_feedsTable)["yOffset"]->asDouble();
+		m_feedVector[i].relativePower=(*m_feedsTable)["relativePower"]->asDouble();
+		m_feedVector[i].code=(WORD)(*m_feedsTable)["feedCode"]->asLongLong();
+		ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"FEED_VALUE_ENTRY: %d %lf %lf %lf",m_feedVector[i].code,m_feedVector[i].xOffset,m_feedVector[i].yOffset,m_feedVector[i].relativePower));
+		m_feedsTable->Next();
+	}
+	m_feedsTable->closeTable();
+	delete m_feedsTable;
+	m_feedsTable=NULL;
 
     //The taper.....
     try {
