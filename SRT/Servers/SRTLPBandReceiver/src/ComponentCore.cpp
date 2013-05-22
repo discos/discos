@@ -415,7 +415,7 @@ void CComponentCore::getCalibrationMark(
     DWORD sizeL=0;
     DWORD sizeR=0;
     ACS::doubleSeq lo;
-    short polarization;
+	Receivers::TPolarization polarization;
 
     baci::ThreadSyncGuard guard(&m_mutex);
     if (m_setupMode=="") {
@@ -423,7 +423,6 @@ void CComponentCore::getCalibrationMark(
         impl.setReason("receiver not configured yet");
         throw impl;
     }
-    cout << "some checks" << endl;
     //let's do some checks about input data
     unsigned stdLen=freqs.length();
     if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
@@ -450,23 +449,19 @@ void CComponentCore::getCalibrationMark(
     resBw.length(stdLen);
 
     double startFreq, bandwidth = 1.0;
-    cout << "before for" << endl;
     for (unsigned i=0;i<stdLen;i++) {
         startFreq = (feeds[i] == 0) ? m_LBandStartFreq[ifs[i]] : m_PBandStartFreq[ifs[i]];
         bandwidth = (feeds[i] == 0) ? m_configuration.getLBandIFBandwidth()[ifs[i]] : m_configuration.getPBandIFBandwidth()[ifs[i]];
-        polarization = (feeds[i] == 0) ? m_configuration.getLBandPolarization()[ifs[i]] : m_configuration.getPBandPolarization()[ifs[i]];
+        polarization = (feeds[i] == 0) ? m_configuration.getLBandPolarizations()[ifs[i]] : m_configuration.getPBandPolarizations()[ifs[i]];
         (feeds[i] == 0) ? getLBandLO(lo) : getPBandLO(lo);
         tableLeftFreq = NULL;
         tableLeftMark = NULL;
         tableRightFreq = NULL;
         tableRightMark = NULL;
-        cout << "tables NULL, i = " << i << endl;
 
         // Get the calibration mark tables
         sizeL = m_configuration.getLeftMarkTable(tableLeftFreq, tableLeftMark, feeds[i]);
         sizeR = m_configuration.getRightMarkTable(tableRightFreq, tableRightMark, feeds[i]);
-        cout << "sizeL: " << sizeL << endl;
-        cout << "sizeR: " << sizeR << endl;
         
         // Now computes the mark for each input band, considering the present mode and configuration of the receiver.
         if (!IRA::CIRATools::skyFrequency(
@@ -483,38 +478,21 @@ void CComponentCore::getCalibrationMark(
             realBw = 0.0;
         }
 
-        cout << "skyFrequ :)" << endl;
         ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"SUB_BAND %lf %lf", realFreq, realBw));
-        realFreq += lo[ifs[i]];
+        realFreq += lo[i];
         resFreq[i] = realFreq;
         resBw[i] = realBw;
         realFreq += realBw / 2.0;
         ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
 
-        cout << "lo[" << i << "]: " << lo[i] << endl;
-        cout << "realFreq: " << realFreq << endl;
-
-        cout << "ifs[" << i << "]: " << ifs[i] << endl;
-        for(size_t j=0; j<sizeL; j++)
-            cout << "tableLeftFreq" << tableLeftFreq[j] << endl;
-        for(size_t j=0; j<sizeL; j++)
-            cout << "tableLeftMark" << tableLeftMark[j] << endl;
-        for(size_t j=0; j<sizeR; j++)
-            cout << "tableRigthFreq" << tableRightFreq[j] << endl;
-        for(size_t j=0; j<sizeR; j++)
-            cout << "tableRigthMark" << tableRightMark[j] << endl;
-
-        if (polarization==(long)Receivers::RCV_LCP) {
-            cout << "RCV_LCP" << endl;
+        if (polarization==Receivers::RCV_LCP || polarization==Receivers::RCV_HLP) {
             result[i]=linearFit(tableLeftFreq, tableLeftMark, sizeL, realFreq);
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
         }
-        else { //RCV_RCP
-            cout << "RCV_RCP" << endl;
+        else { // RCV_RCP
             result[i]=linearFit(tableRightFreq,tableRightMark,sizeR,realFreq);
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"RIGHT_MARK_VALUE %lf",result[i]));
         }
-        cout << "end pola:)" << endl;
     }
 
     if (tableLeftFreq) delete [] tableLeftFreq;
