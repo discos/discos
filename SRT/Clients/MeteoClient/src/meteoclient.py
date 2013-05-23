@@ -1,6 +1,6 @@
-# to do: emit from 
 #! /usr/bin/env python
 
+# to do: emit from 
 
 from Acspy.Clients.SimpleClient import PySimpleClient # Import the acspy.PySimpleClient class
 
@@ -348,7 +348,7 @@ class myPlot(Qwt.QwtPlot):
                 self.curveWSpeedPeak.attach(self)		
 #    		self.setAxisAutoScale(Qwt.QwtPlot.yLeft)
                 self.setAxisScale(Qwt.QwtPlot.yLeft,0,60,10)
-	        self.setAxisTitle(Qwt.QwtPlot.yLeft, "Wind Speed (Km/s)")
+	        self.setAxisTitle(Qwt.QwtPlot.yLeft, "Wind Speed (Km/h)")
 
                 self.setAxisLabelAlignment(Qwt.QwtPlot.xBottom, Qt.Qt.AlignLeft | Qt.Qt.AlignBottom)
 
