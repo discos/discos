@@ -78,7 +78,7 @@ TCL_SCRIPTS_L   =
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = plotwind meteoclient
+PY_SCRIPTS         = plotwind meteoClient
 PY_SCRIPTS_L       =
 
 PY_MODULES         =
