@@ -191,13 +191,13 @@ public: // Operations
 	 * @param count number of characters from the left
 	 * @return the string composed by the selected characters
 	*/
-	CString Left(int count) const;
+	CString Left(int count=1) const;
 	/**
 	 * Gets the first characters of the string from the right.
 	 * @param count number of characters from the right
 	 * @return the string composed by the selected characters
 	*/
-	CString Right(int count) const;
+	CString Right(int count=1) const;
 	/**
 	 * Gets the characters within a range.
 	 * @param start index of the first character
