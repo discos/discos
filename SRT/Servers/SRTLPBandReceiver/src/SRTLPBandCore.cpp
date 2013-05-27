@@ -87,8 +87,8 @@ void SRTLPBandCore::setMode(const char * mode) throw (
             _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): setup mode not set");
         }
 
-        IRA::CString feed0(setupMode.Left(0));
-        IRA::CString feed1(setupMode.Left(1));
+        IRA::CString feed0 = setupMode[0];
+        IRA::CString feed1 = setupMode[1];
 
         if(feed0 == feed1) { // Single feed
             if((feed0 == "L" && cmdMode.Left() != "X") || (feed0 == "P" && cmdMode.Right() != "X"))

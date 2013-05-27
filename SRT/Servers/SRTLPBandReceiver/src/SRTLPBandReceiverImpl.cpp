@@ -4,6 +4,7 @@
 #include "DevIOLocalOscillator.h"
 #include "DevIOPolarization.h"
 #include "DevIOMode.h"
+#include "DevIOFeeds.h"
 #include "DevIOVacuum.h"
 #include "DevIOCryoTemperatureCoolHead.h"
 #include "DevIOCryoTemperatureCoolHeadWindow.h"
@@ -92,7 +93,12 @@ void SRTLPBandReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentErr
     try {
         m_preceiverName = new ROstring(getContainerServices()->getName() + ":receiverName", getComponent());
         m_pIFs = new baci::ROlong(getContainerServices()->getName() + ":IFs", getComponent());
-        m_pfeeds = new baci::ROlong(getContainerServices()->getName() + ":feeds", getComponent());
+        m_pfeeds = new baci::ROlong(
+                getContainerServices()->getName() + ":feeds", 
+                getComponent(), 
+                new DevIOFeeds(&m_core), 
+                true
+        );
         m_pvacuum = new baci::ROdouble(
                 getContainerServices()->getName() + ":vacuum", 
                 getComponent(), 
@@ -193,8 +199,7 @@ void SRTLPBandReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentErr
 
     // Write some fixed values
     m_preceiverName->getDevIO()->write(getComponent()->getName(), timestamp);
-    m_pfeeds->getDevIO()->write(m_core.getFeeds(), timestamp);
-    m_pIFs->getDevIO()->write(m_core.getIFs() * m_core.getFeeds(), timestamp);
+    m_pIFs->getDevIO()->write(m_core.getIFs(), timestamp);
     m_core.setVacuumDefault(m_pvacuum->default_value());
 
     SRTLPBandCore *temp = &m_core;
@@ -384,13 +389,13 @@ void SRTLPBandReceiverImpl::setMode(const char * mode) throw (
 }
 
 
-void SRTLPBandReceiverImpl::setSetup(const char * setup_mode) throw (
+void SRTLPBandReceiverImpl::setSetupMode(const char * setup_mode) throw (
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
         )
 {
     try {
-        ; // m_core.setSetup(setup_mode);
+        m_core.setSetupMode(setup_mode);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
         ex.log(LM_DEBUG);
@@ -420,6 +425,7 @@ ACS::doubleSeq * SRTLPBandReceiverImpl::getCalibrationMark(
     ACS::doubleSeq_var result = new ACS::doubleSeq;
     ACS::doubleSeq_var resFreq = new ACS::doubleSeq;
     ACS::doubleSeq_var resBw = new ACS::doubleSeq;
+
     try {
         m_core.getCalibrationMark(result.inout(), resFreq.inout(), resBw.inout(), freqs, bandwidths, feeds,ifs,scaleFactor);
     }
@@ -494,7 +500,7 @@ CORBA::Double SRTLPBandReceiverImpl::getTaper(
     CORBA::Double res;
     double wL;
     try {
-        res = (CORBA::Double)m_core.getTaper(freq, bandWidth, feed, ifNumber, wL);
+        res = (CORBA::Double)m_core.getTaper(freq, bandWidth, feed, ifNumber, wL); 
         waveLen = wL;
         return res;
     }

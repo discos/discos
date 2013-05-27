@@ -47,7 +47,7 @@ module Receivers {
         // readonly attribute ACS::ROstring mode;     
         // void calOn();
         // void calOff();
-        // void setMode(in string mode);
+        // void setSetupMode(in string mode);
         // void setLO(in ACS::doubleSeq lo1);
         // ACS::doubleSeq getCalibrationMark(...)
         // long getFeeds(out ACS::doubleSeq X,out ACS::doubleSeq Y,out ACS::doubleSeq power);
@@ -242,6 +242,15 @@ module Receivers {
 
         /** It sets the RF path of the P band feed to the sky */
         void setPBandSkyPath() raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+ 
+        /**
+         * This method allows the receiver to know the setup mode.
+         * @param setup_mode the setup mode (for instance LLP, KKG, LPP, CCB, ecc.)
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         */
+        void setSetupMode(in string setup_mode) raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+
          
     };
 

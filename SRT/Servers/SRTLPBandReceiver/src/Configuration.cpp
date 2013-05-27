@@ -266,12 +266,6 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
 		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
 		throw dummy;
 	}
-	m_feedsTable->First();
-	if (m_feeds!=m_feedsTable->recordCount()) {
-		_EXCPT(ComponentErrors::CDBAccessExImpl, dummy, "CConfiguration::init()");
-		dummy.setFieldName("feed table size");
-		throw dummy;
-	}
 	len=m_feeds;
 	try {
 		m_feedVector=new TFeedValue[len];
@@ -382,9 +376,9 @@ void CConfiguration::setMode(const char * mode) throw (
         }
     }
 
-    CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
-
     maci::ContainerServices* Services = m_services;
+    CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
+    _GET_DWORD_ATTRIBUTE("Feeds","Number of feeds:", m_feeds, MODE_PATH);
 
     _GET_STRING_ATTRIBUTE("LBandPolarization", "LBand IF polarization:", value, MODE_PATH);
     int start = 0;

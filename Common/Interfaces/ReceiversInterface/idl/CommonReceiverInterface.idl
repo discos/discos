@@ -74,14 +74,6 @@ module Receivers {
          * The mode must be a valid mode code, recognized by the receiver. 
          */
         void setMode(in string mode) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
- 
-        /**
-         * This method allows the receiver to know the setup mode.
-         * @param setup_mode the setup mode (for instance LLP, KKG, LPP, CCB, ecc.)
-         * @throw ComponentErrors::ComponentErrorsEx
-         * @throw ReceiversErrors::ReceiversErrorsEx
-         */
-        void setSetup(in string setup_mode) raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
         /**
          * It allows to set the local oscillators of the current recevier. Generally this function allows to give one value for each 

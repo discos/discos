@@ -169,10 +169,12 @@ public:
 	 */
 	inline const IRA::CString& getActualMode() const { return m_mode; }
 
+
 	/**
 	 * @return mnemonic of the default mode of the receiver
 	 */
 	inline const IRA::CString& getDefaultMode() const { return m_defaultMode; }
+
 
     /**
      * @return the markVector

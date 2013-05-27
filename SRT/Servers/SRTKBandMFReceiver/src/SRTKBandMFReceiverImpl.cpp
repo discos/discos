@@ -262,7 +262,7 @@ void SRTKBandMFReceiverImpl::aboutToAbort()
 }
 
 
-void SRTKBandMFReceiverImpl::activate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
+void SRTKBandMFReceiverImpl::activate(const char * setup_mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
 {
     try {
         m_core.activate();

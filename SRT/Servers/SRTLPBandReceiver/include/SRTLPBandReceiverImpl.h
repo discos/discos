@@ -222,7 +222,7 @@ public:
      * @throw ReceiversErrors::ReceiversErrorsEx
      * @throw ComponentErrors::ComponentErrorsEx
      */
-    void setSetup(const char * setup_mode) throw (
+    void setSetupMode(const char * setup_mode) throw (
             ComponentErrors::ComponentErrorsEx,
             ReceiversErrors::ReceiversErrorsEx
     );

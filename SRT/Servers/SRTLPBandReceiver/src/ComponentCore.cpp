@@ -423,6 +423,7 @@ void CComponentCore::getCalibrationMark(
         impl.setReason("receiver not configured yet");
         throw impl;
     }
+
     //let's do some checks about input data
     unsigned stdLen=freqs.length();
     if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
@@ -437,32 +438,60 @@ void CComponentCore::getCalibrationMark(
             throw impl;
         }
     }
-    for (unsigned i=0;i<stdLen;i++) {
-        if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
-            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
-            impl.setValueName("feed identifier");
-            throw impl;
+
+    if(getFeeds() > 1) { // Dual feed
+        for (unsigned i=0;i<stdLen;i++) {
+            if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
+                _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
+                impl.setValueName("feed identifier");
+                throw impl;
+            }
         }
     }
+
+    IRA::CString actualMode(getActualMode());
+    ACS::longSeq feeds_idx; // Backend indexes
     result.length(stdLen);
     resFreq.length(stdLen);
     resBw.length(stdLen);
+    feeds_idx.length(stdLen);
 
     double startFreq, bandwidth = 1.0;
     for (unsigned i=0;i<stdLen;i++) {
-        startFreq = (feeds[i] == 0) ? m_LBandStartFreq[ifs[i]] : m_PBandStartFreq[ifs[i]];
-        bandwidth = (feeds[i] == 0) ? m_configuration.getLBandIFBandwidth()[ifs[i]] : m_configuration.getPBandIFBandwidth()[ifs[i]];
-        polarization = (feeds[i] == 0) ? m_configuration.getLBandPolarizations()[ifs[i]] : m_configuration.getPBandPolarizations()[ifs[i]];
-        (feeds[i] == 0) ? getLBandLO(lo) : getPBandLO(lo);
+        if(actualMode.Right() == "X") { // P band conf
+            startFreq = m_PBandStartFreq[ifs[i]];
+            bandwidth = m_configuration.getPBandIFBandwidth()[ifs[i]];
+            polarization = m_configuration.getPBandPolarizations()[ifs[i]];
+            getPBandLO(lo);
+            for(size_t j=0; j<stdLen; j++) // Backend indexes
+                feeds_idx[j] = 0; 
+        }
+        else if(actualMode.Left() == "X") { // L band conf
+            startFreq = m_LBandStartFreq[ifs[i]];
+            bandwidth = m_configuration.getLBandIFBandwidth()[ifs[i]];
+            polarization = m_configuration.getLBandPolarizations()[ifs[i]];
+            getLBandLO(lo);
+            for(size_t j=0; j<stdLen; j++) // Backend indexes
+                feeds_idx[j] = 1; 
+        }
+        else { // Dual band conf: backend indexes
+            startFreq = (feeds[i] == 0) ? m_PBandStartFreq[ifs[i]] : m_LBandStartFreq[ifs[i]];
+            bandwidth = (feeds[i] == 0) ? m_configuration.getPBandIFBandwidth()[ifs[i]] : m_configuration.getLBandIFBandwidth()[ifs[i]];
+            polarization = (feeds[i] == 0) ? m_configuration.getPBandPolarizations()[ifs[i]] \
+                           : m_configuration.getLBandPolarizations()[ifs[i]];
+            (feeds[i] == 0) ? getPBandLO(lo) : getLBandLO(lo);
+            feeds_idx[i] = feeds[i];
+        }
+
         tableLeftFreq = NULL;
         tableLeftMark = NULL;
         tableRightFreq = NULL;
         tableRightMark = NULL;
 
         // Get the calibration mark tables
-        sizeL = m_configuration.getLeftMarkTable(tableLeftFreq, tableLeftMark, feeds[i]);
-        sizeR = m_configuration.getRightMarkTable(tableRightFreq, tableRightMark, feeds[i]);
-        
+        sizeL = m_configuration.getLeftMarkTable(tableLeftFreq, tableLeftMark, feeds_idx[i]);
+        sizeR = m_configuration.getRightMarkTable(tableRightFreq, tableRightMark, feeds_idx[i]);
+
         // Now computes the mark for each input band, considering the present mode and configuration of the receiver.
         if (!IRA::CIRATools::skyFrequency(
                 freqs[i],
@@ -519,6 +548,7 @@ double CComponentCore::getTaper(
     double *taperVec = NULL;
     DWORD size;
     ACS::doubleSeq lo;
+    short feed_idx; // Backend index
 
     baci::ThreadSyncGuard guard(&m_mutex);
     if (m_actualMode=="") {
@@ -537,9 +567,26 @@ double CComponentCore::getTaper(
         throw impl;
     }
 
-    startFreq = (feed == 0) ? m_LBandStartFreq[ifNumber] : m_PBandStartFreq[ifNumber];
-    bandwidth = (feed == 0) ? m_configuration.getLBandIFBandwidth()[ifNumber] :  m_configuration.getPBandIFBandwidth()[ifNumber];
-    (feed == 0) ? getLBandLO(lo) : getPBandLO(lo);
+    IRA::CString actualMode(getActualMode());
+
+    if(actualMode.Right() == "X") { // P band conf
+        startFreq = m_PBandStartFreq[ifNumber];
+        bandwidth = m_configuration.getPBandIFBandwidth()[ifNumber];
+        getPBandLO(lo);
+        feed_idx = 0;
+    }
+    else if(actualMode.Left() == "X") { // L band conf
+        startFreq = m_LBandStartFreq[ifNumber];
+        bandwidth = m_configuration.getLBandIFBandwidth()[ifNumber];
+        getLBandLO(lo);
+        feed_idx = 1;
+    }
+    else { // Dual band conf: backend indexes
+        startFreq = (feed == 0) ? m_PBandStartFreq[ifNumber] : m_LBandStartFreq[ifNumber];
+        bandwidth = (feed == 0) ? m_configuration.getPBandIFBandwidth()[ifNumber] :  m_configuration.getLBandIFBandwidth()[ifNumber];
+        (feed == 0) ? getPBandLO(lo) : getLBandLO(lo);
+        feed_idx = feed;
+    }
 
     // take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
     if (!IRA::CIRATools::skyFrequency(freq, bw, startFreq, bandwidth, realFreq, realBw)) {
@@ -551,7 +598,7 @@ double CComponentCore::getTaper(
     ACS_LOG(LM_FULL_INFO, "CComponentCore::getTaper()", (LM_DEBUG,"CENTRAL_FREQUENCY %lf", centralFreq));
     waveLen = LIGHTSPEED / (centralFreq * 1000000);
     ACS_LOG(LM_FULL_INFO, "CComponentCore::getTaper()", (LM_DEBUG, "WAVELENGTH %lf", waveLen));
-    size = m_configuration.getTaperTable(freqVec, taperVec, feed);
+    size = m_configuration.getTaperTable(freqVec, taperVec, feed_idx);
     taper = linearFit(freqVec, taperVec, size, centralFreq);
     ACS_LOG(LM_FULL_INFO, "CComponentCore::getTaper()", (LM_DEBUG,"TAPER %lf", taper));
     if (freqVec) delete [] freqVec;
@@ -573,7 +620,7 @@ void CComponentCore::setSetupMode(const char * setup_mode) throw (ReceiversError
 
     // Call the derived class method (setMode is pure virtual in ComponentCore).
     setMode((const char *)getTargetMode()); 
-    ACS_LOG(LM_FULL_INFO,"CComponentCore::setSetupMode()",(LM_NOTICE,"SETUP_MODE %s", string(setupMode).c_str()));
+    ACS_LOG(LM_FULL_INFO,"CComponentCore::setSetupMode()",(LM_NOTICE,"SETUP_MODE %s", (const char *)getTargetMode()));
 }
 
 
@@ -581,8 +628,8 @@ const IRA::CString CComponentCore::getTargetMode()
 {
     IRA::CString setupMode = getSetupMode().IsEmpty() ? "PLP" : getSetupMode();
     IRA::CString defaultMode = m_configuration.getDefaultMode();
-    IRA::CString feed0(setupMode.Left(0));
-    IRA::CString feed1(setupMode.Left(1));
+    IRA::CString feed0 = setupMode[0];
+    IRA::CString feed1 = setupMode[1];
 
     if(feed0 == feed1) { // Single feed
         if(feed0 == "L")

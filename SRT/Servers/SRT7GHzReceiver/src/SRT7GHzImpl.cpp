@@ -167,7 +167,7 @@ void SRT7GHzImpl::aboutToAbort()
 	m_core.cleanup();
 }
 
-void SRT7GHzImpl::activate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT7GHzImpl::activate(const char * setup_mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		m_core.activate();
