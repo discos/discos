@@ -17,6 +17,7 @@
 #include <ReceiversDefinitionsC.h>
 #include "utils.h"
 
+
 /**
  * This class implements the component configuration. The data inside this class are initialized at the startup from the
  * configuration database and then are used (read) inside the component.
@@ -166,8 +167,12 @@ public:
 	/**
 	 * @return mnemonic of the working mode of the receiver
 	 */
-	inline const IRA::CString& getSetupMode() const { return m_mode; }
+	inline const IRA::CString& getActualMode() const { return m_mode; }
 
+	/**
+	 * @return mnemonic of the default mode of the receiver
+	 */
+	inline const IRA::CString& getDefaultMode() const { return m_defaultMode; }
 
     /**
      * @return the markVector
@@ -302,7 +307,7 @@ private:
 	IRA::CString m_localOscillatorInstance;
     maci::ContainerServices* m_services;
 	IRA::CString m_mode;
-    // std::vector<std::string> m_availableModes;
+	IRA::CString m_defaultMode;
 	double *m_LBandRFMin;
 	double *m_LBandRFMax;
 	double *m_PBandRFMin;

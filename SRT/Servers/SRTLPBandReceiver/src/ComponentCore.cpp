@@ -27,6 +27,7 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_fetValues.IDR = 0.0;
     m_fetValues.VGR = 0.0;
     m_statusWord = 0;
+    m_setupMode = "";
 }
 
 CConfiguration const * const  CComponentCore::execute() throw (
@@ -79,7 +80,7 @@ CConfiguration const * const  CComponentCore::execute() throw (
         m_PBandPolarization[i] = (long)m_configuration.getPBandPolarizations()[i];
     }
 
-    m_setupMode="";
+    m_actualMode="";
     return &m_configuration;
 }
 
@@ -175,10 +176,10 @@ void CComponentCore::getPBandPolarization(ACS::longSeq& pol)
 }
 
 
-const IRA::CString& CComponentCore::getSetupMode()
+const IRA::CString& CComponentCore::getActualMode()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
-    return m_setupMode;
+    return m_actualMode;
 }
 
 
@@ -203,7 +204,7 @@ const DWORD& CComponentCore::getFeeds()
 }
 
 
-void CComponentCore::activate() throw (
+void CComponentCore::activate(const char * setup_mode) throw (
         ReceiversErrors::ModeErrorExImpl,
         ComponentErrors::ValidationErrorExImpl,
         ComponentErrors::ValueOutofRangeExImpl,
@@ -215,8 +216,7 @@ void CComponentCore::activate() throw (
         )
 {
     baci::ThreadSyncGuard guard(&m_mutex);
-    // Call the f of the derived class (setMode is pure virtual in ComponentCore).
-    setMode((const char *)m_configuration.getSetupMode()); 
+    setSetupMode(setup_mode); // It calls the setMode()
     guard.release();
     lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 }
@@ -234,7 +234,7 @@ void CComponentCore::calOn() throw (
         )
 {
     baci::ThreadSyncGuard guard(&m_mutex);
-    if (m_setupMode=="") {
+    if (m_actualMode=="") {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::calOn()");
         impl.setReason("receiver not configured yet");
         throw impl;
@@ -274,7 +274,7 @@ void CComponentCore::calOff() throw (
         )
 {
     baci::ThreadSyncGuard guard(&m_mutex);
-    if (m_setupMode=="") {
+    if (m_actualMode=="") {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::calOff()");
         impl.setReason("receiver not configured yet");
         throw impl;
@@ -418,7 +418,7 @@ void CComponentCore::getCalibrationMark(
 	Receivers::TPolarization polarization;
 
     baci::ThreadSyncGuard guard(&m_mutex);
-    if (m_setupMode=="") {
+    if (m_actualMode=="") {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
         impl.setReason("receiver not configured yet");
         throw impl;
@@ -521,7 +521,7 @@ double CComponentCore::getTaper(
     ACS::doubleSeq lo;
 
     baci::ThreadSyncGuard guard(&m_mutex);
-    if (m_setupMode=="") {
+    if (m_actualMode=="") {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getTaper()");
         impl.setReason("receiver not configured yet");
         throw impl;
@@ -558,6 +558,40 @@ double CComponentCore::getTaper(
     if (taperVec) delete [] taperVec;
 
     return taper;
+}
+
+
+void CComponentCore::setSetupMode(const char * setup_mode) throw (ReceiversErrors::ModeErrorExImpl)
+{
+    IRA::CString setupMode(setup_mode);
+    setupMode.MakeUpper();
+    if(setupMode == "PLP" || setupMode == "PPP" || setupMode == "LLP")
+        m_setupMode = setupMode;
+    else {
+        _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "ComponentCore::setSetupMode()");
+    }
+
+    // Call the derived class method (setMode is pure virtual in ComponentCore).
+    setMode((const char *)getTargetMode()); 
+    ACS_LOG(LM_FULL_INFO,"CComponentCore::setSetupMode()",(LM_NOTICE,"SETUP_MODE %s", string(setupMode).c_str()));
+}
+
+
+const IRA::CString CComponentCore::getTargetMode()
+{
+    IRA::CString setupMode = getSetupMode().IsEmpty() ? "PLP" : getSetupMode();
+    IRA::CString defaultMode = m_configuration.getDefaultMode();
+    IRA::CString feed0(setupMode.Left(0));
+    IRA::CString feed1(setupMode.Left(1));
+
+    if(feed0 == feed1) { // Single feed
+        if(feed0 == "L")
+            return "XX" + defaultMode.Mid(2, 2);
+        else
+            return defaultMode.Mid(0, 2) + "XX";
+    }
+    else // Dual Feed
+        return defaultMode;
 }
 
 

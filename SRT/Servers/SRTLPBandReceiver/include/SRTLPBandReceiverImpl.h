@@ -149,11 +149,17 @@ public:
      * It must be called to switch the receiver to operative mode. 
      * When called the default configuration and mode is loaded. Regarding this
      * implementation calling this method corresponds to a call to <i>setMode("NORMAL")</i>.
+     * @param setup_mode the setup mode (KKG, CCB, LLP, PLP, ecc.)
      * @throw CORBA::SystemExcpetion
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw ReceiversErrors::ReceiversErrorsEx
      */
-     virtual void activate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+     virtual void activate(const char * setup_mode) throw (
+             CORBA::SystemException,
+             ComponentErrors::ComponentErrorsEx, 
+             ReceiversErrors::ReceiversErrorsEx
+     );
+    
 
      /**
       * It must be called to switch off the receiver
@@ -208,7 +214,19 @@ public:
             ComponentErrors::ComponentErrorsEx,
             ReceiversErrors::ReceiversErrorsEx
     );
-    
+     
+
+    /**
+     * This method allows the receiver to know the setup mode.
+     * @param setup_mode the setup mode (for instance KKG, CCB, LLP, PPP, ecc.)
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw ComponentErrors::ComponentErrorsEx
+     */
+    void setSetup(const char * setup_mode) throw (
+            ComponentErrors::ComponentErrorsEx,
+            ReceiversErrors::ReceiversErrorsEx
+    );
+
     
     /**
      * This method is called when the values of the calibration mark of the receiver are required. 

@@ -73,7 +73,7 @@
  *      <li>void getBandwidth(...)</li>
  *      <li>void getStartFrequency(...)</li>
  *      <li>void getPolarization(...)</li>
- *      <li>const IRA::CString& getSetupMode()</li>
+ *      <li>const IRA::CString& getActualMode()</li>
  *      <li>const DWORD& getIFs()</li>
  *      <li>const DWORD& getFeeds()</li>
  *      <li>const Management::TSystemStatus& getComponentStatus()</li>

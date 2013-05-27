@@ -64,8 +64,9 @@ public:
     /**
      * It activate the receiver, in other words it allows to setup the default configuration 
      * and to make sure the LNA are turned on.
+     * @ param setup_mode the setup mode (KKG, CCB, LLP, LPP, ecc.)
      */
-    void activate() throw (
+    void activate(const char * setup_mode) throw (
             ReceiversErrors::ModeErrorExImpl,
             ComponentErrors::ValidationErrorExImpl,
             ComponentErrors::ValueOutofRangeExImpl,
@@ -367,7 +368,7 @@ public:
      * It returns the current operating mode of the receiver.
      * @return output string
      */
-    const IRA::CString& getSetupMode();
+    const IRA::CString& getActualMode();
 
 
     /**
@@ -382,6 +383,26 @@ public:
      * @return output value
      */
     const DWORD& getFeeds();
+
+    /**
+     * It sets the setup mode
+     * @param setup_mode the setup mode (KKG, PLP, PPP, CCB, ...)
+     * @throw ReceiversErrors::ModeErrorExImpl
+     */
+    void setSetupMode(const char * setup_mode) throw (ReceiversErrors::ModeErrorExImpl);
+
+    /**
+     * It returns the setup mode (KKG, CCB, LLP, PLP, ecc.)
+     * @return output value
+     */
+    const IRA::CString getSetupMode() { return m_setupMode; }
+
+
+    /**
+     * It returns the final mode, based on the setup mode 
+     * @return output value
+     */
+    const IRA::CString getTargetMode();
 
 
     /**
@@ -497,7 +518,8 @@ protected:
     ACS::doubleSeq m_PBandStartFreq;
     ACS::doubleSeq m_LBandBandwidth;
     ACS::doubleSeq m_PBandBandwidth;
-    IRA::CString m_setupMode;
+    IRA::CString m_actualMode;
+    IRA::CString m_setupMode; // The setup mode: KKG, LLP, PLP, CCB, ecc.
 
 
 private:

@@ -82,6 +82,23 @@ void SRTLPBandCore::setMode(const char * mode) throw (
         IRA::CString cmdMode(mode);
         cmdMode.MakeUpper();
 
+        IRA::CString setupMode = getSetupMode();
+        if(setupMode.IsEmpty()) {
+            _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): setup mode not set");
+        }
+
+        IRA::CString feed0(setupMode.Left(0));
+        IRA::CString feed1(setupMode.Left(1));
+
+        if(feed0 == feed1) { // Single feed
+            if((feed0 == "L" && cmdMode.Left() != "X") || (feed0 == "P" && cmdMode.Right() != "X"))
+                _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): mismatch with the setup mode");
+        }
+        else { // Dual Feed
+            if(cmdMode.Find('X') != -1)
+                _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): mismatch with the setup mode");
+        }
+
         m_configuration.setMode(cmdMode);
             
         setLBandFilter(m_configuration.getLBandFilterID());
@@ -89,11 +106,11 @@ void SRTLPBandCore::setMode(const char * mode) throw (
         setLBandPolarization(m_configuration.getLBandPolarization());
         setPBandPolarization(m_configuration.getPBandPolarization());
             
-        m_setupMode = m_configuration.getSetupMode();
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s", string(m_setupMode).c_str()));
+        m_actualMode = m_configuration.getActualMode();
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s", string(m_actualMode).c_str()));
     }
     catch (...) {
-        m_setupMode = ""; // If we don't reach the end of the method then the mode will be unknown
+        m_actualMode = ""; // If we don't reach the end of the method then the mode will be unknown
         _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode()");
     }
 }

@@ -38,7 +38,7 @@ public:
 	ACE_CString read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
 		AUTO_TRACE("DevIOMode::read()");
 		timestamp=getTimeStamp();
-		return (const char *)m_core->getSetupMode();
+		return (const char *)m_core->getActualMode();
     }
 
     void write(const ACE_CString& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {

@@ -255,14 +255,14 @@ void SRTLPBandReceiverImpl::aboutToAbort()
 }
 
 
-void SRTLPBandReceiverImpl::activate() throw (
+void SRTLPBandReceiverImpl::activate(const char * setup_mode) throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx, 
         ReceiversErrors::ReceiversErrorsEx
         )
 {
     try {
-        m_core.activate();
+        m_core.activate(setup_mode);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
         ex.log(LM_DEBUG);
@@ -380,6 +380,25 @@ void SRTLPBandReceiverImpl::setMode(const char * mode) throw (
         _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTLPBandReceiverImpl::setMode()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
+    }
+}
+
+
+void SRTLPBandReceiverImpl::setSetup(const char * setup_mode) throw (
+        ComponentErrors::ComponentErrorsEx,
+        ReceiversErrors::ReceiversErrorsEx
+        )
+{
+    try {
+        ; // m_core.setSetup(setup_mode);
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getReceiversErrorsEx();
     }
 }
 

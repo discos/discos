@@ -142,9 +142,9 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
     _GET_DWORD_ATTRIBUTE("LNASamplingTime", "Time needed to collect LNA information from control boards (uSec):", m_LNASamplingTime,"");
     _GET_DWORD_ATTRIBUTE("RepetitionCacheTime", "Log repetition filter, caching time (uSec):", m_repetitionCacheTime,"");
     _GET_DWORD_ATTRIBUTE("RepetitionExpireTime", "Log repetition filter, expire time (uSec):", m_repetitionExpireTime,"");
-    _GET_STRING_ATTRIBUTE("DefaultMode", "Default operating mode:", m_mode,"");
+    _GET_STRING_ATTRIBUTE("DefaultMode", "Default operating mode:", m_defaultMode,"");
 
-    const IRA::CString DEFAULTMODE_PATH = CONFIG_PATH"/Modes/" + m_mode;
+    const IRA::CString DEFAULTMODE_PATH = CONFIG_PATH"/Modes/" + m_defaultMode;
     // now read the receiver configuration
 
     _GET_STRING_ATTRIBUTE("Mode","mode name:", m_mode, DEFAULTMODE_PATH);
