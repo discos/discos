@@ -58,16 +58,32 @@ public:
         ACS::doubleSeq lbandValue, pbandValue;
         lbandValue.length(m_pCore->getIFs());
         pbandValue.length(m_pCore->getIFs());
-        m_val.length(lbandValue.length() + pbandValue.length());
         m_pCore->getLBandBandwidth(lbandValue);
         m_pCore->getPBandBandwidth(pbandValue);
 
-        // Set the first two values (IF0 and IF1)
-        for(size_t i=0; i<lbandValue.length(); i++)
-            m_val[i] = lbandValue[i];
-        // Set the IF2 and IF3 values
-        for(size_t i=2, j=0; i<m_val.length(); i++, j++)
-            m_val[i] = pbandValue[j];
+        IRA::CString actualMode(m_pCore->getActualMode());
+        if(actualMode.Right() == "X") { // P band
+            m_val.length(pbandValue.length());
+            for(size_t i=0; i<m_val.length(); i++)
+                m_val[i] = pbandValue[i];
+        }
+        else if(actualMode.Left() == "X") { // L band
+            m_val.length(lbandValue.length());
+            for(size_t i=0; i<m_val.length(); i++)
+                m_val[i] = lbandValue[i];
+        }
+        else { // Dual feed
+            m_val.length(pbandValue.length() + lbandValue.length());
+            // Set the first two values (IF0 and IF1)
+            for(size_t i=0; i<pbandValue.length(); i++)
+                m_val[i] = pbandValue[i];
+            // Set the IF2 and IF3 values
+            for(size_t i=2, j=0; i<m_val.length(); i++, j++)
+                m_val[i] = lbandValue[j];
+        }
+
+
+
 
         timestamp = getTimeStamp();  //Completion time
         return m_val;
