@@ -2,13 +2,14 @@
 
 # This is a python client that can be used as a terminal to the system, It issues the command
 # action of the connected sub-system boss.
-#who                                   when           what
-#andrea orlati(a.orlati@ira.inaf.it)   22/08/2008     Creation
-#andrea orlati(a.orlati@ira.inaf.it)   25/09/2009   
-#andrea orlati(a.orlati@ira.inaf.it)   23/07/2010     If no component name is given it logs into the scheduler
-#andrea orlati(a.orlati@ira.inaf.it)   26/07/2010     Added support for command history
-#andrea orlati(a.orlati@ira.inaf.it)   24/09/2010     Exceptions coming from the component command are now logged as it should be by a client application
-#andrea orlati(a.orlati@ira.inaf.it)   20/07/2011     Logging exceptions now works also in ACS 8.2
+#who                                       when           what
+#andrea orlati(a.orlati@ira.inaf.it)       22/08/2008     Creation
+#andrea orlati(a.orlati@ira.inaf.it)       25/09/2009   
+#andrea orlati(a.orlati@ira.inaf.it)       23/07/2010     If no component name is given it logs into the scheduler
+#andrea orlati(a.orlati@ira.inaf.it)       26/07/2010     Added support for command history
+#andrea orlati(a.orlati@ira.inaf.it)       24/09/2010     Exceptions coming from the component command are now logged as it should be by a client application
+#andrea orlati(a.orlati@ira.inaf.it)       20/07/2011     Logging exceptions now works also in ACS 8.2
+#Marco Buttu (mbuttu@oa-cagliari.inaf.it)  28/05/2013     Tab completion from a file of commands, help command
 
 import getopt, sys
 import Acspy.Common.Err
@@ -22,6 +23,7 @@ import string
 import readline
 import os
 from Acspy.Clients.SimpleClient import PySimpleClient
+from nuraghe_commands import __dict__ as commands
 
 def usage():
     print "systerm [-h|--help] [ComponentName]"
@@ -42,9 +44,9 @@ class HistoryCompleter(object):
     def complete(self, text, state):
         response=None
         if state==0:
-            history_values=get_history_items()
+            # history_values=get_history_items()
             if text:
-                self.matches=sorted(h for h in history_values if h and h.startswith(text))
+                self.matches=sorted(c for c in commands if c and c.startswith(text))
             else:
                 self.matches=[]
         try:
@@ -109,6 +111,12 @@ def main():
         cmdCounter=cmdCounter+1
         if cmd=="exit":
             stop=True
+        elif cmd.startswith('help='):
+            h, c = cmd.split('=')
+            if c not in commands:
+                print "%s?not a valid command" %c
+            else:
+                print commands[c].__doc__
         elif cmd:
             try:
                 res=component.command(cmd)
@@ -118,6 +126,7 @@ def main():
                 newEx.setAction("command()")
                 newEx.setReason("comunication error to component server")
                 newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
+
     simpleClient.releaseComponent(compName)     
     simpleClient.disconnect()
     readline.write_history_file(historyFile)            

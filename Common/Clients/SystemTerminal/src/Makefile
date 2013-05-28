@@ -20,7 +20,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = _tui_SysTerm
+PY_SCRIPTS         = _tui_SysTerm nuraghe_commands.py
 PY_SCRIPTS_L       =
 
 PY_MODULES         =
