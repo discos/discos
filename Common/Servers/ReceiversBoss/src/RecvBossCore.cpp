@@ -1371,7 +1371,7 @@ void CRecvBossCore::getPolarization(ACS::longSeq& pol) throw (ComponentErrors::C
 		return;
 	}
 	IRA::CIRATools::getTime(now);
-	if (now.value().value>m_loEpoch+m_config->propertyUpdateTime()*10) {
+	if (now.value().value>m_polEpoch+m_config->propertyUpdateTime()*10) {
 		ACS::ROlongSeq_var polRef;
 		ACSErr::Completion_var comp;
 		ACS::longSeq_var val;
@@ -1764,7 +1764,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::CORBAProble
 	m_currentRecvInstance=component;
 	loadReceiver(); // throw ComponentErrors::CouldntGetComponentExImpl
 	try {
-		m_currentRecv->activate();
+		m_currentRecv->activate(code);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CRecvBossCore::setup()");

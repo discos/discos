@@ -28,7 +28,7 @@
 <body>
 	antennaSetup=LP
 	receiversSetup=LLP
-	receiversMode=C4**
+	receiversMode=XXC4
 	initialize=LLP
 	device=0
 	calOff
@@ -39,7 +39,7 @@
 <body>
 	antennaSetup=LP
 	receiversSetup=PPP
-	receiversMode=**C3
+	receiversMode=C3XX
 	initialize=PPP
 	device=0
 	calOff
@@ -49,8 +49,8 @@
 <Procedure name="setupPLP" args="0">
 <body>
 	antennaSetup=LP
-	receiversSetup=LPP
-	receiversMode=C4C3
+	receiversSetup=PLP
+	receiversMode=C3C4
 	initialize=PLP
 	device=0
 	calOff

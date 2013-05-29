@@ -905,9 +905,7 @@ void CEngineThread::collectReceiversData()
 			}
 			else {
 				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
-				impl.setAttributeName("initialFrequency");	/**
-				 * check if a directory exists
-				 */
+				impl.setAttributeName("initialFrequency");
 				bool DirectoryExists(const IRA::CString& path);
 				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 				impl.log(LM_ERROR);

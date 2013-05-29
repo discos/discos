@@ -56,7 +56,7 @@
 
 /* define the main frame dimension */
 /* ******************************* */
-#define WINDOW_WIDTH 50     /*columns */
+#define WINDOW_WIDTH 60     /*columns */
 #define WINDOW_HEIGHT 15     /* rows */
 /* ******************************* */
 

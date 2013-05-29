@@ -124,10 +124,10 @@ IRA::CString IFFormat(const baci::BACIValue& value,const void* arg)
 
 int main(int argc, char *argv[]) {
 	bool loggedIn=false;
-	int fieldCounter;
+	//int fieldCounter;
 	maci::SimpleClient client;
 	ACE_Time_Value tv(1);
-	IRA::CString fields[MAXFIELDNUMBER];
+	//IRA::CString fields[MAXFIELDNUMBER];
 	IRA::CString inputCommand;
 	maci::ComponentInfo_var info;
 	CORBA::Object_var obj;
@@ -270,7 +270,7 @@ int main(int argc, char *argv[]) {
 		//actualsetup_field
 		_TW_SET_COMPONENT(actualSetup_field,18,0,8,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		//mode_field
-		_TW_SET_COMPONENT(mode_field,18,1,8,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(mode_field,18,1,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		//status_box
 		_TW_SET_COMPONENT(status_box,18,2,10,1,BLACK_GREEN,CStyle::BOLD,output_label);
 		status_box->setStatusLook(Management::MNG_OK,CStyle(BLACK_GREEN,CStyle::BOLD));
@@ -279,8 +279,9 @@ int main(int argc, char *argv[]) {
 		//feeds_field
 		_TW_SET_COMPONENT(feeds_field,18,3,2,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		//IFs_field
-		_TW_SET_COMPONENT(IFs_field,18,4,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,0,output_label);
-		IFs_field->setFormatFunction(IFFormat,NULL);
+		_TW_SET_COMPONENT(IFs_field,18,4,2,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		//_TW_SET_COMPONENT(IFs_field,18,4,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,0,output_label);
+		//IFs_field->setFormatFunction(IFFormat,NULL);
 		//LO_text
 		_TW_SET_COMPONENT(LO_text,18,5,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		LO_text->setWAlign(CFrameComponent::LEFT);
@@ -414,7 +415,7 @@ int main(int argc, char *argv[]) {
 		client.run(tv);
 	}
 
-	for(;;)	{
+	/*for(;;)	{
 		if ((fieldCounter=userInput->parseCommand(fields,MAXFIELDNUMBER))>0) {
 			fields[0].MakeUpper();
 			if (fields[0]=="EXIT") break;
@@ -428,7 +429,7 @@ int main(int argc, char *argv[]) {
 		}
 		client.run(tv);
 		tv.set(0,MAINTHREADSLEEPTIME*1000);		
-	}
+	}*/
 		
 	window.closeFrame();
 	
