@@ -80,26 +80,26 @@
 <Receiver>
 	<receiverCode>LP</receiverCode>
         <phi>90.0</phi>
-        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> -2.2933666706 </coefficientVal00>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> -2.2857789993        </coefficientVal00>
         <coefficientNum01> 1 </coefficientNum01> <coefficientVal01> 0.0 </coefficientVal01>
-        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> -0.0081273140 </coefficientVal02>
-        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> -0.0185187403 </coefficientVal03>
-        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0013069536  </coefficientVal04>
-        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> -0.0009291506 </coefficientVal05>
-        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.3067421317 </coefficientVal06>
-        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> -0.2181605548 </coefficientVal07>
+        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> -0.0091895359 </coefficientVal02>
+        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> -0.0894266963 </coefficientVal03>
+        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0018128322 </coefficientVal04>
+        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> -0.0023823651 </coefficientVal05>
+        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.2023846656 </coefficientVal06>
+        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> -0.1307237744 </coefficientVal07>
         <coefficientNum08> 0 </coefficientNum08> <coefficientVal08> 0 </coefficientVal08>
         <coefficientNum09> 0 </coefficientNum09> <coefficientVal09> 0 </coefficientVal09>
-        <coefficientNum10> 1 </coefficientNum10> <coefficientVal10> -0.0339095332 </coefficientVal10>
-        <coefficientNum11> 1 </coefficientNum11> <coefficientVal11> -0.0000435748 </coefficientVal11>
-        <coefficientNum12> 1 </coefficientNum12> <coefficientVal12> -0.0003875243  </coefficientVal12>
-        <coefficientNum13> 1 </coefficientNum13> <coefficientVal13> 0.0004249602 </coefficientVal13>
-        <coefficientNum14> 1 </coefficientNum14> <coefficientVal14> 0.0005932985  </coefficientVal14>
-        <coefficientNum15> 1 </coefficientNum15> <coefficientVal15> 0.0002558492 </coefficientVal15>
-        <coefficientNum16> 1 </coefficientNum16> <coefficientVal16> 0.0002624479 </coefficientVal16>
-        <coefficientNum17> 1 </coefficientNum17> <coefficientVal17> 0.0001502736  </coefficientVal17>
-        <coefficientNum18> 1 </coefficientNum18> <coefficientVal18> 0.0016966705 </coefficientVal18>
-        <coefficientNum19> 1 </coefficientNum19> <coefficientVal19> -0.0025470885 </coefficientVal19>
+        <coefficientNum10> 1 </coefficientNum10> <coefficientVal10> -0.0199667234 </coefficientVal10>
+        <coefficientNum11> 1 </coefficientNum11> <coefficientVal11> -0.0015620823 </coefficientVal11>
+        <coefficientNum12> 1 </coefficientNum12> <coefficientVal12> -0.0016970964 </coefficientVal12>
+        <coefficientNum13> 1 </coefficientNum13> <coefficientVal13> -0.0043243342 </coefficientVal13>
+        <coefficientNum14> 1 </coefficientNum14> <coefficientVal14> 0.0001897580 </coefficientVal14>
+        <coefficientNum15> 1 </coefficientNum15> <coefficientVal15> 0.0001858544 </coefficientVal15>
+        <coefficientNum16> 1 </coefficientNum16> <coefficientVal16> 0.0009959243 </coefficientVal16>
+        <coefficientNum17> 1 </coefficientNum17> <coefficientVal17> -0.0001986132 </coefficientVal17>
+        <coefficientNum18> 1 </coefficientNum18> <coefficientVal18> -0.0001294275 </coefficientVal18>
+        <coefficientNum19> 1 </coefficientNum19> <coefficientVal19> -0.0004546749 </coefficientVal19>
         <coefficientNum20> 0 </coefficientNum20> <coefficientVal20> 0 </coefficientVal20>
         <coefficientNum21> 0 </coefficientNum21> <coefficientVal21> 0 </coefficientVal21>
         <coefficientNum22> 0 </coefficientNum22> <coefficientVal22> 0 </coefficientVal22>
