@@ -23,7 +23,7 @@ ifeq ($(TARGETSYS),SRT)
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower NoiseGenerator DBBC SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation \
 		SRT7GHzReceiver SRTLPBandReceiver CustomLogger\
-		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CustomLoggingClient\
+		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient\
 		SRTActiveSurfaceGUIClient SRTMountTextClient \
 		Plotter KStars SRTScripts \
 
@@ -59,7 +59,7 @@ ifeq ($(TARGETSYS),MED)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		Metrology TotalPower NoiseGenerator HolographyBackend DBBC MedicinaMount MedWeatherStation CustomLogger\
-		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal \
+		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient\
 		MedicinaMountTextClient MedicinaMountGUIClient MedicinaGeneralControlSystemGUIClient CustomLoggingClient\
 		Plotter KStars Scripts \
 		MedScripts

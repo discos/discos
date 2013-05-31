@@ -334,7 +334,8 @@ int main(int argc, char *argv[]) {
 		_TW_ADD_LABEL("Mode            :",0,1,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Status          :",0,2,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Feeds           :",0,3,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("LO                  :",0,5,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("IFs             :",0,4,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("LO              :",0,5,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Start Freq.     :",0,6,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Bandwidth       :",0,7,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Polarization    :",0,8,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);

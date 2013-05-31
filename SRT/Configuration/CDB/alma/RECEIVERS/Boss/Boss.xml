@@ -30,6 +30,6 @@
 
 <AvailableReceiver Code="PPP" Component="RECEIVERS/SRTLPBandReceiver"/>
 
-<AvailableReceiver Code="LPP" Component="RECEIVERS/SRTLPBandReceiver"/>
+<AvailableReceiver Code="PLP" Component="RECEIVERS/SRTLPBandReceiver"/>
 
 </ReceiversBoss>
