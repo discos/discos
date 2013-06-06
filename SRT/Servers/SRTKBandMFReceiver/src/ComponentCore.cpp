@@ -82,19 +82,18 @@ void CComponentCore::cleanup()
 void CComponentCore::getLO(ACS::doubleSeq& lo)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
-    lo.length(m_configuration.getIFs());
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        lo[i]=m_localOscillatorValue;
-    }
+    lo.length(m_configuration.getIFs() * m_configuration.getFeeds());
+    for (WORD i=0;i<lo.length();i++)
+       lo[i]=m_localOscillatorValue;
 }
 
 
 void CComponentCore::getBandwidth(ACS::doubleSeq& bw)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
-    bw.length(m_configuration.getIFs());
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        bw[i]=m_bandwidth[i];
+    bw.length(m_configuration.getIFs() * m_configuration.getFeeds());
+    for (WORD i=0;i<bw.length();i++) {
+        bw[i]= m_bandwidth[i % m_configuration.getIFs()];
     }
 }
 
@@ -102,9 +101,9 @@ void CComponentCore::getBandwidth(ACS::doubleSeq& bw)
 void CComponentCore::getStartFrequency(ACS::doubleSeq& sf)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
-    sf.length(m_configuration.getIFs());
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        sf[i]=m_startFreq[i];
+    sf.length(m_configuration.getIFs() * m_configuration.getFeeds());
+    for (WORD i=0;i<sf.length();i++) {
+        sf[i]=m_startFreq[i % m_configuration.getIFs()];
     }
 }
 
@@ -112,9 +111,9 @@ void CComponentCore::getStartFrequency(ACS::doubleSeq& sf)
 void CComponentCore::getPolarization(ACS::longSeq& pol)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
-    pol.length(m_configuration.getIFs());
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        pol[i]=m_polarization[i];
+    pol.length(m_configuration.getIFs() * m_configuration.getFeeds());
+    for (WORD i=0;i<pol.length();i++) {
+        pol[i]=m_polarization[i % m_configuration.getIFs()];
     }
 }
 
