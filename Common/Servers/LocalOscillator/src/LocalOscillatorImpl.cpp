@@ -108,14 +108,15 @@ void LocalOscillatorImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 		if  ((CIRATools::getDBValue(getContainerServices(),"GPIBBoard",GPIBBOARD)) &&
 			   (CIRATools::getDBValue(getContainerServices(),"PrimaryAddress",PRIMARYADDRESS)) &&
-			   (CIRATools::getDBValue(getContainerServices(),"SecondaryAddress",SECONDARYADDRESS)))
+			   (CIRATools::getDBValue(getContainerServices(),"SecondaryAddress",SECONDARYADDRESS))&&
+			   (CIRATools::getDBValue(getContainerServices(),"Timeout",TIMEOUT)))
 		  	  {
-					  ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::initialize()",(LM_INFO,"GPIBBoard %d,Primary address %d, Secondary addres ",GPIBBOARD, PRIMARYADDRESS,SECONDARYADDRESS));
+					  CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::initialize()",(LM_NOTICE,"GPIBBoard %d,Primary address %d, Secondary address %d, Timeout %d",GPIBBOARD, PRIMARYADDRESS,SECONDARYADDRESS,TIMEOUT));
 
 
 		  	  } else
 		  	  {
-			  		  ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::initialize()",(LM_ERROR,"Error getting GPIB setup params  from CDB" ));
+		  		CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::initialize()",(LM_ERROR,"Error getting GPIB setup params  from CDB" ));
 			  		  _EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"LocalOscillatorImpl::initialize()");
 			  		  dummy.log(LM_DEBUG);
 			  		  throw dummy;
@@ -126,10 +127,8 @@ void LocalOscillatorImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	   CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
 	   line->configure(GPIBBOARD,PRIMARYADDRESS,SECONDARYADDRESS,T10s,1,0);
 	   line->init(reply); // get the identification string from the device.
-	   ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::initialize()",(LM_INFO,"GPIB Device %s",reply.c_str()));
+	   CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::initialize()",(LM_NOTICE,"GPIB Device %s",reply.c_str()));
 	   m_gpibonline=true;
-	   //				sendCMD("*RST"); // reset
-//	   	 line->sendCMD("POW:ALC:SOUR INT"); // enable internal leveling;
 
 
 
@@ -137,7 +136,7 @@ void LocalOscillatorImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	 {
 		 _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,dummy,"LocalOscillatorImpl::set");
 	 	 dummy.log(LM_DEBUG);
-		 ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::initialize()",(LM_DEBUG,"LocalOscillatorImpl::initialize() %s",ex.what()));
+	 	CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::initialize()",(LM_DEBUG,"LocalOscillatorImpl::initialize() %s",ex.what()));
 
 	 }
 
@@ -176,9 +175,7 @@ void LocalOscillatorImpl::set(CORBA::Double rf_ampl, CORBA::Double rf_freq) thro
 
     	 line->setFreq(rf_freq); // set frequency
  		 line->setPower(rf_ampl); // set  amplitude
- 		 cout << "LO: frequency set to " << rf_freq << endl;
- 		 cout << "LO: power set to " << rf_ampl << endl;
-		ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::set()",(LM_DEBUG,"LO SET to freq: %f power:%f ",rf_freq,rf_ampl));
+         CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::set()",(LM_NOTICE,"LO SET to freq: %f power:%f ",rf_freq,rf_ampl));
 
 
  		 m_freq=rf_freq;
@@ -186,7 +183,7 @@ void LocalOscillatorImpl::set(CORBA::Double rf_ampl, CORBA::Double rf_freq) thro
 
  		 } catch (GPIBException& ex)
  		 {
- 			 ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::set()",(LM_DEBUG,"LocalOscillatorImpl::set() %s",ex.what()));
+ 			CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::set()",(LM_DEBUG,"LocalOscillatorImpl::set() %s",ex.what()));
  			 _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"LocalOscillatorImpl::set()");
  //			impl.setReason("Could not set local oscillator");
  			impl.log(LM_DEBUG);
@@ -207,27 +204,30 @@ void LocalOscillatorImpl::get(CORBA::Double& rf_ampl, CORBA::Double& rf_freq) th
      		CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
  	 		line->getFreq(rf_freq); // get frequency
  	 		line->getPower(rf_ampl); // get  amplitude
+ 	        CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_NOTICE,"LO READ freq: %f power:%f ",rf_freq,rf_ampl));
+
 // 	 		if (rf_freq !=m_freq)
-// 	 		{
-// 	 		    ACS::Time timestamp;
-// 	 			m_isLocked->getDevIO()->write(1,timestamp);
-//
-// 	 		} else
-// 	 		{
-//	 		    ACS::Time timestamp;
-// 	 			m_isLocked->getDevIO()->write(0,timestamp); //
-// 	 			ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_WARNING,"LocalOscillatorImpl read %f, expected %f",rf_freq,));
-// 	 		}
+ 	       // 	        	 		{
+ 	       // 		    ACS::Time timestamp;
+ 	       //		m_isLocked->getDevIO()->write(1,timestamp);
+
+ 	       //	} else
+ 	       //	{
+ 	       //    ACS::Time timestamp;
+ 	       //		m_isLocked->getDevIO()->write(0,timestamp); //
+ 	       //		CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_WARNING,"LocalOscillatorImpl read %f, expected %f",rf_freq,m_freq));
+ 	       //	}
 
  	 } catch (GPIBException& ex)
  	 {
- 	     	ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_DEBUG,"LocalOscillatorImpl::initialize() %s",ex.what()));
+ 		CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_DEBUG,"LocalOscillatorImpl::get() %s",ex.what()));
             _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"LocalOscillatorImpl::get");
  			impl.log(LM_DEBUG);
  			throw impl.getReceiversErrorsEx();
+ 	 } catch (ACSErr::ACSbaseExImpl& E) {
+			_ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,dummy,E,"LocalOscillatorImpl::get()");
+			throw dummy.getReceiversErrorsEx();
  	 }
-
-
 
 }
 
@@ -240,6 +240,7 @@ void LocalOscillatorImpl::rfon() throw (CORBA::SystemException,ReceiversErrors::
  	     		CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
 
  	     		line->rfOn();
+ 	     		CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::rfon()",(LM_NOTICE,"RF Signal ON " ));
 
  	 	 		 } catch (GPIBException& ex)
  	 	 		 {
@@ -265,6 +266,7 @@ void LocalOscillatorImpl::rfoff() throw (CORBA::SystemException,ReceiversErrors:
  	     		CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
 
  	     		line->rfOff();
+	     		CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::rfOff()",(LM_NOTICE,"RF Signal OFF " ));
 
  	 	 		 } catch (GPIBException& ex)
  	 	 		 {

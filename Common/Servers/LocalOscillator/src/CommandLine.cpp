@@ -140,7 +140,7 @@ int CommandLine::configure(int bid,int pad,int sat,int tmo, int eot, int eos) th
 	                    eos);
 
  	if (m_device==ERR) {
- 						cout <<"err" <<endl;
+ 						//cout <<"err" <<endl;
 					   throw GPIBException("ibdev:"+GPIB_errors[ThreadIberr()]);
 					}
 	if (m_device==TIMO) {
@@ -246,7 +246,7 @@ int CommandLine::getFreq(double & freq) throw (GPIBException)
 	try {
 		string reply;
 		query(QUERYFREQ,reply);
-		cout << "commandline freq:" <<reply << endl;
+	//	cout << "commandline freq:" <<reply << endl;
 		freq=atof(reply.c_str());
 		return 0;
 
@@ -309,7 +309,7 @@ int CommandLine::sendCMD(string cmd) throw(GPIBException)
 
  	if (i& ERR )
 	{
-		cout << "Error:" <<endl;
+		//cout << "Error:" <<endl;
 		throw GPIBException("ibrwt:"+GPIB_errors[ThreadIberr()]);
 	}
 
@@ -328,6 +328,7 @@ void CommandLine::queryErrors(string& reply) throw(GPIBException)
  		}catch(GPIBException& ex){
 			throw ex;
 		}
+
  }
 
 int CommandLine::parseSCPIErrors(string msg,string& reply)
@@ -358,7 +359,7 @@ int CommandLine::rfOn() throw (GPIBException)
 		int iReply;
 
 		query(QUERYRF,reply);
-		iReply=atof(reply.c_str());
+		iReply=atoi(reply.c_str());
 		if (iReply == 0){
 			sendCMD(RFONCMD);
 
@@ -371,6 +372,7 @@ int CommandLine::rfOn() throw (GPIBException)
 
 	}
 
+	return 0;
 
 
 }
@@ -382,7 +384,7 @@ int CommandLine::rfOff() throw (GPIBException)
 			string reply;
 			int iReply;
 			query(QUERYRF,reply);
-			iReply=atof(reply.c_str());
+			iReply=atoi(reply.c_str());
 
 			if (iReply == 1){
 				sendCMD(RFOFFCMD);
@@ -396,6 +398,7 @@ int CommandLine::rfOff() throw (GPIBException)
 
 		}
 
+       return 0;
 
 
 }
