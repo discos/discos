@@ -1,6 +1,8 @@
 #ifndef LOCALOSCILLATORIMPL_H
 #define LOCALOSCILLATORIMPL_H
 
+#include <IRA>
+
 #include <baci.h>
 #include <baciCharacteristicComponentImpl.h>
 #include <baciROdouble.h>
@@ -16,7 +18,6 @@
 #include "DevIOfrequency.h"
 #include "DevIOamplitude.h"
 
-#include <IRA>
 
 //#define GPIBBOARD 0
 //#define PRIMARYADDRESS 10
