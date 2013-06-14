@@ -85,9 +85,10 @@ string make_request(
 /**
  * Verify whether the answer is valid.
  * @param answer the answer received from minor servo
- * @throw ComponentErrors::SocketErrorEx if the answer is a NAK
+ * @return true if the answer is as expected, false if it is a NAK or a wrong answer
+ * @throw ComponentErrors::SocketErrorEx 
  */
- void verify(string answer) throw (ComponentErrors::SocketErrorExImpl);
+ bool verify(string answer) throw (ComponentErrors::SocketErrorExImpl);
 
 
 /**

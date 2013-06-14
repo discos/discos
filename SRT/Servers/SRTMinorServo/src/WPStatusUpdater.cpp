@@ -26,6 +26,8 @@ WPStatusUpdater::WPStatusUpdater(
 {
     AUTO_TRACE("WPStatusUpdater::WPStatusUpdater()");
     m_counter = 0;
+    for(size_t i=0; i<NUMBER_OF_SERVOS; i++)
+        m_clean_counter.push_back(false);
 }
 
 WPStatusUpdater::~WPStatusUpdater() { 
@@ -59,10 +61,6 @@ void WPStatusUpdater::runLoop()
                 ACS::doubleSeq act_pos = (status_par.actual_pos).position;
                 ACS::Time act_pos_time = (status_par.actual_pos).exe_time;
                 ACS::Time diff = abs_diff(act_pos_time, getTimeStamp());
-                // TODO: REMOVE
-                // cout << "acs_pos_time: " << act_pos_time << endl;
-                // cout << "timestamp: " << getTimeStamp() << endl;
-                // cout << "diff: " << diff << endl;
 
                 // Update the actual elongation (it is just the actual position for the GFR, PFP and M3R)
                 ACS::doubleSeq act_elongation = (status_par.actual_elongation).position;
@@ -123,7 +121,7 @@ void WPStatusUpdater::runLoop()
                 bitset<32> app_status_bset(status_par.appStatus);
 
                 // Set the READY bit of the status pattern
-                if(status_par.appState == APP_REMOTE_AUTO && status_par.cabState == CAB_OK)
+                if(status_par.appState == APP_REMOTE_AUTO && status_par.cabState == CAB_OK && !((*m_params->stow_state)[address]))
                     status_bset.set(STATUS_READY);
                 else
                     status_bset.reset(STATUS_READY);
@@ -135,12 +133,21 @@ void WPStatusUpdater::runLoop()
                     status_bset.reset(STATUS_SETUP);
                 
                 // Set the PARKED bit of the status pattern
-                if(status_par.cabState == CAB_DISABLED_FROM_AIF_IN)
-                    status_bset.set(STATUS_PARKED);
+                if(status_par.cabState == CAB_DISABLED_FROM_AIF_IN || status_par.cabState == CAB_DISABLED_FROM_OTHER_CAB
+                        || status_par.cabState == CAB_BLOCK_REMOVED)
+                    { 
+                        // Compute the difference of actual pos and park pos
+                        for(size_t i=0; i<((*m_params->park_positions)[address]).size(); i++) { // TODO: subtract the offset!
+                            if(!(fabs(((*m_params->park_positions)[address])[i] - act_pos[i]) < PARK_DELTA)) {
+                                status_bset.reset(STATUS_PARKED);
+                                break;
+                            }
+                            status_bset.set(STATUS_PARKED);
+                        }
+                    }
                 else
                     status_bset.reset(STATUS_PARKED);
-
-
+                
                 // Set the WARNING bit of the status pattern
                 if(!app_status_bset.test(ASTATUS_WARNING) || !app_status_bset.test(ASTATUS_MESSAGE))
                     status_bset.set(STATUS_WARNING);
@@ -161,7 +168,6 @@ void WPStatusUpdater::runLoop()
 
                 if(diff > MAX_TIME_DIFF) {
                     ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: abs(actual_time - actual_pos_time) = %llu", diff));
-                    cout << "MAX_TIME_DIFF" << endl;
                 }
                 else {
                     CSecAreaResourceWrapper<map<int, vector< PositionItem> > > lst_secure_requests = (m_params->cmd_pos_list)->Get();
@@ -197,9 +203,15 @@ void WPStatusUpdater::runLoop()
                                         break;
                                     }
                             }
+                            m_clean_counter[address] = false;
                         }
                         catch(PosNotFoundEx) {
-                            ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: cmd position at @%llu not found!", act_pos_time));
+                            if(m_clean_counter[address]) {
+                                ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: cmd position at @%llu not found!", act_pos_time));
+                                m_clean_counter[address] = false;
+                            }
+                            else
+                                m_clean_counter[address] = true;
                         }
                     }
                     lst_secure_requests.Release();

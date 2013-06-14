@@ -71,6 +71,12 @@ void word2binChar(char *dst, unsigned char bytes[], int len);
  */
 int str2int(const string &s);
 
+/**
+ * Return the integer value stored in a string. See str2int() doc.
+ *
+ */
+unsigned long str2ulong(const string &s);
+
 
 /**
  * Return the double value stored in a string.

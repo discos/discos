@@ -8,6 +8,8 @@
 -->
 
 <!-- Expire time in seconds -->
+<!-- Limits in mm: theta_z(-945,945) -->
+<!-- Park position: theta_z(0) -->
 <WPServo
     xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -33,7 +35,7 @@
     require_calibration = "0"
     expire_time = "0.05000"
     tracking_delta = "2"
-    limits="(-949, 949)"
+    limits="(-945, 945)"
 >
               
     <!-- Actual Position (ROdoubleSeq) -->
@@ -67,8 +69,6 @@
         graph_min="0"
         graph_max="0"
         min_step="0"
-        min_value="-945"
-        max_value="945"
 	/>
               
     <!-- Position Difference (ROdoubleSeq) -->

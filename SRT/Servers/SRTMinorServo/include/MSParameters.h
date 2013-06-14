@@ -12,6 +12,8 @@
 #define STATUS_WIDTH 6
 #define STREAM_PRECISION 16
 
+const double PARK_DELTA = 0.1;
+
 using namespace IRA;
 
 struct CDBParameters {
@@ -25,7 +27,7 @@ struct CDBParameters {
     DWORD SERVER_TIMEOUT;
     DWORD SERVO_ADDRESS;
     double ZERO;
-    double PARK_POSITION;
+    IRA::CString PARK_POSITION;
     DWORD MIN_SPEED;
     DWORD MAX_SPEED;
     DWORD VIRTUAL_RS;
@@ -136,9 +138,11 @@ enum {
     CAB_BLOCK_REMOVED,
     CAB_DISABLED_FROM_AIF_IN,
     CAB_SUPPLY_FAIL,
+    CAB_DISABLED_FROM_OTHER_CAB, 
     CAB_EMERGENCY_REMOVED,
     CAB_BLOCK_ACTIVE
 };
+
 
 enum {
     STATUS_READY,

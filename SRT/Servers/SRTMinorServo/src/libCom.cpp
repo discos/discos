@@ -124,8 +124,9 @@ string make_request(
                 
         // clean (data channel, high speed)
         case 8: {
-            // The syntax: "#clean:<cmd_number>=<app_number>\r"
-            request = req_header + commands[cmd_idx] + ":" + cmd_number + "=" + app_number + message_closer;
+            // The syntax: "#clean:<cmd_number>=<app_number>,<time>\r"
+            request = req_header + commands[cmd_idx] + ":" + cmd_number + "=" + app_number + "," + exe_time_str;
+            request += message_closer;
             break;
         }
          
@@ -144,10 +145,10 @@ string make_request(
 }
 
 
-void verify(string answer) throw (ComponentErrors::SocketErrorExImpl) {
+bool verify(string answer) throw (ComponentErrors::SocketErrorExImpl) {
 
     if(startswith(answer, nak_header))
-        THROW_EX(ComponentErrors, SocketErrorEx, "Nak answer: " + answer, false);
+        return false;
 
     unsigned short cmd_len = sizeof(commands) / sizeof(string);
     bool found = false;
@@ -156,8 +157,8 @@ void verify(string answer) throw (ComponentErrors::SocketErrorExImpl) {
             found = true;
             break;
         }
-    if(!found)
-        THROW_EX(ComponentErrors, SocketErrorEx, "Command not found. Answer was: " + answer, false);
+
+    return found == true ? true : false;
 }
 
 
@@ -283,7 +284,8 @@ void process(
                istm.str(parameters[0]);
                status_par->appStatus = strtol((istm.str()).c_str(), NULL, 16);
                parameters.erase(parameters.begin());
-               status_par->cabState = str2int(parameters[0]);
+               // Get the last byte and compute the value in decimal
+               status_par->cabState = (unsigned int)(((parameters[0])[(parameters[0]).size()-1]) - 48); 
                parameters.erase(parameters.begin());
 
                // If the number of positions retrieved is that we expect, assign the positions

@@ -96,7 +96,7 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
                     return;
                 }
                 
-                // If the answer is a NAK_stow turn the stow-bit off and delete the item from the map
+                // If the answer is a NAK_stow, turn the stow-bit off and delete the item from the map
                 if(startswith(rec_answer, "NAK_stow")) {
                     (*m_params->stow_state)[saddress] = false;
                     if(m_stow_counter.count(key))

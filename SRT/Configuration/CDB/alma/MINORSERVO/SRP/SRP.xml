@@ -4,11 +4,14 @@
        Marco Buttu, mbuttu@oa-cagliari.inaf.it
  
    Created: Tue Oct 13 09:36:00 CEST 2009
-   Last Modified:
+   Last Modified: Fri Jun 7 12:20:32 UTC 2013
+
 -->
 
 <!-- Expire time in seconds -->
-<!-- limits: x, y, z, theta_x, theta_y, theta_z) -->
+<!-- Limits: x(-50,50), y(-50,50), z(-110,110), theta_x(-0.25,0.25), theta_y(-0.25,0.25), theta_z(-0.25,0.25) -->
+<!-- Elongation Limits: Z1(-125,125), Z2(-125,125), Z3(-125,125), Y4(-125,125), Y5(-125,125), X6(-125,125) -->
+<!-- Park position (elongations): Z1(-125), Z2(-125), Z3(-125), Y4(0), Y5(0), X6(0) -->
 <WPServo
     xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -26,7 +29,7 @@
     timeout="2000000"
     servo_address="1"
     zero="1570.00"
-    park_position="0"
+    park_position="-5,5,-125,0,0,0"
     max_speed="0"
     min_speed="0"
     driver_type = "unknown"
@@ -34,7 +37,7 @@
     require_calibration = "0"
     expire_time = "0.05000"
     tracking_delta = "1"
-    limits="(-45, 45); (-105, 105); (-45, 45); (-0.20, 0.20); (-0.20, 0.20); (-0.20, 0.20)"
+    limits="(-50, 50); (-50, 50); (-110, 110); (-0.25, 0.25); (-0.25, 0.25); (-0.25, 0.25)"
 >
               
     <!-- Actual Position (ROdoubleSeq) -->
@@ -68,8 +71,6 @@
         graph_min="0"
         graph_max="0"
         min_step="0"
-        min_value="-110"
-        max_value="+110"
 	/>
               
     <!-- Position Difference (ROdoubleSeq) -->

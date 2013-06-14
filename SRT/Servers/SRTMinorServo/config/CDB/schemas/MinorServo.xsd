@@ -89,7 +89,7 @@
         <xs:attribute name="servo_address" type="xs:unsignedShort" use="optional" />
         <!-- zero reference position -->
         <xs:attribute name="zero" type="xs:double" use="required" />
-        <xs:attribute name="park_position" type="xs:double" use="required" />
+        <xs:attribute name="park_position" type="xs:string" use="required" />
         <xs:attribute name="max_speed" type="xs:unsignedLong" use="optional" />
         <xs:attribute name="min_speed" type="xs:unsignedLong" use="optional" />
         <!-- Type of drivers -->
@@ -199,25 +199,11 @@
         <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
         <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
         <xs:attribute name="slaves" type="xs:string" use="required" />
-        <xs:attribute name="conf7GHz" type="xs:string" use="required" />
-        <xs:attribute name="conf22GHz" type="xs:string" use="required" />
-        <xs:attribute name="confB" type="xs:string" use="required" />
-        <!--    <xs:attribute name="confC" type="xs:string" use="required" />
-        <xs:attribute name="confD" type="xs:string" use="required" />
-        <xs:attribute name="confE" type="xs:string" use="required" />
-        <xs:attribute name="confF" type="xs:string" use="required" />
-        <xs:attribute name="confG" type="xs:string" use="required" />
-        <xs:attribute name="confH" type="xs:string" use="required" />
-        <xs:attribute name="confI" type="xs:string" use="required" />
-        <xs:attribute name="confL" type="xs:string" use="required" />
-        <xs:attribute name="confM" type="xs:string" use="required" />
-        <xs:attribute name="confN" type="xs:string" use="required" />
-        <xs:attribute name="confO" type="xs:string" use="required" />
-        <xs:attribute name="confP" type="xs:string" use="required" />
-        <xs:attribute name="confQ" type="xs:string" use="required" />
-        <xs:attribute name="confR" type="xs:string" use="required" />
-        <xs:attribute name="confS" type="xs:string" use="required" />
-        <xs:attribute name="confT" type="xs:string" use="required" /> -->
+        <xs:attribute name="CCB" type="xs:string" use="required" />
+        <xs:attribute name="KKG" type="xs:string" use="required" />
+        <xs:attribute name="LLP" type="xs:string" use="required" />
+        <xs:attribute name="PPP" type="xs:string" use="required" />
+        <xs:attribute name="LPP" type="xs:string" use="required" />
 
     </xs:complexType>
 

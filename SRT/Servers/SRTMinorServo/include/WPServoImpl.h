@@ -299,17 +299,21 @@ public:
      * @arg doubleSeq offset sequence of user offsets to add to the position;
      * one offset for each axis
      * @throw MinorServoErrors::OperationNotPermittedEx
+     * @throw MinorServoErrors::CommunicationErrorEx
      */ 
      virtual void setUserOffset(const ACS::doubleSeq &offset) 
-         throw (MinorServoErrors::OperationNotPermittedEx);
+         throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
     /** Return the user offset of the position */ 
      virtual ACS::doubleSeq * getUserOffset(void); 
 
 
-    /** Clear the position user offset */ 
-     virtual void clearUserOffset(void);
+    /** Clear the position user offset
+     * @throw MinorServoErrors::CommunicationErrorEx
+     */
+     virtual void clearUserOffset(void) 
+          throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
     /**
@@ -320,7 +324,7 @@ public:
      * @throw MinorServoErrors::OperationNotPermittedEx
      */ 
      virtual void setSystemOffset(const ACS::doubleSeq &offset) 
-         throw (MinorServoErrors::OperationNotPermittedEx);
+         throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
     /** Return the system offset of the position */ 
@@ -328,7 +332,7 @@ public:
 
 
     /** Clear the position system offset */ 
-     virtual void clearSystemOffset(void);
+     virtual void clearSystemOffset(void) throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
     /**
@@ -343,10 +347,11 @@ public:
 
     /**
      * Clean the MSCU positions queue
+     * @arg long  exe_time execution time
      * 
      * @throw MinorServoErrors::CommunicationErrorEx
      */ 
-     virtual void cleanPositionsQueue() throw (MinorServoErrors::CommunicationErrorEx);
+     virtual void cleanPositionsQueue(const ACS::Time exe_time=0) throw (MinorServoErrors::CommunicationErrorEx);
 
     /**
      * Accomplish a stow of minor servo.
@@ -423,6 +428,9 @@ private:
      */
     static map<int, bool> m_stow_state;
 
+    /** Map of park positions vector **/
+    static map<int, vector<double> > m_park_positions;
+
     /** Structure containing the CDB parameters */
     CDBParameters *m_cdb_ptr;
 
@@ -431,6 +439,9 @@ private:
 
     /* A list of Limits. Each limit is a couple (min, max) of limits for the correpondig axis. */
     vector<Limits> m_limits;
+
+    /* The park position. */
+    vector<double> m_park_position;
 
     /** Structure containing the ExpireTime values */
     static ExpireTime m_expire;
@@ -503,6 +514,8 @@ private:
      */
     static map<int, WPServoTalker *> m_talkers;
 
+    static map<int, unsigned long *> m_status_map;
+
     /** @var thread parameters */
     static ThreadParameters m_thread_params;
 
@@ -513,7 +526,10 @@ private:
     
     void setLimits(IRA::CString limits);
 
-    void setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target) throw (MinorServoErrors::OperationNotPermittedEx);
+    void setParkPosition(IRA::CString position);
+
+    void setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target)
+         throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
      
     virtual bool isStatusThreadEn();
 

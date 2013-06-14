@@ -37,8 +37,14 @@ WPServoTalker::WPServoTalker(
         ExpireTime *const expire_ptr,
         CSecureArea< map<int, vector<PositionItem> > > *cmdPos_list,
         const Offsets *const offsets,
-        const vector<Limits> limits
-        ) throw (ComponentErrors::MemoryAllocationExImpl): m_cdb_ptr(cdb_ptr), m_offsets(offsets), m_limits(limits), m_cmdPos_list(cmdPos_list)
+        const vector<Limits> limits,
+        map<int, unsigned long *> status_map
+        ) throw (ComponentErrors::MemoryAllocationExImpl): 
+             m_cdb_ptr(cdb_ptr), 
+             m_offsets(offsets), 
+             m_limits(limits), 
+             m_cmdPos_list(cmdPos_list),
+             m_status_map(status_map)
 {
     AUTO_TRACE("WPServoTalker::WPServoTalker();");
 
@@ -109,6 +115,16 @@ void WPServoTalker::setCmdPos(
             ) {
     
     AUTO_TRACE("WPServoTalker::setCmdPos()");
+    if(!is_dummy) { 
+        if(m_status_map.count(m_cdb_ptr->SERVO_ADDRESS)) {
+            bitset<STATUS_WIDTH> status_bset(*(m_status_map[m_cdb_ptr->SERVO_ADDRESS]));
+            if(!status_bset.test(STATUS_READY))
+                THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set minor servo position: servo not ready", true);
+        }
+        else
+           THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set minor servo position: servo statua unknown", true);
+    }
+
     timeval now;
     gettimeofday(&now, NULL);
     double starting_time = now.tv_sec + now.tv_usec / TIME_SF;
@@ -126,12 +142,6 @@ void WPServoTalker::setCmdPos(
             if(positions[i] <= m_limits[i].min || positions[i] >= m_limits[i].max)
                 THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set minor servo position: position not allowed", true);
         }
-
-        // Check the limits
-        for(size_t i=0; i<positions.length(); i++) {
-            positions[i] += (m_offsets->user)[i] + (m_offsets->system)[i];
-        }
-        
 
         // The first argument is the index of a vector of commands; make_request converts the position to virtual
         string request = make_request(2, m_cdb_ptr, m_cmd_number, -1, -1, -1, exe_time, &positions);
@@ -322,9 +332,8 @@ ACS::Time WPServoTalker::look_for_a_response(
         try {
             if((m_responses->Get())->count(request_id)) {
                 answer = (*(m_responses->Get()))[request_id];
-                // Raise an exception if the answer is a NAK
-                verify(answer);
-                if(process_enabled) process(answer, parameters, udata, status_par, cmd_idx, m_cdb_ptr, timestamp, slave);
+                if(process_enabled && verify(answer)) 
+                    process(answer, parameters, udata, status_par, cmd_idx, m_cdb_ptr, timestamp, slave);
                 // Delete the answer from the map of responses
                 CSecAreaResourceWrapper<map<int, string> > secure_responses = m_responses->Get();
                 secure_responses->erase(request_id);

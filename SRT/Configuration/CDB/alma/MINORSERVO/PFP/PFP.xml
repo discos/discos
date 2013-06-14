@@ -4,10 +4,12 @@
        Marco Buttu, mbuttu@oa-cagliari.inaf.it
  
    Created: Tue Oct 13 09:36:00 CEST 2009
-   Last Modified:
+   Last Modified: 23/05/2013: limits
 -->
 
 <!-- Expire time in seconds -->
+<!-- Limits in mm: theta_y(-26,2740), x(-1400,1400), z(-199,40) -->
+<!-- Park position: theta_y(2730.15), x(0), z(-195) -->
 <WPServo
     xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -25,7 +27,7 @@
     timeout="2000000"
     servo_address="0"
     zero="0"
-    park_position="0"
+    park_position="2730.15,0,-195"
     max_speed="0"
     min_speed="0"
     driver_type = "unknown"
@@ -33,7 +35,7 @@
     require_calibration = "0"
     expire_time = "0.05000"
     tracking_delta = "2"
-    limits="(-1, 77); (-1490, 1490); (-200, 50)"
+    limits="(-26, 2740); (-1400, 1400); (-199, 40)"
 >
               
     <!-- Actual Position (ROdoubleSeq) -->
@@ -67,8 +69,6 @@
         graph_min="0"
         graph_max="0"
         min_step="0"
-        min_value="-25"
-        max_value="25"
 	/>
               
     <!-- Position Difference (ROdoubleSeq) -->

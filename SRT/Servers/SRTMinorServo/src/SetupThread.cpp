@@ -40,7 +40,7 @@ void SetupThread::run()
         for(vector<string>::iterator iter = (m_params->actions).begin(); iter != (m_params->actions).end(); iter++) {
             // Split the action in items.
             vector<string> items = split(*iter, items_separator);
-            // Set the name of component to move from a string
+            // Set the name of the component
             MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
             string comp_name = get_component_name(items.front());
             if((*m_params->component_refs).count(comp_name)) {
@@ -83,7 +83,7 @@ void SetupThread::run()
             for(vector<string>::iterator iter = (m_params->actions).begin(); iter != (m_params->actions).end(); iter++) {
                 // Split the action in items.
                 vector<string> items = split(*iter, items_separator);
-                // Set the name of component to move from a string
+                // Set the name of the component
                 MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
                 string comp_name = get_component_name(items.front());
                 if((*m_params->component_refs).count(comp_name)) {
@@ -106,7 +106,7 @@ void SetupThread::run()
         for(vector<string>::iterator iter = (m_params->actions).begin(); iter != (m_params->actions).end(); iter++) {
             // Split the action in items.
             vector<string> items = split(*iter, items_separator);
-            // Set the name of component to move from a string
+            // Set the name of component 
             MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
             string comp_name = get_component_name(items.front());
             // Set a doubleSeq from a string of positions

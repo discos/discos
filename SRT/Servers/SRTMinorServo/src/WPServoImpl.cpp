@@ -23,8 +23,10 @@ SocketListener* WPServoImpl::m_listener_ptr = NULL;
 WPStatusUpdater* WPServoImpl::m_status_ptr = NULL;
 ExpireTime WPServoImpl::m_expire;
 map<int, WPServoTalker *> WPServoImpl::m_talkers;
+map<int, unsigned long *> WPServoImpl::m_status_map;
 map<int, bool> WPServoImpl::m_status_thread_en;
 map<int, bool> WPServoImpl::m_stow_state;
+map<int, vector<double> > WPServoImpl::m_park_positions;
 CSecureArea<unsigned short> *WPServoImpl::m_instance_counter = NULL;
 CSecureArea< map<int, vector<PositionItem> > >* WPServoImpl::m_cmdPos_list = \
     new CSecureArea< map<int, vector<PositionItem> > >(new map<int, vector<PositionItem> >);
@@ -268,9 +270,15 @@ void WPServoImpl::initialize() throw (
 
     try {
         pthread_mutex_lock(&init_mutex); 
+
+        if(m_status_map.count(m_cdb_ptr->SERVO_ADDRESS))
+            THROW_EX(ComponentErrors, ThreadErrorEx, "Attempting to set an existing key in m_status_map", false)
+        else
+            m_status_map[m_cdb_ptr->SERVO_ADDRESS] = &(m_expire.status[m_cdb_ptr->SERVO_ADDRESS]);
+
         // The socket connection is shared among minor servos (singleton design pattern)
         m_wpServoLink_ptr = WPServoSocket::getSingletonInstance(m_cdb_ptr, &m_expire);
-        m_wpServoTalker_ptr = new WPServoTalker(m_cdb_ptr, &m_expire, m_cmdPos_list, &m_offsets, m_limits);
+        m_wpServoTalker_ptr = new WPServoTalker(m_cdb_ptr, &m_expire, m_cmdPos_list, &m_offsets, m_limits, m_status_map);
 
         if(m_talkers.count(m_cdb_ptr->SERVO_ADDRESS))
             THROW_EX(ComponentErrors, ThreadErrorEx, "Attempting to set an existing key in m_talkers", false)
@@ -287,6 +295,13 @@ void WPServoImpl::initialize() throw (
         m_thread_params.status_thread_en = &m_status_thread_en;
         m_thread_params.tracking_delta = m_cdb_ptr->TRACKING_DELTA;
         m_thread_params.stow_state = &m_stow_state;
+
+        setParkPosition(m_cdb_ptr->PARK_POSITION);
+        // set m_park_positions
+        for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+            (m_park_positions[m_cdb_ptr->SERVO_ADDRESS]).push_back(m_park_position[i]);
+
+        m_thread_params.park_positions = &m_park_positions;
 
         try {
             // I'll create the threads whitout the aid of the manager because I don't want
@@ -556,14 +571,14 @@ void WPServoImpl::disable(const ACS::Time exe_time) throw (MinorServoErrors::Com
 }
 
 
-void WPServoImpl::clearUserOffset() 
+void WPServoImpl::clearUserOffset() throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx)
 {
     AUTO_TRACE("WPServoImpl::clearUserOffset()");
     ACS::doubleSeq offset;
     offset.length(m_cdb_ptr->NUMBER_OF_AXIS);
     for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
         offset[i] = 0;
-    setUserOffset(offset);
+    setUserOffset(offset); // Raise a MinorServoErrors::CommunicationErrorEx
 }
 
 
@@ -571,13 +586,13 @@ void WPServoImpl::clearUserOffset()
 
 
 void WPServoImpl::setUserOffset(const ACS::doubleSeq &offset) 
-    throw (MinorServoErrors::OperationNotPermittedEx)
+    throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx)
 {
     AUTO_TRACE("WPServoImpl::setUserOffset()");
     if(offset.length() != m_cdb_ptr->NUMBER_OF_AXIS)  {
         THROW_EX(MinorServoErrors, OperationNotPermittedEx, "Cannot set the user offset: wrong number of axis", true);
     }
-    setOffset(offset, m_offsets.user);
+    setOffset(offset, m_offsets.user); // Raise a MinorServoErrors::CommunicationErrorEx
 }
 
 
@@ -595,6 +610,7 @@ ACS::doubleSeq * WPServoImpl::getUserOffset(void)
 
 
 void WPServoImpl::clearSystemOffset() 
+    throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx)
 {
     AUTO_TRACE("WPServoImpl::clearSystemOffset()");
     ACS::doubleSeq offset;
@@ -606,7 +622,7 @@ void WPServoImpl::clearSystemOffset()
 
 
 void WPServoImpl::setSystemOffset(const ACS::doubleSeq &offset) 
-    throw (MinorServoErrors::OperationNotPermittedEx)
+    throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx)
 {
     AUTO_TRACE("WPServoImpl::setSystemOffset()");
     if(offset.length() != m_cdb_ptr->NUMBER_OF_AXIS)  {
@@ -628,7 +644,8 @@ ACS::doubleSeq * WPServoImpl::getSystemOffset(void)
 }
 
 
-void WPServoImpl::setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target) throw (MinorServoErrors::OperationNotPermittedEx)
+void WPServoImpl::setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target) 
+    throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx)
 {
     pthread_mutex_lock(&offset_mutex); 
     try {
@@ -671,8 +688,6 @@ void WPServoImpl::setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target
                 PositionItem item;
                 item.exe_time = getTimeStamp();
                 (item.position).length(m_cdb_ptr->NUMBER_OF_AXIS);
-                // for(size_t i = 0; i < (item.position).length(); i++)
-                //     (item.position)[i] = m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS][i];
                 item.position = m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS];
                 vitem.push_back(item);
             }
@@ -688,6 +703,7 @@ void WPServoImpl::setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target
     }
     catch(...) {
         pthread_mutex_unlock(&offset_mutex); 
+        m_status_ptr->restart();
         throw;
     }
         
@@ -712,6 +728,12 @@ void WPServoImpl::setup(const ACS::Time exe_time)
 {
 
     AUTO_TRACE("WPServoImpl::setup()");
+    if(m_expire.cabState[m_cdb_ptr->SERVO_ADDRESS] == CAB_DISABLED_FROM_OTHER_CAB)
+        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot make a minor servo setup: drive cabinet disabled from other DC", true);
+
+    if(isStarting())
+        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot make a new minor servo setup: an old setup is in progress.", true);
+
     try {
         // The index code of setup command in Talk.cpp is 3
         m_wpServoTalker_ptr->action(3, exe_time);
@@ -723,12 +745,14 @@ void WPServoImpl::setup(const ACS::Time exe_time)
 }
 
 
-void WPServoImpl::cleanPositionsQueue() throw (MinorServoErrors::CommunicationErrorEx) 
+void WPServoImpl::cleanPositionsQueue(const ACS::Time exe_time) throw (MinorServoErrors::CommunicationErrorEx) 
 {
 
     AUTO_TRACE("WPServoImpl::cleanPositionsQueue()");
     try {
-        m_wpServoTalker_ptr->action(8);
+        m_wpServoTalker_ptr->action(8, exe_time);
+        // The MSCU sometimes returns a NAK if there is not a delay between a clear and a setpos commands
+        usleep(200000); // 200000us = 0.20 sec
     }
     catch(...) {
         THROW_EX(MinorServoErrors, CommunicationErrorEx, "Cannot clean the MSCU positions queue", true);
@@ -781,12 +805,37 @@ void WPServoImpl::stow(const ACS::Time exe_time)
 {
 
     AUTO_TRACE("WPServoImpl::stow()");
+    if(!isReady())
+        THROW_EX(MinorServoErrors, StowErrorEx, "Cannot make a minor servo stow: servo not ready", true);
+
+    if(isParking())
+        THROW_EX(MinorServoErrors, StowErrorEx, "Cannot make a new minor servo stow: an old stow is in progress.", true);
+
     try {
         // The index code of stow command in Talk.cpp is 4
         m_wpServoTalker_ptr->action(4, exe_time);
     }
     catch(...) {
         THROW_EX(MinorServoErrors, StowErrorEx, "Cannot make a minor servo stow", true);
+    }
+
+    ACS::doubleSeq dummy_cmd_pos;
+    dummy_cmd_pos.length(m_cdb_ptr->NUMBER_OF_AXIS);
+    ACS::Time timestamp = getTimeStamp();
+    // Initialize the commanded position with the stow position
+    for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+        dummy_cmd_pos[i] = m_park_position[i] - (m_offsets.user)[i];
+
+    // Iposta la dummy_cmd_pos al valore di park_pos
+    try {
+        // We put the position in the commanded position list, without
+        // to command it to the MSCU (parameter is_dummy=true)
+        // In fact the WPStatusUpdater thread needs a position in the 
+        // commanded position list to complete its updating
+        m_wpServoTalker_ptr->setCmdPos(dummy_cmd_pos, timestamp, 0, true);
+    }
+    catch(MinorServoErrors::PositioningErrorEx& ex) {
+        _ADD_BACKTRACE(MinorServoErrors::PositioningErrorExImpl, _dummy, ex, "WPServo::stow()");
     }
 
 }
@@ -875,6 +924,15 @@ void WPServoImpl::setLimits(IRA::CString limits) {
         lim.max = str2double(max);
         m_limits.push_back(lim);
     }
+}
+
+void WPServoImpl::setParkPosition(IRA::CString position) {
+    vector<string> items = split(string(position), ",");
+    for(vector<string>::iterator iter = items.begin(); iter != items.end(); iter++)
+        m_park_position.push_back(str2double(*iter));
+
+    if(m_park_position.size() != m_cdb_ptr->NUMBER_OF_AXIS)
+        THROW_EX(ComponentErrors, UnexpectedEx, "WPServoImpl::setParkPosition(): wrong park position in the CDB", false);
 }
 
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_actPos, actPos);

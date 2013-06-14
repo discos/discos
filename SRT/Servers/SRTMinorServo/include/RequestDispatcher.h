@@ -26,6 +26,7 @@ struct ThreadParameters {
     map<int, bool> *status_thread_en;
     double tracking_delta;
     map<int, bool> *stow_state;
+    map<int, vector<double> > *park_positions;
 };
 
 // This class takes care of getting requests from minor servos and send them. 

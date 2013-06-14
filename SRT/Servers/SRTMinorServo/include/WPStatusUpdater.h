@@ -14,7 +14,7 @@
 #include "MSParameters.h"
 #include "RequestDispatcher.h"
  
-const ACS::Time MAX_TIME_DIFF = 1 * 10000000; // One second
+const ACS::Time MAX_TIME_DIFF = 4 * 10000000; // Four seconds
 
 // This class updates the status property of minor servos.
 class WPStatusUpdater : public ACS::Thread
@@ -47,7 +47,7 @@ private:
      ThreadParameters *m_params;
 
      unsigned long m_counter;
-
+     vector<bool> m_clean_counter;
 };
 
 #endif 

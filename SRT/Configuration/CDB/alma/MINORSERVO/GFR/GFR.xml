@@ -4,10 +4,12 @@
        Marco Buttu, mbuttu@oa-cagliari.inaf.it
  
    Created: Tue Oct 13 09:36:00 CEST 2009
-   Last Modified:
+   Last Modified: Fri Jun 7 12:20:32 UTC 2013
 -->
 
 <!-- Expire time in seconds -->
+<!-- Limits in mm: theta_z(-1745,1745) -->
+<!-- Park position: theta_z(0) -->
 <WPServo
     xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -32,7 +34,7 @@
     require_calibration = "0"
     expire_time = "0.05000"
     tracking_delta = "2"
-    limits="(-1749, 1749)"
+    limits="(-1745, 1745)"
 >
               
     <!-- Actual Position (ROdoubleSeq) -->
@@ -66,8 +68,6 @@
         graph_min="0"
         graph_max="0"
         min_step="0"
-        min_value="-1745"
-        max_value="1745"
 	/>
               
     <!-- Position Difference (ROdoubleSeq) -->

@@ -87,6 +87,19 @@ int str2int(const string &s) {
     return num;
 }
 
+unsigned long str2ulong(const string &s) {
+    string s_copy(s);
+    strip(s_copy);
+    istringstream istm;
+    istm.precision(__UTILS_STREAM_PREC__);
+    istm.clear();
+    istm.str("");
+    unsigned long num;
+    istm.str(s_copy);
+    istm >> num;
+    return num;
+
+}
 
 double str2double(const string &s) {
     string s_copy(s);

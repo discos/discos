@@ -58,7 +58,7 @@ module MinorServo {
      *     <li><em>setup(exe_time)</em>: accomplish a setup at some time.</li>
      *     <li><em>stow(exe_time)</em>: accomplish a stow at some time.</li>
      *     <li><em>calibrate(exe_time)</em>: accomplish a calibration at some time.</li>
-     *     <li><em>cleanPositionsQueue()</em>: clean the MSCU positions queue.</li>
+     *     <li><em>cleanPositionsQueue(exe_time)</em>: clean the MSCU positions queue.</li>
      * </ul> 
      */
     interface WPServo : ACS::CharacteristicComponent {
@@ -328,17 +328,22 @@ module MinorServo {
          * @arg doubleSeq offset sequence of user offsets to add to the position;
          * one offset for each axis
          * @throw MinorServoErrors::OperationNotPermittedEx
+         * @throw MinorServoErrors::CommunicationErrorEx
          */ 
          void setUserOffset(in ACS::doubleSeq offset) 
-             raises (MinorServoErrors::OperationNotPermittedEx);
+             raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
         /** Return the user offset of the position */
          ACS::doubleSeq getUserOffset();
 
 
-        /** Clear the position user offset */ 
-         void clearUserOffset();
+        /** Clear the position user offset
+         * @throw MinorServoErrors::CommunicationErrorEx
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+         void clearUserOffset()
+             raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
         /**
@@ -346,18 +351,23 @@ module MinorServo {
          * 
          * @arg doubleSeq offset sequence of position system offsets;
          * one offset for each axis
+         * @throw MinorServoErrors::CommunicationErrorEx
          * @throw MinorServoErrors::OperationNotPermittedEx
          */ 
          void setSystemOffset(in ACS::doubleSeq offset) 
-             raises (MinorServoErrors::OperationNotPermittedEx);
+             raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
         /** Return the system offset of the position */
          ACS::doubleSeq getSystemOffset();
 
 
-        /** Clear the position system offset */ 
-         void clearSystemOffset();
+        /** Clear the position system offset
+         * @throw MinorServoErrors::CommunicationErrorEx
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */ 
+         void clearSystemOffset()
+             raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
        
        
        /**
@@ -385,10 +395,11 @@ module MinorServo {
 
         /**
          * Clean the MSCU positions queue
+         * @arg long  exe_time execution time
          * 
          * @throw MinorServoErrors::CommunicationErrorEx
          */
-        void cleanPositionsQueue() raises (MinorServoErrors::CommunicationErrorEx);
+        void cleanPositionsQueue(in ACS::Time exe_time) raises (MinorServoErrors::CommunicationErrorEx);
 
 
         /**

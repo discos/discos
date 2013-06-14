@@ -53,7 +53,8 @@ public:
             ExpireTime *const expire_ptr, 
             CSecureArea< map<int, vector<PositionItem> > > *cmd_list,
             const Offsets *const offsets,
-            const vector<Limits> limits
+            const vector<Limits> limits,
+            map<int, unsigned long *> status_map
     ) throw (ComponentErrors::MemoryAllocationExImpl);
 
 
@@ -198,6 +199,10 @@ private:
     const vector<Limits> m_limits;
 
     CSecureArea< map<int, vector<PositionItem> > > *m_cmdPos_list;
+
+    /** map of status values **/
+    map<int, unsigned long *> m_status_map;
+
 
     /**
     * This map has the command number as a key and the response as a value.

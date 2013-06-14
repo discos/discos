@@ -24,29 +24,35 @@
     actionThreadStackSize="2048"
     monitoringThreadStackSize="4096"
     
-    conf7GHz="
-        @ SRP: park;
+    CCB="
         @ PFP: park;
-        @ GFR: AZ = (-567.8);
-        @ M3R: park;
+        @ SRP: LX = (0); LY = (0); LZ = (0); TX = (0); TY = (0); TZ = (0);
+        @ GFR: LZ = (0);
+        @ M3R: LZ = (286.67);
     "
-    conf22GHz="
-        @ SRP: park;
+    KKG="
         @ PFP: park;
-        @ GFR: AZ = (1323.5);
-        @ M3R: park;
+        @ SRP: LX = (0); LY = (0); LZ = (0); TX = (0); TY = (0); TZ = (0);
+        @ GFR: LZ = (1323.5);
+        @ M3R: none;
     "
-    confB="
-        @ PFP: LX = (11, 12, 13); LZ = (20, 21, 22, 23, 24); AZ = (31, 32, 33);
-        @ SRP: 
-             LX = (1, 1, 1);
-             LY = (1, 1, 1);
-             LZ = (1, 1, 1);
-             AX = (1, 1, 1);
-             AY = (1, 1, 1);
-             AZ = (1, 1, 1);
-        @ GFR: park; 
-        @ M3R: AZ = (1, 1, 1);
+    LLP="
+        @ SRP: park;
+        @ PFP: TY = (-25.75); LX = (458); LZ = (-45.9);
+        @ GFR: none; 
+        @ M3R: none;
+    "
+    PPP="
+        @ SRP: park;
+        @ PFP: TY = (-25.75); LX = (458); LZ = (-45.9);
+        @ GFR: none; 
+        @ M3R: none;
+    "
+    PLP="
+        @ SRP: park;
+        @ PFP: TY = (-25.75); LX = (458); LZ = (-45.9);
+        @ GFR: none; 
+        @ M3R: none;
     "
 
     slaves="GFR, M3R, PFP, SRP"

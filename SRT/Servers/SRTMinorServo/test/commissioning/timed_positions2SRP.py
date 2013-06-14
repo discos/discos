@@ -47,7 +47,7 @@ class TestPositioning(unittest.TestCase):
         self.component.setPosition(cmd_pos, 0)
         print '\nsetPosition(%s, %s)' %(cmd_pos, 0)
         time.sleep(10)
-        delay = 20 * 10 ** 7 # 20 seconds
+        delay = 10 * 10 ** 7 # 10 seconds
         step =  2 * 10 ** 6 # 200 ms
         exe_time = TimeHelper.getTimeStamp().value + delay # Set the positions in delay seconds from now
         for i in range(100): # 20 seconds
