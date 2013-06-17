@@ -66,7 +66,7 @@
 #define RPOS	0x31
 #define GO	0x32
 
-#define ASCALIBRATION "/CDB/alma/AS/AScalibration.txt"
+#define MM2STEP	1400 //(42000 STEP / 30 MM)
 
 // specific macro
   /** 	@#define _ADD_MEMBER(OBJ,MEMB)
@@ -278,196 +278,199 @@ using namespace std;
  * @version "@(#) $Id: usdImpl.h,v 1.1 2011-03-24 09:18:00 c.migoni Exp $"
  */
 class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSurface::USD
-//class USDImpl: public CharacteristicComponentImpl,public virtual POA_MOD_USD::USD
 {
-  public:
+	public:
   
-     /**
-     * Constructor
-     * @param poa Poa which will activate this and also all other components.
-     * @param name component's name. This is also the name that will be used to find the
-     * configuration data for the component in the Configuration Database.
-     */
-    USDImpl(const ACE_CString &, maci::ContainerServices* );
+     	/**
+     	* Constructor
+     	* @param poa Poa which will activate this and also all other components.
+     	* @param name component's name. This is also the name that will be used to find the
+     	* configuration data for the component in the Configuration Database.
+     	*/
+	USDImpl(const ACE_CString &, maci::ContainerServices* );
 
-    /**
-     * Destructor
-     */
-    virtual ~USDImpl();
+    	/**
+     	* Destructor
+     	*/
+    	virtual ~USDImpl();
 	
-    /*Override component lifecycle methods*/
-    virtual void initialize() throw (ACSErr::ACSbaseExImpl);
-    virtual void execute() throw (ACSErr::ACSbaseExImpl);
+    	/*Override component lifecycle methods*/
+    	virtual void initialize() throw (ACSErr::ACSbaseExImpl);
+    	virtual void execute() throw (ACSErr::ACSbaseExImpl);
 	virtual void cleanUp();
 	virtual void aboutToAbort();
 
-		/**
-     * Following functions returns a reference to the property implementation of IDL interface 
-     */ 
-    virtual ACS::RWlong_ptr delay() throw (CORBA::SystemException);
-    virtual ACS::RWlong_ptr cmdPos() throw (CORBA::SystemException);
-    virtual ACS::RWlong_ptr Fmin() throw (CORBA::SystemException);
-    virtual ACS::RWlong_ptr Fmax() throw (CORBA::SystemException);
-    virtual ACS::RWlong_ptr acc() throw (CORBA::SystemException);
-    virtual ACS::RWlong_ptr uBits() throw (CORBA::SystemException);
-    virtual ACS::RWdouble_ptr lmCorr() throw (CORBA::SystemException);
-    virtual ACS::ROlong_ptr actPos() throw (CORBA::SystemException);
-    virtual ACS::ROpattern_ptr status() throw (CORBA::SystemException);
-    virtual ACS::ROlong_ptr softVer() throw (CORBA::SystemException);
-    virtual ACS::ROlong_ptr type() throw (CORBA::SystemException);
-    virtual ACS::RWdouble_ptr gravCorr() throw (CORBA::SystemException);
-    virtual ACS::RWdouble_ptr userOffset() throw (CORBA::SystemException);
+	/**
+     	* Following functions returns a reference to the property implementation of IDL interface 
+     	*/ 
+    	virtual ACS::RWlong_ptr delay() throw (CORBA::SystemException);
+    	virtual ACS::RWlong_ptr cmdPos() throw (CORBA::SystemException);
+    	virtual ACS::RWlong_ptr Fmin() throw (CORBA::SystemException);
+    	virtual ACS::RWlong_ptr Fmax() throw (CORBA::SystemException);
+    	virtual ACS::RWlong_ptr acc() throw (CORBA::SystemException);
+    	virtual ACS::RWlong_ptr uBits() throw (CORBA::SystemException);
+    	virtual ACS::RWdouble_ptr lmCorr() throw (CORBA::SystemException);
+    	virtual ACS::ROlong_ptr actPos() throw (CORBA::SystemException);
+    	virtual ACS::ROpattern_ptr status() throw (CORBA::SystemException);
+    	virtual ACS::ROlong_ptr softVer() throw (CORBA::SystemException);
+    	virtual ACS::ROlong_ptr type() throw (CORBA::SystemException);
+    	virtual ACS::RWdouble_ptr gravCorr() throw (CORBA::SystemException);
+    	virtual ACS::RWdouble_ptr userOffset() throw (CORBA::SystemException);
 	
-		/**
-		 * Implementation of unparametrized synchrnous methods
-		 * There are the function that makes some typical operation with the actuator.
-		 */
-		 
-		 
-		void stop() 	throw (CORBA::SystemException, ASErrors::ASErrorsEx)	{ 	
-				try {	action(STOP); }
-			 _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::stop()",m_status)
-		} 
+	/**
+	* Implementation of unparametrized synchrnous methods
+	* There are the function that makes some typical operation with the actuator.
+	*/
+	void stop() throw (CORBA::SystemException, ASErrors::ASErrorsEx) { 	
+		try {
+			action(STOP);
+		}
+		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::stop()",m_status)
+	} 
 		
-		void up() 		throw (CORBA::SystemException,ASErrors::ASErrorsEx) {		
-				try {	action(GO,1,1); }
-			 _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::up()",m_status)
-		} 
+	void up() throw (CORBA::SystemException,ASErrors::ASErrorsEx) {		
+		try {
+			action(GO,1,1);
+		}
+		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::up()",m_status)
+	} 
 		
-		void down() 	throw (CORBA::SystemException,ASErrors::ASErrorsEx) {  
-				try {	action(GO,-1,1); }
-			 _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::down()",m_status)
-		} 
+	void down() throw (CORBA::SystemException,ASErrors::ASErrorsEx) {  
+		try {
+			action(GO,-1,1);
+		}
+		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::down()",m_status)
+	} 
 	 
-		void reset() 	throw (CORBA::SystemException,ASErrors::ASErrorsEx);
+	void reset() 	throw (CORBA::SystemException,ASErrors::ASErrorsEx);
 		 
-     /**
-     * upperMost() & bottomMost().Put the USD against the mechanical range limits (upper and lower).
-		 * This intrinsecally makes the scale uncalibrated. 
-		 * Be carefull to avoid mech. stress due to max diffs between adiacent nearest actuators
-		 */
-		 
-		 void bottom() throw (CORBA::SystemException,ASErrors::ASErrorsEx) 	{ 
-			 try {	action(CPOS, m_bottom<<USxS,4); }
-			 _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::bottom()",m_status)
-		 }
-		 void top() 	 throw (CORBA::SystemException,ASErrors::ASErrorsEx) 	{ 
-				try {	action(CPOS,m_top<<USxS,4); }
-			 _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::top()",m_status)
-		} 
+     	/**
+     	* upperMost() & bottomMost().Put the USD against the mechanical range limits (upper and lower).
+	* This intrinsecally makes the scale uncalibrated. 
+	* Be carefull to avoid mech. stress due to max diffs between adiacent nearest actuators
+	*/
+	void bottom() throw (CORBA::SystemException,ASErrors::ASErrorsEx) { 
+		try {
+			action(CPOS, m_bottom<<USxS,4);
+		}
+		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::bottom()",m_status)
+	}
+	void top() throw (CORBA::SystemException,ASErrors::ASErrorsEx) { 
+		try {
+			action(CPOS,m_top<<USxS,4);
+		}
+		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::top()",m_status)
+	} 
 
-		 /**
-		 * Implementation of move methods
-		 * This function moves the actuator of incr step relative to actual position.
-		 * @param incr Amount of increment in ustep.If negative the movement will be toward the bottom.
-		 */
-		void move(CORBA::Long incr) throw (CORBA::SystemException,ASErrors::ASErrorsEx)  {	
-			try {	action(RPOS,incr<<USxS,4); }
-			    _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::move()",m_status)
-		} 
+	/**
+	* Implementation of move methods
+	* This function moves the actuator of incr step relative to actual position.
+	* @param incr Amount of increment in ustep.If negative the movement will be toward the bottom.
+	*/
+	void move(CORBA::Long incr) throw (CORBA::SystemException,ASErrors::ASErrorsEx) {	
+		try {
+			action(RPOS,incr<<USxS,4);
+		}
+		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::move()",m_status)
+	} 
 	
+	/**
+	* Calibrate the scale. USD already must be already against the uppermost edge.
+	* This function moves the actuator back untill the camma trailing edge.
+	* Records the position and move futher to record the camma falling edge.
+	* For the best measure "stop by hardware" USD function is used.
+	* Then computes the len of camma zone, the central point and distance from uppermost edge.
+	* Finally move USD in camma central zone, load on USD counter the zeroRef value, moves the USD to 0 position and mark it as calibrated.
+	* @return 
+	*/
+	//virtual ACSErr::Completion* calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
+	void calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
 	
-		 /**
-		 * Calibrate the scale. USD already must be already against the uppermost edge.
-		 * This function moves the actuator back untill the camma trailing edge.
-		 * Records the position and move futher to record the camma falling edge.
-		 * For the best measure "stop by hardware" USD function is used.
-		 *Then computes the len of camma zone, the central point and distance from uppermost edge.
-		 * Finally move USD in camma central zone, load on USD counter the zeroRef value, moves the USD to 0 position and mark it as calibrated.
-		 * @return 
-		 */
-		//virtual ACSErr::Completion* calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
-		void calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
-	
-		 /**
-		 * Calibration verification. USD already must be already calibrated.
-		 * This function moves the actuator to zero ref position and check the camma on status.
-		 * Moves to uppermost edge and check again the camma on-status.
-		 * Adds half camma lenght and check the off status.
-		 * Makes the same control on bottom edge.
-		 * Be aware that other nearest usd are at middle scale, to avoid mechanical stresses
-		 * @return 
-		*/
-		 //virtual ACSErr::Completion* calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx) ;
-		 void calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
+	/**
+	* Calibration verification. USD already must be already calibrated.
+	* This function moves the actuator to zero ref position and check the camma on status.
+	* Moves to uppermost edge and check again the camma on-status.
+	* Adds half camma lenght and check the off status.
+	* Makes the same control on bottom edge.
+	* Be aware that other nearest usd are at middle scale, to avoid mechanical stresses
+	* @return 
+	*/
+	//virtual ACSErr::Completion* calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx) ;
+	void calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx);
 
+	/**
+	* Write calibration results on xml configuration file
+	*/
 	void writeCalibration(CORBA::Double_out cammaLenD, CORBA::Double_out cammaPosD, CORBA::Boolean_out calibrate) throw (CORBA::SystemException,ASErrors::ASErrorsEx);
+
+	/**
+	* This function gets parameters useful for update function
+	*/
+	void posTable (const ACS::doubleSeq& theActuatorsCorrections, CORBA::Long theParPositions, CORBA::Double theDeltaEL, CORBA::Long theThreshold);
 			 
-     /**
-     * home. bring the USD to zero reference position.
-     * This function moves the actuator to zero reference position, tipically at usd middlescale
-     * @return 
-		 */
-		 
-		 void refPos() throw (CORBA::SystemException,ASErrors::ASErrorsEx) {	
-				try {	action(CPOS,0,4);	 }
-			 _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::refPos()",m_status)
-		} 
+     	/**
+     	* home. bring the USD to zero reference position.
+     	* This function moves the actuator to zero reference position, tipically at usd middlescale
+     	* @return 
+	*/
+	void refPos() throw (CORBA::SystemException,ASErrors::ASErrorsEx) {
+		try {
+			action(CPOS,0,4);
+		}
+		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::refPos()",m_status)
+	} 
 	 
-     /**
-     * setProfile().  Set the surface active profile.
-     * It could be of shaped type (default) or parabolic
-     * @param prof	0 shaped, 1 parabolic 
-		 */
-			 void setProfile(CORBA::Long prof) throw (CORBA::SystemException,ASErrors::ASErrorsEx) {			 } 
+     	/**
+     	* setProfile().  Set the surface active profile.
+     	* @param prof	0 shaped, 1 parabolic, 2 parabolic fixed
+	*/
+	void setProfile(CORBA::Long prof) throw (CORBA::SystemException,ASErrors::ASErrorsEx) {
+		m_profile = prof;
+	} 
 	 
-     /**
-     * correction().The last minute coorection to be applied.
-     * They will be added to actual computed USD position
-     * @param corr	the correction in mm 
-     */
-		 
-		 void correction(CORBA::Double corr) throw (CORBA::SystemException,ASErrors::ASErrorsEx) {
-				ACSErr::Completion_var comp;
-				try {comp=lmCorr()->set_sync(corr);}
-				catch (CORBA::SystemException& Ex) 
-				{
-					ACS_SHORT_LOG((LM_CRITICAL, "CORBA::SystemException thrown! "));
-				}
-		 } 
+     	/**
+     	* correction().The last minute coorection to be applied.
+     	* They will be added to actual computed USD position
+     	* @param corr	the correction in mm 
+     	*/
+	void correction(CORBA::Double corr) throw (CORBA::SystemException,ASErrors::ASErrorsEx) {
+		ACSErr::Completion_var comp;
+		try {
+			comp = lmCorr()->set_sync(corr);
+		}
+		catch (CORBA::SystemException& Ex) 
+		{
+			ACS_SHORT_LOG((LM_CRITICAL, "CORBA::SystemException thrown! "));
+		}
+	} 
 
-     /**
-     * update(). Applay the antenna elevation dependant corrections.
-     * They are the gravity and user-offset
-     * @param position	the new usd position in step. 
-     */
-		 //void update(CORBA::Double elev) throw (CORBA::SystemException,ASErrors::ASErrorsEx) {		 } 
-		 void update(CORBA::Long position) throw (CORBA::SystemException,ASErrors::ASErrorsEx) {
-            try { 
-                action(CPOS, position<<USxS,4);
-            }
-            _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::update()",m_status)
-         }
+     	/**
+     	* update(). Applay the antenna elevation dependant corrections.
+     	* They are the gravity and user-offset
+     	* @param elevation	antenna elevation in degrees. 
+     	*/
+	void update(CORBA::Double elevation) throw (CORBA::SystemException,ASErrors::ASErrorsEx);
 
-     /**
-     * stow() & setup(). General management functions.
-		 * stow: Stop the USD position loop control and bring it to bottom most position (full closed).
-		 * setup: bring the usd to zeroRef position and starts the pos. control loop
-		 */
-			void stow() 		throw (CORBA::SystemException,ASErrors::ASErrorsEx) 	{
-				try {
-                    action(STOP);
+     	/**
+     	* stow() & setup(). General management functions.
+	* stow: Stop the USD position loop control and bring it to bottom most position (full closed).
+	* setup: bring the usd to zeroRef position and starts the pos. control loop
+	*/
+	void stow() throw (CORBA::SystemException,ASErrors::ASErrorsEx) {
+		try {
+                	action(STOP);
                 }
                 _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::stow()",m_status)
 			 
                 try {
-                    action(CPOS, m_bottom<<USxS,4);
+                	action(CPOS, m_bottom<<USxS,4);
                 }
                 _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::stow()",m_status)
                  
-                 /*if(m_available) {
-					CompletionImpl comp(m_pLan->sendUSDCmd(0x31,m_addr,-10000,4));
-                    printf("passato in stow\n");
-					if (compCheck(comp)) throw ASErrors::USDErrorExImpl(comp,__FILE__,__LINE__,"usdImpl::stow()").getUSDErrorEx();
-				}  else {
-					ACS_SHORT_LOG((LM_INFO,"USD  not available"));
-					throw ASErrors::USDUnavailableExImpl(__FILE__,__LINE__,"usdImpl::stow()").getUSDUnavailableEx();
-				}*/
-			}
-			
-			void setup() 	throw (CORBA::SystemException,ASErrors::ASErrorsEx) 	{ 
-				try {
-                    action(STOP);
+	}
+	void setup() throw (CORBA::SystemException,ASErrors::ASErrorsEx) { 
+		try {
+			action(STOP);
                 }
                 _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::setup()",m_status)
 				
@@ -475,89 +478,94 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSu
                     action(CPOS,0,4);
                 }
                 _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"USDImpl::setup()",m_status)
+	}
 
-				/*if(m_available) {
-					CompletionImpl comp(m_pLan->sendUSDCmd(0x31,m_addr,0,4));
-                    printf("passato in setup\n");
-					if (compCheck(comp)) throw ASErrors::USDErrorExImpl(comp,__FILE__,__LINE__,"usdImpl::setup()").getUSDErrorEx();
-				}  else {
-					ACS_SHORT_LOG((LM_INFO,"USD  not available"));
-					throw ASErrors::USDUnavailableExImpl(__FILE__,__LINE__,"usdImpl::setup()").getUSDUnavailableEx();
-				}*/
-			}
+	/**
+     	* check a corba exception.
+     	* Convert a CORBA exception in  C++ exception and check it.
+     	* @param Ex CORBA exception.
+    	*/
+	void exCheck(ASErrors::ASErrorsEx Ex);
 
-	
-    /**
-     * check a corba exception.
-     * Convert a CORBA exception in  C++ exception and check it.
-     * @param Ex CORBA exception.
-    */
-		void exCheck(ASErrors::ASErrorsEx Ex);
-
-     /**
-     * Check a CORBA completion passed by reference.
-     * Convert an error completion in  C++ exception and log it.
-     * @param comp completion.
-     * @return true if comp is an error completion else false
-    */
+     	/**
+     	* Check a CORBA completion passed by reference.
+     	* Convert an error completion in  C++ exception and log it.
+     	* @param comp completion.
+     	* @return true if comp is an error completion else false
+    	*/
 	bool compCheck(ACSErr::CompletionImpl& );
 
-    /** 
-    * 	flag rappresenting the availability of the module.
-    *   It is available if is comunicating. After five times USD doesn't respond, the flag is set to FALSE to inhibit any further activity.
-    */	
+    	/** 
+    	* flag rappresenting the availability of the module.
+    	* It is available if is comunicating. After five times USD doesn't respond, the flag is set to FALSE to inhibit any further activity.
+    	*/	
 	bool m_available;
 
-    /** 
-    * 	stepper motor positioning resolution (step)
-    */	
+    	/** 
+    	* stepper motor positioning resolution (step)
+    	*/	
 	double m_step_res;
 
 	/** 
-    * 	calibrate flag
-    */	
+    	* calibrate flag
+    	*/	
 	BYTE m_calibrate;
 
 	/** 
-    * 	position loop on
-    */	
+    	* position loop on
+    	*/	
 	BYTE m_ploop;
 
+	private:
 
-  private:
-   /** 
-    * 	pointer to LAN/485 component
-    */	
+	CORBA::Long m_profile;
+   	/**
+    	* pointer to LAN/485 component
+    	*/
 	//MOD_LAN::lan* m_pLan;
 	SRTActiveSurface::lan* m_pLan;
 	
 	/** 
-    * 	sector of usd
-    */	
+    	* sector of usd
+    	*/	
 	BYTE m_sector;
 
-    /** 
-    * 	lan address of usd. 
-    *   Each lan rappresent a radius. Looking frontally at parabola, the first start from north and the other follow in cw mode.
-    */	
+    	/**
+    	* lan address of usd. 
+    	* Each lan rappresent a radius. Looking frontally at parabola, the first start from north and the other follow in cw mode.
+    	*/	
 	BYTE m_lanNum;
 
-    /** 
-    * 	serial address of usd
-    */	
+    	/** 
+    	* serial address of usd
+    	*/	
 	BYTE m_addr;
 
 	/** 
-    * 	camma lenght in step
-    */	
+    	* camma lenght in step
+    	*/	
 	int m_cammaLen;
 
-	/** 
-    * 	camma position in step
-    */	
+	/**
+    	* camma position in step
+    	*/
 	int m_cammaPos;
 
+	/**
+    	* camma end in step
+    	*/
         int m_cammaEnd;
+
+	/**
+	* array of actuator corrections
+	* number of update table parameters
+	* delta elevation between two measures
+	* threshold between actual and updated position
+	*/
+	double *actuatorsCorrections;
+	int parPositions;
+	double deltaEL;
+	int threshold;
 
 	/**
 	* camma len and camma pos in degrees
@@ -565,107 +573,106 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSu
 	double m_cammaLenD;
 	double m_cammaPosD;
 
-    /**                                         
-    * 	usefull range in step
-    */	
+    	/**
+    	* usefull range in step
+    	*/
 	int m_fullRange;
 
-    /**                                         
-    * 	zero offset
-    */	
+    	/**                                      
+    	* zero offset
+    	*/
 	int m_zeroRef;
 
-		/** 
-    * 	step x turn (step)
-    */	
+	/** 
+    	* step x turn (step)
+    	*/	
 	int m_step_giro;
 
-		/** 
-    * 	step resolution (1/2^rs) pag 7 manuale USD
-    */	
+	/** 
+    	* step resolution (1/2^rs) pag 7 manuale USD
+    	*/	
 	BYTE m_rs;
 
-
-	/** 
-    * 	step to deg conversion factor
-    */	
+	/**
+	* step to deg conversion factor
+    	*/
 	double m_step2deg;
 
-    /** 
-    * 	top position (step)
-    */	
+    	/**
+    	* top position (step)
+    	*/
 	int m_top;
 
-    /** 
-    * 	bottom position (step)
-    */	
+    	/**
+    	* bottom position (step)
+    	*/
 	int m_bottom;
 
-	/** 
-    * 	status bytes
-    */	
+	/**
+    	* status bytes
+    	*/
 	int m_status;
 
-     /**
-     * Check if USD motor is still running after given psition
-		 * The required time is computed from position displacement and Fmax value,
-		 * plus some safety seconds.
-		 * @param allowed secs for motion.
-     * @return true if still running 0 if stopped.
-    */
+     	/**
+     	* Check if USD motor is still running after given psition
+	* The required time is computed from position displacement and Fmax value,
+	* plus some safety seconds.
+	* @param allowed secs for motion.
+     	* @return true if still running 0 if stopped.
+    	*/
 	bool stillRunning(long pos) throw (ASErrors::ASErrorsExImpl);
 	
-     /**
-     * Check calibration comparing quote and cal status
-		 * Must be used only when not running
-     * @return true if calibrated 0 if not.
-    */
+     	/**
+     	* Check calibration comparing quote and cal status
+	* Must be used only when not running
+     	* @return true if calibrated 0 if not.
+    	*/
 	bool chkCal() throw (ASErrors::ASErrorsExImpl);
 	
-	 /**
-     * Check the thrown exception and logging it.
-     * Basing on  thrown C++ exception, it set to FALSE the m_available flag to inhibit any further activity 
-     * @param exImpl C++ exception.
-    */
+	/**
+     	* Check the thrown exception and logging it.
+     	* Basing on  thrown C++ exception, it set to FALSE the m_available flag to inhibit any further activity 
+     	* @param exImpl C++ exception.
+    	*/
 	void exImplCheck(ASErrors::ASErrorsExImpl);
 
-  /**
-		*	Perform an action on USD
-		*	@param cmd one of USD available command
-		*	@param parameter an otional parameter for the command
-		*	@param nbytes lenght in bytes of parameter
-		*/
+  	/**
+	* Perform an action on USD
+	* @param cmd one of USD available command
+	* @param parameter an otional parameter for the command
+	* @param nbytes lenght in bytes of parameter
+	*/
 	void action( int cmd,int parameter=0,int nbytes=0) throw (ASErrors::ASErrorsExImpl);
 
+	/**
+	* ALMA C++ coding standards state copy operators should be disabled.
+     	*/
+    	void operator=(const USDImpl&);
+ 
+ 	/**
+     	* cob name of the LAN component.
+     	*/
+ 	IRA::CString lanCobName;
 	
 	/**
-     * ALMA C++ coding standards state copy operators should be disabled.
-     */
-    void operator=(const USDImpl&);
- 
- /**
-     * cob name of the LAN component.
-     */
- 		IRA::CString lanCobName;
-/**
 	* pointer to Container Services
 	*/
 	ContainerServices* cs;
 
-  protected:
-    SmartPropertyPointer<RWlong> m_delay_sp;
-    SmartPropertyPointer<RWlong> m_cmdPos_sp;
-    SmartPropertyPointer<RWlong> m_Fmin_sp;
-    SmartPropertyPointer<RWlong> m_Fmax_sp;
-    SmartPropertyPointer<RWlong> m_acc_sp;
-    SmartPropertyPointer<RWlong> m_uBits_sp;
-    SmartPropertyPointer<RWdouble> m_lmCorr_sp;
-    SmartPropertyPointer<ROlong> m_actPos_sp;
-    SmartPropertyPointer<ROpattern> m_status_sp;
-    SmartPropertyPointer<ROlong> m_softVer_sp;
-    SmartPropertyPointer<ROlong> m_type_sp;
-    SmartPropertyPointer<RWdouble> m_gravCorr_sp;
-    SmartPropertyPointer<RWdouble> m_userOffset_sp;
+  	protected:
+    	SmartPropertyPointer<RWlong> m_delay_sp;
+    	SmartPropertyPointer<RWlong> m_cmdPos_sp;
+    	SmartPropertyPointer<RWlong> m_Fmin_sp;
+    	SmartPropertyPointer<RWlong> m_Fmax_sp;
+    	SmartPropertyPointer<RWlong> m_acc_sp;
+    	SmartPropertyPointer<RWlong> m_uBits_sp;
+    	SmartPropertyPointer<RWdouble> m_lmCorr_sp;
+    	SmartPropertyPointer<ROlong> m_actPos_sp;
+    	SmartPropertyPointer<ROpattern> m_status_sp;
+    	SmartPropertyPointer<ROlong> m_softVer_sp;
+    	SmartPropertyPointer<ROlong> m_type_sp;
+    	SmartPropertyPointer<RWdouble> m_gravCorr_sp;
+    	SmartPropertyPointer<RWdouble> m_userOffset_sp;
 };
 
 #endif /*!USDImpl_H*/

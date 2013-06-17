@@ -20,22 +20,22 @@
 using namespace maci;
 
 USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* containerServices) : 
-    CharacteristicComponentImpl(CompName,containerServices),
-    m_pLan(SRTActiveSurface::lan::_nil()),
-    //m_pLan(MOD_LAN::lan::_nil()),
+	CharacteristicComponentImpl(CompName,containerServices),
+	m_pLan(SRTActiveSurface::lan::_nil()),
+    	//m_pLan(MOD_LAN::lan::_nil()),
 	m_delay_sp(this),
-    m_cmdPos_sp(this),
-    m_Fmin_sp(this),
-    m_Fmax_sp(this),
-    m_acc_sp(this),
-    m_uBits_sp(this),
-    m_lmCorr_sp(this),
-    m_actPos_sp(this),
-    m_status_sp(this),
-    m_softVer_sp(this),
-    m_type_sp(this),
-    m_gravCorr_sp(this),
-    m_userOffset_sp(this)	
+    	m_cmdPos_sp(this),
+    	m_Fmin_sp(this),
+    	m_Fmax_sp(this),
+    	m_acc_sp(this),
+    	m_uBits_sp(this),
+    	m_lmCorr_sp(this),
+    	m_actPos_sp(this),
+    	m_status_sp(this),
+    	m_softVer_sp(this),
+    	m_type_sp(this),
+    	m_gravCorr_sp(this),
+    	m_userOffset_sp(this)	
 { 
 	ACS_SHORT_LOG((LM_INFO,"::USDImpl::USDImpl: constructor;Constructor!"));
 }
@@ -145,18 +145,6 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	{
 		ACS_DEBUG("::usdImpl::initialize","Not captuerd exception!"); 
 	}
-	//////////////////////////////////////////
-	/*try {
-		_SET_PROP(Fmin,100,"usdImpl::initialize()")
-		_SET_PROP(Fmax,500,"usdImpl::initialize()")
-		_SET_PROP(delay,5,"usdImpl::initialize()")
-		_SET_PROP(acc,50,"usdImpl::initialize()")
-	}
-	_CATCH_EXCP_THROW_EX(CORBA::SystemException,corbaError,"::usdImpl::initialize()",m_addr)
-	_CATCH_EXCP_THROW_EX(ASErrors::DevIOErrorEx,DevIOError,"::usdImpl::initialize()",m_addr)		// for _GET_PROP
-	_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"::usdImpl::initialize()",m_addr)	// for local USD excp
-	*/
-	//////////////////////////////////////////
 }
 
 void USDImpl::execute() throw (ACSErr::ACSbaseExImpl)
@@ -266,6 +254,8 @@ void USDImpl::cleanUp()
 		 //m_pLan = MOD_LAN::lan::_nil();
 		 m_pLan = SRTActiveSurface::lan::_nil();
 	}
+
+	delete [] actuatorsCorrections;
 }
 
  
@@ -280,7 +270,9 @@ void USDImpl::aboutToAbort()
 	{
 		ACS_SHORT_LOG((LM_INFO, "cannot release lan component %s", (const char*)lanCobName));
 	}
-	
+
+	delete [] actuatorsCorrections;
+
 	// be sure to set the reference to nil
 	//m_pLan = MOD_LAN::lan::_nil();
 	m_pLan = SRTActiveSurface::lan::_nil();
@@ -330,10 +322,11 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 	try {
 		action(STOP);
 		ACS_DEBUG("::usdImpl::calibrate","stopped!");
+
 		CIRATools::Wait(1,0); // 1 sec
 		action(LCNTR,m_step_giro<<USxS,4); // load the counter with know value
 		ACS_DEBUG_PARAM("::usdImpl::calibrate","Loaded %d on counter",m_step_giro);
-		
+
 		_SET_PROP(Fmax,100,"usdImpl::calibrate()")
 		ACS_DEBUG_PARAM("::usdImpl::calibrate","Fmax set to:%d",100);
 		
@@ -345,9 +338,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		
 		ifp=1;
 		CIRATools::Wait(3,0);
-		
 		_GET_PROP(status,m_status,"usdImpl::calibrate()")
-
 		if(m_status&MRUN) {
 			ACS_DEBUG("::usdImpl::calibrate","camma begin not found!");
 			_THROW_EX(USDStillRunning,"::usdImpl::calibrate()",ifp);
@@ -356,7 +347,12 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		
 		_GET_PROP(actPos,cammaBegin,"usdImpl::calibrate()")
 		ACS_DEBUG_PARAM("::usdImpl::calibrate","Camma begin at:%d",cammaBegin);
-		printf("cammaBegin = %ld\n", cammaBegin);
+		//printf("cammaBegin = %ld\n", cammaBegin);
+
+		action(HSTOP,0,1); // disable HW stop 
+		ACS_DEBUG("::usdImpl::calibrate","hstop disabled!");
+		move (-10); // moves 10 steps further to avoid istheresis zone
+		CIRATools::Wait(1,0);
 		
 		action(HSTOP,1,1);  					 // sets the stop @ camma off
 		ACS_DEBUG("::usdImpl::calibrate","hard stop to 0");
@@ -367,7 +363,6 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		ifp=2;
 		CIRATools::Wait(3,0);
 		_GET_PROP(status,m_status,"usdImpl::calibrate()")
-		printf("before if\n");
 		if(m_status&MRUN) {
 			ACS_DEBUG("::usdImpl::calibrate","camma end not found!");
 			printf("inside if\n");
@@ -375,17 +370,18 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 			printf("inside if\n");
 			action(STOP);
 		}
-		printf("after if\n");
 
 		_GET_PROP(actPos,cammaEnd,"usdImpl::calibrate()")
 		ACS_DEBUG_PARAM("::usdImpl::calibrate","Camma end at:%d",cammaEnd);
-		printf("cammaEnd = %ld\n", cammaEnd);
+		//printf("cammaEnd = %ld\n", cammaEnd);
  
 		//m_cammaEnd = cammaEnd;
 		m_cammaLen=cammaBegin-cammaEnd;
 		m_cammaPos=cammaEnd+m_cammaLen/2;
+		//m_cammaPos=10+m_step_giro-cammaEnd-m_cammaLen/2;
 
 		m_cammaLenD = (double)(m_cammaLen*m_step2deg);
+		//m_cammaPosD = (double)((10+m_step_giro-cammaEnd-m_cammaLen/2)*m_step2deg);
 		m_cammaPosD = (double)((m_step_giro-cammaEnd-m_cammaLen/2)*m_step2deg);
 		//printf("cammaLen = %f\n", cammaLenD);
 		//printf("cammaPos = %f\n", cammaPosD);
@@ -539,6 +535,71 @@ void USDImpl:: writeCalibration(CORBA::Double_out cammaLenD, CORBA::Double_out c
 	cammaLenD = m_cammaLenD;
 	cammaPosD = m_cammaPosD;
 	calibrate = m_calibrate;
+}
+
+void USDImpl::posTable (const ACS::doubleSeq& theActuatorsCorrections, CORBA::Long theParPositions, CORBA::Double theDeltaEL, CORBA::Long theThreshold)
+{
+	int s;
+
+	parPositions = theParPositions;
+	deltaEL = theDeltaEL;
+	threshold = theThreshold;
+
+	actuatorsCorrections = new double [parPositions];
+	//printf ("corrections = ");
+	//printf ("threshold in posTable = %d\n", threshold);
+	for (s = 0; s < parPositions; s++) {
+		actuatorsCorrections [s] = theActuatorsCorrections[s];
+	//	printf ("%f ", actuatorsCorrections [s]);
+	}
+	//printf("\n");
+}
+
+void USDImpl::update (CORBA::Double elevation) throw (CORBA::SystemException,ASErrors::ASErrorsEx)
+{
+	double updatePosMM;
+	long updatePos, actpos, diffPos;
+	int k;
+	double elevations[parPositions-1];
+
+	for (k = 0; k < parPositions-1; k++)
+		elevations [k] = (k+1)*deltaEL;
+	if (m_profile == 2) { // PARABOLIC_FIXED
+		//printf("parabFix = %f,",actuatorsCorrections[parPositions-1]);
+		updatePosMM = actuatorsCorrections[parPositions-1];
+		updatePos = (CORBA::Long)(updatePosMM*MM2STEP);
+		//printf("upPosStep = %ld\n",updatePos);
+		_SET_PROP(cmdPos,updatePos,"usdImpl::calibrate()")
+	}
+	else { // SHAPED
+		if (elevation <= 15.0) {
+			updatePosMM = actuatorsCorrections[0];
+		//	printf("elevation = %f, upPosMM = %f,",elevation,updatePosMM);
+		}
+		else if (elevation >= 90 ) {
+			updatePosMM = actuatorsCorrections[parPositions-2];
+		//	printf("elevation = %f, upPosMM = %f,",elevation,updatePosMM);
+		}
+		else {
+			k = (int)(floor(elevation/deltaEL));
+			updatePosMM = ((elevation-elevations[k-1])/deltaEL)*(actuatorsCorrections[k]-actuatorsCorrections[k-1])+actuatorsCorrections[k-1];
+		//	printf("elevation = %f, upPosMM = %f,",elevation,updatePosMM);
+		}
+		if (m_profile == 1) { // SHAPED + PARABOLIC
+			updatePosMM += actuatorsCorrections[parPositions-1];
+		//	printf("elevation = %f, upPosMM parab = %f,",elevation,updatePosMM);
+		}
+		updatePos = (CORBA::Long)(updatePosMM*MM2STEP);
+		//printf("upPosStep = %ld\n",updatePos);
+		_GET_PROP(actPos,actpos,"usdImpl::update()")
+		//printf("actpos = %ld\n", actpos);
+		diffPos = labs(actpos-updatePos);
+		//printf("threshold = %d\n", threshold);
+		if (diffPos >= threshold) {
+		//	printf("diff >= threshold: %ld\n", diffPos);
+			_SET_PROP(cmdPos,updatePos,"usdImpl::update()")
+		}
+	}
 }
 
 void USDImpl::exImplCheck(ASErrors::ASErrorsExImpl ex)
@@ -730,9 +791,7 @@ USDImpl::~USDImpl()
 }
 
        
-
 /* --------------------- [ CORBA interface ] ----------------------*/
-
 
 ACS::RWlong_ptr USDImpl::delay() throw (CORBA::SystemException)
 {
