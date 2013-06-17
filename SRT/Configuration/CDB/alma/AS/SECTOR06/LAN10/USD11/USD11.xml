@@ -59,8 +59,16 @@
    -   Wed Apr 17 11:15:16 UTC 2013 modified by jDAL
    -   Wed Apr 17 11:52:27 UTC 2013 modified by jDAL
    -   Wed Apr 17 14:04:32 UTC 2013 modified by jDAL
+   -   Fri Apr 19 11:11:29 UTC 2013 modified by jDAL
+   -   Fri Apr 19 12:49:55 UTC 2013 modified by jDAL
+   -   Mon Apr 29 11:38:41 UTC 2013 modified by jDAL
+   -   Tue Apr 30 07:34:34 UTC 2013 modified by jDAL
+   -   Tue Apr 30 10:11:46 UTC 2013 modified by jDAL
+   -   Thu May 02 09:48:38 UTC 2013 modified by jDAL
+   -   Thu May 02 09:48:39 UTC 2013 modified by jDAL
+   -   Thu May 02 09:48:39 UTC 2013 modified by jDAL
 -->
-<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="6" lan="10" serialAddress="11" cammaLen="0" cammaPos="0" calibrate="0">
+<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="6" lan="10" serialAddress="11" cammaLen="59.4" cammaPos="154.8" calibrate="1">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />
 	<cmdPos min_value="-21000" max_value="21000" units="step" description="commanded position" />
 	<Fmin min_value="20" max_value="10000" units="step" default_value="100" description="min freq" />
