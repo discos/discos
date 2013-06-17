@@ -19,7 +19,7 @@
 
 #
 # user definable C-compilation flags
-#USER_CFLAGS = 
+#USER_CFLAGS =
 
 #
 # additional include and library search paths
