@@ -203,11 +203,12 @@ void SRTActiveSurfaceBossImpl::update (CORBA::Double elevation) throw (CORBA::Sy
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::update()");
 
-    CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-    try {
-        resource->onewayAction(SRTActiveSurface::AS_UPDATE, 0, 0, 0, elevation, 0, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+    	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
+
+	try {
+        	resource->onewayAction(SRTActiveSurface::AS_UPDATE, 0, 0, 0, elevation, 0, 0, m_profile);
+    	}
+    	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();
 	}
@@ -285,13 +286,13 @@ void SRTActiveSurfaceBossImpl::move (CORBA::Long circle,  CORBA::Long actuator, 
 
 void SRTActiveSurfaceBossImpl::correction (CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius, CORBA::Double correction) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
 {
-	AUTO_TRACE("SRTActiveSurfaceBossImpl::top()");
+	AUTO_TRACE("SRTActiveSurfaceBossImpl::correction()");
 
-    CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-    try {
-        resource->onewayAction(SRTActiveSurface::AS_CORRECTION, circle, actuator, radius, 0, correction, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
+	try {
+		resource->onewayAction(SRTActiveSurface::AS_CORRECTION, circle, actuator, radius, 0, correction, 0, m_profile);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();
 	}
@@ -311,16 +312,23 @@ void SRTActiveSurfaceBossImpl::reset (CORBA::Long circle, CORBA::Long actuator, 
 	}
 }
 
-void SRTActiveSurfaceBossImpl::setProfile (SRTActiveSurface::TASProfile newprofile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
+void SRTActiveSurfaceBossImpl::setProfile (SRTActiveSurface::TASProfile newProfile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::setProfile()");
 
-    m_profile = newprofile;
+	m_profile = newProfile;
 
-	_SET_CDB(profile, m_profile,"::usdImpl::setProfile")
+	_SET_CDB(profile, m_profile,"SRTActiveSurfaceBossImpl::setProfile")
 
-    CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-    resource->m_profile = newprofile;
+	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
+	try {
+		resource->onewayAction(SRTActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, m_profile);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	
 }
 
 void SRTActiveSurfaceBossImpl::usdStatus4GUIClient (CORBA::Long circle, CORBA::Long actuator, CORBA::Long_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)

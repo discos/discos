@@ -18,33 +18,30 @@ void CSRTActiveSurfaceBossCore::initialize()
 {
 	ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::initialize()",(LM_INFO,"CSRTActiveSurfaceBossCore::initialize"));
     
-    int n;
-    char * value;
-    int elevation;
-    double position;
-
-    m_enable = false;
-    m_status=Management::MNG_OK;
-    AutoUpdate = false;
-    actuatorcounter = circlecounter = totacts = 1;
+    	m_enable = false;
+    	m_status=Management::MNG_OK;
+    	AutoUpdate = false;
+    	actuatorcounter = circlecounter = totacts = 1;
 
 	
-    value = USDTABLECORRECTIONS;
-    ifstream usdCorrections (value);
-    if (!usdCorrections) {
-        ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+    	/*value = USDTABLECORRECTIONS;
+    	ifstream usdCorrections (value);
+    	if (!usdCorrections) {
+        	ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
 		exit(-1);
 	}
-    for (n = 1; n <= 100440; n++) { // 90*1116
-        usdCorrections >> elevation >> position;
-        actuatorsCorrections[n] = position;
-    }
+    	for (n = 0; n < 7812; n++) { // 7*1116
+        	usdCorrections >> position;
+		actuatorsCorrections[n]=position;
+    	}*/
 }
 
 void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
 {
     	char serial_usd[23];
 	char graf[5], mecc[4];
+	char * value;
+	int s, i, l;
 
 	s_usdTable = getenv ("ACS_CDB");
 	strcat(s_usdTable,USDTABLE);
@@ -53,6 +50,14 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", s_usdTable));
 		exit(-1);
 	}
+
+	value = USDTABLECORRECTIONS;
+    	ifstream usdCorrections (value);
+    	if (!usdCorrections) {
+        	ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+		exit(-1);
+	}
+	actuatorsCorrections.length(NPOSITIONS);
 /*
 	// get reference to lan components
 	for (int s = 1; s <= 8; s++)
@@ -77,7 +82,7 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
 	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::execute()", (LM_INFO,"CSRTActiveSurfaceBossCore::LAN_LOCATED"));
 */			
     	// Get reference to usd components
-	for (int i = firstUSD; i <= lastUSD; i++) {
+	for (i = firstUSD; i <= lastUSD; i++) {
 		usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
         	usd[circleIndex][usdCircleIndex] = SRTActiveSurface::USD::_nil();
         	try {
@@ -92,6 +97,20 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
 	    	}
         	CIRATools::Wait(LOOPTIME);
     	}
+
+	for (i = 1; i <= CIRCLES; i++) {
+		for (l = 1; l <= actuatorsInCircle[i]; l++) {
+			printf ("Corrections = ");
+			for (s = 0; s < NPOSITIONS; s++) {
+        			usdCorrections >> actuatorsCorrections[s];
+				printf ("%f ", actuatorsCorrections[s]);
+        		}
+			printf("\n");
+			if (!CORBA::is_nil(usd[i][l])) {
+				usd[i][l]->posTable(actuatorsCorrections, NPOSITIONS, DELTAEL, THRESHOLDPOS);
+			}
+		}
+	}
 	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::execute()", (LM_INFO,"CSRTActiveSurfaceBossCore::USD_LOCATED"));
 
     	if (usdCounter < (int)lastUSD*WARNINGUSDPERCENT)
@@ -188,15 +207,17 @@ void CSRTActiveSurfaceBossCore::cleanUp()
 		Impl.setComponentName((const char *)m_antennaBoss->name());
 		Impl.log(LM_DEBUG);
 	}
+
+	//delete [] actuatorsCorrections;
 }
 
 void CSRTActiveSurfaceBossCore::reset (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
-    if (circle == 0 && actuator == 0 &&radius == 0) // ALL
+    if (circle == 0 && actuator == 0 &&radius == 0) // ALL 
 	{
-        int i, l;
+        	int i, l;
 		for (i = 1; i <= CIRCLES; i++)
-    	{
+    		{
 		    for (l = 1; l <= actuatorsInCircle[i]; l++) 
 			{
                 if (!CORBA::is_nil(usd[i][l]))
@@ -346,13 +367,13 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 	int i, l;
 
 	if (circle == 0 && actuator == 0 && radius == 0) { // ALL
-		printf("up.....\n");
+		printf("top.....\n");
 		for (i = 1; i <= CIRCLES; i++) {
 			for (l = 1; l <= actuatorsInCircle[i]; l++) {
 				if (!CORBA::is_nil(usd[i][l])) {
 					try {
-						usd[i][l]->up();
-						printf ("actuator n.%d_%d up\n", i, l);
+						usd[i][l]->top();
+						printf ("actuator n.%d_%d top\n", i, l);
 					}
 					catch (ASErrors::ASErrorsEx & Ex) {
 						checkASerrors ("actuator", i, l, Ex);
@@ -362,7 +383,23 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 		}
 		ACE_OS::sleep (90);
 
-		printf("stop.....\n");
+		printf("move to upper mechanical position.....\n");
+		for (i = 1; i <= CIRCLES; i++) {
+			for (l = 1; l <= actuatorsInCircle[i]; l++) {
+				if (!CORBA::is_nil(usd[i][l])) {
+					try {
+						usd[i][l]->move(1400);
+						printf ("actuator n.%d_%d move\n", i, l);
+					}
+					catch (ASErrors::ASErrorsEx & Ex) {
+						checkASerrors ("actuator", i, l, Ex);
+					}
+				}
+			}
+		}
+		ACE_OS::sleep (5);
+
+		/*printf("stop.....\n");
 		for (i = 1; i <= CIRCLES; i++) {
 			for (l = 1; l <= actuatorsInCircle[i]; l++) {
 				if (!CORBA::is_nil(usd[i][l])) {
@@ -376,7 +413,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 				}
 			}
 		}
-		ACE_OS::sleep (1);
+		ACE_OS::sleep (1);*/
 
 		printf("calibration.....\n");
 		for (i = 1; i <= CIRCLES; i++) {
@@ -394,7 +431,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 		}
 		ACE_OS::sleep (15);
 
-		printf("stop.....\n");
+		/*printf("stop.....\n");
 		for (i = 1; i <= CIRCLES; i++) {
 			for (l = 1; l <= actuatorsInCircle[i]; l++) {
 				if (!CORBA::is_nil(usd[i][l])) {
@@ -408,7 +445,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 				}
 			}
 		}
-		ACE_OS::sleep (1);
+		ACE_OS::sleep (1);*/
 
 		printf ("calibration verification.....\n");
 		for (i = 1; i <= CIRCLES; i++) {
@@ -426,7 +463,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
         	}
 		ACE_OS::sleep (150);
 
-		printf("stop.....\n");
+		/*printf("stop.....\n");
 		for (i = 1; i <= CIRCLES; i++) {
 			for (l = 1; l <= actuatorsInCircle[i]; l++) {
 				if (!CORBA::is_nil(usd[i][l])) {
@@ -440,7 +477,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 				}
 			}
 		}
-		ACE_OS::sleep (1);
+		ACE_OS::sleep (1);*/
 
 		printf ("write calibration results.....\n");
 		for (i = 1; i <= CIRCLES; i++) {
@@ -460,12 +497,12 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 		ACE_OS::sleep (1);
 	}
 	else if (circle != 0 && actuator == 0 && radius == 0) { // CIRCLE
-		printf("up.....\n");
+		printf("top.....\n");
 		for (l = 1; l <= actuatorsInCircle[circle]; l++) {
             		if (!CORBA::is_nil(usd[circle][l])) {
                 		try {
-					usd[circle][l]->up();
-					printf ("actuator n.%d_%d up\n", circle, l);
+					usd[circle][l]->top();
+					printf ("actuator n.%d_%d top\n", circle, l);
 				}
 				catch (ASErrors::ASErrorsEx & Ex) {
 					checkASerrors ("actuator", circle, l, Ex);
@@ -474,7 +511,21 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 		}
 		ACE_OS::sleep (90);
 
-		printf("stop.....\n");
+		printf("move to upper mechanical position.....\n");
+		for (l = 1; l <= actuatorsInCircle[circle]; l++) {
+            		if (!CORBA::is_nil(usd[circle][l])) {
+                		try {
+					usd[circle][l]->move(1400);
+					printf ("actuator n.%d_%d move\n", circle, l);
+				}
+				catch (ASErrors::ASErrorsEx & Ex) {
+					checkASerrors ("actuator", circle, l, Ex);
+				}
+			}
+		}
+		ACE_OS::sleep (5);
+
+		/*printf("stop.....\n");
 		for (l = 1; l <= actuatorsInCircle[circle]; l++) {
             		if (!CORBA::is_nil(usd[circle][l])) {
                 		try {
@@ -486,7 +537,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 				}
 			}
 		}
-		ACE_OS::sleep (1);
+		ACE_OS::sleep (1);*/
 					
 		printf("calibration.....\n");
 		for (l = 1; l <= actuatorsInCircle[circle]; l++) {
@@ -502,7 +553,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 		}
 		ACE_OS::sleep (15);
 
-		printf("stop.....\n");
+		/*printf("stop.....\n");
 		for (l = 1; l <= actuatorsInCircle[circle]; l++) {
             		if (!CORBA::is_nil(usd[circle][l])) {
                 		try {
@@ -514,7 +565,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 				}
 			}
 		}
-		ACE_OS::sleep (1);
+		ACE_OS::sleep (1);*/
 
 		printf ("calibration verification.....\n");
 		for (l = 1; l <= actuatorsInCircle[circle]; l++) {
@@ -530,7 +581,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 		}
 		ACE_OS::sleep (150);
 
-		printf("stop.....\n");
+		/*printf("stop.....\n");
 		for (l = 1; l <= actuatorsInCircle[circle]; l++) {
             		if (!CORBA::is_nil(usd[circle][l])) {
                 		try {
@@ -542,7 +593,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 				}
 			}
 		}
-		ACE_OS::sleep (1);
+		ACE_OS::sleep (1);*/
 
 		printf ("write calibration results.....\n");
 		for (l = 1; l <= actuatorsInCircle[circle]; l++) {
@@ -565,14 +616,14 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
         	setradius(radius, actuatorsradius, jumpradius);
         	int l;
 
-		printf("up.....\n");
+		printf("top.....\n");
 		for (l = 1; l <= actuatorsradius; l++) {
             		if ((radius == 13 || radius == 37 || radius == 61 || radius == 85) && l == 14)
                 		jumpradius++;  // 17 circle
             		if (!CORBA::is_nil(lanradius[l+jumpradius][radius])) {
                 		try {
-					lanradius[l+jumpradius][radius]->up();
-					printf ("actuator n.%d_%d up\n", l+jumpradius, radius);
+					lanradius[l+jumpradius][radius]->top();
+					printf ("actuator n.%d_%d top\n", l+jumpradius, radius);
                 		}
 				catch (ASErrors::ASErrorsEx &Ex) {
 					checkASerrors("actuator", l+jumpradius, radius, Ex);
@@ -581,7 +632,23 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 		}
 		ACE_OS::sleep (90);
 
-		printf("stop.....\n");
+		printf("move to upper mechanical position.....\n");
+		for (l = 1; l <= actuatorsradius; l++) {
+            		if ((radius == 13 || radius == 37 || radius == 61 || radius == 85) && l == 14)
+                		jumpradius++;  // 17 circle
+            		if (!CORBA::is_nil(lanradius[l+jumpradius][radius])) {
+                		try {
+					lanradius[l+jumpradius][radius]->move(1400);
+					printf ("actuator n.%d_%d move\n", l+jumpradius, radius);
+                		}
+				catch (ASErrors::ASErrorsEx &Ex) {
+					checkASerrors("actuator", l+jumpradius, radius, Ex);
+				}
+			}
+		}
+		ACE_OS::sleep (5);
+
+		/*printf("stop.....\n");
 		for (l = 1; l <= actuatorsradius; l++) {
             		if ((radius == 13 || radius == 37 || radius == 61 || radius == 85) && l == 14)
                 		jumpradius++;  // 17 circle
@@ -595,7 +662,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 				}
 			}
 		}
-		ACE_OS::sleep (1);
+		ACE_OS::sleep (1);*/
 					
 		printf("calibration.....\n");
 		for (l = 1; l <= actuatorsradius; l++) {
@@ -613,7 +680,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 		}
 		ACE_OS::sleep (15);
 
-		printf("stop.....\n");
+		/*printf("stop.....\n");
 		for (l = 1; l <= actuatorsradius; l++) {
             		if ((radius == 13 || radius == 37 || radius == 61 || radius == 85) && l == 14)
                 		jumpradius++;  // 17 circle
@@ -627,7 +694,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 				}
 			}
 		}
-		ACE_OS::sleep (1);
+		ACE_OS::sleep (1);*/
 
 		printf ("calibration verification.....\n");
 		for (l = 1; l <= actuatorsradius; l++) {
@@ -645,7 +712,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 		}
 		ACE_OS::sleep (150);
 
-		printf("stop.....\n");
+		/*printf("stop.....\n");
 		for (l = 1; l <= actuatorsradius; l++) {
             		if ((radius == 13 || radius == 37 || radius == 61 || radius == 85) && l == 14)
                 		jumpradius++;  // 17 circle
@@ -659,7 +726,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 				}
 			}
 		}
-		ACE_OS::sleep (1);
+		ACE_OS::sleep (1);*/
 
 		printf ("write calibration results.....\n");
 		for (l = 1; l <= actuatorsradius; l++) {
@@ -680,16 +747,25 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 	}
 	else {
 		if (!CORBA::is_nil(usd[circle][actuator])) { // SINGLE ACTUATOR
-			printf("up.....\n");
+			printf("top.....\n");
 			try {
-				usd[circle][actuator]->up();
-				printf ("actuator n.%d_%d up\n", circle, actuator);
+				usd[circle][actuator]->top();
+				printf ("actuator n.%d_%d top\n", circle, actuator);
 			}
 			catch (ASErrors::ASErrorsEx &Ex) {
 				checkASerrors("actuator", circle, actuator, Ex);
 			}
 			ACE_OS::sleep (90);
-			printf("stop.....\n");
+			printf("move to upper mechanical position.....\n");
+			try {
+				usd[circle][actuator]->move(1400);
+				printf ("actuator n.%d_%d move\n", circle, actuator);
+			}
+			catch (ASErrors::ASErrorsEx &Ex) {
+				checkASerrors("actuator", circle, actuator, Ex);
+			}
+			ACE_OS::sleep (5);
+			/*printf("stop.....\n");
 			try {
 				usd[circle][actuator]->stop();
 				printf ("actuator n.%d_%d stop\n", circle, actuator);
@@ -697,7 +773,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 			catch (ASErrors::ASErrorsEx &Ex) {
 				checkASerrors("actuator", circle, actuator, Ex);
 			}
-			ACE_OS::sleep (1);
+			ACE_OS::sleep (1);*/
 			printf("calibration.....\n");
 			try {
 				usd[circle][actuator]->calibrate();
@@ -707,7 +783,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 				checkASerrors("actuator", circle, actuator, Ex);
 			}
 			ACE_OS::sleep (15);
-			printf("stop.....\n");
+			/*printf("stop.....\n");
 			try {
 				usd[circle][actuator]->stop();
 				printf ("actuator n.%d_%d stop\n", circle, actuator);
@@ -715,7 +791,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 			catch (ASErrors::ASErrorsEx &Ex) {
 				checkASerrors("actuator", circle, actuator, Ex);
 			}
-			ACE_OS::sleep (1);
+			ACE_OS::sleep (1);*/
 			printf ("calibration verification.....\n");
 			try {
 				usd[circle][actuator]->calVer();
@@ -922,30 +998,21 @@ void CSRTActiveSurfaceBossCore::calVer (int circle, int actuator, int radius) th
 
 void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, double elevation, double correction, long incr, SRTActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
-	time_t start;
-	time_t stop;
-	printf ("onewayaction\n");
 	if (circle == 0 && actuator == 0 &&radius == 0) // ALL
 	{
-		printf ("onewayaction ALL\n");
         	int i, l;
         	int counter = 0;
-        	long index;
         	ACSErr::Completion_var completion;
 	    	ACS::ROlong_var actPos_var; 
 	    	ACS::RWlong_var cmdPos_var;
-        	CORBA::Long actPos;
-        	CORBA::Long cmdPos;
-        	CORBA::Long updatePos;
-		CORBA::Long newPos;
+		time_t start;
+		time_t stop;
 
 		time(&start);
 		for (i = 1; i <= CIRCLES; i++)
     		{
 			for (l = 1; l <= actuatorsInCircle[i]; l++) 
 			{
-                		index = (long)elevation+counter*90;
-
 				if (!CORBA::is_nil(usd[i][l]))
 				{
 			    		try {
@@ -975,40 +1042,7 @@ void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction o
                                 				usd[i][l]->top();
                                 			break;
                             				case SRTActiveSurface::AS_UPDATE:
-                                				actPos_var = usd[i][l]->actPos ();
-                                				if (actPos_var.ptr() != ACS::ROlong::_nil()) {
-                                    					actPos = actPos_var->get_sync (completion.out ());
-                                				}
-                                				else {
-                                    					_EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CSRTActiveSurfaceBossCore::setActuator()");
-                                    					impl.setPropertyName("usd actual position");
-                                    					impl.log();
-                                				}
-                                				cmdPos_var = usd[i][l]->cmdPos ();
-                                				if (cmdPos_var.ptr() != ACS::RWlong::_nil()) {
-                                    					cmdPos = cmdPos_var->get_sync (completion.out ());
-                                				}
-                                				else {
-                                    					_EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CSRTActiveSurfaceBossCore::setActuator()");
-                                    					impl.setPropertyName("usd commanded position");
-                                    					impl.log();
-                                				}
-                                				updatePos = (CORBA::Long)((actuatorsCorrections[index])*MM2STEP);
-								if (labs(updatePos-actPos) > THRESHOLDPOS) {
-									// compute new pos via linear interpolation
-									// between index-1 and index+1 position
-									// TBD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-									try {
-                                    						//completion = cmdPos_var->set_sync(newPos*MM2STEP);
-                                					}
-                                					catch (CORBA::SystemException &E) {
-                                    						_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::onewayAction()");
-                                    						impl.setName(E._name());
-                                    						impl.setMinor(E.minor());
-			                        				impl.log();
-                                					}
-                                					//usd[i][l]->update(newPos*MM2STEP);
-								}
+								usd[i][l]->update(elevation);
                                 			break;
                             				case SRTActiveSurface::AS_CORRECTION:
                                 				usd[i][l]->correction(correction*MM2STEP);
@@ -1016,8 +1050,11 @@ void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction o
                             				case SRTActiveSurface::AS_MOVE:
                                 				usd[i][l]->move(incr*MM2STEP);
                                 			break;
+                            				case SRTActiveSurface::AS_PROFILE:
+                                				usd[i][l]->setProfile(profile);
+                                			break;
                         			}
-						//CIRATools::Wait(LOOPTIME);
+						//CIRATools::Wait(500);
 					}
 					catch (ASErrors::ASErrorsEx& E) {
 						_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,E,"CSRTActiveSurfaceBossCore::onewayAction()");
@@ -1086,6 +1123,8 @@ void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction o
                             break;
                         case SRTActiveSurface::AS_MOVE:
                             usd[circle][l]->move(incr*MM2STEP);
+                            break;
+                        case SRTActiveSurface::AS_PROFILE:
                             break;
                     }
 					//CIRATools::Wait(LOOPTIME);
@@ -1157,6 +1196,8 @@ void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction o
                         case SRTActiveSurface::AS_MOVE:
                             lanradius[l+jumpradius][radius]->move(incr*MM2STEP);
                             break;
+                        case SRTActiveSurface::AS_PROFILE:
+                            break;
                     }
 					//CIRATools::Wait(LOOPTIME);
                 }
@@ -1219,6 +1260,8 @@ void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction o
                         break;
                      case SRTActiveSurface::AS_MOVE:
                         usd[circle][actuator]->move(incr*MM2STEP);
+                        break;
+                     case SRTActiveSurface::AS_PROFILE:
                         break;
                 }
             }
@@ -1345,13 +1388,15 @@ void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::C
 {
     if (AutoUpdate) {
         ACS::Time time;
+	TIMEVALUE tS;
         double azimuth=0.0;
         double elevation=0.0;
 
-        time = getTimeStamp();
+        //time = getTimeStamp();
+	tS.value (time);
 
         try {
-            //m_antennaBoss->getRawCoordinates(time, azimuth, elevation);
+            m_antennaBoss->getRawCoordinates(time, azimuth, elevation);
         }
         catch (CORBA::SystemException& ex) {
             _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
