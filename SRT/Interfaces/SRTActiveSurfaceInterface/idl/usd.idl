@@ -147,6 +147,11 @@ module SRTActiveSurface
 	*/
 	void writeCalibration(out double cammaLenD, out double cammaPosD, out boolean calibrate) raises (ASErrors::ASErrorsEx);
 
+	/**
+	* sets actuators corrections table
+	*/
+	void posTable (in ACS::doubleSeq actuatorsCorrections, in long parPositions, in double deltaEL, in long threshold);
+
 		/**
     	*	go to reference position. 
     	*	@return 
@@ -154,7 +159,7 @@ module SRTActiveSurface
     	oneway void refPos();
 
 		/**
-    	*	set the profile, 0 shaped 1 parabolic. 
+    	*	set the profile, 0 shaped, 1 parabolic, 2 parabolic fixed. 
     	*/
     	void setProfile(in long prof) raises (ASErrors::ASErrorsEx);
 
@@ -166,8 +171,8 @@ module SRTActiveSurface
 		/**
     	*	recalculates the gravity and user corrections based on antenna elevation. 
     	*/
-    	//oneway void update(in double elev);
-    	oneway void update(in long position);
+    	oneway void update(in double elev);
+    	/* oneway void update(in long position); */
 		
 		/**
     	*	stow and setup  
@@ -180,7 +185,6 @@ module SRTActiveSurface
     	*/
     	oneway void top();
     	oneway void bottom();
-
 	};
 
 };

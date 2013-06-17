@@ -32,13 +32,15 @@ module SRTActiveSurface {
         AS_TOP,
         AS_UPDATE,
         AS_CORRECTION,
-        AS_MOVE
+        AS_MOVE,
+	AS_PROFILE
     };
     ACS_ENUM(TASOneWayAction);
 
     enum TASProfile {
         AS_SHAPED,
-        AS_PARABOLIC
+        AS_PARABOLIC,
+	AS_PARABOLIC_FIXED
     };
     ACS_ENUM(TASProfile);
 
