@@ -94,6 +94,69 @@ using namespace TW;
 
 #define TEMPLATE_4_ROTSYSTEMSTATUS  Management::ROTSystemStatus_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
 
+#include <map>
+
+template <_TW_PROPERTYCOMPONENT_C>
+class CCustomPropertyText : public  CPropertyComponent <_TW_PROPERTYCOMPONENT_TL> {
+public:
+	CCustomPropertyText(PR property): CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>(property) { }
+	virtual ~CCustomPropertyText() {}
+protected:
+	WORD draw() {
+		WORD width,height;
+		bool done;
+		CPoint newPosition;
+		IRA::CString tmp;
+		WORD iter,step;
+		WORD newX,newY;
+		IRA::CString value,orig,ret;
+		std::map<std::string,int> data;
+
+		int start=0;
+		if (!CFrameComponent::getMainFrame()) return 4;
+		if (!CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getEnabled()) return 1;
+		if (!CFrameComponent::getMainFrame()->insideBorders(CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getPosition())) return 2;
+		height=CFrameComponent::getEffectiveHeight();
+		width=CFrameComponent::getEffectiveWidth();
+		orig=CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getValue();
+		while (IRA::CIRATools::getNextToken(orig,start,' ',ret)) {
+			if ( (ret!=" ") && (ret!="") && (ret!="\n")) {
+				data[(const char *)ret]+=1;
+			}
+		}
+		value="";
+		for (std::map<std::string,int>::iterator i=data.begin(); i!=data.end(); ++i) {
+			IRA::CString temp;
+			temp.Format("%s (x%d) ",i->first.c_str(),i->second);
+			value+=temp;
+		}
+		step=value.GetLength()/width;
+		newY=CFrameComponent::getHeightAlignment(CPropertyComponent <_TW_PROPERTYCOMPONENT_TL>::getHAlign(),step,height);
+		iter=0;
+		done=false;
+		for (int i=0;i<height;i++) {
+			if (!CFrameComponent::getMainFrame()->clearCanvas(CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getPosition()+CPoint(0,i),width,
+			  CStyle(CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getStyle().getColorPair(),0))) return 3;
+		}
+		while ((newY<height) && (!done)) {
+			if (step>0) {
+				tmp=value.Mid(iter*width,width);
+			}
+			else {
+				tmp=value;
+				done=true;
+			}
+			iter++;
+			newX=CFrameComponent::getWidthAlignment(CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getWAlign(),tmp.GetLength(),width);
+			newPosition=CPoint(newX,newY);
+			if (!CFrameComponent::getMainFrame()->writeCanvas(newPosition+CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getPosition(),CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getStyle(),tmp)) return 3;
+			newY++;
+		}
+		return 0;
+	}
+};
+
+
 IRA::CString polarizationFormat(const baci::BACIValue& value,const void* arg)
 {
 	if (value.longValue()==Receivers::RCV_LCP)  {
@@ -141,10 +204,10 @@ int main(int argc, char *argv[]) {
 	TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> * status_box;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *feeds_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *IFs_field;
-	TW::CPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(long)> *polarization_text;
-	TW::CPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *initialFrequency_text;
-	TW::CPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *bandWidth_text;
-	TW::CPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *LO_text;
+	CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(long)> *polarization_text;
+	CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *initialFrequency_text;
+	CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *bandWidth_text;
+	CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *LO_text;
 
 	/* ******************************* */
 	TW::CLabel *output_label;
@@ -254,10 +317,10 @@ int main(int argc, char *argv[]) {
 		status_box=new TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> (status.in(),Management::MNG_OK);
 		feeds_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)>(feeds.in());
 		IFs_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)>(IFs.in());
-		initialFrequency_text=new TW::CPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(initialFrequency.in());
-		bandWidth_text=new TW::CPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(bandWidth.in());
-		LO_text=new TW::CPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(LO.in());
-		polarization_text=new TW::CPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(long)>(polarization.in());
+		initialFrequency_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(initialFrequency.in());
+		bandWidth_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(bandWidth.in());
+		LO_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(LO.in());
+		polarization_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(long)>(polarization.in());
 		/* ************************ */
 		#if USE_OUTPUT_FIELD >=1 
 			output_label=new TW::CLabel("");

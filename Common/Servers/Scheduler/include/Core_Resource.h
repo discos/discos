@@ -1,17 +1,17 @@
 #ifndef CORE_RESOURCE_H_
 #define CORE_RESOURCE_H_
 
-// $Id: Core_Resource.h,v 1.9 2011-05-20 16:53:09 a.orlati Exp $
 
 #define RESOURCE_INIT m_antennaBoss=Antenna::AntennaBoss::_nil(); \
 									m_receiversBoss=Receivers::ReceiversBoss::_nil();	\
+									m_minorServoBoss=MinorServo::MinorServoBoss::_nil(); \
 									m_defaultBackend=Backends::GenericBackend::_nil(); \
 									m_defaultDataReceiver=Management::DataReceiver::_nil(); \
 									m_customLogger=Management::CustomLogger::_nil(); \
 									m_weatherStation=Weather::GenericWeatherStation::_nil(); \
 									m_antennaNC=NULL; \
 									m_isTracking=false; \
-									m_antennaBossError=m_receiversBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=m_weatherStationError=false; \
+									m_antennaBossError=m_receiversBossError=m_minorServoBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=m_weatherStationError=false; \
 									m_currentDevice=0;\
 									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false; \
 									
@@ -70,6 +70,14 @@ Receivers::ReceiversBoss_var m_receiversBoss;
  * true if an error was detected when communicating to the receivers boss
  */
 bool m_receiversBossError;
+/**
+ * Minor Servo boss reference
+ */
+MinorServo::MinorServoBoss_var m_minorServoBoss;
+/**
+ * true if an error was detected when communicating to the minor servo boss
+ */
+bool m_minorServoBossError;
 /**
  * CustomLogger reference
  */
@@ -140,6 +148,20 @@ void loadAntennaBoss(Antenna::AntennaBoss_var& ref,bool& errorDetected) const th
  * @param ref reference to the antenna boss component
  */
 void unloadAntennaBoss(Antenna::AntennaBoss_var& ref) const;
+
+/**
+ * used to get a reference to the minor servo  boss component.
+ * @param ref the pointer to the minor servo boss component
+ * @param errorDetected this flag is true if the reference seems not valid any more and the reference should not be considered valid any more
+ */
+void loadMinorServoBoss(MinorServo::MinorServoBoss_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl);
+
+/**
+ * used to free the reference to the minor servo  boss component
+ * @param ref reference to the minor servo  boss component
+ */
+void unloadMinorServoBoss(MinorServo::MinorServoBoss_var& ref) const;
+
 /**
  * used to get a reference to the receivers boss component.
  * @param ref reference to the receivers boss component

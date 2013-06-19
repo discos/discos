@@ -203,7 +203,7 @@ static void antennaNCHandler(Antenna::AntennaDataBlock antennaData,void *handler
 /**
  * used as wrapper to function that are in charge of forwarding commands to other packages  
 */
-bool remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl);
+bool remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl,ManagementErrors::UnsupportedOperationExImpl);
 
 
 

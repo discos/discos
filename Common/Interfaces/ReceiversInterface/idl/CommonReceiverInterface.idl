@@ -89,7 +89,7 @@ module Receivers {
         /**
          * It can be called when the value of the calibration diode is required.  
          * It can process as many subbands at a  time, provided they belong to the current receiver.  
-         * The subbands are identified by giving  four coordinates....the feed, the polarization and the start frequency, the bandwidth of the detector. 
+         * The subbands are identified by giving  four coordinates....the feed, the IF and the start frequency, the bandwidth of the detector. 
          * @param freqs this parameter is used to pass the start frequencies of the bands that are to be analyzed (MHz). This frequencies
          * generally refers to detector start frequency, before any other computation the recevier correlate this value to the real start
          * frequency of the receiver.
@@ -97,7 +97,7 @@ module Receivers {
          * generally refers to detector bandwidth, before any other computation the recevier correlate this value to the real bandwidth
          * of the receiver.
          * @param feeds is a list that stores the corresponding feed of the subband we are asking for
-         * @param ifs is a list that identfies which IFs of the feed we are interested in, usually 0..1
+         * @param ifs is a list that identfies which IFs of the feed we are interested in, usually 0..<i>IFs</i>-1
          * @param skyFreq used to return the resulting frequency whan comparing the detector subband and the receiver IF band, the band is the real observed frequency in fact the oscillator is also added (MHz)
          * @param skyBw used to return the total observed bandwidth. (Mhz)
          * @param scaleFactor this value is used as a weight during system temperature computation in order to scale to a real tsys value. 
@@ -108,6 +108,22 @@ module Receivers {
          */
         ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs,out ACS::doubleSeq skyFreq,out ACS::doubleSeq skyBw,
         		out double scaleFactor)    raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        
+        
+        /**
+         * It is called to get the all the receiver output information in one call.  An output is identified by providing the feed and the IF identifier. It can process any number of requests at a time.   
+         * @param feeds is a list that stores the corresponding feed of the output we are asking for
+         * @param ifs is a list that identifies which IFs of the feed we are interested in, usually 0..<i>IFs</i>-1        
+         * @param freq used to return the start frequency of the band provided by the output  the oscillator (if present) is not  added (MHz)
+         * @param bw used to return the total provided bandwidth. (MHz)
+         * @param pols it specifies the polarization of the receiver output, since ACs does not support for enum sequences the correct value must be matched against the <i>Receivers::TPolarization</i> enumeration.
+         * @param LO it gives (if present) the value of the local oscillator (MHz). 
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw CORBA::SystemException  
+         */
+        void getIFOutput(in ACS::longSeq feeds,in ACS::longSeq ifs,out ACS::doubleSeq freqs,out ACS::doubleSeq bw,out ACS::longSeq pols,out ACS::doubleSeq LO) raises (ComponentErrors::ComponentErrorsEx,
+        		ReceiversErrors::ReceiversErrorsEx);
             
         /**
          * It can be called when the relative positions and power (with respect to the central beam) of each feed 

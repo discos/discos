@@ -168,7 +168,7 @@
     <nFreqRange>1</nFreqRange>
     <freqRange>500.0-5000.0</freqRange>
     <fluxCoeff1>2.537</fluxCoeff1>
-    <fluxCoeff2>-2.801</fluxCoeff2>
+    <fluxCoeff2>-0.565</fluxCoeff2>
     <fluxCoeff3>-0.0404</fluxCoeff3>
     <size>0.000072722</size>
     <model>GAUSS</model>

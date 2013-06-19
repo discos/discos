@@ -45,12 +45,16 @@ CDataCollection::CDataCollection()
 	m_telescopeTrackingTime=0;
 	m_localOscillator.length(0);
 	m_calibrationMarks.length(0);
-	m_recBandWidth.length(0);
-	m_recInitialFrequency.length(0);
+	//m_recBandWidth.length(0);
+	//m_recInitialFrequency.length(0);
 	m_calibrationMarks.length(0);
 	m_sourceFlux.length(0);
 	m_skyFrequency.length(0);
 	m_skyBandwidth.length(0);
+	m_receiverPolarization.length(0);
+	m_receiversIFID.length(0);
+	m_backendAttenuations.length(0);
+	m_sectionsID.length(0);
 }
 	
 CDataCollection::~CDataCollection()
@@ -111,12 +115,6 @@ void CDataCollection::saveFeedHeader(CFitsWriter::TFeedHeader * fH,const WORD& n
 ACS::Time CDataCollection::getFirstDumpTime()
 {
 	return m_dumpCollection.getFirstTime();
-}
-
-long CDataCollection::SectionPolNumber(const long& ch) const 
-{ 
-	if (m_sectionH[ch].polarization==Backends::BKND_FULL_STOKES) return 4; 
-	else return 1;
 }
 
 long CDataCollection::getInputsNumber() const
@@ -180,7 +178,7 @@ IRA::CString CDataCollection::getSubScanType() const
 	}
 }
 
-void CDataCollection::getInputsConfiguration(ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts) const
+void CDataCollection::getInputsConfiguration(ACS::longSeq& sectionID,ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts) const
 {
 	long inputs=0;
 	long inputsNumber=getInputsNumber();
@@ -189,6 +187,7 @@ void CDataCollection::getInputsConfiguration(ACS::longSeq& feeds,ACS::longSeq& i
 	feeds.length(inputsNumber);
 	ifs.length(inputsNumber);
 	atts.length(inputsNumber);
+	sectionID.length(inputsNumber);
 	for(int i=0;i<m_mainH.sections;i++) {
 		if (m_sectionH[i].inputs==1) {
 			ifs[inputs]=m_sectionH[i].IF[0];
@@ -196,6 +195,7 @@ void CDataCollection::getInputsConfiguration(ACS::longSeq& feeds,ACS::longSeq& i
 			feeds[inputs]=m_sectionH[i].feed;
 			freqs[inputs]=m_sectionH[i].frequency;
 			bws[inputs]=m_sectionH[i].bandWidth;
+			sectionID[inputs]=m_sectionH[i].id;
 			inputs+=1;
 		}
 		else { //inputs==2
@@ -204,18 +204,20 @@ void CDataCollection::getInputsConfiguration(ACS::longSeq& feeds,ACS::longSeq& i
 			feeds[inputs]=m_sectionH[i].feed;
 			freqs[inputs]=m_sectionH[i].frequency;
 			bws[inputs]=m_sectionH[i].bandWidth;
+			sectionID[inputs]=m_sectionH[i].id;
 			inputs+=1;
 			ifs[inputs]=m_sectionH[i].IF[1];
 			atts[inputs]=m_sectionH[i].attenuation[1];
 			feeds[inputs]=m_sectionH[i].feed;
 			freqs[inputs]=m_sectionH[i].frequency;
 			bws[inputs]=m_sectionH[i].bandWidth;
+			sectionID[inputs]=m_sectionH[i].id;
 			inputs+=1;
 		}
 	}
 }
 
-void CDataCollection::setSkyFrequency(const ACS::doubleSeq& freq)
+/*void CDataCollection::setSkyFrequency(const ACS::doubleSeq& freq)
 {
 	long j=0;
 	unsigned inp=0;
@@ -225,9 +227,9 @@ void CDataCollection::setSkyFrequency(const ACS::doubleSeq& freq)
 		j++;
 		inp+=m_sectionH[j].inputs;
 	}
-}
+}*/
 
-void CDataCollection::setSkyBandwidth(const ACS::doubleSeq& bw)
+/*void CDataCollection::setSkyBandwidth(const ACS::doubleSeq& bw)
 {
 	long j=0;
 	unsigned inp=0;
@@ -237,7 +239,7 @@ void CDataCollection::setSkyBandwidth(const ACS::doubleSeq& bw)
 		j++;
 		inp+=m_sectionH[j].inputs;
 	}
-}
+}*/
 
 
 bool CDataCollection::getDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize)

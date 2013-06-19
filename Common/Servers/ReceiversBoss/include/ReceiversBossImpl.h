@@ -35,8 +35,8 @@
 
 /** 
  * @mainpage ReceiversBoss component Implementation 
- * @date 08/04/2013
- * @version 0.41.0
+ * @date 18/06/2013
+ * @version 0.42.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.2.0
  * @remarks compiler version is 4.1.2
@@ -142,7 +142,7 @@ public:
 	void park() throw (CORBA::SystemException,ManagementErrors::ParkingErrorEx);
 	
 	/**
-	 * This method is called when the values of the calibration mark of the current receiver are required. A value is returned for every subbands.
+	 * This method is called when the values of the calibration mark of the current receiver are required. A value is returned for every sub bands.
 	 * The subbands are defined by giving the feed number, the polarization the initial frequency and the bandwidth.
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
@@ -158,6 +158,18 @@ public:
 	 */
     virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs,
     		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+    /**
+     * this method is  called to get the all the receiver output information in one call.  An output is identified by providing the feed and the IF identifier. It can process any number of requests at a time.
+     * @param feeds is a list that stores the corresponding feed of the output we are asking for
+     * @param ifs is a list that identifies which IFs of the feed we are interested in, usually 0..<i>IFs</i>-1
+     * @param freq used to return the start frequency of the band provided by the output  the oscillator (if present) is not  added (MHz)
+     * @param bw used to return the total provided bandwidth. (MHz)
+     * @param pols it specifies the polarization of the receiver output, since ACs does not support for enum sequences the correct value must be matched against the <i>Receivers::TPolarization</i> enumeration.
+     * @param LO it gives (if present) the value of the local oscillator (MHz).
+     */
+    virtual void getIFOutput (const ACS::longSeq & feeds, const ACS::longSeq & ifs,ACS::doubleSeq_out freqs,ACS::doubleSeq_out bw,ACS::longSeq_out pols,ACS::doubleSeq_out LO) throw (
+    		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is called in order to know the geometry of the currently configured receiver. The geometry is given along the X and Y axis where the central feed is the origin

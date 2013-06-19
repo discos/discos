@@ -55,6 +55,67 @@ void CCore::unloadAntennaBoss(Antenna::AntennaBoss_var& ref) const
 	}
 }
 
+void CCore::loadMinorServoBoss(MinorServo::MinorServoBoss_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl)
+{
+	if ((!CORBA::is_nil(ref)) && (errorDetected)) { // if reference was already taken, but an error was found....dispose the reference
+		try {
+			m_services->releaseComponent((const char*)ref->name());
+		}
+		catch (...) { //dispose silently...if an error...no matter
+		}
+		ref=MinorServo::MinorServoBoss::_nil();
+	}
+	if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
+		try {
+			if (m_config->getMinorServoBossComponent()!="") {
+				ref=m_services->getDefaultComponent<MinorServo::MinorServoBoss>((const char*)m_config->getMinorServoBossComponent());
+				ACS_LOG(LM_FULL_INFO,"CCore::loadMinorServoBoss()",(LM_INFO,"MINORSERVOBOSS_LOCATED"));
+				errorDetected=false;
+			}
+			else {
+				ACS_LOG(LM_FULL_INFO,"CCore::loadMinorServoBoss()",(LM_WARNING,"MINOR_SERVO_UNAVAILABLE"));
+			}
+		}
+		catch (maciErrType::CannotGetComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadMinorServoBoss()");
+			Impl.setComponentName((const char*)m_config->getMinorServoBossComponent());
+			ref=MinorServo::MinorServoBoss::_nil();
+			throw Impl;
+		}
+		catch (maciErrType::NoPermissionExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadMinorServoBoss()");
+			Impl.setComponentName((const char*)m_config->getMinorServoBossComponent());
+			ref=MinorServo::MinorServoBoss::_nil();
+			throw Impl;
+		}
+		catch (maciErrType::NoDefaultComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadMinorServoBoss()");
+			Impl.setComponentName((const char*)m_config->getMinorServoBossComponent());
+			ref=MinorServo::MinorServoBoss::_nil();
+			throw Impl;
+		}
+	}
+}
+
+void CCore::unloadMinorServoBoss(MinorServo::MinorServoBoss_var& ref) const
+{
+	if (!CORBA::is_nil(ref)) {
+		try {
+			m_services->releaseComponent((const char*)ref->name());
+		}
+		catch (maciErrType::CannotReleaseComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CCore::unloadMinorServoBoss()");
+			Impl.setComponentName((const char *)m_config->getAntennaBossComponent());
+			Impl.log(LM_WARNING);
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::unloadMinorServoBoss())");
+			impl.log(LM_WARNING);
+		}
+		ref=MinorServo::MinorServoBoss::_nil();
+	}
+}
+
 void CCore::loadReceiversBoss(Receivers::ReceiversBoss_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl)
 {
 	if ((!CORBA::is_nil(ref)) && (errorDetected)) { // if reference was already taken, but an error was found....dispose the reference

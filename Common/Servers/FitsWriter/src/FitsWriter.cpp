@@ -408,8 +408,9 @@ bool CFitsWriter::addFeedTable(const IRA::CString& name)
 	}
 };
 
-bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq& los,const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,
-		const ACS::doubleSeq& sourceFlux,const IRA::CString& name,const IRA::CString& rfName)
+bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::longSeq& feedsID, const ACS::longSeq& ifsID,const ACS::longSeq& pols,const ACS::doubleSeq& los,
+		const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,const ACS::doubleSeq& sourceFlux,const ACS::doubleSeq& atts,
+		const IRA::CString& name,const IRA::CString& rfName)
 {
 	std::vector<long> id;
 	std::vector<long> bins;
@@ -426,6 +427,7 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq&
 	std::vector<double> calib;
 	std::vector<long> section;
 	long inputsNumber=0;
+	long fluxIterator=0;
 	//double skyFreq,skyBw;
 	
 	if (!pFits) {
@@ -441,9 +443,10 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq&
 		id.push_back(m_channels[i].id);  // Section ID
 		bins.push_back(m_channels[i].bins); //Section Bins
 		sampleRate.push_back(m_channels[i].sampleRate); // section S.R.
-		if (i<(long)sourceFlux.length()) {
-			flux.push_back(sourceFlux[i]);// estimated source flux associated to the section parameters
+		if (fluxIterator<(long)sourceFlux.length()) {
+			flux.push_back(sourceFlux[fluxIterator]);// estimated source flux associated to the section parameters
 		}
+		fluxIterator+=m_channels[i].inputs;
 		// creation of the channels columns for the data table......
 		colName << "Ch" << m_channels[i].id;
 	    DataColName.push_back(colName.str());		
@@ -457,7 +460,75 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq&
 		}
 		DataColForm.push_back(type.str());
 		DataColUnit.push_back("");
-		for (long j=0;((j<m_channels[i].inputs) && (j<2));j++) {
+
+		if (m_channels[i].inputs>1) {
+			tsysType << (m_channels[i].inputs) << "D";;
+			tsysColForm.push_back(tsysType.str());
+		}
+		else {
+			tsysColForm.push_back("D");
+		}
+		tsysColName.push_back(colName.str());
+		tsysColUnit.push_back("K");
+	}
+	inputsNumber=sectionID.length();
+	for (unsigned j=0;j<sectionID.length();j++) {
+		if (j<feedsID.length()) {
+			feed.push_back(feedsID[j]);
+		}
+		else {
+			feed.push_back(0);
+		}
+		if (j<ifsID.length()) {
+			ifChain.push_back(ifsID[j]);
+		}
+		else {
+			ifChain.push_back(0);
+		}
+		if (j<pols.length()) {
+			if (pols[j]==Receivers::RCV_LCP) polarization.push_back("LCP");
+			else if (pols[j]==Receivers::RCV_RCP) polarization.push_back("RCP");
+			else if (pols[j]==Receivers::RCV_VLP) polarization.push_back("VLP");
+			else if (pols[j]==Receivers::RCV_HLP) polarization.push_back("HLP");
+			else polarization.push_back("");
+		}
+		else {
+			polarization.push_back("");
+		}
+		if (j<skyFreq.length()) {
+			frequency.push_back(skyFreq[j]);
+		}
+		else {
+			frequency.push_back(DOUBLENULLVALUE);
+		}
+		if (j<skyBandWidth.length()) {
+			bandWidth.push_back(skyBandWidth[j]);
+		}
+		else {
+			bandWidth.push_back(DOUBLENULLVALUE);
+		}
+		if (j<los.length()) {
+			localOscillator.push_back(los[j]);
+		}
+		else {
+			localOscillator.push_back(DOUBLENULLVALUE);
+		}
+		if (j<marks.length()) { // in this case the noise cal values are given one for each backend input
+			calib.push_back(marks[j]);
+		}
+		else {
+			calib.push_back(DOUBLENULLVALUE);
+		}
+		if (j<atts.length()) {
+			attenuation.push_back(atts[j]);
+		}
+		else {
+			attenuation.push_back(DOUBLENULLVALUE);
+		}
+		section.push_back(sectionID[j]);
+	}
+
+		/*for (long j=0;((j<m_channels[i].inputs) && (j<2));j++) {
 			inputsNumber++;
 			unsigned ifNumber;
 			ifNumber=(unsigned) m_channels[i].IF[j];
@@ -499,8 +570,8 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq&
 			}
 			attenuation.push_back(m_channels[i].attenuation[j]);
 			section.push_back(m_channels[i].id);
-		}
-		if (m_channels[i].inputs>1) {
+		}*/
+		/*if (m_channels[i].inputs>1) {
 			tsysType << (m_channels[i].inputs) << "D";;
 			tsysColForm.push_back(tsysType.str());
 		}
@@ -508,8 +579,8 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq&
 			tsysColForm.push_back("D");
 		}
 		tsysColName.push_back(colName.str());
-		tsysColUnit.push_back("K");
-	}
+		tsysColUnit.push_back("K");*/
+	/*}*/
 	try {
 		section_table = pFits->addTable((const char *)name,m_mainHeader.sections, SectColName, SectColForm, SectColUnit);
 		if (!section_table) {

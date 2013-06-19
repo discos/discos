@@ -10,6 +10,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  21/07/2010      Creation                                                  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  28/02/2011      For computation is now considered the real band, given by the receiver band and the backend filter */
 /* Andrea Orlati(aorlati@ira.inaf.it)  8/04/2013       changes to fit the new K band, dual feed in Medicina  */
+/* Andrea Orlati(aorlati@ira.inaf.it)  18/06/2013     changes in order to make the length of sequence properties equal to IFs*feeds */
 
 #ifdef COMPILE_TARGET_MED
 
@@ -105,6 +106,10 @@ public:
 			const ACS::longSeq& ifs,double& scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,
 					ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
 	
+	void getIFOutput(const ACS::longSeq& feeds,const ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq&  bw,ACS::longSeq& pols,ACS::doubleSeq& LO)  throw (
+			ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::UnexpectedExImpl);
+
 	void getLO(ACS::doubleSeq& lo) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 	
 	void getInitialFrequency(ACS::doubleSeq& iFreq) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
@@ -132,8 +137,8 @@ private:
 	maci::ContainerServices* m_services;
 	CConfiguration *m_config;
 	BACIMutex m_mutex;
-	long m_feeds;
-	long m_IFs;
+	long m_feeds; // numebr of feeds;
+	long m_IFs;  //number of IFs per feed
 	IRA::CString m_currentOperativeMode;
 
 #ifdef COMPILE_TARGET_MED
@@ -155,6 +160,7 @@ private:
 	double m_startFreq[_RECVBOSSCORE_MAX_IFS];
 	double m_bandWidth[_RECVBOSSCORE_MAX_IFS];
 	IRA::CString m_currentReceiver;
+	long m_totalOutputs;
 
 #else
 	Receivers::Receiver_var m_currentRecv;

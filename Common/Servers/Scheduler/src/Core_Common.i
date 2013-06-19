@@ -774,7 +774,7 @@ void CCore::antennaNCHandler(Antenna::AntennaDataBlock antennaData,void *handler
 	}
 }
 
-bool CCore::remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl)
+bool CCore::remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl,ManagementErrors::UnsupportedOperationExImpl)
 {
 	char * ret_val;
 	CORBA::Boolean res;
@@ -854,6 +854,34 @@ bool CCore::remoteCall(const IRA::CString& command,const IRA::CString& package,c
 				m_defaultBackendError=true;
 				throw impl;
 			}			
+			break;
+		}
+		case 4: { //minor servo package
+			try {
+				baci::ThreadSyncGuard guard(&m_mutex);
+				loadMinorServoBoss(m_minorServoBoss,m_minorServoBossError);
+				if (CORBA::is_nil(m_minorServoBoss)) {
+					_EXCPT(ManagementErrors::UnsupportedOperationExImpl,impl,"CCore::remoteCall()");
+					throw impl;
+				}
+			}
+			catch (ComponentErrors::CouldntGetComponentExImpl& err) {
+				_ADD_BACKTRACE(ParserErrors::PackageErrorExImpl,impl,err,"CCore::remoteCall()");
+				impl.setPackageName((const char *)package);
+				throw impl;
+			}
+			try {
+				res=m_minorServoBoss->command((const char *)command,ret_val); // throw CORBA::SystemException
+				out=IRA::CString(ret_val);
+				CORBA::string_free(ret_val);
+				return res;
+			}
+			catch (CORBA::SystemException& err) {
+				_EXCPT(ParserErrors::PackageErrorExImpl,impl,"CCore::command()");
+				impl.setPackageName((const char *)package);
+				m_minorServoBossError=true;
+				throw impl;
+			}
 			break;
 		}
 		default: {

@@ -84,6 +84,8 @@
 
 <ErrorCode name="WeatherStationError" shortDescription="Cannot read parameters from weather station" description=""/>
 
-<ErrorCode name="UnkownProjectCodeError" shortDescription="The project code is invalid or not allowd" description=""/>
+<ErrorCode name="UnkownProjectCodeError" shortDescription="The project code is invalid or not allowed" description=""/>
+
+<ErrorCode name="UnsupportedOperation" shortDescription="The operation is invalid or not supported by this release " description=""/>
 
 </Type>

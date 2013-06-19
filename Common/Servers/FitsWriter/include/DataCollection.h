@@ -288,17 +288,13 @@ public:
 	/**
 	 * Gets the inputs configuration from the backend
 	 */
-	void getInputsConfiguration(ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts) const;
+	void getInputsConfiguration(ACS::longSeq& sectionID,ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts) const;
 	
 	/**
-	 * Get the inputs number of the given section
+	 * Get number of expected streams coming from a section.
+	 * @param section section identifier
 	 */
-	long getSectionInputs(const long& ch) const { return m_sectionH[ch].inputs; }
-	
-	/**
-	 * Get polarization given the section number. 
-	 */
-	long SectionPolNumber(const long& ch) const;
+	long getSectionStreamsNumber(const long& section) const { if (m_sectionH[section].polarization==Backends::BKND_FULL_STOKES) return 4; else return 1; }
 	
 	/**
 	 * Saves the main headers coming from the backend
@@ -447,36 +443,29 @@ public:
 	 */
 	const IRA::CString& getReceiverCode() const {return m_receiverCode;	}
 
-	/**
-	 * It allows to set the current band start frequency coming from the receiver, one entry for each IF
+	/*
+	 * It allows to read the sequence of identifiers of the backend sections
+	 * @param sec used to return back the the array
 	 */
-	void setReceiverInitialFrequency(const ACS::doubleSeq& iFreq) { m_recInitialFrequency=iFreq; }
-	void setReceiverInitialFrequency() { m_recInitialFrequency.length(0); }
+	void getSectionsID(ACS::longSeq& sec) const { sec=m_sectionsID; }
 
 	/*
-	 * It allows to read the sequence of start frequencies
-	 * @param bw used to return back the the array
-	 */
-	void getReceiverInitialFrequency(ACS::doubleSeq& iFreq) const { iFreq=m_recInitialFrequency; }	
-	
-	
-	/**
-	 * It allows to set the current band width coming from the receiver, one entry for each IF
-	 */
-	void setReceiverBandWidth(const ACS::doubleSeq& bw) { m_recBandWidth=bw; }
-	void setReceiverBandWidth() { m_recBandWidth.length(0); }
+	 * It allows to read the sequence of attenuations for each backend input
+	 * @param att used to return back the the array
+	*/
+	void getBackendAttenuations(ACS::doubleSeq& att) const { att=m_backendAttenuations; }
 
 	/*
-	 * It allows to read the sequence of band widths of the receiver
-	 * @param bw used to return back the the array
-	 */
-	void getReceiverBandWidth(ACS::doubleSeq& bw) const { bw=m_recBandWidth; }
-	
-	/**
-	 * It allows to set the current local oscillator
-	 */
-	void setLocalOscillator(const ACS::doubleSeq& lo) {m_localOscillator=lo; }; 
-	void setLocalOscillator() { m_localOscillator.length(0); }
+	 * It allows to read the sequence of feeds identifiers for each backend input
+	 * @param feed used to return back the the array
+	*/
+	void getFeedsID(ACS::longSeq& feed) const { feed=m_receiverFeedID; }
+
+	/*
+	 * It allows to read the sequence of ifs  identifiers for each backend input
+	 * @param ifid used to return back the the array
+	*/
+	void getIFsID(ACS::longSeq& ifid) const { ifid=m_receiversIFID; }
 	
 	/*
 	 * It allows to read the sequence of local oscillators
@@ -484,23 +473,11 @@ public:
 	 */
 	void getLocalOscillator(ACS::doubleSeq& lo) const { lo=m_localOscillator; }
 	
-	/**
-	 * It allows to set the polarization value for each of the ifs
-	 */
-	void setReceiverPolarization(const ACS::longSeq& pol) {m_receiverPolarization=pol; }; 
-	void setReceiverPolarization() { m_receiverPolarization.length(0); }
-	
 	/*
 	 * allows to read the sequence of IFs polarization
 	 * @param pol used to return back the the array
 	 */
 	void getReceiverPolarization(ACS::longSeq& pol) const { pol=m_receiverPolarization; }
-	
-	/**
-	 * It allows to set the current value for the calibration mark; }
-	 **/
-	void setCalibrationMarks(const ACS::doubleSeq& mark) { m_calibrationMarks=mark; };
-	void setCalibrationMarks() {m_calibrationMarks.length(0); };
 	
 	/*
 	 * @return the arrays that contains the local oscillator values.
@@ -544,12 +521,42 @@ public:
 	 */
 	void getSourceFlux(ACS::doubleSeq& fl) const { fl=m_sourceFlux; }
 
+
+	/**
+	 * allows to store the information about each of the backend inputs. The dimension of the sequences should be exactly the number returned by the method <i>getInputsNumber()</i>-
+	 */
+	void setInputsTable(const ACS::longSeq& sectionID,const ACS::longSeq& feed,const ACS::longSeq& ifs,const ACS::longSeq& pols,const ACS::doubleSeq& freq,const ACS::doubleSeq& bw,
+			const ACS::doubleSeq& los,const ACS::doubleSeq& atts,const ACS::doubleSeq& mark)  {
+		m_receiverPolarization=pols;
+		m_receiversIFID=ifs;
+		m_receiverFeedID=feed;
+		m_calibrationMarks=mark;
+		m_backendAttenuations=atts;
+		m_skyFrequency=freq;
+		m_skyBandwidth=bw;
+		m_sectionsID=sectionID;
+		m_localOscillator=los;
+	}
+
+	void setInputsTable()
+	{
+		m_receiverPolarization.length(0);
+		m_receiversIFID.length(0);
+		m_backendAttenuations.length(0);
+		m_receiverFeedID.length(0);
+		m_calibrationMarks.length(0);
+		m_skyFrequency.length(0);
+		m_skyBandwidth.length(0);
+		m_sectionsID.length(0);
+		m_localOscillator.length(0);
+	}
+
 	/**
 	 * allows to set the sky frequencies. The input argument is expected to be of the same multiplicity as the number of inputs of the backend.
 	 * The number of stored values corresponds to the number of sections
 	 */
-	void setSkyFrequency(const ACS::doubleSeq& freq);
-	void setSkyFrequency() { m_skyFrequency.length(0); }
+	/*void setSkyFrequency(const ACS::doubleSeq& freq);
+	void setSkyFrequency() { m_skyFrequency.length(0); }*/
 
 	/**
 	 * @param freq used to return the number of frequencies, one value for each section
@@ -560,8 +567,8 @@ public:
 	 * allows to set the sky bandwidth. The input argument is expected to be of the same multiplicity as the number of inputs of the backend.
 	 * The number of stored values corresponds to the number of sections
 	 */
-	void setSkyBandwidth(const ACS::doubleSeq& bw);
-	void setSkyBandwidth() { m_skyBandwidth.length(0); }
+	/*void setSkyBandwidth(const ACS::doubleSeq& bw);
+	void setSkyBandwidth() { m_skyBandwidth.length(0); }*/
 
 	/**
 	 * @param freq used to return the number of bandwidths, one value for each section
@@ -710,17 +717,17 @@ private:
 	/**
 	 * array that contains the start values of bands coming from the receiver
 	*/	
-	ACS::doubleSeq m_recInitialFrequency;
+	//ACS::doubleSeq m_recInitialFrequency;
 	/**
 	 * array that contains the values of the receiver band widths
 	 */	
-	ACS::doubleSeq m_recBandWidth;
+	//ACS::doubleSeq m_recBandWidth;
 	/**
-	 * array that contains the values of the local oscillator
+	 * array that contains the values of the local oscillator (one for each input defined by the backend)
 	 */
 	ACS::doubleSeq m_localOscillator;
 	/**
-	 * array that contains the values of polarization for each of the ifs
+	 * array that contains the values of receiver polarization (one for each input defined by the backend)
 	 */	
 	ACS::longSeq m_receiverPolarization;
 	/**
@@ -732,13 +739,31 @@ private:
 	 */
 	ACS::doubleSeq m_sourceFlux;
 	/**
-	 * stores the initial frequencies of the bands observed (projected to sky), one value for each section of the backend
+	 * stores the initial frequencies of the bands observed (projected to sky) (one for each input defined by the backend)
 	 */
 	ACS::doubleSeq m_skyFrequency;
 	/**
-	 * stores the band width of the bands observed (projected to sky), one value for each section of the backend
+	 * stores the band width of the bands observed (projected to sky) (one for each input defined by the backend)
 	 */
 	ACS::doubleSeq m_skyBandwidth;
+	/**
+	 * stores the identifiers of the receiver IFs (one for each input defined by the backend)
+	 */
+	ACS::longSeq m_receiversIFID;
+	/**
+	 * Stores the attenuations of each backend input
+	 */
+	ACS::doubleSeq m_backendAttenuations;
+	/**
+	 * stores the identifier of the receiver feeds ((one for each input defined by the backend)
+	 */
+	ACS::longSeq m_receiverFeedID;
+	/**
+	 * Stores the identifier od the baclend section (one for each input)
+	 */
+	ACS::longSeq m_sectionsID;
+
+
 	/**
 	 * relative humidity
 	 */

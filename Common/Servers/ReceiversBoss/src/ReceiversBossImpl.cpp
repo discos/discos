@@ -269,6 +269,35 @@ ACS::doubleSeq *ReceiversBossImpl::getCalibrationMark(const ACS::doubleSeq& freq
 	return result._retn();
 }
 
+void ReceiversBossImpl::getIFOutput (const ACS::longSeq & feeds, const ACS::longSeq & ifs,ACS::doubleSeq_out freqs,ACS::doubleSeq_out bw,ACS::longSeq_out pols,ACS::doubleSeq_out LO) throw (
+		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	ACS::doubleSeq_var resFreq=new ACS::doubleSeq;
+	ACS::doubleSeq_var resBw=new ACS::doubleSeq;
+	ACS::longSeq_var resPols=new ACS::longSeq;
+	ACS::doubleSeq_var resLO=new ACS::doubleSeq;
+	try {
+		m_core->getIFOutput(feeds,ifs,resFreq,resBw,resPols,resLO);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::getIFOutput()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+	freqs=resFreq._retn();
+	bw=resBw._retn();
+	pols=resPols._retn();
+	LO=resLO._retn();
+}
+
 CORBA::Long ReceiversBossImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
 		ReceiversErrors::ReceiversErrorsEx)
 {

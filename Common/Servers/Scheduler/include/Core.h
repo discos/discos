@@ -22,6 +22,7 @@
 #include <AntennaBossC.h>
 #include <FitsWriterC.h>
 #include <ReceiversBossC.h>
+#include <MinorServoBossC.h>
 #include <GenericBackendC.h>
 #include <CustomLoggerC.h>
 #include <GenericWeatherStationC.h>

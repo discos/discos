@@ -174,7 +174,7 @@ bool CEngineThread::processData()
 #endif
 	for (int i=0;i<data->getSectionsNumber();i++) {
 		bins=data->getSectionBins(i);
-		pol=data->SectionPolNumber(i);
+		pol=data->getSectionStreamsNumber(i);
 		switch (data->getSampleSize()) {
 			case sizeof(BYTE2_TYPE): {
 #ifdef FW_DEBUG
@@ -348,9 +348,17 @@ void CEngineThread::runLoop()
 				ACS::longSeq polarizations;
 				ACS::doubleSeq skyFreq,skyBw;
 				ACS::doubleSeq fluxes;
+				ACS::longSeq feedsID;
+				ACS::longSeq ifsID;
+				ACS::doubleSeq atts;
+				ACS::longSeq sectionsID;
 
 				data->getSite(site,dut1,siteName);
 				data->getLocalOscillator(LocalOscillator);
+				data->getSectionsID(sectionsID);
+				data->getBackendAttenuations(atts);
+				data->getFeedsID(feedsID);
+				data->getIFsID(ifsID);
 				data->getSkyBandwidth(skyBw);
 				data->getSkyFrequency(skyFreq);
 				data->getCalibrationMarks(calib);
@@ -554,7 +562,7 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					data->setStatus(Management::MNG_FAILURE);
 				}
-				if (!m_file->addSectionTable(polarizations,LocalOscillator,skyFreq,skyBw,calib,fluxes)) {
+				if (!m_file->addSectionTable(sectionsID,feedsID,ifsID,polarizations,LocalOscillator,skyFreq,skyBw,calib,fluxes,atts)) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -840,7 +848,7 @@ void CEngineThread::collectReceiversData()
 			receiverBossError=true;
 			data->setReceiverCode(IRA::CString(""));
 		}
-		try { //get the local oscillator
+		/*try { //get the local oscillator
 			ACS::ROdoubleSeq_var loRef;
 			ACS::doubleSeq_var lo;
 			loRef=m_receiversBoss->LO();
@@ -866,8 +874,8 @@ void CEngineThread::collectReceiversData()
 			data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
 			data->setLocalOscillator();							
-		}
-		try { //get the band width for each if
+		}*/
+		/*try { //get the band width for each if
 			ACS::ROdoubleSeq_var bwRef;
 			ACS::doubleSeq_var bw;
 			bwRef=m_receiversBoss->bandWidth();
@@ -893,8 +901,8 @@ void CEngineThread::collectReceiversData()
 			data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
 			data->setReceiverBandWidth();							
-		}			
-		try { //get the band initial frequency for each IF of the receiver
+		}	*/
+		/*try { //get the band initial frequency for each IF of the receiver
 			ACS::ROdoubleSeq_var ifreqRef;
 			ACS::doubleSeq_var ifreq;
 			ifreqRef=m_receiversBoss->initialFrequency();
@@ -921,8 +929,8 @@ void CEngineThread::collectReceiversData()
 			data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
 			data->setReceiverInitialFrequency();							
-		}	
-		try { //get the local polarization of each ifs
+		}	*/
+		/*try { //get the local polarization of each ifs
 			ACS::ROlongSeq_var polRef;
 			ACS::longSeq_var pol;
 			polRef=m_receiversBoss->polarization();
@@ -948,7 +956,7 @@ void CEngineThread::collectReceiversData()
 			data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
 			data->setReceiverPolarization();							
-		}
+		}*/
 		try { //get the feeds geometry
 			long inputs;
 			ACS::doubleSeq_var xOff;
@@ -981,18 +989,24 @@ void CEngineThread::collectReceiversData()
 			data->setStatus(Management::MNG_WARNING);
 			data->saveFeedHeader(NULL,0);
 		}
-		try { // get the calibration marks values
-			ACS::doubleSeq_var calMarks;
+		try { // get the calibration marks values and inputs configuration
 			ACS::doubleSeq freqs,bws,atts;
-			ACS::longSeq feeds,ifs;
+			ACS::longSeq feeds,ifs,sectionsID;
 			ACS::doubleSeq_var skyFreq;
 			ACS::doubleSeq_var skyBw;
+			ACS::doubleSeq_var calMarks;
+			ACS::longSeq_var rcvPol;
+			ACS::doubleSeq_var LO;
+			ACS::doubleSeq_var IFFreq;
+			ACS::doubleSeq_var IFBw;
 			double scale;
-			data->getInputsConfiguration(feeds,ifs,freqs,bws,atts);
+			data->getInputsConfiguration(sectionsID,feeds,ifs,freqs,bws,atts);
 			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),scale);
-			data->setCalibrationMarks(calMarks.in());
+			m_receiversBoss->getIFOutput(feeds,ifs,IFFreq.out(),IFBw.out(),rcvPol.out(),LO.out());
+			data->setInputsTable(sectionsID,feeds,ifs,rcvPol.in(),skyFreq.in(),skyBw.in(),LO.in(),atts,calMarks.in());
+			/*data->setCalibrationMarks(calMarks.in());
 			data->setSkyFrequency(skyFreq.in());
-			data->setSkyBandwidth(skyBw.in());
+			data->setSkyBandwidth(skyBw.in());*/
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
@@ -1000,24 +1014,25 @@ void CEngineThread::collectReceiversData()
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
 			data->setStatus(Management::MNG_WARNING);
-			data->setCalibrationMarks();
+			data->setInputsTable();
+			/*data->setCalibrationMarks();
 			data->setSkyFrequency();
-			data->setSkyBandwidth();
+			data->setSkyBandwidth();*/
 			receiverBossError=true;
 		} 		
 		catch (ComponentErrors::ComponentErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
-			impl.setOperationName("getCalibrationMark()");
+			impl.setOperationName("getCalibrationMark(),getIFOutputMark()");
 			impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 			impl.log(LM_ERROR);
 			data->setStatus(Management::MNG_WARNING);
-			data->setCalibrationMarks();
+			data->setInputsTable();
+			//data->setCalibrationMarks();
 		}
 	}
 	else {
 		data->setReceiverCode(IRA::CString(""));
-		data->setLocalOscillator();
 		data->saveFeedHeader(NULL,0);
-		data->setCalibrationMarks();
+		data->setInputsTable();
 	}
 }

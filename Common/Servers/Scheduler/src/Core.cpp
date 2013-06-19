@@ -159,6 +159,10 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("getTpi","backend",3,&CCore::remoteCall);
 	m_parser->add("getZero","backend",3,&CCore::remoteCall);
 	m_parser->add("initialize","backend",3,&CCore::remoteCall);
+
+	m_parser->add("servoSetup","minorservo",4,&CCore::remoteCall);
+	m_parser->add("servoPark","minorservo",4,&CCore::remoteCall);
+
 	// procedures
 	loadProcedures(m_config->getDefaultProceduresFile()); // throws ManagementErrors::ProcedureFileLoadingErrorExImpl
 }
@@ -171,6 +175,7 @@ void CCore::cleanUp()
 	RESOURCE_CLEANUP;
 	unloadAntennaBoss(m_antennaBoss);
 	unloadReceiversBoss(m_receiversBoss);
+	unloadMinorServoBoss(m_minorServoBoss);
 	unloadCustomLogger(m_customLogger);
 	unloadWeatherStation(m_weatherStation);
 	unloadDefaultBackend();

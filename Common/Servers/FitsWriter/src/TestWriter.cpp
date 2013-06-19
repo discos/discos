@@ -5,7 +5,7 @@
 #include <IRA>
 #include <DateTime.h>
 
-#define SECTIONS 14
+#define SECTIONS 7
 #define FEEDS 7
 #define BINS 256
 #define POLS 4
@@ -22,6 +22,10 @@ int main(int argc, char *argv[])
 	ACS::doubleSeq skyFreq;
 	ACS::doubleSeq skyBw;
 	ACS::doubleSeq flux;
+	ACS::doubleSeq atts;
+	ACS::longSeq sectionsID;
+	ACS::longSeq feedsID;
+	ACS::longSeq ifsID;
 	CFitsWriter *file;
 	IRA::CString fileName;
 	TIMEVALUE now;
@@ -44,15 +48,23 @@ int main(int argc, char *argv[])
 	mH.beams=FEEDS;
 	mH.integration=0;
 	mH.sampleSize=sizeof(DATA_TYPE);
-	skyFreq.length(SECTIONS);
-	skyBw.length(SECTIONS);
-	flux.length(SECTIONS);
+	inputsNumber=SECTIONS*2;
+	los.length(inputsNumber);
+	calib.length(inputsNumber);
+	pols.length(inputsNumber);
+	skyFreq.length(inputsNumber);
+	skyBw.length(inputsNumber);
+	flux.length(inputsNumber);
+	atts.length(inputsNumber);
+	feedsID.length(inputsNumber);
+	sectionsID.length(inputsNumber);
+	ifsID.length(inputsNumber);
+	tsys=new double[inputsNumber];
 	for (int i=0;i<SECTIONS;i++) {
 		cH[i].id=i;  
 		cH[i].bins=BINS;
 		cH[i].polarization=Backends::BKND_FULL_STOKES;  
 		cH[i].inputs=2;
-		inputsNumber+=2;
 		cH[i].bandWidth=2000.0;				
 		cH[i].frequency=110.0;                
 		cH[i].attenuation[0]=9.0;
@@ -60,10 +72,16 @@ int main(int argc, char *argv[])
 		cH[i].IF[0]=0;
 		cH[i].IF[1]=1;
 		cH[i].sampleRate=0.000025;              
-		cH[i].feed=i/2;
-		skyFreq[i]=8180.0;
-		skyBw[i]=800;
-		flux[i]=1.66;
+		cH[i].feed=i;
+		los[i*2]=los[i*2+1]=8080;
+		feedsID[i*2]=feedsID[i*2+1]=cH[i].feed;
+		sectionsID[i*2]=sectionsID[i*2+1]=cH[i].id;
+		ifsID[i*2]=cH[i].IF[0]; ifsID[i*2+1]=cH[i].IF[1];
+		atts[i*2]=cH[i].attenuation[0]; atts[i*2+1]=cH[i].attenuation[1];
+		pols[i*2]=Receivers::RCV_LCP; pols[i*2+1]=Receivers::RCV_RCP;
+		skyFreq[i*2]=skyFreq[i*2+1]=8180.0;
+		skyBw[i*2]=skyBw[i*2+1]=800;
+		flux[i*2]=flux[i*2+1]=1.66;
 	}
 	for (int i=0;i<FEEDS;i++) {
 		fH[i].id=i;
@@ -71,18 +89,10 @@ int main(int argc, char *argv[])
 		fH[i].yOffset=0.14*i;
 		fH[i].relativePower=0.02*i*i;
 	}
-	los.length(2);
-	los[0]=8080.0;
-	los[1]=8080.0;
-	calib.length(inputsNumber);
-	tsys=new double[inputsNumber];
 	for (unsigned k=0;k<inputsNumber;k++) {
 		calib[k]=32.56+k;
 		tsys[k]=((DATA_TYPE)random()/(DATA_TYPE)RAND_MAX)*calib[k];
 	}
-	pols.length(2);
-	pols[0]=Receivers::RCV_LCP;
-	pols[1]=Receivers::RCV_RCP;
 
 	/*recvFreq.length(2);
 	recvFreq[0]=100.0+los[0];
@@ -110,7 +120,7 @@ int main(int argc, char *argv[])
 		printf("FITS Error: %s\n",(const char *)file->getLastError());
 		exit(-1);
 	}
-	if (!file->addSectionTable(pols,los,skyFreq,skyBw,calib,flux)) {
+	if (!file->addSectionTable(sectionsID,feedsID,ifsID,pols,los,skyFreq,skyBw,calib,flux,atts)) {
 		printf("FITS Error: %s\n",(const char *)file->getLastError());
 		exit(-1);
 	}

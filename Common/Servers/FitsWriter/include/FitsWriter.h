@@ -147,18 +147,23 @@ public:
 	
 	/**
 	 * It allows to add the sections and rfInput table to the fits file
+	 * @param sectionID identifier of the backend sections
+	 * @param feedsIF identifiers of the receivers feeds
+	 * @param ifsIF identifiers of the receivers IF
 	 * @param pols for each receiver IF gives its polarization
 	 * @param los for IF gives its local oscillator value in MHz
 	 * @param skyFreq for each backend section it gives the resulting observed sky frequency (MHz)
 	 * @param skyBandWidth for each backend section it gives the value of the band width (MHz)
 	 * @param marks for each RF input gives the value of the noise calibration mark. (°K) 
 	 * @param sourceFlux for each backend section it reports the estimated source flux computed with section parameters
+	 * @param atts attenuation, one for each input of the backend
 	 * @param name name of the sections table
 	 * @param rfName name of the RF inputs table
 	 * @return false if the operation is not successful
 	 */
-	bool addSectionTable(const ACS::longSeq& pols,const ACS::doubleSeq& los,const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,
-			const ACS::doubleSeq& sourceFlux,const IRA::CString& name="SECTION TABLE",const IRA::CString& rfName="RF INPUTS");
+	bool addSectionTable(const ACS::longSeq &sectionID, const ACS::longSeq& feedsID, const ACS::longSeq& ifsID,const ACS::longSeq& pols,const ACS::doubleSeq& los,
+			const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,
+			const ACS::doubleSeq& sourceFlux,const ACS::doubleSeq& atts,const IRA::CString& name="SECTION TABLE",const IRA::CString& rfName="RF INPUTS");
 	
 	/**
 	 * It allows to add data table to the fits file
