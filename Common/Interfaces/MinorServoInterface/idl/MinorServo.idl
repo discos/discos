@@ -50,6 +50,8 @@ module MinorServo {
      *     <li><em>setPosition(position, exe_time)</em>: set the position of WPServo at some time.</li>
      *     <li><em>setUserOffset(offset)</em>: set an user offset to the position.</li>
      *     <li><em>disable(exe_time)</em>: brake the servo.</li>
+     *     <li><em>clearEmergency()</em>: clear the emergency stop.</li>
+     *     <li><em>isInEmergencyStop()</em>: return true when the servo is in emergency stop.</li>
      *     <li><em>clearUserOffset(offset)</em>: clear the user offset of the position.</li>
      *     <li><em>getUserOffset(offset)</em>: get the user offset of the position.</li>
      *     <li><em>setSystemOffset(offset)</em>: set a system offset to the position.</li>
@@ -59,6 +61,10 @@ module MinorServo {
      *     <li><em>stow(exe_time)</em>: accomplish a stow at some time.</li>
      *     <li><em>calibrate(exe_time)</em>: accomplish a calibration at some time.</li>
      *     <li><em>cleanPositionsQueue(exe_time)</em>: clean the MSCU positions queue.</li>
+     *     <li><em>isReadyToSetup()</em>: return true when the minor servo needs a setup to be ready, false otherwise.</li>
+     *     <li><em>isDisabledFromOtherDC()</em>: return true when the minor servo is disabled from other drive cabinet.</li>
+     *     <li><em>getStatus()</em>: return the status value.</li>
+     *     <li><em>getTrackingDelta()</em>: return the delta (in mm) used to know when the commanded pos is reached..</li>
      * </ul> 
      */
     interface WPServo : ACS::CharacteristicComponent {
@@ -377,6 +383,19 @@ module MinorServo {
          * @throw MinorServoErrors::CommunicationErrorEx
          */
          void disable(in ACS::Time exe_time) raises (MinorServoErrors::CommunicationErrorEx);
+ 
+       
+       /**
+         * Clear the emergency stop.
+         * 
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */
+         void clearEmergency() raises (MinorServoErrors::CommunicationErrorEx);
+ 
+       
+       /** Is the servo in an emergency stop condition? **/
+         boolean isInEmergencyStop();
+
 
 
         /**
@@ -454,12 +473,29 @@ module MinorServo {
         boolean isParking();
 
 
+        /** Return true when the minor servo is disabled and needs a setup */
+        boolean isReadyToSetup();
+
+
+        /** Return true when the minor servo is disabled from other drive cabinet */
+        boolean isDisabledFromOtherDC();
+
+
         /** Set the flag used by the StatusUpdater to enable the servo status updating */
         // void setStatusUpdating(in boolean flag);
 
       
         /** Return true if the StatusUpdater thread is updating the status */
         boolean isStatusThreadEn();
+
+
+        /** Return the minor servo status */
+        long getStatus();
+
+
+        /** Return the tracking_delta CDB attribute */
+        double getTrackingDelta();
+
 
         /**
          * Return the data required as a sequence, each item is related to the corresponding axis

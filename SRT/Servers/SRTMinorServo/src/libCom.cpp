@@ -137,6 +137,14 @@ string make_request(
             request += message_closer;
             break;
         }
+ 
+        // clremergency (data channel, high speed)
+        case 10: {
+            // The syntax: "#clremergency:<cmd_number>=<app_number>,<exe_time>\r"
+            request = req_header + commands[cmd_idx] + ":" + cmd_number + "=" + app_number + "," + exe_time_str;
+            request += message_closer;
+            break;
+        }
 
         default:
             request = "";

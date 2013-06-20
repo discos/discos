@@ -24,7 +24,7 @@ struct ThreadParameters {
     ExpireTime *expire_time; 
     CSecureArea< map<int, vector<PositionItem> > > *cmd_pos_list;
     map<int, bool> *status_thread_en;
-    double tracking_delta;
+    map<int, double> tracking_delta;
     map<int, bool> *stow_state;
     map<int, vector<double> > *park_positions;
 };

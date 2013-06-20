@@ -20,7 +20,7 @@ servos = {
     'M3R': 3  # Mirror 3 Rotator
 }
 
-commands = ['stow', 'setup', 'disable', 'setpos', 'getpos', 'clean', 'getstatus']
+commands = ['stow', 'setup', 'disable', 'clremergency', 'setpos', 'getpos', 'clean', 'getstatus']
 headers = ('#', '!', '?', '@')
 closers = ('\r\n', '\n\r', '\r', '\n')
 cmd_num = 0

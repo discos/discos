@@ -12,7 +12,7 @@
 #define STATUS_WIDTH 6
 #define STREAM_PRECISION 16
 
-const double PARK_DELTA = 0.1;
+const double MAX_DELTA = 0.1;
 
 using namespace IRA;
 

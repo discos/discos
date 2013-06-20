@@ -132,7 +132,7 @@ void MSBossPublisher::runLoop()
             data.status != *m_params->status ||
             data.tracking != vstatus_bset.test(VS_TRACKING) || 
             data.parking != vstatus_bset.test(VS_PARKING) || 
-            data.configuring != vstatus_bset.test(VS_CONFIGURING) || 
+            data.starting != vstatus_bset.test(VS_CONFIGURING) || 
             data.parked != vstatus_bset.test(VS_PARKED) ? true : publish_data;
 
         if(publish_data) {
@@ -140,7 +140,7 @@ void MSBossPublisher::runLoop()
             data.tracking = vstatus_bset.test(VS_TRACKING); 
             data.parked = vstatus_bset.test(VS_PARKED); 
             data.parking = vstatus_bset.test(VS_PARKING); 
-            data.configuring = vstatus_bset.test(VS_CONFIGURING); 
+            data.starting = vstatus_bset.test(VS_CONFIGURING); 
             data.timeMark = (now.value()).value;
             try {
                 (m_params->nchannel)->publishData<MinorServo::MinorServoDataBlock>(data);

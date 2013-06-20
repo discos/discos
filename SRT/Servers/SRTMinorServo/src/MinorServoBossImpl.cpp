@@ -223,12 +223,12 @@ void MinorServoBossImpl::setup(const char *config) throw (CORBA::SystemException
     int mutex_res = pthread_mutex_trylock(&setup_mutex); 
     try {
         if(mutex_res != 0)
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "Error in setup(): mutex locked", true);
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing another setup", true);
 
         m_thread_params.is_setup_locked = true;
 
         if(m_vstatus_flags.is_parking)
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "Impossible to perform a setup due subsystem parking", true);
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a park", true);
 
         // Retrive the configuration parameter from CDB. The syntax is: "Focus, Receiver"
         if(!CIRATools::getDBValue(getContainerServices(), config, m_config))
@@ -276,11 +276,11 @@ void MinorServoBossImpl::setup(const char *config) throw (CORBA::SystemException
 
     try {
         if(m_setup_thread_ptr != NULL)
-             m_setup_thread_ptr->restart();
+            m_setup_thread_ptr->restart();
         else {
             m_setup_thread_ptr = getContainerServices()->getThreadManager()->create<SetupThread,
-                MSThreadParameters>("SetupThread", m_thread_params);
-             m_setup_thread_ptr->resume();
+               MSThreadParameters>("SetupThread", m_thread_params);
+            m_setup_thread_ptr->resume();
         }
     }
     catch(...) {
@@ -290,6 +290,9 @@ void MinorServoBossImpl::setup(const char *config) throw (CORBA::SystemException
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "The MinorServoBoss is attempting to execute a previous setup", true);
     }
 }
+
+
+bool MinorServoBossImpl::isStarting() { return m_thread_params.is_setup_locked; }
 
 
 void MinorServoBossImpl::park() throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx)
@@ -324,12 +327,13 @@ void MinorServoBossImpl::park() throw (CORBA::SystemException, ManagementErrors:
                     component_ref = m_component_refs[*iter];
                     if(!CORBA::is_nil(component_ref))
                         if(!component_ref->isParked())
-                            component_ref->stow(NOW);
+                            component_ref->stow(0);
                 }
                 usleep(INCR_SLEEP_TIME / 10); // Convert the time of macros in microseconds
             }
 
             unsigned int counter = 0;
+            unsigned MAX_PARK_TIME = 10000000; // TODO: remove
             while(counter < MAX_PARK_TIME) {
                 bool all_parked = true;
                 counter += INCR_SLEEP_TIME;
@@ -1270,6 +1274,7 @@ string get_component_name(string token)
 
 
 ACS::doubleSeq get_positions(string comp_name, string token, const MSThreadParameters *const params)
+    throw (ManagementErrors::ConfigurationErrorExImpl)
 {
     ACS::doubleSeq positions;
     try {

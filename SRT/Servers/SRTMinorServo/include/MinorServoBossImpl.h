@@ -104,6 +104,10 @@ public:
     
     /** Return true if the elevation tracking is enabled */
     bool isTrackingEn();
+
+
+    /** Return true when the system is performing a setup */
+    bool isStarting();
 	
 	/**
 	 * This method will be used to configure the MinorServoBoss before starting an observation
@@ -351,7 +355,8 @@ private:
  * @param token string that contains the polynomial coefficients
  * @return doubleSeq of positions to set
  */
-ACS::doubleSeq get_positions(string comp_name, string token, const MSThreadParameters *const params);
+ACS::doubleSeq get_positions(string comp_name, string token, const MSThreadParameters *const params)
+    throw (ManagementErrors::ConfigurationErrorExImpl);
 
 
 /** 

@@ -292,6 +292,13 @@ public:
      virtual void disable(const ACS::Time exe_time) throw (MinorServoErrors::CommunicationErrorEx);
 
 
+    /**
+     * Send a clremergency, in order to remove the emergency stop condition. 
+     * 
+     * @throw MinorServoErrors::CommunicationErrorEx
+     */ 
+     virtual void clearEmergency() throw (MinorServoErrors::CommunicationErrorEx);
+
 
     /**
      * Set an user offset to the position.
@@ -409,7 +416,16 @@ public:
       */
      virtual ACS::doubleSeq * getData(const char *data_name) throw (MinorServoErrors::CommunicationErrorEx);
 
+     virtual CORBA::Long getStatus();
      
+     virtual CORBA::Double getTrackingDelta();
+
+     virtual bool isReadyToSetup();
+
+     virtual bool isDisabledFromOtherDC();
+
+     virtual bool isInEmergencyStop();
+
      /** Return the minor servo number of axes */
      virtual short int numberOfAxes() {return m_cdb_ptr->NUMBER_OF_AXIS;}; 
 

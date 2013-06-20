@@ -293,7 +293,7 @@ void WPServoImpl::initialize() throw (
         m_thread_params.expire_time = &m_expire;
         m_thread_params.cmd_pos_list = m_cmdPos_list;
         m_thread_params.status_thread_en = &m_status_thread_en;
-        m_thread_params.tracking_delta = m_cdb_ptr->TRACKING_DELTA;
+        (m_thread_params.tracking_delta)[m_cdb_ptr->SERVO_ADDRESS] = m_cdb_ptr->TRACKING_DELTA;
         m_thread_params.stow_state = &m_stow_state;
 
         setParkPosition(m_cdb_ptr->PARK_POSITION);
@@ -566,6 +566,20 @@ void WPServoImpl::disable(const ACS::Time exe_time) throw (MinorServoErrors::Com
     }
     catch(...) {
         THROW_EX(MinorServoErrors, CommunicationErrorEx, "Cannot brake the servo", true);
+    }
+
+}
+
+
+void WPServoImpl::clearEmergency() throw (MinorServoErrors::CommunicationErrorEx) 
+{
+    AUTO_TRACE("WPServoImpl::clearEmergency()");
+    try {
+        // The index code of clremergency command in Talk.cpp is 9
+        m_wpServoTalker_ptr->action(10, 0);
+    }
+    catch(...) {
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, "Cannot clear the emergency stop", true);
     }
 
 }
@@ -934,6 +948,37 @@ void WPServoImpl::setParkPosition(IRA::CString position) {
     if(m_park_position.size() != m_cdb_ptr->NUMBER_OF_AXIS)
         THROW_EX(ComponentErrors, UnexpectedEx, "WPServoImpl::setParkPosition(): wrong park position in the CDB", false);
 }
+
+
+CORBA::Long WPServoImpl::getStatus() {
+    return m_expire.status[m_cdb_ptr->SERVO_ADDRESS];
+}
+
+
+CORBA::Double WPServoImpl::getTrackingDelta() {
+    return m_cdb_ptr->TRACKING_DELTA;
+}
+
+
+bool WPServoImpl::isReadyToSetup() {
+    bitset<32> app_status(m_expire.appStatus[m_cdb_ptr->SERVO_ADDRESS]);
+    return 
+        ( m_expire.cabState[m_cdb_ptr->SERVO_ADDRESS] == CAB_DISABLED_FROM_AIF_IN ||
+          m_expire.cabState[m_cdb_ptr->SERVO_ADDRESS] == CAB_BLOCK_REMOVED ||
+          (app_status.test(ASTATUS_READY) && !app_status.test(ASTATUS_AUTOMATIC)) 
+        ) ? true : false;
+}
+
+
+bool WPServoImpl::isDisabledFromOtherDC() {
+    return (m_expire.cabState[m_cdb_ptr->SERVO_ADDRESS] == CAB_DISABLED_FROM_OTHER_CAB) ? true : false;
+}
+
+
+bool WPServoImpl::isInEmergencyStop() {
+    return (m_expire.cabState[m_cdb_ptr->SERVO_ADDRESS] == CAB_EMERGENCY_REMOVED) ? true : false;
+}
+
 
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_actPos, actPos);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::RWdoubleSeq, m_cmdPos, cmdPos);

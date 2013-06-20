@@ -137,8 +137,8 @@ void WPStatusUpdater::runLoop()
                         || status_par.cabState == CAB_BLOCK_REMOVED)
                     { 
                         // Compute the difference of actual pos and park pos
-                        for(size_t i=0; i<((*m_params->park_positions)[address]).size(); i++) { // TODO: subtract the offset!
-                            if(!(fabs(((*m_params->park_positions)[address])[i] - act_pos[i]) < PARK_DELTA)) {
+                        for(size_t i=0; i<((*m_params->park_positions)[address]).size(); i++) { 
+                            if(!(fabs(((*m_params->park_positions)[address])[i] - act_pos[i]) < (m_params->tracking_delta)[address])) {
                                 status_bset.reset(STATUS_PARKED);
                                 break;
                             }
@@ -157,7 +157,6 @@ void WPStatusUpdater::runLoop()
                 // Set the FAILURE bit of the status pattern
                 if(
                         !app_status_bset.test(ASTATUS_FAULT) || 
-                        !app_status_bset.test(ASTATUS_TRIP)  || 
                         !app_status_bset.test(ASTATUS_TRIP)  ||
                         status_par.cabState == CAB_SUPPLY_FAIL   ||
                         status_par.cabState == CAB_BLOCK_ACTIVE
@@ -198,7 +197,7 @@ void WPStatusUpdater::runLoop()
 
                                 is_tracking = true;
                                 for(unsigned int i = 0; i < act_pos.length(); i++)
-                                    if(((m_params->expire_time)->posDiff[address])[i] > m_params->tracking_delta) {
+                                    if(((m_params->expire_time)->posDiff[address])[i] > (m_params->tracking_delta)[address]) {
                                         is_tracking = false;
                                         break;
                                     }

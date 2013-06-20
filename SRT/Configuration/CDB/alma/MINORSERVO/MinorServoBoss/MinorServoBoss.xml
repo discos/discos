@@ -16,6 +16,7 @@
          
          x = 2.222 + 1.111*E + 0*E
 -->
+<!-- The action order must be: park; active servos; none -->
 <MinorServoBoss
     xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -26,8 +27,8 @@
     
     CCB="
         @ PFP: park;
+        @ GFR: park;
         @ SRP: LX = (0); LY = (0); LZ = (0); TX = (0); TY = (0); TZ = (0);
-        @ GFR: LZ = (0);
         @ M3R: LZ = (286.67);
     "
     KKG="

@@ -24,9 +24,9 @@ module MinorServo {
     struct MinorServoDataBlock {
         ACS::Time timeMark;
         boolean tracking;
+        boolean starting;
         boolean parking;
         boolean parked;
-        boolean configuring;
         Management::TSystemStatus status;
     };
 
@@ -67,7 +67,14 @@ module MinorServo {
          * @return true if the tracking elevation is enabled
          */
 		boolean isTrackingEn();
-			
+
+		
+        /**
+         * Is the system starting?
+         * @return true if the system is starting
+         */
+		boolean isStarting();
+		
 
 		/** Return the actual configuration */
 		string getActualSetup();

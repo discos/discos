@@ -22,7 +22,8 @@
 
 using namespace IRA;
 
-const string commands[] = {"getpos", "getspar", "setpos", "setup", "stow", "calibrate", "getappstatus", "getstatus", "clean", "disable"};
+const string commands[] = {"getpos", "getspar", "setpos", "setup", "stow", "calibrate", "getappstatus", "getstatus", "clean", "disable",
+                           "clremergency"};
 
 // Header of request
 const string req_header("#");
