@@ -110,8 +110,13 @@
    -   Mon Jun 17 08:06:17 UTC 2013 modified by jDAL
    -   Mon Jun 17 08:08:34 UTC 2013 modified by jDAL
    -   Mon Jun 17 09:32:11 UTC 2013 modified by jDAL
+   -   Wed Jun 19 09:12:22 UTC 2013 modified by jDAL
+   -   Wed Jun 19 09:12:33 UTC 2013 modified by jDAL
+   -   Wed Jun 19 09:13:27 UTC 2013 modified by jDAL
+   -   Wed Jun 19 10:12:36 UTC 2013 modified by jDAL
+   -   Wed Jun 19 11:17:08 UTC 2013 modified by jDAL
 -->
-<SRTActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:SRTActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" profile="2">
+<SRTActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:SRTActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" profile="0">
 	<status />
 	<enabled />
 </SRTActiveSurfaceBoss>
