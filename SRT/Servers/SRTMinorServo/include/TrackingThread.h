@@ -13,22 +13,24 @@
 #include <IRA>
 #include <MinorServoS.h>
 #include "MSParameters.h"
-#include "SetupThread.h"
+#include <MSBossConfiguration.h>
 #include <string>
 #include <map>
 #include "utils.h"
+#include <AntennaBossC.h>
+
 
 // Sleep Time in 100ns
-#define TT_SLEEP_TIME 50000000
+#define TT_SLEEP_TIME 10000000 // 1 second
 
-// This class updates the status property of minor servos.
+// This class updates the minor servos positions depending of the antenna elevation
 class TrackingThread : public ACS::Thread
 {
 public:
 
 	TrackingThread(
         const ACE_CString& name, 
-        MSThreadParameters& params,
+        MSBossConfiguration * configuration,
         const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
         const ACS::TimeInterval& sleepTime=TT_SLEEP_TIME,
         const bool del=true
@@ -46,7 +48,8 @@ public:
     virtual void runLoop();
 
 private:
-    MSThreadParameters *m_params;
+    MSBossConfiguration *m_configuration;
+    Antenna::AntennaBoss_var m_antennaBoss;
      
 };
 

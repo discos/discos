@@ -15,6 +15,7 @@
 #include "MSParameters.h"
 #include "MinorServoBossImpl.h"
 #include "utils.h"
+#include <MSBossConfiguration.h> // TODO: remove
 
 #define MAX_DTIME 1000000
 

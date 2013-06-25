@@ -18,6 +18,7 @@
 #include <map>
 #include <pthread.h>
 #include "utils.h"
+#include "MSBossConfiguration.h"
 
 using namespace maci;
 
@@ -69,14 +70,14 @@ struct MSThreadParameters {
 };
 
 
-// This class updates the status property of minor servos.
+// This class perform a system setup 
 class SetupThread : public ACS::Thread
 {
 public:
 
 	SetupThread(
         const ACE_CString& name, 
-        MSThreadParameters& params,
+        MSBossConfiguration * configuration,
         const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
         const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime,
         const bool del=false
@@ -96,16 +97,10 @@ public:
 private:
     MSThreadParameters *m_params;
 
-    /** Names of components to park **/
-    vector<string> m_toPark;
-
     /** Names of positioning components **/
     vector<string> m_positioning;
 
-    /** Map of components to set. For instance: {"SRP": (0,0,0,0,0,0), "GFR": (1325.5)} **/
-    map<string, ACS::doubleSeq> m_toSet;
-
-    bool m_validActions;
+    MSBossConfiguration * m_configuration;
      
 };
 

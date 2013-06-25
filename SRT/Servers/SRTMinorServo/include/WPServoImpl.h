@@ -427,7 +427,7 @@ public:
      virtual bool isInEmergencyStop();
 
      /** Return the minor servo number of axes */
-     virtual short int numberOfAxes() {return m_cdb_ptr->NUMBER_OF_AXIS;}; 
+     virtual unsigned short int numberOfAxes() {return m_cdb_ptr->NUMBER_OF_AXIS;}; 
 
 
 private:

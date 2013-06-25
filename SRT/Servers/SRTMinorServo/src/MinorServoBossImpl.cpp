@@ -21,8 +21,9 @@
 #include <pthread.h>
 #include <math.h>
 #include "libCom.h"
+#include "MSBossConfiguration.h"
 
-static pthread_mutex_t setup_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t tracking_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 MSThreadParameters MinorServoBossImpl::m_thread_params;
 
@@ -31,10 +32,10 @@ MinorServoBossImpl::MinorServoBossImpl(
         const ACE_CString &CompName, maci::ContainerServices *containerServices
         ) : 
     CharacteristicComponentImpl(CompName, containerServices),
-	m_services(containerServices),
+    m_services(containerServices),
     m_status(this),
     // m_verbose_status(this),
-	m_nchannel(NULL)
+    m_nchannel(NULL)
 {   
     AUTO_TRACE("MinorServoBossImpl::MinorServoBossImpl()");
     m_commanded_conf = "none";
@@ -42,6 +43,7 @@ MinorServoBossImpl::MinorServoBossImpl(
     m_tracking_thread_ptr = NULL;
     m_is_tracking_en = false;
     m_setup_thread_ptr = NULL;
+    m_park_thread_ptr = NULL;
     m_scan_thread_ptr = NULL;
     m_scanning = false;
     m_publisher_thread_ptr = NULL;
@@ -52,10 +54,15 @@ MinorServoBossImpl::MinorServoBossImpl(
     m_status_value = Management::MNG_OK;
     (m_thread_params.scan_data).positioning_time = 0;
     m_servo_scanned = "none";
+    m_configuration = new MSBossConfiguration(m_services);
 }
 
 
-MinorServoBossImpl::~MinorServoBossImpl() { AUTO_TRACE("MinorServoBossImpl::~MinorServoBossImpl()"); }
+MinorServoBossImpl::~MinorServoBossImpl() { 
+    AUTO_TRACE("MinorServoBossImpl::~MinorServoBossImpl()"); 
+    if(m_configuration != NULL)
+        delete m_configuration;
+}
 
 
 void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponentExImpl, ManagementErrors::ConfigurationErrorExImpl)
@@ -65,12 +72,12 @@ void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponen
     if(!CIRATools::getDBValue(getContainerServices(), "slaves", m_cdb_slaves))
         THROW_EX(ComponentErrors, CDBAccessEx, "I cannot read 'slaves' from CDB", false);
 
-	try {
-		m_nchannel = new nc::SimpleSupplier(MinorServo::MINORSERVO_DATA_CHANNEL, this);
-	}
-	catch (...) {
-		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"MinorServoBoss::initialize()");
-	}
+    try {
+        m_nchannel = new nc::SimpleSupplier(MinorServo::MINORSERVO_DATA_CHANNEL, this);
+    }
+    catch (...) {
+        _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"MinorServoBoss::initialize()");
+    }
 
     // The m_vstatus_flags is an alias of m_thread_params.is_initialized
     m_vstatus_flags.is_initialized = &(m_thread_params.is_initialized = false);
@@ -109,9 +116,9 @@ void MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImp
         m_status = new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus>(
                 getContainerServices()->getName() + ":status", 
                 getComponent(), 
-                new SubsystemStatusDevIO(&m_status_value), 
+                new SubsystemStatusDevIO(&(m_configuration->m_status)), 
                 true
-        );	
+        );  
 
         // m_verbose_status = new ROpattern(
         //         getContainerServices()->getName() + ":verbose_status", 
@@ -149,18 +156,19 @@ void MinorServoBossImpl::cleanUp()
     AUTO_TRACE("MinorServoBossImpl::cleanUp()");
     stopPropertiesMonitoring();
 
-	if (m_tracking_thread_ptr != NULL) {
-        m_tracking_thread_ptr->suspend();
-        m_tracking_thread_ptr->terminate();
-    }
+    turnTrackingOff();
 
-	if (m_publisher_thread_ptr != NULL) {
+    if (m_publisher_thread_ptr != NULL) {
         m_publisher_thread_ptr->suspend();
         m_publisher_thread_ptr->terminate();
     }
 
-	if (m_setup_thread_ptr != NULL) {
+    if (m_setup_thread_ptr != NULL) {
         m_setup_thread_ptr->suspend();
+    }
+
+    if (m_park_thread_ptr != NULL) {
+        m_park_thread_ptr->suspend();
     }
 
     map<string, MinorServo::WPServo_var>::reverse_iterator rbegin_iter = m_component_refs.rbegin(); 
@@ -171,10 +179,10 @@ void MinorServoBossImpl::cleanUp()
     m_component_refs.clear();
     m_tracking_list.clear();
 
-	if(m_nchannel !=NULL ) {
-		m_nchannel->disconnect();
-		m_nchannel = NULL;
-	}
+    if(m_nchannel !=NULL ) {
+        m_nchannel->disconnect();
+        m_nchannel = NULL;
+    }
 
     CharacteristicComponentImpl::cleanUp(); 
 }
@@ -185,19 +193,21 @@ void MinorServoBossImpl::aboutToAbort()
     AUTO_TRACE("MinorServoBossImpl::aboutToAbort()");
     stopPropertiesMonitoring();
 
-	if (m_tracking_thread_ptr != NULL) {
-        m_tracking_thread_ptr->suspend();
-        m_tracking_thread_ptr->terminate();
-    }
+    turnTrackingOff();
 
-	if (m_publisher_thread_ptr != NULL) {
+    if (m_publisher_thread_ptr != NULL) {
         m_publisher_thread_ptr->suspend();
         m_publisher_thread_ptr->terminate();
     }
 
-	if (m_setup_thread_ptr != NULL) {
+    if (m_setup_thread_ptr != NULL) {
         m_setup_thread_ptr->suspend();
         m_setup_thread_ptr->terminate();
+    }
+
+    if (m_park_thread_ptr != NULL) {
+        m_park_thread_ptr->suspend();
+        m_park_thread_ptr->terminate();
     }
 
     map<string, MinorServo::WPServo_var>::reverse_iterator rbegin_iter = m_component_refs.rbegin(); 
@@ -208,10 +218,10 @@ void MinorServoBossImpl::aboutToAbort()
     m_component_refs.clear();
     m_tracking_list.clear();
 
-	if(m_nchannel != NULL ) {
-		m_nchannel->disconnect();
-		m_nchannel = NULL;
-	}
+    if(m_nchannel != NULL ) {
+        m_nchannel->disconnect();
+        m_nchannel = NULL;
+    }
 
     CharacteristicComponentImpl::aboutToAbort(); 
 }
@@ -219,165 +229,101 @@ void MinorServoBossImpl::aboutToAbort()
 
 void MinorServoBossImpl::setup(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx)
 {
-	AUTO_TRACE("MinorServoBossImpl::setup()");
-    int mutex_res = pthread_mutex_trylock(&setup_mutex); 
-    try {
-        if(mutex_res != 0)
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing another setup", true);
+    AUTO_TRACE("MinorServoBossImpl::setup()");
 
-        m_thread_params.is_setup_locked = true;
+    if(m_configuration->isStarting())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing another setup", true);
 
-        if(m_vstatus_flags.is_parking)
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a park", true);
+    if(m_configuration->isParking())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a park", true);
 
-        // Retrive the configuration parameter from CDB. The syntax is: "Focus, Receiver"
-        if(!CIRATools::getDBValue(getContainerServices(), config, m_config))
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "Unavailable Configuration", true);
-
-        m_commanded_conf = static_cast<string>(config);
-        m_actual_conf = "unknown";
-
-        m_thread_params.is_initialized = false;
-        // Split the string in actions. For instance, an action should be: 'SRP: park'
-        string config_str(m_config);
-
-        if(m_is_tracking_en) {
-            if(m_tracking_thread_ptr != NULL) {
-                m_tracking_thread_ptr->suspend();
-                m_tracking_thread_ptr->terminate();
-                m_tracking_thread_ptr = NULL;
-            }
-            try {
-                m_tracking_thread_ptr = getContainerServices()->getThreadManager()->create<TrackingThread,
-                    MSThreadParameters>("TrackingThread", m_thread_params);
-            }
-            catch(...) {
-                m_thread_params.is_setup_locked = false;
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, "Error: TrackingThread already exists", true);
-            }
-        }
-
-        m_thread_params.tracking_thread_ptr = m_tracking_thread_ptr;
-        m_thread_params.scan_thread_ptr = m_scan_thread_ptr;
-        m_thread_params.actions = split(config_str, actions_separator);
-        m_thread_params.tracking_list = &m_tracking_list;
-        m_thread_params.component_refs = &m_component_refs;
-        m_thread_params.services = m_services;
-        m_thread_params.commanded_conf = m_commanded_conf;
-        m_thread_params.actual_conf = &m_actual_conf;
-        m_thread_params.setup_mutex = &setup_mutex;
-        m_thread_params.is_scanning_ptr = &m_scanning;
-    }
-    catch(...) {
-        if(mutex_res == 0)
-            pthread_mutex_unlock(&setup_mutex); 
-        throw;
-    }
+    m_configuration->init(string(config));  //throw (ComponentErrors::CDBAccessExImpl);
+    // m_thread_params.tracking_thread_ptr = m_tracking_thread_ptr;
+    // m_thread_params.scan_thread_ptr = m_scan_thread_ptr;
+    // m_thread_params.actions = split(config_str, actions_separator);
+    // m_thread_params.tracking_list = &m_tracking_list;
+    // m_thread_params.component_refs = &m_component_refs;
+    // m_thread_params.services = m_services;
+    // m_thread_params.commanded_conf = m_commanded_conf;
+    // m_thread_params.actual_conf = &m_actual_conf;
+    // m_thread_params.tracking_mutex = &tracking_mutex;
+    // m_thread_params.is_scanning_ptr = &m_scanning;
 
     try {
         if(m_setup_thread_ptr != NULL)
             m_setup_thread_ptr->restart();
         else {
             m_setup_thread_ptr = getContainerServices()->getThreadManager()->create<SetupThread,
-               MSThreadParameters>("SetupThread", m_thread_params);
+               MSBossConfiguration *>("SetupThread", m_configuration);
             m_setup_thread_ptr->resume();
         }
     }
     catch(...) {
-        m_thread_params.is_setup_locked = false;
-        if(mutex_res == 0)
-            pthread_mutex_unlock(&setup_mutex); 
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "The MinorServoBoss is attempting to execute a previous setup", true);
     }
 }
 
 
-bool MinorServoBossImpl::isStarting() { return m_thread_params.is_setup_locked; }
+bool MinorServoBossImpl::isStarting() { return m_configuration->isStarting(); }
+
+
+bool MinorServoBossImpl::isParking() { return m_configuration->isParking(); }
+
+
+bool MinorServoBossImpl::isReady() { return m_configuration->isConfigured(); }
 
 
 void MinorServoBossImpl::park() throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx)
 {
-	AUTO_TRACE("MinorServoBossImpl::park()");
-    int mutex_res = pthread_mutex_trylock(&setup_mutex); 
+    AUTO_TRACE("MinorServoBossImpl::park()");
+
+    if(m_configuration->isStarting())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a setup.", true);
+
+    if(m_configuration->isParking())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing another park.", true);
+
+    m_configuration->m_isParking = true;
+    m_configuration->m_isConfigured = false;
+
+    turnTrackingOff();
+
     try {
-        if(mutex_res != 0)
-            THROW_EX(ManagementErrors, ParkingErrorEx, "Error in park(): mutex locked", true);
-
-        m_thread_params.is_parking_locked = true;
-
-        try {
-            m_vstatus_flags.is_parking = true;
-            m_thread_params.is_initialized = false;
-            m_actual_conf = "unknown";
-            m_commanded_conf = "park position";
-
-            if(m_thread_params.is_setup_locked)
-                THROW_EX(ManagementErrors, ParkingErrorEx, "The MinorServoBoss is attempting to execute a setup", true);
-
-            if(m_tracking_thread_ptr != NULL) {
-                m_tracking_thread_ptr->suspend();
-                m_tracking_thread_ptr->terminate();
-                m_tracking_thread_ptr = NULL;
-            }
-
-            vector<string> slaves = get_slaves();
-            for(vector<string>::iterator iter = slaves.begin(); iter != slaves.end(); iter++) {
-                if(m_component_refs.count(*iter)) {
-                    MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-                    component_ref = m_component_refs[*iter];
-                    if(!CORBA::is_nil(component_ref))
-                        if(!component_ref->isParked())
-                            component_ref->stow(0);
-                }
-                usleep(INCR_SLEEP_TIME / 10); // Convert the time of macros in microseconds
-            }
-
-            unsigned int counter = 0;
-            unsigned MAX_PARK_TIME = 10000000; // TODO: remove
-            while(counter < MAX_PARK_TIME) {
-                bool all_parked = true;
-                counter += INCR_SLEEP_TIME;
-                usleep(INCR_SLEEP_TIME / 10); // Convert the time of macros in microseconds
-
-                vector<string> slaves = get_slaves();
-                for(vector<string>::iterator iter = slaves.begin(); iter != slaves.end(); iter++)
-                    if(m_component_refs.count(*iter)) {
-                        MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-                        component_ref = m_component_refs[*iter];
-                        // If the MinorServo should be parked
-                        if(!CORBA::is_nil(component_ref) && !component_ref->isParked())
-                            all_parked = false;
-                    }
-
-                if(all_parked)
-                    break;
-            }
-
-            m_actual_conf = "park position";
-            m_vstatus_flags.is_parking = false;
-            m_thread_params.is_parking_locked = false;
-            if(mutex_res == 0)
-                pthread_mutex_unlock(&setup_mutex); 
-        }
-        catch(...) {
-            m_actual_conf = "unknown";
-            m_vstatus_flags.is_parking = false;
-            m_thread_params.is_parking_locked = false;
-            THROW_EX(ManagementErrors, ParkingErrorEx, "Error parking the minor servos", true);
+        if(m_park_thread_ptr != NULL)
+            m_park_thread_ptr->restart();
+        else {
+            m_park_thread_ptr = getContainerServices()->getThreadManager()->create<ParkThread,
+               MSBossConfiguration *>("ParkThread", m_configuration);
+            m_park_thread_ptr->resume();
         }
     }
     catch(...) {
-        if(mutex_res == 0)
-            pthread_mutex_unlock(&setup_mutex); 
-        throw;
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The MinorServoBoss is attempting to execute a previous park", true);
     }
+
+
 }
 
 
 CORBA::Boolean MinorServoBossImpl::command(const char *cmd, CORBA::String_out answer) throw (CORBA::SystemException)
 {
-	AUTO_TRACE("MinorServoBossImpl::command()");
-	return true;
+    AUTO_TRACE("MinorServoBossImpl::command()");
+
+	IRA::CString out;
+	bool res;
+	try {
+		m_parser->run(cmd, out);
+		res = true;
+	}
+	catch(ParserErrors::ParserErrorsExImpl& ex) {
+		res = false;
+	}
+	catch(ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_ERROR); 
+		res = false;
+	}
+	answer = CORBA::string_dup((const char *)out);
+	return res;
 }
 
 
@@ -402,14 +348,14 @@ vector<string> MinorServoBossImpl::get_slaves()
 
 bool MinorServoBossImpl::isParked() throw (ManagementErrors::ConfigurationErrorEx) {
 
-    if(m_vstatus_flags.is_parking || m_thread_params.is_setup_locked)
+    if(isStarting() || isParking())
         return false;
 
     map<string, MinorServo::WPServo_var>::iterator begin_iter = m_component_refs.begin(); 
     map<string, MinorServo::WPServo_var>::iterator end_iter = m_component_refs.end(); 
     for(map<string, MinorServo::WPServo_var>::iterator viter = begin_iter; viter != end_iter; viter++)
         if(!CORBA::is_nil(viter->second))
-            if(!(viter->second)->isParked())
+            if((viter->second)->isReady())
                 return false;
 
     return true;
@@ -436,7 +382,7 @@ void MinorServoBossImpl::stopScan() throw (ManagementErrors::SubscanErrorEx)
     if(m_is_tracking_en)
         turnTrackingOn();
     else {
-        int mutex_res = pthread_mutex_trylock(&setup_mutex); 
+        int mutex_res = pthread_mutex_trylock(&tracking_mutex); // TODO: no!
         try {
             if(mutex_res != 0) {
                 ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::stopScan: some problems going the minor servo back to its position"));
@@ -465,12 +411,12 @@ void MinorServoBossImpl::stopScan() throw (ManagementErrors::SubscanErrorEx)
                 }
             }
             if(mutex_res == 0)
-                pthread_mutex_unlock(&setup_mutex); 
+                pthread_mutex_unlock(&tracking_mutex); 
             m_scan_active = false;
         }
         catch(...) {
             if(mutex_res == 0)
-                pthread_mutex_unlock(&setup_mutex); 
+                pthread_mutex_unlock(&tracking_mutex); 
             m_scan_active = false;
             ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::stopScan: test 5: catturata una eccezione"));
             throw;
@@ -487,7 +433,7 @@ bool MinorServoBossImpl::checkScan(
         const char *servo
     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
 {
-    int mutex_res = pthread_mutex_trylock(&setup_mutex); 
+    int mutex_res = pthread_mutex_trylock(&tracking_mutex);  // TODO: no!
     try {
         if(mutex_res != 0)
             THROW_EX(ManagementErrors, ConfigurationErrorEx, "checkScan: lock in setup", true);
@@ -519,7 +465,7 @@ bool MinorServoBossImpl::checkScan(
             if(!CORBA::is_nil(component_ref))
                 if(component_ref->isParked()) {
                     if(mutex_res == 0)
-                        pthread_mutex_unlock(&setup_mutex); 
+                        pthread_mutex_unlock(&tracking_mutex); 
                     return false;
                 }
                 else {
@@ -532,7 +478,7 @@ bool MinorServoBossImpl::checkScan(
                     if(axis > number_of_axis - 1) {
                         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - axis %d does not exist", axis));
                         if(mutex_res == 0)
-                            pthread_mutex_unlock(&setup_mutex); 
+                            pthread_mutex_unlock(&tracking_mutex); 
                         return false;
                     }
 
@@ -544,7 +490,7 @@ bool MinorServoBossImpl::checkScan(
                     if((*acc).length() - 1 < idx || (*mspeed).length() - 1 < idx) {
                         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - error, index out of range"));
                         if(mutex_res == 0)
-                            pthread_mutex_unlock(&setup_mutex); 
+                            pthread_mutex_unlock(&tracking_mutex); 
                         return false;
                     }
                     double acceleration = (*acc)[idx] / 208.67; // TODO: remove this line and decomment the following
@@ -571,7 +517,7 @@ bool MinorServoBossImpl::checkScan(
                                 if(startswith(token, park_token)) {
                                     ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: the minor servo is parked"));
                                     if(mutex_res == 0)
-                                        pthread_mutex_unlock(&setup_mutex); 
+                                        pthread_mutex_unlock(&tracking_mutex); 
                                     return false;
                                 }
                                 positions_seq = get_positions(comp_name, items.back(), &m_thread_params);
@@ -582,7 +528,7 @@ bool MinorServoBossImpl::checkScan(
                         if(positions_seq.length() <= axis) {
                             ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: wrong position indexing"));
                             if(mutex_res == 0)
-                                pthread_mutex_unlock(&setup_mutex); 
+                                pthread_mutex_unlock(&tracking_mutex); 
                             return false;
                         }
 
@@ -596,7 +542,7 @@ bool MinorServoBossImpl::checkScan(
                         if(act_pos.length() <= axis) {
                             ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: wrong actual position indexing"));
                             if(mutex_res == 0)
-                                pthread_mutex_unlock(&setup_mutex); 
+                                pthread_mutex_unlock(&tracking_mutex); 
                             return false;
                         }
 
@@ -670,18 +616,18 @@ bool MinorServoBossImpl::checkScan(
                         if(CIRATools::timeSubtract(stime, gtime) <= 0) {
                             THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: starting time too much close to actual time", true);
                             if(mutex_res == 0)
-                                pthread_mutex_unlock(&setup_mutex); 
+                                pthread_mutex_unlock(&tracking_mutex); 
                             return false;
                         }
 
                         if(mutex_res == 0)
-                            pthread_mutex_unlock(&setup_mutex); 
+                            pthread_mutex_unlock(&tracking_mutex); 
                         return get_min_time(range, acceleration, max_speed) * (1 + GUARD_COEFF) <= total_time;
                     }
                     else {
                         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - Acceleration or maximum speed wrong")); 
                         if(mutex_res == 0)
-                            pthread_mutex_unlock(&setup_mutex); 
+                            pthread_mutex_unlock(&tracking_mutex); 
                         return false;
                     }
                 }
@@ -689,19 +635,19 @@ bool MinorServoBossImpl::checkScan(
         else {
             ACS_SHORT_LOG((LM_WARNING, ("MinorServoBoss::checkScan - some problems getting the component " + comp_name).c_str()));
             if(mutex_res == 0)
-                pthread_mutex_unlock(&setup_mutex); 
+                pthread_mutex_unlock(&tracking_mutex); 
             return false;
         }
     }
     catch(...) {
         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - unexpected exception"));
         if(mutex_res == 0)
-            pthread_mutex_unlock(&setup_mutex); 
+            pthread_mutex_unlock(&tracking_mutex); 
         throw;
     }
 
     if(mutex_res == 0)
-        pthread_mutex_unlock(&setup_mutex); 
+        pthread_mutex_unlock(&tracking_mutex); 
     ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - last line!"));
     return false;
 }
@@ -716,7 +662,7 @@ void MinorServoBossImpl::startScan(
     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
 {
 
-    int mutex_res = pthread_mutex_trylock(&setup_mutex); 
+    int mutex_res = pthread_mutex_trylock(&tracking_mutex); 
     m_scanning = true;
     m_scan_active = true;
     try {
@@ -777,7 +723,7 @@ void MinorServoBossImpl::startScan(
                 double zero = dao_p->get_double("zero");
                 if(axis > number_of_axis - 1) {
                     if(mutex_res == 0)
-                        pthread_mutex_unlock(&setup_mutex); 
+                        pthread_mutex_unlock(&tracking_mutex); 
                     THROW_EX(ManagementErrors, SubscanErrorEx,  "startScan: axis index error", true);
                 }
 
@@ -795,7 +741,7 @@ void MinorServoBossImpl::startScan(
                     if((*acc).length() - 1 < idx || (*mspeed).length() - 1 < idx) {
                         ACS_SHORT_LOG((LM_ERROR, "MinorServoBoss::startScan - DUMMY TEST 01C"));
                         if(mutex_res == 0)
-                            pthread_mutex_unlock(&setup_mutex); 
+                            pthread_mutex_unlock(&tracking_mutex); 
                         THROW_EX(ManagementErrors, SubscanErrorEx, "MinorServoBoss::startScan - error, index out of range", true);
                     }
                     ACS_SHORT_LOG((LM_ERROR, "MinorServoBoss::startScan - DUMMY TEST 02"));
@@ -806,7 +752,7 @@ void MinorServoBossImpl::startScan(
                     // Qua fare il calcolo del positioning_time
                     if(max_speed == 0 || acceleration == 0) {
                         if(mutex_res == 0)
-                            pthread_mutex_unlock(&setup_mutex); 
+                            pthread_mutex_unlock(&tracking_mutex); 
                         THROW_EX(ManagementErrors, SubscanErrorEx, "MinorServoBoss::startScan - Acceleration or maximum speed wrong", true);
                     }
 
@@ -827,7 +773,7 @@ void MinorServoBossImpl::startScan(
                         if(act_pos.length() <= axis) {
                             ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: wrong actual position indexing"));
                             if(mutex_res == 0)
-                                pthread_mutex_unlock(&setup_mutex); 
+                                pthread_mutex_unlock(&tracking_mutex); 
                         }
                         ACS_SHORT_LOG((LM_ERROR, "MinorServoBoss::startScan - DUMMY TEST 04"));
 
@@ -953,7 +899,7 @@ void MinorServoBossImpl::startScan(
     }
     catch(...) {
         if(mutex_res == 0)
-            pthread_mutex_unlock(&setup_mutex); 
+            pthread_mutex_unlock(&tracking_mutex); 
         m_scanning = false;
         THROW_EX(ManagementErrors, SubscanErrorEx, "Error performing a startScan", true);
     }
@@ -962,68 +908,65 @@ void MinorServoBossImpl::startScan(
 
 void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::ConfigurationErrorEx) 
 {
-    int mutex_res = pthread_mutex_trylock(&setup_mutex); 
+    if(isStarting())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is starting.", true);
+
+    if(isParking())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is parking.", true);
+
+    if(!isReady())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is not ready.", true);
+
+    int mutex_res = pthread_mutex_trylock(&tracking_mutex); 
+    if(mutex_res != 0) {
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is busy.", true);
+    }
+
+    if(m_tracking_thread_ptr != NULL) {
+        m_tracking_thread_ptr->suspend();
+        m_tracking_thread_ptr->terminate();
+        m_tracking_thread_ptr = NULL;
+    }
+
     try {
-        if(mutex_res != 0)
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: lock in setup", true);
-
-        if(m_vstatus_flags.is_parking)
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "Impossible to perform a turnTrackingOn due subsystem parking", true);
-
-        m_is_tracking_en = true;
-        ACS_SHORT_LOG((LM_WARNING, "tracking_en == true"));
-        if(m_thread_params.is_initialized) {
-            if(m_tracking_thread_ptr != NULL) {
-                m_tracking_thread_ptr->suspend();
-                m_tracking_thread_ptr->terminate();
-                m_tracking_thread_ptr = NULL;
-            }
-            try {
-                m_tracking_thread_ptr = getContainerServices()->getThreadManager()->create<TrackingThread,
-                    MSThreadParameters>("TrackingThread", m_thread_params);
-                ACS_SHORT_LOG((LM_WARNING, "trackingThread created"));
-            }
-            catch(...)
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, "Error: TrackingThread already exists", true);
-
-            m_tracking_thread_ptr->resume();
-            ACS_SHORT_LOG((LM_WARNING, "trackingThread resumed"));
-        }
-        if(mutex_res == 0)
-            pthread_mutex_unlock(&setup_mutex); 
+        m_tracking_thread_ptr = getContainerServices()->getThreadManager()->create<TrackingThread,
+            MSBossConfiguration *>("TrackingThread", m_configuration);
+        ACS_SHORT_LOG((LM_WARNING, "trackingThread created"));
     }
     catch(...) {
-        if(mutex_res == 0)
-            pthread_mutex_unlock(&setup_mutex); 
-        ACS_SHORT_LOG((LM_ERROR, "Exception in turnTrackingOn"));
-        throw;
+        if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "Error in TrackingThread", true);
     }
+
+    m_tracking_thread_ptr->resume();
+    if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
+    ACS_SHORT_LOG((LM_INFO, "trackingThread resumed"));
 }
 
 
 void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::ConfigurationErrorEx) 
 {
-    int mutex_res = pthread_mutex_trylock(&setup_mutex); 
-    try {
-        if(mutex_res != 0)
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: lock in setup", true);
+    if(isStarting())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is starting.", true);
 
-        if(m_tracking_thread_ptr != NULL) {
-            m_tracking_thread_ptr->suspend();
-            m_tracking_thread_ptr->terminate();
-            m_tracking_thread_ptr = NULL;
-        }
+    if(isParking())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is parking.", true);
 
-        m_is_tracking_en = false;
-        if(mutex_res == 0)
-            pthread_mutex_unlock(&setup_mutex); 
+    if(!isReady())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is not ready.", true);
+
+    int mutex_res = pthread_mutex_trylock(&tracking_mutex); 
+    if(mutex_res != 0) {
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is busy.", true);
     }
-    catch(...) {
-        if(mutex_res == 0)
-            pthread_mutex_unlock(&setup_mutex); 
-        ACS_SHORT_LOG((LM_ERROR, "Exception in turnTrackingOff"));
-        throw;
+
+    if(m_tracking_thread_ptr != NULL) {
+        m_tracking_thread_ptr->suspend();
+        m_tracking_thread_ptr->terminate();
+        m_tracking_thread_ptr = NULL;
     }
+
+    if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
 }
 
 
@@ -1249,20 +1192,22 @@ ACS::doubleSeq * MinorServoBossImpl::getOffset(const char *servo, string offset_
 
 
 bool MinorServoBossImpl::isTrackingEn() {
-    TIMEVALUE now(0.0L);
-    IRA::CIRATools::getTime(now);
-    ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss: time now: %llu", now.value().value));
-    return m_is_tracking_en;
+    return m_configuration->isTrackingEn();
+}
+
+
+bool MinorServoBossImpl::isTracking() {
+    return m_configuration->isElevationTracking();
 }
 
 
 char * MinorServoBossImpl::getActualSetup() {
-    return CORBA::string_dup(m_actual_conf.c_str());
+    return CORBA::string_dup((m_configuration->m_actualSetup).c_str());
 }
 
 
 char * MinorServoBossImpl::getCommandedSetup() {
-    return CORBA::string_dup(m_commanded_conf.c_str());
+    return CORBA::string_dup((m_configuration->m_commandedSetup).c_str());
 }
 
 

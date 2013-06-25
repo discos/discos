@@ -12,6 +12,7 @@
 #include <pthread.h>
 #include <time.h>
 #include "MinorServoBossImpl.h"
+#include <MSBossConfiguration.h> // TODO: remove
 
 ScanThread::ScanThread(
         const ACE_CString& name, 

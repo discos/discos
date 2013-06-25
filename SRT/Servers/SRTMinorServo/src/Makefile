@@ -19,10 +19,11 @@ WPServoImpl_LIBS = MinorServoStubs IRALibrary ComponentErrors SRTMinorServoLibra
 DerotatorImpl_OBJECTS = DerotatorImpl sensorSocket icdSocket utils
 DerotatorImpl_LIBS = MinorServoStubs IRALibrary ComponentErrors MinorServoErrors
 
-MinorServoBossImpl_OBJECTS = MinorServoBossImpl utils SetupThread TrackingThread ScanThread MSBossPublisher libCom
+MinorServoBossImpl_OBJECTS = MinorServoBossImpl utils SetupThread ParkThread TrackingThread ScanThread MSBossPublisher libCom \
+							 MSBossConfiguration
 MinorServoBossImpl_LIBS = MinorServoStubs MinorServoBossStubs SRTMinorServoLibrary ManagmentDefinitionsStubs ManagementErrors \
-						  IRALibrary ComponentErrors MinorServoErrors acsnc
-
+						  IRALibrary ComponentErrors MinorServoErrors acsnc ParserErrors AntennaDefinitionsStubs AntennaBossStubs \
+						  AntennaErrors 
 # ----------------------------------------------------------------------
 # List of all possible C-sources (used to create automatic dependencies)
 # ----------------------------------------------------------------------

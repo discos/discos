@@ -18,16 +18,13 @@
 
 SetupThread::SetupThread(
         const ACE_CString& name, 
-        MSThreadParameters& params,
+        MSBossConfiguration * configuration,
         const ACS::TimeInterval& responseTime,
         const ACS::TimeInterval& sleepTime,
         const bool del
-        ) : ACS::Thread(name, responseTime, sleepTime, del), m_params(&params)
+        ) : ACS::Thread(name, responseTime, sleepTime, del), m_configuration(configuration)
 {
     AUTO_TRACE("SetupThread::SetupThread()");
-    m_validActions = false;
-    m_toPark.clear();
-    m_toSet.clear();
     m_positioning.clear();
 }
 
@@ -36,37 +33,8 @@ SetupThread::~SetupThread() { AUTO_TRACE("SetupThread::~SetupThread()"); }
 void SetupThread::onStart() { 
     AUTO_TRACE("SetupThread::onStart()"); 
 
-    m_toPark.clear();
-    m_toSet.clear();
     m_positioning.clear();
-    m_validActions = true;
-    *(m_params->status) = Management::MNG_OK;
-    // Get the actions
-    for(vector<string>::iterator iter = (m_params->actions).begin(); iter != (m_params->actions).end(); iter++) {
-        // Split the action in items.
-        vector<string> items = split(*iter, items_separator);
-        // Get the name of component 
-        string comp_name = get_component_name(items.front());
-        // Get the action
-        string action(items.back());
-        strip(action);
-        if(startswith(action, "none") || startswith(action, "NONE")) {
-            continue;
-        }
-        else if(startswith(action, "park") || startswith(action, "PARK")) {
-            m_toPark.push_back(comp_name);
-        }
-        else
-            // Set a doubleSeq from a string of positions
-            try {
-                ACS::doubleSeq positions = get_positions(comp_name, action, m_params);
-                m_toSet[comp_name] = positions;
-            }
-            catch(...) {
-                m_validActions=false;
-                return;
-            }
-    }
+    m_configuration->m_status = Management::MNG_OK;
 }
 
 void SetupThread::onStop() { AUTO_TRACE("SetupThread::onStop()"); }
@@ -74,38 +42,40 @@ void SetupThread::onStop() { AUTO_TRACE("SetupThread::onStop()"); }
 void SetupThread::run()
 {
     AUTO_TRACE("SetupThread::run()");
-    if(!m_validActions) {
-        m_params->is_initialized = false;
-        *(m_params->status) = Management::MNG_FAILURE;
-        pthread_mutex_unlock(m_params->setup_mutex); 
-        m_params->is_setup_locked = false;
-        ACS_SHORT_LOG((LM_ERROR, ("SetupThread::onStart(): error getting the configuration from the CDB.")));
+    if(!m_configuration->isValidCDBConfiguration()) {
+        ACS_SHORT_LOG((LM_ERROR, "Wrong CDB configuration."));
+        m_configuration->m_status = Management::MNG_FAILURE;
+        m_configuration->m_isStarting = false;
+        m_configuration->m_isConfigured = true;
         return;
     }
 
     // Park the components
     unsigned long counter = 0;
+    vector<string> toPark(m_configuration->m_servosToPark);
+    vector<string> toMove(m_configuration->m_servosToMove);
     while(true) {
         unsigned short num_of_parked_comp = 0;
-        for(vector<string>::iterator iter = m_toPark.begin(); iter != m_toPark.end(); iter++) {
+        for(vector<string>::iterator iter = toPark.begin(); iter != toPark.end(); iter++) {
+            string comp_name = *iter;
             MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-            if((*m_params->component_refs).count(*iter)) {
-                component_ref = (*m_params->component_refs)[*iter];
+            if((m_configuration->m_component_refs).count(comp_name)) {
+                component_ref = (m_configuration->m_component_refs)[comp_name];
                 // Park the minor servo
                 try {
                     if(!CORBA::is_nil(component_ref)) {
                         bitset<STATUS_WIDTH> status_bset(component_ref->getStatus());
                         if(component_ref->isParking()) {
-                            ACS_SHORT_LOG((LM_INFO, (string("SetupThread: the ") + *iter + string(" is parking.")).c_str()));
+                            ACS_SHORT_LOG((LM_INFO, (string("SetupThread: the ") + comp_name + string(" is parking.")).c_str()));
                             continue;
                         }
                         if(component_ref->isStarting()) {
-                            ACS_SHORT_LOG((LM_INFO, (string("SetupThread: the ") + *iter + string(" is starting.")).c_str()));
+                            ACS_SHORT_LOG((LM_INFO, (string("SetupThread: the ") + comp_name + string(" is starting.")).c_str()));
                             continue;
                         }
                         else if(component_ref->isParked()) {
                             ++num_of_parked_comp;
-                            ACS_SHORT_LOG((LM_INFO, (string("SetupThread: the ") + *iter + string(" is parked.")).c_str()));
+                            ACS_SHORT_LOG((LM_INFO, (string("SetupThread: the ") + comp_name + string(" is parked.")).c_str()));
                             continue;
                         }
                         else if(component_ref->isReadyToSetup()) {
@@ -113,35 +83,39 @@ void SetupThread::run()
                             continue;
                         }
                         else if(component_ref->isDisabledFromOtherDC()) {
-                            string msg(*iter + " disabled from other DC.");
+                            string msg(comp_name + " disabled from other DC.");
                             ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                            *(m_params->status) = Management::MNG_FAILURE;
-                            pthread_mutex_unlock(m_params->setup_mutex); 
-                            m_params->is_setup_locked = false;
+                            m_configuration->m_status = Management::MNG_FAILURE;
+                            m_configuration->m_isStarting = false;
+                            m_configuration->m_isConfigured = false;
+                            m_configuration->m_actualSetup = "unknown";
                             return;
                         }
                         else if(status_bset.test(STATUS_FAILURE)) {
-                            string msg(*iter + " in failure.");
+                            string msg(comp_name + " in failure.");
                             ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                            *(m_params->status) = Management::MNG_FAILURE;
-                            pthread_mutex_unlock(m_params->setup_mutex); 
-                            m_params->is_setup_locked = false;
+                            m_configuration->m_status = Management::MNG_FAILURE;
+                            m_configuration->m_isStarting = false;
+                            m_configuration->m_isConfigured = false;
+                            m_configuration->m_actualSetup = "unknown";
                             return;
                         }
                         else if(component_ref->isInEmergencyStop()){
-                            string msg(*iter + " in emergency stop.");
+                            string msg(comp_name + " in emergency stop.");
                             ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                            *(m_params->status) = Management::MNG_FAILURE;
-                            pthread_mutex_unlock(m_params->setup_mutex); 
-                            m_params->is_setup_locked = false;
+                            m_configuration->m_status = Management::MNG_FAILURE;
+                            m_configuration->m_isStarting = false;
+                            m_configuration->m_isConfigured = false;
+                            m_configuration->m_actualSetup = "unknown";
                             return;
                         }
                         else if(!component_ref->isReady()) {
-                            string msg(*iter + " not ready.");
+                            string msg(comp_name + " not ready.");
                             ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                            *(m_params->status) = Management::MNG_FAILURE;
-                            pthread_mutex_unlock(m_params->setup_mutex); 
-                            m_params->is_setup_locked = false;
+                            m_configuration->m_status = Management::MNG_FAILURE;
+                            m_configuration->m_isStarting = false;
+                            m_configuration->m_isConfigured = false;
+                            m_configuration->m_actualSetup = "unknown";
                             return;
                         }
                         else {
@@ -150,30 +124,33 @@ void SetupThread::run()
                         }
                     }
                     else {
-                        ACS_SHORT_LOG((LM_ERROR, ("SetupThread: cannot get the component "  + (*iter)).c_str()));
-                        *(m_params->status) = Management::MNG_FAILURE;
-                        pthread_mutex_unlock(m_params->setup_mutex); 
-                        m_params->is_setup_locked = false;
+                        ACS_SHORT_LOG((LM_ERROR, ("SetupThread: cannot get the component "  + comp_name).c_str()));
+                        m_configuration->m_status = Management::MNG_FAILURE;
+                        m_configuration->m_isStarting = false;
+                        m_configuration->m_isConfigured = false;
+                        m_configuration->m_actualSetup = "unknown";
                         return;
                     }
                 }
                 catch(...) {
-                    ACS_SHORT_LOG((LM_ERROR, ("SetupThread: error parking "  + (*iter)).c_str()));
-                    *(m_params->status) = Management::MNG_FAILURE;
-                    pthread_mutex_unlock(m_params->setup_mutex); 
-                    m_params->is_setup_locked = false;
+                    ACS_SHORT_LOG((LM_ERROR, ("SetupThread: error parking "  + comp_name).c_str()));
+                    m_configuration->m_status = Management::MNG_FAILURE;
+                    m_configuration->m_isStarting = false;
+                    m_configuration->m_isConfigured = false;
+                    m_configuration->m_actualSetup = "unknown";
                     return;
                 }
             }
             else {
                 ACS_SHORT_LOG((LM_ERROR, ("SetupThread::run(): error performing the setup")));
-                *(m_params->status) = Management::MNG_FAILURE;
-                pthread_mutex_unlock(m_params->setup_mutex); 
-                m_params->is_setup_locked = false;
+                m_configuration->m_status = Management::MNG_FAILURE;
+                m_configuration->m_isStarting = false;
+                m_configuration->m_isConfigured = false;
+                m_configuration->m_actualSetup = "unknown";
                 return;
             }
         }
-        if(m_toPark.size() == num_of_parked_comp)
+        if(toPark.size() == num_of_parked_comp)
             break;
 
         ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
@@ -181,9 +158,9 @@ void SetupThread::run()
         counter += ITER_SLEEP_TIME / 2;
         if(sleep_ret != SLEEP_OK || counter > MAX_ACTION_TIME) {
             ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): MAX_ACTION_TIME reached.")));
-            pthread_mutex_unlock(m_params->setup_mutex); 
-            m_params->is_setup_locked = false;
-            m_params->is_initialized = false;
+            m_configuration->m_isStarting = false;
+            m_configuration->m_isConfigured = false;
+            m_configuration->m_actualSetup = "unknown";
             return;
         }
     }
@@ -192,20 +169,22 @@ void SetupThread::run()
     ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
     sleep_ret = ACS::ThreadBase::sleep(ITER_SLEEP_TIME * 3); // 6 seconds
     if(sleep_ret != SLEEP_OK || counter > MAX_ACTION_TIME) {
-        pthread_mutex_unlock(m_params->setup_mutex); 
-        m_params->is_setup_locked = false;
-        m_params->is_initialized = false;
+        m_configuration->m_isStarting = false;
+        m_configuration->m_isConfigured = false;
+        m_configuration->m_actualSetup = "unknown";
         return;
     }
 
     // Positioning
     counter = 0;
     while(true) {
+        cout << "positioning..." << endl;
         unsigned short num_of_on_target = 0;
-        for(map<string, ACS::doubleSeq>::iterator iter = m_toSet.begin(); iter != m_toSet.end(); iter++) {
+        for(vector<string>::iterator iter = toMove.begin(); iter != toMove.end(); iter++) {
+            string comp_name = *iter;
             MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-            if((*m_params->component_refs).count(iter->first)) {
-                component_ref = (*m_params->component_refs)[iter->first];
+            if((m_configuration->m_component_refs).count(comp_name)) {
+                component_ref = (m_configuration->m_component_refs)[comp_name];
                 // Positioning the minor servo
                 try {
                     if(!CORBA::is_nil(component_ref)) {
@@ -214,137 +193,153 @@ void SetupThread::run()
                         if (refActPos.ptr() != ACS::ROdoubleSeq::_nil()) {
                             ACSErr::Completion_var completion;
                             ACS::doubleSeq * act_pos = refActPos->get_sync(completion.out());
-                            if(act_pos->length() != (iter->second).length()) {
+                            ACS::doubleSeq target_pos = m_configuration->getPosition(comp_name);
+                            cout << "Target pos:" << endl;
+                            for(size_t z=0; z!=target_pos.length(); z++)
+                                cout << "target_pos[" << z << "]: " << target_pos[z] << endl;
+
+                            if(act_pos->length() != target_pos.length()) {
                                 ACS_SHORT_LOG((LM_ERROR, ("SetupThread: lenghts of target and act pos do not match")));
-                                pthread_mutex_unlock(m_params->setup_mutex); 
-                                m_params->is_setup_locked = false;
-                                m_params->is_initialized = false;
+                                m_configuration->m_isStarting = false;
+                                m_configuration->m_isConfigured = false;
+                                m_configuration->m_actualSetup = "unknown";
                                 return;
                             }
                             bool on_target = true;
                             // Compute the difference between actual and target positions
-                            for(size_t i=0; i<(iter->second).length(); i++) { 
-                                if(fabs((iter->second)[i] - (*act_pos)[i]) > component_ref->getTrackingDelta())
+                            for(size_t i=0; i<target_pos.length(); i++) { 
+                                if(fabs(target_pos[i] - (*act_pos)[i]) > component_ref->getTrackingDelta())
                                     on_target = false;
                             }
                             if(on_target) {
+                                cout << comp_name + " on target" << endl;
                                 ++num_of_on_target;
                                 continue;
                             }
                             else {
                                 bitset<STATUS_WIDTH> status_bset(component_ref->getStatus());
                                 if(component_ref->isParking()) {
-                                    ACS_SHORT_LOG((LM_INFO, ("SetupThread: the " + iter->first + " is parking.").c_str()));
+                                    ACS_SHORT_LOG((LM_INFO, ("SetupThread: the " + comp_name + " is parking.").c_str()));
                                     continue;
                                 }
                                 if(component_ref->isStarting()) {
-                                    ACS_SHORT_LOG((LM_INFO, ("SetupThread: the " + iter->first + " is starting.").c_str()));
+                                    ACS_SHORT_LOG((LM_INFO, ("SetupThread: the " + comp_name + " is starting.").c_str()));
                                     continue;
                                 }
                                 else if(component_ref->isReadyToSetup()) {
+                                    cout << comp_name + "->setup()" << endl;
                                     component_ref->setup(0);
                                     continue;
                                 }
                                 else if(component_ref->isDisabledFromOtherDC()) {
-                                    string msg(iter->first + " disabled from other DC.");
+                                    string msg(comp_name + " disabled from other DC.");
                                     ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                                    *(m_params->status) = Management::MNG_FAILURE;
-                                    pthread_mutex_unlock(m_params->setup_mutex); 
-                                    m_params->is_setup_locked = false;
+                                    m_configuration->m_status = Management::MNG_FAILURE;
+                                    m_configuration->m_isStarting = false;
+                                    m_configuration->m_isConfigured = false;
+                                    m_configuration->m_actualSetup = "unknown";
                                     return;
                                 }
                                 else if(status_bset.test(STATUS_FAILURE)) {
-                                    string msg(iter->first + " in failure.");
+                                    string msg(comp_name + " in failure.");
                                     ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                                    *(m_params->status) = Management::MNG_FAILURE;
-                                    pthread_mutex_unlock(m_params->setup_mutex); 
-                                    m_params->is_setup_locked = false;
+                                    m_configuration->m_status = Management::MNG_FAILURE;
+                                    m_configuration->m_isStarting = false;
+                                    m_configuration->m_isConfigured = false;
+                                    m_configuration->m_actualSetup = "unknown";
                                     return;
                                 }
                                 else if(component_ref->isInEmergencyStop()){
-                                    string msg(iter->first + " in emergency stop.");
+                                    string msg(comp_name + " in emergency stop.");
                                     ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                                    *(m_params->status) = Management::MNG_FAILURE;
-                                    pthread_mutex_unlock(m_params->setup_mutex); 
-                                    m_params->is_setup_locked = false;
+                                    m_configuration->m_status = Management::MNG_FAILURE;
+                                    m_configuration->m_isStarting = false;
+                                    m_configuration->m_isConfigured = false;
+                                    m_configuration->m_actualSetup = "unknown";
                                     return;
                                 }
                                 else if(!component_ref->isReady()) {
-                                    string msg(iter->first + " not ready.");
+                                    string msg(comp_name + " not ready.");
                                     ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                                    *(m_params->status) = Management::MNG_FAILURE;
-                                    pthread_mutex_unlock(m_params->setup_mutex); 
-                                    m_params->is_setup_locked = false;
+                                    m_configuration->m_status = Management::MNG_FAILURE;
+                                    m_configuration->m_isStarting = false;
+                                    m_configuration->m_isConfigured = false;
+                                    m_configuration->m_actualSetup = "unknown";
                                     return;
                                 }
                                 else {
-                                    if(std::find(m_positioning.begin(), m_positioning.end(), iter->first) != m_positioning.end()) {
-                                        ACS_SHORT_LOG((LM_INFO, ("SetupThread: the " + iter->first + " is moving.").c_str()));
+                                    if(std::find(m_positioning.begin(), m_positioning.end(), comp_name) != m_positioning.end()) {
+                                        ACS_SHORT_LOG((LM_INFO, ("SetupThread: the " + comp_name + " is moving.").c_str()));
                                         continue; // The servo is moving
                                     }
                                     else {
-                                        component_ref->setPosition(iter->second, 0);
-                                        m_positioning.push_back(iter->first);
+                                        component_ref->setPosition(target_pos, 0);
+                                        cout << comp_name + "->setPosition()" << endl;
+                                        m_positioning.push_back(comp_name);
                                         continue;
                                     }
                                 }
                             }
                         }
                         else {
-                            ACS_SHORT_LOG((LM_ERROR, (string("SetupThread: cannot get the act_pos of ")  + iter->first).c_str()));
-                            pthread_mutex_unlock(m_params->setup_mutex); 
-                            m_params->is_setup_locked = false;
-                            m_params->is_initialized = false;
+                            ACS_SHORT_LOG((LM_ERROR, (string("SetupThread: cannot get the act_pos of ")  + comp_name).c_str()));
+                            m_configuration->m_isStarting = false;
+                            m_configuration->m_isConfigured = false;
+                            m_configuration->m_actualSetup = "unknown";
                             return;
                         }
                     }
                     else {
-                        ACS_SHORT_LOG((LM_ERROR, ("SetupThread: cannot get the component "  + iter->first).c_str()));
-                        *(m_params->status) = Management::MNG_FAILURE;
-                        pthread_mutex_unlock(m_params->setup_mutex); 
-                        m_params->is_setup_locked = false;
+                        ACS_SHORT_LOG((LM_ERROR, ("SetupThread: cannot get the component "  + comp_name).c_str()));
+                        m_configuration->m_status = Management::MNG_FAILURE;
+                        m_configuration->m_isStarting = false;
+                        m_configuration->m_isConfigured = false;
+                        m_configuration->m_actualSetup = "unknown";
                         return;
                     }
                 }
                 catch(...) {
-                    ACS_SHORT_LOG((LM_ERROR, ("SetupThread: error positioning "  + iter->first).c_str()));
-                    *(m_params->status) = Management::MNG_FAILURE;
-                    pthread_mutex_unlock(m_params->setup_mutex); 
-                    m_params->is_setup_locked = false;
+                    ACS_SHORT_LOG((LM_ERROR, ("SetupThread: error positioning "  + comp_name).c_str()));
+                    m_configuration->m_status = Management::MNG_FAILURE;
+                    m_configuration->m_isStarting = false;
+                    m_configuration->m_isConfigured = false;
+                    m_configuration->m_actualSetup = "unknown";
                     return;
                 }
             }
             else {
                 ACS_SHORT_LOG((LM_ERROR, ("SetupThread::run(): error performing the setup")));
-                *(m_params->status) = Management::MNG_FAILURE;
-                pthread_mutex_unlock(m_params->setup_mutex); 
-                m_params->is_setup_locked = false;
+                m_configuration->m_status = Management::MNG_FAILURE;
+                m_configuration->m_isStarting = false;
+                m_configuration->m_isConfigured = false;
+                m_configuration->m_actualSetup = "unknown";
                 return;
             }
         }
-        if(m_toSet.size() == num_of_on_target)
+        if(toMove.size() == num_of_on_target)
             break;
 
         ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
-        sleep_ret = ACS::ThreadBase::sleep(ITER_SLEEP_TIME); // 2 second
+        sleep_ret = ACS::ThreadBase::sleep(ITER_SLEEP_TIME); // 2 seconds
         counter += ITER_SLEEP_TIME / 2;
         if(sleep_ret != SLEEP_OK || counter > MAX_ACTION_TIME) {
             ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): MAX_ACTION_TIME reached.")));
-            pthread_mutex_unlock(m_params->setup_mutex); 
-            m_params->is_setup_locked = false;
-            m_params->is_initialized = false;
+            m_configuration->m_isStarting = false;
+            m_configuration->m_isConfigured = false;
+            m_configuration->m_actualSetup = "unknown";
             return;
         }
     }
 
     // Setup DONE
-    *m_params->actual_conf = m_params->commanded_conf;
-    m_params->is_initialized = true;
-    if(m_params->tracking_thread_ptr != NULL)
-        (m_params->tracking_thread_ptr)->resume();
+    m_configuration->m_isStarting = false;
+    m_configuration->m_isConfigured = true;
+    m_configuration->m_actualSetup = m_configuration->m_commandedSetup;
 
-    pthread_mutex_unlock(m_params->setup_mutex); 
-    m_params->is_setup_locked = false;
+    // TODO:
+    // if(m_params->tracking_thread_ptr != NULL)
+    //     (m_params->tracking_thread_ptr)->resume();
+
     ACS_SHORT_LOG((LM_INFO, ("SetupThread::run(): setup done.")));
     return;
 }

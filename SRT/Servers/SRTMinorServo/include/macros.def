@@ -20,3 +20,5 @@
     TYPE##_var tmp=TYPE::_narrow(PROPERTY->getCORBAReference()); \
     return tmp._retn(); \
 }
+
+

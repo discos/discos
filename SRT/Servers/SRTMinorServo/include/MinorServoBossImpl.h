@@ -26,22 +26,14 @@
 #include <MinorServoS.h>
 #include <MinorServoBossS.h>
 #include "SetupThread.h"
+#include "ParkThread.h"
 #include "TrackingThread.h"
 #include "ScanThread.h"
 #include "MSBossPublisher.h"
 #include "MSParameters.h"
+#include "MSBossConfiguration.h"
 
 using namespace baci;
-
-const string actions_separator("@");
-const string items_separator(":");
-const string pos_separator(",");
-const string park_token("park");
-const string boundary_tokens("()");
-const string slaves_separator(",");
-const string coeffs_separator(";");
-const string coeffs_id("=");
-
 
 struct VerboseStatusFlags {
     bool *is_initialized;
@@ -108,6 +100,19 @@ public:
 
     /** Return true when the system is performing a setup */
     bool isStarting();
+
+    
+    /** Return true if the the servo position is changing by depending of the elevation */
+    bool isTracking();
+
+
+    /** Return true when the system is performing a park */
+    bool isParking();
+
+
+    /** Return true when the system is ready */
+    bool isReady();
+
 	
 	/**
 	 * This method will be used to configure the MinorServoBoss before starting an observation
@@ -270,8 +275,10 @@ private:
 
 	ContainerServices *m_services;
 
-    /** The last congiguration c-string of setup method */
+    /** The last configuration c-string of setup method */
     CString m_config; 
+
+	SimpleParser::CParser<MinorServoBossImpl> *m_parser;
 
     /** The CDB slaves attribute. Every slave is a Minor Servo to control */
     CString m_cdb_slaves;
@@ -281,6 +288,8 @@ private:
 
     /** Vector of intermediary positions needed to perform a scan */
     vector<ScanPosition> m_scan_pos;
+
+    MSBossConfiguration * m_configuration;
 
     /** Is the elevation tracking enabled?*/
     bool m_is_tracking_en;
@@ -325,6 +334,8 @@ private:
     TrackingThread *m_tracking_thread_ptr;
 
     SetupThread *m_setup_thread_ptr;
+
+    ParkThread *m_park_thread_ptr;
 
     ScanThread *m_scan_thread_ptr;
 

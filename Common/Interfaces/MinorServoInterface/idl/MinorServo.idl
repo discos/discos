@@ -450,7 +450,7 @@ module MinorServo {
 
 
         /** Return minor servo number of axes */
-        short numberOfAxes();
+        unsigned short numberOfAxes();
 
 
         /** Return true when the minor servo is parked */

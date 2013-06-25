@@ -67,6 +67,13 @@ module MinorServo {
          * @return true if the tracking elevation is enabled
          */
 		boolean isTrackingEn();
+	
+	
+        /**
+         * Is the minor servo positions following the antenna elevation?
+         * @return true if the minor servo is following the antenna elevation
+         */
+		boolean isTracking();
 
 		
         /**
@@ -74,7 +81,21 @@ module MinorServo {
          * @return true if the system is starting
          */
 		boolean isStarting();
+
 		
+        /**
+         * Is the system parking?
+         * @return true if the system is parking
+         */
+		boolean isParking();
+	
+		
+        /**
+         * Is the system ready?
+         * @return true if the system is ready
+         */
+		boolean isReady();	
+
 
 		/** Return the actual configuration */
 		string getActualSetup();
