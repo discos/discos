@@ -561,7 +561,9 @@ void USDImpl::update (CORBA::Double elevation) throw (CORBA::SystemException,ASE
 	long updatePos, actpos, diffPos;
 	int k;
 	double elevations[parPositions-1];
+	bool running;
 
+	try {
 	for (k = 0; k < parPositions-1; k++)
 		elevations [k] = (k+1)*deltaEL;
 	if (m_profile == 2) { // PARABOLIC_FIXED
@@ -597,9 +599,16 @@ void USDImpl::update (CORBA::Double elevation) throw (CORBA::SystemException,ASE
 		//printf("threshold = %d\n", threshold);
 		if (diffPos >= threshold) {
 		//	printf("diff >= threshold: %ld\n", diffPos);
-			_SET_PROP(cmdPos,updatePos,"usdImpl::update()")
+			_GET_PROP(status,m_status,"usdImpl::update()")
+			running = m_status&MRUN;
+			if (running == false)
+				_SET_PROP(cmdPos,updatePos,"usdImpl::update()")
 		}
 	}
+	}
+	_CATCH_EXCP_THROW_EX(CORBA::SystemException,corbaError,"::usdImpl::update()",m_addr)	// for CORBA
+	_CATCH_EXCP_THROW_EX(ASErrors::DevIOErrorEx,DevIOError,"::usdImpl::update()",m_addr)	// for _GET_PROP
+	_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl,USDError,"::usdImpl::update()",m_addr)	// for local USD excp
 }
 
 void USDImpl::exImplCheck(ASErrors::ASErrorsExImpl ex)
