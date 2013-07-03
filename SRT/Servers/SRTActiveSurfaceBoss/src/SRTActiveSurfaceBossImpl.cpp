@@ -82,10 +82,10 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	}
 
     	// configure the parser.....
-	m_parser->add("setup",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::setupAS),0);
-	m_parser->add("start",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::startAS),0);
-	m_parser->add("stop",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::stopAS),0);
-	m_parser->add("stow",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::stowAS),0);
+	//m_parser->add("asSetup",new function1<CSRTActiveSurfaceBossCore,non_constant,void_type,I<enum_type<SRTActiveSurfaceProfile2String,SRTActiveSurface::TASProfile> > >(boss,&CSRTActiveSurfaceBossCore::setProfile),1);
+	m_parser->add("asOn",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asOn),0);
+	m_parser->add("asOff",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asOff),0);
+	m_parser->add("asPark",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asPark),0);
 
     ACS_LOG(LM_FULL_INFO, "SRTActiveSurfaceBossImpl::initialize()", (LM_INFO,"COMPSTATE_INITIALIZED"));
 }
@@ -318,11 +318,12 @@ void SRTActiveSurfaceBossImpl::setProfile (SRTActiveSurface::TASProfile newProfi
 
 	m_profile = newProfile;
 
-	_SET_CDB(profile, m_profile,"SRTActiveSurfaceBossImpl::setProfile")
+	//_SET_CDB(profile, m_profile,"SRTActiveSurfaceBossImpl::setProfile")
 
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
 	try {
-		resource->onewayAction(SRTActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, m_profile);
+		//resource->onewayAction(SRTActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, m_profile);
+		resource->setProfile(m_profile);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

@@ -95,17 +95,17 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
             		Impl.setComponentName(serial_usd);
             		Impl.log(LM_DEBUG);
 	    	}
-        	CIRATools::Wait(LOOPTIME);
+        	//CIRATools::Wait(LOOPTIME);
     	}
 
 	for (i = 1; i <= CIRCLES; i++) {
 		for (l = 1; l <= actuatorsInCircle[i]; l++) {
-			printf ("Corrections = ");
+			//printf ("Corrections = ");
 			for (s = 0; s < NPOSITIONS; s++) {
         			usdCorrections >> actuatorsCorrections[s];
-				printf ("%f ", actuatorsCorrections[s]);
+			//	printf ("%f ", actuatorsCorrections[s]);
         		}
-			printf("\n");
+			//printf("\n");
 			if (!CORBA::is_nil(usd[i][l])) {
 				usd[i][l]->posTable(actuatorsCorrections, NPOSITIONS, DELTAEL, THRESHOLDPOS);
 			}
@@ -120,7 +120,7 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
     
     	m_antennaBoss = Antenna::AntennaBoss::_nil();
     	try {
-        	//m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
+        	m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
     	}
     	catch (maciErrType::CannotGetComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::execute()");
@@ -200,7 +200,7 @@ void CSRTActiveSurfaceBossCore::cleanUp()
 	}
 */
     	try {
-		//m_services->releaseComponent((const char*)m_antennaBoss->name());
+		m_services->releaseComponent((const char*)m_antennaBoss->name());
 	}
 	catch (maciErrType::CannotReleaseComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
@@ -1387,16 +1387,14 @@ void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentEr
 void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
     if (AutoUpdate) {
-        ACS::Time time;
-	TIMEVALUE tS;
+	TIMEVALUE now;
         double azimuth=0.0;
         double elevation=0.0;
 
-        //time = getTimeStamp();
-	tS.value (time);
+	IRA::CIRATools::getTime(now);
 
         try {
-            m_antennaBoss->getRawCoordinates(time, azimuth, elevation);
+            m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
         }
         catch (CORBA::SystemException& ex) {
             _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
@@ -1407,7 +1405,7 @@ void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::C
 	    }
         azimuth = 0.0;
         try {
-            onewayAction(SRTActiveSurface::AS_UPDATE, 0, 0, 0, elevation, 0, 0, m_profile);
+            onewayAction(SRTActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex) {
             ex.log(LM_DEBUG);
@@ -1416,7 +1414,20 @@ void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::C
     }
 }
 
-void CSRTActiveSurfaceBossCore::setupAS() throw (ComponentErrors::ComponentErrorsEx)
+void CSRTActiveSurfaceBossCore::setProfile(SRTActiveSurface::TASProfile newProfile) throw (ComponentErrors::ComponentErrorsEx)
+{
+	_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
+	
+    	try {
+        	onewayAction(SRTActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
+        }
+        catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+            	ex.log(LM_DEBUG);
+            	throw ex.getComponentErrorsEx();
+        }
+}
+
+void CSRTActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentErrorsEx)
 {
     try {
             onewayAction(SRTActiveSurface::AS_SETUP, 0, 0, 0, 0, 0, 0, m_profile);
@@ -1427,15 +1438,15 @@ void CSRTActiveSurfaceBossCore::setupAS() throw (ComponentErrors::ComponentError
         }
 }
 
-void CSRTActiveSurfaceBossCore::startAS()
+void CSRTActiveSurfaceBossCore::asOn()
 {
     enableAutoUpdate();
 }
 
-void CSRTActiveSurfaceBossCore::stowAS() throw (ComponentErrors::ComponentErrorsEx)
+void CSRTActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
 {
     try {
-            onewayAction(SRTActiveSurface::AS_STOW, 0, 0, 0, 0, 0, 0, m_profile);
+            onewayAction(SRTActiveSurface::AS_REFPOS, 0, 0, 0, 0, 0, 0, m_profile);
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex) {
             ex.log(LM_DEBUG);
@@ -1443,15 +1454,17 @@ void CSRTActiveSurfaceBossCore::stowAS() throw (ComponentErrors::ComponentErrors
         }
 }
 
-void CSRTActiveSurfaceBossCore::stopAS() throw (ComponentErrors::ComponentErrorsEx)
+void CSRTActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsEx)
 {
-    try {
-            onewayAction(SRTActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
+	try {
+		onewayAction(SRTActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-            ex.log(LM_DEBUG);
-            throw ex.getComponentErrorsEx();
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
         }
+
+	disableAutoUpdate();
 }
 
 void CSRTActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& actPos, long int& cmdPos, long int& Fmin, long int& Fmax, long int& acc,long int& delay/*CORBA::Long_out actPos, CORBA::Long_out cmdPos, CORBA::Long_out Fmin, CORBA::Long_out Fmax, CORBA::Long_out acc, CORBA::Long_out delay*/) throw (ComponentErrors::PropertyErrorExImpl, ComponentErrors::ComponentNotActiveExImpl)
