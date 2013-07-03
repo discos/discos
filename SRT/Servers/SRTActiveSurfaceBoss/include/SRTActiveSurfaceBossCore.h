@@ -25,6 +25,7 @@
 #include <IRA>
 #include <fstream>
 #include <iostream>
+#include <slamac.h>
 
 #define CIRCLES 17
 #define ACTUATORS 96
@@ -47,6 +48,13 @@
 #define ENBL	0x002000
 #define PAUT	0x000800
 #define CAL 	0x008000
+
+#define _SET_CDB_CORE(PROP,LVAL,ROUTINE) {	\
+		if (!CIRATools::setDBValue(m_services,#PROP,(const long&) LVAL)) \
+		{ ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,ROUTINE); \
+			exImpl.setFieldName(#PROP); throw exImpl; \
+		} \
+}
 
 using namespace IRA;
 using namespace baci;
@@ -139,19 +147,19 @@ public:
 	*/	
 	void enableAutoUpdate();
 
-    void checkASerrors(char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex);
+    	void checkASerrors(char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex);
 
 	void checkAScompletionerrors (char *str, int circle, int actuator, CompletionImpl comp);
 
-    void setupAS() throw (ComponentErrors::ComponentErrorsEx);
+    	void asSetup() throw (ComponentErrors::ComponentErrorsEx);
 
-    void startAS();
+    	void asOn();
 
-    void stopAS() throw (ComponentErrors::ComponentErrorsEx);
+    	void asOff() throw (ComponentErrors::ComponentErrorsEx);
 
-    void stowAS() throw (ComponentErrors::ComponentErrorsEx);
+	void asPark() throw (ComponentErrors::ComponentErrorsEx);
 
-	//void setProfile(SRTActiveSurface::TASProfile profile) throw (ComponentErrors::ComponentErrorsEx);
+	void setProfile (SRTActiveSurface::TASProfile profile) throw (ComponentErrors::ComponentErrorsEx);
 
 private:
 	ContainerServices* m_services;
