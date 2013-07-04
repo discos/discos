@@ -10,6 +10,41 @@ static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 using namespace SimpleParser;
 
+class SRTActiveSurfaceProfile2String {
+public:
+	static char *valToStr(SRTActiveSurface::TASProfile& val) {
+		char *c=new char[16];
+		if (val==SRTActiveSurface::AS_SHAPED) {
+			strcpy(c,"S");
+		}
+		else if (val==SRTActiveSurface::AS_PARABOLIC) {
+			strcpy(c,"P");
+		}
+		else {
+			strcpy(c,"PF"); // PARABOLIC_FIXED
+		}
+		return c;
+	}
+	static SRTActiveSurface::TASProfile strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
+		IRA::CString strVal(str);
+		strVal.MakeUpper();
+		if (strVal=="S") {
+			return SRTActiveSurface::AS_SHAPED;
+		}
+		else if (strVal=="P") {
+			return SRTActiveSurface::AS_PARABOLIC;
+		}
+		else if (strVal=="PF") {
+			return SRTActiveSurface::AS_PARABOLIC_FIXED;
+		}
+		else {
+			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"SRTActiveSurfaceProfile2String::strToVal()");
+			throw ex;
+
+		}
+	}
+};
+
 SRTActiveSurfaceBossImpl::SRTActiveSurfaceBossImpl(const ACE_CString &CompName, maci::ContainerServices *containerServices) : 
 	CharacteristicComponentImpl(CompName,containerServices),
     m_pstatus(this),
@@ -82,7 +117,7 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	}
 
     	// configure the parser.....
-	//m_parser->add("asSetup",new function1<CSRTActiveSurfaceBossCore,non_constant,void_type,I<enum_type<SRTActiveSurfaceProfile2String,SRTActiveSurface::TASProfile> > >(boss,&CSRTActiveSurfaceBossCore::setProfile),1);
+    m_parser->add("asSetup",new function1<CSRTActiveSurfaceBossCore,non_constant,void_type,I<enum_type<SRTActiveSurfaceProfile2String,SRTActiveSurface::TASProfile> > >(boss,&CSRTActiveSurfaceBossCore::setProfile),1);
 	m_parser->add("asOn",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asOn),0);
 	m_parser->add("asOff",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asOff),0);
 	m_parser->add("asPark",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asPark),0);

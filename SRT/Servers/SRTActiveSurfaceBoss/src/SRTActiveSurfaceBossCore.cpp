@@ -1414,7 +1414,7 @@ void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::C
     }
 }
 
-void CSRTActiveSurfaceBossCore::setProfile(SRTActiveSurface::TASProfile newProfile) throw (ComponentErrors::ComponentErrorsEx)
+void CSRTActiveSurfaceBossCore::setProfile(const SRTActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsEx)
 {
 	_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
 	

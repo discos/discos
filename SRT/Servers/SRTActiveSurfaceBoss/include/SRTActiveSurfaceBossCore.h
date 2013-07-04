@@ -159,7 +159,7 @@ public:
 
 	void asPark() throw (ComponentErrors::ComponentErrorsEx);
 
-	void setProfile (SRTActiveSurface::TASProfile profile) throw (ComponentErrors::ComponentErrorsEx);
+	void setProfile (const SRTActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsEx);
 
 private:
 	ContainerServices* m_services;
