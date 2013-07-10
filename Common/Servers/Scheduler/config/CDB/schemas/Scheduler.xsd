@@ -61,6 +61,8 @@
 		<xs:attribute name="ReceiversBossInterface" type="xs:string" use="required" />
 		<!-- the interface of component that leads the minor servo subsystem -->
 		<xs:attribute name="MinorServoBossInterface" type="xs:string" use="required" />
+		<!-- the interface of component that leads the active surface subsystem -->
+		<xs:attribute name="ActiveSurfaceBossInterface" type="xs:string" use="required" />		
 		<!-- the interface of component that is in charge of log file creation -->
 		<xs:attribute name="CustomLoggerInterface" type="xs:string" use="required" />
 		<!-- the interface of weather station -->

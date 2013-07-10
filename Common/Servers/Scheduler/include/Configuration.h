@@ -68,9 +68,13 @@ public:
 	*/
 	const IRA::CString& getReceiversBossComponent() const { return m_receiversBossComp; }
 	/**
-	 * @return the name of the interface of the  boss component.
+	 * @return the name of the interface of the  boss component od minor servos.
 	*/
 	const IRA::CString& getMinorServoBossComponent() const { return m_minorServoBossComp; }
+	/**
+	 * @return the name of the interface of the  boss component of the active surface
+	*/
+	const IRA::CString& getActiveSurfaceBossComponent() const { return m_activeSurfaceBossComp; }
 	/**
 	 * @return the name of the interface of the custom logger component.
 	*/
@@ -153,6 +157,7 @@ private:
 	IRA::CString m_observatoryComp;
 	IRA::CString m_receiversBossComp;
 	IRA::CString m_minorServoBossComp;
+	IRA::CString m_activeSurfaceBossComp;
 	IRA::CString m_defaultBackendInst;
 	IRA::CString m_defaultDataReceiverInst;
 	IRA::CString m_logDir;

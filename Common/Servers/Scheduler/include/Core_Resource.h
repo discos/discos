@@ -150,6 +150,19 @@ void loadAntennaBoss(Antenna::AntennaBoss_var& ref,bool& errorDetected) const th
 void unloadAntennaBoss(Antenna::AntennaBoss_var& ref) const;
 
 /**
+ * used to get a reference to the active surface  boss component.
+ * @param ref the pointer to the active surface boss component
+ * @param errorDetected this flag is true if the reference seems not valid any more and the reference should not be considered valid any more
+ */
+//void loadActiveSurfaceBoss(SRTActiveSurface::SRTActiveSurfaceBoss_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl);
+
+/**
+ * used to free the reference to the active surface  boss component
+ * @param ref reference to the  boss component
+ */
+//void unloadActiveSurfaceBoss(SRTActiveSurface::SRTActiveSurfaceBoss_var& ref) const;
+
+/**
  * used to get a reference to the minor servo  boss component.
  * @param ref the pointer to the minor servo boss component
  * @param errorDetected this flag is true if the reference seems not valid any more and the reference should not be considered valid any more

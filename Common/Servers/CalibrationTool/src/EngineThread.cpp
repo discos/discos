@@ -167,6 +167,7 @@ bool CEngineThread::processData ()
 
     CSkySource CTskySource (m_targetRa, m_targetDec, IRA::CSkySource::SS_J2000);
     CDateTime CTdateTime (tS);
+    IRA::CString temp;
 
     switch (data->getScanAxis ()) {
         case Management::MNG_NO_AXIS:
@@ -189,6 +190,10 @@ bool CEngineThread::processData ()
 	        m_cosLat = cos (targetEL);
 	        //m_CoordIndex = 0;	// LON
 	        m_latPositions[m_dataSeqCounter] = el;
+
+	        IRA::CIRATools::timeToStr(time,temp);
+	        printf("time: %s, integration %ld \n",(const char *)temp,data->getIntegrationTime () * 10000);
+	        printf("coordinata: %lf, target AZ: %lf, offset: %lf\n",coordinate*DR2D,targetAZ*DR2D,offset*DR2D);
 	        break;
         case Management::MNG_HOR_LAT:
             CTskySource.process (CTdateTime, m_site);
@@ -258,6 +263,8 @@ bool CEngineThread::processData ()
         case Management::MNG_PFP_Z:
 	    break;
         case Management::MNG_PFP_Y:
+        break;
+        default:
         break;
     }
     data->setDataX (coordinate);
@@ -862,6 +869,8 @@ void CEngineThread::setAxisOffsets()
 	   	case Management::MNG_PFP_Z:
 	   		break;
 	   	case Management::MNG_PFP_Y:
+	   		break;
+	   	default:
 	   		break;
     }
 }

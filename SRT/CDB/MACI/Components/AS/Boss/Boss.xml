@@ -13,4 +13,5 @@
 	Type="IDL:alma/SRTActiveSurface/SRTActiveSurfaceBoss:1.0"
 	Container="SRTActiveSurfaceContainer"
     ImplLang="cpp"
+   	Default="true"
 />

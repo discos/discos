@@ -67,7 +67,9 @@ public:
 	/**
 	 * Call this function to get the milliseconds of integration time
 	 */
-	void getIntegration(long &integr) const  { integr=m_integration; }
+	void getIntegration(long &integr) const  {
+		resultingSampleRate(m_integration,m_commonSampleRate,integr);
+	}
 	
 	/**
 	 * Call this function in order to get the start frequency value for each section. 
@@ -427,7 +429,14 @@ public:
 
 	long sectionNumber() { return m_inputsNumber; }
 
-	
+	/**
+	 * Computes the resulting integration time considering the sample rate and the integration time.
+	 * @param integration current integration time (msec)
+	 * @param sr current sample rate (MHz)
+	 * @param result integration time resulting from the two parameters
+	 * @return true if the resulting integration has to be rounded to match the two input parameters
+	 */
+	static bool resultingSampleRate(const long& integration,const double& sr,long& result);
 protected:
 	/**
 	 * Automatically called by the framework as a result of a connection request. See super-class for more details.

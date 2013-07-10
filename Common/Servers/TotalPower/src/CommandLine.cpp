@@ -505,6 +505,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		m_bandWidth[inputId]=newBW;
 		for (int j=0;j<m_inputsNumber;j++) m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
 		m_commonSampleRate=newSR;
+		m_integration=0;
 		// log warning about configuration that are ignored.
 		if (freq>=0) {
 			ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_FREQUENCY"));
@@ -1047,8 +1048,16 @@ void CCommandLine::setIntegration(const long& integration)  throw (BackendsError
 		throw impl;
 	}
 	if (integration>=0) {
-		m_integration=integration;
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_NOTICE,"INTEGRATION is now %ld (millisec)",m_integration));
+		long result;
+		bool out;
+		out=resultingSampleRate(integration,m_commonSampleRate,result);
+		m_integration=result;
+		if (!out) {
+			ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_NOTICE,"INTEGRATION is now %ld (millisec)",m_integration));
+		}
+		else {
+			ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_WARNING,"INTEGRATION is rounded to %ld (millisec)",m_integration));
+		}
 	}
 }
 
@@ -1183,13 +1192,16 @@ void CCommandLine::getTime(ACS::Time& tt) throw (ComponentErrors::SocketErrorExI
 void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 {
 	long chs=0;
+	long intTime;
 	// count the available channels.......
 	for(int i=0;i<m_inputsNumber;i++) {
 		if (m_enabled[i]) chs++;
 	}
 	bkd.sections=chs;
 	bkd.beams=m_beams;
-	bkd.integration=m_integration;
+	resultingSampleRate(m_integration,m_commonSampleRate,intTime);
+	bkd.integration=intTime;
+	//bkd.integration=m_integration;
 	bkd.sampleSize=m_sampleSize;
 }
 
@@ -1230,6 +1242,21 @@ void CCommandLine::saveTsys(const ACS::doubleSeq& tsys,const ACS::doubleSeq& rat
 		}
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::saveTsys()",(LM_INFO,"KELVIN_COUNTS_CONVERSION_FACTOR_SET"));
 	}
+}
+
+bool CCommandLine::resultingSampleRate(const long& integration,const double& sr,long& result)
+{
+	bool res=false;
+	long accumulations;
+	double temp;
+	temp=(double)integration*1000.0*sr;
+	accumulations=(long)round(temp);
+	if (accumulations<1) accumulations=1;
+	if (((temp-accumulations)>0.0) || ((temp-accumulations)<0.0)) {
+		res=true;
+	}
+	result=(long)round((accumulations/(sr*1000)));
+	return res;
 }
 
 // Protected Methods
@@ -1479,7 +1506,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 		return false;
 	}
 	// Common configurations.......
-	m_integration=DEFAULT_INTEGRATION;
+	m_integration=DEFAULT_INTEGRATION;  // integration if by default zero...that means the 1/samplerate is the real integration time
 	m_currentSampleRate=m_integration;  // this is given in milliseconds as sample period
 	m_sampleSize=SAMPLESIZE;
 	m_commonSampleRate=DEFAULT_SAMPLE_RATE;

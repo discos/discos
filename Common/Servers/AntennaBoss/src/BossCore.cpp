@@ -222,7 +222,8 @@ void CBossCore::getObservedHorizontal(TIMEVALUE& time,TIMEDIFFERENCE& duration,d
 		converter.getApparentHorizontal(az,el);
 	}
 	else {
-		m_observedHorizontals.selectPoint(time,az,el);
+		TIMEVALUE midTime(time.value().value+duration.value().value/2);
+		m_observedHorizontals.selectPoint(midTime,az,el);
 	}
 }
 
@@ -234,7 +235,8 @@ void CBossCore::getObservedEquatorial(TIMEVALUE& time,TIMEDIFFERENCE& duration,d
 		m_integratedObservedEquatorial.averagePoint(time,stopTime,ra,dec);
 	}
 	else {
-		m_observedEquatorials.selectPoint(time,ra,dec);
+		TIMEVALUE midTime(time.value().value+duration.value().value/2);
+		m_observedEquatorials.selectPoint(midTime,ra,dec);
 	}
 }
 
@@ -249,7 +251,8 @@ void CBossCore::getObservedGalactic(TIMEVALUE& time,TIMEDIFFERENCE& duration,dou
 		IRA::CSkySource::equatorialToGalactic(ra,dec,lng,lat);
 	}
 	else {
-		m_observedGalactics.selectPoint(time,lng,lat);
+		TIMEVALUE midTime(time.value().value+duration.value().value/2);
+		m_observedGalactics.selectPoint(midTime,lng,lat);
 	}
 }
 

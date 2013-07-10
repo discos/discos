@@ -389,10 +389,10 @@ void CProtocol::decodeData(BYTE *buff,const double& sampleRate,const WORD& prevS
 	clock=*((DWORD*)buff);
 	if (clock!=previousClock) { // stores the sample counter when the clock changes
 		if (isNewStream(prevStatus,prevCounter,counter) ) {
-			sampleCounter=2;
+			sampleCounter=1;   // this is a workaround the samples belonging to the first second of data are 1 less than expected and the missing one is the first
 		}
 		else {
-			sampleCounter=1;
+			sampleCounter=0;
 		}
 	}
 	else {
@@ -501,6 +501,7 @@ bool CProtocol::decodeFPGATime(const DWORD& clock,const double& sampleRate,const
 	DWORD clockT;
 	double period;
 	long second,minute,hour,day,micro;
+	ACS::TimeInterval temp;
 	TIMEDIFFERENCE bkndTime;
 	bkndTime.reset(); 
 	bkndTime.normalize(true);
@@ -512,12 +513,16 @@ bool CProtocol::decodeFPGATime(const DWORD& clock,const double& sampleRate,const
 	minute=clockT/60;
 	second=clockT % 60;
 	period=1.0/sampleRate; // sample rate is MHz so period is in microseconds
-	micro=(long)(period*((double)counter-0.5)); // take the mean time
+	//micro=(long)(period*((double)counter-0.5)); // take the mean time
+	micro=(long)(period*((double)counter)); // I'd like to assign the time to the start of the sample!
 	bkndTime.day(day);
 	bkndTime.hour(hour);
 	bkndTime.minute(minute);
 	bkndTime.second(second);
 	bkndTime.microSecond(micro);
+	temp=bkndTime.value().value;
+	temp-=(long long)(period*10);   // we have to shift back the time of one period...because the sample is referred to the period before.
+	bkndTime.value(temp);
 	getReferenceTime(tm);
 	tm+=bkndTime.value();
 	return true;

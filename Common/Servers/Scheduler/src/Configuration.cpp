@@ -88,6 +88,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component interface is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);
 	_GET_STRING_ATTRIBUTE("MinorServoBossInterface","Minor Servo Boss component interface is ",m_minorServoBossComp);
+	_GET_STRING_ATTRIBUTE("ActiveSurfaceBossInterface","Active Surface Boss component interface is ",m_activeSurfaceBossComp);
 	_GET_STRING_ATTRIBUTE("CustomLoggerInterface","Custom logger component interface is ",m_custoLoggerComp);
 	_GET_STRING_ATTRIBUTE("WeatherStationInstance","Weather station component interface is ",m_weatherComp);
 	_GET_STRING_ATTRIBUTE("DefaultBackendInstance","Default backend component instance is ",m_defaultBackendInst);
