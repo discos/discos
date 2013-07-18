@@ -110,13 +110,7 @@ void SetupThread::run()
                             return;
                         }
                         else if(!component_ref->isReady()) {
-                            string msg(comp_name + " not ready.");
-                            ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                            m_configuration->m_status = Management::MNG_FAILURE;
-                            m_configuration->m_isStarting = false;
-                            m_configuration->m_isConfigured = false;
-                            m_configuration->m_actualSetup = "unknown";
-                            return;
+                            continue;
                         }
                         else {
                             component_ref->stow(0);
@@ -178,7 +172,6 @@ void SetupThread::run()
     // Positioning
     counter = 0;
     while(true) {
-        cout << "positioning..." << endl;
         unsigned short num_of_on_target = 0;
         for(vector<string>::iterator iter = toMove.begin(); iter != toMove.end(); iter++) {
             string comp_name = *iter;
@@ -194,9 +187,7 @@ void SetupThread::run()
                             ACSErr::Completion_var completion;
                             ACS::doubleSeq * act_pos = refActPos->get_sync(completion.out());
                             ACS::doubleSeq target_pos = m_configuration->getPosition(comp_name);
-                            cout << "Target pos:" << endl;
                             for(size_t z=0; z!=target_pos.length(); z++)
-                                cout << "target_pos[" << z << "]: " << target_pos[z] << endl;
 
                             if(act_pos->length() != target_pos.length()) {
                                 ACS_SHORT_LOG((LM_ERROR, ("SetupThread: lenghts of target and act pos do not match")));
@@ -212,7 +203,6 @@ void SetupThread::run()
                                     on_target = false;
                             }
                             if(on_target) {
-                                cout << comp_name + " on target" << endl;
                                 ++num_of_on_target;
                                 continue;
                             }
@@ -227,7 +217,6 @@ void SetupThread::run()
                                     continue;
                                 }
                                 else if(component_ref->isReadyToSetup()) {
-                                    cout << comp_name + "->setup()" << endl;
                                     component_ref->setup(0);
                                     continue;
                                 }
@@ -259,13 +248,7 @@ void SetupThread::run()
                                     return;
                                 }
                                 else if(!component_ref->isReady()) {
-                                    string msg(comp_name + " not ready.");
-                                    ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                                    m_configuration->m_status = Management::MNG_FAILURE;
-                                    m_configuration->m_isStarting = false;
-                                    m_configuration->m_isConfigured = false;
-                                    m_configuration->m_actualSetup = "unknown";
-                                    return;
+                                    continue;
                                 }
                                 else {
                                     if(std::find(m_positioning.begin(), m_positioning.end(), comp_name) != m_positioning.end()) {
@@ -274,7 +257,6 @@ void SetupThread::run()
                                     }
                                     else {
                                         component_ref->setPosition(target_pos, 0);
-                                        cout << comp_name + "->setPosition()" << endl;
                                         m_positioning.push_back(comp_name);
                                         continue;
                                     }

@@ -42,76 +42,67 @@ void ParkThread::run()
 {
     AUTO_TRACE("ParkThread::run()");
     vector<string> pass_check; 
-    if(m_configuration->isConfigured()) {
 
-        // Park the components
-        unsigned long counter = 0;
-        vector<string> toMove(m_configuration->m_servosToMove);
+    // Put the servos in the position elevation independent and disable the axes 
+    unsigned long counter = 0;
+    vector<string> toMove(m_configuration->m_servosToMove);
 
-        // Positioning
-        counter = 0;
-        while(true) {
-            unsigned short num_of_on_target = 0;
-            for(vector<string>::iterator iter = toMove.begin(); iter != toMove.end(); iter++) {
-                string comp_name = *iter;
-                MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-                if((m_configuration->m_component_refs).count(comp_name)) {
-                    component_ref = (m_configuration->m_component_refs)[comp_name];
-                    // Positioning the minor servo
-                    try {
-                        if(!CORBA::is_nil(component_ref)) {
-                            // Compute the position difference
-                            ACS::ROdoubleSeq_var refActPos = component_ref->actPos();
-                            if (refActPos.ptr() != ACS::ROdoubleSeq::_nil()) {
-                                ACSErr::Completion_var completion;
-                                ACS::doubleSeq * act_pos = refActPos->get_sync(completion.out());
-                                ACS::doubleSeq target_pos = m_configuration->getPosition(comp_name);
+    // Positioning
+    counter = 0;
+    while(true) {
+        unsigned short num_of_on_target = 0;
+        for(vector<string>::iterator iter = toMove.begin(); iter != toMove.end(); iter++) {
+            string comp_name = *iter;
+            MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+            if((m_configuration->m_component_refs).count(comp_name)) {
+                component_ref = (m_configuration->m_component_refs)[comp_name];
+                // Positioning the minor servo
+                try {
+                    if(!CORBA::is_nil(component_ref)) {
+                        // Compute the position difference
+                        ACS::ROdoubleSeq_var refActPos = component_ref->actPos();
+                        if (refActPos.ptr() != ACS::ROdoubleSeq::_nil()) {
+                            ACSErr::Completion_var completion;
+                            ACS::doubleSeq * act_pos = refActPos->get_sync(completion.out());
+                            ACS::doubleSeq target_pos = m_configuration->getPosition(comp_name);
 
-                                if(act_pos->length() != target_pos.length()) {
-                                    ACS_SHORT_LOG((LM_ERROR, ("ParkThread: lenghts of target and act pos do not match")));
-                                    m_configuration->m_isParking = false;
-                                    if(find(pass_check.begin(), pass_check.end(), comp_name) == pass_check.end()) {
-                                        pass_check.push_back(comp_name);
-                                        ++num_of_on_target;
-                                    }
-                                    continue; // Try with the other servos
-                                }
-                                bool on_target = true;
-                                // Compute the difference between actual and target positions
-                                for(size_t i=0; i<target_pos.length(); i++) { 
-                                    if(fabs(target_pos[i] - (*act_pos)[i]) > component_ref->getTrackingDelta())
-                                        on_target = false;
-                                }
-                                if(on_target) {
-                                    ++num_of_on_target;
+                            if(act_pos->length() != target_pos.length()) {
+                                ACS_SHORT_LOG((LM_ERROR, ("ParkThread: lenghts of target and act pos do not match")));
+                                m_configuration->m_isParking = false;
+                                if(find(pass_check.begin(), pass_check.end(), comp_name) == pass_check.end()) {
                                     pass_check.push_back(comp_name);
-                                    continue;
+                                    ++num_of_on_target;
                                 }
-                                if(component_ref->isReady()) {
-                                    if(std::find(m_positioning.begin(), m_positioning.end(), comp_name) != m_positioning.end()) {
-                                        ACS_SHORT_LOG((LM_INFO, ("ParkThread: the " + comp_name + " is moving.").c_str()));
-                                        continue; // The servo is moving
-                                    }
-                                    else {
-                                        component_ref->setPosition(target_pos, 0);
-                                        m_positioning.push_back(comp_name);
-                                        continue;
-                                    }
+                                continue; // Try with the other servos
+                            }
+                            bool on_target = true;
+                            // Compute the difference between actual and target positions
+                            for(size_t i=0; i<target_pos.length(); i++) { 
+                                if(fabs(target_pos[i] - (*act_pos)[i]) > component_ref->getTrackingDelta())
+                                    on_target = false;
+                            }
+                            if(on_target) {
+                                ++num_of_on_target;
+                                pass_check.push_back(comp_name);
+                                continue;
+                            }
+                            if(component_ref->isReady()) {
+                                if(std::find(m_positioning.begin(), m_positioning.end(), comp_name) != m_positioning.end()) {
+                                    ACS_SHORT_LOG((LM_INFO, ("ParkThread: the " + comp_name + " is moving.").c_str()));
+                                    continue; // The servo is moving
+                                }
+                                else {
+                                    component_ref->setPosition(target_pos, 0);
+                                    m_positioning.push_back(comp_name);
+                                    m_configuration->m_isConfigured = false;
+                                    continue;
                                 }
                             }
                         }
                     }
-                    catch(...) {
-                        ACS_SHORT_LOG((LM_WARNING, ("ParkThread: error positioning "  + comp_name).c_str()));
-                        if(find(pass_check.begin(), pass_check.end(), comp_name) == pass_check.end()) {
-                            pass_check.push_back(comp_name);
-                            ++num_of_on_target;
-                        }
-                        continue;
-                    }
                 }
-                else {
-                    ACS_SHORT_LOG((LM_WARNING, ("ParkThread::run(): cannot get the component reference.")));
+                catch(...) {
+                    ACS_SHORT_LOG((LM_WARNING, ("ParkThread: error positioning "  + comp_name).c_str()));
                     if(find(pass_check.begin(), pass_check.end(), comp_name) == pass_check.end()) {
                         pass_check.push_back(comp_name);
                         ++num_of_on_target;
@@ -119,49 +110,60 @@ void ParkThread::run()
                     continue;
                 }
             }
-            if(toMove.size() == num_of_on_target)
-                break;
-
-            ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
-            sleep_ret = ACS::ThreadBase::sleep(PARK_ITER_SLEEP_TIME); // 2 seconds
-            counter += PARK_ITER_SLEEP_TIME / 2;
-            if(sleep_ret != SLEEP_OK || counter > PARK_MAX_ACTION_TIME) {
-                ACS_SHORT_LOG((LM_WARNING, ("ParkThread::run(): PARK_MAX_ACTION_TIME reached.")));
-                m_configuration->m_isParking = false;
-                return;
+            else {
+                ACS_SHORT_LOG((LM_WARNING, ("ParkThread::run(): cannot get the component reference.")));
+                if(find(pass_check.begin(), pass_check.end(), comp_name) == pass_check.end()) {
+                    pass_check.push_back(comp_name);
+                    ++num_of_on_target;
+                }
+                continue;
             }
         }
-        
-        // Wait till the position is stable 
+        if(toMove.size() == num_of_on_target)
+            break;
+
         ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
         sleep_ret = ACS::ThreadBase::sleep(PARK_ITER_SLEEP_TIME); // 2 seconds
+        counter += PARK_ITER_SLEEP_TIME / 2;
         if(sleep_ret != SLEEP_OK || counter > PARK_MAX_ACTION_TIME) {
+            ACS_SHORT_LOG((LM_WARNING, ("ParkThread::run(): PARK_MAX_ACTION_TIME reached.")));
             m_configuration->m_isParking = false;
             return;
         }
+    }
+    
+    // Wait till the position is stable 
+    ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
+    sleep_ret = ACS::ThreadBase::sleep(PARK_ITER_SLEEP_TIME); // 2 seconds
+    if(sleep_ret != SLEEP_OK || counter > PARK_MAX_ACTION_TIME) {
+        m_configuration->m_isParking = false;
+        return;
+    }
 
-        for(vector<string>::iterator iter = toMove.begin(); iter != toMove.end(); iter++) {
-            string comp_name = *iter;
-            MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-            if((m_configuration->m_component_refs).count(comp_name)) {
-                component_ref = (m_configuration->m_component_refs)[comp_name];
-                // Disabling the minor servos
-                try {
-                    if(!CORBA::is_nil(component_ref)) {
-                       if(component_ref->isReady()) {
-                           component_ref->disable(0);
-                       }
-                    }
-                }
-                catch(...) {
-                    ACS_SHORT_LOG((LM_ERROR, ("ParkThread: cannot disable "  + comp_name).c_str()));
+    for(vector<string>::iterator iter = toMove.begin(); iter != toMove.end(); iter++) {
+        string comp_name = *iter;
+        MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+        if((m_configuration->m_component_refs).count(comp_name)) {
+            component_ref = (m_configuration->m_component_refs)[comp_name];
+            // Disabling the minor servos
+            try {
+                if(!CORBA::is_nil(component_ref)) {
+                   if(component_ref->isReady()) {
+                       component_ref->disable(0);
+                       m_configuration->m_isConfigured = false;
+                   }
                 }
             }
-            else {
+            catch(...) {
                 ACS_SHORT_LOG((LM_ERROR, ("ParkThread: cannot disable "  + comp_name).c_str()));
             }
         }
+        else {
+            ACS_SHORT_LOG((LM_ERROR, ("ParkThread: cannot disable "  + comp_name).c_str()));
+        }
     }
+
+    /* Park the components
     else { 
         // Park the components
         unsigned long counter = 0;
@@ -228,6 +230,7 @@ void ParkThread::run()
                             }
                             else {
                                 component_ref->stow(0);
+                                m_configuration->m_isConfigured = false;
                                 continue;
                             }
                         }
@@ -270,7 +273,8 @@ void ParkThread::run()
                 return;
             }
         }
-    }
+    } 
+    */
 
     // Park DONE
     m_configuration->m_isParking = false;

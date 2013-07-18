@@ -6,6 +6,7 @@
 <Procedure name="setupCCB" args="0">
 <body>
 	antennaSetup=CCB
+    servoSetup=CCB
 	receiversSetup=CCB
 	initialize=CCB
 	device=0
@@ -16,6 +17,7 @@
 <Procedure name="setupKKG" args="0">
 <body>
 	antennaSetup=KKG
+    servoSetup=KKG
 	receiversSetup=KKG
 	receiversMode=SINGLEDISH
 	initialize=KKG
@@ -27,6 +29,7 @@
 <Procedure name="setupLLP" args="0">
 <body>
 	antennaSetup=LP
+    servoSetup=LLP
 	receiversSetup=LLP
 	receiversMode=XXC4
 	initialize=LLP
@@ -38,6 +41,7 @@
 <Procedure name="setupPPP" args="0">
 <body>
 	antennaSetup=LP
+    servoSetup=PPP
 	receiversSetup=PPP
 	receiversMode=C3XX
 	initialize=PPP
@@ -49,6 +53,7 @@
 <Procedure name="setupPLP" args="0">
 <body>
 	antennaSetup=LP
+    servoSetup=PLP
 	receiversSetup=PLP
 	receiversMode=C3C4
 	initialize=PLP

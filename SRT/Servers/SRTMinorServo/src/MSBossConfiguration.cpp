@@ -14,6 +14,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
     m_isElevationTracking = false;
     m_dynamic_comps.clear();
     m_services = Services;
+    m_isTrackingEn = false;
 }
 
 

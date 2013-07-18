@@ -32,6 +32,7 @@
 #include "MSBossPublisher.h"
 #include "MSParameters.h"
 #include "MSBossConfiguration.h"
+#include <SP_parser.h>
 
 using namespace baci;
 
@@ -88,11 +89,14 @@ public:
 
 		
 	/**
-	 * This method is used to stow the antenna.
+	 * This method is used to stow the minor servo. Only for a configured system.
 	 * @throw CORBA::SystemExcpetion
-	 * @throw ManagementErrors::ParkingErrorEx  
+	 * @throw ManagementErrors::ParkingErrorEx
 	 */
-	void park() throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx);
+	virtual void park() throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx);
+    
+    void parkImpl() throw (CORBA::SystemException, ManagementErrors::ParkingErrorExImpl);
+
     
     /** Return true if the elevation tracking is enabled */
     bool isTrackingEn();
@@ -120,7 +124,9 @@ public:
 	 * @throw CORBA::SystemException
 	 * @throw ManagementErrors::ConfigurationErrorEx
 	 */
-	void setup(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
+	virtual void setup(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
+    
+    void setupImpl(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorExImpl);
 
 
     /**
@@ -290,9 +296,6 @@ private:
     vector<ScanPosition> m_scan_pos;
 
     MSBossConfiguration * m_configuration;
-
-    /** Is the elevation tracking enabled?*/
-    bool m_is_tracking_en;
 
     bool m_scan_active;
 

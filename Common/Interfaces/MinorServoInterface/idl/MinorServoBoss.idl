@@ -103,7 +103,6 @@ module MinorServo {
 		
 		/** Return the commanded configuration */
 		string getCommandedSetup();
-
  
         /** 
          * Check if the scan is achievable

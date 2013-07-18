@@ -52,7 +52,7 @@ public:
 
     /** Destructor */
     ~MSBossConfiguration();
-
+    
     void init(std::string commandedSetup) throw (ManagementErrors::ConfigurationErrorEx);
 
     inline bool isConfigured() { return m_isConfigured; }

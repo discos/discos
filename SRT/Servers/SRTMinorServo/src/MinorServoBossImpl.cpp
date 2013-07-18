@@ -23,6 +23,8 @@
 #include "libCom.h"
 #include "MSBossConfiguration.h"
 
+using namespace SimpleParser;
+
 static pthread_mutex_t tracking_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 MSThreadParameters MinorServoBossImpl::m_thread_params;
@@ -41,7 +43,6 @@ MinorServoBossImpl::MinorServoBossImpl(
     m_commanded_conf = "none";
     m_actual_conf = "none";
     m_tracking_thread_ptr = NULL;
-    m_is_tracking_en = false;
     m_setup_thread_ptr = NULL;
     m_park_thread_ptr = NULL;
     m_scan_thread_ptr = NULL;
@@ -55,13 +56,18 @@ MinorServoBossImpl::MinorServoBossImpl(
     (m_thread_params.scan_data).positioning_time = 0;
     m_servo_scanned = "none";
     m_configuration = new MSBossConfiguration(m_services);
+    m_parser= new SimpleParser::CParser<MinorServoBossImpl>(this, 1);
 }
 
 
 MinorServoBossImpl::~MinorServoBossImpl() { 
     AUTO_TRACE("MinorServoBossImpl::~MinorServoBossImpl()"); 
+
     if(m_configuration != NULL)
         delete m_configuration;
+
+    if(m_parser != NULL)
+        delete m_parser;
 }
 
 
@@ -105,6 +111,18 @@ void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponen
     m_thread_params.commanded_conf = m_commanded_conf;
     m_thread_params.actual_conf = &m_actual_conf;
     (m_thread_params.actions).clear();
+
+    m_parser->add(
+            "servoPark", 
+            new function0<MinorServoBossImpl, non_constant, void_type>(this, &MinorServoBossImpl::parkImpl), 
+            0
+    );
+
+    m_parser->add(
+            "servoSetup", 
+            new function1<MinorServoBossImpl, non_constant, void_type, I<string_type> >(this, &MinorServoBossImpl::setupImpl), 
+            1
+    );
 }
 
 
@@ -156,7 +174,13 @@ void MinorServoBossImpl::cleanUp()
     AUTO_TRACE("MinorServoBossImpl::cleanUp()");
     stopPropertiesMonitoring();
 
-    turnTrackingOff();
+    try {
+        turnTrackingOff(); // Raises ConfigurationError
+    }
+    catch(...){
+        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::cleanUp(): some problems turning the elevation tracking off."));
+    }
+
 
     if (m_publisher_thread_ptr != NULL) {
         m_publisher_thread_ptr->suspend();
@@ -193,7 +217,12 @@ void MinorServoBossImpl::aboutToAbort()
     AUTO_TRACE("MinorServoBossImpl::aboutToAbort()");
     stopPropertiesMonitoring();
 
-    turnTrackingOff();
+    try {
+        turnTrackingOff();
+    }
+    catch(...){
+        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::aboutToAbort(): some problems turning the elevation tracking off."));
+    }
 
     if (m_publisher_thread_ptr != NULL) {
         m_publisher_thread_ptr->suspend();
@@ -231,23 +260,24 @@ void MinorServoBossImpl::setup(const char *config) throw (CORBA::SystemException
 {
     AUTO_TRACE("MinorServoBossImpl::setup()");
 
+    try {
+        setupImpl(config);
+    }
+	catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getConfigurationErrorEx();		
+    }
+}
+
+void MinorServoBossImpl::setupImpl(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorExImpl)
+{
     if(m_configuration->isStarting())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing another setup", true);
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing another setup", false);
 
     if(m_configuration->isParking())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a park", true);
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a park", false);
 
-    m_configuration->init(string(config));  //throw (ComponentErrors::CDBAccessExImpl);
-    // m_thread_params.tracking_thread_ptr = m_tracking_thread_ptr;
-    // m_thread_params.scan_thread_ptr = m_scan_thread_ptr;
-    // m_thread_params.actions = split(config_str, actions_separator);
-    // m_thread_params.tracking_list = &m_tracking_list;
-    // m_thread_params.component_refs = &m_component_refs;
-    // m_thread_params.services = m_services;
-    // m_thread_params.commanded_conf = m_commanded_conf;
-    // m_thread_params.actual_conf = &m_actual_conf;
-    // m_thread_params.tracking_mutex = &tracking_mutex;
-    // m_thread_params.is_scanning_ptr = &m_scanning;
+    m_configuration->init(string(config));  // Throw (ComponentErrors::CDBAccessExImpl);
 
     try {
         if(m_setup_thread_ptr != NULL)
@@ -259,7 +289,53 @@ void MinorServoBossImpl::setup(const char *config) throw (CORBA::SystemException
         }
     }
     catch(...) {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The MinorServoBoss is attempting to execute a previous setup", true);
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The MinorServoBoss is attempting to execute a previous setup", false);
+    }
+}
+
+
+void MinorServoBossImpl::park() throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx)
+{
+    try {
+        parkImpl();
+    }
+	catch (ManagementErrors::ParkingErrorExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getParkingErrorEx();		
+    }
+}
+
+void MinorServoBossImpl::parkImpl() throw (CORBA::SystemException, ManagementErrors::ParkingErrorExImpl)
+{
+    AUTO_TRACE("MinorServoBossImpl::parkImpl()");
+
+    if(m_configuration->isStarting()) {
+        THROW_EX(ManagementErrors, ParkingErrorEx, "The system is executing a setup.", false);
+    }
+
+    if(m_configuration->isParking())
+        THROW_EX(ManagementErrors, ParkingErrorEx, "The system is executing another park.", false);
+
+    try {
+        turnTrackingOff(); // Raises ConfigurationError
+    }
+    catch(...) {
+        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::park(): some problems turning the elevation tracking off."));
+    }
+
+    m_configuration->m_isParking = true;
+
+    try {
+        if(m_park_thread_ptr != NULL)
+            m_park_thread_ptr->restart();
+        else {
+            m_park_thread_ptr = getContainerServices()->getThreadManager()->create<ParkThread,
+               MSBossConfiguration *>("ParkThread", m_configuration);
+            m_park_thread_ptr->resume();
+        }
+    }
+    catch(...) {
+        THROW_EX(ManagementErrors, ParkingErrorEx, "The MinorServoBoss is attempting to execute a previous park", false);
     }
 }
 
@@ -273,57 +349,33 @@ bool MinorServoBossImpl::isParking() { return m_configuration->isParking(); }
 bool MinorServoBossImpl::isReady() { return m_configuration->isConfigured(); }
 
 
-void MinorServoBossImpl::park() throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx)
-{
-    AUTO_TRACE("MinorServoBossImpl::park()");
-
-    if(m_configuration->isStarting())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a setup.", true);
-
-    if(m_configuration->isParking())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing another park.", true);
-
-    m_configuration->m_isParking = true;
-    m_configuration->m_isConfigured = false;
-
-    turnTrackingOff();
-
-    try {
-        if(m_park_thread_ptr != NULL)
-            m_park_thread_ptr->restart();
-        else {
-            m_park_thread_ptr = getContainerServices()->getThreadManager()->create<ParkThread,
-               MSBossConfiguration *>("ParkThread", m_configuration);
-            m_park_thread_ptr->resume();
-        }
-    }
-    catch(...) {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The MinorServoBoss is attempting to execute a previous park", true);
-    }
-
-
-}
-
-
 CORBA::Boolean MinorServoBossImpl::command(const char *cmd, CORBA::String_out answer) throw (CORBA::SystemException)
 {
     AUTO_TRACE("MinorServoBossImpl::command()");
 
-	IRA::CString out;
-	bool res;
-	try {
-		m_parser->run(cmd, out);
-		res = true;
-	}
-	catch(ParserErrors::ParserErrorsExImpl& ex) {
-		res = false;
-	}
-	catch(ACSErr::ACSbaseExImpl& ex) {
-		ex.log(LM_ERROR); 
-		res = false;
-	}
-	answer = CORBA::string_dup((const char *)out);
-	return res;
+    IRA::CString out;
+    bool res;
+    try {
+        m_parser->run(cmd, out);
+        res = true;
+    }
+    catch(ParserErrors::ParserErrorsExImpl& ex) {
+        res = false;
+    }
+    catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
+        ex.log(LM_ERROR); 
+        res = false;
+    }
+    catch(ACSErr::ACSbaseExImpl& ex) {
+        ex.log(LM_ERROR); 
+        res = false;
+    }
+    catch(...) {
+        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::command(): unknown exception."));
+        res = false;
+    }
+    answer = CORBA::string_dup((const char *)out);
+    return res;
 }
 
 
@@ -379,8 +431,8 @@ void MinorServoBossImpl::stopScan() throw (ManagementErrors::SubscanErrorEx)
 
     usleep(SCAN_STOP_TIME_GUARD); // Wait a bit
 
-    if(m_is_tracking_en)
-        turnTrackingOn();
+    if(m_configuration->isTrackingEn())
+        turnTrackingOn(); // NO: it raises ConfigurationError
     else {
         int mutex_res = pthread_mutex_trylock(&tracking_mutex); // TODO: no!
         try {
@@ -851,7 +903,7 @@ void MinorServoBossImpl::startScan(
                         m_scan_pos[m_scan_pos.size() - 1] = scan_item;
 
                         m_thread_params.starting_scan_time = starting_time;
-                        m_thread_params.is_tracking_enabled = m_is_tracking_en;
+                        m_thread_params.is_tracking_enabled = m_configuration->m_isTrackingEn;
                         (m_thread_params.scan_data).scan_pos = &m_scan_pos;
                         (m_thread_params.scan_data).axis_id = axis;
                         (m_thread_params.scan_data).comp_name = comp_name;
@@ -952,12 +1004,12 @@ void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::Configuratio
     if(isParking())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is parking.", true);
 
-    if(!isReady())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is not ready.", true);
+    // if(!isReady())
+    //     THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is not ready.", true);
 
     int mutex_res = pthread_mutex_trylock(&tracking_mutex); 
     if(mutex_res != 0) {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is busy.", true);
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is busy.", true);
     }
 
     if(m_tracking_thread_ptr != NULL) {
