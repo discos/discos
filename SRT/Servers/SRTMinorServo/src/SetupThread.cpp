@@ -50,12 +50,13 @@ void SetupThread::run()
         return;
     }
 
+    vector<string> park_check; 
+
     // Park the components
     unsigned long counter = 0;
     vector<string> toPark(m_configuration->m_servosToPark);
     vector<string> toMove(m_configuration->m_servosToMove);
     while(true) {
-        unsigned short num_of_parked_comp = 0;
         for(vector<string>::iterator iter = toPark.begin(); iter != toPark.end(); iter++) {
             string comp_name = *iter;
             MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
@@ -74,7 +75,8 @@ void SetupThread::run()
                             continue;
                         }
                         else if(component_ref->isParked()) {
-                            ++num_of_parked_comp;
+                            if(find(park_check.begin(), park_check.end(), comp_name) == park_check.end())
+                                park_check.push_back(comp_name);
                             ACS_SHORT_LOG((LM_INFO, (string("SetupThread: the ") + comp_name + string(" is parked.")).c_str()));
                             continue;
                         }
@@ -83,22 +85,17 @@ void SetupThread::run()
                             continue;
                         }
                         else if(component_ref->isDisabledFromOtherDC()) {
-                            string msg(comp_name + " disabled from other DC.");
-                            ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                            m_configuration->m_status = Management::MNG_FAILURE;
-                            m_configuration->m_isStarting = false;
-                            m_configuration->m_isConfigured = false;
-                            m_configuration->m_actualSetup = "unknown";
-                            return;
+                            if(find(park_check.begin(), park_check.end(), comp_name) == park_check.end())
+                                park_check.push_back(comp_name);
+                            ACS_SHORT_LOG((LM_INFO, (string("SetupThread: the ") + comp_name + string(" is disabled from other DC.")).c_str()));
+                            continue;
                         }
                         else if(status_bset.test(STATUS_FAILURE)) {
                             string msg(comp_name + " in failure.");
                             ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                            m_configuration->m_status = Management::MNG_FAILURE;
-                            m_configuration->m_isStarting = false;
-                            m_configuration->m_isConfigured = false;
-                            m_configuration->m_actualSetup = "unknown";
-                            return;
+                            if(find(park_check.begin(), park_check.end(), comp_name) == park_check.end())
+                                park_check.push_back(comp_name);
+                            continue;
                         }
                         else if(component_ref->isInEmergencyStop()){
                             string msg(comp_name + " in emergency stop.");
@@ -144,7 +141,7 @@ void SetupThread::run()
                 return;
             }
         }
-        if(toPark.size() == num_of_parked_comp)
+        if(toPark.size() == park_check.size())
             break;
 
         ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
@@ -171,8 +168,8 @@ void SetupThread::run()
 
     // Positioning
     counter = 0;
+    vector<string> on_target_check; 
     while(true) {
-        unsigned short num_of_on_target = 0;
         for(vector<string>::iterator iter = toMove.begin(); iter != toMove.end(); iter++) {
             string comp_name = *iter;
             MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
@@ -203,7 +200,8 @@ void SetupThread::run()
                                     on_target = false;
                             }
                             if(on_target) {
-                                ++num_of_on_target;
+                                if(find(on_target_check.begin(), on_target_check.end(), comp_name) == on_target_check.end())
+                                    on_target_check.push_back(comp_name);
                                 continue;
                             }
                             else {
@@ -298,7 +296,7 @@ void SetupThread::run()
                 return;
             }
         }
-        if(toMove.size() == num_of_on_target)
+        if(toMove.size() == on_target_check.size())
             break;
 
         ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;

@@ -21,7 +21,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
 MSBossConfiguration::~MSBossConfiguration() {}
 
 
-void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::ConfigurationErrorEx)
+void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::ConfigurationErrorExImpl)
 {
     // Starting
     m_isStarting = true;
@@ -31,7 +31,7 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
     IRA::CString config;
     if(!CIRATools::getDBValue(m_services, setupMode.c_str(), config)) {
         m_isStarting = false;
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, setupMode + ": unavailable configuration code.", true);
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, setupMode + ": unavailable configuration code.", false);
     }
 
     // initializing
@@ -62,12 +62,12 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
                 m_component_refs[comp_name] = component_ref;
             else {
                 m_isStarting = false;
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, ("Cannot get component " + comp_name).c_str(), true);
+                THROW_EX(ManagementErrors, ConfigurationErrorEx, ("Cannot get component " + comp_name).c_str(), false);
             }
         }
         catch (maciErrType::CannotGetComponentExImpl& ex) {
             m_isStarting = false;
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, ("Cannot get the reference of " + comp_name).c_str(), true);
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, ("Cannot get the reference of " + comp_name).c_str(), false);
         }
 
         // Get the action
@@ -103,7 +103,7 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
 
             if(coefficients.empty()) {
                 m_isStarting = false;
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, ("No coefficients for " + comp_name).c_str(), true);
+                THROW_EX(ManagementErrors, ConfigurationErrorEx, ("No coefficients for " + comp_name).c_str(), false);
             }
 
             (m_servosCoefficients[comp_name]).push_back(coefficients);
@@ -114,7 +114,7 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
         if(m_servosCoefficients.count(comp_name) && m_component_refs.count(comp_name)) {
             if((m_servosCoefficients[comp_name]).size() != (m_component_refs[comp_name])->numberOfAxes()) {
                 m_isStarting = false;
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, "Mismatch between number of coefficients and number of axes", true);
+                THROW_EX(ManagementErrors, ConfigurationErrorEx, "Mismatch between number of coefficients and number of axes", false);
             }
         }
     }
@@ -143,7 +143,7 @@ ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, double elevati
         }
     }
     else {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, comp_name + "has no coefficients", true);
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, comp_name + "has no coefficients", false);
     }
 
     return positions;

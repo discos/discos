@@ -133,20 +133,22 @@ void WPStatusUpdater::runLoop()
                     status_bset.reset(STATUS_SETUP);
                 
                 // Set the PARKED bit of the status pattern
-                if(status_par.cabState == CAB_DISABLED_FROM_AIF_IN || status_par.cabState == CAB_DISABLED_FROM_OTHER_CAB
-                        || status_par.cabState == CAB_BLOCK_REMOVED)
-                    { 
-                        // Compute the difference of actual pos and park pos
-                        for(size_t i=0; i<((*m_params->park_positions)[address]).size(); i++) { 
-                            if(!(fabs(((*m_params->park_positions)[address])[i] - act_pos[i]) < (m_params->tracking_delta)[address])) {
-                                status_bset.reset(STATUS_PARKED);
-                                break;
-                            }
-                            status_bset.set(STATUS_PARKED);
-                        }
+                if(status_par.cabState == CAB_DISABLED_FROM_OTHER_CAB) { 
+                        status_bset.set(STATUS_PARKED);
                     }
-                else
-                    status_bset.reset(STATUS_PARKED);
+                else 
+                    if(status_par.cabState == CAB_DISABLED_FROM_AIF_IN || status_par.cabState == CAB_BLOCK_REMOVED) { 
+                            // Compute the difference of actual pos and park pos
+                            for(size_t i=0; i<((*m_params->park_positions)[address]).size(); i++) { 
+                                if(!(fabs(((*m_params->park_positions)[address])[i] - act_pos[i]) < (m_params->tracking_delta)[address])) {
+                                    status_bset.reset(STATUS_PARKED);
+                                    break;
+                                }
+                                status_bset.set(STATUS_PARKED);
+                            }
+                        }
+                    else
+                        status_bset.reset(STATUS_PARKED);
                 
                 // Set the WARNING bit of the status pattern
                 if(!app_status_bset.test(ASTATUS_WARNING) || !app_status_bset.test(ASTATUS_MESSAGE))
