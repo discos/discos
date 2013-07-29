@@ -60,12 +60,12 @@ USER_LIB =	-lACE \
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     = 
-EXECUTABLES_L   = TestClient 
+#EXECUTABLES_L   = TestClient 
 
 #
 # <brief description of xxxxx program>
-TestClient_OBJECTS   = TestClient
-TestClient_LIBS      = SRTActiveSurfaceBossImpl IRALibrary lanStubs usdStubs ASErrors ComponentErrors ClientErrors ManagementErrors
+#TestClient_OBJECTS   = TestClient
+#TestClient_LIBS      = SRTActiveSurfaceBossImpl IRALibrary lanStubs usdStubs ASErrors ComponentErrors ClientErrors ManagementErrors
 
 #
 # special compilation flags for single c sources
@@ -84,7 +84,7 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 SRTActiveSurfaceBossImpl_OBJECTS = SRTActiveSurfaceBossImpl SRTActiveSurfaceBossCore SRTActiveSurfaceBossWatchingThread SRTActiveSurfaceBossWorkingThread
-SRTActiveSurfaceBossImpl_LIBS = lanStubs usdStubs SRTActiveSurfaceBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors AntennaErrors IRALibrary ParserErrors
+SRTActiveSurfaceBossImpl_LIBS = lanStubs usdStubs ActiveSurfaceBossStubs SRTActiveSurfaceBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors AntennaErrors IRALibrary ParserErrors
 
 #
 # Scripts (public and local)

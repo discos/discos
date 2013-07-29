@@ -34,7 +34,7 @@
 #include <SP_parser.h>
 
 #define LOOPSTATUSTIME 10000000 // 1.0 second
-#define LOOPWORKINGTIME 2000000 // 0.2 seconds
+#define LOOPWORKINGTIME 5000000 // 0.5 seconds
 
 #define _SET_CDB(PROP,LVAL,ROUTINE) {	\
 	maci::ContainerServices* cs=getContainerServices();\
@@ -58,12 +58,12 @@ using namespace ASErrors;
 using namespace ComponentErrors;
 
 /**
- * This class implements the SRTActiveSurface::SRTActiveSurfaceBoss CORBA interface and the ACS Component.  
+ * This class implements the ActiveSurface::SRTActiveSurfaceBoss CORBA interface and the ACS Component.  
  * @author <a href=mailto:migoni@ca.astro.it>Carlo Migoni</a>
  * Osservatorio Astronomico di Cagliari, Italia
  * <br> 
  */
-class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public virtual POA_SRTActiveSurface::SRTActiveSurfaceBoss
+class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public virtual POA_ActiveSurface::SRTActiveSurfaceBoss
 {
 	public:
 	
@@ -121,13 +121,13 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	 *  This method can be called in order to disable the automatic update of the surface.
 	 * @throw CORBA::SystemException 
 	*/	
-    void disableAutoUpdate() throw (CORBA::SystemException);
+    void asOff() throw (CORBA::SystemException);
 		
 	/**
 	 *  This method can be called in order to enable the automatic update of the surface.
 	 * @throw CORBA::SystemException 
 	*/		
-	void enableAutoUpdate() throw (CORBA::SystemException);
+	void asOn() throw (CORBA::SystemException);
 
     /**
 	 * This is the command line interpreter for the sub-system. All the attributes and all the methods exposed by the boss can be
@@ -140,9 +140,24 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
 	//virtual char * command(const char *cmd) throw (CORBA::SystemException, ManagementErrors::CommandLineErrorEx);
 
+	/**
+	 * This method is used to park (i.e. reference position) the active surface).
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ManagementErrors::ParkingErrorEx  
+	 */
+	void park() throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx);
+
+	/**
+	 * This method will be used to configure the MinorServoBoss before starting an observation
+	 * @param config mnemonic code of the required configuration
+	 * @throw CORBA::SystemException
+	 * @throw ManagementErrors::ConfigurationErrorEx
+	 */
+	void setup(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
+
     void stop ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void setup ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+    //void setup ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
     void stow ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
@@ -154,7 +169,7 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 
     void correction ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius, CORBA::Double correction) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void setProfile ( SRTActiveSurface::TASProfile profile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+    void setProfile ( ActiveSurface::TASProfile profile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
     void usdStatus4GUIClient( CORBA::Long circle,  CORBA::Long actuator, CORBA::Long_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
@@ -198,7 +213,7 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
     /* *
      * Active Surface profile
      */
-    SRTActiveSurface::TASProfile m_profile;
+    ActiveSurface::TASProfile m_profile;
 };
 
 #endif /*SRTACTIVESURFACEBOSSIMPL_H*/

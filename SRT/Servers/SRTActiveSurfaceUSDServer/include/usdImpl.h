@@ -277,7 +277,7 @@ using namespace std;
  * IRA, Bologna<br>
  * @version "@(#) $Id: usdImpl.h,v 1.1 2011-03-24 09:18:00 c.migoni Exp $"
  */
-class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSurface::USD
+class USDImpl: public CharacteristicComponentImpl,public virtual POA_ActiveSurface::USD
 {
 	public:
   
@@ -523,7 +523,7 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSu
     	* pointer to LAN/485 component
     	*/
 	//MOD_LAN::lan* m_pLan;
-	SRTActiveSurface::lan* m_pLan;
+	ActiveSurface::lan* m_pLan;
 	
 	/** 
     	* sector of usd

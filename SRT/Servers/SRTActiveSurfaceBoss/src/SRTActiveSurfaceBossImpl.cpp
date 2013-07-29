@@ -12,12 +12,12 @@ using namespace SimpleParser;
 
 class SRTActiveSurfaceProfile2String {
 public:
-	static char *valToStr(SRTActiveSurface::TASProfile& val) {
+	static char *valToStr(ActiveSurface::TASProfile& val) {
 		char *c=new char[16];
-		if (val==SRTActiveSurface::AS_SHAPED) {
+		if (val==ActiveSurface::AS_SHAPED) {
 			strcpy(c,"S");
 		}
-		else if (val==SRTActiveSurface::AS_PARABOLIC) {
+		else if (val==ActiveSurface::AS_PARABOLIC) {
 			strcpy(c,"P");
 		}
 		else {
@@ -25,17 +25,17 @@ public:
 		}
 		return c;
 	}
-	static SRTActiveSurface::TASProfile strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
+	static ActiveSurface::TASProfile strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
 		IRA::CString strVal(str);
 		strVal.MakeUpper();
 		if (strVal=="S") {
-			return SRTActiveSurface::AS_SHAPED;
+			return ActiveSurface::AS_SHAPED;
 		}
 		else if (strVal=="P") {
-			return SRTActiveSurface::AS_PARABOLIC;
+			return ActiveSurface::AS_PARABOLIC;
 		}
 		else if (strVal=="PF") {
-			return SRTActiveSurface::AS_PARABOLIC_FIXED;
+			return ActiveSurface::AS_PARABOLIC_FIXED;
 		}
 		else {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"SRTActiveSurfaceProfile2String::strToVal()");
@@ -117,7 +117,7 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	}
 
     	// configure the parser.....
-    m_parser->add("asSetup",new function1<CSRTActiveSurfaceBossCore,non_constant,void_type,I<enum_type<SRTActiveSurfaceProfile2String,SRTActiveSurface::TASProfile> > >(boss,&CSRTActiveSurfaceBossCore::setProfile),1);
+    	m_parser->add("asSetup",new function1<CSRTActiveSurfaceBossCore,non_constant,void_type,I<enum_type<SRTActiveSurfaceProfile2String,ActiveSurface::TASProfile> > >(boss,&CSRTActiveSurfaceBossCore::setProfile),1);
 	m_parser->add("asOn",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asOn),0);
 	m_parser->add("asOff",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asOff),0);
 	m_parser->add("asPark",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asPark),0);
@@ -184,7 +184,7 @@ void SRTActiveSurfaceBossImpl::stop (CORBA::Long circle, CORBA::Long actuator, C
 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        resource->onewayAction(SRTActiveSurface::AS_STOP, circle, actuator, radius, 0, 0, 0, m_profile);
+        resource->onewayAction(ActiveSurface::AS_STOP, circle, actuator, radius, 0, 0, 0, m_profile);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -192,27 +192,71 @@ void SRTActiveSurfaceBossImpl::stop (CORBA::Long circle, CORBA::Long actuator, C
 	}
 }
 
+void SRTActiveSurfaceBossImpl::setup (const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx)
+{
+	AUTO_TRACE("SRTActiveSurfaceBossImpl::setup()");
+	IRA::CString strVal(config);
+	strVal.MakeUpper();
+	if (strVal=="S") {
+		setProfile(ActiveSurface::AS_SHAPED);
+	}
+	else if (strVal=="P") {
+		setProfile(ActiveSurface::AS_PARABOLIC);
+	}
+	else if (strVal=="PF") {
+		setProfile(ActiveSurface::AS_PARABOLIC_FIXED);
+	}
+	else {
+		_EXCPT(ManagementErrors::ConfigurationErrorExImpl,ex,"SRTActiveSurfaceBossImpl::setup()");
+		throw ex.getConfigurationErrorEx();
+	}
+/*	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
+	try { 
+		//resource->setProfile(config);	
+	}
+	catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getConfigurationErrorEx();
+	}
+*/
+}
+
+void SRTActiveSurfaceBossImpl::park () throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx)
+{
+	AUTO_TRACE("SRTActiveSurfaceBossImpl::park()");
+
+    	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
+    	try {
+        	resource->onewayAction(ActiveSurface::AS_REFPOS, 0, 0, 0, 0, 0, 0, m_profile);
+    	}
+    	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		_EXCPT(ManagementErrors::ParkingErrorExImpl,ex,"SRTActiveSurfaceBossImpl::park()");
+		throw ex.getParkingErrorEx();
+	}
+	setProfile (ActiveSurface::AS_SHAPED);
+}
+/*
 void SRTActiveSurfaceBossImpl::setup (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::setup()");
 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        resource->onewayAction(SRTActiveSurface::AS_SETUP, circle, actuator, radius, 0, 0, 0, m_profile);
+        resource->onewayAction(ActiveSurface::AS_SETUP, circle, actuator, radius, 0, 0, 0, m_profile);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();
 	}
 }
-
+*/
 void SRTActiveSurfaceBossImpl::stow (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::stow()");
 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        resource->onewayAction(SRTActiveSurface::AS_STOW, circle, actuator, radius, 0, 0, 0, m_profile);
+        resource->onewayAction(ActiveSurface::AS_STOW, circle, actuator, radius, 0, 0, 0, m_profile);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -226,7 +270,7 @@ void SRTActiveSurfaceBossImpl::refPos (CORBA::Long circle, CORBA::Long actuator,
 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        resource->onewayAction(SRTActiveSurface::AS_REFPOS, circle, actuator, radius, 0, 0, 0, m_profile);
+        resource->onewayAction(ActiveSurface::AS_REFPOS, circle, actuator, radius, 0, 0, 0, m_profile);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -241,7 +285,7 @@ void SRTActiveSurfaceBossImpl::update (CORBA::Double elevation) throw (CORBA::Sy
     	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
 
 	try {
-        	resource->onewayAction(SRTActiveSurface::AS_UPDATE, 0, 0, 0, elevation, 0, 0, m_profile);
+        	resource->onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation, 0, 0, m_profile);
     	}
     	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -255,7 +299,7 @@ void SRTActiveSurfaceBossImpl::up (CORBA::Long circle, CORBA::Long actuator, COR
 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        resource->onewayAction(SRTActiveSurface::AS_UP, circle, actuator, radius, 0, 0, 0, m_profile);
+        resource->onewayAction(ActiveSurface::AS_UP, circle, actuator, radius, 0, 0, 0, m_profile);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -269,7 +313,7 @@ void SRTActiveSurfaceBossImpl::down (CORBA::Long circle, CORBA::Long actuator, C
 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        resource->onewayAction(SRTActiveSurface::AS_DOWN, circle, actuator, radius, 0, 0, 0, m_profile);
+        resource->onewayAction(ActiveSurface::AS_DOWN, circle, actuator, radius, 0, 0, 0, m_profile);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -283,7 +327,7 @@ void SRTActiveSurfaceBossImpl::bottom (CORBA::Long circle, CORBA::Long actuator,
 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        resource->onewayAction(SRTActiveSurface::AS_BOTTOM, circle, actuator, radius, 0, 0, 0, m_profile);
+        resource->onewayAction(ActiveSurface::AS_BOTTOM, circle, actuator, radius, 0, 0, 0, m_profile);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -297,7 +341,7 @@ void SRTActiveSurfaceBossImpl::top (CORBA::Long circle, CORBA::Long actuator, CO
 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        resource->onewayAction(SRTActiveSurface::AS_TOP, circle, actuator, radius, 0, 0, 0, m_profile);
+        resource->onewayAction(ActiveSurface::AS_TOP, circle, actuator, radius, 0, 0, 0, m_profile);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -311,7 +355,7 @@ void SRTActiveSurfaceBossImpl::move (CORBA::Long circle,  CORBA::Long actuator, 
 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        resource->onewayAction(SRTActiveSurface::AS_MOVE, circle, actuator, radius, 0, 0, incr, m_profile);
+        resource->onewayAction(ActiveSurface::AS_MOVE, circle, actuator, radius, 0, 0, incr, m_profile);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -325,7 +369,7 @@ void SRTActiveSurfaceBossImpl::correction (CORBA::Long circle,  CORBA::Long actu
 
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
 	try {
-		resource->onewayAction(SRTActiveSurface::AS_CORRECTION, circle, actuator, radius, 0, correction, 0, m_profile);
+		resource->onewayAction(ActiveSurface::AS_CORRECTION, circle, actuator, radius, 0, correction, 0, m_profile);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -347,7 +391,7 @@ void SRTActiveSurfaceBossImpl::reset (CORBA::Long circle, CORBA::Long actuator, 
 	}
 }
 
-void SRTActiveSurfaceBossImpl::setProfile (SRTActiveSurface::TASProfile newProfile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
+void SRTActiveSurfaceBossImpl::setProfile (ActiveSurface::TASProfile newProfile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::setProfile()");
 
@@ -357,14 +401,13 @@ void SRTActiveSurfaceBossImpl::setProfile (SRTActiveSurface::TASProfile newProfi
 
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
 	try {
-		//resource->onewayAction(SRTActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, m_profile);
+		//resource->onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, m_profile);
 		resource->setProfile(m_profile);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();
 	}
-	
 }
 
 void SRTActiveSurfaceBossImpl::usdStatus4GUIClient (CORBA::Long circle, CORBA::Long actuator, CORBA::Long_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
@@ -447,16 +490,20 @@ void SRTActiveSurfaceBossImpl::recoverUSD (CORBA::Long circle, CORBA::Long actua
 	}
 }
 
-void SRTActiveSurfaceBossImpl::enableAutoUpdate() throw (CORBA::SystemException)
+void SRTActiveSurfaceBossImpl::asOn() throw (CORBA::SystemException)
 {
-    AUTO_TRACE("SRTActiveSurfaceBossImpl::enableAutoUpdate()");
-	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-	resource->enableAutoUpdate();
+	AUTO_TRACE("SRTActiveSurfaceBossImpl::asOn()");
+	if (m_profile != ActiveSurface::AS_PARABOLIC_FIXED) {
+		CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
+		resource->enableAutoUpdate();
+	}
+	else
+		update(0.0);
 }
 
-void SRTActiveSurfaceBossImpl::disableAutoUpdate() throw (CORBA::SystemException)
+void SRTActiveSurfaceBossImpl::asOff() throw (CORBA::SystemException)
 {
-    AUTO_TRACE("SRTActiveSurfaceBossImpl::disable()");
+    AUTO_TRACE("SRTActiveSurfaceBossImpl::asOff()");
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
 	resource->disableAutoUpdate();
 }

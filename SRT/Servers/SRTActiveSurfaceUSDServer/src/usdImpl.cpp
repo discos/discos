@@ -21,7 +21,7 @@ using namespace maci;
 
 USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* containerServices) : 
 	CharacteristicComponentImpl(CompName,containerServices),
-	m_pLan(SRTActiveSurface::lan::_nil()),
+	m_pLan(ActiveSurface::lan::_nil()),
     	//m_pLan(MOD_LAN::lan::_nil()),
 	m_delay_sp(this),
     	m_cmdPos_sp(this),
@@ -78,9 +78,9 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	// Use container to activate the object
 	ACS_SHORT_LOG((LM_INFO, "Getting component: %s", (const char*)lanCobName) );
 	//MOD_LAN::lan_var obj=MOD_LAN::lan::_nil();
-	SRTActiveSurface::lan_var obj=SRTActiveSurface::lan::_nil();
+	ActiveSurface::lan_var obj=ActiveSurface::lan::_nil();
 	try {
-		obj=cs->getComponent<SRTActiveSurface::lan>((const char *)lanCobName);
+		obj=cs->getComponent<ActiveSurface::lan>((const char *)lanCobName);
 	}
 	catch (maciErrType::CannotGetComponentExImpl)
 	{	
@@ -90,7 +90,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	}
 	
 	//m_pLan = MOD_LAN::lan::_narrow(obj.in());
-	m_pLan = SRTActiveSurface::lan::_narrow(obj.in());
+	m_pLan = ActiveSurface::lan::_narrow(obj.in());
 	ACS_SHORT_LOG((LM_INFO,"lan linked!"));
 
 	m_available = true;
@@ -252,7 +252,7 @@ void USDImpl::cleanUp()
 		}
 		 // be sure to set the reference to nil
 		 //m_pLan = MOD_LAN::lan::_nil();
-		 m_pLan = SRTActiveSurface::lan::_nil();
+		 m_pLan = ActiveSurface::lan::_nil();
 	}
 
 	delete [] actuatorsCorrections;
@@ -275,7 +275,7 @@ void USDImpl::aboutToAbort()
 
 	// be sure to set the reference to nil
 	//m_pLan = MOD_LAN::lan::_nil();
-	m_pLan = SRTActiveSurface::lan::_nil();
+	m_pLan = ActiveSurface::lan::_nil();
 }
 
 void USDImpl::reset() 	throw (CORBA::SystemException,ASErrors::ASErrorsEx)
@@ -593,17 +593,17 @@ void USDImpl::update (CORBA::Double elevation) throw (CORBA::SystemException,ASE
 		}
 		updatePos = (CORBA::Long)(updatePosMM*MM2STEP);
 		//printf("upPosStep = %ld\n",updatePos);
-		_GET_PROP(actPos,actpos,"usdImpl::update()")
+		//_GET_PROP(actPos,actpos,"usdImpl::update()")
 		//printf("actpos = %ld\n", actpos);
-		diffPos = labs(actpos-updatePos);
+		//diffPos = labs(actpos-updatePos);
 		//printf("threshold = %d\n", threshold);
-		if (diffPos >= threshold) {
+		//if (diffPos >= threshold) {
 		//	printf("diff >= threshold: %ld\n", diffPos);
 			_GET_PROP(status,m_status,"usdImpl::update()")
 			running = m_status&MRUN;
 			if (running == false)
 				_SET_PROP(cmdPos,updatePos,"usdImpl::update()")
-		}
+		//}
 	}
 	}
 	_CATCH_EXCP_THROW_EX(CORBA::SystemException,corbaError,"::usdImpl::update()",m_addr)	// for CORBA

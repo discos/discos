@@ -57,13 +57,13 @@ USER_LIB = 	-lACE \
 #
 # C programs (public and local)
 # -----------------------------
-EXECUTABLES     = SRTAS_Calibration
+#EXECUTABLES     = SRTAS_Calibration
 EXECUTABLES_L   =  
 
 #
 # <brief description of xxxxx program>
-SRTAS_Calibration_OBJECTS = SRTAS_Calibration
-SRTAS_Calibration_LIBS = IRALibrary SRTActiveSurfaceBossStubs ManagmentDefinitionsStubs ASErrors ClientErrors ComponentErrors ManagementErrors
+#SRTAS_Calibration_OBJECTS = SRTAS_Calibration
+#SRTAS_Calibration_LIBS = IRALibrary SRTActiveSurfaceBossStubs ManagmentDefinitionsStubs ASErrors ClientErrors ComponentErrors ManagementErrors
 
 # xxxxx_LDFLAGS   =
 

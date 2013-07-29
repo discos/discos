@@ -112,7 +112,7 @@ public:
 
     void calVer(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl);
 
-    void onewayAction(SRTActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, double elevation, double correction, long incr, SRTActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
+    void onewayAction(ActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
 
@@ -159,16 +159,16 @@ public:
 
 	void asPark() throw (ComponentErrors::ComponentErrorsEx);
 
-	void setProfile (const SRTActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsEx);
+	void setProfile (const ActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsExImpl);
 
 private:
 	ContainerServices* m_services;
 
-	SRTActiveSurface::USD_var usd[CIRCLES+1][ACTUATORS+1];
+	ActiveSurface::USD_var usd[CIRCLES+1][ACTUATORS+1];
 
-	SRTActiveSurface::USD_var lanradius[CIRCLES+1][ACTUATORS+1];
+	ActiveSurface::USD_var lanradius[CIRCLES+1][ACTUATORS+1];
 
-	SRTActiveSurface::lan_var lan[9][13];
+	ActiveSurface::lan_var lan[9][13];
 
 	IRA::CString lanCobName;
 
@@ -199,7 +199,7 @@ private:
 
     Antenna::AntennaBoss_var m_antennaBoss;
 
-    SRTActiveSurface::TASProfile m_profile;
+    ActiveSurface::TASProfile m_profile;
 
 	char *s_usdTable;
 

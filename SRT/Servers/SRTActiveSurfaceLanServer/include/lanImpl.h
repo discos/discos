@@ -40,7 +40,7 @@ using namespace ASErrors;
  * IRA, Bologna<br>
  * @version "@(#) $Id: lanImpl.h,v 1.1 2011-03-24 09:16:27 c.migoni Exp $"
  */
-class lanImpl: public CharacteristicComponentImpl,public virtual POA_SRTActiveSurface::lan
+class lanImpl: public CharacteristicComponentImpl,public virtual POA_ActiveSurface::lan
 //class lanImpl: public CharacteristicComponentImpl,public virtual POA_MOD_LAN::lan
 {
   public:

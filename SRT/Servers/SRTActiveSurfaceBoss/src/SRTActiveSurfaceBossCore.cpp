@@ -67,9 +67,9 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
 			lanCobName.Format("AS/SECTOR%02d/LAN%02d",s, l);
 			ACS_SHORT_LOG((LM_INFO, "Getting component: %s", (const char*)lanCobName));
 			printf("lan = %s\n", (const char*)lanCobName);
-			lan[s][l] = SRTActiveSurface::lan::_nil();
+			lan[s][l] = ActiveSurface::lan::_nil();
 			try {
-				lan[s][l] = m_services->getComponent<SRTActiveSurface::lan>((const char *)lanCobName);
+				lan[s][l] = m_services->getComponent<ActiveSurface::lan>((const char *)lanCobName);
 			}
         		catch (maciErrType::CannotGetComponentExImpl& ex) {
             			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::execute()");
@@ -84,9 +84,9 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
     	// Get reference to usd components
 	for (i = firstUSD; i <= lastUSD; i++) {
 		usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
-        	usd[circleIndex][usdCircleIndex] = SRTActiveSurface::USD::_nil();
+        	usd[circleIndex][usdCircleIndex] = ActiveSurface::USD::_nil();
         	try {
-            		usd[circleIndex][usdCircleIndex] = m_services->getComponent<SRTActiveSurface::USD>(serial_usd);
+            		usd[circleIndex][usdCircleIndex] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
 			lanradius[circleIndex][lanIndex] = usd[circleIndex][usdCircleIndex];
 			usdCounter++;
         	}
@@ -996,7 +996,7 @@ void CSRTActiveSurfaceBossCore::calVer (int circle, int actuator, int radius) th
 */
 }
 
-void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, double elevation, double correction, long incr, SRTActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl)
+void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
 	if (circle == 0 && actuator == 0 &&radius == 0) // ALL
 	{
@@ -1017,40 +1017,40 @@ void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction o
 				{
 			    		try {
                         			switch (onewayAction) {
-                            				case SRTActiveSurface::AS_STOP:
+                            				case ActiveSurface::AS_STOP:
                                 				usd[i][l]->stop();
                                 			break;
-                            				case SRTActiveSurface::AS_SETUP:
+                            				case ActiveSurface::AS_SETUP:
                                 				usd[i][l]->setup();
                                 			break;
-                            				case SRTActiveSurface::AS_STOW:
+                            				case ActiveSurface::AS_STOW:
                                 				usd[i][l]->stow();
                                 			break;
-                            				case SRTActiveSurface::AS_REFPOS:
+                            				case ActiveSurface::AS_REFPOS:
                                 				usd[i][l]->refPos();
                                 			break;
-                            				case SRTActiveSurface::AS_UP:
+                            				case ActiveSurface::AS_UP:
                                 				usd[i][l]->up();
                                 			break;
-                            				case SRTActiveSurface::AS_DOWN:
+                            				case ActiveSurface::AS_DOWN:
                                 				usd[i][l]->down();
                                 			break;
-                            				case SRTActiveSurface::AS_BOTTOM:
+                            				case ActiveSurface::AS_BOTTOM:
                                 				usd[i][l]->bottom();
                                 			break;
-                            				case SRTActiveSurface::AS_TOP:
+                            				case ActiveSurface::AS_TOP:
                                 				usd[i][l]->top();
                                 			break;
-                            				case SRTActiveSurface::AS_UPDATE:
+                            				case ActiveSurface::AS_UPDATE:
 								usd[i][l]->update(elevation);
                                 			break;
-                            				case SRTActiveSurface::AS_CORRECTION:
+                            				case ActiveSurface::AS_CORRECTION:
                                 				usd[i][l]->correction(correction*MM2STEP);
                                 			break;
-                            				case SRTActiveSurface::AS_MOVE:
+                            				case ActiveSurface::AS_MOVE:
                                 				usd[i][l]->move(incr*MM2STEP);
                                 			break;
-                            				case SRTActiveSurface::AS_PROFILE:
+                            				case ActiveSurface::AS_PROFILE:
                                 				usd[i][l]->setProfile(profile);
                                 			break;
                         			}
@@ -1092,39 +1092,39 @@ void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction o
             if (!CORBA::is_nil(usd[circle][l])) {
                 try {
                     switch (onewayAction) {
-                        case SRTActiveSurface::AS_STOP:
+                        case ActiveSurface::AS_STOP:
                             usd[circle][l]->stop();
                             break;
-                        case SRTActiveSurface::AS_SETUP:
+                        case ActiveSurface::AS_SETUP:
                             usd[circle][l]->setup();
                             break;
-                        case SRTActiveSurface::AS_STOW:
+                        case ActiveSurface::AS_STOW:
                             usd[circle][l]->stow();
                             break;
-                        case SRTActiveSurface::AS_REFPOS:
+                        case ActiveSurface::AS_REFPOS:
                             usd[circle][l]->refPos();
                             break;
-                        case SRTActiveSurface::AS_UP:
+                        case ActiveSurface::AS_UP:
                             usd[circle][l]->up();
                             break;
-                        case SRTActiveSurface::AS_DOWN:
+                        case ActiveSurface::AS_DOWN:
                             usd[circle][l]->down();
                             break;
-                        case SRTActiveSurface::AS_BOTTOM:
+                        case ActiveSurface::AS_BOTTOM:
                             usd[circle][l]->bottom();
                             break;
-                        case SRTActiveSurface::AS_TOP:
+                        case ActiveSurface::AS_TOP:
                             usd[circle][l]->top();
                             break;
-                        case SRTActiveSurface::AS_UPDATE:
+                        case ActiveSurface::AS_UPDATE:
                             break;
-                        case SRTActiveSurface::AS_CORRECTION:
+                        case ActiveSurface::AS_CORRECTION:
                             usd[circle][l]->correction(correction*MM2STEP);
                             break;
-                        case SRTActiveSurface::AS_MOVE:
+                        case ActiveSurface::AS_MOVE:
                             usd[circle][l]->move(incr*MM2STEP);
                             break;
-                        case SRTActiveSurface::AS_PROFILE:
+                        case ActiveSurface::AS_PROFILE:
                             break;
                     }
 					//CIRATools::Wait(LOOPTIME);
@@ -1164,39 +1164,39 @@ void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction o
             if (!CORBA::is_nil(lanradius[l+jumpradius][radius])) {
                 try {
                     switch (onewayAction) {
-                        case SRTActiveSurface::AS_STOP:
+                        case ActiveSurface::AS_STOP:
                             lanradius[l+jumpradius][radius]->stop();
                             break;
-                        case SRTActiveSurface::AS_SETUP:
+                        case ActiveSurface::AS_SETUP:
                             lanradius[l+jumpradius][radius]->setup();
                             break;
-                        case SRTActiveSurface::AS_STOW:
+                        case ActiveSurface::AS_STOW:
                             lanradius[l+jumpradius][radius]->stow();
                             break;
-                        case SRTActiveSurface::AS_REFPOS:
+                        case ActiveSurface::AS_REFPOS:
                             lanradius[l+jumpradius][radius]->refPos();
                             break;
-                        case SRTActiveSurface::AS_UP:
+                        case ActiveSurface::AS_UP:
                             lanradius[l+jumpradius][radius]->up();
                             break;
-                        case SRTActiveSurface::AS_DOWN:
+                        case ActiveSurface::AS_DOWN:
                             lanradius[l+jumpradius][radius]->down();
                             break;
-                        case SRTActiveSurface::AS_BOTTOM:
+                        case ActiveSurface::AS_BOTTOM:
                             lanradius[l+jumpradius][radius]->bottom();
                             break;
-                        case SRTActiveSurface::AS_TOP:
+                        case ActiveSurface::AS_TOP:
                             lanradius[l+jumpradius][radius]->top();
                             break;
-                        case SRTActiveSurface::AS_UPDATE:
+                        case ActiveSurface::AS_UPDATE:
                             break;
-                        case SRTActiveSurface::AS_CORRECTION:
+                        case ActiveSurface::AS_CORRECTION:
                             lanradius[l+jumpradius][radius]->correction(correction*MM2STEP);
                             break;
-                        case SRTActiveSurface::AS_MOVE:
+                        case ActiveSurface::AS_MOVE:
                             lanradius[l+jumpradius][radius]->move(incr*MM2STEP);
                             break;
-                        case SRTActiveSurface::AS_PROFILE:
+                        case ActiveSurface::AS_PROFILE:
                             break;
                     }
 					//CIRATools::Wait(LOOPTIME);
@@ -1229,39 +1229,39 @@ void CSRTActiveSurfaceBossCore::onewayAction(SRTActiveSurface::TASOneWayAction o
         if (!CORBA::is_nil(usd[circle][actuator])) { // SINGLE ACTUATOR
             try {
                 switch (onewayAction) {
-                    case SRTActiveSurface::AS_STOP:
+                    case ActiveSurface::AS_STOP:
                         usd[circle][actuator]->stop();
                         break;
-                    case SRTActiveSurface::AS_SETUP:
+                    case ActiveSurface::AS_SETUP:
                         usd[circle][actuator]->setup();
                         break;
-                     case SRTActiveSurface::AS_STOW:
+                     case ActiveSurface::AS_STOW:
                         usd[circle][actuator]->stow();
                         break;
-                     case SRTActiveSurface::AS_REFPOS:
+                     case ActiveSurface::AS_REFPOS:
                         usd[circle][actuator]->refPos();
                         break;
-                     case SRTActiveSurface::AS_UP:
+                     case ActiveSurface::AS_UP:
                         usd[circle][actuator]->up();
                         break;
-                     case SRTActiveSurface::AS_DOWN:
+                     case ActiveSurface::AS_DOWN:
                         usd[circle][actuator]->down();
                         break;
-                     case SRTActiveSurface::AS_BOTTOM:
+                     case ActiveSurface::AS_BOTTOM:
                         usd[circle][actuator]->bottom();
                         break;
-                     case SRTActiveSurface::AS_TOP:
+                     case ActiveSurface::AS_TOP:
                         usd[circle][actuator]->top();
                         break;
-                     case SRTActiveSurface::AS_UPDATE:
+                     case ActiveSurface::AS_UPDATE:
                         break;
-                     case SRTActiveSurface::AS_CORRECTION:
+                     case ActiveSurface::AS_CORRECTION:
                         usd[circle][actuator]->correction(correction*MM2STEP);
                         break;
-                     case SRTActiveSurface::AS_MOVE:
+                     case ActiveSurface::AS_MOVE:
                         usd[circle][actuator]->move(incr*MM2STEP);
                         break;
-                     case SRTActiveSurface::AS_PROFILE:
+                     case ActiveSurface::AS_PROFILE:
                         break;
                 }
             }
@@ -1386,40 +1386,40 @@ void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentEr
 
 void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
-    if (AutoUpdate) {
-	TIMEVALUE now;
-        double azimuth=0.0;
-        double elevation=0.0;
+    	if (AutoUpdate) {
+		TIMEVALUE now;
+        	double azimuth=0.0;
+        	double elevation=0.0;
 
-	IRA::CIRATools::getTime(now);
+		IRA::CIRATools::getTime(now);
 
-        try {
-            m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
-        }
-        catch (CORBA::SystemException& ex) {
-            _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
-            impl.setName(ex._name());
-		    impl.setMinor(ex.minor());
-            m_status=Management::MNG_WARNING;
-            throw impl;
-	    }
-        azimuth = 0.0;
-        try {
-            onewayAction(SRTActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
-        }
-        catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-            ex.log(LM_DEBUG);
-            throw ex.getComponentErrorsEx();
-        }
-    }
+        	try {
+	            	m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
+        	}
+        	catch (CORBA::SystemException& ex) {
+            		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
+            		impl.setName(ex._name());
+		    	impl.setMinor(ex.minor());
+            		m_status=Management::MNG_WARNING;
+            		throw impl;
+	    	}
+        	azimuth = 0.0;
+        	try {
+            		onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
+        	}
+        	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+            		ex.log(LM_DEBUG);
+            		throw ex.getComponentErrorsEx();
+        	}
+    	}
 }
 
-void CSRTActiveSurfaceBossCore::setProfile(const SRTActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsEx)
+void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
 {
 	_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
-	
+	m_profile = newProfile;	
     	try {
-        	onewayAction(SRTActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
+        	onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex) {
             	ex.log(LM_DEBUG);
@@ -1430,7 +1430,7 @@ void CSRTActiveSurfaceBossCore::setProfile(const SRTActiveSurface::TASProfile& n
 void CSRTActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentErrorsEx)
 {
     try {
-            onewayAction(SRTActiveSurface::AS_SETUP, 0, 0, 0, 0, 0, 0, m_profile);
+            onewayAction(ActiveSurface::AS_SETUP, 0, 0, 0, 0, 0, 0, m_profile);
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex) {
             ex.log(LM_DEBUG);
@@ -1440,24 +1440,35 @@ void CSRTActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentError
 
 void CSRTActiveSurfaceBossCore::asOn()
 {
-    enableAutoUpdate();
+	if (m_profile != ActiveSurface::AS_PARABOLIC_FIXED)
+		enableAutoUpdate();
+	else {
+		try {
+            		onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 0, 0, 0, m_profile);
+        	}
+        	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+            		ex.log(LM_DEBUG);
+            		throw ex.getComponentErrorsEx();
+        	}
+	}
 }
 
 void CSRTActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
 {
-    try {
-            onewayAction(SRTActiveSurface::AS_REFPOS, 0, 0, 0, 0, 0, 0, m_profile);
+	try {
+            onewayAction(ActiveSurface::AS_REFPOS, 0, 0, 0, 0, 0, 0, m_profile);
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex) {
             ex.log(LM_DEBUG);
             throw ex.getComponentErrorsEx();
         }
+	setProfile (ActiveSurface::AS_SHAPED);
 }
 
 void CSRTActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsEx)
 {
 	try {
-		onewayAction(SRTActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
+		onewayAction(ActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -1573,9 +1584,9 @@ void CSRTActiveSurfaceBossCore::recoverUSD(int circleIndex, int usdCircleIndex) 
 
     setserial (circleIndex, usdCircleIndex, lanIndex, serial_usd);
 
-    usd[circleIndex][usdCircleIndex] = SRTActiveSurface::USD::_nil();
+    usd[circleIndex][usdCircleIndex] = ActiveSurface::USD::_nil();
     try {
-        usd[circleIndex][usdCircleIndex] = m_services->getComponent<SRTActiveSurface::USD>(serial_usd);
+        usd[circleIndex][usdCircleIndex] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
         lanradius[circleIndex][lanIndex] = usd[circleIndex][usdCircleIndex];
     }
     catch (maciErrType::CannotGetComponentExImpl& ex) {
