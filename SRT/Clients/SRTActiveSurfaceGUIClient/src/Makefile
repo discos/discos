@@ -31,10 +31,10 @@ USER_LIB = 	-lACE \
 		-lTAO_PortableServer \
 		-lTAO_Svc_Utils \
 		-lTAO_CosTrading \
-        -lTAO_CosNotification \
+        	-lTAO_CosNotification \
 		-lTAO_DynamicAny \
 		-lTAO_IFR_Client \
-        -lTAO_CosProperty \
+        	-lTAO_CosProperty \
 		-lacsutil \
 		-lcdb \
 		-llogging \
@@ -136,7 +136,7 @@ QT_COMPILE_FILES = $(subst .cpp,,$(QT_UI_FILES_MOC) $(QT_UI_FILES_EXTERN_MOC_H) 
 #
 # <brief description of xxxxx program>
 SRTActiveSurfaceGUIClient_OBJECTS   = $(QT_COMPILE_FILES) SRTActiveSurfaceGUIui SRTActiveSurfaceCore SRTActiveSurfaceClientEventLoop SRTActiveSurfaceGUIClient 
-SRTActiveSurfaceGUIClient_LIBS      = IRALibrary SRTActiveSurfaceBossStubs ASErrors ComponentErrors ClientErrors ManagementErrors ManagmentDefinitionsStubs
+SRTActiveSurfaceGUIClient_LIBS      = IRALibrary ActiveSurfaceBossStubs SRTActiveSurfaceBossStubs ASErrors ComponentErrors ClientErrors ManagementErrors ManagmentDefinitionsStubs
 
 $(PROG)_OBJECTS            = $(PROG)
 $(PROG)_LDFLAGS            =

@@ -12,8 +12,8 @@ using namespace maci;
 int main(int argc,char* argv[])
 {
 	QApplication a(argc,argv);
-    SRTActiveSurface::SRTActiveSurfaceBoss_var ASBoss;
-    bool SRTActiveSurfaceBossComponent = false;
+    	ActiveSurface::SRTActiveSurfaceBoss_var ASBoss;
+    	bool SRTActiveSurfaceBossComponent = false;
   
 	SRTActiveSurfaceGUI* mySRTActiveSurfaceGUI = new SRTActiveSurfaceGUI;
 	mySRTActiveSurfaceGUI->setFixedSize(1270,960);

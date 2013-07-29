@@ -2,6 +2,7 @@
 
 // ACS includes
 #include <baci.h>
+#include <ActiveSurfaceBossC.h>
 #include <SRTActiveSurfaceBossC.h>
 #include <ClientErrors.h>
 #include <ComponentErrors.h>
@@ -26,7 +27,7 @@ class SRTActiveSurfaceCore : public QThread
         SRTActiveSurfaceCore(QObject *parent = 0);
         ~SRTActiveSurfaceCore();
 
-	    void setASBoss(SRTActiveSurface::SRTActiveSurfaceBoss_var ASBoss);
+	    void setASBoss(ActiveSurface::SRTActiveSurfaceBoss_var ASBoss);
 	    void run(void);
         void stop(void);
         void setactuator(int circle, int actuator);
@@ -85,7 +86,7 @@ class SRTActiveSurfaceCore : public QThread
         int setGUIasStatusCode();
         
 	private:
-	    SRTActiveSurface::SRTActiveSurfaceBoss_var tASBoss;
+	    ActiveSurface::SRTActiveSurfaceBoss_var tASBoss;
 	    int actuatorcounter;
 	    int circlecounter;
 	    int totacts;

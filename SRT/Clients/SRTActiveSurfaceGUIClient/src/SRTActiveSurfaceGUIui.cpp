@@ -23,7 +23,7 @@ SRTActiveSurfaceGUI::SRTActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasStatusCode()), this, SLOT(changeGUIasStatusCode()));
 }
 
-void SRTActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, SRTActiveSurface::SRTActiveSurfaceBoss_var theASBoss)
+void SRTActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::SRTActiveSurfaceBoss_var theASBoss)
 {
     mySRTActiveSurfaceClientEventLoop.setSimpleClient(theClient);
     mySRTActiveSurfaceCore.setASBoss(theASBoss);

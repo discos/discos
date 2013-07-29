@@ -14,7 +14,7 @@ class SRTActiveSurfaceGUI : public QWidget, public Ui_SRTActiveSurfaceGUI
     public:
         SRTActiveSurfaceGUI(QWidget *parent = 0);
 
-        void setParameters(maci::SimpleClient* theClient, SRTActiveSurface::SRTActiveSurfaceBoss_var theASBoss);
+        void setParameters(maci::SimpleClient* theClient, ActiveSurface::SRTActiveSurfaceBoss_var theASBoss);
         void clearactuatorslineedit();
 
     public slots:

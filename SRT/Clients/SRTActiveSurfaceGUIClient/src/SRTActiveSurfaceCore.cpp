@@ -771,9 +771,12 @@ void SRTActiveSurfaceCore::move(int circle, int actuator, int radius, long incr)
 void SRTActiveSurfaceCore::setProfile(long int profile)
 {
 	if (profile == 0)
-        tASBoss->setProfile(SRTActiveSurface::AS_SHAPED);
-    else
-        tASBoss->setProfile(SRTActiveSurface::AS_PARABOLIC);
+        	tASBoss->setProfile(SRTActiveSurface::AS_SHAPED);
+    	if (profile == 1)
+        	tASBoss->setProfile(SRTActiveSurface::AS_PARABOLIC);
+    	if (profile == 2)
+        	tASBoss->setProfile(SRTActiveSurface::AS_PARABOLIC_FIXED);
+
 
 }
 
