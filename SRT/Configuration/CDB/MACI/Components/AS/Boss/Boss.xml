@@ -10,7 +10,7 @@
               
 	Name="Boss"
 	Code="SRTActiveSurfaceBossImpl"
-	Type="IDL:alma/SRTActiveSurface/SRTActiveSurfaceBoss:1.0"
+	Type="IDL:alma/ActiveSurface/SRTActiveSurfaceBoss:1.0"
 	Container="SRTActiveSurfaceContainer"
     ImplLang="cpp"
     Default="true"
