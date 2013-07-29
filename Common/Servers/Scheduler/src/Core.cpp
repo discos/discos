@@ -150,9 +150,9 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("setLO","receivers",2,&CCore::remoteCall);
 	m_parser->add("antennaUnitOn","receivers",2,&CCore::remoteCall);
 	m_parser->add("antennaUnitOff","receivers",2,&CCore::remoteCall);
+
 	// backend
 	//m_parser->add("bck","backends",3,&CCore::remoteCall);
-
 	m_parser->add("integration","backend",3,&CCore::remoteCall);
 	m_parser->add("setSection","backend",3,&CCore::remoteCall);
 	m_parser->add("setAttenuation","backend",3,&CCore::remoteCall);
@@ -160,8 +160,15 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("getZero","backend",3,&CCore::remoteCall);
 	m_parser->add("initialize","backend",3,&CCore::remoteCall);
 
+	// minor servo
 	m_parser->add("servoSetup","minorservo",4,&CCore::remoteCall);
 	m_parser->add("servoPark","minorservo",4,&CCore::remoteCall);
+
+	// active surface
+	m_parser->add("asSetup","activesurface",5,&CCore::remoteCall);
+	m_parser->add("asPark","activesurface",5,&CCore::remoteCall);
+	m_parser->add("asOn","activesurface",5,&CCore::remoteCall);
+	m_parser->add("asOff","activesurface",5,&CCore::remoteCall);
 
 	// procedures
 	loadProcedures(m_config->getDefaultProceduresFile()); // throws ManagementErrors::ProcedureFileLoadingErrorExImpl
