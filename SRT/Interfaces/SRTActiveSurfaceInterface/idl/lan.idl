@@ -11,7 +11,7 @@
 #pragma prefix "alma"
 
 
-module SRTActiveSurface 
+module ActiveSurface 
 {
    /** @interface lan
      *  This interface rappresents the module converting comunications from serial to lan.

@@ -17,7 +17,7 @@
 
 #pragma prefix "alma"
 
-module SRTActiveSurface
+module ActiveSurface
 {
 
    /** @interface USD

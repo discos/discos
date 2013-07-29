@@ -16,10 +16,11 @@
 #include <ComponentErrors.idl>
 #include <ASErrors.idl>
 #include <ManagmentDefinitions.idl>
+#include <ActiveSurfaceBoss.idl>
 
 #pragma prefix "alma"
 
-module SRTActiveSurface {
+module ActiveSurface {
 
     enum TASOneWayAction {
         AS_STOP,
@@ -43,8 +44,6 @@ module SRTActiveSurface {
 	AS_PARABOLIC_FIXED
     };
     ACS_ENUM(TASProfile);
-
-
 	
 	/**
 	 * This component is the supervisor of the SRT Active Surface subsystem.
@@ -54,7 +53,7 @@ module SRTActiveSurface {
  	 * Osservatorio Astronomico di Cagliari, Italia
  	 * <br> 
 	*/ 
-	interface SRTActiveSurfaceBoss: ACS::CharacteristicComponent {
+	interface SRTActiveSurfaceBoss: ActiveSurface::ActiveSurfaceBoss {
 
         /**
 		* This attribute is a general flag that shows if the subsytem led by this component is ok or some problems 
@@ -69,7 +68,7 @@ module SRTActiveSurface {
 		*               to investigate the problem.
 		* @arg \c <i>MNG_FAILURE</i> a hard problem encoutered, the observation cannot be carried on. 
 		*/
-		readonly attribute Management::ROTSystemStatus status;
+		/**readonly attribute Management::ROTSystemStatus status;*/
 
         /**
 		 * This attribute shows if the SRTActiveSurfaceBoss component is enabled or not. Since this component is the subsystem leader and entry point,
@@ -87,7 +86,7 @@ module SRTActiveSurface {
 		 *  or not, is reported by the property <i>enable</i>.
 		 * @throw CORBA::SystemException 
 		*/
-		void disableAutoUpdate();
+		//void disableAutoUpdate();
 		
 		/**
 		 *  This method can be called in order to enable the component. That means restore all the functionalities of the  subsystem.
@@ -95,7 +94,7 @@ module SRTActiveSurface {
          *  If the component is enabled or not, is reported by the property <i>enabled</i>.
 		 * @throw CORBA::SystemException 
 		*/		
-		void enableAutoUpdate();
+		//void enableAutoUpdate();
 
         /**
 		 * This is the command line interpreter for the sub-system. All the attributes and all the methods exposed by the boss can be
@@ -105,7 +104,7 @@ module SRTActiveSurface {
 		 * free the returned string (@sa CORBA::string_free).
 		 * @todo provide e full description of the syntax and protocol (to be decided yet)
 		*/
-		boolean command (in string command,out string answer);
+		//boolean command (in string command,out string answer);
 		//string command(in string cmd) raises (ComponentErrors::ComponentErrorsEx);
 
         /**
@@ -113,7 +112,7 @@ module SRTActiveSurface {
         */
         void stop (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
 
-        void setup (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+        //void setup (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
 
         void stow (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
 
@@ -125,7 +124,7 @@ module SRTActiveSurface {
 
         void correction (in long circle, in long actuator, in long radius, in double correction) raises (ComponentErrors::ComponentErrorsEx);
 
-        void setProfile (in SRTActiveSurface::TASProfile profile) raises (ComponentErrors::ComponentErrorsEx);
+        void setProfile (in ActiveSurface::TASProfile profile) raises (ComponentErrors::ComponentErrorsEx);
 
         void usdStatus4GUIClient (in long circle, in long actuator, out long status) raises (ComponentErrors::ComponentErrorsEx);
 
