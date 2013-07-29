@@ -17,12 +17,11 @@ ifeq ($(TARGETSYS),SRT)
 	MODULES:=SRTDox \
 		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
 		SRTActiveSurfaceErrors \
-		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface \
+		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface\
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary \
-		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		TotalPower NoiseGenerator DBBC SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation \
-		SRT7GHzReceiver SRTLPBandReceiver CustomLogger\
+		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger \
+		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient\
 		SRTActiveSurfaceGUIClient SRTMountTextClient \
 		Plotter KStars SRTScripts \
