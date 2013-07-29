@@ -26,6 +26,7 @@
 #include <GenericBackendC.h>
 #include <CustomLoggerC.h>
 #include <GenericWeatherStationC.h>
+#include <ActiveSurfaceBossC.h>
 #include <ScheduleTimer.h>
 #include <Site.h>
 #include <DateTime.h>
