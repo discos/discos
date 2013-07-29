@@ -41,13 +41,17 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
     	char serial_usd[23];
 	char graf[5], mecc[4];
 	char * value;
+	char * value2;
 	int s, i, l;
 
-	s_usdTable = getenv ("ACS_CDB");
-	strcat(s_usdTable,USDTABLE);
-	ifstream usdTable(s_usdTable);
+	//s_usdTable = getenv ("ACS_CDB");
+	//strcat(s_usdTable,USDTABLE);
+	value2 = USDTABLE;
+	//ifstream usdTable(s_usdTable);
+	ifstream usdTable(value2);
 	if (!usdTable) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", s_usdTable));
+		//ACS_SHORT_LOG ((LM_INFO, "File %s not found", s_usdTable));
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value2));
 		exit(-1);
 	}
 
