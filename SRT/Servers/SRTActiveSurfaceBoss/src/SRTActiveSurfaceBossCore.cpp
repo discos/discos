@@ -1397,24 +1397,26 @@ void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::C
 
 		IRA::CIRATools::getTime(now);
 
-        	try {
-	            	m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
-        	}
-        	catch (CORBA::SystemException& ex) {
-            		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
-            		impl.setName(ex._name());
-		    	impl.setMinor(ex.minor());
-            		m_status=Management::MNG_WARNING;
-            		throw impl;
-	    	}
-        	azimuth = 0.0;
-        	try {
-            		onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
-        	}
-        	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-            		ex.log(LM_DEBUG);
-            		throw ex.getComponentErrorsEx();
-        	}
+		if (!CORBA::is_nil(m_antennaBoss)) {
+			try {
+	            		m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
+        		}	
+        		catch (CORBA::SystemException& ex) {
+            			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
+            			impl.setName(ex._name());
+		    		impl.setMinor(ex.minor());
+            			m_status=Management::MNG_WARNING;
+            			throw impl;
+	    		}
+        		azimuth = 0.0;
+        		try {
+            			onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
+        		}
+        		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+            			ex.log(LM_DEBUG);
+            			throw ex.getComponentErrorsEx();
+        		}
+		}
     	}
 }
 
