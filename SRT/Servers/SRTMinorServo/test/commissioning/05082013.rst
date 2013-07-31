@@ -1,0 +1,19 @@
+Test servo minori 5-10 agosto 2013
+==================================
+
+Configurazione CDB
+------------------
+Accertarsi che venga caricata correttamente la configurazione dal CDB quando si fa il setup.
+Infatti adesso il setup del SRP è suddiviso in piu' linee
+
+
+Eseguire test sulle correzioni in funzione dell'elevazione
+----------------------------------------------------------
+1. Eseguire il test con il mount non attivo, e verificare che il test venga eseguito
+
+2. Avviare il Mount container ed il mount
+
+3. Avviare il MinorServoBoss
+
+4. Eseguire il test automatico test_tracking.py
+

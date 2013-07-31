@@ -78,7 +78,7 @@ response_types = (
 
 # Available servers
 servers = {
-        'MSCUSimulator': ('192.168.200.201', 10000), # gavino4SRT
+        'MSCUSimulator': ('10.0.2.15', 10000), 
         'MSCU': ('192.168.3.14', 10000)
 }
 
