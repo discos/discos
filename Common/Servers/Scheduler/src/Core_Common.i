@@ -884,6 +884,34 @@ bool CCore::remoteCall(const IRA::CString& command,const IRA::CString& package,c
 			}
 			break;
 		}
+		case 5: { //active surface  package
+				try {
+					baci::ThreadSyncGuard guard(&m_mutex);
+					loadActiveSurfaceBoss(m_activeSurfaceBoss,m_activeSurfaceBossError);
+					if (CORBA::is_nil(m_activeSurfaceBoss)) {
+						_EXCPT(ManagementErrors::UnsupportedOperationExImpl,impl,"CCore::remoteCall()");
+						throw impl;
+					}
+				}
+				catch (ComponentErrors::CouldntGetComponentExImpl& err) {
+					_ADD_BACKTRACE(ParserErrors::PackageErrorExImpl,impl,err,"CCore::remoteCall()");
+					impl.setPackageName((const char *)package);
+					throw impl;
+				}
+				try {
+					res=m_activeSurfaceBoss->command((const char *)command,ret_val); // throw CORBA::SystemException
+					out=IRA::CString(ret_val);
+					CORBA::string_free(ret_val);
+					return res;
+				}
+				catch (CORBA::SystemException& err) {
+					_EXCPT(ParserErrors::PackageErrorExImpl,impl,"CCore::command()");
+					impl.setPackageName((const char *)package);
+					m_activeSurfaceBossError=true;
+					throw impl;
+				}
+				break;
+			}
 		default: {
 			_EXCPT(ParserErrors::PackageErrorExImpl,impl,"CCore::remoteCall()");
 			impl.setPackageName((const char *)package);

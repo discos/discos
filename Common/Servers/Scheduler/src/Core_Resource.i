@@ -55,7 +55,7 @@ void CCore::unloadAntennaBoss(Antenna::AntennaBoss_var& ref) const
 	}
 }
 
-/*void CCore::loadActiveSurfaceBoss(SRTActiveSurface::SRTActiveSurfaceBoss_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl)
+void CCore::loadActiveSurfaceBoss(ActiveSurface::ActiveSurfaceBoss_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl)
 {
 	if ((!CORBA::is_nil(ref)) && (errorDetected)) { // if reference was already taken, but an error was found....dispose the reference
 		try {
@@ -63,12 +63,12 @@ void CCore::unloadAntennaBoss(Antenna::AntennaBoss_var& ref) const
 		}
 		catch (...) { //dispose silently...if an error...no matter
 		}
-		ref=SRTActiveSurface::SRTActiveSurfaceBoss::_nil();
+		ref=ActiveSurface::ActiveSurfaceBoss::_nil();
 	}
 	if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
 		try {
 			if (m_config->getActiveSurfaceBossComponent()!="") {
-				ref=m_services->getDefaultComponent<SRTActiveSurface::SRTActiveSurfaceBoss>((const char*)m_config->getActiveSurfaceBossComponent());
+				ref=m_services->getDefaultComponent<ActiveSurface::ActiveSurfaceBoss>((const char*)m_config->getActiveSurfaceBossComponent());
 				ACS_LOG(LM_FULL_INFO,"CCore::loadActiveSurfaceBoss()",(LM_INFO,"ACTIVE_SURFACE_BOSS_LOCATED"));
 				errorDetected=false;
 			}
@@ -79,25 +79,25 @@ void CCore::unloadAntennaBoss(Antenna::AntennaBoss_var& ref) const
 		catch (maciErrType::CannotGetComponentExImpl& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadActiveSurfaceBoss()");
 			Impl.setComponentName((const char*)m_config->getActiveSurfaceBossComponent());
-			ref=SRTActiveSurface::SRTActiveSurfaceBoss::_nil();
+			ref=ActiveSurface::ActiveSurfaceBoss::_nil();
 			throw Impl;
 		}
 		catch (maciErrType::NoPermissionExImpl& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadActiveSurfaceBoss()");
 			Impl.setComponentName((const char*)m_config->getActiveSurfaceBossComponent());
-			ref=SRTActiveSurface::SRTActiveSurfaceBoss::_nil();
+			ref=ActiveSurface::ActiveSurfaceBoss::_nil();
 			throw Impl;
 		}
 		catch (maciErrType::NoDefaultComponentExImpl& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadActiveSurfaceBoss()");
 			Impl.setComponentName((const char*)m_config->getActiveSurfaceBossComponent());
-			ref=SRTActiveSurface::SRTActiveSurfaceBoss::_nil();
+			ref=ActiveSurface::ActiveSurfaceBoss::_nil();
 			throw Impl;
 		}
 	}
 }
 
-void CCore::unloadActiveSurfaceBoss(SRTActiveSurface::SRTActiveSurfaceBoss_var& ref) const
+void CCore::unloadActiveSurfaceBoss(ActiveSurface::ActiveSurfaceBoss_var& ref) const
 {
 	if (!CORBA::is_nil(ref)) {
 		try {
@@ -112,9 +112,9 @@ void CCore::unloadActiveSurfaceBoss(SRTActiveSurface::SRTActiveSurfaceBoss_var& 
 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::unloadActiveSurfaceBoss())");
 			impl.log(LM_WARNING);
 		}
-		ref=SRTActiveSurface::SRTActiveSurfaceBoss::_nil();
+		ref=ActiveSurface::ActiveSurfaceBoss::_nil();
 	}
-}*/
+}
 
 void CCore::loadMinorServoBoss(MinorServo::MinorServoBoss_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl)
 {

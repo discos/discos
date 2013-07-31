@@ -5,13 +5,15 @@
 #define RESOURCE_INIT m_antennaBoss=Antenna::AntennaBoss::_nil(); \
 									m_receiversBoss=Receivers::ReceiversBoss::_nil();	\
 									m_minorServoBoss=MinorServo::MinorServoBoss::_nil(); \
+									m_activeSurfaceBoss=ActiveSurface::ActiveSurfaceBoss::_nil(); 	\
 									m_defaultBackend=Backends::GenericBackend::_nil(); \
 									m_defaultDataReceiver=Management::DataReceiver::_nil(); \
 									m_customLogger=Management::CustomLogger::_nil(); \
 									m_weatherStation=Weather::GenericWeatherStation::_nil(); \
 									m_antennaNC=NULL; \
 									m_isTracking=false; \
-									m_antennaBossError=m_receiversBossError=m_minorServoBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=m_weatherStationError=false; \
+									m_antennaBossError=m_receiversBossError=m_minorServoBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=\
+									m_activeSurfaceBossError=m_weatherStationError=false; \
 									m_currentDevice=0;\
 									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false; \
 									
@@ -79,6 +81,14 @@ MinorServo::MinorServoBoss_var m_minorServoBoss;
  */
 bool m_minorServoBossError;
 /**
+ * Active Surface Boss reference
+ */
+ActiveSurface::ActiveSurfaceBoss_var m_activeSurfaceBoss;
+/**
+ * true if an error was detected when communicating to the active surface  boss
+ */
+bool m_activeSurfaceBossError;
+/**
  * CustomLogger reference
  */
 Management::CustomLogger_var m_customLogger;
@@ -115,7 +125,7 @@ IRA::CString m_defaultDataReceiverInstance;
  */
 Management::DataReceiver_var m_defaultDataReceiver;
 /**
- * true if an error was detected when comminicating to the default data receiver
+ * true if an error was detected when communicating to the default data receiver
  */
 bool m_defaultDataReceiverError;
 /**
@@ -154,13 +164,13 @@ void unloadAntennaBoss(Antenna::AntennaBoss_var& ref) const;
  * @param ref the pointer to the active surface boss component
  * @param errorDetected this flag is true if the reference seems not valid any more and the reference should not be considered valid any more
  */
-//void loadActiveSurfaceBoss(SRTActiveSurface::SRTActiveSurfaceBoss_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl);
+void loadActiveSurfaceBoss(ActiveSurface::ActiveSurfaceBoss_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl);
 
 /**
  * used to free the reference to the active surface  boss component
  * @param ref reference to the  boss component
  */
-//void unloadActiveSurfaceBoss(SRTActiveSurface::SRTActiveSurfaceBoss_var& ref) const;
+void unloadActiveSurfaceBoss(ActiveSurface::ActiveSurfaceBoss_var& ref) const;
 
 /**
  * used to get a reference to the minor servo  boss component.
