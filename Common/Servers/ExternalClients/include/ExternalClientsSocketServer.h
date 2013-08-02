@@ -17,6 +17,8 @@
 #include <ManagementErrors.h>
 #include "Configuration.h"
 #include <SchedulerC.h>
+#include <AntennaBossC.h>
+#include <ObservatoryC.h>
 
 #define BUFFERSIZE 1000
 #define GAVINO "MANAGEMENT/Gavino"
@@ -108,12 +110,19 @@ private:
     CSocket newExternalClientsSocketServer;
     /** This is the reference to the scheduler component */
     Management::Scheduler_var m_Scheduler;
+    /** This is the reference to the antenna boss component */
+    Antenna::AntennaBoss_var m_antennaBoss;
+    /**
+	 * This is the reference to the observatory component
+	 */
+	Antenna::Observatory_var m_observatory;
 
     int receiveBuffer(BYTE *Msg,WORD Len);
     void printBuffer(BYTE *Buff,WORD Len);
     OperationResult sendBuffer(BYTE *Msg,WORD Len);
     bool m_accept;
     char superVisorName[20];
+    IRA::CString m_observatoryComp;
 };
 
 #endif
