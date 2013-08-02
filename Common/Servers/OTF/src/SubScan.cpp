@@ -27,6 +27,7 @@ double glon =0.0;
 double glat =0.0; 
 double pAngle =0.0;
 
+
 /**
  * Initialization of site parameters
  **/
@@ -1175,7 +1176,7 @@ void SubScan::coordConvert(const double& lon, const double& lat,
  */
 void SubScan::setPointingScan() throw (AntennaErrors::RateTooHighExImpl)
 {
-	IRA::CString prtime, printerval;
+	//IRA::CString prtime, printerval;
 	TIMEDIFFERENCE halfDuration(m_subScanDuration.value());
 	halfDuration.divide(2);
 	////printf("Half Scan Duration: %lf\n",(double)halfDuration.value().value);
@@ -1199,14 +1200,14 @@ void SubScan::setPointingScan() throw (AntennaErrors::RateTooHighExImpl)
 	////printf("Target EL at mid-scan: %lf\n",m_targetEl);
 	if (m_geometry==Antenna::SUBSCAN_CONSTLAT){
 		// Following the source diurnal arc and adding the foreseen half-span and the offsets
-		coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_startUT, m_dut1, site);
+		coordConvert(m_origCenterRA, m_origCenterDec, m_coordFrame, m_startUT, m_dut1, site);
 		m_startLat=el+m_latoff;
 		if (m_direction==Antenna::SUBSCAN_INCREASE){
 			m_startLon=az-(m_lonSpan/(2.0*cos(m_targetEl)))+m_lonoff/cos(m_targetEl);
 		}else{
 			m_startLon=az+(m_lonSpan/(2.0*cos(m_targetEl)))+m_lonoff/cos(m_targetEl);
 		}
-		coordConvert(m_centerRA, m_centerDec, m_coordFrame, m_stopUT, m_dut1, site);
+		coordConvert(m_origCenterRA, m_origCenterDec, m_coordFrame, m_stopUT, m_dut1, site);
 		m_stopLat=el+m_latoff;
 		if (m_direction==Antenna::SUBSCAN_INCREASE){
 			m_stopLon=az+(m_lonSpan/(2.0*cos(m_targetEl)))+m_lonoff/cos(m_targetEl);
@@ -1216,20 +1217,20 @@ void SubScan::setPointingScan() throw (AntennaErrors::RateTooHighExImpl)
 
 
 	} else if (m_geometry==Antenna::SUBSCAN_CONSTLON){
-			coordConvert(m_centerRA, m_centerDec, m_coordFrame, m_startUT, m_dut1, site);
-			m_startLon=az+m_lonoff/cos(m_targetEl);
+			coordConvert(m_origCenterRA, m_origCenterDec, m_coordFrame, m_startUT, m_dut1, site);
 			if (m_direction==Antenna::SUBSCAN_INCREASE){
 				m_startLat=el-(m_latSpan/(2.0))+m_latoff;
 			}else{
 				m_startLat=el+(m_latSpan/(2.0))+m_latoff;
 			}
-			coordConvert(m_centerRA, m_centerDec, m_coordFrame, m_stopUT, m_dut1, site);
-			m_stopLon=az+m_lonoff/cos(m_targetEl);
+			m_startLon=az+m_lonoff/cos(m_targetEl);
+			coordConvert(m_origCenterRA, m_origCenterDec, m_coordFrame, m_stopUT, m_dut1, site);
 			if (m_direction==Antenna::SUBSCAN_INCREASE){
 				m_stopLat=el+(m_latSpan/(2.0))+m_latoff;
 			}else{
 				m_stopLat=el-(m_latSpan/(2.0))+m_latoff;
 			}
+			m_stopLon=az+m_lonoff/cos(m_targetEl);
 	}
 	m_lonRate=(m_lonSpan/cos(m_targetEl))/(IRA::CIRATools::timeMicroSeconds(m_subScanDuration)/1000000.0);
 	m_latRate=(m_latSpan)/(IRA::CIRATools::timeMicroSeconds(m_subScanDuration)/1000000.0);
@@ -1282,13 +1283,13 @@ void SubScan::setPointingScan() throw (AntennaErrors::RateTooHighExImpl)
 		m_rampStartTime.subtract(m_rampDuration.value());
 		coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_rampStartTime, m_dut1, site);
 		m_rampStartLon=az+m_lonoff/cos(m_targetEl);
-		m_rampStartLat=m_startLat-(0.5*m_rampLatAcceleration*(pow((double(IRA::CIRATools::timeMicroSeconds(m_rampDuration))*0.000001),2.0)))+m_latoff;
+		m_rampStartLat=m_startLat-(0.5*m_rampLatAcceleration*(pow((double(IRA::CIRATools::timeMicroSeconds(m_rampDuration))*0.000001),2.0)))/*+m_latoff*/;
 		//deceleration ramp after data acquisition
 		m_rampStopTime.value(m_stopUT.value());
 		m_rampStopTime.add(m_rampDuration.value());
 		coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_rampStopTime, m_dut1, site);
 		m_rampStopLon=az+m_lonoff/cos(m_targetEl);
-		m_rampStopLat=m_stopLat+(0.5*m_rampLatAcceleration*(pow((double(IRA::CIRATools::timeMicroSeconds(m_rampDuration))*0.000001),2.0)))+m_latoff;
+		m_rampStopLat=m_stopLat+(0.5*m_rampLatAcceleration*(pow((double(IRA::CIRATools::timeMicroSeconds(m_rampDuration))*0.000001),2.0)))/*+m_latoff*/;
 	}
 	else if (m_geometry==Antenna::SUBSCAN_CONSTLAT) {
 		if (m_direction==Antenna::SUBSCAN_INCREASE) {
@@ -1304,44 +1305,44 @@ void SubScan::setPointingScan() throw (AntennaErrors::RateTooHighExImpl)
 		m_rampStartTime.value(m_startUT.value());
 		m_rampStartTime.subtract(m_rampDuration.value());
 		coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_rampStartTime, m_dut1, site);
-		m_rampStartLon=m_startLon-(0.5*m_rampLonAcceleration*(pow((double(IRA::CIRATools::timeMicroSeconds(m_rampDuration))*0.000001),2.0)))+m_lonoff/cos(m_targetEl);
+		m_rampStartLon=m_startLon-(0.5*m_rampLonAcceleration*(pow((double(IRA::CIRATools::timeMicroSeconds(m_rampDuration))*0.000001),2.0)))/*+m_lonoff/cos(m_targetEl)*/;
 		m_rampStartLat=el+m_latoff;
 		// deceleration after data acquisition
 		m_rampStopTime.value(m_stopUT.value());
 		m_rampStopTime.add(m_rampDuration.value());
 		coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_rampStopTime, m_dut1, site);
 		m_rampStopLat=el+m_latoff;
-		m_rampStopLon=m_stopLon+(0.5*m_rampLonAcceleration*(pow((double(IRA::CIRATools::timeMicroSeconds(m_rampDuration))*0.000001),2.0)))+m_lonoff/cos(m_targetEl);
+		m_rampStopLon=m_stopLon+(0.5*m_rampLonAcceleration*(pow((double(IRA::CIRATools::timeMicroSeconds(m_rampDuration))*0.000001),2.0)))/*+m_lonoff/cos(m_targetEl)*/;
 	}
 
 	//printf("* m_rampStartLon: %lf\n",m_rampStartLon*DR2D);
 	//printf("* m_rampStartLat: %lf\n",m_rampStartLat*DR2D);
-	IRA::CIRATools::timeToStr(m_rampStartTime.value().value, prtime);
+	//IRA::CIRATools::timeToStr(m_rampStartTime.value().value, prtime);
 	//printf("* m_rampStartTime: %s\n", (const char *)prtime);
-	IRA::CIRATools::intervalToStr(m_rampDuration.value().value, printerval);
+	//IRA::CIRATools::intervalToStr(m_rampDuration.value().value, printerval);
 	//printf("* m_rampDuration: %s\n", (const char *)printerval);
-	IRA::CIRATools::timeToStr(m_startUT.value().value, prtime);
+	//IRA::CIRATools::timeToStr(m_startUT.value().value, prtime);
 	//printf("* m_startLon: %lf\n",m_startLon*DR2D);
 	//printf("* m_startLat: %lf\n",m_startLat*DR2D);
 	//printf("* m_startUT: %s\n", (const char *)prtime);
-	IRA::CIRATools::intervalToStr(m_subScanDuration.value().value, printerval);
+	//IRA::CIRATools::intervalToStr(m_subScanDuration.value().value, printerval);
 	//printf("* m_subScanDuration: %s\n", (const char *)printerval);
 	//printf("* m_stopLon: %lf\n",m_stopLon*DR2D);
 	//printf("* m_stopLat: %lf\n",m_stopLat*DR2D);
-	IRA::CIRATools::timeToStr(m_stopUT.value().value, prtime);
+	//IRA::CIRATools::timeToStr(m_stopUT.value().value, prtime);
 	//printf("* m_stopUT: %s\n", (const char *)prtime);
 	//printf("* m_rampStopLon: %lf\n",m_rampStopLon*DR2D);
 	//printf("* m_rampStopLat: %lf\n",m_rampStopLat*DR2D);
-	IRA::CIRATools::timeToStr(m_rampStopTime.value().value, prtime);
+	//IRA::CIRATools::timeToStr(m_rampStopTime.value().value, prtime);
 	//printf("* m_rampStopTime: %s\n", (const char *)prtime);
 	//checking the source positions at the scan start-mid-stop instants
-	coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_startUT, m_dut1, site);
+	//coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_startUT, m_dut1, site);
 	//printf("* Source az at start: %lf\n",az*DR2D);
 	//printf("* Source el at start: %lf\n",el*DR2D);
-	coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_midUT, m_dut1, site);
+	//coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_midUT, m_dut1, site);
 	//printf("* Source az at mid-scan: %lf\n",az*DR2D);
 	//printf("* Source el at mid-scan: %lf\n",el*DR2D);
-	coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_stopUT, m_dut1, site);
+	//coordConvert(m_centerLon, m_centerLat, m_coordFrame, m_stopUT, m_dut1, site);
 	//printf("* Source az at stop: %lf\n",az*DR2D);
 	//printf("* Source el at stop: %lf\n",el*DR2D);
 
@@ -1431,9 +1432,9 @@ void SubScan::computePointingScan(const TIMEVALUE& time){
 	   	coordConvert(m_centerLon, m_centerLat, m_coordFrame, utTime, m_dut1, site);
 	   	if (m_geometry==Antenna::SUBSCAN_CONSTLON){
 	   		tmpLon=az+m_lonoff/cos(m_targetEl);
-	   		tmpLat=m_rampStopLat - 0.5*m_rampLatAcceleration*deltaTSq;
+	   		tmpLat=m_stopLat +m_latRate*deltaTSec - 0.5*m_rampLatAcceleration*deltaTSq;
 	   	} else {
-	   		tmpLon=m_rampStopLon - 0.5*m_rampLonAcceleration*deltaTSq;
+	   		tmpLon=m_stopLon +m_lonRate*deltaTSec - 0.5*m_rampLonAcceleration*deltaTSq;
 	   		tmpLat=el+m_latoff;
 	   	}
     	coordConvert(tmpLon, tmpLat, tmpCoordFrame, utTime,
