@@ -15,6 +15,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
     m_dynamic_comps.clear();
     m_services = Services;
     m_isTrackingEn = false;
+    m_isScanning = false;
 }
 
 

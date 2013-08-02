@@ -117,6 +117,9 @@ public:
     /** Return true when the system is ready */
     bool isReady();
 
+
+    /** Return true when the system is performing a scan */
+    bool isScanning();
 	
 	/**
 	 * This method will be used to configure the MinorServoBoss before starting an observation
@@ -137,7 +140,7 @@ public:
 
 
     /**
-     * Turn the elevation tracking of minor servos off
+     * Turn the elevation tracking of minor servos off. After that, the system is not ready
      * @throw ManagementErrors::ConfigurationErrorEx
      */
     void turnTrackingOff() throw (ManagementErrors::ConfigurationErrorEx);

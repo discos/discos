@@ -77,6 +77,13 @@ public:
 
     inline std::vector<std::string> getDynamicComponents() { return m_dynamic_comps; }
 
+
+    struct Scanning {
+        ACS::Time starting_time;
+        ACS::Time total_time;
+    };
+
+
     /** 
      * Return a doubleSeq of positions to set
      * @param comp_name string component name
@@ -94,6 +101,10 @@ public:
     bool m_isValidCDBConfiguration;
     bool m_isElevationTracking;
     bool m_isTrackingEn; // Is the tracking enabled?
+    bool m_isScanning; 
+
+    Scanning m_scanning;
+    
 
     std::vector<std::string> m_servosToPark;
 

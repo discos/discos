@@ -40,6 +40,8 @@ class TestElevationTracking(unittest.TestCase):
             if counter > 240:
                 self.assertTrue(counter > 240)
                 return
+
+        self.minorservo_boss.turnTrackingOn() # Turn the tracking ON
         
         min_el = 6.0
         max_el = 88.0

@@ -20,8 +20,8 @@
 
 // The Delta Time is the time between two axis positioning (Time in 100ns)
 const ACS::Time SCAN_DELTA_TIME = 1000000; // 100ms, 
+const ACS::Time SCAN_SLEEP_TIME = 10000000; // 1 second
 // Sleep Time in 100ns
-const unsigned int SCAN_SLEEP_TIME = static_cast<unsigned int>(0.9 * SCAN_DELTA_TIME);
 const double GUARD_COEFF = 0.2;
 
 // This class updates the status property of minor servos.
@@ -31,7 +31,7 @@ public:
 
 	ScanThread(
         const ACE_CString& name, 
-        MSThreadParameters& params,
+        MSBossConfiguration * configuration,
         const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
         const ACS::TimeInterval& sleepTime=SCAN_SLEEP_TIME,
         const bool del=true
@@ -46,10 +46,11 @@ public:
     virtual void onStop();
 
     /// This method overrides the thread implementation class.
-    virtual void runLoop();
+    virtual void run();
 
 private:
-    MSThreadParameters *m_params;
+    MSBossConfiguration * m_configuration;
+    const TIMEVALUE m_final_time;
      
 };
 

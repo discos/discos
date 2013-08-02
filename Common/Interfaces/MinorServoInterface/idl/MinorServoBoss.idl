@@ -95,6 +95,14 @@ module MinorServo {
          * @return true if the system is ready
          */
 		boolean isReady();	
+	
+		
+        /**
+         * Is the system performing a scan?
+         * @return true if the system is performing a scan
+         */
+		boolean isScanning();	
+
 
 
 		/** Return the actual configuration */
