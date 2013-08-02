@@ -571,7 +571,7 @@ int main(int argc, char *argv[])
 	signal(SIGINT,SIG_IGN);
 
 	try {
-		hwRef->setOffsets(10.0*DD2R,10.0*DD2R,Antenna::ANT_HORIZONTAL);
+		//hwRef->setOffsets(10.0*DD2R,10.0*DD2R,Antenna::ANT_HORIZONTAL);
 		commandedSector=hwRef->setSubScan((const char *)staticTargetName,initAz,initSector,initEl,initTime,lon1,lat1,lon2,lat2,coordFrame,geometry,subScanFrame,description,
 				direction,startUT,duration);
 	}

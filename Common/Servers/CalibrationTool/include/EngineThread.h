@@ -110,7 +110,7 @@ private:
     ACS::doubleSeq m_dataSeq;
     ACS::doubleSeq m_tsysDataSeq;
     //double m_coordinate;
-    double m_lastCoordinate;
+    //double m_lastCoordinate;
     double m_LatPos, m_LonPos;
     double m_LatOff, m_LonOff;
     double m_LatErr, m_LonErr;

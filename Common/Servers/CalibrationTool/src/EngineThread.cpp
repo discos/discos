@@ -32,7 +32,7 @@ CEngineThread::CEngineThread (const ACE_CString & name,
     m_dataSeq.length (DATACOORDINATESSEQLENGTH);
     m_tsysDataSeq.length (DATATSYSSEQLENGTH);
     m_dataSeqCounter = 0;
-    m_lastCoordinate = 0;
+    //m_lastCoordinate = 0;
     m_off = new float[DATATSYSSEQLENGTH];
     m_secsFromMidnight = new float[DATATSYSSEQLENGTH];
     m_Par = new float[PARAMETERNUMBER];
@@ -186,14 +186,14 @@ bool CEngineThread::processData ()
 	        //else offset = targetAZ - coordinate;
 	        else offset = coordinate - targetAZ ;*/
 	        offset=IRA::CIRATools::differenceBetweenAnglesRad(az,targetAZ);
-	        m_lastCoordinate = az;
+	        //m_lastCoordinate = az;
 	        m_cosLat = cos (targetEL);
 	        //m_CoordIndex = 0;	// LON
 	        m_latPositions[m_dataSeqCounter] = el;
 
-	        IRA::CIRATools::timeToStr(time,temp);
-	        printf("time: %s, integration %ld \n",(const char *)temp,data->getIntegrationTime () * 10000);
-	        printf("coordinata: %lf, target AZ: %lf, offset: %lf\n",coordinate*DR2D,targetAZ*DR2D,offset*DR2D);
+	        //IRA::CIRATools::timeToStr(time,temp);
+	        //printf("time: %s, integration %ld \n",(const char *)temp,data->getIntegrationTime () * 10000);
+	        //printf("coordinata: %lf, target AZ: %lf, offset: %lf\n",coordinate*DR2D,targetAZ*DR2D,offset*DR2D);
 	        break;
         case Management::MNG_HOR_LAT:
             CTskySource.process (CTdateTime, m_site);
@@ -215,7 +215,7 @@ bool CEngineThread::processData ()
 	        }
 	        else offset = targetRA - coordinate;*/
             offset=IRA::CIRATools::differenceBetweenAnglesRad(ra,m_targetRa);
-	        m_lastCoordinate = ra;
+	        //m_lastCoordinate = ra;
 	        m_cosLat = cos (m_targetDec);
 	        //m_CoordIndex = 0;	// LON
             m_latPositions[m_dataSeqCounter] = dec;
@@ -241,7 +241,7 @@ bool CEngineThread::processData ()
 	        else
 	            offset = targetLON - coordinate;*/
 	        offset=IRA::CIRATools::differenceBetweenAnglesRad(lon,targetLON);
-	        m_lastCoordinate = lon;
+	        //m_lastCoordinate = lon;
 	        m_cosLat = cos (targetLAT);
 	        //m_CoordIndex = 0;	// LON
             m_latPositions[m_dataSeqCounter] = lat;
@@ -953,7 +953,15 @@ void CEngineThread::writeFileHeaders(const ACS::Time& now)
     	break;
     case Management::MNG_PFP_Y:
     	break;
+    case Management::MNG_BEAMPARK:
+    	break;
+    case Management::MNG_TRACK:
+    	break;
+    case Management::MNG_GCIRCLE:
+    	break;
     }
+
+
     m_file << (const char *) out;
     m_file << sourceFlux << std::endl;
 }
