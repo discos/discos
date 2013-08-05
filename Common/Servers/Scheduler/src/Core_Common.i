@@ -767,10 +767,21 @@ void CCore::antennaNCHandler(Antenna::AntennaDataBlock antennaData,void *handler
 {
 	CCore *me=static_cast<CCore *>(handlerParam);
 	if (antennaData.status!=Management::MNG_OK) {
-		me->m_isTracking=false;
+		me->m_isAntennaTracking=false;
 	}
 	else {
-		me->m_isTracking=antennaData.tracking;
+		me->m_isAntennaTracking=antennaData.tracking;
+	}
+}
+
+void CCore::minorServoNCHandler(MinorServo::MinorServoDataBlock servoData,void *handlerParam)
+{
+	CCore *me=static_cast<CCore *>(handlerParam);
+	if (servoData.status!=Management::MNG_OK) {
+		me->m_isMinorServoTracking=false;
+	}
+	else {
+		me->m_isMinorServoTracking=servoData.tracking;
 	}
 }
 

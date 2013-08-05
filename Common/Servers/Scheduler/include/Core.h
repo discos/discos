@@ -233,13 +233,19 @@ public:
 	 * This is not thread safe but is almost atomic.
 	 * @return true if the telescope is tracking or not
 	 */
-	inline bool isTracking() const { return m_isTracking; }
+	inline bool isTracking() const { return (m_isAntennaTracking && m_isMinorServoTracking); }
 	
 	/**
 	 * This is not thread safe but we can consider it almost atomic.
 	 * It clear the tracking flag, issued when a new scan is commanded in order to prevent the scheduler to consider the tracking when it is not the case
 	 */
-	inline void clearTracking() { m_isTracking=false; }
+	inline void clearAntennaTracking() { m_isAntennaTracking=false; }
+
+	/**
+	 * This is not thread safe but we can consider it almost atomic.
+	 * It clear the tracking flag from minor servo, issued when a new scan is commanded in order to prevent the scheduler to consider the tracking when it is not the case
+	 */
+	inline void clarMinorServoTracking() { m_isMinorServoTracking=false; }
 	
 	/**
 	 * This is not thread safe but it is almost atomic.

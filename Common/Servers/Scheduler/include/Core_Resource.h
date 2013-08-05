@@ -11,7 +11,7 @@
 									m_customLogger=Management::CustomLogger::_nil(); \
 									m_weatherStation=Weather::GenericWeatherStation::_nil(); \
 									m_antennaNC=NULL; \
-									m_isTracking=false; \
+									m_isAntennaTracking=m_isMinorServoTracking=false; \
 									m_antennaBossError=m_receiversBossError=m_minorServoBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=\
 									m_activeSurfaceBossError=m_weatherStationError=false; \
 									m_currentDevice=0;\
@@ -20,6 +20,12 @@
 #define RESOURCE_EXEC ACS_NEW_SIMPLE_CONSUMER(m_antennaNC,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,antennaNCHandler,static_cast<void*>(this)); \
 					  m_antennaNC->consumerReady(); \
 					  ACS_LOG(LM_FULL_INFO, "Core::execute()", (LM_INFO,"ANTENNA_NC_READY")); \
+		      if (m_config->getMinorServoBossComponent()!="") {	\
+		      			  ACS_NEW_SIMPLE_CONSUMER(m_minorServoNC,MinorServo::MinorServoDataBlock,MinorServo::MINORSERVO_DATA_CHANNEL,minorServoNCHandler,static_cast<void*>(this)); \
+					  m_minorServoNC->consumerReady(); \
+					  ACS_LOG(LM_FULL_INFO, "Core::execute()", (LM_INFO,"MINOR_SERVO_NC_READY")); \
+		      } \
+		      else { m_isMinorServoTracking=true; } \
 					  m_defaultBackendInstance=m_config->getDefaultBackendInstance(); \
 					  m_defaultDataReceiverInstance=m_config->getDefaultDataReceiverInstance(); \
 					  try { \
@@ -37,6 +43,8 @@
 
 #define RESOURCE_CLEANUP if (m_antennaNC!=NULL) m_antennaNC->disconnect(); \
 						 m_antennaNC=NULL; \
+			if (m_minorServoNC!=NULL) m_minorServoNC->disconnect(); \
+						 m_minorServoNC=NULL; \
 						 if (m_parser) { \
 						    delete m_parser; \
 						 } \
@@ -139,10 +147,22 @@ bool m_scanStarted;
  * pointer to the antenna notification channel
 */
 nc::SimpleConsumer<Antenna::AntennaDataBlock> *m_antennaNC;
+
+/**
+ * pointer to the minor servo notification channel
+*/
+nc::SimpleConsumer<MinorServo::MinorServoDataBlock> *m_minorServoNC;
+
 /*
- * Tracking status of the telescope it resumes all the subsystem tracking flags
+ * Tracking status of the telescope
  */
-bool m_isTracking;
+bool m_isAntennaTracking;
+
+/*
+ * Tracking status of the minor Servo subsystem
+ */
+bool m_isMinorServoTracking;
+
 /**
  * Stores the ID of the section of the current backend selected as current active device.
  */

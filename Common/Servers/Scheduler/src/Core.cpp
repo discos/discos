@@ -563,7 +563,7 @@ void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& 
 		m_antennaBossError=true;
 		throw impl;
 	}
-	clearTracking();
+	clearAntennaTracking();
 	guard.release();
 	waitOnSource();
 	try {
@@ -720,7 +720,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		m_antennaBossError=true;
 		throw impl;
 	}
-	clearTracking();
+	clearAntennaTracking();
 	guard.release();
 	waitOnSource();
 	try {

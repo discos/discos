@@ -191,7 +191,7 @@ void CScheduleExecutor::runLoop()
 					cleanScan();
 					break;
 				}
-				m_core->clearTracking();
+				m_core->clearAntennaTracking();
 				m_stage=WRITING_INITIALIZATION;
 			}
 			case WRITING_INITIALIZATION: { //prepare the data transfer, it configures the backend and the writer. In case of error the scan is aborted.

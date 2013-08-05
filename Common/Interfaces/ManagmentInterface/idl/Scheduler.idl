@@ -128,6 +128,10 @@ module Management {
 		 * @param duration this determine how long the single scan has to take.
 		 */ 
 		void crossScan(in TCoordinateFrame coordFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * Performs a focusing 
+		void peakFocus(in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);*/
 		
 		/**
 		 * Performs a skydip using the main drives of the telescope. The scan is done at the current azimuth position and consists of moving the antenna between two elevation  positions. A system temperature measurment
