@@ -5,7 +5,7 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-    Name="MinorServoBoss"    
+    Name="Boss"    
     Code="MinorServoBossImpl"
     ImplLang="cpp"
     Type="IDL:alma/MinorServo/MinorServoBoss:1.0"
