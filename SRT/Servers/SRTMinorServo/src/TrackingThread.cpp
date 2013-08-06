@@ -29,16 +29,16 @@ TrackingThread::TrackingThread(
     AUTO_TRACE("TrackingThread::TrackingThread()");
     
     try {
-        m_antennaBoss = Antenna::AntennaBoss::_nil();
-        m_antennaBoss = (m_configuration->m_services)->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
-        if(CORBA::is_nil(m_antennaBoss)) {
-            ACS_SHORT_LOG((LM_WARNING, "TrackingThread: _nil reference of AntennaBoss component"));
+        m_antennaMount = Antenna::Mount::_nil();
+        m_antennaMount = (m_configuration->m_services)->getComponent<Antenna::Mount>("ANTENNA/Mount");
+        if(CORBA::is_nil(m_antennaMount)) {
+            ACS_SHORT_LOG((LM_WARNING, "TrackingThread: _nil reference of Mount component"));
             m_configuration->m_isElevationTracking = false;
         }
     }
     catch (maciErrType::CannotGetComponentExImpl& ex) {
         m_configuration->m_isElevationTracking = false;
-        ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the AntennaBoss component"));
+        ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the AntennaMount component"));
     }
 }
 
@@ -66,29 +66,40 @@ void TrackingThread::runLoop()
     m_configuration->m_isElevationTracking = true;
 
     try {
-        for(vector<string>::iterator iter = start; iter != end; iter++) {
-            string comp_name = *iter;
+        vector<string> dynamics_comp = m_configuration->getDynamicComponents();
+        for(size_t i=0; i<dynamics_comp.size(); i++) {
+            string comp_name(dynamics_comp[i]);
             // Get the elevation
             try {
-                if(CORBA::is_nil(m_antennaBoss))
-                    m_antennaBoss = (m_configuration->m_services)->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
+                if(CORBA::is_nil(m_antennaMount))
+                    m_antennaMount = (m_configuration->m_services)->getComponent<Antenna::Mount>("ANTENNA/Mount");
 
                 TIMEVALUE now;
-                double azimuth = 0.0;
-                double elevation = 0.0;
+                double elevation = 45.0;
                 IRA::CIRATools::getTime(now);
 
                 try {
-                    if(!CORBA::is_nil(m_antennaBoss))
-                        m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
+                    if(!CORBA::is_nil(m_antennaMount)) {
+                        // Get the reference to the  actEl double property
+                        ACS::ROdouble_var actEl = m_antennaMount->commandedElevation();
+                        if (actEl.ptr() != ACS::ROdouble::_nil()) {
+                            // Get the current value of the property synchronously
+                            ACSErr::Completion_var completion;
+                            elevation = actEl->get_sync(completion.out());
+                        }
+                        else {
+                            ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the antenna elevation."));
+                            m_configuration->m_isElevationTracking = false;
+                        }
+                    }
                 }
                 catch (CORBA::SystemException& ex) {
                     ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the antenna elevation."));
                     m_configuration->m_isElevationTracking = false;
                 }
 
-                elevation = elevation * DR2D; // From radians to decimal (be sure we want to use decimal...)
-                elevation = (elevation > MIN_ELEVATION) ? elevation : 0.0; // Decimal?
+                // elevation = elevation * DR2D; // From radians to decimal (be sure we want to use decimal...)
+                elevation = (elevation > MIN_ELEVATION) ? elevation : 45.0; // Decimal?
 
                 // Set the servo position
                 MinorServo::WPServo_var component_ref;
@@ -98,8 +109,9 @@ void TrackingThread::runLoop()
                         // Set a doubleSeq from a string of positions
                         ACS::doubleSeq positions = m_configuration->getPosition(comp_name, elevation);
                         // Set a minor servo position if the doubleSeq is not empty
-                        if(positions.length())
+                        if(positions.length()) {
                             component_ref->setPosition(positions, NOW);
+                        }
                         else {
                             ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the antenna elevation."));
                             m_configuration->m_isElevationTracking = false;
@@ -113,7 +125,7 @@ void TrackingThread::runLoop()
             }
             catch (maciErrType::CannotGetComponentExImpl& ex) {
                 m_configuration->m_isElevationTracking = false;
-                ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the AntennaBoss component"));
+                ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the AntennaMount component"));
             }
         }
     }

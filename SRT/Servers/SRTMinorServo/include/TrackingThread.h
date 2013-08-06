@@ -17,11 +17,11 @@
 #include <string>
 #include <map>
 #include "utils.h"
-#include <AntennaBossC.h>
+#include <MountC.h>
 
 
 // Sleep Time in 100ns
-#define TT_SLEEP_TIME 10000000 // 1 second
+#define TT_SLEEP_TIME 1000000 // 100 ms
 
 // This class updates the minor servos positions depending of the antenna elevation
 class TrackingThread : public ACS::Thread
@@ -49,7 +49,7 @@ public:
 
 private:
     MSBossConfiguration *m_configuration;
-    Antenna::AntennaBoss_var m_antennaBoss;
+    Antenna::Mount_var m_antennaMount;
      
 };
 

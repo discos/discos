@@ -90,7 +90,7 @@ public:
      * @param elevation the antenna elevation
      * @return doubleSeq of positions to set
      */
-    ACS::doubleSeq getPosition(string comp_name, double elevation=0)
+    ACS::doubleSeq getPosition(string comp_name, double elevation=45.0)
         throw (ManagementErrors::ConfigurationErrorExImpl);
 
     std::string m_actualSetup;

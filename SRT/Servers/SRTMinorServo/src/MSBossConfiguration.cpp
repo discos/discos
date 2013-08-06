@@ -108,8 +108,9 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
             }
 
             (m_servosCoefficients[comp_name]).push_back(coefficients);
-            if(coefficients.size() > 1)
+            if(coefficients.size() > 1) {
                 m_dynamic_comps.push_back(comp_name);
+            }
         }
 
         if(m_servosCoefficients.count(comp_name) && m_component_refs.count(comp_name)) {

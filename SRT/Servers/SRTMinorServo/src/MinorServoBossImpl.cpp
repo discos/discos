@@ -260,6 +260,8 @@ void MinorServoBossImpl::setup(const char *config) throw (CORBA::SystemException
 {
     AUTO_TRACE("MinorServoBossImpl::setup()");
 
+    turnTrackingOff(); // It raises ConfigurationErrorEx
+
     try {
         setupImpl(config);
     }
@@ -812,7 +814,7 @@ void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::Configuration
     try {
         m_tracking_thread_ptr = getContainerServices()->getThreadManager()->create<TrackingThread,
             MSBossConfiguration *>("TrackingThread", m_configuration);
-        ACS_SHORT_LOG((LM_WARNING, "trackingThread created"));
+        ACS_SHORT_LOG((LM_INFO, "trackingThread created"));
     }
     catch(...) {
         if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 

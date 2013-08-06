@@ -22,7 +22,7 @@ DerotatorImpl_LIBS = MinorServoStubs IRALibrary ComponentErrors MinorServoErrors
 MinorServoBossImpl_OBJECTS = MinorServoBossImpl utils SetupThread ParkThread TrackingThread ScanThread MSBossPublisher libCom \
 							 MSBossConfiguration
 MinorServoBossImpl_LIBS = MinorServoStubs MinorServoBossStubs SRTMinorServoLibrary ManagmentDefinitionsStubs ManagementErrors \
-						  IRALibrary ComponentErrors MinorServoErrors acsnc ParserErrors AntennaDefinitionsStubs AntennaBossStubs \
+						  IRALibrary ComponentErrors MinorServoErrors acsnc ParserErrors AntennaDefinitionsStubs MountStubs \
 						  AntennaErrors 
 # ----------------------------------------------------------------------
 # List of all possible C-sources (used to create automatic dependencies)
