@@ -829,12 +829,6 @@ void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::Configuration
 
 void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::ConfigurationErrorEx) 
 {
-    if(isStarting())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is starting.", true);
-
-    if(isParking())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is parking.", true);
-
     int mutex_res = pthread_mutex_trylock(&tracking_mutex); 
     if(mutex_res != 0) {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is busy.", true);
