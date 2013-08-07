@@ -92,6 +92,10 @@ public:
 	*/
 	const IRA::CString& getReceiversBossComponent() const { return m_receiversBossComp; }
 	/**
+	 * @return the name of the interface of the minor servo boss component.
+	*/
+	const IRA::CString& getMinorServoBossComponent() const { return m_msBossComp; }
+	/**
 	 * @return the name of the interface of the scheduler component.
 	*/	
 	const IRA::CString& getSchedulerComponent() const { return m_schedulerComp; }	
@@ -114,6 +118,7 @@ private:
 	IRA::CString m_receiversBossComp;
 	IRA::CString m_schedulerComp;
 	IRA::CString m_meteoInstance;
+	IRA::CString m_msBossComp;
 };
 
 };

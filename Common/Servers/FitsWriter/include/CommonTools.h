@@ -15,6 +15,7 @@
 #include <String.h>
 #include <GenericWeatherStationC.h> 
 #include <ReceiversBossC.h>
+#include <MinorServoBossC.h>
 #include <SchedulerC.h>
 #include <BackendsDefinitionsC.h>
 #include <ManagmentDefinitionsC.h>
@@ -58,6 +59,23 @@ public:
 	 * @param services pointer to the container services object
 	 */	
 	static void unloadReceiversBoss(Receivers::ReceiversBoss_var& ref,maci::ContainerServices *& services) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
+
+	/**
+	 * Used to get a reference to the minor servo boss component.
+	 * @param ref reference to to the minor servo boss component. if not null this does not do anything
+	 * @param services pointer to the container services object
+	 * @param name name of the interface of the component
+	 * @param errorDetected if true and the component reference is not null the method makes a try of releasing it before acquire again the reference
+	*/
+	static void getMSBoss(MinorServo::MinorServoBoss_var& ref,maci::ContainerServices *& services,const IRA::CString& name,bool& errorDetected) throw (
+			ComponentErrors::CouldntGetComponentExImpl);
+
+	/**
+	 * used to free the reference to the minor servo boss component
+	 * @param ref reference to to the receivers boss component.
+	 * @param services pointer to the container services object
+	 */
+	static void unloadMSBoss(MinorServo::MinorServoBoss_var& ref,maci::ContainerServices *& services) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 
 	/**
 	 * Used to get a reference to the scheduler component.  

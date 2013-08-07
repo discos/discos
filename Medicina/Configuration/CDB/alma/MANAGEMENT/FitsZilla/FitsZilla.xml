@@ -18,6 +18,7 @@
 			   AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
   	           ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
 			   ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
+			   MinorServoBossInterface=""
 	     	   SchedulerInterface="IDL:alma/Management/Scheduler:1.0"
 	     	   MeteoInstance="WEATHERSTATION/WeatherStation"            
 >

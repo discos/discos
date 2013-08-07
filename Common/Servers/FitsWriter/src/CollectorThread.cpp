@@ -1,4 +1,3 @@
-// $Id: CollectorThread.cpp,v 1.3 2011-04-18 13:42:37 a.orlati Exp $
 
 #include "CollectorThread.h"
 #include <LogFilter.h>

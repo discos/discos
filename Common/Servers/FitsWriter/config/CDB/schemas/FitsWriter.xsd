@@ -55,6 +55,8 @@
 	<xs:attribute name="ObservatoryInterface" type="xs:string" use="required" />
 	<!-- the interface of component that leads the receivers subsystem -->
 	<xs:attribute name="ReceiversBossInterface" type="xs:string" use="required" />
+	<!-- the interface of component that leads the minor servo subsystem -->
+	<xs:attribute name="MinorServoBossInterface" type="xs:string" use="required" />	
 	<!-- the interface of the component that leads the system and carries on the observation -->
 	<xs:attribute name="SchedulerInterface" type="xs:string" use="required" />
 	<!-- the instance name of the component that samples the meteo data -->

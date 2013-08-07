@@ -32,8 +32,9 @@
 #define FITS_VERSION3 "V.0.9"
 #define FITS_VERSION4 "V.0.91"
 #define FITS_VERSION5 "V.0.92"
+#define FITS_VERSION6 "V.1.0"
 
-#define CURRENT_VERSION FITS_VERSION5
+#define CURRENT_VERSION FITS_VERSION6
 
 #define DEFAULT_COMMENT CURRENT_VERSION" Created by  S. Righini, M. Bartolini  & A. Orlati"
 
@@ -42,6 +43,8 @@
 #define HISTORY3 FITS_VERSION3" The section table has been splitted into two tables: sections and rf inputs table"
 #define HISTORY4 FITS_VERSION4" Added the flux column in section table"
 #define HISTORY5 FITS_VERSION5" SubScanType added as primary header keyword"
+#define HISTORY6 FITS_VERSION6" Added new table to store position of subriflector e primary focus receivers: SERVO TaBLE"
+
 
 /**
  * This class is very specific and it used to create a fits file from the data coming from backends that validates the <i>Backends::GenericBackends</i> interface
@@ -164,6 +167,15 @@ public:
 	bool addSectionTable(const ACS::longSeq &sectionID, const ACS::longSeq& feedsID, const ACS::longSeq& ifsID,const ACS::longSeq& pols,const ACS::doubleSeq& los,
 			const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,
 			const ACS::doubleSeq& sourceFlux,const ACS::doubleSeq& atts,const IRA::CString& name="SECTION TABLE",const IRA::CString& rfName="RF INPUTS");
+
+	/**
+	 * It allows to add the servo table to the file
+	 * @param axisName list of the names of the involved axis
+	 * @param axisUnit list of the corresponding measurements units adopted for each axis, its dimension
+	 *        must reflect the size of the previous argument
+	 * @param name name of the table
+	*/
+	bool addServoTable(const ACS::stringSeq &axisName,const ACS::stringSeq& axisUnit,const IRA::CString name="SERVO TABLE");
 	
 	/**
 	 * It allows to add data table to the fits file
@@ -226,9 +238,17 @@ public:
 	 * @return false if the operation fails
 	 */
 	bool setPrimaryHeaderComment(const IRA::CString& comment);
+
+	/**
+	 * This method stores the position of the servo system in the file into the dedicated table
+	 * @param time reference time in mjd
+	 * @param pos sequence of positions, one for each involved axis
+	 * @return false if the operation failed
+	 */
+	bool storeServoData(const double& time, const ACS::doubleSeq& pos);
 	
 	/**
-	 * This method stores the auxiliary data into  the fits file.
+	 * This method stores the auxiliary data into the fits file.
 	 * @param data reference to the structure that contains the data (corresponding to one row of the table) to be saved
 	 * @pointer to the vector that contains the tsys values for the channels. It must be a value for each channel.
 	 * @return false if the operation failed
@@ -238,7 +258,7 @@ public:
 	/**
 	 * This method stores the raw data into the fits file. This data should be the raw data directly coming from the backend.
 	 * @param p vector containing the raw data
-	 * @param size number of elments of the provided vector
+	 * @param size number of elements of the provided vector
 	 * @param index identifies the column  (starting from the first column of the data table that contains raw data) the provided vector refers to
 	 */
 	template <typename T>
@@ -263,6 +283,7 @@ public:
 		std::string data_type;
 		CCfits::FITS *pFits;
 		CCfits::Table *data_table, *section_table, *rfInput_table, *feed_table, *tsys_table;
+		CCfits::Table *servo_table;
 		
 		Backends::TMainHeader m_mainHeader; // main header data structure
 		bool m_mainHeaderSet; //flags used to check if the main header has been saved
@@ -283,6 +304,9 @@ public:
 		std::vector<string> tsysColName;
 		std::vector<string> tsysColUnit;
 		std::vector<string> tsysColForm;
+		std::vector<string> servoColName;
+		std::vector<string> servoColUnit;
+		std::vector<string> servoColForm;
 		int next_row, data_column, feed_number;
 };
 

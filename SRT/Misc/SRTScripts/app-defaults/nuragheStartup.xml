@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>7</select>
+        <select>12</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -70,6 +70,10 @@
         </container>
         <container>
             <name>MinorServoContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>MinorServoBossContainer</name>
             <type>cpp</type>
         </container>
         <container>

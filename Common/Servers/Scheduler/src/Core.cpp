@@ -891,6 +891,21 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"CROSSSCAN_DONE"));
 }
 
+void CCore::clearTracking()
+{
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	m_clearTrackingTime=now.value().value;
+}
+
+bool CCore::isTracking() const
+{
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	ACS::TimeInterval diff=now.value().value-m_clearTrackingTime;
+	return (m_isAntennaTracking && m_isMinorServoTracking && (diff>5000000));
+}
+
 void CCore::resetSchedulerStatus()
 {
 	baci::ThreadSyncGuard guard(&m_mutex);

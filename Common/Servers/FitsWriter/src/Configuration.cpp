@@ -59,13 +59,14 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("WorkingThreadTimeSlice","Time slice of working thread (uSec)",m_workingThreadTimeSlice);
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter cache time (uSec)",m_repetitionCacheTime);
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter expire time  (uSec)",m_repetitionExpireTime);
-	_GET_DWORD_ATTRIBUTE("MeteoParameterDutyCycle","Meteo sensor enquery gap  (uSec)",m_meteoParameterDutyCycle);
-	_GET_DWORD_ATTRIBUTE("TrackingFlagDutyCycle","Tracking flag enquery gap  (uSec)",m_trackingFlagDutyCycle);
+	_GET_DWORD_ATTRIBUTE("MeteoParameterDutyCycle","Weather sensor enquire gap  (uSec)",m_meteoParameterDutyCycle);
+	_GET_DWORD_ATTRIBUTE("TrackingFlagDutyCycle","Tracking flag enquire gap  (uSec)",m_trackingFlagDutyCycle);
 	_GET_STRING_ATTRIBUTE("AntennaBossInterface","Antenna Boss component interface is ",m_antennaBossComp);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component is ",m_observatoryComp);
-	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Reveicers Boss component interface is ",m_receiversBossComp);
+	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);
+	_GET_STRING_ATTRIBUTE("MinorServoBossInterface","Minor servo Boss component interface is ",m_msBossComp);
 	_GET_STRING_ATTRIBUTE("SchedulerInterface","Scheduler component interface is ",m_schedulerComp);
-	_GET_STRING_ATTRIBUTE("MeteoInstance","Meteo component instance is ",m_meteoInstance);	
+	_GET_STRING_ATTRIBUTE("MeteoInstance","Weather component instance is ",m_meteoInstance);
 	m_workingThreadTime*=10;
 	m_workingThreadTimeSlice*=10;
 	m_collectorThreadTime*=10;

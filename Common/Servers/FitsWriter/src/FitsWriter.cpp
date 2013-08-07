@@ -43,7 +43,7 @@ CFitsWriter::CFitsWriter()
 	pFits=NULL;
 	m_mainHeaderSet=false;
 	
-	data_table=section_table=rfInput_table=feed_table=tsys_table=NULL;
+	data_table=section_table=rfInput_table=feed_table=tsys_table=servo_table=NULL;
 	next_row = 1;
 	data_column = _FW_DATAHEADER_ELEMENTS; //the first column containing channel data in data table
 	feed_number = 1;	
@@ -167,6 +167,9 @@ CFitsWriter::~CFitsWriter()
 	tsysColName.clear();
 	tsysColForm.clear();
 	tsysColUnit.clear();
+	servoColName.clear();
+	servoColForm.clear();
+	servoColUnit.clear();
 };
 
 bool CFitsWriter::flush()
@@ -206,6 +209,7 @@ bool CFitsWriter::create()
 		pFits->pHDU().writeHistory(HISTORY3);
 		pFits->pHDU().writeHistory(HISTORY4);
 		pFits->pHDU().writeHistory(HISTORY5);
+		pFits->pHDU().writeHistory(HISTORY6);
 		pFits->pHDU().writeDate();
 	}
 	catch (CCfits::FitsException& ex) {
@@ -276,6 +280,30 @@ bool CFitsWriter::saveSectionHeader(const TSectionHeader* tch)
 	}
 	return true;
 };
+
+bool CFitsWriter::storeServoData(const double& time,const ACS::doubleSeq& pos)
+{
+	if (servo_table) {
+		double app;
+		try {
+			app=time;
+			servo_table->column(1).write(&app,1,next_row);
+			for (unsigned k=0;k<pos.length();k++) {
+				app=pos[k];
+				servo_table->column(2+k).write(&app,1,next_row);
+			}
+		}
+		catch(FitsException& fe) {
+			m_lastError = fe.message().c_str();
+			return false;
+		}
+		return true;
+	}
+	else {
+		m_lastError= "data table not available";
+		return false;
+	}
+}
 
 bool CFitsWriter::storeAuxData(TDataHeader& dh,double * tsys) {
 	try{
@@ -387,6 +415,43 @@ bool CFitsWriter::addDataTable(const IRA::CString& dataName,const IRA::CString t
 	}	
 	return true;
 };
+
+bool CFitsWriter::addServoTable(const ACS::stringSeq &axisName,const ACS::stringSeq& axisUnit,const IRA::CString name)
+{
+	if (!pFits) {
+		m_lastError = "cannot create servo table: no main header found";
+		return false;
+	}
+	if (!data_table) {
+		m_lastError= "data table not available";
+		return false;
+	}
+	unsigned dim=axisName.length();
+	servoColName.clear();
+	servoColUnit.clear();
+	servoColForm.clear();
+	servoColName.push_back(_FITSW_DATACOL_TIME);
+	servoColUnit.push_back("MJD");
+	servoColForm.push_back("D");
+	for (unsigned k=0;k<dim;k++) {
+		servoColName.push_back((const char *)axisName[k]);
+		servoColUnit.push_back((const char *)axisUnit[k]);
+		servoColForm.push_back("D");
+	}
+	try{
+		servo_table=pFits->addTable((const char *)name,0,servoColName,servoColForm,servoColUnit);
+		return true;
+	}
+	catch(FitsException& fe){
+		m_lastError = fe.message().c_str();
+		return false;
+	}
+	catch(...) {
+		m_lastError = "cannot create servo table";
+		return false;
+	}
+}
+
 
 bool CFitsWriter::addFeedTable(const IRA::CString& name)
 {

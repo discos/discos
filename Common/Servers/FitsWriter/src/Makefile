@@ -54,7 +54,7 @@ FitsWriter CollectorThread
 FitsWriterImpl_LIBS = baci maci FitsWriterStubs DataReceiverStubs ComponentErrors ManagementErrors ReceiversErrors bulkDataReceiverStubs\
                  ManagmentDefinitionsStubs ACSBulkDataError bulkDataStubs IRALibrary\
                  bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs \
-                 EphemGeneratorStubs BackendsDefinitionsStubs ObservatoryStubs \
+                 EphemGeneratorStubs BackendsDefinitionsStubs ObservatoryStubs MinorServoBossStubs MinorServoErrors\
                  GenericWeatherStationStubs ReceiversBossStubs ReceiversDefinitionsStubs CommonReceiverInterfaceStubs SchedulerStubs ManagmentDefinitionsStubs
 
 

@@ -111,6 +111,61 @@ void CCommonTools::unloadReceiversBoss(Receivers::ReceiversBoss_var& ref,maci::C
 	}
 }
 
+void CCommonTools::getMSBoss(MinorServo::MinorServoBoss_var& ref,maci::ContainerServices *& services,const IRA::CString& name,bool& errorDetected) throw (
+		ComponentErrors::CouldntGetComponentExImpl)
+{
+	if ((!CORBA::is_nil(ref)) && (errorDetected)) { // if reference was already taken, but an error was found....dispose the reference
+		try {
+			services->releaseComponent((const char*)ref->name());
+		}
+		catch (...) { //dispose silently...if an error...no matter
+		}
+		ref=MinorServo::MinorServoBoss::_nil();
+	}
+	if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
+		try {
+			ref=services->getDefaultComponent<MinorServo::MinorServoBoss>((const char*)name);
+			errorDetected=false;
+		}
+		catch (maciErrType::CannotGetComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCommonTools::getMSBoss()");
+			Impl.setComponentName((const char*)name);
+			throw Impl;
+		}
+		catch (maciErrType::NoPermissionExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCommonTools::getMSBoss()");
+			Impl.setComponentName((const char*)name);
+			throw Impl;
+		}
+		catch (maciErrType::NoDefaultComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCommonTools::getMSBoss()");
+			Impl.setComponentName((const char*)name);
+			throw Impl;
+		}
+	}
+}
+
+void CCommonTools::unloadMSBoss(MinorServo::MinorServoBoss_var& ref,maci::ContainerServices *& services) throw (
+		ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
+{
+	if (!CORBA::is_nil(ref)) {
+		IRA::CString name((const char *)ref->name());
+		try {
+			services->releaseComponent((const char*)ref->name());
+		}
+		catch (maciErrType::CannotReleaseComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,impl,ex,"CCommonTools::unloadMSBoss()");
+			impl.setComponentName((const char *)name);
+			throw impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommonTools::unloadMSBoss())");
+			throw impl;
+		}
+		ref=MinorServo::MinorServoBoss::_nil();
+	}
+}
+
 void CCommonTools::getScheduler(Management::Scheduler_var& ref,maci::ContainerServices *& services,const IRA::CString& name,bool& errorDetected) throw (
 		ComponentErrors::CouldntGetComponentExImpl)
 {

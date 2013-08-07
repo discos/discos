@@ -13,6 +13,7 @@
 #include <String.h>
 #include <GenericWeatherStationC.h> 
 #include <ReceiversBossC.h>
+#include <MinorServoBossC.h>
 #include <SchedulerC.h>
 #include <BackendsDefinitionsC.h>
 #include <ManagmentDefinitionsC.h>
@@ -479,6 +480,10 @@ public:
 	 */
 	void getReceiverPolarization(ACS::longSeq& pol) const { pol=m_receiverPolarization; }
 	
+	void getServoAxisNames(ACS::stringSeq& names) const { names=m_servoAxisNames; }
+
+	void getServoAxisUnits(ACS::stringSeq& units) const { units=m_servoAxisUnits; }
+
 	/*
 	 * @return the arrays that contains the local oscillator values.
 	 * @param len used to return back the size of the local oscillator array
@@ -521,6 +526,13 @@ public:
 	 */
 	void getSourceFlux(ACS::doubleSeq& fl) const { fl=m_sourceFlux; }
 
+	/**
+	 * allows to store the information about each of the servo system axis
+	 */
+	void setServoAxis(const ACS::stringSeq& name, const ACS::stringSeq& unit) {
+		m_servoAxisNames=name;
+		m_servoAxisUnits=unit;
+	}
 
 	/**
 	 * allows to store the information about each of the backend inputs. The dimension of the sequences should be exactly the number returned by the method <i>getInputsNumber()</i>-
@@ -762,8 +774,14 @@ private:
 	 * Stores the identifier od the baclend section (one for each input)
 	 */
 	ACS::longSeq m_sectionsID;
-
-
+	/**
+	 * Stores the description or name of each involved axis of the servo system
+	 */
+	ACS::stringSeq m_servoAxisNames;
+	/**
+	 * Stores the measurment unit of each involved axis of the servo system
+	 */
+	ACS::stringSeq m_servoAxisUnits;
 	/**
 	 * relative humidity
 	 */

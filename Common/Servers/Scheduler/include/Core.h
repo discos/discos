@@ -35,6 +35,8 @@
 #include "Configuration.h"
 #include "Schedule.h"
 
+#define MINOR_SERVO_AVAILABLE m_config->getMinorServoBossComponent()!=""
+
 //using namespace maci;
 using namespace IRA;
 
@@ -233,7 +235,7 @@ public:
 	 * This is not thread safe but is almost atomic.
 	 * @return true if the telescope is tracking or not
 	 */
-	inline bool isTracking() const { return (m_isAntennaTracking && m_isMinorServoTracking); }
+	bool isTracking() const;
 	
 	/**
 	 * This is not thread safe but we can consider it almost atomic.
@@ -245,8 +247,14 @@ public:
 	 * This is not thread safe but we can consider it almost atomic.
 	 * It clear the tracking flag from minor servo, issued when a new scan is commanded in order to prevent the scheduler to consider the tracking when it is not the case
 	 */
-	inline void clarMinorServoTracking() { m_isMinorServoTracking=false; }
+	inline void clarMinorServoTracking() { if (MINOR_SERVO_AVAILABLE) m_isMinorServoTracking=false; }
 	
+	/**
+	 * This is not thread safe but we can consider it almost atomic.
+	 * This method will cause the tracking flag to be false for a certain amount of time.
+	 */
+	void clearTracking();
+
 	/**
 	 * This is not thread safe but it is almost atomic.
 	 * @return the current active device

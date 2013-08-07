@@ -90,6 +90,8 @@ private:
 	Antenna::AntennaBoss_var m_antennaBoss;
 	bool receiverBossError;
 	Receivers::ReceiversBoss_var m_receiversBoss;
+	bool minorServoBossError;
+	MinorServo::MinorServoBoss_var m_minorServoBoss;
 	bool checkTime(const ACS::Time& currentTime);
 	bool checkTimeSlot(const ACS::Time& slotStart);
 	bool processData();
@@ -101,6 +103,10 @@ private:
 	 * It gets and updates the all the required data from the antenna subsystem 
 	 */
 	void collectAntennaData();
+	/**
+	 * It gets and update all the required data from the minor servo subsytem
+	 */
+	void collectMinorServoData();
 
 };
 

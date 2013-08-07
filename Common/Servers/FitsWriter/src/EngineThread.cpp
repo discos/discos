@@ -43,6 +43,7 @@ CEngineThread::~CEngineThread()
 	try {
 		CCommonTools::unloadAntennaBoss(m_antennaBoss,m_service);
 		CCommonTools::unloadReceiversBoss(m_receiversBoss,m_service);
+		CCommonTools::unloadMSBoss(m_minorServoBoss,m_service);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		ex.log(LM_WARNING);
@@ -88,6 +89,7 @@ bool CEngineThread::processData()
 	double az,el;
 	bool tracking;
 	double hum,temp,press;
+	ACS::doubleSeq servoPositions;
 	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	if (!data->getDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
 	TIMEVALUE tS;
@@ -172,6 +174,42 @@ bool CEngineThread::processData()
 		data->setStatus(Management::MNG_FAILURE);
 	}
 #endif
+	if (m_config->getMinorServoBossComponent()!="") {
+		try {
+			CCommonTools::getMSBoss(m_minorServoBoss,m_service,m_config->getMinorServoBossComponent(),minorServoBossError);
+		}
+		catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
+			_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
+			data->setStatus(Management::MNG_FAILURE);
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+			data->setStatus(Management::MNG_FAILURE);
+			minorServoBossError=true;
+		}
+		//****************************************************//
+		//** ADD CALL to get Minor servo positions here
+		//****************************************************//
+		/*
+		try {
+			minorServoBossError->
+		}
+		catch ()
+		*/
+#ifdef FW_DEBUG
+#else
+		if (!m_file->storeServoData(tdh.time,servoPositions)) {
+			_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
+			impl.setFileName((const char *)data->getFileName());
+			impl.setError(m_file->getLastError());
+			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+			data->setStatus(Management::MNG_FAILURE);
+		}
+#endif
+	}
 	for (int i=0;i<data->getSectionsNumber();i++) {
 		bins=data->getSectionBins(i);
 		pol=data->getSectionStreamsNumber(i);
@@ -331,6 +369,8 @@ void CEngineThread::runLoop()
 				collectReceiversData();
 				//get the data from the antenna boss
 				collectAntennaData();
+				//get the data from the minor servo boss...if subsystem is enabled
+				collectMinorServoData();
 				// now creates the file, the tables and the headers
 				Backends::TMainHeader mH=data->getMainHeader();
 				Backends::TSectionHeader const *cH=data->getSectionHeader();
@@ -352,6 +392,7 @@ void CEngineThread::runLoop()
 				ACS::longSeq ifsID;
 				ACS::doubleSeq atts;
 				ACS::longSeq sectionsID;
+				ACS::stringSeq axisName,axisUnit;
 
 				data->getSite(site,dut1,siteName);
 				data->getLocalOscillator(LocalOscillator);
@@ -555,6 +596,17 @@ void CEngineThread::runLoop()
 						data->setStatus(Management::MNG_FAILURE);
 					}
 				}
+				if (m_config->getMinorServoBossComponent()!="") {
+					data->getServoAxisNames(axisName);
+					data->getServoAxisUnits(axisUnit);
+					if (!m_file->addServoTable(axisName,axisUnit)) {
+						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+						impl.setFileName((const char *)data->getFileName());
+						impl.setError(m_file->getLastError());
+						impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+						data->setStatus(Management::MNG_FAILURE);
+					}
+				}
 				if (!m_file->saveSectionHeader(cH)) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)data->getFileName());
@@ -635,6 +687,27 @@ void CEngineThread::runLoop()
 	}
 }
 //}
+
+void CEngineThread::collectMinorServoData()
+{
+	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+	if (m_config->getMinorServoBossComponent()=="") {
+		return; // in case the minor servo subsystem is not enabled
+	}
+	try {
+		CCommonTools::getMSBoss(m_minorServoBoss,m_service,m_config->getMinorServoBossComponent(),minorServoBossError);
+	}
+	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
+		ex.log(LM_ERROR);
+		data->setStatus(Management::MNG_WARNING);
+		m_minorServoBoss=MinorServo::MinorServoBoss::_nil();
+	}
+	if (!CORBA::is_nil(m_minorServoBoss)) {
+		ACS::stringSeq_var names;
+		ACS::stringSeq_var units;
+		data->setServoAxis(names.in(),units.in());
+	}
+}
 
 void CEngineThread::collectAntennaData()
 {

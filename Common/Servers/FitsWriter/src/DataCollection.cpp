@@ -55,6 +55,8 @@ CDataCollection::CDataCollection()
 	m_receiversIFID.length(0);
 	m_backendAttenuations.length(0);
 	m_sectionsID.length(0);
+	m_servoAxisNames.length(0);
+	m_servoAxisNames.length(0);
 }
 	
 CDataCollection::~CDataCollection()
