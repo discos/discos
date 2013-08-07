@@ -133,6 +133,31 @@ public:
 
 
     /**
+     * It is called to get the all the receiver output information in one call.  
+     * An output is identified by providing the feed and the IF identifier. It can process any number of requests at a time.   
+     * @param feeds is a list that stores the corresponding feed of the output we are asking for
+     * @param ifs is a list that identifies which IFs of the feed we are interested in, usually 0..<i>IFs</i>-1        
+     * @param freq used to return the start frequency of the band provided by the output  the oscillator 
+     * (if present) is not  added (MHz)
+     * @param bw used to return the total provided bandwidth. (MHz)
+     * @param pols it specifies the polarization of the receiver output, since ACS does not support for enum 
+     * sequences the correct value must be matched against the <i>Receivers::TPolarization</i> enumeration.
+     * @param LO it gives (if present) the value of the local oscillator (MHz). 
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw CORBA::SystemException  
+     */
+     void getIFOutput(
+             const ACS::longSeq& feeds,
+             const ACS::longSeq& ifs,
+             ACS::doubleSeq& freqs,
+             ACS::doubleSeq& bw,
+             ACS::longSeq& pols, 
+             ACS::doubleSeq& LO
+     ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl);
+
+
+    /**
      * It computes the taper given a reference band.
      * @param freq start frequency of the reference band
      * @param bw width of the reference band

@@ -209,28 +209,32 @@ public:
             ReceiversErrors::ReceiversErrorsEx
     );
     
-    
+ 
     /**
-     * This method is called when the values of the calibration mark of the receiver are required. 
-     * A value is returned for every provided sub bands. The sub bands are defined by giving the 
-     * feed number, the polarization, the initial frequency and the bandwidth.
-     * @param freqs for each sub band this is the list of the starting frequencies (in MHz). 
-     * The value is compared and adjusted to the the real initial frequency of the receiver.
-     * @param bandwidths for each sub band this is the width in MHz. The value is compared and 
-     * adjusted to the the real band width of the receiver.
-     * @param feeds for each sub band this if the feed number. In that case zero is the only 
-     * allowed value.
-     * @param ifs for each sub band this indicates the proper IF
-     * @param skyFreq for each sub band it returns the real observed frequency(MHz), included 
-     * detector, receiver IF  and Local Oscillator.
-     * @param skyBw for each sub band it returns the real observed bandwidth(MHz), included 
-     * detector bandwidth , receiver IF bandwidth
-     * @param scaleFactor multiplication factor for tsys computation
-     * @throw CORBA::SystemException
+     * It is called to get the all the receiver output information in one call.  
+     * An output is identified by providing the feed and the IF identifier. It can process any number of requests at a time.   
+     * @param feeds is a list that stores the corresponding feed of the output we are asking for
+     * @param ifs is a list that identifies which IFs of the feed we are interested in, usually 0..<i>IFs</i>-1        
+     * @param freq used to return the start frequency of the band provided by the output  the oscillator 
+     * (if present) is not  added (MHz)
+     * @param bw used to return the total provided bandwidth. (MHz)
+     * @param pols it specifies the polarization of the receiver output, since ACS does not support for enum 
+     * sequences the correct value must be matched against the <i>Receivers::TPolarization</i> enumeration.
+     * @param LO it gives (if present) the value of the local oscillator (MHz). 
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw ReceiversErrors::ReceiversErrorsEx
-     * @return the list of the noise calibration value in Kelvin degrees.
+     * @throw CORBA::SystemException  
      */
+    virtual void getIFOutput(
+            const ACS::longSeq& feeds,
+            const ACS::longSeq& ifs,
+            ACS::doubleSeq_out freqs,
+            ACS::doubleSeq_out bw,
+            ACS::longSeq_out pols,
+            ACS::doubleSeq_out LO
+    ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+            
+
     virtual ACS::doubleSeq * getCalibrationMark(
             const ACS::doubleSeq& freqs, 
             const ACS::doubleSeq& bandwidths, 
@@ -240,6 +244,9 @@ public:
             ACS::doubleSeq_out skyBw,
             CORBA::Double_out scaleFactor
     ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+
+
+
 
 
     /**
@@ -343,21 +350,21 @@ public:
             ReceiversErrors::ReceiversErrorsEx
     );
 
-	/**
-	 * It allows to turn the antenna unit on
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 */
-	virtual void turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    /**
+     * It allows to turn the antenna unit on
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    virtual void turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
-	/**
-	 *  It allows to turn the antenna unit off
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-	 */
-	virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    /**
+     *  It allows to turn the antenna unit off
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 
     /**

@@ -552,6 +552,57 @@ void CComponentCore::getCalibrationMark(
 }
 
 
+void CComponentCore::getIFOutput(
+        const ACS::longSeq& feeds,
+        const ACS::longSeq& ifs,
+        ACS::doubleSeq& freqs,
+        ACS::doubleSeq& bw,
+        ACS::longSeq& pols, 
+        ACS::doubleSeq& LO
+        ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
+{
+
+    if (m_setupMode=="") {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getIFOutput()");
+        impl.setReason("receiver not configured yet");
+        throw impl;
+    }
+    // let's do some checks about input data
+    unsigned stdLen=feeds.length();
+    if ((stdLen!=ifs.length())) {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getIFOutput()");
+        impl.setReason("sub-bands definition is not consistent");
+        throw impl;
+    }
+    for (unsigned i=0;i<stdLen;i++) {
+        if ((ifs[i]>=(long)m_configuration.getIFs()) || (ifs[i]<0)) {
+            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getIFOutputMark()");
+            impl.setValueName("IF identifier");
+            throw impl;
+        }
+    }
+    for (unsigned i=0;i<stdLen;i++) {
+        if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
+            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getIFOutput()");
+            impl.setValueName("feed identifier");
+            throw impl;
+        }
+    }
+        
+    freqs.length(stdLen);
+    bw.length(stdLen);
+    pols.length(stdLen);
+    LO.length(stdLen);
+    
+    for (unsigned i=0;i<stdLen;i++) {
+        freqs[i] = m_startFreq[ifs[i]];
+        bw[i] = m_bandwidth[ifs[i]];
+        pols[i] = m_polarization[ifs[i]];
+        LO[i] = m_localOscillatorValue;
+    }
+}
+
+
 double CComponentCore::getTaper(
         const double& freq,
         const double& bw,

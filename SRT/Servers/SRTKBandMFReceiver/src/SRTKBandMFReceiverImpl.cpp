@@ -284,22 +284,22 @@ void SRTKBandMFReceiverImpl::activate(const char * setup_mode) throw (CORBA::Sys
 
 void SRTKBandMFReceiverImpl::deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	try {
-		m_core.deactivate();
-	}
-	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getComponentErrorsEx();
-	}
-	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getReceiversErrorsEx();
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRTKBandMFReceiverImpl::deactivate()");
-		impl.log(LM_DEBUG);
-		throw impl.getComponentErrorsEx();
-	}
+    try {
+        m_core.deactivate();
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getReceiversErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRTKBandMFReceiverImpl::deactivate()");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
 }
 
 void SRTKBandMFReceiverImpl::calOn() throw (
@@ -439,6 +439,47 @@ ACS::doubleSeq * SRTKBandMFReceiverImpl::getCalibrationMark(
     skyBw = resBw._retn();
     return result._retn();
 }
+
+
+void SRTKBandMFReceiverImpl::getIFOutput(
+            const ACS::longSeq& feeds,
+            const ACS::longSeq& ifs,
+            ACS::doubleSeq_out freqs,
+            ACS::doubleSeq_out bw,
+            ACS::longSeq_out pols,
+            ACS::doubleSeq_out LO
+    ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
+{
+    ACS_SHORT_LOG((LM_INFO, "SRTKBandMFReceiverImpl::getIFOutput()"));
+    ACS::doubleSeq_var freqs_res = new ACS::doubleSeq;
+    ACS::doubleSeq_var bw_res = new ACS::doubleSeq;
+    ACS::longSeq_var pols_res = new ACS::longSeq;
+    ACS::doubleSeq_var LO_res = new ACS::doubleSeq;
+
+    try {
+        m_core.getIFOutput(feeds, ifs, freqs_res.inout(), bw_res.inout(), pols_res.inout(), LO_res.inout());
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();        
+    }
+    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getReceiversErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRTKBandReceiverImpl::getIFOutput()");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+
+    freqs = freqs_res._retn();
+    bw = bw_res._retn();
+    pols = pols_res._retn();
+    LO = LO_res._retn();
+}
+            
+
 
 
 CORBA::Long SRTKBandMFReceiverImpl::getFeeds(
@@ -613,14 +654,14 @@ void SRTKBandMFReceiverImpl::turnVacuumSensorOff() throw (
 
 void SRTKBandMFReceiverImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	//has it to be implemented?
-	ACS_LOG(LM_FULL_INFO,"SRTKBandMFReceiverImpl::turnAntennaUnitOn()",(LM_NOTICE,"KBAND_ANTENNA_UNIT_ON"));
+    //has it to be implemented?
+    ACS_LOG(LM_FULL_INFO,"SRTKBandMFReceiverImpl::turnAntennaUnitOn()",(LM_NOTICE,"KBAND_ANTENNA_UNIT_ON"));
 }
 
 void SRTKBandMFReceiverImpl::turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	//has it to be implemented?
-	ACS_LOG(LM_FULL_INFO,"SRTKBandMFReceiverImpl::turnAntennaUnitOff()",(LM_NOTICE,"KBAND_ANTENNA_UNIT_OFF"));
+    //has it to be implemented?
+    ACS_LOG(LM_FULL_INFO,"SRTKBandMFReceiverImpl::turnAntennaUnitOff()",(LM_NOTICE,"KBAND_ANTENNA_UNIT_OFF"));
 }
 
 
