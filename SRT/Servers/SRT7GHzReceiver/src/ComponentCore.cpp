@@ -446,7 +446,7 @@ void CComponentCore::getIFOutput(
         ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
 {
 
-/*    if (m_setupMode=="") {
+	if (m_setupMode=="") {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getIFOutput()");
         impl.setReason("receiver not configured yet");
         throw impl;
@@ -472,18 +472,16 @@ void CComponentCore::getIFOutput(
             throw impl;
         }
     }
-
     freqs.length(stdLen);
     bw.length(stdLen);
     pols.length(stdLen);
     LO.length(stdLen);
-
     for (unsigned i=0;i<stdLen;i++) {
         freqs[i] = m_startFreq[ifs[i]];
         bw[i] = m_bandwidth[ifs[i]];
         pols[i] = m_polarization[ifs[i]];
         LO[i] = m_localOscillatorValue;
-    }*/
+    }
 }
 
 double CComponentCore::getTaper(const double& freq,const double& bw,const long& feed,const long& ifNumber,double& waveLen) throw (
