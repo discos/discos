@@ -108,6 +108,7 @@ class TestElevationTracking(unittest.TestCase):
             print "Actual elevation: %f" %el
             print "\tExpected position:\t%s" %([("%.2f" %pos) for pos in expected])
             print "\tReal position:\t\t%s" %([("%.2f" %pos) for pos in srp_pos])
+            time.sleep(2)
             for ideal_pos, real_pos in zip(expected, srp_pos):
                 self.assertAlmostEqual(ideal_pos, real_pos, places=0)
             message = "\nNext elevation -> %s degrees" %elevations[i+1] if i < len(elevations) - 1 else "Test done!"

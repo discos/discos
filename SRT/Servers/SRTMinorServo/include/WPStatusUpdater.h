@@ -24,7 +24,7 @@ public:
 	WPStatusUpdater(
             const ACE_CString& name, 
             ThreadParameters& params,
-            const ACS::TimeInterval& responseTime=status_response_time,
+            const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
             const ACS::TimeInterval& sleepTime=status_sleep_time
     );
 

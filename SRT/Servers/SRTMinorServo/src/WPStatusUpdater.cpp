@@ -53,6 +53,14 @@ void WPStatusUpdater::runLoop()
             if((m_params->map_of_talkers_ptr)->count(address) && (*m_params->status_thread_en).count(address)
                     && (*m_params->status_thread_en)[address]) 
             {
+                /* TODO: REMOVE the following lines ---------*/
+                // TIMEVALUE now(0.0L);
+                // IRA::CIRATools::getTime(now);
+                // IRA::CString outString;
+                // IRA::CIRATools::timeToStr(now.value().value, outString);
+                // cout << "Begin cicle: " << outString << endl;
+                /* TODO: REMOVE the lines above -------------*/
+
                 StatusParameters status_par;
                 ((*m_params->map_of_talkers_ptr)[address])->getStatus(status_par, timestamp);
                 bitset<STATUS_WIDTH> status_bset((m_params->expire_time)->status[address]);
@@ -225,6 +233,12 @@ void WPStatusUpdater::runLoop()
                 
                 // Update the status pattern
                 (m_params->expire_time)->status[address] = status_bset.to_ulong();
+
+                /* TODO: REMOVE the following lines ---------*/
+                // IRA::CIRATools::getTime(now);
+                // IRA::CIRATools::timeToStr(now.value().value, outString);
+                // cout << "End cicle: " << outString << endl;
+                /* TODO: REMOVE the lines above -------------*/
             }  
         }
         pthread_mutex_unlock(m_params->status_mutex); 

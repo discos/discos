@@ -691,7 +691,7 @@ void MinorServoBossImpl::startScan(
             THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is not ready", true);
 
         if(isScanning())
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is not ready", true);
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is executing another scan", true);
         
         m_scanning = true;
         m_scan_active = true;
@@ -736,6 +736,7 @@ void MinorServoBossImpl::startScan(
             ACS::doubleSeq act_pos = *((component_ref->actPos())->get_sync(completion.out()));
                                                         
             turnTrackingOff();
+            ACS_SHORT_LOG((LM_INFO, "Tracking OFF executed."));
                                                     
             if(act_pos.length() <= axis) {          
                 ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: wrong actual position length"));
@@ -747,20 +748,35 @@ void MinorServoBossImpl::startScan(
             ACS::doubleSeq pos; // The position to set
             pos.length(act_pos.length());           
             // The first position is the actual one for all axes except for the one to scan, whose is (act_pos - range/2)
-            for(size_t i=0; i<= pos.length(); i++) {
+            ACS_SHORT_LOG((LM_INFO, "before the target_pos"));
+            for(size_t i=0; i<pos.length(); i++) {
                 if(i==axis)                             
                     pos[i] = act_pos[i] - range/2;      
                 else                                    
                     pos[i] = act_pos[i];                
             }
 
+            ACS_SHORT_LOG((LM_INFO, "Setting the position"));
+            cout << "N: " << N << endl;
+            cout << "delta: " << delta << endl;
+            double starting_pos = pos[axis];
             for(size_t i=0; i<=N; i++) {
-                pos[axis] += delta * i;
-                component_ref->setPosition(pos, stime.value().value + dtime.value().value * i);
+                pos[axis] = starting_pos + delta * i;
+                cout << "pos: " << pos[axis] << endl;
+
+                try {
+                    component_ref->setPosition(pos, stime.value().value + dtime.value().value * i);
+                }
+                catch(...) {// Position not allowed
+                    THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: position not allowed.", true);
+                }
+
+                usleep(20000); // Wait a bit (20 ms)
             }
             m_configuration->m_isConfigured = false;
         }
         
+        ACS_SHORT_LOG((LM_INFO, "Starting star thread"));
         if(m_scan_thread_ptr != NULL) {
             m_scan_thread_ptr->suspend();
             m_scan_thread_ptr->terminate();
@@ -782,10 +798,9 @@ void MinorServoBossImpl::startScan(
     }
     catch(...) {
         m_scanning = false;
-        m_configuration->m_isScanning = true;
+        m_configuration->m_isScanning = false;
         throw;
     }
-
 }
 
 

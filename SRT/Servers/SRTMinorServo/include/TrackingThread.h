@@ -20,8 +20,8 @@
 #include <MountC.h>
 
 
-// Sleep Time in 100ns
-#define TT_SLEEP_TIME 1000000 // 100 ms
+// Sleep Time in 50ms (N * 10 = N us)
+#define TT_SLEEP_TIME 100000 * 10 // 100 ms
 
 // This class updates the minor servos positions depending of the antenna elevation
 class TrackingThread : public ACS::Thread

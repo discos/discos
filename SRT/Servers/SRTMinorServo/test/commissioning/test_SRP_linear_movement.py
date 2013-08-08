@@ -20,7 +20,6 @@ server = servers['MSCU']
 class NackEx(Exception):
     pass
 
-
 class TestPositioning(unittest.TestCase):
     """Test the minor servo properties."""
 
@@ -47,21 +46,36 @@ class TestPositioning(unittest.TestCase):
         self.component.setPosition(cmd_pos, 0)
         print '\nsetPosition(%s, %s)' %(cmd_pos, 0)
         time.sleep(10)
-        sdelay = 10
-        delay = sdelay * 10 ** 7 # 10 seconds
-        step =  1 * 10 ** 6 # 100 ms
+        sdelay = 20
+        delay = sdelay * 10 ** 7 # 20 seconds
+        step =  2 * 10 ** 6 # 100 ms
+        points = 100
         exe_time = TimeHelper.getTimeStamp().value + delay # Set the positions in delay seconds from now
-        for i in range(100): # 10 seconds
-            for idx, item in enumerate(cmd_pos):
-                if idx < 3:
-                    cmd_pos[idx] += 0.2
-            print '\nsetPosition(%s, %s)' %(cmd_pos, exe_time + delay + step * i)
-            self.component.setPosition(cmd_pos, exe_time + delay  + step * i)
-            time.sleep(0.2)
+        out_file = open('data/commanded_pos.data', 'w')
 
-        time.sleep(sdelay)
+        for i in range(points): 
+            cmd_pos[2] += 0.2 # increment the z axis
+            future_time = exe_time + step * i
+            self.component.setPosition(cmd_pos, future_time)
+            length = len(str(future_time))
+            time_seconds = str(future_time)[length-8:]
+            out_file.write("Time: %s -- Position Z: %.4f\n" %(time_seconds, cmd_pos[2]))
+            # time.sleep(0.1)
 
+        actual_time = TimeHelper.getTimeStamp().value 
+        while actual_time < exe_time - 4:
+            actual_time = TimeHelper.getTimeStamp().value 
+            time.sleep(1)
 
+        out_file = open('data/linear_movement.data', 'w')
+        while actual_time < exe_time + points * step:
+            actPos_obj = self.component._get_actPos()
+            actPos, cmp = actPos_obj.get_sync()
+            actual_time = TimeHelper.getTimeStamp().value
+            length = len(str(actual_time))
+            time_seconds = str(actual_time)[length-8:]
+            out_file.write("Time: %s -- Position Z: %.4f\n" %(time_seconds, actPos[2]))
+            time.sleep(0.04)
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPositioning)
