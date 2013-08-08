@@ -191,6 +191,31 @@ public:
     virtual CORBA::Long getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
+
+    /**
+     * It is called to get the all the receiver output information in one call.
+     * An output is identified by providing the feed and the IF identifier. It can process any number of requests at a time.
+     * @param feeds is a list that stores the corresponding feed of the output we are asking for
+     * @param ifs is a list that identifies which IFs of the feed we are interested in, usually 0..<i>IFs</i>-1
+     * @param freq used to return the start frequency of the band provided by the output  the oscillator
+     * (if present) is not  added (MHz)
+     * @param bw used to return the total provided bandwidth. (MHz)
+     * @param pols it specifies the polarization of the receiver output, since ACS does not support for enum
+     * sequences the correct value must be matched against the <i>Receivers::TPolarization</i> enumeration.
+     * @param LO it gives (if present) the value of the local oscillator (MHz).
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw CORBA::SystemException
+     */
+    virtual void getIFOutput(
+            const ACS::longSeq& feeds,
+            const ACS::longSeq& ifs,
+            ACS::doubleSeq_out freqs,
+            ACS::doubleSeq_out bw,
+            ACS::longSeq_out pols,
+            ACS::doubleSeq_out LO
+    ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+
 	/**
 	 * This method is called in order to know the taper of the receiver.
 	 * @throw CORBA::SystemException

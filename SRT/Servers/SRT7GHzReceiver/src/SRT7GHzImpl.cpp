@@ -343,6 +343,42 @@ CORBA::Long SRT7GHzImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS:
 	return res;
 }
 
+void SRT7GHzImpl::getIFOutput(
+		const ACS::longSeq& feeds,
+        const ACS::longSeq& ifs,
+        ACS::doubleSeq_out freqs,
+        ACS::doubleSeq_out bw,
+        ACS::longSeq_out pols,
+        ACS::doubleSeq_out LO
+) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
+{
+    ACS::doubleSeq_var freqs_res = new ACS::doubleSeq;
+    ACS::doubleSeq_var bw_res = new ACS::doubleSeq;
+    ACS::longSeq_var pols_res = new ACS::longSeq;
+    ACS::doubleSeq_var LO_res = new ACS::doubleSeq;
+
+    try {
+        m_core.getIFOutput(feeds, ifs, freqs_res.inout(), bw_res.inout(), pols_res.inout(), LO_res.inout());
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getReceiversErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRT7GHzImpl::getIFOutput()");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+    freqs = freqs_res._retn();
+    bw = bw_res._retn();
+    pols = pols_res._retn();
+    LO = LO_res._retn();
+}
+
 CORBA::Double SRT7GHzImpl::getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (
 		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
