@@ -1,36 +1,6 @@
-Test tracking in funzione elevazione
-====================================
-
-
-Servo Park
-==========
-Provare il servoPark in combinazione con i servoSetup
-
-
-Verificare il perche' non riesco comandare il mount dalla mia macchina
-======================================================================
-
-
-Test movimento lineare SRP
-==========================
-Test movimento SRP lineare quando le posizione vengono comandate in anticipo.
-
-
-Test clear position della MSCU
-==============================
-Comandare una serie di posizioni future alla MSCU e fare il clear. Verificare
-che non vengano eseguite.
-
-
-Directory test
-==============
-Riordinare la directory dei test dei servo minori, rinominando in modo corretto i moduli.
-Distinguere tra auto e non-auto.
-
-
-Ricevitori
-==========
-Aggiornare 7GHz ed LP sulla base di quanto fatto per il KBand.
+Setup dei servo
+===============
+Caricare la tabella con superficia attiva disabilitata quando non ho ref al ASBoss
 
 
 Notification Channel MinorServoBoss
@@ -44,6 +14,49 @@ Stabilire la politica di tracking::
 
 Quindi quando lo scan e' in atto avro' isTracking = true. Al termine dello scan avro'
 isTracking
+
+
+
+Ricevitori
+==========
+Vefifiare 7GHz e aggiornare LP sulla base di quanto fatto per il KBand. 
+Anche oscillatore locale LP (vedi email)
+
+
+Servo Park
+==========
+Provare il servoPark in combinazione con i servoSetup
+
+
+Verificare il perche' non riesco comandare il mount dalla mia macchina
+======================================================================
+Chiedere ad Antonella
+
+
+Test movimento lineare SRP
+==========================
+Test movimento SRP lineare quando le posizione vengono comandate in anticipo.
+Come mai non viene aggiornata la posizione attuale? Verificare che:
+
+    * aggiornamento della posizione da parte di Franco, andando a fare un set
+      pos in anticipo (comando un certo numero di posizioni, per 10 secondi)
+      e poi vado a leggere le posizioni (tutto con MSCU, senza ACS). Prendere
+      spunto dal test_SRP_scan.py, ma usare solo la MSCU.
+    * mettere dei timestamp e vedere se e' la chiamata a getStatus che rallenta
+      tutto (per il timestamp, usare il metodo IRA::CTools timeToStr(). Metterne
+      uno prima della chiamata e uno immediatamente dopo...
+
+
+Test clear position della MSCU
+==============================
+Comandare una serie di posizioni future alla MSCU e fare il clear. Verificare
+che non vengano eseguite.
+
+
+Directory test
+==============
+Riordinare la directory dei test dei servo minori, rinominando in modo corretto i moduli.
+Distinguere tra auto e non-auto.
 
 
 
@@ -80,14 +93,24 @@ Implementare il metodo del MinorServoBoss::
 
     ACS::doubleSeq getAxesPosition(ACS::Time time)
 
-Prende un tempo (passato) e restituisce la posizione dei servo all'istante indicato. Se l'istante
-non esiste fa la media delle posizione all'istante prima e a quello dopo, pesata con la distanza (pesa
+Prende un tempo (passato) e restituisce la posizione dei servo (non comandata, effettiva)
+all'istante indicato. Devo cercare la posizione al tempo restituito dall MSCU (quello associato
+alla posizione nel getStatus. Quando time=0 restutiusce la posizione attuale.
+Se l'istante non esiste fa la media delle posizione all'istante prima e a quello dopo, pesata con la distanza (pesa
 di piu' la posizione il cui tempo e' piu' vicino a time).
 Gli assi sono nello stesso ordine di axes. Risoluzione temporale del thread che legge e aggiorna il 
 vettore di queste posizioni: 100ms (sleep_time)
 Prima di implementarlo pensare a come scrivere getAxesInfo()
 La coda delle posizioni in memoria va svuotata con un park e anche con il setup. Usare un vector
 e rimuovere le posizioni a partire dalla prima quando questo raggiunge una certa dimensione.
+
+Implementare il metodo:
+
+   ACS::doubleSeq getPosition(ACS::Time time, out ACS::Time associated_time)
+
+Quando time=0 restituisco l'ultima posizione comandata. In quel caso associated_time
+e' il tempo che la MSCU associa a quella posizione, altrimeni negli altri casi coincide
+con time.
 
 
 Lo scan degli assi

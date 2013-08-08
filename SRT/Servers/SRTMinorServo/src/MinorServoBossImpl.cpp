@@ -736,7 +736,6 @@ void MinorServoBossImpl::startScan(
             ACS::doubleSeq act_pos = *((component_ref->actPos())->get_sync(completion.out()));
                                                         
             turnTrackingOff();
-            ACS_SHORT_LOG((LM_INFO, "Tracking OFF executed."));
                                                     
             if(act_pos.length() <= axis) {          
                 ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: wrong actual position length"));
@@ -748,7 +747,6 @@ void MinorServoBossImpl::startScan(
             ACS::doubleSeq pos; // The position to set
             pos.length(act_pos.length());           
             // The first position is the actual one for all axes except for the one to scan, whose is (act_pos - range/2)
-            ACS_SHORT_LOG((LM_INFO, "before the target_pos"));
             for(size_t i=0; i<pos.length(); i++) {
                 if(i==axis)                             
                     pos[i] = act_pos[i] - range/2;      
@@ -756,45 +754,38 @@ void MinorServoBossImpl::startScan(
                     pos[i] = act_pos[i];                
             }
 
-            ACS_SHORT_LOG((LM_INFO, "Setting the position"));
-            cout << "N: " << N << endl;
-            cout << "delta: " << delta << endl;
-            double starting_pos = pos[axis];
-            for(size_t i=0; i<=N; i++) {
-                pos[axis] = starting_pos + delta * i;
-                cout << "pos: " << pos[axis] << endl;
-
-                try {
+            try {
+                component_ref->setPosition(pos, 0); // Go to the starting position
+                double starting_pos = pos[axis]; 
+                for(size_t i=0; i<=N; i++) {
+                    pos[axis] = starting_pos + delta * i;
                     component_ref->setPosition(pos, stime.value().value + dtime.value().value * i);
+                    usleep(20000); // Wait a bit (20 ms)
                 }
-                catch(...) {// Position not allowed
-                    THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: position not allowed.", true);
-                }
-
-                usleep(20000); // Wait a bit (20 ms)
             }
+            catch(...) {// Position not allowed
+                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: position not allowed.", true);
+            }
+
             m_configuration->m_isConfigured = false;
         }
         
-        ACS_SHORT_LOG((LM_INFO, "Starting star thread"));
-        if(m_scan_thread_ptr != NULL) {
-            m_scan_thread_ptr->suspend();
-            m_scan_thread_ptr->terminate();
-            m_scan_thread_ptr = NULL;
+        if(m_scan_thread_ptr != NULL) { 
+            m_setup_thread_ptr->restart();
+        }
+        else {
         }
 
         (m_configuration->m_scanning).starting_time = starting_time;
         (m_configuration->m_scanning).total_time = total_time;
-        try {
-            m_scan_thread_ptr = getContainerServices()->getThreadManager()->create<ScanThread, MSBossConfiguration *> ("ScanThread", m_configuration);
-            ACS_SHORT_LOG((LM_INFO, "ScanThread created"));
-        }
-        catch(...) {
-            THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: ScanThread already exists.", true);
-        }
 
-        m_scan_thread_ptr->resume();
-        ACS_SHORT_LOG((LM_INFO, "ScanThread resumed"));
+        if(m_setup_thread_ptr != NULL)
+            m_setup_thread_ptr->restart();
+        else {
+            m_scan_thread_ptr = getContainerServices()->getThreadManager()->create<ScanThread, MSBossConfiguration *> 
+                ("ScanThread", m_configuration);
+            m_scan_thread_ptr->resume();
+        }
     }
     catch(...) {
         m_scanning = false;
@@ -829,7 +820,6 @@ void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::Configuration
     try {
         m_tracking_thread_ptr = getContainerServices()->getThreadManager()->create<TrackingThread,
             MSBossConfiguration *>("TrackingThread", m_configuration);
-        ACS_SHORT_LOG((LM_INFO, "trackingThread created"));
     }
     catch(...) {
         if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
@@ -838,7 +828,6 @@ void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::Configuration
 
     m_tracking_thread_ptr->resume();
     if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
-    ACS_SHORT_LOG((LM_INFO, "trackingThread resumed"));
 }
 
 

@@ -59,25 +59,29 @@ class TestScan(unittest.TestCase):
         print "\nThe MinorServoBoss is ready."
 
         time.sleep(10)
-        delay = 10 * 10 ** 7 # 10 seconds
+        delay = 15 * 10 ** 7 # 15 seconds
         starting_time = TimeHelper.getTimeStamp().value + delay # Start the scan in `delay` seconds from now
         range_ = 20 # mm 
         total_time = 10 * 10 ** 7 # 10 seconds
+        abit = 4 * 10 ** 7 # 
         self.boss.startScan(starting_time, range_, total_time, 2, "SRP")
 
         actual_time = TimeHelper.getTimeStamp().value 
-        while actual_time < starting_time - 2:
+        while actual_time < starting_time - abit:
             actual_time = TimeHelper.getTimeStamp().value 
-            time.sleep(0.5)
+            time.sleep(0.2)
 
         out_file = open('data/scan.data', 'w')
-        while actual_time < starting_time + total_time -3:
-            actPos_obj = self.srp._get_actPos()
+        actPos_obj = self.srp._get_actPos()
+        posDiff_obj = self.srp._get_posDiff()
+        while actual_time < starting_time + total_time + abit:
             actPos, cmp = actPos_obj.get_sync()
+            posDiff, cmp = posDiff_obj.get_sync()
             actual_time = TimeHelper.getTimeStamp().value
             length = len(str(actual_time))
             time_seconds = str(actual_time)[length-8:]
-            out_file.write("Time: %s -- Position: %s\n" %(time_seconds, ["%.4f" %pos for pos in actPos]))
+            out_file.write("Time: %s -- Position: %s -- Diff: %s\n" %(time_seconds, 
+                ["%.4f" %pos for pos in actPos], ["%.4f" %pos for pos in posDiff]))
             time.sleep(0.04)
 
 if __name__ == "__main__":
