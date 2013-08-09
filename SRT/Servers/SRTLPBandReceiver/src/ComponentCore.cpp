@@ -101,7 +101,7 @@ void CComponentCore::getLBandLO(ACS::doubleSeq& lo)
     baci::ThreadSyncGuard guard(&m_mutex);
     lo.length(m_configuration.getIFs());
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        lo[i] = m_configuration.getLBandRFMin()[i] - m_configuration.getLBandIFMin()[i];
+        lo[i] = 0;
     }
 }
 
@@ -111,7 +111,7 @@ void CComponentCore::getPBandLO(ACS::doubleSeq& lo)
     baci::ThreadSyncGuard guard(&m_mutex);
     lo.length(m_configuration.getIFs());
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        lo[i] = m_configuration.getPBandRFMin()[i] - m_configuration.getPBandIFMin()[i];
+        lo[i] = 0;
     }
 }
 
@@ -530,6 +530,78 @@ void CComponentCore::getCalibrationMark(
     if (tableRightMark) delete [] tableRightMark;
     scale = 1.0;
 
+}
+
+
+void CComponentCore::getIFOutput(
+        const ACS::longSeq& feeds,
+        const ACS::longSeq& ifs,
+        ACS::doubleSeq& freqs,
+        ACS::doubleSeq& bw,
+        ACS::longSeq& pols, 
+        ACS::doubleSeq& LO
+        ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
+{
+
+    if (m_setupMode=="") {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getIFOutput()");
+        impl.setReason("receiver not configured yet");
+        throw impl;
+    }
+    // let's do some checks about input data
+    unsigned stdLen=feeds.length();
+    if ((stdLen!=ifs.length())) {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getIFOutput()");
+        impl.setReason("sub-bands definition is not consistent");
+        throw impl;
+    }
+    for (unsigned i=0;i<stdLen;i++) {
+        if ((ifs[i]>=(long)m_configuration.getIFs()) || (ifs[i]<0)) {
+            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getIFOutputMark()");
+            impl.setValueName("IF identifier");
+            throw impl;
+        }
+    }
+    for (unsigned i=0;i<stdLen;i++) {
+        if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
+            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getIFOutput()");
+            impl.setValueName("feed identifier");
+            throw impl;
+        }
+    }
+        
+    freqs.length(stdLen);
+    bw.length(stdLen);
+    pols.length(stdLen);
+    LO.length(stdLen);
+
+    IRA::CString actualMode(getActualMode());
+
+    ACS::doubleSeq lo;
+    for (unsigned i=0;i<stdLen;i++) {
+        if(actualMode.Right() == "X") { // P band conf
+            freqs[i] = m_PBandStartFreq[ifs[i]];
+            bw[i] = m_configuration.getPBandIFBandwidth()[ifs[i]];
+            pols[i] = (long)m_configuration.getPBandPolarizations()[ifs[i]];
+            getPBandLO(lo);
+            LO[i] = lo[ifs[i]];
+        }
+        else if(actualMode.Left() == "X") { // L band conf
+            freqs[i] = m_LBandStartFreq[ifs[i]];
+            bw[i] = m_configuration.getLBandIFBandwidth()[ifs[i]];
+            pols[i] = (long)m_configuration.getLBandPolarizations()[ifs[i]];
+            getLBandLO(lo);
+            LO[i] = lo[ifs[i]];
+        }
+        else { // Dual band conf: backend indexes
+            freqs[i] = (feeds[i] == 0) ? m_PBandStartFreq[ifs[i]] : m_LBandStartFreq[ifs[i]];
+            bw[i] = (feeds[i] == 0) ? m_configuration.getPBandIFBandwidth()[ifs[i]] : m_configuration.getLBandIFBandwidth()[ifs[i]];
+            pols[i] = (feeds[i] == 0) ? (long)m_configuration.getPBandPolarizations()[ifs[i]] : 
+                (long)m_configuration.getLBandPolarizations()[ifs[i]];
+            (feeds[i] == 0) ? getPBandLO(lo) : getLBandLO(lo);
+            LO[i] = lo[ifs[i]];
+        }
+    }
 }
 
 

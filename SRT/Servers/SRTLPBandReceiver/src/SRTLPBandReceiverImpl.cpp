@@ -448,6 +448,45 @@ ACS::doubleSeq * SRTLPBandReceiverImpl::getCalibrationMark(
 }
 
 
+void SRTLPBandReceiverImpl::getIFOutput(
+            const ACS::longSeq& feeds,
+            const ACS::longSeq& ifs,
+            ACS::doubleSeq_out freqs,
+            ACS::doubleSeq_out bw,
+            ACS::longSeq_out pols,
+            ACS::doubleSeq_out LO
+    ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
+{
+    ACS_SHORT_LOG((LM_INFO, "SRTLPBandReceiverImpl::getIFOutput()"));
+    ACS::doubleSeq_var freqs_res = new ACS::doubleSeq;
+    ACS::doubleSeq_var bw_res = new ACS::doubleSeq;
+    ACS::longSeq_var pols_res = new ACS::longSeq;
+    ACS::doubleSeq_var LO_res = new ACS::doubleSeq;
+
+    try {
+        m_core.getIFOutput(feeds, ifs, freqs_res.inout(), bw_res.inout(), pols_res.inout(), LO_res.inout());
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();        
+    }
+    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getReceiversErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRTLPBandReceiverImpl::getIFOutput()");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+
+    freqs = freqs_res._retn();
+    bw = bw_res._retn();
+    pols = pols_res._retn();
+    LO = LO_res._retn();
+}
+            
+
 CORBA::Long SRTLPBandReceiverImpl::getFeeds(
         ACS::doubleSeq_out X,
         ACS::doubleSeq_out Y,
