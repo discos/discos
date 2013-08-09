@@ -36,7 +36,7 @@
     virtual_rs = "1"
     require_calibration = "0"
     expire_time = "0.05000"
-    tracking_delta = "0.1"
+    tracking_delta = "1.0"
     limits="(-50, 50); (-50, 50); (-110, 110); (-0.25, 0.25); (-0.25, 0.25); (-0.25, 0.25)"
 >
               

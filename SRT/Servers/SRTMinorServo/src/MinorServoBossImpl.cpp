@@ -80,6 +80,7 @@ void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponen
 
     try {
         m_nchannel = new nc::SimpleSupplier(MinorServo::MINORSERVO_DATA_CHANNEL, this);
+        m_configuration->m_nchannel = m_nchannel;
     }
     catch (...) {
         _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"MinorServoBoss::initialize()");
@@ -159,7 +160,7 @@ void MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImp
     }
     try {
         m_publisher_thread_ptr = getContainerServices()->getThreadManager()->create<MSBossPublisher,
-            MSThreadParameters>("MSBossPublisher", m_thread_params);
+            MSBossConfiguration *>("MSBossPublisher", m_configuration);
         m_publisher_thread_ptr->resume();
     }
     catch(...) {

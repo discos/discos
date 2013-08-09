@@ -13,13 +13,14 @@
 #include <IRA>
 #include <MinorServoS.h>
 #include "MSParameters.h"
+#include "MSBossConfiguration.h"
 #include "SetupThread.h"
 #include <string>
 #include <map>
 #include "utils.h"
 
 // Sleep Time in 100ns
-#define PUBLISHER_SLEEP_TIME 50000000
+#define PUBLISHER_SLEEP_TIME 50000000 // 0.5 seconds
 #define VSTATUS_LENGTH 7
 #define VS_OK 0
 #define VS_TRACKING 1
@@ -36,7 +37,7 @@ public:
 
 	MSBossPublisher(
         const ACE_CString& name, 
-        MSThreadParameters& params,
+        MSBossConfiguration * configuration,
         const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
         const ACS::TimeInterval& sleepTime=PUBLISHER_SLEEP_TIME,
         const bool del=true
@@ -54,7 +55,8 @@ public:
     virtual void runLoop();
 
 private:
-    MSThreadParameters *m_params;
+    MSBossConfiguration * m_configuration;
+    TIMEVALUE m_last_event;
 	
 	/** The status of the whole minor servo subsystem */
 	Management::TSystemStatus m_status;

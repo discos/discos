@@ -20,6 +20,8 @@ ARG must be:
     * NOAS: means no active surface
     * AS: active surface"""
 
+asurface_conf = False
+
 if len(sys.argv) == 2:
     arg = sys.argv[1].strip() 
     if arg not in ['NOAS', 'AS']:
@@ -79,7 +81,9 @@ class TestElevationTracking(unittest.TestCase):
         min_el = 6.0
         max_el = 89.0
         # Choice a range of 10 random elevation values
-        elevations = sorted([randrange(min_el, max_el) for i in range(10)])
+        elevations = [randrange(min_el, max_el) for i in range(10)]
+        elevations.append(45)
+        elevations = sorted(elevations)
 
         # Get the actual azimut position
         az_obj = self.antenna_mount._get_azimuth()
@@ -126,8 +130,8 @@ class TestElevationTracking(unittest.TestCase):
             else:
                 expected = [
                     0,
-                    17.117487139874 - 0,002707044952 * el - 0.009870218853 * el**2 + 0.000031617958 * el**3,
-                    -6.374633191475 + 0.169826241752 * el - 0.000419997047 * el**2 - 0,000003985237 * el**3,
+                    17.117487139874 - 0.002707044952 * el - 0.009870218853 * el**2 + 0.000031617958 * el**3,
+                    -6.374633191475 + 0.169826241752 * el - 0.000419997047 * el**2 - 0.000003985237 * el**3,
                     -0.061286707040614161 - 0.0001426193499425 * el + 0.000039508844799 * el**2 - 0.000000131010010 * el**3,
                     0,
                     0

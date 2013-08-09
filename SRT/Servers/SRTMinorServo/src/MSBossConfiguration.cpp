@@ -17,6 +17,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
     m_isTrackingEn = false;
     m_isScanning = false;
     m_isASConfiguration = false;
+    m_nchannel = NULL;
 }
 
 MSBossConfiguration::~MSBossConfiguration() {}

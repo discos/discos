@@ -27,6 +27,7 @@
 #include <macros.def>
 #include <SP_parser.h>
 #include <SRTActiveSurfaceBossS.h>
+#include <acsncSimpleSupplier.h>
 
 const std::string actions_separator = "@";
 const std::string items_separator = ":";
@@ -126,6 +127,9 @@ public:
 
     /** Active surface boss references */
     ActiveSurface::SRTActiveSurfaceBoss_var m_as_ref;
+
+	/** This is the pointer to the notification channel */
+	nc::SimpleSupplier *m_nchannel;
 
     maci::ContainerServices * m_services;
 };
