@@ -26,6 +26,7 @@
 #include <ManagmentDefinitionsS.h>
 #include <macros.def>
 #include <SP_parser.h>
+#include <SRTActiveSurfaceBossS.h>
 
 const std::string actions_separator = "@";
 const std::string items_separator = ":";
@@ -71,6 +72,9 @@ public:
 
     inline std::string getCommandedSetup() { return m_commandedSetup; }
 
+    /** Return true when we are using the ASACTIVE cofiguration */
+    inline bool isASConfiguration() { return m_isASConfiguration; }
+
     inline std::vector<std::string> getServosToPark() { return m_servosToPark; }
 
     inline std::vector<std::string> getServosToMove() { return m_servosToMove; }
@@ -102,9 +106,9 @@ public:
     bool m_isElevationTracking;
     bool m_isTrackingEn; // Is the tracking enabled?
     bool m_isScanning; 
+    bool m_isASConfiguration;
 
     Scanning m_scanning;
-    
 
     std::vector<std::string> m_servosToPark;
 
@@ -119,6 +123,9 @@ public:
 
     /** Map of component references */
     map<string, MinorServo::WPServo_var> m_component_refs;
+
+    /** Active surface boss references */
+    ActiveSurface::SRTActiveSurfaceBoss_var m_as_ref;
 
     maci::ContainerServices * m_services;
 };

@@ -344,9 +344,9 @@ void MinorServoBossImpl::parkImpl() throw (CORBA::SystemException, ManagementErr
 
 bool MinorServoBossImpl::isStarting() { return m_configuration->isStarting(); }
 
+bool MinorServoBossImpl::isASConfiguration() { return m_configuration->isASConfiguration(); }
 
 bool MinorServoBossImpl::isParking() { return m_configuration->isParking(); }
-
 
 bool MinorServoBossImpl::isReady() { return m_configuration->isConfigured(); }
 

@@ -199,7 +199,9 @@
         <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
         <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
         <xs:attribute name="slaves" type="xs:string" use="required" />
+        <xs:attribute name="CCB_ASACTIVE" type="xs:string" use="required" />
         <xs:attribute name="CCB" type="xs:string" use="required" />
+        <xs:attribute name="KKG_ASACTIVE" type="xs:string" use="required" />
         <xs:attribute name="KKG" type="xs:string" use="required" />
         <xs:attribute name="LLP" type="xs:string" use="required" />
         <xs:attribute name="PPP" type="xs:string" use="required" />

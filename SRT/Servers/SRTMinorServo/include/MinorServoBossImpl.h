@@ -106,6 +106,10 @@ public:
     bool isStarting();
 
     
+    /** Return true when we are using the ASACTIVE configuration */
+    bool isASConfiguration();
+
+    
     /** Return true if the the servo position is changing by depending of the elevation */
     bool isTracking();
 

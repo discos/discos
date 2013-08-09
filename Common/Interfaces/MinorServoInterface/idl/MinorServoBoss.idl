@@ -82,6 +82,12 @@ module MinorServo {
          */
 		boolean isStarting();
 
+        /*
+         * Is the Active surface configuration (polynomial to use when te AS is active)?
+         * @return true if we are using the configuration with the AS active.
+         */
+        boolean isASConfiguration();
+
 		
         /**
          * Is the system parking?
@@ -140,7 +146,7 @@ module MinorServo {
          * @param range the total axis movement in mm (centered in the actual position)
          * @param total_time the duration of axis movement
          * @param axis the identification code of the axis
-         * @param servo the servo name
+         * @param servo the servo name (GFR, SRP, PFP, M3R)
          *
          * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
          */

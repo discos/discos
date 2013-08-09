@@ -1,6 +1,8 @@
 Setup dei servo
 ===============
 Caricare la tabella con superficia attiva disabilitata quando non ho ref al ASBoss
+Fare test.
+Verificare che isASConfigurationEnabled() sia false.
 
 
 Notification Channel MinorServoBoss
@@ -16,7 +18,6 @@ Quindi quando lo scan e' in atto avro' isTracking = true. Al termine dello scan 
 isTracking
 
 
-
 Ricevitori
 ==========
 Vefifiare 7GHz e aggiornare LP sulla base di quanto fatto per il KBand. 
@@ -28,16 +29,13 @@ Servo Park
 Provare il servoPark in combinazione con i servoSetup
 
 
-Verificare il perche' non riesco comandare il mount dalla mia macchina
-======================================================================
-Chiedere ad Antonella
-
-
 Test movimento lineare SRP
 ==========================
 Test movimento SRP lineare quando le posizione vengono comandate in anticipo.
 Come mai non viene aggiornata la posizione attuale? Verificare che:
 
+    * Non vi siano sleep il look_for_a_response e nei due thread socket listener
+      e socket dispatcher.
     * aggiornamento della posizione da parte di Franco, andando a fare un set
       pos in anticipo (comando un certo numero di posizioni, per 10 secondi)
       e poi vado a leggere le posizioni (tutto con MSCU, senza ACS). Prendere
@@ -45,6 +43,12 @@ Come mai non viene aggiornata la posizione attuale? Verificare che:
     * mettere dei timestamp e vedere se e' la chiamata a getStatus che rallenta
       tutto (per il timestamp, usare il metodo IRA::CTools timeToStr(). Metterne
       uno prima della chiamata e uno immediatamente dopo...
+
+
+
+Verificare il perche' non riesco comandare il mount dalla mia macchina
+======================================================================
+Chiedere MTM.
 
 
 Test clear position della MSCU
@@ -147,6 +151,8 @@ l'elevazione ed gavino-mng sappia se la superficie attiva sta inseguendo
 l'elevazione. In questo modo, prima di caricare la configurazione
 vado a leggere lo stato della superficie attiva, e nel caso in cui
 non sia in tracking allora carico la tabella alternativa.
+Quanto non riesco a recuperare l'elevazione devo lanciare una eccezione perche' l'osservazione
+non puo' continuare.
 
 
 Vefifica efficacia correzioni in funzione dell'elevazione

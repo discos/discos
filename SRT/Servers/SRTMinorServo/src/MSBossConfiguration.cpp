@@ -16,8 +16,8 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
     m_services = Services;
     m_isTrackingEn = false;
     m_isScanning = false;
+    m_isASConfiguration = false;
 }
-
 
 MSBossConfiguration::~MSBossConfiguration() {}
 
@@ -27,6 +27,29 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
     // Starting
     m_isStarting = true;
     m_commandedSetup = string(setupMode);
+    m_isASConfiguration = false;
+
+    IRA::CError error;
+    try {
+        m_as_ref =  ActiveSurface::SRTActiveSurfaceBoss::_nil();
+        m_as_ref = m_services->getComponent<ActiveSurface::SRTActiveSurfaceBoss>("AS/Boss");
+        if(!CORBA::is_nil(m_as_ref)) {
+            if(false) { // TODO: remove this line and decomment the one below
+            // if(m_as_ref->isReadyToUpdate()) {
+                setupMode = setupMode + string("_ASACTIVE");
+                m_isASConfiguration = true;
+            }
+            else {
+                ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): 'NO ACTIVE SUFRACE' configuration."));
+            }
+        }
+        else {
+            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): nil ASBoss reference: 'NO ACTIVE SUFRACE' configuration."));
+        }
+    }
+    catch (maciErrType::CannotGetComponentExImpl& ex) {
+        ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): cannot get the ASBoss component: 'NO ACTIVE SUFRACE' configuration."));
+    }
 
     // Read the component configuration
     IRA::CString config;
@@ -55,7 +78,6 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
         strip(comp_name);
 
         // Get the component
-        IRA::CError error;
         try {
             MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
             component_ref = m_services->getComponent<MinorServo::WPServo>(("MINORSERVO/" + comp_name).c_str());

@@ -5,9 +5,16 @@
        Andrea Orlati, aorlati@ira.inaf.it
 -->
 
-<!-- The order of axises of every minor servo have to be the same as MSCU one -->
-<!-- 
-     For instance if we have the following values: (C0, C1, C2), the axis value will be:
+<!-- ASACTIVE means the active sufrace is enabled and changing with the elevation,
+     otherwise the code without the ASACTIVE suffice is the configuration with
+     no active sufrace enabled.
+-->
+<!-- The order of axises of every minor servo have to be the same as MSCU one.
+     Legend:
+       * TX means translation in X
+       * RX means rotation in X
+
+     Given a setup code , if we have the following values: (C0, C1, C2), the axis value will be:
 
          C0 + C1*E + C2*E^2 
 
@@ -16,7 +23,7 @@
          
          x = 2.222 + 1.111*E + 0*E
      
-     The rotation unit is sec, not arc sec.
+     PS. The rotation unit is sec, not arc sec.
 -->
 <!-- The action order must be: park; active servos; none -->
 <MinorServoBoss
@@ -27,43 +34,67 @@
     actionThreadStackSize="2048"
     monitoringThreadStackSize="4096"
     
+    CCB_ASACTIVE="
+        @ PFP: park;
+        @ GFR: park;
+        @ SRP: TX = (0); 
+               TY = (29.8166666666665, 0.263472663139432, -0.018206701940039, 0.000072373113855); 
+               TZ = (-6.37463319147492, 0.169826241751738, -0.000419997047419, -0.000003985237184);
+               RX = (-0.03222222222222361, 0.00014822163433269445, 0.000027586713698, -0.000000077732053);
+               RY = (0); 
+               RZ = (0);
+        @ M3R: RZ = (286.67);
+    "
     CCB="
         @ PFP: park;
         @ GFR: park;
-        @ SRP: LX = (0); 
-               LY = (29.8166666666665, 0.263472663139432, -0.018206701940039, 0.000072373113855); 
-               LZ = (-6.37463319147492, 0.169826241751738, -0.000419997047419, -0.000003985237184);
-               TX = (-0.03222222222222361, 0.00014822163433269445, 0.000027586713698, -0.000000077732053);
-               TY = (0); 
-               TZ = (0);
-        @ M3R: LZ = (286.67);
+        @ SRP: TX = (0); 
+               TY = (17.117487139874, -0.002707044952, -0.009870218853, 0.000031617958);
+               TZ = (-6.374633191475, 0.169826241752, -0.000419997047, -0.000003985237);
+               RX = (-0.061286707040614161, -0.0001426193499425, 0.000039508844799, -0.000000131010010); 
+               RY = (0); 
+               RZ = (0);
+        @ M3R: RZ = (286.67);
+    "
+
+    KKG_ASACTIVE="
+        @ PFP: park;
+        @ SRP: TX = (0); 
+               TY = (29.8166666666665, 0.263472663139432, -0.018206701940039, 0.000072373113855);
+               TZ = (-6.37463319147492, 0.169826241751738, -0.000419997047419, -0.000003985237184);
+               RX = (-0.061286707040614161, -0.0001426193499425, 0.000039508844799, -0.000000131010010); 
+               RY = (0); 
+               RZ = (0);
+        @ GFR: RZ = (1323.5);
+        @ M3R: none;
     "
     KKG="
         @ PFP: park;
-        @ SRP: LX = (0); 
-               LY = (29.8166666666665, 0.263472663139432, -0.018206701940039, 0.000072373113855);
-               LZ = (-6.37463319147492, 0.169826241751738, -0.000419997047419, -0.000003985237184);
-               TX = (-0.03222222222222361, 0.00014822163433269445, 0.000027586713698, -0.000000077732053);
-               TY = (0); 
-               TZ = (0);
-        @ GFR: LZ = (1323.5);
+        @ SRP: TX = (0); 
+               TY = (17.117487139874, -0.002707044952, -0.009870218853, 0.000031617958);
+               TZ = (-6.374633191475, 0.169826241752, -0.000419997047, -0.000003985237);
+               RX = (-0.061286707040614161, -0.0001426193499425, 0.000039508844799, -0.000000131010010); 
+               RY = (0); 
+               RZ = (0);
+        @ GFR: RZ = (1323.5);
         @ M3R: none;
     "
+
     LLP="
         @ SRP: park;
-        @ PFP: TY = (-25.75); LX = (458); LZ = (-46.2);
+        @ PFP: RY = (-25.75); TX = (458); TZ = (-46.2);
         @ GFR: none; 
         @ M3R: none;
     "
     PPP="
         @ SRP: park;
-        @ PFP: TY = (-25.75); LX = (458); LZ = (-45.9);
+        @ PFP: RY = (-25.75); TX = (458); TZ = (-45.9);
         @ GFR: none; 
         @ M3R: none;
     "
     PLP="
         @ SRP: park;
-        @ PFP: TY = (-25.75); LX = (458); LZ = (-45.9);
+        @ PFP: RY = (-25.75); TX = (458); TZ = (-45.9);
         @ GFR: none; 
         @ M3R: none;
     "

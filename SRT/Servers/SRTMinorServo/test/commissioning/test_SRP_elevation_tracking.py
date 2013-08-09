@@ -9,8 +9,29 @@ import time
 import Antenna
 from AntennaErrors import AntennaErrorsEx
 from random import randrange
+import sys
 
+err_message = """
+Usage: 
 
+    python %s ARG " %__file__
+
+ARG must be:
+    * NOAS: means no active surface
+    * AS: active surface"""
+
+if len(sys.argv) == 2:
+    arg = sys.argv[1].strip() 
+    if arg not in ['NOAS', 'AS']:
+        print err_message
+        sys.exit(0)
+    elif arg == 'AS':
+        asurface_conf = True
+   
+else:
+   print err_message
+   sys.exit(0)
+   
 def isAlmostEqual(a, b, delta=0.2):
     return True if abs(a-b) < delta else False
 
@@ -93,14 +114,25 @@ class TestElevationTracking(unittest.TestCase):
                 # get the actual elevation
                 el, cmp = el_obj.get_sync()
             # Compute the expected values
-            expected = [
-                0,
-                29.8166666666665 + 0.263472663139432 * el - 0.018206701940039 * el**2 + 0.000072373113855 * el**3,
-                -6.37463319147492 + 0.169826241751738 * el - 0.000419997047419 * el**2 - 0.000003985237184 * el**3,
-                -0.03222222222222361 + 0.00014822163433269445 * el + 0.000027586713698 * el**2 - 0.000000077732053 * el**3,
-                0,
-                0
-            ]
+            if asurface_conf:
+                expected = [
+                       0,
+                       29.8166666666665 + 0.263472663139432 * el - 0.018206701940039 * el**2 + 0.000072373113855 * el**3,
+                       -6.37463319147492 + 0.169826241751738 * el - 0.000419997047419 * el**2 - 0.000003985237184 * el**3,
+                       -0.03222222222222361 + 0.00014822163433269445 * el + 0.000027586713698 * el**2 - 0.000000077732053 * el**3,
+                       0,
+                       0
+                   ]
+            else:
+                expected = [
+                    0,
+                    17.117487139874 - 0,002707044952 * el - 0.009870218853 * el**2 + 0.000031617958 * el**3,
+                    -6.374633191475 + 0.169826241752 * el - 0.000419997047 * el**2 - 0,000003985237 * el**3,
+                    -0.061286707040614161 - 0.0001426193499425 * el + 0.000039508844799 * el**2 - 0.000000131010010 * el**3,
+                    0,
+                    0
+                ]
+
             pos_obj = self.srp._get_actPos()
             srp_pos, cmp = pos_obj.get_sync()
 
