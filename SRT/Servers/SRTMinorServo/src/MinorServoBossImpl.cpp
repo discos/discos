@@ -343,6 +343,34 @@ void MinorServoBossImpl::parkImpl() throw (CORBA::SystemException, ManagementErr
 }
 
 
+void MinorServoBossImpl::getAxesInfo(ACS::stringSeq_out axes, ACS::stringSeq_out units)
+    throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx) 
+{
+
+    if(!isReady())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getAxesInfo(): the system is not ready", true);
+
+    ACS::stringSeq_var axes_res = new ACS::stringSeq;
+    ACS::stringSeq_var units_res = new ACS::stringSeq;
+
+    vector<string> a = m_configuration->getAxes();
+    vector<string> u = m_configuration->getUnits();
+    axes_res->length(a.size());
+    units_res->length(u.size());
+
+    if(a.size() != u.size())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getAxesInfo(): mismatch between axes and units length", true);
+
+    for(size_t i=0; i<a.size(); i++) {
+        axes_res[i] = (a[i]).c_str();
+        units_res[i] = (u[i]).c_str();
+    }
+
+    axes = axes_res._retn();
+    units = units_res._retn();
+}
+
+
 bool MinorServoBossImpl::isStarting() { return m_configuration->isStarting(); }
 
 bool MinorServoBossImpl::isASConfiguration() { return m_configuration->isASConfiguration(); }

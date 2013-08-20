@@ -82,6 +82,10 @@ public:
 
     inline std::vector<std::string> getDynamicComponents() { return m_dynamic_comps; }
 
+    inline std::vector<std::string> getAxes() { return m_axes; }
+
+    inline std::vector<std::string> getUnits() { return m_units; }
+
 
     struct Scanning {
         ACS::Time starting_time;
@@ -117,6 +121,11 @@ public:
 
     /** Components with number of coefficients greather than 1 */
     std::vector<std::string> m_dynamic_comps;
+
+    /** Active axes */
+    std::vector<std::string> m_axes;
+    /** Axes units */
+    std::vector<std::string> m_units;
 
     std::map<std::string, std::vector<std::vector<double> > > m_servosCoefficients;
 

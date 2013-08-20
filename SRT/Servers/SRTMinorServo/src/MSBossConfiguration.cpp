@@ -65,6 +65,8 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
     m_servosToMove.clear();
     m_servosCoefficients.clear();
     m_dynamic_comps.clear();
+    m_axes.clear();
+    m_units.clear();
     m_isValidCDBConfiguration = false;
 
     vector<string> actions = split(string(config), actions_separator);
@@ -114,7 +116,19 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
         for(vector<string>::iterator viter = aitems.begin(); viter != aitems.end(); viter++) {
             vector<string> labels = split(*viter, coeffs_id);
             string coeffs = labels.back();
+            string axis_and_unit(labels.front());
             strip(coeffs);
+
+            // Get the axis and unit
+            vector<string> tokens = split(axis_and_unit, string("("));
+            string axis = tokens.front();
+            strip(axis);
+            m_axes.push_back(comp_name + string("_") + axis);
+            string unit = tokens.back();
+            strip(unit, string(")"));
+            strip(unit);
+            m_units.push_back(unit);
+            // End axis and unit
 
             for(string::size_type idx = 0; idx != boundary_tokens.size(); idx++)
                 strip(coeffs, char2string(boundary_tokens[idx]));
@@ -127,6 +141,8 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
 
             if(coefficients.empty()) {
                 m_isStarting = false;
+                m_axes.clear();
+                m_units.clear();
                 THROW_EX(ManagementErrors, ConfigurationErrorEx, ("No coefficients for " + comp_name).c_str(), false);
             }
 
@@ -139,6 +155,8 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
         if(m_servosCoefficients.count(comp_name) && m_component_refs.count(comp_name)) {
             if((m_servosCoefficients[comp_name]).size() != (m_component_refs[comp_name])->numberOfAxes()) {
                 m_isStarting = false;
+                m_axes.clear();
+                m_units.clear();
                 THROW_EX(ManagementErrors, ConfigurationErrorEx, "Mismatch between number of coefficients and number of axes", false);
             }
         }

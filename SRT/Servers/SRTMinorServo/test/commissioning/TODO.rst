@@ -1,13 +1,11 @@
 Setup dei servo
 ===============
-Caricare la tabella con superficia attiva disabilitata quando non ho ref al ASBoss
-Fare test.
 Verificare che isASConfigurationEnabled() sia false.
 
 
 Notification Channel MinorServoBoss
 ===================================
-Pubblicare il flag di tracking nel NC, ad ogni cambiamento e in ogni caso, ogni secondo.
+Pubblicare il flag di tracking nel NC, ad ogni cambiamento e in ogni caso, ogni secondo. (DONE)
 Chiamare isReady() isOnFocus()? Stabilisco che il sistema e' onFocus() quando e' pronto e
 la diff di posizione, rispetto a quella di fuoco, e' inferiore a un delta?
 Stabilire la politica di tracking::
@@ -20,8 +18,7 @@ isTracking
 
 Ricevitori
 ==========
-Vefifiare 7GHz e aggiornare LP sulla base di quanto fatto per il KBand. 
-Anche oscillatore locale LP (vedi email)
+Vedi email Andrea di Agosto
 
 
 Servo Park
@@ -35,7 +32,7 @@ Test movimento SRP lineare quando le posizione vengono comandate in anticipo.
 Come mai non viene aggiornata la posizione attuale? Verificare che:
 
     * Non vi siano sleep il look_for_a_response e nei due thread socket listener
-      e socket dispatcher.
+      e socket dispatcher (DONE: sembra tutto ok)
     * aggiornamento della posizione da parte di Franco, andando a fare un set
       pos in anticipo (comando un certo numero di posizioni, per 10 secondi)
       e poi vado a leggere le posizioni (tutto con MSCU, senza ACS). Prendere
@@ -71,24 +68,8 @@ Implementare l'interfaccia dei metodi definiti nelle prossime sezioni, e fare il
 
 Informazioni sugli assi
 =======================
-Implementare il metodo del MinorServoBoss::
-
-    void getAxesInfo(out ACS::stringSeq axes, out ACS::stringSeq units)
-
-Il parametro `axes` avra' come elementi le descrizioni degli assi coinvolti. Ad esempio,
-per la configurazione CCB sara'::
-
-     axes = "SRP_XT", "SRP_YT", "SRP_ZT", "SRP_XR", "SRP_YR", "SRP_ZR", "GFR_ZR", "M3R_ZR"
-
-dove T significa Translation e R Rotation.
-Il parametro units contiene le unita' di misura degli assi, indicati con lo stesso ordine
-che hanno in `axes`::
-
-     units = "mm", "mm", "mm", "degree", "degree", "degree", "degree", "degree"
-
-Leggere queste informazioni nella configurazione del CDB del Boss. Ad esempio, in CCB avremo oltre
-che le posizioni dei servo anche i campi `AXES: ...`  e `UNITS: ...`.
-Prima di implementarlo pensare a come scrivere le posizioni di getAxesPosition()
+Testare il metodo getAxesInfo() e verificare che restituisce le sequenze corrette,
+a seconda della configurazione.
 
 
 Richiesta della posizione dei servo ad un dato momento

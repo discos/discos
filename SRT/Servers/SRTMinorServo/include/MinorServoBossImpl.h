@@ -284,6 +284,20 @@ public:
       */
      ACS::doubleSeq * getSystemOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
     
+ 
+     /** Return the active axes names and related units
+      *
+      * @param axes a sequence of active axes. For instance: 
+      * ("SRP_XT", "SRP_YT", "SRP_ZT", "SRP_XR", "SRP_YR", "SRP_ZR", "GFR_ZR")
+      * @param units a sequence of strings, each one is the unit of the corresponding axis.
+      * For instance: ("mm", "mm", "mm", "degree", "degree", "degree", "mm")
+      * @throw MinorServoErrors::ConfigurationErrorEx
+      */
+     void getAxesInfo(ACS::stringSeq_out axes, ACS::stringSeq_out units)
+         throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
+
+
+
 private:
 
 	ContainerServices *m_services;

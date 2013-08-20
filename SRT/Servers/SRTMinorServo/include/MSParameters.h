@@ -248,7 +248,6 @@ const unsigned long status_sleep_time = 50 * 10; // 50 us
 
 // WPServoTalker parameters
 #define USLEEP_TIME 5 // 5us
-#define STATUS_USLEEP_TIME 500000 // 500000us = 0.5 sec
 #define GUARD_TIME 0.0005 // In seconds
 #define TIME_SF 1000000.0 // Time Scale Factor
 
