@@ -532,17 +532,7 @@ protected:
 
     CConfiguration m_configuration;
     IRA::ReceiverControl *m_control; // This object is thread safe
-    ACS::longSeq m_LBandPolarization;
-    ACS::longSeq m_PBandPolarization;
-    ACS::doubleSeq m_startFreq;
-    ACS::doubleSeq m_bandwidth;
-    ACS::longSeq m_polarization;
     BACIMutex m_mutex;
-
-    ACS::doubleSeq m_LBandStartFreq;
-    ACS::doubleSeq m_PBandStartFreq;
-    ACS::doubleSeq m_LBandBandwidth;
-    ACS::doubleSeq m_PBandBandwidth;
     IRA::CString m_actualMode;
     IRA::CString m_setupMode; // The setup mode: KKG, LLP, PLP, CCB, ecc.
 

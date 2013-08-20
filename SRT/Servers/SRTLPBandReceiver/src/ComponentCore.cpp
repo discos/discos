@@ -64,21 +64,6 @@ CConfiguration const * const  CComponentCore::execute() throw (
         _EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CComponentCore::execute()");
         throw dummy;
     }
-    // Members initialization
-    m_LBandStartFreq.length(m_configuration.getIFs());
-    m_PBandStartFreq.length(m_configuration.getIFs());
-    m_LBandPolarization.length(m_configuration.getIFs());
-    m_PBandPolarization.length(m_configuration.getIFs());
-
-    for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        m_LBandStartFreq[i] = m_configuration.getLBandIFMin()[i];
-        m_LBandPolarization[i] = (long)m_configuration.getLBandPolarizations()[i];
-    }
-
-    for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        m_PBandStartFreq[i] = m_configuration.getPBandIFMin()[i];
-        m_PBandPolarization[i] = (long)m_configuration.getPBandPolarizations()[i];
-    }
 
     m_actualMode="";
     return &m_configuration;
@@ -141,7 +126,7 @@ void CComponentCore::getLBandStartFrequency(ACS::doubleSeq& sf)
     baci::ThreadSyncGuard guard(&m_mutex);
     sf.length(m_configuration.getIFs());
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        sf[i] = m_LBandStartFreq[i];
+        sf[i] = m_configuration.getLBandIFMin()[i];
     }
 }
 
@@ -151,7 +136,7 @@ void CComponentCore::getPBandStartFrequency(ACS::doubleSeq& sf)
     baci::ThreadSyncGuard guard(&m_mutex);
     sf.length(m_configuration.getIFs());
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        sf[i] = m_PBandStartFreq[i];
+        sf[i] = m_configuration.getPBandIFMin()[i];
     }
 }
 
@@ -161,7 +146,7 @@ void CComponentCore::getLBandPolarization(ACS::longSeq& pol)
     baci::ThreadSyncGuard guard(&m_mutex);
     pol.length(m_configuration.getIFs());
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        pol[i] = m_LBandPolarization[i];
+        pol[i] = m_configuration.getLBandPolarizations()[i];
     }
 }
 
@@ -171,7 +156,7 @@ void CComponentCore::getPBandPolarization(ACS::longSeq& pol)
     baci::ThreadSyncGuard guard(&m_mutex);
     pol.length(m_configuration.getIFs());
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        pol[i] = m_PBandPolarization[i];
+        pol[i] = m_configuration.getPBandPolarizations()[i];
     }
 }
 
@@ -459,7 +444,7 @@ void CComponentCore::getCalibrationMark(
     double startFreq, bandwidth = 1.0;
     for (unsigned i=0;i<stdLen;i++) {
         if(actualMode.Right() == "X") { // P band conf
-            startFreq = m_PBandStartFreq[ifs[i]];
+            startFreq = m_configuration.getPBandIFMin()[ifs[i]];
             bandwidth = m_configuration.getPBandIFBandwidth()[ifs[i]];
             polarization = m_configuration.getPBandPolarizations()[ifs[i]];
             getPBandLO(lo);
@@ -467,7 +452,7 @@ void CComponentCore::getCalibrationMark(
                 feeds_idx[j] = 0; 
         }
         else if(actualMode.Left() == "X") { // L band conf
-            startFreq = m_LBandStartFreq[ifs[i]];
+            startFreq = m_configuration.getLBandIFMin()[ifs[i]];
             bandwidth = m_configuration.getLBandIFBandwidth()[ifs[i]];
             polarization = m_configuration.getLBandPolarizations()[ifs[i]];
             getLBandLO(lo);
@@ -475,8 +460,10 @@ void CComponentCore::getCalibrationMark(
                 feeds_idx[j] = 1; 
         }
         else { // Dual band conf: backend indexes
-            startFreq = (feeds[i] == 0) ? m_PBandStartFreq[ifs[i]] : m_LBandStartFreq[ifs[i]];
-            bandwidth = (feeds[i] == 0) ? m_configuration.getPBandIFBandwidth()[ifs[i]] : m_configuration.getLBandIFBandwidth()[ifs[i]];
+            startFreq = (feeds[i] == 0) ? m_configuration.getPBandIFMin()[ifs[i]] : 
+                m_configuration.getLBandIFMin()[ifs[i]];
+            bandwidth = (feeds[i] == 0) ? m_configuration.getPBandIFBandwidth()[ifs[i]] : 
+                m_configuration.getLBandIFBandwidth()[ifs[i]];
             polarization = (feeds[i] == 0) ? m_configuration.getPBandPolarizations()[ifs[i]] \
                            : m_configuration.getLBandPolarizations()[ifs[i]];
             (feeds[i] == 0) ? getPBandLO(lo) : getLBandLO(lo);
@@ -580,22 +567,24 @@ void CComponentCore::getIFOutput(
     ACS::doubleSeq lo;
     for (unsigned i=0;i<stdLen;i++) {
         if(actualMode.Right() == "X") { // P band conf
-            freqs[i] = m_PBandStartFreq[ifs[i]];
+            freqs[i] = m_configuration.getPBandIFMin()[ifs[i]];
             bw[i] = m_configuration.getPBandIFBandwidth()[ifs[i]];
             pols[i] = (long)m_configuration.getPBandPolarizations()[ifs[i]];
             getPBandLO(lo);
             LO[i] = lo[ifs[i]];
         }
         else if(actualMode.Left() == "X") { // L band conf
-            freqs[i] = m_LBandStartFreq[ifs[i]];
+            freqs[i] = m_configuration.getLBandIFMin()[ifs[i]];
             bw[i] = m_configuration.getLBandIFBandwidth()[ifs[i]];
             pols[i] = (long)m_configuration.getLBandPolarizations()[ifs[i]];
             getLBandLO(lo);
             LO[i] = lo[ifs[i]];
         }
         else { // Dual band conf: backend indexes
-            freqs[i] = (feeds[i] == 0) ? m_PBandStartFreq[ifs[i]] : m_LBandStartFreq[ifs[i]];
-            bw[i] = (feeds[i] == 0) ? m_configuration.getPBandIFBandwidth()[ifs[i]] : m_configuration.getLBandIFBandwidth()[ifs[i]];
+            freqs[i] = (feeds[i] == 0) ? m_configuration.getPBandIFMin()[ifs[i]] : 
+                m_configuration.getLBandIFMin()[ifs[i]];
+            bw[i] = (feeds[i] == 0) ? m_configuration.getPBandIFBandwidth()[ifs[i]] : 
+                m_configuration.getLBandIFBandwidth()[ifs[i]];
             pols[i] = (feeds[i] == 0) ? (long)m_configuration.getPBandPolarizations()[ifs[i]] : 
                 (long)m_configuration.getLBandPolarizations()[ifs[i]];
             (feeds[i] == 0) ? getPBandLO(lo) : getLBandLO(lo);
@@ -642,20 +631,22 @@ double CComponentCore::getTaper(
     IRA::CString actualMode(getActualMode());
 
     if(actualMode.Right() == "X") { // P band conf
-        startFreq = m_PBandStartFreq[ifNumber];
+        startFreq = m_configuration.getPBandIFMin()[ifNumber];
         bandwidth = m_configuration.getPBandIFBandwidth()[ifNumber];
         getPBandLO(lo);
         feed_idx = 0;
     }
     else if(actualMode.Left() == "X") { // L band conf
-        startFreq = m_LBandStartFreq[ifNumber];
+        startFreq = m_configuration.getLBandIFMin()[ifNumber];
         bandwidth = m_configuration.getLBandIFBandwidth()[ifNumber];
         getLBandLO(lo);
         feed_idx = 1;
     }
     else { // Dual band conf: backend indexes
-        startFreq = (feed == 0) ? m_PBandStartFreq[ifNumber] : m_LBandStartFreq[ifNumber];
-        bandwidth = (feed == 0) ? m_configuration.getPBandIFBandwidth()[ifNumber] :  m_configuration.getLBandIFBandwidth()[ifNumber];
+        startFreq = (feed == 0) ? m_configuration.getPBandIFMin()[ifNumber] :
+            m_configuration.getLBandIFMin()[ifNumber];
+        bandwidth = (feed == 0) ? m_configuration.getPBandIFBandwidth()[ifNumber] :  
+            m_configuration.getLBandIFBandwidth()[ifNumber];
         (feed == 0) ? getPBandLO(lo) : getLBandLO(lo);
         feed_idx = feed;
     }
