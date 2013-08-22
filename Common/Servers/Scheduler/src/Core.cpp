@@ -536,7 +536,7 @@ void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& 
 	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"TSYS_COMPUTATION"));
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
-			m_antennaBoss->goOff(Antenna::ANT_HORIZONTAL,-1.0);
+			m_antennaBoss->goOff(Antenna::ANT_HORIZONTAL,-1.0*DD2R); // go off 1 degree....
 		}
 		else {
 			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::skydip()");

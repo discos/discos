@@ -22,7 +22,7 @@
 <Configuration>
 	<configurationID>CCB</configurationID>
  	<sections>2</sections>
- 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>BWG</inputPort>
  	<beams>1</beams>
  	<bandWidth>1250.0</bandWidth>
@@ -36,7 +36,7 @@
 <Configuration>
 	<configurationID>LLP</configurationID>
  	<sections>2</sections>
- 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>PRIMARY</inputPort>
  	<beams>1</beams>
  	<bandWidth>2350.0</bandWidth>
@@ -50,7 +50,7 @@
 <Configuration>
 	<configurationID>PPP</configurationID>
  	<sections>2</sections>
- 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>PRIMARY</inputPort>
  	<beams>1</beams>
  	<bandWidth>730.0</bandWidth>
@@ -64,7 +64,7 @@
 <Configuration>
 	<configurationID>PLP</configurationID>
  	<sections>4</sections>
- 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>PRIMARY</inputPort>
  	<beams>2</beams>
  	<bandWidth>2350.0</bandWidth>

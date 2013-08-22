@@ -22,7 +22,7 @@
 <Configuration>
 	<configurationID>CCC</configurationID>
  	<sections>2</sections>
- 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>GREGORIAN</inputPort>
  	<beams>1</beams>
  	<bandWidth>1250.0</bandWidth>
@@ -36,7 +36,7 @@
 <Configuration>
 	<configurationID>LLP</configurationID>
  	<sections>2</sections>
- 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>PRIMARY</inputPort>
  	<beams>1</beams>
  	<bandWidth>300.0</bandWidth>
@@ -50,7 +50,7 @@
 <Configuration>
 	<configurationID>PPP</configurationID>
  	<sections>2</sections>
- 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>PRIMARY</inputPort>
  	<beams>1</beams>
  	<bandWidth>300.0</bandWidth>
