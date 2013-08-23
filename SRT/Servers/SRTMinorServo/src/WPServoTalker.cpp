@@ -233,6 +233,9 @@ void WPServoTalker::getStatus(
     secure_requests->push_back(request);
     secure_requests.Release();
     timestamp = look_for_a_response(get_request_id(request), starting_time, 7, true, NULL, NULL, -1, &status_par);
+    // Add the offsets
+    ((status_par.actual_pos).offsets).user = m_offsets->user;
+    ((status_par.actual_pos).offsets).system = m_offsets->system;
 }   
 
 

@@ -13,6 +13,7 @@
 #define STREAM_PRECISION 16
 
 const double MAX_DELTA = 0.1;
+const size_t MAX_HISTORY_SIZE = 16384; // 2 ** 14
 
 using namespace IRA;
 

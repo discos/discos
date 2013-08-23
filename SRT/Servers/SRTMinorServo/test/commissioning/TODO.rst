@@ -65,15 +65,29 @@ Interfaccia dei metodi definiti nelle prossime sezioni
 ======================================================
 Implementare l'interfaccia dei metodi definiti nelle prossime sezioni, e fare il commit.
 
-
-Informazioni sugli assi
-=======================
-Testare il metodo getAxesInfo() e verificare che restituisce le sequenze corrette,
-a seconda della configurazione.
+Salvataggio della posizione nella history
+=========================================
+FARE TEST.
+VERIFICARE CHE NON CAMBI NULLA PER CMD_POS!
+ogni volta che scrivo la posizione sulla act_list (WPServoImpl), la scrivo anche su file.
+Verificare quanto impiega questa operazione, e stabilire come rimuovere la prima linea
+del file quando questo supera una certa dimensione.
 
 
 Richiesta della posizione dei servo ad un dato momento
 ======================================================
+Implementare nei component di basso livello, il metodo:
+
+   ACS::doubleSeq getPositionFromHistory(ACS::Time time, out ACS::Time associated_time)
+
+Quando time=0 restituisco l'ultima posizione comandata, così come quando il tempo è superiore
+all'ultima posizione comandata. Se la posizione non vi e' piu' perche' gia' cancellata, restituisce
+la posizione piu' vecchia.
+associated_time e' il tempo relativo alla posizione letta (quello mediato). Quindi nei casi in
+cui il tempo e' fuori range, coincide con il tempo della posizione piu' recente o piu' vecchia.
+Negli altri casi e' il valore mediato.
+
+
 Implementare il metodo del MinorServoBoss::
 
     ACS::doubleSeq getAxesPosition(ACS::Time time)
@@ -88,14 +102,6 @@ vettore di queste posizioni: 100ms (sleep_time)
 Prima di implementarlo pensare a come scrivere getAxesInfo()
 La coda delle posizioni in memoria va svuotata con un park e anche con il setup. Usare un vector
 e rimuovere le posizioni a partire dalla prima quando questo raggiunge una certa dimensione.
-
-Implementare il metodo:
-
-   ACS::doubleSeq getPosition(ACS::Time time, out ACS::Time associated_time)
-
-Quando time=0 restituisco l'ultima posizione comandata. In quel caso associated_time
-e' il tempo che la MSCU associa a quella posizione, altrimeni negli altri casi coincide
-con time.
 
 
 Lo scan degli assi
@@ -155,3 +161,5 @@ Questo restituisce una stringa che puo' essere:
 - "AS-ACTIVE"
 - "AS_NOT_ACTIVE"
 
+Implementare clearemergency
+===========================

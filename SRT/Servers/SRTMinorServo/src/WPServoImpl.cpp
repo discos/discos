@@ -30,6 +30,8 @@ map<int, vector<double> > WPServoImpl::m_park_positions;
 CSecureArea<unsigned short> *WPServoImpl::m_instance_counter = NULL;
 CSecureArea< map<int, vector<PositionItem> > >* WPServoImpl::m_cmdPos_list = \
     new CSecureArea< map<int, vector<PositionItem> > >(new map<int, vector<PositionItem> >);
+CSecureArea< map<int, vector<PositionItem> > >* WPServoImpl::m_actPos_list = \
+    new CSecureArea< map<int, vector<PositionItem> > >(new map<int, vector<PositionItem> >);
 
 static pthread_mutex_t const_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t destr_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -86,12 +88,10 @@ WPServoImpl::~WPServoImpl() {
     AUTO_TRACE("WPServoImpl::~WPServoImpl()"); 
 
     try {
-        int status_par = -1;
         pthread_mutex_lock(&destr_mutex); 
         if(m_instance_counter != NULL) {
             CSecAreaResourceWrapper<unsigned short> secure_ptr = m_instance_counter->Get();
             --(*secure_ptr);
-            status_par = *secure_ptr;
             if(!(*secure_ptr)) {
                 if(m_dispatcher_ptr != NULL) {
                     m_dispatcher_ptr->suspend();
@@ -107,6 +107,15 @@ WPServoImpl::~WPServoImpl() {
                     m_status_ptr->suspend();
                     m_status_ptr->terminate();
                     delete m_status_ptr;
+                }
+                if(m_actPos_list != NULL) {
+                    delete m_actPos_list;
+                }
+                if(m_cmdPos_list != NULL) {
+                    delete m_cmdPos_list;
+                }
+                if(m_instance_counter != NULL) {
+                    delete m_instance_counter;
                 }
             }
             secure_ptr.Release();
@@ -292,6 +301,7 @@ void WPServoImpl::initialize() throw (
         m_thread_params.status_mutex = &status_mutex;
         m_thread_params.expire_time = &m_expire;
         m_thread_params.cmd_pos_list = m_cmdPos_list;
+        m_thread_params.act_pos_list = m_actPos_list;
         m_thread_params.status_thread_en = &m_status_thread_en;
         (m_thread_params.tracking_delta)[m_cdb_ptr->SERVO_ADDRESS] = m_cdb_ptr->TRACKING_DELTA;
         m_thread_params.stow_state = &m_stow_state;
@@ -954,6 +964,32 @@ CORBA::Long WPServoImpl::getStatus() {
     return m_expire.status[m_cdb_ptr->SERVO_ADDRESS];
 }
 
+
+ACS::doubleSeq * WPServoImpl::getPositionFromHistory(ACS::Time time) throw (ComponentErrors::UnexpectedEx) {
+
+    ACS::doubleSeq_var position = new ACS::doubleSeq;
+    position->length(m_cdb_ptr->NUMBER_OF_AXIS);
+    PositionItem pos_item;
+
+    try {
+        // Get the CSecArea
+        CSecAreaResourceWrapper<map<int, vector<PositionItem> > > secure_request = m_actPos_list->Get(); 
+        pos_item = getPosItemFromHistory(secure_request, time, m_cdb_ptr->SERVO_ADDRESS);
+        secure_request.Release();
+        position = pos_item.position;
+    }
+    catch(PosNotFoundEx) {
+        THROW_EX(ComponentErrors, UnexpectedEx, "WPServoImpl::getPositionFromHistory(): position not found.", true);
+    }
+    catch(IndexErrorEx) {
+        THROW_EX(ComponentErrors, UnexpectedEx, "WPServoImpl::getPositionFromHistory(): index out of range.", true);
+    }
+    catch (...) {
+        THROW_EX(ComponentErrors, UnexpectedEx, "WPServoImpl::getPositionFromHistory()", true);
+    }
+
+    return position._retn();
+}
 
 CORBA::Double WPServoImpl::getTrackingDelta() {
     return m_cdb_ptr->TRACKING_DELTA;

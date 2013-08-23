@@ -360,6 +360,17 @@ public:
      */ 
      virtual void cleanPositionsQueue(const ACS::Time exe_time=0) throw (MinorServoErrors::CommunicationErrorEx);
 
+
+    /** Return the servo position at a given time.
+     *  If the time is too old, it returns the older position.
+     *  If the time is in advance or 0, it returns the latest position.
+     *  @arg time the position time
+     *  @return the position
+     *  @throw ComponentError::UnexpectedEx
+     */      
+     ACS::doubleSeq * getPositionFromHistory(ACS::Time time) throw (ComponentErrors::UnexpectedEx);
+
+
     /**
      * Accomplish a stow of minor servo.
      * 
@@ -453,6 +464,11 @@ private:
     /* A list of vectors of commanded positions. The item are indexed by the servo address */
     static CSecureArea< map<int, vector<PositionItem> > > *m_cmdPos_list;
 
+    /* A list of vectors of real positions. It is the history of the actual positions read from the MSCU.
+     * The item are indexed by the servo address 
+     */
+    static CSecureArea< map<int, vector<PositionItem> > > *m_actPos_list;
+
     /* A list of Limits. Each limit is a couple (min, max) of limits for the correpondig axis. */
     vector<Limits> m_limits;
 
@@ -537,7 +553,7 @@ private:
 
     /** @var Instance counter  */
     static CSecureArea<unsigned short> *m_instance_counter;
-     
+
     void setStatusUpdating(bool flag);
     
     void setLimits(IRA::CString limits);

@@ -12,6 +12,7 @@
 
 #include <baci.idl>
 #include <MinorServoErrors.idl>
+#include <ComponentErrors.idl>
 
 #pragma prefix "alma"
 
@@ -64,7 +65,8 @@ module MinorServo {
      *     <li><em>isReadyToSetup()</em>: return true when the minor servo needs a setup to be ready, false otherwise.</li>
      *     <li><em>isDisabledFromOtherDC()</em>: return true when the minor servo is disabled from other drive cabinet.</li>
      *     <li><em>getStatus()</em>: return the status value.</li>
-     *     <li><em>getTrackingDelta()</em>: return the delta (in mm) used to know when the commanded pos is reached..</li>
+     *     <li><em>getTrackingDelta()</em>: return the delta (in mm) used to know when the commanded pos is reached.</li>
+     *     <li><em>getPositionFromHistory()</em>: take a time and return the related position.</li>
      * </ul> 
      */
     interface WPServo : ACS::CharacteristicComponent {
@@ -367,6 +369,14 @@ module MinorServo {
         /** Return the system offset of the position */
          ACS::doubleSeq getSystemOffset();
 
+        /** Return the servo position at a given time.
+         *  If the time is too old, it returns the older position.
+         *  If the time is in advance or 0, it returns the latest position.
+         *  @arg time the position time
+         *  @return the position
+         *  @throw ComponentError::UnexpectedEx
+         */
+         ACS::doubleSeq getPositionFromHistory(in ACS::Time time) raises (ComponentErrors::UnexpectedEx);
 
         /** Clear the position system offset
          * @throw MinorServoErrors::CommunicationErrorEx

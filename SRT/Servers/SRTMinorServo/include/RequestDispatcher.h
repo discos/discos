@@ -23,6 +23,7 @@ struct ThreadParameters {
     pthread_mutex_t *status_mutex;
     ExpireTime *expire_time; 
     CSecureArea< map<int, vector<PositionItem> > > *cmd_pos_list;
+    CSecureArea< map<int, vector<PositionItem> > > *act_pos_list;
     map<int, bool> *status_thread_en;
     map<int, double> tracking_delta;
     map<int, bool> *stow_state;

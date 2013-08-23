@@ -69,6 +69,28 @@ void WPStatusUpdater::runLoop()
                 ACS::doubleSeq act_pos = (status_par.actual_pos).position;
                 ACS::Time act_pos_time = (status_par.actual_pos).exe_time;
                 ACS::Time diff = abs_diff(act_pos_time, getTimeStamp());
+                PositionItem act_pos_item;
+                act_pos_item.position = act_pos;
+                act_pos_item.exe_time = act_pos_time;
+                (act_pos_item.offsets).user = ((status_par.actual_pos).offsets).user;
+                (act_pos_item.offsets).system = ((status_par.actual_pos).offsets).system;
+
+                // Actual position list (the history)
+                CSecAreaResourceWrapper<map<int, vector< PositionItem> > > apl_secure_requests = (m_params->act_pos_list)->Get();
+                if((*apl_secure_requests).count(address)) {
+                    size_t diff = ((*apl_secure_requests)[address]).size() - MAX_HISTORY_SIZE;
+                    if(diff > 0) {
+                        vector<PositionItem>::iterator ibegin = ((*apl_secure_requests)[address]).begin();
+                        ((*apl_secure_requests)[address]).erase(ibegin, ibegin + diff);
+                    }
+
+                    if(((*apl_secure_requests)[address]).size() > MAX_HISTORY_SIZE) {
+                        ACS_SHORT_LOG((LM_ERROR, "In WPStatusUpdater: reached the MAX_HISTORY_SIZE"));
+                    }
+                    else
+                        ((*apl_secure_requests)[address]).push_back(act_pos_item);
+                }
+                apl_secure_requests.Release();
 
                 // Update the actual elongation (it is just the actual position for the GFR, PFP and M3R)
                 ACS::doubleSeq act_elongation = (status_par.actual_elongation).position;
@@ -183,7 +205,6 @@ void WPStatusUpdater::runLoop()
                     if((*lst_secure_requests).count(address)) {
                         try {
                             vector<PositionItem>::size_type idx = findPositionIndex(lst_secure_requests, act_pos_time, address, true);
-
                             // Updating of the commanded position property
                             // The commanded position is updated adding to the position in the list of PositionItems
                             // The system offset is unknown by the user

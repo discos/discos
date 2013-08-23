@@ -317,6 +317,7 @@ void process(
 
                    if(cdb_ptr->VIRTUAL_RS == 1)
                        real2virtual((status_par->actual_pos).position, cdb_ptr->SERVO_ADDRESS, cdb_ptr->ZERO);
+                   // The offsets are added in WPServoTalker::getStatus()
                }
                else
                    // If the number of positions is unexpected raise an exception
