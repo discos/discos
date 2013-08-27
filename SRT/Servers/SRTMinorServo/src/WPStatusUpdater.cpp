@@ -78,7 +78,7 @@ void WPStatusUpdater::runLoop()
                 // Actual position list (the history)
                 CSecAreaResourceWrapper<map<int, vector< PositionItem> > > apl_secure_requests = (m_params->act_pos_list)->Get();
                 if((*apl_secure_requests).count(address)) {
-                    size_t diff = ((*apl_secure_requests)[address]).size() - MAX_HISTORY_SIZE;
+                    long diff = ((*apl_secure_requests)[address]).size() - MAX_HISTORY_SIZE;
                     if(diff > 0) {
                         vector<PositionItem>::iterator ibegin = ((*apl_secure_requests)[address]).begin();
                         ((*apl_secure_requests)[address]).erase(ibegin, ibegin + diff);
@@ -87,9 +87,15 @@ void WPStatusUpdater::runLoop()
                     if(((*apl_secure_requests)[address]).size() > MAX_HISTORY_SIZE) {
                         ACS_SHORT_LOG((LM_ERROR, "In WPStatusUpdater: reached the MAX_HISTORY_SIZE"));
                     }
-                    else
+                    else {
                         ((*apl_secure_requests)[address]).push_back(act_pos_item);
+                    }
                 }
+                else {
+                    ((*apl_secure_requests)[address]).insert(
+                        ((*apl_secure_requests)[address]).begin(), act_pos_item);
+                }
+
                 apl_secure_requests.Release();
 
                 // Update the actual elongation (it is just the actual position for the GFR, PFP and M3R)

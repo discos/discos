@@ -60,8 +60,10 @@ PositionItem getPosItemFromHistory(
     if((*vptr).count(address)) {
         pos_list = (*vptr)[address];
 
-        if(pos_list.empty())
+        if(pos_list.empty()) {
+            // cout << "list empty" << endl;
             throw PosNotFoundEx("The position history vector is empty.");
+        }
 
         const size_t size = pos_list.size();
         size_t idx_begin = 0;
@@ -143,6 +145,7 @@ PositionItem getPosItemFromHistory(
                         ((result.offsets).system)[i] = soa + (exe_time - ta)*(sob - soa)/(tb - ta);
                     }
                     else {
+                        // cout << "time diff not pos" << endl;
                         throw PosNotFoundEx("Time difference not positive.");
                     }
                 }
@@ -154,6 +157,7 @@ PositionItem getPosItemFromHistory(
         }
     }
     else {
+        // cout << "cannot get the history" << endl;
         throw PosNotFoundEx("Cannot get the history.");
     }
 
