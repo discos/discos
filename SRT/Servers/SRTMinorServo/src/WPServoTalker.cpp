@@ -156,8 +156,10 @@ void WPServoTalker::setCmdPos(
     // Set the position in the vector list when look_for_a_response found the response
     // We must use the cmd_positions insead of positions because make_request(...) modifies the positions making 
     // a virtual2real transformation
+    
     PositionItem item;
-    item.exe_time = exe_time;
+    ACS::Time real_time = (exe_time == 0) ? timestamp : exe_time;
+    item.exe_time = real_time;
     (item.position).length(cmd_positions.length());
     ((item.offsets).user).length(cmd_positions.length());
     ((item.offsets).system).length(cmd_positions.length());
@@ -168,7 +170,7 @@ void WPServoTalker::setCmdPos(
     }
     
     try {
-        vector<PositionItem>::size_type idx = findPositionIndex(lst_secure_requests, exe_time, m_cdb_ptr->SERVO_ADDRESS);
+        vector<PositionItem>::size_type idx = findPositionIndex(lst_secure_requests, real_time, m_cdb_ptr->SERVO_ADDRESS);
         ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).insert(
             ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).begin() + idx + 1, item);
     }

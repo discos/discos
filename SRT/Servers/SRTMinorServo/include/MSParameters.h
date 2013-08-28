@@ -13,7 +13,7 @@
 #define STREAM_PRECISION 16
 
 const double MAX_DELTA = 0.1;
-const size_t MAX_HISTORY_SIZE = 16384; // 2 ** 14
+const size_t MAX_HISTORY_SIZE = 65536; // 2 ** 16
 
 using namespace IRA;
 
@@ -245,7 +245,7 @@ const string status_messages[16] = {
 // Set the sleep_time in useconds: for instance 2 * 10 means 2 useconds
 const unsigned long scheduler_sleep_time = 20 * 10;
 const unsigned long listener_sleep_time = 2 * 10;
-const unsigned long status_sleep_time = 50 * 10; // 50 us
+const unsigned long status_sleep_time = 2000 * 10; // 2ms
 
 // WPServoTalker parameters
 #define USLEEP_TIME 5 // 5us

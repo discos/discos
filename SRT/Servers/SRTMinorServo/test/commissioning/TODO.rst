@@ -3,24 +3,6 @@ Setup dei servo
 Verificare che isASConfigurationEnabled() sia false.
 
 
-Notification Channel MinorServoBoss
-===================================
-Pubblicare il flag di tracking nel NC, ad ogni cambiamento e in ogni caso, ogni secondo. (DONE)
-Chiamare isReady() isOnFocus()? Stabilisco che il sistema e' onFocus() quando e' pronto e
-la diff di posizione, rispetto a quella di fuoco, e' inferiore a un delta?
-Stabilire la politica di tracking::
-
-    isTracking = isOnFocus || isScanning
-
-Quindi quando lo scan e' in atto avro' isTracking = true. Al termine dello scan avro'
-isTracking
-
-
-Ricevitori
-==========
-Vedi email Andrea di Agosto
-
-
 Servo Park
 ==========
 Provare il servoPark in combinazione con i servoSetup

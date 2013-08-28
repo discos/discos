@@ -563,7 +563,6 @@ void WPServoImpl::setPosition(const ACS::doubleSeq &position, const ACS::Time ex
     }
     catch(...)
         THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set position", true);
-
 }
 
 
