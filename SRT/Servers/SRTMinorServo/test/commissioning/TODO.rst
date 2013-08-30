@@ -1,30 +1,3 @@
-Setup dei servo
-===============
-Verificare che isASConfigurationEnabled() sia false.
-
-
-Servo Park
-==========
-Provare il servoPark in combinazione con i servoSetup
-
-
-Test movimento lineare SRP
-==========================
-Test movimento SRP lineare quando le posizione vengono comandate in anticipo.
-Come mai non viene aggiornata la posizione attuale? Verificare che:
-
-    * Non vi siano sleep il look_for_a_response e nei due thread socket listener
-      e socket dispatcher (DONE: sembra tutto ok)
-    * aggiornamento della posizione da parte di Franco, andando a fare un set
-      pos in anticipo (comando un certo numero di posizioni, per 10 secondi)
-      e poi vado a leggere le posizioni (tutto con MSCU, senza ACS). Prendere
-      spunto dal test_SRP_scan.py, ma usare solo la MSCU.
-    * mettere dei timestamp e vedere se e' la chiamata a getStatus che rallenta
-      tutto (per il timestamp, usare il metodo IRA::CTools timeToStr(). Metterne
-      uno prima della chiamata e uno immediatamente dopo...
-
-
-
 Verificare il perche' non riesco comandare il mount dalla mia macchina
 ======================================================================
 Chiedere MTM.
@@ -41,35 +14,18 @@ Directory test
 Riordinare la directory dei test dei servo minori, rinominando in modo corretto i moduli.
 Distinguere tra auto e non-auto.
 
+Park e posizione comandata
+==========================
+Quando si fa il park, la posizione comandata deve essere quella di parcheggio?
+
 
 
 Interfaccia dei metodi definiti nelle prossime sezioni
 ======================================================
 Implementare l'interfaccia dei metodi definiti nelle prossime sezioni, e fare il commit.
 
-Salvataggio della posizione nella history
-=========================================
-FARE TEST.
-VERIFICARE CHE NON CAMBI NULLA PER CMD_POS!
-ogni volta che scrivo la posizione sulla act_list (WPServoImpl), la scrivo anche su file.
-Verificare quanto impiega questa operazione, e stabilire come rimuovere la prima linea
-del file quando questo supera una certa dimensione.
-
-
 Richiesta della posizione dei servo ad un dato momento
 ======================================================
-Implementare nei component di basso livello, il metodo:
-
-   ACS::doubleSeq getPositionFromHistory(ACS::Time time, out ACS::Time associated_time)
-
-Quando time=0 restituisco l'ultima posizione comandata, così come quando il tempo è superiore
-all'ultima posizione comandata. Se la posizione non vi e' piu' perche' gia' cancellata, restituisce
-la posizione piu' vecchia.
-associated_time e' il tempo relativo alla posizione letta (quello mediato). Quindi nei casi in
-cui il tempo e' fuori range, coincide con il tempo della posizione piu' recente o piu' vecchia.
-Negli altri casi e' il valore mediato.
-
-
 Implementare il metodo del MinorServoBoss::
 
     ACS::doubleSeq getAxesPosition(ACS::Time time)

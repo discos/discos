@@ -134,6 +134,7 @@ void WPServoTalker::setCmdPos(
 
     CSecAreaResourceWrapper<map<int, vector<PositionItem> > > lst_secure_requests = m_cmdPos_list->Get(); 
 
+    ACS::Time real_exe_time = getTimeStamp();
     if(!is_dummy) { // If we really want to command the position to the MSCU
         ACS::doubleSeq positions = cmd_positions;
         // Add the offsets to the positions before make_request (so positions and offsets are both in virtual coordinate)
@@ -143,14 +144,23 @@ void WPServoTalker::setCmdPos(
                 THROW_EX(MinorServoErrors, PositioningErrorEx, "Cannot set minor servo position: position not allowed", true);
         }
 
+        // The MSCU returns my timestamp, so in the case of a exe_time in the past, or exe_time==0,
+        // I cannot get the real time of the execution. So I get the actual time in order to have
+        // at least a good approximation...
+        if (exe_time == 0 || exe_time <= real_exe_time)
+            real_exe_time = getTimeStamp();
+        else 
+            real_exe_time = exe_time;
+
         // The first argument is the index of a vector of commands; make_request converts the position to virtual
-        string request = make_request(2, m_cdb_ptr, m_cmd_number, -1, -1, -1, exe_time, &positions);
+        string request = make_request(2, m_cdb_ptr, m_cmd_number, -1, -1, -1, real_exe_time, &positions);
         // Schedule a position setting
         CSecAreaResourceWrapper<vector<string> > secure_requests = m_requests->Get();
         secure_requests->push_back(request);
         secure_requests.Release();
 
         timestamp = look_for_a_response(get_request_id(request), starting_time, 2);
+        timestamp = real_exe_time; // When time==0 or in the past, the MSCU does not return the execution time...
     }
 
     // Set the position in the vector list when look_for_a_response found the response
@@ -158,8 +168,7 @@ void WPServoTalker::setCmdPos(
     // a virtual2real transformation
     
     PositionItem item;
-    ACS::Time real_time = (exe_time == 0) ? timestamp : exe_time;
-    item.exe_time = real_time;
+    item.exe_time = real_exe_time;
     (item.position).length(cmd_positions.length());
     ((item.offsets).user).length(cmd_positions.length());
     ((item.offsets).system).length(cmd_positions.length());
@@ -170,7 +179,7 @@ void WPServoTalker::setCmdPos(
     }
     
     try {
-        vector<PositionItem>::size_type idx = findPositionIndex(lst_secure_requests, real_time, m_cdb_ptr->SERVO_ADDRESS);
+        vector<PositionItem>::size_type idx = findPositionIndex(lst_secure_requests, real_exe_time, m_cdb_ptr->SERVO_ADDRESS);
         ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).insert(
             ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).begin() + idx + 1, item);
     }

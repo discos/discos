@@ -726,7 +726,7 @@ void MinorServoBossImpl::startScan(
         m_scan_active = true;
         m_configuration->m_isScanning = true;
 
-        const ACS::Time SCAN_DELTA_TIME = 1000000; // 100ms, 
+        const ACS::Time SCAN_DELTA_TIME = 10000000; // 1 second, 
         
         TIMEVALUE now(0.0L);
         IRA::CIRATools::getTime(now);

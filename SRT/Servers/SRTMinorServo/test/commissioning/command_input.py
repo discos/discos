@@ -38,8 +38,9 @@ while(True):
     else:
         cmd_num += 1
         if user_command == 'setpos':
+            exe_time = raw_input('\nInsert the execution time (0 means now): ')
             positions = raw_input('\nInsert the positions, separated by commas (0,0,1,7,3,5): ')
-            command = '#%s:%d=%d,0,0,0,%s' %(user_command, cmd_num, servos[servo], positions.strip())
+            command = '#%s:%d=%d,%s,0,0,%s' %(user_command, cmd_num, servos[servo], exe_time, positions.strip())
         else:
             command = '#%s:%d=%d,0' %(user_command, cmd_num, servos[servo])
 

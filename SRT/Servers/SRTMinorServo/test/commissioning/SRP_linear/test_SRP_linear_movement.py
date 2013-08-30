@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # Author: Marco Buttu <m.buttu@oa-cagliari.inaf.it>
 # Copyright: This module has been placed in the public domain.
-"""Use this module to test the minor servo setPosition() method, with `exe_time != 0`.
-   The positions are commanded all at once."""
+"""Use this module to test if the SRP movement is `linear`."""
 
 import unittest
 import threading
@@ -14,6 +13,7 @@ from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Common import TimeHelper
 from maciErrTypeImpl import CannotGetComponentExImpl
 from parameters import *
+import datetime
 
 server = servers['MSCU']
 
@@ -30,7 +30,7 @@ def isAlmostEqual(seq1, seq2, delta = 0.2):
     return True
 
 
-class TestPositionFromHistory(unittest.TestCase):
+class TestLinearMovement(unittest.TestCase):
     """Test the minor servo properties."""
 
     def setUp(self):
@@ -74,16 +74,36 @@ class TestPositionFromHistory(unittest.TestCase):
         print "Done!"
 
         delay = 20 * 10 ** 7 # 20 seconds
-        step =  2 * 10 ** 6 # 200 ms
-        points = 40
+        step =  6 * 10 ** 6 # 1 second
+        points = 10
+        increment = 2.0 # mm
         exe_time = TimeHelper.getTimeStamp().value + delay # Set the positions in delay seconds from now
         print "Setting the positions..."
+        commanded_positions = {}
         self.component.setPosition(cmdPos, exe_time)
+        commanded_positions[exe_time] = cmdPos[:] 
+        starting_pos = cmdPos[:]
         for i in range(points): 
-            cmdPos[2] += 0.2 # increment the z axis
-            future_time = exe_time + step * i
+            cmdPos[2] += increment # increment the z axis
+            future_time = exe_time + step * (i + 1)
             self.component.setPosition(cmdPos, future_time)
+            commanded_positions[future_time] = cmdPos[:]
         print "Done!"
+
+        expected_positions = {}
+        sampling_time_step = 2 * 10 ** 6 # 2ms
+        scale_factor = step / sampling_time_step # Integer result
+        sampling_points = points * scale_factor
+        position = starting_pos
+        expected_positions[exe_time] = position[:]
+        for i in range(sampling_points):
+            position[2] += increment / scale_factor # float result
+            next_time = exe_time + sampling_time_step * (i + 1)
+            expected_positions[next_time] = position[:]
+        for j in range(4):
+            next_time = exe_time + sampling_time_step * (i + 2 + j)
+            expected_positions[next_time] = position[:]
+            
 
         actual_time = TimeHelper.getTimeStamp().value 
         print "Waiting the exe_time..."
@@ -94,42 +114,49 @@ class TestPositionFromHistory(unittest.TestCase):
             time.sleep(1)
 
         print "The servo is moving..."
-        positions = {}
         while actual_time < exe_time + points * step:
             actPos, cmp = actPos_obj.get_sync()
-            actual_time = TimeHelper.getTimeStamp().value
-            positions[actual_time] = actPos
             print "actPos", actPos
-            time.sleep(0.200)
+            time.sleep(1)
+            actual_time = TimeHelper.getTimeStamp().value 
         print "Done!"
 
         print "Writing the file..."
-        out_file = open('data/history.data', 'w')
+        out_file = open('data/linear_movement.data', 'w')
+        keys = sorted(commanded_positions.keys())
+        out_file.write('# Running time: %s\n\n' %str(datetime.datetime.now()))
+        out_file.write('# Positions (Z) from %.4f (mm) to %.4f (mm)\n' %(commanded_positions[keys[0]][2], commanded_positions[keys[-1]][2]))
+        out_file.write('# Time step between adiacent positions: %d (ms)\n' %(step / (10 ** 4)))
+        out_file.write('# starting_time: %d\n' %exe_time)
+        for t in sorted(commanded_positions.keys()):
+            t_diff_ms = (t - exe_time) / (1.0 * 10**4)
+            out_file.write('# pos(Z) @ starting_time + %0*.3f (ms) -> %0*.3f (mm)\n' %(9, t_diff_ms, 6, commanded_positions[t][2]))
+
         hpositions = {}
-        for t in sorted(positions.keys()):
+        for t in sorted(expected_positions.keys()):
             print "time: ", t
-            rp = ' '.join(['%.4f' %item for item in positions[t]])
+            ep = ' '.join(['%.4f' %item for item in expected_positions[t]])
             hp = self.component.getPositionFromHistory(t)
-            out_file.write("\n" + "-"*68)
-            out_file.write("\nTime: %s" %t)
-            out_file.write("\nExpected: %s" %rp)
+            out_file.write("\n#" + "-"*68)
+            out_file.write("\nTime: exe_time + %0*d ms" %(5, (t - exe_time) / (10**4)))
+            out_file.write("\nExpected: %s" %ep)
             out_file.write("\nHistory:  %s" %' '.join(['%.4f' %item for item in hp]))
             hpositions[t] = hp
             print "-"*40
             print "Timestamp: ", t
             print "History : ", hp
-            print "Expected: ", rp
+            print "Expected: ", ep
             print
-        pos = [positions[t] for t in sorted(positions.keys())]
+        pos = [expected_positions[t] for t in sorted(expected_positions.keys())]
         hpos = [hpositions[t] for t in sorted(hpositions.keys())]
-        max_diff = max([abs(p[2] - h[2]) for p, h in zip(pos[4:], hpos[4:])])
-        out_file.write("\n\nMax diff: %.4f" %max_diff)
-        print "Max diff [4:]: ", max_diff
+        max_diff = max([abs(p[2] - h[2]) for p, h in zip(pos, hpos)])
+        out_file.write("\n\n# Max diff: %.4f" %max_diff)
+        print "Max diff: ", max_diff
         print "Done!"
 
 
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestPositionFromHistory)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestLinearMovement)
     unittest.TextTestRunner(verbosity=2).run(suite)
     print "\n" + "="*70
 
