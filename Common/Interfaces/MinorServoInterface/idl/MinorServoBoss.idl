@@ -242,6 +242,15 @@ module MinorServo {
          */
         void getAxesInfo(out ACS::stringSeq axes, out ACS::stringSeq units) raises (ManagementErrors::ConfigurationErrorEx);
 
+ 
+        /** Return the positions of the active axes
+         *  
+         * @param time the time related to the positin we want to retrieve
+         * @return a sequence of positions, in the same order of the axes parameter of getAxesInfo()
+         * @throw MinorServoErrors::ConfigurationErrorEx if the system is not configured
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        ACS::doubleSeq getAxesPosition(in ACS::Time time) raises (ManagementErrors::ConfigurationErrorEx, ComponentErrors::UnexpectedEx);
             
     };
 

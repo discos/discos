@@ -371,6 +371,49 @@ void MinorServoBossImpl::getAxesInfo(ACS::stringSeq_out axes, ACS::stringSeq_out
 }
 
 
+ACS::doubleSeq * MinorServoBossImpl::getAxesPosition(ACS::Time time) 
+    throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx, ComponentErrors::UnexpectedEx)
+{
+
+    if(!isReady())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getAxesPosition(): the system is not ready", true);
+
+    vector<string> servosToMove = m_configuration->getServosToMove();
+
+    ACS::doubleSeq_var positions_res = new ACS::doubleSeq;
+    ACS::doubleSeq_var position = new ACS::doubleSeq;
+    vector<double> vpositions;
+
+    for(size_t i=0; i<servosToMove.size(); i++) {
+        string comp_name = servosToMove[i];
+        MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+        if((m_configuration->m_component_refs).count(comp_name)) {
+            component_ref = (m_configuration->m_component_refs)[comp_name];
+            if(CORBA::is_nil(component_ref)) {
+                string msg("getAxesPosition(): cannot get the reference of " + comp_name);
+                THROW_EX(ManagementErrors, ConfigurationErrorEx, msg.c_str(), true);
+            }
+        }
+        else {
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, msg.c_str(), true);
+                string msg("getAxesPosition(): " + comp_name);
+                THROW_EX(ManagementErrors, ConfigurationErrorEx, (msg + " not found").c_str(), true);
+        }
+
+        position = component_ref->getPositionFromHistory(time); // Raises ComponentErrors::UnexpectedEx
+
+        for(size_t j=0; j<position->length(); j++)
+            vpositions.push_back(position[j]);
+    }
+
+    positions_res->length(vpositions.size());
+    for(size_t i=0; i<vpositions.size(); i++)
+        positions_res[i] = vpositions[i];
+
+    return positions_res._retn();
+}
+
+
 bool MinorServoBossImpl::isStarting() { return m_configuration->isStarting(); }
 
 bool MinorServoBossImpl::isASConfiguration() { return m_configuration->isASConfiguration(); }
@@ -792,7 +835,7 @@ void MinorServoBossImpl::startScan(
                     usleep(20000); // Wait a bit (20 ms)
                 }
             }
-            catch(...) {// Position not allowed
+            catch(...) { // Position not allowed
                 THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: position not allowed.", true);
             }
 

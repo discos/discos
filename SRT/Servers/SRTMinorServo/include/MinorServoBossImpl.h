@@ -295,6 +295,17 @@ public:
       */
      void getAxesInfo(ACS::stringSeq_out axes, ACS::stringSeq_out units)
          throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
+ 
+ 
+     /** Return the positions of the active axes
+      *  
+      * @param time the time related to the positin we want to retrieve
+      * @return a sequence of positions, in the same order of the axes parameter of getAxesInfo()
+      * @throw MinorServoErrors::ConfigurationErrorEx if the system is not configured
+      * @throw ComponentErrors::UnexpectedEx
+      */
+     ACS::doubleSeq * getAxesPosition(ACS::Time) 
+         throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx, ComponentErrors::UnexpectedEx);
 
 
 
