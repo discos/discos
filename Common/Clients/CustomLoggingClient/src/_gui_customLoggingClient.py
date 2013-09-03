@@ -9,6 +9,7 @@ import acscommon
 import Management
 from Acspy.Nc.Consumer import Consumer
 import signal
+import sys
 import logging
 import bisect
 import functools
@@ -87,8 +88,8 @@ if __name__ == '__main__':
     #try:
 
     def handle_signal(num, trace):
-        trace.f_locals['app'].clear()
-        trace.f_locals['consumer'].disconnect()
+        #trace.f_locals['app'].clear()
+        #trace.f_locals['consumer'].disconnect()
         print "Exiting"
         sys.exit(0)
 
