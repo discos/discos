@@ -1104,6 +1104,33 @@ void CCore::startSchedule(const char* scheduleFile,const char * startSubScan) th
 	}
 }
 
+void CCore::getCurrentBackend(IRA::CString& bck)
+{
+	Backends::GenericBackend_var backend;
+	backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (CORBA::is_nil(backend)) {
+		bck=m_defaultBackendInstance;
+	}
+	else {
+		bck=backend->name();
+	}
+}
+
+void  CCore::getCurrentDataReceiver(IRA::CString& dv)
+{
+	Management::DataReceiver_var dataWriter;
+	dataWriter=m_schedExecuter->getWriterReference(); //get the reference to the currently used backend.
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (CORBA::is_nil(dataWriter)) {
+		dv=m_defaultDataReceiverInstance;
+	}
+	else {
+		dv=dataWriter->name();
+	}
+
+}
+
 bool CCore::command(const IRA::CString& cmd,IRA::CString& answer)
 {
 	try {

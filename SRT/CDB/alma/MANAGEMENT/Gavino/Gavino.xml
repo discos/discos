@@ -40,4 +40,6 @@
 <status/>
 <tracking/>
 <projectCode/>
+<currentBackend/>
+<currentRecorder/>
 </Scheduler>

@@ -1,5 +1,3 @@
-// $Id: Client.cpp.template,v 1.5 2008-03-06 09:04:26 a.orlati Exp $
-
 #include "Client.h"
 
 #define _GET_ACS_PROPERTY(TYPE,NAME) TYPE##_var NAME; \
@@ -91,6 +89,14 @@
 #define COMPONENT_INTERFACE COMPONENT_IDL_MODULE::COMPONENT_IDL_INTERFACE
 #define COMPONENT_DECLARATION COMPONENT_IDL_MODULE::COMPONENT_SMARTPOINTER
 
+static bool terminate;
+
+void quintHandler(int sig)
+{
+	terminate=true;
+}
+
+
 using namespace TW;
 
 int main(int argc, char *argv[]) {
@@ -120,11 +126,16 @@ int main(int argc, char *argv[]) {
 	//CCallbackVoid cbStow;
 	/* ******************************** */
 
+	// enable runloop
+	terminate=false;
+
 	// mainframe 
 	TW::CFrame window(CPoint(0,0),CPoint(WINDOW_WIDTH,WINDOW_HEIGHT),'|','|','-','-'); 
 	
 	// disable ctrl+C
 	signal(SIGINT,SIG_IGN);
+	//install termination signal handler
+	signal(SIGUSR1,quintHandler);
 	
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::MANAGER_LOGGING"));
 	try {
@@ -268,10 +279,10 @@ int main(int argc, char *argv[]) {
 	// now it is possible to show the frame
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::START"));
 	window.showFrame();
-	for(;;)	{
+	while(!terminate) {
 		if (userInput->readCommand(inputCommand)) {
-			if (inputCommand=="exit") break;
-			if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
+			if (inputCommand=="exit") terminate=true;
+			else if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
 				try {
 					char * outputAnswer;
 					component->command((const char *)inputCommand,outputAnswer);

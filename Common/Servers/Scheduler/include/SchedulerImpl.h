@@ -132,9 +132,21 @@ public:
 	
 	/**
      * Returns a reference to the projectCode property Implementation of IDL interface.
-	 * @return pointer to read-only string property target
+	 * @return pointer to read-only string property projectCode
 	*/
 	virtual ACS::ROstring_ptr projectCode() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the currentBackend property Implementation of IDL interface.
+	 * @return pointer to read-only string property currentBackend
+	*/
+	virtual ACS::ROstring_ptr currentBackend() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the currentRecorder property Implementation of IDL interface.
+	 * @return pointer to read-only string property currentRecorder
+	*/
+	virtual ACS::ROstring_ptr currentRecorder() throw (CORBA::SystemException);
 
 	/**
 	 * This method implements the command line interpreter. The interpreter allows to ask for services or to issue commands
@@ -283,6 +295,8 @@ private:
 	baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_ptracking;
 	baci::SmartPropertyPointer<baci::ROlong> m_pcurrentDevice;
 	baci::SmartPropertyPointer<baci::ROstring> m_pprojectCode;
+	baci::SmartPropertyPointer<baci::ROstring> m_pcurrentBackend;
+	baci::SmartPropertyPointer<baci::ROstring> m_pcurrentRecorder;
 	CConfiguration m_config;
 	CCore *m_core;
 };

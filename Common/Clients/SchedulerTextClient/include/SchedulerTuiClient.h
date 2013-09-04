@@ -10,6 +10,7 @@
 /* Andrea Orlati (a.orlati@ira.inaf.it)  09/08/13     Creation  */
 
 #include <SchedulerC.h>
+#include <ManagmentDefinitionsC.h>
 
 #include <ManagementErrors.h>
 
@@ -26,6 +27,11 @@
 #include <TW_PropertyText.h>
 #include <TW_Label.h>
 #include <TW_InputCommand.h>
+#include <TW_PropertyStatusBox.h>
+#include <TW_PropertyLedDisplay.h>
+#include <TW_LedDisplay.h>
+
+
 
 #define GRAY_COLOR 0
 #define BLUE_GRAY 0
@@ -44,8 +50,8 @@
 
 /* define the main frame dimension */
 /* ******************************* */
-#define WINDOW_WIDTH 74      /*columns */
-#define WINDOW_HEIGHT 30     /* rows */  
+#define WINDOW_WIDTH 46      /*columns */
+#define WINDOW_HEIGHT 16     /* rows */
 /* ******************************* */
 
 /* **************************************************** */
@@ -61,7 +67,7 @@
 
 /* define name and component interface */
 /* ********************************** */
-#define COMPONENT_NAME "IDL:alma/Management/Scheduler:1.0"              /* the name of the istantiation of the component */
+#define COMPONENT_INTERFACE_TPYE "IDL:alma/Management/Scheduler:1.0"       /* the type of the interface */
 #define COMPONENT_IDL_MODULE Management	/* the IDL module that contains the component interface */
 #define COMPONENT_IDL_INTERFACE Scheduler  /* the IDL interface of the component */
 #define COMPONENT_SMARTPOINTER Scheduler_var /* the component type */

@@ -62,86 +62,6 @@
 	} \
 }
 
-/*#define _CATCH_ALL(OUTPUT,ROUTINE,COMP_EXCEPTION) \
-	catch (COMP_EXCEPTION &E) { \
-		_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,E,ROUTINE); \
-		IRA::CString Message; \
-		if (OUTPUT!=NULL) { \
-			_EXCPT_TO_CSTRING(Message,impl); \
-			OUTPUT->setValue(Message); \
-			OUTPUT->Refresh(); \
-		} \
-		impl.log(); \
-	} \
-	catch (CORBA::SystemException &C) { \
-		_EXCPT(ClientErrors::CORBAProblemExImpl,impl,ROUTINE); \
-		impl.setName(C._name()); \
-		impl.setMinor(C.minor()); \
-		if (OUTPUT!=NULL) { \
-			IRA::CString Message; \
-			_EXCPT_TO_CSTRING(Message,impl); \
-			OUTPUT->setValue(Message); \
-			OUTPUT->Refresh(); \
-		} \
-		impl.log(); \
-	} \
-	catch (...) { \
-		_EXCPT(ClientErrors::UnknownExImpl,impl,ROUTINE); \
-		if (OUTPUT!=NULL) { \
-			IRA::CString Message; \
-			_EXCPT_TO_CSTRING(Message,impl); \
-			OUTPUT->setValue(Message); \
-			OUTPUT->Refresh(); \
-		} \
-		impl.log(); \
-	}
-
-
-#define _CATCH_ALL2(OUTPUT,ROUTINE,COMP_EXCEPTION1,COMP_EXCEPTION2) \
-	catch (COMP_EXCEPTION1 &E) { \
-		_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,E,ROUTINE); \
-		IRA::CString Message; \
-		if (OUTPUT!=NULL) { \
-			_EXCPT_TO_CSTRING(Message,impl); \
-			OUTPUT->setValue(Message); \
-			OUTPUT->Refresh(); \
-		} \
-		impl.log(); \
-	} \
-	catch (COMP_EXCEPTION2 &E) { \
-		_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,E,ROUTINE); \
-		IRA::CString Message; \
-		if (OUTPUT!=NULL) { \
-			_EXCPT_TO_CSTRING(Message,impl); \
-			OUTPUT->setValue(Message); \
-			OUTPUT->Refresh(); \
-		} \
-		impl.log(); \
-	} \
-	catch (CORBA::SystemException &C) { \
-		_EXCPT(ClientErrors::CORBAProblemExImpl,impl,ROUTINE); \
-		impl.setName(C._name()); \
-		impl.setMinor(C.minor()); \
-		if (OUTPUT!=NULL) { \
-			IRA::CString Message; \
-			_EXCPT_TO_CSTRING(Message,impl); \
-			OUTPUT->setValue(Message); \
-			OUTPUT->Refresh(); \
-		} \
-		impl.log(); \
-	} \
-	catch (...) { \
-		_EXCPT(ClientErrors::UnknownExImpl,impl,ROUTINE); \
-		if (OUTPUT!=NULL) { \
-			IRA::CString Message; \
-			_EXCPT_TO_CSTRING(Message,impl); \
-			OUTPUT->setValue(Message); \
-			OUTPUT->Refresh(); \
-		} \
-		impl.log(); \
-	}
-*/
-
 #define COMPONENT_INTERFACE COMPONENT_IDL_MODULE::COMPONENT_IDL_INTERFACE
 #define COMPONENT_DECLARATION COMPONENT_IDL_MODULE::COMPONENT_SMARTPOINTER
 
@@ -150,6 +70,13 @@
 #define TEMPLATE_4_ROTSYSTEMSTATUS  Management::ROTSystemStatus_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
 
 using namespace TW;
+
+static bool terminate;
+
+void quintHandler(int sig)
+{
+	terminate=true;
+}
 
 IRA::CLogGuard guard(GUARDINTERVAL*1000);
 TW::CLabel* extraLabel1;
@@ -163,57 +90,6 @@ COMPONENT_DECLARATION component=COMPONENT_INTERFACE::_nil();
 nc::SimpleConsumer<Antenna::AntennaDataBlock> *simpleConsumer=NULL;
 
 #include "UpdateGenerator.i"
-
-/*bool parseRa(const IRA::CString& str,double& rad)
-{
-	int hh,mm;
-	double ss;
-	if (sscanf((const char *)str,"%02d:%02d:%lf",&hh,&mm,&ss)==3) {
-		rad=((double)hh+mm/60.0+ss/3600)*15.0*DD2R;
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-bool parseDec(const IRA::CString& str,double &rad)
-{
-	int dd,mm;
-	double ss;
-	if (sscanf((const char*)str,"%d:%d:%lf",&dd,&mm,&ss)==3) {
-		if (dd<0) rad=((double)dd-mm/60.0-ss/3600.0)*DD2R;
-		else rad=((double)dd+mm/60.0+ss/3600.0)*DD2R;
-		return true;
-	}
-	else {
-		return false;
-	}
-}*/
-
-/*bool parseTime(const IRA::CString& str,ACS::Time& time)
-{
-	long hh,mm,year,doy;
-	double ss;
-	double fract;
-	if (sscanf((const char*)str,"%ld-%ld-%ld:%ld:%lf",&year,&doy,&hh,&mm,&ss)==5 ) {
-		TIMEVALUE tt;
-		tt.reset();
-		tt.year((unsigned long)year);
-		tt.dayOfYear(doy);
-		tt.hour(hh);
-		tt.minute(mm);
-		tt.second((long)ss);
-		fract=ss-(long)ss;
-		tt.microSecond((long)(fract*1000000));
-		time=tt.value().value;
-		return true;
-	}
-	else {
-		return false;
-	}
-		
-}*/
 
 void NotificationHandler(Antenna::AntennaDataBlock data,void *handlerParam)
 {
@@ -278,11 +154,14 @@ int main(int argc, char *argv[]) {
 	TW::CLabel *output_label;
 	TW::CInputCommand *userInput;
 
+	terminate=false;
+
 	// mainframe 
 	TW::CFrame window(CPoint(0,0),CPoint(WINDOW_WIDTH,WINDOW_HEIGHT),'|','|','-','-'); 
 	
 	// disable ctrl+C
 	signal(SIGINT,SIG_IGN);
+	signal(SIGUSR1,quintHandler);
 	
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"MANAGER_LOGGING"));
 	try {
@@ -653,11 +532,11 @@ int main(int argc, char *argv[]) {
 	
 	window.showFrame();
 	 
-	for(;;)	{
+	while(!terminate) {
 		//if ((fieldCounter=userInput->parseCommand(fields,MAXFIELDNUMBER))>0) {  // there is something input
 		if (userInput->readCommand(inputCommand)) {
-			if (inputCommand=="exit") break;
-			if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
+			if (inputCommand=="exit") terminate=true;
+			else if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
 				try {
 					char * outputAnswer;
 					component->command((const char *)inputCommand,outputAnswer);

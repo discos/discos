@@ -261,6 +261,16 @@ public:
 	 */
 	inline long getCurrentDevice() const { return m_currentDevice; }
 	
+	/**.
+	 * @param dv returns back  the current active data receiver
+	 */
+	void  getCurrentDataReceiver(IRA::CString& dv);
+
+	/*
+	 * Used to know the currently used backend.
+	 */
+	void getCurrentBackend(IRA::CString& bck);
+
 private:
 
 	/**

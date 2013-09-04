@@ -125,6 +125,13 @@ void CMotorsStatusCallback::done (const ACS::longSeq& vlaue,const ACSErr::Comple
 
 using namespace TW;
 
+static bool terminate;
+
+void quintHandler(int sig)
+{
+	terminate=true;
+}
+
 int main(int argc, char *argv[]) {
 	bool loggedIn=false;
 	int fieldCounter;
@@ -189,11 +196,14 @@ int main(int argc, char *argv[]) {
 	TW::CLabel *output_label;
 	TW::CInputCommand *userInput;
 
+	terminate=false;
+
 	// mainframe 
 	TW::CFrame window(CPoint(0,0),CPoint(WINDOW_WIDTH,WINDOW_HEIGHT),'|','|','-','-'); 
 	
 	// disable ctrl+C
 	signal(SIGINT,SIG_IGN);
+	signal(SIGUSR1,quintHandler);
 	
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::MANAGER_LOGGING"));
 	try {
@@ -808,10 +818,10 @@ int main(int argc, char *argv[]) {
 	// now it is possible to show the frame
 	ACS_LOG(LM_FULL_INFO,"::Main()",(LM_INFO,"START"));
 	window.showFrame();
-	for(;;)	{
+	while(!terminate) {
 		if ((fieldCounter=userInput->parseCommand(fields,MAXFIELDNUMBER))>0) {
 			fields[0].MakeUpper();
-			if (fields[0]=="EXIT") break;
+			if (fields[0]=="EXIT") terminate=true;;
 		}
 		client.run(tv);
 		tv.set(0,MAINTHREADSLEEPTIME*1000);		

@@ -92,6 +92,13 @@
 
 using namespace TW;
 
+static bool terminate;
+
+void quintHandler(int sig)
+{
+	terminate=true;
+}
+
 #define TEMPLATE_4_ROTSYSTEMSTATUS  Management::ROTSystemStatus_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
 
 #include <map>
@@ -213,11 +220,14 @@ int main(int argc, char *argv[]) {
 	TW::CLabel *output_label;
 	TW::CInputCommand *userInput;
 
+	terminate=false;
+
 	// mainframe 
 	TW::CFrame window(CPoint(0,0),CPoint(WINDOW_WIDTH,WINDOW_HEIGHT),'|','|','-','-'); 
 	
 	// disable ctrl+C
 	signal(SIGINT,SIG_IGN);
+	signal(SIGUSR1,quintHandler);
 	
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::MANAGER_LOGGING"));
 	try {
@@ -437,10 +447,10 @@ int main(int argc, char *argv[]) {
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::START"));
 	window.showFrame();
 
-	for(;;)	{
+	while(!terminate) {
 		if (userInput->readCommand(inputCommand)) {
-			if (inputCommand=="exit") break;
-			if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
+			if (inputCommand=="exit")  terminate=true;
+			else if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
 				try {
 					char * outputAnswer;
 					component->command((const char *)inputCommand,outputAnswer);

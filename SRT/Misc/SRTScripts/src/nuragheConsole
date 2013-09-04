@@ -5,7 +5,8 @@
 # This code is under GNU General Public Licence (GPL).                                              
 #                                                                                                     
 # Who                                when            What                                             
-# Andrea Orlati(aorlati@ira.inaf.it) 08/08/2012      Creation                                  
+# Andrea Orlati(aorlati@ira.inaf.it) 08/08/2012      Creation        
+# Andrea Orlati(aorlati@ira.inaf.it)04/09/2013      switch --stop now available                          
 #************************************************************************
 #   NAME
 # 
@@ -28,9 +29,10 @@
 #   BUGS     
 #
 
-LONGOPTS=help
-SHORTOPTS=h
+LONGOPTS=help,stop
+SHORTOPTS=hs
 CL_HELP=
+CL_STOP=
 
 function printUsage {
    echo "Start interactive console for the ESCS system"
@@ -38,6 +40,7 @@ function printUsage {
         echo "Usage: `basename $0` [OPTIONS]  "
         echo "Options: "
         echo "   -h | --help    prints this help"
+        echo "   -s | --stop    close the console and all the user interface windows"        
 }
 
 # This simply checks for the correctness of the command line
@@ -56,6 +59,8 @@ do
 	case "$i" in
 		-h) CL_HELP=true ;;
 		--help) CL_HELP=true ;;
+		-s) CL_STOP=true ;;
+		--stop) CL_STOP=true ;;		
 		--)  break;;
 	esac
 	shift
@@ -70,15 +75,31 @@ if [ "$CL_HELP" ] ; then
    exit
 fi
 
-xterm -geometry 100x37+300+0 +sb -title Mount -e /bin/bash --login -c _tui_SRTMountTextClient &
+if [ "$CL_STOP" ] ; then
+   killall -s SIGUSR1 -u $USER -q _tui_SRTMountTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_ObservatoryTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_AntennaBossTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_GenericBackendTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_SysTerm
+   killall -s SIGUSR1 -u $USER -q _tui_ReceiversBossTextClient
+   #close the operator input
+   pkill -SIGUSR1 -f -n -u $USER _tui_SysTerm
+   #close the logging display client 
+   #pkill -SIGUSR1 -f -n -u $USER _gui_customLoggingClient
+   exit
+fi
+
+schedulerTui
 sleep 0.5s
-xterm -geometry 69x16+0+0 +sb -title Observatory -e /bin/bash --login -c _tui_ObservatoryTextClient &
+mountTui
 sleep 0.5s
-xterm -geometry 82x31+0+0 +sb -title AntennaBoss -e /bin/bash --login -c _tui_AntennaBossTextClient &
+observatoryTui
 sleep 0.5s
-xterm -geometry 101x28+0+0 +sb -title GenericBackend -e /bin/bash --login -c "_tui_GenericBackendTextClient BACKENDS/TotalPower" &
+antennaBossTui
 sleep 0.5s
-xterm -geometry 130x25+200+200 -sb -title OperatorInput -e /bin/bash --login -c _tui_SysTerm &
+genericBackendTui BACKENDS/TotalPower
+sleep 0.5s
+operatorInput
 sleep 0.5s
 receiversBossTui
 sleep 0.5s

@@ -1,4 +1,3 @@
-// $Id: MedicinaMountTextClient.cpp,v 1.11 2010-12-06 12:48:26 a.orlati Exp $
 
 #include <ComponentErrors.h>
 #include "MedicinaMountTextClient.h"
@@ -25,6 +24,13 @@
 #define MAXFIELDNUMBER 10
 
 using namespace TW;
+
+static bool terminate;
+
+void quintHandler(int sig)
+{
+	terminate=true;
+}
 	
 #define TEMPLATE_4_ROTMODES Antenna::ROTCommonModes_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
 #define TEMPLATE_4_ROTSTATUS Antenna::ROTStatus_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
@@ -104,7 +110,9 @@ int main(int argc, char *argv[]) {
 	CORBA::Object_var obj;
 	
 	//_IRA_LOGFILTER_DECLARE;
-		
+
+	terminate=false;
+
 	/* Main frame */
 	TW::CFrame window(CPoint(0,0),CPoint(WINDOW_WIDTH,WINDOW_HEIGHT),'|','|','-','-'); 
 	
@@ -146,6 +154,8 @@ int main(int argc, char *argv[]) {
 
 	// disable ctrl+C
 	signal(SIGINT,SIG_IGN);
+	signal(SIGUSR1,quintHandler);
+
 	ACS_LOG(LM_SOURCE_INFO,"mountTui::Main()",(LM_INFO,"MANAGER_LOGGING"));
 	try {
 		if (client.init(argc,argv)==0) {
@@ -499,10 +509,10 @@ int main(int argc, char *argv[]) {
 	/** now it is possible to show the frame */
 	ACS_LOG(LM_FULL_INFO,"mountTui::Main()",(LM_INFO,"START"));
 	window.showFrame();
-	for(;;)	{
+	while(!terminate) {
 		if ((fieldCounter=usrInput->parseCommand(fields,MAXFIELDNUMBER))>0) {
 			fields[0].MakeUpper();
-			if (fields[0]=="EXIT") break;
+			if (fields[0]=="EXIT") terminate=true;
 		}
 		client.run(tv);
 		tv.set(0,MAINTHREADSLEEPTIME*1000);

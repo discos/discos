@@ -122,9 +122,16 @@ public:
      /**
       * Get a reference to the backend used by the schedule. Attention must be payed to the fact that the currently used backend may change without advice.
       * So the caller must ask for another reference to the backend itself. 
-      * @return the reference of backend currently used by the schedule
+      * @return the reference of backend currently used by the schedule, it must be freed
       */
      Backends::GenericBackend_ptr getBackendReference();
+
+     /**
+      * Get a reference to the writer used by the schedule. Attention must be payed to the fact that the currently used writer may change without advice.
+      * So the caller must ask for another reference to the writer itself.
+      * @return the reference of writer currently used by the schedule, it must be freed
+      */
+     Management::DataReceiver_ptr  getWriterReference();
      
 private:
 	enum TScheduleStages {

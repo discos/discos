@@ -10,6 +10,7 @@
 #andrea orlati(a.orlati@ira.inaf.it)       24/09/2010     Exceptions coming from the component command are now logged as it should be by a client application
 #andrea orlati(a.orlati@ira.inaf.it)       20/07/2011     Logging exceptions now works also in ACS 8.2
 #Marco Buttu (mbuttu@oa-cagliari.inaf.it)  28/05/2013     Tab completion from a file of commands, help command
+#andrea orlati(a.orlati@ira.inaf.it)       04/09/2013     Implemented support for external termination signal
 
 import getopt, sys
 import Acspy.Common.Err
@@ -22,8 +23,11 @@ import ACSLog
 import string
 import readline
 import os
+import signal
 from Acspy.Clients.SimpleClient import PySimpleClient
 from nuraghe_commands import __dict__ as commands
+
+stopAll=False
 
 def usage():
     print "systerm [-h|--help] [ComponentName]"
@@ -31,9 +35,13 @@ def usage():
     print "                      If not given the Scheduler component is used."
     print "[-h|--help]           displays this help"
 
+def handler(num, stack):
+    global stopAll
+    stopAll=True
 
 def get_history_items():
     return [readline.get_history_item(i) for i in xrange(1,readline.get_current_history_length()+1)]
+
 
 class HistoryCompleter(object):
 
@@ -54,8 +62,15 @@ class HistoryCompleter(object):
         except IndexError:
             response=None
         return response
-
+    
+    
 def main():
+    
+    global stopAll
+   
+    #handler for the external request of termination 
+    signal.signal(signal.SIGUSR1, handler)
+
     try:
         opts, args = getopt.getopt(sys.argv[1:],"h",["help"])
     except getopt.GetoptError, err:
@@ -104,13 +119,20 @@ def main():
     readline.set_completer(HistoryCompleter().complete)
     readline.parse_and_bind('tab: complete')
     
-    stop=False
     cmdCounter=0
-    while not stop:
-        cmd=raw_input("<%d> "%cmdCounter)
+    
+    while not stopAll:
+        sys.stdout.write("<%d> "%cmdCounter)
+        cmd=''
+        try:
+            cmd=sys.stdin.readline()
+        except IOError:
+            cmd='exit'
+            pass
         cmdCounter=cmdCounter+1
+        cmd=cmd.strip()
         if cmd=="exit":
-            stop=True
+            stopAll=True
         elif cmd.startswith('help='):
             h, c = cmd.split('=')
             if c not in commands:
@@ -124,7 +146,7 @@ def main():
             except Exception, ex:
                 newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
                 newEx.setAction("command()")
-                newEx.setReason("comunication error to component server")
+                newEx.setReason("communication error to component server")
                 newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
 
     simpleClient.releaseComponent(compName)     

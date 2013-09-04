@@ -7,6 +7,8 @@
 #include "DevIOTracking.h"
 #include "DevIOCurrentDevice.h"
 #include "DevIOProjectCode.h"
+#include "DevIOCurrentBackend.h"
+#include "DevIOCurrentRecorder.h"
 #include <LogFilter.h>
 
 static char *rcsId="@(#) schedulerImpl";
@@ -22,7 +24,9 @@ SchedulerImpl::SchedulerImpl(const ACE_CString &CompName,maci::ContainerServices
 	m_psubScanID(this),
 	m_ptracking(this),
 	m_pcurrentDevice(this),
-	m_pprojectCode(this)
+	m_pprojectCode(this),
+	m_pcurrentBackend(this),
+	m_pcurrentRecorder(this)
 {	
 	AUTO_TRACE("SchedulerImpl::SchedulerImpl()");
 }
@@ -56,6 +60,8 @@ void SchedulerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_pcurrentDevice=new ROlong(getContainerServices()->getName()+":currentDevice",getComponent(),new DevIOCurrentDevice(m_core),true);
 		m_pprojectCode=new ROstring(getContainerServices()->getName()+":projectCode",getComponent(),
 				new DevIOProjectCode(m_core),true);
+		m_pcurrentBackend=new ROstring(getContainerServices()->getName()+":currentBackend",getComponent(),new DevIOCurrentBackend(m_core),true);
+		m_pcurrentRecorder=new ROstring(getContainerServices()->getName()+":currentRecorder",getComponent(),new DevIOCurrentRecorder(m_core),true);
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"SchedulerImpl::initialize()");
@@ -322,6 +328,9 @@ _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_psubScanID,subScanID);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,Management::ROTBoolean,m_ptracking,tracking);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pcurrentDevice,currentDevice);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pprojectCode,projectCode);
+_PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pcurrentBackend,currentBackend);
+_PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pcurrentRecorder,currentRecorder);
+
 
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

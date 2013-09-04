@@ -108,6 +108,13 @@
 
 using namespace TW;
 
+static bool terminate;
+
+void quintHandler(int sig)
+{
+	terminate=true;
+}
+
 IRA::CString tsysFormat(const baci::BACIValue& value,const void* arg)
 {
 	IRA::CString formatted="";
@@ -177,11 +184,14 @@ int main(int argc, char *argv[]) {
 	TW::CLabel *output_label;
 	TW::CInputCommand *userInput;
 
+	terminate=false;
+
 	// mainframe 
 	TW::CFrame window(CPoint(0,0),CPoint(WINDOW_WIDTH,WINDOW_HEIGHT),'|','|','-','-'); 
 	
 	// disable ctrl+C
 	signal(SIGINT,SIG_IGN);
+	signal(SIGUSR1,quintHandler);
 	
 	strcpy(spaces6Float,"%06.1lf");
 	strcpy(spaces4Float,"%04.1lf");
@@ -460,10 +470,10 @@ int main(int argc, char *argv[]) {
 	// now it is possible to show the frame
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::START"));
 	window.showFrame();
-	for(;;)	{
+	while(!terminate) {
 		if (userInput->readCommand(inputCommand)) {
-			if (inputCommand=="exit") break;
-			if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
+			if (inputCommand=="exit") terminate=true;
+			else if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
 				try {
 					char * outputAnswer;
 					component->command((const char *)inputCommand,outputAnswer);

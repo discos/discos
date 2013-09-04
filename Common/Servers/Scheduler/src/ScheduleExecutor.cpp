@@ -554,6 +554,20 @@ Backends::GenericBackend_ptr CScheduleExecutor::getBackendReference()
 	}
 }
 
+Management::DataReceiver_ptr  CScheduleExecutor::getWriterReference()
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (CORBA::is_nil(m_writer)) {
+		return Management::DataReceiver::_nil();
+	}
+	else {
+		Management::DataReceiver_var tmp;
+		tmp=Management::DataReceiver::_duplicate(m_writer);
+		return tmp._retn();
+	}
+}
+
+
 //************************PRIVATE*********************************** 
 
 void CScheduleExecutor::stopRecording()
@@ -635,6 +649,7 @@ void CScheduleExecutor::cleanSchedule(bool error)
 		if (m_schedule!=NULL) { 
 			delete m_schedule;
 			m_schedule=NULL;
+			m_scheduleName="";
 		}
 		m_scheduleLoaded=false;
 	}
@@ -691,9 +706,9 @@ void CScheduleExecutor::getNextScan(const DWORD& counter,CSchedule::TRecord& rec
  		rec.ut=CCore::getUTFromLST(now,now,rec.lst,m_site,m_dut1); //get the corresponding ut time starting from the lst
  		IRA::CString out;
  		IRA::CIRATools::intervalToStr(rec.lst,out);
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_DEBUG,"LST_SCAN_START: %s",(const char *)out));
+ 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::getNextScan()",(LM_DEBUG,"LST_SCAN_START: %s",(const char *)out));
  		IRA::CIRATools::timeToStr(rec.ut,out);
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_DEBUG,"UT_SCAN_START: %s",(const char *)out));
+ 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::getNextScan()",(LM_DEBUG,"UT_SCAN_START: %s",(const char *)out));
  	}
  	else if ((m_schedule->getSchedMode()==CSchedule::SEQ) || (m_schedule->getSchedMode()==CSchedule::TIMETAGGED)) {
  		if (!m_schedule->getSubScan_SEQ(rec)) {

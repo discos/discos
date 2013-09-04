@@ -95,6 +95,13 @@
 
 using namespace TW;
 
+static bool terminate;
+
+void quintHandler(int sig)
+{
+	terminate=true;
+}
+
 #define TEMPLATE_4_ROTGEOMODEL Antenna::ROTGeodeticModel_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
 
 /**
@@ -145,11 +152,14 @@ int main(int argc, char *argv[]) {
 	//CCallbackVoid cbStow;
 	/* ******************************** */
 
+	terminate=false;
+
 	// mainframe 
 	TW::CFrame window(CPoint(0,0),CPoint(WINDOW_WIDTH,WINDOW_HEIGHT),'|','|','-','-'); 
 	
 	// disable ctrl+C
 	signal(SIGINT,SIG_IGN);
+	signal(SIGUSR1,quintHandler);
 	
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::MANAGER_LOGGING"));
 	try {
@@ -390,10 +400,10 @@ int main(int argc, char *argv[]) {
 	// now it is possible to show the frame
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::START"));
 	window.showFrame();
-	for(;;)	{
+	while(!terminate) {
 		if ((fieldCounter=userInput->parseCommand(fields,MAXFIELDNUMBER))>0) {
 			fields[0].MakeUpper();
-			if (fields[0]=="EXIT") break;
+			if (fields[0]=="EXIT") terminate=true;
 		}
 		client.run(tv);
 		tv.set(0,MAINTHREADSLEEPTIME*1000);

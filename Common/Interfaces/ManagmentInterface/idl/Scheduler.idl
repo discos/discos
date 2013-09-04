@@ -216,6 +216,17 @@ module Management {
 		 * This attribute reports the currently running project code, this code will be used for foutput files name, paths and to collect schedules 
 		 */
 		readonly attribute ACS::ROstring projectCode;
+		
+		/**
+		 * This attribute reports the name of the instance of the currently used backend
+		 */
+		readonly attribute ACS::ROstring currentBackend;
+		
+		/**
+		 * This attribute reports the name of the instance of the currently used data receiver
+		 */
+		readonly attribute ACS::ROstring currentRecorder;
+		
 
 	};
 };
