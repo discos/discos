@@ -12,10 +12,7 @@ from socket import *
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Common import TimeHelper
 from maciErrTypeImpl import CannotGetComponentExImpl
-from parameters import *
 import datetime
-
-server = servers['MSCU']
 
 class NackEx(Exception):
     pass
@@ -34,11 +31,6 @@ class TestLinearMovement(unittest.TestCase):
     """Test the minor servo properties."""
 
     def setUp(self):
-        # Direct connection used to match the property values
-        self.sockobj = socket(AF_INET, SOCK_STREAM)
-        self.sockobj.settimeout(socket_timeout)
-        # Connect to the MSCU
-        self.sockobj.connect(server) 
         self.pyclient = PySimpleClient()
         self.cmd_num = 0
         self.component_name = "MINORSERVO/SRP"
@@ -49,8 +41,8 @@ class TestLinearMovement(unittest.TestCase):
         self.sockobj.close()
         self.pyclient.releaseComponent(self.component_name)
 
-    def test_getPositionFromHistory(self):
-        """Test the getPositionFromHistory() method."""
+    def test_SRPLinearMovement(self):
+        """Test if the SRP movement is linear."""
         print
         print "Performing a setup..."
         self.component.setup(0)
@@ -74,7 +66,7 @@ class TestLinearMovement(unittest.TestCase):
         print "Done!"
 
         delay = 20 * 10 ** 7 # 20 seconds
-        step =  6 * 10 ** 6 # 1 second
+        step =  2 * 10 ** 7 # 1 second
         points = 10
         increment = 2.0 # mm
         exe_time = TimeHelper.getTimeStamp().value + delay # Set the positions in delay seconds from now
@@ -122,7 +114,7 @@ class TestLinearMovement(unittest.TestCase):
         print "Done!"
 
         print "Writing the file..."
-        out_file = open('data/linear_movement.data', 'w')
+        out_file = open('../data/linear_movement.data', 'w')
         keys = sorted(commanded_positions.keys())
         out_file.write('# Running time: %s\n\n' %str(datetime.datetime.now()))
         out_file.write('# Positions (Z) from %.4f (mm) to %.4f (mm)\n' %(commanded_positions[keys[0]][2], commanded_positions[keys[-1]][2]))

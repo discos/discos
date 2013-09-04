@@ -33,8 +33,8 @@ public:
         const ACE_CString& name, 
         MSBossConfiguration * configuration,
         const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
-        const ACS::TimeInterval& sleepTime=SCAN_SLEEP_TIME,
-        const bool del=true
+        const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime,
+        const bool del=false
     );
 
     ~ScanThread();

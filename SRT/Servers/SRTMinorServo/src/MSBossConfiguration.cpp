@@ -12,10 +12,10 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
     m_isStarting = false;
     m_isParking = false;
     m_isElevationTracking = false;
+    m_isScanning = false;
     m_dynamic_comps.clear();
     m_services = Services;
     m_isTrackingEn = false;
-    m_isScanning = false;
     m_isASConfiguration = false;
     m_nchannel = NULL;
 }
@@ -29,6 +29,7 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
     m_isStarting = true;
     m_commandedSetup = string(setupMode);
     m_isASConfiguration = false;
+    ACS::doubleSeq dummy;
 
     IRA::CError error;
     try {
@@ -162,6 +163,25 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
         }
     }
     m_isValidCDBConfiguration = true;
+}
+
+void MSBossConfiguration::setScan(
+        ACS::Time starting_time, 
+        ACS::Time total_time, 
+        ACS::Time delta_time, 
+        double range, 
+        std::string comp_name, 
+        unsigned short axis_index,
+        ACS::doubleSeq actPos
+        )
+{
+    m_scan.starting_time = starting_time;
+    m_scan.total_time = total_time;
+    m_scan.delta_time = delta_time;
+    m_scan.range = range;
+    m_scan.comp_name = comp_name;
+    m_scan.axis_index = axis_index;
+    m_scan.actPos = actPos;
 }
 
 

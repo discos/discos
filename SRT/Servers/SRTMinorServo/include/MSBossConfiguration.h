@@ -87,9 +87,15 @@ public:
     inline std::vector<std::string> getUnits() { return m_units; }
 
 
-    struct Scanning {
+    struct Scan {
         ACS::Time starting_time;
         ACS::Time total_time;
+        ACS::Time delta_time;
+        double range;
+        std::string comp_name;
+        unsigned short axis_index;
+        ACS::doubleSeq actPos;
+        bool isActive;
     };
 
 
@@ -102,18 +108,30 @@ public:
     ACS::doubleSeq getPosition(string comp_name, double elevation=45.0)
         throw (ManagementErrors::ConfigurationErrorExImpl);
 
+    void setScan(
+            const ACS::Time starting_time, 
+            const ACS::Time total_time, 
+            const ACS::Time delta_time,
+            const double range, 
+            const std::string comp_name, 
+            const unsigned short axis_index, 
+            const ACS::doubleSeq actPos
+    );
+
+    inline Scan getScanInfo() { return m_scan; }
+
     std::string m_actualSetup;
     std::string m_commandedSetup;
     bool m_isConfigured;
     bool m_isStarting;
+    bool m_isScanning;
     bool m_isParking;
     bool m_isValidCDBConfiguration;
     bool m_isElevationTracking;
     bool m_isTrackingEn; // Is the tracking enabled?
-    bool m_isScanning; 
     bool m_isASConfiguration;
 
-    Scanning m_scanning;
+    Scan m_scan;
 
     std::vector<std::string> m_servosToPark;
 

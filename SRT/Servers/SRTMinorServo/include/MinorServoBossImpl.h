@@ -329,10 +329,6 @@ private:
 
     MSBossConfiguration * m_configuration;
 
-    bool m_scan_active;
-
-    bool m_scanning;
-
     /** Map of component references */
     map<string, MinorServo::WPServo_var> m_component_refs;
  

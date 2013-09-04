@@ -46,7 +46,6 @@ MinorServoBossImpl::MinorServoBossImpl(
     m_setup_thread_ptr = NULL;
     m_park_thread_ptr = NULL;
     m_scan_thread_ptr = NULL;
-    m_scanning = false;
     m_publisher_thread_ptr = NULL;
     m_thread_params.is_setup_locked = false;
     m_thread_params.is_parking_locked = false;
@@ -497,14 +496,14 @@ void MinorServoBossImpl::stopScan() throw (ManagementErrors::SubscanErrorEx)
     if(!m_thread_params.is_initialized)
         THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan: the system is not initialized", true);
 
-    if(m_scanning && m_scan_thread_ptr != NULL) {
+    if(m_configuration->m_isScanning = false && m_scan_thread_ptr != NULL) {
         // TODO: If it is not suspended?
         m_scan_thread_ptr->suspend();
         m_scan_thread_ptr->terminate();
         m_scan_thread_ptr = NULL;
     }
     else
-        if(m_scan_active == false)
+        if(m_configuration->m_isScanning == false)
             THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan: scanning not active", true);
 
     usleep(SCAN_STOP_TIME_GUARD); // Wait a bit
@@ -542,12 +541,12 @@ void MinorServoBossImpl::stopScan() throw (ManagementErrors::SubscanErrorEx)
             }
             if(mutex_res == 0)
                 pthread_mutex_unlock(&tracking_mutex); 
-            m_scan_active = false;
+            m_configuration->m_isScanning = false;
         }
         catch(...) {
             if(mutex_res == 0)
                 pthread_mutex_unlock(&tracking_mutex); 
-            m_scan_active = false;
+            m_configuration->m_isScanning = false;
             ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::stopScan: test 5: catturata una eccezione"));
             throw;
         }
@@ -765,11 +764,9 @@ void MinorServoBossImpl::startScan(
         if(isScanning())
             THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is executing another scan", true);
         
-        m_scanning = true;
-        m_scan_active = true;
         m_configuration->m_isScanning = true;
 
-        const ACS::Time SCAN_DELTA_TIME = 10000000; // 1 second, 
+        const ACS::Time SCAN_DELTA_TIME = 5000000; // 500ms
         
         TIMEVALUE now(0.0L);
         IRA::CIRATools::getTime(now);
@@ -805,62 +802,35 @@ void MinorServoBossImpl::startScan(
                                                         
             // Get the actual position                  
             ACSErr::Completion_var completion;          
-            ACS::doubleSeq act_pos = *((component_ref->actPos())->get_sync(completion.out()));
+            ACS::doubleSeq actPos = *((component_ref->actPos())->get_sync(completion.out()));
                                                         
             turnTrackingOff();
                                                     
-            if(act_pos.length() <= axis) {          
+            if(actPos.length() <= axis) {          
                 ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: wrong actual position length"));
                 THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: wrong actual position length.", true);
             }                                       
-                                                    
-            double N = static_cast<double>((ttime.value()).value) / SCAN_DELTA_TIME;
-            double delta = range / N;               
-            ACS::doubleSeq pos; // The position to set
-            pos.length(act_pos.length());           
-            // The first position is the actual one for all axes except for the one to scan, whose is (act_pos - range/2)
-            for(size_t i=0; i<pos.length(); i++) {
-                if(i==axis)                             
-                    pos[i] = act_pos[i] - range/2;      
-                else                                    
-                    pos[i] = act_pos[i];                
-            }
-
-            try {
-                component_ref->setPosition(pos, 0); // Go to the starting position
-                double starting_pos = pos[axis]; 
-                for(size_t i=0; i<=N; i++) {
-                    pos[axis] = starting_pos + delta * i;
-                    component_ref->setPosition(pos, stime.value().value + dtime.value().value * i);
-                    usleep(20000); // Wait a bit (20 ms)
-                }
-            }
-            catch(...) { // Position not allowed
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: position not allowed.", true);
-            }
-
-            m_configuration->m_isConfigured = false;
+            m_configuration->setScan(starting_time, total_time, SCAN_DELTA_TIME, range, comp_name, axis, actPos);
+        }
+        else {
+            THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: cannot get the component reference.", true);
         }
         
-        if(m_scan_thread_ptr != NULL) { 
-            m_setup_thread_ptr->restart();
+        try {
+            if(m_scan_thread_ptr != NULL)
+                m_scan_thread_ptr->restart();
+            else {
+                m_scan_thread_ptr = getContainerServices()->getThreadManager()->create<ScanThread, MSBossConfiguration *> 
+                    ("ScanThread", m_configuration);
+                m_scan_thread_ptr->resume();
+            }
         }
-        else {
+        catch(...) {
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, "The MinorServoBoss is attempting to execute a previous scan", false);
         }
 
-        (m_configuration->m_scanning).starting_time = starting_time;
-        (m_configuration->m_scanning).total_time = total_time;
-
-        if(m_setup_thread_ptr != NULL)
-            m_setup_thread_ptr->restart();
-        else {
-            m_scan_thread_ptr = getContainerServices()->getThreadManager()->create<ScanThread, MSBossConfiguration *> 
-                ("ScanThread", m_configuration);
-            m_scan_thread_ptr->resume();
-        }
     }
     catch(...) {
-        m_scanning = false;
         m_configuration->m_isScanning = false;
         throw;
     }
