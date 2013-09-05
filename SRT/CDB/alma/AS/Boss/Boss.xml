@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+-->
+
+<SRTActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:SRTActiveSurfaceBoss:1.0"
+             xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+             xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             WatchingThreadTime="200000"
+             RepetitionCacheTime="2000000"
+             RepetitionExpireTime="5000000"
+             profile="0">
+
+<status/>
+<enabled/>
+
+</SRTActiveSurfaceBoss>

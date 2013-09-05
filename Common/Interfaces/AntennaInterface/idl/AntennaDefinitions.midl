@@ -1,0 +1,162 @@
+#ifndef _ANTENNADEFINITIONS_IDL_
+#define _ANTENNADEFINITIONS_IDL_
+
+/* *********************************************************************** */
+/* IRA Istituto di Radioastronomia                                         */
+/* */
+/*                                                                         */
+/* This code is under GNU General Public Licence (GPL).                    */
+/*                                                                         */
+/* Who                                             when             what                */
+/* Andrea Orlati(aorlati@ira.inaf.it)  20/02/2007      Creation            */
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+
+#pragma prefix "alma"
+
+/** 
+ * @mainpage IDL Interface documentation of the antenna subsystem
+ * @date 08/04/2013
+ * @version 1.14.0
+ * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>, 
+ *                 <a href=mailto:c.migoni@ira.inaf.it>Carlo Migoni</a>,
+ *                 <a href=mailto:righin_s@ira.inaf.it>Simona Righini</a>, 
+ * @remarks Last compiled under ACS 8.0.2
+*/
+
+
+/**  
+ * This module is the whole antenna guidance subsystem. 
+ * @htmlonly <a href="$(INTROOT)/bitmaps/Antenna.png" target="_self"> The UML diagram </a> @endhtmlonly
+ * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ * Istituto di Radioastronomia, Italia
+ * <br> 
+*/ 
+module Antenna {
+	
+	/**
+	 * This structure contains all the crucial information and data that describe a site of observation as it is defined in the <i>CSite</i> class
+	 * included in the IRALibrary package.
+	*/
+	struct TSiteInformation  {
+		double longitude;				/* longitude of the site */
+		double latitude;			    /* latitude of the site */
+		double height;                  /* height of the site */
+		double xP;                      /* xP polar motion */
+		double yP;                      /* yP polar motion */
+		long elipsoid;                  /* elipsoid model */
+		double DUT1;				    /* difference UT, UT1 */
+	};
+
+	/**
+	 * This enumerates the possible equinox for a moving coordinate system (equatorial)
+	*/
+	enum TSystemEquinox {
+		ANT_B1950,  
+		ANT_J2000,
+		ANT_APPARENT
+	};
+	
+	/**
+	 * Enlist all the supported coordinate frames
+	*/
+	enum TCoordinateFrame {
+		ANT_EQUATORIAL,      /*!< equatorial frame  */     
+		ANT_HORIZONTAL,       /*!< horizontal frame  */     
+		ANT_GALACTIC              /*!< galactic frame  */      
+	};
+	
+	ACS_ENUM(TCoordinateFrame);
+	
+	/**
+	 * Enlist the supported traking curve generators
+	*/
+	enum TGeneratorType {
+		ANT_SIDEREAL,            /*!< perform a sidereal tracking of a source  */     
+		ANT_SUN,                      /*!< tracks the sun  */     
+		ANT_MOON,                  /*!< tracks the moon  */     
+		ANT_SATELLITE,         /*!< tracks an artificial sattelite  */     
+		ANT_SOLARSYTEMBODY,   /*!< tracks a body of the solar system */
+		ANT_OTF,					  /*!< perform a On the Fly Scan */
+		ANT_NONE                  /*!< no generator */
+	};
+	
+	ACS_ENUM(TGeneratorType);
+	
+	/**
+	 * All the provided model are listed in this enumeration. 
+	 */
+	enum TGeodeticModel {
+		GEOID_WGS84,
+		GEOID_GRS80,
+		GEOID_MERIT83,
+		GEOID_OSU91A,
+		GEOID_SOVIET85		
+	};
+	
+	ACS_ENUM(TGeodeticModel);
+	
+	/** All common modes that both antenna axis can have, are listed by this enumeration */
+	enum TCommonModes {
+		ACU_STANDBY,             /*!< axe is disabled  */     
+		ACU_STOP,                /*!< brakes are on  */
+		ACU_PRESET,              /*!< Axe will be commanded to fixed position */
+		ACU_PROGRAMTRACK,        /*!/*!< Axe will commanded giving a position and a mark of time */
+		ACU_RATE,                /*!< Axe will be commanded by giving rates */
+		ACU_STOW,                /*!< Axe is slewing to survival position */
+		ACU_UNSTOW,              /*!< Stow pins are to be extracted */
+		ACU_UNKNOWN              /*!< The axe is a mode not listed above */
+	};
+
+	ACS_ENUM(TCommonModes);
+	
+	/** This is used to describe the status of connection to the Antenna */
+	enum TStatus { 
+		ACU_NOTCNTD,   	         /*!< Socket is not connected, no operation available  */
+		ACU_CNTDING,             /*!< Connection is in progress, no operation available */
+		ACU_CNTD,  		         /*!< Socket is connected and ready, antenna ready */
+		ACU_BSY			         /*!< Antenna is busy, no operation available */		
+	};
+	
+	ACS_ENUM(TStatus);
+	
+	/** This enum enlists all the antenna travel sectors */
+	enum TSections {
+		ACU_CW,				/*!< antenna is in CW section of travel range (>180°) */
+		ACU_CCW,			/*!< antenna is in CCW section of travel range (<=180°) */
+		ACU_NEUTRAL   /*!< this name is used only when commanding positions to the antenna, it means that the mount can choose */
+		                             /*!< of the other two section to reach the commanded point */
+	};
+	
+	ACS_ENUM(TSections);
+	
+	/* 
+	 * Subscan geometry. List of the possible modes. 
+	 */
+	enum TsubScanGeometry {
+		SUBSCAN_GREATCIRCLE,
+		SUBSCAN_CONSTLON,
+		SUBSCAN_CONSTLAT
+	};
+	
+	/* 
+	 * Subscan description. List of the set of parameters to define the subscan.  
+	 */
+	enum TsubScanDescription {
+		SUBSCAN_STARTSTOP,
+		SUBSCAN_CENTER
+	};
+	
+	/* 
+	 * Subscan direction. Specification of the scanning direction. 
+	 */
+	enum TsubScanDirection {
+		SUBSCAN_INCREASE,
+		SUBSCAN_DECREASE
+	};
+		
+};
+
+
+#endif /*ANTENNADEFINITIONS_IDL_*/

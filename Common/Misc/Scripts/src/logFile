@@ -1,0 +1,48 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+# "@(#) $Id: logFile,v 1.1 2009-01-28 11:30:50 a.orlati Exp $"
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 28/01/2009      Creation                                  
+#************************************************************************
+#   NAME
+# 
+#   SYNOPSIS
+# 
+#   DESCRIPTION
+#
+#   FILES
+#
+#   ENVIRONMENT
+#
+#   RETURN VALUES
+#
+#   CAUTIONS
+#
+#   EXAMPLES
+#
+#   SEE ALSO
+#
+#   BUGS     
+#
+
+function printUsage {
+   echo "Saves logs entry into a file"
+   echo ""
+        echo "Usage: `basename $0` filename  "
+}
+
+if [ ! -n "$1" ]
+then
+   printUsage
+   exit
+fi
+
+loggingClient -f /archive/logs/$1 Logging
+
+
+#
+# ___oOo___

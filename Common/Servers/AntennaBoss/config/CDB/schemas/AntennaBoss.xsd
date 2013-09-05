@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: AntennaBoss.xsd,v 1.13 2011-05-20 16:52:46 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   27-11-2007  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:AntennaBoss:1.0"
+	xmlns="urn:schemas-cosylab-com:AntennaBoss:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:ant="urn:schemas-cosylab-com:Antenna:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Antenna.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+	
+	<xs:complexType name="AntennaBossType">
+		<xs:sequence>
+			<xs:element name="target" type="baci:ROstring"/>
+			<xs:element name="targetRightAscension" type="baci:ROdouble"/>
+			<xs:element name="targetDeclination" type="baci:ROdouble"/>
+			<xs:element name="targetVlsr" type="baci:ROdouble"/>
+			<xs:element name="targetFlux" type="baci:ROdouble"/>			
+			<xs:element name="azimuthOffset" type="baci:ROdouble"/>
+			<xs:element name="elevationOffset" type="baci:ROdouble"/>
+			<xs:element name="rightAscensionOffset" type="baci:ROdouble"/>
+			<xs:element name="declinationOffset" type="baci:ROdouble"/>
+			<xs:element name="longitudeOffset" type="baci:ROdouble"/>
+			<xs:element name="latitudeOffset" type="baci:ROdouble"/>
+			<xs:element name="rawAzimuth" type="baci:ROdouble"/>
+			<xs:element name="rawElevation" type="baci:ROdouble"/>
+			<xs:element name="observedAzimuth" type="baci:ROdouble"/>
+			<xs:element name="observedElevation" type="baci:ROdouble"/>
+			<xs:element name="observedRightAscension" type="baci:ROdouble"/>
+			<xs:element name="observedDeclination" type="baci:ROdouble"/>
+			<xs:element name="observedGalLongitude" type="baci:ROdouble"/>
+			<xs:element name="observedGalLatitude" type="baci:ROdouble"/>			
+			<xs:element name="generatorType" type="ant:GeneratorTypeType" />
+			<xs:element name="status" type="mng:SystemStatusType" />	
+			<xs:element name="enabled" type="mng:BooleanType" />
+			<xs:element name="correctionEnabled" type="mng:BooleanType" />			
+			<xs:element name="pointingAzimuthCorrection" type="baci:ROdouble"/>
+			<xs:element name="pointingElevationCorrection" type="baci:ROdouble"/>
+			<xs:element name="refractionCorrection" type="baci:ROdouble"/>
+			<xs:element name="FWHM" type="baci:ROdouble" />
+		</xs:sequence>
+		<!-- sleep time of the watching thread (microseconds), this is the thread that keeps data up to date -->
+		<xs:attribute name="WatchingThreadTime" type="xs:unsignedLong" use="required" />
+		<!-- sleep time of the working thread (microseconds), this is the thread that
+		     computes the tracking curve. This value should be smaller than GapTime -->
+		<xs:attribute name="WorkingThreadTime" type="xs:unsignedLong" use="required" />
+		<!-- the cache time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
+		<!-- the expire time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
+		<!-- here follows the configuration for the tracking curve loader -->
+		<!-- This is the minimum number of points that must be loaded initially,
+		     the number of points loaded into the mount must never goes down this limit  -->
+		<xs:attribute name="MinPointNumber" type="xs:unsignedLong" use="required" />
+		<!-- This is the maximum number of points that could be loaded,
+		     the number of points loaded into the mount never goes beyond this limit  -->
+		<xs:attribute name="MaxPointNumber" type="xs:unsignedLong" use="required" />
+		<!-- The time between two point in the trajectory (microseconds) -->
+		<xs:attribute name="GapTime" type="xs:unsignedLong" use="required" />
+		<!-- this is the integration period that will be used for integrated equatorial coordinates (microseconds) -->
+		<xs:attribute name="CoordinateIntegration" type="xs:unsignedLong" use="required" />
+		<!-- this setup the cutoff elevation for off-source movement, over this limit the off source is done in elevation, under is done in azimuth(degrees) -->
+		<xs:attribute name="CutOffElevation" type="xs:double" use="required" />
+		<!-- Provides the elevation limits in which the skydip scans are performed. the expected form is MinEl-MaxEl (degrees) -->
+		<xs:attribute name="SkydipElevationRange" type="xs:string" use="required" />		
+		<!-- here a list of used component follows -->
+		<xs:attribute name="MountInstance" type="xs:string" use="required" />
+		<xs:attribute name="ObservatoryInterface" type="xs:string" use="required" />
+		<xs:attribute name="PointingModelInstance" type="xs:string" use="required"/>
+		<xs:attribute name="RefractionInstance" type="xs:string" use="required"/>
+		<!-- here a list of the interfaces of dynamic component(plug-in) used as  ephemeris generator -->
+		<xs:attribute name="Sidereal" type="xs:string" use="required"/>
+		<xs:attribute name="Sun" type="xs:string" use="required"/>
+		<xs:attribute name="Moon" type="xs:string" use="required"/>
+		<xs:attribute name="Satellite" type="xs:string" use="required"/>
+		<xs:attribute name="SolarSystemBody" type="xs:string" use="required"/>
+		<xs:attribute name="Otf" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:element name="AntennaBoss" type="AntennaBossType"/>
+	
+</xs:schema>

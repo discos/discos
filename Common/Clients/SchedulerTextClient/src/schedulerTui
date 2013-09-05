@@ -1,0 +1,11 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 08/08/2013      Creation                                  
+#************************************************************************
+
+xterm -geometry 46x16+0+0 +sb -title Scheduler -e /bin/bash --login -c _tui_SchedulerTextClient &

@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Andrea Orlati
+   - History:
+ 	- 29-05-08 Created
+-->
+
+<Mount xmlns="urn:schemas-cosylab-com:Mount:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	maxAzimuth="450.0"
+	minAzimuth="-90.0"
+	maxElevation="90.0"
+	minElevation="5.5"
+	diameter="64.0"
+	maxAzimuthRate="0.85"
+	maxElevationRate="0.5"
+	maxReliableAzimuthRate="0.250"
+	maxReliableElevationRate="0.250"
+	maxAzimuthAcceleration="0.3"
+	maxElevationAcceleration="0.18"
+	accScaleFactor="10.0"
+	cw_ccw_limit="180.0"
+	MinElevationAvoidance="10"
+	MaxElevationAvoidance="82"
+/>

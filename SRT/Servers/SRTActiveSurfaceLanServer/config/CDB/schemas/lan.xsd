@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   - Configuration Database Schema for AS lan component
+   -
+   - Author:Giuseppe Maccaferri
+   -
+   - History:
+   -   2005-8-8   GM  Created
+  -->
+<xs:schema
+  targetNamespace="urn:schemas-cosylab-com:lan:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns="urn:schemas-cosylab-com:lan:1.0"
+  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+  <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+
+  <xs:complexType name="typeLan">
+    <xs:sequence> 
+	  <xs:element name="delay" type="baci:RWdouble"/>
+      <xs:element name="status" type="baci:ROlong"/>
+    </xs:sequence>
+	
+	<xs:attribute name="IPAddress" type="xs:string" use="required" />
+	<xs:attribute name="port" type="xs:unsignedInt" use="required" />
+
+  </xs:complexType>
+  
+  <xs:element name="lan" type="typeLan"/>
+</xs:schema>

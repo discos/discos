@@ -1,0 +1,79 @@
+/*******************************************************************************\
+ *
+ *  Author: Marco Buttu, mbuttu@oa-cagliari.inaf.it
+ *  Last Modified: Thu Sep 24 10:51:30 CEST 2009
+ *   
+\*******************************************************************************/
+
+#ifndef _DXCORRELATOR_IDL_
+#define _DXCORRELATOR_IDL_
+
+#include <acscomponent.idl> 
+#include <ACSErrTypeFPGAConnection.idl>
+#include <ACSErrTypeFPGACommunication.idl>
+#include <ComponentErrors.idl>
+
+#pragma prefix "alma"
+
+module DXC {    
+
+    /**
+     * <h1>Digital Cross Correlator Interface</h1>
+     *
+     * <p>This module defines the <em>Digital Cross Correlator</em> CORBA interface.
+     * The DigitalXCorrelator is a FPGA system designed by Giovanni Busonera (CRS4) and
+     * Giampaolo Serra (INAF, Cagliari).</p>
+     * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+     *  
+     * <h2>Methods</h2>:
+     * <ul>
+     *     <li><em>save_coeff</em> saves the cross-correlation coefficients to output file. 
+     *         It take two double arguments: the target antenna latitude and longitude.
+     *     </li>
+     * </ul> 
+     *
+     * <h2>Corba Exceptions</h2>:
+     * <ul>
+     *     <li><em>ACSErrTypeFPGAConnection</em>: raised when we cannot connect to FPGA system.</li>
+     *     <li><em>ACSErrTypeFPGACommunication</em>: raised when we cannot communicate to FPGA system.</li>
+     *     <li><em>ComponentErrors</em>:
+     *         <ul>
+     *             <li><em>CouldntGetAttribute</em>: raised when an error occured retrieving attributes from CDB.</li>
+     *             <li><em>FileIOError</em>: raised when an error occured writing output file.</li>
+     *         </ul>
+     *     </li>
+     * </ul> 
+     */
+    interface DigitalXCorrelator: ACS::ACSComponent { 
+
+        /**
+         * Save the cross-correlation coefficients to output file.
+         *
+         * @arg target latitude (double)
+         * @arg target longitude (double)
+         *
+         * @throw ComponentErrors::FileIOErrorEx
+         * @throw ComponentErrors::CouldntGetAttributeEx
+         * @throw ACSErrTypeFPGAConnection::CannotConnectEx
+         * @throw ACSErrTypeFPGACommunication::CannotRunEx
+         * @throw ACSErrTypeFPGACommunication::CannotGetCoefficientsEx
+         */
+        void save_coeff(in double latitude, in double longitude)
+            raises (
+                ComponentErrors::CouldntGetAttributeEx,
+                ComponentErrors::FileIOErrorEx,
+                ACSErrTypeFPGACommunication::CannotRunEx,
+                ACSErrTypeFPGAConnection::CannotConnectEx
+            );
+        void save_coord(in double latitude, in double longitude)
+            raises (
+                ComponentErrors::CouldntGetAttributeEx,
+                ComponentErrors::FileIOErrorEx,
+                ACSErrTypeFPGACommunication::CannotRunEx,
+                ACSErrTypeFPGAConnection::CannotConnectEx
+            );
+
+    };
+};
+#endif
+

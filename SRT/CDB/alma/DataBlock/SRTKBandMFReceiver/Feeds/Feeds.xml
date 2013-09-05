@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<Feeds xmlns="urn:schemas-cosylab-com:Feeds:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Feed>
+	<feedCode>0</feedCode>
+	<xOffset>0.0</xOffset>
+	<yOffset>0.0</yOffset>
+	<relativePower>1.0</relativePower>
+</Feed>
+<Feed>
+	<feedCode>1</feedCode>
+	<xOffset>1.0</xOffset>
+	<yOffset>1.0</yOffset>
+	<relativePower>1.0</relativePower>
+</Feed>
+<Feed>
+	<feedCode>2</feedCode>
+	<xOffset>2.0</xOffset>
+	<yOffset>2.0</yOffset>
+	<relativePower>1.0</relativePower>
+</Feed>
+<Feed>
+	<feedCode>3</feedCode>
+	<xOffset>3.0</xOffset>
+	<yOffset>3.0</yOffset>
+	<relativePower>1.0</relativePower>
+</Feed>
+<Feed>
+	<feedCode>4</feedCode>
+	<xOffset>4.0</xOffset>
+	<yOffset>4.0</yOffset>
+	<relativePower>1.0</relativePower>
+</Feed>
+<Feed>
+	<feedCode>5</feedCode>
+	<xOffset>5.0</xOffset>
+	<yOffset>5.0</yOffset>
+	<relativePower>1.0</relativePower>
+</Feed>
+<Feed>
+	<feedCode>6</feedCode>
+	<xOffset>6.0</xOffset>
+	<yOffset>6.0</yOffset>
+	<relativePower>1.0</relativePower>
+</Feed>
+
+</Feeds>

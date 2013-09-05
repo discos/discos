@@ -1,0 +1,297 @@
+/* **************************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      	        */
+/* $Id: Mount.midl,v 1.16 2011-04-22 17:14:50 a.orlati Exp $										                    */
+/*                                                                                                      	        */
+/* This code is under GNU General Public Licence (GPL).                                                 	        */
+/*                                                                                                      	        */
+/* Who                                 when            What                                              	        */
+/* Andrea Orlati(aorlati@ira.inaf.it)  12/04/2007      Creation                                          	        */
+/* Andrea Orlati(a.orlati@ira.inaf.it) 24/01/2008      Added the operation getEncodersCoorinates  */
+/* Andrea Orlati(a.orlati@ira.inaf.it) 10/05/2008      mountStatus changed to Management::TSystemStatus  */
+/* Andrea Orlati(a.orlati@ira.inaf.it) 07/07/2008      added forceSection method  */
+/* Andrea Orlati(a.orlati@ira.inaf.it) 17/07/2008      added inner method getAntennaErrors */
+/* Andrea Orlati(a.orlati@ira.inaf.it) 18/07/2008      removed the deprecated notification channel */
+/* Andrea Orlati(a.orlati@ira.inaf.it) 02/04/2010      added the method getHWazimuth */
+
+
+#ifndef _MOUNT_IDL_
+
+#define _MOUNT_IDL_
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ComponentErrors.idl>
+#include <AntennaErrors.idl>
+#include <ManagmentDefinitions.idl>
+#include "AntennaDefinitions.idl"
+
+#pragma prefix "alma"
+
+module Antenna {
+	
+	
+	/** 
+	 * This is the notification channel name, the Mount client must register to this channel as a consumer. Data will be published on this
+	 * channel when one of the members of the <i>MEDACUDataBlock</i> structure changes its value or when 1 second elapsed since last publication.
+	 * In case of errors and one second elapsed since last publication, the last known good data is published until the error is fixed.
+	 * @deprecated this notification channel is deprecated and will be removed. The data published in this channel are now posted by
+	 * the notifcation channel produced by AntennaBoss.
+	*/
+	//const string MOUNT_DATA_CHANNEL="MountData";
+	
+	/**
+     * Notification channel data structure. The component informs all registered consumers when one of these members change its status
+	 * or value (not including time). In any case data are published at least once a second. In case there are problems with the ACU the last
+	 * available data are published until the problem is fixed. 
+	 * Time represents the number of 100 ns since 1582-10-15 00:00:00, it is defined in baci.idl and it is mapped over a longlong type.	 
+	*/
+	//struct MountDataBlock {
+	//	ACS::TimeInterval timeMark;	       /*!< this is the absolute time taken from the ACU when the reported events occurred */
+	//	boolean onSource;			       /*!< true when the antenna is on source or reaches the commanded position */
+	//};
+	
+	/**
+ 	* This IDL interface describes the CORBA interface of a common mount component. This component allows to control the mount of the italian antennas 
+ 	* in the most general case and permits to deal with all common operations such as sending the antenna to survival or fixed positions, beggining a 
+ 	* tracking curve and so on. An easy list of operation required for the user to start tracking a source is:
+ 	* @arg \c <i>unstow()</i> the antenna, so that the survival pins are retracted
+ 	* @arg \c <i>changeMode()</i>, in order to change the single axis operating mode, for example <i>ACU_PROGRAMTRACK</i>
+ 	* @arg \c <i>programTrack()</i>, called several times in order to transfer a tracking curve 
+ 	* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ 	* Istituto di Radioastronomia, Italia
+ 	* <br> 
+	*/
+	interface Mount : ACS::CharacteristicComponent {
+		/** This property is the position of the azimuth axe in degrees, limits set in the CDB */
+		readonly attribute ACS::ROdouble azimuth;
+		/** This property is the position of the elevation axe in degrees, limits set in the CDB */
+		readonly attribute ACS::ROdouble elevation;
+		/** This property is the present azimuth error in degrees */
+		readonly attribute ACS::ROdouble azimuthError;
+		/** This property is the present elevation error in degrees */
+		readonly attribute ACS::ROdouble elevationError;
+		/** This property is the present azimuth mode */
+		readonly attribute ROTCommonModes azimuthMode;
+		/**This property is the present elevation mode */
+		readonly attribute ROTCommonModes elevationMode;
+		/** This property reports the last time read from the ACU, it is represented as the number of 100 ns ticks since 1582-10-15 00:00:00 */
+		readonly attribute ACS::ROuLongLong time;
+		/** This property reports the present rate of the azimuth axe in degrees per second. */
+		readonly attribute ACS::ROdouble azimuthRate;
+		/** This property reports the present rate of the elevation axe in degrees per second. */
+		readonly attribute ACS::ROdouble elevationRate;	
+		/** This property indicates in which section the antenna is, at preset */
+		readonly attribute ROTSections section;
+		/** This property indicates the offsets that will be added to all azimuth coordinates commanded to the mount (degrees) */
+		readonly attribute ACS::ROdouble azimuthOffset;
+		/** This property indicates the offsets that will be added to all elevation coordinates commanded to the mount (degrees) */
+		readonly attribute ACS::ROdouble elevationOffset;
+		/** This property indicates the time offsets loaded into the ACU. It can be used to load the DUT1 (milliseconds) */
+		readonly attribute ACS::ROdouble deltaTime;
+		/** This property reports the last azimuth  position command given to the Mount. In case a PROGRAMTRACK mode is used the value
+		 * reported here is the position in which the component expects the antenna to be. This value is also comprehnsive of the offsets.
+		*/
+		readonly attribute ACS::ROdouble commandedAzimuth;
+		/** This property reports the last elevation position command given to the Mount. In case a PROGRAMTRACK mode is used the value
+		 * reported here is the position in which the component expects the antenna to be. This value is also comprehnsive of the offsets. 
+		*/		
+		readonly attribute ACS::ROdouble commandedElevation;
+		
+		/**
+		 * This property if the flag that resumes the whole status of the mount. If a failure or something wrong is detected by the
+		 * component this flag is turned on (MNG_FAILURE) and no more activities will be allowed util the failure is cleared. MNG_WARNING
+		 * is a minor problem so other commands will be accepted but there is no guarantee they will be executed correctly. 
+		*/
+		readonly attribute Management::ROTSystemStatus mountStatus;
+			
+		/** 
+		 * This method can be used to command the antenna to a fixed position. This procedure succeeds only if the antenna is not in <i>ACU_BSY</i>
+		 * status and the mode is <i>ACU_PRESET</i>.
+         * Range checks are performed in order to verify if the commanded position is inside the limits of the mount for both azimuth and elevation.
+         *  The azimtuh path that will be followed by the mount is the shortest depending on the hard limit of the mount. This means that  
+         * a commanded position of 300 degrees could result in -60 degrees as reported by <i>azimuth</i> property. In order to forse the azimuth sector
+         * a call to <i>forseSection()</i> must be done.
+         * In case of a failure an exception is thrown.
+	 	 * @throw ComponentErrors::ComponentErrorsEx
+	 	 * @throw AntennaErrors::AntennaErrorsEx
+		 * @throw CORBA::SystemException
+		 * @param az azimuth position to be commanded(degrees). 
+		 * @param el elevation position to be commanded(degrees). 
+		*/
+		void preset(in double az,in double el) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/** 
+		 * This method can be used to command the antenna to move at specific rates. This procedure succeeds only if the antenna is not in <i>ACU_BSY</i> 
+		 * and if it is already configured in <i>ACU_RATE</i> mode. Checks are performed in order to make sure the commanded rates are under the limits that the antenna can
+		 * perform, on the contrary the requested rates are decreased.. In case of failure exception is thrown.
+	 	 * @throw ComponentErrors::ComponentErrorsEx
+	 	 * @thorw AntennaErrors::AntennaErrorsEx
+		 * @throw CORBA::SystemException
+		 * @param azRate azimuth rate (degrees/second)
+		 * @param elRate elevation rate (degrees/second)
+		*/
+		void rates(in double azRate,in double elRate) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This method can be used to command/load a tracking curve into the ACU. 
+		 * This procedure succeeds only if the antenna is not in <i>ACU_BSY</i> status and the mode is <i>ACU_PROGRAMTRACK</i>. It allows to 
+		 * transfer a time stamp and the required position of one particular spot of the trajectory. The time values must continuosly 
+		 * increase otherwise the point will be discarded. After one or more data points (According to the interpolation algorithm and the 
+		 * function oder) are loaded, the ACU interpolates the points in order to draw the curve. Rnage checks garantee the elevation and the azimuth are 
+		 * always inside the limits configured inside the CDB. The decision wether use the CW or CCW sector is made automatically, if the <i>forceSection()</i> has not been issued.
+	 	 * @throw ComponentErrors::ComponentErrorsEx 
+		 * @throw CORBA::SystemException		 
+		 * @param az azimuth of the data point that will be transfered (degrees)
+		 * @param el elevation of the data point that will be transfered (degrees)
+		 * @param time time stamp of the data point, the mount will try to reach that point at the given time
+		 * @param restart if true the data point stack will be cleared and all previuos loaded point will be lost.  
+		*/		
+		void programTrack(in double az,in double el,in ACS::Time time,in boolean restart) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+			
+		/**
+		 * This method can be used to stop all running operation (jobs that requires long time to complete) or in a more simple way to 
+		 * stop both antenna axes. That means that all tracking activities are ceased and the axe mode is set to <i>ACU_STOP</i>
+	 	 * @throw ComponentErrors::ComponentErrorsEx 
+	 	 * @throw AntennaErrors::AntennaErrorsEx
+		 * @throw CORBA::SystemException		 
+		*/
+		void stop() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This method must be used to put the antenna in survival position. Since this operation could take long time the method is implemented 
+		 * as an asynchrounos method. This implies that a void CallBack must be supplied in order for the client to be notified when the 
+		 * operation completes. At the same time the antenna status is set to <i>MEDACU::ACU_BSY</i> (@sa <i>TStatus</i>), that means the component will
+		 * not accept any other operation before the whole process terminates. The operation can be stopped before it finishes by using the the
+		 * <i>stop()</i> method. The done() method of the CallBack will be informed on operation result with a Completion:
+	 	 * @arg \c ComponentErrors::NoErrorCompletion
+	 	 * @arg \c AntennaErrors::StoppedByUserCompletion
+	 	 * @arg \c ComponentErrors::OperationErrorCompletion
+		 * @throw CORBA::SystemException
+		 * @param callBack void CallBack object
+		 * @param desc Callback description. The Field negotiatable_timeout is ignored, while the normal_timeout is used to command the minimum
+		 *             interval (100ns unit) between two calls to the Callback working function.
+		*/
+		void stow(in ACS::CBvoid callBack,in ACS::CBDescIn desc);
+
+		/**
+		 * This method must be used to extract the antenna stow pins. Since this operation could take long time the method is inplemented 
+		 * as an asynchrounos method. This implies that a void CallBack must be supplied in order for the client to be notified when the 
+		 * operation completes. At the same time the antenna status is set to <i>MEDACU::ACU_BSY</i> (@sa <i>TStatus</i>), that means the component will
+		 * not accept any other operation before the whole process terminates. The operation can be stopped before it finishes by using the the
+		 * <i>stop()</i> method. The done() method of the CallBack will be informed on operation result with a Completion:
+	 	 * @arg \c ComponentErrors::NoErrorCompletion
+	 	 * @arg \c AntennaErrors::StoppedByUser
+	 	 * @arg \c ComponentErrors::OperationErrorCompletion
+		 * @throw CORBA::SystemException
+		 * @param callBack void CallBack object
+		 * @param desc Callback description. The Field negotiatable_timeout is ignored, while the normal_timeout is used to command the minimum
+		 *             interval (100ns unit) between two calls to the Callback working function.
+		*/
+		void unstow(in ACS::CBvoid callBack,in ACS::CBDescIn desc);
+		
+		/** 
+		 * This method can be used to program different modes for both antenna axes. In order to obtain a more clear component 
+		 * working (more than one way to do the same thing) the selectable modes have been limited. The properties <i>elevationMode</i> and
+		 * <i>azimuthMode</i> are not affected by a call to this method, i.e. they are always read from the ACU.
+		 * In the operation completes succesfully it also clears the offsets.
+	 	 * @throw ComponentErrors::ComponentErrorsEx
+	 	 * @thorw AntennaErrors::AntennaErrorsEx
+		 * @throw CORBA::SystemException
+		 * @param azMode The commanded mode for the azimuth axis. It can be: ACU_PRESET, ACU_PROGRAMTRACK,ACU_RATE,
+		 * @param elMode The commanded mode for the elevation axis. It can be: ACU_PRESET, ACU_PROGRAMTRACK,ACU_RATE
+		*/
+		void changeMode(in TCommonModes azMode,in TCommonModes elMode) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);	
+		
+		/**
+		 * This method should be used to load last-minute pointing offsets into the Antenna Control Unit; for example offsets coming from
+		 * temperature or wind measurments. The values can read back from <i>azimuthOffset</i> <i>elevationOffset</i> properties. Offsets can be applied only if the 
+		 * ACU is in ACU_PRESET or ACU_PROGRAMTRACK mode. All other modes trigger an exception.
+		 *  If the hardware doesn't support this feature (like the ACU of Medicina) the implementation of this interface will simulate it by adding the current
+		 * offsets before commandig any new position to the mount. Range checks are not performed.
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * AntennaErrors::AntennaErrorsEx 		 
+		 * @throw CORBA::SystemException
+ 		 * @param azOff The new offset in azimuth.
+		 * @param elOff The new offset in elevation.
+		*/
+		void setOffsets(in double azOff,in double elOff) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+	 	 * This will set the timer of the Antenna Control Unit to the give time
+	 	 * @throw ComponentErrors::ComponentErrorsEx 
+	 	 * @throw AntennaErrors::AntennaErrorsEx
+		 * @throw CORBA::SystemException		 
+	 	 * @param now The ACU time will be set to this value, in 100 ns units since 1582-10-15 00:00:00.
+		*/
+		void setTime(in ACS::Time now) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This method should be used to load a time offset into the Antenna Control Unit; this value will be added to the ACU internal clock
+		 * in order to obtain the real time (used in trajectory fitting routines) of the Mount. For example if this value is set to the current DUT1
+		 * value the ACU will work in UT1 instead of UTC. The last set value can be read back form the <i>deltaTime</i> property. If the ACU doesn't 
+		 * support this feature (like the ACU of Medicina) this method has no effect.  
+		 * @throw ComponentErrors::ComponentErrorsEx 		
+		 * @thorw AntennaErrors::AntennaErrorsEx 
+		 * @throw CORBA::SystemException
+ 		 * @param delta tjat's the new time offset in milliseconds.
+		*/
+		void setDeltaTime(in double delta) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This method is used internally by client component. It is used to read the azimuth, elevation, azimuthOffset and elevationOffset in one shot.
+		 * All these information are marked with a timestamp. The returned values are in degrees. At any time if you want to know the obseverd sky point 
+		 *  you have to subtract to each coordinate the respective offset.
+		 * @param time this timestamp marks the other values returned by this method
+		 * @param azimuth returns the azimuth read directly from the mount encoders
+		 * @param elevation  returns the elevation read directly from the mount encoders, it is exactly the same value of the property <i>elevation</i>
+		 * @param azOff returns the value of the instant offset for the azimuth axe. This value is the last commanded by the method <i>setOffsets</i>.
+		 * @param elOff returns the value of the instant offset for the elevation axe. This value is the last commanded by the method <i>setOffsets</i>.
+		 * @param section this parameter brings the information of the section in which the mount is at the epoch given by parameter <i>time</i>.
+		 * @throw  CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx 
+		 * @thorw AntennaErrors::AntennaErrorsEx
+		*/
+		void getEncoderCoordinates(out ACS::Time time,out double azimuth,out double elevation,out double azOff,
+				out double elOff,out TSections section) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This method is internally used to retrieve antenna errors in one time.
+		 * @param time this is the timestamp that marks the other values returned by this method
+		 * @param azError error in azimuth in degrees
+		 * @param elError error in elevation in degrees
+		 * @throw  CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @thorw AntennaErrors::AntennaErrorsEx
+		 */
+		void getAntennaErrors(out ACS::Time time,out double azError,out double elError) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This method is used internally by client components. It can be used to force the azimuth range the mount will travel in order to reach the
+		 * next commanded point (@sa <i>preset()</i> or <i>programTrack()</i>). If this method is not used the default behavoiur
+		 * of the mount is to follow the shortest trip. Of course wrap cable limits are always taken into account. The possible section are
+		 * <i>ACU_CW</i>(generally for azimuth grater than 180 degrees) and <i>ACU_CW</i> (generally for azimuth lesser than 180 degrees).
+		 *  The <i>ACU_NEUTRAL</i> option does not change the default behaviour of the mount. This method is usefull at the beginning of a
+		 *  tracking curve for example to ensure to enough travel to follow a source from rise to set. When the first point of the tracking is commanded
+		 * the ACU will be reset to the default section (<i>ACU_NEUTRAL</i>) so that all following point are determined through the algorithm of
+		 * minimum distance.
+		 * @param section select the travel range of the next tracking point  
+		 * @throw CORBA::SystemExcpeption
+		 */
+		void forceSection(in TSections section);
+		
+		/**
+		 * This method can be used to know which direction in azimuth the component will drive the antenna with respect to the real azimuth ranges.
+		 * the result depends on present azimuth, on the destination azimuth, on the azimuth hardware limits and on the preferred section.
+		 * @throw  CORBA::SystemException
+		 * @param destination the destination azimuth on degrees.
+		 * @param section preferred section
+		 * @return the real azimuth coordinate of the destination it could overcome the standard limits of 0..360
+		 */
+		double getHWAzimuth(in double destination,in TSections section);
+
+};
+
+	
+};
+
+#endif

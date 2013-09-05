@@ -1,0 +1,21 @@
+These notes are about the installation of CCfits libraries required by this component to work:
+
+a) cfitsio installation:
+	1) unpack the tarball
+	2) ./configure --prefix=/usr/local
+	3) make
+	4) make install
+b) CCfits intallation:
+	1) unpack the tarball
+	2) ./configure --with-cfitsio=/usr/local --prefix=/usr/local
+	3) make
+	4) make install
+c) add libraries to the path for every user:
+	1) export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+d) get rid of cfitsio library provided by ACS
+	1) rm $ACSROOT/include/fitsio.h
+	2) rm $ACSROOT/include/fitsio2.h
+	3) rm $ACSROOT/include/longnam.h
+	4) rm $ACSROOT/include/drvrsmem.h
+	5) rm $ACSROOT/lib/libcfitsio.a
+	6) rm $ACSROOT/lin/libcfitsio.so

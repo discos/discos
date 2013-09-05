@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: Observatory.xsd,v 1.6 2010-09-14 09:38:29 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   16-01-2006  Created
+-->
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:Observatory:1.0"
+	xmlns="urn:schemas-cosylab-com:Observatory:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:ant="urn:schemas-cosylab-com:Antenna:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Antenna.xsd"/>
+	
+	<xs:complexType name="ObservatoryType">
+		<xs:sequence>
+			<!-- name of the Observatory -->			
+			<xs:element name="observatoryName" type="baci:ROstring" />			
+			<xs:element name="universalTime" type="baci:ROuLongLong" />
+			<xs:element name="julianDay" type="baci:ROdouble" />
+			<!-- Apparent Sideral Time, measured at Greenwich -->			
+			<xs:element name="GAST" type="baci:ROuLongLong" />	
+			<!-- Local Apparent Sideral Time -->						
+			<xs:element name="LST" type="baci:ROuLongLong" />
+			<!-- The difference UT1-UTC in milliseconds -->
+			<xs:element name="DUT1" type="baci:ROdouble" />
+			<!-- Observatory north latitude in degrees (used to read current value) -->
+			<xs:element name="latitude" type="baci:ROdouble" />
+			<!-- Observatory east longitude in degrees (used to read current value) -->
+			<xs:element name="longitude" type="baci:ROdouble" />
+			<!-- Observatory height in meters (used to read current value) -->			
+			<xs:element name="height" type="baci:ROdouble" />
+			<!--  difference angle to reference IERS pole with respect to 90 east meridian in mas (used to read current value) -->			
+			<xs:element name="yPolarMotion" type="baci:ROdouble" />
+			<!--  difference angle to reference IERS pole with respect to Greenwich meridian in mas (used to read current value) -->			
+			<xs:element name="xPolarMotion" type="baci:ROdouble" />
+			<xs:element name="xGeod" type="baci:ROdouble" />
+			<xs:element name="yGeod" type="baci:ROdouble" />
+			<xs:element name="zGeod" type="baci:ROdouble" />
+			<xs:element name="geodeticModel" type="ant:GeodeticModelType" />
+		</xs:sequence>
+	</xs:complexType>
+  
+	<xs:element name="Observatory" type="ObservatoryType"/>
+</xs:schema>

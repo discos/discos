@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- Author: Marco Buttu
+	
+	- History:
+	    + 27-07-2012  Created 
+-->
+
+<xs:schema
+  targetNamespace="urn:schemas-cosylab-com:SRTLPBandNoiseMarkLookUpTable:1.0"
+  xmlns="urn:schemas-cosylab-com:SRTLPBandNoiseMarkLookUpTable:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	
+	<xs:simpleType name="TPolSpecType">
+		<xs:annotation><xs:documentation>
+			restricts the keyoword used to specify the polarization
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="LEFT">
+				<xs:annotation><xs:documentation>
+					left polarization
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="RIGHT">
+	    		<xs:annotation><xs:documentation>
+	    			right polarization
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+		
+	<xs:complexType name="TTableHeader">
+ 		<xs:sequence>
+ 		  <xs:element name="Feed" type="xs:unsignedInt"/>
+ 		  <xs:element name="Polarization" type="TPolSpecType"/>
+ 		  <xs:element name="SkyFrequency" type="xs:double">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		the sky frequency (MHz) used as reference frequency in order to compute the mark value. If a value is missing
+ 		  		the respective mark value should be computed by evaluating a linear interpolation 
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="NoiseMark" type="xs:double">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		the value in Kelvin of the calibration noise diode corresponding to the given sky frequency
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		</xs:sequence>
+ 	</xs:complexType>
+ 
+ 	<xs:complexType name="TTable">
+		<xs:sequence>
+			<xs:element name="MarkEntry" type="TTableHeader" 
+			  minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+ 	</xs:complexType>
+  
+	<xs:element name="SRTLPBandNoiseMarkLookUpTable" type="TTable"/>
+  	
+</xs:schema>

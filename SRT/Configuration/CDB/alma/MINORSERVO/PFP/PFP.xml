@@ -1,0 +1,319 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   Authors: 
+       Marco Buttu, mbuttu@oa-cagliari.inaf.it
+ 
+   Created: Tue Oct 13 09:36:00 CEST 2009
+   Last Modified: 23/05/2013: limits
+-->
+
+<!-- Expire time in seconds -->
+<!-- Limits in mm: theta_y(-26,2740), x(-1400,1400), z(-199,40) -->
+<!-- Park position: theta_y(2730.15), x(0), z(-195) -->
+<WPServo
+    xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+    actionThreadStackSize="2048"
+    monitoringThreadStackSize="4096"
+    number_of_axis="3"
+    number_of_slaves="5"
+    scale_factor="1"
+    scale_offset="0"
+    server_ip="192.168.200.16"
+    server_port="10000"
+    timeout="2000000"
+    servo_address="0"
+    zero="0"
+    park_position="2730.15,0,-195"
+    max_speed="0"
+    min_speed="0"
+    driver_type = "unknown"
+    virtual_rs = "0"
+    require_calibration = "0"
+    expire_time = "0.05000"
+    tracking_delta = "1.0"
+    limits="(-26, 2740); (-1400, 1400); (-199, 40)"
+>
+              
+    <!-- Actual Position (ROdoubleSeq) -->
+    <actPos
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo actual position" 
+        units="mm or degree"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+
+    <!-- Commanded Position (RwdoubleSeq) -->
+    <cmdPos
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo commanded position" 
+        units="mm or degree"
+        resolution="65535"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+	/>
+              
+    <!-- Position Difference (ROdoubleSeq) -->
+    <posDiff
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo position difference" 
+        units="mm or degree"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+     
+    <!-- Actual Elongation (ROdoubleSeq) -->
+    <actElongation
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo actual elongation" 
+        units="mm"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+         
+    <!-- Engine Temperature (ROdoubleSeq) -->
+    <engTemperature
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="Temperature of slave engine" 
+        units="celsius"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+              
+    <!-- Counturing Error (ROdoubleSeq) -->
+    <counturingErr
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="Counturing Error of slaves" 
+        units=""
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+              
+    <!-- Torque Percentage (ROdoubleSeq) -->
+    <torquePerc
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="Torque Percentage of slaves" 
+        units=""
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+              
+    <!-- Engine Current (ROdoubleSeq) -->
+    <engCurrent
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="Engine Current of slaves" 
+        units="Ampere"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+              
+    <!-- Driver Temperature (ROdoubleSeq) -->
+    <driTemperature
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="Temperature of slave drivers" 
+        units="celsius"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+              
+    <!-- Utilization Percentage (ROdoubleSeq) -->
+    <utilizationPerc
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="Utilization Percentage" 
+        units=""
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+              
+    <!-- Drive Cabinet Temperature(ROdoubleSeq) -->
+    <dcTemperature
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="Drive Cabinet Temperature" 
+        units="Celsius"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+               
+    <!-- Engine Voltage (ROdoubleSeq) -->
+    <engVoltage
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="Engine Voltage" 
+        units="Volt"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+              
+    <!-- Driver Status (ROdoubleSeq) -->
+    <driverStatus
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="Driver Status" 
+        units=""
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+              
+    <!-- Error Code (ROdoubleSeq) -->
+    <errorCode
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="Error Code" 
+        units=""
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+              
+    <!-- MinorServo Hardware Status (ROpattern) -->
+    <status
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo hardware status" 
+        units="none"
+        resolution="65535"
+        alarm_mask="0"
+        alarm_trigger="1"
+        alarm_timer_trig="0"
+        bitDescription="Ready, Warning, Failure, Setup, Park, Tracking"
+        whenSet="3,3,3,3,3,3"
+        whenCleared="0,0,0,0,0,0"
+	/>
+
+</WPServo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns="Alma/ACSError" 
+    xsi:schemaLocation="Alma/ACSError ACSError.xsd" 
+    name="ACSErrTypeFPGACommunication" 
+    type="7701" 
+    _prefix="alma">
+
+	<Code name="Communicating" 
+         shortDescription="Communicating" 
+         description="Communication with FPGA in progress"/>
+
+	<ErrorCode name="CannotRun" 
+         shortDescription="Error Running Correlation" 
+         description="Cannot Run Correlation"/>
+
+	<ErrorCode name="CannotGetCoefficients" 
+         shortDescription="Error Getting Coefficients" 
+         description="Cannot Get Coefficients"/>
+
+</Type>
+
+

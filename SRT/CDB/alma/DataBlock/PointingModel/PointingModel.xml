@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+	MEDICINA POINTING MODEL TABLE RECEIVERS
+-->
+<PointingModel xmlns="urn:schemas-cosylab-com:PointingModel:1.0"
+               xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+               xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Receiver>
+	<receiverCode>CCC</receiverCode>
+        <phi>90.0</phi>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0 </coefficientVal00>
+        <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
+        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> 0 </coefficientVal02>
+        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> 0 </coefficientVal03>
+        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> 0 </coefficientVal04>
+        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> 0 </coefficientVal05>
+        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0 </coefficientVal06>
+        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> 0 </coefficientVal07>
+        <coefficientNum08> 0 </coefficientNum08> <coefficientVal08> 0 </coefficientVal08>
+        <coefficientNum09> 0 </coefficientNum09> <coefficientVal09> 0 </coefficientVal09>
+        <coefficientNum10> 0 </coefficientNum10> <coefficientVal10> 0 </coefficientVal10>
+        <coefficientNum11> 0 </coefficientNum11> <coefficientVal11> 0 </coefficientVal11>
+        <coefficientNum12> 0 </coefficientNum12> <coefficientVal12> 0 </coefficientVal12>
+        <coefficientNum13> 0 </coefficientNum13> <coefficientVal13> 0 </coefficientVal13>
+        <coefficientNum14> 0 </coefficientNum14> <coefficientVal14> 0 </coefficientVal14>
+        <coefficientNum15> 0 </coefficientNum15> <coefficientVal15> 0 </coefficientVal15>
+        <coefficientNum16> 0 </coefficientNum16> <coefficientVal16> 0 </coefficientVal16>
+        <coefficientNum17> 0 </coefficientNum17> <coefficientVal17> 0 </coefficientVal17>
+        <coefficientNum18> 0 </coefficientNum18> <coefficientVal18> 0 </coefficientVal18>
+        <coefficientNum19> 0 </coefficientNum19> <coefficientVal19> 0 </coefficientVal19>
+        <coefficientNum20> 0 </coefficientNum20> <coefficientVal20> 0 </coefficientVal20>
+        <coefficientNum21> 0 </coefficientNum21> <coefficientVal21> 0 </coefficientVal21>
+        <coefficientNum22> 0 </coefficientNum22> <coefficientVal22> 0 </coefficientVal22>
+        <coefficientNum23> 0 </coefficientNum23> <coefficientVal23> 0 </coefficientVal23>
+        <coefficientNum24> 0 </coefficientNum24> <coefficientVal24> 0 </coefficientVal24>
+        <coefficientNum25> 0 </coefficientNum25> <coefficientVal25> 0 </coefficientVal25>
+        <coefficientNum26> 0 </coefficientNum26> <coefficientVal26> 0 </coefficientVal26>
+        <coefficientNum27> 0 </coefficientNum27> <coefficientVal27> 0 </coefficientVal27>
+        <coefficientNum28> 0 </coefficientNum28> <coefficientVal28> 0 </coefficientVal28>
+        <coefficientNum29> 0 </coefficientNum29> <coefficientVal29> 0 </coefficientVal29>
+</Receiver>
+
+<Receiver>
+	<receiverCode>KKC</receiverCode>
+        <phi>90.0</phi>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0 </coefficientVal00>
+        <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
+        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> 0 </coefficientVal02>
+        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> 0 </coefficientVal03>
+        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> 0 </coefficientVal04>
+        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> 0 </coefficientVal05>
+        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0 </coefficientVal06>
+        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> 0 </coefficientVal07>
+        <coefficientNum08> 0 </coefficientNum08> <coefficientVal08> 0 </coefficientVal08>
+        <coefficientNum09> 0 </coefficientNum09> <coefficientVal09> 0 </coefficientVal09>
+        <coefficientNum10> 1 </coefficientNum10> <coefficientVal10> 0 </coefficientVal10>
+        <coefficientNum11> 0 </coefficientNum11> <coefficientVal11> 0 </coefficientVal11>
+        <coefficientNum12> 0 </coefficientNum12> <coefficientVal12> 0 </coefficientVal12>
+        <coefficientNum13> 0 </coefficientNum13> <coefficientVal13> 0 </coefficientVal13>
+        <coefficientNum14> 0 </coefficientNum14> <coefficientVal14> 0 </coefficientVal14>
+        <coefficientNum15> 0 </coefficientNum15> <coefficientVal15> 0 </coefficientVal15>
+        <coefficientNum16> 0 </coefficientNum16> <coefficientVal16> 0 </coefficientVal16>
+        <coefficientNum17> 0 </coefficientNum17> <coefficientVal17> 0 </coefficientVal17>
+        <coefficientNum18> 0 </coefficientNum18> <coefficientVal18> 0 </coefficientVal18>
+        <coefficientNum19> 0 </coefficientNum19> <coefficientVal19> 0 </coefficientVal19>
+        <coefficientNum20> 0 </coefficientNum20> <coefficientVal20> 0 </coefficientVal20>
+        <coefficientNum21> 0 </coefficientNum21> <coefficientVal21> 0 </coefficientVal21>
+        <coefficientNum22> 0 </coefficientNum22> <coefficientVal22> 0 </coefficientVal22>
+        <coefficientNum23> 0 </coefficientNum23> <coefficientVal23> 0 </coefficientVal23>
+        <coefficientNum24> 0 </coefficientNum24> <coefficientVal24> 0 </coefficientVal24>
+        <coefficientNum25> 0 </coefficientNum25> <coefficientVal25> 0 </coefficientVal25>
+        <coefficientNum26> 0 </coefficientNum26> <coefficientVal26> 0 </coefficientVal26>
+        <coefficientNum27> 0 </coefficientNum27> <coefficientVal27> 0 </coefficientVal27>
+        <coefficientNum28> 0 </coefficientNum28> <coefficientVal28> 0 </coefficientVal28>
+        <coefficientNum29> 0 </coefficientNum29> <coefficientVal29> 0 </coefficientVal29>
+</Receiver>
+
+</PointingModel>
+

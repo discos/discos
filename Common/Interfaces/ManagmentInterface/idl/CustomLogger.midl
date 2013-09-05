@@ -1,0 +1,105 @@
+#ifndef _CUSTOMLOGGER_IDL
+#define _CUSTOMLOGGER_IDL
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include <ManagementErrors.idl>
+#include <ManagmentDefinitions.idl>
+
+#pragma prefix "alma"
+
+module Management{
+
+        /**
+         * Structure used to transmit Logging events through the CUSTOM LOGGING CHANNEL
+         * It's similar to an ACS Log Record but has been defined for our purposes.
+         */
+        typedef struct CustomLoggingData
+        {
+ 		ACS::Time timeStamp;
+                LogLevel level;
+                string msg; 
+        } TCustomLoggingData;
+   
+        const string CUSTOM_LOGGING_CHANNEL_NAME = "CUSTOM_LOGGING_CHANNEL";
+
+        /**
+         * Component which automatizes the logging functionalities in ACS. 
+         * This component is designed to intercept log messages and direct those in 3 different outputs:
+         * 1) Custom logging events, identified by the extra data source=custom, are written to a file in an abbreviated form
+         *    only including the timestamp, the log level and the log message.
+         * 2) All logging events are written to a sytem log file as xml ACS LogRecords, these include all ACS inormations.
+         * 3) Custom logging events are further redirected to a CUSTOM LOGGING CHANNEL for client immediate notification.
+         */
+        interface CustomLogger: ACS::CharacteristicComponent
+        {
+                /**
+                 * Filename of the custom logging file where only custom events will be written.
+                 */
+                readonly attribute ACS::ROstring filename;
+                /**
+                 * Number of custom logging events received 
+                 */
+                readonly attribute ACS::ROlong nevents;
+                /**
+                 * True if logging functionalities are active
+                 */
+                readonly attribute ROTBoolean isLogging;
+                /**
+                 * Minimum log level for filtered log messages
+                 */
+                readonly attribute ROLogLevel minLevel;
+                /**
+                 * Maximum log level for filtered log messages
+                 */
+                readonly attribute ROLogLevel maxLevel;
+                /**
+                 * Close the actual log files and open two new ones for logging.
+                 * Tries to create the necessary directory.
+                 * @param base_path_log: the directory name for the custom log file
+                 * @param base_path_full_log: the directory name for the full log file
+                 * @param filename_log: the file name for the custom log file
+                 * @param filename_full_log: the file name for the full log file
+                 */
+                void setLogfile(in string base_path_log, in string base_path_full_log,
+                                    in string filename_log, in string filename_full_log) raises (ManagementErrors::ManagementErrorsEx);
+                /**
+                 * Emits a custom logging message. Used mainly for debugging and testing purposes.
+                 * @param msg: the logging message
+                 * @param level: the logging level
+                 */
+                void emitLog(in string msg, in LogLevel level);
+                /**
+                 * Emits a custom logging message from a static context. Used mainly for debugging and testing purposes.
+                 * @param msg: the logging message
+                 * @param level: the logging level
+                 */
+                void emitStaticLog(in string msg, in LogLevel level);
+                /**
+                 * Emits a new Exception with two levels backtrace and logs it.
+                 * Used for debug and testing.
+                 */
+                void emitExceptionLog();
+                /**
+                 * Close the actual log files and stops logging. Flushes all buffers.
+                 */
+                void closeLogfile() raises (ManagementErrors::ManagementErrorsEx);
+                /**
+                 * Set the minimum logging level to be included in custom log files
+                 * @param level: the logging level
+                 */
+                void setMinLevel(in LogLevel level);
+                /**
+                 * Set the maximum level to be included in custom log files
+                 * @param level: the logging level
+                 */
+                void setMaxLevel(in LogLevel level);
+                /**
+                 * Flushes the log events queued by the LoggingProxy and writes to 
+                 * custom log files
+                 */
+                void flush();
+        };
+};
+
+#endif
