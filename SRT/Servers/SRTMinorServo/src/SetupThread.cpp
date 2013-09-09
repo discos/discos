@@ -199,6 +199,11 @@ void SetupThread::run()
                                 if(fabs(target_pos[i] - (*act_pos)[i]) > component_ref->getTrackingDelta())
                                     on_target = false;
                             }
+
+                            // The component must be active, in order to perform a scan
+                            if(component_ref->isReadyToSetup())
+                                component_ref->setup(0);
+
                             if(on_target) {
                                 if(find(on_target_check.begin(), on_target_check.end(), comp_name) == on_target_check.end())
                                     on_target_check.push_back(comp_name);

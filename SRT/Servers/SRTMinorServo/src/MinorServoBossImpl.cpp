@@ -752,18 +752,52 @@ void MinorServoBossImpl::startScan(
         const ACS::Time starting_time, 
         const double range, 
         const ACS::Time total_time, 
-        const unsigned short axis, 
-        const char *servo
+        const char *axis_code
     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
 {
+    if(!isReady())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is not ready", true);
 
+    if(isScanning())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is executing another scan", true);
+
+    startScanImpl(starting_time, range, total_time, string(axis_code));
+}
+
+
+void MinorServoBossImpl::startFocusScan(const ACS::Time starting_time, const double range, const ACS::Time total_time) 
+        throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx) 
+{    
+    if(!isReady())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "startFocusScan: the system is not ready", true);
+
+    if(isScanning())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "startFocusScan: the system is executing another scan", true);
+    
+    string servo_name =  m_configuration->getActivePFocusServo(); 
+    string axis_code = servo_name + string("_TZ");
+    startScanImpl(starting_time, range, total_time, axis_code);
+}
+
+
+void MinorServoBossImpl::startScanImpl(
+        const ACS::Time starting_time, 
+        const double range, 
+        const ACS::Time total_time, 
+        string axis_code
+    ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
+{
+    size_t axis;
     try {
-        if(!isReady())
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is not ready", true);
-
-        if(isScanning())
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is executing another scan", true);
-        
+        axis = m_configuration->getAxisIndex(axis_code);
+    }
+    catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getConfigurationErrorEx();     
+    }
+    vector<string> items = split(axis_code, "_");
+    string comp_name(items[0]);
+    try {
         m_configuration->m_isScanning = true;
 
         const ACS::Time SCAN_DELTA_TIME = 5000000; // 500ms
@@ -781,21 +815,20 @@ void MinorServoBossImpl::startScan(
         if(CIRATools::timeSubtract(stime, now) <= 0)
             THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: starting time is not valid", true);
 
-        string comp_name(servo);
         m_servo_scanned = comp_name;
         MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
         if((m_configuration->m_component_refs).count(comp_name)) {
             component_ref = (m_configuration->m_component_refs)[comp_name];
 
             if(CORBA::is_nil(component_ref)) 
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: cannot get the reference of the component.", true);
+                THROW_EX(ManagementErrors, SubscanErrorEx, "startScanImpl: cannot get the reference of the component.", true);
 
             if(!component_ref->isReady()) 
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: the component is not ready.", true);
+                THROW_EX(ManagementErrors, SubscanErrorEx, "startScanImpl: the component is not ready.", true);
 
             CDB::DAL_ptr dal_p = getContainerServices()->getCDB();
             CDB::DAO_ptr dao_p = dal_p->get_DAO_Servant(("alma/MINORSERVO/" + comp_name).c_str());
-            long number_of_axis = dao_p->get_long("number_of_axis");
+            size_t number_of_axis = dao_p->get_long("number_of_axis");
                                                         
             if(axis > number_of_axis - 1)               
                 THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: axis index error", true);

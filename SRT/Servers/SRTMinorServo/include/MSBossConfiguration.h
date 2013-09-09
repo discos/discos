@@ -86,6 +86,11 @@ public:
 
     inline std::vector<std::string> getUnits() { return m_units; }
 
+    // Return the name of the servo active in the primary focus
+    inline std::string getActivePFocusServo() { return m_active_pfocus_servo; }
+
+    short getAxisIndex(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl);
+
 
     struct Scan {
         ACS::Time starting_time;
@@ -122,6 +127,7 @@ public:
 
     std::string m_actualSetup;
     std::string m_commandedSetup;
+    std::string m_active_pfocus_servo;
     bool m_isConfigured;
     bool m_isStarting;
     bool m_isScanning;

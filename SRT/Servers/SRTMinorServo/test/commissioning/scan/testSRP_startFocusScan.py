@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Author: Marco Buttu <m.buttu@oa-cagliari.inaf.it>
 # Copyright: This module has been placed in the public domain.
-"""Use this module to test the minor servo boss startScan() method"""
+"""Use this module to test the minor servo boss startFocusScan() method"""
 
 import unittest
 import threading
@@ -17,8 +17,8 @@ import datetime
 class NackEx(Exception):
     pass
 
-class TestScan(unittest.TestCase):
-    """Test the minor servo properties."""
+class TestFocusScan(unittest.TestCase):
+    """Test the minor servo startFocusScan() method."""
 
     def setUp(self):
         self.pyclient = PySimpleClient()
@@ -33,7 +33,7 @@ class TestScan(unittest.TestCase):
         self.pyclient.releaseComponent(self.boss)
 
     def test_startScan(self):
-        """Test the startScan() method."""
+        """Test the startFocusScan() method (SRP active)."""
         setup_code = 'CCB'
         self.boss.setup(setup_code)
         time.sleep(1) # Wait a bit, until the boss begins the configuration process
@@ -53,13 +53,13 @@ class TestScan(unittest.TestCase):
         time.sleep(10)
         delay = 15 * 10 ** 7 # 15 seconds
         starting_time = TimeHelper.getTimeStamp().value + delay # Start the scan in `delay` seconds from now
-        range_ = 8.0 # mm 
-        total_time = 4 * 10 ** 7 # 4 seconds
+        range_ = 10.0 # mm 
+        total_time = 40 * 10 ** 7 # 4 seconds
         mm_per_sec = range_ / total_time
         actPos_obj = self.srp._get_actPos()
         actPos, cmp = actPos_obj.get_sync()
         print "\nCalling the startScan() method, starting in %d s from now." %(delay/10**7)
-        self.boss.startScan(starting_time, range_, total_time, 2, "SRP")
+        self.boss.startFocusScan(starting_time, range_, total_time)
         expected_positions = {}
         sampling_time = 2000000 # 200ms
         exe_times = range(starting_time, starting_time + total_time + sampling_time, sampling_time)
@@ -113,7 +113,7 @@ class TestScan(unittest.TestCase):
         print "Done!"
 
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestScan)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestFocusScan)
     unittest.TextTestRunner(verbosity=2).run(suite)
     print "\n" + "="*70
 

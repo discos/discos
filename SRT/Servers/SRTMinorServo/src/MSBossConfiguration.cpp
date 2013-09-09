@@ -111,6 +111,9 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
         }
 
         m_servosToMove.push_back(comp_name);
+        if(comp_name == "SRP" || comp_name == "PFP")
+            m_active_pfocus_servo = comp_name;
+
         vector<double> position_values;
         vector<string> aitems = split(action, coeffs_separator);
         vector<string> values;
@@ -164,6 +167,38 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
     }
     m_isValidCDBConfiguration = true;
 }
+
+
+short MSBossConfiguration::getAxisIndex(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl) {
+    short id = 0;
+    string servo_name;
+    strip(axis_code);
+    try {
+        vector<string> items = split(axis_code, string("_"));
+        servo_name = items[0];
+    }
+    catch(...) {
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "Wrong axis code", false);
+    }
+
+    bool found = false;
+    for(size_t i=0; i<m_axes.size(); i++) {
+        vector<string> items = split(m_axes[i], string("_"));
+        if(items[0] == servo_name) {
+            if(m_axes[i] == axis_code) {
+                found = true;
+                break;
+            }
+            id++;
+        }
+    }
+    if(found)
+        return id;
+    else{
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "Axis not active", false);
+    }
+}
+
 
 void MSBossConfiguration::setScan(
         ACS::Time starting_time, 

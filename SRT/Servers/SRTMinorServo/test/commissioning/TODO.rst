@@ -26,28 +26,15 @@ Implementare l'interfaccia dei metodi definiti nelle prossime sezioni, e fare il
 
 Richiesta della posizione dei servo ad un dato momento
 ======================================================
-Implementare il metodo del MinorServoBoss::
-
-    ACS::doubleSeq getAxesPosition(ACS::Time time)
-
-Prende un tempo (passato) e restituisce la posizione dei servo (non comandata, effettiva)
-all'istante indicato. Devo cercare la posizione al tempo restituito dall MSCU (quello associato
-alla posizione nel getStatus. Quando time=0 restutiusce la posizione attuale.
-Se l'istante non esiste fa la media delle posizione all'istante prima e a quello dopo, pesata con la distanza (pesa
-di piu' la posizione il cui tempo e' piu' vicino a time).
-Gli assi sono nello stesso ordine di axes. Risoluzione temporale del thread che legge e aggiorna il 
-vettore di queste posizioni: 100ms (sleep_time)
-Prima di implementarlo pensare a come scrivere getAxesInfo()
-La coda delle posizioni in memoria va svuotata con un park e anche con il setup. Usare un vector
-e rimuovere le posizioni a partire dalla prima quando questo raggiunge una certa dimensione.
-
+OK: DONE!
 
 Lo scan degli assi
 ==================
 Levare il metodo startScan() dall'interfaccia e rinominarlo, per poi wrapparlo con i seguenti metodi::
 
+    // Scansione del servo in fuoco primario, lungo l'asse zeta
     startFocusScan(starting_time, range, total_time)
-    startScan(ACS::time starting_time, double range, ACS::Time total_time, string code)
+    startScan(ACS::time starting_time, double range, ACS::Time total_time, string axis_code, string servo_name)
 
 L'attributo `code` di startScan() e' uno dei codici degli assi (SRP_XT, ecc.), che poi devo mappare
 in axis e servo da passare all'attuale startScan(), che e' stato rinominato.

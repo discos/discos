@@ -140,13 +140,28 @@ module MinorServo {
 
         
         /** 
+         * Start the scan of the Z axis of the MinorServo active in the primary focus.
+         *
+         * @param starting_time the time the scan will start
+         * @param range the total axis movement in mm (centered in the actual position)
+         * @param total_time the duration of axis movement
+         *
+         * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
+         */
+        void startFocusScan(
+                in ACS::Time starting_time, 
+                in double range, 
+                in ACS::Time total_time
+        ) raises (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+ 
+
+        /** 
          * Start the scan of one axis of a MinorServo target.
          *
          * @param starting_time the time the scan will start
          * @param range the total axis movement in mm (centered in the actual position)
          * @param total_time the duration of axis movement
-         * @param axis the identification code of the axis
-         * @param servo the servo name (GFR, SRP, PFP, M3R)
+         * @param axis_code the identification code of the axis (SRP_ZT, GFR_ZT, ecc.)
          *
          * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
          */
@@ -154,8 +169,7 @@ module MinorServo {
                 in ACS::Time starting_time, 
                 in double range, 
                 in ACS::Time total_time, 
-                in unsigned short axis, 
-                in string servo
+                in string axis_code
         ) raises (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
 
 

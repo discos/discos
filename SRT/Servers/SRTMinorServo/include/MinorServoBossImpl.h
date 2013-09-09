@@ -203,22 +203,42 @@ public:
 	 * @param starting_time the time the scan will start
      * @param range the total axis movement in mm (centered in the actual position)
 	 * @param total_time the duration of axis movement
-	 * @param axis the identification code of the axis
-	 * @param servo the servo name
+	 * @param axis_code the code of the axis (SRP_TZ, GFR_TZ, ecc.)
      *
-     * @return pointer to ROpattern verbose status property
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
      void startScan(
              const ACS::Time starting_time, 
              const double range, 
              const ACS::Time total_time, 
-             const unsigned short axis, 
-             const char *servo
+             const char *axis_code
      ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
      
      
      void stopScan() throw (ManagementErrors::SubscanErrorEx);
+     
+     void startScanImpl(
+        const ACS::Time starting_time, 
+        const double range, 
+        const ACS::Time total_time, 
+        string axis_code
+    ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+ 
+
+    /** 
+     * Start the scan of the Z axis of the MinorServo active in the primary focus.
+     *
+	 * @param starting_time the time the scan will start
+     * @param range the total axis movement in mm (centered in the actual position)
+	 * @param total_time the duration of axis movement
+     *
+     * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
+     */
+     void startFocusScan(
+             const ACS::Time starting_time, 
+             const double range, 
+             const ACS::Time total_time
+     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
      
 
      /** 
