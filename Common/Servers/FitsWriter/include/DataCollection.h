@@ -534,6 +534,11 @@ public:
 		m_servoAxisUnits=unit;
 	}
 
+	void setServoAxis() {
+		m_servoAxisNames.length(0);
+		m_servoAxisUnits.length(0);
+	}
+
 	/**
 	 * allows to store the information about each of the backend inputs. The dimension of the sequences should be exactly the number returned by the method <i>getInputsNumber()</i>-
 	 */

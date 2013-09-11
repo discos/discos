@@ -89,7 +89,7 @@ bool CEngineThread::processData()
 	double az,el;
 	bool tracking;
 	double hum,temp,press;
-	ACS::doubleSeq servoPositions;
+	ACS::doubleSeq_var servoPositions;
 	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	if (!data->getDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
 	TIMEVALUE tS;
@@ -123,10 +123,13 @@ bool CEngineThread::processData()
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 		data->setStatus(Management::MNG_FAILURE);
 	}
+	ra=dec=az=el=0.0;
 	try {
-		//integration is multiplied by 10000 because internally we have the value in millesec while the method requires 100ns.
-		m_antennaBoss->getObservedEquatorial(time,data->getIntegrationTime()*10000,ra,dec);
-		m_antennaBoss->getObservedHorizontal(time,data->getIntegrationTime()*10000,az,el);
+		if (!CORBA::is_nil(m_antennaBoss)) {
+			//integration is multiplied by 10000 because internally we have the value in millesec while the method requires 100ns.
+			m_antennaBoss->getObservedEquatorial(time,data->getIntegrationTime()*10000,ra,dec);
+			m_antennaBoss->getObservedHorizontal(time,data->getIntegrationTime()*10000,az,el);
+		}
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
@@ -159,7 +162,7 @@ bool CEngineThread::processData()
 	tdh.az=az;
 	tdh.el=el;
 	tdh.par_angle=IRA::CSkySource::paralacticAngle(tConverter,data->getSite(),az,el);
-	tdh.derot_angle=0.333357887; /*********************** get it Now is fixed to 19.1 degreees*******************/
+	tdh.derot_angle=0.333357887; /*********************** get it Now is fixed to 19.1 degrees*******************/
 	tdh.flag_cal=calOn;
 	tdh.flag_track=tracking;
 	data->getMeteo(hum,temp,press);
@@ -190,26 +193,62 @@ bool CEngineThread::processData()
 			data->setStatus(Management::MNG_FAILURE);
 			minorServoBossError=true;
 		}
-		//****************************************************//
-		//** ADD CALL to get Minor servo positions here
-		//****************************************************//
-		/*
+		servoPositions->length(0);
 		try {
-			minorServoBossError->
+			if (!CORBA::is_nil(m_minorServoBoss)) {
+				servoPositions=m_minorServoBoss->getAxesPosition(time);
+			}
 		}
-		catch ()
-		*/
-#ifdef FW_DEBUG
-#else
-		if (!m_file->storeServoData(tdh.time,servoPositions)) {
-			_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
-			impl.setFileName((const char *)data->getFileName());
-			impl.setError(m_file->getLastError());
+		catch (ManagementErrors::ConfigurationErrorEx& ex) {
+				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::processData()");
+				impl.setOperationName("getAxesPosition()");
+				impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
+				impl.log(LM_ERROR);
+				data->setStatus(Management::MNG_WARNING);
+		}
+		catch ( ComponentErrors::UnexpectedEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::processData()");
+			impl.setOperationName("getAxesPosition()");
+			impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
+			impl.log(LM_ERROR);
+			data->setStatus(Management::MNG_WARNING);
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+			data->setStatus(Management::MNG_FAILURE);
+			minorServoBossError=true;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CEngineThread::processData()");
 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 			data->setStatus(Management::MNG_FAILURE);
 		}
+#ifdef FW_DEBUG
+		if (servoPositions->length()>0) {
+			IRA::CString tempOut;
+			out="Minor Servo: "
+					for (long inc=0;inc<servoPositions->length();inc++) {
+						tempOut.Format("%f ",servoPositions[inc]);
+						out+=tempOut;
+					}
+			m_file << (const char *) out;
+			m_file << endl;
+		}
+#else
+		if (servoPositions->length()>0) {
+			if (!m_file->storeServoData(tdh.time,servoPositions.in())) {
+				_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
+				impl.setFileName((const char *)data->getFileName());
+				impl.setError(m_file->getLastError());
+				_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+				data->setStatus(Management::MNG_FAILURE);
+			}
+		}
 #endif
-	}
+	}  // m_config->getMinorServoBossComponent()!=""
 	for (int i=0;i<data->getSectionsNumber();i++) {
 		bins=data->getSectionBins(i);
 		pol=data->getSectionStreamsNumber(i);
@@ -705,6 +744,25 @@ void CEngineThread::collectMinorServoData()
 	if (!CORBA::is_nil(m_minorServoBoss)) {
 		ACS::stringSeq_var names;
 		ACS::stringSeq_var units;
+		try {
+			m_minorServoBoss->getAxesInfo(names.out(),units.out());
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectMinorServoData()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			impl.log(LM_ERROR);
+			data->setStatus(Management::MNG_WARNING);
+			minorServoBossError=true;
+		}
+		catch (ManagementErrors::ConfigurationErrorEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectMinorServoData()");
+			impl.setOperationName("getAxesInfo()");
+			impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
+			impl.log(LM_ERROR);
+			data->setStatus(Management::MNG_WARNING);
+			data->setServoAxis();
+		}
 		data->setServoAxis(names.in(),units.in());
 	}
 }
