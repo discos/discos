@@ -42,7 +42,7 @@ SRTActiveSurfaceCore::~SRTActiveSurfaceCore()
 {
 }
 
-void SRTActiveSurfaceCore::setASBoss (SRTActiveSurface::SRTActiveSurfaceBoss_var ASBoss)
+void SRTActiveSurfaceCore::setASBoss (ActiveSurface::SRTActiveSurfaceBoss_var ASBoss)
 {
     tASBoss = ASBoss;
     actuatorcounter = circlecounter = totacts = 1;
@@ -771,11 +771,11 @@ void SRTActiveSurfaceCore::move(int circle, int actuator, int radius, long incr)
 void SRTActiveSurfaceCore::setProfile(long int profile)
 {
 	if (profile == 0)
-        	tASBoss->setProfile(SRTActiveSurface::AS_SHAPED);
+        	tASBoss->setProfile(ActiveSurface::AS_SHAPED);
     	if (profile == 1)
-        	tASBoss->setProfile(SRTActiveSurface::AS_PARABOLIC);
+        	tASBoss->setProfile(ActiveSurface::AS_PARABOLIC);
     	if (profile == 2)
-        	tASBoss->setProfile(SRTActiveSurface::AS_PARABOLIC_FIXED);
+        	tASBoss->setProfile(ActiveSurface::AS_PARABOLIC_FIXED);
 
 
 }
@@ -848,7 +848,7 @@ void SRTActiveSurfaceCore::setup(int circle, int actuator, int radius)
 	callfromfunction = true;
 
     try {
-        tASBoss->setup(circle, actuator, radius);
+        //tASBoss->setup(circle, actuator, radius);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 	    ex.log(LM_DEBUG);
@@ -917,12 +917,14 @@ void SRTActiveSurfaceCore::refPos(int circle, int actuator, int radius)
 
 void SRTActiveSurfaceCore::enableAutoUpdate()
 {
-    tASBoss->enableAutoUpdate();
+    //tASBoss->enableAutoUpdate();
+    tASBoss->asOn();
 }
 
 void SRTActiveSurfaceCore::disableAutoUpdate()
 {
-    tASBoss->disableAutoUpdate();
+    //tASBoss->disableAutoUpdate();
+    tASBoss->asOff();
 }
 
 /*

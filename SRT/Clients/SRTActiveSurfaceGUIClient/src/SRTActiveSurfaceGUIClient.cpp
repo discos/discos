@@ -54,7 +54,7 @@ int main(int argc,char* argv[])
 
     // Get reference to the Active Surface Boss component
     try {
-        ASBoss = client->getComponent < SRTActiveSurface::SRTActiveSurfaceBoss > ("AS/Boss", 0, true);
+        ASBoss = client->getComponent < ActiveSurface::SRTActiveSurfaceBoss > ("AS/Boss", 0, true);
         if (CORBA::is_nil (ASBoss.in ()) == true) {
             _EXCPT(ClientErrors::CouldntAccessComponentExImpl,impl,"TestClient::Main()");
             impl.setComponentName("AS/Boss");
