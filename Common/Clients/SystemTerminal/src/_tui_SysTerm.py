@@ -122,33 +122,38 @@ def main():
     cmdCounter=0
     
     while not stopAll:
-        sys.stdout.write("<%d> "%cmdCounter)
-        cmd=''
         try:
-            cmd=sys.stdin.readline()
-        except IOError:
-            cmd='exit'
-            pass
-        cmdCounter=cmdCounter+1
-        cmd=cmd.strip()
-        if cmd=="exit":
-            stopAll=True
-        elif cmd.startswith('help='):
-            h, c = cmd.split('=')
-            if c not in commands:
-                print "%s?not a valid command" %c
-            else:
-                print commands[c].__doc__
-        elif cmd:
+            #sys.stdout.write("<%d> "%cmdCounter)
+            cmd=''
             try:
-                res=component.command(cmd)
-                print res[1]
-            except Exception, ex:
-                newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
-                newEx.setAction("command()")
-                newEx.setReason("communication error to component server")
-                newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
-
+                #cmd=sys.stdin.readline()
+                cmd=raw_input('>')
+            except IOError:
+                cmd='exit'
+                pass
+            cmdCounter=cmdCounter+1
+            cmd=cmd.strip()
+            if cmd=="exit":
+                stopAll=True
+            elif cmd.startswith('help='):
+                h, c = cmd.split('=')
+                if c not in commands:
+                    print "%s?not a valid command" %c
+                else:
+                    print commands[c].__doc__
+            elif cmd:
+                try:
+                    res=component.command(cmd)
+                    print res[1]
+                except Exception, ex:
+                    newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
+                    newEx.setAction("command()")
+                    newEx.setReason("communication error to component server")
+                    newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
+        except KeyboardInterrupt:
+            stopAll=True
+            pass
+            
     simpleClient.releaseComponent(compName)     
     simpleClient.disconnect()
     readline.write_history_file(historyFile)            
