@@ -21,8 +21,8 @@ ifeq ($(TARGETSYS),SRT)
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger \
-		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver\
-		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient\
+		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver \
+		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
 		SRTActiveSurfaceGUIClient SRTMountTextClient \
 		Plotter KStars SRTScripts \
 
@@ -57,8 +57,8 @@ ifeq ($(TARGETSYS),MED)
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		Metrology TotalPower NoiseGenerator HolographyBackend DBBC MedicinaMount MedWeatherStation CustomLogger\
-		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient\
+		Metrology TotalPower NoiseGenerator HolographyBackend DBBC MedicinaMount MedWeatherStation CustomLogger \
+		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient \
 		MedicinaMountTextClient MedicinaMountGUIClient MedicinaGeneralControlSystemGUIClient CustomLoggingClient\
 		Plotter KStars Scripts \
 		MedScripts
