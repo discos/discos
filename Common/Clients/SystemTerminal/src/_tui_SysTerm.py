@@ -127,7 +127,7 @@ def main():
             cmd=''
             try:
                 #cmd=sys.stdin.readline()
-                cmd=raw_input('>')
+                cmd=raw_input("<%d> "%cmdCounter)
             except IOError:
                 cmd='exit'
                 pass
