@@ -19,10 +19,7 @@
 #include "utils.h"
 
 // The Delta Time is the time between two axis positioning (Time in 100ns)
-const ACS::Time SCAN_DELTA_TIME = 1000000; // 100ms, 
 const ACS::Time SCAN_SLEEP_TIME = 10000000; // 1 second
-// Sleep Time in 100ns
-const double GUARD_COEFF = 0.2;
 
 // This class updates the status property of minor servos.
 class ScanThread : public ACS::Thread

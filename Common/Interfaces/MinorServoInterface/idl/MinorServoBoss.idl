@@ -63,15 +63,22 @@ module MinorServo {
 			
 	
         /**
-         * Should be the minor servo positions following the antenna elevation?
+         * Should the minor servo position follows the antenna elevation?
          * @return true if the tracking elevation is enabled
          */
-		boolean isTrackingEn();
+		boolean isElevationTrackingEn();
 	
 	
         /**
          * Is the minor servo positions following the antenna elevation?
          * @return true if the minor servo is following the antenna elevation
+         */
+		boolean isElevationTracking();
+	
+	
+        /**
+         * Is the system following the commanded position?
+         * @return true if the minor servos are following the commanded positions
          */
 		boolean isTracking();
 
@@ -108,7 +115,13 @@ module MinorServo {
          * @return true if the system is performing a scan
          */
 		boolean isScanning();	
-
+	
+		
+        /**
+         * Is the system performing a scan or waiting for another scan?
+         * @return true if the system is performing a scan or waiting for another scan
+         */
+		boolean isScanActive();	
 
 
 		/** Return the actual configuration */
@@ -117,6 +130,11 @@ module MinorServo {
 		
 		/** Return the commanded configuration */
 		string getCommandedSetup();
+
+		
+		/** Return the central position of the axis involved in the scan */
+		double getCentralScanPosition() raises (ManagementErrors::SubscanErrorEx);
+
  
         /** 
          * Check if the scan is achievable

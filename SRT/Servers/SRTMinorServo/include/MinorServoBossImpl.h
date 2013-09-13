@@ -99,7 +99,11 @@ public:
 
     
     /** Return true if the elevation tracking is enabled */
-    bool isTrackingEn();
+    bool isElevationTrackingEn();
+
+    
+    /** Is the system tracking the commanded position? */
+    bool isTracking();
 
 
     /** Return true when the system is performing a setup */
@@ -111,7 +115,7 @@ public:
 
     
     /** Return true if the the servo position is changing by depending of the elevation */
-    bool isTracking();
+    bool isElevationTracking();
 
 
     /** Return true when the system is performing a park */
@@ -124,6 +128,11 @@ public:
 
     /** Return true when the system is performing a scan */
     bool isScanning();
+
+
+    /** Return true if a scan is active. To get the system in tracking, perform a stopScan() */
+    bool isScanActive();
+
 	
 	/**
 	 * This method will be used to configure the MinorServoBoss before starting an observation
@@ -133,6 +142,7 @@ public:
 	 */
 	virtual void setup(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
     
+
     void setupImpl(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorExImpl);
 
 
@@ -224,6 +234,10 @@ public:
         string axis_code
     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
  
+    
+    /** Return the central position of the axis involved in the scan */
+    CORBA::Double getCentralScanPosition() throw (ManagementErrors::SubscanErrorEx);
+
 
     /** 
      * Start the scan of the Z axis of the MinorServo active in the primary focus.

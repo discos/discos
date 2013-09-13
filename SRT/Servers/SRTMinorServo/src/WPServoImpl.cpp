@@ -775,7 +775,33 @@ void WPServoImpl::cleanPositionsQueue(const ACS::Time exe_time) throw (MinorServ
     try {
         m_wpServoTalker_ptr->action(8, exe_time);
         // The MSCU sometimes returns a NAK if there is not a delay between a clear and a setpos commands
-        usleep(200000); // 200000us = 0.20 sec
+        usleep(500000); // 500 ms
+        CSecAreaResourceWrapper<map<int, vector< PositionItem> > > lst_secure_requests = (m_cmdPos_list)->Get();
+        if((*lst_secure_requests).count(m_cdb_ptr->SERVO_ADDRESS)) {
+            try {
+                vector<PositionItem>::size_type idx = findPositionIndex(
+                        lst_secure_requests, 
+                        getTimeStamp(), 
+                        m_cdb_ptr->SERVO_ADDRESS, 
+                        true
+                );
+                vector<PositionItem>::iterator ibegin = ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).begin();
+                vector<PositionItem>::iterator iend = ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).end();
+                if(ibegin + idx + 1 < iend) {
+                    ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).erase(ibegin + idx + 1, iend);
+                }
+            }
+            catch(PosNotFoundEx) {
+                lst_secure_requests.Release();
+                ACS_SHORT_LOG((LM_WARNING, "In WPServoImpl::cleanPositionsQueue(): cannot clean the commanded positions."));
+            }
+            // PositionItem item;
+            // item.position = m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS];
+            // item.exe_time = getTimeStamp();
+            // ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).clear();
+            // ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).insert(ibegin, item);
+        }
+        lst_secure_requests.Release();
     }
     catch(...) {
         THROW_EX(MinorServoErrors, CommunicationErrorEx, "Cannot clean the MSCU positions queue", true);
@@ -948,6 +974,25 @@ void WPServoImpl::setLimits(IRA::CString limits) {
         m_limits.push_back(lim);
     }
 }
+
+
+ACS::doubleSeq * WPServoImpl::getMaxPositions() {
+    ACS::doubleSeq_var limits = new ACS::doubleSeq;
+    limits->length(m_limits.size());
+    for(size_t i=0; i<limits->length(); i++)
+        limits[i] = (m_limits[i]).max;
+    return limits._retn();
+}
+
+
+ACS::doubleSeq * WPServoImpl::getMinPositions() {
+    ACS::doubleSeq_var limits = new ACS::doubleSeq;
+    limits->length(m_limits.size());
+    for(size_t i=0; i<limits->length(); i++)
+        limits[i] = (m_limits[i]).min;
+    return limits._retn();
+}
+
 
 void WPServoImpl::setParkPosition(IRA::CString position) {
     vector<string> items = split(string(position), ",");

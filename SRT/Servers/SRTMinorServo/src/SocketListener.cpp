@@ -164,7 +164,6 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
                     }
                     return;
                 }
-
             }
             catch(...) 
                 THROW_EX(ComponentErrors, SocketErrorEx, 

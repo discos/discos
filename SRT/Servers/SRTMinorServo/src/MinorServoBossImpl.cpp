@@ -189,10 +189,12 @@ void MinorServoBossImpl::cleanUp()
 
     if (m_setup_thread_ptr != NULL) {
         m_setup_thread_ptr->suspend();
+        m_setup_thread_ptr->terminate();
     }
 
     if (m_park_thread_ptr != NULL) {
         m_park_thread_ptr->suspend();
+        m_setup_thread_ptr->terminate();
     }
 
     map<string, MinorServo::WPServo_var>::reverse_iterator rbegin_iter = m_component_refs.rbegin(); 
@@ -421,8 +423,9 @@ bool MinorServoBossImpl::isParking() { return m_configuration->isParking(); }
 
 bool MinorServoBossImpl::isReady() { return m_configuration->isConfigured(); }
 
-
 bool MinorServoBossImpl::isScanning() { return m_configuration->m_isScanning; }
+
+bool MinorServoBossImpl::isScanActive() { return m_configuration->m_isScanActive; }
 
 
 CORBA::Boolean MinorServoBossImpl::command(const char *cmd, CORBA::String_out answer) throw (CORBA::SystemException)
@@ -491,65 +494,41 @@ bool MinorServoBossImpl::isParked() throw (ManagementErrors::ConfigurationErrorE
 
 void MinorServoBossImpl::stopScan() throw (ManagementErrors::SubscanErrorEx)
 {
-
-    // TODO!
-    if(!m_thread_params.is_initialized)
-        THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan: the system is not initialized", true);
-
-    if(m_configuration->m_isScanning = false && m_scan_thread_ptr != NULL) {
-        // TODO: If it is not suspended?
-        m_scan_thread_ptr->suspend();
-        m_scan_thread_ptr->terminate();
-        m_scan_thread_ptr = NULL;
-    }
-    else
-        if(m_configuration->m_isScanning == false)
-            THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan: scanning not active", true);
-
-    usleep(SCAN_STOP_TIME_GUARD); // Wait a bit
-
-    if(m_configuration->isTrackingEn())
-        turnTrackingOn(); // NO: it raises ConfigurationError
-    else {
-        int mutex_res = pthread_mutex_trylock(&tracking_mutex); // TODO: no!
-        try {
-            if(mutex_res != 0) {
-                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::stopScan: some problems going the minor servo back to its position"));
-                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::stopScan: perform a turnTrackingOn or a setup"));
-                THROW_EX(ManagementErrors, SubscanErrorEx, "checkScan: lock in setup", true);
-            }
-            
-            for(vector<string>::iterator iter = (m_thread_params.actions).begin(); \
-                    iter != (m_thread_params.actions).end(); iter++) {
-                // Split the action in items.
-                vector<string> items = split(*iter, items_separator);
-                // Set the name of component to move from a string
+    if(m_configuration->m_isScanActive) {
+        string comp_name((m_configuration->m_scan).comp_name);
+        if(m_component_refs.count(comp_name)) {
+            MinorServo::WPServo_var component_ref = m_component_refs[comp_name];
+            try {
                 MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-                string comp_name = get_component_name(items.front());
-                if(comp_name != m_servo_scanned)
-                    continue;
+                component_ref = m_services->getComponent<MinorServo::WPServo>(("MINORSERVO/" + comp_name).c_str());
+                if(!CORBA::is_nil(component_ref)) {
+                    if(m_scan_thread_ptr != NULL) {
+                        m_scan_thread_ptr->terminate();
+                        m_scan_thread_ptr->suspend();
+                    }
+                    component_ref->cleanPositionsQueue(NOW);
+                    m_configuration->m_isScanning = false;
+                    if((m_configuration->m_scan).wasElevationTrackingEn)
+                        turnTrackingOn();
+                    else
+                        component_ref->setPosition((m_configuration->m_scan).centralPos, NOW);
 
-                // Set a doubleSeq from a string of positions
-                ACS::doubleSeq positions = get_positions(comp_name, items.back(), &m_thread_params);
-
-                if(positions.length() && (*m_thread_params.component_refs).count(comp_name)) {
-                    component_ref = (*m_thread_params.component_refs)[comp_name];
-                    // Set a minor servo position if the doubleSeq is not empty
-                    if(!CORBA::is_nil(component_ref))
-                        component_ref->setPosition(positions, NOW);
+                    m_configuration->m_isScanActive = false;
+                }
+                else {
+                    THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan(): nil component reference", true);
                 }
             }
-            if(mutex_res == 0)
-                pthread_mutex_unlock(&tracking_mutex); 
-            m_configuration->m_isScanning = false;
+            catch(...) {
+                THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan(): unexpected exception", true);
+            }
         }
-        catch(...) {
-            if(mutex_res == 0)
-                pthread_mutex_unlock(&tracking_mutex); 
-            m_configuration->m_isScanning = false;
-            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::stopScan: test 5: catturata una eccezione"));
-            throw;
+        else {
+            THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan(): cannot get the component reference", true);
         }
+    }
+    else {
+        THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan(): no scan active", true);
     }
 }
 
@@ -562,26 +541,25 @@ bool MinorServoBossImpl::checkScan(
         const char *servo
     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
 {
-    int mutex_res = pthread_mutex_trylock(&tracking_mutex);  // TODO: no!
     try {
-        if(mutex_res != 0)
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "checkScan: system in lock", true);
-
         TIMEVALUE now(0.0L);
         TIMEVALUE stime(starting_time);
         TIMEVALUE ttime(total_time);
         TIMEVALUE dtime(SCAN_DELTA_TIME);
 
         if(!isReady())
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is not ready", true);
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, "checkScan(): the system is not ready", true);
+
+        if(isScanning())
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, "checkScan(): the system is performing another scan", true);
             
         IRA::CIRATools::getTime(now);
         if(CIRATools::timeSubtract(ttime, dtime) < 0) {
-            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: total time is too short"));
+            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): total time is too short"));
             return false;
         }
         if(CIRATools::timeSubtract(stime, now) <= 0) {
-            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: starting time is not valid"));
+            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: starting time is less or equal to the actual time"));
             return false;
         }
 
@@ -592,9 +570,7 @@ bool MinorServoBossImpl::checkScan(
             component_ref = (m_configuration->m_component_refs)[comp_name];
             if(!CORBA::is_nil(component_ref))
                 if(!component_ref->isReady()) {
-                    if(mutex_res == 0)
-                        pthread_mutex_unlock(&tracking_mutex); 
-                    return false;
+                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "checkScan(): the component is not ready", true);
                 }
                 else {
                     CDB::DAL_ptr dal_p = getContainerServices()->getCDB();
@@ -605,20 +581,14 @@ bool MinorServoBossImpl::checkScan(
                     double zero = dao_p->get_double("zero");
                     if(axis > number_of_axis - 1) {
                         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - axis %d does not exist", axis));
-                        if(mutex_res == 0)
-                            pthread_mutex_unlock(&tracking_mutex); 
                         return false;
                     }
 
                     ACS::doubleSeq *acc = component_ref->getData("ACCELERATION");
                     ACS::doubleSeq *mspeed = component_ref->getData("MAX_SPEED");
                     size_t idx = (*acc).length() - number_of_axis + axis;
-                    // ACS::doubleSeq pos_limit = component_ref->getData("POS_LIMIT");
-                    // ACS::doubleSeq neg_limit = component_ref->getData("NEG_LIMIT");
                     if((*acc).length() - 1 < idx || (*mspeed).length() - 1 < idx) {
                         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - error, index out of range"));
-                        if(mutex_res == 0)
-                            pthread_mutex_unlock(&tracking_mutex); 
                         return false;
                     }
                     double acceleration = (*acc)[idx]; 
@@ -632,8 +602,6 @@ bool MinorServoBossImpl::checkScan(
 
                         if(act_pos.length() <= axis) {
                             ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: wrong position indexing"));
-                            if(mutex_res == 0)
-                                pthread_mutex_unlock(&tracking_mutex); 
                             return false;
                         }
 
@@ -641,6 +609,16 @@ bool MinorServoBossImpl::checkScan(
                         positions_left = positions_right = act_pos;
                         positions_left[axis] = positions_left[axis] - range / 2;
                         positions_right[axis] = positions_right[axis] + range / 2;
+                        ACS::doubleSeq_var max_values = component_ref->getMaxPositions();
+                        ACS::doubleSeq_var min_values = component_ref->getMinPositions();
+                        if(positions_left[axis] <= min_values[axis]) {
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): min position out of range"));
+                            return false;
+                        }
+                        if(positions_right[axis] >= max_values[axis]) {
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): max position out of range"));
+                            return false;
+                        }
                         
                         double left_distance = abs_(act_pos[axis] - positions_left[axis]);
                         double right_distance = abs_(act_pos[axis] - positions_right[axis]);
@@ -684,65 +662,43 @@ bool MinorServoBossImpl::checkScan(
                                     max_diff_right = diff_right[i];
                             }
                             positioning_distance = max_diff_left <= max_diff_right ? max_diff_left : max_diff_right;
-
-                            for(size_t i = 0; i < act_pos.length(); i++) {
-                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - positions[%d] = %f", i, act_pos[i]));
-                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - left[%d] = %f", i, positions_left[i]));
-                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - right[%d] = %f", i, positions_right[i]));
-                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - diff[%d] = %f", i, diff[i]));
-                            }
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - max =  %f", max_diff));
-
-                            for(size_t i = 0; i < act_pos.length(); i++) {
-                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - diff_left[%d] = %f", i, diff_left[i]));
-                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - diff_right[%d] = %f", i, diff_right[i]));
-                            }
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - positioning_distance = %f", positioning_distance));
-
-
                         }
 
-                        (m_thread_params.scan_data).positioning_time = get_min_time(positioning_distance, acceleration, max_speed);
+                        ACS::Time positioning_time = get_min_time(positioning_distance, acceleration, max_speed);
                         
-                        ACS::Time guard_time = static_cast<ACS::Time>(SCAN_SHIFT_TIME + \
-                                (m_thread_params.scan_data).positioning_time * (1 + GUARD_COEFF));
+                        ACS::Time min_time = static_cast<ACS::Time>(SCAN_SHIFT_TIME + positioning_time * (1 + SCAN_GUARD_COEFF));
                         IRA::CIRATools::getTime(now);
-                        TIMEVALUE gtime(now.value().value + guard_time);
-                        if(CIRATools::timeSubtract(stime, gtime) <= 0) {
-                            THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: starting time too much close to actual time", true);
-                            if(mutex_res == 0)
-                                pthread_mutex_unlock(&tracking_mutex); 
+                        if((now.value().value + min_time) >= starting_time) {
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): starting time too much close to actual time"));
                             return false;
                         }
 
-                        if(mutex_res == 0)
-                            pthread_mutex_unlock(&tracking_mutex); 
-                        return get_min_time(range, acceleration, max_speed) * (1 + GUARD_COEFF) <= total_time;
+                        ACS::Time min_scan_time = get_min_time(range, acceleration, max_speed);
+                        ACS::Time guard_min_scan_time = static_cast<ACS::Time>(min_scan_time * (1 + SCAN_GUARD_COEFF));
+                        TIMEVALUE gmst(guard_min_scan_time);
+                        if(CIRATools::timeSubtract(ttime, gmst) <= 0) {
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): total time too short for performing the scan."));
+                            return false;
+                        }
+                        else
+                            return true;
                     }
                     else {
                         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - Acceleration or maximum speed wrong")); 
-                        if(mutex_res == 0)
-                            pthread_mutex_unlock(&tracking_mutex); 
                         return false;
                     }
                 }
         }
         else {
             ACS_SHORT_LOG((LM_WARNING, ("MinorServoBoss::checkScan - some problems getting the component " + comp_name).c_str()));
-            if(mutex_res == 0)
-                pthread_mutex_unlock(&tracking_mutex); 
             return false;
         }
     }
     catch(...) {
         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - unexpected exception"));
-        if(mutex_res == 0)
-            pthread_mutex_unlock(&tracking_mutex); 
         throw;
     }
 
-    if(mutex_res == 0)
-        pthread_mutex_unlock(&tracking_mutex); 
     ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - last line!"));
     return false;
 }
@@ -787,21 +743,19 @@ void MinorServoBossImpl::startScanImpl(
         string axis_code
     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
 {
+    m_configuration->m_isScanning = true;
     size_t axis;
     try {
         axis = m_configuration->getAxisIndex(axis_code);
     }
     catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
         ex.log(LM_DEBUG);
+        m_configuration->m_isScanning = false;
         throw ex.getConfigurationErrorEx();     
     }
     vector<string> items = split(axis_code, "_");
     string comp_name(items[0]);
     try {
-        m_configuration->m_isScanning = true;
-
-        const ACS::Time SCAN_DELTA_TIME = 5000000; // 500ms
-        
         TIMEVALUE now(0.0L);
         IRA::CIRATools::getTime(now);
 
@@ -833,17 +787,39 @@ void MinorServoBossImpl::startScanImpl(
             if(axis > number_of_axis - 1)               
                 THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: axis index error", true);
                                                         
+            turnTrackingOff();
             // Get the actual position                  
             ACSErr::Completion_var completion;          
             ACS::doubleSeq actPos = *((component_ref->actPos())->get_sync(completion.out()));
-                                                        
-            turnTrackingOff();
+            ACS::doubleSeq centralPos = m_configuration->isScanActive() ? (m_configuration->m_scan).centralPos : actPos;
                                                     
             if(actPos.length() <= axis) {          
-                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: wrong actual position length"));
+                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::startScan: wrong actual position length"));
                 THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: wrong actual position length.", true);
             }                                       
-            m_configuration->setScan(starting_time, total_time, SCAN_DELTA_TIME, range, comp_name, axis, actPos);
+
+            ACS::doubleSeq_var max_values = component_ref->getMaxPositions();
+            ACS::doubleSeq_var min_values = component_ref->getMinPositions();
+
+            // Check if the positions are allowed
+            if(centralPos[axis] - range/2 <= min_values[axis]) {
+                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: min axis position out of range.", true);
+            }
+            if(centralPos[axis] + range/2 >= max_values[axis]) {
+                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: max axis position out of range.", true);
+            }
+
+            m_configuration->setScan(
+                    starting_time, 
+                    total_time, 
+                    SCAN_DELTA_TIME, 
+                    range, 
+                    comp_name, 
+                    axis, 
+                    actPos, 
+                    centralPos,
+                    isElevationTrackingEn()
+            );
         }
         else {
             THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: cannot get the component reference.", true);
@@ -861,11 +837,27 @@ void MinorServoBossImpl::startScanImpl(
         catch(...) {
             THROW_EX(ManagementErrors, ConfigurationErrorEx, "The MinorServoBoss is attempting to execute a previous scan", false);
         }
-
+        m_configuration->m_isScanActive = true;
     }
     catch(...) {
         m_configuration->m_isScanning = false;
+        m_configuration->m_isScanActive = false;
         throw;
+    }
+}
+
+
+CORBA::Double MinorServoBossImpl::getCentralScanPosition() throw (ManagementErrors::SubscanErrorEx)
+{
+    if(isScanActive()) {
+        if((m_configuration->m_scan).centralPos.length() > ((m_configuration->m_scan).axis_index))
+            return (m_configuration->m_scan).centralPos[(m_configuration->m_scan).axis_index];
+        else {
+            THROW_EX(ManagementErrors, SubscanErrorEx, "getCentralScanPosition(): cannot get the central position.", true);
+        }
+    }
+    else {
+        THROW_EX(ManagementErrors, SubscanErrorEx, "getCentralScanPosition(): scan not active", true);
     }
 }
 
@@ -918,7 +910,7 @@ void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::Configuratio
         m_tracking_thread_ptr->terminate();
         m_tracking_thread_ptr = NULL;
     }
-    m_configuration->m_isConfigured = false;
+    // m_configuration->m_isConfigured = false;
 
     if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
 }
@@ -1145,13 +1137,18 @@ ACS::doubleSeq * MinorServoBossImpl::getOffset(const char *servo, string offset_
 }
 
 
-bool MinorServoBossImpl::isTrackingEn() {
-    return m_configuration->isTrackingEn();
+bool MinorServoBossImpl::isElevationTrackingEn() {
+    return m_configuration->isElevationTrackingEn();
+}
+
+
+bool MinorServoBossImpl::isElevationTracking() {
+    return m_configuration->isElevationTracking();
 }
 
 
 bool MinorServoBossImpl::isTracking() {
-    return m_configuration->isElevationTracking();
+    return m_configuration->isTracking();
 }
 
 
@@ -1226,9 +1223,16 @@ ACS::doubleSeq get_positions(string comp_name, string token, const MSThreadParam
 ACS::Time get_min_time(double range, double acceleration, double max_speed) {
     if(max_speed == 0 || acceleration == 0)
         return static_cast<ACS::Time>(pow(10, 15));
-    double threshold = pow(max_speed, 2) / acceleration;
-    double min_time = range <= threshold ? 2 * sqrt(range / acceleration) : \
-           2 * max_speed / acceleration + sqrt((range - threshold) / max_speed);
+    /*
+     * s = 1/2 * a * T**2
+     * T = Vmax / a
+     * s = 1/2 Vmax**2 / a
+     * Acceleration and deceleration -> 2 * s = Vmax**2 / a
+     * Time in acce and decc: 2*Vmax/acce
+    */
+    double threshold = pow(max_speed, 2) / acceleration; // 
+    double min_time = range <= threshold ? sqrt(range / acceleration) : \
+           2 * max_speed / acceleration + (range - threshold) / max_speed;
     return static_cast<ACS::Time>(min_time * pow(10, 7));
 }
 

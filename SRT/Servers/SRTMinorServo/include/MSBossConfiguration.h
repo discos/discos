@@ -65,7 +65,13 @@ public:
 
     inline bool isElevationTracking() { return m_isElevationTracking; }
 
-    inline bool isTrackingEn() { return m_isTrackingEn; }
+    inline bool isElevationTrackingEn() { return m_isElevationTrackingEn; }
+
+    inline bool isTracking() { return m_isTracking; }
+
+    inline bool isScanning() { return m_isScanning; }
+
+    inline bool isScanActive() { return m_isScanActive; }
 
     inline bool isValidCDBConfiguration() { return m_isValidCDBConfiguration; }
 
@@ -100,7 +106,8 @@ public:
         std::string comp_name;
         unsigned short axis_index;
         ACS::doubleSeq actPos;
-        bool isActive;
+        ACS::doubleSeq centralPos;
+        bool wasElevationTrackingEn;
     };
 
 
@@ -120,7 +127,9 @@ public:
             const double range, 
             const std::string comp_name, 
             const unsigned short axis_index, 
-            const ACS::doubleSeq actPos
+            const ACS::doubleSeq actPos,
+            const ACS::doubleSeq centralPos,
+            bool wasElevationTrackingEn
     );
 
     inline Scan getScanInfo() { return m_scan; }
@@ -131,10 +140,12 @@ public:
     bool m_isConfigured;
     bool m_isStarting;
     bool m_isScanning;
+    bool m_isScanActive;
     bool m_isParking;
     bool m_isValidCDBConfiguration;
     bool m_isElevationTracking;
-    bool m_isTrackingEn; // Is the tracking enabled?
+    bool m_isElevationTrackingEn; // Is the tracking enabled?
+    bool m_isTracking;
     bool m_isASConfiguration;
 
     Scan m_scan;

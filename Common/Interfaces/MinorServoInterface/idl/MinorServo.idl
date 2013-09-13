@@ -354,6 +354,14 @@ module MinorServo {
              raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
+        /** Return the maximum position values (right limits) */
+        ACS::doubleSeq getMaxPositions();
+
+
+        /** Return the minimum position values (left limits) */
+        ACS::doubleSeq getMinPositions();
+
+
         /**
          * Set a system offset to the position.
          * 

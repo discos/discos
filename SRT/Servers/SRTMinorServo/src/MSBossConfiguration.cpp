@@ -12,10 +12,12 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
     m_isStarting = false;
     m_isParking = false;
     m_isElevationTracking = false;
+    m_isElevationTrackingEn = false;
+    m_isTracking = false;
     m_isScanning = false;
+    m_isScanActive = false;
     m_dynamic_comps.clear();
     m_services = Services;
-    m_isTrackingEn = false;
     m_isASConfiguration = false;
     m_nchannel = NULL;
 }
@@ -207,7 +209,9 @@ void MSBossConfiguration::setScan(
         double range, 
         std::string comp_name, 
         unsigned short axis_index,
-        ACS::doubleSeq actPos
+        ACS::doubleSeq actPos,
+        ACS::doubleSeq centralPos,
+        bool wasElevationTrackingEn
         )
 {
     m_scan.starting_time = starting_time;
@@ -217,6 +221,8 @@ void MSBossConfiguration::setScan(
     m_scan.comp_name = comp_name;
     m_scan.axis_index = axis_index;
     m_scan.actPos = actPos;
+    m_scan.centralPos = centralPos;
+    m_scan.wasElevationTrackingEn = wasElevationTrackingEn;
 }
 
 

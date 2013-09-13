@@ -57,7 +57,6 @@ void MSBossPublisher::runLoop()
             vstatus_bset.reset(VS_WARNING);
             vstatus_bset.reset(VS_FAILURE);
 
-
             vector<string> toMove = m_configuration->getServosToMove();
             for(size_t i=0; i<toMove.size(); i++) {
                 string comp_name(toMove[i]);
@@ -79,8 +78,11 @@ void MSBossPublisher::runLoop()
                         if(!m_configuration->isConfigured())
                             vstatus_bset.reset(VS_OK);
                         // TRACKING
-                        if(!m_configuration->isConfigured() || !component_ref->isTracking())
+                        if(!m_configuration->isConfigured() || 
+                           !component_ref->isTracking() ||
+                           (m_configuration->isScanActive() && !m_configuration->isScanning())) {
                             vstatus_bset.reset(VS_TRACKING);
+                        }
                         // PARKED
                         if(!component_ref->isParked())
                             vstatus_bset.reset(VS_PARKED);
@@ -140,6 +142,7 @@ void MSBossPublisher::runLoop()
                 ? true : publish_data;
         }
 
+        m_configuration->m_isTracking = vstatus_bset.test(VS_TRACKING); 
         if(publish_data) {
             // data.status = *m_configuration->status; // TODO: update the Boss status
             data.tracking = vstatus_bset.test(VS_TRACKING); 

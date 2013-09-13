@@ -51,7 +51,6 @@ void ScanThread::run()
     TIMEVALUE final_time((m_configuration->m_scan).starting_time + (m_configuration->m_scan).total_time);
     double range = (m_configuration->m_scan).range;
     size_t axis = (m_configuration->m_scan).axis_index;
-    ACS::doubleSeq_var act_pos = (m_configuration->m_scan).actPos;
 
     const ACS::Time MSCU_SAMPLING_TIME = 1000000; // 100ms
     const size_t MSCU_BUFF_SIZE = 100; // 100 points
@@ -64,25 +63,35 @@ void ScanThread::run()
     vector<ACS::doubleSeq> positions;
     vector<ACS::Time> exe_times;
     ACS::doubleSeq pos; // The position to set
-    pos.length(act_pos->length());           
+    pos.length(((m_configuration->m_scan).centralPos).length());
     // The first position is the actual one for all the axes except for the one to scan, whose is (act_pos - range/2)
+    bool reverse = false;
+    // Distance between the actual position and the left point of the scan
+    double dist_from_left = fabs((m_configuration->m_scan).actPos[axis] - ((m_configuration->m_scan).centralPos[axis] - range/2));
+    // Distance between the actual position and the right point of the scan
+    double dist_from_right = fabs((m_configuration->m_scan).actPos[axis] - ((m_configuration->m_scan).centralPos[axis] + range/2));
+    // Distance between the actual position and the central point of the scan
+    double dist_from_central = fabs((m_configuration->m_scan).actPos[axis] - (m_configuration->m_scan).centralPos[axis] );
+    if(dist_from_central > delta && dist_from_right < dist_from_left) {
+        reverse = true;
+    }
     for(size_t i=0; i<pos.length(); i++) {
         if(i==axis)                             
-            pos[i] = act_pos[i] - range/2;      
+            pos[i] = reverse ? (m_configuration->m_scan).centralPos[i] + range/2 : (m_configuration->m_scan).centralPos[i] - range/2;      
         else                                    
-            pos[i] = act_pos[i];                
+            pos[i] = (m_configuration->m_scan).centralPos[i];                
     }
     size_t idx = 0;
     try {
         component_ref->setPosition(pos, 0); // Go to the starting position
         double starting_pos = pos[axis]; // Axis value
         for(size_t i=0; i<N; i++) {
-            pos[axis] = starting_pos + delta * i;
+            pos[axis] = reverse ? starting_pos - delta * i : starting_pos + delta * i;
             ACS::Time exe_time = stime.value().value + dtime.value().value * i;
             positions.push_back(pos);
             exe_times.push_back(exe_time);
         }
-        pos[axis] = starting_pos + range;
+        pos[axis] = reverse ? starting_pos - range : starting_pos + range;
         positions.push_back(pos);
         exe_times.push_back(stime.value().value + ttime.value().value);
         if(positions.size() != exe_times.size()) {
@@ -103,10 +112,10 @@ void ScanThread::run()
             }
         }
         else { // Send (EQUIVALENT_BUFF_SIZE / 2) positions only
-            for(; idx<(EQUIVALENT_BUFF_SIZE/2); idx++) {
+            for(; idx<(EQUIVALENT_BUFF_SIZE / 2); idx++) {
                 component_ref->setPosition(positions[idx], exe_times[idx]);
                 ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
-                sleep_ret = ACS::ThreadBase::sleep(10000); // Wait 1 ms
+                sleep_ret = ACS::ThreadBase::sleep(1000); // Wait 100 us
                 if(sleep_ret != SLEEP_OK) {
                     m_configuration->m_isScanning = false;
                     return;
@@ -117,7 +126,7 @@ void ScanThread::run()
             IRA::CIRATools::getTime(now);
             while(now.value().value < stime.value().value) {
                 ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
-                sleep_ret = ACS::ThreadBase::sleep(100000); // Wait 10 ms
+                sleep_ret = ACS::ThreadBase::sleep(10000); // Wait 1 ms
                 if(sleep_ret != SLEEP_OK) {
                     m_configuration->m_isScanning = false;
                     return;
@@ -144,7 +153,7 @@ void ScanThread::run()
                     lastTime = getTimeStamp();
                 }
                 ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
-                sleep_ret = ACS::ThreadBase::sleep(200000); // Wait 20 ms
+                sleep_ret = ACS::ThreadBase::sleep(1000); // Wait 100 us
                 if(sleep_ret != SLEEP_OK) {
                     m_configuration->m_isScanning = false;
                     return;

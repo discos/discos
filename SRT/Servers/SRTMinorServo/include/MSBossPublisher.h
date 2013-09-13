@@ -20,7 +20,7 @@
 #include "utils.h"
 
 // Sleep Time in 100ns
-#define PUBLISHER_SLEEP_TIME 50000000 // 0.5 seconds
+#define PUBLISHER_SLEEP_TIME 1000000 // 100 mseconds
 #define VSTATUS_LENGTH 7
 #define VS_OK 0
 #define VS_TRACKING 1

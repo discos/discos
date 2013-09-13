@@ -558,6 +558,12 @@ private:
     
     void setLimits(IRA::CString limits);
 
+    // Return a sequence of the max values
+    ACS::doubleSeq * getMaxPositions();
+    
+    // Return a sequence of the min values
+    ACS::doubleSeq * getMinPositions();
+
     void setParkPosition(IRA::CString position);
 
     void setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target)

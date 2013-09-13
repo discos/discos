@@ -46,13 +46,13 @@ TrackingThread::~TrackingThread() { AUTO_TRACE("TrackingThread::~TrackingThread(
 
 void TrackingThread::onStart() { 
     AUTO_TRACE("TrackingThread::onStart()"); 
-    m_configuration->m_isTrackingEn = true;
+    m_configuration->m_isElevationTrackingEn = true;
 }
 
 void TrackingThread::onStop() { 
     AUTO_TRACE("TrackingThread::onStop()"); 
     m_configuration->m_isElevationTracking = false;
-    m_configuration->m_isTrackingEn = false;
+    m_configuration->m_isElevationTrackingEn = false;
 }
 
 void TrackingThread::runLoop()

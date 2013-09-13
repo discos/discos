@@ -35,11 +35,12 @@ class TestFocusScan(unittest.TestCase):
     def test_startScan(self):
         """Test the startFocusScan() method (SRP active)."""
         setup_code = 'CCB'
-        self.boss.setup(setup_code)
-        time.sleep(1) # Wait a bit, until the boss begins the configuration process
+        if not self.boss.isReady():
+            self.boss.setup(setup_code)
+            print "\nExecuting the %s setup. Wait a bit ..." %setup_code
+            time.sleep(1) # Wait a bit, until the boss begins the configuration process
         
         counter = 0
-        print "\nExecuting the minor servo %s setup. Wait a bit ..." %setup_code
         delay_ready = 2
         while not self.boss.isReady(): # Wait until the minor servo boss is ready
             time.sleep(delay_ready) # Wait a bit, until the boss is active
@@ -50,15 +51,15 @@ class TestFocusScan(unittest.TestCase):
 
         print "\nThe MinorServoBoss is ready."
 
-        time.sleep(10)
-        delay = 15 * 10 ** 7 # 15 seconds
+        time.sleep(2)
+        delay = 8 * 10 ** 7 # 8 seconds
         starting_time = TimeHelper.getTimeStamp().value + delay # Start the scan in `delay` seconds from now
-        range_ = 10.0 # mm 
-        total_time = 40 * 10 ** 7 # 4 seconds
+        range_ = 20.0 # mm 
+        total_time = 20 * 10 ** 7 # 20 seconds
         mm_per_sec = range_ / total_time
         actPos_obj = self.srp._get_actPos()
         actPos, cmp = actPos_obj.get_sync()
-        print "\nCalling the startScan() method, starting in %d s from now." %(delay/10**7)
+        print "\nCalling the startScan() method, starting in %d seconds from now." %(delay/10**7)
         self.boss.startFocusScan(starting_time, range_, total_time)
         expected_positions = {}
         sampling_time = 2000000 # 200ms

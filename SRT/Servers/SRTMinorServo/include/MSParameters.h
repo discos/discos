@@ -6,7 +6,7 @@
 #include <vector>
 #include "utils.h"
 
-#define NOW getNextTime()
+#define NOW 0
 
 #define NUMBER_OF_SERVOS 4
 #define STATUS_WIDTH 6
@@ -14,6 +14,12 @@
 
 const double MAX_DELTA = 0.1;
 const size_t MAX_HISTORY_SIZE = 32768; // 2 ** 15
+const ACS::Time SCAN_DELTA_TIME = 5000000; // 500ms
+// Time in 100ns: 10000000 == 1sec
+const double SCAN_GUARD_COEFF = 0.1;
+const unsigned int SCAN_SHIFT_TIME = 20000000; // 2 seconds
+const unsigned int SCAN_STOP_TIME_GUARD = 2000000; // 2 second
+        
 
 using namespace IRA;
 

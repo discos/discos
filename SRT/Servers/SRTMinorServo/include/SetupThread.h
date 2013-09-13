@@ -26,9 +26,6 @@ const unsigned int ITER_SLEEP_TIME = 30000000; // Iteration sleep time: 3 second
 const unsigned int INCR_SLEEP_TIME = 20000000; // Increment sleep time: 2 seconds
 const unsigned int MAX_ACTION_TIME = 2100000000; // Maximum action (stop, positioning, ecc.) time: 210 seconds
 const unsigned int MAX_SETUP_TIME = 80000000; // Maximum setup time: 8 seconds
-// Time in 100ns: 10000000 == 1sec
-const unsigned int SCAN_SHIFT_TIME = 50000000;
-const unsigned int SCAN_STOP_TIME_GUARD = 2000000; // 2 second
 
 struct TrackingThread;
 struct MSBossPublisher;
