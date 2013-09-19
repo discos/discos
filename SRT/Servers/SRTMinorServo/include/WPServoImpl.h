@@ -99,6 +99,29 @@ public:
      */
      virtual ACS::ROdoubleSeq_ptr actPos() throw (CORBA::SystemException);
 
+    
+    /** 
+     * Return a reference to plainActPos property (ROdoubleSeq) 
+     *
+     * The plainActPos property is a ROdoubleSeq of coordinates. The reference
+     * system of coordinates is a "virtual system", that is a system binds
+     * with minor servo, and in general it is not bind with minor servo 
+     * positioner. The position is computed without the user and system offset,
+     * so it is: 
+     *
+     *     plainActPos = virtual_real_actual_position - (user_offset + system_offset)
+     * 
+     * where `virtual_real_actual_position` is the real elongation converted by
+     * the real2virtual function. So, it is also:
+     *
+     *     plainActPos = actPos - user_offset 
+     *
+     * @return pointer to ROdoubleSeq plainActPos property
+     * @throw CORBA::SystemException
+     */
+     virtual ACS::ROdoubleSeq_ptr plainActPos() throw (CORBA::SystemException);
+
+
 
     /** 
      * Set the cmdPos property (commanded position, RWdoubleSeq) 
@@ -139,7 +162,18 @@ public:
      * @throw CORBA::SystemException
      */
      virtual ACS::ROdoubleSeq_ptr actElongation() throw (CORBA::SystemException);
-
+ 
+    
+    /** 
+     * Return a reference to virtualActElongation property (virtual actual elongation, ROdoubleSeq) 
+     *
+     * The virtualActElongation property is a ROdoubleSeq of coordinates. The reference
+     * system of coordinates is virtual one
+     *
+     * @return pointer to ROdoubleSeq virtualActElongation property
+     * @throw CORBA::SystemException
+     */
+     virtual ACS::ROdoubleSeq_ptr virtualActElongation() throw (CORBA::SystemException);
    
 
     /** 
@@ -484,6 +518,9 @@ private:
     /** Actual position property */
     SmartPropertyPointer<ROdoubleSeq> m_actPos;
 
+    /** Plain actual position property (real position -(user_offset + system_offset) */
+    SmartPropertyPointer<ROdoubleSeq> m_plainActPos;
+
     /** Commanded position property */
     SmartPropertyPointer<RWdoubleSeq> m_cmdPos;
 
@@ -492,6 +529,9 @@ private:
 
     /** Actual elongation property */
     SmartPropertyPointer<ROdoubleSeq> m_actElongation;
+
+    /** Virtual Actual elongation property */
+    SmartPropertyPointer<ROdoubleSeq> m_virtualActElongation;
 
     /** Offsets to add to the input positions */
     Offsets m_offsets;

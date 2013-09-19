@@ -77,9 +77,11 @@ void ScanThread::run()
     }
     for(size_t i=0; i<pos.length(); i++) {
         if(i==axis)                             
-            pos[i] = reverse ? (m_configuration->m_scan).centralPos[i] + range/2 : (m_configuration->m_scan).centralPos[i] - range/2;      
+            pos[i] = reverse ? 
+                     (m_configuration->m_scan).plainCentralPos[i] + range/2 : 
+                     (m_configuration->m_scan).plainCentralPos[i] - range/2;      
         else                                    
-            pos[i] = (m_configuration->m_scan).centralPos[i];                
+            pos[i] = (m_configuration->m_scan).plainCentralPos[i];                
     }
     size_t idx = 0;
     try {
@@ -169,7 +171,6 @@ void ScanThread::run()
 
     m_configuration->m_isScanning = false;
     ACS_SHORT_LOG((LM_INFO, ("ScanThread::run(): scanning done.")));
-    // A new setup?
     return;
 }
 

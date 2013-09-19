@@ -187,13 +187,29 @@ public:
 
 
     /** 
-     * Check if the scan is achievable
+     * Check if the focus scan is achievable
      *
 	 * @param starting_time the time the scan will start
      * @param range the total axis movement in mm (centered in the actual position)
 	 * @param total_time the duration of axis movement
-	 * @param axis the identification code of the axis
-	 * @param servo the servo name
+     *
+     * @return true if the scan is achievable
+     * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
+     */
+     bool checkFocusScan(
+             const ACS::Time starting_time, 
+             const double range, 
+             const ACS::Time total_time
+     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+
+
+    /** 
+     * Check if the scan is achievable (IDL interface)
+     *
+	 * @param starting_time the time the scan will start
+     * @param range the total axis movement in mm (centered in the actual position)
+	 * @param total_time the duration of axis movement
+	 * @param axis_code the identification code of the axis
      *
      * @return true if the scan is achievable
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
@@ -202,8 +218,26 @@ public:
              const ACS::Time starting_time, 
              double range, 
              const ACS::Time total_time, 
-             const unsigned short axis, 
-             const char *servo
+             const char *axis_code
+     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+
+
+    /** 
+     * Check if the scan is achievable (implementation)
+     *
+	 * @param starting_time the time the scan will start
+     * @param range the total axis movement in mm (centered in the actual position)
+	 * @param total_time the duration of axis movement
+	 * @param axis_code the identification code of the axis
+     *
+     * @return true if the scan is achievable
+     * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
+     */
+     bool checkScanImpl(
+             const ACS::Time starting_time, 
+             double range, 
+             const ACS::Time total_time, 
+             const string axis_code
      ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
      
 
@@ -264,27 +298,32 @@ public:
       * @throw MinorServoErrors::OperationNotPermittedEx
       */
      void clearUserOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
-     
+      
 
      /** 
       * Set the user offset of the servo
       *
-      * @param servo the servo name
-      * @param doubleSeq offset sequence of user offsets to add to the position;
-      * one offset for each axis
+      * @param axis_code the axis code (for instance: SRP_TZ, GRF_TZ, ecc.) 
+      * @param double the offset
       * @throw MinorServoErrors::OperationNotPermittedEx
+      * @throw ManagementErrors::ConfigurationErrorEx
       */
-     void setUserOffset(const char *servo, const ACS::doubleSeq &offset) throw (MinorServoErrors::OperationNotPermittedEx);
+     void setUserOffset(const char * axis_code, const double offset) 
+         throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
      
+     
+     vector<double> getOffsetImpl(string offset_type)
+         throw (MinorServoErrors::OperationNotPermittedExImpl, ManagementErrors::ConfigurationErrorExImpl);
+
 
      /**
-      * Return the user offset of a servo
+      * Return the user offset of the system, in the same order of getAxesInfo()
       *
-      * @param servo the servo name
-      * @return offset the user offset of the servo
+      * @return offset the user offset of the system, in the same order of getAxesInfo()
+      * @throw ManagementErrors::ConfigurationErrorEx
       * @throw MinorServoErrors::OperationNotPermittedEx
       */
-     ACS::doubleSeq * getUserOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
+     ACS::doubleSeq * getUserOffset() throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
  
 
      /** 
@@ -296,27 +335,28 @@ public:
       * @throw MinorServoErrors::OperationNotPermittedEx
       */
      void clearSystemOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
-     
+      
 
      /** 
       * Set the system offset of the servo
       *
-      * @param servo the servo name
-      * @param doubleSeq offset sequence of system offsets to add to the position;
-      * one offset for each axis
+      * @param axis_code the axis code (for instance: SRP_TZ, GRF_TZ, ecc.) 
+      * @param double the offset
       * @throw MinorServoErrors::OperationNotPermittedEx
+      * @throw ManagementErrors::ConfigurationErrorEx
       */
-     void setSystemOffset(const char *servo, const ACS::doubleSeq &offset) throw (MinorServoErrors::OperationNotPermittedEx);
-     
+     void setSystemOffset(const char * axis_code, const double offset) 
+         throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+
 
      /**
-      * Return the system offset of a servo
+      * Return the system offset, in the same order of getAxesInfo()
       *
-      * @param servo the servo name
-      * @return offset the system offset of the servo
+      * @return offset the system offset
       * @throw MinorServoErrors::OperationNotPermittedEx
+      * @throw ManagementErrors::ConfigurationErrorEx
       */
-     ACS::doubleSeq * getSystemOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
+     ACS::doubleSeq * getSystemOffset() throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
     
  
      /** Return the active axes names and related units
@@ -415,8 +455,17 @@ private:
     
     void clearOffset(const char *servo, string offset_type) throw (MinorServoErrors::OperationNotPermittedEx);
 
-    void setOffset(const char *servo, const ACS::doubleSeq &offset, string offset_type)
-        throw (MinorServoErrors::OperationNotPermittedEx);
+
+   /** 
+    * Set the offset (Implementation)
+    *
+    * @param comp_name the component name
+    * @param doubleSeq offset sequence of user offsets to add to the position; one offset for each axis
+    * @throw MinorServoErrors::OperationNotPermittedExImpl
+    * @throw MinorServoErrors::ConfigurationErrorExImpl
+    */
+    void setOffsetImpl(string comp_name, double offset, string offset_type)
+        throw (MinorServoErrors::OperationNotPermittedExImpl, ManagementErrors::ConfigurationErrorExImpl);
 
     ACS::doubleSeq * getOffset(const char *servo, string offset_type) 
         throw (MinorServoErrors::OperationNotPermittedEx);

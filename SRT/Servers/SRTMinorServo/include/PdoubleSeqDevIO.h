@@ -29,20 +29,22 @@ class PdoubleSeqDevIO : public DevIO<ACS::doubleSeq>
 public:
     enum TLinkedProperty {
 
-        ACT_POS,           /*!< the devio will be used to read the  actPos */
-        CMD_POS,           /*!< the devio will be used to set the  cmdPos */
-        POS_DIFF,          /*!< the devio will be used to read the  posDiff */
-        ACT_ELONGATION,    /*!< the devio will be used to read the  actElongation */
-        ENG_TEMPERATURE,   /*!< the devio will be used to read the  engTemperature */
-        COUNTURING_ERR,    /*!< the devio will be used to read the  counturingErr */
-        TORQUE_PERC,       /*!< the devio will be used to read the  torquePerce */
-        ENG_CURRENT,       /*!< the devio will be used to read the  engCurrent */
-        ENG_VOLTAGE,       /*!< the devio will be used to read the  engVoltage */
-        DRI_TEMPERATURE,   /*!< the devio will be used to read the  driTemperature */
-        UTILIZATION_PERC,  /*!< the devio will be used to read the  utilizationPerc */
-        DC_TEMPERATURE,    /*!< the devio will be used to read the  dcTemperature */
-        DRIVER_STATUS,     /*!< the devio will be used to read the  driverStatus */
-        ERROR_CODE         /*!< the devio will be used to read the  errorCode */
+        ACT_POS,           
+        PLAIN_ACT_POS,    
+        CMD_POS,         
+        POS_DIFF,       
+        ACT_ELONGATION, 
+        VIRTUAL_ACT_ELONGATION,  
+        ENG_TEMPERATURE,  
+        COUNTURING_ERR,  
+        TORQUE_PERC,    
+        ENG_CURRENT,   
+        ENG_VOLTAGE,  
+        DRI_TEMPERATURE, 
+        UTILIZATION_PERC,
+        DC_TEMPERATURE,  
+        DRIVER_STATUS,  
+        ERROR_CODE     
     };
     
     PdoubleSeqDevIO(
@@ -64,6 +66,10 @@ public:
                 m_PropertyName=CString("Actual Position");
                 break;
             }
+            case PLAIN_ACT_POS: {
+                m_PropertyName=CString("Plain Actual Position");
+                break;
+            }
             case CMD_POS: {
                 m_PropertyName=CString("Commanded Position");
                 break;
@@ -74,6 +80,10 @@ public:
             }
             case ACT_ELONGATION: {
                 m_PropertyName=CString("Actual Elongation");
+                break;
+            }
+            case VIRTUAL_ACT_ELONGATION: {
+                m_PropertyName=CString("Virtual Actual Elongation");
                 break;
             }
             case ENG_TEMPERATURE: {
@@ -156,12 +166,12 @@ public:
             switch (m_Property) {
 
                 case ACT_POS: {
-                    // if(!isValueUpToDate()) {
-                    //     m_wpServoTalk->getActPos(m_expire_ptr->actPos[m_cdb_ptr->SERVO_ADDRESS], timestamp);
-                    //     gettimeofday(&now, NULL);
-                    //     m_expire_ptr->timeLastActPos[m_cdb_ptr->SERVO_ADDRESS] = now.tv_sec + now.tv_usec / 1000000.0;
-                    // }
                     m_value = m_expire_ptr->actPos[m_cdb_ptr->SERVO_ADDRESS];
+                    break;
+                }
+
+                case PLAIN_ACT_POS: {
+                    m_value = m_expire_ptr->plainActPos[m_cdb_ptr->SERVO_ADDRESS];
                     break;
                 }
 
@@ -185,7 +195,11 @@ public:
                     m_value = m_expire_ptr->actElongation[m_cdb_ptr->SERVO_ADDRESS];
                     break;
                 }
-
+               
+                case VIRTUAL_ACT_ELONGATION: {
+                    m_value = m_expire_ptr->virtualActElongation[m_cdb_ptr->SERVO_ADDRESS];
+                    break;
+                }
                 case ENG_TEMPERATURE: {
                     if(!isValueUpToDate()) {
                         m_wpServoTalk->getParameter(
@@ -451,6 +465,10 @@ private:
 
             case ACT_POS: {
                 diff = actual_time - m_expire_ptr->timeLastActPos[m_cdb_ptr->SERVO_ADDRESS];
+                break;
+            }
+            case PLAIN_ACT_POS: {
+                diff = actual_time - m_expire_ptr->timeLastPlainActPos[m_cdb_ptr->SERVO_ADDRESS];
                 break;
             }
             case ENG_TEMPERATURE: {

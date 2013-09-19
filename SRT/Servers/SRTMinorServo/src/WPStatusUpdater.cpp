@@ -222,8 +222,12 @@ void WPStatusUpdater::runLoop()
                             else { 
                                 // Updating of actual position property
                                 for(size_t i=0; i != act_pos.length(); i++) {
+                                        ((m_params->expire_time)->virtualActElongation[address])[i] = act_pos[i];
                                         ((m_params->expire_time)->actPos[address])[i] = \
                                             act_pos[i] - ((((*lst_secure_requests)[address])[idx]).offsets).system[i];
+                                        ((m_params->expire_time)->plainActPos[address])[i] =
+                                            act_pos[i] - ((((*lst_secure_requests)[address])[idx]).offsets).system[i] - \
+                                                         ((((*lst_secure_requests)[address])[idx]).offsets).user[i];
                                 }
 
                                 for(unsigned int i = 0; i < act_pos.length(); i++)

@@ -16,7 +16,7 @@ const double MAX_DELTA = 0.1;
 const size_t MAX_HISTORY_SIZE = 32768; // 2 ** 15
 const ACS::Time SCAN_DELTA_TIME = 5000000; // 500ms
 // Time in 100ns: 10000000 == 1sec
-const double SCAN_GUARD_COEFF = 0.1;
+const double SCAN_GUARD_COEFF = 0.2;
 const unsigned int SCAN_SHIFT_TIME = 20000000; // 2 seconds
 const unsigned int SCAN_STOP_TIME_GUARD = 2000000; // 2 second
         
@@ -48,12 +48,16 @@ struct CDBParameters {
 struct ExpireTime {
 	ACS::doubleSeq actPos[NUMBER_OF_SERVOS];
     double timeLastActPos[NUMBER_OF_SERVOS];
+	ACS::doubleSeq plainActPos[NUMBER_OF_SERVOS];
+    double timeLastPlainActPos[NUMBER_OF_SERVOS];
 	ACS::doubleSeq cmdPos[NUMBER_OF_SERVOS];
     double timeLastCmdPos[NUMBER_OF_SERVOS];
 	ACS::doubleSeq posDiff[NUMBER_OF_SERVOS];
     double timeLastPosDiff[NUMBER_OF_SERVOS];
 	ACS::doubleSeq actElongation[NUMBER_OF_SERVOS];
     double timeLastActElongation[NUMBER_OF_SERVOS];
+	ACS::doubleSeq virtualActElongation[NUMBER_OF_SERVOS];
+    double timeLastVirtualActElongation[NUMBER_OF_SERVOS];
 	ACS::doubleSeq engTemperature[NUMBER_OF_SERVOS];
     double timeLastEngTemperature[NUMBER_OF_SERVOS];
 	ACS::doubleSeq counturingErr[NUMBER_OF_SERVOS];

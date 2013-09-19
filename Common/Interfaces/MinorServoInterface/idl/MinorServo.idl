@@ -31,9 +31,11 @@ module MinorServo {
      * <h3>Properties</h3>:
      * <ul>
      *     <li><em>actPos</em>: actual position (ROdoubleSeq)</li>
+     *     <li><em>plainActPos</em>: plain actual position (ROdoubleSeq) (actPos - user_offset)</li>
      *     <li><em>cmdPos</em>: commanded position (RWdoubleSeq)</li>
      *     <li><em>posDiff</em>: difference between commanded and actual position (ROdoubleSeq)</li>
      *     <li><em>actElongation</em>: actuators elongation (ROdoubleSeq)</li>
+     *     <li><em>virtualActElongation</em>: virtual absolute position (ROdoubleSeq)</li>
      *     <li><em>engTemperature</em>: engine temperature (ROdoubleSeq)</li>
      *     <li><em>driTemperature</em>: driver temperature (ROdoubleSeq)</li>
      *     <li><em>counturingErr</em>: counturing error (ROdoubleSeq)</li>
@@ -83,6 +85,26 @@ module MinorServo {
          */
         readonly attribute ACS::ROdoubleSeq actPos;
 
+        /** 
+         * Plain Actutal Position property (ROdoubleSeq) 
+         *
+         * The plainActPos property is a ROdoubleSeq of coordinates. The reference
+         * system of coordinates is a "virtual system", that is a system binds
+         * with minor servo, and in general it is not bind with minor servo 
+         * positioner. The position is computed without the user and system offset,
+         * so it is: 
+         *
+         *     plainActPos = virtual_real_actual_position - (user_offset + system_offset)
+         * 
+         * where `virtual_real_actual_position` is the real elongation converted by
+         * the real2virtual function. So, it is also:
+         *
+         *     plainActPos = actPos - user_offset 
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq plainActPos;
+
         /**
          * Commanded Position Property (RWdoubleSeq).
          * The WPServo commanded position, that is the latest position set.
@@ -111,6 +133,15 @@ module MinorServo {
          * @throw ComponentErrors::SocketErrorExImpl
          */
         readonly attribute ACS::ROdoubleSeq actElongation;
+
+        /**
+         * Virtual Actual Elongation Property (ROdoubleSeq).
+         * The WPServo actual elongation, after the real2virtual transformation. Every sequence item is a "virtual" coordinate.
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq virtualActElongation;
+
 
         /**
          * Engine temperatures Property (ROdoubleSeq).

@@ -28,12 +28,16 @@
         <xs:sequence>
             <!-- MinorServo actual position (ROdoubleSeq) -->
             <xs:element name="actPos" type="baci:ROdoubleSeq" />
+            <!-- MinorServo plain actual position (ROdoubleSeq) -->
+            <xs:element name="plainActPos" type="baci:ROdoubleSeq" />
             <!-- MinorServo commanded position (RWdoubleSeq) -->
             <xs:element name="cmdPos" type="baci:RWdoubleSeq" />
             <!-- Difference between commanded and actual position (ROdoubleSeq) -->
             <xs:element name="posDiff" type="baci:ROdoubleSeq" />
             <!-- MinorServo actual elongation (ROdoubleSeq) -->
             <xs:element name="actElongation" type="baci:ROdoubleSeq" />
+            <!-- MinorServo virtual actual elongation (ROdoubleSeq) -->
+            <xs:element name="virtualActElongation" type="baci:ROdoubleSeq" />
             <!-- Temperature of slave engine (ROdoubleSeq) -->
             <xs:element name="engTemperature" type="baci:ROdoubleSeq" />
             <!-- Counturing Error of slaves (ROdoubleSeq) -->

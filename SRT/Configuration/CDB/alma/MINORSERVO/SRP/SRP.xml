@@ -59,6 +59,25 @@
         alarm_timer_trig="0"
 	/>
 
+    <!-- Plain Actual Position (ROdoubleSeq) -->
+    <plainActPos
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo plain actual position (actPos - user_offset)" 
+        units="mm, mm, mm, degree, degree, degree"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+
     <!-- Commanded Position (RwdoubleSeq) -->
     <cmdPos
         default_timer_trig="0"
@@ -99,7 +118,7 @@
         initialize_devio="0"
         default_value="0"
         description="MinorServo actual elongation" 
-        units="mm"
+        units="mm, mm, mm, mm, mm, mm"
         resolution="65535"
         alarm_low_on="0"
         alarm_high_on="0"
@@ -110,7 +129,26 @@
         min_step="0"
         alarm_timer_trig="0"
 	/>
-             
+ 
+    <!-- Virtual Actual Elongation (ROdoubleSeq) -->
+    <virtualActElongation
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo virtual actual elongation" 
+        units="mm, mm, mm, mm, mm, mm"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+            
     <!-- Engine Temperature (ROdoubleSeq) -->
     <engTemperature
         default_timer_trig="0"

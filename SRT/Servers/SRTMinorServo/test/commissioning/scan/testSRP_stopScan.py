@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Author: Marco Buttu <m.buttu@oa-cagliari.inaf.it>
 # Copyright: This module has been placed in the public domain.
-"""Use this module to test the minor servo boss startFocusScan() method"""
+"""Use this module to test the minor servo boss stopScan() method"""
 
 import unittest
 import threading
@@ -17,8 +17,8 @@ import datetime
 class NackEx(Exception):
     pass
 
-class TestFocusScan(unittest.TestCase):
-    """Test the minor servo startFocusScan() method."""
+class TestStopScan(unittest.TestCase):
+    """Test the minor servo stopScan() method."""
 
     def setUp(self):
         self.pyclient = PySimpleClient()
@@ -32,8 +32,8 @@ class TestFocusScan(unittest.TestCase):
         self.pyclient.releaseComponent(self.srp)
         self.pyclient.releaseComponent(self.boss)
 
-    def test_startScan(self):
-        """Test the startFocusScan() method (SRP active)."""
+    def test_stopScan(self):
+        """Test the stopScan() method (SRP active)."""
         setup_code = 'CCB'
         if not self.boss.isReady():
             self.boss.setup(setup_code)
@@ -78,13 +78,24 @@ class TestFocusScan(unittest.TestCase):
             time.sleep(0.2)
 
         print "\nScanning..."
+        stop_delay = 0.5 * (1.0 * total_time) / (10**7) 
+        time.sleep(stop_delay)
+        print "\nStop scan and checks"
+        self.boss.stopScan()
+        time.sleep(2)
+        self.assertTrue(self.boss.isReady())
+        self.assertFalse(self.boss.isScanning())
+        self.assertFalse(self.boss.isScanActive())
+        time.sleep(5)
+        self.assertTrue(self.boss.isTracking())
+
         while actual_time < starting_time + total_time:
             actual_time = TimeHelper.getTimeStamp().value 
             time.sleep(0.2)
         print "\nDone!"
 
         print "Writing the file..."
-        out_file = open('../data/scan.data', 'w')
+        out_file = open('../data/stop_scan.data', 'w')
         out_file.write('# Running time: %s\n\n' %str(datetime.datetime.now()))
         out_file.write('# Starting time: %d\n' %starting_time)
         out_file.write('# Total time: %d\n\n s' %(total_time/10**7))
@@ -114,7 +125,7 @@ class TestFocusScan(unittest.TestCase):
         print "Done!"
 
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestFocusScan)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestStopScan)
     unittest.TextTestRunner(verbosity=2).run(suite)
     print "\n" + "="*70
 

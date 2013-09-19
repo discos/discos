@@ -8,13 +8,9 @@ import threading
 import os
 import time
 from random import randrange as rr
-from socket import *       
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Common import TimeHelper
 from maciErrTypeImpl import CannotGetComponentExImpl
-from parameters import *
-
-server = servers['MSCU']
 
 class NackEx(Exception):
     pass
@@ -33,11 +29,6 @@ class TestPositionFromHistory(unittest.TestCase):
     """Test the minor servo properties."""
 
     def setUp(self):
-        # Direct connection used to match the property values
-        self.sockobj = socket(AF_INET, SOCK_STREAM)
-        self.sockobj.settimeout(socket_timeout)
-        # Connect to the MSCU
-        self.sockobj.connect(server) 
         self.pyclient = PySimpleClient()
         self.cmd_num = 0
         self.component_name = "MINORSERVO/SRP"
@@ -45,7 +36,6 @@ class TestPositionFromHistory(unittest.TestCase):
 
     def _tearDownClass():
         print "in tearDown"
-        self.sockobj.close()
         self.pyclient.releaseComponent(self.component_name)
 
     def test_getPositionFromHistory(self):
@@ -104,7 +94,7 @@ class TestPositionFromHistory(unittest.TestCase):
         print "Done!"
 
         print "Writing the file..."
-        out_file = open('data/history.data', 'w')
+        out_file = open('../data/history.data', 'w')
         hpositions = {}
         for t in sorted(positions.keys()):
             print "time: ", t

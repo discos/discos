@@ -46,9 +46,11 @@ WPServoImpl::WPServoImpl(
         ) : 
     CharacteristicComponentImpl(CompName, containerServices),
     m_actPos(this),
+    m_plainActPos(this),
     m_cmdPos(this),
     m_posDiff(this),
     m_actElongation(this),
+    m_virtualActElongation(this),
     m_engTemperature(this),
     m_counturingErr(this),
     m_torquePerc(this),
@@ -231,6 +233,7 @@ void WPServoImpl::initialize() throw (
     m_expire.timeLastCmdPos[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastPosDiff[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastActElongation[m_cdb_ptr->SERVO_ADDRESS] = -100;
+    m_expire.timeLastVirtualActElongation[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastEngTemperature[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastCounturingErr[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastTorquePerc[m_cdb_ptr->SERVO_ADDRESS] = -100;
@@ -246,9 +249,11 @@ void WPServoImpl::initialize() throw (
     m_expire.timeLastAppStatus[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.timeLastCabState[m_cdb_ptr->SERVO_ADDRESS] = -100;
     m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.plainActPos[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.cmdPos[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.posDiff[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.actElongation[m_cdb_ptr->SERVO_ADDRESS] = 0;
+    m_expire.virtualActElongation[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.engTemperature[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.counturingErr[m_cdb_ptr->SERVO_ADDRESS] = 0;
     m_expire.torquePerc[m_cdb_ptr->SERVO_ADDRESS] = 0;
@@ -265,9 +270,11 @@ void WPServoImpl::initialize() throw (
     m_expire.cabState[m_cdb_ptr->SERVO_ADDRESS] = 0;
     // Set the length of sequences
     m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
+    m_expire.plainActPos[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
     m_expire.cmdPos[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
     m_expire.posDiff[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
     m_expire.actElongation[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
+    m_expire.virtualActElongation[m_cdb_ptr->SERVO_ADDRESS].length(m_cdb_ptr->NUMBER_OF_AXIS);
 
     // Offsets initialization
     (m_offsets.user).length(m_cdb_ptr->NUMBER_OF_AXIS);
@@ -395,6 +402,13 @@ void WPServoImpl::execute()
                 getComponent(), 
                 new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::ACT_POS, m_cdb_ptr, &m_expire), true);
         
+        // Plain Actual Position
+        m_plainActPos = new ROdoubleSeq(
+                getContainerServices()->getName() + ":plainActPos", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::PLAIN_ACT_POS, m_cdb_ptr, &m_expire), true);
+        
+
         // Commanded Position
         m_cmdPos = new RWdoubleSeq(
                 getContainerServices()->getName() + ":cmdPos", 
@@ -412,6 +426,13 @@ void WPServoImpl::execute()
                 getContainerServices()->getName() + ":actElongation", 
                 getComponent(), 
                 new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::ACT_ELONGATION, m_cdb_ptr, &m_expire), true);
+ 
+        // Virtual Actual Elongation
+        m_virtualActElongation = new ROdoubleSeq(
+                getContainerServices()->getName() + ":virtualActElongation", 
+                getComponent(), 
+                new PdoubleSeqDevIO(m_wpServoTalker_ptr, PdoubleSeqDevIO::VIRTUAL_ACT_ELONGATION, m_cdb_ptr, &m_expire), true);
+
 
         // Engine temperature
         m_engTemperature = new ROdoubleSeq(
@@ -694,7 +715,8 @@ void WPServoImpl::setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target
                 vector<PositionItem>::size_type idx = findPositionIndex(
                         lst_secure_requests,
                         now.value().value, 
-                        m_cdb_ptr->SERVO_ADDRESS
+                        m_cdb_ptr->SERVO_ADDRESS,
+                        false
                 );
                 // For every item in PositionItem
                 for( ; idx < ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).size(); idx++) {
@@ -714,7 +736,7 @@ void WPServoImpl::setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target
                 item.position = m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS];
                 vitem.push_back(item);
             }
-            ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).clear();
+            // ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).clear(); // Is it necessary?
             lst_secure_requests.Release();
             cleanPositionsQueue();
             ACS::Time timestamp;
@@ -778,28 +800,25 @@ void WPServoImpl::cleanPositionsQueue(const ACS::Time exe_time) throw (MinorServ
         usleep(500000); // 500 ms
         CSecAreaResourceWrapper<map<int, vector< PositionItem> > > lst_secure_requests = (m_cmdPos_list)->Get();
         if((*lst_secure_requests).count(m_cdb_ptr->SERVO_ADDRESS)) {
-            try {
-                vector<PositionItem>::size_type idx = findPositionIndex(
-                        lst_secure_requests, 
-                        getTimeStamp(), 
-                        m_cdb_ptr->SERVO_ADDRESS, 
-                        true
-                );
-                vector<PositionItem>::iterator ibegin = ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).begin();
-                vector<PositionItem>::iterator iend = ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).end();
-                if(ibegin + idx + 1 < iend) {
-                    ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).erase(ibegin + idx + 1, iend);
+            if(((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).size() > 1) {
+                try {
+                    vector<PositionItem>::size_type idx = findPositionIndex(
+                            lst_secure_requests, 
+                            getTimeStamp(), 
+                            m_cdb_ptr->SERVO_ADDRESS, 
+                            false
+                    );
+                    vector<PositionItem>::iterator ibegin = ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).begin();
+                    vector<PositionItem>::iterator iend = ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).end();
+                    if(ibegin + idx + 1 < iend) {
+                        ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).erase(ibegin + idx + 1, iend);
+                    }
+                }
+                catch(PosNotFoundEx) {
+                    lst_secure_requests.Release();
+                    ACS_SHORT_LOG((LM_WARNING, "In WPServoImpl::cleanPositionsQueue(): cannot clean the commanded positions."));
                 }
             }
-            catch(PosNotFoundEx) {
-                lst_secure_requests.Release();
-                ACS_SHORT_LOG((LM_WARNING, "In WPServoImpl::cleanPositionsQueue(): cannot clean the commanded positions."));
-            }
-            // PositionItem item;
-            // item.position = m_expire.actPos[m_cdb_ptr->SERVO_ADDRESS];
-            // item.exe_time = getTimeStamp();
-            // ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).clear();
-            // ((*lst_secure_requests)[m_cdb_ptr->SERVO_ADDRESS]).insert(ibegin, item);
         }
         lst_secure_requests.Release();
     }
@@ -1061,9 +1080,11 @@ bool WPServoImpl::isInEmergencyStop() {
 
 
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_actPos, actPos);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_plainActPos, plainActPos);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::RWdoubleSeq, m_cmdPos, cmdPos);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_posDiff, posDiff);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_actElongation, actElongation);
+GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_virtualActElongation, virtualActElongation);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_engTemperature, engTemperature);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_counturingErr, counturingErr);
 GET_PROPERTY_REFERENCE(WPServoImpl, ACS::ROdoubleSeq, m_torquePerc, torquePerc);

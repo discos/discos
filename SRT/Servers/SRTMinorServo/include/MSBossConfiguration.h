@@ -38,6 +38,13 @@ const std::string slaves_separator = ",";
 const std::string coeffs_separator = ";";
 const std::string coeffs_id = "=";
 
+struct InfoAxisCode {
+    size_t axis_id;
+    std::string comp_name;
+    size_t numberOfAxes;
+};
+
+
 /**
  * This class stores the actual minor servo system configuration. The data inside this class are 
  * initialized at the startup from the configuration database and then are used (read) inside the component.
@@ -95,8 +102,7 @@ public:
     // Return the name of the servo active in the primary focus
     inline std::string getActivePFocusServo() { return m_active_pfocus_servo; }
 
-    short getAxisIndex(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl);
-
+    InfoAxisCode getInfoFromAxisCode(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl);
 
     struct Scan {
         ACS::Time starting_time;
@@ -107,6 +113,8 @@ public:
         unsigned short axis_index;
         ACS::doubleSeq actPos;
         ACS::doubleSeq centralPos;
+        ACS::doubleSeq plainCentralPos;
+        ACS::doubleSeq virtualCentralElongation;
         bool wasElevationTrackingEn;
     };
 
@@ -129,6 +137,8 @@ public:
             const unsigned short axis_index, 
             const ACS::doubleSeq actPos,
             const ACS::doubleSeq centralPos,
+            const ACS::doubleSeq plainCentralPos,
+            const ACS::doubleSeq virtualCentralElongation,
             bool wasElevationTrackingEn
     );
 

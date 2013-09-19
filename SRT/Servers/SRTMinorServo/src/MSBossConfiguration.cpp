@@ -170,23 +170,38 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
     m_isValidCDBConfiguration = true;
 }
 
-
-short MSBossConfiguration::getAxisIndex(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl) {
+InfoAxisCode MSBossConfiguration::getInfoFromAxisCode(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl) {
+    InfoAxisCode result;
     short id = 0;
-    string servo_name;
+    string comp_name;
     strip(axis_code);
     try {
         vector<string> items = split(axis_code, string("_"));
-        servo_name = items[0];
+        comp_name = items[0];
+        result.comp_name = comp_name;
     }
     catch(...) {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "Wrong axis code", false);
     }
 
+    // Get the component
+    MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+    if(m_component_refs.count(comp_name)) {
+        component_ref = m_component_refs[comp_name];
+        if(CORBA::is_nil(component_ref)) {
+            string msg("getAxesPosition(): cannot get the reference of " + comp_name);
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, msg.c_str(), false);
+        }
+        result.numberOfAxes = component_ref->numberOfAxes();
+    }
+    else {
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, ("Cannot get component " + comp_name).c_str(), false);
+    }
+
     bool found = false;
     for(size_t i=0; i<m_axes.size(); i++) {
         vector<string> items = split(m_axes[i], string("_"));
-        if(items[0] == servo_name) {
+        if(items[0] == comp_name) {
             if(m_axes[i] == axis_code) {
                 found = true;
                 break;
@@ -194,8 +209,10 @@ short MSBossConfiguration::getAxisIndex(string axis_code) throw (ManagementError
             id++;
         }
     }
-    if(found)
-        return id;
+    if(found) {
+        result.axis_id = id;
+        return result;
+    }
     else{
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "Axis not active", false);
     }
@@ -211,6 +228,8 @@ void MSBossConfiguration::setScan(
         unsigned short axis_index,
         ACS::doubleSeq actPos,
         ACS::doubleSeq centralPos,
+        ACS::doubleSeq plainCentralPos,
+        ACS::doubleSeq virtualCentralElongation,
         bool wasElevationTrackingEn
         )
 {
@@ -222,6 +241,8 @@ void MSBossConfiguration::setScan(
     m_scan.axis_index = axis_index;
     m_scan.actPos = actPos;
     m_scan.centralPos = centralPos;
+    m_scan.plainCentralPos = plainCentralPos;
+    m_scan.virtualCentralElongation = virtualCentralElongation;
     m_scan.wasElevationTrackingEn = wasElevationTrackingEn;
 }
 
