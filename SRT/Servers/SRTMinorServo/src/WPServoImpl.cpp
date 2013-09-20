@@ -615,18 +615,24 @@ void WPServoImpl::clearEmergency() throw (MinorServoErrors::CommunicationErrorEx
 }
 
 
-void WPServoImpl::clearUserOffset() throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx)
+void WPServoImpl::clearUserOffset(bool clear_positions) 
+    throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx)
 {
     AUTO_TRACE("WPServoImpl::clearUserOffset()");
-    ACS::doubleSeq offset;
-    offset.length(m_cdb_ptr->NUMBER_OF_AXIS);
-    for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
-        offset[i] = 0;
-    setUserOffset(offset); // Raise a MinorServoErrors::CommunicationErrorEx
+    if(clear_positions) {
+        ACS::doubleSeq offset;
+        offset.length(m_cdb_ptr->NUMBER_OF_AXIS);
+        for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+            offset[i] = 0;
+        setUserOffset(offset); // Raise a MinorServoErrors::CommunicationErrorEx
+    }
+    else {
+        pthread_mutex_lock(&offset_mutex); 
+        for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+            m_offsets.user[i] = 0;
+        pthread_mutex_unlock(&offset_mutex); 
+    }
 }
-
-
-
 
 
 void WPServoImpl::setUserOffset(const ACS::doubleSeq &offset) 
@@ -638,7 +644,6 @@ void WPServoImpl::setUserOffset(const ACS::doubleSeq &offset)
     }
     setOffset(offset, m_offsets.user); // Raise a MinorServoErrors::CommunicationErrorEx
 }
-
 
 
 ACS::doubleSeq * WPServoImpl::getUserOffset(void) 
@@ -653,15 +658,23 @@ ACS::doubleSeq * WPServoImpl::getUserOffset(void)
 }
 
 
-void WPServoImpl::clearSystemOffset() 
+void WPServoImpl::clearSystemOffset(bool clear_positions) 
     throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx)
 {
     AUTO_TRACE("WPServoImpl::clearSystemOffset()");
-    ACS::doubleSeq offset;
-    offset.length(m_cdb_ptr->NUMBER_OF_AXIS);
-    for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
-        offset[i] = 0;
-    setSystemOffset(offset);
+    if(clear_positions) {
+        ACS::doubleSeq offset;
+        offset.length(m_cdb_ptr->NUMBER_OF_AXIS);
+        for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+            offset[i] = 0;
+        setSystemOffset(offset); // Raise a MinorServoErrors::CommunicationErrorEx
+    }
+    else {
+        pthread_mutex_lock(&offset_mutex); 
+        for(size_t i=0; i<m_cdb_ptr->NUMBER_OF_AXIS; i++)
+            m_offsets.system[i] = 0;
+        pthread_mutex_unlock(&offset_mutex); 
+    }
 }
 
 
@@ -780,6 +793,8 @@ void WPServoImpl::setup(const ACS::Time exe_time)
         THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot make a new minor servo setup: an old setup is in progress.", true);
 
     try {
+        clearUserOffset(false); // Do not set the actual and future positions
+        usleep(500000); // 500 ms
         // The index code of setup command in Talk.cpp is 3
         m_wpServoTalker_ptr->action(3, exe_time);
     }
@@ -880,6 +895,8 @@ void WPServoImpl::stow(const ACS::Time exe_time)
         THROW_EX(MinorServoErrors, StowErrorEx, "Cannot make a new minor servo stow: an old stow is in progress.", true);
 
     try {
+        clearUserOffset(false); // Do not set the actual and future positions
+        usleep(500000); // 500 ms
         // The index code of stow command in Talk.cpp is 4
         m_wpServoTalker_ptr->action(4, exe_time);
     }

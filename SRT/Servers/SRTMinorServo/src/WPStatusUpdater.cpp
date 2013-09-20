@@ -43,12 +43,13 @@ void WPStatusUpdater::runLoop()
     // unsigned long status;
     ACS::Time timestamp;
     bool is_tracking = false;
+    unsigned long address=0;
     // A smarter policy than round robin should be to iterate only on active servos.
     try {
         pthread_mutex_lock(m_params->status_mutex); 
         if(!(m_params->map_of_talkers_ptr)->empty()) {
             // The servo address
-            unsigned long address = m_counter % NUMBER_OF_SERVOS;
+            address = m_counter % NUMBER_OF_SERVOS;
 
             if((m_params->map_of_talkers_ptr)->count(address) && (*m_params->status_thread_en).count(address)
                     && (*m_params->status_thread_en)[address]) 
@@ -274,6 +275,11 @@ void WPStatusUpdater::runLoop()
         }
         pthread_mutex_unlock(m_params->status_mutex); 
         m_counter = m_counter == COUNTER_LIMIT ? 0 : ++m_counter;
+    }
+    catch (const std::exception &e) {
+        pthread_mutex_unlock(m_params->status_mutex); 
+        ACS_SHORT_LOG((LM_ERROR, "@%ll: unexpected error updating the status.", timestamp));
+        ACS_SHORT_LOG((LM_ERROR, e.what()));
     }
     catch (...) {
         pthread_mutex_unlock(m_params->status_mutex); 

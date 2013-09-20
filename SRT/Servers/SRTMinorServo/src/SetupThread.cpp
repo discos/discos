@@ -107,9 +107,11 @@ void SetupThread::run()
                             return;
                         }
                         else if(!component_ref->isReady()) {
+                            // Set the targetPos
                             continue;
                         }
                         else {
+                            component_ref->clearUserOffset(false);
                             component_ref->stow(0);
                             continue;
                         }
@@ -193,20 +195,25 @@ void SetupThread::run()
                                 m_configuration->m_actualSetup = "unknown";
                                 return;
                             }
+
+                            // The component must be active, in order to perform a scan
+                            // We perform a setup also if the component is active, in order to clean the offsets
+                            if(component_ref->isReadyToSetup() || component_ref->isReady())
+                                component_ref->setup(0);
+
                             bool on_target = true;
                             // Compute the difference between actual and target positions
                             for(size_t i=0; i<target_pos.length(); i++) { 
-                                if(fabs(target_pos[i] - (*act_pos)[i]) > component_ref->getTrackingDelta())
+                                if(fabs(target_pos[i] - (*act_pos)[i]) > component_ref->getTrackingDelta()) {
                                     on_target = false;
+                                }
                             }
 
-                            // The component must be active, in order to perform a scan
-                            if(component_ref->isReadyToSetup())
-                                component_ref->setup(0);
-
                             if(on_target) {
+                                cout << comp_name << " on target!" << endl;
                                 if(find(on_target_check.begin(), on_target_check.end(), comp_name) == on_target_check.end())
                                     on_target_check.push_back(comp_name);
+
                                 continue;
                             }
                             else {
@@ -259,6 +266,8 @@ void SetupThread::run()
                                         continue; // The servo is moving
                                     }
                                     else {
+                                        ACS_SHORT_LOG((LM_INFO, ("SetupThread: positioning " + comp_name).c_str()));
+                                        component_ref->clearUserOffset(false);
                                         component_ref->setPosition(target_pos, 0);
                                         m_positioning.push_back(comp_name);
                                         continue;

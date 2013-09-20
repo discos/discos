@@ -922,13 +922,35 @@ void MinorServoBossImpl::startScanImpl(
 
 CORBA::Double MinorServoBossImpl::getCentralScanPosition() throw (ManagementErrors::SubscanErrorEx)
 {
+    ACS::doubleSeq_var position_res = new ACS::doubleSeq;
+    string comp_name = (m_configuration->m_scan).comp_name;
+
     if(isScanActive()) {
-        size_t idx = (m_configuration->m_scan).axis_index;
-        return (m_configuration->m_scan).centralPos[idx];
+        MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+        if((m_configuration->m_component_refs).count(comp_name)) {
+            component_ref = (m_configuration->m_component_refs)[comp_name];
+            if(CORBA::is_nil(component_ref)) 
+                THROW_EX(ManagementErrors, SubscanErrorEx, "startScanImpl: cannot get the reference of the component.", true);
+
+            ACS::doubleSeq plainCentralPos = (m_configuration->m_scan).plainCentralPos;
+
+            ACS::doubleSeq_var user_offset = component_ref->getUserOffset();
+            position_res->length(user_offset->length());
+            if(user_offset->length() != plainCentralPos.length()) {
+                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: mismatch between offset and central position length.", true);
+            }
+            for(size_t i=0; i<plainCentralPos.length(); i++) 
+                position_res[i] = plainCentralPos[i] + user_offset[i];
+        }
+        else {
+            THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: cannot get the name of" + comp_name, true);
+        }
     }
     else {
         THROW_EX(ManagementErrors, SubscanErrorEx, "getCentralScanPosition(): scan not active", true);
     }
+
+    return position_res[(m_configuration->m_scan).axis_index];
 }
 
 
@@ -1009,10 +1031,10 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
                 component_ref = m_component_refs[*iter];
                 if(!CORBA::is_nil(component_ref))
                     if(offset_type == "user")
-                        component_ref->clearUserOffset();
+                        component_ref->clearUserOffset(true);
                     else
                         if(offset_type == "system")
-                            component_ref->clearSystemOffset();
+                            component_ref->clearSystemOffset(true);
                         else {
                             THROW_EX(
                                     MinorServoErrors, 
@@ -1037,10 +1059,10 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
             component_ref = m_component_refs[comp_name];
             if(!CORBA::is_nil(component_ref)) {
                     if(offset_type == "user")
-                        component_ref->clearUserOffset();
+                        component_ref->clearUserOffset(true);
                     else
                         if(offset_type == "system")
-                            component_ref->clearSystemOffset();
+                            component_ref->clearSystemOffset(true);
                         else {
                             THROW_EX(
                                     MinorServoErrors, 

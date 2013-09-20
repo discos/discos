@@ -350,10 +350,11 @@ public:
      virtual ACS::doubleSeq * getUserOffset(void); 
 
 
-    /** Clear the position user offset
+    /** Clear the user offset
+     * @arg bool set_positions if true, it also sets the actual and the future positions
      * @throw MinorServoErrors::CommunicationErrorEx
      */
-     virtual void clearUserOffset(void) 
+     virtual void clearUserOffset(bool set_positions) 
           throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
@@ -372,8 +373,12 @@ public:
      virtual ACS::doubleSeq * getSystemOffset(void);
 
 
-    /** Clear the position system offset */ 
-     virtual void clearSystemOffset(void) throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
+    /** Clear the system offset
+     * @arg bool set_positions if true, it also sets the actual and the future positions
+     * @throw MinorServoErrors::CommunicationErrorEx
+     */
+     virtual void clearSystemOffset(bool set_positions) 
+          throw (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
     /**
