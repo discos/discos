@@ -66,9 +66,9 @@ class TestLinearMovement(unittest.TestCase):
         print "Done!"
 
         delay = 20 * 10 ** 7 # 20 seconds
-        step =  2 * 10 ** 7 # 1 second
-        points = 10
-        increment = 2.0 # mm
+        step =  5 * 10 ** 6 # 500 ms
+        points = 20 # 10mm
+        increment = 0.5 # mm
         exe_time = TimeHelper.getTimeStamp().value + delay # Set the positions in delay seconds from now
         print "Setting the positions..."
         commanded_positions = {}
@@ -83,7 +83,7 @@ class TestLinearMovement(unittest.TestCase):
         print "Done!"
 
         expected_positions = {}
-        sampling_time_step = 2 * 10 ** 6 # 2ms
+        sampling_time_step = 4 * 10 ** 5 # 40ms
         scale_factor = step / sampling_time_step # Integer result
         sampling_points = points * scale_factor
         position = starting_pos

@@ -55,10 +55,10 @@ module MinorServo {
      *     <li><em>disable(exe_time)</em>: brake the servo.</li>
      *     <li><em>clearEmergency()</em>: clear the emergency stop.</li>
      *     <li><em>isInEmergencyStop()</em>: return true when the servo is in emergency stop.</li>
-     *     <li><em>clearUserOffset(offset)</em>: clear the user offset of the position.</li>
+     *     <li><em>clearUserOffset(boolean)</em>: clear the user offset of the position.</li>
      *     <li><em>getUserOffset(offset)</em>: get the user offset of the position.</li>
      *     <li><em>setSystemOffset(offset)</em>: set a system offset to the position.</li>
-     *     <li><em>clearSystemOffset(offset)</em>: clear the system offset of the position.</li>
+     *     <li><em>clearSystemOffset(boolean)</em>: clear the system offset of the position.</li>
      *     <li><em>getSystemOffset(offset)</em>: get the system offset of the position.</li>
      *     <li><em>setup(exe_time)</em>: accomplish a setup at some time.</li>
      *     <li><em>stow(exe_time)</em>: accomplish a stow at some time.</li>
@@ -378,10 +378,11 @@ module MinorServo {
 
 
         /** Clear the position user offset
+         * @arg boolean set_positions if true, it also sets the actual and the future positions
          * @throw MinorServoErrors::CommunicationErrorEx
          * @throw MinorServoErrors::OperationNotPermittedEx
          */
-         void clearUserOffset()
+         void clearUserOffset(in boolean set_positions)
              raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
 
 
@@ -418,10 +419,11 @@ module MinorServo {
          ACS::doubleSeq getPositionFromHistory(in ACS::Time time) raises (ComponentErrors::UnexpectedEx);
 
         /** Clear the position system offset
+         * @arg boolean set_positions if true, it also sets the actual and the future positions
          * @throw MinorServoErrors::CommunicationErrorEx
          * @throw MinorServoErrors::OperationNotPermittedEx
          */ 
-         void clearSystemOffset()
+         void clearSystemOffset(in boolean set_positions)
              raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
        
        

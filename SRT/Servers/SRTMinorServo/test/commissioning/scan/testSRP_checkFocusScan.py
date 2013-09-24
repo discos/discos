@@ -72,8 +72,8 @@ class TestCheckFocusScan(unittest.TestCase):
 
         time.sleep(2)
         starting_time = TimeHelper.getTimeStamp().value + self.delay # Check for the scan in `delay` seconds from now
-        range_ = 40.0 # mm 
-        total_time = 40 * 10 ** 7 # 10 seconds
+        range_ = 10.0 # mm 
+        total_time = 10 * 10 ** 7 # 10 seconds
         actPos_obj = self.srp._get_actPos()
         actPos, cmp = actPos_obj.get_sync()
         actual_pos = actPos[self.axis_id]

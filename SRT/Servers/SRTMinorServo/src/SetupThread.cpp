@@ -186,7 +186,6 @@ void SetupThread::run()
                             ACSErr::Completion_var completion;
                             ACS::doubleSeq * act_pos = refActPos->get_sync(completion.out());
                             ACS::doubleSeq target_pos = m_configuration->getPosition(comp_name);
-                            for(size_t z=0; z!=target_pos.length(); z++)
 
                             if(act_pos->length() != target_pos.length()) {
                                 ACS_SHORT_LOG((LM_ERROR, ("SetupThread: lenghts of target and act pos do not match")));
@@ -196,10 +195,6 @@ void SetupThread::run()
                                 return;
                             }
 
-                            // The component must be active, in order to perform a scan
-                            // We perform a setup also if the component is active, in order to clean the offsets
-                            if(component_ref->isReadyToSetup() || component_ref->isReady())
-                                component_ref->setup(0);
 
                             bool on_target = true;
                             // Compute the difference between actual and target positions
@@ -210,10 +205,12 @@ void SetupThread::run()
                             }
 
                             if(on_target) {
-                                cout << comp_name << " on target!" << endl;
-                                if(find(on_target_check.begin(), on_target_check.end(), comp_name) == on_target_check.end())
+                                if(find(on_target_check.begin(), on_target_check.end(), comp_name) == on_target_check.end()) {
                                     on_target_check.push_back(comp_name);
-
+                                    component_ref->clearUserOffset(false);
+                                    if(component_ref->isReadyToSetup())
+                                        component_ref->setup(0);
+                                }
                                 continue;
                             }
                             else {

@@ -35,10 +35,9 @@ class TestFocusScan(unittest.TestCase):
     def test_startScan(self):
         """Test the startFocusScan() method (SRP active)."""
         setup_code = 'CCB'
-        if not self.boss.isReady():
-            self.boss.setup(setup_code)
-            print "\nExecuting the %s setup. Wait a bit ..." %setup_code
-            time.sleep(1) # Wait a bit, until the boss begins the configuration process
+        self.boss.setup(setup_code)
+        print "\nExecuting the %s setup. Wait a bit ..." %setup_code
+        time.sleep(1) # Wait a bit, until the boss begins the configuration process
 
         counter = 0
         delay_ready = 2
@@ -46,16 +45,16 @@ class TestFocusScan(unittest.TestCase):
             time.sleep(delay_ready) # Wait a bit, until the boss is active
             counter += delay_ready
             if counter > 240:
-                self.assertTrue(counter > 240)
+                self.assertFalse(counter > 240)
                 return
 
         print "\nThe MinorServoBoss is ready."
 
         time.sleep(2)
-        delay = 8 * 10 ** 7 # 8 seconds
+        delay = 10 * 10 ** 7 # 10 seconds
         starting_time = TimeHelper.getTimeStamp().value + delay # Start the scan in `delay` seconds from now
-        range_ = 40.0 # mm 
-        total_time = 20 * 10 ** 7 # 20 seconds
+        range_ = 15.0 # mm 
+        total_time = 5 * 10 ** 7 # 5 seconds
         mm_per_sec = range_ / total_time
         actPos_obj = self.srp._get_actPos()
         actPos, cmp = actPos_obj.get_sync()
@@ -66,7 +65,12 @@ class TestFocusScan(unittest.TestCase):
         exe_times = range(starting_time, starting_time + total_time + sampling_time, sampling_time)
         expected_position = actPos[:]
         for i, t in enumerate(exe_times):
-            expected_position[2] = actPos[2] -range_/2 + (t - starting_time) * mm_per_sec
+            temp_pos = actPos[2] -range_/2 + (t - starting_time) * mm_per_sec
+            if temp_pos > actPos[2] + range_/2:
+                expected_position[2] = actPos[2] + range_/2
+                print 'expected[2]: ', expected_position[2]
+            else:
+                expected_position[2] = actPos[2] -range_/2 + (t - starting_time) * mm_per_sec
             expected_positions[t] = expected_position[:]
         for i in range(1, 5):
             expected_positions[t + sampling_time * i] = expected_position[:]
@@ -93,7 +97,6 @@ class TestFocusScan(unittest.TestCase):
 
         hpositions = {}
         for t in sorted(expected_positions.keys()):
-            print "time: ", t
             ep = ' '.join(['%.4f' %item for item in expected_positions[t]])
             hp = self.srp.getPositionFromHistory(t)
             out_file.write("\n#" + "-"*68)
@@ -101,11 +104,9 @@ class TestFocusScan(unittest.TestCase):
             out_file.write("\nExpected: %s" %ep)
             out_file.write("\nHistory:  %s" %' '.join(['%.4f' %item for item in hp]))
             hpositions[t] = hp
-            print "-"*40
-            print "Timestamp: ", t
-            print "History : ", hp
-            print "Expected: ", ep
-            print
+
+        self.boss.stopScan()
+
         pos = [expected_positions[t] for t in sorted(expected_positions.keys())]
         hpos = [hpositions[t] for t in sorted(hpositions.keys())]
         max_diff = max([abs(p[2] - h[2]) for p, h in zip(pos, hpos)])

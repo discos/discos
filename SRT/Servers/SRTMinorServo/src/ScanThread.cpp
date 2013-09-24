@@ -136,10 +136,10 @@ void ScanThread::run()
                 IRA::CIRATools::getTime(now);
             }
 
-            ACS::Time lastTime = getTimeStamp();
             while(idx < positions.size()) {
-                size_t freeEquivalentPoints = (size_t)((getTimeStamp() - lastTime) / dtime.value().value);
-                if(freeEquivalentPoints > 0) {
+                size_t consumed = (size_t)((getTimeStamp() -(m_configuration->m_scan).starting_time) / dtime.value().value);
+                size_t freeEquivalentPoints = (idx + 1 - consumed);
+                if(freeEquivalentPoints < EQUIVALENT_BUFF_SIZE / 2) {
                     size_t remainingPoints = positions.size() - (idx + 1);
                     if(remainingPoints <= freeEquivalentPoints) {
                         // Send all the remaining points
@@ -152,7 +152,6 @@ void ScanThread::run()
                             component_ref->setPosition(positions[idx], exe_times[idx]);
                         }
                     }
-                    lastTime = getTimeStamp();
                 }
                 ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
                 sleep_ret = ACS::ThreadBase::sleep(1000); // Wait 100 us
