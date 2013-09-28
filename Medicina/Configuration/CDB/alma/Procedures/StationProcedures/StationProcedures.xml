@@ -21,6 +21,10 @@
 	receiversSetup=KKC
 	initialize=KKC
 	device=0
+	setAttenuation=0,9
+	setAttenuation=1,9
+	setAttenuation=2,9
+	setAttenuation=3,9
 	calOff
 </body>
 </Procedure>
@@ -45,6 +49,8 @@
 	initialize=CCCL
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
+	setAttenuation=0,8
+	setAttenuation=1,8
 	device=0
 	calOff
 </body>

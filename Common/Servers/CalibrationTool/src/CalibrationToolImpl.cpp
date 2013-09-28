@@ -1,4 +1,3 @@
-/* $Id: CalibrationToolImpl.cpp,v 1.5 2011-03-11 12:27:21 c.migoni Exp $ */
 
 #include "CalibrationToolImpl.h"
 #include <Definitions.h>
@@ -154,7 +153,10 @@ void CalibrationToolImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	m_collectThread->setSleepTime(m_config.getCollectorThreadTime());
 	m_collectThread->setConfiguration(&m_config);
 	m_collectThread->setServices(getContainerServices());
-	m_collectThread->resume();
+	/*******************************************************/
+	/* THREAD IS NOT RESUMED as it is not needed at the moment */
+	/*******************************************************/
+	//m_collectThread->resume();
 	try {
 		startPropertiesMonitoring();
 	}
@@ -224,14 +226,20 @@ void CalibrationToolImpl::startScan(const Management::TScanSetup & prm) throw (C
 void CalibrationToolImpl::startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_dataWrapper->Get();
-	bool rec,inc;
-	if (!data->setSubScanSetup(prm,rec,inc)) {
+	bool rec,inc,noScan,warn;
+	if (!data->setSubScanSetup(prm,rec,inc,noScan,warn)) {
+		if (warn) {
+			ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::startSubScan()",(LM_WARNING,"UNEXPECTED_SUBSCAN_SEQUENCE"));
+		}
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CalibrationTool::startSubScan");
 		if (rec) {
 			impl.setReason("Could not start a new subscan while recording");
 		}
 		else if (inc) {
 			impl.setReason("Could not start a new subscan right now");
+		}
+		else if (noScan) {
+			impl.setReason("Could not start a subscan because the axis is not pertinent");
 		}
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();

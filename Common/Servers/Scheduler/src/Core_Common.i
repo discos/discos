@@ -533,7 +533,8 @@ void CCore::setupDataTransfer(bool& scanStarted,
 																		const DWORD& scanID,
 																		const ACS::Time& startTime,
 																		const  DWORD& subScanID,
-																		const Management::TScanAxis& axis
+																		const Management::TScanAxis& axis,
+																		const CConfiguration* config
 	) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl)
 {
  	try {
@@ -624,6 +625,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
  			subSetup.startUt=startTime;
  			subSetup.subScanId=subScanID;
  			subSetup.axis=axis;
+ 			subSetup.minorServoNameForAxis=CORBA::string_dup((const char *)config->getServoName(axis));
  			subSetup.extraPath=CORBA::string_dup((const char *)extraPath);
  			subSetup.baseName=CORBA::string_dup((const char *)baseName);
  			subSetup.targetID=CORBA::string_dup((const char *)targetID);

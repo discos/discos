@@ -11,6 +11,7 @@
 									m_customLogger=Management::CustomLogger::_nil(); \
 									m_weatherStation=Weather::GenericWeatherStation::_nil(); \
 									m_antennaNC=NULL; \
+									m_minorServoNC=NULL; \
 									m_isAntennaTracking=m_isMinorServoTracking=false; \
 									m_clearTrackingTime=0; \
 									m_antennaBossError=m_receiversBossError=m_minorServoBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=\

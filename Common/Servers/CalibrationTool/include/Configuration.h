@@ -79,6 +79,12 @@ public:
 	 * @return the name of the interface of the antenna boss component
 	*/
 	const IRA::CString& getAntennaBossComponent() const { return m_antennaBossComp; }
+
+	/**
+	 * @return the name of the interface of the minor servo  boss component
+	*/
+	const IRA::CString& getMinorServoBossComponent() const { return m_minorServoBossComp; }
+
 	/**
 	 * @return the name of the interface of the scheduler component.
 	*/	
@@ -87,6 +93,11 @@ public:
 	 * @return the name of the interface of the observatory component.
 	*/	
 	const IRA::CString& getObservatoryComponent() const { return m_observatoryComp; }
+
+	/**
+	 * @return the tolerance for the check made about the full width half maximum measurements (percentage/100.0)
+	 */
+	const double& getFWHMTolerance() const { return m_fwhmTol; }
 
     /**
 	 * @return the flag that allows to control the file generation
@@ -102,8 +113,10 @@ private:
 	long m_trackingFlagDutyCycle;
 	long m_generateFile;
 	IRA::CString m_antennaBossComp;
+	IRA::CString m_minorServoBossComp;
 	IRA::CString m_schedulerComp;
     IRA::CString m_observatoryComp;
+    double m_fwhmTol;
 };
 
 };

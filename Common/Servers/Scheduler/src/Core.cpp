@@ -86,7 +86,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	catch (...) {
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CCore::execute()");
 	}
-	m_schedExecuter->initialize(m_services,m_dut1,m_site); // throw (ComponentErrors::TimerErrorExImpl)
+	m_schedExecuter->initialize(m_services,m_dut1,m_site,m_config); // throw (ComponentErrors::TimerErrorExImpl)
 	ACS::TimeInterval sleepTime=m_config->getScheduleExecutorSleepTime()*10;
 	m_schedExecuter->setSleepTime(sleepTime);
 
@@ -208,7 +208,7 @@ void CCore::chooseDefaultDataRecorder(const char *rcvInstance)
 	IRA::CString instance(rcvInstance);
 	if (m_defaultDataReceiverInstance!=instance) {
 		m_defaultDataReceiverInstance=instance;
-		m_defaultDataReceiverError=true;  // this is tricky...in order to force to unload the preset data recorder and then reload the new one the next time the default data recroder is required 
+		m_defaultDataReceiverError=true;  // this is tricky...in order to force to unload the preset data recorder and then reload the new one the next time the default data recorder is required
 	}
 }
 

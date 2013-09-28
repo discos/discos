@@ -1,5 +1,3 @@
-// $Id: CollectorThread.cpp,v 1.2 2011-01-18 10:50:21 c.migoni Exp $
-
 #include "CollectorThread.h"
 #include <LogFilter.h>
 #include <Definitions.h>
@@ -9,6 +7,10 @@
 
 using namespace IRA;
 using namespace CalibrationTool_private;
+
+/*
+ * At the moment the thread has been disabled as the collection on tracking information from the scheduler is not used...see class Impl, the thread is no resumed
+ */
 
 _IRA_LOGFILTER_IMPORT;
 
@@ -61,10 +63,11 @@ void CCollectorThread::runLoop()
 			CCommonTools::getScheduler(m_scheduler,m_services,m_config->getSchedulerComponent(),m_schedulerError);
 		}
 		catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
-			_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
+			/* TO BE REVIEWED */
+			/*_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
 			CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 			data->setStatus(Management::MNG_WARNING);		
-			m_schedulerError=true;
+			m_schedulerError=true;*/
 		}
 		if (!CORBA::is_nil(m_scheduler)) {
 			if (CORBA::is_nil(m_schedulerTracking)) {
@@ -72,14 +75,15 @@ void CCollectorThread::runLoop()
 					m_schedulerTracking=m_scheduler->tracking();
 				}
 				catch (CORBA::SystemException& ex) {
-					_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCollectorThread::runLoop()");
+					/* TO BE REVIEWED */
+					/*_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCollectorThread::runLoop()");
 					impl.setName(ex._name());
 					impl.setMinor(ex.minor());
 					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 					m_schedulerTracking=Management::ROTBoolean::_nil();
 					m_schedulerError=true;
 					CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-					data->setStatus(Management::MNG_WARNING);
+					data->setStatus(Management::MNG_WARNING);*/
 				}
 			}
 			else {
@@ -88,25 +92,27 @@ void CCollectorThread::runLoop()
 					ACSErr::CompletionImpl compImpl(comp);
 					if (compImpl.isErrorFree()) {
 						CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-						data->setTelescopeTracking(track,m_trackingTime);
+						/*data->setTelescopeTracking(track,m_trackingTime);*/
 					}
 					else {
-						_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CCollectorThread::runLoop()");
+						/* TO BE REVIEWED */
+						/*_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CCollectorThread::runLoop()");
 						impl.setAttributeName("tracking");
 						impl.setComponentName((const char *)m_config->getSchedulerComponent());
 						_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 						CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-						data->setStatus(Management::MNG_WARNING);
+						data->setStatus(Management::MNG_WARNING);*/
 					}					
 				}
 				catch (CORBA::SystemException& ex) {
-					_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCollectorThread::runLoop()");
+					/* TO BE REVIEWED */
+					/*_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCollectorThread::runLoop()");
 					impl.setName(ex._name());
 					impl.setMinor(ex.minor());
 					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 					m_schedulerTracking=Management::ROTBoolean::_nil();
 					CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-					data->setStatus(Management::MNG_WARNING);
+					data->setStatus(Management::MNG_WARNING);*/
 				}
 			}
 		}

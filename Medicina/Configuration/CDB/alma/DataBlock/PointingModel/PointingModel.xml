@@ -78,19 +78,19 @@
 </Receiver>
 
 <Receiver>
-	<receiverCode>KKC</receiverCode>
+	<receiverCode>KKC</receiverCode>	
         <phi>90.0</phi>
-        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0.1268119514 </coefficientVal00>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00>  -0.1012933701 </coefficientVal00>
         <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
-        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> 0.1904066652 </coefficientVal02>
-        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> -0.0505887903 </coefficientVal03>
-        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0053100660 </coefficientVal04>
-        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> -0.0016881827 </coefficientVal05>
-        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.0802635103 </coefficientVal06>
-        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> 0.0125866644 </coefficientVal07>
+        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> 0.0017366735 </coefficientVal02>
+        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> -0.0062922020 </coefficientVal03>
+        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0034500442  </coefficientVal04>     
+        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> -0.0024910390 </coefficientVal05>
+        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.4008839726 </coefficientVal06>
+        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> -0.1952472627 </coefficientVal07>
         <coefficientNum08> 0 </coefficientNum08> <coefficientVal08> 0 </coefficientVal08>
         <coefficientNum09> 0 </coefficientNum09> <coefficientVal09> 0 </coefficientVal09>
-        <coefficientNum10> 1 </coefficientNum10> <coefficientVal10> 0.0149070313 </coefficientVal10>
+        <coefficientNum10> 1 </coefficientNum10> <coefficientVal10> -0.2678813040 </coefficientVal10>
         <coefficientNum11> 0 </coefficientNum11> <coefficientVal11> 0 </coefficientVal11>
         <coefficientNum12> 0 </coefficientNum12> <coefficientVal12> 0 </coefficientVal12>
         <coefficientNum13> 0 </coefficientNum13> <coefficientVal13> 0 </coefficientVal13>

@@ -411,9 +411,10 @@ void CScheduleExecutor::getCurrentScanIdentifers(DWORD& scanID,DWORD& subScanID)
 	}
 }
 
-void CScheduleExecutor::initialize(maci::ContainerServices *services,const double& dut1,const IRA::CSite& site)
+void CScheduleExecutor::initialize(maci::ContainerServices *services,const double& dut1,const IRA::CSite& site,const CConfiguration* config)
 { 
 	 m_services=services;
+	 m_config=config;
 	 m_currentWriterInstance="";
 	 m_currentBackendInstance="";
 	 m_currentBackendProcedure="";
@@ -984,7 +985,7 @@ void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec,const Sched
 	if ((rec.backendProc!=_SCHED_NULLTARGET) && (rec.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
 		CCore::setupDataTransfer(m_scanStarted,m_writer.in(),m_writerError,m_backend.in(),m_backendError,m_schedule->getObserverName(),
 				m_schedule->getProjectName(),baseName,path,extraPath,m_schedule->getFileName(),targetID,rec.layout,layoutProc,m_schedule->getScanTag(),m_core->getCurrentDevice(),
-				rec.scanid,m_startRecordTime ,rec.subscanid,scanAxis);
+				rec.scanid,m_startRecordTime ,rec.subscanid,scanAxis,m_config);
 		// throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
 		CCore::startDataTansfer(m_backend.in(),m_backendError,rec.ut,m_streamStarted,m_streamPrepared,m_streamConnected);
 	}

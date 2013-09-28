@@ -53,7 +53,6 @@
 			</xs:complexContent>
 	  </xs:complexType>
 
-
 	<xs:complexType name="ScanAxisType">
 		<xs:complexContent>
 			<xs:restriction base="baci:ROEnum">
@@ -61,7 +60,7 @@
 				<xs:attribute name="graph_max" type="xs:int" use="optional" default="14" />
 				<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
 						"NONE,HORIZONTAL_LONGITUDE,HORIZONTAL_LATITUDE,EQUATORIAL_LONGITUDE,EQUATORIAL_LATITUDE,GALACTIC_LONGITUDE,GALACTIC_LATITUDE,SUBREFLECTOR_Z,
-						SUBREFLECTOR_X,SUBREFLECTORY,PRIMARYFOCUS_Z,PRIMARYFOCUS_Y,BEAMPARK,SIDEREAL_TRACK,GREATCIRCLE"/>
+						SUBREFLECTOR_X,SUBREFLECTOR_Y,PRIMARYFOCUS_Z,PRIMARYFOCUS_Y,BEAMPARK,SIDEREAL_TRACK,GREATCIRCLE"/>
 			</xs:restriction>
 		</xs:complexContent>
 	</xs:complexType>	

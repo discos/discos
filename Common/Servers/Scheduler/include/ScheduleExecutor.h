@@ -17,6 +17,7 @@
 #include <DataReceiverC.h>
 #include <GenericBackendC.h>
 #include "Schedule.h"
+#include "Configuration.h"
 
 #include "Core.h"
 
@@ -78,8 +79,9 @@ public:
       * @param services pointer to the container services
       * @param dut1 delta UT UT1
       * @param site site information structure
+      * @param config pointer to the configuration object
       */
-     void initialize(maci::ContainerServices *services,const double& dut1,const IRA::CSite& site);
+     void initialize(maci::ContainerServices *services,const double& dut1,const IRA::CSite& site,const CConfiguration* config);
      
      /**
       * Called to stop the schedule execution.
@@ -303,6 +305,11 @@ private:
 	 */
 	bool m_haltMe;
 	
+	/**
+	 * pointer to the configuration object
+	 */
+	CConfiguration *m_config;
+
 	/**
 	 * Extract the next scan from a schedule.
 	 * @param currentLine this is the current scan identifier

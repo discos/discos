@@ -40,4 +40,12 @@
 <projectCode/>
 <currentBackend/>
 <currentRecorder/>
+
+<MinorServoMapping axis="SUBR_Z" servoName="SRP_ZT"/>
+<MinorServoMapping axis="SUBR_X" servoName="SRP_XT"/>
+<MinorServoMapping axis="SUBR_Y" servoName="SRP_YT"/>
+<MinorServoMapping axis="PFP_Z" servoName="PFP_ZT"/>
+<MinorServoMapping axis="PFP_Y" servoName="PFP_YT"/>
+
+
 </Scheduler>

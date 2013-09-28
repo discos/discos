@@ -282,6 +282,11 @@ public:
 	const Management::TScanAxis& getScanAxis() const { return m_scanAxis; }
 
 	/**
+	 * @return the identifier that can be used to command the minor servo in charge to move the current scan axis
+	 */
+	const IRA::CString& getMinorServoNameForAxis() const { return m_minorServoNameForAxis; }
+
+	/**
 	 * @return the <i>m_ready</i> flag, that means the headers have been saved
 	 */
 	bool isReady() const { return m_ready; }
@@ -332,15 +337,6 @@ public:
 	 */
 	void haltResetStage();
 	
-	/**
-	 * allows to set the current tracking flag from the telescope
-	 */
-	void setTelescopeTracking(const Management::TBoolean& tracking,const ACS::Time& time) {
-		m_prevTelescopeTracking=m_telecopeTacking;
-		m_telecopeTacking=(tracking==Management::MNG_TRUE);
-		m_telescopeTrackingTime=time;
-	}
-
     /**
      * allows to get HPBW value after gaussian fitting
      */
@@ -455,9 +451,11 @@ public:
 	 * @param setup sub scan setup structure
 	 * @param recording set in case of error, true if the method was called during recording
 	 * @param inconsistent set in case of error, true if the method was called when sun scan headers were not expected
+	 * @param noScanAxis the current scan is not pertinent with the calibrationTool: no proper scan axis or direction
+	 * @param geometryWarning the incoming scan is not consistent with component status, the status will be reset accordingly but a warning should be issued
 	 * @return false if the operation could not be done
 	 */
-	bool setSubScanSetup(const Management::TSubScanSetup& setup,bool& recording,bool& inconsistent);
+	bool setSubScanSetup(const Management::TSubScanSetup& setup,bool& recording,bool& inconsistent,bool& noScanAxis,bool& geometryWarning);
 		
     /**
 	 * Set the scan stage to STOP
@@ -470,6 +468,16 @@ public:
 	void forceReset();
 
 	/**
+	 * @return if the current scan is a focusing scan
+	 */
+	bool isFocusScan() const { return  ((m_coordIndex==2) || (m_coordIndex==3)); }
+
+	/**
+	 * @return if the current scan is a pointing scan
+	 */
+	bool isPointingScan() const { return ((m_coordIndex==1) || (m_coordIndex==0)); }
+
+	/**
 	 * @return if the latitude scan has been performed
 	 */
 	bool isLatDone() const { return m_latDone; }
@@ -478,6 +486,11 @@ public:
 	 * @return if the longitude scan has been performed
 	 */
 	bool isLonDone() const { return m_lonDone; }
+
+	/**
+	 * Marks the  focus scan as done
+	 */
+	void setFocusDone() { m_focusDone=true; }
 
 	/**
 	 * marks the latitude scan done
@@ -492,9 +505,49 @@ public:
 	/**
 	 * marks the longitude and latitude scans undone, that means the current scan has been completed and a new one can be started
 	 */
-	void setCrossScanDone() { m_lonDone=m_latDone=false; }
+	void closePointingScan() { m_lonDone=m_latDone=false; }
+
+	/**
+	 * Puts the number of steps of the current scan to zero, that means the current scan has benn completed and a new one can be started
+	 */
+	void closeFocusScan() { m_focusDone=false; }
+
+	/**
+	 * @return true if the pointing  scan has been closed and another one is ready to be started
+	 */
+	bool isPointingScanClosed() const { return ( (!isLatDone()) && (!isLonDone())); }
+
+	/**
+	 * @return true if the current pointing scan has been completed
+	 */
+	bool isPointingScanDone() const { return ((isLatDone()) && (isLonDone())); }
+
+	/**
+	 * @return true if the current pointing scan has been completed
+	 */
+	bool isFocusScanDone() const { return m_focusDone; }
+
+	/**
+	 * @return true if the Focus scan has been closed and another one is ready to be started
+	 */
+	bool isFocusScanClosed() const { return !m_focusDone; }
+
 
 	int getCoordIndex() const { return m_coordIndex; }
+
+	/**
+	 * @return true if an error was detected during a single scan
+	 */
+	bool isErrorDetected() const { return m_errorDetected; }
+
+	/**
+	 * allows to set the error detection status
+	 */
+	void detectError() { m_errorDetected=true; }
+
+	void setMinorServoAxesNames(const ACS::stringSeq& seq);
+
+	void setMinorServoAxesNames();
 
 private:
 	/** the name of the file */
@@ -530,6 +583,10 @@ private:
 	 */
 	Management::TScanAxis m_scanAxis;
 	/**
+	 * Stores the string identifier for the servo (minor) involved in the scan
+	 */
+	IRA::CString m_minorServoNameForAxis;
+	/**
 	 *  indicates if the component is saving...
 	 */
 	bool m_running;
@@ -539,13 +596,26 @@ private:
 	bool m_scanHeader;
 	bool m_subScanHeader;
 	/**
-	 * true is the lat and lon scan have been done respectively
+	 * true is the lat (first) and lon(second) scan have been done respectively
 	 */
 	bool m_lonDone,m_latDone;
 	/**
-	 * 1 = LAT; 0=LON
+	 * stores the number of steps (of the current scan) in order to check if the current scan(focus) has been completed.
+	 */
+	bool m_focusDone;
+	/**
+	 * 1 = LAT; 0=LON; 2=Z
 	 */
 	int m_coordIndex;
+	/**
+	 * flags the error detection during a scan
+	 */
+	bool m_errorDetected;
+	/**
+	 * used to avoid the mixing of pointing and focus scans
+	 */
+	bool m_lastScanPointing;
+	bool m_lastScanFocus;
 	/**
 	 * Stores the last target ID, it is used to avoid to mix lon and lat scan taken over different sources
 	 */
@@ -574,24 +644,12 @@ private:
 	 * Device number
 	 */
 	long m_deviceID;
-	/**
-	 * this store if the telescope is currently tracking or not;
-	 */
-	bool m_telecopeTacking;
-	/**
-	 * This stored the time of the last update of the tracking flag
-	 */
-	ACS::Time m_telescopeTrackingTime;
-	/**
-	 * this stored the old telescope tracking flag
-	 */
-	bool m_prevTelescopeTracking;
 
     double m_dataY, m_dataX;
 	ACS::doubleSeq m_arrayDataY, m_arrayDataX;
     double m_HPBW, m_amplitude, m_peakOffset, m_offSet, m_slope, m_sourceFlux;
     /**
-     * sets the memeber <i>m_coordIndex</i> given the <i>m_scanAxis</i>
+     * sets the member <i>m_coordIndex</i> given the <i>m_scanAxis</i>
      */
     void setCoordIndex();
 };

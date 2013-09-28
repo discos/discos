@@ -28,13 +28,20 @@
 	} \
 }
 
+#define MAX_AXIS_NUMBER 32
+
 CConfiguration::CConfiguration()
 {
 	m_procTable=NULL;
+	m_minorServoMappings=0;
+	m_axis=NULL;
 }
 
 CConfiguration::~CConfiguration()
 {
+	if (m_axis!=NULL) {
+		delete [] m_axis;
+	}
 }
 
 void CConfiguration::readProcedures(maci::ContainerServices *services,const IRA::CString& procedureFile,ACS::stringSeq& names,ACS::longSeq& args,ACS::stringSeq *&bodies) throw (
@@ -81,9 +88,52 @@ void CConfiguration::readProcedures(maci::ContainerServices *services,const IRA:
 	m_procTable=NULL;
 }
 
-void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
+IRA::CString CConfiguration::getServoName(const Management::TScanAxis& axis) const
+{
+	for (WORD i=0;i<m_minorServoMappings;i++) {
+		if (m_axis[i].axis==axis) {
+			return m_axis[i].servoName;
+		}
+	}
+	return "";
+}
+
+void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl)
 {
 	IRA::CString check;
+	IRA::CString componentName;
+	IRA::CString strVal;
+	IRA::CString fieldPath;
+	componentName=Services->getName();
+	componentName=componentName+"/MinorServoMapping";
+
+	try {
+		m_axis=new TMinorServoAxis[MAX_AXIS_NUMBER];
+	}
+	catch (std::bad_alloc& ex) {
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
+		throw dummy;
+	}
+
+	for(;;) {
+		if (m_minorServoMappings==0) fieldPath=componentName;
+		else fieldPath.Format("%s%d",(const char *)componentName,m_minorServoMappings);
+		if (!CIRATools::getDBValue(Services,"axis",strVal,"alma/",fieldPath)) {
+			break;
+		}
+		ACS_DEBUG_PARAM("CConfiguration::Init()","axis: %s",(const char *)strVal);
+		m_axis[m_minorServoMappings].axis=str2Axis(strVal);
+		if (!CIRATools::getDBValue(Services,"servoName",strVal,"alma/",fieldPath)) {
+			break;
+		}
+		ACS_DEBUG_PARAM("CConfiguration::Init()","servoName: %s",(const char *)strVal);
+		m_axis[m_minorServoMappings].servoName=strVal;
+		m_minorServoMappings++;
+		if (m_minorServoMappings>=MAX_AXIS_NUMBER) break;
+	}
+	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %d",m_minorServoMappings);
+
+
 	_GET_STRING_ATTRIBUTE("AntennaBossInterface","Antenna Boss component interface is ",m_antennaBossComp);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component interface is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);
@@ -112,6 +162,25 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	}
 	else {
 		m_checkProjectCode=false;
+	}
+}
+
+Management::TScanAxis CConfiguration::str2Axis(const IRA::CString& axis) const
+{
+	if (axis=="SUBR_Z") {
+		return Management::MNG_SUBR_Z;
+	}
+	else 	if (axis=="SUBR_X") {
+		return Management::MNG_SUBR_X;
+	}
+	else 	if (axis=="SUBR_Y") {
+		return Management::MNG_SUBR_Y;
+	}
+	else 	if (axis=="PFP_Z") {
+		return Management::MNG_PFP_Z;
+	}
+	else 	/*if (axis=="PFP_Y")*/ {
+		return Management::MNG_PFP_Y;
 	}
 }
 

@@ -12,6 +12,7 @@
 
 
 #include <AntennaBossC.h>
+#include <MinorServoBossC.h>
 #include <String.h>
 #include <SchedulerC.h>
 #include <ObservatoryC.h>
@@ -25,6 +26,24 @@ class CCommonTools
 {
 public:
 	
+
+	/**
+	 * Used to get a reference to the minor servo boss component.
+	 * @param ref reference to to the minor servo boss component. if not null this does not do anything
+	 * @param services pointer to the container services object
+	 * @param name name of the interface of the component
+	 * @param errorDetected if true and the component reference is not null the method makes a try of releasing it before acquire again the reference
+	*/
+	static void getMinorServoBoss(MinorServo::MinorServoBoss_var& ref,maci::ContainerServices *& services,const IRA::CString& name,bool& errorDetected) throw (
+			ComponentErrors::CouldntGetComponentExImpl);
+
+	/**
+	 * used to free the reference to the minor servo boss component
+	 * @param ref reference to to the antenna boss component.
+	 * @param services pointer to the container services object
+	 */
+	static void unloadMinorServoBoss(MinorServo::MinorServoBoss_var& ref,maci::ContainerServices *& services) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
+
 	/**
 	 * Used to get a reference to the antenna boss component.  
 	 * @param ref reference to to the antenna boss component. if not null this does not do anything

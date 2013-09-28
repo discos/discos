@@ -13,6 +13,7 @@
 #include <IRA>
 #include <maciContainerServices.h>
 #include <ComponentErrors.h>
+#include <ManagmentDefinitionsC.h>
 
 using namespace IRA;
 
@@ -25,6 +26,12 @@ using namespace IRA;
   */
 class CConfiguration {
 public:	
+
+	typedef struct {
+		Management::TScanAxis axis;
+		IRA::CString servoName;
+	} TMinorServoAxis;
+
 	/**
 	 * Constructor 
 	*/
@@ -40,7 +47,7 @@ public:
 	 * @throw ComponentErrors::CDBAccessExImpl
 	 * @param Services pointer to the container services object
 	*/
-	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl);
+	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);
 	
 	/**
 	 * This function is called in order to read a table in the CDB that stores a procedure file. 
@@ -149,6 +156,11 @@ public:
 	 */
 	const bool getCheckProjectCode() const { return m_checkProjectCode; }
 
+	/**
+	 * return the name of the servo mapped to the given axis
+	 */
+	IRA::CString getServoName(const Management::TScanAxis& axis) const;
+
 private:
 	IRA::CString m_schedDir;
 	IRA::CString m_dataDir;
@@ -172,13 +184,18 @@ private:
 	IRA::CString m_defaultProceduresFile;
 	IRA::CString m_defaultProjectCode;
 	bool m_checkProjectCode;
+	long m_minorServoMappings;
 	
+	TMinorServoAxis* m_axis;
+
 	/**
 	 * Pointer to the DB table used to load the station procedures from the CDB 
 	*/
 	IRA::CDBTable * m_procTable;
 	
 	void extractBody(const IRA::CString& body,ACS::stringSeq& commands);
+
+	Management::TScanAxis str2Axis(const IRA::CString& axis) const;
 
 };
 

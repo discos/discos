@@ -20,6 +20,7 @@
 #include <f2c.h>
 #include <Site.h>
 #include <ObservatoryC.h>
+#include <MinorServoBossC.h>
 
 #define DATACOORDINATESSEQLENGTH 50000
 #define DATATSYSSEQLENGTH 50000
@@ -91,11 +92,15 @@ private:
 	double *m_ptsys;
 	float *m_ptsys2;
     long m_device;
-	bool antennaBossError;
+	bool m_antennaBossError;
 	Antenna::AntennaBoss_var m_antennaBoss;
+	bool m_minorServoBossError;
+	MinorServo::MinorServoBoss_var m_minorServoBoss;
 	bool checkTime(const ACS::Time& currentTime);
 	bool checkTimeSlot(const ACS::Time& slotStart);
 	bool processData();
+	int computeScanCenter(float *vect,const int& size);
+
 
 	bool DirectoryExists(const IRA::CString& path);
 	bool makeDirectory(const IRA::CString& dirName);
@@ -104,9 +109,10 @@ private:
 	void gaussFit(const ACS::Time& now);
 	void setAxisOffsets();
 	void getAntennaData();
+	void getMinorServoData();
 
 
-    integer m_dataSeqCounter;
+    int m_dataSeqCounter;
     ACS::doubleSeq m_dataSeq;
     ACS::doubleSeq m_tsysDataSeq;
     //double m_coordinate;
@@ -125,16 +131,22 @@ private:
     float m_reducedCHI;
     integer m_ierr;
     double m_cosLat;
-    //int m_CoordIndex;
     double m_raUserOff, m_decUserOff;
 	double m_azUserOff, m_elUserOff;
 	double m_lonUserOff, m_latUserOff;
 	int m_latResult, m_lonResult;
+	int m_focusResult;
 	double m_fwhm;
 	double m_targetRa;
 	double m_targetDec;
 
+	/**
+	 * central position of the current focus scan
+	 */
+	double m_focusScanCenter;
+
     double * m_latPositions;
+    double * m_lonPositions;
 	//ACS::Time m_time;
 	/**
 	 * This object is in charge of storing the site information

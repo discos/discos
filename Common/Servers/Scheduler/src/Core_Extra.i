@@ -136,7 +136,7 @@ void CCore::startRecording(const ACS::Time& startTime,const long& subScanId) thr
 	scanAxis=CCore::computeScanAxis(m_antennaBoss,m_antennaBossError); // throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
 	CCore::setupDataTransfer(m_scanStarted/*,m_streamPrepared*/,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
-			obsName,prj,baseName,path,extraPath,schedule,targetID,layoutName,layout,scanTag,m_currentDevice,m_scanID,startTime,subScanId,scanAxis);
+			obsName,prj,baseName,path,extraPath,schedule,targetID,layoutName,layout,scanTag,m_currentDevice,m_scanID,startTime,subScanId,scanAxis,m_config);
 	// start the recording or data transfer
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
 	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);

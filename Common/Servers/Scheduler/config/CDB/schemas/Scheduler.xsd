@@ -18,6 +18,49 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+		
+	<xs:simpleType name="TMinorServoAxisType">
+		<xs:annotation><xs:documentation>
+			Lists all axis managed by the minor servo system, a subset of the TScanAxis enumeration
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="SUBR_Z">
+				<xs:annotation><xs:documentation>
+					Scan along the Z (focus) of the subreflector
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+	    	<xs:enumeration value="SUBR_X">
+				<xs:annotation><xs:documentation>
+					Scan along the X of the subreflector
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+	    	<xs:enumeration value="SUBR_Y">
+				<xs:annotation><xs:documentation>
+					Scan along the Y of the subreflector
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+	    	<xs:enumeration value="PFP_Z">
+				<xs:annotation><xs:documentation>
+					Scan along the Z (focus) of the primary focus
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+	    	<xs:enumeration value="PFP_Y">
+				<xs:annotation><xs:documentation>
+					Scan along the Y of the primary focus
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="MinorServoMappingType">
+		<xs:attribute name="axis" type="TMinorServoAxisType" use="required"/>
+		<xs:attribute name="servoName" type="xs:string" use="required"/>
+	</xs:complexType>
 	
 	<xs:complexType name="SchedulerType">
 		<xs:sequence>
@@ -29,13 +72,14 @@
 			<xs:element name="tracking" type="mng:BooleanType" />	
 			<xs:element name="projectCode" type="baci:ROstring"/>
 			<xs:element name="currentBackend" type="baci:ROstring"/>
-			<xs:element name="currentRecorder" type="baci:ROstring"/>			
+			<xs:element name="currentRecorder" type="baci:ROstring"/>	
+			<xs:element name="MinorServoMapping" type="MinorServoMappingType" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 		<!-- directory where to find the schedules -->
 		<xs:attribute name="SchedDir" type="xs:string" use="required" />
 		<!-- directory where to store data files -->
 		<xs:attribute name="DataDir" type="xs:string" use="required" />
-		<!-- directory where to store system file and auxilairy files in general -->
+		<!-- directory where to store system file and auxiliary files in general -->
 		<xs:attribute name="SystemDataDir" type="xs:string" use="required" />		
 		<!-- Location inside the CDB where the component looks for the procedures files -->
 		<xs:attribute name="ProceduresLocation" type="xs:string" use="required" />

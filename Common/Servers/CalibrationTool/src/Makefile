@@ -47,7 +47,7 @@ CalibrationToolImpl_LIBS = baci maci CalibrationToolStubs DataReceiverStubs Comp
 						   ManagmentDefinitionsStubs ACSBulkDataError bulkDataStubs IRALibrary \
 						   bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs \
 						   EphemGeneratorStubs BackendsDefinitionsStubs SchedulerStubs ManagmentDefinitionsStubs \
-						   ObservatoryStubs
+						   ObservatoryStubs MinorServoBossStubs MinorServoErrors
 
 #
 # Configuration Database Files

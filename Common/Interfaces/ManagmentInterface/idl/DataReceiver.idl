@@ -43,6 +43,7 @@ module Management {
 		ACS::Time startUt;
 		long subScanId;
 		TScanAxis axis;
+		string minorServoNameForAxis; // the name of the minor servo mapping the axis
 		string targetID;
 		string extraPath;
 		string baseName;  //name of the file

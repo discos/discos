@@ -12,7 +12,7 @@
 	<inputPort>GREGORIAN</inputPort>
 	<beams>7</beams>
  	<bandWidth>2350.0</bandWidth>
- 	<attenuation>2.0</attenuation>		
+ 	<attenuation>11.0</attenuation>		
 	<section_boards>0 1 2 3</section_boards>
 	<polarizations>L R L R</polarizations>
 	<feed>0 0 1 1</feed>
