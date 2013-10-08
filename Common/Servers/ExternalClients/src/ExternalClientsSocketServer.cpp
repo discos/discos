@@ -170,110 +170,116 @@ void CExternalClientsSocketServer::cmdToScheduler()
     rBytes = receiveBuffer(inBuffer,BUFFERSIZE);
 
     if (rBytes > 0 ) {
-		inBuffer[rBytes] = '\0';
-       	printf("Command received = %s\n", inBuffer);
-        if (strncmp ((const char*)inBuffer, "antennaParameters",18)== 0) {
-            TIMEVALUE now;
-            const char answerDelimiter='\\';
-            const char fieldDelimiter=',';
-            IRA::CString m_answerDelimiter;
-            IRA::CString m_fieldDelimiter;
-            ACSErr::Completion_var completion;
-            Management::ROTSystemStatus_var antennaBossStatus_var;
-            ACS::pattern antennaBossStatus_val;
-            Management::ROTBoolean_var tracking_var;
-            bool tracking_val;
-            double ra, dec;
-            double az, el;
-            double lon, lat;
-            IRA::CString azStr;
-            IRA::CString elStr;
-            IRA::CString raStr;
-            IRA::CString decStr;
-            IRA::CString lonStr;
-            IRA::CString latStr;
-            IRA::CString trackingStr;
-            char * status_val;
-            ACS::ROstring_var targetRef;
-            CORBA::String_var target;
+	inBuffer[rBytes] = '\0';
+	//printf("Command received = %s\n", inBuffer);
+	if (strncmp ((const char*)inBuffer, "antennaParameters",18)== 0) {
+		TIMEVALUE now;
+            	const char answerDelimiter='\\';
+            	const char fieldDelimiter=',';
+            	IRA::CString m_answerDelimiter;
+            	IRA::CString m_fieldDelimiter;
+            	ACSErr::Completion_var completion;
+            	Management::ROTSystemStatus_var antennaBossStatus_var;
+            	ACS::pattern antennaBossStatus_val;
+            	Management::ROTBoolean_var tracking_var;
+            	bool tracking_val;
+            	double ra, dec;
+            	double az, el;
+            	double lon, lat;
+            	IRA::CString azStr;
+            	IRA::CString elStr;
+            	IRA::CString raStr;
+            	IRA::CString decStr;
+            	IRA::CString lonStr;
+            	IRA::CString latStr;
+            	IRA::CString trackingStr;
+            	char * status_val;
+            	ACS::ROstring_var targetRef;
+            	CORBA::String_var target;
 
-            IRA::CIRATools::getTime(now);
-            ret_val = "antennaParameters";
-            out = IRA::CString (ret_val);
-            m_answerDelimiter=IRA::CString(answerDelimiter);
-            out+=m_answerDelimiter;
-            IRA::CString outTime;
-            IRA::CIRATools::timeToStr(now.value().value,outTime);
-            out.Concat(outTime);
-            m_fieldDelimiter=IRA::CString(fieldDelimiter);
-            out+=m_fieldDelimiter;
-            antennaBossStatus_var = m_antennaBoss->status();
-            antennaBossStatus_val = antennaBossStatus_var->get_sync(completion.out());
-            if (antennaBossStatus_val == Management::MNG_OK)
-                status_val = "OK";
-            else if (antennaBossStatus_val == Management::MNG_WARNING)
-                status_val = "WARNING";
-            else if (antennaBossStatus_val == Management::MNG_FAILURE)
-                status_val = "FAILURE";
-            else
-                status_val = "UNKNOWN";
-            out.Concat(status_val);
-            out+=m_fieldDelimiter;
-            targetRef = m_antennaBoss->target ();
-		    target = targetRef->get_sync (completion.out ());
-            out.Concat(target);
-            out+=m_fieldDelimiter;
-            m_antennaBoss->getObservedHorizontal(now.value().value,1,az,el);
-            m_antennaBoss->getObservedEquatorial(now.value().value,1,ra,dec);
-            m_antennaBoss->getObservedGalactic(now.value().value,1,lon,lat);
-            IRA::CIRATools::radToAngle(az,azStr);
-            IRA::CIRATools::radToAngle(el,elStr);
-            IRA::CIRATools::radToHourAngle(ra,raStr);
-            IRA::CIRATools::radToSexagesimalAngle(dec,decStr);
-            IRA::CIRATools::radToSexagesimalAngle(lon,lonStr);
-            IRA::CIRATools::radToSexagesimalAngle(lat,latStr);
-            out.Concat(azStr);
-            out+=m_fieldDelimiter;
-            out.Concat(elStr);
-            out+=m_fieldDelimiter;
-            out.Concat(raStr);
-            out+=m_fieldDelimiter;
-            out.Concat(decStr);
-            out+=m_fieldDelimiter;
-            out.Concat(lonStr);
-            out+=m_fieldDelimiter;
-            out.Concat(latStr);
-            out+=m_fieldDelimiter;
-            tracking_var = m_Scheduler->tracking();
-            tracking_val = tracking_var->get_sync(completion.out());
-            if (tracking_val == true)
-                trackingStr = "TRACKING";
-            else
-                trackingStr = "SLEWING";
-            out.Concat(trackingStr);
-        }
+		IRA::CIRATools::getTime(now);
+            	ret_val = "antennaParameters";
+            	out = IRA::CString (ret_val);
+            	m_answerDelimiter=IRA::CString(answerDelimiter);
+            	out+=m_answerDelimiter;
+            	IRA::CString outTime;
+            	IRA::CIRATools::timeToStr(now.value().value,outTime);
+            	out.Concat(outTime);
+            	m_fieldDelimiter=IRA::CString(fieldDelimiter);
+            	out+=m_fieldDelimiter;
+            	antennaBossStatus_var = m_antennaBoss->status();
+            	antennaBossStatus_val = antennaBossStatus_var->get_sync(completion.out());
+		if (antennaBossStatus_val == Management::MNG_OK)
+			status_val = "OK";
+		else if (antennaBossStatus_val == Management::MNG_WARNING)
+			status_val = "WARNING";
+		else if (antennaBossStatus_val == Management::MNG_FAILURE)
+			status_val = "FAILURE";
+		else
+			status_val = "UNKNOWN";
+		out.Concat(status_val);
+		out+=m_fieldDelimiter;
+		targetRef = m_antennaBoss->target ();
+		target = targetRef->get_sync (completion.out ());
+		out.Concat(target);
+		out+=m_fieldDelimiter;
+		m_antennaBoss->getObservedHorizontal(now.value().value,1,az,el);
+		m_antennaBoss->getObservedEquatorial(now.value().value,1,ra,dec);
+		m_antennaBoss->getObservedGalactic(now.value().value,1,lon,lat);
+		IRA::CIRATools::radToAngle(az,azStr);
+		IRA::CIRATools::radToAngle(el,elStr);
+		IRA::CIRATools::radToHourAngle(ra,raStr);
+		IRA::CIRATools::radToSexagesimalAngle(dec,decStr);
+		IRA::CIRATools::radToSexagesimalAngle(lon,lonStr);
+		IRA::CIRATools::radToSexagesimalAngle(lat,latStr);
+		out.Concat(azStr);
+		out+=m_fieldDelimiter;
+		out.Concat(elStr);
+		out+=m_fieldDelimiter;
+		out.Concat(raStr);
+		out+=m_fieldDelimiter;
+		out.Concat(decStr);
+		out+=m_fieldDelimiter;
+		out.Concat(lonStr);
+		out+=m_fieldDelimiter;
+		out.Concat(latStr);
+		out+=m_fieldDelimiter;
+		tracking_var = m_Scheduler->tracking();
+		tracking_val = tracking_var->get_sync(completion.out());
+		printf("tracking_val\n");
+		if (tracking_val == Management::MNG_TRUE) {
+			trackingStr = "TRACKING";
+			printf("tracking\n");
+		}
 		else {
-            try {
-                ans = m_Scheduler->command((const char*)inBuffer, ret_val);
+			trackingStr = "SLEWING";
+			printf("slewing\n");
+		}
+		out.Concat(trackingStr);
+	}
+	else {
+		try {
+			ans = m_Scheduler->command((const char*)inBuffer, ret_val);
+                	out = IRA::CString(ret_val);
         	}
         	catch (CORBA::SystemException& ex) {
-                _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
-                impl.setName(ex._name());
+                	_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                	impl.setName(ex._name());
 		    	impl.setMinor(ex.minor());
 		    	impl.log(LM_ERROR);
-            	ret_val = "CORBA Error";
-                out = IRA::CString(ret_val);
+            		ret_val = "CORBA Error";
+                	out = IRA::CString(ret_val);
         	}
         	catch (...) {
-			    _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
 		    	impl.log(LM_ERROR);
-            	ret_val = "Unexpected Error";
-                out = IRA::CString(ret_val);
+            		ret_val = "Unexpected Error";
+                	out = IRA::CString(ret_val);
 	    	}
-			if (ans == false) {
-			    ret_val = "Nuraghe Error"; // TBD!!
-                out = IRA::CString(ret_val);
-			}
+		if (ans == false) {
+			ret_val = "Nuraghe Error"; // TBD!!
+                	out = IRA::CString(ret_val);
+		}
         }
         Len = out.GetLength();
         int i;
@@ -281,15 +287,15 @@ void CExternalClientsSocketServer::cmdToScheduler()
             outBuffer[i] = out.CharAt(i);
        	}
         outBuffer[Len]='\n';
-        printf("Command returned = %s", outBuffer);
+        //printf("Command returned = %s", outBuffer);
         Res = sendBuffer(outBuffer,Len+1);
         if (Res == WOULDBLOCK || Res == FAIL) {
             _EXCPT(SocketErrorExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
          	impl.log(LM_ERROR);
         }
-	}
-	else { 
-        newExternalClientsSocketServer.Close(m_Error);
+     }
+     else { 
+     	newExternalClientsSocketServer.Close(m_Error);
         m_accept = false;
     }
 }
