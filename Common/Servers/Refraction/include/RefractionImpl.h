@@ -19,10 +19,10 @@
 
 /** 
  * @mainpage Refraction component documentation
- * @date 10/05/2007
+ * @date 09/10/2013
  * @version 1.0.0
  * @author <a href=mailto:migoni@ira.inaf.it>Carlo Migoni</a>
- * @remarks Last compiled under ACS 6.0.2
+ * @remarks Last compiled under ACS 8.02
 */
 
 #include <acscomponentImpl.h>
@@ -88,9 +88,10 @@ class RefractionImpl: public virtual acscomponent::ACSComponentImpl, public virt
 	* This method is used to calculate the corrected zenith distance (radians) due to refraction
 	* @throw CORBA::SystemException
 	* @param obsZenithDistance
+	* @param waveLength wave length in meters
 	* @param corZenithDistance
 	*/
-	void getCorrection (CORBA::Double obsZenithDistance, CORBA::Double_out corZenithDistance) throw (CORBA::SystemException);
+	void getCorrection (CORBA::Double obsZenithDistance,CORBA::Double waveLength, CORBA::Double_out corZenithDistance) throw (CORBA::SystemException);
 
 	private:
     

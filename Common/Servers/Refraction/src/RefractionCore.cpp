@@ -111,16 +111,17 @@ void CRefractionCore::cleanUp()
 	}
 }
 
-void CRefractionCore::getCorrection(double obsZenithDistance, double *corZenithDistance)
+void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, double *corZenithDistance)
 {
     AUTO_TRACE("CRefractionCore::getCorrection()");
-	double elevation;
+	//double elevation;
 	baci::ThreadSyncGuard guard(&m_mutex);
-	elevation = 90.0 - obsZenithDistance*DR2D;
-	if (elevation >= 0.0 && elevation <= 90.0) {
+	//elevation = 90.0 - obsZenithDistance*DR2D;
+	//if (elevation >= 0.0 && elevation <= 90.0) {
+	if ((obsZenithDistance>=0.0) && (obsZenithDistance<=(DPI/2.0))) {
 		double hm = m_site.getHeight(); // meters
 		double tdk = m_temperature + 273.0;
-		double wl = 200.0;
+		double wl = waveLen*1000000; //micro meters
 		double phi = m_site.getLatitude(); // radians
 		double tlr = 0.0065;
 		double eps = 1e-8;
