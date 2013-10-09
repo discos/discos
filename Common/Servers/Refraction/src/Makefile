@@ -58,12 +58,16 @@ USER_LIB =	-lACE \
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     = 
-EXECUTABLES_L   = TestClient
+EXECUTABLES_L   = TestClient TestRefro
 
 #
 # <brief description of xxxxx program>
 TestClient_OBJECTS   = TestClient
 TestClient_LIBS      = RefractionImpl
+
+TestRefro_OBJECTS   = TestRefro
+TestRefro_LIBS      = SlaLibrary
+
 
 #
 # special compilation flags for single c sources

@@ -796,6 +796,11 @@ private:
 	double m_FWHM;
 	
 	/**
+	 * Stores the current observed wavelength (meters)
+	 */
+	double m_waveLength;
+
+	/**
 	 * axis for the current scan
 	 */
 	Management::TScanAxis m_currentAxis;

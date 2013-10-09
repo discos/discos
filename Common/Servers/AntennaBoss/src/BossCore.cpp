@@ -70,6 +70,7 @@ void CBossCore::initialize() throw (ComponentErrors::UnexpectedExImpl)
 	m_tracking=false;
 	m_newScanEpoch=0;
 	m_FWHM=0.0;
+	m_waveLength=0.0;
 	m_currentObservingFrequency=0.0;
 	m_currentAxis=Management::MNG_NO_AXIS;
 	m_targetRA=m_targetDec=m_targetVlsr=m_targetFlux=0.0;
@@ -459,6 +460,7 @@ void CBossCore::setup(const char *config) throw (ManagementErrors::Configuration
 	m_longitudeOffset=m_latitudeOffset=0.0;  //reset offsets
 	m_offsetFrame=Antenna::ANT_HORIZONTAL;
 	m_FWHM=0.0;
+	m_waveLength=0.0;
 	m_currentObservingFrequency=0.0;
 	m_targetFlux=0.0;
 }
@@ -498,20 +500,22 @@ void CBossCore::disableCorrection()
 void CBossCore::setFWHM(const double& val,const double& waveLen)
 { 
 	m_FWHM=val;
+	m_waveLength=waveLen;
 	m_currentObservingFrequency=LIGHTSPEED_MS/waveLen; // frequency in Hz
 	m_currentObservingFrequency/=1000000.0; // frequency in MHz
 	computeFlux();
-	ACS_LOG(LM_FULL_INFO,"CBossCore::setFWHM()",(LM_NOTICE,"FWHM: %lf",val));
+	ACS_LOG(LM_FULL_INFO,"CBossCore::setFWHM()",(LM_NOTICE,"FWHM: %lf",val*DR2D));
 }
 
 void CBossCore::computeFWHM(const double& taper,const double& waveLen)
 {
 	double tp=fabs(taper);
 	m_FWHM=(1.02+0.0135*tp)*(waveLen/m_config->getDiameter());
+	m_waveLength=waveLen;
 	m_currentObservingFrequency=LIGHTSPEED_MS/waveLen;
 	m_currentObservingFrequency/=1000000.0; // frequency in MHz
 	computeFlux();
-	ACS_LOG(LM_FULL_INFO,"CBossCore::setFWHM()",(LM_NOTICE,"FWHM: %lf",m_FWHM));
+	ACS_LOG(LM_FULL_INFO,"CBossCore::setFWHM()",(LM_NOTICE,"FWHM: %lf",m_FWHM*DR2D));
 }
 
 void CBossCore::getFluxes(const ACS::doubleSeq& freqs,ACS::doubleSeq& fluxes) throw (ComponentErrors::CORBAProblemExImpl)
@@ -856,7 +860,7 @@ void CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		loadPointingModel(m_pointingModel); // throw ComponentErrors::CouldntGetComponentExImpl
 		// get Offset from refraction;
 		try {
-			m_refraction->getCorrection(DPI/2.0-el,m_refractionOffset);
+			m_refraction->getCorrection(DPI/2.0-el,m_waveLength,m_refractionOffset);
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {  
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::updateAttributes()");
@@ -1075,7 +1079,7 @@ void CBossCore::loadTrackingPoint(const TIMEVALUE& time,bool restart) throw (Com
 		refOff=0.0;
 		try {
 			if (el>0.0) {
-				m_refraction->getCorrection(DPI/2.0-el,refOff);
+				m_refraction->getCorrection(DPI/2.0-el,m_waveLength,refOff);
 			}
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {

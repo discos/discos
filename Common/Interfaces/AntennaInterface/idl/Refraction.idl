@@ -11,6 +11,7 @@
 /* Carlo Migoni (c.migoni@ira.inaf.it)	01/02/2008	Creation                 */
 /* Carlo Migoni (c.migoni@ira.inaf.it)	27/02/2009	Removed SetMeteoParameters
  * method                                                                    */
+/* Andrea Orlati (a.orlati@ira.inaf.it) 09/10/2013 getCorrection() now requires the wavelength as input argument*/
 /* ***************************************************************************/
 
 #ifndef _REFRACTION_IDL_
@@ -37,10 +38,11 @@ module Antenna {
 		/**
 		* This method is used to calculate the corrected zenith distance (radians) due to refraction
 		* @throw CORBA::SystemException
-		* @param obsZenithDistance
-		* @param corZenithDistance
+		* @param obsZenithDistance 
+		* @param waveLegth the lambda (meters) of the current observation
+		* @param corZenithDistance 
 		*/
-		void getCorrection(in double obsZenithDistance, out double corZenithDistance);
+		void getCorrection(in double obsZenithDistance, in double waveLength, out double corZenithDistance);
 	};
 };
 

@@ -1,5 +1,3 @@
-// $Id: RefractionImpl.cpp,v 1.10 2009-01-30 07:29:47 c.migoni Exp $
-
 #include <new>
 #include <RefractionImpl.h>
 
@@ -39,7 +37,7 @@ void RefractionImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		  ("REFRACTIONBOSSWORKER",boss);
 	}
 	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"Refraction::initialize()");
+		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"RefractionImpl::initialize()");
 		throw _dummy;
 	}
 	catch (...) {
@@ -57,14 +55,14 @@ void RefractionImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		boss->execute();
 	}
 	catch (ACSErr::ACSbaseExImpl& E) {
-		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"Refraction::execute()");
+		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"RefractionImpl::execute()");
 		throw _dummy;
 	}
 	//starts the threads....
 	m_workingThread->resume();
 	/* added in order to avoid to overflood the meteo component with too many requests*/ 
-	m_workingThread->setSleepTime(80000000);  //8 seconds of sllep time
-	ACS_LOG(LM_FULL_INFO,"RefractionImpl::execute()",(LM_INFO,"Refraction::COMPSTATE_OPERATIONAL"));
+	m_workingThread->setSleepTime(80000000);  //8 seconds of sleep time
+	ACS_LOG(LM_FULL_INFO,"RefractionImpl::execute()",(LM_INFO,"COMPSTATE_OPERATIONAL"));
 }
 
 void RefractionImpl::cleanUp()
@@ -76,10 +74,10 @@ void RefractionImpl::cleanUp()
     	if (m_workingThread!=NULL)
 		m_workingThread->suspend();
     	getContainerServices()->getThreadManager()->destroy(m_workingThread);
-    	ACS_LOG(LM_FULL_INFO,"RefractionImpl::cleanUp()",(LM_INFO,"Refraction::THREADS_TERMINATED"));
+    	ACS_LOG(LM_FULL_INFO,"RefractionImpl::cleanUp()",(LM_INFO,"THREADS_TERMINATED"));
 	//core->cleanUp();
 	boss->cleanUp();
-	ACS_LOG(LM_FULL_INFO,"RefractionImpl::cleanUp()",(LM_INFO,"Refraction::BOSS_CORE_FREED"));
+	ACS_LOG(LM_FULL_INFO,"RefractionImpl::cleanUp()",(LM_INFO,"BOSS_CORE_FREED"));
 	ACSComponentImpl::cleanUp();
 }
 
@@ -93,14 +91,14 @@ void RefractionImpl::aboutToAbort()
 	boss->cleanUp();
 }
 
-void RefractionImpl::getCorrection (CORBA::Double obsZenithDistance, CORBA::Double_out corZenithDistance) throw (CORBA::SystemException)
+void RefractionImpl::getCorrection (CORBA::Double obsZenithDistance,CORBA::Double waveLength, CORBA::Double_out corZenithDistance) throw (CORBA::SystemException)
 {
 	AUTO_TRACE("RefractionImpl::getCorrection()");
 
-    	//CSecAreaResourceWrapper<CRefractionCore> resource=m_core->Get();
+    //CSecAreaResourceWrapper<CRefractionCore> resource=m_core->Get();
 
 	//resource->getCorrection(obsZenithDistance, &corZenithDistance);	
-	boss->getCorrection(obsZenithDistance, &corZenithDistance);	
+	boss->getCorrection(obsZenithDistance,waveLength,&corZenithDistance);
 }
 
 /* --------------- [ MACI DLL support functions ] -----------------*/
