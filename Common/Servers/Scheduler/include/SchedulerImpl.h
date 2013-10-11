@@ -220,6 +220,18 @@ public:
 	 */ 
 	virtual void crossScan(Management::TCoordinateFrame coordFrame,CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+
+	/**
+	 * Performs a focus scan moving the subreflector or the receiver along the optical axis of the telescope. The operation consists of system temperature measurement (the telescope is sent
+	 * 3 times the current beam size off) and then a focus scan on the source. The default backend and the default data recorder are used as data source and destination respectively.
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 * @throw CORBA::SystemExcpetion
+	 * @param span this is the overall length of the single scans (mm)
+	 * @param duration this determine how long the scan has to take.
+	 */
+	virtual void focusScan(CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
 	/**
 	 * This method performs a skydip with the antenna. The scan is done across the current azimuth between the two elevation limits. A system temperature measurement is

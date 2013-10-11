@@ -238,6 +238,26 @@ void SchedulerImpl::startSchedule(const char * fileName,const char *startSubScan
 	}
 }
 
+void SchedulerImpl::focusScan(CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+{
+	try {
+		m_core->focusScan(span,duration);
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SchedulerImpl::focusScan()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
 void SchedulerImpl::crossScan(Management::TCoordinateFrame coordFrame,CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {

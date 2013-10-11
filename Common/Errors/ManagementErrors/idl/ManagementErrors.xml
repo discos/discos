@@ -39,6 +39,8 @@
 
 <ErrorCode name="AntennaScanError" shortDescription="Error while commanding a scan to the antenna" description=""/>
 
+<ErrorCode name="MinorServoScanError" shortDescription="Error while commanding a scan to the minor servo system" description=""/>
+
 <ErrorCode name="SubscanError" shortDescription="Error during the execution of a subscan" description="">
 	<Member name="SubScanID" type="long" description="Identifier of the scan" />
 	<Member name="Reason" type="string" description="Describes the cause of the error" />	

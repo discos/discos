@@ -411,7 +411,7 @@ void CScheduleExecutor::getCurrentScanIdentifers(DWORD& scanID,DWORD& subScanID)
 	}
 }
 
-void CScheduleExecutor::initialize(maci::ContainerServices *services,const double& dut1,const IRA::CSite& site,const CConfiguration* config)
+void CScheduleExecutor::initialize(maci::ContainerServices *services,const double& dut1,const IRA::CSite& site,CConfiguration* config)
 { 
 	 m_services=services;
 	 m_config=config;

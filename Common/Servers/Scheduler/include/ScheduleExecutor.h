@@ -81,7 +81,7 @@ public:
       * @param site site information structure
       * @param config pointer to the configuration object
       */
-     void initialize(maci::ContainerServices *services,const double& dut1,const IRA::CSite& site,const CConfiguration* config);
+     void initialize(maci::ContainerServices *services,const double& dut1,const IRA::CSite& site, CConfiguration* config);
      
      /**
       * Called to stop the schedule execution.
@@ -308,7 +308,7 @@ private:
 	/**
 	 * pointer to the configuration object
 	 */
-	CConfiguration *m_config;
+	 CConfiguration *m_config;
 
 	/**
 	 * Extract the next scan from a schedule.

@@ -182,6 +182,13 @@ public:
 			ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl);
 	
 	/**
+	 * This is a macro operation, it performs a focus scan over the previously commanded source
+	 */
+	void focusScan(const double& span,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
+			ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::OperationErrorExImpl,
+			ManagementErrors::UnsupportedOperationExImpl,ManagementErrors::MinorServoScanErrorExImpl,ComponentErrors::TimerErrorExImpl);
+
+	/**
 	 * this is a macro operation, it performs a skydip scan from the current azimuth position
 	 */
 	void skydip(const double& el1,const double& el2,const ACS::TimeInterval& duration)  throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
@@ -276,7 +283,7 @@ private:
 	/**
 	 * pointer to the configuration object
 	 */
-	CConfiguration* m_config;
+	 CConfiguration*  m_config;
 	/**
 	 * pointer to the container services
 	 */
