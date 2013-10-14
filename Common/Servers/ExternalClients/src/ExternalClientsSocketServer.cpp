@@ -37,7 +37,9 @@ void CExternalClientsSocketServer::initialize(CConfiguration *config) throw (Soc
 	AUTO_TRACE("CExternalClientsSocketServer::Init()");
 	m_configuration = config;
 	// Create server socket in blocking mode
-	if (Create(m_Error,STREAM,m_configuration->Port(),&m_configuration->ipAddress()) == FAIL) {
+	CString ipAdd;
+	ipAdd = m_configuration->ipAddress();
+	if (Create(m_Error,STREAM,m_configuration->Port(),&ipAdd) == FAIL) {
 		_EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,m_Error);
 		dummy.setCode(m_Error.getErrorCode());
 		dummy.setDescription((const char*)m_Error.getDescription());
@@ -141,14 +143,14 @@ void CExternalClientsSocketServer::cleanUp()
 
 void CExternalClientsSocketServer::cmdToScheduler()
 {
-    BYTE inBuffer[BUFFERSIZE];
-    BYTE outBuffer[BUFFERSIZE];
-    char * ret_val;
-    IRA::CString out;
+	BYTE inBuffer[BUFFERSIZE];
+    	BYTE outBuffer[BUFFERSIZE];
+    	char * ret_val;
+    	IRA::CString out;
 	int rBytes;
-    WORD Len;
-    OperationResult Res;
-	bool ans;
+    	WORD Len;
+    	OperationResult Res;
+	bool ans = false;
 
     if (m_accept == false) {
         // Accept
@@ -246,14 +248,11 @@ void CExternalClientsSocketServer::cmdToScheduler()
 		out+=m_fieldDelimiter;
 		tracking_var = m_Scheduler->tracking();
 		tracking_val = tracking_var->get_sync(completion.out());
-		printf("tracking_val\n");
 		if (tracking_val == Management::MNG_TRUE) {
 			trackingStr = "TRACKING";
-			printf("tracking\n");
 		}
 		else {
 			trackingStr = "SLEWING";
-			printf("slewing\n");
 		}
 		out.Concat(trackingStr);
 	}
