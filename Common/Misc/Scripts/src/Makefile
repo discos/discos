@@ -32,7 +32,7 @@
 # Python stuff (public and local)
 # ----------------------------
 PY_SCRIPTS         = 
-PY_SCRIPTS_L       = startschedule stopschedule configureBackend
+PY_SCRIPTS_L       = data_stats
 
 PY_MODULES         =
 PY_MODULES_L       =
@@ -41,7 +41,7 @@ PY_PACKAGES        =
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 
-SCRIPTS         = logFile
+SCRIPTS         = 
 
 #
 # list of all possible C-sources (used to create automatic dependencies)

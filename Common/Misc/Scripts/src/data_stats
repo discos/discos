@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+
+import os 
+import re
+import pyfits
+import sys
+import datetime
+import logging
+import optparse #will become argparse in Python2.6
+
+class TargetScan(object):
+    def __init__(self, sname="", 
+                 scanid=0, 
+                 start_time=None, 
+                 last_time=None, 
+                 nsubscans=0, 
+                 receiver=""):
+        self.sname = sname
+        self.scanid = scanid
+        self.start_time = start_time
+        self.last_time = last_time
+        self.nsubscans = nsubscans
+        self.receiver = receiver
+
+    def __str__(self):
+        return "%d\t%s\t%s\t%d\t%s" % (self.scanid,
+                                   self.sname.ljust(10),
+                                   self.receiver,
+                                   self.nsubscans,
+                                   self.start_time.strftime("%Y-%m-%dT%H:%M:%S"))
+    def __repr__(self):
+        return self.__str__()
+
+_fits_pattern = re.compile("^(.*)\.fits$")
+def _is_fits_filename(filename):
+    if _fits_pattern.match(filename):
+        return True
+    else:
+        return False
+
+def console_app():
+    usage = """
+   Usage:
+   data_stats [-d] [--sort time|rec|sname|id] path_to_data
+
+   i.e. data_stats /archive/data/maintenance/20131014/   
+
+   Returns a catalog of scans found in the target directory 
+    """
+    op = optparse.OptionParser()
+    op.set_usage(usage)
+    op.add_option("-d", action="store_true", default=False, dest="debug", help="set debug output")
+    op.add_option("--sort", default="time", dest="sortby", choices=["time", "rec", "sname", "id"],
+                  help="sort output results by the specified parameter")
+    opts, args = op.parse_args(sys.argv[1:])
+    if opts.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+    if not args:
+        dirname = os.path.abspath(".")
+    else:
+        dirname = os.path.abspath(args[0])
+
+    if not os.path.isdir(dirname):
+        logging.error("Invalid target directory: %s" % (dirname,))
+        sys.exit(1)
+
+    scan_list = [] #will store the resulting stats
+
+    for scandir, _, _dir_files in os.walk(dirname):
+        fits_filenames = filter(_is_fits_filename, _dir_files)
+        if fits_filenames: #we found a scan directory with data fits files
+            scandir = os.path.abspath(scandir)
+            logging.debug("scand dir: %s" % scandir)
+            scan = TargetScan()
+            fits_filenames = [os.path.join(scandir, fits_filename) for fits_filename in fits_filenames]
+            for fits_filename in fits_filenames:
+                logging.debug("fits file: %s" % os.path.basename(fits_filename))
+                fits_file = pyfits.open(fits_filename)
+                try:
+                    phdu = fits_file[0].header #fits primary header
+                    ssid = int(phdu.get("SubScanID"))
+                    if ssid == 1:
+                        scan.sname = phdu.get("SOURCE").strip()
+                        scan.scanid = phdu.get("SCANID")
+                        scan.start_time = datetime.datetime.strptime(phdu.get("DATE"), "%Y-%m-%dT%H:%M:%S")
+                        scan.receiver = phdu.get("Receiver Code").strip()
+                    if ssid > scan.nsubscans:
+                        scan.last_time = datetime.datetime.strptime(phdu.get("DATE"), "%Y-%m-%dT%H:%M:%S")
+                        scan.nsubscans = ssid
+                except:
+                    logging.error("could not parse: %s" % (fits_filename,))
+                fits_file.close()
+            scan_list.append(scan)
+
+    if opts.sortby == "rec":
+        scan_list.sort(key=lambda x:x.receiver)
+    elif opts.sortby == "sname":
+        scan_list.sort(key=lambda x:x.sname)
+    elif opts.sortby == "id":
+        scan_list.sort(key=lambda x:x.scanid)
+    else:
+        scan_list.sort(key=lambda x:x.start_time)
+
+    if scan_list:
+        print "N\tSCANID\tSNAME\t\tREC\tSUBSCANS\tSTART TIME"
+        for i,scan in enumerate(scan_list):
+            print str(i) + '\t' + str(scan)
+
+if __name__ == "__main__":
+    console_app()
