@@ -32,8 +32,9 @@ SUBSYSTEM = Clients
 MODULES =  ObservatoryTextClient \
 		   AntennaBossTextClient \
 		   SystemTerminal \
-		   GenericBackendTextClient
-
+		   GenericBackendTextClient\
+           SchedulerTextClient \
+		   CaltoolClient
 
 MAKE_FLAGS = "-k"
 PLATFORM := $(shell uname)
