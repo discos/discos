@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+"""
+This script reads from the command line a list of directories and tries to find
+.fits files inside them, parsing subdirectories in a recursive manner.
+Each directory containing a set of .fits files is supposed to be representing an
+observing \"scan\" where each .fits file is the result of a subscan. 
+A list of scans is built parsing the contents of fits files and results can then
+be ordered according to some scan parameters before being print to stdout.
+
+It is conceived to parse scans obteined with FitsZilla and not MBFITS.
+"""
+
 import os 
 import re
 import pyfits
