@@ -11,8 +11,8 @@ import optparse #will become argparse in Python2.6
 class TargetScan(object):
     def __init__(self, sname="", 
                  scanid=0, 
-                 start_time=None, 
-                 last_time=None, 
+                 start_time=datetime.datetime.now(), 
+                 last_time=datetime.datetime.now(), 
                  nsubscans=0, 
                  receiver=""):
         self.sname = sname
@@ -42,8 +42,12 @@ def console_app():
     usage = """
    Usage:
    data_stats [-d] [--sort time|rec|sname|id] path_to_data
+   
+   Examples:
 
-   i.e. data_stats /archive/data/maintenance/20131014/   
+   data_stats /archive/data/maintenance/20131014/   
+   data_stats /archive/data/maintenance/201310* 
+   data_stats /archive/data/maintenance/201310* | grep -i 3c286
 
    Returns a catalog of scans found in the target directory 
     """
@@ -58,41 +62,44 @@ def console_app():
     else:
         logging.basicConfig(level=logging.INFO)
     if not args:
-        dirname = os.path.abspath(".")
+        dirnames = [os.path.abspath(".")]
     else:
-        dirname = os.path.abspath(args[0])
-
-    if not os.path.isdir(dirname):
-        logging.error("Invalid target directory: %s" % (dirname,))
-        sys.exit(1)
+        dirnames = [os.path.abspath(dir) for dir in args]
 
     scan_list = [] #will store the resulting stats
 
-    for scandir, _, _dir_files in os.walk(dirname):
-        fits_filenames = filter(_is_fits_filename, _dir_files)
-        if fits_filenames: #we found a scan directory with data fits files
-            scandir = os.path.abspath(scandir)
-            logging.debug("scand dir: %s" % scandir)
-            scan = TargetScan()
-            fits_filenames = [os.path.join(scandir, fits_filename) for fits_filename in fits_filenames]
-            for fits_filename in fits_filenames:
-                logging.debug("fits file: %s" % os.path.basename(fits_filename))
-                fits_file = pyfits.open(fits_filename)
-                try:
-                    phdu = fits_file[0].header #fits primary header
-                    ssid = int(phdu.get("SubScanID"))
-                    if ssid == 1:
-                        scan.sname = phdu.get("SOURCE").strip()
-                        scan.scanid = phdu.get("SCANID")
-                        scan.start_time = datetime.datetime.strptime(phdu.get("DATE"), "%Y-%m-%dT%H:%M:%S")
-                        scan.receiver = phdu.get("Receiver Code").strip()
-                    if ssid > scan.nsubscans:
-                        scan.last_time = datetime.datetime.strptime(phdu.get("DATE"), "%Y-%m-%dT%H:%M:%S")
-                        scan.nsubscans = ssid
-                except:
-                    logging.error("could not parse: %s" % (fits_filename,))
-                fits_file.close()
-            scan_list.append(scan)
+    for dirname in dirnames:
+        if not os.path.isdir(dirname):
+            logging.error("Invalid target directory: %s" % (dirname,))
+        for scandir, _, _dir_files in os.walk(dirname):
+            fits_filenames = filter(_is_fits_filename, _dir_files)
+            if fits_filenames: #we found a scan directory with data fits files
+                scandir = os.path.abspath(scandir)
+                logging.debug("scand dir: %s" % scandir)
+                scan = TargetScan()
+                lowest_subscan_id = sys.maxint
+                highest_subscan_id = 0
+                fits_filenames = [os.path.join(scandir, fits_filename) for fits_filename in fits_filenames]
+                for fits_filename in fits_filenames:
+                    logging.debug("fits file: %s" % os.path.basename(fits_filename))
+                    fits_file = pyfits.open(fits_filename)
+                    try:
+                        phdu = fits_file[0].header #fits primary header
+                        ssid = int(phdu.get("SubScanID"))
+                        if ssid < lowest_subscan_id: #we don't always have subscan id number 1
+                            scan.sname = phdu.get("SOURCE").strip()
+                            scan.scanid = phdu.get("SCANID")
+                            scan.start_time = datetime.datetime.strptime(phdu.get("DATE"), "%Y-%m-%dT%H:%M:%S")
+                            scan.receiver = phdu.get("Receiver Code").strip()
+                            lowest_subscan_id = ssid
+                        if ssid > highest_subscan_id:
+                            scan.last_time = datetime.datetime.strptime(phdu.get("DATE"), "%Y-%m-%dT%H:%M:%S")
+                            highest_subscan_id = ssid
+                        scan.nsubscans += 1
+                    except:
+                        logging.error("could not parse: %s" % (fits_filename,))
+                    fits_file.close()
+                scan_list.append(scan)
 
     if opts.sortby == "rec":
         scan_list.sort(key=lambda x:x.receiver)
