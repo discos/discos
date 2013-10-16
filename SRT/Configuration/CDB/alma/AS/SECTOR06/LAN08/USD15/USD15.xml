@@ -1,16 +1,25 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="6" lan="8" serialAddress="15" cammaLen="0" cammaPos="0" calibrate="1">
-	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply"/>
-	<cmdPos min_value="-21000" max_value="21000" units="step" description="commanded position"/>
-	<Fmin min_value="20" max_value="10000" units="step" default_value="100" description="min freq"/>
-	<Fmax min_value="20" max_value="10000" units="step" default_value="500" description="max freq"/>
-	<acc min_value="0" max_value="255" units="mS^2" default_value="50" description="acceleration"/>
-	<uBits default_value="34" description="user bits configuration 0x22"/>
-	<lmCorr units="mm" default_value="0" description="last minute corrections"/>
-	<gravCorr units="mm" default_value="0" description="gravity correction"/>
-	<userOffset units="mm" default_value="0" description="user offset"/>
-	<actPos units="step" description="actual position"/>
-	<status description="Status"/>
-	<softVer description="USD software version"/>
-	<type description="USD type"/>
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+   -   Mon Sep 23 08:04:21 UTC 2013 modified by jDAL
+   -   Mon Sep 23 08:07:35 UTC 2013 modified by jDAL
+   -   Mon Sep 23 09:07:24 UTC 2013 modified by jDAL
+   -   Mon Sep 23 10:34:06 UTC 2013 modified by jDAL
+   -   Mon Sep 23 10:34:06 UTC 2013 modified by jDAL
+   -   Mon Sep 23 10:34:06 UTC 2013 modified by jDAL
+-->
+<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="6" lan="8" serialAddress="15" cammaLen="59.4" cammaPos="158.4" calibrate="1">
+	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />
+	<cmdPos min_value="-21000" max_value="21000" units="step" description="commanded position" />
+	<Fmin min_value="20" max_value="10000" units="step" default_value="100" description="min freq" />
+	<Fmax min_value="20" max_value="10000" units="step" default_value="500" description="max freq" />
+	<acc min_value="0" max_value="255" units="mS^2" default_value="50" description="acceleration" />
+	<uBits default_value="34" description="user bits configuration 0x22" />
+	<lmCorr units="mm" default_value="0" description="last minute corrections" />
+	<gravCorr units="mm" default_value="0" description="gravity correction" />
+	<userOffset units="mm" default_value="0" description="user offset" />
+	<actPos units="step" description="actual position" />
+	<status description="Status" />
+	<softVer description="USD software version" />
+	<type description="USD type" />
 </usd>
