@@ -46,6 +46,7 @@ CEngineThread::CEngineThread (const ACE_CString & name,
 	m_fwhm=0.0;
 	m_targetRa=m_targetDec=0.0;
 	m_focusScanCenter=0.0;
+	m_minorServoCurrentAxisPosition=-1;
 }
 
 CEngineThread::~CEngineThread ()
@@ -357,35 +358,40 @@ bool CEngineThread::processData ()
 				az=el=0;
 			}
 			if (!CORBA::is_nil(m_minorServoBoss)) {
-					try {
-						positions=m_minorServoBoss->getAxesPosition(time+(data->getIntegrationTime () * 10000)/2);
+				try {
+					positions=m_minorServoBoss->getAxesPosition(time+(data->getIntegrationTime () * 10000)/2);
+					if (m_minorServoCurrentAxisPosition!=-1) {
+						coordinate=positions[m_minorServoCurrentAxisPosition];
 					}
-					catch (ManagementErrors::ConfigurationErrorEx &ex) {
-						_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::processData()");
-						impl.setOperationName("getAxesPosition()");
-						impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
-						impl.log(LM_ERROR);
-						data->setStatus(Management::MNG_WARNING);
-						coordinate=0.0;
+					else {
 						data->detectError();
-					}
-					catch (CORBA::SystemException& ex) {
-						_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::getMinorServoData()");
-						impl.setName(ex._name());
-						impl.setMinor(ex.minor());
-						impl.log(LM_ERROR);
-						data->setStatus(Management::MNG_WARNING);
-						coordinate=0;
-						data->detectError();
-						m_minorServoBossError=true;
+						coordinate=m_focusScanCenter;
 					}
 				}
+				catch (ManagementErrors::ConfigurationErrorEx &ex) {
+					_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::processData()");
+					impl.setOperationName("getAxesPosition()");
+					impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
+					impl.log(LM_ERROR);
+					data->setStatus(Management::MNG_WARNING);
+					coordinate=m_focusScanCenter;
+					data->detectError();
+				}
+				catch (CORBA::SystemException& ex) {
+					_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::getMinorServoData()");
+					impl.setName(ex._name());
+					impl.setMinor(ex.minor());
+					impl.log(LM_ERROR);
+					data->setStatus(Management::MNG_WARNING);
+					coordinate=m_focusScanCenter;
+					data->detectError();
+					m_minorServoBossError=true;
+				}
+			}
 			else {
 				coordinate=0;
 			}
-
-
-	        coordinate = az;
+			offset=coordinate-m_focusScanCenter;
 	        m_latPositions[m_dataSeqCounter] = az;
 	        m_lonPositions[m_dataSeqCounter] = el;
 	        break;
@@ -397,8 +403,63 @@ bool CEngineThread::processData ()
         case Management::MNG_PFP_Z:
 
 	    break;
-        case Management::MNG_PFP_Y:
-        break;
+        case Management::MNG_PFP_Y: {
+        	ACS::doubleSeq_var positions;
+	        try {
+	        	if (!CORBA::is_nil(m_antennaBoss)) {
+	        		m_antennaBoss->getObservedHorizontal (time, data->getIntegrationTime () * 10000, az, el);
+	        	}
+	        	else data->detectError();
+	        }
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				impl.log(LM_ERROR);
+				data->setStatus(Management::MNG_FAILURE);
+				m_antennaBossError=true;
+				data->detectError();
+				az=el=0;
+			}
+			if (!CORBA::is_nil(m_minorServoBoss)) {
+				try {
+					positions=m_minorServoBoss->getAxesPosition(time+(data->getIntegrationTime () * 10000)/2);
+					if (m_minorServoCurrentAxisPosition!=-1) {
+						coordinate=positions[m_minorServoCurrentAxisPosition];
+					}
+					else {
+						data->detectError();
+						coordinate=m_focusScanCenter;
+					}
+				}
+				catch (ManagementErrors::ConfigurationErrorEx &ex) {
+					_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::processData()");
+					impl.setOperationName("getAxesPosition()");
+					impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
+					impl.log(LM_ERROR);
+					data->setStatus(Management::MNG_WARNING);
+					coordinate=m_focusScanCenter;
+					data->detectError();
+				}
+				catch (CORBA::SystemException& ex) {
+					_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::getMinorServoData()");
+					impl.setName(ex._name());
+					impl.setMinor(ex.minor());
+					impl.log(LM_ERROR);
+					data->setStatus(Management::MNG_WARNING);
+					coordinate=m_focusScanCenter;
+					data->detectError();
+					m_minorServoBossError=true;
+				}
+			}
+			else {
+				coordinate=0;
+			}
+			offset=coordinate-m_focusScanCenter;
+	        m_latPositions[m_dataSeqCounter] = az;
+	        m_lonPositions[m_dataSeqCounter] = el;
+	        break;
+        }
         default:
         break;
     }
@@ -411,8 +472,10 @@ bool CEngineThread::processData ()
     else
         m_off[m_dataSeqCounter] = 0.0;	// could be the center?
 
-    // secs from midnight array for fit2 function
+    // seconds from midnight array for fit2 function
     m_secsFromMidnight[m_dataSeqCounter] = tS.hour () * 3600.0 + tS.minute () * 60.0 + tS.second () + (tS.microSecond () / 1000000.0);
+
+    //source, scu, axis, offset
 
     if (m_fileOpened) {
     	if (data->isPointingScan()) {
@@ -427,9 +490,14 @@ bool CEngineThread::processData ()
     		m_file << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter]*DR2D << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
     	}
     	else if (data->isFocusScan()) {
-    	   /*********************************/
-    		/* ADD axis record*/
-    		/*********************************/
+    		out.Format ("%04d.%03d.%02d:%02d:%02d.%02d#peakf#axis ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+    		 m_file << (const char *) out;
+    		 if (data->getCoordIndex() == 2) {
+    			 m_file << "Zp" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
+    		 }
+    		 if (data->getCoordIndex() == 3) {
+    			 m_file << "Zs" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
+    		 }
     	}
     }
     m_dataSeqCounter++;
@@ -491,7 +559,7 @@ void CEngineThread::runLoop ()
     		if (data->isPointingScanClosed()) { // done only on the  first subscan of the cross scan!
     			getAntennaData();
     			if (m_fileOpened) {
-    				writeFileHeaders(now.value().value);
+    				writePointingFileHeaders(now.value().value);
     			}
     		}
     	}
@@ -500,7 +568,7 @@ void CEngineThread::runLoop ()
     			getAntennaData();
     			getMinorServoData();
     			if (m_fileOpened) {
-    				writeFileHeaders(now.value().value);
+    				writeFocusFileHeaders(now.value().value);
     			}
     		}
     	}
@@ -534,11 +602,13 @@ void CEngineThread::runLoop ()
 
 void  CEngineThread::getMinorServoData()
 {
+	m_focusScanCenter=0.0;
+	m_minorServoCurrentAxisPosition=-1;
 	if (m_config->getMinorServoBossComponent()=="") {
-		m_focusScanCenter=0.0;
 		return;
 	}
 	ACS::stringSeq_var axesNames;
+	ACS::stringSeq_var axesUnits;
 	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	try {
 		CCommonTools::getMinorServoBoss(m_minorServoBoss,m_service,m_config->getMinorServoBossComponent(),m_minorServoBossError);
@@ -574,11 +644,15 @@ void  CEngineThread::getMinorServoData()
 			m_minorServoBossError=true;
 		}
 		try {
-			/*******************/
-			/* DA completare       */
-			/**********************/
-			/*m_minorServoBoss->getAxesInfo(axesNames.out());
-			data->setMinorServoAxesNames(axesNames.out());*/
+			unsigned pos;
+			m_minorServoBoss->getAxesInfo(axesNames.out(),axesUnits.out());
+			if  (!data->getMinorServoAxisPosition(axesNames.in(),pos)) {
+				m_minorServoCurrentAxisPosition=-1;
+				data->detectError();
+			}
+			else {
+				m_minorServoCurrentAxisPosition=pos;
+			}
 		}
 		catch (ManagementErrors::ConfigurationErrorEx &ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::getMinorServoData()");
@@ -586,7 +660,6 @@ void  CEngineThread::getMinorServoData()
 			impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
 			impl.log(LM_ERROR);
 			data->setStatus(Management::MNG_WARNING);
-			data->setMinorServoAxesNames();
 			data->detectError();
 		}
 		catch (CORBA::SystemException& ex) {
@@ -595,12 +668,9 @@ void  CEngineThread::getMinorServoData()
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
 			data->setStatus(Management::MNG_WARNING);
-			data->setMinorServoAxesNames();
 			data->detectError();
 			m_minorServoBossError=true;
 		}
-
-
 	}
 }
 
@@ -1185,7 +1255,30 @@ void CEngineThread::prepareFile(const ACS::Time& now)
     ACS_LOG (LM_FULL_INFO, "CEngineThread::prepareFile()", (LM_NOTICE, "FILE_OPENED %s", (const char *) data->getFileName ()));
 }
 
-void CEngineThread::writeFileHeaders(const ACS::Time& now)
+void CEngineThread::writeFocusFileHeaders(const ACS::Time& now)
+{
+	TIMEVALUE tS;
+	IRA::CString sourceName;
+    IRA::CString out;
+
+    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+    sourceName=data->getSourceName();
+
+    tS.value (now/*.value().value*/);
+    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#source ",tS.year (), tS.dayOfYear (), tS.hour (),  tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+    m_file << (const char *) out;
+    m_file << (const char *) sourceName;
+    IRA::CIRATools::radToHourAngle(m_targetRa,out);
+    m_file << (const char *) out;
+    IRA::CIRATools::radToSexagesimalAngle(m_targetDec,out);
+    m_file << (const char *) out;
+    m_file << " 2000.0" << std::endl;
+    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#parameters z 0 0 0 0 0 ",tS.year (), tS.dayOfYear (), tS.hour (),  tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+    m_file << (const char *) out;
+    m_file << std::endl;
+}
+
+void CEngineThread::writePointingFileHeaders(const ACS::Time& now)
 {
 	TIMEVALUE tS;
 	IRA::CString sourceName;
@@ -1196,6 +1289,8 @@ void CEngineThread::writeFileHeaders(const ACS::Time& now)
     sourceName=data->getSourceName();
     sourceFlux=data->getSourceFlux();
     tS.value (now/*.value().value*/);
+
+
     out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#source ",tS.year (), tS.dayOfYear (), tS.hour (),  tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     m_file << (const char *) out;
     m_file << (const char *) sourceName;
@@ -1239,8 +1334,6 @@ void CEngineThread::writeFileHeaders(const ACS::Time& now)
     case Management::MNG_GCIRCLE:
     	break;
     }
-
-
     m_file << (const char *) out;
     m_file << sourceFlux << std::endl;
 }

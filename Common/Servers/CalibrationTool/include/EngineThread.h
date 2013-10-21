@@ -105,7 +105,8 @@ private:
 	bool DirectoryExists(const IRA::CString& path);
 	bool makeDirectory(const IRA::CString& dirName);
 	void prepareFile(const ACS::Time& now);
-	void writeFileHeaders(const ACS::Time& now);
+	void writePointingFileHeaders(const ACS::Time& now);
+	void writeFocusFileHeaders(const ACS::Time& now);
 	void gaussFit(const ACS::Time& now);
 	void setAxisOffsets();
 	void getAntennaData();
@@ -144,6 +145,8 @@ private:
 	 * central position of the current focus scan
 	 */
 	double m_focusScanCenter;
+
+	long m_minorServoCurrentAxisPosition;
 
     double * m_latPositions;
     double * m_lonPositions;

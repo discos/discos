@@ -764,6 +764,19 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 	stopRecording();
 	guard.acquire();
 	terminateRecording();
+	try {
+		if (!CORBA::is_nil(m_minorServoBoss)) {
+			m_minorServoBoss->stopScan();
+		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::focusScan()");
+			throw impl;
+		}
+	}
+	catch (ManagementErrors::SubscanErrorEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::MinorServoScanErrorExImpl,impl,ex,"CCore::focusScan()");
+		throw impl;
+	}
 	ACS_LOG(LM_FULL_INFO,"CCore::focusScan()",(LM_NOTICE,"FOCUS_SCAN_DONE"));
 }
 

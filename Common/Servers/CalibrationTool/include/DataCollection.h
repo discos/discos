@@ -545,9 +545,13 @@ public:
 	 */
 	void detectError() { m_errorDetected=true; }
 
-	void setMinorServoAxesNames(const ACS::stringSeq& seq);
-
-	void setMinorServoAxesNames();
+	/**
+	 * check which position the active axis is for the current minor servo
+	 * @param seq list of the axes identifiers
+	 * @param pos position of the active servo minor axis
+	 * @return true if the current active axis could be matched, false otherwise
+	 */
+	bool  getMinorServoAxisPosition(const ACS::stringSeq& seq,unsigned& pos);
 
 private:
 	/** the name of the file */

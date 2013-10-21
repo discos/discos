@@ -124,6 +124,19 @@ IRA::CString CDataCollection::getFileName() const
 	return m_fullPath+m_fileName;
 }
 
+bool  CDataCollection::getMinorServoAxisPosition(const ACS::stringSeq& seq,unsigned& pos)
+{
+	pos=0;
+	for (unsigned i=0;i<seq.length();i++) {
+		IRA::CString name(seq[i]);
+		if (m_minorServoNameForAxis==name) {
+			pos=i;
+			return true;
+		}
+	}
+	return false;
+}
+
 bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& recording,bool& inconsistent)
 {
 	if (m_start && m_running) {
