@@ -52,53 +52,6 @@ class TestCheckFocusScan(unittest.TestCase):
         self.pyclient.releaseComponent(self.boss)
         self.pyclient.releaseComponent(self.srp)
 
-    def test_positioning(self):
-        """Test if checkFocusScan() computes in the right way the positioning time."""
-        if not self.boss.isReady() or not self.boss.isTracking():
-            self.boss.setup(self.setup_code)
-            print "\nExecuting the %s setup. Wait a bit ..." %self.setup_code
-            time.sleep(1) # Wait a bit, until the boss begins the configuration process
-        
-        counter = 0
-        delay_ready = 2
-        while not self.boss.isReady() or not self.srp.isReady(): # Wait until the minor servo boss is ready
-            time.sleep(delay_ready) # Wait a bit, until the boss is active
-            counter += delay_ready
-            if counter > 240:
-                self.assertTrue(counter > 240)
-                return
-
-        print "\nThe MinorServoBoss is ready."
-
-        time.sleep(2)
-        starting_time = TimeHelper.getTimeStamp().value + self.delay # Check for the scan in `delay` seconds from now
-        range_ = 10.0 # mm 
-        total_time = 10 * 10 ** 7 # 10 seconds
-        actPos_obj = self.srp._get_actPos()
-        actPos, cmp = actPos_obj.get_sync()
-        actual_pos = actPos[self.axis_id]
-        left_pos = self.boss.getCentralScanPosition() - range_/2 if self.boss.isScanActive() else actual_pos - range_/2 
-        right_pos = self.boss.getCentralScanPosition() + range_/2 if self.boss.isScanActive() else actual_pos + range_/2 
-        target_pos = left_pos if abs(actual_pos - left_pos) <= abs(actual_pos - right_pos) else right_pos
-        distance = abs(target_pos - actual_pos)
-        min_time = self.shift_time + (self.acceleration_time + (distance - self.acceleration_distance) / self.max_speed)*self.guard_coeff
-        print "Check if it can reach the starting position (%s mm of distance) for the starting time" %distance
-        print "Excpected min time to reach the starting scan position: %s" %min_time
-        checkScan_min_time = (starting_time - TimeHelper.getTimeStamp().value)/(1.0 * 10**7)
-        for i in range(1, 10, 2):
-            if self.boss.checkFocusScan(starting_time, range_, total_time):
-                print "Min time from checkFocusScan(): %s" %checkScan_min_time
-                break
-            else:
-                print "\tIt cannot reach the position in %s" %checkScan_min_time
-                now = TimeHelper.getTimeStamp().value 
-                starting_time = now + self.delay + i * 10**6
-                checkScan_min_time = (starting_time - now)/(1.0 * 10**7)
-
-        print "checkScan_min_time: %s" %checkScan_min_time
-        self.assertTrue(min_time - 1 < checkScan_min_time < min_time + 1)
-
-
     def test_duration(self):
         """Test if checkFocusScan() computes in the right way the minimum scan duration."""
         if not self.boss.isReady() or not self.boss.isTracking():
@@ -174,7 +127,7 @@ class TestCheckFocusScan(unittest.TestCase):
         left_pos = self.boss.getCentralScanPosition() - range_/2 if self.boss.isScanActive() else central_pos - range_/2 
         right_pos = self.boss.getCentralScanPosition() + range_/2 if self.boss.isScanActive() else central_pos + range_/2 
 
-        print "Excpected min position: %s" %min_value
+        print "Expected min position: %s" %min_value
         for i in range(0, 20):
             starting_time = TimeHelper.getTimeStamp().value + self.delay * 3
             new_total_time = total_time + i * 10**7

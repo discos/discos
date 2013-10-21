@@ -252,7 +252,7 @@ public:
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
      void startScan(
-             const ACS::Time starting_time, 
+             ACS::Time & starting_time, 
              const double range, 
              const ACS::Time total_time, 
              const char *axis_code
@@ -262,7 +262,7 @@ public:
      void stopScan() throw (ManagementErrors::SubscanErrorEx);
      
      void startScanImpl(
-        const ACS::Time starting_time, 
+        ACS::Time & starting_time, 
         const double range, 
         const ACS::Time total_time, 
         string axis_code
@@ -283,7 +283,7 @@ public:
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
      void startFocusScan(
-             const ACS::Time starting_time, 
+             ACS::Time & starting_time, 
              const double range, 
              const ACS::Time total_time
      ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
@@ -469,6 +469,10 @@ private:
 
     ACS::doubleSeq * getOffset(const char *servo, string offset_type) 
         throw (MinorServoErrors::OperationNotPermittedEx);
+
+    /** Return the minumun starting time **/
+    ACS::Time getMinScanStartingTime(double range, const string axis_code, double & acceleration, double & max_speed)
+        throw (ManagementErrors::ConfigurationErrorExImpl, ManagementErrors::SubscanErrorExImpl);
 
     void operator=(const MinorServoBossImpl &);
 };

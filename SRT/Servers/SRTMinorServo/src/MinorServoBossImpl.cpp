@@ -565,6 +565,150 @@ bool MinorServoBossImpl::checkScan(
 }
 
 
+ACS::Time MinorServoBossImpl::getMinScanStartingTime(
+        double range, 
+        const string axis_code, 
+        double & acceleration, 
+        double & max_speed
+    )
+    throw (ManagementErrors::ConfigurationErrorExImpl, ManagementErrors::SubscanErrorExImpl)
+{
+    ACS::Time min_starting_time = 0;
+    InfoAxisCode info;
+    info = m_configuration->getInfoFromAxisCode(axis_code); // Throws ConfigurationErrorExImpl
+    size_t axis = info.axis_id;
+    string comp_name = info.comp_name;
+
+    TIMEVALUE dtime(SCAN_DELTA_TIME);
+
+    MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+
+    if((m_configuration->m_component_refs).count(comp_name)) {
+        component_ref = (m_configuration->m_component_refs)[comp_name];
+        if(!CORBA::is_nil(component_ref))
+            if(!component_ref->isReady()) {
+                THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): the component is not ready", false);
+            }
+            else {
+                CDB::DAL_ptr dal_p = getContainerServices()->getCDB();
+                CDB::DAO_ptr dao_p = dal_p->get_DAO_Servant(("alma/MINORSERVO/" + comp_name).c_str());
+                size_t number_of_axis = dao_p->get_long("number_of_axis");
+                bool virtual_rs = dao_p->get_long("virtual_rs");
+                long servo_address = dao_p->get_long("servo_address");
+                double zero = dao_p->get_double("zero");
+                if(axis > number_of_axis - 1) {
+                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): axis out of range", false);
+                }
+
+                ACS::doubleSeq *acc = component_ref->getData("ACCELERATION");
+                ACS::doubleSeq *mspeed = component_ref->getData("MAX_SPEED");
+                size_t idx = (*acc).length() - number_of_axis + axis;
+                if((*acc).length() - 1 < idx || (*mspeed).length() - 1 < idx) {
+                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): index out of range", false);
+                }
+                acceleration = (*acc)[idx]; 
+                max_speed= (*mspeed)[idx]; 
+                if(acceleration != 0 && max_speed != 0) {
+                    ACSErr::Completion_var completion;          
+                    ACS::doubleSeq act_pos = *((component_ref->actPos())->get_sync(completion.out()));
+
+                    if(act_pos.length() <= axis) {
+                        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): wrong position indexing", false);
+                    }
+                    // Get the central position                  
+                    ACS::doubleSeq centralPos = m_configuration->isScanActive() ? (m_configuration->m_scan).centralPos : act_pos;
+
+                    ACS::doubleSeq positions_left, positions_right;
+                    positions_left = positions_right = centralPos;
+                    positions_left[axis] = positions_left[axis] - range / 2;
+                    positions_right[axis] = positions_right[axis] + range / 2;
+                    // Check if the positions are allowed
+                    ACS::doubleSeq_var max_values = component_ref->getMaxPositions();
+                    ACS::doubleSeq_var min_values = component_ref->getMinPositions();
+                    ACS::doubleSeq_var system_offset = component_ref->getSystemOffset();
+                    if(system_offset->length() < axis) {
+                        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): wrong system offset indexing", false);
+                    }
+                    if(positions_left[axis] + system_offset[axis] <= min_values[axis]) {
+                        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): min position out of range", false);
+                    }
+                    if(positions_right[axis] + system_offset[axis] >= max_values[axis]) {
+                        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): max position out of range", false);
+                    }
+                    
+                    double left_distance = abs_(act_pos[axis] - positions_left[axis]);
+                    double right_distance = abs_(act_pos[axis] - positions_right[axis]);
+                    double positioning_distance = left_distance <= right_distance ? left_distance : right_distance;
+
+                    // If the component has a virtual reference system
+                    if(virtual_rs) {
+                        // Conversion from Virtual reference system to the Real one
+                        virtual2real(positions_left, servo_address, zero);
+                        virtual2real(positions_right, servo_address, zero);
+                        ACS::doubleSeq diff;
+                        diff.length(act_pos.length());
+
+                        for(size_t i = 0; i < act_pos.length(); i++)
+                            diff[i] = abs_(positions_left[i] - positions_right[i]);
+
+                        double max_diff = 0;
+                        for(size_t i = 0; i < act_pos.length(); i++)
+                            if(diff[i] > max_diff)
+                                max_diff = diff[i];
+
+                        range = max_diff;
+
+                        // Conversion from Virtual reference system to the Real one
+                        virtual2real(act_pos, servo_address, zero);
+                        ACS::doubleSeq diff_left, diff_right;
+                        diff_left.length(act_pos.length());
+                        diff_right.length(act_pos.length());
+
+                        for(size_t i = 0; i < act_pos.length(); i++) {
+                            diff_left[i] = abs_(act_pos[i] - positions_left[i]);
+                            diff_right[i] = abs_(act_pos[i] - positions_right[i]);
+                        }
+
+                        double max_diff_left = 0;
+                        double max_diff_right = 0;
+                        for(size_t i = 0; i < act_pos.length(); i++) {
+                            if(diff_left[i] > max_diff_left)
+                                max_diff_left = diff_left[i];
+                            if(diff_right[i] > max_diff_right)
+                                max_diff_right = diff_right[i];
+                        }
+                        positioning_distance = max_diff_left <= max_diff_right ? max_diff_left : max_diff_right;
+                    }
+
+                    ACS::Time positioning_time = get_min_time(positioning_distance, acceleration, max_speed);
+                    
+                    
+                    min_starting_time = static_cast<ACS::Time>(
+                            getTimeStamp() + SCAN_SHIFT_TIME + positioning_time * (1 + SCAN_GUARD_COEFF)
+                    );
+                }
+                else {
+                    THROW_EX(
+                            ManagementErrors, 
+                            ConfigurationErrorEx, 
+                            "getMinScanStartingTime(): Acceleration or maximum speed wrong", 
+                            false
+                    );
+                }
+            }
+    }
+    else {
+        THROW_EX(
+                ManagementErrors, 
+                ConfigurationErrorEx, 
+                ("some problems getting the component " + comp_name).c_str(),
+                false
+        );
+    }
+    return min_starting_time;
+}
+
+
 bool MinorServoBossImpl::checkScanImpl(
         const ACS::Time starting_time, 
         double range, 
@@ -572,174 +716,42 @@ bool MinorServoBossImpl::checkScanImpl(
         const string axis_code
     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
 {
-    InfoAxisCode info;
-    try {
-        info = m_configuration->getInfoFromAxisCode(axis_code);
-    }
-    catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getConfigurationErrorEx();     
-    }
-    size_t axis = info.axis_id;
-    string comp_name = info.comp_name;
-
-    try {
-        TIMEVALUE now(0.0L);
-        TIMEVALUE stime(starting_time);
-        TIMEVALUE ttime(total_time);
-        TIMEVALUE dtime(SCAN_DELTA_TIME);
-
-        IRA::CIRATools::getTime(now);
-        if(CIRATools::timeSubtract(ttime, dtime) < 0) {
-            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): total time is too short"));
-            return false;
-        }
-        if(CIRATools::timeSubtract(stime, now) <= 0) {
-            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: starting time is less or equal to the actual time"));
-            return false;
-        }
-
-        MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-
-        if((m_configuration->m_component_refs).count(comp_name)) {
-            component_ref = (m_configuration->m_component_refs)[comp_name];
-            if(!CORBA::is_nil(component_ref))
-                if(!component_ref->isReady()) {
-                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "checkScan(): the component is not ready", true);
-                }
-                else {
-                    CDB::DAL_ptr dal_p = getContainerServices()->getCDB();
-                    CDB::DAO_ptr dao_p = dal_p->get_DAO_Servant(("alma/MINORSERVO/" + comp_name).c_str());
-                    size_t number_of_axis = dao_p->get_long("number_of_axis");
-                    bool virtual_rs = dao_p->get_long("virtual_rs");
-                    long servo_address = dao_p->get_long("servo_address");
-                    double zero = dao_p->get_double("zero");
-                    if(axis > number_of_axis - 1) {
-                        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - axis %d does not exist", axis));
-                        return false;
-                    }
-
-                    ACS::doubleSeq *acc = component_ref->getData("ACCELERATION");
-                    ACS::doubleSeq *mspeed = component_ref->getData("MAX_SPEED");
-                    size_t idx = (*acc).length() - number_of_axis + axis;
-                    if((*acc).length() - 1 < idx || (*mspeed).length() - 1 < idx) {
-                        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - error, index out of range"));
-                        return false;
-                    }
-                    double acceleration = (*acc)[idx]; 
-                    double max_speed= (*mspeed)[idx]; 
-                    if(acceleration != 0 && max_speed != 0) {
-                        ACSErr::Completion_var completion;          
-                        ACS::doubleSeq act_pos = *((component_ref->actPos())->get_sync(completion.out()));
-
-                        if(act_pos.length() <= axis) {
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: wrong position indexing"));
-                            return false;
-                        }
-                        // Get the central position                  
-                        ACS::doubleSeq centralPos = m_configuration->isScanActive() ? (m_configuration->m_scan).centralPos : act_pos;
-
-                        ACS::doubleSeq positions_left, positions_right;
-                        positions_left = positions_right = centralPos;
-                        positions_left[axis] = positions_left[axis] - range / 2;
-                        positions_right[axis] = positions_right[axis] + range / 2;
-                        // Check if the positions are allowed
-                        ACS::doubleSeq_var max_values = component_ref->getMaxPositions();
-                        ACS::doubleSeq_var min_values = component_ref->getMinPositions();
-                        ACS::doubleSeq_var system_offset = component_ref->getSystemOffset();
-                        if(system_offset->length() < axis) {
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan: wrong system offset indexing"));
-                            return false;
-                        }
-                        if(positions_left[axis] + system_offset[axis] <= min_values[axis]) {
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): min position out of range"));
-                            return false;
-                        }
-                        if(positions_right[axis] + system_offset[axis] >= max_values[axis]) {
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): max position out of range"));
-                            return false;
-                        }
                         
-                        double left_distance = abs_(act_pos[axis] - positions_left[axis]);
-                        double right_distance = abs_(act_pos[axis] - positions_right[axis]);
-                        double positioning_distance = left_distance <= right_distance ? left_distance : right_distance;
-
-                        // If the component has a virtual reference system
-                        if(virtual_rs) {
-                            // Conversion from Virtual reference system to the Real one
-                            virtual2real(positions_left, servo_address, zero);
-                            virtual2real(positions_right, servo_address, zero);
-                            ACS::doubleSeq diff;
-                            diff.length(act_pos.length());
-
-                            for(size_t i = 0; i < act_pos.length(); i++)
-                                diff[i] = abs_(positions_left[i] - positions_right[i]);
-
-                            double max_diff = 0;
-                            for(size_t i = 0; i < act_pos.length(); i++)
-                                if(diff[i] > max_diff)
-                                    max_diff = diff[i];
-
-                            range = max_diff;
-
-                            // Conversion from Virtual reference system to the Real one
-                            virtual2real(act_pos, servo_address, zero);
-                            ACS::doubleSeq diff_left, diff_right;
-                            diff_left.length(act_pos.length());
-                            diff_right.length(act_pos.length());
-
-                            for(size_t i = 0; i < act_pos.length(); i++) {
-                                diff_left[i] = abs_(act_pos[i] - positions_left[i]);
-                                diff_right[i] = abs_(act_pos[i] - positions_right[i]);
-                            }
-
-                            double max_diff_left = 0;
-                            double max_diff_right = 0;
-                            for(size_t i = 0; i < act_pos.length(); i++) {
-                                if(diff_left[i] > max_diff_left)
-                                    max_diff_left = diff_left[i];
-                                if(diff_right[i] > max_diff_right)
-                                    max_diff_right = diff_right[i];
-                            }
-                            positioning_distance = max_diff_left <= max_diff_right ? max_diff_left : max_diff_right;
-                        }
-
-                        ACS::Time positioning_time = get_min_time(positioning_distance, acceleration, max_speed);
-                        
-                        ACS::Time min_starting_time = static_cast<ACS::Time>(
-                                getTimeStamp() + SCAN_SHIFT_TIME + positioning_time * (1 + SCAN_GUARD_COEFF)
-                        );
-                        TIMEVALUE min_stime(min_starting_time); // Minimum starting time
-                        if(CIRATools::timeSubtract(min_stime, stime) > 0) {
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): starting time too much close to actual time"));
-                            return false;
-                        }
-
-                        ACS::Time min_scan_time = get_min_time(range, acceleration, max_speed);
-                        ACS::Time guard_min_scan_time = static_cast<ACS::Time>(min_scan_time * (1 + SCAN_GUARD_COEFF));
-                        TIMEVALUE gmst(guard_min_scan_time);
-                        if(CIRATools::timeSubtract(ttime, gmst) <= 0) {
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): total time too short for performing the scan."));
-                            return false;
-                        }
-                        else
-                            return true;
-                    }
-                    else {
-                        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - Acceleration or maximum speed wrong")); 
-                        return false;
-                    }
-                }
-        }
-        else {
-            ACS_SHORT_LOG((LM_WARNING, ("MinorServoBoss::checkScan - some problems getting the component " + comp_name).c_str()));
-            return false;
-        }
+    double acceleration = 0.0;
+    double max_speed = 0.0;
+    TIMEVALUE stime(starting_time);
+    TIMEVALUE ttime(total_time);
+    // (ManagementErrors::ConfigurationErrorExImpl, ManagementErrors::SubscanErrorExImpl)
+    ACS::Time min_starting_time = 0;
+    try {
+        min_starting_time = getMinScanStartingTime(range, axis_code, acceleration, max_speed);
+    }
+    catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
+        return false;
+    }
+    catch(ManagementErrors::SubscanErrorExImpl& ex) {
+        return false;
     }
     catch(...) {
-        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - unexpected exception"));
-        throw;
+        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): unexpected exception getting the min starting time"));
+        return false;
     }
+    
+    TIMEVALUE min_stime(min_starting_time); // Minimum starting time
+    if(min_starting_time > starting_time) {
+        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): starting time too much close to actual time"));
+        return false;
+    }
+
+    ACS::Time min_scan_time = get_min_time(range, acceleration, max_speed);
+    ACS::Time guard_min_scan_time = static_cast<ACS::Time>(min_scan_time * (1 + SCAN_GUARD_COEFF));
+    TIMEVALUE gmst(guard_min_scan_time);
+    if(CIRATools::timeSubtract(ttime, gmst) <= 0) {
+        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): total time too short for performing the scan."));
+        return false;
+    }
+    else
+        return true;
 
     ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - last line!"));
     return false;
@@ -747,7 +759,7 @@ bool MinorServoBossImpl::checkScanImpl(
 
 
 void MinorServoBossImpl::startScan(
-        const ACS::Time starting_time, 
+        ACS::Time & starting_time, 
         const double range, 
         const ACS::Time total_time, 
         const char *axis_code
@@ -763,7 +775,7 @@ void MinorServoBossImpl::startScan(
 }
 
 
-void MinorServoBossImpl::startFocusScan(const ACS::Time starting_time, const double range, const ACS::Time total_time) 
+void MinorServoBossImpl::startFocusScan(ACS::Time & starting_time, const double range, const ACS::Time total_time) 
         throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx) 
 {    
     if(!isReady())
@@ -779,7 +791,7 @@ void MinorServoBossImpl::startFocusScan(const ACS::Time starting_time, const dou
 
 
 void MinorServoBossImpl::startScanImpl(
-        const ACS::Time starting_time, 
+        ACS::Time & starting_time, 
         const double range, 
         const ACS::Time total_time, 
         string axis_code
@@ -794,6 +806,28 @@ void MinorServoBossImpl::startScanImpl(
         ex.log(LM_DEBUG);
         throw ex.getConfigurationErrorEx();     
     }
+
+    try {
+        if(starting_time == 0) {
+            double acceleration = 0.0;
+            double max_speed = 0.0;
+            starting_time = getMinScanStartingTime(range, axis_code, acceleration, max_speed);
+        }
+    }
+    catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getConfigurationErrorEx();     
+    }
+    catch(ManagementErrors::SubscanErrorExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getSubscanErrorEx();     
+    }
+    catch(...) {
+        THROW_EX(ManagementErrors, SubscanErrorEx, "Unexpected exception getting the min starting time", true);
+    }
+
+    cout << "Starging time: " << starting_time << endl;
+
     size_t axis = info.axis_id;
     string comp_name = info.comp_name;
 
