@@ -117,6 +117,18 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	*/
 	virtual Management::ROTBoolean_ptr enabled() throw (CORBA::SystemException);
 
+	/**
+     * Returns a reference to the enable property implementation of IDL interface.
+	 * @return pointer to read-only ROTBoolean  property enabled
+	*/
+	virtual ActiveSurface::ROTASProfile_ptr pprofile() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the tracking property implementation of IDL interface.
+	 * @return pointer to read-only ROTBoolean  property enabled
+	*/
+	virtual Management::ROTBoolean_ptr tracking() throw (CORBA::SystemException);
+
     /**
 	 *  This method can be called in order to disable the automatic update of the surface.
 	 * @throw CORBA::SystemException 
@@ -201,19 +213,19 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 
 	CSRTActiveSurfaceBossWorkingThread *m_workingThread;
 
-    SimpleParser::CParser<CSRTActiveSurfaceBossCore> *m_parser;
+    	SimpleParser::CParser<CSRTActiveSurfaceBossCore> *m_parser;
 
-    SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),
-	  POA_Management::ROTSystemStatus> > m_pstatus;
-    
-	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),
-	  POA_Management::ROTBoolean>  > m_penabled;
-    IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
+	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_pstatus;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean> > m_penabled;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile), POA_ActiveSurface::ROTASProfile> > m_pprofile;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean> > m_ptracking;
 
-    /* *
-     * Active Surface profile
-     */
-    ActiveSurface::TASProfile m_profile;
+	IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
+
+	/* *
+	* Active Surface profile
+	*/
+	ActiveSurface::TASProfile m_profile;
 };
 
 #endif /*SRTACTIVESURFACEBOSSIMPL_H*/

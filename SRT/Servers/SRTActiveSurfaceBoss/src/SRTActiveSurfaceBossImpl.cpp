@@ -4,6 +4,8 @@
 #include "SRTActiveSurfaceBossImpl.h"
 #include "DevIOStatus.h"
 #include "DevIOEnable.h"
+#include "DevIOProfile.h"
+#include "DevIOTracking.h"
 
 static char *rcsId="@(#) $Id: SRTActiveSurfaceBossImpl.cpp,v 1.2 2010-07-26 12:37:07 c.migoni Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
@@ -17,11 +19,14 @@ public:
 		if (val==ActiveSurface::AS_SHAPED) {
 			strcpy(c,"S");
 		}
-		else if (val==ActiveSurface::AS_PARABOLIC) {
+		if (val==ActiveSurface::AS_SHAPED_FIXED) {
+			strcpy(c,"SF");
+		}
+		if (val==ActiveSurface::AS_PARABOLIC) {
 			strcpy(c,"P");
 		}
-		else {
-			strcpy(c,"PF"); // PARABOLIC_FIXED
+		if (val==ActiveSurface::AS_PARABOLIC_FIXED) {
+			strcpy(c,"PF");
 		}
 		return c;
 	}
@@ -30,6 +35,9 @@ public:
 		strVal.MakeUpper();
 		if (strVal=="S") {
 			return ActiveSurface::AS_SHAPED;
+		}
+		else if (strVal=="SF") {
+			return ActiveSurface::AS_SHAPED_FIXED;
 		}
 		else if (strVal=="P") {
 			return ActiveSurface::AS_PARABOLIC;
@@ -40,16 +48,17 @@ public:
 		else {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"SRTActiveSurfaceProfile2String::strToVal()");
 			throw ex;
-
 		}
 	}
 };
 
 SRTActiveSurfaceBossImpl::SRTActiveSurfaceBossImpl(const ACE_CString &CompName, maci::ContainerServices *containerServices) : 
 	CharacteristicComponentImpl(CompName,containerServices),
-    m_pstatus(this),
+	m_pstatus(this),
 	m_penabled(this),
-    m_core(NULL)
+	m_pprofile(this),
+	m_ptracking(this),
+    	m_core(NULL)
 {	
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::SRTActiveSurfaceBossImpl()");
 }
@@ -72,6 +81,10 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		  (getContainerServices()->getName()+":status",getComponent(),new SRTActiveSurfaceBossImplDevIOStatus(m_core),true);	
 		m_penabled=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
 		  (getContainerServices()->getName()+":enabled",getComponent(),new SRTActiveSurfaceBossImplDevIOEnable(m_core),true);
+        	m_pprofile=new ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile),POA_ActiveSurface::ROTASProfile>
+		  (getContainerServices()->getName()+":pprofile",getComponent(),new SRTActiveSurfaceBossImplDevIOProfile(m_core),true);	
+		m_ptracking=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
+		  (getContainerServices()->getName()+":tracking",getComponent(),new SRTActiveSurfaceBossImplDevIOTracking(m_core),true);
 
         	// create the parser for command line execution
 		m_parser =  new SimpleParser::CParser<CSRTActiveSurfaceBossCore>(boss,10);
@@ -200,6 +213,9 @@ void SRTActiveSurfaceBossImpl::setup (const char *config) throw (CORBA::SystemEx
 	if (strVal=="S") {
 		setProfile(ActiveSurface::AS_SHAPED);
 	}
+	else if (strVal=="SF") {
+		setProfile(ActiveSurface::AS_SHAPED_FIXED);
+	}
 	else if (strVal=="P") {
 		setProfile(ActiveSurface::AS_PARABOLIC);
 	}
@@ -224,16 +240,16 @@ void SRTActiveSurfaceBossImpl::setup (const char *config) throw (CORBA::SystemEx
 void SRTActiveSurfaceBossImpl::park () throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx)
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::park()");
-
+	asOff();
+	setProfile (ActiveSurface::AS_SHAPED_FIXED);
     	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     	try {
-        	resource->onewayAction(ActiveSurface::AS_REFPOS, 0, 0, 0, 0, 0, 0, m_profile);
+        	resource->onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
     	}
     	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		_EXCPT(ManagementErrors::ParkingErrorExImpl,ex,"SRTActiveSurfaceBossImpl::park()");
 		throw ex.getParkingErrorEx();
 	}
-	setProfile (ActiveSurface::AS_SHAPED);
 }
 /*
 void SRTActiveSurfaceBossImpl::setup (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
@@ -493,19 +509,35 @@ void SRTActiveSurfaceBossImpl::recoverUSD (CORBA::Long circle, CORBA::Long actua
 void SRTActiveSurfaceBossImpl::asOn() throw (CORBA::SystemException)
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::asOn()");
-	if (m_profile != ActiveSurface::AS_PARABOLIC_FIXED) {
+	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
+	try {
+		resource->asOn();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+/*	if ((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) || (m_profile != ActiveSurface::AS_SHAPED_FIXED)) {
 		CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
 		resource->enableAutoUpdate();
 	}
 	else
-		update(0.0);
+		update(45.0);
+*/
 }
 
 void SRTActiveSurfaceBossImpl::asOff() throw (CORBA::SystemException)
 {
-    AUTO_TRACE("SRTActiveSurfaceBossImpl::asOff()");
+	AUTO_TRACE("SRTActiveSurfaceBossImpl::asOff()");
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-	resource->disableAutoUpdate();
+	try {
+		//resource->disableAutoUpdate();
+		resource->asOff();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
 }
 
 CORBA::Boolean SRTActiveSurfaceBossImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
@@ -540,6 +572,8 @@ CORBA::Boolean SRTActiveSurfaceBossImpl::command(const char *cmd,CORBA::String_o
 
 _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTSystemStatus,m_pstatus,status);
 _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTBoolean,m_penabled,enabled);
+_PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,ActiveSurface::ROTASProfile,m_pprofile,pprofile);
+_PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTBoolean,m_ptracking,tracking);
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>
 MACI_DLL_SUPPORT_FUNCTIONS(SRTActiveSurfaceBossImpl)

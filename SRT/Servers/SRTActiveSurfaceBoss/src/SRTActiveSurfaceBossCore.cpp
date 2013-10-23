@@ -19,7 +19,9 @@ void CSRTActiveSurfaceBossCore::initialize()
 	ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::initialize()",(LM_INFO,"CSRTActiveSurfaceBossCore::initialize"));
     
     	m_enable = false;
+    	m_tracking = false;
     	m_status=Management::MNG_OK;
+    	m_profile=ActiveSurface::AS_SHAPED_FIXED;
     	AutoUpdate = false;
     	actuatorcounter = circlecounter = totacts = 1;
 
@@ -124,7 +126,7 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
     
     	m_antennaBoss = Antenna::AntennaBoss::_nil();
     	try {
-        	m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
+        //	m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
     	}
     	catch (maciErrType::CannotGetComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::execute()");
@@ -204,7 +206,7 @@ void CSRTActiveSurfaceBossCore::cleanUp()
 	}
 */
     	try {
-		m_services->releaseComponent((const char*)m_antennaBoss->name());
+		//m_services->releaseComponent((const char*)m_antennaBoss->name());
 	}
 	catch (maciErrType::CannotReleaseComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
@@ -1446,11 +1448,14 @@ void CSRTActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentError
 
 void CSRTActiveSurfaceBossCore::asOn()
 {
-	if (m_profile != ActiveSurface::AS_PARABOLIC_FIXED)
+	if ((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_SHAPED_FIXED)) {
 		enableAutoUpdate();
+		m_tracking = true;
+	}
 	else {
+		m_tracking = false;
 		try {
-            		onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 0, 0, 0, m_profile);
+            		onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
         	}
         	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
             		ex.log(LM_DEBUG);
@@ -1461,14 +1466,16 @@ void CSRTActiveSurfaceBossCore::asOn()
 
 void CSRTActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
 {
+	asOff();
+	setProfile (ActiveSurface::AS_SHAPED);
 	try {
-            onewayAction(ActiveSurface::AS_REFPOS, 0, 0, 0, 0, 0, 0, m_profile);
+            onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex) {
             ex.log(LM_DEBUG);
             throw ex.getComponentErrorsEx();
         }
-	setProfile (ActiveSurface::AS_SHAPED);
+	m_tracking = false;
 }
 
 void CSRTActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsEx)
@@ -1480,7 +1487,6 @@ void CSRTActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsE
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();
         }
-
 	disableAutoUpdate();
 }
 

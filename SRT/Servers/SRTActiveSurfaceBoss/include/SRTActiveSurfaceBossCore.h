@@ -30,10 +30,10 @@
 #define CIRCLES 17
 #define ACTUATORS 96
 #define firstUSD 1
-#define lastUSD 1116
+#define lastUSD 13
 #define LOOPTIME 100000 // 0,10 sec
-#define USDTABLE "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD.txt\0"
-#define USDTABLECORRECTIONS "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/act_rev02.txt\0"
+#define USDTABLE "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S1.txt\0"
+#define USDTABLECORRECTIONS "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/act_rev02.txt\0"
 #define MM2HSTEP	350 //(10500 HSTEP / 30 MM)
 #define MM2STEP	1400 //(42000 STEP / 30 MM)
 #define WARNINGUSDPERCENT 0.95
@@ -137,6 +137,10 @@ public:
 	*/
 	inline bool getEnable() const { return m_enable; }
     
+	inline const ActiveSurface::TASProfile& getProfile() const { return m_profile; };
+
+	inline bool getTracking() const { return m_tracking; }
+
 	/**
 	 * Sets the <i>AutoUpdate</i> flag to false, i.e. the component will not update automatically the surface. 
 	*/
@@ -200,6 +204,8 @@ private:
     Antenna::AntennaBoss_var m_antennaBoss;
 
     ActiveSurface::TASProfile m_profile;
+
+	bool m_tracking;
 
 	char *s_usdTable;
 

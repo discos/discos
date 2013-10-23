@@ -14,16 +14,20 @@
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:as="urn:schemas-cosylab-com:ActiveSurface:1.0"
 	elementFormDefault="qualified"
 	attributeFormDefault="unqualified">
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
-	
+	<xs:import namespace="urn:schemas-cosylab-com:ActiveSurface:1.0" schemaLocation="ActiveSurface.xsd"/>
+
 	<xs:complexType name="SRTActiveSurfaceBossType">
 		<xs:sequence>
 			<xs:element name="status" type="mng:SystemStatusType" />	
 			<xs:element name="enabled" type="mng:BooleanType" />
+			<xs:element name="pprofile" type="as:ActiveSurfaceProfileType" />	
+			<xs:element name="tracking" type="mng:BooleanType" />
 		</xs:sequence>
 		<!-- sleep time of the watching thread (microseconds), this is the thread that keeps data up to date -->
 		<xs:attribute name="WatchingThreadTime" type="xs:unsignedLong" use="required" />
