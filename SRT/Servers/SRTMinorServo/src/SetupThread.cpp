@@ -199,8 +199,15 @@ void SetupThread::run()
                             bool on_target = true;
                             // Compute the difference between actual and target positions
                             for(size_t i=0; i<target_pos.length(); i++) { 
-                                if(fabs(target_pos[i] - (*act_pos)[i]) > component_ref->getTrackingDelta()) {
-                                    on_target = false;
+                                if(i < 3) {
+                                    if(fabs(target_pos[i] - (*act_pos)[i]) > component_ref->getTrackingDelta()/5) {
+                                        on_target = false;
+                                    }
+                                }
+                                else {
+                                    if(fabs(target_pos[i] - (*act_pos)[i]) > component_ref->getTrackingDelta()/1000) {
+                                        on_target = false;
+                                    }
                                 }
                             }
 

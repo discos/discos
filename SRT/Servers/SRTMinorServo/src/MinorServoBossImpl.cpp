@@ -1126,6 +1126,7 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
     }
 }
 
+
 void MinorServoBossImpl::setUserOffset(const char *axis_code, const double offset) 
     throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx) 
 {
