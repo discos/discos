@@ -300,7 +300,7 @@ bool CFitsWriter::storeServoData(const double& time,const ACS::doubleSeq& pos)
 		return true;
 	}
 	else {
-		m_lastError= "data table not available";
+		m_lastError= "minor servo data table not available";
 		return false;
 	}
 }

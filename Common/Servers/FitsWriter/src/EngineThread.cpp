@@ -83,6 +83,7 @@ bool CEngineThread::processData()
 	char *bufferCopy; // pointer to the memory that has to be freed
 	ACS::Time time;
 	bool calOn;
+	bool applyServoPositions;
 	long pol,bins;
 	long buffSize;
 	double ra,dec;
@@ -193,10 +194,12 @@ bool CEngineThread::processData()
 			data->setStatus(Management::MNG_FAILURE);
 			minorServoBossError=true;
 		}
-		servoPositions->length(0);
+		//servoPositions->length(0);
+		applyServoPositions=false;
 		try {
 			if (!CORBA::is_nil(m_minorServoBoss)) {
 				servoPositions=m_minorServoBoss->getAxesPosition(time);
+				applyServoPositions=true;;
 			}
 		}
 		catch (ManagementErrors::ConfigurationErrorEx& ex) {
@@ -227,7 +230,7 @@ bool CEngineThread::processData()
 			data->setStatus(Management::MNG_FAILURE);
 		}
 #ifdef FW_DEBUG
-		if (servoPositions->length()>0) {
+		if (applyServoPositions) {
 			IRA::CString tempOut;
 			out="Minor Servo: "
 					for (long inc=0;inc<servoPositions->length();inc++) {
@@ -238,7 +241,7 @@ bool CEngineThread::processData()
 			m_file << endl;
 		}
 #else
-		if (servoPositions->length()>0) {
+		if (applyServoPositions) {
 			if (!m_file->storeServoData(tdh.time,servoPositions.in())) {
 				_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
 				impl.setFileName((const char *)data->getFileName());
@@ -635,17 +638,6 @@ void CEngineThread::runLoop()
 						data->setStatus(Management::MNG_FAILURE);
 					}
 				}
-				if (m_config->getMinorServoBossComponent()!="") {
-					data->getServoAxisNames(axisName);
-					data->getServoAxisUnits(axisUnit);
-					if (!m_file->addServoTable(axisName,axisUnit)) {
-						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-						impl.setFileName((const char *)data->getFileName());
-						impl.setError(m_file->getLastError());
-						impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-						data->setStatus(Management::MNG_FAILURE);
-					}
-				}
 				if (!m_file->saveSectionHeader(cH)) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)data->getFileName());
@@ -692,6 +684,17 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					data->setStatus(Management::MNG_FAILURE);
 				}
+				if (m_config->getMinorServoBossComponent()!="") {
+					data->getServoAxisNames(axisName);
+					data->getServoAxisUnits(axisUnit);
+					if (!m_file->addServoTable(axisName,axisUnit)) {
+						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+						impl.setFileName((const char *)data->getFileName());
+						impl.setError(m_file->getLastError());
+						impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+						data->setStatus(Management::MNG_FAILURE);
+					}
+				}				
 #endif
 				m_fileOpened=true;
 				data->startRunnigStage();
