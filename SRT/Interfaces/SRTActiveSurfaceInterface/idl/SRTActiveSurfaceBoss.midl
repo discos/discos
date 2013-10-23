@@ -40,6 +40,7 @@ module ActiveSurface {
 
     enum TASProfile {
         AS_SHAPED,
+	AS_SHAPED_FIXED,
         AS_PARABOLIC,
 	AS_PARABOLIC_FIXED
     };
@@ -78,6 +79,16 @@ module ActiveSurface {
          * commands to the Active Surface.
 		*/
 		readonly attribute Management::ROTBoolean enabled;
+		
+		/*
+		 * This attribute shows the M1 profile
+		*/
+		readonly attribute ActiveSurface::ROTASProfile pprofile;
+
+		/*
+		 * This attribute shows if the ActiveSurfaceBoss is tracking or not, i.e., if M1 is refreshed when the elevation changes
+		*/
+		readonly attribute Management::ROTBoolean tracking;
 
         /**
 		 *  This method can be called in order to disable the component. That
@@ -148,9 +159,7 @@ module ActiveSurface {
         oneway void calibrate (in long circle, in long actuator, in long radius);
 
         void calVer (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
-
 	};
-
 };
 
 #endif
