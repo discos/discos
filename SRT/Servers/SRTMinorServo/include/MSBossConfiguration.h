@@ -102,6 +102,8 @@ public:
     // Return the name of the servo active in the primary focus
     inline std::string getActivePFocusServo() { return m_active_pfocus_servo; }
 
+    void setElevationTracking(string value) ;
+
     InfoAxisCode getInfoFromAxisCode(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl);
 
     struct Scan {
@@ -153,7 +155,7 @@ public:
     bool m_isScanActive;
     bool m_isParking;
     bool m_isValidCDBConfiguration;
-    bool m_isElevationTracking;
+    bool m_isElevationTracking; // Is it tracking?
     bool m_isElevationTrackingEn; // Is the tracking enabled?
     bool m_isTracking;
     bool m_isASConfiguration;

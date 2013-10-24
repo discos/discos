@@ -95,7 +95,7 @@ public:
 	 */
 	virtual void park() throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx);
     
-    void parkImpl() throw (CORBA::SystemException, ManagementErrors::ParkingErrorExImpl);
+    void parkImpl() throw (ManagementErrors::ParkingErrorExImpl);
 
     
     /** Return true if the elevation tracking is enabled */
@@ -143,7 +143,7 @@ public:
 	virtual void setup(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
     
 
-    void setupImpl(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorExImpl);
+    void setupImpl(const char *config) throw (ManagementErrors::ConfigurationErrorExImpl);
 
 
     /**
@@ -301,7 +301,7 @@ public:
 
      
      /** Clear all the offsets. This method is called when the user gives a clearOffsets from the operator input */
-     void clearOffsetsFromOI() throw (MinorServoErrors::OperationNotPermittedEx);
+     void clearOffsetsFromOI() throw (MinorServoErrors::OperationNotPermittedExImpl);
       
 
      /** 
@@ -318,7 +318,7 @@ public:
 
      /** Set the user offset. This method is called when the user gives a clearOffsets from the operator input */
      void setUserOffsetFromOI(const char * axis_code, const double & offset) 
-         throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+         throw (MinorServoErrors::OperationNotPermittedExImpl);
      
      
      vector<double> getOffsetImpl(string offset_type)

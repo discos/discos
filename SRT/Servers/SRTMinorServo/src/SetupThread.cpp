@@ -334,9 +334,8 @@ void SetupThread::run()
     m_configuration->m_isConfigured = true;
     m_configuration->m_actualSetup = m_configuration->m_commandedSetup;
 
-    // TODO:
-    // if(m_params->tracking_thread_ptr != NULL)
-    //     (m_params->tracking_thread_ptr)->resume();
+    if(m_configuration->isElevationTrackingEn())
+        (m_params->tracking_thread_ptr)->resume();
 
     ACS_SHORT_LOG((LM_INFO, ("SetupThread::run(): setup done.")));
     return;

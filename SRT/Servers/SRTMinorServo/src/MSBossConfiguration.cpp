@@ -33,36 +33,12 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
     m_isASConfiguration = false;
     ACS::doubleSeq dummy;
 
-    IRA::CError error;
-    try {
-        m_as_ref =  ActiveSurface::SRTActiveSurfaceBoss::_nil();
-        m_as_ref = m_services->getComponent<ActiveSurface::SRTActiveSurfaceBoss>("AS/Boss");
-        if(!CORBA::is_nil(m_as_ref)) {
-            if(false) { // TODO: remove this line and decomment the one below
-            // if(m_as_ref->isReadyToUpdate()) {
-                setupMode = setupMode + string("_ASACTIVE");
-                m_isASConfiguration = true;
-            }
-            else {
-                ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): 'NO ACTIVE SUFRACE' configuration."));
-            }
-        }
-        else {
-            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): nil ASBoss reference: 'NO ACTIVE SUFRACE' configuration."));
-        }
-    }
-    catch (maciErrType::CannotGetComponentExImpl& ex) {
-        ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): cannot get the ASBoss component: 'NO ACTIVE SUFRACE' configuration."));
-    }
-
     // Read the component configuration
     IRA::CString config;
     if(!CIRATools::getDBValue(m_services, setupMode.c_str(), config)) {
         m_isStarting = false;
         THROW_EX(ManagementErrors, ConfigurationErrorEx, setupMode + ": unavailable configuration code.", false);
     }
-
-    m_isASConfiguration = endswith(setupMode, "ASACTIVE") ? true : false;
 
     // initializing
     m_isConfigured = false;
@@ -220,6 +196,9 @@ InfoAxisCode MSBossConfiguration::getInfoFromAxisCode(string axis_code) throw (M
     }
 }
 
+void MSBossConfiguration::setElevationTracking(string value) {
+    m_isElevationTrackingEn = (value == "ON") ? true : false;
+}
 
 void MSBossConfiguration::setScan(
         ACS::Time starting_time, 

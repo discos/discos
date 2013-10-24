@@ -286,7 +286,7 @@ void MinorServoBossImpl::setup(const char *config) throw (CORBA::SystemException
     }
 }
 
-void MinorServoBossImpl::setupImpl(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorExImpl)
+void MinorServoBossImpl::setupImpl(const char *config) throw (ManagementErrors::ConfigurationErrorExImpl)
 {
     if(m_configuration->isStarting())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing another setup", false);
@@ -322,7 +322,7 @@ void MinorServoBossImpl::park() throw (CORBA::SystemException, ManagementErrors:
     }
 }
 
-void MinorServoBossImpl::parkImpl() throw (CORBA::SystemException, ManagementErrors::ParkingErrorExImpl)
+void MinorServoBossImpl::parkImpl() throw (ManagementErrors::ParkingErrorExImpl)
 {
     AUTO_TRACE("MinorServoBossImpl::parkImpl()");
 
@@ -839,8 +839,6 @@ void MinorServoBossImpl::startScanImpl(
         THROW_EX(ManagementErrors, SubscanErrorEx, "Unexpected exception getting the min starting time", true);
     }
 
-    cout << "Starging time: " << starting_time << endl;
-
     size_t axis = info.axis_id;
     string comp_name = info.comp_name;
 
@@ -876,6 +874,7 @@ void MinorServoBossImpl::startScanImpl(
             if(axis > number_of_axis - 1)               
                 THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: axis index error", true);
                                                         
+            bool wasTrackingEn = isElevationTrackingEn();
             turnTrackingOff();
 
             // Get the actual positions
@@ -938,7 +937,7 @@ void MinorServoBossImpl::startScanImpl(
                     centralPos,
                     plainCentralPos,
                     virtualCentralElongation,
-                    isElevationTrackingEn()
+                    wasTrackingEn()
             );
         }
         else {
@@ -1056,14 +1055,23 @@ void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::Configuratio
 
 
 void MinorServoBossImpl::clearUserOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx){
-
     clearOffset(servo, "user");
 }
 
 
 // Clear offset from Operator Input
-void MinorServoBossImpl::clearOffsetsFromOI() throw (MinorServoErrors::OperationNotPermittedEx){
-    clearUserOffset("ALL");
+void MinorServoBossImpl::clearOffsetsFromOI() throw (MinorServoErrors::OperationNotPermittedExImpl){
+    try {
+        clearUserOffset("ALL");
+    }
+    catch(...) {
+        THROW_EX(
+                MinorServoErrors, 
+                OperationNotPermittedEx, 
+                string("Cannot clear the offsets"), 
+                false 
+        )
+    }
 }
 
 
@@ -1163,10 +1171,19 @@ void MinorServoBossImpl::setUserOffset(const char *axis_code, const double offse
 }
 
 void MinorServoBossImpl::setUserOffsetFromOI(const char * axis_code, const double & offset)
-         throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx)
+         throw (MinorServoErrors::OperationNotPermittedExImpl)
 {
-    // TODO: sollevare ExImpl
-    setUserOffset(axis_code, offset);
+    try {
+        setUserOffset(axis_code, offset);
+    }
+    catch(...) {
+        THROW_EX(
+                MinorServoErrors, 
+                OperationNotPermittedEx, 
+                string("Cannot set the offset"), 
+                false 
+        )
+    }
 }
 
 void MinorServoBossImpl::setSystemOffset(const char *axis_code, const double offset) 
