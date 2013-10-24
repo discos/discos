@@ -298,6 +298,10 @@ public:
       * @throw MinorServoErrors::OperationNotPermittedEx
       */
      void clearUserOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
+
+     
+     /** Clear all the offsets. This method is called when the user gives a clearOffsets from the operator input */
+     void clearOffsetsFromOI() throw (MinorServoErrors::OperationNotPermittedEx);
       
 
      /** 
@@ -309,6 +313,11 @@ public:
       * @throw ManagementErrors::ConfigurationErrorEx
       */
      void setUserOffset(const char * axis_code, const double offset) 
+         throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+
+
+     /** Set the user offset. This method is called when the user gives a clearOffsets from the operator input */
+     void setUserOffsetFromOI(const char * axis_code, const double & offset) 
          throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
      
      

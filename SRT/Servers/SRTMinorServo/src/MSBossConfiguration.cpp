@@ -62,6 +62,8 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
         THROW_EX(ManagementErrors, ConfigurationErrorEx, setupMode + ": unavailable configuration code.", false);
     }
 
+    m_isASConfiguration = endswith(setupMode, "ASACTIVE") ? true : false;
+
     // initializing
     m_isConfigured = false;
     m_servosToPark.clear();

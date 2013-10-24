@@ -123,6 +123,19 @@ void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponen
             new function1<MinorServoBossImpl, non_constant, void_type, I<string_type> >(this, &MinorServoBossImpl::setupImpl), 
             1
     );
+
+    m_parser->add(
+            "clearServoOffsets", 
+            new function0<MinorServoBossImpl, non_constant, void_type>(this, &MinorServoBossImpl::clearOffsetsFromOI), 
+            0
+    );
+ 
+    m_parser->add(
+            "setServoOffset", 
+             new function2<MinorServoBossImpl, non_constant, void_type, I<string_type>, I<double_type> >(this, &MinorServoBossImpl::setUserOffsetFromOI), 
+             2
+    );
+   
 }
 
 
@@ -1048,6 +1061,12 @@ void MinorServoBossImpl::clearUserOffset(const char *servo) throw (MinorServoErr
 }
 
 
+// Clear offset from Operator Input
+void MinorServoBossImpl::clearOffsetsFromOI() throw (MinorServoErrors::OperationNotPermittedEx){
+    clearUserOffset("ALL");
+}
+
+
 void MinorServoBossImpl::clearSystemOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx){
 
     clearOffset(servo, "system");
@@ -1143,6 +1162,12 @@ void MinorServoBossImpl::setUserOffset(const char *axis_code, const double offse
     }
 }
 
+void MinorServoBossImpl::setUserOffsetFromOI(const char * axis_code, const double & offset)
+         throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx)
+{
+    // TODO: sollevare ExImpl
+    setUserOffset(axis_code, offset);
+}
 
 void MinorServoBossImpl::setSystemOffset(const char *axis_code, const double offset) 
     throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx) 
