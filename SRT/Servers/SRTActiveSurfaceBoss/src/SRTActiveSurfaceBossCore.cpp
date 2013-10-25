@@ -126,7 +126,7 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
     
     	m_antennaBoss = Antenna::AntennaBoss::_nil();
     	try {
-        //	m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
+        	m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
     	}
     	catch (maciErrType::CannotGetComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::execute()");
@@ -206,7 +206,7 @@ void CSRTActiveSurfaceBossCore::cleanUp()
 	}
 */
     	try {
-		//m_services->releaseComponent((const char*)m_antennaBoss->name());
+		m_services->releaseComponent((const char*)m_antennaBoss->name());
 	}
 	catch (maciErrType::CannotReleaseComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
@@ -1467,7 +1467,7 @@ void CSRTActiveSurfaceBossCore::asOn()
 void CSRTActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
 {
 	asOff();
-	setProfile (ActiveSurface::AS_SHAPED);
+	setProfile (ActiveSurface::AS_SHAPED_FIXED);
 	try {
             onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
         }
