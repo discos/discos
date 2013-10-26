@@ -22,6 +22,7 @@
 #include "FitsWriter.h"
 #endif
 #include "Configuration.h"
+#include "MetaData.h"
 
 namespace FitsWriter_private {
 
@@ -83,6 +84,7 @@ private:
 	CFitsWriter *m_file;
 #endif
 	CConfiguration *m_config;
+	CMetaData m_info;
 	maci::ContainerServices * m_service;
 	bool m_fileOpened;
 	long m_timeSlice;
@@ -93,6 +95,7 @@ private:
 	Receivers::ReceiversBoss_var m_receiversBoss;
 	bool minorServoBossError;
 	MinorServo::MinorServoBoss_var m_minorServoBoss;
+	ACS::Time m_lastMinorServoEnquireTime;
 	bool checkTime(const ACS::Time& currentTime);
 	bool checkTimeSlot(const ACS::Time& slotStart);
 	bool processData();

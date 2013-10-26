@@ -77,7 +77,13 @@ public:
 	/**
 	 * @return the number of microseconds that will used as gap between two tracking flag refreshes
 	*/
-	const long& getTrackingFlagDutyCycle() const { return m_trackingFlagDutyCycle; }
+	const long& getMinorServoEnquireMinGap() const { return m_trackingFlagDutyCycle; }
+
+	/**
+	 * @return the number of microseconds that will used as gap between two tracking enquires to minor
+	 * servo system
+	*/
+	const long& getTrackingFlagDutyCycle() const { return m_minorServoEnquireMinGap; }
 	
 	/**
 	 * @return the name of the interface of the antenna boss component
@@ -102,8 +108,7 @@ public:
 	/**
 	 * @return the name of the instance of the meteo station component
 	*/	
-	const IRA::CString& getMeteoInstance() const { return m_meteoInstance; }	
-	
+	const IRA::CString& getMeteoInstance() const { return m_meteoInstance; }
 	
 private:
 	long m_workingThreadTime;
@@ -113,6 +118,7 @@ private:
 	long m_repetitionExpireTime;
 	long m_meteoParameterDutyCycle;
 	long m_trackingFlagDutyCycle;
+    long m_minorServoEnquireMinGap;
 	IRA::CString m_antennaBossComp;
 	IRA::CString m_observatoryComp;
 	IRA::CString m_receiversBossComp;

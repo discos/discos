@@ -25,6 +25,7 @@ CEngineThread::CEngineThread(const ACE_CString& name,FitsWriter_private::CDataCo
 	receiverBossError=false;
 	m_antennaBoss=Antenna::AntennaBoss::_nil();
 	antennaBossError=false;
+	m_lastMinorServoEnquireTime=0;
 }
 
 CEngineThread::~CEngineThread()
@@ -91,6 +92,7 @@ bool CEngineThread::processData()
 	bool tracking;
 	double hum,temp,press;
 	ACS::doubleSeq_var servoPositions;
+	long long integrationTime;
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	if (!m_data->getDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
 	TIMEVALUE tS;
@@ -103,6 +105,8 @@ bool CEngineThread::processData()
 	CFitsWriter::TDataHeader tdh;
 	CDateTime tConverter(tS,m_data->getDut1()); 
 	tdh.time=tConverter.getMJD();
+	//integration is multiplied by 10000 because internally we have the value in millesec while the method requires 100ns.
+	integrationTime=m_data->getIntegrationTime()*10000;
 #endif
 	try {
 		CCommonTools::getAntennaBoss(m_antennaBoss,m_service,m_config->getAntennaBossComponent(),antennaBossError);
@@ -127,9 +131,8 @@ bool CEngineThread::processData()
 	ra=dec=az=el=0.0;
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
-			//integration is multiplied by 10000 because internally we have the value in millesec while the method requires 100ns.
-			m_antennaBoss->getObservedEquatorial(time,m_data->getIntegrationTime()*10000,ra,dec);
-			m_antennaBoss->getObservedHorizontal(time,m_data->getIntegrationTime()*10000,az,el);
+			m_antennaBoss->getObservedEquatorial(time,integrationTime,ra,dec);
+			m_antennaBoss->getObservedHorizontal(time,integrationTime,az,el);
 		}
 	}
 	catch (CORBA::SystemException& ex) {
@@ -198,8 +201,11 @@ bool CEngineThread::processData()
 		applyServoPositions=false;
 		try {
 			if (!CORBA::is_nil(m_minorServoBoss)) {
-				servoPositions=m_minorServoBoss->getAxesPosition(time);
-				applyServoPositions=true;;
+				if (time>=m_lastMinorServoEnquireTime+m_config->getMinorServoEnquireMinGap()) {
+					servoPositions=m_minorServoBoss->getAxesPosition(time);
+					m_lastMinorServoEnquireTime=time;
+					applyServoPositions=true;
+				}
 			}
 		}
 		catch (ManagementErrors::ConfigurationErrorEx& ex) {
@@ -249,6 +255,7 @@ bool CEngineThread::processData()
 				_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 				m_data->setStatus(Management::MNG_FAILURE);
 			}
+			m_file->add_servo_table_row();
 		}
 #endif
 	}  // m_config->getMinorServoBossComponent()!=""
@@ -437,18 +444,18 @@ void CEngineThread::runLoop()
 				ACS::stringSeq axisName,axisUnit;
 
 				m_data->getSite(site,dut1,siteName);
-				m_data->getLocalOscillator(LocalOscillator);
-				m_data->getSectionsID(sectionsID);
-				m_data->getBackendAttenuations(atts);
-				m_data->getFeedsID(feedsID);
-				m_data->getIFsID(ifsID);
-				m_data->getSkyBandwidth(skyBw);
-				m_data->getSkyFrequency(skyFreq);
-				m_data->getCalibrationMarks(calib);
-				m_data->getSourceFlux(fluxes);
-				m_data->getReceiverPolarization(polarizations);
-				m_data->getSource(sourceName,sourceRa,sourceDec,sourceVlsr);
-				m_data->getAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
+				m_info.getLocalOscillator(LocalOscillator);
+				m_info.getSectionsID(sectionsID);
+				m_info.getBackendAttenuations(atts);
+				m_info.getFeedsID(feedsID);
+				m_info.getIFsID(ifsID);
+				m_info.getSkyBandwidth(skyBw);
+				m_info.getSkyFrequency(skyFreq);
+				m_info.getCalibrationMarks(calib);
+				m_info.getSourceFlux(fluxes);
+				m_info.getReceiverPolarization(polarizations);
+				m_info.getSource(sourceName,sourceRa,sourceDec,sourceVlsr);
+				m_info.getAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
 				scanTag=m_data->getScanTag();
 				scanID=m_data->getScanID();
 				subScanID=m_data->getSubScanID();
@@ -524,7 +531,7 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if(!m_file->setPrimaryHeaderKey("Receiver Code",(const char *)m_data->getReceiverCode(),"Keyword that identifies the receiver")) {
+				else if(!m_file->setPrimaryHeaderKey("Receiver Code",(const char *)m_info.getReceiverCode(),"Keyword that identifies the receiver")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -659,7 +666,7 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				CFitsWriter::TFeedHeader *feedH=m_data->getFeedHeader();
+				CFitsWriter::TFeedHeader *feedH=m_info.getFeedHeader();
 				if (!m_file->addFeedTable("FEED TABLE")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
@@ -667,14 +674,14 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				for (WORD j=0;j<m_data->getFeedNumber();j++) {
+				for (WORD j=0;j<m_info.getFeedNumber();j++) {
 					if (!m_file->saveFeedHeader(feedH[j])) {
 						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 						impl.setFileName((const char *)m_data->getFileName());
 						impl.setError(m_file->getLastError());
 						impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 						m_data->setStatus(Management::MNG_FAILURE);
-						j=m_data->getFeedNumber(); //exit the cycle
+						j=m_info.getFeedNumber(); //exit the cycle
 					}
 				}
 				if (!m_file->addDataTable()) {
@@ -685,8 +692,8 @@ void CEngineThread::runLoop()
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				if (m_config->getMinorServoBossComponent()!="") {
-					m_data->getServoAxisNames(axisName);
-					m_data->getServoAxisUnits(axisUnit);
+					m_info.getServoAxisNames(axisName);
+					m_info.getServoAxisUnits(axisUnit);
 					if (!m_file->addServoTable(axisName,axisUnit)) {
 						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 						impl.setFileName((const char *)m_data->getFileName());
@@ -764,9 +771,9 @@ void CEngineThread::collectMinorServoData()
 			impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
 			impl.log(LM_ERROR);
 			m_data->setStatus(Management::MNG_WARNING);
-			m_data->setServoAxis();
+			m_info.setServoAxis();
 		}
-		m_data->setServoAxis(names.in(),units.in());
+		m_info.setServoAxis(names.in(),units.in());
 	}
 }
 
@@ -916,19 +923,19 @@ void CEngineThread::collectAntennaData()
 			sourceName="";
 			ra=dec=vlsr=0.0;
 		}
-		m_data->setSource(sourceName,ra,dec,vlsr);
-		m_data->setAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
+		m_info.setSource(sourceName,ra,dec,vlsr);
+		m_info.setAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
 		try { //get the estimated source fluxes
 			ACS::doubleSeq_var fluxes;
 			ACS::doubleSeq freqs;
 			ACS::doubleSeq bw;
-			m_data->getSkyFrequency(freqs);
-			m_data->getSkyBandwidth(bw);
+			m_info.getSkyFrequency(freqs);
+			m_info.getSkyBandwidth(bw);
 			for (unsigned i=0;i<freqs.length();i++) {
 				freqs[i]+=bw[i]/2.0; //computes the central frequency;
 			}
 			m_antennaBoss->getFluxes(freqs,fluxes.out());
-			m_data->setSourceFlux(fluxes);
+			m_info.setSourceFlux(fluxes);
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectAntennaData()");
@@ -937,7 +944,7 @@ void CEngineThread::collectAntennaData()
 			impl.log(LM_ERROR);
 			m_data->setStatus(Management::MNG_WARNING);
 			antennaBossError=true;
-			m_data->setSourceFlux();
+			m_info.setSourceFlux();
 		}
 	}
 }
@@ -962,7 +969,7 @@ void CEngineThread::collectReceiversData()
 			recvCode=recvCodeRef->get_sync(comp.out());
 			ACSErr::CompletionImpl compImpl(comp);
 			if (compImpl.isErrorFree()) {
-				m_data->setReceiverCode((const char *)recvCode);
+				m_info.setReceiverCode((const char *)recvCode);
 			}
 			else {
 				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
@@ -970,7 +977,7 @@ void CEngineThread::collectReceiversData()
 				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 				impl.log(LM_ERROR);
 				m_data->setStatus(Management::MNG_WARNING);
-				m_data->setReceiverCode(IRA::CString(""));
+				m_info.setReceiverCode(IRA::CString(""));
 			}
 		}
 		catch (CORBA::SystemException& ex) {
@@ -980,117 +987,8 @@ void CEngineThread::collectReceiversData()
 			impl.log(LM_ERROR);
 			m_data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
-			m_data->setReceiverCode(IRA::CString(""));
+			m_info.setReceiverCode(IRA::CString(""));
 		}
-		/*try { //get the local oscillator
-			ACS::ROdoubleSeq_var loRef;
-			ACS::doubleSeq_var lo;
-			loRef=m_receiversBoss->LO();
-			lo=loRef->get_sync(comp.out());
-			ACSErr::CompletionImpl compImpl(comp);
-			if (compImpl.isErrorFree()) {
-				m_data->setLocalOscillator(lo.in());
-			}
-			else {
-				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
-				impl.setAttributeName("localOscillator");
-				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
-				impl.log(LM_ERROR);
-				m_data->setStatus(Management::MNG_WARNING);
-				m_data->setLocalOscillator();
-			}							
-		}
-		catch (CORBA::SystemException& ex) {
-			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
-			impl.setName(ex._name());
-			impl.setMinor(ex.minor());
-			impl.log(LM_ERROR);
-			m_data->setStatus(Management::MNG_WARNING);
-			receiverBossError=true;
-			m_data->setLocalOscillator();							
-		}*/
-		/*try { //get the band width for each if
-			ACS::ROdoubleSeq_var bwRef;
-			ACS::doubleSeq_var bw;
-			bwRef=m_receiversBoss->bandWidth();
-			bw=bwRef->get_sync(comp.out());
-			ACSErr::CompletionImpl compImpl(comp);
-			if (compImpl.isErrorFree()) {
-				m_data->setReceiverBandWidth(bw.in());
-			}
-			else {
-				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
-				impl.setAttributeName("bandWidth");
-				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
-				impl.log(LM_ERROR);
-				m_data->setStatus(Management::MNG_WARNING);
-				m_data->setReceiverBandWidth();
-			}							
-		}
-		catch (CORBA::SystemException& ex) {
-			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
-			impl.setName(ex._name());
-			impl.setMinor(ex.minor());
-			impl.log(LM_ERROR);
-			m_data->setStatus(Management::MNG_WARNING);
-			receiverBossError=true;
-			m_data->setReceiverBandWidth();							
-		}	*/
-		/*try { //get the band initial frequency for each IF of the receiver
-			ACS::ROdoubleSeq_var ifreqRef;
-			ACS::doubleSeq_var ifreq;
-			ifreqRef=m_receiversBoss->initialFrequency();
-			ifreq=ifreqRef->get_sync(comp.out());
-			ACSErr::CompletionImpl compImpl(comp);
-			if (compImpl.isErrorFree()) {
-				m_data->setReceiverInitialFrequency(ifreq.in());
-			}
-			else {
-				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
-				impl.setAttributeName("initialFrequency");
-				bool DirectoryExists(const IRA::CString& path);
-				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
-				impl.log(LM_ERROR);
-				m_data->setStatus(Management::MNG_WARNING);
-				m_data->setReceiverInitialFrequency();
-			}							
-		}
-		catch (CORBA::SystemException& ex) {
-			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
-			impl.setName(ex._name());
-			impl.setMinor(ex.minor());
-			impl.log(LM_ERROR);
-			m_data->setStatus(Management::MNG_WARNING);
-			receiverBossError=true;
-			m_data->setReceiverInitialFrequency();							
-		}	*/
-		/*try { //get the local polarization of each ifs
-			ACS::ROlongSeq_var polRef;
-			ACS::longSeq_var pol;
-			polRef=m_receiversBoss->polarization();
-			pol=polRef->get_sync(comp.out());
-			ACSErr::CompletionImpl compImpl(comp);
-			if (compImpl.isErrorFree()) {
-				m_data->setReceiverPolarization(pol.in());
-			}
-			else {
-				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
-				impl.setAttributeName("polarization");
-				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
-				impl.log(LM_ERROR);
-				m_data->setStatus(Management::MNG_WARNING);
-				m_data->setReceiverPolarization();
-			}							
-		}
-		catch (CORBA::SystemException& ex) {
-			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
-			impl.setName(ex._name());
-			impl.setMinor(ex.minor());
-			impl.log(LM_ERROR);
-			m_data->setStatus(Management::MNG_WARNING);
-			receiverBossError=true;
-			m_data->setReceiverPolarization();							
-		}*/
 		try { //get the feeds geometry
 			long inputs;
 			ACS::doubleSeq_var xOff;
@@ -1104,7 +1002,7 @@ void CEngineThread::collectReceiversData()
 				fH[i].yOffset=yOff[i];
 				fH[i].relativePower=power[i];
 			}
-			m_data->saveFeedHeader(fH,inputs);
+			m_info.saveFeedHeader(fH,inputs); //fH deleted inside this object
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
@@ -1113,7 +1011,7 @@ void CEngineThread::collectReceiversData()
 			impl.log(LM_ERROR);
 			m_data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
-			m_data->saveFeedHeader(NULL,0);
+			m_info.saveFeedHeader(NULL,0);
 		} 
 		catch (ComponentErrors::ComponentErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
@@ -1121,7 +1019,7 @@ void CEngineThread::collectReceiversData()
 			impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 			impl.log(LM_ERROR);
 			m_data->setStatus(Management::MNG_WARNING);
-			m_data->saveFeedHeader(NULL,0);
+			m_info.saveFeedHeader(NULL,0);
 		}
 		try { // get the calibration marks values and inputs configuration
 			ACS::doubleSeq freqs,bws,atts;
@@ -1137,10 +1035,7 @@ void CEngineThread::collectReceiversData()
 			m_data->getInputsConfiguration(sectionsID,feeds,ifs,freqs,bws,atts);
 			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),scale);
 			m_receiversBoss->getIFOutput(feeds,ifs,IFFreq.out(),IFBw.out(),rcvPol.out(),LO.out());
-			m_data->setInputsTable(sectionsID,feeds,ifs,rcvPol.in(),skyFreq.in(),skyBw.in(),LO.in(),atts,calMarks.in());
-			/*m_data->setCalibrationMarks(calMarks.in());
-			m_data->setSkyFrequency(skyFreq.in());
-			m_data->setSkyBandwidth(skyBw.in());*/
+			m_info.setInputsTable(sectionsID,feeds,ifs,rcvPol.in(),skyFreq.in(),skyBw.in(),LO.in(),atts,calMarks.in());
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
@@ -1148,7 +1043,7 @@ void CEngineThread::collectReceiversData()
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
 			m_data->setStatus(Management::MNG_WARNING);
-			m_data->setInputsTable();
+			m_info.setInputsTable();
 			/*m_data->setCalibrationMarks();
 			m_data->setSkyFrequency();
 			m_data->setSkyBandwidth();*/
@@ -1160,13 +1055,13 @@ void CEngineThread::collectReceiversData()
 			impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 			impl.log(LM_ERROR);
 			m_data->setStatus(Management::MNG_WARNING);
-			m_data->setInputsTable();
+			m_info.setInputsTable();
 			//m_data->setCalibrationMarks();
 		}
 	}
 	else {
-		m_data->setReceiverCode(IRA::CString(""));
-		m_data->saveFeedHeader(NULL,0);
-		m_data->setInputsTable();
+		m_info.setReceiverCode(IRA::CString(""));
+		m_info.saveFeedHeader(NULL,0);
+		m_info.setInputsTable();
 	}
 }

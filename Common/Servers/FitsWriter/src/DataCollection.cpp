@@ -24,49 +24,20 @@ CDataCollection::CDataCollection()
 	m_observer="";
 	m_scheduleName="";
 	m_status=Management::MNG_OK;
-	m_feeds=NULL;
-	m_feedNumber=0;
-	m_receiverCode="";
 	m_siteName="";
-	m_sourceName="";
-	m_sourceRa=m_sourceDec=m_sourceVlsr=0.0;
 	m_pressure=m_temperature=m_humidity=0.0;
 	m_scanTag=-1;
 	m_deviceID=0;
 	m_scanAxis=Management::MNG_NO_AXIS;
 	m_scanID=m_subScanID=0;
-	//m_antennaBoss=Antenna::AntennaBoss::_nil();
-	//m_meteoData=Metrology::MeteoData::_nil();
-	//m_receiversBoss=Receivers::ReceiversBoss::_nil();
-	//m_scheduler=Management::Scheduler::_nil();
-	//m_config=config;
-	//m_services=services;
 	m_telecopeTacking=m_prevTelescopeTracking=false;
 	m_telescopeTrackingTime=0;
-	m_localOscillator.length(0);
-	m_calibrationMarks.length(0);
-	//m_recBandWidth.length(0);
-	//m_recInitialFrequency.length(0);
-	m_calibrationMarks.length(0);
-	m_sourceFlux.length(0);
-	m_skyFrequency.length(0);
-	m_skyBandwidth.length(0);
-	m_receiverPolarization.length(0);
-	m_receiversIFID.length(0);
-	m_backendAttenuations.length(0);
-	m_sectionsID.length(0);
-	m_servoAxisNames.length(0);
-	m_servoAxisNames.length(0);
 }
 	
 CDataCollection::~CDataCollection()
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_sectionH!=NULL) delete[] m_sectionH;
-	if (m_feeds!=NULL) {
-		delete [] m_feeds;
-		m_feeds=NULL;
-	}
 }
 
 void CDataCollection::forceReset()
@@ -104,26 +75,16 @@ bool CDataCollection::saveDump(char * memory)
 	return m_dumpCollection.pushDump(dh->time,dh->calOn,memory,buffer,track,dh->dumpSize);
 }
 
-void CDataCollection::saveFeedHeader(CFitsWriter::TFeedHeader * fH,const WORD& number)
-{
-	baci::ThreadSyncGuard guard(&m_mutex);
-	if (m_feeds!=NULL) {
-		delete [] m_feeds;
-		m_feedNumber=0;
-	}
-	m_feeds=fH;
-	m_feedNumber=number;
-}
-
 ACS::Time CDataCollection::getFirstDumpTime()
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	return m_dumpCollection.getFirstTime();
 }
 
-long CDataCollection::getInputsNumber() const
+long CDataCollection::getInputsNumber()
 {
 	long sum=0;
+	baci::ThreadSyncGuard guard(&m_mutex);
 	for (long i=0;i<m_mainH.sections;i++) {
 		sum+=m_sectionH[i].inputs;
 	}
@@ -182,9 +143,10 @@ IRA::CString CDataCollection::getSubScanType() const
 	}
 }
 
-void CDataCollection::getInputsConfiguration(ACS::longSeq& sectionID,ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts) const
+void CDataCollection::getInputsConfiguration(ACS::longSeq& sectionID,ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts)
 {
 	long inputs=0;
+	baci::ThreadSyncGuard guard(&m_mutex);
 	long inputsNumber=getInputsNumber();
 	freqs.length(inputsNumber);
 	bws.length(inputsNumber);

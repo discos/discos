@@ -268,6 +268,10 @@ public:
 	 * It moves the write pointer to the next row of the data table. The next call to <i>storeData()</i> will affect the next row. 
 	 */
 	void add_row(){ next_row++; }
+	/**
+	 * It moves the write pointer to the next row of the minor servo table.
+	*/
+	void add_servo_table_row() { next_servo_table_row++; }
 	
 	/**
 	 * It can be used to get a description of the last occured error
@@ -307,7 +311,7 @@ public:
 		std::vector<string> servoColName;
 		std::vector<string> servoColUnit;
 		std::vector<string> servoColForm;
-		int next_row, data_column, feed_number;
+		int next_row, data_column, feed_number, next_servo_table_row;
 };
 
 template <typename T>

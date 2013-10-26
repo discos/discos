@@ -61,6 +61,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter expire time  (uSec)",m_repetitionExpireTime);
 	_GET_DWORD_ATTRIBUTE("MeteoParameterDutyCycle","Weather sensor enquire gap  (uSec)",m_meteoParameterDutyCycle);
 	_GET_DWORD_ATTRIBUTE("TrackingFlagDutyCycle","Tracking flag enquire gap  (uSec)",m_trackingFlagDutyCycle);
+	_GET_DWORD_ATTRIBUTE("MinorServoEnquireMinGap","Minor Servo enquire gap  (uSec)",m_minorServoEnquireMinGap);
 	_GET_STRING_ATTRIBUTE("AntennaBossInterface","Antenna Boss component interface is ",m_antennaBossComp);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);
@@ -70,5 +71,6 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	m_workingThreadTime*=10;
 	m_workingThreadTimeSlice*=10;
 	m_collectorThreadTime*=10;
+	m_minorServoEnquireMinGap*=10;
 }
 

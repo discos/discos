@@ -45,6 +45,7 @@ CFitsWriter::CFitsWriter()
 	
 	data_table=section_table=rfInput_table=feed_table=tsys_table=servo_table=NULL;
 	next_row = 1;
+	next_servo_table_row = 1;
 	data_column = _FW_DATAHEADER_ELEMENTS; //the first column containing channel data in data table
 	feed_number = 1;	
 	
@@ -287,10 +288,10 @@ bool CFitsWriter::storeServoData(const double& time,const ACS::doubleSeq& pos)
 		double app;
 		try {
 			app=time;
-			servo_table->column(1).write(&app,1,next_row);
+			servo_table->column(1).write(&app,1,next_servo_table_row);
 			for (unsigned k=0;k<pos.length();k++) {
 				app=pos[k];
-				servo_table->column(2+k).write(&app,1,next_row);
+				servo_table->column(2+k).write(&app,1,next_servo_table_row);
 			}
 		}
 		catch(FitsException& fe) {
