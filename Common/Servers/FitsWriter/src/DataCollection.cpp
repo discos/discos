@@ -61,19 +61,17 @@ CDataCollection::CDataCollection()
 	
 CDataCollection::~CDataCollection()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_sectionH!=NULL) delete[] m_sectionH;
 	if (m_feeds!=NULL) {
 		delete [] m_feeds;
 		m_feeds=NULL;
 	}
-	//unloadAntennaBoss();
-	//unloadReceiversBoss();
-	//unloadScheduler();
-	//unloadMeteo();
 }
 
 void CDataCollection::forceReset()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	m_running=m_ready=m_start=m_stop=false;
 	m_scanHeader=m_subScanHeader=false;
 	m_reset=true;
@@ -83,6 +81,7 @@ void CDataCollection::forceReset()
 void CDataCollection::saveMainHeaders(Backends::TMainHeader const * h,
 		Backends::TSectionHeader const * ch)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	memcpy(&m_mainH,h,sizeof(Backends::TMainHeader));
 	if (m_sectionH!=NULL) delete[] m_sectionH;
 	m_sectionH=new Backends::TSectionHeader[m_mainH.sections];
@@ -94,6 +93,7 @@ bool CDataCollection::saveDump(char * memory)
 {
 	bool track;
 	char *buffer;
+	baci::ThreadSyncGuard guard(&m_mutex);
 	Backends::TDumpHeader *dh=(Backends::TDumpHeader *) memory;
 	buffer=memory+sizeof(Backends::TDumpHeader); 
 	if (dh->time>=m_telescopeTrackingTime) track=m_telecopeTacking;
@@ -106,6 +106,7 @@ bool CDataCollection::saveDump(char * memory)
 
 void CDataCollection::saveFeedHeader(CFitsWriter::TFeedHeader * fH,const WORD& number)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_feeds!=NULL) {
 		delete [] m_feeds;
 		m_feedNumber=0;
@@ -116,6 +117,7 @@ void CDataCollection::saveFeedHeader(CFitsWriter::TFeedHeader * fH,const WORD& n
 
 ACS::Time CDataCollection::getFirstDumpTime()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	return m_dumpCollection.getFirstTime();
 }
 
@@ -219,43 +221,21 @@ void CDataCollection::getInputsConfiguration(ACS::longSeq& sectionID,ACS::longSe
 	}
 }
 
-/*void CDataCollection::setSkyFrequency(const ACS::doubleSeq& freq)
-{
-	long j=0;
-	unsigned inp=0;
-	m_skyFrequency.length(m_mainH.sections);
-	while (inp<freq.length() && (j<m_mainH.sections)) {
-		m_skyFrequency[j]=freq[inp];
-		j++;
-		inp+=m_sectionH[j].inputs;
-	}
-}*/
-
-/*void CDataCollection::setSkyBandwidth(const ACS::doubleSeq& bw)
-{
-	long j=0;
-	unsigned inp=0;
-	m_skyBandwidth.length(m_mainH.sections);
-	while (inp<bw.length() && (j<m_mainH.sections)) {
-		m_skyBandwidth[j]=bw[inp];
-		j++;
-		inp+=m_sectionH[j].inputs;
-	}
-}*/
-
-
 bool CDataCollection::getDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	return m_dumpCollection.popDump(time,calOn,memory,buffer,tracking,buffSize);
 }
 
 void CDataCollection::startStopStage()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_running) m_stop=true;
 }
 
 void CDataCollection::startRunnigStage()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	m_subScanHeader=false;
 	m_running=true;
 	m_start=false;
@@ -263,28 +243,31 @@ void CDataCollection::startRunnigStage()
 
 void CDataCollection::haltStopStage()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	m_running=false;
 	m_stop=false;
 }
 
 void CDataCollection::haltResetStage()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	m_reset=false;
 }
 
-void CDataCollection::getFileName(IRA::CString& fileName,IRA::CString& fullPath)
+void CDataCollection::getFileName(IRA::CString& fileName,IRA::CString& fullPath) const
 {
 	fileName=m_fileName;
 	fullPath=m_fullPath;
 }
 
-IRA::CString CDataCollection::getFileName()
+IRA::CString CDataCollection::getFileName() const 
 {
 	return m_fullPath+m_fileName;
 }
 
 bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& recording,bool& inconsistent)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_start && m_running) {
 		recording=true;
 		inconsistent =false;
@@ -324,6 +307,7 @@ bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& rec
 
 bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,bool& recording,bool& inconsistent)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_start && m_running) {
 		recording=true;
 		inconsistent =false;
@@ -352,6 +336,7 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 
 bool CDataCollection::stopScan()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	m_ready=false;
 	m_scanHeader=false;
 	return true;

@@ -14,9 +14,9 @@ using namespace FitsWriter_private;
 
 _IRA_LOGFILTER_IMPORT;
 
-CEngineThread::CEngineThread(const ACE_CString& name,CSecureArea<CDataCollection> *param, 
+CEngineThread::CEngineThread(const ACE_CString& name,FitsWriter_private::CDataCollection *param, 
 			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : 
-				ACS::Thread(name,responseTime,sleepTime),m_dataWrapper(param)
+				ACS::Thread(name,responseTime,sleepTime),m_data(param)
 {
 	AUTO_TRACE("CEngineThread::CEngineThread()");
 	m_fileOpened=false;
@@ -62,7 +62,7 @@ void CEngineThread::onStop()
  
 bool CEngineThread::checkTime(const ACS::Time& currentTime)
 {
-	CSecAreaResourceWrapper<CDataCollection> m_data=m_dataWrapper->Get();
+	//CSecAreaResourceWrapper<CDataCollection> m_data=m_dataWrapper->Get();
 	return (currentTime>(m_data->getFirstDumpTime()+getSleepTime()+m_timeSlice)); // gives the cache time to fill a little bit
 }
 
@@ -91,8 +91,8 @@ bool CEngineThread::processData()
 	bool tracking;
 	double hum,temp,press;
 	ACS::doubleSeq_var servoPositions;
-	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-	if (!data->getDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
+	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+	if (!m_data->getDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
 	TIMEVALUE tS;
 	tS.value(time);
 #ifdef FW_DEBUG
@@ -101,7 +101,7 @@ bool CEngineThread::processData()
 	m_file << out;
 #else
 	CFitsWriter::TDataHeader tdh;
-	CDateTime tConverter(tS,data->getDut1()); 
+	CDateTime tConverter(tS,m_data->getDut1()); 
 	tdh.time=tConverter.getMJD();
 #endif
 	try {
@@ -109,27 +109,27 @@ bool CEngineThread::processData()
 	}
 	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 		_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
+		m_data->setStatus(Management::MNG_FAILURE);
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 		impl.setName(ex._name());
 		impl.setMinor(ex.minor());
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
+		m_data->setStatus(Management::MNG_FAILURE);
 		antennaBossError=true;
 	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CEngineThread::processData()");
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
+		m_data->setStatus(Management::MNG_FAILURE);
 	}
 	ra=dec=az=el=0.0;
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
 			//integration is multiplied by 10000 because internally we have the value in millesec while the method requires 100ns.
-			m_antennaBoss->getObservedEquatorial(time,data->getIntegrationTime()*10000,ra,dec);
-			m_antennaBoss->getObservedHorizontal(time,data->getIntegrationTime()*10000,az,el);
+			m_antennaBoss->getObservedEquatorial(time,m_data->getIntegrationTime()*10000,ra,dec);
+			m_antennaBoss->getObservedHorizontal(time,m_data->getIntegrationTime()*10000,az,el);
 		}
 	}
 	catch (CORBA::SystemException& ex) {
@@ -137,13 +137,13 @@ bool CEngineThread::processData()
 		impl.setName(ex._name());
 		impl.setMinor(ex.minor());
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
+		m_data->setStatus(Management::MNG_FAILURE);
 		antennaBossError=true;
 	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CEngineThread::processData()");
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
+		m_data->setStatus(Management::MNG_FAILURE);
 	}
 #ifdef FW_DEBUG
 	out.Format("%f %f %f %f ",ra,dec,az,el);
@@ -157,25 +157,25 @@ bool CEngineThread::processData()
 	m_file << (const char *) out;
 	m_file << endl;
 #else
-	FitsWriter_private::getTsysFromBuffer(buffer,data->getInputsNumber(),m_ptsys);
+	FitsWriter_private::getTsysFromBuffer(buffer,m_data->getInputsNumber(),m_ptsys);
 	tdh.raj2000=ra;
 	tdh.decj2000=dec;
 	tdh.az=az;
 	tdh.el=el;
-	tdh.par_angle=IRA::CSkySource::paralacticAngle(tConverter,data->getSite(),az,el);
+	tdh.par_angle=IRA::CSkySource::paralacticAngle(tConverter,m_data->getSite(),az,el);
 	tdh.derot_angle=0.333357887; /*********************** get it Now is fixed to 19.1 degrees*******************/
 	tdh.flag_cal=calOn;
 	tdh.flag_track=tracking;
-	data->getMeteo(hum,temp,press);
+	m_data->getMeteo(hum,temp,press);
 	tdh.weather[0]=hum;
 	tdh.weather[1]=temp;
 	tdh.weather[2]=press;
 	if (!m_file->storeAuxData(tdh,m_ptsys)) {
 		_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
-		impl.setFileName((const char *)data->getFileName());
+		impl.setFileName((const char *)m_data->getFileName());
 		impl.setError(m_file->getLastError());
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-		data->setStatus(Management::MNG_FAILURE);
+		m_data->setStatus(Management::MNG_FAILURE);
 	}
 #endif
 	if (m_config->getMinorServoBossComponent()!="") {
@@ -184,14 +184,14 @@ bool CEngineThread::processData()
 		}
 		catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 			_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
-			data->setStatus(Management::MNG_FAILURE);
+			m_data->setStatus(Management::MNG_FAILURE);
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-			data->setStatus(Management::MNG_FAILURE);
+			m_data->setStatus(Management::MNG_FAILURE);
 			minorServoBossError=true;
 		}
 		//servoPositions->length(0);
@@ -207,27 +207,27 @@ bool CEngineThread::processData()
 				impl.setOperationName("getAxesPosition()");
 				impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 		}
 		catch ( ComponentErrors::UnexpectedEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::processData()");
 			impl.setOperationName("getAxesPosition()");
 			impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-			data->setStatus(Management::MNG_FAILURE);
+			m_data->setStatus(Management::MNG_FAILURE);
 			minorServoBossError=true;
 		}
 		catch (...) {
 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CEngineThread::processData()");
 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-			data->setStatus(Management::MNG_FAILURE);
+			m_data->setStatus(Management::MNG_FAILURE);
 		}
 #ifdef FW_DEBUG
 		if (applyServoPositions) {
@@ -244,23 +244,23 @@ bool CEngineThread::processData()
 		if (applyServoPositions) {
 			if (!m_file->storeServoData(tdh.time,servoPositions.in())) {
 				_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
-				impl.setFileName((const char *)data->getFileName());
+				impl.setFileName((const char *)m_data->getFileName());
 				impl.setError(m_file->getLastError());
 				_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 			}
 		}
 #endif
 	}  // m_config->getMinorServoBossComponent()!=""
-	for (int i=0;i<data->getSectionsNumber();i++) {
-		bins=data->getSectionBins(i);
-		pol=data->getSectionStreamsNumber(i);
-		switch (data->getSampleSize()) {
+	for (int i=0;i<m_data->getSectionsNumber();i++) {
+		bins=m_data->getSectionBins(i);
+		pol=m_data->getSectionStreamsNumber(i);
+		switch (m_data->getSampleSize()) {
 			case sizeof(BYTE2_TYPE): {
 #ifdef FW_DEBUG
 				BYTE2_TYPE channel[bins*pol];
 				FitsWriter_private::getChannelFromBuffer<BYTE2_TYPE>(i,pol,bins,buffer,channel);
-				out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,data->getSampleSize());
+				out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,m_data->getSampleSize());
 				m_file << (const char *)out;				
 				for (long j=0;j<pol*bins;j++) {
 					out.Format("%d ",channel[j]);
@@ -272,10 +272,10 @@ bool CEngineThread::processData()
 				FitsWriter_private::getChannelFromBuffer<BYTE2_TYPE>(i,pol,bins,buffer,channel);
 				if (!m_file->storeData(channel,bins*pol,i)) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-					data->setStatus(Management::MNG_FAILURE);				
+					m_data->setStatus(Management::MNG_FAILURE);				
 				}
 #endif
 				break;
@@ -284,7 +284,7 @@ bool CEngineThread::processData()
 #ifdef FW_DEBUG
 				BYTE4_TYPE channel[bins*pol];
 				FitsWriter_private::getChannelFromBuffer<BYTE4_TYPE>(i,pol,bins,buffer,channel);
-				out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,data->getSampleSize());
+				out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,m_data->getSampleSize());
 				m_file << (const char *)out;				
 				for (long j=0;j<bins*pol;j++) {
 					out.Format("%10.5f, %d ",channel[j],channel[j]);
@@ -296,10 +296,10 @@ bool CEngineThread::processData()
 				FitsWriter_private::getChannelFromBuffer<BYTE4_TYPE>(i,pol,bins,buffer,channel);
 				if (!m_file->storeData(channel,bins*pol,i)) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}			
 #endif
 				break;	
@@ -308,7 +308,7 @@ bool CEngineThread::processData()
 #ifdef FW_DEBUG
 				BYTE8_TYPE channel[bins*pol];
 				FitsWriter_private::getChannelFromBuffer<BYTE8_TYPE>(i,pol,bins,buffer,channel);
-				out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,data->getSampleSize());
+				out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,m_data->getSampleSize());
 				m_file << (const char *)out;				
 				for (long j=0;j<pol*bins;j++) {
 					out.Format("%10.5lf ",channel[j]);
@@ -320,10 +320,10 @@ bool CEngineThread::processData()
 				FitsWriter_private::getChannelFromBuffer<BYTE8_TYPE>(i,pol,bins,buffer,channel);
 				if (!m_file->storeData(channel,bins*pol,i)) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-					data->setStatus(Management::MNG_FAILURE);						
+					m_data->setStatus(Management::MNG_FAILURE);						
 				}		
 #endif
 			}
@@ -340,9 +340,9 @@ void CEngineThread::runLoop()
 {
 	TIMEVALUE now;
 	IRA::CString filePath,fileName;
-	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	IRA::CIRATools::getTime(now); // it marks the start of the activity job
-	if (data->isReset()) {
+	if (m_data->isReset()) {
 		if (m_fileOpened) {
 			#ifdef FW_DEBUG
 			m_file.close();
@@ -353,54 +353,54 @@ void CEngineThread::runLoop()
 			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"FILE_CLOSED"));
 			m_fileOpened=false;
 		}
-		data->haltResetStage();
+		m_data->haltResetStage();
 		return;
 	}
-	if (data->isStart() && data->isReady() &&  data->isScanHeaderReady() && data->isSubScanHeaderReady()) { // //main headers are already saved and file has to be opened
+	if (m_data->isStart() && m_data->isReady() &&  m_data->isScanHeaderReady() && m_data->isSubScanHeaderReady()) { // //main headers are already saved and file has to be opened
 		if (!m_fileOpened) {
-			data->setStatus(Management::MNG_OK);
+			m_data->setStatus(Management::MNG_OK);
 			// create the file and save main headers
-			data->getFileName(fileName,filePath);
+			m_data->getFileName(fileName,filePath);
 			if (!IRA::CIRATools::directoryExists(filePath)) {
 				if (!IRA::CIRATools::makeDirectory(filePath)) {
 					_EXCPT(ComponentErrors::FileIOErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)filePath);
 					impl.log(LM_ERROR);
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else {
 					ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"NEW_SCAN_FOLDER_CREATED: %s",(const char *)filePath));
 				}
 			}
 #ifdef FW_DEBUG
-			m_file.open((const char *)data->getFileName(),ios_base::out|ios_base::trunc);
+			m_file.open((const char *)m_data->getFileName(),ios_base::out|ios_base::trunc);
 			if (!m_file.is_open()) {
 				_EXCPT(ComponentErrors::FileIOErrorExImpl,impl,"CEngineThread::runLoop()");
-				impl.setFileName((const char *)data->getFileName());
+				impl.setFileName((const char *)m_data->getFileName());
 				impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 			}
 #else
 			m_file = new CFitsWriter();
 			m_file->setBasePath("");
-			m_file->setFileName((const char *)data->getFileName());
+			m_file->setFileName((const char *)m_data->getFileName());
 			if (!m_file->create()) {
 				_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-				impl.setFileName((const char *)data->getFileName());
+				impl.setFileName((const char *)m_data->getFileName());
 				impl.setError(m_file->getLastError());
 				impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 			}
 #endif
 			else {
 #ifdef FW_DEBUG
 				IRA::CString out;
-				Backends::TMainHeader mH=data->getMainHeader();
+				Backends::TMainHeader mH=m_data->getMainHeader();
 				out.Format("Main - ch: %d , beams: %d, sampleSize: %d, integration: %d \n ",
 					mH.sections,mH.beams,mH.sampleSize,mH.integration);
 				m_file<< (const char *) out;
-				Backends::TSectionHeader const *cH=data->getSectionHeader();
-				for (int j=0;j<data->getSections();j++) {
+				Backends::TSectionHeader const *cH=m_data->getSectionHeader();
+				for (int j=0;j<m_data->getSections();j++) {
 					out.Format("channel id: %d, bins: %d , pol: %d, bandWidth: %lf, frequency: %lf, attenuationL: %lf, attenuationR: %lf"
 						 "sampleRate: %lf, feed: %d \n",cH[j].id,cH[j].bins,cH[j].polarization,cH[j].bandWidth,
 						 cH[j].frequency,cH[j].attenuation[0],cH[j].attenuation[1],cH[j].sampleRate,cH[j].feed);
@@ -414,8 +414,8 @@ void CEngineThread::runLoop()
 				//get the data from the minor servo boss...if subsystem is enabled
 				collectMinorServoData();
 				// now creates the file, the tables and the headers
-				Backends::TMainHeader mH=data->getMainHeader();
-				Backends::TSectionHeader const *cH=data->getSectionHeader();
+				Backends::TMainHeader mH=m_data->getMainHeader();
+				Backends::TSectionHeader const *cH=m_data->getSectionHeader();
 				IRA::CString siteName;
 				IRA::CString sourceName;
 				double sourceRa,sourceDec,sourceVlsr;
@@ -436,274 +436,274 @@ void CEngineThread::runLoop()
 				ACS::longSeq sectionsID;
 				ACS::stringSeq axisName,axisUnit;
 
-				data->getSite(site,dut1,siteName);
-				data->getLocalOscillator(LocalOscillator);
-				data->getSectionsID(sectionsID);
-				data->getBackendAttenuations(atts);
-				data->getFeedsID(feedsID);
-				data->getIFsID(ifsID);
-				data->getSkyBandwidth(skyBw);
-				data->getSkyFrequency(skyFreq);
-				data->getCalibrationMarks(calib);
-				data->getSourceFlux(fluxes);
-				data->getReceiverPolarization(polarizations);
-				data->getSource(sourceName,sourceRa,sourceDec,sourceVlsr);
-				data->getAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
-				scanTag=data->getScanTag();
-				scanID=data->getScanID();
-				subScanID=data->getSubScanID();
-				scheduleName=data->getScheduleName();
+				m_data->getSite(site,dut1,siteName);
+				m_data->getLocalOscillator(LocalOscillator);
+				m_data->getSectionsID(sectionsID);
+				m_data->getBackendAttenuations(atts);
+				m_data->getFeedsID(feedsID);
+				m_data->getIFsID(ifsID);
+				m_data->getSkyBandwidth(skyBw);
+				m_data->getSkyFrequency(skyFreq);
+				m_data->getCalibrationMarks(calib);
+				m_data->getSourceFlux(fluxes);
+				m_data->getReceiverPolarization(polarizations);
+				m_data->getSource(sourceName,sourceRa,sourceDec,sourceVlsr);
+				m_data->getAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
+				scanTag=m_data->getScanTag();
+				scanID=m_data->getScanID();
+				subScanID=m_data->getSubScanID();
+				scheduleName=m_data->getScheduleName();
 
 				if (!m_file->saveMainHeader(mH)) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if (!m_file->setPrimaryHeaderKey("Project_Name",(const char *)data->getProjectName(),"Name of the project")) {
+				else if (!m_file->setPrimaryHeaderKey("Project_Name",(const char *)m_data->getProjectName(),"Name of the project")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if (!m_file->setPrimaryHeaderKey("Observer",(const char *)data->getObserverName(),"Name of the observer")) {
+				else if (!m_file->setPrimaryHeaderKey("Observer",(const char *)m_data->getObserverName(),"Name of the observer")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if (!m_file->setPrimaryHeaderKey("Antenna",(const char *)siteName,"Name of the station")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if (!m_file->setPrimaryHeaderKey("SiteLongitude",site.getLongitude(),"Longitude of the site (radians)")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if (!m_file->setPrimaryHeaderKey("SiteLatitude",site.getLatitude(),"Latitude of the site (radians)")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if (!m_file->setPrimaryHeaderKey("SiteHeight",site.getHeight(),"Height of the site (meters)")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if (!m_file->setPrimaryHeaderKey("Beams",mH.beams,"Number of beams")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if (!m_file->setPrimaryHeaderKey("Sections",mH.sections,"Total number of sections")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if (!m_file->setPrimaryHeaderKey("Sample Size",mH.sampleSize,"Number of bytes of a data")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if(!m_file->setPrimaryHeaderKey("Receiver Code",(const char *)data->getReceiverCode(),"Keyword that identifies the receiver")) {
+				else if(!m_file->setPrimaryHeaderKey("Receiver Code",(const char *)m_data->getReceiverCode(),"Keyword that identifies the receiver")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("Source",(const char *)sourceName,"Source identifier")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("RightAscension",sourceRa,"Source right ascension at J2000 (radians)")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("Declination",sourceDec,"Source declination at J2000 (radians)")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("Vlsr",sourceVlsr,"Source radial velocity")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("Azimuth Offset",azOff,"Longitude offset in horizontal frame")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("Elevation Offset",elOff,"Latitude offset in horizontal frame")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("RightAscension Offset",raOff,"Longitude offset in equatorial frame")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("Declination Offset",decOff,"Latitude offset in equatorial frame")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("GalacticLon Offset",lonOff,"Longitude offset in galactic frame")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("GalacticLat Offset",latOff,"Latitude offset in galactic frame")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("ScanID",scanID,"Scan Identifier")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("SubScanID",subScanID,"Subscan Identifier")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("ScheduleName",(const char *)scheduleName,"name of the running schedule")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if(!m_file->setPrimaryHeaderKey("SubScanType",(const char *)data->getSubScanType(),"describes the scan type based on telescope movement")) {
+				else if(!m_file->setPrimaryHeaderKey("SubScanType",(const char *)m_data->getSubScanType(),"describes the scan type based on telescope movement")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				if (scanTag>=0) {
 					if(!m_file->setPrimaryHeaderKey("Scan Tag",scanTag,"Scan tag identifier")) {
 						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-						impl.setFileName((const char *)data->getFileName());
+						impl.setFileName((const char *)m_data->getFileName());
 						impl.setError(m_file->getLastError());
 						impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-						data->setStatus(Management::MNG_FAILURE);
+						m_data->setStatus(Management::MNG_FAILURE);
 					}
 				}
 				if (!m_file->saveSectionHeader(cH)) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				if (!m_file->addSectionTable(sectionsID,feedsID,ifsID,polarizations,LocalOscillator,skyFreq,skyBw,calib,fluxes,atts)) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				if (!m_file->setSectionHeaderKey("Integration",mH.integration,"Integration time (milliseconds)")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				CFitsWriter::TFeedHeader *feedH=data->getFeedHeader();
+				CFitsWriter::TFeedHeader *feedH=m_data->getFeedHeader();
 				if (!m_file->addFeedTable("FEED TABLE")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				for (WORD j=0;j<data->getFeedNumber();j++) {
+				for (WORD j=0;j<m_data->getFeedNumber();j++) {
 					if (!m_file->saveFeedHeader(feedH[j])) {
 						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-						impl.setFileName((const char *)data->getFileName());
+						impl.setFileName((const char *)m_data->getFileName());
 						impl.setError(m_file->getLastError());
 						impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-						data->setStatus(Management::MNG_FAILURE);
-						j=data->getFeedNumber(); //exit the cycle
+						m_data->setStatus(Management::MNG_FAILURE);
+						j=m_data->getFeedNumber(); //exit the cycle
 					}
 				}
 				if (!m_file->addDataTable()) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-					impl.setFileName((const char *)data->getFileName());
+					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-					data->setStatus(Management::MNG_FAILURE);
+					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				if (m_config->getMinorServoBossComponent()!="") {
-					data->getServoAxisNames(axisName);
-					data->getServoAxisUnits(axisUnit);
+					m_data->getServoAxisNames(axisName);
+					m_data->getServoAxisUnits(axisUnit);
 					if (!m_file->addServoTable(axisName,axisUnit)) {
 						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
-						impl.setFileName((const char *)data->getFileName());
+						impl.setFileName((const char *)m_data->getFileName());
 						impl.setError(m_file->getLastError());
 						impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-						data->setStatus(Management::MNG_FAILURE);
+						m_data->setStatus(Management::MNG_FAILURE);
 					}
 				}				
 #endif
 				m_fileOpened=true;
-				data->startRunnigStage();
+				m_data->startRunnigStage();
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"RUNNING_FROM_NOW" ));
-				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"FILE_OPENED %s",(const char *)data->getFileName()));
+				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"FILE_OPENED %s",(const char *)m_data->getFileName()));
 			}
 		} // end !m_fileOpened
 	}
-	else if (data->isStop()) {
+	else if (m_data->isStop()) {
 		ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"STOPPING" ));
 		//save all the data in the buffer an then finalize the file
 		if (m_fileOpened) {
@@ -716,11 +716,11 @@ void CEngineThread::runLoop()
 		m_file=NULL;
 #endif
 		}
-		data->haltStopStage();
+		m_data->haltStopStage();
 		m_fileOpened=false;
 		ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"FILE_FINALIZED"));
 	}
-	else if (data->isRunning()) { // file was already created.... then saves the data into it
+	else if (m_data->isRunning()) { // file was already created.... then saves the data into it
 		 // until there is something to process and
 		// there is still time available.......
 		if (m_fileOpened) {
@@ -732,7 +732,7 @@ void CEngineThread::runLoop()
 
 void CEngineThread::collectMinorServoData()
 {
-	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	if (m_config->getMinorServoBossComponent()=="") {
 		return; // in case the minor servo subsystem is not enabled
 	}
@@ -741,7 +741,7 @@ void CEngineThread::collectMinorServoData()
 	}
 	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 		ex.log(LM_ERROR);
-		data->setStatus(Management::MNG_WARNING);
+		m_data->setStatus(Management::MNG_WARNING);
 		m_minorServoBoss=MinorServo::MinorServoBoss::_nil();
 	}
 	if (!CORBA::is_nil(m_minorServoBoss)) {
@@ -755,7 +755,7 @@ void CEngineThread::collectMinorServoData()
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			minorServoBossError=true;
 		}
 		catch (ManagementErrors::ConfigurationErrorEx& ex) {
@@ -763,22 +763,22 @@ void CEngineThread::collectMinorServoData()
 			impl.setOperationName("getAxesInfo()");
 			impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
-			data->setServoAxis();
+			m_data->setStatus(Management::MNG_WARNING);
+			m_data->setServoAxis();
 		}
-		data->setServoAxis(names.in(),units.in());
+		m_data->setServoAxis(names.in(),units.in());
 	}
 }
 
 void CEngineThread::collectAntennaData()
 {
-	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+	//CSecAreaResourceWrapper<CDataCollection> m_data=m_dataWrapper->Get();
 	try {
 		CCommonTools::getAntennaBoss(m_antennaBoss,m_service,m_config->getAntennaBossComponent(),antennaBossError);
 	}
 	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 		ex.log(LM_ERROR);
-		data->setStatus(Management::MNG_WARNING);		
+		m_data->setStatus(Management::MNG_WARNING);		
 		m_antennaBoss=Antenna::AntennaBoss::_nil();
 	}
 	if (!CORBA::is_nil(m_antennaBoss)) {
@@ -809,7 +809,7 @@ void CEngineThread::collectAntennaData()
 				impl.setAttributeName("target");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				sourceName="";
 			}
 			else {
@@ -822,7 +822,7 @@ void CEngineThread::collectAntennaData()
 				impl.setAttributeName("targetRightAscension");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				ra=0.0;
 			}
 			dec=decRef->get_sync(comp.out());
@@ -832,7 +832,7 @@ void CEngineThread::collectAntennaData()
 				impl.setAttributeName("targetDeclination");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				dec=0.0;
 			}
 			vlsr=vlsrRef->get_sync(comp.out());
@@ -842,7 +842,7 @@ void CEngineThread::collectAntennaData()
 				impl.setAttributeName("targetVlsr");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				vlsr=0.0;
 			}
 			azOff=azOffRef->get_sync(comp.out());
@@ -852,7 +852,7 @@ void CEngineThread::collectAntennaData()
 				impl.setAttributeName("azimuthOffset");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				azOff=0.0;
 			}
 			elOff=elOffRef->get_sync(comp.out());
@@ -862,7 +862,7 @@ void CEngineThread::collectAntennaData()
 				impl.setAttributeName("elevationOffset");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				elOff=0.0;
 			}
 			raOff=raOffRef->get_sync(comp.out());
@@ -872,7 +872,7 @@ void CEngineThread::collectAntennaData()
 				impl.setAttributeName("rightAscensionOffset");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				raOff=0.0;
 			}
 			decOff=decOffRef->get_sync(comp.out());
@@ -882,7 +882,7 @@ void CEngineThread::collectAntennaData()
 				impl.setAttributeName("declinationOffset");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				decOff=0.0;
 			}
 			lonOff=lonOffRef->get_sync(comp.out());
@@ -892,7 +892,7 @@ void CEngineThread::collectAntennaData()
 				impl.setAttributeName("longitudeOffset");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				lonOff=0.0;
 			}
 			latOff=latOffRef->get_sync(comp.out());
@@ -902,7 +902,7 @@ void CEngineThread::collectAntennaData()
 				impl.setAttributeName("targetVlsr");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				latOff=0.0;
 			}
 		}
@@ -911,46 +911,46 @@ void CEngineThread::collectAntennaData()
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			antennaBossError=true;
 			sourceName="";
 			ra=dec=vlsr=0.0;
 		}
-		data->setSource(sourceName,ra,dec,vlsr);
-		data->setAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
+		m_data->setSource(sourceName,ra,dec,vlsr);
+		m_data->setAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
 		try { //get the estimated source fluxes
 			ACS::doubleSeq_var fluxes;
 			ACS::doubleSeq freqs;
 			ACS::doubleSeq bw;
-			data->getSkyFrequency(freqs);
-			data->getSkyBandwidth(bw);
+			m_data->getSkyFrequency(freqs);
+			m_data->getSkyBandwidth(bw);
 			for (unsigned i=0;i<freqs.length();i++) {
 				freqs[i]+=bw[i]/2.0; //computes the central frequency;
 			}
 			m_antennaBoss->getFluxes(freqs,fluxes.out());
-			data->setSourceFlux(fluxes);
+			m_data->setSourceFlux(fluxes);
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectAntennaData()");
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			antennaBossError=true;
-			data->setSourceFlux();
+			m_data->setSourceFlux();
 		}
 	}
 }
 
 void CEngineThread::collectReceiversData()
 {
-	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	try {
 		CCommonTools::getReceiversBoss(m_receiversBoss,m_service,m_config->getReceiversBossComponent(),receiverBossError);
 	}
 	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 		ex.log(LM_ERROR);
-		data->setStatus(Management::MNG_WARNING);		
+		m_data->setStatus(Management::MNG_WARNING);		
 		m_receiversBoss=Receivers::ReceiversBoss::_nil();
 	}
 	if (!CORBA::is_nil(m_receiversBoss)) {
@@ -962,15 +962,15 @@ void CEngineThread::collectReceiversData()
 			recvCode=recvCodeRef->get_sync(comp.out());
 			ACSErr::CompletionImpl compImpl(comp);
 			if (compImpl.isErrorFree()) {
-				data->setReceiverCode((const char *)recvCode);
+				m_data->setReceiverCode((const char *)recvCode);
 			}
 			else {
 				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
 				impl.setAttributeName("receiverCode");
 				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
-				data->setReceiverCode(IRA::CString(""));
+				m_data->setStatus(Management::MNG_WARNING);
+				m_data->setReceiverCode(IRA::CString(""));
 			}
 		}
 		catch (CORBA::SystemException& ex) {
@@ -978,9 +978,9 @@ void CEngineThread::collectReceiversData()
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
-			data->setReceiverCode(IRA::CString(""));
+			m_data->setReceiverCode(IRA::CString(""));
 		}
 		/*try { //get the local oscillator
 			ACS::ROdoubleSeq_var loRef;
@@ -989,15 +989,15 @@ void CEngineThread::collectReceiversData()
 			lo=loRef->get_sync(comp.out());
 			ACSErr::CompletionImpl compImpl(comp);
 			if (compImpl.isErrorFree()) {
-				data->setLocalOscillator(lo.in());
+				m_data->setLocalOscillator(lo.in());
 			}
 			else {
 				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
 				impl.setAttributeName("localOscillator");
 				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
-				data->setLocalOscillator();
+				m_data->setStatus(Management::MNG_WARNING);
+				m_data->setLocalOscillator();
 			}							
 		}
 		catch (CORBA::SystemException& ex) {
@@ -1005,9 +1005,9 @@ void CEngineThread::collectReceiversData()
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
-			data->setLocalOscillator();							
+			m_data->setLocalOscillator();							
 		}*/
 		/*try { //get the band width for each if
 			ACS::ROdoubleSeq_var bwRef;
@@ -1016,15 +1016,15 @@ void CEngineThread::collectReceiversData()
 			bw=bwRef->get_sync(comp.out());
 			ACSErr::CompletionImpl compImpl(comp);
 			if (compImpl.isErrorFree()) {
-				data->setReceiverBandWidth(bw.in());
+				m_data->setReceiverBandWidth(bw.in());
 			}
 			else {
 				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
 				impl.setAttributeName("bandWidth");
 				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
-				data->setReceiverBandWidth();
+				m_data->setStatus(Management::MNG_WARNING);
+				m_data->setReceiverBandWidth();
 			}							
 		}
 		catch (CORBA::SystemException& ex) {
@@ -1032,9 +1032,9 @@ void CEngineThread::collectReceiversData()
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
-			data->setReceiverBandWidth();							
+			m_data->setReceiverBandWidth();							
 		}	*/
 		/*try { //get the band initial frequency for each IF of the receiver
 			ACS::ROdoubleSeq_var ifreqRef;
@@ -1043,7 +1043,7 @@ void CEngineThread::collectReceiversData()
 			ifreq=ifreqRef->get_sync(comp.out());
 			ACSErr::CompletionImpl compImpl(comp);
 			if (compImpl.isErrorFree()) {
-				data->setReceiverInitialFrequency(ifreq.in());
+				m_data->setReceiverInitialFrequency(ifreq.in());
 			}
 			else {
 				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
@@ -1051,8 +1051,8 @@ void CEngineThread::collectReceiversData()
 				bool DirectoryExists(const IRA::CString& path);
 				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
-				data->setReceiverInitialFrequency();
+				m_data->setStatus(Management::MNG_WARNING);
+				m_data->setReceiverInitialFrequency();
 			}							
 		}
 		catch (CORBA::SystemException& ex) {
@@ -1060,9 +1060,9 @@ void CEngineThread::collectReceiversData()
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
-			data->setReceiverInitialFrequency();							
+			m_data->setReceiverInitialFrequency();							
 		}	*/
 		/*try { //get the local polarization of each ifs
 			ACS::ROlongSeq_var polRef;
@@ -1071,15 +1071,15 @@ void CEngineThread::collectReceiversData()
 			pol=polRef->get_sync(comp.out());
 			ACSErr::CompletionImpl compImpl(comp);
 			if (compImpl.isErrorFree()) {
-				data->setReceiverPolarization(pol.in());
+				m_data->setReceiverPolarization(pol.in());
 			}
 			else {
 				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");
 				impl.setAttributeName("polarization");
 				impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
-				data->setReceiverPolarization();
+				m_data->setStatus(Management::MNG_WARNING);
+				m_data->setReceiverPolarization();
 			}							
 		}
 		catch (CORBA::SystemException& ex) {
@@ -1087,9 +1087,9 @@ void CEngineThread::collectReceiversData()
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
-			data->setReceiverPolarization();							
+			m_data->setReceiverPolarization();							
 		}*/
 		try { //get the feeds geometry
 			long inputs;
@@ -1104,24 +1104,24 @@ void CEngineThread::collectReceiversData()
 				fH[i].yOffset=yOff[i];
 				fH[i].relativePower=power[i];
 			}
-			data->saveFeedHeader(fH,inputs);
+			m_data->saveFeedHeader(fH,inputs);
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			receiverBossError=true;
-			data->saveFeedHeader(NULL,0);
+			m_data->saveFeedHeader(NULL,0);
 		} 
 		catch (ComponentErrors::ComponentErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
 			impl.setOperationName("getFeeds()");
 			impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
-			data->saveFeedHeader(NULL,0);
+			m_data->setStatus(Management::MNG_WARNING);
+			m_data->saveFeedHeader(NULL,0);
 		}
 		try { // get the calibration marks values and inputs configuration
 			ACS::doubleSeq freqs,bws,atts;
@@ -1134,24 +1134,24 @@ void CEngineThread::collectReceiversData()
 			ACS::doubleSeq_var IFFreq;
 			ACS::doubleSeq_var IFBw;
 			double scale;
-			data->getInputsConfiguration(sectionsID,feeds,ifs,freqs,bws,atts);
+			m_data->getInputsConfiguration(sectionsID,feeds,ifs,freqs,bws,atts);
 			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),scale);
 			m_receiversBoss->getIFOutput(feeds,ifs,IFFreq.out(),IFBw.out(),rcvPol.out(),LO.out());
-			data->setInputsTable(sectionsID,feeds,ifs,rcvPol.in(),skyFreq.in(),skyBw.in(),LO.in(),atts,calMarks.in());
-			/*data->setCalibrationMarks(calMarks.in());
-			data->setSkyFrequency(skyFreq.in());
-			data->setSkyBandwidth(skyBw.in());*/
+			m_data->setInputsTable(sectionsID,feeds,ifs,rcvPol.in(),skyFreq.in(),skyBw.in(),LO.in(),atts,calMarks.in());
+			/*m_data->setCalibrationMarks(calMarks.in());
+			m_data->setSkyFrequency(skyFreq.in());
+			m_data->setSkyBandwidth(skyBw.in());*/
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
-			data->setInputsTable();
-			/*data->setCalibrationMarks();
-			data->setSkyFrequency();
-			data->setSkyBandwidth();*/
+			m_data->setStatus(Management::MNG_WARNING);
+			m_data->setInputsTable();
+			/*m_data->setCalibrationMarks();
+			m_data->setSkyFrequency();
+			m_data->setSkyBandwidth();*/
 			receiverBossError=true;
 		} 		
 		catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -1159,14 +1159,14 @@ void CEngineThread::collectReceiversData()
 			impl.setOperationName("getCalibrationMark(),getIFOutputMark()");
 			impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
-			data->setInputsTable();
-			//data->setCalibrationMarks();
+			m_data->setStatus(Management::MNG_WARNING);
+			m_data->setInputsTable();
+			//m_data->setCalibrationMarks();
 		}
 	}
 	else {
-		data->setReceiverCode(IRA::CString(""));
-		data->saveFeedHeader(NULL,0);
-		data->setInputsTable();
+		m_data->setReceiverCode(IRA::CString(""));
+		m_data->saveFeedHeader(NULL,0);
+		m_data->setInputsTable();
 	}
 }

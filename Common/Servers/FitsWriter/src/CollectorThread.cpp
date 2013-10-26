@@ -11,9 +11,9 @@ using namespace FitsWriter_private;
 
 _IRA_LOGFILTER_IMPORT;
 
-CCollectorThread::CCollectorThread(const ACE_CString& name,CSecureArea<CDataCollection> *param, 
+CCollectorThread::CCollectorThread(const ACE_CString& name,FitsWriter_private::CDataCollection *param, 
 			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : 
-				ACS::Thread(name,responseTime,sleepTime),m_dataWrapper(param)
+				ACS::Thread(name,responseTime,sleepTime),m_data(param)
 {
 	AUTO_TRACE("CCollectorThread::CCollectorThread()");
 	m_meteoDuty=10000000; //one second
@@ -64,8 +64,8 @@ void CCollectorThread::runLoop()
 		}
 		catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 			_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
-			CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-			data->setStatus(Management::MNG_WARNING);					
+			//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+			m_data->setStatus(Management::MNG_WARNING);					
 			m_meteoError=true;
 		}
 		if (!CORBA::is_nil(m_meteoData)) {
@@ -79,8 +79,8 @@ void CCollectorThread::runLoop()
 				//press=m_meteoData->getPressure();
 				//temp=m_meteoData->getTemperature();
 				// now take the lock in order to store the retrived data.....
-				CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-				data->setMeteo(hum,temp,press);
+				//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+				m_data->setMeteo(hum,temp,press);
 			}
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCollectorThread::runLoop()");
@@ -88,14 +88,14 @@ void CCollectorThread::runLoop()
 				impl.setMinor(ex.minor());
 				_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 				m_meteoError=true;
-				CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-				data->setStatus(Management::MNG_WARNING);		
+				//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+				m_data->setStatus(Management::MNG_WARNING);		
 			}
 			catch (...) {
 				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCollectorThread::runLoop()");
 				_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-				CSecAreaResourceWrapper<CDataCollection> dataAgain=m_dataWrapper->Get();
-				dataAgain->setStatus(Management::MNG_WARNING);
+				//CSecAreaResourceWrapper<CDataCollection> dataAgain=m_dataWrapper->Get();
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 		}
 	}
@@ -108,8 +108,8 @@ void CCollectorThread::runLoop()
 		}
 		catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 			_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
-			CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-			data->setStatus(Management::MNG_WARNING);		
+			//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+			m_data->setStatus(Management::MNG_WARNING);		
 			m_schedulerError=true;
 		}
 		if (!CORBA::is_nil(m_scheduler)) {
@@ -124,8 +124,8 @@ void CCollectorThread::runLoop()
 					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 					m_schedulerTracking=Management::ROTBoolean::_nil();
 					m_schedulerError=true;
-					CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-					data->setStatus(Management::MNG_WARNING);
+					//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+					m_data->setStatus(Management::MNG_WARNING);
 				}
 			}
 			else {
@@ -133,16 +133,16 @@ void CCollectorThread::runLoop()
 					track=m_schedulerTracking->get_sync(comp.out()); // throw CORBA::SystemException
 					ACSErr::CompletionImpl compImpl(comp);
 					if (compImpl.isErrorFree()) {
-						CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-						data->setTelescopeTracking(track,m_trackingTime);
+						//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+						m_data->setTelescopeTracking(track,m_trackingTime);
 					}
 					else {
 						_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CCollectorThread::runLoop()");
 						impl.setAttributeName("tracking");
 						impl.setComponentName((const char *)m_config->getSchedulerComponent());
 						_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-						CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-						data->setStatus(Management::MNG_WARNING);
+						//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+						m_data->setStatus(Management::MNG_WARNING);
 					}					
 				}
 				catch (CORBA::SystemException& ex) {
@@ -151,8 +151,8 @@ void CCollectorThread::runLoop()
 					impl.setMinor(ex.minor());
 					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 					m_schedulerTracking=Management::ROTBoolean::_nil();
-					CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-					data->setStatus(Management::MNG_WARNING);
+					//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+					m_data->setStatus(Management::MNG_WARNING);
 				}
 			}
 		}
@@ -161,6 +161,6 @@ void CCollectorThread::runLoop()
 
 bool CCollectorThread::checkReadyFlag()
 {
-	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-	return data->isReady(); 
+	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+	return m_data->isReady(); 
 }

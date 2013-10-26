@@ -30,7 +30,7 @@ public:
      * @param responseTime thread's heartbeat response time in 100ns unit. Default value is 1s.
      * @param sleepTime thread's sleep time in 100ns unit. Default value is 100ms.
     */
-	CCollectorThread(const ACE_CString& name,CSecureArea<CDataCollection> *param, 
+	CCollectorThread(const ACE_CString& name,CDataCollection *param, 
 			const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
 			const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime);
 
@@ -72,7 +72,7 @@ public:
      void setServices(maci::ContainerServices * const service) { m_services=service; }
           
 private:
-	CSecureArea<CDataCollection> *m_dataWrapper;
+	FitsWriter_private::CDataCollection *m_data;
 	CConfiguration *m_config;
 	maci::ContainerServices * m_services;
 	DDWORD m_meteoDuty; // duty cycle of the meteo request in 100 ns

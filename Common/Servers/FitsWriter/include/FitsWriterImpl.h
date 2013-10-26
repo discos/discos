@@ -199,7 +199,8 @@ private:
 	SmartPropertyPointer<ROdoubleSeq> m_parrayDataY;
 	
 	//nc::SimpleConsumer<Antenna::AntennaDataBlock> *m_antennaNC;
-	IRA::CSecureArea<FitsWriter_private::CDataCollection> *m_dataWrapper;
+	//IRA::CSecureArea<FitsWriter_private::CDataCollection> *m_dataWrapper;
+	FitsWriter_private::CDataCollection *m_data;
 	FitsWriter_private::CConfiguration m_config;
 	FitsWriter_private::CEngineThread *m_workThread;
 	FitsWriter_private::CCollectorThread *m_collectThread;

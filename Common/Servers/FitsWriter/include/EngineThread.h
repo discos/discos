@@ -39,7 +39,7 @@ public:
      * @param responseTime thread's heartbeat response time in 100ns unit. Default value is 1s.
      * @param sleepTime thread's sleep time in 100ns unit. Default value is 100ms.
     */
-	CEngineThread(const ACE_CString& name,CSecureArea<CDataCollection> *param, 
+	CEngineThread(const ACE_CString& name,FitsWriter_private::CDataCollection *param, 
 			const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
 			const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime);
 
@@ -75,7 +75,8 @@ public:
      void setServices(maci::ContainerServices * const service) { m_service=service; }
      
 private:
-	CSecureArea<CDataCollection> *m_dataWrapper;
+	//CSecureArea<CDataCollection> *m_dataWrapper;
+	FitsWriter_private::CDataCollection *m_data;
 #ifdef FW_DEBUG
 	ofstream m_file;
 #else

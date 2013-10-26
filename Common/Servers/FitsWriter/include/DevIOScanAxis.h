@@ -24,7 +24,7 @@ class DevIOScanAxis: public virtual DevIO<Management::TScanAxis>
 
 public:
 
-	DevIOScanAxis(CSecureArea<FitsWriter_private::CDataCollection> * data): m_data(data) {
+	DevIOScanAxis(FitsWriter_private::CDataCollection *data): m_data(data) {
 		AUTO_TRACE("DevIOScanAxis::DevIOScanAxis()");
 	}
 
@@ -39,9 +39,9 @@ public:
 	Management::TScanAxis  read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
 		AUTO_TRACE("DevIOScanAxis::read()");
-		CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_data->Get();
+		//CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_data->Get();
 		timestamp=getTimeStamp();
-		return data->getScanAxis();
+		return m_data->getScanAxis();
     }
 
     void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
@@ -49,7 +49,8 @@ public:
 	}
 
 private:
-	CSecureArea<FitsWriter_private::CDataCollection> *m_data;
+	FitsWriter_private::CDataCollection *m_data;
+	//CSecureArea<FitsWriter_private::CDataCollection> *m_data;
 };
 
 };

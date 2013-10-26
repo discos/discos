@@ -22,7 +22,7 @@ class DevIOProjectName: public virtual DevIO<ACE_CString>
 {
 public:
 
-	DevIOProjectName(CSecureArea<FitsWriter_private::CDataCollection>*data): m_data(data) {
+	DevIOProjectName(FitsWriter_private::CDataCollection *data): m_data(data) {
 		AUTO_TRACE("DevIOProjectName::DevIOProjectName()");
 	}
 
@@ -37,9 +37,9 @@ public:
 	ACE_CString read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
 		AUTO_TRACE("DevIOProjectName::read()");
-		CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_data->Get();
+		//CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_data->Get();
 		timestamp=getTimeStamp();
-		m_val=(const char *)data->getProjectName();
+		m_val=(const char *)m_data->getProjectName();
 		return m_val;
     }
 
@@ -48,7 +48,8 @@ public:
 	}
 
 private:
-	CSecureArea<FitsWriter_private::CDataCollection> *m_data;
+	//CSecureArea<FitsWriter_private::CDataCollection> *m_data;
+	FitsWriter_private::CDataCollection *m_data;
 	ACE_CString m_val;
 };
 

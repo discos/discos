@@ -27,7 +27,7 @@ public:
 	/**
 	 * Constructor
 	 */
-	DevIODeviceID(CSecureArea<FitsWriter_private::CDataCollection>*data) :  m_data(data)
+	DevIODeviceID(FitsWriter_private::CDataCollection *data) :  m_data(data)
 	{
 		AUTO_TRACE("DevIODeviceID::DevIODeviceID()");
 	}
@@ -56,9 +56,9 @@ public:
 	CORBA::Long read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
 		AUTO_TRACE("DevIODeviceID::read()");
-		CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_data->Get();
+		//CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_data->Get();
 		timestamp=getTimeStamp();
-		m_val=data->getDeviceID();
+		m_val=m_data->getDeviceID();
 		return m_val;
 	}
 
@@ -72,7 +72,8 @@ public:
 	}
 
 private:
-	CSecureArea<FitsWriter_private::CDataCollection> *m_data;
+	//CSecureArea<FitsWriter_private::CDataCollection> *m_data;
+	FitsWriter_private::CDataCollection *m_data;
 	CORBA::Long m_val;
 };
 

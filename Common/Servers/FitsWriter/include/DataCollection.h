@@ -28,7 +28,7 @@
 
 
 // number of dumps in the cache
-#define DUMP_CACHE_SIZE 1000 
+#define DUMP_CACHE_SIZE 3000 
 
 #define BYTE2_TYPE unsigned short
 #define BYTE4_TYPE float
@@ -207,13 +207,13 @@ public:
 	 * @param fileName of the file
 	 * @param the exact path of the file in system disk (not including the file itself but including the trailing "/")
 	 */
-	void getFileName(IRA::CString& fileName,IRA::CString& fullPath);
+	void getFileName(IRA::CString& fileName,IRA::CString& fullPath) const;
 
 	/**
 	 * Get the full name of the current file
 	 * @return the full path and the file name of the current file
 	 */	
-	IRA::CString getFileName();
+	IRA::CString getFileName() const;
 	
 	/**
 	 * Get the name of the project
@@ -355,14 +355,14 @@ public:
 	const Management::TSystemStatus& getStatus() const { return m_status; }
 
 	/**
-	 * Sets the current status of the component
+	 * Sets the current status of the component, almost atomic
 	 */
-	void setStatus(const Management::TSystemStatus& st) { m_status=st; }
+	void setStatus(const Management::TSystemStatus& st) { /*baci::ThreadSyncGuard guard(&m_mutex); */m_status=st; }
 	
 	/** 
 	 * Sets the site information and the dut1 required by the component
 	 */
-	void setSite(const IRA::CSite& site,const double& dut1,const IRA::CString& siteName) {m_site=site; m_dut1=dut1; m_siteName=siteName; }
+	void setSite(const IRA::CSite& site,const double& dut1,const IRA::CString& siteName) { 	baci::ThreadSyncGuard guard(&m_mutex); m_site=site; m_dut1=dut1; m_siteName=siteName; }
 	
 	/**
 	 * allows to return back the information regarding the site
@@ -437,12 +437,12 @@ public:
 	/*
 	 * It allows to set the current receiver code
 	 */
-	void setReceiverCode(const IRA::CString& recvCode) { m_receiverCode=recvCode; }
+	void setReceiverCode(const IRA::CString& recvCode) { baci::ThreadSyncGuard guard(&m_mutex); m_receiverCode=recvCode; }
 	
 	/**
 	 * @return the receiver code
 	 */
-	const IRA::CString& getReceiverCode() const {return m_receiverCode;	}
+	const IRA::CString& getReceiverCode() const { return m_receiverCode; }
 
 	/*
 	 * It allows to read the sequence of identifiers of the backend sections
@@ -493,7 +493,7 @@ public:
 	/**
 	 * It allows to set the current source name and its salient parameters
 	 */
-	void setSource(const IRA::CString& source,const double& ra,const double& dec,const double& vlsr) { m_sourceName=source; m_sourceRa=ra; m_sourceDec=dec; m_sourceVlsr=vlsr; }
+	void setSource(const IRA::CString& source,const double& ra,const double& dec,const double& vlsr) { baci::ThreadSyncGuard guard(&m_mutex); m_sourceName=source; m_sourceRa=ra; m_sourceDec=dec; m_sourceVlsr=vlsr; }
 	
 	/**
 	 * @return the name of the source and its parameters
@@ -504,7 +504,7 @@ public:
 	 * It allows to set the antenna position offsets as directly returned by the Antenna subsystem 
 	*/ 
 	void setAntennaOffsets(const double& azOff,const double& elOff,const double& raOff,const double& decOff,const double& lonOff,const double& latOff) { 
-		m_azOff=azOff; m_elOff=elOff; m_raOff=raOff; m_decOff=decOff; m_lonOff=lonOff; m_latOff=latOff;
+			baci::ThreadSyncGuard guard(&m_mutex); m_azOff=azOff; m_elOff=elOff; m_raOff=raOff; m_decOff=decOff; m_lonOff=lonOff; m_latOff=latOff;
 	}
 	
 	/**
@@ -518,8 +518,8 @@ public:
 	 * Stores the list of values corresponding to the estimated source flux of the source,
 	 * @param fl list of fluxes, one value is  given corresponding to each input, but just one for each section is taken
 	 */
-	void setSourceFlux(const ACS::doubleSeq& fl) { m_sourceFlux=fl; }
-	void setSourceFlux() { m_sourceFlux.length(0); }
+	void setSourceFlux(const ACS::doubleSeq& fl) { 	baci::ThreadSyncGuard guard(&m_mutex); m_sourceFlux=fl; }
+	void setSourceFlux() { 	baci::ThreadSyncGuard guard(&m_mutex); m_sourceFlux.length(0); }
 
 	/**
 	 * It returns the estimated source flux, one for each section.
@@ -530,11 +530,13 @@ public:
 	 * allows to store the information about each of the servo system axis
 	 */
 	void setServoAxis(const ACS::stringSeq& name, const ACS::stringSeq& unit) {
+		baci::ThreadSyncGuard guard(&m_mutex);
 		m_servoAxisNames=name;
 		m_servoAxisUnits=unit;
 	}
 
 	void setServoAxis() {
+		baci::ThreadSyncGuard guard(&m_mutex);
 		m_servoAxisNames.length(0);
 		m_servoAxisUnits.length(0);
 	}
@@ -544,6 +546,7 @@ public:
 	 */
 	void setInputsTable(const ACS::longSeq& sectionID,const ACS::longSeq& feed,const ACS::longSeq& ifs,const ACS::longSeq& pols,const ACS::doubleSeq& freq,const ACS::doubleSeq& bw,
 			const ACS::doubleSeq& los,const ACS::doubleSeq& atts,const ACS::doubleSeq& mark)  {
+		baci::ThreadSyncGuard guard(&m_mutex);
 		m_receiverPolarization=pols;
 		m_receiversIFID=ifs;
 		m_receiverFeedID=feed;
@@ -557,6 +560,7 @@ public:
 
 	void setInputsTable()
 	{
+		baci::ThreadSyncGuard guard(&m_mutex);
 		m_receiverPolarization.length(0);
 		m_receiversIFID.length(0);
 		m_backendAttenuations.length(0);
@@ -568,12 +572,6 @@ public:
 		m_localOscillator.length(0);
 	}
 
-	/**
-	 * allows to set the sky frequencies. The input argument is expected to be of the same multiplicity as the number of inputs of the backend.
-	 * The number of stored values corresponds to the number of sections
-	 */
-	/*void setSkyFrequency(const ACS::doubleSeq& freq);
-	void setSkyFrequency() { m_skyFrequency.length(0); }*/
 
 	/**
 	 * @param freq used to return the number of frequencies, one value for each section
@@ -596,6 +594,7 @@ public:
 	 * it sets the meteo parameters
 	 */
 	void setMeteo(const double& hm,const double& temp,const double& press) {
+		baci::ThreadSyncGuard guard(&m_mutex);
 		m_humidity=hm; 
 		m_temperature=temp;
 		m_pressure=press;
@@ -614,6 +613,7 @@ public:
 	 * allows to set the current tracking flag from the telescope
 	 */
 	void setTelescopeTracking(const Management::TBoolean& tracking,const ACS::Time& time) {
+		baci::ThreadSyncGuard guard(&m_mutex);
 		m_prevTelescopeTracking=m_telecopeTacking;
 		m_telecopeTacking=(tracking==Management::MNG_TRUE);
 		m_telescopeTrackingTime=time;
@@ -811,6 +811,11 @@ private:
 	 * this stored the old telescope tracking flag
 	 */
 	bool m_prevTelescopeTracking;
+	
+	/**
+	 * Thread sync mutex
+	 */
+	BACIMutex m_mutex;
 };
 
 };

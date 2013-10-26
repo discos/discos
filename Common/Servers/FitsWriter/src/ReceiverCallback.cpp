@@ -8,7 +8,7 @@
 using namespace IRA;
 using namespace FitsWriter_private;
 
-CSecureArea<FitsWriter_private::CDataCollection> * ReceiverCallback::m_dataCollection=NULL;
+FitsWriter_private::CDataCollection * ReceiverCallback::m_dataCollection=NULL;
 
 _IRA_LOGFILTER_IMPORT;
 
@@ -28,11 +28,11 @@ int ReceiverCallback::cbStart(ACE_Message_Block * userParam_p)
 {
 	Backends::TMainHeader *mainH;
 	Backends::TSectionHeader *channelH;
-	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataCollection->Get();
+	//CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataCollection->Get();
 	mainH=(Backends::TMainHeader *)userParam_p->rd_ptr();
 	userParam_p->rd_ptr(sizeof(Backends::TMainHeader));
 	channelH=(Backends::TSectionHeader *)userParam_p->rd_ptr();	
-	data->saveMainHeaders(mainH,channelH);
+	m_dataCollection->saveMainHeaders(mainH,channelH);
 	m_receivedBytes=0;
 	ACS_LOG(LM_FULL_INFO, "ReceiverCallback::cbStart()",(LM_DEBUG,"START_FROM_BACKEND" ));
 	return 0;
@@ -65,10 +65,10 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 		}
 		dumpH=(Backends::TDumpHeader *)m_buffer;
 		if (m_bufferPointer>dumpH->dumpSize) {
-			CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataCollection->Get();
-			if (!data->saveDump(m_buffer)) { ///this will delete the buffer automatically!!!!!
+			//CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataCollection->Get();
+			if (!m_dataCollection->saveDump(m_buffer)) { ///this will delete the buffer automatically!!!!!
 				_IRA_LOGFILTER_LOG(LM_WARNING,"ReceiverCallback::cbReceive()","CANT_KEEP_THROTTLE");
-				data->setStatus(Management::MNG_WARNING);
+				m_dataCollection->setStatus(Management::MNG_WARNING);
 				delete []m_buffer;
 			}
 			m_buffer=NULL;
@@ -82,9 +82,9 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 
 int ReceiverCallback::cbStop()
 {	
-	CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataCollection->Get();
+	//CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataCollection->Get();
 	ACS_LOG(LM_FULL_INFO, "ReceiverCallback::cbStop()",(LM_DEBUG,"STOP_FROM_BACKEND" ));
-	data->startStopStage();
+	m_dataCollection->startStopStage();
 	//data->setStatus(Management::MNG_WARNING,__LINE__);
 	return 0;
 }
