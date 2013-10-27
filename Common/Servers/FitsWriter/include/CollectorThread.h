@@ -56,16 +56,16 @@ public:
      virtual void runLoop();
      
      /**
-      * This allows to specify the duty cycle for the meteo parmaeters requests
-      * @param duty meteo request cycle duty time in milliseconds
+      * This allows to specify the duty cycle for the meteo parameters requests
+      * @param duty meteo request cycle duty time in microseconds
       */
-     void setMeteoParamDuty(const DDWORD& duty) { m_meteoDuty=duty*10; }
+     void setMeteoParamDuty(const long& duty) { m_meteoDuty=(ACS::TimeInterval)duty*10; }
      
      /**
       * This allows to specify the duty cycle for tracking flag requests
-      * @param duty meteo request cycle duty time in milliseconds
+      * @param duty meteo request cycle duty time in microseconds
       */
-     void setTrackingFlagDuty(const DDWORD& duty) { m_trackingDuty=duty*10; }     
+     void setTrackingFlagDuty(const long& duty) { m_trackingDuty=(ACS::TimeInterval)duty*10; }
      
      void setConfiguration(CConfiguration * const conf) { m_config=conf; }
      
@@ -75,9 +75,9 @@ private:
 	FitsWriter_private::CDataCollection *m_data;
 	CConfiguration *m_config;
 	maci::ContainerServices * m_services;
-	DDWORD m_meteoDuty; // duty cycle of the meteo request in 100 ns
+	ACS::TimeInterval m_meteoDuty; // duty cycle of the meteo request in 100 ns
 	ACS::Time m_meteoTime; // last request to the meteo component
-	DDWORD m_trackingDuty; // duty cycle of the meteo request in 100 ns
+	ACS::TimeInterval m_trackingDuty; // duty cycle of the meteo request in 100 ns
 	ACS::Time m_trackingTime; // last request to the scheduler component
 	bool m_meteoError;
 	Weather::GenericWeatherStation_var m_meteoData;

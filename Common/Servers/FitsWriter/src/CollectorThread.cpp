@@ -18,7 +18,7 @@ CCollectorThread::CCollectorThread(const ACE_CString& name,FitsWriter_private::C
 	AUTO_TRACE("CCollectorThread::CCollectorThread()");
 	m_meteoDuty=10000000; //one second
 	m_meteoTime=0;
-	m_trackingDuty=200000; // 0.2 second
+	m_trackingDuty=2000000; // 0.2 second
 	m_trackingTime=0; 
 	m_meteoData=Weather::GenericWeatherStation::_nil();
 	m_scheduler=Management::Scheduler::_nil();
@@ -56,7 +56,7 @@ void CCollectorThread::runLoop()
 	}
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
-	if ((now.value().value-m_meteoTime)>m_meteoDuty) {
+	if (now.value().value>(m_meteoDuty+m_meteoTime)) {
 		double hum,temp,press;
 		m_meteoTime=now.value().value;
 		try {
@@ -75,11 +75,6 @@ void CCollectorThread::runLoop()
 				hum=pars.humidity;
 				press=pars.pressure;
 				temp=pars.temperature;
-				//hum=m_meteoData->getHumidity();
-				//press=m_meteoData->getPressure();
-				//temp=m_meteoData->getTemperature();
-				// now take the lock in order to store the retrived data.....
-				//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 				m_data->setMeteo(hum,temp,press);
 			}
 			catch (CORBA::SystemException& ex) {
@@ -99,7 +94,7 @@ void CCollectorThread::runLoop()
 			}
 		}
 	}
-	if ((now.value().value-m_trackingTime)>m_trackingDuty) {
+	if (now.value().value>(m_trackingDuty+m_trackingTime)) {
 		Management::TBoolean track;
 		ACSErr::Completion_var comp;
 		m_trackingTime=now.value().value;

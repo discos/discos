@@ -45,17 +45,17 @@ public:
 	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl);
 	
 	/**
-	 * @return the sleep time of the working thread (in 100 ns)
+	 * @return the sleep time of the working thread (microseconds)
 	 */
 	const long& getWorkingThreadTime() const { return m_workingThreadTime; }
 	
 	/**
-	 * @return the sleep time of the collector thread (in 100 ns)
+	 * @return the sleep time of the collector thread (microseconds)
 	 */
 	const long& getCollectorThreadTime() const { return m_collectorThreadTime; }
 	
 	/**
-	 * @return the  time slice of the working thread (in 100 ns))
+	 * @return the  time slice of the working thread (microseconds)
 	 */	
 	const long& getWorkingThreadTimeSlice() const { return m_workingThreadTimeSlice; }
 	
@@ -75,15 +75,15 @@ public:
 	const long& getMeteoParameterDutyCycle() const { return m_meteoParameterDutyCycle; }
 	
 	/**
-	 * @return the number of microseconds that will used as gap between two tracking flag refreshes
-	*/
-	const long& getMinorServoEnquireMinGap() const { return m_trackingFlagDutyCycle; }
-
-	/**
 	 * @return the number of microseconds that will used as gap between two tracking enquires to minor
 	 * servo system
 	*/
-	const long& getTrackingFlagDutyCycle() const { return m_minorServoEnquireMinGap; }
+	const long& getMinorServoEnquireMinGap() const { return m_minorServoEnquireMinGap; }
+
+	/**
+	 * @return the number of microseconds that will used as gap between two tracking flag refreshes
+	*/
+	const long& getTrackingFlagDutyCycle() const { return m_trackingFlagDutyCycle; }
 	
 	/**
 	 * @return the name of the interface of the antenna boss component

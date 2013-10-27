@@ -1,4 +1,3 @@
-// $Id: EngineThread.cpp,v 1.15 2011-04-22 18:51:49 a.orlati Exp $
 
 #include "EngineThread.h"
 #include <LogFilter.h>
@@ -61,10 +60,12 @@ void CEngineThread::onStop()
 	 AUTO_TRACE("CEngineThread::onStop()");
 }
  
-bool CEngineThread::checkTime(const ACS::Time& currentTime)
+bool CEngineThread::checkTime(const ACS::Time& jobStartTime)
 {
-	//CSecAreaResourceWrapper<CDataCollection> m_data=m_dataWrapper->Get();
-	return (currentTime>(m_data->getFirstDumpTime()+getSleepTime()+m_timeSlice)); // gives the cache time to fill a little bit
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	return (now.value().value<(jobStartTime+m_timeSlice));
+	//return (currentTime>(m_data->getFirstDumpTime()+getSleepTime()+m_timeSlice)); // gives the cache time to fill a little bit
 }
 
 bool CEngineThread::checkTimeSlot(const ACS::Time& slotStart)
@@ -201,7 +202,8 @@ bool CEngineThread::processData()
 		applyServoPositions=false;
 		try {
 			if (!CORBA::is_nil(m_minorServoBoss)) {
-				if (time>=m_lastMinorServoEnquireTime+m_config->getMinorServoEnquireMinGap()) {
+				ACS::TimeInterval interval=(ACS::TimeInterval)m_config->getMinorServoEnquireMinGap()*10;
+				if (time>=m_lastMinorServoEnquireTime+interval) {
 					servoPositions=m_minorServoBoss->getAxesPosition(time);
 					m_lastMinorServoEnquireTime=time;
 					applyServoPositions=true;

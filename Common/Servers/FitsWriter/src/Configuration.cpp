@@ -65,12 +65,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_STRING_ATTRIBUTE("AntennaBossInterface","Antenna Boss component interface is ",m_antennaBossComp);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);
-	_GET_STRING_ATTRIBUTE("MinorServoBossInterface","Minor servo Boss component interface is ",m_msBossComp);
+	_GET_STRING_ATTRIBUTE("MinorServoBossInterface","Minor Servo Boss component interface is ",m_msBossComp);
 	_GET_STRING_ATTRIBUTE("SchedulerInterface","Scheduler component interface is ",m_schedulerComp);
 	_GET_STRING_ATTRIBUTE("MeteoInstance","Weather component instance is ",m_meteoInstance);
-	m_workingThreadTime*=10;
-	m_workingThreadTimeSlice*=10;
-	m_collectorThreadTime*=10;
-	m_minorServoEnquireMinGap*=10;
 }
 

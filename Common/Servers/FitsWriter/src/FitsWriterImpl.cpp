@@ -162,12 +162,15 @@ void FitsWriterImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		Impl.setComponentName((const char*)observatory->name());
 		throw Impl;
 	}
-	m_workThread->setSleepTime(m_config.getWorkingThreadTime());
+	ACS::TimeInterval interval;
+	interval=(ACS::TimeInterval)m_config.getWorkingThreadTime()*10;
+	m_workThread->setSleepTime(interval);
 	m_workThread->setTimeSlice(m_config.getWorkingThreadTimeSlice());
 	m_workThread->setConfiguration(&m_config);
 	m_workThread->setServices(getContainerServices());
 	m_workThread->resume();
-	m_collectThread->setSleepTime(m_config.getCollectorThreadTime());
+	interval=(ACS::TimeInterval)m_config.getCollectorThreadTime()*10;
+	m_collectThread->setSleepTime(interval);
 	m_collectThread->setMeteoParamDuty(m_config.getMeteoParameterDutyCycle());
 	m_collectThread->setTrackingFlagDuty(m_config.getTrackingFlagDutyCycle());
 	m_collectThread->setConfiguration(&m_config);
