@@ -28,7 +28,9 @@
 
 
 // number of dumps in the cache
-#define DUMP_CACHE_SIZE 3000 
+// 30000 corresponds to 30 seconds with 1 milliseconds dumps
+#define DUMP_CACHE_SIZE 30000
+
 
 #define BYTE2_TYPE unsigned short
 #define BYTE4_TYPE float

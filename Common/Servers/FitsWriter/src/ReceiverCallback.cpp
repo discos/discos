@@ -65,7 +65,8 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 		}
 		dumpH=(Backends::TDumpHeader *)m_buffer;
 		if (m_bufferPointer>dumpH->dumpSize) {
-			//CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataCollection->Get();
+			// Questa cosa va investigata: cosa succede se nel buffer è compresa anche parte del
+			// dump successivo?
 			if (!m_dataCollection->saveDump(m_buffer)) { ///this will delete the buffer automatically!!!!!
 				_IRA_LOGFILTER_LOG(LM_WARNING,"ReceiverCallback::cbReceive()","CANT_KEEP_THROTTLE");
 				m_dataCollection->setStatus(Management::MNG_WARNING);
