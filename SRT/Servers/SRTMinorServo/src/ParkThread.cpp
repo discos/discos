@@ -64,7 +64,7 @@ void ParkThread::run()
                         if (refActPos.ptr() != ACS::ROdoubleSeq::_nil()) {
                             ACSErr::Completion_var completion;
                             ACS::doubleSeq * act_pos = refActPos->get_sync(completion.out());
-                            ACS::doubleSeq target_pos = m_configuration->getPosition(comp_name);
+                            ACS::doubleSeq target_pos = m_configuration->getPosition(comp_name, getTimeStamp());
 
                             if(act_pos->length() != target_pos.length()) {
                                 ACS_SHORT_LOG((LM_ERROR, ("ParkThread: lenghts of target and act pos do not match")));

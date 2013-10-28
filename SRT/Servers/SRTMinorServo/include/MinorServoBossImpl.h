@@ -391,6 +391,13 @@ public:
          throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx, ComponentErrors::UnexpectedEx);
 
 
+     /** Set the elevation tracking flag to "ON" or "OFF"
+      * 
+      * @param value "ON" or "OFF"
+      * @throw ManagementErrors::ConfigurationErrorEx if the input is different from "ON" or "OFF"
+      */
+     void setElevationTracking(const char * value) throw (ManagementErrors::ConfigurationErrorEx);
+
 
 private:
 

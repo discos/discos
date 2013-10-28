@@ -48,6 +48,8 @@ public:
 private:
     MSBossConfiguration * m_configuration;
     const TIMEVALUE m_final_time;
+    
+    void updatePos(std::string comp_name, ACS::doubleSeq & pos, ACS::Time exe_time, size_t exclude);
      
 };
 

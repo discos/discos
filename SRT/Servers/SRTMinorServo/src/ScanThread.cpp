@@ -75,21 +75,44 @@ void ScanThread::run()
     if(dist_from_central > delta && dist_from_right < dist_from_left) {
         reverse = true;
     }
+
     for(size_t i=0; i<pos.length(); i++) {
-        if(i==axis)                             
+        if(i==axis) {
             pos[i] = reverse ? 
                      (m_configuration->m_scan).plainCentralPos[i] + range/2 : 
                      (m_configuration->m_scan).plainCentralPos[i] - range/2;      
-        else                                    
+        }
+        else {
             pos[i] = (m_configuration->m_scan).plainCentralPos[i];                
+        }
     }
+    // Update the positions of the axes not involved in the scan
+    if((m_configuration->m_scan).wasElevationTrackingEn)
+        updatePos(comp_name, pos, (m_configuration->m_scan).starting_time, axis);
+
     size_t idx = 0;
     try {
         component_ref->setPosition(pos, 0); // Go to the starting position
         double starting_pos = pos[axis]; // Axis value
+        // Wait until the (starting_time - 0.5 seconds), in order to have the future antenna elevations
+        TIMEVALUE now(0.0L);
+        IRA::CIRATools::getTime(now);
+        while(now.value().value > (stime.value().value - 5000000)) {
+            ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
+            sleep_ret = ACS::ThreadBase::sleep(10000); // Wait 1 ms
+            if(sleep_ret != SLEEP_OK) {
+                m_configuration->m_isScanning = false;
+                return;
+            }
+            IRA::CIRATools::getTime(now);
+        }
+
         for(size_t i=0; i<N; i++) {
             pos[axis] = reverse ? starting_pos - delta * i : starting_pos + delta * i;
             ACS::Time exe_time = stime.value().value + dtime.value().value * i;
+            // Update the positions of the axes not involved in the scan
+            if((m_configuration->m_scan).wasElevationTrackingEn)
+                updatePos(comp_name, pos, exe_time, axis);
             positions.push_back(pos);
             exe_times.push_back(exe_time);
         }
@@ -104,7 +127,12 @@ void ScanThread::run()
 
         if(positions.size() <= EQUIVALENT_BUFF_SIZE) { // Send all the positions
             for(; idx<positions.size(); idx++) {
-                component_ref->setPosition(positions[idx], exe_times[idx]);
+                ACS::doubleSeq pos = positions[idx];
+                ACS::Time exe_time = exe_times[idx];
+                // Update the positions of the axes not involved in the scan
+                if((m_configuration->m_scan).wasElevationTrackingEn)
+                    updatePos(comp_name, pos, exe_time, axis);
+                component_ref->setPosition(pos, exe_time);
                 ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
                 sleep_ret = ACS::ThreadBase::sleep(10000); // Wait 1 ms
                 if(sleep_ret != SLEEP_OK) {
@@ -113,9 +141,14 @@ void ScanThread::run()
                 }
             }
         }
-        else { // Send (EQUIVALENT_BUFF_SIZE / 2) positions only
-            for(; idx<(EQUIVALENT_BUFF_SIZE / 2); idx++) {
-                component_ref->setPosition(positions[idx], exe_times[idx]);
+        else { // Send (EQUIVALENT_BUFF_SIZE / 4) positions only
+            for(; idx<(EQUIVALENT_BUFF_SIZE / 4); idx++) {
+                ACS::doubleSeq pos = positions[idx];
+                ACS::Time exe_time = exe_times[idx];
+                // Update the positions of the axes not involved in the scan
+                if((m_configuration->m_scan).wasElevationTrackingEn)
+                    updatePos(comp_name, pos, exe_time, axis);
+                component_ref->setPosition(pos, exe_time);
                 ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
                 sleep_ret = ACS::ThreadBase::sleep(1000); // Wait 100 us
                 if(sleep_ret != SLEEP_OK) {
@@ -124,7 +157,6 @@ void ScanThread::run()
                 }
             }
             // Wait until the starting time
-            TIMEVALUE now(0.0L);
             IRA::CIRATools::getTime(now);
             while(now.value().value < stime.value().value) {
                 ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
@@ -137,19 +169,29 @@ void ScanThread::run()
             }
 
             while(idx < positions.size()) {
-                size_t consumed = (size_t)((getTimeStamp() -(m_configuration->m_scan).starting_time) / dtime.value().value);
+                size_t consumed = (size_t)((getTimeStamp() - (m_configuration->m_scan).starting_time) / dtime.value().value);
                 size_t freeEquivalentPoints = (idx + 1 - consumed);
-                if(freeEquivalentPoints < EQUIVALENT_BUFF_SIZE / 2) {
+                if(freeEquivalentPoints < EQUIVALENT_BUFF_SIZE / 4) {
                     size_t remainingPoints = positions.size() - (idx + 1);
                     if(remainingPoints <= freeEquivalentPoints) {
                         // Send all the remaining points
                         for(; idx<positions.size(); idx++) {
-                            component_ref->setPosition(positions[idx], exe_times[idx]);
+                            ACS::doubleSeq pos = positions[idx];
+                            ACS::Time exe_time = exe_times[idx];
+                            // Update the positions of the axes not involved in the scan
+                            if((m_configuration->m_scan).wasElevationTrackingEn)
+                                updatePos(comp_name, pos, exe_time, axis);
+                            component_ref->setPosition(pos, exe_time);
                         }
                     }
                     else {
                         for(size_t j=0; j<freeEquivalentPoints; j++, idx++) {
-                            component_ref->setPosition(positions[idx], exe_times[idx]);
+                            ACS::doubleSeq pos = positions[idx];
+                            ACS::Time exe_time = exe_times[idx];
+                            // Update the positions of the axes not involved in the scan
+                            if((m_configuration->m_scan).wasElevationTrackingEn)
+                                updatePos(comp_name, pos, exe_time, axis);
+                            component_ref->setPosition(pos, exe_time);
                         }
                     }
                 }
@@ -172,4 +214,18 @@ void ScanThread::run()
     ACS_SHORT_LOG((LM_INFO, ("ScanThread::run(): scanning done.")));
     return;
 }
+
+void ScanThread::updatePos(string comp_name, ACS::doubleSeq & pos, ACS::Time exe_time, size_t exclude) {
+    ACS::doubleSeq plainTargetPos = m_configuration->getPosition(comp_name, exe_time);
+    if(pos.length() != plainTargetPos.length()) {
+        m_configuration->m_isScanning = false;
+        ACS_SHORT_LOG((LM_ERROR, ("ScanThread::updatePos(): unexpected error: plainTargetPos.length()() != pos.length().")));
+        return;
+    }
+    for(size_t k=0; k<pos.length(); k++) {
+        if(k != exclude) // Exclude the axis involved in the scan
+            pos[k] = plainTargetPos[k];
+    }
+}
+
 

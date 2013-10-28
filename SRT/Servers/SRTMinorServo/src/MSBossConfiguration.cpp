@@ -20,6 +20,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
     m_services = Services;
     m_isASConfiguration = false;
     m_nchannel = NULL;
+    m_antennaBoss = Antenna::AntennaBoss::_nil();
 }
 
 MSBossConfiguration::~MSBossConfiguration() {}
@@ -146,6 +147,20 @@ void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::Config
         }
     }
     m_isValidCDBConfiguration = true;
+ 
+    try {
+        m_antennaBoss = Antenna::AntennaBoss::_nil();
+        m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
+        if(CORBA::is_nil(m_antennaBoss)) {
+            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): _nil reference of AntennaBoss component"));
+            m_isElevationTracking = false;
+        }
+    }
+    catch (maciErrType::CannotGetComponentExImpl& ex) {
+        m_isElevationTracking = false;
+        ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the AntennaBoss component"));
+    }
+
 }
 
 InfoAxisCode MSBossConfiguration::getInfoFromAxisCode(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl) {
@@ -229,9 +244,62 @@ void MSBossConfiguration::setScan(
 
 
 
-ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, double elevation)
+ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time)
     throw (ManagementErrors::ConfigurationErrorExImpl)
 {
+    double elevation = 45.0; 
+    double azimuth;
+    if(isElevationTrackingEn()) {
+        try {
+            if(!CORBA::is_nil(m_antennaBoss)) {
+                m_antennaBoss->getRawCoordinates(time, azimuth, elevation);
+                elevation = elevation * DR2D; // From radians to decimal (be sure we want to use decimal...)
+                elevation = (elevation > MIN_ELEVATION) ? elevation : 45.0;
+                m_isElevationTracking = true;
+            }    
+            else {
+                try {
+                    m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
+                    if(CORBA::is_nil(m_antennaBoss)) {
+                        ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): _nil reference of AntennaBoss component"));
+                        m_isElevationTracking = false;
+                    }
+                }
+                catch (maciErrType::CannotGetComponentExImpl& ex) {
+                    m_isElevationTracking = false;
+                    ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the AntennaBoss component"));
+                }
+            }
+        }    
+        catch (ComponentErrors::ComponentErrorsEx& ex) {
+            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): cannot get the AntennaBoss component"));
+            m_antennaBoss = Antenna::AntennaBoss::_nil();
+            m_isElevationTracking = false;
+        }    
+        catch(AntennaErrors::AntennaErrorsEx& ex) {
+            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): cannot get the antenna elevation"));
+            m_antennaBoss = Antenna::AntennaBoss::_nil();
+            m_isElevationTracking = false;
+        }    
+        catch(CORBA::SystemException& ex) {
+            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): the AntennaBoss component is not active"));
+            m_antennaBoss = Antenna::AntennaBoss::_nil();
+            m_isElevationTracking = false;
+            try {
+                m_services->releaseComponent("ANTENNA/Boss");
+                // The component will be reloaded the next time getPosition() is called
+            }
+            catch(maciErrType::CannotReleaseComponentExImpl& ex) {
+                ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): cannot release the AntennaBoss component"));
+            }
+        }    
+        catch(...) {
+            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): unknown error getting the elevation"));
+            m_antennaBoss = Antenna::AntennaBoss::_nil();
+            m_isElevationTracking = false;
+        }    
+    }
+
     ACS::doubleSeq positions;
     if(m_servosCoefficients.count(comp_name)) {
         vector<vector<double> > vcoeff = m_servosCoefficients[comp_name]; 

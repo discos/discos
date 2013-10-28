@@ -185,7 +185,9 @@ void SetupThread::run()
                         if (refActPos.ptr() != ACS::ROdoubleSeq::_nil()) {
                             ACSErr::Completion_var completion;
                             ACS::doubleSeq * act_pos = refActPos->get_sync(completion.out());
-                            ACS::doubleSeq target_pos = m_configuration->getPosition(comp_name);
+                            TIMEVALUE now;
+                            IRA::CIRATools::getTime(now);
+                            ACS::doubleSeq target_pos = m_configuration->getPosition(comp_name, getTimeStamp());
 
                             if(act_pos->length() != target_pos.length()) {
                                 ACS_SHORT_LOG((LM_ERROR, ("SetupThread: lenghts of target and act pos do not match")));
@@ -334,8 +336,17 @@ void SetupThread::run()
     m_configuration->m_isConfigured = true;
     m_configuration->m_actualSetup = m_configuration->m_commandedSetup;
 
-    if(m_configuration->isElevationTrackingEn())
-        (m_params->tracking_thread_ptr)->resume();
+    try {
+        if(m_configuration->isElevationTrackingEn())
+            if(m_params->turnTrackingOn != NULL)
+                (m_params->bossImpl_ptr->*(m_params->turnTrackingOn))();
+            else {
+                ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): NULL pointer for turnTrackingOn.")));
+            }
+    }
+    catch(...) {
+        ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): Cannot get tracking on.")));
+    }
 
     ACS_SHORT_LOG((LM_INFO, ("SetupThread::run(): setup done.")));
     return;

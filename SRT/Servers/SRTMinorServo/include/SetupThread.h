@@ -30,6 +30,7 @@ const unsigned int MAX_SETUP_TIME = 80000000; // Maximum setup time: 8 seconds
 struct TrackingThread;
 struct MSBossPublisher;
 struct ScanThread;
+struct MinorServoBossImpl;
 
 struct ScanPosition {
     ACS::Time time;
@@ -44,6 +45,7 @@ struct ScanData {
     ACS::Time positioning_time;
 };
 
+typedef void (MinorServoBossImpl::*turnTrackingOn_ptr)();
 
 struct MSThreadParameters {
     vector<string> actions;
@@ -64,6 +66,8 @@ struct MSThreadParameters {
     ACS::Time starting_scan_time;
     bool is_tracking_enabled;
     ScanData scan_data;
+    turnTrackingOn_ptr turnTrackingOn;
+    MinorServoBossImpl * bossImpl_ptr;
 };
 
 

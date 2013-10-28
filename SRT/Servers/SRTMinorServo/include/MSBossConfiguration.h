@@ -28,6 +28,7 @@
 #include <SP_parser.h>
 #include <SRTActiveSurfaceBossS.h>
 #include <acsncSimpleSupplier.h>
+#include <AntennaBossC.h>
 
 const std::string actions_separator = "@";
 const std::string items_separator = ":";
@@ -37,6 +38,8 @@ const std::string boundary_tokens = "()";
 const std::string slaves_separator = ",";
 const std::string coeffs_separator = ";";
 const std::string coeffs_id = "=";
+
+const double MIN_ELEVATION = 5; // In decimals
 
 struct InfoAxisCode {
     size_t axis_id;
@@ -124,10 +127,10 @@ public:
     /** 
      * Return a doubleSeq of positions to set
      * @param comp_name string component name
-     * @param elevation the antenna elevation
+     * @param time the time we want to get the elevation the antenna will have at the time `time` 
      * @return doubleSeq of positions to set
      */
-    ACS::doubleSeq getPosition(string comp_name, double elevation=45.0)
+    ACS::doubleSeq getPosition(string comp_name, ACS::Time time)
         throw (ManagementErrors::ConfigurationErrorExImpl);
 
     void setScan(
@@ -188,6 +191,7 @@ public:
 	nc::SimpleSupplier *m_nchannel;
 
     maci::ContainerServices * m_services;
+    Antenna::AntennaBoss_var m_antennaBoss;
 };
 
 

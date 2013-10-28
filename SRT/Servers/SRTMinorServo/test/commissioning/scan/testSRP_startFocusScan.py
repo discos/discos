@@ -53,8 +53,8 @@ class TestFocusScan(unittest.TestCase):
         time.sleep(2)
         delay = 10 * 10 ** 7 # 10 seconds
         starting_time = TimeHelper.getTimeStamp().value + delay # Start the scan in `delay` seconds from now
-        range_ = 15.0 # mm 
-        total_time = 5 * 10 ** 7 # 5 seconds
+        range_ = 15.0 # 15 mm 
+        total_time = 15 * 10 ** 7 # 15 seconds
         mm_per_sec = range_ / total_time
         actPos_obj = self.srp._get_actPos()
         actPos, cmp = actPos_obj.get_sync()

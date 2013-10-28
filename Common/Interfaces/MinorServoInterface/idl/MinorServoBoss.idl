@@ -46,7 +46,15 @@ module MinorServo {
 		 * @throw ManagementErrors::ConfigurationErrorEx
 		 */
 		void turnTrackingOff() raises (ManagementErrors::ConfigurationErrorEx);
-			
+				
+	
+        /**
+         * Set the elevation tracking flag to "ON" or "OFF"
+         * @param value "ON" or "OFF"
+		 * @throw ManagementErrors::ConfigurationErrorEx if the input is different from "ON" or "OFF"
+         */
+		void setElevationTracking(in string value) raises (ManagementErrors::ConfigurationErrorEx);
+
 	
         /**
          * Should the minor servo position change with the antenna elevation?
