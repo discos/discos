@@ -44,9 +44,10 @@ double voltageConverter(double voltage) { return(voltage); }
 
 int main(int argc, char *argv[])
 {
-    if(argc != 7) {
+    if(argc != 5) {
         cerr << "\nWrong number of parameters. ";
-        cerr << "Usage:\n\tTestReceiverControl dewar_IP dewar_port LNA_IP LNA_port, SW_IP SW_port\n" << endl;
+        cerr << "Usage:\n\tTestReceiverControl dewar_IP dewar_port LNA_IP LNA_port\n" << endl;
+        // cerr << "Usage:\n\tTestReceiverControl dewar_IP dewar_port LNA_IP LNA_port, SW_IP SW_port\n" << endl;
         return 1;
     }
 
@@ -54,9 +55,9 @@ int main(int argc, char *argv[])
     unsigned int dewar_port = atoi(argv[2]);
     std::string lna_IP = std::string(argv[3]);
     unsigned int lna_port = atoi(argv[4]);
-    std::string switch_IP = std::string(argv[5]);
-    unsigned int switch_port = atoi(argv[6]);
-    unsigned short feeds = 2; 
+    // std::string switch_IP = std::string(argv[5]);
+    // unsigned int switch_port = atoi(argv[6]);
+    unsigned short feeds = 7; 
     std::vector<BYTE> data;
 
 
@@ -70,8 +71,8 @@ int main(int argc, char *argv[])
                 lna_port, 
                 250000, 
                 feeds,
-                switch_IP,
-                switch_port,
+                "",
+                0,
                 0x7C,
                 0x01,
                 0x7C,
@@ -127,11 +128,11 @@ int main(int argc, char *argv[])
         // cout << "Done!\n" << endl;
         
         // Test the setVacuumSensorOn()
-        cout << "Test setVacuumSensorOn() with a reliable communication" << endl;
-        rc.setVacuumSensorOn();
-        cout << "Done!\n" << endl;
-        
-        sleep(1);
+        // cout << "Test setVacuumSensorOn() with a reliable communication" << endl;
+        // rc.setVacuumSensorOn();
+        // cout << "Done!\n" << endl;
+        // 
+        // sleep(1);
 
         // Test the isVacuumSensorOn()
         // cout << "Test isVacuumSensorOn() with a reliable communication" << endl;

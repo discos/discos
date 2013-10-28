@@ -1420,6 +1420,8 @@ void MinorServoBossImpl::setElevationTracking(const char * value) throw (Managem
     else {
         m_configuration->setElevationTracking(flag); 
     }
+    if(isReady() && m_configuration->isElevationTrackingEn())
+        turnTrackingOn();
 }
 
 
