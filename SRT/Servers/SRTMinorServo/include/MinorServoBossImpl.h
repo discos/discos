@@ -397,6 +397,8 @@ public:
       * @throw ManagementErrors::ConfigurationErrorEx if the input is different from "ON" or "OFF"
       */
      void setElevationTracking(const char * value) throw (ManagementErrors::ConfigurationErrorEx);
+     
+     void setElevationTrackingImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl);
 
 
 private:

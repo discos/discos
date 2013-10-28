@@ -39,13 +39,13 @@ module MinorServo {
 		 * Turn the elevation tracking on
 		 * @throw ManagementErrors::ConfigurationErrorEx
 		 */
-		void turnTrackingOn() raises (ManagementErrors::ConfigurationErrorEx);
+		// void turnTrackingOn() raises (ManagementErrors::ConfigurationErrorEx);
 		
 		/**
 		 * Turn the elevation tracking off
 		 * @throw ManagementErrors::ConfigurationErrorEx
 		 */
-		void turnTrackingOff() raises (ManagementErrors::ConfigurationErrorEx);
+		// void turnTrackingOff() raises (ManagementErrors::ConfigurationErrorEx);
 				
 	
         /**

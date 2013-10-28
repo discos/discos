@@ -51,13 +51,12 @@ MinorServoBossImpl::MinorServoBossImpl(
     m_thread_params.is_parking_locked = false;
     m_thread_params.is_initialized = false;
     m_thread_params.is_scanning_ptr = NULL;
-    m_thread_params.turnTrackingOn = NULL;
-    m_thread_params.bossImpl_ptr = NULL;
+    m_thread_params.bossImpl_ptr = this;
     m_status_value = Management::MNG_OK;
     (m_thread_params.scan_data).positioning_time = 0;
     m_servo_scanned = "none";
     m_configuration = new MSBossConfiguration(m_services);
-    m_parser= new SimpleParser::CParser<MinorServoBossImpl>(this, 1);
+    m_parser= new SimpleParser::CParser<MinorServoBossImpl>(this, 10);
 }
 
 
@@ -113,8 +112,6 @@ void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponen
     m_thread_params.commanded_conf = m_commanded_conf;
     m_thread_params.actual_conf = &m_actual_conf;
     (m_thread_params.actions).clear();
-    m_thread_params.turnTrackingOn = &MinorServoBossImpl::turnTrackingOn;
-    m_thread_params.bossImpl_ptr = this;
 
     m_parser->add(
             "servoPark", 
@@ -125,6 +122,12 @@ void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponen
     m_parser->add(
             "servoSetup", 
             new function1<MinorServoBossImpl, non_constant, void_type, I<string_type> >(this, &MinorServoBossImpl::setupImpl), 
+            1
+    );
+
+    m_parser->add(
+            "setServoElevationTracking", 
+            new function1<MinorServoBossImpl, non_constant, void_type, I<string_type> >(this, &MinorServoBossImpl::setElevationTrackingImpl), 
             1
     );
 
@@ -1413,15 +1416,31 @@ ACS::doubleSeq * MinorServoBossImpl::getOffset(const char *servo, string offset_
 
 
 void MinorServoBossImpl::setElevationTracking(const char * value) throw (ManagementErrors::ConfigurationErrorEx) {
-    string flag(value);
-    if(flag != "ON" || flag != "OFF") {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "setElevationTracking(): value not allowed.", true);
+    try {
+        setElevationTrackingImpl(value);
     }
-    else {
-        m_configuration->setElevationTracking(flag); 
+    catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getConfigurationErrorEx();     
     }
-    if(isReady() && m_configuration->isElevationTrackingEn())
-        turnTrackingOn();
+}
+
+
+void MinorServoBossImpl::setElevationTrackingImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl) {
+    IRA::CString flag(value);
+    flag.MakeUpper();
+    m_configuration->setElevationTracking(flag); 
+    try {
+        if(isReady()) {
+            if(m_configuration->isElevationTrackingEn())
+                turnTrackingOn();
+            else
+                turnTrackingOff();
+        }
+    }
+    catch(...) {
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, string("setElevationTracking(): cannot turn the tracking") + string(flag), false);
+    }
 }
 
 

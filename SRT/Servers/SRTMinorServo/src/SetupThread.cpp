@@ -338,8 +338,8 @@ void SetupThread::run()
 
     try {
         if(m_configuration->isElevationTrackingEn())
-            if(m_params->turnTrackingOn != NULL)
-                (m_params->bossImpl_ptr->*(m_params->turnTrackingOn))();
+            if(m_params->bossImpl_ptr != NULL)
+                (m_params->bossImpl_ptr)->turnTrackingOn();
             else {
                 ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): NULL pointer for turnTrackingOn.")));
             }

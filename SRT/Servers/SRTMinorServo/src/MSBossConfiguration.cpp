@@ -211,8 +211,15 @@ InfoAxisCode MSBossConfiguration::getInfoFromAxisCode(string axis_code) throw (M
     }
 }
 
-void MSBossConfiguration::setElevationTracking(string value) {
-    m_isElevationTrackingEn = (value == "ON") ? true : false;
+void MSBossConfiguration::setElevationTracking(IRA::CString flag) throw (ManagementErrors::ConfigurationErrorExImpl) {
+    const IRA::CString ON("ON");
+    const IRA::CString OFF("OFF");
+    if(flag == ON || flag == OFF) {
+        m_isElevationTrackingEn = (flag == ON) ? true : false;
+    }
+    else {
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, string("setElevationTracking(): value ") + string(flag) + " not allowed.", false);
+    }
 }
 
 void MSBossConfiguration::setScan(
@@ -267,7 +274,7 @@ ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time
                 }
                 catch (maciErrType::CannotGetComponentExImpl& ex) {
                     m_isElevationTracking = false;
-                    ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the AntennaBoss component"));
+                    ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition: cannot get the AntennaBoss component"));
                 }
             }
         }    

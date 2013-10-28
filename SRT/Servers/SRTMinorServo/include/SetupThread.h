@@ -45,8 +45,6 @@ struct ScanData {
     ACS::Time positioning_time;
 };
 
-typedef void (MinorServoBossImpl::*turnTrackingOn_ptr)();
-
 struct MSThreadParameters {
     vector<string> actions;
     map<string, bool> *tracking_list;
@@ -66,7 +64,6 @@ struct MSThreadParameters {
     ACS::Time starting_scan_time;
     bool is_tracking_enabled;
     ScanData scan_data;
-    turnTrackingOn_ptr turnTrackingOn;
     MinorServoBossImpl * bossImpl_ptr;
 };
 

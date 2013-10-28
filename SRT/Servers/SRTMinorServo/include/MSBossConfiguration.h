@@ -105,7 +105,7 @@ public:
     // Return the name of the servo active in the primary focus
     inline std::string getActivePFocusServo() { return m_active_pfocus_servo; }
 
-    void setElevationTracking(string value) ;
+    void setElevationTracking(IRA::CString value) throw (ManagementErrors::ConfigurationErrorExImpl);
 
     InfoAxisCode getInfoFromAxisCode(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl);
 
