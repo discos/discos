@@ -28,7 +28,7 @@ class DevIOHPBW: public virtual DevIO<CORBA::Double>
 	
 public:
 	
-	DevIOHPBW(CSecureArea<CalibrationTool_private::CDataCollection>* data): m_data(data) { 
+	DevIOHPBW(CalibrationTool_private::CDataCollection* data): m_data(data) { 
 		AUTO_TRACE("DevIOHPBW::DevIOHPBW()");
 	}
 	
@@ -41,10 +41,10 @@ public:
 	}
 	
 	CORBA::Double read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-		CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> resource=m_data->Get();
+		//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> resource=m_data->Get();
 		AUTO_TRACE("DevIOHPBW::read()");
 		timestamp=getTimeStamp();
-		return resource->getHPBW();
+		return m_data->getHPBW();
     }
 	
     void write(const CORBA::Double& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
@@ -52,7 +52,7 @@ public:
 	}
     
 private:
-    CSecureArea<CalibrationTool_private::CDataCollection> *m_data;
+    CalibrationTool_private::CDataCollection *m_data;
 };
 
 };

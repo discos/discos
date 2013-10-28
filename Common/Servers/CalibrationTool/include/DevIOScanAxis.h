@@ -26,7 +26,7 @@ class DevIOScanAxis: public virtual DevIO<Management::TScanAxis>
 	
 public:
 	
-	DevIOScanAxis(CSecureArea<CalibrationTool_private::CDataCollection> * data): m_data(data) { 
+	DevIOScanAxis(CalibrationTool_private::CDataCollection * data): m_data(data) { 
 		AUTO_TRACE("DevIOScanAxis::DevIOScanAxis()");
 	}
 	
@@ -41,9 +41,9 @@ public:
 	Management::TScanAxis  read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) 
 	{
 		AUTO_TRACE("DevIOScanAxis::read()");
-		CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_data->Get();
+		//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_data->Get();
 		timestamp=getTimeStamp();
-		return data->getScanAxis();
+		return m_data->getScanAxis();
     }
 	
     void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
@@ -51,7 +51,7 @@ public:
 	}
     
 private:
-	CSecureArea<CalibrationTool_private::CDataCollection> *m_data;
+	CalibrationTool_private::CDataCollection *m_data;
 };
 
 };

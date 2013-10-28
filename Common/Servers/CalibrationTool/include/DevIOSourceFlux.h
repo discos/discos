@@ -28,7 +28,7 @@ class DevIOSourceFlux: public virtual DevIO<CORBA::Double>
 	
 public:
 	
-	DevIOSourceFlux(CSecureArea<CalibrationTool_private::CDataCollection>* data): m_data(data) { 
+	DevIOSourceFlux(CalibrationTool_private::CDataCollection* data): m_data(data) { 
 		AUTO_TRACE("DevIOSourceFlux::DevIOSourceFlux()");
 	}
 	
@@ -41,10 +41,10 @@ public:
 	}
 	
 	CORBA::Double read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-		CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> resource=m_data->Get();
+		//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> resource=m_data->Get();
 		AUTO_TRACE("DevIOSourceFlux::read()");
 		timestamp=getTimeStamp();
-		return resource->getSourceFlux();
+		return m_data->getSourceFlux();
     }
 	
     void write(const CORBA::Double& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
@@ -52,7 +52,7 @@ public:
 	}
     
 private:
-    CSecureArea<CalibrationTool_private::CDataCollection> *m_data;
+    CalibrationTool_private::CDataCollection *m_data;
 };
 
 };

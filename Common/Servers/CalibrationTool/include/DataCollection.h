@@ -151,7 +151,6 @@ private:
 
 /**
  * This class stores all the data that are needed by the calibration file.
- * This class is thread unsafe so must be synchronized.
  * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
  * <br> 
@@ -167,51 +166,38 @@ public:
 	 * Destructor
 	 */
 	~CDataCollection();
-	/**
-	 * Change the name of the save file. 
-	 * @param name new file name
-	 * @return false if the operation could not be done
-	 */
-	/*bool setFileName(const IRA::CString& name);*/
 	
-	/**
-	 * Get the name if the current file 
-	 */
-	/*const IRA::CString& getFileName() const { return m_fileName; }*/
-	
-	/*AA**********************************************************************************************************************************************************************/
 	void getFileName(IRA::CString& fileName,IRA::CString& fullPath) const;
 
 	IRA::CString getFileName() const;
-	/*AA**********************************************************************************************************************************************************************/
 
 	/**
-	 * Get the name of the project
+	 * Get the name of the project. Almost atomic.
 	 */
 	const IRA::CString& getProjectName() const { return m_projectName; }
 
 	/**
-	 * get the identifer number of the device
+	 * get the identifer number of the device. Almost atomic.
 	 */
 	const long& getDevice() const { return m_deviceID; }
 	
 	/**
-	 * Set the current observer name
+	 * Set the current observer name. Almost atomic.
 	 */
 	void setObserverName(const IRA::CString& observerName) { m_observerName=observerName; }
 	
 	/**
-	 * Get the name of the observer
+	 * Get the name of the observer. Almost atomic.
 	 */
 	const IRA::CString& getObserverName() const { return m_observerName; }
 
 	/**
-	 * Set the current source name
+	 * Set the current source name. Almost atomic.
 	 */
 	void setSourceName(const IRA::CString& sourceName) { m_sourceName=sourceName; }
 
 	/**
-	 * Get the name of the source name
+	 * Get the name of the source name. Almost atomic.
 	 */
 	const IRA::CString& getSourceName() const { return m_sourceName; }
 	
@@ -223,7 +209,7 @@ public:
 	/**
 	 * Get the sum of the inputs of all the sections
 	 */
-	long getInputsNumber() const;
+	long getInputsNumber();
 	
 	/**
 	 * Saves the main headers coming from the backend
@@ -252,70 +238,69 @@ public:
 	bool getDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize);
 	
 	/**
-	 * @return the reference to the main header. 
+	 * @return the reference to the main header. Almost atomic.
 	 */
 	const Backends::TMainHeader& getMainHeader() const { return m_mainH; }
 	
 	/**
-	 * @return the pointer to the array of sections  header
+	 * @return the pointer to the array of sections  header Almost atomic.
 	 */
 	Backends::TSectionHeader * getSectionHeader() const { return m_sectionH; }
 	
 	/**
-	 * @return the current status of the component.
+	 * @return the current status of the component. Almost atomic.
 	 */
 	const Management::TSystemStatus& getStatus() const { return m_status; }
 
 	/**
-	 * Sets the current status of the component
+	 * Sets the current status of the component. Almost atomic.
 	 */
 	void setStatus(const Management::TSystemStatus& st) { m_status=st; }
-	
-	/**
-	 * @sets the scan axis value  of the component.
-	 */
-	//void setScanAxis(Management::TScanAxis& scanAxis) {m_scanAxis=scanAxis;}
 
 	/**
-	 * @return the scan axis value  of the component.
+	 * @return the scan axis value  of the component. Almost atomic.
 	 */
 	const Management::TScanAxis& getScanAxis() const { return m_scanAxis; }
 
 	/**
-	 * @return the identifier that can be used to command the minor servo in charge to move the current scan axis
+	 * @return the identifier that can be used to command the minor servo in charge to move the current scan axis. Almost atomic.
 	 */
 	const IRA::CString& getMinorServoNameForAxis() const { return m_minorServoNameForAxis; }
 
 	/**
-	 * @return the <i>m_ready</i> flag, that means the headers have been saved
+	 * @return the <i>m_ready</i> flag, that means the headers have been saved. Almost atomic.
 	 */
 	bool isReady() const { return m_ready; }
 	
 	/**
-	 * @return the <i>m_running</i>  flag, that means the component is working and saving the data from the sender
+	 * @return the <i>m_running</i>  flag, that means the component is working and saving the data from the sender. Almost atomic.
 	 */
 	bool isRunning() const {return m_running; }
 	
 	/**
-	 * @return the <i>m_stop</i> flag, that means the component id finalizing the file
+	 * @return the <i>m_stop</i> flag, that means the component id finalizing the file. Almost atomic.
 	 */
 	bool isStop() const { return m_stop; }
 	
 	/**
-	 * @return the <i>m_start</i> flag, tham means the component is opening the file
+	 * @return the <i>m_start</i> flag, tham means the component is opening the file. Almost atomic.
 	 */
 	bool isStart() const { return m_start; }
 
     /**
-	 *  @return the <i>m_reset</i> flag, that means the component must perform the actions required for a reset
+	 *  @return the <i>m_reset</i> flag, that means the component must perform the actions required for a reset. Almost atomic.
 	 */
 	bool isReset() const { return m_reset; }
 	
-	/*AA**********************************************************************************************************************************************************************/
+	/**
+	* Almost atomic.
+	*/
 	bool isScanHeaderReady() const { return m_scanHeader; }
 
+	/**
+	* Almost atomic.
+	*/
 	bool isSubScanHeaderReady() const { return m_subScanHeader; }
-	/*AA**********************************************************************************************************************************************************************/
 
 	/**
 	 * It puts the component into the stop stage
@@ -332,110 +317,110 @@ public:
 	 */
 	void haltStopStage();
 
-    /**
+    	/**
 	 * acknowledge that the component has been reset
 	 */
 	void haltResetStage();
 	
-    /**
-     * allows to get HPBW value after gaussian fitting
-     */
-    const double& getHPBW() {return m_HPBW;}
+    	/**
+     	 * Allows to get HPBW value after gaussian fitting. Almost atomic.
+     	*/
+    	const double& getHPBW() const {return m_HPBW;}
+
+	/**
+     	 * sets HPBW value after gaussian fitting. Almost atomic.
+        */
+    	void setHPBW(double HPBW) {m_HPBW=HPBW;}
+
+    	/**
+     	* allows to get amplitude (peak temperature) value after gaussian fitting. Almost atomic.
+     	*/
+    	const double& getAmplitude() const {return m_amplitude;}
+
+    	/**
+     	* sets amplitude (peak temperature) value after gaussian fitting. Almost atomic.
+     	*/
+    	void setAmplitude(double amplitude) {m_amplitude=amplitude;}
+
+    	/**
+     	* allows to get peak offset value after gaussian fitting. Almost atomic.
+     	*/
+    	const double& getPeakOffset() const {return m_peakOffset;}
+
+	/**
+     	* sets peak offset value after gaussian fitting. Almost atomic.
+     	*/
+    	void setPeakOffset(double peakOffset) {m_peakOffset=peakOffset;}
+
+	/**
+     	 * allows to get offset value after gaussian fitting. Almost atomic.
+        */
+    	const double& getOffset() const {return m_offSet;}
+
+    	/**
+         * sets offset value after gaussian fitting. Almost atomic.
+        */
+    	void setOffset(double offset) {m_offSet=offset;}
+
+    	/**
+     	* allows to get slope value after gaussian fitting. Almost atomic.
+     	*/
+    	const double& getSlope() const  {return m_slope;}
+
+	/**
+     	 * sets slope value after gaussian fitting. Almost atomic.
+     	*/
+    	void setSlope(double slope) {m_slope=slope;}
+
+	/**
+         * allows to get source flux value. Almost atomic.
+    	 */
+    	const double& getSourceFlux() const {return m_sourceFlux;}
+
+	/**
+     	* sets source flux value. Almost atomic. 
+     	*/
+    	void setSourceFlux(double sourceFlux) {m_sourceFlux=sourceFlux;}
 
     /**
-     * sets HPBW value after gaussian fitting
+     * allows to get single dataY value. Almost atomic. 
      */
-    void setHPBW(double HPBW) {m_HPBW=HPBW;}
-
-    /**
-     * allows to get amplitude (peak temperature) value after gaussian fitting
-     */
-    const double& getAmplitude() {return m_amplitude;}
-
-    /**
-     * sets amplitude (peak temperature) value after gaussian fitting
-     */
-    void setAmplitude(double amplitude) {m_amplitude=amplitude;}
-
-    /**
-     * allows to get peak offset value after gaussian fitting
-     */
-    const double& getPeakOffset() {return m_peakOffset;}
-
-    /**
-     * sets peak offset value after gaussian fitting
-     */
-    void setPeakOffset(double peakOffset) {m_peakOffset=peakOffset;}
-
-    /**
-     * allows to get offset value after gaussian fitting
-     */
-    const double& getOffset() {return m_offSet;}
-
-    /**
-     * sets offset value after gaussian fitting
-     */
-    void setOffset(double offset) {m_offSet=offset;}
-
-    /**
-     * allows to get slope value after gaussian fitting
-     */
-    const double& getSlope() {return m_slope;}
-
-    /**
-     * sets slope value after gaussian fitting
-     */
-    void setSlope(double slope) {m_slope=slope;}
-
-    /**
-     * allows to get source flux value
-     */
-    const double& getSourceFlux() {return m_sourceFlux;}
-
-    /**
-     * sets source flux value
-     */
-    void setSourceFlux(double sourceFlux) {m_sourceFlux=sourceFlux;}
-
-    /**
-     * allows to get single dataY value
-     */
-    const double& getDataY() {return m_dataY;}
+    const double& getDataY() const {return m_dataY;}
 		
     /**
-     * allows to get single dataX value
+     * allows to get single dataX value Almost atomic. 
      */
-    const double& getDataX() {return m_dataX;}
+    const double& getDataX() const {return m_dataX;}
 		
     /**
-     * allows to get arrayDataY value
+     * allows to get arrayDataY value.
      */
-    const ACS::doubleSeq& getArrayDataY() {return m_arrayDataY;}
+    const ACS::doubleSeq& getArrayDataY() {baci::ThreadSyncGuard guard(&m_mutex); return m_arrayDataY;}
 		
     /**
      * allows to get arrayDataX value
      */
-    const ACS::doubleSeq& getArrayDataX() {return m_arrayDataX;}
+    const ACS::doubleSeq& getArrayDataX() {baci::ThreadSyncGuard guard(&m_mutex); return m_arrayDataX;}
 		
     /**
-     * sets single dataY value, tsys value
+     * sets single dataY value, tsys value. Almost atomic.
      */
     void setDataY(double dataY) {m_dataY=dataY;}
 		
     /**
-     * sets single dataX value, axis coordinate
+     * sets single dataX value, axis coordinate. Almost atomic.
      */
     void setDataX(double dataX) {m_dataX=dataX;}
 		
     /**
      * sets arrayDataY value
      */
-    void setArrayDataY(const ACS::doubleSeq& arrayDataY,const long& dim) {m_arrayDataY.length(dim); for(long i=0;i<dim; m_arrayDataY[i]=arrayDataY[i],i++);}
+    void setArrayDataY(const ACS::doubleSeq& arrayDataY,const long& dim) {baci::ThreadSyncGuard guard(&m_mutex); m_arrayDataY.length(dim); for(long i=0;i<dim; m_arrayDataY[i]=arrayDataY[i],i++);}
 		
     /**
      * sets arrayDataX value
      */
-    void setArrayDataX(const ACS::doubleSeq& arrayDataX,const long& dim) {m_arrayDataX.length(dim);  for(long i=0;i<dim; m_arrayDataX[i]=arrayDataX[i],i++); }
+    void setArrayDataX(const ACS::doubleSeq& arrayDataX,const long& dim) {baci::ThreadSyncGuard guard(&m_mutex); m_arrayDataX.length(dim); for(long i=0;i<dim; m_arrayDataX[i]=arrayDataX[i],i++); }
 
     /**
 	 * Change current scan information
@@ -468,80 +453,82 @@ public:
 	void forceReset();
 
 	/**
-	 * @return if the current scan is a focusing scan
+	 * @return if the current scan is a focusing scan. Almost atomic
 	 */
 	bool isFocusScan() const { return  ((m_coordIndex==2) || (m_coordIndex==3)); }
 
 	/**
-	 * @return if the current scan is a pointing scan
+	 * @return if the current scan is a pointing scan. Almost atomic.
 	 */
 	bool isPointingScan() const { return ((m_coordIndex==1) || (m_coordIndex==0)); }
 
 	/**
-	 * @return if the latitude scan has been performed
+	 * @return if the latitude scan has been performed. Almosto atomic.
 	 */
 	bool isLatDone() const { return m_latDone; }
 
 	/**
-	 * @return if the longitude scan has been performed
+	 * @return if the longitude scan has been performed. Almost atomic
 	 */
 	bool isLonDone() const { return m_lonDone; }
 
 	/**
-	 * Marks the  focus scan as done
+	 * Marks the  focus scan as done. Almost atomic.
 	 */
 	void setFocusDone() { m_focusDone=true; }
 
 	/**
-	 * marks the latitude scan done
+	 * marks the latitude scan done. Almost atomic.
 	 */
 	void setLatDone() { m_latDone=true; }
 
 	/**
-	 * marks the longitude scan done
+	 * marks the longitude scan done. Almost atmic.
 	 */
 	void setLonDone() { m_lonDone=true; }
 
 	/**
-	 * marks the longitude and latitude scans undone, that means the current scan has been completed and a new one can be started
+	 * marks the longitude and latitude scans undone, that means the current scan has been completed and a new one can be started. Almost atomic.
 	 */
 	void closePointingScan() { m_lonDone=m_latDone=false; }
 
 	/**
-	 * Puts the number of steps of the current scan to zero, that means the current scan has benn completed and a new one can be started
+	 * Puts the number of steps of the current scan to zero, that means the current scan has benn completed and a new one can be started. Almost atomic.
 	 */
 	void closeFocusScan() { m_focusDone=false; }
 
 	/**
-	 * @return true if the pointing  scan has been closed and another one is ready to be started
+	 * @return true if the pointing  scan has been closed and another one is ready to be started. Almost atomic.
 	 */
 	bool isPointingScanClosed() const { return ( (!isLatDone()) && (!isLonDone())); }
 
 	/**
-	 * @return true if the current pointing scan has been completed
+	 * @return true if the current pointing scan has been completed. Almost atomic.
 	 */
 	bool isPointingScanDone() const { return ((isLatDone()) && (isLonDone())); }
 
 	/**
-	 * @return true if the current pointing scan has been completed
+	 * @return true if the current pointing scan has been completed. Almost atomic.
 	 */
 	bool isFocusScanDone() const { return m_focusDone; }
 
 	/**
-	 * @return true if the Focus scan has been closed and another one is ready to be started
+	 * @return true if the Focus scan has been closed and another one is ready to be started. Almost atomic.
 	 */
 	bool isFocusScanClosed() const { return !m_focusDone; }
 
-
+	/**
+	* @return the numerical identifier of the coordinate involved in the scan. Almost atomic.
+	*/
 	int getCoordIndex() const { return m_coordIndex; }
 
 	/**
-	 * @return true if an error was detected during a single scan
+	 * @return true if an error was detected during a single scan. Almost atomic.
 	 */
 	bool isErrorDetected() const { return m_errorDetected; }
 
 	/**
-	 * allows to set the error detection status
+	 * allows to set the error detection status. Almost atomic.
 	 */
 	void detectError() { m_errorDetected=true; }
 
@@ -551,7 +538,7 @@ public:
 	 * @param pos position of the active servo minor axis
 	 * @return true if the current active axis could be matched, false otherwise
 	 */
-	bool  getMinorServoAxisPosition(const ACS::stringSeq& seq,unsigned& pos);
+	bool getMinorServoAxisPosition(const ACS::stringSeq& seq,unsigned& pos);
 
 private:
 	/** the name of the file */
@@ -648,6 +635,12 @@ private:
 	 * Device number
 	 */
 	long m_deviceID;
+		
+	/**
+	 * Thread sync mutex
+	 */
+	BACIMutex m_mutex;
+
 
     double m_dataY, m_dataX;
 	ACS::doubleSeq m_arrayDataY, m_arrayDataX;

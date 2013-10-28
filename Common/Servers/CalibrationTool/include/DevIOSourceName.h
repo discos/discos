@@ -23,7 +23,7 @@ class DevIOSourceName: public virtual DevIO<ACE_CString>
 {
 public:
 	
-	DevIOSourceName(CSecureArea<CalibrationTool_private::CDataCollection>*data): m_data(data) { 
+	DevIOSourceName(CalibrationTool_private::CDataCollection *data): m_data(data) { 
 		AUTO_TRACE("DevIOSourceName::DevIOSourceName()");
 	}
 	
@@ -38,9 +38,9 @@ public:
 	ACE_CString read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
 		AUTO_TRACE("DevIOSourceName::read()");
-		CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_data->Get();
+		//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_data->Get();
 		timestamp=getTimeStamp();
-		m_val=(const char *)data->getSourceName();
+		m_val=(const char *)m_data->getSourceName();
 		return m_val;
     }
 	
@@ -49,7 +49,7 @@ public:
 	}
     
 private:
-	CSecureArea<CalibrationTool_private::CDataCollection> *m_data;
+	CalibrationTool_private::CDataCollection *m_data;
 	ACE_CString m_val;
 };
 

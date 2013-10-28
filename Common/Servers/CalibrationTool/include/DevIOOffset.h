@@ -28,7 +28,7 @@ class DevIOOffset: public virtual DevIO<CORBA::Double>
 	
 public:
 	
-	DevIOOffset(CSecureArea<CalibrationTool_private::CDataCollection>* data): m_data(data) { 
+	DevIOOffset(CalibrationTool_private::CDataCollection* data): m_data(data) { 
 		AUTO_TRACE("DevIOOffset::DevIOOffset()");
 	}
 	
@@ -41,10 +41,10 @@ public:
 	}
 	
 	CORBA::Double read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-		CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> resource=m_data->Get();
+		//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> resource=m_data->Get();
 		AUTO_TRACE("DevIOOffset::read()");
 		timestamp=getTimeStamp();
-		return resource->getOffset();
+		return m_data->getOffset();
     }
 	
     void write(const CORBA::Double& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
@@ -52,7 +52,7 @@ public:
 	}
     
 private:
-    CSecureArea<CalibrationTool_private::CDataCollection> *m_data;
+    CalibrationTool_private::CDataCollection *m_data;
 };
 
 };

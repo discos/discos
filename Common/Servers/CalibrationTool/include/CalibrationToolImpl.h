@@ -236,7 +236,8 @@ private:
 	SmartPropertyPointer < ROdouble > m_poffset;
 	SmartPropertyPointer < ROdouble > m_psourceFlux;
 
-	IRA::CSecureArea<CalibrationTool_private::CDataCollection> *m_dataWrapper;
+	CalibrationTool_private::CDataCollection* m_data;
+	//IRA::CSecureArea<CalibrationTool_private::CDataCollection> *m_dataWrapper;
 	CalibrationTool_private::CConfiguration m_config;
 	CalibrationTool_private::CEngineThread *m_workThread;
 	CalibrationTool_private::CCollectorThread *m_collectThread;

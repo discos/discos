@@ -31,8 +31,6 @@ CDataCollection::CDataCollection()
 	m_errorDetected=false;
 	m_lastTarget="";
 	m_HPBW= m_amplitude=m_peakOffset=m_offSet=m_slope= m_sourceFlux=0.0;
-	/*m_telecopeTacking=m_prevTelescopeTracking=false;
-	m_telescopeTrackingTime=0;*/
 }
 	
 CDataCollection::~CDataCollection()
@@ -44,6 +42,7 @@ CDataCollection::~CDataCollection()
 void CDataCollection::saveMainHeaders(Backends::TMainHeader const * h,
 		Backends::TSectionHeader const * ch)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	memcpy(&m_mainH,h,sizeof(Backends::TMainHeader));
 	if (m_sectionH!=NULL) delete[] m_sectionH;
 	m_sectionH=new Backends::TSectionHeader[m_mainH.sections];
@@ -53,6 +52,7 @@ void CDataCollection::saveMainHeaders(Backends::TMainHeader const * h,
 
 bool CDataCollection::saveDump(char * memory)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	bool track;
 	char *buffer;
 	Backends::TDumpHeader *dh=(Backends::TDumpHeader *) memory;
@@ -68,11 +68,13 @@ bool CDataCollection::saveDump(char * memory)
 
 ACS::Time CDataCollection::getFirstDumpTime()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	return m_dumpCollection.getFirstTime();
 }
 
-long CDataCollection::getInputsNumber() const
+long CDataCollection::getInputsNumber()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	long sum=0;
 	for (long i=0;i<m_mainH.sections;i++) {
 		sum+=m_sectionH[i].inputs;
@@ -82,16 +84,19 @@ long CDataCollection::getInputsNumber() const
 
 bool CDataCollection::getDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	return m_dumpCollection.popDump(time,calOn,memory,buffer,tracking,buffSize);
 }
 
 void CDataCollection::startStopStage()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_running) m_stop=true;
 }
 
 void CDataCollection::startRunnigStage()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
     m_subScanHeader=false;
 	m_running=true;
 	m_start=false;
@@ -99,12 +104,14 @@ void CDataCollection::startRunnigStage()
 
 void CDataCollection::haltStopStage()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	m_running=false;
 	m_stop=false;
 }
 
 void CDataCollection::haltResetStage()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	m_reset=false;
 	m_errorDetected=false;
 	m_lastScanPointing=m_lastScanFocus=false;
@@ -124,9 +131,10 @@ IRA::CString CDataCollection::getFileName() const
 	return m_fullPath+m_fileName;
 }
 
-bool  CDataCollection::getMinorServoAxisPosition(const ACS::stringSeq& seq,unsigned& pos)
+bool  CDataCollection::getMinorServoAxisPosition(const ACS::stringSeq& seq,unsigned& pos) 
 {
 	pos=0;
+	baci::ThreadSyncGuard guard(&m_mutex);
 	for (unsigned i=0;i<seq.length();i++) {
 		IRA::CString name(seq[i]);
 		if (m_minorServoNameForAxis==name) {
@@ -139,6 +147,7 @@ bool  CDataCollection::getMinorServoAxisPosition(const ACS::stringSeq& seq,unsig
 
 bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& recording,bool& inconsistent)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_start && m_running) {
 		recording=true;
 		inconsistent =false;
@@ -176,6 +185,7 @@ bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& rec
 
 bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,bool& recording,bool& inconsistent,bool& noScanAxis,bool& geometryWarning)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	geometryWarning=false;
 	if (m_start && m_running) {
 		recording=true;
@@ -252,14 +262,16 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 
 bool CDataCollection::stopScan()
 {
-	m_ready=false;
+    baci::ThreadSyncGuard guard(&m_mutex);
+    m_ready=false;
     m_scanHeader=false;
     m_reset=true; // allow to close the file
-	return true;
+    return true;
 }
 
 void CDataCollection::forceReset()
 {
+    baci::ThreadSyncGuard guard(&m_mutex);
 	m_running=m_ready=m_start=m_stop=false;
     m_scanHeader=m_subScanHeader=false;
 	m_reset=true;

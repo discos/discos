@@ -28,7 +28,7 @@ class DevIOArrayDataY: public virtual DevIO<ACS::doubleSeq>
 	
 public:
 	
-	DevIOArrayDataY(CSecureArea<CalibrationTool_private::CDataCollection>* data): m_data(data) { 
+	DevIOArrayDataY(CalibrationTool_private::CDataCollection* data): m_data(data) { 
 		AUTO_TRACE("DevIOArrayDataY::DevIOArrayDataY()");
 	}
 	
@@ -41,10 +41,10 @@ public:
 	}
 	
     ACS::doubleSeq read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-		CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> resource=m_data->Get();
+		//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> resource=m_data->Get();
 		AUTO_TRACE("DevIOArrayDataY::read()");
 		timestamp=getTimeStamp();
-		return resource->getArrayDataY();
+		return m_data->getArrayDataY();
     }
 	
     void write(const ACS::doubleSeq& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
@@ -52,7 +52,7 @@ public:
 	}
     
 private:
-    CSecureArea<CalibrationTool_private::CDataCollection> *m_data;
+   CalibrationTool_private::CDataCollection *m_data;
 };
 
 };

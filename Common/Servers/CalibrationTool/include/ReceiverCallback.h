@@ -28,7 +28,7 @@ public:
 	virtual int cbStart(ACE_Message_Block * userParam_p = 0);
 	virtual int cbReceive(ACE_Message_Block * frame_p);
 	virtual int cbStop();
-	static CSecureArea<CalibrationTool_private::CDataCollection> * m_dataCollection;
+	static CalibrationTool_private::CDataCollection * m_dataCollection;
 private:
 	DDWORD m_receivedBytes;
 	char *m_buffer;

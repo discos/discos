@@ -15,11 +15,9 @@ using namespace CalibrationTool_private;
 _IRA_LOGFILTER_IMPORT;
 
 CEngineThread::CEngineThread (const ACE_CString & name,
-        CSecureArea < CDataCollection > *param,
+        CDataCollection *param,
         const ACS::TimeInterval & responseTime,
-        const ACS::TimeInterval & sleepTime):
-    ACS::Thread (name, responseTime, sleepTime),
-    m_dataWrapper (param)
+        const ACS::TimeInterval & sleepTime): ACS::Thread (name, responseTime, sleepTime),m_data (param)
 {
     AUTO_TRACE ("CEngineThread::CEngineThread()");
     m_fileOpened = false;
@@ -115,7 +113,7 @@ void CEngineThread::onStop ()
 void CEngineThread::initialize () throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl)
 {
     AUTO_TRACE ("CEngineThread::initialize()");
-    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+    //CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
     CCommonTools::getObservatory (m_observatory, m_service, m_config->getObservatoryComponent(), observatoryError); // throw ComponentErrors::CouldntGetComponentExImpl
     try {
         site = m_observatory->getSiteSummary ();
@@ -137,7 +135,7 @@ void CEngineThread::initialize () throw (ComponentErrors::CouldntGetComponentExI
 
 bool CEngineThread::checkTime (const ACS::Time & currentTime)
 {
-    CSecAreaResourceWrapper < CDataCollection > m_data = m_dataWrapper->Get ();
+    //CSecAreaResourceWrapper < CDataCollection > m_data = m_dataWrapper->Get ();
     return (currentTime > (m_data->getFirstDumpTime () + getSleepTime () + m_timeSlice));	// gives the cache time to fill a little bit
 }
 
@@ -165,16 +163,16 @@ bool CEngineThread::processData ()
     double coordinate=0.0;
     ACS::Time time;
 
-    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+    //CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
 
     // get tsys from devices
-    if (!data->getDump (time, calOn, bufferCopy, buffer, tracking, buffSize))   return false;
+    if (!m_data->getDump (time, calOn, bufferCopy, buffer, tracking, buffSize))   return false;
     tS.value (time);
-    CalibrationTool_private::getTsysFromBuffer (buffer, data->getInputsNumber (), m_ptsys);
+    CalibrationTool_private::getTsysFromBuffer (buffer, m_data->getInputsNumber (), m_ptsys);
 
     // we need only the tsys related to the device
-    m_device = data->getDevice ();
-    data->setDataY (m_ptsys[m_device]);
+    m_device = m_data->getDevice ();
+    m_data->setDataY (m_ptsys[m_device]);
     m_tsysDataSeq[m_dataSeqCounter] = m_ptsys[m_device];
 
     CSkySource CTskySource (m_targetRa, m_targetDec, IRA::CSkySource::SS_J2000);
@@ -186,9 +184,9 @@ bool CEngineThread::processData ()
 	}
 	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 		ex.log(LM_ERROR);
-		data->setStatus(Management::MNG_WARNING);
+		m_data->setStatus(Management::MNG_WARNING);
 		m_antennaBoss=Antenna::AntennaBoss::_nil();
-		data->detectError();
+		m_data->detectError();
 	}
 
 	if (m_config->getMinorServoBossComponent()!="") {
@@ -197,13 +195,13 @@ bool CEngineThread::processData ()
 		}
 		catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 			ex.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			m_minorServoBoss=MinorServo::MinorServoBoss::_nil();
-			data->detectError();
+			m_data->detectError();
 		}
 	}
 
-    switch (data->getScanAxis ()) {
+    switch (m_data->getScanAxis ()) {
         case Management::MNG_NO_AXIS:
         	break;
         case Management::MNG_HOR_LON:
@@ -211,18 +209,18 @@ bool CEngineThread::processData ()
 	        CTskySource.getApparentHorizontal (targetAZ, targetEL);
 	        try {
 	        	if (!CORBA::is_nil(m_antennaBoss)) {
-	        		m_antennaBoss->getObservedHorizontal (time, data->getIntegrationTime () * 10000, az, el);
+	        		m_antennaBoss->getObservedHorizontal (time, m_data->getIntegrationTime () * 10000, az, el);
 	        	}
-	        	else data->detectError();
+	        	else m_data->detectError();
 	        }
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 				m_antennaBossError=true;
-				data->detectError();
+				m_data->detectError();
 				az=el=0;
 			}
 	        coordinate = az;
@@ -235,17 +233,17 @@ bool CEngineThread::processData ()
             CTskySource.process (CTdateTime, m_site);
             CTskySource.getApparentHorizontal (targetAZ, targetEL);
             try {
-            	if (!CORBA::is_nil(m_antennaBoss)) m_antennaBoss->getObservedHorizontal (time, data->getIntegrationTime () * 10000, az, el);
-            	else data->detectError();
+            	if (!CORBA::is_nil(m_antennaBoss)) m_antennaBoss->getObservedHorizontal (time, m_data->getIntegrationTime () * 10000, az, el);
+            	else m_data->detectError();
             }
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 				m_antennaBossError=true;
-				data->detectError();
+				m_data->detectError();
 				az=el=0;
 			}
 	        coordinate = el;
@@ -255,17 +253,17 @@ bool CEngineThread::processData ()
 	        break;
         case Management::MNG_EQ_LON:
         	try {
-        		if (!CORBA::is_nil(m_antennaBoss)) m_antennaBoss->getObservedEquatorial (time, data->getIntegrationTime () * 10000, ra, dec);
-        		else data->detectError();
+        		if (!CORBA::is_nil(m_antennaBoss)) m_antennaBoss->getObservedEquatorial (time, m_data->getIntegrationTime () * 10000, ra, dec);
+        		else m_data->detectError();
         	}
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 				m_antennaBossError=true;
-				data->detectError();
+				m_data->detectError();
 				ra=dec=0;
 			}
             coordinate = ra;
@@ -276,17 +274,17 @@ bool CEngineThread::processData ()
             break;
         case Management::MNG_EQ_LAT:
         	try {
-        		if (!CORBA::is_nil(m_antennaBoss)) m_antennaBoss->getObservedEquatorial (time, data->getIntegrationTime () * 10000, ra, dec);
-        		else data->detectError();
+        		if (!CORBA::is_nil(m_antennaBoss)) m_antennaBoss->getObservedEquatorial (time, m_data->getIntegrationTime () * 10000, ra, dec);
+        		else m_data->detectError();
         	}
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 				m_antennaBossError=true;
-				data->detectError();
+				m_data->detectError();
 				ra=dec=0;
 			}
 	        coordinate = dec;
@@ -298,17 +296,17 @@ bool CEngineThread::processData ()
 	        CTskySource.process (CTdateTime, m_site);
 	        IRA::CSkySource::equatorialToGalactic (m_targetRa,m_targetDec, targetLON, targetLAT);
 	        try {
-	        	if (!CORBA::is_nil(m_antennaBoss)) m_antennaBoss->getObservedGalactic (time,data->getIntegrationTime () * 10000,lon, lat);
-	        	else data->detectError();
+	        	if (!CORBA::is_nil(m_antennaBoss)) m_antennaBoss->getObservedGalactic (time,m_data->getIntegrationTime () * 10000,lon, lat);
+	        	else m_data->detectError();
 	        }
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 				m_antennaBossError=true;
-				data->detectError();
+				m_data->detectError();
 				lon=lat=0;
 			}
 	        coordinate = lon;
@@ -321,17 +319,17 @@ bool CEngineThread::processData ()
 	        CTskySource.process (CTdateTime, m_site);
 	        IRA::CSkySource::equatorialToGalactic (m_targetRa, m_targetDec, targetLON, targetLAT);
 	        try {
-	        	if (!CORBA::is_nil(m_antennaBoss)) m_antennaBoss->getObservedGalactic (time, data->getIntegrationTime () * 10000,lon, lat);
-	        	else data->detectError();
+	        	if (!CORBA::is_nil(m_antennaBoss)) m_antennaBoss->getObservedGalactic (time, m_data->getIntegrationTime () * 10000,lon, lat);
+	        	else m_data->detectError();
 	        }
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 				m_antennaBossError=true;
-				data->detectError();
+				m_data->detectError();
 				lon=lat=0;
 			}
 	        coordinate = lat;
@@ -343,28 +341,28 @@ bool CEngineThread::processData ()
         	ACS::doubleSeq_var positions;
 	        try {
 	        	if (!CORBA::is_nil(m_antennaBoss)) {
-	        		m_antennaBoss->getObservedHorizontal (time, data->getIntegrationTime () * 10000, az, el);
+	        		m_antennaBoss->getObservedHorizontal (time, m_data->getIntegrationTime () * 10000, az, el);
 	        	}
-	        	else data->detectError();
+	        	else m_data->detectError();
 	        }
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 				m_antennaBossError=true;
-				data->detectError();
+				m_data->detectError();
 				az=el=0;
 			}
 			if (!CORBA::is_nil(m_minorServoBoss)) {
 				try {
-					positions=m_minorServoBoss->getAxesPosition(time+(data->getIntegrationTime () * 10000)/2);
+					positions=m_minorServoBoss->getAxesPosition(time+(m_data->getIntegrationTime () * 10000)/2);
 					if (m_minorServoCurrentAxisPosition!=-1) {
 						coordinate=positions[m_minorServoCurrentAxisPosition];
 					}
 					else {
-						data->detectError();
+						m_data->detectError();
 						coordinate=m_focusScanCenter;
 					}
 				}
@@ -373,18 +371,18 @@ bool CEngineThread::processData ()
 					impl.setOperationName("getAxesPosition()");
 					impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
 					impl.log(LM_ERROR);
-					data->setStatus(Management::MNG_WARNING);
+					m_data->setStatus(Management::MNG_WARNING);
 					coordinate=m_focusScanCenter;
-					data->detectError();
+					m_data->detectError();
 				}
 				catch (CORBA::SystemException& ex) {
 					_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::getMinorServoData()");
 					impl.setName(ex._name());
 					impl.setMinor(ex.minor());
 					impl.log(LM_ERROR);
-					data->setStatus(Management::MNG_WARNING);
+					m_data->setStatus(Management::MNG_WARNING);
 					coordinate=m_focusScanCenter;
-					data->detectError();
+					m_data->detectError();
 					m_minorServoBossError=true;
 				}
 			}
@@ -407,28 +405,28 @@ bool CEngineThread::processData ()
         	ACS::doubleSeq_var positions;
 	        try {
 	        	if (!CORBA::is_nil(m_antennaBoss)) {
-	        		m_antennaBoss->getObservedHorizontal (time, data->getIntegrationTime () * 10000, az, el);
+	        		m_antennaBoss->getObservedHorizontal (time, m_data->getIntegrationTime () * 10000, az, el);
 	        	}
-	        	else data->detectError();
+	        	else m_data->detectError();
 	        }
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_FAILURE);
+				m_data->setStatus(Management::MNG_FAILURE);
 				m_antennaBossError=true;
-				data->detectError();
+				m_data->detectError();
 				az=el=0;
 			}
 			if (!CORBA::is_nil(m_minorServoBoss)) {
 				try {
-					positions=m_minorServoBoss->getAxesPosition(time+(data->getIntegrationTime () * 10000)/2);
+					positions=m_minorServoBoss->getAxesPosition(time+(m_data->getIntegrationTime () * 10000)/2);
 					if (m_minorServoCurrentAxisPosition!=-1) {
 						coordinate=positions[m_minorServoCurrentAxisPosition];
 					}
 					else {
-						data->detectError();
+						m_data->detectError();
 						coordinate=m_focusScanCenter;
 					}
 				}
@@ -437,18 +435,18 @@ bool CEngineThread::processData ()
 					impl.setOperationName("getAxesPosition()");
 					impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
 					impl.log(LM_ERROR);
-					data->setStatus(Management::MNG_WARNING);
+					m_data->setStatus(Management::MNG_WARNING);
 					coordinate=m_focusScanCenter;
-					data->detectError();
+					m_data->detectError();
 				}
 				catch (CORBA::SystemException& ex) {
 					_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::getMinorServoData()");
 					impl.setName(ex._name());
 					impl.setMinor(ex.minor());
 					impl.log(LM_ERROR);
-					data->setStatus(Management::MNG_WARNING);
+					m_data->setStatus(Management::MNG_WARNING);
 					coordinate=m_focusScanCenter;
-					data->detectError();
+					m_data->detectError();
 					m_minorServoBossError=true;
 				}
 			}
@@ -463,7 +461,7 @@ bool CEngineThread::processData ()
         default:
         break;
     }
-    data->setDataX (coordinate);
+    m_data->setDataX (coordinate);
     m_dataSeq[m_dataSeqCounter] = coordinate;
 
     // offsets array for fit2 function
@@ -478,24 +476,24 @@ bool CEngineThread::processData ()
     //source, scu, axis, offset
 
     if (m_fileOpened) {
-    	if (data->isPointingScan()) {
-    		if (data->getCoordIndex() == 1) {
+    	if (m_data->isPointingScan()) {
+    		if (m_data->getCoordIndex() == 1) {
     			out.Format ("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#lat ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     			m_file << (const char *) out;
     		}
-    		if (data->getCoordIndex() == 0) {
+    		if (m_data->getCoordIndex() == 0) {
     			out.Format ("%04d.%03d.%02d:%02d:%02d.%02d#fivpt#lon ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     			m_file << (const char *) out;
     		}
     		m_file << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter]*DR2D << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
     	}
-    	else if (data->isFocusScan()) {
+    	else if (m_data->isFocusScan()) {
     		out.Format ("%04d.%03d.%02d:%02d:%02d.%02d#peakf#axis ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     		 m_file << (const char *) out;
-    		 if (data->getCoordIndex() == 2) {
+    		 if (m_data->getCoordIndex() == 2) {
     			 m_file << "Zp" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
     		 }
-    		 if (data->getCoordIndex() == 3) {
+    		 if (m_data->getCoordIndex() == 3) {
     			 m_file << "Zs" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
     		 }
     	}
@@ -516,55 +514,55 @@ void CEngineThread::runLoop ()
     IRA::CString filePath;
     IRA::CString projectName;
 
-    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+    //CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
     IRA::CIRATools::getTime (now);	// it marks the start of the activity job
 
-    if (data->isReset()) {
+    if (m_data->isReset()) {
 		if (m_fileOpened) {
 			m_file.close();
 			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"FILE_CLOSED"));
 			m_fileOpened=false;
 		}
-		data->haltResetStage();
+		m_data->haltResetStage();
 		return;
 	}
-    if (data->isStart() && data->isReady() &&  data->isScanHeaderReady() && data->isSubScanHeaderReady()) {
-    	data->setStatus (Management::MNG_OK);
+    if (m_data->isStart() && m_data->isReady() &&  m_data->isScanHeaderReady() && m_data->isSubScanHeaderReady()) {
+    	m_data->setStatus (Management::MNG_OK);
     	if (!m_fileOpened && m_config->outputFile()) {
-    		data->getFileName(fileName,filePath);
+    		m_data->getFileName(fileName,filePath);
     		if (!IRA::CIRATools::directoryExists(filePath)) {
     			if (!IRA::CIRATools::makeDirectory(filePath)) {
     				_EXCPT(ComponentErrors::FileIOErrorExImpl,impl,"CEngineThread::runLoop()");
     				impl.setFileName((const char *)filePath);
     				impl.log(LM_ERROR);
-    				data->setStatus(Management::MNG_FAILURE);
+    				m_data->setStatus(Management::MNG_FAILURE);
     			}
     			else {
     				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"DATA_FOLDER_CREATED: %s",(const char *)filePath));
     			}
     		}
-    		m_file.open ((const char *) data->getFileName(), ios_base::out | ios_base::app);
+    		m_file.open ((const char *) m_data->getFileName(), ios_base::out | ios_base::app);
     		if (!m_file.is_open ()) {
     			_EXCPT (ComponentErrors::FileIOErrorExImpl, impl, "CEngineThread::runLoop()");
     			impl.setFileName ((const char *) fileName);
     			impl.log (LM_ERROR);
-    			data->setStatus (Management::MNG_WARNING);
+    			m_data->setStatus (Management::MNG_WARNING);
     		}
     		else {
     			m_fileOpened = true;
     			prepareFile(now.value().value);
     		}
     	}
-    	if (data->isPointingScan()) {
-    		if (data->isPointingScanClosed()) { // done only on the  first subscan of the cross scan!
+    	if (m_data->isPointingScan()) {
+    		if (m_data->isPointingScanClosed()) { // done only on the  first subscan of the cross scan!
     			getAntennaData();
     			if (m_fileOpened) {
     				writePointingFileHeaders(now.value().value);
     			}
     		}
     	}
-    	else if (data->isFocusScan()) {
-    		if (data->isFocusScanClosed()) {
+    	else if (m_data->isFocusScan()) {
+    		if (m_data->isFocusScanClosed()) {
     			getAntennaData();
     			getMinorServoData();
     			if (m_fileOpened) {
@@ -572,28 +570,28 @@ void CEngineThread::runLoop ()
     			}
     		}
     	}
-        data->startRunnigStage ();
+        m_data->startRunnigStage ();
 	  }
-	  else if (data->isStop ()) {
+	  else if (m_data->isStop ()) {
 		//save all the data in the buffer and then finalize the file
 		  while (processData());
 		  gaussFit(now.value().value);
 		  setAxisOffsets();
-		  if (data->isPointingScan()) {
-			  if (data->isPointingScanDone()) {
-				  data->closePointingScan();
+		  if (m_data->isPointingScan()) {
+			  if (m_data->isPointingScanDone()) {
+				  m_data->closePointingScan();
 				  m_lonResult = m_latResult = 0;
 			  }
 		  }
-		  else if (data->isFocusScan()) {
-			  if (data->isFocusScanDone()) {
-				  data->closeFocusScan();
+		  else if (m_data->isFocusScan()) {
+			  if (m_data->isFocusScanDone()) {
+				  m_data->closeFocusScan();
 				  m_focusResult =0;
 			  }
 		  }
-		  data->haltStopStage ();
+		  m_data->haltStopStage ();
 	  }
-	  else if (data->isRunning ()) {
+	  else if (m_data->isRunning ()) {
 		  // file was already created, then saves the data into it
 		  // until there is something to process and there is still time available
 		  while (checkTime (now.value ().value)  && checkTimeSlot (now.value ().value) && processData ());
@@ -609,15 +607,15 @@ void  CEngineThread::getMinorServoData()
 	}
 	ACS::stringSeq_var axesNames;
 	ACS::stringSeq_var axesUnits;
-	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	try {
 		CCommonTools::getMinorServoBoss(m_minorServoBoss,m_service,m_config->getMinorServoBossComponent(),m_minorServoBossError);
 	}
 	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 		ex.log(LM_ERROR);
-		data->setStatus(Management::MNG_WARNING);
+		m_data->setStatus(Management::MNG_WARNING);
 		m_minorServoBoss=MinorServo::MinorServoBoss::_nil();
-		data->detectError();
+		m_data->detectError();
 	}
 	if (!CORBA::is_nil(m_minorServoBoss)) {
 		try {
@@ -629,26 +627,26 @@ void  CEngineThread::getMinorServoData()
 			impl.setOperationName("getCentralScanPosition()");
 			impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			m_focusScanCenter=0.0;
-			data->detectError();
+			m_data->detectError();
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::getMinorServoData()");
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			m_focusScanCenter=0.0;
-			data->detectError();
+			m_data->detectError();
 			m_minorServoBossError=true;
 		}
 		try {
 			unsigned pos;
 			m_minorServoBoss->getAxesInfo(axesNames.out(),axesUnits.out());
-			if  (!data->getMinorServoAxisPosition(axesNames.in(),pos)) {
+			if  (!m_data->getMinorServoAxisPosition(axesNames.in(),pos)) {
 				m_minorServoCurrentAxisPosition=-1;
-				data->detectError();
+				m_data->detectError();
 			}
 			else {
 				m_minorServoCurrentAxisPosition=pos;
@@ -659,16 +657,16 @@ void  CEngineThread::getMinorServoData()
 			impl.setOperationName("getAxesInfo()");
 			impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
-			data->detectError();
+			m_data->setStatus(Management::MNG_WARNING);
+			m_data->detectError();
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::getMinorServoData()");
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
-			data->detectError();
+			m_data->setStatus(Management::MNG_WARNING);
+			m_data->detectError();
 			m_minorServoBossError=true;
 		}
 	}
@@ -677,15 +675,15 @@ void  CEngineThread::getMinorServoData()
 
 void  CEngineThread::getAntennaData()
 {
-	CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
+	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	try {
 		CCommonTools::getAntennaBoss(m_antennaBoss,m_service,m_config->getAntennaBossComponent(),m_antennaBossError);
 	}
 	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 		ex.log(LM_ERROR);
-		data->setStatus(Management::MNG_WARNING);
+		m_data->setStatus(Management::MNG_WARNING);
 		m_antennaBoss=Antenna::AntennaBoss::_nil();
-		data->detectError();
+		m_data->detectError();
 	}
 	if (!CORBA::is_nil(m_antennaBoss)) {
 		ACSErr::Completion_var comp;
@@ -702,9 +700,9 @@ void  CEngineThread::getAntennaData()
 				impl.setAttributeName("FWHM");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				m_fwhm=0.0;
-				data->detectError();
+				m_data->detectError();
 			}
 			else {
 				m_fwhm=(double)fwhm;
@@ -717,9 +715,9 @@ void  CEngineThread::getAntennaData()
 				impl.setAttributeName("targetRightAscension");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				m_targetRa=0.0;
-				data->detectError();
+				m_data->detectError();
 			}
 			else {
 				m_targetRa=(double)targetRa;
@@ -732,9 +730,9 @@ void  CEngineThread::getAntennaData()
 				impl.setAttributeName("declination");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				m_targetDec=0.0;
-				data->detectError();
+				m_data->detectError();
 			}
 			else {
 				m_targetDec=(double)targetDec;
@@ -747,12 +745,12 @@ void  CEngineThread::getAntennaData()
 		    	impl.setAttributeName ("target");
 		    	impl.setComponentName ((const char *) m_config->getAntennaBossComponent());
 		    	impl.log (LM_ERROR);
-		    	data->setStatus (Management::MNG_WARNING);
-		    	data->setSourceName ("");
-		    	data->detectError();
+		    	m_data->setStatus (Management::MNG_WARNING);
+		    	m_data->setSourceName ("");
+		    	m_data->detectError();
 		    }
 		    else  {
-		    	data->setSourceName ((const char *)target);
+		    	m_data->setSourceName ((const char *)target);
 		    }
 		    sourceFluxRef = m_antennaBoss->targetFlux();
 		    sourceFlux = sourceFluxRef->get_sync(comp.out());
@@ -762,12 +760,12 @@ void  CEngineThread::getAntennaData()
 		    	impl.setAttributeName ("targetFlux");
 		    	impl.setComponentName ((const char *) m_config->getAntennaBossComponent());
 		    	impl.log (LM_ERROR);
-		    	data->setStatus (Management::MNG_WARNING);
-		    	data->setSourceFlux (0.0);
-		    	data->detectError();
+		    	m_data->setStatus (Management::MNG_WARNING);
+			m_data->setSourceFlux(0.0);
+		    	m_data->detectError();
 		    }
 		    else  {
-		    	data->setSourceFlux (sourceFlux);
+			m_data->setSourceFlux(sourceFlux);
 		    }
 		}
 		catch (CORBA::SystemException& ex) {
@@ -775,12 +773,12 @@ void  CEngineThread::getAntennaData()
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
-			data->setStatus(Management::MNG_WARNING);
+			m_data->setStatus(Management::MNG_WARNING);
 			m_antennaBossError=true;
 			m_fwhm=0.0;
 			m_targetRa=m_targetDec=0.0;
-			data->setSourceName ("");
-			data->detectError();
+			m_data->setSourceName ("");
+			m_data->detectError();
 		}
 	}
 }
@@ -797,7 +795,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
     TIMEVALUE tS;
     IRA::CString out;
 
-    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+    //CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
 
 	for (i = 0; i < m_dataSeqCounter; i++)
 		m_ptsys2[i] = (float) m_tsysDataSeq[i];
@@ -826,7 +824,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
     m_Par[0] = tmax;
     m_Par[1] = m_off[imax - 1];
 
-    if (data->getCoordIndex() == 1) {	// LAT scans
+    if (m_data->getCoordIndex() == 1) {	// LAT scans
     	double offMin,offMax;
     	double toll;
 	    m_Par[2] = m_fwhm;
@@ -860,7 +858,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    offMin=GETMIN(m_off[0],m_off[m_dataSeqCounter-1]);
 	    offMax=GETMAX(m_off[0],m_off[m_dataSeqCounter-1]);
 	    toll=1+m_config->getFWHMTolerance();
-	    if (!data->isErrorDetected()) {
+	    if (!m_data->isErrorDetected()) {
 			if (m_ierr>0) {
 				if ((m_Par[1]>offMin) && (m_Par[1]<offMax)) {
 					if ((m_Par[2]<m_fwhm*toll) && (m_Par[2]>m_fwhm/toll)) {
@@ -881,21 +879,21 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    else {
 			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "ERROR_DETECTED_DURING_LAT_SCAN"));
 	    }
-	    data->setAmplitude (m_Par[0]);
-	    data->setPeakOffset (m_Par[1]);
-	    data->setHPBW (m_Par[2]);
-	    data->setOffset (m_Par[3]);
-	    data->setSlope (m_Par[4]);
-	    data->setArrayDataX (m_dataSeq,m_dataSeqCounter);
-	    data->setArrayDataY (m_tsysDataSeq,m_dataSeqCounter);
+	    m_data->setAmplitude (m_Par[0]);
+	    m_data->setPeakOffset (m_Par[1]);
+	    m_data->setHPBW (m_Par[2]);
+	    m_data->setOffset (m_Par[3]);
+	    m_data->setSlope (m_Par[4]);
+	    m_data->setArrayDataX (m_dataSeq,m_dataSeqCounter);
+	    m_data->setArrayDataY (m_tsysDataSeq,m_dataSeqCounter);
 	    for (i = 0; i < m_dataSeqCounter; i++) {
 	    	m_dataSeq[i] = 0.0;
 	    	m_tsysDataSeq[i] = 0.0;
 	    }
 	    m_dataSeqCounter = 0;
-	    data->setLatDone();
+	    m_data->setLatDone();
 	} // m_coordIndex==1
-    else if ((data->getCoordIndex() == 0)) {	// LON scans
+    else if ((m_data->getCoordIndex() == 0)) {	// LON scans
     	int pos=computeScanCenter(m_off,m_dataSeqCounter);
     	double tempLat;
     	double offMin,offMax;
@@ -932,7 +930,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    offMin=GETMIN(m_off[0],m_off[m_dataSeqCounter-1]);
 	    offMax=GETMAX(m_off[0],m_off[m_dataSeqCounter-1]);
 	    toll=1+m_config->getFWHMTolerance();
-	    if (!data->isErrorDetected()) {
+	    if (!m_data->isErrorDetected()) {
 			if (m_ierr>0) {
 				if ((m_Par[1]>offMin) && (m_Par[1]<offMax)) {
 					if ((m_Par[2]<m_fwhm*toll) && (m_Par[2]>m_fwhm/toll)) {
@@ -953,22 +951,22 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    else {
 			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "ERROR_DETECTED_DURING_LON_SCAN"));
 	    }
-	    data->setAmplitude (m_Par[0]);
-		data->setPeakOffset (m_Par[1]);
-		data->setHPBW (m_Par[2]);
-		data->setOffset (m_Par[3]);
-		data->setSlope (m_Par[4]);
-	    data->setArrayDataX (m_dataSeq,m_dataSeqCounter);
-	    data->setArrayDataY (m_tsysDataSeq,m_dataSeqCounter);
+	    m_data->setAmplitude (m_Par[0]);
+		m_data->setPeakOffset (m_Par[1]);
+		m_data->setHPBW (m_Par[2]);
+		m_data->setOffset (m_Par[3]);
+		m_data->setSlope (m_Par[4]);
+	    m_data->setArrayDataX (m_dataSeq,m_dataSeqCounter);
+	    m_data->setArrayDataY (m_tsysDataSeq,m_dataSeqCounter);
 	    for (i = 0; i < m_dataSeqCounter; i++) {
 		  m_dataSeq[i] = 0.0;
 		  m_tsysDataSeq[i] = 0.0;
 	    }
 	    m_dataSeqCounter = 0;
-	   data->setLonDone();
+	   m_data->setLonDone();
 	} // m_CoordIndex == 0
-    if (data->isPointingScan()) {
-		if (data->isPointingScanDone()) {
+    if (m_data->isPointingScan()) {
+		if (m_data->isPointingScanDone()) {
 			if (m_fileOpened) {
 				// offset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_lonResult, m_latResult
 				tS.value (now/*.value().value*/);
@@ -982,20 +980,20 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 				m_file << (const char *) out;
 				m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << m_cosLat* m_LonOff * DR2D << " " << m_LatOff * DR2D << " " << m_cosLat * m_LonErr * DR2D << " " << m_LatErr * DR2D << " " << m_lonResult << " " << m_latResult << std::endl;
 				out.Format("%04d.%03d.%02d:%02d:%02d.%02d#xgain", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
-				m_file << (const char *) out << " " << (const char *)data->getSourceName() << " ";
+				m_file << (const char *) out << " " << (const char *)m_data->getSourceName() << " ";
 				m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << m_lonAmp << " " << m_lonAmpErr << " " << m_latAmp << " " << m_latAmpErr << " " << m_lonFwhm * DR2D << " " << m_lonFwhmErr * DR2D << " " \
-						<< m_latFwhm * DR2D << " " << m_latFwhmErr * DR2D 	<< " " << data->getSourceFlux() << " " << m_lonResult << " " << m_latResult << std::endl;
+						<< m_latFwhm * DR2D << " " << m_latFwhmErr * DR2D 	<< " " << m_data->getSourceFlux() << " " << m_lonResult << " " << m_latResult << std::endl;
 			}
 			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %lf %d %d",
 				m_LonPos * DR2D, m_LatPos * DR2D, m_LonOff * DR2D, m_LatOff * DR2D, m_lonResult, m_latResult));
 			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XOFFSETS = %lf %lf %lf %lf %lf %lf %d %d",
 				m_LonPos * DR2D, m_LatPos * DR2D, m_cosLat * m_LonOff * DR2D, m_LatOff * DR2D, m_cosLat * m_LonErr * DR2D, m_LatErr * DR2D, m_lonResult, m_latResult));
 
-			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XGAIN =%s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d",(const char *)data->getSourceName(),
-				m_LonPos * DR2D, m_LatPos * DR2D, m_lonAmp, m_lonAmpErr, m_latAmp, m_latAmpErr, m_lonFwhm * DR2D, m_lonFwhmErr * DR2D, m_latFwhm * DR2D, m_latFwhmErr * DR2D, data->getSourceFlux(), m_lonResult, m_latResult));
+			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XGAIN =%s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d",(const char *)m_data->getSourceName(),
+				m_LonPos * DR2D, m_LatPos * DR2D, m_lonAmp, m_lonAmpErr, m_latAmp, m_latAmpErr, m_lonFwhm * DR2D, m_lonFwhmErr * DR2D, m_latFwhm * DR2D, m_latFwhmErr * DR2D, m_data->getSourceFlux(), m_lonResult, m_latResult));
 		}
     }
-    else if (data->isFocusScan()) {
+    else if (m_data->isFocusScan()) {
     	/**********************/
     	//OUTPUT OF FOCUS SCAN
     	/************************/
@@ -1004,23 +1002,23 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 
 void CEngineThread::setAxisOffsets()
 {
-	CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+	//CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
 	try {
 		CCommonTools::getAntennaBoss(m_antennaBoss,m_service,m_config->getAntennaBossComponent(),m_antennaBossError);
 	}
 	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
 		ex.log(LM_ERROR);
-		data->setStatus(Management::MNG_WARNING);
+		m_data->setStatus(Management::MNG_WARNING);
 		m_antennaBoss=Antenna::AntennaBoss::_nil();
 		return;
 	}
-    switch (data->getScanAxis ()) {
+    switch (m_data->getScanAxis ()) {
 	   	case Management::MNG_NO_AXIS:
 	   		break;
 	   	case Management::MNG_HOR_LON:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				if ((data->isLonDone()) && (m_lonResult)) {
+	   				if ((m_data->isLonDone()) && (m_lonResult)) {
 	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
 	   					m_antennaBoss->setOffsets (m_cosLat * m_LonOff , m_elUserOff, Antenna::ANT_HORIZONTAL);
 	   				}
@@ -1031,7 +1029,7 @@ void CEngineThread::setAxisOffsets()
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				m_antennaBossError=true;
 			}
 			catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -1039,20 +1037,20 @@ void CEngineThread::setAxisOffsets()
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 			catch (AntennaErrors::AntennaErrorsEx& ex) {
 				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::setAxisOffsets()");
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 	   		break;
 	   	case Management::MNG_HOR_LAT:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				if ((data->isLatDone()) && (m_latResult)) {
+	   				if ((m_data->isLatDone()) && (m_latResult)) {
 	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
 	   					m_antennaBoss->setOffsets (m_azUserOff, /*m_elUserOff + */m_LatOff, Antenna::ANT_HORIZONTAL);
 	   				}
@@ -1063,7 +1061,7 @@ void CEngineThread::setAxisOffsets()
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				m_antennaBossError=true;
 			}
 			catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -1071,20 +1069,20 @@ void CEngineThread::setAxisOffsets()
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 			catch (AntennaErrors::AntennaErrorsEx& ex) {
 				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::setAxisOffsets()");
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 	   		break;
 	   	case Management::MNG_EQ_LON:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				if ((data->isLonDone()) && (m_lonResult)) {
+	   				if ((m_data->isLonDone()) && (m_lonResult)) {
 	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
 	   					m_antennaBoss->setOffsets (m_cosLat * m_LonOff, m_decUserOff, Antenna::ANT_EQUATORIAL);
 	   				}
@@ -1095,7 +1093,7 @@ void CEngineThread::setAxisOffsets()
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				m_antennaBossError=true;
 			}
 			catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -1103,20 +1101,20 @@ void CEngineThread::setAxisOffsets()
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 			catch (AntennaErrors::AntennaErrorsEx& ex) {
 				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::setAxisOffsets()");
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 	   		break;
 	   	case Management::MNG_EQ_LAT:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				if ((data->isLatDone()) && (m_latResult)) {
+	   				if ((m_data->isLatDone()) && (m_latResult)) {
 	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
 	   					m_antennaBoss->setOffsets (m_raUserOff, /*m_decUserOff + */m_LatOff , Antenna::ANT_EQUATORIAL);
 	   				}
@@ -1127,7 +1125,7 @@ void CEngineThread::setAxisOffsets()
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				m_antennaBossError=true;
 			}
 			catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -1135,20 +1133,20 @@ void CEngineThread::setAxisOffsets()
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 			catch (AntennaErrors::AntennaErrorsEx& ex) {
 				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::setAxisOffsets()");
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 	   		break;
 	   	case Management::MNG_GAL_LON:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				if ((data->isLonDone()) && (m_lonResult)) {
+	   				if ((m_data->isLonDone()) && (m_lonResult)) {
 	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
 	   					m_antennaBoss->setOffsets (m_cosLat* m_LonOff,m_latUserOff, Antenna::ANT_GALACTIC);
 	   				}
@@ -1159,7 +1157,7 @@ void CEngineThread::setAxisOffsets()
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				m_antennaBossError=true;
 			}
 			catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -1167,20 +1165,20 @@ void CEngineThread::setAxisOffsets()
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 			catch (AntennaErrors::AntennaErrorsEx& ex) {
 				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::setAxisOffsets()");
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 	   		break;
 	   	case Management::MNG_GAL_LAT:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
-	   				if ((data->isLatDone()) && (m_latResult)) {
+	   				if ((m_data->isLatDone()) && (m_latResult)) {
 	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
 	   					m_antennaBoss->setOffsets (m_lonUserOff, /*m_latUserOff + */m_LatOff, Antenna::ANT_GALACTIC);
 	   				}
@@ -1191,7 +1189,7 @@ void CEngineThread::setAxisOffsets()
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 				m_antennaBossError=true;
 			}
 			catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -1199,14 +1197,14 @@ void CEngineThread::setAxisOffsets()
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 			catch (AntennaErrors::AntennaErrorsEx& ex) {
 				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::setAxisOffsets()");
 				impl.setOperationName("setOffsets()");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
-				data->setStatus(Management::MNG_WARNING);
+				m_data->setStatus(Management::MNG_WARNING);
 			}
 	   		break;
 	   	case Management::MNG_SUBR_Z:
@@ -1232,27 +1230,27 @@ void CEngineThread::prepareFile(const ACS::Time& now)
 	IRA::CString projectName;
     IRA::CString observerName;
 
-    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+    //CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
 	tS.value (now/*.value().value*/);
 	out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Calibration Tool Start\n", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (),(long)(tS.microSecond () / 10000.));
 	m_file << (const char *) out;
     // File Name
-    fileName = data->getFileName();
+    fileName = m_data->getFileName();
     out.Format("%04d.%03d.%02d:%02d:%02d.%02d#File Name: ", tS.year(),tS.dayOfYear(),tS.hour(),tS.minute(),tS.second(),(long)(tS.microSecond()/10000.));
     m_file << (const char *) out;
     m_file << (const char *) fileName << std::endl;
     // Project Name
-    projectName = data->getProjectName ();
+    projectName = m_data->getProjectName ();
     out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Project Name: ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     m_file << (const char *) out;
     m_file << (const char *) projectName << std::endl;
     // Observer Name
-    observerName = data->getObserverName ();
+    observerName = m_data->getObserverName ();
     out.Format("%04d.%03d.%02d:%02d:%02d.%02d#Observer Name: ",tS.year (), tS.dayOfYear (), tS.hour (),  tS.minute (), tS.second (),  (long)(tS.microSecond () / 10000.));
     m_file << (const char *) out;
     m_file << (const char *) observerName << std::endl;
     // Source Name
-    ACS_LOG (LM_FULL_INFO, "CEngineThread::prepareFile()", (LM_NOTICE, "FILE_OPENED %s", (const char *) data->getFileName ()));
+    ACS_LOG (LM_FULL_INFO, "CEngineThread::prepareFile()", (LM_NOTICE, "FILE_OPENED %s", (const char *) m_data->getFileName ()));
 }
 
 void CEngineThread::writeFocusFileHeaders(const ACS::Time& now)
@@ -1261,8 +1259,8 @@ void CEngineThread::writeFocusFileHeaders(const ACS::Time& now)
 	IRA::CString sourceName;
     IRA::CString out;
 
-    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
-    sourceName=data->getSourceName();
+    //CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+    sourceName=m_data->getSourceName();
 
     tS.value (now/*.value().value*/);
     out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#source ",tS.year (), tS.dayOfYear (), tS.hour (),  tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
@@ -1285,9 +1283,9 @@ void CEngineThread::writePointingFileHeaders(const ACS::Time& now)
     double sourceFlux;
     IRA::CString out;
 
-    CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
-    sourceName=data->getSourceName();
-    sourceFlux=data->getSourceFlux();
+    //CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
+    sourceName=m_data->getSourceName();
+    sourceFlux=m_data->getSourceFlux();
     tS.value (now/*.value().value*/);
 
 
@@ -1296,7 +1294,7 @@ void CEngineThread::writePointingFileHeaders(const ACS::Time& now)
     m_file << (const char *) sourceName;
     m_file << " 000000.0 +000000 0000.0 0000.000.00:00:00" << std::endl;
 
-    switch (data->getScanAxis ()) {
+    switch (m_data->getScanAxis ()) {
     case Management::MNG_NO_AXIS:
     	break;
     case Management::MNG_HOR_LON:

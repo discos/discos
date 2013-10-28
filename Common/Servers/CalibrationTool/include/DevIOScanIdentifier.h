@@ -28,7 +28,7 @@ class DevIOScanIdentifier: public virtual DevIO<CORBA::Long>
 	
 public:
 	
-	DevIOScanIdentifier(CSecureArea<CalibrationTool_private::CDataCollection>* data): m_data(data) { 
+	DevIOScanIdentifier(CalibrationTool_private::CDataCollection* data): m_data(data) { 
 		AUTO_TRACE("DevIOScanIdentifier::DevIOScanIdentifier()");
 	}
 	
@@ -41,10 +41,10 @@ public:
 	}
 	
 	CORBA::Long read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-		CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> resource=m_data->Get();
+		//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> resource=m_data->Get();
 		AUTO_TRACE("DevIOScanIdentifier::read()");
 		timestamp=getTimeStamp();
-		return resource->getScanId();
+		return m_data->getScanId();
     }
 	
     void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
@@ -52,7 +52,7 @@ public:
 	}
     
 private:
-    CSecureArea<CalibrationTool_private::CDataCollection> *m_data;
+    CalibrationTool_private::CDataCollection *m_data;
 };
 
 };

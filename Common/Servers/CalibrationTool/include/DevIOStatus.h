@@ -26,7 +26,7 @@ class DevIOStatus: public virtual DevIO<Management::TSystemStatus>
 	
 public:
 	
-	DevIOStatus(CSecureArea<CalibrationTool_private::CDataCollection> * data): m_data(data) { 
+	DevIOStatus(CalibrationTool_private::CDataCollection * data): m_data(data) { 
 		AUTO_TRACE("DevIOStatus::DevIOStatus()");
 	}
 	
@@ -41,9 +41,9 @@ public:
 	Management::TSystemStatus  read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) 
 	{
 		AUTO_TRACE("DevIOStatus::read()");
-		CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_data->Get();
+		//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_data->Get();
 		timestamp=getTimeStamp();
-		return data->getStatus();
+		return m_data->getStatus();
     }
 	
     void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
@@ -51,7 +51,7 @@ public:
 	}
     
 private:
-	CSecureArea<CalibrationTool_private::CDataCollection> *m_data;
+	CalibrationTool_private::CDataCollection *m_data;
 };
 
 };
