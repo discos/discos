@@ -25,19 +25,6 @@ TrackingThread::TrackingThread(
         ) : ACS::Thread(name, responseTime, sleepTime, del), m_configuration(configuration)
 {
     AUTO_TRACE("TrackingThread::TrackingThread()");
-    
-    try {
-        m_antennaMount = Antenna::Mount::_nil();
-        m_antennaMount = (m_configuration->m_services)->getComponent<Antenna::Mount>("ANTENNA/Mount");
-        if(CORBA::is_nil(m_antennaMount)) {
-            ACS_SHORT_LOG((LM_WARNING, "TrackingThread: _nil reference of Mount component"));
-            m_configuration->m_isElevationTracking = false;
-        }
-    }
-    catch (maciErrType::CannotGetComponentExImpl& ex) {
-        m_configuration->m_isElevationTracking = false;
-        ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the AntennaMount component"));
-    }
 }
 
 TrackingThread::~TrackingThread() { AUTO_TRACE("TrackingThread::~TrackingThread()"); }
