@@ -720,6 +720,39 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 	}
 	IRA::CIRATools::Wait(2,0);
 	guard.acquire();
+	try {
+		if (!CORBA::is_nil(m_antennaBoss)) {
+			m_antennaBoss->goOff(Antenna::ANT_HORIZONTAL,0.0);
+		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::focusScan()");
+			throw impl;
+		}
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::focusScan()");
+		throw impl;
+	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::focusScan()");
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::focusScan()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_antennaBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::focusScan()");
+		m_antennaBossError=true;
+		throw impl;
+	}
+	clearAntennaTracking();
+	guard.release();
+	waitOnSource();
+	guard.acquire();
 
 	initRecording(1); //  throw ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl
 	// we already check the minor servo boss is available
