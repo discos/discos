@@ -1380,7 +1380,7 @@ void CSRTActiveSurfaceBossCore::sector1ActiveSurface() throw (ComponentErrors::C
 	char * value;
 	int i;
 
-	value = "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S1.txt\0";
+	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S1.txt\0";
 	ifstream usdTableS1(value);
 	if (!usdTableS1) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1414,7 +1414,7 @@ void CSRTActiveSurfaceBossCore::sector2ActiveSurface() throw (ComponentErrors::C
 	char * value;
 	int i;
 
-	value = "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S2.txt\0";
+	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S2.txt\0";
 	ifstream usdTableS2(value);
 	if (!usdTableS2) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1448,7 +1448,7 @@ void CSRTActiveSurfaceBossCore::sector3ActiveSurface() throw (ComponentErrors::C
 	char * value;
 	int i;
 
-	value = "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S3.txt\0";
+	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S3.txt\0";
 	ifstream usdTableS3(value);
 	if (!usdTableS3) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1482,7 +1482,7 @@ void CSRTActiveSurfaceBossCore::sector4ActiveSurface() throw (ComponentErrors::C
 	char * value;
 	int i;
 
-	value = "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S4.txt\0";
+	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S4.txt\0";
 	ifstream usdTableS4(value);
 	if (!usdTableS4) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1516,7 +1516,7 @@ void CSRTActiveSurfaceBossCore::sector5ActiveSurface() throw (ComponentErrors::C
 	char * value;
 	int i;
 
-	value = "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S5.txt\0";
+	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S5.txt\0";
 	ifstream usdTableS5(value);
 	if (!usdTableS5) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1550,7 +1550,7 @@ void CSRTActiveSurfaceBossCore::sector6ActiveSurface() throw (ComponentErrors::C
 	char * value;
 	int i;
 
-	value = "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S6.txt\0";
+	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S6.txt\0";
 	ifstream usdTableS6(value);
 	if (!usdTableS6) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1584,7 +1584,7 @@ void CSRTActiveSurfaceBossCore::sector7ActiveSurface() throw (ComponentErrors::C
 	char * value;
 	int i;
 
-	value = "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S7.txt\0";
+	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S7.txt\0";
 	ifstream usdTableS7(value);
 	if (!usdTableS7) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1618,7 +1618,7 @@ void CSRTActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::C
 	char * value;
 	int i;
 
-	value = "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S8.txt\0";
+	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S8.txt\0";
 	ifstream usdTableS8(value);
 	if (!usdTableS8) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
