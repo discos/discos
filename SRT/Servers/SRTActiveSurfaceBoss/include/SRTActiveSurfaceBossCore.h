@@ -32,8 +32,8 @@
 #define firstUSD 1
 #define lastUSD 1116
 #define LOOPTIME 100000 // 0,10 sec
-#define USDTABLE "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD.txt\0"
-#define USDTABLECORRECTIONS "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/act_rev02.txt\0"
+#define USDTABLE "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD.txt\0"
+#define USDTABLECORRECTIONS "/home/cmigoni/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/act_rev02.txt\0"
 #define MM2HSTEP	350 //(10500 HSTEP / 30 MM)
 #define MM2STEP	1400 //(42000 STEP / 30 MM)
 #define WARNINGUSDPERCENT 0.95
@@ -116,6 +116,15 @@ public:
 
     void workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
 
+    void sector1ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
+    void sector2ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
+    void sector3ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
+    void sector4ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
+    void sector5ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
+    void sector6ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
+    void sector7ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
+    void sector8ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
+
     void watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
@@ -136,7 +145,7 @@ public:
 	 * @return a boolean value that is true if the antenna is enabled
 	*/
 	inline bool getEnable() const { return m_enable; }
-    
+
 	inline const ActiveSurface::TASProfile& getProfile() const { return m_profile; };
 
 	inline bool getTracking() const { return m_tracking; }
@@ -176,8 +185,16 @@ private:
 
 	IRA::CString lanCobName;
 
-	int usdCounter;
+	int usdCounter, usdCounterS1, usdCounterS2, usdCounterS3, usdCounterS4, usdCounterS5, usdCounterS6, usdCounterS7, usdCounterS8;
 	int lanIndex, circleIndex, usdCircleIndex;
+	int lanIndexS1, circleIndexS1, usdCircleIndexS1;
+	int lanIndexS2, circleIndexS2, usdCircleIndexS2;
+	int lanIndexS3, circleIndexS3, usdCircleIndexS3;
+	int lanIndexS4, circleIndexS4, usdCircleIndexS4;
+	int lanIndexS5, circleIndexS5, usdCircleIndexS5;
+	int lanIndexS6, circleIndexS6, usdCircleIndexS6;
+	int lanIndexS7, circleIndexS7, usdCircleIndexS7;
+	int lanIndexS8, circleIndexS8, usdCircleIndexS8;
     	int actuatorcounter, circlecounter, totacts;
     	ACS::doubleSeq actuatorsCorrections;
 
@@ -210,6 +227,8 @@ private:
 	char *s_usdTable;
 
 	char *s_usdCorrections;
+
+	bool m_sector1, m_sector2, m_sector3, m_sector4, m_sector5, m_sector6, m_sector7, m_sector8;
 };
 
 #endif /*SRTACTIVESURFACEBOSSCORE_H_*/

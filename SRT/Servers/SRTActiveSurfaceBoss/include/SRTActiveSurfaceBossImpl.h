@@ -31,10 +31,19 @@
 #include "SRTActiveSurfaceBossCore.h"
 #include "SRTActiveSurfaceBossWatchingThread.h"
 #include "SRTActiveSurfaceBossWorkingThread.h"
+#include "SRTActiveSurfaceBossSector1Thread.h"
+#include "SRTActiveSurfaceBossSector2Thread.h"
+#include "SRTActiveSurfaceBossSector3Thread.h"
+#include "SRTActiveSurfaceBossSector4Thread.h"
+#include "SRTActiveSurfaceBossSector5Thread.h"
+#include "SRTActiveSurfaceBossSector6Thread.h"
+#include "SRTActiveSurfaceBossSector7Thread.h"
+#include "SRTActiveSurfaceBossSector8Thread.h"
 #include <SP_parser.h>
 
 #define LOOPSTATUSTIME 10000000 // 1.0 second
 #define LOOPWORKINGTIME 5000000 // 0.5 seconds
+#define SECTORTIME 1000000 // 0.1 seconds
 
 #define _SET_CDB(PROP,LVAL,ROUTINE) {	\
 	maci::ContainerServices* cs=getContainerServices();\
@@ -213,19 +222,30 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 
 	CSRTActiveSurfaceBossWorkingThread *m_workingThread;
 
-    	SimpleParser::CParser<CSRTActiveSurfaceBossCore> *m_parser;
+	CSRTActiveSurfaceBossSector1Thread *m_sector1Thread;
+	CSRTActiveSurfaceBossSector2Thread *m_sector2Thread;
+	CSRTActiveSurfaceBossSector3Thread *m_sector3Thread;
+	CSRTActiveSurfaceBossSector4Thread *m_sector4Thread;
+	CSRTActiveSurfaceBossSector5Thread *m_sector5Thread;
+	CSRTActiveSurfaceBossSector6Thread *m_sector6Thread;
+	CSRTActiveSurfaceBossSector7Thread *m_sector7Thread;
+	CSRTActiveSurfaceBossSector8Thread *m_sector8Thread;
 
-	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_pstatus;
-	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean> > m_penabled;
-	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile), POA_ActiveSurface::ROTASProfile> > m_pprofile;
+	SimpleParser::CParser<CSRTActiveSurfaceBossCore> *m_parser;
+
+    	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_pstatus;
+    
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>  > m_penabled;
+    	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile), POA_ActiveSurface::ROTASProfile> > m_pprofile;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean> > m_ptracking;
-
 	IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
 
 	/* *
 	* Active Surface profile
 	*/
 	ActiveSurface::TASProfile m_profile;
+
+	CSRTActiveSurfaceBossCore *boss;
 };
 
 #endif /*SRTACTIVESURFACEBOSSIMPL_H*/
