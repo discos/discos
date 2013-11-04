@@ -6,7 +6,6 @@ import sys
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-NUM_OF_AXES = 6
 SAMPLING_TIME = 10000000 # 10 ** 7 is 1 second
 
 
@@ -31,146 +30,198 @@ class Form(QDialog):
     def __init__(self, parent=None):
 
         self.client = PySimpleClient()
-        self.srp = self.client.getComponent("MINORSERVO/SRP")
+        self.components = [
+                ('SRP', self.client.getComponent("MINORSERVO/SRP")),
+                ('PFP', self.client.getComponent("MINORSERVO/PFP")),
+                ('GFR', self.client.getComponent("MINORSERVO/GFR")),
+                ('M3R', self.client.getComponent("MINORSERVO/M3R")),
+        ]
 
-        actPos = self.srp._get_actPos()
-        actPosCbMonitor = Monitor('actPos') # The name of the property
-        actPosCbMonitorServant = self.client.activateOffShoot(actPosCbMonitor)
-        actPosDesc = ACS.CBDescIn(0L, 0L, 0L) 
-        self.actPosMonitor = actPos.create_monitor(actPosCbMonitorServant, actPosDesc)
-        self.actPosMonitor.set_timer_trigger(SAMPLING_TIME) 
+        self.actPosMonitors = {} # A dict of actPos monitors: {comp_name: monitor}
+        self.actPosCbMonitors = {} # A dict of actPos Call back monitors: {comp_name: monitor}
+        self.cmdPosMonitors = {} # A dict of cmdPos monitors: one item for each servo: {comp_name: monitor}
+        self.cmdPosCbMonitors = {} # A dict of cmdPos Call back monitors: {comp_name: monitor}
+        self.posDiffMonitors = {} # A dict of posDiff monitors: one item for each servo: {comp_name: monitor}
+        self.posDiffCbMonitors = {} # A dict of posDiff Call back monitors: {comp_name: monitor}
+        self.actPosTitles = {}
+        self.cmdPosTitles = {}
+        self.posDiffTitles = {}
+        for comp_name, comp in self.components:
+            actPos = comp._get_actPos()
+            actPosCbMonitor = Monitor(comp_name + 'actPos') 
+            actPosCbMonitorServant = self.client.activateOffShoot(actPosCbMonitor)
+            actPosDesc = ACS.CBDescIn(0L, 0L, 0L) 
+            actPosMonitor = actPos.create_monitor(actPosCbMonitorServant, actPosDesc)
+            actPosMonitor.set_timer_trigger(SAMPLING_TIME) 
+            self.actPosCbMonitors[comp_name] = actPosCbMonitor
+            self.actPosMonitors[comp_name] = actPosMonitor
+
+            cmdPos = comp._get_cmdPos()
+            cmdPosCbMonitor = Monitor(comp_name + 'cmdPos') 
+            cmdPosCbMonitorServant = self.client.activateOffShoot(cmdPosCbMonitor)
+            cmdPosDesc = ACS.CBDescIn(0L, 0L, 0L) 
+            cmdPosMonitor = cmdPos.create_monitor(cmdPosCbMonitorServant, cmdPosDesc)
+            cmdPosMonitor.set_timer_trigger(SAMPLING_TIME) 
+            self.cmdPosCbMonitors[comp_name] = cmdPosCbMonitor
+            self.cmdPosMonitors[comp_name] = cmdPosMonitor
+
+            posDiff = comp._get_posDiff()
+            posDiffCbMonitor = Monitor(comp_name + 'posDiff') 
+            posDiffCbMonitorServant = self.client.activateOffShoot(posDiffCbMonitor)
+            posDiffDesc = ACS.CBDescIn(0L, 0L, 0L) 
+            posDiffMonitor = posDiff.create_monitor(posDiffCbMonitorServant, posDiffDesc)
+            posDiffMonitor.set_timer_trigger(SAMPLING_TIME) 
+            self.posDiffCbMonitors[comp_name] = posDiffCbMonitor
+            self.posDiffMonitors[comp_name] = posDiffMonitor
         
-        actElongation = self.srp._get_actElongation()
-        actElongationCbMonitor = Monitor('actElongation')
-        actElongationCbMonitorServant = self.client.activateOffShoot(actElongationCbMonitor)
-        actElongationDesc = ACS.CBDescIn(0L, 0L, 0L) 
-        self.actElongationMonitor = actElongation.create_monitor(actElongationCbMonitorServant, actElongationDesc)
-        self.actElongationMonitor.set_timer_trigger(SAMPLING_TIME)
- 
-        cmdPos = self.srp._get_cmdPos()
-        cmdPosCbMonitor = Monitor('cmdPos')
-        cmdPosCbMonitorServant = self.client.activateOffShoot(cmdPosCbMonitor)
-        cmdPosDesc = ACS.CBDescIn(0L, 0L, 0L) 
-        self.cmdPosMonitor = cmdPos.create_monitor(cmdPosCbMonitorServant, cmdPosDesc)
-        self.cmdPosMonitor.set_timer_trigger(SAMPLING_TIME)
- 
-        posDiff = self.srp._get_posDiff()
-        posDiffCbMonitor = Monitor('posDiff')
-        posDiffCbMonitorServant = self.client.activateOffShoot(posDiffCbMonitor)
-        posDiffDesc = ACS.CBDescIn(0L, 0L, 0L) 
-        self.posDiffMonitor = posDiff.create_monitor(posDiffCbMonitorServant, posDiffDesc)
-        self.posDiffMonitor.set_timer_trigger(SAMPLING_TIME)
-
         super(Form, self).__init__(parent)
-        self.realLabel =  [
-            QLabel("<font style='color:rgb(80,23,23); font-weight:bold;'>RRS</font>"),
-            QLabel("<font style='color:rgb(122,23,23); font-weight:bold;'>Z1 (mm)</font>"),
-            QLabel("<font style='color:rgb(122,23,23); font-weight:bold;'>Z2 (mm)</font>"),
-            QLabel("<font style='color:rgb(122,23,23); font-weight:bold;'>Z3 (mm)</font>"),
-            QLabel("<font style='color:rgb(122,23,23); font-weight:bold;'>Y4 (mm)</font>"),
-            QLabel("<font style='color:rgb(122,23,23); font-weight:bold;'>Y5 (mm)</font>"),
-            QLabel("<font style='color:rgb(122,23,23); font-weight:bold;'>X6 (mm)</font>")
-        ]
-        self.virtualLabel = [
-            QLabel("<font style='color:rgb(25,35,85); font-weight:bold;'>VRS</font>"),
-            QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>TX (mm)</font>"),
-            QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>TY (mm)</font>"),
-            QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>TZ (mm)</font>"),
-            QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>RX (deg)</font>"),
-            QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>RY (deg)</font>"),
-            QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>RZ (deg)</font>")
-        ]
+        self._order = ('SRP', 'PFP', 'GFR', 'M3R')
+        self.labels = {
+                'SRP': [
+                     QLabel("<font style='color:black; font-weight:bold;'>SRP</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>TX (mm)</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>TY (mm)</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>TZ (mm)</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>RX (deg)</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>RY (deg)</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>RZ (deg)</font>")
+                ],
+                'PFP': [
+                     QLabel("<font style='color:black; font-weight:bold;'>PFP</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>RY (mm)</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>TX (mm)</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>TZ (mm)</font>"),
+                ],
+                'GFR': [
+                     QLabel("<font style='color:black; font-weight:bold;'>GFR</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>RZ (mm)</font>"),
+                ],
+                'M3R': [
+                     QLabel("<font style='color:black; font-weight:bold;'>M3R</font>"),
+                     QLabel("<font style='color:rgb(50,56,131); font-weight:bold;'>RZ (mm)</font>"),
+                ]
+        }
+        for qlabels in self.labels.values():
+            qlabels[0].setFrameStyle(QFrame.StyledPanel);
+            qlabels[0].setStyleSheet("background-color: rgb(104,198,66)");
         
-        self.elongationLabels =  []
-        self.actPosLabels =  []
-        self.cmdPosLabels =  []
-        self.posDiffLabels =  []
-        for i in range(NUM_OF_AXES):
-            # Elongations
-            item = QLabel("<font style='color:black; font-weight:bold;'>0.0</font>")
-            item.setFrameStyle(QFrame.StyledPanel);
-            item.setStyleSheet("background-color: rgb(243,217,210)");
-            self.elongationLabels.append(item)
-            # Actual Position
-            item = QLabel("<font style='color:black; font-weight:bold;'>0.0</font>")
-            item.setFrameStyle(QFrame.StyledPanel);
-            item.setStyleSheet("background-color: rgb(206,224,223)");
-            self.actPosLabels.append(item)
-            # Commanded Position
-            item = QLabel("<font style='color:black; font-weight:bold;'>0.0</font>")
-            item.setFrameStyle(QFrame.StyledPanel);
-            item.setStyleSheet("background-color: rgb(206,224,223)");
-            self.cmdPosLabels.append(item)
-            # Position Difference
-            item = QLabel("<font style='color:black; font-weight:bold;'>0.0</font>")
-            item.setFrameStyle(QFrame.StyledPanel);
-            item.setStyleSheet("background-color: rgb(206,224,223)");
-            self.posDiffLabels.append(item)
 
-        self.actElongationTitle = QLabel("<font style='color:black; font-weight:bold;'>Actual Elongation</font>")
-        self.actElongationTitle.setFrameStyle(QFrame.StyledPanel);
-        self.actElongationTitle.setStyleSheet("background-color: rgb(249,184,184)");
-        self.actPosTitle = QLabel("<font style='color:black; font-weight:bold;'>Actual Position</font>")
-        self.actPosTitle.setFrameStyle(QFrame.StyledPanel);
-        self.actPosTitle.setStyleSheet("background-color: rgb(178,198,213)");
-        self.cmdPosTitle = QLabel("<font style='color:black; font-weight:bold;'>Commanded Position</font>")
-        self.cmdPosTitle.setFrameStyle(QFrame.StyledPanel);
-        self.cmdPosTitle.setStyleSheet("background-color: rgb(178,198,213)");
-        self.posDiffTitle = QLabel("<font style='color:black; font-weight:bold;'>Position Difference</font>")
-        self.posDiffTitle.setFrameStyle(QFrame.StyledPanel);
-        self.posDiffTitle.setStyleSheet("background-color: rgb(178,198,213)");
-
+        self.actPosLabels =  {}
+        self.cmdPosLabels =  {}
+        self.posDiffLabels =  {}
         grid = QGridLayout()
-        grid.addWidget(self.actElongationTitle, 0, 1)
-        grid.addWidget(self.actPosTitle, 0, 2)
-        grid.addWidget(self.cmdPosTitle, 0, 3)
-        grid.addWidget(self.posDiffTitle, 0, 4)
-        for idx, item in enumerate(self.realLabel):
-            grid.addWidget(item, idx, 0)
-        for idx, item in enumerate(self.elongationLabels):
-            grid.addWidget(item, idx + 1, 1)
-        for idx, item in enumerate(self.actPosLabels):
-            grid.addWidget(item, idx + 1, 2)
-        for idx, item in enumerate(self.cmdPosLabels):
-            grid.addWidget(item, idx + 1, 3)
-        for idx, item in enumerate(self.posDiffLabels):
-            grid.addWidget(item, idx + 1, 4)
-        for idx, item in enumerate(self.virtualLabel):
-            grid.addWidget(item, idx, 5)
+        row = 0
+        for comp_name in self._order:
+            # Titles
+            actPosTitle = QLabel("<font style='color:black; font-weight:bold;'>Actual Postion</font>")
+            actPosTitle.setFrameStyle(QFrame.StyledPanel);
+            actPosTitle.setStyleSheet("background-color: rgb(104,198,66)");
+            self.actPosTitles[comp_name] = actPosTitle
+            cmdPosTitle = QLabel("<font style='color:black; font-weight:bold;'>Commanded Position</font>")
+            cmdPosTitle.setFrameStyle(QFrame.StyledPanel);
+            cmdPosTitle.setStyleSheet("background-color: rgb(104,198,66)");
+            self.cmdPosTitles[comp_name] = cmdPosTitle
+            posDiffTitle = QLabel("<font style='color:black; font-weight:bold;'>Position Difference</font>")
+            posDiffTitle.setFrameStyle(QFrame.StyledPanel);
+            posDiffTitle.setStyleSheet("background-color: rgb(104,198,66)");
+            self.posDiffTitles[comp_name] = posDiffTitle
+            # Labels
+            labels = self.labels[comp_name]
+            self.actPosLabels[comp_name] = []
+            self.cmdPosLabels[comp_name] = []
+            self.posDiffLabels[comp_name] = []
+            for label in labels:
+                # Actual Position
+                item = QLabel("<font style='color:black; font-weight:bold;'>0.0</font>")
+                item.setFrameStyle(QFrame.StyledPanel);
+                item.setStyleSheet("background-color: rgb(206,224,223)");
+                self.actPosLabels[comp_name].append(item)
+                # Commanded Position
+                item = QLabel("<font style='color:black; font-weight:bold;'>0.0</font>")
+                item.setFrameStyle(QFrame.StyledPanel);
+                item.setStyleSheet("background-color: rgb(206,224,223)");
+                self.cmdPosLabels[comp_name].append(item)
+                # Position Difference
+                item = QLabel("<font style='color:black; font-weight:bold;'>0.0</font>")
+                item.setFrameStyle(QFrame.StyledPanel);
+                item.setStyleSheet("background-color: rgb(206,224,223)");
+                self.posDiffLabels[comp_name].append(item)
+
+            grid.addWidget(self.actPosTitles[comp_name], row, 1)
+            grid.addWidget(self.cmdPosTitles[comp_name], row, 2)
+            grid.addWidget(self.posDiffTitles[comp_name], row, 3)
+            for idx, item in enumerate(self.labels[comp_name]):
+                grid.addWidget(item, idx + row, 0)
+            for idx, item in enumerate(self.actPosLabels[comp_name][1:]):
+                grid.addWidget(item, idx + row + 1, 1)
+            for idx, item in enumerate(self.cmdPosLabels[comp_name][1:]):
+                grid.addWidget(item, idx + row + 1, 2)
+            for idx, item in enumerate(self.posDiffLabels[comp_name][1:]):
+                grid.addWidget(item, idx + row + 1, 3)
+            row += len(self.labels[comp_name])
 
         self.setLayout(grid)
+        for comp_name, monitor in self.actPosCbMonitors.items():
+            method = getattr(self, 'updateActPos%sUi' %comp_name)
+            self.connect(monitor, SIGNAL(comp_name + "actPosChanged(PyQt_PyObject)"), method)
+        for comp_name, monitor in self.cmdPosCbMonitors.items():
+            method = getattr(self, 'updateCmdPos%sUi' %comp_name)
+            self.connect(monitor, SIGNAL(comp_name + "cmdPosChanged(PyQt_PyObject)"), method)
+        for comp_name, monitor in self.posDiffCbMonitors.items():
+            method = getattr(self, 'updatePosDiff%sUi' %comp_name)
+            self.connect(monitor, SIGNAL(comp_name + "posDiffChanged(PyQt_PyObject)"), method)
 
-        self.connect(actPosCbMonitor, SIGNAL("actPosChanged(PyQt_PyObject)"), self.updateActPosUi)
-        self.connect(actElongationCbMonitor, SIGNAL("actElongationChanged(PyQt_PyObject)"), self.updateActElongationUi)
-        self.connect(cmdPosCbMonitor, SIGNAL("cmdPosChanged(PyQt_PyObject)"), self.updateCmdPosUi)
-        self.connect(posDiffCbMonitor, SIGNAL("posDiffChanged(PyQt_PyObject)"), self.updatePosDiffUi)
-
-        self.setWindowTitle("SRP Reference Systems")
+        self.setWindowTitle("Minor Servo System Monitoring")
 
     def __del__(self):
-        self.actPosMonitor.destroy()
-        self.actElongationMonitor.destroy()
-        self.cmdPosMonitor.destroy()
-        self.posDiffMonitor.destroy()
+        for monitor in self.actPosMonitors.values():
+            monitor.destroy()
+        for monitor in self.cmdPosMonitors.values():
+            monitor.destroy()
+        for monitor in self.posDiffMonitors.values():
+            monitor.destroy()
         self.client.releaseComponent("MINORSERVO/SRP")
+        self.client.releaseComponent("MINORSERVO/PFP")
+        self.client.releaseComponent("MINORSERVO/GFR")
+        self.client.releaseComponent("MINORSERVO/M3R")
         self.client.disconnect()
 
-    def updateActElongationUi(self, value):
-            for idx, item in enumerate(self.elongationLabels):
-                item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
-    
-    def updateActPosUi(self, value):
-            for idx, item in enumerate(self.actPosLabels):
-                item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
-
-    def updateCmdPosUi(self, value):
-            for idx, item in enumerate(self.cmdPosLabels):
-                item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
-
-    def updatePosDiffUi(self, value):
-            for idx, item in enumerate(self.posDiffLabels):
-                item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
-
+    def updateActPosSRPUi(self, value):
+        for idx, item in enumerate(self.actPosLabels['SRP'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updateActPosPFPUi(self, value):
+        for idx, item in enumerate(self.actPosLabels['PFP'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updateActPosGFRUi(self, value):
+        for idx, item in enumerate(self.actPosLabels['GFR'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updateActPosM3RUi(self, value):
+        for idx, item in enumerate(self.actPosLabels['M3R'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updateCmdPosSRPUi(self, value):
+        for idx, item in enumerate(self.cmdPosLabels['SRP'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updateCmdPosPFPUi(self, value):
+        for idx, item in enumerate(self.cmdPosLabels['PFP'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updateCmdPosGFRUi(self, value):
+        for idx, item in enumerate(self.cmdPosLabels['GFR'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updateCmdPosM3RUi(self, value):
+        for idx, item in enumerate(self.cmdPosLabels['M3R'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updatePosDiffSRPUi(self, value):
+        for idx, item in enumerate(self.posDiffLabels['SRP'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updatePosDiffPFPUi(self, value):
+        for idx, item in enumerate(self.posDiffLabels['PFP'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updatePosDiffGFRUi(self, value):
+        for idx, item in enumerate(self.posDiffLabels['GFR'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
+    def updatePosDiffM3RUi(self, value):
+        for idx, item in enumerate(self.posDiffLabels['M3R'][1:]):
+            item.setText("<font style='color:black; font-weight:bold;'>%0.4f</font>" %value[idx])
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
