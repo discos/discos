@@ -144,13 +144,16 @@ void CalibrationToolImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 void CalibrationToolImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
-	m_workThread->setSleepTime(m_config.getWorkingThreadTime());
+	ACS::TimeInterval interval;
+	interval=(ACS::TimeInterval)m_config.getWorkingThreadTime()*10;
+	m_workThread->setSleepTime(interval);
 	m_workThread->setTimeSlice(m_config.getWorkingThreadTimeSlice());
 	m_workThread->setConfiguration(&m_config);
 	m_workThread->setServices(getContainerServices());
 	m_workThread->initialize(); //  throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl)
 	m_workThread->resume();
-	m_collectThread->setSleepTime(m_config.getCollectorThreadTime());
+	interval=(ACS::TimeInterval)m_config.getCollectorThreadTime()*10;
+	m_collectThread->setSleepTime(interval);
 	m_collectThread->setConfiguration(&m_config);
 	m_collectThread->setServices(getContainerServices());
 	/*******************************************************/

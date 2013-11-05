@@ -46,17 +46,17 @@ public:
 	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl);
 	
 	/**
-	 * @return the sleep time of the working thread (in 100 ns)
+	 * @return the sleep time of the working thread (microseconds)
 	 */
 	const long& getWorkingThreadTime() const { return m_workingThreadTime; }
 	
 	/**
-	 * @return the sleep time of the collector thread (in 100 ns)
+	 * @return the sleep time of the collector thread (microseconds)
 	 */
 	const long& getCollectorThreadTime() const { return m_collectorThreadTime; }
 	
 	/**
-	 * @return the  time slice of the working thread (in 100 ns))
+	 * @return the  time slice of the working thread (microseconds)
 	 */	
 	const long& getWorkingThreadTimeSlice() const { return m_workingThreadTimeSlice; }
 	

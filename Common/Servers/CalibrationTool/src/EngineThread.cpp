@@ -133,10 +133,12 @@ void CEngineThread::initialize () throw (ComponentErrors::CouldntGetComponentExI
     }
 }
 
-bool CEngineThread::checkTime (const ACS::Time & currentTime)
+bool CEngineThread::checkTime (const ACS::Time & jobStartTime)
 {
-    //CSecAreaResourceWrapper < CDataCollection > m_data = m_dataWrapper->Get ();
-    return (currentTime > (m_data->getFirstDumpTime () + getSleepTime () + m_timeSlice));	// gives the cache time to fill a little bit
+    //return (currentTime > (m_data->getFirstDumpTime () + getSleepTime () + m_timeSlice));	// gives the cache time to fill a little bit
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	return (now.value().value<(jobStartTime+m_timeSlice));
 }
 
 bool CEngineThread::checkTimeSlot (const ACS::Time & slotStart)
@@ -390,8 +392,8 @@ bool CEngineThread::processData ()
 				coordinate=0;
 			}
 			offset=coordinate-m_focusScanCenter;
-	        m_latPositions[m_dataSeqCounter] = az;
-	        m_lonPositions[m_dataSeqCounter] = el;
+	        m_latPositions[m_dataSeqCounter] = el;
+	        m_lonPositions[m_dataSeqCounter] = az;
 	        break;
         }
         case Management::MNG_SUBR_X:
@@ -454,8 +456,8 @@ bool CEngineThread::processData ()
 				coordinate=0;
 			}
 			offset=coordinate-m_focusScanCenter;
-	        m_latPositions[m_dataSeqCounter] = az;
-	        m_lonPositions[m_dataSeqCounter] = el;
+	        m_latPositions[m_dataSeqCounter] = el;
+	        m_lonPositions[m_dataSeqCounter] = az;
 	        break;
         }
         default:
@@ -489,13 +491,13 @@ bool CEngineThread::processData ()
     	}
     	else if (m_data->isFocusScan()) {
     		out.Format ("%04d.%03d.%02d:%02d:%02d.%02d#peakf#axis ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
-    		 m_file << (const char *) out;
-    		 if (m_data->getCoordIndex() == 2) {
-    			 m_file << "Zp" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
-    		 }
-    		 if (m_data->getCoordIndex() == 3) {
-    			 m_file << "Zs" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << std::endl;
-    		 }
+    		m_file << (const char *) out;
+    		if (m_data->getCoordIndex() == 2) {
+    			m_file << "Zp" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << 0.0 << std::endl;
+    		}
+    		if (m_data->getCoordIndex() == 3) {
+    			m_file << "Zs" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << 0.0 << std::endl;
+    		}
     	}
     }
     m_dataSeqCounter++;
@@ -598,7 +600,7 @@ void CEngineThread::runLoop ()
 	  }
 }
 
-void  CEngineThread::getMinorServoData()
+void CEngineThread::getMinorServoData()
 {
 	m_focusScanCenter=0.0;
 	m_minorServoCurrentAxisPosition=-1;
@@ -672,8 +674,7 @@ void  CEngineThread::getMinorServoData()
 	}
 }
 
-
-void  CEngineThread::getAntennaData()
+void CEngineThread::getAntennaData()
 {
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	try {
@@ -1258,10 +1259,8 @@ void CEngineThread::writeFocusFileHeaders(const ACS::Time& now)
 	TIMEVALUE tS;
 	IRA::CString sourceName;
     IRA::CString out;
-
     //CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
     sourceName=m_data->getSourceName();
-
     tS.value (now/*.value().value*/);
     out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#source ",tS.year (), tS.dayOfYear (), tS.hour (),  tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     m_file << (const char *) out;
@@ -1271,9 +1270,19 @@ void CEngineThread::writeFocusFileHeaders(const ACS::Time& now)
     IRA::CIRATools::radToSexagesimalAngle(m_targetDec,out);
     m_file << (const char *) out;
     m_file << " 2000.0" << std::endl;
-    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#parameters z 0 0 0 0 0 ",tS.year (), tS.dayOfYear (), tS.hour (),  tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#parameters z 0 0 0 0 v0 ",tS.year (), tS.dayOfYear (), tS.hour (),  tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     m_file << (const char *) out;
     m_file << std::endl;
+    out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#scu ",tS.year (), tS.dayOfYear (), tS.hour (),  tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+    m_file << (const char *) out;
+	if (m_data->getCoordIndex() == 2) {
+		//it should be used the current offset from servo system
+		m_file << "Zp" << " " << m_focusScanCenter << " " << 0.0 << std::endl;
+	}
+	if (m_data->getCoordIndex() == 3) {
+		//it should be used the current offset from servo system
+		m_file << "Zs" << " " << m_focusScanCenter << " " << 0.0 << std::endl;
+	}
 }
 
 void CEngineThread::writePointingFileHeaders(const ACS::Time& now)
@@ -1338,7 +1347,7 @@ void CEngineThread::writePointingFileHeaders(const ACS::Time& now)
 
 int CEngineThread::computeScanCenter(float *vect,const int& size)
 {
-	double  min=fabs(vect[0]);
+	double min=fabs(vect[0]);
 	double abs;
 	int pos=0;
 	for (int j=1;j<size;j++) {

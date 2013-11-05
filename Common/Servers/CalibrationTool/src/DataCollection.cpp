@@ -1,5 +1,3 @@
-// $Id: DataCollection.cpp,v 1.2 2011-01-18 10:50:21 c.migoni Exp $
-
 #include "DataCollection.h"
 #include <SecureArea.h>
 

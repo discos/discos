@@ -74,9 +74,11 @@ public:
 
      /**
       * It sets the slice of time the thread is allowed to run.
-      * @param timeSlice time slice given in 100 ns  
+      * @param timeSlice time slice given in microseconds
       */
-     void setTimeSlice(const long& timeSlice) { m_timeSlice=timeSlice; }
+     void setTimeSlice(const long& timeSlice) {
+    	 m_timeSlice=(ACS::TimeInterval)timeSlice*10;
+     }
      
      void setConfiguration(CConfiguration * const conf) { m_config=conf; }
      
@@ -88,7 +90,7 @@ private:
 	CConfiguration *m_config;
 	maci::ContainerServices * m_service;
 	bool m_fileOpened;
-	long m_timeSlice;
+	ACS::TimeInterval m_timeSlice;
 	double *m_ptsys;
 	float *m_ptsys2;
     long m_device;
@@ -96,7 +98,7 @@ private:
 	Antenna::AntennaBoss_var m_antennaBoss;
 	bool m_minorServoBossError;
 	MinorServo::MinorServoBoss_var m_minorServoBoss;
-	bool checkTime(const ACS::Time& currentTime);
+	bool checkTime(const ACS::Time& jobStartTime);
 	bool checkTimeSlot(const ACS::Time& slotStart);
 	bool processData();
 	int computeScanCenter(float *vect,const int& size);

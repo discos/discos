@@ -73,7 +73,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	else {
 		m_fwhmTol=0.0001;
 	}
-	m_workingThreadTime*=10;
-	m_workingThreadTimeSlice*=10;
-	m_collectorThreadTime*=10;
+	//m_workingThreadTime*=10;
+	//m_workingThreadTimeSlice*=10;
+	//m_collectorThreadTime*=10;
 }
