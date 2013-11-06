@@ -13,21 +13,31 @@ Custom widgets classes.
   '''
 
 
+
+
 class PlotProperty(Qwt.QwtPlot):
       
       def __init__(self,parent,*args):
-	Qwt.QwtPlot.__init__(self,parent,*args) # you must initialize the superclass
+	Qwt.QwtPlot.__init__(self,parent,*args)
+        #self.paint=Qt.QPainter(self) # you must initialize the superclass
 	self.timeData= [i for i in range (1000)]
-	
  	self.y=[]
-	self.curve=Qwt.QwtPlotCurve()
+	self.curve=Qwt.QwtPlotCurve('aaaa')
 	self.curve.attach(self)		
 	p = Qt.QPalette() #
         p.setColor(self.backgroundRole(), Qt.QColor(30, 30, 50))
         self.setPalette(p)
 	self.curve.setPen(Qt.QPen(Qt.Qt.red))
-	
-	
+   
+     
+        
+#void Widget::drawCanvas(QPainter* p)
+#{
+#    QwtPlot::drawCanvas( p );  // <<---
+
+#    QStaticText txt("number");
+#    p->drawStaticText ( 0, 0, txt);
+#}	
 	
       def suspend(self):
 	      pass 
@@ -62,7 +72,8 @@ class PlotProperty(Qwt.QwtPlot):
                 
                 self.replot()
       def setDataX(self,val):
-        
+             pass
+      def setCurveColor(self,val):
              pass
       def __del__(self):
 # 	self.actMonwspeed.destroy()

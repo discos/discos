@@ -203,5 +203,11 @@ man   : do_man
 install : install_all
 	@echo " . . . installation done"
 
+gui:
+	pyuic4 calibrationToolClient.ui -o calibrationtool_ui.py
+	
+	sed  -ie 's/Qwt5.QwtPlot/PlotProperty/g' calibrationtool_ui.py
+	
+	 sed -ie '9 i\from customwidgets import *' calibrationtool_ui.py
 
 #___oOo___

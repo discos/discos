@@ -195,7 +195,7 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
                         self.connect(self.thread,Qt.SIGNAL("peakOffset"),self.peakoffsetLineEdit.setText)
                         self.connect(self.thread,Qt.SIGNAL("slope"),self.slopeLineEdit.setText)
                         self.connect(self.thread,Qt.SIGNAL("offset"),self.offsetLineEdit.setText)
-                        self.connect(self.thread,Qt.SIGNAL("target"),self.fluxLineEdit.setText)
+                        self.connect(self.thread,Qt.SIGNAL("target"),self.nameLineEdit.setText)
                         self.connect(self.thread,Qt.SIGNAL("device"),self.deviceIdLineEdit.setText)
                         self.connect(self.thread,Qt.SIGNAL("isRecording"),self.isRecording)
                         
