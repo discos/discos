@@ -132,7 +132,7 @@ void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponen
     );
 
     m_parser->add(
-            "setASConfiguration", 
+            "setServoASConfiguration", 
             new function1<MinorServoBossImpl, non_constant, void_type, I<string_type> >(this, &MinorServoBossImpl::setASConfigurationImpl), 
             1
     );
