@@ -132,6 +132,13 @@ void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponen
     );
 
     m_parser->add(
+            "setASConfiguration", 
+            new function1<MinorServoBossImpl, non_constant, void_type, I<string_type> >(this, &MinorServoBossImpl::setASConfigurationImpl), 
+            1
+    );
+
+
+    m_parser->add(
             "clearServoOffsets", 
             new function0<MinorServoBossImpl, non_constant, void_type>(this, &MinorServoBossImpl::clearOffsetsFromOI), 
             0
@@ -1052,18 +1059,57 @@ void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::Configuration
 void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::ConfigurationErrorEx) 
 {
     int mutex_res = pthread_mutex_trylock(&tracking_mutex); 
-    if(mutex_res != 0) {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is busy.", true);
-    }
+    try {
+        if(mutex_res != 0) {
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is busy.", true);
+        }
 
-    if(m_tracking_thread_ptr != NULL) {
-        m_tracking_thread_ptr->suspend();
-        m_tracking_thread_ptr->terminate();
-        m_tracking_thread_ptr = NULL;
-    }
-    // m_configuration->m_isConfigured = false;
+        if(m_tracking_thread_ptr != NULL) {
+            m_tracking_thread_ptr->suspend();
+            m_tracking_thread_ptr->terminate();
+            m_tracking_thread_ptr = NULL;
+        }
+        if(isReady()) {
+            string comp_name("SRP");
+            MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+            if(!m_component_refs.count(comp_name)) {
+                try {
+                    component_ref = m_services->getComponent<MinorServo::WPServo>(("MINORSERVO/" + comp_name).c_str());
+                }
+                catch(...) {
+                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: cannot get the SRP component.", true);
+                }
+            }
+            else {
+                component_ref = m_component_refs[comp_name];
+            }
+            try {
+                ACS::doubleSeq positions = m_configuration->getPosition(comp_name, getTimeStamp());
+                // set the position
+                if(positions.length()) {
+                    if(!CORBA::is_nil(component_ref)) {
+                        component_ref->setPosition(positions, NOW);
+                    }
+                    else {
+                        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: cannot set the SRP position.", true);
+                    }
+                }
+                else {
+                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: cannot get the SRP position.", true);
+                }
+            }
+            catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
+                ex.log(LM_DEBUG);
+                throw ex.getConfigurationErrorEx();     
+            }
+        }
 
-    if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
+        if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
+    }
+    catch(...) {
+        if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
+        throw;
+    }
 }
 
 
@@ -1440,6 +1486,101 @@ void MinorServoBossImpl::setElevationTrackingImpl(const char * value) throw (Man
     }
     catch(...) {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, string("setElevationTracking(): cannot turn the tracking") + string(flag), false);
+    }
+}
+
+
+void MinorServoBossImpl::setASConfiguration(const char * value) throw (ManagementErrors::ConfigurationErrorEx) {
+    try {
+        setASConfigurationImpl(value);
+    }
+    catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getConfigurationErrorEx();     
+    }
+}
+
+
+void MinorServoBossImpl::setASConfigurationImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl) {
+
+    if(m_configuration->isStarting())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing another setup", false);
+
+    if(m_configuration->isParking())
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a park", false);
+
+    IRA::CString flag(value);
+    flag.MakeUpper();
+    m_configuration->setASConfiguration(flag); 
+
+    bool wasTrackingEn = isElevationTrackingEn();
+    try {
+        if(isReady()) {
+            bool turnedOff = false;
+    
+            try {
+                clearUserOffset("ALL");
+                clearSystemOffset("ALL");
+            }
+            catch(...) {
+                THROW_EX(
+                        ManagementErrors, 
+                        ConfigurationErrorEx, 
+                        string("Cannot clear the offsets"), 
+                        false 
+                );
+            }
+
+            try {
+                turnTrackingOff(); // It raises ConfigurationErrorEx
+                turnedOff = true;
+            }
+            catch(...) {
+                THROW_EX(ManagementErrors, ConfigurationErrorEx, "cannot turn the tracking off", false);
+            }
+            m_configuration->init(m_configuration->m_baseSetup, true); // Keep the actual setup
+            if(wasTrackingEn) {
+                try {
+                    turnTrackingOn(); // It raises ConfigurationErrorEx
+                    turnedOff = false;
+                }
+                catch(...) {
+                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "cannot turn the tracking on", false);
+                }
+            }
+            if(turnedOff) {
+                string comp_name("SRP");
+                MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+                if(!m_component_refs.count(comp_name)) {
+                    try {
+                        component_ref = m_services->getComponent<MinorServo::WPServo>(("MINORSERVO/" + comp_name).c_str());
+                    }
+                    catch(...) {
+                        ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::setASConfiguration(): cannot get the SRP component"));
+                    }
+                }
+                else {
+                    component_ref = m_component_refs[comp_name];
+                }
+
+                ACS::doubleSeq positions = m_configuration->getPosition("SRP", getTimeStamp());
+                // set the position
+                if(positions.length()) {
+                    if(!CORBA::is_nil(component_ref)) {
+                        component_ref->setPosition(positions, NOW);
+                    }
+                    else {
+                        ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::setASConfiguration(): cannot set the position"));
+                    }
+                }
+                else {
+                    ACS_SHORT_LOG((LM_WARNING, "setASConfiguration(): cannot get the position to set."));
+                }
+            }
+        }
+    }
+    catch(...) {
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "setASConfiguration(): cannot change the actual configuration.", false);
     }
 }
 

@@ -65,7 +65,8 @@ public:
     /** Destructor */
     ~MSBossConfiguration();
     
-    void init(std::string commandedSetup) throw (ManagementErrors::ConfigurationErrorExImpl);
+    /** if keepSetup is true, then the system is not performig a real setup, but it is just changing the configuration */
+    void init(std::string commandedSetup, bool keepSetup=false) throw (ManagementErrors::ConfigurationErrorExImpl);
 
     inline bool isConfigured() { return m_isConfigured; }
 
@@ -106,6 +107,8 @@ public:
     inline std::string getActivePFocusServo() { return m_active_pfocus_servo; }
 
     void setElevationTracking(IRA::CString value) throw (ManagementErrors::ConfigurationErrorExImpl);
+ 
+    void setASConfiguration(IRA::CString flag) throw (ManagementErrors::ConfigurationErrorExImpl);
 
     InfoAxisCode getInfoFromAxisCode(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl);
 
@@ -151,6 +154,7 @@ public:
 
     std::string m_actualSetup;
     std::string m_commandedSetup;
+    std::string m_baseSetup;
     std::string m_active_pfocus_servo;
     bool m_isConfigured;
     bool m_isStarting;

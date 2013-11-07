@@ -400,6 +400,10 @@ public:
      
      void setElevationTrackingImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl);
 
+     void setASConfiguration(const char * value) throw (ManagementErrors::ConfigurationErrorEx);
+
+     void setASConfigurationImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl);
+
 
 private:
 

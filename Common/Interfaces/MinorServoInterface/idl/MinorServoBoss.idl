@@ -54,6 +54,16 @@ module MinorServo {
 		 * @throw ManagementErrors::ConfigurationErrorEx if the input is different from "ON" or "OFF"
          */
 		void setElevationTracking(in string value) raises (ManagementErrors::ConfigurationErrorEx);
+	
+	
+        /**
+         * Set the active surface flag to "ON" or "OFF"
+         * If the system is ready, then it change the actual configuration
+         * @param value "ON" or "OFF"
+		 * @throw ManagementErrors::ConfigurationErrorEx if the input is different from "ON" or "OFF"
+         */
+		void setASConfiguration(in string value) raises (ManagementErrors::ConfigurationErrorEx);
+
 
 	
         /**

@@ -4,10 +4,13 @@
 using namespace IRA;
 using namespace std;
 
+static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
 {
     m_actualSetup = "unknown";
     m_commandedSetup = "";
+    m_baseSetup = "";
     m_isConfigured = false;
     m_isStarting = false;
     m_isParking = false;
@@ -26,139 +29,159 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
 MSBossConfiguration::~MSBossConfiguration() {}
 
 
-void MSBossConfiguration::init(string setupMode) throw (ManagementErrors::ConfigurationErrorExImpl)
+void MSBossConfiguration::init(string setupMode, bool keepSetup) throw (ManagementErrors::ConfigurationErrorExImpl)
 {
-    // Starting
-    m_isStarting = true;
-    m_commandedSetup = string(setupMode);
-    m_isASConfiguration = false;
-    ACS::doubleSeq dummy;
-
-    // Read the component configuration
-    IRA::CString config;
-    if(!CIRATools::getDBValue(m_services, setupMode.c_str(), config)) {
-        m_isStarting = false;
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, setupMode + ": unavailable configuration code.", false);
+    int mutex_res = pthread_mutex_trylock(&init_mutex); 
+    if(mutex_res != 0) {
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "MSBossConfiguration::init(): system busy.", true);
     }
+    try {
+        // Starting
+        m_isStarting = true;
+        m_baseSetup = setupMode;
+        m_commandedSetup = m_isASConfiguration ? setupMode + "_ASACTIVE" : setupMode;
+        m_isASConfiguration = false;
+        ACS::doubleSeq dummy;
 
-    // initializing
-    m_isConfigured = false;
-    m_servosToPark.clear();
-    m_servosToMove.clear();
-    m_servosCoefficients.clear();
-    m_dynamic_comps.clear();
-    m_axes.clear();
-    m_units.clear();
-    m_isValidCDBConfiguration = false;
+        // Read the component configuration
+        IRA::CString config;
+        if(!CIRATools::getDBValue(m_services, m_commandedSetup.c_str(), config)) {
+            m_isStarting = false;
+            THROW_EX(ManagementErrors, ConfigurationErrorEx, m_commandedSetup + ": unavailable configuration code.", false);
+        }
 
-    vector<string> actions = split(string(config), actions_separator);
+        // initializing
+        m_isConfigured = false;
+        m_servosToPark.clear();
+        m_servosToMove.clear();
+        m_servosCoefficients.clear();
+        m_dynamic_comps.clear();
+        m_axes.clear();
+        m_units.clear();
+        m_isValidCDBConfiguration = false;
 
-    // Get the actions
-    for(vector<string>::iterator iter = actions.begin(); iter != actions.end(); iter++) {
-        // Split the action in items.
-        vector<string> items = split(*iter, items_separator);
+        vector<string> actions = split(string(config), actions_separator);
 
-        // Get the name of component 
-        string comp_name = items.front();
-        strip(comp_name);
+        // Get the actions
+        for(vector<string>::iterator iter = actions.begin(); iter != actions.end(); iter++) {
+            // Split the action in items.
+            vector<string> items = split(*iter, items_separator);
 
-        // Get the component
-        try {
-            MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-            component_ref = m_services->getComponent<MinorServo::WPServo>(("MINORSERVO/" + comp_name).c_str());
-            if(!CORBA::is_nil(component_ref))
-                m_component_refs[comp_name] = component_ref;
-            else {
+            // Get the name of component 
+            string comp_name = items.front();
+            strip(comp_name);
+
+            // Get the component
+            try {
+                MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+                component_ref = m_services->getComponent<MinorServo::WPServo>(("MINORSERVO/" + comp_name).c_str());
+                if(!CORBA::is_nil(component_ref))
+                    m_component_refs[comp_name] = component_ref;
+                else {
+                    m_isStarting = false;
+                    THROW_EX(ManagementErrors, ConfigurationErrorEx, ("Cannot get component " + comp_name).c_str(), false);
+                }
+            }
+            catch (maciErrType::CannotGetComponentExImpl& ex) {
                 m_isStarting = false;
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, ("Cannot get component " + comp_name).c_str(), false);
+                THROW_EX(ManagementErrors, ConfigurationErrorEx, ("Cannot get the reference of " + comp_name).c_str(), false);
+            }
+
+            // Get the action
+            string action(items.back());
+            strip(action);
+
+            if(startswith(action, "none") || startswith(action, "NONE")) {
+                continue;
+            }
+
+            if(startswith(action, "park") || startswith(action, "PARK")) {
+                m_servosToPark.push_back(comp_name);
+                continue;
+            }
+
+            m_servosToMove.push_back(comp_name);
+            if(comp_name == "SRP" || comp_name == "PFP")
+                m_active_pfocus_servo = comp_name;
+
+            vector<double> position_values;
+            vector<string> aitems = split(action, coeffs_separator);
+            vector<string> values;
+            for(vector<string>::iterator viter = aitems.begin(); viter != aitems.end(); viter++) {
+                vector<string> labels = split(*viter, coeffs_id);
+                string coeffs = labels.back();
+                string axis_and_unit(labels.front());
+                strip(coeffs);
+
+                // Get the axis and unit
+                vector<string> tokens = split(axis_and_unit, string("("));
+                string axis = tokens.front();
+                strip(axis);
+                m_axes.push_back(comp_name + string("_") + axis);
+                string unit = tokens.back();
+                strip(unit, string(")"));
+                strip(unit);
+                m_units.push_back(unit);
+                // End axis and unit
+
+                for(string::size_type idx = 0; idx != boundary_tokens.size(); idx++)
+                    strip(coeffs, char2string(boundary_tokens[idx]));
+
+                values = split(coeffs, pos_separator);
+                vector<double> coefficients;
+                for(vector<string>::size_type idx = 0; idx != values.size(); idx++) {
+                    coefficients.push_back(str2double(values[idx]));
+                }
+
+                if(coefficients.empty()) {
+                    m_isStarting = false;
+                    m_axes.clear();
+                    m_units.clear();
+                    THROW_EX(ManagementErrors, ConfigurationErrorEx, ("No coefficients for " + comp_name).c_str(), false);
+                }
+
+                (m_servosCoefficients[comp_name]).push_back(coefficients);
+                if(coefficients.size() > 1) {
+                    m_dynamic_comps.push_back(comp_name);
+                }
+            }
+
+            if(m_servosCoefficients.count(comp_name) && m_component_refs.count(comp_name)) {
+                if((m_servosCoefficients[comp_name]).size() != (m_component_refs[comp_name])->numberOfAxes()) {
+                    m_isStarting = false;
+                    m_axes.clear();
+                    m_units.clear();
+                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "Mismatch between number of coefficients and number of axes", false);
+                }
+            }
+        }
+        m_isValidCDBConfiguration = true;
+ 
+        try {
+            m_antennaBoss = Antenna::AntennaBoss::_nil();
+            m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
+            if(CORBA::is_nil(m_antennaBoss)) {
+                ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): _nil reference of AntennaBoss component"));
+                m_isElevationTracking = false;
             }
         }
         catch (maciErrType::CannotGetComponentExImpl& ex) {
-            m_isStarting = false;
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, ("Cannot get the reference of " + comp_name).c_str(), false);
-        }
-
-        // Get the action
-        string action(items.back());
-        strip(action);
-
-        if(startswith(action, "none") || startswith(action, "NONE")) {
-            continue;
-        }
-
-        if(startswith(action, "park") || startswith(action, "PARK")) {
-            m_servosToPark.push_back(comp_name);
-            continue;
-        }
-
-        m_servosToMove.push_back(comp_name);
-        if(comp_name == "SRP" || comp_name == "PFP")
-            m_active_pfocus_servo = comp_name;
-
-        vector<double> position_values;
-        vector<string> aitems = split(action, coeffs_separator);
-        vector<string> values;
-        for(vector<string>::iterator viter = aitems.begin(); viter != aitems.end(); viter++) {
-            vector<string> labels = split(*viter, coeffs_id);
-            string coeffs = labels.back();
-            string axis_and_unit(labels.front());
-            strip(coeffs);
-
-            // Get the axis and unit
-            vector<string> tokens = split(axis_and_unit, string("("));
-            string axis = tokens.front();
-            strip(axis);
-            m_axes.push_back(comp_name + string("_") + axis);
-            string unit = tokens.back();
-            strip(unit, string(")"));
-            strip(unit);
-            m_units.push_back(unit);
-            // End axis and unit
-
-            for(string::size_type idx = 0; idx != boundary_tokens.size(); idx++)
-                strip(coeffs, char2string(boundary_tokens[idx]));
-
-            values = split(coeffs, pos_separator);
-            vector<double> coefficients;
-            for(vector<string>::size_type idx = 0; idx != values.size(); idx++) {
-                coefficients.push_back(str2double(values[idx]));
-            }
-
-            if(coefficients.empty()) {
-                m_isStarting = false;
-                m_axes.clear();
-                m_units.clear();
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, ("No coefficients for " + comp_name).c_str(), false);
-            }
-
-            (m_servosCoefficients[comp_name]).push_back(coefficients);
-            if(coefficients.size() > 1) {
-                m_dynamic_comps.push_back(comp_name);
-            }
-        }
-
-        if(m_servosCoefficients.count(comp_name) && m_component_refs.count(comp_name)) {
-            if((m_servosCoefficients[comp_name]).size() != (m_component_refs[comp_name])->numberOfAxes()) {
-                m_isStarting = false;
-                m_axes.clear();
-                m_units.clear();
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, "Mismatch between number of coefficients and number of axes", false);
-            }
-        }
-    }
-    m_isValidCDBConfiguration = true;
- 
-    try {
-        m_antennaBoss = Antenna::AntennaBoss::_nil();
-        m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
-        if(CORBA::is_nil(m_antennaBoss)) {
-            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): _nil reference of AntennaBoss component"));
             m_isElevationTracking = false;
+            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): cannot get the AntennaBoss component"));
         }
+        if(keepSetup) {
+            m_isStarting = false;
+            m_isConfigured = true;
+            m_actualSetup = m_commandedSetup;
+        }
+        if(mutex_res == 0 && pthread_mutex_unlock(&init_mutex)); 
     }
-    catch (maciErrType::CannotGetComponentExImpl& ex) {
-        m_isElevationTracking = false;
-        ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the AntennaBoss component"));
+    catch(...) {
+        if(mutex_res == 0 && pthread_mutex_unlock(&init_mutex)); 
+        m_isStarting = false;
+        m_isConfigured = false;
+        m_actualSetup = "unknown";
+        throw;
     }
 
 }
@@ -210,6 +233,20 @@ InfoAxisCode MSBossConfiguration::getInfoFromAxisCode(string axis_code) throw (M
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "Axis not active", false);
     }
 }
+
+void MSBossConfiguration::setASConfiguration(IRA::CString flag) throw (ManagementErrors::ConfigurationErrorExImpl) {
+    const IRA::CString ON("ON");
+    const IRA::CString OFF("OFF");
+    if(flag == ON || flag == OFF) {
+        m_isASConfiguration = (flag == ON) ? true : false;
+        // Se il sistema è ready, leggi la configurazione attuale e nel caso cambiala
+    }
+    else {
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, string("setASConfiguration(): value ") + string(flag) + " not allowed.", false);
+    }
+}
+
+
 
 void MSBossConfiguration::setElevationTracking(IRA::CString flag) throw (ManagementErrors::ConfigurationErrorExImpl) {
     const IRA::CString ON("ON");
