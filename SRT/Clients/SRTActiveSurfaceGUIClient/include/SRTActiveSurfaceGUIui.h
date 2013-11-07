@@ -36,8 +36,6 @@ class SRTActiveSurfaceGUI : public QWidget, public Ui_SRTActiveSurfaceGUI
         void setup();
         void refPos();
         void recoverUSD();
-        void enableAutoUpdate();
-        void disableAutoUpdate();
         void setupAS();
         void startAS();
         void stowAS();

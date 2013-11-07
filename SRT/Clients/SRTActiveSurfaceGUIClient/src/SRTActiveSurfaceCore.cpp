@@ -696,6 +696,26 @@ void SRTActiveSurfaceCore::calVer(int circle, int actuator, int radius)
     callfromfunction = false;*/
 }
 
+void SRTActiveSurfaceCore::park()
+{
+    try {
+        tASBoss->park();
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+	    ex.log(LM_DEBUG);
+    }
+    catch (CORBA::SystemException& sysEx) {
+        _EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::park()");
+        impl.setName(sysEx._name());
+        impl.setMinor(sysEx.minor());
+        impl.log();
+    }
+    catch (...) {
+        _EXCPT(ClientErrors::UnknownExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::park()");
+        impl.log();
+    }
+}
+
 void SRTActiveSurfaceCore::stow(int circle, int actuator, int radius)
 {
 	callfromfunction = true;
@@ -770,14 +790,14 @@ void SRTActiveSurfaceCore::move(int circle, int actuator, int radius, long incr)
 
 void SRTActiveSurfaceCore::setProfile(long int profile)
 {
-	if (profile == 0)
-        	tASBoss->setProfile(ActiveSurface::AS_SHAPED);
-    	if (profile == 1)
-        	tASBoss->setProfile(ActiveSurface::AS_PARABOLIC);
-    	if (profile == 2)
-        	tASBoss->setProfile(ActiveSurface::AS_PARABOLIC_FIXED);
-
-
+    if (profile == 0)
+        tASBoss->setProfile(ActiveSurface::AS_SHAPED);
+    if (profile == 1)
+        tASBoss->setProfile(ActiveSurface::AS_SHAPED_FIXED);
+    if (profile == 2)
+        tASBoss->setProfile(ActiveSurface::AS_PARABOLIC);
+    if (profile == 3)
+        tASBoss->setProfile(ActiveSurface::AS_PARABOLIC_FIXED);
 }
 
 void SRTActiveSurfaceCore::correction(int circle, int actuator, int radius, double correction)
@@ -917,13 +937,11 @@ void SRTActiveSurfaceCore::refPos(int circle, int actuator, int radius)
 
 void SRTActiveSurfaceCore::enableAutoUpdate()
 {
-    //tASBoss->enableAutoUpdate();
     tASBoss->asOn();
 }
 
 void SRTActiveSurfaceCore::disableAutoUpdate()
 {
-    //tASBoss->disableAutoUpdate();
     tASBoss->asOff();
 }
 

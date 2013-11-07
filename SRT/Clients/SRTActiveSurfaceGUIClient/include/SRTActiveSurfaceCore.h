@@ -54,6 +54,7 @@ class SRTActiveSurfaceCore : public QThread
         void enableAutoUpdate();
         void disableAutoUpdate();
         void recoverUSD(int circle, int actuator);
+        void park();
 
 	    bool monitor;
         int theCircle, theActuator, theRadius;

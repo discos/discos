@@ -6656,7 +6656,7 @@ void SRTActiveSurfaceGUI::startAS()
 void SRTActiveSurfaceGUI::stowAS()
 {
     setallactuators();
-    mySRTActiveSurfaceCore.stow(thecircle,theactuator,theradius);
+    mySRTActiveSurfaceCore.park();
 }
 
 void SRTActiveSurfaceGUI::stopAS()
@@ -6688,20 +6688,6 @@ void SRTActiveSurfaceGUI::recoverUSD()
 	        ManagerLabel->setText(str);
 	    }
     }
-}
-
-void SRTActiveSurfaceGUI::enableAutoUpdate()
-{
-    mySRTActiveSurfaceCore.enableAutoUpdate();
-    yesUpdateButton->setStyleSheet(QApplication::translate("SRTActiveSurfaceGUI", "background-color: rgb(85, 255, 0);", 0, QApplication::UnicodeUTF8));
-    noUpdateButton->setStyleSheet(QApplication::translate("SRTActiveSurfaceGUI", "background-color: rgb(0, 85, 255);", 0, QApplication::UnicodeUTF8));
-}
-
-void SRTActiveSurfaceGUI::disableAutoUpdate()
-{
-    mySRTActiveSurfaceCore.disableAutoUpdate();
-    yesUpdateButton->setStyleSheet(QApplication::translate("SRTActiveSurfaceGUI", "background-color: rgb(0, 85, 255);", 0, QApplication::UnicodeUTF8));
-    noUpdateButton->setStyleSheet(QApplication::translate("SRTActiveSurfaceGUI", "background-color: rgb(85, 255, 0);", 0, QApplication::UnicodeUTF8));
 }
 
 void SRTActiveSurfaceGUI::changeGUIActuatorColor(int circle, int actuator, const char* theActuatorStatusColorString)
