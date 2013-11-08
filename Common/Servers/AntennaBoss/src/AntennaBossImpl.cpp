@@ -15,6 +15,7 @@
 #include "DevIOTargetCoordinate.h"
 #include "DevIOTargetName.h"
 #include "DevIOOffsets.h"
+#include "DevIOLambda.h"
 
 static char *rcsId="@(#) $Id: AntennaBossImpl.cpp,v 1.29 2011-06-05 14:44:40 a.orlati Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
@@ -39,6 +40,7 @@ AntennaBossImpl::AntennaBossImpl(const ACE_CString &CompName,maci::ContainerServ
 	m_ppointingElevationCorrection(this),
 	m_prefractionCorrection(this),
 	m_pFWHM(this),
+	m_pwaveLength(this),
 	m_ptargetFlux(this),
 	m_pcorrectionEnabled(this),
 	m_ptargetRightAscension(this),
@@ -108,6 +110,7 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				new DevIOCorrectionOffsets(m_core,DevIOCorrectionOffsets::REFRACTIONOFFSET),true);
 		m_pFWHM=new ROdouble(getContainerServices()->getName()+":FWHM",getComponent(),
 				new DevIOHPBW(m_core),true);
+		m_pwaveLength=new ROdouble(getContainerServices()->getName()+":waveLength",getComponent(),	new DevIOLambda(m_core),true);
 		m_pcorrectionEnabled=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
 		  (getContainerServices()->getName()+":correctionEnabled",getComponent(),new DevIOEnable(m_core,DevIOEnable::CORRECTION),true);
 		m_ptargetRightAscension=new ROdouble(getContainerServices()->getName()+":targetRightAscension",getComponent(),
@@ -676,6 +679,7 @@ _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ppointingAzimuthCorrecti
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ppointingElevationCorrection,pointingElevationCorrection);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_prefractionCorrection,refractionCorrection);	
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pFWHM,FWHM);
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pwaveLength,waveLength);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,Management::ROTBoolean,m_pcorrectionEnabled,correctionEnabled);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetRightAscension,targetRightAscension);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetDeclination,targetDeclination);

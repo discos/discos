@@ -299,6 +299,13 @@ module Antenna {
 		readonly attribute ACS::ROdouble FWHM;
 		
 		/**
+		 * This attribute reports the currently used wave length in meters.   After component creation this value is zero, that means
+		 * the boss component will remain in the <i>MNG_WARNING</i> status until a new value is provided directly (<i>setFWHM()</i>) or indirectly  (<i>computeFWHM()</i>)
+		 * (@sa <i>setFWHM</i>).
+		 */
+		readonly attribute ACS::ROdouble waveLength;
+
+		/**
 		 * This attribute reports the current azimuth offsets applied due to pointing model (in radians)
 		*/
 		readonly attribute ACS::ROdouble pointingAzimuthCorrection;

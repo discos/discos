@@ -199,10 +199,15 @@ Management::TScanAxis CCore::computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bo
 		antBossError=true;
 		throw impl;
 	}
+	/*
+	// this choice has to be reconsidered, does the minor servo movement always prevail?
+	if (servoAxis!=Management::MNG_NO_AXIS) { // if a minor servo has been selected, the resulting scan axis is the axis mapped to the servo
+		return servoAxis;
+	}
+	else {
+		return scanAxis;
+	}*/
 	return scanAxis;
-	// *******************************
-	// At the moment I just return back the value coming from AntennaBoss but It should be considered the one coming from Servo minor and the result is a combination of both
-	// *******************************
 }
 
 IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const ACS::TimeInterval& lst,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra)
@@ -625,7 +630,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
  			subSetup.startUt=startTime;
  			subSetup.subScanId=subScanID;
  			subSetup.axis=axis;
- 			subSetup.minorServoNameForAxis=CORBA::string_dup((const char *)config->getServoName(axis));
+ 			subSetup.minorServoNameForAxis=CORBA::string_dup((const char *)config->getServoNameFromAxis(axis));
  			subSetup.extraPath=CORBA::string_dup((const char *)extraPath);
  			subSetup.baseName=CORBA::string_dup((const char *)baseName);
  			subSetup.targetID=CORBA::string_dup((const char *)targetID);

@@ -19,7 +19,7 @@
  * @date 23/11/2010
  * @version 1.0.0
  * @author <a href=mailto:migoni@ca.astro.it>Carlo Migoni</a>
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.0.2
 */
 
 #include <baci.h>

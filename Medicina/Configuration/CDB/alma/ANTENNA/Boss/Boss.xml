@@ -55,5 +55,6 @@
 <pointingElevationCorrection/>
 <refractionCorrection/>
 <FWHM/>
+<waveLength/>
 
 </AntennaBoss>

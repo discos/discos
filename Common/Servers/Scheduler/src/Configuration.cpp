@@ -88,7 +88,7 @@ void CConfiguration::readProcedures(maci::ContainerServices *services,const IRA:
 	m_procTable=NULL;
 }
 
-IRA::CString CConfiguration::getServoName(const Management::TScanAxis& axis) const
+IRA::CString CConfiguration::getServoNameFromAxis(const Management::TScanAxis& axis) const
 {
 	for (WORD i=0;i<m_minorServoMappings;i++) {
 		if (m_axis[i].axis==axis) {
@@ -96,6 +96,16 @@ IRA::CString CConfiguration::getServoName(const Management::TScanAxis& axis) con
 		}
 	}
 	return "";
+}
+
+Management::TScanAxis CConfiguration::getAxisFromServoName(const IRA::CString& servoName) const
+{
+	for (WORD i=0;i<m_minorServoMappings;i++) {
+		if (m_axis[i].servoName==servoName) {
+			return m_axis[i].axis;
+		}
+	}
+	return Management::MNG_NO_AXIS;
 }
 
 void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl)
@@ -176,10 +186,16 @@ Management::TScanAxis CConfiguration::str2Axis(const IRA::CString& axis) const
 	else 	if (axis=="SUBR_Y") {
 		return Management::MNG_SUBR_Y;
 	}
+	else 	if (axis=="SUBR_ROTY") {
+		return Management::MNG_SUBR_ROTY;
+	}
+	else 	if (axis=="SUBR_ROTX") {
+		return Management::MNG_SUBR_ROTX;
+	}
 	else 	if (axis=="PFP_Z") {
 		return Management::MNG_PFP_Z;
 	}
-	else 	/*if (axis=="PFP_Y")*/ {
+	else /*	if (axis=="PFP_Y")*/ {
 		return Management::MNG_PFP_Y;
 	}
 }

@@ -131,6 +131,8 @@ module Management  {
 		MNG_SUBR_Z,      /*!< Scan along the Z (focus) of the subreflector */
 		MNG_SUBR_X,      /*!< Scan along the X of the subreflector */
 		MNG_SUBR_Y,      /*!< Scan along the Y of the subreflector */
+		MNG_SUBR_ROTY, /*!< rotation along the Y of the subreflector */
+		MNG_SUBR_ROTX, /*!< rotation  along the X of the subreflector */
 		MNG_PFP_Z,       /*!< Scan along the Z (focus) of the primary focus */
 		MNG_PFP_Y,        /*!< Scan along the Y of the primary focus */
 		MNG_BEAMPARK, /*!< Scan consists of a fixed horizontal position */

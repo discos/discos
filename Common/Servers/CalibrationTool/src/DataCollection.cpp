@@ -320,6 +320,14 @@ void CDataCollection::setCoordIndex()
         	m_coordIndex = -1;
         	break;
         }
+        case Management::MNG_SUBR_ROTY: {
+        	m_coordIndex = -1;
+        	break;
+        }
+        case Management::MNG_SUBR_ROTX: {
+        	m_coordIndex = -1;
+        	break;
+        }
         case Management::MNG_PFP_Z: {
         	m_coordIndex = 2; // ZP
         	break;

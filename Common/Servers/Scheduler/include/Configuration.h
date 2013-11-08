@@ -159,7 +159,12 @@ public:
 	/**
 	 * return the name of the servo mapped to the given axis
 	 */
-	IRA::CString getServoName(const Management::TScanAxis& axis) const;
+	IRA::CString getServoNameFromAxis(const Management::TScanAxis& axis) const;
+
+	/**
+	 * return axis based on the the name of the servo
+	 */
+	Management::TScanAxis getAxisFromServoName(const IRA::CString& servoName) const;
 
 private:
 	IRA::CString m_schedDir;

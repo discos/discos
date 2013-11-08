@@ -137,9 +137,11 @@ private:
     double m_raUserOff, m_decUserOff;
 	double m_azUserOff, m_elUserOff;
 	double m_lonUserOff, m_latUserOff;
+	double m_focusOffset;
 	int m_latResult, m_lonResult;
 	int m_focusResult;
 	double m_fwhm;
+	double m_lambda;
 	double m_targetRa;
 	double m_targetDec;
 

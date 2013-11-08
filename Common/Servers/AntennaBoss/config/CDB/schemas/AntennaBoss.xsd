@@ -51,6 +51,7 @@
 			<xs:element name="pointingElevationCorrection" type="baci:ROdouble"/>
 			<xs:element name="refractionCorrection" type="baci:ROdouble"/>
 			<xs:element name="FWHM" type="baci:ROdouble" />
+			<xs:element name="waveLength" type="baci:ROdouble" />
 		</xs:sequence>
 		<!-- sleep time of the watching thread (microseconds), this is the thread that keeps data up to date -->
 		<xs:attribute name="WatchingThreadTime" type="xs:unsignedLong" use="required" />

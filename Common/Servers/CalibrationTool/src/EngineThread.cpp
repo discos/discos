@@ -38,10 +38,12 @@ CEngineThread::CEngineThread (const ACE_CString & name,
     m_observatory = Antenna::Observatory::_nil ();
     observatoryError = false;
     m_LatOff = m_LonOff = 0.0;
+    m_focusOffset=0.0;
     m_latAmp=m_lonAmp=m_latAmpErr=m_lonAmpErr=m_latFwhm=m_lonFwhm=m_latFwhmErr=m_lonFwhmErr=0.0;
     m_latPositions = new double[DATACOORDINATESSEQLENGTH];
     m_lonPositions = new double[DATACOORDINATESSEQLENGTH];
 	m_fwhm=0.0;
+	m_lambda=0.0;
 	m_targetRa=m_targetDec=0.0;
 	m_focusScanCenter=0.0;
 	m_minorServoCurrentAxisPosition=-1;
@@ -688,10 +690,10 @@ void CEngineThread::getAntennaData()
 	}
 	if (!CORBA::is_nil(m_antennaBoss)) {
 		ACSErr::Completion_var comp;
-		CORBA::Double fwhm,targetRa,targetDec,sourceFlux;
+		CORBA::Double fwhm,targetRa,targetDec,sourceFlux,waveLength;
 		CORBA::String_var target;
 		try { //get the target name and parameters
-			ACS::ROdouble_var fwhmRef,targetRaRef,targetDecRef,sourceFluxRef;
+			ACS::ROdouble_var fwhmRef,targetRaRef,targetDecRef,sourceFluxRef,wlRef;
 			ACS::ROstring_var targetRef;
 			fwhmRef=m_antennaBoss->FWHM();
 			fwhm=fwhmRef->get_sync(comp.out());
@@ -707,6 +709,21 @@ void CEngineThread::getAntennaData()
 			}
 			else {
 				m_fwhm=(double)fwhm;
+			}
+			wlRef=m_antennaBoss->waveLength();
+			waveLength=wlRef->get_sync(comp.out());
+			ACSErr::CompletionImpl wlCompl(comp);
+			if (!wlCompl.isErrorFree()) {
+				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,wlCompl,"CEngineThread::getAntennaData()");
+				impl.setAttributeName("waveLength");
+				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
+				impl.log(LM_ERROR);
+				m_data->setStatus(Management::MNG_WARNING);
+				m_lambda=0.0;
+				m_data->detectError();
+			}
+			else {
+				m_lambda=(double)waveLength;
 			}
 			targetRaRef=m_antennaBoss->targetRightAscension();
 			targetRa=targetRaRef->get_sync(comp.out());
@@ -777,6 +794,7 @@ void CEngineThread::getAntennaData()
 			m_data->setStatus(Management::MNG_WARNING);
 			m_antennaBossError=true;
 			m_fwhm=0.0;
+			m_lambda=0.0;
 			m_targetRa=m_targetDec=0.0;
 			m_data->setSourceName ("");
 			m_data->detectError();
@@ -966,6 +984,136 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    m_dataSeqCounter = 0;
 	   m_data->setLonDone();
 	} // m_CoordIndex == 0
+    else if ((m_data->getCoordIndex() ==2)) {	//    	m_coordIndex = 2   ZP
+    	int pos=computeScanCenter(m_off,m_dataSeqCounter);
+    	//double tempLat;
+    	double offMin,offMax;
+    	//double toll;
+	    m_LatPos=m_latPositions[pos];
+	    //tempLat=m_latPositions[pos];
+	    //m_cosLat=cos(tempLat);
+	    //m_Par[2] = m_fwhm / m_cosLat;
+	    m_Par[2] = m_lambda;
+	    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par, m_errPar, (integer *)&m_dataSeqCounter, &par, &tol, &ftry, (E_fp) fgaus_, &m_reducedCHI, &m_ierr);
+	    //m_Par[2] *=m_cosLat;
+	    //m_errPar[2] *=m_cosLat;
+	    //m_LonOff = m_Par[1];
+	    //m_LonErr = m_errPar[1];
+        //m_lonAmp=m_Par[0];
+	    //m_lonAmpErr=m_errPar[0];
+        //m_lonFwhm=m_Par[2];
+        //m_lonFwhmErr=m_errPar[2];
+	    if (m_fileOpened) {
+	        //2013.093.21:12:38.62#peakf#gaussfit zS  -0.647  20.166  15.784  -7.719  0.071  15
+	    	tS.value (now);
+	    	out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fpeakf#gaussfit zP ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+	    	m_file << (const char *) out;
+	    	m_file << m_Par[1]  << " " << m_Par[2] << " " << m_Par[0] << " " <<  m_Par[3] << " " << m_Par[4] << " " << m_ierr << std::endl;
+	    	out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#err ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+	    	m_file << (const char *) out;
+	    	m_file << m_errPar[1] << " " << m_errPar[2] << " " << m_errPar[0] << " " << m_errPar[3] << " " << m_errPar[4] << " " << m_reducedCHI << std::endl;
+	    }
+		ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FOCUSFIT zP  %lf %lf %lf %lf %lf %d",m_Par[1], m_Par[2], m_Par[0] , m_Par[3], m_Par[4], m_ierr));
+	    m_focusResult=0;
+	    offMin=GETMIN(m_off[0],m_off[m_dataSeqCounter-1]);
+	    offMax=GETMAX(m_off[0],m_off[m_dataSeqCounter-1]);
+	    //toll=1+m_config->getFWHMTolerance();
+	    if (!m_data->isErrorDetected()) {
+			if (m_ierr>0) {
+				if ((m_Par[1]>offMin) && (m_Par[1]<offMax)) {
+						m_focusResult=1;
+				}
+				else {
+					ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "INVALID_IN_FOCUS_FIT"));
+				}
+			}
+			else {
+				ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FOCUSFIT_DID_NOT_CONVERGE"));
+			}
+	    }
+	    else {
+			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "ERROR_DETECTED_DURING_FOCUS_SCAN"));
+	    }
+	    m_focusOffset=m_Par[1];
+	    m_data->setAmplitude (m_Par[0]);
+		m_data->setPeakOffset (m_Par[1]);
+		m_data->setHPBW (m_Par[2]);
+		m_data->setOffset (m_Par[3]);
+		m_data->setSlope (m_Par[4]);
+	    m_data->setArrayDataX (m_dataSeq,m_dataSeqCounter);
+	    m_data->setArrayDataY (m_tsysDataSeq,m_dataSeqCounter);
+	    for (i = 0; i < m_dataSeqCounter; i++) {
+		  m_dataSeq[i] = 0.0;
+		  m_tsysDataSeq[i] = 0.0;
+	    }
+	    m_dataSeqCounter = 0;
+	   m_data->setFocusDone();
+	} // m_CoordIndex == 2
+    else if ((m_data->getCoordIndex() ==2)) {	//    	m_coordIndex = 3   Zs
+    	int pos=computeScanCenter(m_off,m_dataSeqCounter);
+    	//double tempLat;
+    	double offMin,offMax;
+    	//double toll;
+	    m_LatPos=m_latPositions[pos];
+	    //tempLat=m_latPositions[pos];
+	    //m_cosLat=cos(tempLat);
+	    //m_Par[2] = m_fwhm / m_cosLat;
+	    m_Par[2]=m_lambda;
+	    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par, m_errPar, (integer *)&m_dataSeqCounter, &par, &tol, &ftry, (E_fp) fgaus_, &m_reducedCHI, &m_ierr);
+	    //m_Par[2] *=m_cosLat;
+	    //m_errPar[2] *=m_cosLat;
+	    //m_LonOff = m_Par[1];
+	    //m_LonErr = m_errPar[1];
+        //m_lonAmp=m_Par[0];
+	    //m_lonAmpErr=m_errPar[0];
+        //m_lonFwhm=m_Par[2];
+        //m_lonFwhmErr=m_errPar[2];
+	    if (m_fileOpened) {
+	        //2013.093.21:12:38.62#peakf#gaussfit zS  -0.647  20.166  15.784  -7.719  0.071  15
+	    	tS.value (now);
+	    	out.Format("%04d.%03d.%02d:%02d:%02d.%02d#fpeakf#gaussfit zS ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+	    	m_file << (const char *) out;
+	    	m_file << m_Par[1]  << " " << m_Par[2] << " " << m_Par[0] << " " <<  m_Par[3] << " " << m_Par[4] << " " << m_ierr << std::endl;
+	    	out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#err ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+	    	m_file << (const char *) out;
+	    	m_file << m_errPar[1] << " " << m_errPar[2] << " " << m_errPar[0] << " " << m_errPar[3] << " " << m_errPar[4] << " " << m_reducedCHI << std::endl;
+	    }
+		ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FOCUSFIT  zS %lf %lf %lf %lf %lf %d",m_Par[1], m_Par[2], m_Par[0] , m_Par[3], m_Par[4], m_ierr));
+	    m_focusResult=0;
+	    offMin=GETMIN(m_off[0],m_off[m_dataSeqCounter-1]);
+	    offMax=GETMAX(m_off[0],m_off[m_dataSeqCounter-1]);
+	    //toll=1+m_config->getFWHMTolerance();
+	    if (!m_data->isErrorDetected()) {
+			if (m_ierr>0) {
+				if ((m_Par[1]>offMin) && (m_Par[1]<offMax)) {
+						m_focusResult=1;
+				}
+				else {
+					ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "INVALID_IN_FOCUS_FIT"));
+				}
+			}
+			else {
+				ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FOCUSFIT_DID_NOT_CONVERGE"));
+			}
+	    }
+	    else {
+			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "ERROR_DETECTED_DURING_FOCUS_SCAN"));
+	    }
+	    m_focusOffset=m_Par[1];
+	    m_data->setAmplitude (m_Par[0]);
+		m_data->setPeakOffset (m_Par[1]);
+		m_data->setHPBW (m_Par[2]);
+		m_data->setOffset (m_Par[3]);
+		m_data->setSlope (m_Par[4]);
+	    m_data->setArrayDataX (m_dataSeq,m_dataSeqCounter);
+	    m_data->setArrayDataY (m_tsysDataSeq,m_dataSeqCounter);
+	    for (i = 0; i < m_dataSeqCounter; i++) {
+		  m_dataSeq[i] = 0.0;
+		  m_tsysDataSeq[i] = 0.0;
+	    }
+	    m_dataSeqCounter = 0;
+	   m_data->setFocusDone();
+	} // m_CoordIndex == 3
     if (m_data->isPointingScan()) {
 		if (m_data->isPointingScanDone()) {
 			if (m_fileOpened) {
@@ -995,9 +1143,20 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 		}
     }
     else if (m_data->isFocusScan()) {
-    	/**********************/
-    	//OUTPUT OF FOCUS SCAN
-    	/************************/
+    	if (m_data->isFocusScanDone()) {
+    		if (m_fileOpened) {
+    			tS.value (now);
+    			if ((m_data->getCoordIndex() ==2)) {	//    	m_coordIndex = 2   Zs
+    				out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#offset zS", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+    			}
+    			else if ((m_data->getCoordIndex() ==3)) {	//    	m_coordIndex = 3   Zp
+    				out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#offset zP ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
+    			}
+    			m_file << (const char *) out;
+    			m_file << m_Par[1] << " " <<  m_focusScanCenter << " " <<  m_focusScanCenter+m_Par[1] << m_focusResult << std::endl;
+    			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %d",	m_Par[1],  m_focusScanCenter, m_focusScanCenter+m_Par[1], m_focusResult));
+    		}
+    	}
     }
 }
 
@@ -1209,12 +1368,70 @@ void CEngineThread::setAxisOffsets()
 			}
 	   		break;
 	   	case Management::MNG_SUBR_Z:
+	   		try {
+	   			if (!CORBA::is_nil(m_minorServoBoss)) {
+	   				if ((m_data->isFocusScanDone()) && (m_focusResult)) {
+	   					m_minorServoBoss->setUserOffset((const char*)m_data->getMinorServoNameForAxis(),m_focusOffset);
+	   				}
+	   			}
+	   		}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::setAxisOffsets()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				impl.log(LM_ERROR);
+				m_data->setStatus(Management::MNG_WARNING);
+				m_minorServoBossError=true;
+			}
+			catch (MinorServoErrors::OperationNotPermittedEx& ex) {
+				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::setAxisOffsets()");
+				impl.setOperationName("setUserOffsets()");
+				impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
+				impl.log(LM_ERROR);
+				m_data->setStatus(Management::MNG_WARNING);
+			}
+			catch (ManagementErrors::ConfigurationErrorEx& ex) {
+				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::setAxisOffsets()");
+				impl.setOperationName("setUserOffsets()");
+				impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
+				impl.log(LM_ERROR);
+				m_data->setStatus(Management::MNG_WARNING);
+			}
 	   		break;
 	   	case Management::MNG_SUBR_X:
 	   		break;
 	   	case Management::MNG_SUBR_Y:
 	   		break;
 	   	case Management::MNG_PFP_Z:
+	   		try {
+	   			if (!CORBA::is_nil(m_minorServoBoss)) {
+	   				if ((m_data->isFocusScanDone()) && (m_focusResult)) {
+	   					m_minorServoBoss->setUserOffset((const char*)m_data->getMinorServoNameForAxis(),m_focusOffset);
+	   				}
+	   			}
+	   		}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::setAxisOffsets()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				impl.log(LM_ERROR);
+				m_data->setStatus(Management::MNG_WARNING);
+				m_minorServoBossError=true;
+			}
+			catch (MinorServoErrors::OperationNotPermittedEx& ex) {
+				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::setAxisOffsets()");
+				impl.setOperationName("setUserOffsets()");
+				impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
+				impl.log(LM_ERROR);
+				m_data->setStatus(Management::MNG_WARNING);
+			}
+			catch (ManagementErrors::ConfigurationErrorEx& ex) {
+				_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::setAxisOffsets()");
+				impl.setOperationName("setUserOffsets()");
+				impl.setComponentName((const char *)m_config->getMinorServoBossComponent());
+				impl.log(LM_ERROR);
+				m_data->setStatus(Management::MNG_WARNING);
+			}
 	   		break;
 	   	case Management::MNG_PFP_Y:
 	   		break;
@@ -1329,6 +1546,10 @@ void CEngineThread::writePointingFileHeaders(const ACS::Time& now)
     case Management::MNG_SUBR_X:
     	break;
     case Management::MNG_SUBR_Y:
+    	break;
+    case Management::MNG_SUBR_ROTY:
+    	break;
+    case Management::MNG_SUBR_ROTX:
     	break;
     case Management::MNG_PFP_Z:
     	break;

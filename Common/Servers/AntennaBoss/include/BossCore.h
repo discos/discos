@@ -616,6 +616,12 @@ public:
 	 */
 	inline const double& getFWHM() const { return m_FWHM; }
 	
+	/**
+	 * @return the waveLength in meters currently in use. The default is zero, that means the component will be in <i>MNG_WARNING</i>
+	 * status.
+	 */
+	inline const double& getWaveLength() const { return m_waveLength; }
+
 	void getAllattributes();
 	
 	/**

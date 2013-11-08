@@ -263,6 +263,12 @@ public:
 	 * @return pointer to read-only double property FWHM
 	*/	
 	virtual ACS::ROdouble_ptr FWHM() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the 	waveLength property implementation of IDL interface.
+	 * @return pointer to read-only double property 	waveLength
+	*/
+	virtual ACS::ROdouble_ptr 	waveLength() throw (CORBA::SystemException);
 		
 	/**
 	 * This method is used to stow the antenna.
@@ -623,6 +629,7 @@ private:
 	SmartPropertyPointer<ROdouble> m_ppointingElevationCorrection;
 	SmartPropertyPointer<ROdouble> m_prefractionCorrection;
 	SmartPropertyPointer<ROdouble> m_pFWHM;
+	SmartPropertyPointer<ROdouble> m_pwaveLength;
 	SmartPropertyPointer<ROdouble> m_ptargetFlux;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),
 	  POA_Management::ROTBoolean>  > m_pcorrectionEnabled;
