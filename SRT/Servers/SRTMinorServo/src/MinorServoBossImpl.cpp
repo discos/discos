@@ -542,8 +542,14 @@ void MinorServoBossImpl::stopScan() throw (ManagementErrors::SubscanErrorEx)
                     m_configuration->m_isScanning = false;
                     if((m_configuration->m_scan).wasElevationTrackingEn)
                         turnTrackingOn();
-                    else
-                        component_ref->setPosition((m_configuration->m_scan).plainCentralPos, NOW);
+                    else {
+                        if(component_ref->isReady()) {
+                            component_ref->setPosition((m_configuration->m_scan).plainCentralPos, NOW);
+                        }
+                        else {
+                            THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan(): component not ready", true);
+                        }
+                    }
 
                     m_configuration->m_isScanActive = false;
                 }
@@ -1087,7 +1093,12 @@ void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::Configuratio
                 // set the position
                 if(positions.length()) {
                     if(!CORBA::is_nil(component_ref)) {
-                        component_ref->setPosition(positions, NOW);
+                        if(component_ref->isReady())
+                            component_ref->setPosition(positions, NOW);
+                        else {
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::turnTrackingOff(): cannot set the SRP position"));
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::turnTrackingOff(): SRP not ready"));
+                        }
                     }
                     else {
                         THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: cannot set the SRP position.", true);
@@ -1100,6 +1111,9 @@ void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::Configuratio
             catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
                 ex.log(LM_DEBUG);
                 throw ex.getConfigurationErrorEx();     
+            }
+            catch(...) {
+                THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: cannot set the SRP position.", true);
             }
         }
 
@@ -1477,10 +1491,12 @@ void MinorServoBossImpl::setElevationTrackingImpl(const char * value) throw (Man
     m_configuration->setElevationTracking(flag); 
     try {
         if(isReady()) {
-            if(m_configuration->isElevationTrackingEn())
+            if(m_configuration->isElevationTrackingEn()) {
                 turnTrackingOn();
-            else
+            }
+            else {
                 turnTrackingOff();
+            }
         }
     }
     catch(...) {
@@ -1566,7 +1582,13 @@ void MinorServoBossImpl::setASConfigurationImpl(const char * value) throw (Manag
                 // set the position
                 if(positions.length()) {
                     if(!CORBA::is_nil(component_ref)) {
-                        component_ref->setPosition(positions, NOW);
+                        if(component_ref->isReady()) {
+                            component_ref->setPosition(positions, NOW);
+                        }
+                        else {
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::setASConfiguration(): cannot set the position"));
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::setASConfiguration(): SRP not ready"));
+                        }
                     }
                     else {
                         ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::setASConfiguration(): cannot set the position"));

@@ -172,6 +172,11 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
     }
     catch (ACSErr::ACSbaseExImpl& E) {
         ACS_SHORT_LOG((LM_ERROR, "Unexpected error in SocketListener"));
+        pthread_mutex_unlock(m_params->listener_mutex); 
+    }
+    catch (...) {
+        ACS_SHORT_LOG((LM_ERROR, "Unexpected error in SocketListener"));
+        pthread_mutex_unlock(m_params->listener_mutex); 
     }
 }
  

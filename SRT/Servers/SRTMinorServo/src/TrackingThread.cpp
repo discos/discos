@@ -59,7 +59,13 @@ void TrackingThread::runLoop()
                         ACS::doubleSeq positions = m_configuration->getPosition(comp_name, getTimeStamp());
                         // Set a minor servo position if the doubleSeq is not empty
                         if(positions.length()) {
-                            component_ref->setPosition(positions, NOW);
+                            if(component_ref->isReady()) {
+                                component_ref->setPosition(positions, NOW);
+                            }
+                            else {
+                                ACS_SHORT_LOG((LM_WARNING, "TrackingThread: component not ready."));
+                                m_configuration->m_isElevationTracking = false;
+                            }
                         }
                         else {
                             ACS_SHORT_LOG((LM_WARNING, "TrackingThread: cannot get the position to set."));
@@ -72,6 +78,9 @@ void TrackingThread::runLoop()
                     }
                 }
         }
+    }
+    catch (ACSErr::ACSbaseExImpl& E) {
+        ACS_SHORT_LOG((LM_WARNING, "Unexpected error in TrackingThread"));
     }
     catch(...) {
         ACS_SHORT_LOG((LM_WARNING, "An error is occurred in TrackingThread"));

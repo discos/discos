@@ -49,6 +49,10 @@ void RequestDispatcher::runLoop()
         }
         pthread_mutex_unlock(m_params->scheduler_mutex); 
     }
+    catch (ACSErr::ACSbaseExImpl& E) {
+        pthread_mutex_unlock(m_params->scheduler_mutex); 
+        ACS_SHORT_LOG((LM_WARNING, "Unexpected error in RequestDispatcher"));
+    }
     catch(...) {
         pthread_mutex_unlock(m_params->scheduler_mutex); 
         ACS_SHORT_LOG((LM_ERROR, "Unexpected error in RequestDispatcher"));
