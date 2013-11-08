@@ -64,7 +64,6 @@ struct MSThreadParameters {
     ACS::Time starting_scan_time;
     bool is_tracking_enabled;
     ScanData scan_data;
-    MinorServoBossImpl * bossImpl_ptr;
 };
 
 

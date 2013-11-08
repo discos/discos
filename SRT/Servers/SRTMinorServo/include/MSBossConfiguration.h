@@ -30,6 +30,8 @@
 #include <acsncSimpleSupplier.h>
 #include <AntennaBossC.h>
 
+struct MinorServoBossImpl;
+
 const std::string actions_separator = "@";
 const std::string items_separator = ":";
 const std::string pos_separator = ",";
@@ -60,7 +62,7 @@ class MSBossConfiguration {
 public:
 
     /** Default constructor */
-    MSBossConfiguration(maci::ContainerServices *Services);
+    MSBossConfiguration(maci::ContainerServices *Services, MinorServoBossImpl *bossImpl);
 
     /** Destructor */
     ~MSBossConfiguration();
@@ -196,6 +198,8 @@ public:
 
     maci::ContainerServices * m_services;
     Antenna::AntennaBoss_var m_antennaBoss;
+
+    MinorServoBossImpl * m_bossImpl_ptr;
 };
 
 

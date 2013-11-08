@@ -51,11 +51,10 @@ MinorServoBossImpl::MinorServoBossImpl(
     m_thread_params.is_parking_locked = false;
     m_thread_params.is_initialized = false;
     m_thread_params.is_scanning_ptr = NULL;
-    m_thread_params.bossImpl_ptr = this;
     m_status_value = Management::MNG_OK;
     (m_thread_params.scan_data).positioning_time = 0;
     m_servo_scanned = "none";
-    m_configuration = new MSBossConfiguration(m_services);
+    m_configuration = new MSBossConfiguration(m_services, this);
     m_parser= new SimpleParser::CParser<MinorServoBossImpl>(this, 10);
 }
 

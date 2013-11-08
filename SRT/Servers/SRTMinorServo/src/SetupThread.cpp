@@ -336,6 +336,18 @@ void SetupThread::run()
     m_configuration->m_isConfigured = true;
     m_configuration->m_actualSetup = m_configuration->m_commandedSetup;
 
+    try {
+        if(m_configuration->isElevationTrackingEn() && m_configuration->m_bossImpl_ptr != NULL) {
+            (m_configuration->m_bossImpl_ptr)->turnTrackingOn();
+        }
+        else {
+            ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): NULL pointer for the Boss.")));
+        }
+    }
+    catch(...) {
+        ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): Cannot set the tracking ON.")));
+    }
+
     ACS_SHORT_LOG((LM_INFO, ("SetupThread::run(): setup done.")));
     return;
 }

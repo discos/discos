@@ -6,7 +6,7 @@ using namespace std;
 
 static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
+MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services, MinorServoBossImpl * bossImpl_ptr)
 {
     m_actualSetup = "unknown";
     m_commandedSetup = "";
@@ -24,6 +24,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services)
     m_isASConfiguration = false;
     m_nchannel = NULL;
     m_antennaBoss = Antenna::AntennaBoss::_nil();
+    m_bossImpl_ptr = bossImpl_ptr;
 }
 
 MSBossConfiguration::~MSBossConfiguration() {}
