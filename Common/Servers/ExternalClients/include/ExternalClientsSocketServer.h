@@ -18,7 +18,7 @@
 #include "Configuration.h"
 #include <SchedulerC.h>
 #include <AntennaBossC.h>
-#include <ObservatoryC.h>
+#include <ReceiversBossC.h>
 
 #define BUFFERSIZE 1000
 #define GAVINO "MANAGEMENT/Gavino"
@@ -55,13 +55,13 @@ public:
 	*/
 	void initialize(CConfiguration *config) throw (ComponentErrors::SocketErrorExImpl);
 
-    void execute() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl);
+	void execute() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl);
 
-    void cleanUp();
+	void cleanUp();
 
-    void cmdToScheduler();
+	void cmdToScheduler();
 
-    /** This is used to describe the status of connection to the External Client */
+	/** This is used to describe the status of connection to the External Client */
 	enum ExternalClientSocketStatus { 
 		ExternalClientSocketStatus_NOTCNTD,   	         /*!< Socket is not connected, no operation available  */
 		ExternalClientSocketStatus_CNTDING,             /*!< Connection is in progress, no operation available */
@@ -69,60 +69,57 @@ public:
 		ExternalClientSocketStatus_BSY			         /*!< Socket is busy, no operation available */		
 	};
 
-    /** 
-	 * Sets the external client socket status
-     * if status is set to ExternalClientSocketStatus::ExternalClientSocketStatus_BSY then the m_bBusy flag is also set,
-	 * this flag remains on until the status is set ExternalClientSocketStatus::ExternalClientSocketStatus_CNTD esplicitally.
-	 * @param status the new external socket status status.
+    	/** 
+	* Sets the external client socket status
+	* if status is set to ExternalClientSocketStatus::ExternalClientSocketStatus_BSY then the m_bBusy flag is also set,
+	* this flag remains on until the status is set ExternalClientSocketStatus::ExternalClientSocketStatus_CNTD esplicitally.
+	* @param status the new external socket status status.
 	*/
 	void setExternalClientSocketStatus(ExternalClientSocketStatus status);
 
-    /** 
-	 * Gets the external socket status 
-	 * @return the present external socket status
+    	/** 
+	* Gets the external socket status 
+	* @return the present external socket status
 	*/
 	ExternalClientSocketStatus getStatus() const;
 
-    /** 
-	 * This function is used to check if the socket is busy with some stuff.
-	 * @return true if the antenna is not ready to accept new commands.
+    	/** 
+	* This function is used to check if the socket is busy with some stuff.
+	* @return true if the antenna is not ready to accept new commands.
 	*/
 	bool isBusy();
 
-    bool m_byebye;
+    	bool m_byebye;
 
-    void byebye() {m_byebye=true;};
+    	void byebye() {m_byebye=true;};
 	
 private:
-    ContainerServices* m_services;
+    	ContainerServices* m_services;
 
 	/** It contains error information */	
 	CError m_Error;
 	/** Component configuration data */
 	CConfiguration *m_configuration;
-    /** */
+    	/** */
 	bool m_bTimedout;
 	/** This flag is true if the socket is busy (turned on when the status is BSY, turned off when the status is CNTD again)*/
 	bool m_bBusy;
-    /** Connection status */
+    	/** Connection status */
 	ExternalClientSocketStatus m_Status;
-    // New Socket created by Accept function
-    CSocket newExternalClientsSocketServer;
-    /** This is the reference to the scheduler component */
-    Management::Scheduler_var m_Scheduler;
-    /** This is the reference to the antenna boss component */
-    Antenna::AntennaBoss_var m_antennaBoss;
-    /**
-	 * This is the reference to the observatory component
-	 */
-	Antenna::Observatory_var m_observatory;
+    	// New Socket created by Accept function
+    	CSocket newExternalClientsSocketServer;
+    	/** This is the reference to the scheduler component */
+    	Management::Scheduler_var m_Scheduler;
+    	/** This is the reference to the antenna boss component */
+    	Antenna::AntennaBoss_var m_antennaBoss;
+    	/** This is the reference to the receiver boss component */
+    	Receivers::ReceiversBoss_var m_receiversBoss;
 
-    int receiveBuffer(BYTE *Msg,WORD Len);
-    void printBuffer(BYTE *Buff,WORD Len);
-    OperationResult sendBuffer(BYTE *Msg,WORD Len);
-    bool m_accept;
-    char superVisorName[20];
-    IRA::CString m_observatoryComp;
+    	int receiveBuffer(BYTE *Msg,WORD Len);
+    	void printBuffer(BYTE *Buff,WORD Len);
+    	OperationResult sendBuffer(BYTE *Msg,WORD Len);
+    	bool m_accept;
+    	char superVisorName[20];
 };
 
 #endif
