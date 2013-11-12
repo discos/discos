@@ -306,6 +306,10 @@ module MinorServo {
          */
         void getAxesInfo(out ACS::stringSeq axes, out ACS::stringSeq units) raises (ManagementErrors::ConfigurationErrorEx);
 
+
+		/** Return the code of the axis involved in the scan */
+	    string getScanAxis() raises (ManagementErrors::SubscanErrorEx);
+
  
         /** Return the positions of the active axes
          *  

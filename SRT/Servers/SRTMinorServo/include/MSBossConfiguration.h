@@ -121,6 +121,7 @@ public:
         double range;
         std::string comp_name;
         unsigned short axis_index;
+        std::string axis_code;
         ACS::doubleSeq actPos;
         ACS::doubleSeq centralPos;
         ACS::doubleSeq plainCentralPos;
@@ -145,6 +146,7 @@ public:
             const double range, 
             const std::string comp_name, 
             const unsigned short axis_index, 
+            const std::string axis_code,
             const ACS::doubleSeq actPos,
             const ACS::doubleSeq centralPos,
             const ACS::doubleSeq plainCentralPos,

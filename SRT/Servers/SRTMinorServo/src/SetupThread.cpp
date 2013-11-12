@@ -171,6 +171,7 @@ void SetupThread::run()
     // Positioning
     counter = 0;
     vector<string> on_target_check; 
+    vector<string> on_setup_check; 
     while(true) {
         for(vector<string>::iterator iter = toMove.begin(); iter != toMove.end(); iter++) {
             string comp_name = *iter;
@@ -212,6 +213,17 @@ void SetupThread::run()
                                     }
                                 }
                             }
+
+                            if(find(on_setup_check.begin(), on_setup_check.end(), comp_name) == on_setup_check.end()) {
+                                if(component_ref->isReadyToSetup())
+                                    component_ref->setup(0);
+                                on_setup_check.push_back(comp_name);
+                                on_target = false;
+                                continue;
+                            }
+
+                            if(component_ref->isStarting())
+                                on_target = false;
 
                             if(on_target) {
                                 if(find(on_target_check.begin(), on_target_check.end(), comp_name) == on_target_check.end()) {
@@ -337,11 +349,13 @@ void SetupThread::run()
     m_configuration->m_actualSetup = m_configuration->m_commandedSetup;
 
     try {
-        if(m_configuration->isElevationTrackingEn() && m_configuration->m_bossImpl_ptr != NULL) {
-            (m_configuration->m_bossImpl_ptr)->turnTrackingOn();
-        }
-        else {
-            ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): NULL pointer for the Boss.")));
+        if(m_configuration->isElevationTrackingEn()) {
+            if(m_configuration->m_bossImpl_ptr != NULL) {
+                (m_configuration->m_bossImpl_ptr)->turnTrackingOn();
+            }
+            else {
+                ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): NULL pointer for the Boss.")));
+            }
         }
     }
     catch(...) {

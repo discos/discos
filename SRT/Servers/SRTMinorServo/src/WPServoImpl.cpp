@@ -756,13 +756,18 @@ void WPServoImpl::setOffset(const ACS::doubleSeq &offset, ACS::doubleSeq &target
             // Set the positions: the new offsets will be added in the setCmdPos method
             for(vector<PositionItem>::iterator iter = vitem.begin(); iter != vitem.end(); iter++) {
                 timestamp = getTimeStamp();
-                m_wpServoTalker_ptr->setCmdPos((*iter).position, timestamp, (*iter).exe_time);
+                try {
+                    m_wpServoTalker_ptr->setCmdPos((*iter).position, timestamp, (*iter).exe_time);
+                }
+                catch(...) {
+                    THROW_EX(MinorServoErrors, OperationNotPermittedEx, "Cannot set position.", true);
+                }
             }
     }
     catch(...) {
         pthread_mutex_unlock(&offset_mutex); 
-        m_status_ptr->restart();
-        throw;
+        m_status_ptr->restart(); // TO REMOVE?
+        THROW_EX(MinorServoErrors, OperationNotPermittedEx, "Cannot set the offset.", true);
     }
         
     pthread_mutex_unlock(&offset_mutex); 

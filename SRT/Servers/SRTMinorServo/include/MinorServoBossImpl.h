@@ -271,6 +271,10 @@ public:
     
     /** Return the central position of the axis involved in the scan */
     CORBA::Double getCentralScanPosition() throw (ManagementErrors::SubscanErrorEx);
+    
+
+    /** Return the code of the axis involved in the scan */
+    char * getScanAxis() throw (ManagementErrors::SubscanErrorEx);
 
 
     /** 

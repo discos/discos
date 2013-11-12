@@ -41,7 +41,6 @@ void MSBossConfiguration::init(string setupMode, bool keepSetup) throw (Manageme
         m_isStarting = true;
         m_baseSetup = setupMode;
         m_commandedSetup = m_isASConfiguration ? setupMode + "_ASACTIVE" : setupMode;
-        m_isASConfiguration = false;
         ACS::doubleSeq dummy;
 
         // Read the component configuration
@@ -240,7 +239,6 @@ void MSBossConfiguration::setASConfiguration(IRA::CString flag) throw (Managemen
     const IRA::CString OFF("OFF");
     if(flag == ON || flag == OFF) {
         m_isASConfiguration = (flag == ON) ? true : false;
-        // Se il sistema è ready, leggi la configurazione attuale e nel caso cambiala
     }
     else {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, string("setASConfiguration(): value ") + string(flag) + " not allowed.", false);
@@ -267,6 +265,7 @@ void MSBossConfiguration::setScan(
         double range, 
         std::string comp_name, 
         unsigned short axis_index,
+        std::string axis_code,
         ACS::doubleSeq actPos,
         ACS::doubleSeq centralPos,
         ACS::doubleSeq plainCentralPos,
@@ -285,6 +284,7 @@ void MSBossConfiguration::setScan(
     m_scan.plainCentralPos = plainCentralPos;
     m_scan.virtualCentralElongation = virtualCentralElongation;
     m_scan.wasElevationTrackingEn = wasElevationTrackingEn;
+    m_scan.axis_code = axis_code;
 }
 
 

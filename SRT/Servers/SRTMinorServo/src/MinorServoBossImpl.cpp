@@ -958,6 +958,7 @@ void MinorServoBossImpl::startScanImpl(
                     range, 
                     comp_name, 
                     axis, 
+                    axis_code,
                     actPos, 
                     centralPos,
                     plainCentralPos,
@@ -1022,6 +1023,17 @@ CORBA::Double MinorServoBossImpl::getCentralScanPosition() throw (ManagementErro
     }
 
     return position_res[(m_configuration->m_scan).axis_index];
+}
+
+
+char * MinorServoBossImpl::getScanAxis() throw (ManagementErrors::SubscanErrorEx) {
+    if(isScanActive()) {
+        return CORBA::string_dup(((m_configuration->m_scan).axis_code).c_str());
+    }
+    else {
+        THROW_EX(ManagementErrors, SubscanErrorEx, "getScanAxis(): scan not active", true);
+    }
+
 }
 
 
@@ -1163,11 +1175,45 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
                 component_ref = MinorServo::WPServo::_nil();
                 component_ref = m_component_refs[*iter];
                 if(!CORBA::is_nil(component_ref))
-                    if(offset_type == "user")
-                        component_ref->clearUserOffset(true);
+                    if(offset_type == "user") {
+                        if(component_ref->isReady()) {
+                            try {
+                                component_ref->clearUserOffset(true);
+                            }
+                            catch(...) {
+                                THROW_EX(
+                                        MinorServoErrors, 
+                                        OperationNotPermittedEx, 
+                                        string("Cannot clear the WPServo user offset."), 
+                                        true
+                                );
+                            }
+                        }
+                        else if(!component_ref->isParked()) {
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): cannot clear the user offset."));
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): SRP not ready"));
+                        }
+                    }
                     else
-                        if(offset_type == "system")
-                            component_ref->clearSystemOffset(true);
+                        if(offset_type == "system") {
+                            if(component_ref->isReady()) {
+                                try {
+                                    component_ref->clearSystemOffset(true);
+                                }
+                                catch(...) {
+                                    THROW_EX(
+                                            MinorServoErrors, 
+                                            OperationNotPermittedEx, 
+                                            string("Cannot clear the WPServo system offset."), 
+                                            true
+                                    );
+                                }
+                            }
+                            else if(!component_ref->isParked()) {
+                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): cannot clear the system offset."));
+                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): SRP not ready"));
+                            }
+                        }
                         else {
                             THROW_EX(
                                     MinorServoErrors, 
@@ -1191,11 +1237,45 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
         if(m_component_refs.count(comp_name)) {
             component_ref = m_component_refs[comp_name];
             if(!CORBA::is_nil(component_ref)) {
-                    if(offset_type == "user")
-                        component_ref->clearUserOffset(true);
+                    if(offset_type == "user") {
+                        if(component_ref->isReady()) {
+                            try {
+                                component_ref->clearUserOffset(true);
+                            }
+                            catch(...) {
+                                THROW_EX(
+                                        MinorServoErrors, 
+                                        OperationNotPermittedEx, 
+                                        string("Cannot clear the WPServo user offset."), 
+                                        true
+                                );
+                            }
+                        }
+                        else if(!component_ref->isParked()) {
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): cannot clear the user offset."));
+                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): SRP not ready"));
+                        }
+                    }
                     else
-                        if(offset_type == "system")
-                            component_ref->clearSystemOffset(true);
+                        if(offset_type == "system") {
+                            if(component_ref->isReady()) {
+                                try {
+                                    component_ref->clearSystemOffset(true);
+                                }
+                                catch(...) {
+                                    THROW_EX(
+                                            MinorServoErrors, 
+                                            OperationNotPermittedEx, 
+                                            string("Cannot clear the WPServo system offset."), 
+                                            true
+                                    );
+                                }
+                            }
+                            else if(!component_ref->isParked()) {
+                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): cannot clear the system offset."));
+                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): SRP not ready"));
+                            }
+                        }
                         else {
                             THROW_EX(
                                     MinorServoErrors, 
@@ -1286,18 +1366,46 @@ void MinorServoBossImpl::setOffsetImpl(string axis_code, const double offset_val
 
     ACS::doubleSeq offset;
     offset.length(info.numberOfAxes);
-    for(size_t i=0; i<offset.length(); i++)
-        offset[i] = 0.0;
-    offset[info.axis_id] = offset_value;
+    ACS::doubleSeq_var actual_offset;
 
     MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
     if(m_component_refs.count(info.comp_name)) {
         component_ref = m_component_refs[info.comp_name];
         if(!CORBA::is_nil(component_ref)) {
-            if(offset_type == "user")
-                component_ref->setUserOffset(offset);
-            else if(offset_type == "system")
-                component_ref->setSystemOffset(offset);
+            if(offset_type == "user") {
+                actual_offset = component_ref->getUserOffset();
+                for(size_t i=0; i<offset.length(); i++)
+                    offset[i] = actual_offset[i];
+                offset[info.axis_id] = offset_value;
+                try {
+                    component_ref->setUserOffset(offset);
+                }
+                catch(...) {
+                    THROW_EX(
+                            MinorServoErrors, 
+                            OperationNotPermittedEx, 
+                            string("Cannot set the WPServo user offset."), 
+                            false
+                    );
+                }
+            }
+            else if(offset_type == "system") {
+                actual_offset = component_ref->getSystemOffset();
+                for(size_t i=0; i<offset.length(); i++)
+                    offset[i] = actual_offset[i];
+                offset[info.axis_id] = offset_value;
+                try {
+                    component_ref->setSystemOffset(offset);
+                }
+                catch(...) {
+                    THROW_EX(
+                            MinorServoErrors, 
+                            OperationNotPermittedEx, 
+                            string("Cannot set the WPServo system offset."), 
+                            false
+                    );
+                }
+            }
             else {
                 THROW_EX(
                         MinorServoErrors, 
@@ -1305,9 +1413,6 @@ void MinorServoBossImpl::setOffsetImpl(string axis_code, const double offset_val
                         string("The offset ") + offset_type + string(" doesn't exist"), 
                         false
                 );
-            }
-            if(isScanActive()) {
-                // Add the offset to the central pos
             }
         }
         else {
