@@ -21,6 +21,7 @@ SRTActiveSurfaceGUI::SRTActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorValues()), this, SLOT(changeGUIActuatorValues()));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorStatusLabels()), this, SLOT(changeGUIActuatorStatusLabels()));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasStatusCode()), this, SLOT(changeGUIasStatusCode()));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasProfileCode()), this, SLOT(changeGUIasProfileCode()));
 }
 
 void SRTActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::SRTActiveSurfaceBoss_var theASBoss)
@@ -10252,6 +10253,25 @@ void SRTActiveSurfaceGUI::changeGUIasStatusCode()
             break;
     }
 }
+
+void SRTActiveSurfaceGUI::changeGUIasProfileCode()
+{
+    switch (mySRTActiveSurfaceCore.asProfileCode) {
+        case (0):
+            ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "SHAPED", 0, QApplication::UnicodeUTF8));
+            break;
+        case (1):
+            ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "SHAPED FIXED", 0, QApplication::UnicodeUTF8));
+            break;
+        case (2):
+            ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "PARABOLIC", 0, QApplication::UnicodeUTF8));
+            break;
+        case (3):
+            ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "PARABOLIC FIXED", 0, QApplication::UnicodeUTF8));
+            break;
+    }
+}
+
 void SRTActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 {
     ActuatorStatusRunLabel->clear();

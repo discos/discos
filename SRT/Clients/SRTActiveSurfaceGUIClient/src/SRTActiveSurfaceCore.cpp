@@ -68,6 +68,8 @@ void SRTActiveSurfaceCore::run(void)
     Management::ROTSystemStatus_var bossStatus_var;
     ACS::pattern bossStatus_val;
 
+    ActiveSurface::ROTASProfile_var asProfile_var;
+    ACS::pattern asProfile_val;
 
 
     while (monitor == true) {
@@ -86,6 +88,24 @@ void SRTActiveSurfaceCore::run(void)
                 break;
         }
         emit setGUIasStatusCode();
+
+        asProfile_var = tASBoss->pprofile();
+        asProfile_val = asProfile_var->get_sync(completion.out());
+        switch (asProfile_val) {
+            case (ActiveSurface::AS_SHAPED):
+                asProfileCode = 0;
+                break;
+            case (ActiveSurface::AS_SHAPED_FIXED):
+                asProfileCode = 1;
+                break;
+            case (ActiveSurface::AS_PARABOLIC):
+                asProfileCode = 2;
+                break;
+            case (ActiveSurface::AS_PARABOLIC_FIXED):
+                asProfileCode = 3;
+                break;
+        }
+        emit setGUIasProfileCode();
 
         if (totalactuators >= 1 && totalactuators <= 24) // 1 circle
             i= 1;

@@ -73,6 +73,7 @@ class SRTActiveSurfaceCore : public QThread
         int ActuatorStatusLoopLabelCode;
         int ActuatorStatusCalLabelCode;
         int ASstatusCode;
+        int asProfileCode;
 
 	    bool callfromfunction, fromRun;
 
@@ -85,6 +86,7 @@ class SRTActiveSurfaceCore : public QThread
         int setGUIActuatorValues();
         int setGUIActuatorStatusLabels();
         int setGUIasStatusCode();
+        int setGUIasProfileCode();
         
 	private:
 	    ActiveSurface::SRTActiveSurfaceBoss_var tASBoss;
