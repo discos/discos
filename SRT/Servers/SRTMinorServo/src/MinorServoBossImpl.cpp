@@ -1029,12 +1029,12 @@ CORBA::Double MinorServoBossImpl::getCentralScanPosition() throw (ManagementErro
 }
 
 
-char * MinorServoBossImpl::getScanAxis() throw (ManagementErrors::SubscanErrorEx) {
+char * MinorServoBossImpl::getScanAxis() {
     if(isScanActive()) {
         return CORBA::string_dup(((m_configuration->m_scan).axis_code).c_str());
     }
     else {
-        THROW_EX(ManagementErrors, SubscanErrorEx, "getScanAxis(): scan not active", true);
+        return CORBA::string_dup("");
     }
 
 }

@@ -274,7 +274,7 @@ public:
     
 
     /** Return the code of the axis involved in the scan */
-    char * getScanAxis() throw (ManagementErrors::SubscanErrorEx);
+    char * getScanAxis();
 
 
     /** 
