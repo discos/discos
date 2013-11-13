@@ -6289,24 +6289,15 @@ void SRTActiveSurfaceGUI::move()
 
 void SRTActiveSurfaceGUI::setprofile()
 {
-    QString str, str1;
+    QString str;
     long profile;
     
-    str1 = ActuatorNumberlineEdit->text();
-    if (str1.length()==0) {
-	    ManagerLabel->clear();
-	    ////ManagerLabel->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 0);"));
-	    ManagerLabel->setText("choose actuator");
-    }
-    else {
-	    profile = (long)SetProfilecomboBox->currentIndex();
-	    ManagerLabel->clear();
-	    //ManagerLabel->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 255, 0);"));
-	    thecircle = theactuator = theradius = 0;
-	    str = QString("%1 %2").arg("ALL").arg("setprofile");
-	    ManagerLabel->setText(str);
-	    mySRTActiveSurfaceCore.setProfile(profile);
-    }
+    profile = (long)SetProfilecomboBox->currentIndex();
+    ManagerLabel->clear();
+	thecircle = theactuator = theradius = 0;
+	str = QString("%1 %2 %3").arg("set").arg("AS").arg("profile");
+	ManagerLabel->setText(str);
+	mySRTActiveSurfaceCore.setProfile(profile);
 }
 
 void SRTActiveSurfaceGUI::correction()
