@@ -1051,12 +1051,6 @@ void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::Configuration
     if(!isReady())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is not ready.", true);
 
-    if(isScanning())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: scan in progress.", true);
-
-    if(isScanActive())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: a scan is active.", true);
-
     int mutex_res = pthread_mutex_trylock(&tracking_mutex); 
     if(mutex_res != 0) {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is busy.", true);
@@ -1084,11 +1078,6 @@ void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::Configuration
 
 void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::ConfigurationErrorEx) 
 {
-    if(isScanning())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff(): scan in progress.", true);
-
-    if(isScanActive())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff(): a scan is active.", true);
 
     int mutex_res = pthread_mutex_trylock(&tracking_mutex); 
     try {
