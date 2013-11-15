@@ -9,6 +9,29 @@ import sys
  
 import ephem
 
+try:
+    import astropy
+    assert(astropy.version.major >= 0)
+    assert(astropy.version.minor >= 3)
+    from astropy.coordinates import Angle
+    from astropy import units as u
+
+    def fmt_dec(angle):
+        a = Angle(angle, u.deg)
+        return a.to_string(unit=u.deg, decimal=True, precision=5) + 'd'
+
+    def fmt_deg(angle):
+        a = Angle(angle, u.deg)
+        return a.to_string(unit=u.deg, sep=':', precision=5)
+
+    def fmt_hms(angle):
+        a = Angle(angle, u.deg)
+        return a.to_string(unit=u.hourangle, sep=':', precision=5) + 's'
+    
+    USING_ASTROPY = True
+except:
+    USING_ASTORPY = False
+
 def date_parser(arg):
     return datetime.datetime.strptime(arg, "%d/%m/%Y_%H:%M:%S")
  
@@ -40,6 +63,10 @@ def cmd_line():
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
+
+    if not USING_ASTROPY:
+        logging.warning("not using astropy for coordinates formatting")
+
     if options.filename:
         with open(options.filename, "rt") as tle_file:
             lines = tle_file.readlines()
@@ -83,12 +110,20 @@ def cmd_line():
     #get coordinates at specified intervals until stop
     while SRT.date.datetime() < stop_date:
         source.compute(SRT)
-        target_string = "%s\t%s\tEQ\t%s\t%s\t%s\t%s\n" % (source_name,
-                                                        options.scanmode,
-                                                        str(source.ra),
-                                                        str(source.dec),
-                                                        str(SRT.date),
-                                                        str(SRT.sidereal_time()))
+        if not USING_ASTROPY:
+            target_string = "%s\t%s\tEQ\t%s\t%s\t%s\t%s\n" % (source_name,
+                                                            options.scanmode,
+                                                            str(source.ra),
+                                                            str(source.dec),
+                                                            str(SRT.date),
+                                                            str(SRT.sidereal_time()))
+        else:
+            target_string = "%s\t%s\tEQ\t%s\t%s\t%s\t%s\n" % (source_name,
+                                                            options.scanmode,
+                                                            fmt_dec(source.ra),
+                                                            fmt_dec(source.dec),
+                                                            str(SRT.date),
+                                                            str(SRT.sidereal_time()))
         output_file.write(target_string)
         logging.debug(target_string)
         SRT.date = SRT.date.datetime() + options.delta
