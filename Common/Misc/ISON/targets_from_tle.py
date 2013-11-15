@@ -30,7 +30,7 @@ try:
     
     USING_ASTROPY = True
 except:
-    USING_ASTORPY = False
+    USING_ASTROPY = False
 
 def date_parser(arg):
     return datetime.datetime.strptime(arg, "%d/%m/%Y_%H:%M:%S")
