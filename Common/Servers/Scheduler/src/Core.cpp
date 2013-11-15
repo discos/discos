@@ -163,6 +163,10 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	// minor servo
 	m_parser->add("servoSetup","minorservo",4,&CCore::remoteCall);
 	m_parser->add("servoPark","minorservo",4,&CCore::remoteCall);
+	m_parser->add("setServoElevationTracking","minorservo",4,&CCore::remoteCall);
+	m_parser->add("setServoASConfiguration","minorservo",4,&CCore::remoteCall);
+	m_parser->add("clearServoOffsets","minorservo",4,&CCore::remoteCall);
+	m_parser->add("setServoOffset","minorservo",4,&CCore::remoteCall);
 
 	// active surface
 	m_parser->add("asSetup","activesurface",5,&CCore::remoteCall);

@@ -133,7 +133,7 @@ void CCore::startRecording(const ACS::Time& startTime,const long& subScanId) thr
 	//throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 	baseName=CCore::computeOutputFileName(ut,m_site,m_dut1,prj,suffix,extraPath);
 	//get the scan axis
-	scanAxis=CCore::computeScanAxis(m_antennaBoss,m_antennaBossError); // throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+	scanAxis=CCore::computeScanAxis(m_antennaBoss,m_antennaBossError,m_minorServoBoss,m_receiversBossError,*m_config); // throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
 	CCore::setupDataTransfer(m_scanStarted/*,m_streamPrepared*/,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
 			obsName,prj,baseName,path,extraPath,schedule,targetID,layoutName,layout,scanTag,m_currentDevice,m_scanID,startTime,subScanId,scanAxis,m_config);

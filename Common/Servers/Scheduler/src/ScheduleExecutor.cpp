@@ -421,6 +421,8 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 	 Management::FitsWriter::_nil();
 	 m_backend=Backends::GenericBackend::_nil();
 	 m_antennaBoss=Antenna::AntennaBoss::_nil();
+	 m_minorServoBoss=MinorServo::MinorServoBoss::_nil();
+	 m_minorServoBossError=false;
 	 m_antennaBossError=false;
 	 m_backendError=false;
 	 m_writerError=false;
@@ -981,7 +983,7 @@ void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec,const Sched
 	targetID=(const char *)prim->targetName;
 	// compute the axis or direction along which the scan is performed
 	//scanAxis=CCore::computeScanAxis(scanRec.type,scanRec);
-	scanAxis=CCore::computeScanAxis(m_antennaBoss,m_antennaBossError); //  throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+	scanAxis=CCore::computeScanAxis(m_antennaBoss,m_antennaBossError,m_minorServoBoss,m_minorServoBossError,*m_config); //  throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 	if ((rec.backendProc!=_SCHED_NULLTARGET) && (rec.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
 		CCore::setupDataTransfer(m_scanStarted,m_writer.in(),m_writerError,m_backend.in(),m_backendError,m_schedule->getObserverName(),
 				m_schedule->getProjectName(),baseName,path,extraPath,m_schedule->getFileName(),targetID,rec.layout,layoutProc,m_schedule->getScanTag(),m_core->getCurrentDevice(),

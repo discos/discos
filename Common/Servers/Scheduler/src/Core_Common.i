@@ -173,14 +173,16 @@ void CCore::doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TReco
 	// *******************************
 }*/
 
-Management::TScanAxis CCore::computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError) throw (ComponentErrors::ComponentNotActiveExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+Management::TScanAxis CCore::computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError,MinorServo::MinorServoBoss_ptr minorServoBoss,bool& minorServoError,
+		const CConfiguration& config) throw (
+		ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
-	Management::TScanAxis scanAxis;
-	scanAxis=Management::MNG_NO_AXIS;
+	Management::TScanAxis scanAxis_ant,scanAxis_ms;
+	CORBA::String_var servo;
+	scanAxis_ant=scanAxis_ms=Management::MNG_NO_AXIS;
 	try {
 		if (!CORBA::is_nil(antBoss)) {
-			antBoss->getScanAxis(scanAxis);
+			antBoss->getScanAxis(scanAxis_ant);
 		}
 		else {
 			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::computeScanAxis()");
@@ -199,15 +201,34 @@ Management::TScanAxis CCore::computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bo
 		antBossError=true;
 		throw impl;
 	}
-	/*
+	try {
+		if (!CORBA::is_nil(minorServoBoss)) {
+			servo=minorServoBoss->getScanAxis();
+			scanAxis_ms=config.getAxisFromServoName(servo.out());
+		}
+	}
+	catch (ManagementErrors::SubscanErrorEx& ex) {
+
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::computeScanAxis()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		minorServoError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::computeScanAxis()");
+		minorServoError=true;
+		throw impl;
+	}
 	// this choice has to be reconsidered, does the minor servo movement always prevail?
-	if (servoAxis!=Management::MNG_NO_AXIS) { // if a minor servo has been selected, the resulting scan axis is the axis mapped to the servo
-		return servoAxis;
+	if (scanAxis_ms!=Management::MNG_NO_AXIS) { // if a minor servo has been selected, the resulting scan axis is the axis mapped to the servo
+		return scanAxis_ms;
 	}
 	else {
-		return scanAxis;
-	}*/
-	return scanAxis;
+		return scanAxis_ant;
+	}
 }
 
 IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const ACS::TimeInterval& lst,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra)

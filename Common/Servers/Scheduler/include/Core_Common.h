@@ -177,12 +177,16 @@ static IRA::CString computeOutputFileName(const ACS::Time& ut,const ACS::TimeInt
  * Computes the scan axis starting from the configuration of involved sub system bosses.
  * @param antBoss reference to the antenna boss
  * @param antBossErr flags the status of the antenna boss reference
+ * @param minorServoBoss reference to the minor servo boss
+ * @param minorServoError flags the status of the minor servo boss
+ * @param config reference to the configuration object
  * @throw ComponentErrors::ComponentNotActiveExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
  * @throw ComponentErrors::UnexpectedExImpl
  */
-static Management::TScanAxis computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError) throw (ComponentErrors::ComponentNotActiveExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+static Management::TScanAxis computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError,MinorServo::MinorServoBoss_ptr minorServoBoss,bool& minorServoError,
+		const CConfiguration& config) throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+
 
 /**
  * Computes the name of the output file, lst time is derived from provided ut time

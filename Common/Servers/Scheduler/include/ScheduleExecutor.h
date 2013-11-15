@@ -220,6 +220,14 @@ private:
 	 */
 	Antenna::AntennaBoss_var m_antennaBoss;
 	/**
+	 * Minor Servo boss reference
+	 */
+	MinorServo::MinorServoBoss_var m_minorServoBoss;
+	/**
+	 * true if an error was detected when communicating to the minor servo boss
+	 */
+	bool m_minorServoBossError;
+	/**
 	 * Site information object
 	 */
 	IRA::CSite m_site;
