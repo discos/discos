@@ -39,6 +39,8 @@ SRT = ephem.Observer()
 SRT.lat = "39:29:34"
 SRT.lon = "09:14:42"
 SRT.elevation = 700 
+
+ISON_TLE = "C/2012 S1 (ISON),h,11/28.7757/2013,62.3948,295.6536,345.5636,1.000002,0.012446,2000,10.0,3.2"
  
 def cmd_line():
     import argparse
@@ -66,6 +68,8 @@ def cmd_line():
 
     if not USING_ASTROPY:
         logging.warning("not using astropy for coordinates formatting")
+    if not USING_ASTROPY:
+        logging.info("using atropy for coordinates formatting")
 
     if options.filename:
         with open(options.filename, "rt") as tle_file:
@@ -76,7 +80,7 @@ def cmd_line():
             index += 1
         tle = lines[index]
     else: #default is ISON tle ... 
-        tle = "C/2012 S1 (ISON),h,11/28.7757/2013,62.3948,295.6536,345.5636,1.000002,0.012446,2000,10.0,3.2"
+        tle = ISON_TLE
     logging.info("using tle: %s" % (tle,))
     try:
         source = ephem.readdb(tle)
