@@ -113,8 +113,8 @@ def cmd_line():
         if not USING_ASTROPY:
             target_string = "%s\t%s\tEQ\t%s\t%s\t%s\t%s\n" % (source_name,
                                                             options.scanmode,
-                                                            str(source.ra),
-                                                            str(source.dec),
+                                                            str(float(source.ra)) + 'd',
+                                                            str(float(source.dec)) + 'd',
                                                             str(SRT.date),
                                                             str(SRT.sidereal_time()))
         else:
