@@ -1,15 +1,15 @@
+import datetime
 import logging
 import time
 import sys
 import ison_jobs
 from multiprocessing import Process, Value
-from datetime import datetime, timedelta
 
 class Job(object):
     def __init__(self, job_name, job, updating_time=1.0, delay=0, args=()):
         self.name = job_name
         self.job = job    
-        self.starting_time = datetime.now() + timedelta(delay)
+        self.starting_time = datetime.datetime.now() + datetime.timedelta(seconds=delay)
         self.updating_time = updating_time
         self.args = args
         self.create()
@@ -19,7 +19,7 @@ class Job(object):
 
     @staticmethod
     def wait(target_time):
-        while datetime.now() < target_time:
+        while datetime.datetime.now() < target_time:
             time.sleep(0.05)
 
 class DaemonJob(Job):
@@ -74,9 +74,9 @@ def acquire(where, acquiring_time):
     backend.stopAquisition()
     """
     print 'acquire(): starting acquisition'
-    logging.info('Starting acquisition (%s) at %s' %(where, str(datetime.now())))
+    logging.info('Starting acquisition (%s) at %s' %(where, str(datetime.datetime.now())))
     time.sleep(acquiring_time)
-    logging.info('Acquisition (%s) done at %s' %(where, str(datetime.now())))
+    logging.info('Acquisition (%s) done at %s' %(where, str(datetime.datetime.now())))
     print 'acquire(): acquisition done!'
 
 def updateLOLoop(starting_time, update, terminate, updating_time):
@@ -89,7 +89,7 @@ def updateLOLoop(starting_time, update, terminate, updating_time):
         while True:
             if update.value:
                 print '@ --> Updating the LO value'
-                logging.info('Updating the LO value at %s' %str(datetime.now()))
+                logging.info('Updating the LO value at %s' %str(datetime.datetime.now()))
             if terminate.value:
                 break
             time.sleep(updating_time)
@@ -107,5 +107,5 @@ def updateLO(updating_time):
     2. Set the LO value
     """
     print 'updateLO()'
-    logging.info('Updating the LO value at %s' %str(datetime.now()))
+    logging.info('Updating the LO value at %s' %str(datetime.datetime.now()))
 

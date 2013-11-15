@@ -1,8 +1,10 @@
 import argparse
+import datetime
 import time
 import sys
 import os
 from ison_jobs import *
+from targets import next_target, date_parser
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -12,10 +14,11 @@ if __name__ == '__main__':
                         help="Time (in seconds) between beckend.start() and backend.stop()")
     parser.add_argument('-n', '--cycles', default=2, type=int, 
                         help="Number of cycles")
+    parser.add_argument('filename', nargs='?', help='file containing tle informations, if no file is given uses ISON tle')
     args = parser.parse_args()
 
-    filename = os.path.join('logs', 'ison--%s.log' % datetime.now().strftime("%Y_%m_%d-%H_%M_%S"))
-    logging.basicConfig(filename=filename, level=logging.DEBUG)
+    logfile = os.path.join('logs', 'ison--%s.log' % datetime.datetime.now().strftime("%Y_%m_%d-%H_%M_%S"))
+    logging.basicConfig(filename=logfile, level=logging.DEBUG)
     # Arguments of Job: Job name, job, updating_time, delay, *args
     job_goOnSource = ForegroundJob('go on source', goOnSource, ())
     job_waitForTracking = ForegroundJob('wait for tracking', waitForTracking, ())
@@ -25,7 +28,8 @@ if __name__ == '__main__':
 
     lo_daemon = DaemonJob('update local oscillator', updateLOLoop, args.lo_time)
     lo_daemon()
-
+    print next_target(args.filename, datetime.datetime.now())
+    
     def cycle():
         print "-" * 30
         lo_daemon.doNotUpdate()
