@@ -15,9 +15,9 @@ concurrent process that computes and updates the LO value, every 2 seconds:
 
     $ python onoff_switching.py -c 100 -t 10 -r 0 -d 2
 
-For more information, loot at the help:
+For more information, look at the help:
 
-    $ python onoff_switching.py --help # show the online help
+    $ python onoff_switching.py --help # show the help
 
 Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 The author wants to say thanks to: S.Poppi, M.Bartolini, A.Orlati, C.Migoni, and A.Melis
@@ -58,16 +58,14 @@ if __name__ == '__main__':
     logdir = 'logs'
     if not exists(logdir):
         mkdir(logdir)
-    file_name = '%s--%s.log' %(target.name.lower(), datetime.datetime.now().strftime("%Y_%m_%d-%H_%M_%S"))
+    file_name = '%s--%s.log' %(target.name.lower(), datetime.datetime.utcnow().strftime("%Y_%m_%d-%H_%M_%S"))
     logfile = join(logdir, file_name)
     logging.basicConfig(filename=logfile, level=logging.DEBUG)
 
     handler = Handler(target, args.acquisition_time, args.time_to_track, args.reference)
 
-    title = "Starting observation from the %s to %s" %(obs.name, target.name)
-    line = len(title) * '='
-    header = '\n' + line + '\n' + title + '\n' + line + '\n'
-    logging.info(header)
-    print header
+    title = '\n' + handler.getObservationTitle()
+    logging.info(title)
+    print title
     handler.run(args.cycles, args.daemon_cycle_time)
     

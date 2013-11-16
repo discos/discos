@@ -101,7 +101,7 @@ class DaemonJob(object):
     def __init__(self, job_name, job, updating_time=1.0, delay=0, args=()):
         self.name = job_name
         self.job = job    
-        self.starting_time = datetime.datetime.now() + datetime.timedelta(seconds=delay)
+        self.starting_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=delay)
         self.updating_time = updating_time
         self.args = args
         self.create()
@@ -141,6 +141,7 @@ class Handler:
                  at the time the acquisition ends
                * a value of 0.5 means we want to compute the future target position referred 
                  at the central time between starting and ending acquisition time.
+          A value out of range is set to 0.5.
         - offset: the offset we want to add to the off source position
         - stats: when True, the handler saves information that could be useful in order to 
           perform statistics or predict the time_to_track.
@@ -159,7 +160,10 @@ class Handler:
         self.target = target
         self.acquisition_time = acquisition_time
         self.time_to_track = time_to_track
-        self.reference = reference
+        if not 0 <= reference <= 1:
+            self.reference = 0.5
+        else:
+            self.reference = reference
         self.delta = self.acquisition_time * self.reference
         self.timestamp = {'go_on': None, 'go_off': None, 'on_source': None, 'off_source': None}
         self._enablestats(stats)
@@ -170,7 +174,7 @@ class Handler:
         if target not in ('on', 'off'):
             raise ValueError('target %s not allowed' %target)
         self._savedelay(target) # We could use it in order to perform statistics
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
         time_to_track = datetime.timedelta(seconds=self.time_to_track)
         delta = datetime.timedelta(seconds=self.delta)
         time_from_now = time_to_track + delta
@@ -180,10 +184,10 @@ class Handler:
             pass # TODO: add the position offset
         from_now = '%s.%s' %(time_from_now.seconds, time_from_now.microseconds)
         logging.info('%s: next position computed for %s second in advance from now' %(target, from_now))
-        logging.info('@ %s: go to %s at %s' %(datetime.datetime.now(), [ra, dec], at_time))
+        logging.info('@ %s: go to %s at %s' %(datetime.datetime.utcnow(), [ra, dec], at_time))
         # TODO: set the antenna target position
         print 'goToTarget(%s) -> (%s, %s)' %(target, ra, dec)
-        self.timestamp['go_%s' %target] = datetime.datetime.now()
+        self.timestamp['go_%s' %target] = datetime.datetime.utcnow()
 
     def waitForTracking(self):
         """Wait until the antenna reaches the target position."""
@@ -191,7 +195,7 @@ class Handler:
 
     def updateLO(self):
         """Compute the LO value and set it."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
         at_time = now + datetime.timedelta(seconds=self.delta)
         logging.info('At %s: LO value computed for %s' %(now, at_time))
         # TODO: get the local oscillator value
@@ -202,11 +206,11 @@ class Handler:
         """Start and stop the backend acquisition."""
         if which not in ('on_source', 'off_source'):
             raise KeyError('key %s not allowed' %which)
-        self.timestamp[which] = datetime.datetime.now() # Set the timestamp before acquiring
+        self.timestamp[which] = datetime.datetime.utcnow() # Set the timestamp before acquiring
         print 'acquire(): starting acquisition...'
-        logging.info('Starting acquisition at %s' %datetime.datetime.now())
+        logging.info('Starting acquisition at %s' %datetime.datetime.utcnow())
         time.sleep(self.acquisition_time) # Wait for acquisition_time seconds
-        logging.info('Acquisition done at %s' %datetime.datetime.now())
+        logging.info('Acquisition done at %s' %datetime.datetime.utcnow())
         print 'acquire(): acquisition done!'
 
     @staticmethod
@@ -220,7 +224,7 @@ class Handler:
             while True:
                 if update.value:
                     print '@ --> Updating the LO value'
-                    logging.info('Updating the LO value at %s', datetime.datetime.now())
+                    logging.info('Updating the LO value at %s', datetime.datetime.utcnow())
                 if terminate.value:
                     break
                 time.sleep(updating_time)
@@ -230,8 +234,16 @@ class Handler:
             print '@ --> Unexpected error: %s' %e
             logging.exception('Got exception on updateLOLoop()')
         finally:
-            logging.info('LO updating stopped at %s' %datetime.datetime.now())
+            logging.info('LO updating stopped at %s' %datetime.datetime.utcnow())
             print '@ --> LO updating stopped properly.'
+
+    def getObservationTitle(self):
+        format_ = '[%d/%b/%Y:%H:%M:%S]' # [day/month/year:hour:minute:second]
+        starting_time = datetime.datetime.utcnow()
+        title = "ON/OFF observation from the %s to %s, at %s" \
+                %(self.target.from_, self.target.name, starting_time.strftime(format_))
+        line = len(title) * '='
+        return line + '\n' + title + '\n' + line + '\n'
 
     def _enablestats(self, flag):
         self.stats = flag
@@ -252,11 +264,8 @@ class Handler:
             file_name = '%s.stats' %(self.target.name.lower())
             statsfile = join(statsdir, file_name)
             self.statsfile = open(statsfile, 'a')
-            title = "Starting observation from the %s to %s, at %s" \
-                    %(self.target.from_, self.target.name, datetime.datetime.now())
-            line = len(title) * '='
-            header = line + '\n' + title + '\n' + line + '\n'
-            self.statsfile.write(header)
+            title = self.getObservationTitle()
+            self.statsfile.write(title)
         except Exception, e:
             print 'Warning: cannot open or write %s file' %statsfile
             logging.exception('Cannot open %s file', statsfile)
@@ -270,7 +279,7 @@ class Handler:
         acquisition_time = self.timestamp['%s_source' %key] 
         if acquisition_time and starting_time:
             if acquisition_time <= starting_time:
-                logging.warning('At %s: (acquisition_time - starting time) <= 0' %datetime.datetime.now())
+                logging.warning('At %s: (acquisition_time - starting time) <= 0' %datetime.datetime.utcnow())
             delay = (acquisition_time - starting_time)
             seconds = delay.seconds
             useconds = delay.microseconds
@@ -297,8 +306,8 @@ class Handler:
                     if daemon_cycle_time:
                         lo_daemon.doNotUpdate()
         except KeyboardInterrupt:
-            print 'Program stopped at at %s' %datetime.datetime.now()
-            logging.info('Program stopped at at %s' %datetime.datetime.now())
+            print 'Program stopped at at %s' %datetime.datetime.utcnow()
+            logging.info('Program stopped at at %s' %datetime.datetime.utcnow())
         except Exception, e: 
             print 'Unexpected error: %s' %e
             logging.exception('Got exception on main handler')
