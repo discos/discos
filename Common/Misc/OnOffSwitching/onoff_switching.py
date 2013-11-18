@@ -58,7 +58,8 @@ if __name__ == '__main__':
     logdir = 'logs'
     if not exists(logdir):
         mkdir(logdir)
-    file_name = '%s--%s.log' %(target.name.lower(), datetime.datetime.utcnow().strftime("%Y_%m_%d-%H_%M_%S"))
+    file_name = '%s--%s.log' %(target.nickname.lower(), \
+            datetime.datetime.utcnow().strftime("%Y_%m_%d-%H_%M_%S"))
     logfile = join(logdir, file_name)
     logging.basicConfig(filename=logfile, level=logging.DEBUG)
 

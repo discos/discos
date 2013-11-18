@@ -42,6 +42,8 @@ Here is an example that shows how to create a hadler:
     ... 1.000002,0.012446,2000,10.0,3.2" # Orbital parameters
     >>> target = Target(op, observer)
     >>> target.name
+    'C/2012 S1 (ISON)'
+    >>> target.nickname
     'ISON'
     >>> h = Handler(target, acquisition_time=2.0, time_to_track=0, reference=0.5)
     >>> h.acquisition_time
@@ -124,7 +126,7 @@ class DaemonJob(object):
         self._update.value = 1
 
 
-class Handler:
+class Handler(object):
     def __init__(self, target, acquisition_time, time_to_track=0, reference=0.5, offset=0, stats=True):
         """Initialize the Handler.
 
@@ -241,7 +243,7 @@ class Handler:
         format_ = '[%d/%b/%Y:%H:%M:%S]' # [day/month/year:hour:minute:second]
         starting_time = datetime.datetime.utcnow()
         title = "ON/OFF observation from the %s to %s, at %s" \
-                %(self.target.from_, self.target.name, starting_time.strftime(format_))
+                %(self.target.from_, self.target.nickname, starting_time.strftime(format_))
         line = len(title) * '='
         return line + '\n' + title + '\n' + line + '\n'
 
@@ -261,7 +263,7 @@ class Handler:
                 self._enablestats(False)
                 return
         try:
-            file_name = '%s.stats' %(self.target.name.lower())
+            file_name = '%s.stats' %(self.target.nickname.lower())
             statsfile = join(statsdir, file_name)
             self.statsfile = open(statsfile, 'a')
             title = self.getObservationTitle()

@@ -5,17 +5,17 @@ An example of Observer and Target instantiations::
     >>> observer = Observer(**observer_info['SRT'])
     >>> observer.name
     'Sardinia Radio Telescope'
-    >>> observer.latitude, observer.longitude, observer.elevation
+    >>> observer.lat, observer.lon, observer.elevation # doctest: +SKIP 
     ('39:29:34', '09:14:42', 700.0)
     >>> op = "C/2012 S1 (ISON),h,11/28.7757/2013,62.3948,295.6536,345.5636,\
     ... 1.000002,0.012446,2000,10.0,3.2" # Orbital parameters
     >>> target = Target(op, observer)
     >>> target.name
-    'ISON'
+    'C/2012 S1 (ISON)'
     >>> target.from_
     'Sardinia Radio Telescope'
     >>> import datetime
-    >>> target.getRaDec(datetime.datetime.utcnow()) # doctest: +SKIP
+    >>> target.getRaDec(datetime.datetime.utcnow())
     (13:11:31.70, -9:11:18.6)
 
 Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
@@ -25,45 +25,42 @@ Licence: GPL 2.0 <http://www.gnu.org/licenses/gpl-2.0.html>"""
 import ephem
 import logging
 
-class Observer(ephem.Observer):
+class Observer(ephem.Observer, object):
     def __init__(self, name, latitude, longitude, elevation):
         super(Observer, self).__init__()
         self.name = name
-        self.latitude = latitude
-        self.longitude = longitude
+        self.lat = latitude
+        self.lon = longitude
         self.elevation = elevation
         # TODO: horizont?
 
-class Target:
+class Target(object):
     def __init__(self, op, observer):
         """Target information: orbital parameter and observer."""
-        self.op = op
-        self.observer = observer
-        self.name = Target.nameFromOP(op)
-        self.from_ = observer.name
-
-    def getRaDec(self, at_time):
-        """Get the (ra, dec) position of the source from the observer, at `at_time` UTC time."""
         try:
-            source = ephem.readdb(self.op)
+            self.source = ephem.readdb(op)
         except Exception, e:
             print "Unexpected exception: %s" %e
             logging.exception('Got exception on pyephem')
             sys.exit()
+        self.observer = observer
+        self.name = self.source.name
+        try:
+            self.nickname = op[op.find('(')+1:op.find(')')]
+        except:
+            self.nickname = self.name
+        self.from_ = observer.name
+
+    def getRaDec(self, at_time):
+        """Get the (ra, dec) position of the source from the observer, at `at_time` UTC time."""
         self.observer.date = at_time
-        source.compute(self.observer)
+        self.source.compute(self.observer)
         # TODO: logging.warning if not isVisible()
-        return source.ra, source.dec
+        return self.source.ra, self.source.dec
 
     def isVisible(self):
         pass # TODO
 
-    @staticmethod
-    def nameFromOP(op):
-        try:
-            return op[op.find('(')+1:op.find(')')]
-        except:
-            return "unknown_source"
 
 # Observer information
 observer_info = {
