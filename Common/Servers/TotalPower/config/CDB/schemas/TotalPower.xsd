@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: TotalPower.xsd,v 1.3 2011-05-12 14:14:31 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   18-09-2008  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:TotalPower:1.0"
+	xmlns="urn:schemas-cosylab-com:TotalPower:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:bcknd="urn:schemas-cosylab-com:GenericBackend:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:GenericBackend:1.0" schemaLocation="GenericBackend.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+	
+<!--
+	<xs:simpleType name="TBkndConfiguration">
+		<xs:annotation><xs:documentation>
+			Enlist all possible configuration for the backend. many parameters can change for example the number of inputs,
+			the input type (BWG,Gregorian....) the used devices and so on. All the configuration are hard coded in the component,
+			so in order to add a configuration a piece of code in the component shoud reflect the addition.
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="KKC">
+				<xs:annotation><xs:documentation>
+					the backend is connected to the 14 inputs of the secondary focus 22GHz 7 feeds receiver 
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="CCC">
+				<xs:annotation><xs:documentation>
+					the backend is connected to the 2 inputs of the secondary focus 5GHz receiver, LCP and RCP are reported respectively 
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="XXP">
+				<xs:annotation><xs:documentation>
+					the backend is connected to the 2 inputs of the primary focus 8GHz receiver, RCP and LCP are reported respectively 
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+		<xs:enumeration value="CCB">
+			<xs:annotation><xs:documentation>
+					the backend is connected to the 2 inputs of the 7GHz receiver of SRT, RCP and LCP are reported respectively 
+				</xs:documentation></xs:annotation>	
+		</xs:enumeration>
+
+		</xs:restriction>
+	</xs:simpleType>
+-->
+	
+	<xs:complexType name="BackendStatusType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROpattern">
+				<xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="64"/>
+            	<xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                	"Time_Sync,Busy,Suspended,Sampling,CmdLine,DataLine"/>
+				<xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                	"0, 1, 1, 1, 0, 0"/>
+            	<xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+            		"2, 3, 3, 3, 2, 2"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>	
+	
+	<xs:complexType name="TotalPowerType">
+		<xs:complexContent>
+			<xs:extension base="bcknd:GenericBackendType">
+				<xs:sequence>
+					<xs:element name="time" type="baci:ROuLongLong" />
+					<xs:element name="backendName" type="baci:ROstring" />
+					<xs:element name="bandWidth" type="baci:ROdoubleSeq" />
+					<xs:element name="frequency" type="baci:ROdoubleSeq" />
+					<xs:element name="sampleRate" type="baci:ROdoubleSeq" />
+					<xs:element name="attenuation" type="baci:ROdoubleSeq" />
+					<xs:element name="polarization" type="baci:ROlongSeq" />
+					<xs:element name="bins" type="baci:ROlongSeq" />
+					<xs:element name="feed" type="baci:ROlongSeq" />
+					<xs:element name="systemTemperature" type="baci:ROdoubleSeq" />
+					<xs:element name="inputSection" type="baci:ROlongSeq" />
+					<xs:element name="inputsNumber" type="baci:ROlong" />
+					<xs:element name="sectionsNumber" type="baci:ROlong" />
+					<xs:element name="integration" type="baci:ROlong" />
+					<xs:element name="status" type="BackendStatusType" />
+					<xs:element name="busy" type="mng:BooleanType" />
+				</xs:sequence>
+				<xs:attribute name="IPAddress" type="xs:string" use="required" />
+				<xs:attribute name="Port" type="xs:unsignedShort" use="required" />
+				<!-- timeout (microseconds) applied when trying to connect to the backend -->
+				<xs:attribute name="ConnectTimeout" type="xs:unsignedLong" use="required" />
+				<!-- timeout (microseconds) applied when trying to receive data from the to the backend -->
+				<xs:attribute name="CommandLineTimeout" type="xs:unsignedLong" use="required" />
+				<!-- this time (microseconds) is considered validity period of the properties. When this period is elapsed the component will equery
+				         again the hardware -->
+				<xs:attribute name="PropertyRefreshTime" type="xs:unsignedLong" use="required"/>	
+				<!-- indicates the default configuration of the backend -->
+				<xs:attribute name="Configuration" type="xs:string" use="required" />
+				<!-- Tollerance used when dealing with time synchronization and checks, in particular to deal with jitter beween backend and host computer and with network latencies -->
+				<xs:attribute name="TimeTollerance" type="xs:unsignedLong" use="required" />				
+				<!-- the cache time (microseconds) for logging repetition filter -->
+				<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
+				<!-- the expire time (microseconds) for logging repetition filter -->
+				<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
+				<!-- data line tcp port -->
+				<xs:attribute name="DataPort" type="xs:unsignedShort" use="required" />
+				<!-- data line tcp address -->
+				<xs:attribute name="DataIPAddress" type="xs:string" use="required" />
+				<!-- data line latency (microseconds) -->
+				<xs:attribute name="DataLatency" type="xs:unsignedLong" use="required" />
+				<!-- Sender thread sleep time (microseconds), sender duty cycle-->
+				<xs:attribute name="SenderSleepTime" type="xs:unsignedLong" use="required" />
+				<!-- Sender thread response time (microseconds), hart beat time -->
+				<xs:attribute name="SenderResponseTime" type="xs:unsignedLong" use="required" />
+				<!-- Control thread sleep time (microseconds), that's its duty cycle-->
+				<xs:attribute name="ControlSleepTime" type="xs:unsignedLong" use="required" />
+				<!-- Control thread response time (microseconds), hart beat time -->
+				<xs:attribute name="ControlResponseTime" type="xs:unsignedLong" use="required" />
+				<!-- Total number of installed boards-->
+				<xs:attribute name="BoardsNumber" type="xs:unsignedLong" use="required" />
+				<!-- The size of the data buffer (bytes) -->
+				<xs:attribute name="DataBufferSize" type="xs:unsignedLong" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:element name="TotalPower" type="TotalPowerType"/>
+	
+</xs:schema>

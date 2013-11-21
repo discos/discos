@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+-->
+
+<AntennaBoss xmlns="urn:schemas-cosylab-com:AntennaBoss:1.0" 
+             xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+             xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             WatchingThreadTime="200000"
+             WorkingThreadTime="180000"
+             RepetitionCacheTime="4000000"
+             RepetitionExpireTime="10000000"
+             MinPointNumber="20"
+             MaxPointNumber="1000"
+             GapTime="200000"
+	     	 CoordinateIntegration="1000000"
+	     	 CutOffElevation="70.0"
+	     	 SkydipElevationRange="15.0-90.0"
+             MountInstance="ANTENNA/Mount"
+             ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0" 
+             PointingModelInstance="ANTENNA/PointingModel"
+             RefractionInstance="ANTENNA/Refraction"
+         	 Sidereal="IDL:alma/Antenna/SkySource:1.0"
+         	 Sun=""
+         	 Moon="IDL:alma/Antenna/Moon:1.0"
+         	 Satellite=""
+         	 SolarSystemBody=""
+         	 Otf="IDL:alma/Antenna/OTF:1.0">
+             
+<target/>
+<targetRightAscension/>
+<targetDeclination/>
+<targetVlsr/>
+<targetFlux/>
+<azimuthOffset/>
+<elevationOffset/>
+<rightAscensionOffset/>
+<declinationOffset/>
+<longitudeOffset/>
+<latitudeOffset/>
+<rawAzimuth/>
+<rawElevation/>
+<observedAzimuth/>
+<observedElevation/>
+<observedRightAscension/>
+<observedDeclination/>
+<observedGalLongitude/>
+<observedGalLatitude/>
+<generatorType/>
+<status/>
+<enabled/>
+<correctionEnabled/>
+<pointingAzimuthCorrection/>
+<pointingElevationCorrection/>
+<refractionCorrection/>
+<FWHM/>
+<waveLength/>
+
+</AntennaBoss>

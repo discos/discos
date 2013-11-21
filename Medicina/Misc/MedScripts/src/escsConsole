@@ -1,0 +1,109 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 12/08/2010      Creation 
+# Andrea Orlati(aorlati@ira.inaf.it)04/09/2013      switch --stop now available                                
+#************************************************************************
+#   NAME
+# 
+#   SYNOPSIS
+# 
+#   DESCRIPTION
+#
+#   FILES
+#
+#   ENVIRONMENT
+#
+#   RETURN VALUES
+#
+#   CAUTIONS
+#
+#   EXAMPLES
+#
+#   SEE ALSO
+#
+#   BUGS     
+#
+
+LONGOPTS=help,stop
+SHORTOPTS=hs
+CL_HELP=
+CL_STOP=
+
+function printUsage {
+   echo "Start interactive console for the ESCS system"
+   echo ""
+        echo "Usage: `basename $0` [OPTIONS]  "
+        echo "Options: "
+        echo "   -h | --help    prints this help"
+        echo "   -s | --stop    close the console and all the user interface windows"
+}
+
+# This simply checks for the correctness of the command line
+export POSIXLY_CORRECT=1
+
+getopt -n `basename $0` -Q -u -a -l $LONGOPTS $SHORTOPTS "$@" || {
+   printUsage
+   exit
+}
+
+# Now let's parse the command line
+set -- `getopt -u -a -l $LONGOPTS $SHORTOPTS "$@"`
+
+for i
+do
+	case "$i" in
+		-h) CL_HELP=true ;;
+		--help) CL_HELP=true ;;
+		-s) CL_STOP=true ;;
+		--stop) CL_STOP=true ;;
+		--)  break;;
+	esac
+	shift
+done
+
+# restore
+export POSIXLY_CORRECT=
+unset POSIXLY_CORRECT
+
+if [ "$CL_HELP" ] ; then
+   printUsage
+   exit
+fi
+
+if [ "$CL_STOP" ] ; then
+   killall -s SIGUSR1 -u $USER -q _tui_MedicinaMountTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_ObservatoryTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_AntennaBossTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_GenericBackendTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_ReceiversBossTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_SchedulerTextClient
+   #close the operator input
+   pkill -SIGINT -f -n -u $USER _tui_SysTerm
+   #close the logging display client 
+   pkill -SIGUSR1 -f -n -u $USER _gui_customLoggingClient
+   exit
+fi
+
+schedulerTui
+sleep 0.5s
+mountTui
+sleep 0.5s
+observatoryTui
+sleep 0.5s
+antennaBossTui
+sleep 0.5s
+genericBackendTui BACKENDS/TotalPower
+sleep 0.5s
+operatorInput
+sleep 0.5s
+receiversBossTui
+sleep 0.5s
+loggingDisplay
+
+#
+# ___oOo___

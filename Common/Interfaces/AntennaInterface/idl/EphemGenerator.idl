@@ -1,0 +1,152 @@
+/* ************************************************************************************* */
+/* IRA Istituto di Radioastronomia                                                       */
+/*                                                                                       */
+/* This code is under GNU General Public Licence (GPL).                                  */
+/*                                                                                       */
+/* Who                                          When        What                         */
+/* Andrea Orlati(aorlati@ira.inaf.it)           10/09/2007  Creation                     */
+/* Andrea Orlati(aorlati@ira.inaf.it)           15/05/2008  Added method checkTracking   */
+/* Carlo Migoni (migoni@oa-cagliari.inaf.it)    04/10/2011  Added computeFlux() method   */
+/* Andrea Orlati(aorlati@ira.inaf.it)    15/02/2012  Added getAllCoordinates() method   */
+
+
+#ifndef _EPHEMGENERATOR_IDL_
+
+#define _EPHEMGENERATOR_IDL_
+
+#include <baci.idl>
+#include <AntennaDefinitions.idl>
+#include <AntennaErrors.idl>
+
+#pragma prefix "alma"
+
+//#ifndef _ACS_PREPROCESSED_
+#include "EphemGeneratorMACRO_include.idl"
+//#endif
+
+module Antenna {
+	
+	/**
+	 * @struct EphemGeneratorAttributes This structures enlist all the exposed attributes of the interface. 
+	 * All coordinates reported here are apparent, referrred to the current time.
+	 * @arg string sourceID the name or the id of the source 
+	 * @arg double rightAscension the current right ascension in radians
+	 * @arg double declination the current declination in radians
+	 * @arg double azimuth current azimuth in radians
+	 * @arg double elevation current elevation in radians
+	 * @arg double julianEpoch the current time as a julian epoch
+	 * @arg double userAzimuthOffset the user azimuth offset currently in use (radians)
+	 * @arg double userElevationOffset the user elevation offset currently in use (radians)
+	 * @arg double userRightAscensionOffset the user right ascension offset currently in use (radians)
+	 * @arg double userDeclinationOffset the user declination offset currently in use (radians)
+	 * @arg double parallacticAngle the parallactic angle in radians
+	*/
+	/*DEFATTRIBUTES(EphemGeneratorAttributes)
+	ENDDEFATTRIBUTES;*/
+	
+	/** 
+	 * This IDL interface is the general overview of a generator of ephemeris. All kind of generators (to track a source, to perform a scan or
+	 * whatever) must inherit from this interface.
+	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ 	 * Istituto di Radioastronomia, Italia
+ 	 * <br> 
+	*/
+	interface EphemGenerator : ACS::ACSComponent {
+				
+		/**
+		 * This method is used to apply new offsets for the topocentric system. Azimuth offset is corrected for the elevation cosine
+		 * before adding it.
+		 * @return true if the offsets are pertinent and could be applied 
+		 * @throw CORBA::SystemException
+		 * @param az new offset for the azimuth in radians.
+		 * @param el new offset for the elevation in radians.  
+		*/
+		//boolean setHorizontalOffsets(in double az,in double el);
+		
+		/**
+		 * This method is used to apply new offsets for the equatorial system. RA  will be corrected for DEC cosine before adding it.
+		 * @return true if the offsets are pertinent and could be applied 
+		 * @throw CORBA::SystemException
+		 * @param ra new offset for the right ascension in radians.
+		 * @param dec new offset for the declination in radians.  
+		*/
+		//boolean setEquatorialOffsets(in double ra,in double dec);
+		
+		/**
+		 * This method is used to apply new offsets for the galactic frame. Longitude will be corrected for the codise of the latitude. 
+		 * The offsets are added when the conversion from galactic to equatorial J2000 is performed.
+		 * @return true if the offsets are pertinent and could be applied 
+		 * @throw CORBA::SystemException
+		 * @param longitude new offset in galactic longitude in radians
+		 * @param latitude new offset in galactic latitude ion radians
+		*/
+		//boolean setGalacticOffsets(in double longitudeOff,in double latitudeOff);
+		
+		/**
+		 * This method is used to apply new offsets for the selected frame. Longitude will be corrected for the cosine of the latitude before use, so they are sky offsets. 
+		 * If the offset are not pertinent or cannot be applied for the given generator an error is thrown. 
+		 * If the new offset are legal, any other previous offsets in other frames are cleared. If the generator is re-initialized, the offsets are kept.
+		 * @throw CORBA::SystemException
+		 * @throw AntennaErrors::AntennaErrorsEx
+		 * @param lon new offset in longitude in radians 
+		 * @param lat new offset in latitude in radians 
+		 * @param frame offsets reference frame
+		*/		
+		void setOffsets(in double lon,in double lat,in TCoordinateFrame frame) raises (AntennaErrors::AntennaErrorsEx);
+		
+		/**
+		 * This method is only for control software internal use. It used, given a timestamp, to retrive the apparent
+		 * horizontal coordinates in one shot.
+		 * @throw CORBA::SystemException
+		 * @param time this parameter is used to pass the excat time the caller wants to know the topocentric coordinates.
+		 * @param az that's the returned value in radians of the azimuth for the requested time.
+		 * @param el that's the returned value in radians of the elevation for the requested time.
+		*/
+		void getHorizontalCoordinate(in ACS::Time time, out double az,out double el);
+		
+		/**
+		 * This method should only be used internally to know the apparent coordinates in all frames.
+		 * @throw CORBA::SyStemException
+		 * @param time this indicates the time the coordinates refer to
+		 * @param az the apparent  azimuth in radians
+		 * @param el the apparent elevation in radians
+		 * @param ra apparent right ascension in radinas
+		 * @param  dec apparent declination in radians
+		 * @param jepoch julian epoch the equtorial coordinates refer to 
+		 * @param lon galactic longitude corresponding to the apparent equatorial
+		 * @param lat galactic latitude corresponding to the apparent equatorial
+		*/
+		void getAllCoordinates(in ACS::Time time,out double az,out double el, out double ra,out double dec,out double jepoch,out double lon,out double lat);
+		
+		/**
+     	 * This method is called internally to know if the telescope is tracking the right position or not. The generator will subtract the
+     	 * the provided azimuth and elevation  to the computed azimuth and elevation for the given time(pointing error). The
+     	 * pointing error for both directions(the azimuth is also corrected for cosine of elevation) are then squared and summed;
+     	 * the result is then root squared and compared to the tens of the  Half Power Bean Width to know if the antenna is where excpected
+     	 * or not. In the case of OTF generator the behaviour must be a little different, because this component must also take 
+     	 * into account the fact that during acceleration ramps the antenna is not,stritcly speaking, tracking. 
+     	 * The coordinates passed here must be observed (depurated by all the instrumental effects and correction that are used
+     	 * to point correctly the telescope)
+     	 * @param time represent the time that the provided azimuth and elevation referes to. The component will compute its azimuth
+     	 *                 and elevation in order to compare them.
+     	 * @param az the azimuth (radians) of the coordinate where the telescope is, if it is nearby (inside HPBW) the  computed (by this
+     	 *                 component) one, the antenna is tracking.
+     	 * @param az the elevation (radians) of the coordinate where the telescope is, if it is nearby (inside HPBW) the computed (by this
+     	 *                 component) one, the antenna is tracking.
+     	 * @param HPBW the beam width at half power(radians), used to decide if the pointing errors 
+     	 * @return true if the antenna is tracking, false in all other cases. 
+		*/
+		boolean checkTracking (in ACS::Time time,in double az,in double el,in double HPBW);
+
+        /**
+        * This method is used to calculate the flux of a source who's parameter
+        * are read from the SourceCatalog.xsd from CDB
+        * @param freq sky frequency at which we'd like to compute the flux of the current target (MHz)
+        * @param fwhm Full Width Half Maximum (radians)
+        * @param flux computed flux  (Jy)
+        */
+        void computeFlux(in double freq, in double fwhm, out double flux);
+	};
+};
+
+#endif

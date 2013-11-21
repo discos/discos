@@ -1,0 +1,111 @@
+#ifndef __GENERICRECEIVER_IDL__
+#define __GENERICRECEIVER_IDL__
+
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Andrea Orlati <a.orlati@ira.inaf.it>
+ *
+ *  Created: Mon May  3 10:44:59 CEST 2010
+ *  Last Modified: 
+\***************************************************************/
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include <ReceiversErrors.idl>
+#include "ReceiversDefinitions.idl"
+#include <ManagmentDefinitions.idl>
+#include "CommonReceiverInterface.idl"
+
+#pragma prefix "alma"
+
+module Receivers { 
+    
+    /**
+     * <h2>Interface of a generic receiver</h2>
+     * <p>This CORBA interface exports properties and methods defined for a generic 
+     * <em>Receiver</em>.</p>
+     */
+    interface Receiver : CommonReceiverInterface {
+
+        /** Dewar vacuum. */
+        readonly attribute ACS::ROdouble vacuum;
+
+        /** 
+         *  The returned pattern is a X bits field with a meaning depending on the implementation.
+         */
+        readonly attribute ACS::ROpattern status;
+        
+        /**
+         * This property reports the current receiver status
+         */
+        readonly attribute Management::ROTSystemStatus receiverStatus;
+        
+        /** Turn the LNAs of every channel on */
+        void turnLNAsOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+
+        /** Turn the LNAs of every channel off */
+        void turnLNAsOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        
+        /** 
+         * This method must called in order to setup everything for the receiver to become the currently used receiver. 
+         * The default configuration and mode is loaded.
+         * @param setup_mode the setup mode (for instance: LLP, KKG, CCB, ecc.)
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw CORBA::SystemExcpetion    
+        */
+        void activate(in string setup_mode) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);   
+            
+        /**
+         * This method puts the receiver in stand-by, all the operation required for "park" the receiver (when not used anymore) are included here.
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw CORBA::SystemExcpetion    
+         */
+        void deactivate() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+
+        /*
+         ***************************************************
+         *           COMMON_RECEIVER_INTERFACE             *
+         ***************************************************
+
+            readonly attribute ACS::ROdoubleSeq LO;
+            
+            readonly attribute ACS::ROlong feeds;
+            
+            readonly attribute ACS::ROlong IFs;
+
+            readonly attribute ACS::ROlongSeq polarization;
+            
+            readonly attribute ACS::ROdoubleSeq initialFrequency;
+
+        	readonly attribute ACS::ROdoubleSeq bandWidth;
+
+        	readonly attribute ACS::ROstring mode;
+
+            void calOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+
+            void calOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+
+            void setLO(in ACS::doubleSeq lo1) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+
+            ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs) 
+               raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+            long getFeeds(out ACS::doubleSeq X,out ACS::doubleSeq Y,out ACS::doubleSeq power) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+
+            double getTaper(in double freq,in double bandWidth,in long feed,in long ifNumber,out double waveLen) 
+                raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+                
+            void setMode(in string mode) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ConfigurationErrorEx);    
+
+        ***************************************************/
+        
+    };
+
+};
+
+#endif

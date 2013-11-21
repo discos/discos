@@ -1,0 +1,12 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+# "@(#) $Id: genericBackendTui,v 1.2 2010-03-17 09:37:30 a.orlati Exp $"
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 06/05/2009      Creation                                  
+#************************************************************************
+
+xterm -geometry 101x28+0+0 +sb -title GenericBackend -e /bin/bash --login -c "_tui_GenericBackendTextClient $1" &

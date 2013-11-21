@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<AntennaParameters xmlns="urn:schemas-cosylab-com:AntennaParameters:1.0"
+									 xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+									 xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+									 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<BandParameters>
+		<band>LHP</band>
+		<apertureEfficency>0.41</apertureEfficency>
+		<beamEfficency>0.61</beamEfficency>
+		<forwardEfficency>0.97</forwardEfficency>
+		<HPBW>31.2</HPBW>
+		<antennaGain>0.12</antennaGain>
+		<calibrationTemperature_LCP>12.7</calibrationTemperature_LCP>
+		<calibrationTemperature_RCP>15.5</calibrationTemperature_RCP>
+		<dsbImageRatio>-50</dsbImageRatio>
+		<gainPolynomParameters_a>-0.000068310687</gainPolynomParameters_a>
+		<gainPolynomParameters_b>0.007285044</gainPolynomParameters_b>
+		<gainPolynomParameters_c>0.80577027</gainPolynomParameters_c>
+	</BandParameters>
+
+	<BandParameters>
+		<band>LLP</band>
+		<apertureEfficency>0.36</apertureEfficency>
+		<beamEfficency>0.53</beamEfficency>
+		<forwardEfficency>0.97</forwardEfficency>
+		<HPBW>27.6</HPBW>
+		<antennaGain>0.11</antennaGain>
+		<calibrationTemperature_LCP>21.7</calibrationTemperature_LCP>
+		<calibrationTemperature_RCP>24.4</calibrationTemperature_RCP>
+		<dsbImageRatio></dsbImageRatio>
+		<gainPolynomParameters_a>-0.000026828893</gainPolynomParameters_a>
+		<gainPolynomParameters_b>0.0034836402</gainPolynomParameters_b>
+		<gainPolynomParameters_c>0.8869153</gainPolynomParameters_c>
+	</BandParameters>
+
+	<BandParameters>
+		<band>SSP</band>
+		<apertureEfficency>0.43</apertureEfficency>
+		<beamEfficency>0.61</beamEfficency>
+		<forwardEfficency>0.97</forwardEfficency>
+		<HPBW>17.9</HPBW>
+		<antennaGain>0.12</antennaGain>
+		<calibrationTemperature_LCP>13.5</calibrationTemperature_LCP>
+		<calibrationTemperature_RCP>18.9</calibrationTemperature_RCP>
+		<dsbImageRatio>-30</dsbImageRatio>
+		<gainPolynomParameters_a>-0.00013256035</gainPolynomParameters_a>
+		<gainPolynomParameters_b>0.017229174</gainPolynomParameters_b>
+		<gainPolynomParameters_c>0.44017117</gainPolynomParameters_c>
+	</BandParameters>
+
+	<BandParameters>
+		<band>CCC</band>
+		<apertureEfficency>0.58</apertureEfficency>
+		<beamEfficency>0.71</beamEfficency>
+		<forwardEfficency>0.88</forwardEfficency>
+		<HPBW>7.5</HPBW>
+		<antennaGain>0.16</antennaGain>
+		<calibrationTemperature_LCP>5.8</calibrationTemperature_LCP>
+		<calibrationTemperature_RCP>5.7</calibrationTemperature_RCP>
+		<dsbImageRatio>-18</dsbImageRatio>
+		<gainPolynomParameters_a>-0.000046834953</gainPolynomParameters_a>
+		<gainPolynomParameters_b>0.0062403816</gainPolynomParameters_b>
+		<gainPolynomParameters_c>0.79212981</gainPolynomParameters_c>
+	</BandParameters>
+
+	<BandParameters>
+		<band>CHL</band>
+		<apertureEfficency>0.50</apertureEfficency>
+		<beamEfficency>0.62</beamEfficency>
+		<forwardEfficency>0.88</forwardEfficency>
+		<HPBW>5.7</HPBW>
+		<antennaGain>0.14</antennaGain>
+		<calibrationTemperature_LCP>22</calibrationTemperature_LCP>
+		<calibrationTemperature_RCP>21.1</calibrationTemperature_RCP>
+		<dsbImageRatio>-18</dsbImageRatio>
+		<gainPolynomParameters_a>-0.000058197959</gainPolynomParameters_a>
+		<gainPolynomParameters_b>0.0094270958</gainPolynomParameters_b>
+		<gainPolynomParameters_c>0.61824204</gainPolynomParameters_c>
+	</BandParameters>
+
+	<BandParameters>
+		<band>XXP</band>
+		<apertureEfficency>0.48</apertureEfficency>
+		<beamEfficency>0.68</beamEfficency>
+		<forwardEfficency>0.97</forwardEfficency>
+		<HPBW>4.9</HPBW>
+		<antennaGain>0.14</antennaGain>
+		<calibrationTemperature_LCP>8.8</calibrationTemperature_LCP>
+		<calibrationTemperature_RCP>11.3</calibrationTemperature_RCP>
+		<dsbImageRatio>-30</dsbImageRatio>
+		<gainPolynomParameters_a>0.0</gainPolynomParameters_a>
+		<gainPolynomParameters_b>0.0</gainPolynomParameters_b>
+		<gainPolynomParameters_c>0.0</gainPolynomParameters_c>
+	</BandParameters>
+
+	<BandParameters>
+		<band>KKC</band>
+		<apertureEfficency>0.43</apertureEfficency>
+		<beamEfficency>0.72</beamEfficency>
+		<forwardEfficency>0.88</forwardEfficency>
+		<HPBW>2</HPBW>
+		<antennaGain>0.11</antennaGain>
+		<calibrationTemperature_LCP></calibrationTemperature_LCP>
+		<calibrationTemperature_RCP></calibrationTemperature_RCP>
+		<dsbImageRatio>-20</dsbImageRatio>
+		<gainPolynomParameters_a>-0.00024658337</gainPolynomParameters_a>
+		<gainPolynomParameters_b>0.020935913</gainPolynomParameters_b>
+		<gainPolynomParameters_c>0.44252013</gainPolynomParameters_c>
+	</BandParameters>
+
+</AntennaParameters>

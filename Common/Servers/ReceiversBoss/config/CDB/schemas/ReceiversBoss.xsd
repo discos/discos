@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: ReceiversBoss.xsd,v 1.6 2011-02-23 10:51:07 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   19-11-2009  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:ReceiversBoss:1.0"
+	xmlns="urn:schemas-cosylab-com:ReceiversBoss:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+	
+	<xs:complexType name="AvailReceiverType">
+		<xs:attribute name="Code" type="xs:string" use="required"/>
+		<xs:attribute name="Component" type="xs:string" use="required"/>
+	</xs:complexType>
+		
+	<xs:complexType name="ReceiversBossType">
+		<xs:sequence>
+			<!-- Local Oscillator (ROdoubleSeq) -->
+			<xs:element name="LO" type="baci:ROdoubleSeq"/>
+			<!-- current setup (ROstring) -->
+			<xs:element name="actualSetup" type="baci:ROstring"/>
+			<!-- Subsystem status (SystemStatusType) -->
+			<xs:element name="status" type="mng:SystemStatusType" />
+			<xs:element name="feeds" type="baci:ROlong"/>
+			<!-- Intermediate Frequencies (ROlong) -->
+			<xs:element name="IFs" type="baci:ROlong"/>
+			<!-- Polarization (ROlongSeq) -->
+			<xs:element name="polarization" type="baci:ROlongSeq"/>	
+			<!-- initialFrequency (ROdoubleSeq) -->
+			<xs:element name="initialFrequency" type="baci:ROdoubleSeq"/>	
+			<!-- bandWidth (ROdoubleSeq) -->
+			<xs:element name="bandWidth" type="baci:ROdoubleSeq"/>	
+			<!-- current receiver working mode (ROstring) -->
+			<xs:element name="mode" type="baci:ROstring"/>		
+			<xs:element name="AvailableReceiver" type="AvailReceiverType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<!-- the cache time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
+		<!-- the expire time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
+		<!-- time after which an alarm is considered cleared if the condition does not happen anymore-->
+		<xs:attribute name="StatusPersistenceTime" type="xs:unsignedLong" use="required" />
+		<!-- This is the time a property is considered valid before refreshing it (microseconds)-->
+		<xs:attribute name="PropertiesUpdateTime" type="xs:unsignedLong" use="required" />
+		
+		
+	</xs:complexType>
+
+	<xs:element name="ReceiversBoss" type="ReceiversBossType"/>
+	
+</xs:schema>

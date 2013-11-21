@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+-->
+
+<Scheduler xmlns="urn:schemas-cosylab-com:Scheduler:1.0" 
+             xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+             xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             SchedDir="/archive/schedules/"
+             DataDir="/archive/data/"
+	     	 SystemDataDir="/archive/extraData/"
+	     	 LogDir="/archive/logs/"
+	     	 SystemLogDir="/archive/events/"             
+             ProceduresLocation="Procedures"
+             DefaultProceduresFile="StationProcedures"
+             RepetitionCacheTime="4000000"
+             RepetitionExpireTime="10000000"
+             ScheduleExecutorSleepTime="70000"
+             TsysTransitionGap="4000000"           
+             AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
+             ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
+	         ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
+	         MinorServoBossInterface=""
+	         ActiveSurfaceBossInterface=""
+		 	 CustomLoggerInterface="IDL:alma/Management/CustomLogger:1.0"
+	     	 WeatherStationInstance="IDL:alma/Weather/MedWeatherStation:1.0"	         
+	         DefaultBackendInstance="BACKENDS/TotalPower"
+	         DefaultDataReceiverInstance="MANAGEMENT/Point"
+	         DefaultProjectCode="maintenance"
+	         CheckProjectCode="true"
+>
+
+<scheduleName/>
+<scanID/>
+<subScanID/>
+<currentDevice/>
+<status/>
+<tracking/>
+<projectCode/>
+<currentBackend/>
+<currentRecorder/>
+
+
+</Scheduler>

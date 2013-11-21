@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   22-12-2008  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:Scheduler:1.0"
+	xmlns="urn:schemas-cosylab-com:Scheduler:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+		
+	<xs:simpleType name="TMinorServoAxisType">
+		<xs:annotation><xs:documentation>
+			Lists all axis managed by the minor servo system, a subset of the TScanAxis enumeration
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="SUBR_Z">
+				<xs:annotation><xs:documentation>
+					Scan along the Z (focus) of the subreflector
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+	    	<xs:enumeration value="SUBR_X">
+				<xs:annotation><xs:documentation>
+					Scan along the X of the subreflector
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+	    	<xs:enumeration value="SUBR_Y">
+				<xs:annotation><xs:documentation>
+					Scan along the Y of the subreflector
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+	    	<xs:enumeration value="SUBR_ROTY">
+				<xs:annotation><xs:documentation>
+					rotate the subriflector along the Y axis
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+	      	<xs:enumeration value="SUBR_ROTX">
+				<xs:annotation><xs:documentation>
+					rotate the subriflector along the X axis
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+	    	<xs:enumeration value="PFP_Z">
+				<xs:annotation><xs:documentation>
+					Scan along the Z (focus) of the primary focus
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+	    	<xs:enumeration value="PFP_Y">
+				<xs:annotation><xs:documentation>
+					Scan along the Y of the primary focus
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="MinorServoMappingType">
+		<xs:attribute name="axis" type="TMinorServoAxisType" use="required"/>
+		<xs:attribute name="servoName" type="xs:string" use="required"/>
+	</xs:complexType>
+	
+	<xs:complexType name="SchedulerType">
+		<xs:sequence>
+			<xs:element name="scheduleName" type="baci:ROstring"/>
+			<xs:element name="scanID" type="baci:ROlong" />
+			<xs:element name="subScanID" type="baci:ROlong" />
+			<xs:element name="currentDevice" type="baci:ROlong" />
+			<xs:element name="status" type="mng:SystemStatusType" />
+			<xs:element name="tracking" type="mng:BooleanType" />	
+			<xs:element name="projectCode" type="baci:ROstring"/>
+			<xs:element name="currentBackend" type="baci:ROstring"/>
+			<xs:element name="currentRecorder" type="baci:ROstring"/>	
+			<xs:element name="MinorServoMapping" type="MinorServoMappingType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<!-- directory where to find the schedules -->
+		<xs:attribute name="SchedDir" type="xs:string" use="required" />
+		<!-- directory where to store data files -->
+		<xs:attribute name="DataDir" type="xs:string" use="required" />
+		<!-- directory where to store system file and auxiliary files in general -->
+		<xs:attribute name="SystemDataDir" type="xs:string" use="required" />		
+		<!-- Location inside the CDB where the component looks for the procedures files -->
+		<xs:attribute name="ProceduresLocation" type="xs:string" use="required" />
+		<!-- user log files directory -->
+		<xs:attribute name="LogDir" type="xs:string" use="required" />
+		<!-- system log files directory -->
+		<xs:attribute name="SystemLogDir" type="xs:string" use="required" />
+		<!-- Name of the procedure file table (inside the CDB) that will be loaded at startup -->
+		<xs:attribute name="DefaultProceduresFile" type="xs:string" use="required" />		
+		<!-- the cache time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
+		<!-- the expire time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
+		<!-- sleep time of the executor thread in microseconds -->
+		<xs:attribute name="ScheduleExecutorSleepTime" type="xs:unsignedLong" use="required" />
+		<!-- This the gap (microseconds) that the scheduler must respects for a transition of the calibration diode. Used in Tsys computation. -->
+		<xs:attribute name="TsysTransitionGap" type="xs:unsignedLong" use="required" />								
+		<!-- here a list of used component follows -->
+		<!-- the interface of the component that leads the Antenna subsystem -->
+		<xs:attribute name="AntennaBossInterface" type="xs:string" use="required" />
+		<!-- the interface of component that stores observatory information -->
+		<xs:attribute name="ObservatoryInterface" type="xs:string" use="required" />		
+		<!-- the interface of component that leads the receivers subsystem -->
+		<xs:attribute name="ReceiversBossInterface" type="xs:string" use="required" />
+		<!-- the interface of component that leads the minor servo subsystem -->
+		<xs:attribute name="MinorServoBossInterface" type="xs:string" use="required" />
+		<!-- the interface of component that leads the active surface subsystem -->
+		<xs:attribute name="ActiveSurfaceBossInterface" type="xs:string" use="required" />		
+		<!-- the interface of component that is in charge of log file creation -->
+		<xs:attribute name="CustomLoggerInterface" type="xs:string" use="required" />
+		<!-- the interface of weather station -->
+		<xs:attribute name="WeatherStationInstance" type="xs:string" use="required" />
+		<!-- the instance of the default backend -->
+		<xs:attribute name="DefaultBackendInstance" type="xs:string" use="required" />
+		<!-- the instance of the default data receiver -->
+		<xs:attribute name="DefaultDataReceiverInstance" type="xs:string" use="required" />
+		<!-- the code of the default project, loaded at the startup -->
+		<xs:attribute name="DefaultProjectCode" type="xs:string" use="required" />
+		<!-- This flag is "true" or "false" to control if the system should check the project code for its existance or not -->
+		<xs:attribute name="CheckProjectCode" type="xs:boolean" use="required" />
+				
+	</xs:complexType>
+
+	<xs:element name="Scheduler" type="SchedulerType"/>
+	
+</xs:schema>

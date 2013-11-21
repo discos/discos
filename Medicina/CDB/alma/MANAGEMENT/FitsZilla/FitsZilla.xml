@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+   -   
+-->
+<FitsWriter xmlns="urn:schemas-cosylab-com:FitsWriter:1.0" 
+               xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+               xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               recv_protocols="TCP=${HOST}:14000"
+               WorkingThreadTime="80000"
+               WorkingThreadTimeSlice="150000"
+               CollectorThreadTime="50000"
+               RepetitionCacheTime="4000000"
+               RepetitionExpireTime="8000000"
+               MeteoParameterDutyCycle="15000000"
+               TrackingFlagDutyCycle="100000"
+               MinorServoEnquireMinGap="8000"        
+			   AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
+  	           ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
+			   ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
+			   MinorServoBossInterface=""
+	     	   SchedulerInterface="IDL:alma/Management/Scheduler:1.0"
+	     	   MeteoInstance="WEATHERSTATION/WeatherStation"            
+>
+	<fileName/>
+	<status/>
+	<projectName/>
+	<observer/>
+	<deviceID/>
+	<scanAxis/>
+	<dataX/>
+	<dataY/>
+	<arrayDataX/>
+	<arrayDataY/>		
+</FitsWriter>

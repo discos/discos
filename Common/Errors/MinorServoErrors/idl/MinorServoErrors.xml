@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns="Alma/ACSError" 
+    xsi:schemaLocation="Alma/ACSError ACSError.xsd" 
+    name="MinorServoErrors" 
+    type="2007" 
+    _prefix="alma">
+
+	<Code name="NoError" 
+         shortDescription="No Error" 
+         description="No error condition found"/>
+
+	<ErrorCode name="PositioningError" 
+         shortDescription="Error setting the minor servo position" 
+         description="Cannot set the minor servo position"/>
+
+	<ErrorCode name="CommunicationError" 
+         shortDescription="Communication Error" 
+         description="An error occur during low level communication"/>
+
+	<ErrorCode name="SetupError" 
+         shortDescription="Error performing a setup" 
+         description="Cannot perform a minor servo setup"/>
+
+	<ErrorCode name="StowError" 
+         shortDescription="Error performing a stow" 
+         description="Cannot perform a minor servo stow"/>
+
+	<ErrorCode name="CalibrationError" 
+         shortDescription="Error performing a calibration" 
+         description="Cannot perform a minor servo calibration"/>
+
+	<ErrorCode name="OperationNotPermitted" 
+         shortDescription="Operation not permitted" 
+         description="Operation not permitted"/>
+
+</Type>
+
+

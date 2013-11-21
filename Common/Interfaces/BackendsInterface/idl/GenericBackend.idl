@@ -1,0 +1,347 @@
+/* *********************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      	   */
+/* $Id: GenericBackend.idl,v 1.22 2010-09-14 08:04:43 a.orlati Exp $							   */
+/*                                                                                                      	   */
+/* This code is under GNU General Public Licence (GPL).                                                 	   */
+/*                                                                                                      	   */
+/* Who                                  when            What                                              	   */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  08/09/2008      Creation                                          	   */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  17/10/2008      Added method sendHeader(),sendData() and sendStop() */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  22/11/2008      Added method terminate(), busy attribute; removed setStartTime() and setStopTime() */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  29/12/2009      Some stuff reviewed, channels are now sections and input is now a different concept from section. Added getInputs method */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  04/08/2010      the getInputs function has been reviewed, instead of returning the polarization it now returns the IF number */
+
+#ifndef _GENERICBACKEND_IDL
+#define _GENERICBACKEND_IDL
+
+#include <baci.idl>
+#include <bulkData.idl>
+#include <bulkDataSender.idl>
+#include <BackendsDefinitions.idl>
+#include <ManagmentDefinitions.idl>
+#include <ComponentErrors.idl>
+#include <BackendsErrors.idl>
+#include <ReceiversDefinitions.idl>
+
+#pragma prefix "alma"
+
+module Backends {
+	
+	/**
+	 * This is the interface of the component GenericBackend. Any backend inherits from this interface
+	 * so that they can be commanded through a common and known interface. This interface must expose all the
+	 * methods required to deal with a backend. In that way the specific hardware dependency is bypassed.
+	 * The idea is that any backend has general characteristics, for example the integration time, the number of bins or
+	 * the bandwidth wether we are talking about polarimeters or total power detectors or spectrometers. All these 
+	 * characteristics are grouped in this interface.
+	 * This interface is based on the concept of section. A section is one of the sections that the backend is devided into. The section produces a stream of data
+	 * resulting from the sampling and the elaboration of a certain portion of the input  from the receiver. According to the nature of the backend (polarimeter, totalpower, spectrometer...) this stream can
+	 * be different but  always compliant to a certain protocol. The number of section, as well as the properties of the section can vary from case to case.
+	 * A section is characterized by some properties (they could be under user control or not according to the hardware and/or software of the backend:
+	 * @arg Feed: The feed identifier the section is attached to. Useful in case of multifeed receivers
+	 * @arg Polarization: It indicates the polarization coming from the receiver the section is attached to. It could be left, right or full stokes. In that case the section is able to export 4 different flows (the Stokes parameters) along with the data stream. 
+	 * @arg Bins: If the section is able to compute a frequency channelization (i.e. Fourier Transform), this indicates the number of bins the section is operating
+	 * @arg BandWidth: It indicates the band width of the input signal of the section (MHz). No matter if the input is analog or digital
+	 * @arg Frequency: It indicates the start frequency of the input signal (MHz). 
+	 * @arg SampleRate: It gives the sampling rate of the section (MHz). For a common sampler it is the  Nyquist  frequency, for a simple total power could be the number of measure done per seconds.
+	 * @arg inputs: the number of inputs attached to section.  This number can be 1 or two depending on the polarization.
+	 * One fundamental attribute of the backend is the <i>sectionsNumber</i>, it indicates the number of sections and it could be fixed of configurable. It gives the moltiplicity of the attibutes like <i>feed</i>, <i>frequency</i> and so on......
+	 * The <i>inputsNumber</i> indicates the total number of inputs virtually connected to the backend; it is the sum of the inputs of all sections. Typically if the backend is not polarimetric, <i>sectionNumber</i> and <i> inputsNumber</i> match. 
+	 * For every input it is possible to give an attenuation value (DB).
+	 * The backend component transfers data to the data receivers via the ACS Bulk Data service ( similar to the notification channel
+	 * but based on TCP Out Of Bound and semantically a point-to-point connection). The data stream is started by calling the method <i>sendHeader()</i>, this will cause the backend to send a <i>TMainHeader</i> and as many <i>TSectionHeader<i>s as the
+	 * number of available sections. When the acquisitions is started the backend will send a sequential stream of data that refers to a single integration. A <i>TDumpHeader</i> is sent, then the tsys measurmens (one for each virtual input, then a  mix of 4 data flows, 
+	 *  Left/Right data, Stokes U and Q rispectively. This flows are transferend starting from the first section. Of course if the backend is not a polarimeter the Stokes U and Q are not sent.    
+	 * The transfering of the data could be set up by a sequence of calls that could be:
+	 * <pre>
+	 *		backend->connect(receiver); // connect to the data receiver
+	 *		backend->configure(config); // configure the backend
+	 * 	        backend->sendHeader();  // transfer the data header...no configuration are allowed
+	 *		backend->sendData(startTime);  // starts the data transfer.....if the start time is not yet elapsed it waits for the start time
+	 *		backend->sendStop(); // stops the data transfer....but keeps the transfer job up.
+	 *   	        backend->sendData(startTime);  // starts again the data transfer.....
+	 *		backend->sendStop(); // stops the data transfer...  
+	 *              backend->terminate();           // teminates the transfer job....now new configuration is allowed
+	 *		backend->disconnect();
+	 *		receiver->closeReceiver();
+	 *</pre>
+	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+	 * Istituto di Radioastronomia, Italia
+	 * <br> 
+	*/
+	interface GenericBackend: bulkdata::BulkDataSender,Management::CommandInterpreter  {
+		
+		/**
+		 * This attribute is hte current time in the backend. It is represented as the number of 
+		 * 100 ns ticks since 1582-10-15 00:00:00
+		 */
+		readonly attribute ACS::ROuLongLong time;
+		
+		/**
+		 * This attribute reports the name of the component or better the name of the ACS instance of the component. 
+		 */
+		readonly attribute ACS::ROstring backendName;
+		
+		/**
+		 * This attribute reports the bandwidths configured in each section of the backend (Mhz). The length of the sequence is given by the attribute <i>sectionsNumber</i> 
+		 * It can be changed using  the method <i>setSection()</i>.
+		*/
+		readonly attribute ACS::ROdoubleSeq bandWidth;
+		
+		/**
+		 * This attribute reports the start frequency configured in each section of the backend (Mhz). The length of the sequence is given by the attribute <i>sectionsNumber</i> 
+		 * It can be changed using  the method <i>setSection()</i>.
+		*/
+		readonly attribute ACS::ROdoubleSeq frequency;
+		
+		/**
+		 * This attribute reports the sample rate  used by each section of the backend (Mhz). The length of the sequence is given by the attribute <i>sectionsNumber</i> 
+		 * It can be changed using  the method <i>setSection()</i>.
+		*/		
+		readonly attribute ACS::ROdoubleSeq sampleRate;
+		
+		/**
+		 * This attribute lists all attenuation values used in each of the backend inputs (db). The length of the sequnece is given by the attribute <i>inputsNumber</i>.
+		 * It can be modified by the method <i>setAttenuation()</i> 
+		 */
+		readonly attribute ACS::ROdoubleSeq attenuation;
+			
+		/**
+		 * This attribute reports the polarization configured in each section of the backend. The length of the sequence is given by the attribute <i>sectionsNumber</i>
+		 * Since ACS does not support sequences of enum properties, in order to be displayed it must be cast to the corresponding value of the <i>TPolarization</i> enumeration 
+		 * It can be changed using  the method <i>setSection()</i>.
+		*/
+		readonly attribute ACS::ROlongSeq polarization;
+		
+		/**
+		 * This attribute reports the numebr of bins used by each section of the backend). The lenght of the sequence is given by the attribute <i>sectionsNumber</i> 
+		 * It can be changed using  the method <i>setSection()</i>.
+		*/		
+		readonly attribute ACS::ROlongSeq bins;
+
+		/**
+		 * This attribute reports the feed number linked to  each section of the backend. The length of the sequence is given by the attribute <i>sectionsNumber</i> 
+		 * It can be changed using  the method <i>setSection()</i>.
+		*/		
+		readonly attribute ACS::ROlongSeq feed;
+		
+		/**
+		 * This attribute reports the last value  of the system temparature, measured for each of the inputs. The length of the sequence is given by the attribute <i>inputsNumber</i> 
+		* The value reported by this attribute is meaningful only if a previous call to <i>setKelvinCountsRatio()</i> has been done, otherwise a value of 0.0 Kelvin is reported.
+		*/				
+		readonly attribute ACS::ROdoubleSeq systemTemperature;
+		
+		/**
+		 * This attributes reports the section identifier  an inputs is attached to. The length of the sequence is given by the attribute <i>inputsNumber</i>
+		 * The first elements referas to the first input.For example if the first position of the sequence reports a 2 it means that the first inputs refers /is attached to the second section. 
+		 */ 
+		readonly attribute ACS::ROlongSeq inputSection;
+		
+		/**
+		 * This attribute indicates how many inputs are virtually cabled to the backend.  
+		 */
+		readonly attribute ACS::ROlong inputsNumber;
+		
+		/**
+		 * This attributes indicates how many sections are present in the backend.
+		 */
+		readonly attribute ACS::ROlong sectionsNumber;
+		
+		/**
+		 * This attribute reports the number of milliseconds of integration used by the backend at present. If zero it means
+		 * no integration is performed at all.  It can be changed using <i>setIntegration()</i>.
+		 */
+		readonly attribute ACS::ROlong integration;
+		
+		/** 
+		 * This attributes reports on the status of the backend. The meaning of each bit or bit pattern depends on the implementation.
+		 * Each implementation has just to respect the meaning that all bits set to zero means no error. 
+		 */
+		readonly attribute ACS::ROpattern status;
+		
+		/**
+		 * This attribute reports if the component is busy or not. If the component is busy no configuration or other operation are allowed.
+		 * Typically the component became busy when a transfer job is initiated (@sa <i>sendHeader()</i>)
+		 */
+		readonly attribute Management::ROTBoolean busy;
+		
+		/**
+		 * Sends the data flow headers to the receiver side. First a <i>TMainHeader</i> then as many <i>TChannelHeader</i> as the 
+		 * enalbed inputs channels. It begins a transfer job, that means that the backend will not accept any other configuration until 
+		 * a <i>terminate()</i> is issued (component is set to busy).
+		 * @throw CORBA::SystemException
+		 * @throw BackendsErrors::BackendsErrorsEx 
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 */
+		void sendHeader() raises (BackendsErrors::BackendsErrorsEx ,ComponentErrors::ComponentErrorsEx);
+		
+		/**
+		 * Start sending the data. Every data dump is preponed with a <i>TDumpHeader</i>.  The dump consists of sequence of
+		 * samples (<i>TMainHeader::sampleSize</i> bytes long). For the first input there will be as many samples as indicated by 
+		 * <i>TChannelHeader::bins</i>. If the case (@saTChannelHeader::polarization) the left,right and Stokes U and Q are cycled 
+		 * routinaly for each input.
+		 * @throw CORBA::SystemException
+		 * @throw BackendsErrors::BackendsErrorsEx 
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 * @param time start time of the acquisition. If the time is elapsed the acquisition is started anyway, If a zero is passed the acquisition will be started as soon as possible.
+		*/
+		void sendData(in ACS::Time time) raises (BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx);
+
+		/**
+		  * Immediately stops the data flows. This is asort of suspend, that means that the data are not sent but the transfer job i still
+		  * active. A call to <i>sendData</i> enables the data flow again.
+ 		 *  @throw CORBA::SystemException 
+		  * @throw BackendsErrors::BackendsErrorsEx 
+		  * @thorw ComponentErrors::ComponentErrorsEx
+		 */
+		void sendStop() raises (BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx);
+		
+		/**
+		 * Immediately halt the transfer job that was initiated by the previous call to <i>sendDataHeader</i>. Any active data flow is chased and the 
+		 * transfer job closed. The backend configuration is now available.  
+		 *  @throw CORBA::SystemException
+		 * @throw BackendsErrors::BackendsErrorsEx 
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 */
+		void terminate() raises (BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx);
+			
+		/**
+		 * Call this function in order to configure one section at a time.  If the component is busy it is not allowed to call this method.
+		 * @throw ComponentErrors::ComponentErrorsEx 
+		 * @throw BackendsErrors::BackendsErrorsEx
+		 * @throw CORBA::SystemException
+		 * @param input this is the ordinal identifier of the section, it must be included in the range 0..<i>sectionsNumber</i>.
+		 * @param freq sets the value of the start frequency in MHz. That means the frequency of the local oscillator of current section.
+		 * 						  If not set the component assumes a deafult value depending on the implementation. If the value is negative the
+		 * 						  previuos value is left unchanged
+		 * @param bw  sets the value of the bandwidth in MHz. That means the value of the filter of the section. If not set the 
+		 *                       component assumes a default value depending on the implementation. A negative value means not change the 
+		 * 					  current configuration
+		 * @param feed changes the current feed number attached to the section. A negative values leaves the previous configuration
+		 *  @param pol sets the polarization that the input is attached to. In some backends this configuration could be ignored beacuse hardware
+		 *                     limitations. This long value is mapped into a <i>TPolarization</i> enumeration. Also a negative value is allowed meaning the previous value
+		 *                    should be left.
+		 * @param sr sets the sample rate for the input in MHz. That means the frequency of the section sampler. Negative value does
+		 *                     not modify the current configuration
+		 * @param bins number of bins configured for the input. This value can be modified or not according to the specific backend. For
+		 *                example for a simple total power backend this value is always 1.
+		 */
+		void setSection(in long input,in double freq,in double bw,in long feed,in long pol,in double sr,in long bins) raises (
+				ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		
+		/*
+		 * It allows to change the attenuation value for each of the inputs.
+		 * @throw ComponentErrors::ComponentErrorsEx 
+		 * @throw BackendsErrors::BackendsErrorsEx
+		 * @throw CORBA::SystemException
+		 * @param input identifier of the input we want to set the attenuation. It must be between 0 and <i>inputsNumeber</i>-1. The first input belongs to the first section; if the section is polarimetric ti has 2 inputs;
+		 *                by convection the first input of the section is the signal coming from the left polarization.
+		 * @param att sets the attenutation level for given  input in db. If not set the component will assume a default value depending
+		 * 						on the implementation. A negative will keep the present configuration. 
+		 */
+		 void setAttenuation(in long input,in double att) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+		/**
+		 * @deprecated Call this function in order to configure all the sections.  If the component is busy it is not allowed to call this method.
+		 * @throw ComponentErrors::ComponentErrorsEx 
+		 * @throw BackendsErrors::BackendsErrorsEx
+		 * @throw CORBA::SystemException
+		 * @param freq sets the value of the start frequency in MHz. That means the frequency of the local oscillator of current section.
+		 * 						  If not set the component assumes a deafult value depending on the implementation. If the value is negative the
+		 * 						  previuos value is left unchanged
+		 * @param bw  sets the value of the bandwidth in MHz. That means the value of the filter of the section. If not set the 
+		 *                       component assumes a default value depending on the implementation. A negative value means not change the 
+		 * 					  current configuration
+		 * @param feed changes the current feed number attached to the section. A negative values leaves the previous configuration
+		 *  @param pol sets the polarization that the input is attached to. In many backends this configuration is ignored beacuse hardware
+		 *                     limitations. (@sa <i>TPolarization</i>).
+		 * @param sr sets the sample rate for the input in MHz. That means the frequency of the section sampler. Negative value does
+		 *                     not modify the current configuration
+		 * @param bins number of bins configured for the input. This value can be modified or not according to the specific backend. For
+		 *                example for a sinmple total power backend this value is always 1.
+		 */
+		//void setAllSections(in double freq,in double bw,in long feed,in TPolarization pol,in double sr,in long bins) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		
+		/**
+		 * This function can be used to enable or disable a section flow from the data stream. If disable an input is ignored and the
+		 * data coming from that input are not sent to the data receiver.  If the component is busy it is not allowed to call this method.		 
+		 * @throw CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @param enable a sequence of exactly <i>sectionsNumber</i> integers. If the integer is positive the input is enabled,
+		 *                if zero the input is disabled, if negative the previous configuration is unchanged
+		 */ 
+		void enableChannels(in ACS::longSeq enable) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		
+		/**
+		 * Sets the new value for the integration time. A value of zero means that no integration is done. This capability could
+		 * be supported by hardware or simulated by the implementation component.  If the component is busy it is not allowed to call this method.
+		 * @throw CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @thorw BackendsErrors::BackendsErrorsEx
+		 * @param integration new integration time in milliseconds. A negative value will preserve the current setting.
+		*/
+		void setIntegration(in long integration) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		
+		/**
+		 * Sets the current time into the backend. The time used to synchronize the bakend is taken from the host computer 
+		 * that runs the component.  If the component is busy it is not allowed to call this method.
+		 * @throw CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx 
+		 * @throw BackendsErrors::BackendsErrorsEx
+		 */
+		void setTime() raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		
+		/**
+		 * Call this method in order to read the total power from each input. This method must be available also if the backend in the <i>busy</i> status.
+		 * The integration time is not predermined but it should the value given as <i>integrationTime</i>.  
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw BackendsErrors::BackendsErrorsEx 
+		 * @throw CORBA:SystemException
+		 * @return a sequence of double that reports the total power of each input (@sa <i>inputsNumber</i>). The caller must take care of freeing it.
+		 */
+		ACS::doubleSeq getTpi() raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		
+		/**
+		 * Call this method in order to read the total power from each input when the input are connected directly to the 50 Ohm. 
+		 * This method must be available also if the backend in the <i>busy</i> status.
+ 		 * The integration time is not predermined but it should the value given as <i>integrationTime</i>.   
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @thorw BackendsErrors::BackendsErrorsEx
+		 * @throw CORBA:SystemException
+		 * @return a sequence of double that reports the total power of each input (@sa <i>inputsNumber</i>). The caller must take care of freeing it.
+		 */
+		ACS::doubleSeq getZero() raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		
+		/**
+		 * This method is used internally in order for the backend to provide an adeguate tsys value during the sampling. If this method is never called a default value of 1 has to be the default.
+		 * @param ratio this the conversion factor between counts and kelvin. A value for each input is required (@sa <i>inputsNumber</i>).
+		 * @param tsys last measured tsys. The system temperature attribute reports this values.
+		 */
+		void setKelvinCountsRatio(in ACS::doubleSeq ratio,in ACS::doubleSeq tsys);
+		
+		/**
+		 * This method is called internally in order to get definition of the virtual inputs at once. The first element of each sequence corresponds to the first input and so on.
+		 * All sequences must be freed by the caller.
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @thorw BackendsErrors::BackendsErrorsEx
+		 * @throw CORBA:SystemException 
+		 * @param freq starting frequency (MHz)
+		 * @param bandwidth wdth in MHz of the processed band
+		 * @param feed identifier of the connected feed
+		 * @param ifNumber Indicates the Identifier of the Intermediate frequency (IF) the inputs is attached to
+		 * @return the number of available inputs, it can be considered as the length of the output sequences
+		 */
+		long getInputs(out ACS::doubleSeq freq,out ACS::doubleSeq bandwidth,out ACS::longSeq feed,out ACS::longSeq ifNumber) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		
+		/**
+		 * @copybrief Managment::CommandInterpreter::command()
+ 		 * This method can be used to configure and give to the backend some commands. The commands and configuration is given as strings.   If the component is busy 
+		 * it is not allowed to call this method.  
+		 */
+		
+	};
+	
+};
+
+
+#endif
