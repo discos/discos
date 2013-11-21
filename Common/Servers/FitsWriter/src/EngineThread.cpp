@@ -1023,6 +1023,14 @@ void CEngineThread::collectReceiversData()
 			m_data->setStatus(Management::MNG_WARNING);
 			m_info.saveFeedHeader(NULL,0);
 		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
+			impl.setOperationName("getFeeds()");
+			impl.setComponentName((const char *)m_config->getReceiversBossComponent());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			m_info.saveFeedHeader(NULL,0);
+		}
 		try { // get the calibration marks values and inputs configuration
 			ACS::doubleSeq freqs,bws,atts;
 			ACS::longSeq feeds,ifs,sectionsID;
@@ -1052,6 +1060,15 @@ void CEngineThread::collectReceiversData()
 			receiverBossError=true;
 		} 		
 		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
+			impl.setOperationName("getCalibrationMark(),getIFOutputMark()");
+			impl.setComponentName((const char *)m_config->getReceiversBossComponent());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			m_info.setInputsTable();
+			//m_data->setCalibrationMarks();
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx & ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
 			impl.setOperationName("getCalibrationMark(),getIFOutputMark()");
 			impl.setComponentName((const char *)m_config->getReceiversBossComponent());
