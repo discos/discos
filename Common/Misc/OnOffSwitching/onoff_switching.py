@@ -22,9 +22,9 @@ if __name__ == '__main__':
     import config
     try:
         conf = config.Configuration(
-            cycles=2, # Time (in seconds) between beckend start and stop commands
-            acquisition_time=1.0, # Time between backend.acquire() and backend.stop()
-            positioning_time=2.0, # The time the program updates the antenna position
+            cycles=50, # Time (in seconds) between beckend start and stop commands
+            acquisition_time=30.0, # Time between backend.acquire() and backend.stop()
+            positioning_time=15.0, # The time the program updates the antenna position
             observer_name='SRT', # The observer name (SRT, Medicina, ...)
             op="C/2012 S1 (ISON),h,11/28.7757/2013,62.3948,295.6536,345.5636,1.000002,\
                     0.012446,2000,10.0,3.2", # Orbital parameters

@@ -1,4 +1,4 @@
-__all__ = ['antenna', 'recorder', 'receiver', 'scheduler', 'ato', 'ANT_J2000', 'ACU_NEUTRAL']
+__all__ = ['antenna', 'recorder', 'mount', 'receiver', 'scheduler', 'ato', 'ANT_J2000', 'ACU_NEUTRAL']
 
 
 __credits__ = """Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
@@ -10,7 +10,6 @@ import time
 import sys
 from os.path import join, exists, curdir, abspath
 from os import mkdir
-from Acspy.Common.TimeHelper import getTimeStamp
 
 
 class Recorder(object):
@@ -44,8 +43,8 @@ class Recorder(object):
             targetID='',
             extraPath='',
             baseName='')
-        _setStartTime(datetime.datetime.utcnow())
-        _setStopTime(datetime.datetime.utcnow())
+        self._setStartTime(datetime.datetime.utcnow())
+        self._setStopTime(datetime.datetime.utcnow())
 
     def start(self):
         self.writer.reset();
@@ -58,7 +57,7 @@ class Recorder(object):
         self._updateSubScanSetup()
         self.writer.startSubScan(self.subScanSetup);
         self.backend.sendData(self.subScanSetup.startUt)
-        _setStartTime(self.subScanSetup)
+        self._setStartTime(datetime.datetime.utcnow() + datetime.timedelta(1))
         while getTimeStamp().value < self.subScanSetup.startUt + 110000000: 
             time.sleep(1)
 
@@ -71,7 +70,7 @@ class Recorder(object):
         time.sleep(2)
         while self.writer.isRecording():
             time.sleep(1)
-        _setStopTime(datetime.datetime.utcnow())
+        self._setStopTime(datetime.datetime.utcnow())
         self.writer.stopScan() 
         time.sleep(1)
         self.backend.terminate()
@@ -86,11 +85,12 @@ class Recorder(object):
     def _setStartTime(self, value):
         self.startTime = value
 
-    def _setStartTime(self, value):
+    def _setStopTime(self, value):
         self.stopTime = value
 
 try:
     from Acspy.Clients.SimpleClient import PySimpleClient
+    from Acspy.Common.TimeHelper import getTimeStamp
     from maciErrTypeImpl import CannotGetComponentExImpl
     from Antenna import ANT_J2000, ACU_NEUTRAL
     from AntennaErrors import AntennaErrorsEx
@@ -99,6 +99,7 @@ try:
     antenna = client.getComponent('ANTENNA/Boss')
     receiver = client.getComponent('RECEIVERS/Boss')
     scheduler = client.getComponent("MANAGEMENT/Gavino")
+    mount = client.getComponent('ANTENNA/Mount')
     recorder = Recorder()
     # If the backend rounds the time to a next upper value, set a negative `ato` 
     ato = -2 # Offset to add to the backend acquisition time

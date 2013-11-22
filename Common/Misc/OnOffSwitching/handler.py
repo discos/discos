@@ -85,7 +85,7 @@ class Positioner(object):
                     # If it is not a simulation, set the antenna position
                     if not conf.simulate:
                         try:
-                            antenna.sidereal(target.name, ra, dec, ANT_J2000, ACU_NEUTRAL)
+                            antenna.sidereal(conf.target.name, ra, dec, ANT_J2000, ACU_NEUTRAL)
                         except Exception, e:
                             logging.exception('Cannot set the antenna position')
                             print 'ERROR: Cannot set the antenna position'
@@ -116,11 +116,15 @@ class Handler(object):
         self.ato = -0.5 # Acquisition time offset
         if not conf.simulate:
             try:
-                from devices import recorder, ato, receiver, scheduler
+                from devices import recorder, ato, receiver, scheduler, mount
                 self.recorder = recorder
                 self.ato = ato
                 self.receiver = receiver
                 self.scheduler = scheduler
+                self.cmd_az_obj = mount._get_commandedAzimuth()
+                self.act_az_obj = mount._get_azimuth()
+                self.cmd_el_obj = mount._get_commandedElevation()
+                self.act_el_obj = mount._get_elevation()
             except Exception, e:
                 logging.exception('Cannot get the devices')
                 print 'ERROR: Cannot get the devices'
@@ -143,16 +147,28 @@ class Handler(object):
      
     def waitForTracking(self):
         """Wait until the antenna reaches the target position."""
-        track = False
-        slice_time = 0.5
+        slice_time = 1.0
         duration = 0
-        timeout = 30 # seconds
+        timeout = 60 # seconds
         if not self.conf.simulate:
-            track_obj = self.scheduler._get_tracking()
-            while track:
-                track, comp = track_obj.get_sync()
-                time.sleep(slice_time)
-                duration += slice_time
+            track_distance = 0.001 # (move to conf). Below this value off diff pos, the antenna is in tracking
+            track = False
+            time.sleep(2) # Wait untill the antenna get the last commanded posizion
+            while not track:
+                try:
+                    cmd_az, comp = self.cmd_az_obj.get_sync()
+                    act_az, comp = self.act_az_obj.get_sync()
+                    cmd_el, comp = self.cmd_el_obj.get_sync()
+                    act_el, comp = self.act_el_obj.get_sync()
+                    distance = math.sqrt(abs(cmd_az - act_az)**2 + abs(cmd_el - act_el)**2)
+                    track = True if distance < track_distance else False
+                    time.sleep(slice_time)
+                    duration += slice_time
+                    if duration > timeout:
+                        break
+                except Exception, e:
+                    logging.exception('Cannot get the tracking value')
+                    print 'Cannot get the tracking value'
                 if duration > timeout:
                     break
             if not track:
@@ -163,7 +179,7 @@ class Handler(object):
     def updateLO(self):
         """Compute and set the LO value."""
         delta = self.conf.acquisition_time * self.conf.reference + 5 # TODO: see stats in order to fix it
-        startTime = datetime.datetime.utcnow() if self.conf.simulate else self.conf.simulate.startTime
+        startTime = datetime.datetime.utcnow() if self.conf.simulate else self.recorder.startTime
         at_time = startTime + datetime.timedelta(seconds=delta)
         found = False 
         size = len(self._horizons)
@@ -224,6 +240,8 @@ class Handler(object):
             logging.info('Acquisition done at %s', datetime.datetime.utcnow())
             print 'acquire(): acquisition done!'
         except Exception, e:
+            if not self.conf.simulate:
+                self.recorder.stop()
             logging.exception('Cannot get the recorder')
             print 'ERROR: Cannot get the recorder'
             raise

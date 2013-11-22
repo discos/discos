@@ -3,6 +3,7 @@
 # Copyright: This module has been placed in the public domain.
 
 from Acspy.Clients.SimpleClient import PySimpleClient
+import time
 import math
 
 client = PySimpleClient()
@@ -24,6 +25,6 @@ while True:
         break
 
 outfile = open('outfile.data', 'w')
-for i in range(az_list):
-    outfile.write('%s %s' %(az_list[i], el_list[i]))
+for i in range(len(az_list)):
+    outfile.write('%s %s\n' %(az_list[i], el_list[i]))
 outfile.close()
