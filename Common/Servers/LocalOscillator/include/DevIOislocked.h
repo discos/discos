@@ -14,7 +14,7 @@
 #include <baciDevIO.h>
 #include <IRA>
 #include "CommandLine.h"
-
+#include <cmath>
 using namespace IRA;
 
 /**
@@ -71,7 +71,7 @@ public:
 			line->getPower(read_power);
 			m_impl->getStoredValue(expected_power,expected_freq);
 
-			if (expected_freq ==read_frequency)
+			if (fabs(expected_freq - read_frequency) <= 0.1)
  	 		{
 				m_val=1;
 	 			cout << "expected freq: " <<expected_freq << "Read Freq:" << read_frequency  << "flag" <<m_val<< endl;
