@@ -22,7 +22,11 @@ class Configuration(object):
             'stats': bool,
             'target': Target,
             'datestr_format': str,
-            'observer_info': dict
+            'observer_info': dict,
+            'horizons_file_name': str,
+            'lab_freq': float, 
+            'lower_freq': float,
+            'upper_freq': float
     }
     
     observers_info = {

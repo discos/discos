@@ -1,4 +1,8 @@
-__all__ = ['antenna', 'recorder', 'ato', 'ANT_J2000', 'ACU_NEUTRAL']
+__all__ = ['antenna', 'recorder', 'receiver', 'scheduler', 'ato', 'ANT_J2000', 'ACU_NEUTRAL']
+
+
+__credits__ = """Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+Licence: GPL 2.0 <http://www.gnu.org/licenses/gpl-2.0.html>"""
 
 import datetime
 import logging
@@ -93,6 +97,8 @@ try:
     import Management
     client = PySimpleClient()
     antenna = client.getComponent('ANTENNA/Boss')
+    receiver = client.getComponent('RECEIVERS/Boss')
+    scheduler = client.getComponent("MANAGEMENT/Gavino")
     recorder = Recorder()
     # If the backend rounds the time to a next upper value, set a negative `ato` 
     ato = -2 # Offset to add to the backend acquisition time

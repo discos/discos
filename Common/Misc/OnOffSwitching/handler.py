@@ -1,6 +1,11 @@
 from __future__ import division
+
+__credits__ = """Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+Licence: GPL 2.0 <http://www.gnu.org/licenses/gpl-2.0.html>"""
+
 import datetime
 import logging
+import ephem
 import math
 import time
 import sys
@@ -8,10 +13,6 @@ from multiprocessing import Process, Value
 from os.path import join, exists
 from os import mkdir
 from models import Observer, Target
-
-__credits__ = """Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
-Licence: GPL 2.0 <http://www.gnu.org/licenses/gpl-2.0.html>"""
-
 
 class Positioner(object):
     def __new__(cls, conf):
@@ -115,13 +116,14 @@ class Handler(object):
         self.ato = -0.5 # Acquisition time offset
         if not conf.simulate:
             try:
-                from devices import recorder 
+                from devices import recorder, ato, receiver, scheduler
                 self.recorder = recorder
-                from devices import ato
                 self.ato = ato
+                self.receiver = receiver
+                self.scheduler = scheduler
             except Exception, e:
-                logging.exception('Cannot get the recorder')
-                print 'ERROR: Cannot get the recorder'
+                logging.exception('Cannot get the devices')
+                print 'ERROR: Cannot get the devices'
                 raise
 
         if conf.positioning_time < 0:
@@ -132,25 +134,75 @@ class Handler(object):
 
         obs = Observer(**conf.observer_info)
         conf.target = Target(op=conf.op, observer=obs)
-
-        self.delta = conf.acquisition_time * conf.reference
-        self.timestamp = {'go_on': None, 'go_off': None, 'on_source': None, 'off_source': None}
-        self._enablestats(conf.stats)
-        self._createstatsfile()
         self.conf = conf
+
+        self.timestamp = {'go_on': None, 'go_off': None, 'on_source': None, 'off_source': None}
+        self._enablestats(self.conf.stats)
+        self._createstatsfile()
+        self._createHorizons()
      
     def waitForTracking(self):
         """Wait until the antenna reaches the target position."""
-        print 'waitForTracking()'
+        track = False
+        slice_time = 0.5
+        duration = 0
+        timeout = 30 # seconds
+        if not self.conf.simulate:
+            track_obj = self.scheduler._get_tracking()
+            while track:
+                track, comp = track_obj.get_sync()
+                time.sleep(slice_time)
+                duration += slice_time
+                if duration > timeout:
+                    break
+            if not track:
+                raise Exception('Cannot track the source')
+        else:
+            print("waitForTracking()")
 
     def updateLO(self):
-        """Compute the LO value and set it."""
+        """Compute and set the LO value."""
+        delta = self.conf.acquisition_time * self.conf.reference + 5 # TODO: see stats in order to fix it
+        startTime = datetime.datetime.utcnow() if self.conf.simulate else self.conf.simulate.startTime
+        at_time = startTime + datetime.timedelta(seconds=delta)
+        found = False 
+        size = len(self._horizons)
+        for idx, item in enumerate(self._horizons):
+            date, radialSpeed = item
+            print date, at_time
+            if date == at_time:
+                found = True
+                break
+            if date < at_time:
+                if idx == size - 1:
+                    found = True
+                    break # The last element
+                format_ = '%Y-%b-%d %H:%M'
+                t0, t1 = date, self._horizons[idx+1][0]
+                rs0, rs1 = float(radialSpeed), float(self._horizons[idx+1][1])
+                if t0 < at_time < t1:
+                    radialSpeed = rs0 + (rs1 - rs0)*((at_time - t0).seconds/(t1 - t0).seconds)
+                    found = True
+                    break 
+                else:
+                    continue
+        if found:
+            vobs = self.conf.lab_freq * (1 - radialSpeed/(ephem.c/1000))
+            lo = vobs - ((self.conf.upper_freq + self.conf.lower_freq)/2)
+            del self._horizons[:idx]
+        else:
+            raise Exception('Cannot get a proper date in the horizons file')
+
+        if not self.conf.simulate:
+            try:
+                self.receiver.setLO([lo])
+            except Exception, e:
+                logging.exception('Cannot get the receiver')
+                print 'ERROR: Cannot get the receiver'
+                raise
         now = datetime.datetime.utcnow()
-        at_time = now + datetime.timedelta(seconds=self.delta)
-        logging.info('At %s: LO value computed for %s' %(now, at_time))
-        # TODO: get the local oscillator value
-        print 'updateLO() -> ', '@ %s: LO value computed for %s' %(now, at_time)
-        # TODO: set the local oscillator
+        logging.info('At %s: LO value -> %s', now, lo)
+        print 'At %s: LO value -> %s' %(now, lo)
 
     def acquire(self, which):
         """Start and stop the backend acquisition."""
@@ -183,6 +235,31 @@ class Handler(object):
         title = "ON/OFF observation from the %s to %s, at %s" %(from_, nickname, datestr)
         line = len(title) * '='
         return line + '\n' + title + '\n' + line + '\n'
+
+    def _createHorizons(self):
+        format_ = '%Y-%b-%d %H:%M'
+        self._horizons = []
+        found = False
+        try:
+            for idx, line in enumerate(open(join('inputfiles', self.conf.horizons_file_name))):
+                if line.startswith('$$SOE'):
+                    found = True
+                elif line.startswith('$$EOE'):
+                    break
+                elif found:
+                    items = line.split()
+                    if len(items) not in (21, 22):
+                        raise Exception('Unexpected number of items in %s' %file_name)
+                    datestr = items[0] + ' ' + items[1]
+                    delotstr = items[17] if len(items) == 21 else items[18]
+                    radialSpeed = float(delotstr)
+                    date = datetime.datetime.strptime(datestr, format_)
+                    if date >= datetime.datetime.utcnow() - datetime.timedelta(minutes=20):
+                        self._horizons.append((date, radialSpeed))
+        except Exception, e:
+            logging.error('Cannot get the radial speeds from the horizons file')
+            print('Cannot get the radial speeds from the horizons file')
+            sys.exit(1)
 
     def _enablestats(self, flag):
         self.stats = flag
@@ -219,10 +296,13 @@ class Handler(object):
             for cycle in range(self.conf.cycles):
                 if positioner.terminated():
                     raise Exception('Antenna positioning process terminated. See the log file.')
-                for target in ('on', 'off'):
-                    self.waitForTracking()
-                    self.updateLO()
-                    self.acquire('%s_source' %target)
+                positioner.goOnSource()
+                self.waitForTracking()
+                self.updateLO() # LO value in the on/off middle position
+                self.acquire('on_source')
+                positioner.goOffSource()
+                self.waitForTracking()
+                self.acquire('off_source')
         except KeyboardInterrupt:
             print 'Program stopped at at %s' %datetime.datetime.utcnow()
             logging.info('Program stopped at at %s' %datetime.datetime.utcnow())

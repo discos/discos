@@ -3,10 +3,15 @@
 Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 Licence: GPL 2.0 <http://www.gnu.org/licenses/gpl-2.0.html>
 """
-
 if __name__ == '__main__':
+    import logging
     import argparse
+    import datetime
     import sys
+    from handler import Handler
+    from models import Target
+    from os.path import join, exists
+    from os import mkdir
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser()
@@ -27,17 +32,14 @@ if __name__ == '__main__':
             reference=0.5, # LO(time) -> starting_acquisition_time + acquisition_time*reference
             simulate=args.simulate, # If True, the program simulates the observation
             datestr_format='%d/%b/%Y:%H:%M:%S', # [day/month/year:hour:minute:second]
-            stats=True) # If True, the program saves some useful information
+            stats=True, # If True, the program saves some useful information
+            horizons_file_name='lo.txt', # Horizons file name
+            lab_freq=22235.08, # Lab frequency (MHz)
+            lower_freq=145.0, # Backend lower frequency (MHz)
+            upper_freq=207.0) # Backend upper frequency (MHz)
     except Exception, e:
         print('ERROR: %s' %e)
         sys.exit(1)
-
-    import datetime
-    import logging
-    from handler import Handler
-    from models import Target
-    from os.path import join, exists
-    from os import mkdir
 
     # Logging stuffs
     logdir = 'logs'
