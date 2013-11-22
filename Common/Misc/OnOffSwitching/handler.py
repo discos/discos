@@ -153,7 +153,7 @@ class Handler(object):
         if not self.conf.simulate:
             track_distance = 0.001 # (move to conf). Below this value off diff pos, the antenna is in tracking
             track = False
-            time.sleep(2) # Wait untill the antenna get the last commanded posizion
+            time.sleep(self.conf.positioning_time + 2) # Wait untill the antenna get the last commanded posizion
             while not track:
                 try:
                     cmd_az, comp = self.cmd_az_obj.get_sync()
@@ -185,7 +185,6 @@ class Handler(object):
         size = len(self._horizons)
         for idx, item in enumerate(self._horizons):
             date, radialSpeed = item
-            print date, at_time
             if date == at_time:
                 found = True
                 break
