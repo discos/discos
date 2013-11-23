@@ -102,7 +102,7 @@ try:
     mount = client.getComponent('ANTENNA/Mount')
     recorder = Recorder()
     # If the backend rounds the time to a next upper value, set a negative `ato` 
-    ato = -2 # Offset to add to the backend acquisition time
+    ato = -5 # Offset to add to the backend acquisition time
 except Exception, e:
     logging.exception('Cannot get the ACS modules and components')
     print('ERROR: Cannot get the ACS modules and components')

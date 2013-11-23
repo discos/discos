@@ -11,6 +11,13 @@ class TestConfiguration(unittest.TestCase):
     def test_wrongValue(self):
         """Verify a TypeError is raised when the attribute value is not of the right type."""
         self.assertRaises(TypeError, setattr, self.c, 'cycles', 10.2)
+        self.c.lower_freq = 100.0
+        self.assertRaises(AttributeError, setattr, self.c, 'upper_freq', 50.0)
+        self.assertRaises(AttributeError, setattr, self.c, 'observer_name', 'STR')
+    def test_checks(self):
+        """Verify an AttributeError is raised in the case the value does not passes the check."""
+        self.assertRaises(AttributeError, setattr, self.c, 'cycles', 0)
+        self.assertRaises(AttributeError, setattr, self.c, 'acquisition_time', 11)
     def test_wrongName(self):
         """Verify an AttributeError is raised when the attribute name is not allowed."""
         self.assertRaises(AttributeError, setattr, self.c, 'foo', '100')

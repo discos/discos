@@ -22,9 +22,9 @@ if __name__ == '__main__':
     import config
     try:
         conf = config.Configuration(
-            cycles=2, # Time (in seconds) between beckend start and stop commands
-            acquisition_time=30.0, # Time between backend.acquire() and backend.stop()
-            positioning_time=0.5, # The time the program updates the antenna position
+            cycles=4, # Number of on/off cycles, without tacking in account calibrations
+            acquisition_time=20, # Time between backend.acquire() and backend.stop()
+            positioning_time=5.0, # The time the program updates the antenna position
             observer_name='SRT', # The observer name (SRT, Medicina, ...)
             op="C/2012 S1 (ISON),h,11/28.7757/2013,62.3948,295.6536,345.5636,1.000002,\
                     0.012446,2000,10.0,3.2", # Orbital parameters
@@ -36,9 +36,16 @@ if __name__ == '__main__':
             horizons_file_name='lo.txt', # Horizons file name
             lab_freq=22235.08, # Lab frequency (MHz)
             lower_freq=145.0, # Backend lower frequency (MHz)
-            upper_freq=207.0) # Backend upper frequency (MHz)
+            upper_freq=207.0, # Backend upper frequency (MHz)
+            calibrations=50, # Percentage of calibrations (10 means 10% of cycles)
+            ) 
+    except (TypeError, AttributeError), e:
+        print('CONFIGURATION ERROR: %s' %e)
+        sys.exit(1)
     except Exception, e:
-        print('ERROR: %s' %e)
+        import traceback
+        print('UNEXPECTED ERROR: %s' %e)
+        traceback.print_tb(sys.exc_info()[2])
         sys.exit(1)
 
     # Logging stuffs

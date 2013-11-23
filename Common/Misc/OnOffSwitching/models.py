@@ -35,7 +35,7 @@ class Target(object):
     def getRaDec(self, at_time=None):
         """Get the (ra, dec) position of the source from the observer, at `at_time` UTC time."""
         self._compute(at_time)
-        return self.source.ra, self.source.dec
+        return self.source.a_ra, self.source.a_dec
 
     def getRaDecDiff(self, time1, time2):
         return map(lambda x, y: x - y, self.getRaDec(time2), self.getRaDec(time1))

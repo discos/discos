@@ -52,6 +52,7 @@ class Positioner(object):
         self._on_source.value = False
     def terminated(self):
         return self._terminate.value
+
     @staticmethod
     def updatePosition(conf, update, on_source, terminate):
         """Compute and set the target position.
@@ -92,10 +93,10 @@ class Positioner(object):
                             terminate.value = True
                             sys.exit(1)
 
-                    where = 'on source' if on_source else 'off source'
+                    where = 'on source' if on_source.value else 'off source'
                     now = datetime.datetime.utcnow()
-                    logging.info('%s -> (%.4f, %.4f) @ %s', where, ra, dec, now)
-                    print '%s -> (%.4f, %.4f) @ %s' %(where, ra, dec, now)
+                    logging.info('%s: ra_dec(%.4f, %.4f) @ %s', where, ra, dec, now)
+                    print '@ Tracking %s: ra_dec(%.4f, %.4f)' %(where, ra, dec)
                 if terminate.value:
                     break
                 time.sleep(conf.positioning_time)
@@ -113,7 +114,7 @@ class Positioner(object):
 class Handler(object):
     def __init__(self, conf):
 
-        self.ato = -0.5 # Acquisition time offset
+        self.ato = -0.5 # Acquisition time offset (the value assegned in the no-simul mode is imported below)
         if not conf.simulate:
             try:
                 from devices import recorder, ato, receiver, scheduler, mount
@@ -140,7 +141,9 @@ class Handler(object):
         conf.target = Target(op=conf.op, observer=obs)
         self.conf = conf
 
-        self.timestamp = {'go_on': None, 'go_off': None, 'on_source': None, 'off_source': None}
+        utcnow = datetime.datetime.utcnow()
+        self._startAcquisitionTime = {'on_source': utcnow, 'off_source': utcnow, 'calibration': utcnow}
+        self._stopAcquisitionTime = {'on_source': utcnow, 'off_source': utcnow, 'calibration': utcnow}
         self._enablestats(self.conf.stats)
         self._createstatsfile()
         self._createHorizons()
@@ -151,9 +154,9 @@ class Handler(object):
         duration = 0
         timeout = 60 # seconds
         if not self.conf.simulate:
-            track_distance = 0.001 # (move to conf). Below this value off diff pos, the antenna is in tracking
+            track_distance = 0.001 # (move to conf)
             track = False
-            time.sleep(self.conf.positioning_time + 2) # Wait untill the antenna get the last commanded posizion
+            time.sleep(self.conf.positioning_time + 2) # Wait untill the antenna get the cmd pos
             while not track:
                 try:
                     cmd_az, comp = self.cmd_az_obj.get_sync()
@@ -175,10 +178,18 @@ class Handler(object):
                 raise Exception('Cannot track the source')
         else:
             print("waitForTracking()")
+            time.sleep(2.5)
+
 
     def updateLO(self):
         """Compute and set the LO value."""
-        delta = self.conf.acquisition_time * self.conf.reference + 5 # TODO: see stats in order to fix it
+        # Add 2.5 seconds of tracking time. We will calculate this time later, dynamically
+        acq_time = self.conf.acquisition_time 
+        stop_acq_time = self._stopAcquisitionTime['off_source']
+        start_acq_time = self._startAcquisitionTime['on_source']
+        realDelta = (stop_acq_time - start_acq_time).seconds / 2
+        delta = 2 * acq_time * self.conf.reference + 2.5 
+        delta = realDelta if acq_time < realDelta <  2*acq_time else delta
         startTime = datetime.datetime.utcnow() if self.conf.simulate else self.recorder.startTime
         at_time = startTime + datetime.timedelta(seconds=delta)
         found = False 
@@ -217,33 +228,70 @@ class Handler(object):
                 raise
         now = datetime.datetime.utcnow()
         logging.info('At %s: LO value -> %s', now, lo)
-        print 'At %s: LO value -> %s' %(now, lo)
+        print '+> LO(now + %s seconds) -> %.1f MHz' %(delta, lo)
 
     def acquire(self, which):
         """Start and stop the backend acquisition."""
-        if which not in ('on_source', 'off_source'):
+        if which not in self._startAcquisitionTime:
             raise KeyError('key %s not allowed' %which)
 
-        self.timestamp[which] = datetime.datetime.utcnow() # Set the timestamp before acquiring
-
         try:
-            duration = self.conf.acquisition_time if self.conf.acquisition_time > 15 else 20
+            if self.conf.simulate:
+                duration = self.conf.acquisition_time
+            else:
+                if self.conf.acquisition_time < 15: # Offset needed by Xarcos on Nuraghe 0.2
+                    duration = 20
+                else:
+                    duration = self.conf.acquisition_time
             stop_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=duration + self.ato)
-            print 'acquire(): starting acquisition...'
-            logging.info('Starting acquisition at %s', datetime.datetime.utcnow())
+            self._startAcquisitionTime[which] = datetime.datetime.utcnow()
             if not self.conf.simulate:
-                self.recorder.start()
-                while datetime.datetime.utcnow() < stop_time:
+                if which == 'calibration':
+                    try:
+                        self.receiver.calOn()
+                    except Exception, e:
+                        logging.exception('Cannot turn the mark ON')
+                        print '+> ERROR: Cannot turn the mark ON'
+                        sys.exit(1)
+                    logging.info('Calibration mark ON')
+                    print '+> Calibration mark ON'
                     time.sleep(1)
-                self.recorder.stop()
-            logging.info('Acquisition done at %s', datetime.datetime.utcnow())
-            print 'acquire(): acquisition done!'
+                print '+> Starting acquisition %s' %which
+                logging.info('Starting acquisition at %s', datetime.datetime.utcnow())
+                self.recorder.start()
+            else:
+                if which == 'calibration':
+                    logging.info('Calibration mark ON')
+                    print '+> Calibration mark ON (simulation mode)'
+                    logging.info('Starting acquisition at %s', datetime.datetime.utcnow())
+                    print '+> Starting acquisition %s' %which
         except Exception, e:
+            logging.exception('Some problems recording')
+            print('Some problems recording')
+            raise
+        finally:
+            while datetime.datetime.utcnow() < stop_time:
+                time.sleep(1)
             if not self.conf.simulate:
                 self.recorder.stop()
-            logging.exception('Cannot get the recorder')
-            print 'ERROR: Cannot get the recorder'
-            raise
+                logging.info('Acquisition done at %s', datetime.datetime.utcnow())
+                print '+> Acquisition done!'
+                if which == 'calibration':
+                    try:
+                        self.receiver.calOff()
+                        logging.info('Calibration mark OFF')
+                        print '+> Calibration mark OFF'
+                    except Exception, e:
+                        logging.exception('Cannot turn the mark OFF')
+                        print '+> ERROR: Cannot turn the mark OFF'
+                        sys.exit(1)
+            else:
+                logging.info('Acquisition done at %s', datetime.datetime.utcnow())
+                print '+> Acquisition done!'
+                if which == 'calibration':
+                    logging.info('Calibration mark OFF (simulation mode)')
+                    print '+> Calibration mark OFF'
+            self._stopAcquisitionTime[which] = datetime.datetime.utcnow()
 
     def getObservationTitle(self):
         from_ = self.conf.target.from_
@@ -258,7 +306,7 @@ class Handler(object):
         self._horizons = []
         found = False
         try:
-            for idx, line in enumerate(open(join('inputfiles', self.conf.horizons_file_name))):
+            for idx, line in enumerate(open(join('horizons', self.conf.horizons_file_name))):
                 if line.startswith('$$SOE'):
                     found = True
                 elif line.startswith('$$EOE'):
@@ -306,11 +354,23 @@ class Handler(object):
 
     def run(self):
         """Run the jobs in loop for cycles times."""
+        calibrations = int(self.conf.cycles * self.conf.calibrations / 100)
+        total_cycles = self.conf.cycles if not calibrations else self.conf.cycles + 1
+        if not calibrations:
+            print 'WARNING: Observation without calibration'
+            logging.warning('Observation withoud calibration')
+            cal_idx = 0
+            user_input = raw_input('Are you sure you want to continue? (y/n): ')
+            if user_input.strip() != 'y':
+                sys.exit(0)
+        else:
+            cal_idx = int(total_cycles / calibrations)
+
         positioner = Positioner(self.conf)
         positioner() # Start the daemon
 
         try:
-            for cycle in range(self.conf.cycles):
+            for i in range(total_cycles):
                 if positioner.terminated():
                     raise Exception('Antenna positioning process terminated. See the log file.')
                 positioner.goOnSource()
@@ -319,7 +379,10 @@ class Handler(object):
                 self.acquire('on_source')
                 positioner.goOffSource()
                 self.waitForTracking()
-                self.acquire('off_source')
+                if cal_idx and not i % cal_idx:
+                    self.acquire('calibration')
+                else:
+                    self.acquire('off_source')
         except KeyboardInterrupt:
             print 'Program stopped at at %s' %datetime.datetime.utcnow()
             logging.info('Program stopped at at %s' %datetime.datetime.utcnow())
