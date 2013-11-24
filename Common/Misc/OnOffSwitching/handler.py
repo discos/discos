@@ -105,10 +105,6 @@ class Positioner(object):
         except Exception, e:
             print 'UNEXPECTED ERROR in updatePosition(): \n\t%s' %e
             logging.exception('Got exception on updatePoition()')
-        else:
-            datestr = datetime.datetime.utcnow().strftime(conf.datestr_format)
-            logging.info('Observation terminated at %s', datestr)
-            print('\nObservation terminated at %s' %datestr)
 
 
 class Handler(object):
@@ -140,10 +136,8 @@ class Handler(object):
         obs = Observer(**conf.observer_info)
         conf.target = Target(op=conf.op, observer=obs)
         self.conf = conf
+        self.calibrations = int(self.conf.cycles * self.conf.calibrations/100)
 
-        utcnow = datetime.datetime.utcnow()
-        self._startAcquisitionTime = {'on_source': utcnow, 'off_source': utcnow, 'calibration': utcnow}
-        self._stopAcquisitionTime = {'on_source': utcnow, 'off_source': utcnow, 'calibration': utcnow}
         self._enablestats(self.conf.stats)
         self._createstatsfile()
         self._createHorizons()
@@ -183,15 +177,9 @@ class Handler(object):
 
     def updateLO(self):
         """Compute and set the LO value."""
-        # Add 2.5 seconds of tracking time. We will calculate this time later, dynamically
-        acq_time = self.conf.acquisition_time 
-        stop_acq_time = self._stopAcquisitionTime['off_source']
-        start_acq_time = self._startAcquisitionTime['on_source']
-        realDelta = (stop_acq_time - start_acq_time).seconds / 2
-        delta = 2 * acq_time * self.conf.reference + 2.5 
-        delta = realDelta if acq_time < realDelta <  2*acq_time else delta
-        startTime = datetime.datetime.utcnow() if self.conf.simulate else self.recorder.startTime
-        at_time = startTime + datetime.timedelta(seconds=delta)
+        recStartDelay = 0 if self.conf.simulate else self.recorder.startDelay
+        delta = recStartDelay + self.conf.acquisition_time * self.conf.reference 
+        at_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=delta)
         found = False 
         size = len(self._horizons)
         for idx, item in enumerate(self._horizons):
@@ -232,19 +220,12 @@ class Handler(object):
 
     def acquire(self, which):
         """Start and stop the backend acquisition."""
-        if which not in self._startAcquisitionTime:
+        if which not in ('on_source', 'off_source', 'calibration'):
             raise KeyError('key %s not allowed' %which)
 
         try:
-            if self.conf.simulate:
-                duration = self.conf.acquisition_time
-            else:
-                if self.conf.acquisition_time < 15: # Offset needed by Xarcos on Nuraghe 0.2
-                    duration = 20
-                else:
-                    duration = self.conf.acquisition_time
+            duration = self.conf.acquisition_time
             stop_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=duration + self.ato)
-            self._startAcquisitionTime[which] = datetime.datetime.utcnow()
             if not self.conf.simulate:
                 if which == 'calibration':
                     try:
@@ -263,8 +244,8 @@ class Handler(object):
                 if which == 'calibration':
                     logging.info('Calibration mark ON')
                     print '+> Calibration mark ON (simulation mode)'
-                    logging.info('Starting acquisition at %s', datetime.datetime.utcnow())
-                    print '+> Starting acquisition %s' %which
+                logging.info('Starting acquisition at %s', datetime.datetime.utcnow())
+                print '+> Starting acquisition %s' %which
         except Exception, e:
             logging.exception('Some problems recording')
             print('Some problems recording')
@@ -291,15 +272,27 @@ class Handler(object):
                 if which == 'calibration':
                     logging.info('Calibration mark OFF (simulation mode)')
                     print '+> Calibration mark OFF'
-            self._stopAcquisitionTime[which] = datetime.datetime.utcnow()
 
     def getObservationTitle(self):
         from_ = self.conf.target.from_
-        nickname = self.conf.target.nickname 
+        name = self.conf.target.name 
         datestr = datetime.datetime.utcnow().strftime(self.conf.datestr_format)
-        title = "ON/OFF observation from the %s to %s, at %s" %(from_, nickname, datestr)
-        line = len(title) * '='
-        return line + '\n' + title + '\n' + line + '\n'
+        atitle = "ON/OFF observation from the %s to %s, at %s" %(from_, name, datestr)
+        if self.conf.target.isVisible():
+            btitle = "Next setting of %s: %s (UTC)" %(name, self.conf.target.nextSetting())
+        else:
+            btitle = "%s is not visible before %s (UTC)" %(name, self.conf.target.nextRising())
+        ctitle = '# of cycles: %d' %self.conf.cycles + ' | '
+        ctitle += '# of calibrations: %d' %self.calibrations + ' | '
+        ctitle += 'Integration time: %d seconds' %self.conf.acquisition_time
+        len_ = max((len(atitle), len(btitle), len(ctitle)))
+        bold_line = len_ * '='
+        norm_line = len_ * '-'
+
+        main_header = bold_line + '\n' + atitle + '\n' + bold_line + '\n'
+        second_header = btitle + '\n' + norm_line + '\n'
+        third_header = ctitle + '\n' + norm_line + '\n'
+        return main_header + second_header + third_header
 
     def _createHorizons(self):
         format_ = '%Y-%b-%d %H:%M'
@@ -354,35 +347,32 @@ class Handler(object):
 
     def run(self):
         """Run the jobs in loop for cycles times."""
-        calibrations = int(self.conf.cycles * self.conf.calibrations / 100)
-        total_cycles = self.conf.cycles if not calibrations else self.conf.cycles + 1
-        if not calibrations:
+        if not self.calibrations:
             print 'WARNING: Observation without calibration'
             logging.warning('Observation withoud calibration')
-            cal_idx = 0
             user_input = raw_input('Are you sure you want to continue? (y/n): ')
             if user_input.strip() != 'y':
                 sys.exit(0)
-        else:
-            cal_idx = int(total_cycles / calibrations)
 
         positioner = Positioner(self.conf)
         positioner() # Start the daemon
-
+        cal_counter = 0
+        cal_idx = 0 if not self.calibrations else self.conf.cycles/self.calibrations
         try:
-            for i in range(total_cycles):
+            for i in range(self.conf.cycles):
                 if positioner.terminated():
                     raise Exception('Antenna positioning process terminated. See the log file.')
                 positioner.goOnSource()
                 self.waitForTracking()
-                self.updateLO() # LO value in the on/off middle position
+                self.updateLO() # LO value computed for acquisition_time*reference time
                 self.acquire('on_source')
                 positioner.goOffSource()
                 self.waitForTracking()
+                self.acquire('off_source')
                 if cal_idx and not i % cal_idx:
+                    cal_counter += 1
+                    print '+> Starting calibration number %d ...' %cal_counter
                     self.acquire('calibration')
-                else:
-                    self.acquire('off_source')
         except KeyboardInterrupt:
             print 'Program stopped at at %s' %datetime.datetime.utcnow()
             logging.info('Program stopped at at %s' %datetime.datetime.utcnow())
@@ -391,6 +381,15 @@ class Handler(object):
             logging.exception('Got exception on main handler')
         finally:
             positioner.terminate()
+            datestr = datetime.datetime.utcnow().strftime(self.conf.datestr_format)
+            try:
+                logging.info('Observation terminated (%s)', datestr)
+                logging.info('# of cycles: %d | # of calibrations: %d', i, cal_counter)
+                print '\nObservation terminated (%s)' %datestr
+                print '# of cycles: %d | # of calibrations: %d' %(i, cal_counter)
+            except Exception, e:
+                logging.exception('Cannot get the number of cycles and calibrations')
+                print 'Cannot get the number of cycles and calibrations'
 
 if __name__ == '__main__':
     import doctest

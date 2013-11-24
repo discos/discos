@@ -1,4 +1,5 @@
 __all__ = ['antenna', 'recorder', 'mount', 'receiver', 'scheduler', 'ato', 'ANT_J2000', 'ACU_NEUTRAL']
+from __future__ import division
 
 
 __credits__ = """Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
@@ -45,14 +46,15 @@ class Recorder(object):
             baseName='')
         self._setStartTime(datetime.datetime.utcnow())
         self._setStopTime(datetime.datetime.utcnow())
+        self.startDelay = 2.0 # Seconds of delay before the acquistion starts
 
     def start(self):
         self.writer.reset();
-        time.sleep(1)
+        time.sleep(self.startDelay/2)
         self.backend.connect(self.writer);
         self._updateScanSetup()
         self.writer.startScan(self.scanSetup)
-        time.sleep(1)
+        time.sleep(self.startDelay/2)
         self.backend.sendHeader()
         self._updateSubScanSetup()
         self.writer.startSubScan(self.subScanSetup);
