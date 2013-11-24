@@ -35,8 +35,9 @@ class Configuration(object):
             raise AttributeError('%s must be in the range %s' %(attr_name, (min_value, max_value)))
 
     def _acquisition_timeCheck(value):
-        if not value > 10 or value % 10:
-            raise AttributeError('The cycles value must be a multiple of 10')
+        # if not value > 10 or value % 10:
+        #     raise AttributeError('The acquisition_time value must be a multiple of 10')
+        pass
 
     def _observer_nameCheck(value):
         if value not in Configuration.observers_info:
@@ -74,6 +75,7 @@ class Configuration(object):
             'lower_freq': (float, _checkFreq, ('lower_freq',)),
             'upper_freq': (float, _checkFreq, ('upper_freq',)),
             'calibrations': (int, _checkRange, ('calibrations', 0, 50)),
+            'datadir': (str, None, ())
     }
    
     def __init__(self, **kwargs):

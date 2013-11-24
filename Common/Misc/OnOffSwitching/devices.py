@@ -1,6 +1,5 @@
-__all__ = ['antenna', 'recorder', 'mount', 'receiver', 'scheduler', 'ato', 'ANT_J2000', 'ACU_NEUTRAL']
 from __future__ import division
-
+__all__ = ['antenna', 'recorder', 'mount', 'receiver', 'scheduler', 'ato', 'ANT_J2000', 'ACU_NEUTRAL']
 
 __credits__ = """Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 Licence: GPL 2.0 <http://www.gnu.org/licenses/gpl-2.0.html>"""
@@ -15,7 +14,7 @@ from os import mkdir
 
 class Recorder(object):
     def __init__(self, backend_name='BACKENDS/XBackends', writer_name='MANAGEMENT/FitsZilla',\
-            projectName='ison', observerName='Gavino', file_name=''):
+            projectName='ison', observerName='Gavino'):
         wclient = PySimpleClient()
         bclient = PySimpleClient()
         self.writer = wclient.getComponent(writer_name)
@@ -25,13 +24,21 @@ class Recorder(object):
         datadir = '%s_data/' %self.projectNickname
         if not exists(datadir):
             mkdir(datadir)
-        full_path = join(abspath(curdir), datadir)
+        day_datadir = datadir + datetime.datetime.utcnow().strftime('%Y-%b-%d/')
+        if not exists(day_datadir):
+            mkdir(day_datadir)
+        for i in range(1000):
+            obs_datadir = day_datadir + '%03d/'%(i+1)
+            if not exists(obs_datadir):
+                mkdir(obs_datadir)
+                break
+        self.full_path = join(abspath(curdir), obs_datadir)
         self.scanSetup = Management.TScanSetup(
             scanTag=0, 
             scanId=1, 
             projectName=projectName,
             observerName=observerName,
-            path=full_path, 
+            path=self.full_path, 
             extraPath='',
             baseName='',
             scanLayout='', 
@@ -82,7 +89,7 @@ class Recorder(object):
     def _updateScanSetup(self):
         self.scanSetup.scanTag += 1
         utc = datetime.datetime.utcnow()
-        self.scanSetup.extraPath = '%04d-%s' %(self.scanSetup.scanTag, utc.strftime("%Y%m%d-%H%M%S"))
+        self.scanSetup.extraPath = '%03d-%s' %(self.scanSetup.scanTag, utc.strftime("%Y%m%d-%H%M%S"))
 
     def _setStartTime(self, value):
         self.startTime = value

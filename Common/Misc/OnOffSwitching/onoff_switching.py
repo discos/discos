@@ -33,7 +33,7 @@ if __name__ == '__main__':
             simulate=args.simulate, # If True, the program simulates the observation
             datestr_format='%d/%b/%Y:%H:%M:%S', # [day/month/year:hour:minute:second]
             stats=True, # If True, the program saves some useful information
-            horizons_file_name='lo.txt', # Horizons file name
+            horizons_file_name='example.txt', # Horizons file name
             lab_freq=22235.08, # Lab frequency (MHz)
             lower_freq=145.0, # Backend lower frequency (MHz)
             upper_freq=207.0, # Backend upper frequency (MHz)
@@ -63,5 +63,10 @@ if __name__ == '__main__':
     title = '\n' + handler.getObservationTitle()
     logging.info(title)
     print(title)
-    handler.run()
+    try:
+        handler.run()
+    finally:
+        if not conf.simulate:
+            import shutil
+            shutil.copyfile(logfile, join(handler.full_path, file_name))
     
