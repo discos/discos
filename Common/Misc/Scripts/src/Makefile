@@ -31,8 +31,8 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = 
-PY_SCRIPTS_L       = data_stats
+PY_SCRIPTS         = data_stats
+PY_SCRIPTS_L       = 
 
 PY_MODULES         =
 PY_MODULES_L       =

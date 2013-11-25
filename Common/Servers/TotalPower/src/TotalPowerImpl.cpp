@@ -54,10 +54,10 @@ TotalPowerImpl::TotalPowerImpl(const ACE_CString &CompName,maci::ContainerServic
 	m_controlThread=NULL;
 }
 
-TotalPowerImpl::~TotalPowerImpl() 
+TotalPowerImpl::~TotalPowerImpl()
 {
 	AUTO_TRACE("TotalPowerImpl::~TotalPowerImpl()");
-	// if the initialization failed...clear everything as well. 
+	// if the initialization failed...clear everything as well.
 	// otherwise it is called by the cleanUp procedure.
 	if (!m_initialized) deleteAll();
 }
@@ -112,7 +112,7 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	if (m_dataLine.setSockMode(Err,IRA::CSocket::NONBLOCKING)!=IRA::CSocket::SUCCESS) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,Err);
 		dummy.setCode(Err.getErrorCode());
-		dummy.setDescription((const char*)Err.getDescription());		
+		dummy.setDescription((const char*)Err.getDescription());
 		throw dummy;
 	}
 	// set up the listening queue to 1
@@ -124,7 +124,7 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	}
 	ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::initialize()",(LM_INFO,"COMMUNICATION_LINE_DONE"));
 	ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::initialize()",(LM_INFO,"PROPERTY_CREATION"));
-	try {	
+	try {
 		m_ptime=new ROuLongLong(getContainerServices()->getName()+":time",getComponent(),
 				new DevIOTime(m_commandLine),true);
 		m_pbackendName=new ROstring(getContainerServices()->getName()+":backendName",getComponent());
@@ -139,13 +139,13 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_ppolarization=new ROlongSeq(getContainerServices()->getName()+":polarization",getComponent(),
 				new DevIOPolarization(m_commandLine),true);
 		m_pinputsNumber=new ROlong(getContainerServices()->getName()+":inputsNumber",getComponent(),
-				new DevIOInputsNumber(m_commandLine),true); 
+				new DevIOInputsNumber(m_commandLine),true);
 		m_pbins=new ROlongSeq(getContainerServices()->getName()+":bins",getComponent(),
 				new DevIOBins(m_commandLine),true);
 		m_pintegration=new ROlong(getContainerServices()->getName()+":integration",getComponent(),
 				new DevIOIntegration(m_commandLine),false);
 		m_pstatus=new ROpattern(getContainerServices()->getName()+":status",getComponent(),
-				new DevIOStatus(m_commandLine),true);	
+				new DevIOStatus(m_commandLine),true);
 		m_pbusy=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
 		  (getContainerServices()->getName()+":busy",getComponent(), new DevIOBusy(m_commandLine),true);
 		m_pfeed=new ROlongSeq(getContainerServices()->getName()+":feed",getComponent(),new DevIOFeed(m_commandLine),true);
@@ -153,7 +153,7 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_psectionsNumber=new ROlong(getContainerServices()->getName()+":sectionsNumber",getComponent(),
 				new DevIOSectionsNumber(m_commandLine),true);
 		m_pinputSection=new ROlongSeq(getContainerServices()->getName()+":inputSection",getComponent(),new DevIOInputSection(m_commandLine),true);
-		m_parser=new CParser<CCommandLine>(line,10); 
+		m_parser=new CParser<CCommandLine>(line,10);
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"TotalPowerImpl::initialize()");
@@ -178,7 +178,7 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("getZero",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getZero),0 );
 	m_parser->add("getTime",new function1<CCommandLine,non_constant,void_type,O<time_type> >(line,&CCommandLine::getTime),0 );
 	m_parser->add("initialize",new function1<CCommandLine,non_constant,void_type,I<string_type> >(line,&CCommandLine::setup),1 );
-		
+
 	threadPar.sender=this;
 	threadPar.command=m_commandLine;
 	threadPar.configuration=&m_configuration;
@@ -208,13 +208,13 @@ void TotalPowerImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	IRA::CError error;
 	ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::execute()",(LM_INFO,"BACKEND_INITIAL_CONFIGURATION"));
 	try {
-		//sets the property defaults....some of them cannot be changed any more (hardware dependent) 
+		//sets the property defaults....some of them cannot be changed any more (hardware dependent)
 		m_pbackendName->getDevIO()->write(getComponent()->getName(),time);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,impl,ex,"TotalPowerImpl::execute()");
 		throw impl;
-	}	
+	}
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::execute()",(LM_INFO,"SOCKET_CONNECTING"));
 	try {
@@ -226,7 +226,7 @@ void TotalPowerImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		deleteAll();
 		throw ex;
 	}
-	//resume the threads 
+	//resume the threads
 	m_senderThread->resume();
 	m_controlThread->resume();
 	try {
@@ -240,7 +240,7 @@ void TotalPowerImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	catch (ACSErrTypeCommon::NullPointerExImpl& E) {
 		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,__dummy,E,"TotalPowerImpl::execute");
 		deleteAll();
-		throw __dummy;		
+		throw __dummy;
 	}
 	ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::execute()",(LM_INFO,"COMPSTATE_OPERATIONAL"));
 }
@@ -254,7 +254,7 @@ void TotalPowerImpl::deleteAll()
 		}
 		if (m_controlThread!=NULL) {
 			m_controlThread->suspend();
-		}	
+		}
 		if (m_commandLine) {
 			delete m_commandLine;
 			m_commandLine=NULL;
@@ -263,14 +263,14 @@ void TotalPowerImpl::deleteAll()
 			getContainerServices()->getThreadManager()->destroy(m_senderThread);
 			m_senderThread=NULL;
 		}
-		if (m_controlThread!=NULL) {		
+		if (m_controlThread!=NULL) {
 			getContainerServices()->getThreadManager()->destroy(m_controlThread);
 			m_senderThread=NULL;
 		}
 		if (m_parser) {
 			delete m_parser;
 			m_parser=NULL;
-		}	
+		}
 		//need to be closed before the thread that makes use of it
 		m_dataLine.Close(err);
 		ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::deleteAll()",(LM_INFO,"DATA_LINE_CLOSED"));
@@ -286,7 +286,7 @@ void TotalPowerImpl::cleanUp()
 	AUTO_TRACE("TotalPowerImpl::cleanUp()");
 	stopPropertiesMonitoring();
 	deleteAll();
-	CharacteristicComponentImpl::cleanUp();	
+	CharacteristicComponentImpl::cleanUp();
 }
 
 void TotalPowerImpl::aboutToAbort()
@@ -295,7 +295,7 @@ void TotalPowerImpl::aboutToAbort()
 	deleteAll();
 }
 
-void TotalPowerImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx, 
+void TotalPowerImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
 		ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("TotalPowerImpl::sendHeader()");
@@ -315,8 +315,8 @@ void TotalPowerImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::sendHeader()");
 		dummy.log(LM_DEBUG);
@@ -340,19 +340,19 @@ void TotalPowerImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 		throw impl.getComponentErrorsEx();
 	}
 	#else
-	printf("Sects: %d beams: %d integration: %d sampleSize: %d\n",buffer.header.sections,buffer.header.beams,
-			buffer.header.integration,buffer.header.sampleSize);
-	for(int h=0;h<buffer.header.sections;h++) {
-		printf("id: %d bins: %d pol: %d bw: %lf freq: %lf att L: %lf att R: %lf sr: %lf feed: %d\n",
-				buffer.chHeader[h].id,
-				buffer.chHeader[h].bins,
-				buffer.chHeader[h].polarization,
-				buffer.chHeader[h].bandWidth,
-				buffer.chHeader[h].frequency,
-				buffer.chHeader[h].attenuation[0],
-				buffer.chHeader[h].attenuation[1],
-				buffer.chHeader[h].sampleRate,
-				buffer.chHeader[h].feed);
+    printf("Sects: %d beams: %d integration: %d sampleSize: %d\n",buffer.header.sections,buffer.header.beams,
+            buffer.header.integration,buffer.header.sampleSize);
+    for(int h=0;h<buffer.header.sections;h++) {
+        printf("id: %d bins: %d pol: %d bw: %lf freq: %lf att L: %lf att R: %lf sr: %lf feed: %d\n",
+                buffer.chHeader[h].id,
+                buffer.chHeader[h].bins,
+                buffer.chHeader[h].polarization,
+                buffer.chHeader[h].bandWidth,
+                buffer.chHeader[h].frequency,
+                buffer.chHeader[h].attenuation[0],
+                buffer.chHeader[h].attenuation[1],
+                buffer.chHeader[h].sampleRate,
+                buffer.chHeader[h].feed);
 	}
 	#endif
 	ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::sendHeader()",(LM_INFO,"HEADERS_SENT"));
@@ -369,7 +369,7 @@ void TotalPowerImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
+		throw ex.getBackendsErrorsEx();
 	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::sendHeader()");
@@ -391,7 +391,7 @@ void TotalPowerImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
+		throw ex.getBackendsErrorsEx();
 	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::sendHeader()");
@@ -414,8 +414,8 @@ void TotalPowerImpl::terminate() throw (CORBA::SystemException, BackendsErrors::
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::terminate()");
 		dummy.log(LM_DEBUG);
@@ -439,8 +439,8 @@ void TotalPowerImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::sendData()");
 		dummy.log(LM_DEBUG);
@@ -456,11 +456,11 @@ void TotalPowerImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException
 
 void TotalPowerImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
 		ComponentErrors::ComponentErrorsEx)
-{	
+{
 	AUTO_TRACE("TotalPowerImpl::sendStop()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
-		line->suspendDataAcquisition(); 
+		line->suspendDataAcquisition();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -468,8 +468,8 @@ void TotalPowerImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::B
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::sendStop()");
 		dummy.log(LM_DEBUG);
@@ -507,13 +507,13 @@ void TotalPowerImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::B
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::setAllSections()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}		
+	}
 }*/
 
 
@@ -531,13 +531,13 @@ void TotalPowerImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Doub
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::setSection()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}		
+	}
 }
 
 ACS::doubleSeq *TotalPowerImpl::getTpi() throw (CORBA::SystemException,
@@ -555,13 +555,13 @@ ACS::doubleSeq *TotalPowerImpl::getTpi() throw (CORBA::SystemException,
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::getTpi()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}			
+	}
 	return tpi._retn();
 }
 
@@ -580,13 +580,13 @@ ACS::doubleSeq * TotalPowerImpl::getZero () throw (CORBA::SystemException,
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::getZero()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}		
+	}
 	return tpi._retn();
 }
 
@@ -615,13 +615,13 @@ void TotalPowerImpl::enableChannels(const ACS::longSeq& enable) throw (CORBA::Sy
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::enableChannels()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}			
+	}
 }
 
 void TotalPowerImpl::setTime() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
@@ -638,13 +638,13 @@ void TotalPowerImpl::setTime() throw (CORBA::SystemException,ComponentErrors::Co
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::setTime()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}		
+	}
 }
 
 void TotalPowerImpl::setAttenuation(CORBA::Long input,CORBA::Double att) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
@@ -660,13 +660,13 @@ void TotalPowerImpl::setAttenuation(CORBA::Long input,CORBA::Double att) throw (
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::setAttenutation()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}		
+	}
 }
 
 CORBA::Long TotalPowerImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber) throw (CORBA::SystemException,
@@ -704,13 +704,13 @@ void TotalPowerImpl::activateNoiseCalibrationSwitching(CORBA::Long interleave) t
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::activateNoiseCalibrationSwitching()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}			
+	}
 }
 
 void TotalPowerImpl::initialize(const char * configuration) throw (CORBA::SystemException,
@@ -727,13 +727,13 @@ void TotalPowerImpl::initialize(const char * configuration) throw (CORBA::System
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::initialize()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}				
+	}
 }
 
 void TotalPowerImpl::setIntegration(CORBA::Long Integration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
@@ -750,13 +750,13 @@ void TotalPowerImpl::setIntegration(CORBA::Long Integration) throw (CORBA::Syste
 	}
 	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-		throw ex.getBackendsErrorsEx();		
-	}	
+		throw ex.getBackendsErrorsEx();
+	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::setIntegration()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}		
+	}
 }
 
 CORBA::Boolean TotalPowerImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)

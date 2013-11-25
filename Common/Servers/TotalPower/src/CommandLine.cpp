@@ -140,7 +140,7 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::stopDataAcquisition()");
 	}
-	len=CProtocol::stopAcquisition(sBuff); // get the buffer
+	len = CProtocol::stopAcquisition(sBuff); // get the buffer
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
@@ -772,7 +772,7 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 		}
 		waitTime+=integration*2000;
 	}
-	if (waitTime>0) IRA::CIRATools::Wait(waitTime); 
+        if (waitTime>0) IRA::CIRATools::Wait(waitTime); 
 	// now read the total power
 	len=CProtocol::getSample(sBuff); // get the buffer
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {

@@ -15,16 +15,19 @@
 namespace IRA {
 
 /**
- * This class is meant as an error descriptor for the IRALibrary and is used by functions and class members as a way to return errors to the caller. 
+ * This class is meant as an error descriptor for the IRALibrary and is used by 
+ * functions and class members as a way to return errors to the caller.
  * Errors have been devided into ErrorTypes which allows the programmer to
- * localize the orgin of the error. Errors are also described by a code which identifies and explain with
- * more details the erros itself. The combination of type and code gives the CodeNumber which is an identifier 	
- * which uniquely identifies the error in the system. This class also stores some additional information such
- * as the file, the routine and the line of the piece of code that originated the error; the local time the error
- * occured and set of pair (Name,Value) that can be used to report the cause of the error.
+ * localize the orgin of the error. Errors are also described by a code which 
+ * identifies and explain with more details the erros itself. The combination 
+ * of type and code gives the CodeNumber which is an identifier which uniquely
+ * identifies the error in the system. This class also stores some additional 
+ * information such as the file, the routine and the line of the piece of code 
+ * that originated the error; the local time the error occured and set of pair 
+ * (Name,Value) that can be used to report the cause of the error.
  * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
- * <br> 
+ * <br /> 
  */
 class CError 
 {
@@ -36,7 +39,8 @@ public:
 		NoError=0x0000,     /*!< No error found */
 		SerialType=0x0100,  /*!< Serial bus errors */
 		SocketType=0x0200,  /*!< Socket errors */
-		DBType=0x300		/*!< Data base errors */
+		DBType=0x300,		/*!< Data base errors */
+    BEType=0x400    /*!< Backend errors */
 	};
 	/**
 	 * List of all possible serial bus errors 
@@ -79,6 +83,16 @@ public:
 		IllegalOpened=0x03,
 		DalLocation=0x04
 	};
+
+  /**
+   * List of all possible backend errors
+   */
+   enum BEErorrs {
+    GenericError = 0x00,
+    ConnectionError = 0x01,
+    ApiSuccess = 0x02 
+   };
+
 	/** 
 	 * Constructor.
    */

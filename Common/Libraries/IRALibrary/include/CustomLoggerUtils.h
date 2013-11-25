@@ -21,7 +21,7 @@
     Logging::LogSvcHandler::DeprecatedLogInfo tStruct; \
     tStruct = Logging::LogSvcHandler::unformatted2formatted X; \
     LOG(tStruct.priority, routine, tStruct.message); \
-} 
+}
 
 /**
  * @TODO: test this function!!!
@@ -63,7 +63,7 @@ class CustomLoggerUtils
          * i.e. "Trace" is converted to Management::C_TRACE , and so on.
          * The method does not throw exceptions and use C_INFO as default Logging Level for what it cannot interpret.
          * @param str: the capitalized string representing a log leve
-         * @return a Management log level 
+         * @return a Management log level
          */
 	static Management::LogLevel string2customLogLevel(const char *str);
         /**
