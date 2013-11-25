@@ -20,13 +20,11 @@ while True:
         el, compl = el_obj.get_sync()
         az_list.append(math.degrees(az))
         el_list.append(math.degrees(el))
-        time.sleep(0.5)
-        print math.degrees(az), math.degrees(el)
+        time.sleep(0.2)
     except KeyboardInterrupt, e:
         break
 
 outfile = open('outfile.data', 'w')
-len_ = min(len(az_list), len(el_list))
-for i in range(len_):
+for i in range(len(az_list)):
     outfile.write('%s %s\n' %(az_list[i], el_list[i]))
 outfile.close()

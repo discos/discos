@@ -12,7 +12,7 @@ CustomLoggerImpl::CustomLoggerImpl(const ACE_CString& CompName,
     m_loggingSupplier(NULL)
     //consumer_(NULL)
     //_writer(NULL)
-{
+{   
     m_filename_sp = new baci::ROstring(
                                             CompName + ":filename",
                                             getComponent()
@@ -38,7 +38,7 @@ CustomLoggerImpl::CustomLoggerImpl(const ACE_CString& CompName,
 CustomLoggerImpl::~CustomLoggerImpl(){}
 
 ACS::ROstring_ptr CustomLoggerImpl::filename() throw (CORBA::SystemException)
-{
+{   
     if (m_filename_sp==0)
         return ACS::ROstring::_nil();
     ACS::ROstring_var prop = ACS::ROstring::_narrow(
@@ -48,7 +48,7 @@ ACS::ROstring_ptr CustomLoggerImpl::filename() throw (CORBA::SystemException)
 }
 
 ACS::ROlong_ptr CustomLoggerImpl::nevents() throw (CORBA::SystemException)
-{
+{   
     if (m_nevents_sp==0)
         return ACS::ROlong::_nil();
     ACS::ROlong_var prop = ACS::ROlong::_narrow(
@@ -57,9 +57,9 @@ ACS::ROlong_ptr CustomLoggerImpl::nevents() throw (CORBA::SystemException)
     return prop._retn();
 }
 
-ROLogLevel_ptr
+ROLogLevel_ptr 
 CustomLoggerImpl::minLevel() throw (CORBA::SystemException)
-{
+{   
     if (m_min_level_sp==0)
         return ROLogLevel::_nil();
     ROLogLevel_var prop = ROLogLevel::_narrow(
@@ -68,9 +68,9 @@ CustomLoggerImpl::minLevel() throw (CORBA::SystemException)
     return prop._retn();
 }
 
-ROLogLevel_ptr
+ROLogLevel_ptr 
 CustomLoggerImpl::maxLevel() throw (CORBA::SystemException)
-{
+{   
     if (m_max_level_sp==0)
         return ROLogLevel::_nil();
     ROLogLevel_var prop = ROLogLevel::_narrow(
@@ -79,9 +79,9 @@ CustomLoggerImpl::maxLevel() throw (CORBA::SystemException)
     return prop._retn();
 }
 
-ROTBoolean_ptr
+ROTBoolean_ptr 
 CustomLoggerImpl::isLogging() throw (CORBA::SystemException)
-{
+{   
     if (m_isLogging_sp==0)
         return ROTBoolean::_nil();
     ROTBoolean_var prop = ROTBoolean::_narrow(
@@ -111,7 +111,7 @@ CustomLoggerImpl::setMaxLevel(LogLevel level) throw (CORBA::SystemException)
 /*
 * Resolve the naming service and subscribe to the logging channel
 */
-void
+void 
 CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
     ACS::Time _timestamp;
@@ -123,7 +123,7 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     ifgop_ = CosNotifyChannelAdmin::OR_OP;
     m_nevents_sp->getDevIO()->write((long)0, _timestamp);
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : resolving name service"));
-    namingContext_m = maci::ContainerImpl::getContainer()->getService<CosNaming::NamingContext>(acscommon::NAMING_SERVICE_NAME, 0, true);
+    namingContext_m = maci::ContainerImpl::getContainer()->getService<CosNaming::NamingContext>(acscommon::NAMING_SERVICE_NAME, 0, true); 
     if(CORBA::is_nil(namingContext_m))
     {
             _EXCPT(ComponentErrors::CORBAProblemExImpl, _dummy, "CustomLoggerImpl::initialize");
@@ -131,7 +131,7 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
             throw _dummy;
     }
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : resolving logging channel name"));
-    CORBA::Object_var obj = namingContext_m -> resolve(name);
+    CORBA::Object_var obj = namingContext_m -> resolve(name);  
     ec_ = CosNotifyChannelAdmin::EventChannel::_narrow(obj.in());
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : subscribing to the logging channel"));
     CosNotifyChannelAdmin::AdminID adminid;
@@ -158,7 +158,7 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
          _log_max_age = ACS::TimeInterval(0);
      setMinLevel(C_TRACE);
      setMaxLevel(C_EMERGENCY);
-
+     
      /* FILE OUTPUT THREAD INITIALIZATION
      ====================================*/
      CustomLoggerImpl *tmp = this;
@@ -193,13 +193,13 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
      }
 };
 
-void
+void 
 CustomLoggerImpl::execute()
 {
     _writer->resume(); //needed to start the thread
 };
 
-void
+void 
 CustomLoggerImpl::cleanUp()
 {
     //baci::ThreadSyncGuard guard(&_log_queue_mutex);
@@ -247,7 +247,7 @@ CustomLoggerImpl::emitStaticLog(const char *msg, LogLevel level) throw (CORBA::S
     _emitStaticLog(msg, level);
 };
 
-void
+void 
 CustomLoggerImpl::_emitStaticLog(const char *msg, LogLevel level)
 {
     CUSTOM_STATIC_LOG((Logging::BaseLog::Priority)IRA::CustomLoggerUtils::custom2aceLogLevel(level), "CustomLoggerImpl::emitStaticLog", msg);
@@ -271,7 +271,7 @@ CustomLoggerImpl::flush() throw (CORBA::SystemException)
     maci::ContainerImpl::getLoggerProxy()->flush();
 };
 
-void
+void 
 CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx)
 {
     //ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : closing logfile"));
@@ -285,7 +285,7 @@ CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors
         _custom_log.close();
         if(_custom_log.rdstate() == std::ofstream::failbit)
         {
-            _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, dummy, "CustomLoggerImpl::closeLogfile");
+            _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, dummy, "CustomLoggerImpl::closeLogfile"); 
             dummy.setReason("error closing custom logfile");
             CUSTOM_EXCPT_LOG(dummy, LM_DEBUG);
             throw dummy.getCustomLoggerIOErrorEx();
@@ -294,7 +294,7 @@ CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors
         _full_log.close();
         if(_full_log.rdstate() == std::ofstream::failbit)
         {
-            _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, _dummy, "CustomLoggerImpl::closeLogfile");
+            _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, _dummy, "CustomLoggerImpl::closeLogfile"); 
             _dummy.setReason("error closing acs logfile");
             throw _dummy.getCustomLoggerIOErrorEx();
 	}
@@ -309,9 +309,9 @@ CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors
  * @param filename_full_log: file name of acs xml log file
  * @throw ManagementErrors::CustomLoggerIOErrorEx: if cannot create directory or open the files
  */
-void
+void 
 CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_full_log,
-                             const char *filename_log, const char *filename_full_log)
+                             const char *filename_log, const char *filename_full_log) 
                              throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx)
 {
     //Acquire log mutex
@@ -323,14 +323,14 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : custom log directory: %s", base_path_log));
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : acs log directory: %s", base_path_full_log));
     if((mkdir(base_path_log, S_IRWXO|S_IRWXG|S_IRWXU) != 0) && (errno != EEXIST)){
-        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, dummy, "CustomLoggerImpl::setLogfile");
+        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, dummy, "CustomLoggerImpl::setLogfile"); 
         dummy.setReason("cannot create custom log directory");
         dummy.setPath(base_path_log);
         dummy.log(LM_DEBUG);
         throw dummy.getManagementErrorsEx();
     }
     if((mkdir(base_path_full_log, S_IRWXO|S_IRWXG|S_IRWXU) != 0) && (errno != EEXIST)){
-        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, _dummy, "CustomLoggerImpl::setLogfile");
+        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, _dummy, "CustomLoggerImpl::setLogfile"); 
         _dummy.setReason("cannot create acs log directory");
         _dummy.setPath(base_path_full_log);
         _dummy.log(LM_DEBUG);
@@ -351,14 +351,14 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
     full_path.append(filename_full_log);
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : full log file: %s", full_path.c_str()));
     //Writing last message on last opened log files
-    handle(get_log_record((std::string("Custom log file changing to: ") + custom_path).c_str(), C_NOTICE));
-    handle(get_log_record((std::string("Full log file changing to: ") + full_path).c_str(), C_NOTICE));
+    handle(get_log_record((std::string("Custom log file changing to: ") + custom_path).c_str(), C_NOTICE)); 
+    handle(get_log_record((std::string("Full log file changing to: ") + full_path).c_str(), C_NOTICE)); 
     closeLogfile();
     _custom_log.clear();
     _full_log.clear();
     _custom_log.open(custom_path.c_str(), std::ofstream::app);
     if(_custom_log.rdstate() != std::ofstream::goodbit){
-        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, __dummy, "CustomLoggerImpl::setLogfile");
+        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, __dummy, "CustomLoggerImpl::setLogfile"); 
         __dummy.setReason("cannot open custom log file");
         __dummy.setPath(custom_path.c_str());
         __dummy.log(LM_DEBUG);
@@ -366,7 +366,7 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
     }
     _full_log.open(full_path.c_str(), std::ofstream::app);
     if(_full_log.rdstate() != std::ofstream::goodbit){
-        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, ___dummy, "CustomLoggerImpl::setLogfile");
+        _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, ___dummy, "CustomLoggerImpl::setLogfile"); 
         ___dummy.setReason("cannot open acs log file");
         ___dummy.setPath(full_path.c_str());
         ___dummy.log(LM_DEBUG);
@@ -380,7 +380,7 @@ CustomLoggerImpl::setLogfile(const char *base_path_log, const char *base_path_fu
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : logging"));
 };
 
-bool
+bool 
 CustomLoggerImpl::filter(LogRecord& log_record)
 {
     std::string result;
@@ -388,11 +388,11 @@ CustomLoggerImpl::filter(LogRecord& log_record)
     bool filtered=false;
     if((log_record._finished) && //check if we are logging
        // check if the log level is accepted by our logger
-       (m_min_level_sp->getDevIO()->read(ts) <= log_record.log_level) &&
+       (m_min_level_sp->getDevIO()->read(ts) <= log_record.log_level) && 
        (m_max_level_sp->getDevIO()->read(ts) >= log_record.log_level))
     {
         if(log_record.process_name == CUSTOM_PYTHON_LOGGING_PROCESS){ //if the log record has been produced by IRAPy logger
-            filtered = true;
+            filtered = true; 
         }else if(!log_record.kwargs.empty())
         {
             result = log_record.get_data(std::string(CUSTOM_LOGGING_DATA_NAME));
@@ -429,9 +429,9 @@ CustomLoggerImpl::checkLogging()
 };
 
 /**
- * Handle a log record.
+ * Handle a log record. 
  */
-void
+void 
 CustomLoggerImpl::handle(LogRecord_sp log_record)
 {
     if(checkLogging())
@@ -458,8 +458,8 @@ CustomLoggerImpl::handle(LogRecord_sp log_record)
 /*
  * Synchronized method which adds a LogRecord to the queue and increments the number of
  * events successfully logged.
- */
-void
+ */ 
+void 
 CustomLoggerImpl::addToLoggingQueue(LogRecord_sp log_record)
 {
     long _nevents;
@@ -474,7 +474,7 @@ CustomLoggerImpl::addToLoggingQueue(LogRecord_sp log_record)
  * Synchronized method called by the log writer thread
  * Pulls log records out of the queue and writes to file.
  */
-void
+void 
 CustomLoggerImpl::writeLoggingQueue(bool age_check)
 {
     LogRecord_sp _log_record;
@@ -500,7 +500,7 @@ CustomLoggerImpl::writeLoggingQueue(bool age_check)
 	     };
 };
 
-CustomStructuredPushConsumer::CustomStructuredPushConsumer(CustomLoggerImpl* logger) :
+CustomStructuredPushConsumer::CustomStructuredPushConsumer(CustomLoggerImpl* logger) : 
     logger_(logger)
 {
 };
@@ -509,7 +509,7 @@ CustomStructuredPushConsumer::~CustomStructuredPushConsumer()
 {
 };
 
-void
+void 
 CustomStructuredPushConsumer::connect(CosNotifyChannelAdmin::ConsumerAdmin_ptr consumer_admin)
 {
     CosNotifyComm::StructuredPushConsumer_var objref = _this();
@@ -521,13 +521,13 @@ CustomStructuredPushConsumer::connect(CosNotifyChannelAdmin::ConsumerAdmin_ptr c
     proxy_supplier_->connect_structured_push_consumer (objref.in ());
 };
 
-void
+void 
 CustomStructuredPushConsumer::disconnect()
 {
     proxy_supplier_->disconnect_structured_push_supplier();
 };
 
-void
+void 
 CustomStructuredPushConsumer::disconnect_structured_push_consumer ()
 {
   // No-Op.
@@ -572,7 +572,7 @@ void CustomStructuredPushConsumer::push_structured_event (const CosNotification:
 };
 
 /*
- * Constructor
+ * Constructor 
 */
 CustomLogWriterThread::CustomLogWriterThread(const ACE_CString& name, CustomLoggerImpl *logger) :
     ACS::Thread(name)

@@ -54,7 +54,7 @@ class CustomLogWriterThread; //fwd decl
  */
 class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
                           public virtual POA_Management::CustomLogger
-{
+{   
     public:
         CustomLoggerImpl(const ACE_CString &CompName, maci::ContainerServices *containerServices);
         virtual ~CustomLoggerImpl();
@@ -74,14 +74,14 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         XML_Parser log_parser;
         /**
          * Handle a Log record coming from  ACS LOGGING CHANNEL.
-         * Write the log to the system log file, filter the events based on our criteria and
+         * Write the log to the system log file, filter the events based on our criteria and 
          * upon success sends the event to our custom notification channel and stores the record
          * in the queue of our custom events.
          * @param log_record a smart pointer to a LogRecord
          */
         void handle(LogRecord_sp log_record);
-        virtual void setLogfile(const char *base_path_log, const char *base_path_full_log,
-                                    const char *filename_log, const char *filename_full_log)
+        virtual void setLogfile(const char *base_path_log, const char *base_path_full_log,  
+                                    const char *filename_log, const char *filename_full_log) 
                                 throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void emitLog(const char *msg, LogLevel level) throw (CORBA::SystemException);
@@ -103,15 +103,15 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         CustomStructuredPushConsumer* consumer_;
 	/**
 	* Filter the log records.
-	* This filter should return true for all the messages produced by custom logging functions and false for every ACS
+	* This filter shuold return true for all the messages produced by custom logging functions and false for every ACS 
 	* system log record.
 	* @return True if the log record is a custom one.
 	*/
         virtual bool filter(LogRecord& log_record);
-        static void _emitStaticLog(const char *msg, LogLevel level);
+        static void _emitStaticLog(const char *msg, LogLevel level); 
         /**
          * Log files.
-         */
+         */ 
         std::ofstream _custom_log, _full_log;
         /**
          * Priority queue of custom log records.
@@ -144,7 +144,7 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
 };
 
 /**
- * Used to connect to ACS Notification Channel.
+ * Used to connect to ACS Notification Channel. 
  * All our custom logics reside in the CustomStructuredPushConsumer::push_structured_event method.
  */
 class CustomStructuredPushConsumer : public POA_CosNotifyComm::StructuredPushConsumer,
@@ -164,8 +164,8 @@ class CustomStructuredPushConsumer : public POA_CosNotifyComm::StructuredPushCon
 			      const CosNotification::EventTypeSeq & removed);
         /**
          * Invoked every time a notification is received via the ACS LOGGING_CHANNEL.
-         * Tries to unpack the notification into one or more xml strings (one for each log record)
-         * and instantiates the realtive LogRecord objects which constitute the minimal logic unit of
+         * Tries to unpack the notification into one or more xml strings (one for each log record) 
+         * and instantiates the realtive LogRecord objects which constitute the minimal logic unit of 
          * the custom logging logics.
          */
         virtual void push_structured_event (const CosNotification::StructuredEvent & notification);
@@ -182,7 +182,7 @@ class CustomLogWriterThread : public ACS::Thread
         /**
          * Constructor
          */
-        CustomLogWriterThread(const ACE_CString& name, CustomLoggerImpl *logger);
+        CustomLogWriterThread(const ACE_CString& name, CustomLoggerImpl *logger); 
         virtual ~CustomLogWriterThread();
         /**
          * Called once every period, simply invokes the CustomLoggerImpl::writeLoggingQueue method from the thread.

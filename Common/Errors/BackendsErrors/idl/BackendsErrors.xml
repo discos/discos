@@ -29,6 +29,4 @@
 
 <ErrorCode name="ConfigurationError" shortDescription="The configuration is unknown or cannot be loaded" description=""/>
 
-<ErrorCode name="BELibraryError" shortDescription="Error in the libloader library" description=""/>
-
 </Type>

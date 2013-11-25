@@ -22,8 +22,8 @@ if __name__ == '__main__':
     import config
     try:
         conf = config.Configuration(
-            cycles=100, # Number of on/off cycles, without tacking in account calibrations
-            acquisition_time=60, # Time between backend.acquire() and backend.stop()
+            cycles=8, # Number of on/off cycles, without tacking in account calibrations
+            acquisition_time=1, # Time between backend.acquire() and backend.stop()
             positioning_time=5.0, # The time the program updates the antenna position
             observer_name='SRT', # The observer name (SRT, Medicina, ...)
             op="C/2012 S1 (ISON),h,11/28.7757/2013,62.3948,295.6536,345.5636,1.000002,\
@@ -33,11 +33,11 @@ if __name__ == '__main__':
             simulate=args.simulate, # If True, the program simulates the observation
             datestr_format='%d/%b/%Y:%H:%M:%S', # [day/month/year:hour:minute:second]
             stats=True, # If True, the program saves some useful information
-            horizons_file_name='25-26_horizons.txt', # Horizons file name
-            lab_freq=23694.495, # Lab frequency (MHz)
-            lower_freq=155.0, # Backend lower frequency (MHz)
-            upper_freq=170.6, # Backend upper frequency (MHz)
-            calibrations=10, # Percentage of calibrations (10 means 10% of cycles)
+            horizons_file_name='example.txt', # Horizons file name
+            lab_freq=22235.08, # Lab frequency (MHz)
+            lower_freq=145.0, # Backend lower frequency (MHz)
+            upper_freq=207.0, # Backend upper frequency (MHz)
+            calibrations=30, # Percentage of calibrations (10 means 10% of cycles)
             ) 
     except (TypeError, AttributeError), e:
         print('CONFIGURATION ERROR: %s' %e)
@@ -68,5 +68,5 @@ if __name__ == '__main__':
     finally:
         if not conf.simulate:
             import shutil
-            shutil.copyfile(logfile, join(handler.obs_path, file_name))
+            shutil.copyfile(logfile, join(handler.full_path, file_name))
     

@@ -13,8 +13,8 @@ class Configuration(object):
     observers_info = {
         'SRT': {
             'name': 'Sardinia Radio Telescope', 
-            'latitude': "39:29:34.93742", 
-            'longitude': "09:14:42.5764", 
+            'latitude': "39:29:34", 
+            'longitude': "09:14:42", 
             'elevation': 700
         },
 
@@ -35,8 +35,9 @@ class Configuration(object):
             raise AttributeError('%s must be in the range %s' %(attr_name, (min_value, max_value)))
 
     def _acquisition_timeCheck(value):
-        if not value > 10 or value % 10:
-            raise AttributeError('The acquisition_time value must be a multiple of 10')
+        # if not value > 10 or value % 10:
+        #     raise AttributeError('The acquisition_time value must be a multiple of 10')
+        pass
 
     def _observer_nameCheck(value):
         if value not in Configuration.observers_info:
@@ -44,9 +45,6 @@ class Configuration(object):
             raise AttributeError('Observer name %s not in (%s)' %(value, observers))
 
     def _checkFreq(value, attr_name):
-        if value < 125:
-            raise AttributeError('Lower and upper frequencies must be greather than 125 MHz')
-
         if attr_name == 'lower_freq':
             Configuration._lower_freq = value
             if hasattr(Configuration, '_upper_freq') and value >= Configuration._upper_freq:
