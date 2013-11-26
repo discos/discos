@@ -57,9 +57,9 @@ ifeq ($(TARGETSYS),MED)
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		Metrology TotalPower NoiseGenerator HolographyBackend DBBC MedicinaMount MedWeatherStation CustomLogger \
+		Metrology TotalPower NoiseGenerator MedicinaMount MedWeatherStation CustomLogger \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient \
-		MedicinaMountTextClient MedicinaMountGUIClient MedicinaGeneralControlSystemGUIClient CustomLoggingClient\
+		MedicinaMountTextClient CustomLoggingClient\
 		Plotter KStars Scripts \
 		MedScripts
 
