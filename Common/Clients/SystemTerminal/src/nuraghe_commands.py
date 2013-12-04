@@ -67,6 +67,12 @@ def chooseRecorder():
     or MANAGEMENT/Point
     """
 
+def clearServoOffsets():
+    """
+    clearServoOffsets
+    clears the offset of every minor servo
+    """
+
 def crossScan():
     """
     crossScan=scanFrame,span,duration 
@@ -188,6 +194,18 @@ def receiversSetup():
     NOT act on the backend, pointing model or antenna mount mode
     """
 
+def servoPark():
+    """
+    servoPark
+    brakes the minor servos
+    """
+
+def servoSetup():
+    """
+    servoSetup=code 
+    (CCB, KKG, LLP, PLP, PPP) configures the minor servos in ordet to put on focus the receiver
+    """
+
 def setAttenuation():
     """
     setAttenuation=sect,att 
@@ -206,6 +224,32 @@ def setSection():
     """
     setSection=sect,startFreq,bw,feed,sampleRate,bins 
     configures the backend section sect.
+    """
+
+def setServoASConfiguration():
+    """
+    setServoASConfiguration=code
+    (ON, OFF) It enables (ON) or disable (OFF) the M2 active sufrace configuration
+    """
+
+def setServoElevationTracking():
+    """
+    setServoElevationTracking=code
+    (ON, OFF) It enables (ON) or disable (OFF) the M2 corrections during elevation antenna movements
+    """
+
+def setServoOffset():
+    """
+    setServoOffset=AXIS_CODE,VALUE
+    It sets the offset for a servo axis.
+    Allowed AXIS_CODEs:
+        SRP_TX, SRP_TY, SRP_TZ, SRP_RX, SRP_RY, SRP_RZ
+        PFP_RY, PFP_TX, PFP_TZ
+        GFR_RZ
+        M3R_RZ
+
+    For instance, the following command sets an offset of 5mm in the x (virtual) axis of the in the SRP:
+        setServoOffset=SRP_TY,5
     """
 
 def setupCCB():
