@@ -103,10 +103,10 @@ class Positioner(object):
                         ra = ra if on_source.value else ra + ra_offset
                         ra_py, dec_py = conf.target.getRaDec() if on_source.value else \
                                 map(lambda x, y: x + y, conf.target.getRaDec(), (ra_offset, 0))
-                        if abs(ra - ra_py) > 0.1:
+                        if abs(ra - ra_py) > 2e-4:
                             logging.warning('Mismatch between horizons and pyephem RAs: (%.4f, %.4f)', ra, ra_py)
                             print '@ WARNING: Mismatch between horizons and pyephem RAs: (%.4f, %.4f)' %(ra, ra_py)
-                        if abs(dec - dec_py) > 0.1:
+                        if abs(dec - dec_py) > 2e-4:
                             logging.warning('@ Mismatch between horizons and pyephem DECs: (%.4f, %.4f)', dec, dec_py)
                             print '@ WARNING: Mismatch between horizons and pyephem DECs: (%.4f, %.4f)' %(dec, dec_py)
                         del positions[:idx]
@@ -125,8 +125,7 @@ class Positioner(object):
 
                     where = 'on source' if on_source.value else 'off source'
                     now = datetime.datetime.utcnow()
-                    logging.info('%s: ra_dec(%.4f, %.4f) @ %s', where, ra, dec, now)
-                    print '@ Tracking %s: ra_dec(%.4f, %.4f)' %(where, ra, dec)
+                    logging.info('Tracking %s: ra_dec(%.4f, %.4f) @ %s', where, ra, dec, now)
                 if terminate.value:
                     break
                 time.sleep(conf.positioning_time)
@@ -135,6 +134,9 @@ class Positioner(object):
         except Exception, e:
             print 'UNEXPECTED ERROR in updatePosition(): \n\t%s' %e
             logging.exception('Got exception on updatePoition()')
+        finally:
+            if terminate.value:
+                sys.exit(0)
 
 
 class Handler(object):
@@ -143,8 +145,8 @@ class Handler(object):
         self.ato = -0.5 # Acquisition time offset (the value assegned in the no-simul mode is imported below)
         if not conf.simulate:
             try:
-                from devices import recorder, ato, receiver, scheduler, mount
-                self.recorder = recorder
+                from devices import Recorder, ato, receiver, scheduler, mount
+                self.recorder = Recorder(conf.lower_freq, conf.upper_freq)
                 self.ato = ato
                 self.receiver = receiver
                 self.scheduler = scheduler
@@ -152,8 +154,8 @@ class Handler(object):
                 self.act_az_obj = mount._get_azimuth()
                 self.cmd_el_obj = mount._get_commandedElevation()
                 self.act_el_obj = mount._get_elevation()
-                self.full_path = self.recorder.full_path
-                f = open(full_path + 'conf.txt', 'w')
+                self.obs_path = self.recorder.obs_path
+                f = open(self.obs_path + 'conf.txt', 'w')
                 ignored = ('attributes', 'datestr_format', 'observer_info', 'observers_info', 'op', 'stats')
                 for name in dir(conf):
                     if not name.startswith('_') and not name in ignored:
@@ -163,6 +165,13 @@ class Handler(object):
                 logging.exception('Cannot get the devices')
                 print 'ERROR: Cannot get the devices'
                 raise
+            finally:
+                try:
+                    f.close()
+                except Exception, e:
+                    logging.warning('Cannot create the conf.txt file in the observation directory')
+                    print 'WARNING: Cannot create the conf.txt file in the observation directory'
+
 
         if conf.positioning_time < 0:
             raise ValueErro("The positioning time must be positive.")
@@ -212,7 +221,6 @@ class Handler(object):
             print("waitForTracking()")
             time.sleep(2.5)
 
-
     def updateLO(self):
         """Compute and set the LO value."""
         recStartDelay = 0 if self.conf.simulate else self.recorder.startDelay
@@ -240,6 +248,7 @@ class Handler(object):
                 else:
                     continue
         if found:
+            print radialSpeed
             vobs = self.conf.lab_freq * (1 - radialSpeed/(ephem.c/1000))
             lo = vobs - ((self.conf.upper_freq + self.conf.lower_freq)/2)
             del self._horizons_lo[:idx]
@@ -257,7 +266,7 @@ class Handler(object):
         logging.info('At %s: LO value -> %s', now, lo)
         print '+> LO(now + %s seconds) -> %.1f MHz' %(delta, lo)
 
-    def acquire(self, which):
+    def acquire(self, cycle, which):
         """Start and stop the backend acquisition."""
         if which not in ('on_source', 'off_source', 'calibration'):
             raise KeyError('key %s not allowed' %which)
@@ -278,7 +287,7 @@ class Handler(object):
                     time.sleep(1)
                 print '+> Starting acquisition %s' %which
                 logging.info('Starting acquisition at %s', datetime.datetime.utcnow())
-                self.recorder.start()
+                self.recorder.start(cycle, which)
             else:
                 if which == 'calibration':
                     logging.info('Calibration mark ON')
@@ -334,7 +343,7 @@ class Handler(object):
         return main_header + second_header + third_header
 
     def _createHorizons(self):
-        format_ = '%Y-%b-%d %H:%M'
+        format_ = '%Y-%b-%d %H:%M:%S'
         self._horizons_lo = []
         self._horizons_radec = []
         found = False
@@ -346,21 +355,25 @@ class Handler(object):
                     break
                 elif found:
                     items = line.split()
-                    if len(items) not in (21, 22):
-                        raise Exception('Unexpected number of items in %s' %file_name)
+                    if len(items) not in (18, 19):
+                        raise Exception('Unexpected number of items in %s' %self.conf.horizons_file_name)
                     datestr = items[0] + ' ' + items[1]
-                    delotstr = items[17] if len(items) == 21 else items[18]
+                    delotstr = items[13] if len(items) == 18 else items[14]
                     radialSpeed = float(delotstr)
-                    ra_list = items[2:5] if len(items) == 21 else items[3:6]
-                    dec_list = items[5:8] if len(items) == 21 else items[6:9]
-                    ra = sum(float(value)/60**i for i, value in enumerate(ra_list)) * 15
-                    dec = sum(float(value)/60**i for i, value in enumerate(dec_list))
+                    ra_list = items[2:5] if len(items) == 18 else items[3:6]
+                    dec_list = items[5:8] if len(items) == 18 else items[6:9]
+                    ra = math.radians(sum(float(value)/60**i for i, value in enumerate(ra_list)) * 15)
+                    if float(dec_list[0]) < 0.0:
+                        factor = -1
+                    else:
+                        factor = 1
+                    dec = math.radians(factor * sum(abs(float(value))/60**i for i, value in enumerate(dec_list)))
                     date = datetime.datetime.strptime(datestr, format_)
                     if date >= datetime.datetime.utcnow() - datetime.timedelta(minutes=20):
                         self._horizons_lo.append((date, radialSpeed))
                         self._horizons_radec.append((date, ra, dec))
         except Exception, e:
-            logging.error('Cannot get the radial speeds and ra_dec position from the horizons file')
+            logging.exception('Cannot get the radial speeds and ra_dec position from the horizons file')
             print('Cannot get the radial speeds and ra_dec position from the horizons file')
             sys.exit(1)
 
@@ -405,19 +418,21 @@ class Handler(object):
         cal_idx = 0 if not self.calibrations else self.conf.cycles/self.calibrations
         try:
             for i in range(self.conf.cycles):
+                print '>> CYCLE N.%02d' %(i+1)
                 if positioner.terminated():
                     raise Exception('Antenna positioning process terminated. See the log file.')
                 positioner.goOnSource()
                 self.waitForTracking()
                 self.updateLO() # LO value computed for acquisition_time*reference time
-                self.acquire('on_source')
+                self.acquire(i+1, 'on_source')
                 positioner.goOffSource()
                 self.waitForTracking()
-                self.acquire('off_source')
+                self.acquire(i+1, 'off_source')
                 if cal_idx and not i % cal_idx:
                     cal_counter += 1
                     print '+> Starting calibration number %d.....' %cal_counter
-                    self.acquire('calibration')
+                    self.acquire(i+1, 'calibration')
+                print
         except KeyboardInterrupt:
             print 'Program stopped at at %s' %datetime.datetime.utcnow()
             logging.info('Program stopped at at %s' %datetime.datetime.utcnow())
@@ -429,9 +444,9 @@ class Handler(object):
             datestr = datetime.datetime.utcnow().strftime(self.conf.datestr_format)
             try:
                 logging.info('Observation terminated (%s)', datestr)
-                logging.info('# of cycles: %d | # of calibrations: %d', i, cal_counter)
+                logging.info('# of cycles: %d | # of calibrations: %d', (i+1), cal_counter)
                 print '\nObservation terminated (%s)' %datestr
-                print '# of cycles: %d | # of calibrations: %d' %(i, cal_counter)
+                print '# of cycles: %d | # of calibrations: %d' %(i+1, cal_counter)
             except Exception, e:
                 logging.exception('Cannot get the number of cycles and calibrations')
                 print 'Cannot get the number of cycles and calibrations'
