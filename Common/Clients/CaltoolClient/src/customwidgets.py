@@ -50,8 +50,10 @@ class PlotProperty(Qwt.QwtPlot):
                 step=len(val)/1000.
                 if step<1:
 			step=1  #step 0 not allowed
+                step = int(step) #step is used as index so it must be integer
 		for i in  range(0,min(len(val),1000)):
  	      		value_decimated[i] =val[i*step-1]
+                #scipy.signal.resample ... 
 #                self.curve.setData(self.timeData,value_decimated)       
                 self.curve.setData(self.timeData,val)       
 		self.replot()
