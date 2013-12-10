@@ -33,7 +33,7 @@ void ScanThread::onStop() {AUTO_TRACE("ScanThread::onStop()");}
 
 void ScanThread::run()
 {
-    ACS_SHORT_LOG((LM_ERROR, "ScanThread::run()"));
+    ACS_SHORT_LOG((LM_TRACE, "ScanThread::run()"));
     string comp_name = (m_configuration->m_scan).comp_name;
     MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
     if((m_configuration->m_component_refs).count(comp_name)) {
