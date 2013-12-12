@@ -43,13 +43,13 @@
 <currentBackend/>
 <currentRecorder/>
 
-<MinorServoMapping axis="SUBR_Z" servoName="SRP_ZT"/>
-<MinorServoMapping axis="SUBR_X" servoName="SRP_XT"/>
-<MinorServoMapping axis="SUBR_Y" servoName="SRP_YT"/>
-<MinorServoMapping axis="SUBR_ROTY" servoName="SRP_YR"/>
-<MinorServoMapping axis="SUBR_ROTX" servoName="SRP_XR"/>
-<MinorServoMapping axis="PFP_Z" servoName="PFP_ZT"/>
-<MinorServoMapping axis="PFP_Y" servoName="PFP_YT"/>
+<MinorServoMapping axis="SUBR_Z" servoName="SRP_TZ"/>
+<MinorServoMapping axis="SUBR_X" servoName="SRP_TX"/>
+<MinorServoMapping axis="SUBR_Y" servoName="SRP_TY"/>
+<MinorServoMapping axis="SUBR_ROTY" servoName="SRP_RY"/>
+<MinorServoMapping axis="SUBR_ROTX" servoName="SRP_RX"/>
+<MinorServoMapping axis="PFP_Z" servoName="PFP_TZ"/>
+<MinorServoMapping axis="PFP_Y" servoName="PFP_RY"/>
 
 
 </Scheduler>

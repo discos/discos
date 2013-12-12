@@ -350,5 +350,3 @@ void CDataCollection::setCoordIndex()
         }
     }
 }
-
-

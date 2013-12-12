@@ -231,9 +231,6 @@ void CalibrationToolImpl::startSubScan(const ::Management::TSubScanSetup & prm) 
 	//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_dataWrapper->Get();
 	bool rec,inc,noScan,warn;
 	if (!m_data->setSubScanSetup(prm,rec,inc,noScan,warn)) {
-		if (warn) {
-			ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::startSubScan()",(LM_WARNING,"UNEXPECTED_SUBSCAN_SEQUENCE"));
-		}
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CalibrationTool::startSubScan");
 		if (rec) {
 			impl.setReason("Could not start a new subscan while recording");
@@ -246,6 +243,9 @@ void CalibrationToolImpl::startSubScan(const ::Management::TSubScanSetup & prm) 
 		}
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
+	}
+	if (warn) {
+		ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::startSubScan()",(LM_WARNING,"UNEXPECTED_SUBSCAN_SEQUENCE"));
 	}
 	ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::startSubScan()",(LM_DEBUG,"START_SUBSCAN_ISSUED"));
 }

@@ -40,6 +40,7 @@ CEngineThread::CEngineThread (const ACE_CString & name,
     m_LatOff = m_LonOff = 0.0;
     m_focusOffset=0.0;
     m_latAmp=m_lonAmp=m_latAmpErr=m_lonAmpErr=m_latFwhm=m_lonFwhm=m_latFwhmErr=m_lonFwhmErr=0.0;
+    m_latTsys=m_lonTsys=0.0;
     m_latPositions = new double[DATACOORDINATESSEQLENGTH];
     m_lonPositions = new double[DATACOORDINATESSEQLENGTH];
 	m_fwhm=0.0;
@@ -402,10 +403,10 @@ bool CEngineThread::processData ()
 	    break;
         case Management::MNG_SUBR_Y:
 	    break;
-        case Management::MNG_PFP_Z:
+        case Management::MNG_PFP_Y:
 
 	    break;
-        case Management::MNG_PFP_Y: {
+        case Management::MNG_PFP_Z: {
         	ACS::doubleSeq_var positions;
 	        try {
 	        	if (!CORBA::is_nil(m_antennaBoss)) {
@@ -495,10 +496,10 @@ bool CEngineThread::processData ()
     		out.Format ("%04d.%03d.%02d:%02d:%02d.%02d#peakf#axis ", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     		m_file << (const char *) out;
     		if (m_data->getCoordIndex() == 2) {
-    			m_file << "Zp" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << 0.0 << std::endl;
+    			m_file << "Zp" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << " 0.0" << std::endl;
     		}
     		if (m_data->getCoordIndex() == 3) {
-    			m_file << "Zs" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << 0.0 << std::endl;
+    			m_file << "Zs" << " " << m_dataSeqCounter << " " << m_secsFromMidnight[m_dataSeqCounter] << " " << m_off[m_dataSeqCounter] << " " << m_tsysDataSeq[m_dataSeqCounter] << " 0.0" << std::endl;
     		}
     	}
     }
@@ -806,7 +807,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 {
     int i;
     // fit2 function parameters
-    static integer ftry = 20;
+    static integer ftry = 30;
     static real tol = (float) .001;
     static integer par = 5;
     double tmid, tmax, ti;
@@ -859,6 +860,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    m_latAmpErr=m_errPar[0];
         m_latFwhm=m_Par[2];
         m_latFwhmErr=m_errPar[2];
+	m_latTsys=m_Par[3];
 
 	    if (m_fileOpened) {
 	    	// latfit, laterr
@@ -932,6 +934,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    m_lonAmpErr=m_errPar[0];
         m_lonFwhm=m_Par[2];
         m_lonFwhmErr=m_errPar[2];
+	m_lonTsys=m_Par[3];
 
 	    if (m_fileOpened) {
 	    	// lonfit, lonerr
@@ -993,7 +996,9 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    //tempLat=m_latPositions[pos];
 	    //m_cosLat=cos(tempLat);
 	    //m_Par[2] = m_fwhm / m_cosLat;
-	    m_Par[2] = m_lambda;
+	    m_Par[2] = m_lambda*1000;
+	
+		
 	    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par, m_errPar, (integer *)&m_dataSeqCounter, &par, &tol, &ftry, (E_fp) fgaus_, &m_reducedCHI, &m_ierr);
 	    //m_Par[2] *=m_cosLat;
 	    //m_errPar[2] *=m_cosLat;
@@ -1049,7 +1054,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    m_dataSeqCounter = 0;
 	   m_data->setFocusDone();
 	} // m_CoordIndex == 2
-    else if ((m_data->getCoordIndex() ==2)) {	//    	m_coordIndex = 3   Zs
+    else if ((m_data->getCoordIndex() ==3)) {	//    	m_coordIndex = 3   Zs
     	int pos=computeScanCenter(m_off,m_dataSeqCounter);
     	//double tempLat;
     	double offMin,offMax;
@@ -1058,7 +1063,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    //tempLat=m_latPositions[pos];
 	    //m_cosLat=cos(tempLat);
 	    //m_Par[2] = m_fwhm / m_cosLat;
-	    m_Par[2]=m_lambda;
+	    m_Par[2]=m_lambda*1000;
 	    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par, m_errPar, (integer *)&m_dataSeqCounter, &par, &tol, &ftry, (E_fp) fgaus_, &m_reducedCHI, &m_ierr);
 	    //m_Par[2] *=m_cosLat;
 	    //m_errPar[2] *=m_cosLat;
@@ -1131,15 +1136,15 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 				out.Format("%04d.%03d.%02d:%02d:%02d.%02d#xgain", tS.year (), tS.dayOfYear (), tS.hour (), tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
 				m_file << (const char *) out << " " << (const char *)m_data->getSourceName() << " ";
 				m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << m_lonAmp << " " << m_lonAmpErr << " " << m_latAmp << " " << m_latAmpErr << " " << m_lonFwhm * DR2D << " " << m_lonFwhmErr * DR2D << " " \
-						<< m_latFwhm * DR2D << " " << m_latFwhmErr * DR2D 	<< " " << m_data->getSourceFlux() << " " << m_lonResult << " " << m_latResult << std::endl;
+						<< m_latFwhm * DR2D << " " << m_latFwhmErr * DR2D 	<< " " << m_lonTsys << " " << m_latTsys << " " << m_data->getSourceFlux() << " " << m_lonResult << " " << m_latResult << std::endl;
 			}
 			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %lf %d %d",
 				m_LonPos * DR2D, m_LatPos * DR2D, m_LonOff * DR2D, m_LatOff * DR2D, m_lonResult, m_latResult));
 			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XOFFSETS = %lf %lf %lf %lf %lf %lf %d %d",
 				m_LonPos * DR2D, m_LatPos * DR2D, m_cosLat * m_LonOff * DR2D, m_LatOff * DR2D, m_cosLat * m_LonErr * DR2D, m_LatErr * DR2D, m_lonResult, m_latResult));
 
-			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XGAIN =%s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d",(const char *)m_data->getSourceName(),
-				m_LonPos * DR2D, m_LatPos * DR2D, m_lonAmp, m_lonAmpErr, m_latAmp, m_latAmpErr, m_lonFwhm * DR2D, m_lonFwhmErr * DR2D, m_latFwhm * DR2D, m_latFwhmErr * DR2D, m_data->getSourceFlux(), m_lonResult, m_latResult));
+			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XGAIN =%s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d",(const char *)m_data->getSourceName(),
+				m_LonPos * DR2D, m_LatPos * DR2D, m_lonAmp, m_lonAmpErr, m_latAmp, m_latAmpErr, m_lonFwhm * DR2D, m_lonFwhmErr * DR2D, m_latFwhm * DR2D, m_latFwhmErr * DR2D, m_lonTsys, m_latTsys, m_data->getSourceFlux(), m_lonResult, m_latResult));
 		}
     }
     else if (m_data->isFocusScan()) {
@@ -1481,9 +1486,9 @@ void CEngineThread::writeFocusFileHeaders(const ACS::Time& now)
     tS.value (now/*.value().value*/);
     out.Format("%04d.%03d.%02d:%02d:%02d.%02d#peakf#source ",tS.year (), tS.dayOfYear (), tS.hour (),  tS.minute (), tS.second (), (long)(tS.microSecond () / 10000.));
     m_file << (const char *) out;
-    m_file << (const char *) sourceName;
+    m_file << (const char *) sourceName << " ";
     IRA::CIRATools::radToHourAngle(m_targetRa,out);
-    m_file << (const char *) out;
+    m_file << (const char *) out << " ";
     IRA::CIRATools::radToSexagesimalAngle(m_targetDec,out);
     m_file << (const char *) out;
     m_file << " 2000.0" << std::endl;

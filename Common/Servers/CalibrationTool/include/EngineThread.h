@@ -124,6 +124,7 @@ private:
     double m_LatOff, m_LonOff;
     double m_LatErr, m_LonErr;
     double m_latAmp, m_lonAmp;
+    double m_latTsys, m_lonTsys;
     double m_latAmpErr, m_lonAmpErr;
     double m_latFwhm, m_lonFwhm;
     double m_latFwhmErr, m_lonFwhmErr;

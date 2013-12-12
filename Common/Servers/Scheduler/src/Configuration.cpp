@@ -1,5 +1,3 @@
-// $Id: Configuration.cpp,v 1.7 2011-05-20 16:53:09 a.orlati Exp $
-
 #include "Configuration.h"
 
 #define _GET_DWORD_ATTRIBUTE(ATTRIB,DESCR,FIELD) { \

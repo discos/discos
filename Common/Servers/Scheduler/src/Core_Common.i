@@ -204,7 +204,7 @@ Management::TScanAxis CCore::computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bo
 	try {
 		if (!CORBA::is_nil(minorServoBoss)) {
 			servo=minorServoBoss->getScanAxis();
-			scanAxis_ms=config.getAxisFromServoName(servo.out());
+			scanAxis_ms=config.getAxisFromServoName(servo.in());
 		}
 	}
 	catch (ManagementErrors::SubscanErrorEx& ex) {
