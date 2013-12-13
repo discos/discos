@@ -1,5 +1,11 @@
 //$Id: SubScan.cpp,v 1.40 2011-05-13 16:20:02 a.orlati Exp $ 
 
+/**
+ * Time gap values are defined using variables: 
+ * safeGap : line 816
+ * myStartUT : line 148 where a time value is added
+ */
+
 #include "SubScan.h"
 #include <math.h>
 #include <SkySource.h>
@@ -139,12 +145,12 @@ Antenna::TSections SubScan::initScan (
 	else { //have to try to guess the start UT
 		reachOk=false;
 		ACS::Time myStartUT;
-		myStartUT=initTime+50000000; //first guess....it is now plus 5 seconds;
+		myStartUT=initTime+20000000; //it is now plus 2.0 seconds;
 		while (!reachOk) {
 			// could throw ComponentErrors::ValidationErrorExImpl,AntennaErrors::RateTooHighExImpl,AntennaErrors::ExceedingSlewingTimeExImpl)
 			ScanComputer(initAz,initSector,initEl,initTime,lon1,lat1,lon2,lat2,coordFrame,geometry,subScanFrame,description,direction,myStartUT,
 					dut1,subScanDuration,true,sect,reachOk);
-			myStartUT+=20000000; //add other two seconds and check if it is a suitable start time
+			myStartUT+=10000000; //add another second and check if it is a suitable start time
 		}
 		return sect;
 	}
@@ -806,8 +812,8 @@ void SubScan::setSector (const TIMEVALUE& initTime, const double& initAz, const 
 	printf("deltaAz %lf\n",deltaAz);
 	printf("deltaEl %lf\n",deltaEl);*/
 	
-	// Setting the safety gap to 2 seconds
-	safeGap.value((long double)(5.0));
+	// Setting the safety gap to 3.0 seconds because 0.5 was too fast
+	safeGap.value((long double)(3.0));
 	// The following approximation is conservative as it over-estimates the slewing time
 	// in case the slewing path is shorter than the acceleration ramp
     azSlewingTime.value((long double)(deltaAz/m_maxAzimuthRate+m_maxAzimuthRate/m_maxAzimuthAcceleration));
