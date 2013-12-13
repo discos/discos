@@ -51,7 +51,7 @@ class PlotProperty(Qwt.QwtPlot):
                 if step<1:
 			step=1  #step 0 not allowed
 		for i in  range(0,min(len(val),1000)):
- 	      		value_decimated[i] =val[i*step-1]
+ 	      		value_decimated[int(i)] =val[int(i*step-1)]
 #                self.curve.setData(self.timeData,value_decimated)       
                 self.curve.setData(self.timeData,val)       
 		self.replot()
@@ -66,7 +66,7 @@ class PlotProperty(Qwt.QwtPlot):
                 if step<1:
                         step=1  #step 0 not allowed
                 for i in  range(0,min(len(val),1000)):
-                        value_decimated[i] =val[i*step-1]
+                        value_decimated[int(i)] =val[int(i*step)-1]
 #                self.curve.setData(self.timeData,value_decimated)       
                 self.curve.setData(self.timeData,val)       
                 

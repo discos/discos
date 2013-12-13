@@ -37,6 +37,8 @@ class MyWorker(QThread):
                 self.boss     =component[2]
                 self.simpleClient=component[3]
 	        self.run=True;
+                self.scanAxis = self.caltool._get_scanAxis()
+                
                 self.arrayDataY=self.caltool._get_arrayDataY()
 		self.arrayDataX=self.caltool._get_arrayDataX()
                 self.dataX=self.caltool._get_dataX()
@@ -72,9 +74,12 @@ class MyWorker(QThread):
 #	           arrayDataX=self.componenselft._get_arrayDataX()
 #        	   arrayDataY=self.component._get_arrayDataY()
 	           while self.run:
- 
+                        (scanaxis,compl)=self.scanAxis.get_sync()
+                        #self.scanAx
         		(arraydatax,compl)=self.arrayDataX.get_sync()		
-                        arraydatax[:]=[x /math.pi*180. for x in arraydatax]
+                        if 'SUBR' not in str(scanaxis): 
+                                arraydatax[:]=[x /math.pi*180. for x in arraydatax]
+                        
 
 	         	self.emit(Qt.SIGNAL("arrayDataX"),arraydatax)
                         (arraydatay,compl2)=self.arrayDataY.get_sync()
@@ -82,7 +87,9 @@ class MyWorker(QThread):
                         self.emit(Qt.SIGNAL("arrayDataY"),arraydatay)
                         (datay,compl3)=self.dataY.get_sync()
                         (datax,compl3)=self.dataX.get_sync()
-                        datax=datax/math.pi*180.
+                        if 'SUBR' not in str(scanaxis): 
+                        
+                            datax=datax/math.pi*180.
                         (projectname,compl4)=self.projectname.get_sync()
                         self.emit(Qt.SIGNAL("projectname"),projectname)
                         (observername,compl5)=self.observer.get_sync()
@@ -94,11 +101,17 @@ class MyWorker(QThread):
                         (scanid,compl8)=self.scan.get_sync()
                         self.emit(Qt.SIGNAL("scan"),str(scanid))
                         (hpbw,compl9)=self.hpbw.get_sync()
-                        self.emit(Qt.SIGNAL("hpbw"),("%5.3f" % (hpbw/math.pi*180*60))) 
+                        
+                        if 'SUBR' not in str(scanaxis): 
+                               hpbw= hpbw/math.pi*180*60
+                        self.emit(Qt.SIGNAL("hpbw"),("%5.3f" % (hpbw))) 
                         (amplitude,compl10)=self.amplitude.get_sync()
                         self.emit(Qt.SIGNAL("amplitude"),"%5.3f" % amplitude)
                         (peakOffset,compl11)=self.peakOffset.get_sync()
-                        self.emit(Qt.SIGNAL("peakOffset"),"%5.3f" % (peakOffset/math.pi*180))
+                        if 'SUBR' not in str(scanaxis): 
+                                  peakOffset=peakOffset/math.pi*180
+                                  
+                        self.emit(Qt.SIGNAL("peakOffset"),"%5.3f" % (peakOffset))
                         (slope,compl12)=self.slope.get_sync()
                         
                         self.emit(Qt.SIGNAL("slope"),"%5.3f" %slope)
@@ -108,6 +121,8 @@ class MyWorker(QThread):
                         self.emit(Qt.SIGNAL("target"),target)
                         (device,compl13)=self.device.get_sync()
                         self.emit(Qt.SIGNAL("device"),str(device))
+                        self.emit(Qt.SIGNAL("scanAxis"),scanaxis)
+
                         rec= self.caltool.isRecording()
                         if rec==True:  
                            self.datay_tmp.append(datay)
@@ -116,6 +131,7 @@ class MyWorker(QThread):
                            self.emit(Qt.SIGNAL("DataX"),self.datax_tmp)
                         
                         self.emit(Qt.SIGNAL("isRecording"),rec)
+                        self.emit(Qt.SIGNAL("scanAxis"),scanaxis)
 
  #                       print rec
 #                        if (subscanid!=self.oldsubscan and scanid !=self.oldscanid):
@@ -145,7 +161,8 @@ class MyWorker(QThread):
                         self.run=False
                         
 	def __del__(self):
-		pass
+                QThread.msleep(200)
+                pass
  
  
 
@@ -155,26 +172,31 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
  
 	def __init__(self,compname,parent=None):
 		Qt.QDialog.__init__(self)
-
-		self.componentname = compname
- 		print self.componentname
+                
 		self.simpleClient = PySimpleClient()
 		try:
-			component= self.simpleClient.getComponent(self.componentname)
                         scheduler= self.simpleClient.getDefaultComponent("IDL:alma/Management/Scheduler:1.0")
                         antennaBoss =self.simpleClient.getDefaultComponent("IDL:alma/Antenna/AntennaBoss:1.0")
-
-
+                        
+                        #choose default recorder
+                        if compname=='default':
+                              
+                              recorder=scheduler._get_currentRecorder()
+                              (recordername,compl)=recorder.get_sync()
+                              self.componentname=recordername
+                              print recordername
+                        else:
+                              self.componentname=compname
+                        print self.componentname
+                        component= self.simpleClient.getComponent(self.componentname)
      			self.thread=MyWorker([component,scheduler,antennaBoss,self.simpleClient])
 			self.setupUi(self)
 #                        self.qwtPlot_datax.setAxisScale(Qwt.QwtPlot.xBottom, 0,1000)
                         self.qwtPlot_datax.setAxisAutoScale(Qwt.QwtPlot. yLeft) 
 			self.setWindowTitle(self.componentname)
-                        self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
-                        self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
-                        self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.xBottom, "Direction (Deg)")
-                        self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.xBottom, "Direction (Deg)")
-
+                        #self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
+                        #self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
+ 
 
 
 
@@ -198,32 +220,60 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
                         self.connect(self.thread,Qt.SIGNAL("target"),self.nameLineEdit.setText)
                         self.connect(self.thread,Qt.SIGNAL("device"),self.deviceIdLineEdit.setText)
                         self.connect(self.thread,Qt.SIGNAL("isRecording"),self.isRecording)
-                        
+                        self.connect(self.thread,Qt.SIGNAL("scanAxis"),self.scanAxis)
+                       
 
 
 		except  Exception,ex:
 			newEx = ClientErrorsImpl.CouldntAccessComponentExImpl(exception=ex, create=1)
-        		newEx.setComponentName(self.componentname)
+#        		newEx.setComponentName(self.componentname)
          #ACS_LOG_ERROR
         		newEx.log(self.simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
         		self.simpleClient.disconnect()
         		sys.exit(-1)	
+                        
  	@pyqtSlot(Qt.QObject,name="isRecording")
         def isRecording(self,rec):
-          if rec==False:
-              self.recording.setText("OFF")
-              palette = self.recording.palette()
-              role = self.recording.backgroundRole()
-              palette.setColor(role, Qt.QColor('gray'))
-              self.recording.setPalette(palette)
-          if rec==True:
-              self.recording.setText("ON")
-              palette = self.recording.palette()
-              role = self.recording.backgroundRole()
-              palette.setColor(role, Qt.QColor('green'))
-              self.recording.setPalette(palette)
-            
+            if rec==False:
+                self.recording.setText("OFF")
+                palette = self.recording.palette()
+                role = self.recording.backgroundRole()
+                palette.setColor(role, Qt.QColor('gray'))
+                self.recording.setPalette(palette)
+                self.BScanaxis.setEnabled(False)
+                
+                
+                
+            if rec==True:
+                self.recording.setText("ON")
+                palette = self.recording.palette()
+                role = self.recording.backgroundRole()
+                palette.setColor(role, Qt.QColor('green'))
+                self.recording.setPalette(palette)
+                self.BScanaxis.setEnabled(True)
+        
+        @pyqtSlot(Qt.QObject,name="scanAxis")  # decorator for the slot
+        def scanAxis(self,scanaxis):
+                self.BScanaxis.setText(str(scanaxis))
+                
+                if 'SUBR' not in str(scanaxis):
+                        self.scanAxisLabel.setText('ScanAxis - Pointing')
+                        xaxis_text="Direction (Deg)"
+                        hpbw_label_text='HPBW(arcmim)'
+                        peakOffsetLabel_text='PeakOffset(deg)'
+                else:
+                        self.scanAxisLabel.setText('ScanAxis - Focus')
+                        xaxis_text="Distance (mm)"
+                        hpbw_label_text='HPBW(mm)'
 
+                        peakOffsetLabel_text='PeakOffset(mm)'
+                
+                self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.xBottom, xaxis_text)
+                self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.xBottom, xaxis_text)
+                self.hpbw_label.setText(hpbw_label_text)
+                self.peakOffsetLabel.setText(peakOffsetLabel_text)
+                
+        
 
         @pyqtSlot(Qt.QObject,name="scalePlots")  # decorator for the slot
         def scalePlots(self,val):
@@ -264,11 +314,11 @@ def main(args):
               sys.exit()
         
         if len(args)==0:
-            componentname="MANAGEMENT/CalibrationTool"
+            componentname='default'
         else:
             componentname=args[0]
          
-           
+        print componentname   
         app = Qt.QApplication(args)
 	a=Application(componentname) #passa il nome del component al costruttore
 	a.run()
