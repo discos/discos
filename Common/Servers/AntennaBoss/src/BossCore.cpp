@@ -259,7 +259,11 @@ void CBossCore::getObservedGalactic(TIMEVALUE& time,TIMEDIFFERENCE& duration,dou
 
 void CBossCore::getRawHorizontal(const TIMEVALUE& time,double& az,double& el) const
 {
+	//IRA::CString tempo;
+	//IRA::CIRATools::timeToStr(time.value().value,tempo);
+	//printf("getRaw: %s ",(const char *)tempo);
 	m_rawCoordinates.selectPoint(time,az,el);
+	//printf("%lf %lf\n",az,el);
 }
 
 void CBossCore::getApparent(const ACS::Time& time,double& az,double& el,double& ra, double& dec,double& jepoch,double& lon,double& lat)

@@ -11,7 +11,7 @@
 	Name="Boss"
 	Code="AntennaBossImpl"
 	Type="IDL:alma/Antenna/AntennaBoss:1.0"
-	Container="AntennaContainer"
+	Container="AntennaBossContainer"
 	Default="true"
 	KeepAliveTime="-1"
     ImplLang="cpp"

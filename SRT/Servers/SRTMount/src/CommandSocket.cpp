@@ -186,7 +186,6 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 	double finalAz,finalEl;
 	long section;
 	Antenna::TCommonModes azMode,elMode;
-	CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
 	try {
 		if (!checkConnection()) {
 			_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::programTrack()");
@@ -199,6 +198,7 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 			_EXCPT(ComponentErrors::TimeoutExImpl,ex,"CCommandSocket::programTrack()");
 			throw ex;
 		}
+		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
 		data->getActualMode(azMode,elMode);
 		if ((azMode!=Antenna::ACU_PROGRAMTRACK) || (elMode!=Antenna::ACU_PROGRAMTRACK)) {
 			_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"CCommandSocket::programTrack()");
@@ -279,6 +279,7 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 		//clear
 		m_ptSize=0;
 		m_lastScanEpoch=0;
+		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
 		data->clearProgramTrackStack();
 		throw ex; // let the exception go up....
 	}
@@ -286,6 +287,7 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 		//clear
 		m_ptSize=0;
 		m_lastScanEpoch=0;
+		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
 		data->clearProgramTrackStack();
 		throw ex; // let the exception go up....
 	}

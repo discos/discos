@@ -28,8 +28,9 @@ void CWatchingThread::onStart()
 
  void CWatchingThread::runLoop()
  {
-		IRA::CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+		IRA::CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("WATCHINGTHREAD:runLoop");
 		try {
+			//printf("updateAttributes\n");
 			resource->updateAttributes();
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {

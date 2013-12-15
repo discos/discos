@@ -284,7 +284,7 @@ CORBA::Boolean AntennaBossImpl::command(const char *cmd,CORBA::String_out answer
 	bool res;
 	//taking the mutex before execution is a workaround for thread safeness that works only because the parser is configured for only synchronous calls.
 	//If this condition is not true anymore, the mutex acquisition will have to be done directly inside the procedure body.
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:command");
 	try {
 		m_parser->run(cmd,out);
 		res=true;
@@ -370,7 +370,7 @@ void AntennaBossImpl::enable() throw (CORBA::SystemException)
 void AntennaBossImpl::getFluxes (const ACS::doubleSeq& freqs,ACS::doubleSeq_out fluxes) throw (CORBA::SystemException)
 {
 	ACS::doubleSeq_var outFlux =new ACS::doubleSeq;
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getFluxes");
 	resource->getFluxes(freqs,outFlux);
 	fluxes=outFlux._retn();
 }
@@ -393,7 +393,7 @@ void AntennaBossImpl::startScan(ACS::Time& startUT,const Antenna::TTrackingParam
 		CORBA::SystemException,AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("AntennaBossImpl::startScan()");
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:startScan");
 	try {
 		resource->startScan(startUT,parameters,secondary);
 	}
@@ -410,7 +410,7 @@ void AntennaBossImpl::startScan(ACS::Time& startUT,const Antenna::TTrackingParam
 void AntennaBossImpl::track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
 	AUTO_TRACE("AntennaBossImpl::track()");
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:track");
 	try {
 		resource->track(targetName);
 	}
@@ -476,7 +476,7 @@ void AntennaBossImpl::sidereal(const char * targetName,CORBA::Double ra,CORBA::D
 
 void AntennaBossImpl::goOff(Antenna::TCoordinateFrame frame,CORBA::Double skyOffset) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:goOff");
 	try {
 		resource->goOff(frame,skyOffset);
 	}
@@ -492,7 +492,7 @@ void AntennaBossImpl::goOff(Antenna::TCoordinateFrame frame,CORBA::Double skyOff
 
 void AntennaBossImpl::goTo(CORBA::Double az,CORBA::Double el) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:goTo");
 	try {
 		resource->goTo(az,el);
 	}
@@ -509,7 +509,7 @@ void AntennaBossImpl::goTo(CORBA::Double az,CORBA::Double el) throw (ComponentEr
 ACS::Time AntennaBossImpl::lonOTFScan(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
 			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:lonOTFscan");
 	try {
 		return resource->lonOTFScan(scanFrame,span,duration);
 	}
@@ -526,7 +526,7 @@ ACS::Time AntennaBossImpl::lonOTFScan(Antenna::TCoordinateFrame scanFrame,CORBA:
 ACS::Time AntennaBossImpl::latOTFScan(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
 			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:latOTFScan");
 	try {
 		return resource->latOTFScan(scanFrame,span,duration);
 	}
@@ -544,7 +544,7 @@ bool AntennaBossImpl::checkScan(ACS::Time startUt,const Antenna::TTrackingParame
 		ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
 	AUTO_TRACE("AntennaBossImpl::checkScan()");
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:checkScan");
 	try {
 		return resource->checkScan(startUt,parameters,secondary,slewingTime,minElLimit,maxElLimit);
 	}
@@ -567,7 +567,7 @@ char *AntennaBossImpl::getGeneratorCURL(Antenna::TGeneratorType_out type) throw 
 		type=Antenna::ANT_NONE;
 		return CORBA::string_dup("");
 	}
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getGeneratorCurl");
 	type=resource->m_generatorType;
 	if ((!CORBA::is_nil(resource->m_generator)) && (type!=Antenna::ANT_NONE))  
 		return CORBA::string_dup(resource->m_generator->name());
@@ -581,7 +581,7 @@ void AntennaBossImpl::getRawCoordinates(ACS::Time time,CORBA::Double_out az,CORB
 	double Az=0.0;
 	double El=0.0;
 	TIMEVALUE requestTime(time);
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getRawcoordinate");
 	resource->getRawHorizontal(requestTime,Az,El);
 	az=(CORBA::Double)Az;
 	el=(CORBA::Double)El;
@@ -590,7 +590,7 @@ void AntennaBossImpl::getRawCoordinates(ACS::Time time,CORBA::Double_out az,CORB
 void AntennaBossImpl::getApparentCoordinates (ACS::Time time,CORBA::Double_out az,CORBA::Double_out el,CORBA::Double_out ra,CORBA::Double_out dec,CORBA::Double_out jepoch,
 		CORBA::Double_out lon,CORBA::Double_out lat) throw (CORBA::SystemException)
 {
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getApparentCoordinates");
 	resource->getApparent(time,az,el,ra,dec,jepoch,lon,lat);
 }
 
@@ -605,7 +605,7 @@ void AntennaBossImpl::getObservedEquatorial(ACS::Time time,ACS::TimeInterval dur
 	if (!m_core) return;  
 	TIMEVALUE requestTime(time);
 	TIMEDIFFERENCE requestedDuration(duration);
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getObservedEquatorial");
 	resource->getObservedEquatorial(requestTime,requestedDuration,Ra,Dec);
 	ra=(CORBA::Double)Ra;
 	dec=(CORBA::Double)Dec;
@@ -619,7 +619,7 @@ void AntennaBossImpl::getObservedGalactic(ACS::Time time,ACS::TimeInterval durat
 	if (!m_core) return;
 	TIMEVALUE requestTime(time);
 	TIMEDIFFERENCE requestedDuration(duration);
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getObservedgalactic");
 	resource->getObservedGalactic(requestTime,requestedDuration,Long,Lat);
 	longitude=(CORBA::Double)Long;
 	latitude=(CORBA::Double)Lat;
@@ -634,7 +634,7 @@ void AntennaBossImpl::getObservedHorizontal(ACS::Time time,ACS::TimeInterval dur
 	if (!m_core) return;
 	TIMEVALUE requestTime(time);
 	TIMEDIFFERENCE requestedDuration(duration);
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getObservedHorizontal");
 	resource->getObservedHorizontal(requestTime,requestedDuration,Az,El);
 	az=(CORBA::Double)Az;
 	el=(CORBA::Double)El;
@@ -648,7 +648,7 @@ void AntennaBossImpl::getAllOffsets(CORBA::Double_out azOff,CORBA::Double_out el
 		azOff=elOff=raOff=decOff=lonOff=latOff=0.0;
 		return;
 	}
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getAllOffsets");
 	resource->getAllOffsets(az,el,ra,dec,lon,lat);
 	azOff=(CORBA::Double)az; elOff=(CORBA::Double)el; raOff=(CORBA::Double)ra; decOff=(CORBA::Double)dec; lonOff=(CORBA::Double)lon; latOff=(CORBA::Double)lat;
 }
@@ -659,7 +659,7 @@ void AntennaBossImpl::getScanAxis (Management::TScanAxis_out axis) throw (CORBA:
 		axis=Management::MNG_NO_AXIS;
 		return;
 	}
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getScanAxis");
 	axis=resource->getCurrentAxis();
 }
 

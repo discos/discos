@@ -29,6 +29,7 @@ CDataCollection::CDataCollection()
 	m_errorDetected=false;
 	m_lastTarget="";
 	m_HPBW= m_amplitude=m_peakOffset=m_offSet=m_slope= m_sourceFlux=0.0;
+	m_scanAxis=Management::MNG_NO_AXIS;
 }
 	
 CDataCollection::~CDataCollection()

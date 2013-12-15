@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>12</select>
+        <select>3</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -29,6 +29,10 @@
         </container>
         <container>
             <name>AntennaContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>AntennaBossContainer</name>
             <type>cpp</type>
         </container>
         <container>

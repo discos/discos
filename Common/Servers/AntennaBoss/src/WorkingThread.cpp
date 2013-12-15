@@ -9,12 +9,13 @@ CWorkingThread::CWorkingThread(const ACE_CString& name,IRA::CSecureArea<CBossCor
 			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime), m_core(param)
 {
 	AUTO_TRACE("CWorkingThread::CWorkingThread()");
-	IRA::CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	IRA::CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("WORKINGTHREAD:Contructor");
 	m_gap=resource->m_config->getGapTime();
 	m_slice.microSecond(m_gap);
 	m_maxPoints=resource->m_config->getMaxPointNumber();
 	m_minPoints=resource->m_config->getMinPointNumber();
 	m_sleepTime=resource->m_config->getWorkingThreadTime()/10;  // wants to know the number of microseconds
+	m_trackingOk=true;
 }
 
 CWorkingThread::~CWorkingThread()
@@ -25,6 +26,7 @@ CWorkingThread::~CWorkingThread()
 void CWorkingThread::onStart()
 {
 	AUTO_TRACE("CWorkingThread::onStart()");
+	m_trackingOk=true;
 }
 
 void CWorkingThread::onStop()
@@ -34,7 +36,7 @@ void CWorkingThread::onStop()
  
 void CWorkingThread::runLoop()
 {
-	 IRA::CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	 IRA::CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("WORKINGTREAD:runLoop");
 	 TIMEVALUE currentTime,now;
 	 WORD elem,threshold,i;
 	 WORD ramp=(m_maxPoints+m_minPoints)/(STIFFNESS+1);
@@ -57,12 +59,14 @@ void CWorkingThread::runLoop()
 		 for (i=0;i<dataPoints;i++) {
 			 currentTime+=m_slice.value();
 			try {
-				resource->loadTrackingPoint(currentTime,false);
+				resource->loadTrackingPoint(currentTime,!m_trackingOk);
+				m_trackingOk=true;
 			}
 			catch (ACSErr::ACSbaseExImpl& E) {
 				_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,E,"CWorkingThread::runLoop()");
 				impl.setReason("Cannot load the tracking point");
 				_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+				m_trackingOk=false;
 			}
 		 }
 	 }

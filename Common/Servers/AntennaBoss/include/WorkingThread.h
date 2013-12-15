@@ -58,6 +58,7 @@ private:
 	long m_maxPoints;
 	long m_minPoints;
 	long m_sleepTime;
+	bool m_trackingOk;
 };
 
 #endif /*WORKINGTHREAD_H_*/

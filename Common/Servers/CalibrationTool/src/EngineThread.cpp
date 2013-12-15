@@ -1159,8 +1159,8 @@ void CEngineThread::gaussFit(const ACS::Time& now)
     			}
     			m_file << (const char *) out;
     			m_file << m_Par[1] << " " <<  m_focusScanCenter << " " <<  m_focusScanCenter+m_Par[1] << m_focusResult << std::endl;
-    			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %d",	m_Par[1],  m_focusScanCenter, m_focusScanCenter+m_Par[1], m_focusResult));
     		}
+		ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %lf %d",m_LatPos * DR2D, m_Par[1], m_focusScanCenter, m_focusScanCenter+m_Par[1], m_focusResult));
     	}
     }
 }
@@ -1375,8 +1375,17 @@ void CEngineThread::setAxisOffsets()
 	   	case Management::MNG_SUBR_Z:
 	   		try {
 	   			if (!CORBA::is_nil(m_minorServoBoss)) {
+					ACS::doubleSeq_var offs;
 	   				if ((m_data->isFocusScanDone()) && (m_focusResult)) {
-	   					m_minorServoBoss->setUserOffset((const char*)m_data->getMinorServoNameForAxis(),m_focusOffset);
+						double oldOffset;
+						offs=m_minorServoBoss->getUserOffset();
+						if (m_minorServoCurrentAxisPosition!=-1) {
+							oldOffset=offs[m_minorServoCurrentAxisPosition];
+						}
+						else {
+							oldOffset=0.0;		
+						}
+	   					m_minorServoBoss->setUserOffset((const char*)m_data->getMinorServoNameForAxis(),m_focusOffset+oldOffset);
 	   				}
 	   			}
 	   		}
@@ -1410,8 +1419,17 @@ void CEngineThread::setAxisOffsets()
 	   	case Management::MNG_PFP_Z:
 	   		try {
 	   			if (!CORBA::is_nil(m_minorServoBoss)) {
+					ACS::doubleSeq_var offs;
 	   				if ((m_data->isFocusScanDone()) && (m_focusResult)) {
-	   					m_minorServoBoss->setUserOffset((const char*)m_data->getMinorServoNameForAxis(),m_focusOffset);
+						double oldOffset;
+						offs=m_minorServoBoss->getUserOffset();
+						if (m_minorServoCurrentAxisPosition!=-1) {
+							oldOffset=offs[m_minorServoCurrentAxisPosition];
+						}
+						else {
+							oldOffset=0.0;		
+						}
+	   					m_minorServoBoss->setUserOffset((const char*)m_data->getMinorServoNameForAxis(),m_focusOffset+oldOffset);
 	   				}
 	   			}
 	   		}
