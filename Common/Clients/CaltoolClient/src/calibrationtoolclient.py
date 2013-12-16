@@ -194,8 +194,8 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
 #                        self.qwtPlot_datax.setAxisScale(Qwt.QwtPlot.xBottom, 0,1000)
                         self.qwtPlot_datax.setAxisAutoScale(Qwt.QwtPlot. yLeft) 
 			self.setWindowTitle(self.componentname)
-                        #self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
-                        #self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
+                        self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
+                        self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
  
 
 
