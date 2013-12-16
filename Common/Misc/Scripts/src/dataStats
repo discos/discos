@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 """
 This script reads from the command line a list of directories and tries to find
@@ -13,7 +13,10 @@ It is conceived to parse scans obteined with FitsZilla and not MBFITS.
 
 import os 
 import re
-import pyfits
+try:
+    import pyfits
+except:
+    from astropy.io import fits as pyfits
 import sys
 import datetime
 import logging
@@ -73,7 +76,8 @@ def console_app():
     else:
         logging.basicConfig(level=logging.INFO)
     if not args:
-        dirnames = [os.path.abspath(".")]
+        dirnames = [os.path.expanduser("~/data/") + 
+		    datetime.datetime.utcnow().strftime("%Y%m%d")]
     else:
         dirnames = [os.path.abspath(dir) for dir in args]
 
