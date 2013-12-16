@@ -12,6 +12,7 @@
 #Marco Buttu (mbuttu@oa-cagliari.inaf.it)  28/05/2013     Tab completion from a file of commands, help command
 #andrea orlati(a.orlati@ira.inaf.it)       04/09/2013     Implemented support for external termination signal
 #Marco Buttu (mbuttu@oa-cagliari.inaf.it)  16/12/2013     New answer format, showing the values in different lines
+#Marco Buttu (mbuttu@oa-cagliari.inaf.it)  16/12/2013     Commands immediatly saved in the history file
 
 import getopt, sys
 import Acspy.Common.Err
@@ -143,8 +144,9 @@ def main():
                 else:
                     print commands[c].__doc__
             elif cmd:
+                readline.write_history_file(historyFile)            
                 try:
-                    res=component.command(cmd)
+                    res=component.command(cmd)[1]
                     idx = res.find('\\')
                     cmd_name, response = res[:idx+1], res[idx+1:].rstrip('\\')
                     if response:
@@ -166,11 +168,10 @@ def main():
                     newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
         except KeyboardInterrupt:
             stopAll=True
-            pass
             
+    readline.write_history_file(historyFile)            
     simpleClient.releaseComponent(compName)     
     simpleClient.disconnect()
-    readline.write_history_file(historyFile)            
             
 if __name__=="__main__":
    main()
