@@ -11,6 +11,7 @@
 #andrea orlati(a.orlati@ira.inaf.it)       20/07/2011     Logging exceptions now works also in ACS 8.2
 #Marco Buttu (mbuttu@oa-cagliari.inaf.it)  28/05/2013     Tab completion from a file of commands, help command
 #andrea orlati(a.orlati@ira.inaf.it)       04/09/2013     Implemented support for external termination signal
+#Marco Buttu (mbuttu@oa-cagliari.inaf.it)  16/12/2013     New answer format, showing the values in different lines
 
 import getopt, sys
 import Acspy.Common.Err
@@ -144,11 +145,24 @@ def main():
             elif cmd:
                 try:
                     res=component.command(cmd)
-                    print res[1]
+                    idx = res.find('\\')
+                    cmd_name, response = res[:idx+1], res[idx+1:].rstrip('\\')
+                    if response:
+                        groups = response.split(',')
+                        for group in groups:
+                            values = group.split(';')
+                            if len(values) > 1:
+                                print cmd_name
+                                for i, value in enumerate(values):
+                                    print '%02d) %s' %(i+1, value)
+                            else:
+                                print res
+                    else:
+                        print res
                 except Exception, ex:
-                    newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
+                    newEx = ClientErrorsImpl.CouldntPerformActionExImpl(exception=ex, create=1)
                     newEx.setAction("command()")
-                    newEx.setReason("communication error to component server")
+                    newEx.setReason(ex.message)
                     newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
         except KeyboardInterrupt:
             stopAll=True
