@@ -12,6 +12,7 @@
 #include "MinorServoBossImpl.h"
 #include "SubsystemStatusDevIO.h"
 #include "SubsystemVStatusDevIO.h"
+#include "DevIOActualSetup.h"
 #include "utils.h"
 #include "macros.def"
 #include "SetupThread.h"
@@ -36,6 +37,7 @@ MinorServoBossImpl::MinorServoBossImpl(
     CharacteristicComponentImpl(CompName, containerServices),
     m_services(containerServices),
     m_status(this),
+    m_actualSetup(this),
     // m_verbose_status(this),
     m_nchannel(NULL)
 {   
@@ -163,6 +165,9 @@ void MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImp
                 new SubsystemStatusDevIO(&(m_configuration->m_status)), 
                 true
         );  
+
+		m_actualSetup = new baci::ROstring(getContainerServices()->getName() + ":actualSetup",
+                getComponent(), new DevIOActualSetup(m_configuration), true);
 
         // m_verbose_status = new ROpattern(
         //         getContainerServices()->getName() + ":verbose_status", 
@@ -1814,9 +1819,8 @@ ACS::Time get_min_time(double range, double acceleration, double max_speed) {
     return static_cast<ACS::Time>(min_time * pow(10, 7));
 }
 
-
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTSystemStatus, m_status, status);
-// GET_PROPERTY_REFERENCE(MinorServoBossImpl, ACS::ROpattern, m_verbose_status, verbose_status);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, ACS::ROstring, m_actualSetup, actualSetup);
 
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

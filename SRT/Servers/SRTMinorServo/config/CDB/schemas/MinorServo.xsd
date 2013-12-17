@@ -197,6 +197,7 @@
     <xs:complexType name="MinorServoBossType">
         <xs:sequence>
             <xs:element name="status" type="mng:SystemStatusType" />
+            <xs:element name="actualSetup" type="baci:ROstring" />
         </xs:sequence>
 
         <!-- Subsystem attributes -->

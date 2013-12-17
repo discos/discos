@@ -35,6 +35,7 @@ module MinorServo {
     /// Interface of MinorServoBoss
 	interface MinorServoBoss: ACS::CharacteristicComponent, Management::CommandInterpreter, Management::Subsystem {
 
+        readonly attribute ACS::ROstring actualSetup;
 		/**
 		 * Turn the elevation tracking on
 		 * @throw ManagementErrors::ConfigurationErrorEx

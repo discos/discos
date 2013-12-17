@@ -71,7 +71,8 @@
     slaves="GFR, M3R, PFP, SRP"
 >
     <!-- MinorServo Status -->
-	<status description="The summary status of MinorServoBoss"/>
+    <status description="The summary status of MinorServoBoss"/>
+    <actualSetup description="Mnemonic code that defines a setup" />
               
     <!--
    MinorServoBoss Verbose Status (ROpattern)
@@ -94,7 +95,7 @@
         archive_min_int="1"
         archive_max_int="1"
         archive_delta="1"
-	/>
+    />
     -->
 
               

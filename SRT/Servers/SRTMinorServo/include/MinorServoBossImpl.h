@@ -17,6 +17,7 @@
 #include <baciSmartPropertyPointer.h>
 #include <baciROpattern.h>
 #include <baciROuLongLong.h>
+#include <baciROstring.h>
 #include <acsncSimpleSupplier.h>
 #include <enumpropROImpl.h>
 #include <ComponentErrors.h>
@@ -175,6 +176,9 @@ public:
      * @throw CORBA::SystemException
      */
 	 virtual Management::ROTSystemStatus_ptr status() throw (CORBA::SystemException);
+     
+     virtual ACS::ROstring_ptr actualSetup() throw (CORBA::SystemException);
+
     
 
     /** 
@@ -434,6 +438,7 @@ private:
  
     /** Status property */
 	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_status;
+	baci::SmartPropertyPointer<baci::ROstring> m_actualSetup;
     
     /** Store the value of the property */
     Management::TSystemStatus m_status_value;
