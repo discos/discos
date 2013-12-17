@@ -85,7 +85,7 @@ if [ "$CL_START" ] ; then
 fi
 
 if [ "$CL_VIEW" ] ; then
-   acscommandcenter corbaloc::192.168.1.104:3000/Manager &
+   acscommandcenter corbaloc::192.168.1.98:3000/Manager &
 fi
 
 
