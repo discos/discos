@@ -103,6 +103,7 @@
 >
     <!-- MinorServo Status -->
 	<status description="The summary status of MinorServoBoss"/>
+    <actualSetup description="Mnemonic code that defines a setup" />
               
     <!--
    MinorServoBoss Verbose Status (ROpattern)
