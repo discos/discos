@@ -30,7 +30,7 @@ public:
 	ACE_CString read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
 		AUTO_TRACE("DevIOActualSetup::read()");
 		timestamp=getTimeStamp();
-		return (const char *)m_configuration->isConfigured();
+		return (m_configuration->getActualSetup()).c_str();
     }
 
     void write(const ACE_CString& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {

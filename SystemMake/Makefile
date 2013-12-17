@@ -23,7 +23,7 @@ ifeq ($(TARGETSYS),SRT)
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger \
 		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
-		SRTActiveSurfaceGUIClient SRTMountTextClient \
+		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient\
 		Plotter KStars SRTScripts \
 
 	IDL_DOC:=Managment Antenna Backends SRTActiveSurface
