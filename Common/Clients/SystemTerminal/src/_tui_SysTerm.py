@@ -156,7 +156,7 @@ def main():
                             if len(values) > 1:
                                 print cmd_name
                                 for i, value in enumerate(values):
-                                    print '%02d) %s' %(i+1, value)
+                                    print '%02d) %s' %(i, value)
                             else:
                                 print res
                     else:
