@@ -25,7 +25,7 @@
  	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>BWG</inputPort>
  	<beams>1</beams>
- 	<bandWidth>1250.0</bandWidth>
+ 	<bandWidth>2350.0</bandWidth>
  	<attenuation>9.0</attenuation>	 	
  	<section_boards>0 1</section_boards>
  	<polarizations>L R</polarizations>
