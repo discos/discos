@@ -56,7 +56,7 @@ void TrackingThread::runLoop()
                     component_ref = (m_configuration->m_component_refs)[comp_name];
                     if(!CORBA::is_nil(component_ref)) {
                         // Set a doubleSeq from a string of positions
-                        ACS::doubleSeq positions = m_configuration->getPosition(comp_name, getTimeStamp());
+                        ACS::doubleSeq positions = m_configuration->getPosition(comp_name, getTimeStamp() + TT_SLEEP_TIME);
                         // Set a minor servo position if the doubleSeq is not empty
                         if(positions.length()) {
                             if(component_ref->isReady()) {
