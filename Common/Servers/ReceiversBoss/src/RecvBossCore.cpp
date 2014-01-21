@@ -12,7 +12,7 @@ using namespace IRA;
 #define KKC_PORT 10000 // control room server port
 #define RECV_ADDRESS "192.167.189.2"
 #define RECV_PORT 2096
-#define FS_ADDRESS "192.167.189.43"
+#define FS_ADDRESS "192.167.189.62"
 #define FS_PORT 5002
 
 // speed of light in meters per second
