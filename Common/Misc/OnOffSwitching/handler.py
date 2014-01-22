@@ -103,12 +103,12 @@ class Positioner(object):
                         ra = ra if on_source.value else ra + ra_offset
                         ra_py, dec_py = conf.target.getRaDec() if on_source.value else \
                                 map(lambda x, y: x + y, conf.target.getRaDec(), (ra_offset, 0))
-                        if abs(ra - ra_py) > 2e-4:
-                            logging.warning('Mismatch between horizons and pyephem RAs: (%.4f, %.4f)', ra, ra_py)
-                            print '@ WARNING: Mismatch between horizons and pyephem RAs: (%.4f, %.4f)' %(ra, ra_py)
-                        if abs(dec - dec_py) > 2e-4:
-                            logging.warning('@ Mismatch between horizons and pyephem DECs: (%.4f, %.4f)', dec, dec_py)
-                            print '@ WARNING: Mismatch between horizons and pyephem DECs: (%.4f, %.4f)' %(dec, dec_py)
+                        # if abs(ra - ra_py) > 2e-4:
+                        #     logging.warning('Mismatch between horizons and pyephem RAs: (%.4f, %.4f)', ra, ra_py)
+                        #     print '@ WARNING: Mismatch between horizons and pyephem RAs: (%.4f, %.4f)' %(ra, ra_py)
+                        # if abs(dec - dec_py) > 2e-4:
+                        #     logging.warning('@ Mismatch between horizons and pyephem DECs: (%.4f, %.4f)', dec, dec_py)
+                        #     print '@ WARNING: Mismatch between horizons and pyephem DECs: (%.4f, %.4f)' %(dec, dec_py)
                         del positions[:idx]
                     else:
                         raise Exception('Cannot get a proper date in the horizons file')
@@ -116,7 +116,8 @@ class Positioner(object):
                     # If it is not a simulation, set the antenna position
                     if not conf.simulate:
                         try:
-                            antenna.sidereal(conf.target.name, ra, dec, ANT_J2000, ACU_NEUTRAL)
+                            # antenna.sidereal(conf.target.name, ra, dec, ANT_J2000, ACU_NEUTRAL)
+                            antenna.sidereal(conf.target.name, ra_py, dec_py, ANT_J2000, ACU_NEUTRAL)
                         except Exception, e:
                             logging.exception('Cannot set the antenna position')
                             print 'ERROR: Cannot set the antenna position'
@@ -193,7 +194,7 @@ class Handler(object):
         """Wait until the antenna reaches the target position."""
         slice_time = 1.0
         duration = 0
-        timeout = 60 # seconds
+        timeout = 180 # seconds
         if not self.conf.simulate:
             track_distance = 0.001 # (move to conf)
             track = False
