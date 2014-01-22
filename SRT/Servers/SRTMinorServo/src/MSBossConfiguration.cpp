@@ -25,6 +25,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services, Mino
     m_nchannel = NULL;
     m_antennaBoss = Antenna::AntennaBoss::_nil();
     m_bossImpl_ptr = bossImpl_ptr;
+    m_antennaBossError = false;
 }
 
 MSBossConfiguration::~MSBossConfiguration() {}
@@ -306,28 +307,43 @@ ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time
                 try {
                     m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
                     if(CORBA::is_nil(m_antennaBoss)) {
-                        ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): _nil reference of AntennaBoss component"));
+                        if(!m_antennaBossError) {
+                            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): _nil reference of AntennaBoss component"));
+                            m_antennaBossError = true;
+                        }
                         m_isElevationTracking = false;
                     }
                 }
                 catch (maciErrType::CannotGetComponentExImpl& ex) {
                     m_isElevationTracking = false;
-                    ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition: cannot get the AntennaBoss component"));
+                    if(!m_antennaBossError) {
+                        ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition: cannot get the AntennaBoss component"));
+                        m_antennaBossError = true;
+                    }
                 }
             }
         }    
         catch (ComponentErrors::ComponentErrorsEx& ex) {
-            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): cannot get the AntennaBoss component"));
+            if(!m_antennaBossError) {
+                ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): cannot get the AntennaBoss component"));
+                m_antennaBossError = true;
+            }
             m_antennaBoss = Antenna::AntennaBoss::_nil();
             m_isElevationTracking = false;
         }    
         catch(AntennaErrors::AntennaErrorsEx& ex) {
-            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): cannot get the antenna elevation"));
+            if(!m_antennaBossError) {
+                ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): cannot get the antenna elevation"));
+                m_antennaBossError = true;
+            }
             m_antennaBoss = Antenna::AntennaBoss::_nil();
             m_isElevationTracking = false;
         }    
         catch(CORBA::SystemException& ex) {
-            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): the AntennaBoss component is not active"));
+            if(!m_antennaBossError) {
+                ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): the AntennaBoss component is not active"));
+                m_antennaBossError = true;
+            }
             m_antennaBoss = Antenna::AntennaBoss::_nil();
             m_isElevationTracking = false;
             try {
@@ -335,11 +351,17 @@ ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time
                 // The component will be reloaded the next time getPosition() is called
             }
             catch(maciErrType::CannotReleaseComponentExImpl& ex) {
-                ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): cannot release the AntennaBoss component"));
+                if(!m_antennaBossError) {
+                    ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): cannot release the AntennaBoss component"));
+                    m_antennaBossError = true;
+                }
             }
         }    
         catch(...) {
-            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): unknown error getting the elevation"));
+            if(!m_antennaBossError) {
+                ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): unknown error getting the elevation"));
+                m_antennaBossError = true;
+            }
             m_antennaBoss = Antenna::AntennaBoss::_nil();
             m_isElevationTracking = false;
         }    
@@ -364,6 +386,7 @@ ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time
     else {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, comp_name + "has no coefficients", false);
     }
+    m_antennaBossError = false;
 
     return positions;
 }

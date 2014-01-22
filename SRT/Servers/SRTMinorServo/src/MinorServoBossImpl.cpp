@@ -1178,7 +1178,7 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
     string comp_name = get_component_name(string(servo));
     MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
     if(comp_name == "ALL") {
-        vector<string> slaves = get_slaves();
+        vector<string> slaves = m_configuration->getServosToMove();
         for(vector<string>::iterator iter = slaves.begin(); iter != slaves.end(); iter++) {
             if(m_component_refs.count(*iter)) {
                 component_ref = MinorServo::WPServo::_nil();
@@ -1199,8 +1199,8 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
                             }
                         }
                         else if(!component_ref->isParked()) {
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): cannot clear the user offset."));
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): SRP not ready"));
+                            string msg("MinorServoBossImpl::clearOffset(): cannot clear the user offset, " + *iter + " not ready.");
+                            ACS_SHORT_LOG((LM_WARNING, msg.c_str()));
                         }
                     }
                     else
@@ -1219,8 +1219,8 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
                                 }
                             }
                             else if(!component_ref->isParked()) {
-                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): cannot clear the system offset."));
-                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): SRP not ready"));
+                                string msg("MinorServoBossImpl::clearOffset(): cannot clear the system offset, " + *iter + " not ready.");
+                                ACS_SHORT_LOG((LM_WARNING, msg.c_str()));
                             }
                         }
                         else {
@@ -1633,10 +1633,10 @@ void MinorServoBossImpl::setASConfiguration(const char * value) throw (Managemen
 void MinorServoBossImpl::setASConfigurationImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl) {
 
     if(m_configuration->isStarting())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing another setup", false);
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "Cannot set the ASConfiguration because the system is starting", false);
 
     if(m_configuration->isParking())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a park", false);
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "Cannot set the ASConfiguration because the system is parking", false);
 
     IRA::CString flag(value);
     flag.MakeUpper();

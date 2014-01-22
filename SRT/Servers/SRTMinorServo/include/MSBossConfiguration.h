@@ -200,6 +200,7 @@ public:
 
     maci::ContainerServices * m_services;
     Antenna::AntennaBoss_var m_antennaBoss;
+    bool m_antennaBossError;
 
     MinorServoBossImpl * m_bossImpl_ptr;
 };
