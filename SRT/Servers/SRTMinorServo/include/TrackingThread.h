@@ -21,7 +21,8 @@
 
 
 // Sleep Time in 50ms (N * 10 = N us)
-#define TT_SLEEP_TIME 20000 * 10 // 20 ms
+#define TT_SLEEP_TIME 50000 * 10 // 50 ms
+#define ELEVATION_FUTURE_TIME 1700000 // 150 ms
 
 // This class updates the minor servos positions depending of the antenna elevation
 class TrackingThread : public ACS::Thread

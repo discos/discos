@@ -22,41 +22,42 @@ TrackingThread::TrackingThread(
         const ACS::TimeInterval& responseTime,
         const ACS::TimeInterval& sleepTime,
         const bool del
-        ) : ACS::Thread(name, responseTime, sleepTime, del), m_configuration(configuration)
-{
-    AUTO_TRACE("TrackingThread::TrackingThread()");
-}
+            ) : ACS::Thread(name, responseTime, sleepTime, del), m_configuration(configuration)
+    {
+        AUTO_TRACE("TrackingThread::TrackingThread()");
+    }
 
-TrackingThread::~TrackingThread() { AUTO_TRACE("TrackingThread::~TrackingThread()"); }
+    TrackingThread::~TrackingThread() { AUTO_TRACE("TrackingThread::~TrackingThread()"); }
 
-void TrackingThread::onStart() { 
-    AUTO_TRACE("TrackingThread::onStart()"); 
-}
+    void TrackingThread::onStart() { 
+        AUTO_TRACE("TrackingThread::onStart()"); 
+    }
 
-void TrackingThread::onStop() { 
-    AUTO_TRACE("TrackingThread::onStop()"); 
-    m_configuration->m_isElevationTracking = false;
-}
+    void TrackingThread::onStop() { 
+        AUTO_TRACE("TrackingThread::onStop()"); 
+        m_configuration->m_isElevationTracking = false;
+    }
 
-void TrackingThread::runLoop()
-{
-    AUTO_TRACE("TrackingThread::runLoop()");
+    void TrackingThread::runLoop()
+    {
+        AUTO_TRACE("TrackingThread::runLoop()");
 
-    vector<string>::iterator start = (m_configuration->getDynamicComponents()).begin();
-    vector<string>::iterator end = (m_configuration->getDynamicComponents()).end();
-    m_configuration->m_isElevationTracking = true;
+        vector<string>::iterator start = (m_configuration->getDynamicComponents()).begin();
+        vector<string>::iterator end = (m_configuration->getDynamicComponents()).end();
+        m_configuration->m_isElevationTracking = true;
 
-    try {
-        vector<string> dynamics_comp = m_configuration->getDynamicComponents();
-        for(size_t i=0; i<dynamics_comp.size(); i++) {
-            string comp_name(dynamics_comp[i]);
-                // Set the servo position
-                MinorServo::WPServo_var component_ref;
-                if((m_configuration->m_component_refs).count(comp_name)) {
-                    component_ref = (m_configuration->m_component_refs)[comp_name];
-                    if(!CORBA::is_nil(component_ref)) {
-                        // Set a doubleSeq from a string of positions
-                        ACS::doubleSeq positions = m_configuration->getPosition(comp_name, getTimeStamp() + TT_SLEEP_TIME);
+        try {
+            vector<string> dynamics_comp = m_configuration->getDynamicComponents();
+            for(size_t i=0; i<dynamics_comp.size(); i++) {
+                string comp_name(dynamics_comp[i]);
+                    // Set the servo position
+                    MinorServo::WPServo_var component_ref;
+                    if((m_configuration->m_component_refs).count(comp_name)) {
+                        component_ref = (m_configuration->m_component_refs)[comp_name];
+                        if(!CORBA::is_nil(component_ref)) {
+                            // Set a doubleSeq from a string of positions
+                            ACS::Time t = getTimeStamp() + ELEVATION_FUTURE_TIME;
+                            ACS::doubleSeq positions = m_configuration->getPosition(comp_name, t);
                         // Set a minor servo position if the doubleSeq is not empty
                         if(positions.length()) {
                             if(component_ref->isReady()) {
