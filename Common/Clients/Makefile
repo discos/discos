@@ -32,7 +32,8 @@ SUBSYSTEM = Clients
 MODULES =  ObservatoryTextClient \
 		   AntennaBossTextClient \
 		   SystemTerminal \
-		   GenericBackendTextClient
+		   GenericBackendTextClient \
+		   MinorServoBossTextClient
 
 
 MAKE_FLAGS = "-k"

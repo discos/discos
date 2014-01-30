@@ -104,6 +104,12 @@
     <!-- MinorServo Status -->
 	<status description="The summary status of MinorServoBoss"/>
     <actualSetup description="Mnemonic code that defines a setup" />
+    <ready description="True if the system is ready" />
+    <starting description="True if the system is starting" />
+    <asConfiguration description="True if the the AS configuration is active" />
+    <elevationTrack description="True if the M2 position is tracking the elevation" />
+    <scanActive description="True if a scan is active" />
+    <scanning description="True if the system is performing a scan" />
               
     <!--
    MinorServoBoss Verbose Status (ROpattern)

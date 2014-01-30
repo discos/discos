@@ -13,6 +13,16 @@
 #include "SubsystemStatusDevIO.h"
 #include "SubsystemVStatusDevIO.h"
 #include "DevIOActualSetup.h"
+#include "DevIOReady.h"
+#include "DevIOParking.h"
+#include "DevIOScanActive.h"
+#include "DevIOStarting.h"
+#include "DevIOASConfiguration.h"
+#include "DevIOScanning.h"
+#include "DevIOElevationTrack.h"
+
+
+
 #include "utils.h"
 #include "macros.def"
 #include "SetupThread.h"
@@ -37,7 +47,13 @@ MinorServoBossImpl::MinorServoBossImpl(
     CharacteristicComponentImpl(CompName, containerServices),
     m_services(containerServices),
     m_status(this),
+    m_ready(this),
     m_actualSetup(this),
+    m_starting(this),
+    m_asConfiguration(this),
+    m_elevationTrack(this),
+    m_scanActive(this),
+    m_scanning(this),
     // m_verbose_status(this),
     m_nchannel(NULL)
 {   
@@ -166,8 +182,27 @@ void MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImp
                 true
         );  
 
+        m_ready = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
+                  (getContainerServices()->getName()+":ready",getComponent(), \
+                   new DevIOReady(m_configuration),true);
 		m_actualSetup = new baci::ROstring(getContainerServices()->getName() + ":actualSetup",
                 getComponent(), new DevIOActualSetup(m_configuration), true);
+
+        m_starting = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
+                  (getContainerServices()->getName()+":starting",getComponent(), \
+                   new DevIOStarting(m_configuration),true);
+        m_asConfiguration = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
+                  (getContainerServices()->getName()+":asConfiguration",getComponent(), \
+                   new DevIOASConfiguration(m_configuration),true);
+        m_elevationTrack = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
+                  (getContainerServices()->getName()+":elevationTrack",getComponent(), \
+                   new DevIOElevationTrack(m_configuration),true);
+        m_scanActive = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
+                  (getContainerServices()->getName()+":scanActive",getComponent(), \
+                   new DevIOScanActive(m_configuration),true);
+        m_scanning = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
+                  (getContainerServices()->getName()+":scanning",getComponent(), \
+                   new DevIOScanning(m_configuration),true);
 
         // m_verbose_status = new ROpattern(
         //         getContainerServices()->getName() + ":verbose_status", 
@@ -1820,7 +1855,13 @@ ACS::Time get_min_time(double range, double acceleration, double max_speed) {
 }
 
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTSystemStatus, m_status, status);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_ready, ready);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, ACS::ROstring, m_actualSetup, actualSetup);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_starting, starting);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_asConfiguration, asConfiguration);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_elevationTrack, elevationTrack);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_scanActive, scanActive);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_scanning, scanning);
 
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

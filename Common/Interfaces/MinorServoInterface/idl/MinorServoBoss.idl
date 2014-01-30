@@ -36,6 +36,12 @@ module MinorServo {
 	interface MinorServoBoss: ACS::CharacteristicComponent, Management::CommandInterpreter, Management::Subsystem {
 
         readonly attribute ACS::ROstring actualSetup;
+        readonly attribute Management::ROTBoolean ready;
+        readonly attribute Management::ROTBoolean starting;
+        readonly attribute Management::ROTBoolean asConfiguration;
+        readonly attribute Management::ROTBoolean elevationTrack;
+        readonly attribute Management::ROTBoolean scanActive;
+        readonly attribute Management::ROTBoolean scanning;
 		/**
 		 * Turn the elevation tracking on
 		 * @throw ManagementErrors::ConfigurationErrorEx

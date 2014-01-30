@@ -347,6 +347,7 @@ void SetupThread::run()
     m_configuration->m_isStarting = false;
     m_configuration->m_isConfigured = true;
     m_configuration->m_actualSetup = m_configuration->m_commandedSetup;
+    ACS_SHORT_LOG((LM_NOTICE, ("MinorServo setup done. Actual setup: " + m_configuration->m_actualSetup).c_str()));
 
     try {
         if(m_configuration->isElevationTrackingEn()) {

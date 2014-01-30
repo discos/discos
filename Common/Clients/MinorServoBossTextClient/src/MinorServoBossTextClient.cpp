@@ -73,6 +73,9 @@ void quintHandler(int sig)
     terminate=true;
 }
 
+#define TEMPLATE_4_ROTBOOLEAN  Management::ROTBoolean_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,\
+_TW_CBpattern,ACS::CBpattern_var
+
 #define TEMPLATE_4_ROTSYSTEMSTATUS  Management::ROTSystemStatus_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
 
 #include <map>
@@ -137,34 +140,22 @@ protected:
     }
 };
 
-
-// IRA::CString polarizationFormat(const baci::BACIValue& value,const void* arg)
-// {
-//     if (value.longValue()==Receivers::RCV_LCP)  {
-//         return IRA::CString("LCP    ");
-//     }
-//     else  if (value.longValue()==Receivers::RCV_RCP)  {
-//         return IRA::CString("RCP    ");
-//     }
-//     else  if (value.longValue()==Receivers::RCV_VLP)  {
-//         return IRA::CString("VLP    ");
-//     }
-//     else { // Receivers::RCV_HLP)
-//         return IRA::CString("HLP    ");
-//     }
-// }
-
-IRA::CString IFFormat(const baci::BACIValue& value,const void* arg)
+IRA::CString boolFormat(const baci::BACIValue& value,const void* arg)
 {
-    long num=value.longValue();
-    IRA::CString label("");
-    for (long j=0;j<num;j++) {
-        IRA::CString temp;
-        temp.Format("IF%d     ",j);
-        label+=temp;
+    IRA::CString out="";
+    BACIuLongLong app=0;
+    app=value.uLongLongValue();
+    if (Management::MNG_TRUE==(Management::TBoolean)app) {
+        out="1";
     }
-    return label;
+    else {
+        out="0";
+    }
+    return out;
 }
+
+
+
 
 int main(int argc, char *argv[]) {
     bool loggedIn=false;
@@ -179,13 +170,12 @@ int main(int argc, char *argv[]) {
 
     /* Add frame controls declaration */
     TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING> * actualSetup_field;
-    // TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING> *mode_field;
-    // TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *feeds_field;
-    // TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *IFs_field;
-    // CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(long)> *polarization_text;
-    // CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *initialFrequency_text;
-    // CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *bandWidth_text;
-    // CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *LO_text;
+    TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * ready_display;
+    TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * starting_display;
+    TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * asConfiguration_display;
+    TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * elevationTrack_display;
+    TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * scanActive_display;
+    TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * scanning_display;
 
     /* ******************************* */
     TW::CLabel *output_label;
@@ -278,30 +268,22 @@ int main(int argc, char *argv[]) {
     ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"OK, reference is: %d",component.ptr()));
     ACE_OS::sleep(1);
     try {
-        /* Add all component properties here */
-        // _GET_ACS_PROPERTY(ACS::ROlong,IFs);
-        // _GET_ACS_PROPERTY(ACS::ROlong,feeds);
-        // _GET_ACS_PROPERTY(ACS::ROdoubleSeq,initialFrequency);
-        // _GET_ACS_PROPERTY(ACS::ROlongSeq,polarization);
-        // _GET_ACS_PROPERTY(ACS::ROdoubleSeq,bandWidth)
-        // _GET_ACS_PROPERTY(ACS::ROdoubleSeq,LO);;
-        // _GET_ACS_PROPERTY(ACS::ROstring,mode);
-        _GET_ACS_PROPERTY(ACS::ROstring,actualSetup);
-        // _GET_ACS_PROPERTY(Management::ROTSystemStatus,status);
+        _GET_ACS_PROPERTY(ACS::ROstring, actualSetup);
+        _GET_ACS_PROPERTY(Management::ROTBoolean, ready);
+        _GET_ACS_PROPERTY(Management::ROTBoolean, starting);
+        _GET_ACS_PROPERTY(Management::ROTBoolean, asConfiguration);
+        _GET_ACS_PROPERTY(Management::ROTBoolean, elevationTrack);
+        _GET_ACS_PROPERTY(Management::ROTBoolean, scanActive);
+        _GET_ACS_PROPERTY(Management::ROTBoolean, scanning);
         /* ********************************* */
         ACE_OS::sleep(1);
-        /*ACSErr::Completion_var comp;
-        IFnumber=IFs->get_sync(comp.out());*/
-        /** Frame controls creation */
         actualSetup_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING>(actualSetup.in());
-        // mode_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING>(mode.in());
-        // status_box=new TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> (status.in(),Management::MNG_OK);
-        // feeds_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)>(feeds.in());
-        // IFs_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)>(IFs.in());
-        // initialFrequency_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(initialFrequency.in());
-        // bandWidth_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(bandWidth.in());
-        // LO_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(LO.in());
-        // polarization_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(long)>(polarization.in());
+        ready_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(ready.in());
+        starting_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(starting.in());
+        asConfiguration_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(asConfiguration.in());
+        elevationTrack_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(elevationTrack.in());
+        scanActive_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(scanActive.in());
+        scanning_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(scanning.in());
         /* ************************ */
         #if USE_OUTPUT_FIELD >=1 
             output_label=new TW::CLabel("");
@@ -311,39 +293,31 @@ int main(int argc, char *argv[]) {
         userInput=new TW::CInputCommand();
         
         /** setting up the properties of the components of the frame controls */
-        //actualsetup_field
-        _TW_SET_COMPONENT(actualSetup_field,18,0,8,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-        //mode_field
-        // _TW_SET_COMPONENT(mode_field,18,1,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-        //status_box
-        // _TW_SET_COMPONENT(status_box,18,2,10,1,BLACK_GREEN,CStyle::BOLD,output_label);
-        // status_box->setStatusLook(Management::MNG_OK,CStyle(BLACK_GREEN,CStyle::BOLD));
-        // status_box->setStatusLook(Management::MNG_WARNING,CStyle(BLACK_YELLOW,CStyle::BOLD));
-        // status_box->setStatusLook(Management::MNG_FAILURE,CStyle(BLACK_RED,CStyle::BOLD));
-        //feeds_field
-        // _TW_SET_COMPONENT(feeds_field,18,3,2,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-        //IFs_field
-        // _TW_SET_COMPONENT(IFs_field,18,4,2,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-        //_TW_SET_COMPONENT(IFs_field,18,4,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,0,output_label);
-        //IFs_field->setFormatFunction(IFFormat,NULL);
-        //LO_text
-        // _TW_SET_COMPONENT(LO_text,18,5,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-        //LO_text->setWAlign(CFrameComponent::LEFT);
-        //LO_text->setHAlign(CFrameComponent::UP);
-        //LO_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%07.1lf");
-        //initialFrequency_text
-        //_TW_SET_COMPONENT(initialFrequency_text,18,6,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-        //initialFrequency_text->setWAlign(CFrameComponent::LEFT);
-        //initialFrequency_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%07.1lf");
-        //bandWidth_text
-        //_TW_SET_COMPONENT(bandWidth_text,18,7,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-        // bandWidth_text->setWAlign(CFrameComponent::LEFT);
-        // bandWidth_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%07.1lf");
-        //polarization_text
-        //_TW_SET_COMPONENT(polarization_text,18,8,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-        // polarization_text->setWAlign(CFrameComponent::LEFT);
-        //polarization_text->setFormatFunction(polarizationFormat,NULL);
-        //polarization_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%07.1lf");
+        _TW_SET_COMPONENT(actualSetup_field,18,0,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        ready_display->setPosition(CPoint(18,1));
+        ready_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
+        ready_display->setFormatFunction(boolFormat,NULL);
+        ready_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
+        starting_display->setPosition(CPoint(18,2));
+        starting_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
+        starting_display->setFormatFunction(boolFormat,NULL);
+        starting_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
+        asConfiguration_display->setPosition(CPoint(18,3));
+        asConfiguration_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
+        asConfiguration_display->setFormatFunction(boolFormat,NULL);
+        asConfiguration_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
+        elevationTrack_display->setPosition(CPoint(18,4));
+        elevationTrack_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
+        elevationTrack_display->setFormatFunction(boolFormat,NULL);
+        elevationTrack_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
+        scanActive_display->setPosition(CPoint(18,5));
+        scanActive_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
+        scanActive_display->setFormatFunction(boolFormat,NULL);
+        scanActive_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
+        scanning_display->setPosition(CPoint(18,6));
+        scanning_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
+        scanning_display->setFormatFunction(boolFormat,NULL);
+        scanning_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
 
         /* ****************************************************************** */
         _TW_SET_COMPONENT(userInput,0,WINDOW_HEIGHT-6,WINDOW_WIDTH-1,1,USER_INPUT_COLOR_PAIR,USER_INPUT_STYLE,NULL);
@@ -355,21 +329,12 @@ int main(int argc, char *argv[]) {
         ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::MONITORS_INSTALLATION"));
         /** Add all required monitor installation here */
         _INSTALL_MONITOR(actualSetup_field,3000);
-        //_INSTALL_MONITOR(mode_field,3000);
-        //_INSTALL_MONITOR(status_box,3000);
-        //status_box->setValueTrigger(1L,true);
-        //_INSTALL_MONITOR(LO_text,3000);
-        //LO_text->setValueTrigger(0.0,true);
-        //_INSTALL_MONITOR(bandWidth_text,3000);
-        //bandWidth_text->setValueTrigger(0.0,true);
-        //_INSTALL_MONITOR(initialFrequency_text,3000);
-        //initialFrequency_text->setValueTrigger(0.0,true);
-        //_INSTALL_MONITOR(polarization_text,3000);
-        //polarization_text->setValueTrigger(1L,true);
-        //_INSTALL_MONITOR(feeds_field,3000)
-        //_INSTALL_MONITOR(IFs_field,3000)
-        //feeds_field->setValueTrigger(1L,true);.
-        //_INSTALL_MONITOR(polarization_text,3000)
+        _INSTALL_MONITOR(ready_display,3000);
+        _INSTALL_MONITOR(starting_display,3000);
+        _INSTALL_MONITOR(asConfiguration_display,3000);
+        _INSTALL_MONITOR(elevationTrack_display,3000);
+        _INSTALL_MONITOR(scanActive_display,3000);
+        _INSTALL_MONITOR(scanning_display,3000);
         /* ****************************************** */
         ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::DONE"));
         
@@ -381,21 +346,16 @@ int main(int argc, char *argv[]) {
         _TW_ADD_LABEL("Elevation Track :",0,4,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
         _TW_ADD_LABEL("Scan Active     :",0,5,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
         _TW_ADD_LABEL("Scanning        :",0,6,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-        _TW_ADD_LABEL("Active Axes     :",0,7,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-        _TW_ADD_LABEL("Axis Positions  :",0,8,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-        _TW_ADD_LABEL("Axis Offsets    :",0,9,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
         /* ************************* */
         
         /** Add all required association: components/Frame */
         window.addComponent((CFrameComponent*)actualSetup_field);
-        // window.addComponent((CFrameComponent*)mode_field);
-        // window.addComponent((CFrameComponent*)status_box);
-        // window.addComponent((CFrameComponent*)feeds_field);
-        // window.addComponent((CFrameComponent*)IFs_field);
-        // window.addComponent((CFrameComponent*)initialFrequency_text);
-        // window.addComponent((CFrameComponent*)bandWidth_text);
-        // window.addComponent((CFrameComponent*)LO_text);
-        // window.addComponent((CFrameComponent*)polarization_text);
+        window.addComponent((CFrameComponent*)ready_display);
+        window.addComponent((CFrameComponent*)starting_display);
+        window.addComponent((CFrameComponent*)asConfiguration_display);
+        window.addComponent((CFrameComponent*)elevationTrack_display);
+        window.addComponent((CFrameComponent*)scanActive_display);
+        window.addComponent((CFrameComponent*)scanning_display);
         /* ********************************************** */
         window.addComponent((CFrameComponent*)userInput);       
         #if USE_OUTPUT_FIELD >=1 
@@ -460,22 +420,6 @@ int main(int argc, char *argv[]) {
         tv.set(0,MAINTHREADSLEEPTIME*1000);
         client.run(tv);
     }
-
-    /*for(;;)   {
-        if ((fieldCounter=userInput->parseCommand(fields,MAXFIELDNUMBER))>0) {
-            fields[0].MakeUpper();
-            if (fields[0]=="EXIT") break;
-            else {
-                #if USE_OUTPUT_FIELD >=1 
-                    IRA::CString Message("Unknown command");
-                    output_label->setValue(Message);
-                    output_label->Refresh();
-                #endif
-            }
-        }
-        client.run(tv);
-        tv.set(0,MAINTHREADSLEEPTIME*1000);     
-    }*/
         
     window.closeFrame();
     

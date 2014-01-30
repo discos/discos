@@ -58,7 +58,8 @@ ifeq ($(TARGETSYS),MED)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		Metrology TotalPower NoiseGenerator MedicinaMount MedWeatherStation CustomLogger \
-		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient \
+		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
+
 		MedicinaMountTextClient CustomLoggingClient\
 		Plotter KStars Scripts \
 		MedScripts

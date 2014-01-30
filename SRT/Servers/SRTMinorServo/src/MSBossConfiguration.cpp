@@ -302,10 +302,12 @@ ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time
                 elevation = elevation * DR2D; // From radians to decimal (be sure we want to use decimal...)
                 elevation = (elevation > MIN_ELEVATION) ? elevation : 45.0;
                 m_isElevationTracking = true;
+                m_antennaBossError = false;
             }    
             else {
                 try {
                     m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
+                    m_antennaBossError = false;
                     if(CORBA::is_nil(m_antennaBoss)) {
                         if(!m_antennaBossError) {
                             ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): _nil reference of AntennaBoss component"));
@@ -317,7 +319,7 @@ ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time
                 catch (maciErrType::CannotGetComponentExImpl& ex) {
                     m_isElevationTracking = false;
                     if(!m_antennaBossError) {
-                        ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition: cannot get the AntennaBoss component"));
+                        ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::getPosition(): cannot get the AntennaBoss component"));
                         m_antennaBossError = true;
                     }
                 }
@@ -386,7 +388,6 @@ ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time
     else {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, comp_name + "has no coefficients", false);
     }
-    m_antennaBossError = false;
 
     return positions;
 }

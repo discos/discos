@@ -176,10 +176,13 @@ public:
      * @throw CORBA::SystemException
      */
 	 virtual Management::ROTSystemStatus_ptr status() throw (CORBA::SystemException);
-     
+     virtual Management::ROTBoolean_ptr ready() throw (CORBA::SystemException);
      virtual ACS::ROstring_ptr actualSetup() throw (CORBA::SystemException);
-
-    
+     virtual Management::ROTBoolean_ptr starting() throw (CORBA::SystemException);
+     virtual Management::ROTBoolean_ptr asConfiguration() throw (CORBA::SystemException);
+     virtual Management::ROTBoolean_ptr elevationTrack() throw (CORBA::SystemException);
+     virtual Management::ROTBoolean_ptr scanActive() throw (CORBA::SystemException);
+     virtual Management::ROTBoolean_ptr scanning() throw (CORBA::SystemException);
 
     /** 
      * Return a reference to verbose status property (ROpattern) 
@@ -437,8 +440,14 @@ private:
     map<string, MinorServo::WPServo_var> m_component_refs;
  
     /** Status property */
-	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_status;
+    baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_status;
+    baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_ready;
 	baci::SmartPropertyPointer<baci::ROstring> m_actualSetup;
+    baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_starting;
+    baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_asConfiguration;
+    baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_elevationTrack;
+    baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_scanActive;
+    baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_scanning;
     
     /** Store the value of the property */
     Management::TSystemStatus m_status_value;

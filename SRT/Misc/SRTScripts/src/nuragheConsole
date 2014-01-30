@@ -79,6 +79,7 @@ if [ "$CL_STOP" ] ; then
    killall -s SIGUSR1 -u $USER -q _tui_SRTMountTextClient
    killall -s SIGUSR1 -u $USER -q _tui_ObservatoryTextClient
    killall -s SIGUSR1 -u $USER -q _tui_AntennaBossTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_MinorServoBossTextClient
    killall -s SIGUSR1 -u $USER -q _tui_GenericBackendTextClient
    killall -s SIGUSR1 -u $USER -q _tui_ReceiversBossTextClient
    killall -s SIGUSR1 -u $USER -q _tui_SchedulerTextClient
@@ -92,6 +93,8 @@ fi
 schedulerTui
 sleep 0.5s
 mountTui
+sleep 0.5s
+minorservoBossTui
 sleep 0.5s
 observatoryTui
 sleep 0.5s
