@@ -392,8 +392,9 @@ void MinorServoBossImpl::parkImpl() throw (ManagementErrors::ParkingErrorExImpl)
     if(m_configuration->isParking())
         THROW_EX(ManagementErrors, ParkingErrorEx, "The system is executing another park.", false);
 
-    try {
-        turnTrackingOff(); // Raises ConfigurationError
+    try { 
+        if(m_configuration->isElevationTrackingEn())
+            turnTrackingOff(); // Raises ConfigurationError
     }
     catch(...) {
         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::park(): some problems turning the elevation tracking off."));

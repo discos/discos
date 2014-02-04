@@ -105,7 +105,7 @@ void MSBossConfiguration::init(string setupMode, bool keepSetup) throw (Manageme
             if(comp_name == "SRP" || comp_name == "PFP") {
                 m_active_pfocus_servo = comp_name;
                 if(comp_name == "PFP")
-                    setElevationTracking(IRA::CString("OFF")); 
+                    setElevationTracking("OFF"); 
             }
 
             vector<double> position_values;
@@ -389,7 +389,7 @@ ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time
         }
     }
     else {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, comp_name + "has no coefficients", false);
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, comp_name + " has no coefficients", false);
     }
 
     return positions;
