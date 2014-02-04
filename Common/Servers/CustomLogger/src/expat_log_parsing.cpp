@@ -239,14 +239,21 @@ get_log_record(XML_Parser log_parser, const char *xml_text)
      * Modern G++ versions complain about strlen not being parto of std. 
      * Problem reported by Paolo Libardi, check g++ version with him.
      */
-    if(!XML_Parse(log_parser, xml_text, std::strlen(xml_text), false))
+    if(!XML_Parse(log_parser, xml_text, std::strlen(xml_text), false)){
         /**
          * This error function gets called repeatedly flooding the system in some occasion
          * First we're gonna try and guess what causes malformed XML messages
          * then we can decide wether to suppress these errors or not
          */
         //ACE_ERROR ((LM_ERROR, XML_ErrorString(XML_GetErrorCode(log_parser))));
-        ACE_ERROR ((LM_ERROR, std::strcat(XML_ErrorString(XML_GetErrorCode(log_parser)), xml_text)));
+        //ACE_ERROR ((LM_ERROR, std::strcat(XML_ErrorString(XML_GetErrorCode(log_parser)), xml_text)));
+        //std::stringstream msg;
+        //msg << XML_ErrorString(XML_GetErrorCode(log_parser));
+        //msg << " ";
+        //msg << xml_text;
+        //raising this error causes an infinite log message loop
+        //ACE_ERROR ((LM_ERROR, msg.str().c_str() ));
+    }
     return log_record;
 };
 
