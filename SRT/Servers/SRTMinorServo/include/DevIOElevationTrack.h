@@ -24,7 +24,7 @@ public:
 	Management::TBoolean read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
 		AUTO_TRACE("DevIOElevationTrack::read()");
 		timestamp=getTimeStamp();
-		if (m_configuration->isElevationTracking()) {
+		if(m_configuration->isElevationTrackingEn()) {
 			m_val=Management::MNG_TRUE;
 		}
 		else {
