@@ -102,8 +102,11 @@ void MSBossConfiguration::init(string setupMode, bool keepSetup) throw (Manageme
             }
 
             m_servosToMove.push_back(comp_name);
-            if(comp_name == "SRP" || comp_name == "PFP")
+            if(comp_name == "SRP" || comp_name == "PFP") {
                 m_active_pfocus_servo = comp_name;
+                if(comp_name == "PFP")
+                    setElevationTracking(IRA::CString("OFF")); 
+            }
 
             vector<double> position_values;
             vector<string> aitems = split(action, coeffs_separator);

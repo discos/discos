@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
     TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING> * actualSetup_field;
     TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * ready_display;
     TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * starting_display;
-    TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * asConfiguration_display;
+    // TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * asConfiguration_display;
     TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * elevationTrack_display;
     TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * scanActive_display;
     TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * scanning_display;
@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
         _GET_ACS_PROPERTY(ACS::ROstring, actualSetup);
         _GET_ACS_PROPERTY(Management::ROTBoolean, ready);
         _GET_ACS_PROPERTY(Management::ROTBoolean, starting);
-        _GET_ACS_PROPERTY(Management::ROTBoolean, asConfiguration);
+        // _GET_ACS_PROPERTY(Management::ROTBoolean, asConfiguration);
         _GET_ACS_PROPERTY(Management::ROTBoolean, elevationTrack);
         _GET_ACS_PROPERTY(Management::ROTBoolean, scanActive);
         _GET_ACS_PROPERTY(Management::ROTBoolean, scanning);
@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
         actualSetup_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING>(actualSetup.in());
         ready_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(ready.in());
         starting_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(starting.in());
-        asConfiguration_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(asConfiguration.in());
+        // asConfiguration_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(asConfiguration.in());
         elevationTrack_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(elevationTrack.in());
         scanActive_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(scanActive.in());
         scanning_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(scanning.in());
@@ -302,19 +302,19 @@ int main(int argc, char *argv[]) {
         starting_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
         starting_display->setFormatFunction(boolFormat,NULL);
         starting_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
-        asConfiguration_display->setPosition(CPoint(18,3));
-        asConfiguration_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
-        asConfiguration_display->setFormatFunction(boolFormat,NULL);
-        asConfiguration_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
-        elevationTrack_display->setPosition(CPoint(18,4));
+        // asConfiguration_display->setPosition(CPoint(18,3));
+        // asConfiguration_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
+        // asConfiguration_display->setFormatFunction(boolFormat,NULL);
+        // asConfiguration_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
+        elevationTrack_display->setPosition(CPoint(18,3));
         elevationTrack_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
         elevationTrack_display->setFormatFunction(boolFormat,NULL);
         elevationTrack_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
-        scanActive_display->setPosition(CPoint(18,5));
+        scanActive_display->setPosition(CPoint(18,4));
         scanActive_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
         scanActive_display->setFormatFunction(boolFormat,NULL);
         scanActive_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
-        scanning_display->setPosition(CPoint(18,6));
+        scanning_display->setPosition(CPoint(18,5));
         scanning_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
         scanning_display->setFormatFunction(boolFormat,NULL);
         scanning_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
@@ -331,7 +331,7 @@ int main(int argc, char *argv[]) {
         _INSTALL_MONITOR(actualSetup_field,3000);
         _INSTALL_MONITOR(ready_display,3000);
         _INSTALL_MONITOR(starting_display,3000);
-        _INSTALL_MONITOR(asConfiguration_display,3000);
+        // _INSTALL_MONITOR(asConfiguration_display,3000);
         _INSTALL_MONITOR(elevationTrack_display,3000);
         _INSTALL_MONITOR(scanActive_display,3000);
         _INSTALL_MONITOR(scanning_display,3000);
@@ -342,17 +342,17 @@ int main(int argc, char *argv[]) {
         _TW_ADD_LABEL("Current Setup   :",0,0,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
         _TW_ADD_LABEL("Ready           :",0,1,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
         _TW_ADD_LABEL("Starting        :",0,2,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-        _TW_ADD_LABEL("AS Conf         :",0,3,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-        _TW_ADD_LABEL("Elevation Track :",0,4,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-        _TW_ADD_LABEL("Scan Active     :",0,5,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-        _TW_ADD_LABEL("Scanning        :",0,6,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        // _TW_ADD_LABEL("AS Conf         :",0,3,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        _TW_ADD_LABEL("Elevation Track :",0,3,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        _TW_ADD_LABEL("Scan Active     :",0,4,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        _TW_ADD_LABEL("Scanning        :",0,5,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
         /* ************************* */
         
         /** Add all required association: components/Frame */
         window.addComponent((CFrameComponent*)actualSetup_field);
         window.addComponent((CFrameComponent*)ready_display);
         window.addComponent((CFrameComponent*)starting_display);
-        window.addComponent((CFrameComponent*)asConfiguration_display);
+        // window.addComponent((CFrameComponent*)asConfiguration_display);
         window.addComponent((CFrameComponent*)elevationTrack_display);
         window.addComponent((CFrameComponent*)scanActive_display);
         window.addComponent((CFrameComponent*)scanning_display);
