@@ -401,6 +401,7 @@ void MinorServoBossImpl::parkImpl() throw (ManagementErrors::ParkingErrorExImpl)
     }
 
     m_configuration->m_isParking = true;
+    m_configuration->setASConfiguration("OFF");
 
     try {
         if(m_park_thread_ptr != NULL)

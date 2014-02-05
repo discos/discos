@@ -41,7 +41,11 @@ void MSBossConfiguration::init(string setupMode, bool keepSetup) throw (Manageme
         // Starting
         m_isStarting = true;
         m_baseSetup = setupMode;
-        m_commandedSetup = m_isASConfiguration ? setupMode + "_ASACTIVE" : setupMode;
+        // m_commandedSetup = m_isASConfiguration ? setupMode + "_ASACTIVE" : setupMode;
+        if(!endswith(setupMode, "P"))
+            m_commandedSetup = m_isASConfiguration ? setupMode + "_ASACTIVE" : setupMode;
+        else
+            m_commandedSetup = setupMode;
         ACS::doubleSeq dummy;
 
         // Read the component configuration
