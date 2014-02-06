@@ -5,7 +5,11 @@ from IRAPy import logger
 import Management
 import sys
 
-LOG_EVENTS_NUMBER = 500
+try:
+    LOG_EVENTS_NUMBER = int(sys.argv[1])
+except:
+    LOG_EVENTS_NUMBER = 500
+
 client = PySimpleClient()
 log_component = client.getComponent(comp_name = "MANAGEMENT/CustomLogger",
                                     comp_idl_type = "IDL:alma/Management/CustomLogger:1.0",
