@@ -64,6 +64,11 @@ module Management{
                 void setLogfile(in string base_path_log, in string base_path_full_log,
                                     in string filename_log, in string filename_full_log) raises (ManagementErrors::ManagementErrorsEx);
                 /**
+                 * Emits a classical ACS logging message. Used mainly for debugging and testing purposes.
+                 * @param msg: the logging message
+                 */
+                void emitACSLog(in string msg);
+                /**
                  * Emits a custom logging message. Used mainly for debugging and testing purposes.
                  * @param msg: the logging message
                  * @param level: the logging level
@@ -80,6 +85,11 @@ module Management{
                  * Used for debug and testing.
                  */
                 void emitExceptionLog();
+                /**
+                 * Emits a new ACS style Exception with two levels backtrace and logs it.
+                 * Used for debug and testing.
+                 */
+                void emitACSExceptionLog();
                 /**
                  * Close the actual log files and stops logging. Flushes all buffers.
                  */
