@@ -231,6 +231,17 @@ CustomLoggerImpl::cleanUp()
 };
 
 /*
+Used for debugging purpose, emits a classic ACS log event with the given message and DEBUG level
+@param msg: the log message.
+*/
+void
+CustomLoggerImpl::emitACSLog(const char *msg) throw (CORBA::SystemException)
+{
+    ACS_SHORT_LOG((LM_DEBUG, "CustomLogger::emitACSLog - %s", msg));
+    ACS_SHORT_LOG((LM_DEBUG, "CustomLogger::emitACSLog - %s", msg));
+};
+
+/*
 Used for debugging purpose, emits a custom log event with the given message and level
 @param msg: the log message.
 @param level: the CustomLogger::LogLevel level
@@ -251,6 +262,15 @@ void
 CustomLoggerImpl::_emitStaticLog(const char *msg, LogLevel level)
 {
     CUSTOM_STATIC_LOG((Logging::BaseLog::Priority)IRA::CustomLoggerUtils::custom2aceLogLevel(level), "CustomLoggerImpl::emitStaticLog", msg);
+};
+
+void
+CustomLoggerImpl::emitACSExceptionLog()
+{
+    _EXCPT(ManagementErrors::LogFileErrorExImpl, _dummy, "CustomLoggerImpl::emitACSExceptionLog");
+    _ADD_BACKTRACE(ManagementErrors::CustomLoggerIOErrorExImpl, __dummy, _dummy, "CustomLoggerImpl::emitACSExceptionLog1");
+    _ADD_BACKTRACE(ManagementErrors::UnsupportedOperationExImpl, ___dummy, __dummy, "CustomLoggerImpl::emitACSExceptionLog2");
+    ___dummy.log(LM_ERROR);
 };
 
 void

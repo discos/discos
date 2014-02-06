@@ -84,8 +84,10 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
                                     const char *filename_log, const char *filename_full_log) 
                                 throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
+        virtual void emitACSLog(const char *msg) throw (CORBA::SystemException);
         virtual void emitLog(const char *msg, LogLevel level) throw (CORBA::SystemException);
         virtual void emitStaticLog(const char *msg, LogLevel level) throw (CORBA::SystemException);
+        virtual void emitACSExceptionLog();
         virtual void emitExceptionLog();
         virtual void flush() throw (CORBA::SystemException);
         void writeLoggingQueue(bool age_check=true); //invoked by writer thread
