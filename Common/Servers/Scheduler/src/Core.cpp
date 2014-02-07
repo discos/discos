@@ -1285,11 +1285,12 @@ void CCore::setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetCo
 
 void CCore::startSchedule(const char* scheduleFile,const char * startSubScan) throw (
 		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,
-		ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl)
+		ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::LogFileErrorExImpl)
 {
 	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
-		//throw ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl)
+ 		//ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
+ 		//ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl
 		m_schedExecuter->startSchedule(scheduleFile,startSubScan);
 	}
 }

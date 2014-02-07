@@ -91,9 +91,10 @@ public:
 	 * @throw ComponentErrors::AlreadyRunningExImpl
 	 * @throw ManagementErrors::SubscanErrorExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ManagementErrors::LogFileErrorExImpl
 	*/
 	void startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,
-			ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl);
+			ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::LogFileErrorExImpl);
 	
 	 /**
 	  * It clears all the alarms from the scheduler
