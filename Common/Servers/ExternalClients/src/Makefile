@@ -62,7 +62,7 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 ExternalClientsImpl_OBJECTS = ExternalClientsImpl ExternalClientsSocketServer ExternalClientsThread Configuration
-ExternalClientsImpl_LIBS = ExternalClientsStubs ManagmentDefinitionsStubs AntennaDefinitionsStubs AntennaBossStubs SchedulerStubs CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs GenericReceiverStubs ComponentErrors IRALibrary ManagementErrors AntennaErrors ReceiversErrors
+ExternalClientsImpl_LIBS = ExternalClientsStubs ManagmentDefinitionsStubs AntennaDefinitionsStubs AntennaBossStubs SchedulerStubs CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs GenericReceiverStubs MountStubs ComponentErrors IRALibrary ManagementErrors AntennaErrors ReceiversErrors
 
 #
 # Scripts (public and local)

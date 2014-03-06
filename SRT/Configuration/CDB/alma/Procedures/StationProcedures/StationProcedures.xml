@@ -5,6 +5,7 @@
 
 <Procedure name="setupCCB" args="0">
 <body>
+	antennaReset
 	antennaSetup=CCB
     servoSetup=CCB
 	receiversSetup=CCB
@@ -16,6 +17,7 @@
 
 <Procedure name="setupKKG" args="0">
 <body>
+	antennaReset
 	antennaSetup=KKG
     servoSetup=KKG
 	receiversSetup=KKG
@@ -28,6 +30,7 @@
 
 <Procedure name="setupLLP" args="0">
 <body>
+	antennaReset
 	antennaSetup=LP
     servoSetup=LLP
 	receiversSetup=LLP
@@ -40,6 +43,7 @@
 
 <Procedure name="setupPPP" args="0">
 <body>
+	antennaReset
 	antennaSetup=LP
     servoSetup=PPP
 	receiversSetup=PPP
@@ -52,6 +56,7 @@
 
 <Procedure name="setupPLP" args="0">
 <body>
+	antennaReset
 	antennaSetup=LP
     servoSetup=PLP
 	receiversSetup=PLP

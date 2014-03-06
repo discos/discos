@@ -104,6 +104,15 @@ void CExternalClientsSocketServer::execute() throw (ComponentErrors::CouldntGetC
 			Impl.setComponentName("RECEIVERS/Boss");
 			throw Impl;
 		}
+        m_mount = Antenna::Mount::_nil();
+		try {
+			m_mount = m_services->getComponent<Antenna::Mount>("ANTENNA/Mount");
+		}
+		catch (maciErrType::CannotGetComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CExternalClientsSocketServer::execute()");
+			Impl.setComponentName("ANTENNA/Mount");
+			throw Impl;
+		}
 	}
 }
 
@@ -170,7 +179,7 @@ void CExternalClientsSocketServer::cmdToScheduler()
 		//printf("Command received = %s\n", inBuffer);
 		if (strncmp ((const char*)inBuffer, "antennaParameters",18)== 0) {
 			TIMEVALUE now;
-            		const char answerDelimiter='\\';
+         		const char answerDelimiter='\\';
             		const char fieldDelimiter=',';
             		IRA::CString m_answerDelimiter;
             		IRA::CString m_fieldDelimiter;
@@ -197,6 +206,11 @@ void CExternalClientsSocketServer::cmdToScheduler()
 			ACS::doubleSeq_var lo_var;
 			ACS::ROdoubleSeq_var loRef;
 			double lo[2];
+            ACS::ROdouble_var azErr_var, elErr_var;
+            double azErr, elErr;
+            ACS::ROdouble_var pointingAzCorr_var, pointingElCorr_var, refractionCorr_var;
+            double pointingAzCorr, pointingElCorr, refractionCorr;
+            double azOff, elOff, raOff, decOff, lonOff, latOff;
 
 			IRA::CIRATools::getTime(now);
             		ret_val = "antennaParameters";
@@ -208,31 +222,57 @@ void CExternalClientsSocketServer::cmdToScheduler()
             		out.Concat(outTime);
             		m_fieldDelimiter=IRA::CString(fieldDelimiter);
             		out+=m_fieldDelimiter;
-            		antennaBossStatus_var = m_antennaBoss->status();
-            		antennaBossStatus_val = antennaBossStatus_var->get_sync(completion.out());
-			if (antennaBossStatus_val == Management::MNG_OK)
-				status_val = "OK";
-			else if (antennaBossStatus_val == Management::MNG_WARNING)
-				status_val = "WARNING";
-			else if (antennaBossStatus_val == Management::MNG_FAILURE)
-				status_val = "FAILURE";
-			else
-				status_val = "UNKNOWN";
-			out.Concat(status_val);
+                    try {
+                        antennaBossStatus_var = m_antennaBoss->status();
+                        antennaBossStatus_val = antennaBossStatus_var->get_sync(completion.out());
+			            if (antennaBossStatus_val == Management::MNG_OK)
+				            status_val = "OK";
+			            else if (antennaBossStatus_val == Management::MNG_WARNING)
+				            status_val = "WARNING";
+			            else if (antennaBossStatus_val == Management::MNG_FAILURE)
+				            status_val = "FAILURE";
+			            else
+				            status_val = "UNKNOWN";
+                    }
+                    catch (...) {
+				        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+		    		    impl.log(LM_ERROR);
+            			status_val = "NA";
+	    		    }
+			        out.Concat(status_val);
 			out+=m_fieldDelimiter;
-			targetRef = m_antennaBoss->target ();
-			target = targetRef->get_sync (completion.out ());
+            try {
+                targetRef = m_antennaBoss->target ();
+                target = targetRef->get_sync (completion.out ());
+            }
+            catch (...) {
+				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+		    	impl.log(LM_ERROR);
+            	target = "NA";
+	    	}
 			out.Concat(target);
 			out+=m_fieldDelimiter;
-			m_antennaBoss->getObservedHorizontal(now.value().value,1,az,el);
-			m_antennaBoss->getObservedEquatorial(now.value().value,1,ra,dec);
-			m_antennaBoss->getObservedGalactic(now.value().value,1,lon,lat);
-			IRA::CIRATools::radToAngle(az,azStr);
-			IRA::CIRATools::radToAngle(el,elStr);
-			IRA::CIRATools::radToHourAngle(ra,raStr);
-			IRA::CIRATools::radToSexagesimalAngle(dec,decStr);
-			IRA::CIRATools::radToSexagesimalAngle(lon,lonStr);
-			IRA::CIRATools::radToSexagesimalAngle(lat,latStr);
+            try {
+                m_antennaBoss->getObservedHorizontal(now.value().value,1,az,el);
+                m_antennaBoss->getObservedEquatorial(now.value().value,1,ra,dec);
+                m_antennaBoss->getObservedGalactic(now.value().value,1,lon,lat);
+                IRA::CIRATools::radToAngle(az,azStr);
+                IRA::CIRATools::radToAngle(el,elStr);
+                IRA::CIRATools::radToHourAngle(ra,raStr);
+                IRA::CIRATools::radToSexagesimalAngle(dec,decStr);
+                IRA::CIRATools::radToSexagesimalAngle(lon,lonStr);
+                IRA::CIRATools::radToSexagesimalAngle(lat,latStr);
+            }
+            catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                impl.log(LM_ERROR);
+                azStr = "NA";
+                elStr = "NA";
+                raStr = "NA";
+                decStr = "NA";
+                lonStr = "NA";
+                latStr = "NA";
+            }
 			out.Concat(azStr);
 			out+=m_fieldDelimiter;
 			out.Concat(elStr);
@@ -245,23 +285,124 @@ void CExternalClientsSocketServer::cmdToScheduler()
 			out+=m_fieldDelimiter;
 			out.Concat(latStr);
 			out+=m_fieldDelimiter;
-			receiverRef = m_receiversBoss->actualSetup ();
-			receiver = receiverRef->get_sync (completion.out ());
-			out.Concat(receiver);
+            try {
+                azErr_var = m_mount->azimuthError();
+                azErr = azErr_var->get_sync( completion.out());
+            }
+            catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                impl.log(LM_ERROR);
+                azErr = 0.0;
+            }
+            out.Concat(azErr);
 			out+=m_fieldDelimiter;
-			loRef = m_receiversBoss->LO();
-			lo_var = loRef->get_sync(completion.out());
-			lo[0] = lo_var[0];
+            try {
+                elErr_var = m_mount->elevationError();
+                elErr = elErr_var->get_sync( completion.out());
+            }
+            catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                impl.log(LM_ERROR);
+                elErr = 0.0;
+            }
+            out.Concat(elErr);
+			out+=m_fieldDelimiter;
+            try {
+                pointingAzCorr_var = m_antennaBoss->pointingAzimuthCorrection();
+                pointingAzCorr = pointingAzCorr_var->get_sync( completion.out());
+            }
+            catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                impl.log(LM_ERROR);
+                pointingAzCorr = 0.0;
+            }
+            out.Concat(pointingAzCorr);
+			out+=m_fieldDelimiter;
+            try {
+                pointingElCorr_var = m_antennaBoss->pointingElevationCorrection();
+                pointingElCorr = pointingElCorr_var->get_sync( completion.out());
+            }
+            catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                impl.log(LM_ERROR);
+                pointingElCorr = 0.0;
+            }
+            out.Concat(pointingElCorr);
+			out+=m_fieldDelimiter;
+            try {
+                refractionCorr_var = m_antennaBoss->refractionCorrection();
+                refractionCorr = refractionCorr_var->get_sync( completion.out());
+            }
+            catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                impl.log(LM_ERROR);
+                refractionCorr = 0.0;
+            }
+            out.Concat(refractionCorr);
+			out+=m_fieldDelimiter;
+            try {
+                m_antennaBoss->getAllOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
+            }
+            catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                impl.log(LM_ERROR);
+                azOff = 0.0;
+                elOff = 0.0;
+                raOff = 0.0;
+                decOff = 0.0;
+                lonOff = 0.0;
+                latOff = 0.0;
+            }
+			out.Concat(azOff);
+			out+=m_fieldDelimiter;
+			out.Concat(elOff);
+			out+=m_fieldDelimiter;
+			out.Concat(raOff);
+			out+=m_fieldDelimiter;
+			out.Concat(decOff);
+			out+=m_fieldDelimiter;
+			out.Concat(lonOff);
+			out+=m_fieldDelimiter;
+			out.Concat(latOff);
+			out+=m_fieldDelimiter;
+            try {
+                receiverRef = m_receiversBoss->actualSetup ();
+                receiver = receiverRef->get_sync (completion.out ());
+            }
+            catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                impl.log(LM_ERROR);
+                receiver = "NA";
+            }
+            out.Concat(receiver);
+			out+=m_fieldDelimiter;
+            try {
+                loRef = m_receiversBoss->LO();
+                lo_var = loRef->get_sync(completion.out());
+                lo[0] = lo_var[0];
+            }
+            catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                impl.log(LM_ERROR);
+                lo[0] = 0.0;
+            }
 			out.Concat(lo[0]);
 			out+=m_fieldDelimiter;
-			tracking_var = m_Scheduler->tracking();
-			tracking_val = tracking_var->get_sync(completion.out());
-			if (tracking_val == Management::MNG_TRUE) {
-				trackingStr = "TRACKING";
-			}
-			else {
-				trackingStr = "SLEWING";
-			}
+            try {
+                tracking_var = m_Scheduler->tracking();
+                tracking_val = tracking_var->get_sync(completion.out());
+                if (tracking_val == Management::MNG_TRUE) {
+                    trackingStr = "TRACKING";
+                }
+                else {
+                    trackingStr = "SLEWING";
+                }
+            }
+            catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+                impl.log(LM_ERROR);
+                trackingStr = "NA";
+            }
 			out.Concat(trackingStr);
 		}
 		else {

@@ -103,6 +103,11 @@ module Antenna {
 		 * is a minor problem so other commands will be accepted but there is no guarantee they will be executed correctly. 
 		*/
 		readonly attribute Management::ROTSystemStatus mountStatus;
+
+		/**
+		 * It resets all the active errors on the mount
+		 **/
+		void reset() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 			
 		/** 
 		 * This method can be used to command the antenna to a fixed position. This procedure succeeds only if the antenna is not in <i>ACU_BSY</i>

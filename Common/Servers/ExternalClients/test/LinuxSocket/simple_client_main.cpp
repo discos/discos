@@ -6,7 +6,7 @@
 int main ( int argc, int argv[] )
 {
     try {
-        ClientSocket client_socket ( "192.168.200.201", 30000 );
+        ClientSocket client_socket ( "192.168.200.200", 30000 );
         std::string reply;
         std::string command;
 

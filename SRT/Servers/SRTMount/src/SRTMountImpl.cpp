@@ -350,7 +350,13 @@ void SRTMountImpl::unstow(ACS::CBvoid_ptr cb,const ACS::CBDescIn &desc) throw (C
 {
 	ACS::CBDescOut dout;
 	TIMEVALUE now;
-	// copy the tag
+	if (m_commandSocket.checkIsUnstowed()) {
+		Completion completion=ComponentErrors::NoErrorCompletion();
+		dout.id_tag=desc.id_tag;
+		dout.estimated_timeout=0;
+		cb->done(completion,dout);
+		return;		
+	}
 	try {
 		m_commandSocket.unstow(); // send the stow command to the ACU
 	}

@@ -503,6 +503,14 @@ public:
 			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 	
 	/**
+	 * This method try to reset all the pending error conditions of the Antenna subsystem
+	 * @throw ComponentErrors::ComponentErrrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx
+	 * @throw CORBA::SystemException 
+	*/
+	void reset() throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
+
+	/**
 	 * This method implements the command line interpreter. the interpreter allows to ask for services or to issue commands
 	 * to the sub-system by human readable command lines.
 	 * @param cmd string that contains the command line

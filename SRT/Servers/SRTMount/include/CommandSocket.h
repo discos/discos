@@ -244,6 +244,12 @@ public:
 	 * @return the remaining time before the time out
 	 */
 	ACS::TimeInterval checkIsUnstowed(const ACS::Time& startTime,bool& timeout,bool& stopped,bool& unstowed);
+
+	/**
+	 * Checks if the telescope is unstowed
+	 * @return true if the telescope is unstowed
+	 */
+	bool checkIsUnstowed();
 		
 protected:
 	/**

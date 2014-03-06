@@ -99,7 +99,8 @@ void ExternalClientsImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	ACS_LOG(LM_FULL_INFO,"ExternalClientsImpl::execute()",(LM_INFO,"ExternalClients::CONTROL_THREAD_STARTING"));	
 	try {
 		if(m_pExternalClientsThread != NULL) {
-			m_pExternalClientsThread->setSleepTime(m_ControlThreadPeriod);
+//			m_pExternalClientsThread->setSleepTime(m_ControlThreadPeriod);
+			m_pExternalClientsThread->setSleepTime(1);
 			m_pExternalClientsThread->resume();
 	    }
 	}

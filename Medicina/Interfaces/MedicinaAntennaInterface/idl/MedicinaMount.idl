@@ -97,7 +97,7 @@ module Antenna {
 		 * @throw ComponentCommonErrors::ComponentCommonErrorsEx 		 
 		 * @throw CORBA::SystemException 
 		*/ 
-		void resetFailures() raises (ComponentErrors::ComponentErrorsEx);	
+		//void resetFailures() raises (ComponentErrors::ComponentErrorsEx);	
 		
 	};
 	

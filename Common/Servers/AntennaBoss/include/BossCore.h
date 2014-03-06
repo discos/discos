@@ -298,6 +298,11 @@ public:
 	 * @throw ManagementErrors::ConfigurationErrorExImpl
 	*/
 	void setup(const char *config) throw (ManagementErrors::ConfigurationErrorExImpl);
+
+	/**
+	* It tries to reset all the pending failures in the system
+	*/
+	void resetFailures() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntCallOperationExImpl);
 	
 	/**
 	 * This routine is used to put the antenna to survival posistion. It does anything else than calling the stow() method provided

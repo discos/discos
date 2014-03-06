@@ -159,6 +159,7 @@ WORD CACUProtocol::loadProgramTrack(const ACS::Time& startEpoch,const TProgramTr
 	//ACS::Time startUt;
 	long long timeDiff;
 	long castTimeDiff;
+	static ACS::Time lastCommandedTime=0;
 	command=NULL;
 	commNumber=1;
 	if (newTable && (size<PROGRAMTRACK_TABLE_MINIMUM_LENGTH)) { // for a new table at least five points are required!
@@ -176,6 +177,9 @@ WORD CACUProtocol::loadProgramTrack(const ACS::Time& startEpoch,const TProgramTr
 	}
 	else {
 		copyData<TUINT16>(msg,PROGRAMTRACK_LOAD_MODE_APPEND_TABLE,len);  // load mode: new entries will be attached to the existing table
+		if (seq[0].timeMark!=lastCommandedTime+2000000) {
+			printf("Commanded time sequence error, last is %lld, current is %lld \n",lastCommandedTime,seq[0].timeMark);
+		}
 	}
 	copyData<TUINT16>(msg,size,len);  // sequence length
 	//startUt=seq[0].timeMark;
@@ -185,6 +189,12 @@ WORD CACUProtocol::loadProgramTrack(const ACS::Time& startEpoch,const TProgramTr
 	copyData<TREAL64>(msg,elRate,len);  // max speed in elevation...
 	for (WORD i=0;i<size;i++) {
 		timeDiff=(seq[i].timeMark-startEpoch); // 100 ns
+		lastCommandedTime=seq[i].timeMark;
+		if (i>0) {
+			if ((seq[i].timeMark-seq[i-1].timeMark)!=2000000) {
+				printf("Time Gap different: %lld \n",seq[i].timeMark-seq[i-1].timeMark);
+			}
+		}
 		timeDiff=(timeDiff/10000); // milliseconds
 		castTimeDiff=(long)timeDiff;
 		copyData<TINT32>(msg,castTimeDiff,len);

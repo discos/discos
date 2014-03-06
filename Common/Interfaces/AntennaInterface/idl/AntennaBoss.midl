@@ -482,6 +482,14 @@ module Antenna {
 		*/  
 		boolean checkScan(in ACS::Time startUt,in TTrackingParameters parameters,in TTrackingParameters secondary,out ACS::TimeInterval slewingTime,in double lowerElLimit,in double upperElLimit) raises (
 				ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
+		/**
+		 * Reset the failures of the subsystem. 
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx
+		*/
+		void reset() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 		
 		/**
 		 *  This method can be called in order to disable the component. That means that the antenna subsystem cannot be commanded any more via the

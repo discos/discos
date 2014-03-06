@@ -802,6 +802,38 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 	}
 }
 
+void CBossCore::resetFailures() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntCallOperationExImpl)
+{
+	loadMount(m_mount,m_mountError); // throw ComponentErrors::CouldntGetComponentExImpl
+	try {
+		m_mount->reset();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::resetFailures()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		changeBossStatus(Management::MNG_WARNING);
+		m_mountError=true;
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		changeBossStatus(Management::MNG_WARNING);
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::resetFailures()");
+		impl.setComponentName((const char*)m_mount->name());
+		impl.setOperationName("reset()");
+		throw impl;
+	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		changeBossStatus(Management::MNG_WARNING);
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::resetFailures()");
+		impl.setComponentName((const char*)m_mount->name());
+		impl.setOperationName("reset()");
+		throw impl;
+	}
+	m_status=Management::MNG_OK;	
+}
+
+
 void CBossCore::getAllattributes()
 {	
 }

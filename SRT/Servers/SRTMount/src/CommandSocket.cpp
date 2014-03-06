@@ -254,6 +254,7 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 		m_ptSize++;	
 		if (m_ptSize>=CACUProtocol::PROGRAMTRACK_TABLE_MINIMUM_LENGTH) { // the cache is full...time to send data points to the ACU
 			if (m_lastScanEpoch==0) {
+				printf("Nuova tabella\n");
 				m_currentScanStartEpoch=m_ptTable[0].timeMark;
 				len=m_protocol.loadProgramTrack(m_currentScanStartEpoch,m_ptTable,m_ptSize,true,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),message,command,commNum);
 			}
@@ -474,6 +475,12 @@ void CCommandSocket::forceSector(const Antenna::TSections& section)
 {
 	CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
 	data->setCommandedSector(section);
+}
+
+bool CCommandSocket::checkIsUnstowed()
+{
+	CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
+	return data->checkIsUnstowed();
 }
 
 ACS::TimeInterval CCommandSocket::checkIsUnstowed(const ACS::Time& startTime,bool& timeout,bool& stopped,bool& unstowed)
@@ -702,7 +709,7 @@ void CCommandSocket::activate_command() throw (TimeoutExImpl,SocketErrorExImpl,N
 	data.Release(); // this is fundamental in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
 	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
-	IRA::CIRATools::Wait(5,500000); // wait for the real completion of the activate operation
+	IRA::CIRATools::Wait(6,500000); // wait for the real completion of the activate operation
 	ACS_LOG(LM_FULL_INFO,"CStatusSocket::activate_command()",(LM_NOTICE,"AXIS_ARE_NOW_ACTIVE"));
 }
 
@@ -905,6 +912,7 @@ void CCommandSocket::waitAck(const ACS::Time& commandTime) throw (AntennaErrors:
 		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get(); // take the lock
 		if (data->checkLastCommand(answer,error)) { // we have an answer
 			if (error) { // problems.......
+				printf("Command Answer Error %d, %s\n",answer,(const char *)CACUProtocol::commandAnswer2String(answer));
 				_EXCPT(AntennaErrors::NakExImpl,ex,"CCommandSocket::waitAck()");
 				ex.setCode((long)answer);
 				ex.setMessage((const char *)CACUProtocol::commandAnswer2String(answer));
@@ -922,6 +930,7 @@ void CCommandSocket::waitAck(const ACS::Time& commandTime) throw (AntennaErrors:
 		}
 		IRA::CIRATools::getTime(now); // get current time again
 	}
+	printf("Command Answer Error: timeout \n");
 	_EXCPT(ComponentErrors::TimeoutExImpl,ex,"CCommandSocket::waitAck()");
 	throw ex;
 }

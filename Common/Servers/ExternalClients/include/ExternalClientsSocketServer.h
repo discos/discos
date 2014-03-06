@@ -19,6 +19,7 @@
 #include <SchedulerC.h>
 #include <AntennaBossC.h>
 #include <ReceiversBossC.h>
+#include <MountC.h>
 
 #define BUFFERSIZE 1000
 #define GAVINO "MANAGEMENT/Gavino"
@@ -114,6 +115,8 @@ private:
     	Antenna::AntennaBoss_var m_antennaBoss;
     	/** This is the reference to the receiver boss component */
     	Receivers::ReceiversBoss_var m_receiversBoss;
+    	/** This is the reference to the mount component */
+    	Antenna::Mount_var m_mount;
 
     	int receiveBuffer(BYTE *Msg,WORD Len);
     	void printBuffer(BYTE *Buff,WORD Len);

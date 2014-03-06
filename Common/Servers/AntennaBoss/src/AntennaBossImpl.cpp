@@ -183,7 +183,7 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("lonlatOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setGalacticOffsets),2);
 	m_parser->add("skydipOTF",new function3<CBossCore,non_constant,time_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(boss,&CBossCore::skydip),3);
 	m_parser->add("goTo",new function2<CBossCore,non_constant,void_type,I<azimuth_type<rad,false> >,I<elevation_type<rad,false> > >(boss,&CBossCore::goTo),2);
-
+	m_parser->add("antennaReset",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::resetFailures),0);
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
@@ -351,6 +351,23 @@ void AntennaBossImpl::computeFWHM(CORBA::Double taper,CORBA::Double waveLength) 
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 	resource->computeFWHM(taper,waveLength);
 }
+
+void AntennaBossImpl::reset() throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
+{
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	try {
+		resource->resetFailures();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getAntennaErrorsEx();
+	}
+}
+
 
 
 void AntennaBossImpl::setVlsr(CORBA::Double value) throw (CORBA::SystemException)

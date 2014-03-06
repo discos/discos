@@ -150,12 +150,7 @@ module Antenna {
 		 * This reports the number of program track position loaded into the ACU.
 		 */
 		readonly attribute ACS::ROlong programTrackPositions;
-		
-		/**
-		 * It resets all the active errors of both axis
-		 **/
-		void reset() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
-		
+			
 		/**
 		 * This causes the axis of the mount to be activated. The control loop is closed, the brakes are open and the servo amplifier are enabled.
 		 */

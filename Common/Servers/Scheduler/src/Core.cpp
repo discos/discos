@@ -139,7 +139,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("track","antenna",1,&CCore::remoteCall);
 	m_parser->add("azelOffsets","antenna",1,&CCore::remoteCall);
 	m_parser->add("radecOffsets","antenna",1,&CCore::remoteCall);
-	m_parser->add("lonlatOffsets","antenna",1,&CCore::remoteCall);	
+	m_parser->add("lonlatOffsets","antenna",1,&CCore::remoteCall);
+	m_parser->add("antennaReset","antenna",1,&CCore::remoteCall);
 
 	// receivers subsystem
 	m_parser->add("receiversPark","receivers",2,&CCore::remoteCall);
