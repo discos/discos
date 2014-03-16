@@ -233,23 +233,22 @@ LogRecord_sp
 get_log_record(XML_Parser log_parser, const char *xml_text)
 {
     LogRecord_sp log_record(new LogRecord);
-    log_record->xml_text.assign(xml_text);
     XML_SetUserData(log_parser, log_record.get());
-    /**
-     * Modern G++ versions complain about strlen not being parto of std. 
-     */
     if(!XML_Parse(log_parser, xml_text, std::strlen(xml_text), false)){
         /**
-         * This error function gets called repeatedly flooding the system in some occasion
-         * First we're gonna try and guess what causes malformed XML messages
-         * then we can decide wether to suppress these errors or not
+         * We must pay attention here. If we forward malformed XML to the logging
+         * system we get alot of errors, but still we don't want to lose the
+         * malformed message.
          */
         std::stringstream msg;
+        msg << "CustomLoggerMalformedXMLError: ";
         msg << XML_ErrorString(XML_GetErrorCode(log_parser));
-        msg << " ";
-        msg << xml_text;
-        //does raising this error cause an infinite log message loop?
+        log_record->xml_text.assign(msg.str().c_str());
+        //log_record->xml_text.assign("CustomLoggerMalformedXMLError");
         ACE_ERROR ((LM_ERROR, msg.str().c_str() ));
+    }else{
+        // XML is good to go
+        log_record->xml_text.assign(xml_text);
     }
     return log_record;
 };

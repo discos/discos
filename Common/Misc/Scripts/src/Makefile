@@ -31,7 +31,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = data_stats
+PY_SCRIPTS         = data_stats tabbify
 PY_SCRIPTS_L       = 
 
 PY_MODULES         =

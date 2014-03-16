@@ -137,7 +137,11 @@ void SRTKBandMFCore::setMode(const char * mode) throw (
     }
 
     m_setupMode = cmdMode;
-    ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
+    //Here an error is raised when mode variable is inserted into the log string
+    //the string is somehow malformed resulting in impossible XML log message parsing
+    //ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
+    //Maybe the following line fixes the bug by passing the c_string contained in the IRA::CString
+    ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",(const char*)cmdMode));
 }
 
 
