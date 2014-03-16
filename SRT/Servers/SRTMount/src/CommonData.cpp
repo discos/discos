@@ -116,6 +116,9 @@ void CCommonData::getActualMode(Antenna::TCommonModes& azMode,Antenna::TCommonMo
 void CCommonData::addProgramTrackStackPoint(const double& az,const double& el,const ACS::Time& time)
 {
 	TIMEVALUE timeVal(time);
+	if ((time-m_trackStack.getLastTime().value().value)!=2000000) {
+		printf("wront timemark gap: %lld, %lld\n",m_trackStack.getLastTime().value().value,time);
+	}
 	m_trackStack.addPoint(az,el,timeVal);
 }
 

@@ -54,6 +54,17 @@
 	device=0
 	calOff
 </body>
+
+<Procedure name="telescopePark" args="0">
+<body>
+	goTo=180d,89.8d
+	receiversPark
+	waitOnSource
+	antennaPark
+</body>
+</Procedure>
+
+
 </Procedure>
 
 </ProcedureFile>

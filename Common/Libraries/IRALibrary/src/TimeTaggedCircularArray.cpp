@@ -15,6 +15,7 @@ CTimeTaggedCircularArray::CTimeTaggedCircularArray(const unsigned& positions,
 	m_array=new TArrayRecord[m_size];
 	m_lastAzimuth=m_lastElevation=0.0;
 	m_isRad=isRadians;
+	m_lastTime.value().value=0;
 }
 
 CTimeTaggedCircularArray::~CTimeTaggedCircularArray() 

@@ -67,5 +67,18 @@
 </body>
 </Procedure>
 
+<Procedure name="telescopePark" args="0">
+<body>
+	antennaReset
+	goTo=*,89.8d
+	servoPark
+	receiversPark
+	waitOnSource
+	antennaPark
+	asOff
+	asPark
+</body>
+</Procedure>
+
 
 </ProcedureFile>

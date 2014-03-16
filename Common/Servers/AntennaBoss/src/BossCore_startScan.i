@@ -85,14 +85,14 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 	if (!m_correctionEnable_scan) {
 		ACS_LOG(LM_FULL_INFO,"CBossCore::startScan()",(LM_NOTICE,"POINTING_CORRECTIONS_DISABLED_FOR_CURRENT_SCAN"));
 	}
-	try {
+	/*try {
 		ACS_LOG(LM_FULL_INFO,"CBossCore::startScan()",(LM_DEBUG,"LOADING_TRACKING_CURVE"));
 		quickTracking();
 	}
 	catch (ComponentErrors::OperationErrorExImpl& ex) {
 		changeBossStatus(Management::MNG_FAILURE);
 		throw ex;
-	}
+	}*/
 	if (startUt!=0) {
 		IRA::CString out;
 		IRA::CIRATools::timeToStr(startUt,out);
@@ -108,7 +108,8 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 	m_currentAxis=axis;
 	computeFlux();
 	IRA::CIRATools::getTime(now);
-	m_newScanEpoch=now.value().value;	
+	m_newScanEpoch=now.value().value;
+	m_newTracking=true; // let's begin with a new program track table......
 	//Reset observed coordinates arrays
 	m_observedHorizontals.empty();
 	m_observedEquatorials.empty();

@@ -758,12 +758,18 @@ private:
 	 * This member stores the time of the last loaded point in the ACU
 	 */
 	ACS::Time m_lastPointTime;
+
+	/**
+	* if true a new tracking table should be started in tracking table, false new points are appended
+        */
+	bool m_newTracking;
 	
 	/**
 	 * This is the pointer to the working thred, it must be waked up when a tracking is started 
 	*/
 	ACS::Thread *m_workingThread;
-	
+	//WorkingThread *m_workingThread; 	
+
 	/**
 	 * This represnets the status of the whole Antenna subsystem, it also includes and sammerizes the status of the boss component  
 	 */

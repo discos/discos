@@ -19,7 +19,7 @@ using namespace IRA;
 bool done;
 
 void printHelp() {
-	printf("Saves observed Ra/Dec and Az/El in a file\n");
+	printf("Saves observed Ra/Dec,Az/El lon/lat and commanded coordinates in a file\n");
 	printf("\n");
 	printf("CoordinateGrabber [-h] [-s sample] FileName \n");
 	printf("\n");
@@ -46,10 +46,10 @@ int main(int argc, char *argv[])
 	char output[512];
 	TIMEVALUE now,last,lst;
 	maci::ComponentInfo_var info;
-	double az,el;
-	double ra,decl;
-	double lon,lat;
-	double dut1;
+	double az,el,cAz,cEl;
+	double ra,decl,cRa,cDec;
+	double lon,lat,cLon,cLat;
+	double dut1,jepoch;
 	CSite site;
 	Antenna::TSiteInformation_var siteInfo;
 	CDateTime ut;
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
 		ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"FILE_CANNOT_BE_CREATED"));
 		exit(-1);
 	}
-	file<<"UT\tSIDEREAL\tRA2000(deg)\tDEC2000(deg)\tAzimuth(deg)\tElevation(deg)\tGLongitude(deg)\tGLatitude(deg)\n";
+	file<<"UT\tSIDEREAL\tRA2000(deg)\tDEC2000(deg)\tAzimuth(deg)\tElevation(deg)\tGLongitude(deg)\tGLatitude(deg)\tCommandedAz(deg)\tCommandedEl(deg)\n";
 	tv.set(0,sampleInterval);
 	signal(SIGINT,handler);
 	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"RUNNING"));
@@ -184,6 +184,7 @@ int main(int argc, char *argv[])
 			boss->getObservedHorizontal(now.value().value,0,az,el);
 			boss->getObservedEquatorial(now.value().value,0,ra,decl);
 			boss->getObservedGalactic(now.value().value,0,lon,lat);
+			boss->getApparentCoordinates(now.value().value,cAz,cEl,cRa,cDec,jepoch,cLon,cLat);
 		}
 		catch (ACSErr::ACSbaseExImpl& ex) {
 			_ADD_BACKTRACE(ClientErrors::CouldntPerformActionExImpl,impl,ex,"coordinateGrabber::main()"); 
@@ -200,10 +201,10 @@ int main(int argc, char *argv[])
 			impl.log();
 		}
 		ut.LST(site).getDateTime(lst);
-		sprintf(output,"%02d:%02d:%02d.%03d\t%02d:%02d:%02d.%03d\t%10.6lf\t%10.6lf\t%10.6lf\t%10.6lf\t%10.6lf\t%10.6lf\n",
+		sprintf(output,"%02d:%02d:%02d.%03d\t%02d:%02d:%02d.%03d\t%10.6lf\t%10.6lf\t%10.6lf\t%10.6lf\t%10.6lf\t%10.6lf\t%10.6lf\t%10.6lf\n",
 				now.hour(),now.minute(),now.second(),now.microSecond()/1000,
 				lst.hour(),lst.minute(),lst.second(),lst.microSecond()/1000,
-				ra*DR2D,decl*DR2D,az*DR2D,el*DR2D,lon*DR2D,lat*DR2D);
+				ra*DR2D,decl*DR2D,az*DR2D,el*DR2D,lon*DR2D,lat*DR2D,cAz*DR2D,cEl*DR2D);
 		file << output;
 		if (CIRATools::timeDifference(now,last)>1000000) {
 			ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"FLUSHING"));

@@ -63,6 +63,7 @@ void CBossCore::initialize() throw (ComponentErrors::UnexpectedExImpl)
 	m_rawCoordinates.empty();
 	m_generatorType=Antenna::ANT_NONE;
 	m_lastPointTime=0;
+	m_newTracking=true; // let's start with a new table to be loaded into the mount
 	m_integrationStartTime=0;
 	m_enable=true;
 	m_correctionEnable=false;  ///by default the correction are not enabled....when the setup is called they enabled automatically
@@ -1092,14 +1093,14 @@ void CBossCore::loadTrackingPoint(const TIMEVALUE& time,bool restart) throw (Com
 			m_pointingModel->getAzElOffsets(az,el,azOff,elOff);
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {
-			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::setObservedCoordinates()");
+			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::loadTrackingPoint()");
 			impl.setComponentName((const char*)m_pointingModel->name());
 			impl.setOperationName("getAzElOffsets()");
 			changeBossStatus(Management::MNG_WARNING);  // enter warning status and log the message but go ahead
 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 		}
 		catch (CORBA::SystemException& ex) {
-			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::setObservedCoordinates()");
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::loadTrackingPoint()");
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			changeBossStatus(Management::MNG_WARNING);
@@ -1107,7 +1108,7 @@ void CBossCore::loadTrackingPoint(const TIMEVALUE& time,bool restart) throw (Com
 		}
 		catch (...) {
 			changeBossStatus(Management::MNG_WARNING);
-			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CBossCore::setObservedCoordinates()");
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CBossCore::loadTrackingPoint()");
 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 		}
 		az+=azOff;
@@ -1119,14 +1120,14 @@ void CBossCore::loadTrackingPoint(const TIMEVALUE& time,bool restart) throw (Com
 			}
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {
-			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::setObservedCoordinates()");
+			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::loadTrackingPoint()");
 			impl.setComponentName((const char*)m_refraction->name());
 			impl.setOperationName("getCorrection()");
 			changeBossStatus(Management::MNG_WARNING);  // enter warning status and log the message but go ahead
 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 		}
 		catch (CORBA::SystemException& ex) {
-			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::setObservedCoordinates()");
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::loadTrackingPoint()");
 			impl.setName(ex._name());
 			impl.setMinor(ex.minor());
 			changeBossStatus(Management::MNG_WARNING);
@@ -1134,7 +1135,7 @@ void CBossCore::loadTrackingPoint(const TIMEVALUE& time,bool restart) throw (Com
 		}
 		catch (...) {
 			changeBossStatus(Management::MNG_WARNING);
-			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CBossCore::setObservedCoordinates()");
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CBossCore::loadTrackingPoint()");
 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 		}
 		el+=refOff;
