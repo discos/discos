@@ -71,9 +71,9 @@
 <body>
 	antennaReset
 	goTo=*,89.8d
-	servoPark
 	receiversPark
 	waitOnSource
+	servoPark
 	antennaPark
 	asOff
 	asPark
