@@ -70,7 +70,7 @@
 <Procedure name="telescopePark" args="0">
 <body>
 	antennaReset
-	goTo=*,89.8d
+	goTo=180d,89.8d
 	receiversPark
 	waitOnSource
 	servoPark
