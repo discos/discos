@@ -394,7 +394,7 @@ void MinorServoBossImpl::parkImpl() throw (ManagementErrors::ParkingErrorExImpl)
 
     try { 
         if(m_configuration->isElevationTrackingEn())
-            turnTrackingOff(); // Raises ConfigurationError
+            setElevationTrackingImpl(IRA::CString("OFF")); // Raises ConfigurationError
     }
     catch(...) {
         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::park(): some problems turning the elevation tracking off."));
