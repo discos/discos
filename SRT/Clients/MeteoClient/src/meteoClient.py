@@ -80,7 +80,7 @@ class PropertyMonitor(ACS__POA.CBdouble,Qt.QObject):
         #self.count = self.count + 1
         #if self.count <= 5:
 	try:
-        	print "Working: ", str(self.propName), " is ", str(value)
+#        	print "Working: ", str(self.propName), " is ", str(value)
 	#	self.widget.setVal(float(str(value)))
 		value=float(str(value))
 		self.emit(Qt.SIGNAL("PropertyChanghed(float)"),value)
@@ -129,11 +129,11 @@ class SpeedoMeter(Qwt.QwtDial):
         self.setOrigin(135.0)
         self.setScaleArc(0.0, 270.0)
 
-        self.setNeedle(Qwt.QwtDialSimpleNeedle(Qwt.QwtDialSimpleNeedle.Arrow,True,Qt.QColor(Qt.Qt.red),Qt.QColor(Qt.Qt.gray).light(130)))
+        self.setNeedle(Qwt.QwtDialSimpleNeedle(Qwt.QwtDialSimpleNeedle.Arrow,True,Qt.QColor(Qt.Qt.blue),Qt.QColor(Qt.Qt.gray).light(130)))
 
         self.setScaleOptions(Qwt.QwtDial.ScaleTicks | Qwt.QwtDial.ScaleLabel)
         self.setScaleTicks(0, 4, 8)
-        self.setRange(0.0,120.0)
+        self.setRange(0.0,80.0)
         self.setScale(-1, 2, 20)
         self.setFrameShadow(Qwt.QwtDial.Sunken)
 
@@ -155,8 +155,21 @@ class SpeedoMeter(Qwt.QwtDial):
         rect.moveCenter(center)
         painter.setPen(self.palette().color(Qt.QPalette.Text))
         painter.drawText(rect, Qt.Qt.AlignBottom | Qt.Qt.AlignHCenter, self.__label)
+        rect = Qt.QRect(-1000, -1000, 2 * radius-30, 2 * radius-30)
+        rect.moveCenter(center)
+        
+        painter.setPen(Qt.QPen(Qt.Qt.red,8))
+        
+        painter.drawArc(rect,-800,1150)
+        painter.setPen(Qt.QPen(Qt.Qt.green,8))
+        
+        painter.drawArc(rect,400,3220)
+        
+        
+        
     def setVal(self,value=0.):
         self.setValue(value)
+    
     # drawScaleContents
 
 # class SpeedoMeter
@@ -197,13 +210,15 @@ class Background(Qwt.QwtPlotItem):
     def draw(self, painter, xMap, yMap, rect):
         c = Qt.QColor(Qt.Qt.gray)
         r = Qt.QRect(rect)
+        red=Qt.QColor(Qt.Qt.red)
+        yellow=Qt.QColor(Qt.Qt.yellow)
+  
+ 
+        r.setBottom(yMap.transform(61))
+        r.setTop(yMap.transform(61))
+        painter.fillRect(r,red)
 
-        for i in range(60, 0, -10):
-            r.setBottom(yMap.transform(i - 10))
-            r.setTop(yMap.transform(i))
-            painter.fillRect(r, c)
-            c = c.dark(110)
-
+        
     # draw()
 
 # class Background
@@ -214,7 +229,6 @@ class WindWidget(Qt.QWidget):
         Qt.QWidget.__init__(self,parent)        
    
         self.compass=Qwt.QwtCompass(self)
-        #self.lcd=Qt.QLCDNumber()        
         self.lcd =QtGui.QLineEdit('0')
         
         palette = Qt.QPalette( )
@@ -223,15 +237,11 @@ class WindWidget(Qt.QWidget):
         newPalette = self.compass.palette()
         rose=Qwt.QwtSimpleCompassRose(4,1)
         self.compass.setRose(rose)
-        self.compass.setNeedle(Qwt.QwtCompassWindArrow(Qwt.QwtCompassWindArrow.Style2))
+        self.compass.setNeedle(Qwt.QwtCompassWindArrow(Qwt.QwtCompassWindArrow.Style2,Qt.QColor(0xCCCCFF)))
     #    self.lcd.setSegmentStyle(Qt.QLCDNumber.Filled)#        
         lcdpalette = Qt.QPalette( )
-        lcdpalette.setBrush(Qt.QPalette.Background,Qt.Qt.red);          
-#        palette.setColor(Qt.QPalette.Foreground,Qt.Qt.black)
- #       lcdpalette.setColor(Qt.QPalette.Active,Qt.QPalette.Background, Qt.Qt.red);
-      #  self.lcd.setStyleSheet("* { background-color: white; color: red; }")
- #       self.lcd.setPalette( lcdpalette );
-# 
+        lcdpalette.setBrush(Qt.QPalette.Background,Qt.Qt.red)
+        
         layout = Qt.QGridLayout(self)
         layout.addWidget(self.compass,0,0,9,0) 
       #  layout.setColumnStrecth(10) 
@@ -261,31 +271,28 @@ class Temperature(Qt.QWidget):
       def __init__ (self,parent=None):
           Qt.QWidget.__init__(self,parent)
           self.lcd=Qt.QLineEdit()        
-
-  
-          self.thermo = Qwt.QwtThermo(self)
+          self.thermo = Qwt.QwtThermo()
           self.thermo.setRange(-5., 45.0)
           self.thermo.setFillColor(Qt.Qt.red)
           self.thermo.setPipeWidth(12)
           self.thermo.setOrientation(Qt.Qt.Vertical, Qwt.QwtThermo.LeftScale)
           label = Qt.QLabel("Air Temp", self)
   
-          label.setAlignment(Qt.Qt.AlignTop | Qt.Qt.AlignLeft)
-          layout = Qt.QVBoxLayout(self)
-          layout.addWidget(self.thermo)
+          label.setAlignment(Qt.Qt.AlignTop | Qt.Qt.AlignCenter)
+          layout = Qt.QVBoxLayout()
+          layout.setAlignment(Qt.Qt.AlignHCenter)
+          layout.addWidget(self.thermo,Qt.Qt.AlignCenter)
           layout.addWidget(label)
-          layout.addWidget(self.lcd)
-
-
+          layout.addWidget(self.lcd,1,Qt.Qt.AlignRight)
           layout.setMargin(0)
+          self.setLayout(layout)
+          
 
       
       
       def setVal(self,value=0.):
            self.thermo.setValue(value)
            lcdpalette = Qt.QPalette( )
- #  palette->setColor(QPalette::Background,Qt::red);          
-#        palette.setColor(Qt.QPalette.Foreground,Qt.Qt.black)
            lcdpalette.setColor(Qt.QPalette.Background, Qt.Qt.red);
            self.lcd.setPalette( lcdpalette );
            self.lcd.setText(Qt.QString("%1").arg(value,3,'f',1))
@@ -298,7 +305,7 @@ class Values(Qt.QFrame):
 
 
 
-class myPlot(Qwt.QwtPlot):
+class PlotWindWidget(Qwt.QwtPlot):
 
 	def __init__(self,*args):
 		Qwt.QwtPlot.__init__(self,*args)
@@ -312,8 +319,8 @@ class myPlot(Qwt.QwtPlot):
 		self.t=Qt.QTime(h,m,s)
 #		self.timestep=5. # 
 					
-		self.curve=Qwt.QwtPlotCurve()
-		self.curve.setPen(Qt.QPen(Qt.Qt.blue,2))
+#		self.curve=Qwt.QwtPlotCurve()
+#		self.curve.setPen(Qt.QPen(Qt.Qt.blue,2))
 #                 self.curve.setBrush(Qt.Qt.blue)
 
 #		self.curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,Qt.QBrush(Qt.Qt.blue), Qt.QPen(Qt.Qt.yellow),Qt.QSize(4, 4)))
@@ -322,9 +329,15 @@ class myPlot(Qwt.QwtPlot):
                 background = Background()
                 background.attach(self)
                 
+                grid = Qwt.QwtPlotGrid()
+                grid.attach(self)
+                grid.enableX(False)
                 
+                grid.setPen(Qt.QPen(Qt.Qt.black, 0, Qt.Qt.DotLine))
+                
+                self.setCanvasBackground(Qt.Qt.white)
                 self.curveWSpeedPeak=Qwt.QwtPlotCurve()
-                self.curveWSpeedPeak.setPen(Qt.QPen(Qt.Qt.green,2))
+                self.curveWSpeedPeak.setPen(Qt.QPen(Qt.Qt.blue,2))
 #                self.curveWSpeedPeak.setBrush(Qt.Qt.blue)
 #                self.curveWSpeedPeak.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,Qt.QBrush(Qt.Qt.blue), Qt.QPen(Qt.Qt.yellow),Qt.QSize(4, 4)))
          #       self.curveWSpeedPeak.setZ(1)
@@ -344,10 +357,10 @@ class myPlot(Qwt.QwtPlot):
 		self.setAxisScaleDraw( Qwt.QwtPlot.xBottom, TimeScaleDraw(currTime))
                 self.setAxisScale(Qwt.QwtPlot.xBottom, 0, HISTORY*TIMESTEP)
   		self.setAxisLabelRotation(Qwt.QwtPlot.xBottom, -50.0)
-		self.curve.attach(self)
+#		self.curve.attach(self)
                 self.curveWSpeedPeak.attach(self)		
 #    		self.setAxisAutoScale(Qwt.QwtPlot.yLeft)
-                self.setAxisScale(Qwt.QwtPlot.yLeft,0,60,10)
+                self.setAxisScale(Qwt.QwtPlot.yLeft,0,80,10)
 	        self.setAxisTitle(Qwt.QwtPlot.yLeft, "Wind Speed (Km/h)")
 
                 self.setAxisLabelAlignment(Qwt.QwtPlot.xBottom, Qt.Qt.AlignLeft | Qt.Qt.AlignBottom)
@@ -365,7 +378,7 @@ class myPlot(Qwt.QwtPlot):
                      
 
                      self.setAxisScale(Qwt.QwtPlot.xBottom,self.timeData[-1],self.timeData[0])
-                     self.curve.setData(self.timeData,self.y)
+#                     self.curve.setData(self.timeData,self.y)
 
                      self.windSpeedPeak[1:]=self.windSpeedPeak[0:-1] 
                      self.windSpeedPeak[0]=val
@@ -380,13 +393,13 @@ class PlotProperty(Qt.QFrame):
         self.componentname=componentname
         self.propertyname = propertyname
         self.simpleClient = PySimpleClient()
-        self.simpleClient.getLogger().logInfo("We can directly manipulate a device once we get it, which is easy!!")
+        self.simpleClient.getLogger().logInfo("Wheather station client startup")
         
-        self.plotwidget=     myPlot()  
+        self.plotwidget=     PlotWindWidget()  
         self.windspeedw = SpeedoMeter()
         self.winddirw= WindWidget()
         self.temperaturew= Temperature()
-        self.plotwidget.setTitle("WeatherStation")
+        #self.plotwidget.setTitle("WeatherStation")
         self.plotwidget.setMargin(5)
         mainLayout = Qt.QVBoxLayout(self)
         mainLayout.addWidget(self.plotwidget,2)
@@ -404,6 +417,7 @@ class PlotProperty(Qt.QFrame):
         hlayout.addWidget(self.temperaturew)
         hlayout.addStretch(50)
         hlayout.addWidget(self.windspeedw)
+        hlayout.addStretch(50)
         hlayout.addWidget(self.winddirw)
         hlayout.addStretch(50)
         mainLayout.addLayout(hlayout)
@@ -421,19 +435,14 @@ class PlotProperty(Qt.QFrame):
 	self.monitor()
       def monitor(self):
 	component = self.simpleClient.getComponent(self.componentname)
-#	exec("property=component._get_"+self.propertyname+"()") #attenzione exec valuta la stringa di testo
-	#	  ed inizializza un oggetto secondo quanto  contenuto nekka strubga
         windSpeadAvgPr=component._get_windspeed()
         windSpeedPeakProperty =component._get_windspeedpeak()
-#        windDir = component._get_winddir()
 	tempPr  = component._get_temperature()
         windDirPr  = component._get_winddir()
         
         
         
         
-#	windProperty = meteo._get_winddir()
-#	wspeedPr     = meteo._get_windspeed()
 	desc = ACS.CBDescIn(0L, 0L, 0L)
             
      
@@ -441,13 +450,12 @@ class PlotProperty(Qt.QFrame):
         
 	propMonitor = PropertyMonitor(self.plotwidget,self.propertyname)
         cbMonServant = self.simpleClient.activateOffShoot(propMonitor)
-	self.actMon = windSpeadAvgPr.create_monitor(cbMonServant, desc) #attenzione l'oggetto property e' stato creato dalla funzione exec
+	self.actMon = windSpeadAvgPr.create_monitor(cbMonServant, desc)
 	self.actMon.set_timer_trigger(TIMESTEP*10000000)
-        #self.connect(propMonitor, Qt.SIGNAL("PropertyChanghed(float)"),self.plotwidget.setVal)
         
         windSpeedPeakMon=PropertyMonitor(self.plotwidget,"windspeedpeak")
         cbMonServant_wsppeak = self.simpleClient.activateOffShoot(windSpeedPeakMon)
-        self.WSpeedPeakactMon = windSpeedPeakProperty.create_monitor(cbMonServant_wsppeak, desc) #attenzione l'oggetto property e' stato creato dalla funzione exec
+        self.WSpeedPeakactMon = windSpeedPeakProperty.create_monitor(cbMonServant_wsppeak, desc) 
         self.WSpeedPeakactMon.set_timer_trigger(TIMESTEP*10000000)
         self.connect(windSpeedPeakMon, Qt.SIGNAL("PropertyChanghed(float)"),self.plotwidget.setWindSpeedPeak)
         self.connect(windSpeedPeakMon, Qt.SIGNAL("PropertyChanghed(float)"),self.windspeedw.setVal)
