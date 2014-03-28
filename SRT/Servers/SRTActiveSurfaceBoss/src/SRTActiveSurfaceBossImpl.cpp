@@ -210,6 +210,7 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     	if (CIRATools::getDBValue(cs,"profile",(long&)m_profile))
 	{
 		ACS_SHORT_LOG((LM_INFO,"SRTActiveSurfaceBoss: CDB %d profile parameter read", m_profile));
+		boss->m_profile = m_profile;
 	}
 	else
 	{
@@ -243,8 +244,8 @@ void SRTActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		throw _dummy;
 	}
 	//starts the loop status thread....
-	m_watchingThread->resume();
-	m_watchingThread->setSleepTime(LOOPSTATUSTIME);
+	//m_watchingThread->resume();
+	//m_watchingThread->setSleepTime(LOOPSTATUSTIME);
 
 	//starts the loop working thread....
 	m_workingThread->resume();

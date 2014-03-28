@@ -32,6 +32,7 @@ void CSRTActiveSurfaceBossCore::initialize()
 	m_sector6 = false;
 	m_sector7 = false;
 	m_sector8 = false;
+	m_profileSetted = false;
 }
 
 void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -90,8 +91,8 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
 		usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
         	usd[circleIndex][usdCircleIndex] = ActiveSurface::USD::_nil();
         	try {
-            		usd[circleIndex][usdCircleIndex] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-			lanradius[circleIndex][lanIndex] = usd[circleIndex][usdCircleIndex];
+            		//usd[circleIndex][usdCircleIndex] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
+			//lanradius[circleIndex][lanIndex] = usd[circleIndex][usdCircleIndex];
 			usdCounter++;
         	}
         	catch (maciErrType::CannotGetComponentExImpl& ex) {
@@ -124,7 +125,7 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
 */
     	m_antennaBoss = Antenna::AntennaBoss::_nil();
     	try {
-        	//m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
+        	m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
     	}
     	catch (maciErrType::CannotGetComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::execute()");
@@ -1436,6 +1437,7 @@ void CSRTActiveSurfaceBossCore::sector2ActiveSurface() throw (ComponentErrors::C
             		Impl.log(LM_DEBUG);
 	    	}
     	}
+
 	printf("sector2 done\n");
 	m_sector2 = true;
 }
@@ -1470,6 +1472,7 @@ void CSRTActiveSurfaceBossCore::sector3ActiveSurface() throw (ComponentErrors::C
             		Impl.log(LM_DEBUG);
 	    	}
     	}
+
 	printf("sector3 done\n");
 	m_sector3 = true;
 }
@@ -1504,6 +1507,7 @@ void CSRTActiveSurfaceBossCore::sector4ActiveSurface() throw (ComponentErrors::C
             		Impl.log(LM_DEBUG);
 	    	}
     	}
+
 	printf("sector4 done\n");
 	m_sector4 = true;
 }
@@ -1538,6 +1542,7 @@ void CSRTActiveSurfaceBossCore::sector5ActiveSurface() throw (ComponentErrors::C
             		Impl.log(LM_DEBUG);
 	    	}
     	}
+
 	printf("sector5 done\n");
 	m_sector5 = true;
 }
@@ -1572,6 +1577,7 @@ void CSRTActiveSurfaceBossCore::sector6ActiveSurface() throw (ComponentErrors::C
             		Impl.log(LM_DEBUG);
 	    	}
     	}
+
 	printf("sector6 done\n");
 	m_sector6 = true;
 }
@@ -1606,6 +1612,7 @@ void CSRTActiveSurfaceBossCore::sector7ActiveSurface() throw (ComponentErrors::C
             		Impl.log(LM_DEBUG);
 	    	}
     	}
+
 	printf("sector7 done\n");
 	m_sector7 = true;
 }
@@ -1640,6 +1647,7 @@ void CSRTActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::C
             		Impl.log(LM_DEBUG);
 	    	}
     	}
+
 	printf("sector8 done\n");
 	m_sector8 = true;
 }
@@ -1662,6 +1670,7 @@ void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::C
             			impl.setName(ex._name());
 		    		impl.setMinor(ex.minor());
             			m_status=Management::MNG_WARNING;
+				asPark();
             			throw impl;
 	    		}
         		azimuth = 0.0;
@@ -1720,6 +1729,7 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
 		//printf("usdCounter = %d\n", usdCounter);
 	}	
 
+        CIRATools::Wait(1000000);
 	_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
 	m_profile = newProfile;
     	try {
@@ -1729,6 +1739,11 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
             	ex.log(LM_DEBUG);
             	throw ex.getComponentErrorsEx();
         }
+
+	m_profileSetted = true;
+
+        CIRATools::Wait(1000000);
+	asOn();
 }
 
 void CSRTActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentErrorsEx)
@@ -1742,14 +1757,34 @@ void CSRTActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentError
         }
 }
 
-void CSRTActiveSurfaceBossCore::asOn()                                                             
+void CSRTActiveSurfaceBossCore::asOn()
 {
-	if ((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_SHAPED_FIXED)) {
-		enableAutoUpdate();
-		m_tracking = true;
+	if (m_profileSetted == true ) {
+		if ((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_SHAPED_FIXED)) {
+			enableAutoUpdate();
+			m_tracking = true;
+		}
+		else {
+			m_tracking = false;
+			try {
+				onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
+			}
+			catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+				ex.log(LM_DEBUG);
+				throw ex.getComponentErrorsEx();
+			}
+		}
 	}
 	else {
-		m_tracking = false;
+		printf("you must set the profile first\n");
+	}
+}
+
+void CSRTActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
+{
+	if (m_profileSetted == true ) {
+		asOff();
+		setProfile (ActiveSurface::AS_SHAPED_FIXED);
 		try {
 			onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
 		}
@@ -1757,33 +1792,28 @@ void CSRTActiveSurfaceBossCore::asOn()
 			ex.log(LM_DEBUG);
 			throw ex.getComponentErrorsEx();
 		}
+		m_tracking = false;
 	}
-}
-
-void CSRTActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
-{
-	asOff();
-	setProfile (ActiveSurface::AS_SHAPED_FIXED);
-	try {
-            onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
-        }
-        catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-            ex.log(LM_DEBUG);
-            throw ex.getComponentErrorsEx();
-        }
-	m_tracking = false;
+	else {
+		printf("you must set the profile first\n");
+	}
 }
 
 void CSRTActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsEx)
 {
-	try {
-		onewayAction(ActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
-        }
-        catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getComponentErrorsEx();
-        }
-	disableAutoUpdate();
+	if (m_profileSetted == true ) {
+		try {
+			onewayAction(ActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
+		}
+		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+			ex.log(LM_DEBUG);
+			throw ex.getComponentErrorsEx();
+		}
+		disableAutoUpdate();
+	}
+	else {
+		printf("you must set the profile first\n");
+	}
 }
 
 void CSRTActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& actPos, long int& cmdPos, long int& Fmin, long int& Fmax, long int& acc,long int& delay/*CORBA::Long_out actPos, CORBA::Long_out cmdPos, CORBA::Long_out Fmin, CORBA::Long_out Fmax, CORBA::Long_out acc, CORBA::Long_out delay*/) throw (ComponentErrors::PropertyErrorExImpl, ComponentErrors::ComponentNotActiveExImpl)

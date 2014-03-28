@@ -30,7 +30,7 @@
 #define CIRCLES 17
 #define ACTUATORS 96
 #define firstUSD 1
-#define lastUSD 1116
+#define lastUSD 13
 #define LOOPTIME 100000 // 0,10 sec
 #define USDTABLE "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD.txt\0"
 #define USDTABLECORRECTIONS "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/act_rev02.txt\0"
@@ -229,6 +229,8 @@ private:
 	char *s_usdCorrections;
 
 	bool m_sector1, m_sector2, m_sector3, m_sector4, m_sector5, m_sector6, m_sector7, m_sector8;
+
+	bool m_profileSetted;
 };
 
 #endif /*SRTACTIVESURFACEBOSSCORE_H_*/
