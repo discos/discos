@@ -3,7 +3,7 @@
 
 /* ************************************************************************ */
 /* OAC Osservatorio Astronomico di Cagliari                                 */
-/* $Id: ExternalClientsSocketServer.h,v 1.3 2011-03-11 12:28:47 c.migoni Exp $							    */
+/* $Id: ExternalClientsSocketServer.h,v 1.3 2011-03-11 12:28:47 c.migoni Exp $*/
 /*                                                                          */
 /* This code is under GNU General Public Licence (GPL).                     */
 /*                                                                          */

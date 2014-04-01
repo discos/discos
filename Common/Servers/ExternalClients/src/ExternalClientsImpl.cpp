@@ -166,6 +166,6 @@ CORBA::Boolean ExternalClientsImpl::command(const char *cmd,CORBA::String_out an
 
 GET_PROPERTY_REFERENCE(Management::ROTSystemStatus,m_pStatus,status);
 
-/* --------------- [ MACI DLL support functions ] -----------------*/
+/* --------------- [ MACI DLL support functions ] ----------------*/
 #include <maciACSComponentDefines.h>
 MACI_DLL_SUPPORT_FUNCTIONS(ExternalClientsImpl)
