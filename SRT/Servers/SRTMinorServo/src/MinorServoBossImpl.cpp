@@ -341,7 +341,8 @@ void MinorServoBossImpl::setupImpl(const char *config) throw (ManagementErrors::
 {
 
     try {
-        turnTrackingOff(); // It raises ConfigurationErrorEx
+        if(m_configuration->isElevationTrackingEn())
+            setElevationTrackingImpl(IRA::CString("OFF"));
     }
     catch(...) {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "cannot turn the tracking off", false);
