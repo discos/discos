@@ -1,5 +1,6 @@
 #include "ExternalClientsSocketServer.h"
 
+
 #define _GET_STRING_ATTRIBUTE(ATTRIB,DESCR,FIELD) { \
 	CString tmps; \
 	if (!CIRATools::getDBValue(m_services,ATTRIB,tmps)) { \
