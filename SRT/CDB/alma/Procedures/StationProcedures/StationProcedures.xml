@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Procedure name="setupCCG">
+<body>
+	antennaSetup=CCG
+	receiversSetup=CCG
+	initialize=CCG
+	device=0
+	calOff
+</body>	
+</Procedure>
+
+<Procedure name="setupKKG">
+<body>
+	antennaSetup=KKG
+	receiversSetup=KKG
+	receiversMode=SINGLEDISH
+	initialize=KKG
+	device=0
+	calOff
+</body>
+</Procedure>
+
+</ProcedureFile>

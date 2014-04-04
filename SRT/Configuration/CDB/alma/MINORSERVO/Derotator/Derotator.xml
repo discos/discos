@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!-- 10 ms 
+   - History:
+   -   Wed Oct 14 09:07:25 UTC 2009 modified by jDAL
+-->
+<Derotator 
+    xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    PS_IP="192.168.200.50" PS_PORT="4002" PS_TIMEO="5000000" 
+    PS_REFERENCE="688671" 
+    PS_CF="0.001683884" 
+    ICD_IP="192.168.200.50" 
+    ICD_PORT="4001" ICD_TIMEO="5000000" 
+    ICD_REFERENCE="5" 
+    ICD_CF="0.0054622" 
+    ICD_MAX_VALUE="131" 
+    ICD_MIN_VALUE="-131" 
+    ICD_POSITION_EXPIRE_TIME="0.010000"
+>
+	<sensor_position description="Derotator sensor position" units="degree" graph_min="0" graph_max="360" />
+	<icd_position description="Derotator ICD position" units="degree" graph_min="0" graph_max="360" min_value="-131" max_value="131" />
+	<icd_verbose_status description="Derotator ICD Verbose Status" />
+	<icd_summary_status description="Derotator ICD Summary Status" />
+
+</Derotator>

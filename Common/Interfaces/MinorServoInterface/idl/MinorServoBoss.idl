@@ -1,0 +1,334 @@
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *
+ *  Created: Mon Oct 12 09:45:07 CEST 2009
+ *  Last Modified: Tue Sep 17 15:18:13 UTC 2013
+\***************************************************************/
+#ifndef __MINORSERVOBOSS_IDL__
+#define __MINORSERVOBOSS_IDL__
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include <ManagmentDefinitions.idl>
+#include <MinorServoErrors.idl>
+
+#pragma prefix "alma"
+
+/** 
+* This module defines the MinorServo Subsystem interface.
+* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+*/
+module MinorServo {
+
+    struct MinorServoDataBlock {
+        ACS::Time timeMark;
+        boolean tracking;
+        boolean starting;
+        boolean parking;
+        boolean parked;
+        Management::TSystemStatus status;
+    };
+
+    const string MINORSERVO_DATA_CHANNEL = "MinorServoData";
+
+    /// Interface of MinorServoBoss
+	interface MinorServoBoss: ACS::CharacteristicComponent, Management::CommandInterpreter, Management::Subsystem {
+
+        readonly attribute ACS::ROstring actualSetup;
+        readonly attribute Management::ROTBoolean ready;
+        readonly attribute Management::ROTBoolean starting;
+        readonly attribute Management::ROTBoolean asConfiguration;
+        readonly attribute Management::ROTBoolean elevationTrack;
+        readonly attribute Management::ROTBoolean scanActive;
+        readonly attribute Management::ROTBoolean scanning;
+		/**
+		 * Turn the elevation tracking on
+		 * @throw ManagementErrors::ConfigurationErrorEx
+		 */
+		// void turnTrackingOn() raises (ManagementErrors::ConfigurationErrorEx);
+		
+		/**
+		 * Turn the elevation tracking off
+		 * @throw ManagementErrors::ConfigurationErrorEx
+		 */
+		// void turnTrackingOff() raises (ManagementErrors::ConfigurationErrorEx);
+				
+	
+        /**
+         * Set the elevation tracking flag to "ON" or "OFF"
+         * @param value "ON" or "OFF"
+		 * @throw ManagementErrors::ConfigurationErrorEx if the input is different from "ON" or "OFF"
+         */
+		void setElevationTracking(in string value) raises (ManagementErrors::ConfigurationErrorEx);
+	
+	
+        /**
+         * Set the active surface flag to "ON" or "OFF"
+         * If the system is ready, then it change the actual configuration
+         * @param value "ON" or "OFF"
+		 * @throw ManagementErrors::ConfigurationErrorEx if the input is different from "ON" or "OFF"
+         */
+		void setASConfiguration(in string value) raises (ManagementErrors::ConfigurationErrorEx);
+
+
+	
+        /**
+         * Should the minor servo position change with the antenna elevation?
+         * @return true if the elevation tracking is enabled
+         */
+		boolean isElevationTrackingEn();
+	
+	
+        /**
+         * Is the minor servo position following the antenna elevation?
+         * @return true if the minor servo position is following the antenna elevation
+         */
+		boolean isElevationTracking();
+	
+	
+        /**
+         * Is the system on focus?
+         * @return true if the minor servos are following the commanded positions
+         */
+		boolean isTracking();
+
+		
+        /**
+         * Is the system starting?
+         * @return true if the system is starting
+         */
+		boolean isStarting();
+
+        /*
+         * Is the system using the active surface configuration (polynomial to use when te AS is active)?
+         * @return true if we are using the configuration with the AS active.
+         */
+        boolean isASConfiguration();
+
+		
+        /**
+         * Is the system parking?
+         * @return true if the system is parking
+         */
+		boolean isParking();
+	
+		
+        /**
+         * Is the system ready?
+         * System ready means the system is configured (a setup is done). The system could be
+         * ready but out of focus, for instance, when we are performing a scan. If the system
+         * is ready but out of fucus, isTracking() returns false.
+         * @return true if the system is ready (ready to move)
+         */
+		boolean isReady();	
+	
+		
+        /**
+         * Is the system performing a scan?
+         * @return true if the system is performing a scan
+         */
+		boolean isScanning();	
+	
+		
+        /**
+         * Is the system performing a scan or waiting for another scan?
+         * @return true if the system is performing a scan or waiting for another scan
+         */
+		boolean isScanActive();	
+
+
+		/** Return the actual configuration */
+		string getActualSetup();
+
+		
+		/** Return the commanded configuration */
+		string getCommandedSetup();
+
+		
+		/** Return the central position of the axis involved in the scan */
+		double getCentralScanPosition() raises (ManagementErrors::SubscanErrorEx);
+
+        
+        /** 
+         * Start the scan of the Z axis of the MinorServo active in the primary focus.
+         *
+         * @param starting_time the time the scan will start
+         * @param range the total axis movement, in mm
+         * @param total_time the duration of the scan (1 second is 10**7)
+         *
+         * @throw ManagementErrors::ConfigurationErrorEx
+         * @throw ManagementErrors::SubscanErrorEx
+         */
+        void startFocusScan(
+                inout ACS::Time starting_time, 
+                in double range, 
+                in ACS::Time total_time
+        ) raises (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+ 
+
+        /** 
+         * Start the scan of one axis of the MinorServo target.
+         *
+         * @param starting_time the time the scan will start
+         * @param range the total axis movement, in mm
+         * @param total_time the duration of the scan (1 second is 10**7)
+         * @param axis_code the identification code of the axis (SRP_ZT, GFR_ZT, ecc.)
+         *
+         * @throw ManagementErrors::ConfigurationErrorEx
+         * @throw ManagementErrors::SubscanErrorEx
+         */
+        void startScan(
+                inout ACS::Time starting_time, 
+                in double range, 
+                in ACS::Time total_time, 
+                in string axis_code
+        ) raises (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+
+
+        void stopScan() raises (ManagementErrors::SubscanErrorEx);
+  
+        /** 
+         * Check if it is possible to scan the Z axis of the MinorServo active in the primary focus.
+         *
+         * @param starting_time the time the scan will start
+         * @param range the total axis movement in mm (centered in the actual position)
+         * @param total_time the duration of the scan (1 second is 10**7)
+         *
+         * @return true if it is possible
+         * @throw ManagementErrors::ConfigurationErrorEx
+         * @throw ManagementErrors::SubscanErrorEx
+         */
+        boolean checkFocusScan(
+                in ACS::Time starting_time, 
+                in double range, 
+                in ACS::Time total_time
+        ) raises (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+ 
+
+
+        /** 
+         * Check if it is possible to scan an axis of the MinorServo target.
+         *
+         * @param starting_time the time the scan will start
+         * @param range the total axis movement in mm (centered in the actual position)
+         * @param total_time the duration of the scan (1 second is 10**7)
+         * @param axis_code the identification code of the axis (SRP_ZT, GFR_ZT, ecc.)
+         * @return true if it is possible to perform the scan
+         *
+         * @throw ManagementErrors::ConfigurationErrorEx
+         * @throw ManagementErrors::SubscanErrorEx
+         */
+        boolean checkScan(
+                in ACS::Time starting_time, 
+                in double range, 
+                in ACS::Time total_time, 
+                in string axis_code
+        ) raises (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+
+
+ 
+        /** 
+         * Clear the user offset of a servo (or all servos)
+         *
+         * @param servo a string:
+         *     * the servo name 
+         *     * "ALL" to clear the user offset of all servos
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+        void clearUserOffset(
+                in string servo
+        ) raises (MinorServoErrors::OperationNotPermittedEx);
+
+ 
+        /** 
+         * Set the user offset of the servo
+         *
+         * @param axis_code the axis code (SRP_TZ, GFR_RZ, ecc.)
+         * @param double offset 
+         * @throw ManagementError::ConfigurationErrorEx
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+        void setUserOffset(
+                in string axis_code,
+                in double offset
+        ) raises (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+
+
+        /** Return the user offset of the system, by following the order axes of getAxesInfo()
+         *
+         * @return offset the user offset of the system
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         * @throw ManagementError::ConfigurationErrorEx
+         */
+         ACS::doubleSeq getUserOffset() raises (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+
+ 
+        /** 
+         * Clear the system offset of a servo (or all servos)
+         *
+         * @param servo a string:
+         *     * the servo name 
+         *     * "ALL" to clear the system offset of all servos
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+        void clearSystemOffset(
+                in string servo
+        ) raises (MinorServoErrors::OperationNotPermittedEx);
+
+ 
+        /** 
+         * Set the system offset of the servo
+         *
+         * @param axis_code the axis code (SRP_TZ, GFR_RZ, ecc.)
+         * @param double offset 
+         * @throw ManagementError::ConfigurationErrorEx
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+        void setSystemOffset(
+                in string axis_code,
+                in double offset
+        ) raises (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+
+
+
+        /** Return the system offset, by following the order axes of getAxesInfo()
+         *
+         * @return offset the system offset
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         * @throw ManagementError::ConfigurationErrorEx
+         */
+         ACS::doubleSeq getSystemOffset() raises (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+
+ 
+        /** Return the active axes names and related units
+         *
+         * @param axes a sequence of active axes. For instance, for the KKG configuration: 
+         * ("SRP_XT", "SRP_YT", "SRP_ZT", "SRP_XR", "SRP_YR", "SRP_ZR", "GFR_ZR")
+         * For the CCB configuration: 
+         * ("SRP_XT", "SRP_YT", "SRP_ZT", "SRP_XR", "SRP_YR", "SRP_ZR", "M3R_ZR")
+         * @param units a sequence of strings, each one is the unit of the corresponding axis.
+         * For instance: ("mm", "mm", "mm", "degree", "degree", "degree", "mm")
+         * @throw MinorServoErrors::ConfigurationErrorEx
+         */
+        void getAxesInfo(out ACS::stringSeq axes, out ACS::stringSeq units) raises (ManagementErrors::ConfigurationErrorEx);
+
+
+		/** Return the code of the axis involved in the scan */
+	    string getScanAxis();
+
+ 
+        /** Return the positions of the active axes
+         *  
+         * @param time the time related to the position we want to retrieve
+         * @return a sequence of positions, in the same order of the axes parameter of getAxesInfo()
+         * @throw MinorServoErrors::ConfigurationErrorEx if the system is not configured
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        ACS::doubleSeq getAxesPosition(in ACS::Time time) raises (ManagementErrors::ConfigurationErrorEx, ComponentErrors::UnexpectedEx);
+            
+    };
+
+};
+
+#endif

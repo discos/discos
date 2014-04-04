@@ -1,0 +1,17 @@
+1) With 50ms as gap between status frames, the commands tend to timeout even if the command is executed effectively. I suspect that the frame with the command answer is lost or
+   splitted into two consecutive answers.Some investigation are due, for example printing the frame counter to see if one or more is missing. 
+8) The LOG messages are printed (on standard output) with the strange dictionary couple Reason="program track ...." it seems that a previous key=value has
+   not been cleared. The same in jlog? 
+   2012-04-20T08:57:05.929 [MountContainer-GL - CCommandSocket::changeMode_command()] NEW_ACU_MODE PROGRAM_TRACK Code="5" Reason="program track mode not configured" Message="INVALID ARGUMENTS"
+
+
+10) contollare iterazione tra Boss e mount in caso di errore di trasmissione di un pacchetto dati. Il boss fallisce di aggiornare il tempo dell'ultima coordinata comandata
+    ed il ciclo successivo sbaglia a calcolare il tempo.  Nel caso il mount fallisca di mandare il pacchetto occorre "resettare" il tracking.
+
+11) Il campo azimuth sector, letto dal bit ritornato dall'ACU (Pointing status) non funziona, fatto workaround.
+ 
+
+
+
+
+

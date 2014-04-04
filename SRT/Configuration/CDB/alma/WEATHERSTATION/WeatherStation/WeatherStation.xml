@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+    - History:
+       -   Tue Jul 10 13:47:38 UTC 2012 modified by jDAL
+-->
+<WeatherStation xmlns="urn:schemas-cosylab-com:WeatherStation:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IPAddress="192.168.202.66" port="5000">
+	<temperature description="current temperature" units="deg Celsius" />
+	<winddir description="instantaneous wind direction" units="deg" />
+	<windspeed description="average wind speed" units="m/s" max_value="5" />
+	<windspeedpeak description="spike wind direction" units="m/s" max_value="10" />
+	<humidity description="Humidity" />
+	<pressure description="pressure" />
+</WeatherStation>

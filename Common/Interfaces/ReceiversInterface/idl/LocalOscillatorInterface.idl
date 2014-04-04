@@ -1,0 +1,78 @@
+#ifndef __LOCALOSCILLATOR_IDL__
+#define __LOCALOSCILLATOR_IDL__
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include <ReceiversErrors.idl>
+
+#pragma prefix "alma"
+/** 
+* Local oscillator component.
+* @author <a href=mailto:spoppi@oa-cagliari.inaf.it>Sergio Poppi</a>
+*/
+
+module Receivers { 
+	/**
+	<h2>Local Oscillator Interface </h2>
+	@
+	*/
+
+
+	interface LocalOscillator: ACS::CharacteristicComponent {
+	/**
+
+	 LO frequency signal
+
+
+	*/
+        readonly attribute ACS::ROdouble frequency;
+	/**LO signal power	*/
+        readonly attribute ACS::ROdouble amplitude;
+	/** check if actual values are equal to set ones */
+
+        readonly attribute ACS::ROlong isLocked;
+	/**
+	 set the LO parameters 
+	 
+	 @param rf_power signal power (Units: dBM)
+	 @param rf_freq	 signal frequency (Units: MHz )
+    * @throw ReceiversErrors::ReceiversErrorsEx
+    * @throw CORBA::SystemExcpetion 
+	*/
+
+	
+	void set(in double rf_power, in double rf_freq) raises (ReceiversErrors::ReceiversErrorsEx);
+	/**
+	 get the LO parameters 
+	 
+	 
+	 @param rf_power signal power (Units: dBM)
+	 @param rf_freq	 signal frequency (Units: MHz )
+    * @throw ReceiversErrors::ReceiversErrorsEx
+    * @throw CORBA::SystemExcpetion 
+	*/
+
+	void get(out double rf_power, out double rf_freq) raises (ReceiversErrors::ReceiversErrorsEx); // to be corrected with ;
+	/**
+	Turn the signal on
+    * @throw ReceiversErrors::ReceiversErrorsEx
+    * @throw CORBA::SystemExcpetion 
+	
+	*/
+
+	void rfon()raises (ReceiversErrors::ReceiversErrorsEx);
+	/**
+	Turn the signal off
+    * @throw ReceiversErrors::ReceiversErrorsEx
+    * @throw CORBA::SystemExcpetion 
+	
+	*/
+	void rfoff()raises (ReceiversErrors::ReceiversErrorsEx);
+	};
+
+
+
+};
+
+
+#endif

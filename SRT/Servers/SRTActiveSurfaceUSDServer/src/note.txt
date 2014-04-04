@@ -1,0 +1,102 @@
+Note su usdImpl
+
+Inizializzazione
+
+Alla partenza tutte le proprieta' vengono create e quelle che sono WO vanno a settare l'hardware. Sono:
+	delay
+	Fmin
+	Fmax
+	acc
+	uBits
+	cmdPos
+	
+Nel caso che un USD sia gia' funzionante e precedentemente calibrato, si vuole che il programma parta senza perturbare 
+lo stato attuale dell'USD. Nel caso delle prime 5 proprieta' WO, un loro risettaggio puo' essere begnigno, mentre non e' 
+sicuramente positivo il caso di cmdPos e uBits. cmdPos farebbe muovere "involontariamente" l'attuatore, mentre uBits 
+andrebbe a riprogrammare gli user_bits alterando l'eventuale stato del chopper (on/off).
+Non potendo comunque selezionare l'inizializzazione o meno sulla base della singola proprieta, perche' uso un DevIO 
+comune per tutti, disabilito l'inizializzazione nel DevIO. Poi, nell'inizialize dell'implementazione vado a fare un controllo
+sull'attributo calibrate (come e' stato lasciato l'USD all'ultima chiusura software) e lo ubit 5(DIO1) che mi fa capire
+che l'USD non e' stato spento. Se entrambi sono veri, posso considerare l'USD calibrato e funzionante, mentre se uno di loro non 
+lo e' devo reinizializzare l'USD con la funzione reset() e ricalibrare la scala.
+
+
+Scelta dei default
+
+risoluzione
+L'USD 60362 pilota il motore a 1/2 step, quindi la risoluzione impostata deve essere manuale a 1/2step,
+il valore e quindi 0x01.
+
+accelerazione
+Impostato di default il valore usato anche a Noto (50) che significa un rilassamento di 50 volte della rampa min
+
+Fmax- velocita' massima
+Come per Noto usiamo 500step/s(150rpm). Il valore viene opportunamente scalato per la risoluzione
+di posizionamento (1/2) dalla DevIO al monento della lettura e scrittura. 
+
+Fmin - velocita minima
+Come Noto impostiamo 100step/s(30 rpm).Il valore viene opportunamente scalato per la risoluzione
+di posizionamento (1/2) dalla DevIO al monento della lettura e scrittura.  
+
+delay
+Ritardo alla risposta delgi USD. dall'esperianza di Noto il min e 2mS, quindi di defualt e' impostato a 5(2.5mS)
+
+userBits
+Per come sono configurati gli IO si usa 0x22(34), con il bit "drive power" attivo
+
+Corse e scale
+1 giro motore (200 step,50Hstep) corrisponde ad uno spostamento lineare di 142.857143um
+1 hstep=2.857143um
+La corsa utile dell'attuatore e' 30mm max, cioe' 10500hstep,42000step,210giri del motore
+La ris. del motore e' a 1/2 step. (0.357143um).
+la visualizzazione e' in step cosi come il comando, anche se il driver usa sempre ustep(128step) e le quote inviate
+e ricevute dai comandi 0x12,0x23,0x30,0x31 sono sempre moltiplicate o divise x128
+La risoluzione di posizionamento a 4hstep(~12um) che corrispondono a 16 step.
+La ris. di visualizzazione e' 1um (1.4step ) con unita' di misura in mm. 
+Range da +15.00000mm(21000step) a -15.00000mm(-21000step) con zero centrale
+
+verifica calibrazione
+Partendo da un qualsiasi punto porta l'attuatore alla pos. max superiore e
+controlla che la camma sia accesa. Avanza di mezza camma e controlla che il sensore si spenga.
+Poi lo parta al pnuto utile inferiore e di nuovo controlla che la camma sia accesa.
+Infine riporta l'attuatore a zero e ricontrolla che il sensore sia acceso.
+A tutti gli stop legge quota e stato  e controlla che vi sia corrispondeza fra quota 
+e stato della camma. Non e' possibile fare questo controllo "al volo" perche' non si riescono
+a leggere simultaneamente marca e quota.
+
+camma
+La lunghezza e posizione della camma IN STEP, sono salvate nel file .xml come attributi (non proprieta') perche sono 
+variabili sostanzialmente statiche. Vengono aggiornate solo al rifacimento della calibrazione. I nuovi
+valori trovati vengono immediatamente salvati.
+
+STATUS
+Lo stato dell'USD e' ritornato in tre byte. Ordine con cui li riceve lUSD e' inverso a quello del manuale
+e cioe' il byte LSB e quello della risoluzione, poi quello della camma ed il terzo (MSB) e' quello inutilizzato 
+(ritorna sempre 0C).
+Le variabili contenute all'interno non sono gestite come property e vanno estratte per mascheramento.
+Anche al client arrivera' lo status complessivo e non le singole grandezze contenute. Inoltre i due byte gia' 
+in uso verranno integrati con ulteriori due flag che sono:
+bit 11	POS AUTO(1), cioe' sotto controllo loop posizione
+bit 15  CAL(1), cioe' che l'USD e' calibrato
+
+Pertanto allo stato ricevuto dall'USD vengono aggiunti nella DevIO i due su citati flag.
+Il client, potra' sfruttare la definizione xml nello schema files per mappare direttamente gli stati
+riportati dai singoli bit.
+
+
+
+
+NOTE AGGIORNATE DA CARLO IL 24 GIUGNO 2009
+
+Fmax- velocita' massima
+Come per Noto usiamo 500step/s(150rpm). Il valore viene opportunamente scalato per la risoluzione
+di posizionamento (1/2) dalla DevIO al monento della lettura e scrittura.
+1) (PERCHE' SCALATE ?)
+
+Fmin - velocita minima
+Come Noto impostiamo 100step/s(30 rpm).Il valore viene opportunamente scalato per la risoluzione
+di posizionamento (1/2) dalla DevIO al monento della lettura e scrittura.
+1) (PERCHE' SCALATE ?)
+2) A Noto si usa 200 e non 100. (Se 200 bisogna cambiare i file .xml)
+
+

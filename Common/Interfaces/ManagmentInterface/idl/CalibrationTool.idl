@@ -1,0 +1,62 @@
+/* **************************************************************** */
+/* IRA Istituto di Radioastronomia                                  */
+/* $Id: CalibrationTool.idl,v 1.5 2011-04-15 09:09:59 a.orlati Exp $                                                           */
+/*                                                                  */
+/* This code is under GNU General Public Licence (GPL)              */
+/*                                                                  */
+/* Who                                   when            What        */
+/* Andrea Orlati(a.orlati@ira.inaf.it)	 03/11/2010      created   */
+
+#ifndef CALIBRATIONTOOL_IDL_
+#define CALIBRATIONTOOL_IDL_
+
+#include <baci.idl>
+#include <DataReceiver.idl>
+
+#pragma prefix "alma"
+
+module Management { 
+	
+	/**
+	 * This is the interface of the calibration tool, it will fits a gaussian + a slope + a offset against collected data in order to find poinintg offsets and 
+	 * antenna gain.
+     * Based on the policy of then FIVPT program of the Field System
+     * the Calibration Tool must do LAT scans before LON scans !!!!!
+	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ 	 * Istituto di Radioastronomia, Italia
+	 */ 
+	interface CalibrationTool: DataReceiver {
+
+        /**
+		 * Current status of the component
+		 */
+		readonly attribute Management::ROTSystemStatus status;
+		/**
+		 * Half power beam width (radians), resulting from the fitting routine
+		 */
+		readonly attribute ACS::ROdouble hpbw;
+		/**
+		 * gauss curve amplitude resulting from the fitting routine, its unit depend on the unit transferred by the backend, generally kelvin or generic counts
+		 */
+		readonly attribute ACS::ROdouble amplitude;
+		/**
+		 * Offset of the peak with respect to the theoretic central point resulting from the fitting routine. It could be in radians or millimeter depending on the currently used scan axis
+		 */
+		readonly attribute ACS::ROdouble peakOffset;
+		/**
+		 * this parameter takes into account the baseline slope of the data
+		 */
+		readonly attribute ACS::ROdouble slope;
+		/**
+		 * this parameter takes into account the baseline slope of the data
+		 */		
+		readonly attribute ACS::ROdouble offset;
+		/*
+		 * flux of the source currently scanned (Jy)
+		 */
+		readonly attribute ACS::ROdouble sourceFlux;
+	};
+};
+
+
+#endif /*CALIBRATIONTOOL_IDL_*/

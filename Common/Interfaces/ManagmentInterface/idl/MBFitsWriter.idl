@@ -1,0 +1,62 @@
+#ifndef __IDL__MBFitsWriter__
+#define __IDL__MBFitsWriter__
+
+#include <DataReceiver.idl>
+
+#pragma prefix "alma"
+
+module Management {
+	/**
+	 * This is the interface of components that saves the observation data in ad-hoc MBFITS format.
+	 * the inherited attributes and methods are:
+
+	 * @copybrief DataReceiver::fileName
+	 * It stores the name of the file that is currently written according the MBFITS format
+
+	 * @copybrief DataReceiver::projectName
+	 * This string stores the name of the project currently running, it is saved in one key in the main header of the file and in the SCAN table header
+
+	 * @copybrief DataReceiver::observer
+	 * This string stores the name of the observer, it is save in the SCAN table header of the MBFits file
+
+	 * @copybrief DataReceiver::scanIdentifier
+	 * Identifier of the scan currently running.
+
+	 * @copybrief DataReceiver::deviceID
+	 * This is field is not used in the current interface.
+
+	 * @copybrief DataReiver::scanAxis
+
+	 * @copybrief DataReceiver::setFileName()
+	 * Sets a new file name.
+
+	 * @copybrief DataReceiver::setProjectName()
+	 * It sets the name of the project that is currently runnig.
+
+	 * @copybrief DataReceiver::setObserverName()
+	 * It sets the name of the observer.
+
+	 * @copybrief DataReceiver::setScanIdentifier()
+	 * This method will set the scan identifier number.
+
+	 * @copybrief DataReceiver::setDevice()
+	 * This method will set the device identifier, this is the identification number of the backend section that has been elected as primary section.
+
+	 * @copybrief DataReceiver:.setScanAxis()
+	 * This method will set the scan axis value
+
+	 * These attributes are not used by this component
+  	 * @copybrief DataReceiver::dataY
+  	 * @copybrief DataReceiver::dataX
+  	 * @copybrief DataReceiver::arrayDataY
+  	 * @copybrief DataReceiver::arrayDataX
+	 */
+	interface MBFitsWriter : DataReceiver {
+		/**
+		 * Current status of the component
+		 */
+		readonly attribute Management::ROTSystemStatus status;
+	};
+};
+
+#endif	// __IDL__MBFitsWriter__
