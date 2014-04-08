@@ -314,6 +314,8 @@ public:
     virtual ACS::doubleSeq * getZero () 
     	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 
+	virtual void setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
 	/** 
 	 * Returns a reference to the time  property Implementation of IDL interface.
 	 * @return pointer to read-only unsigned long long  property time

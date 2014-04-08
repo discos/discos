@@ -940,6 +940,93 @@ void XBackendsImpl::setMode8bit(CORBA::Boolean mode)
 	ACS_DEBUG("XBackendsImpl::setMode8bit()"," ");	 
  }
 
+void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+{
+	AUTO_TRACE("XBackendsImpl::setXarcosConf()");
+	/*CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+	try {
+		line->InitConf(&m_configuration);  	// this could throw an ACS exception.....
+	}	
+	catch (ComponentErrors::ValidationErrorExImpl& ex) {
+		_THROW_EXCPT(ComponentErrors::ValidationErrorExImpl,"XBackendsImpl::execute()");
+	}
+	catch (...) {
+		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"XBackendsImpl::execute()");
+	}	
+	IRA::CIRATools::Wait(0,100000);
+	*/
+	switch (conf) {
+		case (Backends::XArcos_K7):
+			setSectionsNumber(7);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(0,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(1,-1,-1,1,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(2,-1,-1,2,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(3,-1,-1,3,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(4,-1,-1,4,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(5,-1,-1,5,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(6,-1,-1,6,-1,-1,-1);
+			break;
+		case (Backends::XArcos_K3):
+			setSectionsNumber(6);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(0,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(1,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(2,-1,-1,1,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(3,-1,-1,1,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(4,-1,-1,4,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(5,-1,-1,4,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			break;
+		case (Backends::XArcos_K2R):
+			setSectionsNumber(4);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(0,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(1,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(2,-1,-1,1,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(3,-1,-1,1,-1,-1,-1);
+			break;
+		case (Backends::XArcos_K2L):
+			setSectionsNumber(4);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(0,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(1,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(2,-1,-1,4,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(3,-1,-1,4,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			break;
+		case (Backends::XArcos_C):
+			setSectionsNumber(4);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(0,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(1,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(2,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(3,-1,-1,0,-1,-1,-1);
+			IRA::CIRATools::Wait(0,100000);
+			break;
+	}
+}
+
 _PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROuLongLong,m_ptime,time);
 _PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROstring,m_pbackendName,backendName);
 _PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROdoubleSeq,m_pbandWidth,bandWidth);
