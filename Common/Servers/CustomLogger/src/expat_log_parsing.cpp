@@ -243,9 +243,11 @@ get_log_record(XML_Parser log_parser, const char *xml_text)
         std::stringstream msg;
         msg << "CustomLoggerMalformedXMLError: ";
         msg << XML_ErrorString(XML_GetErrorCode(log_parser));
-        log_record->xml_text.assign(msg.str().c_str());
+        //log_record->xml_text.assign(msg.str().c_str());
         //log_record->xml_text.assign("CustomLoggerMalformedXMLError");
         ACE_ERROR ((LM_ERROR, msg.str().c_str() ));
+        //if errors discrads the malformed XML log record and creates a new one
+        log_record = get_log_record(msg.str().c_str(), Management::C_ERROR);
     }else{
         // XML is good to go
         log_record->xml_text.assign(xml_text);
