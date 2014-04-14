@@ -10,7 +10,7 @@ MAKE_PDF = ON
 CDB_SCHEMAS = SRTLPBandNoiseMarkLookUpTable SRTLPBandReceiverModeSetup MarkCoefficientsKBandLookUpTable SRTLPBandTaperLookUpTable
 
 # IDL Files and flags
-IDL_FILES = SRTKBandMF SRT7GHz SRTLPBand
+IDL_FILES = SRTKBandMF SRT7GHz SRTLPBand SRTKBandDerotator
 
 # list of all possible C-sources (used to create automatic dependencies)
 CSOURCENAMES = \

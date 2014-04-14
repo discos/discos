@@ -56,7 +56,7 @@ INCLUDES        =
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SRTKBandMFReceiverImpl
+LIBRARIES       = SRTKBandMFReceiverImpl SRTKBandDerotatorImpl
 LIBRARIES_L     = 
 
 #
@@ -65,6 +65,10 @@ SRTKBandMFReceiverImpl_OBJECTS   =  Configuration SRTKBandMFReceiverImpl Compone
 SRTKBandMFReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs \
 							  GenericReceiverStubs SRTKBandMFStubs \
                    LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
+
+SRTKBandDerotatorImpl_OBJECTS = SRTKBandDerotatorImpl sensorSocket icdSocket utils 
+SRTKBandDerotatorImpl_LIBS = GenericDerotatorStubs SRTKBandDerotatorStubs IRALibrary ComponentErrors DerotatorErrors \
+                   ManagmentDefinitionsStubs ManagementErrors
 
 #
 # Scripts (public and local)

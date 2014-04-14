@@ -1,0 +1,190 @@
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Andrea Orlati <a.orlati@ira.inaf.it>
+\***************************************************************/
+
+#ifndef __GENERICDEROTATOR__IDL__ 
+#define __GENERICDEROTATOR__IDL__
+
+#include <baci.idl>
+#include <DerotatorErrors.idl>
+#include <ComponentErrors.idl>
+#include <ManagmentDefinitions.idl>
+
+#pragma prefix "alma"
+
+
+module Receivers {
+
+    /**
+     * <h2>Derotator Interface</h2>
+     *
+     * <p>This module defines a generic <em>derotator</em> interface.</p>
+     * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+     * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
+     *  
+     * <h3>Properties</h3>:
+     * <p>The derotator has the following properties:</p>
+     * <ul>
+     *     <li>actPosition: engine encoder position (ROdouble, degrees)</li>
+     *     <li>cmdPosition: commanded position (RWdouble, degrees)</li>
+     *     <li>positionDiff: difference between the actual and the commanded
+     *     position</li>
+     *     <li>tracking: it is true when the position_diff value is less or 
+     *     equal to a given threshold</li>
+     *     <li>status: a generic ROPattern status</li>
+     * </ul> 
+     * <p>The position properties represent the derotator position in the user
+     * reference system. That means each property value is a degree angle,
+     * obteined by subtracting a "zero reference" from the plain angle value 
+     * got from the device:</p> 
+     *
+     * <h3>Methods</h3>:
+     * <ul>
+     *     <li>setup(): allow the derotator to be ready to move</li>
+     *     <li>setPosition(): set the derotator position</li>
+     *     <li>getActPosition(): return the actPosition value</li>
+     *     <li>getCmdPosition(): return the cmdPosition value</li>
+     *     <li>getPositionFromHistory(t): return the position at which
+     *     the derotator was at the time t</li>
+     *     <li>getMaxLimit(): return the biggest position allowed,
+     *     in the URS</li>
+     *     <li>getMinLimit(): return the lowerst position allowed, 
+     *     in the URS</li>
+     *     <li>isTracking(): return the tracking property value</li>
+     *     <li>isReady(): return true when the derotator is ready to move</li>
+     *     <li>isSlewing(): return true when the derotator is moving</li>
+     * </ul> 
+     */
+    interface GenericDerotator : ACS::CharacteristicComponent {
+       
+        /** 
+         * This property returns the engine encoder position in the user
+         * reference system. That means its value is a degree angle,
+         * obtained by subtracting a "zero reference" from the plain value
+         * (in case converted as angle) got from the engine encoder.
+         *
+         * @return the encoder engine position as degree angle, in the URS
+         */
+        readonly attribute ACS::ROdouble actPosition;
+
+ 
+        /** 
+         * This property allows us to set a derotator position and to read the
+         * last commanded position. The value to set must be a degree angle, 
+         * in the user reference system. 
+         *
+         * @return the last commanded position
+         */
+        readonly attribute ACS::RWdouble cmdPosition;
+
+  
+        /** 
+         * @return the difference between the actual and the commanded position
+         */
+        readonly attribute ACS::ROdouble positionDiff;
+ 
+
+        /** 
+         * @return true when the positionDiff value is less or equal to a 
+         * given threshold
+         */
+        readonly attribute Management::ROTBoolean tracking;
+
+
+        /** 
+         * This property reports the current derotator summary status. The 
+         * returned pattern is a 6 bits field, with the following meaning:
+         *
+         *  @arg \c 0 power off
+         *  @arg \c 1 failure (something is broken)
+         *  @arg \c 2 communication error 
+         *  @arg \c 3 not ready
+         *  @arg \c 4 slewing 
+         *  @arg \c 5 warning
+         */
+         readonly attribute ACS::ROpattern status;
+
+        /**
+         * Enable the derotator to move
+         * @throw CORBA::SystemException
+         */
+        void setup() raises (
+            DerotatorErrors::ConfigurationErrorEx, 
+            ComponentErrors::ComponentErrorsEx
+        );
+
+
+        /** 
+         * @return the actPosition property value
+         *
+         * @throw DerotatorErrors::PositioningErrorEx
+	     * @throw DerotatorErrors::CommunicationErrorEx
+         */
+        void setPosition(in double position) raises (
+            DerotatorErrors::PositioningErrorEx,
+            DerotatorErrors::CommunicationErrorEx
+        );
+
+
+        /**
+         * @return the cmdPosition property value
+         *
+         * @throw CORBA::SystemException
+         */
+        double getCmdPosition();
+
+
+        /** 
+         * @return the actPosition property value
+         *
+         * @throw ComponentErrors::ComponentErrorsEx,
+         * @throw DerotatorErrors::CommunicationErrorEx
+         */
+        double getActPosition() raises (
+            ComponentErrors::ComponentErrorsEx,
+            DerotatorErrors::CommunicationErrorEx
+        );
+
+
+        /**
+         * Return the position at which the derotator was at the time t
+         * @throw CORBA::SystemException
+         */
+        double getPositionFromHistory(in ACS::Time time);
+
+        /**
+         * Return the maximum position value allowed.
+         * @throw CORBA::SystemException
+         */
+        double getMaxLimit();
+
+        /**
+         * Return the minimum position value allowed.
+         * @throw CORBA::SystemException
+         */
+        double getMinLimit();
+
+        /**
+         * Return the tracking property value
+         * @throw CORBA::SystemException
+         */
+        boolean isTracking();
+
+        /**
+         * Return true when the derotator is ready for moving
+         * @throw CORBA::SystemException
+         */
+        boolean isReady();
+     
+        /**
+         * Return true when the derotator is moving
+         * @throw CORBA::SystemException
+         */
+        boolean isSlewing();
+    };
+};
+
+#endif
+

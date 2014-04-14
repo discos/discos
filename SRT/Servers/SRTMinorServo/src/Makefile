@@ -11,13 +11,10 @@ CDB_SCHEMAS = MinorServo
 # ----------------------------
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES = WPServoImpl DerotatorImpl MinorServoBossImpl
+LIBRARIES = WPServoImpl MinorServoBossImpl
 
 WPServoImpl_OBJECTS = WPServoImpl WPServoSocket WPServoTalker RequestDispatcher WPStatusUpdater SocketListener utils libCom WPUtils
 WPServoImpl_LIBS = MinorServoStubs IRALibrary ComponentErrors SRTMinorServoLibrary MinorServoErrors
-
-DerotatorImpl_OBJECTS = DerotatorImpl sensorSocket icdSocket utils
-DerotatorImpl_LIBS = MinorServoStubs IRALibrary ComponentErrors MinorServoErrors
 
 MinorServoBossImpl_OBJECTS = MinorServoBossImpl utils SetupThread ParkThread TrackingThread ScanThread MSBossPublisher libCom \
 							 MSBossConfiguration

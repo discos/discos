@@ -11,6 +11,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 #include <ComponentErrors.h>
 #include <IRA>
 
@@ -70,6 +71,12 @@ void word2binChar(char *dst, unsigned char bytes[], int len);
  * @return the integer value stored in the string
  */
 int str2int(const string &s);
+
+/**
+ * Return the integer value stored in a string. See str2int() doc.
+ *
+ */
+unsigned long str2ulong(const string &s);
 
 
 /**
@@ -274,6 +281,26 @@ bool startswith(const string & s, const string & token);
  * @param token: the string of characters to match with the end of s
  */
 bool endswith(const string & s, const string & token);
+
+
+/** Remove every occurrence of a char from a string.
+ * @param str the original string
+ * @param c the character to remove
+ * @return the string without  the occurences of the character
+ */
+string remove(string str, const char c);
+
+
+/** Return the any object as a string.
+ * @param i: a any object
+ * @return the given object as a string
+ */
+template<class T>
+std::string any2string(T i) {
+    std::ostringstream buffer;
+    buffer << i;
+    return buffer.str();
+}
 
 
 DDWORD getNextTime(unsigned long seconds=0, unsigned long mseconds=0);

@@ -87,6 +87,19 @@ int str2int(const string &s) {
     return num;
 }
 
+unsigned long str2ulong(const string &s) {
+    string s_copy(s);
+    strip(s_copy);
+    istringstream istm;
+    istm.precision(__UTILS_STREAM_PREC__);
+    istm.clear();
+    istm.str("");
+    unsigned long num;
+    istm.str(s_copy);
+    istm >> num;
+    return num;
+
+}
 
 double str2double(const string &s) {
     string s_copy(s);
@@ -195,7 +208,6 @@ bool startswith(const string & s, const string & token) {
 }
 
 
-
 bool endswith(const string & s, const string & token) {
     if(s.size() < token.size())
         return false;
@@ -205,6 +217,24 @@ bool endswith(const string & s, const string & token) {
             return false;
 
     return true;
+}
+
+
+string remove(string str, const char c) {
+    stringstream ss;
+    string token;
+    ss << c;
+    ss >> token;
+    string result("");
+    for(vector<string>::size_type idx = 0; idx != str.size(); ++idx) {
+        string item;
+        ss.clear();
+        ss << str[idx];
+        ss >> item;
+        if(item != token)
+            result += item;
+    }
+    return result;
 }
     
 
