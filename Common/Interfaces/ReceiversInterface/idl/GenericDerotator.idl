@@ -31,14 +31,14 @@ module Receivers {
      *     <li>cmdPosition: commanded position (RWdouble, degrees)</li>
      *     <li>positionDiff: difference between the actual and the commanded
      *     position</li>
-     *     <li>tracking: it is true when the position_diff value is less or 
+     *     <li>tracking: it is true when the positionDiff value is less or 
      *     equal to a given threshold</li>
      *     <li>status: a generic ROPattern status</li>
      * </ul> 
      * <p>The position properties represent the derotator position in the user
      * reference system. That means each property value is a degree angle,
-     * obteined by subtracting a "zero reference" from the plain angle value 
-     * got from the device:</p> 
+     * obteined by subtracting (or by adding when write) a "zero reference" 
+     * from the plain angle value got from the device.</p> 
      *
      * <h3>Methods</h3>:
      * <ul>
@@ -106,6 +106,7 @@ module Receivers {
          */
          readonly attribute ACS::ROpattern status;
 
+
         /**
          * Enable the derotator to move
          * @throw CORBA::SystemException
@@ -154,11 +155,13 @@ module Receivers {
          */
         double getPositionFromHistory(in ACS::Time time);
 
+
         /**
          * Return the maximum position value allowed.
          * @throw CORBA::SystemException
          */
         double getMaxLimit();
+
 
         /**
          * Return the minimum position value allowed.
@@ -166,11 +169,13 @@ module Receivers {
          */
         double getMinLimit();
 
+
         /**
          * Return the tracking property value
          * @throw CORBA::SystemException
          */
         boolean isTracking();
+
 
         /**
          * Return true when the derotator is ready for moving
@@ -178,6 +183,7 @@ module Receivers {
          */
         boolean isReady();
      
+
         /**
          * Return true when the derotator is moving
          * @throw CORBA::SystemException
