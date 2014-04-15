@@ -3,10 +3,10 @@
 # Last modified: Thu Jun 11 10:32:37 CEST 2009
 
 """
-A simple client used to get the properties from derotator.
+A simple client used to get the properties from the derotator.
 This module defines the following class:
 
-- `Client`, a client for Derotator component
+- `Client`, a client for the Derotator component
 
 Exception class:
 
@@ -15,7 +15,7 @@ Exception class:
 Functions:
 
 - `dec2deg(angle)`: take a decimal angle and convert it to degree.
-- `int2bin(n, bits=13)`: return the binary of integer n. The default result is on 13 bits.
+- `int2bin(n, bits=13)`: return the binary of an integer n. The default result has 13 bits.
 """
 
 __docformat__ = 'restructuredtext'
@@ -249,7 +249,7 @@ class Client:
 
 if __name__ == "__main__":
     try:
-        drt = Client("Derotator", root='SRTMinorServo')
+        drt = Client("SRTKBandDerotator", root='SRTKBandMFReceiver')
 
         TITLE1 = "User's Reference System"
         TITLE2 = "Physical Properties"
