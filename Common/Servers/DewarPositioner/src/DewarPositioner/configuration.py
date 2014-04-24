@@ -1,0 +1,1 @@
+derotator = {'KKG': 'RECEIVERS/SRTKBandDerotator'}

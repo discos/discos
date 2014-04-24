@@ -11,7 +11,7 @@ CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable Nois
 
 # IDL Files and flags
 IDL_FILES = ReceiversDefinitions CommonReceiverInterface ReceiversBoss GenericReceiver LocalOscillatorInterface \
-			GenericDerotator
+			GenericDerotator DewarPositioner
 
 # list of all possible C-sources (used to create automatic dependencies)
 CSOURCENAMES = \

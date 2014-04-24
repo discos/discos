@@ -1,0 +1,47 @@
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Andrea Orlati <a.orlati@ira.inaf.it>
+\***************************************************************/
+
+#ifndef __DEWAR_POSITIONER__IDL__ 
+#define __DEWAR_POSITIONER__IDL__
+
+#include <baci.idl>
+#include <ReceiversErrors.idl>
+#include <ComponentErrors.idl>
+#include <ManagmentDefinitions.idl>
+#include "ReceiversDefinitions.idl"
+
+#pragma prefix "alma"
+
+
+module Receivers {
+
+    interface DewarPositioner: ACS::CharacteristicComponent {
+       
+        /** A dummy property */
+        readonly attribute ACS::ROdouble fooProperty;
+
+
+        /** Take a configuration code and configure the component
+         * 
+         * This method takes a configuration code, gets the corresponding
+         * derotator component reference and initializes the DewarPositioner. 
+         * For instance, by passing the code KKG the DewarPositioner gets the 
+         * KBandDerotator reference and performs its setup.
+         *
+         */
+        void setup(in string code) raises (ComponentErrors::ComponentErrorsEx);
+
+        /** Return true when the derotator is ready to move */
+        boolean isReady();
+
+
+        /** Return the actual setup configuration (KKG, etc.) */
+        string getActualSetup();
+    };
+};
+
+#endif
+

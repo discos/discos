@@ -114,7 +114,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = SRTKBandMFReceiver
+CDB_SCHEMAS = SRTKBandMFReceiver SRTKBandDerotator
 
 # 
 # IDL Files and flags
