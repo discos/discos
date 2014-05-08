@@ -60,6 +60,7 @@ public:
 		CSecAreaResourceWrapper<CommandLine> line=m_pLink->Get();
 		try {
 			line->getSupplyPressure(m_val);
+
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOsupplyPressure::read()");
@@ -67,14 +68,7 @@ public:
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
-		} 	catch (GPIBException& ex)
-		{
-			 _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,dummy,"DevIOsupplyPressure::read()");
-			 dummy.log(LM_DEBUG);
-			 ACS_LOG(LM_FULL_INFO,"DevIOsupplyPressure::read()",(LM_DEBUG,"DevIOsupplyPressure::read() %s",ex.what()));
-
 		}
-
 
 		timestamp=getTimeStamp();  //complition time
 		return m_val;

@@ -3,7 +3,7 @@
 #
 # "@(#) $Id$"
 #
-# Makefile of ........
+# Makefile of HeliumLine
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
@@ -24,7 +24,30 @@
 #
 # additional include and library search paths
 #USER_INC = 
-#USER_LIB = 
+USER_LIB =               -lACE \
+			-lbaci \
+			-lmaci \
+			-lmaciClient \
+		 	-lTAO \
+			-lTAO_DsLogAdmin \
+			-lTAO_CosNaming \
+			-lTAO_IORTable \
+			-lTAO_PortableServer \
+			-lTAO_Svc_Utils \
+			-lTAO_CosTrading \
+			-lTAO_CosNotification \
+			-lTAO_DynamicAny \
+			-lTAO_IFR_Client \
+			-lTAO_CosProperty \
+			-lacsutil \
+			-lcdb \
+			-llogging \
+			-lacscomponent \
+			-lacserr \
+			-lm \
+			-lloki \
+			-lACSErrTypeCommon \
+			-lmodbus 
 
 #
 # MODULE CODE DESCRIPTION:
@@ -35,79 +58,24 @@
 #
 # C programs (public and local)
 # -----------------------------
-EXECUTABLES     =
-EXECUTABLES_L   = 
+EXECUTABLES_L   = testCommandLine
 
 #
 # <brief description of xxxxx program>
-xxxxx_OBJECTS   =	
-xxxxx_LDFLAGS   =
-xxxxx_LIBS      =
+HeliumLineImpl_OBJECTS   =	HeliumLineImpl CommandLine testCommandLine
+HeliumLineImpl_LIBS      = ReceiversErrors ComponentErrors HeliumLineInterfaceStubs IRALibrary
 
-#
-# special compilation flags for single c sources
-#yyyyy_CFLAGS   = 
+testCommandLine_OBJECTS    = CommandLine testCommandLine
 
-#
-# Includes (.h) files (public only)
-# ---------------------------------
-INCLUDES        =
 
-#
-# Libraries (public and local)
 # ----------------------------
-LIBRARIES       =
-LIBRARIES_L     =
+LIBRARIES       = HeliumLineImpl
 
-#
-# <brief description of lllll library>
-lllll_OBJECTS   =
-
-#
-# Scripts (public and local)
-# ----------------------------
-SCRIPTS         =
-SCRIPTS_L       =
-
-#
-# TCL scripts (public and local)
-# ------------------------------
-TCL_SCRIPTS     =
-TCL_SCRIPTS_L   =
-
-#
-# Python stuff (public and local)
-# ----------------------------
-PY_SCRIPTS         =
-PY_SCRIPTS_L       =
-
-PY_MODULES         =
-PY_MODULES_L       =
-
-PY_PACKAGES        =
-PY_PACKAGES_L      =
-pppppp_MODULES	   =
-
-#
-# <brief description of tttttt tcl-script>
-tttttt_OBJECTS  =
-tttttt_TCLSH    = 
-tttttt_LIBS     = 
-
-#
-# TCL libraries (public and local)
-# ------------------------------
-TCL_LIBRARIES   =
-TCL_LIBRARIES_L =
-
-#
-# <brief description of tttlll library>
-tttlll_OBJECTS  = 
 
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = 
+CDB_SCHEMAS = HeliumLine
 
 # 
 # IDL Files and flags

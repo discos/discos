@@ -18,16 +18,17 @@ class CommandLine {
    public:
      CommandLine();
      ~CommandLine();
-     int configure(string ip,int port,int nb,int start);
+     int configure(char* ip,int port,int nb,int start);
 
      int connect();
      int disconnect();
      int getPressure(double& in,double& out);
+     int getSupplyPressure(double&);
+     int getReturnPressure(double&);
 
 
-
-   private:
-
+  private:
+     int ReadValue(int address,double& value);
      modbus_t *m_mbhandler;
      int m_address;
      int m_nbytes;

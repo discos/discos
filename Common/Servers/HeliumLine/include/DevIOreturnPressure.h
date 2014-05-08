@@ -68,12 +68,6 @@ public:
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
-		} 	catch (GPIBException& ex)
-		{
-			 _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,dummy,"DevIOreturnPressure::read()");
-			 dummy.log(LM_DEBUG);
-			 ACS_LOG(LM_FULL_INFO,"DevIOreturnPressure::read()",(LM_DEBUG,"DevIOreturnPressure::read() %s",ex.what()));
-
 		}
 
 

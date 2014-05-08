@@ -24,6 +24,7 @@
 #include <Definitions.h>
 #include "DevIOsupplyPressure.h"
 #include "DevIOreturnPressure.h"
+#include <string>
 
 using namespace baci;
 using namespace maci;
@@ -45,11 +46,13 @@ public:
      virtual void getSupplyPressure(CORBA::Double& supplyPrs)   throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
      virtual void getReturnPressure(CORBA::Double& returnPrs)   throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx);
 
+     virtual ACS::ROdouble_ptr  supplyPressure ()	throw (CORBA::SystemException);
+ 	 virtual ACS::ROdouble_ptr  returnPressure ()	throw (CORBA::SystemException);
+
 private:
 
      SmartPropertyPointer<ROdouble> m_supplyPressure;
      SmartPropertyPointer<ROdouble> m_returnPressure;
-     SmartPropertyPointer<ROdouble> m_amplitude;
 
   	CommandLine* m_line;
   	CSecureArea<CommandLine> *m_commandLine;
