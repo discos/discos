@@ -12,6 +12,6 @@
     Code="SRTKBandDerotatorImpl"
     ImplLang="cpp"
     Type="IDL:alma/Receivers/SRTKBandDerotator:1.0"
-    Container="SRTKBandContainer"
+    Container="DerotatorsContainer"
 	Default="true"
 />

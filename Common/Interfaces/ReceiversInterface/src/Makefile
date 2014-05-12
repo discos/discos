@@ -7,10 +7,13 @@
 
 MAKE_PDF = ON
 
-CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable NoiseMarkLookUpTable TaperLookUpTable
+CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable \
+			  NoiseMarkLookUpTable TaperLookUpTable \
+			  DewarPositionerMappingTable
 
 # IDL Files and flags
-IDL_FILES = ReceiversDefinitions CommonReceiverInterface ReceiversBoss GenericReceiver LocalOscillatorInterface \
+IDL_FILES = ReceiversDefinitions CommonReceiverInterface ReceiversBoss \
+			GenericReceiver LocalOscillatorInterface \
 			GenericDerotator DewarPositioner
 
 # list of all possible C-sources (used to create automatic dependencies)

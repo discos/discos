@@ -1,25 +1,30 @@
-import unittest
+import unittest2
+from ComponentErrors import ValidationErrorEx
+from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
-from ComponentErrors import ComponentErrorsEx
 
 
-class SetupTest(unittest.TestCase):
+class SetupTest(unittest2.TestCase):
     def setUp(self):
         self.client = PySimpleClient().getComponent('RECEIVERS/DewarPositioner')
+
+    def test_wrongcode(self):
+        """A setup with a wrong code raises a ValidationErrorEx"""
+        self.assertRaises(ValidationErrorEx, self.client.setup, 'FOOCODE')
+
+    def test_not_available(self):
+        """When the derotator is not available, a CannotGetComponentEx must be raised"""
+        self.assertRaises(CannotGetComponentEx, self.client.setup, 'TEST')
 
     def test_rightcode(self):
         """Verify after a setup the component is properly configured"""
         code = 'KKG'
         try:
             self.client.setup(code)
-        except ComponentErrorsEx, ex:
-            pass # It's OK, the derotator is not available
+        except CannotGetComponentEx, ex:
+            print "The derotator is not available"
         self.assertEqual(code, self.client.getActualSetup())
-
-    def test_wrongcode(self):
-        """Verify a setup with a wrong code raises a ComponentErrorEx"""
-        self.assertRaises(ComponentErrorsEx, self.client.setup, 'FOO')
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest2.main()
