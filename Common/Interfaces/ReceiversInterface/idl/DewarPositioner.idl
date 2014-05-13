@@ -37,7 +37,7 @@ module Receivers {
 
 
         /** Put the derotator in the park position */
-        void park();
+        void park() raises (ComponentErrors::NotAllowedEx);
  
         /** Set an absolute position offset for the derotator */
         void setOffset(in double offset);
@@ -61,7 +61,9 @@ module Receivers {
         boolean isRewinding();
 
         /** Return true actual position in the user reference system */
-        double getPosition();
+        double getPosition() raises (
+            ComponentErrors::OperationErrorEx, ComponentErrors::NotAllowedEx
+        );
 
         /** Return the actual setup configuration (KKG, etc.) */
         string getActualSetup();

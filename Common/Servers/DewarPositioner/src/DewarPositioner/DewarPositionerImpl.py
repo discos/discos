@@ -6,7 +6,10 @@ from Acspy.Util.BaciHelper import addProperty
 from maciErrType import CannotGetComponentEx
 
 import ComponentErrorsImpl
+import ComponentErrors
 import DerotatorErrorsImpl
+import DerotatorErrors 
+
 from DewarPositioner.configuration import CDBConf
 from IRAPy import logger
 
@@ -17,14 +20,15 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         services.__init__(self)
         # self.positioner = Positioner() # TODO: Give it the parameters!
         self.cdbconf = CDBConf()
-        self.configured = False
         self.actualSetup = ''
+        self._configured = False
 
     def initialize(self):
         addProperty(self, 'fooProperty')
 
     def setup(self, code):
         code = code.upper()
+        self.commandedSetup = code
         # Assign the derotator name
         comp_name = self.cdbconf.derotator_name(code)
         # If there is not a derotator related to this code, raise an exception
@@ -46,13 +50,54 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             self.derotator.setup()
             self.actualSetup = code
-            self.configured = True
+            self._configured = True
         except (DerotatorErrorsImpl.ConfigurationErrorEx, 
                 ComponentErrorsImpl.ComponentErrorsEx), ex:
             raeson = "Cannot perform the %s setup" %comp_name
             logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
+            raise exc
+
+    def getActualSetup(self):
+        return self.actualSetup
+
+    def getCommandedSetup(self):
+        return self.commandedSetup
+
+    def park(self):
+        if not self.isReady():
+            raeson = "DewarPositioner not ready. A setup() is required."
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(raeson)
+            raise exc
+
+        self.derotator.setPosition(0)
+        self.actualSetup = ''
+        self.commandedSetup = ''
+        self._configured = False
+
+    def getPosition(self):
+        if not self.isReady():
+            raeson = "DewarPositioner not ready. A setup() is required."
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(raeson)
+            raise exc
+
+        try:
+            return self.derotator.getActPosition()
+        except (DerotatorErrors.CommunicationErrorEx, 
+                ComponentErrors.ComponentErrorsEx), ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason("Cannot get the derotator position")
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason("Cannot get the derotator position")
             raise exc
 
     def startTracking(self):
@@ -63,18 +108,21 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def isReady(self):
         try:
-            return self.configured and self.derotator.isReady()
+            return self._configured and self.derotator.isReady()
         except AttributeError:
             return False
+
+    def isSlewing(self):
+        try:
+            return self._configured and self.derotator.isSlewing()
+        except AttributeError:
+            return False
+
 
     def isTracking(self):
         try:
-            return self.configured and self.derotator.isTracking()
+            return self._configured and self.derotator.isTracking()
         except AttributeError:
             return False
-
-    def getActualSetup(self):
-        return self.actualSetup
-
 
 
