@@ -9,7 +9,7 @@ MAKE_PDF = ON
 
 CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable \
 			  NoiseMarkLookUpTable TaperLookUpTable \
-			  DewarPositionerMappingTable
+			  DewarPositionerTable
 
 # IDL Files and flags
 IDL_FILES = ReceiversDefinitions CommonReceiverInterface ReceiversBoss \

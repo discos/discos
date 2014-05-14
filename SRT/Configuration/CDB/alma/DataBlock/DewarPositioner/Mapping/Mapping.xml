@@ -1,16 +1,20 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 
-<DewarPositionerMappingTable xmlns="urn:schemas-cosylab-com:DewarPositionerMappingTable:1.0"
+<DewarPositionerTable xmlns="urn:schemas-cosylab-com:DewarPositionerTable:1.0"
              	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <MappingEntry>
-        <setupCode>KKG</setupCode><DerotatorName>SRTKBandDerotator</DerotatorName>
+        <setupCode>KKG</setupCode>
+        <derotatorName>SRTKBandDerotator</derotatorName>
+        <startingPosition>0.0</startingPosition>
     </MappingEntry>
 
     <MappingEntry>
-        <setupCode>TEST</setupCode><DerotatorName>ForTest</DerotatorName>
+        <setupCode>TEST</setupCode>
+        <derotatorName>ForTest</derotatorName>
+        <startingPosition>0.0</startingPosition>
     </MappingEntry>
 
-</DewarPositionerMappingTable>
+</DewarPositionerTable>

@@ -48,6 +48,9 @@ module Receivers {
         /** Stop the parallactic angle correction */
         void stopTracking();
 
+        /** Return true when the dewar positioner is configured */
+        boolean isConfigured();
+
         /** Return true when the derotator is ready to move */
         boolean isReady();
 

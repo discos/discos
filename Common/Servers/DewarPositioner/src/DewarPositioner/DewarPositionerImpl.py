@@ -20,44 +20,48 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         services.__init__(self)
         # self.positioner = Positioner() # TODO: Give it the parameters!
         self.cdbconf = CDBConf()
-        self.actualSetup = ''
-        self._configured = False
+        self.__reset()
 
     def initialize(self):
         addProperty(self, 'fooProperty')
 
     def setup(self, code):
-        code = code.upper()
-        self.commandedSetup = code
-        # Assign the derotator name
-        comp_name = self.cdbconf.derotator_name(code)
-        # If there is not a derotator related to this code, raise an exception
-        if not comp_name:
-            raeson = "code %s unknown" %code
-            logger.logError(raeson)
-            exc = ComponentErrorsImpl.ValidationErrorExImpl()
-            exc.setReason(raeson)
-            raise exc
-
+        self.commandedSetup = code.upper()
+        self.cdbconf.setup(self.commandedSetup)
+        comp_name = self.cdbconf.get_entry('derotator_name')
+            
         try:
             self.derotator = self.getComponent('RECEIVERS/' + comp_name)
         except CannotGetComponentEx, ex:
             logger.logDebug(ex.message)
             raise
         except Exception:
-            logger.logError('Unexpected exception loading %s' %comp_name)
+            logger.logError('unexpected exception loading %s' %comp_name)
             raise ComponentErrorsImpl.UnexpectedExImpl()
         try:
             self.derotator.setup()
-            self.actualSetup = code
-            self._configured = True
-        except (DerotatorErrorsImpl.ConfigurationErrorEx, 
-                ComponentErrorsImpl.ComponentErrorsEx), ex:
-            raeson = "Cannot perform the %s setup" %comp_name
-            logger.logError(raeson)
+        except (DerotatorErrors.ConfigurationErrorEx, ComponentErrors.ComponentErrorsEx), ex:
+            raeson = "cannot perform the %s setup" %comp_name
+            logger.logError('%s: %s' %(raeson, ex.message))
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc
+
+        position = self.cdbconf.get_entry('starting_position')
+
+        try:
+            self.derotator.setPosition(position)
+        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+            raeson = "cannot set the derotator position"
+            logger.logError('%s: %s' %(raeson, ex.message))
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+
+        self.actualSetup = self.commandedSetup
+
+    def isConfigured(self):
+        return self.commandedSetup == self.actualSetup
 
     def getActualSetup(self):
         return self.actualSetup
@@ -73,10 +77,17 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(raeson)
             raise exc
 
-        self.derotator.setPosition(0)
-        self.actualSetup = ''
-        self.commandedSetup = ''
-        self._configured = False
+        position = self.cdbconf.get_entry('starting_position')
+
+        try:
+            self.derotator.setPosition(position)
+        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+            raeson = "cannot set the derotator position"
+            logger.logError('%s: %s' %(raeson, ex.message))
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        self.__reset()
 
     def getPosition(self):
         if not self.isReady():
@@ -88,8 +99,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
         try:
             return self.derotator.getActPosition()
-        except (DerotatorErrors.CommunicationErrorEx, 
-                ComponentErrors.ComponentErrorsEx), ex:
+        except (DerotatorErrors.CommunicationErrorEx, ComponentErrors.ComponentErrorsEx), ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason("Cannot get the derotator position")
@@ -108,21 +118,26 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def isReady(self):
         try:
-            return self._configured and self.derotator.isReady()
+            return self.isConfigured() and self.derotator.isReady()
         except AttributeError:
             return False
 
     def isSlewing(self):
         try:
-            return self._configured and self.derotator.isSlewing()
+            return self.isConfigured() and self.derotator.isSlewing()
         except AttributeError:
             return False
 
 
     def isTracking(self):
         try:
-            return self._configured and self.derotator.isTracking()
+            return self.isConfigured() and self.derotator.isTracking()
         except AttributeError:
             return False
+    
+    def __reset(self):
+        self.actualSetup = 'unknown'
+        self.commandedSetup = ''
+
 
 

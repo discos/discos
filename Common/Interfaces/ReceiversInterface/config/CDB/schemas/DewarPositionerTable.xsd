@@ -3,8 +3,8 @@
 <!-- Marco Buttu -->
 
 <xs:schema
-	targetNamespace="urn:schemas-cosylab-com:DewarPositionerMappingTable:1.0"
-	xmlns="urn:schemas-cosylab-com:DewarPositionerMappingTable:1.0"
+	targetNamespace="urn:schemas-cosylab-com:DewarPositionerTable:1.0"
+	xmlns="urn:schemas-cosylab-com:DewarPositionerTable:1.0"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -16,7 +16,8 @@
 	<xs:complexType name="MappingHeader">
  		<xs:sequence>
  			<xs:element name="setupCode" type="xs:string" />
- 			<xs:element name="DerotatorName" type="xs:string" />
+ 			<xs:element name="derotatorName" type="xs:string" />
+ 			<xs:element name="startingPosition" type="xs:double" />
  		</xs:sequence>
  	</xs:complexType>
  	
@@ -31,6 +32,6 @@
 		</xs:sequence>
  	</xs:complexType>
  	
- 	<xs:element name="DewarPositionerMappingTable" type="MappingTable" />	
+ 	<xs:element name="DewarPositionerTable" type="MappingTable" />	
 	
 </xs:schema>
