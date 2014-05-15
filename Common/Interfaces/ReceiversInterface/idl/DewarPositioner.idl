@@ -31,6 +31,7 @@ module Receivers {
         void setup(in string code) raises (
             ComponentErrors::ValidationErrorEx,
             ComponentErrors::OperationErrorEx,
+            ComponentErrors::NotAllowedEx,
             maciErrType::CannotGetComponentEx,
             ComponentErrors::UnexpectedEx
         );
@@ -39,8 +40,13 @@ module Receivers {
         /** Put the derotator in the park position */
         void park() raises (ComponentErrors::NotAllowedEx);
  
-        /** Set an absolute position offset for the derotator */
-        void setOffset(in double offset);
+        /** Set an absolute position offset to apply to the position 
+         *  This method does not set any new position but only sets the flag.
+         */
+        void setOffset(in double offset) raises (ComponentErrors::NotAllowedEx);
+
+        /** Return the offset */
+        double getOffset();
         
         /** Start the parallactic angle correction */
         void startTracking();
