@@ -18,14 +18,11 @@ module Receivers {
 
     interface DewarPositioner: ACS::CharacteristicComponent {
 
-        /** A dummy property */
-        readonly attribute ACS::ROdouble fooProperty;
-
         /** Take a configuration code and configure the component
          * 
          * This method takes a configuration code, gets the corresponding
          * derotator component reference and initializes the DewarPositioner. 
-         * For instance, by passing the code KKG the DewarPositioner gets the 
+         * For instance, by giving the code KKG, the DewarPositioner gets the 
          * KBandDerotator reference and performs its setup.
          */
         void setup(in string code) raises (
@@ -37,48 +34,66 @@ module Receivers {
         );
 
 
-        /** Put the derotator in the park position */
+        /** Put the derotator in the park position and clear the offset */
         void park() raises (ComponentErrors::NotAllowedEx);
+
  
-        /** Set an absolute position offset to apply to the position 
-         *  This method does not set any new position but only sets the flag.
-         */
+        /** Set the absolute offset and move the derotator to the new position */
         void setOffset(in double offset) raises (ComponentErrors::NotAllowedEx);
+
 
         /** Return the offset */
         double getOffset();
+
+
+        /** Clear the absolute offset and move the derotator to the new position */
+        void clearOffset() raises (ComponentErrors::NotAllowedEx);
+
         
         /** Start the parallactic angle correction */
         void startTracking();
 
+
         /** Stop the parallactic angle correction */
         void stopTracking();
 
-        /** Return true when the dewar positioner is configured */
+
+        /** Return true when the dewar positioner is properly configured */
         boolean isConfigured();
 
-        /** Return true when the derotator is ready to move */
+
+        /** Return true when the system is configured and the derotator ready to move */
         boolean isReady();
+
 
         /** Return true when the derotator is tracking the commanded position */
         boolean isTracking();
 
+
         /** Return true when the derotator is moving */
         boolean isSlewing();
+
 
         /** Return true when the derotator is rewinding */
         boolean isRewinding();
 
-        /** Return true actual position in the user reference system */
+
+        /** Return the actual position in the user reference system */
         double getPosition() raises (
             ComponentErrors::OperationErrorEx, ComponentErrors::NotAllowedEx
         );
 
+
         /** Return the actual setup configuration (KKG, etc.) */
         string getActualSetup();
 
+
         /** Return the commanded setup configuration (KKG, etc.) */
         string getCommandedSetup();
+
+
+        /** A dummy property */
+        readonly attribute ACS::ROdouble fooProperty;
 
     };
 };

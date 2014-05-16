@@ -20,7 +20,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         services.__init__(self)
         # self.positioner = Positioner() # TODO: Give it the parameters!
         self.cdbconf = CDBConf()
-        self.reset() # Set the offset, actualSetup and commandedSetup vaules
+        self._clearConfiguration() #  Offset, actualSetup and commandedSetup
 
     def initialize(self):
         addProperty(self, 'fooProperty')
@@ -50,6 +50,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc
 
         try:
+            self._clearOffset()
             self._setPosition(0) # The method adds both offset and starting position 
         except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
             raeson = "cannot set the derotator position"
@@ -72,8 +73,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def park(self):
         self._checkConfiguration() # Raises NotAllowedEx if the check fails
+        self._clearConfiguration()
         self._setPosition(0) # The method adds both offset and starting position 
-        self.reset()
 
     def getPosition(self):
         self._checkConfiguration() # Raises NotAllowedEx if the check fails
@@ -116,15 +117,22 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             return False
 
     def setOffset(self, offset):
-        self.offset = offset
+        act_position = self.getPosition()
+        self._setOffset(offset)
+        self._setPosition(act_position)
+
+    def clearOffset(self):
+        act_position = self.getPosition()
+        self._clearOffset()
+        self._setPosition(act_position)
 
     def getOffset(self):
         return self.offset
     
-    def reset(self):
+    def _clearConfiguration(self):
         self.actualSetup = 'unknown'
         self.commandedSetup = ''
-        self.setOffset(0.0)
+        self._clearOffset()
 
     def _setPosition(self, position):
         if not self.derotator.isReady():
@@ -167,4 +175,10 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(raeson)
             raise exc
+
+    def _clearOffset(self):
+        self._setOffset(0.0)
+    
+    def _setOffset(self, offset):
+        self.offset = offset
 
