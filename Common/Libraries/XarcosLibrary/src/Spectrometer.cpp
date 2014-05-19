@@ -112,7 +112,7 @@ int Spectrometer::Status()		// polls status bits
   return t1;
 }
 
-int Spectrometer::GetResults(long *data, int size, int start)
+/*int Spectrometer::GetResults(long *data, int size, int start)
 {
   char *databuf;
 //
@@ -123,6 +123,38 @@ int Spectrometer::GetResults(long *data, int size, int start)
 //
 // Read the data
 //
+  WriteFpgaD(2, (start & 0xff00) >> 8);
+  WriteFpgaD(2, start & 0xff);
+  databuf = new char[size*4];
+  ReadFpgaBlock(3, databuf, size*4);
+//
+// Convert to long
+//
+  int i;
+  for (i=0; i< size; ++i) {
+    int32 value=0;
+    int i2=i*4+3, j;
+    for (j=0; j<4; ++j) {
+      value = (value <<8) | ((long)(databuf[i2-j]) & 0xff);
+    }
+    data[i]=value;
+  }
+  delete[] databuf;
+  return size;
+}*/
+
+int Spectrometer::GetResults(long *data, int size, int start)
+{
+  char *databuf;
+//
+// Correct for actual resolution
+//
+//  start = start * resolution;
+  if (size*resolution > nChans) size = nChans/resolution;
+//
+// Read the data
+//
+  WriteFpgaD(2, 0xff);	// force an address change
   WriteFpgaD(2, (start & 0xff00) >> 8);
   WriteFpgaD(2, start & 0xff);
   databuf = new char[size*4];

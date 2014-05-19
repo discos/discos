@@ -182,9 +182,11 @@ if(doppio){//#ifdef DOPPIO
 		i=0;
 		temp=spec[i];
 		while(i<(Xspec.GetNSezioni()-1)){
+            //printf("1 modoPol = %d\n", temp.GetModoPol());
 			if(temp.GetModoPol()==true);
 			else{
 				tp=spec[i+1];
+              //  printf("2 modoPol = %d\n", tp.GetModoPol());
 				if(tp.GetModoPol()==true){
 					if(temp.GetAdc()==tp.GetAdc()){
 						scambio=true;
@@ -204,9 +206,11 @@ if(doppio){//#ifdef DOPPIO
 		i=0;
 		temp=spec[i];
 		while(i<(Xspec.GetNSezioni()-1)){
+            //printf("3 modoPol = %d\n", temp.GetModoPol());
 			if((temp.GetAdc()<M)&&(temp.GetModoPol()));
 			else{
 				tp=spec[i+1];
+              //  printf("4 modoPol = %d\n", tp.GetModoPol());
 				if((temp.GetAdc()<M)&&(tp.GetAdc()<M)&&(tp.GetModoPol())){
 					scambio=true;
 					tmpD=spec[i];
@@ -214,9 +218,11 @@ if(doppio){//#ifdef DOPPIO
 					spec[i+1]=tmpD;
 				}
 			}
+            //printf("5 modoPol = %d\n", temp.GetModoPol());
 			if((temp.GetAdc()>=M)&&(!(temp.GetModoPol())));
 			else{
 				tp=spec[i+1];
+              //  printf("6 modoPol = %d\n", tp.GetModoPol());
 				if((temp.GetAdc()>=M)&&(tp.GetAdc()>=M)&&(!(tp.GetModoPol()))){
 					scambio=true;
 					tmpD=spec[i];
@@ -231,7 +237,13 @@ if(doppio){//#ifdef DOPPIO
 
 	i=0;//Ordino i non polarimetric per banda
 	scambio=false;
-	while(spec[i].GetModoPol())	i++;
+    // inserito un ulteriore controllo (i < Xspec.GetNSezioni())
+    // per evitare un segmentation fault della GetModoPol
+	//while((spec[i].GetModoPol()) && (i < 7))	{
+	while((spec[i].GetModoPol()) && (i < Xspec.GetNSezioni()))	{
+        //printf("7 modoPol = %d\n", spec[i].GetModoPol());
+        i++;
+    }
 	while((!(spec[i].GetModoPol()))&&(i<Xspec.GetNSezioni())){
 		j=i;
 		temp=spec[i];
