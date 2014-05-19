@@ -152,7 +152,8 @@ void XBackendsImpl::initialize()
 		throw dummy;
 	}
 	// command parser configuration	
-	m_parser->add("setIntegration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(commandL,&CCommandLine::setIntegration),1 );
+	//m_parser->add("setIntegration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(commandL,&CCommandLine::setIntegration),1 );
+	m_parser->add("integration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(commandL,&CCommandLine::setIntegration),1 );
 	m_parser->add("setSection",new function7<CCommandLine,non_constant,void_type,I<long_type>,I<double_type>,I<double_type>,I<long_type>,I<long_type>,I<double_type>,I<long_type> >
 					(commandL,&CCommandLine::setConfiguration),7 );
 	m_parser->add("setAttenuation", new function2<CCommandLine,non_constant,void_type,I<long_type>,I<double_type> >(commandL,&CCommandLine::setAttenuation),2 );
@@ -319,7 +320,8 @@ void XBackendsImpl::sendHeader()
 	THeaderRecord buffer;
 	DWORD tpi[MAX_INPUT_NUMBER];
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	try {		
+    /*
+	try {
 		line->startDataAcquisition();	
 	}	
 	catch (XBackendsErrors::NoSettingExImpl& ex) {
@@ -341,6 +343,7 @@ void XBackendsImpl::sendHeader()
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
 	}
+    */
 	ACS_DEBUG("XBackendsImpl::sendHeader()","Initialization");
 	line->fillMainHeader(buffer.header);
 	line->fillChannelHeader(buffer.chHeader,MAX_INPUT_NUMBER);
@@ -365,7 +368,7 @@ void XBackendsImpl::sendHeader()
 	printf("Chnls: %d beams: %d integration: %d sampleSize: %d\n",buffer.header.sections,buffer.header.beams,
 			buffer.header.integration,buffer.header.sampleSize);
 	for(int h=0;h<buffer.header.sections;h++) {
-		printf("id: %d bins: %d pol: %d bw: %lf freq: %lf att L: %lf att R: %lf sr: %lf feed: %d\n",
+		printf("id: %d bins: %d pol: %d bw: %lf freq: %lf att L: %lf att R: %lf sr: %lf ifd: %d feed: %d\n",
 				buffer.chHeader[h].id,
 				buffer.chHeader[h].bins,
 				buffer.chHeader[h].polarization,
@@ -374,6 +377,7 @@ void XBackendsImpl::sendHeader()
 				buffer.chHeader[h].attenuation[0],
 				buffer.chHeader[h].attenuation[1],
 				buffer.chHeader[h].sampleRate,
+				buffer.chHeader[h].IF[0],
 				buffer.chHeader[h].feed);
 	}
 #endif
@@ -405,12 +409,35 @@ void XBackendsImpl::sendHeader()
 	// now comunicate the reading to the sender thread.....
 	m_pcontrolLoop->saveZero(tpi);
 	// start the job for the backend.....
+	try {
+		line->startDataAcquisition();	
+	}	
+	catch (XBackendsErrors::NoSettingExImpl& ex) {
+		_ADD_BACKTRACE(BackendsErrors::TXErrorExImpl,impl,ex,"XBackendsImpl::sendHeader()");
+		impl.setDetails("Not setting HW");
+		impl.log(LM_DEBUG);
+		throw impl.getBackendsErrorsEx();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getBackendsErrorsEx();		
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"XBackendsImpl::sendHeader()");
+		dummy.log(LM_DEBUG);
+		throw dummy.getComponentErrorsEx();
+	}
 }
 
 void XBackendsImpl::terminate() 
 	throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("XBackendsImpl::terminate()");
+    printf("XBackendsImpl::terminate()\n");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
 		line->stopDataAcquisition();
@@ -434,6 +461,7 @@ void XBackendsImpl::sendData(ACS::Time startTime)
 	throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("XBackendsImpl::sendData()");
+    //printf("sendData()\n");
 //	TIMEVALUE now;
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
@@ -458,14 +486,18 @@ void XBackendsImpl::sendData(ACS::Time startTime)
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
 	}
+    line.Release();
+    IRA::CIRATools::Wait(100000);
 }
 
 void XBackendsImpl::sendStop() 
 	throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx)
 {	
+    printf("XBackendsImpl::sendStop()\n");
 	AUTO_TRACE("XBackendsImpl::sendStop()");	
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
+        //printf ("sendStop::before line->suspendDataAcquisition()\n");
 		line->suspendDataAcquisition(); 
 	}	
 	catch (XBackendsErrors::NoSettingExImpl& ex) {
@@ -488,17 +520,22 @@ void XBackendsImpl::sendStop()
 		throw dummy.getComponentErrorsEx();
 	}	
 #ifndef BKD_DEBUG
+    line.Release();
+    IRA::CIRATools::Wait(100000);
 	try {
+        //printf ("sendStop::before getSender()->stopSend(FLOW_NUMBER)\n");
 		getSender()->stopSend(FLOW_NUMBER);
 	}
 	catch (AVStopSendErrorExImpl& ex) {
 		_ADD_BACKTRACE(BackendsErrors::TXErrorExImpl,impl,ex,"XBackendsImpl::sendStop()");
 		impl.setDetails("stop message could not be sent");
-		throw impl.getBackendsErrorsEx();
+        _IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+		//throw impl.getBackendsErrorsEx();
 	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"XBackendsImpl::sendStop()");
-		throw impl.getComponentErrorsEx();
+        _IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+		//throw impl.getComponentErrorsEx();
 	}
 #endif
 }
@@ -510,7 +547,7 @@ void XBackendsImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Doubl
 	AUTO_TRACE("XBackendsImpl::setSection()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {		
-		line->setConfiguration(input,freq,bw,feed,pol,sr,bins);//Ricezione Specificha Nuova
+		line->setConfiguration(input,freq-ANALOG_FREQUENCY,bw,feed,pol,sr,bins);//Ricezione Specificha Nuova
 		line->setAttenuation(input,-1);
 		line->Init();//Configurazione nell'HW 
 		line->getConfiguration();
@@ -959,19 +996,19 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 		case (Backends::XArcos_K7):
 			setSectionsNumber(7);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(0,-1,-1,0,-1,-1,-1);
+			setSection(0,145,62.5,0,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(1,-1,-1,1,-1,-1,-1);
+			setSection(1,145,62.5,1,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(2,-1,-1,2,-1,-1,-1);
+			setSection(2,145,62.5,2,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(3,-1,-1,3,-1,-1,-1);
+			setSection(3,145,62.5,3,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(4,-1,-1,4,-1,-1,-1);
+			setSection(4,145,62.5,4,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(5,-1,-1,5,-1,-1,-1);
+			setSection(5,145,62.5,5,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(6,-1,-1,6,-1,-1,-1);
+			setSection(6,145,62.5,6,2,125,-1);
 			break;
 		case (Backends::XArcos_K3):
 			setSectionsNumber(6);
@@ -992,13 +1029,13 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 		case (Backends::XArcos_K2R):
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(0,-1,-1,0,-1,-1,-1);
+			setSection(0,145,62.5,1,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(1,-1,-1,0,-1,-1,-1);
+			setSection(1,145,62.5,1,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(2,-1,-1,1,-1,-1,-1);
+			setSection(2,145,62.5,2,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(3,-1,-1,1,-1,-1,-1);
+			setSection(3,145,62.5,2,2,125,-1);
 			break;
 		case (Backends::XArcos_K2L):
 			setSectionsNumber(4);
@@ -1015,14 +1052,16 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 		case (Backends::XArcos_C):
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(0,-1,-1,0,-1,-1,-1);
+			setSection(0,145,62.5,1,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(1,-1,-1,0,-1,-1,-1);
+			setSection(1,145,62.5,1,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(2,-1,-1,0,-1,-1,-1);
+			setSection(2,145,62.5,1,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(3,-1,-1,0,-1,-1,-1);
+			setSection(3,145,62.5,1,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
+            CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+		    line->setFeedC();
 			break;
 	}
 }
@@ -1048,3 +1087,4 @@ _PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROlongSeq,m_pinputSection,inputSectio
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>
 MACI_DLL_SUPPORT_FUNCTIONS(XBackendsImpl)
+

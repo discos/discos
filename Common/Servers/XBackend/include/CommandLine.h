@@ -106,6 +106,7 @@ public:
 	 * Call this function in order to get the number of bins for each input. 
 	 */	
 	void getFeed(ACS::longSeq& feed) const;	
+    void setFeedC();
 	/**
 	 * Call this function in order to get the polarization for each input. 
 	 */	
@@ -454,10 +455,12 @@ private:
 	 *  bandwidth value for each backend input
 	 */
 	double m_bandWidth[MAX_SECTION_NUMBER];
+	double m_bandWidthInput[MAX_SECTION_NUMBER];
 	/**
 	 * frequency value for each backend input
 	 */
 	double m_frequency[MAX_SECTION_NUMBER];
+	double m_frequencyInput[MAX_SECTION_NUMBER];
 	/**
 	 * the sample rate associated to each input
 	 */
@@ -478,6 +481,7 @@ private:
 	 * indicates the feed  number the input is connected to. Configuration dependant
 	 */
 	long m_feedNumber[MAX_SECTION_NUMBER];
+	long m_feedNumberInput[MAX_SECTION_NUMBER];
 	/**
 	 * indicates which section the input belongs to.
 	 */

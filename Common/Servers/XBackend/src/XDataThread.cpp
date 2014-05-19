@@ -36,10 +36,13 @@ void XDataThread::Stop()
 
 void XDataThread::run()
 {
+    bool retval;
+
 	while(ciclo){
 		StartSem.acquire(1);
                 StartSemTp.acquire(1);
-		groupS->GetData(groupS->Xspec.GetNCicli());
+		retval = groupS->GetData(groupS->Xspec.GetNCicli());
+		//retval=groupS->GetData();
 		groupS->countInt++;
 		if(groupS->Xspec.GetNCicli()==0) StopSem.release(1);
                 StartSemTp.release(1);	

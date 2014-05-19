@@ -72,7 +72,8 @@ void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,
 void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
 		XBackendsErrors::NoSettingExImpl)
 {
-	AUTO_TRACE("CCommandLine::stopDataAcquisition()");	
+	AUTO_TRACE("CCommandLine::stopDataAcquisition()");
+    printf("CCommandLine::stopDataAcquisition()\n");
 	if (!getIsBusy()) {
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::stopDataAcquisition()");
 		impl.setReason("transfer job cannot be stopped in this configuration");
@@ -135,8 +136,9 @@ void CCommandLine::resumeDataAcquisition(const ACS::Time& startT)
 	if((m_backendStatus & (1 << SETTING))){
 		m_pcontrolLoop->StartInt();	
 		m_pcontrolLoop->setStop(false);
-	}else{
-		_THROW_EXCPT(XBackendsErrors::NoSettingExImpl,"CCommandLine::resumeDataAcquisition()");
+	}
+    else {
+        _THROW_EXCPT(XBackendsErrors::NoSettingExImpl,"CCommandLine::resumeDataAcquisition()");
 	}
 
 }
@@ -156,9 +158,11 @@ void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExI
 	}
 	checkBackend();//aggiorno lo stato backend
 	if((m_backendStatus & (1 <<DATAREADY))){
+        printf ("suspendDataAcquisition::before m_pcontrolLoop->setStop(true) DATAREADY\n");
 		m_pcontrolLoop->setStop(true);
 	}else if((m_backendStatus & (1 << ACTIVE))){
 	//	m_pcontrolLoop->AbortInt();	
+        printf ("suspendDataAcquisition::before m_pcontrolLoop->setStop(true) ACTIVE\n");
 		m_pcontrolLoop->setStop(true);
 	}else {
 		_THROW_EXCPT(XBackendsErrors::NoSettingExImpl,"CCommandLine::resumeDataAcquisition()");
@@ -240,7 +244,7 @@ void CCommandLine::setAttenuation(const long&secId, const double& attenuation)
 		}
 	}
 	if(m_inputsNumber!=c){
-		_THROW_EXCPT(XBackendsErrors::ErrorConfigurationExImpl,"CCommandLine::setConfiguration()");
+		_THROW_EXCPT(XBackendsErrors::ErrorConfigurationExImpl,"CCommandLine::setAttenuation()");
 	}
 }
 
@@ -412,10 +416,16 @@ void CCommandLine::setConfiguration(const long& secId,const double& freq,const d
 		temp.Setindex(secId);	
 		groupS->Xspec.specificaSezione[secId]=temp;
 		m_bandWidth[secId]=newBW;
+		m_bandWidthInput[secId]=newBW;
+		m_bandWidthInput[secId+1]=newBW;
 		m_sampleRate[secId]=newSR;
 		m_frequency[secId]=newFreq;
+		m_frequencyInput[secId]=newFreq;
+		m_frequencyInput[secId+1]=newFreq;
 		m_bins[secId]=newBins;
 		m_feedNumber[secId]=newFd;
+		m_feedNumberInput[secId]=newFd;
+		m_feedNumberInput[secId+1]=newFd;
 		m_polarization[secId]=(Backends::TPolarization)newPol;
 	}
 	else {
@@ -451,11 +461,23 @@ void CCommandLine::setConfiguration(const long& secId,const double& freq,const d
 			}
 			temp.Setindex(i);
 			groupS->Xspec.specificaSezione[i]=temp;
-			if(newBW!=-1)m_bandWidth[i]=newBW;
+			if(newBW!=-1){
+                m_bandWidth[i]=newBW;
+                m_bandWidthInput[i]=newBW;
+                m_bandWidthInput[i+1]=newBW;
+            }
 			if(newSR!=-1)m_sampleRate[i]=newSR;
-			if(newFreq!=-1)m_frequency[i]=newFreq;
+			if(newFreq!=-1) {
+                m_frequency[i]=newFreq;
+                m_frequencyInput[i]=newFreq;
+                m_frequencyInput[i+1]=newFreq;
+            }
 			if(newBins!=-1)m_bins[i]=newBins;
-			if(newFd!=-1)m_feedNumber[i]=newFd;
+			if(newFd!=-1) {
+                m_feedNumber[i]=newFd;
+                m_feedNumberInput[i]=newFd;
+                m_feedNumberInput[i+1]=newFd;
+            }
 			if(newPol!=-1)m_polarization[i]=(Backends::TPolarization)newPol;
 		}
 	}
@@ -693,9 +715,12 @@ void CCommandLine::getFrequency(ACS::doubleSeq& freq) const
 	AUTO_TRACE("CCommandLine::getFrequency()");
 	CSecAreaResourceWrapper<GroupSpectrometer> line=m_pLink->Get();
 
-	freq.length(m_sectionsNumber);
-	for (int i=0;i<m_sectionsNumber;i++) {
-		freq[i]=m_frequency[i];
+	//freq.length(m_sectionsNumber);
+	//for (int i=0;i<m_sectionsNumber;i++) {
+	freq.length(m_inputsNumber);
+	for (int i=0;i<m_inputsNumber;i++) {
+		freq[i]=ANALOG_FREQUENCY+m_frequencyInput[i];
+		//freq[i]=m_frequency[i];
 	}
 }
 
@@ -713,10 +738,27 @@ void CCommandLine::getFeed(ACS::longSeq& feed) const
 {
 	AUTO_TRACE("CCommandLine::getFeed()");
 
-	feed.length(m_sectionsNumber);
-	for (int i=0;i<m_sectionsNumber;i++) {
-		feed[i]=m_feedNumber[i];
+	//feed.length(m_sectionsNumber);
+	//for (int i=0;i<m_sectionsNumber;i++) {
+	feed.length(m_inputsNumber);
+	for (int i=0;i<m_inputsNumber;i++) {
+		feed[i]=m_feedNumberInput[i];
 	}
+}
+
+void CCommandLine::setFeedC() {
+    m_feedNumber[0]=0;
+	m_feedNumberInput[0]=0;
+    m_feedNumber[1]=0;
+	m_feedNumberInput[1]=0;
+    m_feedNumber[2]=0;
+	m_feedNumberInput[2]=0;
+    m_feedNumber[3]=0;
+	m_feedNumberInput[3]=0;
+	m_feedNumberInput[4]=0;
+	m_feedNumberInput[5]=0;
+	m_feedNumberInput[6]=0;
+	m_feedNumberInput[7]=0;
 }
 
 void CCommandLine::getPolarization(ACS::longSeq& pol) const
@@ -732,9 +774,11 @@ void CCommandLine::getBandWidth(ACS::doubleSeq& bw) const
 {
 	AUTO_TRACE("CCommandLine::getBandWidth()");
 
-	bw.length(m_sectionsNumber);
-	for (int i=0;i<m_sectionsNumber;i++) {
-		bw[i]=m_bandWidth[i];
+	//bw.length(m_sectionsNumber);
+	//for (int i=0;i<m_sectionsNumber;i++) {
+	bw.length(m_inputsNumber);
+	for (int i=0;i<m_inputsNumber;i++) {
+		bw[i]=m_bandWidthInput[i];
 	}
 }
 
@@ -855,8 +899,11 @@ void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& 
 			if (index<size) {
 				chHr[index].id=index;
 				chHr[index].bins=DEFAULT_BINS;
-				chHr[index].bandWidth=head.GetBanda();
-				chHr[index].frequency=MIN_FREQUENCY+(62.5e6+head.GetFlo()-(head.GetBanda())*0.5)*1e-6;		
+				//chHr[index].bandWidth=head.GetBanda();
+				//chHr[index].frequency=ANALOG_FREQUENCY+MIN_FREQUENCY+(62.5e6+head.GetFlo()-(head.GetBanda())*0.5)*1e-6;		
+				chHr[index].bandWidth=m_bandWidth[index];
+				chHr[index].frequency=ANALOG_FREQUENCY+MIN_FREQUENCY+m_frequency[index];		
+                //printf("frequency = %f, bw = %f\n", chHr[index].frequency, chHr[index].bandWidth);
 				if(head.GetModoPol()){
 					chHr[index].inputs=2;
 					chHr[index].polarization=Backends::BKND_FULL_STOKES;
@@ -869,18 +916,22 @@ void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& 
 					chHr[index].attenuation[0]=gainToAttenuation(head.GetGain());
 					chHr[index].attenuation[1]=0;
 				}
-					else{ 
-						chHr[index].inputs=1;
-						chHr[index].polarization=Backends::BKND_RCP;
-						chHr[index].attenuation[0]=0;
-						chHr[index].attenuation[1]=gainToAttenuation(head.GetGain());						
-					}
+				else{ 
+					chHr[index].inputs=1;
+					chHr[index].polarization=Backends::BKND_RCP;
+					chHr[index].attenuation[0]=0;
+					chHr[index].attenuation[1]=gainToAttenuation(head.GetGain());						
+				}
 //				chHr[index].sampleRate=(1/(head.GetBanda()))*1e3;
 //				if(indice<4) S=0;//DA VEDERE SE FUNZIONA !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111
 //				else S=4;
 //				chHr[index].feed=searchFeed(head.GetAdc());
 				chHr[index].feed=m_feedNumber[index];
 				chHr[index].sampleRate=m_sampleRate[index];
+				//chHr[index].IF[0]=m_ifNumber[index];
+				chHr[index].IF[0]=0;
+//				std::cout << "chHr[index].IF[0]" << chHr[index].IF[0] << std::endl;
+				chHr[index].IF[1]=1;
 				index++;
 			}
 			if(tmpD.GetIntestazioneCh1().GetModoPol()==false){
@@ -911,6 +962,10 @@ void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& 
 //						chHr[index].feed=(head.GetAdc()*0.5+S);
 						chHr[index].sampleRate=m_sampleRate[index];
 						chHr[index].feed=m_feedNumber[index];
+						chHr[index].IF[0]=m_ifNumber[index];
+//						std::cout << "chHr[index].IF[0]" << chHr[index].IF[0] << std::endl;
+						chHr[index].IF[1]=0;
+				        //printf("2 chHr[index].polarization = %d, index = %d\n",chHr[index].polarization, index);
 						index++;
 					}					
 				}
@@ -1045,12 +1100,28 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 		m_attenuation[i]=gainToAttenuation(DEFAULT_GAIN);//DEFAULT_ATTENUATION;
 		m_inputSection[i]=(long)(i/2);
 		m_tsys[i]=0.0;	
-		m_tpiZero[i]=0.0;	
+		m_tpiZero[i]=0.0;
 	}
+    m_ifNumber[0] = 0;
+    m_ifNumber[1] = 1;
+    m_ifNumber[2] = 0;
+    m_ifNumber[3] = 1;
+    m_ifNumber[4] = 0;
+    m_ifNumber[5] = 1;
+    m_ifNumber[6] = 0;
+    m_ifNumber[7] = 1;
+    m_ifNumber[8] = 0;
+    m_ifNumber[9] = 1;
+    m_ifNumber[10] = 0;
+    m_ifNumber[11] = 1;
+    m_ifNumber[12] = 0;
+    m_ifNumber[13] = 1;
+
     m_sectionsNumber=DEFAULT_SECTION_NUMBER;
     if (!DEFAULT_POLARIZATION)
         m_sectionsNumber=DEFAULT_SECTION_NUMBER*2;
 
+	m_inputsNumber=DEFAULT_SECTION_NUMBER*2;
 	for( i=0;i<m_sectionsNumber;i++) {
 		m_bandWidth[i]= DEFAULT_BANDWIDTH;
 		m_frequency[i]=DEFAULT_FREQUENCY;
@@ -1061,9 +1132,12 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 		m_bins[i]=DEFAULT_BINS;
 		m_enabled[i]=true;		
 	}
+	for( i=0;i<m_inputsNumber;i++) {
+		m_bandWidthInput[i]= DEFAULT_BANDWIDTH;
+		m_frequencyInput[i]=DEFAULT_FREQUENCY;
+    }
 
 	m_integration=DEFAULT_INTEGRATION;
-	m_inputsNumber=DEFAULT_SECTION_NUMBER*2;
 	//m_sectionsNumber=DEFAULT_SECTION_NUMBER;
     //if (!DEFAULT_POLARIZATION)
         //m_sectionsNumber=DEFAULT_SECTION_NUMBER*2;
@@ -1183,6 +1257,18 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		if(j==MAX_ADC_NUMBER) j=0;
 		else j++;
 	}
+    j=0;
+    i=0;
+	while(i<m_inputsNumber){
+		do{
+			while(!(m_adc[j])) j++;
+			m_feedNumberInput[i]=searchFeed(j);
+			if(m_feedNumberInput[i]==-1) j++;
+		}while((m_feedNumberInput[i]==-1)&&(j<MAX_ADC_NUMBER));
+		i++;
+		if(j==MAX_ADC_NUMBER) j=0;
+		else j++;
+	}
     //printf("initialize configuration end\n");
 //	if (config=="22GHzMultiFeed") { //in order to add a new configuration add an other if
 
@@ -1217,10 +1303,10 @@ void CCommandLine::Init()
 	m_pcontrolLoop->Init();
 	
 	checkBackend();//aggiorno lo stato backend
-	if((m_backendStatus & (1 << SETTING))){
-	}else{
-		_THROW_EXCPT(XBackendsErrors::NoSettingExImpl,"CCommandLine::Init()");
-	}
+	//if((m_backendStatus & (1 << SETTING))){
+	//}else{
+	//	_THROW_EXCPT(XBackendsErrors::NoSettingExImpl,"CCommandLine::Init()");
+	//}
 
 }
 
