@@ -134,7 +134,6 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("goTo","antenna",1,&CCore::remoteCall);
 	m_parser->add("skydipOTF","antenna",1,&CCore::remoteCall);
 	m_parser->add("sidereal","antenna",1,&CCore::remoteCall);
-	m_parser->add("vlsr","antenna",1,&CCore::remoteCall);
 	m_parser->add("bwhm","antenna",1,&CCore::remoteCall);
 	m_parser->add("track","antenna",1,&CCore::remoteCall);
 	m_parser->add("azelOffsets","antenna",1,&CCore::remoteCall);

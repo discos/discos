@@ -600,13 +600,17 @@ void CScheduleExecutor::cleanScan()
 	// clean up backend and writer
 	try {
 		CCore::disableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_writerError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
-		//disableFileWriting();
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
+		ex.log(LM_WARNING);
+	}
+	try {
 		closeBackend();
 		closeWriter();
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
-		m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
-		//ex.log(LM_WARNING);
+		ex.log(LM_WARNING);
 	}
 	m_currentWriterInstance="";
 	m_currentBackendInstance="";
@@ -645,7 +649,14 @@ void CScheduleExecutor::cleanSchedule(bool error)
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
-		//ex.log(LM_WARNING);
+		ex.log(LM_WARNING);
+	}
+	try {
+		closeBackend();
+		closeWriter();
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_WARNING);
 	}
 	// get rid of the schedule file......
 	if (m_scheduleLoaded) {
