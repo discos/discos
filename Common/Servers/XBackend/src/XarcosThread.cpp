@@ -360,6 +360,7 @@ void XarcosThread::runLoop()
 			ACS_DEBUG("XarcosThread::runLoop()"," sto per spedire!!!!! ");
 			try{
 				m_pControl->getSender()->sendData(FLOW_NUMBER,&buffer);
+                //printf("m_pControl->getSender()->sendData(FLOW_NUMBER,&buffer);\n");
 				m_sending=true;
 			}		
 			catch (AVSendFrameErrorExImpl& ex) {

@@ -29,14 +29,24 @@
 			so in order to add a configuration a piece of code in the component shoud reflect the addition.
 		</xs:documentation></xs:annotation>
 		<xs:restriction base="xs:string">
-	    	<xs:enumeration value="22GHzMultiFeed">
+	    	<xs:enumeration value="XK7">
 				<xs:annotation><xs:documentation>
 					the backend is connected to the 14 inputs of the secondary focus 22Ghz 7 feeds receiver 
 				</xs:documentation></xs:annotation>	
 	      	</xs:enumeration>
-	    	<xs:enumeration value="5GHz">
+	    	<xs:enumeration value="XKR">
 				<xs:annotation><xs:documentation>
-					the backend is connected to the 2 inputs of the secondary focus 5Ghz receiver, LCP and RCP are reported respectively 
+					the backend is connected to the central beam and to the right lateral one 
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="XKL">
+				<xs:annotation><xs:documentation>
+					the backend is connected to the central beam and to the left lateral one
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="XC1">
+				<xs:annotation><xs:documentation>
+					the backend is connected to the 2 inputs of the monobeam C band receiver, LCP and RCP are reported respectively 
 				</xs:documentation></xs:annotation>	
 	      	</xs:enumeration>	      	
 		</xs:restriction>

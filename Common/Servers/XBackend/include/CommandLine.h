@@ -258,6 +258,8 @@ public:
 				BackendsErrors::ConnectionExImpl,BackendsErrors::BackendBusyExImpl,
 				XBackendsErrors::ErrorConfigurationExImpl,XBackendsErrors::DisableChInExImpl);
 
+    void setSection(const long& input,const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins);
+
 	/**
 	 * This function will start an acquisition job. The job will be created suspended and requires an explicit
 	 * resum in order to begin the data flow. The backend will just connect to a specific socket.
@@ -501,7 +503,7 @@ private:
 	long searchChIn(long feed);
 	long searchFeed(long ChIn);
 	/**
-	 * This is a pattern variable that soters the status of the component
+	 * This is a pattern variable that stoers the status of the component
 	 */
 	DWORD m_backendStatus;
 	/**
@@ -576,6 +578,8 @@ private:
 	 * @param sta the new antenna status.
 	*/
 	void setStatus(TLineStatus sta);
+
+    bool start;
 
 	/**
 	 * @return the current line status

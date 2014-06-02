@@ -155,7 +155,7 @@ void XBackendsImpl::initialize()
 	//m_parser->add("setIntegration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(commandL,&CCommandLine::setIntegration),1 );
 	m_parser->add("integration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(commandL,&CCommandLine::setIntegration),1 );
 	m_parser->add("setSection",new function7<CCommandLine,non_constant,void_type,I<long_type>,I<double_type>,I<double_type>,I<long_type>,I<long_type>,I<double_type>,I<long_type> >
-					(commandL,&CCommandLine::setConfiguration),7 );
+					(commandL,&CCommandLine::setSection),7 );
 	m_parser->add("setAttenuation", new function2<CCommandLine,non_constant,void_type,I<long_type>,I<double_type> >(commandL,&CCommandLine::setAttenuation),2 );
 	m_parser->add("enable",new function1<CCommandLine,non_constant,void_type,I<longSeq_type> >(commandL,&CCommandLine::setEnabled),1 );
 	m_parser->add("getIntegration",new function1<CCommandLine,constant,void_type,O<long_type> >(commandL,&CCommandLine::getIntegration),0 );
@@ -437,7 +437,7 @@ void XBackendsImpl::terminate()
 	throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("XBackendsImpl::terminate()");
-    printf("XBackendsImpl::terminate()\n");
+    //printf("XBackendsImpl::terminate()\n");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
 		line->stopDataAcquisition();
@@ -486,14 +486,14 @@ void XBackendsImpl::sendData(ACS::Time startTime)
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
 	}
-    line.Release();
-    IRA::CIRATools::Wait(100000);
+    //line.Release();
+    //IRA::CIRATools::Wait(100000);
 }
 
 void XBackendsImpl::sendStop() 
 	throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx)
 {	
-    printf("XBackendsImpl::sendStop()\n");
+    //printf("XBackendsImpl::sendStop()\n");
 	AUTO_TRACE("XBackendsImpl::sendStop()");	
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
@@ -520,11 +520,28 @@ void XBackendsImpl::sendStop()
 		throw dummy.getComponentErrorsEx();
 	}	
 #ifndef BKD_DEBUG
-    line.Release();
-    IRA::CIRATools::Wait(100000);
+    //line.Release();
+    bool active = true;
+    DWORD backendStatus;
+    while (active == true) {
+        //line->checkBackend();
+        line->getBackendStatus(backendStatus);
+        if ((backendStatus & (1 << 2))) { // ACTIVE!!
+            active = true;
+            //printf ("active = %d\n", active);
+        }
+        else {
+            active = false;
+            //printf ("active = %d\n", active);
+        }
+        IRA::CIRATools::Wait(1,0);// TEST!!!!
+    }
+        
+    //IRA::CIRATools::Wait(12,0);// TEST!!!!
+    
 	try {
-        //printf ("sendStop::before getSender()->stopSend(FLOW_NUMBER)\n");
 		getSender()->stopSend(FLOW_NUMBER);
+        //printf ("sendStop::getSender()->stopSend(FLOW_NUMBER)\n");
 	}
 	catch (AVStopSendErrorExImpl& ex) {
 		_ADD_BACKTRACE(BackendsErrors::TXErrorExImpl,impl,ex,"XBackendsImpl::sendStop()");
@@ -993,7 +1010,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 	IRA::CIRATools::Wait(0,100000);
 	*/
 	switch (conf) {
-		case (Backends::XArcos_K7):
+		case (Backends::XArcos_K7): // XK7
 			setSectionsNumber(7);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(0,145,62.5,0,2,125,-1);
@@ -1026,7 +1043,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			setSection(5,-1,-1,4,-1,-1,-1);
 			IRA::CIRATools::Wait(0,100000);
 			break;
-		case (Backends::XArcos_K2R):
+		case (Backends::XArcos_K2R): // XKR
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(0,145,62.5,1,2,125,-1);
@@ -1037,7 +1054,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 			setSection(3,145,62.5,2,2,125,-1);
 			break;
-		case (Backends::XArcos_K2L):
+		case (Backends::XArcos_K2L): // XKL
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(0,-1,-1,0,-1,-1,-1);
@@ -1049,7 +1066,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			setSection(3,-1,-1,4,-1,-1,-1);
 			IRA::CIRATools::Wait(0,100000);
 			break;
-		case (Backends::XArcos_C):
+		case (Backends::XArcos_C): // XC1
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(0,145,62.5,1,2,125,-1);

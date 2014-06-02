@@ -22,6 +22,7 @@ m_GroupSpectrometer(groupS)
 	setStatus(CNTD);//NOTCNTD
 	m_busy=false;
 	m_pcontrolLoop=NULL;
+    start = true;
 }
 
 CCommandLine::~CCommandLine()
@@ -73,7 +74,7 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 		XBackendsErrors::NoSettingExImpl)
 {
 	AUTO_TRACE("CCommandLine::stopDataAcquisition()");
-    printf("CCommandLine::stopDataAcquisition()\n");
+    //printf("CCommandLine::stopDataAcquisition()\n");
 	if (!getIsBusy()) {
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::stopDataAcquisition()");
 		impl.setReason("transfer job cannot be stopped in this configuration");
@@ -148,6 +149,9 @@ void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExI
 {
 
 	AUTO_TRACE("CCommandLine::suspendDataAcquisition()");
+
+    CSecAreaResourceWrapper<GroupSpectrometer> groupS=m_pLink->Get();
+
 	if (!getIsBusy()) { //not suspended....running
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::suspendDataAcquisition()");
 		impl.setReason("transfer job cannot be suspended in present configuration");
@@ -158,11 +162,11 @@ void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExI
 	}
 	checkBackend();//aggiorno lo stato backend
 	if((m_backendStatus & (1 <<DATAREADY))){
-        printf ("suspendDataAcquisition::before m_pcontrolLoop->setStop(true) DATAREADY\n");
+        //printf ("suspendDataAcquisition::before m_pcontrolLoop->setStop(true) DATAREADY\n");
 		m_pcontrolLoop->setStop(true);
 	}else if((m_backendStatus & (1 << ACTIVE))){
 	//	m_pcontrolLoop->AbortInt();	
-        printf ("suspendDataAcquisition::before m_pcontrolLoop->setStop(true) ACTIVE\n");
+        //printf ("suspendDataAcquisition::before m_pcontrolLoop->setStop(true) ACTIVE\n");
 		m_pcontrolLoop->setStop(true);
 	}else {
 		_THROW_EXCPT(XBackendsErrors::NoSettingExImpl,"CCommandLine::resumeDataAcquisition()");
@@ -1094,7 +1098,7 @@ long CCommandLine::searchFeed(long ChIn)
 
 bool CCommandLine::initializeConfiguration(const IRA::CString & config) 
 {
-//	bool ok=false;	
+    if (start == true) {
 	long i=0;
 	for( i=0;i<MAX_INPUT_NUMBER;i++) {
 		m_attenuation[i]=gainToAttenuation(DEFAULT_GAIN);//DEFAULT_ATTENUATION;
@@ -1246,7 +1250,6 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 // *********************
 	int j=0;
 	i=0;
-	//while(i<DEFAULT_SECTION_NUMBER){
 	while(i<m_sectionsNumber){
 		do{
 			while(!(m_adc[j])) j++;
@@ -1269,10 +1272,76 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		if(j==MAX_ADC_NUMBER) j=0;
 		else j++;
 	}
+    start=false;
+    }
+    else {
     //printf("initialize configuration end\n");
-//	if (config=="22GHzMultiFeed") { //in order to add a new configuration add an other if
-
+    if (config=="XK7") { //in order to add a new configuration add an other if
+        setSectionsNumber(7);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(0,145,62.5,0,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(1,145,62.5,1,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(2,145,62.5,2,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(3,145,62.5,3,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(4,145,62.5,4,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(5,145,62.5,5,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(6,145,62.5,6,2,125,-1);
+    }
+    else if (config=="XKR") {
+        setSectionsNumber(4);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(0,145,62.5,1,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(1,145,62.5,1,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(2,145,62.5,2,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(3,145,62.5,2,2,125,-1);
+    }
+    else if (config=="XKL") {
+        setSectionsNumber(4);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(0,-1,-1,0,-1,-1,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(1,-1,-1,0,-1,-1,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(2,-1,-1,4,-1,-1,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(3,-1,-1,4,-1,-1,-1);
+		IRA::CIRATools::Wait(0,100000);
+    }
+    else if (config=="XC1") {
+        setSectionsNumber(4);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(0,145,62.5,1,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(1,145,62.5,1,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(2,145,62.5,1,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(3,145,62.5,1,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+	    setFeedC();
+    }
+    else
+        return false;
+    }
 	return true;
+}
+
+void CCommandLine::setSection(const long& input,const double& freq,const double& bw,
+	const long& feed,const long& pol, const double& sr,const long& bins)
+{
+    setConfiguration(input,freq-ANALOG_FREQUENCY,bw,feed,pol,sr,bins);//Ricezione Specificha Nuova
+	setAttenuation(input,-1);
+    Init();//Configurazione nell'HW 
+	getConfiguration();
 }
 
 void CCommandLine::getTsys(ACS::doubleSeq& tsys) const
