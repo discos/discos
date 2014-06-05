@@ -48,6 +48,13 @@ class SetupTest(unittest2.TestCase):
                 self.derotator.getActPosition()
         )
 
+    def test_offset(self):
+        """Verify the setup clears the offset."""
+        self.positioner.setup('KKG')
+        self.positioner.setOffset(1.5)
+        self.positioner.setup('KKG')
+        self.assertEqual(self.positioner.getOffset(), 0)
+
 
 if __name__ == '__main__':
     unittest2.main()

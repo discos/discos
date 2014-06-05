@@ -1,3 +1,4 @@
+from multiprocessing import Queue
 from Receivers__POA import DewarPositioner as POA
 from Acspy.Servants.CharacteristicComponent import CharacteristicComponent as cc
 from Acspy.Servants.ContainerServices import ContainerServices as services
@@ -11,19 +12,28 @@ import DerotatorErrorsImpl
 import DerotatorErrors 
 
 from DewarPositioner.configuration import CDBConf
+from DewarPositioner.positioner import Positioner
+
 from IRAPy import logger
 
 
 class DewarPositionerImpl(POA, cc, services, lcycle):
+
+    modes = {
+            'tracking': ('FIXED', 'OPTIMIZED'),
+            'rewinding': ('AUTO', 'MANUAL')
+    }
+
     def __init__(self):
         cc.__init__(self)
         services.__init__(self)
-        # self.positioner = Positioner() # TODO: Give it the parameters!
+
         self.cdbconf = CDBConf()
-        self._clearConfiguration() #  Offset, actualSetup and commandedSetup
+        self._setDefaultConfiguration() 
 
     def initialize(self):
         addProperty(self, 'fooProperty')
+    
 
     def setup(self, code):
         self.commandedSetup = code.upper()
@@ -59,8 +69,20 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(raeson)
             raise exc
 
+        self.setRewindingMode('AUTO')
         self.actualSetup = self.commandedSetup
 
+    def setTrackingMode(self, mode):
+        self._setMode('tracking', mode)
+
+    def getTrackingMode(self):
+        return self.trackingMode
+
+    def setRewindingMode(self, mode):
+        self._setMode('rewinding', mode)
+
+    def getRewindingMode(self):
+        return self.rewindingMode
 
     def isConfigured(self):
         return self.commandedSetup == self.actualSetup
@@ -72,8 +94,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         return self.commandedSetup
 
     def park(self):
+        self.stopTracking()
         self._checkConfiguration() # Raises NotAllowedEx if the check fails
-        self._clearConfiguration()
+        self._setDefaultConfiguration()
         self._setPosition(0) # The method adds both offset and starting position 
 
     def getPosition(self):
@@ -92,10 +115,30 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc
 
     def startTracking(self):
-        self.positioner.start() # Start the daemon
+        if not self.getTrackingMode():
+            raeson = "tracking mode not selected: call setTrackingMode()"
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(raeson)
+            raise exc
+        elif not self.isConfigured():
+            raeson = "system not yet configured: a setup() is required"
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(raeson)
+            raise exc
+        else:
+            # Sistema configurato: OK tracking Mode, OK rewinding Mode
+            pass
+        # Se e' in tracking, un nuovo startTracking cosa fa?
+
+        # self.positioner = Positioner(self, 1, 2, 3) # Passo i vari argomenti
+        # self.positioner.start() # Start the daemon
+        raise NotImplementedError('method not yet implemented')
 
     def stopTracking(self):
-        self.positioner.terminate()
+        # self.positioner.terminate()
+        pass
 
     def isReady(self):
         try:
@@ -128,10 +171,13 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def getOffset(self):
         return self.offset
-    
-    def _clearConfiguration(self):
+
+    def _setDefaultConfiguration(self):
+        self.positioner = None
         self.actualSetup = 'unknown'
         self.commandedSetup = ''
+        self.rewindingMode = ''
+        self.trackingMode = ''
         self._clearOffset()
 
     def _setPosition(self, position):
@@ -181,4 +227,24 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
     
     def _setOffset(self, offset):
         self.offset = offset
+
+    def _setMode(self, mode_type, mode):
+        try:
+            modes = DewarPositionerImpl.modes[mode_type]
+        except KeyError:
+            raeson = "_setMode(): mode type %s not in %s" %(
+                    mode_type, DewarPositionerImpl.modes.keys())
+            logger.logDebug(raeson)
+            exc = ComponentErrorsImpl.ValidationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc # Can happen only in case of wrong system input
+        if mode not in modes:
+            raeson = '%s mode %s unknown. Allowed modes: %s' %(mode_type, mode, modes)
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.ValidationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        else:
+            setattr(self, mode_type + 'Mode', mode)
+
 

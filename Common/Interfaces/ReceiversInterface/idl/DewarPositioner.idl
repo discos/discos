@@ -24,6 +24,10 @@ module Receivers {
          * derotator component reference and initializes the DewarPositioner. 
          * For instance, by giving the code KKG, the DewarPositioner gets the 
          * KBandDerotator reference and performs its setup.
+         * The setup() method sets the offset and rewinding mode default values:
+         *
+         *     setOffset(0)
+         *     setRewindingMode(AUTO)
          */
         void setup(in string code) raises (
             ComponentErrors::ValidationErrorEx,
@@ -34,7 +38,16 @@ module Receivers {
         );
 
 
-        /** Put the derotator in the park position and clear the offset */
+        /** Put the derotator in the park position and reset the configuration
+         *  
+         * This method sets the default values:
+         * 
+         *   + setOffset(0)
+         *   + setPosition(0)
+         *   + actualSetup = 'unknown'
+         *   + commandedSetup = ''
+         *   + rewindingMode = ''
+         */
         void park() raises (ComponentErrors::NotAllowedEx);
 
  
@@ -50,8 +63,12 @@ module Receivers {
         void clearOffset() raises (ComponentErrors::NotAllowedEx);
 
         
-        /** Start the parallactic angle correction */
-        void startTracking();
+        /** Start the parallactic angle correction 
+         * 
+         * It raises a NotAllowedEx either when the tracking mode is not yet selected
+         * or the system is not configured.
+         */
+        void startTracking() raises (ComponentErrors::NotAllowedEx);
 
 
         /** Stop the parallactic angle correction */
@@ -72,6 +89,27 @@ module Receivers {
 
         /** Return true when the derotator is moving */
         boolean isSlewing();
+
+
+        /** Set the rewinding mode to "AUTO" or "MANUAL" */
+        void setRewindingMode(in string mode) raises (ComponentErrors::ValidationErrorEx);
+
+
+        /** Get the rewinding mode */
+        string getRewindingMode();
+
+
+        /** Set the tracking mode to "FIXED" or "OPTIMIZED"
+         *
+         * This method does not start the tracking, but just enable it. Once the tracking mode is
+         * selected, the tracking can be started by calling the startTracking() method.
+         * See the documentation for more details about the mode meaning.
+         */
+        void setTrackingMode(in string mode) raises (ComponentErrors::ValidationErrorEx);
+
+
+        /** Get the tracking mode */
+        string getTrackingMode();
 
 
         /** Return true when the derotator is rewinding */
