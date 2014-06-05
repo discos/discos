@@ -39,7 +39,7 @@
 namespace SimpleParser {
 class PolarizationToString {
 public:
-	static char *valToStr(long& val) {
+	char *valToStr(const long& val) {
 		char *c=new char[16];
 		if (val==Backends::BKND_LCP) {
 			strcpy(c,"LEFT");
@@ -53,7 +53,7 @@ public:
 		return c;
 	}
 	
-	static long strToVal(const char* str) {
+	long strToVal(const char* str) {
 		IRA::CString strVal(str);
 		strVal.MakeUpper();
 		if (strVal=="LEFT") {
