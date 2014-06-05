@@ -269,7 +269,7 @@ int main(int argc, char *argv[]) {
 		IRA::CString out;
 		_EXCPT_TO_CSTRING(out,ex);
 		printf("%s\n",(const char *)out);		
-	}	
+	}
 	return 0;
 }
 

@@ -10,9 +10,10 @@ enum TBools {
 };
 
 namespace SimpleParser {
+
 class BoolsString {
 public:
-	static char *valToStr(TBools& val) {
+	char *valToStr(const TBools& val) {
 		char *c=new char[16];
 		if (val==VERO) {
 			strcpy(c,"VERO");
@@ -22,7 +23,7 @@ public:
 		}
 		return c;
 	}
-	static TBools strToVal(const char* str) {
+	TBools strToVal(const char* str) {
 		IRA::CString strVal(str);
 		strVal.MakeUpper();
 		if (strVal=="VERO") {

@@ -68,10 +68,12 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 	elem=checkCommand(command,instr,inParams,parNum,timeTagged,timeCommand,execTime,execInterval); // throws exceptions
 	if (!timeTagged) {   //sync operations
 		if (elem->m_type==PROCEDURE){
+			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Procedure issued {%s}",(const char *)command));
 			pushProcedure(instr,elem->m_procedure,inParams,parNum); // throws ProcedureErrorExImpl
 			return instr+m_answerDelimiter;  //it informs that the procedure seems to be correct and it will be executed 
 		}	
 		else if (elem->m_type==COMMAND) {
+			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Command issued {%s}",(const char *)command));
 			// polimorphic cast...allowed because the CFunctor derives from CBaseFunction
 			CFunctor<OBJ> * function = dynamic_cast<CFunctor<OBJ> *>(elem->m_func);
 			//try {
@@ -87,6 +89,7 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 			return instr+m_answerDelimiter+answer;
 		}
 		else if (elem->m_type==SYSTEMCALL) {
+			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Command issued {%s}",(const char *)command));
 			IRA::CString composeCall;
 			composeCall=elem->m_syscall;
 			for (WORD k=0;k<parNum;k++) {

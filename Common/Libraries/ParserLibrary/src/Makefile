@@ -36,15 +36,20 @@
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     =
-EXECUTABLES_L   = Test1 Test2
+EXECUTABLES_L   = TestFunctions TestParser TestTypes
+
 
 #
 # <brief description of xxxxx program>
-Test1_OBJECTS   = TestFunctions	
-Test1_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors
+TestFunctions_OBJECTS   = TestFunctions	
+TestFunctions_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors
 
-Test2_OBJECTS   = TestParser	
-Test2_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors
+TestParser_OBJECTS   = TestParser	
+TestParser_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors
+
+TestTypes_OBJECTS   = TestTypes	
+TestTypes_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors
+
 
 #
 # Includes (.h) files (public only)
