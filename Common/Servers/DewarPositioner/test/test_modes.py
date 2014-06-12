@@ -13,7 +13,7 @@ class ModeTest(unittest2.TestCase):
     def test_wrong_mode(self):
         """The set* methods must raise a ValidationErrorEx in case of wrong mode"""
         self.assertRaises(ValidationErrorEx, self.dp.setRewindingMode, 'FOO')
-        self.assertRaises(ValidationErrorEx, self.dp.setTrackingMode, 'FOO')
+        self.assertRaises(ValidationErrorEx, self.dp.setUpdatingMode, 'FOO')
 
     def test_right_mode(self):
         """The argument of set* must be returned by get* in case of right mode"""
@@ -21,10 +21,10 @@ class ModeTest(unittest2.TestCase):
         self.assertEqual(self.dp.getRewindingMode(), 'AUTO')
         self.dp.setRewindingMode('MANUAL')
         self.assertEqual(self.dp.getRewindingMode(), 'MANUAL')
-        self.dp.setTrackingMode('FIXED')
-        self.assertEqual(self.dp.getTrackingMode(), 'FIXED')
-        self.dp.setTrackingMode('OPTIMIZED')
-        self.assertEqual(self.dp.getTrackingMode(), 'OPTIMIZED')
+        self.dp.setUpdatingMode('FIXED')
+        self.assertEqual(self.dp.getUpdatingMode(), 'FIXED')
+        self.dp.setUpdatingMode('OPTIMIZED')
+        self.assertEqual(self.dp.getUpdatingMode(), 'OPTIMIZED')
 
 
 if __name__ == '__main__':

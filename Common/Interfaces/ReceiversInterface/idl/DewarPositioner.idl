@@ -88,12 +88,12 @@ module Receivers {
         
         /** Start the parallactic angle correction 
          * 
-         * It raises a NotAllowedEx either when the tracking mode is not yet selected
+         * It raises a NotAllowedEx either when the updating mode is not yet selected
          * or the system is not configured.
          *
          * @throw ComponentErrors::NotAllowedEx
          */
-        void startTracking() raises (ComponentErrors::NotAllowedEx);
+        void startUpdating() raises (ComponentErrors::NotAllowedEx);
 
 
         /** Stop the parallactic angle correction
@@ -101,7 +101,7 @@ module Receivers {
          * @throw ComponentErrors::OperationErrorEx,
          * @throw ComponentErrors::UnexpectedEx
          */
-        void stopTracking() raises (
+        void stopUpdating() raises (
             ComponentErrors::OperationErrorEx,
             ComponentErrors::UnexpectedEx
         );
@@ -133,6 +133,10 @@ module Receivers {
         );
 
 
+        /** Return true when the derotator is updating the position */
+        boolean isUpdating();
+
+
         /** Return true when the derotator is moving
          *
          * @throw ComponentErrors::OperationErrorEx,
@@ -156,20 +160,20 @@ module Receivers {
         string getRewindingMode();
 
 
-        /** Set the tracking mode to "FIXED" or "OPTIMIZED"
+        /** Set the updating mode to "FIXED" or "OPTIMIZED"
          *
-         * This method does not start the tracking, but just enable it. Once the tracking mode is
-         * selected, the tracking can be started by calling the startTracking() method.
+         * This method does not start the updating, but just enable it. Once the updating mode is
+         * selected, the updating can be started by calling the startUpdating() method.
          * See the documentation for more details about the mode meaning.
          *
-         * @param mode the tracking mode ("FIXED" or "OPTIMIZED")
+         * @param mode the updating mode ("FIXED" or "OPTIMIZED")
          * @throw ComponentErrors::ValidationErrorEx
          */
-        void setTrackingMode(in string mode) raises (ComponentErrors::ValidationErrorEx);
+        void setUpdatingMode(in string mode) raises (ComponentErrors::ValidationErrorEx);
 
 
-        /** Get the tracking mode */
-        string getTrackingMode();
+        /** Get the updating mode */
+        string getUpdatingMode();
 
 
         /** Return true when the derotator is rewinding */

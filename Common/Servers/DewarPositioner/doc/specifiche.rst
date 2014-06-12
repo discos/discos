@@ -24,13 +24,13 @@ all'asse di elevazione (**asse di elevazione o z**?). Durante il ``setup()``
 viene impostato il valore di default ``OFFSET=0``.
 
 
-Impostare la modalita' di tracking
+Impostare la modalita' di updating
 ==================================
-Il metodo ``setTrackingMode(MODE)`` abilita il tracking del derotatore (lo
-abilita, non avvia la movimentazione). 
+Il metodo ``setUpdatingMode(MODE)`` abilita l'aggiornamento della posizione
+del derotatore (lo abilita, non avvia la movimentazione). 
 ``MODE`` puo' essere ``FIXED`` o ``OPTIMIZED``.
 
-Il metodo ``getTrackingMode()`` restituisce la modalita' di tracking
+Il metodo ``getUpdatingMode()`` restituisce la modalita' di aggiornamento
 impostata.
 
 
@@ -52,38 +52,39 @@ azimuth. La posizione da comandare sara' quindi::
 
 Cambio modalita'
 ----------------
-Quando si vuole cambiare modalita' di tracking bisogna
-fermare il tracking e riavviarlo::
+Quando si vuole cambiare modalita' di aggiornamento bisogna
+fermare l'aggiornamento e riavviarlo::
 
-    setTrackingMode('OPTIMIZED')
-    startTracking() # Avvia il tracking AUTO
+    setUpdatingMode('OPTIMIZED')
+    startUpdating() # Avvia l'aggiornamento di tipo OPTIMIZED
 
-    # Se ora voglio cambiare modalita' di tracking:
-    stopTracking()
-    setTrackingMode('FIXED')
-    startTracking()
+    # Se ora voglio cambiare modalita' di aggiornamento:
+    stopUpdating()
+    setUpdatingMode('FIXED')
+    startUpdating()
 
 
-Avviare il tracking
-===================
-Il tracking viene avviato con il metodo ``startTracking()``. Questo viene
+Avviare l'aggiornamento
+=======================
+L'aggiornamento viene avviato con il metodo ``startUpdating()``. Questo viene
 chiamato passandogli i parametri della scansione, ovvero l'asse, la direzione
 e il settore di azimuth, indipendentemente dal fatto che la modalita'
 impostata sia ``FIXED`` o ``OPTIMIZED``::
 
-    startTracking(axis, direction, azimuth_section)
+    startUpdating(axis, direction, azimuth_section)
 
 La posizione del derotatore verra' aggiornata con l'equazione (1) se 
-la modalita' di tracking e' ``FIXED``, con la (2) se e' ``OPTIMIZED``.
+la modalita' di aggiornamento e' ``FIXED``, con la (2) se e' ``OPTIMIZED``.
 
-Se il sistema e' gia' in tracking e viene chiamato ``startTracking()``,
+Se il sistema sta gia' aggiornando e viene chiamato ``startUpdating()``,
 il posizionamento avverra' calcolando K (in caso di ``OPTIMIZED``)
 sulla base dei nuovi argomenti.
 
 
-Interrompere il tracking
-========================
-Il metodo ``stopTracking()`` interrompe il tracking.
+Interrompere l'aggiornamento
+============================
+Il metodo ``stopUpdating()`` interrompe l'aggiornamento della posizione.
+
 
 Riavvolgimento
 ==============
@@ -104,6 +105,7 @@ metodo imposta anche la modalita' ``AUTO``, qualora non fosse gia' impostata.
 In caso di modalita' ``MANUAL``, quando si arriva a fine corsa si ha::
 
     isTracking() #-> false
+    isUpdating() #-> false
     isRewindingRequired() #-> true
     # Messaggio di WARNING a log
 
@@ -117,6 +119,7 @@ Durante il riavvolgimento::
 
     isRewinding() #-> true
     isTracking() #-> false
+    isUpdating() #-> ?
 
 Stima del tempo residuo di derotazione
 ======================================
@@ -126,15 +129,16 @@ di derotazione.
 Parcheggio del derotatore
 =========================
 Il metodo ``park()`` disabilita il derotatore *resettando* la modalita'
-di tracking, cancellando gli offset, la configurazione attuale e comandata,
+di aggiornamento, cancellando gli offset, la configurazione attuale e comandata,
 la modalita' di riavvolgimento ecc. Infine posiziona il derotatore in 
-parcheggio.
+parcheggio. Al termine del park() il sistema non sara' piu' configurato, per cui
+isConfigured() restituira' False.
 
-Avvio del tracking
-==================
-Il metodo ``startTracking()`` avvia il tracking del derotatore sulla base della
-modalita' selezionata. Se non e' stata ancora selezionata la modalita' di tracking,
-solleva una eccezione di tipo NotAllowedExImpl.
+Avvio dell'aggiornamento
+========================
+Il metodo ``startUpdating()`` avvia l'aggiornamento della posizione del derotatore 
+sulla base della modalita' selezionata. Se non e' stata ancora selezionata la 
+modalita' di aggiornamento, solleva una eccezione di tipo NotAllowedEx
 
 Elenco completo dei metodi
 ==========================
@@ -153,11 +157,12 @@ Di seguito l'elenco completo dei metodi::
 
     # getPosition()
 
-    # setTrackingMode(MODE) # MODE: FIXED or OPTIMIZED
-    # getTrackingMode()
-    startTracking(AXIS, DIRECTION, AZ_SECTION)
-    stopTracking()
+    # setUpdatingMode(MODE) # MODE: FIXED or OPTIMIZED
+    # getUpdatingMode()
+    startUpdating(AXIS, DIRECTION, AZ_SECTION)
+    stopUpdating()
     # isTracking()
+    # isUpdating()
     # isSlewing()
 
     # setRewindingMode(MODE) # MODE: MANUAL or AUTO (default)
@@ -173,27 +178,27 @@ Di seguito l'elenco completo dei metodi::
 Esempio di utilizzo 
 ===================
 Supponiamo di voler usare il banda K con derotatore in modalita' di rewind 
-``AUTO`` (default) e modalita' di tracking ``OPTIMIZED``. I metodi del 
+``AUTO`` (default) e modalita' di aggioramento ``OPTIMIZED``. I metodi del 
 ``DewarPositioner`` da chiamare risultano::
 
     setup('KKG')
-    setTrackingMode(OPTIMIZED)
-    startTracking(axis, direction, azimuth_section)
+    setUpdatingMode(OPTIMIZED)
+    startUpdating(axis, direction, azimuth_section)
 
 
 Il metodo ``DewarPositioner.setup('KKG')`` viene chiamato dal setup globale::
 
     setupKKG #-> DewarPositioner.setup('KKG')
 
-Il metodo ``setTrackingMode()`` viene chiamato quando l'astronomo da operator
-input da il comando (ad esempio) ``setDerotatorTrackingMode``::
+Il metodo ``setUpdatingMode()`` viene chiamato quando l'astronomo da operator
+input da il comando (ad esempio) ``setDerotatorUpdatingMode``::
 
-    setDerotatorTrackingMode=OPT #-> DewarPositioner.setTrackingMode(OPTIMIZED)
+    setDerotatorUpdatingMode=OPT #-> DewarPositioner.setUpdatingMode(OPTIMIZED)
 
-Il metodo ``startTracking()`` verra' chiamato invece dallo scheduler. Quindi
+Il metodo ``startUpdating()`` verra' chiamato invece dallo scheduler. Quindi
 in definitiva, per utilizzare la modalita' oggetto di questo esempio, da
 operator input::
 
     setupKKG
-    setDerotatorTrackingMode=OPT
+    setDerotatorUpdatingMode=OPT
 

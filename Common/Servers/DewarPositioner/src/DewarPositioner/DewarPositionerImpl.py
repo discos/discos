@@ -21,7 +21,7 @@ from IRAPy import logger
 class DewarPositionerImpl(POA, cc, services, lcycle):
 
     modes = {
-            'tracking': ('FIXED', 'OPTIMIZED'),
+            'updating': ('FIXED', 'OPTIMIZED'),
             'rewinding': ('AUTO', 'MANUAL')
     }
 
@@ -96,9 +96,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc
 
 
-    def startTracking(self):
-        if not self.getTrackingMode():
-            raeson = "tracking mode not selected: call setTrackingMode()"
+    def startUpdating(self):
+        if not self.getUpdatingMode():
+            raeson = "updating mode not selected: call setUpdatingMode()"
             logger.logError(raeson)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(raeson)
@@ -109,17 +109,23 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(raeson)
             raise exc
+        elif self.positioner.isUpdating():
+            raeson = "the positioner is busy: a stopUpdating() is required"
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(raeson)
+            raise exc
         else:
-            # Sistema configurato: OK tracking Mode, OK rewinding Mode
+            # Sistema configurato: OK updating Mode, OK rewinding Mode
             pass
-        # Se e' in tracking, un nuovo startTracking cosa fa?
+        # Se sta aggiornando, un nuovo startUpdating cosa fa?
 
         # self.positioner = Positioner(self, 1, 2, 3) # Passo i vari argomenti
         # self.positioner.start() # Start the daemon
         raise NotImplementedError('method not yet implemented')
 
 
-    def stopTracking(self):
+    def stopUpdating(self):
         try:
             self.positioner.stop()
         except PositionerError, ex:
@@ -186,6 +192,10 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc
 
 
+    def isUpdating(self):
+        return self.positioner.isUpdating()
+
+
     def setOffset(self, offset):
         try:
             self.positioner.setOffset(offset)
@@ -230,12 +240,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         return self.commandedSetup
 
 
-    def setTrackingMode(self, mode):
-        self._setMode('tracking', mode)
+    def setUpdatingMode(self, mode):
+        self._setMode('updating', mode)
 
 
-    def getTrackingMode(self):
-        return self.trackingMode
+    def getUpdatingMode(self):
+        return self.updatingMode
 
 
     def setRewindingMode(self, mode):
@@ -250,7 +260,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self.actualSetup = 'unknown'
         self.commandedSetup = ''
         self.rewindingMode = ''
-        self.trackingMode = ''
+        self.updatingMode = ''
 
 
     def _setMode(self, mode_type, mode):
