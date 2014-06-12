@@ -1,5 +1,4 @@
 from __future__ import with_statement
-import threading
 import time
 
 import ComponentErrorsImpl
@@ -24,12 +23,13 @@ class Control(object):
         self.offset = 0.0
 
 class Positioner(object):
-    lock = threading.Lock()
+
     def __init__(self):
         self.t = None
         self.device_name = ''
         self.control = Control()
         self.is_configured = False
+
 
     def setup(self, device_name, starting_position=0):
         """Configure the positioner.
@@ -40,36 +40,33 @@ class Positioner(object):
             setup('RECEIVERS/SRTKBandDerotator')
 
         An optional `starting_position` can be given. This position will be
-        a reference, so will be added to any position we command.
-        A setup() performs a call to Positioner.stop() in order to stop a
-        previous active process.
+        added to any position we command. A setup() performs a call to 
+        Positioner.stop() in order to stop a previous active process.
         """
         if self.isUpdating():
-            self.stop() # Raise a PositionerError if the process stills alive
+            self.stop() # Raises a PositionerError if the process stills alive
 
         self.device_name = device_name
         self.control.starting_position = starting_position
         self.client = PySimpleClient()
  
         try:
-            # Positioner.lock.acquire()
             self.device = self.client.getComponent(device_name)
             self.device.setup()
             self._clearOffset()
             self.is_configured = True
             self.start(goto, self.control.starting_position)
         except CannotGetComponentEx, ex:
+            raeson = "cannot get the %s component: %s" %(device_name, ex.message)
             logger.logError(ex.message)
-            raise
-        except Exception, ex:
-            raeson = 'cannot perform the %s setup: %s' %(device_name, ex.message)
+            raise PositionerError(ex.message)
+        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+            raeson = "cannot set the %s position: %s" %(device_name, ex.message)
             logger.logError(raeson)
-            exc = ComponentErrorsImpl.UnexpectedExImpl()
-            exc.setReason(raeson)
-            raise exc
-        finally:
-            # Positioner.lock.release()
-            pass
+            raise PositionerError(reason)
+        except Exception, ex:
+            logger.logError(ex.message)
+            raise PositionerError(ex.message)
 
 
     def isConfigured(self):
@@ -80,7 +77,8 @@ class Positioner(object):
         if self.isConfigured():
             return self.device_name
         else:
-            raise PositionerError('Positioner not configured, a setup() is required')
+            raise PositionerError('positioner not configured, a setup() is required')
+
 
     def isReady(self):
         return self.isConfigured() and self.device.isReady()
@@ -111,7 +109,7 @@ class Positioner(object):
             )
             self.t.start()
         else:
-            raise PositionerError('Positioner not configured, a setup() is required')
+            raise PositionerError('positioner not configured, a setup() is required')
         
 
     def stop(self):
@@ -120,7 +118,7 @@ class Positioner(object):
             self.control.stop = True
             self.t.join(timeout=10)
             if self.t.isAlive():
-                PositionerError('Thread %s is alive' %self.t.getName())
+                PositionerError('thread %s is alive' %self.t.getName())
         except AttributeError:
             pass # self.t is None because the system is not yet configured
         finally:
@@ -133,9 +131,9 @@ class Positioner(object):
             self._clearOffset()
             self.start(goto, self.control.starting_position)
             self.is_configured = False
-            # Has the derotator the method park()? In that case I have to call it
+            self.client.releaseComponent(self.device_name)
         else:
-            raise PositionerError('Positioner not configured, a setup() is required')
+            raise PositionerError('positioner not configured, a setup() is required')
 
 
     def isTerminated(self):
@@ -154,51 +152,41 @@ class Positioner(object):
             control.updating = True
 
             # Verify the component is ready to move
-            try:
-                # Positioner.lock.acquire()
-                if not device.isReady():
-                    logger.logError("%s not ready to move: a setup() is required" 
-                            %device._get_name())
-                    # TODO: error communication
-                    return
-            finally:
-                # Positioner.lock.release()
-                pass
+            if not device.isReady():
+                logger.logError("%s not ready to move: a setup() is required" 
+                        %device._get_name())
+                # TODO: error communication
+                return
  
             for position in posgen(*vargs):
                 if control.stop:
                     break
                 target = control.starting_position + control.offset + position
-                try:
-                    # Positioner.lock.acquire()
-                    if device.getMinLimit() < target < device.getMaxLimit():
-                        try:
-                            device.setPosition(target)
-                        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
-                            raeson = "cannot set the %s position" %device._get_name()
-                            logger.logError('%s: %s' %(raeson, ex.message))
-                            # TODO: error communication
-                            break
-                        except Exception, ex:
-                            raeson = "unknown exception setting the %s position" %device._get_name()
-                            logger.logError('%s: %s' %(raeson, ex.message))
-                            # TODO: error communication
-                            break
-                    else:
-                        logger.logError("position %.2f out of range (%.2f, %.2f)" 
-                                %(target, device.getMinLimit(), device.getMaxLimit()))
-                        # TODO: REWINDING!
-                finally:
-                    # Positioner.lock.release()
-                    pass
+                if device.getMinLimit() < target < device.getMaxLimit():
+                    try:
+                        device.setPosition(target)
+                    except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+                        raeson = "cannot set the %s position" %device._get_name()
+                        logger.logError('%s: %s' %(raeson, ex.message))
+                        # TODO: error communication
+                        break
+                    except Exception, ex:
+                        raeson = "unknown exception setting the %s position" %device._get_name()
+                        logger.logError('%s: %s' %(raeson, ex.message))
+                        # TODO: error communication
+                        break
+                else:
+                    logger.logError("position %.2f out of range (%.2f, %.2f)" 
+                            %(target, device.getMinLimit(), device.getMaxLimit()))
+                    # TODO: REWINDING!
 
         except KeyboardInterrupt:
-            logger.logInfo('Stopping Positioner.updatePosition() due to KeyboardInterrupt')
+            logger.logInfo('stopping Positioner.updatePosition() due to KeyboardInterrupt')
         except AttributeError, ex:
-            logger.logError('Positioner.updatePosition(): attribute error')
-            logger.logDebug('Positioner.updatePosition(): %s' %ex)
+            logger.logError('positioner.updatePosition(): attribute error')
+            logger.logDebug('positioner.updatePosition(): %s' %ex)
         except Exception, ex:
-            logger.logError('Unexcpected exception in Positioner.updatePosition(): %s' %ex)
+            logger.logError('unexcpected exception in Positioner.updatePosition(): %s' %ex)
         finally:
             control.updating = False
             # logger.logInfo('Positioner.updatePosition() stopped @ %s' %datetime.utcnow())
@@ -238,14 +226,8 @@ class Positioner(object):
 
     def getPosition(self):
         if self.isConfigured():
-            try:
-                #Positioner.lock.acquire()
-                position = self.device.getActPosition()
-                return position
-            finally:
-                #Positioner.lock.release()
-                pass
+            return self.device.getActPosition()
         else:
-            raise PositionerError('Positioner not configured, a setup() is required')
+            raise PositionerError('positioner not configured, a setup() is required')
 
 

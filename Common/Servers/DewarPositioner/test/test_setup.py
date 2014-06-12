@@ -1,8 +1,7 @@
 import unittest2
 import time
 
-from ComponentErrors import ValidationErrorEx
-from maciErrType import CannotGetComponentEx
+from ComponentErrors import ValidationErrorEx, OperationErrorEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 from DewarPositioner.configuration import CDBConf
@@ -20,14 +19,14 @@ class SetupTest(unittest2.TestCase):
 
     def test_not_available(self):
         """When the derotator is not available, a CannotGetComponentEx must be raised"""
-        self.assertRaises(CannotGetComponentEx, self.positioner.setup, 'TEST')
+        self.assertRaises(OperationErrorEx, self.positioner.setup, 'TEST')
 
     def test_rightcode(self):
         """Verify after a setup the component is properly configured"""
         code = 'KKG'
         try:
             self.positioner.setup(code)
-        except CannotGetComponentEx, ex:
+        except OperationErrorEx, ex:
             print "The derotator is not available"
         self.assertEqual(code, self.positioner.getActualSetup())
 

@@ -43,29 +43,13 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self.cdbconf.setup(self.commandedSetup)
         device_name = self.cdbconf.get_entry('derotator_name')
         starting_position = self.cdbconf.get_entry('starting_position') 
-            
         try:
             self.positioner.setup(device_name, starting_position)
             self.setRewindingMode('AUTO')
             self.actualSetup = self.commandedSetup
-        except CannotGetComponentEx, ex:
-            logger.logError(ex.message)
-            raise
         except PositionerError, ex:
             raeson = '%s' %ex.message
             logger.logError(raeson)
-            exc = ComponentErrorsImpl.OperationErrorExImpl()
-            exc.setReason(raeson)
-            raise exc
-        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
-            raeson = "cannot set the %s position" %device_name
-            logger.logError('%s: %s' %(raeson, ex.message))
-            exc = ComponentErrorsImpl.OperationErrorExImpl()
-            exc.setReason(raeson)
-            raise exc
-        except (DerotatorErrors.ConfigurationErrorEx, ComponentErrors.ComponentErrorsEx), ex:
-            raeson = "cannot perform the %s setup" %device_name
-            logger.logError('%s: %s' %(raeson, ex.message))
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc
@@ -75,26 +59,6 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
-    def setTrackingMode(self, mode):
-        self._setMode('tracking', mode)
-
-    def getTrackingMode(self):
-        return self.trackingMode
-
-    def setRewindingMode(self, mode):
-        self._setMode('rewinding', mode)
-
-    def getRewindingMode(self):
-        return self.rewindingMode
-
-    def isConfigured(self):
-        return self.positioner.isConfigured() and self.commandedSetup == self.actualSetup
-
-    def getActualSetup(self):
-        return self.actualSetup
-
-    def getCommandedSetup(self):
-        return self.commandedSetup
 
     def park(self):
         try:
@@ -130,6 +94,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
             raise exc
+
 
     def startTracking(self):
         if not self.getTrackingMode():
@@ -169,25 +134,117 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc
 
 
+    def isConfigured(self):
+        return self.positioner.isConfigured()
+
+
     def isReady(self):
-        return self.positioner.isReady()
+        try:
+            return self.positioner.isReady()
+        except DerotatorErrors.CommunicationErrorEx, ex:
+            raeson = "cannot known if %s is ready" %device_name
+            logger.logError('%s: %s' %(raeson, ex.message))
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
 
 
     def isSlewing(self):
-        return self.positioner.isSlewing()
+        try:
+            return self.positioner.isSlewing()
+        except DerotatorErrors.CommunicationErrorEx, ex:
+            raeson = "cannot known if %s is slewing" %device_name
+            logger.logError('%s: %s' %(raeson, ex.message))
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
 
 
     def isTracking(self):
-        self.positioner.isTracking()
+        try:
+            self.positioner.isTracking()
+        except DerotatorErrors.CommunicationErrorEx, ex:
+            raeson = "cannot known if %s is tracking" %device_name
+            logger.logError('%s: %s' %(raeson, ex.message))
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+
 
     def setOffset(self, offset):
-        self.positioner.setOffset(offset)
+        try:
+            self.positioner.setOffset(offset)
+        except PositionerError, ex:
+            raeson = "cannot set the %s offset" %device_name
+            logger.logError('%s: %s' %(raeson, ex.message))
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+
 
     def clearOffset(self):
-        self.positioner.clearOffset()
+        try:
+            self.positioner.clearOffset()
+        except PositionerError, ex:
+            raeson = "cannot set the %s offset" %device_name
+            logger.logError('%s: %s' %(raeson, ex.message))
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+
 
     def getOffset(self):
         return self.positioner.getOffset()
+
+
+    def getActualSetup(self):
+        return self.actualSetup
+
+
+    def getCommandedSetup(self):
+        return self.commandedSetup
+
+
+    def setTrackingMode(self, mode):
+        self._setMode('tracking', mode)
+
+
+    def getTrackingMode(self):
+        return self.trackingMode
+
+
+    def setRewindingMode(self, mode):
+        self._setMode('rewinding', mode)
+
+
+    def getRewindingMode(self):
+        return self.rewindingMode
+
 
     def _setDefaultConfiguration(self):
         self.actualSetup = 'unknown'

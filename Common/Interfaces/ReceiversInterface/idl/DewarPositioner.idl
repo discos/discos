@@ -28,12 +28,17 @@ module Receivers {
          *
          *     setOffset(0)
          *     setRewindingMode(AUTO)
+         *
+         * @param code the setup mode (for instance: LLP, KKG, CCB, ecc.)
+         * @throw ComponentErrors::ValidationErrorEx,
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::NotAllowedEx,
+         * @throw ComponentErrors::UnexpectedEx
          */
         void setup(in string code) raises (
             ComponentErrors::ValidationErrorEx,
             ComponentErrors::OperationErrorEx,
             ComponentErrors::NotAllowedEx,
-            maciErrType::CannotGetComponentEx,
             ComponentErrors::UnexpectedEx
         );
 
@@ -47,31 +52,55 @@ module Receivers {
          *   + actualSetup = 'unknown'
          *   + commandedSetup = ''
          *   + rewindingMode = ''
+         *
+         * @throw ComponentErrors::NotAllowedEx,
+         * @throw ComponentErrors::UnexpectedEx
          */
         void park() raises (ComponentErrors::NotAllowedEx, ComponentErrors::UnexpectedEx);
 
  
-        /** Set the absolute offset and move the derotator to the new position */
-        void setOffset(in double offset) raises (ComponentErrors::NotAllowedEx);
+        /** Set the absolute offset and move the derotator to the new position 
+         *
+         * @param offset the offset to apply to the device
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void setOffset(in double offset) raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
 
 
         /** Return the offset */
         double getOffset();
 
 
-        /** Clear the absolute offset and move the derotator to the new position */
-        void clearOffset() raises (ComponentErrors::NotAllowedEx);
+        /** Clear the absolute offset and move the derotator to the new position
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void clearOffset() raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
 
         
         /** Start the parallactic angle correction 
          * 
          * It raises a NotAllowedEx either when the tracking mode is not yet selected
          * or the system is not configured.
+         *
+         * @throw ComponentErrors::NotAllowedEx
          */
         void startTracking() raises (ComponentErrors::NotAllowedEx);
 
 
-        /** Stop the parallactic angle correction */
+        /** Stop the parallactic angle correction
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
         void stopTracking() raises (
             ComponentErrors::OperationErrorEx,
             ComponentErrors::UnexpectedEx
@@ -82,19 +111,44 @@ module Receivers {
         boolean isConfigured();
 
 
-        /** Return true when the system is configured and the derotator ready to move */
-        boolean isReady();
+        /** Return true when the system is configured and the derotator ready to move
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        boolean isReady() raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
 
 
-        /** Return true when the derotator is tracking the commanded position */
-        boolean isTracking();
+        /** Return true when the derotator is tracking the commanded position
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        boolean isTracking() raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
 
 
-        /** Return true when the derotator is moving */
-        boolean isSlewing();
+        /** Return true when the derotator is moving
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        boolean isSlewing() raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
 
 
-        /** Set the rewinding mode to "AUTO" or "MANUAL" */
+        /** Set the rewinding mode to "AUTO" or "MANUAL"
+         *
+         * @param mode the rewinding mode ("AUTO" or "MANUAL")
+         * @throw ComponentErrors::ValidationErrorEx
+         */
         void setRewindingMode(in string mode) raises (ComponentErrors::ValidationErrorEx);
 
 
@@ -107,6 +161,9 @@ module Receivers {
          * This method does not start the tracking, but just enable it. Once the tracking mode is
          * selected, the tracking can be started by calling the startTracking() method.
          * See the documentation for more details about the mode meaning.
+         *
+         * @param mode the tracking mode ("FIXED" or "OPTIMIZED")
+         * @throw ComponentErrors::ValidationErrorEx
          */
         void setTrackingMode(in string mode) raises (ComponentErrors::ValidationErrorEx);
 
@@ -119,7 +176,12 @@ module Receivers {
         boolean isRewinding();
 
 
-        /** Return the actual position in the user reference system */
+        /** Return the actual position in the user reference system
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::NotAllowedEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
         double getPosition() raises (
             ComponentErrors::OperationErrorEx,
             ComponentErrors::NotAllowedEx,
