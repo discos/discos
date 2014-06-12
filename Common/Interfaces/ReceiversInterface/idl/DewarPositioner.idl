@@ -48,7 +48,7 @@ module Receivers {
          *   + commandedSetup = ''
          *   + rewindingMode = ''
          */
-        void park() raises (ComponentErrors::NotAllowedEx);
+        void park() raises (ComponentErrors::NotAllowedEx, ComponentErrors::UnexpectedEx);
 
  
         /** Set the absolute offset and move the derotator to the new position */
@@ -72,7 +72,10 @@ module Receivers {
 
 
         /** Stop the parallactic angle correction */
-        void stopTracking();
+        void stopTracking() raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
 
 
         /** Return true when the dewar positioner is properly configured */
@@ -118,7 +121,9 @@ module Receivers {
 
         /** Return the actual position in the user reference system */
         double getPosition() raises (
-            ComponentErrors::OperationErrorEx, ComponentErrors::NotAllowedEx
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::NotAllowedEx,
+            ComponentErrors::UnexpectedEx
         );
 
 

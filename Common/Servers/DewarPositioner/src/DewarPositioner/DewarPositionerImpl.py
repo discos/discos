@@ -12,7 +12,8 @@ import DerotatorErrorsImpl
 import DerotatorErrors 
 
 from DewarPositioner.configuration import CDBConf
-from DewarPositioner.positioner import Positioner
+from DewarPositioner.positioner import Positioner, PositionerError
+from DewarPositioner.posgenerators import goto
 
 from IRAPy import logger
 
@@ -29,48 +30,50 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         services.__init__(self)
 
         self.cdbconf = CDBConf()
+        self.positioner = Positioner()
         self._setDefaultConfiguration() 
+
 
     def initialize(self):
         addProperty(self, 'fooProperty')
-    
 
+    
     def setup(self, code):
         self.commandedSetup = code.upper()
-
         self.cdbconf.setup(self.commandedSetup)
-        self.comp_name = self.cdbconf.get_entry('derotator_name')
-        self.starting_position = self.cdbconf.get_entry('starting_position') 
+        device_name = self.cdbconf.get_entry('derotator_name')
+        starting_position = self.cdbconf.get_entry('starting_position') 
             
         try:
-            self.derotator = self.getComponent('RECEIVERS/' + self.comp_name)
+            self.positioner.setup(device_name, starting_position)
+            self.setRewindingMode('AUTO')
+            self.actualSetup = self.commandedSetup
         except CannotGetComponentEx, ex:
-            logger.logDebug(ex.message)
+            logger.logError(ex.message)
             raise
-        except Exception:
-            logger.logError('unexpected exception loading %s' %self.comp_name)
-            raise ComponentErrorsImpl.UnexpectedExImpl()
-        try:
-            self.derotator.setup()
-        except (DerotatorErrors.ConfigurationErrorEx, ComponentErrors.ComponentErrorsEx), ex:
-            raeson = "cannot perform the %s setup" %self.comp_name
-            logger.logError('%s: %s' %(raeson, ex.message))
+        except PositionerError, ex:
+            raeson = '%s' %ex.message
+            logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc
-
-        try:
-            self._clearOffset()
-            self._setPosition(0) # The method adds both offset and starting position 
         except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
-            raeson = "cannot set the derotator position"
+            raeson = "cannot set the %s position" %device_name
             logger.logError('%s: %s' %(raeson, ex.message))
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc
-
-        self.setRewindingMode('AUTO')
-        self.actualSetup = self.commandedSetup
+        except (DerotatorErrors.ConfigurationErrorEx, ComponentErrors.ComponentErrorsEx), ex:
+            raeson = "cannot perform the %s setup" %device_name
+            logger.logError('%s: %s' %(raeson, ex.message))
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
 
     def setTrackingMode(self, mode):
         self._setMode('tracking', mode)
@@ -85,7 +88,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         return self.rewindingMode
 
     def isConfigured(self):
-        return self.commandedSetup == self.actualSetup
+        return self.positioner.isConfigured() and self.commandedSetup == self.actualSetup
 
     def getActualSetup(self):
         return self.actualSetup
@@ -94,15 +97,29 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         return self.commandedSetup
 
     def park(self):
-        self.stopTracking()
-        self._checkConfiguration() # Raises NotAllowedEx if the check fails
-        self._setDefaultConfiguration()
-        self._setPosition(0) # The method adds both offset and starting position 
+        try:
+            self.positioner.park()
+            self._setDefaultConfiguration()
+        except PositionerError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+
 
     def getPosition(self):
-        self._checkConfiguration() # Raises NotAllowedEx if the check fails
         try:
-            return self.derotator.getActPosition()
+            return self.positioner.getPosition()
+        except PositionerError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
+            raise exc
         except (DerotatorErrors.CommunicationErrorEx, ComponentErrors.ComponentErrorsEx), ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
@@ -110,8 +127,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc
         except Exception, ex:
             logger.logError(ex.message)
-            exc = ComponentErrorsImpl.OperationErrorExImpl()
-            exc.setReason("Cannot get the derotator position")
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
             raise exc
 
     def startTracking(self):
@@ -121,7 +138,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(raeson)
             raise exc
-        elif not self.isConfigured():
+        elif not self.positioner.isConfigured():
             raeson = "system not yet configured: a setup() is required"
             logger.logError(raeson)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
@@ -136,97 +153,48 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         # self.positioner.start() # Start the daemon
         raise NotImplementedError('method not yet implemented')
 
+
     def stopTracking(self):
-        # self.positioner.terminate()
-        pass
+        try:
+            self.positioner.stop()
+        except PositionerError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(ex.message)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+
 
     def isReady(self):
-        try:
-            return self.isConfigured() and self.derotator.isReady()
-        except AttributeError:
-            return False
+        return self.positioner.isReady()
+
 
     def isSlewing(self):
-        try:
-            return self.isConfigured() and self.derotator.isSlewing()
-        except AttributeError:
-            return False
+        return self.positioner.isSlewing()
 
 
     def isTracking(self):
-        try:
-            return self.isConfigured() and self.derotator.isTracking()
-        except AttributeError:
-            return False
+        self.positioner.isTracking()
 
     def setOffset(self, offset):
-        act_position = self.getPosition()
-        self._setOffset(offset)
-        self._setPosition(act_position)
+        self.positioner.setOffset(offset)
 
     def clearOffset(self):
-        act_position = self.getPosition()
-        self._clearOffset()
-        self._setPosition(act_position)
+        self.positioner.clearOffset()
 
     def getOffset(self):
-        return self.offset
+        return self.positioner.getOffset()
 
     def _setDefaultConfiguration(self):
-        self.positioner = None
         self.actualSetup = 'unknown'
         self.commandedSetup = ''
         self.rewindingMode = ''
         self.trackingMode = ''
-        self._clearOffset()
 
-    def _setPosition(self, position):
-        if not self.derotator.isReady():
-            raeson = "derotator not ready to move: a setup() is required."
-            logger.logError(raeson)
-            exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(raeson)
-            raise exc
-
-        target = self.starting_position + self.offset + position
-        if self.derotator.getMinLimit() < target < self.derotator.getMaxLimit():
-            try:
-                self.derotator.setPosition(target)
-            except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
-                raeson = "cannot set the derotator position"
-                logger.logError('%s: %s' %(raeson, ex.message))
-                exc = ComponentErrorsImpl.OperationErrorExImpl()
-                exc.setReason(raeson)
-                raise exc
-            except Exception, ex:
-                raeson = "unknown exception setting the derotator position"
-                logger.logError('%s: %s' %(raeson, ex.message))
-                exc = ComponentErrorsImpl.OperationErrorExImpl()
-                exc.setReason(raeson)
-                raise exc
-
-        else:
-            raeson = "position %.2f out of range (%.2f, %.2f)" %(target, 
-                     self.derotator.getMinLimit(), self.derotator.getMaxLimit())
-            logger.logError(raeson)
-            exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(raeson)
-            raise exc
-
-    def _checkConfiguration(self):
-        """Raises NotAllowedEx if the dewar positioner is not yet configured"""
-        if not self.isConfigured():
-            raeson = "DewarPositioner not configured. A setup() is required."
-            logger.logError(raeson)
-            exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(raeson)
-            raise exc
-
-    def _clearOffset(self):
-        self._setOffset(0.0)
-    
-    def _setOffset(self, offset):
-        self.offset = offset
 
     def _setMode(self, mode_type, mode):
         try:

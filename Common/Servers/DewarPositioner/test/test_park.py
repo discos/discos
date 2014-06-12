@@ -13,7 +13,7 @@ class ParkTest(unittest2.TestCase):
         self.derotator = client.getComponent('RECEIVERS/SRTKBandDerotator')
         self.positioner.setup('KKG')
 
-    def test_park_position(self):
+    def _test_park_position(self):
         """Verify after a park() the derotator is in the zero position"""
         self.derotator.setPosition(2)
         time.sleep(2)

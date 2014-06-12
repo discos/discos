@@ -1,58 +1,251 @@
-"""This method defines a Positioner class...
-
-Usage::
-
-    >>> from trackers import optimized
-    >>> sleep_time = 0.1 # 100ms
-    >>> p = Positioner()
-    >>> p.start(optimized, derotator, mount, sleep_time, site_info) # Avvia il processo
-    >>> p.terminate() # Termina il processo
-    >>> p.start() # Riavvia il processo...
-
-If you start a process
-"""
+from __future__ import with_statement
+import threading
 import time
-from datetime import datetime
-from multiprocessing import Process, Value
+
+import ComponentErrorsImpl
+import ComponentErrors
+import DerotatorErrorsImpl
+import DerotatorErrors 
+
+from maciErrType import CannotGetComponentEx
+from Acspy.Servants import ContainerServices
+from Acspy.Clients.SimpleClient import PySimpleClient
+from DewarPositioner.posgenerators import goto
 from IRAPy import logger
 
 class PositionerError(Exception):
     pass
 
+class Control(object):
+    def __init__(self):
+        self.updating = False
+        self.stop = False
+        self.starting_position = 0.0
+        self.offset = 0.0
+
 class Positioner(object):
+    lock = threading.Lock()
+    def __init__(self):
+        self.t = None
+        self.device_name = ''
+        self.control = Control()
+        self.is_configured = False
 
-    def start(self, func_updater, *vargs):
-        """Start a new process that computes and sets the position"""
-        self.terminate()
-        self.args = (func_updater, vargs)
-        self.p = Process(target=self.updatePosition, args=self.args)
-        self.p.daemon = True
-        self.p.start()
+    def setup(self, device_name, starting_position=0):
+        """Configure the positioner.
+        
+        The argument `device_name` is the name of the component to drive. For 
+        instance, if we want to drive the SRT K band derotator::
 
-    def updatePosition(self, func_updater, func_args):
+            setup('RECEIVERS/SRTKBandDerotator')
+
+        An optional `starting_position` can be given. This position will be
+        a reference, so will be added to any position we command.
+        A setup() performs a call to Positioner.stop() in order to stop a
+        previous active process.
+        """
+        if self.isUpdating():
+            self.stop() # Raise a PositionerError if the process stills alive
+
+        self.device_name = device_name
+        self.control.starting_position = starting_position
+        self.client = PySimpleClient()
+ 
         try:
-            func_updater(*func_args)
+            # Positioner.lock.acquire()
+            self.device = self.client.getComponent(device_name)
+            self.device.setup()
+            self._clearOffset()
+            self.is_configured = True
+            self.start(goto, self.control.starting_position)
+        except CannotGetComponentEx, ex:
+            logger.logError(ex.message)
+            raise
+        except Exception, ex:
+            raeson = 'cannot perform the %s setup: %s' %(device_name, ex.message)
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(raeson)
+            raise exc
+        finally:
+            # Positioner.lock.release()
+            pass
+
+
+    def isConfigured(self):
+        return self.is_configured
+
+
+    def getDeviceName(self):
+        if self.isConfigured():
+            return self.device_name
+        else:
+            raise PositionerError('Positioner not configured, a setup() is required')
+
+    def isReady(self):
+        return self.isConfigured() and self.device.isReady()
+
+
+    def isSlewing(self):
+        return self.isConfigured() and self.device.isSlewing()
+
+
+    def isTracking(self):
+        return self.isConfigured() and self.device.isTracking()
+
+
+    def start(self, posgen, *vargs):
+        """Start a new process that computes and sets the position"""
+        if self.isConfigured():
+            self.stop() # Raise a PositionerError if the process stills alive
+            args = (
+                    self.device, 
+                    self.control,
+                    posgen, 
+                    vargs
+            )
+            self.t = ContainerServices.ContainerServices().getThread(
+                    name=posgen.__name__, 
+                    target=self.updatePosition, 
+                    args=args
+            )
+            self.t.start()
+        else:
+            raise PositionerError('Positioner not configured, a setup() is required')
+        
+
+    def stop(self):
+        """Stop the process"""
+        try:
+            self.control.stop = True
+            self.t.join(timeout=10)
+            if self.t.isAlive():
+                PositionerError('Thread %s is alive' %self.t.getName())
+        except AttributeError:
+            pass # self.t is None because the system is not yet configured
+        finally:
+            self.control.stop = False
+
+
+    def park(self):
+        if self.isConfigured():
+            self.stop()
+            self._clearOffset()
+            self.start(goto, self.control.starting_position)
+            self.is_configured = False
+            # Has the derotator the method park()? In that case I have to call it
+        else:
+            raise PositionerError('Positioner not configured, a setup() is required')
+
+
+    def isTerminated(self):
+        if not self.t:
+            return True
+        else:
+            return not self.isUpdating() and not self.t.isAlive() 
+
+
+    def isUpdating(self):
+        return self.control.updating
+
+
+    def updatePosition(self, device, control, posgen, vargs):
+        try:
+            control.updating = True
+
+            # Verify the component is ready to move
+            try:
+                # Positioner.lock.acquire()
+                if not device.isReady():
+                    logger.logError("%s not ready to move: a setup() is required" 
+                            %device._get_name())
+                    # TODO: error communication
+                    return
+            finally:
+                # Positioner.lock.release()
+                pass
+ 
+            for position in posgen(*vargs):
+                if control.stop:
+                    break
+                target = control.starting_position + control.offset + position
+                try:
+                    # Positioner.lock.acquire()
+                    if device.getMinLimit() < target < device.getMaxLimit():
+                        try:
+                            device.setPosition(target)
+                        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+                            raeson = "cannot set the %s position" %device._get_name()
+                            logger.logError('%s: %s' %(raeson, ex.message))
+                            # TODO: error communication
+                            break
+                        except Exception, ex:
+                            raeson = "unknown exception setting the %s position" %device._get_name()
+                            logger.logError('%s: %s' %(raeson, ex.message))
+                            # TODO: error communication
+                            break
+                    else:
+                        logger.logError("position %.2f out of range (%.2f, %.2f)" 
+                                %(target, device.getMinLimit(), device.getMaxLimit()))
+                        # TODO: REWINDING!
+                finally:
+                    # Positioner.lock.release()
+                    pass
+
         except KeyboardInterrupt:
             logger.logInfo('Stopping Positioner.updatePosition() due to KeyboardInterrupt')
         except AttributeError, ex:
             logger.logError('Positioner.updatePosition(): attribute error')
             logger.logDebug('Positioner.updatePosition(): %s' %ex)
         except Exception, ex:
-            logger.logError('Unexcpected exception in Positioner.updatePosition()')
-            logger.logDebug('Unexcpected exception in Positioner.updatePosition(): %s' %ex)
+            logger.logError('Unexcpected exception in Positioner.updatePosition(): %s' %ex)
         finally:
+            control.updating = False
+            # logger.logInfo('Positioner.updatePosition() stopped @ %s' %datetime.utcnow())
             # TODO: set a status bit of the DewarPositioner, in order to communicate the error
-            logger.logInfo('Positioner.updatePosition() stopped @ %s' %datetime.utcnow())
 
-    def terminate(self):
-        """Terminate the process by using the SIGTERM signal"""
-        if hasattr(self, 'p'):
-            self.p.terminate()
-            self.p.join()
 
-    def updating(self):
-        if hasattr(self, 'p'):
-            return self.p.is_alive()
+    def setOffset(self, offset):
+        self._setOffset(offset) # set the flag
+        # And now update the device position
+        if self.isUpdating():
+            return
+        elif self.isConfigured():
+            self.stop()
+            act_position = self.getPosition()
+            self.start(goto, act_position)
+
+
+    def clearOffset(self):
+        self.setOffset(0.0)
+
+
+    def _setOffset(self, offset):
+        self.control.offset = offset
+
+
+    def _clearOffset(self):
+        self._setOffset(0.0)
+
+
+    def getOffset(self):
+        return self.control.offset
+
+
+    def getStartingPosition(self):
+        return self.control.starting_position
+
+
+    def getPosition(self):
+        if self.isConfigured():
+            try:
+                #Positioner.lock.acquire()
+                position = self.device.getActPosition()
+                return position
+            finally:
+                #Positioner.lock.release()
+                pass
         else:
-            return False
+            raise PositionerError('Positioner not configured, a setup() is required')
+
 

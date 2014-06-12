@@ -7,7 +7,7 @@
 
     <MappingEntry>
         <setupCode>KKG</setupCode>
-        <derotatorName>SRTKBandDerotator</derotatorName>
+        <derotatorName>RECEIVERS/SRTKBandDerotator</derotatorName>
         <startingPosition>0.0</startingPosition>
     </MappingEntry>
 

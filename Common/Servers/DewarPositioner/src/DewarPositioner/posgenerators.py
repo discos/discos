@@ -1,6 +1,9 @@
-"""This module implements the tracking functions"""
-import functools
+"""This module implements the position generators"""
 from IRAPy import logger
+
+
+def goto(position):
+    yield position
 
 
 def fixed(source, site_info):

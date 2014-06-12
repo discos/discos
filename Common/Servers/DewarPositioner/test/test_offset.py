@@ -10,6 +10,10 @@ class OffsetTest(unittest2.TestCase):
         client = PySimpleClient()
         self.positioner = client.getComponent('RECEIVERS/DewarPositioner')
         self.positioner.setup('KKG')
+        time.sleep(2)
+
+    def tearDown(self):
+        self.positioner.park()
 
     def test_clearOffset(self):
         """Vefify it clears the offset and puts the derotator in the new position."""

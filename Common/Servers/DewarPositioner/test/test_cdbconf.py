@@ -15,7 +15,9 @@ class CDBConfTest(unittest2.TestCase):
 
     def test_rightcode(self):
         """With a wrong code return the derotator name"""
-        self.assertEqual(self.cdbconf.get_entry('derotator_name'), 'SRTKBandDerotator')
+        self.assertEqual(
+                self.cdbconf.get_entry('derotator_name'), 
+                'RECEIVERS/SRTKBandDerotator')
 
 if __name__ == '__main__':
     unittest2.main()
