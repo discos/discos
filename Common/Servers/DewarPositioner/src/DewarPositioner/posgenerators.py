@@ -22,4 +22,7 @@ def fixed(source, site_info):
         logger.logDebug('Unexcpected exception getting the antenna coordinates: %s' %ex)
         raise
 
+def optimized(source, site_info):
+    pass
+
 

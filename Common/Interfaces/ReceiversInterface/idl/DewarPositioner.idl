@@ -111,6 +111,14 @@ module Receivers {
         boolean isConfigured();
 
 
+        /** Return true if an updating mode has been selected */
+        boolean isConfiguredForUpdating();
+
+
+        /** Return true if a rewinding mode has been selected */
+        boolean isConfiguredForRewinding();
+
+
         /** Return true when the system is configured and the derotator ready to move
          *
          * @throw ComponentErrors::OperationErrorEx,
@@ -168,8 +176,12 @@ module Receivers {
          *
          * @param mode the updating mode ("FIXED" or "OPTIMIZED")
          * @throw ComponentErrors::ValidationErrorEx
+         * @throw ComponentErrors::UnexpectedEx
          */
-        void setUpdatingMode(in string mode) raises (ComponentErrors::ValidationErrorEx);
+        void setUpdatingMode(in string mode) raises (
+            ComponentErrors::ValidationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
 
 
         /** Get the updating mode */

@@ -8,7 +8,6 @@ from Acspy.Clients.SimpleClient import PySimpleClient
 
 class PositionerOffsetTest(unittest2.TestCase):
 
-
     def test_set_get(self):
         """Verify the set and get methods"""
         p = Positioner()

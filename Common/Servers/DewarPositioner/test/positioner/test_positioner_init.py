@@ -1,7 +1,7 @@
 import unittest2
 import random
 import time
-from DewarPositioner.positioner import Positioner, PositionerError
+from DewarPositioner.positioner import Positioner, NotAllowedError
 
 
 class PositionerInitTest(unittest2.TestCase):
@@ -14,8 +14,8 @@ class PositionerInitTest(unittest2.TestCase):
         self.assertEqual(p.isTerminated(), True)
         self.assertEqual(p.getOffset(), 0.0)
         self.assertEqual(p.getStartingPosition(), 0.0)
-        self.assertRaises(PositionerError, p.getDeviceName)
-        self.assertRaises(PositionerError, p.start, '', '')
+        self.assertRaises(NotAllowedError, p.getDeviceName)
+        self.assertRaises(NotAllowedError, p._start, '', '') # TODO: call startUpdating()
 
 if __name__ == '__main__':
     unittest2.main()

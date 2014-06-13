@@ -27,8 +27,9 @@ viene impostato il valore di default ``OFFSET=0``.
 Impostare la modalita' di updating
 ==================================
 Il metodo ``setUpdatingMode(MODE)`` abilita l'aggiornamento della posizione
-del derotatore (lo abilita, non avvia la movimentazione). 
-``MODE`` puo' essere ``FIXED`` o ``OPTIMIZED``.
+del derotatore (lo abilita, non avvia la movimentazione) e imposta il tipo
+di aggiornamento, assegnato a ``MODE``, che puo' essere ``FIXED`` o 
+``OPTIMIZED``.
 
 Il metodo ``getUpdatingMode()`` restituisce la modalita' di aggiornamento
 impostata.
@@ -76,9 +77,8 @@ impostata sia ``FIXED`` o ``OPTIMIZED``::
 La posizione del derotatore verra' aggiornata con l'equazione (1) se 
 la modalita' di aggiornamento e' ``FIXED``, con la (2) se e' ``OPTIMIZED``.
 
-Se il sistema sta gia' aggiornando e viene chiamato ``startUpdating()``,
-il posizionamento avverra' calcolando K (in caso di ``OPTIMIZED``)
-sulla base dei nuovi argomenti.
+Se non e' stata ancora selezionata la modalita' di aggiornamento, solleva 
+una eccezione di tipo NotAllowedEx.
 
 
 Interrompere l'aggiornamento
@@ -134,11 +134,6 @@ la modalita' di riavvolgimento ecc. Infine posiziona il derotatore in
 parcheggio. Al termine del park() il sistema non sara' piu' configurato, per cui
 isConfigured() restituira' False.
 
-Avvio dell'aggiornamento
-========================
-Il metodo ``startUpdating()`` avvia l'aggiornamento della posizione del derotatore 
-sulla base della modalita' selezionata. Se non e' stata ancora selezionata la 
-modalita' di aggiornamento, solleva una eccezione di tipo NotAllowedEx
 
 Elenco completo dei metodi
 ==========================

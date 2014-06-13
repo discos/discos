@@ -12,7 +12,7 @@ import DerotatorErrorsImpl
 import DerotatorErrors 
 
 from DewarPositioner.configuration import CDBConf
-from DewarPositioner.positioner import Positioner, PositionerError
+from DewarPositioner.positioner import Positioner, PositionerError, NotAllowedError
 from DewarPositioner.posgenerators import goto
 
 from IRAPy import logger
@@ -20,23 +20,15 @@ from IRAPy import logger
 
 class DewarPositionerImpl(POA, cc, services, lcycle):
 
-    modes = {
-            'updating': ('FIXED', 'OPTIMIZED'),
-            'rewinding': ('AUTO', 'MANUAL')
-    }
-
     def __init__(self):
         cc.__init__(self)
         services.__init__(self)
-
         self.cdbconf = CDBConf()
         self.positioner = Positioner()
         self._setDefaultConfiguration() 
 
-
     def initialize(self):
         addProperty(self, 'fooProperty')
-
     
     def setup(self, code):
         self.commandedSetup = code.upper()
@@ -59,12 +51,11 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
-
     def park(self):
         try:
             self.positioner.park()
             self._setDefaultConfiguration()
-        except PositionerError, ex:
+        except NotAllowedError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(ex.message)
@@ -75,11 +66,10 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
-
     def getPosition(self):
         try:
             return self.positioner.getPosition()
-        except PositionerError, ex:
+        except NotAllowedError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(ex.message)
@@ -95,8 +85,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
-
     def startUpdating(self):
+        # lancio positioner.startUpdating e catturo le dovute eccezioni
         if not self.getUpdatingMode():
             raeson = "updating mode not selected: call setUpdatingMode()"
             logger.logError(raeson)
@@ -124,10 +114,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         # self.positioner.start() # Start the daemon
         raise NotImplementedError('method not yet implemented')
 
-
     def stopUpdating(self):
         try:
-            self.positioner.stop()
+            self.positioner.stopUpdating()
         except PositionerError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
@@ -139,10 +128,16 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
-
     def isConfigured(self):
         return self.positioner.isConfigured()
 
+    def isConfiguredForUpdating(self):
+        """Return True if an updating mode has been selected"""
+        return self.positioner.isConfiguredForUpdating()
+
+    def isConfiguredForRewinding(self):
+        """Return True if a rewinding mode has been selected"""
+        return self.positioner.isConfiguredForRewinding()
 
     def isReady(self):
         try:
@@ -159,7 +154,6 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
-
     def isSlewing(self):
         try:
             return self.positioner.isSlewing()
@@ -174,7 +168,6 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
             raise exc
-
 
     def isTracking(self):
         try:
@@ -191,15 +184,13 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
-
     def isUpdating(self):
         return self.positioner.isUpdating()
-
 
     def setOffset(self, offset):
         try:
             self.positioner.setOffset(offset)
-        except PositionerError, ex:
+        except (PositionerError, NotAllowedError), ex:
             raeson = "cannot set the %s offset" %device_name
             logger.logError('%s: %s' %(raeson, ex.message))
             exc = ComponentErrorsImpl.OperationErrorExImpl()
@@ -210,7 +201,6 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
             raise exc
-
 
     def clearOffset(self):
         try:
@@ -227,59 +217,43 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
-
     def getOffset(self):
         return self.positioner.getOffset()
-
 
     def getActualSetup(self):
         return self.actualSetup
 
-
     def getCommandedSetup(self):
         return self.commandedSetup
 
-
     def setUpdatingMode(self, mode):
-        self._setMode('updating', mode)
-
+        try:
+            self.positioner.setUpdatingMode(mode)
+        except PositionerError, ex:
+            raeson = 'cannot set the updating mode: %s' %ex.message
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.ValidationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc # Can happen only in case of wrong system input
 
     def getUpdatingMode(self):
-        return self.updatingMode
-
+        return self.positioner.getUpdatingMode()
 
     def setRewindingMode(self, mode):
-        self._setMode('rewinding', mode)
-
+        try:
+            self.positioner.setRewindingMode(mode)
+        except PositionerError, ex:
+            raeson = 'cannot set the rewinding mode: %s' %ex.message
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.ValidationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc # Can happen only in case of wrong system input
 
     def getRewindingMode(self):
-        return self.rewindingMode
-
+        return self.positioner.getRewindingMode()
 
     def _setDefaultConfiguration(self):
         self.actualSetup = 'unknown'
         self.commandedSetup = ''
-        self.rewindingMode = ''
-        self.updatingMode = ''
 
-
-    def _setMode(self, mode_type, mode):
-        try:
-            modes = DewarPositionerImpl.modes[mode_type]
-        except KeyError:
-            raeson = "_setMode(): mode type %s not in %s" %(
-                    mode_type, DewarPositionerImpl.modes.keys())
-            logger.logDebug(raeson)
-            exc = ComponentErrorsImpl.ValidationErrorExImpl()
-            exc.setReason(raeson)
-            raise exc # Can happen only in case of wrong system input
-        if mode not in modes:
-            raeson = '%s mode %s unknown. Allowed modes: %s' %(mode_type, mode, modes)
-            logger.logError(raeson)
-            exc = ComponentErrorsImpl.ValidationErrorExImpl()
-            exc.setReason(raeson)
-            raise exc
-        else:
-            setattr(self, mode_type + 'Mode', mode)
-
-
+        

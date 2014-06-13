@@ -17,11 +17,11 @@ class PositionerStopTest(unittest2.TestCase):
         time.sleep(2)
         self.assertEqual(p.isUpdating(), False)
         self.assertEqual(p.isTerminated(), True)
-        p.start(foo)
+        p._start(foo) # TODO: change calling startUpdating()
         time.sleep(1)
         self.assertEqual(p.isUpdating(), True)
         self.assertEqual(p.isTerminated(), False)
-        p.stop()
+        p.stopUpdating()
         self.assertEqual(p.isUpdating(), False)
         self.assertEqual(p.isTerminated(), True)
 

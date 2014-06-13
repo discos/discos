@@ -3,7 +3,7 @@ import random
 import time
 from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
-from DewarPositioner.positioner import Positioner, PositionerError
+from DewarPositioner.positioner import Positioner, NotAllowedError
 
 
 class PositionerParkTest(unittest2.TestCase):
@@ -11,7 +11,7 @@ class PositionerParkTest(unittest2.TestCase):
     def test_notConfigured(self):
         """Verify it raises an exception if not yet configured"""
         p = Positioner()
-        self.assertRaises(PositionerError, p.park)
+        self.assertRaises(NotAllowedError, p.park)
 
     def test_set_starting_pos(self):
         """Vefify the park() method set the device position."""
