@@ -65,15 +65,18 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 	ACS::TimeInterval execInterval;
 	IRA::CString inParams[_SP_MAXLENGTH];
 	IRA::CString outParams[_SP_MAXLENGTH];
+	IRA::CString logCommand;
 	elem=checkCommand(command,instr,inParams,parNum,timeTagged,timeCommand,execTime,execInterval); // throws exceptions
+	logCommand=command;
+	logCommand.RTrim();
 	if (!timeTagged) {   //sync operations
 		if (elem->m_type==PROCEDURE){
-			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Procedure issued {%s}",(const char *)command));
+			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Procedure issued {%s}",(const char *)logCommand));
 			pushProcedure(instr,elem->m_procedure,inParams,parNum); // throws ProcedureErrorExImpl
 			return instr+m_answerDelimiter;  //it informs that the procedure seems to be correct and it will be executed 
 		}	
 		else if (elem->m_type==COMMAND) {
-			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Command issued {%s}",(const char *)command));
+			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Command issued {%s}",(const char *)logCommand));
 			// polimorphic cast...allowed because the CFunctor derives from CBaseFunction
 			CFunctor<OBJ> * function = dynamic_cast<CFunctor<OBJ> *>(elem->m_func);
 			//try {
@@ -526,12 +529,13 @@ int CParser<OBJ>::parseCommand(const IRA::CString& line,IRA::CString& instr,IRA:
 	}
 	while (getNextToken(newLine,i,m_delimiter,token)) {
 		ok=true;
-		if (token==m_jollyChar) {
+		/*if (token==m_jollyChar) {
 			pars[n]=m_jollyCharReplacement;
 		}
 		else {
 			pars[n]=token;
-		}
+		}*/
+		pars[n]=token;
 		n++;
 		if (n>=maxPars) return maxPars;
 	}

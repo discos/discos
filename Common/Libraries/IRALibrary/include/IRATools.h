@@ -25,6 +25,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  28/02/2011	  methods skyFrequency() */
 /* Andrea Orlati(aorlati@ira.inaf.it)  15/07/2011	      reviewed the set of CDB function to prevent a memory leakage */
 /* Andrea Orlati(aorlati@ira.inaf.it)  04/09/2012	   added function makeDirectory() and directoryExists() */
+/* Andrea Orlati(aorlati@ira.inaf.it)  12/06/2014	  Function to handle conversions from Reference frame and definition for radial velocity */
 
 
 #include <time.h>
@@ -38,8 +39,8 @@
 
 /**
  * @mainpage IRALibrary API Documentation
- * @date 08/04/2013
- * @version 2.98.0
+ * @date 12/06/2014
+ * @version 3.0.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.0.2
  * @remarks gcc version is 4.1.2
@@ -562,6 +563,38 @@ public:
 	  * @return true if conversion was successful 
 	  */
 	 static bool strToCoordinateFrame(const IRA::CString& val,Antenna::TCoordinateFrame& frame);
+
+	 /**
+	  * Convert a reference frame (as specified in Antenna subsystem) into a string
+	  * @param val string to be converted
+	  * @param frame converted frame
+	  * @return true if conversion was successful
+	 */
+	 static bool referenceFrameToStr(const Antenna::TReferenceFrame& frame,IRA::CString& str);
+
+	 /**
+	  * Convert a string into a reference frame (as specified in Antenna subsystem)
+	  * @param val string to be converted
+	  * @param frame converted frame
+	  * @return true if conversion was successful
+	 */
+	 static bool strToReferenceFrame(const IRA::CString& val,Antenna::TReferenceFrame& frame);
+
+	 /**
+	  * Convert a reference frame (as specified in Antenna subsystem) into a string
+	  * @param val string to be converted
+	  * @param frame converted frame
+	  * @return true if conversion was successful
+	 */
+	 static bool vradDefinitionToStr(const Antenna::TVradDefinition& frame,IRA::CString& str);
+
+	 /**
+	  * Convert a string into a velocity definition (as specified in Antenna subsystem)
+	  * @param val string to be converted
+	  * @param frame converted frame
+	  * @return true if conversion was successful
+	 */
+	 static bool strToVradDefinition(const IRA::CString& val,Antenna::TVradDefinition& frame);
 	 	 
 	 /**
 	  * Convert a system supported equinox (as specified in Antenna subsystem) into a string

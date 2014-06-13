@@ -4,6 +4,9 @@
 #include <ObservatoryS.h>
 #include <slamac.h>
 
+#define DEFAULT_SUPPORTED_FRAME Antenna::ANT_BARY
+#define DEFAULT_SUPPORTED_DEFINITION Antenna::ANT_OPTICAL
+
 #define GET_PROPERTY_REFERENCE(TYPE,PROPERTY,PROPERTYNAME) TYPE##_ptr SkySourceImpl::PROPERTYNAME() throw (CORBA::SystemException) \
 { \
 	if (PROPERTY==0) return TYPE::_nil(); \
@@ -12,9 +15,6 @@
 }
 
 using namespace ComponentErrors;
-
-/*static char *rcsId="@(#) $Id: SkySourceImpl.cpp,v 1.11 2011-06-21 16:40:04 a.orlati Exp $";
-static void *use_rcsId = ((void)&use_rcsId, (void *) &rcsId);*/
 
 SkySourceImpl::SkySourceImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) :
 	acscomponent::ACSComponentImpl(CompName, containerServices)
@@ -205,6 +205,16 @@ void SkySourceImpl::getAttributes(Antenna::SkySourceAttributes_out att) throw(CO
 			att->inputDeclination,att->inputJEpoch,
 			att->inputRaProperMotion,att->inputDecProperMotion,
 			att->inputParallax,att->inputRadialVelocity);
+
+	if (att->inputRadialVelocity!=0) {  //The skysource supports only barycenter frame, optical definition, so let's suppose these two values
+		att->inputVradFrame=DEFAULT_SUPPORTED_FRAME;
+		att->inputVradDefinition=DEFAULT_SUPPORTED_DEFINITION;
+	}
+	else {
+		att->inputVradFrame=Antenna::ANT_UNDEF_FRAME;
+		att->inputVradDefinition=Antenna::ANT_UNDEF_DEF;
+	}
+
 	att->inputRaProperMotion*=cos((double)att->inputDeclination);
 	m_source.getInputGalactic(att->inputGalacticLongitude,att->inputGalacticLatitude);
 	if (m_source.isBeamPark()) att->axis=Management::MNG_BEAMPARK;
@@ -407,8 +417,7 @@ void SkySourceImpl::setSourceFromEquatorial(const char *sourceName,
 	setSource(sourceName,ra,dec,equinox,dra,ddec,parallax,rvel);
 	// in that case the flux computation is not available since the flux parameters are not known
 	fluxParam.init = false;
-	CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::setSourceFromEquatorial()",
-	   (LM_INFO,"NEW_SOURCE_FROM_EQUATORIAL: %s,%f,%f",sourceName,ra,dec));
+	CUSTOM_LOG(LM_FULL_INFO,"SkySourceImpl::setSourceFromEquatorial()", (LM_INFO,"NEW_SOURCE_FROM_EQUATORIAL: %s,%f,%f",sourceName,ra,dec));
 }
 
 void SkySourceImpl::setSource(CString sourceName,double ra,double dec,

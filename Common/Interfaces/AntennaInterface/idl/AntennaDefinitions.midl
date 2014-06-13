@@ -17,8 +17,8 @@
 
 /** 
  * @mainpage IDL Interface documentation of the antenna subsystem
- * @date 08/04/2013
- * @version 1.14.0
+ * @date 12/06/2014
+ * @version 1.2.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>, 
  *                 <a href=mailto:c.migoni@ira.inaf.it>Carlo Migoni</a>,
  *                 <a href=mailto:righin_s@ira.inaf.it>Simona Righini</a>, 
@@ -66,9 +66,36 @@ module Antenna {
 		ANT_HORIZONTAL,       /*!< horizontal frame  */     
 		ANT_GALACTIC              /*!< galactic frame  */      
 	};
-	
+
 	ACS_ENUM(TCoordinateFrame);
+
+	/**
+	 * Enlist all the supported radial velocity reference frames
+	*/
+	enum TReferenceFrame {
+		ANT_TOPOCEN,  /*!< topocentric  frame  */
+		ANT_BARY,          /*!< barycenter frame  */
+		ANT_LSRK,         /*!< Kinematic Local Standard of Rest  frame  */
+		ANT_LSRD,        /*!< Dynamic Local Standard of Rest  frame  */
+		ANT_GALCEN,  /*!< Galactc center frame  */
+		ANT_LGROUP,  /*!<  Local Group frame  */
+		ANT_UNDEF_FRAME  /*!<   frame  is not defined*/
+	};
 	
+	ACS_ENUM(TReferenceFrame);
+	
+	/**
+	 * Enlist all the supported radial velocity definitions
+	*/
+	enum TVradDefinition {
+		ANT_RADIO,  			/*!< radio definition  */
+		ANT_OPTICAL,          /*!< otical definition */
+		ANT_REDSHIFT,         /*!< red shift */
+		ANT_UNDEF_DEF    /*!<  definition is undefined */
+	};
+
+	ACS_ENUM(TVradDefinition);
+
 	/**
 	 * Enlist the supported traking curve generators
 	*/

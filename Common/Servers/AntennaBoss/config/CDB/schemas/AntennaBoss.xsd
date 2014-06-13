@@ -27,7 +27,9 @@
 			<xs:element name="target" type="baci:ROstring"/>
 			<xs:element name="targetRightAscension" type="baci:ROdouble"/>
 			<xs:element name="targetDeclination" type="baci:ROdouble"/>
-			<xs:element name="targetVlsr" type="baci:ROdouble"/>
+			<xs:element name="targetVrad" type="baci:ROdouble"/>
+			<xs:element name="vradReferenceFrame" type="ant:ReferenceFrameType"/>
+			<xs:element name="vradDefinition" type="ant:VradDefinitionType"/>
 			<xs:element name="targetFlux" type="baci:ROdouble"/>			
 			<xs:element name="azimuthOffset" type="baci:ROdouble"/>
 			<xs:element name="elevationOffset" type="baci:ROdouble"/>

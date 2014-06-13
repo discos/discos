@@ -9,6 +9,7 @@
 #include "DevIOProjectCode.h"
 #include "DevIOCurrentBackend.h"
 #include "DevIOCurrentRecorder.h"
+#include "DevIORestFrequency.h"
 #include <LogFilter.h>
 
 static char *rcsId="@(#) schedulerImpl";
@@ -26,7 +27,8 @@ SchedulerImpl::SchedulerImpl(const ACE_CString &CompName,maci::ContainerServices
 	m_pcurrentDevice(this),
 	m_pprojectCode(this),
 	m_pcurrentBackend(this),
-	m_pcurrentRecorder(this)
+	m_pcurrentRecorder(this),
+	m_prestFrequency(this)
 {	
 	AUTO_TRACE("SchedulerImpl::SchedulerImpl()");
 }
@@ -62,6 +64,7 @@ void SchedulerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				new DevIOProjectCode(m_core),true);
 		m_pcurrentBackend=new ROstring(getContainerServices()->getName()+":currentBackend",getComponent(),new DevIOCurrentBackend(m_core),true);
 		m_pcurrentRecorder=new ROstring(getContainerServices()->getName()+":currentRecorder",getComponent(),new DevIOCurrentRecorder(m_core),true);
+		m_prestFrequency= new ROdoubleSeq(getContainerServices()->getName()+":restFrequency",getComponent(),new DevIORestFrequency(m_core),true);
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"SchedulerImpl::initialize()");
@@ -330,6 +333,12 @@ void SchedulerImpl::setDevice(CORBA::Long deviceID) throw (CORBA::SystemExceptio
 	}	
 }
 
+void SchedulerImpl::setRestFrequency(const ACS::doubleSeq& rest) throw (CORBA::SystemException)
+{
+	m_core->setRestFrequency(rest);
+}
+
+
 void SchedulerImpl::setProjectCode(const char *code) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx)
 {
 	try {
@@ -350,7 +359,7 @@ _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pcurrentDevice,currentDevice
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pprojectCode,projectCode);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pcurrentBackend,currentBackend);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pcurrentRecorder,currentRecorder);
-
+_PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROdoubleSeq,m_prestFrequency,restFrequency);
 
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

@@ -31,7 +31,9 @@
 <target/>
 <targetRightAscension/>
 <targetDeclination/>
-<targetVlsr/>
+<targetVrad/>
+<vradReferenceFrame/>
+<vradDefinition/>
 <targetFlux/>
 <azimuthOffset/>
 <elevationOffset/>

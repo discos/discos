@@ -35,6 +35,72 @@
 
 using namespace TW;
 
+/**
+ * Special widget to handle seuqnce attributes
+ */
+template <_TW_PROPERTYCOMPONENT_C>
+class CCustomPropertyText : public  CPropertyComponent <_TW_PROPERTYCOMPONENT_TL> {
+public:
+	CCustomPropertyText(PR property): CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>(property) { }
+	virtual ~CCustomPropertyText() {}
+protected:
+	WORD draw() {
+		WORD width,height;
+		bool done;
+		CPoint newPosition;
+		IRA::CString tmp;
+		WORD iter,step;
+		WORD newX,newY;
+		IRA::CString value,orig,ret;
+		std::map<std::string,int> data;
+
+		int start=0;
+		if (!CFrameComponent::getMainFrame()) return 4;
+		if (!CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getEnabled()) return 1;
+		if (!CFrameComponent::getMainFrame()->insideBorders(CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getPosition())) return 2;
+		height=CFrameComponent::getEffectiveHeight();
+		width=CFrameComponent::getEffectiveWidth();
+		orig=CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getValue();
+		while (IRA::CIRATools::getNextToken(orig,start,' ',ret)) {
+			if ( (ret!=" ") && (ret!="") && (ret!="\n")) {
+				data[(const char *)ret]+=1;
+			}
+		}
+		value="";
+		for (std::map<std::string,int>::iterator i=data.begin(); i!=data.end(); ++i) {
+			IRA::CString temp;
+			temp.Format("%s (x%d) ",i->first.c_str(),i->second);
+			value+=temp;
+		}
+		step=value.GetLength()/width;
+		newY=CFrameComponent::getHeightAlignment(CPropertyComponent <_TW_PROPERTYCOMPONENT_TL>::getHAlign(),step,height);
+		iter=0;
+		done=false;
+		for (int i=0;i<height;i++) {
+			if (!CFrameComponent::getMainFrame()->clearCanvas(CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getPosition()+CPoint(0,i),width,
+			  CStyle(CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getStyle().getColorPair(),0))) return 3;
+		}
+		while ((newY<height) && (!done)) {
+			if (step>0) {
+				tmp=value.Mid(iter*width,width);
+			}
+			else {
+				tmp=value;
+				done=true;
+			}
+			iter++;
+			newX=CFrameComponent::getWidthAlignment(CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getWAlign(),tmp.GetLength(),width);
+			newPosition=CPoint(newX,newY);
+			if (!CFrameComponent::getMainFrame()->writeCanvas(newPosition+CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getPosition(),CPropertyComponent<_TW_PROPERTYCOMPONENT_TL>::getStyle(),tmp)) return 3;
+			newY++;
+		}
+		return 0;
+	}
+};
+
+
+
+
 static bool terminate;
 
 void quintHandler(int sig)
@@ -82,6 +148,7 @@ int main(int argc, char *argv[]) {
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *currentDevice_field;
 	TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> * status_box;
 	TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * tracking_display;
+	CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *restFrequency_text;
 	// *******************************
 	TW::CLabel *output_label;
 	TW::CInputCommand *userInput;
@@ -183,6 +250,8 @@ int main(int argc, char *argv[]) {
 		_GET_ACS_PROPERTY(ACS::ROlong,currentDevice);
 		_GET_ACS_PROPERTY(Management::ROTBoolean,tracking);
 		_GET_ACS_PROPERTY(Management::ROTSystemStatus,status);
+		_GET_ACS_PROPERTY(ACS::ROdoubleSeq,restFrequency);
+
 		// *********************************
 		ACE_OS::sleep(1);
 		
@@ -197,6 +266,7 @@ int main(int argc, char *argv[]) {
 		status_box=new TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus>(status.in(),Management::MNG_OK) ;
 		currentBackend_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING>(currentBackend.in());
 		currentRecorder_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING>(currentRecorder.in());
+		restFrequency_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(restFrequency.in());
 
 		#if USE_OUTPUT_FIELD >=1 
 			output_label=new TW::CLabel("");
@@ -206,26 +276,31 @@ int main(int argc, char *argv[]) {
 		userInput=new TW::CInputCommand();
 		
 		// setting up the properties of the components of the frame controls
-		_TW_SET_COMPONENT(projectCode_field,22,0,24,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(schedule_field,22,1,20,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(scanID_field,22,2,4,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(projectCode_field,20,0,24,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(schedule_field,20,1,20,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(scanID_field,20,2,4,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		char frm[8];
 		strncpy(frm,"%04ld",8);
 		scanID_field->setFormatFunction(CFormatFunctions::integerFormat,static_cast<const void *>(frm));
 		scanID_field->setWAlign(CFrameComponent::RIGHT);
-		_TW_SET_COMPONENT(subScanID_field,27,2,4,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(subScanID_field,25,2,4,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		subScanID_field->setFormatFunction(CFormatFunctions::integerFormat,static_cast<const void *>(frm));
-		_TW_SET_COMPONENT(currentBackend_field,22,3,24,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(currentRecorder_field,22,4,24,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(currentDevice_field,22,5,7,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		tracking_display->setPosition(CPoint(22,6));
+		_TW_SET_COMPONENT(currentBackend_field,20,3,24,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(currentRecorder_field,20,4,24,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(currentDevice_field,20,5,7,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+
+		_TW_SET_COMPONENT(restFrequency_text,20,6,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		restFrequency_text->setWAlign(CFrameComponent::LEFT);
+		restFrequency_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%.1lf");
+		tracking_display->setPosition(CPoint(20,7));
 		tracking_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
 		tracking_display->setFormatFunction(trackingFormat,NULL);
 		tracking_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
-		_TW_SET_COMPONENT(status_box,22,7,10,1,BLACK_GREEN,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(status_box,20,8,10,1,BLACK_GREEN,CStyle::BOLD,output_label);
 		status_box->setStatusLook(Management::MNG_OK,CStyle(BLACK_GREEN,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_WARNING,CStyle(BLACK_YELLOW,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_FAILURE,CStyle(BLACK_RED,CStyle::BOLD));
+
 
 		// ******************************************************************
 		_TW_SET_COMPONENT(userInput,0,WINDOW_HEIGHT-6,WINDOW_WIDTH-1,1,USER_INPUT_COLOR_PAIR,USER_INPUT_STYLE,NULL);
@@ -244,6 +319,7 @@ int main(int argc, char *argv[]) {
 		_INSTALL_MONITOR(tracking_display,200);
 		_INSTALL_MONITOR(currentBackend_field,1000);
 		_INSTALL_MONITOR(currentRecorder_field,1000);
+		_INSTALL_MONITOR(restFrequency_text,1000)
 
 		//tracking_display->setValueTrigger(1L,true);
 		_INSTALL_MONITOR(status_box,3000);
@@ -252,15 +328,16 @@ int main(int argc, char *argv[]) {
 		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::DONE"));
 		
 		// Add all the static labels
-		_TW_ADD_LABEL("Project Code   :",0,0,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Schedule       :",0,1,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Scan/SubScan   :",0,2,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("/",26,2,1,1,CColorPair::WHITE_BLACK,0,window);
-		_TW_ADD_LABEL("Backend        :",0,3,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Recorder       :",0,4,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Device         :",0,5,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Tracking       :",0,6,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Status         :",0,7,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Project Code   :",0,0,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Schedule       :",0,1,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Scan/SubScan   :",0,2,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("/",24,2,1,1,CColorPair::WHITE_BLACK,0,window);
+		_TW_ADD_LABEL("Backend        :",0,3,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Recorder       :",0,4,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Device         :",0,5,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Rest Freq.     :",0,6,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Tracking       :",0,7,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Status         :",0,8,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		// *************************
 		
 		// Add all required association: components/Frame
@@ -273,6 +350,7 @@ int main(int argc, char *argv[]) {
 		window.addComponent((CFrameComponent*)currentBackend_field);
 		window.addComponent((CFrameComponent*)currentRecorder_field);
 		window.addComponent((CFrameComponent*)status_box);
+		window.addComponent((CFrameComponent*)restFrequency_text);
 		// **********************************************
 		window.addComponent((CFrameComponent*)userInput);		
 		#if USE_OUTPUT_FIELD >=1 

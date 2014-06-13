@@ -161,19 +161,18 @@ public:
 	 * @param delim parameter separator character
 	 * @param cmdDelimiter character that separates the command from the parameters list
 	 * @param levelTwoSupport true if level two support has to be enabled, that means  asynchronous commands (time tagged or not), and key commands.
-	 * @param jolly character that is used as jolly, it will be replaced with a standard symbol/string
 	 * @param answerDelimiter character that the parser uses to separate the various fields in the answer
-	 * òparam timeDelimiter character that mark a timestamp
+	 * @param timeDelimiter character that mark a timestamp
 	 * @param errorDelimiter character used to separate the command from the error message
 	 */  
-	CParser(OBJ *obj,const BYTE& max,bool levelTwoSupport=false,const char delim=',',const char cmdDelimiter='=',const char timeDelimiter='@',const char jolly='*',const char answerDelimiter='\\',const char errorDelimiter='?') {
+	CParser(OBJ *obj,const BYTE& max,bool levelTwoSupport=false,const char delim=',',const char cmdDelimiter='=',const char timeDelimiter='@',/*const char jolly='*',*/const char answerDelimiter='\\',const char errorDelimiter='?') {
 		m_delimiter=delim;
 		m_commandDelimiter=cmdDelimiter;
 		m_timeDelimiter=timeDelimiter;
 		m_answerDelimiter=IRA::CString(answerDelimiter);
 		m_errorDelimiter=IRA::CString(errorDelimiter);
-		m_jollyChar=IRA::CString(jolly);
-		m_jollyCharReplacement="-1";
+		/*m_jollyChar=IRA::CString(jolly);
+		m_jollyCharReplacement="-1";*/
 		m_maxArgs=max;
 		m_ruleSet.clear();
 		m_extraRuleSet.clear();
@@ -304,7 +303,7 @@ public:
 	 * This method is used to override the default replacement for the jolly character.
 	 * @replace the string that will replace the jolly character in command before execution
 	 */
-	void setJollyCharReplacement(const IRA::CString& replace) { m_jollyCharReplacement=replace; }
+	//void setJollyCharReplacement(const IRA::CString& replace) { m_jollyCharReplacement=replace; }
 	
 	/**
 	 * This function is a wrapper of the function <i>executeCommand()</i> but taking into account the exceptions. 
@@ -596,8 +595,8 @@ private:
 	char m_timeDelimiter;
 	IRA::CString m_answerDelimiter;
 	IRA::CString m_errorDelimiter;
-	IRA::CString m_jollyChar;
-	IRA::CString m_jollyCharReplacement;
+	/*RA::CString m_jollyChar;
+	IRA::CString m_jollyCharReplacement;*/
 	BYTE m_maxArgs;
 	ACS::ThreadBase *m_pThread;
 	ACS::ThreadManagerBase m_threadManager;

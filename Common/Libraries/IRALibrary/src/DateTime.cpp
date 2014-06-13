@@ -55,6 +55,7 @@ const CDateTime& CDateTime::operator =(const CDateTime& src)
 	return *(this);
 }
 
+
 void CDateTime::setDateTime(TIMEVALUE& now,const double& dut1)
 {
 	int year,month,day;

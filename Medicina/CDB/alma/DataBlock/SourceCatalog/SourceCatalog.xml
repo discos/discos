@@ -729,4 +729,29 @@
     <modelCoeff6/>
 </Source>
 
+<Source>
+	<sourceName>w31</sourceName>
+	<rightAscension>18:10:28.6</rightAscension>
+	<declination>-19:55:51.0</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity>14.9</radialVelocity>
+    <type/>
+    <nFreqRange/>
+    <freqRange/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
+</Source>
+
 </SourceCatalog>

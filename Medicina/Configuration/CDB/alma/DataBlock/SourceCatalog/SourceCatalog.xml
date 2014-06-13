@@ -556,105 +556,6 @@
 </Source>
 
 <Source>
-	<sourceName>epsi</sourceName>
-	<rightAscension>03:32:55.844</rightAscension>
-	<declination>-09:27:29.74</declination>
-	<epoch>J2000</epoch>
-	<pmRA>-976.36</pmRA>
-	<pmDec>17.98</pmDec>
-	<parallax>310.74</parallax>
-	<radialVelocity>15.5</radialVelocity>
-    <type/>
-    <nFreqRange/>
-    <freqRange/>
-    <fluxCoeff1/>
-    <fluxCoeff2/>
-    <fluxCoeff3/>
-    <size/>
-    <model/>
-    <modelCoeff1/>
-    <modelCoeff2/>
-    <modelCoeff3/>
-    <modelCoeff4/>
-    <modelCoeff5/>
-    <modelCoeff6/>
-</Source>
-
-<Source>
-	<sourceName>proxima</sourceName>
-	<rightAscension>14:29:42.949</rightAscension>
-	<declination>-62:40:46.16</declination>
-	<epoch>J2000</epoch>
-	<pmRA>-3775.4</pmRA>
-	<pmDec>769.33</pmDec>
-	<parallax>772.33</parallax>
-	<radialVelocity></radialVelocity>
-    <type/>
-    <nFreqRange/>
-    <freqRange/>
-    <fluxCoeff1/>
-    <fluxCoeff2/>
-    <fluxCoeff3/>
-    <size/>
-    <model/>
-    <modelCoeff1/>
-    <modelCoeff2/>
-    <modelCoeff3/>
-    <modelCoeff4/>
-    <modelCoeff5/>
-    <modelCoeff6/>
-</Source>
-
-<Source>
-	<sourceName>barnard</sourceName>
-	<rightAscension>17:57:48.498</rightAscension>
-	<declination>+04:41:36.21</declination>
-	<epoch>J2000</epoch>
-	<pmRA>-798.58</pmRA>
-	<pmDec>-10328.12</pmDec>
-	<parallax>548.31</parallax>
-	<radialVelocity>-106.8</radialVelocity>
-    <type/>
-    <nFreqRange/>
-    <freqRange/>
-    <fluxCoeff1/>
-    <fluxCoeff2/>
-    <fluxCoeff3/>
-    <size/>
-    <model/>
-    <modelCoeff1/>
-    <modelCoeff2/>
-    <modelCoeff3/>
-    <modelCoeff4/>
-    <modelCoeff5/>
-    <modelCoeff6/>
-</Source>
-<Source>
-	<sourceName>kaus</sourceName>
-	<rightAscension>18:24:10.318</rightAscension>
-	<declination>-34:23:04.62</declination>
-	<epoch>J2000</epoch>
-	<pmRA/>
-	<pmDec/>
-	<parallax/>
-	<radialVelocity/>
-    <type/>
-    <nFreqRange/>
-    <freqRange/>
-    <fluxCoeff1/>
-    <fluxCoeff2/>
-    <fluxCoeff3/>
-    <size/>
-    <model/>
-    <modelCoeff1/>
-    <modelCoeff2/>
-    <modelCoeff3/>
-    <modelCoeff4/>
-    <modelCoeff5/>
-    <modelCoeff6/>
-</Source>
-
-<Source>
 	<sourceName>w3oh</sourceName>
 	<rightAscension>02:27:04.1</rightAscension>
 	<declination>61:52:27.1</declination>
@@ -680,39 +581,14 @@
 </Source>
 
 <Source>
-	<sourceName>sirio</sourceName>
-	<rightAscension>06:45:08.418</rightAscension>
-	<declination>-16:43:08.52</declination>
+	<sourceName>w31</sourceName>
+	<rightAscension>18:10:28.6</rightAscension>
+	<declination>-19:55:51.0</declination>
 	<epoch>J2000</epoch>
 	<pmRA/>
 	<pmDec/>
 	<parallax/>
-	<radialVelocity/>
-    <type/>
-    <nFreqRange/>
-    <freqRange/>
-    <fluxCoeff1/>
-    <fluxCoeff2/>
-    <fluxCoeff3/>
-    <size/>
-    <model/>
-    <modelCoeff1/>
-    <modelCoeff2/>
-    <modelCoeff3/>
-    <modelCoeff4/>
-    <modelCoeff5/>
-    <modelCoeff6/>
-</Source>
-
-<Source>
-	<sourceName>dubhe</sourceName>
-	<rightAscension>11:03:43.672</rightAscension>
-	<declination>+61:45:03.72</declination>
-	<epoch>J2000</epoch>
-	<pmRA/>
-	<pmDec/>
-	<parallax/>
-	<radialVelocity/>
+	<radialVelocity>14.9</radialVelocity>
     <type/>
     <nFreqRange/>
     <freqRange/>

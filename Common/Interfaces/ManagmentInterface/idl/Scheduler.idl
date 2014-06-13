@@ -114,7 +114,7 @@ module Management {
 		 * @return the tsys for each backend section.
 		 */
 		ACS::doubleSeq systemTemperature() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
-		
+					
 		/**
 		 * Performs a cross scan using the main drives of the telescope. The operation consists of system temperature measurment (the telescope is sent 3 times the current beam size off)
 		 * and then a longitude and a latitude On-The-Fly scans. 
@@ -181,6 +181,11 @@ module Management {
 		void chooseDefaultDataRecorder(in string rcvInstance);
 		
 		/**
+		 * This method allows to change the value af the attribute <i>restFrequency</i>.
+		 */
+		void setRestFrequency(in ACS::doubleSeq rest);
+		
+		/**
 		 * This method sets the current project code. If the project does not exists an error is thrown.
 		 * @param code code of the project, if blank the selected code will be default one 
 		 * @throw ManagementErrors::ManagementErrorsEx 
@@ -234,7 +239,13 @@ module Management {
 		 */
 		readonly attribute ACS::ROstring currentRecorder;
 		
-
+		/**
+		 * This attribute reports the rest frequency currently configured for each section of the backend (Mhz).  
+		 * It can be changed using  the method <i>setRestFrequency</i>.
+		*/		
+		readonly attribute ACS::ROdoubleSeq restFrequency;
+		
+		
 	};
 };
 

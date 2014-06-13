@@ -6,6 +6,7 @@
 /* Who                                  when            What                                              	   */
 /* Andrea Orlati(a.orlati@ira.inaf.it)  10/09/2007      Creation                                          	   */
 /* Andrea Orlati(a.orlati@ira.inaf.it)  08/04/2013     setFixedPoint() has a new argument that allows to give a target id*/
+/* Andrea Orlati(a.orlati@ira.inaf.it)  12/06/2014     added reference frame and velocity definition among the exported attributes */
 
 
 #ifndef _SKYSOURCE_IDL
@@ -46,6 +47,8 @@ module Antenna {
 	double inputDecProperMotion;     /** the proper motion in declination (milli arcseconds per tropical year if FK4 is used, per julian year if Fk5 is used) */
 	double inputParallax;            /** the parallax in milli arcseconds. */
 	double inputRadialVelocity;      /** the radial velocity in Km/sec ( positive value means the source is moving away) */
+	Antenna::TReferenceFrame inputVradFrame; /** reference frame of the radial velocity */
+	Antenna::TVradDefinition inputVradDefinition; /** definition of the radial velocity */
 	double inputGalacticLongitude;   /** the galactic longitude of the source in radians */
 	double inputGalacticLatitude;    /** the galactic latitude of the source in radians*/
 	ENDDEFATTRIBUTES;

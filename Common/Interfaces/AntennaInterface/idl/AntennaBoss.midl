@@ -14,7 +14,8 @@
 /* Andrea Orlati(a.orlati@ira.inaf.it) 10/10/2011      Added attribute targetFlux, that reports the expected source flux */
 /* Andrea Orlati(a.orlati@ira.inaf.it) 15/02/2012      added getApparentCoordinates() method */
 /* Andrea Orlati(a.orlati@ira.inaf.it) 22/02/2013     the check slewing method also check the target against limits given by the caller*/
-/* Andrea Orlati(a.orlati@ira.inaf.it) 08/04/2013    added methods goTo() and skydipScan(). The tracking parameter structure has a new fied that allows to control the pointing corrections during the scan*/
+/* Andrea Orlati(a.orlati@ira.inaf.it) 08/04/2013    added methods goTo() and skydipScan(). The tracking parameter structure has a new field that allows to control the pointing corrections during the scan*/
+/* Andrea Orlati(a.orlati@ira.inaf.it) 12/06/2014    method radial velocity to support for spectroscopy */
 
 #ifndef _ANTENNABOSS_IDL_
 
@@ -79,7 +80,7 @@ module Antenna {
 		 * @arg \c 3 proper motion in declination in mas/year (milli seconds of arc per year (tropical) if FK4 is used, 
 		 * 	               per year (julian) if Fk5 is used)
 		 * @arg \c 4 parallax in milli arcseconds.
-		 * @arg \c 5 rvel radial velocity in Km/sec ( positive value means the source is moving away)
+		 * @arg \c 5 rvel radial velocity in Km/sec ( positive value means the source is moving away), reference frame is supposed to be BARYCENTRE and definition is OPTICAL
 		*/
 		double parameters[ANTENNA_TRACKING_PARAMETER_NUMBER];
 		/**
@@ -106,6 +107,18 @@ module Antenna {
 		 * coordinate frame of the offset
 		 */
 		TCoordinateFrame offsetFrame;
+		/**
+		 * Radial velocity reference frame
+		 */
+		TReferenceFrame VradFrame;
+		/**
+		 * Radial velocity definition
+		 */
+		TVradDefinition VradDefinition;
+		/**
+		 * radial velocity, Km/s id definition is not redshift
+		 */
+		double RadialVelocity;
 		/**
 		 * offsets have been provided or not. If provided they will replace the one given manually for the frame.
 		 */
@@ -182,11 +195,19 @@ module Antenna {
 		/**
 		 * This attribute reports about the radial velocity of the target, given in Km/s.
 		 */
-		readonly attribute ACS::ROdouble targetVlsr;
+		readonly attribute ACS::ROdouble targetVrad;
 		/**
 		 * This attribute reports the expected flux (Jy) of the current target, if not known 0.0 is reported
 		 */
 		 readonly attribute ACS::ROdouble targetFlux;
+		/**
+		 * This attribute reports which is the reference frame of radial velocity of the target
+		 */
+		 readonly attribute Antenna::ROTReferenceFrame vradReferenceFrame;
+		/**
+		 * This attribute reports which is the definition of radial velocity of the target
+		 */
+		 readonly attribute Antenna::ROTVradDefinition vradDefinition;
 		/**
 		 * This attribute reports the present user sky offset(radians) commanded for the azimuth. Offset can be reset by calling <i>setup</i> or esplicitly by calling the
 		 * <i>setHorizontalOffsets()</i> method. The offset can be laso changed by the <i>startScan()</i> method.
@@ -551,7 +572,16 @@ module Antenna {
 		 * @throw CORBA::SystemException 
 		 * @param value new vlsr for the current target (Km/s)
 		 */ 
-		void setVlsr(in double value);
+		//void setVlsr(in double value);
+
+		/**
+		 * This action allows to set the radial velocity corresponding to the current target, If the radial velocity was already given (by catalog for exaple), this command will override the current value.
+		 * @param rval radial velocity (Km/sec) if the velocity definition is not Redshift (Z)
+		 * @param vref reference frame of the velocity
+		 * @param vdef velocity definition
+		 * @throw CORBA::SystemException
+		 */
+		void radialVelocity(in double rval, in TReferenceFrame vref, in TVradDefinition vdef);
 		
 		/**
 		 * copybrief Management::CommandInterpreter::command

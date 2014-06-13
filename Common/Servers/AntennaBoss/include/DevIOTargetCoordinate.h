@@ -28,7 +28,7 @@ public:
 	enum TLinkedAttribute {
 		RIGHTASCENSION,
 		DECLINATION,
-		VLSR,
+		VRAD,
 		FLUX
 	};
 	
@@ -54,8 +54,8 @@ public:
 		else if (m_eq==DECLINATION) {
 			val=resource->getTargetDeclination();
 		}
-		else if (m_eq==VLSR) {
-			val=resource->getTargetVlsr();
+		else if (m_eq==VRAD) {
+			val=resource->getTargetVrad();
 		}
 		else if (m_eq==FLUX) {
 			val=resource->getTargetFlux();

@@ -85,6 +85,7 @@
 			<xs:element name="projectCode" type="baci:ROstring"/>
 			<xs:element name="currentBackend" type="baci:ROstring"/>
 			<xs:element name="currentRecorder" type="baci:ROstring"/>	
+			<xs:element name="restFrequency" type="baci:ROdoubleSeq"/>
 			<xs:element name="MinorServoMapping" type="MinorServoMappingType" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 		<!-- directory where to find the schedules -->

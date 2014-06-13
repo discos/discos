@@ -3,7 +3,7 @@
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/*  $										         */
+/*  									         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
@@ -16,6 +16,7 @@
 /*  Andrea Orlati(aorlati@ira.inaf.it) 15/02/2012      Given implementation of the the method getApparentCoordinates */
 /*  Andrea Orlati(aorlati@ira.inaf.it) 08/02/2013     implemented again the  command method*/
 /*  Andrea Orlati(aorlati@ira.inaf.it) 22/02/2013     new implementation of checkScan()  method */
+/*  Andrea Orlati(aorlati@ira.inaf.it) 12/06/2014     implementation of the radialVelocity method */
 
 
 #ifndef __cplusplus
@@ -39,14 +40,60 @@
 
 /** 
  * @mainpage AntennaBoss component Implementation 
- * @date 08/04/2013
- * @version 1.52.0
+ * @date 12/06/2014
+ * @version 1.6.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.2.0
  * @remarks compiler version is 4.1.2
 */
 
 using namespace baci;
+
+_SP_WILDCARD_CLASS(ReferenceFrame_WildCard,"UNDEF");
+_SP_WILDCARD_CLASS(VradDefinition_WildCard,"UNDEF");
+_SP_WILDCARD_CLASS(VRad_WildCard,"nan");
+
+class ReferenceFrame_converter
+{
+public:
+	Antenna::TReferenceFrame strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+		Antenna::TReferenceFrame frame;
+		if (!CBossCore::mapReferenceFrame(str,frame)) {
+			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"ReferenceFrame_converter::strToVal()");
+			ex.setExpectedType("Reference frame");
+			throw ex;
+		}
+		return frame;
+	}
+	char *valToStr(const Antenna::TReferenceFrame& val) {
+		IRA::CString frame;
+		CBossCore::mapReferenceFrame(val,frame);
+		char *c=new char[frame.GetLength()+1];
+		strcpy(c,(const char*)frame);
+		return c;
+	}
+};
+
+class VradDefinition_converter
+{
+public:
+	Antenna::TVradDefinition strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+		Antenna::TVradDefinition def;
+		if (!CBossCore::mapVelocityDefinition(str,def)) {
+			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"VradDefinition_converter::strToVal()");
+			ex.setExpectedType("Radial velocity definition");
+			throw ex;
+		}
+		return def;
+	}
+	char *valToStr(const Antenna::TVradDefinition& val) {
+		IRA::CString def;
+		CBossCore::mapVelocityDefinition(val,def);
+		char *c=new char[def.GetLength()+1];
+		strcpy(c,(const char*)def);
+		return c;
+	}
+};
 
 
 /**
@@ -169,10 +216,22 @@ public:
 	virtual ACS::ROdouble_ptr targetDeclination() throw (CORBA::SystemException);
 	
 	/**
-     * Returns a reference to the targetVlsr property implementation of IDL interface.
-	 * @return pointer to read-only double property targetVlsr
+     * Returns a reference to the targetVrad property implementation of IDL interface.
+	 * @return pointer to read-only double property targetVrad
+	*/
+	virtual ACS::ROdouble_ptr targetVrad() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the vradReferenceFrame property Implementation of IDL interface.
+	 * @return pointer to read-only ROTReferenceFrame property vradReferenceFrame
+	*/
+	virtual Antenna::ROTReferenceFrame_ptr vradReferenceFrame() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the vradDefinition property Implementation of IDL interface.
+	 * @return pointer to read-only ROTVradDefinition property vradDefinition
 	*/	
-	virtual ACS::ROdouble_ptr targetVlsr() throw (CORBA::SystemException);
+	virtual Antenna::ROTVradDefinition_ptr vradDefinition() throw (CORBA::SystemException);
 
 	/**
      * Returns a reference to the targetFlux property implementation of IDL interface.
@@ -182,7 +241,7 @@ public:
 
 	/**
      * Returns a reference to the generatorType property Implementation of IDL interface.
-	 * @return pointer to read-only ROTGeneratorType property target
+	 * @return pointer to read-only ROTGeneratorType property generatorType
 	*/
 	virtual Antenna::ROTGeneratorType_ptr generatorType() throw (CORBA::SystemException); 
 	
@@ -344,11 +403,13 @@ public:
     void getFluxes (const ACS::doubleSeq& freqs,ACS::doubleSeq_out fluxes) throw (CORBA::SystemException);
 
 	/**
-	 * This method sets the value for the HPBW.
+	 * It will change the current radial velocity, frame and definition for the current target.
 	 * @throw CORBA::SystemException
-	 * @param value the new value in Km per seconds.
+	 * @param vrad radial velocity, given in Km/sec. If the definition is redshift it if the value of Z.
+	 * @param vref reference frame
+	 * @param vdef velocity definition
 	 */
-	void setVlsr(CORBA::Double value) throw (CORBA::SystemException);
+	void radialVelocity(CORBA::Double vrad, Antenna::TReferenceFrame vref, Antenna::TVradDefinition vdef ) throw (CORBA::SystemException);
 	
 	/**
 	 *  This method starts a new scan that could be any of the possible antenna movement.  It loads an ammount of coordinates into the mount and then it starts the thread that is 
@@ -643,7 +704,9 @@ private:
 	  POA_Management::ROTBoolean>  > m_pcorrectionEnabled;
 	SmartPropertyPointer<ROdouble> m_ptargetRightAscension;
 	SmartPropertyPointer<ROdouble> m_ptargetDeclination;
-	SmartPropertyPointer<ROdouble> m_ptargetVlsr;
+	SmartPropertyPointer<ROdouble> m_ptargetVrad;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Antenna::TReferenceFrame), POA_Antenna::ROTReferenceFrame> > m_pvradReferenceFrame;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Antenna::TVradDefinition), POA_Antenna::ROTVradDefinition> > m_pvradDefinition;
 	SmartPropertyPointer<ROdouble> m_pazimuthOffset;
 	SmartPropertyPointer<ROdouble> m_pelevationOffset;
 	SmartPropertyPointer<ROdouble> m_prightAscensionOffset;

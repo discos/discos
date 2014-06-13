@@ -41,6 +41,8 @@ public:
 	}
 };
 
+_SP_WILDCARD_CLASS(Disney_wildcard,"PIPPO");
+
 int main(int argc, char *argv[]) {
 
 	int_type p;
@@ -71,7 +73,7 @@ int main(int argc, char *argv[]) {
 	double_type dt("23.4343222");
 	printf("valore di dt: %lf\n",(double)lt);
 
-	enum_type<Disney_converter,Disney> gino;
+	enum_type<Disney_converter,Disney,Disney_wildcard> gino;
 	gino=PIPPO;
 	enum_type<Disney_converter,Disney> pino("PIPPO");
 	enum_type<Disney_converter,Disney> rino(PLUTO);
@@ -80,6 +82,10 @@ int main(int argc, char *argv[]) {
 	printf("valore di rino: %s, %d\n",(const char *)rino,(int)rino);
 	gino="PLUTO";
 	printf("valore di gino: %s, %d\n",(const char *)gino,(Disney)gino);
+	gino="*";
+	printf("valore di gino: %s, %d\n",(const char *)gino,(Disney)gino);
+
+
 
 	angle_type<rad> angle1;
 	angle1="359.9d";

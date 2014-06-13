@@ -8,6 +8,7 @@
 /*                                                                                                      */
 /* Who                                when            What                                              */
 /* Andrea Orlati (a.orlati@ira.inaf.it)  09/08/13     Creation  */
+/* Andrea Orlati (a.orlati@ira.inaf.it)  12/04/14     display for the restFrequency attribute  */
 
 #include <SchedulerC.h>
 #include <ManagmentDefinitionsC.h>
@@ -50,8 +51,8 @@
 
 /* define the main frame dimension */
 /* ******************************* */
-#define WINDOW_WIDTH 46      /*columns */
-#define WINDOW_HEIGHT 16     /* rows */
+#define WINDOW_WIDTH 60      /*columns */
+#define WINDOW_HEIGHT 17     /* rows */
 /* ******************************* */
 
 /* **************************************************** */

@@ -28,6 +28,7 @@
 #include "Configuration.h"
 #include "Core.h"
 #include <IRA>
+#include <baciROdoubleSeq.h>
 
 /** 
  * @mainpage Scheduler component Implementation 
@@ -149,6 +150,12 @@ public:
 	virtual ACS::ROstring_ptr currentRecorder() throw (CORBA::SystemException);
 
 	/**
+     * Returns a reference to the restFrequency property Implementation of IDL interface.
+	 * @return pointer to read-only double sequence property restFrequency
+	 */
+	virtual ACS::ROdoubleSeq_ptr restFrequency() throw (CORBA::SystemException);
+
+	/**
 	 * This method implements the command line interpreter. The interpreter allows to ask for services or to issue commands
 	 * to the control system by human readable command lines.
 	 * @throw CORBA::SystemException
@@ -192,14 +199,14 @@ public:
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
 	/**
-	 * This method performs the system temperature measurment. In order to do that it uses the currently configured backend and frontend. The measure is performed
+	 * This method performs the system temperature measurement. In order to do that it uses the currently configured backend and frontend. The measure is performed
 	 * for aech of the section of the backend. The sequence of operation is: 
-	 * 	@arg \c a) call the backend in order to collect the informations for each section (start fequency, bandwidth, polarization and feed).
+	 * 	@arg \c a) call the backend in order to collect the informations for each section (start frequency, bandwidth, polarization and feed).
 	 *     @arg \c b) call the receiverboss in order to know the value of the calibration diode for each of the sections
-	 *     @arg \c c) call the backend ion order to get the TPI and TPIzero measurments
+	 *     @arg \c c) call the backend ion order to get the TPI and TPIzero measurements
 	 *     @arg \c d) call the receiverBoss in order to turn the calibration diode on
-	 *     @arg \c  e) call the backend in order to get the TPIcal  measurment
-	 *     @arg \c  f) call the freceiver boss in order to turn the calibration diode off
+	 *     @arg \c  e) call the backend in order to get the TPIcal  measurement
+	 *     @arg \c  f) call the receiver boss in order to turn the calibration diode off
 	 *     @arg \c g) compute the system temperature
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
@@ -220,7 +227,6 @@ public:
 	 */ 
 	virtual void crossScan(Management::TCoordinateFrame coordFrame,CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
-
 
 	/**
 	 * Performs a focus scan moving the subreflector or the receiver along the optical axis of the telescope. The operation consists of system temperature measurement (the telescope is sent
@@ -297,6 +303,12 @@ public:
 	 */
 	virtual void setProjectCode(const char *code) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx);
 
+	/**
+	 * This method allow to set the current value for the rest frequency
+	 * @param rest sequence of value (MHz) that are the rest frequencies to be applied for each section. If one is given the same value is used for the sections.
+	 */
+	virtual void setRestFrequency(const ACS::doubleSeq& rest) throw (CORBA::SystemException);
+
 	
 private:
 
@@ -309,6 +321,7 @@ private:
 	baci::SmartPropertyPointer<baci::ROstring> m_pprojectCode;
 	baci::SmartPropertyPointer<baci::ROstring> m_pcurrentBackend;
 	baci::SmartPropertyPointer<baci::ROstring> m_pcurrentRecorder;
+	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_prestFrequency;
 	CConfiguration m_config;
 	CCore *m_core;
 };

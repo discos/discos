@@ -16,9 +16,11 @@
 #include "DevIOTargetName.h"
 #include "DevIOOffsets.h"
 #include "DevIOLambda.h"
+#include "DevIOVradDefinition.h"
+#include "DevIOVradReferenceFrame.h"
 
-static char *rcsId="@(#) $Id: AntennaBossImpl.cpp,v 1.29 2011-06-05 14:44:40 a.orlati Exp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
+/*static char *rcsId="@(#) $Id: AntennaBossImpl.cpp,v 1.29 2011-06-05 14:44:40 a.orlati Exp $";
+static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);*/
 
 using namespace SimpleParser;
 
@@ -45,7 +47,9 @@ AntennaBossImpl::AntennaBossImpl(const ACE_CString &CompName,maci::ContainerServ
 	m_pcorrectionEnabled(this),
 	m_ptargetRightAscension(this),
 	m_ptargetDeclination(this),
-	m_ptargetVlsr(this),
+	m_ptargetVrad(this),
+	m_pvradReferenceFrame(this),
+    m_pvradDefinition(this),
 	m_pazimuthOffset(this),
 	m_pelevationOffset(this),
 	m_prightAscensionOffset(this),
@@ -117,8 +121,12 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				new DevIOTargetCoordinate(m_core,DevIOTargetCoordinate::RIGHTASCENSION),true);
 		m_ptargetDeclination=new ROdouble(getContainerServices()->getName()+":targetDeclination",getComponent(),
 				new DevIOTargetCoordinate(m_core,DevIOTargetCoordinate::DECLINATION),true);
-		m_ptargetVlsr=new ROdouble(getContainerServices()->getName()+":targetVlsr",getComponent(),
-				new DevIOTargetCoordinate(m_core,DevIOTargetCoordinate::VLSR),true);
+		m_ptargetVrad=new ROdouble(getContainerServices()->getName()+":targetVrad",getComponent(),
+				new DevIOTargetCoordinate(m_core,DevIOTargetCoordinate::VRAD),true);
+		m_pvradReferenceFrame=new ROEnumImpl<ACS_ENUM_T(Antenna::TReferenceFrame), POA_Antenna::ROTReferenceFrame>(
+				getContainerServices()->getName()+":vradReferenceFrame",getComponent(),new DevIOVradReferenceFrame(m_core),true);
+		m_pvradDefinition=new  ROEnumImpl<ACS_ENUM_T(Antenna::TVradDefinition), POA_Antenna::ROTVradDefinition>(
+				getContainerServices()->getName()+":vradDefinition",getComponent(),new DevIOVradDefinition(m_core),true) ;
 		m_ptargetFlux=new ROdouble(getContainerServices()->getName()+":targetFlux",getComponent(),
 				new DevIOTargetCoordinate(m_core,DevIOTargetCoordinate::FLUX),true);
 		m_pazimuthOffset=new ROdouble(getContainerServices()->getName()+":azimuthOffset",getComponent(),
@@ -175,7 +183,7 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("goOff",new function2<CBossCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> > >(boss,&CBossCore::goOff),2);
 	m_parser->add("lonOTF",new function3<CBossCore,non_constant,time_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(boss,&CBossCore::lonOTFScan),3);
 	m_parser->add("latOTF",new function3<CBossCore,non_constant,time_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(boss,&CBossCore::latOTFScan),3);
-	m_parser->add("vlsr",new function1<CBossCore,non_constant,void_type,I<double_type> >(boss,&CBossCore::setVlsr),1);
+	//m_parser->add("vlsr",new function1<CBossCore,non_constant,void_type,I<double_type> >(boss,&CBossCore::setVlsr),1);
 	m_parser->add("fwhm",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >, I<double_type> >(boss,&CBossCore::setFWHM),2);
 	m_parser->add("track",new function1<CBossCore,non_constant,void_type,I<string_type> >(boss,&CBossCore::track),1);
 	m_parser->add("azelOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setHorizontalOffsets),2);
@@ -184,6 +192,10 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("skydipOTF",new function3<CBossCore,non_constant,time_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(boss,&CBossCore::skydip),3);
 	m_parser->add("goTo",new function2<CBossCore,non_constant,void_type,I<azimuth_type<rad,false> >,I<elevation_type<rad,false> > >(boss,&CBossCore::goTo),2);
 	m_parser->add("antennaReset",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::resetFailures),0);
+
+	m_parser->add("radialVelocity",new function3<CBossCore,non_constant,void_type,I<  basic_type<double,double_converter,VRad_WildCard> >,
+			I<enum_type<ReferenceFrame_converter,Antenna::TReferenceFrame,ReferenceFrame_WildCard> >,
+			I<enum_type<VradDefinition_converter,Antenna::TVradDefinition,VradDefinition_WildCard> >  >(boss,&CBossCore::radialVelocity),3);
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
@@ -368,13 +380,17 @@ void AntennaBossImpl::reset() throw (ComponentErrors::ComponentErrorsEx,AntennaE
 	}
 }
 
-
-
-void AntennaBossImpl::setVlsr(CORBA::Double value) throw (CORBA::SystemException)
+/*void AntennaBossImpl::setVlsr(CORBA::Double value) throw (CORBA::SystemException)
 {
 	AUTO_TRACE("AntennaBossImpl::setvlsr");
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
-	resource->setVlsr(value);	
+	resource->setVlsr(value);
+}*/
+
+void AntennaBossImpl::radialVelocity(CORBA::Double vrad, Antenna::TReferenceFrame vref,Antenna::TVradDefinition vdef ) throw (CORBA::SystemException)
+{
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	resource->radialVelocity(vrad,vref,vdef);
 }
 
 void AntennaBossImpl::enable() throw (CORBA::SystemException)
@@ -700,7 +716,9 @@ _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pwaveLength,waveLength);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,Management::ROTBoolean,m_pcorrectionEnabled,correctionEnabled);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetRightAscension,targetRightAscension);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetDeclination,targetDeclination);
-_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetVlsr,targetVlsr);
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetVrad,targetVrad);
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,Antenna::ROTReferenceFrame,m_pvradReferenceFrame,vradReferenceFrame);
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,Antenna::ROTVradDefinition,m_pvradDefinition,vradDefinition);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetFlux,targetFlux);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pazimuthOffset,azimuthOffset);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pelevationOffset,elevationOffset);

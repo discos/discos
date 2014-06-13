@@ -896,6 +896,99 @@ bool CIRATools::strToCoordinateFrame(const IRA::CString& val,Antenna::TCoordinat
 	return true;
 }
 
+bool CIRATools::strToReferenceFrame(const IRA::CString& val,Antenna::TReferenceFrame& frame)
+{
+	// ANT_UNDEF_FRAME is not considered to be  to a legal value for reference frame.
+	// reported into antenna.xsd: TOPOCEN,BARY,LSRK,LSRD,GALCEN,LGRP,UNDEF"
+	IRA::CString strVal(val);
+	strVal.MakeUpper();
+	if (strVal=="BARY") {
+		frame=Antenna::ANT_BARY;
+	}
+	else if (strVal=="LSRK") {
+		frame=Antenna::ANT_LSRK;
+	}
+	else if (strVal=="LSRD") {
+		frame=Antenna::ANT_LSRD;
+	}
+	else if (strVal=="LGRP") {
+		frame=Antenna::ANT_LGROUP;
+	}
+	else if (strVal=="GALCEN") {
+		frame=Antenna::ANT_GALCEN;
+	}
+	else if (strVal=="TOPOCEN") {
+		frame=Antenna::ANT_TOPOCEN;
+	}
+	else {
+		return false;
+	}
+	return true;
+}
+
+bool CIRATools::referenceFrameToStr(const Antenna::TReferenceFrame& frame,IRA::CString& str)
+{
+	if (frame==Antenna::ANT_BARY) {
+		str="BARY";
+	}
+	else if (frame==Antenna::ANT_LSRK) {
+		str="LSRK";
+	}
+	else if (frame==Antenna::ANT_LSRD) {
+		str="LSRD";
+	}
+	else if (frame==Antenna::ANT_LGROUP) {
+		str="LGRP";
+	}
+	else if (frame==Antenna::ANT_GALCEN) {
+		str="GALCEN";
+	}
+	else if (frame==Antenna::ANT_TOPOCEN) {
+		str="TOPOCEN";
+	}
+	else {
+		str="UNDEF";
+	}
+	return true;
+}
+
+bool CIRATools::strToVradDefinition(const IRA::CString& val,Antenna::TVradDefinition& frame)
+{
+	// ANT_UNDEF_DEF   is not considered to be  to a legal value for velocity definition
+	// reported into antenna.xsd: RD,OP,Z,UNDEF
+	IRA::CString strVal(val);
+	strVal.MakeUpper();
+	if (strVal=="RD") {
+		frame=Antenna::ANT_RADIO;
+	}
+	else if (strVal=="OP") {
+		frame=Antenna::ANT_OPTICAL;
+	}
+	else if (strVal=="Z") {
+		frame=Antenna::ANT_REDSHIFT;
+	}
+	else {
+		return false;
+	}
+	return true;
+}
+
+bool CIRATools::vradDefinitionToStr(const Antenna::TVradDefinition& frame,IRA::CString& str)
+{
+	if (frame==Antenna::ANT_RADIO) {
+		str="RD";
+	}
+	else if (frame==Antenna::ANT_OPTICAL) {
+		str="OP";
+	}
+	else if (frame==Antenna::ANT_REDSHIFT) {
+		str="Z";
+	}
+	else {
+		str="UNDEF";
+	}
+	return true;
+}
 
 bool CIRATools::equinoxToStr(const Antenna::TSystemEquinox& ep,IRA::CString& str)
 {

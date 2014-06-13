@@ -69,6 +69,10 @@
 #define TEMPLATE_4_ROTBOOLEAN  Management::ROTBoolean_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
 #define TEMPLATE_4_ROTSYSTEMSTATUS  Management::ROTSystemStatus_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
 
+#define TEMPLATE_4_ROTREFERENCEFRAME Antenna::ROTReferenceFrame_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
+#define TEMPLATE_4_ROTVRADDEFINITION  Antenna::ROTVradDefinition_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
+
+
 using namespace TW;
 
 static bool terminate;
@@ -119,12 +123,13 @@ int main(int argc, char *argv[]) {
 	Antenna::TGeneratorType lastGeneratorType=Antenna::ANT_NONE;
 	Antenna::EphemGenerator_var lastGenerator=Antenna::EphemGenerator::_nil();
 
+	char fluxFormat[20];
 	
 	/* Add frame controls declaration */
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING> *target_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *targetRA_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *targetDec_field;
-	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *targetVlsr_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *targetVrad_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *azOff_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *elOff_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *raOff_field;
@@ -145,6 +150,10 @@ int main(int argc, char *argv[]) {
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *pointingElevationCorrection_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *refractionCorrection_field;
 	TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> * status_box;
+
+	TW::CPropertyStatusBox<TEMPLATE_4_ROTREFERENCEFRAME,Antenna::TReferenceFrame> * refFrame_box;
+	TW::CPropertyStatusBox<TEMPLATE_4_ROTVRADDEFINITION,Antenna::TVradDefinition> * velDef_box;
+
 	TW::CLedDisplay * tracking_display;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *FWHM_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *targetFlux_field;
@@ -247,7 +256,9 @@ int main(int argc, char *argv[]) {
 		_GET_ACS_PROPERTY(ACS::ROstring,target);
 		_GET_ACS_PROPERTY(ACS::ROdouble,targetRightAscension);
 		_GET_ACS_PROPERTY(ACS::ROdouble,targetDeclination);
-		_GET_ACS_PROPERTY(ACS::ROdouble,targetVlsr);	
+		_GET_ACS_PROPERTY(ACS::ROdouble,targetVrad);
+		_GET_ACS_PROPERTY(Antenna::ROTReferenceFrame,vradReferenceFrame);
+		_GET_ACS_PROPERTY(Antenna::ROTVradDefinition,vradDefinition);
 		_GET_ACS_PROPERTY(ACS::ROdouble,azimuthOffset);
 		_GET_ACS_PROPERTY(ACS::ROdouble,elevationOffset);
 		_GET_ACS_PROPERTY(ACS::ROdouble,rightAscensionOffset);
@@ -279,7 +290,7 @@ int main(int argc, char *argv[]) {
 		target_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING>(target.in());
 		targetRA_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(targetRightAscension.in());
 		targetDec_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(targetDeclination.in());
-		targetVlsr_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(targetVlsr.in());		
+		targetVrad_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(targetVrad.in());
 		azOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(azimuthOffset.in());
 		elOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(elevationOffset.in());
 		raOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(rightAscensionOffset.in());
@@ -302,6 +313,8 @@ int main(int argc, char *argv[]) {
 		pointingElevationCorrection_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(pointingElevationCorrection.in());
 		refractionCorrection_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(refractionCorrection.in());
 		status_box=new TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> (status.in(),Management::MNG_OK);
+		refFrame_box=new TW::CPropertyStatusBox<TEMPLATE_4_ROTREFERENCEFRAME,Antenna::TReferenceFrame>(vradReferenceFrame.in(),Antenna::ANT_UNDEF_FRAME);
+		velDef_box=new TW::CPropertyStatusBox<TEMPLATE_4_ROTVRADDEFINITION,Antenna::TVradDefinition>(vradDefinition.in(),Antenna::ANT_UNDEF_DEF);
 		FWHM_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(FWHM.in());
 		targetFlux_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(targetFlux.in());
 		extraLabel1=new CLabel("");
@@ -323,32 +336,37 @@ int main(int argc, char *argv[]) {
 		/** setting up the properties of the components of the frame controls */	
 		_TW_SET_COMPONENT(targetRA_field,22,1,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(targetDec_field,37,1,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(targetVlsr_field,52,1,7,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(targetFlux_field,60,1,7,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(target_field,0,1,17,1,CColorPair::BLUE_BLACK,CStyle::UNDERLINE,output_label);
-		_TW_SET_COMPONENT(azOff_field,22,2,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(elOff_field,37,2,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(raOff_field,22,3,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(decOff_field,37,3,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(lonOff_field,22,4,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(latOff_field,37,4,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(rawAzimuth_field,22,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(rawElevation_field,37,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(observedAzimuth_field,22,6,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(observedElevation_field,37,6,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(observedRightAscension_field,22,7,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(observedDeclination_field,37,7,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(observedGalLongitude_field,22,8,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(observedGalLatitude_field,37,8,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(generatorType_box,22,9,10,1,BLACK_GREEN,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(pointingAzimuthCorrection_field,22,10,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(pointingElevationCorrection_field,32,10,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(refractionCorrection_field,42,10,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(FWHM_field,22,11,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		enabled_display->setPosition(CPoint(22,12));
-		tracking_display->setPosition(CPoint(22,13));
-		correctionEnabled_display->setPosition(CPoint(22,14));
-		_TW_SET_COMPONENT(status_box,22,15,10,1,BLACK_GREEN,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(targetFlux_field,52,1,11,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(target_field,0,1,17,1,CColorPair::GREEN_BLACK,CStyle::UNDERLINE,output_label);
+
+		_TW_SET_COMPONENT(targetVrad_field,22,2,11,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+
+		_TW_SET_COMPONENT(refFrame_box,34,2,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(velDef_box,47,2,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+
+		_TW_SET_COMPONENT(azOff_field,22,3,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(elOff_field,37,3,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(raOff_field,22,4,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(decOff_field,37,4,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(lonOff_field,22,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(latOff_field,37,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(rawAzimuth_field,22,6,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(rawElevation_field,37,6,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(observedAzimuth_field,22,7,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(observedElevation_field,37,7,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(observedRightAscension_field,22,8,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(observedDeclination_field,37,8,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(observedGalLongitude_field,22,9,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(observedGalLatitude_field,37,9,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(generatorType_box,22,10,10,1,BLACK_GREEN,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(pointingAzimuthCorrection_field,22,11,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(pointingElevationCorrection_field,32,11,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(refractionCorrection_field,42,11,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(FWHM_field,22,12,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		enabled_display->setPosition(CPoint(22,13));
+		tracking_display->setPosition(CPoint(22,14));
+		correctionEnabled_display->setPosition(CPoint(22,15));
+		_TW_SET_COMPONENT(status_box,22,16,10,1,BLACK_GREEN,CStyle::BOLD,output_label);
 
 		// setting up the controls look and feel........
 		enabled_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
@@ -365,8 +383,9 @@ int main(int argc, char *argv[]) {
 		observedDeclination_field->setFormatFunction(CFormatFunctions::angleFormat,NULL);
 		targetRA_field->setFormatFunction(CFormatFunctions::angleFormat,static_cast<void *>(&targetRA_field));
 		targetDec_field->setFormatFunction(CFormatFunctions::angleFormat,NULL);
-		targetVlsr_field->setFormatFunction(CFormatFunctions::floatingPointFormat,NULL);
-		targetFlux_field->setFormatFunction(CFormatFunctions::floatingPointFormat,NULL);
+		targetVrad_field->setFormatFunction(CFormatFunctions::floatingPointFormat,NULL);
+		strcpy(fluxFormat,"(%05.1lf Jy)");
+		targetFlux_field->setFormatFunction(CFormatFunctions::floatingPointFormat,static_cast<void *>(fluxFormat));
 		azOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		elOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		raOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL); //format as hh.mm.ss.ss
@@ -389,17 +408,30 @@ int main(int argc, char *argv[]) {
 		status_box->setStatusLook(Management::MNG_OK,CStyle(BLACK_GREEN,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_WARNING,CStyle(BLACK_YELLOW,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_FAILURE,CStyle(BLACK_RED,CStyle::BOLD));
+
+		refFrame_box->setStatusLook(Antenna::ANT_BARY);
+		refFrame_box->setStatusLook(Antenna::ANT_LSRK);
+		refFrame_box->setStatusLook(Antenna::ANT_LSRD);
+		refFrame_box->setStatusLook(Antenna::ANT_GALCEN);
+		refFrame_box->setStatusLook(Antenna::ANT_LGROUP);
+		refFrame_box->setStatusLook(Antenna::ANT_TOPOCEN);
+		refFrame_box->setStatusLook(Antenna::ANT_UNDEF_FRAME);
+		velDef_box->setStatusLook(Antenna::ANT_RADIO);
+		velDef_box->setStatusLook(Antenna::ANT_OPTICAL);
+		velDef_box->setStatusLook(Antenna::ANT_REDSHIFT);
+		velDef_box->setStatusLook(Antenna::ANT_UNDEF_DEF);
+
 		tracking_display->setOrientation(TW::CLedDisplay::HORIZONTAL);
 		tracking_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
 		FWHM_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		
 		// extra labels..........
-		extraLabel1->setWidth(WINDOW_WIDTH-2); extraLabel1->setHeight(1); extraLabel1->setPosition(TW::CPoint(0,18));
-		extraLabel2->setWidth(WINDOW_WIDTH-2); extraLabel2->setHeight(1); extraLabel2->setPosition(TW::CPoint(0,19));
-		extraLabel3->setWidth(WINDOW_WIDTH-2); extraLabel3->setHeight(1); extraLabel3->setPosition(TW::CPoint(0,20));
-		extraLabel4->setWidth(WINDOW_WIDTH-2); extraLabel4->setHeight(1); extraLabel4->setPosition(TW::CPoint(0,21));		
-		extraLabel5->setWidth(WINDOW_WIDTH-2); extraLabel5->setHeight(1); extraLabel5->setPosition(TW::CPoint(0,22));		
-		extraLabel6->setWidth(WINDOW_WIDTH-2); extraLabel6->setHeight(1); extraLabel6->setPosition(TW::CPoint(0,23));		
+		extraLabel1->setWidth(WINDOW_WIDTH-2); extraLabel1->setHeight(1); extraLabel1->setPosition(TW::CPoint(0,19));
+		extraLabel2->setWidth(WINDOW_WIDTH-2); extraLabel2->setHeight(1); extraLabel2->setPosition(TW::CPoint(0,20));
+		extraLabel3->setWidth(WINDOW_WIDTH-2); extraLabel3->setHeight(1); extraLabel3->setPosition(TW::CPoint(0,21));
+		extraLabel4->setWidth(WINDOW_WIDTH-2); extraLabel4->setHeight(1); extraLabel4->setPosition(TW::CPoint(0,22));
+		extraLabel5->setWidth(WINDOW_WIDTH-2); extraLabel5->setHeight(1); extraLabel5->setPosition(TW::CPoint(0,23));
+		extraLabel6->setWidth(WINDOW_WIDTH-2); extraLabel6->setHeight(1); extraLabel6->setPosition(TW::CPoint(0,24));
 		
 		/* ****************************************************************** */
 		_TW_SET_COMPONENT(userInput,0,WINDOW_HEIGHT-6,WINDOW_WIDTH-1,1,USER_INPUT_COLOR_PAIR,USER_INPUT_STYLE,NULL);
@@ -414,14 +446,16 @@ int main(int argc, char *argv[]) {
 		_INSTALL_MONITOR(target_field,2000);
 		_INSTALL_MONITOR(targetRA_field,2000);
 		_INSTALL_MONITOR(targetDec_field,2000);
-		_INSTALL_MONITOR(targetVlsr_field,2000);
+		_INSTALL_MONITOR(targetVrad_field,2000);
+		_INSTALL_MONITOR(refFrame_box,2000);
+		_INSTALL_MONITOR(velDef_box,2000);
 		_INSTALL_MONITOR(targetFlux_field,2000);
-		_INSTALL_MONITOR(azOff_field,300);
-		_INSTALL_MONITOR(elOff_field,300);
-		_INSTALL_MONITOR(raOff_field,300);
-		_INSTALL_MONITOR(decOff_field,300);
-		_INSTALL_MONITOR(lonOff_field,300);
-		_INSTALL_MONITOR(latOff_field,300);
+		_INSTALL_MONITOR(azOff_field,500);
+		_INSTALL_MONITOR(elOff_field,500);
+		_INSTALL_MONITOR(raOff_field,500);
+		_INSTALL_MONITOR(decOff_field,500);
+		_INSTALL_MONITOR(lonOff_field,500);
+		_INSTALL_MONITOR(latOff_field,500);
 		_INSTALL_MONITOR(rawAzimuth_field,300);
 		_INSTALL_MONITOR(rawElevation_field,300);
 		_INSTALL_MONITOR(observedAzimuth_field,300);
@@ -454,21 +488,22 @@ int main(int argc, char *argv[]) {
 		
 		/* Add all the static labels */		
 		//_TW_ADD_LABEL(":",18,1,1,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Horiz. Offs       :",0,2,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Equat. Offs       :",0,3,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Galac. Offs       :",0,4,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Raw Horiz.          :",0,5,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Observed Horiz.   :",0,6,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Observed Equat.   :",0,7,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Observed Galac.   :",0,8,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);		
-		_TW_ADD_LABEL("Generator Type    : ",0,9,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Corr.  az/el/ref     : ",0,10,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("FWHM                 : ",0,11,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Enabled               : ",0,12,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Tracking              : ",0,13,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Correction            : ",0,14,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);		
-		_TW_ADD_LABEL("Status               : ",0,15,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL(" ______________________________Generator___________________________________________",0,17,WINDOW_WIDTH-2,1,CColorPair::GREEN_BLACK,CStyle::BOLD,window);
+		_TW_ADD_LABEL("Radial Velocity   :",0,2,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Horiz. Offs       :",0,3,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Equat. Offs       :",0,4,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Galac. Offs       :",0,5,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Raw Horiz.          :",0,6,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Observed Horiz.   :",0,7,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Observed Equat.   :",0,8,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Observed Galac.   :",0,9,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Generator Type    : ",0,10,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Corr.  az/el/ref     : ",0,11,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("FWHM                 : ",0,12,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Enabled               : ",0,13,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Tracking              : ",0,14,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Correction            : ",0,15,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Status               : ",0,16,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL(" _______________________________Generator__________________________________________",0,17,WINDOW_WIDTH-2,1,CColorPair::GREEN_BLACK,CStyle::BOLD,window);
 		
 		/* ************************* */
 		
@@ -476,7 +511,9 @@ int main(int argc, char *argv[]) {
 		window.addComponent((CFrameComponent*)target_field);
 		window.addComponent((CFrameComponent*)targetRA_field);
 		window.addComponent((CFrameComponent*)targetDec_field);
-		window.addComponent((CFrameComponent*)targetVlsr_field);		
+		window.addComponent((CFrameComponent*)targetVrad_field);
+		window.addComponent((CFrameComponent*)refFrame_box);
+		window.addComponent((CFrameComponent*)velDef_box);
 		window.addComponent((CFrameComponent*)targetFlux_field);
 		window.addComponent((CFrameComponent*)azOff_field);
 		window.addComponent((CFrameComponent*)elOff_field);

@@ -12,8 +12,6 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  09/04/2010      added some wrappers of the function startScan */
 /* Andrea Orlati(aorlati@ira.inaf.it)  08/04/2013      added support for skydip, goTo, correction during scans and scanAxis handling*/
 
-
-
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
 #include <AntennaErrors.h>
@@ -35,6 +33,7 @@
 #include <acsncSimpleSupplier.h>
 #include "Callback.h"
 #include "SlewCheck.h"
+#include <FrequencyTracking.h>
 
 using namespace IRA;
 using namespace maci;
@@ -237,10 +236,10 @@ public:
 	 * the center position is determined by taking the J2000 coordinates. 
 	 * Internally it calls the <i>startScan()</i> method.
 	 * @param scanFrame gives the frame involved during the scan movement
-	 * @param span lenght of the scan in radians
+	 * @param span length of the scan in radians
 	 * @param duration number of seconds that the scan takes
 	 * @return the expected start time, if zero the scan will not be done, for example because the source is not visible at the moment.
-	 * @thorw ComponentErrors::CouldntReleaseComponentExImpl
+	 * @throw ComponentErrors::CouldntReleaseComponentExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	 * @throw ComponentErrors::CORBAProblemExImpl
 	 * @throw ComponentErrors::UnexpectedExImp
@@ -261,10 +260,10 @@ public:
 	 * the center position is determined by taking the J2000 coordinates. 
 	 * Internally it calls the <i>startScan()</i> method.
 	 * @param scanFrame gives the frame involved during the scan movement
-	 * @param span lenght of the scan in radians
+	 * @param span length of the scan in radians
 	 * @param duration number of seconds that the scan takes
 	 * @return the expected start time, if zero the scan will not be done, for example because the source is not visible at the moment.
-	 * @thorw ComponentErrors::CouldntReleaseComponentExImpl
+	 * @throw ComponentErrors::CouldntReleaseComponentExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	 * @throw ComponentErrors::CORBAProblemExImpl
 	 * @throw ComponentErrors::UnexpectedExImp
@@ -286,7 +285,7 @@ public:
 	 * @throw ComponentErrors::CouldntCallOperationExImpl
 	 * @throw ComponentErrors::CORBAProblemExImpl
 	 * @throw ComponentErrors::CouldntReleaseComponentExImpl
-	 * @thorw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	*/
 	void stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,
 			ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl);
@@ -305,7 +304,7 @@ public:
 	void resetFailures() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntCallOperationExImpl);
 	
 	/**
-	 * This routine is used to put the antenna to survival posistion. It does anything else than calling the stow() method provided
+	 * This routine is used to put the antenna to survival position. It does anything else than calling the stow() method provided
 	 * by the mount.
 	 * @throw ManagementErrors::ParkingErrorExImpl
 	*/
@@ -313,7 +312,7 @@ public:
 	
 	/**
 	 * This sets new offsets in the present generator for the given frame. If the generator has not been selected yet,
-	 * the offsets are simply stored. Every time a new tracking is commanded the offsets are not reset excpet the case a new generatoris required and loaded.
+	 * the offsets are simply stored. Every time a new tracking is commanded the offsets are not reset except the case a new generator is required and loaded.
 	 * @param lonOff new azimuth offset in radians
 	 * @param latOff new elevation offset in radians
 	 * @param frame reference frame
@@ -350,9 +349,12 @@ public:
 	void computeFWHM(const double& taper,const double& waveLen);
 	
 	/**
-	 * Sets the current value for the vlsr. 
+	 * Sets the radial velocity for the current target.
+	 * @param val value for the current radial velocity
+	 * @param vframe reference the velocity is referred to
+	 * @param vdef definition adopted for the current velocity
 	*/
-	void setVlsr(const double& val);	
+	void radialVelocity(const double& val,const Antenna::TReferenceFrame& vframe, const Antenna::TVradDefinition& vdef);
 	
 	/**
 	 * It does an iterative computation of the fluxes corresponding to the given frequencies. The FWHM is required to be set otherwise 1.0 is returned.
@@ -369,7 +371,7 @@ public:
 	
 	/**
 	 * Sets the <i>m_correctionEnable</i> flag to false, i.e. the component when commanding a tracking curve will not apply
-	 * the correction due to pointing model and refraction. In that case the Raw coordinates will match the Apparetn ones. 
+	 * the correction due to pointing model and refraction. In that case the Raw coordinates will match the Apparent ones.
 	 * Call <i>enableCorrection()</i> to enable this feature.
 	*/	
 	void disableCorrection();
@@ -441,9 +443,19 @@ public:
 	const double& getTargetFlux() const { return m_targetFlux; }
 
 	/**
-	 * @return the radial velocity of the target in km/s
+	 * @return the radial velocity of the target in km/s or Z based on <i>m_vradDefinition</i>
 	 */
-	const double& getTargetVlsr() const { return m_targetVlsr; }
+	const double& getTargetVrad() const { return m_targetVrad; }
+
+	/**
+	 * @return the reference frame of the current radial velocity
+	 */
+	const Antenna::TReferenceFrame& getReferenceFrame() const { return  m_vradReferenceFrame; }
+
+	/**
+	 * @return the definition of the current radial velocity
+	 */
+	const Antenna::TVradDefinition& getVradDefinition() const { return  m_vradDefinition; }
 		
 	/**
 	 * This function can be called to get the observed  equatorial J2000 coordinates at any given time. This coordinates are computed starting from the
@@ -655,6 +667,23 @@ public:
 	 */
 	Management::TScanAxis getCurrentAxis() const  { return m_currentAxis; }
 	
+	static Antenna::TReferenceFrame mapReferenceFrame(const IRA::CFrequencyTracking::TFrame& frame);
+
+	static IRA::CFrequencyTracking::TFrame mapReferenceFrame(const Antenna::TReferenceFrame& frame);
+
+	static  bool mapReferenceFrame(const IRA::CString& frame,Antenna::TReferenceFrame& outFrame);
+
+	static  void  mapReferenceFrame(const Antenna::TReferenceFrame& frame,IRA::CString& outFrame);
+
+	static Antenna::TVradDefinition mapVelocityDefinition(const  IRA::CFrequencyTracking::TDefinition& def);
+
+	static IRA::CFrequencyTracking::TDefinition mapVelocityDefinition(const Antenna::TVradDefinition& def);
+
+	static bool mapVelocityDefinition(const  IRA::CString& def,Antenna::TVradDefinition& outDef);
+
+	static void mapVelocityDefinition(const  Antenna::TVradDefinition& def,IRA::CString& outDef);
+
+
 private:
 	class TOffset {
 	public:
@@ -693,7 +722,7 @@ private:
 	*/
 	Antenna::Mount_var m_mount;
 	/**
-	 * flag that indicates an error was rilevated during communication to the mount
+	 * flag that indicates an error was relevated during communication to the mount
 	 */
 	bool m_mountError;
 	/**
@@ -707,7 +736,7 @@ private:
 	Antenna::EphemGenerator_var m_generatorFlux;
 
 	/**
-	 * This is the reference to the poiting model component
+	 * This is the reference to the pointing model component
 	*/
 	Antenna::PointingModel_var m_pointingModel;
 	/**
@@ -735,13 +764,13 @@ private:
 	*/		
 	double m_refractionOffset;
 	
-	/** The rusulting offset*/
+	/** The resulting offset*/
 	double m_longitudeOffset;
 	double m_latitudeOffset;
 	Antenna::TCoordinateFrame m_offsetFrame;
 	/** The offset coming from the current scan */
 	TOffset m_scanOffset;
-	/** The offset cominig from the user input */
+	/** The offset coming from the user input */
 	TOffset m_userOffset;
 	
 	/**
@@ -765,13 +794,13 @@ private:
 	bool m_newTracking;
 	
 	/**
-	 * This is the pointer to the working thred, it must be waked up when a tracking is started 
+	 * This is the pointer to the working thread, it must be waked up when a tracking is started
 	*/
 	ACS::Thread *m_workingThread;
 	//WorkingThread *m_workingThread; 	
 
 	/**
-	 * This represnets the status of the whole Antenna subsystem, it also includes and sammerizes the status of the boss component  
+	 * This represents  the status of the whole Antenna subsystem, it also includes and sums up the status of the boss component
 	 */
 	Management::TSystemStatus m_status;
 	
@@ -787,13 +816,13 @@ private:
 	/** pointer to the component itself */
 	acscomponent::ACSComponentImpl *m_thisIsMe;
 	
-	/** This variable stores the information wether the antenna is now tracking or not */
+	/** This variable stores the information weather the antenna is now tracking or not */
 	bool m_tracking;
 	
 	/** This member stores the time that  the above tracking (<i>m_tracking</i>) information refers to */
 	ACS::Time m_trackingTime;
 	/**
-	 * This marks the start time of the current equatorial coorinate integration
+	 * This marks the start time of the current equatorial coordinate integration
 	 */
 	ACS::Time m_integrationStartTime;
 	/**
@@ -884,8 +913,18 @@ private:
 	/**
 	 * Reports the radial velocity of the target
 	 */
-	double m_targetVlsr;
+	double m_targetVrad;
 	
+	/**
+	 * Reference frame of the current radial velocity
+	 */
+	Antenna::TReferenceFrame m_vradReferenceFrame;
+
+	/**
+	 * Definition of the current radial velocity
+	 */
+	Antenna::TVradDefinition m_vradDefinition;
+
 	/**
 	 * Store the estimated flux of the current target
 	 */
@@ -1082,7 +1121,9 @@ private:
 	 * @param dec output parameter declination of the target,radians, J2000
 	 * @param lon output parameter galactic longitude,radians 
 	 * @param lat output parameter galactic latitude, radians
-	 * @param vlsr output radial velocity of the target, in Km/s
+	 * @param vrad output radial velocity of the target, in Km/s
+	 * @param velFrame reference frame of the radial velocity
+	 * @param velDef definition of the radial velocity
 	 * @param sourceName output parameter, name of the target
 	 * @param scanOffset returns the offset for the current scan
 	 * @param axis movement axis of the prepared scan
@@ -1091,9 +1132,9 @@ private:
 	 */
 	Antenna::EphemGenerator_ptr prepareScan(bool useInternals,ACS::Time& startUT,const Antenna::TTrackingParameters& prim,const Antenna::TTrackingParameters& sec,
 			const TOffset& userOffset,Antenna::TGeneratorType& generatorType,Antenna::TTrackingParameters& lastPar,Antenna::TSections& section,double& ra,double& dec,double& lon,
-			double& lat,double& vlsr,IRA::CString& sourceName,TOffset& scanOffset,Management::TScanAxis& axis,Antenna::EphemGenerator_out generatorFlux)
-			throw (ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,
-				   AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
+			double& lat,double& vrad,Antenna::TReferenceFrame& velFrame,Antenna::TVradDefinition& velDef,IRA::CString& sourceName,TOffset& scanOffset,
+			Management::TScanAxis& axis,Antenna::EphemGenerator_out generatorFlux) throw (ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::UnexpectedExImpl,
+					ComponentErrors::CORBAProblemExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	
 	/** 
 	 * This private function is used internally by the <i>prepareScan()</i> in order to set up the secondary generator for OTF scans. The secondary generator is used to fix the central point
@@ -1104,13 +1145,15 @@ private:
 	 * @param dec output parameter declination of the target,radians, J2000
 	 * @param lon output parameter, the galactic longitude, radians
 	 * @param lat output parameter, the galactic latitude, radians
-	 * @param vlsr output radial velocity of the target, in Km/s
+	 * @param vrad output radial velocity of the target, in Km/s
+	 * @param velFrame output reference frame for the radial velocity
+	 * @param velDef output definition for the radial velocity
 	 * @param sourceName output parameter, name of the target
 	 * @param result reports the result of the operation, if true the generator could successfully be configured
 	 * @return the reference to the configured generator
 	 */
 	Antenna::EphemGenerator_ptr prepareOTFSecondary(const bool& useInternal,const Antenna::TTrackingParameters& sec,IRA::CString& sourceName,double& ra,double& dec,double& lon,
-			double& lat,double& vlsr,bool& result);
+			double& lat,double& vrad,Antenna::TReferenceFrame& velFrame,Antenna::TVradDefinition& velDef,bool& result);
 	
 	/**
 	 * This private member execute the computation of the current target flux
@@ -1120,7 +1163,6 @@ private:
 	void addOffsets(double &lon,double& lat,Antenna::TCoordinateFrame& frame,const TOffset& userOffset,const TOffset& scanOffset) const;
 	
 	void copyTrack(Antenna::TTrackingParameters& dest,const Antenna::TTrackingParameters& source,bool copyOffs=true) const;
-
 };
 
 

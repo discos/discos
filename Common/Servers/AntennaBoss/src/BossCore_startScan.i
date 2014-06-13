@@ -7,7 +7,9 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
 {
 	Antenna::TSections section;
-	double ra,dec,vlsr,lon,lat;
+	double ra,dec,vrad,lon,lat;
+	Antenna::TReferenceFrame velFrame;
+	Antenna::TVradDefinition velDef;
 	IRA::CString name;
 	TIMEVALUE now;
 	Management::TScanAxis axis;
@@ -20,7 +22,8 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 		m_generatorType=Antenna::ANT_NONE;
 		m_generator=Antenna::EphemGenerator::_nil(); // it also releases the previous reference.
 		m_generatorFlux=Antenna::EphemGenerator::_nil(); // it also releases the previous reference.
-		m_generator=prepareScan(false,startUt,parameters,secondary,m_userOffset,m_generatorType,m_lastScanParameters,section,ra,dec,lon,lat,vlsr,name,m_scanOffset,axis,m_generatorFlux.out());
+		m_generator=prepareScan(false,startUt,parameters,secondary,m_userOffset,m_generatorType,m_lastScanParameters,section,ra,dec,lon,lat,vrad,velFrame,velDef,name,
+				m_scanOffset,axis,m_generatorFlux.out());
 		//computes the resulting offset, coming from the user and the scan
 		addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);
 		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"TOTAL_OFFSETS: %lf %lf",m_longitudeOffset,m_latitudeOffset));
@@ -104,7 +107,9 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 	m_targetName=name;
 	m_targetRA=ra;
 	m_targetDec=dec;
-	m_targetVlsr=vlsr;
+	m_targetVrad=vrad;
+	m_vradReferenceFrame=velFrame;
+	m_vradDefinition=velDef;
 	m_currentAxis=axis;
 	computeFlux();
 	IRA::CIRATools::getTime(now);

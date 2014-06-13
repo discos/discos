@@ -28,6 +28,9 @@ void CBossCore::copyTrack(Antenna::TTrackingParameters& dest,const Antenna::TTra
 	dest.otf.description=source.otf.description;
 	dest.otf.direction=source.otf.direction;
 	dest.otf.subScanDuration=source.otf.subScanDuration;
+	dest.VradFrame=source.VradFrame;
+	dest.VradDefinition=source.VradDefinition;
+	dest.RadialVelocity=source.RadialVelocity;
 }
 
 Antenna::EphemGenerator_ptr CBossCore::prepareScan(
@@ -43,7 +46,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		double& dec,
 		double& lon,
 		double& lat,
-		double& vlsr,
+		double& vrad,
+		Antenna::TReferenceFrame& velFrame,
+		Antenna::TVradDefinition& velDef,
 		IRA::CString& sourceName,
 		TOffset& scanOffset,
 		Management::TScanAxis& axis,
@@ -55,7 +60,10 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 	TOffset scanOffTmp(0.0,0.0,Antenna::ANT_HORIZONTAL);
 	Antenna::TCoordinateFrame offFrameTmp;
 	Antenna::TTrackingParameters primary,secondary;
-	double secRa,secDec,secLon,secLat,secVlsr;
+	double secRa,secDec,secLon,secLat,secVrad;
+	Antenna::TReferenceFrame secVelFrame;
+	Antenna::TVradDefinition secVelDef;
+
 	IRA::CString secSourceName;
 	bool secondaryActive=false;
 	bool lastActive=false;
@@ -131,7 +139,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			if (secondary.type!=Antenna::ANT_NONE) { // the secondary track takes the precedence
 				bool result;
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_ON_SECONDARY_TRACK"));
-				currentGeneratorFlux=prepareOTFSecondary(useInternals,secondary,secSourceName,secRa,secDec,secLon,secLat,secVlsr,result);
+				currentGeneratorFlux=prepareOTFSecondary(useInternals,secondary,secSourceName,secRa,secDec,secLon,secLat,secVrad,secVelFrame,secVelDef,result);
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"GENERATORE %u",currentGeneratorFlux.in()));
 				if (!result) {
 					_EXCPT(AntennaErrors::SecondaryScanErrorExImpl,ex,"CBossCore::prepareScan()");
@@ -169,7 +177,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			else if (lastPar.type!=Antenna::ANT_NONE) { // otherwise the scan commanded the previous time is used as secondary
 				bool result;
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_ON_LAST_COMMANDED_TRACK"));
-				currentGeneratorFlux=prepareOTFSecondary(useInternals,lastPar,secSourceName,secRa,secDec,secLon,secLat,secVlsr,result);
+				currentGeneratorFlux=prepareOTFSecondary(useInternals,lastPar,secSourceName,secRa,secDec,secLon,secLat,secVrad,secVelFrame,secVelDef,result);
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"GENERATORE %u",currentGeneratorFlux.in()));
 				if (!result) {
 					_EXCPT(AntennaErrors::SecondaryScanErrorExImpl,ex,"CBossCore::prepareScan()");
@@ -311,7 +319,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			lon=att->gLongitude;
 			lat=att->gLatitude;
 			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"SKYSOURCE RA_DEC LAT_LON %lf %lf %lf %lf",ra,dec,lat,lon));
-			vlsr=att->inputRadialVelocity;
+			vrad=att->inputRadialVelocity;
+			velFrame=att->inputVradFrame;
+			velDef=att->inputVradDefinition;
 			sourceName=IRA::CString(att->sourceID);
 			axis=att->axis;
 			currentGeneratorFlux=currentGenerator; // the flux computer is the sky source generator itself...make a deep copy
@@ -321,6 +331,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			ra=dec=0.0; // in that case I do not want to rise an error
 			lon=lat=0.0;
 			axis=Management::MNG_NO_AXIS;
+			vrad=0.0;
+			velFrame=Antenna::ANT_UNDEF_FRAME;
+			velDef=Antenna::ANT_UNDEF_DEF;
 		}		
 	}
 	else if (primary.type==Antenna::ANT_MOON) {
@@ -339,7 +352,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			dec=att->J2000Declination;
 			lon=att->gLongitude;
 			lat=att->gLatitude;
-			vlsr=0.0; 
+			vrad=0.0;
+			velFrame=Antenna::ANT_UNDEF_FRAME;
+			velDef=Antenna::ANT_UNDEF_DEF;
 			axis=att->axis;
 			sourceName=IRA::CString(att->sourceID);
 			currentGeneratorFlux=currentGenerator; // the flux computer is the moon generator itself...make a deep copy
@@ -347,7 +362,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		catch (CORBA::SystemException& ex) {
 			sourceName=IRA::CString("????");
 			ra=dec=0.0; // in that case I do not want to rise an error
-			vlsr=0.0;
+			vrad=0.0;
+			velFrame=Antenna::ANT_UNDEF_FRAME;
+			velDef=Antenna::ANT_UNDEF_DEF;
 			axis=Management::MNG_NO_AXIS;
 		}
 	}
@@ -398,11 +415,15 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			axis=att->axis;
 			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_CENTER_RA_DEC LAT_LON %lf %lf %lf %lf",ra,dec,lat,lon));
 			if (secondaryActive||lastActive) { // in case of a secondary track....it is possible that vlsr and flux are computable
-				vlsr=secVlsr;
+				vrad=secVrad;
+				velFrame=secVelFrame;
+				velDef=secVelDef;
 				sourceName=secSourceName;
 			}
-			else { //normal OTF...impossible to know vlsr
-				vlsr=0.0;
+			else { //normal OTF...impossible to know vrad
+				vrad=0.0;
+				velFrame=Antenna::ANT_UNDEF_FRAME;
+				velDef=Antenna::ANT_UNDEF_DEF;
 				sourceName=IRA::CString(att->sourceID);
 				currentGeneratorFlux=currentGenerator; // if no secondary scan is used, the generator in charge to compute the flux is the OTF itself...make a deep copy
 			}
@@ -412,7 +433,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			sourceName=IRA::CString("????");
 			ra=dec=0.0; // in that case I do not want to rise an error
 			lon=lat=0.0;
-			vlsr=0.0;
+			vrad=0.0;
+			velFrame=Antenna::ANT_UNDEF_FRAME;
+			velDef=Antenna::ANT_UNDEF_DEF;
 			axis=Management::MNG_NO_AXIS;
 		}
 	}
@@ -432,7 +455,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 }
 
 Antenna::EphemGenerator_ptr CBossCore::prepareOTFSecondary(const bool& useInternal,const Antenna::TTrackingParameters& sec,IRA::CString& sourceName,double& ra,double& dec,double& lon,
-		double& lat,double& vlsr,bool& result)
+		double& lat,double& vrad,Antenna::TReferenceFrame& velFrame,Antenna::TVradDefinition& velDef,bool& result)
 {
 	ACS::Time inputTime;
 	TIMEVALUE now;
@@ -467,7 +490,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareOTFSecondary(const bool& useIntern
 
 	try {
 		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareOTFSecondary()",(LM_DEBUG,"PREPARE_SECONDARY_FOR OTF"));
-		tmp=prepareScan(useInternal,inputTime,sec,nullScan,m_userOffset,genType,lastScan,section,ra,dec,lon,lat,vlsr,sourceName,scanOff,axis,tmpFlux.out());
+		tmp=prepareScan(useInternal,inputTime,sec,nullScan,m_userOffset,genType,lastScan,section,ra,dec,lon,lat,vrad,velFrame,velDef,sourceName,scanOff,axis,tmpFlux.out());
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		ex.log(LM_DEBUG);

@@ -42,6 +42,7 @@
 <projectCode/>
 <currentBackend/>
 <currentRecorder/>
+<restFrequency/>
 
 <MinorServoMapping axis="SUBR_Z" servoName="SRP_TZ"/>
 <MinorServoMapping axis="SUBR_X" servoName="SRP_TX"/>

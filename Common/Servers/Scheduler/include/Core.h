@@ -269,6 +269,18 @@ public:
 	 */
 	inline long getCurrentDevice() const { return m_currentDevice; }
 	
+	/**
+	 * Not thread safe, but not a big issue
+	 * @param out used to return to the caller the values of the rest frequencies
+	 */
+	void getRestFrequency(ACS::doubleSeq& out) const  { out=m_restFrequency; }
+
+	/**
+	 * called to set proper values for the rest frequency
+	 * @param in new values
+	 */
+	void setRestFrequency(const ACS::doubleSeq& in);
+
 	/**.
 	 * @param dv returns back  the current active data receiver
 	 */

@@ -254,7 +254,7 @@ public:
 	/**
 	 * Sets the current Data and Time in the form of Modified Julian Day.
 	*/ 
-	void setMJD(const long double& jd) { setJulianDay(jd+DT_MJD0); }
+	void setMJD(const long double& jd,const double dut1=0.0) { setJulianDay(jd+DT_MJD0); setDut1(dut1);}
 	
 	/**
 	 * Gets the Iternational Atomic Time. This is the laboratory timescale; The UTC is keeped in pace to TAI by the regular 

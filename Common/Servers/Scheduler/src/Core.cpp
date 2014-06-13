@@ -110,8 +110,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::setProjectCode),1);
 	// no range checks because * is allowed
 	m_parser->add("skydip",new function3<CCore,non_constant,void_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(this,&CCore::skydip),3);
-
 	m_parser->add("agc","_tp_agc",2);
+	m_parser->add("restFrequency",new function1<CCore,non_constant,void_type,I<doubleSeq_type> >(this,&CCore::setRestFrequency),1);
 
 
 	//add remote commands ************  should be loaded from a CDB table............................**********/
@@ -140,6 +140,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("radecOffsets","antenna",1,&CCore::remoteCall);
 	m_parser->add("lonlatOffsets","antenna",1,&CCore::remoteCall);
 	m_parser->add("antennaReset","antenna",1,&CCore::remoteCall);
+	m_parser->add("radialVelocity","antenna",1,&CCore::remoteCall);
 
 	// receivers subsystem
 	m_parser->add("receiversPark","receivers",2,&CCore::remoteCall);
@@ -1094,6 +1095,12 @@ bool CCore::isTracking() const
 	IRA::CIRATools::getTime(now);
 	ACS::TimeInterval diff=now.value().value-m_clearTrackingTime;
 	return (m_isAntennaTracking && m_isMinorServoTracking && (diff>5000000));
+}
+
+void CCore::setRestFrequency(const ACS::doubleSeq& in)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	m_restFrequency=in;
 }
 
 void CCore::resetSchedulerStatus()

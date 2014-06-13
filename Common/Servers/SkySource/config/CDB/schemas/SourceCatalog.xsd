@@ -109,7 +109,8 @@
  		  </xs:element> 	
  		  <xs:element name="radialVelocity" type="xs:double" default="0.0" >
  		  	<xs:annotation><xs:documentation>
- 		  		radial velocity in Km/sec, a positive value means the source is moving away
+ 		  		radial velocity in Km/sec, a positive value means the source is moving away,
+ 		  		reference frame is barycentre and velocidi definition is optical
  		  	</xs:documentation></xs:annotation>
  		  </xs:element> 		  
           <xs:element name="type" type="xs:string">

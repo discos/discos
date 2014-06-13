@@ -18,6 +18,7 @@
 									m_activeSurfaceBossError=m_weatherStationError=false; \
 									m_currentDevice=0;\
 									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false; \
+									m_restFrequency.length(0);
 									
 #define RESOURCE_EXEC ACS_NEW_SIMPLE_CONSUMER(m_antennaNC,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,antennaNCHandler,static_cast<void*>(this)); \
 					  m_antennaNC->consumerReady(); \
@@ -174,6 +175,10 @@ ACS::Time m_clearTrackingTime;
  * Stores the ID of the section of the current backend selected as current active device.
  */
 long m_currentDevice;
+/**
+ * Stores the values of the rest frequencies
+ */
+ACS::doubleSeq m_restFrequency;
 /**
  * used to get a reference to the antenna boss component.
  * @param ref the pointer to the antenna boss component
