@@ -86,33 +86,23 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc
 
     def startUpdating(self):
-        # lancio positioner.startUpdating e catturo le dovute eccezioni
-        if not self.getUpdatingMode():
-            raeson = "updating mode not selected: call setUpdatingMode()"
-            logger.logError(raeson)
+        try:
+            self.positioner.startUpdating()
+        except PositionerError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(raeson)
             raise exc
-        elif not self.positioner.isConfigured():
-            raeson = "system not yet configured: a setup() is required"
-            logger.logError(raeson)
-            exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(raeson)
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
             raise exc
-        elif self.positioner.isUpdating():
-            raeson = "the positioner is busy: a stopUpdating() is required"
-            logger.logError(raeson)
-            exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(raeson)
-            raise exc
-        else:
-            # Sistema configurato: OK updating Mode, OK rewinding Mode
-            pass
-        # Se sta aggiornando, un nuovo startUpdating cosa fa?
-
-        # self.positioner = Positioner(self, 1, 2, 3) # Passo i vari argomenti
-        # self.positioner.start() # Start the daemon
-        raise NotImplementedError('method not yet implemented')
 
     def stopUpdating(self):
         try:

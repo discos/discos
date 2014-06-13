@@ -89,11 +89,17 @@ module Receivers {
         /** Start the parallactic angle correction 
          * 
          * It raises a NotAllowedEx either when the updating mode is not yet selected
-         * or the system is not configured.
+         * or the positioner is not configured or when it is already updating.
          *
          * @throw ComponentErrors::NotAllowedEx
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
          */
-        void startUpdating() raises (ComponentErrors::NotAllowedEx);
+        void startUpdating() raises (
+            ComponentErrors::NotAllowedEx,
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
 
 
         /** Stop the parallactic angle correction

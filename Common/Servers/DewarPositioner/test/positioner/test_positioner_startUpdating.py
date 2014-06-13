@@ -16,7 +16,6 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.assertRaises(NotAllowedError, p.startUpdating)
         p.setUpdatingMode('FIXED')
         self.assertEqual(p.isConfiguredForUpdating(), True)
-        self.assertEqual(None, p.startUpdating())
 
 if __name__ == '__main__':
     unittest2.main()

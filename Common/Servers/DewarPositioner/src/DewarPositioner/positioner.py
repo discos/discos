@@ -11,7 +11,7 @@ import DerotatorErrors
 from maciErrType import CannotGetComponentEx
 from Acspy.Servants import ContainerServices
 from Acspy.Clients.SimpleClient import PySimpleClient
-from DewarPositioner.posgenerators import goto, fixed, optimized
+from DewarPositioner.posgenerator import PosGenerator, PosGeneratorError
 from IRAPy import logger
 
 
@@ -25,6 +25,7 @@ class Positioner(object):
     def __init__(self):
         self.lock = threading.Lock()
         self.control = Control()
+        self.posgen = PosGenerator()
         self._setDefaultConfiguration()
 
     def setup(self, device_name, starting_position=0):
@@ -50,7 +51,7 @@ class Positioner(object):
             self.device.setup()
             self._clearOffset()
             self.is_configured = True
-            self._start(goto, self.control.starting_position)
+            self._start(self.posgen.goto, self.control.starting_position)
         except CannotGetComponentEx, ex:
             raise PositionerError("cannot get the %s component: %s" 
                     %(device_name, ex.message))
@@ -90,25 +91,15 @@ class Positioner(object):
             elif self.isUpdating():
                 raise NotAllowedError('the positionier is already updating: a stopUpdating() is required')
 
-            return # REMOVE
- 
-            try:
-                mount_name = 'ANTENNA/Mount'
-                mount = self.client.getComponent(mount_name)
-            except CannotGetComponentEx, ex:
-                raise PositionerError("cannot get the %s component: %s" %(mount_name, ex.message))
-            except Exception, ex:
-                raise PositionerError(ex.message)
-
             mode = self.getUpdatingMode()
             if mode == 'FIXED':
-                posgenerator = fixed
+                posgen = self.posgen.fixed
             elif mode == 'OPTIMIZED':
-                posgenerator = optimized
+                posgen = self.posgen.optimized
             else:
                 raise PositionerError('mode %s unknown' %mode)
 
-            self._start(posgenerator, mount)
+            self._start(posgen)
         finally:
             self.lock.release()
 
@@ -130,7 +121,7 @@ class Positioner(object):
             try:
                 self.lock.acquire()
                 self._clearOffset()
-                self._start(goto, self.control.starting_position)
+                self._start(self.posgen.goto, self.control.starting_position)
                 self.is_configured = False
                 self.client.releaseComponent(self.device_name)
                 self._setDefaultConfiguration()
@@ -232,7 +223,7 @@ class Positioner(object):
         elif self.isConfigured():
             self.stopUpdating()
             act_position = self.getPosition()
-            self._start(goto, act_position)
+            self._start(self.posgen.goto, act_position)
 
     def clearOffset(self):
         self.setOffset(0.0)
