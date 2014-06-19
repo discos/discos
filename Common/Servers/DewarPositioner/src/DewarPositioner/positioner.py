@@ -26,6 +26,7 @@ class Positioner(object):
         self.lock = threading.Lock()
         self.control = Control()
         self.posgen = PosGenerator()
+        self.client = PySimpleClient()
         self._setDefaultConfiguration()
 
     def setup(self, device_name, starting_position=0):
@@ -99,7 +100,21 @@ class Positioner(object):
             else:
                 raise PositionerError('mode %s unknown' %mode)
 
-            self._start(posgen)
+            try:
+                comp_name = 'ANTENNA/Observatory'
+                observatory = self.client.getComponent(comp_name)
+                lat_obj = observatory._get_latitude()
+                latitude, compl = lat_obj.get_sync()
+                latitude = latitude
+                comp_name = 'ANTENNA/Mount'
+                mount = self.client.getComponent(comp_name)
+                self._start(posgen, mount, {'latitude': latitude})
+            except Exception, ex:
+                raeson = 'cannot get the %s component' %comp_name
+                logger.logError(raeson)
+                logger.logDebug('%s: %s' %(raeson, ex.message))
+                raise PositionerError(raeson)
+
         finally:
             self.lock.release()
 
