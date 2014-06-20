@@ -1,6 +1,6 @@
-import unittest2
 import random
 import time
+import unittest2
 from maciErrType import CannotGetComponentEx
 from DewarPositioner.positioner import Positioner, PositionerError
 from Acspy.Clients.SimpleClient import PySimpleClient
@@ -17,18 +17,25 @@ class PositionerOffsetTest(unittest2.TestCase):
 
     def test_set_new_pos(self):
         """Vefify the setOffset set a new position."""
-        device_name = 'RECEIVERS/SRTKBandDerotator'
-        client = PySimpleClient()
-        derotator = client.getComponent(device_name)
+        try:
+            client = PySimpleClient()
+            device = client.getComponent('RECEIVERS/SRTKBandDerotator')
+            using_mock = False
+        except CannotGetComponentEx:
+            print '\nINFO -> component not available: we will use a mock device'
+            from mock_components import MockDevice
+            device = MockDevice()
+            using_mock = True
+
         p = Positioner()
-        p.setup(device_name)
-        time.sleep(3)
-        act_position = derotator.getActPosition()
+        p.setup(site_info={}, source=None, device=device)
+        time.sleep(0.5) if using_mock else time.sleep(1)
+        act_position = device.getActPosition()
         offset = 1.5
         p.setOffset(offset)
-        time.sleep(3)
+        time.sleep(0.5) if using_mock else time.sleep(3)
         self.assertAlmostEqual(p.getPosition(), act_position + offset, places=2)
-        self.assertAlmostEqual(act_position + offset, derotator.getActPosition(), places=2)
+        self.assertAlmostEqual(act_position + offset, device.getActPosition(), places=2)
         p.park()
 
 

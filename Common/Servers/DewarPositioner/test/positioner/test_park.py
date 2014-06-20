@@ -15,18 +15,27 @@ class PositionerParkTest(unittest2.TestCase):
 
     def test_set_starting_pos(self):
         """Vefify the park() method set the device position."""
+        try:
+            client = PySimpleClient()
+            device = client.getComponent('RECEIVERS/SRTKBandDerotator')
+            using_mock = False
+        except CannotGetComponentEx:
+            print '\nINFO -> component not available: we will use a mock device'
+            from mock_components import MockDevice
+            device = MockDevice()
+            using_mock = True
+
         p = Positioner()
-        p.setup('RECEIVERS/SRTKBandDerotator')
-        time.sleep(3)
+        p.setup(site_info={}, source=None, device=device)
+        time.sleep(0.5) if using_mock else time.sleep(2)
         offset = 2
         p.setOffset(offset)
-        time.sleep(1)
+        time.sleep(0.5) if using_mock else time.sleep(2)
         p.park()
-        time.sleep(3)
-        derotator = PySimpleClient().getComponent('RECEIVERS/SRTKBandDerotator')
+        time.sleep(0.5) if using_mock else time.sleep(3)
         self.assertAlmostEqual(
                 p.getStartingPosition(), 
-                derotator.getActPosition(), 
+                device.getActPosition(), 
                 places=2
         )
 

@@ -10,7 +10,6 @@ import DerotatorErrors
 
 from maciErrType import CannotGetComponentEx
 from Acspy.Servants import ContainerServices
-from Acspy.Clients.SimpleClient import PySimpleClient
 from DewarPositioner.posgenerator import PosGenerator, PosGeneratorError
 from IRAPy import logger
 
@@ -26,10 +25,9 @@ class Positioner(object):
         self.lock = threading.Lock()
         self.control = Control()
         self.posgen = PosGenerator()
-        self.client = PySimpleClient()
         self._setDefaultConfiguration()
 
-    def setup(self, device_name, starting_position=0):
+    def setup(self, site_info, source, device, starting_position=0):
         """Configure the positioner.
         
         The argument `device_name` is the name of the component to drive. For 
@@ -40,25 +38,24 @@ class Positioner(object):
         An optional `starting_position` can be given. This position will be
         added to every position we command. A setup() performs a call to 
         Positioner.stopUpdating() in order to stop a previous active thread.
+        TODO: describe source and site_info arguments; source could be None and 
+              site_info an empty dictionary.
+              be None
         """
         try:
             self.lock.acquire()
             if self.isUpdating():
                 self.stopUpdating()
-            self.device_name = device_name
+            self.site_info = site_info
+            self.source = source
+            self.device = device
             self.control.starting_position = starting_position
-            self.client = PySimpleClient()
-            self.device = self.client.getComponent(device_name)
             self.device.setup()
             self._clearOffset()
             self.is_configured = True
             self._start(self.posgen.goto, self.control.starting_position)
-        except CannotGetComponentEx, ex:
-            raise PositionerError("cannot get the %s component: %s" 
-                    %(device_name, ex.message))
         except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
-            raise PositionerError("cannot set the %s position: %s" 
-                    %(device_name, ex.message))
+            raise PositionerError("cannot set the position: %s" %ex.message)
         except Exception, ex:
             raise PositionerError(ex.message)
         finally:
@@ -69,7 +66,7 @@ class Positioner(object):
 
     def getDeviceName(self):
         if self.isConfigured():
-            return self.device_name
+            return self.device._get_name()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
@@ -100,21 +97,12 @@ class Positioner(object):
             else:
                 raise PositionerError('mode %s unknown' %mode)
 
-            try:
-                comp_name = 'ANTENNA/Observatory'
-                observatory = self.client.getComponent(comp_name)
-                lat_obj = observatory._get_latitude()
-                latitude, compl = lat_obj.get_sync()
-                latitude = latitude
-                comp_name = 'ANTENNA/Mount'
-                mount = self.client.getComponent(comp_name)
-                self._start(posgen, mount, {'latitude': latitude})
-            except Exception, ex:
-                raeson = 'cannot get the %s component' %comp_name
-                logger.logError(raeson)
-                logger.logDebug('%s: %s' %(raeson, ex.message))
-                raise PositionerError(raeson)
-
+            if not self.site_info:
+                raise NotAllowedError('no site information available')
+            elif not self.source:
+                raise NotAllowedError('no source available')
+            else:
+                self._start(posgen, self.source, self.site_info)
         finally:
             self.lock.release()
 
@@ -138,7 +126,6 @@ class Positioner(object):
                 self._clearOffset()
                 self._start(self.posgen.goto, self.control.starting_position)
                 self.is_configured = False
-                self.client.releaseComponent(self.device_name)
                 self._setDefaultConfiguration()
             finally:
                 self.lock.release()
@@ -224,6 +211,7 @@ class Positioner(object):
             logger.logError('positioner.updatePosition(): attribute error')
             logger.logDebug('positioner.updatePosition(): %s' %ex)
         except Exception, ex:
+            print ex
             logger.logError('unexcpected exception in Positioner.updatePosition(): %s' %ex)
         finally:
             control.updating = False
@@ -283,7 +271,6 @@ class Positioner(object):
     def _setDefaultConfiguration(self):
         self.is_configured = False
         self.t = None
-        self.device_name = ''
         self.rewindingMode = ''
         self.updatingMode = ''
 

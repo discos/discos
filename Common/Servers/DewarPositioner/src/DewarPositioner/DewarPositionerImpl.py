@@ -4,6 +4,7 @@ from Acspy.Servants.CharacteristicComponent import CharacteristicComponent as cc
 from Acspy.Servants.ContainerServices import ContainerServices as services
 from Acspy.Servants.ComponentLifecycle import ComponentLifecycle as lcycle
 from Acspy.Util.BaciHelper import addProperty
+from Acspy.Clients.SimpleClient import PySimpleClient
 from maciErrType import CannotGetComponentEx
 
 import ComponentErrorsImpl
@@ -13,10 +14,8 @@ import DerotatorErrors
 
 from DewarPositioner.configuration import CDBConf
 from DewarPositioner.positioner import Positioner, PositionerError, NotAllowedError
-from DewarPositioner.posgenerators import goto
 
 from IRAPy import logger
-
 
 class DewarPositionerImpl(POA, cc, services, lcycle):
 
@@ -26,6 +25,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self.cdbconf = CDBConf()
         self.positioner = Positioner()
         self._setDefaultConfiguration() 
+        self.client = PySimpleClient()
 
     def initialize(self):
         addProperty(self, 'fooProperty')
@@ -36,7 +36,37 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         device_name = self.cdbconf.get_entry('derotator_name')
         starting_position = self.cdbconf.get_entry('starting_position') 
         try:
-            self.positioner.setup(device_name, starting_position)
+            device = self.client.getComponent(device_name)
+        except CannotGetComponentEx, ex:
+            raeson = "cannot get the %s component: %s" %(device_name, ex.message)
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+
+        try:
+            observatory = self.client.getComponent('ANTENNA/Observatory')
+            lat_obj = observatory._get_latitude()
+            latitude, compl = lat_obj.get_sync()
+            site_info = {'latitude': latitude}
+        except Exception, ex:
+            logger.logWarning('cannot get the site information: %s' %ex.message)
+            site_info = {}
+
+        try:
+            source_name = 'ANTENNA/Mount'
+            source = self.client.getComponent(source_name)
+        except Exception:
+            logger.logWarning('cannot get the %s component' %source_name)
+            source = None
+
+        try:
+            self.positioner.setup(site_info, source, device, starting_position)
             self.setRewindingMode('AUTO')
             self.actualSetup = self.commandedSetup
         except PositionerError, ex:
@@ -133,7 +163,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             return self.positioner.isReady()
         except DerotatorErrors.CommunicationErrorEx, ex:
-            raeson = "cannot known if %s is ready" %device_name
+            raeson = "cannot known if the derotator is ready" 
             logger.logError('%s: %s' %(raeson, ex.message))
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
@@ -148,7 +178,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             return self.positioner.isSlewing()
         except DerotatorErrors.CommunicationErrorEx, ex:
-            raeson = "cannot known if %s is slewing" %device_name
+            raeson = "cannot known if the derotator is slewing" 
             logger.logError('%s: %s' %(raeson, ex.message))
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
@@ -163,7 +193,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             self.positioner.isTracking()
         except DerotatorErrors.CommunicationErrorEx, ex:
-            raeson = "cannot known if %s is tracking" %device_name
+            raeson = "cannot known if the derotator is tracking"
             logger.logError('%s: %s' %(raeson, ex.message))
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
@@ -181,7 +211,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             self.positioner.setOffset(offset)
         except (PositionerError, NotAllowedError), ex:
-            raeson = "cannot set the %s offset" %device_name
+            raeson = "cannot set the derotator offset" 
             logger.logError('%s: %s' %(raeson, ex.message))
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
@@ -196,7 +226,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             self.positioner.clearOffset()
         except PositionerError, ex:
-            raeson = "cannot set the %s offset" %device_name
+            raeson = "cannot set the derotator offset"
             logger.logError('%s: %s' %(raeson, ex.message))
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
