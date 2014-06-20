@@ -1,7 +1,6 @@
 class MockDevice(object):
     def __init__(self):
-        self.is_ready = False
-        self.position = 0
+        self._setDefault()
 
     def _get_name(self):
         return 'mock device'
@@ -29,3 +28,10 @@ class MockDevice(object):
 
     def getActPosition(self):
         return self.position
+
+    def park(self):
+        self._setDefault()
+
+    def _setDefault(self):
+        self.position = 0.0
+        self.is_ready = False

@@ -10,6 +10,7 @@
 #include <baci.idl>
 #include <maciErrType.idl>
 #include <ComponentErrors.idl>
+#include <ManagmentDefinitions.idl>
 
 #pragma prefix "alma"
 
@@ -17,6 +18,15 @@
 module Receivers {
 
     interface DewarPositioner: ACS::CharacteristicComponent {
+    
+        struct DataBlock {
+            ACS::Time timeMark;
+            boolean tracking;
+            boolean updating;
+            boolean slewing;
+            Management::TSystemStatus status;
+        };
+        const string DATA_CHANNEL = "DewarPositionerData";
 
         /** Take a configuration code and configure the component
          * 
@@ -62,7 +72,7 @@ module Receivers {
         /** Set the absolute offset and move the derotator to the new position 
          *
          * @param offset the offset to apply to the device
-         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::OperationErrorEx
          * @throw ComponentErrors::UnexpectedEx
          */
         void setOffset(in double offset) raises (

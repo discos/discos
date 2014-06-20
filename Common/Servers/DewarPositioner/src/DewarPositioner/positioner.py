@@ -15,6 +15,7 @@ from IRAPy import logger
 
 
 class Positioner(object):
+    lock = threading.Lock()
 
     modes = {
             'updating': ('FIXED', 'OPTIMIZED'),
@@ -22,7 +23,6 @@ class Positioner(object):
     }
 
     def __init__(self):
-        self.lock = threading.Lock()
         self.control = Control()
         self.posgen = PosGenerator()
         self._setDefaultConfiguration()
@@ -43,9 +43,10 @@ class Positioner(object):
               be None
         """
         try:
-            self.lock.acquire()
+            Positioner.lock.acquire()
             if self.isUpdating():
                 self.stopUpdating()
+            self.control = Control()
             self.site_info = site_info
             self.source = source
             self.device = device
@@ -59,7 +60,7 @@ class Positioner(object):
         except Exception, ex:
             raise PositionerError(ex.message)
         finally:
-            self.lock.release()
+            Positioner.lock.release()
 
     def isConfigured(self):
         return self.is_configured
@@ -81,7 +82,7 @@ class Positioner(object):
 
     def startUpdating(self):
         try:
-            self.lock.acquire()
+            Positioner.lock.acquire()
             if not self.isConfigured():
                 raise NotAllowedError('positioner not configured: a setup() is required')
             elif not self.isConfiguredForUpdating():
@@ -103,8 +104,9 @@ class Positioner(object):
                 raise NotAllowedError('no source available')
             else:
                 self._start(posgen, self.source, self.site_info)
+                self.control.must_update = True
         finally:
-            self.lock.release()
+            Positioner.lock.release()
 
     def stopUpdating(self):
         """Stop the updating thread"""
@@ -117,18 +119,19 @@ class Positioner(object):
             pass # self.t is None because the system is not yet configured
         finally:
             self.control.stop = False
+            self.control.must_update = False
 
     def park(self):
         if self.isConfigured():
             self.stopUpdating()
             try:
-                self.lock.acquire()
+                Positioner.lock.acquire()
                 self._clearOffset()
                 self._start(self.posgen.goto, self.control.starting_position)
                 self.is_configured = False
                 self._setDefaultConfiguration()
             finally:
-                self.lock.release()
+                Positioner.lock.release()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
@@ -171,7 +174,41 @@ class Positioner(object):
     def isUpdating(self):
         return self.control.updating
 
-    def updatePosition(self, device, control, posgen, vargs):
+    def setOffset(self, offset):
+        if not self.isConfigured():
+            raise NotAllowedError('positioner not configured: a setup() is required')
+        else:
+            self._setOffset(offset) # set the flag
+            if self.isUpdating():
+                return
+            else:
+                self.stopUpdating()
+                act_position = self.getPosition()
+                self._start(self.posgen.goto, act_position)
+
+    def clearOffset(self):
+        self.setOffset(0.0)
+
+    def _setOffset(self, offset):
+        self.control.offset = offset
+
+    def _clearOffset(self):
+        self._setOffset(0.0)
+
+    def getOffset(self):
+        return self.control.offset
+
+    def getStartingPosition(self):
+        return self.control.starting_position
+
+    def getPosition(self):
+        if self.isConfigured():
+            return self.device.getActPosition()
+        else:
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+    @staticmethod
+    def updatePosition(device, control, posgen, vargs):
         try:
             control.updating = True
 
@@ -204,12 +241,12 @@ class Positioner(object):
                     logger.logError("position %.2f out of range (%.2f, %.2f)" 
                             %(target, device.getMinLimit(), device.getMaxLimit()))
                     # TODO: REWINDING!
-
+            control.must_update = False
         except KeyboardInterrupt:
             logger.logInfo('stopping Positioner.updatePosition() due to KeyboardInterrupt')
         except AttributeError, ex:
-            logger.logError('positioner.updatePosition(): attribute error')
-            logger.logDebug('positioner.updatePosition(): %s' %ex)
+            logger.logError('Positioner.updatePosition(): attribute error')
+            logger.logDebug('Positioner.updatePosition(): %s' %ex)
         except Exception, ex:
             print ex
             logger.logError('unexcpected exception in Positioner.updatePosition(): %s' %ex)
@@ -218,36 +255,6 @@ class Positioner(object):
             # logger.logInfo('Positioner.updatePosition() stopped @ %s' %datetime.utcnow())
             # TODO: set a status bit of the DewarPositioner, in order to communicate the error
 
-    def setOffset(self, offset):
-        self._setOffset(offset) # set the flag
-        # And now update the device position
-        if self.isUpdating():
-            return
-        elif self.isConfigured():
-            self.stopUpdating()
-            act_position = self.getPosition()
-            self._start(self.posgen.goto, act_position)
-
-    def clearOffset(self):
-        self.setOffset(0.0)
-
-    def _setOffset(self, offset):
-        self.control.offset = offset
-
-    def _clearOffset(self):
-        self._setOffset(0.0)
-
-    def getOffset(self):
-        return self.control.offset
-
-    def getStartingPosition(self):
-        return self.control.starting_position
-
-    def getPosition(self):
-        if self.isConfigured():
-            return self.device.getActPosition()
-        else:
-            raise NotAllowedError('positioner not configured: a setup() is required')
 
     def _start(self, posgen, *vargs):
         """Start a new process that computes and sets the position"""
@@ -261,18 +268,41 @@ class Positioner(object):
             )
             self.t = ContainerServices.ContainerServices().getThread(
                     name=posgen.__name__, 
-                    target=self.updatePosition, 
+                    target=Positioner.updatePosition, 
                     args=args
             )
             self.t.start()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
+    def status(self):
+        """Un thread lanciato da DewarPositionerImpl deve leggere questo stato e
+        aggiornare il notification channel. Per capire come si aggiorna il NC vedi
+        ~/notification_channel"""
+        # if self.control.must_update and not self.isUpdating():
+            # Errore, perche' dovrebbe aggiornare ma non lo sta facendo...
+
+        # Legge lo status di self.device. Questo e' un decimal che devo convertire
+        # in stringa binaria (con ~/dec2bin), formattato con il numero di bit che
+        # mi interessa. Lo stato di device e' dato da:
+        #   bit 0: power off
+        #   bit 1: failure
+        #   bit 2: communication error
+        #   bit 3: not ready
+        #   bit 4: slewing
+        #   bit 5: warning
+        # Quindi un valore 16 significa che sono in slewing
+        # Leggo anche isReady(), isTracking(), isSlewing()
+        # Quando ho letto lo stato del device valuto insieme al must_update e poi
+        # restituisca una tupla con gli stati (o meglio un dizionario). Fare anche test
+        # return (timestamp, tracking, slewing, ..., ) # I bit del notification channel
+
     def _setDefaultConfiguration(self):
         self.is_configured = False
         self.t = None
         self.rewindingMode = ''
         self.updatingMode = ''
+        self.control = Control()
 
 
 class Control(object):
@@ -281,6 +311,7 @@ class Control(object):
         self.stop = False
         self.starting_position = 0.0
         self.offset = 0.0
+        self.must_update = False
 
 
 class PositionerError(Exception):

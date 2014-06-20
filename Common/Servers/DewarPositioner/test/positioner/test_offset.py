@@ -2,41 +2,55 @@ import random
 import time
 import unittest2
 from maciErrType import CannotGetComponentEx
-from DewarPositioner.positioner import Positioner, PositionerError
+from DewarPositioner.positioner import Positioner, NotAllowedError
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
 class PositionerOffsetTest(unittest2.TestCase):
 
-    def test_set_get(self):
-        """Verify the set and get methods"""
-        p = Positioner()
-        p.setOffset(2)
-        self.assertEqual(p.getOffset(), 2)
-        p.clearOffset()
-
-    def test_set_new_pos(self):
-        """Vefify the setOffset set a new position."""
+    def setUp(self):
+        self.p = Positioner()
         try:
             client = PySimpleClient()
-            device = client.getComponent('RECEIVERS/SRTKBandDerotator')
-            using_mock = False
+            self.device = client.getComponent('RECEIVERS/SRTKBandDerotator')
+            self.using_mock = False
         except CannotGetComponentEx:
             print '\nINFO -> component not available: we will use a mock device'
             from mock_components import MockDevice
-            device = MockDevice()
-            using_mock = True
+            self.device = MockDevice()
+            self.using_mock = True
 
-        p = Positioner()
-        p.setup(site_info={}, source=None, device=device)
-        time.sleep(0.5) if using_mock else time.sleep(1)
-        act_position = device.getActPosition()
+    def tearDown(self):
+        self.p.park()
+        time.sleep(0.2)
+
+    def test_set_get(self):
+        """Verify the set and get methods"""
+        self.assertRaises(NotAllowedError, self.p.setOffset, 2)
+        self.p.setup(site_info={}, source=None, device=self.device)
+        self.p.setOffset(2)
+        self.assertEqual(self.p.getOffset(), 2)
+        self.p.clearOffset()
+        self.assertEqual(self.p.getOffset(), 0)
+
+    def test_set_new_pos(self):
+        """Vefify the setOffset set a new position."""
+        self.p.setup(site_info={}, source=None, device=self.device)
+        time.sleep(0.5) if self.using_mock else time.sleep(1)
+        act_position = self.device.getActPosition()
         offset = 1.5
-        p.setOffset(offset)
-        time.sleep(0.5) if using_mock else time.sleep(3)
-        self.assertAlmostEqual(p.getPosition(), act_position + offset, places=2)
-        self.assertAlmostEqual(act_position + offset, device.getActPosition(), places=2)
-        p.park()
+        self.p.setOffset(offset)
+        time.sleep(0.5) if self.using_mock else time.sleep(3)
+        self.assertAlmostEqual(
+                self.p.getPosition(), 
+                act_position + offset, 
+                places=2
+        )
+        self.assertAlmostEqual(
+                act_position + offset, 
+                self.device.getActPosition(), 
+                places=2
+        )
 
 
 if __name__ == '__main__':

@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import unittest2
 import random
 import time
@@ -22,6 +23,12 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.assertRaises(NotAllowedError, p.startUpdating)
         p.setUpdatingMode('FIXED')
         self.assertEqual(p.isConfiguredForUpdating(), True)
+        self.assertRaises(NotAllowedError, p.startUpdating)
+        with self.assertRaisesRegexp(NotAllowedError, '^no site information'):
+            p.startUpdating()
+        p.setup(site_info={'foo': 'foo'}, source=None, device=device)
+        with self.assertRaisesRegexp(NotAllowedError, 'no source available'):
+            p.startUpdating()
 
 if __name__ == '__main__':
     unittest2.main()
