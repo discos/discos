@@ -15,15 +15,15 @@ ifeq ($(TARGETSYS),SRT)
 	#Add all modules included in the SRT system  in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=SRTDox \
-		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
+		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors XBackendErrors \
 		SRTActiveSurfaceErrors \
-		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface\
+		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface \
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
-		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary \
-		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger \
+		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary \
+		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger XBackend \
 		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
-		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient\
+		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient \
 		Plotter KStars SRTScripts \
 
 	IDL_DOC:=Managment Antenna Backends SRTActiveSurface
@@ -31,15 +31,15 @@ ifeq ($(TARGETSYS),SRT)
 
 	Managment_MODULES:=ManagmentInterface
 	Antenna_MODULES:=AntennaInterface SRTAntennaInterface
-	Backends_MODULES:=BackendsInterface
+	Backends_MODULES:=BackendsInterface XBackendInterface
 	WeatherStation_MODULES:=WeatherStationInterface SRTWeatherStationInterface
 	Receivers_MODULES:=ReceiversInterface
 	MinorServo_MODULES:=MinorServoInterface
 	SRTActiveSurface_MODULES:=SRTActiveSurfaceInterface
-	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary
+	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss SRTMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter MBFitsWriter ExternalClients
-	BackendsImplementation_MODULES:=TotalPower NoiseGenerator
+	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
 	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
 	WeatherStationImplementation_MODULES:=SRTWeatherStation
 	SRTActiveSurfaceImplementation_MODULES:=SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss 
