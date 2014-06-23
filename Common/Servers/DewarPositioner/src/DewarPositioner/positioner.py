@@ -1,5 +1,6 @@
 from __future__ import with_statement
 import threading
+import datetime
 import time
 
 import Antenna
@@ -155,6 +156,9 @@ class Positioner(object):
         """Return True if an updating mode has been selected"""
         return bool(self.updatingMode)
 
+    def mustUpdate(self):
+        return self.control.must_update
+
     def isConfiguredForRewinding(self):
         """Return True if a rewinding mode has been selected"""
         return bool(self.rewindingMode)
@@ -248,7 +252,6 @@ class Positioner(object):
             logger.logError('Positioner.updatePosition(): attribute error')
             logger.logDebug('Positioner.updatePosition(): %s' %ex)
         except Exception, ex:
-            print ex
             logger.logError('unexcpected exception in Positioner.updatePosition(): %s' %ex)
         finally:
             control.updating = False
@@ -276,26 +279,87 @@ class Positioner(object):
             raise NotAllowedError('positioner not configured: a setup() is required')
 
     def status(self):
-        """Un thread lanciato da DewarPositionerImpl deve leggere questo stato e
-        aggiornare il notification channel. Per capire come si aggiorna il NC vedi
-        ~/notification_channel"""
-        # if self.control.must_update and not self.isUpdating():
-            # Errore, perche' dovrebbe aggiornare ma non lo sta facendo...
+        """Read the status of the device and return a string.
 
-        # Legge lo status di self.device. Questo e' un decimal che devo convertire
-        # in stringa binaria (con ~/dec2bin), formattato con il numero di bit che
-        # mi interessa. Lo stato di device e' dato da:
-        #   bit 0: power off
-        #   bit 1: failure
-        #   bit 2: communication error
-        #   bit 3: not ready
-        #   bit 4: slewing
-        #   bit 5: warning
-        # Quindi un valore 16 significa che sono in slewing
-        # Leggo anche isReady(), isTracking(), isSlewing()
-        # Quando ho letto lo stato del device valuto insieme al must_update e poi
-        # restituisca una tupla con gli stati (o meglio un dizionario). Fare anche test
-        # return (timestamp, tracking, slewing, ..., ) # I bit del notification channel
+        The returned string represents a bit pattern with the following meaning:
+
+            bit 0: tracking
+            bit 1: updating
+            bit 2: slewing
+            bit 3: warning
+            bit 4: failure
+
+        That means the string '00101' indicates the positioner is slewing and
+        tracking. The string '10000' means the positioner is in failure, and
+        so on.
+        """
+        try:
+            Positioner.lock.acquire()
+            if not self.isConfigured():
+                raise NotAllowedError('positioner not configured: a setup() is required')
+            failure = False
+            warning = False
+            if self.mustUpdate() and not self.isUpdating():
+                failure = True
+
+            try:
+                status_obj = self.device._get_status()
+            except Exception, ex:
+                raise PositionerError('cannot get the device status property: %s' %ex.message)
+
+            try:
+                device_status, compl = status_obj.get_sync()
+            except Exception, ex:
+                raise PositionerError('cannot get the device status value: %s' %ex.message)
+
+            if compl.code:
+                raise PositionerError('the device status value is not valid')
+            else:
+                # The generic derotator' status is a decimal number. When converted
+                # to binary, its meaning is the following:
+                #
+                #     bit 0: power off
+                #     bit 1: failure
+                #     bit 2: communication error
+                #     bit 3: not ready
+                #     bit 4: slewing
+                #     bit 5: warning
+                #
+                # A decimal value of 16 corresponds to the binary value 10000. We must
+                # read the bits from right to left, so the bit with value 1 is the
+                # bit 4, and that means the device is slewing.
+                # We want a string of 6 bits. For instance, for a decimal value of
+                # 16 we want to get the string 010000 instead of 10000
+                binrepr = Status.dec2bin(device_status, 6) # A string of 6 values 
+                po, f, ce, nr, s, w = [bool(int(item)) for item in reversed(binrepr)]
+                if po:
+                    logger.logError('the device is power off')
+                    failure = True
+                elif f:
+                    logger.logError('the device has a failure')
+                    failure = True
+                elif ce:
+                    logger.logError('cannot comunicate with the device')
+                    failure = True
+                elif nr:
+                    logger.logWarning('device not ready to move')
+                    warning = True
+
+            status = ''
+            status += '1' if failure else '0'
+            status += '1' if warning else '0'
+            status += '1' if self.isSlewing() else '0'
+            status += '1' if self.isUpdating() else '0'
+            status += '1' if self.isTracking() else '0'
+            return status
+        except (NotAllowedError, PositionerError), ex:
+            logger.logError(ex.message)
+            raise
+        except Exception, ex:
+            logger.logError(ex.message)
+            return '10000' # Failure
+        finally:
+            Positioner.lock.release()
 
     def _setDefaultConfiguration(self):
         self.is_configured = False
@@ -314,10 +378,46 @@ class Control(object):
         self.must_update = False
 
 
+class Status(object):
+    @staticmethod
+    def dec2bin(n, nbits=None):
+        """Convert a decimal number to its binary value as a string.
+
+        The paramter `n` represents the decimal value and `nbits` the number of
+        bit of the resulting string. Some examples::
+
+            >>> Status.dec2bin(10)
+            '01010'
+            >>> Status.dec2bin(10, 6)
+            '001010'
+            >>> Status.dec2bin(16, 6)
+            '010000'
+            >>> Status.dec2bin(16, 5)
+            '010000'
+            >>> Status.dec2bin(16, 10)
+            '0000010000'
+            >>> Status.dec2bin(0, 6)
+            '000000'
+        """
+        if n == 0:
+            value = '0'
+        else:
+            value = Status.dec2bin(n//2) + str(n%2)
+
+        if nbits:
+            return value if len(value) >= nbits else '0'*(nbits - len(value)) + value
+        else:
+            return value
+
+
 class PositionerError(Exception):
     pass
+
 
 class NotAllowedError(Exception):
     pass
 
 
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
