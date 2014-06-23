@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- Marco Buttu, mbuttu@oa-cagliari.inaf.it -->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTKBandDerotator:1.0"
+	xmlns="urn:schemas-cosylab-com:SRTKBandDerotator:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:rcv="urn:schemas-cosylab-com:Receivers:1.0"
+
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import 
+        namespace="urn:schemas-cosylab-com:CDB:1.0" 
+        schemaLocation="CDB.xsd" />
+    <xs:import 
+        namespace="urn:schemas-cosylab-com:BACI:1.0" 
+        schemaLocation="BACI.xsd" />
+    <xs:import 
+        namespace="urn:schemas-cosylab-com:Managment:1.0" 
+        schemaLocation="Managment.xsd"/>
+
+    <xs:complexType name="SRTKBandDerotatorType">
+
+        <xs:sequence>
+            <!-- Physical sensor position (degree) -->
+            <xs:element name="sensor_position" type="baci:ROdouble"/>
+            <!-- Position in the user reference system  (degrees) -->
+            <xs:element name="actPosition" type="baci:ROdouble"/>
+            <!-- Commanded position, in the user reference system (degrees) -->
+            <xs:element name="cmdPosition" type="baci:RWdouble"/>
+            <!-- Difference between the actual and the commanded position -->
+            <xs:element name="positionDiff" type="baci:ROdouble"/>
+            <!-- True when the difference between the actual and the commanded
+                 is less or equal to the delta_tracking CDB attribute -->
+			<xs:element name="tracking" type="mng:BooleanType" />
+
+            <xs:element name="icd_verbose_status">
+                 <xs:complexType>
+                    <xs:complexContent>
+                        <xs:restriction base="baci:ROpattern">
+                            <xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="65535"/>
+                            <xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                                "polling error, wrong response flag, command error, wrong response code,
+                                 internal monitoring signals, external monitoring signals, warning,
+                                 initialization error, quick stop active, not operation enable, moving,
+                                 moving error, wrong position"/>
+                            <xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                                "3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3"/>
+                            <xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+                                "0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0"/>
+                        </xs:restriction>
+                    </xs:complexContent>
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="status">
+                 <xs:complexType>
+                    <xs:complexContent>
+                        <xs:restriction base="baci:ROpattern">
+                            <xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="65535"/>
+                            <xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                                "Off, Failure, Communication Error, Not Ready, Slewing, Warning"/>
+                            <xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                                "3, 3, 3, 3, 3, 3"/>
+                            <xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+                                "0, 0, 0, 0, 0, 0"/>
+                        </xs:restriction>
+                    </xs:complexContent>
+                </xs:complexType>
+            </xs:element>
+
+        </xs:sequence>
+
+        <!-- Sensor attributes -->
+        <xs:attribute name="SensorIP" type="xs:string" use="required" />
+        <xs:attribute name="SensorPort" type="xs:unsignedShort" use="required" />
+        <!-- timeout (microseconds) applied when trying to connect to the sensor -->
+        <xs:attribute name="SensorTimeout" type="xs:unsignedLong" use="required" />
+        <!-- Reference position (zero position) of sensor in steps -->
+        <xs:attribute name="SensorZeroReference" type="xs:long" use="required" />
+        <!-- ***********************************************************
+         * The PS_CF factor is compute as follow:
+         * PS_CF = 360/(Derotator Circumference in step) = 360/(PI*D)
+         * D = 68052 step     
+         * PI = 3.14159
+         * SF = 0.1 mm/step
+         ************************************************************-->
+        <xs:attribute name="SensorConversionFactor" type="xs:double" use="required" />
+
+        <!-- ICD attributes -->
+        <xs:attribute name="IP" type="xs:string" use="required" />
+        <xs:attribute name="Port" type="xs:unsignedShort" use="required" />
+        <!-- timeout (microseconds) applied when trying to connect to the ICD -->
+        <xs:attribute name="Timeout" type="xs:unsignedLong" use="required" />
+        <!-- Reference position (zero position) of ICD in degrees, related to User's Referece System -->
+        <xs:attribute name="ZeroReference" type="xs:double" use="required" />
+        <!-- We use a degree/step conversion factor -->
+        <xs:attribute name="ConversionFactor" type="xs:double" use="required" />
+        <!-- Max value allowed for the position, not in the URS (degree) -->
+        <xs:attribute name="MaxValue" type="xs:double" use="required" />
+        <!-- Min value allowed for the position, not in the URS (degree) -->
+        <xs:attribute name="MinValue" type="xs:double" use="required" />
+        <xs:attribute name="TrackingDelta" type="xs:double" use="required" />
+        <!-- Expire time of ICD position request in seconds. For instance: 0.001 for 1ms-->
+        <xs:attribute name="PositionExpireTime" type="xs:double" use="required" />
+    </xs:complexType>
+    <xs:element name="SRTKBandDerotator" type="SRTKBandDerotatorType"/>
+
+</xs:schema>
