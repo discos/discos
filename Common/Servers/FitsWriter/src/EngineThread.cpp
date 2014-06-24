@@ -792,19 +792,19 @@ void CEngineThread::collectAntennaData()
 	}
 	if (!CORBA::is_nil(m_antennaBoss)) {
 		ACSErr::Completion_var comp;
-		CORBA::Double ra=0.0,dec=0.0,vlsr=0.0;	
+		CORBA::Double ra=0.0,dec=0.0,vrad=0.0;
 		CORBA::Double raOff=0.0,decOff=0.0,azOff=0.0,elOff=0.0,lonOff=0.0,latOff=0.0;
 		IRA::CString sourceName="";
 		try { //get the target name and parameters
 			ACS::ROstring_var targetRef;
 			CORBA::String_var target;
-			ACS::ROdouble_var raRef,decRef,vlsrRef;
+			ACS::ROdouble_var raRef,decRef,vradRef;
 			ACS::ROdouble_var raOffRef,decOffRef,azOffRef,elOffRef,lonOffRef,latOffRef;
 			//let's take the references to the attributes
 			targetRef=m_antennaBoss->target();
 			raRef=m_antennaBoss->targetRightAscension();
 			decRef=m_antennaBoss->targetDeclination();
-			vlsrRef=m_antennaBoss->targetVlsr();
+			vradRef=m_antennaBoss->targetVrad();
 			azOffRef=m_antennaBoss->azimuthOffset();
 			elOffRef=m_antennaBoss->elevationOffset();
 			raOffRef=m_antennaBoss->rightAscensionOffset();
@@ -844,15 +844,15 @@ void CEngineThread::collectAntennaData()
 				m_data->setStatus(Management::MNG_WARNING);
 				dec=0.0;
 			}
-			vlsr=vlsrRef->get_sync(comp.out());
-			ACSErr::CompletionImpl vlsrCompl(comp);
-			if (!vlsrCompl.isErrorFree()) {
-				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,vlsrCompl,"CEngineThread::collectAntennaData()");
-				impl.setAttributeName("targetVlsr");
+			vrad=vradRef->get_sync(comp.out());
+			ACSErr::CompletionImpl vradCompl(comp);
+			if (!vradCompl.isErrorFree()) {
+				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,vradCompl,"CEngineThread::collectAntennaData()");
+				impl.setAttributeName("targetVrad");
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
 				m_data->setStatus(Management::MNG_WARNING);
-				vlsr=0.0;
+				vrad=0.0;
 			}
 			azOff=azOffRef->get_sync(comp.out());
 			ACSErr::CompletionImpl azOffCompl(comp);
@@ -923,9 +923,9 @@ void CEngineThread::collectAntennaData()
 			m_data->setStatus(Management::MNG_WARNING);
 			antennaBossError=true;
 			sourceName="";
-			ra=dec=vlsr=0.0;
+			ra=dec=vrad=0.0;
 		}
-		m_info.setSource(sourceName,ra,dec,vlsr);
+		m_info.setSource(sourceName,ra,dec,vrad);
 		m_info.setAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
 		try { //get the estimated source fluxes
 			ACS::doubleSeq_var fluxes;

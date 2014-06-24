@@ -40,7 +40,7 @@ using namespace maci;
 namespace SimpleParser {
 class PolarizationToString {
 public:
-	static char *valToStr(long& val) {
+	static char *valToStr(const long& val) {
 		char *c=new char[16];
 		if (val==Backends::BKND_LCP) {
 			strcpy(c,"LEFT");
