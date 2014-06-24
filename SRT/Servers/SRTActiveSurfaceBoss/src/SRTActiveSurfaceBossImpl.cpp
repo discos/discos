@@ -14,7 +14,7 @@ using namespace SimpleParser;
 
 class SRTActiveSurfaceProfile2String {
 public:
-	static char *valToStr(ActiveSurface::TASProfile& val) {
+	static char *valToStr(const ActiveSurface::TASProfile& val) {
 		char *c=new char[16];
 		if (val==ActiveSurface::AS_SHAPED) {
 			strcpy(c,"S");
