@@ -136,7 +136,7 @@ Antenna::TSections SubScan::initScan (
 				dut1,subScanDuration,false,sect,reachOk);
 		return sect;
 	}
-	else { //have to try to guess the start UT
+	else { //have to try to guess the nearest feasible start UT
 		reachOk=false;
 		ACS::Time myStartUT;
 		myStartUT=initTime+50000000; //first guess....it is now plus 5 seconds;
@@ -779,6 +779,10 @@ void SubScan::setSector (const TIMEVALUE& initTime, const double& initAz, const 
     //elSlewRampTime.normalize(true);
     //azSlewMaxSpeedTime.normalize(true);
     //elSlewMaxSpeedTime.normalize(true);
+	double Azslewramp; // extension of ramp to reach slewing speed
+	double Azslewcruise; // extension of slewing path, once removed the ramp
+	double Elslewramp; // extension of ramp to reach slewing speed
+	double Elslewcruise; // extension of slewing path, once removed the ramp
     azSlewingTime.normalize(true);
     elSlewingTime.normalize(true);
     deltaTime.normalize(true);
@@ -806,12 +810,27 @@ void SubScan::setSector (const TIMEVALUE& initTime, const double& initAz, const 
 	printf("deltaAz %lf\n",deltaAz);
 	printf("deltaEl %lf\n",deltaEl);*/
 	
-	// Setting the safety gap to 2 seconds
-	safeGap.value((long double)(5.0));
-	// The following approximation is conservative as it over-estimates the slewing time
-	// in case the slewing path is shorter than the acceleration ramp
-    azSlewingTime.value((long double)(deltaAz/m_maxAzimuthRate+m_maxAzimuthRate/m_maxAzimuthAcceleration));
-    elSlewingTime.value((long double)(deltaEl/m_maxElevationRate+m_maxElevationRate/m_maxElevationAcceleration));
+	// Setting the safety gap to 0.25 seconds, this value should be fine-tuned with on-site tests
+	safeGap.value((long double)(0.25));
+    
+	// Computing the slewing ramp and confronting it with the path needed to reach the scan ramp-start position
+	Azslewramp=fabs(0.5*m_maxAzimuthRate*m_maxAzimuthRate/m_maxAzimuthAcceleration);  //length of slewing ramp
+	Elslewramp=fabs(0.5*m_maxElevationRate*m_maxElevationRate/m_maxElevationAcceleration);  //length of slewing ramp
+	
+    if (deltaAz < Azslewramp) {   // all slewing happens in acceleration+deceleration regime, as the antenna should halt in the scan ramp-start position 
+	 azSlewingTime.value((long double)(sqrt(2*deltaAz/m_maxAzimuthAcceleration)));
+	} else {  // facing both the ramp and the slewing cruise
+		Azslewcruise=deltaAz-Azslewramp;
+		azSlewingTime.value((long double)(Azslewcruise/m_maxAzimuthRate+m_maxAzimuthRate/m_maxAzimuthAcceleration)); 
+	}
+	
+	if (deltaEl < Elslewramp) {   // all slewing happens in acceleration+deceleration regime, as the antenna should halt in the scan ramp-start position 
+		elSlewingTime.value((long double)(sqrt(2*deltaEl/m_maxElevationAcceleration)));
+	} else {  // facing both the ramp and the slewing cruise
+		Elslewcruise=deltaEl-Elslewramp;
+		elSlewingTime.value((long double)(Elslewcruise/m_maxElevationRate+m_maxElevationRate/m_maxElevationAcceleration)); 
+	}
+	
     // Adding the safety gap
     azSlewingTime.add(safeGap.value());
     elSlewingTime.add(safeGap.value());
