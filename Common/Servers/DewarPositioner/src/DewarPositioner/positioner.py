@@ -278,25 +278,27 @@ class Positioner(object):
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
-    def status(self):
+    def getStatus(self):
         """Read the status of the device and return a string.
 
         The returned string represents a bit pattern with the following meaning:
 
-            bit 0: tracking
-            bit 1: updating
-            bit 2: slewing
-            bit 3: warning
-            bit 4: failure
+            bit 0: ready
+            bit 1: tracking
+            bit 2: updating
+            bit 3: slewing
+            bit 4: warning
+            bit 5: failure
 
-        That means the string '00101' indicates the positioner is slewing and
-        tracking. The string '10000' means the positioner is in failure, and
-        so on.
+        That means the string '000001' means the positioner is ready, the string
+        '100000' means the positioner is in failure, the string '001011' 
+        indicates the positioner is ready, it is slewing and tracking, and so on.
         """
         try:
             Positioner.lock.acquire()
             if not self.isConfigured():
                 raise NotAllowedError('positioner not configured: a setup() is required')
+
             failure = False
             warning = False
             if self.mustUpdate() and not self.isUpdating():
@@ -330,7 +332,11 @@ class Positioner(object):
                 # bit 4, and that means the device is slewing.
                 # We want a string of 6 bits. For instance, for a decimal value of
                 # 16 we want to get the string 010000 instead of 10000
-                binrepr = Status.dec2bin(device_status, 6) # A string of 6 values 
+                try:
+                    binrepr = Status.dec2bin(device_status, 6) # A string of 6 values 
+                except Exception, ex:
+                    raise PositionerError('error in Status.dec2bin(): %s' %ex.message)
+
                 po, f, ce, nr, s, w = [bool(int(item)) for item in reversed(binrepr)]
                 if po:
                     logger.logError('the device is power off')
@@ -341,9 +347,6 @@ class Positioner(object):
                 elif ce:
                     logger.logError('cannot comunicate with the device')
                     failure = True
-                elif nr:
-                    logger.logWarning('device not ready to move')
-                    warning = True
 
             status = ''
             status += '1' if failure else '0'
@@ -351,13 +354,14 @@ class Positioner(object):
             status += '1' if self.isSlewing() else '0'
             status += '1' if self.isUpdating() else '0'
             status += '1' if self.isTracking() else '0'
+            status += '1' if self.isReady() else '0'
             return status
-        except (NotAllowedError, PositionerError), ex:
+        except (NotAllowedError), ex:
             logger.logError(ex.message)
-            raise
+            return '000000' # Not ready
         except Exception, ex:
             logger.logError(ex.message)
-            return '10000' # Failure
+            return '100000' # Failure
         finally:
             Positioner.lock.release()
 

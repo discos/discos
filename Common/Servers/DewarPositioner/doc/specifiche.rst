@@ -139,30 +139,30 @@ Elenco completo dei metodi
 ==========================
 Di seguito l'elenco completo dei metodi:: 
 
-    # setup(CODE)
-    # getActalSetup()
-    # getCommandedSetup()
-    # isReady()
-    # isConfigured()
-    # park()
+    setup(CODE)
+    getActalSetup()
+    getCommandedSetup()
+    isReady()
+    isConfigured()
+    park()
 
-    # setOffset(OFFSET)
-    # clearOffset()
-    # getOffset()
+    setOffset(OFFSET)
+    clearOffset()
+    getOffset()
 
-    # getPosition()
+    getPosition()
 
-    # setUpdatingMode(MODE) # MODE: FIXED or OPTIMIZED
-    # getUpdatingMode()
+    setUpdatingMode(MODE) # MODE: FIXED or OPTIMIZED
+    getUpdatingMode()
     startUpdating(AXIS, DIRECTION, AZ_SECTION)
     stopUpdating()
-    # isTracking()
-    # isUpdating()
-    # isSlewing()
+    isTracking()
+    isUpdating()
+    isSlewing()
 
-    # setRewindingMode(MODE) # MODE: MANUAL or AUTO (default)
+    setRewindingMode(MODE) # MODE: MANUAL or AUTO (default)
     setAutoRewinding(NUMBER_OF_FEEDS)
-    # getRewindingMode()
+    getRewindingMode()
     rewind(NUMBER_OF_FEEDS)
     isRewindingRequired()
     isRewinding()

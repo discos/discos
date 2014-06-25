@@ -37,7 +37,7 @@ class MockDevice(object):
 
     def _get_status(self):
         completion = Completion()
-        return Property('000000', completion)
+        return Property(0, completion)
 
     def _setDefault(self):
         self.position = 0.0

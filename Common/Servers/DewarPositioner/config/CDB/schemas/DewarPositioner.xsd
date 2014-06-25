@@ -18,7 +18,7 @@
     <xs:complexType name="DewarPositionerType">
 
         <xs:sequence>
-            <xs:element name="fooProperty" type="baci:ROdouble" />
+            <xs:element name="status" type="baci:ROpattern" />
         </xs:sequence>
 
         <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />

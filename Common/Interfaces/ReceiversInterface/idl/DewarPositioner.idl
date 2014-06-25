@@ -229,8 +229,29 @@ module Receivers {
         string getCommandedSetup();
 
 
-        /** A dummy property */
-        readonly attribute ACS::ROdouble fooProperty;
+        /** This property reports the status of the DewarPositioner.
+         *  The returned pattern is a 6 bits field with the following meaning:
+         *
+         *  @arg \c 0 ready: the dewar positioner is ready to move
+         *  @arg \c 1 tracking: 1 means the derotator is tracking (the difference
+         *            between the actual position and the commanded one is lesser
+         *            of a given threshold
+         *  @arg \c 2 updating: 1 means the DP is updating the derotator position.
+         *            The system is updating the position during the time the 
+         *            thread that computes the position and calls the 
+         *            derotator.setPosition() is alive.
+         *  @arg \c 3 slewing: 1 means the derotator is moving. It is possibile 
+         *            the system is not updating the position, because the thread 
+         *            execution is terminated, but the slewing status bit is stills
+         *            active because the derotator is going to the commanded position.
+         *  #arg \c 4 warning: a value of 1 means there is a warning
+         *  #arg \c 5 failure: a value of 1 means there is a failure
+         *
+         * For instance, when the status value is 5 (decimal value), then the
+         * system is ready and updating. In fact, the binary representation of 5 is 
+         * (with 6 bits) 000101.
+         */
+         readonly attribute ACS::ROpattern status;
 
     };
 };

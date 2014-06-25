@@ -14,6 +14,7 @@ import DerotatorErrors
 
 from DewarPositioner.configuration import CDBConf
 from DewarPositioner.positioner import Positioner, PositionerError, NotAllowedError
+from DewarPositioner.devios import StatusDevIO
 
 from IRAPy import logger
 
@@ -28,7 +29,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self.client = PySimpleClient()
 
     def initialize(self):
-        addProperty(self, 'fooProperty')
+        addProperty(self, 'status', devio_ref=StatusDevIO(self.positioner))
     
     def setup(self, code):
         self.commandedSetup = code.upper()
