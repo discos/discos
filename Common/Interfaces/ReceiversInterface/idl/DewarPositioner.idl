@@ -16,18 +16,20 @@
 
 
 module Receivers {
+ 
+    struct DewarPositionerDataBlock {
+        ACS::Time timeMark;
+        boolean ready;
+        boolean tracking;
+        boolean updating;
+        boolean slewing;
+        Management::TSystemStatus status;
+    };
+
+    const string DEWAR_POSITIONER_DATA_CHANNEL = "DewarPositionerData";
 
     interface DewarPositioner: ACS::CharacteristicComponent {
-    
-        struct DataBlock {
-            ACS::Time timeMark;
-            boolean tracking;
-            boolean updating;
-            boolean slewing;
-            Management::TSystemStatus status;
-        };
-        const string DATA_CHANNEL = "DewarPositionerData";
-
+   
         /** Take a configuration code and configure the component
          * 
          * This method takes a configuration code, gets the corresponding

@@ -1,3 +1,4 @@
+import time
 from multiprocessing import Queue
 from Receivers__POA import DewarPositioner as POA
 from Acspy.Servants.CharacteristicComponent import CharacteristicComponent as cc
@@ -5,12 +6,18 @@ from Acspy.Servants.ContainerServices import ContainerServices as services
 from Acspy.Servants.ComponentLifecycle import ComponentLifecycle as lcycle
 from Acspy.Util.BaciHelper import addProperty
 from Acspy.Clients.SimpleClient import PySimpleClient
+from Acspy.Nc.Supplier import Supplier
+from Acspy.Common.TimeHelper import getTimeStamp
 from maciErrType import CannotGetComponentEx
+from ACSErrTypeCommonImpl import CORBAProblemExImpl
 
+import Management
+import Receivers 
 import ComponentErrorsImpl
 import ComponentErrors
 import DerotatorErrorsImpl
 import DerotatorErrors 
+
 
 from DewarPositioner.configuration import CDBConf
 from DewarPositioner.positioner import Positioner, PositionerError, NotAllowedError
@@ -27,10 +34,45 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self.positioner = Positioner()
         self._setDefaultConfiguration() 
         self.client = PySimpleClient()
+        self.control = Control()
+        try:
+            self.supplier = Supplier(Receivers.DEWAR_POSITIONER_DATA_CHANNEL)
+        except CORBAProblemExImpl, ex:
+            logger.logError('cannot create the dewar positioner data channel')
+            logger.logDebug('cannot create the data channel: %s' %ex.message)
+        except Exception, ex:
+            logger.logError(ex.message)
+
+        try:
+            self.status_thread = services().getThread(
+                    name='Publisher',
+                    target=DewarPositionerImpl.publisher,
+                    args=(self.positioner, self.supplier, self.control)
+            )
+            self.status_thread.start()
+        except AttributeError, ex:
+            logger.logWarning('supplier not available')
+            logger.logDebug('supplier not available: %s' %ex.message)
+        except Exception, ex:
+            logger.logError('cannot create the status thread: %s' %ex.message)
 
     def initialize(self):
         addProperty(self, 'status', devio_ref=StatusDevIO(self.positioner))
-    
+
+    def cleanUp(self):
+        try:
+            self.control.stop = True
+            self.supplier.disconnect()
+            self.status_thread.join(timeout=5)
+            if self.status_thread.isAlive():
+                logger.logError('thread %s is alive' %self.status_thread.getName())
+        except AttributeError:
+            logger.logDebug('self has no attribute `supplier`: %s' %ex.message)
+        except Exception, ex:
+            logger.logError(ex.message)
+        finally:
+            self.control.stop = False
+
     def setup(self, code):
         self.commandedSetup = code.upper()
         self.cdbconf.setup(self.commandedSetup)
@@ -277,4 +319,43 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self.actualSetup = 'unknown'
         self.commandedSetup = ''
 
+    @staticmethod
+    def publisher(positioner, supplier, control, sleep_time=1):
+        error = False
+        while True:
+            if control.stop:
+                break
+            else:
+                try:
+                    status = [bool(int(item)) for item in positioner.getStatus()]
+                    failure, warning, slewing, updating, tracking, ready = status
+
+                    if failure:
+                        management_status = Management.MNG_FAILURE
+                    elif warning:
+                        management_status = Management.MNG_WARNING
+                    else:
+                        management_status = Management.MNG_OK
+
+                    event = Receivers.DewarPositionerDataBlock(
+                            getTimeStamp().value,
+                            ready,
+                            tracking, 
+                            updating,
+                            slewing,
+                            management_status
+                    )
+                    supplier.publishEvent(simple_data=event)
+                    error = False
+                except Exception, ex:
+                    if not error:
+                        logger.logError('cannot publish the status: %s' %ex.message)
+                        error = True
+                finally:
+                    time.sleep(sleep_time)
+
         
+class Control(object):
+    def __init__(self):
+        self.stop = False
+

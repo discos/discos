@@ -293,6 +293,7 @@ class Positioner(object):
         That means the string '000001' means the positioner is ready, the string
         '100000' means the positioner is in failure, the string '001011' 
         indicates the positioner is ready, it is slewing and tracking, and so on.
+        This method does not raise any exception, but always returns a status code.
         """
         try:
             Positioner.lock.acquire()
