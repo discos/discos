@@ -51,6 +51,7 @@ void SRTKBandDerotatorImpl::initialize() throw (ComponentErrors::CDBAccessExImpl
     ConversionFactor = 1;
     MaxValue = 0;
     MinValue = 0;
+    Step = 0;
     PositionExpireTime = 0;
 
     icdSocket *icd_socket = NULL;
@@ -240,6 +241,17 @@ void SRTKBandDerotatorImpl::initialize() throw (ComponentErrors::CDBAccessExImpl
                 );
         ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, 
                 "SRTKBandDerotatorImpl::initialize(), I can't read MinValue from CDB");
+        throw exImpl;
+    }
+
+    if(!CIRATools::getDBValue(getContainerServices(), "Step", Step)) {
+        ACS_LOG(
+                LM_FULL_INFO, 
+                "SRTKBandDerotatorImpl::initialize", 
+                (LM_INFO, "Error reading the Step form CDB")
+                );
+        ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, 
+                "SRTKBandDerotatorImpl::initialize(), I can't read Step from CDB");
         throw exImpl;
     }
 
@@ -510,6 +522,10 @@ double SRTKBandDerotatorImpl::getMaxLimit() {
 
 double SRTKBandDerotatorImpl::getMinLimit() {
     return MinValue - ZeroReference;
+}
+
+double SRTKBandDerotatorImpl::getStep() {
+    return Step;
 }
 
 

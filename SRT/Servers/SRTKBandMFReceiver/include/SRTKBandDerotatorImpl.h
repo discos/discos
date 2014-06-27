@@ -192,6 +192,12 @@ public:
       */
      double getMinLimit();
 
+     /**  
+      * @ return the angle (in degrees) between two adiacent feeds
+      */
+     double getStep();
+
+
 
      /**  
       * @ return true when the derotator is tracking
@@ -233,6 +239,7 @@ private:
     double ConversionFactor;
     double MaxValue;
     double MinValue;
+    double Step;
     double TrackingDelta;
     double PositionExpireTime;
 

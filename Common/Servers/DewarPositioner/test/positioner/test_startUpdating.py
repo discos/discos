@@ -27,6 +27,9 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         with self.assertRaisesRegexp(NotAllowedError, '^no site information'):
             p.startUpdating()
         p.setup(site_info={'foo': 'foo'}, source=None, device=device)
+        with self.assertRaisesRegexp(NotAllowedError, '^not configured for updating'):
+            p.startUpdating()
+        p.setUpdatingMode('FIXED')
         with self.assertRaisesRegexp(NotAllowedError, 'no source available'):
             p.startUpdating()
 

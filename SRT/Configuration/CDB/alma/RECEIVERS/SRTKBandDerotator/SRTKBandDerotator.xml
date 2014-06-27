@@ -16,6 +16,7 @@
     ConversionFactor="0.0054622" 
     MaxValue="130" 
     MinValue="-130" 
+    Step="60"
     TrackingDelta="0.1"
     PositionExpireTime="0.010000"
 >

@@ -52,6 +52,7 @@ module Receivers {
      *     in the URS</li>
      *     <li>getMinLimit(): return the lowerst position allowed, 
      *     in the URS</li>
+     *     <li>getStep(): return the angle (in degrees) between two feeds</li>
      *     <li>isTracking(): return the tracking property value</li>
      *     <li>isReady(): return true when the derotator is ready to move</li>
      *     <li>isSlewing(): return true when the derotator is moving</li>
@@ -168,6 +169,14 @@ module Receivers {
          * @throw CORBA::SystemException
          */
         double getMinLimit();
+
+
+        /**
+         * @return the angle (in degrees) between two feeds</li>
+         *
+         * @throw CORBA::SystemException
+         */
+        double getStep();
 
 
         /**

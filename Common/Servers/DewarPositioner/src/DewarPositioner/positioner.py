@@ -12,6 +12,7 @@ import DerotatorErrors
 from maciErrType import CannotGetComponentEx
 from Acspy.Servants import ContainerServices
 from DewarPositioner.posgenerator import PosGenerator, PosGeneratorError
+from DewarPositioner.updater import Updater
 from IRAPy import logger
 
 
@@ -150,24 +151,24 @@ class Positioner(object):
         if mode not in modes:
             raise PositionerError('%s mode %s unknown; allowed modes: %s' %(mode_type, mode, modes))
         else:
-            setattr(self, mode_type + 'Mode', mode)
+            self.control.modes[mode_type] = mode
 
     def isConfiguredForUpdating(self):
         """Return True if an updating mode has been selected"""
-        return bool(self.updatingMode)
-
-    def mustUpdate(self):
-        return self.control.must_update
+        return bool(self.control.modes['updating'])
 
     def isConfiguredForRewinding(self):
         """Return True if a rewinding mode has been selected"""
-        return bool(self.rewindingMode)
+        return bool(self.control.modes['rewinding'])
 
     def getUpdatingMode(self):
-        return self.updatingMode
+        return self.control.modes['updating']
 
     def getRewindingMode(self):
-        return self.rewindingMode
+        return self.control.modes['rewinding']
+
+    def mustUpdate(self):
+        return self.control.must_update
 
     def isTerminated(self):
         if not self.t:
@@ -205,74 +206,24 @@ class Positioner(object):
     def getStartingPosition(self):
         return self.control.starting_position
 
+    def getRewindingOffset(self):
+        return self.control.rewinding_offset
+
     def getPosition(self):
         if self.isConfigured():
             return self.device.getActPosition()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
-    @staticmethod
-    def updatePosition(device, control, posgen, vargs):
-        try:
-            control.updating = True
-
-            # Verify the component is ready to move
-            if not device.isReady():
-                logger.logError("%s not ready to move: a setup() is required" 
-                        %device._get_name())
-                # TODO: error communication
-                return
- 
-            for position in posgen(*vargs):
-                if control.stop:
-                    break
-                target = control.starting_position + control.offset + position
-                if device.getMinLimit() < target < device.getMaxLimit():
-                    try:
-                        device.setPosition(target)
-                        time.sleep(0.1) # TODO: from CDB
-                    except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
-                        raeson = "cannot set the %s position" %device._get_name()
-                        logger.logError('%s: %s' %(raeson, ex.message))
-                        # TODO: error communication
-                        break
-                    except Exception, ex:
-                        raeson = "unknown exception setting the %s position" %device._get_name()
-                        logger.logError('%s: %s' %(raeson, ex.message))
-                        # TODO: error communication
-                        break
-                else:
-                    logger.logError("position %.2f out of range (%.2f, %.2f)" 
-                            %(target, device.getMinLimit(), device.getMaxLimit()))
-                    # TODO: REWINDING!
-            control.must_update = False
-        except KeyboardInterrupt:
-            logger.logInfo('stopping Positioner.updatePosition() due to KeyboardInterrupt')
-        except AttributeError, ex:
-            logger.logError('Positioner.updatePosition(): attribute error')
-            logger.logDebug('Positioner.updatePosition(): %s' %ex)
-        except Exception, ex:
-            logger.logError('unexcpected exception in Positioner.updatePosition(): %s' %ex)
-        finally:
-            control.updating = False
-            # logger.logInfo('Positioner.updatePosition() stopped @ %s' %datetime.utcnow())
-            # TODO: set a status bit of the DewarPositioner, in order to communicate the error
-
-
     def _start(self, posgen, *vargs):
         """Start a new process that computes and sets the position"""
         if self.isConfigured():
             self.stopUpdating() # Raise a PositionerError if the process stills alive
-            args = (
-                    self.device, 
-                    self.control,
-                    posgen, 
-                    vargs
-            )
+            self.updater = Updater(self.device, self.control)
             self.t = ContainerServices.ContainerServices().getThread(
                     name=posgen.__name__, 
-                    target=Positioner.updatePosition, 
-                    args=args
+                    target=self.updater.updatePosition, 
+                    args=(posgen, vargs)
             )
             self.t.start()
         else:
@@ -358,7 +309,6 @@ class Positioner(object):
             status += '1' if self.isReady() else '0'
             return status
         except (NotAllowedError), ex:
-            logger.logError(ex.message)
             return '000000' # Not ready
         except Exception, ex:
             logger.logError(ex.message)
@@ -369,18 +319,18 @@ class Positioner(object):
     def _setDefaultConfiguration(self):
         self.is_configured = False
         self.t = None
-        self.rewindingMode = ''
-        self.updatingMode = ''
         self.control = Control()
 
 
 class Control(object):
     def __init__(self):
         self.updating = False
+        self.must_update = False
         self.stop = False
         self.starting_position = 0.0
         self.offset = 0.0
-        self.must_update = False
+        self.rewinding_offset = 0.0
+        self.modes = {'rewinding': '', 'updating': ''}
 
 
 class Status(object):

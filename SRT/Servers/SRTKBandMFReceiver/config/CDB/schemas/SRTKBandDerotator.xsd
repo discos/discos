@@ -103,6 +103,7 @@
         <xs:attribute name="MaxValue" type="xs:double" use="required" />
         <!-- Min value allowed for the position, not in the URS (degree) -->
         <xs:attribute name="MinValue" type="xs:double" use="required" />
+        <xs:attribute name="Step" type="xs:double" use="required" />
         <xs:attribute name="TrackingDelta" type="xs:double" use="required" />
         <!-- Expire time of ICD position request in seconds. For instance: 0.001 for 1ms-->
         <xs:attribute name="PositionExpireTime" type="xs:double" use="required" />

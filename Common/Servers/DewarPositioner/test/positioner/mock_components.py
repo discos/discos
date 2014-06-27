@@ -26,6 +26,9 @@ class MockDevice(object):
     def getMaxLimit(self):
         return +120.0
 
+    def getStep(self):
+        return 60.0
+
     def setPosition(self, position):
         self.position = position
 
