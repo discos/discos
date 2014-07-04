@@ -27,12 +27,6 @@ class StatusPropertyTest(unittest2.TestCase):
         value, compl = status_obj.get_sync()
         self.assertEqual(value, 3)
 
-    def test_configured_and_updating(self):
-        self.positioner.setup('KKG')
-        status_obj = self.positioner._get_status()
-        value, compl = status_obj.get_sync()
-        self.assertEqual(value, 7)
-
 
 if __name__ == '__main__':
     unittest2.main()

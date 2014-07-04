@@ -124,6 +124,22 @@ module Receivers {
             ComponentErrors::UnexpectedEx
         );
 
+        
+        /** Rewind the derotator
+         * 
+         * The parameter `number_of_feeds` defines the rotation angle. For
+         * instance, for a derotator with 60 degrees of angle between two
+         * feeds, number_of_feeds=2 menas we want a rotation of 120 degrees.
+         *
+         * @param number_of_feeds the number of feeds we want to rotate
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void rewind(in long number_of_feeds) raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
 
         /** Return true when the dewar positioner is properly configured */
         boolean isConfigured();

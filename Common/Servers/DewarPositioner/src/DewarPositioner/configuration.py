@@ -5,9 +5,25 @@ from Acspy.Util import ACSCorba
 from IRAPy import logger
 
 class CDBConf(object):
-    def __init__(self, path="alma/DataBlock/DewarPositioner/"):
-        self.path = path
+    def __init__(
+            self, data_path="alma/DataBlock/DewarPositioner/", 
+            component_path='alma/RECEIVERS/DewarPositioner'):
+
+        dal = ACSCorba.cdb()
+        self.mapping_dao = dal.get_DAO(data_path + 'Mapping')
+        self.component_dao = dal.get_DAO_Servant(component_path)
         self._make_conf()
+        self._make_attr()
+
+    def get_attribute(self, attrname):
+        try:
+            return getattr(self, attrname)
+        except AttributeError, ex: 
+            raeson = "invalid attribute name"
+            logger.logError('%s: %s' %(raeson, ex.message))
+            exc = ComponentErrorsImpl.ValidationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
 
     def setup(self, setup_code):
         self.setup_code = setup_code
@@ -39,11 +55,15 @@ class CDBConf(object):
             exc.setReason(raeson)
             raise exc
 
+    def _make_attr(self):
+        self.updating_time = self.component_dao.get_double('UpdatingTime')
+        self.rewinding_sleep_time = self.component_dao.get_double('RewindingSleepTime')
+        self.rewinding_timeout = self.component_dao.get_double('RewindingTimeout')
+
     def _make_conf(self):
         """Create the mapping {'setupCode': 'derotatorName'}"""
         dal = ACSCorba.cdb()
-        mapping_dao = dal.get_DAO(self.path + 'Mapping')
-        mapping_root = ElementTree.fromstring(mapping_dao)
+        mapping_root = ElementTree.fromstring(self.mapping_dao)
         self.mapping = {}
         for child in mapping_root.getchildren():
             code, name, starting_position = child

@@ -31,7 +31,19 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         cc.__init__(self)
         services.__init__(self)
         self.cdbconf = CDBConf()
-        self.positioner = Positioner()
+
+        try:
+            cdb_info = {
+                'updating_time': self.cdbconf.get_attribute('updating_time'),
+                'rewinding_timeout': self.cdbconf.get_attribute('rewinding_timeout'),
+                'rewinding_sleep_time': self.cdbconf.get_attribute('rewinding_sleep_time') 
+            }
+            self.positioner = Positioner(cdb_info)
+        except AttributeError, ex:
+            logger.logWarning('cannot get the CDB attribute %s' %ex.message)
+        except Exception, ex:
+            logger.logWarning('cannot get the CDB attributes: %s' %ex.message)
+
         self._setDefaultConfiguration() 
         self.client = PySimpleClient()
         self.control = Control()
@@ -191,6 +203,24 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
+    def rewind(number_of_feeds):
+        try:
+            return self.positioner.rewind(number_of_feeds)
+        except (PositionerError, NotAllowedError), ex:
+            raeson = "cannot rewind the derotator" 
+            logger.logError('%s: %s' %(raeson, ex.message))
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(raeson)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+
+    def isRewinding(self):
+        return self.positioner.isRewinding()
+
     def isConfigured(self):
         return self.positioner.isConfigured()
 
@@ -291,7 +321,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def setUpdatingMode(self, mode):
         try:
-            self.positioner.setUpdatingMode(mode)
+            self.positioner.setUpdatingMode(mode.upper())
         except PositionerError, ex:
             raeson = 'cannot set the updating mode: %s' %ex.message
             logger.logError(raeson)
@@ -304,7 +334,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def setRewindingMode(self, mode):
         try:
-            self.positioner.setRewindingMode(mode)
+            self.positioner.setRewindingMode(mode.upper())
         except PositionerError, ex:
             raeson = 'cannot set the rewinding mode: %s' %ex.message
             logger.logError(raeson)

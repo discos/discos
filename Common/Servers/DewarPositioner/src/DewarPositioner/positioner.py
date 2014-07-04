@@ -12,19 +12,22 @@ import DerotatorErrors
 from maciErrType import CannotGetComponentEx
 from Acspy.Servants import ContainerServices
 from DewarPositioner.posgenerator import PosGenerator, PosGeneratorError
-from DewarPositioner.updater import Updater
 from IRAPy import logger
 
 
 class Positioner(object):
-    lock = threading.Lock()
+    general_lock = threading.Lock()
+    rewinding_lock = threading.Lock()
 
     modes = {
             'updating': ('FIXED', 'OPTIMIZED'),
             'rewinding': ('AUTO', 'MANUAL')
     }
 
-    def __init__(self):
+    def __init__(self, cdb_info):
+        self.rewinding_timeout = cdb_info['rewinding_timeout']
+        self.rewinding_sleep_time = cdb_info['rewinding_sleep_time']
+        self.updating_time = cdb_info['updating_time']
         self.control = Control()
         self.posgen = PosGenerator()
         self._setDefaultConfiguration()
@@ -32,20 +35,11 @@ class Positioner(object):
     def setup(self, site_info, source, device, starting_position=0):
         """Configure the positioner.
         
-        The argument `device_name` is the name of the component to drive. For 
-        instance, if we want to drive the SRT K band derotator::
-
-            setup('RECEIVERS/SRTKBandDerotator')
-
-        An optional `starting_position` can be given. This position will be
-        added to every position we command. A setup() performs a call to 
-        Positioner.stopUpdating() in order to stop a previous active thread.
-        TODO: describe source and site_info arguments; source could be None and 
-              site_info an empty dictionary.
-              be None
+        A setup() performs a call to Positioner.stopUpdating() in order to 
+        stop a previous active thread.
         """
         try:
-            Positioner.lock.acquire()
+            Positioner.general_lock.acquire()
             if self.isUpdating():
                 self.stopUpdating()
             self.control = Control()
@@ -62,7 +56,7 @@ class Positioner(object):
         except Exception, ex:
             raise PositionerError(ex.message)
         finally:
-            Positioner.lock.release()
+            Positioner.general_lock.release()
 
     def isConfigured(self):
         return self.is_configured
@@ -80,11 +74,36 @@ class Positioner(object):
         return self.isConfigured() and self.device.isSlewing()
 
     def isTracking(self):
-        return self.isConfigured() and self.device.isTracking()
+        return self.isConfigured() and \
+               self.device.isTracking() and not \
+               self.isRewinding() and not \
+               self.isRewindingRequired()
+
+    def setPosition(self, position):
+        target = (
+                self.control.starting_position +
+                self.control.offset +
+                self.control.rewinding_offset +
+                position
+        )
+        if self.device.getMinLimit() < target < self.device.getMaxLimit():
+            try:
+                self.device.setPosition(target)
+            except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+                raeson = "cannot set the %s position" %self.device._get_name()
+                logger.logError('%s: %s' %(raeson, ex.message))
+                raise PositionerError(raeson)
+            except Exception, ex:
+                raeson = "unknown exception setting the %s position" %self.device._get_name()
+                logger.logError('%s: %s' %(raeson, ex.message))
+                raise PositionerError(raeson)
+        else:
+            raise OutOfRangeError("position %.2f out of range {%.2f, %.2f}" 
+                    %(target, self.device.getMinLimit(), self.device.getMaxLimit()))
 
     def startUpdating(self):
         try:
-            Positioner.lock.acquire()
+            Positioner.general_lock.acquire()
             if not self.isConfigured():
                 raise NotAllowedError('positioner not configured: a setup() is required')
             elif not self.isConfiguredForUpdating():
@@ -108,7 +127,110 @@ class Positioner(object):
                 self._start(posgen, self.source, self.site_info)
                 self.control.must_update = True
         finally:
-            Positioner.lock.release()
+            Positioner.general_lock.release()
+
+    def updatePosition(self, posgen, vargs):
+        try:
+            self.control.is_rewinding_required = False
+            self.control.is_updating = True
+            self.control.rewinding_offset = 0
+
+            if not self.device.isReady():
+                logger.logError("%s not ready to move: a setup() is required" 
+                        %self.device._get_name())
+                return
+ 
+            for position in posgen(*vargs):
+                if self.control.stop:
+                    break
+                else:
+                    try:
+                        self.setPosition(position)
+                        time.sleep(self.updating_time)
+                    except OutOfRangeError, ex:
+                        logger.logInfo(ex.message)
+                        if self.control.modes['rewinding'] == 'AUTO':
+                            self.rewind(number_of_feeds=None) # Blocking call
+                        else:
+                            if self.control.modes['rewinding'] == 'MANUAL':
+                                self.control.is_rewinding_required = True
+                            else:
+                                logger.logError('wrong rewinding mode: %s' %self.control.modes['rewinding'])
+                            break
+                    except Exception, ex:
+                        logger.logError(ex.message)
+                        break
+            self.control.must_update = False
+        except KeyboardInterrupt:
+            logger.logInfo('stopping Positioner.updatePosition() due to KeyboardInterrupt')
+        except AttributeError, ex:
+            logger.logError('Positioner.updatePosition(): attribute error')
+            logger.logDebug('Positioner.updatePosition(): %s' %ex)
+        except PositionerError, ex:
+            logger.logError('Positioner.updatePosition(): %s' %ex.message)
+        except Exception, ex:
+            logger.logError('unexcpected exception in Positioner.updatePosition(): %s' %ex)
+        finally:
+            self.control.is_updating = False
+
+    def rewind(self, number_of_feeds=None):
+        if not self.isConfigured():
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+        try:
+            Positioner.rewinding_lock.acquire()
+            logger.logInfo('starting the rewinding...')
+            self.control.is_rewinding = True
+            act_pos, space = self.getRewindingParameters(number_of_feeds)
+            self.control.rewinding_offset += space
+            self.setPosition(act_pos)
+            starting_time = now = datetime.datetime.now()
+            while (now - starting_time).seconds < self.rewinding_timeout:
+                if self.device.isTracking():
+                    break
+                else:
+                    time.sleep(self.rewinding_sleep_time)
+                    now = datetime.datetime.now()
+            else:
+                raise PositionerError('%ss exceeded' %self.rewinding_timeout)
+
+            self.control.is_rewinding_required = False
+        except Exception, ex:
+            self.control.is_rewinding_required = True
+            raise PositionerError(ex.message)
+        finally:
+            self.control.is_rewinding = False
+            self.control.rewinding_offset = 0
+            Positioner.rewinding_lock.release()
+
+    def getRewindingParameters(self, number_of_feeds):
+        if not self.isConfigured():
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+        if number_of_feeds != None and number_of_feeds <= 0:
+            raise PositionerError('the number of feeds must be positive')
+
+        try:
+            act_pos = self.device.getActPosition()
+        except Exception, ex:
+            raeson = 'cannot get the device position: %s' %ex.message
+            raise PositionerError(raeson)
+
+        lspace = act_pos - self.device.getMinLimit() # Space on the left
+        rspace = self.device.getMaxLimit() - act_pos # Space on the right
+        sign = -1 if lspace >= rspace else 1
+        space = max(lspace, rspace)
+        max_number_of_feeds = int(space // self.device.getStep())
+        if number_of_feeds == None:
+            n = max_number_of_feeds
+        elif number_of_feeds <= max_number_of_feeds:
+            n = number_of_feeds
+        else:
+            raise PositionerError('actual pos: {%.1f} -> max number of feeds: {%d} (%s given)'
+                    %(act_pos, max_number_of_feeds, number_of_feeds))
+
+        rewinding_value = sign * n * self.device.getStep()
+        return (act_pos, rewinding_value)
 
     def stopUpdating(self):
         """Stop the updating thread"""
@@ -127,13 +249,13 @@ class Positioner(object):
         if self.isConfigured():
             self.stopUpdating()
             try:
-                Positioner.lock.acquire()
+                Positioner.general_lock.acquire()
                 self._clearOffset()
                 self._start(self.posgen.goto, self.control.starting_position)
                 self.is_configured = False
                 self._setDefaultConfiguration()
             finally:
-                Positioner.lock.release()
+                Positioner.general_lock.release()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
@@ -177,7 +299,7 @@ class Positioner(object):
             return not self.isUpdating() and not self.t.isAlive() 
 
     def isUpdating(self):
-        return self.control.updating
+        return self.control.is_updating
 
     def setOffset(self, offset):
         if not self.isConfigured():
@@ -209,6 +331,12 @@ class Positioner(object):
     def getRewindingOffset(self):
         return self.control.rewinding_offset
 
+    def isRewindingRequired(self):
+        return self.control.is_rewinding_required and not self.control.is_rewinding
+
+    def isRewinding(self):
+        return self.control.is_rewinding
+
     def getPosition(self):
         if self.isConfigured():
             return self.device.getActPosition()
@@ -219,10 +347,9 @@ class Positioner(object):
         """Start a new process that computes and sets the position"""
         if self.isConfigured():
             self.stopUpdating() # Raise a PositionerError if the process stills alive
-            self.updater = Updater(self.device, self.control)
             self.t = ContainerServices.ContainerServices().getThread(
                     name=posgen.__name__, 
-                    target=self.updater.updatePosition, 
+                    target=self.updatePosition, 
                     args=(posgen, vargs)
             )
             self.t.start()
@@ -247,7 +374,7 @@ class Positioner(object):
         This method does not raise any exception, but always returns a status code.
         """
         try:
-            Positioner.lock.acquire()
+            Positioner.general_lock.acquire()
             if not self.isConfigured():
                 raise NotAllowedError('positioner not configured: a setup() is required')
 
@@ -314,7 +441,7 @@ class Positioner(object):
             logger.logError(ex.message)
             return '100000' # Failure
         finally:
-            Positioner.lock.release()
+            Positioner.general_lock.release()
 
     def _setDefaultConfiguration(self):
         self.is_configured = False
@@ -324,12 +451,14 @@ class Positioner(object):
 
 class Control(object):
     def __init__(self):
-        self.updating = False
+        self.is_updating = False
         self.must_update = False
         self.stop = False
         self.starting_position = 0.0
         self.offset = 0.0
         self.rewinding_offset = 0.0
+        self.is_rewinding_required = False
+        self.is_rewinding = False
         self.modes = {'rewinding': '', 'updating': ''}
 
 
@@ -370,6 +499,10 @@ class PositionerError(Exception):
 
 
 class NotAllowedError(Exception):
+    pass
+
+
+class OutOfRangeError(Exception):
     pass
 
 

@@ -14,9 +14,14 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             device = client.getComponent('RECEIVERS/SRTKBandDerotator')
         except CannotGetComponentEx:
             print '\nINFO -> component not available: we will use a mock device'
-            from mock_components import MockDevice
+            from DewarPositionerTest.mock_components import MockDevice
             device = MockDevice()
-        p = Positioner()
+        cdb_info = {
+                'updating_time': 0.1,
+                'rewinding_timeout': 1.5,
+                'rewinding_sleep_time': 1
+        }
+        p = Positioner(cdb_info)
         self.assertRaises(NotAllowedError, p.startUpdating)
         p.setup(site_info={}, source=None, device=device)
         self.assertEqual(p.isConfiguredForUpdating(), False)

@@ -7,24 +7,25 @@ class MockDevice(object):
 
     def setup(self):
         self.is_ready = True
+        self.is_tracking = True
 
     def isReady(self):
         return self.is_ready
 
     def isSlewing(self):
-        return False
+        return self.is_slewing
 
     def isTracking(self):
-        return False
+        return self.is_tracking
 
     def isUpdating(self):
-        return False
+        return self.is_updating
 
     def getMinLimit(self):
-        return -120.0
+        return -130.0
 
     def getMaxLimit(self):
-        return +120.0
+        return +130.0
 
     def getStep(self):
         return 60.0
@@ -45,6 +46,9 @@ class MockDevice(object):
     def _setDefault(self):
         self.position = 0.0
         self.is_ready = False
+        self.is_tracking = False
+        self.is_updating = False
+        self.is_slewing = False
 
 
 class Property(object):

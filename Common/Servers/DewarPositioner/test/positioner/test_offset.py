@@ -9,14 +9,19 @@ from Acspy.Clients.SimpleClient import PySimpleClient
 class PositionerOffsetTest(unittest2.TestCase):
 
     def setUp(self):
-        self.p = Positioner()
+        cdb_info = {
+                'updating_time': 0.1,
+                'rewinding_timeout': 1.5,
+                'rewinding_sleep_time': 1
+        }
+        self.p = Positioner(cdb_info)
         try:
             client = PySimpleClient()
             self.device = client.getComponent('RECEIVERS/SRTKBandDerotator')
             self.using_mock = False
         except CannotGetComponentEx:
             print '\nINFO -> component not available: we will use a mock device'
-            from mock_components import MockDevice
+            from DewarPositionerTest.mock_components import MockDevice
             self.device = MockDevice()
             self.using_mock = True
 
@@ -51,7 +56,6 @@ class PositionerOffsetTest(unittest2.TestCase):
                 self.device.getActPosition(), 
                 places=2
         )
-
 
 if __name__ == '__main__':
     unittest2.main()

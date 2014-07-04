@@ -8,9 +8,16 @@ from DewarPositioner.positioner import Positioner, NotAllowedError
 
 class PositionerParkTest(unittest2.TestCase):
 
+    def setUp(self):
+        self.cdb_info = {
+                'updating_time': 0.1,
+                'rewinding_timeout': 1.5,
+                'rewinding_sleep_time': 1
+        }
+
     def test_notConfigured(self):
         """Verify it raises an exception if not yet configured"""
-        p = Positioner()
+        p = Positioner(self.cdb_info)
         self.assertRaises(NotAllowedError, p.park)
 
     def test_set_starting_pos(self):
@@ -21,11 +28,11 @@ class PositionerParkTest(unittest2.TestCase):
             using_mock = False
         except CannotGetComponentEx:
             print '\nINFO -> component not available: we will use a mock device'
-            from mock_components import MockDevice
+            from DewarPositionerTest.mock_components import MockDevice
             device = MockDevice()
             using_mock = True
 
-        p = Positioner()
+        p = Positioner(self.cdb_info)
         p.setup(site_info={}, source=None, device=device)
         time.sleep(0.5) if using_mock else time.sleep(2)
         offset = 2
