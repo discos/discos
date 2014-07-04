@@ -92,6 +92,7 @@
 				<xs:attribute name="IPAddress" type="xs:string" use="required" />
 				<xs:attribute name="Port" type="xs:unsignedShort" use="required" />
 				<xs:attribute name="Configuration" type="TBkndConfiguration" use="required" />
+				<xs:attribute name="Mode8Bit" type="xs:unsignedShort" use="required" />
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>

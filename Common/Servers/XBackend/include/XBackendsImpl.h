@@ -525,6 +525,7 @@ private:
  	CConfiguration m_configuration;
  	SimpleParser::CParser<CCommandLine> * m_parser;
  	void deleteAll();
+    DWORD Mode8Bit;
 };
 
 #endif /*XBackendsImpl_H_*/

@@ -44,6 +44,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 //	_GET_DWORD_ATTRIBUTE("ConnectTimeout","Time out of the command line connection  is (uSec): ",m_dwConnectTimeout);
 //	_GET_DWORD_ATTRIBUTE("PropertyRefreshTime","The property refresh time is (microseconds): ",m_dwPropertyRefreshTime);
 	_GET_STRING_ATTRIBUTE("Configuration","Backend configuration is: ",m_sConfig);
+	_GET_DWORD_ATTRIBUTE("Mode8Bit","Mode8Bit is: ",m_mode8bit);
 //	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter cache time (uSec)",m_dwRepetitionCacheTime);
 //	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter expire time  (uSec)",m_dwRepetitionExpireTime);
 //	_GET_DWORD_ATTRIBUTE("DataPort","Port of data line is: ",m_wDataPort);

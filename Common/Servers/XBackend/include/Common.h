@@ -10,7 +10,6 @@
 /* Who                           				     when           What                                              */
 /* Liliana Branciforti(bliliana@arcetri.astro.it) 04/08/2009 		Creation								*/
 
-
 //#define BKD_DEBUG 
 #define DOPPIO
 

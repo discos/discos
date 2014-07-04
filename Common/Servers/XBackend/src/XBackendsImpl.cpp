@@ -93,7 +93,7 @@ void XBackendsImpl::initialize()
 	else {
 		ACS_DEBUG_PARAM("XBackendsImpl::initialize()","Port: %lu",Port); 
 	}
-	
+    Mode8Bit=m_configuration.getMode8Bit();
 	try {
 #ifdef DOPPIO 
 		groupS=new GroupSpectrometer(IPAddress,Port,true);
@@ -212,6 +212,12 @@ void XBackendsImpl::execute()
 	}
 //	_IRA_LOGFILTER_ACTIVATE(m_configuration.getRepetitionCacheTime(),m_configuration.getRepetitionExpireTime());
 	//ACS_LOG(LM_FULL_INFO,"XBackendsImpl::execute()",(LM_INFO,"SOCKET_CONNECTING"));
+
+    if (Mode8Bit == 0)
+        line->setMode8BitParameter(false);
+    if (Mode8Bit == 1)
+        line->setMode8BitParameter(true);
+
 	try {
 		line->InitConf(&m_configuration);  	// this could throw an ACS exception.....
 	}	

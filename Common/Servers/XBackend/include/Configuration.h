@@ -106,6 +106,8 @@ public:
 	 * @return the server address for the data transfer (it should be the address of the machine, running this component
 	 */
 	inline const IRA::CString& getDataIPAddress() const { return m_sDataAddress; }
+
+	inline const DWORD& getMode8Bit() const { return m_mode8bit; }
 	
 private:
 	WORD m_wPort;
@@ -121,6 +123,7 @@ private:
 	DWORD m_dwDataLatency;
 	DWORD m_dwSenderSleepTime;
 	DWORD m_dwSenderResponseTime;
+    DWORD m_mode8bit;
 };
 
 #endif /*CONFIGURATION_H_*/

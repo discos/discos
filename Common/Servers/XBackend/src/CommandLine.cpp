@@ -1155,8 +1155,9 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
         
 
 
-	if (DEFAULT_MODE8BIT){
-		m_mode8bit=true;
+	//if (DEFAULT_MODE8BIT){
+	//	m_mode8bit=true;
+	if (m_mode8bit==true){
 #ifdef DOPPIO 
 		for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;
 		m_adc[0]=m_adc[1]=m_adc[8]=m_adc[9]=false;
@@ -1166,11 +1167,12 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 #endif 	
 	}
 	else {
-		m_mode8bit=false;
+		//m_mode8bit=false;
 		for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;
 	}
 
-        bool ottobit=DEFAULT_MODE8BIT;
+        //bool ottobit=DEFAULT_MODE8BIT;
+        bool ottobit=m_mode8bit;
         CSecAreaResourceWrapper<GroupSpectrometer> groupS=m_pLink->Get();
         groupS->Xspec.SetModo8bit(ottobit); 
         groupS->AdcSetMode(groupS->Xspec.GetModo8bit()); //Cambio la distribuzione //QSTA
@@ -1307,13 +1309,13 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
     else if (config=="XKL") {
         setSectionsNumber(4);
 		IRA::CIRATools::Wait(0,100000);
-		setSection(0,-1,-1,0,-1,-1,-1);
+		setSection(0,145,62.5,1,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
-		setSection(1,-1,-1,0,-1,-1,-1);
+		setSection(1,145,62.5,1,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
-		setSection(2,-1,-1,4,-1,-1,-1);
+		setSection(2,145,62.5,3,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
-		setSection(3,-1,-1,4,-1,-1,-1);
+		setSection(3,145,62.5,3,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
     }
     else if (config=="XC1") {
