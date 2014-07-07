@@ -418,7 +418,7 @@ void MedicinaMountImpl::rates(CORBA::Double azRate,CORBA::Double elRate) throw (
 	}
 }
 
-void MedicinaMountImpl::reset() throw (CORBA::SystemException, ComponentErrorsEx, AntennaErrors::AntennaErrorsEx))
+void MedicinaMountImpl::reset() throw (CORBA::SystemException, ComponentErrorsEx, AntennaErrors::AntennaErrorsEx)
 {
 	AUTO_TRACE("MedicinaMountImpl::failureReset()");
 	if (m_ACULink) {

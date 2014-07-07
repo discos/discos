@@ -409,7 +409,7 @@ public:
 	 * 		@arg \c AntennnaErros::Connection 	 
 	 * 		@arg \c ComponentErrors::SocketError
 	*/
-	void reset() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, AntennaErrors::AntennaErrorsEx));	
+	void reset() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, AntennaErrors::AntennaErrorsEx);
 	
 	/**
 	 * This will set the ACU time according to the argument. 
