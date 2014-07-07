@@ -19,4 +19,8 @@
 
 <SynthesizerEntry><Frequency>18000.0</Frequency><OutputPower>-0.7</OutputPower></SynthesizerEntry>
 
+<SynthesizerEntry><Frequency>19000.0</Frequency><OutputPower>2.5</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>20000.0</Frequency><OutputPower>1.8</OutputPower></SynthesizerEntry>
+
 </LocalOscillatorLookUpTable>
