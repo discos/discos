@@ -9,7 +9,8 @@
                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
                IPAddress="192.168.200.214"
                Port="1234"
-	       	   Configuration="XC1">
+               Configuration="XC1"
+               Mode8Bit="0">
 	<time/>
 	<backendName/>
 	<bandWidth/>
