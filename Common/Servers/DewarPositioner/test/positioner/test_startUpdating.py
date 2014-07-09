@@ -9,6 +9,7 @@ from DewarPositioner.positioner import Positioner, NotAllowedError
 class PositionerStartUpdatingTest(unittest2.TestCase):
 
     def test_notYetConfigured(self):
+        """Verify isConfiguredForUpdating() and startUpdating()"""
         try:
             client = PySimpleClient()
             device = client.getComponent('RECEIVERS/SRTKBandDerotator')
@@ -22,11 +23,15 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
                 'rewinding_sleep_time': 1
         }
         p = Positioner(cdb_info)
+        # startUpdating() raises NotAllowedError when the system is not configured
         self.assertRaises(NotAllowedError, p.startUpdating)
         p.setup(site_info={}, source=None, device=device)
+        # isConfiguredForUpdating() returns False when the system is not configured
         self.assertEqual(p.isConfiguredForUpdating(), False)
+        # startUpdating() raises NotAllowedError when updating mode is not yet selected
         self.assertRaises(NotAllowedError, p.startUpdating)
         p.setUpdatingMode('FIXED')
+        # isConfiguredForUpdating() returns True after a setUpdatingMode()
         self.assertEqual(p.isConfiguredForUpdating(), True)
         self.assertRaises(NotAllowedError, p.startUpdating)
         with self.assertRaisesRegexp(NotAllowedError, '^no site information'):

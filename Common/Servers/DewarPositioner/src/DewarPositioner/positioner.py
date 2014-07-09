@@ -150,7 +150,13 @@ class Positioner(object):
                     except OutOfRangeError, ex:
                         logger.logInfo(ex.message)
                         if self.control.modes['rewinding'] == 'AUTO':
-                            self.rewind(number_of_feeds=None) # Blocking call
+                            try:
+                                self.rewind() 
+                            except Exception, ex:
+                                # In case of wrong auto_rewinding_feeds
+                                self.control.is_rewinding_required = True
+                                logger.logError(ex.message)
+                                break
                         else:
                             if self.control.modes['rewinding'] == 'MANUAL':
                                 self.control.is_rewinding_required = True
@@ -181,7 +187,9 @@ class Positioner(object):
             Positioner.rewinding_lock.acquire()
             logger.logInfo('starting the rewinding...')
             self.control.is_rewinding = True
-            act_pos, space = self.getRewindingParameters(number_of_feeds)
+            # getAutoRewindingFeeds() returns None in case the user did not specify it
+            n = number_of_feeds if number_of_feeds != None else self.getAutoRewindingFeeds()
+            act_pos, space = self.getRewindingParameters(n)
             self.control.rewinding_offset += space
             self.setPosition(act_pos)
             starting_time = now = datetime.datetime.now()
@@ -203,7 +211,7 @@ class Positioner(object):
             self.control.rewinding_offset = 0
             Positioner.rewinding_lock.release()
 
-    def getRewindingParameters(self, number_of_feeds):
+    def getRewindingParameters(self, number_of_feeds=None):
         if not self.isConfigured():
             raise NotAllowedError('positioner not configured: a setup() is required')
 
@@ -215,22 +223,30 @@ class Positioner(object):
         except Exception, ex:
             raeson = 'cannot get the device position: %s' %ex.message
             raise PositionerError(raeson)
-
         lspace = act_pos - self.device.getMinLimit() # Space on the left
         rspace = self.device.getMaxLimit() - act_pos # Space on the right
         sign = -1 if lspace >= rspace else 1
         space = max(lspace, rspace)
-        max_number_of_feeds = int(space // self.device.getStep())
+
+        max_actual_number_of_feeds = int(space // self.device.getStep())
+
         if number_of_feeds == None:
-            n = max_number_of_feeds
-        elif number_of_feeds <= max_number_of_feeds:
+            n = max_actual_number_of_feeds
+        elif number_of_feeds <= max_actual_number_of_feeds:
             n = number_of_feeds
         else:
             raise PositionerError('actual pos: {%.1f} -> max number of feeds: {%d} (%s given)'
-                    %(act_pos, max_number_of_feeds, number_of_feeds))
+                    %(act_pos, max_actual_number_of_feeds, number_of_feeds))
 
         rewinding_value = sign * n * self.device.getStep()
         return (act_pos, rewinding_value)
+
+    def getMaxRewindingFeeds(self):
+        if not self.isConfigured():
+            raise NotAllowedError('positioner not configured: a setup() is required')
+        else:
+            full_range = self.device.getMaxLimit() - self.device.getMinLimit()
+            return int(full_range // self.device.getStep())
 
     def stopUpdating(self):
         """Stop the updating thread"""
@@ -274,6 +290,8 @@ class Positioner(object):
             raise PositionerError('%s mode %s unknown; allowed modes: %s' %(mode_type, mode, modes))
         else:
             self.control.modes[mode_type] = mode
+        if mode == 'MANUAL':
+            self.clearAutoRewindingFeeds()
 
     def isConfiguredForUpdating(self):
         """Return True if an updating mode has been selected"""
@@ -342,6 +360,25 @@ class Positioner(object):
             return self.device.getActPosition()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
+
+    def setAutoRewindingFeeds(self, number_of_feeds):
+        if self.isConfigured():
+            max_rewinding_feeds = self.getMaxRewindingFeeds()
+            if number_of_feeds > max_rewinding_feeds:
+                raise NotAllowedError('max number of feeds: {%d} (%s given)'
+                        %(max_rewinding_feeds, number_of_feeds))
+            elif number_of_feeds <= 0:
+                raise NotAllowedError('the number of feeds must be positive')
+            else:
+                self.control.auto_rewinding_feeds = number_of_feeds
+        else:
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+    def getAutoRewindingFeeds(self):
+        return self.control.auto_rewinding_feeds
+
+    def clearAutoRewindingFeeds(self):
+        self.control.auto_rewinding_feeds = None
 
     def _start(self, posgen, *vargs):
         """Start a new process that computes and sets the position"""
@@ -459,6 +496,7 @@ class Control(object):
         self.rewinding_offset = 0.0
         self.is_rewinding_required = False
         self.is_rewinding = False
+        self.auto_rewinding_feeds = None
         self.modes = {'rewinding': '', 'updating': ''}
 
 

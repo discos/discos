@@ -31,6 +31,7 @@ class PositionerOffsetTest(unittest2.TestCase):
 
     def test_set_get(self):
         """Verify the set and get methods"""
+        # Not allowed when the system is not yet configured
         self.assertRaises(NotAllowedError, self.p.setOffset, 2)
         self.p.setup(site_info={}, source=None, device=self.device)
         self.p.setOffset(2)

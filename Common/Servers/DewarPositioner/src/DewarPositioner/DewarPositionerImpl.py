@@ -125,10 +125,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             self.setRewindingMode('AUTO')
             self.actualSetup = self.commandedSetup
         except PositionerError, ex:
-            raeson = '%s' %ex.message
-            logger.logError(raeson)
+            logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
-            exc.setReason(raeson)
+            exc.setReason(ex.message)
             raise exc
         except Exception, ex:
             logger.logError(ex.message)
@@ -176,12 +175,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         except PositionerError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
-            exc.setReason(raeson)
+            exc.setReason(ex.message)
             raise exc
         except NotAllowedError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(raeson)
+            exc.setReason(ex.message)
             raise exc
         except Exception, ex:
             logger.logError(ex.message)
@@ -203,12 +202,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
-    def rewind(number_of_feeds):
+    def rewind(self, number_of_feeds):
         try:
             return self.positioner.rewind(number_of_feeds)
         except (PositionerError, NotAllowedError), ex:
-            raeson = "cannot rewind the derotator" 
-            logger.logError('%s: %s' %(raeson, ex.message))
+            raeson = "cannot rewind the derotator: %s" %ex.message
+            logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc
@@ -236,8 +235,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             return self.positioner.isReady()
         except DerotatorErrors.CommunicationErrorEx, ex:
-            raeson = "cannot known if the derotator is ready" 
-            logger.logError('%s: %s' %(raeson, ex.message))
+            raeson = "cannot known if the derotator is ready: %s" %ex.message
+            logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc
@@ -251,8 +250,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             return self.positioner.isSlewing()
         except DerotatorErrors.CommunicationErrorEx, ex:
-            raeson = "cannot known if the derotator is slewing" 
-            logger.logError('%s: %s' %(raeson, ex.message))
+            raeson = "cannot known if the derotator is slewing: %s" %ex.message
+            logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc
@@ -266,8 +265,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             self.positioner.isTracking()
         except DerotatorErrors.CommunicationErrorEx, ex:
-            raeson = "cannot known if the derotator is tracking"
-            logger.logError('%s: %s' %(raeson, ex.message))
+            raeson = "cannot known if the derotator is tracking: %s" %ex.message
+            logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc
@@ -284,8 +283,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             self.positioner.setOffset(offset)
         except (PositionerError, NotAllowedError), ex:
-            raeson = "cannot set the derotator offset" 
-            logger.logError('%s: %s' %(raeson, ex.message))
+            raeson = "cannot set the derotator offset: %s" %ex.message
+            logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc
@@ -299,8 +298,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             self.positioner.clearOffset()
         except PositionerError, ex:
-            raeson = "cannot set the derotator offset"
-            logger.logError('%s: %s' %(raeson, ex.message))
+            raeson = "cannot set the derotator offset: %s" %ex.message
+            logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc

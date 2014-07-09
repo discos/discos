@@ -226,6 +226,33 @@ module Receivers {
         boolean isRewinding();
 
 
+        /** Set the number of feeds the user want to rewind in AUTO rewinding 
+         *  mode
+         *
+         * @param number_of_feeds the number of feeds the user want to rewind
+         * in auto rewinding mode. For instance, for the SRTKBandReceiver, the
+         * angle between two feeds is 60 degrees, so number_of_feeds=2 means
+         * the auto rewind must be of 120 degrees.
+         * @throw ComponentErrors::NotAllowedEx
+         */
+        void setAutoRewindingFeeds(in long number_of_feeds) 
+            raises (ComponentErrors::NotAllowedEx);
+
+        /** Clear the number of feeds selected by setAutoRewindingMode()
+         *
+         * When the auto rewinding feeds is cleared, in case of AUTO 
+         * rewinding mode the rewinding will be as larger as possible.
+         */
+        void clearAutoRewindingFeeds();
+
+
+        /** Get the number of feeds selected by setAutoRewindingMode()
+         *
+         * In case no auto rewinding feeds is selected, it returns 0.
+         */
+        long getAutoRewindingFeeds();
+
+
         /** Return the actual position in the user reference system
          *
          * @throw ComponentErrors::OperationErrorEx,

@@ -4,7 +4,7 @@ import time
 import unittest2
 import mocker
 
-from DewarPositioner.positioner import Positioner, PositionerError
+from DewarPositioner.positioner import Positioner, PositionerError, NotAllowedError
 from DewarPositionerTest.mock_components import MockDevice
 
 class RewindTest(unittest2.TestCase):
@@ -80,7 +80,7 @@ class RewindTest(unittest2.TestCase):
         self.assertEqual(self.p.isRewinding(), False)
 
     def test_tracking_when_rewinding_required(self):
-        """Verify the traking is False when the rewinding is required"""
+        """Verify the tracking flag is False when a rewinding is required"""
         self.p = self.m.patch(self.p)
         self.p.isRewindingRequired()
         self.m.result(True)
@@ -113,9 +113,46 @@ class RewindTest(unittest2.TestCase):
         """Verify the value of the position after auto rewinding (from 0)"""
         time.sleep(0.5) # Wait until the setup is completed
         self.device.setPosition(100)
-        expected = sum(self.p.getRewindingParameters(None))
-        self.p.rewind(None)
+        expected = sum(self.p.getRewindingParameters())
+        self.p.rewind()
         self.assertEqual(self.device.getActPosition(), expected)
+
+    def test_xxxAutoRewindingFeeds(self):
+        """Verify setAutoRewindingFeeds() and clearAutoRewindingFeeds()"""
+        time.sleep(0.5) # Wait until the setup is completed
+        n = 1
+        # NotAllowedError is raised in case of a number of feeds too large
+        with self.assertRaisesRegexp(NotAllowedError, 'max number of feeds'):
+            self.p.setAutoRewindingFeeds(5)
+        # NotAllowedError is raised in case of a number of feeds not positive
+        with self.assertRaisesRegexp(NotAllowedError, 'must be positive'):
+            self.p.setAutoRewindingFeeds(0)
+        self.device.setPosition(100)
+        self.p.setAutoRewindingFeeds(n)
+        expected = sum(self.p.getRewindingParameters(n))
+        self.p.rewind(self.p.getAutoRewindingFeeds())
+        self.assertEqual(self.device.getActPosition(), expected)
+        self.device.setPosition(100)
+        self.p.clearAutoRewindingFeeds()
+        expected = sum(self.p.getRewindingParameters())
+        self.p.rewind(self.p.getAutoRewindingFeeds())
+        self.assertEqual(self.device.getActPosition(), expected)
+        self.p.park()
+        # A NotAllowedError is raised in case the system is not configured
+        with self.assertRaisesRegexp(NotAllowedError, 'not configured'):
+            self.p.setAutoRewindingFeeds(n)
+
+    def test_wrong_auto_rewinding_feeds(self):
+        """must_update is True in case of wrong auto rewinding_feeds during rewinding"""
+        time.sleep(0.5) # Wait until the setup is completed
+        n = 4
+        self.p.setAutoRewindingFeeds(n)
+        self.device.setPosition(50)
+        self.assertEqual(self.p.isRewindingRequired(), False)
+        with self.assertRaisesRegexp(PositionerError, 'actual pos: {50.0}'):
+            self.p.rewind()
+        time.sleep(0.5) # Wait until the rewind returns
+        self.assertEqual(self.p.isRewindingRequired(), True)
 
 
 if __name__ == '__main__':

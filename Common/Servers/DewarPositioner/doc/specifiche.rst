@@ -32,7 +32,25 @@ di aggiornamento, assegnato a ``MODE``, che puo' essere ``FIXED`` o
 ``OPTIMIZED``.
 
 Il metodo ``getUpdatingMode()`` restituisce la modalita' di aggiornamento
-impostata.
+impostata, mentre il metodo ``isConfiguredForUpdating()`` restituisce True
+se e' stata impostata la modalita' di aggiornamento. Quindi, riassumendo::
+
+    >>> getUpdatingMode() # Restituisce una stringa vuota
+    '' 
+    >>> setup('KKG')
+    >>> getUpdatingMode() # Restituisce ancora una stringa vuota
+    ''
+    >>> isConfiguredForUpdating() # Restituisce False
+    False
+    >>> setUpdatingMode('OPTIMIZED')
+    >>> getUpdatingMode() # Restituisce 'OPTIMIZED'
+    'OPTIMIZED'
+    >>> isConfiguredForUpdating() # Restituisce True
+    True
+    setUpdatingMode('WRONGMODE') # Modo non valido, solleva eccezione
+    Traceback (most recent call last):
+        ...
+    ValidationErrorEx: code WRONGMODE unknown
 
 
 Modalita' FIXED
@@ -98,9 +116,15 @@ Il tipo di riavvolgimento lo si imposta tramite il metodo
 ``setRewindingMode(MODE)``. L'argomento ``MODE`` puo' essere ``AUTO`` (default) 
 o ``MANUAL``.
 
-Il metodo ``setAutoRewinding(NUMBER_OF_FEEDS)`` imposta il riavvolgimento
+Il metodo ``setAutoRewindingFeeds(NUMBER_OF_FEEDS)`` imposta il riavvolgimento
 automatico pari al numero di feed passato come argomento. La chiamata a questo
 metodo imposta anche la modalita' ``AUTO``, qualora non fosse gia' impostata.
+Qualora il numero di feeds fosse superiore a quello massimo consentito per il
+riavvolgimento, verra' sollevata una eccezione.
+
+Il metodo ``clearAutoRewindingFeeds()`` chiamato in modalita' di rewinding AUTO,
+fa si che il numero di feeds di rotazione del riavvolgimento automatico venga
+calcolato dal sistema. In altre parole, annulla il ``setAutoRewindingFeeds``.
 
 In caso di modalita' ``MANUAL``, quando si arriva a fine corsa si ha::
 
@@ -134,6 +158,11 @@ la modalita' di riavvolgimento ecc. Infine posiziona il derotatore in
 parcheggio. Al termine del park() il sistema non sara' piu' configurato, per cui
 isConfigured() restituira' False.
 
+Recuperare la posizione ad un dato tempo
+========================================
+Il metodo getPositionFromHistory(t) restituisce la posizione del derotatore al
+tempo t.
+
 
 Elenco completo dei metodi
 ==========================
@@ -144,6 +173,7 @@ Di seguito l'elenco completo dei metodi::
     getCommandedSetup()
     isReady()
     isConfigured()
+    isConfiguredForUpdating()
     park()
 
     setOffset(OFFSET)
@@ -161,7 +191,8 @@ Di seguito l'elenco completo dei metodi::
     isSlewing()
 
     setRewindingMode(MODE) # MODE: MANUAL or AUTO (default)
-    setAutoRewinding(NUMBER_OF_FEEDS)
+    setAutoRewindingFeeds(NUMBER_OF_FEEDS)
+    clearAutoRewindingFeeds()
     getRewindingMode()
     rewind(NUMBER_OF_FEEDS)
     isRewindingRequired()

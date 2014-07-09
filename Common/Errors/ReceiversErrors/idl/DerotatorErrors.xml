@@ -3,7 +3,7 @@
     xmlns="Alma/ACSError" 
     xsi:schemaLocation="Alma/ACSError ACSError.xsd" 
     name="DerotatorErrors" 
-    type="2008" 
+    type="2009" 
     _prefix="alma">
 
     <Code name="Communicating" 
