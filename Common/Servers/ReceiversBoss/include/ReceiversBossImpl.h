@@ -225,7 +225,36 @@ public:
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
 	virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 * called in order to get back the position of the derotator at a given epoch
+	 * @param reference epoch
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	virtual CORBA::Double getDerotatorPosition (ACS::Time epoch) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 * This method is a wrap a call to the derotator setup, allowing to activate the derotation. If the derotator is not supported by the current receiver an error is risen.
+	 * @param mode specified the tracking mode of the derotator, if <i>RCV_UNDEF_UPDATE</i> is given the present value is kept
+	 * @param rewind specifies the rewind mode in case the derotator reaches its final limit, if i<i>RCV_UNDEF_REWIND</i> is given, the present value is kept
+	 * @param feeds number of feeds to derotate in case automatic rewind mode is slected, if -1 the present value if not changed
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+    virtual void derotatorSetup (Receivers::TUpdateModes mode,Receivers::TRewindModes rewind,CORBA::Long feeds) throw (CORBA::SystemException,
+    		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
+    /**
+     * It disable the derotator. It is implicitly called also by the <i>park()</i> method.
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    virtual void derotatorPark () throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
 	/**
 	 * Returns a reference to the LO property implementation of the IDL interface.
 	 * @return pointer to read-only double sequence property

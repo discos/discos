@@ -7,6 +7,16 @@
 
 MAKE_PDF = ON
 
+INCLUDES = ReceiversModule.h
+
+#
+# Libraries (public and local)
+# ----------------------------
+ 
+EXECUTABLES_L   = TestReceivers
+TestReceivers_OBJECTS = ReceiversModule
+TestReceivers_LIBS= ReceiversDefinitionsStubs baci maci
+
 CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable \
 			  NoiseMarkLookUpTable TaperLookUpTable \
 			  DewarPositionerTable

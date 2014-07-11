@@ -27,4 +27,24 @@
 		</xs:complexContent>
 	</xs:complexType>	
 	
+	<xs:complexType name="RewindModesType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default="AUTO,MANUAL,UNDEFINED"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="UpdateModesType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="3" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default="FIXED,OPTIMIZED,DISABLED,UNDEFINED"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>	
+	
 </xs:schema>

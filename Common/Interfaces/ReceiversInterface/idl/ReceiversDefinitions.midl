@@ -44,6 +44,28 @@ module Receivers {
         double y;
     };
 
+    /**
+     * Defines the possible modes for rewinding the derotator
+     */
+    enum TRewindModes {
+    	RCV_AUTO_REWIND,  /*!< System is in charge to rewind the derotator */
+    	RCV_MANUAL_REWIND, /*!< System will wait for explicit command in order to rewind */
+    	RCV_UNDEF_REWIND /*!< no proper setup defined yet  */
+    };
+    // Not required at the moment
+    ACS_ENUM(TRewindModes);
+
+    /**
+      * Defines the possible modes for updateing the derotator
+      */
+    enum TUpdateModes {
+    	RCV_FIXED_UPDATE, /*!< derotation is done in fixed mode */
+    	RCV_OPTIMIZED_UPDATE, /*!< derotation is done optimizing the spacial cover of the multfeed */
+    	RCV_DISABLED_UPDATE,  /*!< no derotation necessary */
+    	RCV_UNDEF_UPDATE /*!< no proper setup */
+    };
+    // Not required at the moment
+    ACS_ENUM(TUpdateModes);
 
 };
 
