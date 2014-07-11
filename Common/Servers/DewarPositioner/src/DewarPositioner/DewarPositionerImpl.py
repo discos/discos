@@ -25,7 +25,25 @@ from DewarPositioner.devios import StatusDevIO
 
 from IRAPy import logger
 
+
+__copyright__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
+
+
 class DewarPositionerImpl(POA, cc, services, lcycle):
+ 
+    commands = {
+        # command_name: (method_name, (type_of_arg1, ..., type_of_argN))
+        'derotatorSetup': ('setup', (str,)),
+        'derotatorPark': ('park', ()),
+        'derotatorRewind': ('rewind', (int,)),
+        'derotatorStartUpdating': ('startUpdating', ()),
+        'derotatorStopUpdating': ('stopUpdating', ()),
+        'derotatorSetOffset': ('setOffset', (float,)),
+        'derotatorClearOffset': ('clearOffset',),
+        'derotatorSetUpdatingMode': ('setUpdatingMode', (str,)),
+        'derotatorClearUpdatingMode': ('clearUpdatingMode', ()),
+        'derotatorSetRewindingMode': ('setRewindingMode', (str,)),
+    }
 
     def __init__(self):
         cc.__init__(self)
@@ -328,6 +346,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(raeson)
             raise exc # Can happen only in case of wrong system input
 
+    def clearUpdatingMode(self):
+        self.positioner.clearUpdatingMode()
+
     def getUpdatingMode(self):
         return self.positioner.getUpdatingMode()
 
@@ -382,6 +403,82 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                         error = True
                 finally:
                     time.sleep(sleep_time)
+
+    def command(self, cmd):
+        """Execute the command cmd
+        
+        This method returns a tuple (success, answer), where success is a boolean
+        that indicates the command is executed correctly (success = True) or not
+        (success = False). The argument answer is a string that represents the
+        error message in case of error, the value returned from the method in
+        case it returns a non Null object, an empty string in case it returns None.
+        """
+        try:
+            command, args_str = cmd.split('=') if '=' in cmd else (cmd, '')
+            command = command.strip()
+            args = [item.strip() for item in args_str.split(',')]
+        except ValueError:
+            success = False 
+            answer = 'invalid command: maybe there are too many symbols of ='
+        except Exception, ex:
+            success = False 
+            answer = ex.message
+        else:
+            success = True
+
+        if not success:
+            logger.logError(answer)
+            return (success, answer)
+
+        if command not in DewarPositionerImpl.commands:
+            success = False
+            answer = 'command %s does not exist' %command
+            logger.logError(answer)
+            return (success, answer)
+        else:
+            method_name, types = DewarPositionerImpl.commands[command]
+            # For instance:
+            # >>> DewarPositionerImpl.command['foo']
+            # ('setup', (str, str, float))
+            # >>> method_name, types = DewarPositionerImpl.commands[command]
+            # >>> method_name
+            # 'setup'
+            # >>> types
+            # (str, str, float)
+            try:
+                method = getattr(self, method_name)
+            except AttributeError, ex:
+                success = False
+                answer = "%s has no attribute %s" %(self, method_name)
+                logger.logError(answer)
+                return (success, answer)
+            try:
+                result = method(*[type_(arg) for (arg, type_) in zip(args, types)])
+                # For instance:
+                # >>> args = ('1', 'python', '3.50')
+                # >>> types = (int, str, float)
+                # >>> [type_(arg) for (arg, type_) in zip(args, types)]
+                # [1, 'python', 3.5]
+                # >>> def foo(a, b, c):
+                # ...     print a, b, c
+                # ... 
+                # >>> foo(*[type_(arg) for (arg, type_) in zip(args, types)])
+                # 1 python 3.5
+                answer = '' if result is None else result
+                success = True
+            except TypeError, ex:
+                success = False
+                answer = ex.message
+                logger.logError(answer)
+                return (success, answer)
+            except Exception, ex:
+                success = False
+                answer = ex.getReason() if hasattr(ex, 'getReason') else ex.message
+                logger.logError(answer)
+                return (success, answer)
+
+        logger.logInfo('command %s executed' %cmd)
+        return (success, answer)
 
         
 class Control(object):

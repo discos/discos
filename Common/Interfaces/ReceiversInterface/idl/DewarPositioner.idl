@@ -28,7 +28,10 @@ module Receivers {
 
     const string DEWAR_POSITIONER_DATA_CHANNEL = "DewarPositionerData";
 
-    interface DewarPositioner: ACS::CharacteristicComponent {
+    interface DewarPositioner: 
+        ACS::CharacteristicComponent,
+        Management::CommandInterpreter
+    {
    
         /** Take a configuration code and configure the component
          * 
@@ -216,6 +219,10 @@ module Receivers {
             ComponentErrors::ValidationErrorEx,
             ComponentErrors::UnexpectedEx
         );
+
+
+        /** Clear the updating mode */
+        void clearUpdatingMode();
 
 
         /** Get the updating mode */

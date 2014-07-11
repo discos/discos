@@ -278,6 +278,13 @@ class Positioner(object):
     def setUpdatingMode(self, mode):
         self._setMode('updating', mode)
 
+    def clearUpdatingMode(self):
+        try:
+            Positioner.general_lock.acquire()
+            self.control.modes['updating'] = ''
+        finally:
+            Positioner.general_lock.release()
+
     def setRewindingMode(self, mode):
         self._setMode('rewinding', mode)
 

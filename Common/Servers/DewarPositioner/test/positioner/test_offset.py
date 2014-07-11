@@ -58,5 +58,20 @@ class PositionerOffsetTest(unittest2.TestCase):
                 places=2
         )
 
+    def test_out_of_range(self):
+        """Cause a rewind in case the offset is out of range"""
+        self.p.setup(site_info={}, source=None, device=self.device)
+        self.p.setRewindingMode('AUTO')
+        time.sleep(0.5) # Wait for the setup
+        actual_pos = 100
+        self.device.setPosition(actual_pos)
+        offset = 50
+        max_rewinding_feeds = 180 
+        expected = actual_pos - max_rewinding_feeds + offset
+        self.p.setOffset(offset)
+        time.sleep(0.5) # Wait for the offset
+        self.assertEqual(self.device.getActPosition(), expected)
+
+
 if __name__ == '__main__':
     unittest2.main()
