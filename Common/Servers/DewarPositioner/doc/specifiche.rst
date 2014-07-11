@@ -19,8 +19,8 @@ Impostare l'offset
 ==================
 Il metodo ``setOffset(OFFSET)`` serve a definire la geometria iniziale, 
 e si riferisce al frame AZ/EL, per cui ``OFFSET=0`` (gradi) corrisponde 
-alla geometria in cui i tre feed 1, 0, 4 sono allineati e perpedicolari 
-all'asse di elevazione (**asse di elevazione o z**?). Durante il ``setup()`` 
+alla geometria in cui i tre feed 1, 0, 4 sono allineati e paralleli
+all'asse di elevazione. Durante il ``setup()`` 
 viene impostato il valore di default ``OFFSET=0``.
 
 
@@ -29,11 +29,13 @@ Impostare la modalita' di updating
 Il metodo ``setUpdatingMode(MODE)`` abilita l'aggiornamento della posizione
 del derotatore (lo abilita, non avvia la movimentazione) e imposta il tipo
 di aggiornamento, assegnato a ``MODE``, che puo' essere ``FIXED`` o 
-``OPTIMIZED``.
+``OPTIMIZED``. 
 
 Il metodo ``getUpdatingMode()`` restituisce la modalita' di aggiornamento
 impostata, mentre il metodo ``isConfiguredForUpdating()`` restituisce True
-se e' stata impostata la modalita' di aggiornamento. Quindi, riassumendo::
+se e' stata impostata la modalita' di aggiornamento. Se la modalita' di
+aggiornamento non e' impostata, allora ``getUpdatingMode()`` restituisce una 
+stringa vuota. Quindi, riassumendo::
 
     >>> getUpdatingMode() # Restituisce una stringa vuota
     '' 
@@ -47,7 +49,10 @@ se e' stata impostata la modalita' di aggiornamento. Quindi, riassumendo::
     'OPTIMIZED'
     >>> isConfiguredForUpdating() # Restituisce True
     True
-    setUpdatingMode('WRONGMODE') # Modo non valido, solleva eccezione
+    >>> clearUpdatingMode()
+    >>> getUpdatingMode()
+    ''
+    >>> setUpdatingMode('WRONGMODE') # Modo non valido, solleva eccezione
     Traceback (most recent call last):
         ...
     ValidationErrorEx: code WRONGMODE unknown
@@ -62,25 +67,92 @@ allora in questa configurazione la posizione del derotatore e' data da::
 
 Modalita' OPTIMIZED
 -------------------
-Il ``DewarPositioner`` calcola la posizione iniziale ``K`` del derotatore 
-per ottimizzare la copertura spaziale del multifeed in base all'*asse* di 
-scansione, alla *direzione* di scansione e alla posizione (*settore*) di 
-azimuth. La posizione da comandare sara' quindi::
+In questo caso ad ogni scan il ``DewarPositioner`` calcola la posizione 
+iniziale ``K`` (posizione di inizio
+scan) del derotatore per ottimizzare la copertura spaziale del multifeed lungo 
+l'asse di scansione. La posizione da comandare e' data da::
 
-    Po(t) = OFFSET + K + D(t) = K + Pf(t)    (2)
+    Po(t) = K + OFFSET + D(t) = K + Pf(t)    (2)
 
-Cambio modalita'
-----------------
-Quando si vuole cambiare modalita' di aggiornamento bisogna
-fermare l'aggiornamento e riavviarlo::
+Vediamo di capire da cosa e' dato ``K``. Partiamo considerando la seguente notazione:
 
-    setUpdatingMode('OPTIMIZED')
-    startUpdating() # Avvia l'aggiornamento di tipo OPTIMIZED
+  * ``AXIS``: rappresenta l'asse di scansione (``Managment::TScanAxis``), e puo' 
+    essere ``SIDERALE``, ``GLON``, ``GLAT``, ``AZ``, ``EL``, ``RA``, ``DEC``, 
+    ``GREATCIRCLE``
+  * ``SECTOR``: puo' assumere i valori ``NORD`` o ``SUD`` (da definire nella interfaccia IDL)
+  * ``DIRECTION``: puo' assumere i valori ``INCREASE`` o ``DECREASE`` (da definire nella IDL)
+  * ``TABLE(RECEIVER, AXIS)``: tabella di correzione in base al ricevitore e all'asse di scansione;
 
-    # Se ora voglio cambiare modalita' di aggiornamento:
-    stopUpdating()
-    setUpdatingMode('FIXED')
-    startUpdating()
+Il valore di ``K``, in modulo, e' dato da::
+
+    abs(K) = C + NUMBER_OF_FEEDS*STEP
+
+dove ``C`` e' una costante positiva che dipende da ``AXIS``, e vale:
+
+  * ``0`` se ``AXIS == RA, DEC, AZ, EL, SIDERALE``
+  * ``TABLE(RECEIVER, AXIS)`` se ``AXIS == GLON, GLAT``
+
+``STEP`` e' l'angolo compreso tra due feed adiacenti (ad esempio, 60 gradi
+per il ricevitore 22GHz di SRT). Il contributo ``NUMBER_OF_FEEDS*STEP`` fa si
+che prima di ogni scan il derotatore abbia davanti a se la massima escursione
+possibile. 
+Facciamo un esempio: supponiamo di utilizzare il derotatore del
+22GHz di SRT, la cui posizione puo' andare da -130 a +130 gradi, e il cui ``STEP``
+e' pari a 60 gradi. Dobbiamo iniziare una scansione con ``AXIS == GLON``, per la
+quale quindi ``C = TABLE(KKG, GLON)``. Supponiamo che si abbia ``C = 40 gradi``.
+Supponiamo infine che durante la scansione il cielo ruoti CCW. Il derotatore ruotera'
+anche esso CCW, per cui dobbiamo sceglere il valore di ``NUMBER_OF_FEEDS`` che
+garantisca la massima escursione, ovvero tale che ``OFFSET + NUBER_OF_FEEDS*STEP``
+sia il piu' vicino possibile al limite positivo +130 gradi. Se ``OFFSET == 0``
+allora questo e' dato da ``NUMBER_OF_FEEDS == 1``, visto che si ha:
+
+.. code-block:: none
+
+    C + NUMBER_OF_FEEDS*STEPS + OFFSET == 40 + 1*60 + 0 == 100 gradi < 130
+
+mentre con ``NUMBER_OF_FEEDS == 2`` avremmo ottenuto:
+
+.. code-block:: none
+
+    C + NUMBER_OF_FEEDS*STEPS + OFFSET == 40 + 2*60 + 0 == 160 gradi > 130
+
+
+Se ad esempio ``OFFSET == 35 gradi``, allora si ha ``NUMBER_OF_FEEDS == 0``,
+visto che:
+
+.. code-block:: none
+
+    C + NUMBER_OF_FEEDS*STEPS + OFFSET == 40 + 0*60 + 35 == 75 gradi < 130
+
+mentre con ``NUMBER_OF_FEEDS == 1`` avremmo ottenuto:
+
+.. code-block:: none
+
+    C + NUMBER_OF_FEEDS*STEPS + OFFSET == 40 + 1*60 + 35 == 135 gradi > 130
+
+Per quanto riguarda il segno di ``K``, questo dipende da ``SECTOR``:
+
+  * se ``SECTOR == SUD`` il cielo ruota CW, per cui ``SGN(K) == -1``
+  * se ``SECTOR == NORD`` il cielo ruota CCW per cui ``SGN(K) == +1``
+
+Quindi, riassumendo, se ``SECTOR == SUD``::
+
+
+  Po(t) = K + OFFSET + D(t) = -(C + NUMBER_OF_FEEDS*STEP) + OFFSET + D(t) 
+
+
+mentre se ``SECTOR == NORD``::
+
+
+  Po(t) = K + OFFSET + D(t) = +(C + NUMBER_OF_FEEDS*STEP) + OFFSET + D(t) 
+
+
+In entrambi i casi:
+
+  * ``C == 0`` se ``AXIS == RA, DEC, AZ, EL, SIDERALE``
+  * ``C == TABLE(RECEIVER, AXIS)`` se ``AXIS == GLON, GLAT``
+
+**DOMANDA**: quale e' il legame tra il parametro ``DIRECTION`` e il segno di ``K``?
 
 
 Avviare l'aggiornamento
@@ -90,13 +162,27 @@ chiamato passandogli i parametri della scansione, ovvero l'asse, la direzione
 e il settore di azimuth, indipendentemente dal fatto che la modalita'
 impostata sia ``FIXED`` o ``OPTIMIZED``::
 
-    startUpdating(axis, direction, azimuth_section)
+    startUpdating(AXIS, DIRECTION, SECTION)
 
 La posizione del derotatore verra' aggiornata con l'equazione (1) se 
 la modalita' di aggiornamento e' ``FIXED``, con la (2) se e' ``OPTIMIZED``.
 
 Se non e' stata ancora selezionata la modalita' di aggiornamento, solleva 
-una eccezione di tipo NotAllowedEx.
+una eccezione di tipo ``ComponentErrors::NotAllowedEx``.
+
+Cambio modalita'
+----------------
+Quando si vuole cambiare modalita' di aggiornamento bisogna
+fermare l'aggiornamento e riavviarlo::
+
+    setUpdatingMode('OPTIMIZED')
+    startUpdating(AXIS, DIRECTION, SECTION) # Avvio aggiornamento (OPTIMIZED)
+
+    # Se ora voglio cambiare modalita' di aggiornamento:
+    stopUpdating() # Fermo l'aggiornamento
+    setUpdatingMode('FIXED') # Cambio la modalita'
+    startUpdating(AXIS, DIRECTION, SECTION) # Avvio aggiornamento (FIXED)
+
 
 
 Interrompere l'aggiornamento
@@ -175,36 +261,49 @@ Di seguito l'elenco completo dei metodi::
     isConfigured()
     isConfiguredForUpdating()
     park()
-
     setOffset(OFFSET)
     clearOffset()
     getOffset()
-
     getPosition()
-
     setUpdatingMode(MODE) # MODE: FIXED or OPTIMIZED
+    clearUpdatingMode()
     getUpdatingMode()
     startUpdating(AXIS, DIRECTION, AZ_SECTION)
     stopUpdating()
     isTracking()
     isUpdating()
     isSlewing()
-
     setRewindingMode(MODE) # MODE: MANUAL or AUTO (default)
+    clearRewindingMode()
     setAutoRewindingFeeds(NUMBER_OF_FEEDS)
     clearAutoRewindingFeeds()
     getRewindingMode()
     rewind(NUMBER_OF_FEEDS)
     isRewindingRequired()
     isRewinding()
-
     getRemainingTime()
 
+
+Comandi
+=======
+Elenco dei comandi accettati da DewarPositioner.command()::
+
+    derotatorSetup=CODE -> DewarPositioner.setup(CODE)
+    derotatorPark -> DewarPositioner.park()
+    derotatorRewind=FEEDS -> DewarPositioner.rewind(FEEDS)
+    derotatorStartUpdating -> DewarPositioner.startUpdating()
+    derotatorStopUpdating -> DewarPositioner.stopUpdating()
+    derotatorSetOffset=OFFSET -> DewarPositioner.setOffset(OFFSET)
+    derotatorClearOffset -> DewarPositioner.clearOffset()
+    derotatorSetUpdatingMode=MODE -> DewarPositioner.setUpdatingMode(MODE)
+    derotatorClearUpdatingMode -> DewarPositioner.clearUpdatingMode()
+    derotatorSetRewindingMode=MODE -> DewarPositioner.setRewindingMode(MODE)
+    
 
 Esempio di utilizzo 
 ===================
 Supponiamo di voler usare il banda K con derotatore in modalita' di rewind 
-``AUTO`` (default) e modalita' di aggioramento ``OPTIMIZED``. I metodi del 
+``AUTO`` (default) e modalita' di aggiornamento ``OPTIMIZED``. I metodi del 
 ``DewarPositioner`` da chiamare risultano::
 
     setup('KKG')
@@ -217,14 +316,14 @@ Il metodo ``DewarPositioner.setup('KKG')`` viene chiamato dal setup globale::
     setupKKG #-> DewarPositioner.setup('KKG')
 
 Il metodo ``setUpdatingMode()`` viene chiamato quando l'astronomo da operator
-input da il comando (ad esempio) ``setDerotatorUpdatingMode``::
+input da il comando ``derotatorSetUpdatingMode``::
 
-    setDerotatorUpdatingMode=OPT #-> DewarPositioner.setUpdatingMode(OPTIMIZED)
+    derotatorSetUpdatingMode=OPTIMIZED #-> DewarPositioner.setUpdatingMode(OPTIMIZED)
 
 Il metodo ``startUpdating()`` verra' chiamato invece dallo scheduler. Quindi
 in definitiva, per utilizzare la modalita' oggetto di questo esempio, da
 operator input::
 
     setupKKG
-    setDerotatorUpdatingMode=OPT
+    derotatorSetUpdatingMode=OPTIMIZED
 
