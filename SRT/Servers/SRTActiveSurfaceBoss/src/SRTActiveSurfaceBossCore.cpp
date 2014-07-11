@@ -1389,7 +1389,7 @@ void CSRTActiveSurfaceBossCore::sector1ActiveSurface() throw (ComponentErrors::C
 	}
 	// Get reference to usd components
 	for (i = 1; i <= 139; i++) {
-		usdTableS1 >> lanIndex >> circleIndexS1 >> usdCircleIndexS1 >> serial_usd >> graf >> mecc;
+		usdTableS1 >> lanIndexS1 >> circleIndexS1 >> usdCircleIndexS1 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS1][usdCircleIndexS1] = ActiveSurface::USD::_nil();
         	try {
 			printf("S1: circleIndexS1 = %d, usdCircleIndexS1 = %d\n", circleIndexS1, usdCircleIndexS1);
