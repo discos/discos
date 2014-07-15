@@ -11,12 +11,57 @@
 #include "DevIOBandWidth.h"
 #include "DevIOInitialFrequency.h"
 #include "DevIOMode.h"
+#include <ReceiversModule.h>
 
 static char *rcsId="@(#) $Id: ReceiversBossImpl.cpp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 using namespace SimpleParser;
 using namespace baci;
+
+_SP_WILDCARD_CLASS(UpdateModes_WildCard,"UNDEFINED");
+_SP_WILDCARD_CLASS(RewindModes_WildCard,"UNDEFINED");
+
+class UpdateModes_converter
+{
+public:
+	Receivers::TUpdateModes strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+		Receivers::TUpdateModes mode;
+		if (!Receivers::Definitions::map(str,mode)) {
+			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"UpdateModes_converter::strToVal()");
+			ex.setExpectedType("Update Mode");
+			throw ex;
+		}
+		return mode;
+	}
+	char *valToStr(const Receivers::TUpdateModes& val) {
+		IRA::CString mode(Receivers::Definitions::map(val));
+		char *c=new char[mode.GetLength()+1];
+		strcpy(c,(const char*)mode);
+		return c;
+	}
+};
+
+class RewindModes_converter
+{
+public:
+	Receivers::TRewindModes strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+		Receivers::TRewindModes mode;
+		if (!Receivers::Definitions::map(str,mode)) {
+			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"RewindModes_converter::strToVal()");
+			ex.setExpectedType("Rewind Mode");
+			throw ex;
+		}
+		return mode;
+	}
+	char *valToStr(const Receivers::TRewindModes& val) {
+		IRA::CString mode(Receivers::Definitions::map(val));
+		char *c=new char[mode.GetLength()+1];
+		strcpy(c,(const char*)mode);
+		return c;
+	}
+};
+
 
 _IRA_LOGFILTER_DECLARE;
 
@@ -75,6 +120,11 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("setLO",new function1<CRecvBossCore,non_constant,void_type,I<doubleSeq_type> >(m_core,&CRecvBossCore::setLO),1);
 	m_parser->add("antennaUnitOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOn),0);
 	m_parser->add("antennaUnitOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOff),0);
+	m_parser->add("derotatorSetup",new function3<CRecvBossCore,non_constant,void_type,
+			I<enum_type<UpdateModes_converter,Receivers::TUpdateModes,UpdateModes_WildCard> >,
+			I<enum_type<RewindModes_converter,Receivers::TRewindModes,RewindModes_WildCard> >, I<long_type> >(m_core,&CRecvBossCore::derotatorSetup),3);
+	m_parser->add("derotatorPark",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::derotatorPark),0);
+
 	ACS_LOG(LM_FULL_INFO,"ReceiversBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 

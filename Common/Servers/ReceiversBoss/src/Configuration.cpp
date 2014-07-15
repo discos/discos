@@ -77,6 +77,11 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 			break;
 		}
 		m_receiver[m_receiverNum].code=strVal;
+		if (!CIRATools::getDBValue(Services,"Derotator",strVal,"alma/",fieldPath)) {
+			break;
+		}
+		strVal.MakeUpper();
+		m_receiver[m_receiverNum].derotator=strVal;
 		if (!CIRATools::getDBValue(Services,"Component",strVal,"alma/",fieldPath)) {
 			break;
 		}
@@ -88,13 +93,16 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","RepetitionExpireTime (uSec):",m_expireCacheTime,"");
 	_GET_DWORD_ATTRIBUTE("StatusPersistenceTime","StatusPersistenceTime (uSec):",m_statusPersistenceTime,"");
 	_GET_DWORD_ATTRIBUTE("PropertiesUpdateTime","PropertiesUpdateTime (uSec):",m_propertiesUpdateTime,"");
+	_GET_STRING_ATTRIBUTE("DewarPositionerInterface","DewarPositionerInterface:",m_dewarPositionerInterface,"");
 }
 
-bool CConfiguration::getReceiver(const IRA::CString& code,IRA::CString& component) const
+bool CConfiguration::getReceiver(const IRA::CString& code,IRA::CString& component,bool& derotator) const
 {
 	for(WORD j=0;j<m_receiverNum;j++) {
 		if (code==m_receiver[j].code) {
 			component=m_receiver[j].component;
+			if (m_receiver[j].derotator=="TRUE") derotator=true;
+			else derotator=false;
 			return true;
 		}
 	}

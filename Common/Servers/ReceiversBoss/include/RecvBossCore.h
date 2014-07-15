@@ -84,6 +84,25 @@ public:
 	void AUOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 					ComponentErrors::UnexpectedExImpl);
 
+	/**
+	 * Used to read the position of the derotator at a given epoch
+	 * @param epoch reference time
+	 * @return the position of the derotator (degrees)
+	 */
+	double getDerotatorPosition (const ACS::Time& epoch) throw ();
+
+	/**
+	 * This method is a wrap a call to the derotator setup, allowing to activate the derotation. If the derotator is not supported by the current receiver an error is risen.
+	 * @param mode specified the tracking mode of the derotator, if <i>RCV_UNDEF_UPDATE</i> is given the present value is kept
+	 * @param rewind specifies the rewind mode in case the derotator reaches its final limit, if i<i>RCV_UNDEF_REWIND</i> is given, the present value is kept
+	 * @param feeds number of feeds to derotate in case automatic rewind mode is selected, if -1 the present value if not changed
+	 */
+    void derotatorSetup (const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw ();
+
+    /**
+     * It disable the derotator. It is implicitly called also by the <i>park()</i> method.
+     */
+     void derotatorPark () throw ();
 
 	/**
 	 * This method will configure the component that controls the receiver actually identified by the given code

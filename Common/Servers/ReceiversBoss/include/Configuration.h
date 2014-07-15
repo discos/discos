@@ -26,6 +26,7 @@ public:
 
 	typedef struct {
 		IRA::CString code;
+		IRA::CString derotator;
 		IRA::CString component;
 	} TReceiver;
 
@@ -52,9 +53,10 @@ public:
 	 * of controlling the receiver
 	 * @param code requested receiver code
 	 * @param component name of the component instance
+	 * @param derotator permits to know whether the receiver is equipped with a derotator or not
 	 * @return true if the code is available, false otherwise
 	 */
-	bool getReceiver(const IRA::CString& code,IRA::CString& component) const;
+	bool getReceiver(const IRA::CString& code,IRA::CString& component,bool& derotator) const;
 
 	/**
 	 *  Gets the persistence time of the status of the component
@@ -72,6 +74,11 @@ public:
 	 */
 	inline const DDWORD& propertyUpdateTime() const { return m_propertiesUpdateTime;}
 
+	/**
+	 * Get the interface for the derotator driver component. It could be empty.
+	 */
+	inline const IRA::CString& dewarPositionerInterface() const {  return m_dewarPositionerInterface; }
+
 private:
 	TReceiver * m_receiver;
 	WORD m_receiverNum;
@@ -79,6 +86,7 @@ private:
 	DDWORD m_repetitionCacheTime;
 	DDWORD m_statusPersistenceTime;
 	DDWORD m_propertiesUpdateTime;
+	IRA::CString m_dewarPositionerInterface;
 };
 
 

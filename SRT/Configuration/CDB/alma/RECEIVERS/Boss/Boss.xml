@@ -10,7 +10,8 @@
              RepetitionCacheTime="7000000"
 			 RepetitionExpireTime="10000000"
 			 StatusPersistenceTime="4000000"
-			 PropertiesUpdateTime="3000000"> 
+			 PropertiesUpdateTime="3000000"
+			 DewarPositionerInterface="IDL:alma/Receivers/DewarPositioner:1.0"> 
 
 <LO/>
 <actualSetup/>
@@ -22,14 +23,14 @@
 <bandWidth/>
 <mode/>
 
-<AvailableReceiver Code="CCB" Component="RECEIVERS/SRT7GHzReceiver"/>
+<AvailableReceiver Code="CCB" Derotator="false" Component="RECEIVERS/SRT7GHzReceiver"/>
 
-<AvailableReceiver Code="KKG" Component="RECEIVERS/SRTKBandMFReceiver"/>
+<AvailableReceiver Code="KKG" Derotator="true" Component="RECEIVERS/SRTKBandMFReceiver"/>
 
-<AvailableReceiver Code="LLP" Component="RECEIVERS/SRTLPBandReceiver"/>
+<AvailableReceiver Code="LLP" Derotator="false" Component="RECEIVERS/SRTLPBandReceiver"/>
 
-<AvailableReceiver Code="PPP" Component="RECEIVERS/SRTLPBandReceiver"/>
+<AvailableReceiver Code="PPP" Derotator="false" Component="RECEIVERS/SRTLPBandReceiver"/>
 
-<AvailableReceiver Code="PLP" Component="RECEIVERS/SRTLPBandReceiver"/>
+<AvailableReceiver Code="PLP" Derotator="false" Component="RECEIVERS/SRTLPBandReceiver"/>
 
 </ReceiversBoss>

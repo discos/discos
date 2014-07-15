@@ -10,7 +10,8 @@
              RepetitionCacheTime="7000000"
 			 RepetitionExpireTime="10000000"
 			 StatusPersistenceTime="4000000"
-			 PropertiesUpdateTime="3000000"> 
+			 PropertiesUpdateTime="3000000"
+			 DewarPositionerInterface=""> 
 
 <LO/>
 <actualSetup/>
@@ -22,8 +23,8 @@
 <bandWidth/>
 <mode/>
 
-<AvailableReceiver Code="CCG" Component="RECEIVERS/SRT7GHzReceiver"/>
+<AvailableReceiver Code="CCG" Derotator="false" Component="RECEIVERS/SRT7GHzReceiver"/>
 
-<AvailableReceiver Code="KKG" Component="RECEIVERS/SRTKbandMFReceiver"/>
+<AvailableReceiver Code="KKG" Derotator="false" Component="RECEIVERS/SRTKbandMFReceiver"/>
 
 </ReceiversBoss>

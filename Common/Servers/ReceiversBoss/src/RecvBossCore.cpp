@@ -663,6 +663,21 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 	return taper;
 }
 
+double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw ()
+{
+	return 0;
+}
+
+void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw ()
+{
+
+}
+
+void CRecvBossCore::derotatorPark () throw ()
+{
+}
+
+
 long CRecvBossCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) throw (ComponentErrors::ValidationErrorExImpl,
 		ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl)
 {
@@ -1146,6 +1161,39 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 		throw impl;
 	}
 }
+
+double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw ()
+{
+
+	return 0;
+}
+
+void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw ()
+{
+	// RCV_AUTO_REWIND,
+    // RCV_MANUAL_REWIND,
+    // RCV_UNDEF_REWIND
+
+	// RCV_FIXED_UPDATE,
+    // RCV_OPTIMIZED_UPDATE,
+    // RCV_DISABLED_UPDATE,
+    // RCV_UNDEF_UPDATE
+
+	if (mode==Receivers::RCV_UNDEF_REWIND) {
+		// keep present value
+	}
+	if (rewind==Receivers::RCV_UNDEF_UPDATE) {
+		// keep present value
+	}
+	if (feeds==-1) {
+		// keep present value
+	}
+}
+
+void CRecvBossCore::derotatorPark () throw ()
+{
+}
+
 
 void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 		ComponentErrors::UnexpectedExImpl)
@@ -1862,7 +1910,8 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::CORBAProble
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl)
 {
 	IRA::CString component;
-	if (!m_config->getReceiver(code,component)) {
+	bool derotator;
+	if (!m_config->getReceiver(code,component,derotator)) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setup()");
 		impl.setReason("Receiver code is not known");
 		throw impl;

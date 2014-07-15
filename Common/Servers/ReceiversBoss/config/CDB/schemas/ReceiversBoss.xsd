@@ -22,6 +22,7 @@
 	
 	<xs:complexType name="AvailReceiverType">
 		<xs:attribute name="Code" type="xs:string" use="required"/>
+		<xs:attribute name="Derotator" type="xs:boolean" use="required"/>
 		<xs:attribute name="Component" type="xs:string" use="required"/>
 	</xs:complexType>
 		
@@ -54,7 +55,8 @@
 		<xs:attribute name="StatusPersistenceTime" type="xs:unsignedLong" use="required" />
 		<!-- This is the time a property is considered valid before refreshing it (microseconds)-->
 		<xs:attribute name="PropertiesUpdateTime" type="xs:unsignedLong" use="required" />
-		
+		<!-- the interface of component that is in charge of driving the derotator  -->
+		<xs:attribute name="DewarPositionerInterface" type="xs:string" use="required" />		
 		
 	</xs:complexType>
 

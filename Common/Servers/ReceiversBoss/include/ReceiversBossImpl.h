@@ -33,10 +33,11 @@
 #include "RecvBossCore.h"
 #include "WatchingThread.h"
 
+
 /** 
  * @mainpage ReceiversBoss component Implementation 
- * @date 18/06/2013
- * @version 0.42.0
+ * @date 15/07/2014
+ * @version 0.43.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
  * @remarks Last compiled under ACS 8.2.0
  * @remarks compiler version is 4.1.2
