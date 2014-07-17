@@ -88,21 +88,33 @@ public:
 	 * Used to read the position of the derotator at a given epoch
 	 * @param epoch reference time
 	 * @return the position of the derotator (degrees)
+	 * @throw ReceiversErrors::NoDewarPositioningExImpl
+	 * @throw ReceiversErrors::NoDerotatorAvailableExImpl
+	 * @throw ComponentErrors::ValidationErrorExImpl
 	 */
-	double getDerotatorPosition (const ACS::Time& epoch) throw ();
+	double getDerotatorPosition (const ACS::Time& epoch) throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+			ComponentErrors::ValidationErrorExImpl);
 
 	/**
 	 * This method is a wrap a call to the derotator setup, allowing to activate the derotation. If the derotator is not supported by the current receiver an error is risen.
 	 * @param mode specified the tracking mode of the derotator, if <i>RCV_UNDEF_UPDATE</i> is given the present value is kept
 	 * @param rewind specifies the rewind mode in case the derotator reaches its final limit, if i<i>RCV_UNDEF_REWIND</i> is given, the present value is kept
 	 * @param feeds number of feeds to derotate in case automatic rewind mode is selected, if -1 the present value if not changed
+	 * @throw ReceiversErrors::NoDewarPositioningExImpl
+	 * @throw ReceiversErrors::NoDerotatorAvailableExImpl
+	 * @throw ComponentErrors::ValidationErrorExImpl
 	 */
-    void derotatorSetup (const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw ();
+    void derotatorSetup (const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
+    		ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl);
 
     /**
      * It disable the derotator. It is implicitly called also by the <i>park()</i> method.
+     * @throw ReceiversErrors::NoDewarPositioningExImpl
+     * @throw ReceiversErrors::NoDerotatorAvailableExImpl
+     * @throw ComponentErrors::ValidationErrorExImpl
      */
-     void derotatorPark () throw ();
+     void derotatorPark () throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+    			ComponentErrors::ValidationErrorExImpl);
 
 	/**
 	 * This method will configure the component that controls the receiver actually identified by the given code

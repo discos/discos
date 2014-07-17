@@ -33,7 +33,10 @@
 	</ErrorCode>
 	
 	<ErrorCode name="NoRemoteControlError" shortDescription="The receiver is not remotely controllable" description=""/>
-         
+	
+	<ErrorCode name="NoDewarPositioning" shortDescription="Dewar positioning and derotation is not supported by this release" description=""/>
+    
+    <ErrorCode name="NoDerotatorAvailable" shortDescription="The current receiver is not equipped with a derotator" description=""/>     
 </Type>
 
 

@@ -464,16 +464,63 @@ void ReceiversBossImpl::turnAntennaUnitOff() throw (CORBA::SystemException,Compo
 
 CORBA::Double ReceiversBossImpl::getDerotatorPosition (ACS::Time epoch) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	return 0;
+	try {
+		return (CORBA::Double)m_core->getDerotatorPosition(epoch);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::getDerotatorPosition()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
 }
 
 void ReceiversBossImpl::derotatorSetup (Receivers::TUpdateModes mode,Receivers::TRewindModes rewind,CORBA::Long feeds) throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
+	try {
+		m_core->derotatorSetup(mode,rewind,feeds);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::derotatorSetup()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
 }
 
 void ReceiversBossImpl::derotatorPark () throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
+	try {
+		m_core->derotatorPark();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::derotatorPark()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
 }
 
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdoubleSeq,m_plocalOscillator,LO);
