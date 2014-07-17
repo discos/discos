@@ -14,25 +14,45 @@ Il setup imposta i valori di default::
     setOffset(0)
     setRewindingMode(AUTO)
 
+Dopo il setup() i tre feed 1, 0, 4 sono allineati e paralleli
+all'orizzonte. 
 
 Impostare l'offset
 ==================
-Il metodo ``setOffset(OFFSET)`` serve a definire la geometria iniziale, 
-e si riferisce al frame AZ/EL, per cui ``OFFSET=0`` (gradi) corrisponde 
-alla geometria in cui i tre feed 1, 0, 4 sono allineati e paralleli
-all'asse di elevazione. Durante il ``setup()`` 
-viene impostato il valore di default ``OFFSET=0``.
+Il metodo ``setOffset(OFFSET)`` imposta un offset che viene sommato
+alle posizioni da comandare al derotatore.
+La chiamata al metodo ``setOffset()`` ha effetto immediato, nel senso 
+che la nuova posizione viene immediatamente comandata::
+
+    >>> DewarPositioner.getPosition()
+    10
+    >>> DewarPositioner.seOffset(3)
+    >>> DewarPositioner.getPosition()
+    13
+    >>> DewarPositioner.getOffset()
+    3
+
+Durante il ``setup()`` viene impostato il valore di default ``OFFSET=0``.
 
 
 Impostare la modalita' di updating
 ==================================
 Il metodo ``setUpdatingMode(MODE)`` abilita l'aggiornamento della posizione
 del derotatore (lo abilita, non avvia la movimentazione) e imposta il tipo
-di aggiornamento, assegnato a ``MODE``, che puo' essere ``FIXED`` o 
-``OPTIMIZED``. 
+di aggiornamento, assegnato a ``MODE``, che puo' essere:
+
+   1. ``FIXED``: il derotatore non aggiorna la sua posizione in funzione
+      dell'angolo parallatico
+   2. ``SIMPLE``: il derotatore aggiorna la sua posizione in funzione 
+      dell'angolo parallatico; all'inizio di ogni scan il derotatore viene
+      posizionato in modo da ottimizzare la copertura spaziale 
+      del multifeed lungo l'asse di scansione
+   3. ``OPTIMIZED``: e' analoga alla ``SIMPLE``, ma la posizione del
+      derotatore all'inizio di ogni scan e' ottimizzata anche per ottenere
+      la massima durata dello scan prima che si renda necessario riavvolgere
 
 Il metodo ``getUpdatingMode()`` restituisce la modalita' di aggiornamento
-impostata, mentre il metodo ``isConfiguredForUpdating()`` restituisce True
+impostata, mentre il metodo ``isConfiguredForUpdating()`` restituisce ``True``
 se e' stata impostata la modalita' di aggiornamento. Se la modalita' di
 aggiornamento non e' impostata, allora ``getUpdatingMode()`` restituisce una 
 stringa vuota. Quindi, riassumendo::
@@ -57,115 +77,137 @@ stringa vuota. Quindi, riassumendo::
         ...
     ValidationErrorEx: code WRONGMODE unknown
 
-
-Modalita' FIXED
----------------
-Se chiamiamo ``D(t)`` la derotazione in funzione dell'angolo parallattico, 
-allora in questa configurazione la posizione del derotatore e' data da::
-
-    Pf(t) = OFFSET + D(t)    (1)
-
-Modalita' OPTIMIZED
--------------------
-In questo caso ad ogni scan il ``DewarPositioner`` calcola la posizione 
-iniziale ``K`` (posizione di inizio
-scan) del derotatore per ottimizzare la copertura spaziale del multifeed lungo 
-l'asse di scansione. La posizione da comandare e' data da::
-
-    Po(t) = K + OFFSET + D(t) = K + Pf(t)    (2)
-
-Vediamo di capire da cosa e' dato ``K``. Partiamo considerando la seguente notazione:
+Prima di approdondire il funzionamento delle tre modalita', vediamo di
+definire alcuni termini che utilizzeremo durante la trattazione:
 
   * ``AXIS``: rappresenta l'asse di scansione (``Managment::TScanAxis``), e puo' 
     essere ``SIDERALE``, ``GLON``, ``GLAT``, ``AZ``, ``EL``, ``RA``, ``DEC``, 
     ``GREATCIRCLE``
-  * ``SECTOR``: puo' assumere i valori ``NORD`` o ``SUD`` (da definire nella interfaccia IDL)
-  * ``DIRECTION``: puo' assumere i valori ``INCREASE`` o ``DECREASE`` (da definire nella IDL)
-  * ``TABLE(RECEIVER, AXIS)``: tabella di correzione in base al ricevitore e all'asse di scansione;
+  * ``SECTOR``: puo' assumere i valori ``NORD`` o ``SUD`` 
+    (da definire nella interfaccia IDL)
+  * ``TABLE(RECEIVER, AXIS)``: tabella che fornisce un parametro ``C``
+    utilizzato per individuare la posizione iniziale del derotatore 
+    prima di ogni scan; il valore di ``C`` dipende dalla geometria dei feed
+    e dall'asse di scansione
+  * ``STEP`` e' l'angolo compreso tra due feed adiacenti (ad esempio, 60 gradi
+    per il ricevitore 22GHz di SRT). 
+    
+Modalita' FIXED
+----------------
+Il derotatore non aggiorna la posizione in funzione dell'angolo parallatico.
+All'inizio di ogni scan, a seconda dell'asse di scansione viene 
+ricavato il valore di ``C`` dalla tabella ``TABLE(RECEIVER, AXIS)``, 
+e la posizione del derotatore durante lo scan risultera' data da::
 
-Il valore di ``K``, in modulo, e' dato da::
+    Pf(t) = OFFSET + C    (1)
 
-    abs(K) = C + NUMBER_OF_FEEDS*STEP
+Modalita' SIMPLE
+----------------
+Se chiamiamo ``D(t)`` la derotazione in funzione dell'angolo parallattico, 
+allora in questa configurazione la posizione del derotatore sara' data da::
 
-dove ``C`` e' una costante positiva che dipende da ``AXIS``, e vale:
+    Ps(t) = OFFSET + C + D(t) = Pf(t) + D(t)    (2)
 
-  * ``0`` se ``AXIS == RA, DEC, AZ, EL, SIDERALE``
-  * ``TABLE(RECEIVER, AXIS)`` se ``AXIS == GLON, GLAT``
+dove ``C``, come per la modalita' ``FIXED``, viene letto da tabella.
 
-``STEP`` e' l'angolo compreso tra due feed adiacenti (ad esempio, 60 gradi
-per il ricevitore 22GHz di SRT). Il contributo ``NUMBER_OF_FEEDS*STEP`` fa si
-che prima di ogni scan il derotatore abbia davanti a se la massima escursione
-possibile. 
-Facciamo un esempio: supponiamo di utilizzare il derotatore del
-22GHz di SRT, la cui posizione puo' andare da -130 a +130 gradi, e il cui ``STEP``
-e' pari a 60 gradi. Dobbiamo iniziare una scansione con ``AXIS == GLON``, per la
-quale quindi ``C = TABLE(KKG, GLON)``. Supponiamo che si abbia ``C = 40 gradi``.
-Supponiamo infine che durante la scansione il cielo ruoti CCW. Il derotatore ruotera'
-anche esso CCW, per cui dobbiamo sceglere il valore di ``NUMBER_OF_FEEDS`` che
-garantisca la massima escursione, ovvero tale che ``OFFSET + NUBER_OF_FEEDS*STEP``
-sia il piu' vicino possibile al limite positivo +130 gradi. Se ``OFFSET == 0``
-allora questo e' dato da ``NUMBER_OF_FEEDS == 1``, visto che si ha:
+Modalita' OPTIMIZED
+-------------------
+In questo caso all'inizio di ogni scan la posizione del derotatore
+viene ottimizzata sia per ottenere la massima copertura spaziale del 
+multifeed lungo l'asse di scansione, sia per massimizzare
+la durata dello scan prima che si renda necessario riavvolgere.
+In questo caso la posizione da comandare e' data da::
+
+    Po(t) = OFFSET + C + D(t) + K = K + Ps(t)    (3)
+
+Il parametro ``K`` e' quello che consente di ottenere una posizione iniziale
+tale che si abbia la massima durata dello scan prima che sia necessario
+riavvolgere. Il valore di ``K``, in modulo, e' dato da::
+
+    abs(K) = NUMBER_OF_FEEDS*STEP
+
+dove ``NUMBER_OF_FEEDS`` e' la nostra incognita, e rappresenta il numero di 
+feed di cui dobbiamo ruotare il derotatore per garantire la massima escursione
+durante lo scan. Vediamo come calcolarlo, con un esempio.
+Supponiamo di utilizzare il derotatore del
+22GHz di SRT, la cui posizione puo' andare da -106 a +106 gradi, e il cui ``STEP``
+e' pari a 60 gradi. Dobbiamo iniziare una scansione con ``AXIS == GLON``, 
+e supponiamo che da tabella si abbia ``C = 40 gradi``.
+Supponiamo infine che durante la scansione il cielo ruoti CCW. 
+Il derotatore ruotera' anche esso CCW, per cui dobbiamo sceglere il 
+valore di ``NUMBER_OF_FEEDS`` che
+garantisca la massima escursione, ovvero tale che 
+``OFFSET + C + NUBER_OF_FEEDS*STEP`` sia il piu' vicino possibile al 
+limite positivo +106 gradi, ma non lo superi. Se ``OFFSET = 0``
+allora questo e' dato da ``NUMBER_OF_FEEDS = 1``, visto che si ha:
 
 .. code-block:: none
 
-    C + NUMBER_OF_FEEDS*STEPS + OFFSET == 40 + 1*60 + 0 == 100 gradi < 130
+    C + NUMBER_OF_FEEDS*STEPS + OFFSET == 40 + NUMBER_OF_FEEDS*60 + 0 < 106
 
-mentre con ``NUMBER_OF_FEEDS == 2`` avremmo ottenuto:
+ovvero:
+
+.. code-block:: none
+    
+    NUMBER_OF_FEEDS < (106-40)/60  --> NUMBER_OF_FEEDS = 1
+
+Quindi in questo caso ``K = NUMBER_OF_FEEDS*STEP = 60 gradi``.
+Se ad esempio ``OFFSET = 35 gradi``, allora si ha ``NUMBER_OF_FEEDS = 0``,
+ovvero ``K = 0`` visto che:
 
 .. code-block:: none
 
-    C + NUMBER_OF_FEEDS*STEPS + OFFSET == 40 + 2*60 + 0 == 160 gradi > 130
+    C + NUMBER_OF_FEEDS*STEPS + OFFSET == 40 + NUMBER_OF_FEEDS*60 + 35 < 106 
 
-
-Se ad esempio ``OFFSET == 35 gradi``, allora si ha ``NUMBER_OF_FEEDS == 0``,
-visto che:
+ovvero:
 
 .. code-block:: none
 
-    C + NUMBER_OF_FEEDS*STEPS + OFFSET == 40 + 0*60 + 35 == 75 gradi < 130
+    NUMBER_OF_FEEDS < (106-75)/60
 
-mentre con ``NUMBER_OF_FEEDS == 1`` avremmo ottenuto:
-
-.. code-block:: none
-
-    C + NUMBER_OF_FEEDS*STEPS + OFFSET == 40 + 1*60 + 35 == 135 gradi > 130
 
 Per quanto riguarda il segno di ``K``, questo dipende da ``SECTOR``:
 
   * se ``SECTOR == SUD`` il cielo ruota CW, per cui ``SGN(K) == -1``
   * se ``SECTOR == NORD`` il cielo ruota CCW per cui ``SGN(K) == +1``
 
+Ad esempio, consideriamo l'esempio di prima, con ``C = 40 gradi``, ``OFFSET = 0``,
+ma con ``SECTOR = SUD``, ovvero rotazione CW. In questo caso avremo
+``NUMBER_OF_FEEDS = 2``:
+
+.. code-block:: none
+
+    40 -NUMBER_OF_FEEDS*60 + 0 > -106  -->  NUMBER_OF_FEEDS < 146/60 
+
+per cui:
+
+.. code-block:: none
+
+    K = -NUMBER_OF_FEEDS*STEP = -2*60 = -120
+
+
 Quindi, riassumendo, se ``SECTOR == SUD``::
 
 
-  Po(t) = K + OFFSET + D(t) = -(C + NUMBER_OF_FEEDS*STEP) + OFFSET + D(t) 
+    Po(t) = OFFSET + C + D(t) - NUMBER_OF_FEEDS*STEP = Ps(t) - NUMBER_OF_FEEDS*STEP
 
 
 mentre se ``SECTOR == NORD``::
 
-
-  Po(t) = K + OFFSET + D(t) = +(C + NUMBER_OF_FEEDS*STEP) + OFFSET + D(t) 
-
-
-In entrambi i casi:
-
-  * ``C == 0`` se ``AXIS == RA, DEC, AZ, EL, SIDERALE``
-  * ``C == TABLE(RECEIVER, AXIS)`` se ``AXIS == GLON, GLAT``
-
-**DOMANDA**: quale e' il legame tra il parametro ``DIRECTION`` e il segno di ``K``?
+    Po(t) = OFFSET + C + D(t) + NUMBER_OF_FEEDS*STEP = Ps(t) + NUMBER_OF_FEEDS*STEP
 
 
 Avviare l'aggiornamento
 =======================
 L'aggiornamento viene avviato con il metodo ``startUpdating()``. Questo viene
 chiamato passandogli i parametri della scansione, ovvero l'asse, la direzione
-e il settore di azimuth, indipendentemente dal fatto che la modalita'
-impostata sia ``FIXED`` o ``OPTIMIZED``::
+e il settore di azimuth:: 
 
-    startUpdating(AXIS, DIRECTION, SECTION)
+    startUpdating(AXIS, SECTION)
 
 La posizione del derotatore verra' aggiornata con l'equazione (1) se 
-la modalita' di aggiornamento e' ``FIXED``, con la (2) se e' ``OPTIMIZED``.
+la modalita' di aggiornamento e' ``FIXED``, con la (2) se e' ``SIMPLE``
+e con la (3) se e' ``OPTIMIZED``.
 
 Se non e' stata ancora selezionata la modalita' di aggiornamento, solleva 
 una eccezione di tipo ``ComponentErrors::NotAllowedEx``.
@@ -176,13 +218,12 @@ Quando si vuole cambiare modalita' di aggiornamento bisogna
 fermare l'aggiornamento e riavviarlo::
 
     setUpdatingMode('OPTIMIZED')
-    startUpdating(AXIS, DIRECTION, SECTION) # Avvio aggiornamento (OPTIMIZED)
+    startUpdating(AXIS, SECTION) # Avvio aggiornamento (OPTIMIZED)
 
     # Se ora voglio cambiare modalita' di aggiornamento:
     stopUpdating() # Fermo l'aggiornamento
     setUpdatingMode('FIXED') # Cambio la modalita'
-    startUpdating(AXIS, DIRECTION, SECTION) # Avvio aggiornamento (FIXED)
-
+    startUpdating(AXIS, SECTION) # Avvio aggiornamento (FIXED)
 
 
 Interrompere l'aggiornamento
@@ -196,7 +237,7 @@ Se ``STEP`` e' l'angolo tra due feed (60 gradi per il banda K) e supponiamo
 che all'istante ``t`` il derotatore sia in posizione di fine corsa 
 ``FinalLimit``, allora all'istante ``t+1`` la nuova posizione comandata sara'::
 
-    P(t+1) = FinalLimit + D(t) - NUMBER_OF_FEED*STEP (step=60 gradi per il KBand). 
+    P(t+1) = FinalLimit + D(t+1) - NUMBER_OF_FEED*STEP 
 
 Il tipo di riavvolgimento lo si imposta tramite il metodo 
 ``setRewindingMode(MODE)``. L'argomento ``MODE`` puo' essere ``AUTO`` (default) 
@@ -265,10 +306,10 @@ Di seguito l'elenco completo dei metodi::
     clearOffset()
     getOffset()
     getPosition()
-    setUpdatingMode(MODE) # MODE: FIXED or OPTIMIZED
+    setUpdatingMode(MODE) # MODE: FIXED, SIMPLE or OPTIMIZED
     clearUpdatingMode()
     getUpdatingMode()
-    startUpdating(AXIS, DIRECTION, AZ_SECTION)
+    startUpdating(AXIS, AZ_SECTION)
     stopUpdating()
     isTracking()
     isUpdating()
