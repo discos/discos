@@ -7,15 +7,15 @@
     SensorIP="192.168.200.50" 
     SensorPort="4002" 
     SensorTimeout="500000" 
-    SensorZeroReference="688671" 
+    SensorZeroReference="731719" 
     SensorConversionFactor="0.001683884" 
     IP="192.168.200.50" 
     Port="4001" 
     Timeout="500000" 
-    ZeroReference="0" 
+    ZeroReference="-99.46666" 
     ConversionFactor="0.0054622" 
-    MaxValue="130" 
-    MinValue="-130" 
+    MaxValue="105.5" 
+    MinValue="-105.5" 
     Step="60"
     TrackingDelta="0.1"
     PositionExpireTime="0.010000"
@@ -33,8 +33,7 @@
     <cmdPosition 
         description="Commanded position" 
         units="degree" 
-        graph_min="0" graph_max="360" 
-        min_value="-130" max_value="130" />
+        graph_min="0" graph_max="360" />
 
     <positionDiff
         description="Position difference" 

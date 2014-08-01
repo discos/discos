@@ -14,8 +14,23 @@ Il setup imposta i valori di default::
     setOffset(0)
     setRewindingMode(AUTO)
 
-Dopo il setup() i tre feed 1, 0, 4 sono allineati e paralleli
-all'orizzonte. 
+Dopo il ``setup()``, nel caso del `KBandDerotator` i tre feed 1, 0, 4 sono 
+allineati e paralleli all'orizzonte. 
+
+.. note:: Il derotatore del banda K e' stato allineato meccanicamente con
+          i tre feed 1, 0 e 4 paralleli all'orizzonte, e in tale posizione
+          e' stato letto un numero di conteggi dell'encoder del motore
+          pari a -18210. Sempre in tale posizione, il numero di conteggi 
+          letti dal sensore di posizione e' pari a 731719.
+          Il limiti negativo e positivo corrispondono, rispettivamente,
+          ad un numero di conteggi dell'encoder del motore pari a -19330 e
+          +19330. Dal punto di vista dell'interfaccia del derotatore (e
+          quindi della posizione vista dall'osservatore), se poniamo come
+          riferimento di zero la posizione dei tre feed 1, 0 e 4 paralleli
+          all'orizzonte (731719 step del sensore di posizione), allora
+          il limite negativo e' pari a -6.03 gradi, mentre il limite positivo
+          e' pari a 204.97 gradi.
+
 
 Impostare l'offset
 ==================
