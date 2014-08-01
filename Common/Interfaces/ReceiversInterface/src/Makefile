@@ -46,7 +46,7 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
-	$(RM) *~ ../include ../test ../*~ ../lib ../object ../rtai ../bin
+	$(RM) *~ ../test ../*~ ../lib ../object ../rtai ../bin
 	$(RM) ../doc/html
 	$(RM) tmp.txt acsexmplbeans.jar ../doc/abeans.log
 	@echo " . . . clean done"
