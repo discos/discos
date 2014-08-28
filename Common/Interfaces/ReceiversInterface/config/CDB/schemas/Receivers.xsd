@@ -41,8 +41,8 @@
 		<xs:complexContent>
 			<xs:restriction base="baci:ROEnum">
 				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
-				<xs:attribute name="graph_max" type="xs:int" use="optional" default="3" />
-				<xs:attribute name="statesDescription" type="xs:string" use="optional" default="FIXED,OPTIMIZED,DISABLED,UNDEFINED"/>
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="4" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default="FIXED,SIMPLE,OPTIMIZED,DISABLED,UNDEFINED"/>
 			</xs:restriction>
 		</xs:complexContent>
 	</xs:complexType>	

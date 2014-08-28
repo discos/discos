@@ -228,6 +228,16 @@ public:
 	virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
+	 * It allows to prepare the receivers for the current scan
+	 * @param startUT epoch at which the scan is going to be executed
+	 * @param param list of required parameters
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	virtual void startScan(ACS::Time startUT,const Receivers::TReceiversParameters & param) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
 	 * called in order to get back the position of the derotator at a given epoch
 	 * @param reference epoch
 	 * @throw CORBA::SystemException

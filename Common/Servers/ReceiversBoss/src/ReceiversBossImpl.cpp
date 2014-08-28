@@ -289,7 +289,13 @@ void ReceiversBossImpl::setMode(const char * mode) throw (CORBA::SystemException
 
 void ReceiversBossImpl::park() throw (CORBA::SystemException,ManagementErrors::ParkingErrorEx)
 {
-	m_core->park();
+	try {
+		m_core->park();
+	}
+	catch (ManagementErrors::ParkingErrorExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getParkingErrorEx();
+	}
 }
 
 ACS::doubleSeq *ReceiversBossImpl::getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds,const ACS::longSeq& ifs,
@@ -421,7 +427,6 @@ CORBA::Boolean ReceiversBossImpl::command(const char *cmd,CORBA::String_out answ
 	return res;
 }
 
-
 void ReceiversBossImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
@@ -460,6 +465,28 @@ void ReceiversBossImpl::turnAntennaUnitOff() throw (CORBA::SystemException,Compo
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
 	}
+}
+
+void ReceiversBossImpl::startScan(ACS::Time startUT,const Receivers::TReceiversParameters & param) throw (CORBA::SystemException,
+		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try{
+		m_core->startScan(startUT,param);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::startScan()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+
 }
 
 CORBA::Double ReceiversBossImpl::getDerotatorPosition (ACS::Time epoch) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)

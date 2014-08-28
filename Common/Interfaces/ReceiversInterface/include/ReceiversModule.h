@@ -53,6 +53,10 @@ public:
 			mode=RCV_FIXED_UPDATE;
 			return true;
 		}
+		if (strcasecmp(strMode,"SIMPLE")==0) {
+			mode=RCV_SIMPLE_UPDATE;
+			return true;
+		}
 		if (strcasecmp(strMode,"OPTIMIZED")==0) {
 			mode=RCV_OPTIMIZED_UPDATE;
 			return true;
@@ -69,9 +73,13 @@ public:
 			return false;
 		}
 	}
+
 	static const char *map(const TUpdateModes& mode ) {
 		if (mode==RCV_FIXED_UPDATE) {
 			return "AUTO";
+		}
+		if (mode==RCV_SIMPLE_UPDATE) {
+			return "SIMPLE";
 		}
 		if (mode==RCV_OPTIMIZED_UPDATE) {
 			return "OPTIMIZED";

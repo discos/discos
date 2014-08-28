@@ -19,7 +19,18 @@
 #pragma prefix "alma"
 
 module Receivers { 
+	
+	/**
+	 * This structure is used to pass the receivers parameters to the <i>startScan()</i> routine on subscan basis.
+	*/
+	typedef  struct  RecvPoint {
+		/**
+		 * Indicates which axis the current scan is going to follow
+		 */
+		Management::TScanAxis axis;
+	} TReceiversParameters;
     
+		
     /**
      * <h2>Interface of a generic receiver</h2>
      * <p>This CORBA interface exports properties and methods defined for a generic 
@@ -99,15 +110,25 @@ module Receivers {
          *  @throw ComponentErrors::ComponentErrorsEx
          */
         void derotatorPark()  raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
-        
+              
         /**
-         * This method allow to collect the current position of the derotator, if derotator is not activable or is not activated an error is thrown.
+         * This method allows to collect the current position of the derotator, if derotator is not activable or is not activated an error is thrown.
          * @return the position of the derotator in degrees
          * @param epoch the returned postion refers to the given epoch
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw ComponentErrors::ComponentErrorsEx
          */
         double getDerotatorPosition(in ACS::Time epoch) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        
+        /**
+         * This method allows to prepare the receivers for scan 
+         * @param startUT exact time the scan is expected to start
+         * @param param structure containing all the information required in order to prepare the receiver for the scan.
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void startScan(in ACS::Time startUT,in TReceiversParameters param) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        
     };
     
     

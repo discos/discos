@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
 
 	printf("\n");
 	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_FIXED_UPDATE));
+	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_SIMPLE_UPDATE));
 	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_OPTIMIZED_UPDATE));
 	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_DISABLED_UPDATE));
 	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_UNDEF_UPDATE));

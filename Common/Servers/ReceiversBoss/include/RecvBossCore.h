@@ -29,11 +29,13 @@
 
 #include <ManagmentDefinitionsC.h>
 #include <GenericReceiverS.h>
+#include <DewarPositionerC.h>
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
 #include <ReceiversErrors.h>
 #include <IRA>
 #include "Configuration.h"
+#include <ReceiversBossS.h>
 
 #endif
 
@@ -103,18 +105,29 @@ public:
 	 * @throw ReceiversErrors::NoDewarPositioningExImpl
 	 * @throw ReceiversErrors::NoDerotatorAvailableExImpl
 	 * @throw ComponentErrors::ValidationErrorExImpl
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 * @throw ComponentErrors::UnexpectedExImpl
+	 * @throw ReceiversErrors::DewarPositionerSetupErrorExImpl
 	 */
-    void derotatorSetup (const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
-    		ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl);
+    void derotatorSetup(const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
+    		ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,
+    		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
+    		ReceiversErrors::DewarPositionerSetupErrorExImpl);
 
     /**
      * It disable the derotator. It is implicitly called also by the <i>park()</i> method.
      * @throw ReceiversErrors::NoDewarPositioningExImpl
      * @throw ReceiversErrors::NoDerotatorAvailableExImpl
      * @throw ComponentErrors::ValidationErrorExImpl
+     * @throw ComponentErrors::CouldntGetComponentExImpl
+     * @throw ReceiversErrors::DewarPositionerParkingErrorExImpl
+     * @throw ComponentErrors::CORBAProblemExImpl
+     * @throw ComponentErrors::UnexpectedExImpl
      */
-     void derotatorPark () throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-    			ComponentErrors::ValidationErrorExImpl);
+     void derotatorPark() throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+    			ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
+    			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
 
 	/**
 	 * This method will configure the component that controls the receiver actually identified by the given code
@@ -125,8 +138,10 @@ public:
 	void setMode(const char * mode) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::ModeErrorExImpl,
 			ComponentErrors::UnexpectedExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::CORBAProblemExImpl);
 	
-	void park();
+	void park()  throw (ManagementErrors::ParkingErrorExImpl);
 	
+	void startScan(ACS::Time startUT,const Receivers::TReceiversParameters& param);
+
 	long getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) throw (ComponentErrors::ValidationErrorExImpl,
 			ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
 	
@@ -214,8 +229,19 @@ private:
 	Management::TSystemStatus m_recvStatus;
 	ACS::Time m_recvStatusEpoch;
 
+	Receivers::TUpdateModes m_updateMode;
+	Receivers::TRewindModes m_rewindMode;
+	long m_rewindFeeds;
+
+	Receivers::DewarPositioner_var m_dewarPositioner;
+	bool m_dewarPositionerError;
+
 	void loadReceiver() throw (ComponentErrors::CouldntGetComponentExImpl);
 	void unloadReceiver();
+	void loadDewarPositioner()  throw (ComponentErrors::CouldntGetComponentExImpl);
+	void unloadDewarPositioner();
+
+
 	void changeBossStatus(const Management::TSystemStatus& status);
 
 

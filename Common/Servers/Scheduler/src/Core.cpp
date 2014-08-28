@@ -151,6 +151,9 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("setLO","receivers",2,&CCore::remoteCall);
 	m_parser->add("antennaUnitOn","receivers",2,&CCore::remoteCall);
 	m_parser->add("antennaUnitOff","receivers",2,&CCore::remoteCall);
+	m_parser->add("derotatorPark","receivers",2,&CCore::remoteCall);
+	m_parser->add("derotatorSetup","receivers",2,&CCore::remoteCall);
+
 
 	// backend
 	//m_parser->add("bck","backends",3,&CCore::remoteCall);
