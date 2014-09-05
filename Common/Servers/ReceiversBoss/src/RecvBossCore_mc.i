@@ -1,4 +1,4 @@
-//#define RB_DEBUG
+#define RB_DEBUG
 
 //#define KKC_ADDRESS "192.168.51.13" // this is the PortServer installed directly in the MF
 #define KKC_ADDRESS "192.167.189.102" // this is the server installed in control room PC
@@ -20,7 +20,8 @@ CRecvBossCore::~CRecvBossCore()
 {
 }
 
-void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration *config)
+void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration *config,acscomponent::ACSComponentImpl *me)
+	throw (ComponentErrors::UnexpectedExImpl)
 {
 	m_currentReceiver="";
 	m_currentOperativeMode="";
@@ -37,6 +38,15 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	}
 	m_config=config;
 	m_totalOutputs=0;
+	m_notificationChannel=NULL;
+
+	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::initialize()",(LM_INFO,"OPENING_RECEIVERS_BOSS_NOTIFICATION_CHANNEL"));
+	try {
+		m_notificationChannel=new nc::SimpleSupplier(Receivers::RECEIVERS_DATA_CHANNEL,me);
+	}
+	catch (...) {
+		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CRecvBossCore::initialize()");
+	}
 }
 
 void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl)
@@ -73,6 +83,10 @@ void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,C
 void CRecvBossCore::cleanUp()
 {
 	if (m_KKCFeedTable) delete m_KKCFeedTable;
+	if (m_notificationChannel!=NULL) {
+		m_notificationChannel->disconnect();
+		m_notificationChannel=NULL;
+	}
 }
 
 void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
@@ -906,7 +920,13 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 
 void  CRecvBossCore::updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
 {
+	return;
+}
 
+void CRecvBossCore::updateDewarPositionerStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::OperationErrorExImpl)
+{
+	return;
 }
 
 void CRecvBossCore::getPolarization(ACS::longSeq& pol) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
@@ -963,3 +983,28 @@ const Management::TSystemStatus& CRecvBossCore::getStatus()
 {
 	return m_status;
 }
+
+void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErrorExImpl)
+{
+	static TIMEVALUE lastEvent(0.0L);
+	Receivers::ReceiversDataBlock data;
+	TIMEVALUE now;
+	baci::ThreadSyncGuard guard(&m_mutex);
+	IRA::CIRATools::getTime(now);
+	if (CIRATools::timeDifference(lastEvent,now)>=1000000) {  //one second from last event
+		data.tracking=(m_currentReceiver!="");
+		data.timeMark=now.value().value;
+		data.status=m_status;
+		try {
+			m_notificationChannel->publishData<Receivers::ReceiversDataBlock>(data);
+		}
+		catch (acsncErrType::PublishEventFailureExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::NotificationChannelErrorExImpl,impl,ex,"CRecvBossCore::publishData()");
+			m_status=Management::MNG_WARNING;
+			throw impl;
+		}
+		IRA::CIRATools::timeCopy(lastEvent,now);
+	}
+}
+
+

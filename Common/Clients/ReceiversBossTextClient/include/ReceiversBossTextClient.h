@@ -38,6 +38,7 @@
 #include <TW_Label.h>
 #include <TW_InputCommand.h>
 #include <TW_PropertyStatusBox.h>
+#include <TW_LedDisplay.h>
 
 #define GRAY_COLOR 0
 #define BLUE_GRAY 0

@@ -20,6 +20,29 @@
 
 module Receivers { 
 	
+	/** 
+	 * This is a notification channel name, it publishes information about the receivers subsystem that can be used to other
+	 * subsystems. Boss will be the data producer for this channel. Anyone interested in these information  must register
+	 *  to this channel as a consumer. Data will be published on this channel when one of the members of the
+	 *  <i>ReceiversDataBlock</i> structure changes its value or when at least 1 second has elapsed since last publication. 
+	 *  In case of errors and one second elapsed since last publication, the last known good data is published until   the error
+	 *  is fixed.
+	*/
+	const string RECEIVERS_DATA_CHANNEL="ReceiversData";
+	
+	/**
+     * Notification channel data structure. The boss informs all registered consumers when one of these members change 
+     * its status or value (not including time). In any case data are published at least once a second. In case there are problems 
+     * retrieving the information or other, the last available data are published until the problem is fixed. 
+	 * Time represents the number of 100 ns since 1582-10-15 00:00:00, it is defined in baci.idl and it is mapped over a
+	 *  longlong type.	 
+	*/
+	struct ReceiversDataBlock {
+		ACS::Time timeMark;	  /*!< this is the absolute time mark that reportes exactly when the publised events occurred */
+		boolean tracking;			              /*!< true when the receivers are ready and the dewar positioner is tracking   */
+		Management::TSystemStatus status; /*!< this report the subsystem status. @sa the attribute <i>status</i> */
+	};
+	
 	/**
 	 * This structure is used to pass the receivers parameters to the <i>startScan()</i> routine on subscan basis.
 	*/

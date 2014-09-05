@@ -21,6 +21,7 @@
 #include <ReceiversBossS.h>
 #include <ReceiversDefinitionsS.h>
 #include <IRA>
+#include <acsncSimpleSupplier.h>
 #include "Configuration.h"
 
 #define _RECVBOSSCORE_MAX_IFS 4
@@ -36,6 +37,7 @@
 #include <IRA>
 #include "Configuration.h"
 #include <ReceiversBossS.h>
+#include <acsncSimpleSupplier.h>
 
 #endif
 
@@ -64,7 +66,7 @@ public:
 	/**
 	 * This function initializes the boss core, all preliminary operation are performed here.
 	*/
-	virtual void initialize(maci::ContainerServices* services,CConfiguration *config);
+	virtual void initialize(maci::ContainerServices* services,CConfiguration *config,acscomponent::ACSComponentImpl *me) throw (ComponentErrors::UnexpectedExImpl);
 	
 	/** 
 	 * This function performs all the clean up operation required to free al the resources allocated by the class
@@ -176,6 +178,10 @@ public:
 
 	void  updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 
+	void updateDewarPositionerStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+			ComponentErrors::OperationErrorExImpl);
+
+	void publishData() throw (ComponentErrors::NotificationChannelErrorExImpl);
 private:
 
 
@@ -229,12 +235,19 @@ private:
 	Management::TSystemStatus m_recvStatus;
 	ACS::Time m_recvStatusEpoch;
 
+	Management::TSystemStatus m_dewarStatus;
+	bool m_dewarTracking;
+	ACS::Time m_dewarStatusEpoch;
+
+
 	Receivers::TUpdateModes m_updateMode;
 	Receivers::TRewindModes m_rewindMode;
 	long m_rewindFeeds;
 
 	Receivers::DewarPositioner_var m_dewarPositioner;
 	bool m_dewarPositionerError;
+
+
 
 	void loadReceiver() throw (ComponentErrors::CouldntGetComponentExImpl);
 	void unloadReceiver();
@@ -244,8 +257,10 @@ private:
 
 	void changeBossStatus(const Management::TSystemStatus& status);
 
-
 #endif
+
+	/** This is the pointer to the notification channel */
+	nc::SimpleSupplier *m_notificationChannel;
 
 #ifdef COMPILE_TARGET_MED
 	void setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);

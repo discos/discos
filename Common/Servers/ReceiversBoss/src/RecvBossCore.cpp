@@ -18,11 +18,14 @@ CRecvBossCore::~CRecvBossCore()
 {
 }
 
-void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration *config)
+void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration *config,acscomponent::ACSComponentImpl *me) throw (
+		ComponentErrors::UnexpectedExImpl)
 {
 	m_status=Management::MNG_OK;
 	m_bossStatus=Management::MNG_OK;
 	m_recvStatus=Management::MNG_WARNING;
+	m_dewarStatus=Management::MNG_WARNING;
+	m_dewarTracking=false;
 	m_currentRecv=Receivers::Receiver::_nil();
 	m_currentRecvError=false;
 	m_currentRecvInstance="";
@@ -38,10 +41,20 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	m_pol.length(0);
 	m_updateMode=Receivers::RCV_UNDEF_UPDATE;
 	m_rewindMode=Receivers::RCV_AUTO_REWIND;
+	m_notificationChannel=NULL;
+
+	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::initialize()",(LM_INFO,"OPENING_RECEIVERS_BOSS_NOTIFICATION_CHANNEL"));
+	try {
+		m_notificationChannel=new nc::SimpleSupplier(Receivers::RECEIVERS_DATA_CHANNEL,me);
+	}
+	catch (...) {
+		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CRecvBossCore::initialize()");
+	}
+
 	m_rewindFeeds=0;
 	m_dewarPositioner=Receivers::DewarPositioner::_nil();
 	m_dewarPositionerError=false;
-	m_loEpoch=m_starFreqEpoch=m_bandWidthEpoch=m_polEpoch=m_feedsEpoch=m_IFsEpoch=m_modeEpoch=m_recvStatusEpoch=0;
+	m_loEpoch=m_starFreqEpoch=m_bandWidthEpoch=m_polEpoch=m_feedsEpoch=m_IFsEpoch=m_modeEpoch=m_recvStatusEpoch=m_dewarStatusEpoch=0;
 }
 
 void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl)
@@ -51,7 +64,12 @@ void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,C
 void CRecvBossCore::cleanUp()
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
+	if (m_notificationChannel!=NULL) {
+		m_notificationChannel->disconnect();
+		m_notificationChannel=NULL;
+	}
 	unloadReceiver();
+	unloadDewarPositioner();
 	m_currentRecvCode="";
 	m_currentRecvInstance="";
 }
@@ -583,13 +601,15 @@ void CRecvBossCore::park() throw (ManagementErrors::ParkingErrorExImpl)
 	m_currentRecvCode="";
 	m_currentRecvInstance="";
 	m_recvStatus=Management::MNG_WARNING;
+	m_dewarStatus=Management::MNG_WARNING;
+	m_dewarTracking=false;
 	m_lo.length(0);
 	m_startFreq.length(0);
 	m_bandWidth.length(0);
 	m_pol.length(0);
 	m_currentOperativeMode="";
 	m_feeds=m_IFs=0;
-	m_loEpoch=m_starFreqEpoch=m_bandWidthEpoch=m_polEpoch=m_feedsEpoch=m_IFsEpoch=m_modeEpoch=m_recvStatusEpoch=0;
+	m_loEpoch=m_starFreqEpoch=m_bandWidthEpoch=m_polEpoch=m_feedsEpoch=m_IFsEpoch=m_modeEpoch=m_recvStatusEpoch=m_dewarStatusEpoch=0;
 	try {
 		derotatorPark();
 	}
@@ -1178,14 +1198,67 @@ void  CRecvBossCore::updateRecvStatus() throw (ComponentErrors::CouldntGetCompon
 				ex.setReceiverCode((const char *)m_currentRecvCode);
 				throw ex;
 			}
-			/*****************************************/
-			/* ADD also the check of the derotator status */
-			/* before I have to check if the dewar positioner is available*/
-			/**************************************/
 		}
 	}
 	else {  // if no receiver configured yet, it's status is supposed to be WARNING
 		m_recvStatus=Management::MNG_WARNING;
+	}
+}
+
+void CRecvBossCore::updateDewarPositionerStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::OperationErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	IRA::CString component;
+	bool derotator;
+	TIMEVALUE now;
+	if (m_currentRecvCode=="") {
+		m_dewarStatus=Management::MNG_WARNING;
+		return;
+	}
+	if (!m_config->getReceiver(m_currentRecvCode,component,derotator)) {
+		m_dewarStatus=Management::MNG_WARNING;
+		return;
+	}
+	if ((derotator) &&  (m_config->dewarPositionerInterface()!="")) {
+		IRA::CIRATools::getTime(now);
+		if (now.value().value>m_dewarStatusEpoch+m_config->propertyUpdateTime()*10) {
+			loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
+			try {
+				m_dewarTracking=m_dewarPositioner->isTracking();
+			}
+			catch (ComponentErrors::OperationErrorEx& ex){
+				_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CRecvBossCore::updateDewarPositionerStatus()");
+				impl.setReason("could not call isTracking method from dewar positioner");
+				changeBossStatus(Management::MNG_FAILURE);
+				m_dewarTracking=false;
+				throw impl;
+			}
+			catch (ComponentErrors::UnexpectedEx& ex ) {
+				_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CRecvBossCore::updateDewarPositionerStatus()");
+				impl.setReason("could not call isTracking method from dewar positioner");
+				changeBossStatus(Management::MNG_FAILURE);
+				m_dewarTracking=false;
+				throw impl;
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::updateDewarPositionerStatus()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				changeBossStatus(Management::MNG_FAILURE);
+				m_dewarPositionerError=true;
+				throw impl;
+			}
+			/***************************************/
+			/* GET THE STATUS FROM THE DEWAR POSITIONER */
+			/* m_dewarStatus= */
+			/******************************************/
+			m_dewarStatusEpoch=now.value().value;
+		}
+	}
+	else { // case the derotator is not used or supported
+		m_dewarStatus=Management::MNG_OK;
+		m_dewarTracking=true;
 	}
 }
 
@@ -1194,15 +1267,50 @@ const Management::TSystemStatus& CRecvBossCore::getStatus()
 	baci::ThreadSyncGuard guard(&m_mutex);
 	//first of all try to clear the boss status...
 	changeBossStatus(Management::MNG_OK);; // it will be cleared only if the status persistence time is elapsed
-	if (m_bossStatus>m_recvStatus) {
-		m_status=m_bossStatus;
+	if (m_recvStatus>m_dewarStatus) {
+		m_status=m_recvStatus;
 	}
 	else {
-		m_status=m_recvStatus;
+		m_status=m_dewarStatus;
+	}
+	if (m_bossStatus>m_status) {
+		m_status=m_bossStatus;
 	}
 	return m_status;
 }
 
+void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErrorExImpl)
+{
+	bool sendData;
+	static TIMEVALUE lastEvent(0.0L);
+	static Receivers::ReceiversDataBlock prvData={0,false,Management::MNG_OK};
+	TIMEVALUE now;
+	baci::ThreadSyncGuard guard(&m_mutex);
+	IRA::CIRATools::getTime(now);
+	if (CIRATools::timeDifference(lastEvent,now)>=1000000) {  //one second from last event
+		sendData=true;
+	}
+	else if ((prvData.tracking!=m_dewarTracking) || (prvData.status!=m_status)) {
+		sendData=true;
+	}
+	else {
+		sendData=false;
+	}
+	if (sendData) {
+		prvData.tracking=m_dewarTracking;
+		prvData.timeMark=now.value().value;
+		prvData.status=m_status;
+		try {
+			m_notificationChannel->publishData<Receivers::ReceiversDataBlock>(prvData);
+		}
+		catch (acsncErrType::PublishEventFailureExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::NotificationChannelErrorExImpl,impl,ex,"CRecvBossCore::publishData()");
+			changeBossStatus(Management::MNG_WARNING);
+			throw impl;
+		}
+		IRA::CIRATools::timeCopy(lastEvent,now);
+	}
+}
 
 //************ PRIVATE ****************************
 

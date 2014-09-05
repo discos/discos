@@ -111,7 +111,7 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"ReceiversBossImpl::initialize()");
 		throw dummy;
 	}
-	m_core->initialize(getContainerServices(),&m_config);
+	m_core->initialize(getContainerServices(),&m_config,this);
 	m_parser->add("receiversPark",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::park),0);
 	m_parser->add("receiversSetup",new function1<CRecvBossCore,non_constant,void_type,I<string_type> >(m_core,&CRecvBossCore::setupReceiver),1);
 	m_parser->add("receiversMode",new function1<CRecvBossCore,non_constant,void_type,I<string_type> >(m_core,&CRecvBossCore::setMode),1);

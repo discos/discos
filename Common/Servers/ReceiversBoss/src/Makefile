@@ -49,7 +49,7 @@ EXECUTABLES_L   =
 ReceiversBossImpl_OBJECTS   = ReceiversBossImpl	RecvBossCore Configuration WatchingThread
 ReceiversBossImpl_LDFLAGS   =
 ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs GenericReceiverStubs \
-							  DewarPositionerStubs ManagmentDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors
+							  DewarPositionerStubs ManagmentDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc
 
 #
 # special compilation flags for single c sources

@@ -66,7 +66,7 @@ EXECUTABLES_L   =
 _tui_ReceiversBossTextClient_OBJECTS   = ReceiversBossTextClient
 #xxxxx_LDFLAGS   =
 _tui_ReceiversBossTextClient_LIBS      = ReceiversBossStubs CommonReceiverInterfaceStubs ReceiversDefinitionsStubs IRALibrary ManagmentDefinitionsStubs \
-         TextWindowLibrary ClientErrors ComponentErrors ManagementErrors ReceiversErrors
+         TextWindowLibrary ClientErrors ComponentErrors ManagementErrors ReceiversErrors acsnc
 
 
 SCRIPTS         = receiversBossTui

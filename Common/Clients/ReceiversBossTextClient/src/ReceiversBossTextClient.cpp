@@ -1,5 +1,6 @@
 #include "ReceiversBossTextClient.h"
 #include "ReceiversDefinitionsC.h"
+#include <acsncSimpleConsumer.h>
 
 #define _GET_ACS_PROPERTY(TYPE,NAME) TYPE##_var NAME; \
 {	\
@@ -27,31 +28,6 @@
 	} \
 	COMP->setTriggerTime(TRIGGERTIME); \
 }
-
-/*#define _GET_PROPERTY_VALUE_ONCE(TYPE,FORMAT,PROPERTY,PROPERTNAME,CONTROL) { \
-	try { \
-		TYPE temp; \
-		ACSErr::Completion_var cmpl; \
-		temp=PROPERTY->get_sync(cmpl.out()); \
-		CompletionImpl cmplImpl(cmpl.in()); \
-		if (cmplImpl.isErrorFree()) { \
-			IRA::CString val(0,FORMAT,temp); \
-			CONTROL->setValue(val); \
-			CONTROL->Refresh(); \
-		} \
-		else { \
-			_ADD_BACKTRACE(ClientErrors::CouldntAccessPropertyExImpl,impl,cmplImpl,"::Main()"); \
-			impl.setPropertyName(PROPERTNAME); \
-			impl.log(); \
-			goto ErrorLabel; \
-		} \
-	} \
-	catch (...) { \
-		_EXCPT(ClientErrors::UnknownExImpl,impl,"::Main()"); \
-		impl.log(); \
-		goto ErrorLabel; \
-	} \
-}*/
 
 #define _CATCH_ALL(OUTPUT,ROUTINE,COMP_EXCEPTION) \
 	catch (COMP_EXCEPTION &E) { \
@@ -91,6 +67,22 @@
 #define COMPONENT_DECLARATION COMPONENT_IDL_MODULE::COMPONENT_SMARTPOINTER
 
 using namespace TW;
+
+nc::SimpleConsumer<Receivers::ReceiversDataBlock> *simpleConsumer=NULL;
+
+void NotificationHandler(Receivers::ReceiversDataBlock data,void *handlerParam)
+{
+	TW::CLedDisplay *control;
+	control=static_cast<TW::CLedDisplay*>(handlerParam);
+	if (data.tracking) {
+		control->setValue("1");
+		control->Refresh();
+	}
+	else {
+		control->setValue("0");
+		control->Refresh();
+	}
+}
 
 static bool terminate;
 
@@ -211,6 +203,7 @@ int main(int argc, char *argv[]) {
 	TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> * status_box;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *feeds_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *IFs_field;
+	TW::CLedDisplay * tracking_display;
 	CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(long)> *polarization_text;
 	CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *initialFrequency_text;
 	CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)> *bandWidth_text;
@@ -331,6 +324,7 @@ int main(int argc, char *argv[]) {
 		bandWidth_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(bandWidth.in());
 		LO_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(LO.in());
 		polarization_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(long)>(polarization.in());
+		tracking_display=new TW::CLedDisplay(1);
 		/* ************************ */
 		#if USE_OUTPUT_FIELD >=1 
 			output_label=new TW::CLabel("");
@@ -372,7 +366,9 @@ int main(int argc, char *argv[]) {
 		_TW_SET_COMPONENT(polarization_text,18,8,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		polarization_text->setWAlign(CFrameComponent::LEFT);
 		polarization_text->setFormatFunction(polarizationFormat,NULL);
-		//polarization_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%07.1lf");
+		tracking_display->setPosition(CPoint(48,2));
+		tracking_display->setOrientation(TW::CLedDisplay::HORIZONTAL);
+		tracking_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
 
 		/* ****************************************************************** */
 		_TW_SET_COMPONENT(userInput,0,WINDOW_HEIGHT-6,WINDOW_WIDTH-1,1,USER_INPUT_COLOR_PAIR,USER_INPUT_STYLE,NULL);
@@ -399,6 +395,10 @@ int main(int argc, char *argv[]) {
 		_INSTALL_MONITOR(IFs_field,3000)
 		//feeds_field->setValueTrigger(1L,true);.
 		_INSTALL_MONITOR(polarization_text,3000)
+		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::NOTIFICATION_CHANNEL_SUBSCRIPTION"));
+		ACS_NEW_SIMPLE_CONSUMER(simpleConsumer,Receivers::ReceiversDataBlock,Receivers::RECEIVERS_DATA_CHANNEL,
+				NotificationHandler,static_cast<void*>(tracking_display));
+		simpleConsumer->consumerReady();
 		/* ****************************************** */
 		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::DONE"));
 		
@@ -412,6 +412,7 @@ int main(int argc, char *argv[]) {
 		_TW_ADD_LABEL("Start Freq.     :",0,6,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Bandwidth       :",0,7,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Polarization    :",0,8,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Dewar          :",31,2,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		/* ************************* */
 		
 		/** Add all required association: components/Frame */
@@ -424,6 +425,7 @@ int main(int argc, char *argv[]) {
 		window.addComponent((CFrameComponent*)bandWidth_text);
 		window.addComponent((CFrameComponent*)LO_text);
 		window.addComponent((CFrameComponent*)polarization_text);
+		window.addComponent((CFrameComponent*)tracking_display);
 		/* ********************************************** */
 		window.addComponent((CFrameComponent*)userInput);		
 		#if USE_OUTPUT_FIELD >=1 
@@ -512,6 +514,9 @@ int main(int argc, char *argv[]) {
 ErrorLabel:
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::ABORTING"));	
 CloseLabel:
+	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::NOTIFICATION_CHANNEL_LOGGING_OUT"));
+	if (simpleConsumer!=NULL) simpleConsumer->disconnect();
+	simpleConsumer=NULL;
 	window.Destroy();
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::FRAME_CLOSED"));	
 	ACE_OS::sleep(1);	
