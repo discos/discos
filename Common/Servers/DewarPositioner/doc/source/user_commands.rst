@@ -13,10 +13,10 @@ ovvero l'elenco dei comandi che possono essere dati da
     derotatorGetConfiguration -> DewarPositioner.getConfiguration()
     derotatorIsConfigured -> DewarPositioner.isConfigured()
     derotatorIsUpdating -> DewarPositioner.isUpdating()
+    derotatorStopUpdating?
     derotatorRewind=FEEDS -> DewarPositioner.rewind(FEEDS)
-    derotatorStartUpdating -> DewarPositioner.startUpdating()
-    derotatorStopUpdating -> DewarPositioner.stopUpdating()
     derotatorSetRewindingMode=MODE -> DewarPositioner.setRewindingMode(MODE)
+    derotatorGetRewindingMode
     ... # TODO
 
 Come possiamo vedere, iniziano tutti con ``derotator``.

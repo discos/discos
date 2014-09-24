@@ -74,7 +74,7 @@ Fatto ciò, vengono impostati i seguenti valori di default::
 
 La posizione ``0`` è quella scelta per l'allineamento iniziale. Ad esempio,
 per il `KBandDerotator` è quella in cui i tre feed 1, 0, 4 sono 
-paralleli all'orizzonte, con il feed 1 a ovest.
+paralleli all'orizzonte, con il feed 1 a est.
 Discuteremo del metodo ``setConfiguration()`` nella sezione 
 :ref:`configurations`, mentre il metodo ``setRewindingMode()`` è
 discusso in :ref:`rewinding`.

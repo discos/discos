@@ -3,6 +3,7 @@
 **************************
 Elenco completo dei metodi
 **************************
+Esempio di riferimento a :meth:`positioner.Positioner.getStatus()`. 
 Di seguito l'elenco completo dei metodi:: 
 
     setup(CODE) # CODE: KKG, ...
@@ -24,10 +25,13 @@ Di seguito l'elenco completo dei metodi::
     setRewindingMode(MODE) # MODE: MANUAL or AUTO (default)
     clearRewindingMode()
     setAutoRewindingFeeds(NUMBER_OF_FEEDS)
-    clearAutoRewindingFeeds()
     getRewindingMode()
     rewind(NUMBER_OF_FEEDS)
     isRewindingRequired()
     isRewinding()
+    getStatus() # Restituisce lo status pubblicato dal NC
     ... # TODO
 
+.. autoclass:: positioner.Positioner
+    :members:
+    :undoc-members:

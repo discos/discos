@@ -63,10 +63,11 @@ aggiorna la posizione del derotatore, per cui se si vuole usare la modalità
 fissa e aggiornare la posizione, allora da *operator input* bisogna 
 usare in sequenza i comandi ``derotatorSetConfiguration`` e 
 ``derotatorSetPosition``. Ad esempio, se si volesse usare la modalità
-*fixed* con posizione del derotatore a 30°::
+*fixed* con posizione del derotatore a 30°, si dovrebbero utilizzare
+i seguenti comandi::
 
     derotatorSetConfiguration=FIXED
-    derotatorSetPosition=30
+    derotatorSetPosition=30d
 
 I due precedenti comandi eseguono la chiamata, rispettivamente, di::
 
@@ -77,14 +78,16 @@ Esempio di utilizzo
 ~~~~~~~~~~~~~~~~~~~
 Vediamo un esempio di sessione di lavoro con *operator input*::
 
+    > derotatorGetPosition
+    50d
     > derotatorSetConfiguration=FIXED
     > derotatorGetConfiguration
     FIXED
     > derotatorGetPosition
-    50
-    > derotatorSetPosition=10
+    50d
+    > derotatorSetPosition=10d
     > derotatorGetPosition
-    10
+    10d
 
 .. note:: Come possiamo vedere, se il derotatore si trova in 
    una certa posizione ``Px`` e viene impostata
@@ -95,10 +98,11 @@ Vediamo un esempio di sessione di lavoro con *operator input*::
 La stessa sessione di lavoro interattiva, utilizzando le API 
 del ``DewarPositioner``, è la seguente::
 
+    >>> DewarPositioner.getPosition()
+    50
     >>> DewarPositioner.setConfiguration('FIXED')
     >>> DewarPositioner.getConfiguration()
     FIXED
-    >>> derotatorGetPosition
     >>> DewarPositioner.getPosition()
     50
     >>> DewarPositioner.setPosition(10)
@@ -115,7 +119,8 @@ aggiornata al variare della posizione dell'antenna o dell'asse
 di scansione. Nelle configurazioni *dinamiche* invece 
 il ``DewarPositioner`` aggiorna la posizione del derotatore in funzione
 della posizione dell'antenna, al fine di compensare l'angolo parallatico
-(o quello *paragalattico*, a seconda dell'asse di scansione). 
+(più un eventuale contributo del *galactic parallactic angle*, 
+a seconda dell'asse di scansione). 
 
 .. note:: L'asse di scansione, indicato con ``AXIS`` e
    definito come ``Managment::TScanAxis`` nella interfaccia IDL, può
@@ -129,7 +134,8 @@ dalla seguente equazione::
 
 dove ``Pi`` è una *posizione iniziale*, mentre ``D(AZ, EL, AXIS)``
 è la cosidetta *funzione di derotazione*, che serve
-per compensare l'angolo parallattico (o *paragalattico*).
+per compensare l'angolo parallattico (o il contributo del
+*galactic parallactic angle*).
 Ciò che differenzia una configurazione
 dinamica dall'altra è la posizione iniziale, mentre la 
 funzione di derotazione non cambia, ed è data da:
@@ -140,20 +146,24 @@ funzione di derotazione non cambia, ed è data da:
     * ``D = G(AZ, EL)`` quando ``AXIS`` è ``GLON`` o ``GLAT``
 
 dove ``P(AZ, EL)`` è la funzione di compensazione dell'angolo parallatico,
-mentre ``G(AZ, EL)`` è quella di compensazione dell'angolo *paragalattico*.
+mentre ``G(AZ, EL)`` è quella di compensazione del contributo dovuto al
+*galactic parallactic angle* (GAL).
 
 Come per le configurazioni statiche, anche per quelle dinamiche 
 l'impostazione della configurazione non causa l'aggiornamento della posizione,
 visto che non è ancora noto l'asse di scansione. L'aggiornamento avviene quindi
 solamente dopo che viene chiamato il metodo ``DewarPositioner.startUpdating()``,
-il quale prende come argomento un dato asse. Ad esempio::
+il quale prende come argomento un asse e il settore (``SECTOR``, può 
+essere ``NORTH`` o ``SOUTH``). Ad esempio::
 
-    >>> from Management import MNG_SIDEREAL
-    >>> DewarPositioner.setConfiguration('BSC') # Non aggiorna la posizione
-    >>> DewarPositioner.startUpdating(MNG_SIDEREAL) # Avvia l'aggiornamento della posizione
+    >>> from Management import MNG_SIDEREAL, NORTH
+    >>> DewarPositioner.setConfiguration('BSC') # Non aggiorna posizione
+    >>> DewarPositioner.startUpdating(MNG_SIDEREAL, NORTH) # Avvia aggiornamento posizione
 
-La chiamata a questi metodi viene eseguita in modo automatico da Nuraghe/ESCS, e 
-non può essere fatta manualmente dall'astronomo tramite *operator input*.
+La chiamata al metodo ``DewarPositioner.startUpdating()`` viene eseguita in 
+modo automatico da Nuraghe/ESCS, e 
+non può essere fatta manualmente dall'astronomo tramite *operator input* (non
+esiste un comando ``derotatorStartUpdating``).
 
 
 .. _bsc:
@@ -162,28 +172,12 @@ Configurazione *best space coverage*
 ------------------------------------
 Nella configurazione *best space coverage*, che identificheremo con
 il codice ``BSC``, i feed vengono disposti in modo tale da 
-avere la miglior copertura spaziale della sorgente durante la scansione
-lungo un dato asse. Un esempio di scan in configurazione ``BSC``
-è illustrato in figura 1.
-
-.. figure:: images/bestspace.png
-   :scale: 80%
-   :alt: bestspace
-   :align: center
-
-   Figura 1: Feed disposti in modo da avere la migliore copertura spaziale.
-
-La configurazione ``BSC`` garantisce che durante la scansione
-non si verifichi il caso mostrato in figura 2, nel quale
-l'area osservata da ciascun feed è in parte coperta anche da un altro feed,
-e nemmeno il caso opposto in cui vi è un gap tra le zone coperte dai feed.
-
-.. figure:: images/not_bestspace_overlap.png
-   :scale: 80%
-   :alt: overlap
-   :align: center
-
-   Figura 2: Le aree coperte dai feed si sovrappongono
+avere la miglior copertura spaziale della sorgente durante una scansione.
+Tipicamente la miglior copertura viene ottenuta
+equispaziando, quando possibile, i beam nella 
+direzione ortogonale a quella di scansione (se si sta facendo una scansione in 
+azimuth i feed vengono equispaziati in elevazione, in modo da ottimizzare la 
+scansione dell'area osservata).
 
 Quando questa configurazione è attiva, il sistema prima posiziona il derotatore
 in una posizione iniziale che indicheremo con ``Pis`` (il pedice *i* sta per
@@ -191,7 +185,8 @@ in una posizione iniziale che indicheremo con ``Pis`` (il pedice *i* sta per
 configurazione, e in questo caso significa *space*),
 dopodiché aggiunge a ``Pis`` il contributo alla *derotazione* (che indicheremo
 con ``D``) dovuto alla
-compensazione dell'angolo parallatico o di quello *paragalattico*, a seconda
+compensazione dell'angolo parallatico più eventuale contributo del
+*galactic parallactic angle*, a seconda
 dell'asse di scansione scelto. 
 
 La posizione del derotatore, che in questa configurazione indichiamo 
@@ -206,12 +201,12 @@ con ``Ps``, è quindi data dalla seguente equazione:
           dipende dall'asse di scansione, per cui abbiamo utilizzato
           la notazione ``Pi(AXIS)`` per indicare che ``Pi`` è funzione 
           dell'asse. Allo stesso modo, la funzione di compensazione
-          dell'angolo (parallatico o *paragalattico*) dipende dai 
+          dell'angolo (parallatico più eventuale contributo del GAL) dipende dai 
           valori dell'azimuth, dell'elevazione e dell'asse di scansione,
           per cui la abbiamo indicata con ``D(AZ, EL, AXIS)``.
 
 
-La modalità ``BSC`` non consente
+Quando è impostata la modalità ``BSC`` non è consentito
 l'utilizzo del metodo ``DewarPositioner.setPosition()``, e quindi
 neppure quello del corrispondente comando. Nel caso lo si chiami,
 questo solleva una eccezione::
@@ -241,7 +236,7 @@ posizione, perchè questo è compito di Nuraghe/ESCS, il quale chiama i
 seguenti metodi::
 
     >>> DewarPositioner.setConfiguration('BSC')
-    >>> DewarPositioner.startUpdating(AXIS) # Chiamato ad avvio scansione lungo AXIS
+    >>> DewarPositioner.startUpdating(AXIS, SECTOR) # Chiamato ad avvio scansione 
 
 .. _optimized:
 
@@ -261,7 +256,7 @@ In questo caso la posizione da comandare è data da::
 
     Po = Pio(SECTOR, AXIS) + D(AZ, EL, AXIS) 
     
-dove ``SECTOR`` può essere ``NORD`` o ``SUD``, mentre ``Pio`` è dato da::
+dove ``SECTOR`` può essere ``NORTH`` o ``SOUTH``, mentre ``Pio`` è dato da::
 
     Pio(SECTOR) = K(SECTOR) + Pis(AXIS) 
 
@@ -301,10 +296,10 @@ ovvero:
 
 Quindi in questo caso ``K = NUMBER_OF_FEEDS*STEP = 60 gradi``.
 Per quanto riguarda il segno di ``K``, questo cambia a seconda che
-``SECTOR`` sia ``NORD`` o ``SUD``:
+``SECTOR`` sia ``NORTH`` o ``SOUTH``:
 
-  * ``NORD``: il cielo ruota CCW per cui ``SGN(K) == +1``
-  * ``SUD``: il cielo ruota CW, per cui ``SGN(K) == -1``
+  * ``NORTH``: il cielo ruota CCW per cui ``SGN(K) == +1``
+  * ``SOUTH``: il cielo ruota CW, per cui ``SGN(K) == -1``
 
 Ad esempio, consideriamo l'esempio di prima, con ``Pis = 40 gradi`` e
 con l'antenna che osserva a *sud*, ovvero rotazione CW. In questo caso si
@@ -360,8 +355,6 @@ i possibili set. La posizione del derotatore è data da::
    asse. In generale però se non è possibile allinearli con un asse, è 
    probabile che li si possa allineare con quello ortogonale.
 
-Esempio di utilizzo
-~~~~~~~~~~~~~~~~~~~
 Rispetto alle altre configurazioni dinamiche, nella configurazione *aligned*
 vi è un ulteriore comando da utilizzare, chiamato ``derotatorSetAlignment``,
 che prende come argomento una stringa identificativa dei feed che si 
@@ -382,15 +375,22 @@ dei seguenti metodi::
 
     DewarPositioner.setConfiguration('ALIGNED') # Non avvia aggiornamento posizione
     DewarPositioner.setAlignment('default') # Non avvia aggiornamento posizione
-    DewarPositioner.startUpdating(AXIS) # Chiamato quando viene avviato lo scan
 
 La sessione di *operator input* riportata all'inizio di questa sezione da
-invece luogo alle seguenti chiamate::
+quindi luogo alle seguenti chiamate::
 
     DewarPositioner.setConfiguration('ALIGNED') 
     DewarPositioner.setAlignment('default') 
-    DewarPositioner.setAlignment('0-4') 
-    DewarPositioner.startUpdating(AXIS) # Chiamato quando viene avviato lo scan
+    DewarPositioner.setAlignment('0-4') # Sovrascrive il precedente
+
+Nel caso venga scelta un allineamento non valido, viene sollevata
+una eccezione::
+
+    >>> DewarPositioner.setConfiguration('ALIGNED') 
+    >>> DewarPosition.setAlignment('1-0-5')
+    Traceback (most recent call last):
+    ...
+    ValidationErrorEx: alignmento 1-0-5 not available
 
 Concludiamo dicendo che così come per la configurazione ``BSC`` e ``OPTIMIZED``, 
 anche la ``ALIGNED`` non consente l'utilizzo del comando ``derotatorSetPosition``.
@@ -413,7 +413,7 @@ verrà utilizzata come ``Pic`` la posizione attuale. Ad esempio, se
 si vuole avere una posizione iniziale di 30°::
 
     > derotatorSetConfiguration=CUSTOM
-    > derotatorSetPosition=30
+    > derotatorSetPosition=30d
 
 Come al solito l'aggiornamento viene avviato da Nuraghe/ESCS nel momento
 in cui viene comandata la scansione lundo un dato asse.

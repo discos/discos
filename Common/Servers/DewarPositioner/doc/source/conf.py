@@ -40,7 +40,16 @@ if not on_rtd:  # only import and set the theme if we're building docs locally
 extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
+    'sphinx.ext.autodoc',
 ]
+module_path = os.path.join(
+        os.environ['ACS_PATH'], 
+        'Common', 
+        'Servers', 
+        'DewarPositioner', 
+        'src', 
+        'DewarPositioner')
+sys.path.append(module_path)
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
