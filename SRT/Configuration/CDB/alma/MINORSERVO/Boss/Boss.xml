@@ -66,7 +66,7 @@
                RY = (-0.036111111111111108); 
                RZ = (0);
         @ GFR: RZ(mm) = (1323.5);
-        @ M3R: none;
+        @ M3R: RZ(mm) = (860);
     "
     KKG="
         @ PFP: park;
@@ -77,26 +77,26 @@
                RY(degree) = (-0.03611111111111111); 
                RZ(degree) = (0);
         @ GFR: RZ(mm) = (1323.5);
-        @ M3R: none;
+        @ M3R: RZ(mm) = (860);
     "
 
     LLP="
         @ SRP: park;
         @ PFP: RY(mm) = (-25.75); TX(mm) = (458); TZ(mm)= (-46.2);
-        @ GFR: none; 
-        @ M3R: none;
+        @ GFR: RZ(mm) = (-600);
+        @ M3R: RZ(mm) = (860);
     "
     PPP="
         @ SRP: park;
         @ PFP: RY(mm) = (-25.75); TX(mm) = (458); TZ(mm) = (-45.9);
-        @ GFR: none; 
-        @ M3R: none;
+        @ GFR: RZ(mm) = (-600);
+        @ M3R: RZ(mm) = (860);
     "
     PLP="
         @ SRP: park;
         @ PFP: RY(mm) = (-25.75); TX(mm) = (458); TZ(mm) = (-45.9);
-        @ GFR: none; 
-        @ M3R: none;
+        @ GFR: RZ(mm) = (-600);
+        @ M3R: RZ(mm) = (860);
     "
 
     slaves="GFR, M3R, PFP, SRP"
