@@ -17,16 +17,19 @@ class PositionerSetupTest(unittest2.TestCase):
         try:
             client = PySimpleClient()
             self.device = client.getComponent('RECEIVERS/SRTKBandDerotator')
+            self.using_mock = False
         except CannotGetComponentEx:
             print '\nINFO -> component not available: we will use a mock device'
-            from DewarPositionerTest.mock_components import MockDevice
-            self. device = MockDevice()
+            from DewarPositionerMockers.mock_components import MockDevice
+            self.device = MockDevice()
+            self.using_mock = True
 
     def test_starting_pos(self):
         """Verify it sets properly the starting position"""
         p = Positioner(self.cdb_info)
-        p.setup(site_info={}, source=None, device=self.device, starting_position=2)
-        self.assertEqual(p.getStartingPosition(), 2)
+        p.setup(site_info={}, source=None, device=self.device, setup_position=2)
+        time.sleep(0.5) if self.using_mock else time.sleep(2)
+        self.assertEqual(p.getPosition(), 2)
 
     def test_device_name(self):
         """Verify it sets properly the device_name"""

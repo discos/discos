@@ -5,7 +5,7 @@ import unittest2
 import mocker
 
 from DewarPositioner.positioner import Positioner, PositionerError, NotAllowedError
-from DewarPositionerTest.mock_components import MockDevice
+from DewarPositionerMockers.mock_components import MockDevice
 
 class RewindTest(unittest2.TestCase):
 

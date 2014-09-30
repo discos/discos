@@ -3,7 +3,7 @@ import random
 import time
 from maciErrType import CannotGetComponentEx
 from DewarPositioner.positioner import Positioner, NotAllowedError, PositionerError
-from DewarPositionerTest.mock_components import MockDevice, Property, Completion
+from DewarPositionerMockers.mock_components import MockDevice, Property, Completion
 
 import mocker
 

@@ -15,7 +15,7 @@ class PositionerStopTest(unittest2.TestCase):
             device = client.getComponent('RECEIVERS/SRTKBandDerotator')
         except CannotGetComponentEx:
             print '\nINFO -> component not available: we will use a mock device'
-            from DewarPositionerTest.mock_components import MockDevice
+            from DewarPositionerMockers.mock_components import MockDevice
             device = MockDevice()
 
         cdb_info = {

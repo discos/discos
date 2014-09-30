@@ -2,7 +2,7 @@
 # Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 #-----------------------------------------
 
-PY_PACKAGES = DewarPositionerTest
+PY_PACKAGES = DewarPositionerMockers
 
 
 # INCLUDE STANDARDS

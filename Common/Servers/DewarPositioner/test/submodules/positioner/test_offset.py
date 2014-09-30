@@ -21,7 +21,7 @@ class PositionerOffsetTest(unittest2.TestCase):
             self.using_mock = False
         except CannotGetComponentEx:
             print '\nINFO -> component not available: we will use a mock device'
-            from DewarPositionerTest.mock_components import MockDevice
+            from DewarPositionerMockers.mock_components import MockDevice
             self.device = MockDevice()
             self.using_mock = True
 

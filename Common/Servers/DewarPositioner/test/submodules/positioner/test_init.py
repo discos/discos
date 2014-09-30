@@ -18,7 +18,6 @@ class PositionerInitTest(unittest2.TestCase):
         self.assertEqual(p.isConfigured(), False)
         self.assertEqual(p.isTerminated(), True)
         self.assertEqual(p.getOffset(), 0.0)
-        self.assertEqual(p.getStartingPosition(), 0.0)
         self.assertRaises(NotAllowedError, p.getDeviceName)
         self.assertRaises(NotAllowedError, p.startUpdating)
 

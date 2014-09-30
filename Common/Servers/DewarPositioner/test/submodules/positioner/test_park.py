@@ -20,15 +20,15 @@ class PositionerParkTest(unittest2.TestCase):
         p = Positioner(self.cdb_info)
         self.assertRaises(NotAllowedError, p.park)
 
-    def test_set_starting_pos(self):
-        """Vefify the park() method set the device position."""
+    def test_set_park_position(self):
+        """Vefify the park() method sets the device position."""
         try:
             client = PySimpleClient()
             device = client.getComponent('RECEIVERS/SRTKBandDerotator')
             using_mock = False
         except CannotGetComponentEx:
             print '\nINFO -> component not available: we will use a mock device'
-            from DewarPositionerTest.mock_components import MockDevice
+            from DewarPositionerMockers.mock_components import MockDevice
             device = MockDevice()
             using_mock = True
 
@@ -38,10 +38,11 @@ class PositionerParkTest(unittest2.TestCase):
         offset = 2
         p.setOffset(offset)
         time.sleep(0.5) if using_mock else time.sleep(2)
-        p.park()
+        park_position=1
+        p.park(park_position=park_position)
         time.sleep(0.5) if using_mock else time.sleep(3)
         self.assertAlmostEqual(
-                p.getStartingPosition(), 
+                park_position,
                 device.getActPosition(), 
                 places=2
         )
