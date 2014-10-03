@@ -3,8 +3,8 @@
 <!-- Marco Buttu -->
 
 <xs:schema
-	targetNamespace="urn:schemas-cosylab-com:DewarPositionerTable:1.0"
-	xmlns="urn:schemas-cosylab-com:DewarPositionerTable:1.0"
+	targetNamespace="urn:schemas-cosylab-com:DewarPositionerInitialPositionTable:1.0"
+	xmlns="urn:schemas-cosylab-com:DewarPositionerInitialPositionTable:1.0"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -13,25 +13,24 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	
-	<xs:complexType name="MappingHeader">
+	<xs:complexType name="PositionHeader">
  		<xs:sequence>
- 			<xs:element name="setupCode" type="xs:string" />
- 			<xs:element name="derotatorName" type="xs:string" />
- 			<xs:element name="startingPosition" type="xs:double" />
+ 			<xs:element name="axisCode" type="xs:string" />
+ 			<xs:element name="position" type="xs:string" />
  		</xs:sequence>
  	</xs:complexType>
  	
- 	<xs:complexType name="MappingTable">
+ 	<xs:complexType name="PositionTable">
 		<xs:sequence>
             <xs:element 
-                name="MappingEntry" 
-                type="MappingHeader"  
+                name="PositionRecord" 
+                type="PositionHeader"  
                 minOccurs="1" 
                 maxOccurs="unbounded" 
             />
 		</xs:sequence>
  	</xs:complexType>
  	
- 	<xs:element name="DewarPositionerTable" type="MappingTable" />	
+ 	<xs:element name="DewarPositionerInitialPositionTable" type="PositionTable" />	
 	
 </xs:schema>

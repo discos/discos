@@ -12,9 +12,8 @@ module Receivers {
 
     interface SRTKBandDerotator : ACS::CharacteristicComponent, GenericDerotator {
  
-        /**
-         * Return the sensor position (not related to the user's reference 
-         * system) as a degree angle.
+        /** Computation of the sensor lenght
+         *
          * To get a sensor position we should send a PR (Position Request).
          * The response from the sensor contains the position in its three 
          * middle bytes. That bytes are converted from binary to decimal and 
@@ -60,10 +59,10 @@ module Receivers {
          * \f[
          *         $$\alpha^\circ = -DRT\_PS\_CF*(sensor\_length - DRT\_PS\_REFERENCE)$$
          * \f]
-         *
-         * @return sensor position as a degree angle
          */
-        readonly attribute ACS::ROdouble sensor_position;
+
+         /** return the engine position as a degree angle */
+        readonly attribute ACS::ROdouble enginePosition;
 
 
         /** 
@@ -94,13 +93,13 @@ module Receivers {
 
 
         /**
-         * Return the sensor position (double) in the user's reference system
+         * Return the engine position (double) in the user's reference system
          * Look at `doc/derotator_intro.pdf` to see more about user's reference system
          *
-         * @return the sensor position (double) in the user's reference system
+         * @return the engine position (double) in the user's reference system
          * @throw CORBA::SystemException
          */
-        double getSensorPosition();
+        double getEnginePosition();
 
 	};
 

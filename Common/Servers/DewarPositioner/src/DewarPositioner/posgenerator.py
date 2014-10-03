@@ -7,13 +7,24 @@ from IRAPy import logger
 
 class PosGenerator(object):
 
-    def __init__(self, timeout=5):
-        self.timeout = timeout
+    def __init__(self, zdtimeout=5):
+        self.zdtimeout = zdtimeout # Timeout in case of zero division error
       
     def goto(self, position):
         yield position
 
     def fixed(self, source, site_info):
+        """Generate a ...
+         
+        A better description...
+
+        :param source: object with ``_get_azimuth()`` and ``_get_elevation()``
+         methods
+        :param site_info: di
+        :type site_info: dict
+        :returns:  a position
+        :raises: PosGeneratorError
+        """
         try:
             latitude = radians(site_info['latitude'])
             az_obj = source._get_azimuth()
@@ -48,8 +59,8 @@ class PosGenerator(object):
                 except ZeroDivisionError:
                     logger.logWarning('zero division error computing tan(p)')
                     zerodiv_time = datetime.datetime.now() - last_zerodiv_time
-                    if zerodiv_time.seconds >= self.timeout:
-                        raeson = 'zero division for more than %ds' %self.timeout
+                    if zerodiv_time.seconds >= self.zdtimeout:
+                        raeson = 'zero division for more than %ds' %self.zdtimeout
                         logger.logError(raeson)
                         raise PosGeneratorError(raeson)
                     else:

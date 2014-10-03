@@ -20,13 +20,13 @@
     TrackingDelta="0.1"
     PositionExpireTime="0.010000"
 >
-    <sensor_position 
-        description="Sensor position" 
+    <enginePosition 
+        description="Engine position" 
         units="degree" 
         graph_min="0" graph_max="360" />
 
     <actPosition 
-        description="Actual position" 
+        description="Sensor actual position" 
         units="degree" 
         graph_min="0" graph_max="360" />
 

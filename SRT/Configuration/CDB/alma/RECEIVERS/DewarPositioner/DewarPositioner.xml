@@ -6,7 +6,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     UpdatingTime="0.1"
     RewindingSleepTime="1"
-    RewindingTimeout="120"
+    RewindingTimeout="200"
 >
 
     <status

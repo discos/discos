@@ -27,7 +27,7 @@ module Receivers {
      * <h3>Properties</h3>:
      * <p>The derotator has the following properties:</p>
      * <ul>
-     *     <li>actPosition: engine encoder position (ROdouble, degrees)</li>
+     *     <li>actPosition: sensor encoder position (ROdouble, degrees)</li>
      *     <li>cmdPosition: commanded position (RWdouble, degrees)</li>
      *     <li>positionDiff: difference between the actual and the commanded
      *     position</li>
@@ -43,6 +43,7 @@ module Receivers {
      * <h3>Methods</h3>:
      * <ul>
      *     <li>setup(): allow the derotator to be ready to move</li>
+     *     <li>powerOff(): switch the power amplifier off </li>
      *     <li>setPosition(): set the derotator position</li>
      *     <li>getActPosition(): return the actPosition value</li>
      *     <li>getCmdPosition(): return the cmdPosition value</li>
@@ -61,12 +62,14 @@ module Receivers {
     interface GenericDerotator : ACS::CharacteristicComponent {
        
         /** 
-         * This property returns the engine encoder position in the user
-         * reference system. That means its value is a degree angle,
+         * This property returns the sensor encoder position in the user
+         * reference system. In case the derotator has not a sensor device,
+         * it returns the engine encoder position.
+         * That means its value is a degree angle,
          * obtained by subtracting a "zero reference" from the plain value
-         * (in case converted as angle) got from the engine encoder.
+         * (in case converted as angle) got from the encoder.
          *
-         * @return the encoder engine position as degree angle, in the URS
+         * @return the sensor position as degree angle, in the URS
          */
         readonly attribute ACS::ROdouble actPosition;
 
@@ -111,11 +114,21 @@ module Receivers {
         /**
          * Enable the derotator to move
          * @throw CORBA::SystemException
+         * @throw DerotatorErrors::ConfigurationErrorEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
         void setup() raises (
             DerotatorErrors::ConfigurationErrorEx, 
             ComponentErrors::ComponentErrorsEx
         );
+
+
+        /** Switch the power amplifier off
+         *
+         * @throw CORBA::SystemException
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void powerOff() raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** 

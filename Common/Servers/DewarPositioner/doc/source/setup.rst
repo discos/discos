@@ -69,7 +69,7 @@ riferimento al component ``KBandDerotator``).
 Fatto ciò, vengono impostati i seguenti valori di default::
 
     DewarPositioner.setConfiguration('FIXED')
-    DewarPositioner.setStartingPosition(0) 
+    DewarPositioner.setPosition(0) 
     DewarPositioner.setRewindingMode('AUTO')
 
 La posizione ``0`` è quella scelta per l'allineamento iniziale. Ad esempio,

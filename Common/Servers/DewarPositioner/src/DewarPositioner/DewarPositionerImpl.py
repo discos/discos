@@ -19,7 +19,7 @@ import DerotatorErrorsImpl
 import DerotatorErrors 
 
 
-from DewarPositioner.configuration import CDBConf
+from DewarPositioner.cdbconf import CDBConf
 from DewarPositioner.positioner import Positioner, PositionerError, NotAllowedError
 from DewarPositioner.devios import StatusDevIO
 
@@ -51,12 +51,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self.cdbconf = CDBConf()
 
         try:
-            cdb_info = {
+            cdb_attributes = {
                 'updating_time': self.cdbconf.get_attribute('updating_time'),
                 'rewinding_timeout': self.cdbconf.get_attribute('rewinding_timeout'),
                 'rewinding_sleep_time': self.cdbconf.get_attribute('rewinding_sleep_time') 
             }
-            self.positioner = Positioner(cdb_info)
+            self.positioner = Positioner(cdb_attributes)
         except AttributeError, ex:
             logger.logWarning('cannot get the CDB attribute %s' %ex.message)
         except Exception, ex:
@@ -438,7 +438,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         else:
             method_name, types = DewarPositionerImpl.commands[command]
             # For instance:
-            # >>> DewarPositionerImpl.command['foo']
+            # >>> DewarPositionerImpl.commands['foo']
             # ('setup', (str, str, float))
             # >>> method_name, types = DewarPositionerImpl.commands[command]
             # >>> method_name

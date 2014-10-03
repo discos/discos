@@ -3,40 +3,51 @@ import threading
 import datetime
 import time
 
-import Antenna
-import ComponentErrorsImpl
-import ComponentErrors
-import DerotatorErrorsImpl
-import DerotatorErrors 
+import DerotatorErrors
 
-from maciErrType import CannotGetComponentEx
 from Acspy.Servants import ContainerServices
-from DewarPositioner.posgenerator import PosGenerator, PosGeneratorError
+from DewarPositioner.posgenerator import PosGenerator
 from IRAPy import logger
 
+__docformat__ = 'restructuredtext'
 
 class Positioner(object):
     general_lock = threading.Lock()
     rewinding_lock = threading.Lock()
 
     modes = {
-            'updating': ('FIXED', 'OPTIMIZED'),
+            'updating': ('FIXED', 'BSC'),
             'rewinding': ('AUTO', 'MANUAL')
     }
 
-    def __init__(self, cdb_info):
-        self.rewinding_timeout = cdb_info['rewinding_timeout']
-        self.rewinding_sleep_time = cdb_info['rewinding_sleep_time']
-        self.updating_time = cdb_info['updating_time']
+    def __init__(self, cdb_attributes):
+        """Initialize the `Positioner` by setting the default values.
+
+        :param cdb_attribute: {'attr_name': value} dictionary of CDB attributes
+        :type name: dict.
+        :returns:  None
+        """
+        self.rewinding_timeout = cdb_attributes['rewinding_timeout']
+        self.rewinding_sleep_time = cdb_attributes['rewinding_sleep_time']
+        self.updating_time = cdb_attributes['updating_time']
         self.control = Control()
         self.posgen = PosGenerator()
-        self._setDefaultConfiguration()
+        self._setDefault()
 
-    def setup(self, site_info, source, device, starting_position=0):
+    def setup(self, site_info, source, device, setup_position=0):
         """Configure the positioner.
-        
-        A setup() performs a call to Positioner.stopUpdating() in order to 
+
+        A `setup()` performs a call to Positioner.stopUpdating() in order to
         stop a previous active thread.
+
+        :param site_info: {'attr_name': value} dictionary of CDB attributes
+        :type site_info: dict.
+        :param source: object with the methods ``get_azimuth()``, `get_elevation()``
+         and ``_get_name()``
+        :param device: object with the ``GenericDerotator`` interface
+        :param setup_position: the device position commanded during the setup
+        :type setup_position: double
+        :raises: PositionerError
         """
         try:
             Positioner.general_lock.acquire()
@@ -46,11 +57,10 @@ class Positioner(object):
             self.site_info = site_info
             self.source = source
             self.device = device
-            self.control.starting_position = starting_position
             self.device.setup()
             self._clearOffset()
             self.is_configured = True
-            self._start(self.posgen.goto, self.control.starting_position)
+            self._start(self.posgen.goto, setup_position)
         except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
             raise PositionerError("cannot set the position: %s" %ex.message)
         except Exception, ex:
@@ -59,6 +69,7 @@ class Positioner(object):
             Positioner.general_lock.release()
 
     def isConfigured(self):
+        """Return True when the setup() is done properly"""
         return self.is_configured
 
     def getDeviceName(self):
@@ -68,6 +79,7 @@ class Positioner(object):
             raise NotAllowedError('positioner not configured: a setup() is required')
 
     def isReady(self):
+        """Return True when the device is ready to move"""
         return self.isConfigured() and self.device.isReady()
 
     def isSlewing(self):
@@ -80,12 +92,7 @@ class Positioner(object):
                self.isRewindingRequired()
 
     def setPosition(self, position):
-        target = (
-                self.control.starting_position +
-                self.control.offset +
-                self.control.rewinding_offset +
-                position
-        )
+        target = position + self.control.offset + self.control.rewinding_offset
         if self.device.getMinLimit() < target < self.device.getMaxLimit():
             try:
                 self.device.setPosition(target)
@@ -261,15 +268,15 @@ class Positioner(object):
             self.control.stop = False
             self.control.must_update = False
 
-    def park(self):
+    def park(self, park_position=0):
         if self.isConfigured():
             self.stopUpdating()
             try:
                 Positioner.general_lock.acquire()
                 self._clearOffset()
-                self._start(self.posgen.goto, self.control.starting_position)
+                self._start(self.posgen.goto, park_position)
                 self.is_configured = False
-                self._setDefaultConfiguration()
+                self._setDefault()
             finally:
                 Positioner.general_lock.release()
         else:
@@ -349,9 +356,6 @@ class Positioner(object):
 
     def getOffset(self):
         return self.control.offset
-
-    def getStartingPosition(self):
-        return self.control.starting_position
 
     def getRewindingOffset(self):
         return self.control.rewinding_offset
@@ -487,7 +491,7 @@ class Positioner(object):
         finally:
             Positioner.general_lock.release()
 
-    def _setDefaultConfiguration(self):
+    def _setDefault(self):
         self.is_configured = False
         self.t = None
         self.control = Control()
@@ -498,7 +502,6 @@ class Control(object):
         self.is_updating = False
         self.must_update = False
         self.stop = False
-        self.starting_position = 0.0
         self.offset = 0.0
         self.rewinding_offset = 0.0
         self.is_rewinding_required = False
