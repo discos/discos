@@ -11,7 +11,7 @@
 			 RepetitionExpireTime="10000000"
 			 StatusPersistenceTime="4000000"
 			 PropertiesUpdateTime="3000000"
-			 DewarPositionerInterface="IDL:alma/Receivers/DewarPositioner:1.0"> 
+			 DewarPositionerInterface=""> 
 
 <LO/>
 <actualSetup/>
