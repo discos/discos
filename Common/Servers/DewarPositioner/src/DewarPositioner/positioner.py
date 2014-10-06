@@ -54,7 +54,7 @@ class Positioner(object):
             self.device = device
             self.device.setup()
             self._clearOffset()
-            self.is_configured = True
+            self.is_setup = True
             self._start(self.posgen.goto, setupPosition)
         except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
             raise PositionerError("cannot set the position: %s" %ex.message)
@@ -63,25 +63,30 @@ class Positioner(object):
         finally:
             Positioner.generalLock.release()
 
+    def isSetup(self):
+        return self.is_setup
+
     def isConfigured(self):
-        """Return True when the setup() is done properly"""
-        return self.is_configured
+        return self.conf.isConfigured()
+
+    def getConfiguration(self):
+        return self.conf.getConfiguration()
 
     def getDeviceName(self):
-        if self.isConfigured():
+        if self.isSetup():
             return self.device._get_name()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
     def isReady(self):
         """Return True when the device is ready to move"""
-        return self.isConfigured() and self.device.isReady()
+        return self.isSetup() and self.device.isReady()
 
     def isSlewing(self):
-        return self.isConfigured() and self.device.isSlewing()
+        return self.isSetup() and self.device.isSlewing()
 
     def isTracking(self):
-        return self.isConfigured() and \
+        return self.isSetup() and \
                self.device.isTracking() and not \
                self.isRewinding() and not \
                self.isRewindingRequired()
@@ -106,14 +111,14 @@ class Positioner(object):
     def startUpdating(self):
         try:
             Positioner.generalLock.acquire()
-            if not self.isConfigured():
+            if not self.isSetup():
                 raise NotAllowedError('positioner not configured: a setup() is required')
-            elif not self.isConfiguredForUpdating():
-                raise NotAllowedError('not configured for updating: a setUpdatingMode() is required')
+            elif not self.conf.isSetup():
+                raise NotAllowedError('CDB not configured: a setConfiguration() is required')
             elif self.isUpdating():
                 raise NotAllowedError('the positionier is already updating: a stopUpdating() is required')
 
-            mode = self.getUpdatingMode()
+            mode = self.conf.getConfiguration()
             if mode == 'FIXED':
                 posgen = self.posgen.fixed
             elif mode == 'OPTIMIZED':
@@ -182,7 +187,7 @@ class Positioner(object):
             self.control.isUpdating = False
 
     def rewind(self, numberOfFeeds=None):
-        if not self.isConfigured():
+        if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
 
         try:
@@ -214,7 +219,7 @@ class Positioner(object):
             Positioner.rewindingLock.release()
 
     def getRewindingParameters(self, numberOfFeeds=None):
-        if not self.isConfigured():
+        if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
 
         if numberOfFeeds != None and numberOfFeeds <= 0:
@@ -244,7 +249,7 @@ class Positioner(object):
         return (actPos, rewinding_value)
 
     def getMaxRewindingFeeds(self):
-        if not self.isConfigured():
+        if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
         else:
             full_range = self.device.getMaxLimit() - self.device.getMinLimit()
@@ -264,28 +269,17 @@ class Positioner(object):
             self.control.mustUpdate = False
 
     def park(self, parkPosition=0):
-        if self.isConfigured():
+        if self.isSetup():
             self.stopUpdating()
             try:
                 Positioner.generalLock.acquire()
                 self._clearOffset()
                 self._start(self.posgen.goto, parkPosition)
-                self.is_configured = False
                 self._setDefault()
             finally:
                 Positioner.generalLock.release()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
-
-    def setUpdatingMode(self, mode):
-        self._setMode('updating', mode)
-
-    def clearUpdatingMode(self):
-        try:
-            Positioner.generalLock.acquire()
-            self.control.modes['updating'] = ''
-        finally:
-            Positioner.generalLock.release()
 
     def setRewindingMode(self, mode):
         self._setMode('rewinding', mode)
@@ -295,16 +289,9 @@ class Positioner(object):
         if mode == 'MANUAL':
             self.clearAutoRewindingFeeds()
 
-    def isConfiguredForUpdating(self):
-        """Return True if an updating mode has been selected"""
-        return bool(self.control.modes['updating'])
-
-    def isConfiguredForRewinding(self):
+    def isSetupForRewinding(self):
         """Return True if a rewinding mode has been selected"""
         return bool(self.control.modes['rewinding'])
-
-    def getUpdatingMode(self):
-        return self.control.modes['updating']
 
     def getRewindingMode(self):
         return self.control.modes['rewinding']
@@ -322,7 +309,7 @@ class Positioner(object):
         return self.control.isUpdating
 
     def setOffset(self, offset):
-        if not self.isConfigured():
+        if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
         else:
             self._setOffset(offset) # set the flag
@@ -355,13 +342,13 @@ class Positioner(object):
         return self.control.isRewinding
 
     def getPosition(self):
-        if self.isConfigured():
+        if self.isSetup():
             return self.device.getActPosition()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
     def setAutoRewindingFeeds(self, numberOfFeeds):
-        if self.isConfigured():
+        if self.isSetup():
             max_rewinding_feeds = self.getMaxRewindingFeeds()
             if numberOfFeeds > max_rewinding_feeds:
                 raise NotAllowedError('max number of feeds: {%d} (%s given)'
@@ -381,7 +368,7 @@ class Positioner(object):
 
     def _start(self, posgen, *vargs):
         """Start a new process that computes and sets the position"""
-        if self.isConfigured():
+        if self.isSetup():
             self.stopUpdating() # Raise a PositionerError if the process stills alive
             self.t = ContainerServices.ContainerServices().getThread(
                     name=posgen.__name__, 
@@ -390,7 +377,7 @@ class Positioner(object):
             )
             self.t.start()
         else:
-            raise NotAllowedError('positioner not configured: a setup() is required')
+            raise NotAllowedError('not configured: a setConfiguration() is required')
 
     def getStatus(self):
         """Read the status of the device and return a string.
@@ -411,7 +398,7 @@ class Positioner(object):
         """
         try:
             Positioner.generalLock.acquire()
-            if not self.isConfigured():
+            if not self.isSetup():
                 raise NotAllowedError('positioner not configured: a setup() is required')
 
             failure = False
@@ -480,9 +467,10 @@ class Positioner(object):
             Positioner.generalLock.release()
 
     def _setDefault(self):
-        self.is_configured = False
         self.t = None
+        self.is_setup = False
         self.control = Control()
+        self.conf.clearConfiguration()
 
 
 class Control(object):

@@ -18,7 +18,8 @@ class CDBConf(object):
     mappingAttributes = (
             'DerotatorName', 
             'SetupPosition',
-            'ParkPosition'
+            'ParkPosition',
+            'DefaultConfiguration',
     )
 
     def __init__(
@@ -40,6 +41,7 @@ class CDBConf(object):
         self._setPath(name='mapping', path=mappingPath)
         self._makeAttr(self.mappingPath, CDBConf.mappingAttributes)
         self.setupCode = setupCode
+        self.setConfiguration(self.getAttribute('DefaultConfiguration'))
 
     def setConfiguration(self, configurationCode):
         if self.setupCode:
@@ -56,14 +58,20 @@ class CDBConf(object):
         self._makeRecords(
             dictName='initialPosition',
             path=os.path.join(self.configurationPath, 'InitialPosition'))
-        self.isConfigured = True
+        self._isConfigured = True
+
+    def clearConfiguration(self):
+        self._setDefaults()
+
+    def isConfigured(self):
+        return self._isConfigured
 
     def getConfiguration(self):
         return self.configurationCode
 
     def getInitialPosition(self, axisCode):
         """Take an axis and return its initial position"""
-        if not self.isConfigured:
+        if not self._isConfigured:
             raeson = "DewarPotitioner not configured"
             logger.logError(raeson)
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
@@ -209,7 +217,7 @@ class CDBConf(object):
             raise exc
 
     def _setDefaults(self):
-        self.isConfigured = False
+        self._isConfigured = False
         self.setupCode = '' # For instance, KKG
         self.configurationCode = '' # For instance, BSC
         self.setupPath = '' # Path to the directory code (ie. to KKG)

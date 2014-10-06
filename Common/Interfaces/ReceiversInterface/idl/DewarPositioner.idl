@@ -148,10 +148,6 @@ module Receivers {
         boolean isConfigured();
 
 
-        /** Return true if an updating mode has been selected */
-        boolean isConfiguredForUpdating();
-
-
         /** Return true if a rewinding mode has been selected */
         boolean isConfiguredForRewinding();
 
@@ -220,13 +216,10 @@ module Receivers {
             ComponentErrors::UnexpectedEx
         );
 
+        /** Get the configuration code */
+        string getConfiguration();
 
-        /** Clear the updating mode */
-        void clearUpdatingMode();
 
-
-        /** Get the updating mode */
-        string getUpdatingMode();
 
 
         /** Return true when the derotator is rewinding */

@@ -40,8 +40,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         'derotatorStopUpdating': ('stopUpdating', ()),
         'derotatorSetOffset': ('setOffset', (float,)),
         'derotatorClearOffset': ('clearOffset',),
-        'derotatorSetUpdatingMode': ('setUpdatingMode', (str,)),
-        'derotatorClearUpdatingMode': ('clearUpdatingMode', ()),
+        'derotatorSetConfiguration': ('setConfiguration', (str,)),
         'derotatorSetRewindingMode': ('setRewindingMode', (str,)),
     }
 
@@ -49,20 +48,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         cc.__init__(self)
         services.__init__(self)
         self.cdbconf = CDBConf()
-
-        try:
-            cdbAttributes = {
-                'UpdatingTime': self.cdbconf.getAttribute('UpdatingTime'),
-                'RewindingTimeout': self.cdbconf.getAttribute('RewindingTimeout'),
-                'RewindingSleepTime': self.cdbconf.getAttribute('RewindingSleepTime') 
-            }
-            self.positioner = Positioner(self.cdbconf)
-        except AttributeError, ex:
-            logger.logWarning('cannot get the CDB attribute %s' %ex.message)
-        except Exception, ex:
-            logger.logWarning('cannot get the CDB attributes: %s' %ex.message)
-
-        self._setDefaultConfiguration() 
+        self.positioner = Positioner(self.cdbconf)
+        self._setDefaultSetup() 
         self.client = PySimpleClient()
         self.control = Control()
         try:
@@ -106,8 +93,6 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
     def setup(self, code):
         self.commandedSetup = code.upper()
         self.cdbconf.setup(self.commandedSetup)
-        self.setupPosition = self.cdbconf.getAttribute('SetupPosition') 
-        self.parkPosition = self.cdbconf.getAttribute('ParkPosition') 
         deviceName = self.cdbconf.getAttribute('DerotatorName')
         try:
             device = self.client.getComponent(deviceName)
@@ -140,7 +125,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             source = None
 
         try:
-            self.positioner.setup(siteInfo, source, device, setupPosition)
+            self.positioner.setup(
+                    siteInfo, 
+                    source, 
+                    device, 
+                    float(self.cdbconf.getAttribute('SetupPosition')))
+            self.setConfiguration('FIXED')
             self.setRewindingMode('AUTO')
             self.actualSetup = self.commandedSetup
         except PositionerError, ex:
@@ -156,8 +146,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def park(self):
         try:
-            self.positioner.park(self.parkPosition)
-            self._setDefaultConfiguration()
+            parkPosition = float(self.cdbconf.getAttribute('ParkPosition'))
+            self.positioner.park(parkPosition)
+            self._setDefaultSetup()
         except NotAllowedError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
@@ -240,7 +231,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         return self.positioner.isRewinding()
 
     def isConfigured(self):
-        return self.positioner.isConfigured()
+        return self.cdbconf.isConfigured()
 
     def isConfiguredForUpdating(self):
         """Return True if an updating mode has been selected"""
@@ -337,21 +328,6 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
     def getCommandedSetup(self):
         return self.commandedSetup
 
-    def setUpdatingMode(self, mode):
-        try:
-            self.positioner.setUpdatingMode(mode.upper())
-        except PositionerError, ex:
-            raeson = 'cannot set the updating mode: %s' %ex.message
-            logger.logError(raeson)
-            exc = ComponentErrorsImpl.ValidationErrorExImpl()
-            exc.setReason(raeson)
-            raise exc # Can happen only in case of wrong system input
-
-    def clearUpdatingMode(self):
-        self.positioner.clearUpdatingMode()
-
-    def getUpdatingMode(self):
-        return self.positioner.getUpdatingMode()
 
     def setRewindingMode(self, mode):
         try:
@@ -365,21 +341,17 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
 
     def setConfiguration(self, confCode):
-        code = confCode.upper()
-        self.cdbconf.setConfiguration(code) # Raises ValidationErrorExImpl
-        self.positioner.setConfiguration(code)
+        self.cdbconf.setConfiguration(confCode.upper())
 
     def getConfiguration(self):
-        raise self.cdbconf.getConfiguration()
+        raise self.positioner.getConfiguration()
 
     def getRewindingMode(self):
         return self.positioner.getRewindingMode()
 
-    def _setDefaultConfiguration(self):
+    def _setDefaultSetup(self):
         self.actualSetup = 'unknown'
         self.commandedSetup = ''
-        self.setupPosition = 0.0
-        self.parkPosition = 0.0
 
     @staticmethod
     def publisher(positioner, supplier, control, sleep_time=1):

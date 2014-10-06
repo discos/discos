@@ -25,6 +25,7 @@ class PositionerSetupTest(unittest2.TestCase):
     def test_starting_pos(self):
         """Verify it sets properly the starting position"""
         p = Positioner(self.cdbconf)
+        self.cdbconf.setup('KKG')
         p.setup(siteInfo={}, source=None, device=self.device, setupPosition=2)
         time.sleep(0.5) if self.using_mock else time.sleep(2)
         self.assertEqual(p.getPosition(), 2)
@@ -34,6 +35,20 @@ class PositionerSetupTest(unittest2.TestCase):
         p = Positioner(self.cdbconf)
         p.setup(siteInfo={}, source=None, device=self.device)
         self.assertEqual(p.getDeviceName(), self.device._get_name())
+
+    def test_configuration(self):
+        """Verify the setup() sets the default configuration"""
+        p = Positioner(self.cdbconf)
+        self.assertEqual(p.isConfigured(), False)
+        self.assertEqual(p.getConfiguration(), '')
+        p.setup(siteInfo={}, source=None, device=self.device)
+        self.assertEqual(p.isConfigured(), False)
+        self.assertEqual(p.getConfiguration(), '')
+        self.assertEqual(p.isSetup(), True)
+        self.cdbconf.setup('KKG')
+        self.assertEqual(p.isConfigured(), True)
+        self.assertEqual(p.getConfiguration(), 'FIXED')
+
 
 
 if __name__ == '__main__':

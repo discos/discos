@@ -10,7 +10,7 @@ from DewarPositioner.cdbconf import CDBConf
 class PositionerStartUpdatingTest(unittest2.TestCase):
 
     def test_notYetConfigured(self):
-        """Verify isConfiguredForUpdating() and startUpdating()"""
+        """Verify startUpdating()"""
         try:
             client = PySimpleClient()
             device = client.getComponent('RECEIVERS/SRTKBandDerotator')
@@ -23,21 +23,16 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         p = Positioner(cdbconf)
         # startUpdating() raises NotAllowedError when the system is not configured
         self.assertRaises(NotAllowedError, p.startUpdating)
+        self.assertEqual(p.isConfigured(), False)
         p.setup(siteInfo={}, source=None, device=device)
-        # isConfiguredForUpdating() returns False when the system is not configured
-        self.assertEqual(p.isConfiguredForUpdating(), False)
-        # startUpdating() raises NotAllowedError when updating mode is not yet selected
+        # startUpdating() raises NotAllowedError when the system is not configured
         self.assertRaises(NotAllowedError, p.startUpdating)
-        p.setUpdatingMode('FIXED')
-        # isConfiguredForUpdating() returns True after a setUpdatingMode()
-        self.assertEqual(p.isConfiguredForUpdating(), True)
+        cdbconf.setup('KKG')
+        time.sleep(0.1)
         self.assertRaises(NotAllowedError, p.startUpdating)
         with self.assertRaisesRegexp(NotAllowedError, '^no site information'):
             p.startUpdating()
         p.setup(siteInfo={'foo': 'foo'}, source=None, device=device)
-        with self.assertRaisesRegexp(NotAllowedError, '^not configured for updating'):
-            p.startUpdating()
-        p.setUpdatingMode('FIXED')
         with self.assertRaisesRegexp(NotAllowedError, 'no source available'):
             p.startUpdating()
 
