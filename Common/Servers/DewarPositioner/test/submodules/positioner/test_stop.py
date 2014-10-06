@@ -19,12 +19,12 @@ class PositionerStopTest(unittest2.TestCase):
             device = MockDevice()
 
         cdb_info = {
-                'updating_time': 0.1,
-                'rewinding_timeout': 1.5,
-                'rewinding_sleep_time': 1
+                'UpdatingTime': 0.1,
+                'RewindingTimeout': 1.5,
+                'RewindingSleepTime': 1
         }
         p = Positioner(cdb_info)
-        p.setup(site_info={}, source=None, device=device)
+        p.setup(siteInfo={}, source=None, device=device)
         def foo():
             time.sleep(0.5)
             yield 0

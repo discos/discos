@@ -10,9 +10,9 @@ class PositionerOffsetTest(unittest2.TestCase):
 
     def setUp(self):
         cdb_info = {
-                'updating_time': 0.1,
-                'rewinding_timeout': 1.5,
-                'rewinding_sleep_time': 1
+                'UpdatingTime': 0.1,
+                'RewindingTimeout': 1.5,
+                'RewindingSleepTime': 1
         }
         self.p = Positioner(cdb_info)
         try:
@@ -33,7 +33,7 @@ class PositionerOffsetTest(unittest2.TestCase):
         """Verify the set and get methods"""
         # Not allowed when the system is not yet configured
         self.assertRaises(NotAllowedError, self.p.setOffset, 2)
-        self.p.setup(site_info={}, source=None, device=self.device)
+        self.p.setup(siteInfo={}, source=None, device=self.device)
         self.p.setOffset(2)
         self.assertEqual(self.p.getOffset(), 2)
         self.p.clearOffset()
@@ -41,7 +41,7 @@ class PositionerOffsetTest(unittest2.TestCase):
 
     def test_set_new_pos(self):
         """Vefify the setOffset set a new position."""
-        self.p.setup(site_info={}, source=None, device=self.device)
+        self.p.setup(siteInfo={}, source=None, device=self.device)
         time.sleep(0.5) if self.using_mock else time.sleep(1)
         act_position = self.device.getActPosition()
         offset = 1.5
@@ -60,7 +60,7 @@ class PositionerOffsetTest(unittest2.TestCase):
 
     def test_out_of_range(self):
         """Cause a rewind in case the offset is out of range"""
-        self.p.setup(site_info={}, source=None, device=self.device)
+        self.p.setup(siteInfo={}, source=None, device=self.device)
         self.p.setRewindingMode('AUTO')
         time.sleep(0.5) # Wait for the setup
         actual_pos = 100

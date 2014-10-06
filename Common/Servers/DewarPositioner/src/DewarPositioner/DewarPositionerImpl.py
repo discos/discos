@@ -51,12 +51,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self.cdbconf = CDBConf()
 
         try:
-            cdb_attributes = {
-                'updating_time': self.cdbconf.get_attribute('updating_time'),
-                'rewinding_timeout': self.cdbconf.get_attribute('rewinding_timeout'),
-                'rewinding_sleep_time': self.cdbconf.get_attribute('rewinding_sleep_time') 
+            cdbAttributes = {
+                'UpdatingTime': self.cdbconf.getAttribute('UpdatingTime'),
+                'RewindingTimeout': self.cdbconf.getAttribute('RewindingTimeout'),
+                'RewindingSleepTime': self.cdbconf.getAttribute('RewindingSleepTime') 
             }
-            self.positioner = Positioner(cdb_attributes)
+            self.positioner = Positioner(cdbAttributes)
         except AttributeError, ex:
             logger.logWarning('cannot get the CDB attribute %s' %ex.message)
         except Exception, ex:

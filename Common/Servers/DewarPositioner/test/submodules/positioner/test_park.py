@@ -9,15 +9,15 @@ from DewarPositioner.positioner import Positioner, NotAllowedError
 class PositionerParkTest(unittest2.TestCase):
 
     def setUp(self):
-        self.cdb_info = {
-                'updating_time': 0.1,
-                'rewinding_timeout': 1.5,
-                'rewinding_sleep_time': 1
+        self.cdbInfo = {
+                'UpdatingTime': 0.1,
+                'RewindingTimeout': 1.5,
+                'RewindingSleepTime': 1
         }
 
     def test_notConfigured(self):
         """Verify it raises an exception if not yet configured"""
-        p = Positioner(self.cdb_info)
+        p = Positioner(self.cdbInfo)
         self.assertRaises(NotAllowedError, p.park)
 
     def test_set_park_position(self):
@@ -32,8 +32,8 @@ class PositionerParkTest(unittest2.TestCase):
             device = MockDevice()
             using_mock = True
 
-        p = Positioner(self.cdb_info)
-        p.setup(site_info={}, source=None, device=device)
+        p = Positioner(self.cdbInfo)
+        p.setup(siteInfo={}, source=None, device=device)
         time.sleep(0.5) if using_mock else time.sleep(2)
         offset = 2
         p.setOffset(offset)

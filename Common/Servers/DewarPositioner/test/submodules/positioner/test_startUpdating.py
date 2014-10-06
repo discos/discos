@@ -18,14 +18,14 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             from DewarPositionerMockers.mock_components import MockDevice
             device = MockDevice()
         cdb_info = {
-                'updating_time': 0.1,
-                'rewinding_timeout': 1.5,
-                'rewinding_sleep_time': 1
+                'UpdatingTime': 0.1,
+                'RewindingTimeout': 1.5,
+                'RewindingSleepTime': 1
         }
         p = Positioner(cdb_info)
         # startUpdating() raises NotAllowedError when the system is not configured
         self.assertRaises(NotAllowedError, p.startUpdating)
-        p.setup(site_info={}, source=None, device=device)
+        p.setup(siteInfo={}, source=None, device=device)
         # isConfiguredForUpdating() returns False when the system is not configured
         self.assertEqual(p.isConfiguredForUpdating(), False)
         # startUpdating() raises NotAllowedError when updating mode is not yet selected
@@ -36,7 +36,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.assertRaises(NotAllowedError, p.startUpdating)
         with self.assertRaisesRegexp(NotAllowedError, '^no site information'):
             p.startUpdating()
-        p.setup(site_info={'foo': 'foo'}, source=None, device=device)
+        p.setup(siteInfo={'foo': 'foo'}, source=None, device=device)
         with self.assertRaisesRegexp(NotAllowedError, '^not configured for updating'):
             p.startUpdating()
         p.setUpdatingMode('FIXED')

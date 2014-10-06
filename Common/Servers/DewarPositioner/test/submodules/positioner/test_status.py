@@ -13,9 +13,9 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.m = mocker.Mocker()
         self.device = self.m.patch(MockDevice())
         cdb_info = {
-                'updating_time': 0.1,
-                'rewinding_timeout': 1.5,
-                'rewinding_sleep_time': 1
+                'UpdatingTime': 0.1,
+                'RewindingTimeout': 1.5,
+                'RewindingSleepTime': 1
         }
         self.p = Positioner(cdb_info)
 
@@ -31,7 +31,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         """After a setup, just the tracking bit is high in case the device is not ready"""
         self.device = MockDevice()
         self.p.setup(
-                site_info={}, 
+                siteInfo={}, 
                 source=None, 
                 device=self.device)
         time.sleep(0.2)
@@ -44,7 +44,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.m.throw(RuntimeError)
         self.m.replay()
         self.p.setup(
-                site_info={}, 
+                siteInfo={}, 
                 source=None, 
                 device=self.device)
         self.assertEqual(self.p.getStatus(), '100000')
@@ -55,7 +55,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.m.result('foo')
         self.m.replay()
         self.p.setup(
-                site_info={}, 
+                siteInfo={}, 
                 source=None, 
                 device=self.device)
         self.assertEqual(self.p.getStatus(), '100000')
@@ -66,7 +66,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.m.result(Property(1, Completion(1)))
         self.m.replay()
         self.p.setup(
-                site_info={}, 
+                siteInfo={}, 
                 source=None, 
                 device=self.device)
         self.assertEqual(self.p.getStatus(), '100000')
@@ -84,7 +84,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.m.count(1, None)
         self.m.replay()
         self.p.setup(
-                site_info={}, 
+                siteInfo={}, 
                 source=None, 
                 device=self.device)
         time.sleep(0.2)
@@ -99,7 +99,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.m.count(1, None)
         self.m.replay()
         self.p.setup(
-                site_info={}, 
+                siteInfo={}, 
                 source=None, 
                 device=self.device)
         time.sleep(0.2)
@@ -111,7 +111,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.m.result(Property(2, Completion()))
         self.m.replay()
         self.p.setup(
-                site_info={}, 
+                siteInfo={}, 
                 source=None, 
                 device=self.device)
         time.sleep(0.2)
@@ -123,7 +123,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.m.result(Property(4, Completion()))
         self.m.replay()
         self.p.setup(
-                site_info={}, 
+                siteInfo={}, 
                 source=None, 
                 device=self.device)
         time.sleep(0.2)
@@ -135,7 +135,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.m.result(Property(8, Completion()))
         self.m.replay()
         self.p.setup(
-                site_info={}, 
+                siteInfo={}, 
                 source=None, 
                 device=self.device)
         time.sleep(0.2)
@@ -147,7 +147,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.m.throw(RuntimeError)
         self.m.replay()
         self.p.setup(
-                site_info={}, 
+                siteInfo={}, 
                 source=None, 
                 device=self.device)
         time.sleep(0.2)

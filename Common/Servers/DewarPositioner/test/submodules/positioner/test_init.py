@@ -9,9 +9,9 @@ class PositionerInitTest(unittest2.TestCase):
     def test___init__(self):
         """Verify the right behavior of the initializer"""
         cdb_info = {
-                'updating_time': 0.1,
-                'rewinding_timeout': 1.5,
-                'rewinding_sleep_time': 1
+                'UpdatingTime': 0.1,
+                'RewindingTimeout': 1.5,
+                'RewindingSleepTime': 1
         }
         p = Positioner(cdb_info)
         self.assertEqual(p.isUpdating(), False)
