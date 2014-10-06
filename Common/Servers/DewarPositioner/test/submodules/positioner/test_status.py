@@ -3,6 +3,7 @@ import random
 import time
 from maciErrType import CannotGetComponentEx
 from DewarPositioner.positioner import Positioner, NotAllowedError, PositionerError
+from DewarPositioner.cdbconf import CDBConf
 from DewarPositionerMockers.mock_components import MockDevice, Property, Completion
 
 import mocker
@@ -12,12 +13,8 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
     def setUp(self):
         self.m = mocker.Mocker()
         self.device = self.m.patch(MockDevice())
-        cdb_info = {
-                'UpdatingTime': 0.1,
-                'RewindingTimeout': 1.5,
-                'RewindingSleepTime': 1
-        }
-        self.p = Positioner(cdb_info)
+        cdbconf = CDBConf()
+        self.p = Positioner(cdbconf)
 
     def tearDown(self):
         self.m.restore()

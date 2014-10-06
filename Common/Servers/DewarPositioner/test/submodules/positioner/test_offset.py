@@ -3,18 +3,15 @@ import time
 import unittest2
 from maciErrType import CannotGetComponentEx
 from DewarPositioner.positioner import Positioner, NotAllowedError
+from DewarPositioner.cdbconf import CDBConf
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
 class PositionerOffsetTest(unittest2.TestCase):
 
     def setUp(self):
-        cdb_info = {
-                'UpdatingTime': 0.1,
-                'RewindingTimeout': 1.5,
-                'RewindingSleepTime': 1
-        }
-        self.p = Positioner(cdb_info)
+        cdbconf = CDBConf()
+        self.p = Positioner(cdbconf)
         try:
             client = PySimpleClient()
             self.device = client.getComponent('RECEIVERS/SRTKBandDerotator')

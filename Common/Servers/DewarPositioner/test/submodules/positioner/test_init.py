@@ -2,18 +2,15 @@ import unittest2
 import random
 import time
 from DewarPositioner.positioner import Positioner, NotAllowedError
+from DewarPositioner.cdbconf import CDBConf
 
 
 class PositionerInitTest(unittest2.TestCase):
 
     def test___init__(self):
         """Verify the right behavior of the initializer"""
-        cdb_info = {
-                'UpdatingTime': 0.1,
-                'RewindingTimeout': 1.5,
-                'RewindingSleepTime': 1
-        }
-        p = Positioner(cdb_info)
+        cdbconf = CDBConf()
+        p = Positioner(cdbconf)
         self.assertEqual(p.isUpdating(), False)
         self.assertEqual(p.isConfigured(), False)
         self.assertEqual(p.isTerminated(), True)

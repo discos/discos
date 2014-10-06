@@ -5,6 +5,7 @@ import unittest2
 import mocker
 
 from DewarPositioner.positioner import Positioner, PositionerError, NotAllowedError
+from DewarPositioner.cdbconf import CDBConf
 from DewarPositionerMockers.mock_components import MockDevice
 
 class RewindTest(unittest2.TestCase):
@@ -12,12 +13,9 @@ class RewindTest(unittest2.TestCase):
     def setUp(self):
         self.device = MockDevice()
         self.m = mocker.Mocker()
-        self.cdb_info = {
-                'UpdatingTime': 0.1,
-                'RewindingTimeout': 1.5,
-                'RewindingSleepTime': 1
-        }
-        self.p = Positioner(self.cdb_info)
+        self.cdbconf = CDBConf()
+        self.cdbconf.attributes['RewindingTimeout'] = '2.0'
+        self.p = Positioner(self.cdbconf)
         self.p.setup(siteInfo={}, source=None, device=self.device)
 
     def tearDown(self):
@@ -45,7 +43,7 @@ class RewindTest(unittest2.TestCase):
 
     def test_timeout_exceeded(self):
         """Raise PositionerError when the timeout is exceeded"""
-        timeout = self.cdb_info['RewindingTimeout']
+        timeout = float(self.cdbconf.getAttribute('RewindingTimeout'))
         setattr(self.device, 'is_tracking', False)
         with self.assertRaisesRegexp(PositionerError, '%ss exceeded' %timeout):
             self.p.rewind(numberOfFeeds=2)
@@ -59,8 +57,8 @@ class RewindTest(unittest2.TestCase):
                    args=(n,)
         )
         self.assertEqual(self.p.isRewinding(), False)
-        timeout = self.cdb_info['RewindingTimeout'] 
-        sleep_time = self.cdb_info['RewindingSleepTime']
+        timeout = float(self.cdbconf.getAttribute('RewindingTimeout'))
+        sleep_time = float(self.cdbconf.getAttribute('RewindingSleepTime'))
         requests = timeout / sleep_time
         self.device = self.m.patch(self.device)
         self.device.isTracking()
@@ -72,11 +70,11 @@ class RewindTest(unittest2.TestCase):
         self.m.count(1, None)
         self.m.replay()
         t.start()
-        time.sleep(self.cdb_info['RewindingTimeout'] / 2.0)
+        time.sleep(timeout / 2.0)
         self.assertEqual(self.p.isRewinding(), True)
         self.assertEqual(self.p.isRewindingRequired(), False)
         self.assertEqual(self.p.isTracking(), False)
-        time.sleep(self.cdb_info['RewindingTimeout'])
+        time.sleep(timeout)
         self.assertEqual(self.p.isRewinding(), False)
 
     def test_tracking_when_rewinding_required(self):

@@ -17,6 +17,8 @@
 
     <xs:complexType name="DewarPositionerMappingType">
         <xs:attribute name="DerotatorName" type="xs:string" use="required" />
+        <xs:attribute name="SetupPosition" type="xs:string" use="required" />
+        <xs:attribute name="ParkPosition" type="xs:string" use="required" />
     </xs:complexType>
 
     <xs:element name="DewarPositionerMapping" type="DewarPositionerMappingType"/>

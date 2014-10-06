@@ -5,6 +5,7 @@ import time
 from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 from DewarPositioner.positioner import Positioner, NotAllowedError
+from DewarPositioner.cdbconf import CDBConf
 
 class PositionerStartUpdatingTest(unittest2.TestCase):
 
@@ -17,12 +18,9 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             print '\nINFO -> component not available: we will use a mock device'
             from DewarPositionerMockers.mock_components import MockDevice
             device = MockDevice()
-        cdb_info = {
-                'UpdatingTime': 0.1,
-                'RewindingTimeout': 1.5,
-                'RewindingSleepTime': 1
-        }
-        p = Positioner(cdb_info)
+        cdbconf = CDBConf()
+        cdbconf.attributes['RewindingTimeout'] = 2
+        p = Positioner(cdbconf)
         # startUpdating() raises NotAllowedError when the system is not configured
         self.assertRaises(NotAllowedError, p.startUpdating)
         p.setup(siteInfo={}, source=None, device=device)

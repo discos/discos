@@ -205,17 +205,17 @@ module Receivers {
         string getRewindingMode();
 
 
-        /** Set the updating mode to "FIXED" or "OPTIMIZED"
+        /** Set the configuration to "FIXED", "BSC", "OPTIMIZED", ecc.
          *
          * This method does not start the updating, but just enable it. Once the updating mode is
          * selected, the updating can be started by calling the startUpdating() method.
          * See the documentation for more details about the mode meaning.
          *
-         * @param mode the updating mode ("FIXED" or "OPTIMIZED")
+         * @param mode the updating mode ("FIXED", "BSC", ...)
          * @throw ComponentErrors::ValidationErrorEx
          * @throw ComponentErrors::UnexpectedEx
          */
-        void setUpdatingMode(in string mode) raises (
+        void setConfiguration(in string mode) raises (
             ComponentErrors::ValidationErrorEx,
             ComponentErrors::UnexpectedEx
         );

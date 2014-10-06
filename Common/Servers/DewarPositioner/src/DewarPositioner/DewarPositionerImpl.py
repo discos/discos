@@ -56,7 +56,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 'RewindingTimeout': self.cdbconf.getAttribute('RewindingTimeout'),
                 'RewindingSleepTime': self.cdbconf.getAttribute('RewindingSleepTime') 
             }
-            self.positioner = Positioner(cdbAttributes)
+            self.positioner = Positioner(self.cdbconf)
         except AttributeError, ex:
             logger.logWarning('cannot get the CDB attribute %s' %ex.message)
         except Exception, ex:
@@ -74,12 +74,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(ex.message)
 
         try:
-            self.status_thread = services().getThread(
+            self.statusThread = services().getThread(
                     name='Publisher',
                     target=DewarPositionerImpl.publisher,
                     args=(self.positioner, self.supplier, self.control)
             )
-            self.status_thread.start()
+            self.statusThread.start()
         except AttributeError, ex:
             logger.logWarning('supplier not available')
             logger.logDebug('supplier not available: %s' %ex.message)
@@ -93,9 +93,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             self.control.stop = True
             self.supplier.disconnect()
-            self.status_thread.join(timeout=5)
-            if self.status_thread.isAlive():
-                logger.logError('thread %s is alive' %self.status_thread.getName())
+            self.statusThread.join(timeout=5)
+            if self.statusThread.isAlive():
+                logger.logError('thread %s is alive' %self.statusThread.getName())
         except AttributeError:
             logger.logDebug('self has no attribute `supplier`: %s' %ex.message)
         except Exception, ex:
@@ -106,12 +106,13 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
     def setup(self, code):
         self.commandedSetup = code.upper()
         self.cdbconf.setup(self.commandedSetup)
-        device_name = self.cdbconf.get_entry('derotator_name')
-        starting_position = self.cdbconf.get_entry('starting_position') 
+        self.setupPosition = self.cdbconf.getAttribute('SetupPosition') 
+        self.parkPosition = self.cdbconf.getAttribute('ParkPosition') 
+        deviceName = self.cdbconf.getAttribute('DerotatorName')
         try:
-            device = self.client.getComponent(device_name)
+            device = self.client.getComponent(deviceName)
         except CannotGetComponentEx, ex:
-            raeson = "cannot get the %s component: %s" %(device_name, ex.message)
+            raeson = "cannot get the %s component: %s" %(deviceName, ex.message)
             logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
@@ -126,20 +127,20 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             observatory = self.client.getComponent('ANTENNA/Observatory')
             lat_obj = observatory._get_latitude()
             latitude, compl = lat_obj.get_sync()
-            site_info = {'latitude': latitude}
+            siteInfo = {'latitude': latitude}
         except Exception, ex:
             logger.logWarning('cannot get the site information: %s' %ex.message)
-            site_info = {}
+            siteInfo = {}
 
         try:
-            source_name = 'ANTENNA/Mount'
-            source = self.client.getComponent(source_name)
+            sourceName = 'ANTENNA/Mount'
+            source = self.client.getComponent(sourceName)
         except Exception:
-            logger.logWarning('cannot get the %s component' %source_name)
+            logger.logWarning('cannot get the %s component' %sourceName)
             source = None
 
         try:
-            self.positioner.setup(site_info, source, device, starting_position)
+            self.positioner.setup(siteInfo, source, device, setupPosition)
             self.setRewindingMode('AUTO')
             self.actualSetup = self.commandedSetup
         except PositionerError, ex:
@@ -155,7 +156,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def park(self):
         try:
-            self.positioner.park()
+            self.positioner.park(self.parkPosition)
             self._setDefaultConfiguration()
         except NotAllowedError, ex:
             logger.logError(ex.message)
@@ -362,12 +363,23 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(raeson)
             raise exc # Can happen only in case of wrong system input
 
+
+    def setConfiguration(self, confCode):
+        code = confCode.upper()
+        self.cdbconf.setConfiguration(code) # Raises ValidationErrorExImpl
+        self.positioner.setConfiguration(code)
+
+    def getConfiguration(self):
+        raise self.cdbconf.getConfiguration()
+
     def getRewindingMode(self):
         return self.positioner.getRewindingMode()
 
     def _setDefaultConfiguration(self):
         self.actualSetup = 'unknown'
         self.commandedSetup = ''
+        self.setupPosition = 0.0
+        self.parkPosition = 0.0
 
     @staticmethod
     def publisher(positioner, supplier, control, sleep_time=1):

@@ -16,20 +16,15 @@ class Positioner(object):
     rewindingLock = threading.Lock()
 
     modes = {
-            'updating': ('FIXED', 'BSC'),
-            'rewinding': ('AUTO', 'MANUAL')
+            'rewinding': ('AUTO', 'MANUAL'),
     }
 
-    def __init__(self, cdbAttributes):
+    def __init__(self, cdbconf):
         """Initialize the `Positioner` by setting the default values.
 
-        :param cdbAttributes: {'attr_name': value} dictionary of CDB attributes
-        :type name: dict.
-        :returns:  None
+        The `cdbconf` parameter is a CDBConf instance.
         """
-        self.rewindingTimeout = cdbAttributes['RewindingTimeout']
-        self.rewindingSleepTime = cdbAttributes['RewindingSleepTime']
-        self.updatingTime = cdbAttributes['UpdatingTime']
+        self.conf = cdbconf
         self.control = Control()
         self.posgen = PosGenerator()
         self._setDefault()
@@ -153,7 +148,7 @@ class Positioner(object):
                 else:
                     try:
                         self.setPosition(position)
-                        time.sleep(self.updatingTime)
+                        time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
                         logger.logInfo(ex.message)
                         if self.control.modes['rewinding'] == 'AUTO':
@@ -200,14 +195,14 @@ class Positioner(object):
             self.control.rewindingOffset += space
             self.setPosition(actPos)
             startingTime = now = datetime.datetime.now()
-            while (now - startingTime).seconds < self.rewindingTimeout:
+            while (now - startingTime).seconds < float(self.conf.getAttribute('RewindingTimeout')):
                 if self.device.isTracking():
                     break
                 else:
-                    time.sleep(self.rewindingSleepTime)
+                    time.sleep(float(self.conf.getAttribute('RewindingSleepTime')))
                     now = datetime.datetime.now()
             else:
-                raise PositionerError('%ss exceeded' %self.rewindingTimeout)
+                raise PositionerError('%ss exceeded' %self.conf.getAttribute('RewindingTimeout'))
 
             self.control.isRewindingRequired = False
         except Exception, ex:
@@ -268,13 +263,13 @@ class Positioner(object):
             self.control.stop = False
             self.control.mustUpdate = False
 
-    def park(self, park_position=0):
+    def park(self, parkPosition=0):
         if self.isConfigured():
             self.stopUpdating()
             try:
                 Positioner.generalLock.acquire()
                 self._clearOffset()
-                self._start(self.posgen.goto, park_position)
+                self._start(self.posgen.goto, parkPosition)
                 self.is_configured = False
                 self._setDefault()
             finally:
@@ -296,14 +291,7 @@ class Positioner(object):
         self._setMode('rewinding', mode)
 
     def _setMode(self, mode_type, mode):
-        try:
-            modes = Positioner.modes[mode_type]
-        except KeyError:
-            raise PositionerError("mode type %s not in %s" %(mode_type, Positioner.modes.keys()))
-        if mode not in modes:
-            raise PositionerError('%s mode %s unknown; allowed modes: %s' %(mode_type, mode, modes))
-        else:
-            self.control.modes[mode_type] = mode
+        self.control.modes[mode_type] = mode
         if mode == 'MANUAL':
             self.clearAutoRewindingFeeds()
 

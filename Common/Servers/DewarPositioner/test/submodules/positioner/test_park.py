@@ -4,20 +4,17 @@ import time
 from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 from DewarPositioner.positioner import Positioner, NotAllowedError
+from DewarPositioner.cdbconf import CDBConf
 
 
 class PositionerParkTest(unittest2.TestCase):
 
     def setUp(self):
-        self.cdbInfo = {
-                'UpdatingTime': 0.1,
-                'RewindingTimeout': 1.5,
-                'RewindingSleepTime': 1
-        }
+        self.cdbconf = CDBConf()
 
     def test_notConfigured(self):
         """Verify it raises an exception if not yet configured"""
-        p = Positioner(self.cdbInfo)
+        p = Positioner(self.cdbconf)
         self.assertRaises(NotAllowedError, p.park)
 
     def test_set_park_position(self):
@@ -32,14 +29,14 @@ class PositionerParkTest(unittest2.TestCase):
             device = MockDevice()
             using_mock = True
 
-        p = Positioner(self.cdbInfo)
+        p = Positioner(self.cdbconf)
         p.setup(siteInfo={}, source=None, device=device)
         time.sleep(0.5) if using_mock else time.sleep(2)
         offset = 2
         p.setOffset(offset)
         time.sleep(0.5) if using_mock else time.sleep(2)
         park_position=1
-        p.park(park_position=park_position)
+        p.park(parkPosition=park_position)
         time.sleep(0.5) if using_mock else time.sleep(3)
         self.assertAlmostEqual(
                 park_position,

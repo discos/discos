@@ -5,6 +5,7 @@ import time
 from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 from DewarPositioner.positioner import Positioner, PositionerError
+from DewarPositioner.cdbconf import CDBConf
 
 
 class PositionerStopTest(unittest2.TestCase):
@@ -18,12 +19,8 @@ class PositionerStopTest(unittest2.TestCase):
             from DewarPositionerMockers.mock_components import MockDevice
             device = MockDevice()
 
-        cdb_info = {
-                'UpdatingTime': 0.1,
-                'RewindingTimeout': 1.5,
-                'RewindingSleepTime': 1
-        }
-        p = Positioner(cdb_info)
+        cdbconf = CDBConf()
+        p = Positioner(cdbconf)
         p.setup(siteInfo={}, source=None, device=device)
         def foo():
             time.sleep(0.5)

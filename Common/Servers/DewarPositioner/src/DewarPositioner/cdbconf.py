@@ -17,6 +17,8 @@ class CDBConf(object):
 
     mappingAttributes = (
             'DerotatorName', 
+            'SetupPosition',
+            'ParkPosition'
     )
 
     def __init__(
@@ -55,6 +57,9 @@ class CDBConf(object):
             dictName='initialPosition',
             path=os.path.join(self.configurationPath, 'InitialPosition'))
         self.isConfigured = True
+
+    def getConfiguration(self):
+        return self.configurationCode
 
     def getInitialPosition(self, axisCode):
         """Take an axis and return its initial position"""
