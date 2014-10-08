@@ -15,10 +15,6 @@ class Positioner(object):
     generalLock = threading.Lock()
     rewindingLock = threading.Lock()
 
-    modes = {
-            'rewinding': ('AUTO', 'MANUAL'),
-    }
-
     def __init__(self, cdbconf):
         """Initialize the `Positioner` by setting the default values.
 
@@ -113,8 +109,8 @@ class Positioner(object):
             Positioner.generalLock.acquire()
             if not self.isSetup():
                 raise NotAllowedError('positioner not configured: a setup() is required')
-            elif not self.conf.isSetup():
-                raise NotAllowedError('CDB not configured: a setConfiguration() is required')
+            elif not self.conf.isConfigured():
+                raise NotAllowedError('CDB not configured: a CDBConf.setConfiguration() is required')
             elif self.isUpdating():
                 raise NotAllowedError('the positionier is already updating: a stopUpdating() is required')
 
@@ -279,13 +275,14 @@ class Positioner(object):
             finally:
                 Positioner.generalLock.release()
         else:
-            raise NotAllowedError('positioner not configured: a setup() is required')
+            raise NotAllowedError('positioner not ready: a setup() is required')
 
     def setRewindingMode(self, mode):
-        self._setMode('rewinding', mode)
-
-    def _setMode(self, mode_type, mode):
-        self.control.modes[mode_type] = mode
+        modes = ('AUTO', 'MANUAL')
+        if mode not in modes:
+            raise PositionerError('mode %s unknown; allowed modes: %s' %(mode, modes))
+        else:
+            self.control.modes['rewinding'] = mode
         if mode == 'MANUAL':
             self.clearAutoRewindingFeeds()
 

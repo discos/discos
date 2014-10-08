@@ -24,13 +24,13 @@ class CommandTest(unittest2.TestCase):
         """Verify the answer is the exception message and success is False"""
         success, answer = self.dp.command('derotatorSetRewindingMode=a,b')
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'rewinding mode A unknown')
+        self.assertRegexpMatches(answer, 'mode A unknown')
         success, answer = self.dp.command('derotatorSetRewindingMode=')
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'rewinding mode  unknown')
+        self.assertRegexpMatches(answer, 'mode  unknown')
         success, answer = self.dp.command('derotatorPark=a,b')
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'positioner not configured: a setup')
+        self.assertRegexpMatches(answer, 'positioner not ready: a setup')
 
     def test_command_fail(self):
         """Verify the answer is the exception message and success is False"""

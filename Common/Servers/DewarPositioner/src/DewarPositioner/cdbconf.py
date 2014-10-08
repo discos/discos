@@ -22,6 +22,10 @@ class CDBConf(object):
             'DefaultConfiguration',
     )
 
+    configurationRecords = (
+            'InitialPosition',
+    )
+
     def __init__(
             self, 
             componentPath='alma/RECEIVERS/DewarPositioner',
@@ -46,6 +50,7 @@ class CDBConf(object):
     def setConfiguration(self, configurationCode):
         if self.setupCode:
             confPath = os.path.join(self.setupPath, configurationCode)
+            self.clearConfiguration() 
             # Set the path self.configurationPath if the directory exists
             self._setPath(name='configuration', path=confPath)
             self.configurationCode = configurationCode
@@ -55,13 +60,11 @@ class CDBConf(object):
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
             raise exc
-        self._makeRecords(
-            dictName='initialPosition',
-            path=os.path.join(self.configurationPath, 'InitialPosition'))
+        for record in CDBConf.configurationRecords:
+            self._makeRecords(
+                dictName=record,
+                path=os.path.join(self.configurationPath, record))
         self._isConfigured = True
-
-    def clearConfiguration(self):
-        self._setDefaults()
 
     def isConfigured(self):
         return self._isConfigured
@@ -79,8 +82,8 @@ class CDBConf(object):
             raise exc
         else:
             try:
-                # initialPosition -> {'axisCode': ['position']}
-                values = self.initialPosition[axisCode] 
+                # InitialPosition -> {'axisCode': ['position']}
+                values = self.InitialPosition[axisCode] 
                 return float(values[0]) 
             except KeyError:
                 raeson = "axis code %s does not exist" %axisCode
@@ -88,6 +91,13 @@ class CDBConf(object):
                 exc = ComponentErrorsImpl.ValidationErrorExImpl()
                 exc.setReason(raeson)
                 raise exc
+            except AttributeError:
+                raeson = "this configuration does not have an initial position"
+                logger.logError(raeson)
+                exc = ComponentErrorsImpl.ValidationErrorExImpl()
+                exc.setReason(raeson)
+                raise exc
+
 
     def getAttribute(self, name):
         """Return the attribute as a string.
@@ -139,12 +149,12 @@ class CDBConf(object):
                 exc = ComponentErrorsImpl.ValidationErrorExImpl()
                 exc.setReason(raeson)
                 raise exc
-
+ 
     def _makeRecords(self, dictName, path):
         """Make a dictionary of CDB records 
 
         The parameter `dictName` is the name we want to give the dictionary. 
-        For instance, `dictName='initialPosition'`.
+        For instance, `dictName='InitialPosition'`.
         The parameter `path` is a the relative path to the directory containing
         the table. For instance:
 
@@ -166,10 +176,10 @@ class CDBConf(object):
             </PositionRecord>
 
         where `axisCode` is the primary key and there is just the `position`
-        value. So in that case, if for instance dictName='initialPosition', 
+        value. So in that case, if for instance dictName='InitialPosition', 
         the method builds the dictionary::
 
-            initialPosition = {
+            InitialPosition = {
                 'AZ': ['2.0'],
                 'EL': ['3.0']
             }
@@ -216,12 +226,19 @@ class CDBConf(object):
             exc.setReason(raeson)
             raise exc
 
-    def _setDefaults(self):
+    def clearConfiguration(self):
         self._isConfigured = False
-        self.setupCode = '' # For instance, KKG
         self.configurationCode = '' # For instance, BSC
+        self.configurationPath = '' # Configuration directory path (ie. to BSC)
+        for record in CDBConf.configurationRecords:
+            if hasattr(self, record):
+                attr = getattr(self, record)
+                attr.clear() # Clear the dictionary
+
+    def _setDefaults(self):
+        self.setupCode = '' # For instance, KKG
         self.setupPath = '' # Path to the directory code (ie. to KKG)
         self.mappingPath = '' # Mapping directory path
-        self.configurationPath = '' # Configuration directory path (ie. to BSC)
+        self.clearConfiguration()
 
 

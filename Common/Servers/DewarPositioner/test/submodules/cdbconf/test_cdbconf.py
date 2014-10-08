@@ -37,7 +37,13 @@ class CDBConfTest(unittest2.TestCase):
         self.conf.setConfiguration(confCode)
         self.assertEqual(self.conf.configurationCode, confCode)
         self.assertRegexpMatches(self.conf.configurationPath, confCode)
-        self.assertTrue(hasattr(self.conf, 'initialPosition'))
+        self.assertTrue(any(self.conf.InitialPosition))
+        confCode = 'FIXED'
+        self.conf.setConfiguration(confCode)
+        self.assertEqual(self.conf.configurationCode, confCode)
+        self.assertRegexpMatches(self.conf.configurationPath, confCode)
+        self.assertFalse(any(self.conf.InitialPosition))
+
 
     def test_getInitialPosition(self):
         """Test the getInitialPosition() method"""
@@ -51,7 +57,7 @@ class CDBConfTest(unittest2.TestCase):
         self.assertEqual(self.conf.getInitialPosition('JUST_FOR_TEST'), 9.0)
         self.conf.setConfiguration('FIXED')
         # Verify the dictionary is empty in case of FIXED configuration
-        self.assertEqual(self.conf.initialPosition, {})
+        self.assertEqual(self.conf.InitialPosition, {})
 
     def test_setup(self):
         """Test the setup method"""

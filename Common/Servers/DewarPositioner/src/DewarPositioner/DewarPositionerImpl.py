@@ -34,6 +34,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
     commands = {
         # command_name: (method_name, (type_of_arg1, ..., type_of_argN))
         'derotatorSetup': ('setup', (str,)),
+        'derotatorGetActualSetup': ('getActualSetup', ()),
         'derotatorPark': ('park', ()),
         'derotatorRewind': ('rewind', (int,)),
         'derotatorStartUpdating': ('startUpdating', ()),
@@ -145,20 +146,23 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc
 
     def park(self):
-        try:
-            parkPosition = float(self.cdbconf.getAttribute('ParkPosition'))
-            self.positioner.park(parkPosition)
-            self._setDefaultSetup()
-        except NotAllowedError, ex:
-            logger.logError(ex.message)
-            exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(ex.message)
-            raise exc
-        except Exception, ex:
-            logger.logError(ex.message)
-            exc = ComponentErrorsImpl.UnexpectedExImpl()
-            exc.setReason(ex.message)
-            raise exc
+        if self.positioner.isReady():
+            try:
+                parkPosition = float(self.cdbconf.getAttribute('ParkPosition'))
+                self.positioner.park(parkPosition)
+                self._setDefaultSetup()
+            except NotAllowedError, ex:
+                logger.logError(ex.message)
+                exc = ComponentErrorsImpl.NotAllowedExImpl()
+                exc.setReason(ex.message)
+                raise exc
+            except Exception, ex:
+                logger.logError(ex.message)
+                exc = ComponentErrorsImpl.UnexpectedExImpl()
+                exc.setReason(ex.message)
+                raise exc
+        else:
+            raise NotAllowedError('positioner not ready: a setup() is required')
 
     def getPosition(self):
         try:
@@ -331,7 +335,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def setRewindingMode(self, mode):
         try:
-            self.positioner.setRewindingMode(mode.upper())
+            mode = mode.upper().strip()
+            self.positioner.setRewindingMode(mode)
         except PositionerError, ex:
             raeson = 'cannot set the rewinding mode: %s' %ex.message
             logger.logError(raeson)
