@@ -67,6 +67,9 @@ void CSenderThread::runLoop()
 			Backends::TDumpHeader dh;
 			m_startTime.value(now.value().value); // copy the time of the acquisition
 			generateBuffer(tsys,data,tsysSize,dataSize);
+			IRA::CString out;
+			IRA::CIRATools::timeToStr(m_startTime.value().value,out);
+			printf("%s, sending %ld bytes\n",(const char *)out,dataSize);
 			
 			dh.calOn=false;
 			dh.time=now.value().value;
