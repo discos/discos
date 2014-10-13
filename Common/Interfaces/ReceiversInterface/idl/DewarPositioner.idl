@@ -72,8 +72,20 @@ module Receivers {
          * @throw ComponentErrors::UnexpectedEx
          */
         void park() raises (ComponentErrors::NotAllowedEx, ComponentErrors::UnexpectedEx);
-
  
+
+        /** Set the derotator position
+         * 
+         * @param the position
+         * @throw ComponentErrors::NotAllowedEx
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void setPosition(in double position) raises (
+            ComponentErrors::NotAllowedEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
         /** Set the absolute offset and move the derotator to the new position 
          *
          * @param offset the offset to apply to the device

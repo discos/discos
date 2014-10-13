@@ -33,16 +33,18 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
  
     commands = {
         # command_name: (method_name, (type_of_arg1, ..., type_of_argN))
-        'derotatorSetup': ('setup', (str,)),
+        'derotatorSetup': ('setup', (str,)), 
         'derotatorGetActualSetup': ('getActualSetup', ()),
+        'derotatorIsReady': ('isReady', ()), 
+        'derotatorSetConfiguration': ('setConfiguration', (str,)),
+        'derotatorGetConfiguration': ('getConfiguration', ()), 
         'derotatorPark': ('park', ()),
-        'derotatorRewind': ('rewind', (int,)),
-        'derotatorStartUpdating': ('startUpdating', ()),
-        'derotatorStopUpdating': ('stopUpdating', ()),
         'derotatorSetOffset': ('setOffset', (float,)),
         'derotatorClearOffset': ('clearOffset',),
-        'derotatorSetConfiguration': ('setConfiguration', (str,)),
         'derotatorSetRewindingMode': ('setRewindingMode', (str,)),
+        'derotatorRewind': ('rewind', (int,)),
+        'derotatorSetPosition': ('_setPositionCmd', (str,)),
+        'derotatorGetPosition': ('_getPositionCmd', ()), 
     }
 
     def __init__(self):
@@ -84,7 +86,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             self.statusThread.join(timeout=5)
             if self.statusThread.isAlive():
                 logger.logError('thread %s is alive' %self.statusThread.getName())
-        except AttributeError:
+        except AttributeError, ex:
             logger.logDebug('self has no attribute `supplier`: %s' %ex.message)
         except Exception, ex:
             logger.logError(ex.message)
@@ -182,6 +184,56 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
             raise exc
+
+    def setPosition(self, position):
+        if not self.isReady():
+            raeson = "positioner not ready, a setup() is required"
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(reason)
+            raise exc
+        elif not self.isConfigured():
+            raeson = "positioner not configured, a setConfiguration() is required"
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(reason)
+            raise exc
+        elif self.cdbconf.getAttribute('SetPositionAllowed') != 'true':
+            raeson = "setPosition() not allowed in %s configuration" %self.getConfiguration()
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(reason)
+            raise exc
+        else:
+            try:
+                self.positioner.goTo(position)
+            except Exception, ex:
+                raeson = 'cannot set position: %s' %ex.message
+                logger.logError(raeson)
+                exc = ComponentErrorsImpl.UnexpectedExImpl()
+                exc.setReason(raeson)
+                raise exc
+
+    def _setPositionCmd(self, position):
+        """Wrap setPosition() in order to strip the `d` at the end of the string"""
+        str_value = position.strip().rstrip('d')
+        try:
+            self.setPosition(float(str_value))
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.ValidationErrorExImpl()
+            exc.setReason(ex.message)
+            raise exc # Can happen only in case of wrong system input
+ 
+    def _getPositionCmd(self):
+        """Wrap getPosition() in order to add the `d` at the end of the string"""
+        try:
+            return '%.4fd' %self.getPosition()
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.ValidationErrorExImpl()
+            exc.setReason(ex.message)
+            raise exc # Can happen only in case of wrong system input
 
     def startUpdating(self):
         try:
@@ -349,7 +401,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self.cdbconf.setConfiguration(confCode.upper())
 
     def getConfiguration(self):
-        raise self.positioner.getConfiguration()
+        return self.positioner.getConfiguration()
 
     def getRewindingMode(self):
         return self.positioner.getRewindingMode()
@@ -453,7 +505,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 # ... 
                 # >>> foo(*[type_(arg) for (arg, type_) in zip(args, types)])
                 # 1 python 3.5
-                answer = '' if result is None else result
+                answer = '' if result is None else str(result)
                 success = True
             except TypeError, ex:
                 success = False

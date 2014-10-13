@@ -87,7 +87,7 @@ class Positioner(object):
                self.isRewinding() and not \
                self.isRewindingRequired()
 
-    def setPosition(self, position):
+    def _setPosition(self, position):
         target = position + self.control.offset + self.control.rewindingOffset
         if self.device.getMinLimit() < target < self.device.getMaxLimit():
             try:
@@ -148,7 +148,7 @@ class Positioner(object):
                     break
                 else:
                     try:
-                        self.setPosition(position)
+                        self._setPosition(position)
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
                         logger.logInfo(ex.message)
@@ -194,7 +194,7 @@ class Positioner(object):
             n = numberOfFeeds if numberOfFeeds != None else self.getAutoRewindingFeeds()
             actPos, space = self.getRewindingParameters(n)
             self.control.rewindingOffset += space
-            self.setPosition(actPos)
+            self._setPosition(actPos)
             startingTime = now = datetime.datetime.now()
             while (now - startingTime).seconds < float(self.conf.getAttribute('RewindingTimeout')):
                 if self.device.isTracking():
@@ -304,6 +304,18 @@ class Positioner(object):
 
     def isUpdating(self):
         return self.control.isUpdating
+
+
+    def goTo(self, position):
+        if not self.isSetup():
+            raise NotAllowedError('positioner not configured: a setup() is required')
+        try:
+            Positioner.generalLock.acquire()
+            self.stopUpdating()
+            self._start(self.posgen.goto, position)
+        finally:
+            Positioner.generalLock.release()
+
 
     def setOffset(self, offset):
         if not self.isSetup():

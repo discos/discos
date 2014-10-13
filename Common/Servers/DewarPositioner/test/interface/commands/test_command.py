@@ -20,7 +20,7 @@ class CommandTest(unittest2.TestCase):
         self.assertEqual(success, False)
         self.assertRegexpMatches(answer, 'invalid command: maybe there are')
 
-    def test_wrong_command(self):
+    def test_wrong_parameters(self):
         """Verify the answer is the exception message and success is False"""
         success, answer = self.dp.command('derotatorSetRewindingMode=a,b')
         self.assertEqual(success, False)
@@ -32,21 +32,17 @@ class CommandTest(unittest2.TestCase):
         self.assertEqual(success, False)
         self.assertRegexpMatches(answer, 'positioner not ready: a setup')
 
-    def test_command_fail(self):
+    def test_command_fails(self):
         """Verify the answer is the exception message and success is False"""
-        success, answer = self.dp.command('derotatorSetup=KKG')
+        success, answer = self.dp.command('derotatorSetConfiguration=FIXED')
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'cannot get the')
+        self.assertRegexpMatches(answer, 'cannot set the configuration')
 
     def test_command_returns_None(self):
         """Verify the answer is an empty string and success is True"""
         success, answer = self.dp.command('derotatorSetRewindingMode=AUTO')
         self.assertEqual(success, True)
         self.assertRegexpMatches(answer, '')
-
-    # TODO: other tests with derotatorSetRewindingMode, in order to run all line
-    # of code of command()
-
 
 
 if __name__ == '__main__':

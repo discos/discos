@@ -22,6 +22,10 @@ class CDBConf(object):
             'DefaultConfiguration',
     )
 
+    actionsAttributes = (
+            'SetPositionAllowed',
+    )
+
     configurationRecords = (
             'InitialPosition',
     )
@@ -53,7 +57,6 @@ class CDBConf(object):
             self.clearConfiguration() 
             # Set the path self.configurationPath if the directory exists
             self._setPath(name='configuration', path=confPath)
-            self.configurationCode = configurationCode
         else:
             raeson = "cannot set the configuration: a setup is required"
             logger.logError(raeson)
@@ -64,6 +67,11 @@ class CDBConf(object):
             self._makeRecords(
                 dictName=record,
                 path=os.path.join(self.configurationPath, record))
+
+        actionsPath = os.path.join(self.configurationPath, 'Actions')
+        self._setPath(name='actions', path=actionsPath)
+        self._makeAttr(self.actionsPath, CDBConf.actionsAttributes)
+        self.configurationCode = configurationCode
         self._isConfigured = True
 
     def isConfigured(self):

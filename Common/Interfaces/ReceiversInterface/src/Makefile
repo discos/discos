@@ -19,7 +19,8 @@ TestReceivers_LIBS= ReceiversDefinitionsStubs baci maci
 
 CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable \
 			  NoiseMarkLookUpTable TaperLookUpTable \
-			  DewarPositionerInitialPositionTable DewarPositionerMapping
+			  DewarPositionerInitialPositionTable DewarPositionerMapping \
+			  DewarPositionerActions
 
 # IDL Files and flags
 IDL_FILES = ReceiversDefinitions CommonReceiverInterface ReceiversBoss \

@@ -10,7 +10,7 @@ class DerotatorSetupCmdTest(unittest2.TestCase):
         dp = DewarPositionerImpl()
         success, answer = dp.command('derotatorSetup=KKG')
         self.assertEqual(success, True)
-        success, answer = dp.command('derotatorGetActSetup')
+        success, answer = dp.command('derotatorGetActualSetup')
         self.assertEqual(success, True)
         self.assertRegexpMatches(answer, 'KKG')
 
