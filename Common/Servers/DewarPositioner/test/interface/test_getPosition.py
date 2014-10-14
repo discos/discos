@@ -16,15 +16,15 @@ class GetPositionTest(unittest2.TestCase):
 
     def _test_notReady(self):
         """The DewarPositioner must raise a NotAllowedEx when it's not ready"""
-        return
         self.positioner.park()
+        time.sleep(1)
         self.assertRaises(NotAllowedEx, self.positioner.getPosition)
 
     def test_value(self):
         """Verify it returns the right value"""
         self.derotator.setPosition(1.5)
         time.sleep(2)
-        self.assertAlmostEqual(self.positioner.getPosition(), 1.5, places=2)
+        self.assertAlmostEqual(self.positioner.getPosition(), 1.5, places=1)
         self.positioner.park()
 
 

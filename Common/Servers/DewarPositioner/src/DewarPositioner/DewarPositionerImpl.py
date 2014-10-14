@@ -164,7 +164,11 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 exc.setReason(ex.message)
                 raise exc
         else:
-            raise NotAllowedError('positioner not ready: a setup() is required')
+            raeson = 'positioner not ready: a setup() is required'
+            logger.logError(raeson)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(raeson)
+            raise exc
 
     def getPosition(self):
         try:

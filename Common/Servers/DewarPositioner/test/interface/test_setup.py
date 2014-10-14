@@ -4,7 +4,7 @@ import time
 from ComponentErrors import ValidationErrorEx, OperationErrorEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
-from DewarPositioner.configuration import CDBConf
+from DewarPositioner.cdbconf import CDBConf
 
 
 class SetupTest(unittest2.TestCase):
@@ -17,10 +17,6 @@ class SetupTest(unittest2.TestCase):
         """A setup with a wrong code raises a ValidationErrorEx"""
         self.assertRaises(ValidationErrorEx, self.positioner.setup, 'FOOCODE')
 
-    def test_not_available(self):
-        """When the derotator is not available, a CannotGetComponentEx must be raised"""
-        self.assertRaises(OperationErrorEx, self.positioner.setup, 'TEST')
-
     def test_rightcode(self):
         """Verify after a setup the component is properly configured"""
         code = 'KKG'
@@ -30,22 +26,9 @@ class SetupTest(unittest2.TestCase):
             print "The derotator is not available"
         self.assertEqual(code, self.positioner.getActualSetup())
 
-    def test_starting_position(self):
-        """Verify the setup puts the derotator in its starting position."""
-        self.derotator.setup()
-        self.derotator.setPosition(1.5)
-        time.sleep(2)
-
-        setup_code = 'KKG'
-        cdbconf = CDBConf()
-        cdbconf.setup(setup_code)
-        self.positioner.setup(setup_code)
-        time.sleep(2)
-
-        self.assertAlmostEqual(
-                cdbconf.get_entry('starting_position'), 
-                self.derotator.getActPosition()
-        )
+    def test_default_configuration(self):
+        self.positioner.setup('KKG')
+        self.assertEqual(self.positioner.getConfiguration(), 'FIXED')
 
     def test_offset(self):
         """Verify the setup clears the offset."""
