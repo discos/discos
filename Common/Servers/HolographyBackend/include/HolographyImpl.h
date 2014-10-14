@@ -271,7 +271,6 @@ public:
      */
     virtual ACS::doubleSeq * getZero () throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
-  virtual char * command(const char *configCommand) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);    
 
     /**
      * Call this function to set the current time (from the local computer) into the backend. 
@@ -419,6 +418,16 @@ public:
 	*/
 	virtual ACS::ROlong_ptr sectionsNumber() throw (CORBA::SystemException);	
 	
+	/**
+	 * This method allows the client to interface the component by sending text commands. The command is parsed and executed according the
+	 * defined command syntax and grammar. This method is required to implement the <i>Managment::CommandInterpreter</i> interface.
+     * @throw CORBA::SystemException
+	 * @throw ManagementErrors::CommandLineErrorEx
+	 * @param configCommand this string contains the string that will be executed
+	 * @return  answer  the string that reports the command execution results or in case, errors
+	 */
+
+	virtual CORBA::Boolean  command(const char *cmd,CORBA::String_out answer)   throw (CORBA::SystemException);
 
 	
 protected:

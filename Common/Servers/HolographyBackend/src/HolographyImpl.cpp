@@ -420,6 +420,19 @@ void HolographyImpl::deleteAll()
 
 }
 
+ CORBA::Boolean  HolographyImpl::command(const char *cmd,CORBA::String_out answer)   throw (CORBA::SystemException)
+ {
+	 AUTO_TRACE("HolographyImpl::command()");
+	 	IRA::CString out;
+	 	bool res;
+
+
+	 	answer=CORBA::string_dup((const char *)"No command allowed");
+	 	return res;
+ }
+
+
+
 
 ACS::doubleSeq *HolographyImpl::getTpi () throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
@@ -427,8 +440,8 @@ ACS::doubleSeq *HolographyImpl::getTpi () throw (CORBA::SystemException,
 //	AUTO_TRACE("HolographyImpl::getTpi()");
 	AUTO_TRACE("HolographyImpl::getTpi() Not used");
 	ACS::doubleSeq_var tpi=new ACS::doubleSeq;
-	//tpi->length(1);
-	//tpi[0]=0;
+	tpi->length(1);
+	tpi[0]=0;
 	
 
 	return tpi._retn();
@@ -487,15 +500,15 @@ void HolographyImpl::activateNoiseCalibrationSwitching(CORBA::Long interleave) t
   	
 }
 
-char * HolographyImpl::command(const char *configCommand)  throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
-{
-	AUTO_TRACE("HolographyImpl::command()");
-	IRA::CString out;
-	IRA::CString in;
-	bool error;
+//char * HolographyImpl::command(const char *configCommand)  throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+//{
+//	AUTO_TRACE("HolographyImpl::command()");
+//	IRA::CString out;
+//	IRA::CString in;
+//	bool error;
 	
-	return CORBA::string_dup((const char *)out);
-}
+//	return CORBA::string_dup((const char *)out);
+//}
 
 void HolographyImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins) throw (
 				CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
