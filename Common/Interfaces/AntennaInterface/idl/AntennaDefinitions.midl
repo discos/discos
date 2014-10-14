@@ -157,6 +157,14 @@ module Antenna {
 	};
 	
 	ACS_ENUM(TSections);
+
+	/** This enum enlists the two azimuth sections. They of course differs from the azimtuh rail sections  */	
+	enum TAzimuthSection {
+		ANT_NORTH,  /*!<  0°<= az <90° and 270°< az <360° */
+		ANT_SOUTH  /*!<  90° <= az <= 270° */
+	};
+	
+	ACS_ENUM(TAzimuthSection);
 	
 	/* 
 	 * Subscan geometry. List of the possible modes. 
