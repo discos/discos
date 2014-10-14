@@ -24,10 +24,11 @@ class CDBConf(object):
 
     actionsAttributes = (
             'SetPositionAllowed',
+            'DynamicUpdatingAllowed',
     )
 
     configurationRecords = (
-            'InitialPosition',
+            'UpdatingPosition',
     )
 
     def __init__(
@@ -80,8 +81,8 @@ class CDBConf(object):
     def getConfiguration(self):
         return self.configurationCode
 
-    def getInitialPosition(self, axisCode):
-        """Take an axis and return its initial position"""
+    def getUpdatingConfiguration(self, axisCode):
+        """Take an axis and return the a tuple (initial_position, 'functionName')"""
         if not self._isConfigured:
             raeson = "DewarPotitioner not configured"
             logger.logError(raeson)
@@ -90,9 +91,9 @@ class CDBConf(object):
             raise exc
         else:
             try:
-                # InitialPosition -> {'axisCode': ['position']}
-                values = self.InitialPosition[axisCode] 
-                return float(values[0]) 
+                # UpdatingPosition -> {'axisCode': ['position', 'functionName']}
+                values = self.UpdatingPosition[axisCode] 
+                return (float(values[0]), values[1]) # (initial_position, functionName)
             except KeyError:
                 raeson = "axis code %s does not exist" %axisCode
                 logger.logError(raeson)
@@ -100,7 +101,7 @@ class CDBConf(object):
                 exc.setReason(raeson)
                 raise exc
             except AttributeError:
-                raeson = "this configuration does not have an initial position"
+                raeson = "this configuration does not have an updating position dictionary"
                 logger.logError(raeson)
                 exc = ComponentErrorsImpl.ValidationErrorExImpl()
                 exc.setReason(raeson)
@@ -162,34 +163,29 @@ class CDBConf(object):
         """Make a dictionary of CDB records 
 
         The parameter `dictName` is the name we want to give the dictionary. 
-        For instance, `dictName='InitialPosition'`.
+        For instance, `dictName='UpdatingPosition'`.
         The parameter `path` is a the relative path to the directory containing
         the table. For instance:
 
-            path = 'alma/DataBlock/DewarPositioner/KKG/BSC/InitialPosition'
+            path = 'alma/DataBlock/DewarPositioner/KKG/BSC/UpdatingPosition'
 
         The method `_makeRecords()` makes a dictionary {'primary_key': values},
         where `primary_key` is the primary key of the record, and `values` 
         is a list of the related values, stored as strings. For instance, for 
-        the InitialPosition table we have records like these::
+        the UpdatingPosition table we have records like these::
 
-            <PositionRecord>
-                <axisCode>AZ</axisCode>
+            <UpdatingRecord>
+                <axisCode>MNG_TRACK</axisCode>
                 <position>2.0</position>
-            </PositionRecord>
+                <functionName>parallactic</functionName>
+            </UpdatingRecord>
             
-            <PositionRecord>
-                <axisCode>EL</axisCode>
-                <position>3.0</position>
-            </PositionRecord>
+        where `axisCode` is the primary key and there are two values, one for `position`
+        and one for the function name. So in that case, if for instance 
+        dictName='InitialPosition', the method builds the dictionary::
 
-        where `axisCode` is the primary key and there is just the `position`
-        value. So in that case, if for instance dictName='InitialPosition', 
-        the method builds the dictionary::
-
-            InitialPosition = {
-                'AZ': ['2.0'],
-                'EL': ['3.0']
+            UpdatingPosition = {
+                'MNG_TRACK': ['2.0', 'parallactic'],
             }
         """
         try:
@@ -238,9 +234,13 @@ class CDBConf(object):
         self._isConfigured = False
         self.configurationCode = '' # For instance, BSC
         self.configurationPath = '' # Configuration directory path (ie. to BSC)
-        for record in CDBConf.configurationRecords:
-            if hasattr(self, record):
-                attr = getattr(self, record)
+        for name in CDBConf.configurationRecords:
+            if hasattr(self, name):
+                attr = getattr(self, name)
+                attr.clear() # Clear the dictionary
+        for name in CDBConf.actionsAttributes:
+            if hasattr(self, name):
+                attr = getattr(self, name)
                 attr.clear() # Clear the dictionary
 
     def _setDefaults(self):

@@ -113,22 +113,19 @@ class Positioner(object):
                 raise NotAllowedError('CDB not configured: a CDBConf.setConfiguration() is required')
             elif self.isUpdating():
                 raise NotAllowedError('the positionier is already updating: a stopUpdating() is required')
-
-            mode = self.conf.getConfiguration()
-            if mode == 'FIXED':
-                posgen = self.posgen.fixed
-            elif mode == 'OPTIMIZED':
-                posgen = self.posgen.optimized
-            else:
-                raise PositionerError('mode %s unknown' %mode)
-
-            if not self.siteInfo:
+            elif self.conf.getAttribute('DynamicUpdatingAllowed') != 'true':
+                raise NotAllowedError('dynamic updating not allowed in %s conf' %self.conf.getConfiguration())
+            elif not self.siteInfo:
                 raise NotAllowedError('no site information available')
             elif not self.source:
                 raise NotAllowedError('no source available')
             else:
-                self._start(posgen, self.source, self.siteInfo)
-                self.control.mustUpdate = True
+                try:
+                    posgen = getattr(self.posgen, self.getConfiguration().lower()) 
+                    self._start(posgen, self.source, self.siteInfo)
+                    self.control.mustUpdate = True
+                except AttributeError, ex:
+                    raise PositionerError(ex.message)
         finally:
             Positioner.generalLock.release()
 

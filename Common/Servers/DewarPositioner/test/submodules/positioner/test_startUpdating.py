@@ -28,12 +28,17 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         # startUpdating() raises NotAllowedError when the system is not configured
         self.assertRaises(NotAllowedError, p.startUpdating)
         cdbconf.setup('KKG')
+        cdbconf.setConfiguration('BSC')
         time.sleep(0.1)
         self.assertRaises(NotAllowedError, p.startUpdating)
-        with self.assertRaisesRegexp(NotAllowedError, '^no site information'):
+        with self.assertRaisesRegexp(NotAllowedError, '^no site information available'):
             p.startUpdating()
         p.setup(siteInfo={'foo': 'foo'}, source=None, device=device)
         with self.assertRaisesRegexp(NotAllowedError, 'no source available'):
+            p.startUpdating()
+        time.sleep(0.1)
+        cdbconf.setConfiguration('FIXED')
+        with self.assertRaisesRegexp(NotAllowedError, '^dynamic'):
             p.startUpdating()
 
 if __name__ == '__main__':

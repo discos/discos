@@ -19,7 +19,7 @@ TestReceivers_LIBS= ReceiversDefinitionsStubs baci maci
 
 CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable \
 			  NoiseMarkLookUpTable TaperLookUpTable \
-			  DewarPositionerInitialPositionTable DewarPositionerMapping \
+			  DewarPositionerUpdatingTable DewarPositionerMapping \
 			  DewarPositionerActions
 
 # IDL Files and flags

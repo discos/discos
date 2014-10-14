@@ -71,10 +71,6 @@ class PosGenerator(object):
                 logger.logDebug(raeson)
                 raise PosGeneratorError(raeson)
 
-
-    def optimized(source, site_info):
-        yield self.fixed()
-
     
 class PosGeneratorError(Exception):
     pass

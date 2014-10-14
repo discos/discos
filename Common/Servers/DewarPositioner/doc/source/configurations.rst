@@ -124,8 +124,10 @@ a seconda dell'asse di scansione).
 
 .. note:: L'asse di scansione, indicato con ``AXIS`` e
    definito come ``Managment::TScanAxis`` nella interfaccia IDL, può
-   essere ``SIDEREAL``, ``GLON``, ``GLAT``, ``AZ``, ``EL``, ``RA``, ``DEC`` e
-   ``GREATCIRCLE``
+   essere ``MNG_HOR_LON`` (azimuth), ``MNG_HOR_LAT`` (elevation), 
+   ``MNG_EQ_LON`` (RA), ``MNG_EQ_LAT`` (DEC), ``MNG_GAL_LON``,
+   ``MNG_GAL_LAT``, ``MNG_TRACK`` (SIDEREAL), ``MNG_GCIRCLE`` (GREATCIRCLE).
+   
 
 Nelle configurazioni dinamiche la posizione del derotatore è data
 dalla seguente equazione::
@@ -140,25 +142,26 @@ Ciò che differenzia una configurazione
 dinamica dall'altra è la posizione iniziale, mentre la 
 funzione di derotazione non cambia, ed è data da:
 
-    * ``D = 0`` quando ``AXIS`` è ``AZ`` o ``EL``
-    * ``D = P(AZ, EL)`` quando ``AXIS`` è ``SIDEREAL``, ``RA``, ``DEC`` 
-      o ``GREATCIRCLE``
-    * ``D = G(AZ, EL)`` quando ``AXIS`` è ``GLON`` o ``GLAT``
+    * ``D = 0`` quando ``AXIS`` è ``HOR_LON`` o ``HOR_LAT``
+    * ``D = P(AZ, EL)`` quando ``AXIS`` è ``TRACK``, ``EQ_LON``, ``EQ_LAT`` 
+      o ``GCIRCLE``
+    * ``D = G(AZ, EL)`` quando ``AXIS`` è ``GAL_LON`` o ``GAL_LAT``
 
 dove ``P(AZ, EL)`` è la funzione di compensazione dell'angolo parallatico,
 mentre ``G(AZ, EL)`` è quella di compensazione del contributo dovuto al
-*galactic parallactic angle* (GAL).
+*galactic parallactic angle* (GPA).
 
 Come per le configurazioni statiche, anche per quelle dinamiche 
 l'impostazione della configurazione non causa l'aggiornamento della posizione,
 visto che non è ancora noto l'asse di scansione. L'aggiornamento avviene quindi
 solamente dopo che viene chiamato il metodo ``DewarPositioner.startUpdating()``,
 il quale prende come argomento un asse e il settore (``SECTOR``, può 
-essere ``NORTH`` o ``SOUTH``). Ad esempio::
+essere ``Antenna.ANT_NORTH`` o ``Antenna.ANT_SOUTH``). Ad esempio::
 
-    >>> from Management import MNG_SIDEREAL, NORTH
+    >>> from Management import MNG_SIDEREAL
+    >>> from Antenna import ANT_NORTH, ANT_SOUTH
     >>> DewarPositioner.setConfiguration('BSC') # Non aggiorna posizione
-    >>> DewarPositioner.startUpdating(MNG_SIDEREAL, NORTH) # Avvia aggiornamento posizione
+    >>> DewarPositioner.startUpdating(MNG_SIDEREAL, ANT_NORTH) # Avvia aggiornamento posizione
 
 La chiamata al metodo ``DewarPositioner.startUpdating()`` viene eseguita in 
 modo automatico da Nuraghe/ESCS, e 
@@ -201,7 +204,7 @@ con ``Ps``, è quindi data dalla seguente equazione:
           dipende dall'asse di scansione, per cui abbiamo utilizzato
           la notazione ``Pi(AXIS)`` per indicare che ``Pi`` è funzione 
           dell'asse. Allo stesso modo, la funzione di compensazione
-          dell'angolo (parallatico più eventuale contributo del GAL) dipende dai 
+          dell'angolo (parallatico più eventuale contributo del GPA) dipende dai 
           valori dell'azimuth, dell'elevazione e dell'asse di scansione,
           per cui la abbiamo indicata con ``D(AZ, EL, AXIS)``.
 

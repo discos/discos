@@ -11,6 +11,7 @@
 #include <maciErrType.idl>
 #include <ComponentErrors.idl>
 #include <ManagmentDefinitions.idl>
+#include "AntennaDefinitions.idl"
 
 #pragma prefix "alma"
 
@@ -118,11 +119,12 @@ module Receivers {
          * It raises a NotAllowedEx either when the updating mode is not yet selected
          * or the positioner is not configured or when it is already updating.
          *
+         * @param axis 
          * @throw ComponentErrors::NotAllowedEx
          * @throw ComponentErrors::OperationErrorEx,
          * @throw ComponentErrors::UnexpectedEx
          */
-        void startUpdating() raises (
+        void startUpdating(in Management::TScanTypes axis, in Antenna::TAzimuthSection sector) raises (
             ComponentErrors::NotAllowedEx,
             ComponentErrors::OperationErrorEx,
             ComponentErrors::UnexpectedEx

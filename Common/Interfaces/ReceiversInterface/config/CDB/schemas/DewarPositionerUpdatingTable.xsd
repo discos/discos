@@ -3,8 +3,8 @@
 <!-- Marco Buttu -->
 
 <xs:schema
-	targetNamespace="urn:schemas-cosylab-com:DewarPositionerInitialPositionTable:1.0"
-	xmlns="urn:schemas-cosylab-com:DewarPositionerInitialPositionTable:1.0"
+	targetNamespace="urn:schemas-cosylab-com:DewarPositionerUpdatingTable:1.0"
+	xmlns="urn:schemas-cosylab-com:DewarPositionerUpdatingTable:1.0"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -13,24 +13,25 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	
-	<xs:complexType name="PositionHeader">
+	<xs:complexType name="UpdatingHeader">
  		<xs:sequence>
  			<xs:element name="axisCode" type="xs:string" />
  			<xs:element name="position" type="xs:string" />
+ 			<xs:element name="functionName" type="xs:string" />
  		</xs:sequence>
  	</xs:complexType>
  	
- 	<xs:complexType name="PositionTable">
+ 	<xs:complexType name="UpdatingTable">
 		<xs:sequence>
             <xs:element 
-                name="PositionRecord" 
-                type="PositionHeader"  
+                name="UpdatingRecord" 
+                type="UpdatingHeader"  
                 minOccurs="1" 
                 maxOccurs="unbounded" 
             />
 		</xs:sequence>
  	</xs:complexType>
  	
- 	<xs:element name="DewarPositionerInitialPositionTable" type="PositionTable" />	
+ 	<xs:element name="DewarPositionerUpdatingTable" type="UpdatingTable" />	
 	
 </xs:schema>

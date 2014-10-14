@@ -206,7 +206,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raeson = "setPosition() not allowed in %s configuration" %self.getConfiguration()
             logger.logError(raeson)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(reason)
+            exc.setReason(raeson)
             raise exc
         else:
             try:
@@ -239,7 +239,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc # Can happen only in case of wrong system input
 
-    def startUpdating(self):
+    def startUpdating(self, axis, sector):
+        # TODO
         try:
             self.positioner.startUpdating()
         except PositionerError, ex:

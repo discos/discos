@@ -37,27 +37,27 @@ class CDBConfTest(unittest2.TestCase):
         self.conf.setConfiguration(confCode)
         self.assertEqual(self.conf.configurationCode, confCode)
         self.assertRegexpMatches(self.conf.configurationPath, confCode)
-        self.assertTrue(any(self.conf.InitialPosition))
+        self.assertTrue(any(self.conf.UpdatingPosition))
         confCode = 'FIXED'
         self.conf.setConfiguration(confCode)
         self.assertEqual(self.conf.configurationCode, confCode)
         self.assertRegexpMatches(self.conf.configurationPath, confCode)
-        self.assertFalse(any(self.conf.InitialPosition))
+        self.assertFalse(any(self.conf.UpdatingPosition))
 
 
-    def test_getInitialPosition(self):
-        """Test the getInitialPosition() method"""
+    def test_getUpdatingConfiguration(self):
+        """Test the getUpdatingConfiguration() method"""
         # It raises an exception in case a setConfiguration() is required
-        self.assertRaises(ValidationErrorEx, self.conf.getInitialPosition, '')
+        self.assertRaises(ValidationErrorEx, self.conf.getUpdatingConfiguration, '')
         # Once configured, it raises an exception in case of wrong axis name
         self.conf.setup('KKG')
         self.conf.setConfiguration('BSC')
-        self.assertRaises(ValidationErrorEx, self.conf.getInitialPosition, 'foo')
+        self.assertRaises(ValidationErrorEx, self.conf.getUpdatingConfiguration, 'foo')
         # Get the position
-        self.assertEqual(self.conf.getInitialPosition('JUST_FOR_TEST'), 9.0)
+        self.assertEqual(self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), (9.0, 'gpa'))
         self.conf.setConfiguration('FIXED')
         # Verify the dictionary is empty in case of FIXED configuration
-        self.assertEqual(self.conf.InitialPosition, {})
+        self.assertEqual(self.conf.UpdatingPosition, {})
 
     def test_setup(self):
         """Test the setup method"""
