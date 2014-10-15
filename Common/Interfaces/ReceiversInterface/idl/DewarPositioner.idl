@@ -220,12 +220,16 @@ module Receivers {
          * This method does not start the updating, but just enable it. Once the updating mode is
          * selected, the updating can be started by calling the startUpdating() method.
          * See the documentation for more details about the mode meaning.
+         * In case for unknown reasons the method can not stop the position updating,
+         * a ComponentErrors::OperationErrorEx is raised. 
          *
          * @param mode the updating mode ("FIXED", "BSC", ...)
+         * @throw ComponentErrors::OperationErrorEx
          * @throw ComponentErrors::ValidationErrorEx
          * @throw ComponentErrors::UnexpectedEx
          */
         void setConfiguration(in string mode) raises (
+            ComponentErrors::OperationErrorEx,
             ComponentErrors::ValidationErrorEx,
             ComponentErrors::UnexpectedEx
         );

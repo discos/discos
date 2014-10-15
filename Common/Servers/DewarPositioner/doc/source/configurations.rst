@@ -428,17 +428,9 @@ Dal punto di vista di Nuraghe/ESCS, se si vuole interrompere
 l'aggiornamento della posizione del derotatore 
 bisogna chiamare il metodo ``DewarPositioner.stopUpdating()``.
 
-L'astronomo invece può interrompere l'aggiornamento in due modi:
-
-  1. passando alla configurazione :ref:`fixed <fixed>`, e in questo
-     caso il derotatore si fermerà all'ultima posizione comandata
-  2. utilizzando il comando ``derotatorStopUpdating``
-
-.. attention:: Nota personale: per passare da una modalità all'altra è necessario
-   uno ``stopUpdating()``? In questo caso 
-   nel ``DewarPositionerImpl.setConfiguration()``,
-   devo inserire delle procedure
-   in modo che venga chiamato lo ``stopUpdating()``.
+L'astronomo invece può interrompere l'aggiornamento passando alla
+configurazione :ref:`fixed <fixed>`, e in questo caso il derotatore si 
+fermerà all'ultima posizione comandata.
 
 Concludiamo dicendo che oltre ai comandi visti in questa sezione, ve ne
 sono altri legati alle configurazioni, come ``derotatorGetConfiguration``,

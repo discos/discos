@@ -240,9 +240,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc # Can happen only in case of wrong system input
 
     def startUpdating(self, axis, sector):
-        # TODO
         try:
-            self.positioner.startUpdating()
+            self.positioner.startUpdating(str(axis), str(sector))
         except PositionerError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
@@ -401,8 +400,22 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(raeson)
             raise exc # Can happen only in case of wrong system input
 
-
     def setConfiguration(self, confCode):
+        if self.positioner.isUpdating():
+            self.positioner.stopUpdating()
+        # The unit of time is `seconds`
+        total_wait_time = 2 
+        counter = 0
+        step = 0.1
+        while self.positioner.isUpdating():
+            time.sleep(step)
+            counter += step
+            if counter > max_wait_time:
+                raeson = "cannot stop the position updating"
+                logger.logError(raeson)
+                exc = ComponentErrorsImpl.OperationErrorExImpl()
+                exc.setReason(raeson)
+                raise exc
         self.cdbconf.setConfiguration(confCode.upper())
 
     def getConfiguration(self):

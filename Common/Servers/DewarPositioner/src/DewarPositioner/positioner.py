@@ -121,10 +121,11 @@ class Positioner(object):
                 raise NotAllowedError('no source available')
             else:
                 try:
-                    posgen = getattr(self.posgen, self.getConfiguration().lower()) 
+                    initialPosition, functionName = self.conf.getUpdatingConfiguration()
+                    posgen = getattr(self.posgen, functionName) 
                     self._start(posgen, self.source, self.siteInfo)
                     self.control.mustUpdate = True
-                except AttributeError, ex:
+                except Exception, ex:
                     raise PositionerError(ex.message)
         finally:
             Positioner.generalLock.release()

@@ -107,7 +107,6 @@ class CDBConf(object):
                 exc.setReason(raeson)
                 raise exc
 
-
     def getAttribute(self, name):
         """Return the attribute as a string.
 
