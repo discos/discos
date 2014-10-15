@@ -293,14 +293,6 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
     def isConfigured(self):
         return self.cdbconf.isConfigured()
 
-    def isConfiguredForUpdating(self):
-        """Return True if an updating mode has been selected"""
-        return self.positioner.isConfiguredForUpdating()
-
-    def isConfiguredForRewinding(self):
-        """Return True if a rewinding mode has been selected"""
-        return self.positioner.isConfiguredForRewinding()
-
     def isReady(self):
         try:
             return self.positioner.isReady()
@@ -333,7 +325,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def isTracking(self):
         try:
-            self.positioner.isTracking()
+            return self.positioner.isTracking()
         except DerotatorErrors.CommunicationErrorEx, ex:
             raeson = "cannot known if the derotator is tracking: %s" %ex.message
             logger.logError(raeson)
@@ -358,6 +350,11 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
             raise exc
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
+            raise exc
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
@@ -372,6 +369,11 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
+            raise exc
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
             raise exc
         except Exception, ex:
             logger.logError(ex.message)

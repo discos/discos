@@ -104,7 +104,8 @@ class Positioner(object):
             raise OutOfRangeError("position %.2f out of range {%.2f, %.2f}" 
                     %(target, self.device.getMinLimit(), self.device.getMaxLimit()))
 
-    def startUpdating(self):
+    def startUpdating(self, axis, sector):
+        sectors = ('ANT_NORTH', 'ANT_SOUTH')
         try:
             Positioner.generalLock.acquire()
             if not self.isSetup():
@@ -119,11 +120,13 @@ class Positioner(object):
                 raise NotAllowedError('no site information available')
             elif not self.source:
                 raise NotAllowedError('no source available')
+            elif sector not in sectors:
+                raise NotAllowedError('sector %s not in %s' %(sector, sectors))
             else:
                 try:
-                    initialPosition, functionName = self.conf.getUpdatingConfiguration()
+                    initialPosition, functionName = self.conf.getUpdatingConfiguration(axis)
                     posgen = getattr(self.posgen, functionName) 
-                    self._start(posgen, self.source, self.siteInfo)
+                    self._start(posgen, self.source, self.siteInfo, initialPosition)
                     self.control.mustUpdate = True
                 except Exception, ex:
                     raise PositionerError(ex.message)

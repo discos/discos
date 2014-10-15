@@ -13,8 +13,8 @@ class PosGenerator(object):
     def goto(self, position):
         yield position
 
-    def fixed(self, source, site_info):
-        """Generate a ...
+    def parallactic(self, source, site_info, initil_position=0):
+        """Generate a parallactic...
          
         A better description...
 
@@ -55,7 +55,7 @@ class PosGenerator(object):
                     tan_p = - sin(az) / (tan(latitude)*cos(el) - sin(el)*cos(az))
                     last_zerodiv_time = datetime.datetime.now()
                     p = atan(tan_p)
-                    yield degrees(p)
+                    yield initial_position + degrees(p)
                 except ZeroDivisionError:
                     logger.logWarning('zero division error computing tan(p)')
                     zerodiv_time = datetime.datetime.now() - last_zerodiv_time
