@@ -94,6 +94,12 @@ class CDBConf(object):
                 # UpdatingPosition -> {'axisCode': ['position', 'functionName']}
                 values = self.UpdatingPosition[axisCode] 
                 return (float(values[0]), values[1]) # (initial_position, functionName)
+            except IndexError:
+                raeson = "wrong CDB configuration for %s" %axisCode
+                logger.logError(raeson)
+                exc = ComponentErrorsImpl.ValidationErrorExImpl()
+                exc.setReason(raeson)
+                raise exc
             except KeyError:
                 raeson = "axis code %s does not exist" %axisCode
                 logger.logError(raeson)

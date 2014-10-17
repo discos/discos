@@ -13,7 +13,7 @@ class PosGenerator(object):
     def goto(self, position):
         yield position
 
-    def parallactic(self, source, site_info, initil_position=0):
+    def parallactic(self, source, site_info, initial_position=0):
         """Generate a parallactic...
          
         A better description...
@@ -31,11 +31,9 @@ class PosGenerator(object):
             el_obj = source._get_elevation()
         except (KeyError, TypeError), ex:
             raise PosGeneratorError('cannot get the latitude: %s' %ex.message)
-        except TypeError, ex:
-            raise PosGeneratorError('site_info has not the key `latitude`')
         except Exception, ex:
             raeson = 'cannot get the %s property objects' %source._get_name()
-            logger.logDebug('%s: %s' %(raeson, ex.message))
+            logger.logDebug('%s: %s' %raeson)
             raise PosGeneratorError(raeson)
 
         last_zerodiv_time = datetime.datetime.now()

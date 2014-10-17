@@ -51,10 +51,36 @@ class MockDevice(object):
         self.is_slewing = False
 
 
+class MockSource(object):
+    def __init__(self, azimuth=0, elevation=0):
+        completion = Completion()
+        self.azimuth_obj = Property(azimuth, completion)
+        self.elevation_obj = Property(elevation, completion)
+
+    def setAzimuth(self, value):
+        self.azimuth_obj.setValue(value)
+
+    def setElevation(self, value):
+        self.elevation_obj.setValue(value)
+
+    def _get_azimuth(self):
+        completion = Completion()
+        return self.azimuth_obj
+
+    def _get_elevation(self):
+        completion = Completion()
+        return self.elevation_obj
+
+    def _get_name(self):
+        return 'MockSource'
+
+
 class Property(object):
     def __init__(self, value, completion):
         self.value = value
         self.completion = completion
+    def setValue(self, value):
+        self.value = value
     def get_sync(self):
         return (self.value, self.completion)
 

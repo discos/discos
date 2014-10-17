@@ -129,11 +129,11 @@ class Positioner(object):
                     self._start(posgen, self.source, self.siteInfo, initialPosition)
                     self.control.mustUpdate = True
                 except Exception, ex:
-                    raise PositionerError(ex.message)
+                    raise PositionerError('configuration problem: %s' %ex.message)
         finally:
             Positioner.generalLock.release()
 
-    def updatePosition(self, posgen, vargs):
+    def _updatePosition(self, posgen, vargs):
         try:
             self.control.isRewindingRequired = False
             self.control.isUpdating = True
@@ -172,14 +172,14 @@ class Positioner(object):
                         break
             self.control.mustUpdate = False
         except KeyboardInterrupt:
-            logger.logInfo('stopping Positioner.updatePosition() due to KeyboardInterrupt')
+            logger.logInfo('stopping Positioner._updatePosition() due to KeyboardInterrupt')
         except AttributeError, ex:
-            logger.logError('Positioner.updatePosition(): attribute error')
-            logger.logDebug('Positioner.updatePosition(): %s' %ex)
+            logger.logError('Positioner._updatePosition(): attribute error')
+            logger.logDebug('Positioner._updatePosition(): %s' %ex.message)
         except PositionerError, ex:
-            logger.logError('Positioner.updatePosition(): %s' %ex.message)
+            logger.logError('Positioner._updatePosition(): %s' %ex.message)
         except Exception, ex:
-            logger.logError('unexcpected exception in Positioner.updatePosition(): %s' %ex)
+            logger.logError('unexcpected exception in Positioner._updatePosition(): %s' %ex)
         finally:
             self.control.isUpdating = False
 
@@ -382,7 +382,7 @@ class Positioner(object):
             self.stopUpdating() # Raise a PositionerError if the process stills alive
             self.t = ContainerServices.ContainerServices().getThread(
                     name=posgen.__name__, 
-                    target=self.updatePosition, 
+                    target=self._updatePosition, 
                     args=(posgen, vargs)
             )
             self.t.start()
