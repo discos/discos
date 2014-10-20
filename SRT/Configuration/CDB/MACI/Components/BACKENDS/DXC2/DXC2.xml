@@ -9,6 +9,6 @@
 	  Type="IDL:alma/DXC/DigitalXCorrelator:1.0" 
       Default="true"
       Container="MetrologyContainer"
-      ImplLang="cpp"
+      ImplLang="py"
 />
 
