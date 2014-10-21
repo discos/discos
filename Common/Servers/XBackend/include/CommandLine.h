@@ -608,7 +608,9 @@ public:
 		throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConnectionExImpl);
 	double gainToAttenuation(double gain){ return -20*log10(gain/MAX_GAIN); }
 	double attenuationToGain(double attenuation){ return MAX_GAIN*exp10(-attenuation/20); }
-    void setMode8BitParameter(bool mode) {m_mode8bit=mode;}
+    	void setMode8BitParameter(bool mode) {m_mode8bit=mode;}
+
+	bool m_XarcosC;
 };
 
 #endif /*_COMMANDLINE_H_*/

@@ -605,7 +605,9 @@ void XBackendsImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Doubl
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"XBackendsImpl::setSection()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}		
+	}
+	if (line->m_XarcosC == true)
+		line->setFeedC();		
 }
 
 ACS::doubleSeq *XBackendsImpl::getTpi ()
@@ -1015,9 +1017,11 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 	}	
 	IRA::CIRATools::Wait(0,100000);
 	*/
+	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	switch (conf) {
-		case (Backends::XArcos_K7): // XK7
-			setSectionsNumber(7);
+		case (Backends::XArcos_K77): // XK77, ALL FEED
+			setMode8bit(false);
+            setSectionsNumber(7);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(0,145,62.5,0,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
@@ -1032,59 +1036,63 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			setSection(5,145,62.5,5,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(6,145,62.5,6,2,125,-1);
-			break;
-		case (Backends::XArcos_K3):
-			setSectionsNumber(6);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(0,-1,-1,0,-1,-1,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(1,-1,-1,0,-1,-1,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(2,-1,-1,1,-1,-1,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(3,-1,-1,1,-1,-1,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(4,-1,-1,4,-1,-1,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(5,-1,-1,4,-1,-1,-1);
-			IRA::CIRATools::Wait(0,100000);
-			break;
-		case (Backends::XArcos_K2R): // XKR
+			line->m_XarcosC=false;
+			break;		
+		case (Backends::XArcos_K01): // XK01, CENTRAL FEED & FEED 1
+			setMode8bit(true);
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(0,145,62.5,1,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(1,145,62.5,1,2,125,-1);
+			setSection(1,174.296875,3.90625,1,2,7.8125,-1);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(2,145,62.5,2,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(3,145,62.5,2,2,125,-1);
+			setSection(3,174.296875,3.90625,2,2,7.8125,-1);
+			line->m_XarcosC=false;
 			break;
-		case (Backends::XArcos_K2L): // XKL
-			setSectionsNumber(4);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(0,-1,-1,0,-1,-1,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(1,-1,-1,0,-1,-1,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(2,-1,-1,4,-1,-1,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(3,-1,-1,4,-1,-1,-1);
-			IRA::CIRATools::Wait(0,100000);
-			break;
-		case (Backends::XArcos_C): // XC1
+		case (Backends::XArcos_K04): // XK04, CENTRAL FEED & FEED 4
+			setMode8bit(true);
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(0,145,62.5,1,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(1,145,62.5,1,2,125,-1);
+			setSection(1,174.296875,3.90625,1,2,7.8125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(2,145,62.5,1,2,125,-1);
+			setSection(2,145,62.5,3,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(3,145,62.5,1,2,125,-1);
+			setSection(3,174.296875,3.90625,3,2,7.8125,-1);
 			IRA::CIRATools::Wait(0,100000);
-            CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+			line->m_XarcosC=false;
+			break;
+		case (Backends::XArcos_K00): // XK00, CENTRAL FEED
+			setMode8bit(true);
+			setSectionsNumber(4);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(0,145,62.5,1,2,125,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(1,172.34375,7.8125,1,2,15.625,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(2,175.2734375,1.953125,1,2,3.90625,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
+			IRA::CIRATools::Wait(0,100000);
+            line->m_XarcosC=false;
+			break;
+		case (Backends::XArcos_C00): // XC00
+			setMode8bit(true);
+			setSectionsNumber(4);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(0,145,62.5,1,2,125,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(1,172.34375,7.8125,1,2,15.625,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(2,175.2734375,1.953125,1,2,3.90625,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
+			IRA::CIRATools::Wait(0,100000);
 		    line->setFeedC();
+            line->m_XarcosC=true;
 			break;
 	}
 }
