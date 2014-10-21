@@ -7,6 +7,7 @@ Contents:
     * ``submodules`` directory: contains tests
     * ``dependencies`` directory: third-part dependencies
     * ``DewarPositionrMockers``: user defined mockers
+    * ``no_auto``: no automatic tests
     * ``Makefile``: use it for installing the user defined mockers
 
 
@@ -23,6 +24,7 @@ Other requirements
 The ``DewarPositionerMockers`` directory is a packege containing
 a mocker. To install this package::
 
+  $ make
   $ make install
 
 Run the tests

@@ -152,7 +152,7 @@ class Positioner(object):
                         self._setPosition(position)
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
-                        logger.logInfo(ex.message)
+                        logger.logWarning('position %.2f out of range' %position)
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
                                 self.rewind() 

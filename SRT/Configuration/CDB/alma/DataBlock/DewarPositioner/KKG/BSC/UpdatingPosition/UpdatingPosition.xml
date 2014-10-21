@@ -8,49 +8,49 @@
 
     <UpdatingRecord>
         <axisCode>MNG_HOR_LON</axisCode>
-        <position>1.0</position>
-        <functionName>static 0</functionName>
+        <position>19.2</position>
+        <functionName>static0</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_HOR_LAT</axisCode>
-        <position>2.0</position>
-        <functionName>static 0</functionName>
+        <position>79.2</position>
+        <functionName>static0</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_TRACK</axisCode>
-        <position>3.0</position>
+        <position>19.2</position>
         <functionName>parallactic</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_EQ_LON</axisCode>
-        <position>4.0</position>
+        <position>19.2</position>
         <functionName>parallactic</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_EQ_LAT</axisCode>
-        <position>5.0</position>
+        <position>79.2</position>
         <functionName>parallactic</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_GCIRCLE</axisCode>
-        <position>6.0</position>
+        <position>19.2</position>
         <functionName>parallactic</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_GAL_LON</axisCode>
-        <position>7.0</position>
+        <position>19.2</position>
         <functionName>gpa</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_GAL_LAT</axisCode>
-        <position>8.0</position>
+        <position>79.2</position>
         <functionName>gpa</functionName>
     </UpdatingRecord>
 
