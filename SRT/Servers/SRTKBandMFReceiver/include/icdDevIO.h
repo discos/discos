@@ -28,7 +28,7 @@ template <class T> class icdDevIO : public DevIO<T>
 {
 public:
     enum TLinkedProperty {
-        ACT_POSITION,    
+        POSITION,    
         CMD_POSITION,     
         POSITION_DIFF,     
         TRACKING,     
@@ -43,7 +43,7 @@ public:
             ) : m_icdLink(link), m_Property(Property), m_logGuard(guardInterval)
     {
         switch (m_Property) {
-            case ACT_POSITION : {
+            case POSITION : {
                 m_PropertyName=CString("Actual position");
                 break;
             }
@@ -105,7 +105,7 @@ public:
         CSecAreaResourceWrapper <icdSocket> icd_socket = m_icdLink->Get();
         try {
             switch (m_Property) {
-                case ACT_POSITION : {
+                case POSITION : {
                     m_Value = (T)icd_socket->getActPosition();
                     break;
                 }

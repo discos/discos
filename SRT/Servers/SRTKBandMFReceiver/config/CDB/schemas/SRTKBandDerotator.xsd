@@ -25,9 +25,9 @@
     <xs:complexType name="SRTKBandDerotatorType">
 
         <xs:sequence>
-            <!-- Physical sensor position (degree) -->
-            <xs:element name="sensor_position" type="baci:ROdouble"/>
-            <!-- Position in the user reference system  (degrees) -->
+            <!-- Engine position (degree) -->
+            <xs:element name="enginePosition" type="baci:ROdouble"/>
+            <!-- Sensor position in the user reference system  (degrees) -->
             <xs:element name="actPosition" type="baci:ROdouble"/>
             <!-- Commanded position, in the user reference system (degrees) -->
             <xs:element name="cmdPosition" type="baci:RWdouble"/>

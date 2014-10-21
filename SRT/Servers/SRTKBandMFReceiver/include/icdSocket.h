@@ -274,6 +274,19 @@ public:
      * @throw ComponentErrors::SocketErrorExImpl
      */
     void driveEnable() throw (ComponentErrors::SocketErrorExImpl);
+ 
+
+    /**
+     * This method switches the power amplifier off
+     * @throw ComponentErrors::SocketErrorExImpl
+     */
+    void driveDisable() throw (ComponentErrors::SocketErrorExImpl);
+
+ 
+    /** Fault reset
+     * @throw ComponentErrors::SocketErrorExImpl
+     */
+    void reset() throw (ComponentErrors::SocketErrorExImpl);
 
     
     /**

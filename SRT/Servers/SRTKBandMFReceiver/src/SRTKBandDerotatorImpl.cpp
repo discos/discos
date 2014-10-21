@@ -17,7 +17,7 @@ SRTKBandDerotatorImpl::SRTKBandDerotatorImpl(
         const ACE_CString &CompName,maci::ContainerServices *containerServices
         ) : 
     CharacteristicComponentImpl(CompName,containerServices),
-    m_sensor_position(this),
+    m_enginePosition(this),
     m_actPosition(this),
     m_cmdPosition(this),
     m_positionDiff(this),
@@ -310,8 +310,8 @@ void SRTKBandDerotatorImpl::execute() throw (ACSErr::ACSbaseExImpl)
     AUTO_TRACE("SRTKBandDerotatorImpl::execute()");
 
     try {       
-        m_sensor_position = new ROdouble(
-                getContainerServices()->getName() + ":sensor_position", 
+        m_actPosition = new ROdouble(
+                getContainerServices()->getName() + ":actPosition", 
                 getComponent(),
                 new sensorDevIO<CORBA::Double>(
                     m_sensorLink, 
@@ -330,10 +330,10 @@ void SRTKBandDerotatorImpl::execute() throw (ACSErr::ACSbaseExImpl)
     }
 
     try {       
-        m_actPosition = new ROdouble(
-                getContainerServices()->getName() + ":actPosition", 
+        m_enginePosition = new ROdouble(
+                getContainerServices()->getName() + ":enginePosition", 
                 getComponent(), 
-                new icdDevIO<CORBA::Double>(m_icdLink, icdDevIO<CORBA::Double>::ACT_POSITION), 
+                new icdDevIO<CORBA::Double>(m_icdLink, icdDevIO<CORBA::Double>::POSITION), 
                 true
         );
         m_cmdPosition = new RWdouble(
@@ -414,6 +414,7 @@ void SRTKBandDerotatorImpl::setup() throw (
     CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
     try {
         socket->driveEnable();
+        socket->reset();
     }
     catch (ComponentErrors::SocketErrorExImpl& ex) {
         ex.log(LM_DEBUG);
@@ -434,6 +435,28 @@ void SRTKBandDerotatorImpl::setup() throw (
         throw impl.getComponentErrorsEx();
     }
 }
+
+
+void SRTKBandDerotatorImpl::powerOff() throw (
+        CORBA::SystemException,
+        ComponentErrors::ComponentErrorsEx)
+{
+    AUTO_TRACE("SRTKBandDerotatormpl::powerOff()");
+    CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
+    try {
+        socket->driveDisable();
+    }
+    catch (...) {
+        _EXCPT(
+                ComponentErrors::UnexpectedExImpl, 
+                impl, 
+                "SRTKBandDerotatorImpl::powerOff()"
+        );
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+}
+
 
 void SRTKBandDerotatorImpl::setPosition(double position) throw (
         CORBA::SystemException, 
@@ -474,9 +497,9 @@ double SRTKBandDerotatorImpl::getActPosition()
     )
 {
     AUTO_TRACE("Derotatormpl::getActPosition()");
-    CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
+    CSecAreaResourceWrapper<sensorSocket> socket = m_sensorLink->Get();
     try {
-        return socket->getActPosition();
+        return socket->getPosition();
     }
     catch (DerotatorErrors::CommunicationErrorExImpl& ex) {
         ex.log(LM_DEBUG);
@@ -495,7 +518,7 @@ double SRTKBandDerotatorImpl::getActPosition()
         _EXCPT(
                 ComponentErrors::UnexpectedExImpl, 
                 impl, 
-                "SRTKBandDerotatorImpl::setup()"
+                "SRTKBandDerotatorImpl::getActPosition()"
         );
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
@@ -547,14 +570,39 @@ bool SRTKBandDerotatorImpl::isTracking() {
 }
 
 
-double SRTKBandDerotatorImpl::getSensorPosition() {
-    AUTO_TRACE("Derotatormpl::getSensorPosition()");
-    CSecAreaResourceWrapper<sensorSocket> socket = m_sensorLink->Get();
-    return socket->getURSPosition();
+double SRTKBandDerotatorImpl::getEnginePosition() {
+    AUTO_TRACE("Derotatormpl::getEnginePosition()");
+    CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
+    try {
+        return socket->getActPosition();
+    }
+    catch (DerotatorErrors::CommunicationErrorExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getDerotatorErrorsEx();
+    }
+    catch (DerotatorErrors::ValidationErrorExImpl& ex) {
+        ex.log(LM_DEBUG);
+        _EXCPT(
+                DerotatorErrors::ConfigurationErrorExImpl, 
+                impl, 
+                "SRTKBandDerotatorImpl::getEnginePosition(): wrong derotator answer."
+        );
+        throw impl.getDerotatorErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(
+                ComponentErrors::UnexpectedExImpl, 
+                impl, 
+                "SRTKBandDerotatorImpl::getEnginePosition()"
+        );
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
 }
 
 
-GET_PROPERTY_REFERENCE(SRTKBandDerotatorImpl, ACS::ROdouble, m_sensor_position, sensor_position);
+
+GET_PROPERTY_REFERENCE(SRTKBandDerotatorImpl, ACS::ROdouble, m_enginePosition, enginePosition);
 GET_PROPERTY_REFERENCE(SRTKBandDerotatorImpl, ACS::ROdouble, m_actPosition, actPosition);
 GET_PROPERTY_REFERENCE(SRTKBandDerotatorImpl, ACS::RWdouble, m_cmdPosition, cmdPosition);
 GET_PROPERTY_REFERENCE(SRTKBandDerotatorImpl, ACS::ROdouble, m_positionDiff, positionDiff);

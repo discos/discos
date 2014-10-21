@@ -71,12 +71,12 @@ public:
     
     
     /** 
-     * Return a reference to the sensor postition property implementation of IDL interface.
+     * Return a reference to the engine postition property implementation of IDL interface.
      *
      * @return pointer to read-only double property position 
      * @throw CORBA::SystemException
      */
-     virtual ACS::ROdouble_ptr sensor_position() throw (CORBA::SystemException);
+     virtual ACS::ROdouble_ptr enginePosition() throw (CORBA::SystemException);
 
 
     /** 
@@ -100,7 +100,7 @@ public:
     /** 
      * Return a reference to the positionDiff property implemented in the IDL interface
      *
-     * @return pointer to read-write double property position 
+     * @return pointer to read-only double property position 
      * @throw CORBA::SystemException
      */
      virtual ACS::ROdouble_ptr positionDiff() throw (CORBA::SystemException);
@@ -139,6 +139,15 @@ public:
         DerotatorErrors::ConfigurationErrorEx, 
         ComponentErrors::ComponentErrorsEx);
 
+
+    /** Switch the power amplifier off
+     *
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx);
+     */
+     void powerOff() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+
+
     /**
      * Set the derotator position (value in the user's reference system)
      *
@@ -156,7 +165,7 @@ public:
 
 
     /**
-     * @return the ICD position (double) in the user's reference system
+     * @return the sensor position (double) in the user's reference system
      *
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw DerotatorErrors::CommunicationErrorEx
@@ -217,12 +226,13 @@ public:
      bool isSlewing();
 
      /**
-      * Return the sensor position (double) in the user's reference system
+      * Return the engine position (double) in the user's reference system
       *
-      * @return sensor position (double) in the user's reference system
+      * @return engine position (double) in the user's reference system
       * @throw CORBA::SystemException
       */
-     double getSensorPosition() ;
+     double getEnginePosition() ;
+
 
 private:
     // CDB attributes
@@ -235,7 +245,7 @@ private:
     CString IP;
     DWORD Port;
     DWORD Timeout;
-    long ZeroReference;
+    double ZeroReference;
     double ConversionFactor;
     double MaxValue;
     double MinValue;
@@ -246,8 +256,8 @@ private:
    CSecureArea<sensorSocket> *m_sensorLink;
    CSecureArea<icdSocket> *m_icdLink;
 
-   // Sensor position property
-   SmartPropertyPointer<ROdouble> m_sensor_position;
+   // Engine position property
+   SmartPropertyPointer<ROdouble> m_enginePosition;
    
    /*
     * This property returns the engine encoder position in the user

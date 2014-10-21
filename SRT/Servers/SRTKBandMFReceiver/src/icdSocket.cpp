@@ -163,7 +163,7 @@ double icdSocket::getActPosition() throw (
         //     (0DDC - 0000)h = 3548 - 0
         long icd_position = hex2dec(buff, ICD_FBRD_INDEX, ICD_RDWORD_LEN) \
                           - hex2dec(buff, ICD_SIGN_INDEX, ICD_RDWORD_LEN);
-        
+
         m_actPosition = m_ICD_CF*icd_position ;
     }
     catch (...) {
@@ -308,7 +308,29 @@ void icdSocket::setPosition(double position) throw (
         
     }
 }   
-    
+ 
+
+void icdSocket::reset() throw (ComponentErrors::SocketErrorExImpl) {
+
+    AUTO_TRACE("icdSocket::reset()");
+
+    BYTE buff[] = { // 8, 4, 0, 1, 0, 0, 1, C, 0, 0, 0, 0, 0, 0, 0, 8, CR
+        0x38, 0x34, 0x30, 0x31, 0x30, 0x30, 0x31, 0x43,
+        0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x38,
+        0x0D
+    }; // ICD ``driveCtrl - FaultReset`` (Commands.driveCtrl, 28:1, bit 3)
+
+    // If responseCheck (called by make_talk) finds an error, it sets a bit on the
+    // pattern property in order to communicate the problem to the client. 
+    // After it logs the error code, it trows an exception
+    try {
+        // Make a conversation to and from icd. The response is stored in buff
+        make_talk(buff, true) ;
+    }
+    catch (...) {
+    }
+}   
+   
 
 void icdSocket::driveEnable() throw (ComponentErrors::SocketErrorExImpl) {
 
@@ -320,9 +342,9 @@ void icdSocket::driveEnable() throw (ComponentErrors::SocketErrorExImpl) {
         0x0D
     }; // This message is an ICD ``driveCtrl - driveEnable`` (Commands.driveCtrl, 28:1)
 
-    // If responseCheck (called by make_talk) finds an error it set a bit on 
-    // pattern property to communicate the problem to client. 
-    // After it logs the error code trows an exception
+    // If responseCheck (called by make_talk) finds an error, it sets a bit on the
+    // pattern property in order to communicate the problem to the client. 
+    // After it logs the error code, it trows an exception
     try {
         // Make a conversation to and from icd. The response is stored in buff
         make_talk(buff, true) ;
@@ -330,6 +352,29 @@ void icdSocket::driveEnable() throw (ComponentErrors::SocketErrorExImpl) {
     catch (...) {
     }
 }   
+ 
+
+void icdSocket::driveDisable() throw (ComponentErrors::SocketErrorExImpl) {
+
+    AUTO_TRACE("icdSocket::driveDisable()");
+
+    BYTE buff[] = { // 8, 4, 0, 1, 0, 0, 1, C, 0, 0, 0, 0, 0, 0, 0, 2, CR
+        0x38, 0x34, 0x30, 0x31, 0x30, 0x30, 0x31, 0x43,
+        0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x31,
+        0x0D
+    }; // This message is an ICD ``driveCtrl - driveDisable`` (Commands.driveCtrl, 28:1, bit 1)
+
+    // If responseCheck (called by make_talk) finds an error, it sets a bit on the
+    // pattern property in order to communicate the problem to the client. 
+    // After it logs the error code, it trows an exception
+    try {
+        // Make a conversation to and from icd. The response is stored in buff
+        make_talk(buff, true) ;
+    }
+    catch (...) {
+    }
+}   
+
 
 
 void icdSocket::updateDriveStatus() throw (ComponentErrors::SocketErrorExImpl) {
