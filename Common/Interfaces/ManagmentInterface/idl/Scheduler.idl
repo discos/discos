@@ -171,14 +171,14 @@ module Management {
 		 * @throw CORBA::SystemExcpetion  
 		 * @param bckInstance name of the instance of the new default backend 
 		 */
-		void chooseDefaultBackend(in string bckInstance);
+		void chooseDefaultBackend(in string bckInstance) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
 		 * This method allows to change the instance of the  data recorder choosen as default. The new component is not loaded, it will the next time the default data recorder is required. 
 		 * @param rcvInstance name of the instance of the new default component
 		 * @throw CORBA::SystemExcpetion  
 		 */ 
-		void chooseDefaultDataRecorder(in string rcvInstance);
+		void chooseDefaultDataRecorder(in string rcvInstance) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
 		 * This method allows to change the value af the attribute <i>restFrequency</i>.

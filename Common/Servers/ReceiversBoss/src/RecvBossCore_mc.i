@@ -780,7 +780,7 @@ void CRecvBossCore::getIFOutput(const ACS::longSeq& feeds,const ACS::longSeq& if
 	}
 }
 
-void CRecvBossCore::CRecvBossCore::startScan(ACS::Time startUT,const Receivers::TReceiversParameters & param)
+void CRecvBossCore::CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters & param)
 {
 
 }

@@ -254,17 +254,23 @@ public:
 
 	/**
 	 * It allows to change the name of the instance of the current default backend
-	 * @throw CORBA::SystemException 
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
 	 * @param bckInstance name of the instance 
 	*/ 
-	virtual void chooseDefaultBackend(const char *bckInstance) throw (CORBA::SystemException);
+	virtual void chooseDefaultBackend(const char *bckInstance) throw (CORBA::SystemException,
+		ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
 	/**
 	 * It allows to change the name of the instance of the current data recorder component
-	 * @throw CORBA::SystemException 
+	 * @throw CORBA::SystemException
+	 * @thorw ComponentErrors::ComponentErrorsEx
+	 * @thorw ManagementErrors::ManagementErrorsEx
 	 * @param rvcInstance name of the instance 
 	 */
-	virtual void chooseDefaultDataRecorder(const char *rcvInstance) throw (CORBA::SystemException);
+	virtual void chooseDefaultDataRecorder(const char *rcvInstance) throw (CORBA::SystemException,
+		ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
 	/**
 	 * This method stops the current running schedule, if any. In order to start a new schedule the current one must be stopped.

@@ -18,8 +18,8 @@
  * @throw ComponentErrors::CORBAProblemExImpl
  * @return true if the scan has been checked successfully
  */ 	
-static bool checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,const double& minEl,const double& maxEl,Antenna::AntennaBoss_ptr antBoss,bool& antBossError)
-	throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl);
+/*static bool checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,const double& minEl,const double& maxEl,Antenna::AntennaBoss_ptr antBoss,bool& antBossError)
+	throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl);*/
 
 
 /**
@@ -34,8 +34,8 @@ static bool checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRec
  * @param antBoss reference to the antenna boss
  * @param antBossErr flags the status of the antenna boss reference
 */
-static void doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,Antenna::AntennaBoss_ptr antBoss,bool& antBossError) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl);
+/*static void doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,Antenna::AntennaBoss_ptr antBoss,bool& antBossError) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl);*/
 
 
 /**
@@ -184,8 +184,8 @@ static IRA::CString computeOutputFileName(const ACS::Time& ut,const ACS::TimeInt
  * @throw ComponentErrors::CORBAProblemExImpl
  * @throw ComponentErrors::UnexpectedExImpl
  */
-static Management::TScanAxis computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError,MinorServo::MinorServoBoss_ptr minorServoBoss,bool& minorServoError,
-		const CConfiguration& config) throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+/*static Management::TScanAxis computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError,MinorServo::MinorServoBoss_ptr minorServoBoss,bool& minorServoError,
+		const CConfiguration& config) throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);*/
 
 
 /**
@@ -209,6 +209,11 @@ static void antennaNCHandler(Antenna::AntennaDataBlock antennaData,void *handler
  * This is the handler of the events coming from the notification channel published by the Minor Servo subsystem
  */
 static void minorServoNCHandler(MinorServo::MinorServoDataBlock servoData,void *handlerParam);
+
+/**
+ * This is the handler of the events coming from the notification channel published by the Receivers subsystem
+ */
+static void receiversNCHandler(Receivers::ReceiversDataBlock receiversData,void *handlerParam);
 
 /**
  * used as wrapper to function that are in charge of forwarding commands to other packages  

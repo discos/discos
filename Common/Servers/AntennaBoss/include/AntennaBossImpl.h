@@ -551,16 +551,20 @@ public:
 	 * @throw AntennaErrors::AntennaErrorsEx
 	 * @throw CORBA::SystemException 
 	 * @param targetName name of the target of the scan 
-	 * @param startUt this is the time before which the telescope is supposed to reach the target
+	 * @param startUt this is the time before which the telescope is supposed to reach the target. It returns the expected start time (it could be zero meaning the telescope could
+	 *                  start as soon as possible)
 	 * @param parameters this structure describes the target
 	 * @param secondary this the secondary tracking structure. It may be used according to the generator given with the primary structure.
-	 * @param slewingTime time that the telescope will take to reach the target position
 	 * @param minElLimit  elevation lower limit to check the visibility of the target
 	 * @param maxElLimit elevation upper  limit to check the visibility of the target
+	 * @param slewingTime time that the telescope will take to reach the target position
+	 * @param section north or south
+	 * @param axis it reports back the axis of the scan
 	 * @return true if the telescope will be in the target position before the given epoch expires and the target is above the horizon, false if the
 	 * telescope will not be able to get there.
 	 */ 
-	bool checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary,ACS::TimeInterval_out slewingTime,CORBA::Double minElLimit,CORBA::Double maxElLimit) throw (
+	bool checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary,
+			CORBA::Double minElLimit,CORBA::Double maxElLimit,Antenna::TRunTimeParameters_out runTime) throw (
 			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 	
 	/**

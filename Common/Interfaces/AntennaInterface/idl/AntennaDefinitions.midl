@@ -12,6 +12,7 @@
 
 #include <baci.idl>
 #include <enumpropMACRO.idl>
+#include <ManagmentDefinitions.idl>
 
 #pragma prefix "alma"
 
@@ -190,6 +191,41 @@ module Antenna {
 		SUBSCAN_INCREASE,
 		SUBSCAN_DECREASE
 	};
+	
+		
+	/**
+	 * This structure is used to fill all the runtime information (from teh antenna) regarding the current scan
+	*/
+	typedef struct RunTime {
+	/**
+	 * expected azimuth at the beggining of the scan
+	*/
+	double azimuth;
+	/**
+	 * expected elevation at the beggining of the scan
+	*/
+	double elevation;
+	/**
+	 * expected starting ut time
+	*/ 
+	ACS::Time startEpoch;
+	/**
+	 * This flags inform the the scan is an On-The-Fly 
+	 */
+	boolean onTheFly; 
+	/**
+	 * expected slewing time
+	*/ 
+	ACS::TimeInterval slewingTime;
+	/**
+	 * expected azituh section at the begging of the scan
+	*/
+	Antenna::TAzimuthSection section;
+	/**
+	 * scan axis of the current scan
+	*/ 
+	Management::TScanAxis axis;
+	} TRunTimeParameters;
 		
 };
 

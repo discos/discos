@@ -55,7 +55,7 @@ module Antenna {
 	 * It defines the dimension of the tracking parameter vector
 	 */
 	const long ANTENNA_TRACKING_PARAMETER_NUMBER=10;
-	
+
 	/**
 	 * This structure is used to pass the tracking parameters to the <i>startTracking()</i> routine. The coordinates are supposed to be in radians 
 	 * and their meaning varies according to the <i>TGeneratorType</i> and <i>TCoordinateFrame</i>. 
@@ -490,19 +490,23 @@ module Antenna {
 		 * @throw CORBA::SystemExcpetion
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw AntennaErrors::AntennaErrorsEx
-		 * @param startUt this is the time before which the telescope is supposed to reach the target, if negative the scan is checked only against 
-		 *        the elevation.
+		 * @param startUt this is the time before which the telescope is supposed to reach the target, if zero the scan is checked only against the elevation.
 		 * @param parameters structure that describes the scan to be performed.
 		 * @param secondary this stucture is identical to the previous one, in most cases it is ignored, only on particular cases it is used as a secondary trajectory generator in order to get
 		 *                  a combination of both of them.
-		 * @param slewingTime time that the telescope will take to reach the target position
 		 * @param lowerElLimit defines the lower limit in elevation to be checked: the target must lay beyound that limit (radians). A negative value forces the check against default value
-		 * @param upper ElLimit defines the upper limit in elevation to be checked: the target must lay below that limit (radians). A negative value forces the check against default value
+		 * @param runTime structure used to return some of the run time information about the scan. 
+		 * 	@arg \c azimuth initial azimuth of the current scan
+		 *	@arg \c elevation initial elevation of the current scan
+		 *	@arg \c startEpoch starting ut time of the current scan
+		 *	@arg \c slewingTime expected slewng time to the starting point
+		 *	@arg \c section indicates where in the azimuth range the scan will start
+		 *	@arg \c axis scanning axis of the curretn scan
 		 * @return true if the telescope will be in the target position before the given epoch expires, false if the
 		 * telescope will not be able to get there in time ( now+SlewTime>ut).
 		*/  
-		boolean checkScan(in ACS::Time startUt,in TTrackingParameters parameters,in TTrackingParameters secondary,out ACS::TimeInterval slewingTime,in double lowerElLimit,in double upperElLimit) raises (
-				ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		boolean checkScan(in ACS::Time startUt,in TTrackingParameters parameters,in TTrackingParameters secondary,in double lowerElLimit,in double upperElLimit,
+				out TRunTimeParameters runTime) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 
 		/**
 		 * Reset the failures of the subsystem. 

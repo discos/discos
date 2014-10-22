@@ -235,7 +235,21 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	virtual void startScan(ACS::Time startUT,const Receivers::TReceiversParameters & param) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	virtual void startScan(ACS::Time& startUT,const Receivers::TReceiversParameters & param) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 * Check if the receivers can be ready for the next scan.
+ 	 * @param startUT epoch at which the scan is going to be executed
+	 * @param param list of required parameters
+	 * @param runtTime structure containing the runt time parameters of the scan
+	 * @param antennaInfo run time parameters from the antenna subsystem 
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	virtual CORBA::Boolean checkScan(ACS::Time startUt,const Receivers::TReceiversParameters& param,
+	 const Antenna::TRunTimeParameters & antennaInfo,Receivers::TRunTimeParameters_out runTime) throw (
+	 CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * called in order to get back the position of the derotator at a given epoch

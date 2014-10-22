@@ -142,7 +142,7 @@ public:
 	
 	void park()  throw (ManagementErrors::ParkingErrorExImpl);
 	
-	void startScan(ACS::Time startUT,const Receivers::TReceiversParameters& param);
+	void startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param);
 
 	long getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) throw (ComponentErrors::ValidationErrorExImpl,
 			ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);

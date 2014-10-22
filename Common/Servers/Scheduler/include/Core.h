@@ -225,13 +225,13 @@ public:
 	 * It allows to change the backend elected as default backend, the default backend is the device used for all operation (for example tsys) when a schedule is not running.
 	 * @param bckInstance name of the instance of the backend that has to be placed as default backend 
 	 */
-	void chooseDefaultBackend(const char *bckInstance);
+	void chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl);
 	
 	/**
-	 * It allows to change the component elected as default data receiver, 
+	 * It allows to change the component elected as default data receiver.
 	 * @param rcvInstance name of the instance of the data receiver component 
 	 */
-	void chooseDefaultDataRecorder(const char *rcvInstance);
+	void chooseDefaultDataRecorder(const char *rcvInstance) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl);
 	
 	/**
 	 * It allows to change the current status of the scheduler.
@@ -253,9 +253,15 @@ public:
 
 	/**
 	 * This is not thread safe but we can consider it almost atomic.
+	 * It clear the tracking flag, issued when a new scan is commanded in order to prevent the scheduler to consider the tracking when it is not the case
+	 */
+	inline void clearReceiversTracking() { m_isReceiversTracking=false; }
+
+	/**
+	 * This is not thread safe but we can consider it almost atomic.
 	 * It clear the tracking flag from minor servo, issued when a new scan is commanded in order to prevent the scheduler to consider the tracking when it is not the case
 	 */
-	inline void clarMinorServoTracking() { if (MINOR_SERVO_AVAILABLE) m_isMinorServoTracking=false; }
+	inline void clearMinorServoTracking() { if (MINOR_SERVO_AVAILABLE) m_isMinorServoTracking=false; }
 	
 	/**
 	 * This is not thread safe but we can consider it almost atomic.

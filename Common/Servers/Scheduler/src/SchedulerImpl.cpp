@@ -207,16 +207,38 @@ void SchedulerImpl::clearStatus() throw (CORBA::SystemException)
 	m_core->resetSchedulerStatus();
 }
 
-void SchedulerImpl::chooseDefaultBackend(const char *bckInstance) throw (CORBA::SystemException)
+void SchedulerImpl::chooseDefaultBackend(const char *bckInstance) throw (CORBA::SystemException,
+  ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	AUTO_TRACE("SchedulerImpl::chooseDefaultBackend()");
-	m_core->chooseDefaultBackend(bckInstance);	
+	try {
+		m_core->chooseDefaultBackend(bckInstance);	
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();		
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
 }
 
-void SchedulerImpl::chooseDefaultDataRecorder(const char *rcvInstance) throw (CORBA::SystemException)
+void SchedulerImpl::chooseDefaultDataRecorder(const char *rcvInstance) throw (CORBA::SystemException,
+  ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	AUTO_TRACE("SchedulerImpl::chooseDefaultDataRecorder()");
-	m_core->chooseDefaultDataRecorder(rcvInstance);	
+	try {
+		m_core->chooseDefaultDataRecorder(rcvInstance);
+	}
+		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();		
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}	
 }
 
 void SchedulerImpl::startSchedule(const char * fileName,const char *startSubScan) throw (CORBA::SystemException,

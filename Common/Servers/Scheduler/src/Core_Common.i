@@ -1,23 +1,22 @@
 
-bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,const double& minEl,const double& maxEl,Antenna::AntennaBoss_ptr antBoss,bool& antBossError)
+/*bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,const double& minEl,const double& maxEl,Antenna::AntennaBoss_ptr antBoss,bool& antBossError)
 	throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl)
 {
 	//No sync required, this is a private static method, called only by public method of this class and by the schedule executor. 
 	ACS::TimeInterval slewTime;
+	Antenna::TAzimuthSection azSection;
 	bool answer;
-	//****************************************************************************************************************
 	// this function should check if the telescope could perform the required motion according the schedule type and the scan type
 	// at the moment the only motion involved is the antenna motion, in future it could be the subreflector or other subsystems.
 	// the better way is to check the scanRec.type which should be changed from Antenna::TGeneratorType to something more generic
 	// "scanData.type" which is Management::TScanTypes
-	//*****************************************************************************************************************
 	if (mode==CSchedule::LST) {    // all the motion should be checked against the ut time
 		Antenna::TTrackingParameters *prim=static_cast<Antenna::TTrackingParameters *>(scanData.primaryParameters);
 		Antenna::TTrackingParameters *sec=static_cast<Antenna::TTrackingParameters *>(scanData.secondaryParameters);
 		//Antenna::TTrackingParameters * param=(Antenna::TTrackingParameters *)scanRec.scanPar;  //get the definitions of the 		
 		try {
 			if (!CORBA::is_nil(antBoss)) {
-				answer=antBoss->checkScan(scanInfo.ut,*prim,*sec,slewTime,minEl,maxEl);
+				answer=antBoss->checkScan(scanInfo.ut,*prim,*sec,minEl,maxEl,slewTime,azSection);
 				ACS_STATIC_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %lld :",slewTime));
 				return answer;
 			}
@@ -56,7 +55,7 @@ bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRec
 		try {
 			if (!CORBA::is_nil(antBoss)) {
 				ACS::Time timeTemp=0;
-				answer=antBoss->checkScan(timeTemp,*prim,*sec,slewTime,minEl,maxEl);   // for SEQ schedule the position is not check against the time (ut=0)
+				answer=antBoss->checkScan(timeTemp,*prim,*sec,minEl,maxEl,slewTime,azSection);   // for SEQ schedule the position is not check against the time (ut=0)
 				ACS_STATIC_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %lld :",slewTime));
 				return answer;
 			}
@@ -92,13 +91,12 @@ bool CCore::checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRec
 		// ******************* UT, we'll see if it makes sense
 		return true;
 	}	
-}
+}*/
 
-void CCore::doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,Antenna::AntennaBoss_ptr antBoss,bool& antBossError) throw (ComponentErrors::OperationErrorExImpl,
+/*void CCore::doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,Antenna::AntennaBoss_ptr antBoss,bool& antBossError) throw (ComponentErrors::OperationErrorExImpl,
 		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl)
 {
 	//No sync required, this is a private static method, called only by public method of this class and by the schedule executor.
-	/********************************************/
 	//This performs the scan from the Antenna point of view....when more apparatus will be involved we should think about it
 	// here we'll have to put the code to command a different scans according the involved subsystem, for example subreflector instead of the antenna.
 	// the better way is to check the m_currentScanRec.type which should be changed from Antenna::TGeneratorType to something more generic
@@ -135,7 +133,7 @@ void CCore::doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TReco
 		antBossError=true;
 		throw impl;
 	}
-}
+}*/
 
 /*Management::TScanAxis CCore::computeScanAxis(const Management::TScanTypes& type,const Schedule::CScanList::TRecord& scanRec)
 {
@@ -173,7 +171,7 @@ void CCore::doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TReco
 	// *******************************
 }*/
 
-Management::TScanAxis CCore::computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError,MinorServo::MinorServoBoss_ptr minorServoBoss,bool& minorServoError,
+/*Management::TScanAxis CCore::computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError,MinorServo::MinorServoBoss_ptr minorServoBoss,bool& minorServoError,
 		const CConfiguration& config) throw (
 		ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
@@ -229,7 +227,7 @@ Management::TScanAxis CCore::computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bo
 	else {
 		return scanAxis_ant;
 	}
-}
+}*/
 
 IRA::CString CCore::computeOutputFileName(const ACS::Time& ut,const ACS::TimeInterval& lst,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra)
 {
@@ -411,10 +409,10 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
 {
 	if (streamStarted) {
  		try {
+ 			streamStarted=false;
  			if (!CORBA::is_nil(backend)) {
  				backend->sendStop();
  			}
- 			streamStarted=false;
  		}
  		catch (BackendsErrors::BackendsErrorsEx& ex) {
  			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::disableDataTransfer()");
@@ -441,10 +439,10 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
  	}
  	if (streamPrepared) {
  		try {
+ 			streamPrepared=false;
  			if (!CORBA::is_nil(backend)) {
  				backend->terminate();
  			}	
- 			streamPrepared=false;
  		}
  		catch (BackendsErrors::BackendsErrorsEx& ex) {
  			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::disableDataTransfer()");
@@ -471,10 +469,10 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
  	}
 	if (scanStarted) {
 		try {
+			scanStarted=false;
 			if (!CORBA::is_nil(writer)) {
 				writer->stopScan();
 			}
-			scanStarted=false;
 		}
  		catch (ComponentErrors::ComponentErrorsEx& ex) {
  			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::disableDataTransfer()");
@@ -501,6 +499,7 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
 	}
  	if (streamConnected) {
  		try {
+ 			streamConnected=false;
  			if (!CORBA::is_nil(backend)) {
  				backend->disconnect();
  			}	
@@ -537,7 +536,6 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
  			writerError=true;
  			throw impl;
  		}
- 		streamConnected=false;	
  	}	
 }
 
@@ -791,6 +789,17 @@ void CCore::startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendE
 	}
 }
 
+void CCore::receiversNCHandler(Receivers::ReceiversDataBlock receiversData,void *handlerParam)
+{
+	CCore *me=static_cast<CCore *>(handlerParam);
+	if (receiversData.status!=Management::MNG_OK) {
+		me->m_isReceiversTracking=false;
+	}
+	else {
+		me->m_isReceiversTracking=receiversData.tracking;
+	}
+}
+
 void CCore::antennaNCHandler(Antenna::AntennaDataBlock antennaData,void *handlerParam)
 {
 	CCore *me=static_cast<CCore *>(handlerParam);
@@ -868,13 +877,13 @@ bool CCore::remoteCall(const IRA::CString& command,const IRA::CString& package,c
 		}
 		case 3: { // default backend..
 			Backends::GenericBackend_var backend;
-			backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
+			//backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
 			try {
+				/*if (CORBA::is_nil(backend)) {*/
 				baci::ThreadSyncGuard guard(&m_mutex);
-				if (CORBA::is_nil(backend)) {
-					loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
-					backend=m_defaultBackend;
-				}
+				loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
+				backend=m_defaultBackend;
+				/*}*/
 			}
 			catch (ComponentErrors::CouldntGetComponentExImpl& err) { //this exception can be thrown by the loadDefaultBackend()
 				_ADD_BACKTRACE(ParserErrors::PackageErrorExImpl,impl,err,"CCore::remoteCall()");

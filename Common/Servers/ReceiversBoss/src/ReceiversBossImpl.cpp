@@ -467,7 +467,7 @@ void ReceiversBossImpl::turnAntennaUnitOff() throw (CORBA::SystemException,Compo
 	}
 }
 
-void ReceiversBossImpl::startScan(ACS::Time startUT,const Receivers::TReceiversParameters & param) throw (CORBA::SystemException,
+void ReceiversBossImpl::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters & param) throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try{
@@ -486,7 +486,16 @@ void ReceiversBossImpl::startScan(ACS::Time startUT,const Receivers::TReceiversP
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
 	}
+}
 
+CORBA::Boolean ReceiversBossImpl::checkScan(ACS::Time startUt,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters& antennaInfo,
+  Receivers::TRunTimeParameters_out runTime) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	// At the moment no need to perform checks or something
+	// also no need to compute startUT
+	runTime.startEpoch=startUt;
+	runTime.onTheFly=false;
+	return true;
 }
 
 CORBA::Double ReceiversBossImpl::getDerotatorPosition (ACS::Time epoch) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)

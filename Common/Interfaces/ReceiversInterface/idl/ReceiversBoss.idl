@@ -15,6 +15,7 @@
 #include <ManagmentDefinitions.idl>
 #include "CommonReceiverInterface.idl"
 #include "ReceiversDefinitions.idl"
+#include <AntennaDefinitions.idl>
 
 #pragma prefix "alma"
 
@@ -45,12 +46,10 @@ module Receivers {
 	
 	/**
 	 * This structure is used to pass the receivers parameters to the <i>startScan()</i> routine on subscan basis.
+	 * Empty at the moment.
 	*/
-	typedef  struct  RecvPoint {
-		/**
-		 * Indicates which axis the current scan is going to follow
-		 */
-		Management::TScanAxis axis;
+	typedef struct RecvPoint {
+		long dummy;
 	} TReceiversParameters;
     
 		
@@ -145,12 +144,26 @@ module Receivers {
         
         /**
          * This method allows to prepare the receivers for scan 
-         * @param startUT exact time the scan is expected to start
+         * @param startUT exact time the scan is required to start, as output the effective stat time 
          * @param param structure containing all the information required in order to prepare the receiver for the scan.
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw ComponentErrors::ComponentErrorsEx
          */
-        void startScan(in ACS::Time startUT,in TReceiversParameters param) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        void startScan(inout ACS::Time startUT,in TReceiversParameters param) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        
+		/**
+		 * This method is only be used internally. Anyone that needs to know if the receiver subsystem could perform a given scan before a given time, can call this. 
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ReceiversErrors::ReceiversErrorsEx
+		 * @param startUt this is the time before which the receivers are supposed to be ready for the scan. 
+		 * @param param structure that describes the scan to be performed.
+		 * @param antennaInfo structure that contains desired information from the antenna subsystem
+		 * @param runTime stores the runtime parameters regarding the current scan from the receivers
+		 * @return true if the subsystem could accomplish the required scan.
+		 */
+		boolean checkScan(in ACS::Time startUt,in TReceiversParameters param,in Antenna::TRunTimeParameters antennaInfo,
+		out TRunTimeParameters runTime) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
     };
     

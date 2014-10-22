@@ -1117,9 +1117,11 @@ const IRA::CString& CRecvBossCore::getRecvCode()
 	return m_currentRecvCode;
 }
 
-void CRecvBossCore::startScan(ACS::Time startUT,const Receivers::TReceiversParameters & param)
+void CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters & param)
 {
-
+	// at the moment no need to change startUT and return different value
+	// for the derotator we assume the device is fast enough to follow antenna movments, on the contrary it will rise a warning and
+	// affect the tracking flag
 }
 
 const IRA::CString& CRecvBossCore::getOperativeMode() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)

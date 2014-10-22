@@ -692,12 +692,11 @@ void CBossCore::stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors:
 	m_rawCoordinates.empty();
 }
 
-bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParameters& par,const Antenna::TTrackingParameters& secondary,ACS::TimeInterval& slewingTime,double minElLimit,double maxElLimit) throw (
+bool CBossCore::checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& par,const Antenna::TTrackingParameters& secondary,Antenna::TRunTimeParameters& runTime,double minElLimit,double maxElLimit) throw (
 		ComponentErrors::CouldntGetComponentExImpl,AntennaErrors::ScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,
 		AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
 {
 	double azimuth,elevation,stopElevation,stopAzimuth,hwAzimuth;
-	ACS::Time inputTime;
 	Antenna::TSections section;
 	ACS::Time startTime=startUt; //it can be changed in the prepareScan routine
 	CSlewCheck::TCheckResult visible;
@@ -706,30 +705,39 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 	Antenna::EphemGenerator_var generator=Antenna::EphemGenerator::_nil();
 	Antenna::EphemGenerator_var generatorFlux=Antenna::EphemGenerator::_nil();
 	//the getHorizontal says where the antenna should be at the given time, even if the time is far before the start time, in that case the start point of the scan is given
-	TIMEVALUE now;
-	IRA::CIRATools::getTime(now);
-	inputTime=now.value().value;
-	IRA::CString out;
-	IRA::CIRATools::timeToStr(inputTime,out);
-	ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"CHECK_TIME_IS: %s",(const char *)out));
 	try {
 		double ra,dec,lon,lat,vrad;
 		Antenna::TReferenceFrame velFrame;
 		Antenna::TVradDefinition velDef;
-		Management::TScanAxis axis;
+		//Management::TScanAxis axis;
 		TOffset scanOff;
 		Antenna::TTrackingParameters lastScan;
 		IRA::CString name;
 		copyTrack(lastScan,m_lastScanParameters);
-		generator=prepareScan(true,startTime,par,secondary,m_userOffset,generatorType,lastScan,section,ra,dec,lon,lat,vrad,velFrame,velDef,name,scanOff,axis,generatorFlux.out());
+		// startUt is changed by preparescan just in case of an OTF scan
+		generator=prepareScan(true,startTime,par,secondary,m_userOffset,generatorType,lastScan,section,ra,dec,lon,lat,vrad,velFrame,velDef,name,scanOff,runTime.axis,generatorFlux.out());
 		if (generatorType==Antenna::ANT_OTF) {
-			generator->getHorizontalCoordinate(startTime,azimuth,elevation); //use inputTime (=now), in order to get the first point of the scan)
+			generator->getHorizontalCoordinate(startTime,azimuth,elevation); 
 			generator->getHorizontalCoordinate(startTime+par.otf.subScanDuration,stopAzimuth,stopElevation); //this is the coordinate at the end of the scan
+			runTime.startEpoch=startTime;
+			runTime.azimuth=azimuth;
+			runTime.elevation=elevation;
+			runTime.onTheFly=true;
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"OTF_AZ_EL: %lf %lf",azimuth,elevation));
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"OTF_STOPAZ_STOPEL: %lf %lf",stopAzimuth,stopElevation));
 		}
 		else { // all other cases 
+			ACS::Time inputTime;
+			TIMEVALUE now;
+			IRA::CIRATools::getTime(now);
+			inputTime=now.value().value;
+			IRA::CString out;
+			IRA::CIRATools::timeToStr(inputTime,out);
+			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"CHECK_TIME_IS: %s",(const char *)out));
 			generator->getHorizontalCoordinate(inputTime,azimuth,elevation); //use inputTime (=now), in order to get where the source is now)
+			runTime.azimuth=azimuth;
+			runTime.elevation=elevation;
+			runTime.onTheFly=false;
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_AZ_EL: %lf %lf",azimuth,elevation));
 		}
 	}
@@ -764,6 +772,12 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 	catch (...) {
 		changeBossStatus(Management::MNG_WARNING);
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CBossCore::checkScan()");
+	}
+	if ((azimuth*DR2D>=90.0) && (azimuth<=270.0)) {
+		runTime.section=Antenna::ANT_SOUTH;
+	}
+	else {
+		runTime.section=Antenna::ANT_NORTH;
 	}
 	loadMount(m_mount,m_mountError); 
 	// ask the mount about the azimuth coordinate that will be effectively commanded to the antenna (hardware coordinate)
@@ -800,14 +814,22 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 	if (visible==CSlewCheck::VISIBLE) {
 		ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_INSIDE_ELEVATION_RANGE"));
 		// if startUt==0 no slewing checks are done...the answer is always true but the slewing time is computed anyway
-		// don't use startTime because it could have been changed (by OTF) and want to keep track of the startUt==0 in any case.
-		slew=m_slewCheck.checkSlewing(m_lastEncoderAzimuth,m_lastEncoderElevation,m_lastEncoderRead,hwAzimuth,elevation,startUt,slewingTime);
+		slew=m_slewCheck.checkSlewing(m_lastEncoderAzimuth,m_lastEncoderElevation,m_lastEncoderRead,hwAzimuth,elevation,startUt,runTime.slewingTime);
+		if (generatorType!=Antenna::ANT_OTF) { // the startime need to be computed only for not-OTF scans. 
+			runTime.startEpoch=m_lastEncoderRead+runTime.slewingTime+1000000; // add 0.1s as safety margin
+		}
 		if (slew) {
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_REACHABLE_ON_TIME"));
 		}
 		else {
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_NOT_REACHABLE_ON_TIME"));
 		}
+		// in case all the check are successful the estimated start time is returned back.
+		// generally it works according the following table:
+		// startUT          OTF_SCAN                TRACK_SCAN
+		//     0            computedUT(prepareScan) computedUT(here)
+		//     A            A                       A
+		// the last entry is valid only if the antenna is capable to start before A.
 		return slew;
 	}
 	else if (visible==CSlewCheck::AVOIDANCE) {

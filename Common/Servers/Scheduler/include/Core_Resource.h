@@ -12,7 +12,7 @@
 									m_weatherStation=Weather::GenericWeatherStation::_nil(); \
 									m_antennaNC=NULL; \
 									m_minorServoNC=NULL; \
-									m_isAntennaTracking=m_isMinorServoTracking=false; \
+									m_isAntennaTracking=m_isMinorServoTracking=m_isReceiversTracking=false; \
 									m_clearTrackingTime=0; \
 									m_antennaBossError=m_receiversBossError=m_minorServoBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=\
 									m_activeSurfaceBossError=m_weatherStationError=false; \
@@ -29,6 +29,9 @@
 		      			  ACS_LOG(LM_FULL_INFO, "Core::execute()", (LM_INFO,"MINOR_SERVO_NC_READY")); \
 					  } \
 					  else { m_isMinorServoTracking=true; } \
+					  ACS_NEW_SIMPLE_CONSUMER(m_receiversNC,Receivers::ReceiversDataBlock,Receivers::RECEIVERS_DATA_CHANNEL,receiversNCHandler,static_cast<void*>(this)); \
+					  m_receiversNC->consumerReady(); \
+					  ACS_LOG(LM_FULL_INFO, "Core::execute()", (LM_INFO,"RECEIEVERS_NC_READY")); \
 					  m_defaultBackendInstance=m_config->getDefaultBackendInstance(); \
 					  m_defaultDataReceiverInstance=m_config->getDefaultDataReceiverInstance(); \
 					  try { \
@@ -48,6 +51,8 @@
 						 m_antennaNC=NULL; \
 						 if (m_minorServoNC!=NULL) m_minorServoNC->disconnect(); \
 						 m_minorServoNC=NULL; \
+						 if (m_receiversNC!=NULL) m_receiversNC->disconnect(); \
+						 m_receiversNC=NULL; \
 						 if (m_parser) { \
 						    delete m_parser; \
 						 } \
@@ -152,6 +157,11 @@ bool m_scanStarted;
 nc::SimpleConsumer<Antenna::AntennaDataBlock> *m_antennaNC;
 
 /**
+ * pointer to the receivers notification channel
+*/
+nc::SimpleConsumer<Receivers::ReceiversDataBlock> *m_receiversNC;
+
+/**
  * pointer to the minor servo notification channel
 */
 nc::SimpleConsumer<MinorServo::MinorServoDataBlock> *m_minorServoNC;
@@ -166,6 +176,11 @@ bool m_isAntennaTracking;
  */
 bool m_isMinorServoTracking;
 
+/**
+ * Tracking status of the receivers subsystem
+ */
+bool m_isReceiversTracking;
+
 /*
  * Marks when the clear tracking has been issue, the tracking will be false for next 500msec
  */
@@ -179,6 +194,14 @@ long m_currentDevice;
  * Stores the values of the rest frequencies
  */
 ACS::doubleSeq m_restFrequency;
+/**
+ * structure used to pass back and forth runtime parameters from the receivers
+ */
+Receivers::TRunTimeParameters m_receiversRunTime;
+/**
+ * structure used to pass back and forth runtime parameters from the receivers
+ */
+Antenna::TRunTimeParameters m_antennaRunTime;
 /**
  * used to get a reference to the antenna boss component.
  * @param ref the pointer to the antenna boss component

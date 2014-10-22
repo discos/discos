@@ -67,6 +67,20 @@ module Receivers {
     };
     // Not required at the moment
     ACS_ENUM(TUpdateModes);
+    
+    /**
+	 * This structure is used to fill in all the runtime information (from the receivers) regarding the current scan
+	*/
+	typedef struct RunTime {
+		/**
+	 	* expected stating ut time
+		*/ 
+		ACS::Time startEpoch;
+		/**
+		 * indicates the commanded scan requires an On-The-Fly management
+		 */
+		boolean onTheFly;
+	} TRunTimeParameters;
 
 };
 

@@ -48,8 +48,9 @@ EXECUTABLES_L   =
 # <brief description of xxxxx program>
 ReceiversBossImpl_OBJECTS   = ReceiversBossImpl	RecvBossCore Configuration WatchingThread
 ReceiversBossImpl_LDFLAGS   =
-ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs GenericReceiverStubs \
-							  DewarPositionerStubs ManagmentDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc
+ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs \
+							  GenericReceiverStubs DewarPositionerStubs ManagmentDefinitionsStubs AntennaDefinitionsStubs \
+							  ManagementErrors ParserErrors ReceiversErrors acsnc
 
 #
 # special compilation flags for single c sources

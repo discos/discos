@@ -17,6 +17,7 @@
 #include <ManagmentDefinitions.idl>
 #include "CommonReceiverInterface.idl"
 
+
 #pragma prefix "alma"
 
 module Receivers { 

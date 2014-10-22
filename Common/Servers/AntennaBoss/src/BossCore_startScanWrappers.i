@@ -7,8 +7,10 @@ void CBossCore::track(const char *targetName) throw (ComponentErrors::CouldntRel
 		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
 {	
 	ACS::Time startUt=0;
+	//Management::TScanAxis axis;
 	Antenna::TTrackingParameters par,second;
-	ACS::TimeInterval slewingTime;
+	//ACS::TimeInterval slewingTime;
+	//Antenna::TAzimuthSection section;
 	second.type=Antenna::ANT_NONE;
 	second.secondary=false;
 	second.applyOffsets=false;
@@ -21,9 +23,10 @@ void CBossCore::track(const char *targetName) throw (ComponentErrors::CouldntRel
 	par.targetName=CORBA::string_dup(targetName);
 	par.section=Antenna::ACU_NEUTRAL;
 	par.enableCorrection=true;
-	if (!checkScan(startUt,par,second,slewingTime,m_config->getMinElevation(),m_config->getMaxElevation())) {   // check if the target is set or not...in case we just signal a possible problem
+	/*if (!checkScan(startUt,par,second,slewingTime,section,axis,m_config->getMinElevation(),m_config->getMaxElevation())) {   // check if the target is set or not...in case we just signal a possible problem
 		ACS_LOG(LM_FULL_INFO,"CBossCore::track()",(LM_WARNING,"SCAN_WILL_NOT_BE_PROPERLY_EXECUTED"));
 	} //...but the scan is commanded anyway
+	startUt=0; // override the startUt computed by the previous call*/
 	startScan(startUt,par,second); // could throw exceptions
 }
 	
@@ -33,7 +36,9 @@ void CBossCore::moon() throw (ComponentErrors::CouldntReleaseComponentExImpl,Com
 {
 	ACS::Time startUt=0;
 	Antenna::TTrackingParameters par,second;
-	ACS::TimeInterval slewingTime;
+	//ACS::TimeInterval slewingTime;
+	//Antenna::TAzimuthSection section;
+	//Management::TScanAxis axis;
 	second.type=Antenna::ANT_NONE;
 	second.secondary=false;
 	second.applyOffsets=false;
@@ -45,9 +50,10 @@ void CBossCore::moon() throw (ComponentErrors::CouldntReleaseComponentExImpl,Com
 	par.applyOffsets=false;
 	par.section=Antenna::ACU_NEUTRAL;
 	par.enableCorrection=true;
-	if (!checkScan(startUt,par,second,slewingTime,m_config->getMinElevation(),m_config->getMaxElevation())) {   // check if the target is set or not...in case we just signal a possible problem
+	/*if (!checkScan(startUt,par,second,slewingTime,section,axis,m_config->getMinElevation(),m_config->getMaxElevation())) {   // check if the target is set or not...in case we just signal a possible problem
 		ACS_LOG(LM_FULL_INFO,"CBossCore::moon()",(LM_WARNING,"SCAN_WILL_NOT_BE_PROPERLY_EXECUTED"));
 	} //...but the scan is commanded anyway
+	startUt=0; // override the startUt computed by the previous call*/
 	startScan(startUt,par,second); // could throw exceptions
 }
 
@@ -106,7 +112,9 @@ void CBossCore::sidereal(const char * targetName,const double& ra,const double& 
 {
 	ACS::Time startUt=0;
 	Antenna::TTrackingParameters prim,second;
-	ACS::TimeInterval slewingTime;
+	//ACS::TimeInterval slewingTime;
+	//Antenna::TAzimuthSection azSection;
+	//Management::TScanAxis axis;
 	second.secondary=false; second.paramNumber=0; second.applyOffsets=false; second.type=Antenna::ANT_NONE; second.enableCorrection=true;
 	prim.type=Antenna::ANT_SIDEREAL;
 	prim.parameters[0]=ra;
@@ -119,9 +127,10 @@ void CBossCore::sidereal(const char * targetName,const double& ra,const double& 
 	prim.secondary=false;
 	prim.applyOffsets=false;
 	prim.enableCorrection=true;
-	if (!checkScan(startUt,prim,second,slewingTime,m_config->getMinElevation(),m_config->getMaxElevation())) {   // check if the target is set or not...in case we just signal a possible problem
+	/*if (!checkScan(startUt,prim,second,slewingTime,azSection,axis,m_config->getMinElevation(),m_config->getMaxElevation())) {   // check if the target is set or not...in case we just signal a possible problem
 		ACS_LOG(LM_FULL_INFO,"CBossCore::sidereal()",(LM_WARNING,"SCAN_WILL_NOT_BE_PROPERLY_EXECUTED"));
 	} //...but the scan is commanded anyway
+	startUt=0; // override the startUt computed by the previous call*/
 	startScan(startUt,prim,second);
 }
 
@@ -193,7 +202,9 @@ ACS::Time CBossCore::lonOTFScan(const Antenna::TCoordinateFrame& scanFrame,const
 		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
 {
 	ACS::Time startUt=0;
-	ACS::TimeInterval slewingTime;
+	//ACS::TimeInterval slewingTime;
+	//Antenna::TAzimuthSection section;
+	//Management::TScanAxis axis;
 	Antenna::TTrackingParameters prim,second;
 	second.secondary=false; second.paramNumber=0; second.applyOffsets=false; second.type=Antenna::ANT_NONE; second.enableCorrection=true;
 	prim.type=Antenna::ANT_OTF;
@@ -218,9 +229,10 @@ ACS::Time CBossCore::lonOTFScan(const Antenna::TCoordinateFrame& scanFrame,const
 	prim.targetName=CORBA::string_dup("otf"); // not strictly necessary as the system will take the last commanded name
 	prim.section=Antenna::ACU_NEUTRAL;
 	prim.enableCorrection=true;
-	if (!checkScan(startUt,prim,second,slewingTime,m_config->getMinElevation(),m_config->getMaxElevation())) {   // check if the target is set or not...in case we just signal a possible problem
+	/*if (!checkScan(startUt,prim,second,slewingTime,section,axis,m_config->getMinElevation(),m_config->getMaxElevation())) {   // check if the target is set or not...in case we just signal a possible problem
 		ACS_LOG(LM_FULL_INFO,"CBossCore::lonOTFScan()",(LM_WARNING,"SCAN_WILL_NOT_BE_PROPERLY_EXECUTED"));
 	} //...but the scan is commanded anyway
+	startUt=0; // override the startUt computed by the previous call*/
 	startScan(startUt,prim,second);
 	return startUt;
 }
@@ -231,8 +243,10 @@ ACS::Time CBossCore::latOTFScan(const Antenna::TCoordinateFrame& scanFrame,const
 		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
 {
 	ACS::Time startUt=0;
-	ACS::TimeInterval slewingTime;
+	//ACS::TimeInterval slewingTime;
+	//Antenna::TAzimuthSection section;
 	Antenna::TTrackingParameters prim,second;
+	//Management::TScanAxis axis;
 	second.secondary=false; second.paramNumber=0; second.applyOffsets=false; second.type=Antenna::ANT_NONE; second.enableCorrection=true;
 	prim.type=Antenna::ANT_OTF;
 	prim.otf.lon1=0.0; // they will be set by internal engine
@@ -256,9 +270,10 @@ ACS::Time CBossCore::latOTFScan(const Antenna::TCoordinateFrame& scanFrame,const
 	prim.targetName=CORBA::string_dup("otf"); // not strictly necessary as the system will take the last commanded name
 	prim.section=Antenna::ACU_NEUTRAL;
 	prim.enableCorrection=true;
-	if (!checkScan(startUt,prim,second,slewingTime,m_config->getMinElevation(),m_config->getMaxElevation())) {   // check if the target is set or not...in case we just signal a possible problem
+	/*if (!checkScan(startUt,prim,second,slewingTime,section,axis,m_config->getMinElevation(),m_config->getMaxElevation())) {   // check if the target is set or not...in case we just signal a possible problem
 		ACS_LOG(LM_FULL_INFO,"CBossCore::latOTFScan()",(LM_WARNING,"SCAN_WILL_NOT_BE_PROPERLY_EXECUTED"));
 	} //...but the scan is commanded anyway
+	startUt=0; // override the startUt computed by the previous call*/
 	startScan(startUt,prim,second);
 	return startUt;
 }

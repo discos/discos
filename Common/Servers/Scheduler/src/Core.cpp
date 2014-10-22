@@ -200,23 +200,33 @@ void CCore::cleanUp()
 	ACS_LOG(LM_FULL_INFO,"CCore::cleanUp()",(LM_INFO,"THREAD_DESTROYED"));
 }
 
-void CCore::chooseDefaultBackend(const char *bckInstance)
-{
+void CCore::chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl)
+{	
+	//************************************************************** /
+	/* It should be forbidden is a schedule is running or recording is active */
+	/* Also the check that the backend is available must be done */
+	/* *****************************************************************/
 	baci::ThreadSyncGuard guard(&m_mutex);
 	IRA::CString instance(bckInstance);
 	if (m_defaultBackendInstance!=instance) {
 		m_defaultBackendInstance=instance;
 		m_defaultBackendError=true;  // this is tricky...in order to force to unload the preset backend and then reload the new one the next time the default backend is required 
+		loadDefaultBackend();  //throw (ComponentErrors::CouldntGetComponentExImpl)
 	}
 }
 
-void CCore::chooseDefaultDataRecorder(const char *rcvInstance)
+void CCore::chooseDefaultDataRecorder(const char *rcvInstance) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
 {
+	//************************************************************** /
+	/* It should be forbidden is a schedule is running or recording is active */
+	/* Also the check that the backend is available must be done */
+	/* *****************************************************************/
 	baci::ThreadSyncGuard guard(&m_mutex);
 	IRA::CString instance(rcvInstance);
 	if (m_defaultDataReceiverInstance!=instance) {
 		m_defaultDataReceiverInstance=instance;
 		m_defaultDataReceiverError=true;  // this is tricky...in order to force to unload the preset data recorder and then reload the new one the next time the default data recorder is required
+		loadDefaultDataReceiver(); // throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
 	}
 }
 
@@ -296,22 +306,14 @@ void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCom
 	IRA::CString outLog;
 	IRA::CString backendName;
 	
-	backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
+	//backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if (CORBA::is_nil(backend)) {
-		loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
-		backend=m_defaultBackend;
-	}	
+	//if (CORBA::is_nil(backend)) {
+	loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
+	backend=m_defaultBackend;
+	/*}
 	else {
-		/*try {  	
-			backend=m_services->getComponent<Backends::GenericBackend>((const char *)backendName);
-		}
-		catch (maciErrType::CannotGetComponentExImpl& ex) {
-			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::callTSys()");
-			Impl.setComponentName((const char*)backendName);
-			throw Impl;		
-		}*/
-	}
+	}*/
 	loadReceiversBoss(m_receiversBoss,m_receiversBossError); // throw ComponentErrors::CouldntGetComponentExImpl& err)	
 	//Now get information from the backend about all the involved inputs.....
 	try {
@@ -631,7 +633,7 @@ void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& 
 	stopRecording();
 	guard.acquire();
 	//throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-	terminateRecording();
+	terminateScan();
 	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"SKYDIP_DONE"));
 }
 
@@ -804,7 +806,7 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 	waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl
 	stopRecording();
 	guard.acquire();
-	terminateRecording();
+	terminateScan();
 	try {
 		if (!CORBA::is_nil(m_minorServoBoss)) {
 			m_minorServoBoss->stopScan();
@@ -1081,7 +1083,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	/*// throw (ComponentErrors::OperationErrorExImpl)
 	CCore::stopScan(m_defaultDataReceiver.in(), m_defaultDataReceiverError,m_scanStarted);
 	CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);*/
-	terminateRecording();
+	terminateScan();
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"CROSSSCAN_DONE"));
 }
 
@@ -1097,7 +1099,7 @@ bool CCore::isTracking() const
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
 	ACS::TimeInterval diff=now.value().value-m_clearTrackingTime;
-	return (m_isAntennaTracking && m_isMinorServoTracking && (diff>5000000));
+	return (m_isAntennaTracking && m_isMinorServoTracking && m_isReceiversTracking && (diff>5000000));
 }
 
 void CCore::setRestFrequency(const ACS::doubleSeq& in)
@@ -1174,22 +1176,15 @@ void CCore::setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetCo
 		device=deviceID;
 	}
 	guard.release();
-	backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
+	//backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
 	guard.acquire();
-	if (CORBA::is_nil(backend)) {
-		loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
-		backend=m_defaultBackend;
-	}
+	//if (CORBA::is_nil(backend)) {
+	loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
+	backend=m_defaultBackend;
+	/*}
 	else {
-		/*try {  	
-			backend=m_services->getComponent<Backends::GenericBackend>((const char *)backendName);
-		}
-		catch (maciErrType::CannotGetComponentExImpl& ex) {
-			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::setDevice()");
-			Impl.setComponentName((const char*)backendName);
-			throw Impl;		
-		}*/
-	}	
+
+	}	*/
 	// get the receiver boss.....
 	loadReceiversBoss(m_receiversBoss,m_receiversBossError); // throw ComponentErrors::CouldntGetComponentExImpl)	
 	try {
@@ -1307,7 +1302,7 @@ void CCore::startSchedule(const char* scheduleFile,const char * startSubScan) th
 
 void CCore::getCurrentBackend(IRA::CString& bck)
 {
-	Backends::GenericBackend_var backend;
+	/*Backends::GenericBackend_var backend;
 	backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (CORBA::is_nil(backend)) {
@@ -1315,12 +1310,13 @@ void CCore::getCurrentBackend(IRA::CString& bck)
 	}
 	else {
 		bck=backend->name();
-	}
+	}*/
+	bck=m_defaultBackendInstance;
 }
 
 void  CCore::getCurrentDataReceiver(IRA::CString& dv)
 {
-	Management::DataReceiver_var dataWriter;
+	/*Management::DataReceiver_var dataWriter;
 	dataWriter=m_schedExecuter->getWriterReference(); //get the reference to the currently used backend.
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (CORBA::is_nil(dataWriter)) {
@@ -1328,8 +1324,8 @@ void  CCore::getCurrentDataReceiver(IRA::CString& dv)
 	}
 	else {
 		dv=dataWriter->name();
-	}
-
+	}*/
+	dv=m_defaultDataReceiverInstance;
 }
 
 bool CCore::command(const IRA::CString& cmd,IRA::CString& answer)
