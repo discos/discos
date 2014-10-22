@@ -13,6 +13,7 @@
 #andrea orlati(a.orlati@ira.inaf.it)       04/09/2013     Implemented support for external termination signal
 #Marco Buttu (mbuttu@oa-cagliari.inaf.it)  16/12/2013     New answer format, showing the values in different lines
 #Marco Buttu (mbuttu@oa-cagliari.inaf.it)  16/12/2013     Commands immediatly saved in the history file
+#Marco Buttu (mbuttu@oa-cagliari.inaf.it)  22/10/2014     help() without argument lists all the commands
 
 import getopt, sys
 import Acspy.Common.Err
@@ -27,7 +28,7 @@ import readline
 import os
 import signal
 from Acspy.Clients.SimpleClient import PySimpleClient
-from nuraghe_commands import __dict__ as commands
+from nuraghe_commands import commands
 
 stopAll=False
 
@@ -137,12 +138,16 @@ def main():
             cmd=cmd.strip()
             if cmd=="exit":
                 stopAll=True
-            elif cmd.startswith('help='):
-                h, c = cmd.split('=')
-                if c not in commands:
-                    print "%s?not a valid command" %c
+            elif cmd == 'help()':
+                print '\t' + '\n\t'.join(sorted(commands.keys()))
+            elif cmd.startswith('help('):
+                start = cmd.find('(') + 1
+                end = cmd.find(')')
+                arg = cmd[start:end] # help(setupCCB) -> arg=setupCCB
+                if arg not in commands:
+                    print "`%s` is not a valid command" %(arg if arg else cmd)
                 else:
-                    print commands[c].__doc__
+                    print commands['help'](arg)
             elif cmd:
                 readline.write_history_file(historyFile)            
                 try:

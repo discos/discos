@@ -1,19 +1,16 @@
-# Who                                      when            What                                             
-# Marco Buttu (mbuttu@oa-cagliari.inaf.it) 28/05/2013      Creation                                  
-
-# Doctrings from the "Observing at the SRT with Nuraghe, Issue n.4, 23/05/13,
+# Marco Buttu <mbuttu@oa-cagliari.inaf.it> 
+# Doctrings from the "Observing at the SRT with Nuraghe, Issue n.8, 21/10/14",
 # by Simona Righini and Andrea Orlati"
-
-def antennaAzEl():
-    """
-    antennaAzEl sets the antenna to PRESET mode (fixed Az-El pointings). 
-    To enable tracking again, e.g. to run schedules, an antennaTrack 
-    or antennaSetup must follow
-    """
 
 def antennaPark():
     """
     antennaPark sends the antenna to stow position
+    """
+
+def antennaReset():
+    """
+    antennaReset resets the antenna status after a failure, for 
+    example after the emergency stop button is released.
     """
 
 def antennaSetup():
@@ -26,9 +23,9 @@ def antennaSetup():
 
 def antennaStop():
     """
-    antennaStop stops the antenna. Activities can start again only 
-    commanding a mode change as antennaTrack (which does not affect the 
-    overall setup) or a new setup
+    antennaStop stops the antenna motion, if any, and changes the mount 
+    mode to Stop. Activities can start again only commanding a mode change
+    as antennaTrack (which does not affect the overall setup) or a new setup
     """
 
 def antennaTrack():
@@ -37,11 +34,33 @@ def antennaTrack():
     the pointing model or any receiver setup
     """
 
+def antennaUnstow():
+    """
+    antennaUnstow performs the unstow procedure
+    """
+
+def asSetup():
+    """
+    asSetup=code
+    configures and enables the active surface (AS). Allowed values 
+    of code:
+
+    * SF: shaped configuration in fixed position (optimised for El=45d)
+    * S:  shaped configuration in tracking - i.e. it adjusts according 
+          to the observed elevation position
+    * PF: parabolic configuration in fixed position (optimised for El=45d)
+    * P:  parabolic configuration in tracking - i.e. it adjusts according 
+          to the observed elevation position
+    """
+
 def azelOffsets():
     """
     azelOffsets=double'd',double'd' 
     sets the Az-El offsets (degrees). They are intended "on sky"
-    Example: azelOffsets=-0.05d,0.05d
+
+    e.g. > azelOffsets=0.5d,0.3d
+    sets an azimuth offset to 0.5 degrees and the elevation offset to 
+    0.3 degrees
     """
 
 def calOn():
@@ -98,6 +117,19 @@ def flushAll():
     flushAll deletes all the queue of the temporized commands
     """
 
+def focusScan():
+    """
+    focusScan=span,duration
+    commands a focus scan on a previously selected target (by means of 
+    the track or sidereal commands).
+    Parameters:
+
+    * span: the length run on the z-axis expressed in mm, 
+    * duration: the time length espressed in hh:mm:ss,
+
+    e.g. > focusScan=60,00:01:00
+    """
+
 def getAttenuations():
     """
     getAttenuations reads the attenuation values (dB) currently configured for 
@@ -117,6 +149,8 @@ def goOff():
     ('eq', 'hor' or 'gal'). The user provides the offset value (degrees only), 
     but the system automatically chooses on which axis to perform the slewing, 
     taking into account the present position of the antenna
+
+    e.g. > goOff=eq,1.0d
     """
 
 def goTo():
@@ -140,9 +174,29 @@ def haltSchedule():
     """
 
 def help(command):
+    """
+    help(command)
+    prints the `command`'s documentation. For instance:
+
+        > help(calOn)'
+        calOn switches the calibration mark on
+
+    When used without argument, it lists all the available commands:
+
+        > help()
+        antennaPark
+        antennaReset
+        ...
+    """
     myself =  __import__(__name__)
-    cmd = getattr(myself, command)
-    return cmd.__doc__
+    try:
+        cmd = getattr(myself, command)
+        return cmd.__doc__
+    except Exception, ex:
+        print ex.message
+        print 'usage: help(command)'
+        print 'e.g. > help(setupCCB)'
+        print 'help() (without argument) lists all the available commands'
 
 def initialize():
     """
@@ -151,11 +205,29 @@ def initialize():
     selected receiver. It does NOT act on the receiver, pointing model or antenna mount mode
     """
 
+def integration():
+    """
+    integration=N
+    sets the integration time
+    """
+
+def log():
+    """
+    log=logfilename
+    allows the user to change the default logfile (named station.log).
+    logfilename have be indicated without extension.
+    When schedules are run, a new logfile is automatically started, 
+    and it is named after the schedule: schedulename.log.
+    """
+
 def lonlatOffsets():
     """
     lonlatOffsets=double'd',double'd' 
     sets the Galactic b-l offsets (degrees). They are intended "on sky".
-    Example: lonlatOffsets=2.0d,-1.0d
+
+    e.g. > lonlatOffsets=0.1d,0.5d
+    sets the galactic longitude offset to 0.1 degrees and the galactic 
+    latitude offset to 0.5 degrees
     """
 
 def moon():
@@ -173,18 +245,29 @@ def preset():
     Example: preset=180d,45d
     """
 
-def projectCode():
+def project():
     """
-    projectCode=code 
-    lets the system know which project is observing (the code must correspond to the one
-    provided by the TAC)
+    project=projectcode
+    sets the project code/name (a string assigned to the project by the TAC).
+
+    (e.g. > project=scicom)
     """
 
 def radecOffsets():
     """
     radecOffsets=double'd',double'd' 
     sets the RA-Dec offsets (degrees). They are intended "on sky".
-    Example: radecOffsets=1.0d,0.0d
+
+    e.g. > radecOffsets=0.3d,0.0d
+    sets the right ascension offset to 0.3 degrees and the elevation 
+    offset to 0.0 degrees
+    """
+
+def receiversMode():
+    """
+    receiversMode=code 
+    configures the working mode of the receiver, according to its peculiar
+    characteristics
     """
 
 def receiversSetup():
@@ -254,11 +337,25 @@ def setServoOffset():
 
 def setupCCB():
     """
-    setupCCB (setupKKG, etc...) unstows the antenna, sets it to tracking mode, 
-    selects the pointing model, and configures the receiver and the backend using default parameters. 
-    In practice, it is a shortcut corresponding to this sequence: 
-    antennaSetup=Code, receiverSetup=receiverCode, initialize=receiverCode, device=0, calOff
+    The setup command sets the antenna mount, the minor servos, 
+    the selected receiver and the default backend (TotalPower) 
+    according to default parameters. 
+    The antenna mode is set to ProgramTrack (allowing tracking 
+    and the execution of schedules). Any time the mount mode is 
+    switched to ProgramTrack, the antenna will slew and go to 
+    the position which had been observed the last time the 
+    ProgramTrack was active. This is normal, you can command a 
+    different target or go on with other operations.
     """
+
+def setupKKG():
+    pass # Documentation appened the and of this module
+
+def setupLLP():
+    pass # Documentation appened the and of this module
+
+def setupPPP():
+    pass # Documentation appened the and of this module
 
 def sidereal():
     """
@@ -268,7 +365,8 @@ def sidereal():
     are precessed to the observing epoch. The sector keyword forces the cable wrap
     sector, if needed: its value can be 'cw', 'ccw' or 'neutral'. The last option means 
     the system will automatically choose the optimal alternative.
-    Example: sidereal=src12,319.256d,70.864d,2000,neutral
+
+    e.g. > sidereal=src12,319.256d,70.864d,2000,neutral
     """
 
 def skydip():
@@ -291,6 +389,12 @@ def stopSchedule():
     stopSchedule immediately stops the running schedule, truncating the acquisition
     """
 
+def telescopePark():
+    """
+    telescopePark parks all the elements: mount (sending the antenna to 
+    stow position), minor servo and active surface
+    """
+
 def ti():
     """
     ti lists all the active temporized commands
@@ -298,10 +402,12 @@ def ti():
 
 def track():
     """
-    track=sourcename 
-    points the antenna, in sidereal tracking, to the specified source, which must be
-    present in the local catalogue. If you need to insert frequently observed sources 
-    in this catalogue, contact the system manager
+    track=source
+    if the antenna is in ProgramTrack mode and the sourcename is known 
+    within the station catalogue (which includes the most commonly 
+    observed calibrators), it directly points to the source and tracks it.
+
+    e.g. > track=3c286
     """
 
 def tsys():
@@ -322,4 +428,18 @@ def wx():
     wx returns the current weather parameters: ground temperature (Centigrade), relative humidity (%), 
     atmospheric pressure (hPa), wind speed (km/h).
     """
+
+import copy
+myself =  __import__(__name__)
+# Create the commands dictionary
+commands = myself.__dict__.copy() # Shallow copy, but we do not mind
+for cmd in commands.keys():
+    if cmd.startswith('__'):
+        del commands[cmd]
+
+# Make the setupXXX.__doc__
+for cmd in commands:
+    if cmd.startswith('setup'):
+        setupXXX = getattr(myself, cmd)
+        setupXXX.__doc__ = setupCCB.__doc__
 
