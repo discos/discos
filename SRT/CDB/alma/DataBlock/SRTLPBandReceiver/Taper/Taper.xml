@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<TaperLookUpTable xmlns="urn:schemas-cosylab-com:TaperLookUpTable:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<TaperEntry><Frequency>1300</Frequency><Taper>-5.2</Taper></TaperEntry>
+
+<TaperEntry><Frequency>1550</Frequency><Taper>-8.9</Taper></TaperEntry>
+
+<TaperEntry><Frequency>1800</Frequency><Taper>-12.7</Taper></TaperEntry>
+
+</TaperLookUpTable>

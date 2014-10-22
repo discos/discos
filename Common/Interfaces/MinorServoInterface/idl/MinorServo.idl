@@ -1,0 +1,719 @@
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Giuseppe Maccaferri <g.maccaferri@ira.inaf.it>
+ *
+ *  Created: Mon Oct 12 09:45:07 CEST 2009
+ *  Last Modified: Mon Nov  9 11:20:11 CET 2009
+\***************************************************************/
+
+#ifndef __MINORSERVO__IDL__ 
+#define __MINORSERVO__IDL__
+
+#include <baci.idl>
+#include <MinorServoErrors.idl>
+#include <ComponentErrors.idl>
+
+#pragma prefix "alma"
+
+
+module MinorServo {
+
+    typedef sequence<double> DataSeq;
+
+
+    /**
+     * <h2>Interface of servos that address the wave path</h2>
+     *
+     * <p>This module defines a generic <em>WPServo</em> system CORBA interface.</p>
+     * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+     *  
+     * <h3>Properties</h3>:
+     * <ul>
+     *     <li><em>actPos</em>: actual position (ROdoubleSeq)</li>
+     *     <li><em>plainActPos</em>: plain actual position (ROdoubleSeq) (actPos - user_offset)</li>
+     *     <li><em>cmdPos</em>: commanded position (RWdoubleSeq)</li>
+     *     <li><em>posDiff</em>: difference between commanded and actual position (ROdoubleSeq)</li>
+     *     <li><em>actElongation</em>: actuators elongation (ROdoubleSeq)</li>
+     *     <li><em>virtualActElongation</em>: virtual absolute position (ROdoubleSeq)</li>
+     *     <li><em>engTemperature</em>: engine temperature (ROdoubleSeq)</li>
+     *     <li><em>driTemperature</em>: driver temperature (ROdoubleSeq)</li>
+     *     <li><em>counturingErr</em>: counturing error (ROdoubleSeq)</li>
+     *     <li><em>torquePerc</em>: torque percentage (ROdoubleSeq)</li>
+     *     <li><em>engCurrent</em>: engine current (ROdoubleSeq)</li>
+     *     <li><em>engVoltage</em>: engine voltage (ROdoubleSeq)</li>
+     *     <li><em>utilizationPerc</em>: utilization percentage (ROdoubleSeq)</li>
+     *     <li><em>dcTemperature</em>: drive cabinet temperature (ROdoubleSeq)</li>
+     *     <li><em>driverStatus</em>: driver status (ROdoubleSeq)</li>
+     *     <li><em>errorCode</em>: error code (ROdoubleSeq)</li>
+     * </ul> 
+     *
+     * <h3>Synchronous Methods and Callbacks</h3>:
+     * <ul>
+     *     <li><em>setPosition(position, exe_time)</em>: set the position of WPServo at some time.</li>
+     *     <li><em>setUserOffset(offset)</em>: set an user offset to the position.</li>
+     *     <li><em>disable(exe_time)</em>: brake the servo.</li>
+     *     <li><em>clearEmergency()</em>: clear the emergency stop.</li>
+     *     <li><em>isInEmergencyStop()</em>: return true when the servo is in emergency stop.</li>
+     *     <li><em>clearUserOffset(boolean)</em>: clear the user offset of the position.</li>
+     *     <li><em>getUserOffset(offset)</em>: get the user offset of the position.</li>
+     *     <li><em>setSystemOffset(offset)</em>: set a system offset to the position.</li>
+     *     <li><em>clearSystemOffset(boolean)</em>: clear the system offset of the position.</li>
+     *     <li><em>getSystemOffset(offset)</em>: get the system offset of the position.</li>
+     *     <li><em>setup(exe_time)</em>: accomplish a setup at some time.</li>
+     *     <li><em>stow(exe_time)</em>: accomplish a stow at some time.</li>
+     *     <li><em>calibrate(exe_time)</em>: accomplish a calibration at some time.</li>
+     *     <li><em>cleanPositionsQueue(exe_time)</em>: clean the MSCU positions queue.</li>
+     *     <li><em>isReadyToSetup()</em>: return true when the minor servo needs a setup to be ready, false otherwise.</li>
+     *     <li><em>isDisabledFromOtherDC()</em>: return true when the minor servo is disabled from other drive cabinet.</li>
+     *     <li><em>getStatus()</em>: return the status value.</li>
+     *     <li><em>getTrackingDelta()</em>: return the delta (in mm) used to know when the commanded pos is reached.</li>
+     *     <li><em>getPositionFromHistory()</em>: take a time and return the related position.</li>
+     * </ul> 
+     */
+    interface WPServo : ACS::CharacteristicComponent {
+
+
+        /******************** PROPERTIES *******************/
+
+        /**
+         * Actual Position Property (ROdoubleSeq).
+         * The WPServo actual position. Every sequence item is a "virtual" coordinate,
+         * that is a coordinate related to WPServo system rather than physical axis.
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq actPos;
+
+        /** 
+         * Plain Actutal Position property (ROdoubleSeq) 
+         *
+         * The plainActPos property is a ROdoubleSeq of coordinates. The reference
+         * system of coordinates is a "virtual system", that is a system binds
+         * with minor servo, and in general it is not bind with minor servo 
+         * positioner. The position is computed without the user and system offset,
+         * so it is: 
+         *
+         *     plainActPos = virtual_real_actual_position - (user_offset + system_offset)
+         * 
+         * where `virtual_real_actual_position` is the real elongation converted by
+         * the real2virtual function. So, it is also:
+         *
+         *     plainActPos = actPos - user_offset 
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq plainActPos;
+
+        /**
+         * Commanded Position Property (RWdoubleSeq).
+         * The WPServo commanded position, that is the latest position set.
+         * Every sequence item is a "virtual" coordinate, that is a coordinate related to 
+         * WPServo system rather than physical axis.
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::RWdoubleSeq cmdPos;
+
+        /**
+         * Difference between commanded and actual position (ROdoubleSeq).
+         * Every item is the difference between the related items of commanded and
+         * actual position. The difference is between coordinates in the virtual
+         * reference system rather than physical axis.
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq posDiff;
+
+        /**
+         * Actual Elongation Property (ROdoubleSeq).
+         * The WPServo actual elongation. Every sequence item is a "real" coordinate,
+         * that is the coordinate related to the physical axes (actuator elongations for the SRP).
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq actElongation;
+
+        /**
+         * Virtual Actual Elongation Property (ROdoubleSeq).
+         * The WPServo actual elongation, after the real2virtual transformation. Every sequence item is a "virtual" coordinate.
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq virtualActElongation;
+
+
+        /**
+         * Engine temperatures Property (ROdoubleSeq).
+         * Each item is an engine temperature of minor servo slave.
+         * For instance, the PFP has 5 slaves: 
+         *   1. PLC
+         *   2. Theta Slave
+         *   3. Theta Master
+         *   4. X axis
+         *   5. Z axis
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq engTemperature;
+
+        /**
+         * Driver temperatures Property (ROdoubleSeq).
+         * Each item is a driver temperature of minor servo slave.
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq driTemperature;
+
+        /**
+         * Counturing Error Property (ROdoubleSeq).
+         * Each item is a counturing error of minor servo slave.
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq counturingErr;
+
+        /**
+         * Torque Percentage Property (ROdoubleSeq).
+         * Each item is a torque percentage of minor servo slave.
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq torquePerc;
+
+        /**
+         * Engine Current Property (ROdoubleSeq).
+         * Each item is an engine current of minor servo slave.
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq engCurrent;
+
+        /**
+         * Engine Voltage (ROdoubleSeq).
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq engVoltage;
+
+        /**
+         * Utilization Percentage Property (ROdoubleSeq).
+         * Each item is the utilization percentage of minor servo slave.
+         * That percentage is the ratio between actual power and maximum supplying power.
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq utilizationPerc;
+
+        /**
+         * Drive Cabinet Temperature (ROdoubleSeq).
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq dcTemperature;
+
+        /**
+         * Driver Status (ROdoubleSeq).
+         * Each item is the driver status of minor servo slave.
+         *
+         * <h2>SRT Diagnostic Code</h2>
+         * The index code and subcode of diagnostic request are `183:0` and the answer
+         * code means as follows:
+         * 
+         *     - 0:   OK, no fault
+         *     - 10:  Initalization phase
+         *     - 91:  Trip-Set C135
+         *     - 92:  Trip-Set AIF
+         *     - 93:  Trip-Set CAN
+         *     - 102: Trip active
+         *     - 103: Emergency stop was released
+         *     - 104: Message active
+         *     - 105: Power off
+         *     - 111: BSP C135, Operation inhibited
+         *     - 112: BSP AIF, Operation inhibited
+         *     - 113: BSP CAN, Operation inhibited
+         *     - 121: CINH term 28, Controller inhibited via X5/28
+         *     - 122: CINH int 1
+         *     - 123: CINH int 2
+         *     - 124: CINH C135/STP, STOP key at the keypad
+         *     - 125: CINH AIF, Controller inhibited via AIF
+         *     - 126: CINH CAN, Controller inhibited via system bus
+         *     - 131: FAIL-QSP, Fault reaction
+         *     - 141: Lock mode, Restart protection active
+         *     - 142: IMP, Power outputs with high resistance
+         *     - 151: Quick Stop via MCTRL-QSP
+         *     - 152: Quick Stop via STOP key at the keypad
+         *     - 153: Quick Stop via AIF
+         *     - 154: Quick Stop via system bus
+         *     - 250: Warning
+         *
+         * More informations see at section "7.8 Code table" (pag. 462): 
+         *   - Common/Servers/MinorServo/doc/SRT_manuals/SHB_9300_servo_position_controller_v3-0_EN.pdf
+         *
+         * <h2>Medicina Diagnostic Code</h2>
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq driverStatus;
+
+        /**
+         * Error Code (ROdoubleSeq).
+         * Each item is the error code of minor servo slave.
+         *
+         * <h2>SRT Error Code</h2>
+         * The index code and subcode of error number request are `168:1` and the answer
+         * code means as follows:
+         * 
+         *     - x071: System error
+         *     - x220: Data error
+         *     - x221: Data error warning
+         *     - x061: Communication error
+         *     - x062: Communication error at the process data input object CAN_IN_1
+         *     - x063: Communication error at the process data input object CAN_IN_2
+         *     - x064: Communication error at the process data input object CAN_IN_3
+         *     - x065: BUS-OFF state
+         *     - x091: External fault (TRIP-Set)
+         *     - x105: Internal fault
+         *     - x107: Incorrect power stage
+         *     - x110: Sensor fault - heatsink temperature
+         *     - x111: Sensor fault - indoor temperature
+         *     - x032: Motor phase failure
+         *     - x030: Undervoltage
+         *     - x200: Max. system speed exceeded (C0596)
+         *     - x190: Difference between actual speed and speed setpoint exceeds set tolerance limits (C0576
+         *     - x011: Short circuit
+         *     - x012: Earth fault
+         *     - x015: I x t overload
+         *     - x050: Heatsink temperature is higher than the value set in the controller
+         *     - x053: Heatsink temperature is higher than the value set in the controller
+         *     - x054: Heatsink temperature is higher than the value set under C0122
+         *     - x057: Motor temperature is higher than the value set under C0121
+         *     - x058: PTC at terminals T1, T2 indicates motor overheat
+         *     - x020: Overvoltage
+         *     - x151: Negative limit switch
+         *     - x152: Positive limit switch
+         *     - x153: First following error
+         *     - x154: Negative position limit
+         *     - x155: Positive position limit
+         *     - x156: No reference
+         *     - x157: PS Absolute mode instead of relative mode
+         *     - x158: Actual offset out of range.
+         *     - x159: Impermissible programming
+         *     - x162: Encoder range
+         *     - x163: Phase overflow
+         *     - x164: 1st following error
+         *     - x165: 2nd following error
+         *     - x166: Transmission error of a sync telegram on the system bus
+         *     - x167: TP control error
+         *     - x168: Internal limitation
+         *     - x074: Program fault
+         *     - x079: Initializing error
+         *     - x075: Parameter set error
+         *     - x072: Parameter set error
+         *     - x073: Parameter set error
+         *     - x077: Parameter set error
+         *     - x078: Parameter set error
+         *     - x082: Resolver cable interrupted
+         *     - x083: Encoder fault at X9/8 (Cable interrupted or Input X9 PIN 8 not assigned)
+         *     - x085: Master current source defective
+         *     - x086: Sensor fault
+         *     - x087: Encoder fault
+         *     - x088: Encoder fault
+         *
+         * More informations see at section "8.3 Fault messages" (pag. 553): 
+         *   - SRT/Servers/SRTMinorServo/doc/SRT_manuals/SHB_9300_servo_position_controller_v3-0_EN.pdf
+         * 
+         * <h2>Medicina Error Code</h2>
+         *
+         * @throw ComponentErrors::SocketErrorExImpl
+         */
+        readonly attribute ACS::ROdoubleSeq errorCode;
+
+
+        /** This property reports the status of Minor Servo Component. 
+         *  When the component is not initialized (by a setup) the pattern will be 00000X;
+         *  The returned pattern is a 6 bits field with the following meaning:
+         *
+         *  @arg \c 0 Ready: 1 means the MinorServo is ready and can be positioned
+         *  @arg \c 1 Warning: 1 means there is an abnormal condition that should not affect the observation
+         *  @arg \c 2 Failure: 1 means there is a failure condition, the observation will not be succesful
+         *  #arg \c 3 Setup: 1 means the MinorServo is on startup state
+         *  #arg \c 4 Parked: 1 means the MinorServo is parked
+         *  @arg \c 5 Tracking: 1 means the MinorServo is tracking the commanded position
+         */
+         readonly attribute ACS::ROpattern status;
+
+
+        /******************** METHODS & CALLBACKS *******************/
+
+        /**
+         * Set the position of WPServo. The time of execution command is an input parameter.
+         * 
+         * @arg doubleSeq position sequence of virtual axis
+         * @arg long  exe_time execution time
+         * @throw MinorServoErrors::PositioningErrorEx,
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */
+         void setPosition(in ACS::doubleSeq position, in ACS::Time exe_time)
+            raises (
+                MinorServoErrors::PositioningErrorEx,
+                MinorServoErrors::CommunicationErrorEx
+            );
+
+
+        /**
+         * Set an user offset to the position.
+         * 
+         * @arg doubleSeq offset sequence of user offsets to add to the position;
+         * one offset for each axis
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */ 
+         void setUserOffset(in ACS::doubleSeq offset) 
+             raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
+
+
+        /** Return the user offset of the position */
+         ACS::doubleSeq getUserOffset();
+
+
+        /** Clear the position user offset
+         * @arg boolean set_positions if true, it also sets the actual and the future positions
+         * @throw MinorServoErrors::CommunicationErrorEx
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */
+         void clearUserOffset(in boolean set_positions)
+             raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
+
+
+        /** Return the maximum position values (right limits) */
+        ACS::doubleSeq getMaxPositions();
+
+
+        /** Return the minimum position values (left limits) */
+        ACS::doubleSeq getMinPositions();
+
+
+        /**
+         * Set a system offset to the position.
+         * 
+         * @arg doubleSeq offset sequence of position system offsets;
+         * one offset for each axis
+         * @throw MinorServoErrors::CommunicationErrorEx
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */ 
+         void setSystemOffset(in ACS::doubleSeq offset) 
+             raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
+
+
+        /** Return the system offset of the position */
+         ACS::doubleSeq getSystemOffset();
+
+        /** Return the servo position at a given time.
+         *  If the time is too old, it returns the older position.
+         *  If the time is in advance or 0, it returns the latest position.
+         *  @arg time the position time
+         *  @return the position
+         *  @throw ComponentError::UnexpectedEx
+         */
+         ACS::doubleSeq getPositionFromHistory(in ACS::Time time) raises (ComponentErrors::UnexpectedEx);
+
+        /** Clear the position system offset
+         * @arg boolean set_positions if true, it also sets the actual and the future positions
+         * @throw MinorServoErrors::CommunicationErrorEx
+         * @throw MinorServoErrors::OperationNotPermittedEx
+         */ 
+         void clearSystemOffset(in boolean set_positions)
+             raises (MinorServoErrors::OperationNotPermittedEx, MinorServoErrors::CommunicationErrorEx);
+       
+       
+       /**
+         * Brake the servo. A setup enables the servo.
+         * 
+         * @arg long  exe_time execution time
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */
+         void disable(in ACS::Time exe_time) raises (MinorServoErrors::CommunicationErrorEx);
+ 
+       
+       /**
+         * Clear the emergency stop.
+         * 
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */
+         void clearEmergency() raises (MinorServoErrors::CommunicationErrorEx);
+ 
+       
+       /** Is the servo in an emergency stop condition? **/
+         boolean isInEmergencyStop();
+
+
+
+        /**
+         * Accomplish a WPServo setup at some time.
+         * 
+         * @arg long exe_time execution time
+         * @throw MinorServoErrors::SetupErrorEx,
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */
+        void setup(in ACS::Time exe_time)
+            raises (
+                MinorServoErrors::SetupErrorEx,
+                MinorServoErrors::CommunicationErrorEx
+            );
+
+
+        /**
+         * Clean the MSCU positions queue
+         * @arg long  exe_time execution time
+         * 
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */
+        void cleanPositionsQueue(in ACS::Time exe_time) raises (MinorServoErrors::CommunicationErrorEx);
+
+
+        /**
+         * Accomplish a WPServo stow at some time.
+         * 
+         * @arg long  exe_time execution time
+         * @throw MinorServoErrors::StowErrorEx,
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */
+        void stow(in ACS::Time exe_time)
+            raises (
+                MinorServoErrors::StowErrorEx,
+                MinorServoErrors::CommunicationErrorEx
+            );
+
+
+        /**
+         * Accomplish a WPServo calibration at some time.
+         * 
+         * @arg long  exe_time execution time
+         * @throw MinorServoErrors::CalibrationErrorEx,
+         * @throw MinorServoErrors::CommunicationErrorEx
+         */
+        void calibrate(in ACS::Time exe_time)
+            raises (
+                MinorServoErrors::CalibrationErrorEx,
+                MinorServoErrors::CommunicationErrorEx
+            );
+
+
+        /** Return minor servo number of axes */
+        unsigned short numberOfAxes();
+
+
+        /** Return true when the minor servo is parked */
+        boolean isParked();
+
+
+        /** Return true when the minor servo is ready */
+        boolean isReady();
+
+
+        /** Return true when the minor servo is tracking */
+        boolean isTracking();
+
+
+        /** Return true when the minor servo is starting */
+        boolean isStarting();
+
+
+        /** Return true when the minor servo is parking */
+        boolean isParking();
+
+
+        /** Return true when the minor servo is disabled and needs a setup */
+        boolean isReadyToSetup();
+
+
+        /** Return true when the minor servo is disabled from other drive cabinet */
+        boolean isDisabledFromOtherDC();
+
+
+        /** Set the flag used by the StatusUpdater to enable the servo status updating */
+        // void setStatusUpdating(in boolean flag);
+
+      
+        /** Return true if the StatusUpdater thread is updating the status */
+        boolean isStatusThreadEn();
+
+
+        /** Return the minor servo status */
+        long getStatus();
+
+
+        /** Return the tracking_delta CDB attribute */
+        double getTrackingDelta();
+
+
+        /**
+         * Return the data required as a sequence, each item is related to the corresponding axis
+         * 
+         * @param string data_name is the name of the data we would retrieve. Possible values are:
+         * <ul>
+         *     <li>POS_LIMIT</li>
+         *     <li>NEG_LIMIT</li>
+         *     <li>ACCELERATION</li>
+         *     <li>MAX_SPEED</li>
+         * </ul>
+         * return doubleSeq one data for each axis.
+         * @throw MinorServoErrors::CannotGetWPSDataEx
+         */
+        ACS::doubleSeq getData(in string data_name) raises (MinorServoErrors::CommunicationErrorEx);
+
+    };
+
+    /**
+     * <h2>Derotator Interface</h2>
+     *
+     * <p>This module defines the <em>derotator</em> CORBA interface.
+     * The device position is always an angle typed in a double.
+     * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+     *  
+     * <p>Properties</p>:
+     * <ul>
+     *     <li><em>sensor_position</em>: sensor position (degree, readonly)</li>
+     *     <li><em>icd_position</em>: icd position (degree, write/read)</li>
+     *     <li><em>icd_verbose_status</em>: derotator verbose status</li>
+     * </ul> 
+     *
+     * <p>Methods</p>:
+     * <ul>
+     *     <li><em>getTargetPosition</em>: the target position</li>
+     *     <li><em>getURSPosition</em>: the actual position in the user's reference system</li>
+     * </ul> 
+     */
+    interface Derotator : ACS::CharacteristicComponent {
+        
+        /**
+         * Returns the sensor position (not related to user's reference system) as degree angle.
+         * To get a sensor position I send a PR (Position Request).
+         * The response from the sensor contains the position in its three middle
+         * bytes. These bytes are converted from binary to decimal and after converted from
+         * length unit (step) to angle unit (degree). The Conversion Factor (DRT_PS_CF) is compute as follow:
+         * 
+         * \f[
+         *         $$sensor\_length - reference = \alpha^{rad}\cdot R$$
+         * \f]
+         * 
+         * <ul>   
+         *   <li><em>sensor_length</em> is the position (in steps) we get from the sensor</li>
+         *   <li><em>reference</em> is the zero position of the sensor (688671 steps)</li>
+         *   <li><em>R</em> is the radius of derotator (\f$D = 2\cdot R = 68052\,steps\f$) and \f$C = \pi\cdot D\f$ 
+         *       is the circumference</li>
+         *   <li>\f$\alpha^{r}\f$ is the angle (in radiant) between the sensor position  and the reference</li>
+         *   <li>1 step = 0.01 mm</li>
+         * </ul>
+         *
+         * \f[
+         *         $$\alpha^{r} = 2\cdot(sensor\_length - reference)/D$$
+         * \f]
+         * \f[
+         *         $$\alpha^\circ = \frac{180}{\pi}\cdot\alpha^{r}$$
+         * \f]
+         * \f[
+         *         $$\alpha^\circ = DRT\_PS\_CF\cdot(sensor\_length - sensor_reference)$$
+         * \f]
+         *
+         * where:
+         *   
+         * \f[
+         *         $$DRT\_PS\_CF = 360/(\pi\cdot D) = 360/C = 0.001683884$$
+         * \f]
+         *
+         *   Since we want the rotation way of derotator is the same of engine rotation way, we change
+         *   the sign of the previous equation:
+         *
+         * \f[
+         *         $$\alpha^\circ = -DRT\_PS\_CF*(sensor\_length - DRT\_PS\_REFERENCE)$$
+         * \f]
+         *
+         * @return sensor position as degree angle
+         */
+        readonly attribute ACS::ROdouble sensor_position;
+
+        /** 
+         * Return the icd position as degree angle.
+         * The position is the physical device positon, not related to the user reference system.
+         * So, this is the value read from device, converted in degrees without any reference system 
+         * shifting
+         *
+         * @return icd position as degree angle (physical device position)
+         * @throw ComponentErrors::SocketErrorExImpl, 
+         MinorServoErrors::CannotSetWPSPositionEx
+         */
+        readonly attribute ACS::RWdouble icd_position;
+
+
+        /** 
+         *  This property reports the current verbose status of the ICD. The returned pattern is a 13 bits 
+         *  field with the following meaning:
+         *
+         *  @arg \c 0 POL_ERR: polling error, polling request is different to polling response
+         *  @arg \c 1 WRONG_RFLAG: wrong response flag: (rf != sf)
+         *  @arg \c 2 CMDERR: command error 
+         *  @arg \c 3 WRONG_RCODE: wrong response code 
+         *  @arg \c 4 IMS_FLTSIG: Internal monitoring signals, FltSig 
+         *  @arg \c 5 EMS_SIGN: External monitoring signals, Sign 
+         *  @arg \c 6 WARNING: To know the warning cause look at parameter Status.WarnSig (28:10) 
+         *  @arg \c 7 INIT_ERR: Initialization Error (``not ready to switch on`` or ``switch on disabled``)
+         *  @arg \c 8 QS_ACTIVE: Quick Stop active 
+         *  @arg \c 9 NOT_OP_ENABLE: Not Operation Enable. When the unit is set to Operation Enable, 
+         *            then we can set the position and drive the ICD
+         *  @arg \c 10 MOVING: Status bit for monitoring the process status.
+         *  @arg \c 11 MOVING_ERR: Status bit related to x_err. x_err is the first bit (bit 15) of fbstatusword. 
+         *             I think the manual documentation is wrong, so the correct values of x_err are the follows:
+         *             <ul>
+         *                 <li>0: An asynchronous error occurs during processing</li>
+         *                 <li>1: No error occurs during processing</li>
+         *             </ul>
+         *  @arg \c 12 WRONG_POSITION
+         */
+        readonly attribute ACS::ROpattern icd_verbose_status;
+
+
+        /** 
+         *  This property reports the current ICD summary status. The returned pattern is a 6 bits 
+         *  field with the following meaning:
+         *
+         *  @arg \c 0 OFF: the ICD is power OFF
+         *  @arg \c 1 F:   Failure (something is broken)
+         *  @arg \c 2 CE:  Communication Error 
+         *  @arg \c 3 NR:  Not Ready
+         *  @arg \c 4 S:   Slewing 
+         *  @arg \c 5 W:   Warning
+         */readonly attribute ACS::ROpattern icd_summary_status;
+
+        /**
+         * Return the ICD target position (double) in the user's reference system
+         * Look at `doc/derotator_intro.pdf` to see more about user's reference system
+         * @return ICD target position (double) in the user's reference system
+         * @throw CORBA::SystemException
+         */
+        void getIcdTargetPosition(out double target_position);
+
+        /**
+         * Return the ICD position (double) in the user's reference system
+         * Look at `doc/derotator_intro.pdf` to see more about user's reference system
+         *
+         * @return ICD position (double) in the user's reference system
+         * @throw CORBA::SystemException
+         */
+        void getIcdURSPosition(out double icd_urs_position);
+
+        /**
+         * Return the sensor position (double) in the user's reference system
+         * Look at `doc/derotator_intro.pdf` to see more about user's reference system
+         *
+         * @return sensor position (double) in the user's reference system
+         * @throw CORBA::SystemException
+         */
+        void getSensorURSPosition(out double sensor_urs_position);
+    };
+
+};
+
+#endif
+

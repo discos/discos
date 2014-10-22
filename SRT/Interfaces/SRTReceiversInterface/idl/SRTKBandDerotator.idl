@@ -1,0 +1,109 @@
+#ifndef ___SRTKBANDDEROTATOR_IDL__
+#define ___SRTKBANDDEROTATOR_IDL__
+
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include "GenericDerotator.idl"
+
+#pragma prefix "alma"
+
+module Receivers {
+
+    interface SRTKBandDerotator : ACS::CharacteristicComponent, GenericDerotator {
+ 
+        /** Computation of the sensor lenght
+         *
+         * To get a sensor position we should send a PR (Position Request).
+         * The response from the sensor contains the position in its three 
+         * middle bytes. That bytes are converted from binary to decimal and 
+         * after converted from length unit (step) to angle unit (degree). 
+         * The Conversion Factor (DRT_PS_CF) is compute as follow:
+         * 
+         * \f[
+         *         $$sensor\_length - reference = \alpha^{rad}\cdot R$$
+         * \f]
+         * 
+         * <ul>   
+         *   <li><em>sensor_length</em> is the position (in steps) we get from 
+         *   the sensor</li>
+         *   <li><em>reference</em> is the zero position of the sensor (688671 
+         *   steps)</li>
+         *   <li><em>R</em> is the radius of the derotator 
+         *   (\f$D = 2\cdot R = 68052\,steps\f$) and \f$C = \pi\cdot D\f$ is 
+         *   the circumference</li>
+         *   <li>\f$\alpha^{r}\f$ is the angle (in radians) between the sensor 
+         *   position and the reference</li>
+         *   <li>1 step = 0.01 mm</li>
+         * </ul>
+         *
+         * \f[
+         *         $$\alpha^{r} = 2\cdot(sensor\_length - reference)/D$$
+         * \f]
+         * \f[
+         *         $$\alpha^\circ = \frac{180}{\pi}\cdot\alpha^{r}$$
+         * \f]
+         * \f[
+         *         $$\alpha^\circ = DRT\_PS\_CF\cdot(sensor\_length - sensor_reference)$$
+         * \f]
+         *
+         * where:
+         *   
+         * \f[
+         *         $$DRT\_PS\_CF = 360/(\pi\cdot D) = 360/C = 0.001683884$$
+         * \f]
+         *
+         *   Since we want the rotation way of the derotator is the same of 
+         *   the engine one, we change the sign of the previous equation:
+         *
+         * \f[
+         *         $$\alpha^\circ = -DRT\_PS\_CF*(sensor\_length - DRT\_PS\_REFERENCE)$$
+         * \f]
+         */
+
+         /** return the engine position as a degree angle */
+        readonly attribute ACS::ROdouble enginePosition;
+
+
+        /** 
+         *  This property reports the current verbose status of the ICD. The 
+         *  returned pattern is a 13 bits field with the following meaning:
+         *
+         *  @arg \c 0 POL_ERR: polling error, polling request is different to polling response
+         *  @arg \c 1 WRONG_RFLAG: wrong response flag: (rf != sf)
+         *  @arg \c 2 CMDERR: command error 
+         *  @arg \c 3 WRONG_RCODE: wrong response code 
+         *  @arg \c 4 IMS_FLTSIG: Internal monitoring signals, FltSig 
+         *  @arg \c 5 EMS_SIGN: External monitoring signals, Sign 
+         *  @arg \c 6 WARNING: To know the warning cause look at parameter Status.WarnSig (28:10) 
+         *  @arg \c 7 INIT_ERR: Initialization Error (``not ready to switch on`` or ``switch on disabled``)
+         *  @arg \c 8 QS_ACTIVE: Quick Stop active 
+         *  @arg \c 9 NOT_OP_ENABLE: Not Operation Enable. When the unit is set to Operation Enable, 
+         *            then we can set the position and drive the ICD
+         *  @arg \c 10 MOVING: Status bit for monitoring the process status.
+         *  @arg \c 11 MOVING_ERR: Status bit related to x_err. x_err is the first bit (bit 15) of fbstatusword. 
+         *             I think the manual documentation is wrong, so the correct values of x_err are the follows:
+         *             <ul>
+         *                 <li>0: An asynchronous error occurs during processing</li>
+         *                 <li>1: No error occurs during processing</li>
+         *             </ul>
+         *  @arg \c 12 WRONG_POSITION
+         */
+        readonly attribute ACS::ROpattern icd_verbose_status;
+
+
+        /**
+         * Return the engine position (double) in the user's reference system
+         * Look at `doc/derotator_intro.pdf` to see more about user's reference system
+         *
+         * @return the engine position (double) in the user's reference system
+         * @throw CORBA::SystemException
+         */
+        double getEnginePosition();
+
+	};
+
+
+};
+
+#endif

@@ -1,0 +1,54 @@
+/* ***************************************************************************/
+/* INAF - Istituto Nazionale di AstroFisica                                  */
+/* IRA - Istituto di Radioastronomia                                         */
+/* OAC - Osservatorio Astronomico di Cagliari                                */
+/*                                                                           */
+/* $Id: PointingModel.idl,v 1.8 2008-02-01 09:37:50 c.migoni Exp $           */
+/*                                                                           */
+/* This code is under GNU General Public Licence (GPL).                      */
+/*                                                                           */
+/* Who					When		What                 */
+/* Carlo Migoni (c.migoni@ira.inaf.it)	02/04/2007	Creation             */
+/*                                                                           */
+/* ***************************************************************************/
+
+#ifndef _POINTINGMODEL_IDL_
+
+#define _POINTINGMODEL_IDL_
+
+#include <baci.idl>
+#include <acscomponent.idl>
+#include <AntennaErrors.idl>
+
+#pragma prefix "alma"
+
+module Antenna {
+	/**
+	 * This IDL module describes the CORBA interface of the Pointing Model.
+	 * @author <a href=mailto:c.migoni@ira.inaf.it> Carlo Migoni</a>
+	 * INAF - Istituto Nazionale di AstroFisica
+	 * IRA - Istituto di Radioastronomia
+	 * OAC - Osservatorio Astronomico di Cagliari
+	 * <br> 
+	*/
+	interface PointingModel : ACS::ACSComponent {
+		/**
+		* This method is used to calculate the azimuth and elevation offsets (radians)
+		* @throw CORBA::SystemException
+		* @throw AntennaErrors::ReceiverNotFoundEx
+		* @param azimuth
+		* @param elevation
+		* @param azOffset
+		* @param elOffset
+		*/
+		void getAzElOffsets(in double azimuth, in double elevation, out double azOffset, out double elOffset) raises (AntennaErrors::AntennaErrorsEx);
+		/**
+		* This method is used to set the receiver for the observation
+		* @throw CORBA::SystemException
+		* @param receiverCode
+		*/
+		void setReceiver(in string receiverCode) raises (AntennaErrors::AntennaErrorsEx);
+	};
+};
+
+#endif

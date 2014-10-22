@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- Marco Buttu, mbuttu@oa-cagliari.inaf.it -->
+
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:DewarPositionerMapping:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="urn:schemas-cosylab-com:DewarPositionerMapping:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+
+    <xs:complexType name="DewarPositionerMappingType">
+        <xs:attribute name="DerotatorName" type="xs:string" use="required" />
+        <xs:attribute name="SetupPosition" type="xs:string" use="required" />
+        <xs:attribute name="ParkPosition" type="xs:string" use="required" />
+        <xs:attribute name="DefaultConfiguration" type="xs:string" use="required" />
+    </xs:complexType>
+
+    <xs:element name="DewarPositionerMapping" type="DewarPositionerMappingType"/>
+
+</xs:schema>

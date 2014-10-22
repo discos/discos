@@ -1,0 +1,49 @@
+/* ***************************************************************************/
+/* INAF - Istituto Nazionale di AstroFisica                                  */
+/* IRA - Istituto di Radioastronomia                                         */
+/* OAC - Osservatorio Astronomico di Cagliari                                */
+/*                                                                           */
+/* $Id: Refraction.idl,v 1.5 2009-01-29 12:37:55 c.migoni Exp $              */
+/*                                                                           */
+/* This code is under GNU General Public Licence (GPL).                      */
+/*                                                                           */
+/* Who					                When		What                     */
+/* Carlo Migoni (c.migoni@ira.inaf.it)	01/02/2008	Creation                 */
+/* Carlo Migoni (c.migoni@ira.inaf.it)	27/02/2009	Removed SetMeteoParameters
+ * method                                                                    */
+/* Andrea Orlati (a.orlati@ira.inaf.it) 09/10/2013 getCorrection() now requires the wavelength as input argument*/
+/* ***************************************************************************/
+
+#ifndef _REFRACTION_IDL_
+
+#define _REFRACTION_IDL_
+
+#include <baci.idl>
+#include <acscomponent.idl>
+#include <AntennaErrors.idl>
+
+#pragma prefix "alma"
+
+module Antenna {
+
+    /**
+	 * This IDL module describes the CORBA interface of the Refraction.
+	 * @author <a href=mailto:c.migoni@ira.inaf.it> Carlo Migoni</a>
+	 * INAF - Istituto Nazionale di AstroFisica
+	 * IRA - Istituto di Radioastronomia
+	 * OAC - Osservatorio Astronomico di Cagliari
+	 * <br> 
+	*/
+	interface Refraction : ACS::ACSComponent {
+		/**
+		* This method is used to calculate the corrected zenith distance (radians) due to refraction
+		* @throw CORBA::SystemException
+		* @param obsZenithDistance 
+		* @param waveLegth the lambda (meters) of the current observation
+		* @param corZenithDistance 
+		*/
+		void getCorrection(in double obsZenithDistance, in double waveLength, out double corZenithDistance);
+	};
+};
+
+#endif

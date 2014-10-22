@@ -1,0 +1,145 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+   -   Fri Jul 20 12:32:10 UTC 2007 modified by jDAL
+   -   Mon Jul 23 08:51:57 UTC 2007 modified by jDAL
+   -   Fri Aug 01 11:57:13 UTC 2008 modified by jDAL
+   -   Mon Aug 25 06:43:41 UTC 2008 modified by jDAL
+   -   Mon Aug 25 06:51:50 UTC 2008 modified by jDAL
+   -   Tue Aug 26 09:01:56 UTC 2008 modified by jDAL
+   -   Tue Aug 26 10:04:51 UTC 2008 modified by jDAL
+   -   Tue Aug 26 10:14:56 UTC 2008 modified by jDAL
+   -   Wed Aug 27 07:27:34 UTC 2008 modified by jDAL
+   -   Thu Aug 28 07:27:01 UTC 2008 modified by jDAL
+   -   Thu Aug 28 08:49:25 UTC 2008 modified by jDAL
+   -   Fri Aug 29 07:38:38 UTC 2008 modified by jDAL
+   -   Fri Aug 29 08:29:37 UTC 2008 modified by jDAL
+   -   Fri Aug 29 08:35:22 UTC 2008 modified by jDAL
+   -   Fri Aug 29 08:39:56 UTC 2008 modified by jDAL
+   -   Fri Aug 29 08:56:44 UTC 2008 modified by jDAL
+   -   Fri Aug 29 09:04:38 UTC 2008 modified by jDAL
+   -   Fri Aug 29 09:13:31 UTC 2008 modified by jDAL
+   -   Fri Aug 29 09:18:38 UTC 2008 modified by jDAL
+   -   Fri Aug 29 09:31:31 UTC 2008 modified by jDAL
+   -   Tue Sep 02 07:11:02 UTC 2008 modified by jDAL
+   -   Tue Sep 02 08:19:21 UTC 2008 modified by jDAL
+   -   Tue Sep 02 09:19:37 UTC 2008 modified by jDAL
+   -   Fri Sep 05 08:47:27 UTC 2008 modified by jDAL
+   -   Fri Sep 05 09:25:07 UTC 2008 modified by jDAL
+   -   Fri Sep 05 10:20:16 UTC 2008 modified by jDAL
+   -   Fri Sep 05 11:35:38 UTC 2008 modified by jDAL
+   -   Mon Sep 08 06:22:11 UTC 2008 modified by jDAL
+   -   Wed Sep 10 07:25:28 UTC 2008 modified by jDAL
+   -   Tue Sep 16 10:41:04 UTC 2008 modified by jDAL
+   -   Tue Sep 16 11:34:06 UTC 2008 modified by jDAL
+   -   Tue Sep 16 12:19:53 UTC 2008 modified by jDAL
+   -   Tue Sep 16 13:24:05 UTC 2008 modified by jDAL
+   -   Tue Sep 16 14:43:35 UTC 2008 modified by jDAL
+   -   Wed Sep 17 10:16:10 UTC 2008 modified by jDAL
+   -   Wed Sep 17 12:26:21 UTC 2008 modified by jDAL
+   -   Wed Sep 17 12:40:10 UTC 2008 modified by jDAL
+   -   Wed Sep 17 12:50:58 UTC 2008 modified by jDAL
+   -   Thu Sep 18 06:29:55 UTC 2008 modified by jDAL
+   -   Thu Sep 18 08:04:05 UTC 2008 modified by jDAL
+   -   Thu Sep 18 09:02:42 UTC 2008 modified by jDAL
+   -   Thu Sep 18 09:49:19 UTC 2008 modified by jDAL
+   -   Fri Sep 19 10:19:32 UTC 2008 modified by jDAL
+   -   Fri Sep 19 11:39:27 UTC 2008 modified by jDAL
+   -   Fri Sep 19 20:41:10 UTC 2008 modified by jDAL
+   -   Tue Sep 23 08:04:54 UTC 2008 modified by jDAL
+   -   Tue Sep 23 08:49:52 UTC 2008 modified by jDAL
+   -   Tue Sep 23 09:50:11 UTC 2008 modified by jDAL
+   -   Tue Sep 23 10:28:43 UTC 2008 modified by jDAL
+   -   Wed Sep 24 08:21:48 UTC 2008 modified by jDAL
+   -   Wed Sep 24 09:53:34 UTC 2008 modified by jDAL
+   -   Thu Sep 25 08:12:34 UTC 2008 modified by jDAL
+   -   Thu Sep 25 08:34:59 UTC 2008 modified by jDAL
+   -   Thu Sep 25 09:41:18 UTC 2008 modified by jDAL
+   -   Thu Sep 25 13:18:03 UTC 2008 modified by jDAL
+   -   Fri Sep 26 06:37:24 UTC 2008 modified by jDAL
+   -   Fri Sep 26 06:57:43 UTC 2008 modified by jDAL
+   -   Fri Sep 26 07:47:08 UTC 2008 modified by jDAL
+   -   Fri Sep 26 08:54:27 UTC 2008 modified by jDAL
+   -   Mon Sep 29 06:24:12 UTC 2008 modified by jDAL
+   -   Mon Sep 29 07:03:17 UTC 2008 modified by jDAL
+   -   Mon Sep 29 11:53:41 UTC 2008 modified by jDAL
+   -   Mon Sep 29 12:27:47 UTC 2008 modified by jDAL
+   -   Mon Sep 29 12:48:13 UTC 2008 modified by jDAL
+   -   Mon Sep 29 13:06:08 UTC 2008 modified by jDAL
+   -   Tue Sep 30 05:30:15 UTC 2008 modified by jDAL
+   -   Tue Sep 30 06:07:07 UTC 2008 modified by jDAL
+   -   Tue Sep 30 06:30:34 UTC 2008 modified by jDAL
+   -   Tue Sep 30 06:37:14 UTC 2008 modified by jDAL
+   -   Tue Sep 30 06:44:13 UTC 2008 modified by jDAL
+   -   Mon Oct 06 08:20:15 UTC 2008 modified by jDAL
+   -   Mon Oct 06 08:34:32 UTC 2008 modified by jDAL
+   -   Mon Oct 06 09:30:21 UTC 2008 modified by jDAL
+   -   Thu Oct 09 09:23:26 UTC 2008 modified by jDAL
+   -   Thu Oct 09 11:31:21 UTC 2008 modified by jDAL
+   -   Mon Feb 04 15:40:54 UTC 2013 modified by jDAL
+   -   Mon Feb 04 16:15:26 UTC 2013 modified by jDAL
+   -   Wed Feb 06 10:55:08 UTC 2013 modified by jDAL
+   -   Wed Feb 06 11:36:13 UTC 2013 modified by jDAL
+   -   Fri Feb 08 10:22:36 UTC 2013 modified by jDAL
+   -   Mon Feb 25 11:54:26 UTC 2013 modified by jDAL
+   -   Mon Feb 25 12:47:54 UTC 2013 modified by jDAL
+   -   Mon Feb 25 14:29:44 UTC 2013 modified by jDAL
+   -   Mon Feb 25 14:48:57 UTC 2013 modified by jDAL
+   -   Mon Feb 25 15:05:56 UTC 2013 modified by jDAL
+   -   Mon Feb 25 15:32:07 UTC 2013 modified by jDAL
+   -   Tue Feb 26 11:30:24 UTC 2013 modified by jDAL
+   -   Tue Feb 26 13:23:51 UTC 2013 modified by jDAL
+   -   Tue Feb 26 13:24:38 UTC 2013 modified by jDAL
+   -   Mon Mar 04 10:42:22 UTC 2013 modified by jDAL
+   -   Mon Mar 04 12:29:20 UTC 2013 modified by jDAL
+   -   Tue Mar 05 10:34:26 UTC 2013 modified by jDAL
+   -   Tue Mar 05 11:38:33 UTC 2013 modified by jDAL
+   -   Tue Mar 05 13:00:08 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:03:13 UTC 2013 modified by jDAL
+   -   Wed Mar 06 12:40:54 UTC 2013 modified by jDAL
+   -   Thu Mar 07 11:28:56 UTC 2013 modified by jDAL
+   -   Fri Mar 08 10:01:33 UTC 2013 modified by jDAL
+   -   Fri Mar 08 10:58:44 UTC 2013 modified by jDAL
+   -   Fri Mar 08 13:06:41 UTC 2013 modified by jDAL
+   -   Mon Mar 11 15:52:49 UTC 2013 modified by jDAL
+   -   Tue Mar 12 08:46:23 UTC 2013 modified by jDAL
+   -   Tue Mar 12 09:24:30 UTC 2013 modified by jDAL
+   -   Wed Mar 20 10:20:42 UTC 2013 modified by jDAL
+   -   Thu Mar 21 08:41:14 UTC 2013 modified by jDAL
+   -   Mon Mar 25 14:16:06 UTC 2013 modified by jDAL
+   -   Mon Mar 25 15:16:20 UTC 2013 modified by jDAL
+   -   Wed Mar 27 12:05:57 UTC 2013 modified by jDAL
+   -   Wed Mar 27 15:20:10 UTC 2013 modified by jDAL
+   -   Wed Apr 03 10:19:35 UTC 2013 modified by jDAL
+   -   Wed Apr 03 14:08:00 UTC 2013 modified by jDAL
+   -   Fri Apr 12 08:51:06 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:04:20 UTC 2013 modified by jDAL
+   -   Wed Apr 17 11:41:36 UTC 2013 modified by jDAL
+   -   Wed Apr 17 13:53:38 UTC 2013 modified by jDAL
+   -   Fri Apr 19 11:01:44 UTC 2013 modified by jDAL
+   -   Fri Apr 19 12:28:46 UTC 2013 modified by jDAL
+   -   Mon Apr 29 11:17:29 UTC 2013 modified by jDAL
+   -   Tue Apr 30 07:13:21 UTC 2013 modified by jDAL
+   -   Tue Apr 30 09:50:33 UTC 2013 modified by jDAL
+   -   Thu May 02 08:57:24 UTC 2013 modified by jDAL
+   -   Thu May 02 08:57:24 UTC 2013 modified by jDAL
+   -   Thu May 02 08:57:25 UTC 2013 modified by jDAL
+   -   Tue Feb 18 14:01:10 UTC 2014 modified by jDAL
+   -   Tue Feb 18 14:01:10 UTC 2014 modified by jDAL
+   -   Tue Feb 18 14:01:11 UTC 2014 modified by jDAL
+-->
+<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="4" lan="1" serialAddress="8" cammaLen="57.6" cammaPos="154.8" calibrate="1">
+	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />
+	<cmdPos min_value="-21000" max_value="21000" units="step" description="commanded position" />
+	<Fmin min_value="20" max_value="10000" units="step" default_value="100" description="min freq" />
+	<Fmax min_value="20" max_value="10000" units="step" default_value="500" description="max freq" />
+	<acc min_value="0" max_value="255" units="mS^2" default_value="50" description="acceleration" />
+	<uBits default_value="34" description="user bits configuration 0x22" />
+	<lmCorr units="mm" default_value="0" description="last minute corrections" />
+	<gravCorr units="mm" default_value="0" description="gravity correction" />
+	<userOffset units="mm" default_value="0" description="user offset" />
+	<actPos units="step" description="actual position" />
+	<status description="Status" />
+	<softVer description="USD software version" />
+	<type description="USD type" />
+</usd>

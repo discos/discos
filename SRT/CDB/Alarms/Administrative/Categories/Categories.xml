@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<categories 
+	xmlns="urn:schemas-cosylab-com:acsalarm-categories:1.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <category is-default="true" path="LOW_LEVEL">
+        <description>Alarms related to low level and hardware</description>
+        <alarms>
+            <FaultFamily>BACIProperty</FaultFamily>
+        </alarms>
+    </category>
+  
+    <category is-default="true" path="COMPONENT">
+        <description>Alarms raised by low level components</description>
+        <alarms>
+            <FaultFamily>Receiver</FaultFamily>
+            <FaultFamily>MinorServo</FaultFamily>
+        </alarms>
+    </category>
+
+    <category is-default="true" path="BOSS">
+        <description>Alarms raised by high level components</description>
+        <alarms>
+            <FaultFamily>ReceiverBoss</FaultFamily>
+            <FaultFamily>MinorServoBoss</FaultFamily>
+        </alarms>
+    </category>
+
+</categories>

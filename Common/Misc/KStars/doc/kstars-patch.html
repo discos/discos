@@ -1,0 +1,97 @@
+<html><head>
+ <meta http-equiv="Content-Type" content="text/html "><title>'[kde-edu]: KDE_EXPORT in libkdeedu (long)' - MARC</title></head><body bgcolor="#ffffff" link="#0000c0" text="#000000" vlink="#800080">
+<pre><b>[<a href="http://lists.kde.org/?l=kde-edu&amp;m=111029697222884&amp;w=2">prev in list</a>] [<a href="http://lists.kde.org/?l=kde-edu&amp;m=111121852325676&amp;w=2">next in list</a>] [<font color="#c0c0c0">prev in thread</font>] [<a href="http://lists.kde.org/?l=kde-edu-devel&amp;m=111031234111857&amp;w=2">next in thread</a>] </b>
+<b><font size="+1">
+List:       <a href="http://lists.kde.org/?l=kde-edu&amp;r=1&amp;w=2">kde-edu</a>
+Subject:    <a href="http://lists.kde.org/?t=111031245900005&amp;r=1&amp;w=2">[kde-edu]: KDE_EXPORT in libkdeedu (long)</a>
+From:       <a href="http://lists.kde.org/?a=100126150500002&amp;r=1&amp;w=2">Jason Harris &lt;kstars () 30doradus ! org&gt;</a>
+Date:       <a href="http://lists.kde.org/?l=kde-edu&amp;r=1&amp;w=2&amp;b=200503">2005-03-08 20:07:27</a>
+Message-ID: <a href="http://lists.kde.org/?i=200503081307.27418.kstars%20%28%29%2030doradus%20%21%20org">200503081307.27418.kstars () 30doradus ! org</a></font>
+[<a href="http://lists.kde.org/?l=kde-edu&amp;m=111031234011623&amp;q=raw">Download message RAW</a>]</b>
+
+Hello,
+
+At work I am running KDE-3.3.1 and gcc-3.4.2 on Fedora Core 3.  I have noticed 
+that with this combination, I cannot compile kdeedu from HEAD, because I get 
+"visibility" errors in libkdeedu, due to the use of the "KDE_EXPORT" macro.
+
+After some searching, I think I have narrowed down the problem.  In KDE-3.3.1, 
+the kdemacros.h file contains:
+
+#if __GNUC__ - 0 &gt; 3 || (__GNUC__ - 0 == 3 &amp;&amp; __GNUC_MINOR__ - 0 &gt; 2)
+#define KDE_NO_EXPORT __attribute__ ((visibility("hidden")))
+#define KDE_EXPORT __attribute__ ((visibility("visible")))
+#else
+#define KDE_NO_EXPORT
+#define KDE_EXPORT
+#endif
+
+Whereas, it has since been changed to:
+
+#if __GNUC__ - 0 &gt; 3 || (__GNUC__ - 0 == 3 &amp;&amp; __GNUC_MINOR__ - 0 &gt; 4)
+/* Visibility is available for GCC newer than 3.4.
+ * See: <a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9283">http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9283</a> 
+ */
+#define KDE_NO_EXPORT __attribute__ ((visibility("hidden")))
+#define KDE_EXPORT __attribute__ ((visibility("default")))
+#elif defined(Q_WS_WIN)
+#define KDE_NO_EXPORT
+#define KDE_EXPORT __declspec(dllexport)
+#else
+#define KDE_NO_EXPORT
+#define KDE_EXPORT
+#endif
+
+So, KDE_EXPORT used to mean visibility="visible", and it now means 
+visibility="default".  My compile error states that 'visibility must be one 
+of "default",  "hidden", "protected" or "internal" ', because it's picking up 
+the deprecated(?) "visible" definition of KDE_EXPORT.  
+
+I have read that this is fixed in KDE-3.3.2, so maybe it isn't worth fixing 
+and we should simply tell any users who complain about this to upgrade to 
+3.3.2 or newer.  However, I have implemented a workaround in my local copies 
+of libkdeedu/kdeeduplot and libkdeedu/extdate.  In pertinent header files, I 
+placed the following:
+
+#if __GNUC__ - 0 &gt; 3 || (__GNUC__ - 0 == 3 &amp;&amp; __GNUC_MINOR__ - 0 &gt; 3)
+#define KSTARS_NO_EXPORT __attribute__ ((visibility("hidden")))
+#define KSTARS_EXPORT __attribute__ ((visibility("default")))
+#else 
+#define KSTARS_NO_EXPORT KDE_NO_EXPORT
+#define KSTARS_EXPORT KDE_EXPORT
+#endif
+
+and then replaced all instances of "KDE_EXPORT" with "KSTARS_EXPORT".  Note 
+that this not only fixes the deprecated visibility flag ("visible" -&gt; 
+"default"), it also modifies the GNUC_MINOR check from "&gt;4" to "&gt;3".  I 
+changed this because my GNUC_MINOR is not &gt;4 (I have gcc-3.4.2), yet it knows 
+about visibility.
+
+Do you think it is worth applying a patch like this?  I would like my app to 
+be usable by any version of KDE-3.3.x, not just &gt;=KDE-3.3.2.  I believe this 
+is the only issue preventing it.
+
+Also, do you think that the GNUC_MINOR check in kdemacros is in error?  I 
+don't know anything about this visibility stuff, all I know is what my 
+gcc-3.4.2 compiler is telling me...
+
+thanks,
+Jason
+-- 
+-------------------------------
+KStars: KDE Desktop Planetarium
+<a href="http://edu.kde.org/kstars">http://edu.kde.org/kstars</a>
+_______________________________________________
+kde-edu mailing list
+kde-edu@mail.kde.org
+<a href="https://mail.kde.org/mailman/listinfo/kde-edu">https://mail.kde.org/mailman/listinfo/kde-edu</a>
+<b>[<a href="http://lists.kde.org/?l=kde-edu&amp;m=111029697222884&amp;w=2">prev in list</a>] [<a href="http://lists.kde.org/?l=kde-edu&amp;m=111121852325676&amp;w=2">next in list</a>] [<font color="#c0c0c0">prev in thread</font>] [<a href="http://lists.kde.org/?l=kde-edu-devel&amp;m=111031234111857&amp;w=2">next in thread</a>] </b>
+</pre>
+  <br><center>
+    <a href="http://lists.kde.org/?q=configure">Configure</a> | 
+
+    <a href="http://www.kde.org/">The&nbsp;K&nbsp;Desktop&nbsp;Environment&nbsp;home&nbsp;page</a> |
+    <a href="http://marc.info/">Other&nbsp;List&nbsp;Archives&nbsp;at&nbsp;MARC</a>
+</center>
+
+</body></html>

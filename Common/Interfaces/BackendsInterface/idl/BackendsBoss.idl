@@ -1,0 +1,33 @@
+/* *********************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      	   */
+/* $Id: BackendsBoss.idl,v 1.1 2008-09-10 14:29:16 a.orlati Exp $							   */
+/*                                                                                                      	   */
+/* This code is under GNU General Public Licence (GPL).                                                 	   */
+/*                                                                                                      	   */
+/* Who                                  when            What                                              	   */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  10/09/2009      Creation                                          	   */
+
+
+#ifndef _BACKENDBOSS_IDL
+#define _BACKENDBOSS_IDL
+
+#include <baci.idl>
+#include <BackendsDefinitions.idl>
+#include <ManagmentDefinitions.idl>
+#include <ComponentErrors.idl>
+
+#pragma prefix "alma"
+
+
+module Backends {
+	
+	interface BackendsBoss: ACS::CharacteristicComponent {
+		
+		readonly attribute Management::ROTSystemStatus status;
+		
+	};
+	
+};
+
+
+#endif

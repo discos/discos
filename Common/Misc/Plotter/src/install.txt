@@ -1,0 +1,4 @@
+Instructions:
+1) install gnuplot at least version 3.5
+2) install Numeric python package
+3) install Gnuplot.py package

@@ -1,0 +1,20 @@
+
+# The first field is the name of the procedure which must be unique in the file. If the procedure has input parameters, the exact number must be indicated
+# between parenthesis. It is advisable that the names of the procedure are in capital letter in order to avoid name clashes with names of procedure already
+# registered in the system. The open bracket must lie on the same line of the procedure name. 
+# Between the brackets the configuration commands must be provided one for each line. 
+STANDARDPRESCAN {
+	tsys
+}
+
+STANDARDPOSTSCAN {
+	wait=3.2
+}
+
+INITALL {
+	setLO=21964.0:21964.0
+}
+
+ENDSCAN(1) {
+	wait=$0
+}

@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<SRTKBandDerotator 
+    xmlns="urn:schemas-cosylab-com:SRTKBandDerotator:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    SensorIP="192.168.200.50" 
+    SensorPort="4002" 
+    SensorTimeout="500000" 
+    SensorZeroReference="731719" 
+    SensorConversionFactor="0.001683884" 
+    IP="192.168.200.50" 
+    Port="4001" 
+    Timeout="500000" 
+    ZeroReference="-99.46666" 
+    ConversionFactor="0.0054622" 
+    MaxValue="105.5" 
+    MinValue="-105.5" 
+    Step="60"
+    TrackingDelta="0.1"
+    PositionExpireTime="0.010000"
+>
+    <enginePosition 
+        description="Engine position" 
+        units="degree" 
+        graph_min="0" graph_max="360" />
+
+    <actPosition 
+        description="Sensor actual position" 
+        units="degree" 
+        graph_min="0" graph_max="360" />
+
+    <cmdPosition 
+        description="Commanded position" 
+        units="degree" 
+        graph_min="0" graph_max="360" />
+
+    <positionDiff
+        description="Position difference" 
+        units="degree" 
+        graph_min="0" graph_max="360" />
+
+    <tracking />
+
+	<icd_verbose_status description="Derotator ICD Verbose Status" />
+	<status description="Derotator status" />
+
+</SRTKBandDerotator>

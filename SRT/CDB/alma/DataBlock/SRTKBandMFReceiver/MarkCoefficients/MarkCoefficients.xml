@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<MarkCoefficientsKBandLookUpTable xmlns="urn:schemas-cosylab-com:MarkCoefficientsKBandLookUpTable:1.0"
+                xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+                xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+                <MarkEntry><Feed>0</Feed><Polarization>LEFT</Polarization><Coefficients>0.2912, -21.21, 506.97, -3955.5</Coefficients></MarkEntry>
+                <MarkEntry><Feed>0</Feed><Polarization>RIGHT</Polarization><Coefficients>0.2141, -15.771, 379.96, -2976.8</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>LEFT</Polarization><Coefficients>0.558,-40.436,961.81,-7472.1</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>RIGHT</Polarization><Coefficients>0.523,-37.88,899.74,-6974.4</Coefficients></MarkEntry>
+                <MarkEntry><Feed>2</Feed><Polarization>LEFT</Polarization><Coefficients>0.8963,-63.274,1469.2,-11170.0</Coefficients></MarkEntry>
+                <MarkEntry><Feed>2</Feed><Polarization>RIGHT</Polarization><Coefficients>0.8572,-60.324,1396.3,-10581.0</Coefficients></MarkEntry>
+                <MarkEntry><Feed>3</Feed><Polarization>LEFT</Polarization><Coefficients>0.5176,-37.47,889.81,-6895.8</Coefficients></MarkEntry>
+                <MarkEntry><Feed>3</Feed><Polarization>RIGHT</Polarization><Coefficients>0.5173,-37.339,884.31,-6838.1</Coefficients></MarkEntry>
+                <MarkEntry><Feed>4</Feed><Polarization>LEFT</Polarization><Coefficients>0.662,-47.86,1136.2,-8809.9</Coefficients></MarkEntry>
+                <MarkEntry><Feed>4</Feed><Polarization>RIGHT</Polarization><Coefficients>0.7267,-52.213,1231.4,-9486.9</Coefficients></MarkEntry>
+                <MarkEntry><Feed>5</Feed><Polarization>LEFT</Polarization><Coefficients>0.3535,-25.63,609.53,-4727.4</Coefficients></MarkEntry>
+                <MarkEntry><Feed>5</Feed><Polarization>RIGHT</Polarization><Coefficients>0.3955,-28.468,672.77,-5192.0</Coefficients></MarkEntry>
+                <MarkEntry><Feed>6</Feed><Polarization>LEFT</Polarization><Coefficients>0.2725,-19.926,478.05,-3737.9</Coefficients></MarkEntry>
+                <MarkEntry><Feed>6</Feed><Polarization>RIGHT</Polarization><Coefficients>0.201,-15.761,398.52,-3237.7</Coefficients></MarkEntry>
+
+</MarkCoefficientsKBandLookUpTable>

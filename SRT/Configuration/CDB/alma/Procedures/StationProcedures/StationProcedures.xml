@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Procedure name="setupCCB" args="0">
+<body>
+	antennaReset
+	antennaSetup=CCB
+    servoSetup=CCB
+	receiversSetup=CCB
+	initialize=CCB
+	device=0
+	calOff
+</body>	
+</Procedure>
+
+<Procedure name="setupKKG" args="0">
+<body>
+	antennaReset
+	antennaSetup=KKG
+    servoSetup=KKG
+	receiversSetup=KKG
+	receiversMode=SINGLEDISH
+	initialize=KKG
+	device=0
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupLLP" args="0">
+<body>
+	antennaReset
+	antennaSetup=LP
+    servoSetup=LLP
+	receiversSetup=LLP
+	receiversMode=XXC4
+	initialize=LLP
+	device=0
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupPPP" args="0">
+<body>
+	antennaReset
+	antennaSetup=LP
+    servoSetup=PPP
+	receiversSetup=PPP
+	receiversMode=C3XX
+	initialize=PPP
+	device=0
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupPLP" args="0">
+<body>
+	antennaReset
+	antennaSetup=LP
+    servoSetup=PLP
+	receiversSetup=PLP
+	receiversMode=C3C4
+	initialize=PLP
+	device=0
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="telescopePark" args="0">
+<body>
+	antennaReset
+	goTo=180d,89.8d
+	receiversPark
+	waitOnSource
+	servoPark
+	antennaPark
+	asOff
+	asPark
+</body>
+</Procedure>
+
+
+</ProcedureFile>

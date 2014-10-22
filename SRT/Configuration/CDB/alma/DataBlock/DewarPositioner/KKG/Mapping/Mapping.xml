@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<DewarPositionerMapping
+    xmlns="urn:schemas-cosylab-com:DewarPositionerMapping:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    DerotatorName="RECEIVERS/SRTKBandDerotator"
+    SetupPosition="0.0"
+    ParkPosition="0.0"
+    DefaultConfiguration="FIXED"
+/>

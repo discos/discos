@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: Station.xsd,v 1.2 2010-08-31 12:22:31 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   18-03-2009  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:Station:1.0"
+	xmlns="urn:schemas-cosylab-com:Station:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"	
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+
+<xs:complexType name="StationType">
+	<!-- name or code of the station  -->
+	<xs:attribute name="stationName" type="xs:string" use="required"/>
+	<!--  The difference UT1-UTC in milliseconds -->
+	<xs:attribute name="DUT1" type="xs:double" use="required"/>
+	<!-- Station north latitude in degrees -->
+	<xs:attribute name="latitude" type="xs:double" use="required"/>
+	<!-- Station east longitude in degrees -->
+	<xs:attribute name="longitude" type="xs:double" use="required"/>
+	<!-- Station height over the sea level in meters -->			
+	<xs:attribute name="height" type="xs:double" use="required"/>
+	<!--  difference angle to reference IERS pole with respect to 90 east meridian in mas -->	
+	<xs:attribute name="yPolarMotion" type="xs:double" use="required"/>
+	<!--  difference angle to reference IERS pole with respect to Greenwich meridian in mas -->
+	<xs:attribute name="xPolarMotion" type="xs:double" use="required"/>
+	<!--  allow to configure the startup geodetic model  -->
+	<xs:attribute name="geodeticModel" type="xs:long" use="required"/>
+	
+</xs:complexType>
+
+<xs:element name="Station" type="StationType"/>
+
+</xs:schema>
