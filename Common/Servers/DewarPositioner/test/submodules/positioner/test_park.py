@@ -41,7 +41,7 @@ class PositionerParkTest(unittest2.TestCase):
         self.assertAlmostEqual(
                 park_position,
                 device.getActPosition(), 
-                places=2
+                places=1
         )
 
 

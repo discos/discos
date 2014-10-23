@@ -29,12 +29,12 @@ class GoTo(unittest2.TestCase):
     def test_goTo(self):
         """Verify the get method returns the position we set"""
         # Not allowed when the system is not yet configured
-        self.assertRaises(NotAllowedError, self.p.goTo, 2)
+        self.assertRaises(NotAllowedError, self.p.goTo, 1.5)
         self.p.setup(siteInfo={}, source=None, device=self.device)
         self.cdbconf.setup('KKG') # Default configuration: FIXED
-        self.p.goTo(2)
-        time.sleep(0.2)
-        self.assertEqual(self.p.getPosition(), 2)
+        self.p.goTo(1.5)
+        time.sleep(2)
+        self.assertAlmostEqual(self.p.getPosition(), 1.5, places=1)
         self.cdbconf.setConfiguration('BSC')
 
 

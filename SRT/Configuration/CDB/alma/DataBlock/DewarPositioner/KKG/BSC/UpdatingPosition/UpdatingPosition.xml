@@ -6,57 +6,66 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
+<!--
+     If you want to add to the initial position a static value X, 
+     use gotoX as a functionName.
+     For instance, when the MNG_HOR_LON is selected, the functionName
+     is static0, that means a 0 static value will be added to the
+     initial position, so the derotator commanded position will be
+     19.2 + 0, for every value of azimuth and elevation.
+-->
+
     <UpdatingRecord>
         <axisCode>MNG_HOR_LON</axisCode>
-        <position>19.2</position>
+        <initialPosition>19.2</initialPosition>
         <functionName>static0</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_HOR_LAT</axisCode>
-        <position>79.2</position>
+        <initialPosition>79.2</initialPosition>
         <functionName>static0</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_TRACK</axisCode>
-        <position>19.2</position>
+        <initialPosition>19.2</initialPosition>
         <functionName>parallactic</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_EQ_LON</axisCode>
-        <position>19.2</position>
+        <initialPosition>19.2</initialPosition>
         <functionName>parallactic</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_EQ_LAT</axisCode>
-        <position>79.2</position>
+        <initialPosition>79.2</initialPosition>
         <functionName>parallactic</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_GCIRCLE</axisCode>
-        <position>19.2</position>
+        <initialPosition>19.2</initialPosition>
         <functionName>parallactic</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_GAL_LON</axisCode>
-        <position>19.2</position>
+        <initialPosition>19.2</initialPosition>
         <functionName>gpa</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_GAL_LAT</axisCode>
-        <position>79.2</position>
+        <initialPosition>79.2</initialPosition>
         <functionName>gpa</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>JUST_FOR_TEST</axisCode>
-        <position>9.0</position>
+        <initialPosition>9.0</initialPosition>
         <functionName>gpa</functionName>
     </UpdatingRecord>
 

@@ -26,9 +26,9 @@ class PositionerSetupTest(unittest2.TestCase):
         """Verify it sets properly the starting position"""
         p = Positioner(self.cdbconf)
         self.cdbconf.setup('KKG')
-        p.setup(siteInfo={}, source=None, device=self.device, setupPosition=2)
+        p.setup(siteInfo={}, source=None, device=self.device, setupPosition=1.5)
         time.sleep(0.5) if self.using_mock else time.sleep(2)
-        self.assertEqual(p.getPosition(), 2)
+        self.assertAlmostEqual(p.getPosition(), 1.5, places=1)
 
     def test_device_name(self):
         """Verify it sets properly the device_name"""

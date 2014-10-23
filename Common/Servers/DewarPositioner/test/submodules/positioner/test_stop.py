@@ -30,7 +30,7 @@ class PositionerStopTest(unittest2.TestCase):
         self.assertEqual(p.isTerminated(), True)
         t = threading.Thread(
                 name='test_stopped', 
-                target=p.updatePosition, 
+                target=p._updatePosition, 
                 args=(foo, ()))
         t.start()
         time.sleep(0.5)

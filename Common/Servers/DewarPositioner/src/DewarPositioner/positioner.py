@@ -124,9 +124,18 @@ class Positioner(object):
                 raise NotAllowedError('sector %s not in %s' %(sector, sectors))
             else:
                 try:
-                    initialPosition, functionName = self.conf.getUpdatingConfiguration(axis)
-                    posgen = getattr(self.posgen, functionName) 
-                    self._start(posgen, self.source, self.siteInfo, initialPosition)
+                    updatingConf = self.conf.getUpdatingConfiguration(axis)
+                    initialPosition = float(updatingConf['initialPosition'])
+                    functionName = updatingConf['functionName']
+                    # If the functionName is a staticX, we command just one position
+                    if functionName.startswith('static'):
+                        # functionName = 'static2' -> staticValue = float('2')
+                        staticValue = float(functionName.lstrip('static')) 
+                        position = initialPosition + staticValue
+                        self._start(self.posgen.goto, position)
+                    else:
+                        posgen = getattr(self.posgen, functionName) 
+                        self._start(posgen, self.source, self.siteInfo, initialPosition)
                     self.control.mustUpdate = True
                 except Exception, ex:
                     raise PositionerError('configuration problem: %s' %ex.message)
@@ -260,10 +269,11 @@ class Positioner(object):
             if self.t.isAlive():
                 PositionerError('thread %s is alive' %self.t.getName())
         except AttributeError:
-            pass # self.t is None because the system is not yet configured
+            return # self.t is None because the system is not yet configured
         finally:
             self.control.stop = False
             self.control.mustUpdate = False
+        time.sleep(0.3)
 
     def park(self, parkPosition=0):
         if self.isSetup():
@@ -386,6 +396,7 @@ class Positioner(object):
                     args=(posgen, vargs)
             )
             self.t.start()
+            time.sleep(0.3) # In case of goto, take the time to command the position
         else:
             raise NotAllowedError('not configured: a setConfiguration() is required')
 

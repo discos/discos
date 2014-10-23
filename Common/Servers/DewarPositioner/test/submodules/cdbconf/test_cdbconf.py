@@ -54,7 +54,9 @@ class CDBConfTest(unittest2.TestCase):
         self.conf.setConfiguration('BSC')
         self.assertRaises(ValidationErrorEx, self.conf.getUpdatingConfiguration, 'foo')
         # Get the position
-        self.assertEqual(self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), (9.0, 'gpa'))
+        self.assertEqual(
+                self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), 
+                {'initialPosition': '9.0', 'functionName': 'gpa'})
         self.conf.setConfiguration('FIXED')
         # Verify the dictionary is empty in case of FIXED configuration
         self.assertEqual(self.conf.UpdatingPosition, {})

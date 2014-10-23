@@ -82,7 +82,7 @@ class CDBConf(object):
         return self.configurationCode
 
     def getUpdatingConfiguration(self, axisCode):
-        """Take an axis and return the a tuple (initial_position, 'functionName')"""
+        """Take an axis and return the dict {'initialPosition': X, 'functionName': Y)"""
         if not self._isConfigured:
             raeson = "DewarPotitioner not configured"
             logger.logError(raeson)
@@ -91,9 +91,8 @@ class CDBConf(object):
             raise exc
         else:
             try:
-                # UpdatingPosition -> {'axisCode': ['position', 'functionName']}
-                values = self.UpdatingPosition[axisCode] 
-                return (float(values[0]), values[1]) # (initial_position, functionName)
+                # UpdatingPosition -> {'axisCode': {'initialPosition': X, 'functionName': Y}}
+                return self.UpdatingPosition[axisCode] 
             except IndexError:
                 raeson = "wrong CDB configuration for %s" %axisCode
                 logger.logError(raeson)
@@ -156,7 +155,7 @@ class CDBConf(object):
 
         for name in attributes:
             try:
-                self.attributes[name] = dao.get_field_data(name)
+                self.attributes[name] = dao.get_field_data(name).strip()
             except cdbErrType.CDBFieldDoesNotExistEx:
                 raeson = "CDB field %s does not exist" %name
                 logger.logWarning(raeson)
@@ -181,7 +180,7 @@ class CDBConf(object):
 
             <UpdatingRecord>
                 <axisCode>MNG_TRACK</axisCode>
-                <position>2.0</position>
+                <initialPosition>2.0</initialPosition>
                 <functionName>parallactic</functionName>
             </UpdatingRecord>
             
@@ -190,7 +189,7 @@ class CDBConf(object):
         dictName='InitialPosition', the method builds the dictionary::
 
             UpdatingPosition = {
-                'MNG_TRACK': ['2.0', 'parallactic'],
+                'MNG_TRACK': {'initialPosition': '2.0', 'functionName': 'parallactic'],
             }
         """
         try:
@@ -203,15 +202,23 @@ class CDBConf(object):
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
             raise exc
-        except cdbErrType.CDBXMLErrorEx:
-            children = () # In case of empty table, like the FIXED confi
+        except Exception, ex:
+            children = () 
 
         setattr(self, dictName, {})
         d = getattr(self, dictName)
         for child in children:
-            items = [item.text.strip() for item in child]
-            primary_key, values = items[0], items[1:]
-            d[primary_key] = values # Put the record in the `dictName`
+            valuesDict = {}
+            primaryKey, fields = child[0].text.strip(), child[1:]
+            for field in fields:
+                # Find the field name
+                # e.g. field.tag = '...DewarPositionerUpdatingTable:1.0}axisCode'
+                idx = field.tag.find('}') + 1
+                fieldName = field.tag[idx:]
+                fieldValue = field.text.strip()
+                valuesDict[fieldName] = fieldValue
+            d[primaryKey] = valuesDict
+
 
     def _setPath(self, name, path):
         ACS_CDB = os.getenv('ACS_CDB')
