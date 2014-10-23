@@ -5,7 +5,7 @@
 	  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	  Name="DXC2" 
-	  Code="DigitalXCorrelatorSimImpl.DigitalXCorrelator"
+	  Code="DigitalXCorrelatorImpl.DigitalXCorrelator"
 	  Type="IDL:alma/DXC/DigitalXCorrelator:1.0" 
       Default="true"
       Container="MetrologyContainer"
