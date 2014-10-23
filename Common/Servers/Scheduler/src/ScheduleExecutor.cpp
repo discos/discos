@@ -295,7 +295,8 @@ void CScheduleExecutor::runLoop()
 						}
 						if ((m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
 							  m_startRecordTime=m_core->startRecording(m_currentScan.ut,m_currentScan.scanid,m_currentScan.subscanid,m_schedule->getScanTag(),
-									  m_currentScan.suffix,m_schedule->getObserverName(), m_schedule->getProjectName(),m_schedule->getFileName(),m_currentScan.layout,layoutProc);
+									  m_config->getDataDirectory(), m_currentScan.suffix,m_schedule->getObserverName(), m_schedule->getProjectName(),
+									  m_schedule->getFileName(),m_currentScan.layout,layoutProc);
 						}
 						else {
 							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_NOTICE,"NO_RECORDING_REQUIRED"));
@@ -500,7 +501,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"PROJECT: %s",(const char *)m_projectCode));
  	}
  	// if the schedule is properly started the status of the scheduler is considered now to be ok.
- 	m_core->resetSchedulerStatus();
+ 	m_core->clearStatus();
  	m_stage=INIT;  // put the executor in the init stage.
  	m_goAhead=true; // make sure the executor is not suspended
  	m_stopMe=false;

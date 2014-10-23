@@ -204,7 +204,7 @@ void SchedulerImpl::haltSchedule() throw (CORBA::SystemException)
 void SchedulerImpl::clearStatus() throw (CORBA::SystemException)
 {
 	AUTO_TRACE("SchedulerImpl::clearStatus()");
-	m_core->resetSchedulerStatus();
+	m_core->clearStatus();
 }
 
 void SchedulerImpl::chooseDefaultBackend(const char *bckInstance) throw (CORBA::SystemException,

@@ -24,10 +24,10 @@ CCore::~CCore()
 void CCore::initialize()
 {
 	RESOURCE_INIT;
-	EXTRA_INIT;
-	resetSchedulerStatus();
+	clearStatus();
 	m_currentProceduresFile="";
 	m_lastWeatherTime=0;
+	m_scanID=0;
 }
 
 void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::ProcedureFileLoadingErrorExImpl)
@@ -1087,32 +1087,17 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"CROSSSCAN_DONE"));
 }
 
-void CCore::clearTracking()
-{
-	TIMEVALUE now;
-	IRA::CIRATools::getTime(now);
-	m_clearTrackingTime=now.value().value;
-}
-
-bool CCore::isTracking() const
-{
-	TIMEVALUE now;
-	IRA::CIRATools::getTime(now);
-	ACS::TimeInterval diff=now.value().value-m_clearTrackingTime;
-	return (m_isAntennaTracking && m_isMinorServoTracking && m_isReceiversTracking && (diff>5000000));
-}
-
 void CCore::setRestFrequency(const ACS::doubleSeq& in)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_restFrequency=in;
 }
 
-void CCore::resetSchedulerStatus()
+void CCore::clearStatus()
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_schedulerStatus=Management::MNG_OK;
-	ACS_LOG(LM_FULL_INFO,"CCore::resetSchedulerStatus()",(LM_NOTICE,"COMPONENT_STATUS_RESET"));
+	ACS_LOG(LM_FULL_INFO,"CCore::clearStatus()",(LM_NOTICE,"COMPONENT_STATUS_RESET"));
 }
 
 void CCore::stopSchedule()
@@ -1300,34 +1285,6 @@ void CCore::startSchedule(const char* scheduleFile,const char * startSubScan) th
 	}
 }
 
-void CCore::getCurrentBackend(IRA::CString& bck)
-{
-	/*Backends::GenericBackend_var backend;
-	backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
-	baci::ThreadSyncGuard guard(&m_mutex);
-	if (CORBA::is_nil(backend)) {
-		bck=m_defaultBackendInstance;
-	}
-	else {
-		bck=backend->name();
-	}*/
-	bck=m_defaultBackendInstance;
-}
-
-void  CCore::getCurrentDataReceiver(IRA::CString& dv)
-{
-	/*Management::DataReceiver_var dataWriter;
-	dataWriter=m_schedExecuter->getWriterReference(); //get the reference to the currently used backend.
-	baci::ThreadSyncGuard guard(&m_mutex);
-	if (CORBA::is_nil(dataWriter)) {
-		dv=m_defaultDataReceiverInstance;
-	}
-	else {
-		dv=dataWriter->name();
-	}*/
-	dv=m_defaultDataReceiverInstance;
-}
-
 bool CCore::command(const IRA::CString& cmd,IRA::CString& answer)
 {
 	try {
@@ -1343,42 +1300,17 @@ bool CCore::command(const IRA::CString& cmd,IRA::CString& answer)
 	}
 }
 
-void CCore::getScanCounter(DWORD& cc)
-{
-	if (m_schedExecuter) cc= m_schedExecuter->getCurrentScheduleCounter();
-	else cc=0;
-}
-
-void CCore::getCurrentIdentifiers(DWORD& scanID,DWORD& subScanID)
-{
-	if (m_schedExecuter) m_schedExecuter->getCurrentScanIdentifers(scanID,subScanID);
-	else {
-		scanID=subScanID=0;
-	}
-}
-	
-void CCore::getScheduleName(IRA::CString& name)
-{
-	if (m_schedExecuter) name=m_schedExecuter->getScheduleName();
-	else name="";
-}
-
-void CCore::getProjectCode(IRA::CString& code)
-{
-	if (m_schedExecuter) code=m_schedExecuter->getProjectCode();
-	else code="";
-}
+#include "Core_Getter.i"
 
 /////// PRIVATES
 
-void CCore::changeSchedulerStatus(const Management::TSystemStatus& status)
-{
-	baci::ThreadSyncGuard guard(&m_mutex);
-	if (status>=m_schedulerStatus) m_schedulerStatus=status; 
-}
 
 #include "Core_Common.i"
 
 #include "Core_Resource.i"
 
 #include "Core_Extra.i"
+
+#include "Core_Basic.i"
+
+#include "Core_Operations.i"
