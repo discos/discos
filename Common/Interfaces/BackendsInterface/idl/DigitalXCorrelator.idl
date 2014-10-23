@@ -65,14 +65,6 @@ module DXC {
                 ACSErrTypeFPGACommunication::CannotRunEx,
                 ACSErrTypeFPGAConnection::CannotConnectEx
             );
-        void save_coord(in double latitude, in double longitude)
-            raises (
-                ComponentErrors::CouldntGetAttributeEx,
-                ComponentErrors::FileIOErrorEx,
-                ACSErrTypeFPGACommunication::CannotRunEx,
-                ACSErrTypeFPGAConnection::CannotConnectEx
-            );
-
     };
 };
 #endif
