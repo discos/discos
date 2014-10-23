@@ -101,10 +101,10 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
             self.max_attempts =1
 
 #	    self.samples==int(dao.get_double("SAMPLES"))
-	    self.port=0
+	    self.port='/dev/ttyr00'
 	    self.baudrate=115200
 	    self.samples=25000000 
-	    self.out_file_name="/home/almamgr/outfile"
+	    self.out_file_name="/home/spoppi/outfile"
 	    
 	
 	
@@ -141,7 +141,17 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
 	
     def cleanUp(self):
         self.corr.disconnect()
+        self.getLogger().logDebug("CleanUp")
+
         self.out_file.close()
+        ComponentLifecycle.cleanUp()
+        
+    def aboutToAbort(self):
+        self.getLogger().logDebug("About to Abort")
+
+        self.corr.disconnect()
+        self.out_file.close()
+        
 
     def save_coord(self, azimuth, elevation):
 	try:

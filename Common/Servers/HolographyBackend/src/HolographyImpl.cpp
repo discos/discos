@@ -203,8 +203,8 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 		temp=&m_sender_thread_param;    // reference to pass to create thread
 		if (m_senderThread==NULL) {
 			m_senderThread=getContainerServices()->getThreadManager()->create<CSenderThread,CSenderThread::TSenderParameter*>("CORRELATORDATA",temp);
-//			m_senderThread->setSleepTime(sampling_time*10000); // the sampling time is read from CDB
-			m_senderThread->setSleepTime(0); // set to 0
+			m_senderThread->setSleepTime(sampling_time*10000); // the sampling time is read from CDB
+//			m_senderThread->setSleepTime(0); // set to 0
 		        m_senderThread->setResponseTime(50000000);
 
 
@@ -284,7 +284,7 @@ void HolographyImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException
 	   IRA::CIRATools::getTime(now);
 
 	  if (startTime!=0 &&  startTime<now.value().value) {
-		ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::sendData()",(LM_WARNING,"START_TIME_ALREADY_ELAPSED"));
+		ACS_LOG(LM_FULL_INFO,"HolographyImpl::sendData()",(LM_WARNING,"START_TIME_ALREADY_ELAPSED"));
 	      } else           
 	   { 
   
@@ -314,9 +314,9 @@ void HolographyImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException
 	}
         catch (CORBA::SystemException &ex)
 	{
-		ACS_LOG(LM_FULL_INFO,"HolographyImpl::sendHeader()",(LM_ERROR
+		ACS_LOG(LM_FULL_INFO,"HolographyImpl::sendData()",(LM_ERROR
 		,"SystemException"));
-	//	ex.log(LM_DEBUG);
+		//ex.log(LM_DEBUG);
 
 	}
         catch (...) {
@@ -338,7 +338,7 @@ void HolographyImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::B
 		IRA::CIRATools::getTime(now);		
 		if (m_LogObservedPositions)
  		{
-//			m_antennaBoss->getRawCoordinates(now.value().value,az,el);
+//			            m_antennaBoss->getRawCoordinates(now.value().value,az,el);
 		} else
 		{
 		 	az=-0.69; 
@@ -358,7 +358,7 @@ void HolographyImpl::terminate() throw (CORBA::SystemException, BackendsErrors::
 	} catch(maciErrType::CannotReleaseComponentExImpl &ex)
 	
 	{
-		ACS_LOG(LM_FULL_INFO,"HolographyImpl::sendHeader()",(LM_ERROR
+		ACS_LOG(LM_FULL_INFO,"HolographyImpl::terminate()",(LM_ERROR
 		,"CannotReleaseComponentExImpl"));
 		ex.log(LM_DEBUG);
 
