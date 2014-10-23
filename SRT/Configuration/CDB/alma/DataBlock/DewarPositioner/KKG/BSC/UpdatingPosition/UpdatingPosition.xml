@@ -6,14 +6,14 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<!--
+     <!--
      If you want to add to the initial position a static value X, 
      use gotoX as a functionName.
      For instance, when the MNG_HOR_LON is selected, the functionName
      is static0, that means a 0 static value will be added to the
      initial position, so the derotator commanded position will be
      19.2 + 0, for every value of azimuth and elevation.
--->
+     -->
 
     <UpdatingRecord>
         <axisCode>MNG_HOR_LON</axisCode>

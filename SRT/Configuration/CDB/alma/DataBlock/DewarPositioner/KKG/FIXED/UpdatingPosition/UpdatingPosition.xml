@@ -6,6 +6,69 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-    <UpdatingRecord /> <!-- nothing to do -->
+
+     <!--
+     If you want to add to the initial position a static value X, 
+     use gotoX as a functionName.
+     For instance, when the MNG_HOR_LON is selected, the functionName
+     is static0, that means a 0 static value will be added to the
+     initial position, so the derotator commanded position will be
+     19.2 + 0, for every value of azimuth and elevation.
+     -->
+
+    <UpdatingRecord>
+        <axisCode>MNG_HOR_LON</axisCode>
+        <initialPosition>0</initialPosition>
+        <functionName>none</functionName>
+    </UpdatingRecord>
+
+    <UpdatingRecord>
+        <axisCode>MNG_HOR_LAT</axisCode>
+        <initialPosition>0</initialPosition>
+        <functionName>none</functionName>
+    </UpdatingRecord>
+
+    <UpdatingRecord>
+        <axisCode>MNG_TRACK</axisCode>
+        <initialPosition>0</initialPosition>
+        <functionName>none</functionName>
+    </UpdatingRecord>
+
+    <UpdatingRecord>
+        <axisCode>MNG_EQ_LON</axisCode>
+        <initialPosition>0</initialPosition>
+        <functionName>none</functionName>
+    </UpdatingRecord>
+
+    <UpdatingRecord>
+        <axisCode>MNG_EQ_LAT</axisCode>
+        <initialPosition>0</initialPosition>
+        <functionName>none</functionName>
+    </UpdatingRecord>
+
+    <UpdatingRecord>
+        <axisCode>MNG_GCIRCLE</axisCode>
+        <initialPosition>0</initialPosition>
+        <functionName>none</functionName>
+    </UpdatingRecord>
+
+    <UpdatingRecord>
+        <axisCode>MNG_GAL_LON</axisCode>
+        <initialPosition>0</initialPosition>
+        <functionName>none</functionName>
+    </UpdatingRecord>
+
+    <UpdatingRecord>
+        <axisCode>MNG_GAL_LAT</axisCode>
+        <initialPosition>0</initialPosition>
+        <functionName>none</functionName>
+    </UpdatingRecord>
+
+    <UpdatingRecord>
+        <axisCode>JUST_FOR_TEST</axisCode>
+        <initialPosition>0</initialPosition>
+        <functionName>none</functionName>
+    </UpdatingRecord>
+
 
 </DewarPositionerUpdatingTable>
