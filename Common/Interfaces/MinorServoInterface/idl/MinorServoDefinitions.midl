@@ -1,0 +1,61 @@
+#ifndef __MINORSERVODEFINITIONS_IDL__
+#define __MINORSERVODEFINITIONS_IDL__
+
+#include <baci.idl>
+
+#pragma prefix "alma"
+
+/**
+ * @mainpage IDL Interface documentation of the Minor Servo subsystem
+ * @date 22/10/2014
+ * @version 1.0.0
+ * @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+ * @remarks Last compiled under ACS 8.0.2
+*/
+
+/**
+* This module defines the MinorServo Subsystem interface.
+* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+*/
+module MinorServo {
+
+    /**
+	 * This structure is used to fill in all the runtime information (from the Minor Servo) regarding the current scan
+	*/
+	typedef struct RunTime {
+		/**
+	 	* expected start ut time
+		*/
+		ACS::Time startEpoch;
+		/**
+		 * indicates the commanded scan requires an On-The-Fly management
+		 */
+		boolean onTheFly;
+		/**
+		 * position of the axis involved in the scan, see <i>getCentralScanPosition()</i>
+		 */
+		double centerScan;
+	} TRunTimeParameters;
+
+    struct MinorServoScan {
+		/**
+		 * span of the scan in mm or arcsec according the requested axis
+		 */
+        double range;
+        /**
+         * duration of the scan
+         */
+        ACS::TimeInterval total_time;
+        /**
+         * mnemonic code of the axis involved in the scan
+         */
+        string axis_code;
+        /**
+         * if true the system is not required to start any scan and should keep going the normal behviour. In case a scan
+         * is currently "active" or not closed this will cause an explicit call to <i>stopScan()</i>
+         */
+        boolean is_empty_scan;
+    };
+};
+
+#endif //__MINORSERVODEFINITIONS_IDL__
