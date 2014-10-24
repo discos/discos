@@ -81,6 +81,38 @@ ifeq ($(TARGETSYS),MED)
 	CDB_SVN_LOCATION="Medicina/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina
 else
+ifeq ($(TARGETSYS),NT)
+	#Add all modules included in the Noto system in this sequence
+	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
+	MODULES:=
+		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors\
+		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface\
+		MedicinaAntennaInterface MedicinaWeatherStationInterface \
+		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
+		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
+		Metrology TotalPower NoiseGenerator NotoMount CustomLogger \
+		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
+		MedicinaMountTextClient CustomLoggingClient\
+		Plotter KStars Scripts \
+
+	IDL_DOC:=Managment Antenna Backends Metrology
+	CPP_DOC:=Libraries AntennaImplementation 
+
+	Managment_MODULES:=ManagmentInterface
+	Antenna_MODULES:=AntennaInterface MedicinaAntennaInterface
+	Backends_MODULES:=BackendsInterface
+	WeatherStation_MODULES:=WeatherStationInterface MedicinaWeatherStationInterface
+	Receivers_MODULES:=ReceiversInterface
+	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary
+	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss MedicinaMount
+	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter MBFitsWriter ExternalClients
+	BackendsImplementation_MODULES:=TotalPower NoiseGenerator HolographyBackend DBBC
+	ReceiversImplementation_MODULES:=ReceiversBoss
+	
+	CDB_SVN_LOCATION="Noto/Configuration/CDB"
+	SYSTEM_SVN_MODULES=Common Medicina Noto
+
+else
 	RESULT:=$(error TARGETSYS variable is not set correctly!)	
 endif
 endif
