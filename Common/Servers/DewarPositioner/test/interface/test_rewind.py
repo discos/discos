@@ -16,14 +16,14 @@ class RewindTest(unittest2.TestCase):
         if self.positioner.isReady():
             self.positioner.park()
 
-    def test_number_of_feeds_oor(self):
-        """Raise OperationError when the number of feeds is out of range"""
+    def test_number_of_steps_oor(self):
+        """Raise OperationError when the number of steps is out of range"""
         with self.assertRaisesRegexp(OperationErrorEx, 'actual pos: {0.0}'):
-            self.positioner.rewind(3)
+            self.positioner.rewind(4)
 
-    def test_not_positive_number_of_feeds(self):
-        """Raise OperationError when the number of feeds is not positive"""
-        with self.assertRaisesRegexp(OperationErrorEx, 'feeds must be positive'):
+    def test_not_positive_number_of_steps(self):
+        """Raise OperationError when the number of steps is not positive"""
+        with self.assertRaisesRegexp(OperationErrorEx, 'steps must be positive'):
             self.positioner.rewind(0)
 
 

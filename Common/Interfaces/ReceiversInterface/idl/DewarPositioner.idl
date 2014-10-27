@@ -148,16 +148,23 @@ module Receivers {
         
         /** Rewind the derotator
          * 
-         * The parameter `number_of_feeds` defines the rotation angle. For
-         * instance, for a derotator with 60 degrees of angle between two
-         * feeds, number_of_feeds=2 menas we want a rotation of 120 degrees.
+         * The parameter `steps` defines the rotation angle unit. For
+         * instance, for a derotator with a step of 60 degrees, a value 
+         * steps=2 means we want a rotation of 120 degrees.
          *
-         * @param number_of_feeds the number of feeds we want to rotate
+         * @param steps the number of steps we want to rotate
          * @throw ComponentErrors::OperationErrorEx,
          * @throw ComponentErrors::UnexpectedEx
          */
-        void rewind(in long number_of_feeds) raises (
+        void rewind(in long steps) raises (
             ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
+        /** Return the rewinding unit value */
+        double getRewindingStep() raises (
+            ComponentErrors::NotAllowedEx,
             ComponentErrors::UnexpectedEx
         );
 
@@ -244,31 +251,32 @@ module Receivers {
         boolean isRewinding();
 
 
-        /** Set the number of feeds the user want to rewind in AUTO rewinding 
+        /** Set the number of steps the user want to rewind in AUTO rewinding 
          *  mode
          *
-         * @param number_of_feeds the number of feeds the user want to rewind
+         * @param steps the number of steps the user want to rewind
          * in auto rewinding mode. For instance, for the SRTKBandReceiver, the
-         * angle between two feeds is 60 degrees, so number_of_feeds=2 means
-         * the auto rewind must be of 120 degrees.
+         * step is 60 degrees, so if we set steps=2 that means the auto rewind 
+         * must be of 120 degrees.
          * @throw ComponentErrors::NotAllowedEx
          */
-        // void setAutoRewindingFeeds(in long number_of_feeds) 
-        //     raises (ComponentErrors::NotAllowedEx);
+        void setAutoRewindingSteps(in long steps) 
+             raises (ComponentErrors::NotAllowedEx);
 
-        /** Clear the number of feeds selected by setAutoRewindingMode()
+
+        /** Clear the number of steps selected by setAutoRewindingSteps()
          *
-         * When the auto rewinding feeds is cleared, in case of AUTO 
+         * When the auto rewinding steps is cleared, in case of AUTO 
          * rewinding mode the rewinding will be as larger as possible.
          */
-        // void clearAutoRewindingFeeds();
+        void clearAutoRewindingSteps();
 
 
-        /** Get the number of feeds selected by setAutoRewindingMode()
+        /** Get the number of steps selected by setAutoRewindingSteps()
          *
-         * In case no auto rewinding feeds is selected, it returns 0.
+         * In case no auto rewinding steps is selected, it returns 0.
          */
-        // long getAutoRewindingFeeds();
+        long getAutoRewindingSteps();
 
 
         /** Return the actual position in the user reference system

@@ -63,8 +63,8 @@ class PositionerOffsetTest(unittest2.TestCase):
         actual_pos = 100
         self.device.setPosition(actual_pos)
         offset = 50
-        max_rewinding_feeds = 180 
-        expected = actual_pos - max_rewinding_feeds + offset
+        max_rewinding_steps = 180 
+        expected = actual_pos - max_rewinding_steps + offset
         self.p.setOffset(offset)
         time.sleep(0.5) # Wait for the offset
         self.assertEqual(self.device.getActPosition(), expected)

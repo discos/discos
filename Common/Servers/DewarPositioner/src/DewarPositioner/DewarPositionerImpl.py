@@ -42,9 +42,15 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         'derotatorSetOffset': ('setOffset', (float,)),
         'derotatorClearOffset': ('clearOffset',),
         'derotatorSetRewindingMode': ('setRewindingMode', (str,)),
+        'derotatorGetRewindingMode': ('getRewindingMode', ()),
+        'derotatorSetAutoRewindingSteps': ('setAutoRewindingSteps', (int,)),
+        'derotatorGetAutoRewindingSteps': ('getAutoRewindingSteps', ()),
+        'derotatorClearAutoRewindingSteps': ('clearAutoRewindingSteps', ()),
+        'derotatorIsRewinding': ('isRewinding', ()), 
         'derotatorRewind': ('rewind', (int,)),
         'derotatorSetPosition': ('_setPositionCmd', (str,)),
         'derotatorGetPosition': ('_getPositionCmd', ()), 
+        'derotatorGetRewindingStep': ('_getRewindingStepCmd', ()),
     }
 
     def __init__(self):
@@ -229,6 +235,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc # Can happen only in case of wrong system input
  
+
     def _getPositionCmd(self):
         """Wrap getPosition() in order to add the `d` at the end of the string"""
         try:
@@ -238,6 +245,18 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(ex.message)
             raise exc # Can happen only in case of wrong system input
+ 
+ 
+    def _getRewindingStepCmd(self):
+        """Wrap getRewindingStep() in order to add the `d` at the end of the string"""
+        try:
+            return '%sd' %self.getRewindingStep()
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.ValidationErrorExImpl()
+            exc.setReason(ex.message)
+            raise exc
+
 
     def startUpdating(self, axis, sector):
         try:
@@ -272,9 +291,28 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
-    def rewind(self, number_of_feeds):
+
+    def setAutoRewindingSteps(self, steps):
         try:
-            return self.positioner.rewind(number_of_feeds)
+            self.positioner.setAutoRewindingSteps(steps)
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+
+
+    def getAutoRewindingSteps(self):
+        return self.positioner.getAutoRewindingSteps()
+
+
+    def clearAutoRewindingSteps(self):
+        return self.positioner.clearAutoRewindingSteps()
+
+
+    def rewind(self, steps):
+        try:
+            return self.positioner.rewind(steps)
         except (PositionerError, NotAllowedError), ex:
             raeson = "cannot rewind the derotator: %s" %ex.message
             logger.logError(raeson)
@@ -287,11 +325,29 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc
 
+
     def isRewinding(self):
         return self.positioner.isRewinding()
 
+
+    def getRewindingStep(self):
+        try:
+            return self.positioner.getRewindingStep()
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(ex.message)
+            raise exc
+
+
     def isConfigured(self):
         return self.cdbconf.isConfigured()
+
 
     def isReady(self):
         try:
