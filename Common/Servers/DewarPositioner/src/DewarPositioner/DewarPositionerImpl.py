@@ -47,6 +47,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         'derotatorGetAutoRewindingSteps': ('getAutoRewindingSteps', ()),
         'derotatorClearAutoRewindingSteps': ('clearAutoRewindingSteps', ()),
         'derotatorIsRewinding': ('isRewinding', ()), 
+        'derotatorIsRewindingRequired': ('isRewindingRequired', ()), 
         'derotatorRewind': ('rewind', (int,)),
         'derotatorSetPosition': ('_setPositionCmd', (str,)),
         'derotatorGetPosition': ('_getPositionCmd', ()), 
@@ -330,6 +331,10 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def isRewinding(self):
         return self.positioner.isRewinding()
+
+
+    def isRewindingRequired(self):
+        return self.positioner.isRewindingRequired()
 
 
     def getRewindingStep(self):

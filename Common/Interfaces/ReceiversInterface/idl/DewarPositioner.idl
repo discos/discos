@@ -245,10 +245,12 @@ module Receivers {
         string getConfiguration();
 
 
-
-
         /** Return true when the derotator is rewinding */
         boolean isRewinding();
+
+
+        /** Return true when a manual rewinding is required */
+        boolean isRewindingRequired();
 
 
         /** Set the number of steps the user want to rewind in AUTO rewinding 
