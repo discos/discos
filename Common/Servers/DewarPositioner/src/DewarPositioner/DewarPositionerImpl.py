@@ -208,7 +208,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(reason)
             raise exc
-        elif self.cdbconf.getAttribute('SetPositionAllowed') != 'true':
+        elif self.cdbconf.getAttribute('SetCustomPositionAllowed') != 'true':
             raeson = "setPosition() not allowed in %s configuration" %self.getConfiguration()
             logger.logError(raeson)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
@@ -217,6 +217,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         else:
             try:
                 self.positioner.goTo(position)
+                # Set the initialPosition, in order to add it to the dynamic one
+                self.cdbconf.updateInitialPositions(position)
             except Exception, ex:
                 raeson = 'cannot set position: %s' %ex.message
                 logger.logError(raeson)
@@ -475,6 +477,10 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 exc.setReason(raeson)
                 raise exc
         self.cdbconf.setConfiguration(confCode.upper())
+        if self.cdbconf.getAttribute('SetCustomPositionAllowed') == 'true':
+            position = self.positioner.getPosition()
+            # Set the initialPosition, in order to add it to the dynamic one
+            self.cdbconf.updateInitialPositions(position)
 
     def getConfiguration(self):
         return self.positioner.getConfiguration()

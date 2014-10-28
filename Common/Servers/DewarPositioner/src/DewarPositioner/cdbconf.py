@@ -23,7 +23,7 @@ class CDBConf(object):
     )
 
     actionsAttributes = (
-            'SetPositionAllowed',
+            'SetCustomPositionAllowed',
             'DynamicUpdatingAllowed',
     )
 
@@ -111,6 +111,12 @@ class CDBConf(object):
                 exc = ComponentErrorsImpl.ValidationErrorExImpl()
                 exc.setReason(raeson)
                 raise exc
+
+
+    def updateInitialPositions(self, position):
+        for axis in self.UpdatingPosition:
+            self.UpdatingPosition[axis]['initialPosition'] = '%.2f' %position
+
 
     def getAttribute(self, name):
         """Return the attribute as a string.

@@ -1,5 +1,5 @@
 import unittest2
-import mocker
+import time
 from DewarPositioner.DewarPositionerImpl import DewarPositionerImpl
 
 
@@ -11,10 +11,12 @@ class DerotatorParkTest(unittest2.TestCase):
         success, answer = dp.command('derotatorIsReady')
         self.assertEqual((success, answer), (True, 'False'))
         dp.command('derotatorSetup=KKG')
+        time.sleep(0.5)
         success, answer = dp.command('derotatorIsReady')
         self.assertEqual((success, answer), (True, 'True'))
         success, answer = dp.command('derotatorPark')
         self.assertEqual((success, answer), (True, ''))
+        time.sleep(0.5)
         success, answer = dp.command('derotatorIsReady')
         self.assertEqual((success, answer), (True, 'False'))
 

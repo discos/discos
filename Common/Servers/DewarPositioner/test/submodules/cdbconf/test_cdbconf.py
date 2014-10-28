@@ -42,7 +42,7 @@ class CDBConfTest(unittest2.TestCase):
         self.conf.setConfiguration(confCode)
         self.assertEqual(self.conf.configurationCode, confCode)
         self.assertRegexpMatches(self.conf.configurationPath, confCode)
-        self.assertFalse(any(self.conf.UpdatingPosition))
+        self.assertTrue(any(self.conf.UpdatingPosition))
 
 
     def test_getUpdatingConfiguration(self):
@@ -58,8 +58,24 @@ class CDBConfTest(unittest2.TestCase):
                 self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), 
                 {'initialPosition': '9.0', 'functionName': 'gpa'})
         self.conf.setConfiguration('FIXED')
-        # Verify the dictionary is empty in case of FIXED configuration
-        self.assertEqual(self.conf.UpdatingPosition, {})
+        self.assertEqual(
+                self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), 
+                {'initialPosition': '0', 'functionName': 'none'})
+
+
+    def test_updateInitialPositions(self):
+        """Test the updateInitialPositions() method"""
+        self.conf.setup('KKG')
+        self.conf.setConfiguration('BSC')
+        # Get the position
+        self.assertEqual(
+                self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), 
+                {'initialPosition': '9.0', 'functionName': 'gpa'})
+        self.conf.updateInitialPositions(100)
+        self.assertEqual(
+                self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), 
+                {'initialPosition': '100.00', 'functionName': 'gpa'})
+
 
     def test_setup(self):
         """Test the setup method"""

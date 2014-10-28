@@ -13,27 +13,27 @@ class PosGenerator(object):
     def goto(self, position):
         yield position
 
-    def parallactic(self, source, site_info, initial_position=0):
+    def parallactic(self, source, siteInfo, initialPosition=0):
         """Generate a parallactic...
          
         A better description...
 
         :param source: object with ``_get_azimuth()`` and ``_get_elevation()``
          methods
-        :param site_info: di
-        :type site_info: dict
+        :param siteInfo: di
+        :type siteInfo: dict
         :returns:  a position
         :raises: PosGeneratorError
         """
         try:
-            latitude = radians(site_info['latitude'])
+            latitude = radians(siteInfo['latitude'])
             az_obj = source._get_azimuth()
             el_obj = source._get_elevation()
         except (KeyError, TypeError), ex:
             raise PosGeneratorError('cannot get the latitude: %s' %ex.message)
         except Exception, ex:
             raeson = 'cannot get the %s property objects' %source._get_name()
-            logger.logDebug('%s: %s' %raeson)
+            logger.logDebug(raeson)
             raise PosGeneratorError(raeson)
 
         last_zerodiv_time = datetime.datetime.now()
@@ -53,7 +53,7 @@ class PosGenerator(object):
                     tan_p = - sin(az) / (tan(latitude)*cos(el) - sin(el)*cos(az))
                     last_zerodiv_time = datetime.datetime.now()
                     p = atan(tan_p)
-                    yield initial_position + degrees(p)
+                    yield initialPosition + degrees(p)
                 except ZeroDivisionError:
                     logger.logWarning('zero division error computing tan(p)')
                     zerodiv_time = datetime.datetime.now() - last_zerodiv_time

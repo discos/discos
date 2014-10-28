@@ -56,6 +56,27 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.cdbconf.UpdatingPosition['ANT_NORTH'] = [10, 'fooName'] # [position, functionName]
         self.assertRaises(PositionerError, self.p.startUpdating, axis, sector)
 
+    def test_custom(self):
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('CUSTOM')
+        site_info = {'latitude': 50}
+        self.p.setup(site_info, self.source, self.device)
+        
+        customPosition = 2.0
+        self.cdbconf.updateInitialPositions(customPosition)
+        posgen = PosGenerator()
+        gen = posgen.parallactic(self.source, site_info)
+        try:
+            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH')
+            for i in range(5, 15):
+                self.source.setAzimuth(i*10)
+                self.source.setElevation(i*5)
+                time.sleep(0.11)
+                expected = customPosition + gen.next()
+                self.assertEqual(expected, self.device.getActPosition())
+        finally:
+            self.p.stopUpdating()
+
     def test_bsc(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
@@ -77,6 +98,8 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
                 self.assertEqual(expected, self.device.getActPosition())
         finally:
             self.p.stopUpdating()
+
+
 
     def test_staticX(self):
         self.cdbconf.setup('KKG')

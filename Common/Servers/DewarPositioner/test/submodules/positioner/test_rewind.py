@@ -130,7 +130,7 @@ class RewindTest(unittest2.TestCase):
         self.device.setPosition(100)
         self.p.clearAutoRewindingSteps()
         expected = sum(self.p.getRewindingParameters())
-        self.p.rewind(self.p.getAutoRewindingSteps())
+        self.p.rewind(self.p.getAutoRewindingSteps() or None)
         self.assertEqual(self.device.getActPosition(), expected)
         self.p.park()
         # A NotAllowedError is raised in case the system is not configured
