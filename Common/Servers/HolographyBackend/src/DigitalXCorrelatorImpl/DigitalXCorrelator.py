@@ -103,8 +103,8 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
 #	    self.samples==int(dao.get_double("SAMPLES"))
 	    self.port='/dev/ttyr00'
 	    self.baudrate=115200
-	    self.samples=25000000 
-	    self.out_file_name="/home/spoppi/outfile"
+	    self.samples=5000000 
+	    self.out_file_name="/home/gavino/Holography/outfile"
 	    
 	
 	
@@ -124,6 +124,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
             raise ACSErrTypeFPGAConnectionImpl.CannotConnectExImpl()
         try:
             # Version 051:
+	    print self.out_file_name
             dt = datetime.datetime.now()
             file_id = "_%04d%02d%02d_%02d%02d" %(dt.year, dt.month, dt.day, dt.hour, dt.minute)
             self.out_file = open(self.out_file_name + file_id, 'a', 0)
