@@ -2,6 +2,7 @@
 # Doctrings from the "Observing at the SRT with Nuraghe, Issue n.8, 21/10/14",
 # by Simona Righini and Andrea Orlati"
 
+
 def antennaPark():
     """
     antennaPark sends the antenna to stow position
@@ -99,6 +100,63 @@ def crossScan():
     scanFrame ('eq','hor' or 'gal'), spanning span degrees in duration seconds. 
     * indicated using the track or sidereal commands
     """
+
+def derotatorClearAutoRewindingSteps():
+    """TODO"""
+
+def derotatorClearOffset():
+    """TODO"""
+
+def derotatorGetActualSetup():
+    """TODO"""
+
+def derotatorGetAutoRewindingSteps():
+    """TODO"""
+
+def derotatorGetConfiguration():
+    """TODO"""
+
+def derotatorGetPosition():
+    """TODO"""
+
+def derotatorGetRewindingMode():
+    """TODO"""
+
+def derotatorGetRewindingStep():
+    """TODO"""
+
+def derotatorIsReady():
+    """TODO"""
+
+def derotatorIsRewinding():
+    """TODO"""
+
+def derotatorIsRewindingRequired():
+    """TODO"""
+
+def derotatorPark():
+    """TODO"""
+
+def derotatorRewind():
+    """TODO"""
+
+def derotatorSetAutoRewindingSteps():
+    """TODO"""
+
+def derotatorSetConfiguration():
+    """TODO"""
+
+def derotatorSetOffset():
+    """TODO"""
+
+def derotatorSetPosition():
+    """TODO"""
+
+def derotatorSetRewindingMode():
+    """TODO"""
+
+def derotatorSetup():
+    """TODO"""
 
 def device():
     """

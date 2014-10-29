@@ -14,6 +14,7 @@
 #Marco Buttu (mbuttu@oa-cagliari.inaf.it)  16/12/2013     New answer format, showing the values in different lines
 #Marco Buttu (mbuttu@oa-cagliari.inaf.it)  16/12/2013     Commands immediatly saved in the history file
 #Marco Buttu (mbuttu@oa-cagliari.inaf.it)  22/10/2014     help() without argument lists all the commands
+#Marco Buttu (mbuttu@oa-cagliari.inaf.it)  28/10/2014     control of the success value returned by the command
 
 import getopt, sys
 import Acspy.Common.Err
@@ -151,10 +152,10 @@ def main():
             elif cmd:
                 readline.write_history_file(historyFile)            
                 try:
-                    res=component.command(cmd)[1]
+                    success, res = component.command(cmd)
                     idx = res.find('\\')
                     cmd_name, response = res[:idx+1], res[idx+1:].rstrip('\\')
-                    if response:
+                    if success and response:
                         groups = response.split(',')
                         for group in groups:
                             values = group.split(';')
@@ -162,9 +163,9 @@ def main():
                                 print cmd_name
                                 for i, value in enumerate(values):
                                     print '%02d) %s' %(i, value)
-                            else:
+                            elif res:
                                 print res
-                    else:
+                    elif res:
                         print res
                 except Exception, ex:
                     newEx = ClientErrorsImpl.CouldntPerformActionExImpl(exception=ex, create=1)
