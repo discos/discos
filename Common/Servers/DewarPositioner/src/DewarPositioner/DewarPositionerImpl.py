@@ -40,7 +40,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         'derotatorGetConfiguration': ('getConfiguration', ()), 
         'derotatorPark': ('park', ()),
         'derotatorSetOffset': ('setOffset', (float,)),
-        'derotatorClearOffset': ('clearOffset',),
+        'derotatorClearOffset': ('clearOffset', ()),
         'derotatorSetRewindingMode': ('setRewindingMode', (str,)),
         'derotatorGetRewindingMode': ('getRewindingMode', ()),
         'derotatorSetAutoRewindingSteps': ('setAutoRewindingSteps', (int,)),
@@ -201,13 +201,13 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raeson = "positioner not ready, a setup() is required"
             logger.logError(raeson)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(reason)
+            exc.setReason(raeson)
             raise exc
         elif not self.isConfigured():
             raeson = "positioner not configured, a setConfiguration() is required"
             logger.logError(raeson)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(reason)
+            exc.setReason(raeson)
             raise exc
         elif self.cdbconf.getAttribute('SetCustomPositionAllowed') != 'true':
             raeson = "setPosition() not allowed in %s configuration" %self.getConfiguration()
@@ -230,35 +230,17 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
     def _setPositionCmd(self, position):
         """Wrap setPosition() in order to strip the `d` at the end of the string"""
         str_value = position.strip().rstrip('d')
-        try:
-            self.setPosition(float(str_value))
-        except Exception, ex:
-            logger.logError(ex.message)
-            exc = ComponentErrorsImpl.ValidationErrorExImpl()
-            exc.setReason(ex.message)
-            raise exc # Can happen only in case of wrong system input
+        self.setPosition(float(str_value))
  
 
     def _getPositionCmd(self):
         """Wrap getPosition() in order to add the `d` at the end of the string"""
-        try:
-            return '%.4fd' %self.getPosition()
-        except Exception, ex:
-            logger.logError(ex.message)
-            exc = ComponentErrorsImpl.ValidationErrorExImpl()
-            exc.setReason(ex.message)
-            raise exc # Can happen only in case of wrong system input
+        return '%.4fd' %self.getPosition()
  
- 
+
     def _getRewindingStepCmd(self):
         """Wrap getRewindingStep() in order to add the `d` at the end of the string"""
-        try:
-            return '%sd' %self.getRewindingStep()
-        except Exception, ex:
-            logger.logError(ex.message)
-            exc = ComponentErrorsImpl.ValidationErrorExImpl()
-            exc.setReason(ex.message)
-            raise exc
+        return '%sd' %self.getRewindingStep()
 
 
     def startUpdating(self, axis, sector):
@@ -494,7 +476,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         return self.positioner.getRewindingMode()
 
     def _setDefaultSetup(self):
-        self.actualSetup = 'unknown'
+        self.actualSetup = 'none'
         self.commandedSetup = ''
 
     @staticmethod
@@ -547,7 +529,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             args = [item.strip() for item in args_str.split(',')]
         except ValueError:
             success = False 
-            answer = 'invalid command: maybe there are too many symbols of ='
+            answer = 'Error: invalid command: maybe there are too many symbols of ='
         except Exception, ex:
             success = False 
             answer = ex.message
@@ -560,11 +542,10 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
         if command not in DewarPositionerImpl.commands:
             success = False
-            answer = 'command %s does not exist' %command
+            answer = 'Error: command %s does not exist' %command
             logger.logError(answer)
             return (success, answer)
         else:
-            method_name, types = DewarPositionerImpl.commands[command]
             # For instance:
             # >>> DewarPositionerImpl.commands['foo']
             # ('setup', (str, str, float))
@@ -573,11 +554,19 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             # 'setup'
             # >>> types
             # (str, str, float)
+            method_name, types = DewarPositionerImpl.commands[command]
+            # If we expect some arguments but there is not
+            if types and not any(args):
+                success = False
+                answer = 'Error: missing arguments, type help(%s) for details' %command
+                logger.logError(answer)
+                return (success, answer)
+
             try:
                 method = getattr(self, method_name)
             except AttributeError, ex:
                 success = False
-                answer = "%s has no attribute %s" %(self, method_name)
+                answer = "Error: %s has no attribute %s" %(self, method_name)
                 logger.logError(answer)
                 return (success, answer)
             try:
@@ -594,14 +583,14 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 # 1 python 3.5
                 answer = '' if result is None else str(result)
                 success = True
-            except TypeError, ex:
+            except (ValueError, TypeError), ex:
                 success = False
-                answer = ex.message
-                logger.logError(answer)
+                answer = 'Error: wrong parameter usage.\nType help(%s) for details' %command
+                logger.logError('%s\n%s' %(ex.message, answer))
                 return (success, answer)
             except Exception, ex:
                 success = False
-                answer = ex.getReason() if hasattr(ex, 'getReason') else ex.message
+                answer = 'Error: %s' %(ex.getReason() if hasattr(ex, 'getReason') else ex.message)
                 logger.logError(answer)
                 return (success, answer)
 

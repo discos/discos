@@ -547,7 +547,7 @@ class Control(object):
         self.isRewindingRequired = False
         self.isRewinding = False
         self.autoRewindingSteps = None
-        self.modes = {'rewinding': '', 'updating': ''}
+        self.modes = {'rewinding': 'none', 'updating': 'none'}
 
 
 class Status(object):

@@ -241,8 +241,8 @@ class CDBConf(object):
             setattr(self, '%sPath' %name, path)
         else:
             # For instance: name='setup' and path='alma/DataBlock/KKG', so
-            # reason="setup alma/DataBlock/KKG not available"
-            raeson = "%s %s not available" %(name, abs_path)
+            # raeson="setup alma/DataBlock/KKG not available"
+            raeson = "%s %s not available" %(name, path)
             logger.logError(raeson)
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
@@ -250,7 +250,7 @@ class CDBConf(object):
 
     def clearConfiguration(self):
         self._isConfigured = False
-        self.configurationCode = '' # For instance, BSC
+        self.configurationCode = 'none' # For instance, BSC
         self.configurationPath = '' # Configuration directory path (ie. to BSC)
         for name in CDBConf.configurationRecords:
             if hasattr(self, name):
