@@ -1362,10 +1362,17 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 void CCommandLine::setSection(const long& input,const double& freq,const double& bw,
 	const long& feed,const long& pol, const double& sr,const long& bins)
 {
-    setConfiguration(input,freq-ANALOG_FREQUENCY,bw,feed,pol,sr,bins);//Ricezione Specificha Nuova
+    long fd;
+    if (m_XarcosC == true)
+        fd = 1;
+    else
+        fd = feed;
+    setConfiguration(input,freq-ANALOG_FREQUENCY,bw,fd,pol,sr,bins);//Ricezione Specificha Nuova
 	setAttenuation(input,-1);
     Init();//Configurazione nell'HW 
 	getConfiguration();
+    if (m_XarcosC == true)
+        setFeedC();
 }
 
 void CCommandLine::getTsys(ACS::doubleSeq& tsys) const
@@ -1534,20 +1541,23 @@ void CCommandLine::setMode8bit(bool mode)
 	}	
 	else return;  
 	if (mode){
-		m_mode8bit=true;/*
+		m_mode8bit=true;
+                
+		
+
 #ifdef DOPPIO 
 		for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;
 		m_adc[0]=m_adc[1]=m_adc[8]=m_adc[9]=false;
 #else 
 		for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;
 		m_adc[0]=m_adc[1]=false;
-#endif 	*/
-	}
+#endif 	
+	} 
 	else {
 		m_mode8bit=false;
-		//for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;
+		for( i=0;i<MAX_ADC_NUMBER;i++) m_adc[i]=true;
 	}
-    /*
+/*    
 	if(oldMode==false){//Check ChIn and Feed
 		int j=0;
 		i=0;
@@ -1561,7 +1571,8 @@ void CCommandLine::setMode8bit(bool mode)
 				m_feedNumber[i]=searchFeed(j);
 			}				
 		}
-	}*/
+	}
+*/
 	//setDefaultConfiguration();//Aggiorno la configurazione nell'HW
 }
 

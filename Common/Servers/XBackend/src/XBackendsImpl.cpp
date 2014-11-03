@@ -570,7 +570,9 @@ void XBackendsImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Doubl
 	AUTO_TRACE("XBackendsImpl::setSection()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {		
-		line->setConfiguration(input,freq-ANALOG_FREQUENCY,bw,feed,pol,sr,bins);//Ricezione Specificha Nuova
+		if (line->m_XarcosC == true)
+            feed = 1;
+   		line->setConfiguration(input,freq-ANALOG_FREQUENCY,bw,feed,pol,sr,bins);//Ricezione Specificha Nuova
 		line->setAttenuation(input,-1);
 		line->Init();//Configurazione nell'HW 
 		line->getConfiguration();
@@ -984,6 +986,7 @@ void XBackendsImpl::setMode8bit(CORBA::Boolean mode)
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
 		line->setMode8bit(mode);
+		//if (line->m_XarcosC==true) line->setFeedC(); // aggiunto 29 ottobre 2014
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -1093,6 +1096,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 		    line->setFeedC();
             line->m_XarcosC=true;
+		    //setMode8bit(true);
 			break;
 	}
 }
