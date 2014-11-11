@@ -114,6 +114,7 @@ else
 	RESULT:=$(error TARGETSYS variable is not set correctly!)	
 endif
 endif
+endif
 
 
 # ******* END of Editable area *****************
