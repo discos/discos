@@ -1,7 +1,7 @@
 /******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
 * DO NOT EDIT
 * Automatically generated from ../idl/XBackends.midl
-* on Wed Apr  9 09:07:07 2014
+* on Fri Oct 17 17:13:16 2014
 *******************************************************************************/
 #ifndef _XBackends_midl_
 #define _XBackends_midl_
@@ -17,11 +17,11 @@
 module Backends {
 
  enum TXArcosConf {
-  XArcos_K7,
-  XArcos_K3,
-  XArcos_K2R,
-  XArcos_K2L,
-  XArcos_C
+  XArcos_K77,
+  XArcos_K01,
+  XArcos_K04,
+        XArcos_K00,
+  XArcos_C00
  };
 
  typedef sequence<TXArcosConf> TXArcosConfSeq; interface CBTXArcosConf : ACS::Callback { oneway void working(in TXArcosConf value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TXArcosConf value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
