@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns="Alma/ACSError" 
+    xsi:schemaLocation="Alma/ACSError ACSError.xsd" 
+    name="DerotatorErrors" 
+    type="2009" 
+    _prefix="alma">
+
+    <Code name="Communicating" 
+         shortDescription="No Error" 
+         description="No error condition found"/>
+
+    <ErrorCode name="CommunicationError" 
+         shortDescription="An error occured during the communication" 
+         description="Cannot communicate properly with the derotator"/>
+
+    <ErrorCode name="ConfigurationError" 
+         shortDescription="Error configuring the derotator" 
+         description="Cannot perform the derotator configuration"/>
+
+    <ErrorCode name="RemoteControlError" 
+         shortDescription="The derotator is not remotely controllable" 
+         description=""/>
+
+    <ErrorCode name="ValidationError" 
+         shortDescription="Cannot validate the derotator answer" 
+         description="Cannot understand the derotator answer"/>
+
+    <ErrorCode name="PositioningError" 
+         shortDescription="Cannot set the position" 
+         description=""/>
+
+    <ErrorCode name="UnexpectedError" 
+         shortDescription="Unexpected error" 
+         description=""/>
+</Type>
+
+

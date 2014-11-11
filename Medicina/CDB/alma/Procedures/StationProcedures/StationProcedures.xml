@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Procedure name="setupCCC" args="0">
+<body>
+	antennaSetup=CCC
+	receiversSetup=CCC
+	initialize=CCC
+	setSection=0,*,730.0,*,*,*,*
+	setSection=1,*,730.0,*,*,*,*
+	device=0
+	calOff
+</body>	
+</Procedure>
+
+<Procedure name="setupKKC" args="0">
+<body>
+	antennaSetup=KKC
+	receiversSetup=KKC
+	initialize=KKC
+	device=0
+	setAttenuation=0,9
+	setAttenuation=1,9
+	setAttenuation=2,9
+	setAttenuation=3,9
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupXXP" args="0">
+<body>
+	antennaSetup=XXP
+	receiversSetup=XXP
+	initialize=XXP
+	setSection=0,*,730.0,*,*,*,*
+	setSection=1,*,730.0,*,*,*,*
+	device=0
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupCCCL" args="0">
+<body>
+	antennaSetup=CCC
+	receiversSetup=CCC
+	receiversMode=NARROWBANDWIDTH
+	initialize=CCCL
+	setSection=0,*,300.0,*,*,*,*
+	setSection=1,*,300.0,*,*,*,*
+	setAttenuation=0,8
+	setAttenuation=1,8
+	device=0
+	calOff
+</body>
+</Procedure>
+
+
+</ProcedureFile>

@@ -1,0 +1,323 @@
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Andrea Orlati <a.orlati@ira.inaf.it>
+\***************************************************************/
+
+#ifndef __DEWAR_POSITIONER__IDL__ 
+#define __DEWAR_POSITIONER__IDL__
+
+#include <baci.idl>
+#include <maciErrType.idl>
+#include <ComponentErrors.idl>
+#include <ManagmentDefinitions.idl>
+#include "AntennaDefinitions.idl"
+
+#pragma prefix "alma"
+
+
+module Receivers {
+ 
+    struct DewarPositionerDataBlock {
+        ACS::Time timeMark;
+        boolean ready;
+        boolean tracking;
+        boolean updating;
+        boolean slewing;
+        Management::TSystemStatus status;
+    };
+
+    const string DEWAR_POSITIONER_DATA_CHANNEL = "DewarPositionerData";
+
+    interface DewarPositioner: 
+        ACS::CharacteristicComponent,
+        Management::CommandInterpreter
+    {
+   
+        /** Take a configuration code and configure the component
+         * 
+         * This method takes a configuration code, gets the corresponding
+         * derotator component reference and initializes the DewarPositioner. 
+         * For instance, by giving the code KKG, the DewarPositioner gets the 
+         * KBandDerotator reference and performs its setup.
+         * The setup() method sets the offset and rewinding mode default values:
+         *
+         *     setOffset(0)
+         *     setRewindingMode(AUTO)
+         *
+         * @param code the setup mode (for instance: LLP, KKG, CCB, ecc.)
+         * @throw ComponentErrors::ValidationErrorEx,
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::NotAllowedEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void setup(in string code) raises (
+            ComponentErrors::ValidationErrorEx,
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::NotAllowedEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
+        /** Put the derotator in the park position and reset the configuration
+         *  
+         * This method sets the default values:
+         * 
+         *   + setOffset(0)
+         *   + setPosition(0)
+         *   + actualSetup = 'unknown'
+         *   + commandedSetup = ''
+         *   + rewindingMode = ''
+         *
+         * @throw ComponentErrors::NotAllowedEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void park() raises (ComponentErrors::NotAllowedEx, ComponentErrors::UnexpectedEx);
+ 
+
+        /** Set the derotator position
+         * 
+         * @param the position
+         * @throw ComponentErrors::NotAllowedEx
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void setPosition(in double position) raises (
+            ComponentErrors::NotAllowedEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
+        /** Set the absolute offset and move the derotator to the new position 
+         *
+         * @param offset the offset to apply to the device
+         * @throw ComponentErrors::NotAllowedEx
+         * @throw ComponentErrors::OperationErrorEx
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void setOffset(in double offset) raises (
+            ComponentErrors::NotAllowedEx,
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
+        /** Return the offset */
+        double getOffset();
+
+
+        /** Clear the absolute offset and move the derotator to the new position
+         *
+         * @throw ComponentErrors::NotAllowedEx
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void clearOffset() raises (
+            ComponentErrors::NotAllowedEx,
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+        
+        /** Start the parallactic angle correction 
+         * 
+         * It raises a NotAllowedEx either when the updating mode is not yet selected
+         * or the positioner is not configured or when it is already updating.
+         *
+         * @param axis 
+         * @throw ComponentErrors::NotAllowedEx
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void startUpdating(in Management::TScanAxis axis, in Antenna::TAzimuthSection sector) raises (
+            ComponentErrors::NotAllowedEx,
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
+        /** Stop the parallactic angle correction
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void stopUpdating() raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+        
+        /** Rewind the derotator
+         * 
+         * The parameter `number_of_feeds` defines the rotation angle. For
+         * instance, for a derotator with 60 degrees of angle between two
+         * feeds, number_of_feeds=2 menas we want a rotation of 120 degrees.
+         *
+         * @param number_of_feeds the number of feeds we want to rotate
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void rewind(in long number_of_feeds) raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
+        /** Return true when the dewar positioner is properly configured */
+        boolean isConfigured();
+
+
+        /** Return true when the system is configured and the derotator ready to move
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        boolean isReady() raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
+        /** Return true when the derotator is tracking the commanded position
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        boolean isTracking() raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
+        /** Return true when the derotator is updating the position */
+        boolean isUpdating();
+
+
+        /** Return true when the derotator is moving
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        boolean isSlewing() raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
+        /** Set the rewinding mode to "AUTO" or "MANUAL"
+         *
+         * @param mode the rewinding mode ("AUTO" or "MANUAL")
+         * @throw ComponentErrors::ValidationErrorEx
+         */
+        void setRewindingMode(in string mode) raises (ComponentErrors::ValidationErrorEx);
+
+
+        /** Get the rewinding mode */
+        string getRewindingMode();
+
+
+        /** Set the configuration to "FIXED", "BSC", "OPTIMIZED", ecc.
+         *
+         * This method does not start the updating, but just enable it. Once the updating mode is
+         * selected, the updating can be started by calling the startUpdating() method.
+         * See the documentation for more details about the mode meaning.
+         * In case for unknown reasons the method can not stop the position updating,
+         * a ComponentErrors::OperationErrorEx is raised. 
+         *
+         * @param mode the updating mode ("FIXED", "BSC", ...)
+         * @throw ComponentErrors::OperationErrorEx
+         * @throw ComponentErrors::ValidationErrorEx
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        void setConfiguration(in string mode) raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::ValidationErrorEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+        /** Get the configuration code */
+        string getConfiguration();
+
+
+
+
+        /** Return true when the derotator is rewinding */
+        boolean isRewinding();
+
+
+        /** Set the number of feeds the user want to rewind in AUTO rewinding 
+         *  mode
+         *
+         * @param number_of_feeds the number of feeds the user want to rewind
+         * in auto rewinding mode. For instance, for the SRTKBandReceiver, the
+         * angle between two feeds is 60 degrees, so number_of_feeds=2 means
+         * the auto rewind must be of 120 degrees.
+         * @throw ComponentErrors::NotAllowedEx
+         */
+        // void setAutoRewindingFeeds(in long number_of_feeds) 
+        //     raises (ComponentErrors::NotAllowedEx);
+
+        /** Clear the number of feeds selected by setAutoRewindingMode()
+         *
+         * When the auto rewinding feeds is cleared, in case of AUTO 
+         * rewinding mode the rewinding will be as larger as possible.
+         */
+        // void clearAutoRewindingFeeds();
+
+
+        /** Get the number of feeds selected by setAutoRewindingMode()
+         *
+         * In case no auto rewinding feeds is selected, it returns 0.
+         */
+        // long getAutoRewindingFeeds();
+
+
+        /** Return the actual position in the user reference system
+         *
+         * @throw ComponentErrors::OperationErrorEx,
+         * @throw ComponentErrors::NotAllowedEx,
+         * @throw ComponentErrors::UnexpectedEx
+         */
+        double getPosition() raises (
+            ComponentErrors::OperationErrorEx,
+            ComponentErrors::NotAllowedEx,
+            ComponentErrors::UnexpectedEx
+        );
+
+
+        /** Return the actual setup configuration (KKG, etc.) */
+        string getActualSetup();
+
+
+        /** Return the commanded setup configuration (KKG, etc.) */
+        string getCommandedSetup();
+
+
+        /** This property reports the status of the DewarPositioner.
+         *  The returned pattern is a 6 bits field with the following meaning:
+         *
+         *  @arg \c 0 ready: the dewar positioner is ready to move
+         *  @arg \c 1 tracking: 1 means the derotator is tracking (the difference
+         *            between the actual position and the commanded one is lesser
+         *            of a given threshold
+         *  @arg \c 2 updating: 1 means the DP is updating the derotator position.
+         *            The system is updating the position during the time the 
+         *            thread that computes the position and calls the 
+         *            derotator.setPosition() is alive.
+         *  @arg \c 3 slewing: 1 means the derotator is moving. It is possibile 
+         *            the system is not updating the position, because the thread 
+         *            execution is terminated, but the slewing status bit is stills
+         *            active because the derotator is going to the commanded position.
+         *  #arg \c 4 warning: a value of 1 means there is a warning
+         *  #arg \c 5 failure: a value of 1 means there is a failure
+         *
+         * For instance, when the status value is 5 (decimal value), then the
+         * system is ready and updating. In fact, the binary representation of 5 is 
+         * (with 6 bits) 000101.
+         */
+         readonly attribute ACS::ROpattern status;
+
+    };
+};
+
+#endif
+

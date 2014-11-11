@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+
+"""
+This sript is conceived to convert a text file by substituting tabs to spaces
+"""
+
+import os 
+import re
+import sys
+import logging
+import optparse #will become argparse in Python2.6
+
+WHITESPACES_PATTERN = re.compile("\s+")
+
+def console_app():
+    usage = """
+   Usage:
+   tabbify path_to_data
+   
+   Examples:
+    
+   tabbify /data/schedules/Maintenance/mia_schedula.lis
+
+    """
+    op = optparse.OptionParser()
+    op.set_usage(usage)
+    op.add_option("-d", action="store_true", default=False, dest="debug", help="set debug output")
+    opts, args = op.parse_args(sys.argv[1:])
+    if opts.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+    if not args:
+        print usage
+        sys.exit(0)
+    else:
+        filenames = [os.path.abspath(filename) for filename in args]
+
+    for filename in filenames:
+        logging.info("tabbifying: %s" % (filename,))
+        if not os.path.exists(filename):
+            logging.error("Invalid file name: %s" % (filename,))
+        else:
+            file =  open(filename, "rt")
+            lines = file.readlines()
+            file.close()
+            output_file = open(filename, "wt")
+            for line in lines:
+                tabbed_line = re.subn(WHITESPACES_PATTERN, '\t', line.strip())[0]
+                output_file.write(tabbed_line + '\n')
+            output_file.close()
+
+if __name__ == "__main__":
+    console_app()

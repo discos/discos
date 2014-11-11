@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: Antenna.xsd,v 1.9 2010-12-28 19:09:40 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   24-01-2008  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:Antenna:1.0"
+	xmlns="urn:schemas-cosylab-com:Antenna:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	
+	<xs:complexType name="SystemEquinoxType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
+					"B1950,J2000,APPARENT"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="GeneratorTypeType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="5" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
+					"SIDEREAL,SUN,MOON,SATELLITE,SOLARSYSTEMBODY,OTF,NONE"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="StatusType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="3" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
+					"DISCONNECTED,CONNECTING,READY,BUSY"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="CommonModesType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="11" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
+						"STANDBY,STOP,PRESET,PROGRAMTRACK,RATE,STOW,UNSTOW,UNKNOWN"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="SectionType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default="CW,CCW,NEUTRAL"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>	
+	
+	<xs:complexType name="TAzimuthSectionType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="1" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default="NORTH,SOUTH"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="CoordinateFrameType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
+					"EQUATORIAL,HORIZONTAL,GALACTIC"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="ReferenceFrameType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="6" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
+					"TOPOCEN,BARY,LSRK,LSRD,GALCEN,LGRP,UNDEF"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="VradDefinitionType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="3" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
+					"RD,OP,Z,UNDEF"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+		
+	<xs:complexType name="GeodeticModelType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROEnum">
+				<xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+				<xs:attribute name="graph_max" type="xs:int" use="optional" default="4" />
+				<xs:attribute name="statesDescription" type="xs:string" use="optional" default=
+						"WGS84,GRS80,MERIT83,OSU91A,SOVIET85"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+</xs:schema>

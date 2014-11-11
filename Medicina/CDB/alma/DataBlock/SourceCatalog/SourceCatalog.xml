@@ -1,0 +1,757 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<SourceCatalog xmlns="urn:schemas-cosylab-com:SourceCatalog:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Source>
+	<sourceName>3c48</sourceName>
+	<rightAscension>01:37:41.297</rightAscension>
+	<declination>+33:09:35.12</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-23780.0</freqRange>
+    <fluxCoeff1>2.465</fluxCoeff1>
+    <fluxCoeff2>-0.004</fluxCoeff2>
+    <fluxCoeff3>-0.1251</fluxCoeff3>
+    <size>0.000007272</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000004848</modelCoeff2>
+    <modelCoeff3>0.000004848</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c123</sourceName>
+	<rightAscension>04:37:04.375</rightAscension>
+	<declination>29:40:13.82</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-23780.0</freqRange>
+    <fluxCoeff1>2.525</fluxCoeff1>
+    <fluxCoeff2>0.246</fluxCoeff2>
+    <fluxCoeff3>-0.1638</fluxCoeff3>
+    <size>0.000111507</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000111507</modelCoeff2>
+    <modelCoeff3>0.000024241</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c147</sourceName>
+	<rightAscension>05:42:36.265</rightAscension>
+	<declination>+49:51:07.08</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-23780.0</freqRange>
+    <fluxCoeff1>2.806</fluxCoeff1>
+    <fluxCoeff2>-0.140</fluxCoeff2>
+    <fluxCoeff3>-0.1031</fluxCoeff3>
+    <size>0.000004848</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000004848</modelCoeff2>
+    <modelCoeff3>0.000004848</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c161</sourceName>
+	<rightAscension>06:27:10.096</rightAscension>
+	<declination>-05:53:04.77</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-10550.0</freqRange>
+    <fluxCoeff1>1.250</fluxCoeff1>
+    <fluxCoeff2>0.726</fluxCoeff2>
+    <fluxCoeff3>-0.2286</fluxCoeff3>
+    <size>0.000014544</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000014544</modelCoeff2>
+    <modelCoeff3>0.000014544</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c218</sourceName>
+	<rightAscension>09:18:05.651</rightAscension>
+	<declination>-12:05:43.99</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-10550.0</freqRange>
+    <fluxCoeff1>4.729</fluxCoeff1>
+    <fluxCoeff2>-1.025</fluxCoeff2>
+    <fluxCoeff3>0.0130</fluxCoeff3>
+    <size>0.000227862</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000227862</modelCoeff2>
+    <modelCoeff3>0.000067874</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c227</sourceName>
+	<rightAscension>09:47:45.148</rightAscension>
+	<declination>07:25:20.60</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-5000.0</freqRange>
+    <fluxCoeff1>6.757</fluxCoeff1>
+    <fluxCoeff2>-2.801</fluxCoeff2>
+    <fluxCoeff3>0.2969</fluxCoeff3>
+    <size>0.000969627</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000969627</modelCoeff2>
+    <modelCoeff3>0.000242407</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c249.1</sourceName>
+	<rightAscension>11:04:13.878</rightAscension>
+	<declination>76:58:58.17</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-5000.0</freqRange>
+    <fluxCoeff1>2.537</fluxCoeff1>
+    <fluxCoeff2>-0.565</fluxCoeff2>
+    <fluxCoeff3>-0.0404</fluxCoeff3>
+    <size>0.000072722</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000072722</modelCoeff2>
+    <modelCoeff3>0.000072722</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c286</sourceName>
+	<rightAscension>13:31:08.286</rightAscension>
+	<declination>+30:30:32.92</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-43200.0</freqRange>
+    <fluxCoeff1>0.956</fluxCoeff1>
+    <fluxCoeff2>0.584</fluxCoeff2>
+    <fluxCoeff3>-0.1644</fluxCoeff3>
+    <size>0.000007272</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000004848</modelCoeff2>
+    <modelCoeff3>0.000004848</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c295</sourceName>
+	<rightAscension>14:11:20.516</rightAscension>
+	<declination>+52:12:09.86</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-32000.0</freqRange>
+    <fluxCoeff1>1.490</fluxCoeff1>
+    <fluxCoeff2>0.756</fluxCoeff2>
+    <fluxCoeff3>-0.2545</fluxCoeff3>
+    <size>0.000024241</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000024241</modelCoeff2>
+    <modelCoeff3>0.000004848</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c309.1</sourceName>
+	<rightAscension>14:59:07.578</rightAscension>
+	<declination>+71:40:19.85</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-32000.0</freqRange>
+    <fluxCoeff1>2.617</fluxCoeff1>
+    <fluxCoeff2>-0.437</fluxCoeff2>
+    <fluxCoeff3>-0.0373</fluxCoeff3>
+    <size>0.000007272</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000007272</modelCoeff2>
+    <modelCoeff3>0.000007272</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c348</sourceName>
+	<rightAscension>16:51:08.147</rightAscension>
+	<declination>+04:59:33.32</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-10550.0</freqRange>
+    <fluxCoeff1>3.852</fluxCoeff1>
+    <fluxCoeff2>-0.361</fluxCoeff2>
+    <fluxCoeff3>-0.1053</fluxCoeff3>
+    <size>0.000824183</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000824183</modelCoeff2>
+    <modelCoeff3>0.000121203</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c353</sourceName>
+	<rightAscension>17:20:28.147</rightAscension>
+	<declination>-00:58:47.12</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-10550.0</freqRange>
+    <fluxCoeff1>3.148</fluxCoeff1>
+    <fluxCoeff2>-0.157</fluxCoeff2>
+    <fluxCoeff3>-0.0911</fluxCoeff3>
+    <size>0.001018109</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.001018109</modelCoeff2>
+    <modelCoeff3>0.000290888</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>ngc7027</sourceName>
+	<rightAscension>21:07:01.593</rightAscension>
+	<declination>+42:14:10.18</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>10550.0-43200.0</freqRange>
+    <fluxCoeff1>1.2937</fluxCoeff1>
+    <fluxCoeff2>-0.134</fluxCoeff2>
+    <fluxCoeff3>0.0</fluxCoeff3>
+    <size>0.000048481</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000033937</modelCoeff2>
+    <modelCoeff3>0.000048481</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>dr21</sourceName>
+	<rightAscension>20:39:01.10</rightAscension>
+	<declination>+42:19:43.00</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>18000.0-26500.0</freqRange>
+    <fluxCoeff1>1.231</fluxCoeff1>
+    <fluxCoeff2>0.000</fluxCoeff2>
+    <fluxCoeff3>0.0</fluxCoeff3>
+    <size>0.000096963</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000096963</modelCoeff2>
+    <modelCoeff3>0.000096963</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>taua</sourceName>
+	<rightAscension>05:34:31.94</rightAscension>
+	<declination>+22:00:52.20</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-35000.0</freqRange>
+    <fluxCoeff1>3.915</fluxCoeff1>
+    <fluxCoeff2>-0.299</fluxCoeff2>
+    <fluxCoeff3>0.0</fluxCoeff3>
+    <size>0.001454441</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.00122173</modelCoeff2>
+    <modelCoeff3>0.000756309</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>casa</sourceName>
+	<rightAscension>23:23:24.00</rightAscension>
+	<declination>+58:48:09.00</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>300.0-31000.0</freqRange>
+    <fluxCoeff1>5.660</fluxCoeff1>
+    <fluxCoeff2>-0.760</fluxCoeff2>
+    <fluxCoeff3>0.0</fluxCoeff3>
+    <size>0.001163553</size>
+    <model>DISK</model>
+    <modelCoeff1>0.001163553</modelCoeff1>
+    <modelCoeff2>0.0</modelCoeff2>
+    <modelCoeff3>0.0</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>cyga</sourceName>
+	<rightAscension>19:59:28.357</rightAscension>
+	<declination>+40:44:02.10</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>2</nFreqRange>
+    <freqRange>20.0-2000.0,2000.0-31000.0</freqRange>
+    <fluxCoeff1>4.695,7.161</fluxCoeff1>
+    <fluxCoeff2>0.085,-1.244</fluxCoeff2>
+    <fluxCoeff3>-0.178,0.0</fluxCoeff3>
+    <size>0.000557536</size>
+    <model>DISK</model>
+    <modelCoeff1>0.000557536</modelCoeff1>
+    <modelCoeff2>0.0</modelCoeff2>
+    <modelCoeff3>0.0</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c380</sourceName>
+	<rightAscension>18:29:31.725</rightAscension>
+	<declination>+48:44:46.95</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>2</nFreqRange>
+    <freqRange>2020.0-2520.0,8080.0-9080.0</freqRange>
+    <fluxCoeff1>1.041,0.716</fluxCoeff1>
+    <fluxCoeff2>0.0,0.0</fluxCoeff2>
+    <fluxCoeff3>0.0,0.0</fluxCoeff3>
+    <size>0.000004848</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000004848</modelCoeff2>
+    <modelCoeff3>0.000004848</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>vira</sourceName>
+	<rightAscension>12:30:49.423</rightAscension>
+	<declination>+12:23:28.04</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>2</nFreqRange>
+    <freqRange>500.0-2520.0,2520.0-10550.0</freqRange>
+    <fluxCoeff1>4.484,4.484</fluxCoeff1>
+    <fluxCoeff2>-0.603,-0.603</fluxCoeff2>
+    <fluxCoeff3>-0.0280,-0.0280</fluxCoeff3>
+    <size>0.000969627</size>
+    <model>GAUSS</model>
+    <modelCoeff1>0.808</modelCoeff1>
+    <modelCoeff2>0.000193925</modelCoeff2>
+    <modelCoeff3>0.000096963</modelCoeff3>
+    <modelCoeff4>0.192</modelCoeff4>
+    <modelCoeff5>0.002908882</modelCoeff5>
+    <modelCoeff6>0.002908882</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c391</sourceName>
+	<rightAscension>18:49:22.40</rightAscension>
+	<declination>-00:55:21.00</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>2</nFreqRange>
+    <freqRange>2020.0-2520.0,8080.0-9080.0</freqRange>
+    <fluxCoeff1>1.204,0.875</fluxCoeff1>
+    <fluxCoeff2>0.0,0.0</fluxCoeff2>
+    <fluxCoeff3>0.0,0.0</fluxCoeff3>
+    <size>0.001308997</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.001308997</modelCoeff2>
+    <modelCoeff3>0.001308997</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>3c84</sourceName>
+	<rightAscension>03:19:48.160</rightAscension>
+	<declination>+41:30:42.10</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>2</nFreqRange>
+    <freqRange>2020.0-2520.0,8080.0-9080.0</freqRange>
+    <fluxCoeff1>1.60205,1.69987</fluxCoeff1>
+    <fluxCoeff2>0.0,0.0</fluxCoeff2>
+    <fluxCoeff3>0.0,0.0</fluxCoeff3>
+    <size>0.000004848</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.000004848</modelCoeff2>
+    <modelCoeff3>0.000004848</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>oria</sourceName>
+	<rightAscension>05:35:17.3</rightAscension>
+	<declination>-05:23:28.00</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>2</nFreqRange>
+    <freqRange>2020.0-2520.0,8080.0-9080.0</freqRange>
+    <fluxCoeff1>2.64345,2.53147</fluxCoeff1>
+    <fluxCoeff2>0.0,0.0</fluxCoeff2>
+    <fluxCoeff3>0.0,0.0</fluxCoeff3>
+    <size>0.001163553</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0.001163553</modelCoeff2>
+    <modelCoeff3>0.001163553</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
+	<sourceName>epsi</sourceName>
+	<rightAscension>03:32:55.844</rightAscension>
+	<declination>-09:27:29.74</declination>
+	<epoch>J2000</epoch>
+	<pmRA>-976.36</pmRA>
+	<pmDec>17.98</pmDec>
+	<parallax>310.74</parallax>
+	<radialVelocity>15.5</radialVelocity>
+    <type/>
+    <nFreqRange/>
+    <freqRange/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
+</Source>
+
+<Source>
+	<sourceName>proxima</sourceName>
+	<rightAscension>14:29:42.949</rightAscension>
+	<declination>-62:40:46.16</declination>
+	<epoch>J2000</epoch>
+	<pmRA>-3775.4</pmRA>
+	<pmDec>769.33</pmDec>
+	<parallax>772.33</parallax>
+	<radialVelocity></radialVelocity>
+    <type/>
+    <nFreqRange/>
+    <freqRange/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
+</Source>
+
+<Source>
+	<sourceName>barnard</sourceName>
+	<rightAscension>17:57:48.498</rightAscension>
+	<declination>+04:41:36.21</declination>
+	<epoch>J2000</epoch>
+	<pmRA>-798.58</pmRA>
+	<pmDec>-10328.12</pmDec>
+	<parallax>548.31</parallax>
+	<radialVelocity>-106.8</radialVelocity>
+    <type/>
+    <nFreqRange/>
+    <freqRange/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
+</Source>
+<Source>
+	<sourceName>kaus</sourceName>
+	<rightAscension>18:24:10.318</rightAscension>
+	<declination>-34:23:04.62</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type/>
+    <nFreqRange/>
+    <freqRange/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
+</Source>
+
+<Source>
+	<sourceName>w3oh</sourceName>
+	<rightAscension>02:27:04.1</rightAscension>
+	<declination>61:52:27.1</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type/>
+    <nFreqRange/>
+    <freqRange/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
+</Source>
+
+<Source>
+	<sourceName>sirio</sourceName>
+	<rightAscension>06:45:08.418</rightAscension>
+	<declination>-16:43:08.52</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type/>
+    <nFreqRange/>
+    <freqRange/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
+</Source>
+
+<Source>
+	<sourceName>dubhe</sourceName>
+	<rightAscension>11:03:43.672</rightAscension>
+	<declination>+61:45:03.72</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type/>
+    <nFreqRange/>
+    <freqRange/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
+</Source>
+
+<Source>
+	<sourceName>w31</sourceName>
+	<rightAscension>18:10:28.6</rightAscension>
+	<declination>-19:55:51.0</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity>14.9</radialVelocity>
+    <type/>
+    <nFreqRange/>
+    <freqRange/>
+    <fluxCoeff1/>
+    <fluxCoeff2/>
+    <fluxCoeff3/>
+    <size/>
+    <model/>
+    <modelCoeff1/>
+    <modelCoeff2/>
+    <modelCoeff3/>
+    <modelCoeff4/>
+    <modelCoeff5/>
+    <modelCoeff6/>
+</Source>
+
+</SourceCatalog>

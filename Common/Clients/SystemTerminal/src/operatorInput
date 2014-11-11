@@ -1,0 +1,11 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 26/07/2010      Creation                                  
+#************************************************************************
+
+xterm -geometry 130x25+200+200 -sb -title OperatorInput -e /bin/bash --login -c "_tui_SysTerm $1" &

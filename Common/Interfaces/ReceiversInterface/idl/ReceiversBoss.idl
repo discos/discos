@@ -1,0 +1,160 @@
+#ifndef __RECEIVERS_BOSS_IDL__
+#define __RECEIVERS_BOSS_IDL__
+
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Andrea Orlati <a.orlati@ira.inaf.it>
+ *
+ *  Created: Thu Oct 21 15:33:10 CEST 2010 
+\***************************************************************/
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include <ReceiversErrors.idl>
+#include <ManagmentDefinitions.idl>
+#include "CommonReceiverInterface.idl"
+#include "ReceiversDefinitions.idl"
+
+#pragma prefix "alma"
+
+module Receivers { 
+	
+	/** 
+	 * This is a notification channel name, it publishes information about the receivers subsystem that can be used to other
+	 * subsystems. Boss will be the data producer for this channel. Anyone interested in these information  must register
+	 *  to this channel as a consumer. Data will be published on this channel when one of the members of the
+	 *  <i>ReceiversDataBlock</i> structure changes its value or when at least 1 second has elapsed since last publication. 
+	 *  In case of errors and one second elapsed since last publication, the last known good data is published until   the error
+	 *  is fixed.
+	*/
+	const string RECEIVERS_DATA_CHANNEL="ReceiversData";
+	
+	/**
+     * Notification channel data structure. The boss informs all registered consumers when one of these members change 
+     * its status or value (not including time). In any case data are published at least once a second. In case there are problems 
+     * retrieving the information or other, the last available data are published until the problem is fixed. 
+	 * Time represents the number of 100 ns since 1582-10-15 00:00:00, it is defined in baci.idl and it is mapped over a
+	 *  longlong type.	 
+	*/
+	struct ReceiversDataBlock {
+		ACS::Time timeMark;	  /*!< this is the absolute time mark that reportes exactly when the publised events occurred */
+		boolean tracking;			              /*!< true when the receivers are ready and the dewar positioner is tracking   */
+		Management::TSystemStatus status; /*!< this report the subsystem status. @sa the attribute <i>status</i> */
+	};
+	
+	/**
+	 * This structure is used to pass the receivers parameters to the <i>startScan()</i> routine on subscan basis.
+	*/
+	typedef  struct  RecvPoint {
+		/**
+		 * Indicates which axis the current scan is going to follow
+		 */
+		Management::TScanAxis axis;
+	} TReceiversParameters;
+    
+		
+    /**
+     * <h2>Interface of a generic receiver</h2>
+     * <p>This CORBA interface exports properties and methods defined for a generic 
+     * <em>Receiver</em>.</p>
+     */
+    interface ReceiversBoss : ACS::CharacteristicComponent, CommonReceiverInterface, Management::CommandInterpreter, Management::Subsystem {
+
+        /** **** THIS PROPERTY SHOULD BE MOVED IN THE SUBSYSTEM INTERFACE ****
+         *
+         * This attribute reports the current configuration name of the receiver subsystem (the configuration commanded by a subsystem setup). 
+         * This string can be either a valid configuration name or 'unknown' when the system is in an unknown status 
+         */
+        readonly attribute ACS::ROstring actualSetup;
+
+ 
+        /***************************************************\
+         *           COMMON_RECEIVER_INTERFACE             *
+         ***************************************************
+
+            readonly attribute ACS::ROdoubleSeq LO;
+            
+            readonly attribute ACS::ROlong feeds;
+            
+            readonly attribute ACS::ROlong IFs;
+
+            readonly attribute ACS::ROlongSeq polarization;
+
+            void calOn() raises (ComponentErrors::ComponentErrorsEx);
+
+            void calOff() raises (ComponentErrors::ComponentErrorsEx);
+
+            void setLO(in ACS::doubleSeq lo1) raises (ComponentErrors::ComponentErrorsEx);
+
+            ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs) 
+               raises (ComponentErrors::ComponentErrorsEx);
+
+            long getFeeds(out ACS::doubleSeq X,out ACS::doubleSeq Y,out ACS::doubleSeq power) raises (ComponentErrors::ComponentErrorsEx);
+
+            double getTaper(in double freq,in double bandWidth,in long feed,in long ifNumber,out double waveLen) 
+                raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /***************************************************\
+         *               COMMAND_INTERPRETER               *
+         ***************************************************
+
+            string  command(in string command) raises (ManagementErrors::CommandLineErrorEx);
+
+
+        /***************************************************\
+         *                  SUBSYSTEM                      *
+         ***************************************************
+
+            readonly attribute Management::ROTSystemStatus status;
+            
+            void setup(in string config) raises (ManagementErrors::ConfigurationErrorEx);
+            
+            void park() raises (ManagementErrors::ParkingErrorEx);
+
+        \***************************************************/
+
+        /**
+         * This method prepares the system for derotation but not starting it. If the no derotator is supported, or no receiver has been configured or the current receiver
+         * does not have a derotator an error is raised.
+         * @param mode specifies how to manage the derotation, if <i>RCV_UNDEF_UPDATE</i> the current value is kept
+         * @param rewind specifies how to manage the rewind, when it is needed. If <i>RCV_UNDEF_REWIND</i> the current value is kept
+         * @param feeds give the number of feeds when the number. if -1 the current value is kept 
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void derotatorSetup(in TUpdateModes mode,in TRewindModes rewind,in long feeds) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx); 
+        
+        /**
+         *  This method parks the current derotator. In order to start the derotator again, another <i>derotatorSetup</i> must be called.
+         *  It is implicitly called by the <i>park()</i> method of the boss. 
+         *  @throw ReceiversErrors::ReceiversErrorsEx
+         *  @throw ComponentErrors::ComponentErrorsEx
+         */
+        void derotatorPark()  raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+              
+        /**
+         * This method allows to collect the current position of the derotator, if derotator is not activable or is not activated an error is thrown.
+         * @return the position of the derotator in degrees
+         * @param epoch the returned postion refers to the given epoch
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        double getDerotatorPosition(in ACS::Time epoch) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        
+        /**
+         * This method allows to prepare the receivers for scan 
+         * @param startUT exact time the scan is expected to start
+         * @param param structure containing all the information required in order to prepare the receiver for the scan.
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void startScan(in ACS::Time startUT,in TReceiversParameters param) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        
+    };
+    
+    
+};
+
+#endif

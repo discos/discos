@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+   - $Id: XBackendsErrors.xml,v 1.5 2010/07/12 09:13:40 bliliana Exp $
+   - Author: Liliana Branciforti Orlati
+   -
+   - History:
+   -   2010-06-18  Created
+-->
+
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="Alma/ACSError" xsi:schemaLocation="Alma/ACSError ACSError.xsd"
+ name="XBackendsErrors" type="2006" _prefix="alma">
+
+<Code name="NoError" shortDescription="No error" description="No error condition found"/>
+
+<ErrorCode name="NoSetting" shortDescription="Device is not set" description=""/>
+
+<ErrorCode name="ErrorConfiguration" shortDescription="Specifiche is not correct" description=""/>
+
+<ErrorCode name="DisableChIn" shortDescription="Hardware Channels is disable" description=""/>
+
+<ErrorCode name="NoImplemented" shortDescription="Command is not implemented" description=""/>
+
+</Type>
