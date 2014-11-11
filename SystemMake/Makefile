@@ -26,8 +26,8 @@ ifeq ($(TARGETSYS),SRT)
 		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient \
 		Plotter KStars SRTScripts \
 
-	IDL_DOC:=Managment Antenna Backends SRTActiveSurface
-	CPP_DOC:=Libraries AntennaImplementation SRTActiveSurfaceImplementation
+	IDL_DOC:=Managment Antenna Backends SRTActiveSurface WeatherStation
+	CPP_DOC:=Libraries AntennaImplementation SRTActiveSurfaceImplementation BackendsImplementation ReceiversImplementation WeatherStationImplementation MinorServoImplementation
 
 	Managment_MODULES:=ManagmentInterface
 	Antenna_MODULES:=AntennaInterface SRTAntennaInterface
@@ -52,29 +52,29 @@ ifeq ($(TARGETSYS),MED)
 	#Add all modules included in the Medicina system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=MEDDox \
-		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors\
-		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface\
+		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors XBackendErrors\
+		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface\
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		Metrology TotalPower NoiseGenerator MedicinaMount MedWeatherStation CustomLogger \
+		Metrology TotalPower NoiseGenerator MedicinaMount MedWeatherStation CustomLogger XBackend\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
 		MedicinaMountTextClient CustomLoggingClient\
 		Plotter KStars Scripts \
 		MedScripts
 
-	IDL_DOC:=Managment Antenna Backends Metrology
-	CPP_DOC:=Libraries AntennaImplementation 
+	IDL_DOC:=Managment Antenna Backends WeatherStation Receivers
+	CPP_DOC:=Libraries AntennaImplementation ManagementImplementation BackendsImplementation WeatherStationImplementation
 
 	Managment_MODULES:=ManagmentInterface
 	Antenna_MODULES:=AntennaInterface MedicinaAntennaInterface
-	Backends_MODULES:=BackendsInterface
+	Backends_MODULES:=BackendsInterface XBackendInterface
 	WeatherStation_MODULES:=WeatherStationInterface MedicinaWeatherStationInterface
 	Receivers_MODULES:=ReceiversInterface
 	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss MedicinaMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter MBFitsWriter ExternalClients
-	BackendsImplementation_MODULES:=TotalPower NoiseGenerator HolographyBackend DBBC
+	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
 	ReceiversImplementation_MODULES:=ReceiversBoss
 	WeatherStationImplementation_MODULES:=MedWeatherStation Metrology
 	
@@ -85,28 +85,26 @@ ifeq ($(TARGETSYS),NT)
 	#Add all modules included in the Noto system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=
-		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors\
-		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface\
-		MedicinaAntennaInterface MedicinaWeatherStationInterface \
+		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
+		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface \
+		NotoAntennaInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
-		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		Metrology TotalPower NoiseGenerator NotoMount CustomLogger \
-		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
-		MedicinaMountTextClient CustomLoggingClient\
-		Plotter KStars Scripts \
+		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
+		TotalPower NotoMount CustomLogger \
+		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal SchedulerTextClient \
+		NotoMountTextClient CustomLoggingClient Scripts
 
 	IDL_DOC:=Managment Antenna Backends Metrology
-	CPP_DOC:=Libraries AntennaImplementation 
+	CPP_DOC:=Libraries AntennaImplementation ManagementImplementation BackendsImplementation ReceiversImplementation
 
 	Managment_MODULES:=ManagmentInterface
-	Antenna_MODULES:=AntennaInterface MedicinaAntennaInterface
+	Antenna_MODULES:=AntennaInterface NotoAntennaInterface
 	Backends_MODULES:=BackendsInterface
-	WeatherStation_MODULES:=WeatherStationInterface MedicinaWeatherStationInterface
 	Receivers_MODULES:=ReceiversInterface
 	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary
-	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss MedicinaMount
+	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss NotoMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter MBFitsWriter ExternalClients
-	BackendsImplementation_MODULES:=TotalPower NoiseGenerator HolographyBackend DBBC
+	BackendsImplementation_MODULES:=TotalPower
 	ReceiversImplementation_MODULES:=ReceiversBoss
 	
 	CDB_SVN_LOCATION="Noto/Configuration/CDB"
