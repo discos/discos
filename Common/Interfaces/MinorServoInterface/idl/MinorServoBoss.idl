@@ -69,8 +69,6 @@ module MinorServo {
          */
 		void setASConfiguration(in string value) raises (ManagementErrors::ConfigurationErrorEx);
 
-
-	
         /**
          * Should the minor servo position change with the antenna elevation?
          * @return true if the elevation tracking is enabled
@@ -172,16 +170,14 @@ module MinorServo {
          * @param starting_time the time the scan will start or 0 if the scan is required to start immediately
          * @param scan structure containing the description of the scan to be executed
          * @param antennaInfo auxiliary information from the antenna
-         * @param runTime auxiliary information computed at run time by the subsystem
          *
          * @throw ManagementErrors::ConfigurationErrorEx
          * @throw ManagementErrors::SubscanErrorEx
          */
         void startScan(
-                in ACS::Time starting_time, 
+                inout ACS::Time starting_time, 
                 in MinorServoScan scan,
-                in Antenna::TRunTimeParameters antennaInfo,
-                out TRunTimeParameters runtime
+                in Antenna::TRunTimeParameters antennaInfo
         ) raises (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
 
 		/**
@@ -220,7 +216,7 @@ module MinorServo {
          * @throw ManagementErrors::SubscanErrorEx
          */
         boolean checkScan(
-                inout ACS::Time starting_time,
+                in ACS::Time starting_time,
                 in MinorServoScan scan,
 				in Antenna::TRunTimeParameters antennaInfo,
 				out TRunTimeParameters runtime
