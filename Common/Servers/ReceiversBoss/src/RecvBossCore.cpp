@@ -359,45 +359,45 @@ void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Re
 			if (mode!=m_updateMode) {
 				updateCommanded=mode;
 				try {
-					m_dewarPositioner->setUpdatingMode(Receivers::Definitions::map(updateCommanded));
-				}
-				catch (ComponentErrors::ComponentErrorsEx& ex) {
-					_ADD_BACKTRACE(ReceiversErrors::DewarPositionerSetupErrorExImpl,impl,ex,"CRecvBossCore::derotatorSetup()");
-					impl.setDetails("updatingMode");
-					changeBossStatus(Management::MNG_FAILURE);
-					throw impl;
-				}
-				catch (CORBA::SystemException& ex) {
-					_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorSetup()");
-					impl.setName(ex._name());
-					impl.setMinor(ex.minor());
-					changeBossStatus(Management::MNG_FAILURE);
-					m_dewarPositionerError=true;
-					throw impl;
-				}
-				catch (...) {
-					_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorSetup()");
-					changeBossStatus(Management::MNG_FAILURE);
-					m_dewarPositionerError=true;
-					throw impl;
-				}
-			}
-			else { // keep the current update mode and do nothing
-				updateCommanded=m_updateMode;
-			}
-		}
-		else { // save the update mode and do nothing
-			updateCommanded=mode;
-		}
-	}
-	else { // keep present update mode and do nothing
-		updateCommanded=m_updateMode;
-	}
-	if (feeds==-1) {
-		if (feeds!=m_rewindFeeds) {
-			feedsCommanded=feeds;
-			try {
-				m_dewarPositioner->setAutoRewindingFeeds(feedsCommanded);
+                        ; // m_dewarPositioner->setUpdatingMode(Receivers::Definitions::map(updateCommanded));
+                    }
+                    catch (ComponentErrors::ComponentErrorsEx& ex) {
+                        _ADD_BACKTRACE(ReceiversErrors::DewarPositionerSetupErrorExImpl,impl,ex,"CRecvBossCore::derotatorSetup()");
+                        impl.setDetails("updatingMode");
+                        changeBossStatus(Management::MNG_FAILURE);
+                        throw impl;
+                    }
+                    catch (CORBA::SystemException& ex) {
+                        _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorSetup()");
+                        impl.setName(ex._name());
+                        impl.setMinor(ex.minor());
+                        changeBossStatus(Management::MNG_FAILURE);
+                        m_dewarPositionerError=true;
+                        throw impl;
+                    }
+                    catch (...) {
+                        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorSetup()");
+                        changeBossStatus(Management::MNG_FAILURE);
+                        m_dewarPositionerError=true;
+                        throw impl;
+                    }
+                }
+                else { // keep the current update mode and do nothing
+                    updateCommanded=m_updateMode;
+                }
+            }
+            else { // save the update mode and do nothing
+                updateCommanded=mode;
+            }
+        }
+        else { // keep present update mode and do nothing
+            updateCommanded=m_updateMode;
+        }
+        if (feeds==-1) {
+            if (feeds!=m_rewindFeeds) {
+                feedsCommanded=feeds;
+                try {
+                    ; // m_dewarPositioner->setAutoRewindingFeeds(feedsCommanded);
 			}
 			catch (ComponentErrors::ComponentErrorsEx& ex) {
 				_ADD_BACKTRACE(ReceiversErrors::DewarPositionerSetupErrorExImpl,impl,ex,"CRecvBossCore::derotatorSetup()");
