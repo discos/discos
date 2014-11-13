@@ -2,7 +2,7 @@ from __future__ import with_statement
 import unittest2
 import time
 from Acspy.Clients.SimpleClient import PySimpleClient
-from ComponentErrors import OperationErrorEx
+from ComponentErrors import ComponentErrorsEx
 
 
 class RewindTest(unittest2.TestCase):
@@ -17,13 +17,13 @@ class RewindTest(unittest2.TestCase):
             self.positioner.park()
 
     def test_number_of_steps_oor(self):
-        """Raise OperationError when the number of steps is out of range"""
-        with self.assertRaisesRegexp(OperationErrorEx, 'actual pos: {0.0}'):
+        """Raise ComponentErrors when the number of steps is out of range"""
+        with self.assertRaisesRegexp(ComponentErrorsEx, 'actual pos: {0.0}'):
             self.positioner.rewind(4)
 
     def test_not_positive_number_of_steps(self):
-        """Raise OperationError when the number of steps is not positive"""
-        with self.assertRaisesRegexp(OperationErrorEx, 'steps must be positive'):
+        """Raise ComponentErrorsEx when the number of steps is not positive"""
+        with self.assertRaisesRegexp(ComponentErrorsEx, 'steps must be positive'):
             self.positioner.rewind(0)
 
 

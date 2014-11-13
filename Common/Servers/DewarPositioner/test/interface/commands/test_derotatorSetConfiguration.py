@@ -9,7 +9,7 @@ class DerotatorSetConfigurationTest(unittest2.TestCase):
     def test_SetConfiguration(self):
         dp = DewarPositionerImpl()
         success, answer = dp.command('derotatorGetConfiguration')
-        self.assertEqual((success, answer), (True, ''))
+        self.assertEqual((success, answer), (True, 'none'))
         dp.command('derotatorSetup=KKG')
         success, answer = dp.command('derotatorSetConfiguration=BSC')
         self.assertEqual(success, True)

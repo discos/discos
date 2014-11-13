@@ -24,7 +24,7 @@ class CDBConfTest(unittest2.TestCase):
     def test_setConfiguration(self):
         """Test the setConfiguration() method"""
         # Vefify the configurationCode and path are not set before the setup
-        self.assertEqual(self.conf.configurationCode, '')
+        self.assertEqual(self.conf.configurationCode, 'none')
         self.assertEqual(self.conf.configurationPath, '')
         # Vefify it raises an exception in case a setup is required
         self.assertRaises(ValidationErrorEx, self.conf.setConfiguration, 'BSC')

@@ -1,5 +1,5 @@
 import unittest2
-from ComponentErrors import ValidationErrorEx
+from ComponentErrors import ComponentErrorsEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
@@ -11,8 +11,8 @@ class ModeTest(unittest2.TestCase):
         self.dp = client.getComponent('RECEIVERS/DewarPositioner')
 
     def test_wrong_mode(self):
-        """The set* methods must raise a ValidationErrorEx in case of wrong mode"""
-        self.assertRaises(ValidationErrorEx, self.dp.setRewindingMode, 'FOO')
+        """The set* methods must raise a ComponentsErrorEx in case of wrong mode"""
+        self.assertRaises(ComponentErrorsEx, self.dp.setRewindingMode, 'FOO')
 
     def test_right_mode(self):
         """The argument of set* must be returned by get* in case of right mode"""

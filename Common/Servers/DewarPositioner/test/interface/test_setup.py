@@ -1,7 +1,7 @@
 import unittest2
 import time
 
-from ComponentErrors import ValidationErrorEx, OperationErrorEx
+from ComponentErrors import ComponentErrorsEx, ComponentErrorsEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 from DewarPositioner.cdbconf import CDBConf
@@ -14,15 +14,15 @@ class SetupTest(unittest2.TestCase):
         self.derotator = client.getComponent('RECEIVERS/SRTKBandDerotator')
 
     def test_wrongcode(self):
-        """A setup with a wrong code raises a ValidationErrorEx"""
-        self.assertRaises(ValidationErrorEx, self.positioner.setup, 'FOOCODE')
+        """A setup with a wrong code raises a ComponentErrorsEx"""
+        self.assertRaises(ComponentErrorsEx, self.positioner.setup, 'FOOCODE')
 
     def test_rightcode(self):
         """Verify after a setup the component is properly configured"""
         code = 'KKG'
         try:
             self.positioner.setup(code)
-        except OperationErrorEx, ex:
+        except ComponentErrorsEx, ex:
             print "The derotator is not available"
         self.assertEqual(code, self.positioner.getActualSetup())
 

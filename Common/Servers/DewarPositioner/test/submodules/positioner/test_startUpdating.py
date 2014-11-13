@@ -38,8 +38,8 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             self.p.startUpdating('axis', 'sector')
         self.p.setup(siteInfo={'foo': 'foo'}, source='self.source', device=self.device)
         self.cdbconf.setConfiguration('FIXED')
-        with self.assertRaisesRegexp(NotAllowedError, '^dynamic'):
-            self.p.startUpdating('axis', 'sector')
+        self.p.startUpdating('axis', 'sector') # Do not raise exception
+        self.p.stopUpdating() # Do not raise exception
         self.cdbconf.setConfiguration('BSC')
         sector = 'WRONG_SECTOR'
         with self.assertRaisesRegexp(NotAllowedError, '^sector %s not in' %sector):

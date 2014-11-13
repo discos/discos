@@ -1,6 +1,6 @@
 import unittest2
 import time
-from ComponentErrors import ValidationErrorEx, NotAllowedEx
+from ComponentErrors import ComponentErrorsEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
@@ -23,7 +23,7 @@ class BSCTest(unittest2.TestCase):
     def test_setPosition(self):
         """Verify we can not set the position"""
         self.dp.setConfiguration('BSC')
-        self.assertRaises(NotAllowedEx, self.dp.setPosition, 1)
+        self.assertRaises(ComponentErrorsEx, self.dp.setPosition, 1)
 
 
 if __name__ == '__main__':

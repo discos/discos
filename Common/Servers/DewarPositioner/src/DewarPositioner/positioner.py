@@ -125,7 +125,7 @@ class Positioner(object):
             elif self.isUpdating():
                 raise NotAllowedError('the positionier is already updating: a stopUpdating() is required')
             elif self.conf.getAttribute('DynamicUpdatingAllowed') != 'true':
-                raise NotAllowedError('dynamic updating not allowed in %s conf' %self.conf.getConfiguration())
+                pass # Do nothing
             elif not self.siteInfo:
                 raise NotAllowedError('no site information available')
             elif not self.source:
@@ -291,7 +291,7 @@ class Positioner(object):
             self.control.stop = True
             self.t.join(timeout=10)
             if self.t.isAlive():
-                PositionerError('thread %s is alive' %self.t.getName())
+                logger.logWarning('thread %s is alive' %self.t.getName())
         except AttributeError:
             return # self.t is None because the system is not yet configured
         finally:

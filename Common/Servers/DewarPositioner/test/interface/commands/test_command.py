@@ -14,29 +14,29 @@ class CommandTest(unittest2.TestCase):
         cmd = 'pippo'
         success, answer = self.dp.command(cmd)
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'command %s does not exist' %cmd)
+        self.assertRegexpMatches(answer, 'Error - command %s does not exist' %cmd)
         cmd = 'pippo=='
         success, answer = self.dp.command(cmd)
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'invalid command: maybe there are')
+        self.assertRegexpMatches(answer, 'Error - invalid command: maybe there are')
 
     def test_wrong_parameters(self):
         """Verify the answer is the exception message and success is False"""
         success, answer = self.dp.command('derotatorSetRewindingMode=a,b')
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'mode A unknown')
+        self.assertRegexpMatches(answer, 'Error - cannot set the rewinding mode')
         success, answer = self.dp.command('derotatorSetRewindingMode=')
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'mode  unknown')
+        self.assertRegexpMatches(answer, 'Error - missing arguments, type help')
         success, answer = self.dp.command('derotatorPark=a,b')
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'positioner not ready: a setup')
+        self.assertRegexpMatches(answer, 'Error - positioner not ready: a setup')
 
     def test_command_fails(self):
         """Verify the answer is the exception message and success is False"""
         success, answer = self.dp.command('derotatorSetConfiguration=FIXED')
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'cannot set the configuration')
+        self.assertRegexpMatches(answer, 'Error - cannot set the configuration')
 
     def test_command_returns_None(self):
         """Verify the answer is an empty string and success is True"""

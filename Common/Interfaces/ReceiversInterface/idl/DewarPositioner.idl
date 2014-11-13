@@ -46,17 +46,9 @@ module Receivers {
          *     setRewindingMode(AUTO)
          *
          * @param code the setup mode (for instance: LLP, KKG, CCB, ecc.)
-         * @throw ComponentErrors::ValidationErrorEx,
-         * @throw ComponentErrors::OperationErrorEx,
-         * @throw ComponentErrors::NotAllowedEx,
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        void setup(in string code) raises (
-            ComponentErrors::ValidationErrorEx,
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::NotAllowedEx,
-            ComponentErrors::UnexpectedEx
-        );
+        void setup(in string code) raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Put the derotator in the park position and reset the configuration
@@ -69,36 +61,25 @@ module Receivers {
          *   + commandedSetup = ''
          *   + rewindingMode = ''
          *
-         * @throw ComponentErrors::NotAllowedEx,
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        void park() raises (ComponentErrors::NotAllowedEx, ComponentErrors::UnexpectedEx);
+        void park() raises (ComponentErrors::ComponentErrorsEx);
  
 
         /** Set the derotator position
          * 
          * @param the position
-         * @throw ComponentErrors::NotAllowedEx
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        void setPosition(in double position) raises (
-            ComponentErrors::NotAllowedEx,
-            ComponentErrors::UnexpectedEx
-        );
+        void setPosition(in double position) raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Set the absolute offset and move the derotator to the new position 
          *
          * @param offset the offset to apply to the device
-         * @throw ComponentErrors::NotAllowedEx
-         * @throw ComponentErrors::OperationErrorEx
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        void setOffset(in double offset) raises (
-            ComponentErrors::NotAllowedEx,
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::UnexpectedEx
-        );
+        void setOffset(in double offset) raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Return the offset */
@@ -107,15 +88,9 @@ module Receivers {
 
         /** Clear the absolute offset and move the derotator to the new position
          *
-         * @throw ComponentErrors::NotAllowedEx
-         * @throw ComponentErrors::OperationErrorEx,
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        void clearOffset() raises (
-            ComponentErrors::NotAllowedEx,
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::UnexpectedEx
-        );
+        void clearOffset() raises (ComponentErrors::ComponentErrorsEx);
 
         
         /** Start the parallactic angle correction 
@@ -124,26 +99,18 @@ module Receivers {
          * or the positioner is not configured or when it is already updating.
          *
          * @param axis 
-         * @throw ComponentErrors::NotAllowedEx
-         * @throw ComponentErrors::OperationErrorEx,
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
         void startUpdating(in Management::TScanAxis axis, in Antenna::TAzimuthSection sector) raises (
-            ComponentErrors::NotAllowedEx,
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::UnexpectedEx
+            ComponentErrors::ComponentErrorsEx
         );
 
 
         /** Stop the parallactic angle correction
          *
-         * @throw ComponentErrors::OperationErrorEx,
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        void stopUpdating() raises (
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::UnexpectedEx
-        );
+        void stopUpdating() raises (ComponentErrors::ComponentErrorsEx);
 
         
         /** Rewind the derotator
@@ -153,20 +120,13 @@ module Receivers {
          * steps=2 means we want a rotation of 120 degrees.
          *
          * @param steps the number of steps we want to rotate
-         * @throw ComponentErrors::OperationErrorEx,
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        void rewind(in long steps) raises (
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::UnexpectedEx
-        );
+        void rewind(in long steps) raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Return the rewinding unit value */
-        double getRewindingStep() raises (
-            ComponentErrors::NotAllowedEx,
-            ComponentErrors::UnexpectedEx
-        );
+        double getRewindingStep() raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Return true when the dewar positioner is properly configured */
@@ -175,24 +135,16 @@ module Receivers {
 
         /** Return true when the system is configured and the derotator ready to move
          *
-         * @throw ComponentErrors::OperationErrorEx,
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        boolean isReady() raises (
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::UnexpectedEx
-        );
+        boolean isReady() raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Return true when the derotator is tracking the commanded position
          *
-         * @throw ComponentErrors::OperationErrorEx,
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        boolean isTracking() raises (
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::UnexpectedEx
-        );
+        boolean isTracking() raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Return true when the derotator is updating the position */
@@ -201,21 +153,17 @@ module Receivers {
 
         /** Return true when the derotator is moving
          *
-         * @throw ComponentErrors::OperationErrorEx,
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        boolean isSlewing() raises (
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::UnexpectedEx
-        );
+        boolean isSlewing() raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Set the rewinding mode to "AUTO" or "MANUAL"
          *
          * @param mode the rewinding mode ("AUTO" or "MANUAL")
-         * @throw ComponentErrors::ValidationErrorEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        void setRewindingMode(in string mode) raises (ComponentErrors::ValidationErrorEx);
+        void setRewindingMode(in string mode) raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Get the rewinding mode */
@@ -231,15 +179,10 @@ module Receivers {
          * a ComponentErrors::OperationErrorEx is raised. 
          *
          * @param mode the updating mode ("FIXED", "BSC", ...)
-         * @throw ComponentErrors::OperationErrorEx
-         * @throw ComponentErrors::ValidationErrorEx
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        void setConfiguration(in string mode) raises (
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::ValidationErrorEx,
-            ComponentErrors::UnexpectedEx
-        );
+        void setConfiguration(in string mode) raises (ComponentErrors::ComponentErrorsEx);
+
 
         /** Get the configuration code */
         string getConfiguration();
@@ -260,10 +203,9 @@ module Receivers {
          * in auto rewinding mode. For instance, for the SRTKBandReceiver, the
          * step is 60 degrees, so if we set steps=2 that means the auto rewind 
          * must be of 120 degrees.
-         * @throw ComponentErrors::NotAllowedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        void setAutoRewindingSteps(in long steps) 
-             raises (ComponentErrors::NotAllowedEx);
+        void setAutoRewindingSteps(in long steps) raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Clear the number of steps selected by setAutoRewindingSteps()
@@ -283,15 +225,9 @@ module Receivers {
 
         /** Return the actual position in the user reference system
          *
-         * @throw ComponentErrors::OperationErrorEx,
-         * @throw ComponentErrors::NotAllowedEx,
-         * @throw ComponentErrors::UnexpectedEx
+         * @throw ComponentErrors::ComponentErrorsEx
          */
-        double getPosition() raises (
-            ComponentErrors::OperationErrorEx,
-            ComponentErrors::NotAllowedEx,
-            ComponentErrors::UnexpectedEx
-        );
+        double getPosition() raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Return the actual setup configuration (KKG, etc.) */

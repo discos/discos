@@ -40,10 +40,10 @@ class PositionerSetupTest(unittest2.TestCase):
         """Verify the setup() sets the default configuration"""
         p = Positioner(self.cdbconf)
         self.assertEqual(p.isConfigured(), False)
-        self.assertEqual(p.getConfiguration(), '')
+        self.assertEqual(p.getConfiguration(), 'none')
         p.setup(siteInfo={}, source=None, device=self.device)
         self.assertEqual(p.isConfigured(), False)
-        self.assertEqual(p.getConfiguration(), '')
+        self.assertEqual(p.getConfiguration(), 'none')
         self.assertEqual(p.isSetup(), True)
         self.cdbconf.setup('KKG')
         self.assertEqual(p.isConfigured(), True)

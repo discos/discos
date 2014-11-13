@@ -1,5 +1,5 @@
 import unittest2
-from ComponentErrors import ValidationErrorEx, NotAllowedEx
+from ComponentErrors import ComponentErrorsEx
 from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 import time
@@ -25,7 +25,7 @@ class ParkTest(unittest2.TestCase):
         """Verify after a park() the DewarPositioner is not configured"""
         self.positioner.park()
         self.assertEqual(self.positioner.isConfigured(), False)
-        self.assertRaises(NotAllowedEx, self.positioner.park)
+        self.assertRaises(ComponentErrorsEx, self.positioner.park)
 
 
 if __name__ == '__main__':

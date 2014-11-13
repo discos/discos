@@ -68,7 +68,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError('cannot create the dewar positioner data channel')
             logger.logDebug('cannot create the data channel: %s' %ex.message)
         except Exception, ex:
-            logger.logError(ex.message)
+            reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
+            logger.logError(reason)
 
         try:
             self.statusThread = services().getThread(
@@ -100,23 +101,24 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         finally:
             self.control.stop = False
 
+
     def setup(self, code):
         self.commandedSetup = code.upper()
-        self.cdbconf.setup(self.commandedSetup)
-        deviceName = self.cdbconf.getAttribute('DerotatorName')
         try:
+            self.cdbconf.setup(self.commandedSetup)
+            deviceName = self.cdbconf.getAttribute('DerotatorName')
             device = self.client.getComponent(deviceName)
         except CannotGetComponentEx, ex:
             raeson = "cannot get the %s component: %s" %(deviceName, ex.message)
             logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
         try:
             observatory = self.client.getComponent('ANTENNA/Observatory')
@@ -124,7 +126,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             latitude, compl = lat_obj.get_sync()
             siteInfo = {'latitude': latitude}
         except Exception, ex:
-            logger.logWarning('cannot get the site information: %s' %ex.message)
+            reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
+            logger.logWarning('cannot get the site information: %s' %reason)
             siteInfo = {}
 
         try:
@@ -147,12 +150,20 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
+        except ComponentErrors.ComponentErrorsEx, ex:
+            data_list = ex.errorTrace.data # A list
+            reason = data_list[0].value if data_list else 'component error'
+            logger.logError(reason)
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(reason)
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
-            logger.logError(ex.message)
+            reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
+            logger.logError(reason)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
-            exc.setReason(ex.message)
-            raise exc
+            exc.setReason(reason)
+            raise exc.getComponentErrorsEx()
 
     def park(self):
         if self.positioner.isReady():
@@ -164,18 +175,18 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 logger.logError(ex.message)
                 exc = ComponentErrorsImpl.NotAllowedExImpl()
                 exc.setReason(ex.message)
-                raise exc
+                raise exc.getComponentErrorsEx()
             except Exception, ex:
                 logger.logError(ex.message)
                 exc = ComponentErrorsImpl.UnexpectedExImpl()
                 exc.setReason(ex.message)
-                raise exc
+                raise exc.getComponentErrorsEx()
         else:
             raeson = 'positioner not ready: a setup() is required'
             logger.logError(raeson)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
     def getPosition(self):
         try:
@@ -184,17 +195,17 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except (DerotatorErrors.CommunicationErrorEx, ComponentErrors.ComponentErrorsEx), ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason("Cannot get the derotator position")
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
     def setPosition(self, position):
         if not self.isReady():
@@ -202,19 +213,19 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(raeson)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
         elif not self.isConfigured():
             raeson = "positioner not configured, a setConfiguration() is required"
             logger.logError(raeson)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
         elif self.cdbconf.getAttribute('SetCustomPositionAllowed') != 'true':
             raeson = "setPosition() not allowed in %s configuration" %self.getConfiguration()
             logger.logError(raeson)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
         else:
             try:
                 self.positioner.goTo(position)
@@ -225,7 +236,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 logger.logError(raeson)
                 exc = ComponentErrorsImpl.UnexpectedExImpl()
                 exc.setReason(raeson)
-                raise exc
+                raise exc.getComponentErrorsEx()
 
     def _setPositionCmd(self, position):
         """Wrap setPosition() in order to strip the `d` at the end of the string"""
@@ -250,17 +261,17 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except NotAllowedError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
     def stopUpdating(self):
         try:
@@ -269,12 +280,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
 
     def setAutoRewindingSteps(self, steps):
@@ -284,7 +295,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
 
     def getAutoRewindingSteps(self):
@@ -303,12 +314,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
 
     def isRewinding(self):
@@ -326,12 +337,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
 
     def isConfigured(self):
@@ -346,12 +357,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
     def isSlewing(self):
         try:
@@ -361,12 +372,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
     def isTracking(self):
         try:
@@ -376,12 +387,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
     def isUpdating(self):
         return self.positioner.isUpdating()
@@ -394,17 +405,17 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except NotAllowedError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
 
     def clearOffset(self):
         try:
@@ -414,23 +425,26 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(raeson)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
             exc.setReason(raeson)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except NotAllowedError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
         except Exception, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setReason(ex.message)
-            raise exc
+            raise exc.getComponentErrorsEx()
+
 
     def getOffset(self):
         return self.positioner.getOffset()
 
+
     def getActualSetup(self):
         return self.actualSetup
+
 
     def getCommandedSetup(self):
         return self.commandedSetup
@@ -445,7 +459,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             logger.logError(raeson)
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
-            raise exc # Can happen only in case of wrong system input
+            raise exc.getComponentErrorsEx() # wrong system input
+
 
     def setConfiguration(self, confCode):
         if self.positioner.isUpdating():
@@ -462,12 +477,20 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 logger.logError(raeson)
                 exc = ComponentErrorsImpl.OperationErrorExImpl()
                 exc.setReason(raeson)
-                raise exc
-        self.cdbconf.setConfiguration(confCode.upper())
-        if self.cdbconf.getAttribute('SetCustomPositionAllowed') == 'true':
-            position = self.positioner.getPosition()
-            # Set the initialPosition, in order to add it to the dynamic one
-            self.cdbconf.updateInitialPositions(position)
+                raise exc.getComponentErrorsEx()
+        try:
+            self.cdbconf.setConfiguration(confCode.upper())
+            if self.cdbconf.getAttribute('SetCustomPositionAllowed') == 'true':
+                position = self.positioner.getPosition()
+                # Set the initialPosition, in order to add it to the dynamic one
+                self.cdbconf.updateInitialPositions(position)
+        except Exception, ex:
+            reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
+            logger.logError(reason)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setReason(reason)
+            raise exc.getComponentErrorsEx()
+
 
     def getConfiguration(self):
         return self.positioner.getConfiguration()
@@ -508,8 +531,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                     supplier.publishEvent(simple_data=event)
                     error = False
                 except Exception, ex:
+                    reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
                     if not error:
-                        logger.logError('cannot publish the status: %s' %ex.message)
+                        logger.logError('cannot publish the status: %s' %reason)
                         error = True
                 finally:
                     time.sleep(sleep_time)
@@ -529,7 +553,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             args = [item.strip() for item in args_str.split(',')]
         except ValueError:
             success = False 
-            answer = 'Error: invalid command: maybe there are too many symbols of ='
+            answer = 'Error - invalid command: maybe there are too many symbols of ='
         except Exception, ex:
             success = False 
             answer = ex.message
@@ -542,7 +566,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
         if command not in DewarPositionerImpl.commands:
             success = False
-            answer = 'Error: command %s does not exist' %command
+            answer = 'Error - command %s does not exist' %command
             logger.logError(answer)
             return (success, answer)
         else:
@@ -558,7 +582,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             # If we expect some arguments but there is not
             if types and not any(args):
                 success = False
-                answer = 'Error: missing arguments, type help(%s) for details' %command
+                answer = 'Error - missing arguments, type help(%s) for details' %command
                 logger.logError(answer)
                 return (success, answer)
 
@@ -566,7 +590,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 method = getattr(self, method_name)
             except AttributeError, ex:
                 success = False
-                answer = "Error: %s has no attribute %s" %(self, method_name)
+                answer = "Error - %s has no attribute %s" %(self, method_name)
                 logger.logError(answer)
                 return (success, answer)
             try:
@@ -585,12 +609,19 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 success = True
             except (ValueError, TypeError), ex:
                 success = False
-                answer = 'Error: wrong parameter usage.\nType help(%s) for details' %command
+                answer = 'Error - wrong parameter usage.\nType help(%s) for details' %command
                 logger.logError('%s\n%s' %(ex.message, answer))
+                return (success, answer)
+            except ComponentErrors.ComponentErrorsEx, ex:
+                success = False
+                data_list = ex.errorTrace.data # A list
+                reason = data_list[0].value if data_list else 'component error'
+                answer = 'Error - %s' %reason
+                logger.logError(answer)
                 return (success, answer)
             except Exception, ex:
                 success = False
-                answer = 'Error: %s' %(ex.getReason() if hasattr(ex, 'getReason') else ex.message)
+                answer = 'Error - %s' %(ex.getReason() if hasattr(ex, 'getReason') else ex.message)
                 logger.logError(answer)
                 return (success, answer)
 

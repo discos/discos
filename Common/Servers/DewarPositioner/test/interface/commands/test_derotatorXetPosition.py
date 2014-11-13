@@ -26,7 +26,7 @@ class DerotatorSetPositionTest(unittest2.TestCase):
         self.assertAlmostEqual(value, 0, places=1)
         success, answer = dp.command('derotatorSetPosition=foo')
         self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'invalid')
+        self.assertRegexpMatches(answer, 'Error - wrong parameter usage')
 
 if __name__ == '__main__':
     unittest2.main()
