@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+from Acspy.Clients.SimpleClient import PySimpleClient
+from IRAPy import logger
+import Management
+import sys
+import time
+
+client = PySimpleClient()
+log_component = client.getComponent(comp_name = "MANAGEMENT/CustomLogger",
+                                    comp_idl_type = "IDL:alma/Management/CustomLogger:1.0",
+                                    container_name = "LoggerContainer")
+try:
+    i = 0
+    log_component.emitLog("continuous logging starts", Management.C_INFO)
+    while True:
+	log_component.emitLog("continuous logging event number %d" % i, Management.C_INFO)
+        i += 1
+        time.sleep(0.5)
+except KeyboardInterrupt:
+    log_component.emitLog("continuous logging ends", Management.C_INFO)
+finally:
+    client.releaseComponent("MANAGEMENT/CustomLogger")
+

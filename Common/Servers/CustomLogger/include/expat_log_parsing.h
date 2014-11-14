@@ -20,8 +20,8 @@
 #define END_TAG "</root>"
 #define END_TAG_LEN 7
 
-class LogRecord; //fwd dec
-class LogRecordComparator; //fwd dec
+class LogRecord; //fwd declaration
+class LogRecordComparator; //fwd declaration
 
 /**
  * Smart pointer to a LogRecord, used in conjunction with STL and non-standard containers.

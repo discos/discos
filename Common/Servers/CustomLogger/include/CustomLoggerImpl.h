@@ -80,8 +80,8 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
          * @param log_record a smart pointer to a LogRecord
          */
         void handle(LogRecord_sp log_record);
-        virtual void setLogfile(const char *base_path_log, const char *base_path_full_log,  
-                                    const char *filename_log, const char *filename_full_log) 
+        virtual void setLogfile(const char *base_path,
+                                const char *filename) 
                                 throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void closeLogfile() throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         virtual void emitACSLog(const char *msg) throw (CORBA::SystemException);
@@ -92,6 +92,9 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         virtual void flush() throw (CORBA::SystemException);
         void writeLoggingQueue(bool age_check=true); //invoked by writer thread
     private:
+        void _open_log_file(bool custom, const char* base_path, const char* filename)
+                                throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
+        void _close_log_file(bool custom) throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);
         baci::SmartPropertyPointer<baci::ROstring> m_filename_sp;
         baci::SmartPropertyPointer<baci::ROlong> m_nevents_sp;
         baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(LogLevel), POA_Management::ROLogLevel> > m_min_level_sp;
