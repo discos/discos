@@ -39,7 +39,7 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	m_startFreq.length(0);
 	m_bandWidth.length(0);
 	m_pol.length(0);
-	m_updateMode=Receivers::RCV_UNDEF_UPDATE;
+	m_updateMode=Receivers::RCV_UNDEF_DEROTCONF;
 	m_rewindMode=Receivers::RCV_AUTO_REWIND;
 	m_notificationChannel=NULL;
 
@@ -50,8 +50,6 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	catch (...) {
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CRecvBossCore::initialize()");
 	}
-
-	m_rewindFeeds=0;
 	m_dewarPositioner=Receivers::DewarPositioner::_nil();
 	m_dewarPositionerError=false;
 	m_loEpoch=m_starFreqEpoch=m_bandWidthEpoch=m_polEpoch=m_feedsEpoch=m_IFsEpoch=m_modeEpoch=m_recvStatusEpoch=m_dewarStatusEpoch=0;
@@ -243,20 +241,112 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 	}
 }
 
-double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (ReceiversErrors::NoDewarPositioningExImpl,
-		ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl)
+double CRecvBossCore::getDerotatorPosition(const ACS::Time& epoch) throw (ComponentErrors::CouldntGetComponentExImpl,
+		ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
+	IRA::CString component;
+	bool derotator;
 	if (m_currentRecvCode=="") {
 		return 0;
 	}
-	if (m_config->dewarPositionerInterface()=="") {
-		_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::getDerotatorPosition()");
+	if (!m_config->getReceiver(m_currentRecvCode,component,derotator)) {
+		return 0;
 	}
-
-	return 0;
+	if (m_config->dewarPositionerInterface()=="") {
+	}
+	if (!derotator) {
+		return 0;
+	}
+	baci::ThreadSyncGuard guard(&m_mutex);
+	loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
+	try {
+		/*******************************************************************/
+		/* call the method of the dewar positioner to retrieve the position */
+		/* For the moment I'll return a zero*/
+		/*************************************************************************/
+		return 0;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ReceiversErrors::DewarPositionerCommandErrorExImpl,impl,ex,"CRecvBossCore::setDerotatorPosition()");
+		impl.setCommand("setPosition()");
+		changeBossStatus(Management::MNG_FAILURE);
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		changeBossStatus(Management::MNG_FAILURE);
+		m_dewarPositionerError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
+		changeBossStatus(Management::MNG_FAILURE);
+		m_dewarPositionerError=true;
+		throw impl;
+	}
 }
 
-void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
+void CRecvBossCore::setDerotatorPosition(const double& pos) throw (ReceiversErrors::NoDewarPositioningExImpl,
+		ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+		ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+{
+	IRA::CString component;
+	bool derotator;
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (m_currentRecvCode=="") {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
+		impl.setReason("Receiver not configured yet");
+		changeBossStatus(Management::MNG_WARNING);
+		throw impl;
+	}
+	// the receiver code should be validated....
+	if (!m_config->getReceiver(m_currentRecvCode,component,derotator)) {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
+		impl.setReason("Receiver code is not known");
+		changeBossStatus(Management::MNG_WARNING);
+		throw impl;
+	}
+	// a dewar positioner must be available.....
+	if (m_config->dewarPositionerInterface()=="") {
+		_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
+		changeBossStatus(Management::MNG_WARNING);
+		throw impl;
+	}
+	// receiver must be equipped with a derotator
+	if (!derotator) {
+		_EXCPT(ReceiversErrors::NoDerotatorAvailableExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
+		changeBossStatus(Management::MNG_WARNING);
+		throw impl;
+	}
+	loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
+	try {
+		m_dewarPositioner->setPosition(pos);
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ReceiversErrors::DewarPositionerCommandErrorExImpl,impl,ex,"CRecvBossCore::setDerotatorPosition()");
+		impl.setCommand("setPosition()");
+		changeBossStatus(Management::MNG_FAILURE);
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		changeBossStatus(Management::MNG_FAILURE);
+		m_dewarPositionerError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
+		changeBossStatus(Management::MNG_FAILURE);
+		m_dewarPositionerError=true;
+		throw impl;
+	}
+}
+
+void CRecvBossCore::derotatorMode(const Receivers::TDerotatorConfigurations& mode,const Receivers::TRewindModes& rewind) throw (
 		ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
 		ReceiversErrors::DewarPositionerSetupErrorExImpl)
@@ -264,32 +354,31 @@ void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Re
 	baci::ThreadSyncGuard guard(&m_mutex);
 	IRA::CString component;
 	bool derotator;
-	Receivers::TUpdateModes updateCommanded;
+	Receivers::TDerotatorConfigurations updateCommanded;
 	Receivers::TRewindModes rewindCommanded;
-	long feedsCommanded;
 	// receiver must be yet configured.....
 	if (m_currentRecvCode=="") {
-		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::derotatorSetup()");
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::derotatorMode()");
 		impl.setReason("Receiver not configured yet");
 		changeBossStatus(Management::MNG_WARNING);
 		throw impl;
 	}
 	// the receiver code should be validated....
 	if (!m_config->getReceiver(m_currentRecvCode,component,derotator)) {
-		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::derotatorSetup()");
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::derotatorMode()");
 		impl.setReason("Receiver code is not known");
 		changeBossStatus(Management::MNG_WARNING);
 		throw impl;
 	}
 	// a dewar positioner must be available.....
 	if (m_config->dewarPositionerInterface()=="") {
-		_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetup()");
+		_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorMode()");
 		changeBossStatus(Management::MNG_WARNING);
 		throw impl;
 	}
 	// receiver must be equipped with a derotator
 	if (!derotator) {
-		_EXCPT(ReceiversErrors::NoDerotatorAvailableExImpl,impl,"CRecvBossCore::derotatorSetup()");
+		_EXCPT(ReceiversErrors::NoDerotatorAvailableExImpl,impl,"CRecvBossCore::derotatorMode()");
 		changeBossStatus(Management::MNG_WARNING);
 		throw impl;
 	}
@@ -298,16 +387,18 @@ void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Re
 	try {
 		// According to IDL documentation this should also:
 		// 1) resets offsets
-		// 2) set derotation mode to AUTO
+		// 3) set rewind mode to AUTO
 		m_dewarPositioner->setup(m_currentRecvCode);
+		m_rewindMode=Receivers::RCV_AUTO_REWIND;
+		/*m_updateMode=Receivers::RCV_FIXED_DEROTCONF;*/
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ReceiversErrors::DewarPositionerSetupErrorExImpl,impl,ex,"CRecvBossCore::derotatorSetup()");
+		_ADD_BACKTRACE(ReceiversErrors::DewarPositionerSetupErrorExImpl,impl,ex,"CRecvBossCore::derotatorMode()");
 		changeBossStatus(Management::MNG_FAILURE);
 		throw impl;
 	}
 	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorSetup()");
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorMode()");
 		impl.setName(ex._name());
 		impl.setMinor(ex.minor());
 		changeBossStatus(Management::MNG_FAILURE);
@@ -315,7 +406,7 @@ void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Re
 		throw impl;
 	}
 	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorSetup()");
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorMode()");
 		changeBossStatus(Management::MNG_FAILURE);
 		m_dewarPositionerError=true;
 		throw impl;
@@ -327,13 +418,13 @@ void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Re
 				m_dewarPositioner->setRewindingMode(Receivers::Definitions::map(rewindCommanded));
 			}
 			catch (ComponentErrors::ComponentErrorsEx& ex) {
-				_ADD_BACKTRACE(ReceiversErrors::DewarPositionerSetupErrorExImpl,impl,ex,"CRecvBossCore::derotatorSetup()");
-				impl.setDetails("rewindingMode");
+				_ADD_BACKTRACE(ReceiversErrors::DewarPositionerSetupErrorExImpl,impl,ex,"CRecvBossCore::derotatorMode()");
+				impl.setDetails("RewindingMode");
 				changeBossStatus(Management::MNG_FAILURE);
 				throw impl;
 			}
 			catch (CORBA::SystemException& ex) {
-				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorSetup()");
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorMode()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				changeBossStatus(Management::MNG_FAILURE);
@@ -341,7 +432,7 @@ void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Re
 				throw impl;
 			}
 			catch (...) {
-				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorSetup()");
+				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorMode()");
 				changeBossStatus(Management::MNG_FAILURE);
 				m_dewarPositionerError=true;
 				throw impl;
@@ -354,59 +445,20 @@ void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Re
 	else {
 		rewindCommanded=m_rewindMode;
 	}
-	if (mode!=Receivers::RCV_UNDEF_UPDATE) {
-		if (mode!=Receivers::RCV_DISABLED_UPDATE) {
-			if (mode!=m_updateMode) {
-				updateCommanded=mode;
-				try {
-					m_dewarPositioner->setUpdatingMode(Receivers::Definitions::map(updateCommanded));
-				}
-				catch (ComponentErrors::ComponentErrorsEx& ex) {
-					_ADD_BACKTRACE(ReceiversErrors::DewarPositionerSetupErrorExImpl,impl,ex,"CRecvBossCore::derotatorSetup()");
-					impl.setDetails("updatingMode");
-					changeBossStatus(Management::MNG_FAILURE);
-					throw impl;
-				}
-				catch (CORBA::SystemException& ex) {
-					_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorSetup()");
-					impl.setName(ex._name());
-					impl.setMinor(ex.minor());
-					changeBossStatus(Management::MNG_FAILURE);
-					m_dewarPositionerError=true;
-					throw impl;
-				}
-				catch (...) {
-					_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorSetup()");
-					changeBossStatus(Management::MNG_FAILURE);
-					m_dewarPositionerError=true;
-					throw impl;
-				}
-			}
-			else { // keep the current update mode and do nothing
-				updateCommanded=m_updateMode;
-			}
-		}
-		else { // save the update mode and do nothing
+	if (mode!=Receivers::RCV_UNDEF_DEROTCONF) {
+		if (mode!=m_updateMode) {
 			updateCommanded=mode;
-		}
-	}
-	else { // keep present update mode and do nothing
-		updateCommanded=m_updateMode;
-	}
-	if (feeds==-1) {
-		if (feeds!=m_rewindFeeds) {
-			feedsCommanded=feeds;
 			try {
-				m_dewarPositioner->setAutoRewindingFeeds(feedsCommanded);
+				m_dewarPositioner->setConfiguration(Receivers::Definitions::map(updateCommanded));
 			}
 			catch (ComponentErrors::ComponentErrorsEx& ex) {
-				_ADD_BACKTRACE(ReceiversErrors::DewarPositionerSetupErrorExImpl,impl,ex,"CRecvBossCore::derotatorSetup()");
-				impl.setDetails("setAutoRewindingFeeds");
+				_ADD_BACKTRACE(ReceiversErrors::DewarPositionerSetupErrorExImpl,impl,ex,"CRecvBossCore::derotatorMode()");
+				impl.setDetails("updatingMode");
 				changeBossStatus(Management::MNG_FAILURE);
 				throw impl;
 			}
 			catch (CORBA::SystemException& ex) {
-				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorSetup()");
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorMode()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
 				changeBossStatus(Management::MNG_FAILURE);
@@ -414,22 +466,21 @@ void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Re
 				throw impl;
 			}
 			catch (...) {
-				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorSetup()");
+				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorMode()");
 				changeBossStatus(Management::MNG_FAILURE);
 				m_dewarPositionerError=true;
 				throw impl;
 			}
 		}
-		else {
-			feedsCommanded=m_feeds;
+		else { // keep the current update mode and do nothing
+			updateCommanded=m_updateMode;
 		}
 	}
-	else {
-		feedsCommanded=m_rewindFeeds;
+	else { // keep present update mode and do nothing
+		updateCommanded=m_updateMode;
 	}
 	m_rewindMode=rewindCommanded;
 	m_updateMode=updateCommanded;
-	m_rewindFeeds=feedsCommanded;
 }
 
 void CRecvBossCore::derotatorPark () throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
@@ -465,20 +516,24 @@ void CRecvBossCore::derotatorPark () throw (ReceiversErrors::NoDewarPositioningE
 		changeBossStatus(Management::MNG_WARNING);
 		throw impl;
 	}
-	m_updateMode=Receivers::RCV_UNDEF_UPDATE;
+	m_updateMode=Receivers::RCV_UNDEF_DEROTCONF;
 	m_rewindMode=Receivers::RCV_AUTO_REWIND;
-	m_rewindFeeds=0;
 	loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
 	try {
+		// According to IDL documentation this should also:
+		// 1) resets offsets
+		// 2) put the derotator to park position
+		// 3) set rewind mode to UNKNOWN
+		// 4) set the configuration to UNKNOWN
 		m_dewarPositioner->park();
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ReceiversErrors::DewarPositionerParkingErrorExImpl,impl,ex,"CRecvBossCore::derotatorSetup()");
+		_ADD_BACKTRACE(ReceiversErrors::DewarPositionerParkingErrorExImpl,impl,ex,"CRecvBossCore::derotatorPark()");
 		changeBossStatus(Management::MNG_WARNING);
 		throw impl;
 	}
 	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorSetup()");
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::derotatorPark()");
 		impl.setName(ex._name());
 		impl.setMinor(ex.minor());
 		changeBossStatus(Management::MNG_WARNING);
@@ -486,13 +541,12 @@ void CRecvBossCore::derotatorPark () throw (ReceiversErrors::NoDewarPositioningE
 		throw impl;
 	}
 	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorSetup()");
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::derotatorPark()");
 		changeBossStatus(Management::MNG_WARNING);
 		m_dewarPositionerError=true;
 		throw impl;
 	}
 }
-
 
 void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 		ComponentErrors::UnexpectedExImpl)
@@ -1117,10 +1171,10 @@ const IRA::CString& CRecvBossCore::getRecvCode()
 	return m_currentRecvCode;
 }
 
-void CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters & param)
+void CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters & antennaInfo)
 {
 	// at the moment no need to change startUT and return different value
-	// for the derotator we assume the device is fast enough to follow antenna movments, on the contrary it will rise a warning and
+	// for the derotator we assume the device is fast enough to follow antenna movements, on the contrary it will rise a warning and
 	// affect the tracking flag
 }
 

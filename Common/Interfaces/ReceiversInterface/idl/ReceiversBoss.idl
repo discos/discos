@@ -39,7 +39,7 @@ module Receivers {
 	 *  longlong type.	 
 	*/
 	struct ReceiversDataBlock {
-		ACS::Time timeMark;	  /*!< this is the absolute time mark that reportes exactly when the publised events occurred */
+		ACS::Time timeMark;	  /*!< this is the absolute time mark that reports exactly when the published events occurred */
 		boolean tracking;			              /*!< true when the receivers are ready and the dewar positioner is tracking   */
 		Management::TSystemStatus status; /*!< this report the subsystem status. @sa the attribute <i>status</i> */
 	};
@@ -66,6 +66,11 @@ module Receivers {
          * This string can be either a valid configuration name or 'unknown' when the system is in an unknown status 
          */
         readonly attribute ACS::ROstring actualSetup;
+
+        /**
+         * This attribute can be used as readout of the actual derotator position
+         */
+        readonly attribute ACS::ROdouble derotatorPosition;
 
  
         /***************************************************\
@@ -117,13 +122,13 @@ module Receivers {
         /**
          * This method prepares the system for derotation but not starting it. If the no derotator is supported, or no receiver has been configured or the current receiver
          * does not have a derotator an error is raised.
-         * @param mode specifies how to manage the derotation, if <i>RCV_UNDEF_UPDATE</i> the current value is kept
+         * @param mode specifies how to manage the derotation, if <i>RCV_UNDEF_DEROTCONF</i> the current value is kept
          * @param rewind specifies how to manage the rewind, when it is needed. If <i>RCV_UNDEF_REWIND</i> the current value is kept
          * @param feeds give the number of feeds when the number. if -1 the current value is kept 
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw ComponentErrors::ComponentErrorsEx
          */
-        void derotatorSetup(in TUpdateModes mode,in TRewindModes rewind,in long feeds) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx); 
+        void derotatorMode(in TDerotatorConfigurations mode,in TRewindModes rewind) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
         /**
          *  This method parks the current derotator. In order to start the derotator again, another <i>derotatorSetup</i> must be called.
@@ -131,25 +136,32 @@ module Receivers {
          *  @throw ReceiversErrors::ReceiversErrorsEx
          *  @throw ComponentErrors::ComponentErrorsEx
          */
-        void derotatorPark()  raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        void derotatorPark() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+        /**
+         * This method allows to set the starting position of the derotator. Allowed only if FIXED or CUSTOM modes are setup.
+         * @param position the initial position (degrees)
+         */
+        void setDerotatorPosition(in double position) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
               
         /**
-         * This method allows to collect the current position of the derotator, if derotator is not activable or is not activated an error is thrown.
-         * @return the position of the derotator in degrees
-         * @param epoch the returned postion refers to the given epoch
+         * This method allows to collect the current position of the derotator, if derotator is not available or it is not activated an error is thrown.
+         * @return the position of the derotator in degrees. Used only internally.
+         * @param epoch the returned position refers to the given epoch
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw ComponentErrors::ComponentErrorsEx
          */
-        double getDerotatorPosition(in ACS::Time epoch) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        double getDerotatorPositionFromHistory(in ACS::Time epoch) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
         /**
          * This method allows to prepare the receivers for scan 
-         * @param startUT exact time the scan is required to start, as output the effective stat time 
+         * @param startUT exact time the scan is required to start, as output the effective start time
          * @param param structure containing all the information required in order to prepare the receiver for the scan.
+         * @param antennaInfo auxiliary information from the antenna
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw ComponentErrors::ComponentErrorsEx
          */
-        void startScan(inout ACS::Time startUT,in TReceiversParameters param) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        void startScan(inout ACS::Time startUT,in TReceiversParameters param,in Antenna::TRunTimeParameters antennaInfo) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
 		/**
 		 * This method is only be used internally. Anyone that needs to know if the receiver subsystem could perform a given scan before a given time, can call this. 
@@ -163,7 +175,7 @@ module Receivers {
 		 * @return true if the subsystem could accomplish the required scan.
 		 */
 		boolean checkScan(in ACS::Time startUt,in TReceiversParameters param,in Antenna::TRunTimeParameters antennaInfo,
-		out TRunTimeParameters runTime) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+		 out TRunTimeParameters runTime) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
     };
     

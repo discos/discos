@@ -48,25 +48,29 @@ public:
 		}
 	}
 
-	static bool map(const char *strMode,TUpdateModes& mode) {
+	static bool map(const char *strMode,TDerotatorConfigurations& mode) {
 		if (strcasecmp(strMode,"FIXED")==0) {
-			mode=RCV_FIXED_UPDATE;
+			mode=RCV_FIXED_DEROTCONF;
 			return true;
 		}
-		if (strcasecmp(strMode,"SIMPLE")==0) {
-			mode=RCV_SIMPLE_UPDATE;
+		if (strcasecmp(strMode,"BSC")==0) {
+			mode=RCV_BSC_DEROTCONF;
 			return true;
 		}
 		if (strcasecmp(strMode,"OPTIMIZED")==0) {
-			mode=RCV_OPTIMIZED_UPDATE;
+			mode=RCV_OPTIMIZED_DEROTCONF;
 			return true;
 		}
-		if (strcasecmp(strMode,"DISABLED")==0) {
-			mode=RCV_DISABLED_UPDATE;
+		if (strcasecmp(strMode,"ALIGNED")==0) {
+			mode=RCV_ALIGNED_DEROTCONF;
+			return true;
+		}
+		if (strcasecmp(strMode,"CUSTOM")==0) {
+			mode=RCV_CUSTOM_DEROTCONF;
 			return true;
 		}
 		if (strcasecmp(strMode,"UNDEFINED")==0) {
-			mode=RCV_UNDEF_UPDATE;
+			mode=RCV_UNDEF_DEROTCONF;
 			return true;
 		}
 		else {
@@ -74,20 +78,23 @@ public:
 		}
 	}
 
-	static const char *map(const TUpdateModes& mode ) {
-		if (mode==RCV_FIXED_UPDATE) {
-			return "AUTO";
+	static const char *map(const TDerotatorConfigurations& mode ) {
+		if (mode==RCV_FIXED_DEROTCONF) {
+			return "FIXED";
 		}
-		if (mode==RCV_SIMPLE_UPDATE) {
-			return "SIMPLE";
+		if (mode==RCV_BSC_DEROTCONF) {
+			return "BSC";
 		}
-		if (mode==RCV_OPTIMIZED_UPDATE) {
+		if (mode==RCV_OPTIMIZED_DEROTCONF) {
 			return "OPTIMIZED";
 		}
-		if (mode==RCV_DISABLED_UPDATE) {
-			return "DISABLED";
+		if (mode==RCV_ALIGNED_DEROTCONF) {
+			return "ALIGNED";
 		}
-		else { //RCV_UNDEF_UPDATE
+		if (mode==RCV_CUSTOM_DEROTCONF) {
+			return "CUSTOM";
+		}
+		else { //RCV_UNDEF_DEROTCONF
 			return "UNDEFINED";
 		}
 	}

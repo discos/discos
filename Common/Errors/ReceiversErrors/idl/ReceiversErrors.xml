@@ -39,10 +39,15 @@
     <ErrorCode name="NoDerotatorAvailable" shortDescription="The current receiver is not equipped with a derotator" description=""/>
     
     <ErrorCode name="DewarPositionerSetupError" shortDescription="Error encountered during the setup of the dewar positioner" description="">
-		<Member name="Details" type="string" description="more details on the error" />   
+		<Member name="Details" type="string" description="More details on the error" />   
 	</ErrorCode>
 
 	<ErrorCode name="DewarPositionerParkingError" shortDescription="Error detected during derotator parking" description=""/>
+	
+	<ErrorCode name="DewarPositionerCommandError" shortDescription="Error detected while issueing a command to the dewar positioner" description="">
+		<Member name="Command" type="string" description="It specifies which command has failed" />   
+	</ErrorCode>
+	
          
 </Type>
 

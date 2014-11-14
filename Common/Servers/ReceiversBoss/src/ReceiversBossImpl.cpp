@@ -11,6 +11,7 @@
 #include "DevIOBandWidth.h"
 #include "DevIOInitialFrequency.h"
 #include "DevIOMode.h"
+#include "DevIODerotatorPosition.h"
 #include <ReceiversModule.h>
 
 static char *rcsId="@(#) $Id: ReceiversBossImpl.cpp $";
@@ -19,14 +20,14 @@ static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 using namespace SimpleParser;
 using namespace baci;
 
-_SP_WILDCARD_CLASS(UpdateModes_WildCard,"UNDEFINED");
+_SP_WILDCARD_CLASS(DerotatorConfigurations_WildCard,"UNDEFINED");
 _SP_WILDCARD_CLASS(RewindModes_WildCard,"UNDEFINED");
 
-class UpdateModes_converter
+class DerotatorConfigurations_converter
 {
 public:
-	Receivers::TUpdateModes strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
-		Receivers::TUpdateModes mode;
+	Receivers::TDerotatorConfigurations strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+		Receivers::TDerotatorConfigurations mode;
 		if (!Receivers::Definitions::map(str,mode)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"UpdateModes_converter::strToVal()");
 			ex.setExpectedType("Update Mode");
@@ -34,7 +35,7 @@ public:
 		}
 		return mode;
 	}
-	char *valToStr(const Receivers::TUpdateModes& val) {
+	char *valToStr(const Receivers::TDerotatorConfigurations& val) {
 		IRA::CString mode(Receivers::Definitions::map(val));
 		char *c=new char[mode.GetLength()+1];
 		strcpy(c,(const char*)mode);
@@ -77,7 +78,8 @@ ReceiversBossImpl::ReceiversBossImpl(const ACE_CString &CompName,maci::Container
 	m_pbandWidth(this),
 	m_ppolarization(this),
 	m_pstatus(this),
-	m_pmode(this)
+	m_pmode(this),
+	m_pderotatorPosition(this)
 {	
 	AUTO_TRACE("ReceiversBossImpl::ReceiversBossImpl()");
 	m_core=NULL;
@@ -104,6 +106,8 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_pinitialFrequency=new ROdoubleSeq(getContainerServices()->getName()+":initialFrequency",getComponent(),new DevIOInitialFrequency(m_core),true);
 		m_pbandWidth=new ROdoubleSeq(getContainerServices()->getName()+":bandWidth",getComponent(),new DevIOBandWidth(m_core),true);
 		m_pmode=new ROstring(getContainerServices()->getName()+":mode",getComponent(),new DevIOMode(m_core),true);
+		m_pderotatorPosition=new ROdouble(getContainerServices()->getName()+":derotatorPosition",getComponent(),
+		  new DevIODerotatorPosition(m_core),true);
 		// create the parser for command line execution
 		m_parser= new SimpleParser::CParser<CRecvBossCore>(m_core,10);
 	}
@@ -120,10 +124,11 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("setLO",new function1<CRecvBossCore,non_constant,void_type,I<doubleSeq_type> >(m_core,&CRecvBossCore::setLO),1);
 	m_parser->add("antennaUnitOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOn),0);
 	m_parser->add("antennaUnitOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOff),0);
-	m_parser->add("derotatorSetup",new function3<CRecvBossCore,non_constant,void_type,
-			I<enum_type<UpdateModes_converter,Receivers::TUpdateModes,UpdateModes_WildCard> >,
-			I<enum_type<RewindModes_converter,Receivers::TRewindModes,RewindModes_WildCard> >, I<long_type> >(m_core,&CRecvBossCore::derotatorSetup),3);
+	m_parser->add("derotatorMode",new function2<CRecvBossCore,non_constant,void_type,
+			I<enum_type<DerotatorConfigurations_converter,Receivers::TDerotatorConfigurations,DerotatorConfigurations_WildCard> >,
+			I<enum_type<RewindModes_converter,Receivers::TRewindModes,RewindModes_WildCard> > >(m_core,&CRecvBossCore::derotatorMode),2);
 	m_parser->add("derotatorPark",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::derotatorPark),0);
+	m_parser->add("derotatorPosition",new function1<CRecvBossCore,non_constant,void_type, I<angle_type<SimpleParser::deg> > >(m_core,&CRecvBossCore::setDerotatorPosition),1);
 
 	ACS_LOG(LM_FULL_INFO,"ReceiversBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
@@ -467,11 +472,11 @@ void ReceiversBossImpl::turnAntennaUnitOff() throw (CORBA::SystemException,Compo
 	}
 }
 
-void ReceiversBossImpl::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters & param) throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void ReceiversBossImpl::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,
+		const Antenna::TRunTimeParameters& antennaInfo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try{
-		m_core->startScan(startUT,param);
+		m_core->startScan(startUT,param,antennaInfo);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -498,7 +503,29 @@ CORBA::Boolean ReceiversBossImpl::checkScan(ACS::Time startUt,const Receivers::T
 	return true;
 }
 
-CORBA::Double ReceiversBossImpl::getDerotatorPosition (ACS::Time epoch) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void ReceiversBossImpl::setDerotatorPosition(CORBA::Double position) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+  ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core->setDerotatorPosition(position);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::setDerotatorPosition()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+CORBA::Double ReceiversBossImpl::getDerotatorPositionFromHistory(ACS::Time epoch) throw (CORBA::SystemException,
+  ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		return (CORBA::Double)m_core->getDerotatorPosition(epoch);
@@ -518,11 +545,11 @@ CORBA::Double ReceiversBossImpl::getDerotatorPosition (ACS::Time epoch) throw (C
 	}
 }
 
-void ReceiversBossImpl::derotatorSetup (Receivers::TUpdateModes mode,Receivers::TRewindModes rewind,CORBA::Long feeds) throw (CORBA::SystemException,
+void ReceiversBossImpl::derotatorMode(Receivers::TDerotatorConfigurations mode,Receivers::TRewindModes rewind) throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
-		m_core->derotatorSetup(mode,rewind,feeds);
+		m_core->derotatorMode(mode,rewind);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -539,7 +566,7 @@ void ReceiversBossImpl::derotatorSetup (Receivers::TUpdateModes mode,Receivers::
 	}
 }
 
-void ReceiversBossImpl::derotatorPark () throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void ReceiversBossImpl::derotatorPark() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		m_core->derotatorPark();
@@ -568,6 +595,7 @@ _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROlong,m_pIFs,IFs);
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdoubleSeq,m_pbandWidth,bandWidth);
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdoubleSeq,m_pinitialFrequency,initialFrequency);
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROstring,m_pmode,mode);
+_PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdouble,m_pderotatorPosition,derotatorPosition);
 
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

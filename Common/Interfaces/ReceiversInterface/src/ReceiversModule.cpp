@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 {
 	//printf("%s\n",(const char *)Receivers::Definitions::mapRewindModes(Receivers::Definitions::mapRewindModes(Receivers::RCV_AUTO_REWIND)));
 	Receivers::TRewindModes rewindMode;
-	Receivers::TUpdateModes updateMode;
+	Receivers::TDerotatorConfigurations updateMode;
 	Receivers::TPolarization polMode;
 
 
@@ -35,11 +35,11 @@ int main(int argc, char *argv[])
 	}
 
 	printf("\n");
-	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_FIXED_UPDATE));
-	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_SIMPLE_UPDATE));
-	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_OPTIMIZED_UPDATE));
-	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_DISABLED_UPDATE));
-	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_UNDEF_UPDATE));
+	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_FIXED_DEROTCONF));
+	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_BSC_DEROTCONF));
+	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_OPTIMIZED_DEROTCONF));
+	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_ALIGNED_DEROTCONF));
+	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_UNDEF_DEROTCONF));
 
 	if (Receivers::Definitions::map(UPDATE_TEST1,updateMode)) {
 		printf("%s\n",(const char *)Receivers::Definitions::map(updateMode));
