@@ -629,11 +629,11 @@ bool MinorServoBossImpl::checkFocusScan(const ACS::Time starting_time, const dou
 }
 
 
-bool MinorServoBossImpl::checkScan(
+CORBA::Boolean MinorServoBossImpl::checkScan(
         const ACS::Time starting_time, 
-        const double range, 
-        const ACS::Time total_time, 
-        const char *axis_code
+        const MinorServo::MinorServoScan & scan,
+        const Antenna::TRunTimeParameters & antennaInfo,
+        MinorServo::TRunTimeParameters_out runTime
     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
 {
     if(!isReady())
@@ -642,7 +642,14 @@ bool MinorServoBossImpl::checkScan(
     if(isScanning())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is executing another scan", true);
 
-    return checkScanImpl(starting_time, range, total_time, string(axis_code));
+    runTime.startEpoch = starting_time != 0 ? starting_time : getTimeStamp();
+    runTime.onTheFly = false;
+
+    return checkScanImpl(
+            starting_time, 
+            scan.range, 
+            scan.total_time, 
+            string(scan.axis_code));
 }
 
 
@@ -841,9 +848,8 @@ bool MinorServoBossImpl::checkScanImpl(
 
 void MinorServoBossImpl::startScan(
         ACS::Time & starting_time, 
-        const double range, 
-        const ACS::Time total_time, 
-        const char *axis_code
+        const MinorServo::MinorServoScan & scan,
+        const Antenna::TRunTimeParameters & antennaInfo
     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
 {
     if(!isReady())
@@ -852,7 +858,7 @@ void MinorServoBossImpl::startScan(
     if(isScanning())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is executing another scan", true);
 
-    startScanImpl(starting_time, range, total_time, string(axis_code));
+    startScanImpl(starting_time, scan.range, scan.total_time, string(scan.axis_code));
 }
 
 

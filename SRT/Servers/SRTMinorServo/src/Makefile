@@ -20,7 +20,8 @@ MinorServoBossImpl_OBJECTS = MinorServoBossImpl utils SetupThread ParkThread Tra
 							 MSBossConfiguration
 MinorServoBossImpl_LIBS = MinorServoStubs MinorServoBossStubs SRTMinorServoLibrary ManagmentDefinitionsStubs ManagementErrors \
 						  IRALibrary ComponentErrors MinorServoErrors acsnc ParserErrors AntennaDefinitionsStubs MountStubs \
-						  AntennaBossStubs AntennaErrors ActiveSurfaceBossStubs SRTActiveSurfaceBossStubs 
+						  AntennaBossStubs AntennaErrors ActiveSurfaceBossStubs SRTActiveSurfaceBossStubs \
+						  MinorServoDefinitionsStubs
 # ----------------------------------------------------------------------
 # List of all possible C-sources (used to create automatic dependencies)
 # ----------------------------------------------------------------------

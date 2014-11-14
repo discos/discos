@@ -214,18 +214,18 @@ public:
      * Check if the scan is achievable (IDL interface)
      *
 	 * @param starting_time the time the scan will start
-     * @param range the total axis movement in mm (centered in the actual position)
-	 * @param total_time the duration of axis movement
-	 * @param axis_code the identification code of the axis
+     * @param scan structure containing the description of the scan to be executed
+     * @param antennaInfo auxiliary information from the antenna
+     * @param runTime auxiliary information computed at run time by the subsystem
      *
      * @return true if the scan is achievable
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
-     bool checkScan(
+     virtual CORBA::Boolean checkScan(
              const ACS::Time starting_time, 
-             double range, 
-             const ACS::Time total_time, 
-             const char *axis_code
+             const MinorServo::MinorServoScan & scan,
+             const Antenna::TRunTimeParameters & antennaInfo,
+             MinorServo::TRunTimeParameters_out runTime
      ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
 
 
@@ -240,7 +240,7 @@ public:
      * @return true if the scan is achievable
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
-     bool checkScanImpl(
+     virtual CORBA::Boolean checkScanImpl(
              const ACS::Time starting_time, 
              double range, 
              const ACS::Time total_time, 
@@ -252,17 +252,15 @@ public:
      * Start the scan of one axis of a MinorServo target.
      *
 	 * @param starting_time the time the scan will start
-     * @param range the total axis movement in mm (centered in the actual position)
-	 * @param total_time the duration of axis movement
-	 * @param axis_code the code of the axis (SRP_TZ, GFR_TZ, ecc.)
+     * @param scan structure containing the description of the scan to be executed
+     * @param antennaInfo auxiliary information from the antenna
      *
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
-     void startScan(
+     virtual void startScan(
              ACS::Time & starting_time, 
-             const double range, 
-             const ACS::Time total_time, 
-             const char *axis_code
+             const MinorServo::MinorServoScan & scan,
+             const Antenna::TRunTimeParameters & antennaInfo
      ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
      
      
