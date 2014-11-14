@@ -220,21 +220,23 @@ void CCore::chooseDefaultDataRecorder(const char *rcvInstance)
 	}
 }
 
-void CCore::changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
+void 
+CCore::changeLogFile(const char *fileName) 
+throw (ComponentErrors::CouldntGetComponentExImpl,
+       ComponentErrors::CORBAProblemExImpl,
+       ManagementErrors::LogFileErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
-	IRA::CString fullName,fullSysName;
+	loadCustomLogger(m_customLogger, m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
+	IRA::CString fullName;
 	IRA::CString logName(fileName);
-	fullName=logName+".log";
-	fullSysName=logName+".xml";
+	fullName = logName + ".log";
 	ACS_LOG(LM_FULL_INFO,"CCore::changeLogFile()",(LM_NOTICE,"NEW_LOG_FILE: %s",(const char *)fullName));
 	try {
 		m_customLogger->flush();
 		m_customLogger->setLogfile((const char *)m_config->getLogDirectory(),
-																	 (const char *)m_config->getSystemLogDirectory(),
-																	 (const char *)fullName,
-																	 (const char *)fullSysName);
+					   (const char *)fullName
+                                          );
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::changeLogFile()");

@@ -510,7 +510,22 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		throw ex;
  	}
  	m_scheduleCounter=m_schedule->getSubScanCounter(subScanidentifier)-1; //need to point before the first scan in the schedule, the first scan has counter==1
- 	m_core->changeLogFile((const char *)m_schedule->getBaseName()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
+        /* Compose log file name as:
+         * schedulename + _ + YEAR + DOY + HOUR + MIN + SEC
+         * ================================================ */
+ 	TIMEVALUE currentUT;
+ 	IRA::CIRATools::getTime(currentUT); // get the current time
+        std::stringstream logfile_name;
+        logfile_name << (const char *)m_schedule->getBaseName();
+        logfile_name <<  "_";
+        logfile_name <<  currentUT.year();
+        logfile_name <<  currentUT.dayOfYear();
+        logfile_name <<  currentUT.hour();
+        logfile_name <<  currentUT.minute();
+        logfile_name <<  currentUT.second();
+        /* Change log file with the new name 
+         * ================================= */
+ 	m_core->changeLogFile((const char *)logfile_name.str().c_str()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
  	// load the procedures associated to the schedule
  	m_core->loadProceduresFile(m_schedule->getPreScanProcedureList());
  	m_active=true;
