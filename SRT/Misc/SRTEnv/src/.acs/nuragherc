@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Paths to the external libraries
+export LD_LIBRARY_PATH=/usr/local/Trolltech/Qt-4.5.2/lib:/usr/local/lib:$LD_LIBRARY_PATH
+export PATH=/usr/local/Trolltech/Qt-4.5.2/bin:/usr/local/bin:$PATH:$HOME/Software/fv5.3
+export QTDIR=/usr/local/Trolltech/Qt-4.5.2
+export QTLIB=/usr/local/Trolltech/Qt-4.5.2/lib
+export QTINC=/usr/local/Trolltech/Qt-4.5.2/include
+export qt_prefix=/usr/local/Trolltech/Qt-4.5.2/lib
+
+# Set the root endpoints
+export NURAGHEROOT=$HOME/Nuraghe
+export NURAGHESETUPBIN=$HOME/bin
+
+# Set the TAG and BRANCH you want to use
+export NURAGHETAG=nuraghe-0.4
+export NURAGHEBRANCH=DerotatorAndMinorServo
+
+# Set the SVN environment
+export TARGETSYS=SRT
+export SYSLOCATION=$NURAGHEROOT/ACS/trunk/
+export SYSTEM_SVN_TAG=NURAGHETAG
+export SVNUSER=gavino
+
+# Set the ACS environment
+export ACS_LOG_STDOUT=5
+export ACS_LOG_CENTRAL=5
+source $HOME/.acs/.bash_profile.acs
+
+# Nuraghe setup aliases
+alias nuragheTrunk="source $NURAGHESETUPBIN/nuragheTrunkSetup.sh"
+alias nuragheTag="source $NURAGHESETUPBIN/nuragheTagSetup.sh"
+alias nuragheBranch="source $NURAGHESETUPBIN/nuragheBranchSetup.sh"
+alias setupNuragheStable=nuragheTab
+
+# Some useful aliases
+alias lo-ssh='ssh gavino@nuraghe-lo'
+alias startnuraghelo='echo "use command: VBoxHeadless -s NURAGHE-LO"'
+alias monitorAcuTemp="watch -n 60 $HOME/bin/showacutemp.sh"
+alias printNuragheSetup='source $NURAGHESETUPBIN/printNuragheSetup.sh'
+
+# Make a trunk setup
+if [ -f $ACS_TMP/nuraghetrunk.lock ]
+    then
+    nuragheTrunk
+fi
+# Make a tag setup
+if [ -f $ACS_TMP/nuraghetag.lock ]
+    then
+    nuragheTag
+fi
+# Make a branch setup
+if [ -f $ACS_TMP/nuraghebranch.lock ]
+    then
+    nuragheBranch
+fi
+
