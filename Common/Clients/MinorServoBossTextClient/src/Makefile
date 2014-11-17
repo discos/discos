@@ -66,7 +66,8 @@ EXECUTABLES_L   =
 _tui_MinorServoBossTextClient_OBJECTS   = MinorServoBossTextClient
 #xxxxx_LDFLAGS   =
 _tui_MinorServoBossTextClient_LIBS      = MinorServoBossStubs IRALibrary ManagmentDefinitionsStubs \
-         TextWindowLibrary ClientErrors ComponentErrors ManagementErrors MinorServoErrors
+         TextWindowLibrary ClientErrors ComponentErrors ManagementErrors MinorServoErrors AntennaDefinitionsStubs \
+		 MinorServoDefinitionsStubs
 
 
 SCRIPTS         = minorservoBossTui
