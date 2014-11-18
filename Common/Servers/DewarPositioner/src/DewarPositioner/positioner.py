@@ -52,6 +52,7 @@ class Positioner(object):
             self.device.setup()
             self._clearOffset()
             self.is_setup = True
+            time.sleep(0.5) # Give the device the time to accomplish the setup
             self._start(self.posgen.goto, setupPosition)
         except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
             raise PositionerError("cannot set the position: %s" %ex.message)
