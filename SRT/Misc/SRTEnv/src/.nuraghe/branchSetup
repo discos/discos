@@ -1,5 +1,4 @@
 #!/bin/sh
-   
 unset ACS_CDB
 unset INTROOT
 
@@ -22,6 +21,8 @@ export NURAGHEVERSION=BRANCH
 source $HOME/.acs/.bash_profile.acs
 export ACS_CDB=$NURAGHEROOT/ACS/branches/$NURAGHEBRANCH/SRT/Configuration
 
+# Customize the promt
+source $NURAGHERC/nuraghePrompt
 # Print the actual setup
-source $NURAGHESETUPBIN/printNuragheSetup.sh
+$NURAGHERC/printNuragheSetup.sh
 

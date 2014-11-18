@@ -8,7 +8,11 @@ alias la='ls -a'
 alias ll='ls -l'
 
 # Import the nuraghe environment
-source $HOME/.acs/nuragherc
+source $HOME/.nuraghe/nuragherc
 
-export PYTHONSTARTUP=$HOME/.pyrc
+# Initialize the Python shell
+if [ -f $HOME/.pyrc ]
+then
+    export PYTHONSTARTUP=$HOME/.pyrc
+fi
 

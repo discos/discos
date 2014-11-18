@@ -1,7 +1,7 @@
 #!/bin/sh
 # Echo only in interactive shell
 if tty -s
-  then 
+then 
   echo "Nuraghe Version: " $NURAGHEVERSION
   echo "CDB set to" $ACS_CDB
   echo "introot set to" $INTROOT

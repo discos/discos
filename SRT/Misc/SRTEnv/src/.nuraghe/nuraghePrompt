@@ -1,0 +1,4 @@
+#!/bin/sh
+bldgrn='\e[1;32m' # Green
+txtrst='\e[0m'    # Text Reset
+PS1="\u@\h:\w (\[$bldgrn\]$NURAGHEVERSION\[$txtrst\]) $ "

@@ -10,16 +10,16 @@ export qt_prefix=/usr/local/Trolltech/Qt-4.5.2/lib
 
 # Set the root endpoints
 export NURAGHEROOT=$HOME/Nuraghe
-export NURAGHESETUPBIN=$HOME/bin
+export NURAGHERC=$HOME/.nuraghe
 
 # Set the TAG and BRANCH you want to use
-export NURAGHETAG=nuraghe-0.4
+export NURAGHETAG=0.4
 export NURAGHEBRANCH=DerotatorAndMinorServo
 
 # Set the SVN environment
 export TARGETSYS=SRT
 export SYSLOCATION=$NURAGHEROOT/ACS/trunk/
-export SYSTEM_SVN_TAG=NURAGHETAG
+export SYSTEM_SVN_TAG=nuraghe-$NURAGHETAG
 export SVNUSER=gavino
 
 # Set the ACS environment
@@ -28,16 +28,16 @@ export ACS_LOG_CENTRAL=5
 source $HOME/.acs/.bash_profile.acs
 
 # Nuraghe setup aliases
-alias nuragheTrunk="source $NURAGHESETUPBIN/nuragheTrunkSetup.sh"
-alias nuragheTag="source $NURAGHESETUPBIN/nuragheTagSetup.sh"
-alias nuragheBranch="source $NURAGHESETUPBIN/nuragheBranchSetup.sh"
-alias setupNuragheStable=nuragheTab
+alias nuragheTrunk="source $NURAGHERC/trunkSetup"
+alias nuragheTag="source $NURAGHERC/tagSetup"
+alias nuragheBranch="source $NURAGHERC/branchSetup"
 
 # Some useful aliases
 alias lo-ssh='ssh gavino@nuraghe-lo'
+alias as-ssh='ssh -X gavino@nuraghe-as'
 alias startnuraghelo='echo "use command: VBoxHeadless -s NURAGHE-LO"'
 alias monitorAcuTemp="watch -n 60 $HOME/bin/showacutemp.sh"
-alias printNuragheSetup='source $NURAGHESETUPBIN/printNuragheSetup.sh'
+alias printNuragheSetup='$NURAGHERC/printNuragheSetup.sh'
 
 # Make a trunk setup
 if [ -f $ACS_TMP/nuraghetrunk.lock ]
@@ -54,4 +54,3 @@ if [ -f $ACS_TMP/nuraghebranch.lock ]
     then
     nuragheBranch
 fi
-

@@ -17,11 +17,13 @@ if [ -f $ACS_TMP/nuraghebranch.lock ]
    touch $ACS_TMP/nuraghetag.lock
 fi
 
-export INTROOT=$NURAGHEROOT/introot
+export INTROOT=$NURAGHEROOT/introotTag-$NURAGHETAG
 export NURAGHEVERSION=TAG-$NURAGHETAG
 source $HOME/.acs/.bash_profile.acs
-export ACS_CDB=$NURAGHEROOT/ACS/tags/$NURAGHETAG/SRT/Configuration
+export ACS_CDB=$NURAGHEROOT/ACS/tags/$SYSTEM_SVN_TAG/SRT/Configuration
 
+# Customize the promt
+source $NURAGHERC/nuraghePrompt
 # Print the actual setup
-source $NURAGHESETUPBIN/printNuragheSetup.sh
+$NURAGHERC/printNuragheSetup.sh
 
