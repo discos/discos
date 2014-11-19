@@ -1,4 +1,15 @@
 #!/bin/sh
 bldgrn='\e[1;32m' # Green
+bldblu='\e[1;34m' # Blu
+bldred='\e[1;31m' # Red
 txtrst='\e[0m'    # Text Reset
-PS1="\u@\h:\w (\[$bldgrn\]$NURAGHEVERSION\[$txtrst\]) $ "
+
+if [ $NURAGHEVERSION == "TRUNK" ]
+then
+    PS1="\u@\h:\w (\[$bldred\]$NURAGHEVERSION\[$txtrst\]) $ "
+elif [ $NURAGHEVERSION == "BRANCH" ]
+then
+    PS1="\u@\h:\w (\[$bldblu\]$NURAGHEVERSION\[$txtrst\]) $ "
+else
+    PS1="\u@\h:\w (\[$bldgrn\]$NURAGHEVERSION\[$txtrst\]) $ "
+fi
