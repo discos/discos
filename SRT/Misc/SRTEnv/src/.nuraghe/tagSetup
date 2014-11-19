@@ -18,7 +18,7 @@ if [ -f $ACS_TMP/nuraghebranch.lock ]
 fi
 
 export INTROOT=$NURAGHEROOT/introotTag-$NURAGHETAG
-export NURAGHEVERSION=TAG-$NURAGHETAG
+export NURAGHEVERSION=STABLE-$NURAGHETAG
 source $HOME/.acs/.bash_profile.acs
 export ACS_CDB=$NURAGHEROOT/ACS/tags/$SYSTEM_SVN_TAG/SRT/Configuration
 

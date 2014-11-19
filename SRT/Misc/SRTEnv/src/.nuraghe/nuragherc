@@ -43,6 +43,7 @@ fi
 alias nuragheTrunk="source $NURAGHERC/trunkSetup"
 alias nuragheTag="source $NURAGHERC/tagSetup"
 alias nuragheBranch="source $NURAGHERC/branchSetup"
+alias nuragheStable=nuragheTag
 
 # Some useful aliases
 alias lo-ssh='ssh gavino@nuraghe-lo'
