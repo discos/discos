@@ -27,6 +27,18 @@ export ACS_LOG_STDOUT=5
 export ACS_LOG_CENTRAL=5
 source $HOME/.acs/.bash_profile.acs
 
+# Import machine dependent configuration
+MACHINENAME=`echo "$HOSTNAME" | cut -d"." -f1`
+CUSTOMRCFILE="$NURAGHERC/$MACHINENAME"rc
+# Ie.: MACHINEMAME=nuraghe-as -> CUSTOMRCFILE=$NURAGHERC/nuraghe-asrc
+# Ie.: MACHINEMAME=nuraghe-lo -> CUSTOMRCFILE=$NURAGHERC/nuraghe-lorc
+if [ -f $CUSTOMRCFILE]
+then
+    source $CUSTOMRCFILE
+else
+    echo "Warning: cannot find $CUSTOMRCFILE"
+fi
+
 # Nuraghe setup aliases
 alias nuragheTrunk="source $NURAGHERC/trunkSetup"
 alias nuragheTag="source $NURAGHERC/tagSetup"
@@ -42,15 +54,15 @@ alias printNuragheSetup='$NURAGHERC/printNuragheSetup.sh'
 # Make a trunk setup
 if [ -f $ACS_TMP/nuraghetrunk.lock ]
     then
-    nuragheTrunk
+    source $NURAGHERC/trunkSetup
 fi
 # Make a tag setup
 if [ -f $ACS_TMP/nuraghetag.lock ]
     then
-    nuragheTag
+    source $NURAGHERC/tagSetup
 fi
 # Make a branch setup
 if [ -f $ACS_TMP/nuraghebranch.lock ]
     then
-    nuragheBranch
+    source $NURAGHERC/branchSetup
 fi
