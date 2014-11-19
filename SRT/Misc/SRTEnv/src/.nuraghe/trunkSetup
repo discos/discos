@@ -25,4 +25,4 @@ export ACS_CDB=$NURAGHEROOT/ACS/trunk/SRT/Configuration
 # Customize the promt
 source $NURAGHERC/nuraghePrompt
 # Print the actual setup
-$NURAGHERC/printNuragheSetup.sh
+# $NURAGHERC/printNuragheSetup.sh

@@ -36,7 +36,10 @@ if [ -f $CUSTOMRCFILE ]
 then
     source $CUSTOMRCFILE
 else
-    echo "Warning: cannot find $CUSTOMRCFILE"
+    echo
+    echo "WARNING: cannot find $CUSTOMRCFILE"
+    touch $CUSTOMRCFILE
+    echo "WARNING: created an empty new one"
 fi
 
 # Nuraghe setup aliases
@@ -62,16 +65,14 @@ fi
 
 # Make a trunk setup
 if [ -f $ACS_TMP/nuraghetrunk.lock ]
-    then
+then
     source $NURAGHERC/trunkSetup
-fi
 # Make a tag setup
-if [ -f $ACS_TMP/nuraghetag.lock ]
-    then
+elif [ -f $ACS_TMP/nuraghetag.lock ]
+then
     source $NURAGHERC/tagSetup
-fi
 # Make a branch setup
-if [ -f $ACS_TMP/nuraghebranch.lock ]
-    then
+elif [ -f $ACS_TMP/nuraghebranch.lock ]
+then
     source $NURAGHERC/branchSetup
 fi
