@@ -1,6 +1,8 @@
 #ifndef CORE_EXTRA_H_
 #define CORE_EXTRA_H_
 
+// Call back and event handlers
+
 /**
  * This is the handler of the events coming from the notification channel published by the Antenna subsystem
  */

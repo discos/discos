@@ -1,6 +1,7 @@
 #ifndef CORE_RESOURCE_H_
 #define CORE_RESOURCE_H_
 
+// Declaration and management of the resources....
 
 #define RESOURCE_INIT m_antennaBoss=Antenna::AntennaBoss::_nil(); \
 									m_receiversBoss=Receivers::ReceiversBoss::_nil();	\
@@ -18,7 +19,10 @@
 									m_activeSurfaceBossError=m_weatherStationError=false; \
 									m_currentDevice=0;\
 									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false; \
-									m_restFrequency.length(0);
+									m_restFrequency.length(0); \
+									m_scanID=0; m_subScanID=0; \
+									m_subScanEpoch=0;
+
 									
 #define RESOURCE_EXEC ACS_NEW_SIMPLE_CONSUMER(m_antennaNC,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,antennaNCHandler,static_cast<void*>(this)); \
 					  m_antennaNC->consumerReady(); \
@@ -152,6 +156,20 @@ bool m_streamPrepared;
 bool m_streamConnected;
 bool m_scanStarted;
 /**
+ * @var Last commanded scan identifier
+ */
+long m_scanID;
+/**
+ * @var Last commanded sub scan identifier
+ */
+long m_subScanID;
+
+/**
+ * This is starting epoch of the last subScan, it could be zero denoting the fact the scan was begun as soon as possible
+ */
+ACS::Time m_subScanEpoch;
+
+/**
  * pointer to the antenna notification channel
 */
 nc::SimpleConsumer<Antenna::AntennaDataBlock> *m_antennaNC;
@@ -190,6 +208,7 @@ ACS::Time m_clearTrackingTime;
  * Stores the ID of the section of the current backend selected as current active device.
  */
 long m_currentDevice;
+
 /**
  * Stores the values of the rest frequencies
  */
@@ -202,6 +221,10 @@ Receivers::TRunTimeParameters m_receiversRunTime;
  * structure used to pass back and forth runtime parameters from the receivers
  */
 Antenna::TRunTimeParameters m_antennaRunTime;
+/**
+ * structure used to pass back and forth runtime parameters from the minor servo
+ */
+MinorServo::TRunTimeParameters m_servoRunTime;
 /**
  * used to get a reference to the antenna boss component.
  * @param ref the pointer to the antenna boss component

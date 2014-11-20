@@ -143,8 +143,14 @@ public:
      * @throw ComponentErrors::UnexpectedExImpl
      */
      void derotatorPark() throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-    			ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
-    			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+      ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
+      ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+
+     /**
+      * Return back the present configuration of the dewar positioner
+      */
+     void getDewarParameter(Receivers::TDerotatorConfigurations& mod,double& pos) throw (
+       ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
 
 	/**
 	 * This method will configure the component that controls the receiver actually identified by the given code
@@ -157,7 +163,9 @@ public:
 	
 	void park()  throw (ManagementErrors::ParkingErrorExImpl);
 	
-	void startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters& antennaInfo);
+	void startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters& antennaInfo) throw(
+			ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl);
 
 	long getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) throw (ComponentErrors::ValidationErrorExImpl,
 			ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);

@@ -18,9 +18,12 @@ void CCore::getScanCounter(DWORD& cc)
 
 void CCore::getCurrentIdentifiers(DWORD& scanID,DWORD& subScanID)
 {
-	if (m_schedExecuter) m_schedExecuter->getCurrentScanIdentifers(scanID,subScanID);
+	if ((m_schedExecuter) && (m_schedExecuter->isScheduleActive())) {
+		m_schedExecuter->getCurrentScanIdentifers(scanID,subScanID);
+	}
 	else {
-		scanID=subScanID=0;
+		scanID=m_scanID;
+		subScanID=m_subScanID;
 	}
 }
 

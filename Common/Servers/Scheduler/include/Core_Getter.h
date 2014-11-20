@@ -1,6 +1,8 @@
 #ifndef CORE_GETTER_H_
 #define CORE_GETTER_H_
 
+// attribute getter functions....
+
 /**
  * This is not thread safe but it is almost atomic.
  * @return the current active device

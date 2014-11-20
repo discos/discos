@@ -33,6 +33,7 @@
 #define FITS_VERSION4 "V.0.91"
 #define FITS_VERSION5 "V.0.92"
 #define FITS_VERSION6 "V.1.0"
+#define FITS_VERSION7 "V.1.01"
 
 #define CURRENT_VERSION FITS_VERSION6
 
@@ -43,8 +44,8 @@
 #define HISTORY3 FITS_VERSION3" The section table has been splitted into two tables: sections and rf inputs table"
 #define HISTORY4 FITS_VERSION4" Added the flux column in section table"
 #define HISTORY5 FITS_VERSION5" SubScanType added as primary header keyword"
-#define HISTORY6 FITS_VERSION6" Added new table to store position of subriflector e primary focus receivers: SERVO TaBLE"
-
+#define HISTORY6 FITS_VERSION6" Added new table to store position of subriflector e primary focus receivers: SERVO TABLE"
+#define HISTORY7 FITS_VERSION7" New keywords in FEED TABLE header to describe derotator configuration"
 
 /**
  * This class is very specific and it used to create a fits file from the data coming from backends that validates the <i>Backends::GenericBackends</i> interface
@@ -340,7 +341,7 @@ bool CFitsWriter::setFeedHeaderKey(const IRA::CString& name, T val, const IRA::C
 		return false;
 	}
 	try {
-		feed_table->addKey(name, val, description);
+		feed_table->addKey((const char *)name, val,(const char *) description);
 	}
 	catch(CCfits::FitsException& fe) {
 		m_lastError = fe.message().c_str();

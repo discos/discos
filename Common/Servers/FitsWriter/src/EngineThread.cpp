@@ -6,6 +6,7 @@
 #include <ManagementErrors.h>
 #include <DateTime.h>
 #include <SkySource.h>
+#include <ReceiversModule.h>
 #include "CommonTools.h"
 
 using namespace IRA;
@@ -92,6 +93,7 @@ bool CEngineThread::processData()
 	double az,el;
 	bool tracking;
 	double hum,temp,press;
+	double derot;
 	ACS::doubleSeq_var servoPositions;
 	long long integrationTime;
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
@@ -149,6 +151,39 @@ bool CEngineThread::processData()
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 		m_data->setStatus(Management::MNG_FAILURE);
 	}
+	try {
+		CCommonTools::getReceiversBoss(m_receiversBoss,m_service,m_config->getReceiversBossComponent(),receiverBossError);
+	}
+	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
+		_IRA_LOGFILTER_LOG_EXCEPTION(ex,LM_ERROR);
+		m_data->setStatus(Management::MNG_FAILURE);
+	}
+	derot=0.0;
+	try {
+		derot=m_receiversBoss->getDerotatorPositionFromHistory(time);
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::processData()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+		m_data->setStatus(Management::MNG_FAILURE);
+		receiverBossError=true;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
+		impl.setOperationName("getDerotatorPositionFromHistory()");
+		impl.setComponentName((const char *)m_config->getReceiversBossComponent());
+		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+		m_data->setStatus(Management::MNG_FAILURE);
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx & ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
+		impl.setOperationName("getDerotatorPositionFromHistory()");
+		impl.setComponentName((const char *)m_config->getReceiversBossComponent());
+		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+		m_data->setStatus(Management::MNG_FAILURE);
+	}
 #ifdef FW_DEBUG
 	out.Format("%f %f %f %f ",ra,dec,az,el);
 	m_file << (const char *) out;
@@ -167,7 +202,7 @@ bool CEngineThread::processData()
 	tdh.az=az;
 	tdh.el=el;
 	tdh.par_angle=IRA::CSkySource::paralacticAngle(tConverter,m_data->getSite(),az,el);
-	tdh.derot_angle=0.333357887; /*********************** get it Now is fixed to 19.1 degrees*******************/
+	tdh.derot_angle=derot;
 	tdh.flag_cal=calOn;
 	tdh.flag_track=tracking;
 	m_data->getMeteo(hum,temp,press);
@@ -686,6 +721,23 @@ void CEngineThread::runLoop()
 						j=m_info.getFeedNumber(); //exit the cycle
 					}
 				}
+				double dewarPos;
+				Receivers::TDerotatorConfigurations dewarMode;
+				m_info.getDewarConfiguration(dewarMode,dewarPos);
+				if (!m_file->setFeedHeaderKey("DEWRTMOD",(const char *)Receivers::Definitions::map(dewarMode),"Dewar positioner configuration mode")) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getFileName());
+					impl.setError(m_file->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					m_data->setStatus(Management::MNG_FAILURE);
+				}
+				if (!m_file->setFeedHeaderKey("DEWUSER",(double)dewarPos,"Dewar initial angle")) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getFileName());
+					impl.setError(m_file->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					m_data->setStatus(Management::MNG_FAILURE);
+				}
 				if (!m_file->addDataTable()) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
@@ -1076,6 +1128,38 @@ void CEngineThread::collectReceiversData()
 			m_data->setStatus(Management::MNG_WARNING);
 			m_info.setInputsTable();
 			//m_data->setCalibrationMarks();
+		}
+		try {
+			Receivers::TDerotatorConfigurations mod;
+			double setupPos;
+			m_receiversBoss->getDewarParameter(mod,setupPos);
+			m_info.setDewarConfiguration(mod,setupPos);
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			m_info.setDewarConfiguration();
+			receiverBossError=true;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
+			impl.setOperationName("getDewarParameter()");
+			impl.setComponentName((const char *)m_config->getReceiversBossComponent());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			m_info.setDewarConfiguration();
+			//m_data->setCalibrationMarks();
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx & ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
+			impl.setOperationName("getDewarParameter()");
+			impl.setComponentName((const char *)m_config->getReceiversBossComponent());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			m_info.setDewarConfiguration();
 		}
 	}
 	else {

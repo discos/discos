@@ -27,7 +27,7 @@
 
 <ErrorCode name="NotAllowedDuringSchedule" shortDescription="The operation is not allowed during schedule execution" description=""/>
 
-<ErrorCode name="TargetIsNotVisible" shortDescription="The selected target is not visible" description=""/>
+<ErrorCode name="TargetOrSubscanNotFeasible" shortDescription="The selected target is not visible or sub scan not feasible" description=""/>
 
 <ErrorCode name="BackendNotAvailable" shortDescription="The selected backend is not available" description=""/>
 
@@ -41,7 +41,11 @@
 
 <ErrorCode name="MinorServoScanError" shortDescription="Error while commanding a scan to the minor servo system" description=""/>
 
-<ErrorCode name="SubscanError" shortDescription="Error during the execution of a subscan" description="">
+<ErrorCode name="TelescopeSubScanError" shortDescription="Error while commanding a sub scan to the telescope" description="">
+	<Member name="Reason" type="string" description="Describes the cause of the error" />	
+</ErrorCode>
+
+<ErrorCode name="SubscanError" shortDescription="Error during the execution of a subscan in the schedule" description="">
 	<Member name="SubScanID" type="long" description="Identifier of the scan" />
 	<Member name="Reason" type="string" description="Describes the cause of the error" />	
 </ErrorCode>

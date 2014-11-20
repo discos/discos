@@ -385,7 +385,7 @@ module Antenna {
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw AntennaErrors::AntennaErrorsEx 
 		 * @param startUT the exact time the scan is supposed to start, if negative or zero it must be started as soon as possible. In that case the argument could return back the computed
-		 *                effective start UT time.
+		 *                effective start UT time (i.e in case of OTF scan).
 		 * @param parameters this stucture is the list of all parameters that are required by Boss to define the sub scan. The caller
 		 *               is responsible for the management of the structure.
 		 * @param secondary this stucture is identical to the previous one, in most cases it is ignored, only on particular cases it is used as a secondary trajectory generator. For example
@@ -498,7 +498,7 @@ module Antenna {
 		 * @param runTime structure used to return some of the run time information about the scan. 
 		 * 	@arg \c azimuth initial azimuth of the current scan
 		 *	@arg \c elevation initial elevation of the current scan
-		 *	@arg \c startEpoch starting ut time of the current scan
+		 *	@arg \c startEpoch starting ut time of the current scan (if startUT!=0 it is always equal to startUT, otherwise it is computed in all scan cases)
 		 *	@arg \c slewingTime expected slewng time to the starting point
 		 *	@arg \c section indicates where in the azimuth range the scan will start
 		 *	@arg \c axis scanning axis of the curretn scan

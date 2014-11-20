@@ -27,7 +27,6 @@ void CCore::initialize()
 	clearStatus();
 	m_currentProceduresFile="";
 	m_lastWeatherTime=0;
-	m_scanID=0;
 }
 
 void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::ProcedureFileLoadingErrorExImpl)
@@ -95,7 +94,6 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("wait",new function1<CCore,constant,void_type,I<double_type> >(this,&CCore::wait),1);
 	m_parser->add("nop",new function0<CCore,constant,void_type >(this,&CCore::nop),0);
 	m_parser->add("waitOnSource",new function0<CCore,constant,void_type >(this,&CCore::waitOnSource),0);
-	m_parser->add("status",new function0<CCore,constant,int_type >(this,&CCore::status),0);
 	m_parser->add("haltSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::haltSchedule),0);
 	m_parser->add("stopSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::stopSchedule),0);
 	m_parser->add("startSchedule",new function2<CCore,non_constant,void_type,I<string_type>,I<string_type> >(this,&CCore::startSchedule),2);
@@ -198,95 +196,6 @@ void CCore::cleanUp()
 	if (m_schedExecuter!=NULL) m_schedExecuter->suspend();
 	m_services->getThreadManager()->destroy(m_schedExecuter);
 	ACS_LOG(LM_FULL_INFO,"CCore::cleanUp()",(LM_INFO,"THREAD_DESTROYED"));
-}
-
-void CCore::chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl)
-{	
-	//************************************************************** /
-	/* It should be forbidden is a schedule is running or recording is active */
-	/* Also the check that the backend is available must be done */
-	/* *****************************************************************/
-	baci::ThreadSyncGuard guard(&m_mutex);
-	IRA::CString instance(bckInstance);
-	if (m_defaultBackendInstance!=instance) {
-		m_defaultBackendInstance=instance;
-		m_defaultBackendError=true;  // this is tricky...in order to force to unload the preset backend and then reload the new one the next time the default backend is required 
-		loadDefaultBackend();  //throw (ComponentErrors::CouldntGetComponentExImpl)
-	}
-}
-
-void CCore::chooseDefaultDataRecorder(const char *rcvInstance) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	//************************************************************** /
-	/* It should be forbidden is a schedule is running or recording is active */
-	/* Also the check that the backend is available must be done */
-	/* *****************************************************************/
-	baci::ThreadSyncGuard guard(&m_mutex);
-	IRA::CString instance(rcvInstance);
-	if (m_defaultDataReceiverInstance!=instance) {
-		m_defaultDataReceiverInstance=instance;
-		m_defaultDataReceiverError=true;  // this is tricky...in order to force to unload the preset data recorder and then reload the new one the next time the default data recorder is required
-		loadDefaultDataReceiver(); // throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
-	}
-}
-
-void CCore::changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
-{
-	baci::ThreadSyncGuard guard(&m_mutex);
-	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
-	IRA::CString fullName,fullSysName;
-	IRA::CString logName(fileName);
-	fullName=logName+".log";
-	fullSysName=logName+".xml";
-	ACS_LOG(LM_FULL_INFO,"CCore::changeLogFile()",(LM_NOTICE,"NEW_LOG_FILE: %s",(const char *)fullName));
-	try {
-		m_customLogger->flush();
-		m_customLogger->setLogfile((const char *)m_config->getLogDirectory(),
-																	 (const char *)m_config->getSystemLogDirectory(),
-																	 (const char *)fullName,
-																	 (const char *)fullSysName);
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::changeLogFile()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_customLoggerError=true;
-		throw impl;
-	}
-	catch (ManagementErrors::ManagementErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::LogFileErrorExImpl,impl,ex,"CCore::changeLogFile()");
-		impl.setFileName((const char *)fullName);
-		throw impl;
-	}
-}
-
-void CCore::getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind) throw (ComponentErrors::CouldntGetComponentExImpl,
-		ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
-{
-	baci::ThreadSyncGuard guard(&m_mutex);
-	loadWeatherStation(m_weatherStation,m_weatherStationError); // throw ComponentErrors::CouldntGetComponentExImpl
-	TIMEVALUE now;
-	IRA::CIRATools::getTime(now);
-	try {
-		if (now.value().value>m_lastWeatherTime+100000000) {  // hard coded for now...ten seconds
-			m_weatherPar=m_weatherStation->getData();
-		}
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::getWeatherStationParameters()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_weatherStationError=true;
-		throw impl;
-	}
-	catch (...) {
-		_EXCPT(ManagementErrors::WeatherStationErrorExImpl,impl,"CCore::getWeatherStationParameters()");
-		throw impl;
-	}
-	temp=m_weatherPar.temperature;
-	hum=m_weatherPar.humidity;
-	pres=m_weatherPar.pressure;
-	wind=m_weatherPar.wind;
 }
 
 void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,
@@ -823,7 +732,7 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 	ACS_LOG(LM_FULL_INFO,"CCore::focusScan()",(LM_NOTICE,"FOCUS_SCAN_DONE"));
 }
 
-void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
+/*void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
 		ManagementErrors::TargetIsNotVisibleExImpl,ManagementErrors::TsysErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
 		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl)
@@ -839,22 +748,12 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	CORBA::Double offset;
 	//Management::TScanAxis scanAxis;
 	IRA::CString obsName,prj,suffix,path,extraPath,baseName;
-	IRA::CString layoutName,schedule/*,targetID*/;
+	IRA::CString layoutName,schedule;
 	ACS::stringSeq layout;
-	//long scanTag=0;
-	//long scanID=1,subScanID;
 	TIMEVALUE now;
 	ACS::Time waitFor;
-	//long long waitMicro;
 	ACS::Time startTime;
 		
-	//obsName=IRA::CString("system");
-	/*prj=IRA::CString("pointingCrossScan");*/
-	//getProjectCode(prj);
-	//layout.length(0);
-	//layoutName=_SCHED_NULLTARGET;
-	//schedule="none";
-	//targetID="crossScanTarget";
 	
 	// now take the mutex
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -871,15 +770,6 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 				bwhm=tmp;
 			}
 		}
-		/*ACS::ROstring_var targetRef=m_antennaBoss->target();
-		if (!CORBA::is_nil(targetRef)) {
-			CORBA::String_var  tmp;
-			tmp=targetRef->get_sync(comp.out());
-			ACSErr::CompletionImpl compImpl(comp);
-			if (compImpl.isErrorFree()) {
-				targetID=(const char *)tmp;
-			}
-		}*/
 	}
 	catch (...) {
 		//in this case we do not want to to do nothing.....it is an error but we can survive
@@ -967,45 +857,16 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	//ManagementErrors::DataTransferSetupErrorExImpl)
 
 	startRecording(startTime,1);
-	/*if (scanFrame==Antenna::ANT_HORIZONTAL) {
-		scanAxis=Management::MNG_HOR_LAT;
-	}
-	else if (scanFrame==Antenna::ANT_EQUATORIAL) {
-		scanAxis=Management::MNG_EQ_LAT;
-	}
-	else {
-		scanAxis=Management::MNG_GAL_LAT;
-	}
-	path=m_config->getSystemDataDirectory()+prj+"/";
-	suffix=targetID;
-	baseName=CCore::computeOutputFileName(startTime,m_site,m_dut1,prj,suffix,extraPath);
-	subScanID=1;
-	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
-	CCore::setupDataTransfer(m_scanStarted,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
-			obsName,prj,baseName,path,extraPath,schedule,targetID,layoutName,layout,scanTag,m_currentDevice,scanID,startTime,subScanID,scanAxis);
-	// start the recording or data transfer
-	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
-	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);*/
+
 	// now set the the data transfer stop
 	waitFor=startTime+duration; // this is the time at which the stop should be issued
 	//waitMicro=(duration/10)/10000; // one tens of the total duration
 	//IRA::CIRATools::getTime(now);
 	guard.release();
 	waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl
-	/*while (now.value().value<waitFor) {
-		IRA::CIRATools::Wait(waitMicro);
-		IRA::CIRATools::getTime(now);
-	}*/
 	//guard.acquire();
 	stopRecording();
 
-	/*// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
-	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
-	// wait for a data transfer to complete before start with the latitude scan
-	guard.release();
-	while (checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError)) {
-		IRA::CIRATools::Wait(0,250000); // 0.25 seconds
-	}*/
 	guard.acquire();
 	// LONGITUDE SCAN..............
 	// now lets go and check the lon scan....typically if a source was commanded before....and it is above the horizon and the scan could be performed
@@ -1040,57 +901,126 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		throw impl;
 	}
 	startRecording(startTime,2);
-	/*if (scanFrame==Antenna::ANT_HORIZONTAL) {
-		scanAxis=Management::MNG_HOR_LON;
-	}
-	else if (scanFrame==Antenna::ANT_EQUATORIAL) {
-		scanAxis=Management::MNG_EQ_LON;
-	}
-	else {
-		scanAxis=Management::MNG_GAL_LON;
-	}
-	suffix=targetID;
-	baseName=CCore::computeOutputFileName(startTime,m_site,m_dut1,prj,suffix,extraPath);
-	subScanID=2;
-	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
-	CCore::setupDataTransfer(m_scanStarted,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
-			obsName,prj,baseName,path,extraPath,schedule,targetID,layoutName,layout,scanTag,m_currentDevice,scanID,startTime,subScanID,scanAxis);
-	// start the recording or data transfer
-	// throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
-	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,startTime,m_streamStarted,m_streamPrepared,m_streamConnected);*/
 	// now set the the data transfer stop
 	waitFor=startTime+duration; // this is the time at which the stop should be issued
 	//waitMicro=(duration/10)/10000; // one tens of the total duration
 	//IRA::CIRATools::getTime(now);
 	guard.release();	
 	waitUntil(waitFor);
-	/*while (now.value().value<waitFor) {
-		IRA::CIRATools::Wait(waitMicro);
-		IRA::CIRATools::getTime(now);
-	}*/
 	//guard.acquire();
 	stopRecording();
-	/*// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
-	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
-	// wait for a couple of seconds before start with the latitude scan
-	guard.release();
-	//bool check=checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError);
-	while (checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError)) {
-		IRA::CIRATools::Wait(0,250000); // 0.25 seconds
-	}*/
 	guard.acquire();
-
-	/*// throw (ComponentErrors::OperationErrorExImpl)
-	CCore::stopScan(m_defaultDataReceiver.in(), m_defaultDataReceiverError,m_scanStarted);
-	CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);*/
 	terminateScan();
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"CROSSSCAN_DONE"));
-}
+}*/
 
-void CCore::setRestFrequency(const ACS::doubleSeq& in)
+void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
+		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
+		ManagementErrors::TsysErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
+		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
 {
+	//no need to get the mutex, because it is already done inside the executor object
+	if (m_schedExecuter) {
+		if (m_schedExecuter->isScheduleActive()) {
+			_THROW_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,"CCore::crossScan()");
+		}
+	}
+	// let's create the scans.....filling up the required fields :-)
+	CORBA::Double bwhm=0.017453; // one degree in radians
+	CORBA::Double offset;
+	//Management::TScanAxis scanAxis;
+	IRA::CString obsName,prj,suffix,path,extraPath,baseName;
+	IRA::CString layoutName,schedule;
+	ACS::stringSeq layout;
+	TIMEVALUE now;
+
+	/*******************************************************/
+	/* THIS MACRO METHOD SHOULD NOT TAKE THE MUTEX; RELYING ON THE MUTEX OF THE CALLED METHODS */
+	/* IF I CAN GET RID OF THE GOOFF CALL TO THE ANTENNA THIS SHOULD BE ACCOMPLISHED VERY EASILY */
+
+	// now take the mutex
 	baci::ThreadSyncGuard guard(&m_mutex);
-	m_restFrequency=in;
+	//make sure the antenna is available.
+	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
+	try {
+		ACSErr::Completion_var comp;
+		ACS::ROdouble_var ref=m_antennaBoss->FWHM();
+		if (!CORBA::is_nil(ref)) {
+			CORBA::Double tmp;
+			tmp=ref->get_sync(comp.out());
+			ACSErr::CompletionImpl compImpl(comp);
+			if (compImpl.isErrorFree()) {
+				bwhm=tmp;
+			}
+		}
+	}
+	catch (...) {
+		//in this case we do not want to to do nothing.....it is an error but we can survive
+	}
+	offset=bwhm*5; // the offset (sky) five times the antenna beam
+	// TSYS SCAN
+	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"TSYS_COMPUTATION"));
+	try {
+		if (!CORBA::is_nil(m_antennaBoss)) {
+			m_antennaBoss->goOff(scanFrame,offset);
+		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::crossScan()");
+			throw impl;
+		}
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::crossScan()");
+		throw impl;
+	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::crossScan()");
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::crossScan()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_antennaBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::crossScan()");
+		m_antennaBossError=true;
+		throw impl;
+	}
+	clearAntennaTracking();
+	guard.release(); // release the mutex...from now I rely on mutex of called methods
+	waitOnSource();
+	/***********************************************/
+	/* I have to think again on I handle the call in case of error */
+	/* isn't the callTsys an operation as all the others? */
+	/*************************************************/
+	try {
+		ACS::doubleSeq tsys;
+		callTSys(tsys);
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		_ADD_BACKTRACE(ManagementErrors::TsysErrorExImpl,impl,ex,"CCore::crossScan()");
+		throw impl;
+	}
+	IRA::CIRATools::Wait(2,0);
+	initRecording(1);
+	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LATITUDE_SCAN"));
+	// start the scan
+	latOTF(scanFrame,span,duration); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	startRecording(1,duration); // start recording
+	stopRecording();
+	// LONGITUDE SCAN..............
+	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LONGITUDE_SCAN"));
+	// start the scan
+	lonOTF(scanFrame,span,duration); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	startRecording(1,duration); // start recording the first subscan
+	stopRecording();
+	startRecording(2,duration); // start recording the second subscan
+	stopRecording();
+	terminateScan();
+	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"CROSSSCAN_DONE"));
 }
 
 void CCore::clearStatus()
@@ -1098,191 +1028,6 @@ void CCore::clearStatus()
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_schedulerStatus=Management::MNG_OK;
 	ACS_LOG(LM_FULL_INFO,"CCore::clearStatus()",(LM_NOTICE,"COMPONENT_STATUS_RESET"));
-}
-
-void CCore::stopSchedule()
-{
-	//no need to get the mutex, because it is already done inside the Schedule Executor thread
-	if (m_schedExecuter) {
-		m_schedExecuter->stopSchedule(true);
-	}
-}
-
-void CCore::haltSchedule()
-{
-	//no need to get the mutex, because it is already done inside the Schedule Executor thread
-	if (m_schedExecuter) {
-		m_schedExecuter->stopSchedule(false);
-	}
-}
-
-void CCore::setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
-{
-	IRA::CString newCode(code);
-	if (newCode=="''") { // if '' given...maps to default user
-		newCode=m_config->getDefaultProjectCode();
-	}
-	if (m_config->getCheckProjectCode()) {
-		IRA::CString path=m_config->getScheduleDirectory()+newCode;
-			if (!IRA::CIRATools::directoryExists(path)) {
-				_EXCPT(ManagementErrors::UnkownProjectCodeErrorExImpl,impl,"CCore::setProjectCode()");
-				throw impl;
-			}
-	}
-	//no need to get the mutex, because it is already done inside the Schedule Executor thread
-	if (m_schedExecuter) {
-		m_schedExecuter->setProjectCode(newCode);
-	}
-}
-
-void CCore::setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,
-		ComponentErrors::OperationErrorExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	baci::ThreadSyncGuard guard(&m_mutex);
-	//ACS::Time timestamp;
-	Backends::GenericBackend_var backend;
-	ACS::ROlong_var sectionsNumber;
-	ACS::ROlongSeq_var inputSection;
-	ACSErr::Completion_var comp;
-	long sections=-1;
-	long input=-1;
-	ACS::longSeq_var iS;
-	ACS::longSeq_var IFs,feeds;
-	ACS::doubleSeq_var bws,freqs;
-	double freq,bw;
-	long IF,feed,inputs;
-	double taper,waveLen;
-	long device;
-	//IRA::CString backendName;
-	if (deviceID<0) {
-		device=m_currentDevice;
-	}
-	else {
-		device=deviceID;
-	}
-	guard.release();
-	//backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
-	guard.acquire();
-	//if (CORBA::is_nil(backend)) {
-	loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
-	backend=m_defaultBackend;
-	/*}
-	else {
-
-	}	*/
-	// get the receiver boss.....
-	loadReceiversBoss(m_receiversBoss,m_receiversBossError); // throw ComponentErrors::CouldntGetComponentExImpl)	
-	try {
-		sectionsNumber=backend->sectionsNumber();
-		inputSection=backend->inputSection();
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::setDevice()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		throw impl;
-	}
-	sections=sectionsNumber->get_sync(comp.out());
-	iS=inputSection->get_sync(comp.out());
-	/*if (backendName!="") {
-		try {
-			m_services->releaseComponent((const char*)backendName);
-		}
-		catch (maciErrType::CannotReleaseComponentExImpl& ex) {
-			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CCore::setDevice()");
-			Impl.setComponentName((const char *)backendName);
-		}
-		catch (...) {
-			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::callTSys())");
-		}
-	}*/
-	if (device>=sections) {
-		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::setDevice()");
-		impl.setReason("device identifier does not exist in the current backend");
-		throw impl;
-	}
-	for (unsigned ii=0;ii<iS->length();ii++) {
-		if (iS[ii]==device) {
-			input=ii;
-			break;
-		}
-	}
-	//********************************
-	// in the case no iS[ii] corresponds to the device/section an error should be risen
-	//********************************
-	try {
-		inputs=backend->getInputs(freqs,bws,feeds,IFs);
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::setDevice()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setDevice()");
-		impl.setReason("Unable to get inputs information from backend");
-		throw impl;
-	}
-	catch (BackendsErrors::BackendsErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setDevice()");
-		impl.setReason("Unable to get inputs information from backend");
-		throw impl;
-	}	
-	if ((input<0) || (input>=inputs)) { //no input for the given section
-		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::setDevice()");
-		impl.setReason("device does not look to have an input");
-		throw impl;
-	}
-	bw=bws[input];
-	freq=freqs[input];
-	feed=feeds[input];
-	IF=IFs[input];
-	try {
-		taper=m_receiversBoss->getTaper(freq,bw,feed,IF,waveLen);
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::setDevice()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_receiversBossError=true;
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setDevice()");
-		impl.setReason("Unable to get taper information from receivers boss");
-		throw impl;
-	}
-	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setDevice()");
-		impl.setReason("Unable to get taper information from receivers boss");
-		throw impl;
-	}
-	loadAntennaBoss(m_antennaBoss,m_antennaBossError);
-	try {
-		m_antennaBoss->computeFWHM(taper,waveLen);
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::setDevice()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_antennaBossError=true;
-		throw impl;
-	}
-	m_currentDevice=device;
-	ACS_LOG(LM_FULL_INFO,"CCore::setDevice()",(LM_NOTICE,"DEFAULT_DEVICE: %ld",m_currentDevice));
-}
-
-void CCore::startSchedule(const char* scheduleFile,const char * startSubScan) throw (
-		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,
-		ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::LogFileErrorExImpl)
-{
-	//no need to get the mutex, because it is already done inside the Schedule Executor thread
-	if (m_schedExecuter) {
- 		//ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
- 		//ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl
-		m_schedExecuter->startSchedule(scheduleFile,startSubScan);
-	}
 }
 
 bool CCore::command(const IRA::CString& cmd,IRA::CString& answer)
@@ -1302,6 +1047,8 @@ bool CCore::command(const IRA::CString& cmd,IRA::CString& answer)
 
 #include "Core_Getter.i"
 
+#include "Core_Operations.i"
+
 /////// PRIVATES
 
 
@@ -1313,4 +1060,3 @@ bool CCore::command(const IRA::CString& cmd,IRA::CString& answer)
 
 #include "Core_Basic.i"
 
-#include "Core_Operations.i"

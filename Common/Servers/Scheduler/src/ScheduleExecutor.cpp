@@ -30,6 +30,14 @@ void CScheduleExecutor::onStop()
 void CScheduleExecutor::runLoop()
 {
 	baci::ThreadSyncGuard guard(&m_mutex); // keep the mutex for thread execution
+	/***************************************************************/
+	/* ************************************************************/
+	/* To be replaced by the new schedule block */
+	Receivers::TReceiversParameters recvPar;
+	MinorServo::MinorServoScan servoPar;
+    servoPar.is_empty_scan=true; // no scan
+    recvPar.dummy=0;
+	/*****************************************************************/
 	if (m_stopMe) {
 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"SCHEDULE_STOPPED_BY_USER"));
 		cleanSchedule(false); //it also sets m_stopMe to false again;
@@ -119,12 +127,11 @@ void CScheduleExecutor::runLoop()
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"CHECKING_THE_SCAN"));
 					Antenna::TTrackingParameters *prim,*sec;
-					Receivers::TReceiversParameters recvPar;
 					m_schedule->getElevationLimits(minEl,maxEl);
 					prim=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.primaryParameters);
 					sec=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
 					//ok=CCore::checkScan(m_schedule->getSchedMode(),m_currentScan,m_currentScanRec,minEl,maxEl,m_antennaBoss.in(),m_antennaBossError);
-					ok=m_core->checkScan(m_currentScan.ut,prim,sec,&recvPar,minEl,maxEl);
+					ok=m_core->checkScan(m_currentScan.ut,prim,sec,&servoPar,&recvPar,minEl,maxEl);
 				}
 				catch (ACSErr::ACSbaseExImpl& ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,ex,"CScheduleExecutor::runLoop()");
@@ -176,15 +183,11 @@ void CScheduleExecutor::runLoop()
 			}
 			case SCAN_PREPARATION: {  // command the scan to the telescope...in case of error the current scan is aborted
 				try {
+					Antenna::TTrackingParameters *prim,*sec;
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"COMMAND_SCAN_TO_THE_TELESCOPE"));
-					//CCore::doScan(m_currentScan,m_currentScanRec,m_antennaBoss.in(),m_antennaBossError);
-					/***************************************************************/
-					//**************************************************************/
-					//*************************************************************/
-					//m_core->doScan(m_currentScan.ut,prim,sec,minEl,maxEl,recvPar);
-					//**************************************************************/
-					//**************************************************************/
-					/****************************************************************/
+					prim=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.primaryParameters);
+					sec=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
+					m_core->doScan(m_currentScan.ut,prim,sec,&servoPar,&recvPar);
 				}
 				catch (ACSErr::ACSbaseExImpl& Ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,Ex,"CScheduleExecutor::runLoop()");
@@ -706,13 +709,11 @@ void CScheduleExecutor::procedureCallBack(const void *param,const IRA::CString& 
 	if (!result) me->m_core->changeSchedulerStatus(Management::MNG_WARNING); //logs are done by parser for runtime, by core class for errors during parsing. The status has to be changed here.
 	me->m_goAhead=true;
 }
-
-
 void CScheduleExecutor::stopRecordingEventHandler(const ACS::Time& time,const void *par)
 {
-	CScheduleExecutor *core;
-	core=static_cast<CScheduleExecutor *>(const_cast<void *>(par));
-	core->stopRecording();
+	CScheduleExecutor *me;
+	me=static_cast<CScheduleExecutor *>(const_cast<void *>(par));
+	me->stopRecording();
 }
 
 void CScheduleExecutor::restartEventHandler(const ACS::Time& time,const void *par)

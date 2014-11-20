@@ -1,6 +1,8 @@
 #ifndef CORE_BASIC_H_
 #define CORE_BASIC_H_
 
+//Some basic operations, they are called by other methods as APIs.
+
 /**
  * This method will close (if necessary) the established connection between a backend and a data receiver.It closes and frees the resources allocated to enable the trasmission. In practice it calls sendStop()
  * terminate(), disconnect() and closeReceiver()

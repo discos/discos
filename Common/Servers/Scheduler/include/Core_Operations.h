@@ -1,6 +1,8 @@
 #ifndef CORE_OPERATIONS_H_
 #define CORE_OPERATIONS_H_
 
+//list of operations and commands that are directly exposed by the component interface, and are mapped to RAL commands
+
 /**
  * Make the current thread wait for the given number of seconds. It can be used stop execution.
  * @param seconds number of seconds to wait, expressed as integer number plus fraction of seconds.
@@ -23,21 +25,111 @@ void nop() const;
  */
 void waitOnSource() const;
 
+/*
+ * Starts a longitude OnTheFly scan
+ * @param scanFrame select which frame is going to be scanned
+ * @param span length of the scan
+ * @param span duration of the scan
+ */
+void lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
+		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+
+/*
+ * Starts a latitude OnTheFly scan
+ * @param scanFrame select which frame is going to be scanned
+ * @param span length of the scan
+ * @param span duration of the scan
+ */
+void latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
+		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+
+
+/**
+ * It changes the current device, first it checks if the corresponding section is existent in the current backend (default backend if no schedule is running, the schedule backend if a schedule runs).
+ * The the section configuration is read and eventually a new beamsize is computed also using the current configuration of the receiver.
+ * @param deviceID identifier of the section (device) of the current backend. If negative, the current value is not changed.
+ */
+void setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,
+		ComponentErrors::OperationErrorExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
+
+/**
+ * It allows to set a new project code. If requested by the component configuration (<i>CheckProjectCode</i>)  the project is checked to be registered in the system.
+ * If not present an error is thrown. The check consist in verifying a folder named "code" exists in <i>SchedDir</i> of the configuration.
+ * @param code new project code
+ * @throw ManagementErrors::UnkownProjectCodeErrorExImpl
+ */
+void setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl);
+
+/**
+ * called to set proper values for the rest frequency
+ * @param in new values
+ */
+void setRestFrequency(const ACS::doubleSeq& in);
+
+/**
+ * This method stops the current schedule, if one is running. If no schedule is active at tehe moment it takes
+ * no action.
+ * This function is thread safe.
+ */
+void stopSchedule();
+
+/**
+ * This method halts the current schedule, if one is runnig. If no schedule is active at the moment it takes
+ * no action. The active schedule is halted after the currently running scan is completed.
+ * This function is thread safe.
+ */
+void haltSchedule();
+
+/**
+ * This method loads a schedule file and starts the execution of the schedule form the given line.
+ * This function is thread safe.
+ * @param scheduleFile string that reports the file name of the schedule to load
+ * @param startSubScan subscan of the schedule to start from
+ * @throw ComponentErrors::MemoryAllocationExImpl
+ * @throw ManagementErrors::ScheduleErrorExImpl
+ * @throw ComponentErrors::AlreadyRunningExImpl
+ * @throw ManagementErrors::SubscanErrorExImpl
+ * @throw ComponentErrors::CouldntGetComponentExImpl
+ * @throw ManagementErrors::LogFileErrorExImpl
+*/
+void startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,
+		ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,
+		ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::LogFileErrorExImpl);
+
+/**
+ * It allows to change the backend elected as default backend, the default backend is the device used for all operation (for example tsys) when a schedule is not running.
+ * @param bckInstance name of the instance of the backend that has to be placed as default backend
+ */
+void chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl);
+
+/**
+ * It allows to change the component elected as default data receiver.
+ * @param rcvInstance name of the instance of the data receiver component
+ */
+void chooseDefaultDataRecorder(const char *rcvInstance) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl);
+
+/**
+ * Allows to change the name of the current log file.
+ * @param fileName new file name.
+ * @param ComponentErrors::CouldntGetComponentExImpl
+ * @param ComponentErrors::CORBAProblemExImpl
+ * @param ManagementErrors::LogFileErrorExImpl
+ */
+void changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
+
+/**
+ * Allows to read out from weather station.
+ * @throw ComponentErrors::CouldntGetComponentExImpl
+ * @throw ManagementErrors::WeatherStationErrorExImpl
+ * @throw ComponentErrors::CORBAProblemExImpl
+ */
+void getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind)  throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
+
 /**
  * initialize the writing of the data
  * @param scaid identifier of the scan
  */
 void initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
-
-/*
- * starts data recording at a given time, other arguments are required in order to prepare the acquisition
- * @param recUt start time in UT
- */
-ACS::Time startRecording(const ACS::Time& recUt,const long& scanId, const long& subScanId, const long& scanTag,const IRA::CString& basePath,
-														 const IRA::CString& suffix,const IRA::CString observerName, const IRA::CString& projectName, const IRA::CString& scheduleFileName,
-														 const IRA::CString& layout, const ACS::stringSeq& layoutProc )  throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-															  ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl, ManagementErrors::DataTransferSetupErrorExImpl,
-															  ComponentErrors::ComponentNotActiveExImpl, ComponentErrors::CouldntGetComponentExImpl);
 
 /**
  * Start the recording at the given time
@@ -51,10 +143,11 @@ void startRecording(const ACS::Time& startTime,const long& subScanId) throw (Com
 /**
  * Starts the recording immediately. It is used to be called by RAL
  * @param subScanId identifier of the subscan
+ * @param duration recording time
  */
-void startRecording(const long& subScanId) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
+void startRecording(const long& subScanId,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
 		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
-		ManagementErrors::DataTransferSetupErrorExImpl);
+		ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::TimerErrorExImpl);
 
 /**
  * Immediately stops the data recording
@@ -70,103 +163,5 @@ void stopRecording() throw (ComponentErrors::OperationErrorExImpl,ManagementErro
  * @param ComponentErrors::CouldntGetComponentExImpl
  */
 void terminateScan() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
-
-/**
- * Check the scan against the telescope whether it could be executed or not. The result could depend also on  scan type, instrument configuration and so on.
- * @param ut required start time for the scan, it could be zero meaning start as soon as possible. As output argument it returns the true start time
- * @param prim primary scan configuration for the subscan (antenna)
- * @param sec primary scan configuration for the subscan (antenna)
- * @param recvPar structure containing the scan configuration for the receivers subsystem.
- * @param minEl elevation lower limit
- * @param maxEl elevation upper limit
- * @throw ComponentErrors::UnexpectedExImpl
- * @throw ComponentErrors::OperationErrorExImpl
- * @throw ComponentErrors::ComponentNotActiveExImpl
- * @throw ComponentErrors::CORBAProblemExImpl
- * @thorw ComponentErrors::CouldntGetComponentExImpl
- * @return true if the scan has been checked successfully
- */
-bool checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
-	const Receivers::TReceiversParameters*const recvPar,const double& minEl,const double& maxEl) throw (ComponentErrors::UnexpectedExImpl,
-	ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
-	ComponentErrors::CouldntGetComponentExImpl);
-
-/**
- * Send to the telescope the commands required to start scan.
- * @throw ComponentErrors::OperationErrorExImpl
- * @throw ComponentErrors::CORBAProblemExImpl
- * @throw ComponentErrors::UnexpectedExImpl
- * @throw ComponentErrors::ComponentNotActiveExImpl
- * @throw ComponentErrors::CouldntGetComponentExImpl
- * @param ut required start time for the scan, it could be zero meaning start as soon as possible. As output argument it returns the true start time
- * @param prim primary scan configuration for the subscan (antenna)
- * @param sec primary scan configuration for the subscan (antenna)
- * @param recvPar structure containing the scan configuration for the receivers subsystem. It may be modified with proper values by the routine.
-*/
-void doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim,const Antenna::TTrackingParameters *const sec,const Receivers::TReceiversParameters& recvPa)
-	throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl,
-	ComponentErrors::CouldntGetComponentExImpl);
-
-/**
- * Computes the scan axis starting from the current configuration of involved sub system bosses.
- * @throw ComponentErrors::ComponentNotActiveExImpl
- * @throw ComponentErrors::CORBAProblemExImpl
- * @throw ComponentErrors::UnexpectedExImpl
- * @throw ComponentErrors::CouldntGetComponentExImpl
- */
-Management::TScanAxis computeScanAxis() throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
-		ComponentErrors::CouldntGetComponentExImpl);
-
-/**
- * This method will close (if necessary) the established connection between a backend and a data receiver.It closes and frees the resources allocated to enable the trasmission. In practice it calls sendStop()
- * terminate(), disconnect() and closeReceiver()
- * @throw ComponentErrors::OperationErrorExImpl
- * @throw ComponentErrors::CORBAProblemExImpl
- * @throw ComponentErrors::UnexpectedExImpl
- * @throw ComponentErrors::CouldntGetComponentExImpl);
- */
-void disableDataTransfer() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
-		ComponentErrors::CouldntGetComponentExImpl);
-
-/**
- * It allows to send a configuration procedure to a backend.
- * @param name name of the procedure
- * @param procedure sequence of commands contained by the configuration procedure
- * @throw ManagementErrors::BackendProcedureErrorExImpl
- * @throw ComponentErrors::CORBAProblemExImpl
- * @throw ComponentErrors::UnexpectedExImpl
- * @throw ComponentErrors::CouldntGetComponentExImpl
- */
-void configureBackend(const IRA::CString& name,const std::vector<IRA::CString>& procedure) throw (ManagementErrors::BackendProcedureErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
-
-/**
- * Enable the transfer between the backend and the receiver. In practice it connects the backend with the receiver itself
- * @throwComponentErrors::OperationErrorExImpl
- * @throw ComponentErrors::CORBAProblemExImpl
- * @throw ComponentErrors::UnexpectedExImpl
- * @throw ComponentErrors::CouldntGetComponentExImpl
- */
-void enableDataTransfer() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
-		ComponentErrors::CouldntGetComponentExImpl);
-
-/**
- * It stops the data transfer between the backend and the configured data recorder.
- * @throw ComponentErrors::OperationErrorExImpl
- * @throw ManagementErrors::BackendNotAvailableExImpl
- * @throw ComponentErrors::CouldntGetComponentExImpl
- */
-void stopDataTransfer() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl);
-
-/**
- * This static method inquiries the DataReceiver to check if the data transfer is still active or not.
- * @throw ComponentErrors::OperationErrorExImpl
- * @throw ComponentErrors::UnexpectedExImpl
- * @throw ComponentErrors::CouldntGetComponentExImpl
- * @return true if the recording is still going on
- */
-bool checkRecording() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
-
-
 
 #endif /* CORE_OPERATIONS_H_ */

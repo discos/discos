@@ -498,7 +498,14 @@ CORBA::Boolean ReceiversBossImpl::checkScan(ACS::Time startUt,const Receivers::T
 {
 	// At the moment no need to perform checks or something
 	// also no need to compute startUT
-	runTime.startEpoch=startUt;
+	if (startUt!=0) {
+		runTime.startEpoch=startUt;
+	}
+	else {
+		TIMEVALUE now;
+		IRA::CIRATools::getTime(now);
+		runTime.startEpoch=now.value().value+2000000; // take now, plus 0.2 sec
+	}
 	runTime.onTheFly=false;
 	return true;
 }
@@ -585,6 +592,28 @@ void ReceiversBossImpl::derotatorPark() throw (CORBA::SystemException,ComponentE
 		throw impl.getComponentErrorsEx();
 	}
 }
+
+void ReceiversBossImpl::getDewarParameter(Receivers::TDerotatorConfigurations_out mod,CORBA::Double_out pos) throw (
+  CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core->getDewarParameter(mod,pos);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::getDewarParameter()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
 
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdoubleSeq,m_plocalOscillator,LO);
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROstring,m_pactualSetup,actualSetup);

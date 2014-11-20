@@ -295,6 +295,17 @@ public:
     virtual void setDerotatorPosition(CORBA::Double position) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
       ReceiversErrors::ReceiversErrorsEx);
 
+    /**
+     * Return the present configuration of the dewar positioner.
+     * @param mod present configuration
+     * @param pos initial position of the derotator.
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+    virtual void getDewarParameter(Receivers::TDerotatorConfigurations_out mod,CORBA::Double_out pos) throw (
+      CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
 	/**
 	 * Returns a reference to the LO property implementation of the IDL interface.
 	 * @return pointer to read-only double sequence property

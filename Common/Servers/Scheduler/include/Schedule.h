@@ -16,8 +16,11 @@
 #include <fstream>
 #include <acstimeDurationHelper.h>
 #include <vector>
-#include <AntennaDefinitionsS.h>
-#include <AntennaBossS.h>
+#include <AntennaDefinitionsC.h>
+#include <ReceiversDefinitionsC.h>
+#include <MinorServoBossC.h>
+#include <AntennaBossC.h>
+#include <ReceiversBossC.h>
 
 #define _SCHED_NULLTARGET "NULL"
 
@@ -27,6 +30,25 @@
 namespace Schedule {
 
 class CParser;
+
+/**
+ * This class quickly maps a subscan (defined by its salient parameters) to the correct subscan configurations structures used to
+ * command the subscan to the telescope.
+ */
+class CSubScanBinder {
+public:
+	CSubScanBinder(Antenna::TTrackingParameters * const primary,Antenna::TTrackingParameters * const secondary,
+	  MinorServo::MinorServoScan * const servo,Receivers::TReceiversParameters * const receievers);
+	~CSubScanBinder();
+	void lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
+	void latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
+private:
+	Antenna::TTrackingParameters *m_primary;
+	Antenna::TTrackingParameters *m_secondary;
+	MinorServo::MinorServoScan *m_servo;
+	Receivers::TReceiversParameters *m_receievers;
+	void init();
+};
 
 /**
  * This is the base class that exposes a pure virtual method that is used by the parser to read the input file.

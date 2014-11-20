@@ -80,57 +80,11 @@ public:
 	 * This function performs all the clean up operation required to free al the resources allocated by the class
 	*/
 	virtual void cleanUp();
-
-	/**
-	 * This method loads a schedule file and starts the execution of the schedule form the given line.
-	 * This function is thread safe.
-	 * @param scheduleFile string that reports the file name of the schedule to load
-	 * @param startSubScan subscan of the schedule to start from
-	 * @throw ComponentErrors::MemoryAllocationExImpl
-	 * @throw ManagementErrors::ScheduleErrorExImpl
-	 * @throw ComponentErrors::AlreadyRunningExImpl
-	 * @throw ManagementErrors::SubscanErrorExImpl
-	 * @throw ComponentErrors::CouldntGetComponentExImpl
-	 * @throw ManagementErrors::LogFileErrorExImpl
-	*/
-	void startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,
-			ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::LogFileErrorExImpl);
 	
 	 /**
 	  * It clears all the alarms from the scheduler
 	  */
 	 void clearStatus();
-	
-	/**
-	 * This method stops the current schedule, if one is runnig. If no schedule is active at tehe moment it takes
-	 * no action.
-	 * This function is thread safe.
-	 */
-	void stopSchedule();
-	
-	/**
-	 * This method halts the current schedule, if one is runnig. If no schedule is active at the moment it takes
-	 * no action. The active schedule is halted after the currently running scan is completed.
-	 * This function is thread safe.
-	 */
-	void haltSchedule();	
-	
-	/**
-	 * Allows to change the name of the current log file.
-	 * @param fileName new file name.
-	 * @param ComponentErrors::CouldntGetComponentExImpl
-	 * @param ComponentErrors::CORBAProblemExImpl
-	 * @param ManagementErrors::LogFileErrorExImpl
-	 */
-	void changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
-
-	/**
-	 * Allows to read out from weather station.
-	 * @throw ComponentErrors::CouldntGetComponentExImpl
-	 * @throw ManagementErrors::WeatherStationErrorExImpl
-	 * @throw ComponentErrors::CORBAProblemExImpl
-	 */
-	void getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind)  throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
 
 	/**
 	 * It computes the system temperature.
@@ -148,8 +102,9 @@ public:
 	 */
 	void crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
 			ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
-			ManagementErrors::TargetIsNotVisibleExImpl,ManagementErrors::TsysErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
-			ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl);
+			ManagementErrors::TsysErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
+			ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,
+			ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
 	
 	/**
 	 * This is a macro operation, it performs a focus scan over the previously commanded source
@@ -173,42 +128,10 @@ public:
 	 * @return the result of the command execution
 	 */ 
 	bool command(const IRA::CString& cmd,IRA::CString& answer);
-	
-	/**
-	 * It changes the current device, first it checks if the corresponding section is existent in the current backend (default backend if no schedule is running, the schedule backend if a schedule runs).
-	 * The the section configuration is read and eventually a new beamsize is computed also using the current configuration of the receiver.
-	 * @param deviceID identifier of the section (device) of the current backend. If negative, the current value is not changed.
-	 */ 
-	void setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,
-			ComponentErrors::OperationErrorExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
-	
-	/**
-	 * It allows to set a new project code. If requested by the component configuration (<i>CheckProjectCode</i>)  the project is checked to be registered in the system.
-	 * If not present an error is thrown. The check consist in verifying a folder named "code" exists in <i>SchedDir</i> of the configuration.
-	 * @param code new project code
-	 * @throw ManagementErrors::UnkownProjectCodeErrorExImpl
-	 */
-	void setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl);
-
-	/**
-	 * It allows to change the backend elected as default backend, the default backend is the device used for all operation (for example tsys) when a schedule is not running.
-	 * @param bckInstance name of the instance of the backend that has to be placed as default backend 
-	 */
-	void chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl);
-	
-	/**
-	 * It allows to change the component elected as default data receiver.
-	 * @param rcvInstance name of the instance of the data receiver component 
-	 */
-	void chooseDefaultDataRecorder(const char *rcvInstance) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl);
-
-	/**
-	 * called to set proper values for the rest frequency
-	 * @param in new values
-	 */
-	void setRestFrequency(const ACS::doubleSeq& in);
 
 	#include "Core_Getter.h"
+
+	#include "Core_Operations.h"
 
 private:
 
@@ -258,11 +181,6 @@ private:
 	 */
 	ACS::Time m_lastWeatherTime;
 
-	/**
-	 * Last commanded scan identifier
-	 */
-	long m_scanID;
-
 	#include "Core_Common.h"
 		
 	#include "Core_Resource.h"
@@ -270,8 +188,6 @@ private:
 	#include "Core_Extra.h" 
 
 	#include "Core_Basic.h"
-
-	#include "Core_Operations.h"
 		 	
 };
 
