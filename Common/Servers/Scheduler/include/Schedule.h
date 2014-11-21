@@ -42,6 +42,9 @@ public:
 	~CSubScanBinder();
 	void lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
 	void latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
+	void track(const char *targetName);
+	void moon();
+	void sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section);
 private:
 	Antenna::TTrackingParameters *m_primary;
 	Antenna::TTrackingParameters *m_secondary;

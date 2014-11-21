@@ -372,6 +372,84 @@ void SchedulerImpl::setProjectCode(const char *code) throw (CORBA::SystemExcepti
 	}
 }
 
+void SchedulerImpl::lonOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->lonOTF(scanFrame,span,duration);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
+void SchedulerImpl::latOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->latOTF(scanFrame,span,duration);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
+void SchedulerImpl::track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->track(targetName);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
+void SchedulerImpl::moon() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->moon();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
+void SchedulerImpl::sidereal(const char * targetName,CORBA::Double ra,CORBA::Double dec,Antenna::TSystemEquinox eq,Antenna::TSections section) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->sidereal(targetName,ra,dec,eq,section);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,Management::ROTSystemStatus,m_pstatus,status);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pscheduleName,scheduleName);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pscanID,scanID);

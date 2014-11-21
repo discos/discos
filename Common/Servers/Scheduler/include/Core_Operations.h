@@ -43,6 +43,47 @@ void lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const 
 void latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
 		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
 
+/**
+ * start the tracking of a source form its catalog identifier
+ * @param name of the target
+ */
+void track(const char *targetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+
+/**
+ * starts the tracking of the moon
+ */
+void moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+
+/**
+ * Starts a sidereal tracking of a source from equatorial coordinates
+ * @param targetName name of the source
+ * @param ra right ascension
+ * @param dec declination
+ * @param eq reference equinox of equatorial coordinate
+ * @param section required section of the azimuth range
+ */
+void sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section) throw (
+	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+
+/*
+ * Sends the Antenna off source for a given numeber of beams sizes
+ * @param frame reference frame
+ * @param beams number of beams sizes to be applied as offset
+ */
+void goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
+		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl);
+
+/**
+ * It computes the system temperature.
+ * @param ComponentErrors::CouldntGetComponentExImpl
+ * @param ComponentErrors::CORBAProblemExImpl
+ * @param ComponentErrors::OperationErrorExImpl
+ * @param ComponentErrors::CouldntReleaseComponentExImpl
+ * @param  tsys list of the tsys given as output, one for each channel of the currently selected backend.
+ * */
+void callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,
+		ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 
 /**
  * It changes the current device, first it checks if the corresponding section is existent in the current backend (default backend if no schedule is running, the schedule backend if a schedule runs).

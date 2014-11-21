@@ -87,24 +87,12 @@ public:
 	 void clearStatus();
 
 	/**
-	 * It computes the system temperature.
-	 * @param ComponentErrors::CouldntGetComponentExImpl
-	 * @param ComponentErrors::CORBAProblemExImpl
-	 * @param ComponentErrors::OperationErrorExImpl 
-	 * @param ComponentErrors::CouldntReleaseComponentExImpl
-	 * @param  tsys list of the tsys given as output, one for each channel of the currently selected backend.
-	 * */
-	void callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,
-			ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
-	
-	/**
 	 * This is a macro operation, it performs a cross scan over a previously commanded source.....
 	 */
 	void crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
 			ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
-			ManagementErrors::TsysErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
-			ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,
-			ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+			ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::AntennaScanErrorExImpl,
+			ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
 	
 	/**
 	 * This is a macro operation, it performs a focus scan over the previously commanded source

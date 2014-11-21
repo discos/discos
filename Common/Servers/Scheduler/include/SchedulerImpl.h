@@ -315,6 +315,66 @@ public:
 	 */
 	virtual void setRestFrequency(const ACS::doubleSeq& rest) throw (CORBA::SystemException);
 
+	/**
+	 * It allows to immediately start an OTF scan along the longitude axis of the given frame.
+	 * A visible and observable source must be already commanded in order to take its equatorial J2000 coordinate as
+	 * center of the OTF scan.
+	 * @param scanFrame frame along which doing the scan
+	 * @param span total lenght of the scan (radians)
+	 * @param duration time required by the scan to complete
+	 * @return the expected start time of the scan, if a the target is not visible a zero is returned
+ 	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void lonOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It allows to immediately start an OTF scan along the latitude axis of the given frame.
+	 * A visible and observable source must be already commanded in order to take its equatorial J2000 coordinate as
+	 * center of the OTF scan.
+	 * @param scanFrame frame along which doing the scan
+	 * @param span total lenght of the scan (radians)
+	 * @param duration time required by the scan to complete
+	 * @return the expected start time of the scan, if a the target is not visible a zero is returned
+ 	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void latOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a sidereal traking over a catalog source.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 * @param targetName name of the source to track, it must be known by the system
+	*/
+	virtual void track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 *  It allows to immediately start a tracking of the moon.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	*/
+	virtual void moon() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It allows to immediately start a tracking of a sidereal source, given its equatorial coordinates
+	 * @param targetName name or identifier of the source
+	 * @param ra right ascension in radians
+	 * @param dec declination in radians
+	 * @param eq reference equinox of the equatorial coordinates
+	 * @param section preferred section of the azimuth cable wrap
+ 	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+	virtual void sidereal(const char * targetName,CORBA::Double ra,CORBA::Double dec,Antenna::TSystemEquinox eq,Antenna::TSections section) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
 	
 private:
 

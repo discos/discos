@@ -6,6 +6,11 @@
 //some common, general use operations, the changes caused by these methods do not have influence on the status of the component
 // and do not have direct interface to RAL.
 
+
+/**
+ *
+ */
+
 /**
  * Check the scan against the telescope whether it could be executed or not. The result could depend also on  scan type, instrument configuration and so on.
  * @param ut required start time for the scan, it could be zero meaning start as soon as possible. As output argument it returns the true start time

@@ -394,22 +394,6 @@ module Antenna {
 		*/ 
 		void startScan(inout ACS::Time startUT,in TTrackingParameters parameters,in TTrackingParameters secondary) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 		
-		/**
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a sidereal traking over a catalog source.
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx 
-		 * @param targetName name of the source to track, it must be known by the system
-		 */ 
-		void track(in string targetName) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
-		
-		/**
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a traking of the moon.
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx 
-		 */ 
-		void moon() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 
 		/**
 		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a skydip from the prsent azimuth position.
@@ -422,28 +406,17 @@ module Antenna {
 		 */
 		ACS::Time skydipScan(in double el1,in double el2,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 
-		/**
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start tracking a given sidereal target given its equatorial coordinates. 
-		 * @param targetName name or identifier of the source
-		 * @param ra right ascension (radians)
-		 * @param dec declination (radians)
-		 * @param eq reference equinox of the equtorial coordinates
-		 * @param section It allows to force the preferred section of the azimuth axis.
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx 
-		 */
-		void sidereal(in string targetName,in double ra,in double dec,in TSystemEquinox eq,in Antenna::TSections section) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
-
 		/*
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go offsource along a given frame. The offset is always done along longitude a part from a particular case.
-		 * If th eframe is horizontal and the current elevation is over the cut off threshold the movement is not done in azimuth but in elevation. A source or a target must already be commanded.
-		 * @param skyOffset this is the sky offset that to be applied(radians). 
+		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go off source along a given frame.
+		 * The offset is always done along longitude a part from a particular case.
+		 * If the frame is horizontal and the current elevation is over the cut off threshold the movement is not done in azimuth but in elevation.
+		 * A source or a target must already be commanded.
+		 * @param beams this is the number of beams applied as offset.
 		 * @throw CORBA::SystemExcpetion
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw AntennaErrors::AntennaErrorsEx 
 		 */
-		 void goOff(in Antenna::TCoordinateFrame frame,in double skyOffset) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		 void goOff(in Antenna::TCoordinateFrame frame,in double beams) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 
 		 /**
 		  * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go to a fixed horizontal position.
@@ -454,34 +427,6 @@ module Antenna {
 		 * @throw AntennaErrors::AntennaErrorsEx
 		  */
 		 void goTo(in double az,in double el);
-		
-		/**
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a longitude On The Fly scan over the currently commanded target. If no target is commanded yet an error is
-		 * thrown. The current target is used as the central point of the scan (taken from the J2000 equatorial). If the target is not above the horizon a zero is returned otherwise the expected start
-		 * time is returned.
-		 * @param scanFrame this indicates the frame along which the scan is done  
-		 * @param span distance or lenght of the scan (radians)
-		 * @param duration duration of the scan in seconds, the combinaiton of duration and span gives the scan velocity
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx 
-		 * @return the expected start time, is zero the scan is not performed because the scan is not visible or the scan will cross the antenna limits.
-		 */ 
-		ACS::Time lonOTFScan(in Antenna::TCoordinateFrame scanFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
-		
-		/**
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a latitude On The Fly scan over the currently commanded target. If no target is commanded yet an error is
-		 * thrown. The current target is used as the central point of the scan (taken from the J2000 equatorial). If the target is not above the horizon a zero is returned otherwise the expected start
-		 * time is returned.
-		 * @param scanFrame this indicates the frame along which the scan is done  
-		 * @param span distance or lenght of the scan (radians)
-		 * @param duration duration of the scan in seconds, the combinaiton of duration and span gives the scan velocity
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx 
-		 * @return the expected start time, is zero the scan is not performed because the scan is not visible or the scan will cross the antenna limits.
-		 */ 
-		ACS::Time latOTFScan(in Antenna::TCoordinateFrame scanFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx); 
 					
 		/**
 		 * This method is only be used internally. Anyone that needs to know if the telescope

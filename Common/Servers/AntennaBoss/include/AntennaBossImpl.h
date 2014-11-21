@@ -426,23 +426,6 @@ public:
 			AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx);
 	
 	/**
-	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a sidereal traking over a catalog source.
-	 * @throw CORBA::SystemExcpetion
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw AntennaErrors::AntennaErrorsEx 
-	 * @param targetName name of the source to track, it must be known by the system
-	*/ 
-	virtual void track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
-			
-	/**
-	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a tracking of the moon.
-	 * @throw CORBA::SystemExcpetion
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw AntennaErrors::AntennaErrorsEx 
-	*/ 
-	virtual void moon() throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
-
-	/**
 	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a skydip scan
 	 * @param el1 sets the first edge of the elevation range, a negative means take the default value
 	 * @param el2 sets the second edge of the elevation range, a negative means take the default value
@@ -455,29 +438,16 @@ public:
 	virtual ACS::Time skydipScan(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 		
 	/**
-	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a traking of a sidereal source, given its equatorial coordinates
-	 * @param targetName name or identifier of the source
-	 * @param ra right ascension in radians
-	 * @param dec declination in radians
-	 * @param eq reference equinox of the equatorial coordinates
-	 * @param section preferred section of the azimuth cable wrap
- 	 * @throw CORBA::SystemExcpetion
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw AntennaErrors::AntennaErrorsEx  
-	 */
-	virtual void sidereal(const char * targetName,CORBA::Double ra,CORBA::Double dec,Antenna::TSystemEquinox eq,Antenna::TSections section) throw (
-			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
-
-	/**
-	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go offsource along a given frame. The Offset is always done in longitude a part the case
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go offsource along a given frame.
+	 * The Offset is always done in longitude a part the case
 	 * of horizontal frame. In that case if the elevation is above a cut off limit the offset is done in latitude.
 	 * @param frame frame involved for the offset
-	 * @param skyOffset total sky offset (radians)
+	 * @param beams number of beams to be applied as offset
  	 * @throw CORBA::SystemExcpetion
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw AntennaErrors::AntennaErrorsEx  
 	 */
-    virtual void goOff(Antenna::TCoordinateFrame frame,CORBA::Double skyOffset) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
+    virtual void goOff(Antenna::TCoordinateFrame frame,CORBA::Double beams) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 
 	/**
 	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go to a fixed horizontal position.
@@ -489,33 +459,6 @@ public:
 	 */
     virtual void goTo(CORBA::Double az,CORBA::Double el) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 
-	/**
-	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start an OTF scan along the longitude axis of the given frame. A visible and observable source must be already commanded
-	 * in order to take its equtorial J200 coordinate as center of the OTF scan.
-	 * @param scanFrame frame along which doing the scan
-	 * @param span total lenght of the scan (radians) 
-	 * @param duration time required by the scan to complete
-	 * @return the expected start time of the scan, if a the target is not visible a zero is returned
- 	 * @throw CORBA::SystemExcpetion
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw AntennaErrors::AntennaErrorsEx  
-	 */	
-    virtual ACS::Time lonOTFScan(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
-			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
-	/**
-	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start an OTF scan along the latitude axis of the given frame. A visible and observable source must be already commanded
-	 * in order to take its equtorial J200 coordinate as center of the OTF scan.
-	 * @param scanFrame frame along which doing the scan
-	 * @param span total lenght of the scan (radians) 
-	 * @param duration time required by the scan to complete
-	 * @return the expected start time of the scan, if a the target is not visible a zero is returned
- 	 * @throw CORBA::SystemExcpetion
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw AntennaErrors::AntennaErrorsEx  
-	 */	
-    virtual ACS::Time latOTFScan(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
-			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
-    
 	/**
 	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start an On The Fly scan over a central point. The central point is
 	 * given in J2000 equatorial frame and the scan is done along the elevation axis of the telescope.

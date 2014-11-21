@@ -63,6 +63,88 @@ void CCore::latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span
 	m_subScanEpoch=startTime;
 }
 
+void CCore::track(const char *targetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	ACS::Time startTime=0; // start asap
+	Antenna::TTrackingParameters primary,secondary;
+	MinorServo::MinorServoScan servo;
+	Receivers::TReceiversParameters receievers;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	binder.track(targetName);
+	startTime=0; // it means start as soon as possible
+	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	m_subScanEpoch=startTime;
+}
+
+void CCore::moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	ACS::Time startTime=0; // start asap
+	Antenna::TTrackingParameters primary,secondary;
+	MinorServo::MinorServoScan servo;
+	Receivers::TReceiversParameters receievers;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	binder.moon();
+	startTime=0; // it means start as soon as possible
+	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	m_subScanEpoch=startTime;
+}
+
+void CCore::sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section) throw (
+	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	ACS::Time startTime=0; // start asap
+	Antenna::TTrackingParameters primary,secondary;
+	MinorServo::MinorServoScan servo;
+	Receivers::TReceiversParameters receievers;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	binder.sidereal(targetName,ra,dec,eq,section);
+	startTime=0; // it means start as soon as possible
+	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	m_subScanEpoch=startTime;
+}
+
+void CCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
+		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
+	try {
+		if (!CORBA::is_nil(m_antennaBoss)) {
+			m_subScanEpoch=0;
+			m_antennaBoss->goOff(frame,beams); // go off 3 beam sizes
+			clearAntennaTracking();
+		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::goOff()");
+			throw impl;
+		}
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::goOff()");
+		throw impl;
+	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::goOff()");
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::goOff()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_antennaBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::goOff()");
+		m_antennaBossError=true;
+		throw impl;
+	}
+}
+
 void CCore::chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl)
 {
 	//************************************************************** /
@@ -313,10 +395,6 @@ void CCore::setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetCo
 	//if (CORBA::is_nil(backend)) {
 	loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
 	backend=m_defaultBackend;
-	/*}
-	else {
-
-	}	*/
 	// get the receiver boss.....
 	loadReceiversBoss(m_receiversBoss,m_receiversBossError); // throw ComponentErrors::CouldntGetComponentExImpl)
 	try {
@@ -407,6 +485,219 @@ void CCore::setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetCo
 	m_currentDevice=device;
 	ACS_LOG(LM_FULL_INFO,"CCore::setDevice()",(LM_NOTICE,"DEFAULT_DEVICE: %ld",m_currentDevice));
 }
+
+void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,
+		ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
+{
+	Backends::GenericBackend_var backend;
+	ACS::doubleSeq_var freq;
+	ACS::doubleSeq_var bandWidth;
+	ACS::longSeq_var feed;
+	ACS::doubleSeq_var skyFreq;
+	ACS::doubleSeq_var skyBw;
+	ACS::doubleSeq ratio;
+	ACS::doubleSeq_var mark,tpi,zero,tpiCal;
+	ACS::longSeq_var IFs;
+	double scaleFactor;
+	long inputs;
+	IRA::CString outLog;
+	IRA::CString backendName;
+
+	//backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
+	baci::ThreadSyncGuard guard(&m_mutex);
+	//if (CORBA::is_nil(backend)) {
+	loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
+	backend=m_defaultBackend;
+	loadReceiversBoss(m_receiversBoss,m_receiversBossError); // throw ComponentErrors::CouldntGetComponentExImpl& err)
+	//Now get information from the backend about all the involved inputs.....
+	try {
+		inputs=backend->getInputs(freq,bandWidth,feed,IFs);
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get inputs information from backend");
+		throw impl;
+	}
+	catch (BackendsErrors::BackendsErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get inputs information from backend");
+		throw impl;
+	}
+	// call the receivers boss in order to get the calibration diode values......
+	try {
+		mark=m_receiversBoss->getCalibrationMark(freq,bandWidth,feed,IFs,skyFreq.out(),skyBw.out(),scaleFactor);
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_receiversBossError=true;
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get calibration diode values");
+		throw impl;
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get calibration diode values");
+		throw impl;
+	}
+	//wait for the calibration diode to settle......
+	//Now contact the backend to get the TotalPower when the calibration diode is switched off
+	try {
+		tpi=backend->getTpi();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get TPI measurements");
+		throw impl;
+	}
+	catch (BackendsErrors::BackendsErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get TPI measurements");
+		throw impl;
+	}
+	try {
+		zero=backend->getZero();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get TPI zero measurements");
+		throw impl;
+	}
+	catch (BackendsErrors::BackendsErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get TPI zero measurements");
+		throw impl;
+	}
+	// now turn again the calibration diode on
+	try {
+		m_receiversBoss->calOn();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_receiversBossError=true;
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Could not turn the calibration mark on");
+		throw impl;
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Could not turn the calibration mark on");
+		throw impl;
+	}
+	//wait for the calibration diode to switch on completely
+	guard.release();
+	IRA::CIRATools::Wait(m_config->getTsysGapTime());
+	guard.acquire();
+	//Now contact the backend to get the TotalPower and readings.
+	try {
+		tpiCal=backend->getTpi();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get TPI cal measurements");
+		throw impl;
+	}
+	catch (BackendsErrors::BackendsErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Unable to get TPI cal measurements");
+		throw impl;
+	}
+	//eventually let's make sure the calibration diode is off again
+	try {
+		m_receiversBoss->calOff();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_receiversBossError=true;
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Could not turn the calibration mark off");
+		throw impl;
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+		impl.setReason("Could not turn the calibration mark off");
+		throw impl;
+	}
+	// computes the tsys and the Kelvin over counts ratio.......
+	ratio.length(inputs);
+	tsys.length(inputs);
+	for (int i=0;i<inputs;i++) {
+		if ((mark[i]>0.0) && (tpiCal[i]>tpi[i])) {
+			//ratio[i]=(tpiCal[i]-tpi[i])/mark[i];
+			ratio[i]=mark[i]/(tpiCal[i]-tpi[i]);
+			ratio[i]*=scaleFactor;
+			tsys[i]=(tpi[i]-zero[i])*ratio[i];
+		}
+		else {
+			ratio[i]=1.0;
+			tsys[i]=-1.0;
+		}
+	}
+	//Now contact the backend to give back some results.....
+	try {
+		backend->setKelvinCountsRatio(ratio,tsys);
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		throw impl;
+	}
+	//Now let's compose a message to log
+	for (int i=0;i<inputs;i++) {
+		outLog.Format("DEVICE/%d Feed: %d, IF: %d, Freq: %lf, Bw: %lf/",i,feed[i],IFs[i],freq[i],bandWidth[i]);
+		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
+		outLog.Format("CALTEMP/%d %lf(%lf)",i,mark[i],scaleFactor);
+		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
+		outLog.Format("TPICAL/%d %lf",i,tpiCal[i]);
+		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
+		outLog.Format("TPIZERO/%d %lf",i,zero[i]);
+		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
+		outLog.Format("TPI/%d %lf",i,tpi[i]);
+		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
+		outLog.Format("TSYS/%d %lf",i,tsys[i]);
+		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
+	}
+}
+
 void CCore::stopSchedule()
 {
 	//no need to get the mutex, because it is already done inside the Schedule Executor thread

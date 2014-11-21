@@ -90,7 +90,7 @@ module Antenna {
 	*/
 	enum TVradDefinition {
 		ANT_RADIO,  			/*!< radio definition  */
-		ANT_OPTICAL,          /*!< otical definition */
+		ANT_OPTICAL,          /*!< optical definition */
 		ANT_REDSHIFT,         /*!< red shift */
 		ANT_UNDEF_DEF    /*!<  definition is undefined */
 	};
@@ -98,7 +98,7 @@ module Antenna {
 	ACS_ENUM(TVradDefinition);
 
 	/**
-	 * Enlist the supported traking curve generators
+	 * Enlist the supported tracking curve generators
 	*/
 	enum TGeneratorType {
 		ANT_SIDEREAL,            /*!< perform a sidereal tracking of a source  */     
@@ -194,37 +194,37 @@ module Antenna {
 	
 		
 	/**
-	 * This structure is used to fill all the runtime information (from teh antenna) regarding the current scan
+	 * This structure is used to fill all the runtime information (from the antenna) regarding the current scan
 	*/
 	typedef struct RunTime {
-	/**
-	 * expected azimuth at the beggining of the scan
-	*/
-	double azimuth;
-	/**
-	 * expected elevation at the beggining of the scan
-	*/
-	double elevation;
-	/**
-	 * expected starting ut time
-	*/ 
-	ACS::Time startEpoch;
-	/**
-	 * This flags inform the the scan is an On-The-Fly 
-	 */
-	boolean onTheFly; 
-	/**
-	 * expected slewing time
-	*/ 
-	ACS::TimeInterval slewingTime;
-	/**
-	 * expected azituh section at the begging of the scan
-	*/
-	Antenna::TAzimuthSection section;
-	/**
-	 * scan axis of the current scan
-	*/ 
-	Management::TScanAxis axis;
+		/**
+	 	 * expected azimuth at the beggining of the scan
+	 	 */
+		double azimuth;
+		/**
+	 	 * expected elevation at the beggining of the scan
+	 	 */
+		double elevation;
+		/**
+	 	 * expected starting ut time
+	 	 */
+		ACS::Time startEpoch;
+		/**
+	 	 * This flags inform the the scan is an On-The-Fly
+	 	 */
+		boolean onTheFly;
+		/**
+		 * expected slewing time
+		*/
+		ACS::TimeInterval slewingTime;
+		/**
+		 * expected azimuth section at the begging of the scan
+		 */
+		Antenna::TAzimuthSection section;
+		/**
+		 * scan axis of the current scan
+		 */
+		Management::TScanAxis axis;
 	} TRunTimeParameters;
 		
 };

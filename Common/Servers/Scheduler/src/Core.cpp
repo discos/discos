@@ -110,6 +110,14 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("skydip",new function3<CCore,non_constant,void_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(this,&CCore::skydip),3);
 	m_parser->add("agc","_tp_agc",2);
 	m_parser->add("restFrequency",new function1<CCore,non_constant,void_type,I<doubleSeq_type> >(this,&CCore::setRestFrequency),1);
+	m_parser->add("lonOTF",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(this,&CCore::lonOTF),3);
+	m_parser->add("latOTF",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(this,&CCore::latOTF),3);
+	m_parser->add("goOff",new function2<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(this,&CCore::goOff),2);
+	m_parser->add("moon",new function0<CCore,non_constant,void_type >(this,&CCore::moon),0);
+	m_parser->add("sidereal",new function5<CCore,non_constant,void_type,I<string_type>,I<rightAscension_type<rad,true> >,
+			I<declination_type<rad,true> >,I<enum_type<AntennaEquinox2String,Antenna::TSystemEquinox > >,
+			I<enum_type<AntennaSection2String,Antenna::TSections> > >(this,&CCore::sidereal),5);
+	m_parser->add("track",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::track),1);
 
 
 	//add remote commands ************  should be loaded from a CDB table............................**********/
@@ -125,15 +133,9 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("antennaStop","antenna",1,&CCore::remoteCall);
 	m_parser->add("antennaSetup","antenna",1,&CCore::remoteCall);	
 	m_parser->add("preset","antenna",1,&CCore::remoteCall);
-	m_parser->add("moon","antenna",1,&CCore::remoteCall);
-	m_parser->add("lonOTF","antenna",1,&CCore::remoteCall);
-	m_parser->add("latOTF","antenna",1,&CCore::remoteCall);
-	m_parser->add("goOff","antenna",1,&CCore::remoteCall);
 	m_parser->add("goTo","antenna",1,&CCore::remoteCall);
 	m_parser->add("skydipOTF","antenna",1,&CCore::remoteCall);
-	m_parser->add("sidereal","antenna",1,&CCore::remoteCall);
 	m_parser->add("bwhm","antenna",1,&CCore::remoteCall);
-	m_parser->add("track","antenna",1,&CCore::remoteCall);
 	m_parser->add("azelOffsets","antenna",1,&CCore::remoteCall);
 	m_parser->add("radecOffsets","antenna",1,&CCore::remoteCall);
 	m_parser->add("lonlatOffsets","antenna",1,&CCore::remoteCall);
@@ -196,237 +198,6 @@ void CCore::cleanUp()
 	if (m_schedExecuter!=NULL) m_schedExecuter->suspend();
 	m_services->getThreadManager()->destroy(m_schedExecuter);
 	ACS_LOG(LM_FULL_INFO,"CCore::cleanUp()",(LM_INFO,"THREAD_DESTROYED"));
-}
-
-void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,
-		ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	Backends::GenericBackend_var backend;
-	ACS::doubleSeq_var freq;
-	ACS::doubleSeq_var bandWidth;
-	ACS::longSeq_var feed;
-	ACS::doubleSeq_var skyFreq;
-	ACS::doubleSeq_var skyBw;
-	ACS::doubleSeq ratio;
-	ACS::doubleSeq_var mark,tpi,zero,tpiCal;
-	ACS::longSeq_var IFs;
-	double scaleFactor;
-	long inputs;
-	IRA::CString outLog;
-	IRA::CString backendName;
-	
-	//backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
-	baci::ThreadSyncGuard guard(&m_mutex);
-	//if (CORBA::is_nil(backend)) {
-	loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
-	backend=m_defaultBackend;
-	/*}
-	else {
-	}*/
-	loadReceiversBoss(m_receiversBoss,m_receiversBossError); // throw ComponentErrors::CouldntGetComponentExImpl& err)	
-	//Now get information from the backend about all the involved inputs.....
-	try {
-		inputs=backend->getInputs(freq,bandWidth,feed,IFs);
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Unable to get inputs information from backend");
-		throw impl;
-	}
-	catch (BackendsErrors::BackendsErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Unable to get inputs information from backend");
-		throw impl;
-	}
-	// call the receivers boss in order to get the calibration diode values......
-	try {
-		mark=m_receiversBoss->getCalibrationMark(freq,bandWidth,feed,IFs,skyFreq.out(),skyBw.out(),scaleFactor);
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_receiversBossError=true;
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Unable to get calibration diode values");
-		throw impl;
-	}
-	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Unable to get calibration diode values");
-		throw impl;
-	}
-	//wait for the calibration diode to settle......
-	/*guard.release();
-	IRA::CIRATools::Wait(m_config->getTsysGapTime());
-	guard.acquire();*/
-	//Now contact the backend to get the TotalPower when the calibration diode is switched off
-	try {
-		tpi=backend->getTpi();
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Unable to get TPI measurements");
-		throw impl;
-	}
-	catch (BackendsErrors::BackendsErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Unable to get TPI measurements");
-		throw impl;
-	}
-	try {
-		zero=backend->getZero();
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Unable to get TPI zero measurements");
-		throw impl;
-	}
-	catch (BackendsErrors::BackendsErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Unable to get TPI zero measurements");
-		throw impl;
-	}
-	// now turn again the calibration diode on
-	try {
-		m_receiversBoss->calOn();
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_receiversBossError=true;
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Could not turn the calibration mark on");
-		throw impl;
-	}
-	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Could not turn the calibration mark on");
-		throw impl;
-	}
-	//wait for the calibration diode to switch on completely
-	guard.release();
-	IRA::CIRATools::Wait(m_config->getTsysGapTime());
-	guard.acquire();
-	//Now contact the backend to get the TotalPower and readings.
-	try {
-		tpiCal=backend->getTpi();
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Unable to get TPI cal measurements");
-		throw impl;
-	}
-	catch (BackendsErrors::BackendsErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Unable to get TPI cal measurements");
-		throw impl;
-	}
-	//eventually let's make sure the calibration diode is off again 
-	try {
-		m_receiversBoss->calOff();
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_receiversBossError=true;
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Could not turn the calibration mark off");
-		throw impl;
-	}
-	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
-		impl.setReason("Could not turn the calibration mark off");
-		throw impl;
-	}
-	// computes the tsys and the Kelvin over counts ratio.......
-	ratio.length(inputs);
-	tsys.length(inputs);
-	for (int i=0;i<inputs;i++) {
-		if ((mark[i]>0.0) && (tpiCal[i]>tpi[i])) {
-			//ratio[i]=(tpiCal[i]-tpi[i])/mark[i];
-			ratio[i]=mark[i]/(tpiCal[i]-tpi[i]);
-			ratio[i]*=scaleFactor;
-			tsys[i]=(tpi[i]-zero[i])*ratio[i];
-		}
-		else {
-			ratio[i]=1.0;
-			tsys[i]=-1.0;
-		}	
-	}
-	//Now contact the backend to give back some results.....
-	try {
-		backend->setKelvinCountsRatio(ratio,tsys);
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		throw impl;
-	}
-	//release the backend...if necessary
-	/*if (backendName!="") {
-		try {
-			m_services->releaseComponent((const char*)backendName);
-		}
-		catch (maciErrType::CannotReleaseComponentExImpl& ex) {
-			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CCore::callTSys()");
-			Impl.setComponentName((const char *)backendName);
-		}
-		catch (...) {
-			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::callTSys())");
-		}
-	}*/
-	//Now let's compose a message to log
-	for (int i=0;i<inputs;i++) {
-		outLog.Format("DEVICE/%d Feed: %d, IF: %d, Freq: %lf, Bw: %lf/",i,feed[i],IFs[i],freq[i],bandWidth[i]);
-		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("CALTEMP/%d %lf(%lf)",i,mark[i],scaleFactor);
-		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));		
-		outLog.Format("TPICAL/%d %lf",i,tpiCal[i]);
-		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("TPIZERO/%d %lf",i,zero[i]);
-		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("TPI/%d %lf",i,tpi[i]);
-		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("TSYS/%d %lf",i,tsys[i]);
-		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-	}
 }
 
 void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
@@ -914,10 +685,12 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"CROSSSCAN_DONE"));
 }*/
 
-void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
-		ManagementErrors::TsysErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
-		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
+		ManagementErrors::NotAllowedDuringScheduleExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
+		ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
+		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,
+		ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
 {
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {
@@ -925,86 +698,23 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 			_THROW_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,"CCore::crossScan()");
 		}
 	}
-	// let's create the scans.....filling up the required fields :-)
-	CORBA::Double bwhm=0.017453; // one degree in radians
-	CORBA::Double offset;
-	//Management::TScanAxis scanAxis;
 	IRA::CString obsName,prj,suffix,path,extraPath,baseName;
 	IRA::CString layoutName,schedule;
 	ACS::stringSeq layout;
+	ACS::doubleSeq tsys;
 	TIMEVALUE now;
-
-	/*******************************************************/
-	/* THIS MACRO METHOD SHOULD NOT TAKE THE MUTEX; RELYING ON THE MUTEX OF THE CALLED METHODS */
-	/* IF I CAN GET RID OF THE GOOFF CALL TO THE ANTENNA THIS SHOULD BE ACCOMPLISHED VERY EASILY */
-
-	// now take the mutex
-	baci::ThreadSyncGuard guard(&m_mutex);
-	//make sure the antenna is available.
-	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
-	try {
-		ACSErr::Completion_var comp;
-		ACS::ROdouble_var ref=m_antennaBoss->FWHM();
-		if (!CORBA::is_nil(ref)) {
-			CORBA::Double tmp;
-			tmp=ref->get_sync(comp.out());
-			ACSErr::CompletionImpl compImpl(comp);
-			if (compImpl.isErrorFree()) {
-				bwhm=tmp;
-			}
-		}
-	}
-	catch (...) {
-		//in this case we do not want to to do nothing.....it is an error but we can survive
-	}
-	offset=bwhm*5; // the offset (sky) five times the antenna beam
+	// the mutex is not necessary as it's taken internally by all the called procedures, generally this macro calls should not required the mutex
+	//baci::ThreadSyncGuard guard(&m_mutex);
 	// TSYS SCAN
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"TSYS_COMPUTATION"));
-	try {
-		if (!CORBA::is_nil(m_antennaBoss)) {
-			m_antennaBoss->goOff(scanFrame,offset);
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::crossScan()");
-			throw impl;
-		}
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::crossScan()");
-		throw impl;
-	}
-	catch (AntennaErrors::AntennaErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::crossScan()");
-		throw impl;
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::crossScan()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_antennaBossError=true;
-		throw impl;
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::crossScan()");
-		m_antennaBossError=true;
-		throw impl;
-	}
-	clearAntennaTracking();
-	guard.release(); // release the mutex...from now I rely on mutex of called methods
+
+	//throw (ComponentErrors::CouldntGetComponentExImpl,
+	//			ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+	//			ComponentErrors::UnexpectedExImpl);
+	goOff(scanFrame,3.0); // go off 3 beans sizes
 	waitOnSource();
-	/***********************************************/
-	/* I have to think again on I handle the call in case of error */
-	/* isn't the callTsys an operation as all the others? */
-	/*************************************************/
-	try {
-		ACS::doubleSeq tsys;
-		callTSys(tsys);
-	}
-	catch (ACSErr::ACSbaseExImpl& ex) {
-		_ADD_BACKTRACE(ManagementErrors::TsysErrorExImpl,impl,ex,"CCore::crossScan()");
-		throw impl;
-	}
-	IRA::CIRATools::Wait(2,0);
+	callTSys(tsys);
+	wait(1.5);
 	initRecording(1);
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LATITUDE_SCAN"));
 	// start the scan

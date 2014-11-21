@@ -71,7 +71,56 @@ void CSubScanBinder::latOTF(const Antenna::TCoordinateFrame& scanFrame,const dou
 	// The other subsystems can stay with defaults
 }
 
+void CSubScanBinder::sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section)
+{
+	m_secondary->secondary=false; m_secondary->paramNumber=0; m_secondary->applyOffsets=false;
+	m_secondary->type=Antenna::ANT_NONE; m_secondary->enableCorrection=true;
+	m_primary->type=Antenna::ANT_SIDEREAL;
+	m_primary->parameters[0]=ra;
+	m_primary->parameters[1]=dec;
+	m_primary->paramNumber=2;
+	m_primary->frame=Antenna::ANT_EQUATORIAL;
+	m_primary->equinox=eq;
+	m_primary->section=section;
+	m_primary->targetName=CORBA::string_dup(targetName);
+	m_primary->secondary=false;
+	m_primary->applyOffsets=false;
+	m_primary->enableCorrection=true;
+	// The other subsystems can stay with defaults
+}
 
+void CSubScanBinder::moon()
+{
+	m_secondary->type=Antenna::ANT_NONE;
+	m_secondary->secondary=false;
+	m_secondary->applyOffsets=false;
+	m_secondary->paramNumber=0;
+	m_secondary->enableCorrection=true;
+	m_primary->type=Antenna::ANT_MOON;
+	m_primary->secondary=false;
+	m_primary->targetName=CORBA::string_dup("Moon");
+	m_primary->applyOffsets=false;
+	m_primary->section=Antenna::ACU_NEUTRAL;
+	m_primary->enableCorrection=true;
+	// The other subsystems can stay with defaults
+}
+
+void CSubScanBinder::track(const char *targetName)
+{
+	m_secondary->type=Antenna::ANT_NONE;
+	m_secondary->secondary=false;
+	m_secondary->applyOffsets=false;
+	m_secondary->paramNumber=0;
+	m_secondary->enableCorrection=true;
+	m_primary->type=Antenna::ANT_SIDEREAL;
+	m_primary->secondary=false;
+	m_primary->paramNumber=0;
+	m_primary->applyOffsets=false;
+	m_primary->targetName=CORBA::string_dup(targetName);
+	m_primary->section=Antenna::ACU_NEUTRAL;
+	m_primary->enableCorrection=true;
+	// The other subsystems can stay with defaults
+}
 
 void CSubScanBinder::init()
 {
