@@ -40,6 +40,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         'derotatorGetConfiguration': ('getConfiguration', ()), 
         'derotatorPark': ('park', ()),
         'derotatorSetOffset': ('setOffset', (float,)),
+        'derotatorGetOffset': ('getOffset', ()),
         'derotatorClearOffset': ('clearOffset', ()),
         'derotatorSetRewindingMode': ('setRewindingMode', (str,)),
         'derotatorGetRewindingMode': ('getRewindingMode', ()),
@@ -621,7 +622,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 return (success, answer)
             except Exception, ex:
                 success = False
-                answer = 'Error - %s' %(ex.getReason() if hasattr(ex, 'getReason') else ex.message)
+                msg = ex.message if ex.message else 'unexpected exception'
+                answer = 'Error - %s' %(ex.getReason() if hasattr(ex, 'getReason') else msg)
                 logger.logError(answer)
                 return (success, answer)
 
