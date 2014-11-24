@@ -59,8 +59,8 @@ Parleremo delle configurazioni e del riavvolgimento nelle prossime sezioni.
 
 .. _oiconfigurations:
 
-Configurazione del DewarPositioner
-==================================
+Configurazione 
+==============
 
 Il ``DewarPositioner`` ha cinque configurazioni:
 :ref:`fixed <fixed>`,
@@ -311,7 +311,7 @@ in cui viene comandata la scansione lundo un dato asse.
 
 
 Interrompere l'aggiornamento
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Se si vuole interrompere l'aggiornamento della posizione, si deve 
 impostare la configurazione :ref:`fixed <fixed>`. In questo caso il derotatore si 
 fermerà all'ultima posizione comandata.

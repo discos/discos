@@ -149,6 +149,9 @@ def derotatorSetConfiguration():
 def derotatorSetOffset():
     """TODO"""
 
+def derotatorGetOffset():
+    """TODO"""
+
 def derotatorSetPosition():
     """TODO"""
 

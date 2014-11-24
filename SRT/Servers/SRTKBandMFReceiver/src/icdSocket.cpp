@@ -180,10 +180,38 @@ double icdSocket::getActPosition() throw (
 
 
 double icdSocket::getPositionDiff() throw (ComponentErrors::SocketErrorExImpl) {
-    return getActPosition() - m_cmdPosition;
+    try {
+        return (getActPosition() - m_cmdPosition);
+    }
+    catch (DerotatorErrors::ValidationErrorExImpl & ex) {
+        CUSTOM_LOG(LM_FULL_INFO, "SRTKBandDerotator::icdSocket::getPositionDiff", 
+                (LM_WARNING, "validation error: cannot compute the position difference"));
+        _THROW_EXCPT(
+                ComponentErrors::SocketErrorExImpl, 
+                "icdSocket::getPositionDiff(): validation error, cannot compute the position difference"
+        );
+    }
+    catch (DerotatorErrors::CommunicationErrorExImpl & ex) {
+        CUSTOM_LOG(LM_FULL_INFO, "SRTKBandDerotator::icdSocket::getPositionDiff", 
+                (LM_WARNING, "communication error: cannot compute the position difference"));
+        _THROW_EXCPT(
+                ComponentErrors::SocketErrorExImpl, 
+                "icdSocket::getPositionDiff(): communication error, cannot compute the position difference"
+        );
+    }
+    catch (...) {
+        CUSTOM_LOG(LM_FULL_INFO, "SRTKBandDerotator::icdSocket::getPositionDiff", 
+                (LM_WARNING, "unexpected error: cannot compute the position difference"));
+        _THROW_EXCPT(
+                ComponentErrors::SocketErrorExImpl, 
+                "icdSocket::getPositionDiff(): unexpected error, cannot compute the position difference"
+        );
+    }
+
 }   
 
 bool icdSocket::isTracking() {
+    return true; // TODO: remove me!
     bool flag = false;
     try {
         flag = fabs(getPositionDiff()) < m_TRACKING_DELTA ? true : false;
