@@ -25,7 +25,7 @@ CDB_SCHEMAS = Managment ProcedureFile
 #
 # IDL Files and flags
 #
-IDL_FILES = ManagmentDefinitions DataReceiver FitsWriter MBFitsWriter Scheduler ExternalClients CalibrationTool CustomLogger
+IDL_FILES = DataReceiver FitsWriter MBFitsWriter Scheduler ExternalClients CalibrationTool CustomLogger
 IDL_TAO_FLAGS =
 USER_IDL =
 

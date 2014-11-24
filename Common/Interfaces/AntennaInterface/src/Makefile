@@ -29,7 +29,7 @@ CDB_SCHEMAS = Antenna Mount Station PointingModel
 # 
 # IDL Files and flags
 # 
-IDL_FILES = AntennaDefinitions Observatory Mount PointingModel EphemGeneratorMACRO_include \
+IDL_FILES = Observatory Mount PointingModel EphemGeneratorMACRO_include \
 EphemGenerator SkySource OTF Refraction AntennaBoss Moon
 IDL_TAO_FLAGS =
 USER_IDL =

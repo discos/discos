@@ -23,7 +23,7 @@ CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable \
 			  DewarPositionerActions
 
 # IDL Files and flags
-IDL_FILES = ReceiversDefinitions CommonReceiverInterface ReceiversBoss \
+IDL_FILES = CommonReceiverInterface ReceiversBoss \
 			GenericReceiver LocalOscillatorInterface \
 			GenericDerotator DewarPositioner
 

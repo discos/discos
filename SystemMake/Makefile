@@ -17,7 +17,7 @@ ifeq ($(TARGETSYS),SRT)
 	MODULES:=SRTDox \
 		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors XBackendErrors \
 		SRTActiveSurfaceErrors \
-		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface \
+		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface \
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger XBackend \
@@ -53,7 +53,7 @@ ifeq ($(TARGETSYS),MED)
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=MEDDox \
 		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors\
-		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface\
+		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface\
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
