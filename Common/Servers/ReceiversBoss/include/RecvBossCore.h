@@ -146,6 +146,11 @@ public:
       ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
       ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
 
+     void derotatorRewind(const long& steps) throw (ComponentErrors::ValidationErrorExImpl,
+       ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+       ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl,
+       ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+
      /**
       * Return back the present configuration of the dewar positioner
       */

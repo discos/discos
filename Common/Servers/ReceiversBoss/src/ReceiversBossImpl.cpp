@@ -129,6 +129,8 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 			I<enum_type<RewindModes_converter,Receivers::TRewindModes,RewindModes_WildCard> > >(m_core,&CRecvBossCore::derotatorMode),2);
 	m_parser->add("derotatorPark",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::derotatorPark),0);
 	m_parser->add("derotatorPosition",new function1<CRecvBossCore,non_constant,void_type, I<angle_type<SimpleParser::deg> > >(m_core,&CRecvBossCore::setDerotatorPosition),1);
+	m_parser->add("derotatorRewind",new function1<CRecvBossCore,non_constant,void_type,I<long_type> >(m_core,&CRecvBossCore::derotatorRewind),1);
+
 
 	ACS_LOG(LM_FULL_INFO,"ReceiversBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
@@ -556,7 +558,7 @@ void ReceiversBossImpl::derotatorRewind(CORBA::Long steps) throw (
 		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
-		//m_core->derotatorMode(mode,rewind);
+		m_core->derotatorRewind(steps);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

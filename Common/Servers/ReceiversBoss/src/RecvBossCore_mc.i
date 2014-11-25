@@ -711,6 +711,16 @@ void CRecvBossCore::setDerotatorPosition(const double& pos) throw (ReceiversErro
 	throw impl;
 }
 
+void CRecvBossCore::derotatorRewind(const long& steps) throw (ComponentErrors::ValidationErrorExImpl,
+  ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+  ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl,
+  ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+{
+	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorRewind()");
+	m_status=Management::MNG_WARNING;
+	throw impl;
+}
+
 void CRecvBossCore::derotatorPark() throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
     			ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
     			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
