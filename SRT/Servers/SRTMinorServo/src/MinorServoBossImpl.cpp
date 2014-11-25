@@ -862,7 +862,17 @@ void MinorServoBossImpl::startScan(
     if(isScanning())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is executing another scan", true);
 
-    startScanImpl(starting_time, scan.range, scan.total_time, string(scan.axis_code));
+    if(scan.is_empty_scan) {
+        return ;
+    }
+    else {
+        startScanImpl(
+                starting_time, 
+                scan.range, 
+                scan.total_time, 
+                string(scan.axis_code)
+        );
+    }
 }
 
 
