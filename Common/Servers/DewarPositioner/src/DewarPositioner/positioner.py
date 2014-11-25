@@ -302,17 +302,15 @@ class Positioner(object):
 
 
     def park(self, parkPosition=0):
+        self._clearOffset()
         if self.isSetup():
             self.stopUpdating()
             try:
                 Positioner.generalLock.acquire()
-                self._clearOffset()
                 self._start(self.posgen.goto, parkPosition)
-                self._setDefault()
             finally:
                 Positioner.generalLock.release()
-        else:
-            raise NotAllowedError('positioner not ready: a setup() is required')
+        self._setDefault()
 
 
     def setRewindingMode(self, mode):

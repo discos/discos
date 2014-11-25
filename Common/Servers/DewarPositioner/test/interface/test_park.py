@@ -22,10 +22,10 @@ class ParkTest(unittest2.TestCase):
         self.assertAlmostEqual(self.derotator.getActPosition(), 0, places=1)
 
     def test_configuration(self):
-        """Verify after a park() the DewarPositioner is not configured"""
+        """Verify we can perform a park() also in case the DewarPositioner is not ready"""
         self.positioner.park()
         self.assertEqual(self.positioner.isConfigured(), False)
-        self.assertRaises(ComponentErrorsEx, self.positioner.park)
+        self.positioner.park() # Do not raise an exception
 
 
 if __name__ == '__main__':

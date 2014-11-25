@@ -167,27 +167,25 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc.getComponentErrorsEx()
 
     def park(self):
-        if self.positioner.isReady():
-            try:
+        try:
+            if self.positioner.isReady():
                 parkPosition = float(self.cdbconf.getAttribute('ParkPosition'))
                 self.positioner.park(parkPosition)
-                self._setDefaultSetup()
-            except NotAllowedError, ex:
-                logger.logError(ex.message)
-                exc = ComponentErrorsImpl.NotAllowedExImpl()
-                exc.setReason(ex.message)
-                raise exc.getComponentErrorsEx()
-            except Exception, ex:
-                logger.logError(ex.message)
-                exc = ComponentErrorsImpl.UnexpectedExImpl()
-                exc.setData('Reason', ex.message)
-                raise exc.getComponentErrorsEx()
-        else:
-            reason = 'positioner not ready: a setup() is required'
-            logger.logError(reason)
+            else:
+                logger.logWarning('positioner not ready: a setup() is required')
+                self.positioner.park()
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(reason)
+            exc.setReason(ex.message)
             raise exc.getComponentErrorsEx()
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setData('Reason', ex.message)
+            raise exc.getComponentErrorsEx()
+        finally:
+            self._setDefaultSetup()
 
     def getPosition(self):
         try:

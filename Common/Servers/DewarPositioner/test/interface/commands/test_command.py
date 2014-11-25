@@ -29,8 +29,7 @@ class CommandTest(unittest2.TestCase):
         self.assertEqual(success, False)
         self.assertRegexpMatches(answer, 'Error - missing arguments, type help')
         success, answer = self.dp.command('derotatorPark=a,b')
-        self.assertEqual(success, False)
-        self.assertRegexpMatches(answer, 'Error - positioner not ready: a setup')
+        self.assertEqual(success, True)
 
     def test_command_fails(self):
         """Verify the answer is the exception message and success is False"""

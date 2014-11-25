@@ -13,9 +13,9 @@ class PositionerParkTest(unittest2.TestCase):
         self.cdbconf = CDBConf()
 
     def test_notConfigured(self):
-        """Verify it raises an exception if not yet configured"""
+        """Verify it does not raise an exception if not yet configured"""
         p = Positioner(self.cdbconf)
-        self.assertRaises(NotAllowedError, p.park)
+        p.park()
 
     def test_set_park_position(self):
         """Vefify the park() method sets the device position."""
