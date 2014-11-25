@@ -285,6 +285,15 @@ public:
     virtual void derotatorPark() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
     /**
+     * Allows to perform a manual rewind of the derotator.
+     * @param steps number of steps (it depends on the currently configured receiver)
+     * @throw CORBA::SystemException
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw ComponentErrors::ComponentErrorsEx
+     */
+    virtual void derotatorRewind(CORBA::Long steps) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+    /**
      * It allows to set the initial position (receivers feed geometry) of the derotator. It is valid only in case the FIXED or CUSTOM configuration
      * are active (@sa <i>derotatorMode</i>).
      * @param position new position in degrees

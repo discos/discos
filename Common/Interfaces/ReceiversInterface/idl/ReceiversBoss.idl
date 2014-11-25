@@ -143,6 +143,14 @@ module Receivers {
          * @param position the initial position (degrees)
          */
         void setDerotatorPosition(in double position) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+        /**
+         * Allows to perform a manual rewind of the derotator.
+         * @param steps number of steps (it depends on the currently configured receiver)
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void derotatorRewind(in long steps)  raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
               
         /**
          * This method allows to collect the current position of the derotator, if derotator is not available or it is not activated an error is thrown.

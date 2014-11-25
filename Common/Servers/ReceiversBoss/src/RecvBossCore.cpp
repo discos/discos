@@ -387,9 +387,9 @@ void CRecvBossCore::derotatorMode(const Receivers::TDerotatorConfigurations& mod
 	try {
 		// According to IDL documentation this should also:
 		// 1) resets offsets
-		// 3) set rewind mode to AUTO
+		// 3) set rewind mode to MANUAL
 		m_dewarPositioner->setup(m_currentRecvCode);
-		m_rewindMode=Receivers::RCV_AUTO_REWIND;
+		m_rewindMode=Receivers::RCV_MANUAL_REWIND;
 		m_updateMode=Receivers::RCV_UNDEF_DEROTCONF;
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -528,7 +528,7 @@ void CRecvBossCore::derotatorPark() throw (ReceiversErrors::NoDewarPositioningEx
 		throw impl;
 	}
 	m_updateMode=Receivers::RCV_UNDEF_DEROTCONF;
-	m_rewindMode=Receivers::RCV_AUTO_REWIND;
+	m_rewindMode=Receivers::RCV_UNDEF_REWIND;
 	loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
 	try {
 		// According to IDL documentation this should also:
