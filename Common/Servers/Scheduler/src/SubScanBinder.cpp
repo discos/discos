@@ -39,6 +39,10 @@ void CSubScanBinder::lonOTF(const Antenna::TCoordinateFrame& scanFrame,const dou
 	m_primary->targetName=CORBA::string_dup("otf"); // not strictly necessary as the system will take the last commanded name
 	m_primary->section=Antenna::ACU_NEUTRAL;
 	m_primary->enableCorrection=true;
+    m_servo->is_empty_scan=true;
+    m_servo->axis_code=CORBA::string_dup("");
+    m_servo->range=0;
+    m_servo->total_time=0;
 	// The other subsystems can stay with defaults
 }
 
@@ -68,6 +72,10 @@ void CSubScanBinder::latOTF(const Antenna::TCoordinateFrame& scanFrame,const dou
 	m_primary->targetName=CORBA::string_dup("otf"); // not strictly necessary as the system will take the last commanded name
 	m_primary->section=Antenna::ACU_NEUTRAL;
 	m_primary->enableCorrection=true;
+    m_servo->is_empty_scan=true;
+    m_servo->axis_code=CORBA::string_dup("");
+    m_servo->range=0;
+    m_servo->total_time=0;
 	// The other subsystems can stay with defaults
 }
 
@@ -86,6 +94,10 @@ void CSubScanBinder::sidereal(const char * targetName,const double& ra,const dou
 	m_primary->secondary=false;
 	m_primary->applyOffsets=false;
 	m_primary->enableCorrection=true;
+    m_servo->is_empty_scan=true;
+    m_servo->axis_code=CORBA::string_dup("");
+    m_servo->range=0;
+    m_servo->total_time=0;
 	// The other subsystems can stay with defaults
 }
 
@@ -102,6 +114,10 @@ void CSubScanBinder::moon()
 	m_primary->applyOffsets=false;
 	m_primary->section=Antenna::ACU_NEUTRAL;
 	m_primary->enableCorrection=true;
+    m_servo->is_empty_scan=true;
+    m_servo->axis_code=CORBA::string_dup("");
+    m_servo->range=0;
+    m_servo->total_time=0;
 	// The other subsystems can stay with defaults
 }
 
@@ -119,6 +135,10 @@ void CSubScanBinder::track(const char *targetName)
 	m_primary->targetName=CORBA::string_dup(targetName);
 	m_primary->section=Antenna::ACU_NEUTRAL;
 	m_primary->enableCorrection=true;
+    m_servo->is_empty_scan=true;
+    m_servo->axis_code=CORBA::string_dup("");
+    m_servo->range=0;
+    m_servo->total_time=0;
 	// The other subsystems can stay with defaults
 }
 
@@ -143,7 +163,7 @@ void CSubScanBinder::init()
 		m_servo->range=0;
 		m_servo->total_time=0;
 		m_servo->axis_code=CORBA::string_dup("");;
-		m_servo->is_empty_scan=false;
+		m_servo->is_empty_scan=true;
 		m_receievers->dummy=0;
 }
 /*

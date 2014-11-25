@@ -199,7 +199,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 		try {
 			if (!CORBA::is_nil(m_minorServoBoss)) {
 				servoUT=ut;
-				m_minorServoBoss->startScan(receiversUT,*servoPar,m_antennaRunTime);
+				//m_minorServoBoss->startScan(receiversUT,*servoPar,m_antennaRunTime);
 				ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"MINOR_SERVO_SCAN_EPOCH %lld",servoUT));
 			}
 			else {

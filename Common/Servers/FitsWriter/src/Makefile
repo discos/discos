@@ -40,7 +40,7 @@ testWriter_LIBS = IRALibrary
 testBulk_OBJECTS  = testBulkTransmission
 testBulk_LIBS     = IRALibrary FitsWriterStubs GenericBackendStubs ComponentErrors ClientErrors \
 	bulkDataStubs bulkDataReceiverStubs bulkDataCallback ManagmentDefinitionsStubs DataReceiverStubs ReceiversDefinitionsStubs baci maci \
-	maciClient bulkDataSenderStubs BackendsErrors ManagementErrors
+	maciClient bulkDataSenderStubs MinorServoDefinitionsStubs BackendsErrors ManagementErrors
 
 # Libraries (public and local)
 # ----------------------------
@@ -53,7 +53,7 @@ FitsWriterImpl_OBJECTS   = FitsWriterImpl ReceiverCallback DataCollection Engine
 FitsWriter CollectorThread MetaData
 FitsWriterImpl_LIBS = baci maci FitsWriterStubs DataReceiverStubs ComponentErrors ManagementErrors ReceiversErrors bulkDataReceiverStubs\
                  ManagmentDefinitionsStubs ACSBulkDataError bulkDataStubs IRALibrary\
-                 bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs \
+                 bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs MinorServoDefinitionsStubs \
                  EphemGeneratorStubs BackendsDefinitionsStubs ObservatoryStubs MinorServoBossStubs MinorServoErrors\
                  GenericWeatherStationStubs ReceiversBossStubs ReceiversDefinitionsStubs CommonReceiverInterfaceStubs SchedulerStubs ManagmentDefinitionsStubs
 

@@ -112,7 +112,7 @@ CDB_SCHEMAS =
 # 
 # IDL Files and flags
 # 
-IDL_FILES = AntennaDefinitions ReceiversDefinitions BackendsDefinitions ManagmentDefinitions
+IDL_FILES = ManagmentDefinitions AntennaDefinitions ReceiversDefinitions BackendsDefinitions
 TAO_IDLFLAGS =
 USER_IDL =
 #

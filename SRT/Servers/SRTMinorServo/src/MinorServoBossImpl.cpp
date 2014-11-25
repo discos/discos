@@ -644,12 +644,16 @@ CORBA::Boolean MinorServoBossImpl::checkScan(
 
     runTime.startEpoch = starting_time != 0 ? starting_time : getTimeStamp();
     runTime.onTheFly = false;
-
-    return checkScanImpl(
-            starting_time, 
-            scan.range, 
-            scan.total_time, 
-            string(scan.axis_code));
+    if(scan.is_empty_scan) {
+        return true;
+    }
+    else {
+        return checkScanImpl(
+                starting_time, 
+                scan.range, 
+                scan.total_time, 
+                string(scan.axis_code));
+    }
 }
 
 
