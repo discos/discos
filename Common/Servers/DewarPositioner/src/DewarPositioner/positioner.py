@@ -124,7 +124,7 @@ class Positioner(object):
             elif not self.conf.isConfigured():
                 raise NotAllowedError('CDB not configured: a CDBConf.setConfiguration() is required')
             elif self.isUpdating():
-                raise NotAllowedError('the positionier is already updating: a stopUpdating() is required')
+                self.stopUpdating()
             elif self.conf.getAttribute('DynamicUpdatingAllowed') != 'true':
                 pass # Do nothing
             elif not self.siteInfo:
@@ -298,7 +298,7 @@ class Positioner(object):
         finally:
             self.control.stop = False
             self.control.mustUpdate = False
-        time.sleep(0.3)
+            time.sleep(0.3)
 
 
     def park(self, parkPosition=0):
@@ -438,7 +438,7 @@ class Positioner(object):
                     args=(posgen, vargs)
             )
             self.t.start()
-            time.sleep(0.3) # In case of goto, take the time to command the position
+            time.sleep(0.2) # In case of goto, take the time to command the position
         else:
             raise NotAllowedError('not configured: a setConfiguration() is required')
 

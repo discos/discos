@@ -18,7 +18,7 @@ class RewindTest(unittest2.TestCase):
 
     def test_number_of_steps_oor(self):
         """Raise ComponentErrors when the number of steps is out of range"""
-        with self.assertRaisesRegexp(ComponentErrorsEx, 'actual pos: {0.0}'):
+        with self.assertRaisesRegexp(ComponentErrorsEx, 'cannot rewind the derotator'):
             self.positioner.rewind(4)
 
     def test_not_positive_number_of_steps(self):

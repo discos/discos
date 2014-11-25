@@ -145,7 +145,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                     device, 
                     float(self.cdbconf.getAttribute('SetupPosition')))
             self.setConfiguration('FIXED')
-            self.setRewindingMode('AUTO')
+            self.setRewindingMode('MANUAL')
             self.actualSetup = self.commandedSetup
         except PositionerError, ex:
             logger.logError(ex.message)
@@ -205,6 +205,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setData('Reason', ex.message)
             raise exc.getComponentErrorsEx()
+
 
     def setPosition(self, position):
         if not self.isReady():
@@ -465,7 +466,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         if self.positioner.isUpdating():
             self.positioner.stopUpdating()
         # The unit of time is `seconds`
-        total_wait_time = 2 
+        max_wait_time = 2 
         counter = 0
         step = 0.1
         while self.positioner.isUpdating():
