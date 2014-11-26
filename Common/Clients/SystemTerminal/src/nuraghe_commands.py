@@ -366,7 +366,7 @@ def setLO():
 
 def setSection():
     """
-    setSection=sect,startFreq,bw,feed,sampleRate,bins 
+    setSection=sect,startFreq,bw,feed,mode,sampleRate,bins 
     configures the backend section sect.
     """
 

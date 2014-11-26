@@ -138,6 +138,7 @@ module Receivers {
 	     * @throw DerotatorErrors::CommunicationErrorEx
          */
         void setPosition(in double position) raises (
+            ComponentErrors::ComponentErrorsEx,
             DerotatorErrors::PositioningErrorEx,
             DerotatorErrors::CommunicationErrorEx
         );

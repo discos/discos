@@ -726,13 +726,10 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LONGITUDE_SCAN"));
 	// start the scan
 	lonOTF(scanFrame,span,duration); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
-	startRecording(1,duration); // start recording the first subscan
-	stopRecording();
 	startRecording(2,duration); // start recording the second subscan
 	stopRecording();
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"GEP_STOPPED_IT"));
 	terminateScan();
-
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"CROSSSCAN_DONE"));
 }
 

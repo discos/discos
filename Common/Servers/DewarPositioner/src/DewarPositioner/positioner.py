@@ -123,8 +123,6 @@ class Positioner(object):
                 raise NotAllowedError('positioner not configured: a setup() is required')
             elif not self.conf.isConfigured():
                 raise NotAllowedError('CDB not configured: a CDBConf.setConfiguration() is required')
-            elif self.isUpdating():
-                self.stopUpdating()
             elif self.conf.getAttribute('DynamicUpdatingAllowed') != 'true':
                 pass # Do nothing
             elif not self.siteInfo:
@@ -134,6 +132,8 @@ class Positioner(object):
             elif sector not in sectors:
                 raise NotAllowedError('sector %s not in %s' %(sector, sectors))
             else:
+                if self.isUpdating():
+                    self.stopUpdating()
                 try:
                     updatingConf = self.conf.getUpdatingConfiguration(axis)
                     initialPosition = float(updatingConf['initialPosition'])
@@ -290,6 +290,7 @@ class Positioner(object):
 
     def stopUpdating(self):
         """Stop the updating thread"""
+        logger.logNotice('stopping the derotator position updating thread')
         try:
             self.control.stop = True
             self.t.join(timeout=10)
@@ -301,6 +302,7 @@ class Positioner(object):
             self.control.stop = False
             self.control.mustUpdate = False
             time.sleep(0.3)
+            logger.logNotice('derotator position updating thread stopped')
 
 
     def park(self, parkPosition=0):

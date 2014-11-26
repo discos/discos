@@ -33,7 +33,7 @@ class PosGenerator(object):
             raise PosGeneratorError('cannot get the latitude: %s' %ex.message)
         except Exception, ex:
             raeson = 'cannot get the %s property objects' %source._get_name()
-            logger.logDebug(raeson)
+            logger.logNotice(raeson)
             raise PosGeneratorError(raeson)
 
         last_zerodiv_time = datetime.datetime.now()
@@ -45,7 +45,7 @@ class PosGenerator(object):
                 el = radians(eld) # Elevation in radians
             except Exception, ex:
                 raeson = 'cannot get the %s property values' %source._get_name()
-                logger.logDebug('%s: %s' %(raeson, ex.message))
+                logger.logNotice('%s: %s' %(raeson, ex.message))
                 raise PosGeneratorError(raeson)
 
             if not cmpl_az.code and not cmpl_el.code:
@@ -66,7 +66,7 @@ class PosGenerator(object):
                         continue
             else:
                 raeson = 'cannot get the %s coordinates' %source._get_name()
-                logger.logDebug(raeson)
+                logger.logNotice(raeson)
                 raise PosGeneratorError(raeson)
 
     
