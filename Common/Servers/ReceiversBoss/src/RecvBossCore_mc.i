@@ -952,13 +952,14 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 	}
 }
 
-void  CRecvBossCore::updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
+void  CRecvBossCore::updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+		ReceiversErrors::UnavailableReceiverAttributeExImpl)
 {
 	return;
 }
 
 void CRecvBossCore::updateDewarPositionerStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::OperationErrorExImpl)
+		ComponentErrors::OperationErrorExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl)
 {
 	return;
 }

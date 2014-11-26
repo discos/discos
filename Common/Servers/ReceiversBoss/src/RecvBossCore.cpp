@@ -1420,7 +1420,7 @@ void  CRecvBossCore::updateRecvStatus() throw (ComponentErrors::CouldntGetCompon
 }
 
 void CRecvBossCore::updateDewarPositionerStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::OperationErrorExImpl)
+		ComponentErrors::OperationErrorExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	IRA::CString component;
@@ -1441,25 +1441,23 @@ void CRecvBossCore::updateDewarPositionerStatus() throw (ComponentErrors::Couldn
 			try {
 				m_dewarTracking=m_dewarPositioner->isTracking();
 			}
-			catch (ComponentErrors::OperationErrorEx& ex){
-				_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CRecvBossCore::updateDewarPositionerStatus()");
-				impl.setReason("could not call isTracking method from dewar positioner");
+			catch (ComponentErrors::ComponentErrorsEx& ex) {
+				_ADD_BACKTRACE(ReceiversErrors::DewarPositionerCommandErrorExImpl,impl,ex,"CRecvBossCore::updateDewarPositionerStatus");
+				impl.setCommand("isTracking()");
 				changeBossStatus(Management::MNG_FAILURE);
-				m_dewarTracking=false;
-				throw impl;
-			}
-			catch (ComponentErrors::UnexpectedEx& ex ) {
-				_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CRecvBossCore::updateDewarPositionerStatus()");
-				impl.setReason("could not call isTracking method from dewar positioner");
-				changeBossStatus(Management::MNG_FAILURE);
-				m_dewarTracking=false;
 				throw impl;
 			}
 			catch (CORBA::SystemException& ex) {
 				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::updateDewarPositionerStatus()");
 				impl.setName(ex._name());
 				impl.setMinor(ex.minor());
-				changeBossStatus(Management::MNG_FAILURE);
+				changeBossStatus(Management::MNG_WARNING);
+				m_dewarPositionerError=true;
+				throw impl;
+			}
+			catch (...) {
+				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::updateDewarPositionerStatus()");
+				changeBossStatus(Management::MNG_WARNING);
 				m_dewarPositionerError=true;
 				throw impl;
 			}

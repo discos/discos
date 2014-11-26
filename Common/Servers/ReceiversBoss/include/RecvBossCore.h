@@ -207,7 +207,7 @@ public:
 	void  updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 
 	void updateDewarPositionerStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-			ComponentErrors::OperationErrorExImpl);
+			ComponentErrors::OperationErrorExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl);
 
 	void publishData() throw (ComponentErrors::NotificationChannelErrorExImpl);
 private:
