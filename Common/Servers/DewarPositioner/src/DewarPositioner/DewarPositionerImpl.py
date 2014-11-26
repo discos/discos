@@ -105,6 +105,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
     def setup(self, code):
         self.commandedSetup = code.upper()
+        logger.logNotice('starting the derotator %s setup' %self.commandedSetup)
         try:
             self.cdbconf.setup(self.commandedSetup)
             deviceName = self.cdbconf.getAttribute('DerotatorName')
@@ -147,6 +148,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             self.setConfiguration('FIXED')
             self.setRewindingMode('MANUAL')
             self.actualSetup = self.commandedSetup
+            logger.logNotice('derotator %s setup done' %self.commandedSetup)
         except PositionerError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
@@ -167,6 +169,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc.getComponentErrorsEx()
 
     def park(self):
+        logger.logNotice('parking the derotator')
         try:
             if self.positioner.isReady():
                 parkPosition = float(self.cdbconf.getAttribute('ParkPosition'))
@@ -186,6 +189,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc.getComponentErrorsEx()
         finally:
             self._setDefaultSetup()
+        logger.logNotice('derotator parked')
 
     def getPosition(self):
         try:
@@ -255,6 +259,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
 
     def startUpdating(self, axis, sector):
+        logger.logNotice('starting the derotator position updating')
         try:
             self.positioner.startUpdating(str(axis), str(sector))
         except PositionerError, ex:
@@ -274,6 +279,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc.getComponentErrorsEx()
 
     def stopUpdating(self):
+        logger.logNotice('stopping the derotator position updating')
         try:
             self.positioner.stopUpdating()
         except PositionerError, ex:
@@ -286,6 +292,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setData('Reason', ex.message)
             raise exc.getComponentErrorsEx()
+        logger.logNotice('derotator position updating stopped')
 
 
     def setAutoRewindingSteps(self, steps):

@@ -155,6 +155,7 @@ class Positioner(object):
 
 
     def _updatePosition(self, posgen, vargs):
+        logger.logNotice('starting the derotator position updating thread')
         try:
             self.control.isRewindingRequired = False
             self.control.isUpdating = True
@@ -203,6 +204,7 @@ class Positioner(object):
             logger.logError('unexcpected exception in Positioner._updatePosition(): %s' %ex)
         finally:
             self.control.isUpdating = False
+        logger.logNotice('exiting from the derotator position updating thread')
 
 
     def rewind(self, steps=None):
