@@ -317,12 +317,14 @@ void CCore::stopRecording() throw (ComponentErrors::OperationErrorExImpl,Managem
 	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl);
 	loadDefaultDataReceiver();
 	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
+	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"GEP_STOPPED_DATA_TRANSFER"));
 	// wait for a data transfer to complete before start with the latitude scan
 	while (checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError)) {  // throw (ComponentErrors::OperationErrorExImpl)
 		guard.release();
 		IRA::CIRATools::Wait(0,250000); // 0.25 seconds
 		guard.acquire();
 	}
+	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"GEP_STOP_RECORDING"));
 	m_subScanEpoch=0;
 }
 
@@ -333,8 +335,15 @@ void CCore::terminateScan() throw (ComponentErrors::OperationErrorExImpl,Compone
 	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl);
 	loadDefaultDataReceiver();
 	CCore::stopScan(m_defaultDataReceiver.in(), m_defaultDataReceiverError,m_scanStarted);
+
+	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"GEP_STOP_SCAN"));
+
+
 	//throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 	CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
+
+	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"GEP_DISABLE_DATA_TRANSFER"));
+
 	m_scanID=0; m_subScanID=0;
 	m_subScanEpoch=0;
 }
