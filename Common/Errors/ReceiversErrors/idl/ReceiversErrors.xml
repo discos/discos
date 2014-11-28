@@ -48,7 +48,8 @@
 		<Member name="Command" type="string" description="It specifies which command has failed" />   
 	</ErrorCode>
 	
-         
+	<ErrorCode name="DewarPositionerNotConfigured" shortDescription="Dewar positioner not configured" description=""/>
+	  
 </Type>
 
 
