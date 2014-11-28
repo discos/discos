@@ -101,9 +101,9 @@ public:
 	 * @throw ReceiversErrors::DewarPositionerNotConfiguredExImpl
 	 */
 	void setDerotatorPosition(const double& pos) throw (ReceiversErrors::NoDewarPositioningExImpl,
-	  ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
-	  ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-	  ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl);
+			ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+			ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
+			ReceiversErrors::DewarPositionerNotConfiguredExImpl);
 
 	/**
 	 * Used to read the position of the derotator at a given epoch
