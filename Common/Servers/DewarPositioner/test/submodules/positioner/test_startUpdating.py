@@ -19,6 +19,25 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
 
     def tearDown(self):
         self.p.park()
+ 
+    def test_alreadyUpdating(self):
+        """The call to startUpdating() have to stop and start again a new updating"""
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('BSC')
+        site_info = {'latitude': 50}
+        self.p.setup(site_info, self.source, self.device)
+        posgen = PosGenerator()
+        gen = posgen.parallactic(self.source, site_info)
+        try:
+            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH')
+            time.sleep(0.2)
+            self.assertEqual(self.p.isUpdating(), True)
+            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH')
+            time.sleep(0.2)
+            self.assertEqual(self.p.isUpdating(), True)
+        finally:
+            self.p.stopUpdating()
+
 
     def test_notYetConfigured(self):
         """Verify startUpdating()"""
@@ -34,7 +53,8 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         with self.assertRaisesRegexp(NotAllowedError, '^no site information available'):
             self.p.startUpdating('axis', 'sector')
         self.p.setup(siteInfo={'foo': 'foo'}, source=None, device=self.device)
-        with self.assertRaisesRegexp(NotAllowedError, 'no source available'):
+        self.cdbconf.setConfiguration('BSC')
+        with self.assertRaisesRegexp(NotAllowedError, "no source available"):
             self.p.startUpdating('axis', 'sector')
         self.p.setup(siteInfo={'foo': 'foo'}, source='self.source', device=self.device)
         self.cdbconf.setConfiguration('FIXED')

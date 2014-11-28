@@ -53,6 +53,7 @@ void SRTKBandDerotatorImpl::initialize() throw (ComponentErrors::CDBAccessExImpl
     MinValue = 0;
     Step = 0;
     PositionExpireTime = 0;
+    TrackingDelta = 1;
 
     icdSocket *icd_socket = NULL;
 
@@ -407,7 +408,7 @@ void SRTKBandDerotatorImpl::aboutToAbort()
 
 void SRTKBandDerotatorImpl::setup() throw (
         CORBA::SystemException,
-        DerotatorErrors::ConfigurationErrorEx, 
+        DerotatorErrors::DerotatorErrorsEx, 
         ComponentErrors::ComponentErrorsEx)
 {
     AUTO_TRACE("Derotatormpl::setup()");
@@ -461,8 +462,7 @@ void SRTKBandDerotatorImpl::powerOff() throw (
 void SRTKBandDerotatorImpl::setPosition(double position) throw (
         CORBA::SystemException, 
         ComponentErrors::ComponentErrorsEx, 
-        DerotatorErrors::PositioningErrorEx,
-        DerotatorErrors::CommunicationErrorEx
+        DerotatorErrors::DerotatorErrorsEx
     )
 {
     CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
@@ -493,7 +493,7 @@ double SRTKBandDerotatorImpl::getActPosition()
     throw (
             CORBA::SystemException, 
             ComponentErrors::ComponentErrorsEx, 
-            DerotatorErrors::CommunicationErrorEx
+            DerotatorErrors::DerotatorErrorsEx
     )
 {
     AUTO_TRACE("Derotatormpl::getActPosition()");
@@ -539,12 +539,12 @@ double SRTKBandDerotatorImpl::getPositionFromHistory(ACS::Time t) {
 
 
 double SRTKBandDerotatorImpl::getMaxLimit() {
-    return MaxValue - ZeroReference;
+    return MaxValue + ZeroReference;
 }
 
 
 double SRTKBandDerotatorImpl::getMinLimit() {
-    return MinValue - ZeroReference;
+    return MinValue + ZeroReference;
 }
 
 double SRTKBandDerotatorImpl::getStep() {
@@ -565,12 +565,18 @@ bool SRTKBandDerotatorImpl::isSlewing() {
 
 
 bool SRTKBandDerotatorImpl::isTracking() {
-    CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
-    return socket->isTracking();
+    double diff = getCmdPosition() - getActPosition();
+    return fabs(diff) < TrackingDelta ? true : false;
 }
 
 
-double SRTKBandDerotatorImpl::getEnginePosition() {
+double SRTKBandDerotatorImpl::getEnginePosition()
+    throw (
+            CORBA::SystemException, 
+            ComponentErrors::ComponentErrorsEx, 
+            DerotatorErrors::DerotatorErrorsEx
+    )
+{
     AUTO_TRACE("Derotatormpl::getEnginePosition()");
     CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
     try {

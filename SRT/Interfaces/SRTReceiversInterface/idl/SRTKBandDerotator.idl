@@ -99,7 +99,10 @@ module Receivers {
          * @return the engine position (double) in the user's reference system
          * @throw CORBA::SystemException
          */
-        double getEnginePosition();
+        double getEnginePosition() raises (
+            DerotatorErrors::DerotatorErrorsEx, 
+            ComponentErrors::ComponentErrorsEx
+        );
 
 	};
 

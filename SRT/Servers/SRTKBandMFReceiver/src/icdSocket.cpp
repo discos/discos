@@ -175,7 +175,7 @@ double icdSocket::getActPosition() throw (
 
     // Conversion from position unit (step) to angle unit (degree) 
 
-    return m_actPosition - m_ICD_REFERENCE; // Return the icd position in degree and in the URS
+    return m_ICD_REFERENCE - m_actPosition; // Return the icd position in degree and in the URS
 }   
 
 
@@ -211,15 +211,7 @@ double icdSocket::getPositionDiff() throw (ComponentErrors::SocketErrorExImpl) {
 }   
 
 bool icdSocket::isTracking() {
-    return true; // TODO: remove me!
-    bool flag = false;
-    try {
-        flag = fabs(getPositionDiff()) < m_TRACKING_DELTA ? true : false;
-    }
-    catch (...) {
-        ACS_SHORT_LOG((LM_WARNING, "Cannot compute the tracking flag"));
-    }
-    return flag;
+    return true; // TODO: do nothing
 }
 
 
@@ -282,13 +274,13 @@ void icdSocket::setPosition(double position) throw (
     }; // This message is an ICD ``set absolute position`` (PTP.p_absPTP, 35:1)
 
     double sh_position;
-    sh_position = position + m_ICD_REFERENCE;
-
-    const double max_rel = m_ICD_MAX_VALUE - m_ICD_REFERENCE;
-    const double min_rel = m_ICD_MIN_VALUE - m_ICD_REFERENCE;
+    sh_position = m_ICD_REFERENCE - position;
 
     m_icd_summary_status &= ~(1 << W) ;
     setCmdPosition(position);
+    const double max_rel = m_ICD_REFERENCE - m_ICD_MAX_VALUE;
+    const double min_rel = m_ICD_REFERENCE - m_ICD_MIN_VALUE;
+
 
     if(sh_position > m_ICD_MAX_VALUE || sh_position < m_ICD_MIN_VALUE) {
         ACS_SHORT_LOG((LM_ERROR, "# You are trying to set a position out of range (%.2f°, %.2f°)", min_rel, max_rel));
@@ -298,6 +290,7 @@ void icdSocket::setPosition(double position) throw (
         throw ex;
     }
     
+    // Revert the rotation way
     if(sh_position < 0)
         setNegativeDir();
 

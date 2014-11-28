@@ -131,12 +131,12 @@ public:
      *
      * @return ICD target position (double) in the user's reference system
      * @throw CORBA::SystemException
-     * @throw DerotatorErrors::ConfigurationErrorEx, 
+     * @throw DerotatorErrors::DerotatorErrorsEx,
      * @throw ComponentErrors::ComponentErrorsEx);
      */
      void setup() throw (
         CORBA::SystemException,
-        DerotatorErrors::ConfigurationErrorEx, 
+        DerotatorErrors::DerotatorErrorsEx, 
         ComponentErrors::ComponentErrorsEx);
 
 
@@ -151,16 +151,14 @@ public:
     /**
      * Set the derotator position (value in the user's reference system)
      *
-     * @ComponentErrors::ComponentErrorsEx, 
-     * @throw DerotatorErrors::PositioningErrorEx,
+     * @throw DerotatorErrors::DerotatorErrorsEx,
 	 * @throw DerotatorErrors::CommunicationErrorEx
      * @throw CORBA::SystemException
      */
      void setPosition(double position) throw (
          CORBA::SystemException, 
          ComponentErrors::ComponentErrorsEx, 
-         DerotatorErrors::PositioningErrorEx,
-	     DerotatorErrors::CommunicationErrorEx
+         DerotatorErrors::DerotatorErrorsEx
      );
 
 
@@ -168,13 +166,13 @@ public:
      * @return the sensor position (double) in the user's reference system
      *
      * @throw ComponentErrors::ComponentErrorsEx
-     * @throw DerotatorErrors::CommunicationErrorEx
+     * @throw DerotatorErrors::DerotatorErrorsEx
      * @throw CORBA::SystemException
      */
      double getActPosition() throw (
             CORBA::SystemException, 
             ComponentErrors::ComponentErrorsEx, 
-            DerotatorErrors::CommunicationErrorEx
+            DerotatorErrors::DerotatorErrorsEx
      );
 
 
@@ -231,7 +229,11 @@ public:
       * @return engine position (double) in the user's reference system
       * @throw CORBA::SystemException
       */
-     double getEnginePosition() ;
+     double getEnginePosition() throw (
+            CORBA::SystemException, 
+            ComponentErrors::ComponentErrorsEx, 
+            DerotatorErrors::DerotatorErrorsEx
+     );
 
 
 private:

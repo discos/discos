@@ -138,7 +138,7 @@ double sensorSocket::getPosition() throw (ComponentErrors::SocketErrorExImpl) {
     // Conversion from position unit (step) to angle unit (degree) 
     m_sensor_position = -m_PS_CF*(sensor_length - m_PS_REFERENCE);
 
-    return m_sensor_position; // Return the sensor position in degree.
+    return -m_sensor_position; // Return the sensor position in degree.
 }   
 
 

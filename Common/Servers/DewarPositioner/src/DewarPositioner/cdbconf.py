@@ -84,7 +84,7 @@ class CDBConf(object):
     def getUpdatingConfiguration(self, axisCode):
         """Take an axis and return the dict {'initialPosition': X, 'functionName': Y)"""
         if not self._isConfigured:
-            raeson = "DewarPotitioner not configured"
+            raeson = "DewarPositioner not configured"
             logger.logError(raeson)
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)

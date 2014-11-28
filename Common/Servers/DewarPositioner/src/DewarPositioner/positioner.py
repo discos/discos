@@ -21,7 +21,6 @@ class Positioner(object):
         The `cdbconf` parameter is a CDBConf instance.
         """
         self.conf = cdbconf
-        self.control = Control()
         self.posgen = PosGenerator()
         self._setDefault()
 
@@ -538,6 +537,7 @@ class Positioner(object):
         self.is_setup = False
         self.control = Control()
         self.conf.clearConfiguration()
+        self._clearOffset()
 
 
 class Control(object):

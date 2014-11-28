@@ -242,6 +242,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 exc.setData('Reason', reason)
                 raise exc.getComponentErrorsEx()
 
+
     def _setPositionCmd(self, position):
         """Wrap setPosition() in order to strip the `d` at the end of the string"""
         str_value = position.strip().rstrip('d')
@@ -491,6 +492,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 position = self.positioner.getPosition()
                 # Set the initialPosition, in order to add it to the dynamic one
                 self.cdbconf.updateInitialPositions(position)
+                logger.logNotice('initial position set to %.4f' %position)
         except Exception, ex:
             reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
             logger.logError(reason)

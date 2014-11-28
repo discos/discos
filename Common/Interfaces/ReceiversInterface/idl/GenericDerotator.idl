@@ -114,11 +114,11 @@ module Receivers {
         /**
          * Enable the derotator to move
          * @throw CORBA::SystemException
-         * @throw DerotatorErrors::ConfigurationErrorEx
+         * @throw DerotatorErrors::DerotatorErrorsEx
          * @throw ComponentErrors::ComponentErrorsEx
          */
         void setup() raises (
-            DerotatorErrors::ConfigurationErrorEx, 
+            DerotatorErrors::DerotatorErrorsEx, 
             ComponentErrors::ComponentErrorsEx
         );
 
@@ -134,13 +134,12 @@ module Receivers {
         /** 
          * @return the actPosition property value
          *
-         * @throw DerotatorErrors::PositioningErrorEx
-	     * @throw DerotatorErrors::CommunicationErrorEx
+         * @throw ComponentErrors::ComponentErrorsEx,
+	     * @throw DerotatorErrors::DerotatorErrorsEx
          */
         void setPosition(in double position) raises (
             ComponentErrors::ComponentErrorsEx,
-            DerotatorErrors::PositioningErrorEx,
-            DerotatorErrors::CommunicationErrorEx
+            DerotatorErrors::DerotatorErrorsEx
         );
 
 
@@ -156,11 +155,11 @@ module Receivers {
          * @return the actPosition property value
          *
          * @throw ComponentErrors::ComponentErrorsEx,
-         * @throw DerotatorErrors::CommunicationErrorEx
+         * @throw DerotatorErrors::DerotatorErrorsEx
          */
         double getActPosition() raises (
             ComponentErrors::ComponentErrorsEx,
-            DerotatorErrors::CommunicationErrorEx
+	        DerotatorErrors::DerotatorErrorsEx
         );
 
 
