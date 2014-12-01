@@ -89,7 +89,9 @@ static const string POWERCMD="FREQ AMPL";
 static const string RFONCMD="OUTP:STAT ON";
 static const string RFOFFCMD="OUTP:STAT OFF";
 static const string QUERYRF="OUTP:STAT?";
-static const string FREQUNIT=" MHZ";
+static const string FREQUNIT="HZ";
+#define MULTIPLY 1e6
+    
 static const string POWERUNIT=" dBM";
 
 
@@ -267,7 +269,7 @@ int CommandLine::setFreq(double freq) throw (GPIBException){
 	try{
 
 		string cmd;
-		cmd=FREQCMD+ stringify(freq)+FREQUNIT;
+		cmd=FREQCMD+ stringify(freq*MULTIPLY)+FREQUNIT;
                 cout << "GPIB STRING: "<<cmd <<endl;   
 		sendCMD(cmd);
 

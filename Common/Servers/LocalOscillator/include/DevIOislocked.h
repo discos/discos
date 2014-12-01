@@ -16,7 +16,7 @@
 #include "CommandLine.h"
 #include <cmath>
 
-#define SYNTH_TOLLERANCE 0.00001
+#define SYNTH_TOLLERANCE 10
 
 #define DEBUG 1
 using namespace IRA;
