@@ -37,6 +37,22 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             self.assertEqual(self.p.isUpdating(), True)
         finally:
             self.p.stopUpdating()
+ 
+    def test_cannotSetPosition(self):
+        """Cannot set position during an updating"""
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('CUSTOM')
+        site_info = {'latitude': 50}
+        self.p.setup(site_info, self.source, self.device)
+        posgen = PosGenerator()
+        gen = posgen.parallactic(self.source, site_info)
+        try:
+            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH')
+            time.sleep(0.2)
+            self.assertRaises(NotAllowedError, self.p.setPosition, 0)
+        finally:
+            self.p.stopUpdating()
+
 
 
     def test_notYetConfigured(self):

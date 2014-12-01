@@ -51,8 +51,9 @@ class Positioner(object):
             self.device.setup()
             self._clearOffset()
             self.is_setup = True
-            time.sleep(0.5) # Give the device the time to accomplish the setup
+            time.sleep(0.4) # Give the device the time to accomplish the setup
             self._start(self.posgen.goto, setupPosition)
+            time.sleep(0.1) # Give the thread the time to finish
         except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
             raise PositionerError("cannot set the position: %s" %ex.message)
         except Exception, ex:
@@ -94,6 +95,24 @@ class Positioner(object):
                self.device.isTracking() and not \
                self.isRewinding() and not \
                self.isRewindingRequired()
+
+
+    def setPosition(self, position):
+        if not self.isReady():
+            raise NotAllowedError('positioner not ready, a setup() is required')
+        elif not self.isConfigured():
+            raise NotAllowedError('positioner not configured, a setConfiguration() is required')
+        elif self.conf.getAttribute('SetCustomPositionAllowed') != 'true':
+            raise NotAllowedError('setPosition() not allowed in %s configuration" %self.getConfiguration()')
+        elif self.isUpdating():
+            raise NotAllowedError('the positioner is executing a scan')
+        else:
+            try:
+                self.goTo(position)
+                # Set the initialPosition, in order to add it to the dynamic one
+                self.conf.updateInitialPositions(position)
+            except Exception, ex:
+                raise PositionerError('cannot set position: %s' %ex.message)
 
 
     def _setPosition(self, position):

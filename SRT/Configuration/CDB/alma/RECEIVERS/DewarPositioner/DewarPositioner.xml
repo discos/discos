@@ -7,6 +7,9 @@
     UpdatingTime="0.1"
     RewindingSleepTime="1"
     RewindingTimeout="200"
+    DefaultConfiguration="FIXED"
+    DefaultRewindingMode="MANUAL"
+    Latitude="39.493040"
 >
 
     <status

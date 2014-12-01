@@ -1,11 +1,13 @@
 import unittest2
 import time
-from ComponentErrors import NotAllowedEx
+from ComponentErrors import ComponentErrorsEx
 from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
+from Antenna import ANT_NORTH
+from Management import  MNG_TRACK
 
 
-class GetPositionTest(unittest2.TestCase):
+class GetSetPositionTest(unittest2.TestCase):
     """Test the DewarPositioner.getPosition() method"""
     def setUp(self):
         client = PySimpleClient()
@@ -14,11 +16,11 @@ class GetPositionTest(unittest2.TestCase):
         self.positioner.setup('KKG')
         time.sleep(1)
 
-    def _test_notReady(self):
+    def test_notReady(self):
         """The DewarPositioner must raise a NotAllowedEx when it's not ready"""
         self.positioner.park()
         time.sleep(1)
-        self.assertRaises(NotAllowedEx, self.positioner.getPosition)
+        self.assertRaises(ComponentErrorsEx, self.positioner.getPosition)
 
     def test_value(self):
         """Verify it returns the right value"""

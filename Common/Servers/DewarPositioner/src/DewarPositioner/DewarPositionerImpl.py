@@ -127,11 +127,13 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             observatory = self.client.getComponent('ANTENNA/Observatory')
             lat_obj = observatory._get_latitude()
             latitude, compl = lat_obj.get_sync()
-            siteInfo = {'latitude': latitude}
         except Exception, ex:
             reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
             logger.logWarning('cannot get the site information: %s' %reason)
-            siteInfo = {}
+            latitude = float(self.cdbconf.getAttribute('Latitude'))
+            logger.logWarning('setting the default latitude value: %.2f' %latitude)
+        finally:
+            siteInfo = {'latitude': latitude}
 
         try:
             sourceName = 'ANTENNA/Boss'
@@ -146,8 +148,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                     source, 
                     device, 
                     float(self.cdbconf.getAttribute('SetupPosition')))
-            self.setConfiguration('FIXED')
-            self.setRewindingMode('MANUAL')
+                
+            self.setConfiguration(self.cdbconf.getAttribute('DefaultConfiguration'))
+            self.setRewindingMode(self.cdbconf.getAttribute('DefaultRewindingMode'))
             self.actualSetup = self.commandedSetup
             logger.logNotice('derotator %s setup done' %self.commandedSetup)
         except PositionerError, ex:
@@ -213,35 +216,18 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
 
     def setPosition(self, position):
-        if not self.isReady():
-            reason = "positioner not ready, a setup() is required"
-            logger.logError(reason)
+        try:
+            self.positioner.setPosition(position)
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
             exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(reason)
+            exc.setReason(ex.message)
             raise exc.getComponentErrorsEx()
-        elif not self.isConfigured():
-            reason = "positioner not configured, a setConfiguration() is required"
-            logger.logError(reason)
-            exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(reason)
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setData('Reason', ex.message)
             raise exc.getComponentErrorsEx()
-        elif self.cdbconf.getAttribute('SetCustomPositionAllowed') != 'true':
-            reason = "setPosition() not allowed in %s configuration" %self.getConfiguration()
-            logger.logError(reason)
-            exc = ComponentErrorsImpl.NotAllowedExImpl()
-            exc.setReason(reason)
-            raise exc.getComponentErrorsEx()
-        else:
-            try:
-                self.positioner.goTo(position)
-                # Set the initialPosition, in order to add it to the dynamic one
-                self.cdbconf.updateInitialPositions(position)
-            except Exception, ex:
-                reason = 'cannot set position: %s' %ex.message
-                logger.logError(reason)
-                exc = ComponentErrorsImpl.UnexpectedExImpl(reason)
-                exc.setData('Reason', reason)
-                raise exc.getComponentErrorsEx()
 
 
     def _setPositionCmd(self, position):
@@ -355,7 +341,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
 
     def isConfigured(self):
-        return self.cdbconf.isConfigured()
+        return self.positioner.isConfigured()
 
 
     def isReady(self):

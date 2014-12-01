@@ -12,14 +12,16 @@ class CDBConf(object):
     componentAttributes = (
             'UpdatingTime', 
             'RewindingSleepTime', 
-            'RewindingTimeout'
+            'RewindingTimeout',
+            'DefaultConfiguration',
+            'DefaultRewindingMode',
+            'Latitude',
     )
 
     mappingAttributes = (
             'DerotatorName', 
             'SetupPosition',
             'ParkPosition',
-            'DefaultConfiguration',
     )
 
     actionsAttributes = (
