@@ -56,7 +56,7 @@ class CDBConfTest(unittest2.TestCase):
         # Get the position
         self.assertEqual(
                 self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), 
-                {'initialPosition': '9.0', 'functionName': 'gpa'})
+                {'initialPosition': '-9.0', 'functionName': 'gpa'})
         self.conf.setConfiguration('FIXED')
         self.assertEqual(
                 self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), 
@@ -70,11 +70,11 @@ class CDBConfTest(unittest2.TestCase):
         # Get the position
         self.assertEqual(
                 self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), 
-                {'initialPosition': '9.0', 'functionName': 'gpa'})
-        self.conf.updateInitialPositions(100)
+                {'initialPosition': '-9.0', 'functionName': 'gpa'})
+        self.conf.updateInitialPositions(-100)
         self.assertEqual(
                 self.conf.getUpdatingConfiguration('JUST_FOR_TEST'), 
-                {'initialPosition': '100.00', 'functionName': 'gpa'})
+                {'initialPosition': '-100.00', 'functionName': 'gpa'})
 
 
     def test_setup(self):

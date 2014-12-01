@@ -55,7 +55,6 @@ class CDBConf(object):
     def setConfiguration(self, configurationCode):
         if self.setupCode:
             confPath = os.path.join(self.setupPath, configurationCode)
-            self.clearConfiguration() 
             # Set the path self.configurationPath if the directory exists
             self._setPath(name='configuration', path=confPath)
         else:
@@ -64,13 +63,17 @@ class CDBConf(object):
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
             raise exc
+
+        # Create records
+        self._clearRecords()
         for record in CDBConf.configurationRecords:
             self._makeRecords(
                 dictName=record,
                 path=os.path.join(self.configurationPath, record))
-
+        # Create attributes
         actionsPath = os.path.join(self.configurationPath, 'Actions')
         self._setPath(name='actions', path=actionsPath)
+        self._clearAttributes()
         self._makeAttr(self.actionsPath, CDBConf.actionsAttributes)
         self.configurationCode = configurationCode
         self._isConfigured = True
@@ -252,10 +255,16 @@ class CDBConf(object):
         self._isConfigured = False
         self.configurationCode = 'none' # For instance, BSC
         self.configurationPath = '' # Configuration directory path (ie. to BSC)
+        self._clearRecords()
+        self._clearAttributes()
+
+    def _clearRecords(self):
         for name in CDBConf.configurationRecords:
             if hasattr(self, name):
                 attr = getattr(self, name)
                 attr.clear() # Clear the dictionary
+
+    def _clearAttributes(self):
         for name in CDBConf.actionsAttributes:
             if hasattr(self, name):
                 attr = getattr(self, name)

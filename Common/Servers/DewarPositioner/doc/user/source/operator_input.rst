@@ -26,6 +26,8 @@ in banda K::
           automaticamente eseguito anche il *setup* del ``DewarPositioner``.
           In altre parole, quando viene dato il comando ``setupKKG``,
           questo esegue a sua volta anche ``derotatorSetup=KKG``.
+          
+.. note:: Anche il receiverSetup=KKG fa il derotatorSetup=KKG?
 
 Al termine del *setup* il derotatore sarà pronto per essere utilizzato. Il
 comando ``derotatorGetActualSetup`` restituisce il setup attuale, mentre il
@@ -43,6 +45,8 @@ scelta per l'allineamento iniziale. Possiamo verificarlo con il comando
 
     > derotatorGetPosition
     0.0084d
+
+.. note:: Dire che e' normale che il valore restituito non e' 0
 
 Ad esempio, per il il derotatore del ricevitore in banda K la posizione iniziale è quella in cui i tre feed 1, 0, 4 sono 
 paralleli all'orizzonte, con il feed 1 a est.
