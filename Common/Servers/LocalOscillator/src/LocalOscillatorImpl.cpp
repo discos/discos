@@ -2,6 +2,9 @@
 #include <Definitions.h>
 #include <maciContainerServices.h>
 
+#define MULTIPLY 1e6
+
+
 #define _GET_STRING_ATTRIBUTE(ATTRIB,DESCR,FIELD) { \
 	CString tmps; \
 	if (!CIRATools::getDBValue(Services,ATTRIB,tmps)) { \
@@ -173,7 +176,7 @@ void LocalOscillatorImpl::set(CORBA::Double rf_ampl, CORBA::Double rf_freq) thro
  	try {
  		CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
 
-    	 line->setFreq(rf_freq); // set frequency
+    	 line->setFreq(rf_freq*MULTIPLY); // set frequency
  		 line->setPower(rf_ampl); // set  amplitude
          CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::set()",(LM_NOTICE,"SYNTHESIZER SET to freq: %f power:%f ",rf_freq,rf_ampl));
 

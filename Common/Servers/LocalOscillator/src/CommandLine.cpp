@@ -90,7 +90,7 @@ static const string RFONCMD="OUTP:STAT ON";
 static const string RFOFFCMD="OUTP:STAT OFF";
 static const string QUERYRF="OUTP:STAT?";
 static const string FREQUNIT="HZ";
-#define MULTIPLY 1e6
+#define MULTIPLY 1
     
 static const string POWERUNIT=" dBM";
 
