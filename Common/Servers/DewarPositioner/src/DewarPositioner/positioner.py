@@ -300,7 +300,7 @@ class Positioner(object):
         finally:
             self.control.stop = False
             self.control.mustUpdate = False
-            time.sleep(0.3)
+            time.sleep(0.1)
             logger.logNotice('derotator position updating thread stopped')
 
 
@@ -441,7 +441,7 @@ class Positioner(object):
                     args=(posgen, vargs)
             )
             self.t.start()
-            time.sleep(0.2) # In case of goto, take the time to command the position
+            time.sleep(0.15) # In case of goto, take the time to command the position
         else:
             raise NotAllowedError('not configured: a setConfiguration() is required')
 

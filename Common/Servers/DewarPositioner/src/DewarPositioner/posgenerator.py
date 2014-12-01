@@ -3,6 +3,7 @@ import datetime
 import time
 from math import sin, cos, tan, atan, radians, degrees
 from IRAPy import logger
+from Acspy.Common.TimeHelper import getTimeStamp
 
 
 class PosGenerator(object):
@@ -27,46 +28,35 @@ class PosGenerator(object):
         """
         try:
             latitude = radians(siteInfo['latitude'])
-            az_obj = source._get_azimuth()
-            el_obj = source._get_elevation()
         except (KeyError, TypeError), ex:
             raise PosGeneratorError('cannot get the latitude: %s' %ex.message)
         except Exception, ex:
-            raeson = 'cannot get the %s property objects' %source._get_name()
+            raeson = 'unexpected exception getting the site latitude' 
             logger.logNotice(raeson)
             raise PosGeneratorError(raeson)
 
         last_zerodiv_time = datetime.datetime.now()
         while True:
             try:
-                azd, cmpl_az = az_obj.get_sync()
-                eld, cmpl_el = el_obj.get_sync()
-                az = radians(azd) # Azimuth in radians
-                el = radians(eld) # Elevation in radians
+                t = getTimeStamp().value + 1*10*6 # 100 ms in the future
+                az, el = source.getRawCoordinates(t) # Values in radians
+                tan_p = - sin(az) / (tan(latitude)*cos(el) - sin(el)*cos(az))
+                last_zerodiv_time = datetime.datetime.now()
+                p = atan(tan_p)
+                yield initialPosition + degrees(p)
+            except ZeroDivisionError:
+                logger.logWarning('zero division error computing the parallactic angle')
+                zerodiv_time = datetime.datetime.now() - last_zerodiv_time
+                if zerodiv_time.seconds >= self.zdtimeout:
+                    raeson = 'zero division for more than %ds' %self.zdtimeout
+                    logger.logError(raeson)
+                    raise PosGeneratorError(raeson)
+                else:
+                    time.sleep(0.5)
+                    continue
             except Exception, ex:
-                raeson = 'cannot get the %s property values' %source._get_name()
+                raeson = 'cannot get the %s (az, el)  values' %source._get_name()
                 logger.logNotice('%s: %s' %(raeson, ex.message))
-                raise PosGeneratorError(raeson)
-
-            if not cmpl_az.code and not cmpl_el.code:
-                try:
-                    tan_p = - sin(az) / (tan(latitude)*cos(el) - sin(el)*cos(az))
-                    last_zerodiv_time = datetime.datetime.now()
-                    p = atan(tan_p)
-                    yield initialPosition + degrees(p)
-                except ZeroDivisionError:
-                    logger.logWarning('zero division error computing tan(p)')
-                    zerodiv_time = datetime.datetime.now() - last_zerodiv_time
-                    if zerodiv_time.seconds >= self.zdtimeout:
-                        raeson = 'zero division for more than %ds' %self.zdtimeout
-                        logger.logError(raeson)
-                        raise PosGeneratorError(raeson)
-                    else:
-                        time.sleep(0.5)
-                        continue
-            else:
-                raeson = 'cannot get the %s coordinates' %source._get_name()
-                logger.logNotice(raeson)
                 raise PosGeneratorError(raeson)
 
     

@@ -133,7 +133,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             siteInfo = {}
 
         try:
-            sourceName = 'ANTENNA/Mount'
+            sourceName = 'ANTENNA/Boss'
             source = self.client.getComponent(sourceName)
         except Exception:
             logger.logWarning('cannot get the %s component' %sourceName)

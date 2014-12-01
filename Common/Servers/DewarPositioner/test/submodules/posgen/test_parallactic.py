@@ -15,98 +15,53 @@ class PosGeneratorParallacticTest(unittest2.TestCase):
         self.m.restore()
         self.m.verify()
 
-    def test_elevation(self):
+    def test_wrong_site_info(self):
         """Raise a PosGeneratorError in case of wrong site_info"""
         gen = self.posgen.parallactic(self.source, siteInfo={'LATITUDE': 39})
         self.assertRaises(PosGeneratorError, gen.next)
         gen = self.posgen.parallactic(self.source, siteInfo=11)
         self.assertRaises(PosGeneratorError, gen.next)
 
-    def test_property_objs(self):
-        """Raise a PosGeneratorError if cannot get source property objects"""
-        self.source._get_azimuth()
-        self.m.throw(RuntimeError)
-        mocker.expect(self.source._get_name()).result('mocker')
+    def test_az_el_values(self):
+        """Raise a PosGeneratorError if cannot get the (az, el) values"""
+        source = self.m.mock()
+        mocker.expect(source.getRawCoordinates(mocker.ANY)).result((None, None))
+        mocker.expect(source._get_name()).result('mocker')
         self.m.replay()
-        gen = self.posgen.parallactic(self.source, siteInfo={'latitude': 39})
-        self.assertRaises(PosGeneratorError, gen.next)
-
-    def test_property_values(self):
-        """Raise a PosGeneratorError if cannot get source property values"""
-        az_obj = self.m.mock()
-        el_obj = self.m.mock()
-        mocker.expect(az_obj.get_sync()).result((100, None))
-        el_obj.get_sync()
-        self.m.throw(RuntimeError)
-        mocker.expect(self.source._get_azimuth()).result(az_obj)
-        mocker.expect(self.source._get_elevation()).result(el_obj)
-        mocker.expect(self.source._get_name()).result('mocker')
-        self.m.replay()
-        gen = self.posgen.parallactic(self.source, siteInfo={'latitude': 39})
-        self.assertRaises(PosGeneratorError, gen.next)
-
-    def test_completion_error(self):
-        """Raise a PosGeneratorError if the completion takes an error"""
-        cmpl_az = self.m.mock()
-        cmpl_el = self.m.mock()
-        mocker.expect(cmpl_az.code).result(1)
-        az_obj = self.m.mock()
-        el_obj = self.m.mock()
-        mocker.expect(az_obj.get_sync()).result((100, cmpl_az))
-        mocker.expect(el_obj.get_sync()).result((45, cmpl_el))
-        mocker.expect(self.source._get_azimuth()).result(az_obj)
-        mocker.expect(self.source._get_elevation()).result(el_obj)
-        mocker.expect(self.source._get_name()).result('mocker')
-        self.m.replay()
-        gen = self.posgen.parallactic(self.source, siteInfo={'latitude': 39})
+        gen = self.posgen.parallactic(source, siteInfo={'latitude': 39})
         self.assertRaises(PosGeneratorError, gen.next)
 
     def test_zero_division_timeout(self):
         """Raise a PosGeneratorError if case of countinuos zero division"""
-        cmpl_az = self.m.mock()
-        cmpl_el = self.m.mock()
-        mocker.expect(cmpl_az.code).result(0)
+        source = self.m.mock()
+        mocker.expect(
+                source.getRawCoordinates(mocker.ANY)
+                ).result((90, 0))
         self.m.count(1, None)
-        mocker.expect(cmpl_el.code).result(0)
         self.m.count(1, None)
-        az_obj = self.m.mock()
-        el_obj = self.m.mock()
-        mocker.expect(az_obj.get_sync()).result((90, cmpl_az))
-        self.m.count(1, None)
-        mocker.expect(el_obj.get_sync()).result((0, cmpl_el))
-        self.m.count(1, None)
-        mocker.expect(self.source._get_azimuth()).result(az_obj)
         self.m.count(1, None) 
-        mocker.expect(self.source._get_elevation()).result(el_obj)
         self.m.count(1, None)
         self.m.replay()
-        gen = self.posgen.parallactic(self.source, siteInfo={'latitude': 0})
+        gen = self.posgen.parallactic(source, siteInfo={'latitude': 0})
         self.assertRaises(PosGeneratorError, gen.next)
 
     def test_right_behavior(self):
         """Generate 3 positions and do not stop in case of isolated zero div"""
-        elevations = (45, 45, 0, 45) # The value 0 will cause a zero division
         azimuths = (45, 45, 90, 45)
+        elevations = (45, 45, 0, 45) # The value 0 will cause a zero division
         latitude = 0
-        cmpl_az = self.m.mock()
-        cmpl_el = self.m.mock()
-        mocker.expect(cmpl_az.code).result(0)
-        self.m.count(4)
-        mocker.expect(cmpl_el.code).result(0)
-        self.m.count(4)
-        az_obj = self.m.mock()
-        el_obj = self.m.mock()
+        source = self.m.mock()
         for (az, el) in zip(azimuths, elevations):
-            mocker.expect(az_obj.get_sync()).result((az, cmpl_az))
-            mocker.expect(el_obj.get_sync()).result((el, cmpl_el))
-        mocker.expect(self.source._get_azimuth()).result(az_obj)
-        mocker.expect(self.source._get_elevation()).result(el_obj)
+            mocker.expect(
+                    source.getRawCoordinates(mocker.ANY)
+                    ).result((radians(az), radians(el)))
+            self.m.count(1)
         self.m.replay()
-        gen = self.posgen.parallactic(self.source, siteInfo={'latitude': latitude})
+        gen = self.posgen.parallactic(source, siteInfo={'latitude': latitude})
         latitude = radians(latitude)
         for azd, eld in zip(azimuths, elevations):
-            el = radians(eld)
             az = radians(azd)
+            el = radians(eld)
             try:
                 tan_p = - sin(az) / (tan(latitude)*cos(el) - sin(el)*cos(az))
                 p = atan(tan_p)
