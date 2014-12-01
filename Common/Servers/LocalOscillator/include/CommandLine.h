@@ -23,7 +23,7 @@ class BadConversion : public runtime_error {
  inline string stringify(double x)
  {
    std::ostringstream o;
-   if (!(o << x))
+   if (!(o <<fixed<<setw(8) << x))
      throw BadConversion("stringify(double)");
    return o.str();
  }

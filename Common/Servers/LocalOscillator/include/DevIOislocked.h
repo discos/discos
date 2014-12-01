@@ -15,6 +15,10 @@
 #include <IRA>
 #include "CommandLine.h"
 #include <cmath>
+
+#define SYNTH_TOLLERANCE 0.00001
+
+#define DEBUG 1
 using namespace IRA;
 
 /**
@@ -71,11 +75,13 @@ public:
 			line->getPower(read_power);
 			m_impl->getStoredValue(expected_power,expected_freq);
 
-			if (fabs(expected_freq - read_frequency) <= 0.1)
+			if (fabs(expected_freq - read_frequency) <= SYNTH_TOLLERANCE)
  	 		{
 				m_val=1;
+                                ACS_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_DEBUG,"Expected frequency: %f  Actual Value: %f",expected_freq,read_frequency));
+#if DEBUG
 	 			cout << "expected freq: " <<expected_freq << "Read Freq:" << read_frequency  << "flag" <<m_val<< endl;
-
+#endif
  	 		} else
  	 		{
 

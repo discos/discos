@@ -175,7 +175,7 @@ void LocalOscillatorImpl::set(CORBA::Double rf_ampl, CORBA::Double rf_freq) thro
 
     	 line->setFreq(rf_freq); // set frequency
  		 line->setPower(rf_ampl); // set  amplitude
-         CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::set()",(LM_NOTICE,"LO SET to freq: %f power:%f ",rf_freq,rf_ampl));
+         CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::set()",(LM_NOTICE,"SYNTHESIZER SET to freq: %f power:%f ",rf_freq,rf_ampl));
 
 
  		 m_freq=rf_freq;
@@ -204,7 +204,7 @@ void LocalOscillatorImpl::get(CORBA::Double& rf_ampl, CORBA::Double& rf_freq) th
      		CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
  	 		line->getFreq(rf_freq); // get frequency
  	 		line->getPower(rf_ampl); // get  amplitude
- 	        CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_NOTICE,"LO READ freq: %f power:%f ",rf_freq,rf_ampl));
+ 	        CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_NOTICE,"SYNTHESIZER READ freq: %f power:%f ",rf_freq,rf_ampl));
 
 // 	 		if (rf_freq !=m_freq)
  	       // 	        	 		{

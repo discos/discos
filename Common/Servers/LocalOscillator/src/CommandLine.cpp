@@ -268,6 +268,7 @@ int CommandLine::setFreq(double freq) throw (GPIBException){
 
 		string cmd;
 		cmd=FREQCMD+ stringify(freq)+FREQUNIT;
+                cout << "GPIB STRING: "<<cmd <<endl;   
 		sendCMD(cmd);
 
 	} catch (GPIBException& ex)
@@ -302,7 +303,7 @@ int CommandLine::getPower(double& pow)  throw (GPIBException)
 
 int CommandLine::sendCMD(string cmd) throw(GPIBException)
 {
-
+        cout << "sent:" <<cmd << endl;
  	ibwrt(m_device,const_cast<char*>(cmd.c_str()), cmd.size());
 	int i;
 	i=ThreadIbsta();
