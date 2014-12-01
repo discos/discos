@@ -107,6 +107,9 @@ def derotatorClearAutoRewindingSteps():
 def derotatorClearOffset():
     """TODO"""
 
+def derotatorIsUpdating():
+    """TODO"""
+
 def derotatorGetActualSetup():
     """TODO"""
 

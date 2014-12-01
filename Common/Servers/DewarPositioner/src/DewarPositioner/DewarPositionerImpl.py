@@ -47,6 +47,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         'derotatorSetAutoRewindingSteps': ('setAutoRewindingSteps', (int,)),
         'derotatorGetAutoRewindingSteps': ('getAutoRewindingSteps', ()),
         'derotatorClearAutoRewindingSteps': ('clearAutoRewindingSteps', ()),
+        'derotatorIsUpdating': ('isUpdating', ()),
         'derotatorIsRewinding': ('isRewinding', ()), 
         'derotatorIsRewindingRequired': ('isRewindingRequired', ()), 
         'derotatorRewind': ('rewind', (int,)),
