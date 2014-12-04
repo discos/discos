@@ -13,6 +13,9 @@ import optparse #will become argparse in Python2.6
 import shutil
 import tempfile
 
+# Using this PATTERN leaves original tab characters in place
+#WHITESPACES_PATTERN = re.compile("[ \r\n\f\v]+")
+# Using this PATTERN also tab characters are replaced with new ones
 WHITESPACES_PATTERN = re.compile("\s+")
 
 def console_app():
@@ -54,12 +57,21 @@ def console_app():
             substitutions_count = 0
             with os.fdopen(tmp_fd, "wt") as tmp_file:
                 for line in lines:
-                    matches = re.subn(WHITESPACES_PATTERN, '\t', line.strip())
-                    logging.debug("[orig] %s" % (line,))
-                    logging.debug("[dest] %s" % (matches[0],))
-                    logging.debug("[subs] %d" % (matches[1],))
-                    substitutions_count += matches[1]
-                    tmp_file.write(matches[0] + '\n')
+                    # removing trailing whitespaces
+                    # we keep starting whitespaces as there could be indentation
+                    line = line.rstrip()
+                    if not line.startswith('#'):
+                        # Here happens the actual substitution
+                        matches = re.subn(WHITESPACES_PATTERN, '\t', line)
+                        logging.debug("[orig] %s" % (line,))
+                        logging.debug("[dest] %s" % (matches[0],))
+                        logging.debug("[subs] %d" % (matches[1],))
+                        substitutions_count += matches[1]
+                        writeline = matches[0]
+                    else:
+                        logging.debug("[comm] %s" % (line,))
+                        writeline = line
+                    tmp_file.write(writeline + '\n')
             logging.debug("closed tmp file: %s" % (tmp_filename,))
             logging.debug("substitutes %d occurencies" % (substitutions_count,))
             try:
