@@ -61,7 +61,8 @@ int MeteoSocket:: updateParam(){
 
 		receiveData(err,rdata);
 		ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","received:  %s", (const char *) rdata);
-
+                
+                
  		parse(rdata);
  		if (err.isNoError()) return 0;
  		else return -1;
@@ -246,37 +247,62 @@ void MeteoSocket::initParser(MeteoData *md)
 
 }
 
+vector<string> MeteoSocket::split (string message, string delimiter=",")
+{
+  /**
+   Do as the split string method as default the delimiter is comma         
+          
+          
+  */
+          
+          
+   vector<string> v;
 
+   size_t pos = 0;
+   std::string token;
+   while ((pos = message.find(delimiter)) != std::string::npos) {
+       token = message.substr(0, pos);
+       std::cout << token << std::endl;
+       v.push_back(token);
+       message.erase(0, pos + delimiter.length());
+   }
+   v.push_back(message);
+   return v;
+ 
+}
+          
 
 
 
 int MeteoSocket::parse(const char* recv)
 {
 	int len;
+        string recvS;
+        vector<string> vrecv;
+     
 	len=strlen(recv);
-
+        recvS=recv;
+        
 //  	cout <<"received"<< len << endl;
-	string ss;
-	string srecv;
-	srecv=string(recv);
-	vector<string> vrecv;
-
-	istringstream  ist(srecv); // string stream
-	while (ist >> ss) vrecv.push_back(ss) ;// split the string
+        vrecv=split(recvS,"/");
+        vrecv=split(vrecv[2],",");
+     
 	int ndata=vrecv.size();
 	if (ndata > 3)
 	
 	{
-	 	double temp,pres,hum,wind;
-		temp = atof(vrecv[ndata-3].c_str());
-		pres = atof(vrecv[ndata-2].c_str());
-		hum  = atof(vrecv[ndata-1].c_str());
-		wind  = -99.;//  atof(vrecv[ndata-1].c_str());
-
+	 	double temp,pres,hum,wind,winddir;
+		temp = atof(vrecv[0].c_str());
+		pres = atof(vrecv[1].c_str());
+		hum  = atof(vrecv[2].c_str());
+                wind  = atof(vrecv[3].c_str());
+                winddir =atof(vrecv[4].c_str());
 		m_temperature=temp;
 		m_pressure=pres;
 		m_humidity=hum;
 		m_windspeed=wind;
+                m_winddir=winddir;
+                
 		
 
 

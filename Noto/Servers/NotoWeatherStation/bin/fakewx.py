@@ -32,13 +32,14 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 	    	    done=1
 		    break 
     	          
-            if self.data=='spettro\n':
+            if self.data=='wx\n':
 		  now=datetime.datetime.utcnow()
 		  tt=now.timetuple()
-#	          self.request.send('0132  dr21 %s +42:19:44 2000.0 300.00 5  21964.000   0.0 kkc 80.047 60.416 17:23:13 +44:37:55 0 0 31.5 1018.0 90.0 \n')
-            	  print "received spettro, sent back fake string"     
+                  
+#	         11:02:22/wx/19.00,1013.34,77.00,3.13,215
+            	  print "received wx, sent back fake string"     
 		  	  
-            	  self.request.send('0132  dr21 %s +42:19:44 2000.0 300.00 5  21964.000   0.0 kkc 80.047 60.416 17:23:13 +44:37:55 0 0 %f %f %f 22\n' % (datetime.datetime.utcnow().strftime("%H:%M:%S"),tt[3]+.04,tt[4]+.99,tt[5]+.43))
+            	  self.request.send('%s/wx/%f,%f,%f,22,44\n' % (datetime.datetime.utcnow().strftime("%H:%M:%S"),tt[3]+.04,tt[4]+.99,tt[5]+.43))
             	  self.data=""
 	          msg=""
 	    

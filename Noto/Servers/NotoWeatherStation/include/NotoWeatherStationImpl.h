@@ -3,13 +3,14 @@
 
 #include <baci.h>
 #include <baciCharacteristicComponentImpl.h>
-#include "NotoWeatherStationImpl.h"
+// #include "NotoWeatherStationImpl.h"
  
 
 
 ///CORBA generated servant stub
-#include <MedWeatherStationS.h> // Noto and Medicina Weather Stations have the same interface
- 
+#include <NotoWeatherStationS.h>
+
+
 
 ///Includes for each BACI property used in this example
 #include <baciROdouble.h>
@@ -46,8 +47,8 @@ using namespace IRA;
 
  
 /** 
- * @mainpage Notoicina Meteo Station
- * @date 01/11/2010
+ * @mainpage Noto Meteo Station
+ * @date 04/12/2014
  * @version 1.1.0
  * @author <a href=mailto:spoppi@oa-cagliari.inaf.it>Sergio Poppi</a>
  * @remarks Last compiled under ACS 8.2
@@ -56,7 +57,7 @@ using namespace IRA;
 
 
  /**
-The class implements the Notoicina Weather Station Station.
+The class implements the Noto Weather Station Station.
 Not all the paramters from the station have been implemented.
 
 
@@ -67,9 +68,7 @@ Not all the paramters from the station have been implemented.
 
 
 class  NotoWeatherStationImpl:     public virtual CharacteristicComponentImpl,     //Standard component superclass
-			 public virtual POA_Weather::NotoWeatherStation //CORBA servant stub
-				   
-
+			 public virtual POA_Weather::NotoWeatherStation //CORBA servant  
 {
 public:
 	/**

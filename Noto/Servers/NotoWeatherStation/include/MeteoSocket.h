@@ -9,7 +9,7 @@
 using namespace IRA;
 
 
-const static char WEATHERCMD[10] ="spettro\n";
+const static char WEATHERCMD[10] ="wx\n";
 
 
 class MeteoSocket : public CSocket{
@@ -45,7 +45,7 @@ static int Depth;
 	char Buff[BUFFSIZE];
 	MeteoData *m_meteodata;
 	map<string,double> m_map;
-	
+	vector<string> split (string message, string delimiter=",");
 	double m_windspeed;
 	double m_winddir;
 	double m_temperature;

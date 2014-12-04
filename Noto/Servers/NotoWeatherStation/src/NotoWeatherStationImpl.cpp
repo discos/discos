@@ -156,9 +156,9 @@ Weather::parameters NotoWeatherStationImpl::getData()throw (CORBA::SystemExcepti
 	double pressure;
 	double humidity;
 	
-	sock->sendCMD(err,CString("spettro\n"));
+	sock->sendCMD(err,CString("wx\n"));
 	sock->receiveData(err,rdata);
-
+        
 
 	
 	ACSErr::Completion_var completion;
@@ -268,8 +268,14 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		}
 
 	} catch (ComponentErrors::SocketErrorExImpl &x)
-	{
+	
+        {
+                 ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::initialize()",
+                       (LM_ERROR,"Can not connect  to WeatherStation @%s:%d  ",
+                       (const char *) ADDRESS,PORT));
+
 		_THROW_EXCPT(ComponentErrors::SocketErrorExImpl,"NotoWeatherStationImpl::initialize()");
+ 
 	}
 
 
