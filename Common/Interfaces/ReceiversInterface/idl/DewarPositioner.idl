@@ -96,14 +96,20 @@ module Receivers {
         /** Start the parallactic angle correction 
          * 
          * It raises a NotAllowedEx either when the updating mode is not yet selected
-         * or the positioner is not configured or when it is already updating.
+         * or the positioner not configured.
          *
-         * @param axis 
+         * @param axis the scan axis
+         * @param sector the antenna sector (NORTH or SOUTH)
+         * @param azimuth the azimuth (radians) at the beginning of the scan
+         * @param elevation the elevation (radians) at the beginning of the scan
          * @throw ComponentErrors::ComponentErrorsEx
          */
-        void startUpdating(in Management::TScanAxis axis, in Antenna::TAzimuthSection sector) raises (
-            ComponentErrors::ComponentErrorsEx
-        );
+        void startUpdating(
+            in Management::TScanAxis axis, 
+            in Antenna::TAzimuthSection sector,
+            in double azimuth,
+            in double elevation
+        ) raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** Stop the parallactic angle correction

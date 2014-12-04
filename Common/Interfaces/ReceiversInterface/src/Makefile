@@ -25,7 +25,7 @@ CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable \
 # IDL Files and flags
 IDL_FILES = CommonReceiverInterface ReceiversBoss \
 			GenericReceiver LocalOscillatorInterface \
-			GenericDerotator DewarPositioner
+			DewarPositionerDefinitions GenericDerotator DewarPositioner
 
 # list of all possible C-sources (used to create automatic dependencies)
 CSOURCENAMES = \
@@ -47,9 +47,6 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
-	$(RM) *~ ../test ../*~ ../lib ../object ../rtai ../bin
-	$(RM) ../doc/html
-	$(RM) tmp.txt acsexmplbeans.jar ../doc/abeans.log
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 
@@ -60,3 +57,4 @@ man   : do_man
 
 install : install_all
 	@echo " . . . installation done"
+

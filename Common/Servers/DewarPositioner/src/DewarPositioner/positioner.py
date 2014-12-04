@@ -3,6 +3,8 @@ import threading
 import datetime
 import time
 
+import Management
+import Antenna
 import DerotatorErrors
 
 from Acspy.Servants import ContainerServices
@@ -111,6 +113,7 @@ class Positioner(object):
                 self.goTo(position)
                 # Set the initialPosition, in order to add it to the dynamic one
                 self.conf.updateInitialPositions(position)
+                self.control.updateScanInfo({'iStaticPos': position})
             except Exception, ex:
                 raise PositionerError('cannot set position: %s' %ex.message)
 
@@ -133,7 +136,7 @@ class Positioner(object):
                     %(target, self.device.getMinLimit(), self.device.getMaxLimit()))
 
 
-    def startUpdating(self, axis, sector):
+    def startUpdating(self, axis, sector, az, el):
         sectors = ('ANT_NORTH', 'ANT_SOUTH')
         try:
             Positioner.generalLock.acquire()
@@ -147,13 +150,13 @@ class Positioner(object):
                 raise NotAllowedError('no site information available')
             elif not self.source:
                 raise NotAllowedError('no source available')
-            elif sector not in sectors:
+            elif str(sector) not in sectors:
                 raise NotAllowedError('sector %s not in %s' %(sector, sectors))
             else:
                 if self.isUpdating():
                     self.stopUpdating()
                 try:
-                    updatingConf = self.conf.getUpdatingConfiguration(axis)
+                    updatingConf = self.conf.getUpdatingConfiguration(str(axis))
                     initialPosition = float(updatingConf['initialPosition'])
                     functionName = updatingConf['functionName']
                     # If the functionName is a staticX, we command just one position
@@ -164,7 +167,23 @@ class Positioner(object):
                         self._start(self.posgen.goto, position)
                     else:
                         posgen = getattr(self.posgen, functionName) 
-                        self._start(posgen, self.source, self.siteInfo, initialPosition)
+                        try:
+                            iParallacticPos = PosGenerator.getParallacticAngle(
+                                self.siteInfo['latitude'], 
+                                az, 
+                                el
+                            )
+                        except ZeroDivisionError:
+                            raise NotAllowedError('zero division error computing p(%.2f, %.2f)' %(az, el))
+
+                        self.control.setScanInfo(
+                            axis=axis, 
+                            sector=sector,
+                            iStaticPos=initialPosition, 
+                            iParallacticPos=iParallacticPos,
+                            dParallacticPos=0
+                        )
+                        self._start(posgen, self.source, self.siteInfo)
                     self.control.mustUpdate = True
                 except Exception, ex:
                     raise PositionerError('configuration problem: %s' %ex.message)
@@ -189,7 +208,11 @@ class Positioner(object):
                     break
                 else:
                     try:
-                        self._setPosition(position)
+                        Pis = self.control.scanInfo['iStaticPos']
+                        Pip = self.control.scanInfo['iParallacticPos']
+                        Pdp = Pip - position
+                        self._setPosition(position) # _setPosition() will add the offsets
+                        self.control.scanInfo.update({'dParallactic': Pdp})
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
                         logger.logWarning('position %.2f out of range' %position)
@@ -222,7 +245,17 @@ class Positioner(object):
             logger.logError('unexcpected exception in Positioner._updatePosition(): %s' %ex)
         finally:
             self.control.isUpdating = False
+            self.control.updateScanInfo({
+                'axis': Management.MNG_NO_AXIS,
+                'iParallacticPos': 0,
+                'dParallacticPos': 0,
+            })
+
         logger.logNotice('exiting from the derotator position updating thread')
+
+
+    def getScanInfo(self):
+        return self.control.scanInfo
 
 
     def rewind(self, steps=None):
@@ -570,7 +603,32 @@ class Control(object):
         self.isRewinding = False
         self.autoRewindingSteps = None
         self.modes = {'rewinding': 'none', 'updating': 'none'}
+        self.clearScanInfo()
 
+    def setScanInfo(self, axis, sector, iStaticPos, iParallacticPos, dParallacticPos):
+        self.scanInfo = {
+            'axis': axis,
+            'sector': sector,
+            'iStaticPos': iStaticPos,
+            'iParallacticPos': iParallacticPos,
+            'dParallacticPos': dParallacticPos,
+        }
+
+    def clearScanInfo(self):
+        self.setScanInfo(
+            axis=Management.MNG_NO_AXIS, 
+            sector=Antenna.ANT_NORTH,
+            iStaticPos=0,
+            iParallacticPos=0,
+            dParallacticPos=0,
+        )
+
+    def updateScanInfo(self, info):
+        for key in info.keys():
+            if key not in self.scanInfo:
+                raise PositionerError('key %s not in control.scanInfo' %key)
+        self.scanInfo.update(info)
+    
 
 class Status(object):
     @staticmethod

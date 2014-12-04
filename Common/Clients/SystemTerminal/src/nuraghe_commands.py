@@ -128,6 +128,9 @@ def derotatorGetRewindingMode():
 def derotatorGetRewindingStep():
     """TODO"""
 
+def derotatorGetScanInfo():
+    """TODO"""
+
 def derotatorIsReady():
     """TODO"""
 

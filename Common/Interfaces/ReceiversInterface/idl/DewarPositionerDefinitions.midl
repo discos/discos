@@ -1,0 +1,49 @@
+#ifndef __DEWARPOSITIONERDEFINITIONS_IDL__
+#define __DEWARPOSITIONERDEFINITIONS_IDL__
+
+#include <baci.idl>
+#include "AntennaDefinitions.idl"
+
+#pragma prefix "alma"
+
+/**
+* @mainpage DewarPositioner documentation of the DewarPositioner
+* @date 04/12/2014
+* @version 1.0.0
+* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+* @remarks Last compiled under ACS 8.0.2
+*/
+
+
+/**
+* This module defines the DewarPositioner IDL interface
+* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+*/
+module Receivers {
+
+    /** Current scan runtime information */
+	typedef struct PositionerScanInfo {
+
+		/** Actual time **/
+		ACS::Time timestamp;
+
+        /** Scan axis **/
+        Management::TScanAxis axis;
+        
+        /** Antenna sector (NORTH or SOUTH) **/
+        Antenna::TAzimuthSection sector;
+
+        /** Static initial position (from CDB): Pis **/
+		double iStaticPos;
+
+        /** Parallactic angle at the beginning of the scan: Pip */
+		double iParallacticPos;
+
+        /** Delta between the present parallactic angle and Pip: Pdp */
+		double dParallacticPos;
+
+	} TDewarPositionerScanInfo;
+
+};
+
+#endif 

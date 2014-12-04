@@ -22,6 +22,7 @@ import DerotatorErrors
 from DewarPositioner.cdbconf import CDBConf
 from DewarPositioner.positioner import Positioner, PositionerError, NotAllowedError
 from DewarPositioner.devios import StatusDevIO
+from Receivers import TDewarPositionerScanInfo as ScanInfo
 
 from IRAPy import logger
 
@@ -54,7 +55,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         'derotatorSetPosition': ('_setPositionCmd', (str,)),
         'derotatorGetPosition': ('_getPositionCmd', ()), 
         'derotatorGetRewindingStep': ('_getRewindingStepCmd', ()),
+        'derotatorGetScanInfo': ('_getScanInfoCmd', ()),
     }
+
 
     def __init__(self):
         cc.__init__(self)
@@ -214,7 +217,6 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setData('Reason', ex.message)
             raise exc.getComponentErrorsEx()
 
-
     def setPosition(self, position):
         try:
             self.positioner.setPosition(position)
@@ -244,12 +246,44 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
     def _getRewindingStepCmd(self):
         """Wrap getRewindingStep() in order to add the `d` at the end of the string"""
         return '%sd' %self.getRewindingStep()
+    
+
+    def _getScanInfoCmd(self):
+        """Wrap getScanAxis() in order to show a human representation""" 
+        res = ''
+        info = self.getScanInfo()
+        res += 'axis: %s\n' %info['axis']
+        sector = info['sector']
+        res += 'sector: %s\n' %info['sector']
+        Pis = info['iStaticPos']
+        res += 'Pis: %.4f\n' %info['iStaticPos']
+        Pip = info['iParallacticPos']
+        res += 'Pip: %.4f\n' %info['iParallacticPos']
+        Pid = info['dParallacticPos']
+        res += 'Pdp: %.4f' %info['dParallacticPos']
+        return res
+        
+    
+    def getScanInfo(self):
+        """Return the current scan information.
+        
+        The current scan information is represented by the following IDL structure::
+        
+            Receivers.TDewarPositionerScanInfo {
+                axis;
+                sector;
+                iStaticPos;
+                iParallacticPos;
+                dParallacticPos;
+            }
+        """
+        return self.positioner.getScanInfo()
 
 
-    def startUpdating(self, axis, sector):
+    def startUpdating(self, axis, sector, az, el):
         logger.logNotice('starting the derotator position updating')
         try:
-            self.positioner.startUpdating(str(axis), str(sector))
+            self.positioner.startUpdating(axis, sector, az, el)
         except PositionerError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
@@ -479,6 +513,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 position = self.positioner.getPosition()
                 # Set the initialPosition, in order to add it to the dynamic one
                 self.cdbconf.updateInitialPositions(position)
+                self.positioner.control.updateScanInfo({'iStaticPos': position})
                 logger.logNotice('initial position set to %.4f' %position)
         except Exception, ex:
             reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message

@@ -11,21 +11,11 @@ class PosGenerator(object):
     def __init__(self, zdtimeout=5):
         self.zdtimeout = zdtimeout # Timeout in case of zero division error
       
-    def goto(self, position):
-        yield position
+    def goto(self, iStaticPos):
+        yield iStaticPos
 
-    def parallactic(self, source, siteInfo, initialPosition=0):
-        """Generate a parallactic...
-         
-        A better description...
-
-        :param source: object with ``_get_azimuth()`` and ``_get_elevation()``
-         methods
-        :param siteInfo: di
-        :type siteInfo: dict
-        :returns:  a position
-        :raises: PosGeneratorError
-        """
+    def parallactic(self, source, siteInfo):
+        """Return the parallactic angle"""
         try:
             latitude = radians(siteInfo['latitude'])
         except (KeyError, TypeError), ex:
@@ -40,10 +30,8 @@ class PosGenerator(object):
             try:
                 t = getTimeStamp().value + 1*10*6 # 100 ms in the future
                 az, el = source.getRawCoordinates(t) # Values in radians
-                tan_p = - sin(az) / (tan(latitude)*cos(el) - sin(el)*cos(az))
+                yield PosGenerator.getParallacticAngle(latitude, az, el)
                 last_zerodiv_time = datetime.datetime.now()
-                p = atan(tan_p)
-                yield initialPosition + degrees(p)
             except ZeroDivisionError:
                 logger.logWarning('zero division error computing the parallactic angle')
                 zerodiv_time = datetime.datetime.now() - last_zerodiv_time
@@ -58,6 +46,12 @@ class PosGenerator(object):
                 raeson = 'cannot get the %s (az, el)  values' %source._get_name()
                 logger.logNotice('%s: %s' %(raeson, ex.message))
                 raise PosGeneratorError(raeson)
+
+    @staticmethod
+    def getParallacticAngle(latitude, az, el):
+        tan_p = - sin(az) / (tan(latitude)*cos(el) - sin(el)*cos(az))
+        p = atan(tan_p)
+        return degrees(p)
 
     
 class PosGeneratorError(Exception):
