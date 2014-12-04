@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import with_statement
 
 """
 This sript is conceived to convert a text file by substituting tabs to spaces
@@ -9,17 +10,21 @@ import re
 import sys
 import logging
 import optparse #will become argparse in Python2.6
+import shutil
+import tempfile
 
 WHITESPACES_PATTERN = re.compile("\s+")
 
 def console_app():
     usage = """
-   Usage:
-   tabbify path_to_data
+   The scripts operates on a file by substituting each occurrence
+   of one or more consecutive whitespace character with a tab character.
+
+   $ tabbify path_to_data
    
    Examples:
     
-   tabbify /data/schedules/Maintenance/mia_schedula.lis
+   $ tabbify /data/schedules/Maintenance/mia_schedula.lis
 
     """
     op = optparse.OptionParser()
@@ -35,20 +40,40 @@ def console_app():
         sys.exit(0)
     else:
         filenames = [os.path.abspath(filename) for filename in args]
+        logging.debug("filenames list: %s" % (str(filenames),))
 
     for filename in filenames:
         logging.info("tabbifying: %s" % (filename,))
         if not os.path.exists(filename):
             logging.error("Invalid file name: %s" % (filename,))
         else:
-            file =  open(filename, "rt")
-            lines = file.readlines()
-            file.close()
-            output_file = open(filename, "wt")
-            for line in lines:
-                tabbed_line = re.subn(WHITESPACES_PATTERN, '\t', line.strip())[0]
-                output_file.write(tabbed_line + '\n')
-            output_file.close()
+            with open(filename, "rt") as input_file:
+                lines = input_file.readlines()
+            (tmp_fd, tmp_filename) = tempfile.mkstemp(text=True)
+            logging.debug("created tmp file: %s" % (tmp_filename,))
+            substitutions_count = 0
+            with os.fdopen(tmp_fd, "wt") as tmp_file:
+                for line in lines:
+                    matches = re.subn(WHITESPACES_PATTERN, '\t', line.strip())
+                    logging.debug("[orig] %s" % (line,))
+                    logging.debug("[dest] %s" % (matches[0],))
+                    logging.debug("[subs] %d" % (matches[1],))
+                    substitutions_count += matches[1]
+                    tmp_file.write(matches[0] + '\n')
+            logging.debug("closed tmp file: %s" % (tmp_filename,))
+            logging.debug("substitutes %d occurencies" % (substitutions_count,))
+            try:
+                shutil.copyfile(tmp_filename, filename)
+                logging.debug("copied %s to %s" % (tmp_filename, filename))
+            except:
+                logging.error("cannot copy %s to %s" % (tmp_filename, filename))
+                sys.exit(1)
+            try:
+                os.remove(tmp_filename)
+                logging.debug("removed file %s" % (tmp_filename,))
+            except:
+                logging.error("cannot remove file %s" % (tmp_filename,))
+                sys.exit(1)
 
 if __name__ == "__main__":
     console_app()
