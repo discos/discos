@@ -31,8 +31,8 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
 			//antennaUT will stores the estimated start time from the antenna for all kind of subscans
-			antennaAnswer=m_antennaBoss->checkScan(ut,*prim,*sec,minEl,maxEl,m_antennaRunTime);
-			ACS_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %lld :",m_antennaRunTime.slewingTime));
+			antennaAnswer=m_antennaBoss->checkScan(ut,*prim,*sec,minEl,maxEl,m_antennaRTime.out());
+			ACS_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %lld :",m_antennaRTime->slewingTime));
 		}
 		else {
 			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
@@ -64,34 +64,43 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 	if (!antennaAnswer) return antennaAnswer;
 	if ((MINOR_SERVO_AVAILABLE)) { // check if the minor servo system is enabled
 		loadMinorServoBoss(m_minorServoBoss,m_minorServoBossError); // (ComponentErrors::CouldntGetComponentExImpl)
-		 try {
-			 if (!CORBA::is_nil(m_minorServoBoss)) {
-				 minorServoAnswer=m_minorServoBoss->checkScan(ut,*servoPar,m_antennaRunTime,m_servoRunTime);
-			 }
-			 else {
-				 _EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
-				 throw impl;
-			 }
-		 }
-		 /*****************************************************/
-		 /* should replace all the exceptions */
-		 /***************************************************/
-		 catch (...) {
-			_EXCPT(ComponentErrors::OperationErrorExImpl,impl,"CCore::checkScan()");
-			impl.setReason("Could not connect to the minor servo boss");
+		try {
+			if (!CORBA::is_nil(m_minorServoBoss)) {
+				minorServoAnswer=m_minorServoBoss->checkScan(ut,*servoPar,m_antennaRTime.in(),m_servoRunTime.out());
+			}
+			else {
+				_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
+				throw impl;
+			}
+		}
+		catch (MinorServoErrors::MinorServoErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
+			impl.setReason("Could not check the minor servo scan");
 			throw impl;
-		 }
-		 if (!minorServoAnswer) return minorServoAnswer;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
+			impl.setReason("Could not check the minor servo scan");
+			throw impl;
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::checkScan()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			m_minorServoBossError=true;
+			throw impl;
+		}
+		if (!minorServoAnswer) return minorServoAnswer;
 	}
 	else { // otherwise the scan is always considered "feasible"
 		minorServoAnswer=true;
-		m_servoRunTime.startEpoch=0;
-		m_servoRunTime.onTheFly=false;
+		m_servoRunTime->startEpoch=0;
+		m_servoRunTime->onTheFly=false;
 	}
 	loadReceiversBoss(m_receiversBoss,m_receiversBossError);
 	try {
 		if (!CORBA::is_nil(m_receiversBoss)) {
-			receiversAnswer=m_receiversBoss->checkScan(ut,*recvPar,m_antennaRunTime,m_receiversRunTime);
+			receiversAnswer=m_receiversBoss->checkScan(ut,*recvPar,m_antennaRTime.in(),m_receiversRunTime);
 		}
 		else {
 			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
@@ -137,18 +146,18 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 		 *    Y			Y			N		 y			max(ant.ut,servo.ut)  (scan along subr.y)
 		 *    Y			Y			Y        n			max(all)*/
 		/* ****************************************************************** */
-		if ((!m_antennaRunTime.onTheFly) && (!m_servoRunTime.onTheFly)) { //simple beampark scan, for example
+		if ((!m_antennaRTime->onTheFly) && (!m_servoRunTime->onTheFly)) { //simple beampark scan, for example
 			// do nothing as ut should be zero as well, i.e the system must wait for the tracking flag to be true
 		}
-		else if ((!m_antennaRunTime.onTheFly) && (m_servoRunTime.onTheFly)) { //typical case is focus scan...
-			ut=MAX(m_antennaRunTime.startEpoch,m_servoRunTime.startEpoch)+2000000; // add 0.2 sec. as overhead
+		else if ((!m_antennaRTime->onTheFly) && (m_servoRunTime->onTheFly)) { //typical case is focus scan...
+			ut=MAX(m_antennaRTime->startEpoch,m_servoRunTime->startEpoch)+2000000; // add 0.2 sec. as overhead
 		}
-		else if ((m_antennaRunTime.onTheFly) && (!m_servoRunTime.onTheFly)) { //typical case of OTF scan...the resulting time is the one comingo from the antenna
-			ut=m_antennaRunTime.startEpoch;
+		else if ((m_antennaRTime->onTheFly) && (!m_servoRunTime->onTheFly)) { //typical case of OTF scan...the resulting time is the one comingo from the antenna
+			ut=m_antennaRTime->startEpoch;
 		}
 		else { // both are OTF...typically a scan along a subreflector axis (Y for example)
 			// the correct start time is the maximum of the two times
-			ut=MAX(m_antennaRunTime.startEpoch,m_servoRunTime.startEpoch)+2000000; // add 0.2 sec. as overhead
+			ut=MAX(m_antennaRTime->startEpoch,m_servoRunTime->startEpoch)+2000000; // add 0.2 sec. as overhead
 		}
 	}  // otherwise keep the original starting time, which is the one requested by the user
 	return true;
@@ -199,22 +208,31 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 		try {
 			if (!CORBA::is_nil(m_minorServoBoss)) {
 				servoUT=ut;
-				m_minorServoBoss->startScan(receiversUT,*servoPar,m_antennaRunTime);
+				m_minorServoBoss->startScan(receiversUT,*servoPar,m_antennaRTime.in());
 				ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"MINOR_SERVO_SCAN_EPOCH %lld",servoUT));
 			}
 			else {
-				_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
+				_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::doScan()");
 				throw impl;
 			}
-		 }
-		 /*****************************************************/
-		 /* should replace all the exceptions */
-		 /***************************************************/
-		 catch (...) {
-			_EXCPT(ComponentErrors::OperationErrorExImpl,impl,"CCore::checkScan()");
-			impl.setReason("Could not connect to the minor servo boss");
+		}
+		catch (MinorServoErrors::MinorServoErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::doScan()");
+			impl.setReason("Could not start the minor servo scan");
 			throw impl;
-		 }
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::doScan()");
+			impl.setReason("Could not start the minor servo scan");
+			throw impl;
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::doScan()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			m_minorServoBossError=true;
+			throw impl;
+		}
 	}
 	else {
 		servoUT=0;
@@ -223,7 +241,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 	try {
 		if (!CORBA::is_nil(m_receiversBoss)) {
 			receiversUT=ut;
-			m_receiversBoss->startScan(receiversUT,*recvPa,m_antennaRunTime);
+			m_receiversBoss->startScan(receiversUT,*recvPa,m_antennaRTime.in());
 			ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"RECEIEVERS_SCAN_EPOCH %lld",receiversUT));
 		}
 		else {
@@ -329,7 +347,7 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 	getProjectCode(projectCode);
 	path=/*m_config->getDataDirectory()*/basePath+projectCode+"/";
 
-	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
+	/*loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
 	try {
 		ACSErr::Completion_var comp;
 		ACS::ROstring_var targetRef=m_antennaBoss->target();
@@ -345,17 +363,23 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 	catch (...) {
 		targetID="";
 		//in this case we do not want to to do nothing.....it is an error but we can survive
-	}
+	}*/
+	targetID=m_antennaRTime->targetName;
 	if (suffix=="") {
-		newSuffix=targetID;
+		if (targetID=="") {
+			newSuffix="none";
+		}
+		else {
+			newSuffix=targetID;
+		}
 	}
 	else {
 		newSuffix=suffix;
 	}
-	baseName=CCore::computeOutputFileName(startUTTime,m_site,m_dut1,projectCode,suffix,extraPath);
+	baseName=CCore::computeOutputFileName(startUTTime,m_site,m_dut1,projectCode,newSuffix,extraPath);
 	// compute the axis or direction along which the scan is performed
 	scanAxis=computeScanAxis(); //  throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl);
+	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::OperationErrorExImpl);
 	loadDefaultDataReceiver();
 	CCore::setupDataTransfer(m_scanStarted,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,observerName,
 			projectName,baseName,path,extraPath,scheduleFileName,targetID,layout,layoutProc,scanTag,getCurrentDevice(),scanId,startUTTime ,subScanId,scanAxis,
@@ -405,17 +429,14 @@ bool CCore::checkRecording() throw (ComponentErrors::OperationErrorExImpl,Compon
 	return CCore::checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError);
 }
 
-/********************************************************************/
-/* maybe this should became a static, Core_Basic method             */
-/********************************************************************/
 Management::TScanAxis CCore::computeScanAxis() throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::OperationErrorExImpl)
 {
 	Management::TScanAxis scanAxis_ant,scanAxis_ms;
 	CORBA::String_var servo;
 	scanAxis_ant=scanAxis_ms=Management::MNG_NO_AXIS;
 	baci::ThreadSyncGuard guard(&m_mutex);
-	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
+	/*loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
 			m_antennaBoss->getScanAxis(scanAxis_ant);
@@ -436,16 +457,26 @@ Management::TScanAxis CCore::computeScanAxis() throw (ComponentErrors::Component
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::computeScanAxis()");
 		m_antennaBossError=true;
 		throw impl;
-	}
-	loadMinorServoBoss(m_minorServoBoss,m_minorServoBossError); // throw ComponentErrors::CouldntGetComponentExImpl
+	}*/
+	scanAxis_ant=m_antennaRTime->axis;
+	servo=m_servoRunTime->scanAxis;
+	scanAxis_ms=m_config->getAxisFromServoName(servo.in());
+	/*loadMinorServoBoss(m_minorServoBoss,m_minorServoBossError); // throw ComponentErrors::CouldntGetComponentExImpl
 	try {
 		if (!CORBA::is_nil(m_minorServoBoss)) {
 			servo=m_minorServoBoss->getScanAxis();
 			scanAxis_ms=m_config->getAxisFromServoName(servo.in());
 		}
 	}
-	catch (ManagementErrors::SubscanErrorEx& ex) {
-
+	catch (MinorServoErrors::MinorServoErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::computeScanAxis()");
+		impl.setReason("Could not start the minor servo scan");
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::computeScanAxis()");
+		impl.setReason("Could not start the minor servo scan");
+		throw impl;
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::computeScanAxis()");
@@ -453,12 +484,7 @@ Management::TScanAxis CCore::computeScanAxis() throw (ComponentErrors::Component
 		impl.setMinor(ex.minor());
 		m_minorServoBossError=true;
 		throw impl;
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::computeScanAxis()");
-		m_minorServoBossError=true;
-		throw impl;
-	}
+	}*/
 	// this choice has to be reconsidered, does the minor servo movement always prevail?
 	if (scanAxis_ms!=Management::MNG_NO_AXIS) { // if a minor servo has been selected, the resulting scan axis is the axis mapped to the servo
 		return scanAxis_ms;

@@ -1,0 +1,82 @@
+#ifndef __RECEIVERSDEFINITIONS_IDL__
+#define __RECEIVERSDEFINITIONS_IDL__
+
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Andrea Orlati <a.orlati@ira.inaf.it>
+\***************************************************************/
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+
+#pragma prefix "alma"
+
+/** 
+ * @mainpage IDL Interface documentation of the receivers subsystem
+ * @date 05/08/2011
+ * @version 1.0.0
+ * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>, 
+ *                  <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a> 
+ * @remarks Last compiled under ACS 8.0.2
+*/
+
+/** 
+* This module defines the whole interfaces of receiver subsystem
+* @author <a href=mailto:mbuttu@oa-cagliari.inaf.it>Marco Buttu</a>
+* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
+* <br>
+*/
+module Receivers {
+	
+	/// polarization of the input channel 
+	enum TPolarization {
+		RCV_LCP,       /*!< the IF is left circular polarization  */
+		RCV_RCP,        /*!< the IF  is right circular polarization */
+		RCV_VLP,		/*!<the IF is vertical linear polarization */
+		RCV_HLP	   /*!<the IF is horizontal linear polarization */
+	};
+	ACS_ENUM(TPolarization);
+
+    /// A couple of coordinates (x, y)
+    struct TPosition {
+        double x;
+        double y;
+    };
+
+    typedef struct RunTime {
+    	ACS::Time startEpoch;
+    	boolean onTheFly;
+    	ACS::Time timeToStop; /*!< indicates the exact time (when) the scan will be closed, it could be zero if no time is required */
+    } TRunTimeParameters;
+
+    /**
+     * Defines the possible modes for rewinding the derotator
+     */
+    enum TRewindModes {
+    	RCV_AUTO_REWIND,  /*!< System is in charge to rewind the derotator */
+    	RCV_MANUAL_REWIND, /*!< System will wait for explicit command in order to rewind */
+    	RCV_UNDEF_REWIND /*!< no proper setup defined yet  */
+    };
+    // Not required at the moment
+    ACS_ENUM(TRewindModes);
+
+    /**
+      * Defines the possible configurations for the derotator
+      */
+    enum TDerotatorConfigurations {
+    	RCV_FIXED_DEROTCONF, /*!< derotation is done in fixed mode */
+        RCV_BSC_DEROTCONF,
+        RCV_OPTIMIZED_DEROTCONF,
+        RCV_ALIGNED_DEROTCONF,
+        RCV_CUSTOM_DEROTCONF,
+        RCV_UNDEF_DEROTCONF
+    };
+    // Not required at the moment
+    ACS_ENUM(TDerotatorConfigurations);
+
+
+
+};
+
+#endif

@@ -24,7 +24,7 @@
 
 MAKE_PDF = ON
 
-CDB_SCHEMAS = Antenna Mount Station PointingModel
+CDB_SCHEMAS = Mount Station PointingModel
 
 # 
 # IDL Files and flags

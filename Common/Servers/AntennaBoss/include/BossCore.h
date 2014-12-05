@@ -424,15 +424,16 @@ public:
 	 *         as soon as possible
 	 * @param par the description of the scan that has to be checked
 	 * @param secondary the description of the scan that is the secondary of the scan that has to be checked
-	 * @param runtTime collection of parameters computed at run time regarding the current scan
+	 * @param rtTime collection of parameters computed at run time regarding the current scan (pointer)
 	 * @param minElLimit defines the avoidance area in elevation, this is the lower limit (radians): the source must stay beyond that one. A negative means use default value
 	 * @param maxElLimit defines the avoidance area in elevation, this is the upper limit (radians): the source must stay below that one. A negative means use default value
 	 * @return true if the telescope will be in the target position before the given epoch expires, false if the
 	 * telescope will not be able to get there (for example the target is below the horizon)
 	 */ 													   
-	bool checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& par,const Antenna::TTrackingParameters& secondary,Antenna::TRunTimeParameters& runTime,double minElLimit=-1.0,double maxElLimit=-1.0) throw (
-			ComponentErrors::CouldntGetComponentExImpl,AntennaErrors::ScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,
-			AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
+	bool checkScan(const ACS::Time& startUt,const Antenna::TTrackingParameters& par,const Antenna::TTrackingParameters& secondary,Antenna::TRunTimeParameters_out rTime,
+		const double& minElLimit=-1.0,const double& maxElLimit=-1.0) throw (
+		ComponentErrors::CouldntGetComponentExImpl,AntennaErrors::ScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,
+		AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	
 	/**
 	 * This function returns the value that describes the type of the current ephemeris generator.

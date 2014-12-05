@@ -26,7 +26,7 @@ CSOURCENAMES = \
 #
 # IDL FILES
 #
-IDL_FILES = MinorServoDefinitions MinorServo MinorServoBoss
+IDL_FILES = MinorServo MinorServoBoss
 
 #
 # INCLUDE STANDARDS

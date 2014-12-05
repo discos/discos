@@ -460,11 +460,11 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 			throw impl;
 		}
 	}
-	catch (ManagementErrors::ConfigurationErrorEx& ex) {
+	catch (MinorServoErrors::MinorServoErrorsEx& ex) {
 		_ADD_BACKTRACE(ManagementErrors::MinorServoScanErrorExImpl,impl,ex,"CCore::focusScan()");
 		throw impl;
 	}
-	catch (ManagementErrors::SubscanErrorEx& ex) {
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ManagementErrors::MinorServoScanErrorExImpl,impl,ex,"CCore::focusScan()");
 		throw impl;
 	}
@@ -497,8 +497,19 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 			throw impl;
 		}
 	}
-	catch (ManagementErrors::SubscanErrorEx& ex) {
+	catch (MinorServoErrors::MinorServoErrorsEx& ex) {
 		_ADD_BACKTRACE(ManagementErrors::MinorServoScanErrorExImpl,impl,ex,"CCore::focusScan()");
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::MinorServoScanErrorExImpl,impl,ex,"CCore::focusScan()");
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::focusScan()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_antennaBossError=true;
 		throw impl;
 	}
 	ACS_LOG(LM_FULL_INFO,"CCore::focusScan()",(LM_NOTICE,"FOCUS_SCAN_DONE"));

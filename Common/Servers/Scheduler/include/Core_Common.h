@@ -82,9 +82,10 @@ void startScan(ACS::Time& time,const Antenna::TTrackingParameters *const prim,co
  * @throw ComponentErrors::CORBAProblemExImpl
  * @throw ComponentErrors::UnexpectedExImpl
  * @throw ComponentErrors::CouldntGetComponentExImpl
+ * @throw ComponentErrors::OperationErrorExImpl
  */
 Management::TScanAxis computeScanAxis() throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
-		ComponentErrors::CouldntGetComponentExImpl);
+		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::OperationErrorExImpl);
 
 /**
  * It allows to send a configuration procedure to a backend.

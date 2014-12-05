@@ -21,7 +21,10 @@
 									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false; \
 									m_restFrequency.length(0); \
 									m_scanID=0; m_subScanID=0; \
-									m_subScanEpoch=0;
+									m_subScanEpoch=0; \
+									m_antennaRTime=new Antenna::TRunTimeParameters; m_antennaRTime->targetName=""; \
+									m_antennaRTime->axis=Management::MNG_NO_AXIS; \
+									m_servoRunTime=new MinorServo::TRunTimeParameters; m_servoRunTime->scanAxis="";
 
 									
 #define RESOURCE_EXEC ACS_NEW_SIMPLE_CONSUMER(m_antennaNC,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,antennaNCHandler,static_cast<void*>(this)); \
@@ -35,7 +38,7 @@
 					  else { m_isMinorServoTracking=true; } \
 					  ACS_NEW_SIMPLE_CONSUMER(m_receiversNC,Receivers::ReceiversDataBlock,Receivers::RECEIVERS_DATA_CHANNEL,receiversNCHandler,static_cast<void*>(this)); \
 					  m_receiversNC->consumerReady(); \
-					  ACS_LOG(LM_FULL_INFO, "Core::execute()", (LM_INFO,"RECEIEVERS_NC_READY")); \
+					  ACS_LOG(LM_FULL_INFO, "Core::execute()", (LM_INFO,"RECEIVERS_NC_READY")); \
 					  m_defaultBackendInstance=m_config->getDefaultBackendInstance(); \
 					  m_defaultDataReceiverInstance=m_config->getDefaultDataReceiverInstance(); \
 					  try { \
@@ -220,11 +223,11 @@ Receivers::TRunTimeParameters m_receiversRunTime;
 /**
  * structure used to pass back and forth runtime parameters from the receivers
  */
-Antenna::TRunTimeParameters m_antennaRunTime;
+Antenna::TRunTimeParameters_var m_antennaRTime;
 /**
  * structure used to pass back and forth runtime parameters from the minor servo
  */
-MinorServo::TRunTimeParameters m_servoRunTime;
+MinorServo::TRunTimeParameters_var m_servoRunTime;
 /**
  * used to get a reference to the antenna boss component.
  * @param ref the pointer to the antenna boss component

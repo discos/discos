@@ -437,16 +437,17 @@ module Antenna {
 		 * @throw AntennaErrors::AntennaErrorsEx
 		 * @param startUt this is the time before which the telescope is supposed to reach the target, if zero the scan is checked only against the elevation.
 		 * @param parameters structure that describes the scan to be performed.
-		 * @param secondary this stucture is identical to the previous one, in most cases it is ignored, only on particular cases it is used as a secondary trajectory generator in order to get
+		 * @param secondary this structure is identical to the previous one, in most cases it is ignored, only on particular cases it is used as a secondary trajectory generator in order to get
 		 *                  a combination of both of them.
-		 * @param lowerElLimit defines the lower limit in elevation to be checked: the target must lay beyound that limit (radians). A negative value forces the check against default value
-		 * @param runTime structure used to return some of the run time information about the scan. 
+		 * @param lowerElLimit defines the lower limit in elevation to be checked: the target must lay beyond that limit (radians). A negative value forces the check against default value
+		 * @param runTime structure used to return some of the run time information about the scan (it must be freed by caller).
+		 *  @arg \c targetName name of the current target
 		 * 	@arg \c azimuth initial azimuth of the current scan
 		 *	@arg \c elevation initial elevation of the current scan
 		 *	@arg \c startEpoch starting ut time of the current scan (if startUT!=0 it is always equal to startUT, otherwise it is computed in all scan cases)
-		 *	@arg \c slewingTime expected slewng time to the starting point
+		 *	@arg \c slewingTime expected slewing time to the starting point
 		 *	@arg \c section indicates where in the azimuth range the scan will start
-		 *	@arg \c axis scanning axis of the curretn scan
+		 *	@arg \c axis scanning axis of the current scan
 		 * @return true if the telescope will be in the target position before the given epoch expires, false if the
 		 * telescope will not be able to get there in time ( now+SlewTime>ut).
 		*/  

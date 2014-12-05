@@ -35,6 +35,11 @@ module MinorServo {
 		 * position of the axis involved in the scan, see <i>getCentralScanPosition()</i>
 		 */
 		double centerScan;
+		/**
+		 * name of the scan involved in the current scan, it could be empty if onTheFly==false
+		 */
+		string scanAxis;
+    	ACS::Time timeToStop; /*!< indicates the exact time (when) the scan will be closed, it could be zero if no time is required */
 	} TRunTimeParameters;
 
     struct MinorServoScan {

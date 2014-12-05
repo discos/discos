@@ -16,6 +16,7 @@
 # REMARKS
 #    None
 #------------------------------------------------------------------------
+MAKE_PDF = ON
 
 #
 # user definable C-compilation flags
@@ -36,7 +37,10 @@
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     =
-EXECUTABLES_L   = 
+EXECUTABLES_L   = TestReceivers
+TestReceivers_OBJECTS = ReceiversModule
+TestReceivers_LIBS= ReceiversDefinitionsStubs baci maci
+
 
 #
 # <brief description of xxxxx program>
@@ -51,68 +55,17 @@ xxxxx_LIBS      =
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        =
-
-#
-# Libraries (public and local)
-# ----------------------------
-LIBRARIES       =
-LIBRARIES_L     =
-
-#
-# <brief description of lllll library>
-lllll_OBJECTS   =
-
-#
-# Scripts (public and local)
-# ----------------------------
-SCRIPTS         =
-SCRIPTS_L       =
-
-#
-# TCL scripts (public and local)
-# ------------------------------
-TCL_SCRIPTS     =
-TCL_SCRIPTS_L   =
-
-#
-# Python stuff (public and local)
-# ----------------------------
-PY_SCRIPTS         =
-PY_SCRIPTS_L       =
-
-PY_MODULES         =
-PY_MODULES_L       =
-
-PY_PACKAGES        =
-PY_PACKAGES_L      =
-pppppp_MODULES	   =
-
-#
-# <brief description of tttttt tcl-script>
-tttttt_OBJECTS  =
-tttttt_TCLSH    = 
-tttttt_LIBS     = 
-
-#
-# TCL libraries (public and local)
-# ------------------------------
-TCL_LIBRARIES   =
-TCL_LIBRARIES_L =
-
-#
-# <brief description of tttlll library>
-tttlll_OBJECTS  = 
+INCLUDES        = ReceiversModule.h
 
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = 
+CDB_SCHEMAS = Managment Antenna Receivers 
 
 # 
 # IDL Files and flags
 # 
-IDL_FILES = ManagmentDefinitions AntennaDefinitions ReceiversDefinitions BackendsDefinitions
+IDL_FILES = ManagmentDefinitions AntennaDefinitions ReceiversDefinitions BackendsDefinitions MinorServoDefinitions
 TAO_IDLFLAGS =
 USER_IDL =
 #

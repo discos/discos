@@ -198,11 +198,15 @@ module Antenna {
 	*/
 	typedef struct RunTime {
 		/**
-	 	 * expected azimuth at the beggining of the scan
+		 * Name of the target
+		 */
+		string targetName;
+		/**
+	 	 * expected azimuth at the beginning of the scan
 	 	 */
 		double azimuth;
 		/**
-	 	 * expected elevation at the beggining of the scan
+	 	 * expected elevation at the beginning of the scan
 	 	 */
 		double elevation;
 		/**
@@ -225,6 +229,7 @@ module Antenna {
 		 * scan axis of the current scan
 		 */
 		Management::TScanAxis axis;
+    	ACS::Time timeToStop; /*!< indicates the exact time (when) the scan will be closed, it could be zero if no time is required */
 	} TRunTimeParameters;
 		
 };

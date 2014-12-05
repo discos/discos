@@ -20,7 +20,7 @@
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = Managment ProcedureFile
+CDB_SCHEMAS = ProcedureFile
 
 #
 # IDL Files and flags

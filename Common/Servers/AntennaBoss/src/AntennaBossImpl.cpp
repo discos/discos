@@ -481,9 +481,10 @@ void AntennaBossImpl::goTo(CORBA::Double az,CORBA::Double el) throw (ComponentEr
 	}
 }
 
-bool AntennaBossImpl::checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary,
-					CORBA::Double minElLimit,CORBA::Double maxElLimit,Antenna::TRunTimeParameters_out runTime) throw (
-					ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
+bool AntennaBossImpl::checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,
+  const Antenna::TTrackingParameters& secondary,
+  CORBA::Double minElLimit,CORBA::Double maxElLimit,Antenna::TRunTimeParameters_out runTime) throw (
+  ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
 	AUTO_TRACE("AntennaBossImpl::checkScan()");
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:checkScan");
@@ -505,7 +506,7 @@ char *AntennaBossImpl::getGeneratorCURL(Antenna::TGeneratorType_out type) throw 
 	AUTO_TRACE("AntennaBossImpl::getGeneratorCURL()");
 	//that's another workaround for the same problem described in "getObservedEquatorial". The cause of that (this function called before
 	// m_core is initialized) is a mystery to me.
-	if (!m_core)  {
+	if (!m_core) {
 		type=Antenna::ANT_NONE;
 		return CORBA::string_dup("");
 	}
