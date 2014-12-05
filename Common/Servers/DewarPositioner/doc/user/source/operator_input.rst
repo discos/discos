@@ -141,8 +141,8 @@ una nuova posizione con ``derotatorSetPosition``::
 Configurazioni dinamiche
 ------------------------
 Nelle configurazioni statiche la posizione del derotatore non viene
-aggiornata al variare della posizione dell'antenna o dell'asse
-di scansione. Nelle configurazioni *dinamiche* invece 
+aggiornata al variare della posizione dell'antenna.
+Nelle configurazioni *dinamiche* invece 
 il ``DewarPositioner`` aggiorna la posizione del derotatore in funzione
 della posizione dell'antenna, al fine di compensare l'angolo parallatico
 (più un eventuale contributo del *galactic parallactic angle*, 
@@ -151,12 +151,15 @@ a seconda dell'asse di scansione).
 Nelle configurazioni dinamiche la posizione del derotatore è data
 dalla seguente equazione::
 
-    P = Pi + D(AZ, EL, AXIS)
+    P = Pis(AXIS) + Pip(AZ0,EL0) + Pdp(AZ,EL) 
 
-dove ``Pi`` è una *posizione iniziale*, mentre ``D(AZ, EL, AXIS)``
+dove ``Pis`` è una *posizione statica*, mentre ...
 è la cosidetta *funzione di derotazione*, che serve
 per compensare l'angolo parallattico (o il contributo del
 *galactic parallactic angle*).
+
+.. note:: In alcune configurazioni (S-Band) il contributo Pip è nullo.
+
 Ciò che differenzia una configurazione
 dinamica dall'altra è la posizione iniziale, mentre la 
 funzione di derotazione non cambia, ed è data da:

@@ -461,6 +461,13 @@ class Positioner(object):
             raise NotAllowedError('positioner not configured: a setup() is required')
 
 
+    def getCmdPosition(self):
+        if self.isSetup():
+            return self.device.getCmdPosition()
+        else:
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+
     def setAutoRewindingSteps(self, steps):
         if self.isSetup():
             max_rewinding_steps = self.getMaxRewindingSteps()

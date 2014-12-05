@@ -171,7 +171,7 @@ public:
     * Create a socket and make a connection to it 
     * @throw ComponentErrors::SocketErrorExImpl
     */
-    void Init() throw (ComponentErrors::SocketErrorExImpl) ;
+    void Init(double actPosition=0) throw (ComponentErrors::SocketErrorExImpl) ;
 
 
     /// Return the icd position as degree angle, in the user reference system

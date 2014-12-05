@@ -11,7 +11,8 @@
 #include <maciErrType.idl>
 #include <ComponentErrors.idl>
 #include <ManagmentDefinitions.idl>
-#include "AntennaDefinitions.idl"
+#include <AntennaDefinitions.idl>
+#include <DewarPositionerDefinitions.idl>
 
 #pragma prefix "alma"
 
@@ -236,12 +237,23 @@ module Receivers {
         double getPosition() raises (ComponentErrors::ComponentErrorsEx);
 
 
+        /** Return the commanded position in the user reference system
+         *
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        double getCmdPosition() raises (ComponentErrors::ComponentErrorsEx);
+
+
         /** Return the actual setup configuration (KKG, etc.) */
         string getActualSetup();
 
 
         /** Return the commanded setup configuration (KKG, etc.) */
         string getCommandedSetup();
+
+
+        /** Return the current scan information */
+        TDewarPositionerScanInfo getScanInfo();
 
 
         /** This property reports the status of the DewarPositioner.

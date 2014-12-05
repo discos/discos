@@ -52,7 +52,7 @@ icdSocket::~icdSocket() {
     Close(m_Error);
 }
 
-void icdSocket::Init() throw (ComponentErrors::SocketErrorExImpl) {
+void icdSocket::Init(double actPosition) throw (ComponentErrors::SocketErrorExImpl) {
 
     AUTO_TRACE("icdSocket; creating derotator icd socket");
     
@@ -92,7 +92,7 @@ void icdSocket::Init() throw (ComponentErrors::SocketErrorExImpl) {
         }
     }
 
-    setCmdPosition(getActPosition());
+    setCmdPosition(actPosition);
 }
 
 

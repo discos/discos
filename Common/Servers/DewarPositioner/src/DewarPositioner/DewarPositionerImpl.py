@@ -54,6 +54,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         'derotatorRewind': ('rewind', (int,)),
         'derotatorSetPosition': ('_setPositionCmd', (str,)),
         'derotatorGetPosition': ('_getPositionCmd', ()), 
+        'derotatorGetCmdPosition': ('_getCmdPositionCmd', ()), 
         'derotatorGetRewindingStep': ('_getRewindingStepCmd', ()),
         'derotatorGetScanInfo': ('_getScanInfoCmd', ()),
     }
@@ -198,6 +199,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             self._setDefaultSetup()
         logger.logNotice('derotator parked')
 
+
     def getPosition(self):
         try:
             return self.positioner.getPosition()
@@ -216,6 +218,22 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setData('Reason', ex.message)
             raise exc.getComponentErrorsEx()
+
+
+    def getCmdPosition(self):
+        try:
+            return self.positioner.getCmdPosition()
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
+            raise exc.getComponentErrorsEx()
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setData('Reason', ex.message)
+            raise exc.getComponentErrorsEx()
+
 
     def setPosition(self, position):
         try:
@@ -242,6 +260,11 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         """Wrap getPosition() in order to add the `d` at the end of the string"""
         return '%.4fd' %self.getPosition()
  
+    def _getCmdPositionCmd(self):
+        """Wrap getCmdPosition() in order to add the `d` at the end of the string"""
+        return '%.4fd' %self.getCmdPosition()
+ 
+
 
     def _getRewindingStepCmd(self):
         """Wrap getRewindingStep() in order to add the `d` at the end of the string"""

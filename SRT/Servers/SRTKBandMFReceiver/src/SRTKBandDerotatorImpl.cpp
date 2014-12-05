@@ -302,7 +302,7 @@ void SRTKBandDerotatorImpl::initialize() throw (ComponentErrors::CDBAccessExImpl
         throw dummy;
     }
 
-    icd_socket->Init();
+    icd_socket->Init(getActPosition());
     icd_socket->driveEnable();
 }
 

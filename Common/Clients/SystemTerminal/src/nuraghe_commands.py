@@ -119,6 +119,9 @@ def derotatorGetAutoRewindingSteps():
 def derotatorGetConfiguration():
     """TODO"""
 
+def derotatorGetCmdPosition():
+    """TODO"""
+
 def derotatorGetPosition():
     """TODO"""
 
