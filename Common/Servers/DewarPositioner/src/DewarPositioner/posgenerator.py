@@ -1,7 +1,7 @@
 """This module implements the position generators"""
 import datetime
 import time
-from math import sin, cos, tan, atan, radians, degrees
+from math import sin, cos, tan, atan, degrees
 from IRAPy import logger
 from Acspy.Common.TimeHelper import getTimeStamp
 
@@ -17,7 +17,7 @@ class PosGenerator(object):
     def parallactic(self, source, siteInfo):
         """Return the parallactic angle"""
         try:
-            latitude = radians(siteInfo['latitude'])
+            latitude = siteInfo['latitude']
         except (KeyError, TypeError), ex:
             raise PosGeneratorError('cannot get the latitude: %s' %ex.message)
         except Exception, ex:
@@ -30,7 +30,8 @@ class PosGenerator(object):
             try:
                 t = getTimeStamp().value + 1*10*6 # 100 ms in the future
                 az, el = source.getRawCoordinates(t) # Values in radians
-                yield PosGenerator.getParallacticAngle(latitude, az, el)
+                position = PosGenerator.getParallacticAngle(latitude, az, el)
+                yield position
                 last_zerodiv_time = datetime.datetime.now()
             except ZeroDivisionError:
                 logger.logWarning('zero division error computing the parallactic angle')
@@ -42,6 +43,9 @@ class PosGenerator(object):
                 else:
                     time.sleep(0.5)
                     continue
+            except GeneratorExit: # Required in Python 2.5:
+                # http://www.algorithm.co.il/blogs/programming/generatorexit-another-reason-to-upgrade-to-python-2-6/
+                raise 
             except Exception, ex:
                 raeson = 'cannot get the %s (az, el)  values' %source._get_name()
                 logger.logNotice('%s: %s' %(raeson, ex.message))
@@ -49,6 +53,7 @@ class PosGenerator(object):
 
     @staticmethod
     def getParallacticAngle(latitude, az, el):
+        """Arguments in radians"""
         tan_p = - sin(az) / (tan(latitude)*cos(el) - sin(el)*cos(az))
         p = atan(tan_p)
         return degrees(p)

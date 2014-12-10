@@ -11,6 +11,8 @@ class PositionerParkTest(unittest2.TestCase):
 
     def setUp(self):
         self.cdbconf = CDBConf()
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('FIXED')
 
     def test_notConfigured(self):
         """Verify it does not raise an exception if not yet configured"""
@@ -31,9 +33,6 @@ class PositionerParkTest(unittest2.TestCase):
 
         p = Positioner(self.cdbconf)
         p.setup(siteInfo={}, source=None, device=device)
-        time.sleep(0.5) if using_mock else time.sleep(2)
-        offset = 2
-        p.setOffset(offset)
         time.sleep(0.5) if using_mock else time.sleep(2)
         park_position=1
         p.park(parkPosition=park_position)

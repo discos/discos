@@ -16,8 +16,12 @@
     <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
 
     <xs:complexType name="DewarPositionerActionsType">
+        <!-- True in case the configuration allows to set a custom position-->
         <xs:attribute name="SetCustomPositionAllowed" type="xs:boolean" use="required" />
+        <!-- True in case the configuration allows a dynamic position updating -->
         <xs:attribute name="DynamicUpdatingAllowed" type="xs:boolean" use="required" />
+        <!-- True in case the initial parallactic angle must be added -->
+        <xs:attribute name="AddInitialParallactic" type="xs:boolean" use="required" />
     </xs:complexType>
 
     <xs:element name="DewarPositionerActions" type="DewarPositionerActionsType"/>

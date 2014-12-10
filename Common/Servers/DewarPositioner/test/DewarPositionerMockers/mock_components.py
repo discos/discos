@@ -22,10 +22,10 @@ class MockDevice(object):
         return self.is_updating
 
     def getMinLimit(self):
-        return -130.0
+        return -230.0
 
     def getMaxLimit(self):
-        return +130.0
+        return +230.0
 
     def getStep(self):
         return 60.0

@@ -25,6 +25,7 @@ all:	do_all
 clean : clean_all
 	$(RM) *~ *Impl/*~ 
 	$(RM) ../lib/python/site-packages/*
+	$(RM) $(INTROOT)/lib/python/site-packages/DewarPositioner
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 

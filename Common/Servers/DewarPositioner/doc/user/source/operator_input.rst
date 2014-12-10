@@ -169,6 +169,10 @@ funzione di derotazione non cambia, ed è data da:
       o ``GCIRCLE``
     * ``D = G(AZ, EL)`` quando ``AXIS`` è ``GAL_LON`` o ``GAL_LAT``
 
+.. note:: Dire che nel caso di D=0 (HOR_LON e HOR_LAT), il valore di Pip è zero
+          In generale, se D=N, con N fisso indipendentemente da AXIS, EL e AZ,
+          allora Pip=N
+
 dove ``P(AZ, EL)`` è la funzione di compensazione dell'angolo parallatico,
 mentre ``G(AZ, EL)`` è quella di compensazione del contributo dovuto al
 *galactic parallactic angle* (GPA).

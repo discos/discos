@@ -3,7 +3,7 @@
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	IntegrationLogs="false"
 	MaxQueueLength="5"
-	MaxSuppliers="10"
+	MaxSuppliers="20"
 	RejectNewEvents="false"
 	DiscardPolicy="FifoOrder"
 	EventReliability="BestEffort"

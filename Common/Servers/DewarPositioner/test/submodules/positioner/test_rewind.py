@@ -22,7 +22,7 @@ class RewindTest(unittest2.TestCase):
         self.m.restore()
         self.m.verify()
 
-    def test_number_of_steps_oor(self):
+    def _test_number_of_steps_oor(self):
         """Raise PositionerError when the number of steps is out of range"""
         with self.assertRaisesRegexp(PositionerError, 'actual pos: {0.0}'):
             self.p.rewind(steps=3)
@@ -113,7 +113,7 @@ class RewindTest(unittest2.TestCase):
         self.p.rewind()
         self.assertEqual(self.device.getActPosition(), expected)
 
-    def test_xxxAutoRewindingSteps(self):
+    def _test_xxxAutoRewindingSteps(self):
         """Verify setAutoRewindingSteps() and clearAutoRewindingSteps()"""
         n = 1
         # NotAllowedError is raised in case of a number of steps too large
@@ -137,7 +137,7 @@ class RewindTest(unittest2.TestCase):
         with self.assertRaisesRegexp(NotAllowedError, 'not configured'):
             self.p.setAutoRewindingSteps(n)
 
-    def test_wrong_auto_rewinding_steps(self):
+    def _test_wrong_auto_rewinding_steps(self):
         """must_update is True in case of wrong auto rewinding_steps during rewinding"""
         n = 4
         self.p.setAutoRewindingSteps(n)

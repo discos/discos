@@ -54,6 +54,7 @@ class Positioner(object):
             self._clearOffset()
             self.is_setup = True
             time.sleep(0.4) # Give the device the time to accomplish the setup
+            self.control.updateScanInfo({'iStaticPos': setupPosition})
             self._start(self.posgen.goto, setupPosition)
             time.sleep(0.1) # Give the thread the time to finish
         except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
@@ -145,7 +146,7 @@ class Positioner(object):
             elif not self.conf.isConfigured():
                 raise NotAllowedError('CDB not configured: a CDBConf.setConfiguration() is required')
             elif self.conf.getAttribute('DynamicUpdatingAllowed') != 'true':
-                pass # Do nothing
+                logger.logNotice('dynamic updating not allowed')
             elif not self.siteInfo:
                 raise NotAllowedError('no site information available')
             elif not self.source:
@@ -164,6 +165,13 @@ class Positioner(object):
                         # functionName = 'static2' -> staticValue = float('2')
                         staticValue = float(functionName.lstrip('static')) 
                         position = initialPosition + staticValue
+                        self.control.setScanInfo(
+                            axis=axis, 
+                            sector=sector,
+                            iStaticPos=initialPosition, 
+                            iParallacticPos=staticValue,
+                            dParallacticPos=0
+                        )
                         self._start(self.posgen.goto, position)
                     else:
                         posgen = getattr(self.posgen, functionName) 
@@ -192,7 +200,6 @@ class Positioner(object):
 
 
     def _updatePosition(self, posgen, vargs):
-        logger.logNotice('starting the derotator position updating thread')
         try:
             self.control.isRewindingRequired = False
             self.control.isUpdating = True
@@ -203,6 +210,11 @@ class Positioner(object):
                         %self.device._get_name())
                 return
  
+            if self.isConfigured():
+                isOptimized = (self.conf.getAttribute('AddInitialParallactic') == 'false')
+            else:
+                isOptimized = False
+
             for position in posgen(*vargs):
                 if self.control.stop:
                     break
@@ -210,12 +222,13 @@ class Positioner(object):
                     try:
                         Pis = self.control.scanInfo['iStaticPos']
                         Pip = self.control.scanInfo['iParallacticPos']
-                        Pdp = Pip - position
-                        self._setPosition(position) # _setPosition() will add the offsets
+                        Pdp = 0 if posgen.__name__ == 'goto' else (position - Pip)
+                        target = Pis + Pdp if isOptimized else Pis + Pip + Pdp
+                        self._setPosition(target) # _setPosition() will add the offsets
                         self.control.scanInfo.update({'dParallactic': Pdp})
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
-                        logger.logWarning('position %.2f out of range' %position)
+                        logger.logWarning('position %.2f out of range' %target)
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
                                 self.rewind() 
@@ -244,14 +257,7 @@ class Positioner(object):
         except Exception, ex:
             logger.logError('unexcpected exception in Positioner._updatePosition(): %s' %ex)
         finally:
-            self.control.isUpdating = False
-            self.control.updateScanInfo({
-                'axis': Management.MNG_NO_AXIS,
-                'iParallacticPos': 0,
-                'dParallacticPos': 0,
-            })
-
-        logger.logNotice('exiting from the derotator position updating thread')
+            self.control.stopUpdating()
 
 
     def getScanInfo(self):
@@ -341,7 +347,6 @@ class Positioner(object):
 
     def stopUpdating(self):
         """Stop the updating thread"""
-        logger.logNotice('stopping the derotator position updating thread')
         try:
             self.control.stop = True
             self.t.join(timeout=10)
@@ -353,7 +358,6 @@ class Positioner(object):
             self.control.stop = False
             self.control.mustUpdate = False
             time.sleep(0.1)
-            logger.logNotice('derotator position updating thread stopped')
 
 
     def park(self, parkPosition=0):
@@ -362,9 +366,11 @@ class Positioner(object):
             self.stopUpdating()
             try:
                 Positioner.generalLock.acquire()
+                self.control.updateScanInfo({'iStaticPos': parkPosition})
                 self._start(self.posgen.goto, parkPosition)
             finally:
                 Positioner.generalLock.release()
+                time.sleep(0.5) # Wait the thread stops before to set the defaults
         self._setDefault()
 
 
@@ -408,6 +414,7 @@ class Positioner(object):
         try:
             Positioner.generalLock.acquire()
             self.stopUpdating()
+            self.control.updateScanInfo({'iStaticPos': position})
             self._start(self.posgen.goto, position)
         finally:
             Positioner.generalLock.release()
@@ -500,7 +507,7 @@ class Positioner(object):
                     args=(posgen, vargs)
             )
             self.t.start()
-            time.sleep(0.15) # In case of goto, take the time to command the position
+            time.sleep(0.10) # In case of goto, take the time to command the position
         else:
             raise NotAllowedError('not configured: a setConfiguration() is required')
 
@@ -635,7 +642,14 @@ class Control(object):
             if key not in self.scanInfo:
                 raise PositionerError('key %s not in control.scanInfo' %key)
         self.scanInfo.update(info)
-    
+
+    def stopUpdating(self):
+        self.isUpdating = False
+        self.updateScanInfo({
+            'axis': Management.MNG_NO_AXIS,
+            'iParallacticPos': 0,
+            'dParallacticPos': 0,
+        })
 
 class Status(object):
     @staticmethod

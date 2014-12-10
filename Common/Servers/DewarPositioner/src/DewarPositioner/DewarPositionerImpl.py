@@ -1,4 +1,5 @@
 import time
+from math import radians
 from multiprocessing import Queue
 from Receivers__POA import DewarPositioner as POA
 from Acspy.Servants.CharacteristicComponent import CharacteristicComponent as cc
@@ -130,11 +131,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             observatory = self.client.getComponent('ANTENNA/Observatory')
             lat_obj = observatory._get_latitude()
-            latitude, compl = lat_obj.get_sync()
+            latitude_dec, compl = lat_obj.get_sync()
+            latitude = radians(latitude_dec)
         except Exception, ex:
             reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
             logger.logWarning('cannot get the site information: %s' %reason)
-            latitude = float(self.cdbconf.getAttribute('Latitude'))
+            latitude = radians(float(self.cdbconf.getAttribute('Latitude')))
             logger.logWarning('setting the default latitude value: %.2f' %latitude)
         finally:
             siteInfo = {'latitude': latitude}

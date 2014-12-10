@@ -27,6 +27,7 @@ class CDBConf(object):
     actionsAttributes = (
             'SetCustomPositionAllowed',
             'DynamicUpdatingAllowed',
+            'AddInitialParallactic',
     )
 
     configurationRecords = (
