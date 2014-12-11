@@ -1,28 +1,28 @@
 import unittest2
 import time
-from ComponentErrors import ValidationErrorEx, NotAllowedEx
+from ComponentErrors import ComponentErrorsEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class CustomOPTTest(unittest2.TestCase):
-    """Test the CUSTOM_OPT Configuration"""
+class BSC_OPTTest(unittest2.TestCase):
+    """Test the BSC_OPT Configuration"""
 
     def setUp(self):
         client = PySimpleClient()
         self.dp = client.getComponent('RECEIVERS/DewarPositioner')
         self.dp.setup('KKG')
-        self.dp.setConfiguration('CUSTOM_OPT')
+        self.dp.setConfiguration('BSC_OPT')
     
     def tearDown(self):
         self.dp.park()
-        time.sleep(0.5)
+        time.sleep(1)
 
     def test_setConfiguration(self):
-        self.assertEqual(self.dp.getConfiguration(), 'CUSTOM_OPT')
+        self.assertEqual(self.dp.getConfiguration(), 'BSC_OPT')
 
     def test_setPosition(self):
-        """Verify we can set the position"""
-        self.dp.setPosition(1)
+        """Verify we can not set the position"""
+        self.assertRaises(ComponentErrorsEx, self.dp.setPosition, 1)
 
 
 if __name__ == '__main__':

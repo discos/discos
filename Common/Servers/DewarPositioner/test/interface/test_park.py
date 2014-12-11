@@ -19,7 +19,7 @@ class ParkTest(unittest2.TestCase):
         time.sleep(2)
         self.positioner.park()
         time.sleep(3)
-        self.assertAlmostEqual(self.derotator.getActPosition(), 0, places=1)
+        self.assertAlmostEqual(self.derotator.getActPosition(), 0, places=0)
 
     def test_configuration(self):
         """Verify we can perform a park() also in case the DewarPositioner is not ready"""

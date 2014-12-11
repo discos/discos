@@ -156,7 +156,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         gen = posgen.parallactic(self.source, site_info)
         axisCode = 'MNG_TRACK'
         updatingConf = self.cdbconf.getUpdatingConfiguration(axisCode)
-        initialPosition = float(updatingConf['initialPosition'])
+        Pis = float(updatingConf['initialPosition'])
         try:
             begin_idx = 5
             for i in range(begin_idx, 10):
@@ -166,8 +166,35 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
                 if i == begin_idx:
                     self.p.startUpdating(axisCode, 'ANT_NORTH', az, el)
                 time.sleep(0.11)
-            expected = initialPosition + gen.next()
-            self.assertEqual(expected, self.device.getActPosition())
+                expected = Pis + gen.next()
+                self.assertAlmostEqual(expected, self.device.getActPosition(), places=2)
+        finally:
+            self.p.stopUpdating()
+
+    def test_bsc_opt(self):
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('BSC_OPT')
+        latitude = radians(50)
+        site_info = {'latitude': latitude}
+        self.p.setup(site_info, self.source, self.device)
+        
+        posgen = PosGenerator()
+        gen = posgen.parallactic(self.source, site_info)
+        axisCode = 'MNG_TRACK'
+        updatingConf = self.cdbconf.getUpdatingConfiguration(axisCode)
+        Pis = float(updatingConf['initialPosition'])
+        try:
+            begin_idx = 5
+            for i in range(begin_idx, 10):
+                az, el = radians(i*10), radians(i*5)
+                self.source.setAzimuth(az)
+                self.source.setElevation(el)
+                if i == begin_idx:
+                    Pip = PosGenerator.getParallacticAngle(latitude, az, el)
+                    self.p.startUpdating(axisCode, 'ANT_NORTH', az, el)
+                time.sleep(0.11)
+                expected = Pis + gen.next() - Pip # Only the delta
+                self.assertAlmostEqual(expected, self.device.getActPosition(), places=2)
         finally:
             self.p.stopUpdating()
 
@@ -196,7 +223,6 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             self.assertEqual(expected, self.device.getActPosition())
         finally:
             self.p.stopUpdating()
-
 
     def test_CUSTOM_staticX(self):
         self.cdbconf.setup('KKG')

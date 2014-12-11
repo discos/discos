@@ -137,7 +137,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
             logger.logWarning('cannot get the site information: %s' %reason)
             latitude = radians(float(self.cdbconf.getAttribute('Latitude')))
-            logger.logWarning('setting the default latitude value: %.2f' %latitude)
+            logger.logWarning('setting the default latitude value: %.2f radians' %latitude)
         finally:
             siteInfo = {'latitude': latitude}
 

@@ -11,6 +11,8 @@ from Acspy.Common.TimeHelper import getTimeStamp
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
+__author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
+
 class CheckScanTest(unittest2.TestCase):
     """Test the MinorServoBoss.checkScan() behavior"""
 
