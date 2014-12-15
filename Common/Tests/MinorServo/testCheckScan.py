@@ -33,7 +33,7 @@ class CheckScanTest(unittest2.TestCase):
 
         self.scan = MinorServo.MinorServoScan(
             range=50,
-            total_time=500000000,
+            total_time=500000000, # 50 seconds
             axis_code='SRP_TZ',
             is_empty_scan=False)
 
@@ -70,7 +70,7 @@ class CheckScanTest(unittest2.TestCase):
     def testStartAtGivenTime(self):
         """Check the behavior when the scan must start at a given time"""
         center = self.boss.getAxesPosition(getTimeStamp().value)['SRP_TZ']
-        startTime = getTimeStamp().value + 60 # Start in a minute from now
+        startTime = getTimeStamp().value + 60*10**7 # Start in a minute from now
         msInfo = MinorServo.TRunTimeParameters
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
 
@@ -85,7 +85,7 @@ class CheckScanTest(unittest2.TestCase):
     def testTooFast(self):
         """The result must be False when the total time is not enough"""
         center = self.boss.getAxesPosition(getTimeStamp().value)['SRP_TZ']
-        startTime = getTimeStamp().value + 60 # Start in a minute from now
+        startTime = getTimeStamp().value + 60*10**7 # Start in a minute from now
         msInfo = MinorServo.TRunTimeParameters
         self.scan.total_time = 500000 # 50 ms
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
@@ -94,7 +94,7 @@ class CheckScanTest(unittest2.TestCase):
     def testOutOfRange(self):
         """The result must be False in case of scan out of range"""
         center = self.boss.getAxesPosition(getTimeStamp().value)['SRP_TZ']
-        startTime = getTimeStamp().value + 60 # Start in a minute from now
+        startTime = getTimeStamp().value + 60*10**7 # Start in a minute from now
         msInfo = MinorServo.TRunTimeParameters
         self.scan.range = 5000 # 5 meters...
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
@@ -136,7 +136,7 @@ class CheckScanTest(unittest2.TestCase):
             axis_code='',
             is_empty_scan=True)
         center = self.boss.getAxesPosition(getTimeStamp().value)['SRP_TZ']
-        startTime = getTimeStamp().value + 60 # Start in a minute from now
+        startTime = getTimeStamp().value + 60*10**7 # Start in a minute from now
         msInfo = MinorServo.TRunTimeParameters
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
 
