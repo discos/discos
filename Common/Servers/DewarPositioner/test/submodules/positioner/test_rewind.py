@@ -1,6 +1,8 @@
 from __future__ import with_statement
 import threading
 import time
+from math import radians
+
 import unittest2
 import mocker
 
@@ -17,15 +19,17 @@ class RewindTest(unittest2.TestCase):
         self.cdbconf.attributes['RewindingTimeout'] = '2.0'
         self.p = Positioner(self.cdbconf)
         self.p.setup(siteInfo={}, source=None, device=self.device)
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('CUSTOM')
 
     def tearDown(self):
         self.m.restore()
         self.m.verify()
 
-    def _test_number_of_steps_oor(self):
+    def test_number_of_steps_oor(self):
         """Raise PositionerError when the number of steps is out of range"""
         with self.assertRaisesRegexp(PositionerError, 'actual pos: {0.0}'):
-            self.p.rewind(steps=3)
+            self.p.rewind(steps=4)
 
     def test_not_positive_number_of_steps(self):
         """Raise PositionerError when the number of steps is not positive"""
@@ -33,7 +37,7 @@ class RewindTest(unittest2.TestCase):
             self.p.rewind(steps=0)
 
     def test_cannot_get_actual_position(self):
-        """Raise PositionerError when the number of steps is not positive"""
+        """Raise PositionerError when cannot get the actual position"""
         self.device = self.m.patch(self.device)
         self.device.getActPosition()
         self.m.throw(RuntimeError)
@@ -100,34 +104,39 @@ class RewindTest(unittest2.TestCase):
 
     def test_position_after_rewinding_from100(self):
         """Verify the value of the position after the rewinding (from 100)"""
-        n = 2
-        self.device.setPosition(100)
-        expected = sum(self.p.getRewindingParameters(n))
-        self.p.rewind(steps=n)
-        self.assertEqual(self.device.getActPosition(), expected)
-
-    def test_position_after_auto_rewinding_from100(self):
-        """Verify the value of the position after auto rewinding (from 0)"""
-        self.device.setPosition(100)
+        self.p.setRewindingMode('MANUAL')
+        self.p.setPosition(100)
         expected = sum(self.p.getRewindingParameters())
         self.p.rewind()
         self.assertEqual(self.device.getActPosition(), expected)
 
-    def _test_xxxAutoRewindingSteps(self):
+    def test_position_after_auto_rewinding_from100(self):
+        """Verify the value of the position after auto rewinding (from 0)"""
+        self.p.setRewindingMode('AUTO')
+        self.p.setPosition(100)
+        n = 2
+        expected = sum(self.p.getRewindingParameters(n))
+        self.p.rewind(steps=n)
+        self.assertEqual(self.device.getActPosition(), expected)
+
+    def test_xxxAutoRewindingSteps(self):
         """Verify setAutoRewindingSteps() and clearAutoRewindingSteps()"""
         n = 1
         # NotAllowedError is raised in case of a number of steps too large
+        max_limit = self.device.getMaxLimit() 
+        min_limit = self.device.getMinLimit()
+        max_rewinding_steps = (max_limit - min_limit) // self.device.getStep()
         with self.assertRaisesRegexp(NotAllowedError, 'max number of steps'):
-            self.p.setAutoRewindingSteps(5)
+            self.p.setAutoRewindingSteps(max_rewinding_steps + 1)
         # NotAllowedError is raised in case of a number of steps not positive
         with self.assertRaisesRegexp(NotAllowedError, 'must be positive'):
             self.p.setAutoRewindingSteps(0)
-        self.device.setPosition(100)
+        self.p.setPosition(100)
         self.p.setAutoRewindingSteps(n)
         expected = sum(self.p.getRewindingParameters(n))
         self.p.rewind(self.p.getAutoRewindingSteps())
         self.assertEqual(self.device.getActPosition(), expected)
-        self.device.setPosition(100)
+        self.p.setPosition(100)
         self.p.clearAutoRewindingSteps()
         expected = sum(self.p.getRewindingParameters())
         self.p.rewind(self.p.getAutoRewindingSteps() or None)
@@ -136,18 +145,6 @@ class RewindTest(unittest2.TestCase):
         # A NotAllowedError is raised in case the system is not configured
         with self.assertRaisesRegexp(NotAllowedError, 'not configured'):
             self.p.setAutoRewindingSteps(n)
-
-    def _test_wrong_auto_rewinding_steps(self):
-        """must_update is True in case of wrong auto rewinding_steps during rewinding"""
-        n = 4
-        self.p.setAutoRewindingSteps(n)
-        self.device.setPosition(50)
-        self.assertEqual(self.p.isRewindingRequired(), False)
-        with self.assertRaisesRegexp(PositionerError, 'actual pos: {50.0}'):
-            self.p.rewind()
-        time.sleep(0.5) # Wait until the rewind returns
-        self.assertEqual(self.p.isRewindingRequired(), True)
-
 
 if __name__ == '__main__':
     unittest2.main()

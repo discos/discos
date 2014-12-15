@@ -120,7 +120,7 @@ class Positioner(object):
 
 
     def _setPosition(self, position):
-        target = position + self.control.offset + self.control.rewindingOffset
+        target = position + self.control.offset 
         if self.device.getMinLimit() < target < self.device.getMaxLimit():
             try:
                 self.device.setPosition(target)
@@ -228,14 +228,13 @@ class Positioner(object):
                         self.control.scanInfo.update({'dParallactic': Pdp})
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
-                        logger.logWarning('position %.2f out of range' %target)
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
                                 self.rewind() 
                             except Exception, ex:
                                 # In case of wrong autoRewindingSteps
                                 self.control.isRewindingRequired = True
-                                logger.logError(ex.message)
+                                logger.logError('cannot rewind: %s' %ex.message)
                                 break
                         else:
                             if self.control.modes['rewinding'] == 'MANUAL':
@@ -272,13 +271,16 @@ class Positioner(object):
 
         try:
             Positioner.rewindingLock.acquire()
-            logger.logInfo('starting the rewinding...')
             self.control.isRewinding = True
             # getAutoRewindingSteps() returns None in case the user did not specify it
             n = steps if steps != None else self.control.autoRewindingSteps
             actPos, space = self.getRewindingParameters(n)
-            self.control.rewindingOffset += space
-            self._setPosition(actPos)
+            oldPis = self.control.scanInfo['iStaticPos']
+            newPis = oldPis + space
+            self.control.updateScanInfo({'iStaticPos': newPis})
+            self.conf.updateInitialPositions(newPis)
+            self._setPosition(newPis)
+            logger.logInfo('rewinding in progress...')
             startingTime = now = datetime.datetime.now()
             while (now - startingTime).seconds < float(self.conf.getAttribute('RewindingTimeout')):
                 if self.device.isTracking():
