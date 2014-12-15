@@ -8,6 +8,7 @@ import Antenna
 import DerotatorErrors
 
 from Acspy.Servants import ContainerServices
+from Acspy.Common.TimeHelper import getTimeStamp
 from DewarPositioner.posgenerator import PosGenerator
 from IRAPy import logger
 
@@ -225,7 +226,7 @@ class Positioner(object):
                         Pdp = 0 if posgen.__name__ == 'goto' else (position - Pip)
                         target = Pis + Pdp if isOptimized else Pis + Pip + Pdp
                         self._setPosition(target) # _setPosition() will add the offsets
-                        self.control.scanInfo.update({'dParallactic': Pdp})
+                        self.control.scanInfo.update({'dParallacticPos': Pdp})
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
                         if self.control.modes['rewinding'] == 'AUTO':
@@ -623,6 +624,7 @@ class Control(object):
 
     def setScanInfo(self, axis, sector, iStaticPos, iParallacticPos, dParallacticPos):
         self.scanInfo = {
+            'timestamp': getTimeStamp().value,
             'axis': axis,
             'sector': sector,
             'iStaticPos': iStaticPos,
@@ -643,6 +645,7 @@ class Control(object):
         for key in info.keys():
             if key not in self.scanInfo:
                 raise PositionerError('key %s not in control.scanInfo' %key)
+        info.update({'timestamp': getTimeStamp().value})
         self.scanInfo.update(info)
 
     def stopUpdating(self):

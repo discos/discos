@@ -288,22 +288,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         res += 'Pdp: %.4f' %info['dParallacticPos']
         return res
         
-    
     def getScanInfo(self):
-        """Return the current scan information.
-        
-        The current scan information is represented by the following IDL structure::
-        
-            Receivers.TDewarPositionerScanInfo {
-                axis;
-                sector;
-                iStaticPos;
-                iParallacticPos;
-                dParallacticPos;
-            }
-        """
-        return self.positioner.getScanInfo()
-
+        return ScanInfo(**self.positioner.getScanInfo())
 
     def startUpdating(self, axis, sector, az, el):
         logger.logNotice('starting the derotator position updating')
