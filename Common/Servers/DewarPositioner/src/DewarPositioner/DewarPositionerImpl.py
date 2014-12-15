@@ -547,6 +547,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setData('Reason', reason)
             raise exc.getComponentErrorsEx()
 
+    def getManagementStatus(self):
+        return self.control.mngStatus
 
     def getConfiguration(self):
         return self.positioner.getConfiguration()
@@ -570,11 +572,11 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                     failure, warning, slewing, updating, tracking, ready = status
 
                     if failure:
-                        management_status = Management.MNG_FAILURE
-                    elif warning:
-                        management_status = Management.MNG_WARNING
+                        control.mngStatus = Management.MNG_FAILURE
+                    elif warning or not positioner.isSetup():
+                        control.mngStatus = Management.MNG_WARNING
                     else:
-                        management_status = Management.MNG_OK
+                        control.mngStatus = Management.MNG_OK
 
                     event = Receivers.DewarPositionerDataBlock(
                             getTimeStamp().value,
@@ -582,7 +584,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                             tracking, 
                             updating,
                             slewing,
-                            management_status
+                            control.mngStatus
                     )
                     supplier.publishEvent(simple_data=event)
                     error = False
@@ -684,9 +686,10 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
         logger.logInfo('command %s executed' %cmd)
         return (success, answer)
-
         
+
 class Control(object):
     def __init__(self):
         self.stop = False
+        self.mngStatus = Management.MNG_OK
 

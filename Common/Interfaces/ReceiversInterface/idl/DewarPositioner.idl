@@ -256,6 +256,10 @@ module Receivers {
         TDewarPositionerScanInfo getScanInfo();
 
 
+        /** Return the status published to the notification channel */
+        Management::TSystemStatus getManagementStatus();
+
+
         /** This property reports the status of the DewarPositioner.
          *  The returned pattern is a 6 bits field with the following meaning:
          *
