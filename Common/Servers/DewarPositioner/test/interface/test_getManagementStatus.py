@@ -19,6 +19,7 @@ class MngStatusTest(unittest2.TestCase):
     def test_setup(self):
         self.assertEqual(self.positioner.getManagementStatus(), MNG_WARNING)
         self.positioner.setup('KKG')
+        time.sleep(1)
         self.assertEqual(self.positioner.getManagementStatus(), MNG_OK)
 
 if __name__ == '__main__':

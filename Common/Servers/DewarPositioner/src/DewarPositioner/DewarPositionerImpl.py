@@ -277,15 +277,11 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         """Wrap getScanAxis() in order to show a human representation""" 
         res = ''
         info = self.getScanInfo()
-        res += 'axis: %s\n' %info['axis']
-        sector = info['sector']
-        res += 'sector: %s\n' %info['sector']
-        Pis = info['iStaticPos']
-        res += 'Pis: %.4f\n' %info['iStaticPos']
-        Pip = info['iParallacticPos']
-        res += 'Pip: %.4f\n' %info['iParallacticPos']
-        Pid = info['dParallacticPos']
-        res += 'Pdp: %.4f' %info['dParallacticPos']
+        res += 'axis: %s\n' %info.axis
+        res += 'sector: %s\n' %info.sector
+        res += 'Pis: %.4f\n' %info.iStaticPos
+        res += 'Pip: %.4f\n' %info.iParallacticPos
+        res += 'Pdp: %.4f' %info.dParallacticPos
         return res
         
     def getScanInfo(self):
@@ -677,5 +673,5 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 class Control(object):
     def __init__(self):
         self.stop = False
-        self.mngStatus = Management.MNG_OK
+        self.mngStatus = Management.MNG_WARNING
 
