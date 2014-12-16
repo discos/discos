@@ -18,9 +18,10 @@
 									m_antennaBossError=m_receiversBossError=m_minorServoBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=\
 									m_activeSurfaceBossError=m_weatherStationError=false; \
 									m_currentDevice=0;\
-									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false; \
+									m_streamStarted=m_streamPrepared=m_streamConnected=m_dataTransferInitialized=false; \
 									m_restFrequency.length(0); \
 									m_scanID=0; m_subScanID=0; \
+									m_abortCurrentOperation=false; \
 									m_subScanEpoch=0; \
 									m_antennaRTime=new Antenna::TRunTimeParameters; m_antennaRTime->targetName=""; \
 									m_antennaRTime->axis=Management::MNG_NO_AXIS; \
@@ -157,7 +158,11 @@ bool m_defaultDataReceiverError;
 bool m_streamStarted;
 bool m_streamPrepared;
 bool m_streamConnected;
-bool m_scanStarted;
+bool m_dataTransferInitialized;
+/**
+ * these member keep track if a subscan has been issued to the telescope (antenna..minorServo....)
+ */
+//bool m_antennaSubScanStarted,m_msSubScanStarted,m_recvSubScanStarted;
 /**
  * @var Last commanded scan identifier
  */
@@ -228,6 +233,10 @@ Antenna::TRunTimeParameters_var m_antennaRTime;
  * structure used to pass back and forth runtime parameters from the minor servo
  */
 MinorServo::TRunTimeParameters_var m_servoRunTime;
+/**
+ * This flags force the component to abort all "long-lasting" operations
+ */
+bool m_abortCurrentOperation;
 /**
  * used to get a reference to the antenna boss component.
  * @param ref the pointer to the antenna boss component
@@ -347,9 +356,10 @@ void loadProceduresFile(Schedule::CProcedureList *loader);
  * @param time time to be scheduled
  * @param parameter pointer to the parameter that will be passed to the event handler
  * @param handler pointer to the handler function
+ * @param cleanup pointer to the cleanup function, if required.
  * @return false if the event could not be scheduled
  */
-bool addTimerEvent(const ACS::Time& time,IRA::CScheduleTimer::TCallBack handler,void *parameter);
+bool addTimerEvent(const ACS::Time& time,IRA::CScheduleTimer::TCallBack handler,void *parameter,CScheduleTimer::TCleanupFunction cleanup=NULL);
 
 /**
  * Allows to delete the timer event associated to a specific time

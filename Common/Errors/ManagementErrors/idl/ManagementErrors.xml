@@ -94,4 +94,10 @@
 
 <ErrorCode name="UnsupportedOperation" shortDescription="The operation is invalid or not supported by this release " description=""/>
 
+<ErrorCode name="AbortedByUser" shortDescription="The operation was aborted by the user" description="">
+	<Member name="Operation" type="string" description="Name of the aborted operation" />
+</ErrorCode>
+
+<ErrorCode name="RecordingAlreadyActive" shortDescription="Recording is already active" description=""/>
+
 </Type>

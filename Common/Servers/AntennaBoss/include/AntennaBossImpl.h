@@ -327,7 +327,7 @@ public:
      * Returns a reference to the 	waveLength property implementation of IDL interface.
 	 * @return pointer to read-only double property 	waveLength
 	*/
-	virtual ACS::ROdouble_ptr 	waveLength() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr waveLength() throw (CORBA::SystemException);
 		
 	/**
 	 * This method is used to stow the antenna.
@@ -425,6 +425,17 @@ public:
 	void startScan(ACS::Time& startUT,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary) throw (CORBA::SystemException,
 			AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx);
 	
+	/*
+	 * The system will performs all the operation required to force the close of the current scan.
+	 * Closing the scan means making ready the system for the next scan. At the moment no need
+	 * to take specific actions.
+	 * @param timeToStop expected epoch in which the system is ready to start another scan.
+	 * @throw AntennaErrors::AntennaErrorsEx
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw CORBA::SystemException
+	 */
+    virtual void closeScan(ACS::Time& timeToStop) throw (CORBA::SystemException,AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx);
+
 	/**
 	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a skydip scan
 	 * @param el1 sets the first edge of the elevation range, a negative means take the default value

@@ -418,7 +418,7 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 	 m_config=config;
 	 m_currentBackendProcedure="";
 	 Management::FitsWriter::_nil();
-	 m_scanStarted=false;
+	 //m_scanStarted=false;
 	 m_scheduleRewound=false;
 	 m_site=site;
 	 m_dut1=dut1;
@@ -491,7 +491,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	}
  	m_scheduleLoaded=true;
  	m_scheduleCounter=m_schedule->getSubScanCounter(subScanidentifier)-1; //need to point before the first scan in the schedule, the first scan has counter==1
- 	m_core->changeLogFile((const char *)m_schedule->getBaseName()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
+ 	m_core->_changeLogFile((const char *)m_schedule->getBaseName()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
  	// load the procedures associated to the schedule
  	m_core->loadProceduresFile(m_schedule->getPreScanProcedureList());
  	m_active=true;
@@ -549,7 +549,7 @@ void CScheduleExecutor::cleanScan()
 		m_core->disableDataTransfer();
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
-		m_scanStarted=false;
+		//m_scanStarted=false;
 		ex.log(LM_WARNING);
 	}
 	m_currentBackendProcedure="";
@@ -583,7 +583,7 @@ void CScheduleExecutor::cleanSchedule(bool error)
 		m_core->disableDataTransfer();
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
-		m_scanStarted=false;
+		//m_scanStarted=false;
 		ex.log(LM_WARNING);
 	}
 	// get rid of the schedule file......
@@ -686,8 +686,8 @@ void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw 
  	 			dummy.setReason((const char *)m_schedule->getLastError());
  	 			throw dummy;
  	 		}
- 	 		m_core->chooseDefaultBackend(bckInstance);  //CouldntGetComponentExImpl
- 	 		m_core->chooseDefaultDataRecorder(rec.writerInstance); //CouldntGetComponentExImpl ComponentErrors::UnexpectedExImpl
+ 	 		m_core->_chooseDefaultBackend(bckInstance);  //CouldntGetComponentExImpl
+ 	 		m_core->_chooseDefaultDataRecorder(rec.writerInstance); //CouldntGetComponentExImpl ComponentErrors::UnexpectedExImpl
  	 		//throw ManagementErrors::BackendProcedureErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl
  	 		m_core->configureBackend(rec.backendProc,command);
  	 		m_currentBackendProcedure=rec.backendProc;

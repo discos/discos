@@ -177,12 +177,14 @@ void CCore::enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backen
 void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& writerError,bool& streamStarted,bool& streamPrepared,
 		bool& streamConnected,bool& scanStarted) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
+	bool forceReset=false;
 	if (streamStarted) {
  		try {
  			streamStarted=false;
  			if (!CORBA::is_nil(backend)) {
  				backend->sendStop();
  			}
+ 			forceReset=true;
  		}
  		catch (BackendsErrors::BackendsErrorsEx& ex) {
  			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::disableDataTransfer()");
@@ -204,36 +206,6 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
  		catch (...) {
  			backendError=true;
  			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::disableDataTransfer())");
- 			throw impl;
- 		}
- 	}
- 	if (streamPrepared) {
- 		try {
- 			streamPrepared=false;
- 			if (!CORBA::is_nil(backend)) {
- 				backend->terminate();
- 			}
- 		}
- 		catch (BackendsErrors::BackendsErrorsEx& ex) {
- 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::disableDataTransfer()");
- 			impl.setReason("backend failed to terminate data transfer");
- 			throw impl;
- 		}
- 		catch (ComponentErrors::ComponentErrorsEx& ex) {
- 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::disableDataTransfer()");
- 			impl.setReason("backend failed to terminate data transfer");
- 			throw impl;
- 		}
- 		catch (CORBA::SystemException& ex) {
- 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::disableDataTransfer()");
- 			impl.setName(ex._name());
- 			impl.setMinor(ex.minor());
- 			backendError=true;
- 			throw impl;
- 		}
- 		catch (...) {
- 			backendError=true;
- 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::disableDataTransfer()");
  			throw impl;
  		}
  	}
@@ -267,6 +239,49 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
  			throw impl;
  		}
 	}
+	if (forceReset) {
+ 		// the writer will reset,
+		try {
+ 			if (!CORBA::is_nil(writer)) {
+ 				writer->reset();
+ 			}
+ 		}
+ 		catch (...) {
+ 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::disableDataTransfer())");
+ 			writerError=true;
+ 			throw impl;
+ 		}
+	}
+ 	if (streamPrepared) {
+ 		try {
+ 			streamPrepared=false;
+ 			if (!CORBA::is_nil(backend)) {
+ 				backend->terminate();
+ 			}
+ 		}
+ 		catch (BackendsErrors::BackendsErrorsEx& ex) {
+ 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::disableDataTransfer()");
+ 			impl.setReason("backend failed to terminate data transfer");
+ 			throw impl;
+ 		}
+ 		catch (ComponentErrors::ComponentErrorsEx& ex) {
+ 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::disableDataTransfer()");
+ 			impl.setReason("backend failed to terminate data transfer");
+ 			throw impl;
+ 		}
+ 		catch (CORBA::SystemException& ex) {
+ 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::disableDataTransfer()");
+ 			impl.setName(ex._name());
+ 			impl.setMinor(ex.minor());
+ 			backendError=true;
+ 			throw impl;
+ 		}
+ 		catch (...) {
+ 			backendError=true;
+ 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::disableDataTransfer()");
+ 			throw impl;
+ 		}
+ 	}
  	if (streamConnected) {
  		try {
  			streamConnected=false;

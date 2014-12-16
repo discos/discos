@@ -183,6 +183,16 @@ module Receivers {
         void startScan(inout ACS::Time startUT,in TReceiversParameters param,in Antenna::TRunTimeParameters antennaInfo) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
 		/**
+		 * This method virtually stops the current scan. The boss indeed is not required to do anything.
+		 * @param timeToStop stores the expected epoch in which the scan will be stopped (closed). It could be zero mening the
+		 *         scan will be closed immediately
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ReceiversErrors::ReceiversErrorsEx
+		 */
+		void closeScan(out ACS::Time timeToStop) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+
+		/**
 		 * This method is only be used internally. Anyone that needs to know if the receiver subsystem could perform a given scan before a given time, can call this. 
 		 * @throw CORBA::SystemExcpetion
 		 * @throw ComponentErrors::ComponentErrorsEx

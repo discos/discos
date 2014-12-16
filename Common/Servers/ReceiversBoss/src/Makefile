@@ -50,7 +50,7 @@ ReceiversBossImpl_OBJECTS   = ReceiversBossImpl	RecvBossCore Configuration Watch
 ReceiversBossImpl_LDFLAGS   =
 ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs \
 							  GenericReceiverStubs DewarPositionerStubs ManagmentDefinitionsStubs AntennaDefinitionsStubs \
-							  ManagementErrors ParserErrors ReceiversErrors acsnc
+							  DewarPositionerDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc
 
 #
 # special compilation flags for single c sources

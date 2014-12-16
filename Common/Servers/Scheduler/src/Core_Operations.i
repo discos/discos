@@ -1,39 +1,84 @@
-void CCore::wait(const double& seconds) const
+void CCore::_wait(const double& seconds) throw (ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
 {
-	int sec;
-	long micro;
-	sec=(int)seconds;
-	micro=(long)((seconds-(double)sec)*1000000.0);
-	IRA::CIRATools::Wait(sec,micro);
-}
-
-void CCore::waitUntil(const ACS::Time& time) throw (ComponentErrors::TimerErrorExImpl)
-{
-	long done=0;
-	if (!addTimerEvent(time,waitUntilHandler,static_cast<void *>(&done))) {
+	long *done;
+	done=new long;
+	*done=0;
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	ACS::Time time;
+	time=now.value().value+(ACS::Time)(seconds*10000000);
+	m_abortCurrentOperation=false;
+	if (!addTimerEvent(time,waitUntilHandler,static_cast<void *>(done),waitUntilHandlerCleanup)) {
 		//errore
-		_EXCPT(ComponentErrors::TimerErrorExImpl,dummy,"CCore::waitUntil()");
+		_EXCPT(ComponentErrors::TimerErrorExImpl,dummy,"CCore::wait()");
 		dummy.setReason("timer event could not be scheduled");
+		delete done;
 		throw dummy;
 	}
-	while (!done) {
+	while ((*done)==0) {
+		if (m_abortCurrentOperation) {
+			m_abortCurrentOperation=false;
+			_EXCPT(ManagementErrors::AbortedByUserExImpl,dummy,"CCore::wait()");
+			dummy.setOperation("wait for an amount of time");
+			throw dummy;
+		}
 		IRA::CIRATools::Wait(25000); // 25 milliseconds
 	}
 }
 
-void CCore::nop() const
+void CCore::_waitUntil(const ACS::Time& time) throw (ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
+{
+	long *done;
+	done=new long;
+	*done=0;
+	m_abortCurrentOperation=false;
+	if (!addTimerEvent(time,waitUntilHandler,static_cast<void *>(done),waitUntilHandlerCleanup)) {
+		//errore
+		_EXCPT(ComponentErrors::TimerErrorExImpl,dummy,"CCore::waitUntil()");
+		dummy.setReason("timer event could not be scheduled");
+		delete done;
+		throw dummy;
+	}
+	while ((*done)==0) {
+		if (m_abortCurrentOperation) {
+			m_abortCurrentOperation=false;
+			_EXCPT(ManagementErrors::AbortedByUserExImpl,dummy,"CCore::waitUntil()");
+			dummy.setOperation("wait until an epoch");
+			throw dummy;
+		}
+		IRA::CIRATools::Wait(25000); // 25 milliseconds
+	}
+}
+
+void CCore::_abort() throw (ManagementErrors::NotAllowedDuringScheduleExImpl)
+{
+	//no need to get the mutex, because it is already done inside the Schedule Executor thread
+	if (m_schedExecuter) {
+		if (m_schedExecuter->isScheduleActive()) {
+			_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,dummy,"CCore::abort()");
+			throw dummy;
+		}
+	}
+	m_abortCurrentOperation=true;
+}
+
+void CCore::_nop() const
 {
 	return;
 }
 
-void CCore::waitOnSource() const
+void CCore::_waitOnSource() const
 {
 	while (!isTracking()) {
-		wait(0.1);
+		/*********************************************************/
+		// TO BE CORRECTED, USE THE IRA LIBRARY FUNCTION
+		/********************************************************/
+
+		_wait(0.1);
 	}
 }
 
-void CCore::lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
+void CCore::_lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
 		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -48,7 +93,7 @@ void CCore::lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span
 	m_subScanEpoch=startTime;
 }
 
-void CCore::latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
+void CCore::_latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
 		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -63,7 +108,7 @@ void CCore::latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span
 	m_subScanEpoch=startTime;
 }
 
-void CCore::track(const char *targetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+void CCore::_track(const char *targetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -77,7 +122,7 @@ void CCore::track(const char *targetName) throw (ManagementErrors::TelescopeSubS
 	m_subScanEpoch=startTime;
 }
 
-void CCore::moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+void CCore::_moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -91,7 +136,7 @@ void CCore::moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,Manageme
 	m_subScanEpoch=startTime;
 }
 
-void CCore::sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section) throw (
+void CCore::_sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section) throw (
 	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -106,7 +151,7 @@ void CCore::sidereal(const char * targetName,const double& ra,const double& dec,
 	m_subScanEpoch=startTime;
 }
 
-void CCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
+void CCore::_goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
@@ -145,7 +190,7 @@ void CCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams) th
 	}
 }
 
-void CCore::chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl)
+void CCore::_chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl)
 {
 	//************************************************************** /
 	/* It should be forbidden is a schedule is running or recording is active */
@@ -160,7 +205,7 @@ void CCore::chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors
 	}
 }
 
-void CCore::chooseDefaultDataRecorder(const char *rcvInstance) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
+void CCore::_chooseDefaultDataRecorder(const char *rcvInstance) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	//************************************************************** /
 	/* It should be forbidden is a schedule is running or recording is active */
@@ -175,7 +220,7 @@ void CCore::chooseDefaultDataRecorder(const char *rcvInstance) throw (ComponentE
 	}
 }
 
-void CCore::changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
+void CCore::_changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
@@ -205,7 +250,7 @@ void CCore::changeLogFile(const char *fileName) throw (ComponentErrors::CouldntG
 	}
 }
 
-void CCore::getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind) throw (ComponentErrors::CouldntGetComponentExImpl,
+void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -234,7 +279,7 @@ void CCore::getWeatherStationParameters(double &temp,double& hum,double& pres, d
 	wind=m_weatherPar.wind;
 }
 
-void CCore::initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
+void CCore::_initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
 		ComponentErrors::CORBAProblemExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -242,10 +287,11 @@ void CCore::initRecording(const long& scanid) throw (ComponentErrors::CouldntGet
 	//*********************CHECK if a schedule is running or if already recording in that case we must give up
 	//************************************************************************************************************************
 	try {
-		CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
+		CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,
+				m_streamConnected,m_dataTransferInitialized);
 	}
 	catch (...) {
-		m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
+		m_streamStarted=m_streamPrepared=m_streamConnected=m_dataTransferInitialized=false;
 		// keep it up, no need to give up now......
 	}
 	m_scanID=0; m_subScanID=0;
@@ -259,22 +305,27 @@ void CCore::initRecording(const long& scanid) throw (ComponentErrors::CouldntGet
 	m_scanID=scanid;
 }
 
-void CCore::startRecording(const long& subScanId,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
+void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
 		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
-		ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::TimerErrorExImpl)
+		ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	//************************************************************************************************************************
 	//*********************CHECK if a schedule is running or if the  recording is not initialized (streamConnected and streamPrepared) in that case we must give up
 	//************************************************************************************************************************
 	ACS::Time realStart,waitFor;
+
 	IRA::CString prj,path,suffix,obsName,schedule,layoutName;
 	long scanTag;
 	ACS::stringSeq layout;
+	// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
+	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl);
+	loadDefaultDataReceiver();
+
 	//no mutex below.....
 	guard.release();
 	if (m_subScanEpoch==0) {
-		waitOnSource();
+		_waitOnSource();
 	}
 	scanTag=0; suffix=""; obsName=IRA::CString("system"); getProjectCode(prj); schedule="none";
 	layout.length(0); layoutName=_SCHED_NULLTARGET;
@@ -283,32 +334,32 @@ void CCore::startRecording(const long& subScanId,const ACS::TimeInterval& durati
 	realStart=startRecording(m_subScanEpoch,m_scanID,m_subScanID,scanTag,m_config->getSystemDataDirectory(),suffix,obsName,prj,schedule,layoutName,layout);
 	waitFor=realStart+duration; // this is the time at which the stop should be issued
 	guard.release();
-	waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl
+	//This is to implement a finally clause, if the user abort when the recording has already started I'd like, at least to stop it
+	try {
+		_waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl
+	}
+	catch (ManagementErrors::AbortedByUserExImpl& ex){
+		guard.acquire();
+		m_subScanEpoch=0;
+		CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
+		guard.release();
+		throw ex;
+	}
+	guard.acquire();
+	m_subScanEpoch=0;
+	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
+	guard.release();
+	// wait for a data transfer to complete before start with the latitude scan
+	while (checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError)) {  // throw (ComponentErrors::OperationErrorExImpl)
+		_wait(0.20); // throw ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl
+		//IRA::CIRATools::Wait(0,250000); // 0.25 seconds
+	}
 }
 
-void CCore::startRecording(const ACS::Time& startTime,const long& subScanId) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		  ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl, ManagementErrors::DataTransferSetupErrorExImpl,
-		  ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CouldntGetComponentExImpl)
-{
-	//************************************************************************************************************************
-	//*********************CHECK if a schedule is running or if the  recording is not initialized (streamConnected and streamPrepared) in that case we must give up
-	//************************************************************************************************************************
-	IRA::CString prj,path,suffix,obsName,schedule,layoutName;
-	long scanTag;
-	ACS::stringSeq layout;
-	ACS::Time ut;
-	scanTag=0;
-	suffix="";
-	obsName=IRA::CString("system");
-	getProjectCode(prj);
-	schedule="none";
-	layout.length(0);
-	layoutName=_SCHED_NULLTARGET;
-	m_subScanID=subScanId;
-	ut=startRecording(startTime,m_scanID,subScanId,scanTag,m_config->getSystemDataDirectory(),suffix,obsName,prj,schedule,layoutName,layout);
-}
-
-void CCore::stopRecording() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl,
+/*******************************************************************************************/
+/* TO BE DELETED WHEN MACRON INSTRUCTION LIKE SKYDIP HAVE BEEN AMMENDED */
+/*****************************************************************************************/
+void CCore::_stopRecording() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
 	// now take the mutex
@@ -318,34 +369,34 @@ void CCore::stopRecording() throw (ComponentErrors::OperationErrorExImpl,Managem
 	loadDefaultDataReceiver();
 	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
 	// wait for a data transfer to complete before start with the latitude scan
+	guard.release();
 	while (checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError)) {  // throw (ComponentErrors::OperationErrorExImpl)
-		guard.release();
 		IRA::CIRATools::Wait(0,250000); // 0.25 seconds
-		guard.acquire();
 	}
 	m_subScanEpoch=0;
 }
 
-void CCore::terminateScan() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
+void CCore::_terminateScan() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
+	m_scanID=0; m_subScanID=0;
+	m_subScanEpoch=0;
 	// throw (ComponentErrors::OperationErrorExImpl)
 	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl);
 	loadDefaultDataReceiver();
-	CCore::stopScan(m_defaultDataReceiver.in(), m_defaultDataReceiverError,m_scanStarted);
+	CCore::stopScan(m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_dataTransferInitialized);
 	//throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-	CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
-	m_scanID=0; m_subScanID=0;
-	m_subScanEpoch=0;
+	CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,
+			m_streamConnected,m_dataTransferInitialized);
 }
 
-void CCore::setRestFrequency(const ACS::doubleSeq& in)
+void CCore::_setRestFrequency(const ACS::doubleSeq& in)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_restFrequency=in;
 }
 
-void CCore::setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
+void CCore::_setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
 {
 	IRA::CString newCode(code);
 	if (newCode=="''") { // if '' given...maps to default user
@@ -364,7 +415,7 @@ void CCore::setProjectCode(const char* code) throw (ManagementErrors::UnkownProj
 	}
 }
 
-void CCore::setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,
+void CCore::_setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,
 		ComponentErrors::OperationErrorExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -486,7 +537,7 @@ void CCore::setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetCo
 	ACS_LOG(LM_FULL_INFO,"CCore::setDevice()",(LM_NOTICE,"DEFAULT_DEVICE: %ld",m_currentDevice));
 }
 
-void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,
+void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,
 		ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	Backends::GenericBackend_var backend;
@@ -698,7 +749,7 @@ void CCore::callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCom
 	}
 }
 
-void CCore::stopSchedule()
+void CCore::_stopSchedule()
 {
 	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
@@ -706,7 +757,7 @@ void CCore::stopSchedule()
 	}
 }
 
-void CCore::haltSchedule()
+void CCore::_haltSchedule()
 {
 	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
@@ -714,7 +765,7 @@ void CCore::haltSchedule()
 	}
 }
 
-void CCore::startSchedule(const char* scheduleFile,const char * startSubScan) throw (
+void CCore::_startSchedule(const char* scheduleFile,const char * startSubScan) throw (
 		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,
 		ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::LogFileErrorExImpl)
 {

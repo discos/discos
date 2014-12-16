@@ -81,6 +81,9 @@ public:
 	 * Destructor. It clears all the dumps that eventually are still there.
 	 */
 	~CDumpCollection() {
+		flushAll();
+	};
+	void flushAll() {
 		std::list<TRecord *>::iterator i;
 		for (i=m_collection.begin();i!=m_collection.end();i++) {
 			TRecord *rec=*i;
@@ -88,7 +91,7 @@ public:
 			delete rec;
 		}
 		m_collection.clear();
-	};
+	}
 	/**
 	 * Adds a new dump in the back of the stack (FIFO). If the stack reached its maximum size a false
 	 * is returned and the dump is discarded
@@ -148,6 +151,10 @@ public:
 			return rec->time;
 		}		
 	}
+	/**
+	 * @return true if the stack is empty
+	 */
+	bool isEmpty() { return m_collection.empty(); }
 private:
 	typedef struct {
 		ACS::Time time;

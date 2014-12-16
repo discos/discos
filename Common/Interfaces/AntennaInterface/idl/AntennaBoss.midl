@@ -394,6 +394,14 @@ module Antenna {
 		*/ 
 		void startScan(inout ACS::Time startUT,in TTrackingParameters parameters,in TTrackingParameters secondary) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 		
+		/**
+		 * This method virtually stops the current scan. The antenna boss indeed is not required to do anything.
+		 * @param timeToStop stores the expected epoch in which the scan will be stopped (closed)
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw AntennaErrors::AntennaErrorsEx
+		 */
+		void closeScan(out ACS::Time timeToStop) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
 
 		/**
 		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a skydip from the prsent azimuth position.

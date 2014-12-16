@@ -1135,6 +1135,7 @@ void SubScan::fillAllAttributes (Antenna::OTFAttributes* att) {
 	att->startUT=m_startUT.value().value;
 	att->subScanDuration=m_subScanDuration.value().value;
 	att->axis=m_scanType;
+	att->rampDuration=m_rampDuration.value().value;
 }
 
 // This fills the horizontal coordinates attributes only

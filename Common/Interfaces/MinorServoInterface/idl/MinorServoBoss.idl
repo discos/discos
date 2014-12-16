@@ -166,9 +166,13 @@ module MinorServo {
 
 		/**
 		 * Closes the current scan and force the minor servo system to its normal behaviour
+		 * @param timeToStop stores the expected epoch in which the scan will be stopped (closed). It could be zero meaning the
+		 *         scan will be closed immediately
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ReceiversErrors::ReceiversErrorsEx
 		*/
-        void stopScan() raises (MinorServoErrors::MinorServoErrorsEx,ComponentErrors::ComponentErrorsEx);
-  
+        void closeScan(out ACS::Time timeToStop) raises (MinorServoErrors::MinorServoErrorsEx,ComponentErrors::ComponentErrorsEx);
+    
         /** 
          * @todo to be review in order to reflect the signature of the method <i>checktScan()</i>
          * Check if it is possible to scan the Z axis of the MinorServo active in the primary focus.

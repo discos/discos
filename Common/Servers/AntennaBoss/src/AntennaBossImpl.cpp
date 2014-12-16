@@ -433,6 +433,24 @@ void AntennaBossImpl::startScan(ACS::Time& startUT,const Antenna::TTrackingParam
 	}		
 }
 
+void AntennaBossImpl::closeScan(ACS::Time& timeToStop) throw (CORBA::SystemException,AntennaErrors::AntennaErrorsEx,
+		ComponentErrors::ComponentErrorsEx)
+{
+	AUTO_TRACE("AntennaBossImpl::closeScan()");
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:closeScan");
+	try {
+		resource->closeScan(timeToStop);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getAntennaErrorsEx();
+	}
+}
+
 ACS::Time AntennaBossImpl::skydipScan(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();

@@ -250,7 +250,7 @@ private:
 	/**
 	 * true if the schedule is already in the middle of a scan
 	 */
-	 bool m_scanStarted;
+	 //bool m_scanStarted;
 	 /**
 	  * true when the schedule has arrived to the end and it is restarted from the beginning, status is persistent through subscans
 	  */

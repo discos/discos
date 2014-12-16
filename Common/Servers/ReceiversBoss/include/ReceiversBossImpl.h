@@ -228,6 +228,16 @@ public:
 	 */
 	virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
+	/*
+	 * The system will performs all the operation required to force the close of the current scan.
+	 * Closing the scan means making ready the system for the next scan.
+	 * @param timeToStop expected epoch in which the system is ready to start another scan.
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw CORBA::SystemException
+	 */
+    virtual void closeScan(ACS::Time& timeToStop) throw (CORBA::SystemException,ReceiversErrors::ReceiversErrorsEx,ComponentErrors::ComponentErrorsEx);
+
 	/**
 	 * It allows to prepare the receivers for the current scan
 	 * @param startUT epoch at which the scan is going to be executed

@@ -248,6 +248,51 @@ module Management {
 		 * @throw ManagementErrors::ManagementErrorsEx
 		 */
 		void moon() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * Send the antenna off by the specified number of beam sizes
+		 * @param frame coordinate reference frame
+		 * @param beams number of beam sizes applied as offsets
+		 */
+		void goOff(in Antenna::TCoordinateFrame frame,in double beams) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It allows to abort all the long-run jobs which are presently ongoing, a skydip or a waitUntil operation
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void abort() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * Allows to prepare the system in order to start a data recording, the recording will involve the currently selected data recorder
+		 * and backend
+		 * @param scanid scan identifier
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void initRecording(in long scanid) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It will start the data recording. The start time may vary according to the subscan commanded to the telescope.
+		 * In any case it will never start before the telescope tracking flag is true. When the duration is expired a stop
+		 * recording is issued automatically
+		 * @param subScanId sub scan identifier
+		 * @param duration required duration of the data acquisition
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void startRecording(in long subScanId,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * This operation will finalize the current scan.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void terminateScan() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 			
 		/**
 		 * This attribute reports the scan identifier currently played by the scheduler.

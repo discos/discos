@@ -24,6 +24,11 @@ static void receiversNCHandler(Receivers::ReceiversDataBlock receiversData,void 
 static void waitUntilHandler(const ACS::Time& time,const void *par);
 
 /**
+ * cleanup event handler user to implement <i>waitUntil()</i> function
+ */
+static void waitUntilHandlerCleanup(const void *par);
+
+/**
  * used as wrapper to function that are in charge of forwarding commands to other packages
 */
 bool remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl,ManagementErrors::UnsupportedOperationExImpl);

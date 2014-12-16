@@ -90,34 +90,38 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_schedExecuter->setSleepTime(sleepTime);
 
 	//add local commands
-	m_parser->add("tsys",new function1<CCore,non_constant,void_type,O<doubleSeq_type> >(this,&CCore::callTSys),0);
-	m_parser->add("wait",new function1<CCore,constant,void_type,I<double_type> >(this,&CCore::wait),1);
-	m_parser->add("nop",new function0<CCore,constant,void_type >(this,&CCore::nop),0);
-	m_parser->add("waitOnSource",new function0<CCore,constant,void_type >(this,&CCore::waitOnSource),0);
-	m_parser->add("haltSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::haltSchedule),0);
-	m_parser->add("stopSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::stopSchedule),0);
-	m_parser->add("startSchedule",new function2<CCore,non_constant,void_type,I<string_type>,I<string_type> >(this,&CCore::startSchedule),2);
-	m_parser->add("device",new function1<CCore,non_constant,void_type,I<long_type> >(this,&CCore::setDevice),1);
-	m_parser->add("chooseBackend",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::chooseDefaultBackend),1);
-	m_parser->add("chooseRecorder",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::chooseDefaultDataRecorder),1);
+	m_parser->add("tsys",new function1<CCore,non_constant,void_type,O<doubleSeq_type> >(this,&CCore::_callTSys),0);
+	m_parser->add("wait",new function1<CCore,non_constant,void_type,I<double_type> >(this,&CCore::_wait),1);
+	m_parser->add("nop",new function0<CCore,constant,void_type >(this,&CCore::_nop),0);
+	m_parser->add("waitOnSource",new function0<CCore,constant,void_type >(this,&CCore::_waitOnSource),0);
+	m_parser->add("haltSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::_haltSchedule),0);
+	m_parser->add("stopSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::_stopSchedule),0);
+	m_parser->add("startSchedule",new function2<CCore,non_constant,void_type,I<string_type>,I<string_type> >(this,&CCore::_startSchedule),2);
+	m_parser->add("device",new function1<CCore,non_constant,void_type,I<long_type> >(this,&CCore::_setDevice),1);
+	m_parser->add("chooseBackend",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_chooseDefaultBackend),1);
+	m_parser->add("chooseRecorder",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_chooseDefaultDataRecorder),1);
 	m_parser->add("crossScan",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >,
 			I<interval_type> >(this,&CCore::crossScan),3);
 	m_parser->add("focusScan",new function2<CCore,non_constant,void_type,I<double_type >,I<interval_type> >(this,&CCore::focusScan),2);
-	m_parser->add("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::changeLogFile),1);
-	m_parser->add("wx",new function4<CCore,non_constant,void_type,O<double_type>,O<double_type>,O<double_type>,O<double_type> >(this,&CCore::getWeatherStationParameters),0);
-	m_parser->add("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::setProjectCode),1);
+	m_parser->add("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_changeLogFile),1);
+	m_parser->add("wx",new function4<CCore,non_constant,void_type,O<double_type>,O<double_type>,O<double_type>,O<double_type> >(this,&CCore::_getWeatherStationParameters),0);
+	m_parser->add("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_setProjectCode),1);
 	// no range checks because * is allowed
 	m_parser->add("skydip",new function3<CCore,non_constant,void_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(this,&CCore::skydip),3);
 	m_parser->add("agc","_tp_agc",2);
-	m_parser->add("restFrequency",new function1<CCore,non_constant,void_type,I<doubleSeq_type> >(this,&CCore::setRestFrequency),1);
-	m_parser->add("lonOTF",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(this,&CCore::lonOTF),3);
-	m_parser->add("latOTF",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(this,&CCore::latOTF),3);
-	m_parser->add("goOff",new function2<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(this,&CCore::goOff),2);
-	m_parser->add("moon",new function0<CCore,non_constant,void_type >(this,&CCore::moon),0);
+	m_parser->add("restFrequency",new function1<CCore,non_constant,void_type,I<doubleSeq_type> >(this,&CCore::_setRestFrequency),1);
+	m_parser->add("lonOTF",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(this,&CCore::_lonOTF),3);
+	m_parser->add("latOTF",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(this,&CCore::_latOTF),3);
+	m_parser->add("moon",new function0<CCore,non_constant,void_type >(this,&CCore::_moon),0);
 	m_parser->add("sidereal",new function5<CCore,non_constant,void_type,I<string_type>,I<rightAscension_type<rad,true> >,
 			I<declination_type<rad,true> >,I<enum_type<AntennaEquinox2String,Antenna::TSystemEquinox > >,
-			I<enum_type<AntennaSection2String,Antenna::TSections> > >(this,&CCore::sidereal),5);
-	m_parser->add("track",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::track),1);
+			I<enum_type<AntennaSection2String,Antenna::TSections> > >(this,&CCore::_sidereal),5);
+	m_parser->add("track",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_track),1);
+	m_parser->add("goOff",new function2<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(this,&CCore::_goOff),2);
+	m_parser->add("abort",new function0<CCore,non_constant,void_type >(this,&CCore::_abort),0);
+	m_parser->add("initRecording",new function1<CCore,non_constant,void_type,I<long_type> >(this,&CCore::_initRecording),1);
+	m_parser->add("startRecording",new function2<CCore,non_constant,void_type,I<long_type>,I<interval_type> >(this,&CCore::_startRecording),2);
+	m_parser->add("terminateScan",new function0<CCore,non_constant,void_type >(this,&CCore::_terminateScan),0);
 
 
 	//add remote commands ************  should be loaded from a CDB table............................**********/
@@ -204,7 +208,7 @@ void CCore::cleanUp()
 void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl, ComponentErrors::CORBAProblemExImpl,
 		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
-		ComponentErrors::TimerErrorExImpl)
+		ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
 {
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {
@@ -256,10 +260,10 @@ void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& 
 	}
 	clearAntennaTracking();
 	guard.release();
-	waitOnSource();
+	_waitOnSource();
 	try {
 		ACS::doubleSeq tsys;
-		callTSys(tsys);
+		_callTSys(tsys);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		_ADD_BACKTRACE(ManagementErrors::TsysErrorExImpl,impl,ex,"CCore::skydip()");
@@ -270,7 +274,7 @@ void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& 
 
 	// throw  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
 	// ComponentErrors::CORBAProblemExImpl)
-	initRecording(1);
+	_initRecording(1);
 
 	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"SKYDIP_SCAN"));
 	try {
@@ -304,23 +308,23 @@ void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& 
 	}
 	// throw  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
 	//ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
-	//ManagementErrors::DataTransferSetupErrorExImpl)
-	startRecording(startTime,1);
+	//ManagementErrors::DataTransferSetupErrorExImpl.ManagementErrors::AbortedByUserExImpl)
+	_startRecording(startTime,1);
 	// now set the the data transfer stop
 	waitFor=startTime+duration; // this is the time at which the stop should be issued
 	guard.release();
-	waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl
+	_waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl
 	//throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl, ComponentErrors::OperationErrorExImpl)
-	stopRecording();
+	_stopRecording();
 	guard.acquire();
 	//throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-	terminateScan();
+	_terminateScan();
 	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"SKYDIP_DONE"));
 }
 
 void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
 		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::OperationErrorExImpl,
-		ManagementErrors::UnsupportedOperationExImpl,ManagementErrors::MinorServoScanErrorExImpl,ComponentErrors::TimerErrorExImpl)
+		ManagementErrors::UnsupportedOperationExImpl,ManagementErrors::MinorServoScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
 {
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {
@@ -400,10 +404,10 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 	}
 	clearAntennaTracking();
 	guard.release();
-	waitOnSource();
+	_waitOnSource();
 	try {
 		ACS::doubleSeq tsys;
-		callTSys(tsys);
+		_callTSys(tsys);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		_ADD_BACKTRACE(ManagementErrors::TsysErrorExImpl,impl,ex,"CCore::focusScan()");
@@ -442,10 +446,10 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 	}
 	clearAntennaTracking();
 	guard.release();
-	waitOnSource();
+	_waitOnSource();
 	guard.acquire();
 
-	initRecording(1); //  throw ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl
+	_initRecording(1); //  throw ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl
 	// we already check the minor servo boss is available
 	loadMinorServoBoss(m_minorServoBoss,m_minorServoBossError); // (ComponentErrors::CouldntGetComponentExImpl)
 
@@ -480,15 +484,15 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 		m_antennaBossError=true;
 		throw impl;
 	}
-	startRecording(startTime,1);
+	_startRecording(startTime,1);
 	// now set the the data transfer stop
 	waitFor=startTime+duration; // this is the time at which the stop should be issued
 	guard.release();
-	waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl
-	stopRecording();
+	_waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl
+	_stopRecording();
 	guard.acquire();
-	terminateScan();
-	try {
+	_terminateScan();
+	/*try {
 		if (!CORBA::is_nil(m_minorServoBoss)) {
 			m_minorServoBoss->stopScan();
 		}
@@ -511,7 +515,7 @@ void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) thro
 		impl.setMinor(ex.minor());
 		m_antennaBossError=true;
 		throw impl;
-	}
+	}*/
 	ACS_LOG(LM_FULL_INFO,"CCore::focusScan()",(LM_NOTICE,"FOCUS_SCAN_DONE"));
 }
 
@@ -702,7 +706,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
 		ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
 		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,
-		ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::AbortedByUserExImpl)
 {
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {
@@ -723,23 +727,21 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	//throw (ComponentErrors::CouldntGetComponentExImpl,
 	//			ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 	//			ComponentErrors::UnexpectedExImpl);
-	goOff(scanFrame,3.0); // go off 3 beans sizes
-	waitOnSource();
-	callTSys(tsys);
-	wait(1.5);
-	initRecording(1);
+	_goOff(scanFrame,3.0); // go off 3 beans sizes
+	_waitOnSource();
+	_callTSys(tsys);
+	_wait(1.5);
+	_initRecording(1);
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LATITUDE_SCAN"));
 	// start the scan
-	latOTF(scanFrame,span,duration); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
-	startRecording(1,duration); // start recording
-	stopRecording();
+	_latOTF(scanFrame,span,duration); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	_startRecording(1,duration); // start recording
 	// LONGITUDE SCAN..............
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"LONGITUDE_SCAN"));
 	// start the scan
-	lonOTF(scanFrame,span,duration); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
-	startRecording(2,duration); // start recording the second subscan
-	stopRecording();
-	terminateScan();
+	_lonOTF(scanFrame,span,duration); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	_startRecording(2,duration); // start recording the second subscan
+	_terminateScan();
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"CROSSSCAN_DONE"));
 }
 

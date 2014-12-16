@@ -495,6 +495,14 @@ void ReceiversBossImpl::startScan(ACS::Time& startUT,const Receivers::TReceivers
 	}
 }
 
+void ReceiversBossImpl::closeScan(ACS::Time& timeToStop) throw (CORBA::SystemException,ReceiversErrors::ReceiversErrorsEx,ComponentErrors::ComponentErrorsEx)
+{
+	timeToStop=0;
+	// ***********************************************
+	//*** Should I call explicitly the DewarPositioner::stopUpdate() ?
+	// ***************************************************
+}
+
 CORBA::Boolean ReceiversBossImpl::checkScan(ACS::Time startUt,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters& antennaInfo,
   Receivers::TRunTimeParameters_out runTime) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
@@ -509,6 +517,7 @@ CORBA::Boolean ReceiversBossImpl::checkScan(ACS::Time startUt,const Receivers::T
 		runTime.startEpoch=now.value().value+2000000; // take now, plus 0.2 sec
 	}
 	runTime.onTheFly=false;
+	runTime.timeToStop=0;
 	return true;
 }
 

@@ -436,6 +436,11 @@ public:
 		AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	
 	/**
+	 *
+	 */
+	void closeScan(ACS::Time& timeToStop) const { timeToStop=m_timeToStop; }
+
+	/**
 	 * This function returns the value that describes the type of the current ephemeris generator.
 	 * @return the current ephem generator type.
 	 */
@@ -747,6 +752,12 @@ private:
 	Management::TScanAxis m_currentAxis;
 
 	/**
+	 * Epoch at which the current scan is supposed to close, it could be zero meaning the scan does
+	 * not need a close (normal sidereal for example)
+	 */
+	ACS::Time m_timeToStop;
+
+	/**
 	 * The current observing sky frequency, used for FWHM and flux computation (MHz)
 	 */
 	double m_currentObservingFrequency;
@@ -1019,6 +1030,7 @@ private:
 	 * @param vrad output radial velocity of the target, in Km/s
 	 * @param velFrame reference frame of the radial velocity
 	 * @param velDef definition of the radial velocity
+	 * @param timeToStop expected time the scan is expected to be completed, zero means no need to wait
 	 * @param sourceName output parameter, name of the target
 	 * @param scanOffset returns the offset for the current scan
 	 * @param axis movement axis of the prepared scan
@@ -1027,7 +1039,7 @@ private:
 	 */
 	Antenna::EphemGenerator_ptr prepareScan(bool useInternals,ACS::Time& startUT,const Antenna::TTrackingParameters& prim,const Antenna::TTrackingParameters& sec,
 			const TOffset& userOffset,Antenna::TGeneratorType& generatorType,Antenna::TTrackingParameters& lastPar,Antenna::TSections& section,double& ra,double& dec,double& lon,
-			double& lat,double& vrad,Antenna::TReferenceFrame& velFrame,Antenna::TVradDefinition& velDef,IRA::CString& sourceName,TOffset& scanOffset,
+			double& lat,double& vrad,Antenna::TReferenceFrame& velFrame,Antenna::TVradDefinition& velDef,ACS::Time& timeToStop,IRA::CString& sourceName,TOffset& scanOffset,
 			Management::TScanAxis& axis,Antenna::EphemGenerator_out generatorFlux) throw (ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::UnexpectedExImpl,
 					ComponentErrors::CORBAProblemExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	

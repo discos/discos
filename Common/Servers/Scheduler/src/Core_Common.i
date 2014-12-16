@@ -174,6 +174,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 		if (!CORBA::is_nil(m_antennaBoss)) {
 			antennaUT=ut;
 			m_antennaBoss->startScan(antennaUT,*prim,*sec); // the ut could be modified by the call
+			//m_antennaSubScanStarted=true;
 			ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"ANTENNA_SCAN_EPOCH %lld",antennaUT));
 		}
 		else {
@@ -209,6 +210,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 			if (!CORBA::is_nil(m_minorServoBoss)) {
 				servoUT=ut;
 				m_minorServoBoss->startScan(receiversUT,*servoPar,m_antennaRTime.in());
+				//m_msSubScanStarted=true;
 				ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"MINOR_SERVO_SCAN_EPOCH %lld",servoUT));
 			}
 			else {
@@ -242,6 +244,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 		if (!CORBA::is_nil(m_receiversBoss)) {
 			receiversUT=ut;
 			m_receiversBoss->startScan(receiversUT,*recvPa,m_antennaRTime.in());
+			//m_recvSubScanStarted=true;
 			ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"RECEIEVERS_SCAN_EPOCH %lld",receiversUT));
 		}
 		else {
@@ -285,6 +288,7 @@ void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const 
   const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPar) throw (
   ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	try {
 		if (!checkScan(time,prim,sec,servoPar,recvPar)) {
 			_EXCPT(ManagementErrors::TargetOrSubscanNotFeasibleExImpl,impl,"CCore::startScan()");
@@ -305,6 +309,121 @@ void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const 
 		throw impl;
 	}
 	clearTracking();
+}
+
+void CCore::closeScan(bool wait) throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::OperationErrorExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	ACS::Time antennaUT,servoUT,receiversUT,newUT;
+	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
+	try {
+		if (!CORBA::is_nil(m_antennaBoss)) {
+			m_antennaBoss->closeScan(antennaUT); // the ut could be modified by the call
+			ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"ANTENNA_CLOSE_SCAN_EPOCH %lld",antennaUT));
+		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::closeScan()");
+			throw impl;
+		}
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::closeScan()");
+		impl.setReason("Could not close the antenna scan");
+		throw impl;
+	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::closeScan()");
+		impl.setReason("Could not close the antenna scan");
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::closeScan()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_antennaBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::closeScan()");
+		m_antennaBossError=true;
+		throw impl;
+	}
+	if ((MINOR_SERVO_AVAILABLE)) { // check if the minor servo system is enabled
+		loadMinorServoBoss(m_minorServoBoss,m_minorServoBossError); // (ComponentErrors::CouldntGetComponentExImpl)
+		try {
+			if (!CORBA::is_nil(m_minorServoBoss)) {
+				m_minorServoBoss->closeScan(servoUT);
+				ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"MINOR_SERVO_CLOSE_SCAN_EPOCH %lld",servoUT));
+			}
+			else {
+				_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::closeScan()");
+				throw impl;
+			}
+		}
+		catch (MinorServoErrors::MinorServoErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::closeScan()");
+			impl.setReason("Could not close the minor servo scan");
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::closeScan()");
+			impl.setReason("Could not close the minor servo scan");
+			throw impl;
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::closeScan()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			m_minorServoBossError=true;
+			throw impl;
+		}
+	}
+	else {
+		servoUT=0;
+	}
+	loadReceiversBoss(m_receiversBoss,m_receiversBossError);
+	try {
+		if (!CORBA::is_nil(m_receiversBoss)) {
+			m_receiversBoss->closeScan(receiversUT);
+			ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"RECEIEVERS_STOP_SCAN_EPOCH %lld",receiversUT));
+		}
+		else {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::closeScan()");
+			throw impl;
+		}
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::closeScan()");
+		impl.setReason("Could not close to the receivers scan");
+		throw impl;
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::closeScan()");
+		impl.setReason("Could not close to the receivers scan");
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::closeScan()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_receiversBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::closeScan()");
+		m_receiversBossError=true;
+		throw impl;
+	}
+	if (wait) {
+		TIMEVALUE now;
+		IRA::CIRATools::getTime(now);
+		newUT=GETMAX3(receiversUT,servoUT,antennaUT);
+		if ((newUT!=0) && (newUT>now.value().value)) {
+			guard.release();
+			_waitUntil(newUT);
+		}
+	}
 }
 
 ACS::Time CCore::startRecording(const ACS::Time& recUt,
@@ -381,7 +500,7 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 	scanAxis=computeScanAxis(); //  throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::OperationErrorExImpl);
 	loadDefaultDataReceiver();
-	CCore::setupDataTransfer(m_scanStarted,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,observerName,
+	CCore::setupDataTransfer(m_dataTransferInitialized,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,observerName,
 			projectName,baseName,path,extraPath,scheduleFileName,targetID,layout,layoutProc,scanTag,getCurrentDevice(),scanId,startUTTime ,subScanId,scanAxis,
 			m_config); // throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
 	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,recUt,m_streamStarted,m_streamPrepared,m_streamConnected);
@@ -403,7 +522,7 @@ void CCore::disableDataTransfer() throw (ComponentErrors::OperationErrorExImpl,C
 	//loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl);
 	//loadDefaultDataReceiver();
 	CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,
-			m_streamConnected,m_scanStarted);
+			m_streamConnected,m_dataTransferInitialized);
 }
 
 void CCore::enableDataTransfer() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,

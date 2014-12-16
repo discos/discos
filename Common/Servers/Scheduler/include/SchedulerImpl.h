@@ -376,6 +376,37 @@ public:
 	virtual void sidereal(const char * targetName,CORBA::Double ra,CORBA::Double dec,Antenna::TSystemEquinox eq,Antenna::TSections section) throw (
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
 	
+	/**
+	 * It sends the antenna out of source for a given offset.
+	 * @param frame coordinate reference frame
+	 * @param beams offset given as a number of beam sizes
+	 */
+    virtual void goOff(Antenna::TCoordinateFrame frame,CORBA::Double beams) throw (ComponentErrors::ComponentErrorsEx,
+    		ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It aborts the long-running operations
+	 */
+	virtual void abort() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It prepares the data recording.
+	 * @param scanId identifier of the scan that is going to be open
+	 */
+    virtual void initRecording(CORBA::Long scanid) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+    /**
+     * It starts the data acquisition, it also take care of stopping the data stream after the required duration.
+     * @param subScanId identifier of the current subscan
+     * @param duration required recording time
+     */
+    virtual void startRecording(CORBA::Long subScanId,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+    /**
+     * It finalized the current scan (initiated by initRecording)
+     */
+    virtual void terminateScan() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
 private:
 
 	baci::SmartPropertyPointer<baci::ROstring> m_pscheduleName;

@@ -123,7 +123,7 @@ void SchedulerImpl::aboutToAbort()
 void SchedulerImpl::weatherParamenters (CORBA::Double_out temperature,CORBA::Double_out humidity,CORBA::Double_out pressure,CORBA::Double_out wind)
 {
 	try {
-		m_core->getWeatherStationParameters(temperature,humidity,pressure,wind) ;
+		m_core->_getWeatherStationParameters(temperature,humidity,pressure,wind) ;
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -138,7 +138,7 @@ void SchedulerImpl::weatherParamenters (CORBA::Double_out temperature,CORBA::Dou
 void SchedulerImpl::changeLogFile(const char *fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	try {
-		m_core->changeLogFile(fileName);
+		m_core->_changeLogFile(fileName);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -156,7 +156,7 @@ ACS::doubleSeq *SchedulerImpl::systemTemperature() throw (CORBA::SystemException
 	ACS::doubleSeq *out=NULL;
 	out=new ACS::doubleSeq;
 	try {
-		m_core->callTSys(*out);
+		m_core->_callTSys(*out);
 	}
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		if (out!=NULL) delete out;
@@ -192,13 +192,13 @@ CORBA::Boolean SchedulerImpl::command(const char *cmd,CORBA::String_out answer) 
 void SchedulerImpl::stopSchedule() throw (CORBA::SystemException)
 {
 	AUTO_TRACE("SchedulerImpl::stopSchedule()");
-	m_core->stopSchedule();
+	m_core->_stopSchedule();
 }
 
 void SchedulerImpl::haltSchedule() throw (CORBA::SystemException)
 {
 	AUTO_TRACE("SchedulerImpl::haltSchedule()");
-	m_core->haltSchedule();
+	m_core->_haltSchedule();
 }
 
 void SchedulerImpl::clearStatus() throw (CORBA::SystemException)
@@ -212,7 +212,7 @@ void SchedulerImpl::chooseDefaultBackend(const char *bckInstance) throw (CORBA::
 {
 	AUTO_TRACE("SchedulerImpl::chooseDefaultBackend()");
 	try {
-		m_core->chooseDefaultBackend(bckInstance);	
+		m_core->_chooseDefaultBackend(bckInstance);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -229,7 +229,7 @@ void SchedulerImpl::chooseDefaultDataRecorder(const char *rcvInstance) throw (CO
 {
 	AUTO_TRACE("SchedulerImpl::chooseDefaultDataRecorder()");
 	try {
-		m_core->chooseDefaultDataRecorder(rcvInstance);
+		m_core->_chooseDefaultDataRecorder(rcvInstance);
 	}
 		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -246,7 +246,7 @@ void SchedulerImpl::startSchedule(const char * fileName,const char *startSubScan
 {
 	AUTO_TRACE("SchedulerImpl::startSchedule()");
 	try {
-		m_core->startSchedule(fileName,startSubScan);
+		m_core->_startSchedule(fileName,startSubScan);
 	}
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -338,7 +338,7 @@ void SchedulerImpl::setDevice(CORBA::Long deviceID) throw (CORBA::SystemExceptio
 {
 	AUTO_TRACE("SchedulerImpl::setDevice()");
 	try {
-		m_core->setDevice(deviceID);
+		m_core->_setDevice(deviceID);
 	}
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -357,14 +357,14 @@ void SchedulerImpl::setDevice(CORBA::Long deviceID) throw (CORBA::SystemExceptio
 
 void SchedulerImpl::setRestFrequency(const ACS::doubleSeq& rest) throw (CORBA::SystemException)
 {
-	m_core->setRestFrequency(rest);
+	m_core->_setRestFrequency(rest);
 }
 
 
 void SchedulerImpl::setProjectCode(const char *code) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx)
 {
 	try {
-		m_core->setProjectCode(code);
+		m_core->_setProjectCode(code);
 	}
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -376,7 +376,7 @@ void SchedulerImpl::lonOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double spa
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
 	try {
-		m_core->lonOTF(scanFrame,span,duration);
+		m_core->_lonOTF(scanFrame,span,duration);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -392,7 +392,7 @@ void SchedulerImpl::latOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double spa
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
 	try {
-		m_core->latOTF(scanFrame,span,duration);
+		m_core->_latOTF(scanFrame,span,duration);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -407,7 +407,7 @@ void SchedulerImpl::latOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double spa
 void SchedulerImpl::track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
 	try {
-		m_core->track(targetName);
+		m_core->_track(targetName);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -422,7 +422,7 @@ void SchedulerImpl::track(const char *targetName) throw (ComponentErrors::Compon
 void SchedulerImpl::moon() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
 	try {
-		m_core->moon();
+		m_core->_moon();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -438,7 +438,83 @@ void SchedulerImpl::sidereal(const char * targetName,CORBA::Double ra,CORBA::Dou
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
 	try {
-		m_core->sidereal(targetName,ra,dec,eq,section);
+		m_core->_sidereal(targetName,ra,dec,eq,section);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
+void SchedulerImpl::goOff(Antenna::TCoordinateFrame frame,CORBA::Double beams) throw (ComponentErrors::ComponentErrorsEx,
+		ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->_goOff(frame,beams);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
+void SchedulerImpl::abort() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->_abort();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
+void SchedulerImpl::initRecording(CORBA::Long scanid) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->_initRecording(scanid);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
+void SchedulerImpl::startRecording(CORBA::Long subScanId,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->_startRecording(subScanId,duration);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
+void SchedulerImpl::terminateScan() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->_terminateScan();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
