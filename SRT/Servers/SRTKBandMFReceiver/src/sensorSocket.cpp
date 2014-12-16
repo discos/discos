@@ -155,20 +155,28 @@ double sensorSocket::getURSPosition() {
 void sensorSocket::receiveBuffer(BYTE *msg, WORD len) 
     throw (ComponentErrors::SocketErrorExImpl) {
 
-    int bytesNum = 0;
-
-    // Receive the response form the sensor one byte at once 
-    for(int i=0; i<len; i++) {
-        bytesNum += Receive(m_Error, (void *)(&msg[i]), 1) ;
-    }
-        
-    // Throw a SocketErrorExImpl if it didn't receive "len" bytes
-    if (bytesNum != len) { // partial timeout
-        ACS_DEBUG("sensorSocket::receiveBuffer", "socket problem, not all bytes received");
-        ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, 
-                "sensorSocket::receiveBuffer(), Not all bytes received");
-        throw exImpl;
+    for(int j=0; j<5*len; j++) {
+        if(Receive(m_Error, (void *)(&msg[0]), 1) == 1) {
+            if(msg[0] == STS) // 0x02 -> '#' (request header)
+                break;
+            else
+                continue;
+        }
     } 
+    
+    if(msg[0] != STS) {
+        ACS_DEBUG("sensorSocket::receiveBuffer()", "no answer header received");
+        msg[0] = 0x00;
+    }
+    else {
+        for(size_t i=1; i<len;) {
+            if(Receive(m_Error, (void *)(&msg[i]), 1) == 1) {
+                i++;
+            }
+            else
+                continue;
+        }
+    }
 }
 
 

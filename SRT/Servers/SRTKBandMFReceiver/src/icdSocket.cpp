@@ -667,6 +667,33 @@ void icdSocket::sendBuffer(BYTE *msg, WORD len) throw (ComponentErrors::SocketEr
 }
  
 
+void icdSocket::receivePolling(BYTE *msg, WORD len) throw (ComponentErrors::SocketErrorExImpl) {
+    // Receive the response form the icd one byte at once 
+    for(int j=0; j<5*len; j++) {
+        if(Receive(m_Error, (void *)(&msg[0]), 1) == 1) {
+            if(msg[0] == 0x23) // 0x23 -> '#' (Polling header)
+                break;
+            else
+                continue;
+        }
+    } 
+    
+    if(msg[0] != 0x23) {
+        ACS_DEBUG("icdSocket::receivePolling", "no answer header received");
+        msg[0] = 0x00;
+    }
+    else {
+        for(size_t i=1; i<len;) {
+            if(Receive(m_Error, (void *)(&msg[i]), 1) == 1) {
+                i++;
+            }
+            else
+                continue;
+        }
+    }
+}
+
+
 void icdSocket::receiveBuffer(BYTE *msg, WORD len) throw (ComponentErrors::SocketErrorExImpl) {
 
     int bytesNum = 0;
@@ -695,13 +722,12 @@ void icdSocket::polling(void) throw (ComponentErrors::SocketErrorExImpl) {
         sendBuffer(polling, POL_LEN);
     }
     catch (...){
-        ACS_DEBUG("icdSocket::polling", "ICD polling problem");
         ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, 
-                "icdSocket::polling, ICD polling problem");
+                "icdSocket::polling(): cannot pull the device");
         throw exImpl;
     }
     BYTE polling_response[POL_LEN];
-    receiveBuffer(polling_response, POL_LEN);
+    receivePolling(polling_response, POL_LEN);
 
 #ifdef DEBUG_SPE
     /********************* SWITCH POLLING ERROR ON ***********************/

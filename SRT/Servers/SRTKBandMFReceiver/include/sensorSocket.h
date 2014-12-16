@@ -19,8 +19,8 @@
 #define CHECKSUM_INDEX 3   // Index of byte in which containing the checksum
 #define FB_INDEX 1         // Index of the first byte containing the sensor position
 
-const BYTE STS = 0x02;     // Start of message (Start message To Sensor)
-const BYTE ETS = 0x03;     // Stop of message (End of message To Sensor)
+const BYTE STS = 0x02;     // Start of message (Start message To the Sensor)
+const BYTE ETS = 0x03;     // Stop of message (End of message To the Sensor)
 const BYTE SA = 0x0B;      // Sensor Address encoding, corresponding to sensor serial address "0"
 const BYTE PR = 0x04;      // This encoding means a position request
 const BYTE AR = 0x05;      // This encoding means an address request

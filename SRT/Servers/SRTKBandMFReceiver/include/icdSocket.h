@@ -310,7 +310,7 @@ protected:
     /** Make a conversation to and from icd 
      *
      * @param buff pointer to the byte buffer that will contain the message to send
-     * @param check enable the responseCheck related to actual transmitted command. 
+     * @param check enable the responseCheck related to the actual transmitted command. 
      * Default check value is true. The responseCheck is disable for driveStatus
      * command, otherwise the responseCheck of driveStatus command masks the status 
      * of the previous command.
@@ -355,6 +355,15 @@ protected:
     * @throw ComponentErrors::SocketErrorExImpl
     */
     void receiveBuffer(BYTE *msg, WORD len) throw (ComponentErrors::SocketErrorExImpl) ;
+ 
+
+    /**
+    * Receive a polling answer from the icd
+    * @param msg pointer to the byte buffer that will contain the message from the icd
+    * @param len number of bytes to be read
+    * @throw ComponentErrors::SocketErrorExImpl
+    */
+    void receivePolling(BYTE *msg, WORD len) throw (ComponentErrors::SocketErrorExImpl) ;
 
 
     /**
