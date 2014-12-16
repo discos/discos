@@ -27,7 +27,7 @@ class CheckScanTest(unittest2.TestCase):
             t0 = datetime.now()
             while not self.boss.isReady() and (datetime.now() - t0).seconds < 60*5):
                 time.sleep(2)
-            self.assertEqual(self.boss.isReady(), True) # Timeout expired?
+            self.assertTrue(self.boss.isReady()) # Timeout expired?
 
         self.assertEqual(self.boss.getActualSetup(), code)
 
@@ -58,10 +58,10 @@ class CheckScanTest(unittest2.TestCase):
         msInfo = MinorServo.TRunTimeParameters
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
 
-        self.assertEqual(res, True)
+        self.assertTrue(res)
         # Cannot know the startEpoch time...
         self.assertGreater(msInfo.startEpoch, getTimeStamp.now().value)
-        self.assertEqual(msInfo.onTheFly, True)
+        self.assertTrue(msInfo.onTheFly)
         self.assertEqual(msInfo.centerScan, center)
         self.assertEqual(msInfo.scanAxis, 'SRP_TZ')
         # Cannot know the timeToStop time...
@@ -74,9 +74,9 @@ class CheckScanTest(unittest2.TestCase):
         msInfo = MinorServo.TRunTimeParameters
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
 
-        self.assertEqual(res, True)
+        self.assertTrue(res)
         self.assertEqual(msInfo.startEpoch, startTime)
-        self.assertEqual(msInfo.onTheFly, True)
+        self.assertTrue(msInfo.onTheFly)
         self.assertEqual(msInfo.centerScan, center)
         self.assertEqual(msInfo.scanAxis, 'SRP_TZ')
         # Cannot know the timeToStop time...
@@ -89,7 +89,7 @@ class CheckScanTest(unittest2.TestCase):
         msInfo = MinorServo.TRunTimeParameters
         self.scan.total_time = 500000 # 50 ms
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
-        self.assertEqual(res, False)
+        self.assertFalse(res)
 
     def testOutOfRange(self):
         """The result must be False in case of scan out of range"""
@@ -98,7 +98,7 @@ class CheckScanTest(unittest2.TestCase):
         msInfo = MinorServo.TRunTimeParameters
         self.scan.range = 5000 # 5 meters...
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
-        self.assertEqual(res, False) # does it currently throw an exception?
+        self.assertFalse(res) # does it currently throw an exception?
 
     def testTooCloseToNow(self):
         """The result must be False when the starting time is too close to now"""
@@ -106,7 +106,7 @@ class CheckScanTest(unittest2.TestCase):
         startTime = getTimeStamp().value + 2 # Start in 2 seconds from now
         msInfo = MinorServo.TRunTimeParameters
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
-        self.assertEqual(res, False) # does it currently throw an exception?
+        self.assertFalse(res) # does it currently throw an exception?
 
     def testStartASAPEmptyScan(self):
         """An empty scan when that must start as soon as possible"""
@@ -120,10 +120,10 @@ class CheckScanTest(unittest2.TestCase):
         msInfo = MinorServo.TRunTimeParameters
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
 
-        self.assertEqual(res, True)
+        self.assertTrue(res)
         # Cannot know the startEpoch time...
         self.assertGreater(msInfo.startEpoch, getTimeStamp.now().value)
-        self.assertEqual(msInfo.onTheFly, False)
+        self.assertFalse(msInfo.onTheFly)
         self.assertEqual(msInfo.centerScan, center)
         self.assertEqual(msInfo.scanAxis, '')
         self.assertEqual(msInfo.timeToStop, 0)
@@ -140,9 +140,9 @@ class CheckScanTest(unittest2.TestCase):
         msInfo = MinorServo.TRunTimeParameters
         res = self.boss.checkScan(startTime, self.scan, self.antennaInfo, msInfo)
 
-        self.assertEqual(res, True)
+        self.assertTrue(res)
         self.assertEqual(msInfo.startEpoch, startTime)
-        self.assertEqual(msInfo.onTheFly, False)
+        self.assertFalse(msInfo.onTheFly)
         self.assertEqual(msInfo.centerScan, center)
         self.assertEqual(msInfo.scanAxis, '')
         self.assertGreater(msInfo.timeToStop, 0)

@@ -27,7 +27,7 @@ class StartScanTest(unittest2.TestCase):
             t0 = datetime.now()
             while not self.boss.isReady() and (datetime.now() - t0).seconds < 60*5):
                 time.sleep(2)
-            self.assertEqual(self.boss.isReady(), True) # Timeout expired?
+            self.assertTrue(self.boss.isReady()) # Timeout expired?
 
         self.assertEqual(self.boss.getActualSetup(), code)
 
