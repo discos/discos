@@ -66,7 +66,7 @@ SRTKBandMFReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors Receiv
 							  GenericReceiverStubs SRTKBandMFStubs \
                    LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
 
-SRTKBandDerotatorImpl_OBJECTS = SRTKBandDerotatorImpl sensorSocket icdSocket utils 
+SRTKBandDerotatorImpl_OBJECTS = SRTKBandDerotatorImpl sensorSocket icdSocket utils StatusUpdater
 SRTKBandDerotatorImpl_LIBS = GenericDerotatorStubs SRTKBandDerotatorStubs IRALibrary ComponentErrors DerotatorErrors \
                    ManagmentDefinitionsStubs ManagementErrors
 

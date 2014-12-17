@@ -47,8 +47,8 @@ module Receivers {
      *     <li>setPosition(): set the derotator position</li>
      *     <li>getActPosition(): return the actPosition value</li>
      *     <li>getCmdPosition(): return the cmdPosition value</li>
-     *     <li>getPositionFromHistory(t): return the position at which
-     *     the derotator was at the time t</li>
+     *     <li>getPositionFromHistory(t): return the the derotator position at
+     *     the time t</li>
      *     <li>getMaxLimit(): return the biggest position allowed,
      *     in the URS</li>
      *     <li>getMinLimit(): return the lowerst position allowed, 
@@ -163,11 +163,15 @@ module Receivers {
         );
 
 
-        /**
-         * Return the position at which the derotator was at the time t
-         * @throw CORBA::SystemException
+        /** Return the derotator position at a given time.
+         *  If the time is lesser the the older one stored in the queue,
+         *  then it returns oldest position.
+         *  If the time is in advance or 0, it returns the latest position.
+         *  @arg time the time related to the position we want to get
+         *  @return the position
+         *  @throw ComponentError::ComponentErrorsEx
          */
-        double getPositionFromHistory(in ACS::Time time);
+         double getPositionFromHistory(in ACS::Time time) raises (ComponentErrors::ComponentErrorsEx);
 
 
         /**

@@ -237,6 +237,17 @@ module Receivers {
         double getPosition() raises (ComponentErrors::ComponentErrorsEx);
 
 
+        /** Return the derotator position at a given time.
+         *  If the time is lesser the the older one stored in the queue,
+         *  then it returns oldest position.
+         *  If the time is in advance or 0, it returns the latest position.
+         *  @arg time the time related to the position we want to get
+         *  @return the position
+         *  @throw ComponentError::ComponentErrorsEx
+         */
+         double getPositionFromHistory(in ACS::Time time) raises (ComponentErrors::ComponentErrorsEx);
+
+
         /** Return the commanded position in the user reference system
          *
          * @throw ComponentErrors::ComponentErrorsEx

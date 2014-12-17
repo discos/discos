@@ -28,8 +28,11 @@
 #include <LogFilter.h>
 #include "sensorSocket.h"
 #include "icdSocket.h"
+#include "StatusUpdater.h"
+#include "utils.h"
 
 using namespace baci;
+
 
 class SRTKBandDerotatorImpl: public CharacteristicComponentImpl,  public virtual POA_Receivers::SRTKBandDerotator {
 
@@ -185,7 +188,10 @@ public:
     /**
      * @return the position at which the derotator was at a given time t</li>
      */
-     double getPositionFromHistory(ACS::Time t);
+     double getPositionFromHistory(ACS::Time t) throw (
+         CORBA::SystemException, 
+         ComponentErrors::ComponentErrorsEx
+     );
      
 
      /**  
@@ -286,6 +292,14 @@ private:
    //
    // ICD Summary Status 
    SmartPropertyPointer<ROpattern> m_status;
+
+   /** A vectors of <timestamp, position> */
+   static CSecureArea<vector<PositionItem> > *m_actPos_list;
+
+   static ThreadParameters m_thread_params;
+
+   /** @var static pointer to status thread */
+   static StatusUpdater *m_status_ptr;
 
    void operator=(const SRTKBandDerotatorImpl&);
 

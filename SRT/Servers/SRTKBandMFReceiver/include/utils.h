@@ -21,6 +21,7 @@
 #define __UTILS_STREAM_PREC__ 16
 
 using namespace std;
+using namespace IRA;
 
 typedef string::size_type (string::*find_t)(const string &delim, string::size_type offset) const;
 
@@ -305,4 +306,38 @@ std::string any2string(T i) {
 
 DDWORD getNextTime(unsigned long seconds=0, unsigned long mseconds=0);
 
+
+// --- BEGIN get position from history
+struct PositionItem {
+    ACS::Time exe_time;
+    double position;
+};
+
+
+class PosNotFoundEx: public std::logic_error {
+    public:
+        PosNotFoundEx(const std::string &s): std::logic_error(s) {};
+        virtual ~PosNotFoundEx() throw() {};
+};
+
+class IndexErrorEx: public std::logic_error {
+    public:
+        IndexErrorEx(const std::string &s): std::logic_error(s) {};
+        virtual ~IndexErrorEx() throw() {};
+};
+
+vector<PositionItem>::size_type findPositionIndex(
+        CSecAreaResourceWrapper<vector<PositionItem> > vptr, 
+        ACS::Time exe_time,
+        bool clear=false
+) throw (PosNotFoundEx);
+
+
+PositionItem getPosItemFromHistory(
+        CSecAreaResourceWrapper<vector<PositionItem> > vptr, 
+        ACS::Time exe_time) throw (PosNotFoundEx, IndexErrorEx);
+// --- END get position from history
+
+
 #endif
+

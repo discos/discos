@@ -471,6 +471,13 @@ class Positioner(object):
             raise NotAllowedError('positioner not configured: a setup() is required')
 
 
+    def getPositionFromHistory(self, t):
+        if self.isSetup():
+            return self.device.getPositionFromHistory(t)
+        else:
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+
     def getCmdPosition(self):
         if self.isSetup():
             return self.device.getCmdPosition()

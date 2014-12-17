@@ -221,6 +221,24 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setData('Reason', ex.message)
             raise exc.getComponentErrorsEx()
 
+    def getPositionFromHistory(self, t):
+        try:
+            return self.positioner.getPositionFromHistory(t)
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
+            raise exc.getComponentErrorsEx()
+        except (DerotatorErrors.CommunicationErrorEx, ComponentErrors.ComponentErrorsEx), ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason("Cannot get the derotator position at the time %s" %s)
+            raise exc.getComponentErrorsEx()
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setData('Reason', ex.message)
+            raise exc.getComponentErrorsEx()
 
     def getCmdPosition(self):
         try:
