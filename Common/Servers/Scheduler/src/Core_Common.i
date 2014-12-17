@@ -465,24 +465,6 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 	ACS_LOG(LM_FULL_INFO,"CCore::startRecording()",(LM_DEBUG,"RECORDING_START_TIME: %s",(const char *)out));
 	getProjectCode(projectCode);
 	path=/*m_config->getDataDirectory()*/basePath+projectCode+"/";
-
-	/*loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
-	try {
-		ACSErr::Completion_var comp;
-		ACS::ROstring_var targetRef=m_antennaBoss->target();
-		if (!CORBA::is_nil(targetRef)) {
-			CORBA::String_var  tmp;
-			tmp=targetRef->get_sync(comp.out());
-			ACSErr::CompletionImpl compImpl(comp);
-			if (compImpl.isErrorFree()) {
-				targetID=(const char *)tmp;
-			}
-		}
-	}
-	catch (...) {
-		targetID="";
-		//in this case we do not want to to do nothing.....it is an error but we can survive
-	}*/
 	targetID=m_antennaRTime->targetName;
 	if (suffix=="") {
 		if (targetID=="") {
@@ -500,8 +482,8 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 	scanAxis=computeScanAxis(); //  throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::OperationErrorExImpl);
 	loadDefaultDataReceiver();
-	CCore::setupDataTransfer(m_dataTransferInitialized,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,observerName,
-			projectName,baseName,path,extraPath,scheduleFileName,targetID,layout,layoutProc,scanTag,getCurrentDevice(),scanId,startUTTime ,subScanId,scanAxis,
+	CCore::setupDataTransfer(m_dataTransferInitialized,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
+			m_streamPrepared,observerName,projectName,baseName,path,extraPath,scheduleFileName,targetID,layout,layoutProc,scanTag,getCurrentDevice(),scanId,startUTTime ,subScanId,scanAxis,
 			m_config); // throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
 	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,recUt,m_streamStarted,m_streamPrepared,m_streamConnected);
 	return startUTTime;

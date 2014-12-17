@@ -92,14 +92,16 @@ public:
 	void crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
 			ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
 			ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::AntennaScanErrorExImpl,
-			ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::AbortedByUserExImpl);
+			ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+			ManagementErrors::AbortedByUserExImpl,ManagementErrors::RecordingAlreadyActiveExImpl);
 	
 	/**
 	 * This is a macro operation, it performs a focus scan over the previously commanded source
 	 */
 	void focusScan(const double& span,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
 			ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::OperationErrorExImpl,
-			ManagementErrors::UnsupportedOperationExImpl,ManagementErrors::MinorServoScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl);
+			ManagementErrors::UnsupportedOperationExImpl,ManagementErrors::MinorServoScanErrorExImpl,ComponentErrors::TimerErrorExImpl,
+			ManagementErrors::AbortedByUserExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl);
 
 	/**
 	 * this is a macro operation, it performs a skydip scan from the current azimuth position
@@ -107,7 +109,8 @@ public:
 	void skydip(const double& el1,const double& el2,const ACS::TimeInterval& duration)  throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
 			ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl, ComponentErrors::CORBAProblemExImpl,
 			ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
-			ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl);
+			ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl,
+			ManagementErrors::RecordingAlreadyActiveExImpl);
 
 	/**
 	 * It parses a human readable command and executes it

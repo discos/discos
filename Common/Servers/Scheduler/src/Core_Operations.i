@@ -280,12 +280,15 @@ void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, 
 }
 
 void CCore::_initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl)
+		ComponentErrors::CORBAProblemExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	//************************************************************************************************************************
-	//*********************CHECK if a schedule is running or if already recording in that case we must give up
-	//************************************************************************************************************************
+	if (m_schedExecuter) {
+		if (m_schedExecuter->isScheduleActive()) {
+			_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,dummy,"CCore::_initRecording()");
+			throw dummy;
+		}
+	}
 	try {
 		CCore::disableDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_streamStarted,m_streamPrepared,
 				m_streamConnected,m_dataTransferInitialized);
@@ -307,14 +310,25 @@ void CCore::_initRecording(const long& scanid) throw (ComponentErrors::CouldntGe
 
 void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
 		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
-		ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
+		ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl,
+		ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	//************************************************************************************************************************
-	//*********************CHECK if a schedule is running or if the  recording is not initialized (streamConnected and streamPrepared) in that case we must give up
-	//************************************************************************************************************************
+	if (m_schedExecuter) {
+		if (m_schedExecuter->isScheduleActive()) {
+			_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,dummy,"CCore::_initRecording()");
+			throw dummy;
+		}
+	}
+	if (m_streamStarted) {
+		_EXCPT(ManagementErrors::RecordingAlreadyActiveExImpl,dummy,"CCore::_initRecording()");
+		throw dummy;
+	}
+	if ((!m_streamConnected) && (!m_streamPrepared)) {
+		_EXCPT(ManagementErrors::DataTransferSetupErrorExImpl,dummy,"CCore::_initRecording()");
+		throw dummy;
+	}
 	ACS::Time realStart,waitFor;
-
 	IRA::CString prj,path,suffix,obsName,schedule,layoutName;
 	long scanTag;
 	ACS::stringSeq layout;

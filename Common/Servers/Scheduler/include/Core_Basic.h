@@ -49,6 +49,7 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
  * @param writerError will be returned back true if an error occurred in the communication to writer component
  * @param backend reference to the backend
  * @param backendError will be returned back true if an error occurred in the communication to backend component
+ * @param streamPrepared flag that indicates if the stream has already been prepared or not
  * @param obsName name of the current observer
  * @param prj name of the project currently running
  * @param baseName name of the file to be created
@@ -63,10 +64,11 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
  * @param axis indicates which axis is currently used by the telescope.
  * @param config pointer to the configuration object
  */
-static void setupDataTransfer(bool& scanStarted,/*bool& streamPrepared,*/Management::DataReceiver_ptr writer,bool& writerError,Backends::GenericBackend_ptr backend,bool& backendError,
-		const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& targetID,
+static void setupDataTransfer(bool& scanStarted,Management::DataReceiver_ptr writer,bool& writerError,Backends::GenericBackend_ptr backend,bool& backendError,
+		const bool& streamPrepared,const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& targetID,
 		const IRA::CString& layoutName,const ACS::stringSeq& layout,const long& scanTag,const long& device,const DWORD& scanID,const ACS::Time& startTime,const  DWORD& subScanID,
-		const Management::TScanAxis& axis,const CConfiguration* config) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl);
+		const Management::TScanAxis& axis,const CConfiguration* config) throw (ComponentErrors::OperationErrorExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::DataTransferSetupErrorExImpl);
 
 /**
  * This static method starts the data transfer between the backend and the configured data recorder.

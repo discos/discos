@@ -175,7 +175,8 @@ void _getWeatherStationParameters(double &temp,double& hum,double& pres, double&
  * initialize the writing of the data
  * @param scaid identifier of the scan
  */
-void _initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
+void _initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl);
 
 /**
  * Start the recording at the given time
@@ -193,7 +194,8 @@ void _initRecording(const long& scanid) throw (ComponentErrors::CouldntGetCompon
  */
 void _startRecording(const long& subScanId,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
 		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
-		ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl);
+		ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl,
+		ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl);
 
 /**
  * Immediately stops the data recording

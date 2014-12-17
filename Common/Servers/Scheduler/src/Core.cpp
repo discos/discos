@@ -208,7 +208,7 @@ void CCore::cleanUp()
 void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl, ComponentErrors::CORBAProblemExImpl,
 		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
-		ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
+		ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl)
 {
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {
@@ -324,7 +324,8 @@ void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& 
 
 void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
 		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::OperationErrorExImpl,
-		ManagementErrors::UnsupportedOperationExImpl,ManagementErrors::MinorServoScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
+		ManagementErrors::UnsupportedOperationExImpl,ManagementErrors::MinorServoScanErrorExImpl,ComponentErrors::TimerErrorExImpl,
+		ManagementErrors::AbortedByUserExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl)
 {
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {
@@ -706,7 +707,7 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
 		ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
 		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,
-		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::AbortedByUserExImpl)
+		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::AbortedByUserExImpl,ManagementErrors::RecordingAlreadyActiveExImpl)
 {
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {

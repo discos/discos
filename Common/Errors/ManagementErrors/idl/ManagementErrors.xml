@@ -33,7 +33,7 @@
 
 <ErrorCode name="DataRecorderNotAvailable" shortDescription="The selected data recorder is not available" description=""/>
 
-<ErrorCode name="DataTransferSetupError" shortDescription="The data transfer was not properly setup" description=""/>
+<ErrorCode name="DataTransferSetupError" shortDescription="The data transfer was not properly configured or initialized" description=""/>
 
 <ErrorCode name="TsysError" shortDescription="Error during System Temperature computation" description=""/>
 

@@ -325,27 +325,32 @@ void CCore::disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backe
 }
 
 void CCore::setupDataTransfer(bool& scanStarted,
-																		 /*bool& streamPrepared,*/
-																		Management::DataReceiver_ptr writer,bool& writerError,
-																		Backends::GenericBackend_ptr backend,bool& backendError,
-																		const IRA::CString& obsName,
-																		const IRA::CString& prj,
-																		const IRA::CString& baseName,
-																		const IRA::CString& path,
-																		const IRA::CString& extraPath,
-																		const IRA::CString& schedule,
-																		const IRA::CString& targetID,
-																		const IRA::CString& layoutName,
-																		const ACS::stringSeq& layout,
-																		const long& scanTag,
-																		const long& device,
-																		const DWORD& scanID,
-																		const ACS::Time& startTime,
-																		const  DWORD& subScanID,
-																		const Management::TScanAxis& axis,
-																		const CConfiguration* config
-	) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl)
+							  Management::DataReceiver_ptr writer,bool& writerError,
+							  Backends::GenericBackend_ptr backend,bool& backendError,
+							  const bool& streamPrepared,
+							  const IRA::CString& obsName,
+							  const IRA::CString& prj,
+							  const IRA::CString& baseName,
+							  const IRA::CString& path,
+							  const IRA::CString& extraPath,
+							  const IRA::CString& schedule,
+							  const IRA::CString& targetID,
+							  const IRA::CString& layoutName,
+							  const ACS::stringSeq& layout,
+							  const long& scanTag,
+							  const long& device,
+							  const DWORD& scanID,
+							  const ACS::Time& startTime,
+							  const  DWORD& subScanID,
+							  const Management::TScanAxis& axis,
+							  const CConfiguration* config
+	) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,
+			ComponentErrors::UnexpectedExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
 {
+	if (!streamPrepared) {
+		_EXCPT(ManagementErrors::DataTransferSetupErrorExImpl,impl,"CCore::setupDataTansfer()");
+		throw impl;
+	}
  	try {
  		if (!CORBA::is_nil(writer)) {
  			Management::TScanSetup setup;
@@ -398,36 +403,6 @@ void CCore::setupDataTransfer(bool& scanStarted,
  		impl.setMinor(ex.minor());
  		throw impl;
  	}
-	/*if (!CORBA::is_nil(backend)) {
-		try {
-			if (!streamPrepared) {
-				backend->sendHeader();
-				streamPrepared=true;
-			}
-		}
-		catch (BackendsErrors::BackendsErrorsEx& ex) {
-			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setupDataTransfer()");
-			impl.setReason("backend failed to send header to writer");
-			throw impl;
-		}
-		catch (ComponentErrors::ComponentErrorsEx& ex) {
-			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::setupDataTransfer()");
-			impl.setReason("backend failed to send header to writer");
-			throw impl;
-		}
-		catch (CORBA::SystemException& ex) {
-			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::setupDataTransfer()");
-			impl.setName(ex._name());
-			impl.setMinor(ex.minor());
-			backendError=true;
-			throw impl;
-		}
-		catch (...) {
-			backendError=true;
-			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::setupDataTransfer()");
-			throw impl;
-		}
-	}*/
  	try {
  		if (!CORBA::is_nil(writer)) {
  			Management::TSubScanSetup subSetup;
