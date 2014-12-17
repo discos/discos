@@ -146,9 +146,12 @@ private:
 		WRITING_INITIALIZATION,
 		PRE_SCAN_PROC,
 		SCAN_START,
-		SCHEDULE_STOP,
+		STOP_SCHEDULING,
 		SCAN_EXECUTION,
-		POST_SCAN_PROC
+		POST_SCAN_PROC,
+		SCAN_CLOSEUP,
+		CLOSEUP_WAIT,
+		RECORDING_FINALIZE
 	};
 	/**
 	 * Stores the present stage of the scan
@@ -313,6 +316,11 @@ private:
 	 */
 	bool m_haltMe;
 	
+	/**
+	 * represent the time stamp at which the current scan is supposed to be closed and a new one can be initialized
+	 */
+	ACS::Time m_closeScanTimer;
+
 	/**
 	 * pointer to the configuration object
 	 */

@@ -100,4 +100,6 @@
 
 <ErrorCode name="RecordingAlreadyActive" shortDescription="Recording is already active" description=""/>
 
+<ErrorCode name="CloseTelescopeScanError" shortDescription="Not able command the scan close to the telescope" description=""/>
+
 </Type>

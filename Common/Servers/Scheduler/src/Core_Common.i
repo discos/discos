@@ -169,12 +169,12 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time antennaUT,servoUT,receiversUT,newUT;
+	m_subScanStarted=true;
 	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
 			antennaUT=ut;
 			m_antennaBoss->startScan(antennaUT,*prim,*sec); // the ut could be modified by the call
-			//m_antennaSubScanStarted=true;
 			ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"ANTENNA_SCAN_EPOCH %lld",antennaUT));
 		}
 		else {
@@ -210,7 +210,6 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 			if (!CORBA::is_nil(m_minorServoBoss)) {
 				servoUT=ut;
 				m_minorServoBoss->startScan(receiversUT,*servoPar,m_antennaRTime.in());
-				//m_msSubScanStarted=true;
 				ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"MINOR_SERVO_SCAN_EPOCH %lld",servoUT));
 			}
 			else {
@@ -244,7 +243,6 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 		if (!CORBA::is_nil(m_receiversBoss)) {
 			receiversUT=ut;
 			m_receiversBoss->startScan(receiversUT,*recvPa,m_antennaRTime.in());
-			//m_recvSubScanStarted=true;
 			ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"RECEIEVERS_SCAN_EPOCH %lld",receiversUT));
 		}
 		else {
@@ -290,6 +288,13 @@ void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	try {
+		closeScan(true);
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		_ADD_BACKTRACE(ManagementErrors::CloseTelescopeScanErrorExImpl,impl,ex,"CCore::startScan()");
+		throw impl;
+	}
+	try {
 		if (!checkScan(time,prim,sec,servoPar,recvPar)) {
 			_EXCPT(ManagementErrors::TargetOrSubscanNotFeasibleExImpl,impl,"CCore::startScan()");
 			throw impl;
@@ -311,11 +316,16 @@ void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const 
 	clearTracking();
 }
 
-void CCore::closeScan(bool wait) throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::OperationErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
+ACS::Time CCore::closeScan(bool wait) throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::OperationErrorExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time antennaUT,servoUT,receiversUT,newUT;
+	if (!m_subScanStarted) {
+		return 0;
+	}
+	ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"CLOSING_CURRENT_TELESCOPE_SCAN"));
 	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
@@ -415,15 +425,17 @@ void CCore::closeScan(bool wait) throw (ComponentErrors::ComponentNotActiveExImp
 		m_receiversBossError=true;
 		throw impl;
 	}
+	m_subScanStarted=false;
+	newUT=GETMAX3(receiversUT,servoUT,antennaUT);
 	if (wait) {
 		TIMEVALUE now;
 		IRA::CIRATools::getTime(now);
-		newUT=GETMAX3(receiversUT,servoUT,antennaUT);
 		if ((newUT!=0) && (newUT>now.value().value)) {
 			guard.release();
-			_waitUntil(newUT);
+			_waitUntil(newUT); // throw (ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
 		}
 	}
+	return newUT;
 }
 
 ACS::Time CCore::startRecording(const ACS::Time& recUt,

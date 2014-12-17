@@ -79,9 +79,11 @@ void startScan(ACS::Time& time,const Antenna::TTrackingParameters *const prim,co
 /**
  * This method issues a close to the current subscan and in case waits for this operation to complete
  * @param wait true if the methods has to wait for the operation to complete in all the subsystems
+ * @return the time requested by the telescope to close the scan in all subsystems (not a duration but a precise time)
  */
-void closeScan(bool wait) throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::OperationErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl);
+ACS::Time closeScan(bool wait) throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::OperationErrorExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl);
 
 /**
  * Computes the scan axis starting from the current configuration of involved sub system bosses.

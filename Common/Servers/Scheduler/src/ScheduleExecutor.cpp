@@ -188,6 +188,7 @@ void CScheduleExecutor::runLoop()
 					prim=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.primaryParameters);
 					sec=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
 					m_core->doScan(m_currentScan.ut,prim,sec,&servoPar,&recvPar);
+					m_closeScanTimer=0;
 				}
 				catch (ACSErr::ACSbaseExImpl& Ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,Ex,"CScheduleExecutor::runLoop()");
@@ -258,7 +259,6 @@ void CScheduleExecutor::runLoop()
 							m_core->changeSchedulerStatus(Management::MNG_WARNING);
 						}
 						m_stage=SCAN_START;
-						/*}*/
 					}
 				}
 				else {
@@ -317,9 +317,9 @@ void CScheduleExecutor::runLoop()
 						break;
 					}					
 				}
-				m_stage=SCHEDULE_STOP;
+				m_stage=STOP_SCHEDULING;
 			}
-			case SCHEDULE_STOP: { // schedule the scan stop..in case of error. the schedule is aborted
+			case STOP_SCHEDULING: { // schedule the scan stop..in case of error. the schedule is aborted
 				if (m_core->isStreamStarted()) {
 					m_lastScheduledTime=m_startRecordTime+(unsigned long long)(m_currentScan.duration*10000000); // this is the stop time in 100 ns.
 					IRA::CString out;
@@ -355,9 +355,6 @@ void CScheduleExecutor::runLoop()
 						cleanScan();
 						break;
 					}
-					if  (m_core->checkRecording()) {
-						break;
-					}
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"SUBSCAN_DONE"));
 				}
 				m_stage=POST_SCAN_PROC;
@@ -367,7 +364,7 @@ void CScheduleExecutor::runLoop()
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"POSTSCAN_PROCEDURE_IS_NOT_NULL"));
 					if (m_currentScan.postScanBlocking) {
 						m_goAhead=false;
-						m_stage=SCAN_SELECTION;
+						m_stage=SCAN_CLOSEUP;
 						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BLOCKING_POSTSCAN_PROCEDURE"));
 						try {
 							m_core->executeProcedure(m_currentScan.postScan,&procedureCallBack,this);
@@ -389,9 +386,47 @@ void CScheduleExecutor::runLoop()
 							m_core->changeSchedulerStatus(Management::MNG_WARNING);
 						}
 					}
-					/*}*/
 				}
-				m_stage=SCAN_SELECTION;				
+				m_stage=SCAN_CLOSEUP;
+			}
+			case SCAN_CLOSEUP : {
+				// trying to clean up and close the current scan commanded to the telescope
+				try {
+					m_closeScanTimer=m_core->closeScan(false);
+				}
+				catch (ACSErr::ACSbaseExImpl& ex) {
+					_ADD_BACKTRACE(ManagementErrors::CloseTelescopeScanErrorExImpl,impl,ex,"CScheduleExecutor::runLoop()");
+					impl.log(LM_ERROR);
+					m_core->changeSchedulerStatus(Management::MNG_FAILURE);
+					cleanScan();
+					break;
+				}
+				m_stage=CLOSEUP_WAIT;
+				break;
+			}
+			case CLOSEUP_WAIT : {
+				if (m_closeScanTimer!=0) {
+					TIMEVALUE now;
+					IRA::CIRATools::getTime(now);
+					if (m_closeScanTimer>now.value().value) {
+						break;
+					}
+					m_closeScanTimer=0;
+				}
+				m_stage=RECORDING_FINALIZE;
+			}
+			case RECORDING_FINALIZE: {
+				// wait for the recorder to consume all the data in its cache
+				try {
+					if (m_core->checkRecording()) {
+						break;
+					}
+				}
+				catch (ACSErr::ACSbaseExImpl& ex) {
+					ex.log(LM_WARNING);
+					m_core->changeSchedulerStatus(Management::MNG_WARNING);
+				}
+				m_stage=SCAN_SELECTION;
 				break;
 			}
 			default : {
@@ -428,6 +463,7 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 	 m_projectCode=m_core->m_config->getDefaultProjectCode();
 	 m_scheduleCounter=0;
 	 m_lastScanID=0;
+	 m_closeScanTimer=0;
 	 m_goAhead=true;
 	 m_stage=INIT;
 	 m_firstSubScan=0;
@@ -552,6 +588,13 @@ void CScheduleExecutor::cleanScan()
 		//m_scanStarted=false;
 		ex.log(LM_WARNING);
 	}
+	try {
+		m_core->closeScan(false);
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_WARNING);
+	}
+	m_closeScanTimer=0;
 	m_currentBackendProcedure="";
 	m_stage=SCAN_SELECTION;
 	m_subScanDone=false;
@@ -586,6 +629,13 @@ void CScheduleExecutor::cleanSchedule(bool error)
 		//m_scanStarted=false;
 		ex.log(LM_WARNING);
 	}
+	try {
+		m_core->closeScan(false);
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_WARNING);
+	}
+	m_closeScanTimer=0;
 	// get rid of the schedule file......
 	if (m_scheduleLoaded) {
 		if (m_schedule!=NULL) { 
@@ -598,6 +648,7 @@ void CScheduleExecutor::cleanSchedule(bool error)
 	m_currentBackendProcedure="";
 	m_scheduleCounter=0;
 	m_lastScanID=0;
+	m_closeScanTimer=0;
 	m_stage=LIMBO;
 	m_firstSubScan=0;
 	m_startSubScan=0;

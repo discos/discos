@@ -23,6 +23,7 @@
 									m_scanID=0; m_subScanID=0; \
 									m_abortCurrentOperation=false; \
 									m_subScanEpoch=0; \
+									m_subScanStarted=false; \
 									m_antennaRTime=new Antenna::TRunTimeParameters; m_antennaRTime->targetName=""; \
 									m_antennaRTime->axis=Management::MNG_NO_AXIS; \
 									m_servoRunTime=new MinorServo::TRunTimeParameters; m_servoRunTime->scanAxis="";
@@ -237,6 +238,10 @@ MinorServo::TRunTimeParameters_var m_servoRunTime;
  * This flags force the component to abort all "long-lasting" operations
  */
 bool m_abortCurrentOperation;
+/**
+ * if true a scan has been commanded to the telescope and the scan is still active (not closed)
+ */
+bool m_subScanStarted;
 /**
  * used to get a reference to the antenna boss component.
  * @param ref the pointer to the antenna boss component
