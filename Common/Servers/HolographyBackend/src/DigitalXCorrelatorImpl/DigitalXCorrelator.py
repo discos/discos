@@ -104,7 +104,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
 	    self.port='/dev/ttyr00'
 	    self.baudrate=115200
 	    self.samples=5000000 
-	    self.out_file_name="/home/gavino/Holography/outfile"
+	    self.out_file_name="/home/spoppi/Holography/outfile"
 	    
 	
 	
@@ -192,15 +192,15 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
            cannot get the coefficients.
         """
 
-        try:
-            self.corr.disconnect()
-            err = self.corr.connect(self.port, self.baudrate)
-	    self.corr.set_samples(self.samples)
+        #try:
+            #self.corr.disconnect()
+            #err = self.corr.connect(self.port, self.baudrate)
+	    #self.corr.set_samples(self.samples)
 
-        except Exception:
-            self.getLogger().logDebug("Error in save_coeff: cannot connect to FPGA")
-            self.getLogger().logError("Error... cannot connect to FPGA")
-            raise ACSErrTypeFPGAConnectionImpl.CannotConnectExImpl()
+        #except Exception:
+            #self.getLogger().logDebug("Error in save_coeff: cannot connect to FPGA")
+            #self.getLogger().logError("Error... cannot connect to FPGA")
+            #raise ACSErrTypeFPGAConnectionImpl.CannotConnectExImpl()
 
 #       # Running Correlation
         try:

@@ -130,6 +130,8 @@ void HolographyImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 ACS_LOG(LM_FULL_INFO,"HolographyImpl::initialize()",(LM_INFO,"PROPERTY_CREATION"));
 	try {	
+                m_correlator=getContainerServices()->getDefaultComponent<DXC::DigitalXCorrelator>("IDL:alma/DXC/DigitalXCorrelator:1.0");
+
 		m_ptime=new ROuLongLong(getContainerServices()->getName()+":time",getComponent());		
 		m_pbackendName=new ROstring(getContainerServices()->getName()+":backendName",getComponent());
 		m_pbandWidth=new ROdoubleSeq(getContainerServices()->getName()+":bandWidth",getComponent());
@@ -147,13 +149,17 @@ ACS_LOG(LM_FULL_INFO,"HolographyImpl::initialize()",(LM_INFO,"PROPERTY_CREATION"
 		m_ptsys=new ROdoubleSeq(getContainerServices()->getName()+":systemTemperature",getComponent());
 		m_psectionsNumber=new ROlong(getContainerServices()->getName()+":sectionsNumber",getComponent());
 		m_initialized=true;
+                
 // 		m_parser=new CParser<CCommandLine>(10); 
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"HolographyImpl::initialize()");
 		
 		throw dummy;
-	}
+	}catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+                ex.log(LM_DEBUG);
+                throw ex.getComponentErrorsEx();
+        }
 
 }
 
@@ -183,13 +189,11 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 		DWORD sampling_time;
 		sampling_time=m_configuration.getSamplingTime(); 
  		
-//		m_correlator=getContainerServices()->getDefaultComponent<DXC::DigitalXCorrelator>("IDL:alma/DXC/DigitalXCorrelator:1.0");
 
 
 
 		CSenderThread::TSenderParameter *temp;
 
-		m_correlator=getContainerServices()->getDefaultComponent<DXC::DigitalXCorrelator>("IDL:alma/DXC/DigitalXCorrelator:1.0");
 
        if (m_LogObservedPositions)
  		{
@@ -205,7 +209,7 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 			m_senderThread=getContainerServices()->getThreadManager()->create<CSenderThread,CSenderThread::TSenderParameter*>("CORRELATORDATA",temp);
 			m_senderThread->setSleepTime(sampling_time*10000); // the sampling time is read from CDB
 //			m_senderThread->setSleepTime(0); // set to 0
-		        m_senderThread->setResponseTime(50000000);
+//		        m_senderThread->setResponseTime(50000000);
 
 
 
