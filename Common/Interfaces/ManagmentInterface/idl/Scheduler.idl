@@ -249,12 +249,15 @@ module Management {
 		 */
 		void moon() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
-		/**
-		 * Send the antenna off by the specified number of beam sizes
-		 * @param frame coordinate reference frame
-		 * @param beams number of beam sizes applied as offsets
-		 */
-		void goOff(in Antenna::TCoordinateFrame frame,in double beams) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		 /**
+		  * It allows to immediately go to a fixed horizontal position (beampark).
+		  * @param az azimuth in radians. It could be -1, in that case the current position is taken
+		  * @param el elevation in radians. It could be -1, in that case the current position is taken
+		  * @throw CORBA::SystemExcpetion
+		  * @throw ComponentErrors::ComponentErrorsEx
+		  * @throw AntennaErrors::AntennaErrorsEx
+		  */
+		 void goTo(in double az,in double el) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
 		/**
 		 * It allows to abort all the long-run jobs which are presently ongoing, a skydip or a waitUntil operation

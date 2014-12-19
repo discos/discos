@@ -183,9 +183,8 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("radecOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setEquatorialOffsets),2);
 	m_parser->add("lonlatOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setGalacticOffsets),2);
 	m_parser->add("skydipOTF",new function3<CBossCore,non_constant,time_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(boss,&CBossCore::skydip),3);
-	m_parser->add("goTo",new function2<CBossCore,non_constant,void_type,I<azimuth_type<rad,false> >,I<elevation_type<rad,false> > >(boss,&CBossCore::goTo),2);
 	m_parser->add("antennaReset",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::resetFailures),0);
-
+	m_parser->add("goOff",new function2<CBossCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(boss,&CBossCore::goOff),2);
 	m_parser->add("radialVelocity",new function3<CBossCore,non_constant,void_type,I<  basic_type<double,double_converter,VRad_WildCard> >,
 			I<enum_type<ReferenceFrame_converter,Antenna::TReferenceFrame,ReferenceFrame_WildCard> >,
 			I<enum_type<VradDefinition_converter,Antenna::TVradDefinition,VradDefinition_WildCard> >  >(boss,&CBossCore::radialVelocity),3);
@@ -481,22 +480,6 @@ void AntennaBossImpl::goOff(Antenna::TCoordinateFrame frame,CORBA::Double beams)
 		ex.log(LM_DEBUG);
 		throw ex.getAntennaErrorsEx();
 	}		
-}
-
-void AntennaBossImpl::goTo(CORBA::Double az,CORBA::Double el) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
-{
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:goTo");
-	try {
-		resource->goTo(az,el);
-	}
-	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getComponentErrorsEx();
-	}
-	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getAntennaErrorsEx();
-	}
 }
 
 bool AntennaBossImpl::checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,

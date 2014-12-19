@@ -461,16 +461,6 @@ public:
     virtual void goOff(Antenna::TCoordinateFrame frame,CORBA::Double beams) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 
 	/**
-	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go to a fixed horizontal position.
-	 * @param az azimuth in radians
-	 * @param el elevation in radians
- 	 * @throw CORBA::SystemExcpetion
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw AntennaErrors::AntennaErrorsEx
-	 */
-    virtual void goTo(CORBA::Double az,CORBA::Double el) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
-
-	/**
 	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start an On The Fly scan over a central point. The central point is
 	 * given in J2000 equatorial frame and the scan is done along the elevation axis of the telescope.
 	 * @param cRa right ascension of the central point (radians)

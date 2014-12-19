@@ -45,6 +45,7 @@ public:
 	void track(const char *targetName);
 	void moon();
 	void sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section);
+	void goTo(const double& az,const double& el);
 private:
 	Antenna::TTrackingParameters *m_primary;
 	Antenna::TTrackingParameters *m_secondary;

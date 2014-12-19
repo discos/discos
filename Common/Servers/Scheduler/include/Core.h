@@ -93,7 +93,7 @@ public:
 			ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
 			ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::AntennaScanErrorExImpl,
 			ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-			ManagementErrors::AbortedByUserExImpl,ManagementErrors::RecordingAlreadyActiveExImpl);
+			ManagementErrors::AbortedByUserExImpl,ManagementErrors::RecordingAlreadyActiveExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl);
 	
 	/**
 	 * This is a macro operation, it performs a focus scan over the previously commanded source

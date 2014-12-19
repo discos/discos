@@ -16,6 +16,16 @@ void _wait(const double& seconds) throw (ComponentErrors::TimerErrorExImpl,Manag
 void _waitUntil(const ACS::Time& time) throw (ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl);
 
 /**
+ * Make the current thread wait for the telescope to reach the target.
+ */
+void _waitOnSource() throw (ManagementErrors::AbortedByUserExImpl);
+
+/**
+ * Make the current thread wait for the tracking flag to be true.
+ */
+void _waitTracking() throw (ManagementErrors::AbortedByUserExImpl);
+
+/**
  * forces the abort of current (in any) long running operations. If no operation is still ongoing it does nothing.
  */
 void _abort() throw (ManagementErrors::NotAllowedDuringScheduleExImpl);
@@ -25,11 +35,6 @@ void _abort() throw (ManagementErrors::NotAllowedDuringScheduleExImpl);
  */
 void _nop() const;
 
-/**
- * Make the current thread wait for the tracking flag to be true. It can be used to stop the schedule execution until the telescope is tracking
- */
-void _waitOnSource() const;
-
 /*
  * Starts a longitude OnTheFly scan
  * @param scanFrame select which frame is going to be scanned
@@ -37,7 +42,8 @@ void _waitOnSource() const;
  * @param span duration of the scan
  */
 void _lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /*
  * Starts a latitude OnTheFly scan
@@ -46,18 +52,21 @@ void _lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const
  * @param span duration of the scan
  */
 void _latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /**
  * start the tracking of a source form its catalog identifier
  * @param name of the target
  */
-void _track(const char *targetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+void _track(const char *targetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,
+		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /**
  * starts the tracking of the moon
  */
-void _moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+void _moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /**
  * Starts a sidereal tracking of a source from equatorial coordinates
@@ -68,16 +77,15 @@ void _moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErro
  * @param section required section of the azimuth range
  */
 void _sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section) throw (
-	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+	ManagementErrors::CloseTelescopeScanErrorExImpl);
 
-/*
- * Sends the Antenna off source for a given numeber of beams sizes
- * @param frame reference frame
- * @param beams number of beams sizes to be applied as offset
+
+/**
+ * It sends the telescope to fixed position in the horizontal frame
  */
-void _goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
-		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl);
+void _goTo(const double& azimuth,const double& elevation) throw (ManagementErrors::TelescopeSubScanErrorExImpl,
+		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /**
  * It computes the system temperature.

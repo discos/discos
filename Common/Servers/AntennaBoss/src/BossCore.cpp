@@ -1108,6 +1108,38 @@ void CBossCore::setGalacticOffsets(const double& lonOff,const double& latOff) th
 	setOffsets(lonOff,latOff,Antenna::ANT_GALACTIC); // could throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)	
 }
 
+void CBossCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::NoTargetCommandedYetExImpl)
+{
+	// this is a workaround in order to make sure there is a target already commanded
+	if (m_rawCoordinates.isEmpty()) {
+		_EXCPT(AntennaErrors::NoTargetCommandedYetExImpl,impl,"CBossCore::goOff");
+		throw impl;
+	}
+	double skyOffset=m_FWHM*beams;
+	double lonOff,latOff;
+	if (frame==Antenna::ANT_HORIZONTAL) {
+		if (m_lastEncoderElevation>m_config->getCutOffElevation()) {
+			latOff=skyOffset;
+			lonOff=0.0;
+		}
+		else {
+			latOff=0.0;
+			lonOff=skyOffset;
+		}
+	}
+	else if (frame==Antenna::ANT_EQUATORIAL) {
+		latOff=0.0;
+		lonOff=skyOffset;
+	}
+	else if (frame==Antenna::ANT_GALACTIC) {
+		latOff=0.0;
+		lonOff=skyOffset;
+	}
+	// could throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)
+	setOffsets(lonOff,latOff,frame);
+}
+
 #include "BossCore_startScan.i"
 
 #include "BossCore_prepareScan.i"

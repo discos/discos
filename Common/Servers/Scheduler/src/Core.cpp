@@ -93,7 +93,9 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("tsys",new function1<CCore,non_constant,void_type,O<doubleSeq_type> >(this,&CCore::_callTSys),0);
 	m_parser->add("wait",new function1<CCore,non_constant,void_type,I<double_type> >(this,&CCore::_wait),1);
 	m_parser->add("nop",new function0<CCore,constant,void_type >(this,&CCore::_nop),0);
-	m_parser->add("waitOnSource",new function0<CCore,constant,void_type >(this,&CCore::_waitOnSource),0);
+	m_parser->add("waitOnSource",new function0<CCore,non_constant,void_type >(this,&CCore::_waitOnSource),0);
+	m_parser->add("waitTracking",new function0<CCore,non_constant,void_type >(this,&CCore::_waitTracking),0);
+	m_parser->add("waitUntil",new function1<CCore,non_constant,void_type,I<time_type> >(this,&CCore::_waitUntil),1);
 	m_parser->add("haltSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::_haltSchedule),0);
 	m_parser->add("stopSchedule",new function0<CCore,non_constant,void_type >(this,&CCore::_stopSchedule),0);
 	m_parser->add("startSchedule",new function2<CCore,non_constant,void_type,I<string_type>,I<string_type> >(this,&CCore::_startSchedule),2);
@@ -117,7 +119,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 			I<declination_type<rad,true> >,I<enum_type<AntennaEquinox2String,Antenna::TSystemEquinox > >,
 			I<enum_type<AntennaSection2String,Antenna::TSections> > >(this,&CCore::_sidereal),5);
 	m_parser->add("track",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_track),1);
-	m_parser->add("goOff",new function2<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(this,&CCore::_goOff),2);
+	m_parser->add("goTo",new function2<CCore,non_constant,void_type,I<azimuth_type<rad,false> >,I<elevation_type<rad,false> > >(this,&CCore::_goTo),2);
 	m_parser->add("abort",new function0<CCore,non_constant,void_type >(this,&CCore::_abort),0);
 	m_parser->add("initRecording",new function1<CCore,non_constant,void_type,I<long_type> >(this,&CCore::_initRecording),1);
 	m_parser->add("startRecording",new function2<CCore,non_constant,void_type,I<long_type>,I<interval_type> >(this,&CCore::_startRecording),2);
@@ -137,7 +139,6 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("antennaStop","antenna",1,&CCore::remoteCall);
 	m_parser->add("antennaSetup","antenna",1,&CCore::remoteCall);	
 	m_parser->add("preset","antenna",1,&CCore::remoteCall);
-	m_parser->add("goTo","antenna",1,&CCore::remoteCall);
 	m_parser->add("skydipOTF","antenna",1,&CCore::remoteCall);
 	m_parser->add("bwhm","antenna",1,&CCore::remoteCall);
 	m_parser->add("azelOffsets","antenna",1,&CCore::remoteCall);
@@ -145,6 +146,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("lonlatOffsets","antenna",1,&CCore::remoteCall);
 	m_parser->add("antennaReset","antenna",1,&CCore::remoteCall);
 	m_parser->add("radialVelocity","antenna",1,&CCore::remoteCall);
+	m_parser->add("goOff","antenna",1,&CCore::remoteCall);
 
 	// receivers subsystem
 	m_parser->add("receiversPark","receivers",2,&CCore::remoteCall);
@@ -707,7 +709,8 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 		ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
 		ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
 		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl,
-		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::AbortedByUserExImpl,ManagementErrors::RecordingAlreadyActiveExImpl)
+		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::AbortedByUserExImpl,
+		ManagementErrors::RecordingAlreadyActiveExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
 {
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {
@@ -724,11 +727,8 @@ void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& s
 	//baci::ThreadSyncGuard guard(&m_mutex);
 	// TSYS SCAN
 	ACS_LOG(LM_FULL_INFO,"CCore::crossScan()",(LM_NOTICE,"TSYS_COMPUTATION"));
-
-	//throw (ComponentErrors::CouldntGetComponentExImpl,
-	//			ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-	//			ComponentErrors::UnexpectedExImpl);
-	_goOff(scanFrame,3.0); // go off 3 beans sizes
+	// it calls directly the antennaBoss method
+	goOff(scanFrame,3.0); // go off 3 beams sizes
 	_waitOnSource();
 	_callTSys(tsys);
 	_wait(1.5);

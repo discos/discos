@@ -375,13 +375,16 @@ public:
 	 */
 	virtual void sidereal(const char * targetName,CORBA::Double ra,CORBA::Double dec,Antenna::TSystemEquinox eq,Antenna::TSections section) throw (
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
-	
-	/**
-	 * It sends the antenna out of source for a given offset.
-	 * @param frame coordinate reference frame
-	 * @param beams offset given as a number of beam sizes
+
+    /**
+	 * It allows to immediately go to a fixed horizontal position (beampark).
+	 * @param az azimuth in radians. It could be -1, in that case the current position is taken
+	 * @param el elevation in radians. It could be -1, in that case the current position is taken
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx
 	 */
-    virtual void goOff(Antenna::TCoordinateFrame frame,CORBA::Double beams) throw (ComponentErrors::ComponentErrorsEx,
+    virtual void goTo(CORBA::Double az,CORBA::Double el) throw (ComponentErrors::ComponentErrorsEx,
     		ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
 
 	/**

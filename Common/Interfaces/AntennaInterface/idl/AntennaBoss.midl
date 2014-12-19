@@ -136,7 +136,7 @@ module Antenna {
 		 */
 		boolean secondary;
 		/**
-		 * enable/disable the poinintg corrections....refraction, pointign model. Just for the current scan.
+		 * enable/disable the pointing corrections....refraction, pointign model. Just for the current scan.
 		 */
 		boolean enableCorrection;
 	} TTrackingParameters;
@@ -425,16 +425,6 @@ module Antenna {
 		 * @throw AntennaErrors::AntennaErrorsEx 
 		 */
 		 void goOff(in Antenna::TCoordinateFrame frame,in double beams) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
-
-		 /**
-		  * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go to a fixed horizontal position.
-		  * @param az azimuth in radians
-		  * @param el elevation in radians
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx
-		  */
-		 void goTo(in double az,in double el);
 					
 		/**
 		 * This method is only be used internally. Anyone that needs to know if the telescope

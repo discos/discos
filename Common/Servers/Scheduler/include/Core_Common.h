@@ -65,7 +65,8 @@ ACS::Time startRecording(const ACS::Time& recUt,const long& scanId, const long& 
 /*
  * This method is is the wrap of both <i>checkScan()<i> and the <i>doScan()<i> methods, it takes all the actions to start a subscan.
  * @throw ManagementsErrors::TelescopeSubScanErrorExImpl
- * @throw ManagementsErrors::TargetOrSubscanNotFeasibleImpl)
+ * @throw ManagementsErrors::TargetOrSubscanNotFeasibleImpl
+ * @thorw ManagementErrors::CloseTelescopeScanErrorExImpl
  * @param ut required start time for the scan, it could be zero meaning start as soon as possible. As output argument it returns the true start time
  * @param prim primary scan configuration for the subscan (antenna)
  * @param sec primary scan configuration for the subscan (antenna)
@@ -74,7 +75,17 @@ ACS::Time startRecording(const ACS::Time& recUt,const long& scanId, const long& 
 */
 void startScan(ACS::Time& time,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
 	const MinorServo::MinorServoScan*const servoPar, const Receivers::TReceiversParameters*const recvPar) throw (
-	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl);
+	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+	ManagementErrors::CloseTelescopeScanErrorExImpl);
+
+/*
+ * Sends the Antenna off source for a given number of beams sizes. It calls the corresponding method of the antenna subsystem
+ * @param frame reference frame
+ * @param beams number of beams sizes to be applied as offset
+ */
+void goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
+		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl);
 
 /**
  * This method issues a close to the current subscan and in case waits for this operation to complete

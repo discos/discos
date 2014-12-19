@@ -33,11 +33,21 @@ void CBossCore::copyTrack(Antenna::TTrackingParameters& dest,const Antenna::TTra
 	dest.RadialVelocity=source.RadialVelocity;
 }
 
+void CBossCore::mappingScan(Antenna::TTrackingParameters& scan) const
+{
+	// this is a scan mapping to support goTo (beamPark) with optional parameters
+	// in this case the parameters are azimuth and elevation
+	if ((scan.type==Antenna::ANT_SIDEREAL) && (scan.frame==Antenna::ANT_HORIZONTAL)) {
+		if (scan.parameters[0]<0.0) scan.parameters[0]=m_lastEncoderAzimuth;
+		if (scan.parameters[1]<0.0) scan.parameters[1]=m_lastEncoderElevation;
+	}
+}
+
 Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		bool useInternals,
 		ACS::Time& startUT,
-		const Antenna::TTrackingParameters& prim,
-		const Antenna::TTrackingParameters& sec,
+		const Antenna::TTrackingParameters& _prim,
+		const Antenna::TTrackingParameters& _sec,
 		const TOffset& userOffset,
 		Antenna::TGeneratorType& generatorType,
 		Antenna::TTrackingParameters& lastPar,
@@ -60,7 +70,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 	double latOffTmp,lonOffTmp;
 	TOffset scanOffTmp(0.0,0.0,Antenna::ANT_HORIZONTAL);
 	Antenna::TCoordinateFrame offFrameTmp;
-	Antenna::TTrackingParameters primary,secondary;
+	Antenna::TTrackingParameters primary,secondary,prim,sec;
 	double secRa,secDec,secLon,secLat,secVrad;
 	Antenna::TReferenceFrame secVelFrame;
 	Antenna::TVradDefinition secVelDef;
@@ -71,6 +81,11 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 	
 	Antenna::EphemGenerator_var currentGenerator;
 	Antenna::EphemGenerator_var currentGeneratorFlux;
+
+	// this is a workaround in order to preserve the input arguments before mappingScan
+	copyTrack(prim,_prim);
+	copyTrack(sec,_sec);
+	mappingScan(prim);
 
 	// let's save the primary and secondary tracks information.
 	copyTrack(primary,prim);

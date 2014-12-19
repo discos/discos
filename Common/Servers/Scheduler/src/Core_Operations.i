@@ -67,19 +67,37 @@ void CCore::_nop() const
 	return;
 }
 
-void CCore::_waitOnSource() const
+void CCore::_waitOnSource() throw (ManagementErrors::AbortedByUserExImpl)
 {
-	while (!isTracking()) {
-		/*********************************************************/
-		// TO BE CORRECTED, USE THE IRA LIBRARY FUNCTION
-		/********************************************************/
+	m_abortCurrentOperation=false;
+	while (!m_isAntennaTracking) {
+		if (m_abortCurrentOperation) {
+			m_abortCurrentOperation=false;
+			_EXCPT(ManagementErrors::AbortedByUserExImpl,dummy,"CCore::_waitOnSource()");
+			dummy.setOperation("wait for source tracking");
+			throw dummy;
+		}
+		IRA::CIRATools::Wait(25000);
+	}
+}
 
-		_wait(0.1);
+void CCore::_waitTracking() throw (ManagementErrors::AbortedByUserExImpl)
+{
+	m_abortCurrentOperation=false;
+	while (!isTracking()) {
+		if (m_abortCurrentOperation) {
+			m_abortCurrentOperation=false;
+			_EXCPT(ManagementErrors::AbortedByUserExImpl,dummy,"CCore::_waitTracking()");
+			dummy.setOperation("wait for telescope tracking");
+			throw dummy;
+		}
+		IRA::CIRATools::Wait(25000);
 	}
 }
 
 void CCore::_lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -94,7 +112,7 @@ void CCore::_lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& spa
 }
 
 void CCore::_latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -108,7 +126,8 @@ void CCore::_latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& spa
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_track(const char *targetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+void CCore::_track(const char *targetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -122,7 +141,8 @@ void CCore::_track(const char *targetName) throw (ManagementErrors::TelescopeSub
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+void CCore::_moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -137,7 +157,7 @@ void CCore::_moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,Managem
 }
 
 void CCore::_sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section) throw (
-	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl)
+	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -151,7 +171,22 @@ void CCore::_sidereal(const char * targetName,const double& ra,const double& dec
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
+void CCore::_goTo(const double& azimuth,const double& elevation) throw (ManagementErrors::TelescopeSubScanErrorExImpl,
+		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	ACS::Time startTime=0; // start asap
+	Antenna::TTrackingParameters primary,secondary;
+	MinorServo::MinorServoScan servo;
+	Receivers::TReceiversParameters receievers;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	binder.goTo(azimuth,elevation);
+	startTime=0; // it means start as soon as possible
+	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	m_subScanEpoch=startTime;
+}
+
+/*void CCore::_goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
@@ -160,7 +195,7 @@ void CCore::_goOff(const Antenna::TCoordinateFrame& frame,const double& beams) t
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
 			m_subScanEpoch=0;
-			m_antennaBoss->goOff(frame,beams); // go off 3 beam sizes
+			m_antennaBoss->goOff(frame,beams);
 			clearAntennaTracking();
 		}
 		else {
@@ -188,7 +223,7 @@ void CCore::_goOff(const Antenna::TCoordinateFrame& frame,const double& beams) t
 		m_antennaBossError=true;
 		throw impl;
 	}
-}
+}*/
 
 void CCore::_chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl)
 {

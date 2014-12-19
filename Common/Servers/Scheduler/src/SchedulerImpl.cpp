@@ -450,11 +450,11 @@ void SchedulerImpl::sidereal(const char * targetName,CORBA::Double ra,CORBA::Dou
 	}
 }
 
-void SchedulerImpl::goOff(Antenna::TCoordinateFrame frame,CORBA::Double beams) throw (ComponentErrors::ComponentErrorsEx,
+void SchedulerImpl::goTo(CORBA::Double az,CORBA::Double el) throw (ComponentErrors::ComponentErrorsEx,
 		ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
 	try {
-		m_core->_goOff(frame,beams);
+		m_core->_goTo(az,el);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

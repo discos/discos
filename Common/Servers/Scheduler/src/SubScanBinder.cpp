@@ -142,6 +142,27 @@ void CSubScanBinder::track(const char *targetName)
 	// The other subsystems can stay with defaults
 }
 
+void CSubScanBinder::goTo(const double& az,const double& el)
+{
+	m_secondary->secondary=false; m_secondary->paramNumber=0; m_secondary->applyOffsets=false;
+	m_secondary->type=Antenna::ANT_NONE; m_secondary->enableCorrection=true;
+	m_primary->type=Antenna::ANT_SIDEREAL;
+	m_primary->parameters[0]=az;
+	m_primary->parameters[1]=el;
+	m_primary->paramNumber=2;
+	m_primary->frame=Antenna::ANT_HORIZONTAL;
+	m_primary->equinox=Antenna::ANT_APPARENT;
+	m_primary->section=Antenna::ACU_NEUTRAL;
+	m_primary->targetName=CORBA::string_dup("BeamPark");
+	m_primary->secondary=false;
+	m_primary->applyOffsets=false;
+	m_primary->enableCorrection=false;
+    m_servo->is_empty_scan=true;
+    m_servo->axis_code=CORBA::string_dup("");
+    m_servo->range=0;
+    m_servo->total_time=0;
+}
+
 void CSubScanBinder::init()
 {
 		m_primary->targetName=CORBA::string_dup("");;

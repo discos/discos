@@ -134,45 +134,19 @@ public:
 			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 
 	/**
-	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go off source along a given frame.
+	 * It allows to immediately go off source along a given frame.
 	 * The Offset is always done in longitude a part the case
 	 * of horizontal frame. In that case if the elevation is above a cut off limit the offset is done in latitude.
 	 * @param frame frame involved for the offset
 	 * @param beams number of beams to be applied as offset
-	 * @throw ComponentErrors::CouldntReleaseComponentExImpl
-	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	 * @throw ComponentErrors::CORBAProblemExImpl
-	 * @throw ComponentErrors::UnexpectedExImp
-	 * @throw ComponentErrors::CouldntCallOperationExImpl
-	 * @throw ComponentErrors::OperationErrorExImpl
-	 * @throw AntennaErrors::ScanErrorExImpl
-	 * @throw AntennaErrors::SecondaryScanErrorExImpl 
-	 * @throw AntennaErrors::MissingTargetExImp
-	 * @throw AntennaErrors::LoadGeneratorErrorExImpl 
+	 * @throw ComponentErrors::UnexpectedExImpl
+	 * @throw AntennaErrors::NoTargetCommandedYetExImpl
 	 */
-    void goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
-			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
-	
-	/**
-	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go a fixed horizontal position
-	 * @param az azimuth position (rad)
-	 * @param el elevation position (rad)
-	 * @thorw ComponentErrors::CouldntReleaseComponentExImpl
-	 * @throw ComponentErrors::CouldntGetComponentExImpl
-	 * @throw ComponentErrors::CORBAProblemExImpl
-	 * @throw ComponentErrors::UnexpectedExImp
-	 * @throw ComponentErrors::CouldntCallOperationExImpl
-	 * @throw ComponentErrors::OperationErrorExImpl
-	 * @throw AntennaErrors::ScanErrorExImpl
-	 * @throw AntennaErrors::SecondaryScanErrorExImpl
-	 * @throw AntennaErrors::MissingTargetExImp
-	 * @throw AntennaErrors::LoadGeneratorErrorExImpl
-	 */
-    void goTo(const double& az,const double& el) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
-			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
-	
+	void goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::UnexpectedExImpl,
+			ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::NoTargetCommandedYetExImpl);
+
+
 	/**
 	 * Immediately stops the antenna tracking and stops the mount, the ephemeris generator is also released.
 	 * @throw ComponentErrors::UnexpectedExImpl
@@ -1017,8 +991,8 @@ private:
 	 * This private function will configure the scan into the given generator according the scan parameters and type.
 	 * @param useInternals this flag is for internal use, if true the generator is allocated by duplicating the internal generator references
 	 * @param startUt the scan is required to start at the given time (if zero it can be reset to the estimated start Ut time).
-	 * @param prim scan parameters
-	 * @param sec secondary scan parameters
+	 * @param _prim scan parameters
+	 * @param _sec secondary scan parameters
 	 * @param userOffset current user offsets
 	 * @param generatorType type of the returned generator
 	 * @param lastPar stores the parameters of the last commanded scan
@@ -1037,7 +1011,7 @@ private:
 	 * @param generatorFlux reference to the generator in charge of doing the flux computation
 	 * @return the reference of the current generator, the caller must free it
 	 */
-	Antenna::EphemGenerator_ptr prepareScan(bool useInternals,ACS::Time& startUT,const Antenna::TTrackingParameters& prim,const Antenna::TTrackingParameters& sec,
+	Antenna::EphemGenerator_ptr prepareScan(bool useInternals,ACS::Time& startUT,const Antenna::TTrackingParameters& _prim,const Antenna::TTrackingParameters& _sec,
 			const TOffset& userOffset,Antenna::TGeneratorType& generatorType,Antenna::TTrackingParameters& lastPar,Antenna::TSections& section,double& ra,double& dec,double& lon,
 			double& lat,double& vrad,Antenna::TReferenceFrame& velFrame,Antenna::TVradDefinition& velDef,ACS::Time& timeToStop,IRA::CString& sourceName,TOffset& scanOffset,
 			Management::TScanAxis& axis,Antenna::EphemGenerator_out generatorFlux) throw (ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::UnexpectedExImpl,
@@ -1070,6 +1044,8 @@ private:
 	void addOffsets(double &lon,double& lat,Antenna::TCoordinateFrame& frame,const TOffset& userOffset,const TOffset& scanOffset) const;
 	
 	void copyTrack(Antenna::TTrackingParameters& dest,const Antenna::TTrackingParameters& source,bool copyOffs=true) const;
+
+	void mappingScan(Antenna::TTrackingParameters& scan) const;
 };
 
 
