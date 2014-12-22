@@ -11,7 +11,6 @@
              DataDir="/archive/data/"
              SystemDataDir="/archive/auxiliary/"
              LogDir="/archive/logs/"
-	     	 SystemLogDir="/archive/events/"
              ProceduresLocation="Procedures"
              DefaultProceduresFile="StationProcedures"
              RepetitionCacheTime="2000000"
