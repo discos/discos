@@ -307,6 +307,10 @@ module MinorServo {
          * ("SRP_XT", "SRP_YT", "SRP_ZT", "SRP_XR", "SRP_YR", "SRP_ZR", "GFR_ZR")
          * For the CCB configuration: 
          * ("SRP_XT", "SRP_YT", "SRP_ZT", "SRP_XR", "SRP_YR", "SRP_ZR", "M3R_ZR")
+         * For Medicina Secondary Focus:
+         * ("X", "Y", "Z", "THETA_X", "THETA_Y")
+         * For Medicina Primary Focus
+         * ("YP", "ZP")
          * @param units a sequence of strings, each one is the unit of the corresponding axis.
          * For instance: ("mm", "mm", "mm", "degree", "degree", "degree", "mm")
          * @throw MinorServoErrors::ConfigurationErrorEx

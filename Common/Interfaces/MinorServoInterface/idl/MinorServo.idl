@@ -16,6 +16,7 @@
 
 #pragma prefix "alma"
 
+//TODO: this code is very SRT specific and should be moved into SRT
 
 module MinorServo {
 
