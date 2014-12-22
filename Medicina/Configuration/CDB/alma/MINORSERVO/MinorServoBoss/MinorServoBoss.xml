@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   Authors: 
+       Marco Bartolini bartolini@ira.inaf.it
+-->
+
+<MinorServoBoss
+    xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    actionThreadStackSize="2048"
+    monitoringThreadStackSize="4096"
+    
+    server_ip = "192.168.51.30"
+>
+    <status description="The summary status of MinorServoBoss"/>
+    <actualSetup description="Mnemonic code that defines a setup" />
+    <ready description="servo is ready to receive commands" />
+    <starting description="starting a setup" />
+    <asConfiguration description="Active surface configuration always off" />
+    <elevationTrack description="servo is tracking current elevation" />
+    <scanActive description="servo is performing a scan operation" />
+    <scanning description="servo is performing a scan operation" />
+              
+    <!--
+   MinorServoBoss Verbose Status (ROpattern)
+    <verbose_status
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServoBoss verbose status" 
+        format="I don't know"
+        units="none"
+        resolution="65535"
+        alarm_mask="1"
+        alarm_trigger="0"
+        alarm_timer_trig="0"
+        bitDescription="Ok, Tracking, Configuring, Parking, Parked, Warning, Failure"
+        whenSet="3,3,3,3,3,3,3"
+        whenCleared="0,0,0,0,0,0,0"
+        archive_priority="1"
+        archive_min_int="1"
+        archive_max_int="1"
+        archive_delta="1"
+    />
+    -->
+
+</MinorServoBoss>
