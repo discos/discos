@@ -46,6 +46,13 @@ void CIRATools::getTime(TIMEVALUE& Now)
 	Now.value(TimeUtil::ace2epoch(ACE_OS::gettimeofday()));	
 }
 
+ACS::Time CIRATools::getACSTime()
+{
+    TIMEVALUE now;
+    CIRATools::getTime(now);
+    return now.value().value;
+}
+
 void CIRATools::timeCopy(TIMEVALUE& dst,const TIMEVALUE& src)
 {
 	// EpochHelper.value() should have to have the 'const' qualifiers....that would result in a warning

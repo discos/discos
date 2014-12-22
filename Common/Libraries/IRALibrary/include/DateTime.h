@@ -17,6 +17,8 @@
 #define DATETIME_H
 
 #include <acstimeEpochHelper.h>
+#include "Definitions.h"
+#include "IRATools.h"
 #include "Site.h"
 
 #define DT_SECSPERDAY 86400.0

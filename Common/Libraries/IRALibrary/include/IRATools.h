@@ -26,6 +26,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  15/07/2011	      reviewed the set of CDB function to prevent a memory leakage */
 /* Andrea Orlati(aorlati@ira.inaf.it)  04/09/2012	   added function makeDirectory() and directoryExists() */
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/06/2014	  Function to handle conversions from Reference frame and definition for radial velocity */
+/* Marco Bartolini (bartolini@ira.inaf.it)  18/06/2014	   added function ACS::Time getACSTime() */
 
 
 #include <time.h>
@@ -36,6 +37,9 @@
 #include <acstimeDurationHelper.h>
 #include <maciSimpleClient.h>
 #include <AntennaDefinitionsC.h>
+
+#include "Definitions.h"
+#include "String.h"
 
 /**
  * @mainpage IRALibrary API Documentation
@@ -125,6 +129,11 @@ public:
 	 * @param Now the ACS EpochHelper class that contains the current time
 	*/
 	static void getTime(TIMEVALUE& Now);
+	/**
+	 * Call this function to get the current time.
+	 * @return the ACS::Time variable containing the current time
+	*/
+	static ACS::Time getACSTime();
 	/** 
 	 * This function performs the copy of an epoch
 	 * @param dst destination epoch

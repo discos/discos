@@ -34,9 +34,9 @@ USER_CFLAGS =
 # Includes (.h) files (public only)
 # ---------------------------------
 INCLUDES = Definitions.h String.h IRATools.h Error.h SecureArea.h SerialPort.h Lecom.h \
- Socket.h DataField.h DBTable.h LogFilter.h Site.h DateTime.h SkySource.h TimeTaggedCircularArray.h \
+ Socket.h DataField.h DBTable.h LogFilter.h Site.h DateTime.h Timer.h SkySource.h TimeTaggedCircularArray.h \
  ScheduleTimer.h TimeoutSync.h MicroControllerBoard.h ReceiverControl.h MicroControllerBoardDef.h \
- SourceFlux.h CustomLoggerUtils.h LogDike.h FrequencyTracking.h IRA
+ SourceFlux.h CustomLoggerUtils.h LogDike.h IRA
 
 #
 # Libraries (public and local)
@@ -44,14 +44,14 @@ INCLUDES = Definitions.h String.h IRATools.h Error.h SecureArea.h SerialPort.h L
 LIBRARIES       = IRALibrary
 LIBRARIES_L     =
 IRALibrary_OBJECTS = String IRATools Error SerialPort Lecom Socket DataField DBTable LogFilter \
- Site DateTime SkySource TimeTaggedCircularArray ScheduleTimer TimeoutSync MicroControllerBoard \
+ Site DateTime Timer SkySource TimeTaggedCircularArray ScheduleTimer TimeoutSync MicroControllerBoard \
  ReceiverControl SourceFlux CustomLoggerUtils LogDike FrequencyTracking
 IRALibrary_LIBS = acstime SlaLibrary maciClient
 
 PY_PACKAGES  = IRAPy
 
 EXECUTABLES     = FTrack STrack
-EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike TestTimeTaggedCircularArray TestFlux
+EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike TestTimeTaggedCircularArray TestFlux TestTimer
 
 #
 # <brief description of xxxxx program>
@@ -81,6 +81,9 @@ TestTimeTaggedCircularArray_LIBS = IRALibrary
 
 TestFlux_OBJECTS = TestSourceFlux
 TestFlux_LIBS = IRALibrary
+
+TestTimer_OBJECTS = TestTimer
+TestTimer_LIBS = IRALibrary
 
 FTrack_OBJECTS = TestFrequency FrequencyTracking 
 FTrack_LIBS = SlaLibrary IRALibrary
