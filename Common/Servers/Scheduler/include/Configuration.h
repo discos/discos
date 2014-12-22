@@ -125,7 +125,7 @@ public:
 	/**
 	 * @return the path to the directory where to store the system stores the system log files
 	 */
-	const IRA::CString& getSystemLogDirectory() const { return m_systemLogDir; }
+	//const IRA::CString& getSystemLogDirectory() const { return m_systemLogDir; }
 	/**
 	 * @return the sleep time between two execution of the schedule executor thread (microseconds)
 	 */ 
@@ -178,7 +178,7 @@ private:
 	IRA::CString m_defaultBackendInst;
 	IRA::CString m_defaultDataReceiverInst;
 	IRA::CString m_logDir;
-	IRA::CString m_systemLogDir;
+	//IRA::CString m_systemLogDir;
 	IRA::CString m_custoLoggerComp;
 	IRA::CString m_weatherComp;
 	long m_repetitionCacheTime;

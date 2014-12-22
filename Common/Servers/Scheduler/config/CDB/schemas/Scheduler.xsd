@@ -98,8 +98,6 @@
 		<xs:attribute name="ProceduresLocation" type="xs:string" use="required" />
 		<!-- user log files directory -->
 		<xs:attribute name="LogDir" type="xs:string" use="required" />
-		<!-- system log files directory -->
-		<xs:attribute name="SystemLogDir" type="xs:string" use="required" />
 		<!-- Name of the procedure file table (inside the CDB) that will be loaded at startup -->
 		<xs:attribute name="DefaultProceduresFile" type="xs:string" use="required" />		
 		<!-- the cache time (microseconds) for logging repetition filter -->
