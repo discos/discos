@@ -2,7 +2,7 @@
 #define _BOSS_CORE_STARTSCANWRAPPERS_I_
 
 
-ACS::Time  CBossCore::skydip(const double& el1, const double& el2,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+/*ACS::Time  CBossCore::skydip(const double& el1, const double& el2,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
 		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
 {
@@ -48,6 +48,6 @@ ACS::Time  CBossCore::skydip(const double& el1, const double& el2,const ACS::Tim
 	//in this case we skip the scan check because we want to pass over the scan suggested limits.....
 	startScan(startUt,par,second);
 	return startUt;
-}
+}*/
 
 #endif

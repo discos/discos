@@ -446,7 +446,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw AntennaErrors::AntennaErrorsEx
 	*/
-	virtual ACS::Time skydipScan(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
+	//virtual ACS::Time skydipScan(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException);
 		
 	/**
 	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go offsource along a given frame.

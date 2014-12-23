@@ -126,6 +126,22 @@ void CCore::_latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& spa
 	m_subScanEpoch=startTime;
 }
 
+void CCore::_skydipOTF(const double& el1,const double& el2,const ACS::TimeInterval& duration) throw (
+		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	ACS::Time startTime=0; // start asap
+	Antenna::TTrackingParameters primary,secondary;
+	MinorServo::MinorServoScan servo;
+	Receivers::TReceiversParameters receievers;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	binder.skydip(el1,el2,duration,NULL);
+	startTime=0; // it means start as soon as possible
+	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	m_subScanEpoch=startTime;
+}
+
 void CCore::_track(const char *targetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
 		ManagementErrors::CloseTelescopeScanErrorExImpl)
 {

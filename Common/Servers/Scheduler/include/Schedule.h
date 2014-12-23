@@ -42,6 +42,21 @@ public:
 	~CSubScanBinder();
 	void lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
 	void latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
+	void addOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame);
+	void OTF(const IRA::CString& target,
+			const double& lon1,const double& lat1,const double& lon2,const double& lat2,
+			const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
+			const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDescription& description,
+			const Antenna::TsubScanDirection& direction,const ACS::TimeInterval& subScanDuration);
+
+	void OTFC(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
+		const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDirection& direction,
+		const double& span,const ACS::TimeInterval& subScanDuration,const Antenna::TTrackingParameters * const sec);
+
+	void skydip(const double& lat1,const double& lat2,const ACS::TimeInterval& duration,
+			const Antenna::TTrackingParameters * const sec);
+
+
 	void track(const char *targetName);
 	void moon();
 	void sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section);
@@ -52,6 +67,8 @@ private:
 	MinorServo::MinorServoScan *m_servo;
 	Receivers::TReceiversParameters *m_receievers;
 	void init();
+	void addSecondaryAntennaTrack(const Antenna::TTrackingParameters * const sec);
+
 };
 
 /**

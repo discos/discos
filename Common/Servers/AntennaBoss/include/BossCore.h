@@ -129,9 +129,9 @@ public:
 	 * @throw AntennaErrors::MissingTargetExImp
 	 * @throw AntennaErrors::LoadGeneratorErrorExImpl
 	*/
-	ACS::Time skydip(const double& el1, const double& el2,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+	/*ACS::Time skydip(const double& el1, const double& el2,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
-			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
+			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);*/
 
 	/**
 	 * It allows to immediately go off source along a given frame.

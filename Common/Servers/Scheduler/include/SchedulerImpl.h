@@ -322,7 +322,6 @@ public:
 	 * @param scanFrame frame along which doing the scan
 	 * @param span total lenght of the scan (radians)
 	 * @param duration time required by the scan to complete
-	 * @return the expected start time of the scan, if a the target is not visible a zero is returned
  	 * @throw CORBA::SystemExcpetion
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
@@ -337,12 +336,24 @@ public:
 	 * @param scanFrame frame along which doing the scan
 	 * @param span total lenght of the scan (radians)
 	 * @param duration time required by the scan to complete
-	 * @return the expected start time of the scan, if a the target is not visible a zero is returned
  	 * @throw CORBA::SystemExcpetion
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
 	 */
     virtual void latOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It allows to move the antenna along the elevation in order to perform a skydip scan. The scan will be set according the
+	 * currently tracked source.
+	 * @param el1 first elevation limit of the scan
+	 * @param el2 second elevation limit of the scan
+	 * @param duration duration of the scan in 10^-7 seconds, the combination of duration and span gives the scan velocity
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void skydipOTF(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
 
 	/**

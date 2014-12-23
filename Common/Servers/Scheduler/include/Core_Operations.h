@@ -56,6 +56,16 @@ void _latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const
 		ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /**
+ * Starts a skydip OnTheFly scan
+ * @param el1 first elevation border of the scan
+ * @param el2 second elevation border of the scan
+ * @param duration duration of the scan
+ */
+void _skydipOTF(const double& el1,const double& el2,const ACS::TimeInterval& duration) throw (
+		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl);
+
+/**
  * start the tracking of a source form its catalog identifier
  * @param name of the target
  */

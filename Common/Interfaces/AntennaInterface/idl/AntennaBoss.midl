@@ -412,7 +412,7 @@ module Antenna {
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw AntennaErrors::AntennaErrorsEx
 		 */
-		ACS::Time skydipScan(in double el1,in double el2,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		//ACS::Time skydipScan(in double el1,in double el2,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 
 		/*
 		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go off source along a given frame.

@@ -404,6 +404,22 @@ void SchedulerImpl::latOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double spa
 	}
 }
 
+void SchedulerImpl::skydipOTF(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (
+		ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->_skydipOTF(el1,el2,duration);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
 void SchedulerImpl::track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
 	try {

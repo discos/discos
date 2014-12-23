@@ -198,8 +198,8 @@ module Management {
 		 * If no target is commanded yet an error is thrown. The current target is used as the central point of the scan (taken from the J2000 equatorial).
 		 * If the target is not above the horizon an error is risen.
 		 * @param scanFrame this indicates the frame along which the scan is done
-		 * @param span distance or lenght of the scan (radians)
-		 * @param duration duration of the scan in seconds, the combinaiton of duration and span gives the scan velocity
+		 * @param span distance or length of the scan (radians)
+		 * @param duration duration of the scan in 10^-7 seconds, the combination of duration and span gives the scan velocity
 		 * @throw CORBA::SystemExcpetion
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw ManagementErrors::ManagementErrorsEx
@@ -207,17 +207,28 @@ module Management {
 		void lonOTF(in Antenna::TCoordinateFrame scanFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
 		/**
-		 * It allows to immediately start a latitude On The Fly to Antenna. The will be scan over the currently commanded target.
+		 * It allows to immediately start a latitude On The Fly to Antenna. The scan will be over the currently commanded target.
 		 * If no target is commanded yet an error is thrown. The current target is used as the central point of the scan (taken from the J2000 equatorial).
 		 * If the target is not above the horizon an error is risen.
 		 * @param scanFrame this indicates the frame along which the scan is done
-		 * @param span distance or lenght of the scan (radians)
-		 * @param duration duration of the scan in seconds, the combinaiton of duration and span gives the scan velocity
+		 * @param span distance or length of the scan (radians)
+		 * @param duration duration of the scan in 10^-7 seconds, the combination of duration and span gives the scan velocity
 		 * @throw CORBA::SystemExcpetion
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw ManagementErrors::ManagementErrorsEx
 		 */
 		void latOTF(in Antenna::TCoordinateFrame scanFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It allows to move the antenna along the elevation in order to perform a skydip scan. The scan will be set according the
+		 * currently tracked source.
+		 * @param el1 first elevation limit of the scan
+		 * @param el2 second elevation limit of the scan
+		 * @param duration duration of the scan in 10^-7 seconds, the combination of duration and span gives the scan velocity
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void skydipOTF(in double el1,in double el2,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
 		/**
 		 * It allows to immediately start tracking a given sidereal target given its equatorial coordinates.
