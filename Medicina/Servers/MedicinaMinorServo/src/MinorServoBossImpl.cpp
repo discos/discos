@@ -29,7 +29,8 @@ MinorServoBossImpl::MinorServoBossImpl(
     // m_verbose_status(this),
     m_nchannel(NULL),
     m_publisher_thread_ptr(NULL),
-    m_tracking_thread_ptr(NULL)
+    m_tracking_thread_ptr(NULL),
+    m_position_monitoring_thread_ptr(NULL)
 {   
     AUTO_TRACE("MinorServoBossImpl::MinorServoBossImpl()");
     m_commanded_conf = "none";
@@ -194,6 +195,13 @@ MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImpl)
     catch(...) {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "Error: MSBossPublisher already exists", true);
     }
+    m_position_monitoring_thread_ptr = getContainerServices()->
+                                       getThreadManager()->
+                                       create<PositionMonitoringThread, MedMinorServoControl_sp>
+                                       (POSITION_MONITORING_THREAD_NAME, m_control);
+    m_position_monitoring_thread_ptr->resume();
+    CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::execute",
+              (LM_DEBUG, "Position Monitoring Thread started"));
     startPropertiesMonitoring();
 }
 
@@ -212,6 +220,10 @@ MinorServoBossImpl::cleanUp()
     if (m_publisher_thread_ptr != NULL) {
         m_publisher_thread_ptr->suspend();
         m_publisher_thread_ptr->terminate();
+    }
+    if (m_position_monitoring_thread_ptr != NULL) {
+        m_position_monitoring_thread_ptr->suspend();
+        m_position_monitoring_thread_ptr->terminate();
     }
     if(m_nchannel !=NULL ) {
         m_nchannel->disconnect();
@@ -235,6 +247,10 @@ MinorServoBossImpl::aboutToAbort()
     if (m_publisher_thread_ptr != NULL) {
         m_publisher_thread_ptr->suspend();
         m_publisher_thread_ptr->terminate();
+    }
+    if (m_position_monitoring_thread_ptr != NULL) {
+        m_position_monitoring_thread_ptr->suspend();
+        m_position_monitoring_thread_ptr->terminate();
     }
     if(m_nchannel != NULL ) {
         m_nchannel->disconnect();
@@ -391,17 +407,16 @@ ACS::doubleSeq *
 MinorServoBossImpl::getAxesPosition(ACS::Time time) 
     throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx, ComponentErrors::UnexpectedEx)
 {
-
     //TODO: substitue ConfigurationError with something state-related
     if(!isReady())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "getAxesPosition(): the system is not ready", true);
-
-    //vector<string> servosToMove = m_configuration->getServosToMove();
-
     ACS::doubleSeq_var positions_res = new ACS::doubleSeq;
     vector<double> vpositions;
-
-    MedMinorServoPosition position = m_control->get_position_at(time);
+    MedMinorServoPosition position;
+    if(time == 0)
+        position = m_control->get_position();
+    else
+        position = m_control->get_position_at(time);
     vpositions = position.get_axes_positions();
     positions_res->length(vpositions.size());
     for(size_t i=0; i<vpositions.size(); i++)

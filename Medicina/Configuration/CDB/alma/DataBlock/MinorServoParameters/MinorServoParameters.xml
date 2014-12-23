@@ -13,20 +13,20 @@
         <primary>0</primary>
         <trackel>1</trackel>
         <Xaxis>mm,-70.0,70.0,15,0,0,0,0</Xaxis>
-        <Yaxis>mm,-70.0,70.0,-38.365,0,0,0,0</Yaxis>
-        <Zaxis>mm,-70.0,70.0,0,0,0,0,0</Zaxis>
-        <THETAXaxis>deg,-5,5.0,0,0,0,0,0</THETAXaxis>
-        <THETAYaxis>deg,-5,5.0,0,0,0,0,0</THETAYaxis>
+        <Yaxis>mm,-70.0,70.0,-37.9929,0,0,0,0</Yaxis>
+        <Zaxis>mm,-70.0,70.0,14.4818,0,0,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0,-0.0150346,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,-0.0486663,0,0,0,0</THETAYaxis>
     </MinorServo>
     <MinorServo>
         <code>CCC</code>
         <primary>0</primary>
         <trackel>1</trackel>
-        <Xaxis>mm,-70.0,70.0,-20,0,0,0,0</Xaxis>
-        <Yaxis>mm,-70.0,70.0,+40,0,0,0,0</Yaxis>
-        <Zaxis>mm,-70.0,70.0,0,0,0,0,0</Zaxis>
-        <THETAXaxis>deg,-5,5.0,0,0,0,0,0</THETAXaxis>
-        <THETAYaxis>deg,-5,5.0,0,0,0,0,0</THETAYaxis>
+        <Xaxis>mm,-70.0,70.0,-7.62,0,0,0,0</Xaxis>
+        <Yaxis>mm,-70.0,70.0,-18.2314,0,0,0,0</Yaxis>
+        <Zaxis>mm,-70.0,70.0,2.18271,0,0,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0,-0.0736767,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,0.0199275,0,0,0,0</THETAYaxis>
     </MinorServo>
     <!--
     <MinorServo>

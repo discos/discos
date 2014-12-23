@@ -30,7 +30,8 @@ MedMinorServoControl_LIBS   = baci acsnc IRALibrary ManagmentDefinitionsStubs Ma
 MinorServoBossImpl_OBJECTS = MedMinorServoControl MedMinorServoGeometry \
                              MedMinorServoStatus MedMinorServoParameters \
                              MedMinorServoTime MedMinorServoModbus \
-                             ModbusChannel PositionQueue MSBossPublisher \
+                             ModbusChannel PositionQueue \
+                             PositionMonitoringThread MSBossPublisher \
                              MSBossTracker MedMinorServoOffset MinorServoBossImpl
 
 MinorServoBossImpl_LIBS = MinorServoBossStubs \
@@ -41,7 +42,9 @@ MinorServoBossImpl_LIBS = MinorServoBossStubs \
                           ActiveSurfaceBossStubs boost_thread acstime modbus \
                           baci
 
-EXECUTABLES_L     = testclient testgeometry testprimary testsecondary testpassive
+EXECUTABLES_L     = testclient testgeometry testprimary testsecondary testpassive real_to_virtual
+real_to_virtual_OBJECTS = real_to_virtual testutils MedMinorServoGeometry MedMinorServoTime
+real_to_virtual_LIBS = IRALibrary
 testclient_OBJECTS = testclient testutils MedMinorServoModbus ModbusChannel MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
 testclient_LIBS = IRALibrary boost_thread modbus 
 testprimary_OBJECTS = testprimary testutils MedMinorServoModbus ModbusChannel MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue

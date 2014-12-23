@@ -1,19 +1,32 @@
 #include "PositionMonitoringThread.hpp"
 
 PositionMonitoringThread::PositionMonitoringThread(const ACE_CString& name, 
-                                const int sleepTime,
-                                PositionQueue* positions,
-                                MedMinorServoModbus_sp channel) : 
-    ACS::Thread(name, sleepTime),
-    _positions(positions),
-    _channel(channel)
-    {}
+                         MedMinorServoControl_sp control,
+                         const ACS::TimeInterval& responseTime,
+                         const ACS::TimeInterval& sleepTime,
+                         const bool del
+                         ) : ACS::Thread(name, responseTime, sleepTime, del),
+                             m_control(control)
+{}
+
+PositionMonitoringThread::~PositionMonitoringThread(){}
+
+void
+PositionMonitoringThread::onStart(){
+    AUTO_TRACE("PositionMonitoringThread::onStart()");
+}
+
+void
+PositionMonitoringThread::onStop(){
+    AUTO_TRACE("PositionMonitoringThread::onStop()");
+}
 
 void 
 PositionMonitoringThread::runLoop()
 {
-    _actual_status =_modbus->read_status();
-    _actual_position = MedMinorServoGeometry::positionFromAxes(_actual_status);
-    _position_queue.push(_actual_position);
+    m_control->update_position();
+    /*CUSTOM_LOG(LM_FULL_INFO, 
+               "MinorServo::PositionMonitoringThread::runLoop",
+               (LM_DEBUG, "Update current position"));*/
 }
 

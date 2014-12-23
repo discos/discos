@@ -45,6 +45,7 @@
 #include "utils.h"
 #include "MSBossPublisher.h"
 #include "MSBossTracker.hpp"
+#include "PositionMonitoringThread.hpp"
 #include "MedMinorServoParameters.hpp"
 #include "MedMinorServoControl.hpp"
 #include "MedMinorServoGeometry.hpp"
@@ -63,6 +64,7 @@
 
 #define PUBLISHER_THREAD_NAME "MSBossPublisher"
 #define TRACKING_THREAD_NAME "MSBossTracking"
+#define POSITION_MONITORING_THREAD_NAME "PositionMonitoringThread"
 
 using namespace baci;
 using namespace std;
@@ -393,7 +395,7 @@ public:
       * @throw MinorServoErrors::ConfigurationErrorEx if the system is not configured
       * @throw ComponentErrors::UnexpectedEx
       */
-     ACS::doubleSeq * getAxesPosition(ACS::Time) 
+     ACS::doubleSeq * getAxesPosition(ACS::Time = 0) 
          throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx, ComponentErrors::UnexpectedEx);
 
      /** Set the elevation tracking flag to "ON" or "OFF"
@@ -455,6 +457,7 @@ private:
 
     MSBossPublisher *m_publisher_thread_ptr;
     MSBossTracker *m_tracking_thread_ptr;
+    PositionMonitoringThread *m_position_monitoring_thread_ptr;
 	 
 	/** This is the pointer to the notification channel */
 	nc::SimpleSupplier *m_nchannel;
