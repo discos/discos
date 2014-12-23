@@ -44,9 +44,11 @@
 #include <IRA>
 #include "utils.h"
 #include "MSBossPublisher.h"
+#include "MSBossTracker.hpp"
 #include "MedMinorServoParameters.hpp"
 #include "MedMinorServoControl.hpp"
 #include "MedMinorServoGeometry.hpp"
+#include "MedMinorServoOffset.hpp"
 #include "MedMinorServoStatus.hpp"
 #include "DevIOActualSetup.h"
 #include "DevIOASConfiguration.h"
@@ -60,6 +62,7 @@
 //#include "MSBossConfiguration.h"
 
 #define PUBLISHER_THREAD_NAME "MSBossPublisher"
+#define TRACKING_THREAD_NAME "MSBossTracking"
 
 using namespace baci;
 using namespace std;
@@ -413,6 +416,7 @@ private:
     MedMinorServoConfiguration m_config;
     MedMinorServoParameters *m_actual_config;
     MedMinorServoStatus m_servo_status;
+    MedMinorServoOffset m_offset;
 
     IRA::CString m_server_ip;
     string m_commanded_conf;
@@ -450,6 +454,7 @@ private:
     //ScanThread *m_scan_thread_ptr;
 
     MSBossPublisher *m_publisher_thread_ptr;
+    MSBossTracker *m_tracking_thread_ptr;
 	 
 	/** This is the pointer to the notification channel */
 	nc::SimpleSupplier *m_nchannel;

@@ -17,7 +17,7 @@ class DevIOActualSetup: public virtual DevIO<ACE_CString>
 {
 public:
 
-	DevIOActualSetup(MedMinorServoParameters *conf): m_configuration(conf) {
+	DevIOActualSetup(MedMinorServoParameters **conf): m_configuration(conf) {
 		AUTO_TRACE("DevIOActualSetup::DevIOActualSetup()");
 	}
 
@@ -32,8 +32,8 @@ public:
 	ACE_CString read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
 		AUTO_TRACE("DevIOActualSetup::read()");
 		timestamp=getTimeStamp();
-        if(m_configuration){
-		    return (m_configuration->get_name()).c_str();
+        if(*m_configuration){
+		    return ((*m_configuration)->get_name()).c_str();
         }else{
             return "unconfigured";
         }
@@ -44,7 +44,7 @@ public:
 	}
 
 private:
-	MedMinorServoParameters *m_configuration;
+	MedMinorServoParameters **m_configuration;
 };
 
 

@@ -30,7 +30,8 @@ MedMinorServoControl_LIBS   = baci acsnc IRALibrary ManagmentDefinitionsStubs Ma
 MinorServoBossImpl_OBJECTS = MedMinorServoControl MedMinorServoGeometry \
                              MedMinorServoStatus MedMinorServoParameters \
                              MedMinorServoTime MedMinorServoModbus \
-                             ModbusChannel PositionQueue MSBossPublisher MinorServoBossImpl
+                             ModbusChannel PositionQueue MSBossPublisher \
+                             MSBossTracker MedMinorServoOffset MinorServoBossImpl
 
 MinorServoBossImpl_LIBS = MinorServoBossStubs \
                           ManagmentDefinitionsStubs ManagementErrors \

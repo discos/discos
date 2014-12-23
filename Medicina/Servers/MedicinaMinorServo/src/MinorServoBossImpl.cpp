@@ -17,6 +17,7 @@ MinorServoBossImpl::MinorServoBossImpl(
     CharacteristicComponentImpl(CompName, containerServices),
     m_services(containerServices),
     m_actual_config(NULL),
+    m_actual_conf("unconfigured"),
     m_status(this),
     m_ready(this),
     m_actualSetup(this),
@@ -26,13 +27,13 @@ MinorServoBossImpl::MinorServoBossImpl(
     m_scanActive(this),
     m_scanning(this),
     // m_verbose_status(this),
-    m_nchannel(NULL)
+    m_nchannel(NULL),
+    m_publisher_thread_ptr(NULL),
+    m_tracking_thread_ptr(NULL)
 {   
     AUTO_TRACE("MinorServoBossImpl::MinorServoBossImpl()");
     m_commanded_conf = "none";
-    //m_tracking_thread_ptr = NULL;
     //m_scan_thread_ptr = NULL;
-    m_publisher_thread_ptr = NULL;
     m_servo_scanned = "none";
     m_parser = new SimpleParser::CParser<MinorServoBossImpl>(this, 10);
 }
@@ -149,7 +150,7 @@ MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImpl)
                   (getContainerServices()->getName()+":ready", getComponent(), \
                    new DevIOReady(&m_servo_status), true);
 		m_actualSetup = new baci::ROstring(getContainerServices()->getName() + ":actualSetup",
-                getComponent(), new DevIOActualSetup(m_actual_config), true);
+                getComponent(), new DevIOActualSetup(&m_actual_config), true);
         m_starting = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
                   (getContainerServices()->getName()+":starting",getComponent(), \
                    new DevIOStarting(&m_servo_status), true);
@@ -179,7 +180,9 @@ MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImpl)
         m_publisher_thread_ptr = NULL;
     }
     try {
-        PublisherThreadParameters thread_params(&m_servo_status, m_nchannel);
+        PublisherThreadParameters thread_params(&m_servo_status, 
+                                                m_nchannel,
+                                                m_control);
         m_publisher_thread_ptr = getContainerServices()->
                                  getThreadManager()->
                                  create<MSBossPublisher, PublisherThreadParameters>
@@ -191,6 +194,7 @@ MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImpl)
     catch(...) {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "Error: MSBossPublisher already exists", true);
     }
+    startPropertiesMonitoring();
 }
 
 void 
@@ -246,6 +250,8 @@ throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx)
     AUTO_TRACE("MinorServoBossImpl::setup()");
     try {
         setupImpl(config);
+        CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::setup",
+                   (LM_NOTICE, "Minor Servo Setup: %s", config));
     }
     catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
         ex.log(LM_DEBUG);
@@ -280,16 +286,18 @@ throw (ManagementErrors::ConfigurationErrorExImpl)
     }else{
         m_servo_status.reset();
         m_servo_status.starting = true;
-        clearUserOffset();
-        clearSystemOffset();
         m_actual_config = &(m_config[std::string(config)]);
         /**
          * Get the setup position at 45 deg
          */
         MedMinorServoPosition setup_position = m_actual_config->get_position();
+        m_offset.initialize(m_actual_config->is_primary_focus());
+        //clearUserOffset();
+        //clearSystemOffset();
         m_control->set_position(setup_position);
         m_servo_status.ready = true;
         m_servo_status.starting = false;
+        m_actual_conf = string(config);
     }
 }
 
@@ -979,7 +987,6 @@ char * MinorServoBossImpl::getScanAxis() {
 
 }
 
-
 void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::ConfigurationErrorEx) 
 {
     if(isStarting())
@@ -988,11 +995,6 @@ void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::Configuration
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is parking.", true);
     if(!isReady())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is not ready.", true);
-    /*
-    int mutex_res = pthread_mutex_trylock(&tracking_mutex); 
-    if(mutex_res != 0) {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is busy.", true);
-    }
 
     if(m_tracking_thread_ptr != NULL) {
         m_tracking_thread_ptr->suspend();
@@ -1000,89 +1002,39 @@ void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::Configuration
         m_tracking_thread_ptr = NULL;
     }
 
+    m_servo_status.elevation_tracking = true;
     try {
-        m_tracking_thread_ptr = getContainerServices()->getThreadManager()->create<TrackingThread,
-            MSBossConfiguration *>("TrackingThread", m_configuration);
+        TrackerThreadParameters params(&m_servo_status,
+                                        m_control,
+                                        &m_actual_config,
+                                        &m_offset,
+                                        m_services);
+
+        m_tracking_thread_ptr = getContainerServices()->
+                                 getThreadManager()->
+                                 create<MSBossTracker, TrackerThreadParameters>
+                                 (TRACKING_THREAD_NAME, params);
     }
     catch(...) {
-        if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "Error in TrackingThread", true);
     }
-
     m_tracking_thread_ptr->resume();
-    if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
-    */
 }
 
 void MinorServoBossImpl::turnTrackingOff() throw (ManagementErrors::ConfigurationErrorEx) 
 {
-    /*
-    int mutex_res = pthread_mutex_trylock(&tracking_mutex); 
-    try {
-        if(mutex_res != 0) {
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: the system is busy.", true);
-        }
-
-        if(m_tracking_thread_ptr != NULL) {
-            m_tracking_thread_ptr->suspend();
-            m_tracking_thread_ptr->terminate();
-            m_tracking_thread_ptr = NULL;
-        }
-        if(isReady()) {
-            string comp_name("SRP");
-            MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-            if(!m_component_refs.count(comp_name)) {
-                try {
-                    component_ref = m_services->getComponent<MinorServo::WPServo>(("MINORSERVO/" + comp_name).c_str());
-                }
-                catch(...) {
-                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: cannot get the SRP component.", true);
-                }
-            }
-            else {
-                component_ref = m_component_refs[comp_name];
-            }
-            try {
-                ACS::doubleSeq positions = m_configuration->getPosition(comp_name, getTimeStamp());
-                // set the position
-                if(positions.length()) {
-                    if(!CORBA::is_nil(component_ref)) {
-                        if(component_ref->isReady())
-                            component_ref->setPosition(positions, NOW);
-                        else {
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::turnTrackingOff(): cannot set the SRP position"));
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::turnTrackingOff(): SRP not ready"));
-                        }
-                    }
-                    else {
-                        THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: cannot set the SRP position.", true);
-                    }
-                }
-                else {
-                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: cannot get the SRP position.", true);
-                }
-            }
-            catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
-                ex.log(LM_DEBUG);
-                throw ex.getConfigurationErrorEx();     
-            }
-            catch(...) {
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOff: cannot set the SRP position.", true);
-            }
-        }
-
-        if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
+    if(m_tracking_thread_ptr != NULL) {
+        m_tracking_thread_ptr->suspend();
+        m_tracking_thread_ptr->terminate();
+        m_tracking_thread_ptr = NULL;
     }
-    catch(...) {
-        if(mutex_res == 0 && pthread_mutex_unlock(&tracking_mutex)); 
-        throw;
-    }
-    */
+    m_servo_status.elevation_tracking = false;
 }
 
 
 void MinorServoBossImpl::clearUserOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx){
-    //clearUserOffset();
+    //TODO: add control and exception
+    m_offset.clearUserOffset();
 }
 
 
@@ -1103,8 +1055,8 @@ void MinorServoBossImpl::clearOffsetsFromOI() throw (MinorServoErrors::Operation
 
 
 void MinorServoBossImpl::clearSystemOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx){
-
-    //clearSystemOffset();
+    //TODO: add control and exception
+    m_offset.clearSystemOffset();
 }
 
 //void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) throw (MinorServoErrors::OperationNotPermittedEx)
@@ -1306,79 +1258,18 @@ void MinorServoBossImpl::setOffsetImpl(string axis_code, const double offset_val
     if(!isReady())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "setOffsetImpl(): the system is not ready", false);
 
-    /*
-    InfoAxisCode info;
-    info = m_configuration->getInfoFromAxisCode(axis_code); // raises ManagementErrors::ConfigurationErrorExImpl
-
-    ACS::doubleSeq offset;
-    offset.length(info.numberOfAxes);
-    ACS::doubleSeq_var actual_offset;
-
-    MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-    if(m_component_refs.count(info.comp_name)) {
-        component_ref = m_component_refs[info.comp_name];
-        if(!CORBA::is_nil(component_ref)) {
-            if(offset_type == "user") {
-                actual_offset = component_ref->getUserOffset();
-                for(size_t i=0; i<offset.length(); i++)
-                    offset[i] = actual_offset[i];
-                offset[info.axis_id] = offset_value;
-                try {
-                    component_ref->setUserOffset(offset);
-                }
-                catch(...) {
-                    THROW_EX(
-                            MinorServoErrors, 
-                            OperationNotPermittedEx, 
-                            string("Cannot set the WPServo user offset."), 
-                            false
-                    );
-                }
-            }
-            else if(offset_type == "system") {
-                actual_offset = component_ref->getSystemOffset();
-                for(size_t i=0; i<offset.length(); i++)
-                    offset[i] = actual_offset[i];
-                offset[info.axis_id] = offset_value;
-                try {
-                    component_ref->setSystemOffset(offset);
-                }
-                catch(...) {
-                    THROW_EX(
-                            MinorServoErrors, 
-                            OperationNotPermittedEx, 
-                            string("Cannot set the WPServo system offset."), 
-                            false
-                    );
-                }
-            }
-            else {
-                THROW_EX(
-                        MinorServoErrors, 
-                        OperationNotPermittedEx, 
-                        string("The offset ") + offset_type + string(" doesn't exist"), 
-                        false
-                );
-            }
-        }
-        else {
-            THROW_EX(
-                    MinorServoErrors, 
-                    OperationNotPermittedEx, 
-                    string("The reference to component ") + info.comp_name + string(" is NULL"), 
-                    false
-            );
-        }
-    }
-    else {
+    int axis_mapping = m_actual_config->getAxisMapping(axis_code);
+    if(axis_mapping < 0)
         THROW_EX(
                 MinorServoErrors, 
                 OperationNotPermittedEx, 
-                string("The component ") + info.comp_name + string(" is not active"), 
+                string("Wrogn offset axis"),
                 false
         );
-    }
-    */
+    if(offset_type == "user")
+        m_offset.setUserOffset(axis_mapping, offset_value);
+    else
+        m_offset.setSystemOffset(axis_mapping, offset_value);
 }
 
 
@@ -1430,60 +1321,24 @@ ACS::doubleSeq * MinorServoBossImpl::getSystemOffset()
 }
 
 
-vector<double> MinorServoBossImpl::getOffsetImpl(string offset_type)
-     throw (MinorServoErrors::OperationNotPermittedExImpl, ManagementErrors::ConfigurationErrorExImpl)
+vector<double> 
+MinorServoBossImpl::getOffsetImpl(string offset_type)
+     throw (MinorServoErrors::OperationNotPermittedExImpl, 
+            ManagementErrors::ConfigurationErrorExImpl)
 {
     if(!isReady())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "getOffsetImpl(): the system is not ready", false);
 
     vector<double> axes_values;
-    if(m_actual_config->is_primary_focus())
-    {
-        axes_values.push_back(0.0);
-        axes_values.push_back(0.0);
-    }else{
-        axes_values.push_back(0.0);
-        axes_values.push_back(0.0);
-        axes_values.push_back(0.0);
-        axes_values.push_back(0.0);
-        axes_values.push_back(0.0);
-    }
-    
-    /*
-    MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-    for(size_t i=0; i<servosToMove.size(); i++) {
-        string comp_name = servosToMove[i];
-        if((m_configuration->m_component_refs).count(comp_name)) {
-            component_ref = (m_configuration->m_component_refs)[comp_name];
-            if(CORBA::is_nil(component_ref)) {
-                string msg("getOffsetImpl(): cannot get the reference of " + comp_name);
-                THROW_EX(MinorServoErrors, OperationNotPermittedEx, msg.c_str(), false);
-            }
-        }
-        else {
-            string msg("getOffsetImpl(): " + comp_name);
-            THROW_EX(MinorServoErrors, OperationNotPermittedEx, (msg + " not found").c_str(), false);
-        }
-
-        ACS::doubleSeq_var offset;
-        if(offset_type == "user") {
-            offset = component_ref->getUserOffset();
-        }
-        else if(offset_type == "system") {
-            offset = component_ref->getSystemOffset();
-        }
-        else {
-            THROW_EX(MinorServoErrors, OperationNotPermittedEx, "getOffsetImpl(): Wrong offset type", false);
-        }
-
-        for(size_t i=0; i<offset->length(); i++)
-            axes_values.push_back(offset[i]);
-    }
-    */
-    return axes_values;
+    if(offset_type == "user")
+        return m_offset.getUserOffset();
+    else
+        return m_offset.getSystemOffset();
 }
 
-void MinorServoBossImpl::setElevationTracking(const char * value) throw (ManagementErrors::ConfigurationErrorEx) {
+void 
+MinorServoBossImpl::setElevationTracking(const char * value) 
+throw (ManagementErrors::ConfigurationErrorEx) {
     try {
         setElevationTrackingImpl(value);
     }
@@ -1494,25 +1349,19 @@ void MinorServoBossImpl::setElevationTracking(const char * value) throw (Managem
 }
 
 
-void MinorServoBossImpl::setElevationTrackingImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl) {
-    /*
-    IRA::CString flag(value);
-    flag.MakeUpper();
-    m_configuration->setElevationTracking(flag); 
-    try {
-        if(isReady()) {
-            if(m_configuration->isElevationTrackingEn()) {
-                turnTrackingOn();
-            }
-            else {
-                turnTrackingOff();
-            }
-        }
+void 
+MinorServoBossImpl::setElevationTrackingImpl(const char * value) 
+throw (ManagementErrors::ConfigurationErrorExImpl) {
+    string flag(value);
+    try{
+    if(flag == "ON")
+        turnTrackingOn();
+    else
+        turnTrackingOff();
     }
     catch(...) {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, string("setElevationTracking(): cannot turn the tracking") + string(flag), false);
     }
-    */
 }
 
 
@@ -1635,7 +1484,8 @@ bool MinorServoBossImpl::isTracking() {
 
 
 char * MinorServoBossImpl::getActualSetup() {
-    return CORBA::string_dup((m_actual_config->get_name()).c_str());
+    //return CORBA::string_dup((m_actual_config->get_name()).c_str());
+    return CORBA::string_dup(m_actual_conf.c_str());
 }
 
 
@@ -1675,7 +1525,6 @@ GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_asConfigura
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_elevationTrack, elevationTrack);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_scanActive, scanActive);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_scanning, scanning);
-
 
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>

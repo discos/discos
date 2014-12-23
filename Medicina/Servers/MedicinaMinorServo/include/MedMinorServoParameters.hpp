@@ -13,6 +13,7 @@
 //#include <macros.def>
 
 #include "MedMinorServoGeometry.hpp"
+#include "MedMinorServoOffset.hpp"
 
 class VirtualAxis
 {
@@ -57,6 +58,8 @@ class MedMinorServoParameters
          * supports elevation tracking
          */
         MedMinorServoPosition get_position(double elevation = 45.0);
+        MedMinorServoPosition get_position(double elevation,
+                                           MedMinorServoOffset* offset);
         void add_axis(std::string name, 
                       std::string units,
                       std::vector<double> coefficients,
@@ -68,6 +71,7 @@ class MedMinorServoParameters
         bool is_primary_focus(){ return _primary_focus;};
         std::vector<std::string> getAxes(){return _axes_names;};
         std::vector<std::string> getUnits(){return _axes_units;};
+        int getAxisMapping(std::string axis_name);
     private:
         std::string _name;
         bool _can_track_elevation, _primary_focus, _secondary_focus;

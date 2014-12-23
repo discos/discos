@@ -98,6 +98,15 @@ MedMinorServoParameters::add_axis(
     add_axis(_axis);
 }
 
+int
+MedMinorServoParameters::getAxisMapping(std::string axis_name)
+{
+    for(int i = 0; i < _axes_names.size(); ++i)
+        if(_axes_names[i] == axis_name)
+            return i;
+    return -1;
+}
+
 void
 MedMinorServoParameters::add_axis(VirtualAxis axis)
 {
@@ -149,6 +158,16 @@ MedMinorServoParameters::get_position(double elevation)
         } //end for
     } //end else
     return position;
+}
+
+MedMinorServoPosition
+MedMinorServoParameters::get_position(double elevation, 
+                                      MedMinorServoOffset *offset)
+{
+    MedMinorServoPosition position, offset_position;
+    position = get_position(elevation);
+    offset_position = offset->getOffsetPosition();
+    return position + offset_position;
 }
 
 MedMinorServoConfiguration
