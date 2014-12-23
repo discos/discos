@@ -1,4 +1,4 @@
-#define RB_DEBUG
+//#define RB_DEBUG
 
 //#define KKC_ADDRESS "192.168.51.13" // this is the PortServer installed directly in the MF
 #define KKC_ADDRESS "192.167.189.102" // this is the server installed in control room PC
