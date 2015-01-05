@@ -54,7 +54,7 @@ bool CConfiguration::getInputPorts(const IRA::CString& conf,CProtocol::TInputs* 
 		else if (ret=="BWG") {
 			inputPort[size]=CProtocol::BWG;
 		}
-		else if (ret=="BWG") { // GREGORIAN
+		else if (ret=="GREGORIAN") { // GREGORIAN
 			inputPort[size]=CProtocol::GREGORIAN;
 		}
 		else {
@@ -62,7 +62,7 @@ bool CConfiguration::getInputPorts(const IRA::CString& conf,CProtocol::TInputs* 
 		}
 		size++;
 	}
-	if ((size!=1) || (size!=m_dwBoardsNumber)) return false; // the size of inputs vector should be 1 or equal to the number of boards
+	if ((size!=1) && (size!=m_dwBoardsNumber)) return false; // the size of inputs vector should be 1 or equal to the number of boards
 	if ((size==1)) {  // if the provided list of input ports is one element, i'll fill everything up to the maximum number of boards
 		for (WORD k=1;k<MAX_BOARDS_NUMBER;k++) {
 			inputPort[k]=inputPort[0];
