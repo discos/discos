@@ -23,7 +23,7 @@
 	<configurationID>CCC</configurationID>
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
- 	<inputPort>GREGORIAN</inputPort>
+ 	<inputPort>GREGORIAN GREGORIAN PRIMARY PRIMARY</inputPort>
  	<beams>1</beams>
  	<bandWidth>1250.0</bandWidth>
  	<attenuation>10.0</attenuation>	 	

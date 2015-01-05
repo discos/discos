@@ -77,7 +77,7 @@ public:
 	 * @param boards gives the mapping of section over boards, if null the mapping is flat: section 0 on board 0 and so on....
 	 * @return the length of the message
 	 */
-	static  WORD setConfiguration(char *sBuff,long id,const TInputs& input,const double &att,const double& bw,long *boards=NULL);
+	static WORD setConfiguration(char *sBuff,long id,const TInputs& input,const double &att,const double& bw,long *boards=NULL);
 	
 	/**
 	 * Prepare a buffer to be sent to the backend in order to sync  the time. The time is taken from the clock of the host machine.

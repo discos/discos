@@ -37,11 +37,11 @@
 	<configurationID>CCCL</configurationID>
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
- 	<inputPort>PRIMARY</inputPort>
+ 	<inputPort>GREGORIAN GREGORIAN PRIMARY PRIMARY</inputPort>
  	<beams>1</beams>
  	<bandWidth>300.0</bandWidth>
  	<attenuation>6.0</attenuation>	 	
- 	<section_boards>0 1</section_boards>
+ 	<section_boards>2 3</section_boards>
  	<polarizations>L R</polarizations>
  	<feed>0 0</feed>
  	<IF>0 1</IF>

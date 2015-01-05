@@ -32,7 +32,8 @@ public:
 		IRA::CString setupID;
 		long sections;
 		bool calSwitchEnabled;
-		CProtocol::TInputs inputPort;
+		CProtocol::TInputs inputPort[MAX_SECTION_NUMBER];
+		WORD inputPorts;
 		long beams;
 		long section_boards[MAX_SECTION_NUMBER];
 		Backends::TPolarization polarizations[MAX_SECTION_NUMBER];
@@ -154,10 +155,10 @@ public:
 	/**
 	 * This function returns the setups of the backend given the setup ID.
 	 * @param setupID setup identifier or mnemonic
-	 * @param setup structure containinig the setup parameters.
+	 * @param setup structure containing the setup parameters.
 	 * @return true if the setup is present, false if not present or the configuration from the CDB is not correct
 	 */  
-	bool getSetupFromID(const IRA::CString setupID,TBackendSetup& setup);
+	bool getSetupFromID(const IRA::CString setupID,TBackendSetup& setup) throw (ComponentErrors::CDBAccessExImpl);
 	
 private:
 	WORD m_wPort;
@@ -182,6 +183,13 @@ private:
 	 * This is the table used to load from the CDB the backend configurations 
 	*/
 	IRA::CDBTable* m_configurationTable;
+	/*
+	 * Parse the inputs string in order to extract and check the inputs port configuration for each board
+	 * @param conf input string
+	 * @param inputPort resulting port configuration
+	 * @param size dimension of the inputPort array
+	 */
+	bool getInputPorts(const IRA::CString& conf,CProtocol::TInputs* inputPort,WORD& size);
 };
 
 #endif /*CONFIGURATION_H_*/

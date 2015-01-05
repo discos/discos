@@ -57,11 +57,11 @@ CCommandLine::~CCommandLine()
 }
 
 void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketErrorExImpl,
-		ComponentErrors::ValidationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl)
+		ComponentErrors::ValidationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl)
 {
 	AUTO_TRACE("CCommandLine::Init()");
 	m_configuration=config;
-	if (!initializeConfiguration(m_configuration->getConfiguration())) {
+	if (!initializeConfiguration(m_configuration->getConfiguration())) { // throw (ComponentErrors::CDBAccessExImpl)
 		IRA::CString msg;
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::Init()");
 		msg.Format("the requested configuration %s is not known",(const char *)m_configuration->getConfiguration());
@@ -374,7 +374,7 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 		throw impl;
 	}
 	if (inputId>=0) {
-		if (inputId>=m_inputsNumber) {
+		if (inputId>=m_sectionsNumber) {
 			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setAttenuation()");
 			impl.setReason("the input identifier is out of range");
 			throw impl;
@@ -449,7 +449,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		throw impl;
 	}
 	if (inputId>=0) {  //check the section id is in valid rages
-		if (inputId>=m_inputsNumber) {
+		if (inputId>=m_sectionsNumber) {
 			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setConfiguration()");
 			impl.setReason("the section identifier is out of range");
 			throw impl;
@@ -503,7 +503,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setConfiguration()");
 		} 
 		m_bandWidth[inputId]=newBW;
-		for (int j=0;j<m_inputsNumber;j++) m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
+		for (int j=0;j<m_sectionsNumber;j++) m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
 		m_commonSampleRate=newSR;
 		m_integration=0;
 		// log warning about configuration that are ignored.
@@ -628,10 +628,10 @@ void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		if (!CProtocol::decodeData(rBuff,tpi,m_configuration->getBoardsNumber(),m_inputsNumber,m_boards)) {
+		if (!CProtocol::decodeData(rBuff,tpi,m_configuration->getBoardsNumber(),m_sectionsNumber,m_boards)) {
 			_THROW_EXCPT(BackendsErrors::MalformedAnswerExImpl,"CCommandLine::getZeroTPI()");
 		}
-		for (int j=0;j<m_inputsNumber;j++) {
+		for (int j=0;j<m_sectionsNumber;j++) {
 			m_tpiZero[j]=(double)tpi[j]/(double)integration;
 		}
 	}
@@ -702,8 +702,8 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 	
 	if (busy) { // if the backend is sampling data 
 		if (zero) {   // if the zero tpi....i can only return the last available measure...since i cannot change the configuration and switch to 50Ohm
-			tpi.length(m_inputsNumber);
-			for (int j=0;j<m_inputsNumber;j++) {
+			tpi.length(m_sectionsNumber);
+			for (int j=0;j<m_sectionsNumber;j++) {
 				tpi[j]=m_tpiZero[j];  //it should already be normalized to 1 millisec of integration
 			}
 			return;
@@ -780,11 +780,11 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 	}
 	if (res>0) { // operation was ok.
 		DWORD data[MAX_SECTION_NUMBER];
-		if (!CProtocol::decodeData(rBuff,data,m_configuration->getBoardsNumber(),m_inputsNumber,m_boards)) {
+		if (!CProtocol::decodeData(rBuff,data,m_configuration->getBoardsNumber(),m_sectionsNumber,m_boards)) {
 			_THROW_EXCPT(BackendsErrors::MalformedAnswerExImpl,"CCommandLine::getSample()");
 		}
-		tpi.length(m_inputsNumber);
-		for (int j=0;j<m_inputsNumber;j++) {
+		tpi.length(m_sectionsNumber);
+		for (int j=0;j<m_sectionsNumber;j++) {
 			tpi[j]=(double)data[j]/(double)integration;
 			if (zero) m_tpiZero[j]=tpi[j]; // in case of tpiZero we store it......
 		}
@@ -841,28 +841,61 @@ void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExIm
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
 	}
-	len=CProtocol::setConfiguration_broadcast(sBuff,m_defaultInput,m_attenuation[0],m_bandWidth[0]); // get the buffer
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-	}
-	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
-		} 
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_INFO,"DEFAULTS_ARE_SET"));
-	}
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setDefaultConfiguration()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setDefaultConfiguration()");
+	if (m_defaultInputSize==1) {
+		len=CProtocol::setConfiguration_broadcast(sBuff,m_defaultInput[0],m_attenuation[0],m_bandWidth[0]); // get the buffer
+		if ((res=sendBuffer(sBuff,len))==SUCCESS) {
+			res=receiveBuffer(rBuff,RECBUFFERSIZE);
+		}
+		if (res>0) { // operation was ok.
+			if (!CProtocol::isAck(rBuff)) {
+				_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
+			}
+		}
+		else if (res==FAIL) {
+			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
+			dummy.setCode(m_Error.getErrorCode());
+			dummy.setDescription((const char*)m_Error.getDescription());
+			m_Error.Reset();
+			_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setDefaultConfiguration()");
+		}
+		else if (res==WOULDBLOCK) {
+			_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setDefaultConfiguration()");
+		}
+		else {
+			_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
+		}
 	}
 	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
+		for (DWORD k=0;k<m_defaultInputSize;k++) {
+			if (m_sections[k]==-1) {
+				len=CProtocol::setConfiguration(sBuff,(long)k,m_defaultInput[k],0.0,2350.0);
+			}
+			else {
+				len=CProtocol::setConfiguration(sBuff,(long)k,m_defaultInput[k],m_attenuation[m_sections[k]],m_bandWidth[m_sections[k]]);
+			}
+			if ((res=sendBuffer(sBuff,len))==SUCCESS) {
+				res=receiveBuffer(rBuff,RECBUFFERSIZE);
+			}
+			if (res>0) { // operation was ok.
+				if (!CProtocol::isAck(rBuff)) {
+					_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
+				}
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_INFO,"DEFAULTS_ARE_SET"));
+			}
+			else if (res==FAIL) {
+				_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
+				dummy.setCode(m_Error.getErrorCode());
+				dummy.setDescription((const char*)m_Error.getDescription());
+				m_Error.Reset();
+				_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setDefaultConfiguration()");
+			}
+			else if (res==WOULDBLOCK) {
+				_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setDefaultConfiguration()");
+			}
+			else {
+				_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
+			}
+		}
 	}
 	IRA::CIRATools::Wait(0,200000);
 	long integration=(long)round(1.0/ (m_commonSampleRate*1000.0));
@@ -893,7 +926,7 @@ void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExIm
 }
 
 void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl)
+		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl)
 {
 	AUTO_TRACE("CCommandLine::setup()");
 	if (getIsBusy()) {
@@ -1027,8 +1060,8 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setEnabled()");
 		throw impl;
 	}
-	if ((long)en.length()>=m_inputsNumber) {
-		bound=m_inputsNumber;
+	if ((long)en.length()>=m_sectionsNumber) {
+		bound=m_sectionsNumber;
 	}
 	else {
 		bound=en.length();
@@ -1071,8 +1104,8 @@ void CCommandLine::getAttenuation(ACS::doubleSeq& att) throw (ComponentErrors::S
 	}
 	res=getConfiguration();
 	if (res>0) { // load OK
-		att.length(m_inputsNumber);
-		for (int i=0;i<m_inputsNumber;i++) {
+		att.length(m_sectionsNumber);
+		for (int i=0;i<m_sectionsNumber;i++) {
 			att[i]=m_attenuation[i];
 		}
 	}
@@ -1081,8 +1114,8 @@ void CCommandLine::getAttenuation(ACS::doubleSeq& att) throw (ComponentErrors::S
 
 void CCommandLine::getFrequency(ACS::doubleSeq& freq) const
 {
-	freq.length(m_inputsNumber);
-	for (int i=0;i<m_inputsNumber;i++) {
+	freq.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		freq[i]=m_frequency[i];
 	}
 }
@@ -1094,64 +1127,64 @@ void CCommandLine::getBackendStatus(DWORD& status) const
 
 void CCommandLine::getSampleRate(ACS::doubleSeq& sr) const
 {
-	sr.length(m_inputsNumber);
-	for (int i=0;i<m_inputsNumber;i++) {
+	sr.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		sr[i]=m_sampleRate[i];
 	}
 }
 
 void CCommandLine::getTsys(ACS::doubleSeq& tsys) const
 {
-	tsys.length(m_inputsNumber);
-	for (int i=0;i<m_inputsNumber;i++) {
+	tsys.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		tsys[i]=m_tsys[i];
 	}	
 }
 
 void CCommandLine::getKCRatio(ACS::doubleSeq& ratio) const
 {
-	ratio.length(m_inputsNumber);
-	for (int i=0;i<m_inputsNumber;i++) {
+	ratio.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		ratio[i]=m_KCratio[i];
 	}		
 }
 
 void CCommandLine::getBins(ACS::longSeq& bins) const
 {
-	bins.length(m_inputsNumber);
-	for (int i=0;i<m_inputsNumber;i++) {
+	bins.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		bins[i]=m_bins[i];
 	}
 }
 
 void CCommandLine::getPolarization(ACS::longSeq& pol) const
 {
-	pol.length(m_inputsNumber);
-	for (int i=0;i<m_inputsNumber;i++) {
+	pol.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		pol[i]=(long)m_polarization[i];
 	}
 }
 
 void CCommandLine::getFeed(ACS::longSeq& feed) const 
 {
-	feed.length(m_inputsNumber);
-	for (int i=0;i<m_inputsNumber;i++) {
+	feed.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		feed[i]=m_feedNumber[i];
 	}
 }
 
 void CCommandLine::getIFs(ACS::longSeq& ifs) const
 {
-	ifs.length(m_inputsNumber);
-	for (int i=0;i<m_inputsNumber;i++) {
+	ifs.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		ifs[i]=m_ifNumber[i];
 	}	
 }
 
 void CCommandLine::getInputSection(ACS::longSeq& inpSection) const
 {
-	inpSection.length(m_inputsNumber);
-	for (int i=0;i<m_inputsNumber;i++) {
+	inpSection.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		inpSection[i]=m_inputSection[i];
 	}
 }
@@ -1166,8 +1199,8 @@ void CCommandLine::getBandWidth(ACS::doubleSeq& bw) throw (ComponentErrors::Sock
 	}
 	res=getConfiguration();
 	if (res>0) { // load OK
-		bw.length(m_inputsNumber);
-		for (int i=0;i<m_inputsNumber;i++) {
+		bw.length(m_sectionsNumber);
+		for (int i=0;i<m_sectionsNumber;i++) {
 			bw[i]=m_bandWidth[i];
 		}
 	}
@@ -1194,7 +1227,7 @@ void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 	long chs=0;
 	long intTime;
 	// count the available channels.......
-	for(int i=0;i<m_inputsNumber;i++) {
+	for(int i=0;i<m_sectionsNumber;i++) {
 		if (m_enabled[i]) chs++;
 	}
 	bkd.sections=chs;
@@ -1208,7 +1241,7 @@ void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& size)
 {
 	long index=0;
-	for (int i=0;i<m_inputsNumber;i++) {
+	for (int i=0;i<m_sectionsNumber;i++) {
 		if (m_enabled[i]) {
 			if (index<size) {
 				chHr[index].id=i;
@@ -1231,13 +1264,13 @@ void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& 
 
 void CCommandLine::saveTsys(const ACS::doubleSeq& tsys,const ACS::doubleSeq& ratio)
 {
-	if (tsys.length()==(unsigned)m_inputsNumber) {
-		for (int i=0;i<m_inputsNumber;i++) {
+	if (tsys.length()==(unsigned)m_sectionsNumber) {
+		for (int i=0;i<m_sectionsNumber;i++) {
 			m_tsys[i]=tsys[i];
 		}
 	}
-	if (ratio.length()==(unsigned)m_inputsNumber) {
-		for (int i=0;i<m_inputsNumber;i++) {
+	if (ratio.length()==(unsigned)m_sectionsNumber) {
+		for (int i=0;i<m_sectionsNumber;i++) {
 			m_KCratio[i]=ratio[i];
 		}
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::saveTsys()",(LM_INFO,"KELVIN_COUNTS_CONVERSION_FACTOR_SET"));
@@ -1403,7 +1436,7 @@ int CCommandLine::getConfiguration()
 		if ((Res=sendBuffer(sBuff,len))==SUCCESS) {
 			rBytes=receiveBuffer(rBuff,RECBUFFERSIZE);
 			if (rBytes>0) {
-				if (CProtocol::decodeBackendConfiguration(rBuff,m_inputsNumber,m_configuration->getBoardsNumber(),m_attenuation,m_bandWidth,m_input,m_backendTime,m_currentSampleRate,m_boards)) {
+				if (CProtocol::decodeBackendConfiguration(rBuff,m_sectionsNumber,m_configuration->getBoardsNumber(),m_attenuation,m_bandWidth,m_input,m_backendTime,m_currentSampleRate,m_boards)) {
 					CIRATools::getTime(m_lastUpdate);
 				}
 				else {
@@ -1482,22 +1515,27 @@ bool CCommandLine::checkConnection()
 	}
 }
 
-bool CCommandLine::initializeConfiguration(const IRA::CString & config) 
+bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (ComponentErrors::CDBAccessExImpl)
 {
 	int i;
 	CConfiguration::TBackendSetup setup;
-	if (m_configuration->getSetupFromID(config,setup)) {
-		m_inputsNumber=setup.sections;
-		m_defaultInput=setup.inputPort;
+	if (m_configuration->getSetupFromID(config,setup)) { // throw (ComponentErrors::CDBAccessExImpl)
+		m_sectionsNumber=setup.sections;
+		for (WORD k=0;k<MAX_BOARDS_NUMBER;k++) {
+			m_defaultInput[k]=setup.inputPort[k];
+			m_sections[k]=-1;
+		}
+		m_defaultInputSize=setup.inputPorts; // this should be 1 or the number of installed boards
 		m_beams=setup.beams;
 		m_calSwitchingEnabled=setup.calSwitchEnabled;
-		for (i=0;i<m_inputsNumber;i++) {
-			m_input[i]=m_defaultInput;
+		for (i=0;i<m_sectionsNumber;i++) {
+			m_boards[i]=setup.section_boards[i];
+			m_sections[m_boards[i]]=i;
+			m_input[i]=m_defaultInput[m_boards[i]];
 			m_polarization[i]=setup.polarizations[i];
 			m_ifNumber[i]=setup.ifs[i];
 			m_feedNumber[i]=setup.feed[i];
 			m_inputSection[i]=i; // input 0 belongs to section 0 and so on.....
-			m_boards[i]=setup.section_boards[i];
 			m_attenuation[i]=setup.attenuation;
 			m_bandWidth[i]=setup.bandWidth;
 		}		
@@ -1511,7 +1549,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 	m_sampleSize=SAMPLESIZE;
 	m_commonSampleRate=DEFAULT_SAMPLE_RATE;
 	m_calPeriod=DEFAULT_DIODE_SWITCH_PERIOD;
-	for (i=0;i<m_inputsNumber;i++) {
+	for (i=0;i<m_sectionsNumber;i++) {
 		m_sampleRate[i]=DEFAULT_SAMPLE_RATE;
 		m_frequency[i]=STARTFREQUENCY;
 		m_bins[i]=BINSNUMBER;

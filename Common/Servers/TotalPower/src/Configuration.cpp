@@ -41,9 +41,40 @@ CConfiguration::~CConfiguration()
 	}
 }
 
-bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& setup)
+bool CConfiguration::getInputPorts(const IRA::CString& conf,CProtocol::TInputs* inputPort,WORD& size)
+{
+	int start=0;
+	IRA::CString ret;
+	size=0;
+	while (IRA::CIRATools::getNextToken(conf,start,' ',ret)) {
+		if (size>=MAX_BOARDS_NUMBER) return false;
+		if (ret=="PRIMARY") {
+			inputPort[size]=CProtocol::PRIMARY;
+		}
+		else if (ret=="BWG") {
+			inputPort[size]=CProtocol::BWG;
+		}
+		else if (ret=="BWG") { // GREGORIAN
+			inputPort[size]=CProtocol::GREGORIAN;
+		}
+		else {
+			return false;
+		}
+		size++;
+	}
+	if ((size!=1) || (size!=m_dwBoardsNumber)) return false; // the size of inputs vector should be 1 or equal to the number of boards
+	if ((size==1)) {  // if the provided list of input ports is one element, i'll fill everything up to the maximum number of boards
+		for (WORD k=1;k<MAX_BOARDS_NUMBER;k++) {
+			inputPort[k]=inputPort[0];
+		}
+	}
+	return true;
+}
+
+bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& setup) throw (ComponentErrors::CDBAccessExImpl)
 {
 	bool done=false;
+	CString inputPorts;
 	m_configurationTable->First();
 	for (int i=0;i<m_configurationTable->recordCount();i++) {
 		CString id((*m_configurationTable)["configurationID"]->asString());
@@ -65,14 +96,11 @@ bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& se
 		else {
 			setup.calSwitchEnabled=false;
 		}
-		if ((*m_configurationTable)["inputPort"]->asString()=="PRIMARY") {
-			setup.inputPort=CProtocol::PRIMARY;
-		}
-		else if ((*m_configurationTable)["inputPort"]->asString()=="BWG") {
-			setup.inputPort=CProtocol::BWG;
-		}
-		else { // GREGORIAN
-			setup.inputPort=CProtocol::GREGORIAN;
+		inputPorts=(*m_configurationTable)["inputPort"]->asString();
+		if (!getInputPorts(inputPorts,setup.inputPort,setup.inputPorts)) {
+			_EXCPT(ComponentErrors::CDBAccessExImpl,impl,"");
+			impl.setFieldName("Configuration.inputPort");
+			throw impl;
 		}
 		setup.beams=(*m_configurationTable)["beams"]->asLongLong();
 		setup.bandWidth=(*m_configurationTable)["bandWidth"]->asDouble();

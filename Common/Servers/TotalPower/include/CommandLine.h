@@ -57,12 +57,14 @@ public:
 	 * @throw BackendsErrors::NakExImpl
 	*/
 	void Init(CConfiguration *config) throw (ComponentErrors::SocketErrorExImpl,
-			ComponentErrors::ValidationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl);
+			ComponentErrors::ValidationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+			ComponentErrors::CDBAccessExImpl);
 	
 	/**
-	 * Call this function to get the milliseconds of integration time
+	 * Call this function to get the number of inputs
+	 * In this implementation the inputs number is the same of the number of section (SIMPLE_SECTION)
 	 */
-	inline void getInputsNumber(long &in) const { in=m_inputsNumber; }
+	inline void getInputsNumber(long &in) const { in=m_sectionsNumber; }
 		
 	/**
 	 * Call this function to get the milliseconds of integration time
@@ -227,7 +229,7 @@ public:
 	 * @param conf identifier of the configuration to be loaded
 	 */ 
 	void setup(const char *conf) throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl);
+			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl);
 	
 	/**
 	 * This function can be used to set up an input of the backend. The input is identified by its numeric value. If a configuration
@@ -427,7 +429,7 @@ public:
 	 */
 	long *boardsMapping() { return m_boards; }
 
-	long sectionNumber() { return m_inputsNumber; }
+	long sectionNumber() { return m_sectionsNumber; }
 
 	/**
 	 * Computes the resulting integration time considering the sample rate and the integration time.
@@ -504,6 +506,11 @@ private:
 	 * allows to link a section to its proper board number
 	 */
 	long m_boards[MAX_SECTION_NUMBER];
+
+	/**
+	 * Allows to link a board number to its section
+	 */
+	long m_sections[MAX_BOARDS_NUMBER];
 	/**
 	 * the polarization of each backend input 
 	 */
@@ -513,7 +520,7 @@ private:
 	 */
 	long m_bins[MAX_SECTION_NUMBER];
 	/**
-	 * input type for each backend input
+	 * input type for each backend section
 	 */
 	CProtocol::TInputs m_input[MAX_SECTION_NUMBER];
 	/**
@@ -535,7 +542,8 @@ private:
 	/**
 	 * input type for the initial configuration
 	 */
-	CProtocol::TInputs m_defaultInput;
+	CProtocol::TInputs m_defaultInput[MAX_BOARDS_NUMBER];
+	WORD m_defaultInputSize;
 	/**
 	 * That's the clock of the backend. Is has the precision of one second
 	 */
@@ -551,7 +559,7 @@ private:
 	/**
 	 * reports for the number of inputs, for this implementation it happens that number of inputs is equal to the number of sections.
 	 */
-	long m_inputsNumber;
+	long m_sectionsNumber;
 	
 	/**
 	 * reports the number of beams (in the current configuration) that the backend deal with
@@ -631,7 +639,7 @@ private:
 	 * @param config name of the configuration to be loaded
 	 * @return false if the configuration name is not coded or known
 	 */ 
-	bool initializeConfiguration(const IRA::CString & config);
+	bool initializeConfiguration(const IRA::CString & config) throw (ComponentErrors::CDBAccessExImpl);
 	
 	/**
 	 * Check if the connection is still up and ready. If a previuos call timed out it will check the status of the connection.
