@@ -868,7 +868,10 @@ void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExIm
 	else {
 		for (DWORD k=0;k<m_defaultInputSize;k++) {
 			if (m_sections[k]==-1) {
-				len=CProtocol::setConfiguration(sBuff,(long)k,m_defaultInput[k],0.0,2350.0);
+				//***************************************************************************
+				// This should be changed in order to read the Attenuation on board basis and to apply proper db for each board
+				//****************************************************************************
+				len=CProtocol::setConfiguration(sBuff,(long)k,m_defaultInput[k],13.0,2350.0);
 			}
 			else {
 				len=CProtocol::setConfiguration(sBuff,(long)k,m_defaultInput[k],m_attenuation[m_sections[k]],m_bandWidth[m_sections[k]]);
