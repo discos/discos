@@ -128,7 +128,7 @@ module Receivers {
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw ComponentErrors::ComponentErrorsEx
          */
-        void derotatorMode(in TDerotatorConfigurations mode,in TRewindModes rewind) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        void derotatorMode(in TDerotatorConfigurations mode,in TRewindModes rewind,in long feeds) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
         /**
          *  This method parks the current derotator. In order to start the derotator again, another <i>derotatorSetup</i> must be called.

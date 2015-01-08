@@ -691,7 +691,7 @@ void CRecvBossCore::getDewarParameter(Receivers::TDerotatorConfigurations& mod,d
 	pos=0.0;
 }
 
-void CRecvBossCore::derotatorMode(const Receivers::TDerotatorConfigurations& mode,const Receivers::TRewindModes& rewind) throw (
+void CRecvBossCore::derotatorMode(const Receivers::TDerotatorConfigurations& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
 		ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
    		ReceiversErrors::DewarPositionerSetupErrorExImpl)
@@ -819,6 +819,12 @@ void CRecvBossCore::CRecvBossCore::startScan(ACS::Time& startUT,const Receivers:
   ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl)
 {
 
+}
+
+void CRecvBossCore::closeScan(ACS::Time timeToStop) throw (ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl)
+{
+	timeToStop=0;
 }
 
 void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,

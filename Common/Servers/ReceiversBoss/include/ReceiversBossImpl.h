@@ -283,7 +283,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-    virtual void derotatorMode(Receivers::TDerotatorConfigurations mode,Receivers::TRewindModes rewind) throw (CORBA::SystemException,
+    virtual void derotatorMode(Receivers::TDerotatorConfigurations mode,Receivers::TRewindModes rewind,CORBA::Long feeds) throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
     /**

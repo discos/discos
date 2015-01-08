@@ -57,16 +57,16 @@ public:
 			mode=RCV_BSC_DEROTCONF;
 			return true;
 		}
-		if (strcasecmp(strMode,"OPTIMIZED")==0) {
-			mode=RCV_OPTIMIZED_DEROTCONF;
-			return true;
-		}
-		if (strcasecmp(strMode,"ALIGNED")==0) {
-			mode=RCV_ALIGNED_DEROTCONF;
+		if (strcasecmp(strMode,"BSC_OPT")==0) {
+			mode=RCV_BSC_OPTIMIZED_DEROTCONF;
 			return true;
 		}
 		if (strcasecmp(strMode,"CUSTOM")==0) {
 			mode=RCV_CUSTOM_DEROTCONF;
+			return true;
+		}
+		if (strcasecmp(strMode,"CUSTOM_OPT")==0) {
+			mode=RCV_CUSTOM_OPTIMIZED_DEROTCONF;
 			return true;
 		}
 		if (strcasecmp(strMode,"UNDEFINED")==0) {
@@ -85,14 +85,14 @@ public:
 		if (mode==RCV_BSC_DEROTCONF) {
 			return "BSC";
 		}
-		if (mode==RCV_OPTIMIZED_DEROTCONF) {
-			return "OPTIMIZED";
-		}
-		if (mode==RCV_ALIGNED_DEROTCONF) {
-			return "ALIGNED";
+		if (mode==RCV_BSC_OPTIMIZED_DEROTCONF) {
+			return "BSC_OPT";
 		}
 		if (mode==RCV_CUSTOM_DEROTCONF) {
 			return "CUSTOM";
+		}
+		if (mode==RCV_CUSTOM_OPTIMIZED_DEROTCONF) {
+			return "CUSTOM_OPT";
 		}
 		else { //RCV_UNDEF_DEROTCONF
 			return "UNDEFINED";

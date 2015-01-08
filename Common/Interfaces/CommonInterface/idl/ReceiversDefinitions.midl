@@ -66,10 +66,10 @@ module Receivers {
       */
     enum TDerotatorConfigurations {
     	RCV_FIXED_DEROTCONF, /*!< derotation is done in fixed mode */
+        RCV_BSC_OPTIMIZED_DEROTCONF,
         RCV_BSC_DEROTCONF,
-        RCV_OPTIMIZED_DEROTCONF,
-        RCV_ALIGNED_DEROTCONF,
         RCV_CUSTOM_DEROTCONF,
+        RCV_CUSTOM_OPTIMIZED_DEROTCONF,
         RCV_UNDEF_DEROTCONF
     };
     // Not required at the moment

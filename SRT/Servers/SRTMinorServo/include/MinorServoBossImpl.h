@@ -264,7 +264,7 @@ public:
      ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
      
      
-     void stopScan() throw (ManagementErrors::SubscanErrorEx);
+     virtual void closeScan(ACS::Time& timeToStop) throw (ManagementErrors::SubscanErrorEx);
      
      void startScanImpl(
         ACS::Time & starting_time, 

@@ -567,8 +567,11 @@ bool MinorServoBossImpl::isParked() throw (ManagementErrors::ConfigurationErrorE
     return true;
 }
 
-void MinorServoBossImpl::stopScan() throw (ManagementErrors::SubscanErrorEx)
+void MinorServoBossImpl::closeScan(ACS::Time& timeToStop) throw (ManagementErrors::SubscanErrorEx)
 {
+	// ********* to be computed ********************
+	timeToStop=0;
+	// *********************************************
     if(m_configuration->m_isScanActive) {
         string comp_name((m_configuration->m_scan).comp_name);
         if(m_component_refs.count(comp_name)) {
@@ -642,8 +645,8 @@ CORBA::Boolean MinorServoBossImpl::checkScan(
     if(isScanning())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is executing another scan", true);
 
-    runTime.startEpoch = starting_time != 0 ? starting_time : getTimeStamp();
-    runTime.onTheFly = false;
+    runTime->startEpoch = starting_time != 0 ? starting_time : getTimeStamp();
+    runTime->onTheFly = false;
     if(scan.is_empty_scan) {
         return true;
     }

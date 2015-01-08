@@ -5,7 +5,7 @@
 #define REWIND_TEST2 "FOO"
 
 #define UPDATE_TEST1 "DISABLED"
-#define UPDATE_TEST2 "OPTIMIZED"
+#define UPDATE_TEST2 "CUSTOM_OPT"
 
 #define POL_TEST1 "LEFT"
 #define POL_TEST2 "DUMMY"
@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
 	printf("\n");
 	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_FIXED_DEROTCONF));
 	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_BSC_DEROTCONF));
-	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_OPTIMIZED_DEROTCONF));
-	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_ALIGNED_DEROTCONF));
+	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_BSC_OPTIMIZED_DEROTCONF));
+	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_CUSTOM_DEROTCONF));
 	printf("%s\n",(const char *)Receivers::Definitions::map(Receivers::RCV_UNDEF_DEROTCONF));
 
 	if (Receivers::Definitions::map(UPDATE_TEST1,updateMode)) {
