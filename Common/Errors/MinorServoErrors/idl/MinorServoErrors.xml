@@ -16,7 +16,9 @@
 
 	<ErrorCode name="CommunicationError" 
          shortDescription="Communication Error" 
-         description="An error occur during low level communication"/>
+         description="An error occur during low level communication">
+	     <Member name="Reason" type="string" description="report the reason of the error" />
+    </ErrorCode>
 
 	<ErrorCode name="SetupError" 
          shortDescription="Error performing a setup" 
@@ -33,6 +35,12 @@
 	<ErrorCode name="OperationNotPermitted" 
          shortDescription="Operation not permitted" 
          description="Operation not permitted"/>
+
+	<ErrorCode name="ScanError" 
+         shortDescription="Error during a scan operation" 
+         description="Error during a scan operation ">
+	     <Member name="Axis" type="string" description="the name of the axis on which the scan is being executed" />
+    </ErrorCode>
 
 </Type>
 
