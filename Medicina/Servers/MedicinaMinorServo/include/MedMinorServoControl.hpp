@@ -129,6 +129,7 @@ class MedMinorServoControl
         //void stop_monitoring_position();
         void connect();// throw (ServoConnectionError);
         void disconnect();
+        bool is_connected();
     private:
         std::string _server_ip, _servo_name;
         int _server_port;
@@ -136,15 +137,14 @@ class MedMinorServoControl
         MedMinorServoModbus_sp _modbus;
         boost::mutex _command_guard;
         boost::mutex _tracking_offset_guard;
+        boost::recursive_mutex _read_guard;
         PositionQueue _position_queue;
         MEDMINORSERVOSETPOS _commanded_status;
-        //MEDMINORSERVOSTATUS _actual_status;
         MedMinorServoPosition _commanded_position;
-        //MedMinorServoPosition _actual_position;
         MedMinorServoPosition _primary_offset_error, _secondary_offset_error;
         MedMinorServoPosition _system_offset, _user_offset, _tracking_offset;
         MedMinorServoPosition _zero_position;
-        bool _is_elevation_tracking, _can_track_elevation;
+        bool _is_elevation_tracking, _can_track_elevation, _is_connected;
         /**
          * Verifies wether the servo is available for operations or
          * is actually controlled by fieldsystem
@@ -158,6 +158,10 @@ class MedMinorServoControl
          * Get actual status informations from the servo server
          */
         MedMinorServoPosition _read_status();
+        /**
+         * If not connected throw ServoConnectionError
+         */
+        void _check_connection();
 };
 
 #endif

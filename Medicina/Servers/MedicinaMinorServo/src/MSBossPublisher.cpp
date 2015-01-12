@@ -56,37 +56,37 @@ void MSBossPublisher::runLoop()
     IRA::CIRATools::getTime(now);
     bool tracking = m_control->is_tracking();
     try{
-    if((m_old_status.parked != m_status->parked)||
-       (m_old_status.parking != m_status->parking)||
-       (m_old_status.starting != m_status->starting)||
-       (m_old_status.status != m_status->status)||
-       (m_old_tracking != tracking)){
-        data.tracking = tracking;
-        data.parked = m_status->parked;
-        data.parking = m_status->parking;
-        data.starting = m_status->starting;
-        data.status = m_status->status;
-        data.timeMark = (now.value()).value;
-        try {
-            if(m_nc != NULL)
-            {
-                m_nc->publishData<MinorServo::MinorServoDataBlock>(data);
-                CUSTOM_LOG(LM_FULL_INFO, 
-                           "MinorServo::MSBossPublisher::runLoop",
-                           (LM_DEBUG, "Publish minor servo status"));
-            }else
-            {
-                ACS_SHORT_LOG((LM_ERROR, "Error: cannot get the notification channel reference."));
+        if((m_old_status.parked != m_status->parked)||
+           (m_old_status.parking != m_status->parking)||
+           (m_old_status.starting != m_status->starting)||
+           (m_old_status.status != m_status->status)||
+           (m_old_tracking != tracking)){
+            data.tracking = tracking;
+            data.parked = m_status->parked;
+            data.parking = m_status->parking;
+            data.starting = m_status->starting;
+            data.status = m_status->status;
+            data.timeMark = (now.value()).value;
+            try {
+                if(m_nc != NULL)
+                {
+                    m_nc->publishData<MinorServo::MinorServoDataBlock>(data);
+                    CUSTOM_LOG(LM_FULL_INFO, 
+                               "MinorServo::MSBossPublisher::runLoop",
+                               (LM_DEBUG, "Publish minor servo status"));
+                }else
+                {
+                    ACS_SHORT_LOG((LM_ERROR, "Error: cannot get the notification channel reference."));
+                }
             }
-        }
-        catch (ComponentErrors::CORBAProblemEx& ex) {
-            _ADD_BACKTRACE(ComponentErrors::NotificationChannelErrorExImpl, impl, ex, "MSBossPublisher()");
-            throw impl;
-        }
-        IRA::CIRATools::timeCopy(m_last_event, now);
-        m_old_status = *m_status;
-        m_old_tracking = tracking;
-    }//endif
+            catch (ComponentErrors::CORBAProblemEx& ex) {
+                _ADD_BACKTRACE(ComponentErrors::NotificationChannelErrorExImpl, impl, ex, "MSBossPublisher()");
+                throw impl;
+            }
+            IRA::CIRATools::timeCopy(m_last_event, now);
+            m_old_status = *m_status;
+            m_old_tracking = tracking;
+        }//endif
     }
     catch(...) {
         ACS_SHORT_LOG((LM_WARNING, "An error is occurred in MSBossPublisher"));

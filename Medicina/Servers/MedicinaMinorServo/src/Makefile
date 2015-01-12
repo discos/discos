@@ -34,7 +34,7 @@ MinorServoBossImpl_OBJECTS = MedMinorServoControl MedMinorServoGeometry \
                              PositionMonitoringThread MSBossPublisher \
                              MSBossTracker MedMinorServoOffset MinorServoBossImpl
 
-MinorServoBossImpl_LIBS = MinorServoBossStubs \
+MinorServoBossImpl_LIBS = MedMinorServoBossStubs MinorServoBossStubs \
                           ManagmentDefinitionsStubs ManagementErrors \
                           IRALibrary ComponentErrors MinorServoErrors \
                           acsnc ParserErrors AntennaDefinitionsStubs \
@@ -66,7 +66,7 @@ SHELL = /bin/bash
 # 
 # IDL Files and flags
 # 
-IDL_FILES = 
+IDL_FILES = MedMinorServoBoss
 TAO_IDLFLAGS =
 USER_IDL =
 

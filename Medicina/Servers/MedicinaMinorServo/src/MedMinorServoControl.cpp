@@ -13,7 +13,8 @@ MedMinorServoControl::MedMinorServoControl(const char* server_ip,
                                            _position_refresh_time(position_refresh_time),
                                            _elevation_refresh_time(elevation_refresh_time),
                                            _position_queue((int)(position_buffer_length/position_refresh_time)),
-                                           _is_elevation_tracking(false)
+                                           _is_elevation_tracking(false),
+                                           _is_connected(false)
 {
     //initialize offsets
     _primary_offset_error = MedMinorServoGeometry::get_primary_tolerance();
@@ -21,14 +22,14 @@ MedMinorServoControl::MedMinorServoControl(const char* server_ip,
     try{
         //initialize modbus channel for communication
         _modbus = get_med_modbus_channel(_server_ip.c_str(), _server_port);
+        CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoControl()",
+              (LM_DEBUG, "Instantiated new modbus channel"));
     }catch(ModbusError const & _connection_error){
         throw ServoConnectionError(_connection_error.what()); 
     }
     try{
         connect();
         reset();
-        //initilize actual position and position queue
-        _read_status();
     }catch(ModbusTimeout const & _timeout_error){
         throw ServoTimeoutError(_timeout_error.what());
     }catch(ModbusError const & _modbus_error){
@@ -44,31 +45,70 @@ MedMinorServoControl::~MedMinorServoControl()
 void
 MedMinorServoControl::connect()
 {
-    _modbus->connect();
-    CUSTOM_LOG(LM_FULL_INFO,
-               "MinorServo::MedMinorServoControl::connect",
-               (LM_DEBUG, "connected to server %s on port %d", 
-                _server_ip.c_str(),
-               _server_port));
-    if(_can_operate())
-        return;
-    else{
-        disconnect();
-        throw ServoConnectionError("Minor Servo is in use by fieldsystem");
-    }
+    boost::mutex::scoped_lock lock(_command_guard);
+    boost::recursive_mutex::scoped_lock rlock(_read_guard);
+    try{
+        if(!(is_connected()))
+        {
+            if(_can_operate())
+            {
+                // Initialize the connection without moving the subreflector
+                _commanded_position = update_position();
+                if(!(_commanded_position.is_success_position())){
+                    CUSTOM_LOG(LM_FULL_INFO,
+                           "MinorServo::MedMinorServoControl::connect",
+                           (LM_DEBUG, "Got a wrong mode, connecting anyway setting to secondary"));
+                    _commanded_position.mode = MED_MINOR_SERVO_SECONDARY;
+                }
+                _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
+                _commanded_status.escs = 1; //get back control now fieldsystem can not operate
+                _is_connected = true;
+                _send_commanded_status();
+                CUSTOM_LOG(LM_FULL_INFO,
+                           "MinorServo::MedMinorServoControl::connect",
+                           (LM_DEBUG, "connected to server %s on port %d", 
+                            _server_ip.c_str(),
+                           _server_port));
+            }
+            else{
+                throw ServoConnectionError("Minor Servo is in use by fieldsystem");
+            }
+        }
+    }catch (const ModbusError& me){
+        throw ServoConnectionError(me.what());
+    }/*catch(...){
+        throw ServoConnectionError("Cannot connect to server");
+    }*/
 }
 
 void
 MedMinorServoControl::disconnect()
 {
-    _commanded_status.escs = 0; //release control now fieldsystem can operate
-    _send_commanded_status();
-    _modbus->disconnect();
-    CUSTOM_LOG(LM_FULL_INFO,
-               "MinorServo::MedMinorServoControl::disconnect",
-               (LM_DEBUG, "disconnected from server %s on port %d", 
-                _server_ip.c_str(),
-               _server_port));
+    boost::mutex::scoped_lock lock(_command_guard);
+    boost::recursive_mutex::scoped_lock rlock(_read_guard);
+    try{
+        if(is_connected())
+        {
+            _commanded_status.escs = 0; //release control now fieldsystem can operate
+            _send_commanded_status();
+            _is_connected = false;
+            CUSTOM_LOG(LM_FULL_INFO,
+                       "MinorServo::MedMinorServoControl::disconnect",
+                       (LM_DEBUG, "disconnected from server %s on port %d", 
+                        _server_ip.c_str(),
+                       _server_port));
+        }
+    }catch (const ModbusError& me){
+        throw ServoConnectionError(me.what());
+    }catch(...){
+        throw ServoConnectionError("Cannot disconnect");
+    }
+}
+
+bool
+MedMinorServoControl::is_connected()
+{
+    return _is_connected;
 }
 
 void 
@@ -162,16 +202,6 @@ void
 MedMinorServoControl::set_last_position()
 {
     boost::mutex::scoped_lock lock(_command_guard);
-    /*try{
-        _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
-    }catch(MinorServoGeometryError _geometry_error){
-        throw ServoPositionError(_geometry_error.what());
-    }catch(MinorServoAxisLimitError _axis_limit_error){
-        throw ServoPositionError(_axis_limit_error.what());
-    }
-    _commanded_status.enable = 1;
-    _commanded_status.acknowledge = 0;*/
-    _send_commanded_status();
     _send_commanded_status();
     CUSTOM_LOG(LM_FULL_INFO,
                "MinorServo::MedMinorServoControl::set_last_position",
@@ -233,58 +263,92 @@ MedMinorServoControl::reset()
 {
     MedMinorServoPosition actual_position;
     boost::mutex::scoped_lock lock(_command_guard);
+    boost::recursive_mutex::scoped_lock rlock(_read_guard);
+    CUSTOM_LOG(LM_FULL_INFO,
+           "MinorServo::MedMinorServoControl::reset",
+           (LM_DEBUG, "begin reset procedure"));
     _commanded_status.escs = 1;
     _commanded_status.enable = 0;
     _commanded_status.acknowledge = 0;
     _send_commanded_status(true);
+    CUSTOM_LOG(LM_FULL_INFO,
+           "MinorServo::MedMinorServoControl::reset",
+           (LM_DEBUG, "enable = 0"));
+    CUSTOM_LOG(LM_FULL_INFO,
+           "MinorServo::MedMinorServoControl::reset",
+           (LM_DEBUG, "enable = 1"));
     IRA::CTimer _timer;
     do{
         actual_position = update_position();
         if(_timer.elapsed() > 5 * 10000000)
             throw ServoTimeoutError("timeout on disabling axes during reset");
+        CUSTOM_LOG(LM_FULL_INFO,
+               "MinorServo::MedMinorServoControl::reset",
+               (LM_DEBUG, "update position"));
     }while((actual_position.mode != MED_MINOR_SERVO_SR_BLOCK) &&
           (actual_position.mode != MED_MINOR_SERVO_PFR_BLOCK) &&
           (actual_position.mode != MED_MINOR_SERVO_SYSTEM_BLOCK));
     _commanded_status.enable = 1;
     _send_commanded_status(true);
+    CUSTOM_LOG(LM_FULL_INFO,
+           "MinorServo::MedMinorServoControl::reset",
+           (LM_DEBUG, "enable = 1"));
     _timer.reset();
     do{
-        actual_position = _read_status();
+        actual_position = update_position();
         if(_timer.elapsed() > 5 * 10000000)
             throw ServoTimeoutError("timeout on waiting ack request during reset");
+        CUSTOM_LOG(LM_FULL_INFO,
+               "MinorServo::MedMinorServoControl::reset",
+               (LM_DEBUG, "update position"));
     }while(actual_position.mode != MED_MINOR_SERVO_INTERLOCK);
     _commanded_status.acknowledge = 1;
     _send_commanded_status(true);
+    CUSTOM_LOG(LM_FULL_INFO,
+           "MinorServo::MedMinorServoControl::reset",
+           (LM_DEBUG, "acknowledge = 1"));
     _timer.reset();
     do{
-        actual_position = _read_status();
+        actual_position = update_position();
         if(_timer.elapsed() > 5 * 10000000)
+        {
+            CUSTOM_LOG(LM_FULL_INFO,
+               "MinorServo::MedMinorServoControl::reset",
+               (LM_ERROR, "timeout on waiting ack reply during reset"));
             throw ServoTimeoutError("timeout on waiting ack reply during reset");
+        }
+        CUSTOM_LOG(LM_FULL_INFO,
+               "MinorServo::MedMinorServoControl::reset",
+               (LM_DEBUG, "update position"));
     }while(actual_position.mode == MED_MINOR_SERVO_STATUS_INTERLOCK);
     _commanded_status.acknowledge = 0;
     _send_commanded_status(true);
+    CUSTOM_LOG(LM_FULL_INFO,
+           "MinorServo::MedMinorServoControl::reset",
+           (LM_DEBUG, "acknowledge = 0"));
     _timer.reset();
     do{
-        actual_position = _read_status();
+        actual_position = update_position();
         if(_timer.elapsed() > 5 * 10000000)
             throw ServoTimeoutError("timeout on waiting success code during reset");
+        CUSTOM_LOG(LM_FULL_INFO,
+               "MinorServo::MedMinorServoControl::reset",
+               (LM_DEBUG, "update position"));
     }while(!(actual_position.is_success_position())); //error status
     _send_commanded_status();
     CUSTOM_LOG(LM_FULL_INFO,
                "MinorServo::MedMinorServoControl::reset",
-               (LM_DEBUG, "control reset"));
+               (LM_DEBUG, "control has been reset"));
 }
 
 MedMinorServoPosition
 MedMinorServoControl::update_position()
 {
-    //this method was meant to incapsulate _read_status while providing
-    //synchronization logics. Turns out there's no need to synchronize so it's
-    //still here just because of previous decisions.
-    return _read_status();
+    boost::recursive_mutex::scoped_lock rlock(_read_guard);
     CUSTOM_LOG(LM_FULL_INFO,
                "MinorServo::MedMinorServoControl::update_position",
                (LM_DEBUG, "position updated"));
+    return _read_status();
 }
 
 MedMinorServoPosition
@@ -299,17 +363,15 @@ MedMinorServoControl::_read_status()
             throw ServoTimeoutError("timeout on read_status, cannot find valid position");
         try{
             actual_status = _modbus->read_status();
-            if(actual_status.escs == 2){
-                disconnect();
-                throw ServoConnectionError("Minor Servo is in use by fieldsystem");
-            }
+        }catch(ModbusTimeout const & _timeout_error){
+            throw ServoTimeoutError(_timeout_error.what());
+        }catch(ModbusError const & _modbus_error){
+            throw ServoConnectionError(_modbus_error.what());
+        }
+        try{
             actual_position = MedMinorServoGeometry::positionFromAxes(actual_status);
             valid_position = _position_queue.push(actual_position);
-        }catch(ModbusError const & _modbus_error){
-            //TODO: log warning
-            // we have a modbus error, we can try again until timeout
-            valid_position = false;
-        }catch(MinorServoGeometryError const & _geometry_error){
+        }catch(const MinorServoGeometryError& _geometry_error){
             throw ServoPositionError(_geometry_error.what());
         }
     }while(!valid_position);
@@ -320,9 +382,18 @@ bool
 MedMinorServoControl::_can_operate()
 {
     MEDMINORSERVOSTATUS actual_status;
-    actual_status = _modbus->read_status();
+    try{
+        actual_status = _modbus->read_status();
+    }catch(ModbusTimeout const & _timeout_error){
+        throw ServoTimeoutError(_timeout_error.what());
+    }catch(ModbusError const & _modbus_error){
+        throw ServoConnectionError(_modbus_error.what());
+    }
     if(actual_status.escs == 2)
+    {
+        _is_connected = false;
         return false;
+    }
     else
         return true;
 }
@@ -330,7 +401,10 @@ MedMinorServoControl::_can_operate()
 void
 MedMinorServoControl::_send_commanded_status(bool wait_ack)
 {
-    //_commanded_status.escs = 1;
+    if(!(is_connected()))
+        throw ServoConnectionError("Minor Servo is not connected");
+    if(!(_can_operate()))
+        throw ServoConnectionError("Minor Servo is in use by fieldsystem");
     _commanded_status.time = MedMinorServoTime::ACSToServoNow();
     try{
         _modbus->write_command(_commanded_status, wait_ack);
@@ -339,7 +413,6 @@ MedMinorServoControl::_send_commanded_status(bool wait_ack)
     }catch(ModbusError const & _modbus_error){
         throw ServoConnectionError(_modbus_error.what());
     }
-    //_read_status();
 }
 
 MedMinorServoControl_sp 

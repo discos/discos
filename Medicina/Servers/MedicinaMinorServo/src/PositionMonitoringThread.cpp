@@ -24,9 +24,11 @@ PositionMonitoringThread::onStop(){
 void 
 PositionMonitoringThread::runLoop()
 {
-    m_control->update_position();
-    /*CUSTOM_LOG(LM_FULL_INFO, 
-               "MinorServo::PositionMonitoringThread::runLoop",
-               (LM_DEBUG, "Update current position"));*/
+    try{
+        m_control->update_position();
+    }catch(...) {
+        CUSTOM_LOG(LM_FULL_INFO, "PositionMonitoringThread::runLoop()",
+              (LM_WARNING, "Position Monitoring Thread cannot update position"));
+    }
 }
 

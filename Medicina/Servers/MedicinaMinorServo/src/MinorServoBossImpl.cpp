@@ -92,7 +92,6 @@ void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponen
      * INITIALIZE SERVO CONTROL
      */
     //TODO: add exception management here
-    //m_control = new MedMinorServoControl_sp(new MedMinorServoControl(m_server_ip));
     m_control = get_servo_control(m_server_ip);
     CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
               (LM_DEBUG, "Instantiated new minor servo control"));
@@ -229,6 +228,7 @@ MinorServoBossImpl::cleanUp()
         m_nchannel->disconnect();
         m_nchannel = NULL;
     }
+    disconnect();
     CharacteristicComponentImpl::cleanUp(); 
 }
 
@@ -256,6 +256,7 @@ MinorServoBossImpl::aboutToAbort()
         m_nchannel->disconnect();
         m_nchannel = NULL;
     }
+    disconnect();
     CharacteristicComponentImpl::aboutToAbort(); 
 }
 
@@ -999,7 +1000,6 @@ char * MinorServoBossImpl::getScanAxis() {
     else {
         return CORBA::string_dup("");
     }
-
 }
 
 void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::ConfigurationErrorEx) 
@@ -1509,12 +1509,44 @@ char * MinorServoBossImpl::getCommandedSetup() {
     return CORBA::string_dup((m_actual_config->get_name()).c_str());
 }
 
-
-/*string get_component_name(string token) 
+void 
+MinorServoBossImpl::connect()
+throw (MinorServoErrors::CommunicationErrorExImpl)
 {
-    strip(token);
-    return token;
-}*/
+    try{
+        m_control->connect();
+    }catch(ServoTimeoutError& ste){
+        THROW_EX(MinorServoErrors,CommunicationErrorEx, ste.what(), false);
+    }catch(const ServoConnectionError& sce){
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, sce.what(), false);
+    }
+}
+
+void 
+MinorServoBossImpl::disconnect()
+throw (MinorServoErrors::CommunicationErrorExImpl)
+{
+    try{
+        m_control->disconnect();
+    }catch(ServoTimeoutError& ste){
+        THROW_EX(MinorServoErrors,CommunicationErrorEx, ste.what(), false);
+    }catch(const ServoConnectionError& sce){
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, sce.what(), false);
+    }
+}
+
+void 
+MinorServoBossImpl::reset()
+throw (MinorServoErrors::CommunicationErrorExImpl)
+{
+    try{
+        m_control->reset();
+    }catch(const ServoTimeoutError& ste){
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, ste.what(), false);
+    }catch(const ServoConnectionError& sce){
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, sce.what(), false);
+    }
+}
 
 ACS::Time get_min_time(double range, double acceleration, double max_speed) {
     if(max_speed == 0 || acceleration == 0)

@@ -29,6 +29,7 @@
 #include <MinorServoErrors.h>
 #include <MinorServoS.h>
 #include <MinorServoBossS.h>
+#include <MedMinorServoBossS.h>
 #include <SP_parser.h>
 #include <cstring>
 #include <time.h>
@@ -75,7 +76,8 @@ struct VerboseStatusFlags {
 };
 
 
-class MinorServoBossImpl: public CharacteristicComponentImpl, public virtual POA_MinorServo::MinorServoBoss {
+class MinorServoBossImpl: public CharacteristicComponentImpl, 
+                          public virtual POA_MinorServo::MedMinorServoBoss {
 
 public:
     
@@ -411,6 +413,16 @@ public:
 
      void setASConfigurationImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl);
 
+     /******************************************************
+      * MedMinroServoBoss interface specific implementation
+      ******************************************************/ 
+
+      /**
+       * Disconnects from the minor servo server and release control lock
+       */
+      void connect() throw (MinorServoErrors::CommunicationErrorExImpl);
+      void disconnect() throw (MinorServoErrors::CommunicationErrorExImpl);
+      void reset() throw (MinorServoErrors::CommunicationErrorExImpl);
 private:
 	maci::ContainerServices *m_services;
 
