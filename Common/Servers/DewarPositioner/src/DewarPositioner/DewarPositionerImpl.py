@@ -58,6 +58,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         'derotatorGetCmdPosition': ('_getCmdPositionCmd', ()), 
         'derotatorGetRewindingStep': ('_getRewindingStepCmd', ()),
         'derotatorGetScanInfo': ('_getScanInfoCmd', ()),
+        'derotatorGetMaxLimit': ('_getMaxLimitCmd', ()),
+        'derotatorGetMinLimit': ('_getMinLimitCmd', ()),
     }
 
 
@@ -221,6 +223,37 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setData('Reason', ex.message)
             raise exc.getComponentErrorsEx()
 
+
+    def getMaxLimit(self):
+        try:
+            return self.positioner.getMaxLimit()
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
+            raise exc.getComponentErrorsEx()
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setData('Reason', ex.message)
+            raise exc.getComponentErrorsEx()
+
+
+    def getMinLimit(self):
+        try:
+            return self.positioner.getMinLimit()
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
+            raise exc.getComponentErrorsEx()
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl()
+            exc.setData('Reason', ex.message)
+            raise exc.getComponentErrorsEx()
+
+
     def getPositionFromHistory(self, t):
         try:
             return self.positioner.getPositionFromHistory(t)
@@ -280,11 +313,21 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         """Wrap getPosition() in order to add the `d` at the end of the string"""
         return '%.4fd' %self.getPosition()
  
+
     def _getCmdPositionCmd(self):
         """Wrap getCmdPosition() in order to add the `d` at the end of the string"""
         return '%.4fd' %self.getCmdPosition()
  
 
+    def _getMaxLimitCmd(self):
+        """Wrap getMaxLimit() in order to add the `d` at the end of the string"""
+        return '%.4fd' %self.getMaxLimit()
+ 
+
+    def _getMinLimitCmd(self):
+        """Wrap getMinLimit() in order to add the `d` at the end of the string"""
+        return '%.4fd' %self.getMinLimit()
+ 
 
     def _getRewindingStepCmd(self):
         """Wrap getRewindingStep() in order to add the `d` at the end of the string"""

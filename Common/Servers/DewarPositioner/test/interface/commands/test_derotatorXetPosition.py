@@ -28,5 +28,13 @@ class DerotatorSetPositionTest(unittest2.TestCase):
         self.assertEqual(success, False)
         self.assertRegexpMatches(answer, 'Error - wrong parameter usage')
 
+    def test_out_of_range(self):
+        dp = DewarPositionerImpl()
+        dp.command('derotatorSetup=KKG') # Default conf: FIXED
+        success, answer = dp.command('derotatorSetPosition=1000d')
+        self.assertEqual(success, False)
+        self.assertRegexpMatches(answer, 'Error - position 1000.00 out of range')
+
+
 if __name__ == '__main__':
     unittest2.main()

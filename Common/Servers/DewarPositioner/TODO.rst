@@ -1,3 +1,10 @@
+Impostare posizione
+===================
+Il comando derotatorSetPosition, nel caso di posizione out of range,
+non solleva eccezione (visto che viene sollevata nel thread), e quindi
+da operator input non viene segnalato l'errore all'utente.
+
+
 Comandi per lettura scrittura posizione + informazioni scan
 ===========================================================
 Attualmente per impostare e leggere la posizione abbiamo i comandi::

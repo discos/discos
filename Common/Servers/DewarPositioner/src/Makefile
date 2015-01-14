@@ -23,7 +23,7 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all
-	$(RM) *~ *Impl/*~ 
+	$(RM) *~ *Impl/*~ DewarPositioner/*.pyc
 	$(RM) ../lib/python/site-packages/*
 	$(RM) $(INTROOT)/lib/python/site-packages/DewarPositioner
 	@echo " . . . clean done"

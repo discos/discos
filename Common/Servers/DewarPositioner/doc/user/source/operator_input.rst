@@ -4,7 +4,7 @@
 Guida per l'astronomo
 *********************
 In questa sezione viene descritto come interagire con il ``DewarPositioner``
-tramite *operator input*.
+tramite la console *operator input*.
 
 .. _oisetup:
 
@@ -17,7 +17,7 @@ che si intende utilizzare::
    > derotatorSetup=CODE
 
 I codici sono i medesimi che vengono utilizzati per effettuare il setup dell'antenna.
-Ad esempio, se si volesse utilizzare il derotatore del ricevitore
+Ad esempio, se si vuole utilizzare il derotatore del ricevitore
 in banda K::
 
     > derotatorSetup=KKG
@@ -119,7 +119,9 @@ derotatore utilizzando il comando ``derotatorSetPosition``::
     > derotatorGetPosition
     30d
 
-Se il derotatore si trova in     una certa posizione ``Px`` e viene impostata
+Esempio di :math:`a^2`.
+
+Se il derotatore si trova in una certa posizione ``Px`` e viene impostata
 la modalità ``FIXED``, viene tenuta la posizione ``Px``. Il derotatore quindi
 non viene riportato in posizione di zero sinchè non viene comandata
 una nuova posizione con ``derotatorSetPosition``::

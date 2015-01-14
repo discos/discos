@@ -41,6 +41,8 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
+	$(RM) $(INTROOT)/lib/python/site-packages/DewarPositioner*_idl*.py*
+	$(RM) $(INTROOT)/lib/python/site-packages/libDewarPositionerStubs.*
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 

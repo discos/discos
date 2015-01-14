@@ -255,6 +255,22 @@ module Receivers {
         double getCmdPosition() raises (ComponentErrors::ComponentErrorsEx);
 
 
+        /**
+         * Return the maximum position value allowed.
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw CORBA::SystemException
+         */
+        double getMaxLimit() raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /**
+         * Return the minimum position value allowed.
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw CORBA::SystemException
+         */
+        double getMinLimit() raises (ComponentErrors::ComponentErrorsEx);
+
+
         /** Return the actual setup configuration (KKG, etc.) */
         string getActualSetup();
 

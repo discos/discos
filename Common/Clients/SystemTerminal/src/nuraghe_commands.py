@@ -122,6 +122,12 @@ def derotatorGetConfiguration():
 def derotatorGetCmdPosition():
     """TODO"""
 
+def derotatorGetMaxLimit():
+    """TODO"""
+
+def derotatorGetMinLimit():
+    """TODO"""
+
 def derotatorGetPosition():
     """TODO"""
 

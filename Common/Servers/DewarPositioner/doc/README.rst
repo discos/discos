@@ -26,4 +26,3 @@ Introduciamo i comandi::
       dParallacticPos (Pdt)
 
 
-

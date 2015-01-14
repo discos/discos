@@ -110,6 +110,9 @@ class Positioner(object):
             raise NotAllowedError('setPosition() not allowed in %s configuration" %self.getConfiguration()')
         elif self.isUpdating():
             raise NotAllowedError('the positioner is executing a scan')
+        elif not self.device.getMinLimit() < position < self.device.getMaxLimit():
+            raise NotAllowedError('position %.2f out of range [%.2f, %.2f]'
+                    %(position, self.device.getMinLimit(), self.device.getMaxLimit()))
         else:
             try:
                 self.goTo(position)
@@ -117,7 +120,7 @@ class Positioner(object):
                 self.conf.updateInitialPositions(position)
                 self.control.updateScanInfo({'iStaticPos': position})
             except Exception, ex:
-                raise PositionerError('cannot set position: %s' %ex.message)
+                raise PositionerError('cannot set the position: %s' %ex.message)
 
 
     def _setPosition(self, position):
@@ -414,13 +417,14 @@ class Positioner(object):
     def goTo(self, position):
         if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
-        try:
-            Positioner.generalLock.acquire()
-            self.stopUpdating()
-            self.control.updateScanInfo({'iStaticPos': position})
-            self._start(self.posgen.goto, position)
-        finally:
-            Positioner.generalLock.release()
+        else:
+            try:
+                Positioner.generalLock.acquire()
+                self.stopUpdating()
+                self.control.updateScanInfo({'iStaticPos': position})
+                self._start(self.posgen.goto, position)
+            finally:
+                Positioner.generalLock.release()
 
 
     def setOffset(self, offset):
@@ -467,6 +471,20 @@ class Positioner(object):
     def getPosition(self):
         if self.isSetup():
             return self.device.getActPosition()
+        else:
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+
+    def getMaxLimit(self):
+        if self.isSetup():
+            return self.device.getMaxLimit()
+        else:
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+
+    def getMinLimit(self):
+        if self.isSetup():
+            return self.device.getMinLimit()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
