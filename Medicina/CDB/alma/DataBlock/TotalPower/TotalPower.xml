@@ -10,9 +10,9 @@
 	<sections>4</sections>
 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>7</inputPortDB>
+	<inputPortBW>2350</inputPortBW>
 	<beams>7</beams>
- 	<bandWidth>2350.0</bandWidth>
- 	<attenuation>7.0</attenuation>		
 	<section_boards>0 1 2 3</section_boards>
 	<polarizations>L R L R</polarizations>
 	<feed>0 0 1 1</feed>
@@ -24,9 +24,9 @@
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
  	<inputPort>GREGORIAN</inputPort>
+ 	<inputPortDB>10</inputPortDB>
+ 	<inputPortBW>300</inputPortBW>
  	<beams>1</beams>
- 	<bandWidth>300.0</bandWidth>
- 	<attenuation>10.0</attenuation>	 	
  	<section_boards>0 1</section_boards>
  	<polarizations>L R</polarizations>
  	<feed>0 0</feed>
@@ -38,9 +38,9 @@
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
  	<inputPort>GREGORIAN GREGORIAN PRIMARY PRIMARY</inputPort>
+ 	<inputPortDB>13 13 7 7</inputPortDB>
+ 	<inputPortBW>2350 2350 2350 2350</inputPortBW>
  	<beams>1</beams>
- 	<bandWidth>2350.0</bandWidth>
- 	<attenuation>7.0</attenuation>	 	
  	<section_boards>2 3</section_boards>
  	<polarizations>L R</polarizations>
  	<feed>0 0</feed>
@@ -52,9 +52,9 @@
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
  	<inputPort>GREGORIAN</inputPort>
+ 	<inputPortDB>8</inputPortDB>
+ 	<inputPortBW>1250</inputPortBW>
  	<beams>1</beams>
- 	<bandWidth>1250.0</bandWidth>
- 	<attenuation>8.0</attenuation>	 	 	
  	<section_boards>0 1</section_boards>
  	<polarizations>R L</polarizations>
  	<feed>0 0</feed>

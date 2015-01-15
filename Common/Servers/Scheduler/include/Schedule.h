@@ -21,8 +21,10 @@
 #include <MinorServoBossC.h>
 #include <AntennaBossC.h>
 #include <ReceiversBossC.h>
+#include "Configuration.h"
 
 #define _SCHED_NULLTARGET "NULL"
+#define SEPARATOR '\t'
 
 /**
  * This namespace contains all the classes and symbol that are needed to parse and execute the schedules
@@ -38,7 +40,8 @@ class CParser;
 class CSubScanBinder {
 public:
 	CSubScanBinder(Antenna::TTrackingParameters * const primary,Antenna::TTrackingParameters * const secondary,
-	  MinorServo::MinorServoScan * const servo,Receivers::TReceiversParameters * const receievers);
+	  MinorServo::MinorServoScan * const servo,Receivers::TReceiversParameters * const receievers,CConfiguration* config=NULL);
+	CSubScanBinder(CConfiguration* config=NULL,bool dispose=true);
 	~CSubScanBinder();
 	void lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
 	void latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
@@ -56,18 +59,29 @@ public:
 	void skydip(const double& lat1,const double& lat2,const ACS::TimeInterval& duration,
 			const Antenna::TTrackingParameters * const sec);
 
+	void peaker(const IRA::CString& axis,const double& span,const ACS::TimeInterval& duration,const Antenna::TTrackingParameters * const sec);
 
 	void track(const char *targetName);
 	void moon();
 	void sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section);
 	void goTo(const double& az,const double& el);
+
+	Antenna::TTrackingParameters * getPrimary() const { return m_primary; }
+	Antenna::TTrackingParameters * getSecondary() const { return m_secondary;}
+	MinorServo::MinorServoScan * getServo() const { return m_servo; }
+	Receivers::TReceiversParameters *getReceivers() const { return m_receivers;}
+
+
 private:
 	Antenna::TTrackingParameters *m_primary;
 	Antenna::TTrackingParameters *m_secondary;
 	MinorServo::MinorServoScan *m_servo;
-	Receivers::TReceiversParameters *m_receievers;
+	Receivers::TReceiversParameters *m_receivers;
+	bool m_own;
+	CConfiguration* m_config;
 	void init();
 	void addSecondaryAntennaTrack(const Antenna::TTrackingParameters * const sec);
+	void copyPrimaryAntenaTrack(const Antenna::TTrackingParameters * const prim);
 
 };
 
@@ -116,6 +130,16 @@ public:
 	 * @return the message relative to the last error
 	 */
 	const IRA::CString& getLastError() const { return m_lastError; }
+
+	/**
+	 * sets the pointer to the configuration object
+	 */
+	void setConfiguration(CConfiguration* config) { m_config=config; }
+
+	/**
+	 * return the reference to the configuration object
+	 */
+	CConfiguration* getConfiguration() const { return m_config; }
 protected:
 	friend class CParser;
 	/**
@@ -142,6 +166,10 @@ protected:
 	 * Parser class
 	 */
 	CParser *m_parser;
+	/**
+	 * Pointer to the configuration object
+	 */
+	CConfiguration *m_config;
 	/**
 	 * This pure virtual method is called to check is the schedule is consistent. In particular
 	 * to check if all references to other file are all satisfied.
@@ -393,6 +421,8 @@ public:
 		Management::TScanTypes type;
 		void *primaryParameters;
 		void *secondaryParameters;
+		void *servoParameters;
+		void *receieversParsmeters;
 		//IRA::CString target;
 	};
 	/**
@@ -441,8 +471,10 @@ private:
 	 * translate a string into a scan type defined in the Management package
 	 * @return false if the translation was not possible
 	 */
-	bool string2ScanType(const IRA::CString& val,Management::TScanTypes& type);
+	/*bool string2ScanType(const IRA::CString& val,Management::TScanTypes& type);*/
 	
+	bool parsePeaker(const IRA::CString& line,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder);
+
 	/**
 	 * Reset the basic fields of tracking parameters structure.
 	 * @param scan pointer to the structure

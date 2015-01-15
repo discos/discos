@@ -30,6 +30,8 @@ public:
 	typedef struct {
 		Management::TScanAxis axis;
 		IRA::CString servoName;
+		Antenna::TsubScanGeometry antennaGeometry;
+		double beamDevitionFactor;
 	} TMinorServoAxis;
 
 	/**
@@ -165,6 +167,10 @@ public:
 	 * return axis based on the the name of the servo
 	 */
 	Management::TScanAxis getAxisFromServoName(const IRA::CString& servoName) const;
+
+	double getBDFfromAxis(const Management::TScanAxis& axis) const;
+
+	Antenna::TsubScanGeometry getScanGeometryFromAxis(const Management::TScanAxis& axis) const;
 
 private:
 	IRA::CString m_schedDir;

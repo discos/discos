@@ -65,7 +65,7 @@ module Management  {
 		MNG_SOLARSYTEMBODY,    /*!< tracks a body of the solar system */
 		MNG_OTF,			   /*!< perform a On the Fly Scan */
 		MNG_OTFC,              /*!< this is a wrapper of the otf, it allows the system to compute the center of the on-the-fly */  
-		MNG_FOCUS,             /*!< perform a focus measurement */
+		MNG_PEAKER,             /*!< perform a peaker measurement, involving the subreflector or minor servo systems */
 		MNG_SKYDIP,			 /*!< perform a skydip scan */
 		MNG_NONE               /*!< no action */
 	};

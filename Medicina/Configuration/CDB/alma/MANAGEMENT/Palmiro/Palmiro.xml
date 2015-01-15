@@ -43,13 +43,13 @@
 <restFrequency/>
 
 
-<MinorServoMapping axis="SUBR_Z" servoName="Z"/>
-<MinorServoMapping axis="SUBR_X" servoName="X"/>
-<MinorServoMapping axis="SUBR_Y" servoName="Y"/>
-<MinorServoMapping axis="SUBR_ROTY" servoName="THETA_Y"/>
-<MinorServoMapping axis="SUBR_ROTX" servoName="THETA_X"/>
-<MinorServoMapping axis="PFP_Z" servoName="ZP"/>
-<MinorServoMapping axis="PFP_Y" servoName="YP"/>
+<MinorServoMapping axis="SUBR_Z" servoName="Z" antennaGeometry="LON" beamDeviationFactor="0.0" />
+<MinorServoMapping axis="SUBR_X" servoName="X" antennaGeometry="LAT" beamDeviationFactor="0.5"/>
+<MinorServoMapping axis="SUBR_Y" servoName="Y" antennaGeometry="LON" beamDeviationFactor="0.5"/>
+<MinorServoMapping axis="SUBR_ROTY" servoName="THETA_Y" antennaGeometry="LAT" beamDeviationFactor="0.05"/>
+<MinorServoMapping axis="SUBR_ROTX" servoName="THETA_X" antennaGeometry="LON" beamDeviationFactor="0.05"/>
+<MinorServoMapping axis="PFP_Z" servoName="ZP" antennaGeometry="LON" beamDeviationFactor="0.0"/>
+<MinorServoMapping axis="PFP_Y" servoName="YP" antennaGeometry="LON" beamDeviationFactor="0.5"/>
 
 
 </Scheduler>

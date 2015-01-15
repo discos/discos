@@ -254,7 +254,6 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 		m_ptSize++;	
 		if (m_ptSize>=CACUProtocol::PROGRAMTRACK_TABLE_MINIMUM_LENGTH) { // the cache is full...time to send data points to the ACU
 			if (m_lastScanEpoch==0) {
-				printf("Nuova tabella\n");
 				m_currentScanStartEpoch=m_ptTable[0].timeMark;
 				len=m_protocol.loadProgramTrack(m_currentScanStartEpoch,m_ptTable,m_ptSize,true,m_pConfiguration->azimuthRateUpperLimit(),m_pConfiguration->elevationRateLowerLimit(),message,command,commNum);
 			}

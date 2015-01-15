@@ -13,11 +13,13 @@
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:antenna="urn:schemas-cosylab-com:Antenna:1.0"
 	elementFormDefault="qualified"
 	attributeFormDefault="unqualified">
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Antenna.xsd"/>
 		
 	<xs:simpleType name="TMinorServoAxisType">
 		<xs:annotation><xs:documentation>
@@ -72,6 +74,8 @@
 	<xs:complexType name="MinorServoMappingType">
 		<xs:attribute name="axis" type="TMinorServoAxisType" use="required"/>
 		<xs:attribute name="servoName" type="xs:string" use="required"/>
+		<xs:attribute name="antennaGeometry" type="antenna:TsubScanGeometryBasicType" use="required"/>
+		<xs:attribute name="beamDeviationFactor" type="xs:double" use="required"/>
 	</xs:complexType>
 	
 	<xs:complexType name="SchedulerType">

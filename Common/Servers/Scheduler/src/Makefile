@@ -40,14 +40,14 @@ EXECUTABLES_L   = testSched testLSTtoUT
 
 #
 # <brief description of xxxxx program>
-testSched_OBJECTS   = testSchedule Schedule
-testSched_LIBS      = IRALibrary
+testSched_OBJECTS   = testSchedule Schedule SubScanBinder Schedule_ScanList Configuration
+testSched_LIBS      = IRALibrary ComponentErrors
 
 testLSTtoUT_OBJECTS = testLST2UT
-testLSTtoUT_LIBS = IRALibrary
+testLSTtoUT_LIBS = IRALibrary ComponentErrors
 
-scheduleChecker_OBJECTS   = ScheduleChecker Schedule
-scheduleChecker_LIBS      = IRALibrary
+scheduleChecker_OBJECTS   = ScheduleChecker Schedule SubScanBinder Schedule_ScanList Configuration
+scheduleChecker_LIBS      = IRALibrary ComponentErrors
 
 #
 # special compilation flags for single c sources
@@ -64,7 +64,7 @@ INCLUDES        =
 LIBRARIES       = SchedulerImpl
 #LIBRARIES_L     =
 
-SchedulerImpl_OBJECTS = Schedule SchedulerImpl Configuration Core ScheduleExecutor SubScanBinder
+SchedulerImpl_OBJECTS = Schedule SchedulerImpl Configuration Core ScheduleExecutor SubScanBinder Schedule_ScanList
 SchedulerImpl_LIBS = IRALibrary AntennaDefinitionsStubs ManagmentDefinitionsStubs SchedulerStubs acsnc \
 EphemGeneratorStubs AntennaBossStubs ObservatoryStubs FitsWriterStubs DataReceiverStubs CustomLoggerStubs GenericWeatherStationStubs\
 GenericBackendStubs ComponentErrors ManagementErrors AntennaErrors BackendsErrors ParserErrors ReceiversErrors MinorServoErrors\

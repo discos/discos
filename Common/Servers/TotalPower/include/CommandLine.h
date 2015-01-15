@@ -540,9 +540,11 @@ private:
 	 */
 	long m_inputSection[MAX_SECTION_NUMBER];
 	/**
-	 * input type for the initial configuration
+	 * board setup for the initial configuration
 	 */
 	CProtocol::TInputs m_defaultInput[MAX_BOARDS_NUMBER];
+	double m_defaultInputDB[MAX_BOARDS_NUMBER];
+	double m_defaultInputBW[MAX_BOARDS_NUMBER];
 	WORD m_defaultInputSize;
 	/**
 	 * That's the clock of the backend. Is has the precision of one second

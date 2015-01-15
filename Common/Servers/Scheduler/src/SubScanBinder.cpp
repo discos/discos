@@ -3,22 +3,75 @@
 using namespace Schedule;
 
 CSubScanBinder::CSubScanBinder(Antenna::TTrackingParameters * const primary,Antenna::TTrackingParameters * const secondary,
- MinorServo::MinorServoScan * const servo,Receivers::TReceiversParameters * const receievers):
- m_primary(primary),m_secondary(secondary),m_servo(servo),m_receievers(receievers)
+ MinorServo::MinorServoScan * const servo,Receivers::TReceiversParameters * const receivers,CConfiguration* config):
+ m_primary(primary),m_secondary(secondary),m_servo(servo),m_receivers(receivers),m_own(false),m_config(config)
 {
 	init();
 }
 
+CSubScanBinder::CSubScanBinder(CConfiguration* config,bool dispose): m_primary(NULL), m_secondary(NULL), m_servo(NULL),
+		m_receivers(NULL),m_own(dispose), m_config(config)
+{
+	m_primary=new Antenna::TTrackingParameters;
+	m_secondary=new Antenna::TTrackingParameters;
+	m_servo=new MinorServo::MinorServoScan;
+	m_receivers=new Receivers::TReceiversParameters;
+	init();
+}
+
+
 CSubScanBinder::~CSubScanBinder()
 {
-
+	if (m_own) {
+		if (m_primary) delete m_primary;
+		if (m_secondary) delete m_secondary;
+		if (m_servo) delete m_servo;
+		if (m_receivers) delete m_receivers;
+	}
 }
+
+
 
 void CSubScanBinder::addOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame)
 {
 	m_primary->latitudeOffset=latOff;
 	m_primary->longitudeOffset=lonOff;
 	m_primary->applyOffsets=true;	m_primary->offsetFrame=frame;
+}
+
+void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const ACS::TimeInterval& duration,const Antenna::TTrackingParameters * const sec)
+{
+	double antennaSpan,bdf;
+	Management::TScanAxis axisCode;
+	Antenna::TsubScanGeometry geom;
+	Antenna::TsubScanDirection direction;
+	if (!m_config) {
+		bdf=0.0; // do not associate a movement in the telescope.....this corresponds to a simple tracking of the source
+	}
+	else {
+		axisCode=m_config->getAxisFromServoName(axis);
+		bdf=m_config->getBDFfromAxis(axisCode);
+		geom=m_config->getScanGeometryFromAxis(axisCode);
+	}
+	antennaSpan=span*bdf;
+	if (antennaSpan>=0) {
+		direction=Antenna::SUBSCAN_INCREASE;
+	}
+	else {
+		direction=Antenna::SUBSCAN_INCREASE;
+		antennaSpan*=-1.0;
+	}
+	if (antennaSpan>0) {
+		OTFC(Antenna::ANT_EQUATORIAL,geom,Antenna::ANT_HORIZONTAL,direction,antennaSpan,duration,sec);
+	}
+	else {
+		copyPrimaryAntenaTrack(sec);
+	}
+    m_servo->is_empty_scan=false;
+    m_servo->axis_code=CORBA::string_dup((const char *)axis);
+    m_servo->range=span;
+    m_servo->total_time=duration;
+	m_receivers->dummy=0;
 }
 
 void CSubScanBinder::OTFC(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
@@ -285,10 +338,41 @@ void CSubScanBinder::init()
 		m_servo->total_time=0;
 		m_servo->axis_code=CORBA::string_dup("");;
 		m_servo->is_empty_scan=true;
-		m_receievers->dummy=0;
+		m_receivers->dummy=0;
 }
 
 // **** PRVATE *********
+
+void CSubScanBinder::copyPrimaryAntenaTrack(const Antenna::TTrackingParameters * const prim)
+{
+	if (prim!=NULL) {
+		m_primary->targetName=CORBA::string_dup(prim->targetName);
+		m_primary->type=prim->type;
+		for (long k=0;k<Antenna::ANTENNA_TRACKING_PARAMETER_NUMBER;k++) m_primary->parameters[k]=prim->parameters[k];
+		m_primary->paramNumber=prim->paramNumber;
+		m_primary->frame=prim->frame;
+		m_primary->equinox=prim->equinox;
+		m_primary->longitudeOffset=prim->longitudeOffset;
+		m_primary->latitudeOffset=prim->latitudeOffset;
+		m_primary->offsetFrame=prim->offsetFrame;
+		m_primary->applyOffsets=prim->applyOffsets;
+		m_primary->secondary=false;
+		m_primary->section=prim->section;
+		m_primary->otf.lon1=prim->otf.lon1;
+		m_primary->otf.lat1=prim->otf.lat1;
+		m_primary->otf.lon2=prim->otf.lon2;
+		m_primary->otf.lat2=prim->otf.lat2;
+		m_primary->otf.coordFrame=prim->otf.coordFrame;
+		m_primary->otf.geometry=prim->otf.geometry;
+		m_primary->otf.subScanFrame=prim->otf.subScanFrame;
+		m_primary->otf.description=prim->otf.description;
+		m_primary->otf.direction=prim->otf.direction;
+		m_primary->otf.subScanDuration=prim->otf.subScanDuration;
+		m_primary->VradFrame=prim->VradFrame;
+		m_primary->VradDefinition=prim->VradDefinition;
+		m_primary->RadialVelocity=prim->RadialVelocity;
+	}
+}
 
 void CSubScanBinder::addSecondaryAntennaTrack(const Antenna::TTrackingParameters * const sec)
 {

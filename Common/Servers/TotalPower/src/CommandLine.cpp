@@ -871,7 +871,7 @@ void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExIm
 				//***************************************************************************
 				// This should be changed in order to read the Attenuation on board basis and to apply proper db for each board
 				//****************************************************************************
-				len=CProtocol::setConfiguration(sBuff,(long)k,m_defaultInput[k],13.0,2350.0);
+				len=CProtocol::setConfiguration(sBuff,(long)k,m_defaultInput[k],m_defaultInputDB[k],m_defaultInputBW[k]);
 			}
 			else {
 				len=CProtocol::setConfiguration(sBuff,(long)k,m_defaultInput[k],m_attenuation[m_sections[k]],m_bandWidth[m_sections[k]]);
@@ -1526,6 +1526,8 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 		m_sectionsNumber=setup.sections;
 		for (WORD k=0;k<MAX_BOARDS_NUMBER;k++) {
 			m_defaultInput[k]=setup.inputPort[k];
+			m_defaultInputDB[k]=setup.inputPortDB[k];
+			m_defaultInputBW[k]=setup.inputPortBW[k];
 			m_sections[k]=-1;
 		}
 		m_defaultInputSize=setup.inputPorts; // this should be 1 or the number of installed boards
@@ -1535,12 +1537,12 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 			m_boards[i]=setup.section_boards[i];
 			m_sections[m_boards[i]]=i;
 			m_input[i]=m_defaultInput[m_boards[i]];
+			m_attenuation[i]=m_defaultInputDB[m_boards[i]];
+			m_bandWidth[i]=m_defaultInputBW[m_boards[i]];
 			m_polarization[i]=setup.polarizations[i];
 			m_ifNumber[i]=setup.ifs[i];
 			m_feedNumber[i]=setup.feed[i];
 			m_inputSection[i]=i; // input 0 belongs to section 0 and so on.....
-			m_attenuation[i]=setup.attenuation;
-			m_bandWidth[i]=setup.bandWidth;
 		}		
 	}
 	else {

@@ -33,14 +33,14 @@ public:
 		long sections;
 		bool calSwitchEnabled;
 		CProtocol::TInputs inputPort[MAX_SECTION_NUMBER];
+		double inputPortDB[MAX_SECTION_NUMBER];
+		double inputPortBW[MAX_SECTION_NUMBER];
 		WORD inputPorts;
 		long beams;
 		long section_boards[MAX_SECTION_NUMBER];
 		Backends::TPolarization polarizations[MAX_SECTION_NUMBER];
 		long feed[MAX_SECTION_NUMBER];
 		long ifs[MAX_SECTION_NUMBER];
-		double bandWidth;
-		double attenuation;
 	} TBackendSetup;
 	
 	/**
@@ -187,9 +187,28 @@ private:
 	 * Parse the inputs string in order to extract and check the inputs port configuration for each board
 	 * @param conf input string
 	 * @param inputPort resulting port configuration
-	 * @param size dimension of the inputPort array
+	 * @param size returned dimension of the inputPort array
+	 * @return true if parsing was ok
 	 */
 	bool getInputPorts(const IRA::CString& conf,CProtocol::TInputs* inputPort,WORD& size);
+	/*
+	 * Parse the inputs string in order to extract and check the attenuation levels for each input port of each board
+	 * @param conf input string
+	 * @param inputDB resulting port attenuation
+	 * @param size requested dimension of the inputDB array, if real dimension does not correspond an error is returned
+	 * @return true if parsing was ok
+	 */
+	bool getInputPortsDB(const IRA::CString& conf,double* inputDB,const WORD& size);
+
+	/*
+	 * Parse the inputs string in order to extract and check the bandwidth (filters) for each input port of each board
+	 * @param conf input string
+	 * @param inputBW resulting port bandwidth
+	 * @param size requested dimension of the inputBW array, if real dimension does not correspond an error is returned
+	 * @return true if parsing was ok
+	 */
+	bool getInputPortsBW(const IRA::CString& conf,double* inputBW,const WORD& size);
+
 };
 
 #endif /*CONFIGURATION_H_*/
