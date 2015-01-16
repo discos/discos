@@ -34,18 +34,6 @@ enum MedMinorServoMode {
     MED_MINOR_SERVO_TRANSFER_TO_SECONDARY,
 };
 
-/**
- * Axes definitions for primary and secondary focus
- */
-/*const std::string *_PRIMARY_AXES_NAMES;
-std::vector<std::string> PRIMARY_AXES_NAMES;
-const std::string *_PRIMARY_AXES_UNITS;
-std::vector<std::string> PRIMARY_AXES_UNITS;
-const std::string *_SECONDARY_AXES_NAMES;
-std::vector<std::string> SECONDARY_AXES_NAMES;
-const std::string *_SECONDARY_AXES_UNITS;
-std::vector<std::string> SECONDARY_AXES_UNITS;*/
-
 class MinorServoGeometryError: public std::runtime_error
 {
     public:
@@ -85,9 +73,9 @@ class MedMinorServoPosition
          */ 
         bool is_success_position();
         /**
-         * return axes values only for actully used ones
+         * return axes values only for actually used ones
          */
-         std::vector<double> get_axes_positions();
+        std::vector<double> get_axes_positions();
 
         double x;
         double y;
@@ -129,6 +117,10 @@ class MedMinorServoGeometry
                            const MedMinorServoPosition& after_position,
                            ACS::Time time);
         static MedMinorServoPosition abs(const MedMinorServoPosition& position);
+        static double min_time(const MedMinorServoPosition& start, 
+                               const MedMinorServoPosition& stop);
+        static double max_time(const MedMinorServoPosition& start, 
+                               const MedMinorServoPosition& stop);
         static MedMinorServoPosition get_primary_tolerance();
         static MedMinorServoPosition get_secondary_tolerance();
         static bool check_axes_limits(const MedMinorServoPosition& position);

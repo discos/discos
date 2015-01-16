@@ -57,10 +57,17 @@ MedMinorServoControl::connect()
                 if(!(_commanded_position.is_success_position())){
                     CUSTOM_LOG(LM_FULL_INFO,
                            "MinorServo::MedMinorServoControl::connect",
-                           (LM_DEBUG, "Got a wrong mode, connecting anyway setting to secondary"));
-                    _commanded_position.mode = MED_MINOR_SERVO_SECONDARY;
+                           (LM_DEBUG, "Got a wrong mode, connecting anyway trying to guess"));
+                    try{
+                        _commanded_position.mode = MED_MINOR_SERVO_SECONDARY;
+                        _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
+                    }catch(...){
+                        _commanded_position.mode = MED_MINOR_SERVO_PRIMARY;
+                        _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
+                    }
+                }else{
+                    _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
                 }
-                _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
                 _commanded_status.escs = 1; //get back control now fieldsystem can not operate
                 _is_connected = true;
                 _send_commanded_status();
@@ -115,6 +122,7 @@ void
 MedMinorServoControl::set_position(const MedMinorServoPosition& position)
 {
     boost::mutex::scoped_lock lock(_command_guard);
+    boost::recursive_mutex::scoped_lock rlock(_read_guard);
     try{
         _commanded_status = MedMinorServoGeometry::positionToAxes(position);
     }catch(MinorServoGeometryError _geometry_error){
@@ -136,6 +144,7 @@ MedMinorServoControl::set_position_with_speed(const MedMinorServoPosition& posit
                                               double speed)
 {
     boost::mutex::scoped_lock lock(_command_guard);
+    boost::recursive_mutex::scoped_lock rlock(_read_guard);
     try{
         _commanded_status = MedMinorServoGeometry::positionToAxes(position);
     }catch(MinorServoGeometryError _geometry_error){
@@ -164,6 +173,7 @@ MedMinorServoControl::set_position_with_time(const MedMinorServoPosition& positi
                                              double time_offset)
 {
     boost::mutex::scoped_lock lock(_command_guard);
+    boost::recursive_mutex::scoped_lock rlock(_read_guard);
     try{
         _commanded_status = MedMinorServoGeometry::positionToAxes(position);
     }catch(MinorServoGeometryError _geometry_error){
@@ -192,7 +202,6 @@ MedMinorServoControl::set_position_with_time(const MedMinorServoPosition& positi
                                 _commanded_status.pos_z3) / time_offset;
     }
     _send_commanded_status();
-    _send_commanded_status();
     CUSTOM_LOG(LM_FULL_INFO,
                "MinorServo::MedMinorServoControl::set_position_with_time",
                (LM_DEBUG, "set new position"));
@@ -202,6 +211,7 @@ void
 MedMinorServoControl::set_last_position()
 {
     boost::mutex::scoped_lock lock(_command_guard);
+    boost::recursive_mutex::scoped_lock rlock(_read_guard);
     _send_commanded_status();
     CUSTOM_LOG(LM_FULL_INFO,
                "MinorServo::MedMinorServoControl::set_last_position",
@@ -345,9 +355,9 @@ MedMinorServoPosition
 MedMinorServoControl::update_position()
 {
     boost::recursive_mutex::scoped_lock rlock(_read_guard);
-    CUSTOM_LOG(LM_FULL_INFO,
+    /*CUSTOM_LOG(LM_FULL_INFO,
                "MinorServo::MedMinorServoControl::update_position",
-               (LM_DEBUG, "position updated"));
+               (LM_DEBUG, "position updated"));*/
     return _read_status();
 }
 
@@ -381,6 +391,7 @@ MedMinorServoControl::_read_status()
 bool
 MedMinorServoControl::_can_operate()
 {
+    boost::recursive_mutex::scoped_lock rlock(_read_guard);
     MEDMINORSERVOSTATUS actual_status;
     try{
         actual_status = _modbus->read_status();
@@ -430,3 +441,4 @@ get_servo_control(const char* server_ip,
                                     );
     return _tmp;
 }
+

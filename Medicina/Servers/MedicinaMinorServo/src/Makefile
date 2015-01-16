@@ -30,8 +30,9 @@ MedMinorServoControl_LIBS   = baci acsnc IRALibrary ManagmentDefinitionsStubs Ma
 MinorServoBossImpl_OBJECTS = MedMinorServoControl MedMinorServoGeometry \
                              MedMinorServoStatus MedMinorServoParameters \
                              MedMinorServoTime MedMinorServoModbus \
-                             ModbusChannel PositionQueue \
+                             MedMinorServoScan ModbusChannel PositionQueue \
                              PositionMonitoringThread MSBossPublisher \
+                             SetupThread ScanThread \
                              MSBossTracker MedMinorServoOffset MinorServoBossImpl
 
 MinorServoBossImpl_LIBS = MedMinorServoBossStubs MinorServoBossStubs \
@@ -55,6 +56,10 @@ testpassive_OBJECTS = testpassive testutils MedMinorServoModbus ModbusChannel Me
 testpassive_LIBS = IRALibrary boost_thread modbus 
 testgeometry_OBJECTS = testgeometry testutils MedMinorServoGeometry MedMinorServoTime PositionQueue
 testgeometry_LIBS = IRALibrary boost_unit_test_framework boost_thread modbus 
+
+EXECUTABLES = scudisconnect
+scudisconnect_OBJECTS = scudisconnect MedMinorServoModbus ModbusChannel MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
+scudisconnect_LIBS = IRALibrary modbus boost_thread
 
 #
 # Configuration Database Files

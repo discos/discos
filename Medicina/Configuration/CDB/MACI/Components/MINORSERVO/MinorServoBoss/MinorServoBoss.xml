@@ -8,7 +8,7 @@
     Name="MinorServoBoss"    
     Code="MinorServoBossImpl"
     ImplLang="cpp"
-    Type="IDL:alma/MinorServo/MedMinorServoBoss:1.0"
+    Type="IDL:alma/MinorServo/MinorServoBoss:1.0"
     Container="MinorServoBossContainer"
 	Default="true"
 

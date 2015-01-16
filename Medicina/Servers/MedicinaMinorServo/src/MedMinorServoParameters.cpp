@@ -101,9 +101,9 @@ MedMinorServoParameters::add_axis(
 int
 MedMinorServoParameters::getAxisMapping(std::string axis_name)
 {
-    for(int i = 0; i < _axes_names.size(); ++i)
+    for(unsigned int i = 0; i < _axes_names.size(); ++i)
         if(_axes_names[i] == axis_name)
-            return i;
+            return (int)i;
     return -1;
 }
 

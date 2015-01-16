@@ -54,7 +54,15 @@ void MSBossPublisher::runLoop()
     static MinorServo::MinorServoDataBlock data = {0, false, false, false, false, Management::MNG_OK};
     TIMEVALUE now(0.0L);
     IRA::CIRATools::getTime(now);
-    bool tracking = m_control->is_tracking();
+    bool tracking;
+    if(m_status->scan_active){
+        if(m_status->scanning)
+            tracking = true;
+        else
+            tracking = false;
+    }else{
+        tracking = m_control->is_tracking();
+    }
     try{
         if((m_old_status.parked != m_status->parked)||
            (m_old_status.parking != m_status->parking)||

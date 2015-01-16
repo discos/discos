@@ -34,8 +34,9 @@ ModbusChannel::ModbusChannel(const char* server_ip, int server_port) :
         throw ModbusError(modbus_strerror(errno));
     }
     rc = modbus_set_error_recovery(this->_modbus_context,
-                                   MODBUS_ERROR_RECOVERY_PROTOCOL |
-                                   MODBUS_ERROR_RECOVERY_LINK );
+                                   (modbus_error_recovery_mode)
+                                   (MODBUS_ERROR_RECOVERY_PROTOCOL |
+                                   MODBUS_ERROR_RECOVERY_LINK) );
     modbus_check_error(rc);
     timeval _response_timeout;
     _response_timeout.tv_sec = MODBUS_TIMEOUT;

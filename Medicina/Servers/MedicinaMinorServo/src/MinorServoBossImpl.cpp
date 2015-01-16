@@ -27,16 +27,18 @@ MinorServoBossImpl::MinorServoBossImpl(
     m_scanActive(this),
     m_scanning(this),
     // m_verbose_status(this),
-    m_nchannel(NULL),
     m_publisher_thread_ptr(NULL),
     m_tracking_thread_ptr(NULL),
-    m_position_monitoring_thread_ptr(NULL)
+    m_position_monitoring_thread_ptr(NULL),
+    m_setup_thread_ptr(NULL),
+    m_scan_thread_ptr(NULL),
+    m_nchannel(NULL)
 {   
     AUTO_TRACE("MinorServoBossImpl::MinorServoBossImpl()");
     m_commanded_conf = "none";
-    //m_scan_thread_ptr = NULL;
     m_servo_scanned = "none";
     m_parser = new SimpleParser::CParser<MinorServoBossImpl>(this, 10);
+    //m_antennaBoss = Antenna::AntennaBoss::_nil();
 }
 
 
@@ -132,12 +134,11 @@ void MinorServoBossImpl::initialize() throw (ComponentErrors::CouldntGetComponen
     );
 }
 
-
 void 
-MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImpl)
+MinorServoBossImpl::execute() 
+throw (ComponentErrors::MemoryAllocationExImpl)
 {
     AUTO_TRACE("MinorServoBossImpl::execute()");
-
     try {       
         m_status = new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), 
                                   POA_Management::ROTSystemStatus>(
@@ -232,7 +233,6 @@ MinorServoBossImpl::cleanUp()
     CharacteristicComponentImpl::cleanUp(); 
 }
 
-
 void 
 MinorServoBossImpl::aboutToAbort()
 {
@@ -252,6 +252,16 @@ MinorServoBossImpl::aboutToAbort()
         m_position_monitoring_thread_ptr->suspend();
         m_position_monitoring_thread_ptr->terminate();
     }
+    if(m_setup_thread_ptr != NULL)
+    {
+        getContainerServices()->getThreadManager()->destroy(m_setup_thread_ptr);
+        m_setup_thread_ptr = NULL;
+    }
+    if(m_scan_thread_ptr != NULL)
+    {
+        getContainerServices()->getThreadManager()->destroy(m_scan_thread_ptr);
+        m_scan_thread_ptr = NULL;
+    }
     if(m_nchannel != NULL ) {
         m_nchannel->disconnect();
         m_nchannel = NULL;
@@ -262,7 +272,7 @@ MinorServoBossImpl::aboutToAbort()
 
 void 
 MinorServoBossImpl::setup(const char *config) 
-throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx)
+throw (CORBA::SystemException, MinorServoErrors::SetupErrorEx)
 {
     AUTO_TRACE("MinorServoBossImpl::setup()");
     try {
@@ -270,51 +280,63 @@ throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx)
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::setup",
                    (LM_NOTICE, "Minor Servo Setup: %s", config));
     }
-    catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getConfigurationErrorEx();     
+    catch (MinorServoErrors::SetupErrorExImpl& ex) {
+        ex.log(LM_WARNING);
+        throw ex.getSetupErrorEx();     
     }
 }
 
 void 
 MinorServoBossImpl::setupImpl(const char *config) 
-throw (ManagementErrors::ConfigurationErrorExImpl)
+throw (MinorServoErrors::SetupErrorEx)
 {
+    if(m_servo_status.starting)
+        THROW_EX(MinorServoErrors, SetupErrorEx, 
+                 "The system is executing another setup", false);
+    if(m_servo_status.parking)
+        THROW_EX(MinorServoErrors, SetupErrorEx, 
+                 "The system is executing a park", false);
+    if(m_servo_status.scan_active)
+        THROW_EX(MinorServoErrors, SetupErrorEx, 
+                 "The system is performing a scan", false);
+    if(m_config.count(std::string(config)) == 0)
+        THROW_EX(MinorServoErrors, SetupErrorEx, 
+                 "Cannot find requested configuration", false);
     try {
         setElevationTrackingImpl(IRA::CString("OFF"));
     }
     catch(...) {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "cannot turn the tracking off", false);
+        THROW_EX(MinorServoErrors, SetupErrorEx, "cannot turn the tracking off", false);
     }
-    //TODO: define a new Setup Error
-    if(m_servo_status.starting)
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, 
-                 "The system is executing another setup", false);
-    if(m_servo_status.parking)
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, 
-                 "The system is executing a park", false);
-    if(m_servo_status.scanning)
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, 
-                 "The system is performing a scan", false);
-    if(m_config.count(std::string(config)) == 0)
-    {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, 
-                 "Cannot find requested configuration", false);
-    }else{
-        m_servo_status.reset();
-        m_servo_status.starting = true;
-        m_actual_config = &(m_config[std::string(config)]);
-        /**
-         * Get the setup position at 45 deg
-         */
-        MedMinorServoPosition setup_position = m_actual_config->get_position();
-        m_offset.initialize(m_actual_config->is_primary_focus());
-        //clearUserOffset();
-        //clearSystemOffset();
-        m_control->set_position(setup_position);
-        m_servo_status.ready = true;
-        m_servo_status.starting = false;
+    m_servo_status.reset();
+    m_servo_status.starting = true;
+    m_actual_config = &(m_config[std::string(config)]);
+    /**
+     * Get the setup position at 45 deg
+     */
+    MedMinorServoPosition setup_position = m_actual_config->get_position();
+    m_offset.initialize(m_actual_config->is_primary_focus());
+    try{
         m_actual_conf = string(config);
+        m_control->set_position(setup_position);
+        SetupThreadParameters thread_params(m_control,
+                                            &m_servo_status);
+        if(m_setup_thread_ptr != NULL)
+        {
+            getContainerServices()->getThreadManager()->destroy(m_setup_thread_ptr);
+            m_setup_thread_ptr = NULL;
+        }
+        m_setup_thread_ptr = getContainerServices()->getThreadManager()->
+                                create<SetupThread, SetupThreadParameters>
+                                 (SETUP_THREAD_NAME, thread_params);
+        if(m_setup_thread_ptr->isSuspended())
+            m_setup_thread_ptr->resume();
+        CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::setupImpl",
+                   (LM_DEBUG, "Started setup positioning thread"));
+    }catch(const ServoTimeoutError& ste){
+        THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), false);
+    }catch(...){
+        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", false);
     }
 }
 
@@ -351,22 +373,8 @@ throw (ManagementErrors::ParkingErrorExImpl)
         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::park(): some problems turning the elevation tracking off."));
     }
 
-    m_servo_status.parking = true;
-
-    /*try {
-        if(m_park_thread_ptr != NULL)
-            m_park_thread_ptr->restart();
-        else {
-            m_park_thread_ptr = getContainerServices()->getThreadManager()->create<ParkThread,
-               MSBossConfiguration *>("ParkThread", m_configuration);
-            m_park_thread_ptr->resume();
-        }
-    }
-    catch(...) {
-        THROW_EX(ManagementErrors, ParkingErrorEx, "The MinorServoBoss is attempting to execute a previous park", false);
-    }*/
-
-    m_servo_status.parking = false;
+    //m_servo_status.parking = true;
+    //m_servo_status.parking = false;
 }
 
 
@@ -403,7 +411,6 @@ throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx)
     units = units_res._retn();
 }
 
-
 ACS::doubleSeq * 
 MinorServoBossImpl::getAxesPosition(ACS::Time time) 
     throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx, ComponentErrors::UnexpectedEx)
@@ -425,14 +432,12 @@ MinorServoBossImpl::getAxesPosition(ACS::Time time)
     return positions_res._retn();
 }
 
-
 bool MinorServoBossImpl::isStarting() { return m_servo_status.starting; }
 bool MinorServoBossImpl::isASConfiguration() { return m_servo_status.as_configuration; }
 bool MinorServoBossImpl::isParking() { return m_servo_status.parking; }
 bool MinorServoBossImpl::isReady() { return m_servo_status.ready; }
 bool MinorServoBossImpl::isScanning() { return m_servo_status.scanning; }
 bool MinorServoBossImpl::isScanActive() { return m_servo_status.scan_active; }
-
 
 CORBA::Boolean 
 MinorServoBossImpl::command(const char *cmd, CORBA::String_out answer) 
@@ -465,6 +470,62 @@ throw (CORBA::SystemException)
     return res;
 }
 
+/*
+void
+MinorServoBossImpl::loadAntennaBoss()
+{
+    if ((!CORBA::is_nil(m_antenna_boss)) && (m_antenna_boss_error)) {
+        try {
+            m_services->releaseComponent((const char*)m_antenna_boss->name());
+        }catch (...) {}
+        m_antenna_boss = Antenna::AntennaBoss::_nil();
+    }
+    if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
+        try {
+            m_antenna_boss = m_services->getDefaultComponent<Antenna::AntennaBoss>((const char*)m_config->getAntennaBossComponent());
+            m_antenna_boss_error = false;
+         }catch (maciErrType::CannotGetComponentExImpl& ex) {
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadAntennaBoss()");
+            Impl.setComponentName((const char*)m_config->getAntennaBossComponent());
+            ref=Antenna::AntennaBoss::_nil();
+            throw Impl;     
+        }catch (maciErrType::NoPermissionExImpl& ex){
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadAntennaBoss()");
+            Impl.setComponentName((const char*)m_config->getAntennaBossComponent());
+            ref=Antenna::AntennaBoss::_nil();
+            throw Impl;     
+        }catch (maciErrType::NoDefaultComponentExImpl& ex){
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadAntennaBoss()");
+            Impl.setComponentName((const char*)m_config->getAntennaBossComponent());
+            ref=Antenna::AntennaBoss::_nil();
+            throw Impl;             
+        }
+    }
+}
+
+void
+MinorServoBossImpl::unloadAntennaBoss()
+{
+    if (!CORBA::is_nil(ref)) {
+        try {
+            m_services->releaseComponent((const char*)m_antenna_boss->name());
+        }catch(maciErrType::CannotReleaseComponentExImpl& ex) {
+_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CCore::unloadAntennaBoss()");
+Impl.setComponentName((const
+char
+*)m_config->getAntennaBossComponent());
+Impl.log(LM_WARNING);
+}
+catch
+(...)
+{
+_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::unloadAntennaBoss())");
+            impl.log(LM_WARNING);
+                    }
+                            ref=Antenna::AntennaBoss::_nil();
+                                }
+}*/
+
 bool 
 MinorServoBossImpl::isParked() 
 throw (ManagementErrors::ConfigurationErrorEx) 
@@ -474,67 +535,20 @@ throw (ManagementErrors::ConfigurationErrorEx)
     return true;
 }
 
-void MinorServoBossImpl::stopScan() throw (ManagementErrors::SubscanErrorEx)
-{
-/*    if(m_configuration->m_isScanActive) {
-        string comp_name((m_configuration->m_scan).comp_name);
-        if(m_component_refs.count(comp_name)) {
-            MinorServo::WPServo_var component_ref = m_component_refs[comp_name];
-            try {
-                MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-                component_ref = m_services->getComponent<MinorServo::WPServo>(("MINORSERVO/" + comp_name).c_str());
-                if(!CORBA::is_nil(component_ref)) {
-                    if(m_scan_thread_ptr != NULL) {
-                        m_scan_thread_ptr->terminate();
-                        m_scan_thread_ptr->suspend();
-                    }
-                    component_ref->cleanPositionsQueue(NOW);
-                    m_configuration->m_isScanning = false;
-                    if((m_configuration->m_scan).wasElevationTrackingEn)
-                        turnTrackingOn();
-                    else {
-                        if(component_ref->isReady()) {
-                            component_ref->setPosition((m_configuration->m_scan).plainCentralPos, NOW);
-                        }
-                        else {
-                            THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan(): component not ready", true);
-                        }
-                    }
-
-                    m_configuration->m_isScanActive = false;
-                }
-                else {
-                    THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan(): nil component reference", true);
-                }
-            }
-            catch(...) {
-                THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan(): unexpected exception", true);
-            }
-        }
-        else {
-            THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan(): cannot get the component reference", true);
-        }
-    }
-    else {
-        THROW_EX(ManagementErrors, SubscanErrorEx, "stopScan(): no scan active", true);
-    }*/
-}
-
-
-bool MinorServoBossImpl::checkFocusScan(const ACS::Time starting_time, const double range, const ACS::Time total_time) 
-        throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx) 
+bool 
+MinorServoBossImpl::checkFocusScan(const ACS::Time starting_time, 
+                                   const double range, 
+                                   const ACS::Time total_time) 
+    throw (ManagementErrors::ConfigurationErrorEx, 
+           MinorServoErrors::ScanErrorEx) 
 {    
     if(!isReady())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "checkFocusScan: the system is not ready", true);
+        THROW_EX(MinorServoErrors, ScanErrorEx, "checkFocusScan: the system is not ready", true);
     if(isScanning())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "checkFocusScan: the system is executing another scan", true);
-    
-    /*string servo_name =  m_configuration->getActivePFocusServo(); 
-    string axis_code = servo_name + string("_TZ");
-    return checkScanImpl(starting_time, range, total_time, axis_code);*/
-    return true;
+        THROW_EX(MinorServoErrors, ScanErrorEx, "checkFocusScan: the system is executing another scan", true);
+    string axis_code = m_actual_config->is_primary_focus() ? "ZP" : "Z";
+    return checkScanImpl(starting_time, range, total_time, axis_code);
 }
-
 
 bool 
 MinorServoBossImpl::checkScan(
@@ -543,14 +557,13 @@ MinorServoBossImpl::checkScan(
         const ACS::Time total_time, 
         const char *axis_code
         )
-    throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
+    throw (ManagementErrors::ConfigurationErrorEx,
+           MinorServoErrors::ScanErrorEx) 
 {
     if(!isReady())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is not ready", true);
-
+        THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is not ready", true);
     if(isScanning())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is executing another scan", true);
-
+        THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is executing another scan", true);
     return checkScanImpl(starting_time, range, total_time, string(axis_code));
 }
 
@@ -564,141 +577,7 @@ MinorServoBossImpl::getMinScanStartingTime(
     )
     throw (ManagementErrors::ConfigurationErrorExImpl, ManagementErrors::SubscanErrorExImpl)
 {
-    ACS::Time min_starting_time = 0;
-    /*
-    InfoAxisCode info;
-    info = m_configuration->getInfoFromAxisCode(axis_code); // Throws ConfigurationErrorExImpl
-    size_t axis = info.axis_id;
-    string comp_name = info.comp_name;
-
-    TIMEVALUE dtime(SCAN_DELTA_TIME);
-
-    MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-
-    if((m_configuration->m_component_refs).count(comp_name)) {
-        component_ref = (m_configuration->m_component_refs)[comp_name];
-        if(!CORBA::is_nil(component_ref))
-            if(!component_ref->isReady()) {
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): the component is not ready", false);
-            }
-            else {
-                CDB::DAL_ptr dal_p = getContainerServices()->getCDB();
-                CDB::DAO_ptr dao_p = dal_p->get_DAO_Servant(("alma/MINORSERVO/" + comp_name).c_str());
-                size_t number_of_axis = dao_p->get_long("number_of_axis");
-                bool virtual_rs = dao_p->get_long("virtual_rs");
-                long servo_address = dao_p->get_long("servo_address");
-                double zero = dao_p->get_double("zero");
-                if(axis > number_of_axis - 1) {
-                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): axis out of range", false);
-                }
-
-                ACS::doubleSeq *acc = component_ref->getData("ACCELERATION");
-                ACS::doubleSeq *mspeed = component_ref->getData("MAX_SPEED");
-                size_t idx = (*acc).length() - number_of_axis + axis;
-                if((*acc).length() - 1 < idx || (*mspeed).length() - 1 < idx) {
-                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): index out of range", false);
-                }
-                acceleration = (*acc)[idx]; 
-                max_speed= (*mspeed)[idx]; 
-                if(acceleration != 0 && max_speed != 0) {
-                    ACSErr::Completion_var completion;          
-                    ACS::doubleSeq act_pos = *((component_ref->actPos())->get_sync(completion.out()));
-
-                    if(act_pos.length() <= axis) {
-                        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): wrong position indexing", false);
-                    }
-                    // Get the central position                  
-                    ACS::doubleSeq centralPos = m_configuration->isScanActive() ? (m_configuration->m_scan).centralPos : act_pos;
-
-                    ACS::doubleSeq positions_left, positions_right;
-                    positions_left = positions_right = centralPos;
-                    positions_left[axis] = positions_left[axis] - range / 2;
-                    positions_right[axis] = positions_right[axis] + range / 2;
-                    // Check if the positions are allowed
-                    ACS::doubleSeq_var max_values = component_ref->getMaxPositions();
-                    ACS::doubleSeq_var min_values = component_ref->getMinPositions();
-                    ACS::doubleSeq_var system_offset = component_ref->getSystemOffset();
-                    if(system_offset->length() < axis) {
-                        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): wrong system offset indexing", false);
-                    }
-                    if(positions_left[axis] + system_offset[axis] <= min_values[axis]) {
-                        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): min position out of range", false);
-                    }
-                    if(positions_right[axis] + system_offset[axis] >= max_values[axis]) {
-                        THROW_EX(ManagementErrors, ConfigurationErrorEx, "getMinScanStartingTime(): max position out of range", false);
-                    }
-                    
-                    double left_distance = abs_(act_pos[axis] - positions_left[axis]);
-                    double right_distance = abs_(act_pos[axis] - positions_right[axis]);
-                    double positioning_distance = left_distance <= right_distance ? left_distance : right_distance;
-
-                    // If the component has a virtual reference system
-                    if(virtual_rs) {
-                        // Conversion from Virtual reference system to the Real one
-                        virtual2real(positions_left, servo_address, zero);
-                        virtual2real(positions_right, servo_address, zero);
-                        ACS::doubleSeq diff;
-                        diff.length(act_pos.length());
-
-                        for(size_t i = 0; i < act_pos.length(); i++)
-                            diff[i] = abs_(positions_left[i] - positions_right[i]);
-
-                        double max_diff = 0;
-                        for(size_t i = 0; i < act_pos.length(); i++)
-                            if(diff[i] > max_diff)
-                                max_diff = diff[i];
-
-                        range = max_diff;
-
-                        // Conversion from Virtual reference system to the Real one
-                        virtual2real(act_pos, servo_address, zero);
-                        ACS::doubleSeq diff_left, diff_right;
-                        diff_left.length(act_pos.length());
-                        diff_right.length(act_pos.length());
-
-                        for(size_t i = 0; i < act_pos.length(); i++) {
-                            diff_left[i] = abs_(act_pos[i] - positions_left[i]);
-                            diff_right[i] = abs_(act_pos[i] - positions_right[i]);
-                        }
-
-                        double max_diff_left = 0;
-                        double max_diff_right = 0;
-                        for(size_t i = 0; i < act_pos.length(); i++) {
-                            if(diff_left[i] > max_diff_left)
-                                max_diff_left = diff_left[i];
-                            if(diff_right[i] > max_diff_right)
-                                max_diff_right = diff_right[i];
-                        }
-                        positioning_distance = max_diff_left <= max_diff_right ? max_diff_left : max_diff_right;
-                    }
-
-                    ACS::Time positioning_time = get_min_time(positioning_distance, acceleration, max_speed);
-                    
-                    
-                    min_starting_time = static_cast<ACS::Time>(
-                            getTimeStamp() + SCAN_SHIFT_TIME + positioning_time * (1 + SCAN_GUARD_COEFF)
-                    );
-                }
-                else {
-                    THROW_EX(
-                            ManagementErrors, 
-                            ConfigurationErrorEx, 
-                            "getMinScanStartingTime(): Acceleration or maximum speed wrong", 
-                            false
-                    );
-                }
-            }
-    }
-    else {
-        THROW_EX(
-                ManagementErrors, 
-                ConfigurationErrorEx, 
-                ("some problems getting the component " + comp_name).c_str(),
-                false
-        );
-    }
-    */
-    return min_starting_time;
+    return ACS::Time(0.0);
 }
 
 
@@ -707,49 +586,13 @@ bool MinorServoBossImpl::checkScanImpl(
         double range, 
         const ACS::Time total_time, 
         const string axis_code
-    ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
+     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx)
 {
-    /*                    
-    double acceleration = 0.0;
-    double max_speed = 0.0;
-    TIMEVALUE stime(starting_time);
-    TIMEVALUE ttime(total_time);
-    // (ManagementErrors::ConfigurationErrorExImpl, ManagementErrors::SubscanErrorExImpl)
-    ACS::Time min_starting_time = 0;
-    try {
-        min_starting_time = getMinScanStartingTime(range, axis_code, acceleration, max_speed);
-    }
-    catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
-        return false;
-    }
-    catch(ManagementErrors::SubscanErrorExImpl& ex) {
-        return false;
-    }
-    catch(...) {
-        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): unexpected exception getting the min starting time"));
-        return false;
-    }
-    
-    TIMEVALUE min_stime(min_starting_time); // Minimum starting time
-    if(min_starting_time > starting_time) {
-        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): starting time too much close to actual time"));
-        return false;
-    }
-
-    ACS::Time min_scan_time = get_min_time(range, acceleration, max_speed);
-    ACS::Time guard_min_scan_time = static_cast<ACS::Time>(min_scan_time * (1 + SCAN_GUARD_COEFF));
-    TIMEVALUE gmst(guard_min_scan_time);
-    if(CIRATools::timeSubtract(ttime, gmst) <= 0) {
-        ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): total time too short for performing the scan."));
-        return false;
-    }
-    else
-        return true;
-
-    ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan - last line!"));
-    return false;
-    */
-    return true;
+    //TODO: this is so approximate and should change in newer versions
+    MedMinorServoPosition central_position = m_control->get_position();
+    MedMinorServoScan scan(central_position, starting_time, range, total_time,
+                           axis_code, isElevationTracking());
+    return scan.check();
 }
 
 
@@ -758,244 +601,98 @@ void MinorServoBossImpl::startScan(
         const double range, 
         const ACS::Time total_time, 
         const char *axis_code
-    ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
+     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx)
 {
     if(!isReady())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is not ready", true);
-
-    if(isScanning())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "StartScan: the system is executing another scan", true);
-
+        THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is not ready", true);
+    if(isScanActive())
+        THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is executing another scan", true);
     startScanImpl(starting_time, range, total_time, string(axis_code));
 }
 
 
 void MinorServoBossImpl::startFocusScan(ACS::Time & starting_time, const double range, const ACS::Time total_time) 
-        throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx) 
+     throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx)
 {    
     if(!isReady())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "startFocusScan: the system is not ready", true);
-
-    if(isScanning())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "startFocusScan: the system is executing another scan", true);
-    
+        THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is not ready", true);
+    if(isScanActive())
+        THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is executing another scan", true);
     /**
      * we call both primary and secondary focus axes "Z"
      */
     startScanImpl(starting_time, range, total_time, "Z");
 }
 
-
 void MinorServoBossImpl::startScanImpl(
         ACS::Time & starting_time, 
         const double range, 
         const ACS::Time total_time, 
         string axis_code
-    ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx)
+     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx)
 {
-    /*
-    m_configuration->m_isScanning = true;
-    InfoAxisCode info;
-    try {
-        info = m_configuration->getInfoFromAxisCode(axis_code);
+    boost::recursive_mutex::scoped_lock lock(_scan_guard);
+    m_servo_status.scanning = false;
+    m_servo_status.scan_active = true;
+    bool was_tracking = m_servo_status.elevation_tracking;
+    turnTrackingOff();
+    //TODO: get position at starting time
+    MedMinorServoPosition central_position = m_control->get_position();
+    //MedMinorServoPosition central_position = actual_conf->get_position(az,el);
+    m_scan.init(central_position, starting_time, range, total_time, axis_code,
+                was_tracking);
+    ScanThreadParameters thread_params(m_control,
+                                       &m_servo_status,
+                                       m_scan);
+    if(m_scan_thread_ptr != NULL)
+    {
+        getContainerServices()->getThreadManager()->destroy(m_scan_thread_ptr);
+        m_scan_thread_ptr = NULL;
     }
-    catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getConfigurationErrorEx();     
-    }
-    catch(...) {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "Unexpected exception getting the axis information.", true);
-    }
-
-    try {
-        if(starting_time == 0) {
-            double acceleration = 0.0;
-            double max_speed = 0.0;
-            starting_time = getMinScanStartingTime(range, axis_code, acceleration, max_speed);
-        }
-    }
-    catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getConfigurationErrorEx();     
-    }
-    catch(ManagementErrors::SubscanErrorExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getSubscanErrorEx();     
-    }
-    catch(...) {
-        THROW_EX(ManagementErrors, SubscanErrorEx, "Unexpected exception getting the min starting time", true);
-    }
-
-    size_t axis = info.axis_id;
-    string comp_name = info.comp_name;
-
-    try {
-        TIMEVALUE now(0.0L);
-        IRA::CIRATools::getTime(now);
-
-        // If the total time is less than the delta time (the time between two consecutive positioning)
-        TIMEVALUE ttime(total_time);
-        TIMEVALUE dtime(SCAN_DELTA_TIME);
-        if(CIRATools::timeSubtract(ttime, dtime) < 0)
-            THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: total time is too short", true);
-
-        TIMEVALUE stime(starting_time);
-        if(CIRATools::timeSubtract(stime, now) <= 0)
-            THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: starting time is not valid", true);
-
-        m_servo_scanned = comp_name;
-        MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-        if((m_configuration->m_component_refs).count(comp_name)) {
-            component_ref = (m_configuration->m_component_refs)[comp_name];
-
-            if(CORBA::is_nil(component_ref)) 
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScanImpl: cannot get the reference of the component.", true);
-
-            if(!component_ref->isReady()) 
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScanImpl: the component is not ready.", true);
-
-            CDB::DAL_ptr dal_p = getContainerServices()->getCDB();
-            CDB::DAO_ptr dao_p = dal_p->get_DAO_Servant(("alma/MINORSERVO/" + comp_name).c_str());
-            size_t number_of_axis = dao_p->get_long("number_of_axis");
-                                                        
-            if(axis > number_of_axis - 1)               
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: axis index error", true);
-                                                        
-            bool wasTrackingEn = isElevationTrackingEn();
-            turnTrackingOff();
-
-            // Get the actual positions
-            ACSErr::Completion_var completion;          
-            ACS::doubleSeq actPos = *((component_ref->actPos())->get_sync(completion.out()));
-            ACS::doubleSeq plainActPos = *((component_ref->plainActPos())->get_sync(completion.out()));
-
-            // Compute the central positions
-            ACS::doubleSeq plainCentralPos = m_configuration->isScanActive() ? (m_configuration->m_scan).plainCentralPos : plainActPos;
-            ACS::doubleSeq centralPos;
-            centralPos.length(component_ref->numberOfAxes());
-            if(m_configuration->isScanActive()) {
-                ACS::doubleSeq_var user_offset = component_ref->getUserOffset();
-                if(user_offset->length() != centralPos.length()) {
-                    THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: mismatch between offset and central position length.", true);
-                }
-                if(plainCentralPos.length() != centralPos.length()) {
-                    THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: mismatch between central positions length.", true);
-                }
-                for(size_t i=0; i<centralPos.length(); i++) 
-                    centralPos[i] = plainCentralPos[i] + user_offset[i];
-            }
-            else {
-                if(centralPos.length() != actPos.length()) {
-                    THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: mismatch between actual and central position length.", true);
-                } 
-                for(size_t i=0; i<actPos.length(); i++)
-                    centralPos[i] = actPos[i];
-            }
-
-            // Get the virual elongations 
-            ACS::doubleSeq virtualCentralElongation = m_configuration->isScanActive() ? 
-                                                      (m_configuration->m_scan).virtualCentralElongation : 
-                                                      plainActPos;
-                                                    
-            if(actPos.length() <= axis) {          
-                ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::startScan: wrong actual position length"));
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: wrong actual position length.", true);
-            }                                       
-
-            ACS::doubleSeq_var max_values = component_ref->getMaxPositions();
-            ACS::doubleSeq_var min_values = component_ref->getMinPositions();
-
-            // Check if the positions are allowed
-            if(virtualCentralElongation[axis] - range/2 <= min_values[axis]) {
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: min axis position out of range.", true);
-            }
-            if(virtualCentralElongation[axis] + range/2 >= max_values[axis]) {
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: max axis position out of range.", true);
-            }
-
-            m_configuration->setScan(
-                    starting_time, 
-                    total_time, 
-                    SCAN_DELTA_TIME, 
-                    range, 
-                    comp_name, 
-                    axis, 
-                    axis_code,
-                    actPos, 
-                    centralPos,
-                    plainCentralPos,
-                    virtualCentralElongation,
-                    wasTrackingEn
-            );
-        }
-        else {
-            THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: cannot get the component reference.", true);
-        }
-        
-        try {
-            if(m_scan_thread_ptr != NULL)
-                m_scan_thread_ptr->restart();
-            else {
-                m_scan_thread_ptr = getContainerServices()->getThreadManager()->create<ScanThread, MSBossConfiguration *> 
-                    ("ScanThread", m_configuration);
-                m_scan_thread_ptr->resume();
-            }
-        }
-        catch(...) {
-            THROW_EX(ManagementErrors, ConfigurationErrorEx, "The MinorServoBoss is attempting to execute a previous scan", false);
-        }
-        m_configuration->m_isScanActive = true;
-    }
-    catch(...) {
-        m_configuration->m_isScanning = false;
-        m_configuration->m_isScanActive = false;
-        throw;
-    }
-    */
+    m_scan_thread_ptr = getContainerServices()->getThreadManager()->
+                            create<ScanThread, ScanThreadParameters>
+                             (SCAN_THREAD_NAME, thread_params);
+    if(m_scan_thread_ptr->isSuspended())
+        m_scan_thread_ptr->resume();
+    CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::startScanImpl",
+               (LM_DEBUG, "Started scan thread"));
 }
 
-
-CORBA::Double MinorServoBossImpl::getCentralScanPosition() throw (ManagementErrors::SubscanErrorEx)
+void 
+MinorServoBossImpl::stopScan() 
+throw (MinorServoErrors::ScanErrorEx)
 {
-    /*
-    ACS::doubleSeq_var position_res = new ACS::doubleSeq;
-    string comp_name = (m_configuration->m_scan).comp_name;
-
-    if(isScanActive()) {
-        MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-        if((m_configuration->m_component_refs).count(comp_name)) {
-            component_ref = (m_configuration->m_component_refs)[comp_name];
-            if(CORBA::is_nil(component_ref)) 
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScanImpl: cannot get the reference of the component.", true);
-
-            ACS::doubleSeq plainCentralPos = (m_configuration->m_scan).plainCentralPos;
-
-            ACS::doubleSeq_var user_offset = component_ref->getUserOffset();
-            position_res->length(user_offset->length());
-            if(user_offset->length() != plainCentralPos.length()) {
-                THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: mismatch between offset and central position length.", true);
-            }
-            for(size_t i=0; i<plainCentralPos.length(); i++) 
-                position_res[i] = plainCentralPos[i] + user_offset[i];
+    boost::recursive_mutex::scoped_lock lock(_scan_guard);
+    if(isScanActive())
+    {
+        if(isScanning())
+        {
+            CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::stopScan",
+                   (LM_WARNING, "Scan interrupted during execution"));
         }
-        else {
-            THROW_EX(ManagementErrors, SubscanErrorEx, "startScan: cannot get the name of" + comp_name, true);
+        m_servo_status.scanning = false;
+        CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::stopScan",
+               (LM_DEBUG, "returning to central scan position"));
+        m_control->set_position(m_scan.getCentralPosition());
+        if(m_scan.was_elevation_tracking())
+        {
+            CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::stopScan",
+               (LM_DEBUG, "reactivating elevation tracking"));
+            turnTrackingOn();
         }
+        m_servo_status.scan_active = false;
     }
-    else {
-        THROW_EX(ManagementErrors, SubscanErrorEx, "getCentralScanPosition(): scan not active", true);
-    }
+}
 
-    return position_res[(m_configuration->m_scan).axis_index];
-    */
+CORBA::Double MinorServoBossImpl::getCentralScanPosition() throw (MinorServoErrors::ScanErrorEx)
+{
     return 0.0;
 }
 
 
-char * MinorServoBossImpl::getScanAxis() {
+char *MinorServoBossImpl::getScanAxis() {
     if(isScanActive()) {
-        //return CORBA::string_dup(((m_configuration->m_scan).axis_code).c_str());
-        return CORBA::string_dup("Z");
+        return CORBA::string_dup(m_scan.getAxisCode().c_str());
     }
     else {
         return CORBA::string_dup("");
@@ -1073,150 +770,6 @@ void MinorServoBossImpl::clearSystemOffset(const char *servo) throw (MinorServoE
     //TODO: add control and exception
     m_offset.clearSystemOffset();
 }
-
-//void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) throw (MinorServoErrors::OperationNotPermittedEx)
-//{
-    /* 
-    string comp_name = get_component_name(string(servo));
-    MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-    if(comp_name == "ALL") {
-        vector<string> slaves = m_configuration->getServosToMove();
-        for(vector<string>::iterator iter = slaves.begin(); iter != slaves.end(); iter++) {
-            if(m_component_refs.count(*iter)) {
-                component_ref = MinorServo::WPServo::_nil();
-                component_ref = m_component_refs[*iter];
-                if(!CORBA::is_nil(component_ref))
-                    if(offset_type == "user") {
-                        if(component_ref->isReady()) {
-                            try {
-                                component_ref->clearUserOffset(true);
-                            }
-                            catch(...) {
-                                THROW_EX(
-                                        MinorServoErrors, 
-                                        OperationNotPermittedEx, 
-                                        string("Cannot clear the WPServo user offset."), 
-                                        true
-                                );
-                            }
-                        }
-                        else if(!component_ref->isParked()) {
-                            string msg("MinorServoBossImpl::clearOffset(): cannot clear the user offset, " + *iter + " not ready.");
-                            ACS_SHORT_LOG((LM_WARNING, msg.c_str()));
-                        }
-                    }
-                    else
-                        if(offset_type == "system") {
-                            if(component_ref->isReady()) {
-                                try {
-                                    component_ref->clearSystemOffset(true);
-                                }
-                                catch(...) {
-                                    THROW_EX(
-                                            MinorServoErrors, 
-                                            OperationNotPermittedEx, 
-                                            string("Cannot clear the WPServo system offset."), 
-                                            true
-                                    );
-                                }
-                            }
-                            else if(!component_ref->isParked()) {
-                                string msg("MinorServoBossImpl::clearOffset(): cannot clear the system offset, " + *iter + " not ready.");
-                                ACS_SHORT_LOG((LM_WARNING, msg.c_str()));
-                            }
-                        }
-                        else {
-                            THROW_EX(
-                                    MinorServoErrors, 
-                                    OperationNotPermittedEx, 
-                                    string("The offset ") + offset_type + string(" doesn't exist"), 
-                                    true
-                            );
-                        }
-            }
-        }
-    }
-    else {
-        if(!slave_exists(comp_name)) {
-            THROW_EX(
-                    MinorServoErrors, 
-                    OperationNotPermittedEx, 
-                    string("The component ") + comp_name + string(" doesn't exist"), 
-                    true
-            );
-        }
-        if(m_component_refs.count(comp_name)) {
-            component_ref = m_component_refs[comp_name];
-            if(!CORBA::is_nil(component_ref)) {
-                    if(offset_type == "user") {
-                        if(component_ref->isReady()) {
-                            try {
-                                component_ref->clearUserOffset(true);
-                            }
-                            catch(...) {
-                                THROW_EX(
-                                        MinorServoErrors, 
-                                        OperationNotPermittedEx, 
-                                        string("Cannot clear the WPServo user offset."), 
-                                        true
-                                );
-                            }
-                        }
-                        else if(!component_ref->isParked()) {
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): cannot clear the user offset."));
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): SRP not ready"));
-                        }
-                    }
-                    else
-                        if(offset_type == "system") {
-                            if(component_ref->isReady()) {
-                                try {
-                                    component_ref->clearSystemOffset(true);
-                                }
-                                catch(...) {
-                                    THROW_EX(
-                                            MinorServoErrors, 
-                                            OperationNotPermittedEx, 
-                                            string("Cannot clear the WPServo system offset."), 
-                                            true
-                                    );
-                                }
-                            }
-                            else if(!component_ref->isParked()) {
-                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): cannot clear the system offset."));
-                                ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::clearOffset(): SRP not ready"));
-                            }
-                        }
-                        else {
-                            THROW_EX(
-                                    MinorServoErrors, 
-                                    OperationNotPermittedEx, 
-                                    string("The offset ") + offset_type + string(" doesn't exist"), 
-                                    true
-                            );
-                        }
-            }
-            else {
-                THROW_EX(
-                        MinorServoErrors, 
-                        OperationNotPermittedEx, 
-                        string("The reference to component ") + comp_name + string(" is NULL"), 
-                        true
-                );
-            }
-        }
-        else {
-            THROW_EX(
-                    MinorServoErrors, 
-                    OperationNotPermittedEx, 
-                    string("The component ") + comp_name + string(" is not active"), 
-                    true
-            );
-        }
-    }
-    */
-//}
-
 
 void MinorServoBossImpl::setUserOffset(const char *axis_code, const double offset) 
     throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx) 
@@ -1335,7 +888,6 @@ ACS::doubleSeq * MinorServoBossImpl::getSystemOffset()
     return offset_res._retn();
 }
 
-
 vector<double> 
 MinorServoBossImpl::getOffsetImpl(string offset_type)
      throw (MinorServoErrors::OperationNotPermittedExImpl, 
@@ -1363,7 +915,6 @@ throw (ManagementErrors::ConfigurationErrorEx) {
     }
 }
 
-
 void 
 MinorServoBossImpl::setElevationTrackingImpl(const char * value) 
 throw (ManagementErrors::ConfigurationErrorExImpl) {
@@ -1379,7 +930,6 @@ throw (ManagementErrors::ConfigurationErrorExImpl) {
     }
 }
 
-
 void MinorServoBossImpl::setASConfiguration(const char * value) throw (ManagementErrors::ConfigurationErrorEx) {
     try {
         setASConfigurationImpl(value);
@@ -1390,119 +940,32 @@ void MinorServoBossImpl::setASConfiguration(const char * value) throw (Managemen
     }
 }
 
-
-void MinorServoBossImpl::setASConfigurationImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl) {
-    /*
-
-    if(m_configuration->isStarting())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "Cannot set the ASConfiguration because the system is starting", false);
-
-    if(m_configuration->isParking())
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "Cannot set the ASConfiguration because the system is parking", false);
-
-    IRA::CString flag(value);
-    flag.MakeUpper();
-    m_configuration->setASConfiguration(flag); 
-
-    bool wasTrackingEn = isElevationTrackingEn();
-    try {
-        if(isReady()) {
-            bool turnedOff = false;
-    
-            try {
-                clearUserOffset("ALL");
-                clearSystemOffset("ALL");
-            }
-            catch(...) {
-                THROW_EX(
-                        ManagementErrors, 
-                        ConfigurationErrorEx, 
-                        string("Cannot clear the offsets"), 
-                        false 
-                );
-            }
-
-            try {
-                turnTrackingOff(); // It raises ConfigurationErrorEx
-                turnedOff = true;
-            }
-            catch(...) {
-                THROW_EX(ManagementErrors, ConfigurationErrorEx, "cannot turn the tracking off", false);
-            }
-            m_configuration->init(m_configuration->m_baseSetup, true); // Keep the actual setup
-            if(wasTrackingEn) {
-                try {
-                    turnTrackingOn(); // It raises ConfigurationErrorEx
-                    turnedOff = false;
-                }
-                catch(...) {
-                    THROW_EX(ManagementErrors, ConfigurationErrorEx, "cannot turn the tracking on", false);
-                }
-            }
-            if(turnedOff) {
-                string comp_name("SRP");
-                MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
-                if(!m_component_refs.count(comp_name)) {
-                    try {
-                        component_ref = m_services->getComponent<MinorServo::WPServo>(("MINORSERVO/" + comp_name).c_str());
-                    }
-                    catch(...) {
-                        ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::setASConfiguration(): cannot get the SRP component"));
-                    }
-                }
-                else {
-                    component_ref = m_component_refs[comp_name];
-                }
-
-                ACS::doubleSeq positions = m_configuration->getPosition("SRP", getTimeStamp());
-                // set the position
-                if(positions.length()) {
-                    if(!CORBA::is_nil(component_ref)) {
-                        if(component_ref->isReady()) {
-                            component_ref->setPosition(positions, NOW);
-                        }
-                        else {
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::setASConfiguration(): cannot set the position"));
-                            ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::setASConfiguration(): SRP not ready"));
-                        }
-                    }
-                    else {
-                        ACS_SHORT_LOG((LM_WARNING, "MinorServoBossImpl::setASConfiguration(): cannot set the position"));
-                    }
-                }
-                else {
-                    ACS_SHORT_LOG((LM_WARNING, "setASConfiguration(): cannot get the position to set."));
-                }
-            }
-        }
-    }
-    catch(...) {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "setASConfiguration(): cannot change the actual configuration.", false);
-    }
-    */
-}
-
+void MinorServoBossImpl::setASConfigurationImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl) 
+{}
 
 bool MinorServoBossImpl::isElevationTrackingEn() {
     return m_actual_config->can_track_elevation();
 }
 
-
 bool MinorServoBossImpl::isElevationTracking() {
     return m_servo_status.elevation_tracking;
 }
 
-
 bool MinorServoBossImpl::isTracking() {
+    if(!isReady())
+        return false;
+    if(isScanActive())
+        if(isScanning())
+            return true;
+        else
+            return false;
     return m_control->is_tracking();
 }
-
 
 char * MinorServoBossImpl::getActualSetup() {
     //return CORBA::string_dup((m_actual_config->get_name()).c_str());
     return CORBA::string_dup(m_actual_conf.c_str());
 }
-
 
 char * MinorServoBossImpl::getCommandedSetup() {
     //return CORBA::string_dup((m_configuration->m_commandedSetup).c_str());

@@ -12,6 +12,8 @@
 #error This is a C++ include file and cannot be used from plain C
 #endif
 
+#include <boost/thread.hpp>
+
 #include <new>
 #include <acsutil.h>
 #include <baciDB.h>
@@ -38,20 +40,21 @@
 #include "macros.def"
 
 
-//#include "SetupThread.h"
 //#include "ParkThread.h"
 //#include "TrackingThread.h"
-//#include "ScanThread.h"
 #include <IRA>
 #include "utils.h"
 #include "MSBossPublisher.h"
 #include "MSBossTracker.hpp"
 #include "PositionMonitoringThread.hpp"
+#include "SetupThread.hpp"
+#include "ScanThread.hpp"
 #include "MedMinorServoParameters.hpp"
 #include "MedMinorServoControl.hpp"
 #include "MedMinorServoGeometry.hpp"
 #include "MedMinorServoOffset.hpp"
 #include "MedMinorServoStatus.hpp"
+#include "MedMinorServoScan.hpp"
 #include "DevIOActualSetup.h"
 #include "DevIOASConfiguration.h"
 #include "DevIOElevationTrack.h"
@@ -63,9 +66,11 @@
 #include "DevIOStatus.h"
 //#include "MSBossConfiguration.h"
 
-#define PUBLISHER_THREAD_NAME "MSBossPublisher"
-#define TRACKING_THREAD_NAME "MSBossTracking"
-#define POSITION_MONITORING_THREAD_NAME "PositionMonitoringThread"
+#define PUBLISHER_THREAD_NAME "MinorServoPublisherThread"
+#define TRACKING_THREAD_NAME "MinorServoTrackingThread"
+#define POSITION_MONITORING_THREAD_NAME "MinorServoPositionMonitoringThread"
+#define SETUP_THREAD_NAME "MinorServoSetupThread"
+#define SCAN_THREAD_NAME "MinorServoScanThread"
 
 using namespace baci;
 using namespace std;
@@ -160,9 +165,9 @@ public:
 	 * @throw CORBA::SystemException
 	 * @throw ManagementErrors::ConfigurationErrorEx
 	 */
-	virtual void setup(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
+	virtual void setup(const char *config) throw (CORBA::SystemException, MinorServoErrors::SetupErrorEx);
 
-    void setupImpl(const char *config) throw (ManagementErrors::ConfigurationErrorExImpl);
+    void setupImpl(const char *config) throw (MinorServoErrors::SetupErrorEx);
 
     /**
      * Turn the elevation tracking of minor servos on
@@ -205,7 +210,6 @@ public:
      */
      // virtual ACS::ROpattern_ptr verbose_status() throw (CORBA::SystemException);
 
-
     /** 
      * Check if the focus scan is achievable
      *
@@ -220,7 +224,7 @@ public:
              const ACS::Time starting_time, 
              const double range, 
              const ACS::Time total_time
-     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
 
 
     /** 
@@ -239,8 +243,7 @@ public:
              double range, 
              const ACS::Time total_time, 
              const char *axis_code
-     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
-
+     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
 
     /** 
      * Check if the scan is achievable (implementation)
@@ -258,8 +261,7 @@ public:
              double range, 
              const ACS::Time total_time, 
              const string axis_code
-     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
-     
+     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
 
     /** 
      * Start the scan of one axis of a MinorServo target.
@@ -276,20 +278,19 @@ public:
              const double range, 
              const ACS::Time total_time, 
              const char *axis_code
-     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
      
-     
-     void stopScan() throw (ManagementErrors::SubscanErrorEx);
+     void stopScan() throw (MinorServoErrors::ScanErrorEx);
      
      void startScanImpl(
         ACS::Time & starting_time, 
         const double range, 
         const ACS::Time total_time, 
         string axis_code
-    ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
     
     /** Return the central position of the axis involved in the scan */
-    CORBA::Double getCentralScanPosition() throw (ManagementErrors::SubscanErrorEx);
+    CORBA::Double getCentralScanPosition() throw (MinorServoErrors::ScanErrorEx);
 
     /** Return the code of the axis involved in the scan */
     char * getScanAxis();
@@ -307,7 +308,7 @@ public:
              ACS::Time & starting_time, 
              const double range, 
              const ACS::Time total_time
-     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
      
      /** 
       * Clear the user offset of a servo (or all servos)
@@ -425,12 +426,16 @@ public:
       void reset() throw (MinorServoErrors::CommunicationErrorExImpl);
 private:
 	maci::ContainerServices *m_services;
+    //Antenna::AntennaBoss_var m_antenna_boss;
+    //bool  m_antenna_boss_error;
 
     /** The last configuration c-string of setup method */
     MedMinorServoConfiguration m_config;
     MedMinorServoParameters *m_actual_config;
     MedMinorServoStatus m_servo_status;
     MedMinorServoOffset m_offset;
+    MedMinorServoScan m_scan;
+    boost::recursive_mutex _scan_guard;
 
     IRA::CString m_server_ip;
     string m_commanded_conf;
@@ -470,10 +475,14 @@ private:
     MSBossPublisher *m_publisher_thread_ptr;
     MSBossTracker *m_tracking_thread_ptr;
     PositionMonitoringThread *m_position_monitoring_thread_ptr;
+    SetupThread *m_setup_thread_ptr;
+    ScanThread *m_scan_thread_ptr;
 	 
 	/** This is the pointer to the notification channel */
 	nc::SimpleSupplier *m_nchannel;
 
+    //void loadAntennaBoss() throw (ComponentErrors::CouldntGetComponentExImpl);
+    //void unloadAntennaBoss();
     bool isParked() throw (ManagementErrors::ConfigurationErrorEx);
     
     //void clearOffset(const char *servo, string offset_type) throw (MinorServoErrors::OperationNotPermittedEx);

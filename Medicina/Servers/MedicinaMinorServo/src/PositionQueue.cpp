@@ -48,6 +48,7 @@ PositionQueue::push(const MedMinorServoPosition& position)
 MedMinorServoPosition
 PositionQueue::get_position()
 {
+    boost::mutex::scoped_lock lock(_queue_guard);
     if(_size == 0)
         throw EmptyPositionQueueError("no position stored");
     return _queue.front();
@@ -56,6 +57,7 @@ PositionQueue::get_position()
 MedMinorServoPosition
 PositionQueue::get_position(ACS::Time time)
 {
+    boost::mutex::scoped_lock lock(_queue_guard);
     if(_size == 0)
         throw EmptyPositionQueueError("no position stored");
     if(_size == 1)
@@ -64,7 +66,6 @@ PositionQueue::get_position(ACS::Time time)
         return _queue.front();
     if(time <= _oldest_time)
         return _queue.back();
-    boost::mutex::scoped_lock lock(_queue_guard);
     std::deque<MedMinorServoPosition>::iterator it = _queue.begin();
     MedMinorServoPosition before_position, after_position;
     do{
