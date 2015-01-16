@@ -192,7 +192,36 @@ public:
          CORBA::SystemException, 
          ComponentErrors::ComponentErrorsEx
      );
-     
+ 
+
+    /**
+     * Set the derotator speed (in rpm)
+     *
+	 * @throw DerotatorErrors::CommunicationErrorEx
+     * @throw DerotatorErrors::DerotatorErrorsEx
+     * @throw CORBA::SystemException
+     */
+     void setSpeed(unsigned int speed) throw (
+         CORBA::SystemException, 
+         ComponentErrors::ComponentErrorsEx, 
+         DerotatorErrors::DerotatorErrorsEx
+     );
+
+
+    /**
+     * Get the derotator speed (in rpm)
+     *
+     * @return the derotator speed
+	 * @throw DerotatorErrors::CommunicationErrorEx
+     * @throw DerotatorErrors::DerotatorErrorsEx
+     * @throw CORBA::SystemException
+     */
+     DWORD getSpeed() throw (
+         CORBA::SystemException, 
+         ComponentErrors::ComponentErrorsEx, 
+         DerotatorErrors::DerotatorErrorsEx
+     );
+
 
      /**  
       * @ return the biggest position allowed, in the URS
@@ -246,6 +275,9 @@ private:
     // CDB attributes
     CString SensorIP;
     DWORD SensorPort;
+    DWORD Speed;
+    DWORD MaxSpeed;
+    DWORD MinSpeed;
     DWORD SensorTimeout;
     long SensorZeroReference;
     double SensorConversionFactor;
@@ -299,7 +331,7 @@ private:
    static ThreadParameters m_thread_params;
 
    /** @var static pointer to status thread */
-   static StatusUpdater *m_status_ptr;
+   StatusUpdater *m_status_ptr;
 
    void operator=(const SRTKBandDerotatorImpl&);
 

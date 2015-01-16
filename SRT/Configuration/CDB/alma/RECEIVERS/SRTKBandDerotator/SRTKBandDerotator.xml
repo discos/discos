@@ -18,6 +18,9 @@
     MinValue="-105.5" 
     Step="60"
     TrackingDelta="0.1"
+    MaxSpeed="3500" 
+    MinSpeed="300" 
+    Speed="3000" 
     PositionExpireTime="0.010000"
 >
     <enginePosition 

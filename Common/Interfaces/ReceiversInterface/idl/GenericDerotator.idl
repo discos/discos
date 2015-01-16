@@ -45,6 +45,8 @@ module Receivers {
      *     <li>setup(): allow the derotator to be ready to move</li>
      *     <li>powerOff(): switch the power amplifier off </li>
      *     <li>setPosition(): set the derotator position</li>
+     *     <li>setSpeed(): set the derotator speed, in rpm</li>
+     *     <li>getSpeed(): get the derotator speed, in rpm</li>
      *     <li>getActPosition(): return the actPosition value</li>
      *     <li>getCmdPosition(): return the cmdPosition value</li>
      *     <li>getPositionFromHistory(t): return the the derotator position at
@@ -172,6 +174,32 @@ module Receivers {
          *  @throw ComponentError::ComponentErrorsEx
          */
          double getPositionFromHistory(in ACS::Time time) raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** 
+         * Set the derotator speed
+         *
+         * @arg speed speed in rpm
+         * @throw ComponentErrors::ComponentErrorsEx,
+         * @throw DerotatorErrors::DerotatorErrorsEx
+         */
+        void setSpeed(in unsigned long speed) raises (
+            ComponentErrors::ComponentErrorsEx,
+            DerotatorErrors::DerotatorErrorsEx
+        );
+
+
+        /** 
+         * Get the derotator speed
+         *
+         * @return the derotator speed in rpm
+         * @throw ComponentErrors::ComponentErrorsEx,
+         * @throw DerotatorErrors::DerotatorErrorsEx
+         */
+        unsigned long getSpeed() raises (
+            ComponentErrors::ComponentErrorsEx,
+            DerotatorErrors::DerotatorErrorsEx
+        );
 
 
         /**

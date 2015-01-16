@@ -153,13 +153,15 @@ public:
      * Derotator socket constructor.
      * @arg IP IP address of icd
      * @arg port port number of icd
+     * @arg maxSpeed maximum speed in rpm
+     * @arg minSpeed minimum speed in rpm
      * @arg timeout timeout
      * @arg degree/step conversion factor
      * @arg reference position (zero position) of ICD in degrees
      * @arg max absolute position value allowed
      * @arg min absolute position value allowed
      */
-    icdSocket(CString IP, DWORD port, DWORD timeout, double ICD_CF, 
+    icdSocket(CString IP, DWORD port, DWORD maxSpeed, DWORD minSpeed, DWORD timeout, double ICD_CF, 
             double REFERENCE_POSITION, double MAX_VALUE, double MIN_VALUE,
             double TrackingDelta, double ICD_POSITION_EXPIRE_TIME);
 
@@ -287,6 +289,20 @@ public:
      * @throw ComponentErrors::SocketErrorExImpl
      */
     void reset() throw (ComponentErrors::SocketErrorExImpl);
+
+
+    /** Set the derotator speed in rmp **/
+    void setSpeed(DWORD speed) throw (
+         DerotatorErrors::ValidationErrorExImpl, 
+	     DerotatorErrors::CommunicationErrorExImpl
+    );
+
+
+    /** Get the derotator speed in rmp **/
+    DWORD getSpeed() throw (
+         DerotatorErrors::ValidationErrorExImpl, 
+	     DerotatorErrors::CommunicationErrorExImpl
+    );
 
     
     /**
@@ -473,6 +489,12 @@ private:
    
     /** @var timeout */
     const DWORD m_ICD_TIMEO;
+   
+    /** @var max speed */
+    const DWORD m_ICD_MAX_SPEED;
+
+    /** @var min speed */
+    const DWORD m_ICD_MIN_SPEED;
 
     /** @var icd conversion factor from step position to angle position */
     const double m_ICD_CF;

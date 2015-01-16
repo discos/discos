@@ -23,6 +23,8 @@ static int sf = 0 ; // sendflag
 icdSocket::icdSocket(
         CString IP, 
         DWORD port, 
+        DWORD maxSpeed,
+        DWORD minSpeed,
         DWORD timeout,
         double ICD_CF, 
         double ICD_REFERENCE,
@@ -34,6 +36,8 @@ icdSocket::icdSocket(
     m_ICD_IP(IP),
     m_ICD_PORT(port),
     m_ICD_TIMEO(timeout),
+    m_ICD_MAX_SPEED(maxSpeed),
+    m_ICD_MIN_SPEED(minSpeed),
     m_ICD_CF(ICD_CF),
     m_ICD_REFERENCE(ICD_REFERENCE),   
     m_ICD_MAX_VALUE(ICD_MAX_VALUE),
@@ -330,6 +334,115 @@ void icdSocket::setPosition(double position) throw (
     }
 }   
  
+
+void icdSocket::setSpeed(DWORD speed) throw (
+         DerotatorErrors::ValidationErrorExImpl, 
+	     DerotatorErrors::CommunicationErrorExImpl
+    ) 
+{
+    AUTO_TRACE("icdSocket::setSpeed()");
+
+    BYTE buff[] = { // 8, 4, 0, 5, 0, 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, CR
+        0x38, 0x34, 0x30, 0x35, 0x30, 0x30, 0x32, 0x33,
+        0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30,
+        0x0D
+    }; // This message is an ICD ``setpoint speed for point-to-point operation``: 35:5
+
+    m_icd_summary_status &= ~(1 << W) ;
+
+
+    if(speed < m_ICD_MIN_SPEED || speed > m_ICD_MAX_SPEED) {
+        ACS_SHORT_LOG((LM_ERROR, "# Error - max speed out of range [%.2f, %.2f] rpm", 
+                    m_ICD_MIN_SPEED, m_ICD_MAX_SPEED));
+        m_icd_summary_status |=  (1 << W);
+        
+        DerotatorErrors::ValidationErrorExImpl ex(__FILE__, __LINE__, "Speed value out of range");
+        throw ex;
+    }
+    
+    unsigned char hex_steps[ICD_CMDDATA_LEN + 1];
+    dec2hexStr(speed, hex_steps, ICD_CMDDATA_LEN + 1);
+    int i = 0;
+    while(1) {
+        if(hex_steps[i] == '\0') break;
+        i++;
+    }
+
+    int k=0;
+    for(int j=i-1; j>=0; j--) {
+        buff[15-j] = hex_steps[k];
+        k++;
+    }
+    
+    try {
+        // Make a conversation to and from icd. The response is stored in buff
+        make_talk(buff, true) ;
+    }
+    // If responseCheck (called by make_talk) finds an error it set a bit on 
+    // pattern property to communicate the problem to the client. 
+    // After it logs the error code trows an exception
+    catch (...) {
+        DerotatorErrors::CommunicationErrorExImpl ex(__FILE__, __LINE__, 
+                "Cannot set the derotator speed");
+	    throw ex;
+    }
+}   
+
+
+DWORD icdSocket::getSpeed() throw (
+        DerotatorErrors::CommunicationErrorExImpl,
+        DerotatorErrors::ValidationErrorExImpl)
+{
+
+    BYTE buff[] = { // 8, 0, 0, 5, 0, 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, CR
+        0x38, 0x30, 0x30, 0x35, 0x30, 0x30, 0x32, 0x33,
+        0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30,
+        0x0D
+    }; // This message is an ICD ``get setpoint speed``: 35:5
+
+    AUTO_TRACE("icdSocket::getSpeed()");
+    
+    // If responseCheck (called by make_talk) finds an error it sets a bit of the
+    // pattern property in order to communicate the problem to the client. 
+    // After it logs the error code trows an exception
+    try {
+        make_talk(buff, true) ;
+    }
+    catch (...) {
+        _EXCPT(
+                DerotatorErrors::CommunicationErrorExImpl, 
+                impl, 
+                "icdSocket::getSpeed(): cannot get the derotator speed"
+        );
+        impl.log(LM_DEBUG);
+        throw impl;
+    }
+
+    try {
+        // Check the status and set the status pattern
+        fbstatuswordCheck(buff);
+    }
+    catch (...) {
+        _EXCPT(
+                DerotatorErrors::ValidationErrorExImpl, 
+                impl, 
+                "icdSocket::getSpeed(): cannot set the status pattern"
+        );
+        impl.log(LM_DEBUG);
+        throw impl;
+    }
+
+    try {
+        return hex2dec(buff, ICD_FBRD_INDEX, ICD_RDWORD_LEN);
+    }
+    catch (...) {
+        _THROW_EXCPT(
+                DerotatorErrors::ValidationErrorExImpl, 
+                "icdSocket::getActPosition(): cannot convert from a hex value to a decimal one"
+        );
+    }
+}   
+
 
 void icdSocket::reset() throw (ComponentErrors::SocketErrorExImpl) {
 
