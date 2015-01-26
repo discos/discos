@@ -23,6 +23,13 @@
 class LogRecord; //fwd declaration
 class LogRecordComparator; //fwd declaration
 
+class MalformedXMLError : public std::runtime_error
+{
+    public:
+        MalformedXMLError(const char *msg):
+        std::runtime_error(std::string(msg)){};
+};
+
 /**
  * Smart pointer to a LogRecord, used in conjunction with STL and non-standard containers.
  */

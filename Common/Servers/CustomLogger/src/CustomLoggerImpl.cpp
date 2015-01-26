@@ -574,20 +574,25 @@ void CustomStructuredPushConsumer::push_structured_event (const CosNotification:
     Logging::XmlLogRecordSeq *reclist;
     notification.remainder_of_body >>= reclist;
     LogRecord_sp lr;
-    if(xmlLog)
-    {
-        //parse the xml to a LogRecord
-        lr = get_log_record(logger_->log_parser, xmlLog);
-        //handle the log record and the xml
-        logger_->handle(lr);
-    }
-    else if (reclist)
-        for(unsigned int i = 0; i < reclist->length(); i++)
+    try{
+        if(xmlLog)
         {
-            xmlLog = (*reclist)[i].xml;
+            //parse the xml to a LogRecord
             lr = get_log_record(logger_->log_parser, xmlLog);
+            //handle the log record and the xml
             logger_->handle(lr);
         }
+        else if (reclist)
+            for(unsigned int i = 0; i < reclist->length(); i++)
+            {
+                xmlLog = (*reclist)[i].xml;
+                lr = get_log_record(logger_->log_parser, xmlLog);
+                logger_->handle(lr);
+            }
+    }catch(const MalformedXMLError& mxe){
+        free_log_parsing(logger_->log_parser);
+        logger_->log_parser = init_log_parsing();
+    }
 };
 
 /*
