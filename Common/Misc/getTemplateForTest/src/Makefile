@@ -15,6 +15,8 @@
 PY_SCRIPTS         = getTemplateForTest
 PY_MODULES         = gettemplatefortest
 
+SCRIPTS_L          = install_gmock
+
 #
 #>>>>> END OF standard rules
 
