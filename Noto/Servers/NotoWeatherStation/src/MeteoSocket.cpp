@@ -52,17 +52,27 @@ int MeteoSocket::sendCMD(CError& err, CString cmd)
 }
 
 int MeteoSocket:: updateParam(){
+//
+//
+
+
 	    CError err;
 	    CString rdata="";
+            sendCMD(err,CString("all\n"));
 	    sendCMD(err,CString(WEATHERCMD));
 		ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","sent:  %s", (const char *) WEATHERCMD);
 
  		IRA::CIRATools::Wait(0,100000);
-
 		receiveData(err,rdata);
+ 		IRA::CIRATools::Wait(0,100000);
+		receiveData(err,rdata);
+
+                cout << (const char *) rdata << endl;
+
 		ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","received:  %s", (const char *) rdata);
                 
-                
+             sendCMD(err,CString("noresp\n"));
+	                
  		parse(rdata);
  		if (err.isNoError()) return 0;
  		else return -1;
