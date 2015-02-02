@@ -175,6 +175,13 @@ all:
 		make -C $${i} all install ; \
 	done
 
+.PHONY: tall $(BUILD_DIRS)
+
+tall: $(BUILD_DIRS)
+
+$(BUILD_DIRS):
+	$(MAKE) -C $@ all install
+
 compile:
 	@for i in $(BUILD_DIRS); do \
 		make -C $${i} all ; \
