@@ -14,16 +14,15 @@ class ExternalClientTest(unittest.TestCase):
         self.assertRegexpMatches(answer, 'antennaParameters')
 
     def test_speed_dependency(self):
-        """Verify it works in case of clients too fast"""
-        # Send to commands, simulating a client too fast
+        """Verify it works in case of fast clients"""
+        # Send two requests, simulating a fast client
         self.sockobj.sendall('antennaParameters'*2)
         answer = self._get_answers(n=1)
         self.assertRegexpMatches(answer, 'antennaParameters')
 
     def test_do_not_lose_answers(self):
         """Verify it does not lose any answer"""
-        # Send to commands, simulating a client too fast
-        self.sockobj.sendall('antennaParameters'*2)
+        self.sockobj.sendall('antennaParameters'*2) # Send two requests
         # We do not want to lose the answer related to the second request
         answers = self._get_answers(n=2) 
         self.assertEqual(answers.count('antennaParameters/'), 2)
