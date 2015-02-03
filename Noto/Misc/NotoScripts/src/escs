@@ -1,0 +1,113 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                
+      
+#
+# This code is under GNU General Public Licence (GPL).                                           
+   
+#                                                                                                
+     
+# Who                                when            What                                        
+     
+# Andrea Orlati(aorlati@ira.inaf.it) 3/02/2015      Creation                        
+#************************************************************************
+#   NAME
+#      escs
+# 
+#   SYNOPSIS
+# 
+#   DESCRIPTION
+#     start the escs control system for the Noto station
+#       
+#   FILES
+#
+#   ENVIRONMENT
+#
+#   RETURN VALUES
+#
+#   CAUTIONS
+#
+#   EXAMPLES
+#
+#   SEE ALSO
+#
+#   BUGS     
+#
+
+LONGOPTS=start,view,help,close
+SHORTOPTS=svhc
+CL_START=
+CL_VIEW=
+CL_HELP=
+CL_CLOSE=
+
+function printUsage {
+   echo "Gets the ESCS system started, management priviledges are needed"
+   echo ""
+        echo "Usage: `basename $0` [OPTIONS]  "
+        echo "Options: "
+        echo "   -s | --start   starts the system"
+        echo "   -v | --view    load the Command Center for monitoring purposes"
+        echo "   -h | --help    prints this help"
+	echo "   -c | --close   close the system"
+}
+
+# This simply checks for the correctness of the command line
+export POSIXLY_CORRECT=1
+
+getopt -n `basename $0` -Q -u -a -l $LONGOPTS $SHORTOPTS "$@" || {
+   printUsage
+   exit
+}
+
+# Now let's parse the command line
+set -- `getopt -u -a -l $LONGOPTS $SHORTOPTS "$@"`
+
+for i
+do
+        case "$i" in
+                -h) CL_HELP=true ;;
+                --help) CL_HELP=true ;;
+                --view) CL_VIEW=true ;;
+                -v) CL_VIEW=true ;;
+                --start) CL_START=true ;;
+                -s) CL_START=true ;;
+                --close) CL_CLOSE=true ;;
+                -c) CL_CLOSE=true ;;
+                --)  break;;
+        esac
+        shift
+done
+
+# restore
+export POSIXLY_CORRECT=
+unset POSIXLY_CORRECT
+
+
+if [ "$CL_HELP" ] ; then
+   printUsage
+   exit
+fi
+
+if [ "$CL_START" ] ; then
+   rm -rf $ACS_TMP/*
+   acsStart &
+   wait %1
+   #acsStartContainer -cpp LoggerContainer &
+   #acsStartContainer -cpp WeatherStationContainer &
+   #acsStartContainer -cpp MountContainer &
+   acsStartContainer -cpp AntennaContainer &
+   exit
+fi
+
+if [ "$CL_CLOSE" ] ; then
+   acsStop	
+fi
+
+if [ "$CL_VIEW" ] ; then
+   acscommandcenter corbaloc::192.167.187.17:3000/Manager &
+fi
+
+
+
+

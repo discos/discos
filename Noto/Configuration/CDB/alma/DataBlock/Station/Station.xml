@@ -11,9 +11,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	stationName="Medicina"
 	DUT1="0.0" 
-	latitude="44.52048889"
-	longitude="11.64693056"
-	height="28.0"
-	yPolarMotion="0.0"
+	latitude="36.87585"
+	longitude="14.9889"
+	height="32.0"
+	PolarMotion="0.0"
 	xPolarMotion="0.0"
 	geodeticModel="0" />
