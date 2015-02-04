@@ -284,7 +284,7 @@ vector<string> MeteoSocket::split (string message, string delimiter=",")
 
 
 
-int MeteoSocket::parse(const char* recv)
+int MeteoSocket::fs_parse(const char* recv)
 {
 	int len;
         string recvS;
@@ -329,4 +329,44 @@ int MeteoSocket::parse(const char* recv)
 
  
 }
+ int MeteoSocket::parse(const char* recv)
+{
+        int len;
+        float temp,pres,hum;
+        int temperature=0;
+        long pressure=0;
+        int humidity=0;
+        int wind_dir=0;
+        int wind_speed=0;
+
+                temperature=recv[14];
+                temperature=temperature<<8;
+                temperature=temperature|(recv[13]&0xff);
+                humidity=recv[34];
+                pressure=recv[9];
+                pressure=pressure<<8;
+                pressure=pressure|(recv[8]&0xff);
+                wind_speed=recv[15];
+                wind_dir=recv[18];
+                wind_dir=wind_dir<<8;
+                wind_dir=wind_dir|(recv[17]&0xff);
+                 
+                temp=(float)(temperature-320)*5/9/10;// tenth of fahrenight degree to celsius 
+                hum=(float)humidity;
+                pres= (float) pressure/1000*33.8639 ;
+                 
+                m_temperature=temp;
+                m_pressure=pres;
+                m_humidity=hum;
+                m_windspeed=wind_speed;
+                m_winddir=wind_dir;
+
+                 ACS_LOG(LM_FULL_INFO,"MeteoSocket::parse()",(LM_DEBUG," Meteoparms  %f %f %f",temp,pres,hum ));
+                  
+
+        return 0;
+
  
+}
+
+
