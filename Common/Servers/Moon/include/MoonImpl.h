@@ -31,7 +31,7 @@
 #include <MoonS.h>
 #include <String.h>
 #include <Site.h>
-#include <MoonImpl.h>
+#include <IRA>
 #include <ComponentErrors.h>
 #include <ComponentErrors.h>
 #include <acscomponentImpl.h>
