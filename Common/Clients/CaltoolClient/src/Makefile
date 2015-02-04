@@ -188,7 +188,7 @@ endif
 #
 # TARGETS
 # -------
-all:	do_all
+all:	gui do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
