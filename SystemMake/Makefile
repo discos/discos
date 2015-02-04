@@ -10,6 +10,94 @@
 # Andrea O. 15/04/11  match now the present status of the cvs
 # Andrea O. 13/06/12  installation procedure now ported to svn, environment variable SVNUSER now required
 # Andrea O. 13/01/13  environment variable SYSTEM_SVN_TAG now required to control which TAG has to be downloaded from svn
+# Bartolini 02/02/15  added .PHONY target tall
+# Bartolini 03/02/15  split away common, inspired by http://lackof.org/taggart/hacking/make-example/
+
+COMMON_DOC:=
+COMMON_ERRORS:=ClientErrors ComponentErrors AntennaErrors ParserErrors \
+               BackendsErrors ManagementErrors ReceiversErrors \
+               MetrologyErrors MinorServoErrors XBackendErrors
+COMMON_INTERFACES:=ManagmentInterface AntennaInterface ReceiversInterface \
+                   BackendsInterface MinorServoInterface \
+                   WeatherStationInterface ActiveSurfaceInterface \
+                   XBackendInterface
+COMMON_LIBRARIES:=SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
+                  XarcosLibrary
+COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
+                Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
+                CalibrationTool TotalPower NoiseGenerator CustomLogger \
+                XBackend #DBBC 
+COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
+                GenericBackendTextClient ReceiversBossTextClient \
+                SystemTerminal CaltoolClient CustomLoggingClient \
+                SchedulerTextClient
+COMMON_MISC:=Plotter KStars Scripts
+COMMON_MODULES:=$(COMMON_ERRORS) \
+                $(COMMON_INTERFACES) \
+                $(COMMON_LIBRARIES) \
+                $(COMMON_SERVERS) \
+                $(COMMON_CLIENTS) \
+                $(COMMON_MISC)
+
+SRT_DOC:=SRTDox
+SRT_ERRORS:=SRTActiveSurfaceErrors
+SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
+                SRTWeatherStationInterface SRTReceiversInterface
+SRT_LIBRARIES:=SRTMinorServoLibrary
+SRT_SERVERS:=SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer \
+             SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
+             SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver
+SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
+             MinorServoBossTextClient
+SRT_MISC:=SRTScripts
+SRT_MODULES:=$(SRT_ERRORS) \
+             $(SRT_INTERFACES) \
+             $(SRT_LIBRARIES) \
+             $(SRT_SERVERS) \
+             $(SRT_CLIENTS) \
+             $(SRT_MISC)
+
+MED_DOC:=MEDDox
+MED_ERRORS:=
+MED_INTERFACES:=MedicinaAntennaInterface MedicinaWeatherStationInterface
+MED_LIBRARIES:=
+MED_SERVERS:=
+MED_CLIENTS:=MedicinaMountTextClient 
+MED_MISC:=MedScripts
+MED_MODULES:=$(MED_ERRORS) \
+             $(MED_INTERFACES) \
+             $(MED_LIBRARIES) \
+             $(MED_SERVERS) \
+             $(MED_CLIENTS) \
+             $(MED_MISC)
+
+NT_DOC:=NTDox
+NT_ERRORS:=
+NT_INTERFACES:=NotoAntennaInterface \
+NT_LIBRARIES:=
+NT_SERVERS:=
+NT_CLIENTS:=NotoMountTextClient 
+NT_MISC:=
+NT_MODULES:=$(NT_ERRORS) \
+            $(NT_INTERFACES) \
+            $(NT_LIBRARIES) \
+            $(NT_SERVERS) \
+            $(NT_CLIENTS) \
+            $(NT_MISC)
+
+ifeq ($(TARGETSYS),SRT)
+	TARGET_MODULES:=SRT_MODULES
+else 
+ifeq ($(TARGETSYS),MED)
+	TARGET_MODULES:=MED_MODULES
+else 
+ifeq ($(TARGETSYS),NT)
+	TARGET_MODULES:=NT_MODULES
+else
+	RESULT:=$(error TARGETSYS variable is not set correctly!)	
+endif
+endif
+endif
 
 ifeq ($(TARGETSYS),SRT)
 	#Add all modules included in the SRT system  in this sequence
@@ -160,6 +248,15 @@ COMPILE_MODULES_PATH:=$(call PathFinder,$(MODULES))
 
 BUILD_DIRS:=$(foreach i, $(COMPILE_MODULES_PATH), $(i)/src)
 
+COMMON_MODULES_PATH:=$(call PathFinder,$(COMMON_MODULES))
+COMMON_MODULES_DIRS:=$(foreach i, $(COMMON_MODULES_PATH), $(i)/src)
+COMMON_BUILD_TARGETS:=$(COMMON_MODULES_DIRS:%=build-%)
+COMMON_CLEAN_TARGETS:=$(COMMON_MODULES_DIRS:%=clean-%)
+TARGET_MODULES_PATH:=$(call PathFinder,$(TARGET_MODULES))
+TARGET_MODULES_DIRS:=$(foreach i, $(TARGET_MODULES_PATH), $(i)/src)
+TARGET_BUILD_TARGETS:=$(TARGET_MODULES_DIRS:%=build-%)
+TARGET_CLEAN_TARGETS:=$(TARGET_MODULES_DIRS:%=clean-%)
+
 ifeq (X$(DOCROOT),X)
 	DOC:=$(HOME)/docroot
 else
@@ -175,12 +272,37 @@ all:
 		make -C $${i} all install ; \
 	done
 
-.PHONY: tall $(BUILD_DIRS)
+.PHONY: tall
 
-tall: $(BUILD_DIRS)
+tall: common-build target-build
 
-$(BUILD_DIRS):
-	$(MAKE) -C $@ all install
+.PHONY: common-build $(COMMON_BUILD_TARGETS)
+
+common-build: $(COMMON_BUILD_TARGETS)
+
+$(COMMON_BUILD_TARGETS):
+	$(MAKE) -C $(@:build-%=%) all install
+
+.PHONY: common-clean $(COMMON_CLEAN_TARGETS)
+
+common-clean: $(COMMON_CLEAN_TARGETS)
+
+$(COMMON_CLEAN_TARGETS):
+	$(MAKE) -C $(@:clean-%=%) clean_dist
+
+.PHONY: target-build $(TARGET_BUILD_TARGETS)
+
+target-build: $(TARGET_BUILD_TARGETS)
+
+$(TARGET_BUILD_TARGETS):
+	$(MAKE) -C $(@:build-%=%) all install
+
+.PHONY: target-clean $(TARGET_CLEAN_TARGETS)
+
+target-clean: $(TARGET_CLEAN_TARGETS)
+
+$(TARGET_CLEAN_TARGETS):
+	$(MAKE) -C $(@:clean-%=%) clean_dist
 
 compile:
 	@for i in $(BUILD_DIRS); do \
