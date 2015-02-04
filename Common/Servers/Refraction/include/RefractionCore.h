@@ -10,12 +10,14 @@
 /* Who                                  when        What              */
 /* Carlo Migoni (migoni@ca.astro.it)   26/01/2009  Creation           */
 
+#include <acscomponentImpl.h>
 #include <ComponentErrors.h>
 #include <Site.h>
 #include <acsContainerServices.h>
 #include <ObservatoryC.h>
 #include <GenericWeatherStationC.h>
 #include <acsThread.h>
+#include <IRA>
 
 using namespace IRA;
 using namespace maci;
