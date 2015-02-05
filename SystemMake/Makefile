@@ -85,14 +85,14 @@ NT_MODULES:=$(NT_ERRORS) \
             $(NT_CLIENTS) \
             $(NT_MISC)
 
-ifeq ($(TARGETSYS),SRT)
-	TARGET_MODULES:=SRT_MODULES
+ifeq ($(TARGETSYS), SRT)
+	TELESCOPE_MODULES:=$(SRT_MODULES)
 else 
-ifeq ($(TARGETSYS),MED)
-	TARGET_MODULES:=MED_MODULES
+ifeq ($(TARGETSYS), MED)
+	TELESCOPE_MODULES:=$(MED_MODULES)
 else 
-ifeq ($(TARGETSYS),NT)
-	TARGET_MODULES:=NT_MODULES
+ifeq ($(TARGETSYS), NT)
+	TELESCOPE_MODULES:=$(NT_MODULES)
 else
 	RESULT:=$(error TARGETSYS variable is not set correctly!)	
 endif
@@ -252,10 +252,10 @@ COMMON_MODULES_PATH:=$(call PathFinder,$(COMMON_MODULES))
 COMMON_MODULES_DIRS:=$(foreach i, $(COMMON_MODULES_PATH), $(i)/src)
 COMMON_BUILD_TARGETS:=$(COMMON_MODULES_DIRS:%=build-%)
 COMMON_CLEAN_TARGETS:=$(COMMON_MODULES_DIRS:%=clean-%)
-TARGET_MODULES_PATH:=$(call PathFinder,$(TARGET_MODULES))
-TARGET_MODULES_DIRS:=$(foreach i, $(TARGET_MODULES_PATH), $(i)/src)
-TARGET_BUILD_TARGETS:=$(TARGET_MODULES_DIRS:%=build-%)
-TARGET_CLEAN_TARGETS:=$(TARGET_MODULES_DIRS:%=clean-%)
+TELESCOPE_MODULES_PATH:=$(call PathFinder,$(TELESCOPE_MODULES))
+TELESCOPE_MODULES_DIRS:=$(foreach i, $(TELESCOPE_MODULES_PATH), $(i)/src)
+TELESCOPE_BUILD_TARGETS:=$(TELESCOPE_MODULES_DIRS:%=build-%)
+TELESCOPE_CLEAN_TARGETS:=$(TELESCOPE_MODULES_DIRS:%=clean-%)
 
 ifeq (X$(DOCROOT),X)
 	DOC:=$(HOME)/docroot
@@ -274,7 +274,7 @@ all:
 
 .PHONY: tall
 
-tall: common-build target-build
+tall: common-build telescope-build
 
 .PHONY: common-build $(COMMON_BUILD_TARGETS)
 
@@ -290,18 +290,18 @@ common-clean: $(COMMON_CLEAN_TARGETS)
 $(COMMON_CLEAN_TARGETS):
 	$(MAKE) -C $(@:clean-%=%) clean_dist
 
-.PHONY: target-build $(TARGET_BUILD_TARGETS)
+.PHONY: telescope-build $(TELESCOPE_BUILD_TARGETS)
 
-target-build: $(TARGET_BUILD_TARGETS)
+telescope-build: $(TELESCOPE_BUILD_TARGETS)
 
-$(TARGET_BUILD_TARGETS):
+$(TELESCOPE_BUILD_TARGETS):
 	$(MAKE) -C $(@:build-%=%) all install
 
-.PHONY: target-clean $(TARGET_CLEAN_TARGETS)
+.PHONY: telescope-clean $(TELESCOPE_CLEAN_TARGETS)
 
-target-clean: $(TARGET_CLEAN_TARGETS)
+telescope-clean: $(TELESCOPE_CLEAN_TARGETS)
 
-$(TARGET_CLEAN_TARGETS):
+$(TELESCOPE_CLEAN_TARGETS):
 	$(MAKE) -C $(@:clean-%=%) clean_dist
 
 compile:
