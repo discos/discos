@@ -9,7 +9,7 @@
 using namespace IRA;
 
 
-const static char WEATHERCMD[10] ="LOOP\n";
+const static char WEATHERCMD[9] ="LOOP 1\n";
 
 
 class MeteoSocket : public CSocket{
@@ -51,7 +51,7 @@ static int Depth;
 	double m_temperature;
 	double m_pressure;
 	double m_humidity;
-        int parse(const char* buff);   // weather data from station
+        int parse( const char* buff);   // weather data from station
         int fs_parse(const char* buff); // weather data from the field system
 
 //	MeteoData *m_sensorData;

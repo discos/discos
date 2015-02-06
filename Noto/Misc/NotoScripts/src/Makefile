@@ -66,7 +66,7 @@ lllll_OBJECTS   =
 #
 # Scripts (public and local)
 # ----------------------------
-SCRIPTS         = escs
+SCRIPTS         = escs escsConsole
 SCRIPTS_L       =
 
 #

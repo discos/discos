@@ -92,20 +92,40 @@ fi
 if [ "$CL_START" ] ; then
    rm -rf $ACS_TMP/*
    acsStart &
-   wait %1
-   #acsStartContainer -cpp LoggerContainer &
-   #acsStartContainer -cpp WeatherStationContainer &
-   #acsStartContainer -cpp MountContainer &
+   wait %1	
+   acsStartContainer -cpp LoggerContainer &
+   acsStartContainer -cpp WeatherStationContainer &
+   acsStartContainer -cpp MountContainer &
    acsStartContainer -cpp AntennaContainer &
+   acsStartContainer -cpp CalibrationToolContainer &
+   acsStartContainer -cpp FitsZillaContainer &
+   acsStartContainer -cpp PointContainer &
+   acsStartContainer -cpp ReceiversContainer &
+   acsStartContainer -cpp TotalPowerContainer &
+   acsStartContainer -cpp ManagementContainer &
+   acsStartContainer -cpp ExternalClientContainer &
    exit
 fi
 
 if [ "$CL_CLOSE" ] ; then
-   acsStop	
+   acsStopContainer ExternalClientContainer
+   acsStopContainer TotalPowerContainer
+   acsStopContainer CalibrationToolContainer
+   acsStopContainer FitsZillaContainer
+   acsStopContainer PointContainer
+   acsStopContainer AntennaContainer
+   acsStopContainer ReceiversContainer
+   acsStopContainer MountContainer		
+   acsStopContainer WeatherStationContainer
+   acsStopContainer ManagementContainer
+   acsStopContainer LoggerContainer
+   acsStop
+   exit	
 fi
 
 if [ "$CL_VIEW" ] ; then
    acscommandcenter corbaloc::192.167.187.17:3000/Manager &
+   exit
 fi
 
 

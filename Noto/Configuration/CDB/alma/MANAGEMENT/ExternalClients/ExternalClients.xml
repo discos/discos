@@ -11,7 +11,7 @@
                  Port="30000"
 		 ReceiveTimeout="10000000"
                  ControlThreadPeriod="10000000"
-		 SuperVisor="Palmiro">
+		 SuperVisor="Ducezio">
                
 	<status description="The status of the external client component" />
 </ExternalClients>
