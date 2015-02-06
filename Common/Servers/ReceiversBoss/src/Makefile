@@ -22,9 +22,11 @@
 # a quick comment on this: in order to control receivers a t med the boss is in charge of doing much more things that it has to. So
 # different code is required until new specific component to control the receivers for Medicina are written
 ifeq ($(TARGETSYS),MED)
-	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -D 'COMPILE_TARGET_MED'
+	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_MED'
+else ifeq ($(TARGETSYS),NT)
+	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -U 'COMPILE_TARGET_MED' -D 'COMPILE_TARGET_NT'
 else
-	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -D 'COMPILE_TARGET_STANDARD'
+	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_STANDARD'
 endif
 
 #
@@ -49,7 +51,8 @@ EXECUTABLES_L   =
 ReceiversBossImpl_OBJECTS   = ReceiversBossImpl	RecvBossCore Configuration WatchingThread
 ReceiversBossImpl_LDFLAGS   =
 ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs GenericReceiverStubs \
-							  DewarPositionerStubs ManagmentDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc
+	     		  DewarPositionerStubs ManagmentDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc \
+			  AntennaDefinitionsStubs			
 
 #
 # special compilation flags for single c sources

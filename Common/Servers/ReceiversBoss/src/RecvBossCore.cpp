@@ -6,6 +6,10 @@ using namespace IRA;
 
 #include "RecvBossCore_mc.i"
 
+#elif COMPILE_TARGET_NT
+
+#include "RecvBossCore_nt.i"
+
 #else
 
 #include <ReceiversModule.h>

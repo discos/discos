@@ -6,7 +6,7 @@
 int main ( int argc, int argv[] )
 {
     try {
-        ClientSocket client_socket ( "192.168.200.200", 30000 );
+        ClientSocket client_socket ( "192.167.187.17", 30000 );
         std::string reply;
         std::string command;
 
@@ -15,6 +15,7 @@ int main ( int argc, int argv[] )
         //for (;;) {
             try {
                 client_socket << "antennaParameters";
+                //client_socket << "antennaParameters";
                 //std::cin >> command;
                 //client_socket << command;
                 client_socket >> reply;
@@ -22,7 +23,7 @@ int main ( int argc, int argv[] )
             }
             catch ( SocketException& ) {}
 
-            std::cout << "Closing communication" << "\n";
+            //std::cout << "Closing communication" << "\n";
         }
     }
     catch ( SocketException& e ) {

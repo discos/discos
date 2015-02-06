@@ -188,11 +188,12 @@ endif
 #
 # TARGETS
 # -------
-all:	do_all
+all:	gui do_all 
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
 	@echo " . . . clean done"
+	@rm calibrationtool_ui.py
 
 clean_dist : clean_all clean_dist_all 
 	@echo " . . . clean_dist done"
@@ -206,8 +207,8 @@ install : install_all
 gui:
 	pyuic4 calibrationToolClient.ui -o calibrationtool_ui.py
 	
-	sed  -ie 's/Qwt5.QwtPlot/PlotProperty/g' calibrationtool_ui.py
+	@sed  -ie 's/Qwt5.QwtPlot/PlotProperty/g' calibrationtool_ui.py
 	
-	 sed -ie '9 i\from customwidgets import *' calibrationtool_ui.py
+	@sed -ie '9 i\from customwidgets import *' calibrationtool_ui.py
 
 #___oOo___
