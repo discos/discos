@@ -40,10 +40,6 @@
             <type>py</type>
         </container>
         <container>
-            <name>ExternalClientsContainer</name>
-            <type>cpp</type>
-        </container>
-        <container>
             <name>FitsZillaContainer</name>
             <type>cpp</type>
         </container>
@@ -97,6 +93,10 @@
         </container>
         <container>
             <name>XContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>ExternalClientsContainer</name>
             <type>cpp</type>
         </container>
     </containers>
