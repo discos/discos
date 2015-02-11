@@ -202,8 +202,8 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
-	chmod gu+xw ../test/LinuxSocket/simple_client
-	cp ../test/LinuxSocket/simple_client $(INTROOT)/bin/closeServer
+	#chmod gu+xw ../test/LinuxSocket/simple_client
+	#cp ../test/LinuxSocket/simple_client $(INTROOT)/bin/closeServer
 	@echo " . . . installation done"
 
 
