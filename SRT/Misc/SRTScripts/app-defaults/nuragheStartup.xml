@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>3</select>
+        <select>17</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -29,10 +29,6 @@
         </container>
         <container>
             <name>CalibrationToolContainer</name>
-            <type>cpp</type>
-        </container>
-        <container>
-            <name>ExternalClientsContainer</name>
             <type>cpp</type>
         </container>
         <container>
@@ -89,6 +85,10 @@
         </container>
         <container>
             <name>XContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>ExternalClientsContainer</name>
             <type>cpp</type>
         </container>
     </containers>
