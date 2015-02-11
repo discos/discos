@@ -32,12 +32,6 @@ COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
                 SchedulerTextClient
 COMMON_MISC:=Plotter KStars Scripts
-COMMON_MODULES:=$(COMMON_ERRORS) \
-                $(COMMON_INTERFACES) \
-                $(COMMON_LIBRARIES) \
-                $(COMMON_SERVERS) \
-                $(COMMON_CLIENTS) \
-                $(COMMON_MISC)
 
 SRT_DOC:=SRTDox
 SRT_ERRORS:=SRTActiveSurfaceErrors
@@ -50,12 +44,6 @@ SRT_SERVERS:=SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer \
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
              MinorServoBossTextClient
 SRT_MISC:=SRTScripts
-SRT_MODULES:=$(SRT_ERRORS) \
-             $(SRT_INTERFACES) \
-             $(SRT_LIBRARIES) \
-             $(SRT_SERVERS) \
-             $(SRT_CLIENTS) \
-             $(SRT_MISC)
 
 MED_DOC:=MEDDox
 MED_ERRORS:=
@@ -64,40 +52,14 @@ MED_LIBRARIES:=
 MED_SERVERS:=
 MED_CLIENTS:=MedicinaMountTextClient 
 MED_MISC:=MedScripts
-MED_MODULES:=$(MED_ERRORS) \
-             $(MED_INTERFACES) \
-             $(MED_LIBRARIES) \
-             $(MED_SERVERS) \
-             $(MED_CLIENTS) \
-             $(MED_MISC)
 
 NT_DOC:=NTDox
 NT_ERRORS:=
-NT_INTERFACES:=NotoAntennaInterface \
+NT_INTERFACES:=NotoAntennaInterface
 NT_LIBRARIES:=
 NT_SERVERS:=
 NT_CLIENTS:=NotoMountTextClient 
 NT_MISC:=
-NT_MODULES:=$(NT_ERRORS) \
-            $(NT_INTERFACES) \
-            $(NT_LIBRARIES) \
-            $(NT_SERVERS) \
-            $(NT_CLIENTS) \
-            $(NT_MISC)
-
-ifeq ($(TARGETSYS), SRT)
-	TELESCOPE_MODULES:=$(SRT_MODULES)
-else 
-ifeq ($(TARGETSYS), MED)
-	TELESCOPE_MODULES:=$(MED_MODULES)
-else 
-ifeq ($(TARGETSYS), NT)
-	TELESCOPE_MODULES:=$(NT_MODULES)
-else
-	RESULT:=$(error TARGETSYS variable is not set correctly!)	
-endif
-endif
-endif
 
 ifeq ($(TARGETSYS),SRT)
 	#Add all modules included in the SRT system  in this sequence
@@ -205,11 +167,52 @@ endif
 
 
 # ******* END of Editable area *****************
+COMMON_MODULES:=$(COMMON_ERRORS) \
+                $(COMMON_INTERFACES) \
+                $(COMMON_LIBRARIES) \
+                $(COMMON_SERVERS) \
+                $(COMMON_CLIENTS) \
+                $(COMMON_MISC)
+
+SRT_MODULES:=$(SRT_ERRORS) \
+             $(SRT_INTERFACES) \
+             $(SRT_LIBRARIES) \
+             $(SRT_SERVERS) \
+             $(SRT_CLIENTS) \
+             $(SRT_MISC)
+
+MED_MODULES:=$(MED_ERRORS) \
+             $(MED_INTERFACES) \
+             $(MED_LIBRARIES) \
+             $(MED_SERVERS) \
+             $(MED_CLIENTS) \
+             $(MED_MISC)
+
+NT_MODULES:=$(NT_ERRORS) \
+            $(NT_INTERFACES) \
+            $(NT_LIBRARIES) \
+            $(NT_SERVERS) \
+            $(NT_CLIENTS) \
+            $(NT_MISC)
+
+ifeq ($(TARGETSYS), SRT)
+	TELESCOPE_MODULES:=$(SRT_MODULES)
+else 
+ifeq ($(TARGETSYS), MED)
+	TELESCOPE_MODULES:=$(MED_MODULES)
+else 
+ifeq ($(TARGETSYS), NT)
+	TELESCOPE_MODULES:=$(NT_MODULES)
+else
+	RESULT:=$(error TARGETSYS variable is not set correctly!)	
+endif
+endif
+endif
 
 CURRENT_DIR:=$(shell pwd)/..
 
 define PathFinder
-	$(shell for MOD in $(1); do find ${CURRENT_DIR} -name $${MOD} -not -path *CDB* -not -path *site-packages* -type d -print; done)
+	$(shell for MOD in $(1); do find ${CURRENT_DIR} -name $${MOD} -not -path *CDB* -not -path *site-packages* \( -type d -o -type l \) -print; done)
 endef
 
 #if the INTROOT varaible is not defined the make is stopped
