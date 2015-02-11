@@ -14,4 +14,5 @@
 	Container="ExternalClientsContainer"
 	Default="true"
    	ImplLang="cpp"
+    Autostart="true"
 />
