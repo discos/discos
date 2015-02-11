@@ -84,15 +84,14 @@ else
 ifeq ($(TARGETSYS),NT)
 	#Add all modules included in the Noto system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
-	MODULES:=
-		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
+	MODULES:= ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
 		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface \
-		NotoAntennaInterface \
+		NotoAntennaInterface NotoWeatherStationInterface\
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		TotalPower NotoMount CustomLogger \
+		TotalPower NotoMount CustomLogger NotoWeatherStation \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal SchedulerTextClient \
-		NotoMountTextClient CustomLoggingClient Scripts
+		NotoMountTextClient CustomLoggingClient Scripts NotoScripts
 
 	IDL_DOC:=Managment Antenna Backends Metrology
 	CPP_DOC:=Libraries AntennaImplementation ManagementImplementation BackendsImplementation ReceiversImplementation
@@ -122,7 +121,7 @@ endif
 CURRENT_DIR:=$(shell pwd)/..
 
 define PathFinder
-	$(shell for MOD in $(1); do find ${CURRENT_DIR} -name $${MOD} -not -path *CDB* -not -path *site-packages* -type d -print; done)
+	$(shell for MOD in $(1); do find ${CURRENT_DIR} -name $${MOD} -not -path *CDB* -not -path *site-packages* \( -type d -o -type l \) -print; done)
 endef
 
 #if the INTROOT varaible is not defined the make is stopped
