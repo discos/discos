@@ -7,7 +7,7 @@
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
-# spoppi  01/07/11  created
+# manager  03/02/15  created
 #
 
 #*******************************************************************************
@@ -66,7 +66,7 @@ lllll_OBJECTS   =
 #
 # Scripts (public and local)
 # ----------------------------
-SCRIPTS         =
+SCRIPTS         = escs escsConsole
 SCRIPTS_L       =
 
 #
@@ -78,10 +78,10 @@ TCL_SCRIPTS_L   =
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         =  calibrationtoolclient
-PY_SCRIPTS_L       =  
+PY_SCRIPTS         =
+PY_SCRIPTS_L       =
 
-PY_MODULES         = customwidgets calibrationtool_ui 
+PY_MODULES         =
 PY_MODULES_L       =
 
 PY_PACKAGES        =
@@ -188,12 +188,11 @@ endif
 #
 # TARGETS
 # -------
-all:	gui do_all 
+all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
 	@echo " . . . clean done"
-	@rm calibrationtool_ui.py
 
 clean_dist : clean_all clean_dist_all 
 	@echo " . . . clean_dist done"
@@ -204,11 +203,5 @@ man   : do_man
 install : install_all
 	@echo " . . . installation done"
 
-gui:
-	pyuic4 calibrationToolClient.ui -o calibrationtool_ui.py
-	
-	@sed  -ie 's/Qwt5.QwtPlot/PlotProperty/g' calibrationtool_ui.py
-	
-	@sed -ie '9 i\from customwidgets import *' calibrationtool_ui.py
 
 #___oOo___

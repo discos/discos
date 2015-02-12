@@ -24,6 +24,7 @@
 #define BUFFERSIZE 1000
 #define GAVINO "MANAGEMENT/Gavino"
 #define PALMIRO "MANAGEMENT/Palmiro"
+#define DUCEZIO "MANAGEMENT/Ducezio"
 
 using namespace IRA;
 using namespace maci;

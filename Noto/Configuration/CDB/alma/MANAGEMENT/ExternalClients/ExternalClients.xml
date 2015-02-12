@@ -7,11 +7,11 @@
                  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
                  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                 IPAddress="192.168.150.171"
+                 IPAddress="192.167.187.17"
                  Port="30000"
 		 ReceiveTimeout="10000000"
                  ControlThreadPeriod="10000000"
-		 SuperVisor="Palmiro">
+		 SuperVisor="Ducezio">
                
 	<status description="The status of the external client component" />
 </ExternalClients>

@@ -23,7 +23,19 @@
 #include <IRA>
 #include <acsncSimpleSupplier.h>
 #include "Configuration.h"
+#define _RECVBOSSCORE_MAX_IFS 4
 
+#elif COMPILE_TARGET_NT
+
+#include <ManagmentDefinitionsC.h>
+#include <ComponentErrors.h>
+#include <ManagementErrors.h>
+#include <ReceiversErrors.h>
+#include <ReceiversBossS.h>
+#include <ReceiversDefinitionsS.h>
+#include <IRA>
+#include <acsncSimpleSupplier.h>
+#include "Configuration.h"
 #define _RECVBOSSCORE_MAX_IFS 4
 
 #else
@@ -214,6 +226,25 @@ private:
 	IRA::CString m_currentReceiver;
 	long m_totalOutputs;
 
+#elif COMPILE_TARGET_NT
+
+	void reinit() throw (ComponentErrors::IRALibraryResourceExImpl);
+	void reinitCal() throw (ComponentErrors::IRALibraryResourceExImpl);
+
+	IRA::CSocket m_fsSocket;
+	//bool m_fsOpened;
+	IRA::CSocket m_fsSocketCal;
+	//bool m_fsCalOpened;
+	bool m_fsSocketError;
+	bool m_fsCalSocketError;
+	double m_LO[_RECVBOSSCORE_MAX_IFS];
+	Receivers::TPolarization m_pols[_RECVBOSSCORE_MAX_IFS];
+	double m_startFreq[_RECVBOSSCORE_MAX_IFS];
+	double m_bandWidth[_RECVBOSSCORE_MAX_IFS];
+	IRA::CString m_currentReceiver;
+	long m_totalOutputs;
+
+	
 #else
 	Receivers::Receiver_var m_currentRecv;
 	bool m_currentRecvError;
@@ -263,7 +294,11 @@ private:
 	nc::SimpleSupplier *m_notificationChannel;
 
 #ifdef COMPILE_TARGET_MED
-	void setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+	void setup(const char * code) throw(ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+
+#elif COMPILE_TARGET_NT
+	void setup(const char * code) throw(ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+
 #else
 	void setup(const char * code) throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
 			ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl);

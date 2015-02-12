@@ -156,8 +156,8 @@ Weather::parameters NotoWeatherStationImpl::getData()throw (CORBA::SystemExcepti
 	double pressure;
 	double humidity;
 	
-	sock->sendCMD(err,CString("wx\n"));
-	sock->receiveData(err,rdata);
+//	sock->sendCMD(err,CString("wx\n"));
+//	sock->receiveData(err,rdata);
         
 
 	
