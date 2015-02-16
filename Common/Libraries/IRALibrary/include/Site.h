@@ -11,7 +11,7 @@
 #ifndef CSITE_H
 #define CSITE_H
 
-#include <IRA>
+//#include <IRA>
 #include <AntennaDefinitionsC.h>
 
 namespace IRA {

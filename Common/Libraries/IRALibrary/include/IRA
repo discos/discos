@@ -16,5 +16,6 @@
 //#include "LogFilter.h"
 #include "TimeTaggedCircularArray.h"
 #include "CustomLoggerUtils.h"
+#include "Timer.h"
 
 #endif
