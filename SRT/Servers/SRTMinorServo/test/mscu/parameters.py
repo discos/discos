@@ -7,10 +7,6 @@ headers = ('#', '!', '?', '@')
 closers = ('\r\n', '\n\r', '\r', '\n')
 socket_timeout = 3.0
 
-# Shelve file that share the SRP position. The setpos command sets these vaules
-# and the getpos command read from here.
-db_name = 'positions.db'
-
 # Available commands
 commands = (
         'stow', 
@@ -69,12 +65,6 @@ number_of_slaves = {
         'GFR': 3,
         'M3R': 3,
 }
-
-# Response to generate
-response_types = (
-        'expected_ack', 
-        'mixed', 
-)
 
 # Available servers
 servers = {

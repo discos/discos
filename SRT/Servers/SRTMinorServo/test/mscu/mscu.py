@@ -1,117 +1,42 @@
 #!/usr/bin/env python
 # Author: Marco Buttu <m.buttu@oa-cagliari.inaf.it>
-# Copyright: This module has been placed in the public domain.
 
-"""
-This module defines a Minor Servo Control Unit (MSCU) simulator. 
-It is useful mainly for testing a MinorServo ACS component or a 
-MSCU GUI client. The real MSCU server was developed by Franco Fiocchi
-in Medicina (BO) and provides an high level API to communicate with 
-minor servos hardware of SRT.
-This module defines the following classes:
+import socket
+import traceback
+import os
+import sys
 
-- `MSCU`, a Minor Servo Control Unit server
-
-Functions:
-
-- `error_message(command)`: return a generic error message for the command
-- `reap()`: collect any child processes that may be outstanding
-
-Global variables used to make and to parse messages (defined in parameters.py):
-
-- `headers`: allowed headers of messages
-- `closers`: allowed closers of messages
-- `commands`: allowed MSCU high level commands
-- `app_nr`: dictionary that hold the address of every minor servo as
-   a key and a *human name* as a value
-- `response_types`: type of response to send to a client, used for testing
-   wrong or unexpected responses
-
-
-How To Use This Module
-======================
-(See the individual classes, methods, and attributes for details.)
-
-1. Import it: ``import mscu`` or ``from mscu import ...``.
-
-2. Create a MSCU object::
-
-       mscu = MSCU(host, port, response_type)
-
-3. Run the server::
-
-       mscu.run()
-
-An alternative way is to execute directly this module from a shell::
-
-       ./mscu.py
-"""
-
-
-import socket, traceback, os, sys
-import answer
+import commands
 import posutils
-from parameters import headers, closers, commands, time_stamp, app_nr, number_of_axis, \
-        response_types, db_name, filtered
+
+from parameters import headers, closers, commands, app_nr, filtered
 
 
-class MSCU:
-    """
-    A Minor Servo Control Unit (MSCU) simulator.
-    
-    The MSCU is a server that provides high level APIs to communicate
-    whit minor servos of SRT.
+class MSCU(object):
 
-    The MSCU is started with the `run()` method, which expects connections
-    from clients and make and send responses.
-    """
+    def __init__(self, host='', port=10000):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.bind((host, port))
+        self.set_response_policy()
 
-    def __init__(self, host='', port=10000, response_type='expected_ack'):
-        """
-        Initialize a `MSCU` object.
-
-        Parameters:
-
-        - `host`: a string, the IP address allowed to make request. All IPs to default.
-        - `port`: a positive integer, the port the MSCU lists for requests.
-        - `response_type`: a string; only values in `response_types` are allowed.
-        """
-        self.host = host
-        self.port = port
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.response_type = response_type
         db = posutils.PositionDB()
         db.initialize()
 
-    def __setattr__(self, name, value):
-        """Only certain values are allowed for ``response_type`` attribute."""
-        if name == "response_type":
-            if value not in response_types:
-                raise AttributeError("%s is not a valid response_type. Allowed values: %s" \
-                        % (value, response_types))
-            else:
-                # Use the attribute dictionary to avoid loops
-                self.__dict__[name] = value 
+    def set_response_policy(self, policy='expected'):
+        if policy in ('expected', 'mixed'):
+            self.response_policy = policy
         else:
-            # Use the attribute dictionary to avoid loops
-            self.__dict__[name] = value
+            raise ValueError('response policy %s not allowed' %policy)
 
     def run(self):
-        """Run the MSCU server."""
-        self.s.bind((self.host, self.port))
-        self.s.listen(1)
-        # Display a welcome message
-        print "*"*43
-        print "MSCU_simulator - Waiting for connections..."
-        print "*"*43
-        print "Response type: %s\n" %self.response_type
-
+        self.socket.listen(1)
+        self._welcome()
         # Number of connections counter
         counter = 0
         while True:
             try:
-                connection, clientaddr = self.s.accept()
+                connection, clientaddr = self.socket.accept()
                 counter += 1 
                 print "\n%d. Got connection from %s" %(counter, connection.getpeername())
             except KeyboardInterrupt:
@@ -121,25 +46,35 @@ class MSCU:
                 continue
 
             # Clean up old children
-            reap()
+            MSCU.reap()
 
             # Fork a process for this connection
             pid = os.fork()
 
             if pid:
-                # This is the parent process. Close the child's socket and return to the top of the loop.
+                # This is the parent process. Close the child's socket and 
+                # return to the top of the loop.
                 connection.close()
                 continue
             else:
-                # From here on, this is the child
-                # Close the parent's socket
-                self.s.close()
-
-                # Process the data
+                # From here on, this is the child. 
+                self.socket.close() # Close the parent's socket
                 try:
+                    buff = ''
                     while True:
-                        data = connection.recv(2048)
-
+                        byte = connection.recv(1)
+                        buff = byte if byte in headers else buff + byte
+                        if buff.startswith(headers):
+                            if buff.endswith(closers):
+                                data = buff
+                                buff = '' 
+                                # Go to the try block
+                            else:
+                                continue 
+                        else:
+                            buff = ''
+                            continue
+                        
                         try:
                             # Retrieve the message header
                             header, body = data[0], data[1:].rstrip()
@@ -154,7 +89,7 @@ class MSCU:
                             cause = "Invalid syntax!\n"
                             print cause
                             # Send a general error message
-                            connection.send(cause + error_message(data))
+                            connection.send(cause + MSCU.error_message(data))
                             # An invalid command pass silently
                             continue
 
@@ -163,7 +98,7 @@ class MSCU:
                             cause = "Unexpected command or header.\n"
                             print cause
                             # Send a general error message
-                            connection.send(cause + error_message(data))
+                            connection.send(cause + MSCU.error_message(data))
                             # An invalid command pass silently
                             continue
 
@@ -176,12 +111,12 @@ class MSCU:
                             cause = "Unexpected application number. Allowed values: %s\n" % app_nr.keys()
                             print cause
                             # Send a general error message
-                            connection.send(cause + error_message(data))
+                            connection.send(cause + MSCU.error_message(data))
                             # An invalid command pass silently
                             continue
                             
-                        # Call the appropriate function whose name is the string cmd
-                        for ans in getattr(answer, cmd)(cmd_num, app_num, self.response_type, *params):
+                        # Call the appropriate command whose name is the string cmd
+                        for ans in getattr(commands, cmd)(cmd_num, app_num, self.response_policy, *params):
                             if not cmd in filtered:
                                 print "Answer from %s: %r" % (servo_type, ans)
                             connection.send('%s' %ans)
@@ -202,25 +137,31 @@ class MSCU:
                 # and not go back to the top of the loop
                 sys.exit(0)
 
-def error_message(command):
-    """Return a generic error message."""
-    return "MSCU discards %r message and still waiting next command" %command
+    def _welcome(self):
+        print "*"*43
+        print "MSCU_simulator - Waiting for connections..."
+        print "*"*43
+        print "Response type: %s\n" %self.response_policy
 
-def reap():
-    """Collect any child processes that may be outstanding."""
-    while True:
-        try:
-            result = os.waitpid(-1, os.WNOHANG)
-            if not result[0]: 
+    @staticmethod
+    def error_message(msg):
+        return "message %s discarded" %msg
+
+    @staticmethod
+    def reap():
+        """Collect any child processes that may be outstanding."""
+        while True:
+            try:
+                result = os.waitpid(-1, os.WNOHANG)
+                if not result[0]: 
+                    break
+            except:
                 break
-        except:
-            break
-        print "Reaped process %d" % result[0]
+            print "Reaped process %d" % result[0]
 
 
 if __name__ == "__main__":
-    # mscu = MSCU(response_type="mixed")
-    mscu = MSCU(response_type="expected_ack")
+    mscu = MSCU()
     mscu.run()
 
 

@@ -1,6 +1,6 @@
 import time
 import shelve
-from parameters import closers, time_stamp, number_of_axis, app_nr, db_name, response_types
+from parameters import number_of_axis, app_nr
 
 
 def now():
@@ -9,11 +9,11 @@ def now():
     return int(acstime_ACE_BEGIN + time.time() * 10000000L)
 
 class PositionDB:
-    def __init__(self):
-        pass
+    def __init__(self, name='positions.db'):
+        self.name = name
 
     def initialize(self):
-        db = shelve.open(db_name, writeback = True)
+        db = shelve.open(self.name, writeback = True)
         for servo_type in app_nr.values():
             db[servo_type] = [[now()] + [0] * number_of_axis[servo_type]]
         db.close()
@@ -21,7 +21,7 @@ class PositionDB:
     def insert(self, servo_type, positions, timestamp=None):
         if not timestamp:
             timestamp = now()
-        db = shelve.open(db_name, writeback = True)
+        db = shelve.open(self.name, writeback = True)
         list_of_lists = db[servo_type]
         index = None
         for idx, lst in enumerate(list_of_lists):
@@ -42,7 +42,7 @@ class PositionDB:
         db.close()
 
     def print_positions(self, servo_type=None):
-        db = shelve.open(db_name, writeback = True)
+        db = shelve.open(self.name, writeback = True)
         if servo_type:
             list_of_lists = db[servo_type]
             for lst in list_of_lists:
@@ -62,7 +62,7 @@ class PositionDB:
         timestamp = time_ref
         if hasattr(time_ref, "__call__"):
             timestamp = time_ref()
-        db = shelve.open(db_name, writeback = True)
+        db = shelve.open(self.name, writeback = True)
         list_of_lists = db[servo_type]
         index = None
         for idx, lst in enumerate(list_of_lists):
