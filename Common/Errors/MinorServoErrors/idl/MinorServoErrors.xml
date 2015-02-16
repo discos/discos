@@ -34,6 +34,16 @@
          shortDescription="Operation not permitted" 
          description="Operation not permitted"/>
 
-</Type>
+	<ErrorCode name="ScanError" 
+         shortDescription="Error during a scan operation" 
+         description="Error during a scan operation ">
+	     <Member name="Axis" type="string" description="the name of the axis on which the scan is being executed" />
+    </ErrorCode>
 
+	<ErrorCode name="StatusError" 
+         shortDescription="Actual status does not permit operation"
+         description="Actual status does not permit operation">
+	     <Member name="Reason" type="string" description="report the reason of the error" />
+    </ErrorCode>
+</Type>
 
