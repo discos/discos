@@ -18,9 +18,17 @@
          shortDescription="Communication Error" 
          description="An error occur during low level communication"/>
 
+	<ErrorCode name="ConfigurationError" 
+         shortDescription="Configuration Error" 
+         description="Issuing a wrong configuration" />
+
 	<ErrorCode name="SetupError" 
          shortDescription="Error performing a setup" 
          description="Cannot perform a minor servo setup"/>
+
+	<ErrorCode name="TrackingError" 
+         shortDescription="Error during tracking operation" 
+         description="Cannot interact with servo tracking"/>
 
 	<ErrorCode name="StowError" 
          shortDescription="Error performing a stow" 
