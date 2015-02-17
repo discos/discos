@@ -51,6 +51,7 @@ man   : do_man
 
 install_templates:
 	cp -r ../templates/test $(INTROOT)/templates
+	find $(INTROOT)/templates/test -type d -name ".svn" | xargs rm -rf
 	@echo " . . . templates installed"
 
 install : install_all install_templates
