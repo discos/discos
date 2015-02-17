@@ -162,6 +162,10 @@ class MSCU(object):
 
 if __name__ == "__main__":
     mscu = MSCU()
-    mscu.run()
+    try:
+        mscu.run()
+    finally:
+        db = posutils.PositionDB()
+        db.clear()
 
 

@@ -1,3 +1,4 @@
+import os
 import time
 import shelve
 from parameters import number_of_axis, app_nr
@@ -9,8 +10,11 @@ def now():
     return int(acstime_ACE_BEGIN + time.time() * 10000000L)
 
 class PositionDB:
-    def __init__(self, name='positions.db'):
+    def __init__(self, name='/tmp/positions.db'):
         self.name = name
+
+    def clear(self):
+        os.remove(self.name)
 
     def initialize(self):
         db = shelve.open(self.name, writeback = True)
