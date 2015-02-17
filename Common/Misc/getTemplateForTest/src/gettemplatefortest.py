@@ -29,16 +29,22 @@ def get_template_dir():
     return template_dir
 
 def command_line_util(args):
-    try:
-        help = args[0] == "--help" or args[0] == "-h"
-    except:
-        help = False
-    if help:
+    if len(args) == 1:
+        arg = args.pop()
+        if arg in ('--help', '-h'):
+            print usage
+            sys.exit(0)
+        else:
+            target_dir = arg
+    elif len(args) > 1:
         print usage
         sys.exit(0)
-    if os.path.exists("test"):
-        msg = "ERROR: test directory already exists."
+    else:
+        target_dir = 'test' # Default target directory
+
+    if os.path.exists(target_dir):
+        msg = "ERROR: %s directory already exists." %target_dir
         raise Exception(msg)
     template_dir = get_template_dir()
-    shutil.copytree(template_dir, "test")
+    shutil.copytree(template_dir, target_dir)
 
