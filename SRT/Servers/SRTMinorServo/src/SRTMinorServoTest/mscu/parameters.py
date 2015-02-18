@@ -4,21 +4,8 @@
 
 # Message portions
 headers = ('#', '!', '?', '@')
-closers = ('\r\n', '\n\r', '\r', '\n')
+closers = ('\r\n', '\n\r')
 socket_timeout = 3.0
-
-# Available commands
-commands = (
-        'stow', 
-        'setup', 
-        'getstatus', 
-        'setpos', 
-        'getpos',
-        'getspar',
-        'getappstatus',
-        'getstatus',
-        'clean',
-)
 
 # Available properties
 properties = (

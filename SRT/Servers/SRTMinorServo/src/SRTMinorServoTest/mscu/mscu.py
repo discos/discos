@@ -9,7 +9,7 @@ import sys
 import commands
 import posutils
 
-from parameters import headers, closers, commands, app_nr, filtered
+from parameters import headers, closers, app_nr, filtered
 
 
 class MSCU(object):
@@ -94,7 +94,7 @@ class MSCU(object):
                             continue
 
                         # Print a general error message if we received an invalid command
-                        if header not in headers or cmd not in commands:
+                        if header not in headers or not hasattr(commands, cmd):
                             cause = "Unexpected command or header.\n"
                             print cause
                             # Send a general error message
@@ -162,10 +162,6 @@ class MSCU(object):
 
 if __name__ == "__main__":
     mscu = MSCU()
-    try:
-        mscu.run()
-    finally:
-        db = posutils.PositionDB()
-        db.clear()
+    mscu.run()
 
 
