@@ -39,6 +39,14 @@ typedef ComponentProxy<COMPONENT_TYPE,                                 \
  *
  * While the Proxy Operator '->' gives direct access to the inner
  * object methods.
+ *
+ * In this same library a set of files define some commonly used proxies, for
+ * example in you source code a simple:
+ * #include <AntennaBossProxy.h>
+ * will give immediate access to Antenna::AntennaBoss_proxy type 
+ * 
+ * Defining new proxies should follow the simple AntennaBoss example and should
+ * be done in this module.
  */
 template <typename ComponentClass, typename ComponentVar>
 class ComponentProxy
