@@ -13,7 +13,7 @@ int main()
     Management::CustomLogger_proxy m_customLogger;
     m_customLogger.setComponentName("CustomLogger");
     m_customLogger->emitLog("Proxy log!", Management::C_INFO);
-    Antenna::AntennaBoss_proxy m_antennaBoss("AntennaBoss");
+    Antenna::AntennaBoss_proxy m_antennaBoss;
     return 0;
 }
 
