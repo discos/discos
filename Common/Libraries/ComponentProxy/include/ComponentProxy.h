@@ -13,12 +13,11 @@
 
 #define PROXY_STRINGIFY(x) #x
 #define PROXY_PASTE(a, b) a##b
-#define PROXY_COMPONENT(COMPONENT_TYPE) \
-typedef ComponentProxy<COMPONENT_TYPE, \
-                       PROXY_PASTE(COMPONENT_TYPE, _var) > \
-                       PROXY_PASTE(COMPONENT_TYPE, _proxy); \
-typedef boost::shared_ptr<PROXY_PASTE(COMPONENT_TYPE, _proxy) > \
-        PROXY_PASTE(COMPONENT_TYPE, _proxy_ptr);
+#define PROXY_PASTE2(a, b) a##PROXY_STRINGIFY(b)
+#define PROXY_COMPONENT(COMPONENT_TYPE)                                \
+typedef ComponentProxy<COMPONENT_TYPE,                                 \
+                       PROXY_PASTE(COMPONENT_TYPE, _var) >             \
+                       PROXY_PASTE(COMPONENT_TYPE, _proxy);
 
 /**
  * This class should be used by everyone to manipulate references to 
@@ -29,20 +28,32 @@ typedef boost::shared_ptr<PROXY_PASTE(COMPONENT_TYPE, _proxy) > \
  * PROXY_COMPONENT(AntennaBoss);
  * AntennaBoss_proxy m_antennaBoss("MyComponentName", m_services);
  * m_antennaBoss->yourAntennaBossMethod(methodParameters); 
+ * 
+ * The Proxy operator '.' permits access to proxy methods:
+ * .setComponentName();
+ * .setError();
+ * .resetError();
+ * .loadDefault();
+ * .unload();
+ * .getComponentVar();
+ *
+ * While the Proxy Operator '->' gives direct access to the inner
+ * object methods.
  */
 template <typename ComponentClass, typename ComponentVar>
 class ComponentProxy
 {
     public:
+        ComponentProxy();
         ComponentProxy(const char*, maci::ContainerServices*);
         virtual ~ComponentProxy();
         void loadDefault();
         void unload();
         ComponentVar getComponentVar(){ return m_component_var;};
-        ComponentVar operator*();
         ComponentVar operator->();
         void setError(){ m_error = true;};
         void resetError(){ m_error = false;};
+        void setComponentName(const char*);
     private:
         // We only allow to create an instance via factory methods or explicit
         // constructor
@@ -54,6 +65,19 @@ class ComponentProxy
         ComponentVar m_component_var;
         bool m_error;
 };
+
+template <typename ComponentClass, typename ComponentVar>
+ComponentProxy<ComponentClass, ComponentVar>::ComponentProxy() :
+                                 m_name(NULL),
+                                 m_services(NULL),
+                                 m_error(false)
+{
+    m_component_var = ComponentClass::_nil();
+    if(m_services == NULL)
+    {
+        //TODO: getContainerServices on your own
+    }
+}
 
 template <typename ComponentClass, typename ComponentVar>
 ComponentProxy<ComponentClass, ComponentVar>::ComponentProxy(const char * name, 
@@ -84,9 +108,10 @@ ComponentProxy<ComponentClass, ComponentVar>::loadDefault()
     // dispose the reference
         try {
             m_services->releaseComponent((const char*)m_component_var->name());
-            CUSTOM_LOG(LM_FULL_INFO,"ComponentLoader::loadDefault",
-            //(LM_INFO, PROXY_PASTE("releasing ", PROXY_STRINGIFY(ComponentClass))));
-            (LM_INFO, "releasing "));
+            CUSTOM_LOG(LM_FULL_INFO, 
+                       "ComponentLoader::loadDefault",
+                       (LM_INFO, ("releasing " + this->m_name).c_str())
+                       );
         }catch (...) { //dispose silently...if an error...no matter
         }
         m_component_var = ComponentClass::_nil();
@@ -95,9 +120,10 @@ ComponentProxy<ComponentClass, ComponentVar>::loadDefault()
     //only if it has not been retrieved yet
         try {
             m_component_var = m_services->getDefaultComponent<ComponentClass>(m_name.c_str());
-            CUSTOM_LOG(LM_FULL_INFO,"ComponentLoader::loadDefault",
-            //(LM_INFO, PROXY_PASTE("loading ", PROXY_STRINGIFY(ComponentClass))));
-            (LM_INFO, "loading "));
+            CUSTOM_LOG(LM_FULL_INFO, 
+                       "ComponentLoader::loadDefault",
+                       (LM_INFO, ("loading " + this->m_name).c_str())
+                       );
             m_error = false;
         } catch (maciErrType::CannotGetComponentExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,
@@ -128,9 +154,10 @@ ComponentProxy<ComponentClass, ComponentVar>::unload()
     if (!CORBA::is_nil(m_component_var)) { 
         try {
             m_services->releaseComponent((const char*)m_component_var->name());
-            CUSTOM_LOG(LM_FULL_INFO,"ComponentLoader::unload",
-            //(LM_INFO, PROXY_PASTE("releasing ", PROXY_STRINGIFY(ComponentClass))));
-            (LM_INFO, "releasing "));
+            CUSTOM_LOG(LM_FULL_INFO, 
+                       "ComponentLoader::loadDefault",
+                       (LM_INFO, ("releasing " + this->m_name).c_str())
+                       );
         }catch (maciErrType::CannotReleaseComponentExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,
                            Impl,ex,"ComponentLoader::unload()");
@@ -139,10 +166,20 @@ ComponentProxy<ComponentClass, ComponentVar>::unload()
         }catch (...) { 
             _EXCPT(ComponentErrors::UnexpectedExImpl, impl,
                    "ComponentLoader::unload()");
-            impl.log(LM_WARNING);
+            CUSTOM_EXCPT_LOG(impl, LM_WARNING);
+            //impl.log(LM_WARNING);
         }
         m_component_var = ComponentClass::_nil();
     } 
+}
+
+template <typename ComponentClass, typename ComponentVar>
+void
+ComponentProxy<ComponentClass, ComponentVar>::setComponentName(const char* name)
+{
+    unload();
+    m_name = std::string(name);
+    loadDefault();
 }
 
 template <typename ComponentClass, typename ComponentVar>
@@ -150,16 +187,9 @@ ComponentVar
 ComponentProxy<ComponentClass, ComponentVar>::operator->()
 {
     loadDefault();
-    return m_component_var;
+    return m_component_var.out();
 }
 
-template <typename ComponentClass, typename ComponentVar>
-ComponentVar
-ComponentProxy<ComponentClass, ComponentVar>::operator*()
-{
-    loadDefault();
-    return m_component_var;
-}
 
 #endif
 

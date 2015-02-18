@@ -10,15 +10,16 @@
 # mbartolini  17/02/15  created
 #
 
-EXECUTABLES_L   = test
-test_OBJECTS    = test
-test_LIBS       = IRALibrary ManagmentDefinitionsStubs CustomLoggerStubs \
-                  ManagementErrors ComponentErrors
+EXECUTABLES_L   = compilation_test
+compilation_test_OBJECTS    = compilation_test
+compilation_test_LIBS       = IRALibrary ManagmentDefinitionsStubs AntennaDefinitionsStubs \
+                              CustomLoggerStubs AntennaBossStubs \
+                              ManagementErrors ComponentErrors AntennaErrors
 
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        = ComponentProxy.h
+INCLUDES        = ComponentProxy.h AntennaBossProxy.h CustomLoggerProxy.h
 
 #
 #>>>>> END OF standard rules
