@@ -38,7 +38,7 @@ app_nr = {
 }
 
 # Number of axis of each minor servo
-number_of_axis = {
+axes = {
         'PFP': 3,
         'SRP': 6,
         'GFR': 1,
