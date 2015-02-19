@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+    MEDICINA MINOR SERVO PARAMETERS
+-->
+<MinorServoParameters 
+    xmlns="urn:schemas-cosylab-com:MinorServoParameters:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <MinorServo>
+        <code>KKC</code>
+        <primary>0</primary>
+        <trackel>1</trackel>
+        <!--
+        for each axis we sepcify name an scharacteristics as:
+
+        <NAME>unit,min,max,pol0,pol1,pol2,pol3,pol4</NAME>
+
+        where:
+        * NAME can be one of Xaxis, Yaxis, Zaxis, THETAXaxis, THETAYaxis,
+        or YPaxis, ZPaxis for primary focus
+        * unit is the the unit measure for the axis
+        * min and max are the maximum and minimum values the axis can get
+        * pol0-4 are the coefficients of the 5th grade polynomial which describes
+        elevation tracking corrections
+        -->
+        <Xaxis>mm,-70.0,70.0,15,0,0,0,0</Xaxis>
+        <Yaxis>mm,-70.0,70.0,-37.9929,0,0,0,0</Yaxis>
+        <Zaxis>mm,-70.0,70.0,14.4818,0,0,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0,-0.0150346,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,-0.0486663,0,0,0,0</THETAYaxis>
+    </MinorServo>
+    <MinorServo>
+        <code>CCC</code>
+        <primary>0</primary>
+        <trackel>1</trackel>
+        <Xaxis>mm,-70.0,70.0,-7.62,0,0,0,0</Xaxis>
+        <Yaxis>mm,-70.0,70.0,-18.2314,0,0,0,0</Yaxis>
+        <Zaxis>mm,-70.0,70.0,2.18271,0,0,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0,-0.0736767,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,0.0199275,0,0,0,0</THETAYaxis>
+    </MinorServo>
+    <MinorServo>
+        <code>XXP</code>
+        <primary>1</primary>
+        <trackel>0</trackel>
+        <YPaxis>mm,-340,-320,-331.09,0,0,0,0</YPaxis>
+        <ZPaxis>mm,-320,-300,-306.92,0,0,0,0</ZPaxis>
+    </MinorServo>
+    <MinorServo>
+        <code>LLP</code>
+        <primary>1</primary>
+        <trackel>0</trackel>
+        <YPaxis>mm,-10,0,-5.09,0,0,0,0</YPaxis>
+        <ZPaxis>mm,-320,-270,-302.32,0,0,0,0</ZPaxis>
+    </MinorServo>
+</MinorServoParameters>
