@@ -807,7 +807,9 @@ void CRecvBossCore::park() throw (ManagementErrors::ParkingErrorExImpl)
 	m_feeds=m_IFs=0;
 	m_loEpoch=m_starFreqEpoch=m_bandWidthEpoch=m_polEpoch=m_feedsEpoch=m_IFsEpoch=m_modeEpoch=m_recvStatusEpoch=m_dewarStatusEpoch=0;
 	try {
-		derotatorPark();
+		if (m_updateMode==Receivers::RCV_UNDEF_DEROTCONF) {
+			derotatorPark();
+		}
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		_ADD_BACKTRACE(ManagementErrors::ParkingErrorExImpl,impl,ex,"CRecvBossCore::park()");
