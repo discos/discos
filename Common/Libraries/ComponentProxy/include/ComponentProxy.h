@@ -55,17 +55,18 @@ class ComponentProxy
         ComponentProxy();
         ComponentProxy(const char*, maci::ContainerServices*);
         virtual ~ComponentProxy();
-        void loadDefault();
+        void loadDefault() throw (ComponentErrors::CouldntGetComponentExImpl);
         void unload();
         ComponentVar getComponentVar(){ return m_component_var;};
-        ComponentVar operator->();
+        ComponentVar operator->() throw (ComponentErrors::CouldntGetComponentExImpl);
         void setError(){ m_error = true;};
         void resetError(){ m_error = false;};
+        bool isError(){ return m_error;};
         void setComponentName(const char*);
+        void setContainerServices(maci::ContainerServices*);
     private:
         // We only allow to create an instance via factory methods or explicit
-        // constructor
-        // thus we disable copy contructor and assignment operator
+        // constructor thus we disable copy contructor and assignment operator
         ComponentProxy(const ComponentProxy&);
         ComponentProxy& operator=(const ComponentProxy&);
         std::string m_name; 
@@ -76,29 +77,21 @@ class ComponentProxy
 
 template <typename ComponentClass, typename ComponentVar>
 ComponentProxy<ComponentClass, ComponentVar>::ComponentProxy() :
-                                 m_name(NULL),
+                                 m_name(""),
                                  m_services(NULL),
                                  m_error(false)
 {
     m_component_var = ComponentClass::_nil();
-    if(m_services == NULL)
-    {
-        //TODO: getContainerServices on your own
-    }
 }
 
 template <typename ComponentClass, typename ComponentVar>
-ComponentProxy<ComponentClass, ComponentVar>::ComponentProxy(const char * name, 
-                                 maci::ContainerServices * services = NULL) :
+ComponentProxy<ComponentClass, ComponentVar>::ComponentProxy(const char * name,
+                                 maci::ContainerServices * services) :
                                  m_name(name),
                                  m_services(services),
                                  m_error(false)
 {
     m_component_var = ComponentClass::_nil();
-    if(m_services == NULL)
-    {
-        //TODO: getContainerServices on your own
-    }
 }
 
 template <typename ComponentClass, typename ComponentVar>
@@ -110,7 +103,30 @@ ComponentProxy<ComponentClass, ComponentVar>::~ComponentProxy()
 template <typename ComponentClass, typename ComponentVar>
 void
 ComponentProxy<ComponentClass, ComponentVar>::loadDefault()
+throw (ComponentErrors::CouldntGetComponentExImpl)
 {
+    if(m_name == "")
+    {
+        CUSTOM_LOG(LM_FULL_INFO, 
+                   "ComponentLoader::loadDefault",
+                   (LM_WARNING, "Trying to load component without name " )
+                   );
+        _EXCPT(ComponentErrors::CouldntGetComponentExImpl, impl,
+                   "ComponentLoader::loadDefault()");
+        throw impl;
+        return;
+    }
+    if(m_services == NULL)
+    {
+        CUSTOM_LOG(LM_FULL_INFO, 
+                   "ComponentLoader::loadDefault",
+                   (LM_WARNING, "Trying to load component without Container Services " )
+                   );
+        _EXCPT(ComponentErrors::CouldntGetComponentExImpl, impl,
+                   "ComponentLoader::loadDefault()");
+        throw impl;
+        return;
+    }
     if ((!CORBA::is_nil(m_component_var)) && (m_error)) { 
     // if reference was already taken, but an error was found 
     // dispose the reference
@@ -118,7 +134,7 @@ ComponentProxy<ComponentClass, ComponentVar>::loadDefault()
             m_services->releaseComponent((const char*)m_component_var->name());
             CUSTOM_LOG(LM_FULL_INFO, 
                        "ComponentLoader::loadDefault",
-                       (LM_INFO, ("releasing " + this->m_name).c_str())
+                       (LM_DEBUG, ("releasing " + this->m_name).c_str())
                        );
         }catch (...) { //dispose silently...if an error...no matter
         }
@@ -130,7 +146,7 @@ ComponentProxy<ComponentClass, ComponentVar>::loadDefault()
             m_component_var = m_services->getDefaultComponent<ComponentClass>(m_name.c_str());
             CUSTOM_LOG(LM_FULL_INFO, 
                        "ComponentLoader::loadDefault",
-                       (LM_INFO, ("loading " + this->m_name).c_str())
+                       (LM_DEBUG, ("loading " + this->m_name).c_str())
                        );
             m_error = false;
         } catch (maciErrType::CannotGetComponentExImpl& ex) {
@@ -164,7 +180,7 @@ ComponentProxy<ComponentClass, ComponentVar>::unload()
             m_services->releaseComponent((const char*)m_component_var->name());
             CUSTOM_LOG(LM_FULL_INFO, 
                        "ComponentLoader::loadDefault",
-                       (LM_INFO, ("releasing " + this->m_name).c_str())
+                       (LM_DEBUG, ("releasing " + this->m_name).c_str())
                        );
         }catch (maciErrType::CannotReleaseComponentExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,
@@ -175,7 +191,6 @@ ComponentProxy<ComponentClass, ComponentVar>::unload()
             _EXCPT(ComponentErrors::UnexpectedExImpl, impl,
                    "ComponentLoader::unload()");
             CUSTOM_EXCPT_LOG(impl, LM_WARNING);
-            //impl.log(LM_WARNING);
         }
         m_component_var = ComponentClass::_nil();
     } 
@@ -185,14 +200,29 @@ template <typename ComponentClass, typename ComponentVar>
 void
 ComponentProxy<ComponentClass, ComponentVar>::setComponentName(const char* name)
 {
-    unload();
-    m_name = std::string(name);
-    loadDefault();
+    if(name == "")
+        m_name = std::string(name);
+    else{
+        //TODO: throw exception?
+    }
+}
+
+template <typename ComponentClass, typename ComponentVar>
+void
+ComponentProxy<ComponentClass, ComponentVar>::setContainerServices(
+    maci::ContainerServices* services)
+{
+    if(m_services != NULL)
+        m_services = services;
+    else{
+        //TODO: throw exception?
+    }
 }
 
 template <typename ComponentClass, typename ComponentVar>
 ComponentVar
 ComponentProxy<ComponentClass, ComponentVar>::operator->()
+throw (ComponentErrors::CouldntGetComponentExImpl)
 {
     loadDefault();
     return m_component_var.out();
