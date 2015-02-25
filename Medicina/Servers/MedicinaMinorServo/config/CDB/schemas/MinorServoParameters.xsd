@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:MinorServoParameters:1.0"
+	xmlns="urn:schemas-cosylab-com:MinorServoParameters:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	
+	<xs:complexType name="TTableHeader">
+ 		<xs:sequence>
+ 			<xs:element name="code" type="xs:string" />
+            <xs:element name="primary" type="xs:int" default="1" />
+            <xs:element name="trackel" type="xs:int" default="1" />
+            <xs:element name="Xaxis" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="Yaxis" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="Zaxis" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="THETAXaxis" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="THETAYaxis" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="YPaxis" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="ZPaxis" type="xs:string" minOccurs="0" maxOccurs="1" />
+ 		</xs:sequence>
+ 	</xs:complexType>
+ 	
+	<xs:complexType name="TTableMinorServo">
+		<xs:sequence>
+		 	<xs:element name="MinorServo" type="TTableHeader" minOccurs="1" maxOccurs="unbounded" />
+ 		</xs:sequence>
+ 	</xs:complexType>
+ 		
+	<xs:element name="MinorServoParameters" type="TTableMinorServo"/>
+	
+</xs:schema>
