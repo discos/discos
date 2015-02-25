@@ -45,6 +45,13 @@ axes = {
         'M3R': 1,
 }
 
+stow_position = {
+        'PFP': [2730.15, 0, -195],
+        'SRP': [-125, -125, -125, 0, 0, 0],
+        'GFR': [0],
+        'M3R': [0],
+}
+
 # Number of slaves of each minor servo
 number_of_slaves = {
         'PFP': 5,

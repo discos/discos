@@ -2,6 +2,7 @@
 # Author: Marco Buttu <m.buttu@oa-cagliari.inaf.it>
 
 import socket
+import time
 import traceback
 import os
 import sys
@@ -97,12 +98,15 @@ class MSCU(object):
                             print "\nReceived message from %s: %r" % (connection.getpeername(), data)
                         
                         # Call the appropriate command whose name is the string cmd
-                        ans = getattr(servo, cmd)(cmd_num, *params)
+                        answers = getattr(servo, cmd)(cmd_num, *params)
 
                         if not cmd in filtered:
-                            print "Answer from %s: %r" % (servo.name, ans)
+                            for answer in answers:
+                                print "Answer from %s: %r" % (servo.name, answer)
 
-                        connection.send('%s' %ans)
+                        for answer in answers:
+                            connection.send('%s' %answer)
+                            time.sleep(0.2)
                 except (KeyboardInterrupt, SystemExit):
                     raise
                 except:
