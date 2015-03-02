@@ -159,9 +159,7 @@ cdb:
 	@cd $(ACS_CDB); ln -s $(SYSLOCATION)/$(CDB_SVN_LOCATION) CDB
 
 sources:
-	@cd $(SYSLOCATION) ; for i in $(SYSTEM_SVN_MODULES) ; do \
-		svn checkout svn+ssh://$(SVNUSER)@belzebu.oa-cagliari.inaf.it/repos/ACS/tags/$(SYSTEM_SVN_TAG)/$${i} ;\
-	done
+	@cd $(SYSLOCATION) ; svn checkout svn+ssh://$(SVNUSER)@nuraghe-devel.oa-cagliari.inaf.it/ACS/tags/$(SYSTEM_SVN_TAG)/$${i}
 
 man:
 	@echo "creating documentation tree....."
