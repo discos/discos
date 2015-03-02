@@ -37,13 +37,19 @@ ScanThread::run()
     IRA::CIRATools::getTime(now);
     ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
     // COMMAND STARTING POSITION
-    m_control->set_position(m_scan.getStartPosition());
-    CUSTOM_LOG(LM_FULL_INFO, "ScanThread::run",
+    if(m_status->scan_active)
+    {
+        m_control->set_position(m_scan.getStartPosition());
+        CUSTOM_LOG(LM_FULL_INFO, "ScanThread::run",
                (LM_DEBUG, "Moving to start position"));
+    }else
+        return;
     /**
      * Wait for tracking starting position
      */
     while(!(m_control->is_tracking())){
+        if(!(m_status->scan_active))
+            return;
         sleep_ret = SLEEP_ERROR;
         sleep_ret = ACS::ThreadBase::sleep(10000);
         // Wait 1 ms
@@ -61,6 +67,8 @@ ScanThread::run()
      */
     IRA::CIRATools::getTime(now);
     while(now.value().value < m_scan.getStartingTime() - SCAN_DELTA) {
+        if(!(m_status->scan_active))
+            return;
         sleep_ret = SLEEP_ERROR;
         sleep_ret = ACS::ThreadBase::sleep(10000);
         // Wait 1 ms
@@ -71,10 +79,13 @@ ScanThread::run()
         IRA::CIRATools::getTime(now);
     }
     m_status->scanning = true;
-    m_control->set_position_with_time(m_scan.getStopPosition(), 
+    if(m_status->scan_active){
+        m_control->set_position_with_time(m_scan.getStopPosition(), 
                                       static_cast<double>(m_scan.getTotalTime() / 10000000));
-    CUSTOM_LOG(LM_FULL_INFO, "ScanThread::run",
-               (LM_DEBUG, "Begin scan movement"));
+        CUSTOM_LOG(LM_FULL_INFO, "ScanThread::run",
+                  (LM_DEBUG, "Begin scan movement"));
+    }else
+        return;
     /**
      * Wait for tracking stop position
      */

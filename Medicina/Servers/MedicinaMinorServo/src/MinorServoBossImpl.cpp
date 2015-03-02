@@ -82,11 +82,11 @@ void MinorServoBossImpl::initialize() throw (
                  false);
     CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
               (LM_DEBUG, "server ip: %s", (const char*)m_server_ip));
-    if(!IRA::CIRATools::getDBValue(m_services, "AntennaBossInterface", 
+    /**if(!IRA::CIRATools::getDBValue(m_services, "AntennaBossInterface", 
                                   (const char*)m_antennaBossInterface))
         THROW_EX(ComponentErrors,CDBAccessEx, 
                  "cannot read AntennaBossInterface from CDB",
-                 false);
+                 false);**/
     /**
      * INITIALIZE STATUS
      */
@@ -390,7 +390,7 @@ void
 MinorServoBossImpl::getAxesInfo(ACS::stringSeq_out axes, 
                                 ACS::stringSeq_out units)
           throw (MinorServoErrors::MinorServoErrorsEx,
-                 ComponentErrors::ComponentErrorsEx);
+                 ComponentErrors::ComponentErrorsEx)
 {
     if(!isReady())
         THROW_EX(MinorServoErrors, 
@@ -480,62 +480,6 @@ throw (CORBA::SystemException)
     return res;
 }
 
-/*
-void
-MinorServoBossImpl::loadAntennaBoss()
-{
-    if ((!CORBA::is_nil(m_antenna_boss)) && (m_antenna_boss_error)) {
-        try {
-            m_services->releaseComponent((const char*)m_antenna_boss->name());
-        }catch (...) {}
-        m_antenna_boss = Antenna::AntennaBoss::_nil();
-    }
-    if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
-        try {
-            m_antenna_boss = m_services->getDefaultComponent<Antenna::AntennaBoss>((const char*)m_config->getAntennaBossComponent());
-            m_antenna_boss_error = false;
-         }catch (maciErrType::CannotGetComponentExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadAntennaBoss()");
-            Impl.setComponentName((const char*)m_config->getAntennaBossComponent());
-            ref=Antenna::AntennaBoss::_nil();
-            throw Impl;     
-        }catch (maciErrType::NoPermissionExImpl& ex){
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadAntennaBoss()");
-            Impl.setComponentName((const char*)m_config->getAntennaBossComponent());
-            ref=Antenna::AntennaBoss::_nil();
-            throw Impl;     
-        }catch (maciErrType::NoDefaultComponentExImpl& ex){
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadAntennaBoss()");
-            Impl.setComponentName((const char*)m_config->getAntennaBossComponent());
-            ref=Antenna::AntennaBoss::_nil();
-            throw Impl;             
-        }
-    }
-}
-
-void
-MinorServoBossImpl::unloadAntennaBoss()
-{
-    if (!CORBA::is_nil(ref)) {
-        try {
-            m_services->releaseComponent((const char*)m_antenna_boss->name());
-        }catch(maciErrType::CannotReleaseComponentExImpl& ex) {
-_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CCore::unloadAntennaBoss()");
-Impl.setComponentName((const
-char
-*)m_config->getAntennaBossComponent());
-Impl.log(LM_WARNING);
-}
-catch
-(...)
-{
-_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::unloadAntennaBoss())");
-            impl.log(LM_WARNING);
-                    }
-                            ref=Antenna::AntennaBoss::_nil();
-                                }
-}*/
-
 bool 
 MinorServoBossImpl::isParked() 
 throw (MinorServoErrors::ConfigurationErrorEx) 
@@ -550,7 +494,7 @@ MinorServoBossImpl::checkFocusScan(
              const ACS::Time starting_time, 
              const double range, 
              const ACS::Time total_time
-     ) throw (ManagementErrors::ConfigurationErrorEx, 
+     ) throw (MinorServoErrors::StatusErrorEx,
               MinorServoErrors::ScanErrorEx)
 {    
     if(!isReady())
@@ -558,14 +502,19 @@ MinorServoBossImpl::checkFocusScan(
     if(isScanning())
         THROW_EX(MinorServoErrors, ScanErrorEx, "checkFocusScan: the system is executing another scan", true);
     string axis_code = m_actual_config->is_primary_focus() ? "ZP" : "Z";
-    return checkScanImpl(starting_time, range, total_time, axis_code);
+    //return checkScanImpl(starting_time, range, total_time, axis_code);
+
+    //TODO: fake implementation we shold remove this method or make it conform
+    //to the same interface of checkScan
+    return true; 
 }
 
-MinorServo::TRunTimeParameters 
-MinorervoBossImpl::checkScan(
-        ACS::Time & starting_time, 
-        MinorServo::MinorServoScan scan_parameters,
-        Antenna::TRunTimeParameters antenna_parameters,
+bool 
+MinorServoBossImpl::checkScan(
+        ACS::Time starting_time, 
+        const MinorServo::MinorServoScan& scan_parameters,
+        const Antenna::TRunTimeParameters& antenna_parameters,
+        TRunTimeParameters_out minor_servo_parameters
 ) throw (MinorServoErrors::MinorServoErrorsEx,
          ComponentErrors::ComponentErrorsEx)
 {
@@ -574,9 +523,9 @@ MinorervoBossImpl::checkScan(
     if(isScanning())
         THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is executing another scan", true);
     return checkScanImpl(starting_time, 
-                         scan_parameters.range, 
-                         scan_parameters.total_time, 
-                         string(scan_parameters.axis_code));
+                         scan_parameters,
+                         antenna_parameters,
+                         minor_servo_parameters);
 }
 
 
@@ -587,43 +536,77 @@ MinorServoBossImpl::getMinScanStartingTime(
         double & acceleration, 
         double & max_speed
     )
-    throw (MinorServoErrors::ConfigurationErrorExImpl, MinorServoErrors::ScanErrorEx);
+    throw (MinorServoErrors::ConfigurationErrorExImpl, MinorServoErrors::ScanErrorEx)
 {
     return ACS::Time(0.0);
 }
 
 
-bool MinorServoBossImpl::checkScanImpl(
-        const ACS::Time starting_time, 
-        double range, 
-        const ACS::Time total_time, 
-        const string axis_code
-     ) throw (MinorServoErrors::ScanErrorEx)
+bool 
+MinorServoBossImpl::checkScanImpl(
+        ACS::Time starting_time, 
+        const MinorServo::MinorServoScan& scan_parameters,
+        const Antenna::TRunTimeParameters& antenna_parameters,
+        TRunTimeParameters_out minor_servo_parameters
+     ) throw (MinorServoErrors::MinorServoErrorsEx,
+              ComponentErrors::ComponentErrorsEx)
 {
-    //TODO: this is so approximate and should change in newer versions
-    MedMinorServoPosition central_position = m_control->get_position();
-    MedMinorServoScan scan(central_position, starting_time, range, total_time,
-                           axis_code, isElevationTracking());
-    return scan.check();
+    if(scan_parameters.is_empty_scan)
+    {
+        minor_servo_parameters->startEpoch = 0;
+        minor_servo_parameters->onTheFly = false;
+        minor_servo_parameters->centerScan = 0;
+        minor_servo_parameters->scanAxis = "";
+        minor_servo_parameters->timeToStop = 0;
+        return true; 
+    }
+    MedMinorServoPosition central_position = 
+        m_actual_config->get_position(antenna_parameters.elevation);
+    MedMinorServoScan scan(central_position, 
+                           starting_time, 
+                           scan_parameters.range,
+                           scan_parameters.total_time,
+                           std::string(scan_parameters.axis_code), 
+                           isElevationTracking());
+    if(scan.check())
+    {
+        minor_servo_parameters->startEpoch = scan.getStartingTime();
+        minor_servo_parameters->onTheFly = true;
+        MedMinorServoPosition center_position = scan.getCentralPosition();
+        double center = 0;
+        try{
+            center = center_position.get_axis_position(
+                                            scan_parameters.axis_code);
+        }catch(...){
+            CUSTOM_LOG(LM_FULL_INFO, 
+                       "MinorServo::MinorServoBossImpl::checkScanImpl",
+                       (LM_WARNING, "Wrong axis name, defaulting to Z"));
+            center = center_position.z;
+        }
+        minor_servo_parameters->centerScan = center;
+        minor_servo_parameters->scanAxis = scan_parameters.axis_code;
+        minor_servo_parameters->timeToStop = scan.getTotalTime();
+        return true;
+    }
+    return false;
 }
 
 
 void 
 MinorServoBossImpl::startScan(
         ACS::Time & starting_time, 
-        MinorServo::MinorServoScan scan_parameters,
-        Antenna::TRunTimeParameters antenna_parameters,
+        const MinorServo::MinorServoScan& scan_parameters,
+        const Antenna::TRunTimeParameters& antenna_parameters
 ) throw (MinorServoErrors::MinorServoErrorsEx,
-         ComponentErrors::ComponentErrorsEx);
+         ComponentErrors::ComponentErrorsEx)
 {
     if(!isReady())
         THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is not ready", true);
     if(isScanActive())
         THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is executing another scan", true);
     startScanImpl(starting_time, 
-                  scan_parameters.range, 
-                  scan_parameters.total_time, 
-                  string(scan_parameters.axis_code));
+                  scan_parameters,
+                  antenna_parameters);
 }
 
 
@@ -636,33 +619,36 @@ MinorServoBossImpl::startFocusScan(
               ComponentErrors::ComponentErrorsEx)
 {    
     if(!isReady())
-        THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is not ready", true);
+        THROW_EX(MinorServoErrors, ScanErrorEx, "startFocusScan: the system is not ready", true);
     if(isScanActive())
-        THROW_EX(MinorServoErrors, ScanErrorEx, "checkScan: the system is executing another scan", true);
-    /**
-     * we call both primary and secondary focus axes "Z"
-     */
-    startScanImpl(starting_time, range, total_time, "Z");
+        THROW_EX(MinorServoErrors, ScanErrorEx, "startFocusScan: the system is executing another scan", true);
+    string axis_code = m_actual_config->is_primary_focus() ? "ZP" : "Z";
+    //TODO: fake implementation we shold remove this method or make it conform
+    //to the same interface of checkScan
+    //startScanImpl(starting_time, range, total_time, axis_code);
 }
 
 void 
 MinorServoBossImpl::startScanImpl(
         ACS::Time & starting_time, 
-        const double range, 
-        const ACS::Time total_time, 
-        string axis_code
+        const MinorServo::MinorServoScan& scan_parameters,
+        const Antenna::TRunTimeParameters& antenna_parameters
      ) throw (MinorServoErrors::ScanErrorEx)
 {
+    if(scan_parameters.is_empty_scan)
+        return;
     boost::recursive_mutex::scoped_lock lock(_scan_guard);
     m_servo_status.scanning = false;
     m_servo_status.scan_active = true;
-    bool was_tracking = m_servo_status.elevation_tracking;
     turnTrackingOff();
-    //TODO: get position at starting time
-    MedMinorServoPosition central_position = m_control->get_position();
-    //MedMinorServoPosition central_position = actual_conf->get_position(az,el);
-    m_scan.init(central_position, starting_time, range, total_time, axis_code,
-                was_tracking);
+    MedMinorServoPosition central_position = 
+        m_actual_config->get_position(antenna_parameters.elevation);
+    MedMinorServoScan scan(central_position, 
+                           starting_time, 
+                           scan_parameters.range,
+                           scan_parameters.total_time,
+                           std::string(scan_parameters.axis_code), 
+                           isElevationTracking());
     ScanThreadParameters thread_params(m_control,
                                        &m_servo_status,
                                        m_scan);
@@ -677,32 +663,40 @@ MinorServoBossImpl::startScanImpl(
     if(m_scan_thread_ptr->isSuspended())
         m_scan_thread_ptr->resume();
     CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::startScanImpl",
-               (LM_DEBUG, "Started scan thread"));
+               (LM_INFO, "Started scan"));
 }
 
 void 
-MinorServoBossImpl::stopScan() 
-throw (MinorServoErrors::ScanErrorEx)
+MinorServoBossImpl::closeScan(ACS::Time &timeToStop) 
+throw (MinorServoErrors::MinorServoErrorsEx,
+       ComponentErrors::ComponentErrorsEx)
 {
     boost::recursive_mutex::scoped_lock lock(_scan_guard);
     if(isScanActive())
     {
+        m_servo_status.scan_active = false;
         if(isScanning())
         {
             CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::stopScan",
-                   (LM_WARNING, "Scan interrupted during execution"));
+                   (LM_NOTICE, "Scan interrupted during execution"));
         }
         m_servo_status.scanning = false;
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::stopScan",
                (LM_DEBUG, "returning to central scan position"));
+        double min_time = MedMinorServoGeometry::min_time(
+                            m_control->get_position(),
+                            m_scan.getCentralPosition());
+        ACS::Time now = IRA::CIRATools::getACSTime();
         m_control->set_position(m_scan.getCentralPosition());
+        timeToStop = now + (long long)(min_time * 10000000);
         if(m_scan.was_elevation_tracking())
         {
             CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::stopScan",
                (LM_DEBUG, "reactivating elevation tracking"));
             turnTrackingOn();
         }
-        m_servo_status.scan_active = false;
+    }else{
+        timeToStop = 0;
     }
 }
 
@@ -711,7 +705,19 @@ MinorServoBossImpl::getCentralScanPosition() throw (
     MinorServoErrors::MinorServoErrorsEx,
     ComponentErrors::ComponentErrorsEx)
 {
-    return 0.0;
+    if(isScanActive()) {
+        double center;
+        MedMinorServoPosition central_position = m_scan.getCentralPosition();
+        std::string axis_code = m_scan.getAxisCode();
+        try{
+            center = central_position.get_axis_position(axis_code.c_str());
+            return center;
+        }catch(...){
+            THROW_EX(MinorServoErrors, ScanErrorEx, "Cannot get centarl position", false);
+        }
+    } else {
+            THROW_EX(MinorServoErrors, StatusErrorEx, "no scan active", false);
+    }
 }
 
 
@@ -761,7 +767,7 @@ throw (MinorServoErrors::TrackingErrorEx)
     m_tracking_thread_ptr->resume();
 }
 
-void MinorServoBossImpl::turnTrackingOff() throw (MinorServoErrors::TrackingErrorEx);
+void MinorServoBossImpl::turnTrackingOff() throw (MinorServoErrors::TrackingErrorEx)
 {
     if(m_tracking_thread_ptr != NULL) {
         m_tracking_thread_ptr->suspend();
@@ -879,21 +885,11 @@ MinorServoBossImpl::setOffsetImpl(string axis_code,
 
 
 ACS::doubleSeq * MinorServoBossImpl::getUserOffset() 
-     throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx)
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx)
 {
     vector<double> offset;
-    try {
-        offset = getOffsetImpl("user");
-    }
-    catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getConfigurationErrorEx();     
-    }
-    catch(MinorServoErrors::OperationNotPermittedExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getOperationNotPermittedEx();     
-    }
-
+    offset = getOffsetImpl("user");
     ACS::doubleSeq_var offset_res = new ACS::doubleSeq;
     offset_res->length(offset.size());
     for(size_t i=0; i<offset_res->length(); i++)
@@ -918,10 +914,10 @@ MinorServoBossImpl::getSystemOffset()
 
 vector<double> 
 MinorServoBossImpl::getOffsetImpl(string offset_type)
-     throw (MinorServoErrors::MinorServoErrorsEx);
+     throw (MinorServoErrors::MinorServoErrorsEx)
 {
     if(!isReady())
-        THROW_EX(MinorServoErrors, StatusError, 
+        THROW_EX(MinorServoErrors, StatusErrorEx, 
                  "getOffsetImpl(): the system is not ready", false);
     vector<double> axes_values;
     if(offset_type == "user")

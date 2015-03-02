@@ -17,7 +17,6 @@
 #include <new>
 #include <acsutil.h>
 #include <baciDB.h>
-#include <ManagmentDefinitionsS.h>
 #include <baciCharacteristicComponentImpl.h>
 #include <baciSmartPropertyPointer.h>
 #include <baciROpattern.h>
@@ -25,6 +24,10 @@
 #include <baciROstring.h>
 #include <acsncSimpleSupplier.h>
 #include <enumpropROImpl.h>
+
+#include <MinorServoDefinitionsC.h>
+#include <AntennaDefinitionsC.h>
+#include <ManagmentDefinitionsS.h>
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
 //#include <WPServoImpl.h>
@@ -75,6 +78,7 @@
 
 using namespace baci;
 using namespace std;
+using namespace MinorServo;
 
 struct VerboseStatusFlags {
     bool *is_initialized;
@@ -157,7 +161,8 @@ public:
     /** Return true when the system is performing a scan */
     bool isScanning();
 
-    /** Return true if a scan is active. To get the system in tracking, perform a stopScan() */
+    /** Return true if a scan is active. To get the system in tracking, perform
+     * a closeScan() */
     bool isScanActive();
 	
 	/**
@@ -239,14 +244,14 @@ public:
 	 * @param axis_code the identification code of the axis
      *
      * @return true if the scan is achievable
-     * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
-     MinorServo::TRunTimeParameters checkScan(
-             ACS::Time & starting_time, 
-             MinorServo::MinorServoScan scan_parameters,
-             Antenna::TRunTimeParameters antenna_parameters,
+     bool checkScan(
+             ACS::Time starting_time, 
+             const MinorServo::MinorServoScan& scan_parameters,
+             const Antenna::TRunTimeParameters& antenna_parameters,
+             TRunTimeParameters_out minor_servo_parameters
      ) throw (MinorServoErrors::MinorServoErrorsEx,
-              ComponentErrors::ComponentErrorsEx);
+         ComponentErrors::ComponentErrorsEx);
 
     /** 
      * Check if the scan is achievable (implementation)
@@ -255,16 +260,19 @@ public:
      * @param range the total axis movement in mm (centered in the actual position)
 	 * @param total_time the duration of axis movement
 	 * @param axis_code the identification code of the axis
+     * @param azimuth the antenna azimuth at scan start
+     * @param elevation the antenna elevation at scan start
      *
      * @return true if the scan is achievable
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
      bool checkScanImpl(
-             const ACS::Time starting_time, 
-             double range, 
-             const ACS::Time total_time, 
-             const string axis_code
-     ) throw (MinorServoErrors::ScanErrorEx);
+             ACS::Time starting_time, 
+             const MinorServo::MinorServoScan& scan_parameters,
+             const Antenna::TRunTimeParameters& antenna_parameters,
+             TRunTimeParameters_out minor_servo_parameters
+     ) throw (MinorServoErrors::MinorServoErrorsEx,
+              ComponentErrors::ComponentErrorsEx);
 
     /** 
      * Start the scan of one axis of a MinorServo target.
@@ -278,19 +286,18 @@ public:
      */
      void startScan(
              ACS::Time & starting_time, 
-             MinorServo::MinorServoScan scan_parameters,
-             Antenna::TRunTimeParameters antenna_parameters,
+             const MinorServo::MinorServoScan& scan_parameters,
+             const Antenna::TRunTimeParameters& antenna_parameters
      ) throw (MinorServoErrors::MinorServoErrorsEx,
               ComponentErrors::ComponentErrorsEx);
      
-     void closeScan() throw (MinorServoErrors::MinorServoErrorsEx,
+     void closeScan(ACS::Time &timeToStop) throw (MinorServoErrors::MinorServoErrorsEx,
                              ComponentErrors::ComponentErrorsEx);
      
      void startScanImpl(
-        ACS::Time & starting_time, 
-        const double range, 
-        const ACS::Time total_time, 
-        string axis_code
+             ACS::Time & starting_time, 
+             const MinorServo::MinorServoScan& scan_parameters,
+             const Antenna::TRunTimeParameters& antenna_parameters
      ) throw (MinorServoErrors::ScanErrorEx);
     
     /** Return the central position of the axis involved in the scan */
@@ -430,7 +437,8 @@ public:
                  ComponentErrors::ComponentErrorsEx);
      
      void setElevationTrackingImpl(const char * value)
-          throw (MinorServoErrors::TrackingErrorEx);
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
 
      void setASConfiguration(const char * value)
           throw (MinorServoErrors::MinorServoErrorsEx,

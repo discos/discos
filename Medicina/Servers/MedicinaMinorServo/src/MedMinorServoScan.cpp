@@ -99,29 +99,53 @@ throw (MinorServoErrors::ScanErrorEx)
      * check that computed start and stop positions are within bounds
      */
     if(!(MedMinorServoGeometry::check_axes_limits(m_start_position)))
-        THROW_EX(MinorServoErrors, ScanErrorEx, "Start position out of limits", true);
+    {
+        CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
+              (LM_NOTICE, "Start position out of limits"));
+        return false;
+    }
     if(!(MedMinorServoGeometry::check_axes_limits(m_stop_position)))
-        THROW_EX(MinorServoErrors, ScanErrorEx, "Stop position out of limits", true);
+    {
+        CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
+              (LM_NOTICE, "Stop position out of limits"));
+        return false;
+    }
     if(!(MedMinorServoGeometry::check_axes_limits(m_central_position)))
-        THROW_EX(MinorServoErrors, ScanErrorEx, "Central position out of limits", true);
+    {
+        CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
+              (LM_NOTICE, "Central position out of limits"));
+        return false;
+    }
     /**
      * check that we can reach start position in time
      */
-     double min_start_time = MedMinorServoGeometry::min_time(m_central_position,
-                                                             m_start_position);
-     TIMEVALUE now;
-     IRA::CIRATools::getTime(now);
-     if((m_starting_time + START_SCAN_TOLERANCE) >= (now.value().value + min_start_time * 10000000))
-        THROW_EX(MinorServoErrors, ScanErrorEx, "Cannot reach start position in time", true);
+    double min_start_time = MedMinorServoGeometry::min_time(m_central_position,
+                                                            m_start_position);
+    TIMEVALUE now;
+    IRA::CIRATools::getTime(now);
+    if((m_starting_time + START_SCAN_TOLERANCE) >= (now.value().value + min_start_time * 10000000))
+    {
+        CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
+              (LM_NOTICE, "Cannot reach start position in time"));
+        return false;
+    }
     /**
      * check that we can perform the scan with given speed
      */
-     if(m_total_time >= (static_cast<ACS::Time>(m_max_time * 10000000) +
-                                                SCAN_TOLERANCE))
-        THROW_EX(MinorServoErrors, ScanErrorEx, "Scan is too slow", true);
-     if(m_total_time <= (static_cast<ACS::Time>(m_min_time * 10000000) + 
-                                                SCAN_TOLERANCE))
-        THROW_EX(MinorServoErrors, ScanErrorEx, "Scan is too fast", true);
+    if(m_total_time >= (static_cast<ACS::Time>(m_max_time * 10000000) +
+                                               SCAN_TOLERANCE))
+    {
+        CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
+              (LM_NOTICE, "Scan is too slow"));
+        return false;
+    }
+    if(m_total_time <= (static_cast<ACS::Time>(m_min_time * 10000000) + 
+                                               SCAN_TOLERANCE))
+    {
+        CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
+              (LM_NOTICE, "Scan is too fast"));
+        return false;
+    }
     return true;
 }
 

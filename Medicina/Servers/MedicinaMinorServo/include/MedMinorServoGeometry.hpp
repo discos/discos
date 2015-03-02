@@ -40,6 +40,12 @@ class MinorServoGeometryError: public std::runtime_error
         MinorServoGeometryError(const char *msg): std::runtime_error(std::string(msg)){};
 };
 
+class MinorServoAxisNameError: public std::runtime_error
+{
+    public:
+        MinorServoAxisNameError(const char *msg): std::runtime_error(std::string(msg)){};
+};
+
 class MinorServoAxisLimitError: public std::runtime_error
 {
     public:
@@ -76,6 +82,11 @@ class MedMinorServoPosition
          * return axes values only for actually used ones
          */
         std::vector<double> get_axes_positions();
+        /**
+         * return position of named axis
+         * @param axis: the name of the axis
+         */
+        double get_axis_position(const char*) throw (MinorServoAxisNameError);
 
         double x;
         double y;

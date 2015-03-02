@@ -35,7 +35,7 @@ MSBossTracker::MSBossTracker(
             m_offset(params.m_offset)
 {
     AUTO_TRACE("MSBossTracker::MSBossTracker()");
-    m_antennaBoss.setServices(m_services);
+    m_antennaBoss.setContainerServices(m_services);
     m_antennaBoss.setComponentName("ANTENNA/BOSS");
 }
 

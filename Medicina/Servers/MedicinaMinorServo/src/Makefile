@@ -12,20 +12,15 @@ USER_LIB    =   -lbaci \
 LIBRARIES       = MinorServoBossImpl 
 LIBRARIES_L     =
 
-
-#MedMinorServoTime_OBJECTS = MedMinorServoTime
-#MedMinorServoTime_LIBS = acstime IRALibrary
-
-#MedMinorServoModbus_OBJECTS = MedMinorServoModbus ModbusChannel
-#MedMinorServoModbus_LIBS = IRALibrary modbus boost_thread
-
-#PositionQueue_OBJECTS = PositionQueue MedMinorServoGeometry MedMinorServoTime
-#PositionQueue_LIBS = IRALibrary boost_thread
-
 #
 # <brief description of lllll library>
-MedMinorServoControl_OBJECTS   = MedMinorServoControl MedMinorServoGeometry MedMinorServoTime MedMinorServoModbus ModbusChannel PositionQueue
-MedMinorServoControl_LIBS   = baci acsnc IRALibrary ManagmentDefinitionsStubs ManagementErrors ComponentErrors modbus boost_thread
+MedMinorServoControl_OBJECTS   = MedMinorServoControl MedMinorServoGeometry \
+                                 MedMinorServoTime MedMinorServoModbus \
+                                 ModbusChannel PositionQueue
+
+MedMinorServoControl_LIBS   = baci acsnc IRALibrary ManagmentDefinitionsStubs \
+                              ManagementErrors \
+                              ComponentErrors modbus boost_thread
 
 MinorServoBossImpl_OBJECTS = MedMinorServoControl MedMinorServoGeometry \
                              MedMinorServoStatus MedMinorServoParameters \
@@ -36,7 +31,8 @@ MinorServoBossImpl_OBJECTS = MedMinorServoControl MedMinorServoGeometry \
                              MSBossTracker MedMinorServoOffset MinorServoBossImpl
 
 MinorServoBossImpl_LIBS = MedMinorServoBossStubs MinorServoBossStubs \
-                          ManagmentDefinitionsStubs ManagementErrors \
+                          ManagmentDefinitionsStubs MinorServoDefinitionsStubs \
+                          ManagementErrors \
                           IRALibrary ComponentErrors MinorServoErrors \
                           acsnc ParserErrors AntennaDefinitionsStubs \
                           MountStubs AntennaBossStubs AntennaErrors \

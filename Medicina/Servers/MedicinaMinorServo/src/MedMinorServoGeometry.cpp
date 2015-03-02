@@ -187,6 +187,33 @@ MedMinorServoPosition::get_axes_positions()
     return res;
 }
 
+double 
+MedMinorServoPosition::get_axis_position(const char* axis_name)
+throw (MinorServoAxisNameError)
+{
+    if((mode == MED_MINOR_SERVO_PRIMARY)||
+       (mode == MED_MINOR_SERVO_TRANSFER_TO_PRIMARY))
+    {
+        if((axis_name == "yp")||(axis_name == "YP"))
+            return y;
+        if((axis_name == "zp")||(axis_name == "ZP"))
+            return z;
+        throw MinorServoAxisNameError(axis_name);
+    }else{
+        if((axis_name == "x")||(axis_name == "X"))
+            return x;
+        if((axis_name == "y")||(axis_name == "Y"))
+            return y;
+        if((axis_name == "z")||(axis_name == "Z"))
+            return z;
+        if((axis_name == "theta_x")||(axis_name == "THETA_X"))
+            return theta_x;
+        if((axis_name == "theta_y")||(axis_name == "THETA_Y"))
+            return theta_y;
+        throw MinorServoAxisNameError(axis_name);
+    }
+}
+
 MedMinorServoPosition
 MedMinorServoGeometry::interpolate(const MedMinorServoPosition& before_position,
                                    const MedMinorServoPosition& after_position,
