@@ -359,7 +359,8 @@ void SRTLPBandReceiverImpl::setLO(const ACS::doubleSeq& lo) throw (
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx)
 {
-    ; // Do nothing
+    _EXCPT(ComponentErrors::NotAllowedExImpl, impl, "SRTLPBandReceiverImpl::setLO(): operation not allowed.");
+    throw impl.getComponentErrorsEx();
 }
 
 
