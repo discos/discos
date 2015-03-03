@@ -4,9 +4,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/timer.hpp>
 
-#include "IRA"
+#include <IRA>
+#include <ModbusChannel.h>
 
-#include "ModbusChannel.hpp"
 #include "MedMinorServoProtocol.hpp"
 
 #define PROTOCOLTIMEOUT 2 * 10000000

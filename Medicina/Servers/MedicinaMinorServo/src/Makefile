@@ -16,16 +16,16 @@ LIBRARIES_L     =
 # <brief description of lllll library>
 MedMinorServoControl_OBJECTS   = MedMinorServoControl MedMinorServoGeometry \
                                  MedMinorServoTime MedMinorServoModbus \
-                                 ModbusChannel PositionQueue
+                                 PositionQueue
 
-MedMinorServoControl_LIBS   = baci acsnc IRALibrary ManagmentDefinitionsStubs \
+MedMinorServoControl_LIBS   = baci acsnc IRALibrary ModbusChannel ManagmentDefinitionsStubs \
                               ManagementErrors \
                               ComponentErrors modbus boost_thread
 
 MinorServoBossImpl_OBJECTS = MedMinorServoControl MedMinorServoGeometry \
                              MedMinorServoStatus MedMinorServoParameters \
                              MedMinorServoTime MedMinorServoModbus \
-                             MedMinorServoScan ModbusChannel PositionQueue \
+                             MedMinorServoScan PositionQueue \
                              PositionMonitoringThread MSBossPublisher \
                              SetupThread ScanThread \
                              MSBossTracker MedMinorServoOffset MinorServoBossImpl
@@ -33,7 +33,7 @@ MinorServoBossImpl_OBJECTS = MedMinorServoControl MedMinorServoGeometry \
 MinorServoBossImpl_LIBS = MedMinorServoBossStubs MinorServoBossStubs \
                           ManagmentDefinitionsStubs MinorServoDefinitionsStubs \
                           ManagementErrors \
-                          IRALibrary ComponentErrors MinorServoErrors \
+                          IRALibrary ModbusChannel ComponentErrors MinorServoErrors \
                           acsnc ParserErrors AntennaDefinitionsStubs \
                           MountStubs AntennaBossStubs AntennaErrors \
                           ActiveSurfaceBossStubs boost_thread acstime modbus \
@@ -42,20 +42,20 @@ MinorServoBossImpl_LIBS = MedMinorServoBossStubs MinorServoBossStubs \
 EXECUTABLES_L     = testclient testgeometry testprimary testsecondary testpassive real_to_virtual
 real_to_virtual_OBJECTS = real_to_virtual testutils MedMinorServoGeometry MedMinorServoTime
 real_to_virtual_LIBS = IRALibrary
-testclient_OBJECTS = testclient testutils MedMinorServoModbus ModbusChannel MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
-testclient_LIBS = IRALibrary boost_thread modbus 
-testprimary_OBJECTS = testprimary testutils MedMinorServoModbus ModbusChannel MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
-testprimary_LIBS = IRALibrary boost_thread modbus 
-testsecondary_OBJECTS = testsecondary testutils MedMinorServoModbus ModbusChannel MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
-testsecondary_LIBS = IRALibrary boost_thread modbus 
-testpassive_OBJECTS = testpassive testutils MedMinorServoModbus ModbusChannel MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
-testpassive_LIBS = IRALibrary boost_thread modbus 
+testclient_OBJECTS = testclient testutils MedMinorServoModbus MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
+testclient_LIBS = IRALibrary boost_thread modbus ModbusChannel
+testprimary_OBJECTS = testprimary testutils MedMinorServoModbus MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
+testprimary_LIBS = IRALibrary boost_thread modbus ModbusChannel
+testsecondary_OBJECTS = testsecondary testutils MedMinorServoModbus MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
+testsecondary_LIBS = IRALibrary boost_thread modbus ModbusChannel
+testpassive_OBJECTS = testpassive testutils MedMinorServoModbus MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
+testpassive_LIBS = IRALibrary boost_thread modbus ModbusChannel
 testgeometry_OBJECTS = testgeometry testutils MedMinorServoGeometry MedMinorServoTime PositionQueue
 testgeometry_LIBS = IRALibrary boost_unit_test_framework boost_thread modbus 
 
 EXECUTABLES = scudisconnect
-scudisconnect_OBJECTS = scudisconnect MedMinorServoModbus ModbusChannel MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
-scudisconnect_LIBS = IRALibrary modbus boost_thread
+scudisconnect_OBJECTS = scudisconnect MedMinorServoModbus MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
+scudisconnect_LIBS = IRALibrary modbus ModbusChannel boost_thread
 
 #
 # Configuration Database Files
