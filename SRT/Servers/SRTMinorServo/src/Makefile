@@ -5,7 +5,7 @@
 #*****************************************
 
 PY_PACKAGES = SRTMinorServoTest
-PY_SCRIPTS = mscu-runserver
+PY_SCRIPTS = mscu-start mscu-stop
 
 # On-Line Database Files
 # ----------------------

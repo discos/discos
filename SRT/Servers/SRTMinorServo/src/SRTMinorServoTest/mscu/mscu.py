@@ -9,8 +9,11 @@ import sys
 
 import servo
 
+from multiprocessing import Value
+
 from parameters import headers, closers, filtered, app_nr
 
+stop_server = Value('i', False)
 
 class MSCU(object):
 
@@ -28,6 +31,8 @@ class MSCU(object):
         # Number of connections counter
         counter = 0
         while True:
+            if stop_server.value:
+                sys.exit(0)
             try:
                 connection, clientaddr = self.socket.accept()
                 counter += 1 
@@ -69,6 +74,10 @@ class MSCU(object):
                             continue
                         
                         try:
+                            if data.startswith('#stop'):
+                                stop_server.value = True
+                                connection.close()
+                                break
                             # Retrieve the message header
                             header, body = data[0], data[1:].rstrip()
                             whole_cmd, params_str = body.split('=')
@@ -78,7 +87,7 @@ class MSCU(object):
                             # Retrieve the command parameters
                             all_params = [eval(param.strip()) for param in params_str.split(',')]
                             address, params = all_params[0], all_params[1:]
-                        except:
+                        except Exception:
                             print MSCU.error_message(data)
                             # Send a general error message
                             connection.send(MSCU.error_message(data))
@@ -144,6 +153,13 @@ class MSCU(object):
             except:
                 break
             print "Reaped process %d" % result[0]
+
+    @staticmethod
+    def stop(server=('127.0.0.1', 10000)):
+        sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sockobj.settimeout(2)
+        sockobj.connect(server) 
+        sockobj.sendall('#stop\r\n')
 
 
 if __name__ == "__main__":
