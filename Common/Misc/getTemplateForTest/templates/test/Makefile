@@ -16,8 +16,8 @@ USER_LIBS=C++ pthread
 # unittest_LIBS = $(GTEST_LIBS) <ComponentNameImpl>
 
 EXECUTABLES_L = unittest
-unittest_OBJECTS = unittest
-unittest_LIBS = $(GTEST_LIBS) 
+unittest_OBJECTS = unittest #MedMinorServoGeometry MedMinorServoTime PositionQueue
+unittest_LIBS = $(GTEST_LIBS) MinorServoBossImpl IRALibrary boost_thread 
 
 # END OF CUSTOMIZATION
 # do not edit below this line
