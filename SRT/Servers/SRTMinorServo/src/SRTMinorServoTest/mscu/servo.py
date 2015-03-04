@@ -85,7 +85,7 @@ class Servo(object):
     @staticmethod
     def _setup_process(cab_state):
         cab_state.value = DriveCabinet.cab_state['starting']
-        time.sleep(5) # The setup takes 5 seconds
+        time.sleep(3) # The setup takes 3 seconds
         cab_state.value = DriveCabinet.cab_state['ready']
 
     def setup(self, cmd_num, *params):

@@ -13,7 +13,7 @@ from Acspy.Clients.SimpleClient import PySimpleClient
 
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
-class StartScanTest(unittest2.TestCase):
+class TestStartScan(unittest2.TestCase):
     """Test the MinorServoBoss.startScan() behavior"""
 
     def setUp(self):    

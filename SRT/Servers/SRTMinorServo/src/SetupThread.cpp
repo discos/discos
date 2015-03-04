@@ -150,7 +150,7 @@ void SetupThread::run()
         sleep_ret = ACS::ThreadBase::sleep(ITER_SLEEP_TIME); // 2 seconds
         counter += ITER_SLEEP_TIME / 2;
         if(sleep_ret != SLEEP_OK || counter > MAX_ACTION_TIME) {
-            ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): MAX_ACTION_TIME reached.")));
+            ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): Parking timeout")));
             m_configuration->m_isStarting = false;
             m_configuration->m_isConfigured = false;
             m_configuration->m_actualSetup = "unknown";
@@ -335,7 +335,7 @@ void SetupThread::run()
         sleep_ret = ACS::ThreadBase::sleep(ITER_SLEEP_TIME); // 2 seconds
         counter += ITER_SLEEP_TIME / 2;
         if(sleep_ret != SLEEP_OK || counter > MAX_ACTION_TIME) {
-            ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): MAX_ACTION_TIME reached.")));
+            ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): Positioning timeout")));
             m_configuration->m_isStarting = false;
             m_configuration->m_isConfigured = false;
             m_configuration->m_actualSetup = "unknown";
