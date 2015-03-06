@@ -19,7 +19,6 @@ CSubScanBinder::CSubScanBinder(CConfiguration* config,bool dispose): m_primary(N
 	init();
 }
 
-
 CSubScanBinder::~CSubScanBinder()
 {
 	if (m_own) {
@@ -29,8 +28,6 @@ CSubScanBinder::~CSubScanBinder()
 		if (m_receivers) delete m_receivers;
 	}
 }
-
-
 
 void CSubScanBinder::addOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame)
 {
@@ -105,7 +102,6 @@ void CSubScanBinder::OTFC(const Antenna::TCoordinateFrame& coordFrame,const Ante
     m_servo->range=0;
     m_servo->total_time=0;
 }
-
 
 void CSubScanBinder::skydip(const double& lat1,const double& lat2,const ACS::TimeInterval& duration,
 		const Antenna::TTrackingParameters * const sec)

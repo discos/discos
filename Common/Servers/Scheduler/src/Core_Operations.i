@@ -202,6 +202,28 @@ void CCore::_goTo(const double& azimuth,const double& elevation) throw (Manageme
 	m_subScanEpoch=startTime;
 }
 
+void CCore::_peaker(const char* axis,const double& span,const ACS::TimeInterval& duration) throw (
+		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl,ComponentErrors::ValidationErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	ACS::Time startTime=0; // start asap
+
+	Antenna::TTrackingParameters primary,secondary;
+	MinorServo::MinorServoScan servo;
+	Receivers::TReceiversParameters receievers;
+	if (m_config->getAxisFromServoName(IRA::CString(axis))==Management::MNG_NO_AXIS) {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_peaker()");
+        impl.setReason("Invalid axis");
+        throw impl;
+	}
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	binder.peaker(IRA::CString(axis),span,duration,NULL);
+	startTime=0; // it means start as soon as possible
+	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	m_subScanEpoch=startTime;
+}
+
 /*void CCore::_goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl)
@@ -424,7 +446,7 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 /*******************************************************************************************/
 /* TO BE DELETED WHEN MACRON INSTRUCTION LIKE SKYDIP HAVE BEEN AMMENDED */
 /*****************************************************************************************/
-void CCore::_stopRecording() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl,
+/*void CCore::_stopRecording() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
 	// now take the mutex
@@ -439,7 +461,7 @@ void CCore::_stopRecording() throw (ComponentErrors::OperationErrorExImpl,Manage
 		IRA::CIRATools::Wait(0,250000); // 0.25 seconds
 	}
 	m_subScanEpoch=0;
-}
+}*/
 
 void CCore::_terminateScan() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {

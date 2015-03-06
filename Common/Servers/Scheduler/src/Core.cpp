@@ -104,7 +104,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("chooseRecorder",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_chooseDefaultDataRecorder),1);
 	m_parser->add("crossScan",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >,
 			I<interval_type> >(this,&CCore::crossScan),3);
-	m_parser->add("focusScan",new function2<CCore,non_constant,void_type,I<double_type >,I<interval_type> >(this,&CCore::focusScan),2);
+	m_parser->add("peakerScan",new function3<CCore,non_constant,void_type,I<string_type>,I<double_type >,I<interval_type> >(this,&CCore::peakerScan),3);
 	m_parser->add("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_changeLogFile),1);
 	m_parser->add("wx",new function4<CCore,non_constant,void_type,O<double_type>,O<double_type>,O<double_type>,O<double_type> >(this,&CCore::_getWeatherStationParameters),0);
 	m_parser->add("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_setProjectCode),1);
@@ -112,6 +112,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("skydip",new function3<CCore,non_constant,void_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(this,&CCore::skydip),3);
 	m_parser->add("agc","_tp_agc",2);
 	m_parser->add("restFrequency",new function1<CCore,non_constant,void_type,I<doubleSeq_type> >(this,&CCore::_setRestFrequency),1);
+	m_parser->add("peaker",new function3<CCore,non_constant,void_type,I<string_type>,I<double_type>,I<interval_type> >(this,&CCore::_peaker),3);
 	m_parser->add("lonOTF",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(this,&CCore::_lonOTF),3);
 	m_parser->add("latOTF",new function3<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(this,&CCore::_latOTF),3);
 	m_parser->add("skydipOTF",new function3<CCore,non_constant,void_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(this,&CCore::_skydipOTF),3);
@@ -358,202 +359,31 @@ void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& 
 	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"SKYDIP_DONE"));
 }*/
 
-void CCore::focusScan(const double& span,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
+void CCore::peakerScan(const char *axis,const double& span,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
 		ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::OperationErrorExImpl,
 		ManagementErrors::UnsupportedOperationExImpl,ManagementErrors::MinorServoScanErrorExImpl,ComponentErrors::TimerErrorExImpl,
-		ManagementErrors::AbortedByUserExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl)
+		ManagementErrors::AbortedByUserExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl,ComponentErrors::ValidationErrorExImpl)
 {
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {
 		if (m_schedExecuter->isScheduleActive()) {
-			_THROW_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,"CCore::focusScan()");
+			_THROW_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,"CCore::crossScan()");
 		}
 	}
-	// let's create the scans.....filling up the required fields :-)
-	CORBA::Double bwhm=0.017453; // one degree in radians
-	CORBA::Double offset;
-	//Management::TScanAxis scanAxis;
-	IRA::CString obsName,prj,suffix,path,extraPath,baseName;
-	IRA::CString layoutName,schedule/*,targetID*/;
-	ACS::stringSeq layout;
-	//long scanTag=0;
-	//long scanID=1,subScanID;
+	ACS::doubleSeq tsys;
 	TIMEVALUE now;
-	ACS::Time waitFor;
-	//long long waitMicro;
-	ACS::Time startTime;
-
-	// check if the operation is available
-	if (!(MINOR_SERVO_AVAILABLE)) {
-		_EXCPT(ManagementErrors::UnsupportedOperationExImpl,impl,"CCore::focusScan()");
-		throw impl;
-	}
-	// now take the mutex
-	baci::ThreadSyncGuard guard(&m_mutex);
-	//make sure the antenna is available.
-	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
-	try {
-		ACSErr::Completion_var comp;
-		ACS::ROdouble_var ref=m_antennaBoss->FWHM();
-		if (!CORBA::is_nil(ref)) {
-			CORBA::Double tmp;
-			tmp=ref->get_sync(comp.out());
-			ACSErr::CompletionImpl compImpl(comp);
-			if (compImpl.isErrorFree()) {
-				bwhm=tmp;
-			}
-		}
-	}
-	catch (...) {
-		//in this case we do not want to to do nothing.....it is an error but we can survive
-	}
-	offset=bwhm*5; // the offset (sky) five times the antenna beam
-	// TSYS SCAN
-	ACS_LOG(LM_FULL_INFO,"CCore::focusScan()",(LM_NOTICE,"TSYS_COMPUTATION"));
-	try {
-		if (!CORBA::is_nil(m_antennaBoss)) {
-			m_antennaBoss->goOff(Antenna::ANT_HORIZONTAL,offset);
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::focusScan()");
-			throw impl;
-		}
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::focusScan()");
-		throw impl;
-	}
-	catch (AntennaErrors::AntennaErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::focusScan()");
-		throw impl;
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::focusScan()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_antennaBossError=true;
-		throw impl;
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::focusScan()");
-		m_antennaBossError=true;
-		throw impl;
-	}
-	clearAntennaTracking();
-	guard.release();
+	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"TSYS_COMPUTATION"));
+	// it calls directly the antennaBoss method
+	goOff(Antenna::ANT_HORIZONTAL,3.0); // go off 3 beams sizes
 	_waitOnSource();
-	try {
-		ACS::doubleSeq tsys;
-		_callTSys(tsys);
-	}
-	catch (ACSErr::ACSbaseExImpl& ex) {
-		_ADD_BACKTRACE(ManagementErrors::TsysErrorExImpl,impl,ex,"CCore::focusScan()");
-		throw impl;
-	}
-	IRA::CIRATools::Wait(2,0);
-	guard.acquire();
-	try {
-		if (!CORBA::is_nil(m_antennaBoss)) {
-			m_antennaBoss->goOff(Antenna::ANT_HORIZONTAL,0.0);
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::focusScan()");
-			throw impl;
-		}
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::focusScan()");
-		throw impl;
-	}
-	catch (AntennaErrors::AntennaErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::focusScan()");
-		throw impl;
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::focusScan()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_antennaBossError=true;
-		throw impl;
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::focusScan()");
-		m_antennaBossError=true;
-		throw impl;
-	}
-	clearAntennaTracking();
-	guard.release();
-	_waitOnSource();
-	guard.acquire();
-
-	_initRecording(1); //  throw ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl
-	// we already check the minor servo boss is available
-	loadMinorServoBoss(m_minorServoBoss,m_minorServoBossError); // (ComponentErrors::CouldntGetComponentExImpl)
-
-	try {
-		if (!CORBA::is_nil(m_minorServoBoss)) {
-			startTime=0;
-			m_minorServoBoss->startFocusScan(startTime,span,duration);
-			//startTime=m_antennaBoss->latOTFScan(scanFrame,span,duration);
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::focusScan()");
-			throw impl;
-		}
-	}
-	catch (MinorServoErrors::MinorServoErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::MinorServoScanErrorExImpl,impl,ex,"CCore::focusScan()");
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::MinorServoScanErrorExImpl,impl,ex,"CCore::focusScan()");
-		throw impl;
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::focusScan()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_antennaBossError=true;
-		throw impl;
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::focusScan()");
-		m_antennaBossError=true;
-		throw impl;
-	}
-	_startRecording(startTime,1);
-	// now set the the data transfer stop
-	waitFor=startTime+duration; // this is the time at which the stop should be issued
-	guard.release();
-	_waitUntil(waitFor); // throw ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl
-	_stopRecording();
-	guard.acquire();
+	_callTSys(tsys);
+	_wait(1.5);
+	_initRecording(1);
+	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"START_FOCUSSCAN"));
+	// start the scan
+	_peaker(axis,span,duration);
+	_startRecording(1,duration); // start recording
 	_terminateScan();
-	/*try {
-		if (!CORBA::is_nil(m_minorServoBoss)) {
-			m_minorServoBoss->stopScan();
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::focusScan()");
-			throw impl;
-		}
-	}
-	catch (MinorServoErrors::MinorServoErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::MinorServoScanErrorExImpl,impl,ex,"CCore::focusScan()");
-		throw impl;
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::MinorServoScanErrorExImpl,impl,ex,"CCore::focusScan()");
-		throw impl;
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::focusScan()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_antennaBossError=true;
-		throw impl;
-	}*/
-	ACS_LOG(LM_FULL_INFO,"CCore::focusScan()",(LM_NOTICE,"FOCUS_SCAN_DONE"));
 }
 
 void CCore::crossScan(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (

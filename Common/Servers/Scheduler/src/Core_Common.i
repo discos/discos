@@ -20,7 +20,8 @@ void CCore::changeSchedulerStatus(const Management::TSystemStatus& status)
 bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
 	const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPar,const double& minEl,
 	const double& maxEl) throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
-	ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl)
+	ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,
+	ManagementErrors::UnsupportedOperationExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	//ACS::Time antennaUT,receiversUT;
@@ -96,6 +97,9 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 		minorServoAnswer=true;
 		m_servoRunTime->startEpoch=0;
 		m_servoRunTime->onTheFly=false;
+		if (!servoPar->is_empty_scan) { // if the minor servos are not supported and an effective scan is commanded.
+			_EXCPT(ManagementErrors::UnsupportedOperationExImpl,impl,"CCore::checkScan()");
+		}
 	}
 	loadReceiversBoss(m_receiversBoss,m_receiversBossError);
 	try {

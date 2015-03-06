@@ -56,6 +56,16 @@ void _latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const
 		ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /**
+ * Starts a peaker operation, which is indeed maximizing the focusing or in general the position of the subreflector.
+ * @param axis name of the axis to be maximized
+ * @param span range to be traveled by the axis
+ * @param duration total allotted time
+ */
+void _peaker(const char *axis,const double& span,const ACS::TimeInterval& duration) throw (
+		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+
+/**
  * Starts a skydip OnTheFly scan
  * @param el1 first elevation border of the scan
  * @param el2 second elevation border of the scan
@@ -218,8 +228,8 @@ void _startRecording(const long& subScanId,const ACS::TimeInterval& duration) th
 /**
  * Immediately stops the data recording
  */
-void _stopRecording() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl,
-		ComponentErrors::UnexpectedExImpl);
+/*void _stopRecording() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl,
+		ComponentErrors::UnexpectedExImpl);*/
 
 /**
  * Performs the required operation to close the current scan, including the data acquisition

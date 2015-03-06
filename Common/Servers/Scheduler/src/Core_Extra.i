@@ -141,7 +141,7 @@ bool CCore::remoteCall(const IRA::CString& command,const IRA::CString& package,c
 			}
 			break;
 		}
-		case 5: { //active surface  package
+		case 5: { //active surface package
 				try {
 					baci::ThreadSyncGuard guard(&m_mutex);
 					loadActiveSurfaceBoss(m_activeSurfaceBoss,m_activeSurfaceBossError);

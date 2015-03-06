@@ -263,10 +263,10 @@ void SchedulerImpl::startSchedule(const char * fileName,const char *startSubScan
 	}
 }
 
-void SchedulerImpl::focusScan(CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+void SchedulerImpl::peakerScan(const char *axis,CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	try {
-		m_core->focusScan(span,duration);
+		m_core->peakerScan(axis,span,duration);
 	}
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -377,6 +377,22 @@ void SchedulerImpl::lonOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double spa
 {
 	try {
 		m_core->_lonOTF(scanFrame,span,duration);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
+void SchedulerImpl::peaker(const char *axis,CORBA::Double span,ACS::TimeInterval duration) throw (
+		ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->_peaker(axis,span,duration);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

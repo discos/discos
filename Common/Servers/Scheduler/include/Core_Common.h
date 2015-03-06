@@ -24,14 +24,15 @@
  * @throw ComponentErrors::OperationErrorExImpl
  * @throw ComponentErrors::ComponentNotActiveExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
- * @thorw ComponentErrors::CouldntGetComponentExImpl
+ * @throw ComponentErrors::CouldntGetComponentExImpl
+ * @throw ManagementErrors::UnsupportedOperationExImpl
  * @return true if the scan has been checked successfully
  */
 bool checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
 	const MinorServo::MinorServoScan*const servoPar, const Receivers::TReceiversParameters*const recvPar,const double& minEl=-1.0,
 	const double& maxEl=-1.0) throw (ComponentErrors::UnexpectedExImpl,
 	ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
-	ComponentErrors::CouldntGetComponentExImpl);
+	ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::UnsupportedOperationExImpl);
 
 /**
  * Send to the telescope the commands required to start scan.

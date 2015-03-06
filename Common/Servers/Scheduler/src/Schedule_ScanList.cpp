@@ -711,6 +711,7 @@ bool CScanList::parsePeaker(const IRA::CString& line,DWORD& id,IRA::CString& err
 	double span,seconds;
 	DWORD scanTarget;
 	TIMEDIFFERENCE duration;
+	Management::TScanAxis ax=Management::MNG_NO_AXIS;
 	TRecord rec;
 	long out;
 	out=sscanf((const char *)line,"%u\t%s\t%u\t%s\t%lf\t%lf",&id,type,&scanTarget,axis,&span,&seconds);
@@ -724,14 +725,14 @@ bool CScanList::parsePeaker(const IRA::CString& line,DWORD& id,IRA::CString& err
 	}
 	duration.value((long double)seconds);
 	if (m_config!=0) {
-		if (m_config->getAxisFromServoName(axis)==Management::MNG_NO_AXIS) {
+		ax=m_config->getAxisFromServoName(axis);
+		if (ax==Management::MNG_NO_AXIS) {
 			errMsg="illegal or unknown axis name";
 			return false;
 		}
 	}
 	Antenna::TTrackingParameters * prim=static_cast<Antenna::TTrackingParameters *>(rec.primaryParameters);
-	IRA::CString ax(axis);
-	binder.peaker(ax,span,duration.value().value,prim);
+	binder.peaker(axis,span,duration.value().value,prim);
 	return true;
 }
 

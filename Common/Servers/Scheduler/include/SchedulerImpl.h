@@ -229,15 +229,16 @@ public:
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
 	/**
-	 * Performs a focus scan moving the subreflector or the receiver along the optical axis of the telescope. The operation consists of system temperature measurement (the telescope is sent
+	 * Performs a peaker scan moving the subreflector or the receiver along an axis. The operation consists of system temperature measurement (the telescope is sent
 	 * 3 times the current beam size off) and then a focus scan on the source. The default backend and the default data recorder are used as data source and destination respectively.
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
 	 * @throw CORBA::SystemExcpetion
-	 * @param span this is the overall length of the single scans (mm)
+	 * @param axis name of the axis to scan
+	 * @param span this is the overall length of the single scans (mm or arcsec according to the selected axis)
 	 * @param duration this determine how long the scan has to take.
 	 */
-	virtual void focusScan(CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+	virtual void peakerScan(const char *axis,CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
 	/**
 	 * This method performs a skydip with the antenna. The scan is done across the current azimuth between the two elevation limits. A system temperature measurement is
@@ -314,6 +315,20 @@ public:
 	 * @param rest sequence of value (MHz) that are the rest frequencies to be applied for each section. If one is given the same value is used for the sections.
 	 */
 	virtual void setRestFrequency(const ACS::doubleSeq& rest) throw (CORBA::SystemException);
+
+	/**
+	 * It allows to immediately start a scan that involves a primary focus axis or a subreflector axis. The scan is performed of the currently
+	 * commanded source. If the axis involves a pointing offsets the telescope will try to correct it by moving the antenna by the adequate
+	 * beam deviation factor.
+	 * @param axis name of the axis to scan
+	 * @param span total length of the scan
+	 * @param duration time required by the scan to complete
+ 	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void peaker(const char *axis,CORBA::Double span,ACS::TimeInterval duration) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
 
 	/**
 	 * It allows to immediately start an OTF scan along the longitude axis of the given frame.
