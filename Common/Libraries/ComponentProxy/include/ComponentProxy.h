@@ -57,8 +57,8 @@ class ComponentProxy
         virtual ~ComponentProxy();
         void loadDefault() throw (ComponentErrors::CouldntGetComponentExImpl);
         void unload();
-        ComponentVar getComponentVar(){ return m_component_var;};
-        ComponentVar operator->() throw (ComponentErrors::CouldntGetComponentExImpl);
+        //ComponentVar getComponentVar(){ return m_component_var;};
+        ComponentVar& operator->() throw (ComponentErrors::CouldntGetComponentExImpl);
         void setError(){ m_error = true;};
         void resetError(){ m_error = false;};
         bool isError(){ return m_error;};
@@ -186,7 +186,7 @@ ComponentProxy<ComponentClass, ComponentVar>::unload()
             _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,
                            Impl,ex,"ComponentLoader::unload()");
             Impl.setComponentName(m_name.c_str());
-            Impl.log(LM_WARNING);
+            CUSTOM_EXCPT_LOG(Impl, LM_WARNING);
         }catch (...) { 
             _EXCPT(ComponentErrors::UnexpectedExImpl, impl,
                    "ComponentLoader::unload()");
@@ -228,7 +228,7 @@ ComponentProxy<ComponentClass, ComponentVar>::setContainerServices(
 }
 
 template <typename ComponentClass, typename ComponentVar>
-ComponentVar
+ComponentVar&
 ComponentProxy<ComponentClass, ComponentVar>::operator->()
 throw (ComponentErrors::CouldntGetComponentExImpl)
 {
