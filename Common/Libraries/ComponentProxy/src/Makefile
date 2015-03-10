@@ -10,7 +10,7 @@
 # mbartolini  17/02/15  created
 #
 
-EXECUTABLES_L   = compilation_test single_component
+EXECUTABLES_L   = compilation_test
 compilation_test_OBJECTS    = compilation_test
 compilation_test_LIBS       = IRALibrary \
                               ManagmentDefinitionsStubs \
@@ -50,11 +50,6 @@ compilation_test_LIBS       = IRALibrary \
                               MinorServoErrors \
                               ReceiversErrors \
                               BackendsErrors 
-
-single_component_OBJECTS = single_component
-single_component_LIBS = SchedulerStubs IRALibrary ManagmentDefinitionsStubs \
-                        AntennaDefinitionsStubs \
-                        ManagementErrors ComponentErrors
 
 #
 # Includes (.h) files (public only)
