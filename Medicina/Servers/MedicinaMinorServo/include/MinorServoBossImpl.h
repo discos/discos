@@ -514,12 +514,13 @@ private:
 	/** This is the pointer to the notification channel */
 	nc::SimpleSupplier *m_nchannel;
 
-    //void loadAntennaBoss() throw (ComponentErrors::CouldntGetComponentExImpl);
-    //void unloadAntennaBoss();
     bool isParked() throw (MinorServoErrors::ConfigurationErrorEx);
     
-    //void clearOffset(const char *servo, string offset_type) throw (MinorServoErrors::OperationNotPermittedEx);
-
+    /**
+     * If not tracking elevation, sets the corerct position according to the
+     * actual configuration and actual offsets.
+     */
+    void setCorrectPosition();
    /** 
     * Set the offset (Implementation)
     *

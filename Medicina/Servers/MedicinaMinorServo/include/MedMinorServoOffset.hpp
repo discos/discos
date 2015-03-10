@@ -29,6 +29,8 @@ class MedMinorServoOffset
         void clearSystemOffset();
         void clearOffset();
         MedMinorServoPosition getOffsetPosition();
+        MedMinorServoPosition getSystemOffsetPosition();
+        MedMinorServoPosition getUserOffsetPosition();
         void initialize(bool primary_focus);
     private:
         std::vector<double> _user_offset, _system_offset;

@@ -312,13 +312,16 @@ throw (MinorServoErrors::SetupErrorEx)
                  "Cannot find requested configuration", false);
     try {
         setElevationTrackingImpl(IRA::CString("OFF"));
-    }
-    catch(...) {
+    }catch(...) {
         THROW_EX(MinorServoErrors, SetupErrorEx, "cannot turn the tracking off", false);
+    }
+    try{
+        m_actual_config = &(m_config[std::string(config)]);
+    }catch(...) {
+        THROW_EX(MinorServoErrors, SetupErrorEx, "invalid configuration", false);
     }
     m_servo_status.reset();
     m_servo_status.starting = true;
-    m_actual_config = &(m_config[std::string(config)]);
     /**
      * Get the setup position at 45 deg
      */
@@ -435,6 +438,8 @@ MinorServoBossImpl::getAxesPosition(ACS::Time time)
         position = m_control->get_position();
     else
         position = m_control->get_position_at(time);
+    //We hide the system offsets from the user view
+    position -= m_offset.getSystemOffsetPosition();
     vpositions = position.get_axes_positions();
     positions_res->length(vpositions.size());
     for(size_t i=0; i<vpositions.size(); i++)
@@ -777,14 +782,18 @@ void MinorServoBossImpl::turnTrackingOff() throw (MinorServoErrors::TrackingErro
     m_servo_status.elevation_tracking = false;
 }
 
-
 void 
 MinorServoBossImpl::clearUserOffset(const char *servo) throw (
     MinorServoErrors::MinorServoErrorsEx,
     ComponentErrors::ComponentErrorsEx)
 {
-    //TODO: add control and exception
-    m_offset.clearUserOffset();
+    try{
+        m_offset.clearUserOffset();
+        setCorrectPosition();
+    }catch(MinorServoOffsetError& msoe){
+        THROW_EX(MinorServoErrors, OffsetErrorEx, 
+                 msoe.what(), false);
+    }
 }
 
 
@@ -811,8 +820,13 @@ MinorServoBossImpl::clearSystemOffset(const char *servo)
           throw (MinorServoErrors::MinorServoErrorsEx,
                  ComponentErrors::ComponentErrorsEx)
 {
-    //TODO: add control and exception
-    m_offset.clearSystemOffset();
+    try{
+        m_offset.clearSystemOffset();
+        setCorrectPosition();
+    }catch(MinorServoOffsetError& msoe){
+        THROW_EX(MinorServoErrors, OffsetErrorEx, 
+                 msoe.what(), false);
+    }
 }
 
 void 
@@ -861,6 +875,19 @@ MinorServoBossImpl::setSystemOffset(const char *axis_code,
     setOffsetImpl(string(axis_code), offset, string("system"));
 }
 
+void 
+MinorServoBossImpl::setCorrectPosition()
+{
+    if(isElevationTracking()){
+        return;
+    }
+    MedMinorServoPosition offset_position = m_offset.getOffsetPosition();
+    MedMinorServoPosition correct_position = m_actual_config->get_position();
+    m_control->set_position(correct_position + offset_position);
+    CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBoss::setCorrectPosition",
+              (LM_DEBUG, "Correcting position"));
+}
+
 void
 MinorServoBossImpl::setOffsetImpl(string axis_code, 
                                    const double offset_value, 
@@ -877,10 +904,16 @@ MinorServoBossImpl::setOffsetImpl(string axis_code,
                  string("Wrong offset axis"),
                  false
         );
-    if(offset_type == "user")
-        m_offset.setUserOffset(axis_mapping, offset_value);
-    else
-        m_offset.setSystemOffset(axis_mapping, offset_value);
+    try{
+        if(offset_type == "user")
+            m_offset.setUserOffset(axis_mapping, offset_value);
+        else
+            m_offset.setSystemOffset(axis_mapping, offset_value);
+        setCorrectPosition();
+    }catch(MinorServoOffsetError& msoe){
+        THROW_EX(MinorServoErrors, OffsetErrorEx, 
+                 msoe.what(), false);
+    }
 }
 
 
@@ -920,10 +953,15 @@ MinorServoBossImpl::getOffsetImpl(string offset_type)
         THROW_EX(MinorServoErrors, StatusErrorEx, 
                  "getOffsetImpl(): the system is not ready", false);
     vector<double> axes_values;
-    if(offset_type == "user")
-        return m_offset.getUserOffset();
-    else
-        return m_offset.getSystemOffset();
+    try{
+        if(offset_type == "user")
+            return m_offset.getUserOffset();
+        else
+            return m_offset.getSystemOffset();
+    }catch(MinorServoOffsetError& msoe){
+        THROW_EX(MinorServoErrors, OffsetErrorEx, 
+                 msoe.what(), false);
+    }
 }
 
 void 

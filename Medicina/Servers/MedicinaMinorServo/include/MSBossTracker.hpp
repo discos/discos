@@ -20,7 +20,7 @@
 
 #include "slamac.h" //for DR2D
 
-#include <AntennaBossProxy.h>
+#include <AntennaProxy.h>
 
 #include "MedMinorServoStatus.hpp"
 #include "MedMinorServoControl.hpp"
