@@ -11,6 +11,7 @@
 /* Carlo Migoni (migoni@ca.astro.it)   26/01/2009  Creation           */
 
 #include <ComponentErrors.h>
+#include <IRA>
 #include <Site.h>
 #include <acsContainerServices.h>
 #include <ObservatoryC.h>
