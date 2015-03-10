@@ -37,13 +37,15 @@ class TrackerThreadParameters
                                 MedMinorServoControl_sp,
                                 MedMinorServoParameters **,
                                 MedMinorServoOffset *,
-	                            maci::ContainerServices *);
+	                            maci::ContainerServices *,
+                                std::string);
         virtual ~TrackerThreadParameters();
         MedMinorServoStatus *m_status;
         MedMinorServoControl_sp m_control;
         MedMinorServoParameters **m_parameters;
         MedMinorServoOffset *m_offset;
 	    maci::ContainerServices *m_services;
+        std::string m_antennaBossInterface;
 };
 
 // This class updates the status property of minor servos.
@@ -77,6 +79,7 @@ private:
     MedMinorServoOffset *m_offset;
     maci::ContainerServices * m_services;
     Antenna::AntennaBoss_proxy m_antennaBoss;
+    std::string m_antennaBossInterface;
     bool m_antennaBossError;
 };
 

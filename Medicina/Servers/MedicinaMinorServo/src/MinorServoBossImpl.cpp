@@ -82,11 +82,13 @@ void MinorServoBossImpl::initialize() throw (
                  false);
     CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
               (LM_DEBUG, "server ip: %s", (const char*)m_server_ip));
-    /**if(!IRA::CIRATools::getDBValue(m_services, "AntennaBossInterface", 
-                                  (const char*)m_antennaBossInterface))
+    if(!IRA::CIRATools::getDBValue(m_services, "AntennaBossInterface", m_antennaBossInterface))
         THROW_EX(ComponentErrors,CDBAccessEx, 
                  "cannot read AntennaBossInterface from CDB",
-                 false);**/
+                 false);
+    CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
+              (LM_DEBUG, "antenna boss interface: %s", 
+              (const char*)m_antennaBossInterface));
     /**
      * INITIALIZE STATUS
      */
@@ -759,7 +761,8 @@ throw (MinorServoErrors::TrackingErrorEx)
                                         m_control,
                                         &m_actual_config,
                                         &m_offset,
-                                        m_services);
+                                        m_services,
+                                        std::string((const char*)m_antennaBossInterface));
 
         m_tracking_thread_ptr = getContainerServices()->
                                  getThreadManager()->

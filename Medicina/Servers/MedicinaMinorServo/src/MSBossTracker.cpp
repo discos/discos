@@ -11,12 +11,14 @@ TrackerThreadParameters::TrackerThreadParameters(MedMinorServoStatus *status,
                                                 MedMinorServoControl_sp control,
                                                 MedMinorServoParameters **params,
                                                 MedMinorServoOffset *offset,
-                                                maci::ContainerServices *services):
+                                                maci::ContainerServices *services,
+                                                std::string antennaBossInterface):
                                                 m_status(status),
                                                 m_control(control),
                                                 m_parameters(params),
                                                 m_offset(offset),
-                                                m_services(services)
+                                                m_services(services),
+                                                m_antennaBossInterface(antennaBossInterface)
 {}
 
 TrackerThreadParameters::~TrackerThreadParameters()
@@ -33,11 +35,12 @@ MSBossTracker::MSBossTracker(
             m_control(params.m_control),
             m_parameters(params.m_parameters),
             m_offset(params.m_offset),
-            m_services(params.m_services)
+            m_services(params.m_services),
+            m_antennaBossInterface(params.m_antennaBossInterface)
 {
     AUTO_TRACE("MSBossTracker::MSBossTracker()");
     m_antennaBoss.setContainerServices(m_services);
-    m_antennaBoss.setComponentName("ANTENNA/BOSS");
+    m_antennaBoss.setComponentName(m_antennaBossInterface.c_str());
 }
 
 MSBossTracker::~MSBossTracker() { AUTO_TRACE("MSBossTracker::~MSBossTracker()"); }
