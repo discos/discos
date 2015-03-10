@@ -200,10 +200,14 @@ template <typename ComponentClass, typename ComponentVar>
 void
 ComponentProxy<ComponentClass, ComponentVar>::setComponentName(const char* name)
 {
-    if(name == "")
+    if(m_name == "")
         m_name = std::string(name);
     else{
         //TODO: throw exception?
+        CUSTOM_LOG(LM_FULL_INFO, 
+                   "ComponentLoader::setComponentName",
+                   (LM_DEBUG, ("ComponentName already defined: " + this->m_name).c_str())
+                   );
     }
 }
 
@@ -212,10 +216,14 @@ void
 ComponentProxy<ComponentClass, ComponentVar>::setContainerServices(
     maci::ContainerServices* services)
 {
-    if(m_services != NULL)
+    if(m_services == NULL)
         m_services = services;
     else{
         //TODO: throw exception?
+        CUSTOM_LOG(LM_FULL_INFO, 
+                   "ComponentLoader::setContainerServices",
+                   (LM_DEBUG, "ContainerServices already defined")
+                   );
     }
 }
 
