@@ -115,7 +115,7 @@ class MSCU(object):
 
                         for answer in answers:
                             connection.send('%s' %answer)
-                            time.sleep(0.2)
+                            time.sleep(0.05)
                 except (KeyboardInterrupt, SystemExit):
                     raise
                 except:

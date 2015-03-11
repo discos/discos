@@ -217,18 +217,18 @@ public:
      * Check if the scan is achievable (IDL interface)
      *
 	 * @param starting_time the time the scan will start
-     * @param scan structure containing the description of the scan to be executed
+     * @param msScanInfo structure containing the description of the scan to be executed
      * @param antennaInfo auxiliary information from the antenna
-     * @param runTime auxiliary information computed at run time by the subsystem
+     * @param msParameters auxiliary information computed at run time by the subsystem
      *
      * @return true if the scan is achievable
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
      virtual CORBA::Boolean checkScan(
              const ACS::Time starting_time, 
-             const MinorServo::MinorServoScan & scan,
+             const MinorServo::MinorServoScan & msScanInfo,
              const Antenna::TRunTimeParameters & antennaInfo,
-             MinorServo::TRunTimeParameters_out runTime
+             MinorServo::TRunTimeParameters_out msParameters
      ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
 
 
@@ -236,9 +236,9 @@ public:
      * Check if the scan is achievable (implementation)
      *
 	 * @param starting_time the time the scan will start
-     * @param range the total axis movement in mm (centered in the actual position)
-	 * @param total_time the duration of axis movement
-	 * @param axis_code the identification code of the axis
+     * @param msScanInfo structure containing the description of the scan to be executed
+     * @param antennaInfo auxiliary information from the antenna
+     * @param msParameters auxiliary information computed at run time by the subsystem
      *
      * @return true if the scan is achievable
      * @throw MinorServoErrors::MinorServoErrorsEx, 
@@ -246,9 +246,9 @@ public:
      */
      virtual CORBA::Boolean checkScanImpl(
              const ACS::Time starting_time, 
-             double range, 
-             const ACS::Time total_time, 
-             const string axis_code
+             const MinorServo::MinorServoScan & msScanInfo,
+             const Antenna::TRunTimeParameters & antennaInfo,
+             MinorServo::TRunTimeParameters_out msParameters
      ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
      
 
@@ -548,7 +548,12 @@ private:
         throw (MinorServoErrors::OperationNotPermittedEx);
 
     /** Return the minumun starting time **/
-    ACS::Time getMinScanStartingTime(double range, const string axis_code, double & acceleration, double & max_speed)
+    ACS::Time getMinScanStartingTime(
+            double & range, 
+            const string axis_code, 
+            const double elevation,
+            double & acceleration, 
+            double & max_speed)
         throw (ManagementErrors::ConfigurationErrorExImpl, ManagementErrors::SubscanErrorExImpl);
 
     void operator=(const MinorServoBossImpl &);

@@ -114,7 +114,7 @@ class Servo(object):
             answer += ",%s" %param
         else:
             answer += closers[0]
-        self.dc.cab_state.value = DriveCabinet.cab_state['disable']
+        self.dc.cab_state.value = DriveCabinet.cab_state['stow']
         self.history.insert(self.stow_position)
         return [answer.replace('@', '?'), answer]
 
@@ -128,12 +128,17 @@ class Servo(object):
         return [answer.replace('@', '?'), answer]
 
     def getspar(self, cmd_num, *params):
-        answer = '?getspar' + ':%d=%d' % (cmd_num, self.id)
+        answer = '?getspar' + ':%d=%d> ' % (cmd_num, self.id)
 
-        for param in params[1:]:
-            answer += ',%s' %param
-
-        answer += '> %d' % (sum([ int(param) for param in params]))
+        index_sub = list(params[-2:])
+        if [1250, 0] == index_sub: # Acceleration
+            answer += '3'
+        elif [1240, 0] == index_sub: # Max speed
+            answer += '10'
+        else:
+            print 'index_sub, type: ', index_sub, type(index_sub)
+            answer += '0'
+        
         answer += closers[0]
         return [answer]
 

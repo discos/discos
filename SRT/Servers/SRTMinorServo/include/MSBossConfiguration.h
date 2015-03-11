@@ -129,6 +129,14 @@ public:
         bool wasElevationTrackingEn;
     };
 
+    /** 
+     * Return a doubleSeq of positions to set
+     * @param comp_name string component name
+     * @param elevation the elevation (radians) of the antenna at the beginning of the scan
+     * @return doubleSeq of positions to set
+     */
+    ACS::doubleSeq getPositionFromElevation(string comp_name, double elevation) 
+        throw (ManagementErrors::ConfigurationErrorExImpl);
 
     /** 
      * Return a doubleSeq of positions to set

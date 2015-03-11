@@ -9,12 +9,13 @@ import MinorServo
 import Antenna
 from Acspy.Common.TimeHelper import getTimeStamp
 from Acspy.Clients.SimpleClient import PySimpleClient
+from Acspy.Util import ACSCorba
 
 
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
-class CheckScanTest(unittest2.TestCase):
-    """Test the MinorServoBoss.checkScan() behavior"""
+class CheckEmptyScanTest(unittest2.TestCase):
+    """Test the MinorServoBoss.checkScan() when is_empty_scan is True"""
 
     def setUp(self):    
         code = 'KKG' if os.getenv('TARGETSYS') == 'SRT' else 'KKC'
@@ -36,7 +37,7 @@ class CheckScanTest(unittest2.TestCase):
             range=50,
             total_time=500000000, # 50 seconds
             axis_code='SRP_TZ',
-            is_empty_scan=False)
+            is_empty_scan=True)
 
         self.antennaInfo = Antenna.TRunTimeParameters(
             targetName='dummy',
@@ -62,20 +63,25 @@ class CheckScanTest(unittest2.TestCase):
         axes, units = self.boss.getAxesInfo()
         self.idx = axes.index('SRP_TZ')
 
-    def testStartASAP(self):
-        """Check the behavior when the scan must start as soon as possible"""
-        center = self.boss.getAxesPosition(getTimeStamp().value)[self.idx]
+    def test_start_ASAP_without_startTime(self):
+        """The starting time is unknown and the scan must start ASAP"""
         startTime = 0
-        res, msInfo = self.boss.checkScan(startTime, self.scan, self.antennaInfo)
+        getPosition = getattr(self, 'get%sPosition' %os.getenv('TARGETSYS'))
+        centerScanPosition = getPosition(
+                self.boss.getActualSetup(), 
+                'SRP', 
+                math.degrees(self.antennaInfo.elevation))
+        centerScan = centerScanPosition[self.idx]
 
+        res, msInfo = self.boss.checkScan(startTime, self.scan, self.antennaInfo)
         self.assertTrue(res)
-        # Cannot know the startEpoch time...
-        self.assertGreater(msInfo.startEpoch, getTimeStamp.now().value)
-        self.assertTrue(msInfo.onTheFly)
-        self.assertEqual(msInfo.centerScan, center)
+        self.assertAlmostEqual(msInfo.centerScan, centerScan, delta=0.01)
+        self.assertFalse(msInfo.onTheFly)
+        self.assertGreater(msInfo.startEpoch, getTimeStamp().value)
         self.assertEqual(msInfo.scanAxis, 'SRP_TZ')
-        # Cannot know the timeToStop time...
-        self.assertGreater(msInfo.timeToStop, getTimeStamp.now().value+50000000)
+        self.assertEqual(
+                msInfo.timeToStop, 
+                msInfo.startEpoch + self.scan.total_time)
 
     def _testStartAtGivenTime(self):
         """Check the behavior when the scan must start at a given time"""
@@ -156,6 +162,44 @@ class CheckScanTest(unittest2.TestCase):
         self.assertEqual(msInfo.centerScan, center)
         self.assertEqual(msInfo.scanAxis, '')
         self.assertGreater(msInfo.timeToStop, 0)
+
+    def getSRTPosition(self, conf_code, servo_name, elevation):
+        """Return the servo position related to the elevation.
+
+        Parameters:
+        - conf_code: value returned by getActualSetup() (CCB, CCB_ASACTIVE,...)
+        - servo_name: SRP, GFR, M3R, PFP
+        - elevation: the antenna elevation, in degrees
+        """
+        dal = ACSCorba.cdb()
+        dao = dal.get_DAO_Servant('alma/MINORSERVO/Boss')
+        body = dao.get_field_data(conf_code) 
+        configurations = body.strip().split('@')
+        servos_conf = {}
+        for conf in configurations:
+           if conf:
+               name, value = conf.split(':')
+               servos_conf[name.strip()] = value.strip()
+        
+        srp_conf = servos_conf[servo_name]
+        srp_items = [item.strip() for item in srp_conf.split(';')]
+        srp_axes = []
+        for item in srp_items:
+           if '=' in item:
+               name, value = item.split('=')
+               srp_axes.append(value.strip())
+        
+        position = []
+        for axis in srp_axes:
+            axis = axis.lstrip('(')
+            axis = axis.rstrip(')')
+            # At this point, axis is something like '-0.23, 0.01, 3.2'
+            coeffs = [float(item) for item in axis.split(',')]
+            value = 0
+            for idx, coeff in enumerate(coeffs):
+                value += coeff * elevation**idx
+            position.append(value)
+        return position
 
 
 if __name__ == '__main__':
