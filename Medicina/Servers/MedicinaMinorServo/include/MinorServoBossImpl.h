@@ -180,13 +180,13 @@ public:
      * Turn the elevation tracking of minor servos on
      * @throw ManagementErrors::ConfigurationErrorEx
      */
-    void turnTrackingOn() throw (MinorServoErrors::TrackingErrorEx);
+    void turnTrackingOn() throw (MinorServoErrors::MinorServoErrorsEx);
 
     /**
      * Turn the elevation tracking of minor servos off. After that, the system is not ready
      * @throw ManagementErrors::ConfigurationErrorEx
      */
-    void turnTrackingOff() throw (MinorServoErrors::TrackingErrorEx);
+    void turnTrackingOff() throw (MinorServoErrors::MinorServoErrorsEx);
 
     /** Return the actual configuration */
     char * getActualSetup();
@@ -297,7 +297,7 @@ public:
              ACS::Time & starting_time, 
              const MinorServo::MinorServoScan& scan_parameters,
              const Antenna::TRunTimeParameters& antenna_parameters
-     ) throw (MinorServoErrors::ScanErrorEx);
+     ) throw (MinorServoErrors::MinorServoErrorsEx);
     
     /** Return the central position of the axis involved in the scan */
     CORBA::Double getCentralScanPosition()
