@@ -37,9 +37,9 @@
         <trackel>1</trackel>
         <Xaxis>mm,-70.0,70.0,-7.62,0,0,0,0</Xaxis>
         <Yaxis>mm,-70.0,70.0,-18.2314,0,0,0,0</Yaxis>
-        <Zaxis>mm,-70.0,70.0,2.18271,0,0,0,0</Zaxis>
-        <THETAXaxis>deg,-5,5.0,-0.0736767,0,0,0,0</THETAXaxis>
-        <THETAYaxis>deg,-5,5.0,0.0199275,0,0,0,0</THETAYaxis>
+        <Zaxis>mm,-70.0,70.0,-6.53656,0,0,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0,-0.0663735,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,0.0287089,0,0,0,0</THETAYaxis>
     </MinorServo>
     <MinorServo>
         <code>XXP</code>
