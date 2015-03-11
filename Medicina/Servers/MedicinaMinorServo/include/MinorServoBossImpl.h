@@ -99,8 +99,7 @@ public:
      * @throw ComponentErrors::CouldntGetComponentExImpl, ManagementErrors::ConfigurationErrorEx
      */
     virtual void initialize() throw (
-            ComponentErrors::CouldntGetComponentExImpl, 
-            MinorServoErrors::SetupErrorExImpl
+            ComponentErrors::CouldntGetComponentExImpl
     );
 
     virtual void execute() throw (ComponentErrors::MemoryAllocationExImpl);

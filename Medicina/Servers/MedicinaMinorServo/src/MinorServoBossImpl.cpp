@@ -50,8 +50,7 @@ MinorServoBossImpl::~MinorServoBossImpl() {
 
 
 void MinorServoBossImpl::initialize() throw (
-    ComponentErrors::CouldntGetComponentExImpl, 
-    MinorServoErrors::SetupErrorExImpl)
+    ComponentErrors::CouldntGetComponentExImpl)
 {
     AUTO_TRACE("MinorServoBossImpl::initialize()");
 
@@ -64,7 +63,9 @@ void MinorServoBossImpl::initialize() throw (
                    (LM_DEBUG, "Initialized NC supplier"));
     }
     catch (...) {
-        _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"MinorServoBoss::initialize()");
+        THROW_EX(ComponentErrors, CouldntGetComponentEx, 
+                 "cannot initialize simple supplier",
+                 false);
     }
 
     /**
@@ -77,13 +78,14 @@ void MinorServoBossImpl::initialize() throw (
      * READ ATTRIBUTES FROM CDB
      */
     if(!IRA::CIRATools::getDBValue(m_services, "server_ip", m_server_ip))
-        THROW_EX(ComponentErrors,CDBAccessEx, 
+        //THROW_EX(ComponentErrors,CDBAccessEx, 
+        THROW_EX(ComponentErrors, CouldntGetComponentEx, 
                  "cannot read server_ip from CDB",
                  false);
     CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
               (LM_DEBUG, "server ip: %s", (const char*)m_server_ip));
     if(!IRA::CIRATools::getDBValue(m_services, "AntennaBossInterface", m_antennaBossInterface))
-        THROW_EX(ComponentErrors,CDBAccessEx, 
+        THROW_EX(ComponentErrors, CouldntGetComponentEx, 
                  "cannot read AntennaBossInterface from CDB",
                  false);
     CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
@@ -102,10 +104,15 @@ void MinorServoBossImpl::initialize() throw (
     /**
      * INITIALIZE SERVO CONTROL
      */
-    //TODO: add exception management here
-    m_control = get_servo_control(m_server_ip);
-    CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
+    try{
+        m_control = get_servo_control(m_server_ip);
+        CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
               (LM_DEBUG, "Instantiated new minor servo control"));
+    }catch(ServoConnectionError& sce){
+        THROW_EX(ComponentErrors, CouldntGetComponentEx, 
+                 sce.what(),
+                 false);
+    }
 
     /**
      * INITIALIZE PARSER WITH COMMANDS
@@ -322,13 +329,25 @@ throw (MinorServoErrors::SetupErrorEx)
     }catch(...) {
         THROW_EX(MinorServoErrors, SetupErrorEx, "invalid configuration", false);
     }
-    m_servo_status.reset();
-    m_servo_status.starting = true;
+    try{
+        m_servo_status.reset();
+        m_servo_status.starting = true;
+    }catch(const ServoTimeoutError& ste){
+        THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), false);
+    }catch(const ServoConnectionError& sce){
+        THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), false);
+    }catch(...){
+        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", false);
+    }
     /**
      * Get the setup position at 45 deg
      */
     MedMinorServoPosition setup_position = m_actual_config->get_position();
-    m_offset.initialize(m_actual_config->is_primary_focus());
+    try{
+        m_offset.initialize(m_actual_config->is_primary_focus());
+    }catch(MinorServoOffsetError& msoe){
+        THROW_EX(MinorServoErrors, SetupErrorEx, msoe.what(), false);
+    }
     try{
         m_actual_conf = string(config);
         m_control->set_position(setup_position);
@@ -348,6 +367,8 @@ throw (MinorServoErrors::SetupErrorEx)
                    (LM_DEBUG, "Started setup positioning thread"));
     }catch(const ServoTimeoutError& ste){
         THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), false);
+    }catch(const ServoConnectionError& sce){
+        THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), false);
     }catch(...){
         THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", false);
     }
@@ -436,11 +457,19 @@ MinorServoBossImpl::getAxesPosition(ACS::Time time)
     ACS::doubleSeq_var positions_res = new ACS::doubleSeq;
     vector<double> vpositions;
     MedMinorServoPosition position;
-    if(time == 0)
-        position = m_control->get_position();
-    else
-        position = m_control->get_position_at(time);
-    //We hide the system offsets from the user view
+    try{
+        if(time == 0)
+            position = m_control->get_position();
+        else
+            position = m_control->get_position_at(time);
+        //We hide the system offsets from the user view
+    }catch(const ServoTimeoutError& ste){
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, ste.what(), false);
+    }catch(const ServoConnectionError& sce){
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, sce.what(), false);
+    }catch(...){
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, "Cannot get position", false);
+    }
     position -= m_offset.getSystemOffsetPosition();
     vpositions = position.get_axes_positions();
     positions_res->length(vpositions.size());
@@ -886,9 +915,15 @@ MinorServoBossImpl::setCorrectPosition()
     }
     MedMinorServoPosition offset_position = m_offset.getOffsetPosition();
     MedMinorServoPosition correct_position = m_actual_config->get_position();
-    m_control->set_position(correct_position + offset_position);
-    CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBoss::setCorrectPosition",
+    try{
+        m_control->set_position(correct_position + offset_position);
+        CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBoss::setCorrectPosition",
               (LM_DEBUG, "Correcting position"));
+    }catch(const ServoTimeoutError& ste){
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, ste.what(), false);
+    }catch(const ServoConnectionError& sce){
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, sce.what(), false);
+    }
 }
 
 void

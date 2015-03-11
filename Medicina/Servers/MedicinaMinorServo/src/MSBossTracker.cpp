@@ -60,7 +60,7 @@ void MSBossTracker::runLoop()
     {
         try {
             m_antennaBoss->getRawCoordinates(IRA::CIRATools::getACSTime(), azimuth, elevation);
-        }catch(...){
+        }catch(...){ //CORBA::SystemException
             CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MSBossTracker::runLoop",
                       (LM_WARNING, "Cannot get antenna coordinates"));
             m_antennaBoss.setError();
