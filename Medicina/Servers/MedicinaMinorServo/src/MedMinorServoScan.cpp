@@ -38,8 +38,10 @@ MedMinorServoScan::init(const MedMinorServoPosition central_position,
         TIMEVALUE now;
         IRA::CIRATools::getTime(now);
         m_starting_time = now.value().value;
+        m_asap = true;
     }else{
         m_starting_time = starting_time;
+        m_asap = false;
     }
     m_range = range;
     m_total_time = total_time;
@@ -119,15 +121,18 @@ throw (MinorServoErrors::ScanErrorEx)
     /**
      * check that we can reach start position in time
      */
-    double min_start_time = MedMinorServoGeometry::min_time(m_central_position,
+    m_min_start_time = MedMinorServoGeometry::min_time(m_central_position,
                                                             m_start_position);
-    TIMEVALUE now;
-    IRA::CIRATools::getTime(now);
-    if((m_starting_time + START_SCAN_TOLERANCE) >= (now.value().value + min_start_time * 10000000))
+    if(!m_asap)
     {
-        CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
-              (LM_NOTICE, "Cannot reach start position in time"));
-        return false;
+        TIMEVALUE now;
+        IRA::CIRATools::getTime(now);
+        if((m_starting_time + START_SCAN_TOLERANCE) >= (now.value().value + m_min_start_time * 10000000))
+        {
+            CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
+                  (LM_NOTICE, "Cannot reach start position in time"));
+            return false;
+        }
     }
     /**
      * check that we can perform the scan with given speed
@@ -147,6 +152,23 @@ throw (MinorServoErrors::ScanErrorEx)
         return false;
     }
     return true;
+}
+
+ACS::Time 
+MedMinorServoScan::getStartingTime()
+{
+    if(!(m_initialized))
+        THROW_EX(MinorServoErrors, ScanErrorEx, "Scan is not initialized", true);
+    if(m_asap)
+    {
+        m_min_start_time = MedMinorServoGeometry::min_time(m_central_position,
+                                                            m_start_position);
+        TIMEVALUE now;
+        IRA::CIRATools::getTime(now);
+        m_starting_time = now.value().value;
+        m_starting_time += (ACS::Time)(m_min_start_time * 10000000) + START_SCAN_TOLERANCE;
+    }
+    return m_starting_time;
 }
 
 ACS::Time 

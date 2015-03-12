@@ -37,16 +37,16 @@ class MedMinorServoScan
         MedMinorServoPosition getStartPosition(){return m_start_position;};
         MedMinorServoPosition getStopPosition(){return m_stop_position;};
         string getAxisCode(){return m_axis_code;};
-        ACS::Time getStartingTime(){return m_starting_time;};
+        ACS::Time getStartingTime();
         ACS::Time getMovementTime();
         ACS::Time getTotalTime(){return m_total_time;};
         bool was_elevation_tracking(){ return m_was_tracking;};
     private:
         MedMinorServoPosition m_central_position, m_start_position, m_stop_position;
         ACS::Time m_starting_time, m_total_time;
-        double m_range, m_min_time, m_max_time;
+        double m_range, m_min_time, m_max_time, m_min_start_time;
         string m_axis_code;
-        bool m_initialized, m_was_tracking;
+        bool m_initialized, m_was_tracking, m_asap;
 };
 
 #endif
