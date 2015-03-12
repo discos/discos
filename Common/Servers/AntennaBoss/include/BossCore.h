@@ -142,9 +142,21 @@ public:
 	 * @throw ComponentErrors::CORBAProblemExImpl
 	 * @throw ComponentErrors::UnexpectedExImpl
 	 * @throw AntennaErrors::NoTargetCommandedYetExImpl
+	 * @throw ComponentErrors::CouldntReleaseComponentExImpl
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 * @throw ComponentErrors::UnexpectedExImpl
+	 * @throw ComponentErrors::CouldntCallOperationExImpl
+	 * @throw ComponentErrors::OperationErrorExImpl
+	 * @throw AntennaErrors::ScanErrorExImpl
+	 * @throw AntennaErrors::SecondaryScanErrorExImpl
+	 * @throw AntennaErrors::MissingTargetExImpl
+	 * @throw AntennaErrors::LoadGeneratorErrorExImpl
+	 * @throw AntennaErrors::NoTargetCommandedYetExImpl
 	 */
-	void goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::UnexpectedExImpl,
-			ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::NoTargetCommandedYetExImpl);
+	void goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
+		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::NoTargetCommandedYetExImpl);
 
 
 	/**
