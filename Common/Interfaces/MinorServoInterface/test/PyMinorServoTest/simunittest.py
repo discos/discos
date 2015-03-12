@@ -6,7 +6,7 @@ import subprocess
 
 def run(test_case):
     # Use the simulators and the testing CDB
-    server_name = 'mscu' if os.getenv('TARGETSYS') == 'SRT' else ''
+    server_name = 'mscu' if test_case.telescope == 'SRT' else ''
     if not server_name:
         sys.exit(0) 
 
