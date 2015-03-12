@@ -162,7 +162,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 			break;
 		}
 		ACS_DEBUG_PARAM("CConfiguration::Init()","antennaGeometry: %s",(const char *)strVal);
-		if (Antenna::Definitions::map(strVal,m_axis[m_minorServoMappings].antennaGeometry)) {
+		if (!Antenna::Definitions::map(strVal,m_axis[m_minorServoMappings].antennaGeometry)) {
 			_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
 			dummy.setFieldName("MinorServoMapping");
 			throw dummy;

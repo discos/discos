@@ -219,7 +219,7 @@ void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& 
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {
 		if (m_schedExecuter->isScheduleActive()) {
-			_THROW_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,"CCore::crossScan()");
+			_THROW_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,"CCore::skydip()");
 		}
 	}
 	ACS::doubleSeq tsys;
@@ -239,7 +239,7 @@ void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& 
 	_skydipOTF(el1,el2,duration); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	_startRecording(1,duration); // start recording
 	_terminateScan();
-	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"CROSSSCAN_DONE"));
+	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"SKYDIP_DONE"));
 }
 
 /*void CCore::skydip(const double& el1,const double& el2,const ACS::TimeInterval& duration) throw (ManagementErrors::NotAllowedDuringScheduleExImpl,
@@ -367,7 +367,7 @@ void CCore::peakerScan(const char *axis,const double& span,const ACS::TimeInterv
 	//no need to get the mutex, because it is already done inside the executor object
 	if (m_schedExecuter) {
 		if (m_schedExecuter->isScheduleActive()) {
-			_THROW_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,"CCore::crossScan()");
+			_THROW_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,"CCore::peakerScan()");
 		}
 	}
 	ACS::doubleSeq tsys;
@@ -379,7 +379,7 @@ void CCore::peakerScan(const char *axis,const double& span,const ACS::TimeInterv
 	_callTSys(tsys);
 	_wait(1.5);
 	_initRecording(1);
-	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"START_FOCUSSCAN"));
+	ACS_LOG(LM_FULL_INFO,"CCore::skydip()",(LM_NOTICE,"START_PEAKERSCAN"));
 	// start the scan
 	_peaker(axis,span,duration);
 	_startRecording(1,duration); // start recording
