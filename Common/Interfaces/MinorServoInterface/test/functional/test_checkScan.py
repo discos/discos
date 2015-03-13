@@ -20,11 +20,10 @@ from PyMinorServoTest import simunittest
 
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
-
-class CheckScanTest(unittest2.TestCase):
+class CheckScanBaseTest(unittest2.TestCase):
 
     telescope = os.getenv('TARGETSYS')
-
+    
     @classmethod
     def setUpClass(cls):
         cls.client = PySimpleClient()
@@ -34,7 +33,31 @@ class CheckScanTest(unittest2.TestCase):
     def tearDownClass(cls):
         cls.client.releaseComponent('MINORSERVO/Boss')
 
+    def setUp(self):
+        self.antennaInfo = Antenna.TRunTimeParameters(
+            targetName='dummy',
+            azimuth=math.pi,
+            elevation=math.pi/2 * 1/random.randrange(2, 10),
+            startEpoch=getTimeStamp().value + 100000000,
+            onTheFly=False,
+            slewingTime=100000000,
+            section=Antenna.ANT_SOUTH,
+            axis=Management.MNG_TRACK,
+            timeToStop=0)
+
+        self.scan = MinorServo.MinorServoScan(
+            range=50,
+            total_time=500000000, # 50 seconds
+            axis_code='SRP_TZ',
+            is_empty_scan=True)
+
+
+class CheckScanTest(CheckScanBaseTest):
+
+    telescope = os.getenv('TARGETSYS')
+    
     def setUp(self):    
+        super(CheckScanTest, self).setUp()
         code = 'KKG' if self.telescope == 'SRT' else 'KKC'
 
         # Wait (maximum one minute) in case the boss is parking
@@ -53,23 +76,6 @@ class CheckScanTest(unittest2.TestCase):
                 time.sleep(2)
             if not self.boss.isReady():
                 self.fail('The system is not ready for executing the tests')
-
-        self.antennaInfo = Antenna.TRunTimeParameters(
-            targetName='dummy',
-            azimuth=math.pi,
-            elevation=math.pi/2 * 1/random.randrange(2, 10),
-            startEpoch=getTimeStamp().value + 100000000,
-            onTheFly=False,
-            slewingTime=100000000,
-            section=Antenna.ANT_SOUTH,
-            axis=Management.MNG_TRACK,
-            timeToStop=0)
-
-        self.scan = MinorServo.MinorServoScan(
-            range=50,
-            total_time=500000000, # 50 seconds
-            axis_code='SRP_TZ',
-            is_empty_scan=True)
 
         self.boss.setElevationTracking('OFF')
         self.boss.setASConfiguration('OFF')
@@ -206,38 +212,7 @@ class CheckScanTest(unittest2.TestCase):
         return position
 
 
-class CheckScanInterfaceTest(unittest2.TestCase):
-
-    telescope = os.getenv('TARGETSYS')
-
-    @classmethod
-    def setUpClass(cls):
-        cls.client = PySimpleClient()
-        cls.boss = cls.client.getComponent('MINORSERVO/Boss')
-        if cls.boss.isReady():
-            self.fail('Somone has forgot to release the component...')
-        
-    @classmethod
-    def tearDownClass(cls):
-        cls.client.releaseComponent('MINORSERVO/Boss')
-
-    def setUp(self):
-        self.antennaInfo = Antenna.TRunTimeParameters(
-            targetName='dummy',
-            azimuth=math.pi,
-            elevation=math.pi/2 * 1/random.randrange(2, 10),
-            startEpoch=getTimeStamp().value + 100000000,
-            onTheFly=False,
-            slewingTime=100000000,
-            section=Antenna.ANT_SOUTH,
-            axis=Management.MNG_TRACK,
-            timeToStop=0)
-
-        self.scan = MinorServo.MinorServoScan(
-            range=50,
-            total_time=500000000, # 50 seconds
-            axis_code='SRP_TZ',
-            is_empty_scan=True)
+class CheckScanInterfaceTest(CheckScanBaseTest):
 
     def test_system_not_ready(self):
         """Raise a MinorServoErrorsEx in case the system is not ready"""
