@@ -54,8 +54,6 @@ class CheckScanBaseTest(unittest2.TestCase):
 
 class CheckScanTest(CheckScanBaseTest):
 
-    telescope = os.getenv('TARGETSYS')
-    
     def setUp(self):    
         super(CheckScanTest, self).setUp()
         code = 'KKG' if self.telescope == 'SRT' else 'KKC'
