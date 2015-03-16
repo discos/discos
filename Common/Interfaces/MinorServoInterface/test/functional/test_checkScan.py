@@ -28,6 +28,12 @@ class CheckScanBaseTest(unittest2.TestCase):
     def setUpClass(cls):
         cls.client = PySimpleClient()
         cls.boss = cls.client.getComponent('MINORSERVO/Boss')
+        if telescope == "SRT":
+            axis_code = "SRP_TZ"
+            recv_code = "KKG"
+        else:
+            axis_code = "Z"
+            recv_code = "KKC"
         
     @classmethod
     def tearDownClass(cls):
@@ -48,7 +54,7 @@ class CheckScanBaseTest(unittest2.TestCase):
         self.scan = MinorServo.MinorServoScan(
             range=50,
             total_time=500000000, # 50 seconds
-            axis_code='SRP_TZ',
+            axis_code=self.axis_code,
             is_empty_scan=True)
 
 
@@ -56,7 +62,7 @@ class CheckScanTest(CheckScanBaseTest):
 
     def setUp(self):    
         super(CheckScanTest, self).setUp()
-        code = 'KKG' if self.telescope == 'SRT' else 'KKC'
+        code = self.recv_code
 
         # Wait (maximum one minute) in case the boss is parking
         if self.boss.isParking():
@@ -78,7 +84,7 @@ class CheckScanTest(CheckScanBaseTest):
         self.boss.setElevationTracking('OFF')
         self.boss.setASConfiguration('OFF')
         axes, units = self.boss.getAxesInfo()
-        self.idx = axes.index('SRP_TZ')
+        self.idx = axes.index(self.axis_code)
 
         getPosition = getattr(self, 'get%sPosition' %self.telescope)
         centerScanPosition = getPosition(
@@ -95,7 +101,7 @@ class CheckScanTest(CheckScanBaseTest):
         self.assertTrue(res)
         self.assertAlmostEqual(msInfo.centerScan, self.centerScan, delta=0.01)
         self.assertGreater(msInfo.startEpoch, getTimeStamp().value)
-        self.assertEqual(msInfo.scanAxis, 'SRP_TZ')
+        self.assertEqual(msInfo.scanAxis, self.axis_code)
         self.assertEqual(
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
@@ -110,7 +116,7 @@ class CheckScanTest(CheckScanBaseTest):
         self.assertAlmostEqual(msInfo.centerScan, self.centerScan, delta=0.01)
         self.assertTrue(msInfo.onTheFly)
         self.assertGreater(msInfo.startEpoch, getTimeStamp().value)
-        self.assertEqual(msInfo.scanAxis, 'SRP_TZ')
+        self.assertEqual(msInfo.scanAxis, self.axis_code)
         self.assertEqual(
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
@@ -124,7 +130,7 @@ class CheckScanTest(CheckScanBaseTest):
         self.assertAlmostEqual(msInfo.centerScan, self.centerScan, delta=0.01)
         self.assertFalse(msInfo.onTheFly)
         self.assertEqual(msInfo.startEpoch, startTime)
-        self.assertEqual(msInfo.scanAxis, 'SRP_TZ')
+        self.assertEqual(msInfo.scanAxis, self.axis_code)
         self.assertEqual(
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
@@ -139,7 +145,7 @@ class CheckScanTest(CheckScanBaseTest):
         self.assertAlmostEqual(msInfo.centerScan, self.centerScan, delta=0.01)
         self.assertTrue(msInfo.onTheFly)
         self.assertEqual(msInfo.startEpoch, startTime)
-        self.assertEqual(msInfo.scanAxis, 'SRP_TZ')
+        self.assertEqual(msInfo.scanAxis, self.axis_code)
         self.assertEqual(
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
@@ -164,8 +170,50 @@ class CheckScanTest(CheckScanBaseTest):
         res, msInfo = self.boss.checkScan(startTime, self.scan, self.antennaInfo)
         self.assertFalse(res)
 
+    def getMEDPosition(conf_code, servo_name="", elevation=45):
+        """Return the servo position related to the elevation for MED
+        radiotelescope.
+
+        Parameters:
+        - conf_code: value returned by getActualSetup() (CCC, KKC,...)
+        - servo_name: "" not use at Med
+        - elevation: the antenna elevation, in degrees
+        """
+        from xml.dom.minidom import parseString
+        dal = ACSCorba.cdb()
+        dao = dal.get_DAO('alma/DataBlock/MinorServoParameters')
+        root = parseString(dao).documentElement
+        position = []
+        coefficients = []
+        for minorservo in root.getElementsByTagName("MinorServo"):
+            for code in minorservo.getElementsByTagName("code"):
+                if code.firstChild.data == conf_code:
+                    if minorservo.getElementsByTagName("primary")[0].firstChild.data == "1":
+                        yp_string_poly = minorservo.getElementsByTagName("YPaxis")[0].firstChild.data
+                        coefficients.append(map(float,yp_string_poly.split(",")[3:]))
+                        zp_string_poly = minorservo.getElementsByTagName("ZPaxis")[0].firstChild.data
+                        coefficients.append(map(float,zp_string_poly.split(",")[3:]))
+                    else:
+                        x_string_poly = minorservo.getElementsByTagName("Xaxis")[0].firstChild.data
+                        coefficients.append(map(float,x_string_poly.split(",")[3:]))
+                        y_string_poly = minorservo.getElementsByTagName("Yaxis")[0].firstChild.data
+                        coefficients.append(map(float,y_string_poly.split(",")[3:]))
+                        z_string_poly = minorservo.getElementsByTagName("Zaxis")[0].firstChild.data
+                        coefficients.append(map(float,z_string_poly.split(",")[3:]))
+                        tx_string_poly = minorservo.getElementsByTagName("THETAXaxis")[0].firstChild.data
+                        coefficients.append(map(float,tx_string_poly.split(",")[3:]))
+                        ty_string_poly = minorservo.getElementsByTagName("THETAYaxis")[0].firstChild.data
+                        coefficients.append(map(float,ty_string_poly.split(",")[3:]))
+        for coefficient in coefficients:
+            axis_position = 0
+            for exp, coeff in enumerate(coefficient):
+                axis_position += (elevation)**(exp) * coeff
+            position.append(axis_position)
+        return position
+
     def getSRTPosition(self, conf_code, servo_name, elevation=45):
-        """Return the servo position related to the elevation.
+        """Return the servo position related to the elevation for SRT
+        radiotelescope.
 
         Parameters:
         - conf_code: value returned by getActualSetup() (CCB, CCB_ASACTIVE,...)
