@@ -150,27 +150,26 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		if (!CIRATools::getDBValue(Services,"axis",strVal,"alma/",fieldPath)) {
 			break;
 		}
-		ACS_DEBUG_PARAM("CConfiguration::Init()","axis: %s",(const char *)strVal);
 		m_axis[m_minorServoMappings].axis=str2Axis(strVal);
+		ACS_DEBUG_PARAM("CConfiguration::Init()","axis: %s",(const char *)strVal);
 		if (!CIRATools::getDBValue(Services,"servoName",strVal,"alma/",fieldPath)) {
 			break;
 		}
 		ACS_DEBUG_PARAM("CConfiguration::Init()","servoName: %s",(const char *)strVal);
 		m_axis[m_minorServoMappings].servoName=strVal;
-
 		if (!CIRATools::getDBValue(Services,"antennaGeometry",strVal,"alma/",fieldPath)) {
 			break;
 		}
-		ACS_DEBUG_PARAM("CConfiguration::Init()","antennaGeometry: %s",(const char *)strVal);
 		if (!Antenna::Definitions::map(strVal,m_axis[m_minorServoMappings].antennaGeometry)) {
 			_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
 			dummy.setFieldName("MinorServoMapping");
 			throw dummy;
 		}
-		if (!CIRATools::getDBValue(Services,"antennaGeometry",m_axis[m_minorServoMappings].beamDevitionFactor,"alma/",fieldPath)) {
+		ACS_DEBUG_PARAM("CConfiguration::Init()","antennaGeometry: %s",(const char *)strVal);
+		if (!CIRATools::getDBValue(Services,"beamDeviationFactor",m_axis[m_minorServoMappings].beamDevitionFactor,"alma/",fieldPath)) {
 			break;
 		}
-		ACS_DEBUG_PARAM("CConfiguration::Init()","antennaGeometry: %lf",m_axis[m_minorServoMappings].beamDevitionFactor);
+		ACS_DEBUG_PARAM("CConfiguration::Init()","beamDeviationFactor: %lf",m_axis[m_minorServoMappings].beamDevitionFactor);
 		m_minorServoMappings++;
 		if (m_minorServoMappings>=MAX_AXIS_NUMBER) break;
 	}
