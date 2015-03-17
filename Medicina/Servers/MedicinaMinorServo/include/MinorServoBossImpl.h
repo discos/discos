@@ -174,7 +174,7 @@ public:
         CORBA::SystemException, 
         MinorServoErrors::SetupErrorEx);
 
-    void setupImpl(const char *config) throw (MinorServoErrors::SetupErrorEx);
+    void setupImpl(const char *config) throw (MinorServoErrors::SetupErrorExImpl);
 
     /**
      * Turn the elevation tracking of minor servos on
@@ -436,8 +436,7 @@ public:
                  ComponentErrors::ComponentErrorsEx);
      
      void setElevationTrackingImpl(const char * value)
-          throw (MinorServoErrors::MinorServoErrorsEx,
-                 ComponentErrors::ComponentErrorsEx);
+          throw (MinorServoErrors::MinorServoErrorsExImpl);
 
      void setASConfiguration(const char * value)
           throw (MinorServoErrors::MinorServoErrorsEx,

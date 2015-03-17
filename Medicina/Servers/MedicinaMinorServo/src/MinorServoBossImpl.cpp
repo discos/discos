@@ -305,40 +305,40 @@ MinorServoBossImpl::setup(const char *config) throw (
 
 void 
 MinorServoBossImpl::setupImpl(const char *config) 
-throw (MinorServoErrors::SetupErrorEx)
+throw (MinorServoErrors::SetupErrorExImpl)
 {
     if(m_servo_status.starting)
         THROW_EX(MinorServoErrors, SetupErrorEx, 
-                 "The system is executing another setup", true);
+                 "The system is executing another setup", false);
     if(m_servo_status.parking)
         THROW_EX(MinorServoErrors, SetupErrorEx, 
-                 "The system is executing a park", true);
+                 "The system is executing a park", false);
     if(m_servo_status.scan_active)
         THROW_EX(MinorServoErrors, SetupErrorEx, 
-                 "The system is performing a scan", true);
+                 "The system is performing a scan", false);
     if(m_config.count(std::string(config)) == 0)
         THROW_EX(MinorServoErrors, SetupErrorEx, 
-                 "Cannot find requested configuration", true);
+                 "Cannot find requested configuration", false);
     try {
         setElevationTrackingImpl(IRA::CString("OFF"));
     }catch(...) {
         THROW_EX(MinorServoErrors, SetupErrorEx, "cannot turn the tracking off",
-        true);
+        false);
     }
     try{
         m_actual_config = &(m_config[std::string(config)]);
     }catch(...) {
-        THROW_EX(MinorServoErrors, SetupErrorEx, "invalid configuration", true);
+        THROW_EX(MinorServoErrors, SetupErrorEx, "invalid configuration", false);
     }
     try{
         m_servo_status.reset();
         m_servo_status.starting = true;
     }catch(const ServoTimeoutError& ste){
-        THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), true);
+        THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){
-        THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), true);
+        THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), false);
     }catch(...){
-        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", true);
+        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", false);
     }
     /**
      * Get the setup position at 45 deg
@@ -347,7 +347,7 @@ throw (MinorServoErrors::SetupErrorEx)
     try{
         m_offset.initialize(m_actual_config->is_primary_focus());
     }catch(MinorServoOffsetError& msoe){
-        THROW_EX(MinorServoErrors, SetupErrorEx, msoe.what(), true);
+        THROW_EX(MinorServoErrors, SetupErrorEx, msoe.what(), false);
     }
     try{
         m_actual_conf = string(config);
@@ -367,11 +367,11 @@ throw (MinorServoErrors::SetupErrorEx)
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::setupImpl",
                    (LM_DEBUG, "Started setup positioning thread"));
     }catch(const ServoTimeoutError& ste){
-        THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), true);
+        THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){
-        THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), true);
+        THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), false);
     }catch(...){
-        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", true);
+        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", false);
     }
 }
 
@@ -587,15 +587,6 @@ MinorServoBossImpl::checkScanImpl(
               ComponentErrors::ComponentErrorsEx)
 {
     minor_servo_parameters = new TRunTimeParameters;
-    if(scan_parameters.is_empty_scan)
-    {
-        minor_servo_parameters->startEpoch = 0;
-        minor_servo_parameters->onTheFly = false;
-        minor_servo_parameters->centerScan = 0;
-        minor_servo_parameters->scanAxis = CORBA::string_dup("");
-        minor_servo_parameters->timeToStop = 0;
-        return true; 
-    }
     MedMinorServoPosition central_position = 
         m_actual_config->get_position(antenna_parameters.elevation);
     MedMinorServoScan scan(central_position, 
@@ -604,28 +595,34 @@ MinorServoBossImpl::checkScanImpl(
                            scan_parameters.total_time,
                            std::string(scan_parameters.axis_code), 
                            isElevationTracking());
-    if(scan.check())
+    minor_servo_parameters->startEpoch = scan.getStartingTime();
+    MedMinorServoPosition center_position = scan.getCentralPosition();
+    double center = 0;
+    try{
+        center = center_position.get_axis_position(
+                                        scan_parameters.axis_code);
+    }catch(...){
+        CUSTOM_LOG(LM_FULL_INFO, 
+                   "MinorServo::MinorServoBossImpl::checkScanImpl",
+                   (LM_WARNING, "Wrong axis name, defaulting to Z"));
+        center = center_position.z;
+    }
+    minor_servo_parameters->centerScan = center;
+    minor_servo_parameters->scanAxis = CORBA::string_dup(
+                                         scan_parameters.axis_code);
+    minor_servo_parameters->timeToStop = scan.getTotalTime();
+    if(scan_parameters.is_empty_scan)
     {
-        minor_servo_parameters->startEpoch = scan.getStartingTime();
-        minor_servo_parameters->onTheFly = true;
-        MedMinorServoPosition center_position = scan.getCentralPosition();
-        double center = 0;
-        try{
-            center = center_position.get_axis_position(
-                                            scan_parameters.axis_code);
-        }catch(...){
-            CUSTOM_LOG(LM_FULL_INFO, 
-                       "MinorServo::MinorServoBossImpl::checkScanImpl",
-                       (LM_WARNING, "Wrong axis name, defaulting to Z"));
-            center = center_position.z;
-        }
-        minor_servo_parameters->centerScan = center;
-        minor_servo_parameters->scanAxis = CORBA::string_dup(
-                                             scan_parameters.axis_code);
-        minor_servo_parameters->timeToStop = scan.getTotalTime();
+        minor_servo_parameters->onTheFly = false;
         return true;
     }
-    return false;
+    if(scan.check())
+    {
+        minor_servo_parameters->onTheFly = true;
+        return true;
+    }else{
+        return false;
+    }
 }
 
 
@@ -997,19 +994,33 @@ MinorServoBossImpl::setElevationTracking(const char * value)
           throw (MinorServoErrors::MinorServoErrorsEx,
                  ComponentErrors::ComponentErrorsEx)
 {
-    setElevationTrackingImpl(value);
+    try{
+        setElevationTrackingImpl(value);
+    }catch(const MinorServoErrors::MinorServoErrorsExImpl& mse){
+        THROW_MINORSERVO_EX(OperationNotPermittedEx, 
+                 "setElevationTracking(): error setting tracking info", 
+                 true);
+    }
 }
 
 void 
 MinorServoBossImpl::setElevationTrackingImpl(const char * value) 
-          throw (MinorServoErrors::MinorServoErrorsEx,
-                 ComponentErrors::ComponentErrorsEx)
+          throw (MinorServoErrors::MinorServoErrorsExImpl)
 {
     string flag(value);
-    if(flag == "ON")
-        turnTrackingOn();
-    else
-        turnTrackingOff();
+    try{
+        if(flag == "ON")
+            turnTrackingOn();
+        else
+            turnTrackingOff();
+    }catch(const MinorServoErrors::MinorServoErrorsEx & mse)
+    {
+        THROW_EX(
+                MinorServoErrors, 
+                OperationNotPermittedEx, 
+                "cannot set elevation tracking",
+                false );
+    }
 }
 
 void 
