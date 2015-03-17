@@ -28,18 +28,13 @@ class CheckScanBaseTest(unittest2.TestCase):
     def setUpClass(cls):
         cls.client = PySimpleClient()
         cls.boss = cls.client.getComponent('MINORSERVO/Boss')
-        if telescope == "SRT":
-            axis_code = "SRP_TZ"
-            recv_code = "KKG"
-        else:
-            axis_code = "Z"
-            recv_code = "KKC"
-        
+               
     @classmethod
     def tearDownClass(cls):
         cls.client.releaseComponent('MINORSERVO/Boss')
 
     def setUp(self):
+
         self.antennaInfo = Antenna.TRunTimeParameters(
             targetName='dummy',
             azimuth=math.pi,
@@ -54,7 +49,7 @@ class CheckScanBaseTest(unittest2.TestCase):
         self.scan = MinorServo.MinorServoScan(
             range=50,
             total_time=500000000, # 50 seconds
-            axis_code=self.axis_code,
+            axis_code='SRP_TZ' if self.telescope == 'SRT' else 'Z',
             is_empty_scan=True)
 
 
@@ -62,7 +57,6 @@ class CheckScanTest(CheckScanBaseTest):
 
     def setUp(self):    
         super(CheckScanTest, self).setUp()
-        code = self.recv_code
 
         # Wait (maximum one minute) in case the boss is parking
         if self.boss.isParking():
@@ -72,8 +66,9 @@ class CheckScanTest(CheckScanBaseTest):
             if self.boss.isParking():
                 self.fail('The system can not exit form a parking state')
 
-        if self.boss.getActualSetup() != code:
-            self.boss.setup(code)
+        setupCode = 'KKG' if self.telescope == 'SRT' else 'KKC'
+        if self.boss.getActualSetup() != setupCode:
+            self.boss.setup(setupCode)
             # Wait (maximum 5 minutes) in case the boss is starting
             t0 = datetime.now()
             while not self.boss.isReady() and (datetime.now() - t0).seconds < 60*5:
@@ -84,7 +79,7 @@ class CheckScanTest(CheckScanBaseTest):
         self.boss.setElevationTracking('OFF')
         self.boss.setASConfiguration('OFF')
         axes, units = self.boss.getAxesInfo()
-        self.idx = axes.index(self.axis_code)
+        self.idx = axes.index(self.scan.axis_code)
 
         getPosition = getattr(self, 'get%sPosition' %self.telescope)
         centerScanPosition = getPosition(
@@ -101,7 +96,7 @@ class CheckScanTest(CheckScanBaseTest):
         self.assertTrue(res)
         self.assertAlmostEqual(msInfo.centerScan, self.centerScan, delta=0.01)
         self.assertGreater(msInfo.startEpoch, getTimeStamp().value)
-        self.assertEqual(msInfo.scanAxis, self.axis_code)
+        self.assertEqual(msInfo.scanAxis, self.scan.axis_code)
         self.assertEqual(
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
@@ -116,7 +111,7 @@ class CheckScanTest(CheckScanBaseTest):
         self.assertAlmostEqual(msInfo.centerScan, self.centerScan, delta=0.01)
         self.assertTrue(msInfo.onTheFly)
         self.assertGreater(msInfo.startEpoch, getTimeStamp().value)
-        self.assertEqual(msInfo.scanAxis, self.axis_code)
+        self.assertEqual(msInfo.scanAxis, self.scan.axis_code)
         self.assertEqual(
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
@@ -130,7 +125,7 @@ class CheckScanTest(CheckScanBaseTest):
         self.assertAlmostEqual(msInfo.centerScan, self.centerScan, delta=0.01)
         self.assertFalse(msInfo.onTheFly)
         self.assertEqual(msInfo.startEpoch, startTime)
-        self.assertEqual(msInfo.scanAxis, self.axis_code)
+        self.assertEqual(msInfo.scanAxis, self.scan.axis_code)
         self.assertEqual(
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
@@ -145,7 +140,7 @@ class CheckScanTest(CheckScanBaseTest):
         self.assertAlmostEqual(msInfo.centerScan, self.centerScan, delta=0.01)
         self.assertTrue(msInfo.onTheFly)
         self.assertEqual(msInfo.startEpoch, startTime)
-        self.assertEqual(msInfo.scanAxis, self.axis_code)
+        self.assertEqual(msInfo.scanAxis, self.scan.axis_code)
         self.assertEqual(
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
