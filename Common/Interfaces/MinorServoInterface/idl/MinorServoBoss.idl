@@ -130,22 +130,7 @@ module MinorServo {
 		double getCentralScanPosition() 
         raises (MinorServoErrors::MinorServoErrorsEx,
                 ComponentErrors::ComponentErrorsEx);
-        
-        /** 
-         * @todo to be review in order to reflect the signature of the method <i>startScan()</i>
-         * Start the scan of the Z axis of the MinorServo active in the primary focus.
-         *
-         * @param starting_time the time the scan will start
-         * @param range the total axis movement, in mm
-         * @param total_time the duration of the scan (1 second is 10**7)
-         *
-         */
-        void startFocusScan(
-                inout ACS::Time starting_time, 
-                in double range, 
-                in ACS::Time total_time
-        ) raises (MinorServoErrors::MinorServoErrorsEx,
-                  ComponentErrors::ComponentErrorsEx);
+
 
         /** 
          * Start the scan of one axis of the MinorServo target.
@@ -173,23 +158,6 @@ module MinorServo {
         raises (MinorServoErrors::MinorServoErrorsEx, 
                 ComponentErrors::ComponentErrorsEx);
     
-        /** 
-         * @todo to be review in order to reflect the signature of the method <i>checktScan()</i>
-         * Check if it is possible to scan the Z axis of the MinorServo active in the primary focus.
-         *
-         * @param starting_time the time the scan will start
-         * @param range the total axis movement in mm (centered in the actual position)
-         * @param total_time the duration of the scan (1 second is 10**7)
-         *
-         * @return true if it is possible
-         */
-        boolean checkFocusScan(
-                in ACS::Time starting_time, 
-                in double range, 
-                in ACS::Time total_time
-        ) raises (MinorServoErrors::MinorServoErrorsEx,
-                  ComponentErrors::ComponentErrorsEx);
- 
         /** 
          * Check if it is possible to execute a scan along a given axis
          *
