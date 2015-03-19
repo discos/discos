@@ -411,9 +411,10 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 
 	//no mutex below.....
 	guard.release();
-	if (m_subScanEpoch==0) {
+	/*if (m_subScanEpoch==0) {
+		ACS_LOG(LM_FULL_INFO,"CCore::_startRecording()",(LM_NOTICE,"WAITING_ON_SOURCE_FLAG"));
 		_waitOnSource();
-	}
+	}*/
 	scanTag=0; suffix=""; obsName=IRA::CString("system"); getProjectCode(prj); schedule="none";
 	layout.length(0); layoutName=_SCHED_NULLTARGET;
 	guard.acquire();

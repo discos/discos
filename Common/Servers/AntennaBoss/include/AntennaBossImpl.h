@@ -412,6 +412,18 @@ public:
 	void radialVelocity(CORBA::Double vrad, Antenna::TReferenceFrame vref, Antenna::TVradDefinition vdef ) throw (CORBA::SystemException);
 	
 	/**
+	 * This call will computes the topocentric velocity of the current source with respect to the observer.
+	 * The computation is executed for each of the input rest frequencies.
+	 * @param restFreq reference frequency (MHz)
+	 * @param topo topocentric velocities (km/sec) corresponding to the input frequency
+	 * @throw CORBA::SystemException
+	 * @throw AntennaErrors::AntennaErrorsEx
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 */
+	void getTopocentricFrequency(const ACS::doubleSeq & restFreq,ACS::doubleSeq_out topo) throw (CORBA::SystemException,
+    		AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx);
+
+	/**
 	 *  This method starts a new scan that could be any of the possible antenna movement.  It loads an ammount of coordinates into the mount and then it starts the thread that is 
 	 * in charge to keep the  tracking trajectory up to date. This method succeeds only if the mount has already 
 	 * been configured in PROGRAMTRACK mode.

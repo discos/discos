@@ -156,7 +156,7 @@ install:
 	done
 
 cdb:
-	@cd $(ACS_CDB); ln -s $(SYSLOCATION)/$(CDB_SVN_LOCATION) CDB
+	@cd $(ACS_CDB); ln -s $(SYSLOCATION)/$(SYSTEM_SVN_TAG)/$(CDB_SVN_LOCATION) CDB
 
 sources:
 	@cd $(SYSLOCATION) ; svn checkout svn+ssh://$(SVNUSER)@nuraghe-devel.oa-cagliari.inaf.it/ACS/tags/$(SYSTEM_SVN_TAG)/$${i}

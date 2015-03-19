@@ -7,6 +7,7 @@
 #include <SkySource.h>
 #include <LogFilter.h>
 #include <Definitions.h>
+#include <FrequencyTracking.h>
 #include <math.h>
 
 #define MAXDATAPOINTS 4000
@@ -571,6 +572,32 @@ void CBossCore::radialVelocity(const double& val,const Antenna::TReferenceFrame&
 	}
 	if (vdef!=Antenna::ANT_UNDEF_DEF) {
 		m_vradDefinition=vdef;
+	}
+}
+
+void CBossCore::getTopocentricFrequency(const ACS::doubleSeq& rest,ACS::doubleSeq& topo) throw (AntennaErrors::OperationNotPermittedExImpl)
+{
+	if (rest.length()==0) {
+		topo.length(0);
+		return;
+	}
+	if (m_vradReferenceFrame==Antenna::ANT_UNDEF_FRAME) {
+		_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"BossCore::getTopocentricFrequency");
+		impl.setReason("Reference frame not defined");
+		throw impl;
+	}
+	if (m_vradDefinition==Antenna::ANT_UNDEF_DEF) {
+		_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"BossCore::getTopocentricFrequency");
+		impl.setReason("velocity definition is not known");
+		throw impl;
+	}
+	topo.length(rest.length());
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	for (unsigned i=0;i<rest.length();i++) {
+		IRA::CFrequencyTracking track(m_site,m_targetRA,m_targetDec,mapReferenceFrame(m_vradReferenceFrame),
+				mapVelocityDefinition(m_vradDefinition),rest[i],m_targetVrad);
+		topo[i]=track.getTopocentricFrequency(now.value().value);
 	}
 }
 

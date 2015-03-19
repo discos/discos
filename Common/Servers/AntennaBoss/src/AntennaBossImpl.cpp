@@ -385,6 +385,15 @@ void AntennaBossImpl::radialVelocity(CORBA::Double vrad, Antenna::TReferenceFram
 	resource->radialVelocity(vrad,vref,vdef);
 }
 
+void AntennaBossImpl::getTopocentricFrequency(const ACS::doubleSeq & restFreq,ACS::doubleSeq_out topo) throw (CORBA::SystemException,
+		AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx)
+{
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	ACS::doubleSeq_var cent=new ACS::doubleSeq;
+	resource->getTopocentricFrequency(restFreq,cent);
+	topo=cent._retn();
+}
+
 void AntennaBossImpl::enable() throw (CORBA::SystemException)
 {
 	AUTO_TRACE("AntennaBossImpl::enable()");

@@ -532,11 +532,23 @@ module Antenna {
 		void radialVelocity(in double rval, in TReferenceFrame vref, in TVradDefinition vdef);
 		
 		/**
+		 * This call will computes the topocentric velocity of the current source with respect to the observer. The source radial velocity,
+		 * frame and definition must be known (@sa <i>radialVelocity()</i>). The computation is executed for each of the input rest frequencies.
+		 * @param restFreq reference frequency (MHz)
+		 * @param topo topocentric velocities (km/sec) corresponding to the input frequency
+		 * @throw CORBA::SystemException
+		 * @throw AntennaErrors::AntennaErrorsEx
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 */
+		void getTopocentricFrequency(in ACS::doubleSeq restFreq,out ACS::doubleSeq topo) raises (ComponentErrors::ComponentErrorsEx,
+				AntennaErrors::AntennaErrorsEx);
+
+		/**
 		 * copybrief Management::CommandInterpreter::command
 		 * This is the command line interpreter for the sub-system. All the attributes and all the methods exposed by the boss can be
 		 * called. That means a full set of operation for standard observation, but not full control of the system.
 		 * @param the string that contains the command line to be parsed
-		 * @return the string that contains the answer to the command issued by the input parameter. The caller is resposible to
+		 * @return the string that contains the answer to the command issued by the input parameter. The caller is responsible to
 		 * free the returned string (@sa CORBA::string_free).
 		*/
 		

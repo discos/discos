@@ -237,6 +237,15 @@ public:
 	void radialVelocity(const double& val,const Antenna::TReferenceFrame& vframe, const Antenna::TVradDefinition& vdef);
 	
 	/**
+	 * Computes the topocentric frequencies corresponding to any given rest frequencies. The computation involves the site, the
+	 * currently targeted source. The computetion is done for the present time.
+	 * @param rest list of the rest frequencies (MHz)
+	 * @param topo corresponding topocentric frequencies (MHz)
+	 * @throw AntennaErrors::OperationNotPermittedExImpl
+	 */
+	void getTopocentricFrequency(const ACS::doubleSeq& rest,ACS::doubleSeq& topo) throw (AntennaErrors::OperationNotPermittedExImpl);
+
+	/**
 	 * It does an iterative computation of the fluxes corresponding to the given frequencies. The FWHM is required to be set otherwise 1.0 is returned.
 	 * @param freqs list of frequencies at which make the computation (MHz)
 	 * @param fluxes list of computed fluxes (Jy)
