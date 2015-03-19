@@ -88,7 +88,7 @@ class CheckScanTest(CheckScanBaseTest):
                 math.degrees(self.antennaInfo.elevation))
         self.centerScan = centerScanPosition[self.idx]
 
-    def test_start_ASAP_without_startTime(self):
+    def test_start_ASAP(self):
         """The starting time is unknown and the scan must start ASAP"""
         startTime = 0
 
@@ -101,7 +101,7 @@ class CheckScanTest(CheckScanBaseTest):
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
 
-    def test_not_empty_scan_start_ASAP_without_startTime(self):
+    def test_not_empty_scan_start_ASAP(self):
         """Scan not empty: starting time unknown, the scan must start ASAP"""
         self.scan.is_empty_scan = False
         startTime = 0
@@ -116,8 +116,8 @@ class CheckScanTest(CheckScanBaseTest):
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
 
-    def test_start_ASAP_at_given_time(self):
-        """The starting time is known and the scan must start ASAP"""
+    def test_start_at_given_time(self):
+        """The starting time is known and achievable"""
         startTime = getTimeStamp().value + 60*10**7 # Start in a minute 
 
         res, msInfo = self.boss.checkScan(startTime, self.scan, self.antennaInfo)
@@ -130,8 +130,8 @@ class CheckScanTest(CheckScanBaseTest):
                 msInfo.timeToStop, 
                 msInfo.startEpoch + self.scan.total_time)
 
-    def test_not_empty_scan_start_ASAP_at_given_time(self):
-        """Scan not empty: starting time known, the scan must start ASAP"""
+    def test_not_empty_scan_start_at_given_time(self):
+        """Scan not empty: starting time known and achievable"""
         self.scan.is_empty_scan = False
         startTime = getTimeStamp().value + 60*10**7 # Start in a minute 
 
@@ -146,7 +146,7 @@ class CheckScanTest(CheckScanBaseTest):
                 msInfo.startEpoch + self.scan.total_time)
 
     def test_scan_too_fast(self):
-        """Servo not enought fast for accomplishing the scan in total_time"""
+        """Servo not enough fast for accomplishing the scan in total_time"""
         startTime = getTimeStamp().value + 60*10**7 # Start in a minute from now
         self.scan.total_time = 5000000 # 0.5 seconds
         res, msInfo = self.boss.checkScan(startTime, self.scan, self.antennaInfo)
