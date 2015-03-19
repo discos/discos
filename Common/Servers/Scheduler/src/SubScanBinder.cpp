@@ -62,7 +62,13 @@ void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const AC
 		OTFC(Antenna::ANT_EQUATORIAL,geom,Antenna::ANT_HORIZONTAL,direction,antennaSpan,duration,sec);
 	}
 	else {
-		copyPrimaryAntenaTrack(sec);
+		if (sec==NULL) { // in this case the current target is kept!
+			m_primary->secondary=true;
+			m_secondary->type=Antenna::ANT_NONE;
+		}
+		else {
+			copyPrimaryAntenaTrack(sec);
+		}
 	}
     m_servo->is_empty_scan=false;
     m_servo->axis_code=CORBA::string_dup((const char *)axis);

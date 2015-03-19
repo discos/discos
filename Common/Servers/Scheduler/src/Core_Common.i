@@ -42,12 +42,12 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
-		impl.setReason("Could not connect to the antenna boss");
+		impl.setReason("Could not check scan with antenna boss");
 		throw impl;
 	}
 	catch (AntennaErrors::AntennaErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
-		impl.setReason("Could not connect to the antenna boss");
+		impl.setReason("Could not check scan with antenna boss");
 		throw impl;
 	}
 	catch (CORBA::SystemException& ex) {

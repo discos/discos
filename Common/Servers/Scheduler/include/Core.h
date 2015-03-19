@@ -102,7 +102,7 @@ public:
 			ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::TsysErrorExImpl,ComponentErrors::OperationErrorExImpl,
 			ManagementErrors::UnsupportedOperationExImpl,ManagementErrors::MinorServoScanErrorExImpl,ComponentErrors::TimerErrorExImpl,
 			ManagementErrors::AbortedByUserExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl,
-			ComponentErrors::ValidationErrorExImpl);
+			ComponentErrors::ValidationErrorExImpl,ManagementErrors::TelescopeSubScanErrorExImpl);
 
 	/**
 	 * this is a macro operation, it performs a skydip scan from the current azimuth position
