@@ -278,7 +278,6 @@ void MSBossConfiguration::setScan(
         ACS::doubleSeq actPos,
         ACS::doubleSeq centralPos,
         ACS::doubleSeq plainCentralPos,
-        ACS::doubleSeq virtualCentralElongation,
         bool wasElevationTrackingEn
         )
 {
@@ -291,7 +290,6 @@ void MSBossConfiguration::setScan(
     m_scan.actPos = actPos;
     m_scan.centralPos = centralPos;
     m_scan.plainCentralPos = plainCentralPos;
-    m_scan.virtualCentralElongation = virtualCentralElongation;
     m_scan.wasElevationTrackingEn = wasElevationTrackingEn;
     m_scan.axis_code = axis_code;
 }

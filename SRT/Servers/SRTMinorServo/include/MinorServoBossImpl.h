@@ -195,25 +195,6 @@ public:
 
 
     /** 
-     * Check if the focus scan is achievable
-     *
-	 * @param starting_time the time the scan will start
-     * @param range the total axis movement in mm (centered in the actual position)
-	 * @param total_time the duration of axis movement
-     *
-     * @return true if the scan is achievable
-     *
-     * @throw MinorServoErrors::MinorServoErrorsEx, 
-     * @throw ComponentErrors::ComponentErrorsEx
-     */
-     bool checkFocusScan(
-             const ACS::Time starting_time, 
-             const double range, 
-             const ACS::Time total_time
-     ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
-
-
-    /** 
      * Check if the scan is achievable (IDL interface)
      *
 	 * @param starting_time the time the scan will start
@@ -256,14 +237,14 @@ public:
      * Start the scan of one axis of a MinorServo target.
      *
 	 * @param starting_time the time the scan will start
-     * @param scan structure containing the description of the scan to be executed
+     * @param msScanInfo structure containing the description of the scan to be executed
      * @param antennaInfo auxiliary information from the antenna
      *
      * @throw MinorServoErrors::MinorServoErrorsEx, 
      * @throw ComponentErrors::ComponentErrorsEx
      */
      virtual void startScan(
-             ACS::Time & starting_time, 
+             ACS::Time & startingTime, 
              const MinorServo::MinorServoScan & scan,
              const Antenna::TRunTimeParameters & antennaInfo
      ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
@@ -274,10 +255,9 @@ public:
              ComponentErrors::ComponentErrorsEx);
      
      void startScanImpl(
-        ACS::Time & starting_time, 
-        const double range, 
-        const ACS::Time total_time, 
-        string axis_code
+             ACS::Time & startingTime, 
+             const MinorServo::MinorServoScan & scan,
+             const Antenna::TRunTimeParameters & antennaInfo
      ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
  
     
@@ -291,23 +271,6 @@ public:
     /** Return the code of the axis involved in the scan */
     char * getScanAxis();
 
-
-    /** 
-     * Start the scan of the Z axis of the MinorServo active in the primary focus.
-     *
-	 * @param starting_time the time the scan will start
-     * @param range the total axis movement in mm (centered in the actual position)
-	 * @param total_time the duration of axis movement
-     *
-     * @throw MinorServoErrors::MinorServoErrorsEx, 
-     * @throw ComponentErrors::ComponentErrorsEx
-     */
-     void startFocusScan(
-             ACS::Time & starting_time, 
-             const double range, 
-             const ACS::Time total_time
-     )  throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
-     
 
      /** 
       * Clear the user offset of a servo (or all servos)

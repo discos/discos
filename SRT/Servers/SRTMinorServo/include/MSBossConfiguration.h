@@ -125,7 +125,6 @@ public:
         ACS::doubleSeq actPos;
         ACS::doubleSeq centralPos;
         ACS::doubleSeq plainCentralPos;
-        ACS::doubleSeq virtualCentralElongation;
         bool wasElevationTrackingEn;
     };
 
@@ -158,7 +157,6 @@ public:
             const ACS::doubleSeq actPos,
             const ACS::doubleSeq centralPos,
             const ACS::doubleSeq plainCentralPos,
-            const ACS::doubleSeq virtualCentralElongation,
             bool wasElevationTrackingEn
     );
 
