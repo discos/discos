@@ -48,7 +48,7 @@ class StartScanBaseTest(unittest2.TestCase):
         self.scan = MinorServo.MinorServoScan(
             range=20,
             total_time=100000000, # 10 seconds
-            axis_code='SRP_TZ',
+            axis_code='SRP_TZ' if self.telescope == 'SRT' else 'Z',
             is_empty_scan=False)
         
 
@@ -56,7 +56,7 @@ class StartScanTest(StartScanBaseTest):
 
     def setUp(self):    
         super(StartScanTest, self).setUp()
-        code = 'KKG' if self.telescope == 'SRT' else 'KKC'
+        setupCode = 'KKG' if self.telescope == 'SRT' else 'KKC'
 
         # Wait (maximum one minute) in case the boss is parking
         if self.boss.isParking():
@@ -66,8 +66,8 @@ class StartScanTest(StartScanBaseTest):
             if self.boss.isParking():
                 self.fail('The system can not exit form a parking state')
 
-        if self.boss.getActualSetup() != code:
-            self.boss.setup(code)
+        if self.boss.getActualSetup() != setupCode:
+            self.boss.setup(setupCode)
             # Wait (maximum 5 minutes) in case the boss is starting
             t0 = datetime.now()
             while not self.boss.isReady() and (datetime.now() - t0).seconds < 60*5:
