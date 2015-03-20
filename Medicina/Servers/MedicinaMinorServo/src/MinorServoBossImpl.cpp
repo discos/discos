@@ -587,6 +587,7 @@ MinorServoBossImpl::checkScanImpl(
               ComponentErrors::ComponentErrorsEx)
 {
     minor_servo_parameters = new TRunTimeParameters;
+    double center = 0;
     MedMinorServoPosition central_position = 
         m_actual_config->get_position(antenna_parameters.elevation);
     MedMinorServoScan scan(central_position, 
@@ -597,11 +598,10 @@ MinorServoBossImpl::checkScanImpl(
                            isElevationTracking());
     minor_servo_parameters->startEpoch = scan.getStartingTime();
     MedMinorServoPosition center_position = scan.getCentralPosition();
-    double center = 0;
     try{
         center = center_position.get_axis_position(
                                         scan_parameters.axis_code);
-    }catch(...){
+    }catch(const MinorServoAxisNameError& msane){
         CUSTOM_LOG(LM_FULL_INFO, 
                    "MinorServo::MinorServoBossImpl::checkScanImpl",
                    (LM_WARNING, "Wrong axis name, defaulting to Z"));
@@ -610,15 +610,16 @@ MinorServoBossImpl::checkScanImpl(
     minor_servo_parameters->centerScan = center;
     minor_servo_parameters->scanAxis = CORBA::string_dup(
                                          scan_parameters.axis_code);
-    minor_servo_parameters->timeToStop = scan.getTotalTime();
     if(scan_parameters.is_empty_scan)
     {
         minor_servo_parameters->onTheFly = false;
+        minor_servo_parameters->timeToStop = 0;
         return true;
     }
     if(scan.check())
     {
         minor_servo_parameters->onTheFly = true;
+        minor_servo_parameters->timeToStop = scan.getStopTime();
         return true;
     }else{
         return false;

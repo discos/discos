@@ -154,6 +154,15 @@ throw (MinorServoErrors::ScanErrorEx)
     return true;
 }
 
+ACS::Time
+MedMinorServoScan::getStopTime()
+{
+    return getStartingTime() + 
+           getMovementTime() + 
+           getTotalTime() +
+           START_SCAN_TOLERANCE;
+}
+
 ACS::Time 
 MedMinorServoScan::getStartingTime()
 {
@@ -179,5 +188,4 @@ MedMinorServoScan::getMovementTime()
                                     m_start_position);
     return m_starting_time - static_cast<ACS::Time>(starting_offset_time * 10000000);
 }
-
 

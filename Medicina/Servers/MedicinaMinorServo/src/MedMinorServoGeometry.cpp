@@ -194,21 +194,28 @@ throw (MinorServoAxisNameError)
     if((mode == MED_MINOR_SERVO_PRIMARY)||
        (mode == MED_MINOR_SERVO_TRANSFER_TO_PRIMARY))
     {
-        if((axis_name == "yp")||(axis_name == "YP"))
+        if((strcmp(axis_name, "yp") == 0) ||
+            (strcmp(axis_name, "YP") ==0))
             return y;
-        if((axis_name == "zp")||(axis_name == "ZP"))
+        if((strcmp(axis_name, "zp") == 0) ||
+            (strcmp(axis_name, "ZP") ==0))
             return z;
         throw MinorServoAxisNameError(axis_name);
     }else{
-        if((axis_name == "x")||(axis_name == "X"))
+        if((strcmp(axis_name, "x") == 0) ||
+            (strcmp(axis_name, "X") ==0))
             return x;
-        if((axis_name == "y")||(axis_name == "Y"))
+        if((strcmp(axis_name, "y") == 0) ||
+            (strcmp(axis_name, "Y") ==0))
             return y;
-        if((axis_name == "z")||(axis_name == "Z"))
+        if((strcmp(axis_name, "z") == 0) ||
+            (strcmp(axis_name, "Z") ==0))
             return z;
-        if((axis_name == "theta_x")||(axis_name == "THETA_X"))
+        if((strcmp(axis_name, "theta_x") == 0) ||
+            (strcmp(axis_name, "THETA_X") ==0))
             return theta_x;
-        if((axis_name == "theta_y")||(axis_name == "THETA_Y"))
+        if((strcmp(axis_name, "theta_y") == 0) ||
+            (strcmp(axis_name, "THETA_Y") ==0))
             return theta_y;
         throw MinorServoAxisNameError(axis_name);
     }
