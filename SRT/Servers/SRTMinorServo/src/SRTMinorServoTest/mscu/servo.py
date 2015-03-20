@@ -1,5 +1,4 @@
 from __future__ import division, with_statement
-import pdb
 import time
 import shelve
 import operator
@@ -125,6 +124,7 @@ class Servo(object):
             answer += ",%s" %param
         else:
             answer += closers[0]
+        self.history.clean()
         return [answer.replace('@', '?'), answer]
 
     def getspar(self, cmd_num, *params):
@@ -164,6 +164,17 @@ class History(object):
             self.history.sort(key=operator.itemgetter(0))
             self.history = self.history[-2**15:] # Last 2**15 positions
 
+    def clean(self, since=0):
+        target_time = since if since else Servo.ctime()
+        with History.lock:
+            idx = len(self.history)
+            self.history.sort(key=operator.itemgetter(0))
+            for idx, item in enumerate(self.history):
+                timestamp = item[0]
+                if timestamp > target_time:
+                    break
+            self.history = self.history[:idx] 
+
     def get(self, target_time=None):
         """Return the position @target_time as [timestamp, axisA, ..., axisN]"""
         if target_time is None:
@@ -185,5 +196,4 @@ class History(object):
                         continue
                 else:
                     return self.history[-size]
-        pdb.set_trace()
                     
