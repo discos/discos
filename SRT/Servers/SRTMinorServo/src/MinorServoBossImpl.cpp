@@ -598,9 +598,7 @@ void MinorServoBossImpl::closeScan(ACS::Time& timeToStop) throw (
              MinorServoErrors::MinorServoErrorsEx, 
              ComponentErrors::ComponentErrorsEx)
 {
-	// ********* to be computed ********************
 	timeToStop=0;
-	// *********************************************
     if(m_configuration->m_isScanActive) {
         string comp_name((m_configuration->m_scan).comp_name);
         if(m_component_refs.count(comp_name)) {
@@ -630,6 +628,32 @@ void MinorServoBossImpl::closeScan(ACS::Time& timeToStop) throw (
                     }
 
                     m_configuration->m_isScanActive = false;
+
+                    ACSErr::Completion_var completion;          
+                    ACS::doubleSeq actPos = *((component_ref->actPos())->get_sync(completion.out()));
+                    ACS::doubleSeq centralPos = (m_configuration->m_scan).centralPos;
+                    size_t axis = (m_configuration->m_scan).axis_index;
+                    ACS::doubleSeq *acc = component_ref->getData("ACCELERATION");
+                    ACS::doubleSeq *mspeed = component_ref->getData("MAX_SPEED");
+
+                    CDB::DAL_ptr dal_p = getContainerServices()->getCDB();
+                    CDB::DAO_ptr dao_p = dal_p->get_DAO_Servant(
+                            ("alma/MINORSERVO/" + (m_configuration->m_scan).comp_name).c_str());
+                    size_t number_of_axis = dao_p->get_long("number_of_axis");
+                    size_t idx = (*acc).length() - number_of_axis + axis;
+                    if((*acc).length() - 1 < idx || (*mspeed).length() - 1 < idx) {
+                        string msg("closeScan(): acceleration index out of range");
+                        _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
+                        impl.log(LM_DEBUG);
+                        throw impl.getMinorServoErrorsEx();
+                    }
+                    double acceleration = (*acc)[idx]; 
+                    double max_speed= (*mspeed)[idx]; 
+                    double distance = fabs(actPos[axis] - centralPos[axis]);
+
+                    ACS::Time min_scan_time = get_min_time(distance, acceleration, max_speed);
+                    ACS::Time guard_min_scan_time = static_cast<ACS::Time>(min_scan_time * (1 + SCAN_GUARD_COEFF));
+                    timeToStop = getTimeStamp() + guard_min_scan_time;
                 }
                 else {
                     string msg("closeScan(): nil component reference");
@@ -1152,14 +1176,15 @@ void MinorServoBossImpl::startScanImpl(
         throw impl.getMinorServoErrorsEx();
     }
  
-    min_starting_time = (startingTime==0) ? min_starting_time : startingTime;
 
-    if(startingTime != 0 && min_starting_time > startingTime) {
-        m_configuration->m_isScanning = false;
-        string msg("startScanImpl(): the scan is supposed to start to early");
-        _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-        impl.log(LM_DEBUG);
-        throw impl.getMinorServoErrorsEx();
+    if(startingTime != 0) {
+        if(min_starting_time > startingTime) {
+            m_configuration->m_isScanning = false;
+            string msg("startScanImpl(): the scan is supposed to start to early");
+            _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
+            impl.log(LM_DEBUG);
+            throw impl.getMinorServoErrorsEx();
+        }
     }
     else {
         startingTime = min_starting_time;

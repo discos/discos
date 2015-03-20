@@ -50,6 +50,10 @@ class ScanBaseTest(unittest2.TestCase):
             total_time=100000000, # 10 seconds
             axis_code='SRP_TZ' if self.telescope == 'SRT' else 'Z',
             is_empty_scan=False)
+
+    def tearDown(self):
+        if self.boss.isScanActive():
+            self.boss.closeScan()
         
 
 class ScanTest(ScanBaseTest):
@@ -87,10 +91,6 @@ class ScanTest(ScanBaseTest):
                 'SRP', 
                 math.degrees(self.antennaInfo.elevation))
         self.centerScan = centerScanPosition[self.idx]
-
-    def tearDown(self):
-        if self.boss.isScanActive():
-            self.boss.closeScan()
 
     def test_startScan_empty_scan(self):
         """Do nothing in case of empty scan"""
@@ -137,10 +137,10 @@ class ScanTest(ScanBaseTest):
         """Return the time_to_stop"""
         startTime = 0
         t = self.boss.startScan(startTime, self.scan, self.antennaInfo)
+        self.waitUntil(startTime)
         time_to_stop = self.boss.closeScan()
-        # The time_to_stop should be greater than the starting time
-        self.assertGreater(time_to_stop, t) 
-
+        # The time_to_stop should be greater than now
+        self.assertGreater(time_to_stop, getTimeStamp().value) 
 
     def test_checkScan_empty_scan_start_ASAP(self):
         """Starting time unknown: the scan must start ASAP"""

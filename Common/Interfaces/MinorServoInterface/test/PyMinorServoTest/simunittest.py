@@ -18,7 +18,7 @@ def run(test_case):
         tests = unittest2.TestLoader().loadTestsFromTestCase(test_case)
         suite.addTests(tests)
         print 'Running the tests using the antenna simulators...'
-        unittest2.TextTestRunner().run(suite)
+        unittest2.TextTestRunner(verbosity=2).run(suite)
     finally:
         subprocess.Popen(['%s-stop' %server_name], stdout=FNULL, stderr=FNULL)
         time.sleep(1) # Give the server the time to stop
