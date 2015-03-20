@@ -40,6 +40,7 @@ class MedMinorServoScan
         ACS::Time getStartingTime();
         ACS::Time getMovementTime();
         ACS::Time getTotalTime(){return m_total_time;};
+        ACS::Time getStopTime();
         bool was_elevation_tracking(){ return m_was_tracking;};
     private:
         MedMinorServoPosition m_central_position, m_start_position, m_stop_position;

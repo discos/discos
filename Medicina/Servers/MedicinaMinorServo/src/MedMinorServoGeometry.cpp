@@ -441,56 +441,98 @@ double
 MedMinorServoGeometry::min_time(const MedMinorServoPosition& start, 
                                 const MedMinorServoPosition& stop)
 {
-    double max = 0;
+    double min = 0;
     MEDMINORSERVOSETPOS start_axes = positionToAxes(start);
     MEDMINORSERVOSETPOS stop_axes = positionToAxes(stop);
     if(start.mode == MED_MINOR_SERVO_PRIMARY)
     {
-        double t_yp = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_YP.speed_max;
-        if(t_yp > max) max = t_yp;
-        double t_zp = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_ZP.speed_max;
-        if(t_zp > max) max = t_zp;
+        if(start_axes.pos_x_yp != stop_axes.pos_x_yp)
+        {
+            double t_yp = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_YP.speed_max;
+            if(t_yp > min) min = t_yp;
+        }
+        if(start_axes.pos_y_zp != stop_axes.pos_y_zp)
+        {
+            double t_zp = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_ZP.speed_max;
+            if(t_zp > min) min = t_zp;
+        }
     }else{//MED_MINOR_SERVO_SECONDARY
-        double t_x = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_X.speed_max;
-        if(t_x > max) max = t_x;
-        double t_y = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_Y.speed_max;
-        if(t_y > max) max = t_y;
-        double t_z1 = std::abs(start_axes.pos_z1 - stop_axes.pos_z1) / MINOR_SERVO_Z1.speed_max;
-        if(t_z1 > max) max = t_z1;
-        double t_z2 = std::abs(start_axes.pos_z2 - stop_axes.pos_z2) / MINOR_SERVO_Z2.speed_max;
-        if(t_z2 > max) max = t_z2;
-        double t_z3 = std::abs(start_axes.pos_z3 - stop_axes.pos_z3) / MINOR_SERVO_Z3.speed_max;
-        if(t_z3 > max) max = t_z3;
+        if(start_axes.pos_x_yp != stop_axes.pos_x_yp)
+        {
+            double t_x = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_X.speed_max;
+            if(t_x > min) min = t_x;
+        }
+        if(start_axes.pos_y_zp != stop_axes.pos_y_zp)
+        {
+            double t_y = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_Y.speed_max;
+            if(t_y > min) min = t_y;
+        }
+        if(start_axes.pos_z1 != stop_axes.pos_z1)
+        {
+            double t_z1 = std::abs(start_axes.pos_z1 - stop_axes.pos_z1) / MINOR_SERVO_Z1.speed_max;
+            if(t_z1 > min) min = t_z1;
+        }
+        if(start_axes.pos_z2 != stop_axes.pos_z2)
+        {
+            double t_z2 = std::abs(start_axes.pos_z2 - stop_axes.pos_z2) / MINOR_SERVO_Z2.speed_max;
+            if(t_z2 > min) min = t_z2;
+        }
+        if(start_axes.pos_z3 != stop_axes.pos_z3)
+        {
+            double t_z3 = std::abs(start_axes.pos_z3 - stop_axes.pos_z3) / MINOR_SERVO_Z3.speed_max;
+            if(t_z3 > min) min = t_z3;
+        }
     }
-    return max;
+    return min;
 }
 
 double 
 MedMinorServoGeometry::max_time(const MedMinorServoPosition& start, 
                                 const MedMinorServoPosition& stop)
 {
-    double min = 0;
+    double max = std::numeric_limits<double>::infinity();
     MEDMINORSERVOSETPOS start_axes = positionToAxes(start);
     MEDMINORSERVOSETPOS stop_axes = positionToAxes(stop);
     if(start.mode == MED_MINOR_SERVO_PRIMARY)
     {
-        double t_yp = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_YP.speed_min;
-        if(t_yp < min) min = t_yp;
-        double t_zp = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_ZP.speed_min;
-        if(t_zp < min) min = t_zp;
+        if(start_axes.pos_x_yp != stop_axes.pos_x_yp)
+        {
+            double t_yp = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_YP.speed_min;
+            if(t_yp < max) max = t_yp;
+        }
+        if(start_axes.pos_y_zp != stop_axes.pos_y_zp)
+        {
+            double t_zp = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_ZP.speed_min;
+            if(t_zp < max) max = t_zp;
+        }
     }else{//MED_MINOR_SERVO_SECONDARY
-        double t_x = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_X.speed_min;
-        if(t_x < min) min = t_x;
-        double t_y = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_Y.speed_min;
-        if(t_y < min) min = t_y;
-        double t_z1 = std::abs(start_axes.pos_z1 - stop_axes.pos_z1) / MINOR_SERVO_Z1.speed_min;
-        if(t_z1 < min) min = t_z1;
-        double t_z2 = std::abs(start_axes.pos_z2 - stop_axes.pos_z2) / MINOR_SERVO_Z2.speed_min;
-        if(t_z2 < min) min = t_z2;
-        double t_z3 = std::abs(start_axes.pos_z3 - stop_axes.pos_z3) / MINOR_SERVO_Z3.speed_min;
-        if(t_z3 < min) min = t_z3;
+        if(start_axes.pos_x_yp != stop_axes.pos_x_yp)
+        {
+            double t_x = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_X.speed_min;
+            if(t_x < max) max = t_x;
+        }
+        if(start_axes.pos_y_zp != stop_axes.pos_y_zp)
+        {
+            double t_y = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_Y.speed_min;
+            if(t_y < max) max = t_y;
+        }
+        if(start_axes.pos_z1 != stop_axes.pos_z1)
+        {
+            double t_z1 = std::abs(start_axes.pos_z1 - stop_axes.pos_z1) / MINOR_SERVO_Z1.speed_min;
+            if(t_z1 < max) max = t_z1;
+        }
+        if(start_axes.pos_z2 != stop_axes.pos_z2)
+        {
+            double t_z2 = std::abs(start_axes.pos_z2 - stop_axes.pos_z2) / MINOR_SERVO_Z2.speed_min;
+            if(t_z2 < max) max = t_z2;
+        }
+        if(start_axes.pos_z3 != stop_axes.pos_z3)
+        {
+            double t_z3 = std::abs(start_axes.pos_z3 - stop_axes.pos_z3) / MINOR_SERVO_Z3.speed_min;
+            if(t_z3 < max) max = t_z3;
+        }
     }
-    return min;
+    return max;
 }
 
 MedMinorServoPosition
