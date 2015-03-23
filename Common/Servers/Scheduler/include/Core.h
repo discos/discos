@@ -86,14 +86,16 @@ public:
 	 * This function is thread safe.
 	 * @param scheduleFile string that reports the file name of the schedule to load
 	 * @param startSubScan subscan of the schedule to start from
-	 * @throw ComponentErrors::MemoryAllocationExImpl
 	 * @throw ManagementErrors::ScheduleErrorExImpl
-	 * @throw ComponentErrors::AlreadyRunningExImpl
-	 * @throw ManagementErrors::SubscanErrorExImpl
-	 * @throw ComponentErrors::CouldntGetComponentExImpl
+    * @throw ManagementErrors::AlreadyRunningExImpl
+	 * @throw ComponentErrors::MemoryAllocationExImpl
+    * @throw ManagementErrors::SubscanErrorExImpl
+    * @throw ComponentErrors::CouldntGetComponentExImpl
+    * @throw ComponentErrors::CORBAProblemExImpl
+    * @throw ManagementErrors::LogFileErrorExImpl
 	*/
-	void startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,
-			ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl);
+	void startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,
+		ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
 	
 	 /**
 	  * It clears all the alarms from the scheduler
