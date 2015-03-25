@@ -14,7 +14,7 @@
 # This Makefile follows VLT Standards (see Makefile(5) for more).
 #*******************************************************************************
 # REMARKS
-#    None
+#    NoneTotalPower
 #------------------------------------------------------------------------
 
 #
@@ -40,30 +40,15 @@ EXECUTABLES_L   =
 
 #
 # <brief description of xxxxx program>
-DFBImpl_OBJECTS   =	DFBImpl
+DFBImpl_OBJECTS   =	DFBImpl Configuration
 #DFBImpl_LDFLAGS   =
-DFBImpl_LIBS      =ComponentErrors \
-			AntennaErrors \
-			AntennaBossStubs \
-			AntennaDefinitionsStubs\
-			BackendsErrors  \
-			DFBInterfaceStubs\
-			GenericBackendStubs\
-			ManagmentDefinitionsStubs\
-			ACSBulkDataError\
-			ReceiversDefinitionsStubs \
-			BackendsDefinitionsStubs\
-			bulkDataStubs \
-			bulkDataSenderStubs \
-			bulkDataReceiverStubs\
-			ACSBulkDataError\
-			ACSErrTypeFPGACommunication \
-			ACSErrTypeFPGAConnection \
-			IRALibrary\
- 			ManagementErrors \
-			ClientErrors
-
-#
+DFBImpl_LIBS      =     IRALibrary ComponentErrors GenericBackendStubs ManagmentDefinitionsStubs \
+			AntennaErrors AntennaBossStubs AntennaDefinitionsStubs\
+ 			BackendsErrors  \
+			DFBStubs\
+  ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
+  bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors
+#Interface.
 # special compilation flags for single c sources
 #yyyyy_CFLAGS   = 
 
@@ -126,12 +111,12 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = DFB 
+CDB_SCHEMAS = DFB
 
 # 
 # IDL Files and flags
 # 
-IDL_FILES = DFBInterface
+IDL_FILES = DFB 
 TAO_IDLFLAGS =
 USER_IDL =
 #
@@ -182,7 +167,7 @@ ASCII_TO_MIF =
 # other files to be installed
 #----------------------------
 INSTALL_FILES =
-
+ 
 #
 # list of all possible C-sources (used to create automatic dependencies)
 # ------------------------------
@@ -196,7 +181,7 @@ CSOURCENAMES = \
 
 #
 # INCLUDE STANDARDS
-# -----------------
+# -----------------TotalPower
 
 MAKEDIRTMP := $(shell searchFile include/acsMakefile)
 ifneq ($(MAKEDIRTMP),\#error\#)

@@ -52,11 +52,16 @@
  * @version 0.0.1
  * @author <a href=mailto:spoppi@oa-cagliari.inaf.it>Sergio Poppi</a>
   * @remarks compiler version 4.1.2
+ 
  */
 
+
+#include <Definitions.h>
+
+using namespace IRA;
 using namespace baci;
 using namespace ACSBulkDataError;
-class CSenderThread;
+// class CSenderThread;
 
 
 class DFBImpl : public virtual BulkDataSenderDefaultImpl,public virtual POA_Backends::DFB
@@ -247,8 +252,9 @@ class DFBImpl : public virtual BulkDataSenderDefaultImpl,public virtual POA_Back
      */
     virtual ACS::doubleSeq * getZero () throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
-  virtual char * command(const char *configCommand) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);
-
+    
+    virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
+      
     /**
      * Call this function to set the current time (from the local computer) into the backend.
      * @thorw CORBA::SystemException
@@ -406,12 +412,16 @@ protected:
 
 private:
 
+	IRA::CString m_sAddress;
+	WORD m_wPort;
 
 
 //	struct THeaderRecord {
 //		Backends::TMainHeader header;
 //		Backends::TChannelHeader chHeader[MAX_INPUT_NUMBER];
 //	};
+
+
 	SmartPropertyPointer<ROuLongLong> m_ptime;
 	SmartPropertyPointer<ROstring> m_pbackendName;
 	SmartPropertyPointer<ROdoubleSeq> m_pbandWidth;

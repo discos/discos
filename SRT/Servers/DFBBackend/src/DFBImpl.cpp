@@ -16,25 +16,53 @@
 #include <IRA>
 #include <acsThread.h>
 
+#define _GET_DWORD_ATTRIBUTE(ATTRIB,DESCR,FIELD) { \
+	DWORD tmpw; \
+	if (!CIRATools::getDBValue(Services,ATTRIB,tmpw)) { \
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()"); \
+		dummy.setFieldName(ATTRIB); \
+		throw dummy; \
+	} \
+	else { \
+		FIELD=tmpw; \
+		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %lu",tmpw); \
+	} \
+}
+
+#define _GET_STRING_ATTRIBUTE(ATTRIB,DESCR,FIELD) { \
+	CString tmps; \
+	if (!CIRATools::getDBValue(Services,ATTRIB,tmps)) { \
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"::CConfiguration::Init()"); \
+		dummy.setFieldName(ATTRIB); \
+		throw dummy; \
+	} \
+	else { \
+		FIELD=tmps; \
+		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %s",(const char*)tmps); \
+	} \
+}Configuration
+
+
 
 DFBImpl::DFBImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices):
 BulkDataSenderDefaultImpl(CompName,containerServices),
-	m_ptime(this),
-	m_pbackendName(this),
-	m_pbandWidth(this),
-	m_pfrequency(this),
-	m_psampleRate(this),
-	m_pattenuation(this),
-	m_ppolarization(this),
-	m_pbins(this),
-	m_pinputsNumber(this),
-	m_pintegration(this),
-	m_pstatus(this),
-	m_pbusy(this),
-	m_pfeed(this),
-	m_ptsys(this),
-	m_psectionsNumber(this),
-	m_pinputSection(this)
+         m_ptime(this),
+        m_pbackendName(this),
+        m_pbandWidth(this),
+        m_pfrequency(this),
+        m_psampleRate(this),
+        m_pattenuation(this),
+        m_ppolarization(this),
+        m_pbins(this),
+        m_pinputsNumber(this),
+        m_pintegration(this),
+        m_pstatus(this),
+        m_pbusy(this),
+        m_pfeed(this),
+        m_ptsys(this),
+        m_psectionsNumber(this),
+        m_pinputSection(this)
+        
 
   {
 	AUTO_TRACE("DFBImpl::DFBImpl");
@@ -71,9 +99,17 @@ void DFBImpl::initialize() throw (ACSErr::ACSbaseExImpl)
              m_psectionsNumber=new ROlong(getContainerServices()->getName()+":sectionsNumber",getComponent());
 //             m_initialized=true;
 //              m_parser=new CParser<CCommandLine>(10);
+       
+       
+        
+       
+/*         	_GET_STRING_ATTRIBUTE("IPAddress","TCP/IP address is: ",m_sAddress);*/
+//          	_GET_DWORD_ATTRIBUTE("Port","Port is: ",m_wPort);
+
+
      }
      catch (std::bad_alloc& ex) {
-             _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"HolographyImpl::initialize()");
+             _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"HolographyImpConfigurationl::initialize()");
 
              throw dummy;
      }
@@ -127,7 +163,7 @@ void DFBImpl::aboutToAbort()
     AUTO_TRACE("DFBImpl::aboutToAbort()");
 
 }
-
+ 
 void DFBImpl::cleanUp(){
     AUTO_TRACE("DFBImpl::cleanUp()");
 
@@ -142,7 +178,8 @@ void DFBImpl::deleteAll(){
 ACS::doubleSeq *DFBImpl::getTpi () throw (CORBA::SystemException,
                 ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx){
 
-  AUTO_TRACE("DFBImpl::getTpi()");
+  AUTO_TRACE("DFBImpl::getTpi()"
+);
   ACS::doubleSeq_var tpi=new ACS::doubleSeq;
        tpi->length(1);
       tpi[0]=0;
@@ -204,14 +241,15 @@ void DFBImpl::activateNoiseCalibrationSwitching(CORBA::Long interleave) throw (C
 }
 
 
-char * DFBImpl::command(const char *configCommand)  throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
+CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
 {
+          
         AUTO_TRACE("DFBImpl::command()");
         IRA::CString out;
         IRA::CString in;
         bool error;
-
-        return CORBA::string_dup((const char *)out);
+        error=CORBA::string_dup((const char *)out);
+        return error;
 }
 
 void DFBImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins) throw (
@@ -241,7 +279,8 @@ void DFBImpl::setIntegration(CORBA::Long Integration) throw (CORBA::SystemExcept
  _PROPERTY_REFERENCE_CPP(DFBImpl,ACS::ROpattern,m_pstatus,status);
  _PROPERTY_REFERENCE_CPP(DFBImpl,Management::ROTBoolean,m_pbusy,busy);
 _PROPERTY_REFERENCE_CPP(DFBImpl,ACS::ROlongSeq,m_pfeed,feed);
-_PROPERTY_REFERENCE_CPP(DFBImpl,ACS::ROdoubleSeq,m_ptsys,systemTemperature);
+_PROPERTY_REFERENCE_CPP(DFBImpl,
+ACS::ROdoubleSeq,m_ptsys,systemTemperature);
 _PROPERTY_REFERENCE_CPP(DFBImpl,ACS::ROlong,m_psectionsNumber,sectionsNumber);
 _PROPERTY_REFERENCE_CPP(DFBImpl,ACS::ROlongSeq,m_pinputSection,inputSection);
 #include <maciACSComponentDefines.h>
