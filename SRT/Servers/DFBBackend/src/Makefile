@@ -1,5 +1,20 @@
 #*******************************************************************************
-# PPPPPPPP
+# ALMA - Atacama Large Millimiter Array
+# (c) UNSPECIFIED - FILL IN, 2015 
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 #
 # "@(#) $Id$"
 #
@@ -7,14 +22,14 @@
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
-# spoppi  23/02/12  created
+# spoppi  2015-03-25  created
 #
 
 #*******************************************************************************
 # This Makefile follows VLT Standards (see Makefile(5) for more).
 #*******************************************************************************
 # REMARKS
-#    NoneTotalPower
+#    None
 #------------------------------------------------------------------------
 
 #
@@ -40,15 +55,13 @@ EXECUTABLES_L   =
 
 #
 # <brief description of xxxxx program>
-DFBImpl_OBJECTS   =	DFBImpl Configuration
-#DFBImpl_LDFLAGS   =
-DFBImpl_LIBS      =     IRALibrary ComponentErrors GenericBackendStubs ManagmentDefinitionsStubs \
-			AntennaErrors AntennaBossStubs AntennaDefinitionsStubs\
- 			BackendsErrors  \
-			DFBStubs\
-  ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
-  bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors
-#Interface.
+DFBImpl_OBJECTS   = DFBImpl	
+
+DFBImpl_LIBS      = IRALibrary GenericBackendStubs DFBStubs ManagmentDefinitionsStubs \
+                    BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
+                    bulkDataReceiverStubs ACSBulkDataError ComponentErrors  BackendsErrors\
+		    ParserErrors ManagementErrors
+#
 # special compilation flags for single c sources
 #yyyyy_CFLAGS   = 
 
@@ -60,7 +73,7 @@ INCLUDES        =
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = DFBImpl
+LIBRARIES       =  DFBImpl
 LIBRARIES_L     =
 
 #
@@ -116,7 +129,7 @@ CDB_SCHEMAS = DFB
 # 
 # IDL Files and flags
 # 
-IDL_FILES = DFB 
+IDL_FILES =
 TAO_IDLFLAGS =
 USER_IDL =
 #
@@ -145,7 +158,7 @@ XSDBIND=
 #
 XSDBIND_INCLUDE=
 # man pages to be done
-# --------------------Holography
+# --------------------
 MANSECTIONS =
 MAN1 =
 MAN3 =
@@ -167,7 +180,7 @@ ASCII_TO_MIF =
 # other files to be installed
 #----------------------------
 INSTALL_FILES =
- 
+
 #
 # list of all possible C-sources (used to create automatic dependencies)
 # ------------------------------
@@ -181,7 +194,7 @@ CSOURCENAMES = \
 
 #
 # INCLUDE STANDARDS
-# -----------------TotalPower
+# -----------------
 
 MAKEDIRTMP := $(shell searchFile include/acsMakefile)
 ifneq ($(MAKEDIRTMP),\#error\#)

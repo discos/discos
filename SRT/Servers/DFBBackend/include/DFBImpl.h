@@ -23,8 +23,9 @@
 #include <baciROlongSeq.h>
 #include <baciROpattern.h>
 #include <bulkDataSenderImpl.h>
+#include <IRA>
 
-#include <DFBInterfaceS.h>
+#include <DFBS.h>
 
 /**************************************/
 //Component Errors
@@ -58,7 +59,6 @@
 
 #include <Definitions.h>
 
-using namespace IRA;
 using namespace baci;
 using namespace ACSBulkDataError;
 // class CSenderThread;
@@ -254,7 +254,7 @@ class DFBImpl : public virtual BulkDataSenderDefaultImpl,public virtual POA_Back
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
     
     virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
-      
+  
     /**
      * Call this function to set the current time (from the local computer) into the backend.
      * @thorw CORBA::SystemException

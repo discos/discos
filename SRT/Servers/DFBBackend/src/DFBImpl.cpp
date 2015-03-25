@@ -247,9 +247,9 @@ CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::S
         AUTO_TRACE("DFBImpl::command()");
         IRA::CString out;
         IRA::CString in;
-        bool error;
-        error=CORBA::string_dup((const char *)out);
-        return error;
+        bool res;
+        res=CORBA::string_dup((const char *)out);
+        return res;
 }
 
 void DFBImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins) throw (
