@@ -25,7 +25,7 @@
 #include <bulkDataSenderImpl.h>
 #include <IRA>
 
-#include <DFBS.h>
+#include <DFBInterfaceS.h>
 
 /**************************************/
 //Component Errors
@@ -238,6 +238,12 @@ class DFBImpl : public virtual BulkDataSenderDefaultImpl,public virtual POA_Back
 	 * @param configCommand this string contains the string that will be executed
 	 * @return  answer  the string that reports the command execution results or in case, errors
 	 */
+         
+         
+     
+    virtual CORBA::Boolean command(const char *ddd,CORBA::String_out ddd) throw (CORBA::SystemException);    
+          
+         
   /**
      * Call this function in order to get a total power measure for each input channel. The measure is done when the inputs are directly
      * connected to the 50 Ohm.
@@ -253,7 +259,6 @@ class DFBImpl : public virtual BulkDataSenderDefaultImpl,public virtual POA_Back
     virtual ACS::doubleSeq * getZero () throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
     
-    virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
   
     /**
      * Call this function to set the current time (from the local computer) into the backend.
