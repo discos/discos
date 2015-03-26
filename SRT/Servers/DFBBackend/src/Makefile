@@ -57,7 +57,7 @@ EXECUTABLES_L   =
 # <brief description of xxxxx program>
 DFBImpl_OBJECTS   = DFBImpl	
 
-DFBImpl_LIBS      = IRALibrary GenericBackendStubs DFBStubs ManagmentDefinitionsStubs \
+DFBImpl_LIBS      = IRALibrary GenericBackendStubs DFBInterfaceStubs ManagmentDefinitionsStubs \
                     BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
                     bulkDataReceiverStubs ACSBulkDataError ComponentErrors  BackendsErrors\
 		    ParserErrors ManagementErrors
