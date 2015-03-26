@@ -20,8 +20,9 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 class TestGetAxesInfo(unittest2.TestCase):
 
+    telescope = os.getenv('TARGETSYS')
+
     def setUp(self):
-        self.telescope = os.getenv('TARGETSYS')
         self.client = PySimpleClient()
         self.boss = self.client.getComponent('MINORSERVO/Boss')
         self.setup_code = "CCB" if self.telescope == "SRT" else "CCC"

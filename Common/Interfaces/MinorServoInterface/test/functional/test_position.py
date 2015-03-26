@@ -19,6 +19,8 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 class PositionTest(unittest2.TestCase):
 
+    telescope = os.getenv('TARGETSYS')
+
     @classmethod
     def setUpClass(cls):
         cls.client = PySimpleClient()
@@ -29,7 +31,6 @@ class PositionTest(unittest2.TestCase):
         cls.client.releaseComponent('MINORSERVO/Boss')
 
     def setUp(self):
-        self.telescope = os.getenv('TARGETSYS')
         self.axis_code='SRP_TZ' if self.telescope == 'SRT' else 'Z'
         setupCode = 'KKG' if self.telescope == 'SRT' else 'CCC'
         # Wait (maximum one minute) in case the boss is parking
@@ -54,21 +55,22 @@ class PositionTest(unittest2.TestCase):
         self.idx = axes.index(self.axis_code)
 
     def tearDown(self):
-        self.boss.clearUserOffset(self.axis_code)
+        # self.boss.clearUserOffset(self.axis_code)
+        self.boss.setUserOffset(self.axis_code, 0)
         self.wait_tracking()
 
     def test_get_current_position(self):
         timestamp = getTimeStamp().value
         position = self.get_position()
         position_now = self.get_position(timestamp)
-        self.assertAlmostEqual(position, position_now, 0.1)
+        self.assertAlmostEqual(position, position_now, delta=0.1)
 
     def test_get_offset_position(self):
         position = self.get_position()
         self.boss.setUserOffset(self.axis_code, 10)
         self.wait_tracking()
         position_now = self.get_position()
-        self.assertAlmostEqual(position_now, position + 10, 0.1)
+        self.assertAlmostEqual(position_now, position + 10, delta=0.1)
 
     def test_get_past_position(self):
         timestamp = getTimeStamp().value
@@ -76,16 +78,16 @@ class PositionTest(unittest2.TestCase):
         self.boss.setUserOffset(self.axis_code, 10)
         self.wait_tracking()
         position_past = self.get_position(timestamp)
-        self.assertAlmostEqual(position, position_past, 0.1)
+        self.assertAlmostEqual(position, position_past, delta=0.1)
 
     def test_get_past_position_with_sleep(self):
         timestamp = getTimeStamp().value
         position = self.get_position()
-        self.boss.setUserOffset(self.axis_code, 10)
+        self.boss.setUserOffset(self.axis_code, delta=10)
         self.wait_tracking()
         time.sleep(10)
         position_past = self.get_position(timestamp)
-        self.assertAlmostEqual(position, position_past, 0.1)
+        self.assertAlmostEqual(position, position_past, delta=0.1)
 
     def wait_tracking(self):
         while not self.boss.isTracking():

@@ -19,15 +19,25 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 class TestSystemOffset(unittest2.TestCase):
 
+    telescope = os.getenv('TARGETSYS')
+
+    @classmethod
+    def setUpClass(cls):
+        cls.client = PySimpleClient()
+        cls.boss = cls.client.getComponent('MINORSERVO/Boss')
+        
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.releaseComponent('MINORSERVO/Boss')
+
+
     def setUp(self):
-        self.telescope = os.getenv('TARGETSYS')
-        self.client = PySimpleClient()
-        self.boss = self.client.getComponent('MINORSERVO/Boss')
         self.setup_code = "CCB" if self.telescope == "SRT" else "CCC"
         self.axis_code = "SRP_TX" if self.telescope == "SRT" else "X"
 
     def tearDown(self):
-        self.client.releaseComponent('MINORSERVO/Boss')
+        #self.boss.clearSystemOffset(self.axis_code)
+        self.boss.setSystemOffset(self.axis_code, 0)  # TODO
 
     def test_wrong_servo_name(self):
         """Raise a MinorServoErrorsEx in case of wrong servo name"""

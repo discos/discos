@@ -12,9 +12,14 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 class TestGetCentralScanPosition(unittest2.TestCase):
 
+    telescope = os.getenv('TARGETSYS')
+
     def setUp(self):
-        client = PySimpleClient()
-        self.boss = client.getComponent('MINORSERVO/Boss')
+        self.client = PySimpleClient()
+        self.boss = self.client.getComponent('MINORSERVO/Boss')
+
+    def tearDown(self):
+        self.client.releaseComponent('MINORSERVO/Boss')
 
     def test_scan_not_active(self):
         """Raise a MinorServoErrorsEx if the scan is not active"""

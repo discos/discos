@@ -11,9 +11,16 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 class TestSetASConfiguration(unittest2.TestCase):
 
-    def setUp(self):
-        client = PySimpleClient()
-        self.boss = client.getComponent('MINORSERVO/Boss')
+    telescope = os.getenv('TARGETSYS')
+
+    @classmethod
+    def setUpClass(cls):
+        cls.client = PySimpleClient()
+        cls.boss = cls.client.getComponent('MINORSERVO/Boss')
+        
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.releaseComponent('MINORSERVO/Boss')
 
     def test_right_flag(self):
         """Set the AS configuration properly"""

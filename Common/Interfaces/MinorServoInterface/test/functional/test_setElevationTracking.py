@@ -11,12 +11,18 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 class TestSetElevationTracking(unittest2.TestCase):
 
-    def setUp(self):
-        self.client = PySimpleClient()
-        self.boss = self.client.getComponent('MINORSERVO/Boss')
+    telescope = os.getenv('TARGETSYS')
 
-    def tearDown(self):
-        self.client.releaseComponent('MINORSERVO/Boss')
+    @classmethod
+    def setUpClass(cls):
+        cls.client = PySimpleClient()
+        cls.boss = cls.client.getComponent('MINORSERVO/Boss')
+        
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.releaseComponent('MINORSERVO/Boss')
+
+
 
     def test_right_flag(self):
         """Set the elevation tracking properly"""

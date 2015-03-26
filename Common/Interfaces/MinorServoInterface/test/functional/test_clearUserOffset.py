@@ -19,15 +19,21 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 class TestClearUserOffset(unittest2.TestCase):
 
-    def setUp(self):
-        client = PySimpleClient()
-        self.boss = client.getComponent('MINORSERVO/Boss')
+    telescope = os.getenv('TARGETSYS')
+
+    @classmethod
+    def setUpClass(cls):
+        cls.client = PySimpleClient()
+        cls.boss = cls.client.getComponent('MINORSERVO/Boss')
+        
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.releaseComponent('MINORSERVO/Boss')
 
     def test_wrong_servo_name(self):
         """Raise a MinorServoErrorsEx in case of wrong servo name"""
         with self.assertRaises(MinorServoErrorsEx):
             self.boss.clearUserOffset('FOO')
-
 
 if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):

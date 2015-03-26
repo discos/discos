@@ -218,6 +218,7 @@ class ScanTest(ScanBaseTest):
         self.assertFalse(res)
 
     def isAssertScan(self, startTime):
+        self.assertFalse(self.boss.isScanning())
         self.assertTrue(self.boss.isScanActive())
         # Assertions to verify right after startTime
         self.waitUntil(startTime)
@@ -231,9 +232,7 @@ class ScanTest(ScanBaseTest):
         targetTime = startTime + self.scan.total_time + 1*10**7 
         self.waitUntil(targetTime)
         startPos = self.boss.getAxesPosition(startTime)[self.idx]
-        print "start pos", startPos
         endPos = self.boss.getAxesPosition(targetTime)[self.idx]
-        print "end pos", endPos
         self.assertTrue(self.boss.isScanActive())
         self.assertFalse(self.boss.isScanning())
         self.assertAlmostEqual(startPos + self.scan.range, endPos, delta=0.1)
