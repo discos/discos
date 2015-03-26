@@ -168,6 +168,7 @@ public:
     std::string m_active_pfocus_servo;
     bool m_isConfigured;
     bool m_isStarting;
+    bool m_isScanLocked;
     bool m_isScanning;
     bool m_isScanActive;
     bool m_isParking;

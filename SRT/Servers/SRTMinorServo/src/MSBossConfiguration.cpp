@@ -19,6 +19,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services, Mino
     m_isElevationTrackingEn = false;
     m_isTracking = false;
     m_isScanning = false;
+    m_isScanLocked = false;
     m_isScanActive = false;
     m_dynamic_comps.clear();
     m_services = Services;

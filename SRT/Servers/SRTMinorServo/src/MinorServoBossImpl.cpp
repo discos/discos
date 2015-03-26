@@ -612,6 +612,7 @@ void MinorServoBossImpl::closeScan(ACS::Time& timeToStop) throw (
                         m_scan_thread_ptr->suspend();
                     }
                     component_ref->cleanPositionsQueue(NOW);
+                    m_configuration->m_isScanLocked = false;
                     m_configuration->m_isScanning = false;
                     if((m_configuration->m_scan).wasElevationTrackingEn)
                         turnTrackingOn();
@@ -699,7 +700,7 @@ CORBA::Boolean MinorServoBossImpl::checkScan(
         throw impl.getMinorServoErrorsEx();
     }
 
-    if(isScanning()) {
+    if(m_configuration->m_isScanLocked) {
         string msg("checkScan(): the system is executing another scan");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
@@ -1074,7 +1075,7 @@ void MinorServoBossImpl::startScan(
         throw impl.getMinorServoErrorsEx();
     }
 
-    if(isScanning()) {
+    if(m_configuration->m_isScanLocked) {
         string msg("startScan(): the system is executing another scan");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
@@ -1102,7 +1103,8 @@ void MinorServoBossImpl::startScanImpl(
              MinorServoErrors::MinorServoErrorsEx,
              ComponentErrors::ComponentErrorsEx)
 {
-    m_configuration->m_isScanning = true;
+    m_configuration->m_isScanLocked = true;
+    m_configuration->m_isScanning = false;
     size_t axis;
     string comp_name;
     try {
@@ -1112,13 +1114,13 @@ void MinorServoBossImpl::startScanImpl(
         comp_name = info.comp_name;
     }
     catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
-        m_configuration->m_isScanning = false;
+        m_configuration->m_isScanLocked = false;
          _ADD_BACKTRACE(MinorServoErrors::ConfigurationErrorExImpl, impl, ex, "startScanImpl()");
         throw impl.getMinorServoErrorsEx();
 
     }
     catch(...) {
-        m_configuration->m_isScanning = false;
+        m_configuration->m_isScanLocked = false;
         string msg("startScanImpl(): unexpected exception getting the axis information");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
@@ -1132,12 +1134,12 @@ void MinorServoBossImpl::startScanImpl(
                 antennaInfo.elevation);
     }
     catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
-        m_configuration->m_isScanning = false;
+        m_configuration->m_isScanLocked = false;
         _ADD_BACKTRACE(MinorServoErrors::ConfigurationErrorExImpl, impl, ex, "startScanImpl()");
         throw impl.getMinorServoErrorsEx();
     }
     catch (...) {
-        m_configuration->m_isScanning = false;
+        m_configuration->m_isScanLocked = false;
         string msg("startScanImpl(): cannot get the central scan position");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
@@ -1159,17 +1161,17 @@ void MinorServoBossImpl::startScanImpl(
                 max_speed);
     }
     catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
-        m_configuration->m_isScanning = false;
+        m_configuration->m_isScanLocked = false;
         _ADD_BACKTRACE(MinorServoErrors::ConfigurationErrorExImpl, impl, ex, "startScanImpl()");
         throw impl.getMinorServoErrorsEx();
     }
     catch(ManagementErrors::SubscanErrorExImpl& ex) {
-        m_configuration->m_isScanning = false;
+        m_configuration->m_isScanLocked = false;
         _ADD_BACKTRACE(MinorServoErrors::ConfigurationErrorExImpl, impl, ex, "startScanImpl()");
         throw impl.getMinorServoErrorsEx();
     }
     catch(...) {
-        m_configuration->m_isScanning = false;
+        m_configuration->m_isScanLocked = false;
         string msg("startScanImpl(): cannot get the minimum scan starting time");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
@@ -1179,7 +1181,7 @@ void MinorServoBossImpl::startScanImpl(
 
     if(startingTime != 0) {
         if(min_starting_time > startingTime) {
-            m_configuration->m_isScanning = false;
+            m_configuration->m_isScanLocked = false;
             string msg("startScanImpl(): the scan is supposed to start to early");
             _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
             impl.log(LM_DEBUG);
@@ -1196,7 +1198,7 @@ void MinorServoBossImpl::startScanImpl(
 
     ACS::Time ttime(msScanInfo.total_time);
     if(CIRATools::timeSubtract(ttime, gmst) <= 0) {
-        m_configuration->m_isScanning = false;
+        m_configuration->m_isScanLocked = false;
         string msg("startScanImpl(): total time too short for performing the scan.");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
@@ -1293,8 +1295,9 @@ void MinorServoBossImpl::startScanImpl(
         m_configuration->m_isScanActive = true;
     }
     catch(...) {
-        m_configuration->m_isScanning = false;
+        m_configuration->m_isScanLocked = false;
         m_configuration->m_isScanActive = false;
+        m_configuration->m_isScanning = false;
         throw;
     }
 }
