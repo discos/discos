@@ -108,9 +108,13 @@ void MinorServoBossImpl::initialize() throw (
         m_control = get_servo_control(m_server_ip);
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
               (LM_DEBUG, "Instantiated new minor servo control"));
-    }catch(ServoConnectionError& sce){
+    }catch(const ServoConnectionError& sce){
         THROW_EX(ComponentErrors, CouldntGetComponentEx, 
                  sce.what(),
+                 false);
+    }catch(const ServoTimeoutError& ste){
+        THROW_EX(ComponentErrors, CouldntGetComponentEx, 
+                 ste.what(),
                  false);
     }
 
@@ -142,11 +146,25 @@ void MinorServoBossImpl::initialize() throw (
             new function0<MinorServoBossImpl, non_constant, void_type>(this, &MinorServoBossImpl::clearOffsetsFromOI), 
             0
     );
- 
     m_parser->add(
             "setServoOffset", 
              new function2<MinorServoBossImpl, non_constant, void_type, I<string_type>, I<double_type> >(this, &MinorServoBossImpl::setUserOffsetFromOI), 
              2
+    );
+    m_parser->add(
+            "servoReset", 
+            new function0<MinorServoBossImpl, non_constant, void_type>(this, &MinorServoBossImpl::reset), 
+            0
+    );
+    m_parser->add(
+            "servoConnect", 
+            new function0<MinorServoBossImpl, non_constant, void_type>(this, &MinorServoBossImpl::connect), 
+            0
+    );
+    m_parser->add(
+            "servoDisconnect", 
+            new function0<MinorServoBossImpl, non_constant, void_type>(this, &MinorServoBossImpl::disconnect), 
+            0
     );
 }
 
@@ -461,7 +479,6 @@ MinorServoBossImpl::getAxesPosition(ACS::Time time)
             position = m_control->get_position();
         else
             position = m_control->get_position_at(time);
-        //We hide the system offsets from the user view
     }catch(const ServoTimeoutError& ste){
         THROW_MINORSERVO_EX(CommunicationErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){
@@ -469,6 +486,7 @@ MinorServoBossImpl::getAxesPosition(ACS::Time time)
     }catch(...){
         THROW_MINORSERVO_EX(CommunicationErrorEx, "Cannot get position", false);
     }
+    //We hide the system offsets from the user view
     position -= m_offset.getSystemOffsetPosition();
     vpositions = position.get_axes_positions();
     positions_res->length(vpositions.size());
@@ -590,6 +608,7 @@ MinorServoBossImpl::checkScanImpl(
     double center = 0;
     MedMinorServoPosition central_position = 
         m_actual_config->get_position(antenna_parameters.elevation);
+
     MedMinorServoScan scan(central_position, 
                            starting_time, 
                            scan_parameters.range,
@@ -597,29 +616,29 @@ MinorServoBossImpl::checkScanImpl(
                            std::string(scan_parameters.axis_code), 
                            isElevationTracking());
     minor_servo_parameters->startEpoch = scan.getStartingTime();
-    MedMinorServoPosition center_position = scan.getCentralPosition();
     try{
-        center = center_position.get_axis_position(
+        center = central_position.get_axis_position(
                                         scan_parameters.axis_code);
     }catch(const MinorServoAxisNameError& msane){
         CUSTOM_LOG(LM_FULL_INFO, 
                    "MinorServo::MinorServoBossImpl::checkScanImpl",
                    (LM_WARNING, "Wrong axis name, defaulting to Z"));
-        center = center_position.z;
+        center = central_position.z;
     }
     minor_servo_parameters->centerScan = center;
     minor_servo_parameters->scanAxis = CORBA::string_dup(
                                          scan_parameters.axis_code);
+    minor_servo_parameters->timeToStop = scan.getStopTime();
     if(scan_parameters.is_empty_scan)
     {
         minor_servo_parameters->onTheFly = false;
-        minor_servo_parameters->timeToStop = 0;
+        //minor_servo_parameters->timeToStop = 0;
         return true;
     }
     if(scan.check())
     {
         minor_servo_parameters->onTheFly = true;
-        minor_servo_parameters->timeToStop = scan.getStopTime();
+        //minor_servo_parameters->timeToStop = scan.getStopTime();
         return true;
     }else{
         return false;
@@ -636,9 +655,9 @@ MinorServoBossImpl::startScan(
          ComponentErrors::ComponentErrorsEx)
 {
     if(!isReady())
-        THROW_MINORSERVO_EX(ScanErrorEx, "checkScan: the system is not ready", true);
+        THROW_MINORSERVO_EX(ScanErrorEx, "startScan: the system is not ready", true);
     if(isScanActive())
-        THROW_MINORSERVO_EX(ScanErrorEx, "checkScan: the system is executing another scan", true);
+        THROW_MINORSERVO_EX(ScanErrorEx, "startScan: the system is executing another scan", true);
     startScanImpl(starting_time, 
               scan_parameters,
               antenna_parameters);
@@ -673,8 +692,8 @@ MinorServoBossImpl::startScanImpl(
     if(scan_parameters.is_empty_scan)
         return;
     boost::recursive_mutex::scoped_lock lock(_scan_guard);
-    m_servo_status.scanning = false;
     m_servo_status.scan_active = true;
+    m_servo_status.scanning = false;
     turnTrackingOff();
     MedMinorServoPosition central_position = 
         m_actual_config->get_position(antenna_parameters.elevation);
@@ -684,6 +703,16 @@ MinorServoBossImpl::startScanImpl(
                            scan_parameters.total_time,
                            std::string(scan_parameters.axis_code), 
                            isElevationTracking());
+    if(!(scan.check()))
+    {
+        m_servo_status.scan_active = false;
+        THROW_MINORSERVO_EX(ScanErrorEx, "startScanImpl: cannot start scan", true);
+    }
+
+    starting_time = scan.getStartingTime();
+    CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::startScanImpl",
+               (LM_INFO, "scan will start at: %llu", starting_time));
+    m_scan = scan;
     ScanThreadParameters thread_params(m_control,
                                        &m_servo_status,
                                        m_scan);
@@ -698,7 +727,7 @@ MinorServoBossImpl::startScanImpl(
     if(m_scan_thread_ptr->isSuspended())
         m_scan_thread_ptr->resume();
     CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::startScanImpl",
-               (LM_INFO, "Started scan"));
+               (LM_INFO, "Started minor servo scan"));
 }
 
 void 
@@ -709,29 +738,33 @@ throw (MinorServoErrors::MinorServoErrorsEx,
     boost::recursive_mutex::scoped_lock lock(_scan_guard);
     if(isScanActive())
     {
-        m_servo_status.scan_active = false;
         if(isScanning())
         {
-            CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::stopScan",
+            CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::closeScan",
                    (LM_NOTICE, "Scan interrupted during execution"));
+            m_servo_status.scanning = false;
         }
-        m_servo_status.scanning = false;
-        CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::stopScan",
+        CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::closeScan",
                (LM_DEBUG, "returning to central scan position"));
         double min_time = MedMinorServoGeometry::min_time(
                             m_control->get_position(),
                             m_scan.getCentralPosition());
+        CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::closeScan",
+               (LM_DEBUG, "time to stop position: %f", min_time));
+        ACS::TimeInterval min_time_interval = MedMinorServoTime::deltaToACSTimeInterval(min_time);
         ACS::Time now = IRA::CIRATools::getACSTime();
         m_control->set_position(m_scan.getCentralPosition());
-        timeToStop = now + (long long)(min_time * 10000000);
+        timeToStop = now + min_time_interval + SCAN_TOLERANCE;
         if(m_scan.was_elevation_tracking())
         {
-            CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::stopScan",
+            CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::closeScan",
                (LM_DEBUG, "reactivating elevation tracking"));
             turnTrackingOn();
         }
+        m_servo_status.scan_active = false;
     }else{
         timeToStop = 0;
+        THROW_MINORSERVO_EX(StatusErrorEx, "no scan active", true);
     }
 }
 
@@ -927,7 +960,7 @@ MinorServoBossImpl::setOffsetImpl(string axis_code,
                  "setOffsetImpl(): the system is not ready", false);
     int axis_mapping = m_actual_config->getAxisMapping(axis_code);
     if(axis_mapping < 0)
-        THROW_MINORSERVO_EX( OperationNotPermittedEx, 
+        THROW_MINORSERVO_EX( OffsetErrorEx, 
                  string("Wrong offset axis"),
                  true);
     try{
@@ -938,7 +971,7 @@ MinorServoBossImpl::setOffsetImpl(string axis_code,
         setCorrectPosition();
     }catch(MinorServoOffsetError& msoe){
         THROW_MINORSERVO_EX(OffsetErrorEx, 
-                 msoe.what(), false);
+                 msoe.what(), true);
     }
 }
 
@@ -1100,6 +1133,19 @@ throw (MinorServoErrors::CommunicationErrorExImpl)
         THROW_EX(MinorServoErrors, CommunicationErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){
         THROW_EX(MinorServoErrors, CommunicationErrorEx, sce.what(), false);
+    }
+}
+
+void 
+MinorServoBossImpl::getServoTime(ACS::Time &servoTime)
+throw (MinorServoErrors::CommunicationErrorExImpl)
+{
+    try{
+        m_control->update_position();
+        MedMinorServoPosition position = m_control->get_position();
+        servoTime = position.time;
+    }catch(...){
+        THROW_EX(MinorServoErrors, CommunicationErrorEx, "cannot get time", false);
     }
 }
 

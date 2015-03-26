@@ -21,6 +21,7 @@ module MinorServo{
         void connect() raises (MinorServoErrors::CommunicationErrorEx);
         void disconnect() raises (MinorServoErrors::CommunicationErrorEx);
         void reset() raises (MinorServoErrors::CommunicationErrorEx);
+        void getServoTime(out ACS::Time servoTime) raises (MinorServoErrors::CommunicationErrorEx);
     };
 };
 

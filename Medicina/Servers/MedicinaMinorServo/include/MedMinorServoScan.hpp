@@ -9,8 +9,9 @@
 #include "macros.def"
 #include "MedMinorServoGeometry.hpp"
 #include "MedMinorServoConstants.hpp"
+#include "MedMinorServoTime.hpp"
 
-#define START_SCAN_TOLERANCE 10000000 //1 sec.
+#define START_SCAN_TOLERANCE 30000000 //3 sec.
 #define SCAN_TOLERANCE 1000000 //0.1 sec.
 
 using namespace std; 

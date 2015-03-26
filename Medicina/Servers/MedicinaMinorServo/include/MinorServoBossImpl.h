@@ -448,12 +448,13 @@ public:
       * MedMinroServoBoss interface specific implementation
       ******************************************************/ 
 
-      /**
-       * Disconnects from the minor servo server and release control lock
-       */
-      void connect() throw (MinorServoErrors::CommunicationErrorExImpl);
-      void disconnect() throw (MinorServoErrors::CommunicationErrorExImpl);
-      void reset() throw (MinorServoErrors::CommunicationErrorExImpl);
+     /**
+      * Disconnects from the minor servo server and release control lock
+      */
+     void connect() throw (MinorServoErrors::CommunicationErrorExImpl);
+     void disconnect() throw (MinorServoErrors::CommunicationErrorExImpl);
+     void reset() throw (MinorServoErrors::CommunicationErrorExImpl);
+     void getServoTime(ACS::Time &servoTime) throw (MinorServoErrors::CommunicationErrorExImpl);
 private:
 	maci::ContainerServices *m_services;
     //Antenna::AntennaBoss_var m_antenna_boss;

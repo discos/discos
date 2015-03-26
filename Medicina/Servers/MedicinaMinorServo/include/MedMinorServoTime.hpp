@@ -13,9 +13,11 @@
 #define SYSTIMEBASE_K_SEC_TO_MSEC               ((uint64_t)1000)
 #define SYSTIMEBASE_K_MSEC_TO_USEC              ((uint64_t)1000)
 #define SYSTIMEBASE_K_USEC_TO_NSEC              ((uint64_t)1000)
+#define SYSTIMEBASE_K_USEC_TO_100NSEC           ((uint64_t)10)
 #define SYSTIMEBASE_K_100NSEC                   ((uint64_t)100)
 
-#define SYSTIMEBASE_K_MSEC_TO_100NSEC ((uint64_t)((SYSTIMEBASE_K_MSEC_TO_USEC * SYSTIMEBASE_K_USEC_TO_NSEC) / SYSTIMEBASE_K_100NSEC))
+//#define SYSTIMEBASE_K_MSEC_TO_100NSEC ((uint64_t)((SYSTIMEBASE_K_MSEC_TO_USEC * SYSTIMEBASE_K_USEC_TO_NSEC) / SYSTIMEBASE_K_100NSEC))
+#define SYSTIMEBASE_K_MSEC_TO_100NSEC ((uint64_t)((SYSTIMEBASE_K_MSEC_TO_USEC * SYSTIMEBASE_K_USEC_TO_100NSEC)))
 #define SYSTIMEBASE_K_SEC_TO_100NSEC            ((uint64_t)(SYSTIMEBASE_K_SEC_TO_MSEC * SYSTIMEBASE_K_MSEC_TO_100NSEC))
 #define SYSTIMEBASE_K_DAY_TO_100NSEC            ((uint64_t)(SYSTIMEBASE_K_DAY_TO_HOUR * SYSTIMEBASE_K_HOUR_TO_MIN * SYSTIMEBASE_K_MIN_TO_SEC * SYSTIMEBASE_K_SEC_TO_100NSEC))
 
@@ -41,6 +43,10 @@ class MedMinorServoTime
         static
         uint64_t
         ACSToServoNow();
+
+        static
+        ACS::TimeInterval
+        deltaToACSTimeInterval(double delta);
 };
 
 #endif

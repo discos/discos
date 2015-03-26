@@ -27,6 +27,11 @@ PositionQueue::clear()
 bool
 PositionQueue::push(const MedMinorServoPosition& position)
 {
+    /*CUSTOM_LOG(LM_FULL_INFO, 
+               "MinorServo::PositionQueue::push()",
+               (LM_DEBUG, 
+               "pushing position at time: %s",
+               (const char*)time2str(position.time)));*/
     boost::mutex::scoped_lock lock(_queue_guard);
     if(position.time <= _newest_time)
         return false;
@@ -51,7 +56,13 @@ PositionQueue::get_position()
     boost::mutex::scoped_lock lock(_queue_guard);
     if(_size == 0)
         throw EmptyPositionQueueError("no position stored");
-    return _queue.front();
+    MedMinorServoPosition result = _queue.front();
+    /*CUSTOM_LOG(LM_FULL_INFO, 
+               "MinorServo::PositionQueue::get_position(time)",
+               (LM_DEBUG, 
+               "you requested for a position at most recent time: %s",
+               (const char*)time2str(result.time)));*/
+    return result;
 }
 
 MedMinorServoPosition
@@ -61,11 +72,32 @@ PositionQueue::get_position(ACS::Time time)
     if(_size == 0)
         throw EmptyPositionQueueError("no position stored");
     if(_size == 1)
+    {
+        /*CUSTOM_LOG(LM_FULL_INFO, 
+                   "MinorServo::PositionQueue::get_position(time)",
+                   (LM_DEBUG, 
+                   "you requested for a position at %llu but we have only one",
+                   time));*/
         return _queue.front();
+    }
     if(time >= _newest_time)
+    {
+        /*CUSTOM_LOG(LM_FULL_INFO, 
+                   "MinorServo::PositionQueue::get_position(time)",
+                   (LM_DEBUG, 
+                   "you requested for a position at %llu that is in the future",
+                   time));*/
         return _queue.front();
+    }
     if(time <= _oldest_time)
+    {
+        /*CUSTOM_LOG(LM_FULL_INFO, 
+                   "MinorServo::PositionQueue::get_position(time)",
+                   (LM_DEBUG, 
+                   "you requested for a position at %llu that is too past",
+                   time));*/
         return _queue.back();
+    }
     std::deque<MedMinorServoPosition>::iterator it = _queue.begin();
     MedMinorServoPosition before_position, after_position;
     do{
@@ -73,6 +105,21 @@ PositionQueue::get_position(ACS::Time time)
         it++;
         before_position = *it;
     }while((before_position.time > time) && (it != _queue.end()));
+    /*CUSTOM_LOG(LM_FULL_INFO, 
+               "MinorServo::PositionQueue::get_position(time)",
+               (LM_DEBUG, 
+               "you requested for a position at %llu, found between %llu and %llu",
+               time,
+               before_position.time,
+               after_position.time));*/
     return MedMinorServoGeometry::interpolate(before_position, after_position, time);
+}
+
+IRA::CString
+PositionQueue::time2str(ACS::Time time)
+{
+    IRA::CString cstring;
+    IRA::CIRATools::timeToStr(time, cstring);
+    return cstring;
 }
 

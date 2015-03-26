@@ -6,7 +6,7 @@
 #include <IRA>
 #include "MedMinorServoControl.hpp"
 
-#define POSITION_SLEEP_TIME 1000000 // 100 mseconds
+#define POSITION_SLEEP_TIME 100000 // 100 mseconds
 
 class PositionMonitoringThread : public ACS::Thread
 {
