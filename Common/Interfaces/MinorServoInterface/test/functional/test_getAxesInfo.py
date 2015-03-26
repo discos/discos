@@ -11,7 +11,6 @@ import MinorServo
 import Management
 import Antenna
 
-from PyMinorServoTest import simunittest
 from Acspy.Clients.SimpleClient import PySimpleClient
 from MinorServoErrors import MinorServoErrorsEx
 from Acspy.Common.TimeHelper import getTimeStamp
@@ -22,8 +21,10 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 class TestGetAxesInfo(unittest2.TestCase):
 
     def setUp(self):
+        self.telescope = os.getenv('TARGETSYS')
         self.client = PySimpleClient()
         self.boss = self.client.getComponent('MINORSERVO/Boss')
+        self.setup_code = "CCB" if self.telescope == "SRT" else "CCC"
 
     def tearDown(self):
         self.client.releaseComponent('MINORSERVO/Boss')
@@ -35,7 +36,7 @@ class TestGetAxesInfo(unittest2.TestCase):
 
     def test_ready(self):
         """Get the axes information"""
-        self.boss.setup('CCB')
+        self.boss.setup(self.setup_code)
         counter = 0 # Seconds
         now = time_ref = datetime.datetime.now()
         while not self.boss.isReady() or (time_ref - now).seconds < 20:
@@ -52,5 +53,6 @@ if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
         unittest2.main() # Real test using the antenna CDB
     else:
+        from PyMinorServoTest import simunittest
         simunittest.run(TestGetAxesInfo)
 

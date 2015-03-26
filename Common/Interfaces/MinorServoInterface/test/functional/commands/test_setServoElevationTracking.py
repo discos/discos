@@ -9,7 +9,6 @@ import MinorServo
 import Management
 import Antenna
 
-from PyMinorServoTest import simunittest
 from Acspy.Clients.SimpleClient import PySimpleClient
 from MinorServoErrors import MinorServoErrorsEx
 from Acspy.Common.TimeHelper import getTimeStamp
@@ -29,6 +28,7 @@ class TestSetServoElevationTrackingCmd(unittest2.TestCase):
         self.assertFalse(success)
 
     def test_right_flag(self):
+        #FIXME: we need servoSetup before this
         success, answer = self.boss.command('setServoElevationTracking=on')
         self.assertTrue(success)
 
@@ -37,4 +37,5 @@ if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
         unittest2.main() # Real test using the antenna CDB
     else:
+        from PyMinorServoTest import simunittest
         simunittest.run(TestSetServoElevationTrackingCmd)

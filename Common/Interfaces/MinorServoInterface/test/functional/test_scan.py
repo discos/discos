@@ -15,7 +15,6 @@ from Acspy.Common.TimeHelper import getTimeStamp
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Util import ACSCorba
 
-from PyMinorServoTest import simunittest
 
 
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
@@ -61,7 +60,7 @@ class ScanTest(ScanBaseTest):
 
     def setUp(self):    
         super(ScanTest, self).setUp()
-        setupCode = 'KKG' if self.telescope == 'SRT' else 'KKC'
+        setupCode = 'KKG' if self.telescope == 'SRT' else 'CCC'
 
         # Wait (maximum one minute) in case the boss is parking
         if self.boss.isParking():
@@ -83,7 +82,7 @@ class ScanTest(ScanBaseTest):
         self.boss.setElevationTracking('OFF')
         self.boss.setASConfiguration('OFF')
         axes, units = self.boss.getAxesInfo()
-        self.idx = axes.index('SRP_TZ')
+        self.idx = axes.index(self.scan.axis_code)
 
         getPosition = getattr(self, 'get%sPosition' %self.telescope)
         centerScanPosition = getPosition(
@@ -123,7 +122,7 @@ class ScanTest(ScanBaseTest):
     def test_startScan_out_of_range(self):
         """Scan out of the servo position limits"""
         startTime = 0
-        self.scan.range = 1000 # 1 meter
+        self.scan.range = 5000 # 5 meters
         with self.assertRaises(MinorServoErrorsEx):
             self.boss.startScan(startTime, self.scan, self.antennaInfo)
 
@@ -152,9 +151,8 @@ class ScanTest(ScanBaseTest):
         self.assertAlmostEqual(msInfo.centerScan, self.centerScan, delta=0.01)
         self.assertGreater(msInfo.startEpoch, getTimeStamp().value)
         self.assertEqual(msInfo.scanAxis, self.scan.axis_code)
-        self.assertEqual(
-                msInfo.timeToStop, 
-                msInfo.startEpoch + self.scan.total_time)
+        self.assertEqual(msInfo.timeToStop, 
+                         msInfo.startEpoch + self.scan.total_time)
 
     def test_checkScan_not_empty_scan_start_ASAP(self):
         """Scan not empty: starting time unknown, the scan must start ASAP"""
@@ -215,26 +213,27 @@ class ScanTest(ScanBaseTest):
 
     def test_checkScan_start_time_too_close_to_now(self):
         """Starting time too close to the current time"""
-        startTime = getTimeStamp().value + 1*10**7 # Start in 1 second from now
+        startTime = getTimeStamp().value + 1*10**6 # Start in 0.1 second from now
         res, msInfo = self.boss.checkScan(startTime, self.scan, self.antennaInfo)
         self.assertFalse(res)
 
     def isAssertScan(self, startTime):
-        self.assertTrue(self.boss.isScanning())
+        self.assertTrue(self.boss.isScanActive())
         # Assertions to verify right after startTime
         self.waitUntil(startTime)
-        self.assertTrue(self.boss.isScanActive())
         self.assertTrue(self.boss.isScanning())
+        self.assertTrue(self.boss.isScanActive())
         self.assertAlmostEqual(
                 self.boss.getCentralScanPosition(), 
                 self.centerScan, 
                 delta=0.1)
-
         # Wait untill the scan finishes (one second after the scan)
         targetTime = startTime + self.scan.total_time + 1*10**7 
         self.waitUntil(targetTime)
         startPos = self.boss.getAxesPosition(startTime)[self.idx]
+        print "start pos", startPos
         endPos = self.boss.getAxesPosition(targetTime)[self.idx]
+        print "end pos", endPos
         self.assertTrue(self.boss.isScanActive())
         self.assertFalse(self.boss.isScanning())
         self.assertAlmostEqual(startPos + self.scan.range, endPos, delta=0.1)
@@ -288,7 +287,7 @@ class ScanTest(ScanBaseTest):
             position.append(value)
         return position
 
-    def getMEDPosition(conf_code, servo_name="", elevation=45):
+    def getMEDPosition(self, conf_code, servo_name="", elevation=45):
         """Return the servo position related to the elevation for MED
         radiotelescope.
 
@@ -346,7 +345,8 @@ class ScanInterfaceTest(ScanBaseTest):
 
 if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
-        unittest2.main() # Real test using the antenna CDB
+        unittest2.main(verbosity=2, failfast=True) # Real test using the antenna CDB
     else:
+        from PyMinorServoTest import simunittest
         simunittest.run(ScanTest)
         simunittest.run(ScanInterfaceTest)
