@@ -241,7 +241,7 @@ void DFBImpl::activateNoiseCalibrationSwitching(CORBA::Long interleave) throw (C
 }
 
 
-CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
+CORBA::Boolean DFBImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
 {
           
         AUTO_TRACE("DFBImpl::command()");
