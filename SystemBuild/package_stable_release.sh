@@ -24,8 +24,8 @@ printf "CDB_PREFIX:\t${CDB_PREFIX}\n" >> ${BUILDINFO}
 printf "TARGETSYS:\t${TARGETSYS}\n" >> ${BUILDINFO}
 printf "REPO_VERSION:\t${REPO_VERSION}\n" >> ${BUILDINFO}
 touch ${BASHRC}
-printf "export INTROOT=/${BASEDIR}/introot" >> ${BASHRC}
-printf "export ACS_CDB=/${BASEDIR}/cdb" >> ${BASHRC}
-printf "export TARGETSYS=${TARGETSYS}" >> ${BASHRC}
-printf "export REPO_VERSION=${REPO_VERSION}" >> ${BASHRC}
+printf "export INTROOT=/${BASEDIR}/introot\n" >> ${BASHRC}
+printf "export ACS_CDB=/${BASEDIR}/cdb\n" >> ${BASHRC}
+printf "export TARGETSYS=${TARGETSYS}\n" >> ${BASHRC}
+printf "export REPO_VERSION=${REPO_VERSION}\n" >> ${BASHRC}
 tar czvf discos-${TARGETSYS}-${BASENAME}-b${BUILD_NUMBER}.tar.gz discos
