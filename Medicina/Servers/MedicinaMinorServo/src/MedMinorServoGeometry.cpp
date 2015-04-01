@@ -321,7 +321,6 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
     MedMinorServoPosition result;
     switch(status.system_status)
     {
-        //FIXME: we want the time read by the PLC!!!
         case(MED_MINOR_SERVO_STATUS_PRIMARY): //PRIMARY FOCUS
             result = MedMinorServoPosition(
                 0,
@@ -330,8 +329,8 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 0,
                 0,
                 MED_MINOR_SERVO_PRIMARY,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_TRANSFER_TO_PRIMARY): //PRIMARY FOCUS
             result = MedMinorServoPosition(
@@ -341,8 +340,8 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 0,
                 0,
                 MED_MINOR_SERVO_TRANSFER_TO_PRIMARY,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_PRIMARY_DISABLED): //PRIMARY FOCUS
             result = MedMinorServoPosition(
@@ -352,8 +351,8 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 0,
                 0,
                 MED_MINOR_SERVO_PRIMARY_DISABLED,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_PFR_BLOCK): //PRIMARY FOCUS
             result = MedMinorServoPosition(
@@ -363,8 +362,8 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 0,
                 0,
                 MED_MINOR_SERVO_PFR_BLOCK,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_SECONDARY):
             result = MedMinorServoPosition(
@@ -374,8 +373,8 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 _get_direct_theta_x(status),
                 _get_direct_theta_y(status),
                 MED_MINOR_SERVO_SECONDARY,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_TRANSFER_TO_SECONDARY):
             result = MedMinorServoPosition(
@@ -385,8 +384,8 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 _get_direct_theta_x(status),
                 _get_direct_theta_y(status),
                 MED_MINOR_SERVO_TRANSFER_TO_SECONDARY,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_SECONDARY_DISABLED):
             result = MedMinorServoPosition(
@@ -396,8 +395,8 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 _get_direct_theta_x(status),
                 _get_direct_theta_y(status),
                 MED_MINOR_SERVO_SECONDARY_DISABLED,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_SR_BLOCK):
             result = MedMinorServoPosition(
@@ -407,8 +406,8 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 _get_direct_theta_x(status),
                 _get_direct_theta_y(status),
                 MED_MINOR_SERVO_SR_BLOCK,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_SYSTEM_BLOCK):
             result = MedMinorServoPosition(
@@ -418,18 +417,18 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 _get_direct_theta_x(status),
                 _get_direct_theta_y(status),
                 MED_MINOR_SERVO_SYSTEM_BLOCK,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_LOCAL):
             result = MedMinorServoPosition(0,0,0,0,0, MED_MINOR_SERVO_LOCAL,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_INTERLOCK):
             result = MedMinorServoPosition(0,0,0,0,0, MED_MINOR_SERVO_INTERLOCK,
-                //MedMinorServoTime::servoToACSTime(status.time));
-                IRA::CIRATools::getACSTime());
+                MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         default:
             throw MinorServoGeometryError("Invalid system status converting status to position");
