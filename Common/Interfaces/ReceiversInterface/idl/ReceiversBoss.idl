@@ -120,6 +120,16 @@ module Receivers {
         \***************************************************/
 
         /**
+         * This method prepares the system for the derotation but it does not start it.
+         * if the no derotator is supported, or no receiver has been configured or the current receiver does not have a derotator
+         * an error is raised.
+         * @param mode specifies how to manage the derotation, if <i>RCV_UNDEF_DEROTCONF</i> the current value is kept
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void derotatorSetConfiguration(in TDerotatorConfigurations conf) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+        /**
          * This method prepares the system for derotation but not starting it. If the no derotator is supported, or no receiver has been configured or the current receiver
          * does not have a derotator an error is raised.
          * @param mode specifies how to manage the derotation, if <i>RCV_UNDEF_DEROTCONF</i> the current value is kept
@@ -128,7 +138,7 @@ module Receivers {
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw ComponentErrors::ComponentErrorsEx
          */
-        void derotatorMode(in TDerotatorConfigurations mode,in TRewindModes rewind,in long feeds) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        //void derotatorMode(in TDerotatorConfigurations mode,in TRewindModes rewind,in long feeds) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
         /**
          *  This method parks the current derotator. In order to start the derotator again, another <i>derotatorSetup</i> must be called.
@@ -141,8 +151,27 @@ module Receivers {
         /**
          * This method allows to set the starting position of the derotator. Allowed only if FIXED or CUSTOM modes are setup.
          * @param position the initial position (degrees)
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw ComponentErrors::ComponentErrorEx
          */
-        void setDerotatorPosition(in double position) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        void derotatorSetPosition(in double position) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+        /**
+         * It allows to configure how the dewar positioner behaves in case the derotator hits a final limit and need to rewind.
+         * @param rewind specifies how to manage the rewind, when it is needed. If <i>RCV_UNDEF_REWIND</i> the current value is kept
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw ComponentErrors::ComponentErrorEx
+         */
+        void derotatorSetRewindingMode(in TRewindModes rewind) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+        /**
+         * It sets the number of fixed length steps (it depends on the particular derotator) the dewar positioner moves when an auto
+         * rewind have to be taken
+         * @param steps number of configured auto rewinding steps.
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw ComponentErrors::ComponentErrorEx
+         */
+        void derotatorSetAutoRewindingSteps(in long steps) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
         /**
          * Allows to perform a manual rewind of the derotator.

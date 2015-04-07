@@ -283,9 +283,42 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-    virtual void derotatorMode(Receivers::TDerotatorConfigurations mode,Receivers::TRewindModes rewind,CORBA::Long feeds) throw (CORBA::SystemException,
-    		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    //virtual void derotatorMode(Receivers::TDerotatorConfigurations mode,Receivers::TRewindModes rewind,CORBA::Long feeds) throw (CORBA::SystemException,
+    //		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
+    /**
+     * This method prepares the system for the derotation but it does not start it.
+     * if the no derotator is supported, or no receiver has been configured or the current receiver does not have a derotator
+     * an error is raised.
+     * @param conf specifies how to manage the derotation, if <i>RCV_UNDEF_DEROTCONF</i> the current value is kept
+     * @throw CORBA::SystemException
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw ComponentErrors::ComponentErrorsEx
+    */
+    virtual void derotatorSetConfiguration(Receivers::TDerotatorConfigurations conf) throw (CORBA::SystemException,
+    		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+    /**
+     * It allows to configure how the dewar positioner behaves in case the derotator hits a final limit and need to rewind.
+     * @param rewind specifies how to manage the rewind, when it is needed. If <i>RCV_UNDEF_REWIND</i> the current value is kept
+     * @throw CORBA::SystemException
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw ComponentErrors::ComponentErrorEx
+     */
+    void derotatorSetRewindingMode(Receivers::TRewindModes rewind) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+    		ReceiversErrors::ReceiversErrorsEx);
+
+    /**
+     * It sets the number of fixed length steps (it depends on the particular derotator) the dewar positioner moves when an auto
+     * rewind have to be taken
+     * @param steps number of configured auto rewinding steps.
+     * @throw CORBA::SystemException
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw ComponentErrors::ComponentErrorEx
+     */
+    void derotatorSetAutoRewindingSteps(CORBA::Long steps) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+    		ReceiversErrors::ReceiversErrorsEx);
+
     /**
      * It disable the derotator. It is implicitly called also by the <i>park()</i> method.
 	 * @throw CORBA::SystemException
@@ -311,7 +344,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
      */
-    virtual void setDerotatorPosition(CORBA::Double position) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+    virtual void derotatorSetPosition(CORBA::Double position) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
       ReceiversErrors::ReceiversErrorsEx);
 
     /**

@@ -124,11 +124,20 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("setLO",new function1<CRecvBossCore,non_constant,void_type,I<doubleSeq_type> >(m_core,&CRecvBossCore::setLO),1);
 	m_parser->add("antennaUnitOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOn),0);
 	m_parser->add("antennaUnitOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOff),0);
-	m_parser->add("derotatorMode",new function3<CRecvBossCore,non_constant,void_type,
+	/*m_parser->add("derotatorMode",new function3<CRecvBossCore,non_constant,void_type,
 			I<enum_type<DerotatorConfigurations_converter,Receivers::TDerotatorConfigurations,DerotatorConfigurations_WildCard> >,
-			I<enum_type<RewindModes_converter,Receivers::TRewindModes,RewindModes_WildCard> >,I<long_type> >(m_core,&CRecvBossCore::derotatorMode),3);
+			I<enum_type<RewindModes_converter,Receivers::TRewindModes,RewindModes_WildCard> >,I<long_type> >(m_core,&CRecvBossCore::derotatorMode),3);*/
+	m_parser->add("derotatorSetConfiguration",new function1<CRecvBossCore,non_constant,void_type,
+			I<enum_type<DerotatorConfigurations_converter,Receivers::TDerotatorConfigurations,DerotatorConfigurations_WildCard> > >(
+					m_core,&CRecvBossCore::derotatorSetConfiguration),1);
+	m_parser->add("derotatorSetRewindingMode",new function1<CRecvBossCore,non_constant,void_type,
+			I<enum_type<RewindModes_converter,Receivers::TRewindModes,RewindModes_WildCard> > >(
+					m_core,&CRecvBossCore::derotatorSetRewindingMode),1);
+	m_parser->add("derotatorSetAutoRewindingSteps",new function1<CRecvBossCore,non_constant,void_type,I<long_type> >(
+					m_core,&CRecvBossCore::derotatorSetAutoRewindingSteps),1);
+
 	m_parser->add("derotatorPark",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::derotatorPark),0);
-	m_parser->add("derotatorPosition",new function1<CRecvBossCore,non_constant,void_type, I<angle_type<SimpleParser::deg> > >(m_core,&CRecvBossCore::setDerotatorPosition),1);
+	m_parser->add("derotatorSetPosition",new function1<CRecvBossCore,non_constant,void_type, I<angle_type<SimpleParser::deg> > >(m_core,&CRecvBossCore::setDerotatorPosition),1);
 	m_parser->add("derotatorRewind",new function1<CRecvBossCore,non_constant,void_type,I<long_type> >(m_core,&CRecvBossCore::derotatorRewind),1);
 
 
@@ -533,7 +542,7 @@ CORBA::Boolean ReceiversBossImpl::checkScan(ACS::Time startUt,const Receivers::T
 	return true;
 }
 
-void ReceiversBossImpl::setDerotatorPosition(CORBA::Double position) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+void ReceiversBossImpl::derotatorSetPosition(CORBA::Double position) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
   ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
@@ -596,8 +605,71 @@ void ReceiversBossImpl::derotatorRewind(CORBA::Long steps) throw (
 	}
 }
 
+void ReceiversBossImpl::derotatorSetRewindingMode(Receivers::TRewindModes rewind) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+		ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core->derotatorSetRewindingMode(rewind);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::derotatorSetRewindingMode()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
 
-void ReceiversBossImpl::derotatorMode(Receivers::TDerotatorConfigurations mode,Receivers::TRewindModes rewind,CORBA::Long feeds) throw (CORBA::SystemException,
+void ReceiversBossImpl::derotatorSetAutoRewindingSteps(CORBA::Long steps) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+		ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core->derotatorSetAutoRewindingSteps(steps);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::derotatorSetAutoRewindingSteps()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+
+}
+
+void ReceiversBossImpl::derotatorSetConfiguration(Receivers::TDerotatorConfigurations conf) throw (CORBA::SystemException,
+		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core->derotatorSetConfiguration(conf);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::derotatorSetConfiguration()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+/*void ReceiversBossImpl::derotatorMode(Receivers::TDerotatorConfigurations mode,Receivers::TRewindModes rewind,CORBA::Long feeds) throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
@@ -612,11 +684,11 @@ void ReceiversBossImpl::derotatorMode(Receivers::TDerotatorConfigurations mode,R
 		throw ex.getReceiversErrorsEx();
 	}
 	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::derotatorSetup()");
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::derotatorMode()");
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
 	}
-}
+}*/
 
 void ReceiversBossImpl::derotatorPark() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
