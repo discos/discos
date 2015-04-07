@@ -70,14 +70,16 @@ class ScanTest(ScanBaseTest):
             if self.boss.isParking():
                 self.fail('The system can not exit form a parking state')
 
-        if self.boss.getActualSetup() != setupCode:
+        if self.boss.getActualSetup() != setupCode or not self.boss.isReady():
             self.boss.setup(setupCode)
-            # Wait (maximum 5 minutes) in case the boss is starting
-            t0 = datetime.now()
-            while not self.boss.isReady() and (datetime.now() - t0).seconds < 60*5:
-                time.sleep(2)
-            if not self.boss.isReady():
-                self.fail('The system is not ready for executing the tests')
+
+        # Wait (maximum 5 minutes) in case the boss is starting
+        t0 = datetime.now()
+        while not self.boss.isReady() and (datetime.now() - t0).seconds < 60*5:
+            time.sleep(2)
+
+        if not self.boss.isReady():
+            self.fail('The system is not ready for executing the tests')
 
         self.boss.setElevationTracking('OFF')
         self.boss.setASConfiguration('OFF')

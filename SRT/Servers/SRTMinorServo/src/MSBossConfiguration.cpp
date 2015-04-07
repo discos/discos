@@ -201,6 +201,12 @@ InfoAxisCode MSBossConfiguration::getInfoFromAxisCode(string axis_code) throw (M
     short id = 0;
     string comp_name;
     strip(axis_code);
+    if(axis_code.size() == 0) {
+        result.comp_name = "";
+        result.numberOfAxes = 0;
+        result.axis_id = -1;
+    }
+
     try {
         vector<string> items = split(axis_code, string("_"));
         comp_name = items[0];

@@ -678,10 +678,11 @@ void MinorServoBossImpl::closeScan(ACS::Time& timeToStop) throw (
         }
     }
     else {
-        string msg("closeScan(): no scan active");
-        _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-        impl.log(LM_DEBUG);
-        throw impl.getMinorServoErrorsEx();
+        // string msg("closeScan(): no scan active");
+        // _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
+        // impl.log(LM_DEBUG);
+        // throw impl.getMinorServoErrorsEx();
+        ; // Do nothing
     }
 }
 
@@ -734,7 +735,7 @@ bool MinorServoBossImpl::checkScanImpl(
     ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx)
 {
     MinorServo::TRunTimeParameters_var msParamVar = new MinorServo::TRunTimeParameters;
-    msParamVar->onTheFly = false;
+    msParamVar->onTheFly = (msScanInfo.is_empty_scan == false) ? true : false;
     msParamVar->startEpoch = 0;
     msParamVar->centerScan = 0;
     msParamVar->scanAxis = CORBA::string_dup("");
@@ -751,12 +752,18 @@ bool MinorServoBossImpl::checkScanImpl(
     catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
         ex.log(LM_ERROR);
         msParameters = msParamVar._retn(); 
-        return false;
+        if(msScanInfo.is_empty_scan == true)
+            return true;
+        else
+            return false;
     }
     catch (...) {
         ACS_SHORT_LOG((LM_ERROR, "checkScanImpl(): cannot get the axis info"));
         msParameters = msParamVar._retn(); 
-        return false;
+        if(msScanInfo.is_empty_scan == true)
+            return true;
+        else
+            return false;
     }
 
     ACS::doubleSeq plainCentralPos; // Position without offsets
@@ -770,12 +777,18 @@ bool MinorServoBossImpl::checkScanImpl(
     catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
         ex.log(LM_ERROR);
         msParameters = msParamVar._retn(); 
-        return false;
+        if(msScanInfo.is_empty_scan == true)
+            return true;
+        else
+            return false;
     }
     catch (...) {
         ACS_SHORT_LOG((LM_ERROR, "checkScanImpl(): cannot get the central scan position"));
         msParameters = msParamVar._retn(); 
-        return false;
+        if(msScanInfo.is_empty_scan == true)
+            return true;
+        else
+            return false;
     }
 
     MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
@@ -803,19 +816,19 @@ bool MinorServoBossImpl::checkScanImpl(
         string msg("startScanImpl(): cannot get the " + comp_name + " component");
         ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
         msParameters = msParamVar._retn(); 
-        return false;
+        if(msScanInfo.is_empty_scan == true)
+            return true;
+        else
+            return false;
     }
 
     ACS::Time min_starting_time = 0;
-    msParamVar->onTheFly = (msScanInfo.is_empty_scan == false) ? true : false;
-    msParamVar->startEpoch = 0;
     msParamVar->centerScan = centralPos[axis];
     msParamVar->scanAxis = CORBA::string_dup(msScanInfo.axis_code);
-    msParamVar->timeToStop = 0;
 
     double acceleration = 0.0;
     double max_speed = 0.0;
-    double scanDistance = msScanInfo.range;
+        double scanDistance = msScanInfo.range;
     TIMEVALUE stime(startingTime);
     ACS::Time ttime(msScanInfo.total_time);
     try {
@@ -829,17 +842,26 @@ bool MinorServoBossImpl::checkScanImpl(
     catch(ManagementErrors::ConfigurationErrorExImpl& ex) {
         ex.log(LM_ERROR);
         msParameters = msParamVar._retn(); 
-        return false;
+        if(msScanInfo.is_empty_scan == true)
+            return true;
+        else
+            return false;
     }
     catch(ManagementErrors::SubscanErrorExImpl& ex) {
         ex.log(LM_ERROR);
         msParameters = msParamVar._retn(); 
-        return false;
+        if(msScanInfo.is_empty_scan == true)
+            return true;
+        else
+            return false;
     }
     catch(...) {
         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): unexpected exception getting the min starting time"));
         msParameters = msParamVar._retn(); 
-        return false;
+        if(msScanInfo.is_empty_scan == true)
+            return true;
+        else
+            return false;
     }
     
 
@@ -849,7 +871,10 @@ bool MinorServoBossImpl::checkScanImpl(
     if(startingTime != 0 && min_starting_time > startingTime) {
         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): not enought time to start the scan"));
         msParameters = msParamVar._retn(); 
-        return false;
+        if(msScanInfo.is_empty_scan == true)
+            return true;
+        else
+            return false;
     }
 
     msParameters = msParamVar._retn(); 
@@ -859,7 +884,10 @@ bool MinorServoBossImpl::checkScanImpl(
     TIMEVALUE gmst(guard_min_scan_time);
     if(CIRATools::timeSubtract(ttime, gmst) <= 0) {
         ACS_SHORT_LOG((LM_WARNING, "MinorServoBoss::checkScan(): total time too short for performing the scan."));
-        return false;
+        if(msScanInfo.is_empty_scan == true)
+            return true;
+        else
+            return false;
     }
     else {
         return true;
