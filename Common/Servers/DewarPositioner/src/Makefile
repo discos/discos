@@ -2,9 +2,10 @@
 # Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 #-----------------------------------------
 
+
 CDB_SCHEMAS = DewarPositioner
 
-PY_SCRIPTS = # List of scripts to be installed in the bin directory
+PY_SCRIPTS = derotatorPosition
 PY_MODULES =
 PY_PACKAGES = DewarPositioner
 
