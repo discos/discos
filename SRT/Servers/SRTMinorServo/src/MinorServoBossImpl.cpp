@@ -678,11 +678,9 @@ void MinorServoBossImpl::closeScan(ACS::Time& timeToStop) throw (
         }
     }
     else {
-        // string msg("closeScan(): no scan active");
-        // _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-        // impl.log(LM_DEBUG);
-        // throw impl.getMinorServoErrorsEx();
-        ; // Do nothing
+        m_configuration->m_isScanLocked = false;
+        m_configuration->m_isScanning = false;
+        m_configuration->m_isScanActive = false;
     }
 }
 
@@ -1111,6 +1109,7 @@ void MinorServoBossImpl::startScan(
     }
 
     if(msScanInfo.is_empty_scan) {
+        startingTime = getTimeStamp();
         return ;
     }
     else {
