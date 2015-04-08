@@ -339,9 +339,8 @@ class ScanInterfaceTest(ScanBaseTest):
             t = self.boss.checkScan(0, self.scan, self.antennaInfo) 
 
     def test_closeScan_scan_not_active(self):
-        """Raise a MinorServoErrorsEx in case no scan is active"""
-        with self.assertRaises(MinorServoErrorsEx):
-            time_to_stop = self.boss.closeScan() 
+        """Do nothing in case no scan is active"""
+        self.boss.closeScan() 
 
 
 if __name__ == '__main__':
