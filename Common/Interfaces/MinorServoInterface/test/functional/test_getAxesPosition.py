@@ -20,14 +20,19 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 class TestGetAxesPosition(unittest2.TestCase):
 
-    def setUp(self):
-        self.telescope = os.getenv('TARGETSYS')
-        self.client = PySimpleClient()
-        self.boss = self.client.getComponent('MINORSERVO/Boss')
-        self.setup_code = "CCB" if self.telescope == "SRT" else "CCC"
+    telescope = os.getenv('TARGETSYS')
 
-    def tearDown(self):
-        self.client.releaseComponent('MINORSERVO/Boss')
+    @classmethod
+    def setUpClass(cls):
+        cls.client = PySimpleClient()
+        cls.boss = cls.client.getComponent('MINORSERVO/Boss')
+        
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.releaseComponent('MINORSERVO/Boss')
+
+    def setUp(self):
+        self.setup_code = "CCB" if self.telescope == "SRT" else "CCC"
 
     def test_not_ready(self):
         """Raise a MinorServoErrorsEx in case the system is not ready"""

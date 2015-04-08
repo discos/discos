@@ -52,7 +52,12 @@ class ScanBaseTest(unittest2.TestCase):
 
     def tearDown(self):
         if self.boss.isScanActive():
-            self.boss.closeScan()
+            t = self.boss.closeScan()
+            self.waitUntil(t)
+
+    def waitUntil(self, targetTime):
+        while getTimeStamp().value < targetTime:
+            time.sleep(0.1)
         
 
 class ScanTest(ScanBaseTest):
@@ -238,10 +243,6 @@ class ScanTest(ScanBaseTest):
         self.assertTrue(self.boss.isScanActive())
         self.assertFalse(self.boss.isScanning())
         self.assertAlmostEqual(startPos + self.scan.range, endPos, delta=0.1)
-
-    def waitUntil(self, targetTime):
-        while getTimeStamp().value < targetTime:
-            time.sleep(0.1)
 
     def getSRTPosition(self, conf_code, servo_name, elevation=45):
         """Return the servo position related to the elevation.
