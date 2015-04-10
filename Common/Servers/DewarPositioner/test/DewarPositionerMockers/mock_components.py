@@ -22,19 +22,24 @@ class MockDevice(object):
         return self.is_updating
 
     def getMinLimit(self):
-        return -230.0
+        return -85.77
 
     def getMaxLimit(self):
-        return +230.0
+        return +125.23
 
     def getStep(self):
         return 60.0
 
     def setPosition(self, position):
-        self.position = position
+        self.cmd_position = position
+        if self.getMinLimit() < position < self.getMaxLimit():
+            self.position = position
 
     def getActPosition(self):
         return self.position
+
+    def getCmdPosition(self):
+        return self.cmd_position
 
     def park(self):
         self._setDefault()
@@ -44,7 +49,7 @@ class MockDevice(object):
         return Property(0, completion)
 
     def _setDefault(self):
-        self.position = 0.0
+        self.position = self.cmd_position = 0.0
         self.is_ready = False
         self.is_tracking = False
         self.is_updating = False

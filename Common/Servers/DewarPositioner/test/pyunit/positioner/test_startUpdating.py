@@ -119,6 +119,40 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         finally:
             self.p.stopUpdating()
 
+
+    def test_custom_auto_rewinding(self):
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('CUSTOM')
+        latitude = radians(39.49)
+        site_info = {'latitude': latitude}
+        self.p.setup(site_info, self.source, self.device)
+        self.p.setRewindingMode('AUTO')
+        
+        Pis = -23
+        self.cdbconf.updateInitialPositions(Pis)
+        try:
+            # Az and el in radians; the related parallactic angle is -63
+            az, el = 1.2217, 0.6109
+            parallactic = PosGenerator.getParallacticAngle(latitude, az, el)
+            target = Pis + parallactic
+            min_limit = self.device.getMinLimit()
+            # The final angle is -86, lower than the min limit (-85.77)
+            self.assertLess(target, min_limit)
+
+            self.source.setAzimuth(az)
+            self.source.setElevation(el)
+            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el)
+
+            # For the K Band, we expect a rewind of 120 degrees
+            # rewind_angle = self.p.getAutoRewindingSteps() * self.device.getStep()
+            rewind_angle = 180 # The maximum, in case getAutoRewindingSteps is 0
+            expected = target + rewind_angle
+            time.sleep(0.11)
+            self.assertEqual(expected, self.device.getActPosition())
+        finally:
+            self.p.stopUpdating()
+
+
     def test_custom_opt(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM_OPT')
