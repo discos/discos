@@ -183,10 +183,23 @@ module Management {
 		void chooseDefaultDataRecorder(in string rcvInstance) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
-		 * This method allows to change the value af the attribute <i>restFrequency</i>.
+		 * This method allows to change the value of the attribute <i>restFrequency</i>.
+		 * @param rest frequencies in MHz. In principle a value of rest frequency has to be provided for each os sections of the current backend.
+		 * In case a single value is gives it will be considered to be valid for all sections.
 		 */
 		void setRestFrequency(in ACS::doubleSeq rest);
 		
+		/**
+		 * Moves the frequency configuration in order to have all the sections of the currently active backend ready for spectroscopy.
+		 * The method tries to put the given rest frequency (@sa <i>setRestFrequency</i>) in the center of the corresponding sections.
+		 * In order to obtain this results it acts on the local oscillator of the front end and on the settings of the sections.
+		 * @param dev this string value is expected to be on of the three following code: LO, BCK, ALL.
+		 *        LO the backend sections are centered on the line only moving the local oscillator of the frontend
+		 *        BCK the backend sections are centered on the line only moving the synthetizer of the backend
+		 *        ALL the backend frequency tuning is done with both the above methods
+		 */
+		void fTrack(in string dev) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
 		/**
 		 * This method sets the current project code. If the project does not exists an error is thrown.
 		 * @param code code of the project, if blank the selected code will be default one 

@@ -21,63 +21,6 @@
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Antenna.xsd"/>
 		
-	<xs:simpleType name="TMinorServoAxisType">
-		<xs:annotation><xs:documentation>
-			Lists all axis managed by the minor servo system, a subset of the TScanAxis enumeration
-		</xs:documentation></xs:annotation>
-		<xs:restriction base="xs:string">
-	    	<xs:enumeration value="SUBR_Z">
-				<xs:annotation><xs:documentation>
-					Scan along the Z (focus) of the subreflector
-				</xs:documentation></xs:annotation>	
-	      	</xs:enumeration>
-	      	
-	    	<xs:enumeration value="SUBR_X">
-				<xs:annotation><xs:documentation>
-					Scan along the X of the subreflector
-				</xs:documentation></xs:annotation>	
-	      	</xs:enumeration>
-
-	    	<xs:enumeration value="SUBR_Y">
-				<xs:annotation><xs:documentation>
-					Scan along the Y of the subreflector
-				</xs:documentation></xs:annotation>	
-	      	</xs:enumeration>
-	      	
-	    	<xs:enumeration value="SUBR_ROTY">
-				<xs:annotation><xs:documentation>
-					rotate the subriflector along the Y axis
-				</xs:documentation></xs:annotation>	
-	      	</xs:enumeration>
-
-	      	<xs:enumeration value="SUBR_ROTX">
-				<xs:annotation><xs:documentation>
-					rotate the subriflector along the X axis
-				</xs:documentation></xs:annotation>	
-	      	</xs:enumeration>
-	      	
-	    	<xs:enumeration value="PFP_Z">
-				<xs:annotation><xs:documentation>
-					Scan along the Z (focus) of the primary focus
-				</xs:documentation></xs:annotation>	
-	      	</xs:enumeration>
-
-	    	<xs:enumeration value="PFP_Y">
-				<xs:annotation><xs:documentation>
-					Scan along the Y of the primary focus
-				</xs:documentation></xs:annotation>	
-	      	</xs:enumeration>
-
-		</xs:restriction>
-	</xs:simpleType>
-	
-	<xs:complexType name="MinorServoMappingType">
-		<xs:attribute name="axis" type="TMinorServoAxisType" use="required"/>
-		<xs:attribute name="servoName" type="xs:string" use="required"/>
-		<xs:attribute name="antennaGeometry" type="antenna:TsubScanGeometryBasicType" use="required"/>
-		<xs:attribute name="beamDeviationFactor" type="xs:double" use="required"/>
-	</xs:complexType>
-	
 	<xs:complexType name="SchedulerType">
 		<xs:sequence>
 			<xs:element name="scheduleName" type="baci:ROstring"/>
@@ -90,7 +33,6 @@
 			<xs:element name="currentBackend" type="baci:ROstring"/>
 			<xs:element name="currentRecorder" type="baci:ROstring"/>	
 			<xs:element name="restFrequency" type="baci:ROdoubleSeq"/>
-			<xs:element name="MinorServoMapping" type="MinorServoMappingType" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 		<!-- directory where to find the schedules -->
 		<xs:attribute name="SchedDir" type="xs:string" use="required" />

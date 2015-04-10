@@ -102,4 +102,6 @@
 
 <ErrorCode name="CloseTelescopeScanError" shortDescription="Not able command the scan close to the telescope" description=""/>
 
+<ErrorCode name="InvalidRestFrequency" shortDescription="The rest frequency is not provided or does not match the number of backend sections" description=""/>
+
 </Type>

@@ -360,6 +360,10 @@ void SchedulerImpl::setRestFrequency(const ACS::doubleSeq& rest) throw (CORBA::S
 	m_core->_setRestFrequency(rest);
 }
 
+void SchedulerImpl::fTrack(const char* dev) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	m_core->_fTrack(dev);
+}
 
 void SchedulerImpl::setProjectCode(const char *code) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx)
 {

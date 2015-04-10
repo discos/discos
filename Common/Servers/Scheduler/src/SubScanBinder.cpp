@@ -70,6 +70,13 @@ void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const AC
 			copyPrimaryAntenaTrack(sec);
 		}
 	}
+
+    /*second.secondary=false; second.paramNumber=0; second.applyOffsets=false; second.type=Antenna::ANT_NONE; second.enableCorrection=true;
+    prim.type=Antenna::ANT_NONE;
+    prim.paramNumber=0;
+    prim.secondary=true;
+    prim.applyOffsets=true;*/
+
     m_servo->is_empty_scan=false;
     m_servo->axis_code=CORBA::string_dup((const char *)axis);
     m_servo->range=span;

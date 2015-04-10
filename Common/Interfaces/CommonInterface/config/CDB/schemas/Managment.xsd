@@ -20,6 +20,119 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	
+	<xs:simpleType name="TScanAxisEnumerationType">
+		<xs:annotation><xs:documentation>
+			Lists all axis managed by the minor servo system, a subset of the TScanAxis enumeration
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+
+	    	<xs:enumeration value="MNG_NO_AXIS">
+				<xs:annotation><xs:documentation>
+					The scan involves no axis
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+	    	<xs:enumeration value="MNG_HOR_LON">
+				<xs:annotation><xs:documentation>
+					The scan is along the horizontal longitude
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+		
+			<xs:enumeration value="MNG_HOR_LAT">
+				<xs:annotation><xs:documentation>
+					The scan is along the horizontal latitude
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+			<xs:enumeration value="MNG_EQ_LON">
+				<xs:annotation><xs:documentation>
+					The scan is along the equatorial longitude
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+			<xs:enumeration value="MNG_EQ_LAT">
+				<xs:annotation><xs:documentation>
+					The scan is along the equatorial latitude
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+			<xs:enumeration value="MNG_GAL_LON">
+				<xs:annotation><xs:documentation>
+					The scan is along the galactic longitude
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+			<xs:enumeration value="MNG_GAL_LAT">
+				<xs:annotation><xs:documentation>
+					The scan is along the galactic latitude
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+			<xs:enumeration value="MNG_BEAMPARK">
+				<xs:annotation><xs:documentation>
+					The scan is beam park positioning
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+			<xs:enumeration value="MNG_TRACK">
+				<xs:annotation><xs:documentation>
+					The scan is normal sidereal tracking
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+			<xs:enumeration value="MNG_GCIRCLE">
+				<xs:annotation><xs:documentation>
+					The scan is along the great circle
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      		
+	    	<xs:enumeration value="SUBR_Z">
+				<xs:annotation><xs:documentation>
+					Scan along the Z (focus) of the subreflector
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+	    	<xs:enumeration value="SUBR_X">
+				<xs:annotation><xs:documentation>
+					Scan along the X of the subreflector
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+	    	<xs:enumeration value="SUBR_Y">
+				<xs:annotation><xs:documentation>
+					Scan along the Y of the subreflector
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+	    	<xs:enumeration value="SUBR_ROTY">
+				<xs:annotation><xs:documentation>
+					rotate the subriflector along the Y axis
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+	      	<xs:enumeration value="SUBR_ROTX">
+				<xs:annotation><xs:documentation>
+					rotate the subriflector along the X axis
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	      	
+	    	<xs:enumeration value="PFP_Z">
+				<xs:annotation><xs:documentation>
+					Scan along the Z (focus) of the primary focus
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+	    	<xs:enumeration value="PFP_Y">
+				<xs:annotation><xs:documentation>
+					Scan along the Y of the primary focus
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+
+		</xs:restriction>
+	</xs:simpleType>
+	
+	
+	
 	<xs:complexType name="SystemStatusType">
 		<xs:complexContent>
 			<xs:restriction base="baci:ROEnum">

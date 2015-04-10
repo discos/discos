@@ -44,14 +44,4 @@
 <currentRecorder/>
 <restFrequency/>
 
-
-<MinorServoMapping axis="SUBR_Z" servoName="SRP_TZ" antennaGeometry="LON" beamDeviationFactor="0.0"/>
-<MinorServoMapping axis="SUBR_X" servoName="SRP_TX" antennaGeometry="LON" beamDeviationFactor="0.0"/>
-<MinorServoMapping axis="SUBR_Y" servoName="SRP_TY" antennaGeometry="LON" beamDeviationFactor="0.0"/>
-<MinorServoMapping axis="SUBR_ROTY" servoName="SRP_RY" antennaGeometry="LON" beamDeviationFactor="0.0"/>
-<MinorServoMapping axis="SUBR_ROTX" servoName="SRP_RX" antennaGeometry="LON" beamDeviationFactor="0.0"/>
-<MinorServoMapping axis="PFP_Z" servoName="PFP_TZ" antennaGeometry="LON" beamDeviationFactor="0.0"/>
-<MinorServoMapping axis="PFP_Y" servoName="PFP_RY" antennaGeometry="LON" beamDeviationFactor="0.0"/>
-
-
 </Scheduler>

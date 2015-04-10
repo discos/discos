@@ -139,6 +139,11 @@ public:
 	long getTsysGapTime() const { return m_TsysGapTime; }
 	
 	/**
+	 * @return the number of meaningful decimal digits when performing ftrack computation, i represents the precision of the local oscillators
+	 */
+	long getFTrackDigits() const { return m_fTrackDigits; }
+
+	/**
 	 * @return the location, inside the CDB of the procedures files
 	 */ 	
 	const IRA::CString& getProceduresLocation() const { return m_proceduresLocation; }
@@ -196,6 +201,7 @@ private:
 	IRA::CString m_defaultProjectCode;
 	bool m_checkProjectCode;
 	long m_minorServoMappings;
+	long m_fTrackDigits;
 	
 	TMinorServoAxis* m_axis;
 

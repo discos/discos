@@ -444,26 +444,6 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 	}
 }
 
-/*******************************************************************************************/
-/* TO BE DELETED WHEN MACRON INSTRUCTION LIKE SKYDIP HAVE BEEN AMMENDED */
-/*****************************************************************************************/
-/*void CCore::_stopRecording() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl,
-		ComponentErrors::UnexpectedExImpl)
-{
-	// now take the mutex
-	baci::ThreadSyncGuard guard(&m_mutex);
-	// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
-	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl);
-	loadDefaultDataReceiver();
-	CCore::stopDataTransfer(m_defaultBackend.in(),m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
-	// wait for a data transfer to complete before start with the latitude scan
-	guard.release();
-	while (checkRecording(m_defaultDataReceiver.in(),m_defaultDataReceiverError)) {  // throw (ComponentErrors::OperationErrorExImpl)
-		IRA::CIRATools::Wait(0,250000); // 0.25 seconds
-	}
-	m_subScanEpoch=0;
-}*/
-
 void CCore::_terminateScan() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -482,6 +462,258 @@ void CCore::_setRestFrequency(const ACS::doubleSeq& in)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_restFrequency=in;
+	IRA::CString out;
+	IRA::CIRATools::doubleSeqToStr(in,out);
+	ACS_LOG(LM_FULL_INFO,"CCore::_setRestFrequency()",(LM_NOTICE,"Rest frequency : %s",(const char *)out));
+}
+
+void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+		ManagementErrors::InvalidRestFrequencyExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ValidationErrorExImpl,
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntCallOperationExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	Backends::GenericBackend_var backend;
+	ACS::ROlong_var sectionsNumberRO;
+	ACS::ROlongSeq_var inputSectionRO;
+	ACS::ROlong_var IFNumberRO;
+	ACS::longSeq_var inputSection;
+	ACSErr::Completion_var comp;
+	long sections;
+	long inputs;
+	long IFNumber;
+	long digits;
+	ACS::longSeq_var bckinputIF,bckinputFeed,fndoutputPol;
+	ACS::doubleSeq_var bckinputBW,bckinputFreq,fndoutputLO,fndoutputBw,fndoutputFreq,topocentricFreq;
+	ACS::doubleSeq sectionFreq,inputLO,lo;
+	IRA::CString device(dev);
+
+	//1) preliminary checks----------------------------------------------------------------------------------
+	if (m_restFrequency.length()==0) {
+		_EXCPT(ManagementErrors::InvalidRestFrequencyExImpl,impl,"CCore::_fTrack()");
+		throw impl;
+	}
+	device.MakeUpper();
+	if ((device!="ALL") && (device!="LO") & (device!="BCK")) {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_fTrack()");
+		impl.setReason("parameter differs from ALL,LO,BCK");
+		throw impl;
+	}
+	//---------------------------------------------------------------------------------------------------
+	//2) initializations----------------------------------------------------------------------------------
+	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl);
+	backend=m_defaultBackend;
+	loadReceiversBoss(m_receiversBoss,m_receiversBossError); // throw ComponentErrors::CouldntGetComponentExImpl)
+	loadAntennaBoss(m_antennaBoss,m_antennaBossError);
+	// now let's collect all the information required by computation
+	digits=m_config->getFTrackDigits();
+	//---------------------------------------------------------------------------------------------------
+	//3) info from backend--------------------------------------------------------------------------------
+	try {
+		sectionsNumberRO=backend->sectionsNumber();
+		inputSectionRO=backend->inputSection();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		throw impl;
+	}
+	sections=sectionsNumberRO->get_sync(comp.out()); // number of backend sections
+	inputSection=inputSectionRO->get_sync(comp.out());
+	if ((m_restFrequency.length()>1) && (m_restFrequency.length()!=(unsigned)sections)) {   // check one rest frequency or as many as section are given
+		_EXCPT(ManagementErrors::InvalidRestFrequencyExImpl,impl,"CCore::_fTrack()");
+		throw impl;
+	}
+	try {
+		inputs=backend->getInputs(bckinputFreq,bckinputBW,bckinputFeed,bckinputIF);
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_defaultBackendError=true;
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getInputs()");
+		impl.setComponentName(backend->name());
+		throw impl;
+	}
+	catch (BackendsErrors::BackendsErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getInputs()");
+		impl.setComponentName(backend->name());
+		throw impl;
+	}
+	if (inputSection->length()!=(unsigned)inputs) {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_fTrack()");
+		impl.setReason("inconsistent data from the backend inputs number");
+		throw impl;
+	}
+	//---------------------------------------------------------------------------------------------------
+	//4) info from antenna--------------------------------------------------------------------------------
+	try {
+		m_antennaBoss->getTopocentricFrequency(m_restFrequency,topocentricFreq.out());
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getTopocentricFrequency()");
+		impl.setComponentName(m_antennaBoss->name());
+		throw impl;
+	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getTopocentricFrequency()");
+		impl.setComponentName(m_antennaBoss->name());
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_antennaBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		m_antennaBossError=true;
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
+		throw impl;
+	}
+	// just to make sure the topocentric sequence has the right dimension!
+	if (topocentricFreq->length()!=m_restFrequency.length()) {
+		topocentricFreq->length(m_restFrequency.length());
+	}
+	//---------------------------------------------------------------------------------------------------
+	//4) info from receivers-------------------------------------------------------------------------------
+	try {
+		IFNumberRO=m_receiversBoss->IFs();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		throw impl;
+	}
+	IFNumber=IFNumberRO->get_sync(comp.out()); // number of output IFs of the receeever
+	try {
+		m_receiversBoss->getIFOutput(bckinputFeed,bckinputIF,fndoutputFreq.out(),fndoutputBw.out(),fndoutputPol.out(),fndoutputLO.out());
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_receiversBossError=true;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getIFOutput");
+		impl.setComponentName(m_receiversBoss->name());
+		throw impl;
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx & ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getIFOutput");
+		impl.setComponentName(m_receiversBoss->name());
+		throw impl;
+	}
+	if (fndoutputFreq->length()!=(unsigned)inputs) {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_fTrack()");
+		impl.setReason("inconsistent data from the receivers if outputs");
+		throw impl;
+	}
+	//---------------------------------------------------------------------------------------------------
+	//5) let's start with some computations  -----------------------------------------------------------------------------
+	sectionFreq.length(sections);
+	inputLO.length(inputs);
+	lo.length(IFNumber);
+	long currentSection;
+	for (long j=0;j<inputs;j++) {
+		if ((device=="ALL") || (device=="LO")) {
+			currentSection=inputSection[j];
+			if (topocentricFreq->length()==1) {
+				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[0]-bckinputFreq[currentSection]-
+						(bckinputBW[currentSection]/2.0),digits);
+			}
+			else {
+				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[currentSection]-bckinputFreq[currentSection]-
+						(bckinputBW[currentSection]/2.0),digits);
+			}
+			lo[bckinputIF[j]]=inputLO[j]; // local oscillator per IFs
+		}
+		else {
+			inputLO[j]=fndoutputLO[j];
+		}
+	}
+	for (long j=0;j<inputs;j++) {
+		if ((device=="ALL") || (device=="BCK")) {
+			currentSection=inputSection[j];
+			if (topocentricFreq->length()==1) {
+				sectionFreq[currentSection]=topocentricFreq[0]-inputLO[j]-(bckinputBW[currentSection]/2.0);
+			}
+			else {
+				sectionFreq[currentSection]=topocentricFreq[currentSection]-inputLO[j]-(bckinputBW[currentSection]/2.0);
+			}
+		}
+	}
+	//---------------------------------------------------------------------------------------------------
+	//5) now lets command the new values  -----------------------------------------------------------------------------
+	if ((device=="ALL") || (device=="LO")) {
+		try {
+			m_receiversBoss->setLO(lo);
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::_fTrack()");
+			impl.setReason("Could not set local oscillator");
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::_fTrack()");
+			impl.setReason("Could not set local oscillator");
+			throw impl;
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			m_receiversBossError=true;
+			throw impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
+			m_receiversBossError=true;
+			throw impl;
+		}
+	}
+	if ((device=="ALL") || (device=="BCK")) {
+		for (long j=0;j<sections;j++) {
+			try {
+				backend->setSection(j,sectionFreq[j],-1.0,-1,-1,-1.0,-1);
+			}
+			catch (ComponentErrors::ComponentErrorsEx& ex) {
+				_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::_fTrack()");
+				impl.setReason("Could not set the backend sections");
+				throw impl;
+			}
+			catch (BackendsErrors::BackendsErrorsEx& ex) {
+				_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::_fTrack()");
+				impl.setReason("Could not set backend sections");
+				throw impl;
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				m_defaultBackendError=true;
+				throw impl;
+			}
+			catch (...) {
+				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
+				m_defaultBackendError=true;
+				throw impl;
+			}
+		}
+	}
 }
 
 void CCore::_setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
@@ -528,9 +760,9 @@ void CCore::_setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetC
 	else {
 		device=deviceID;
 	}
-	guard.release();
+	//guard.release();
 	//backend=m_schedExecuter->getBackendReference(); //get the reference to the currently used backend.
-	guard.acquire();
+	//guard.acquire();
 	//if (CORBA::is_nil(backend)) {
 	loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
 	backend=m_defaultBackend;
@@ -853,9 +1085,9 @@ void CCore::_haltSchedule()
 	}
 }
 
-void CCore::_startSchedule(const char* scheduleFile,const char * startSubScan) throw (
-		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,
-		ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::LogFileErrorExImpl)
+void CCore::_startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,ManagementErrors::AlreadyRunningExImpl,
+		ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+		ManagementErrors::LogFileErrorExImpl)
 {
 	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {

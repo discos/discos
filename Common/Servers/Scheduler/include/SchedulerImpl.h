@@ -317,6 +317,12 @@ public:
 	virtual void setRestFrequency(const ACS::doubleSeq& rest) throw (CORBA::SystemException);
 
 	/**
+	 * It allows to centre the observe frequency line in the observed band.
+	 */
+    virtual void fTrack(const char* dev) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+
+	/**
 	 * It allows to immediately start a scan that involves a primary focus axis or a subreflector axis. The scan is performed of the currently
 	 * commanded source. If the axis involves a pointing offsets the telescope will try to correct it by moving the antenna by the adequate
 	 * beam deviation factor.

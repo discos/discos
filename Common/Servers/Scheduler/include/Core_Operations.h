@@ -141,6 +141,13 @@ void _setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCod
 void _setRestFrequency(const ACS::doubleSeq& in);
 
 /**
+ * Center a frequency line inside the backend sections.
+ */
+void _fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+		ManagementErrors::InvalidRestFrequencyExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ValidationErrorExImpl,
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntCallOperationExImpl);
+
+/**
  * This method stops the current schedule, if one is running. If no schedule is active at tehe moment it takes
  * no action.
  * This function is thread safe.
@@ -164,11 +171,12 @@ void _haltSchedule();
  * @throw ComponentErrors::AlreadyRunningExImpl
  * @throw ManagementErrors::SubscanErrorExImpl
  * @throw ComponentErrors::CouldntGetComponentExImpl
+ * @throw ComponentErrors::CORBAProblemExImpl
  * @throw ManagementErrors::LogFileErrorExImpl
 */
-void _startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,
-		ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::SubscanErrorExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::LogFileErrorExImpl);
+void _startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,ManagementErrors::AlreadyRunningExImpl,
+		ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+		ManagementErrors::LogFileErrorExImpl);
 
 /**
  * It allows to change the backend elected as default backend, the default backend is the device used for all operation (for example tsys) when a schedule is not running.

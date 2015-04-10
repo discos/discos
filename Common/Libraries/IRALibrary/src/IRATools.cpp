@@ -605,6 +605,32 @@ bool CIRATools::timeToStr(const ACS::Time& time,IRA::CString& outString,char dat
 	return true;	
 }
 
+bool CIRATools::doubleSeqToStr(const ACS::doubleSeq& val,IRA::CString& outString,char delimiter)
+{
+	IRA::CString single;
+	unsigned long len=val.length();
+	outString="";
+	for (unsigned i=0;i<len;i++) {
+		single.Format("%lf",val[i]);
+		outString+=single;
+		if (i<len-1) outString+=delimiter;
+	}
+	return true;
+}
+
+bool CIRATools::longSeqToStr(const ACS::longSeq& val,IRA::CString& outString,char delimiter)
+{
+	IRA::CString single;
+	unsigned long len=val.length();
+	outString="";
+	for (unsigned i=0;i<len;i++) {
+		single.Format("%d",val[i]);
+		outString+=single;
+		if (i<len-1) outString+=delimiter;
+	}
+	return true;
+}
+
 bool CIRATools::hourAngleToRad(const IRA::CString& angle,double& rad,bool complete,char delimiter)
 {
 	int p,i=0,dCounter=0; 
@@ -1065,3 +1091,58 @@ bool CIRATools::directoryExists(const IRA::CString& path)
     return exists;
 }
 
+double CIRATools::roundNearest(const double& val,const long& decimals)
+{
+	long precision=(long)pow(10,decimals);
+	return round(val*precision)/precision;
+}
+
+double CIRATools::roundDown(const double& val,const long& decimals)
+{
+	long precision=(long)pow(10,decimals);
+	return floor(val*precision)/precision;
+}
+
+double CIRATools::roundUp(const double& val,const long& decimals)
+{
+	long precision=(long)pow(10,decimals);
+	return ceil(val*precision)/precision;
+}
+
+double CIRATools::getMinimumValue(const ACS::doubleSeq& array,long& pos)
+{
+	if (array.length()>0) {
+		double min=array[0];
+		pos=0;
+		for (unsigned i=1;i<array.length();i++) {
+			if (array[i]<min) {
+				min=array[i];
+				pos=i;
+			}
+		}
+		return min;
+	}
+	else {
+		pos=-1;
+		return 0.0;
+	}
+}
+
+double CIRATools::getMaximumValue(const ACS::doubleSeq& array,long& pos)
+{
+	if (array.length()>0) {
+		double max=array[0];
+		pos=0;
+		for (unsigned i=1;i<array.length();i++) {
+			if (array[i]>max) {
+				max=array[i];
+				pos=i;
+			}
+		}
+		return max;
+	}
+	else {
+		pos=-1;
+		return 0.0;
+	}
+}

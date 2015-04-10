@@ -34,7 +34,7 @@ USER_LIB = -lCCfits
 
 EXECUTABLES_L     = testBulk testWriter
 
-testWriter_OBJECTS = TestWriter FitsWriter
+testWriter_OBJECTS = TestWriter FitsWriter SummaryWriter FitsTools
 testWriter_LIBS = IRALibrary 
 
 testBulk_OBJECTS  = testBulkTransmission
@@ -50,7 +50,7 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 FitsWriterImpl_OBJECTS   = FitsWriterImpl ReceiverCallback DataCollection EngineThread Configuration CommonTools\
-FitsWriter CollectorThread MetaData
+FitsWriter CollectorThread MetaData SummaryWriter FitsTools
 FitsWriterImpl_LIBS = baci maci FitsWriterStubs DataReceiverStubs ComponentErrors ManagementErrors ReceiversErrors bulkDataReceiverStubs\
                  ManagmentDefinitionsStubs ACSBulkDataError bulkDataStubs IRALibrary\
                  bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs MinorServoDefinitionsStubs \

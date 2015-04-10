@@ -133,8 +133,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	IRA::CString componentName;
 	IRA::CString strVal;
 	IRA::CString fieldPath;
-	componentName=Services->getName();
-	componentName=componentName+"/MinorServoMapping";
+
+	componentName="DataBlock/Equipment/MinorServoMapping";
 
 	try {
 		m_axis=new TMinorServoAxis[MAX_AXIS_NUMBER];
@@ -175,7 +175,14 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	}
 	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %d",m_minorServoMappings);
 
-
+	if (!CIRATools::getDBValue(Services,"FTrackPrecisionDigits",m_fTrackDigits,fieldPath)) {
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
+		dummy.setFieldName("FTrackPrecisionDigits");
+		throw dummy;
+	}
+	else {
+		ACS_DEBUG_PARAM("CConfiguration::Init()","Ftrack precision decimal digits %lu",m_fTrackDigits);
+	}
 	_GET_STRING_ATTRIBUTE("AntennaBossInterface","Antenna Boss component interface is ",m_antennaBossComp);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component interface is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);

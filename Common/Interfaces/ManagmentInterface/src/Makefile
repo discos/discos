@@ -20,7 +20,7 @@
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = ProcedureFile
+CDB_SCHEMAS = ProcedureFile TelescopeEquipment
 
 #
 # IDL Files and flags
