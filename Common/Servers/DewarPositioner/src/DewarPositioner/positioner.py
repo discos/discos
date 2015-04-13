@@ -124,10 +124,10 @@ class Positioner(object):
 
 
     def _setPosition(self, position):
-        target = position + self.control.offset 
-        if self.device.getMinLimit() < target < self.device.getMaxLimit():
+        self.control.target = position + self.control.offset 
+        if self.device.getMinLimit() < self.control.target < self.device.getMaxLimit():
             try:
-                self.device.setPosition(target)
+                self.device.setPosition(self.control.target)
             except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
                 raeson = "cannot set the %s position" %self.device._get_name()
                 logger.logError('%s: %s' %(raeson, ex.message))
@@ -138,7 +138,7 @@ class Positioner(object):
                 raise PositionerError(raeson)
         else:
             raise OutOfRangeError("position %.2f out of range {%.2f, %.2f}" 
-                    %(target, self.device.getMinLimit(), self.device.getMaxLimit()))
+                    %(self.control.target, self.device.getMinLimit(), self.device.getMaxLimit()))
 
 
     def startUpdating(self, axis, sector, az, el):
@@ -278,12 +278,13 @@ class Positioner(object):
             self.control.isRewinding = True
             # getAutoRewindingSteps() returns None in case the user did not specify it
             n = steps if steps != None else self.control.autoRewindingSteps
-            actPos, space = self.getRewindingParameters(n)
+            targetPos, space = self.getRewindingParameters(n)
             oldPis = self.control.scanInfo['iStaticPos']
             newPis = oldPis + space
+            newPos = targetPos + space
             self.control.updateScanInfo({'iStaticPos': newPis})
             self.conf.updateInitialPositions(newPis)
-            self._setPosition(newPis)
+            self._setPosition(newPos)
             logger.logInfo('rewinding in progress...')
             startingTime = now = datetime.datetime.now()
             while (now - startingTime).seconds < float(self.conf.getAttribute('RewindingTimeout')):
@@ -306,34 +307,41 @@ class Positioner(object):
 
 
     def getRewindingParameters(self, steps=None):
+        """Return the target position and the rewinding offset"""
         if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
 
         if steps != None and steps <= 0:
             raise PositionerError('the number of steps must be positive')
 
-        try:
-            actPos = self.device.getActPosition()
-        except Exception, ex:
-            raeson = 'cannot get the device position: %s' %ex.message
-            raise PositionerError(raeson)
-        lspace = actPos - self.device.getMinLimit() # Space on the left
-        rspace = self.device.getMaxLimit() - actPos # Space on the right
-        sign = -1 if lspace >= rspace else 1
-        space = max(lspace, rspace)
+        target = self.control.target
+        # space is the distance from the target to the farest limit
+        # To be sure, I add a delta of 0.1...
+        if target - 0.1 <= self.device.getMinLimit():
+            space = abs(self.device.getMaxLimit() - target)
+            sign = +1 # The space must be added to the target position
+        elif self.device.getMaxLimit() <= target + 0.1:
+            space = abs(target - self.device.getMinLimit())
+            sign = -1
+        else:
+            lspace = abs(self.device.getMinLimit() - target) # Space on the left
+            rspace = abs(self.device.getMaxLimit() - target) # Space on the right
+            sign = -1 if lspace >= rspace else 1
+            space = max(lspace, rspace)
 
-        maxActualNumberOfSteps = int(space // self.device.getStep())
+
+        maxNumberOfSteps = int(space // self.device.getStep())
 
         if steps == None:
-            n = maxActualNumberOfSteps
-        elif steps <= maxActualNumberOfSteps:
+            n = maxNumberOfSteps
+        elif steps <= maxNumberOfSteps:
             n = steps
         else:
-            raise PositionerError('actual pos: {%.1f} -> max number of steps: {%d} (%s given)'
-                    %(actPos, maxActualNumberOfSteps, steps))
+            raise PositionerError('target pos: {%.1f} -> max number of steps: {%d} (%s given)'
+                    %(target, maxNumberOfSteps, steps))
 
         rewinding_value = sign * n * self.device.getStep()
-        return (actPos, rewinding_value)
+        return (target, rewinding_value)
 
 
     def getRewindingStep(self):
@@ -640,6 +648,7 @@ class Control(object):
         self.mustUpdate = False
         self.stop = False
         self.offset = 0.0
+        self.target = 0,0
         self.rewindingOffset = 0.0
         self.isRewindingRequired = False
         self.isRewinding = False

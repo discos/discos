@@ -28,22 +28,13 @@ class RewindTest(unittest2.TestCase):
 
     def test_number_of_steps_oor(self):
         """Raise PositionerError when the number of steps is out of range"""
-        with self.assertRaisesRegexp(PositionerError, 'actual pos: {0.0}'):
+        with self.assertRaisesRegexp(PositionerError, 'target pos: {0.0}'):
             self.p.rewind(steps=4)
 
     def test_not_positive_number_of_steps(self):
         """Raise PositionerError when the number of steps is not positive"""
         with self.assertRaisesRegexp(PositionerError, 'steps must be positive$'):
             self.p.rewind(steps=0)
-
-    def test_cannot_get_actual_position(self):
-        """Raise PositionerError when cannot get the actual position"""
-        self.device = self.m.patch(self.device)
-        self.device.getActPosition()
-        self.m.throw(RuntimeError)
-        self.m.replay()
-        with self.assertRaisesRegexp(PositionerError, 'cannot get the device'):
-            self.p.rewind(steps=2)
 
     def test_timeout_exceeded(self):
         """Raise PositionerError when the timeout is exceeded"""
@@ -95,9 +86,7 @@ class RewindTest(unittest2.TestCase):
     def test_position_after_rewinding_from0(self):
         """Verify the value of the position after the rewinding (from 0)"""
         n = 2
-        self.device = self.m.patch(self.device)
-        mocker.expect(self.device.isTracking()).result(True)
-        self.m.replay()
+        self.p.setPosition(0)
         expected = sum(self.p.getRewindingParameters(n))
         self.p.rewind(steps=n)
         self.assertEqual(self.device.getActPosition(), expected)
