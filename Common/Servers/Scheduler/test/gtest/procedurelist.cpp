@@ -82,5 +82,38 @@ TEST_F(TestProcedure, CProcedureList_getProcedure_by_name_with_params)
         << "error: " << (const char*)cpl->getLastError();
     ASSERT_EQ(args, (WORD)1) 
         << "error: " << (const char*)cpl->getLastError();
+    ASSERT_EQ(commands[0], IRA::CString("wait=$1"));
+}
+
+TEST_F(TestProcedure,
+CProcedureList_getProcedure_by_name_with_params_to_ACSStringSeq)
+{
+    cpl->readAll(false);
+    ACS::stringSeq  commands;
+    WORD args;
+    bool result = cpl->getProcedure("PROCEDURE_WAIT_PARAM", commands, args);
+    ASSERT_TRUE(result) 
+        << "error: " << (const char*)cpl->getLastError();
+    ASSERT_EQ(args, (WORD)1) 
+        << "error: " << (const char*)cpl->getLastError();
+    IRA::CString line((const char*)commands[0]);
+    ASSERT_EQ(line, IRA::CString("wait=$1"));
+}
+
+TEST_F(TestProcedure, replace_procedure_parameters)
+{
+    const char PARAM = '$';
+    cpl->readAll(false);
+    ACS::stringSeq  commands;
+    WORD args;
+    cpl->getProcedure("PROCEDURE_WAIT_PARAM", commands, args);
+    IRA::CString line((const char*)commands[0]);
+    /* This acts as in Parser Lib, this test should be moved there for
+     * consistency */
+    IRA::CString params[1] = { IRA::CString("10") };
+    IRA::CString param_string;
+    param_string.Format("%c%d", PARAM, 1);
+    line.ReplaceAll((const char*)param_string,(const char*)params[0]); 
+    ASSERT_EQ(line, IRA::CString("wait=10"));
 }
 
