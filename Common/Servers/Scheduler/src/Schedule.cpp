@@ -371,7 +371,7 @@ CProcedureList::~CProcedureList()
 		m_currentRecord->proc.clear();
 		delete m_currentRecord;
 	}
-	m_procedure.clear();		
+	m_procedure.clear();
 }
 
 bool CProcedureList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CString& errorMsg)
