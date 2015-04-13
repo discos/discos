@@ -348,9 +348,14 @@ void CParser<OBJ>::pushProcedure(const IRA::CString& name,const ACS::stringSeq& 
 	for(unsigned i=0;i<procedure.length();i++) {  //check procedure correctness
 		//replace the place holders with the procedure arguments
 		IRA::CString line((const char *)procedure[i]);
+        /* FIXME: if parameters are specified starting from $1 as in bash the
+         * following cycle should be changed to increment j by one as now it
+         * starts from $0
+         */
 		for (WORD j=0;j<parNumber;j++) {
 			IRA::CString pp;
 			pp.Format("%c%d",PROCEDUREPARAMETER,j);
+			/*pp.Format("%c%d",PROCEDUREPARAMETER,j+1);*/
 			line.ReplaceAll((const char *)pp,procPrm[j]);
 		}
 		try {
