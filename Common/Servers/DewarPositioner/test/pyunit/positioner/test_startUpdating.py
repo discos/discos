@@ -56,6 +56,21 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             self.assertRaises(NotAllowedError, self.p.setPosition, 0)
         finally:
             self.p.stopUpdating()
+ 
+    def test_do_nothing_with_axis_MNG_BEAMPARK(self):
+        """Do nothing in case the axis is MNG_BEAMPARK"""
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('CUSTOM')
+        latitude, az, el = [radians(50)] * 3
+        site_info = {'latitude': latitude}
+
+        self.p.setup(site_info, self.source, self.device)
+        try:
+            self.p.startUpdating('MNG_BEAMPARK', 'ANT_NORTH', az, el)
+            time.sleep(0.2)
+            self.assertFalse(self.p.isUpdating())
+        finally:
+            self.p.stopUpdating()
 
     def test_notYetConfigured(self):
         """Verify startUpdating()"""
