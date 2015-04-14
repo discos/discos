@@ -5,7 +5,7 @@ bool CFitsTools::primaryHeaderComment(
 		const IRA::CString& comment,
 		IRA::CString& errorMessage)
 {
-	if (fits) {
+	if (!fits) {
 		errorMessage="fits file is not created";
 		return false;
 	}
@@ -22,7 +22,7 @@ bool CFitsTools::primaryHeaderComment(
 bool CFitsTools::primaryHeaderHistory(CCfits::FITS *const fits,const IRA::CString& history,
 	IRA::CString& errorMessage)
 {
-	if (fits) {
+	if (!fits) {
 		errorMessage="fits file is not created";
 		return false;
 	}
