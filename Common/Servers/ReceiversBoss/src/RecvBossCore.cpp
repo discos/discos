@@ -1714,7 +1714,8 @@ void CRecvBossCore::updateDewarPositionerStatus() throw (ComponentErrors::Couldn
 		m_dewarStatus=Management::MNG_WARNING;
 		return;
 	}
-	if ((derotator) &&  (m_config->dewarPositionerInterface()!="")) {
+	if (m_updateMode!=Receivers::RCV_UNDEF_DEROTCONF) {
+	//if ((derotator) &&  (m_config->dewarPositionerInterface()!="")) {
 		IRA::CIRATools::getTime(now);
 		if (now.value().value>m_dewarStatusEpoch+m_config->propertyUpdateTime()*10) {
 			loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
