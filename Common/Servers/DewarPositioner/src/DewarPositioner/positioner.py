@@ -234,6 +234,7 @@ class Positioner(object):
                         self.control.scanInfo.update({'dParallacticPos': Pdp})
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
+                        logger.logInfo(ex.message)
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
                                 self.rewind() 
@@ -245,6 +246,7 @@ class Positioner(object):
                         else:
                             if self.control.modes['rewinding'] == 'MANUAL':
                                 self.control.isRewindingRequired = True
+                                logger.logInfo('a derotator rewinding is required')
                             else:
                                 logger.logError('wrong rewinding mode: %s' %self.control.modes['rewinding'])
                             break
