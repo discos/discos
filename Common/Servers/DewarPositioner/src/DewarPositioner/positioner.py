@@ -536,7 +536,7 @@ class Positioner(object):
     def _start(self, posgen, *vargs):
         """Start a new process that computes and sets the position"""
         if self.isSetup():
-            self.stopUpdating() # Raise a PositionerError if the process stills alive
+            # self.stopUpdating() # Raise a PositionerError if the process stills alive
             self.t = ContainerServices.ContainerServices().getThread(
                     name=posgen.__name__, 
                     target=self._updatePosition, 

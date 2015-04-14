@@ -70,6 +70,7 @@ class PositionerOffsetTest(unittest2.TestCase):
         max_limit = self.device.getMaxLimit() 
         min_limit = self.device.getMinLimit()
         Pis = max_limit - offset/2
+        time.sleep(0.2) if self.using_mock else time.sleep(3)
         self.p.setPosition(Pis)
         time.sleep(0.2) # Wait a bit for the setup
         max_rewinding_steps = (max_limit - min_limit) // self.device.getStep()

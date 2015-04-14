@@ -24,7 +24,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
     def tearDown(self):
         self.p.park()
  
-    def _test_alreadyUpdating(self):
+    def test_alreadyUpdating(self):
         """The call to startUpdating() have to stop and start again a new updating"""
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
@@ -42,7 +42,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         finally:
             self.p.stopUpdating()
  
-    def _test_cannotSetPosition(self):
+    def test_cannotSetPosition(self):
         """Cannot set position during an updating"""
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
@@ -57,7 +57,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         finally:
             self.p.stopUpdating()
 
-    def _test_notYetConfigured(self):
+    def test_notYetConfigured(self):
         """Verify startUpdating()"""
         # startUpdating() raises NotAllowedError when the system is not configured
         self.assertRaises(NotAllowedError, self.p.startUpdating, 'axis', 'sector', 1, 1)
@@ -94,7 +94,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         self.cdbconf.UpdatingPosition['ANT_NORTH'] = [10, 'fooName'] # [position, functionName]
         self.assertRaises(PositionerError, self.p.startUpdating, axis, sector, 1, 1)
 
-    def _test_custom(self):
+    def test_custom(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
         latitude = radians(50)
@@ -108,7 +108,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         try:
             begin_idx = 5
             for i in range(begin_idx, 10):
-                az, el = radians(i*10), radians(i*5)
+                az, el = radians(180), radians(45 + i)
                 self.source.setAzimuth(az)
                 self.source.setElevation(el)
                 if i == begin_idx:
@@ -153,7 +153,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             self.p.stopUpdating()
 
 
-    def _test_custom_opt(self):
+    def test_custom_opt(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM_OPT')
         latitude = radians(50)
@@ -179,7 +179,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         finally:
             self.p.stopUpdating()
 
-    def _test_bsc(self):
+    def test_bsc(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
         latitude = radians(50)
@@ -205,7 +205,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         finally:
             self.p.stopUpdating()
 
-    def _test_bsc_opt(self):
+    def test_bsc_opt(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC_OPT')
         latitude = radians(50)
@@ -232,7 +232,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         finally:
             self.p.stopUpdating()
 
-    def _test_BSC_staticX(self):
+    def test_BSC_staticX(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
         latitude = radians(50)
@@ -258,7 +258,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         finally:
             self.p.stopUpdating()
 
-    def _test_CUSTOM_staticX(self):
+    def test_CUSTOM_staticX(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
         latitude = radians(50)

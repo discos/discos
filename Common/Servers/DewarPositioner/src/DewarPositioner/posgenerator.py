@@ -1,7 +1,7 @@
 """This module implements the position generators"""
 import datetime
 import time
-from math import sin, cos, tan, atan, degrees
+from math import sin, cos, tan, atan2, degrees
 from IRAPy import logger
 from Acspy.Common.TimeHelper import getTimeStamp
 
@@ -54,8 +54,7 @@ class PosGenerator(object):
     @staticmethod
     def getParallacticAngle(latitude, az, el):
         """Arguments in radians"""
-        tan_p = - sin(az) / (tan(latitude)*cos(el) - sin(el)*cos(az))
-        p = atan(tan_p)
+        p = atan2(-sin(az), tan(latitude)*cos(el) - sin(el)*cos(az))
         return degrees(p)
 
     

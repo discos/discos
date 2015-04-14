@@ -1,6 +1,7 @@
 from __future__ import with_statement
 import unittest2
 import random
+import math
 import time
 
 import Management
@@ -33,12 +34,13 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
     def test_updating(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
-        site_info = {'latitude': 50}
+        latitude = az = el = math.radians(50)
+        site_info = {'latitude': latitude}
         self.p.setup(site_info, self.source, self.device)
         posgen = PosGenerator()
         gen = posgen.parallactic(self.source, site_info)
         self.assertEqual(self.p.getScanInfo()['axis'], Management.MNG_NO_AXIS)
-        self.p.startUpdating(Management.MNG_TRACK, Antenna.ANT_NORTH, 60, 60)
+        self.p.startUpdating(Management.MNG_TRACK, Antenna.ANT_NORTH, az, el)
         self.assertEqual(self.p.getScanInfo()['axis'], Management.MNG_TRACK)
         self.p.stopUpdating()
         self.assertEqual(self.p.getScanInfo()['axis'], Management.MNG_NO_AXIS)
@@ -53,10 +55,10 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
     def test_Pip(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
-        latitude = 50
+        latitude = math.radians(50)
         site_info = {'latitude': latitude}
         self.p.setup(site_info, self.source, self.device)
-        az, el = 60, 60
+        az = el = math.radians(60)
         Pip = PosGenerator.getParallacticAngle(latitude, az, el)
         self.p.startUpdating(Management.MNG_TRACK, Antenna.ANT_NORTH, az, el)
         self.assertEqual(self.p.getScanInfo()['iStaticPos'], -19.2)
@@ -65,12 +67,12 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
     def test_Pdp(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
-        latitude = 50
+        latitude = az = el = math.radians(50)
         site_info = {'latitude': latitude}
         self.p.setup(site_info, self.source, self.device)
         posgen = PosGenerator()
         gen = posgen.parallactic(self.source, site_info)
-        self.p.startUpdating(Management.MNG_TRACK, Antenna.ANT_NORTH, 50, 50)
+        self.p.startUpdating(Management.MNG_TRACK, Antenna.ANT_NORTH, az, el)
         self.assertEqual(self.p.getScanInfo()['axis'], Management.MNG_TRACK)
         self.p.stopUpdating()
         self.assertEqual(self.p.getScanInfo()['axis'], Management.MNG_NO_AXIS)

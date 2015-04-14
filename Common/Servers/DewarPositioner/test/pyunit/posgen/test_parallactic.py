@@ -1,6 +1,6 @@
 import unittest2
 import mocker
-from math import sin, cos, tan, atan, radians, degrees, pi
+from math import sin, cos, tan, atan, radians, degrees, pi, atan2
 from DewarPositioner.posgenerator import PosGenerator, PosGeneratorError
 
 
@@ -31,20 +31,6 @@ class PosGeneratorParallacticTest(unittest2.TestCase):
         gen = self.posgen.parallactic(source, siteInfo={'latitude': 39})
         self.assertRaises(PosGeneratorError, gen.next)
 
-    def test_zero_division_timeout(self):
-        """Raise a PosGeneratorError if case of countinuos zero division"""
-        source = self.m.mock()
-        mocker.expect(
-                source.getRawCoordinates(mocker.ANY)
-                ).result((90, 0))
-        self.m.count(1, None)
-        self.m.count(1, None)
-        self.m.count(1, None) 
-        self.m.count(1, None)
-        self.m.replay()
-        gen = self.posgen.parallactic(source, siteInfo={'latitude': 0})
-        self.assertRaises(PosGeneratorError, gen.next)
-
     def test_right_behavior(self):
         """Generate 3 positions and do not stop in case of isolated zero div"""
         azimuths = (45, 45, 90, 45)
@@ -62,13 +48,17 @@ class PosGeneratorParallacticTest(unittest2.TestCase):
         for azd, eld in zip(azimuths, elevations):
             az = radians(azd)
             el = radians(eld)
-            try:
-                tan_p = - sin(az) / (tan(latitude)*cos(el) - sin(el)*cos(az))
-                p = atan(tan_p)
-            except ZeroDivisionError:
-                continue
+            p = atan2(-sin(az), (tan(latitude)*cos(el) - sin(el)*cos(az)))
             self.assertEqual(degrees(p), gen.next())
 
+    def test_parallactic_greater_than_90(self):
+        """Verify the (abs) parallactic angle can be greater than 90 degrees"""
+        lat = 0.68940505453776013 # 39.5 degrees
+        az = 6.1086523819801535 # 350 degrees
+        el = 1.2217304763960306 # 70 degrees
+        # The related parallactic angle must be 165 degrees
+        parallactic = PosGenerator.getParallacticAngle(lat, az, el)
+        self.assertGreater(abs(parallactic), 90)
 
 if __name__ == '__main__':
     unittest2.main()
