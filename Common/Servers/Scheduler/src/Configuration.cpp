@@ -175,7 +175,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	}
 	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %d",m_minorServoMappings);
 
-	if (!CIRATools::getDBValue(Services,"FTrackPrecisionDigits",m_fTrackDigits,"DataBlock/Equipment")) {
+	if (!CIRATools::getDBValue(Services,"FTrackPrecisionDigits",m_fTrackDigits,"alma/","DataBlock/Equipment")) {
 		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
 		dummy.setFieldName("FTrackPrecisionDigits");
 		throw dummy;
