@@ -149,7 +149,7 @@ class Positioner(object):
                 raise NotAllowedError('positioner not configured: a setup() is required')
             elif not self.conf.isConfigured():
                 raise NotAllowedError('CDB not configured: a CDBConf.setConfiguration() is required')
-            elif axis == 'MNG_BEAMPARK':
+            elif str(axis) == 'MNG_BEAMPARK':
                 pass # Do nothing
             elif self.conf.getAttribute('DynamicUpdatingAllowed') != 'true':
                 logger.logNotice('dynamic updating not allowed')
