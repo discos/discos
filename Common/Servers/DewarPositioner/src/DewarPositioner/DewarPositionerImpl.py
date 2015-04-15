@@ -565,8 +565,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         # The unit of time is `seconds`
         max_wait_time = 2 
         counter = 0
-        step = 0.1
+        step = 0.2
         while self.positioner.isUpdating():
+            self.positioner.stopUpdating()
             time.sleep(step)
             counter += step
             if counter > max_wait_time:
@@ -576,19 +577,15 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                 exc.setReason(reason)
                 raise exc.getComponentErrorsEx()
         try:
+            self.positioner.control.clearScanInfo()
             self.cdbconf.setConfiguration(confCode.upper())
-            if self.cdbconf.getAttribute('SetCustomPositionAllowed') == 'true':
-                position = float(self.cdbconf.getAttribute('SetupPosition'))
-                # Set the initialPosition, in order to add it to the dynamic one
-                self.cdbconf.updateInitialPositions(position)
-                self.positioner.control.updateScanInfo({'iStaticPos': position})
-                logger.logNotice('initial position set to %.4f' %position)
         except Exception, ex:
             reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
             logger.logError(reason)
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setData('Reason', reason)
             raise exc.getComponentErrorsEx()
+
 
     def getManagementStatus(self):
         return self.control.mngStatus

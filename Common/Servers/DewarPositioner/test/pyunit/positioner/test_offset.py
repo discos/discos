@@ -36,6 +36,7 @@ class PositionerOffsetTest(unittest2.TestCase):
         self.p.setup(siteInfo={}, source=None, device=self.device)
         self.p.setOffset(2)
         self.assertEqual(self.p.getOffset(), 2)
+        self.assertEqual(self.p.getPosition(), 2)
         self.p.clearOffset()
         self.assertEqual(self.p.getOffset(), 0)
 

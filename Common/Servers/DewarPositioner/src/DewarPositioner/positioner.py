@@ -160,6 +160,7 @@ class Positioner(object):
             elif str(sector) not in sectors:
                 raise NotAllowedError('sector %s not in %s' %(sector, sectors))
             else:
+                self.control.clearScanInfo()
                 if self.isUpdating():
                     self.stopUpdating()
                 try:
@@ -371,10 +372,9 @@ class Positioner(object):
             if self.t.isAlive():
                 logger.logWarning('thread %s is alive' %self.t.getName())
         except AttributeError:
-            return # self.t is None because the system is not yet configured
+            pass # self.t is None because the system is not yet configured
         finally:
-            self.control.stop = False
-            self.control.mustUpdate = False
+            self.control.clearScanInfo()
             time.sleep(0.1)
 
 
@@ -648,17 +648,9 @@ class Positioner(object):
 
 class Control(object):
     def __init__(self):
-        self.isUpdating = False
-        self.mustUpdate = False
-        self.stop = False
-        self.offset = 0.0
-        self.target = 0,0
-        self.rewindingOffset = 0.0
-        self.isRewindingRequired = False
-        self.isRewinding = False
+        self.clearScanInfo()
         self.autoRewindingSteps = None
         self.modes = {'rewinding': 'none', 'updating': 'none'}
-        self.clearScanInfo()
 
     def setScanInfo(self, axis, sector, iStaticPos, iParallacticPos, dParallacticPos):
         self.scanInfo = {
@@ -671,6 +663,14 @@ class Control(object):
         }
 
     def clearScanInfo(self):
+        self.isUpdating = False
+        self.mustUpdate = False
+        self.stop = False
+        self.offset = 0.0
+        self.target = 0.0
+        self.rewindingOffset = 0.0
+        self.isRewindingRequired = False
+        self.isRewinding = False
         self.setScanInfo(
             axis=Management.MNG_NO_AXIS, 
             sector=Antenna.ANT_NORTH,

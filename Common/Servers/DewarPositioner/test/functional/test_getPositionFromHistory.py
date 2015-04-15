@@ -12,14 +12,18 @@ from DewarPositioner.cdbconf import CDBConf
 
 class GetPositionFromHistoryTest(unittest2.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         client = PySimpleClient()
         self.positioner = client.getComponent('RECEIVERS/DewarPositioner')
         self.positioner.setup('KKG')
         self.cmdPos = 0.8
+        time.sleep(0.2)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(self):
         self.positioner.park()
+        time.sleep(0.2)
 
     def test_notReady(self):
         self.positioner.park()
