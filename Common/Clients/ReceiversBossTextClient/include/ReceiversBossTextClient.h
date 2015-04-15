@@ -12,6 +12,7 @@
 /* Add the component skeleton header file */
 /* ************************************* */
 #include <ReceiversBossC.h>
+#include <DewarPositionerC.h>
 /* ************************************* */
 
 /* Add the component errors header file */
@@ -58,7 +59,7 @@
 /* define the main frame dimension */
 /* ******************************* */
 #define WINDOW_WIDTH 60     /*columns */
-#define WINDOW_HEIGHT 15     /* rows */
+#define WINDOW_HEIGHT 22     /* rows */
 /* ******************************* */
 
 /* define the routine name here, to be used for logging */
@@ -77,9 +78,12 @@
 /* ********************************** */
 #define COMPONENT_NAME "RECEIVERS/Boss"              /* the name of the instantiation of the component */
 #define COMPONENT_INTERFACE_TPYE "IDL:alma/Receivers/ReceiversBoss:1.0"  /* the type of the interface */
+#define DEWAR_INTERFACE_TPYE "IDL:alma/Receivers/DewarPositioner:1.0"
 #define COMPONENT_IDL_MODULE Receivers	/* the IDL module that contains the component interface */
 #define COMPONENT_IDL_INTERFACE ReceiversBoss  /* the IDL interface of the component */
+#define DEWAR_IDL_INTERFACE DewarPositioner
 #define COMPONENT_SMARTPOINTER ReceiversBoss_var /* the component type */
+#define DEWAR_SMARTPOINTER DewarPositioner_var
 /* ********************************** */
 
 /* define user input command style */
