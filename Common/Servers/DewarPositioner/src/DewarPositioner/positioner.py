@@ -234,7 +234,7 @@ class Positioner(object):
                         self.control.scanInfo.update({'dParallacticPos': Pdp})
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
-                        logger.logInfo(ex.message)
+                        logger.logWarning(ex.message)
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
                                 self.rewind() 
