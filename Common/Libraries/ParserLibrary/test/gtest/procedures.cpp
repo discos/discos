@@ -12,11 +12,19 @@ using namespace SimpleParser;
 class TestObject
 {
     public:
-        TestObject(){};
-        void empty_command(){return;};
+        TestObject() : test_value(0){};
+        void empty_command();
         void unary_command(const char* parameter);
         IRA::CString result;
+        int test_value;
 };
+
+void 
+TestObject::empty_command()
+{
+    test_value++;
+    return;
+}
 
 void
 TestObject::unary_command(const char* parameter)
@@ -70,20 +78,23 @@ TEST_F(TestProcedureParsing, run_command_without_argument)
 {
     IRA::CString procedure = "empty_command";
     IRA::CString output;
+    int test_value = to.test_value;
     m_parser->run(procedure, output);
     //This is a google test macro
     RecordProperty("run_output", (const char*) output);
-    SUCCEED();
+    ASSERT_EQ(test_value + 1, to.test_value);
 }
 
 TEST_F(TestProcedureParsing, run_procedure_without_argument)
 {
     IRA::CString procedure = "empty_procedure";
     IRA::CString output;
+    int test_value = to.test_value;
     m_parser->run(procedure, output);
     //This is a google test macro
     RecordProperty("run_output", (const char*) output);
-    SUCCEED();
+    sleep(2);
+    ASSERT_EQ(test_value + 1, to.test_value);
 }
 
 TEST_F(TestProcedureParsing, run_command_with_argument)
@@ -103,7 +114,7 @@ TEST_F(TestProcedureParsing, run_procedure_with_argument)
     m_parser->run(procedure, output);
     //This is a google test macro
     RecordProperty("run_output", (const char*) output);
-    sleep(5);
+    sleep(2);
     ASSERT_EQ(IRA::CString("ciao"), to.result);
 }
 
