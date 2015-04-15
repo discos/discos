@@ -578,7 +578,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         try:
             self.cdbconf.setConfiguration(confCode.upper())
             if self.cdbconf.getAttribute('SetCustomPositionAllowed') == 'true':
-                position = self.positioner.getPosition()
+                position = float(self.cdbconf.getAttribute('SetupPosition'))
                 # Set the initialPosition, in order to add it to the dynamic one
                 self.cdbconf.updateInitialPositions(position)
                 self.positioner.control.updateScanInfo({'iStaticPos': position})

@@ -22,8 +22,8 @@ class PositionerSetupTest(unittest2.TestCase):
             self.device = MockDevice()
             self.using_mock = True
 
-    def test_starting_pos(self):
-        """Verify it sets properly the starting position"""
+    def test_custom_starting_pos(self):
+        """Verify it sets properly a custom starting position"""
         p = Positioner(self.cdbconf)
         self.cdbconf.setup('KKG')
         p.setup(siteInfo={}, source=None, device=self.device, setupPosition=1.5)

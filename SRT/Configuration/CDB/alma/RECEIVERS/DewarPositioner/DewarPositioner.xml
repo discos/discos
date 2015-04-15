@@ -8,7 +8,7 @@
     RewindingSleepTime="1"
     RewindingTimeout="200"
     DefaultConfiguration="FIXED"
-    DefaultRewindingMode="MANUAL"
+    DefaultRewindingMode="AUTO"
     Latitude="39.493040"
 >
 
