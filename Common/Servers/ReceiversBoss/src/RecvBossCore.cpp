@@ -265,8 +265,7 @@ double CRecvBossCore::getDerotatorPosition(const ACS::Time& epoch) throw (Compon
 	baci::ThreadSyncGuard guard(&m_mutex);
 	loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
 	try {
-		m_dewarPositioner->getPositionFromHistory(epoch);
-		return 0;
+		return m_dewarPositioner->getPositionFromHistory(epoch);
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ReceiversErrors::DewarPositionerCommandErrorExImpl,impl,ex,"CRecvBossCore::getDerotatorPosition()");
