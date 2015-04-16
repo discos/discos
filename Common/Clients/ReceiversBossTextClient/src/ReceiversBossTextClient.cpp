@@ -310,7 +310,7 @@ int main(int argc, char *argv[]) {
 		goto ErrorLabel;
 	}
 	component=COMPONENT_INTERFACE::_narrow(obj.in());
-	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"OK, reference is: %d",component.ptr()));
+	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"Receivers Boss reference is: %d",component.ptr()));
 	ACE_OS::sleep(1);
 
 	try {
@@ -318,13 +318,16 @@ int main(int argc, char *argv[]) {
 		obj=info->reference;
 		if (CORBA::is_nil(obj.in())) {
 			ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_NOTICE,"Dewar positioner not available"));
+			dewar=DEWAR_INTERFACE::_nil();
+		}
+		else {
+			dewar=DEWAR_INTERFACE::_narrow(obj.in());
+			ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"Dewar reference is: %d",dewar.ptr()));
 		}
 	}
 	catch(...) {
 		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_NOTICE,"Dewar positioner not available"));
 	}
-	dewar=DEWAR_INTERFACE::_narrow(obj.in());
-	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"OK, reference is: %d",dewar.ptr()));
 	ACE_OS::sleep(1);
 	try {
 		/* Add all component properties here */
@@ -538,7 +541,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		// automatic update of some controls.
-		updateDewar(dewar.out());
+		updateDewar(dewar.in());
 		//sleep for the required ammount of time
 		tv.set(0,MAINTHREADSLEEPTIME*1000);
 		client.run(tv);
