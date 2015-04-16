@@ -1,5 +1,6 @@
 #include "SP_types.h"
 #include "SP_function1.h"
+#include "SP_function2.h"
 #include "SP_function0.h"
 #include "SP_function3.h"
 #include <ComponentErrors.h>
@@ -60,6 +61,9 @@ int changeDouble(double &d) {
 	d/=2.0;
 	return i;
 }
+void doubleTrouble(const double& first, const double& second) {
+    return;
+}
 void test3Unary(const int& i,const int& j,const int& k) {
 	int y=i+j+k;
 	printf("'Test3Unary': %d\n",y);
@@ -108,6 +112,7 @@ int main(int argc, char *argv[]) {
 	function1<CProva,non_constant,void_type,O<angle_type<deg> > > funG(&cl,&CProva::testDegAngle);
 	function1<CProva,non_constant,void_type,O<declination_type<deg,true> > > funH(&cl,&CProva::testDegDeclination);
 	function3<CProva,non_constant,void_type,I<int_type>,I<int_type>,I<int_type> > funI(&cl,&CProva::test3Unary);
+	function2<CProva,non_constant,void_type,I<double_type>, I<double_type> >funJ(&cl,&CProva::doubleTrouble);
 	
 	/*base *p1,*p2;
 	struct prova<int>data;

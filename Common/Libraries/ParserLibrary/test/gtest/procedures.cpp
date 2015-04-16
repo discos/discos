@@ -12,17 +12,26 @@ using namespace SimpleParser;
 class TestObject
 {
     public:
-        TestObject() : test_value(0){};
+        TestObject();
         void empty_command();
         void unary_command(const char* parameter);
+        void two_params_command(const double& first, const double& second);
         IRA::CString result;
-        int test_value;
+        int test_int;
+        double test_double[2];
 };
+
+TestObject::TestObject() :
+    test_int(0)
+{
+    test_double[0] = 0;
+    test_double[1] = 0;
+}
 
 void 
 TestObject::empty_command()
 {
-    test_value++;
+    test_int++;
     return;
 }
 
@@ -30,6 +39,14 @@ void
 TestObject::unary_command(const char* parameter)
 {
     result = IRA::CString(parameter);
+    return;
+}
+
+void 
+TestObject::two_params_command(const double& first, const double& second)
+{
+    test_double[0] = first;
+    test_double[1] = second;
     return;
 }
 
@@ -55,13 +72,22 @@ TestProcedureParsing::TestProcedureParsing()
                       &to,
                       &TestObject::unary_command), 
                   1);
-    ACS::stringSeq noarg_procedure, arg_procedure;
+    m_parser->add("two_params_command",
+                  new function2<TestObject, non_constant, void_type, I<double_type>, I<double_type> >(
+                      &to,
+                      &TestObject::two_params_command), 
+                  2);
+    ACS::stringSeq noarg_procedure, arg_procedure, two_args_procedure;
     noarg_procedure.length(1);
     noarg_procedure[0] = "empty_command";
     m_parser->addExtraProcedure("empty_procedure", "testprocedure", noarg_procedure, 0);
     arg_procedure.length(1);
     arg_procedure[0] = "unary_command=$1";
     m_parser->addExtraProcedure("unary_procedure", "testprocedure", arg_procedure, 1);
+    two_args_procedure.length(1);
+    two_args_procedure[0] = "two_params_command=$1,$2";
+    m_parser->addExtraProcedure("two_params_procedure", "testprocedure",
+                                two_args_procedure, 2);
 }
 
 TestProcedureParsing::~TestProcedureParsing()
@@ -78,23 +104,23 @@ TEST_F(TestProcedureParsing, run_command_without_argument)
 {
     IRA::CString procedure = "empty_command";
     IRA::CString output;
-    int test_value = to.test_value;
+    int test_int = to.test_int;
     m_parser->run(procedure, output);
     //This is a google test macro
     RecordProperty("run_output", (const char*) output);
-    ASSERT_EQ(test_value + 1, to.test_value);
+    ASSERT_EQ(test_int + 1, to.test_int);
 }
 
 TEST_F(TestProcedureParsing, run_procedure_without_argument)
 {
     IRA::CString procedure = "empty_procedure";
     IRA::CString output;
-    int test_value = to.test_value;
+    int test_int = to.test_int;
     m_parser->run(procedure, output);
     //This is a google test macro
     RecordProperty("run_output", (const char*) output);
     sleep(2);
-    ASSERT_EQ(test_value + 1, to.test_value);
+    ASSERT_EQ(test_int + 1, to.test_int);
 }
 
 TEST_F(TestProcedureParsing, run_command_with_argument)
@@ -118,3 +144,25 @@ TEST_F(TestProcedureParsing, run_procedure_with_argument)
     ASSERT_EQ(IRA::CString("ciao"), to.result);
 }
 
+TEST_F(TestProcedureParsing, run_command_with_two_arguments)
+{
+    IRA::CString procedure = "two_params_command=10,20";
+    IRA::CString output;
+    m_parser->run(procedure, output);
+    //This is a google test macro
+    RecordProperty("run_output", (const char*) output);
+    ASSERT_EQ((double)10, to.test_double[0]);
+    ASSERT_EQ((double)20, to.test_double[1]);
+}
+
+TEST_F(TestProcedureParsing, run_procedure_with_two_arguments)
+{
+    IRA::CString procedure = "two_params_procedure=50,60.2345";
+    IRA::CString output;
+    m_parser->run(procedure, output);
+    //This is a google test macro
+    RecordProperty("run_output", (const char*) output);
+    sleep(2);
+    ASSERT_EQ((double)50, to.test_double[0]);
+    ASSERT_EQ((double)60.2345, to.test_double[1]);
+}
