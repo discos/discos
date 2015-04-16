@@ -10,6 +10,7 @@ using namespace IRA;
 
 #include <ReceiversModule.h>
 #include <DewarPositionerDefinitionsC.h>
+#include "slamac.h"
 
 CRecvBossCore::CRecvBossCore()
 {
@@ -265,7 +266,7 @@ double CRecvBossCore::getDerotatorPosition(const ACS::Time& epoch) throw (Compon
 	baci::ThreadSyncGuard guard(&m_mutex);
 	loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
 	try {
-		return m_dewarPositioner->getPositionFromHistory(epoch);
+		return m_dewarPositioner->getPositionFromHistory(epoch)*DD2R;
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ReceiversErrors::DewarPositionerCommandErrorExImpl,impl,ex,"CRecvBossCore::getDerotatorPosition()");
@@ -462,7 +463,9 @@ void CRecvBossCore::derotatorSetConfiguration(const Receivers::TDerotatorConfigu
 	//setup the proper dewar for derotation
 	try {
 		if (m_updateMode!=conf) {
-			m_dewarPositioner->setup(m_currentRecvCode);
+			if (m_dewarPositioner->getActualSetup()!=m_currentRecvCode) {
+				m_dewarPositioner->setup(m_currentRecvCode);
+			}
 			m_rewindMode=Receivers::RCV_AUTO_REWIND;
 			m_autoRewindSteps=1;
 			m_dewarPositioner->setConfiguration(Receivers::Definitions::map(conf));
