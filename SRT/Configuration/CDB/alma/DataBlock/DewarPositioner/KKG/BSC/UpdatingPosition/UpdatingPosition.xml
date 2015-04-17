@@ -23,7 +23,7 @@
 
     <UpdatingRecord>
         <axisCode>MNG_HOR_LAT</axisCode>
-        <initialPosition>-79.2</initialPosition>
+        <initialPosition>-49.2</initialPosition>
         <functionName>static0</functionName>
     </UpdatingRecord>
 
@@ -41,7 +41,7 @@
 
     <UpdatingRecord>
         <axisCode>MNG_EQ_LAT</axisCode>
-        <initialPosition>-79.2</initialPosition>
+        <initialPosition>-49.2</initialPosition>
         <functionName>parallactic</functionName>
     </UpdatingRecord>
 
@@ -59,7 +59,7 @@
 
     <UpdatingRecord>
         <axisCode>MNG_GAL_LAT</axisCode>
-        <initialPosition>-79.2</initialPosition>
+        <initialPosition>-49.2</initialPosition>
         <functionName>gpa</functionName>
     </UpdatingRecord>
 
