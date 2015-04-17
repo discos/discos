@@ -130,6 +130,9 @@ void CCommandLine::resumeDataAcquisition(const ACS::Time& startT)
 		impl.setReason("transfer job cannot be resumed in present configuration");
 		throw impl;
 	}
+
+	m_pcontrolLoop->Init();//Configuro Specifiche nell'HW - TEST 10 aprile 2015
+
 	// check that the backend latency in preparing the data transfer is respected......
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::resumeDataAcquisition()");
