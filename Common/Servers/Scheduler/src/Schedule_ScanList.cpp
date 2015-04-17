@@ -57,7 +57,7 @@ bool CScanList::checkScan(const DWORD& id)
 	return false;
 }
 
-bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,void *& sec/*,IRA::CString& target*/)
+bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,void *& sec,void *& servo,void *& recv/*,IRA::CString& target*/)
 {
 	TIterator i;
 	for (i=m_schedule.begin();i<m_schedule.end();i++) {
@@ -66,6 +66,8 @@ bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,
 			type=(*i)->type;
 			prim=(*i)->primaryParameters;
 			sec=(*i)->secondaryParameters;
+			servo=(*i)->servoParameters;
+			recv=(*i)->receieversParsmeters;
 			return true;
 		}
 	}
@@ -75,7 +77,7 @@ bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,
 
 bool CScanList::getScan(const DWORD& id,TRecord& rec)
 {
-	return getScan(id,rec.type,rec.primaryParameters,rec.secondaryParameters/*,rec.target*/);
+	return getScan(id,rec.type,rec.primaryParameters,rec.secondaryParameters,rec.servoParameters,rec.receieversParsmeters);
 }
 
  bool CScanList::checkConsistency(DWORD& line,IRA::CString& errMsg)
@@ -148,10 +150,12 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			rec->type=type;
 			rec->primaryParameters=(void *)prim;
 			rec->secondaryParameters=(void *)sec;
-
-			rec->receieversParsmeters=0;
-			rec->servoParameters=0;
-
+			// **************************************
+			// Da modificare come MNG_PEAKER
+			CSubScanBinder binder(getConfiguration(),false);
+			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->servoParameters=(void *)binder.getServo();
+			// **************************************
 			//rec->target=sourceName;
 			rec->line=lnNumber;
 			m_schedule.push_back(rec);
@@ -174,8 +178,12 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			rec->type=type;
 			rec->primaryParameters=(void *)prim;
 			rec->secondaryParameters=(void *)sec;
-			rec->receieversParsmeters=0;
-			rec->servoParameters=0;
+			// **************************************
+			// Da modificare come MNG_PEAKER
+			CSubScanBinder binder(getConfiguration(),false);
+			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->servoParameters=(void *)binder.getServo();
+			// **************************************
 
 			//rec->target="";
 			rec->line=lnNumber;
@@ -196,8 +204,12 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			rec->type=type;
 			rec->primaryParameters=(void *)prim;
 			rec->secondaryParameters=(void *)sec;
-			rec->receieversParsmeters=0;
-			rec->servoParameters=0;
+			// **************************************
+			// Da modificare come MNG_PEAKER
+			CSubScanBinder binder(getConfiguration(),false);
+			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->servoParameters=(void *)binder.getServo();
+			// **************************************
 
 			rec->line=lnNumber;
 			m_schedule.push_back(rec);
@@ -217,8 +229,12 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			rec->type=type;
 			rec->primaryParameters=(void *)prim;
 			rec->secondaryParameters=(void *)sec;
-			rec->receieversParsmeters=0;
-			rec->servoParameters=0;
+			// **************************************
+			// Da modificare come MNG_PEAKER
+			CSubScanBinder binder(getConfiguration(),false);
+			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->servoParameters=(void *)binder.getServo();
+			// **************************************
 
 			rec->line=lnNumber;
 			m_schedule.push_back(rec);
@@ -244,8 +260,12 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			rec->type=type;
 			rec->primaryParameters=(void *)prim;
 			rec->secondaryParameters=(void *)sec;
-			rec->receieversParsmeters=0;
-			rec->servoParameters=0;
+			// **************************************
+			// Da modificare come MNG_PEAKER
+			CSubScanBinder binder(getConfiguration(),false);
+			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->servoParameters=(void *)binder.getServo();
+			// **************************************
 
 			//rec->target="";
 			rec->line=lnNumber;

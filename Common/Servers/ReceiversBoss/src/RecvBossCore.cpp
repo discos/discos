@@ -1532,7 +1532,7 @@ const IRA::CString& CRecvBossCore::getRecvCode()
 	return m_currentRecvCode;
 }
 
-void CRecvBossCore::closeScan(ACS::Time timeToStop) throw (ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+void CRecvBossCore::closeScan(ACS::Time& timeToStop) throw (ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
 	timeToStop=0;

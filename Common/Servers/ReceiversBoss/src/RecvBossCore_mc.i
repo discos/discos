@@ -852,7 +852,7 @@ void CRecvBossCore::CRecvBossCore::startScan(ACS::Time& startUT,const Receivers:
 
 }
 
-void CRecvBossCore::closeScan(ACS::Time timeToStop) throw (ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+void CRecvBossCore::closeScan(ACS::Time& timeToStop) throw (ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
 	timeToStop=0;

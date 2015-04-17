@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
 	Management::TScanTypes type;
 	void *scanPar;
 	void *secPar;
+	void *servoPar;
+	void *recvPar;
 	CSchedule::TRecord rec;
 	ACS::stringSeq layoutDef;
 	CSchedule sched("../templates/","schedule.tmpl");
@@ -101,7 +103,7 @@ int main(int argc, char *argv[])
 			IRA::CIRATools::intervalToStr(rec.lst,outString);
 			printf("%u %u %u %s %lf %u %s %s %s %s %s %s\n",rec.counter,rec.scanid,rec.subscanid,(const char *)outString,rec.duration,rec.scan,(const char *)rec.preScan,(const char *)rec.postScan,(const char *)rec.backendProc,
 					(const char *)rec.writerInstance,(const char *)rec.suffix,(const char *)rec.layout);
-			if (!sched.getScanList()->getScan(rec.scan,type,scanPar,secPar)) {
+			if (!sched.getScanList()->getScan(rec.scan,type,scanPar,secPar,servoPar,recvPar)) {
 				printf("Scan number %u is not present\n",rec.scan);
 				return -1;
 			}

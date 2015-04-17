@@ -444,9 +444,11 @@ public:
 	 * @param prim pointer to the buffer that stores the primary scan parameters, the number and the type of parameters could vary from scna type
 	 *                to scan type.
 	 * @param sec pointer to the secondary scan parameters
+	 * @param servo pointer to the servo scan parameters
+	 * @param recv poiner to the receievers scan parameters
 	 * @return false if the scan could not be found. 
 	 */
-	virtual bool getScan(const DWORD&id,Management::TScanTypes& type,void *& prim,void *& sec/*,IRA::CString& target*/);
+	virtual bool getScan(const DWORD&id,Management::TScanTypes& type,void *& prim,void *& sec,void *& servo,void *& recv);
 	
 	/**
 	 * This is the wrapper function of the previuos one, used to get scan data using a structure.
