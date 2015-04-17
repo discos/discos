@@ -21,11 +21,11 @@
 module Backends {
 
 	enum TXArcosConf {
-		XArcos_K7,
-		XArcos_K3,
-		XArcos_K2R,
-		XArcos_K2L,
-		XArcos_C
+		XArcos_K77,
+		XArcos_K01,
+		XArcos_K04,
+        XArcos_K00,
+		XArcos_C00
 	};
 	ACS_ENUM(TXArcosConf);
 
