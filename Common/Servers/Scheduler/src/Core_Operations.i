@@ -506,6 +506,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 	loadAntennaBoss(m_antennaBoss,m_antennaBossError);
 	// now let's collect all the information required by computation
 	digits=m_config->getFTrackDigits();
+	printf("digits :%ld\n",digits);
 	//---------------------------------------------------------------------------------------------------
 	//3) info from backend--------------------------------------------------------------------------------
 	try {
@@ -520,6 +521,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 	}
 	sections=sectionsNumberRO->get_sync(comp.out()); // number of backend sections
 	inputSection=inputSectionRO->get_sync(comp.out());
+	printf("sections :%ld\n",sections);
 	if ((m_restFrequency.length()>1) && (m_restFrequency.length()!=(unsigned)sections)) {   // check one rest frequency or as many as section are given
 		_EXCPT(ManagementErrors::InvalidRestFrequencyExImpl,impl,"CCore::_fTrack()");
 		throw impl;
@@ -580,6 +582,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
 		throw impl;
 	}
+	for (long t=0;t<topocentricFreq->length();t++) printf("topocentric Freq :%lf\n",topocentricFreq[t]);
 	// just to make sure the topocentric sequence has the right dimension!
 	if (topocentricFreq->length()!=m_restFrequency.length()) {
 		topocentricFreq->length(m_restFrequency.length());
@@ -596,6 +599,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		throw impl;
 	}
 	IFNumber=IFNumberRO->get_sync(comp.out()); // number of output IFs of the receeever
+	printf("if number :%ld\n",IFNumber);
 	try {
 		m_receiversBoss->getIFOutput(bckinputFeed,bckinputIF,fndoutputFreq.out(),fndoutputBw.out(),fndoutputPol.out(),fndoutputLO.out());
 	}
@@ -631,13 +635,16 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 	for (long j=0;j<inputs;j++) {
 		if ((device=="ALL") || (device=="LO")) {
 			currentSection=inputSection[j];
+			printf("currentSection :%ld\n",currentSection);
 			if (topocentricFreq->length()==1) {
 				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[0]-bckinputFreq[currentSection]-
 						(bckinputBW[currentSection]/2.0),digits);
+				printf("inputLO[j] :%lf\n",inputLO[j]);
 			}
 			else {
 				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[currentSection]-bckinputFreq[currentSection]-
 						(bckinputBW[currentSection]/2.0),digits);
+				printf("inputLO[j] :%lf\n",inputLO[j]);
 			}
 			lo[bckinputIF[j]]=inputLO[j]; // local oscillator per IFs
 		}

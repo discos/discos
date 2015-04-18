@@ -594,10 +594,12 @@ void CBossCore::getTopocentricFrequency(const ACS::doubleSeq& rest,ACS::doubleSe
 	topo.length(rest.length());
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
+	CDateTime time(now,m_dut1);
 	for (unsigned i=0;i<rest.length();i++) {
+		printf("ra,dec,rest,vrad: %lf,%lf,%lf,%lf\n",m_targetRA,m_targetDec,rest[i],m_targetVrad);
 		IRA::CFrequencyTracking track(m_site,m_targetRA,m_targetDec,mapReferenceFrame(m_vradReferenceFrame),
 				mapVelocityDefinition(m_vradDefinition),rest[i],m_targetVrad);
-		topo[i]=track.getTopocentricFrequency(now.value().value);
+		topo[i]=track.getTopocentricFrequency(time);
 	}
 }
 
