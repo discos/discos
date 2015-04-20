@@ -14,43 +14,43 @@
 	
 	<Feed>
 		<feedCode>1</feedCode>
-		<xOffset>0.001027805</xOffset>
-		<yOffset>0.0</yOffset>
+		<xOffset>0.00033355205</xOffset>
+		<yOffset>-0.00057772859</yOffset>
 		<relativePower>0.97</relativePower>
 	</Feed>
 	
 	<Feed>
 		<feedCode>2</feedCode>
-		<xOffset>0.000513903</xOffset>
-		<yOffset>-0.000890118</yOffset>
+		<xOffset>-0.00033355205</xOffset>
+		<yOffset>-0.00057772859</yOffset>
 		<relativePower>0.99</relativePower>
 	</Feed>
 	
 	<Feed>
 		<feedCode>3</feedCode>
-		<xOffset>-0.000513903</xOffset>
-		<yOffset>-0.000890118</yOffset>
+		<xOffset>-0.00066710365</xOffset>
+		<yOffset>0.0</yOffset>
 		<relativePower>0.97</relativePower>
 	</Feed>
 	
 	<Feed>
 		<feedCode>4</feedCode>
-		<xOffset>-0.001027805</xOffset>
-		<yOffset>0.0</yOffset>
+		<xOffset>-0.00033355205</xOffset>
+		<yOffset>0.00057772859</yOffset>
 		<relativePower>0.95</relativePower>
 	</Feed>
 	
 	<Feed>
 		<feedCode>5</feedCode>
-		<xOffset>-0.000513903</xOffset>
-		<yOffset>0.000890118</yOffset>
+		<xOffset>0.00033355205</xOffset>
+		<yOffset>0.00057772859</yOffset>
 		<relativePower>0.97</relativePower>
 	</Feed>
 	
 	<Feed>
 		<feedCode>6</feedCode>
-		<xOffset>0.000513903</xOffset>
-		<yOffset>0.000890118</yOffset>
+		<xOffset>0.00066710365</xOffset>
+		<yOffset>0.0</yOffset>
 		<relativePower>0.97</relativePower>
 	</Feed>
 	

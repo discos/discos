@@ -103,6 +103,8 @@ void _sidereal(const char * targetName,const double& ra,const double& dec,const 
 
 /**
  * It sends the telescope to fixed position in the horizontal frame
+ * @param azimuth azimuth position given in degrees
+ * @param elevation elevation position given in degrees
  */
 void _goTo(const double& azimuth,const double& elevation) throw (ManagementErrors::TelescopeSubScanErrorExImpl,
 		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl);

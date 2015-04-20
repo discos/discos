@@ -196,7 +196,7 @@ void CCore::_goTo(const double& azimuth,const double& elevation) throw (Manageme
 	MinorServo::MinorServoScan servo;
 	Receivers::TReceiversParameters receievers;
 	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
-	binder.goTo(azimuth,elevation);
+	binder.goTo(azimuth*DD2R,elevation*DD2R);
 	startTime=0; // it means start as soon as possible
 	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;
@@ -582,7 +582,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
 		throw impl;
 	}
-	for (long t=0;t<topocentricFreq->length();t++) printf("topocentric Freq :%lf\n",topocentricFreq[t]);
+	for (unsigned t=0;t<topocentricFreq->length();t++) printf("topocentric Freq :%lf\n",topocentricFreq[t]);
 	// just to make sure the topocentric sequence has the right dimension!
 	if (topocentricFreq->length()!=m_restFrequency.length()) {
 		topocentricFreq->length(m_restFrequency.length());
