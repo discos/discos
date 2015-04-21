@@ -70,7 +70,7 @@ void updateDewar(Receivers::DewarPositioner_ptr dewar)
 	extraLabel3->setValue(outString);
 	extraLabel3->setStyle(TW::CStyle(TW::CColorPair::WHITE_BLACK,0));
 	extraLabel3->Refresh();
-	format.Format("%05.1lf / %05.1lf / %05.1lf",iStaticPos,iParPos,dParPos);
+	format.Format("%05.1lf / %07.3lf / %07.3lf",iStaticPos,iParPos,dParPos);
 	outString="Dewar Position: "+format;
 	extraLabel4->setValue(outString);
 	extraLabel4->setStyle(TW::CStyle(TW::CColorPair::WHITE_BLACK,0));
