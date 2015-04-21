@@ -25,7 +25,7 @@ class PosGeneratorParallacticTest(unittest2.TestCase):
     def test_az_el_values(self):
         """Raise a PosGeneratorError if cannot get the (az, el) values"""
         source = self.m.mock()
-        mocker.expect(source.getRawCoordinates(mocker.ANY)).result((None, None))
+        mocker.expect(source.getApparentCoordinates(mocker.ANY)).result((None, None))
         mocker.expect(source._get_name()).result('mocker')
         self.m.replay()
         gen = self.posgen.parallactic(source, siteInfo={'latitude': 39})
@@ -39,8 +39,8 @@ class PosGeneratorParallacticTest(unittest2.TestCase):
         source = self.m.mock()
         for (az, el) in zip(azimuths, elevations):
             mocker.expect(
-                    source.getRawCoordinates(mocker.ANY)
-                    ).result((radians(az), radians(el)))
+                    source.getApparentCoordinates(mocker.ANY)
+                    ).result((radians(az), radians(el)) + (None,)*5)
             self.m.count(1)
         self.m.replay()
         gen = self.posgen.parallactic(source, siteInfo={'latitude': latitude})

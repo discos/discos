@@ -68,7 +68,7 @@ class MockSource(object):
     def setElevation(self, value):
         self.elevation_obj.setValue(value)
 
-    def getRawCoordinates(self, time):
+    def getApparentCoordinates(self, time):
         return (self.azimuth_obj.value, self.elevation_obj.value)
 
     def _get_azimuth(self):

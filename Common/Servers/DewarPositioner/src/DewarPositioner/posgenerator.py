@@ -29,7 +29,8 @@ class PosGenerator(object):
         while True:
             try:
                 t = getTimeStamp().value + 1*10*6 # 100 ms in the future
-                az, el = source.getRawCoordinates(t) # Values in radians
+                coordinates = source.getApparentCoordinates(t) # Values in radians
+                az, el = coordinates[:2] # The first two elements are (az, el)
                 position = PosGenerator.getParallacticAngle(latitude, az, el)
                 yield position
                 last_zerodiv_time = datetime.datetime.now()
