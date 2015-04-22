@@ -29,16 +29,14 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 	//antennaUT=receiversUT=ut;
 	TIMEVALUE now;
 	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
+	if (CORBA::is_nil(m_antennaBoss)) {
+		_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
+		throw impl;
+	}
 	try {
-		if (!CORBA::is_nil(m_antennaBoss)) {
-			//antennaUT will stores the estimated start time from the antenna for all kind of subscans
-			antennaAnswer=m_antennaBoss->checkScan(ut,*prim,*sec,minEl,maxEl,m_antennaRTime.out());
-			ACS_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %lld :",m_antennaRTime->slewingTime));
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
-			throw impl;
-		}
+		//antennaUT will stores the estimated start time from the antenna for all kind of subscans
+		antennaAnswer=m_antennaBoss->checkScan(ut,*prim,*sec,minEl,maxEl,m_antennaRTime.out());
+		ACS_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %lld :",m_antennaRTime->slewingTime));
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
@@ -65,14 +63,12 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 	if (!antennaAnswer) return antennaAnswer;
 	if ((MINOR_SERVO_AVAILABLE)) { // check if the minor servo system is enabled
 		loadMinorServoBoss(m_minorServoBoss,m_minorServoBossError); // (ComponentErrors::CouldntGetComponentExImpl)
+		if (CORBA::is_nil(m_minorServoBoss)) {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
+			throw impl;
+		}
 		try {
-			if (!CORBA::is_nil(m_minorServoBoss)) {
-				minorServoAnswer=m_minorServoBoss->checkScan(ut,*servoPar,m_antennaRTime.in(),m_servoRunTime.out());
-			}
-			else {
-				_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
-				throw impl;
-			}
+			minorServoAnswer=m_minorServoBoss->checkScan(ut,*servoPar,m_antennaRTime.in(),m_servoRunTime.out());
 		}
 		catch (MinorServoErrors::MinorServoErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
@@ -102,14 +98,12 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 		}
 	}
 	loadReceiversBoss(m_receiversBoss,m_receiversBossError);
+	if (CORBA::is_nil(m_receiversBoss)) {
+		_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
+		throw impl;
+	}
 	try {
-		if (!CORBA::is_nil(m_receiversBoss)) {
-			receiversAnswer=m_receiversBoss->checkScan(ut,*recvPar,m_antennaRTime.in(),m_receiversRunTime);
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::checkScan()");
-			throw impl;
-		}
+		receiversAnswer=m_receiversBoss->checkScan(ut,*recvPar,m_antennaRTime.in(),m_receiversRunTime);
 		if (!receiversAnswer) return receiversAnswer;
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -175,16 +169,14 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 	ACS::Time antennaUT,servoUT,receiversUT,newUT;
 	m_subScanStarted=true;
 	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
+	if (CORBA::is_nil(m_antennaBoss)) {
+		_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::doScan()");
+		throw impl;
+	}
 	try {
-		if (!CORBA::is_nil(m_antennaBoss)) {
-			antennaUT=ut;
-			m_antennaBoss->startScan(antennaUT,*prim,*sec); // the ut could be modified by the call
-			ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"ANTENNA_SCAN_EPOCH %lld",antennaUT));
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::doScan()");
-			throw impl;
-		}
+		antennaUT=ut;
+		m_antennaBoss->startScan(antennaUT,*prim,*sec); // the ut could be modified by the call
+		ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"ANTENNA_SCAN_EPOCH %lld",antennaUT));
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::doScan()");
@@ -210,16 +202,14 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 	}
 	if ((MINOR_SERVO_AVAILABLE)) { // check if the minor servo system is enabled
 		loadMinorServoBoss(m_minorServoBoss,m_minorServoBossError); // (ComponentErrors::CouldntGetComponentExImpl)
+		if (CORBA::is_nil(m_minorServoBoss)) {
+			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::doScan()");
+			throw impl;
+		}
 		try {
-			if (!CORBA::is_nil(m_minorServoBoss)) {
-				servoUT=ut;
-				m_minorServoBoss->startScan(receiversUT,*servoPar,m_antennaRTime.in());
-				ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"MINOR_SERVO_SCAN_EPOCH %lld",servoUT));
-			}
-			else {
-				_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::doScan()");
-				throw impl;
-			}
+			servoUT=ut;
+			m_minorServoBoss->startScan(servoUT,*servoPar,m_antennaRTime.in());
+			ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"MINOR_SERVO_SCAN_EPOCH %lld",servoUT));
 		}
 		catch (MinorServoErrors::MinorServoErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::doScan()");
@@ -243,16 +233,14 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 		servoUT=0;
 	}
 	loadReceiversBoss(m_receiversBoss,m_receiversBossError);
+	if (CORBA::is_nil(m_receiversBoss)) {
+		_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::doScan()");
+		throw impl;
+	}
 	try {
-		if (!CORBA::is_nil(m_receiversBoss)) {
-			receiversUT=ut;
-			m_receiversBoss->startScan(receiversUT,*recvPa,m_antennaRTime.in());
-			ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"RECEIEVERS_SCAN_EPOCH %lld",receiversUT));
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::doScan()");
-			throw impl;
-		}
+		receiversUT=ut;
+		m_receiversBoss->startScan(receiversUT,*recvPa,m_antennaRTime.in());
+		ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"RECEIEVERS_SCAN_EPOCH %lld",receiversUT));
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::doScan()");
