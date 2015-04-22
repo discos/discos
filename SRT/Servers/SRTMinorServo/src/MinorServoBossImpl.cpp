@@ -871,8 +871,9 @@ bool MinorServoBossImpl::checkScanImpl(
             return false;
         }
     }
-    
 
+    // Add 1.5s in order to consider the time between the check and the start
+    min_starting_time += 15000000;
     msParamVar->startEpoch = (startingTime==0) ? min_starting_time : startingTime;
     msParamVar->timeToStop = msParamVar->startEpoch + msScanInfo.total_time;
 
@@ -1162,7 +1163,7 @@ void MinorServoBossImpl::startScanImpl(
         m_configuration->m_isScanLocked = false;
         string msg("startScanImpl(): unexpected exception getting the axis information");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-        impl.log(LM_DEBUG);
+        impl.log(LM_ERROR);
         throw impl.getMinorServoErrorsEx();
     }
 
@@ -1181,7 +1182,7 @@ void MinorServoBossImpl::startScanImpl(
         m_configuration->m_isScanLocked = false;
         string msg("startScanImpl(): cannot get the central scan position");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-        impl.log(LM_DEBUG);
+        impl.log(LM_ERROR);
         throw impl.getMinorServoErrorsEx();
     }
 
@@ -1213,7 +1214,7 @@ void MinorServoBossImpl::startScanImpl(
         m_configuration->m_isScanLocked = false;
         string msg("startScanImpl(): cannot get the minimum scan starting time");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-        impl.log(LM_DEBUG);
+        impl.log(LM_ERROR);
         throw impl.getMinorServoErrorsEx();
     }
  
@@ -1221,9 +1222,9 @@ void MinorServoBossImpl::startScanImpl(
     if(startingTime != 0) {
         if(min_starting_time > startingTime) {
             m_configuration->m_isScanLocked = false;
-            string msg("startScanImpl(): the scan is supposed to start to early");
+            string msg("startScanImpl(): not enough time to start the scan");
             _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-            impl.log(LM_DEBUG);
+            impl.log(LM_ERROR);
             throw impl.getMinorServoErrorsEx();
         }
     }
@@ -1240,7 +1241,7 @@ void MinorServoBossImpl::startScanImpl(
         m_configuration->m_isScanLocked = false;
         string msg("startScanImpl(): total time too short for performing the scan.");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-        impl.log(LM_DEBUG);
+        impl.log(LM_ERROR);
         throw impl.getMinorServoErrorsEx();
     }
 
@@ -1253,14 +1254,14 @@ void MinorServoBossImpl::startScanImpl(
             if(CORBA::is_nil(component_ref)) {
                 string msg("startScanImpl: cannot get the reference of the component.", true);
                 _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-                impl.log(LM_DEBUG);
+                impl.log(LM_ERROR);
                 throw impl.getMinorServoErrorsEx();
             }
 
             if(!component_ref->isReady()) {
                 string msg("startScanImpl: the component is not ready", true);
                 _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-                impl.log(LM_DEBUG);
+                impl.log(LM_ERROR);
                 throw impl.getMinorServoErrorsEx();
             }
 
@@ -1271,7 +1272,7 @@ void MinorServoBossImpl::startScanImpl(
             if(axis > number_of_axis - 1) {
                 string msg("startScanImpl: axis index error", true);
                 _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-                impl.log(LM_DEBUG);
+                impl.log(LM_ERROR);
                 throw impl.getMinorServoErrorsEx();
             }
                                                         
@@ -1286,7 +1287,7 @@ void MinorServoBossImpl::startScanImpl(
             if(user_offset->length() != plainCentralPos.length()) {
                 string msg("startScanImpl(): mismatch between offset and central position length");
                 _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-                impl.log(LM_DEBUG);
+                impl.log(LM_ERROR);
                 throw impl.getMinorServoErrorsEx();
             }
             else {
@@ -1312,7 +1313,7 @@ void MinorServoBossImpl::startScanImpl(
         else {
             string msg("startScanImpl(): cannot get the component reference.");
             _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-            impl.log(LM_DEBUG);
+            impl.log(LM_ERROR);
             throw impl.getMinorServoErrorsEx();
         }
         
@@ -1328,7 +1329,7 @@ void MinorServoBossImpl::startScanImpl(
         catch(...) {
             string msg("startScanImpl(): the MinorServoBoss is attempting to execute a previous scan");
             _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
-            impl.log(LM_DEBUG);
+            impl.log(LM_ERROR);
             throw impl.getMinorServoErrorsEx();
         }
         m_configuration->m_isScanActive = true;

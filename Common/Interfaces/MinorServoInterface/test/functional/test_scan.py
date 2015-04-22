@@ -112,6 +112,15 @@ class ScanTest(ScanBaseTest):
         self.assertGreater(t, getTimeStamp().value)
         self.isAssertScan(t)
 
+    def test_startScan_ASAP_at_checkScan_time(self):
+        """Starting time given by checkScan()"""
+        startTime = 0
+        res, msInfo = self.boss.checkScan(startTime, self.scan, self.antennaInfo)
+        startTime = msInfo.startEpoch 
+        t = self.boss.startScan(startTime, self.scan, self.antennaInfo)
+        self.assertGreater(t, getTimeStamp().value)
+        self.isAssertScan(t)
+
     def test_startScan_at_given_time(self):
         """Start at given time"""
         startTime = getTimeStamp().value + 60*10**7 # Start in one minute 
