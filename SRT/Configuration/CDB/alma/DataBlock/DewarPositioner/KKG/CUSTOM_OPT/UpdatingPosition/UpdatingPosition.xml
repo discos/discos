@@ -54,19 +54,19 @@
     <UpdatingRecord>
         <axisCode>MNG_GAL_LON</axisCode>
         <initialPosition>0.0</initialPosition>
-        <functionName>gpa</functionName>
+        <functionName>galactic_parallactic(</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>MNG_GAL_LAT</axisCode>
         <initialPosition>0.0</initialPosition>
-        <functionName>gpa</functionName>
+        <functionName>galactic_parallactic(</functionName>
     </UpdatingRecord>
 
     <UpdatingRecord>
         <axisCode>JUST_FOR_TEST</axisCode>
         <initialPosition>0.0</initialPosition>
-        <functionName>gpa</functionName>
+        <functionName>galactic_parallactic(</functionName>
     </UpdatingRecord>
 
 </DewarPositionerUpdatingTable>
