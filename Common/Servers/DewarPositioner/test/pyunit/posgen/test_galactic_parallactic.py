@@ -21,7 +21,7 @@ class PosGeneratorGalacticParallacticTest(unittest2.TestCase):
         mocker.expect(source.getApparentCoordinates(mocker.ANY)).result((None, None))
         mocker.expect(source._get_name()).result('mocker')
         self.m.replay()
-        gen = self.posgen.galactic_parallactic(source, siteInfo={'latitude': 39})
+        gen = self.posgen.galacticParallactic(source, siteInfo={'latitude': 39})
         self.assertRaises(PosGeneratorError, gen.next)
 
     def test_right_behavior(self):
@@ -39,7 +39,7 @@ class PosGeneratorGalacticParallacticTest(unittest2.TestCase):
                     ).result((radians(az), radians(el), ra, dec) + (None,)*3)
             self.m.count(1)
         self.m.replay()
-        gen = self.posgen.galactic_parallactic(source, siteInfo={'latitude': latitude})
+        gen = self.posgen.galacticParallactic(source, siteInfo={'latitude': latitude})
         latitude = radians(latitude)
         for azd, eld in zip(azimuths, elevations):
             az = radians(azd)

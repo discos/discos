@@ -10,10 +10,22 @@ class PosGenerator(object):
 
     def __init__(self, zdtimeout=5):
         self.zdtimeout = zdtimeout # Timeout in case of zero division error
+        self.mapping = {
+                'parallactic': {
+                    'getAngleFunction': PosGenerator.getParallacticAngle, 
+                    'coordinateFrame': 'horizontal'
+                },
+                'galacticParallactic': {
+                    'getAngleFunction': PosGenerator.getGalacticParallacticAngle, 
+                    'coordinateFrame': 'equatorial'
+                },
+        }
       
     def goto(self, iStaticPos):
         yield iStaticPos
 
+    # TODO: refactoring required, in order to put all the parallactic and
+    # galacticParallactic common code in one place
     def parallactic(self, source, siteInfo):
         """Return the parallactic angle"""
         try:
@@ -52,7 +64,7 @@ class PosGenerator(object):
                 logger.logNotice('%s: %s' %(raeson, ex.message))
                 raise PosGeneratorError(raeson)
 
-    def galactic_parallactic(self, source, siteInfo):
+    def galacticParallactic(self, source, siteInfo):
         """Return the galactic parallactic angle"""
         try:
             latitude = siteInfo['latitude']
@@ -70,7 +82,7 @@ class PosGenerator(object):
                 coordinates = source.getApparentCoordinates(t) # Values in radians
                 az, el, ra, dec = coordinates[:4] 
                 p = PosGenerator.getParallacticAngle(latitude, az, el)
-                pg = PosGenerator.getGalacticParallacticAngle(ra, dec)
+                pg = PosGenerator.getGalacticParallacticAngle(latitude, ra, dec)
                 yield p + pg
                 last_zerodiv_time = datetime.datetime.now()
             except ZeroDivisionError:
@@ -98,7 +110,7 @@ class PosGenerator(object):
         return degrees(p)
 
     @staticmethod
-    def getGalacticParallacticAngle(ra, dec):
+    def getGalacticParallacticAngle(latitude, ra, dec):
         """Arguments in radians"""
         # North celestial pole coordinates in equatorial celestial frame (j200)
         # ncp = ('12 51 26.28', '27 07 41.7') 

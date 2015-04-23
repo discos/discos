@@ -27,7 +27,7 @@ class OffsetTest(unittest2.TestCase):
                 places=0
         )
 
-    def test_setOffset(self):
+    def _test_setOffset(self):
         """Vefify it sets the offset and puts the derotator in the new position."""
         old_offset = self.positioner.getOffset()
         old_pos = self.positioner.getPosition()

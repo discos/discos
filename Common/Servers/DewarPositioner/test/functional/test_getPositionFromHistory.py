@@ -12,16 +12,14 @@ from DewarPositioner.cdbconf import CDBConf
 
 class GetPositionFromHistoryTest(unittest2.TestCase):
 
-    @classmethod
-    def setUpClass(self):
+    def setUp(self):
         client = PySimpleClient()
         self.positioner = client.getComponent('RECEIVERS/DewarPositioner')
         self.positioner.setup('KKG')
         self.cmdPos = 0.8
         time.sleep(0.2)
 
-    @classmethod
-    def tearDownClass(self):
+    def tearDown(self):
         self.positioner.park()
         time.sleep(0.2)
 
@@ -56,7 +54,7 @@ class GetPositionFromHistoryTest(unittest2.TestCase):
         """Verify the position at a time greater then the latest one"""
         # Change the position (it was 0 after the park())
         self.positioner.setPosition(self.cmdPos)
-        time.sleep(1)
+        time.sleep(2)
         # Verify the position we get at 60 seconds in the future
         t = getTimeStamp().value + 60*10**7
         p = self.positioner.getPositionFromHistory(t)
@@ -66,7 +64,7 @@ class GetPositionFromHistoryTest(unittest2.TestCase):
         """Verify the position at time 0"""
         # Change the position (it was 0 after the park())
         self.positioner.setPosition(self.cmdPos)
-        time.sleep(1)
+        time.sleep(2)
         # Verify the position we get at 60 seconds in the future
         p = self.positioner.getPositionFromHistory(0)
         self.assertAlmostEqual(p, self.cmdPos, places=1)

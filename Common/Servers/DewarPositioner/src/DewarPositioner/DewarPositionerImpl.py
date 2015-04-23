@@ -348,10 +348,10 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
     def getScanInfo(self):
         return ScanInfo(**self.positioner.getScanInfo())
 
-    def startUpdating(self, axis, sector, az, el):
+    def startUpdating(self, axis, sector, az, el, ra, dec):
         logger.logNotice('starting the derotator position updating')
         try:
-            self.positioner.startUpdating(axis, sector, az, el)
+            self.positioner.startUpdating(axis, sector, az, el, ra, dec)
         except PositionerError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()

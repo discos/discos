@@ -141,7 +141,7 @@ class Positioner(object):
                     %(self.control.target, self.device.getMinLimit(), self.device.getMaxLimit()))
 
 
-    def startUpdating(self, axis, sector, az, el):
+    def startUpdating(self, axis, sector, az, el, ra, dec):
         sectors = ('ANT_NORTH', 'ANT_SOUTH')
         try:
             Positioner.generalLock.acquire()
@@ -182,12 +182,18 @@ class Positioner(object):
                         self._start(self.posgen.goto, position)
                     else:
                         posgen = getattr(self.posgen, functionName) 
+                        angle_mapping = self.posgen.mapping[functionName]
+                        getAngleFunction = self.posgen.mapping[functionName]['getAngleFunction']
+                        coordinateFrame = self.posgen.mapping[functionName]['coordinateFrame']
+                        lat = self.siteInfo['latitude']
                         try:
-                            iParallacticPos = PosGenerator.getParallacticAngle(
-                                self.siteInfo['latitude'], 
-                                az, 
-                                el
-                            )
+                            if coordinateFrame == 'horizontal':
+                                iParallacticPos = getAngleFunction(lat, az, el)
+                            elif coordinateFrame == 'equatorial':
+                                iParallacticPos = getAngleFunction(lat, ra, dec)
+                            else:
+                                raise PositionerError('coordinate frame %s unknown' %coordinateFrame)
+
                         except ZeroDivisionError:
                             raise NotAllowedError('zero division error computing p(%.2f, %.2f)' %(az, el))
 

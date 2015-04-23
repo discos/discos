@@ -23,7 +23,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
     def tearDown(self):
         self.p.park()
  
-    def _test_alreadyUpdating(self):
+    def test_alreadyUpdating(self):
         """The call to startUpdating() have to stop and start again a new updating"""
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
@@ -32,16 +32,16 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
         
         self.p.setup(site_info, self.source, self.device)
         try:
-            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el)
+            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el, None, None)
             time.sleep(0.2)
             self.assertEqual(self.p.isUpdating(), True)
-            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el)
+            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el, None, None)
             time.sleep(0.2)
             self.assertEqual(self.p.isUpdating(), True)
         finally:
             self.p.stopUpdating()
  
-    def _test_cannotSetPosition(self):
+    def test_cannotSetPosition(self):
         """Cannot set position during an updating"""
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
@@ -50,13 +50,13 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
 
         self.p.setup(site_info, self.source, self.device)
         try:
-            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el)
+            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el, None, None)
             time.sleep(0.2)
             self.assertRaises(NotAllowedError, self.p.setPosition, 0)
         finally:
             self.p.stopUpdating()
  
-    def _test_do_nothing_with_axis_MNG_BEAMPARK(self):
+    def test_do_nothing_with_axis_MNG_BEAMPARK(self):
         """Do nothing in case the axis is MNG_BEAMPARK"""
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
@@ -65,50 +65,50 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
 
         self.p.setup(site_info, self.source, self.device)
         try:
-            self.p.startUpdating('MNG_BEAMPARK', 'ANT_NORTH', az, el)
+            self.p.startUpdating('MNG_BEAMPARK', 'ANT_NORTH', az, el, None, None)
             time.sleep(0.2)
             self.assertFalse(self.p.isUpdating())
         finally:
             self.p.stopUpdating()
 
-    def _test_notYetConfigured(self):
+    def test_notYetConfigured(self):
         """Verify startUpdating()"""
         # startUpdating() raises NotAllowedError when the system is not configured
-        self.assertRaises(NotAllowedError, self.p.startUpdating, 'axis', 'sector', 1, 1)
+        self.assertRaises(NotAllowedError, self.p.startUpdating, 'axis', 'sector', 1, 1, None, None)
         self.assertEqual(self.p.isConfigured(), False)
         self.p.setup(siteInfo={}, source=None, device=self.device)
         # startUpdating() raises NotAllowedError when the system is not configured
-        self.assertRaises(NotAllowedError, self.p.startUpdating, 'axis', 'sector', 1, 1)
+        self.assertRaises(NotAllowedError, self.p.startUpdating, 'axis', 'sector', 1, 1, None, None)
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
-        self.assertRaises(NotAllowedError, self.p.startUpdating, 'axis', 'sector', 1, 1)
+        self.assertRaises(NotAllowedError, self.p.startUpdating, 'axis', 'sector', 1, 1, None, None)
         with self.assertRaisesRegexp(NotAllowedError, '^no site information available'):
-            self.p.startUpdating('axis', 'sector', 1, 1)
+            self.p.startUpdating('axis', 'sector', 1, 1, None, None)
         self.p.setup(siteInfo={'foo': 'foo'}, source=None, device=self.device)
         self.cdbconf.setConfiguration('BSC')
         with self.assertRaisesRegexp(NotAllowedError, "no source available"):
-            self.p.startUpdating('axis', 'sector', 1, 1)
+            self.p.startUpdating('axis', 'sector', 1, 1, None, None)
         self.p.setup(siteInfo={'foo': 'foo'}, source='source', device=self.device)
         self.cdbconf.setConfiguration('FIXED')
-        self.p.startUpdating('axis', 'sector', 1, 1) # Do not raise an exception
+        self.p.startUpdating('axis', 'sector', 1, 1, None, None) # Do not raise an exception
         self.p.stopUpdating() # Do not raise exception
         self.cdbconf.setConfiguration('BSC')
         sector = 'WRONG_SECTOR'
         with self.assertRaisesRegexp(NotAllowedError, '^sector %s not in' %sector):
-            self.p.startUpdating('axis', sector, 1, 1)
+            self.p.startUpdating('axis', sector, 1, 1, None, None)
         axis = 'WRONG_AXIS'
         sector = 'ANT_NORTH'
         with self.assertRaisesRegexp(PositionerError, '^configuration problem:'):
-            self.p.startUpdating(axis, sector, 1, 1)
+            self.p.startUpdating(axis, sector, 1, 1, None, None)
         axis = 'MNG_TRACK'
         # Raise value error (wrong unpacking)
         self.cdbconf.UpdatingPosition['MNG_TRACK'] = [10] # expected [position, functionName]
-        self.assertRaises(PositionerError, self.p.startUpdating, axis, sector, 1, 1)
+        self.assertRaises(PositionerError, self.p.startUpdating, axis, sector, 1, 1, None, None)
         # Raise AttributeError: fooName does not exist
         self.cdbconf.UpdatingPosition['ANT_NORTH'] = [10, 'fooName'] # [position, functionName]
-        self.assertRaises(PositionerError, self.p.startUpdating, axis, sector, 1, 1)
+        self.assertRaises(PositionerError, self.p.startUpdating, axis, sector, 1, 1, None, None)
 
-    def _test_custom(self):
+    def test_custom(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
         latitude = radians(50)
@@ -126,7 +126,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
                 self.source.setAzimuth(az)
                 self.source.setElevation(el)
                 if i == begin_idx:
-                    self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el)
+                    self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el, None, None)
                 time.sleep(0.11)
                 expected = Pis + gen.next()
                 self.assertEqual(expected, self.device.getActPosition())
@@ -134,7 +134,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             self.p.stopUpdating()
 
 
-    def _test_custom_auto_rewinding(self):
+    def test_custom_auto_rewinding(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
         latitude = radians(39.49)
@@ -155,7 +155,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
 
             self.source.setAzimuth(az)
             self.source.setElevation(el)
-            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el)
+            self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el, None, None)
 
             # For the K Band, we expect a rewind of 120 degrees
             # rewind_angle = self.p.getAutoRewindingSteps() * self.device.getStep()
@@ -167,7 +167,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             self.p.stopUpdating()
 
 
-    def _test_custom_opt(self):
+    def test_custom_opt(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM_OPT')
         latitude = radians(50)
@@ -186,14 +186,14 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
                 self.source.setElevation(el)
                 if i == begin_idx:
                     Pip = PosGenerator.getParallacticAngle(latitude, az, el)
-                    self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el)
+                    self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el, None, None)
                 time.sleep(0.11)
                 expected = Pis + gen.next() - Pip # Only the delta
                 self.assertEqual(expected, self.device.getActPosition())
         finally:
             self.p.stopUpdating()
 
-    def _test_bsc(self):
+    def test_bsc(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
         latitude = radians(50)
@@ -212,14 +212,14 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
                 self.source.setAzimuth(az)
                 self.source.setElevation(el)
                 if i == begin_idx:
-                    self.p.startUpdating(axisCode, 'ANT_NORTH', az, el)
+                    self.p.startUpdating(axisCode, 'ANT_NORTH', az, el, None, None)
                 time.sleep(0.11)
                 expected = Pis + gen.next()
                 self.assertAlmostEqual(expected, self.device.getActPosition(), places=2)
         finally:
             self.p.stopUpdating()
 
-    def _test_bsc_opt(self):
+    def test_bsc_opt(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC_OPT')
         latitude = radians(50)
@@ -239,14 +239,14 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
                 self.source.setElevation(el)
                 if i == begin_idx:
                     Pip = PosGenerator.getParallacticAngle(latitude, az, el)
-                    self.p.startUpdating(axisCode, 'ANT_NORTH', az, el)
+                    self.p.startUpdating(axisCode, 'ANT_NORTH', az, el, None, None)
                 time.sleep(0.11)
                 expected = Pis + gen.next() - Pip # Only the delta
                 self.assertAlmostEqual(expected, self.device.getActPosition(), places=2)
         finally:
             self.p.stopUpdating()
 
-    def _test_BSC_staticX(self):
+    def test_BSC_staticX(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
         latitude = radians(50)
@@ -265,14 +265,14 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
                 self.source.setAzimuth(az)
                 self.source.setElevation(el)
                 if i == begin_idx:
-                    self.p.startUpdating(axisCode, 'ANT_NORTH', az, el)
+                    self.p.startUpdating(axisCode, 'ANT_NORTH', az, el, None, None)
                 time.sleep(0.11)
             expected = initialPosition + staticValue
             self.assertEqual(expected, self.device.getActPosition())
         finally:
             self.p.stopUpdating()
 
-    def _test_CUSTOM_staticX(self):
+    def test_CUSTOM_staticX(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
         latitude = radians(50)
@@ -292,7 +292,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
                 self.source.setAzimuth(az)
                 self.source.setElevation(el)
                 if i == begin_idx:
-                    self.p.startUpdating(axisCode, 'ANT_NORTH', az, el)
+                    self.p.startUpdating(axisCode, 'ANT_NORTH', az, el, None, None)
                 time.sleep(0.11)
             expected = initialPosition + staticValue
             self.assertEqual(expected, self.device.getActPosition())

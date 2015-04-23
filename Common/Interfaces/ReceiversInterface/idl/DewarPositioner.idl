@@ -103,13 +103,17 @@ module Receivers {
          * @param sector the antenna sector (NORTH or SOUTH)
          * @param azimuth the azimuth (radians) at the beginning of the scan
          * @param elevation the elevation (radians) at the beginning of the scan
+         * @param ra the RA (radians) at the beginning of the scan
+         * @param dec the DEC (radians) at the beginning of the scan
          * @throw ComponentErrors::ComponentErrorsEx
          */
         void startUpdating(
             in Management::TScanAxis axis, 
             in Antenna::TAzimuthSection sector,
             in double azimuth,
-            in double elevation
+            in double elevation,
+            in double ra,
+            in double dec
         ) raises (ComponentErrors::ComponentErrorsEx);
 
 
