@@ -760,11 +760,16 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 				velDef,antennaInfo->timeToStop,name,scanOff,antennaInfo->axis,generatorFlux.out());
 		antennaInfo->targetName=CORBA::string_dup((const char *)name);
 		if (generatorType==Antenna::ANT_OTF) {
+			double pangle;
+			TIMEVALUE ct(startTime);
+			IRA::CDateTime time(ct,m_dut1);
 			generator->getHorizontalCoordinate(startTime,azimuth,elevation); 
 			generator->getHorizontalCoordinate(startTime+par.otf.subScanDuration,stopAzimuth,stopElevation); //this is the coordinate at the end of the scan
 			antennaInfo->startEpoch=startTime;
 			antennaInfo->azimuth=azimuth;
 			antennaInfo->elevation=elevation;
+			IRA::CSkySource::horizontalToEquatorial(time,m_site,azimuth,elevation,
+					antennaInfo->rightAscension,antennaInfo->declination,pangle);
 			antennaInfo->onTheFly=true;
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"OTF_AZ_EL: %lf %lf",azimuth,elevation));
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"OTF_STOPAZ_STOPEL: %lf %lf",stopAzimuth,stopElevation));
@@ -785,6 +790,8 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 			generator->getHorizontalCoordinate(inputTime,azimuth,elevation); //use inputTime (=now), in order to get where the source is now)
 			antennaInfo->azimuth=azimuth;
 			antennaInfo->elevation=elevation;
+			antennaInfo->rightAscension=ra;
+			antennaInfo->declination=dec;
 			antennaInfo->onTheFly=false;
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_AZ_EL: %lf %lf",azimuth,elevation));
 		}

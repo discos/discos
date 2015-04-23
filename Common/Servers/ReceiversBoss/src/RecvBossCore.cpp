@@ -1592,7 +1592,8 @@ void CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversPara
 	if ((m_config->dewarPositionerInterface()!="") && (derotator) && (m_updateMode!=Receivers::RCV_UNDEF_DEROTCONF))  {
 		loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
 		try {
-			m_dewarPositioner->startUpdating(antennaInfo.axis,antennaInfo.section,antennaInfo.azimuth,antennaInfo.elevation);
+			m_dewarPositioner->startUpdating(antennaInfo.axis,antennaInfo.section,antennaInfo.azimuth,
+					antennaInfo.elevation,antennaInfo.rightAscension,antennaInfo.declination);
 			m_dewarIsMoving=true;
 		}
 		catch (ComponentErrors::ComponentErrorsEx& ex) {

@@ -1,4 +1,5 @@
 #include "Schedule.h"
+#include <slamac.h>
 
 using namespace Schedule;
 
@@ -47,7 +48,8 @@ void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const AC
 	}
 	else {
 		axisCode=m_config->getAxisFromServoName(axis);
-		bdf=m_config->getBDFfromAxis(axisCode);
+		bdf=m_config->getBDFfromAxis(axisCode)/3600.0; //degrees per mm
+		bdf*=DD2R; // radians per mm
 		geom=m_config->getScanGeometryFromAxis(axisCode);
 	}
 	antennaSpan=span*bdf;

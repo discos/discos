@@ -210,6 +210,14 @@ module Antenna {
 	 	 */
 		double elevation;
 		/**
+		 * expected right ascension at the beginning of the scan
+		 */
+		double rightAscension;
+		/**
+		 * expected declination at the beginning of the scan
+		 */
+		double declination;
+		/**
 	 	 * expected starting ut time
 	 	 */
 		ACS::Time startEpoch;
