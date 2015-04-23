@@ -109,7 +109,7 @@ class PosGenerator(object):
         return degrees(p)
 
     @staticmethod
-    def getGalacticParallacticAngle(latitude, az, el, ra, dec):
+    def getGalacticAngle(ra, dec):
         """Arguments in radians"""
         # North celestial pole coordinates in equatorial celestial frame (j200)
         # ncp = ('12 51 26.28', '27 07 41.7') 
@@ -117,9 +117,15 @@ class PosGenerator(object):
         # dec0 = ephem.degrees(ncp[1])
         ra0 = 3.3660332687500043
         dec0 = 0.47347728280415174
+        g = atan2(sin(ra-ra0), cos(dec)*tan(dec0) - sin(dec)*cos(ra-ra0))
+        return degrees(g)
+
+    @staticmethod
+    def getGalacticParallacticAngle(latitude, az, el, ra, dec):
+        """Arguments in radians"""
         p = PosGenerator.getParallacticAngle(latitude, az, el)
-        gp = degrees(atan2(sin(ra-ra0), cos(dec)*tan(dec0) - sin(dec)*cos(ra-ra0)))
-        return p + gp
+        g = PosGenerator.getGalacticAngle(ra, dec)
+        return p + g
 
     
 class PosGeneratorError(Exception):
