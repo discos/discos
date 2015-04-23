@@ -190,7 +190,7 @@ class Positioner(object):
                             if coordinateFrame == 'horizontal':
                                 iParallacticPos = getAngleFunction(lat, az, el)
                             elif coordinateFrame == 'equatorial':
-                                iParallacticPos = getAngleFunction(lat, ra, dec)
+                                iParallacticPos = getAngleFunction(lat, az, el, ra, dec)
                             else:
                                 raise PositionerError('coordinate frame %s unknown' %coordinateFrame)
 
