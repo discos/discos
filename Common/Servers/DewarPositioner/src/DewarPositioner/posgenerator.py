@@ -81,9 +81,8 @@ class PosGenerator(object):
                 t = getTimeStamp().value + 1*10*6 # 100 ms in the future
                 coordinates = source.getApparentCoordinates(t) # Values in radians
                 az, el, ra, dec = coordinates[:4] 
-                p = PosGenerator.getParallacticAngle(latitude, az, el)
-                pg = PosGenerator.getGalacticParallacticAngle(latitude, ra, dec)
-                yield p + pg
+                pg = PosGenerator.getGalacticParallacticAngle(latitude, az, el, ra, dec)
+                yield pg
                 last_zerodiv_time = datetime.datetime.now()
             except ZeroDivisionError:
                 logger.logWarning('zero division error computing the galactic parallactic angle')
@@ -110,7 +109,7 @@ class PosGenerator(object):
         return degrees(p)
 
     @staticmethod
-    def getGalacticParallacticAngle(latitude, ra, dec):
+    def getGalacticParallacticAngle(latitude, az, el, ra, dec):
         """Arguments in radians"""
         # North celestial pole coordinates in equatorial celestial frame (j200)
         # ncp = ('12 51 26.28', '27 07 41.7') 
@@ -118,8 +117,9 @@ class PosGenerator(object):
         # dec0 = ephem.degrees(ncp[1])
         ra0 = 3.3660332687500043
         dec0 = 0.47347728280415174
-        gp = atan2(sin(ra-ra0), cos(dec)*tan(dec0) - sin(dec)*cos(ra-ra0))
-        return degrees(gp)
+        p = PosGenerator.getParallacticAngle(latitude, az, el)
+        gp = degrees(atan2(sin(ra-ra0), cos(dec)*tan(dec0) - sin(dec)*cos(ra-ra0)))
+        return p + gp
 
     
 class PosGeneratorError(Exception):
