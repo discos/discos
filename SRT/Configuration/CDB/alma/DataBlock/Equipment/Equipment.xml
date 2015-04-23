@@ -13,7 +13,7 @@
 		
 	<MinorServoMapping axis="SUBR_Z" servoName="SRP_TZ" antennaGeometry="LON" beamDeviationFactor="0.0"/>
 	<MinorServoMapping axis="SUBR_X" servoName="SRP_TX" antennaGeometry="LON" beamDeviationFactor="0.0"/>
-	<! TY, BDF = 8.87 arcseconds/mm -->
+    <!-- TY, BDF = 8.87 arcseconds/mm -->
 	<MinorServoMapping axis="SUBR_Y" servoName="SRP_TY" antennaGeometry="LAT" beamDeviationFactor="8.87"/>
 	<MinorServoMapping axis="SUBR_ROTY" servoName="SRP_RY" antennaGeometry="LON" beamDeviationFactor="0.0"/>
 	<MinorServoMapping axis="SUBR_ROTX" servoName="SRP_RX" antennaGeometry="LON" beamDeviationFactor="0.0"/>
