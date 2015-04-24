@@ -196,7 +196,8 @@ void CCore::_goTo(const double& azimuth,const double& elevation) throw (Manageme
 	MinorServo::MinorServoScan servo;
 	Receivers::TReceiversParameters receievers;
 	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
-	binder.goTo(azimuth*DD2R,elevation*DD2R);
+	printf("Parametri del goTo %lf, %lf\n",azimuth,elevation); 
+	binder.goTo(azimuth,elevation);
 	startTime=0; // it means start as soon as possible
 	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;

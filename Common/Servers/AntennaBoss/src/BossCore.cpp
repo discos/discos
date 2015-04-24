@@ -788,6 +788,7 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 			IRA::CIRATools::timeToStr(inputTime,out);
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"CHECK_TIME_IS: %s",(const char *)out));
 			generator->getHorizontalCoordinate(inputTime,azimuth,elevation); //use inputTime (=now), in order to get where the source is now)
+			printf("controllo cordinate di riferimento: %lf, %lf\n",azimuth,elevation);
 			antennaInfo->azimuth=azimuth;
 			antennaInfo->elevation=elevation;
 			antennaInfo->rightAscension=ra;
@@ -828,7 +829,7 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 		changeBossStatus(Management::MNG_WARNING);
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CBossCore::checkScan()");
 	}
-	if ((azimuth*DR2D>=90.0) && (azimuth<=270.0)) {
+	if ((azimuth*DR2D>=90.0) && (azimuth*DR2D<=270.0)) {
 		antennaInfo->section=Antenna::ANT_SOUTH;
 	}
 	else {

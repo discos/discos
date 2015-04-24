@@ -307,6 +307,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			}
 			else if (primary.frame==Antenna::ANT_HORIZONTAL) {
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"SOURCE_AZ_EL: %lf %lf",primary.parameters[0],primary.parameters[1]));
+				printf("parametri beam park: %lf, %lf",primary.parameters[0],primary.parameters[1]);
 				tracker->setFixedPoint(primary.targetName,primary.parameters[0],primary.parameters[1]);
 			}
 			//copy the current track and store it
