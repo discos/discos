@@ -8,7 +8,7 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-    Name="DerotatorSimulator"    
+    Name="SRTKBandDerotator"    
     Code="DerotatorSimulator.DerotatorSimulatorImpl"
     Type="IDL:alma/Receivers/SRTKBandDerotator:1.0"
     ImplLang="py"
