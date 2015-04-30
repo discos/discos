@@ -20,6 +20,8 @@ class CDBConf(object):
 
     mappingAttributes = (
             'DerotatorName', 
+            'ObservatoryName', 
+            'CoordinateSourceName', 
             'SetupPosition',
             'ParkPosition',
     )

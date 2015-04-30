@@ -11,6 +11,14 @@ from DewarPositioner import DewarPositionerImpl
 
 class PublisherTest(unittest2.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        cls.supplier = Supplier(Receivers.DEWAR_POSITIONER_DATA_CHANNEL)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.supplier.disconnect()
+
     def setUp(self):
         self.m = mocker.Mocker()
         self.positioner = self.m.mock()
@@ -33,7 +41,7 @@ class PublisherTest(unittest2.TestCase):
         thread = threading.Thread(
                 name='Publisher',
                 target=DewarPositionerImpl.DewarPositionerImpl.publisher,
-                args=(self.positioner, supplier, control)
+                args=(self.positioner, self.supplier, control)
         )
         thread.start()
 
@@ -60,7 +68,7 @@ class PublisherTest(unittest2.TestCase):
         thread = threading.Thread(
                 name='Publisher',
                 target=DewarPositionerImpl.DewarPositionerImpl.publisher,
-                args=(self.positioner, supplier, control)
+                args=(self.positioner, self.supplier, control)
         )
         thread.start()
 
@@ -87,7 +95,7 @@ class PublisherTest(unittest2.TestCase):
         thread = threading.Thread(
                 name='Publisher',
                 target=DewarPositionerImpl.DewarPositionerImpl.publisher,
-                args=(self.positioner, supplier, control)
+                args=(self.positioner, self.supplier, control)
         )
         thread.start()
 
@@ -114,7 +122,7 @@ class PublisherTest(unittest2.TestCase):
         thread = threading.Thread(
                 name='Publisher',
                 target=DewarPositionerImpl.DewarPositionerImpl.publisher,
-                args=(self.positioner, supplier, control)
+                args=(self.positioner, self.supplier, control)
         )
         thread.start()
 
@@ -141,7 +149,7 @@ class PublisherTest(unittest2.TestCase):
         thread = threading.Thread(
                 name='Publisher',
                 target=DewarPositionerImpl.DewarPositionerImpl.publisher,
-                args=(self.positioner, supplier, control)
+                args=(self.positioner, self.supplier, control)
         )
         thread.start()
 
@@ -168,7 +176,7 @@ class PublisherTest(unittest2.TestCase):
         thread = threading.Thread(
                 name='Publisher',
                 target=DewarPositionerImpl.DewarPositionerImpl.publisher,
-                args=(self.positioner, supplier, control)
+                args=(self.positioner, self.supplier, control)
         )
         thread.start()
 
@@ -202,7 +210,7 @@ class PublisherTest(unittest2.TestCase):
         thread = threading.Thread(
                 name='Publisher',
                 target=DewarPositionerImpl.DewarPositionerImpl.publisher,
-                args=(self.positioner, supplier, control)
+                args=(self.positioner, self.supplier, control)
         )
         thread.start()
 
@@ -225,6 +233,4 @@ class PublisherTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    supplier = Supplier(Receivers.DEWAR_POSITIONER_DATA_CHANNEL)
     unittest2.main()
-    supplier.disconnect()

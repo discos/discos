@@ -131,7 +131,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc.getComponentErrorsEx()
 
         try:
-            observatory = self.client.getComponent('ANTENNA/Observatory')
+            observatoryName = self.cdbconf.getAttribute('ObservatoryName')
+            observatory = self.client.getComponent(observatoryName)
             lat_obj = observatory._get_latitude()
             latitude_dec, compl = lat_obj.get_sync()
             latitude = radians(latitude_dec)
@@ -144,7 +145,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             siteInfo = {'latitude': latitude}
 
         try:
-            sourceName = 'ANTENNA/Boss'
+            sourceName = self.cdbconf.getAttribute('CoordinateSourceName')
             source = self.client.getComponent(sourceName)
         except Exception:
             logger.logWarning('cannot get the %s component' %sourceName)

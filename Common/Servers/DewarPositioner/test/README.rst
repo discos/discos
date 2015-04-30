@@ -1,3 +1,10 @@
+*******************
+Containers to start
+*******************
+- acsStartContainer -py AntennaBossSimulatorContainer
+- acsStartContainer -py DerotatorsContainer
+- acsStartContainer -py DewarPositionerContainer
+
 *****************************
 Content of the test directory
 *****************************

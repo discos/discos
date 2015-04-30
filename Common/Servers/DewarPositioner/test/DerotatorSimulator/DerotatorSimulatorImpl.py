@@ -33,9 +33,6 @@ class DerotatorSimulatorImpl(SRTKBandDerotator, cc, services, lcycle):
     def cleanUp(self):
         pass
 
-    def _get_name(self):
-        return 'DerotatorSimulator'
-
     def setup(self):
         self.status.is_ready.value = True
         self.status.is_tracking.value = True
