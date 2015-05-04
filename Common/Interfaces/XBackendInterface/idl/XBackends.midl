@@ -22,9 +22,9 @@ module Backends {
 
 	enum TXArcosConf {
 		XArcos_K77,
-		XArcos_K01,
-		XArcos_K04,
-        XArcos_K00,
+		XArcos_K06,
+		XArcos_K03,
+        	XArcos_K00,
 		XArcos_C00
 	};
 	ACS_ENUM(TXArcosConf);

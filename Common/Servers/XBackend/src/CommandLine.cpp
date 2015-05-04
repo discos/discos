@@ -1301,9 +1301,22 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		setSection(6,145,62.5,6,2,125,-1);
 		m_XarcosC=false;
     }
-    else if (config=="XK01") {
+    else if (config=="XK06") {
         setMode8bit(true);
 		setSectionsNumber(4);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(0,145,62.5,1,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(1,174.296875,3.90625,1,2,7.8125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(2,145,62.5,6,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(3,174.296875,3.90625,6,2,7.8125,-1);
+		m_XarcosC=false;
+    }
+    else if (config=="XK03") {
+        setMode8bit(true);
+        setSectionsNumber(4);
 		IRA::CIRATools::Wait(0,100000);
 		setSection(0,145,62.5,1,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
@@ -1312,19 +1325,6 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		setSection(2,145,62.5,2,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,174.296875,3.90625,2,2,7.8125,-1);
-		m_XarcosC=false;
-    }
-    else if (config=="XK04") {
-        setMode8bit(true);
-        setSectionsNumber(4);
-		IRA::CIRATools::Wait(0,100000);
-		setSection(0,145,62.5,1,2,125,-1);
-		IRA::CIRATools::Wait(0,100000);
-		setSection(1,174.296875,3.90625,1,2,7.8125,-1);
-		IRA::CIRATools::Wait(0,100000);
-		setSection(2,145,62.5,3,2,125,-1);
-		IRA::CIRATools::Wait(0,100000);
-		setSection(3,174.296875,3.90625,3,2,7.8125,-1);
 		m_XarcosC=false;
     }
     else if(config=="XK00") {
