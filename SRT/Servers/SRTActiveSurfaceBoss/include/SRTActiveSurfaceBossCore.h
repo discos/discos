@@ -231,6 +231,8 @@ private:
 	bool m_sector1, m_sector2, m_sector3, m_sector4, m_sector5, m_sector6, m_sector7, m_sector8;
 
 	bool m_profileSetted;
+	
+	bool m_ASup;
 };
 
 #endif /*SRTACTIVESURFACEBOSSCORE_H_*/

@@ -20,7 +20,7 @@ void CSRTActiveSurfaceBossCore::initialize()
     
     	m_enable = false;
 	m_tracking = false;
-    	m_status = Management::MNG_OK;
+    	m_status = Management::MNG_WARNING;
 	m_profile = ActiveSurface::AS_SHAPED_FIXED;
     	AutoUpdate = false;
     	actuatorcounter = circlecounter = totacts = 1;
@@ -33,6 +33,7 @@ void CSRTActiveSurfaceBossCore::initialize()
 	m_sector7 = false;
 	m_sector8 = false;
 	m_profileSetted = false;
+	m_ASup = false;
 }
 
 void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -1722,28 +1723,34 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
 		m_sector7 = false;
 		m_sector8 = false;
 		usdCounter = usdCounterS1 + usdCounterS2 + usdCounterS3 + usdCounterS4 + usdCounterS5 + usdCounterS6 + usdCounterS7 + usdCounterS8;
-		if (usdCounter < (int)lastUSD*WARNINGUSDPERCENT)
+		if (usdCounter < (int)lastUSD*WARNINGUSDPERCENT) {
         		m_status=Management::MNG_WARNING;
-    		if (usdCounter < (int)lastUSD*ERRORUSDPERCENT)
+			m_ASup=true;
+		}
+    		if (usdCounter < (int)lastUSD*ERRORUSDPERCENT) {
         		m_status=Management::MNG_FAILURE;
+			m_ASup=false;
+		}
 		//printf("usdCounter = %d\n", usdCounter);
 	}	
 
-        CIRATools::Wait(1000000);
-	_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
-	m_profile = newProfile;
-    	try {
-        	onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
-        }
-        catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-            	ex.log(LM_DEBUG);
-            	throw ex.getComponentErrorsEx();
-        }
+	if (m_ASup == true) {
+		CIRATools::Wait(1000000);
+		_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
+		m_profile = newProfile;
+		try {
+        		onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
+        	}
+        	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+            		ex.log(LM_DEBUG);
+            		throw ex.getComponentErrorsEx();
+        	}
 
-	m_profileSetted = true;
+		m_profileSetted = true;
 
-        CIRATools::Wait(1000000);
-	asOn();
+        	CIRATools::Wait(1000000);
+		asOn();
+	}
 }
 
 void CSRTActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentErrorsEx)
