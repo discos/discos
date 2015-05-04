@@ -94,7 +94,7 @@ class History(object):
             self.history.append(data)
             self.history.sort(key=operator.itemgetter(0))
             self.history = self.history[-2**15:] # Last 2**15 positions
-        print 'position %s inserted in the history' %position
+        print 'position inserted in the history: ', position
 
     def clean(self, since=0):
         target_time = since if since else getTimeStamp().value

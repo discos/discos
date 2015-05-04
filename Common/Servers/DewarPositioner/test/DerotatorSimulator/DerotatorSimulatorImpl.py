@@ -63,8 +63,9 @@ class DerotatorSimulatorImpl(SRTKBandDerotator, cc, services, lcycle):
 
     def setPosition(self, position):
         self.cmd_position = position
+        act_pos = self.getActPosition()
         p = Process(target=DerotatorSimulatorImpl._set_position_process, 
-                    args=(self.status, position, self.getSpeed()))
+                    args=(self.status, act_pos, position, self.getSpeed()))
         p.start()
         if self.getMinLimit() < position < self.getMaxLimit():
             self.history.insert(position)
@@ -94,9 +95,10 @@ class DerotatorSimulatorImpl(SRTKBandDerotator, cc, services, lcycle):
         self.status = Status()
 
     @staticmethod
-    def _set_position_process(status, position, speed):
+    def _set_position_process(status, act_pos, position, speed):
         status.is_slewing.value = True
-        time.sleep(position/speed*1.0) # Speed degrees per second
+        distance = float(abs(act_pos - position))
+        time.sleep(distance/speed) # Speed degrees per second
         status.is_slewing.value = False
 
 

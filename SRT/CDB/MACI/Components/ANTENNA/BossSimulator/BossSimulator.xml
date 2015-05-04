@@ -7,7 +7,7 @@
 	Name="Boss"
 	Code="AntennaSimulator.AntennaSimulatorImpl"
 	Type="IDL:alma/Antenna/AntennaBoss:1.0"
-	Container="AntennaSimContainer"
+	Container="AntennaBossSimulatorContainer"
 	Default="true"
 	KeepAliveTime="-1"
     ImplLang="py"
