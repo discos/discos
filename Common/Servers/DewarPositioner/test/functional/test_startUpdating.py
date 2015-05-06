@@ -11,7 +11,7 @@ from ComponentErrors import ComponentErrorsEx
 
 
 class StartUpdatingTest(unittest2.TestCase):
-    """Test the DewarPositioner.rewind() method"""
+    """Test the DewarPositioner.startUpdating() end-to-end method"""
     def setUp(self):
         self.client = PySimpleClient()
         self.device = self.client.getComponent('RECEIVERS/SRTKBandDerotator')
@@ -44,7 +44,6 @@ class StartUpdatingTest(unittest2.TestCase):
 
             Pis + Pip + Pid
         """
-
         latitude = 0.689 # 39.5 degrees
 
         # First step: we choose (az, el) in order to have a parallactic angle
@@ -61,8 +60,10 @@ class StartUpdatingTest(unittest2.TestCase):
         # We expect a rewind of 180 degrees: -93 + 180 -> 87
         expected = target + 180
         self.positioner.startUpdating(MNG_TRACK, ANT_NORTH, az, el, 0, 0)
-        time.sleep(0.11)
+        time.sleep(0.2)
         self.assertAlmostEqual(expected, self.device.getActPosition(), delta=0.1)
+
+        self.positioner.stopUpdating()
 
         # Second step: we do not call stopUpdating(), and we choose (az, el) 
         # in order to have a parallactic angle in range
@@ -74,7 +75,7 @@ class StartUpdatingTest(unittest2.TestCase):
         # We do not expect a rewind
         expected = target
         self.positioner.startUpdating(MNG_TRACK, ANT_NORTH, az, el, 0, 0)
-        time.sleep(0.11)
+        time.sleep(0.2)
         self.assertAlmostEqual(expected, self.device.getActPosition(), delta=0.1)
         
         self.positioner.stopUpdating()

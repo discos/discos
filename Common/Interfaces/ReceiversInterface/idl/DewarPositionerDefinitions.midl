@@ -42,6 +42,9 @@ module Receivers {
         /** Delta between the present parallactic angle and Pip: Pdp */
 		double dParallacticPos;
 
+        /** The offset added to the position in case of rewind */
+		double rewindingOffset;
+
 	} TDewarPositionerScanInfo;
 
 };

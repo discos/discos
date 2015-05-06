@@ -59,7 +59,7 @@ class PositionerOffsetTest(unittest2.TestCase):
                 places=1
         )
 
-    def test_out_of_range(self):
+    def _test_out_of_range(self):
         """Cause a rewind in case the offset is out of range"""
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM_OPT')

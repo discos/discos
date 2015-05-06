@@ -343,7 +343,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         res += 'sector: %s\n' %info.sector
         res += 'Pis: %.4f\n' %info.iStaticPos
         res += 'Pip: %.4f\n' %info.iParallacticPos
-        res += 'Pdp: %.4f' %info.dParallacticPos
+        res += 'Pdp: %.4f\n' %info.dParallacticPos
+        res += 'rewindingOffset: %.4f' %info.rewindingOffset
         return res
         
     def getScanInfo(self):

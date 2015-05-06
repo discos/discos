@@ -117,8 +117,7 @@ class Positioner(object):
             try:
                 self.goTo(position)
                 # Set the initialPosition, in order to add it to the dynamic one
-                self.conf.updateInitialPositions(position)
-                self.control.updateScanInfo({'iStaticPos': position})
+                self.control.user_position = position
             except Exception, ex:
                 raise PositionerError('cannot set the position: %s' %ex.message)
 
@@ -160,12 +159,11 @@ class Positioner(object):
             elif str(sector) not in sectors:
                 raise NotAllowedError('sector %s not in %s' %(sector, sectors))
             else:
-                self.control.clearScanInfo()
                 if self.isUpdating():
                     self.stopUpdating()
                 try:
                     updatingConf = self.conf.getUpdatingConfiguration(str(axis))
-                    initialPosition = float(updatingConf['initialPosition'])
+                    initialPosition = float(updatingConf['initialPosition']) + self.control.user_position
                     functionName = updatingConf['functionName']
                     # If the functionName is a staticX, we command just one position
                     if functionName.startswith('static'):
@@ -177,7 +175,8 @@ class Positioner(object):
                             sector=sector,
                             iStaticPos=initialPosition, 
                             iParallacticPos=staticValue,
-                            dParallacticPos=0
+                            dParallacticPos=0,
+                            rewindingOffset=0,
                         )
                         self._start(self.posgen.goto, position)
                     else:
@@ -193,7 +192,6 @@ class Positioner(object):
                                 iParallacticPos = getAngleFunction(lat, az, el, ra, dec)
                             else:
                                 raise PositionerError('coordinate frame %s unknown' %coordinateFrame)
-
                         except ZeroDivisionError:
                             raise NotAllowedError('zero division error computing p(%.2f, %.2f)' %(az, el))
 
@@ -202,7 +200,8 @@ class Positioner(object):
                             sector=sector,
                             iStaticPos=initialPosition, 
                             iParallacticPos=iParallacticPos,
-                            dParallacticPos=0
+                            dParallacticPos=0,
+                            rewindingOffset=0,
                         )
                         self._start(posgen, self.source, self.siteInfo)
                     self.control.mustUpdate = True
@@ -216,7 +215,7 @@ class Positioner(object):
         try:
             self.control.isRewindingRequired = False
             self.control.isUpdating = True
-            self.control.rewindingOffset = 0
+            self.control.scanInfo.update({'rewindingOffset': 0})
 
             if not self.device.isReady():
                 logger.logError("%s not ready to move: a setup() is required" 
@@ -233,7 +232,7 @@ class Positioner(object):
                     break
                 else:
                     try:
-                        Pis = self.control.scanInfo['iStaticPos']
+                        Pis = self.control.scanInfo['iStaticPos'] + self.control.scanInfo['rewindingOffset'] 
                         Pip = self.control.scanInfo['iParallacticPos']
                         Pdp = 0 if posgen.__name__ == 'goto' else (position - Pip)
                         target = Pis + Pdp if isOptimized else Pis + Pip + Pdp
@@ -289,12 +288,9 @@ class Positioner(object):
             self.control.isRewinding = True
             # getAutoRewindingSteps() returns None in case the user did not specify it
             n = steps if steps != None else self.control.autoRewindingSteps
-            targetPos, space = self.getRewindingParameters(n)
-            oldPis = self.control.scanInfo['iStaticPos']
-            newPis = oldPis + space
-            newPos = targetPos + space
-            self.control.updateScanInfo({'iStaticPos': newPis})
-            self.conf.updateInitialPositions(newPis)
+            targetPos, rewindingOffset = self.getRewindingParameters(n)
+            newPos = targetPos + rewindingOffset
+            self.control.updateScanInfo({'rewindingOffset': rewindingOffset})
             self._setPosition(newPos)
             logger.logInfo('rewinding in progress...')
             startingTime = now = datetime.datetime.now()
@@ -313,7 +309,7 @@ class Positioner(object):
             raise PositionerError(ex.message)
         finally:
             self.control.isRewinding = False
-            self.control.rewindingOffset = 0
+            self.control.updateScanInfo({'rewindingOffset': 0})
             Positioner.rewindingLock.release()
 
 
@@ -380,7 +376,7 @@ class Positioner(object):
         except AttributeError:
             pass # self.t is None because the system is not yet configured
         finally:
-            self.control.clearScanInfo()
+            self.control.stopUpdating()
             time.sleep(0.1)
 
 
@@ -475,7 +471,7 @@ class Positioner(object):
 
 
     def getRewindingOffset(self):
-        return self.control.rewindingOffset
+        return self.control.scanInfo['rewindingOffset']
 
 
     def isRewindingRequired(self):
@@ -657,8 +653,9 @@ class Control(object):
         self.clearScanInfo()
         self.autoRewindingSteps = None
         self.modes = {'rewinding': 'none', 'updating': 'none'}
+        self.stopUpdating()
 
-    def setScanInfo(self, axis, sector, iStaticPos, iParallacticPos, dParallacticPos):
+    def setScanInfo(self, axis, sector, iStaticPos, iParallacticPos, dParallacticPos, rewindingOffset):
         self.scanInfo = {
             'timestamp': getTimeStamp().value,
             'axis': axis,
@@ -666,23 +663,20 @@ class Control(object):
             'iStaticPos': iStaticPos,
             'iParallacticPos': iParallacticPos,
             'dParallacticPos': dParallacticPos,
+            'rewindingOffset': rewindingOffset
         }
 
     def clearScanInfo(self):
-        self.isUpdating = False
-        self.mustUpdate = False
-        self.stop = False
         self.offset = 0.0
         self.target = 0.0
-        self.rewindingOffset = 0.0
-        self.isRewindingRequired = False
-        self.isRewinding = False
+        self.user_position = 0
         self.setScanInfo(
             axis=Management.MNG_NO_AXIS, 
             sector=Antenna.ANT_NORTH,
             iStaticPos=0,
             iParallacticPos=0,
             dParallacticPos=0,
+            rewindingOffset=0,
         )
 
     def updateScanInfo(self, info):
@@ -693,12 +687,18 @@ class Control(object):
         self.scanInfo.update(info)
 
     def stopUpdating(self):
-        self.isUpdating = False
         self.updateScanInfo({
             'axis': Management.MNG_NO_AXIS,
             'iParallacticPos': 0,
             'dParallacticPos': 0,
+            'rewindingOffset': 0,
         })
+        self.isRewindingRequired = False
+        self.isRewinding = False
+        self.isUpdating = False
+        self.mustUpdate = False
+        self.stop = False
+
 
 class Status(object):
     @staticmethod
