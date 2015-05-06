@@ -101,80 +101,202 @@ def crossScan():
     * indicated using the track or sidereal commands
     """
 
-def derotatorClearAutoRewindingSteps():
-    """TODO"""
 
-def derotatorClearOffset():
-    """TODO"""
+def derotatorClearAutoRewindingSteps():
+    """
+    derotatorClearAutoRewindingSteps
+    clears the auto rewinding steps. Look at the derotatorSetAutoRewindingSteps
+    for more information.
+    """
+
 
 def derotatorIsUpdating():
-    """TODO"""
+    """
+    derotatorIsUpdating
+    returns True when the derotator is updating its position
+    """
 
 def derotatorGetActualSetup():
-    """TODO"""
+    """
+    derotatorGetActualSetup
+    returns 'none' if the derotator is not configured, otherwhise it returns
+    the actual setup:
+
+        > derotatorGetActualSetup
+        none
+        > derotatorSetup=KKG
+        > derotatorGetActualSetup
+        KKG
+    """
 
 def derotatorGetAutoRewindingSteps():
-    """TODO"""
+    """
+    derotatorGetAutoRewindingSteps
+    returns the number of steps (feeds) the derotator will be rewinded. For 
+    instance, for the K band derotator, two steps of auto rewinding means that 
+    in case of position out of range the derotator will be rewinded of 120 
+    degrees (one step is 60 degrees)
+    """
 
 def derotatorGetConfiguration():
-    """TODO"""
+    """
+    derotatorGetConfiguration
+    returns the actual configuration:
+
+        > derotatorGetConfiguration
+        FIXED
+        > derotatorSetConfiguration=BSC
+        > derotatorGetConfiguration
+        BSC
+    """
 
 def derotatorGetCmdPosition():
-    """TODO"""
+    """
+    derotatorGetCmdPosition
+    returns the commanded position
+    """
 
 def derotatorGetMaxLimit():
-    """TODO"""
+    """
+    derotatorGetMaxLimit
+    returns the maximum position allowed
+    """
 
 def derotatorGetMinLimit():
-    """TODO"""
+    """
+    derotatorGetMinLimit
+    returns the minimum position allowed
+    """
 
 def derotatorGetPosition():
-    """TODO"""
+    """
+    derotatorGetPosition
+    returns the actual position
+    """
 
 def derotatorGetRewindingMode():
-    """TODO"""
+    """
+    derotatorGetRewindingMode
+    returns the rewinding mode (AUTO or MANUAL)
+    """
 
 def derotatorGetRewindingStep():
-    """TODO"""
+    """
+    derotatorGetRewindingStep
+    returns the rewinding steps. In a symmetric derotator one step is
+    the angle between two feeds. The rewinding steps is the number of
+    feeds the derotator will be rewinded in case of position out of range.
+    """
 
 def derotatorGetScanInfo():
-    """TODO"""
+    """
+    derotatorGetScanInfo
+    returns the information about the current scan:
+
+        > derotatorGetScanInfo
+        axis: MNG_TRACK
+        sector: ANT_NORTH
+        Pis: 20.0000
+        Pip: 35.3300
+        Pdp: 10.1450
+        rewindingOffset: 0.0000
+    """
 
 def derotatorIsReady():
-    """TODO"""
+    """
+    derotatorIsReady
+    returns True when the derotator is ready to move
+    """
 
 def derotatorIsRewinding():
-    """TODO"""
+    """
+    derotatorIsRewinding
+    returns True when the derotator is rewinding
+    """
 
 def derotatorIsRewindingRequired():
-    """TODO"""
+    """
+    derotatorIsRewindingRequired
+    returns True when a manual rewinding (derotatorRewind command) is required
+    """
 
 def derotatorPark():
-    """TODO"""
+    """
+    derotatorPark
+    parks the derotator
+    """
 
 def derotatorRewind():
-    """TODO"""
+    """
+    derotatorRewind
+    rewinds the derotator for a given number of feeds. For instance, if you
+    want to rewind the derotator for 2 feeds:
+
+        > derotatorRewind=2
+    """
 
 def derotatorSetAutoRewindingSteps():
-    """TODO"""
+    """
+    derotatorSetAutoRewindingSteps
+    sets the number of steps (feeds) the derotator will be rewinded. For 
+    instance, for the K band derotator, two steps of auto rewinding means that
+    in case of position out of range the derotator will be rewinded of 120 
+    degrees (one step is 60 degrees):
+
+        > derotatorSetAutoRewindingSteps=2
+
+    The default auto rewinding steps is the maximum value allowed.
+    """
 
 def derotatorSetConfiguration():
-    """TODO"""
+    """
+    derotatorSetConfiguration
+    sets the derotator configuration:
 
-def derotatorSetOffset():
-    """TODO"""
+        > derotatorSetConfiguration=FIXED
+        > derotatorGetConfiguration
+        FIXED
+        > derotatorSetConfiguration=CUSTOM
+        > derotatorSetConfiguration=CUSTOM_OPT
+        > derotatorSetConfiguration=BSC
+        > derotatorSetConfiguration=BSC_OPT
 
-def derotatorGetOffset():
-    """TODO"""
+    The default configuration is FIXED
+    """
 
 def derotatorSetPosition():
-    """TODO"""
+    """
+    derotatorSetPosition
+    sets the derotator position. For instance, to set the derotator position
+    to 30 degrees:
+
+        > derotatorSetPosition=30d
+    
+    You can not set the position in the BSC and BSC_OPT configurations.
+    """
 
 def derotatorSetRewindingMode():
-    """TODO"""
+    """
+    derotatorSetRewindingMode
+    sets the rewinding mode to AUTO or MANUAL:
+
+        > derotatorGetRewindingMode
+        AUTO
+        > derotatorSetRewindingMode=MANUAL
+        > derotatorGetRewindingMode
+        MANUAL
+    """
 
 def derotatorSetup():
-    """TODO"""
+    """
+    derotatorSetup
+    sets the dewar positioner in order to use the proper derotator. For
+    instance, if you want to use the K band derotator:
+
+        > derotatorSetup=KKG
+        > derotatorGetActualSetup
+        KKG
+    """
 
 def device():
     """
