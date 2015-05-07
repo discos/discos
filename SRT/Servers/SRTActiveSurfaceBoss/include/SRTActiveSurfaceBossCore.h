@@ -30,7 +30,7 @@
 #define CIRCLES 17
 #define ACTUATORS 96
 #define firstUSD 1
-#define lastUSD 13
+#define lastUSD 1116
 #define LOOPTIME 100000 // 0,10 sec
 #define USDTABLE "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD.txt\0"
 #define USDTABLECORRECTIONS "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/act_rev02.txt\0"
