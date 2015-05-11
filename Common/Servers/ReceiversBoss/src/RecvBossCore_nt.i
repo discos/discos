@@ -273,7 +273,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_currentOperativeMode="NORMAL";
 	}
 	else if (rec==BANDAC) {
-		char buffer [10] = {'e','s','c','s','k','b','a','n','d','\n' };
+		char buffer [10] = {'e','s','c','s','c','b','a','n','d','\n' };
 		if (m_fsSocket.Send(err,(const void *)buffer,10)!=10) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
 			dummy.setCode(err.getErrorCode());
