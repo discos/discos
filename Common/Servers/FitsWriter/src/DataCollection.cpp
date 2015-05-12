@@ -18,6 +18,7 @@ CDataCollection::CDataCollection()
 	m_running=m_ready=m_start=m_stop=false;
 	m_scanHeader=m_subScanHeader=false;
 	m_reset=false;
+	m_writeSummary=false;
 	m_sectionH=NULL;
 	m_fileName=m_fullPath="";
 	m_project="";
@@ -49,6 +50,7 @@ void CDataCollection::forceReset()
 	}
 	m_running=m_ready=m_start=m_stop=false;
 	m_scanHeader=m_subScanHeader=false;
+	m_writeSummary=false;
 	m_reset=true;
 	m_status=Management::MNG_OK;
 }
@@ -229,6 +231,7 @@ void CDataCollection::haltStopStage()
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_running=false;
 	m_stop=false;
+	m_writeSummary=false;
 }
 
 void CDataCollection::haltResetStage()
@@ -246,6 +249,11 @@ void CDataCollection::getFileName(IRA::CString& fileName,IRA::CString& fullPath)
 IRA::CString CDataCollection::getFileName() const 
 {
 	return m_fullPath+m_fileName;
+}
+
+IRA::CString CDataCollection::getSummaryFileName() const
+{
+	return m_fullPath+"summary.fits";
 }
 
 bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& recording,bool& inconsistent)
@@ -322,6 +330,7 @@ bool CDataCollection::stopScan()
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_ready=false;
 	m_scanHeader=false;
+	m_writeSummary=true;
 	return true;
 }
 

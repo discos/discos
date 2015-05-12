@@ -110,6 +110,8 @@ public:
 	 * @param services pointer to the container services object
 	 */		
 	static void unloadMeteoComponent(Weather::GenericWeatherStation_var& ref,maci::ContainerServices *& services) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
+
+	static void map(const ACS::doubleSeq& seq,std::list<double>& va);
 };
 
 

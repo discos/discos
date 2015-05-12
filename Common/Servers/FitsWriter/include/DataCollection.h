@@ -222,7 +222,13 @@ public:
 	 * @return the full path and the file name of the current file
 	 */	
 	IRA::CString getFileName() const;
-	
+
+	/**
+	 * Get the full name of the current summary file
+	 * @return the full path and the file name of the current file
+	 */
+	IRA::CString getSummaryFileName() const;
+
 	/**
 	 * Get the name of the project
 	 */
@@ -406,6 +412,8 @@ public:
 	 */
 	bool isSubScanHeaderReady() const { return m_subScanHeader; }
 
+	bool isWriteSummary() const { return m_writeSummary; }
+
 	/**
 	 * It puts the component into the stop stage
 	 */
@@ -494,6 +502,7 @@ private:
 	 */
 	bool m_scanHeader;
 	bool m_subScanHeader;
+	bool m_writeSummary;
 	/**
 	 *  indicates if the component is saving...
 	 */

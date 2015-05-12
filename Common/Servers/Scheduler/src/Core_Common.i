@@ -265,7 +265,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 		throw impl;
 	}
 	newUT=GETMAX3(receiversUT,servoUT,antennaUT);
-	if (ut!=newUT) {
+	if ((ut!=newUT) && (ut!=0)){
 		ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_WARNING,"FAIL_TO_HANDSHAKE_SCAN_START_EPOCH"));
 		ut=newUT;
 		IRA::CString timeTag;

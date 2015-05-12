@@ -7,6 +7,7 @@
 #include <DateTime.h>
 #include <SkySource.h>
 #include <ReceiversModule.h>
+#include <AntennaModule.h>
 #include "CommonTools.h"
 
 using namespace IRA;
@@ -20,6 +21,9 @@ CEngineThread::CEngineThread(const ACE_CString& name,FitsWriter_private::CDataCo
 {
 	AUTO_TRACE("CEngineThread::CEngineThread()");
 	m_fileOpened=false;
+	m_summaryOpened=false;
+	m_file=NULL;
+	m_summary=NULL;
 	m_ptsys=new double[256];
 	m_receiversBoss=Receivers::ReceiversBoss::_nil();
 	receiverBossError=false;
@@ -37,6 +41,9 @@ CEngineThread::~CEngineThread()
 #else
 		delete m_file; 
 #endif
+	}
+	if (m_summary) {
+		delete m_summary;
 	}
 	if (m_ptsys) {
 		delete [] m_ptsys;
@@ -397,6 +404,14 @@ void CEngineThread::runLoop()
 			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"FILE_CLOSED"));
 			m_fileOpened=false;
 		}
+		if (m_summaryOpened) {
+			if (m_summary) {
+				delete m_summary;
+			}
+			m_summary=NULL;
+			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"SUMMARY_FILE_CLOSED"));
+			m_summaryOpened=false;
+		}
 		m_data->haltResetStage();
 		return;
 	}
@@ -425,6 +440,23 @@ void CEngineThread::runLoop()
 				m_data->setStatus(Management::MNG_FAILURE);
 			}
 #else
+			//let's create the summary file, it should be created before the first subscan of the scan.......
+			// the the summary will be valid for the duration of all the subscans.....
+			if (!m_summaryOpened) {
+				// now let's create the summary file.
+				m_summary=new CSummaryWriter();
+				m_file->setBasePath("");
+				m_file->setFileName((const char *)m_data->getSummaryFileName());
+				if (!m_summary->create()) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getSummaryFileName());
+					impl.setError((const char *)m_summary->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					m_data->setStatus(Management::MNG_FAILURE);
+				}
+				m_summaryOpened=true;
+			}
+
 			m_file = new CFitsWriter();
 			m_file->setBasePath("");
 			m_file->setFileName((const char *)m_data->getFileName());
@@ -452,9 +484,25 @@ void CEngineThread::runLoop()
 				}
 #else
 				//get data from receivers boss
-				collectReceiversData();
+				if (m_summaryOpened) {
+					collectReceiversData(m_summary->getFilePointer());
+				}
+				else {
+					collectReceiversData(NULL);
+				}
 				//get the data from the antenna boss
-				collectAntennaData();
+				if (m_summaryOpened) {
+					collectAntennaData(m_summary->getFilePointer());
+				}
+				else {
+					collectAntennaData(NULL);
+				}
+				if (m_summaryOpened) {
+					collectSchedulerData(m_summary->getFilePointer());
+				}
+				else {
+					collectSchedulerData(NULL);
+				}
 				//get the data from the minor servo boss...if subsystem is enabled
 				collectMinorServoData();
 				// now creates the file, the tables and the headers
@@ -777,9 +825,19 @@ void CEngineThread::runLoop()
 		m_file=NULL;
 #endif
 		}
-		m_data->haltStopStage();
 		m_fileOpened=false;
 		ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"FILE_FINALIZED"));
+		if (m_summaryOpened && m_data->isWriteSummary()) {
+			if (!m_summary->write()) {
+			}
+			if (!m_summary->close()) {
+			}
+			delete m_summary;
+			m_summary=NULL;
+			m_summaryOpened=false;
+			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"SUMMARY_FILE_FINALIZED"));
+		}
+		m_data->haltStopStage();
 	}
 	else if (m_data->isRunning()) { // file was already created.... then saves the data into it
 		 // until there is something to process and
@@ -831,7 +889,7 @@ void CEngineThread::collectMinorServoData()
 	}
 }
 
-void CEngineThread::collectAntennaData()
+void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 {
 	//CSecAreaResourceWrapper<CDataCollection> m_data=m_dataWrapper->Get();
 	try {
@@ -847,11 +905,17 @@ void CEngineThread::collectAntennaData()
 		CORBA::Double ra=0.0,dec=0.0,vrad=0.0;
 		CORBA::Double raOff=0.0,decOff=0.0,azOff=0.0,elOff=0.0,lonOff=0.0,latOff=0.0;
 		IRA::CString sourceName="";
+		Antenna::TReferenceFrame VFrame;
+		Antenna::TVradDefinition VDefinition;
+
 		try { //get the target name and parameters
 			ACS::ROstring_var targetRef;
 			CORBA::String_var target;
 			ACS::ROdouble_var raRef,decRef,vradRef;
 			ACS::ROdouble_var raOffRef,decOffRef,azOffRef,elOffRef,lonOffRef,latOffRef;
+			Antenna::ROTReferenceFrame_var VFrameRef;
+			Antenna::ROTVradDefinition_var VDefinitionRef;
+
 			//let's take the references to the attributes
 			targetRef=m_antennaBoss->target();
 			raRef=m_antennaBoss->targetRightAscension();
@@ -863,6 +927,33 @@ void CEngineThread::collectAntennaData()
 			decOffRef=m_antennaBoss->declinationOffset();
 			lonOffRef=m_antennaBoss->longitudeOffset();
 			latOffRef=m_antennaBoss->latitudeOffset();
+			VFrameRef=m_antennaBoss->vradReferenceFrame();
+			VDefinitionRef=m_antennaBoss->vradDefinition();
+
+			VDefinition=VDefinitionRef->get_sync(comp.out());
+			ACSErr::CompletionImpl VDefinitionRefCompl(comp);
+			if (!VDefinitionRefCompl.isErrorFree()) {
+				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,VDefinitionRefCompl,"CEngineThread::collectAntennaData()");
+				impl.setAttributeName("vradDefinition");
+				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
+				impl.log(LM_ERROR);
+				m_data->setStatus(Management::MNG_WARNING);
+			}
+			else {
+				if (summaryFile) summaryFile->setKeyword("VDEF",Antenna::Definitions::map(VDefinition));
+			}
+			VFrame=VFrameRef->get_sync(comp.out());
+			ACSErr::CompletionImpl VFrameRefCompl(comp);
+			if (!VFrameRefCompl.isErrorFree()) {
+				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,VFrameRefCompl,"CEngineThread::collectAntennaData()");
+				impl.setAttributeName("vradReferenceFrame");
+				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
+				impl.log(LM_ERROR);
+				m_data->setStatus(Management::MNG_WARNING);
+			}
+			else {
+				if (summaryFile) summaryFile->setKeyword("VFRAME",Antenna::Definitions::map(VFrame));
+			}
 			target=targetRef->get_sync(comp.out());
 			ACSErr::CompletionImpl targetCompl(comp);
 			if (!targetCompl.isErrorFree()) {
@@ -979,6 +1070,12 @@ void CEngineThread::collectAntennaData()
 		}
 		m_info.setSource(sourceName,ra,dec,vrad);
 		m_info.setAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
+		if (summaryFile) {
+			summaryFile->setKeyword("OBJECT",sourceName);
+			summaryFile->setKeyword("RightAscension",ra);
+			summaryFile->setKeyword("Declination",dec);
+			summaryFile->setKeyword("VRAD",sourceName);
+		}
 		try { //get the estimated source fluxes
 			ACS::doubleSeq_var fluxes;
 			ACS::doubleSeq freqs;
@@ -1003,7 +1100,39 @@ void CEngineThread::collectAntennaData()
 	}
 }
 
-void CEngineThread::collectReceiversData()
+void CEngineThread::collectSchedulerData(FitsWriter_private::CFile* summaryFile)
+{
+	try {
+		CCommonTools::getScheduler(m_scheduler,m_service,m_config->getSchedulerComponent(),m_schedulerError);
+	}
+	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
+		ex.log(LM_ERROR);
+		m_data->setStatus(Management::MNG_WARNING);
+		m_scheduler=Management::Scheduler::_nil();
+	}
+	if (!CORBA::is_nil(m_scheduler)) {
+		ACSErr::Completion_var comp;
+		ACS::ROdoubleSeq_var restFreqRef;
+		ACS::doubleSeq_var restFreq;
+		try {
+			restFreqRef=m_scheduler->restFrequency();
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectSchedulerdata()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			m_schedulerError=true;
+		}
+		restFreq=restFreqRef->get_sync(comp.out());
+		std::list<double> va;
+		CCommonTools::map(restFreq,va);
+		if (summaryFile) summaryFile->setKeyword("RESTFREQ",va);
+	}
+}
+
+void CEngineThread::collectReceiversData(FitsWriter_private::CFile* summaryFile)
 {
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	try {
@@ -1024,6 +1153,7 @@ void CEngineThread::collectReceiversData()
 			ACSErr::CompletionImpl compImpl(comp);
 			if (compImpl.isErrorFree()) {
 				m_info.setReceiverCode((const char *)recvCode);
+				if (summaryFile) summaryFile->setKeyword("ReceiverCode",IRA::CString(recvCode.in()));
 			}
 			else {
 				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,compImpl,"CEngineThread::collectReceiversData()");

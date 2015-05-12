@@ -20,6 +20,7 @@
 #include <fstream>
 #else
 #include "FitsWriter.h"
+#include "SummaryWriter.h"
 #endif
 #include "Configuration.h"
 #include "MetaData.h"
@@ -85,11 +86,13 @@ private:
 	ofstream m_file;
 #else
 	CFitsWriter *m_file;
+	CSummaryWriter *m_summary;
 #endif
 	CConfiguration *m_config;
 	CMetaData m_info;
 	maci::ContainerServices * m_service;
 	bool m_fileOpened;
+	bool m_summaryOpened;
 	ACS::TimeInterval m_timeSlice;
 	double *m_ptsys;
 	bool antennaBossError;
@@ -98,6 +101,8 @@ private:
 	Receivers::ReceiversBoss_var m_receiversBoss;
 	bool minorServoBossError;
 	MinorServo::MinorServoBoss_var m_minorServoBoss;
+	bool m_schedulerError;
+	Management::Scheduler_var m_scheduler;
 	ACS::Time m_lastMinorServoEnquireTime;
 	bool checkTime(const ACS::Time& jobStartTime);
 	bool checkTimeSlot(const ACS::Time& slotStart);
@@ -105,15 +110,19 @@ private:
 	/**
 	 * It gets and updates the receiver code, and all the required data from the receviers subsystem 
 	 */
-	void collectReceiversData();
+	void collectReceiversData(FitsWriter_private::CFile* summaryFile);
 	/**
 	 * It gets and updates the all the required data from the antenna subsystem 
 	 */
-	void collectAntennaData();
+	void collectAntennaData(FitsWriter_private::CFile* summaryFile);
 	/**
 	 * It gets and update all the required data from the minor servo subsytem
 	 */
 	void collectMinorServoData();
+	/**
+	 * It gets and update all the required data from the management subsystem
+	 */
+	void collectSchedulerData(FitsWriter_private::CFile* summaryFile);
 
 };
 

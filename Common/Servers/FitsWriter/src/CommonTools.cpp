@@ -263,3 +263,11 @@ void CCommonTools::unloadMeteoComponent(Weather::GenericWeatherStation_var& ref,
 		ref=Weather::GenericWeatherStation::_nil();
 	}
 }
+
+void CCommonTools::map(const ACS::doubleSeq& seq,std::list<double>& va)
+{
+	for(unsigned i=0;i<seq.length();i++) {
+		va.push_back(seq[i]);
+	}
+}
+

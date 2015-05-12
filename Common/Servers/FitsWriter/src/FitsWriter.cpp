@@ -6,6 +6,7 @@
 
 using namespace CCfits;
 using namespace Backends;
+using namespace FitsWriter_private;
 
 #define _FITSW_DATACOL_TIME "time"
 #define _FITSW_DATACOL_RA "raj2000"

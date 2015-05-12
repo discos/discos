@@ -1,5 +1,7 @@
 #include "FitsTools.h"
 
+using namespace FitsWriter_private;
+
 bool CFitsTools::primaryHeaderComment(
 		CCfits::FITS *const fits,
 		const IRA::CString& comment,
@@ -35,4 +37,22 @@ bool CFitsTools::primaryHeaderHistory(CCfits::FITS *const fits,const IRA::CStrin
 	}
 	return true;
 }
+
+bool CFitsTools::flush(CCfits::FITS *const fits,IRA::CString& errorMessage)
+{
+	if (!fits) {
+		errorMessage = "fits file is not created";
+		return false;
+	}
+	try{
+		fits->flush();
+		return true;
+	}
+	catch(CCfits::FitsException& fe){
+		errorMessage = fe.message().c_str();
+		return false;
+	}
+};
+
+
 
