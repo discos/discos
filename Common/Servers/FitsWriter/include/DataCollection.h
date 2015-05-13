@@ -414,6 +414,8 @@ public:
 
 	bool isWriteSummary() const { return m_writeSummary; }
 
+	void closeSummary() { m_writeSummary=false; }
+
 	/**
 	 * It puts the component into the stop stage
 	 */

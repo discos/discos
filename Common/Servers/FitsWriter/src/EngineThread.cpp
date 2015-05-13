@@ -393,6 +393,20 @@ void CEngineThread::runLoop()
 	IRA::CString filePath,fileName;
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	IRA::CIRATools::getTime(now); // it marks the start of the activity job
+	if (m_summaryOpened && m_data->isWriteSummary()) {
+		if ((!m_summary->write()) || (!m_summary->close())) {
+			_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+			impl.setFileName((const char *)m_data->getSummaryFileName());
+			impl.setError((const char *)m_summary->getLastError());
+			impl.log(LM_ERROR); 
+			m_data->setStatus(Management::MNG_FAILURE);
+		}
+		delete m_summary;
+		m_summary=NULL;
+		m_summaryOpened=false;
+		m_data->closeSummary();
+		ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"SUMMARY_FILE_FINALIZED"));
+	}
 	if (m_data->isReset()) {
 		if (m_fileOpened) {
 			#ifdef FW_DEBUG
@@ -445,8 +459,9 @@ void CEngineThread::runLoop()
 			if (!m_summaryOpened) {
 				// now let's create the summary file.
 				m_summary=new CSummaryWriter();
-				m_file->setBasePath("");
-				m_file->setFileName((const char *)m_data->getSummaryFileName());
+				m_summary->setBasePath("");
+				m_summary->setFileName((const char *)m_data->getSummaryFileName());
+				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"SUMMARY_FILE %s",(const char*)m_data->getSummaryFileName()));
 				if (!m_summary->create()) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getSummaryFileName());
@@ -455,6 +470,7 @@ void CEngineThread::runLoop()
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				m_summaryOpened=true;
+				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"SUMMARY_OPENED"));
 			}
 
 			m_file = new CFitsWriter();
@@ -827,16 +843,19 @@ void CEngineThread::runLoop()
 		}
 		m_fileOpened=false;
 		ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"FILE_FINALIZED"));
-		if (m_summaryOpened && m_data->isWriteSummary()) {
-			if (!m_summary->write()) {
-			}
-			if (!m_summary->close()) {
+		/*if (m_summaryOpened && m_data->isWriteSummary()) {
+			if ((!m_summary->write()) || (!m_summary->close())) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getSummaryFileName());
+					impl.setError((const char *)m_summary->getLastError());
+					impl.log(LM_ERROR); 
+					m_data->setStatus(Management::MNG_FAILURE);
 			}
 			delete m_summary;
 			m_summary=NULL;
 			m_summaryOpened=false;
 			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"SUMMARY_FILE_FINALIZED"));
-		}
+		}*/
 		m_data->haltStopStage();
 	}
 	else if (m_data->isRunning()) { // file was already created.... then saves the data into it
@@ -1074,7 +1093,7 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 			summaryFile->setKeyword("OBJECT",sourceName);
 			summaryFile->setKeyword("RightAscension",ra);
 			summaryFile->setKeyword("Declination",dec);
-			summaryFile->setKeyword("VRAD",sourceName);
+			summaryFile->setKeyword("VRAD",vrad);
 		}
 		try { //get the estimated source fluxes
 			ACS::doubleSeq_var fluxes;

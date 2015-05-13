@@ -41,7 +41,7 @@
 #define SCHEMA_ENTRY26 ( _FILE_DOUBLE_TYPE,_FILE_MULTI_ENTRY,"BWID","bandwidth of the Nth section (MHz)" )
 #define SCHEMA_ENTRY27 ( _FILE_LONG_TYPE,_FILE_MULTI_ENTRY,"CHAN","Number of spectral bins of the Nth section" )
 
-#define SCHEMA_ENTRY28 ( _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"VRAD","Radial velocity" )
+#define SCHEMA_ENTRY28 ( _FILE_DOUBLE_TYPE,_FILE_SINGLE_ENTRY,"VRAD","Radial velocity" )
 #define SCHEMA_ENTRY29 ( _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"VFRAME","Radial velocity reference frame" )
 #define SCHEMA_ENTRY30 ( _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"VDEF","Radial velocity definition" )
 

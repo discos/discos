@@ -231,7 +231,6 @@ void CDataCollection::haltStopStage()
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_running=false;
 	m_stop=false;
-	m_writeSummary=false;
 }
 
 void CDataCollection::haltResetStage()
