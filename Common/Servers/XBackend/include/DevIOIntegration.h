@@ -65,7 +65,8 @@ public:
 		try {
 			long val;
 			line->getIntegration(val);
-			m_val=(CORBA::Long)val;
+			//m_val=(CORBA::Long)val;
+			m_val=((CORBA::Long)val)*1000; // msec
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOIntegration::read()");

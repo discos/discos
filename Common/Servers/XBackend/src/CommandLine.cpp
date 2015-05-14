@@ -881,7 +881,8 @@ void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 	bkd.sections=groupSpec->section;//m_sectionsNumber
 	ACS_DEBUG_PARAM("CCommandLine::fillMainHeader()","section: %i",groupSpec->section);
 	bkd.beams=m_beams;
-	bkd.integration=groupSpec->Xspec.GetTempoIntegrazione();
+	//bkd.integration=groupSpec->Xspec.GetTempoIntegrazione();
+	bkd.integration=(groupSpec->Xspec.GetTempoIntegrazione())*1000; //integration time value in msec into the fits header
 	bkd.sampleSize=SAMPLESIZE;	
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::fillMainHeader",(LM_INFO,"Main_OK"));
 }
