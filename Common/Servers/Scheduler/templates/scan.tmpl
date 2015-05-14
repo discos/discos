@@ -44,7 +44,7 @@
 #    per year (julian) if Fk5 is used). Not required.
 #h) [plx] parallax in milli arcseconds. Not required.
 #i) [rvel] radial velocity in Km/sec ( positive value means the source is moving away). Not required.If given the frame is supposed to be BARY and the
-#    definition is OPTICAL
+#    definition is OPTICAL. It could be overriden by the switch "-RVEL"
 
 #for SKYDIP scans: allows to perform a scan along elevation at a fixed azimuth allowing the calibration of the airmass, the scan will be done at 
 # decreasing elevation positions
@@ -69,10 +69,10 @@
 
 #ID type sourceName frame lon lat [epoch] [pmRa] [pmDec] [plx] [rvel]
 #in that case the internal catalog is used.
-3	SIDEREAL	epsi	-HOROFFS	0.245d	0.0d
-4	SIDEREAL	mySource	GAL	200.323232d	45.12211122d
-6	SIDEREAL	Second	EQ	123.4343434d	12.43433343d	1950.0	100.1	67.4	12.4	13.1
-8	SIDEREAL	epsi
+3	SIDEREAL	epsi	-HOROFFS	0.245d	0.0d	-RVEL	33.12	BARY	OP
+4	SIDEREAL	mySource	GAL	200.323232d	45.12211122d	-RVEL	112.223	LSRK	Z
+6	SIDEREAL	Second	EQ	123.4343434d	12.43433343d	1950.0	100.1	67.4	12.4	13.1	-RVEL	112.223	LSRK	RD
+8	SIDEREAL	epsi	-RVEL	12.223	LSRD	OP
 
 #ID type
 5	MOON	-EQOFFS	00:00:15.0	00:01:30.00

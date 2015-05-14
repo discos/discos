@@ -42,6 +42,9 @@ void CBossCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams
 	prim.latitudeOffset=latOff;
     prim.offsetFrame=frame;
     prim.enableCorrection=true;
+	prim.RadialVelocity=0.0;
+	prim.VradFrame=Antenna::ANT_UNDEF_FRAME;
+	prim.VradDefinition=Antenna::ANT_UNDEF_DEF;
     startScan(startUt,prim,second);
 }
 

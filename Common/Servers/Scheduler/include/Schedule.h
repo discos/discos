@@ -534,7 +534,19 @@ private:
 	 * @return the result of the parse
 	 */
 	bool parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
-	
+
+	/**
+	 * Parse the vRAD switch in order to configure a radial velocity
+	 * @param val line to parse
+	 * @param start point inside the line where to start parsing
+	 * @param vrad output radial velocity
+	 * @param frame output radial velocity frame
+	 * @param ref radial velocity definition
+	 * @errMsg error message in case of errors
+	 * @return the result of the parsing
+	 */
+	bool parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,Antenna::TReferenceFrame& frame,Antenna::TVradDefinition& ref,IRA::CString& errMsg);
+
 	/**
 	 * This method is called by the parser in order to read the scan list of a main schedule
 	 * @param line input line to be parsed

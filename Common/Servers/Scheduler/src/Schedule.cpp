@@ -79,8 +79,12 @@ bool CParser::parse(CBaseSchedule* unit,DWORD& line,IRA::CString& errorMsg)
 		else {
 			line++;
 		}
+		// This code is a workaround in order to cope with the carriage return in files edited in windows machine
+		IRA::CString inputLine(inLine);
+		inputLine.Replace('\r',' ',0);
+		inputLine.RTrim();
 		if ((inLine[0]!=COMMENT_CHAR) && (inLine[0]!=0) && (strlen(inLine)!=0)) {
-			if (!unit->parseLine(IRA::CString(inLine),line,errorMsg)) {
+			if (!unit->parseLine(inputLine,line,errorMsg)) {
 				return false;
 			}
 		}

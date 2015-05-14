@@ -352,6 +352,12 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			velFrame=Antenna::ANT_UNDEF_FRAME;
 			velDef=Antenna::ANT_UNDEF_DEF;
 		}
+		//if a radial velocity has been provided the it will override the one coming from the generator.....
+		if ((primary.VradFrame!=Antenna::ANT_UNDEF_FRAME) && (primary.VradDefinition!=Antenna::ANT_UNDEF_DEF)) {
+			vrad=primary.RadialVelocity;
+			velFrame=primary.VradFrame;
+			velDef=primary.VradDefinition;
+		}
 		timeToStop=0; // no need to compute a stop duration
 	}
 	else if (primary.type==Antenna::ANT_MOON) {
@@ -370,9 +376,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			dec=att->J2000Declination;
 			lon=att->gLongitude;
 			lat=att->gLatitude;
-			vrad=0.0;
-			velFrame=Antenna::ANT_UNDEF_FRAME;
-			velDef=Antenna::ANT_UNDEF_DEF;
+			//vrad=0.0;
+			//velFrame=Antenna::ANT_UNDEF_FRAME;
+			//velDef=Antenna::ANT_UNDEF_DEF;
 			axis=att->axis;
 			sourceName=IRA::CString(att->sourceID);
 			currentGeneratorFlux=currentGenerator; // the flux computer is the moon generator itself...make a deep copy
@@ -380,11 +386,14 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		catch (CORBA::SystemException& ex) {
 			sourceName=IRA::CString("????");
 			ra=dec=0.0; // in that case I do not want to rise an error
-			vrad=0.0;
-			velFrame=Antenna::ANT_UNDEF_FRAME;
-			velDef=Antenna::ANT_UNDEF_DEF;
+			//vrad=0.0;
+			//velFrame=Antenna::ANT_UNDEF_FRAME;
+			//velDef=Antenna::ANT_UNDEF_DEF;
 			axis=Management::MNG_NO_AXIS;
 		}
+		vrad=primary.RadialVelocity;
+		velFrame=primary.VradFrame;
+		velDef=primary.VradDefinition;
 		timeToStop=0;
 	}
 	else if (primary.type==Antenna::ANT_OTF) {
@@ -442,14 +451,13 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 				velDef=secVelDef;
 				sourceName=secSourceName;
 			}
-			else { //normal OTF...impossible to know vrad
-				vrad=0.0;
-				velFrame=Antenna::ANT_UNDEF_FRAME;
-				velDef=Antenna::ANT_UNDEF_DEF;
+			else {
+				vrad=primary.RadialVelocity;
+				velFrame=primary.VradFrame;
+				velDef=primary.VradDefinition;
 				sourceName=IRA::CString(att->sourceID);
 				currentGeneratorFlux=currentGenerator; // if no secondary scan is used, the generator in charge to compute the flux is the OTF itself...make a deep copy
 			}
-
 		}
 		catch (CORBA::SystemException& ex) {
 			sourceName=IRA::CString("????");

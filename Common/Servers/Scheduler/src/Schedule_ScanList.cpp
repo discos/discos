@@ -1,10 +1,12 @@
 #include "Schedule.h"
 #include <slamac.h>
 #include <ManagementModule.h>
+#include <AntennaModule.h>
 
 #define OFFFRAMEEQ "-EQOFFS"
 #define OFFFRAMEHOR "-HOROFFS"
 #define OFFFRAMEGAL "-GALOFFS"
+#define RVEL "-RVEL"
 
 #define SIDEREAL "SIDEREAL"
 #define SUN "SUN"
@@ -294,6 +296,9 @@ bool CScanList::parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *
 	scan->type=Antenna::ANT_MOON;
 	scan->paramNumber=0;
 	scan->secondary=false;
+	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
+	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
+	scan->RadialVelocity=0.0;
 	scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
 	scan->enableCorrection=true;
 	if (out==5) {
@@ -378,6 +383,9 @@ bool CScanList::parseSidereal(const IRA::CString& val,Antenna::TTrackingParamete
 	scan->enableCorrection=true;
 	scan->secondary=false;
 	scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
+	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
+	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
+	scan->RadialVelocity=0.0;
 	frame=Antenna::ANT_EQUATORIAL;
 	while (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  //get the next token...it represents the frame in which the coordinates are expressed
 		bool ok=IRA::CIRATools::strToCoordinateFrame(token,frame);
@@ -400,7 +408,7 @@ bool CScanList::parseSidereal(const IRA::CString& val,Antenna::TTrackingParamete
 		else if ((frame==Antenna::ANT_HORIZONTAL) && (ok)) {
 			if (frameOpen || offFrameOpen) {
 				errMsg="wrong horizontal format";
-				return false;  // if the frame has allready been expressed, raise an error;
+				return false;  // if the frame has already been expressed, raise an error;
 			}
 			scan->frame=Antenna::ANT_HORIZONTAL;
 			frameOpen=true;
@@ -458,6 +466,25 @@ bool CScanList::parseSidereal(const IRA::CString& val,Antenna::TTrackingParamete
 			scan->offsetFrame=Antenna::ANT_HORIZONTAL;
 			scan->applyOffsets=true;
 			offFrameOpen=true;
+		}
+		else if (token==RVEL) {
+			if (frameOpen && (scan->frame==Antenna::ANT_EQUATORIAL)) {
+				if (counter<3) {
+					errMsg="wrong horizontal offsets format";
+					return false;
+				}
+				frameOpen=false;
+				scan->paramNumber=paramCounter;
+				counter=0;
+			}
+			if (offFrameOpen || frameOpen) {
+				errMsg="wrong scan definition";
+				return false; // if the offsets frame has already been expressed, raise an error;
+			}
+			if (!parseVRADSwitch(val,start,scan->RadialVelocity,scan->VradFrame,scan->VradDefinition,errMsg)) {
+				return false;
+			}
+			counter=0;
 		}
 		else {
 			if (frameOpen) {
@@ -608,6 +635,39 @@ bool CScanList::parseSidereal(const IRA::CString& val,Antenna::TTrackingParamete
 	return true;
 }
 
+bool CScanList::parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,Antenna::TReferenceFrame& frame,Antenna::TVradDefinition& ref,IRA::CString& errMsg)
+{
+	IRA::CString token;
+	if (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+		vrad=token.ToDouble();
+	}
+	else {
+		errMsg="not enough parameters for the radial velocity switch";
+		return false;
+	}
+	if (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+		if (!Antenna::Definitions::map(token,frame)) {
+			errMsg="the reference frame of the radial velocity is incorrect";
+			return false;
+		}
+	}
+	else {
+		errMsg="not enough parameters for the radial velocity switch";
+		return false;
+	}
+	if (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+		if (!Antenna::Definitions::map(token,ref)) {
+			errMsg="the the radial velocity definition is incorrect";
+			return false;
+		}
+	}
+	else {
+		errMsg="not enough parameters for the radial velocity switch";
+		return false;
+	}
+	return true;
+}
+
 bool CScanList::parseSKYDIP(const IRA::CString& val,Antenna::TTrackingParameters *scan,Antenna::TTrackingParameters *secScan,DWORD& id,IRA::CString& errMsg)
 {
 	TRecord rec;
@@ -620,6 +680,9 @@ bool CScanList::parseSKYDIP(const IRA::CString& val,Antenna::TTrackingParameters
 	scan->latitudeOffset=scan->longitudeOffset=0.0;
 	scan->applyOffsets=false;
 	scan->type=Antenna::ANT_OTF;
+	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
+	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
+	scan->RadialVelocity=0.0;
 	scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
 	scan->secondary=true;
 	scan->enableCorrection=false; // disable the pointing corrections
@@ -772,6 +835,9 @@ bool CScanList::parseOTFC(const IRA::CString& val,Antenna::TTrackingParameters *
 	scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
 	scan->secondary=true;
 	scan->enableCorrection=true;
+	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
+	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
+	scan->RadialVelocity=0.0;
 	out=sscanf((const char *)val,"%u\t%s\t%u\t%s\t%s\t%s\t%s\t%s\t%lf\t%s\t%s\t%s\t",&id,type,&scanCenter,span,coordFrame,subScanFrame,geometry,direction,&duration,offFrame,lonOff,latOff);
 	if ((out!=9) && (out!=12)) {   //parameters are 9 for the OTF plus 3 (not mandatory) for the offsets...
 		errMsg="invalid on the fly scan definition";
@@ -914,6 +980,9 @@ bool CScanList::parseOTF(const IRA::CString& val,Antenna::TTrackingParameters *s
 	scan->latitudeOffset=scan->longitudeOffset=0.0;
 	scan->applyOffsets=false;
 	scan->type=Antenna::ANT_OTF;
+	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
+	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
+	scan->RadialVelocity=0.0;
 	scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
 	out=sscanf((const char *)val,"%u\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%lf\t%s\t%s\t%s",&id,type,targetName,lon1,lat1,lon2,
 			lat2,coordFrame,subScanFrame,geometry,description,direction,&duration,offFrame,lonOff,latOff);

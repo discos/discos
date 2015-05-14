@@ -2,6 +2,7 @@
 
 #include "Schedule.h"
 #include <slamac.h>
+#include <AntennaModule.h>
 #include <IRA>
 
 // this is a quick test for the class CSchedule, in order to test if it works and no memory leakage are behind the corner
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
 {
 	//DWORD scan;
 	double minEl,maxEl;
-	IRA::CString pre,post,target,outString;
+	IRA::CString pre,post,target,outString,outString2;
 	std::vector<IRA::CString> procedure;
 	Management::TScanTypes type;
 	void *scanPar;
@@ -155,6 +156,8 @@ int main(int argc, char *argv[])
 				else {
 					printf("No offsets\n");
 				}
+				printf("\n");
+				printf("radial velocity: %lf, %s, %s\n",tmp->RadialVelocity,Antenna::Definitions::map(tmp->VradFrame),Antenna::Definitions::map(tmp->VradDefinition));
 			}
 			printf("\n");
 			if (!sched.getBackendList()->getBackend(rec.backendProc,target,procedure)) {
