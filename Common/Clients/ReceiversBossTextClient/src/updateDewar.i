@@ -10,7 +10,7 @@ void updateDewar(Receivers::DewarPositioner_ptr dewar)
 	char *corbaStr;
 	IRA::CString configuration;
 	bool isRewRequired,isRewinding;
-	double position,iStaticPos,iParPos,dParPos;
+	double position,iStaticPos,iParPos,dParPos,rewOff;
 	bool isReady;
 	Receivers::TDewarPositionerScanInfo_var info;
 	IRA::CString outString,format;
@@ -34,6 +34,7 @@ void updateDewar(Receivers::DewarPositioner_ptr dewar)
 			iStaticPos=info->iStaticPos;
 			iParPos=info->iParallacticPos;
 			dParPos=info->dParallacticPos;
+			rewOff=info->rewindingOffset;
 		}
 		else {
 			configuration="none";
@@ -41,7 +42,7 @@ void updateDewar(Receivers::DewarPositioner_ptr dewar)
 			isRewinding=false;
 			position=0.0;
 			isReady=true;
-			iStaticPos=iParPos=dParPos=0;
+			iStaticPos=iParPos=dParPos=rewOff=0;
 		}
 	}
 	catch (...) {
@@ -70,7 +71,7 @@ void updateDewar(Receivers::DewarPositioner_ptr dewar)
 	extraLabel3->setValue(outString);
 	extraLabel3->setStyle(TW::CStyle(TW::CColorPair::WHITE_BLACK,0));
 	extraLabel3->Refresh();
-	format.Format("%05.1lf / %07.3lf / %07.3lf",iStaticPos,iParPos,dParPos);
+	format.Format("%05.1lf / %07.3lf / %07.3lf / %05.1lf",iStaticPos,iParPos,dParPos,rewOff);
 	outString="Dewar Position: "+format;
 	extraLabel4->setValue(outString);
 	extraLabel4->setStyle(TW::CStyle(TW::CColorPair::WHITE_BLACK,0));

@@ -362,7 +362,7 @@ ACS::Time CCore::closeScan(bool wait) throw (ComponentErrors::ComponentNotActive
 			ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"ANTENNA_CLOSE_SCAN_EPOCH %lld",antennaUT));
 			IRA::CString outstr;
 			IRA::CIRATools::timeToStr(antennaUT,outstr);
-			printf("tempo di chiusura (Antenna): %s\n",(const char*)outstr);
+			//printf("tempo di chiusura (Antenna): %s\n",(const char*)outstr);
 		}
 		else {
 			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::closeScan()");
@@ -399,7 +399,7 @@ ACS::Time CCore::closeScan(bool wait) throw (ComponentErrors::ComponentNotActive
 				ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"MINOR_SERVO_CLOSE_SCAN_EPOCH %lld",servoUT));
 				IRA::CString outstr;
 				IRA::CIRATools::timeToStr(servoUT,outstr);
-				printf("tempo di chiusura (Servo): %s\n",(const char*)outstr);
+				//printf("tempo di chiusura (Servo): %s\n",(const char*)outstr);
 			}
 			else {
 				_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::closeScan()");
@@ -434,7 +434,7 @@ ACS::Time CCore::closeScan(bool wait) throw (ComponentErrors::ComponentNotActive
 			ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"RECEIEVERS_STOP_SCAN_EPOCH %lld",receiversUT));
 			IRA::CString outstr;
 			IRA::CIRATools::timeToStr(receiversUT,outstr);
-			printf("tempo di chiusura (receievers): %s\n",(const char*)outstr);
+			//printf("tempo di chiusura (receievers): %s\n",(const char*)outstr);
 		}
 		else {
 			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::closeScan()");

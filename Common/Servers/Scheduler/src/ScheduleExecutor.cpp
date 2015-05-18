@@ -65,7 +65,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=STARTTIME_WAIT;
 			}
 			case STARTTIME_WAIT: {
-				printf("START TIME WAIT\n");
+				//printf("START TIME WAIT\n");
 			 	if (m_schedule->getSchedMode()==CSchedule::TIMETAGGED) {
 			 	 	TIMEVALUE currentUT;	
 			 	 	IRA::CDateTime now;
@@ -95,7 +95,7 @@ void CScheduleExecutor::runLoop()
 			 	}				
 			}
 			case SCAN_SELECTION: { //select the next scan to be done.....in case of errors the schedule is stopped.	
-				printf("SCAN_SELECTION\n");		
+				//printf("SCAN_SELECTION\n");
 				if (m_haltMe) { //asked to close at the end of the scan...so close exactly at the beginning of the next one
 					m_stopMe=true;
 					break;
@@ -121,7 +121,7 @@ void CScheduleExecutor::runLoop()
 			case SCAN_CHECK: {// checks the scan if it feasible to be done in time...if not the previous stage is executed again. In case of error the scan is aborted
 				double minEl,maxEl;
 				bool ok;
-				printf("SCAN_CHECK\n");
+				//printf("SCAN_CHECK\n");
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"CHECKING_THE_SCAN"));
 					m_schedule->getElevationLimits(minEl,maxEl);
@@ -129,11 +129,11 @@ void CScheduleExecutor::runLoop()
 					secondary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
 					servoPar=static_cast<MinorServo::MinorServoScan *>(m_currentScanRec.servoParameters);
 					recvPar=static_cast<Receivers::TReceiversParameters *>(m_currentScanRec.receieversParsmeters);
-					printf("Eseguo checkScan\n");
-					printf("ut: %llu\n",m_currentScan.ut);
+					//printf("Eseguo checkScan\n");
+					//printf("ut: %llu\n",m_currentScan.ut);
 					ok=m_core->checkScan(m_currentScan.ut,primary,secondary,servoPar,recvPar,minEl,maxEl);
-					printf("ut: %llu\n",m_currentScan.ut);
-					printf("Fatto checkScan\n");
+					//printf("ut: %llu\n",m_currentScan.ut);
+					//printf("Fatto checkScan\n");
 				}
 				catch (ACSErr::ACSbaseExImpl& ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,ex,"CScheduleExecutor::runLoop()");
@@ -184,17 +184,17 @@ void CScheduleExecutor::runLoop()
 				}
 			}
 			case SCAN_PREPARATION: {  // command the scan to the telescope...in case of error the current scan is aborted
-				printf("SCAN_PREPARATION\n");
+				//printf("SCAN_PREPARATION\n");
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"COMMAND_SCAN_TO_THE_TELESCOPE"));
 					primary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.primaryParameters);
 					secondary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
 					servoPar=static_cast<MinorServo::MinorServoScan *>(m_currentScanRec.servoParameters);
 					recvPar=static_cast<Receivers::TReceiversParameters *>(m_currentScanRec.receieversParsmeters);
-					printf("Eseguo doScan\n");
-					printf("ut: %llu\n",m_currentScan.ut);
+					//printf("Eseguo doScan\n");
+					//printf("ut: %llu\n",m_currentScan.ut);
 					m_core->doScan(m_currentScan.ut,primary,secondary,servoPar,recvPar);
-					printf("Fatto doScan\n");
+					//printf("Fatto doScan\n");
 					m_closeScanTimer=0;
 				}
 				catch (ACSErr::ACSbaseExImpl& Ex) {
@@ -211,7 +211,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=WRITING_INITIALIZATION;
 			}
 			case WRITING_INITIALIZATION: { //prepare the data transfer, it configures the backend and the writer. In case of error the scan is aborted.
-				printf("WRITING_INIT\n");
+				//printf("WRITING_INIT\n");
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PREPARE_DATA_ACQUISITION"));
 					prepareFileWriting(m_currentScan);
@@ -228,7 +228,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=PRE_SCAN_PROC;
 			}
 			case PRE_SCAN_PROC: { // It executed the pre scan procedure. In case of error the scheduled is continued	
-				printf("PRE_SCAN_PROC\n");
+				//printf("PRE_SCAN_PROC\n");
 				ACS::stringSeq preProc;
 				//WORD preProcArgs;
 				if (m_currentScan.preScan!=_SCHED_NULLTARGET) {
@@ -276,7 +276,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=SCAN_START;	 
 			}
 			case SCAN_START: { // It starts the data acquisition......In case of error the current scan is aborted				
-				printf("SCAN_START\n");
+				//printf("SCAN_START\n");
 				bool start=false;
 				if (m_currentScan.ut==0) {
 					if (m_core->isTracking()) {
@@ -330,7 +330,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=STOP_SCHEDULING;
 			}
 			case STOP_SCHEDULING: { // schedule the scan stop..in case of error. the schedule is aborted
-				printf("STOP_SCHEDULING\n");
+				//printf("STOP_SCHEDULING\n");
 				if (m_core->isStreamStarted()) {
 					m_lastScheduledTime=m_startRecordTime+(unsigned long long)(m_currentScan.duration*10000000); // this is the stop time in 100 ns.
 					IRA::CString out;
@@ -351,7 +351,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=SCAN_EXECUTION;
 			}
 			case SCAN_EXECUTION: { //it waits for the scan completion...in case of error the scan is forcibly aborted
-				printf("SCAN_EXECTION\n");
+				//printf("SCAN_EXECTION\n");
 				if (!m_subScanDone) {
 					break;
 				}
@@ -372,7 +372,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=POST_SCAN_PROC;
 			}
 			case POST_SCAN_PROC: { //Executes the post scan procedure..in case of error nothing is done. We try to keep it up.
-				printf("POST_SCAN_PROC\n");
+				//printf("POST_SCAN_PROC\n");
 				if (m_currentScan.postScan!=_SCHED_NULLTARGET) {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"POSTSCAN_PROCEDURE_IS_NOT_NULL"));
 					if (m_currentScan.postScanBlocking) {
@@ -403,13 +403,13 @@ void CScheduleExecutor::runLoop()
 				m_stage=SCAN_CLOSEUP;
 			}
 			case SCAN_CLOSEUP : {
-				printf("SCAN_CLOSEUP\n");
+				//printf("SCAN_CLOSEUP\n");
 				// trying to clean up and close the current scan commanded to the telescope
 				try {
 					m_closeScanTimer=m_core->closeScan(false);
 					IRA::CString outstr;
 					IRA::CIRATools::timeToStr(m_closeScanTimer,outstr);
-					printf("tempo di chiusura: %s\n",(const char*)outstr);
+					//printf("tempo di chiusura: %s\n",(const char*)outstr);
 				}
 				catch (ACSErr::ACSbaseExImpl& ex) {
 					_ADD_BACKTRACE(ManagementErrors::CloseTelescopeScanErrorExImpl,impl,ex,"CScheduleExecutor::runLoop()");
@@ -422,7 +422,7 @@ void CScheduleExecutor::runLoop()
 				break;
 			}
 			case CLOSEUP_WAIT : {
-				printf("CLOSEUP_WAIT\n");
+				//printf("CLOSEUP_WAIT\n");
 				if (m_closeScanTimer!=0) {
 					TIMEVALUE now;
 					IRA::CIRATools::getTime(now);
@@ -434,7 +434,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=RECORDING_FINALIZE;
 			}
 			case RECORDING_FINALIZE: {
-				printf("RECORDING_FINALIZE\n");
+				//printf("RECORDING_FINALIZE\n");
 				// wait for the recorder to consume all the data in its cache
 				try {
 					if (m_core->checkRecording()) {
