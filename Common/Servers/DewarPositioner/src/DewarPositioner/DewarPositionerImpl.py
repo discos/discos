@@ -445,7 +445,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
 
     def isConfigured(self):
-        return self.positioner.isConfigured()
+        # Add the isReady() constraint because the Receiver boss checks if
+        # the DewarPositioner is configured instead of checking if it is Ready
+        return self.positioner.isConfigured() and self.isReady()
 
 
     def isReady(self):
