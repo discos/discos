@@ -19,7 +19,7 @@ ifeq ($(TARGETSYS),SRT)
 		SRTActiveSurfaceErrors \
 		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface \
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
-		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary \
+		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel\
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger XBackend \
 		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver DewarPositioner \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
@@ -55,9 +55,9 @@ ifeq ($(TARGETSYS),MED)
 		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors\
 		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface\
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
-		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
+		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel\
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		Metrology TotalPower NoiseGenerator MedicinaMount MedWeatherStation CustomLogger \
+		Metrology TotalPower NoiseGenerator MedicinaMount MedWeatherStation CustomLogger MedicinaMinorServo\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
 		MedicinaMountTextClient CustomLoggingClient\
 		Plotter KStars Scripts \
