@@ -12,6 +12,7 @@
 	setSection=1,*,730.0,*,*,*,*
 	device=0
 	calOff
+	restFrequency=0
 </body>	
 </Procedure>
 
@@ -26,6 +27,7 @@
 	setAttenuation=2,9
 	setAttenuation=3,9
 	calOff
+	restFrequency=0
 </body>
 </Procedure>
 
@@ -38,6 +40,7 @@
 	setSection=1,*,730.0,*,*,*,*
 	device=0
 	calOff
+	restFrequency=0
 </body>
 </Procedure>
 
@@ -53,8 +56,24 @@
 	setAttenuation=1,8
 	device=0
 	calOff
+	restFrequency=0
 </body>
 </Procedure>
 
+<Procedure name="telescopePark" args="0">
+<body>
+	goTo=180d,89.8d
+	receiversPark
+	waitOnSource
+	antennaPark
+	servoPark
+</body>
+</Procedure>
+
+<Procedure name="focusScan" args="2">
+<body>
+	peakerScan=Z,$1,$2
+</body>
+</Procedure>
 
 </ProcedureFile>
