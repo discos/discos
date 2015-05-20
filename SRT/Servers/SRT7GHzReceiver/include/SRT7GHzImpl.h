@@ -8,6 +8,7 @@
 /*                                                                                                               */
 /* Who                                when                     What                                              */
 /* Andrea Orlati(aorlati@ira.inaf.it) 02/08/2011       		   Creation                                          */
+/* Marco Buttu (mbuttu@oa-cagliari.inaf.it) 20/05/2015         External Mark                                     */
 
 
 #ifndef __cplusplus
@@ -138,6 +139,31 @@ public:
 	 */
 	void calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 	
+
+    /**
+     * This method is used to turn the external calibration diode on.
+     * @throw CORBA::SystemExcpetion
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    void externalCalOn() throw (
+            CORBA::SystemException, 
+            ComponentErrors::ComponentErrorsEx, 
+            ReceiversErrors::ReceiversErrorsEx);
+
+
+    /**
+     * This method is used to turn the external calibration diode off.
+     * @throw CORBA::SystemExcpetion
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    void externalCalOff() throw (
+            CORBA::SystemException, 
+            ComponentErrors::ComponentErrorsEx, 
+            ReceiversErrors::ReceiversErrorsEx);
+
+
 	/**
 	 * This method allows to set local oscillator. In this implementation only the first value is considered.
 	 * @param lo the list contains the values in MHz for the local oscillator

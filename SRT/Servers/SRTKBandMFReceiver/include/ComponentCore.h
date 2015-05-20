@@ -191,6 +191,22 @@ public:
     );
 
 
+    /** It turns the external calibration diode on. */
+    void externalCalOn() throw (
+            ReceiversErrors::NoRemoteControlErrorExImpl,
+            ComponentErrors::ValidationErrorExImpl,
+            ReceiversErrors::ReceiverControlBoardErrorExImpl
+    );
+
+
+    /** It turns the external calibration diode off. */
+    void externalCalOff() throw (
+            ReceiversErrors::NoRemoteControlErrorExImpl,
+            ComponentErrors::ValidationErrorExImpl,
+            ReceiversErrors::ReceiverControlBoardErrorExImpl
+    );
+
+
     /** It turns on the sensor for vacuum measurement. */
     void vacuumSensorOn() throw (
             ReceiversErrors::NoRemoteControlErrorExImpl,

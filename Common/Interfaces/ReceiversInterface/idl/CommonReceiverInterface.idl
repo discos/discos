@@ -68,6 +68,27 @@ module Receivers {
          * @throw CORBA::SystemExcpetion    
         */
         void calOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+
+        /** 
+         * Turns on (activate) the external mark control
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw CORBA::SystemExcpetion    
+        */
+        void externalCalOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+ 
+
+
+        /** 
+         * Turns off (deactivate) the external mark control
+         * @throw ComponentErrors::ComponentErrorsEx
+         * @throw ReceiversErrors::ReceiversErrorsEx
+         * @throw CORBA::SystemExcpetion    
+        */
+        void externalCalOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+ 
+
     
         /**
          * If requirest by a particular receiver, this methos allows to setup particular operating mode. 
