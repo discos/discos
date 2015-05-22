@@ -135,6 +135,7 @@
         <xs:attribute name="LLP" type="xs:string" use="required" />
         <xs:attribute name="PPP" type="xs:string" use="required" />
         <xs:attribute name="PLP" type="xs:string" use="required" />
+        <xs:attribute name="XKP" type="xs:string" use="required" />
 
     </xs:complexType>
 
