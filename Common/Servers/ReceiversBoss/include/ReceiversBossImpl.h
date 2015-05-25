@@ -336,6 +336,11 @@ public:
      */
     virtual void derotatorRewind(CORBA::Long steps) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
+    virtual void externalCalOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+    virtual void externalCalOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+
     /**
      * It allows to set the initial position (receivers feed geometry) of the derotator. It is valid only in case the FIXED or CUSTOM configuration
      * are active (@sa <i>derotatorMode</i>).

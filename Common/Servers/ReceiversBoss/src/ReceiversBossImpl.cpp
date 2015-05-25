@@ -732,6 +732,16 @@ void ReceiversBossImpl::getDewarParameter(Receivers::TDerotatorConfigurations_ou
 }
 
 
+void ReceiversBossImpl::externalCalOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+
+}
+
+void ReceiversBossImpl::externalCalOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+}
+
+
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdoubleSeq,m_plocalOscillator,LO);
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROstring,m_pactualSetup,actualSetup);
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,Management::ROTSystemStatus,m_pstatus,status);
