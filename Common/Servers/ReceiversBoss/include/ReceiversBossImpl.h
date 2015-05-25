@@ -11,6 +11,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 22/07/2010       Given implementation of command function                   */
 /* Andrea Orlati(aorlati@ira.inaf.it) 13/09/2010       Given implementation of new signature of getTaper() method  */
 /* Andrea Orlati(aorlati@ira.inaf.it) 12/02/2013       Changed the method command as new commandInterpreter interface requires  */
+/* Marco Buttu (mbuttu@oa-cagliari.inaf.it) 25/05/2015 Added external mark control  */
 
 
 
@@ -110,6 +111,23 @@ public:
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
 	void calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	
+	/**
+	 * This method is used to enable the external control of the calibration mark
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx  
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
+	 */
+	void externalCalOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	
+	/**
+	 * This method is used to disable the external control of the calibration mark
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx  
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
+	 */
+	void externalCalOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
 	
 	/**
 	 * This method allows to set local oscillator. Depending on the curretly configured receiver one or more values are considered.
@@ -335,10 +353,6 @@ public:
      * @throw ComponentErrors::ComponentErrorsEx
      */
     virtual void derotatorRewind(CORBA::Long steps) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
-
-    virtual void externalCalOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
-
-    virtual void externalCalOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 
     /**

@@ -11,6 +11,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  28/02/2011      For computation is now considered the real band, given by the receiver band and the backend filter */
 /* Andrea Orlati(aorlati@ira.inaf.it)  8/04/2013       changes to fit the new K band, dual feed in Medicina  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  18/06/2013     changes in order to make the length of sequence properties equal to IFs*feeds */
+/* Marco Buttu (mbuttu@oa-cagliari.inaf.it) 25/05/2015 Added external mark control  */
 
 #ifdef COMPILE_TARGET_MED
 
@@ -78,6 +79,14 @@ public:
 	
 	void calOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 			ComponentErrors::UnexpectedExImpl);
+	
+	void externalCalOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::UnexpectedExImpl);
+	
+	void externalCalOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::UnexpectedExImpl);
+	
+
 	
 	void setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 			ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);

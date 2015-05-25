@@ -118,6 +118,48 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 	}
 }
 
+void CRecvBossCore::externalCalOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+				ComponentErrors::UnexpectedExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (m_currentRecvCode=="") {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::externalCalOn()");
+		impl.setReason("Receiver not configured yet");
+		changeBossStatus(Management::MNG_WARNING);
+		throw impl;
+	}
+	loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+	try {
+		m_currentRecv->externalCalOn();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::externalCalOn()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		changeBossStatus(Management::MNG_FAILURE);
+		m_currentRecvError=true;
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::externalCalOn()");
+		impl.setReceiverCode((const char *)m_currentRecvCode);
+		changeBossStatus(Management::MNG_FAILURE);
+		throw impl;
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+		_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::externalCalOn()");
+		impl.setReceiverCode((const char *)m_currentRecvCode);
+		changeBossStatus(Management::MNG_FAILURE);
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::externalCalOn()");
+		changeBossStatus(Management::MNG_FAILURE);
+		m_currentRecvError=true;
+		throw impl;
+	}
+}
+
 void CRecvBossCore::AUOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 				ComponentErrors::UnexpectedExImpl)
 {
@@ -225,7 +267,7 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 		throw impl;
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::calOf()f");
+		_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::calOff()");
 		impl.setReceiverCode((const char *)m_currentRecvCode);
 		changeBossStatus(Management::MNG_FAILURE);
 		throw impl;
@@ -237,12 +279,55 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 		throw impl;
 	}
 	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::calOn()");
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::calOff()");
 		changeBossStatus(Management::MNG_FAILURE);
 		m_currentRecvError=true;
 		throw impl;
 	}
 }
+
+void CRecvBossCore::externalCalOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+				ComponentErrors::UnexpectedExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (m_currentRecvCode=="") {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::externalCalOff()");
+		impl.setReason("Receiver not configured yet");
+		changeBossStatus(Management::MNG_WARNING);
+		throw impl;
+	}
+	loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+	try {
+		m_currentRecv->externalCalOff();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::externalCalOff()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		changeBossStatus(Management::MNG_FAILURE);
+		m_currentRecvError=true;
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::externalCalOff()");
+		impl.setReceiverCode((const char *)m_currentRecvCode);
+		changeBossStatus(Management::MNG_FAILURE);
+		throw impl;
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+		_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::externalCalOff()");
+		impl.setReceiverCode((const char *)m_currentRecvCode);
+		changeBossStatus(Management::MNG_FAILURE);
+		throw impl;
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::externalCalOff()");
+		changeBossStatus(Management::MNG_FAILURE);
+		m_currentRecvError=true;
+		throw impl;
+	}
+}
+
 
 double CRecvBossCore::getDerotatorPosition(const ACS::Time& epoch) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)

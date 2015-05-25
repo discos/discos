@@ -121,6 +121,8 @@ void ReceiversBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("receiversMode",new function1<CRecvBossCore,non_constant,void_type,I<string_type> >(m_core,&CRecvBossCore::setMode),1);
 	m_parser->add("calOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::calOn),0);
 	m_parser->add("calOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::calOff),0);
+	m_parser->add("externalCalOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::externalCalOn),0);
+	m_parser->add("externalCalOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::externalCalOff),0);
 	m_parser->add("setLO",new function1<CRecvBossCore,non_constant,void_type,I<doubleSeq_type> >(m_core,&CRecvBossCore::setLO),1);
 	m_parser->add("antennaUnitOn",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOn),0);
 	m_parser->add("antennaUnitOff",new function0<CRecvBossCore,non_constant,void_type >(m_core,&CRecvBossCore::AUOff),0);
@@ -247,6 +249,47 @@ void ReceiversBossImpl::calOff() throw (CORBA::SystemException,ComponentErrors::
 	}
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::calOff()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+
+void ReceiversBossImpl::externalCalOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{	
+	try {
+		m_core->externalCalOn();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();		
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::externalCalOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void ReceiversBossImpl::externalCalOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core->externalCalOff();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();		
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::externalCalOff()");
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
 	}
@@ -731,15 +774,6 @@ void ReceiversBossImpl::getDewarParameter(Receivers::TDerotatorConfigurations_ou
 	}
 }
 
-
-void ReceiversBossImpl::externalCalOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
-{
-
-}
-
-void ReceiversBossImpl::externalCalOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
-{
-}
 
 
 _PROPERTY_REFERENCE_CPP(ReceiversBossImpl,ACS::ROdoubleSeq,m_plocalOscillator,LO);
