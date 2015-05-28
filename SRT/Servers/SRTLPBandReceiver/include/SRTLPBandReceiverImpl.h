@@ -44,6 +44,8 @@ using namespace baci;
  *     <li>void activate(): It must be called to switch the receiver to operative mode.</li>
  *     <li>void calOn(): This method is used to turn the calibration diode ON.</li>
  *     <li>void calOff(): This method is used to turn the calibration diode OFF.</li>
+ *     <li>void externalCalOn(): This method is used to turn the external calibration diode ON.</li>
+ *     <li>void externalCalOff(): This method is used to turn the external calibration diode OFF.</li>
  *     <li>void setMode(...): This method allows to set the operating mode of the receiver.</li>
  *     <li>void setLO(...): ... do nothing</li>
  *     <li>ACS::doubleSeq * getCalibrationMark(...): This method is called when the values of 
@@ -185,6 +187,31 @@ public:
      * @throw ReceiversErrors::ReceiversErrorsEx
      */
     void calOff() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+
+
+    /**
+     * This method is used to turn the external calibration diode on.
+     * @throw CORBA::SystemExcpetion
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    void externalCalOn() throw (
+            CORBA::SystemException, 
+            ComponentErrors::ComponentErrorsEx, 
+            ReceiversErrors::ReceiversErrorsEx);
+
+
+    /**
+     * This method is used to turn the external calibration diode off.
+     * @throw CORBA::SystemExcpetion
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    void externalCalOff() throw (
+            CORBA::SystemException, 
+            ComponentErrors::ComponentErrorsEx, 
+            ReceiversErrors::ReceiversErrorsEx);
+
 
 
     /**

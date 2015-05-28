@@ -16,10 +16,15 @@
 #include <fstream>
 #include <acstimeDurationHelper.h>
 #include <vector>
-#include <AntennaDefinitionsS.h>
-#include <AntennaBossS.h>
+#include <AntennaDefinitionsC.h>
+#include <ReceiversDefinitionsC.h>
+#include <MinorServoBossC.h>
+#include <AntennaBossC.h>
+#include <ReceiversBossC.h>
+#include "Configuration.h"
 
 #define _SCHED_NULLTARGET "NULL"
+#define SEPARATOR '\t'
 
 /**
  * This namespace contains all the classes and symbol that are needed to parse and execute the schedules
@@ -27,6 +32,58 @@
 namespace Schedule {
 
 class CParser;
+
+/**
+ * This class quickly maps a subscan (defined by its salient parameters) to the correct subscan configurations structures used to
+ * command the subscan to the telescope.
+ */
+class CSubScanBinder {
+public:
+	CSubScanBinder(Antenna::TTrackingParameters * const primary,Antenna::TTrackingParameters * const secondary,
+	  MinorServo::MinorServoScan * const servo,Receivers::TReceiversParameters * const receievers,CConfiguration* config=NULL);
+	CSubScanBinder(CConfiguration* config=NULL,bool dispose=true);
+	~CSubScanBinder();
+	void lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
+	void latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
+	void addOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame);
+	void OTF(const IRA::CString& target,
+			const double& lon1,const double& lat1,const double& lon2,const double& lat2,
+			const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
+			const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDescription& description,
+			const Antenna::TsubScanDirection& direction,const ACS::TimeInterval& subScanDuration);
+
+	void OTFC(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
+		const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDirection& direction,
+		const double& span,const ACS::TimeInterval& subScanDuration,const Antenna::TTrackingParameters * const sec);
+
+	void skydip(const double& lat1,const double& lat2,const ACS::TimeInterval& duration,
+			const Antenna::TTrackingParameters * const sec);
+
+	void peaker(const IRA::CString& axis,const double& span,const ACS::TimeInterval& duration,const Antenna::TTrackingParameters * const sec);
+
+	void track(const char *targetName);
+	void moon();
+	void sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section);
+	void goTo(const double& az,const double& el);
+
+	Antenna::TTrackingParameters * getPrimary() const { return m_primary; }
+	Antenna::TTrackingParameters * getSecondary() const { return m_secondary;}
+	MinorServo::MinorServoScan * getServo() const { return m_servo; }
+	Receivers::TReceiversParameters *getReceivers() const { return m_receivers;}
+
+
+private:
+	Antenna::TTrackingParameters *m_primary;
+	Antenna::TTrackingParameters *m_secondary;
+	MinorServo::MinorServoScan *m_servo;
+	Receivers::TReceiversParameters *m_receivers;
+	bool m_own;
+	CConfiguration* m_config;
+	void init();
+	void addSecondaryAntennaTrack(const Antenna::TTrackingParameters * const sec);
+	void copyPrimaryAntenaTrack(const Antenna::TTrackingParameters * const prim);
+
+};
 
 /**
  * This is the base class that exposes a pure virtual method that is used by the parser to read the input file.
@@ -73,6 +130,16 @@ public:
 	 * @return the message relative to the last error
 	 */
 	const IRA::CString& getLastError() const { return m_lastError; }
+
+	/**
+	 * sets the pointer to the configuration object
+	 */
+	void setConfiguration(CConfiguration* config) { m_config=config; }
+
+	/**
+	 * return the reference to the configuration object
+	 */
+	CConfiguration* getConfiguration() const { return m_config; }
 protected:
 	friend class CParser;
 	/**
@@ -99,6 +166,10 @@ protected:
 	 * Parser class
 	 */
 	CParser *m_parser;
+	/**
+	 * Pointer to the configuration object
+	 */
+	CConfiguration *m_config;
 	/**
 	 * This pure virtual method is called to check is the schedule is consistent. In particular
 	 * to check if all references to other file are all satisfied.
@@ -350,6 +421,8 @@ public:
 		Management::TScanTypes type;
 		void *primaryParameters;
 		void *secondaryParameters;
+		void *servoParameters;
+		void *receieversParsmeters;
 		//IRA::CString target;
 	};
 	/**
@@ -371,9 +444,11 @@ public:
 	 * @param prim pointer to the buffer that stores the primary scan parameters, the number and the type of parameters could vary from scna type
 	 *                to scan type.
 	 * @param sec pointer to the secondary scan parameters
+	 * @param servo pointer to the servo scan parameters
+	 * @param recv poiner to the receievers scan parameters
 	 * @return false if the scan could not be found. 
 	 */
-	virtual bool getScan(const DWORD&id,Management::TScanTypes& type,void *& prim,void *& sec/*,IRA::CString& target*/);
+	virtual bool getScan(const DWORD&id,Management::TScanTypes& type,void *& prim,void *& sec,void *& servo,void *& recv);
 	
 	/**
 	 * This is the wrapper function of the previuos one, used to get scan data using a structure.
@@ -398,8 +473,10 @@ private:
 	 * translate a string into a scan type defined in the Management package
 	 * @return false if the translation was not possible
 	 */
-	bool string2ScanType(const IRA::CString& val,Management::TScanTypes& type);
+	/*bool string2ScanType(const IRA::CString& val,Management::TScanTypes& type);*/
 	
+	bool parsePeaker(const IRA::CString& line,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder);
+
 	/**
 	 * Reset the basic fields of tracking parameters structure.
 	 * @param scan pointer to the structure
@@ -457,7 +534,19 @@ private:
 	 * @return the result of the parse
 	 */
 	bool parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
-	
+
+	/**
+	 * Parse the vRAD switch in order to configure a radial velocity
+	 * @param val line to parse
+	 * @param start point inside the line where to start parsing
+	 * @param vrad output radial velocity
+	 * @param frame output radial velocity frame
+	 * @param ref radial velocity definition
+	 * @errMsg error message in case of errors
+	 * @return the result of the parsing
+	 */
+	bool parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,Antenna::TReferenceFrame& frame,Antenna::TVradDefinition& ref,IRA::CString& errMsg);
+
 	/**
 	 * This method is called by the parser in order to read the scan list of a main schedule
 	 * @param line input line to be parsed

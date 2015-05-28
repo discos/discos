@@ -196,6 +196,20 @@ public:
 	void getServoAxisNames(ACS::stringSeq& names) const { names=m_servoAxisNames; }
 	void getServoAxisUnits(ACS::stringSeq& units) const { units=m_servoAxisUnits; }
 
+	void setDewarConfiguration(const Receivers::TDerotatorConfigurations& mod,const double& pos) {
+		m_dewarMode=mod;
+		m_dewarPos=pos;
+	}
+	void setDewarConfiguration() {
+		m_dewarMode=Receivers::RCV_UNDEF_DEROTCONF;
+		m_dewarPos=0.0;
+	}
+
+	void getDewarConfiguration(Receivers::TDerotatorConfigurations& mod,double& pos) const {
+		mod=m_dewarMode;
+		pos=m_dewarPos;
+	}
+
 private:
 
 	/**
@@ -269,8 +283,14 @@ private:
 	 * Stores the measurement unit of each involved axis of the servo system
 	 */
 	ACS::stringSeq m_servoAxisUnits;
-
-
+	/**
+	 * DewarPositioner configured mode
+	 */
+	Receivers::TDerotatorConfigurations m_dewarMode;
+	/**
+	 * Initial position of the dewar, it depends on the mode.
+	 */
+	double m_dewarPos;
 };
 
 };

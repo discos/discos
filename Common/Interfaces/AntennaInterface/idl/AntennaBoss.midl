@@ -55,7 +55,7 @@ module Antenna {
 	 * It defines the dimension of the tracking parameter vector
 	 */
 	const long ANTENNA_TRACKING_PARAMETER_NUMBER=10;
-	
+
 	/**
 	 * This structure is used to pass the tracking parameters to the <i>startTracking()</i> routine. The coordinates are supposed to be in radians 
 	 * and their meaning varies according to the <i>TGeneratorType</i> and <i>TCoordinateFrame</i>. 
@@ -136,7 +136,7 @@ module Antenna {
 		 */
 		boolean secondary;
 		/**
-		 * enable/disable the poinintg corrections....refraction, pointign model. Just for the current scan.
+		 * enable/disable the pointing corrections....refraction, pointign model. Just for the current scan.
 		 */
 		boolean enableCorrection;
 	} TTrackingParameters;
@@ -385,7 +385,7 @@ module Antenna {
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw AntennaErrors::AntennaErrorsEx 
 		 * @param startUT the exact time the scan is supposed to start, if negative or zero it must be started as soon as possible. In that case the argument could return back the computed
-		 *                effective start UT time.
+		 *                effective start UT time (i.e in case of OTF scan).
 		 * @param parameters this stucture is the list of all parameters that are required by Boss to define the sub scan. The caller
 		 *               is responsible for the management of the structure.
 		 * @param secondary this stucture is identical to the previous one, in most cases it is ignored, only on particular cases it is used as a secondary trajectory generator. For example
@@ -395,21 +395,13 @@ module Antenna {
 		void startScan(inout ACS::Time startUT,in TTrackingParameters parameters,in TTrackingParameters secondary) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 		
 		/**
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a sidereal traking over a catalog source.
-		 * @throw CORBA::SystemExcpetion
+		 * This method virtually stops the current scan. The antenna boss indeed is not required to do anything.
+		 * @param timeToStop stores the expected epoch in which the scan will be stopped (closed)
 		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx 
-		 * @param targetName name of the source to track, it must be known by the system
-		 */ 
-		void track(in string targetName) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
-		
-		/**
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a traking of the moon.
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx 
-		 */ 
-		void moon() raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		 * @throw AntennaErrors::AntennaErrorsEx
+		 */
+		void closeScan(out ACS::Time timeToStop) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+
 
 		/**
 		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a skydip from the prsent azimuth position.
@@ -420,68 +412,19 @@ module Antenna {
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw AntennaErrors::AntennaErrorsEx
 		 */
-		ACS::Time skydipScan(in double el1,in double el2,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
-
-		/**
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start tracking a given sidereal target given its equatorial coordinates. 
-		 * @param targetName name or identifier of the source
-		 * @param ra right ascension (radians)
-		 * @param dec declination (radians)
-		 * @param eq reference equinox of the equtorial coordinates
-		 * @param section It allows to force the preferred section of the azimuth axis.
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx 
-		 */
-		void sidereal(in string targetName,in double ra,in double dec,in TSystemEquinox eq,in Antenna::TSections section) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		//ACS::Time skydipScan(in double el1,in double el2,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 
 		/*
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go offsource along a given frame. The offset is always done along longitude a part from a particular case.
-		 * If th eframe is horizontal and the current elevation is over the cut off threshold the movement is not done in azimuth but in elevation. A source or a target must already be commanded.
-		 * @param skyOffset this is the sky offset that to be applied(radians). 
+		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go off source along a given frame.
+		 * The offset is always done along longitude a part from a particular case.
+		 * If the frame is horizontal and the current elevation is over the cut off threshold the movement is not done in azimuth but in elevation.
+		 * A source or a target must already be commanded.
+		 * @param beams this is the number of beams applied as offset.
 		 * @throw CORBA::SystemExcpetion
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw AntennaErrors::AntennaErrorsEx 
 		 */
-		 void goOff(in Antenna::TCoordinateFrame frame,in double skyOffset) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
-
-		 /**
-		  * This is a wrapper of the <i>startScan()</i> function. It allows to immediately go to a fixed horizontal position.
-		  * @param az azimuth in radians
-		  * @param el elevation in radians
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx
-		  */
-		 void goTo(in double az,in double el);
-		
-		/**
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a longitude On The Fly scan over the currently commanded target. If no target is commanded yet an error is
-		 * thrown. The current target is used as the central point of the scan (taken from the J2000 equatorial). If the target is not above the horizon a zero is returned otherwise the expected start
-		 * time is returned.
-		 * @param scanFrame this indicates the frame along which the scan is done  
-		 * @param span distance or lenght of the scan (radians)
-		 * @param duration duration of the scan in seconds, the combinaiton of duration and span gives the scan velocity
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx 
-		 * @return the expected start time, is zero the scan is not performed because the scan is not visible or the scan will cross the antenna limits.
-		 */ 
-		ACS::Time lonOTFScan(in Antenna::TCoordinateFrame scanFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
-		
-		/**
-		 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a latitude On The Fly scan over the currently commanded target. If no target is commanded yet an error is
-		 * thrown. The current target is used as the central point of the scan (taken from the J2000 equatorial). If the target is not above the horizon a zero is returned otherwise the expected start
-		 * time is returned.
-		 * @param scanFrame this indicates the frame along which the scan is done  
-		 * @param span distance or lenght of the scan (radians)
-		 * @param duration duration of the scan in seconds, the combinaiton of duration and span gives the scan velocity
-		 * @throw CORBA::SystemExcpetion
-		 * @throw ComponentErrors::ComponentErrorsEx
-		 * @throw AntennaErrors::AntennaErrorsEx 
-		 * @return the expected start time, is zero the scan is not performed because the scan is not visible or the scan will cross the antenna limits.
-		 */ 
-		ACS::Time latOTFScan(in Antenna::TCoordinateFrame scanFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx); 
+		 void goOff(in Antenna::TCoordinateFrame frame,in double beams) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 					
 		/**
 		 * This method is only be used internally. Anyone that needs to know if the telescope
@@ -490,19 +433,24 @@ module Antenna {
 		 * @throw CORBA::SystemExcpetion
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw AntennaErrors::AntennaErrorsEx
-		 * @param startUt this is the time before which the telescope is supposed to reach the target, if negative the scan is checked only against 
-		 *        the elevation.
+		 * @param startUt this is the time before which the telescope is supposed to reach the target, if zero the scan is checked only against the elevation.
 		 * @param parameters structure that describes the scan to be performed.
-		 * @param secondary this stucture is identical to the previous one, in most cases it is ignored, only on particular cases it is used as a secondary trajectory generator in order to get
+		 * @param secondary this structure is identical to the previous one, in most cases it is ignored, only on particular cases it is used as a secondary trajectory generator in order to get
 		 *                  a combination of both of them.
-		 * @param slewingTime time that the telescope will take to reach the target position
-		 * @param lowerElLimit defines the lower limit in elevation to be checked: the target must lay beyound that limit (radians). A negative value forces the check against default value
-		 * @param upper ElLimit defines the upper limit in elevation to be checked: the target must lay below that limit (radians). A negative value forces the check against default value
+		 * @param lowerElLimit defines the lower limit in elevation to be checked: the target must lay beyond that limit (radians). A negative value forces the check against default value
+		 * @param runTime structure used to return some of the run time information about the scan (it must be freed by caller).
+		 *  @arg \c targetName name of the current target
+		 * 	@arg \c azimuth initial azimuth of the current scan
+		 *	@arg \c elevation initial elevation of the current scan
+		 *	@arg \c startEpoch starting ut time of the current scan (if startUT!=0 it is always equal to startUT, otherwise it is computed in all scan cases)
+		 *	@arg \c slewingTime expected slewing time to the starting point
+		 *	@arg \c section indicates where in the azimuth range the scan will start
+		 *	@arg \c axis scanning axis of the current scan
 		 * @return true if the telescope will be in the target position before the given epoch expires, false if the
 		 * telescope will not be able to get there in time ( now+SlewTime>ut).
 		*/  
-		boolean checkScan(in ACS::Time startUt,in TTrackingParameters parameters,in TTrackingParameters secondary,out ACS::TimeInterval slewingTime,in double lowerElLimit,in double upperElLimit) raises (
-				ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		boolean checkScan(in ACS::Time startUt,in TTrackingParameters parameters,in TTrackingParameters secondary,in double lowerElLimit,in double upperElLimit,
+				out TRunTimeParameters runTime) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 
 		/**
 		 * Reset the failures of the subsystem. 
@@ -584,11 +532,23 @@ module Antenna {
 		void radialVelocity(in double rval, in TReferenceFrame vref, in TVradDefinition vdef);
 		
 		/**
+		 * This call will computes the topocentric velocity of the current source with respect to the observer. The source radial velocity,
+		 * frame and definition must be known (@sa <i>radialVelocity()</i>). The computation is executed for each of the input rest frequencies.
+		 * @param restFreq reference frequency (MHz)
+		 * @param topo topocentric velocities (km/sec) corresponding to the input frequency
+		 * @throw CORBA::SystemException
+		 * @throw AntennaErrors::AntennaErrorsEx
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 */
+		void getTopocentricFrequency(in ACS::doubleSeq restFreq,out ACS::doubleSeq topo) raises (ComponentErrors::ComponentErrorsEx,
+				AntennaErrors::AntennaErrorsEx);
+
+		/**
 		 * copybrief Management::CommandInterpreter::command
 		 * This is the command line interpreter for the sub-system. All the attributes and all the methods exposed by the boss can be
 		 * called. That means a full set of operation for standard observation, but not full control of the system.
 		 * @param the string that contains the command line to be parsed
-		 * @return the string that contains the answer to the command issued by the input parameter. The caller is resposible to
+		 * @return the string that contains the answer to the command issued by the input parameter. The caller is responsible to
 		 * free the returned string (@sa CORBA::string_free).
 		*/
 		

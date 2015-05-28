@@ -139,7 +139,89 @@ void CComponentCore::activate() throw (ReceiversErrors::ModeErrorExImpl,Componen
 	setMode((const char *)m_configuration.getSetupMode()); // Throw ......
 	guard.release();
 	lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+    externalCalOff();
 }
+
+
+void CComponentCore::externalCalOn() throw (
+        ReceiversErrors::NoRemoteControlErrorExImpl,
+        ComponentErrors::ValidationErrorExImpl,
+        ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+    baci::ThreadSyncGuard guard(&m_mutex);
+    if (m_setupMode=="") {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::externalCalOn()");
+        impl.setReason("receiver not configured yet");
+        throw impl;
+    }
+    guard.release();
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOn()");
+        throw impl;
+    }
+    try {
+        m_control->setExtCalibrationOn();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::externalCalOn()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    try {
+        m_control->isExtCalibrationOn() ? setStatusBit(EXTNOISEMARK) : clearStatusBit(EXTNOISEMARK);
+        clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
+    }    
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::externalCalOn()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+
+}
+
+
+void CComponentCore::externalCalOff() throw (
+        ReceiversErrors::NoRemoteControlErrorExImpl,
+        ComponentErrors::ValidationErrorExImpl,
+        ReceiversErrors::ReceiverControlBoardErrorExImpl
+        )
+{
+    baci::ThreadSyncGuard guard(&m_mutex);
+    if (m_setupMode=="") {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::externalCalOff()");
+        impl.setReason("receiver not configured yet");
+        throw impl;
+    }
+    guard.release();
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOff()");
+        throw impl;
+    }
+    try {
+        m_control->setExtCalibrationOff();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::externalCalOff()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    try {
+        m_control->isExtCalibrationOn() ? setStatusBit(EXTNOISEMARK) : clearStatusBit(EXTNOISEMARK);
+        clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::externalCalOff()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+}
+
+
+
 
 void CComponentCore::deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {

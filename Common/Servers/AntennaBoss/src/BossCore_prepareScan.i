@@ -33,11 +33,21 @@ void CBossCore::copyTrack(Antenna::TTrackingParameters& dest,const Antenna::TTra
 	dest.RadialVelocity=source.RadialVelocity;
 }
 
+void CBossCore::mappingScan(Antenna::TTrackingParameters& scan) const
+{
+	// this is a scan mapping to support goTo (beamPark) with optional parameters
+	// in this case the parameters are azimuth and elevation
+	if ((scan.type==Antenna::ANT_SIDEREAL) && (scan.frame==Antenna::ANT_HORIZONTAL)) {
+		if (scan.parameters[0]<0.0) scan.parameters[0]=m_lastEncoderAzimuth;
+		if (scan.parameters[1]<0.0) scan.parameters[1]=m_lastEncoderElevation;
+	}
+}
+
 Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		bool useInternals,
 		ACS::Time& startUT,
-		const Antenna::TTrackingParameters& prim,
-		const Antenna::TTrackingParameters& sec,
+		const Antenna::TTrackingParameters& _prim,
+		const Antenna::TTrackingParameters& _sec,
 		const TOffset& userOffset,
 		Antenna::TGeneratorType& generatorType,
 		Antenna::TTrackingParameters& lastPar,
@@ -49,6 +59,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		double& vrad,
 		Antenna::TReferenceFrame& velFrame,
 		Antenna::TVradDefinition& velDef,
+		ACS::Time& timeToStop,
 		IRA::CString& sourceName,
 		TOffset& scanOffset,
 		Management::TScanAxis& axis,
@@ -59,7 +70,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 	double latOffTmp,lonOffTmp;
 	TOffset scanOffTmp(0.0,0.0,Antenna::ANT_HORIZONTAL);
 	Antenna::TCoordinateFrame offFrameTmp;
-	Antenna::TTrackingParameters primary,secondary;
+	Antenna::TTrackingParameters primary,secondary,prim,sec;
 	double secRa,secDec,secLon,secLat,secVrad;
 	Antenna::TReferenceFrame secVelFrame;
 	Antenna::TVradDefinition secVelDef;
@@ -70,6 +81,11 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 	
 	Antenna::EphemGenerator_var currentGenerator;
 	Antenna::EphemGenerator_var currentGeneratorFlux;
+
+	// this is a workaround in order to preserve the input arguments before mappingScan
+	copyTrack(prim,_prim);
+	copyTrack(sec,_sec);
+	mappingScan(prim);
 
 	// let's save the primary and secondary tracks information.
 	copyTrack(primary,prim);
@@ -291,6 +307,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			}
 			else if (primary.frame==Antenna::ANT_HORIZONTAL) {
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"SOURCE_AZ_EL: %lf %lf",primary.parameters[0],primary.parameters[1]));
+				printf("parametri beam park: %lf, %lf",primary.parameters[0],primary.parameters[1]);
 				tracker->setFixedPoint(primary.targetName,primary.parameters[0],primary.parameters[1]);
 			}
 			//copy the current track and store it
@@ -334,7 +351,14 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			vrad=0.0;
 			velFrame=Antenna::ANT_UNDEF_FRAME;
 			velDef=Antenna::ANT_UNDEF_DEF;
-		}		
+		}
+		//if a radial velocity has been provided the it will override the one coming from the generator.....
+		if ((primary.VradFrame!=Antenna::ANT_UNDEF_FRAME) && (primary.VradDefinition!=Antenna::ANT_UNDEF_DEF)) {
+			vrad=primary.RadialVelocity;
+			velFrame=primary.VradFrame;
+			velDef=primary.VradDefinition;
+		}
+		timeToStop=0; // no need to compute a stop duration
 	}
 	else if (primary.type==Antenna::ANT_MOON) {
 		// moon has nothing to do...no configuration
@@ -352,9 +376,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			dec=att->J2000Declination;
 			lon=att->gLongitude;
 			lat=att->gLatitude;
-			vrad=0.0;
-			velFrame=Antenna::ANT_UNDEF_FRAME;
-			velDef=Antenna::ANT_UNDEF_DEF;
+			//vrad=0.0;
+			//velFrame=Antenna::ANT_UNDEF_FRAME;
+			//velDef=Antenna::ANT_UNDEF_DEF;
 			axis=att->axis;
 			sourceName=IRA::CString(att->sourceID);
 			currentGeneratorFlux=currentGenerator; // the flux computer is the moon generator itself...make a deep copy
@@ -362,11 +386,15 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		catch (CORBA::SystemException& ex) {
 			sourceName=IRA::CString("????");
 			ra=dec=0.0; // in that case I do not want to rise an error
-			vrad=0.0;
-			velFrame=Antenna::ANT_UNDEF_FRAME;
-			velDef=Antenna::ANT_UNDEF_DEF;
+			//vrad=0.0;
+			//velFrame=Antenna::ANT_UNDEF_FRAME;
+			//velDef=Antenna::ANT_UNDEF_DEF;
 			axis=Management::MNG_NO_AXIS;
 		}
+		vrad=primary.RadialVelocity;
+		velFrame=primary.VradFrame;
+		velDef=primary.VradDefinition;
+		timeToStop=0;
 	}
 	else if (primary.type==Antenna::ANT_OTF) {
 		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_SCANNING"));
@@ -413,6 +441,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			lon=att->centerGLon;
 			lat=att->centerGLat;
 			axis=att->axis;
+
+			startUT=att->startUT; //very important....we want to save the start time computed by OTF
+			timeToStop=startUT+att->subScanDuration+att->rampDuration; // estimate the stop scan epoch.
 			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_CENTER_RA_DEC LAT_LON %lf %lf %lf %lf",ra,dec,lat,lon));
 			if (secondaryActive||lastActive) { // in case of a secondary track....it is possible that vlsr and flux are computable
 				vrad=secVrad;
@@ -420,14 +451,13 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 				velDef=secVelDef;
 				sourceName=secSourceName;
 			}
-			else { //normal OTF...impossible to know vrad
-				vrad=0.0;
-				velFrame=Antenna::ANT_UNDEF_FRAME;
-				velDef=Antenna::ANT_UNDEF_DEF;
+			else {
+				vrad=primary.RadialVelocity;
+				velFrame=primary.VradFrame;
+				velDef=primary.VradDefinition;
 				sourceName=IRA::CString(att->sourceID);
 				currentGeneratorFlux=currentGenerator; // if no secondary scan is used, the generator in charge to compute the flux is the OTF itself...make a deep copy
 			}
-			startUT=att->startUT; //very important....we want to save the start time computed by OTF
 		}
 		catch (CORBA::SystemException& ex) {
 			sourceName=IRA::CString("????");
@@ -437,6 +467,8 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			velFrame=Antenna::ANT_UNDEF_FRAME;
 			velDef=Antenna::ANT_UNDEF_DEF;
 			axis=Management::MNG_NO_AXIS;
+			//startUT=0; //keep the input value
+			timeToStop=0;
 		}
 	}
 	else if (primary.type==Antenna::ANT_SATELLITE) {
@@ -463,6 +495,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareOTFSecondary(const bool& useIntern
 	IRA::CString name;
 	Antenna::TSections section;
 	Antenna::TTrackingParameters nullScan,lastScan;
+	ACS::Time timeToStop;
 	
 	Antenna::EphemGenerator_var tmp=Antenna::EphemGenerator::_nil();
 	Antenna::EphemGenerator_var tmpFlux=Antenna::EphemGenerator::_nil();
@@ -490,7 +523,8 @@ Antenna::EphemGenerator_ptr CBossCore::prepareOTFSecondary(const bool& useIntern
 
 	try {
 		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareOTFSecondary()",(LM_DEBUG,"PREPARE_SECONDARY_FOR OTF"));
-		tmp=prepareScan(useInternal,inputTime,sec,nullScan,m_userOffset,genType,lastScan,section,ra,dec,lon,lat,vrad,velFrame,velDef,sourceName,scanOff,axis,tmpFlux.out());
+		tmp=prepareScan(useInternal,inputTime,sec,nullScan,m_userOffset,genType,lastScan,section,ra,dec,lon,lat,vrad,velFrame,velDef,timeToStop,
+				sourceName,scanOff,axis,tmpFlux.out());
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		ex.log(LM_DEBUG);

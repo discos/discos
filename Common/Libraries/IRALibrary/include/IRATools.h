@@ -400,7 +400,25 @@ public:
 	 * @return the result of the conversion, true if the conversion could be done
 	 */
 	static bool timeToStr(const ACS::Time& time,IRA::CString& outString,char dateDelimiter='-',char timeDelimiter=':');
-	
+
+	/**
+	 * Use this function to convert from a double sequence to a string
+	 * @param val sequence of double values
+	 * @param outString string that contains the string
+	 * @param delimiter character that separates the values inside the string
+	 * @return the result of the conversion, true if the conversion could be done
+	*/
+	static bool doubleSeqToStr(const ACS::doubleSeq& val,IRA::CString& outString,char delimiter=';');
+
+	/**
+	 * Use this function to convert from a long sequence to a string
+	 * @param val sequence of long values
+	 * @param outString string that contains the string
+	 * @param delimiter character that separates the values inside the string
+	 * @return the result of the conversion, true if the conversion could be done
+	*/
+	static bool longSeqToStr(const ACS::longSeq& val,IRA::CString& outString,char delimiter=';');
+
 	/**
 	 * Use this function to convert a string containing an angle in the format (+/-hh:mm:ss.ss) into a radians. If <i>complete</i> argument is not set, the expected fields have not to be all  
 	 * included, the function will try to convert the string anyway. The missing fields are replaced with zeros, the first value is always interpreted as the hours value. 
@@ -633,6 +651,44 @@ public:
 	  * @return true if the directory exists, false otherwise
 	  */
 	 static bool directoryExists(const IRA::CString& path);
+
+	 /**
+	  * Round a double value to the nearest number with decimals precision
+	  * @param val number to be rounded
+	  * @param decimals number of decimal positions to be considered (val=30.77779, decimals=2, res=30.78)
+	  */
+	 static double roundNearest(const double& val,const long& decimals);
+
+	 /**
+	  * Round a double value to the lower number with decimals precision
+	  * @param val number to be rounded
+	  * @param decimals number of decimal positions to be considered (val=30.77779, decimals=2, res=30.77)
+	  */
+	 static double roundDown(const double& val,const long& decimals);
+
+	 /**
+	  * Round a double value to the upper number with decimals precision
+	  * @param val number to be rounded
+	  * @param decimals number of decimal positions to be considered (val=30.77779, decimals=2, res=30.78)
+	  */
+	 static double roundUp(const double& val,const long& decimals);
+
+	 /**
+	  * Camputes the minimum value of a sequence of values.
+	  * @param array sequence of values
+	  * @param pos position of the maximum value
+	  * @return the minimum
+	  */
+	 static double getMinimumValue(const ACS::doubleSeq& array,long& pos);
+
+	 /**
+	  * Camputes the maximum value of a sequence of values.
+	  * @param array sequence of values
+	  * @param pos position of the maximum value
+	  * @return the maximum
+	  */
+	 static double getMaximumValue(const ACS::doubleSeq& array,long& pos);
+
 };
 	
 }

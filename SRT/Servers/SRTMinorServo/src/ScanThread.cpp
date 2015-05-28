@@ -97,7 +97,7 @@ void ScanThread::run()
         // Wait until the (starting_time - 0.5 seconds), in order to have the future antenna elevations
         TIMEVALUE now(0.0L);
         IRA::CIRATools::getTime(now);
-        while(now.value().value > (stime.value().value - 5000000)) {
+        while(now.value().value < (stime.value().value - 5000000)) {
             ACS::ThreadBase::SleepReturn sleep_ret = SLEEP_ERROR;
             sleep_ret = ACS::ThreadBase::sleep(10000); // Wait 1 ms
             if(sleep_ret != SLEEP_OK) {
@@ -125,6 +125,7 @@ void ScanThread::run()
             return;
         }
 
+        m_configuration->m_isScanning = true;
         if(positions.size() <= EQUIVALENT_BUFF_SIZE) { // Send all the positions
             for(; idx<positions.size(); idx++) {
                 ACS::doubleSeq pos = positions[idx];

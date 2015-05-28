@@ -11,6 +11,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 22/07/2010       Given implementation of command function                   */
 /* Andrea Orlati(aorlati@ira.inaf.it) 13/09/2010       Given implementation of new signature of getTaper() method  */
 /* Andrea Orlati(aorlati@ira.inaf.it) 12/02/2013       Changed the method command as new commandInterpreter interface requires  */
+/* Marco Buttu (mbuttu@oa-cagliari.inaf.it) 25/05/2015 Added external mark control  */
 
 
 
@@ -25,6 +26,7 @@
 #include <baciROlongSeq.h>
 #include <baciROstring.h>
 #include <baciROlong.h>
+#include <baciROdouble.h>
 #include <enumpropROImpl.h>
 #include <SP_parser.h>
 #include <ReceiversErrors.h>
@@ -109,6 +111,23 @@ public:
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
 	void calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	
+	/**
+	 * This method is used to enable the external control of the calibration mark
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx  
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
+	 */
+	void externalCalOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	
+	/**
+	 * This method is used to disable the external control of the calibration mark
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx  
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
+	 */
+	void externalCalOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
 	
 	/**
 	 * This method allows to set local oscillator. Depending on the curretly configured receiver one or more values are considered.
@@ -227,15 +246,42 @@ public:
 	 */
 	virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
+	/*
+	 * The system will performs all the operation required to force the close of the current scan.
+	 * Closing the scan means making ready the system for the next scan.
+	 * @param timeToStop expected epoch in which the system is ready to start another scan.
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw CORBA::SystemException
+	 */
+    virtual void closeScan(ACS::Time& timeToStop) throw (CORBA::SystemException,ReceiversErrors::ReceiversErrorsEx,ComponentErrors::ComponentErrorsEx);
+
 	/**
 	 * It allows to prepare the receivers for the current scan
 	 * @param startUT epoch at which the scan is going to be executed
 	 * @param param list of required parameters
+	 * @param antennaInfo axiliary, runtime information from the antenna
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	virtual void startScan(ACS::Time startUT,const Receivers::TReceiversParameters & param) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	virtual void startScan(ACS::Time& startUT,const Receivers::TReceiversParameters & param,
+	  const Antenna::TRunTimeParameters & antennaInfo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+	  ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 * Check if the receivers can be ready for the next scan.
+ 	 * @param startUT epoch at which the scan is going to be executed
+	 * @param param list of required parameters
+	 * @param runtTime structure containing the runt time parameters of the scan
+	 * @param antennaInfo run time parameters from the antenna subsystem 
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+	virtual CORBA::Boolean checkScan(ACS::Time startUt,const Receivers::TReceiversParameters& param,
+	 const Antenna::TRunTimeParameters& antennaInfo,Receivers::TRunTimeParameters_out runTime) throw (
+	 CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * called in order to get back the position of the derotator at a given epoch
@@ -244,27 +290,92 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	virtual CORBA::Double getDerotatorPosition (ACS::Time epoch) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	virtual CORBA::Double getDerotatorPositionFromHistory(ACS::Time epoch) throw (CORBA::SystemException,
+	  ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is a wrap a call to the derotator setup, allowing to activate the derotation. If the derotator is not supported by the current receiver an error is risen.
 	 * @param mode specified the tracking mode of the derotator, if <i>RCV_UNDEF_UPDATE</i> is given the present value is kept
 	 * @param rewind specifies the rewind mode in case the derotator reaches its final limit, if i<i>RCV_UNDEF_REWIND</i> is given, the present value is kept
-	 * @param feeds number of feeds to derotate in case automatic rewind mode is slected, if -1 the present value if not changed
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-    virtual void derotatorSetup (Receivers::TUpdateModes mode,Receivers::TRewindModes rewind,CORBA::Long feeds) throw (CORBA::SystemException,
-    		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    //virtual void derotatorMode(Receivers::TDerotatorConfigurations mode,Receivers::TRewindModes rewind,CORBA::Long feeds) throw (CORBA::SystemException,
+    //		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
+    /**
+     * This method prepares the system for the derotation but it does not start it.
+     * if the no derotator is supported, or no receiver has been configured or the current receiver does not have a derotator
+     * an error is raised.
+     * @param conf specifies how to manage the derotation, if <i>RCV_UNDEF_DEROTCONF</i> the current value is kept
+     * @throw CORBA::SystemException
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw ComponentErrors::ComponentErrorsEx
+    */
+    virtual void derotatorSetConfiguration(Receivers::TDerotatorConfigurations conf) throw (CORBA::SystemException,
+    		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+    /**
+     * It allows to configure how the dewar positioner behaves in case the derotator hits a final limit and need to rewind.
+     * @param rewind specifies how to manage the rewind, when it is needed. If <i>RCV_UNDEF_REWIND</i> the current value is kept
+     * @throw CORBA::SystemException
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw ComponentErrors::ComponentErrorEx
+     */
+    void derotatorSetRewindingMode(Receivers::TRewindModes rewind) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+    		ReceiversErrors::ReceiversErrorsEx);
+
+    /**
+     * It sets the number of fixed length steps (it depends on the particular derotator) the dewar positioner moves when an auto
+     * rewind have to be taken
+     * @param steps number of configured auto rewinding steps.
+     * @throw CORBA::SystemException
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw ComponentErrors::ComponentErrorEx
+     */
+    void derotatorSetAutoRewindingSteps(CORBA::Long steps) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+    		ReceiversErrors::ReceiversErrorsEx);
+
     /**
      * It disable the derotator. It is implicitly called also by the <i>park()</i> method.
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
      */
-    virtual void derotatorPark () throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void derotatorPark() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+    /**
+     * Allows to perform a manual rewind of the derotator.
+     * @param steps number of steps (it depends on the currently configured receiver)
+     * @throw CORBA::SystemException
+     * @throw ReceiversErrors::ReceiversErrorsEx
+     * @throw ComponentErrors::ComponentErrorsEx
+     */
+    virtual void derotatorRewind(CORBA::Long steps) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+
+    /**
+     * It allows to set the initial position (receivers feed geometry) of the derotator. It is valid only in case the FIXED or CUSTOM configuration
+     * are active (@sa <i>derotatorMode</i>).
+     * @param position new position in degrees
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    virtual void derotatorSetPosition(CORBA::Double position) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+      ReceiversErrors::ReceiversErrorsEx);
+
+    /**
+     * Return the present configuration of the dewar positioner.
+     * @param mod present configuration
+     * @param pos initial position of the derotator.
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+	 */
+    virtual void getDewarParameter(Receivers::TDerotatorConfigurations_out mod,CORBA::Double_out pos) throw (
+      CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * Returns a reference to the LO property implementation of the IDL interface.
@@ -320,7 +431,12 @@ public:
 	*/
     virtual ACS::ROstring_ptr mode() throw (CORBA::SystemException);
 
-	
+	/**
+	 * Returns a reference to the derotatorPosition property implementation of the IDL interface.
+	 * @return pointer to read-only double property
+	*/
+	virtual ACS::ROdouble_ptr derotatorPosition() throw (CORBA::SystemException);
+
 private:
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plocalOscillator;
 	baci::SmartPropertyPointer<baci::ROstring> m_pactualSetup;
@@ -332,6 +448,7 @@ private:
 	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),
 	  POA_Management::ROTSystemStatus> > m_pstatus;
 	baci::SmartPropertyPointer<baci::ROstring> m_pmode;
+	baci::SmartPropertyPointer<baci::ROdouble> m_pderotatorPosition;
 	
 	SimpleParser::CParser<CRecvBossCore> *m_parser;
 	CRecvBossCore *m_core;

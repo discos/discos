@@ -271,6 +271,10 @@ bool CDataCollection::stopScan()
 void CDataCollection::forceReset()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
+	if 	(!m_dumpCollection.isEmpty()) {
+		m_dumpCollection.flushAll();
+		ACS_LOG(LM_FULL_INFO, "CDataCollection::forceReset()",(LM_WARNING,"POSSIBLE_LOSS_OF_DATA"));
+	}
 	m_running=m_ready=m_start=m_stop=false;
     m_scanHeader=m_subScanHeader=false;
 	m_reset=true;

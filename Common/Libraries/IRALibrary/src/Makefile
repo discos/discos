@@ -48,10 +48,12 @@ IRALibrary_OBJECTS = String IRATools Error SerialPort Lecom Socket DataField DBT
  ReceiverControl SourceFlux CustomLoggerUtils LogDike FrequencyTracking
 IRALibrary_LIBS = acstime SlaLibrary maciClient
 
-PY_PACKAGES  = IRAPy
+PY_PACKAGES  = IRAPy ReceiverBoardServer
+PY_SCRIPTS = receiver-board-runserver
 
 EXECUTABLES     = FTrack STrack
-EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike TestTimeTaggedCircularArray TestFlux TestTimer
+EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike TestTimeTaggedCircularArray  \
+				  TestFlux TestTimer TestRounding
 
 #
 # <brief description of xxxxx program>
@@ -90,6 +92,9 @@ FTrack_LIBS = SlaLibrary IRALibrary
 
 STrack_OBJECTS = TestSkySource SkySource DateTime String
 STrack_LIBS = IRALibrary
+
+TestRounding_OBJECTS = TestFloatRounding IRATools
+TestRounding_LIBS = IRALibrary
 
 # 
 # IDL Files and flags

@@ -25,6 +25,9 @@ class PublisherTest(unittest2.TestCase):
         self.positioner.getStatus()
         self.m.result('000001')
         self.m.count(1, None)
+        self.positioner.isSetup()
+        self.m.result(True)
+        self.m.count(0, None)
         self.m.replay()
         control = DewarPositionerImpl.Control()
         thread = threading.Thread(
@@ -49,6 +52,9 @@ class PublisherTest(unittest2.TestCase):
         self.positioner.getStatus()
         self.m.result('000011')
         self.m.count(1, None)
+        self.positioner.isSetup()
+        self.m.result(True)
+        self.m.count(0, None)
         self.m.replay()
         control = DewarPositionerImpl.Control()
         thread = threading.Thread(
@@ -73,6 +79,9 @@ class PublisherTest(unittest2.TestCase):
         self.positioner.getStatus()
         self.m.result('010000')
         self.m.count(1, None)
+        self.positioner.isSetup()
+        self.m.result(True)
+        self.m.count(0, None)
         self.m.replay()
         control = DewarPositionerImpl.Control()
         thread = threading.Thread(
@@ -97,6 +106,9 @@ class PublisherTest(unittest2.TestCase):
         self.positioner.getStatus()
         self.m.result('110000')
         self.m.count(1, None)
+        self.positioner.isSetup()
+        self.m.result(True)
+        self.m.count(0, None)
         self.m.replay()
         control = DewarPositionerImpl.Control()
         thread = threading.Thread(
@@ -121,6 +133,9 @@ class PublisherTest(unittest2.TestCase):
         self.positioner.getStatus()
         self.m.result('000001')
         self.m.count(1, None)
+        self.positioner.isSetup()
+        self.m.result(True)
+        self.m.count(0, None)
         self.m.replay()
         control = DewarPositionerImpl.Control()
         thread = threading.Thread(
@@ -145,6 +160,9 @@ class PublisherTest(unittest2.TestCase):
         self.positioner.getStatus()
         self.m.result('111111')
         self.m.count(1, None)
+        self.positioner.isSetup()
+        self.m.result(True)
+        self.m.count(0, None)
         self.m.replay()
         control = DewarPositionerImpl.Control()
         thread = threading.Thread(
@@ -176,6 +194,9 @@ class PublisherTest(unittest2.TestCase):
         self.positioner.getStatus()
         self.m.result('000000')
         self.m.count(1, None)
+        self.positioner.isSetup()
+        self.m.result(True)
+        self.m.count(0, None)
         self.m.replay()
         control = DewarPositionerImpl.Control()
         thread = threading.Thread(

@@ -44,7 +44,9 @@
 			<!-- bandWidth (ROdoubleSeq) -->
 			<xs:element name="bandWidth" type="baci:ROdoubleSeq"/>	
 			<!-- current receiver working mode (ROstring) -->
-			<xs:element name="mode" type="baci:ROstring"/>		
+			<xs:element name="mode" type="baci:ROstring"/>
+			<!-- current derotator position (ROdouble) -->
+			<xs:element name="derotatorPosition" type="baci:ROdouble"/>		
 			<xs:element name="AvailableReceiver" type="AvailReceiverType" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 		<!-- the cache time (microseconds) for logging repetition filter -->

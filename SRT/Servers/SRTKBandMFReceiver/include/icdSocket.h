@@ -153,13 +153,15 @@ public:
      * Derotator socket constructor.
      * @arg IP IP address of icd
      * @arg port port number of icd
+     * @arg maxSpeed maximum speed in rpm
+     * @arg minSpeed minimum speed in rpm
      * @arg timeout timeout
      * @arg degree/step conversion factor
      * @arg reference position (zero position) of ICD in degrees
      * @arg max absolute position value allowed
      * @arg min absolute position value allowed
      */
-    icdSocket(CString IP, DWORD port, DWORD timeout, double ICD_CF, 
+    icdSocket(CString IP, DWORD port, DWORD maxSpeed, DWORD minSpeed, DWORD timeout, double ICD_CF, 
             double REFERENCE_POSITION, double MAX_VALUE, double MIN_VALUE,
             double TrackingDelta, double ICD_POSITION_EXPIRE_TIME);
 
@@ -171,7 +173,7 @@ public:
     * Create a socket and make a connection to it 
     * @throw ComponentErrors::SocketErrorExImpl
     */
-    void Init() throw (ComponentErrors::SocketErrorExImpl) ;
+    void Init(double actPosition=0) throw (ComponentErrors::SocketErrorExImpl) ;
 
 
     /// Return the icd position as degree angle, in the user reference system
@@ -288,6 +290,20 @@ public:
      */
     void reset() throw (ComponentErrors::SocketErrorExImpl);
 
+
+    /** Set the derotator speed in rmp **/
+    void setSpeed(DWORD speed) throw (
+         DerotatorErrors::ValidationErrorExImpl, 
+	     DerotatorErrors::CommunicationErrorExImpl
+    );
+
+
+    /** Get the derotator speed in rmp **/
+    DWORD getSpeed() throw (
+         DerotatorErrors::ValidationErrorExImpl, 
+	     DerotatorErrors::CommunicationErrorExImpl
+    );
+
     
     /**
      * This member funcion calls several status functions:
@@ -310,7 +326,7 @@ protected:
     /** Make a conversation to and from icd 
      *
      * @param buff pointer to the byte buffer that will contain the message to send
-     * @param check enable the responseCheck related to actual transmitted command. 
+     * @param check enable the responseCheck related to the actual transmitted command. 
      * Default check value is true. The responseCheck is disable for driveStatus
      * command, otherwise the responseCheck of driveStatus command masks the status 
      * of the previous command.
@@ -355,6 +371,15 @@ protected:
     * @throw ComponentErrors::SocketErrorExImpl
     */
     void receiveBuffer(BYTE *msg, WORD len) throw (ComponentErrors::SocketErrorExImpl) ;
+ 
+
+    /**
+    * Receive a polling answer from the icd
+    * @param msg pointer to the byte buffer that will contain the message from the icd
+    * @param len number of bytes to be read
+    * @throw ComponentErrors::SocketErrorExImpl
+    */
+    void receivePolling(BYTE *msg, WORD len) throw (ComponentErrors::SocketErrorExImpl) ;
 
 
     /**
@@ -464,6 +489,12 @@ private:
    
     /** @var timeout */
     const DWORD m_ICD_TIMEO;
+   
+    /** @var max speed */
+    const DWORD m_ICD_MAX_SPEED;
+
+    /** @var min speed */
+    const DWORD m_ICD_MIN_SPEED;
 
     /** @var icd conversion factor from step position to angle position */
     const double m_ICD_CF;

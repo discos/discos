@@ -12,19 +12,24 @@ class CDBConf(object):
     componentAttributes = (
             'UpdatingTime', 
             'RewindingSleepTime', 
-            'RewindingTimeout'
+            'RewindingTimeout',
+            'DefaultConfiguration',
+            'DefaultRewindingMode',
+            'Latitude',
     )
 
     mappingAttributes = (
             'DerotatorName', 
+            'ObservatoryName', 
+            'CoordinateSourceName', 
             'SetupPosition',
             'ParkPosition',
-            'DefaultConfiguration',
     )
 
     actionsAttributes = (
-            'SetPositionAllowed',
+            'SetCustomPositionAllowed',
             'DynamicUpdatingAllowed',
+            'AddInitialParallactic',
     )
 
     configurationRecords = (
@@ -55,7 +60,6 @@ class CDBConf(object):
     def setConfiguration(self, configurationCode):
         if self.setupCode:
             confPath = os.path.join(self.setupPath, configurationCode)
-            self.clearConfiguration() 
             # Set the path self.configurationPath if the directory exists
             self._setPath(name='configuration', path=confPath)
         else:
@@ -64,13 +68,17 @@ class CDBConf(object):
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
             raise exc
+
+        # Create records
+        self._clearRecords()
         for record in CDBConf.configurationRecords:
             self._makeRecords(
                 dictName=record,
                 path=os.path.join(self.configurationPath, record))
-
+        # Create attributes
         actionsPath = os.path.join(self.configurationPath, 'Actions')
         self._setPath(name='actions', path=actionsPath)
+        self._clearAttributes()
         self._makeAttr(self.actionsPath, CDBConf.actionsAttributes)
         self.configurationCode = configurationCode
         self._isConfigured = True
@@ -82,21 +90,21 @@ class CDBConf(object):
         return self.configurationCode
 
     def getUpdatingConfiguration(self, axisCode):
-        """Take an axis and return the a tuple (initial_position, 'functionName')"""
+        """Take an axis and return the dict {'initialPosition': X, 'functionName': Y)"""
         if not self._isConfigured:
-            raeson = "DewarPotitioner not configured"
+            raeson = "DewarPositioner not configured"
             logger.logError(raeson)
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
             raise exc
         else:
             try:
-                # UpdatingPosition -> {'axisCode': ['position', 'functionName']}
-                values = self.UpdatingPosition[axisCode] 
-                return (float(values[0]), values[1]) # (initial_position, functionName)
+                # UpdatingPosition -> {'axisCode': {'initialPosition': X, 'functionName': Y}}
+                return self.UpdatingPosition[axisCode] 
             except IndexError:
                 raeson = "wrong CDB configuration for %s" %axisCode
                 logger.logError(raeson)
+
                 exc = ComponentErrorsImpl.ValidationErrorExImpl()
                 exc.setReason(raeson)
                 raise exc
@@ -112,6 +120,12 @@ class CDBConf(object):
                 exc = ComponentErrorsImpl.ValidationErrorExImpl()
                 exc.setReason(raeson)
                 raise exc
+
+
+    def updateInitialPositions(self, position):
+        for axis in self.UpdatingPosition:
+            self.UpdatingPosition[axis]['initialPosition'] = '%.2f' %position
+
 
     def getAttribute(self, name):
         """Return the attribute as a string.
@@ -156,7 +170,7 @@ class CDBConf(object):
 
         for name in attributes:
             try:
-                self.attributes[name] = dao.get_field_data(name)
+                self.attributes[name] = dao.get_field_data(name).strip()
             except cdbErrType.CDBFieldDoesNotExistEx:
                 raeson = "CDB field %s does not exist" %name
                 logger.logWarning(raeson)
@@ -181,7 +195,7 @@ class CDBConf(object):
 
             <UpdatingRecord>
                 <axisCode>MNG_TRACK</axisCode>
-                <position>2.0</position>
+                <initialPosition>2.0</initialPosition>
                 <functionName>parallactic</functionName>
             </UpdatingRecord>
             
@@ -190,7 +204,7 @@ class CDBConf(object):
         dictName='InitialPosition', the method builds the dictionary::
 
             UpdatingPosition = {
-                'MNG_TRACK': ['2.0', 'parallactic'],
+                'MNG_TRACK': {'initialPosition': '2.0', 'functionName': 'parallactic'],
             }
         """
         try:
@@ -203,15 +217,23 @@ class CDBConf(object):
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
             raise exc
-        except cdbErrType.CDBXMLErrorEx:
-            children = () # In case of empty table, like the FIXED confi
+        except Exception, ex:
+            children = () 
 
         setattr(self, dictName, {})
         d = getattr(self, dictName)
         for child in children:
-            items = [item.text.strip() for item in child]
-            primary_key, values = items[0], items[1:]
-            d[primary_key] = values # Put the record in the `dictName`
+            valuesDict = {}
+            primaryKey, fields = child[0].text.strip(), child[1:]
+            for field in fields:
+                # Find the field name
+                # e.g. field.tag = '...DewarPositionerUpdatingTable:1.0}axisCode'
+                idx = field.tag.find('}') + 1
+                fieldName = field.tag[idx:]
+                fieldValue = field.text.strip()
+                valuesDict[fieldName] = fieldValue
+            d[primaryKey] = valuesDict
+
 
     def _setPath(self, name, path):
         ACS_CDB = os.getenv('ACS_CDB')
@@ -228,8 +250,8 @@ class CDBConf(object):
             setattr(self, '%sPath' %name, path)
         else:
             # For instance: name='setup' and path='alma/DataBlock/KKG', so
-            # reason="setup alma/DataBlock/KKG not available"
-            raeson = "%s %s not available" %(name, abs_path)
+            # raeson="setup alma/DataBlock/KKG not available"
+            raeson = "%s %s not available" %(name, path)
             logger.logError(raeson)
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
@@ -237,12 +259,18 @@ class CDBConf(object):
 
     def clearConfiguration(self):
         self._isConfigured = False
-        self.configurationCode = '' # For instance, BSC
+        self.configurationCode = 'none' # For instance, BSC
         self.configurationPath = '' # Configuration directory path (ie. to BSC)
+        self._clearRecords()
+        self._clearAttributes()
+
+    def _clearRecords(self):
         for name in CDBConf.configurationRecords:
             if hasattr(self, name):
                 attr = getattr(self, name)
                 attr.clear() # Clear the dictionary
+
+    def _clearAttributes(self):
         for name in CDBConf.actionsAttributes:
             if hasattr(self, name):
                 attr = getattr(self, name)

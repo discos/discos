@@ -125,10 +125,17 @@ public:
         ACS::doubleSeq actPos;
         ACS::doubleSeq centralPos;
         ACS::doubleSeq plainCentralPos;
-        ACS::doubleSeq virtualCentralElongation;
         bool wasElevationTrackingEn;
     };
 
+    /** 
+     * Return a doubleSeq of positions to set
+     * @param comp_name string component name
+     * @param elevation the elevation (radians) of the antenna at the beginning of the scan
+     * @return doubleSeq of positions to set
+     */
+    ACS::doubleSeq getPositionFromElevation(string comp_name, double elevation) 
+        throw (ManagementErrors::ConfigurationErrorExImpl);
 
     /** 
      * Return a doubleSeq of positions to set
@@ -150,7 +157,6 @@ public:
             const ACS::doubleSeq actPos,
             const ACS::doubleSeq centralPos,
             const ACS::doubleSeq plainCentralPos,
-            const ACS::doubleSeq virtualCentralElongation,
             bool wasElevationTrackingEn
     );
 
@@ -162,6 +168,7 @@ public:
     std::string m_active_pfocus_servo;
     bool m_isConfigured;
     bool m_isStarting;
+    bool m_isScanLocked;
     bool m_isScanning;
     bool m_isScanActive;
     bool m_isParking;

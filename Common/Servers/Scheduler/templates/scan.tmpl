@@ -44,7 +44,7 @@
 #    per year (julian) if Fk5 is used). Not required.
 #h) [plx] parallax in milli arcseconds. Not required.
 #i) [rvel] radial velocity in Km/sec ( positive value means the source is moving away). Not required.If given the frame is supposed to be BARY and the
-#    definition is OPTICAL
+#    definition is OPTICAL. It could be overriden by the switch "-RVEL"
 
 #for SKYDIP scans: allows to perform a scan along elevation at a fixed azimuth allowing the calibration of the airmass, the scan will be done at 
 # decreasing elevation positions
@@ -53,16 +53,26 @@
 #c) elevationUpperLimit   
 #e) duration  duration of the scan in seconds 
 
+#for PEAKER scans: allows to perform a scan along a given axis of the minor servo system. The scan will be executed on 
+# the given source
+#a) targetScan, gives the identifier of the target source(i.d. a defined SIDEREAL o MOON scan).  Any offset given in the centerScan will be ignored. 
+#   The identifier must exist in the file and must be already defined 
+#b) axis_identifier, identifier of the axis to be moved for the scan, it could be X,Y,Z or THETAY or SRP_TY,SRP_RY (for SRT) 
+#c) range, span of the scan or total movment required by the scan along the given axis. The unit can vary according the axis,
+#   for example if the axis is rotation the unit is arcseconds, mm in case of translation
+#d) duration, duration of the scan in seconds 
+
+
 #ID type startLon startLat stopLon stopLat frame subscanframe geometry description direction duration
 1	OTF	mySource	165.7530324d	67.750017d	00:00:50	00:00:00	EQ	HOR	LAT	CEN	INC	60.0	-EQOFFS	0.455d	0.0d
 2	OTF	otf	167.0	67.0	2.0d	0.0d	HOR	HOR	LAT	CEN	DEC	60.0
 
 #ID type sourceName frame lon lat [epoch] [pmRa] [pmDec] [plx] [rvel]
 #in that case the internal catalog is used.
-3	SIDEREAL	epsi	-HOROFFS	0.245d	0.0d
-4	SIDEREAL	mySource	GAL	200.323232d	45.12211122d
-6	SIDEREAL	Second	EQ	123.4343434d	12.43433343d	1950.0	100.1	67.4	12.4	13.1
-8	SIDEREAL	epsi
+3	SIDEREAL	epsi	-HOROFFS	0.245d	0.0d	-RVEL	33.12	BARY	OP
+4	SIDEREAL	mySource	GAL	200.323232d	45.12211122d	-RVEL	112.223	LSRK	Z
+6	SIDEREAL	Second	EQ	123.4343434d	12.43433343d	1950.0	100.1	67.4	12.4	13.1	-RVEL	112.223	LSRK	RD
+8	SIDEREAL	epsi	-RVEL	12.223	LSRD	OP
 
 #ID type
 5	MOON	-EQOFFS	00:00:15.0	00:01:30.00
@@ -76,3 +86,9 @@
 
 13	SIDEREAL	dr21
 14	SKYDIP	13	15.0d	90.0d	300.0
+
+#ID	type	center	axis	span	duration
+15	PEAKER	8	Y	30	60.0
+# do a scan on target 8, moving the Y axis for 30 mm in 1 minute 
+16	PEAKER	3	X	7200	30.0
+# do a scan on target 6, rotating the Y axis for 2 degrees in 30 seconds

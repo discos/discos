@@ -7,25 +7,19 @@
 
 MAKE_PDF = ON
 
-INCLUDES = ReceiversModule.h
-
 #
 # Libraries (public and local)
 # ----------------------------
  
-EXECUTABLES_L   = TestReceivers
-TestReceivers_OBJECTS = ReceiversModule
-TestReceivers_LIBS= ReceiversDefinitionsStubs baci maci
-
-CDB_SCHEMAS = Feeds Receivers ReceiversModeSetup LocalOscillatorLookUpTable \
+CDB_SCHEMAS = Feeds ReceiversModeSetup LocalOscillatorLookUpTable \
 			  NoiseMarkLookUpTable TaperLookUpTable \
 			  DewarPositionerUpdatingTable DewarPositionerMapping \
 			  DewarPositionerActions
 
 # IDL Files and flags
-IDL_FILES = ReceiversDefinitions CommonReceiverInterface ReceiversBoss \
+IDL_FILES = CommonReceiverInterface ReceiversBoss \
 			GenericReceiver LocalOscillatorInterface \
-			GenericDerotator DewarPositioner
+			DewarPositionerDefinitions GenericDerotator DewarPositioner
 
 # list of all possible C-sources (used to create automatic dependencies)
 CSOURCENAMES = \
@@ -47,9 +41,8 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
-	$(RM) *~ ../test ../*~ ../lib ../object ../rtai ../bin
-	$(RM) ../doc/html
-	$(RM) tmp.txt acsexmplbeans.jar ../doc/abeans.log
+	$(RM) $(INTROOT)/lib/python/site-packages/DewarPositioner*_idl*.py*
+	$(RM) $(INTROOT)/lib/python/site-packages/libDewarPositionerStubs.*
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 
@@ -60,3 +53,4 @@ man   : do_man
 
 install : install_all
 	@echo " . . . installation done"
+

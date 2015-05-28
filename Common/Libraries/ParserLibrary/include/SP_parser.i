@@ -71,8 +71,8 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 	logCommand.RTrim();
 	if (!timeTagged) {   //sync operations
 		if (elem->m_type==PROCEDURE){
-			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Procedure issued {%s}",(const char *)logCommand));
 			pushProcedure(instr,elem->m_procedure,inParams,parNum); // throws ProcedureErrorExImpl
+			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Procedure issued {%s}",(const char *)logCommand));
 			return instr+m_answerDelimiter;  //it informs that the procedure seems to be correct and it will be executed 
 		}	
 		else if (elem->m_type==COMMAND) {
@@ -350,7 +350,8 @@ void CParser<OBJ>::pushProcedure(const IRA::CString& name,const ACS::stringSeq& 
 		IRA::CString line((const char *)procedure[i]);
 		for (WORD j=0;j<parNumber;j++) {
 			IRA::CString pp;
-			pp.Format("%c%d",PROCEDUREPARAMETER,j);
+			//pp.Format("%c%d",PROCEDUREPARAMETER,j);
+			pp.Format("%c%d",PROCEDUREPARAMETER,j+1);
 			line.ReplaceAll((const char *)pp,procPrm[j]);
 		}
 		try {

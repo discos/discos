@@ -339,8 +339,9 @@
    -   Thu Mar 27 10:53:42 UTC 2014 modified by jDAL
    -   Thu Mar 27 10:56:05 UTC 2014 modified by jDAL
    -   Thu Mar 27 11:32:19 UTC 2014 modified by jDAL
+   -   Tue Apr 14 13:42:55 UTC 2015 modified by jDAL
 -->
-<SRTActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:SRTActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" profile="3">
+<SRTActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:SRTActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" profile="0">
 	<status />
 	<enabled />
 	<pprofile />

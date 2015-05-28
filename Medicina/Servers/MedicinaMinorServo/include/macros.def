@@ -11,6 +11,16 @@
         throw exImpl; \
 }
 
+#define THROW_MINORSERVO_EX(NAME, MESSAGE, THROUGH_GET) \
+{ \
+    string msg(MESSAGE); \
+    ACS_SHORT_LOG((LM_ERROR, msg.c_str())); \
+    MinorServoErrors::NAME##Impl exImpl(__FILE__, __LINE__, msg.c_str()); \
+    if(THROUGH_GET) \
+        throw exImpl.getMinorServoErrorsEx(); \
+    else \
+        throw exImpl; \
+}
 
 #define GET_PROPERTY_REFERENCE(IMPLNAME, TYPE, PROPERTY, PROPERTYNAME) \
     TYPE##_ptr IMPLNAME::PROPERTYNAME() \

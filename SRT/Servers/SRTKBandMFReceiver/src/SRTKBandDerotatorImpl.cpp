@@ -10,8 +10,14 @@
 #include <ManagmentDefinitionsS.h>
 #include "SRTKBandDerotatorImpl.h"
 #include "sensorDevIO.h"
+#include "StatusUpdater.h"
 #include "icdDevIO.h"
 #include "macros.def"
+
+
+CSecureArea< vector<PositionItem> >* SRTKBandDerotatorImpl::m_actPos_list = \
+    new CSecureArea<vector<PositionItem> >(new vector<PositionItem>);
+ThreadParameters SRTKBandDerotatorImpl::m_thread_params;
 
 SRTKBandDerotatorImpl::SRTKBandDerotatorImpl(
         const ACE_CString &CompName,maci::ContainerServices *containerServices
@@ -26,19 +32,26 @@ SRTKBandDerotatorImpl::SRTKBandDerotatorImpl(
     m_status(this)
 {   
     AUTO_TRACE("SRTKBandDerotatorImpl::SRTKBandDerotatorImpl()");
+    m_status_ptr = NULL;
 }
 
 
 SRTKBandDerotatorImpl::~SRTKBandDerotatorImpl() {
     AUTO_TRACE("SRTKBandDerotatorImpl::~SRTKBandDerotatorImpl()");
+
+    if(m_actPos_list != NULL) {
+        delete m_actPos_list;
+    }
 }
 
 
 void SRTKBandDerotatorImpl::initialize() throw (ComponentErrors::CDBAccessExImpl, ACSErr::ACSbaseExImpl)
 {
-
     SensorIP = "";
     SensorPort = 0;
+    Speed = 0;
+    MaxSpeed = 0;
+    MinSpeed = 0;
     SensorTimeout = 0;
     SensorZeroReference = 0;
     SensorConversionFactor = 1;
@@ -53,6 +66,7 @@ void SRTKBandDerotatorImpl::initialize() throw (ComponentErrors::CDBAccessExImpl
     MinValue = 0;
     Step = 0;
     PositionExpireTime = 0;
+    TrackingDelta = 1;
 
     icdSocket *icd_socket = NULL;
 
@@ -87,6 +101,43 @@ void SRTKBandDerotatorImpl::initialize() throw (ComponentErrors::CDBAccessExImpl
                     "SRTKBandDerotatorImpl::initialize(), I can't read SensorPort from CDB");
             throw exImpl;
         }
+
+
+        if(!CIRATools::getDBValue(getContainerServices(), "Speed", Speed)) {
+            ACS_LOG(
+                    LM_FULL_INFO, 
+                    "SRTKBandDerotatorImpl::initialize", 
+                    (LM_INFO, "Error reading the Speed attribute form CDB")
+                    );
+            ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, 
+                    "SRTKBandDerotatorImpl::initialize(), I can't read Speed from CDB");
+            throw exImpl;
+        }
+
+
+        if(!CIRATools::getDBValue(getContainerServices(), "MaxSpeed", MaxSpeed)) {
+            ACS_LOG(
+                    LM_FULL_INFO, 
+                    "SRTKBandDerotatorImpl::initialize", 
+                    (LM_INFO, "Error reading the MaxSpeed attribute form CDB")
+                    );
+            ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, 
+                    "SRTKBandDerotatorImpl::initialize(), I can't read Speed from CDB");
+            throw exImpl;
+        }
+
+
+        if(!CIRATools::getDBValue(getContainerServices(), "MinSpeed", MinSpeed)) {
+            ACS_LOG(
+                    LM_FULL_INFO, 
+                    "SRTKBandDerotatorImpl::initialize", 
+                    (LM_INFO, "Error reading the MinSpeed attribute form CDB")
+                    );
+            ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, 
+                    "SRTKBandDerotatorImpl::initialize(), I can't read Speed from CDB");
+            throw exImpl;
+        }
+
 
         if(!CIRATools::getDBValue(getContainerServices(), "SensorTimeout", SensorTimeout)) {
             ACS_LOG(
@@ -283,6 +334,8 @@ void SRTKBandDerotatorImpl::initialize() throw (ComponentErrors::CDBAccessExImpl
         icd_socket = new icdSocket(
                 IP, 
                 Port, 
+                MaxSpeed,
+                MinSpeed,
                 Timeout,
                 ConversionFactor,
                 ZeroReference,
@@ -301,8 +354,23 @@ void SRTKBandDerotatorImpl::initialize() throw (ComponentErrors::CDBAccessExImpl
         throw dummy;
     }
 
-    icd_socket->Init();
+    icd_socket->Init(getActPosition());
     icd_socket->driveEnable();
+
+    try {
+        m_thread_params.sensorLink = m_sensorLink;
+        m_thread_params.act_pos_list = m_actPos_list;
+        if(m_status_ptr == NULL)
+            m_status_ptr = new StatusUpdater("StatusUpdater", m_thread_params);
+        m_status_ptr->resume();
+    }
+    catch (std::bad_alloc& ex) {
+        ACS_LOG(
+             LM_FULL_INFO, 
+             "SRTKBandDerotatorImpl::initialize()", 
+             (LM_ERROR, "Error creating the StatusUpdater thread")
+        );
+    }
 }
 
 void SRTKBandDerotatorImpl::execute() throw (ACSErr::ACSbaseExImpl)
@@ -372,6 +440,12 @@ void SRTKBandDerotatorImpl::cleanUp() {
     AUTO_TRACE("SRTKBandDerotatorImpl::cleanUp()");
     stopPropertiesMonitoring();
 
+    if(m_status_ptr != NULL) {
+        m_status_ptr->suspend();
+        m_status_ptr->terminate();
+        m_status_ptr = NULL;
+    }
+
     // the protected object is destoyed by the secure area destructor
     if (m_sensorLink) {
         delete m_sensorLink;
@@ -393,6 +467,12 @@ void SRTKBandDerotatorImpl::aboutToAbort()
 {
     AUTO_TRACE("SRTKBandDerotatorImpl::aboutToAbort()");
 
+    if(m_status_ptr != NULL) {
+        m_status_ptr->suspend();
+        m_status_ptr->terminate();
+        m_status_ptr = NULL;
+    }
+
     if (m_sensorLink) {
         delete m_sensorLink;
         m_sensorLink=NULL;
@@ -407,14 +487,15 @@ void SRTKBandDerotatorImpl::aboutToAbort()
 
 void SRTKBandDerotatorImpl::setup() throw (
         CORBA::SystemException,
-        DerotatorErrors::ConfigurationErrorEx, 
+        DerotatorErrors::DerotatorErrorsEx, 
         ComponentErrors::ComponentErrorsEx)
 {
     AUTO_TRACE("Derotatormpl::setup()");
     CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
     try {
-        socket->driveEnable();
         socket->reset();
+        socket->driveEnable();
+        socket->setSpeed(Speed); 
     }
     catch (ComponentErrors::SocketErrorExImpl& ex) {
         ex.log(LM_DEBUG);
@@ -461,8 +542,7 @@ void SRTKBandDerotatorImpl::powerOff() throw (
 void SRTKBandDerotatorImpl::setPosition(double position) throw (
         CORBA::SystemException, 
         ComponentErrors::ComponentErrorsEx, 
-        DerotatorErrors::PositioningErrorEx,
-        DerotatorErrors::CommunicationErrorEx
+        DerotatorErrors::DerotatorErrorsEx
     )
 {
     CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
@@ -489,11 +569,63 @@ void SRTKBandDerotatorImpl::setPosition(double position) throw (
 }
 
 
+void SRTKBandDerotatorImpl::setSpeed(unsigned int speed) throw (
+        CORBA::SystemException, 
+        DerotatorErrors::DerotatorErrorsEx,
+        ComponentErrors::ComponentErrorsEx
+    )
+{
+    CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
+    try {
+        socket->setSpeed(speed);
+    }
+    catch (DerotatorErrors::ValidationErrorExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getDerotatorErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(
+                ComponentErrors::UnexpectedExImpl, 
+                impl, 
+                "SRTKBandDerotatorImpl::setSpeed()"
+        );
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+}
+
+
+DWORD SRTKBandDerotatorImpl::getSpeed() throw (
+        CORBA::SystemException, 
+        DerotatorErrors::DerotatorErrorsEx,
+        ComponentErrors::ComponentErrorsEx
+    )
+{
+    CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
+    try {
+        return socket->getSpeed();
+    }
+    catch (DerotatorErrors::ValidationErrorExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getDerotatorErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(
+                ComponentErrors::UnexpectedExImpl, 
+                impl, 
+                "SRTKBandDerotatorImpl::getSpeed()"
+        );
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+}
+
+
 double SRTKBandDerotatorImpl::getActPosition() 
     throw (
             CORBA::SystemException, 
             ComponentErrors::ComponentErrorsEx, 
-            DerotatorErrors::CommunicationErrorEx
+            DerotatorErrors::DerotatorErrorsEx
     )
 {
     AUTO_TRACE("Derotatormpl::getActPosition()");
@@ -526,25 +658,52 @@ double SRTKBandDerotatorImpl::getActPosition()
 }
 
 
+double SRTKBandDerotatorImpl::getPositionFromHistory(ACS::Time time) throw (
+        CORBA::SystemException, 
+        ComponentErrors::ComponentErrorsEx) 
+{
+
+    PositionItem pos_item; // <timestamp, position>
+
+    try {
+        // Get the CSecArea
+        CSecAreaResourceWrapper<vector<PositionItem> > secure_request = m_actPos_list->Get(); 
+        pos_item = getPosItemFromHistory(secure_request, time);
+        secure_request.Release();
+        return pos_item.position;
+    }
+    catch(PosNotFoundEx) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMDerotatorImpl::getPositionFromHistory: position not found");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+    catch(IndexErrorEx) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMDerotatorImpl::getPositionFromHistory: index out of range");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMDerotatorImpl::getPositionFromHistory: unexpected exception");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+}
+
+
 double SRTKBandDerotatorImpl::getCmdPosition() {
     CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
     return socket->getCmdPosition();
 }
 
 
-double SRTKBandDerotatorImpl::getPositionFromHistory(ACS::Time t) {
-    AUTO_TRACE("Derotatormpl::getIcdTargetPosition()");
-    return 0; // TODO
-}
-
 
 double SRTKBandDerotatorImpl::getMaxLimit() {
-    return MaxValue - ZeroReference;
+    return MaxValue + ZeroReference;
 }
 
 
 double SRTKBandDerotatorImpl::getMinLimit() {
-    return MinValue - ZeroReference;
+    return MinValue + ZeroReference;
 }
 
 double SRTKBandDerotatorImpl::getStep() {
@@ -565,12 +724,18 @@ bool SRTKBandDerotatorImpl::isSlewing() {
 
 
 bool SRTKBandDerotatorImpl::isTracking() {
-    CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
-    return socket->isTracking();
+    double diff = getCmdPosition() - getActPosition();
+    return fabs(diff) < TrackingDelta ? true : false;
 }
 
 
-double SRTKBandDerotatorImpl::getEnginePosition() {
+double SRTKBandDerotatorImpl::getEnginePosition()
+    throw (
+            CORBA::SystemException, 
+            ComponentErrors::ComponentErrorsEx, 
+            DerotatorErrors::DerotatorErrorsEx
+    )
+{
     AUTO_TRACE("Derotatormpl::getEnginePosition()");
     CSecAreaResourceWrapper<icdSocket> socket = m_icdLink->Get();
     try {

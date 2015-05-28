@@ -5,6 +5,9 @@
 #include <stdexcept>
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
+#include <string>
+
+#include <IRA>
 
 #include "MedMinorServoGeometry.hpp"
 
@@ -38,6 +41,7 @@ class PositionQueue
         int _max_size;
         int _size;
         ACS::Time _oldest_time, _newest_time;
+        IRA::CString time2str(ACS::Time);
 };
 
 #endif 

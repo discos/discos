@@ -11,7 +11,7 @@
 			 RepetitionExpireTime="10000000"
 			 StatusPersistenceTime="4000000"
 			 PropertiesUpdateTime="3000000"
-			 DewarPositionerInterface=""> 
+             DewarPositionerInterface="IDL:alma/Receivers/DewarPositioner:1.0"> 
 
 <LO/>
 <actualSetup/>
@@ -22,6 +22,7 @@
 <initialFrequency/>
 <bandWidth/>
 <mode/>
+<derotatorPosition/>
 
 <AvailableReceiver Code="CCB" Derotator="false" Component="RECEIVERS/SRT7GHzReceiver"/>
 

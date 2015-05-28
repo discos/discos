@@ -2,9 +2,10 @@
 # Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 #-----------------------------------------
 
+
 CDB_SCHEMAS = DewarPositioner
 
-PY_SCRIPTS = # List of scripts to be installed in the bin directory
+PY_SCRIPTS = derotatorPosition
 PY_MODULES =
 PY_PACKAGES = DewarPositioner
 
@@ -23,8 +24,9 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all
-	$(RM) *~ *Impl/*~ 
+	$(RM) *~ *Impl/*~ DewarPositioner/*.pyc
 	$(RM) ../lib/python/site-packages/*
+	$(RM) $(INTROOT)/lib/python/site-packages/DewarPositioner
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 

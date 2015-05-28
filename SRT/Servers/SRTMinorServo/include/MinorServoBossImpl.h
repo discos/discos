@@ -22,6 +22,7 @@
 #include <enumpropROImpl.h>
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
+#include <MinorServoErrors.h>
 #include <WPServoImpl.h>
 #include <MinorServoErrors.h>
 #include <MinorServoS.h>
@@ -194,111 +195,82 @@ public:
 
 
     /** 
-     * Check if the focus scan is achievable
-     *
-	 * @param starting_time the time the scan will start
-     * @param range the total axis movement in mm (centered in the actual position)
-	 * @param total_time the duration of axis movement
-     *
-     * @return true if the scan is achievable
-     * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
-     */
-     bool checkFocusScan(
-             const ACS::Time starting_time, 
-             const double range, 
-             const ACS::Time total_time
-     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
-
-
-    /** 
      * Check if the scan is achievable (IDL interface)
      *
 	 * @param starting_time the time the scan will start
-     * @param range the total axis movement in mm (centered in the actual position)
-	 * @param total_time the duration of axis movement
-	 * @param axis_code the identification code of the axis
+     * @param msScanInfo structure containing the description of the scan to be executed
+     * @param antennaInfo auxiliary information from the antenna
+     * @param msParameters auxiliary information computed at run time by the subsystem
      *
      * @return true if the scan is achievable
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
-     bool checkScan(
+     virtual CORBA::Boolean checkScan(
              const ACS::Time starting_time, 
-             double range, 
-             const ACS::Time total_time, 
-             const char *axis_code
-     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+             const MinorServo::MinorServoScan & msScanInfo,
+             const Antenna::TRunTimeParameters & antennaInfo,
+             MinorServo::TRunTimeParameters_out msParameters
+     ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
 
 
     /** 
      * Check if the scan is achievable (implementation)
      *
 	 * @param starting_time the time the scan will start
-     * @param range the total axis movement in mm (centered in the actual position)
-	 * @param total_time the duration of axis movement
-	 * @param axis_code the identification code of the axis
+     * @param msScanInfo structure containing the description of the scan to be executed
+     * @param antennaInfo auxiliary information from the antenna
+     * @param msParameters auxiliary information computed at run time by the subsystem
      *
      * @return true if the scan is achievable
-     * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
+     * @throw MinorServoErrors::MinorServoErrorsEx, 
+     * @throw ComponentErrors::ComponentErrorsEx
      */
-     bool checkScanImpl(
+     virtual CORBA::Boolean checkScanImpl(
              const ACS::Time starting_time, 
-             double range, 
-             const ACS::Time total_time, 
-             const string axis_code
-     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+             const MinorServo::MinorServoScan & msScanInfo,
+             const Antenna::TRunTimeParameters & antennaInfo,
+             MinorServo::TRunTimeParameters_out msParameters
+     ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
      
 
     /** 
      * Start the scan of one axis of a MinorServo target.
      *
 	 * @param starting_time the time the scan will start
-     * @param range the total axis movement in mm (centered in the actual position)
-	 * @param total_time the duration of axis movement
-	 * @param axis_code the code of the axis (SRP_TZ, GFR_TZ, ecc.)
+     * @param msScanInfo structure containing the description of the scan to be executed
+     * @param antennaInfo auxiliary information from the antenna
      *
-     * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
+     * @throw MinorServoErrors::MinorServoErrorsEx, 
+     * @throw ComponentErrors::ComponentErrorsEx
      */
-     void startScan(
-             ACS::Time & starting_time, 
-             const double range, 
-             const ACS::Time total_time, 
-             const char *axis_code
-     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+     virtual void startScan(
+             ACS::Time & startingTime, 
+             const MinorServo::MinorServoScan & scan,
+             const Antenna::TRunTimeParameters & antennaInfo
+     ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
      
      
-     void stopScan() throw (ManagementErrors::SubscanErrorEx);
+     virtual void closeScan(ACS::Time& timeToStop) throw (
+             MinorServoErrors::MinorServoErrorsEx, 
+             ComponentErrors::ComponentErrorsEx);
      
      void startScanImpl(
-        ACS::Time & starting_time, 
-        const double range, 
-        const ACS::Time total_time, 
-        string axis_code
-    ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
+             ACS::Time & startingTime, 
+             const MinorServo::MinorServoScan & scan,
+             const Antenna::TRunTimeParameters & antennaInfo
+     ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
  
     
     /** Return the central position of the axis involved in the scan */
-    CORBA::Double getCentralScanPosition() throw (ManagementErrors::SubscanErrorEx);
+    CORBA::Double getCentralScanPosition() throw (
+             MinorServoErrors::MinorServoErrorsEx,
+             ComponentErrors::ComponentErrorsEx
+     );
     
 
     /** Return the code of the axis involved in the scan */
     char * getScanAxis();
 
-
-    /** 
-     * Start the scan of the Z axis of the MinorServo active in the primary focus.
-     *
-	 * @param starting_time the time the scan will start
-     * @param range the total axis movement in mm (centered in the actual position)
-	 * @param total_time the duration of axis movement
-     *
-     * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
-     */
-     void startFocusScan(
-             ACS::Time & starting_time, 
-             const double range, 
-             const ACS::Time total_time
-     ) throw (ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx);
-     
 
      /** 
       * Clear the user offset of a servo (or all servos)
@@ -306,9 +278,13 @@ public:
       * @param servo a string:
       *     * the servo name 
       *     * "ALL" to clear the user offset of all servos
-      * @throw MinorServoErrors::OperationNotPermittedEx
+      *
+      * @throw MinorServoErrors::MinorServoErrorsEx, 
+      * @throw ComponentErrors::ComponentErrorsEx
       */
-     void clearUserOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
+     void clearUserOffset(const char *servo) throw (
+             MinorServoErrors::MinorServoErrorsEx,
+             ComponentErrors::ComponentErrorsEx);
 
      
      /** Clear all the offsets. This method is called when the user gives a clearOffsets from the operator input */
@@ -320,11 +296,12 @@ public:
       *
       * @param axis_code the axis code (for instance: SRP_TZ, GRF_TZ, ecc.) 
       * @param double the offset
-      * @throw MinorServoErrors::OperationNotPermittedEx
-      * @throw ManagementErrors::ConfigurationErrorEx
+      *
+      * @throw MinorServoErrors::MinorServoErrorsEx, 
+      * @throw ComponentErrors::ComponentErrorsEx
       */
      void setUserOffset(const char * axis_code, const double offset) 
-         throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+         throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
 
 
      /** Set the user offset. This method is called when the user gives a clearOffsets from the operator input */
@@ -340,10 +317,12 @@ public:
       * Return the user offset of the system, in the same order of getAxesInfo()
       *
       * @return offset the user offset of the system, in the same order of getAxesInfo()
-      * @throw ManagementErrors::ConfigurationErrorEx
-      * @throw MinorServoErrors::OperationNotPermittedEx
+      *
+      * @throw MinorServoErrors::MinorServoErrorsEx, 
+      * @throw ComponentErrors::ComponentErrorsEx
       */
-     ACS::doubleSeq * getUserOffset() throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+     ACS::doubleSeq * getUserOffset() 
+         throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
  
 
      /** 
@@ -352,9 +331,12 @@ public:
       * @param servo a string:
       *     * the servo name 
       *     * "ALL" to clear the system offset of all servos
-      * @throw MinorServoErrors::OperationNotPermittedEx
+      *
+      * @throw MinorServoErrors::MinorServoErrorsEx, 
+      * @throw ComponentErrors::ComponentErrorsEx
       */
-     void clearSystemOffset(const char *servo) throw (MinorServoErrors::OperationNotPermittedEx);
+     void clearSystemOffset(const char *servo)
+         throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
       
 
      /** 
@@ -362,21 +344,24 @@ public:
       *
       * @param axis_code the axis code (for instance: SRP_TZ, GRF_TZ, ecc.) 
       * @param double the offset
-      * @throw MinorServoErrors::OperationNotPermittedEx
-      * @throw ManagementErrors::ConfigurationErrorEx
+      *
+      * @throw MinorServoErrors::MinorServoErrorsEx, 
+      * @throw ComponentErrors::ComponentErrorsEx
       */
      void setSystemOffset(const char * axis_code, const double offset) 
-         throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+         throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
 
 
      /**
       * Return the system offset, in the same order of getAxesInfo()
       *
       * @return offset the system offset
-      * @throw MinorServoErrors::OperationNotPermittedEx
-      * @throw ManagementErrors::ConfigurationErrorEx
+      *
+      * @throw MinorServoErrors::MinorServoErrorsEx, 
+      * @throw ComponentErrors::ComponentErrorsEx
       */
-     ACS::doubleSeq * getSystemOffset() throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+     ACS::doubleSeq * getSystemOffset()
+         throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
     
  
      /** Return the active axes names and related units
@@ -385,33 +370,46 @@ public:
       * ("SRP_XT", "SRP_YT", "SRP_ZT", "SRP_XR", "SRP_YR", "SRP_ZR", "GFR_ZR")
       * @param units a sequence of strings, each one is the unit of the corresponding axis.
       * For instance: ("mm", "mm", "mm", "degree", "degree", "degree", "mm")
-      * @throw MinorServoErrors::ConfigurationErrorEx
+      *
+      * @throw MinorServoErrors::MinorServoErrorsEx, 
+      * @throw ComponentErrors::ComponentErrorsEx
       */
-     void getAxesInfo(ACS::stringSeq_out axes, ACS::stringSeq_out units)
-         throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
+     void getAxesInfo(ACS::stringSeq_out axes, ACS::stringSeq_out units) throw (
+            CORBA::SystemException, 
+            MinorServoErrors::MinorServoErrorsEx, 
+            ComponentErrors::ComponentErrorsEx);
  
  
      /** Return the positions of the active axes
       *  
       * @param time the time related to the positin we want to retrieve
       * @return a sequence of positions, in the same order of the axes parameter of getAxesInfo()
-      * @throw MinorServoErrors::ConfigurationErrorEx if the system is not configured
+      * @throw MinorServoErrors::MinorServoErrorsEx, 
+      * @throw ComponentErrors::ComponentErrorsEx
       * @throw ComponentErrors::UnexpectedEx
       */
-     ACS::doubleSeq * getAxesPosition(ACS::Time) 
-         throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx, ComponentErrors::UnexpectedEx);
+     ACS::doubleSeq * getAxesPosition(ACS::Time) throw (
+            CORBA::SystemException, 
+            MinorServoErrors::MinorServoErrorsEx, 
+            ComponentErrors::ComponentErrorsEx);
 
 
      /** Set the elevation tracking flag to "ON" or "OFF"
       * 
       * @param value "ON" or "OFF"
-      * @throw ManagementErrors::ConfigurationErrorEx if the input is different from "ON" or "OFF"
+      * @throw MinorServoErrors::MinorServoErrorsEx if the input is different from "ON" or "OFF"
       */
-     void setElevationTracking(const char * value) throw (ManagementErrors::ConfigurationErrorEx);
+     void setElevationTracking(const char * value) throw (
+             MinorServoErrors::MinorServoErrorsEx,
+             ComponentErrors::ComponentErrorsEx
+     );
      
      void setElevationTrackingImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl);
 
-     void setASConfiguration(const char * value) throw (ManagementErrors::ConfigurationErrorEx);
+     void setASConfiguration(const char * value) throw (
+             MinorServoErrors::MinorServoErrorsEx,
+             ComponentErrors::ComponentErrorsEx
+     );
 
      void setASConfigurationImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl);
 
@@ -493,7 +491,9 @@ private:
     
     bool isParked() throw (ManagementErrors::ConfigurationErrorEx);
     
-    void clearOffset(const char *servo, string offset_type) throw (MinorServoErrors::OperationNotPermittedEx);
+    void clearOffset(const char *servo, string offset_type) throw (
+             MinorServoErrors::MinorServoErrorsEx,
+             ComponentErrors::ComponentErrorsEx);
 
 
    /** 
@@ -505,13 +505,18 @@ private:
     * @throw MinorServoErrors::ConfigurationErrorExImpl
     */
     void setOffsetImpl(string comp_name, double offset, string offset_type)
-        throw (MinorServoErrors::OperationNotPermittedExImpl, ManagementErrors::ConfigurationErrorExImpl);
+        throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
 
     ACS::doubleSeq * getOffset(const char *servo, string offset_type) 
         throw (MinorServoErrors::OperationNotPermittedEx);
 
     /** Return the minumun starting time **/
-    ACS::Time getMinScanStartingTime(double range, const string axis_code, double & acceleration, double & max_speed)
+    ACS::Time getMinScanStartingTime(
+            double & range, 
+            const string axis_code, 
+            const double elevation,
+            double & acceleration, 
+            double & max_speed)
         throw (ManagementErrors::ConfigurationErrorExImpl, ManagementErrors::SubscanErrorExImpl);
 
     void operator=(const MinorServoBossImpl &);

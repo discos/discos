@@ -23,6 +23,8 @@ static int sf = 0 ; // sendflag
 icdSocket::icdSocket(
         CString IP, 
         DWORD port, 
+        DWORD maxSpeed,
+        DWORD minSpeed,
         DWORD timeout,
         double ICD_CF, 
         double ICD_REFERENCE,
@@ -34,6 +36,8 @@ icdSocket::icdSocket(
     m_ICD_IP(IP),
     m_ICD_PORT(port),
     m_ICD_TIMEO(timeout),
+    m_ICD_MAX_SPEED(maxSpeed),
+    m_ICD_MIN_SPEED(minSpeed),
     m_ICD_CF(ICD_CF),
     m_ICD_REFERENCE(ICD_REFERENCE),   
     m_ICD_MAX_VALUE(ICD_MAX_VALUE),
@@ -52,7 +56,7 @@ icdSocket::~icdSocket() {
     Close(m_Error);
 }
 
-void icdSocket::Init() throw (ComponentErrors::SocketErrorExImpl) {
+void icdSocket::Init(double actPosition) throw (ComponentErrors::SocketErrorExImpl) {
 
     AUTO_TRACE("icdSocket; creating derotator icd socket");
     
@@ -92,7 +96,7 @@ void icdSocket::Init() throw (ComponentErrors::SocketErrorExImpl) {
         }
     }
 
-    setCmdPosition(getActPosition());
+    setCmdPosition(actPosition);
 }
 
 
@@ -175,23 +179,43 @@ double icdSocket::getActPosition() throw (
 
     // Conversion from position unit (step) to angle unit (degree) 
 
-    return m_actPosition - m_ICD_REFERENCE; // Return the icd position in degree and in the URS
+    return m_ICD_REFERENCE - m_actPosition; // Return the icd position in degree and in the URS
 }   
 
 
 double icdSocket::getPositionDiff() throw (ComponentErrors::SocketErrorExImpl) {
-    return getActPosition() - m_cmdPosition;
+    try {
+        return (getActPosition() - m_cmdPosition);
+    }
+    catch (DerotatorErrors::ValidationErrorExImpl & ex) {
+        CUSTOM_LOG(LM_FULL_INFO, "SRTKBandDerotator::icdSocket::getPositionDiff", 
+                (LM_WARNING, "validation error: cannot compute the position difference"));
+        _THROW_EXCPT(
+                ComponentErrors::SocketErrorExImpl, 
+                "icdSocket::getPositionDiff(): validation error, cannot compute the position difference"
+        );
+    }
+    catch (DerotatorErrors::CommunicationErrorExImpl & ex) {
+        CUSTOM_LOG(LM_FULL_INFO, "SRTKBandDerotator::icdSocket::getPositionDiff", 
+                (LM_WARNING, "communication error: cannot compute the position difference"));
+        _THROW_EXCPT(
+                ComponentErrors::SocketErrorExImpl, 
+                "icdSocket::getPositionDiff(): communication error, cannot compute the position difference"
+        );
+    }
+    catch (...) {
+        CUSTOM_LOG(LM_FULL_INFO, "SRTKBandDerotator::icdSocket::getPositionDiff", 
+                (LM_WARNING, "unexpected error: cannot compute the position difference"));
+        _THROW_EXCPT(
+                ComponentErrors::SocketErrorExImpl, 
+                "icdSocket::getPositionDiff(): unexpected error, cannot compute the position difference"
+        );
+    }
+
 }   
 
 bool icdSocket::isTracking() {
-    bool flag = false;
-    try {
-        flag = fabs(getPositionDiff()) < m_TRACKING_DELTA ? true : false;
-    }
-    catch (...) {
-        ACS_SHORT_LOG((LM_WARNING, "Cannot compute the tracking flag"));
-    }
-    return flag;
+    return true; // TODO: do nothing
 }
 
 
@@ -254,13 +278,13 @@ void icdSocket::setPosition(double position) throw (
     }; // This message is an ICD ``set absolute position`` (PTP.p_absPTP, 35:1)
 
     double sh_position;
-    sh_position = position + m_ICD_REFERENCE;
-
-    const double max_rel = m_ICD_MAX_VALUE - m_ICD_REFERENCE;
-    const double min_rel = m_ICD_MIN_VALUE - m_ICD_REFERENCE;
+    sh_position = m_ICD_REFERENCE - position;
 
     m_icd_summary_status &= ~(1 << W) ;
     setCmdPosition(position);
+    const double max_rel = m_ICD_REFERENCE - m_ICD_MAX_VALUE;
+    const double min_rel = m_ICD_REFERENCE - m_ICD_MIN_VALUE;
+
 
     if(sh_position > m_ICD_MAX_VALUE || sh_position < m_ICD_MIN_VALUE) {
         ACS_SHORT_LOG((LM_ERROR, "# You are trying to set a position out of range (%.2f°, %.2f°)", min_rel, max_rel));
@@ -270,6 +294,7 @@ void icdSocket::setPosition(double position) throw (
         throw ex;
     }
     
+    // Revert the rotation way
     if(sh_position < 0)
         setNegativeDir();
 
@@ -309,6 +334,115 @@ void icdSocket::setPosition(double position) throw (
     }
 }   
  
+
+void icdSocket::setSpeed(DWORD speed) throw (
+         DerotatorErrors::ValidationErrorExImpl, 
+	     DerotatorErrors::CommunicationErrorExImpl
+    ) 
+{
+    AUTO_TRACE("icdSocket::setSpeed()");
+
+    BYTE buff[] = { // 8, 4, 0, 5, 0, 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, CR
+        0x38, 0x34, 0x30, 0x35, 0x30, 0x30, 0x32, 0x33,
+        0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30,
+        0x0D
+    }; // This message is an ICD ``setpoint speed for point-to-point operation``: 35:5
+
+    m_icd_summary_status &= ~(1 << W) ;
+
+
+    if(speed < m_ICD_MIN_SPEED || speed > m_ICD_MAX_SPEED) {
+        ACS_SHORT_LOG((LM_ERROR, "# Error - max speed out of range [%.2f, %.2f] rpm", 
+                    m_ICD_MIN_SPEED, m_ICD_MAX_SPEED));
+        m_icd_summary_status |=  (1 << W);
+        
+        DerotatorErrors::ValidationErrorExImpl ex(__FILE__, __LINE__, "Speed value out of range");
+        throw ex;
+    }
+    
+    unsigned char hex_steps[ICD_CMDDATA_LEN + 1];
+    dec2hexStr(speed, hex_steps, ICD_CMDDATA_LEN + 1);
+    int i = 0;
+    while(1) {
+        if(hex_steps[i] == '\0') break;
+        i++;
+    }
+
+    int k=0;
+    for(int j=i-1; j>=0; j--) {
+        buff[15-j] = hex_steps[k];
+        k++;
+    }
+    
+    try {
+        // Make a conversation to and from icd. The response is stored in buff
+        make_talk(buff, true) ;
+    }
+    // If responseCheck (called by make_talk) finds an error it set a bit on 
+    // pattern property to communicate the problem to the client. 
+    // After it logs the error code trows an exception
+    catch (...) {
+        DerotatorErrors::CommunicationErrorExImpl ex(__FILE__, __LINE__, 
+                "Cannot set the derotator speed");
+	    throw ex;
+    }
+}   
+
+
+DWORD icdSocket::getSpeed() throw (
+        DerotatorErrors::CommunicationErrorExImpl,
+        DerotatorErrors::ValidationErrorExImpl)
+{
+
+    BYTE buff[] = { // 8, 0, 0, 5, 0, 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, CR
+        0x38, 0x30, 0x30, 0x35, 0x30, 0x30, 0x32, 0x33,
+        0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30,
+        0x0D
+    }; // This message is an ICD ``get setpoint speed``: 35:5
+
+    AUTO_TRACE("icdSocket::getSpeed()");
+    
+    // If responseCheck (called by make_talk) finds an error it sets a bit of the
+    // pattern property in order to communicate the problem to the client. 
+    // After it logs the error code trows an exception
+    try {
+        make_talk(buff, true) ;
+    }
+    catch (...) {
+        _EXCPT(
+                DerotatorErrors::CommunicationErrorExImpl, 
+                impl, 
+                "icdSocket::getSpeed(): cannot get the derotator speed"
+        );
+        impl.log(LM_DEBUG);
+        throw impl;
+    }
+
+    try {
+        // Check the status and set the status pattern
+        fbstatuswordCheck(buff);
+    }
+    catch (...) {
+        _EXCPT(
+                DerotatorErrors::ValidationErrorExImpl, 
+                impl, 
+                "icdSocket::getSpeed(): cannot set the status pattern"
+        );
+        impl.log(LM_DEBUG);
+        throw impl;
+    }
+
+    try {
+        return hex2dec(buff, ICD_FBRD_INDEX, ICD_RDWORD_LEN);
+    }
+    catch (...) {
+        _THROW_EXCPT(
+                DerotatorErrors::ValidationErrorExImpl, 
+                "icdSocket::getActPosition(): cannot convert from a hex value to a decimal one"
+        );
+    }
+}   
+
 
 void icdSocket::reset() throw (ComponentErrors::SocketErrorExImpl) {
 
@@ -646,6 +780,33 @@ void icdSocket::sendBuffer(BYTE *msg, WORD len) throw (ComponentErrors::SocketEr
 }
  
 
+void icdSocket::receivePolling(BYTE *msg, WORD len) throw (ComponentErrors::SocketErrorExImpl) {
+    // Receive the response form the icd one byte at once 
+    for(int j=0; j<5*len; j++) {
+        if(Receive(m_Error, (void *)(&msg[0]), 1) == 1) {
+            if(msg[0] == 0x23) // 0x23 -> '#' (Polling header)
+                break;
+            else
+                continue;
+        }
+    } 
+    
+    if(msg[0] != 0x23) {
+        ACS_DEBUG("icdSocket::receivePolling", "no answer header received");
+        msg[0] = 0x00;
+    }
+    else {
+        for(size_t i=1; i<len;) {
+            if(Receive(m_Error, (void *)(&msg[i]), 1) == 1) {
+                i++;
+            }
+            else
+                continue;
+        }
+    }
+}
+
+
 void icdSocket::receiveBuffer(BYTE *msg, WORD len) throw (ComponentErrors::SocketErrorExImpl) {
 
     int bytesNum = 0;
@@ -674,13 +835,12 @@ void icdSocket::polling(void) throw (ComponentErrors::SocketErrorExImpl) {
         sendBuffer(polling, POL_LEN);
     }
     catch (...){
-        ACS_DEBUG("icdSocket::polling", "ICD polling problem");
         ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, 
-                "icdSocket::polling, ICD polling problem");
+                "icdSocket::polling(): cannot pull the device");
         throw exImpl;
     }
     BYTE polling_response[POL_LEN];
-    receiveBuffer(polling_response, POL_LEN);
+    receivePolling(polling_response, POL_LEN);
 
 #ifdef DEBUG_SPE
     /********************* SWITCH POLLING ERROR ON ***********************/

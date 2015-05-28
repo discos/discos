@@ -1,24 +1,27 @@
 import random
 import time
 import unittest2
+from math import radians
 from maciErrType import CannotGetComponentEx
 from DewarPositioner.positioner import Positioner, NotAllowedError
 from DewarPositioner.cdbconf import CDBConf
 from Acspy.Clients.SimpleClient import PySimpleClient
+from DewarPositionerMockers.mock_components import MockDevice, MockSource
 
 
 class PositionerOffsetTest(unittest2.TestCase):
 
     def setUp(self):
-        cdbconf = CDBConf()
-        self.p = Positioner(cdbconf)
+        self.cdbconf = CDBConf()
+        self.p = Positioner(self.cdbconf)
+        self.source = MockSource()
         try:
             client = PySimpleClient()
             self.device = client.getComponent('RECEIVERS/SRTKBandDerotator')
             self.using_mock = False
+            print '\nWARNING -> using the real component'
         except CannotGetComponentEx:
             print '\nINFO -> component not available: we will use a mock device'
-            from DewarPositionerMockers.mock_components import MockDevice
             self.device = MockDevice()
             self.using_mock = True
 
@@ -39,34 +42,44 @@ class PositionerOffsetTest(unittest2.TestCase):
     def test_set_new_pos(self):
         """Vefify the setOffset set a new position."""
         self.p.setup(siteInfo={}, source=None, device=self.device)
-        time.sleep(0.5) if self.using_mock else time.sleep(1)
+        time.sleep(0.3) if self.using_mock else time.sleep(3)
         act_position = self.device.getActPosition()
-        offset = 1.5
+        offset = 0.5
         self.p.setOffset(offset)
-        time.sleep(0.5) if self.using_mock else time.sleep(3)
+        time.sleep(0.3) if self.using_mock else time.sleep(3)
         self.assertAlmostEqual(
                 self.p.getPosition(), 
                 act_position + offset, 
-                places=2
+                places=1
         )
         self.assertAlmostEqual(
                 act_position + offset, 
                 self.device.getActPosition(), 
-                places=2
+                places=1
         )
 
     def test_out_of_range(self):
         """Cause a rewind in case the offset is out of range"""
-        self.p.setup(siteInfo={}, source=None, device=self.device)
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('CUSTOM_OPT')
+        az, el, latitude = [radians(50)] * 3
+        site_info = {'latitude': latitude}
+        self.p.setup(site_info, self.source, self.device)
         self.p.setRewindingMode('AUTO')
-        time.sleep(0.5) # Wait for the setup
-        actual_pos = 100
-        self.device.setPosition(actual_pos)
-        offset = 50
-        max_rewinding_feeds = 180 
-        expected = actual_pos - max_rewinding_feeds + offset
+        offset = 20
+        max_limit = self.device.getMaxLimit() 
+        min_limit = self.device.getMinLimit()
+        Pis = max_limit - offset/2
+        self.p.setPosition(Pis)
+        time.sleep(0.2) # Wait a bit for the setup
+        max_rewinding_steps = (max_limit - min_limit) // self.device.getStep()
+        expected = Pis - max_rewinding_steps*self.device.getStep() + offset
+        self.source.setAzimuth(az)
+        self.source.setElevation(el)
+        self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el)
+        time.sleep(0.2) if self.using_mock else time.sleep(3)
         self.p.setOffset(offset)
-        time.sleep(0.5) # Wait for the offset
+        time.sleep(0.2) if self.using_mock else time.sleep(3)
         self.assertEqual(self.device.getActPosition(), expected)
 
 

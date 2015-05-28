@@ -3,9 +3,12 @@ import threading
 import datetime
 import time
 
+import Management
+import Antenna
 import DerotatorErrors
 
 from Acspy.Servants import ContainerServices
+from Acspy.Common.TimeHelper import getTimeStamp
 from DewarPositioner.posgenerator import PosGenerator
 from IRAPy import logger
 
@@ -21,9 +24,9 @@ class Positioner(object):
         The `cdbconf` parameter is a CDBConf instance.
         """
         self.conf = cdbconf
-        self.control = Control()
         self.posgen = PosGenerator()
         self._setDefault()
+
 
     def setup(self, siteInfo, source, device, setupPosition=0):
         """Configure the positioner.
@@ -51,7 +54,10 @@ class Positioner(object):
             self.device.setup()
             self._clearOffset()
             self.is_setup = True
+            time.sleep(0.4) # Give the device the time to accomplish the setup
+            self.control.updateScanInfo({'iStaticPos': setupPosition})
             self._start(self.posgen.goto, setupPosition)
+            time.sleep(0.1) # Give the thread the time to finish
         except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
             raise PositionerError("cannot set the position: %s" %ex.message)
         except Exception, ex:
@@ -59,14 +65,18 @@ class Positioner(object):
         finally:
             Positioner.generalLock.release()
 
+
     def isSetup(self):
         return self.is_setup
+
 
     def isConfigured(self):
         return self.conf.isConfigured()
 
+
     def getConfiguration(self):
         return self.conf.getConfiguration()
+
 
     def getDeviceName(self):
         if self.isSetup():
@@ -74,12 +84,15 @@ class Positioner(object):
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
+
     def isReady(self):
         """Return True when the device is ready to move"""
         return self.isSetup() and self.device.isReady()
 
+
     def isSlewing(self):
         return self.isSetup() and self.device.isSlewing()
+
 
     def isTracking(self):
         return self.isSetup() and \
@@ -87,11 +100,33 @@ class Positioner(object):
                self.isRewinding() and not \
                self.isRewindingRequired()
 
-    def _setPosition(self, position):
-        target = position + self.control.offset + self.control.rewindingOffset
-        if self.device.getMinLimit() < target < self.device.getMaxLimit():
+
+    def setPosition(self, position):
+        if not self.isReady():
+            raise NotAllowedError('positioner not ready, a setup() is required')
+        elif not self.isConfigured():
+            raise NotAllowedError('positioner not configured, a setConfiguration() is required')
+        elif self.conf.getAttribute('SetCustomPositionAllowed') != 'true':
+            raise NotAllowedError('setPosition() not allowed in %s configuration" %self.getConfiguration()')
+        elif self.isUpdating():
+            raise NotAllowedError('the positioner is executing a scan')
+        elif not self.device.getMinLimit() < position < self.device.getMaxLimit():
+            raise NotAllowedError('position %.2f out of range [%.2f, %.2f]'
+                    %(position, self.device.getMinLimit(), self.device.getMaxLimit()))
+        else:
             try:
-                self.device.setPosition(target)
+                self.goTo(position)
+                # Set the initialPosition, in order to add it to the dynamic one
+                self.control.user_position = position
+            except Exception, ex:
+                raise PositionerError('cannot set the position: %s' %ex.message)
+
+
+    def _setPosition(self, position):
+        self.control.target = position + self.control.offset 
+        if self.device.getMinLimit() < self.control.target < self.device.getMaxLimit():
+            try:
+                self.device.setPosition(self.control.target)
             except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
                 raeson = "cannot set the %s position" %self.device._get_name()
                 logger.logError('%s: %s' %(raeson, ex.message))
@@ -102,9 +137,10 @@ class Positioner(object):
                 raise PositionerError(raeson)
         else:
             raise OutOfRangeError("position %.2f out of range {%.2f, %.2f}" 
-                    %(target, self.device.getMinLimit(), self.device.getMaxLimit()))
+                    %(self.control.target, self.device.getMinLimit(), self.device.getMaxLimit()))
 
-    def startUpdating(self, axis, sector):
+
+    def startUpdating(self, axis, sector, az, el, ra, dec):
         sectors = ('ANT_NORTH', 'ANT_SOUTH')
         try:
             Positioner.generalLock.acquire()
@@ -112,58 +148,111 @@ class Positioner(object):
                 raise NotAllowedError('positioner not configured: a setup() is required')
             elif not self.conf.isConfigured():
                 raise NotAllowedError('CDB not configured: a CDBConf.setConfiguration() is required')
-            elif self.isUpdating():
-                raise NotAllowedError('the positionier is already updating: a stopUpdating() is required')
+            elif str(axis) == 'MNG_BEAMPARK':
+                pass # Do nothing
             elif self.conf.getAttribute('DynamicUpdatingAllowed') != 'true':
-                raise NotAllowedError('dynamic updating not allowed in %s conf' %self.conf.getConfiguration())
+                logger.logNotice('dynamic updating not allowed')
             elif not self.siteInfo:
                 raise NotAllowedError('no site information available')
             elif not self.source:
                 raise NotAllowedError('no source available')
-            elif sector not in sectors:
+            elif str(sector) not in sectors:
                 raise NotAllowedError('sector %s not in %s' %(sector, sectors))
             else:
+                if self.isUpdating():
+                    self.stopUpdating()
                 try:
-                    initialPosition, functionName = self.conf.getUpdatingConfiguration(axis)
-                    posgen = getattr(self.posgen, functionName) 
-                    self._start(posgen, self.source, self.siteInfo, initialPosition)
+                    updatingConf = self.conf.getUpdatingConfiguration(str(axis))
+                    initialPosition = float(updatingConf['initialPosition']) + self.control.user_position
+                    functionName = updatingConf['functionName']
+                    # If the functionName is a staticX, we command just one position
+                    if functionName.startswith('static'):
+                        # functionName = 'static2' -> staticValue = float('2')
+                        staticValue = float(functionName.lstrip('static')) 
+                        position = initialPosition + staticValue
+                        self.control.setScanInfo(
+                            axis=axis, 
+                            sector=sector,
+                            iStaticPos=initialPosition, 
+                            iParallacticPos=staticValue,
+                            dParallacticPos=0,
+                            rewindingOffset=0,
+                        )
+                        self._start(self.posgen.goto, position)
+                    else:
+                        posgen = getattr(self.posgen, functionName) 
+                        angle_mapping = self.posgen.mapping[functionName]
+                        getAngleFunction = self.posgen.mapping[functionName]['getAngleFunction']
+                        coordinateFrame = self.posgen.mapping[functionName]['coordinateFrame']
+                        lat = self.siteInfo['latitude']
+                        try:
+                            if coordinateFrame == 'horizontal':
+                                iParallacticPos = getAngleFunction(lat, az, el)
+                            elif coordinateFrame == 'equatorial':
+                                iParallacticPos = getAngleFunction(lat, az, el, ra, dec)
+                            else:
+                                raise PositionerError('coordinate frame %s unknown' %coordinateFrame)
+                        except ZeroDivisionError:
+                            raise NotAllowedError('zero division error computing p(%.2f, %.2f)' %(az, el))
+
+                        self.control.setScanInfo(
+                            axis=axis, 
+                            sector=sector,
+                            iStaticPos=initialPosition, 
+                            iParallacticPos=iParallacticPos,
+                            dParallacticPos=0,
+                            rewindingOffset=0,
+                        )
+                        self._start(posgen, self.source, self.siteInfo)
                     self.control.mustUpdate = True
                 except Exception, ex:
                     raise PositionerError('configuration problem: %s' %ex.message)
         finally:
             Positioner.generalLock.release()
 
+
     def _updatePosition(self, posgen, vargs):
         try:
             self.control.isRewindingRequired = False
             self.control.isUpdating = True
-            self.control.rewindingOffset = 0
+            self.control.scanInfo.update({'rewindingOffset': 0})
 
             if not self.device.isReady():
                 logger.logError("%s not ready to move: a setup() is required" 
                         %self.device._get_name())
                 return
  
+            if self.isConfigured():
+                isOptimized = (self.conf.getAttribute('AddInitialParallactic') == 'false')
+            else:
+                isOptimized = False
+
             for position in posgen(*vargs):
                 if self.control.stop:
                     break
                 else:
                     try:
-                        self._setPosition(position)
+                        Pis = self.control.scanInfo['iStaticPos'] + self.control.scanInfo['rewindingOffset'] 
+                        Pip = self.control.scanInfo['iParallacticPos']
+                        Pdp = 0 if posgen.__name__ == 'goto' else (position - Pip)
+                        target = Pis + Pdp if isOptimized else Pis + Pip + Pdp
+                        self._setPosition(target) # _setPosition() will add the offsets
+                        self.control.scanInfo.update({'dParallacticPos': Pdp})
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
-                        logger.logWarning('position %.2f out of range' %position)
+                        logger.logWarning(ex.message)
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
                                 self.rewind() 
                             except Exception, ex:
-                                # In case of wrong autoRewindingFeeds
+                                # In case of wrong autoRewindingSteps
                                 self.control.isRewindingRequired = True
-                                logger.logError(ex.message)
+                                logger.logError('cannot rewind: %s' %ex.message)
                                 break
                         else:
                             if self.control.modes['rewinding'] == 'MANUAL':
                                 self.control.isRewindingRequired = True
+                                logger.logInfo('a derotator rewinding is required')
                             else:
                                 logger.logError('wrong rewinding mode: %s' %self.control.modes['rewinding'])
                             break
@@ -181,21 +270,29 @@ class Positioner(object):
         except Exception, ex:
             logger.logError('unexcpected exception in Positioner._updatePosition(): %s' %ex)
         finally:
-            self.control.isUpdating = False
+            self.control.stopUpdating()
 
-    def rewind(self, numberOfFeeds=None):
+
+    def getScanInfo(self):
+        return self.control.scanInfo
+
+
+    def rewind(self, steps=None):
         if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
+        elif self.isRewinding():
+            raise NotAllowedError('another rewinding is active')
 
         try:
             Positioner.rewindingLock.acquire()
-            logger.logInfo('starting the rewinding...')
             self.control.isRewinding = True
-            # getAutoRewindingFeeds() returns None in case the user did not specify it
-            n = numberOfFeeds if numberOfFeeds != None else self.getAutoRewindingFeeds()
-            actPos, space = self.getRewindingParameters(n)
-            self.control.rewindingOffset += space
-            self._setPosition(actPos)
+            # getAutoRewindingSteps() returns None in case the user did not specify it
+            n = steps if steps != None else self.control.autoRewindingSteps
+            targetPos, rewindingOffset = self.getRewindingParameters(n)
+            newPos = targetPos + rewindingOffset
+            self.control.updateScanInfo({'rewindingOffset': rewindingOffset})
+            self._setPosition(newPos)
+            logger.logInfo('rewinding in progress...')
             startingTime = now = datetime.datetime.now()
             while (now - startingTime).seconds < float(self.conf.getAttribute('RewindingTimeout')):
                 if self.device.isTracking():
@@ -212,45 +309,62 @@ class Positioner(object):
             raise PositionerError(ex.message)
         finally:
             self.control.isRewinding = False
-            self.control.rewindingOffset = 0
+            self.control.updateScanInfo({'rewindingOffset': 0})
             Positioner.rewindingLock.release()
 
-    def getRewindingParameters(self, numberOfFeeds=None):
+
+    def getRewindingParameters(self, steps=None):
+        """Return the target position and the rewinding offset"""
         if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
 
-        if numberOfFeeds != None and numberOfFeeds <= 0:
-            raise PositionerError('the number of feeds must be positive')
+        if steps != None and steps <= 0:
+            raise PositionerError('the number of steps must be positive')
 
-        try:
-            actPos = self.device.getActPosition()
-        except Exception, ex:
-            raeson = 'cannot get the device position: %s' %ex.message
-            raise PositionerError(raeson)
-        lspace = actPos - self.device.getMinLimit() # Space on the left
-        rspace = self.device.getMaxLimit() - actPos # Space on the right
-        sign = -1 if lspace >= rspace else 1
-        space = max(lspace, rspace)
-
-        maxActualNumberOfFeeds = int(space // self.device.getStep())
-
-        if numberOfFeeds == None:
-            n = maxActualNumberOfFeeds
-        elif numberOfFeeds <= maxActualNumberOfFeeds:
-            n = numberOfFeeds
+        target = self.control.target
+        # space is the distance from the target to the farest limit
+        # To be sure, I add a delta of 0.1...
+        if target - 0.1 <= self.device.getMinLimit():
+            space = abs(self.device.getMaxLimit() - target)
+            sign = +1 # The space must be added to the target position
+        elif self.device.getMaxLimit() <= target + 0.1:
+            space = abs(target - self.device.getMinLimit())
+            sign = -1
         else:
-            raise PositionerError('actual pos: {%.1f} -> max number of feeds: {%d} (%s given)'
-                    %(actPos, maxActualNumberOfFeeds, numberOfFeeds))
+            lspace = abs(self.device.getMinLimit() - target) # Space on the left
+            rspace = abs(self.device.getMaxLimit() - target) # Space on the right
+            sign = -1 if lspace >= rspace else 1
+            space = max(lspace, rspace)
+
+
+        maxNumberOfSteps = int(space // self.device.getStep())
+
+        if steps == None:
+            n = maxNumberOfSteps
+        elif steps <= maxNumberOfSteps:
+            n = steps
+        else:
+            raise PositionerError('target pos: {%.1f} -> max number of steps: {%d} (%s given)'
+                    %(target, maxNumberOfSteps, steps))
 
         rewinding_value = sign * n * self.device.getStep()
-        return (actPos, rewinding_value)
+        return (target, rewinding_value)
 
-    def getMaxRewindingFeeds(self):
+
+    def getRewindingStep(self):
+        if not self.isSetup():
+            raise NotAllowedError('positioner not configured: a setup() is required')
+        else:
+            return self.device.getStep()
+
+
+    def getMaxRewindingSteps(self):
         if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
         else:
             full_range = self.device.getMaxLimit() - self.device.getMinLimit()
             return int(full_range // self.device.getStep())
+
 
     def stopUpdating(self):
         """Stop the updating thread"""
@@ -258,25 +372,27 @@ class Positioner(object):
             self.control.stop = True
             self.t.join(timeout=10)
             if self.t.isAlive():
-                PositionerError('thread %s is alive' %self.t.getName())
+                logger.logWarning('thread %s is alive' %self.t.getName())
         except AttributeError:
             pass # self.t is None because the system is not yet configured
         finally:
-            self.control.stop = False
-            self.control.mustUpdate = False
+            self.control.stopUpdating()
+            time.sleep(0.1)
+
 
     def park(self, parkPosition=0):
+        self._clearOffset()
         if self.isSetup():
             self.stopUpdating()
             try:
                 Positioner.generalLock.acquire()
-                self._clearOffset()
+                self.control.updateScanInfo({'iStaticPos': parkPosition})
                 self._start(self.posgen.goto, parkPosition)
-                self._setDefault()
             finally:
                 Positioner.generalLock.release()
-        else:
-            raise NotAllowedError('positioner not ready: a setup() is required')
+                time.sleep(0.5) # Wait the thread stops before to set the defaults
+        self._setDefault()
+
 
     def setRewindingMode(self, mode):
         modes = ('AUTO', 'MANUAL')
@@ -285,23 +401,28 @@ class Positioner(object):
         else:
             self.control.modes['rewinding'] = mode
         if mode == 'MANUAL':
-            self.clearAutoRewindingFeeds()
+            self.clearAutoRewindingSteps()
+
 
     def isSetupForRewinding(self):
         """Return True if a rewinding mode has been selected"""
         return bool(self.control.modes['rewinding'])
 
+
     def getRewindingMode(self):
         return self.control.modes['rewinding']
 
+
     def mustUpdate(self):
         return self.control.mustUpdate
+
 
     def isTerminated(self):
         if not self.t:
             return True
         else:
             return not self.isUpdating() and not self.t.isAlive() 
+
 
     def isUpdating(self):
         return self.control.isUpdating
@@ -310,12 +431,14 @@ class Positioner(object):
     def goTo(self, position):
         if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
-        try:
-            Positioner.generalLock.acquire()
-            self.stopUpdating()
-            self._start(self.posgen.goto, position)
-        finally:
-            Positioner.generalLock.release()
+        else:
+            try:
+                Positioner.generalLock.acquire()
+                self.stopUpdating()
+                self.control.updateScanInfo({'iStaticPos': position})
+                self._start(self.posgen.goto, position)
+            finally:
+                Positioner.generalLock.release()
 
 
     def setOffset(self, offset):
@@ -330,26 +453,34 @@ class Positioner(object):
                 actPosition = self.getPosition()
                 self._start(self.posgen.goto, actPosition)
 
+
     def clearOffset(self):
         self.setOffset(0.0)
+
 
     def _setOffset(self, offset):
         self.control.offset = offset
 
+
     def _clearOffset(self):
         self._setOffset(0.0)
+
 
     def getOffset(self):
         return self.control.offset
 
+
     def getRewindingOffset(self):
-        return self.control.rewindingOffset
+        return self.control.scanInfo['rewindingOffset']
+
 
     def isRewindingRequired(self):
         return self.control.isRewindingRequired and not self.control.isRewinding
 
+
     def isRewinding(self):
         return self.control.isRewinding
+
 
     def getPosition(self):
         if self.isSetup():
@@ -357,35 +488,68 @@ class Positioner(object):
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
-    def setAutoRewindingFeeds(self, numberOfFeeds):
+
+    def getMaxLimit(self):
         if self.isSetup():
-            max_rewinding_feeds = self.getMaxRewindingFeeds()
-            if numberOfFeeds > max_rewinding_feeds:
-                raise NotAllowedError('max number of feeds: {%d} (%s given)'
-                        %(max_rewinding_feeds, numberOfFeeds))
-            elif numberOfFeeds <= 0:
-                raise NotAllowedError('the number of feeds must be positive')
-            else:
-                self.control.autoRewindingFeeds = numberOfFeeds
+            return self.device.getMaxLimit()
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
-    def getAutoRewindingFeeds(self):
-        return self.control.autoRewindingFeeds
 
-    def clearAutoRewindingFeeds(self):
-        self.control.autoRewindingFeeds = None
+    def getMinLimit(self):
+        if self.isSetup():
+            return self.device.getMinLimit()
+        else:
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+
+    def getPositionFromHistory(self, t):
+        if self.isSetup():
+            return self.device.getPositionFromHistory(t)
+        else:
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+
+    def getCmdPosition(self):
+        if self.isSetup():
+            return self.device.getCmdPosition()
+        else:
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+
+    def setAutoRewindingSteps(self, steps):
+        if self.isSetup():
+            max_rewinding_steps = self.getMaxRewindingSteps()
+            if steps > max_rewinding_steps:
+                raise NotAllowedError('max number of steps: {%d} (%s given)'
+                        %(max_rewinding_steps, steps))
+            elif steps <= 0:
+                raise NotAllowedError('the number of steps must be positive')
+            else:
+                self.control.autoRewindingSteps = steps
+        else:
+            raise NotAllowedError('positioner not configured: a setup() is required')
+
+
+    def getAutoRewindingSteps(self):
+        # Return 0 if self.control.autoRewindingSteps is None
+        return self.control.autoRewindingSteps or 0
+
+
+    def clearAutoRewindingSteps(self):
+        self.control.autoRewindingSteps = None
 
     def _start(self, posgen, *vargs):
         """Start a new process that computes and sets the position"""
         if self.isSetup():
-            self.stopUpdating() # Raise a PositionerError if the process stills alive
+            # self.stopUpdating() # Raise a PositionerError if the process stills alive
             self.t = ContainerServices.ContainerServices().getThread(
                     name=posgen.__name__, 
                     target=self._updatePosition, 
                     args=(posgen, vargs)
             )
             self.t.start()
+            time.sleep(0.10) # In case of goto, take the time to command the position
         else:
             raise NotAllowedError('not configured: a setConfiguration() is required')
 
@@ -481,19 +645,59 @@ class Positioner(object):
         self.is_setup = False
         self.control = Control()
         self.conf.clearConfiguration()
+        self._clearOffset()
 
 
 class Control(object):
     def __init__(self):
+        self.clearScanInfo()
+        self.autoRewindingSteps = None
+        self.modes = {'rewinding': 'none', 'updating': 'none'}
+        self.stopUpdating()
+
+    def setScanInfo(self, axis, sector, iStaticPos, iParallacticPos, dParallacticPos, rewindingOffset):
+        self.scanInfo = {
+            'timestamp': getTimeStamp().value,
+            'axis': axis,
+            'sector': sector,
+            'iStaticPos': iStaticPos,
+            'iParallacticPos': iParallacticPos,
+            'dParallacticPos': dParallacticPos,
+            'rewindingOffset': rewindingOffset
+        }
+
+    def clearScanInfo(self):
+        self.offset = 0.0
+        self.target = 0.0
+        self.user_position = 0
+        self.setScanInfo(
+            axis=Management.MNG_NO_AXIS, 
+            sector=Antenna.ANT_NORTH,
+            iStaticPos=0,
+            iParallacticPos=0,
+            dParallacticPos=0,
+            rewindingOffset=0,
+        )
+
+    def updateScanInfo(self, info):
+        for key in info.keys():
+            if key not in self.scanInfo:
+                raise PositionerError('key %s not in control.scanInfo' %key)
+        info.update({'timestamp': getTimeStamp().value})
+        self.scanInfo.update(info)
+
+    def stopUpdating(self):
+        self.updateScanInfo({
+            'axis': Management.MNG_NO_AXIS,
+            'iParallacticPos': 0,
+            'dParallacticPos': 0,
+            'rewindingOffset': 0,
+        })
+        self.isRewindingRequired = False
+        self.isRewinding = False
         self.isUpdating = False
         self.mustUpdate = False
         self.stop = False
-        self.offset = 0.0
-        self.rewindingOffset = 0.0
-        self.isRewindingRequired = False
-        self.isRewinding = False
-        self.autoRewindingFeeds = None
-        self.modes = {'rewinding': '', 'updating': ''}
 
 
 class Status(object):

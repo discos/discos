@@ -1,9 +1,12 @@
+#include "Version.h"
 #include "FitsWriter.h"
+#include "FitsTools.h"
 #include <Definitions.h>
 #include <IRATools.h>
 
 using namespace CCfits;
 using namespace Backends;
+using namespace FitsWriter_private;
 
 #define _FITSW_DATACOL_TIME "time"
 #define _FITSW_DATACOL_RA "raj2000"
@@ -204,19 +207,20 @@ bool CFitsWriter::create()
 	IRA::CString fullName=m_basepath+m_filename;
 	try {
 		pFits = new FITS((const char *)fullName, Write);
-		setPrimaryHeaderComment(DEFAULT_COMMENT);
-		pFits->pHDU().writeHistory(HISTORY1);
-		pFits->pHDU().writeHistory(HISTORY2);
-		pFits->pHDU().writeHistory(HISTORY3);
-		pFits->pHDU().writeHistory(HISTORY4);
-		pFits->pHDU().writeHistory(HISTORY5);
-		pFits->pHDU().writeHistory(HISTORY6);
 		pFits->pHDU().writeDate();
 	}
 	catch (CCfits::FitsException& ex) {
 		m_lastError = ex.message().c_str();
 		return false;
 	}
+	if (!CFitsTools::primaryHeaderComment(pFits,DEFAULT_COMMENT,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY1,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY2,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY3,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY4,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY5,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY6,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY7,m_lastError)) return false;
 	return true;
 };
 
@@ -233,7 +237,7 @@ bool CFitsWriter::create(const char* name, const char* path)
 	return create();
 };
 
-bool CFitsWriter::setPrimaryHeaderComment(const IRA::CString& comment)
+/*bool CFitsWriter::setPrimaryHeaderComment(const IRA::CString& comment)
 {
 	if (!pFits) {
 		m_lastError= "fits file is not created";
@@ -247,7 +251,7 @@ bool CFitsWriter::setPrimaryHeaderComment(const IRA::CString& comment)
 		return false;
 	}
 	return true;
-};
+};*/
 
 bool CFitsWriter::saveMainHeader(const TMainHeader& tmh)
 {

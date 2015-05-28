@@ -1,4 +1,4 @@
-#include <iostream>
+
 #include <cmath>
 #include "MedMinorServoControl.hpp"
 
@@ -284,9 +284,6 @@ MedMinorServoControl::reset()
     CUSTOM_LOG(LM_FULL_INFO,
            "MinorServo::MedMinorServoControl::reset",
            (LM_DEBUG, "enable = 0"));
-    CUSTOM_LOG(LM_FULL_INFO,
-           "MinorServo::MedMinorServoControl::reset",
-           (LM_DEBUG, "enable = 1"));
     IRA::CTimer _timer;
     do{
         actual_position = update_position();
@@ -295,9 +292,11 @@ MedMinorServoControl::reset()
         CUSTOM_LOG(LM_FULL_INFO,
                "MinorServo::MedMinorServoControl::reset",
                (LM_DEBUG, "update position"));
-    }while((actual_position.mode != MED_MINOR_SERVO_SR_BLOCK) &&
+    /*}while((actual_position.mode != MED_MINOR_SERVO_SR_BLOCK) &&
           (actual_position.mode != MED_MINOR_SERVO_PFR_BLOCK) &&
-          (actual_position.mode != MED_MINOR_SERVO_SYSTEM_BLOCK));
+          (actual_position.mode != MED_MINOR_SERVO_SYSTEM_BLOCK));*/
+    }while(actual_position.mode != MED_MINOR_SERVO_SYSTEM_BLOCK);
+    IRA::CIRATools::Wait(0, 500000);
     _commanded_status.enable = 1;
     _send_commanded_status(true);
     CUSTOM_LOG(LM_FULL_INFO,
@@ -312,6 +311,7 @@ MedMinorServoControl::reset()
                "MinorServo::MedMinorServoControl::reset",
                (LM_DEBUG, "update position"));
     }while(actual_position.mode != MED_MINOR_SERVO_INTERLOCK);
+    IRA::CIRATools::Wait(0, 200000);
     _commanded_status.acknowledge = 1;
     _send_commanded_status(true);
     CUSTOM_LOG(LM_FULL_INFO,
@@ -331,6 +331,7 @@ MedMinorServoControl::reset()
                "MinorServo::MedMinorServoControl::reset",
                (LM_DEBUG, "update position"));
     }while(actual_position.mode == MED_MINOR_SERVO_STATUS_INTERLOCK);
+    IRA::CIRATools::Wait(0, 100000);
     _commanded_status.acknowledge = 0;
     _send_commanded_status(true);
     CUSTOM_LOG(LM_FULL_INFO,

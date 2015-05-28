@@ -81,6 +81,9 @@ public:
 	 * Destructor. It clears all the dumps that eventually are still there.
 	 */
 	~CDumpCollection() {
+		flushAll();
+	};
+	void flushAll() {
 		std::list<TRecord *>::iterator i;
 		for (i=m_collection.begin();i!=m_collection.end();i++) {
 			TRecord *rec=*i;
@@ -88,7 +91,7 @@ public:
 			delete rec;
 		}
 		m_collection.clear();
-	};
+	}
 	/**
 	 * Adds a new dump in the back of the stack (FIFO). If the stack reached its maximum size a false
 	 * is returned and the dump is discarded
@@ -148,6 +151,10 @@ public:
 			return rec->time;
 		}		
 	}
+	/**
+	 * @return true if the stack is empty
+	 */
+	bool isEmpty() { return m_collection.empty(); }
 private:
 	typedef struct {
 		ACS::Time time;
@@ -215,7 +222,13 @@ public:
 	 * @return the full path and the file name of the current file
 	 */	
 	IRA::CString getFileName() const;
-	
+
+	/**
+	 * Get the full name of the current summary file
+	 * @return the full path and the file name of the current file
+	 */
+	IRA::CString getSummaryFileName() const;
+
 	/**
 	 * Get the name of the project
 	 */
@@ -399,6 +412,10 @@ public:
 	 */
 	bool isSubScanHeaderReady() const { return m_subScanHeader; }
 
+	bool isWriteSummary() const { return m_writeSummary; }
+
+	void closeSummary() { m_writeSummary=false; }
+
 	/**
 	 * It puts the component into the stop stage
 	 */
@@ -487,6 +504,7 @@ private:
 	 */
 	bool m_scanHeader;
 	bool m_subScanHeader;
+	bool m_writeSummary;
 	/**
 	 *  indicates if the component is saving...
 	 */

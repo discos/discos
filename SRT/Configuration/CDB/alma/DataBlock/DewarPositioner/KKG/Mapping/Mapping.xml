@@ -7,5 +7,4 @@
     DerotatorName="RECEIVERS/SRTKBandDerotator"
     SetupPosition="0.0"
     ParkPosition="0.0"
-    DefaultConfiguration="FIXED"
 />

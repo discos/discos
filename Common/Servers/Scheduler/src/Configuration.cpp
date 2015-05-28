@@ -1,4 +1,5 @@
 #include "Configuration.h"
+#include <AntennaModule.h>
 
 #define _GET_DWORD_ATTRIBUTE(ATTRIB,DESCR,FIELD) { \
 	DWORD tmpw; \
@@ -96,6 +97,26 @@ IRA::CString CConfiguration::getServoNameFromAxis(const Management::TScanAxis& a
 	return "";
 }
 
+double CConfiguration::getBDFfromAxis(const Management::TScanAxis& axis) const
+{
+	for (WORD i=0;i<m_minorServoMappings;i++) {
+		if (m_axis[i].axis==axis) {
+			return m_axis[i].beamDevitionFactor;
+		}
+	}
+	return 0.0;
+}
+
+Antenna::TsubScanGeometry CConfiguration::getScanGeometryFromAxis(const Management::TScanAxis& axis) const
+{
+	for (WORD i=0;i<m_minorServoMappings;i++) {
+		if (m_axis[i].axis==axis) {
+			return m_axis[i].antennaGeometry;
+		}
+	}
+	return Antenna::SUBSCAN_CONSTLON;
+}
+
 Management::TScanAxis CConfiguration::getAxisFromServoName(const IRA::CString& servoName) const
 {
 	for (WORD i=0;i<m_minorServoMappings;i++) {
@@ -112,8 +133,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	IRA::CString componentName;
 	IRA::CString strVal;
 	IRA::CString fieldPath;
-	componentName=Services->getName();
-	componentName=componentName+"/MinorServoMapping";
+
+	componentName="DataBlock/Equipment/MinorServoMapping";
 
 	try {
 		m_axis=new TMinorServoAxis[MAX_AXIS_NUMBER];
@@ -129,19 +150,39 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		if (!CIRATools::getDBValue(Services,"axis",strVal,"alma/",fieldPath)) {
 			break;
 		}
-		ACS_DEBUG_PARAM("CConfiguration::Init()","axis: %s",(const char *)strVal);
 		m_axis[m_minorServoMappings].axis=str2Axis(strVal);
+		ACS_DEBUG_PARAM("CConfiguration::Init()","axis: %s",(const char *)strVal);
 		if (!CIRATools::getDBValue(Services,"servoName",strVal,"alma/",fieldPath)) {
 			break;
 		}
 		ACS_DEBUG_PARAM("CConfiguration::Init()","servoName: %s",(const char *)strVal);
 		m_axis[m_minorServoMappings].servoName=strVal;
+		if (!CIRATools::getDBValue(Services,"antennaGeometry",strVal,"alma/",fieldPath)) {
+			break;
+		}
+		if (!Antenna::Definitions::map(strVal,m_axis[m_minorServoMappings].antennaGeometry)) {
+			_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
+			dummy.setFieldName("MinorServoMapping");
+			throw dummy;
+		}
+		ACS_DEBUG_PARAM("CConfiguration::Init()","antennaGeometry: %s",(const char *)strVal);
+		if (!CIRATools::getDBValue(Services,"beamDeviationFactor",m_axis[m_minorServoMappings].beamDevitionFactor,"alma/",fieldPath)) {
+			break;
+		}
+		ACS_DEBUG_PARAM("CConfiguration::Init()","beamDeviationFactor: %lf",m_axis[m_minorServoMappings].beamDevitionFactor);
 		m_minorServoMappings++;
 		if (m_minorServoMappings>=MAX_AXIS_NUMBER) break;
 	}
 	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %d",m_minorServoMappings);
 
-
+	if (!CIRATools::getDBValue(Services,"FTrackPrecisionDigits",m_fTrackDigits,"alma/","DataBlock/Equipment")) {
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
+		dummy.setFieldName("FTrackPrecisionDigits");
+		throw dummy;
+	}
+	else {
+		ACS_DEBUG_PARAM("CConfiguration::Init()","Ftrack precision decimal digits %lu",m_fTrackDigits);
+	}
 	_GET_STRING_ATTRIBUTE("AntennaBossInterface","Antenna Boss component interface is ",m_antennaBossComp);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component interface is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);

@@ -39,7 +39,7 @@ module Antenna {
 		double centerRA;                 /** RAJ2000 of the subscan central point (radians), offsets are not included*/
 		double centerDec;                /** DecJ2000 of the subscan central point (radians), offsets are not included*/
 		double centerAz;                 /** azimuth of the subscan central point (radians), offsets are not included */
-		double centerEl;                  /** elevation of the subscan central point (radians), offsets are not included */
+		double centerEl;                 /** elevation of the subscan central point (radians), offsets are not included */
 		double lonSpan;                  /** total length of the subscan along longitude axis (radians)*/
 		double latSpan;                  /** total length of the subscan along latitude axis (radians)*/
 		double skySpan;					 /** absolute amplitude of subscan (radians)*/
@@ -48,6 +48,7 @@ module Antenna {
 		double skyRate;					 /** sky rate (radians/s) */
 		double subScanSpan;              /** amplitude of the great circle arc connecting start and stop points */
 		double phiRate;                  /** scan rate in case of great circle scan (radians/s) */
+		ACS::TimeInterval rampDuration;  /** duration of one acceleration or deceleration ramp */
  		TCoordinateFrame coordFrame;     /** reference frame of the input start-stop or center coordinates */ 
 		TsubScanGeometry geometry;       /** geometry of the subscan path: along the great circle or along one of the frame axes */
 		TCoordinateFrame subScanFrame;   /** reference frame for scan motion: equatorial, galactic or horizontal */

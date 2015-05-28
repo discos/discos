@@ -2,8 +2,8 @@
 <AcsCommandCenterProject xmlns="Alma/Acs/AcsCommandCenterProject"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     creator="acc-v8.1" xsi:type="AcsCommandCenterProject">
-    <mode>remote_daemon</mode>
-    <servicesLocalJavaRoot>/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration</servicesLocalJavaRoot>
+    <mode>local</mode>
+    <servicesLocalJavaRoot></servicesLocalJavaRoot>
     <scriptBase>0</scriptBase>
     <remoteHost>192.168.200.200</remoteHost>
     <remoteAccount></remoteAccount>
@@ -20,11 +20,7 @@
         <againstCDB></againstCDB>
         <againstInterfaceRepository></againstInterfaceRepository>
         <container>
-            <name>WeatherStationContainer</name>
-            <type>cpp</type>
-        </container>
-        <container>
-            <name>MountContainer</name>
+            <name>AntennaBossContainer</name>
             <type>cpp</type>
         </container>
         <container>
@@ -32,52 +28,19 @@
             <type>cpp</type>
         </container>
         <container>
-            <name>AntennaBossContainer</name>
+            <name>CalibrationToolContainer</name>
             <type>cpp</type>
         </container>
         <container>
-            <name>SRTKBandContainer</name>
+            <name>DerotatorsContainer</name>
             <type>cpp</type>
         </container>
         <container>
-            <name>LocalOscillatorsContainer</name>
-            <type>cpp</type>
-            <heapSizeMB></heapSizeMB>
-            <useDedicatedSettings>true</useDedicatedSettings>
-            <scriptBase>0</scriptBase>
-            <remoteHost>192.168.200.212</remoteHost>
-            <remoteAccount></remoteAccount>
-        </container>
-        <container>
-            <name>TotalPowerContainer</name>
-            <type>cpp</type>
-        </container>
-        <container>
-            <name>SRT7GHzContainer</name>
-            <type>cpp</type>
-        </container>
-        <container>
-            <name>SRTLPBandContainer</name>
-            <type>cpp</type>
-        </container>
-        <container>
-            <name>ReceiversContainer</name>
-            <type>cpp</type>
-        </container>
-        <container>
-            <name>ManagementContainer</name>
-            <type>cpp</type>
+            <name>DewarPositionerContainer</name>
+            <type>py</type>
         </container>
         <container>
             <name>FitsZillaContainer</name>
-            <type>cpp</type>
-        </container>
-        <container>
-            <name>MinorServoContainer</name>
-            <type>cpp</type>
-        </container>
-        <container>
-            <name>MinorServoBossContainer</name>
             <type>cpp</type>
         </container>
         <container>
@@ -85,11 +48,55 @@
             <type>cpp</type>
         </container>
         <container>
+            <name>ManagementContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>MinorServoBossContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>MinorServoContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>MountContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
             <name>PointContainer</name>
             <type>cpp</type>
         </container>
         <container>
-            <name>CalibrationToolContainer</name>
+            <name>ReceiversContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>SRT7GHzContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>SRTKBandContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>SRTLPBandContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>TotalPowerContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>WeatherStationContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>XContainer</name>
+            <type>cpp</type>
+        </container>
+        <container>
+            <name>ExternalClientsContainer</name>
             <type>cpp</type>
         </container>
     </containers>

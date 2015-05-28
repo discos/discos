@@ -32,15 +32,19 @@ USER_LIB = -lCCfits
 # As a general rule:  public file are "cleaned" and "installed"  
 #                     local (_L) are not "installed".
 
-EXECUTABLES_L     = testBulk testWriter
-
-testWriter_OBJECTS = TestWriter FitsWriter
-testWriter_LIBS = IRALibrary 
+EXECUTABLES_L     = testBulk testWriter testSummary
 
 testBulk_OBJECTS  = testBulkTransmission
 testBulk_LIBS     = IRALibrary FitsWriterStubs GenericBackendStubs ComponentErrors ClientErrors \
 	bulkDataStubs bulkDataReceiverStubs bulkDataCallback ManagmentDefinitionsStubs DataReceiverStubs ReceiversDefinitionsStubs baci maci \
-	maciClient bulkDataSenderStubs BackendsErrors ManagementErrors
+	maciClient bulkDataSenderStubs MinorServoDefinitionsStubs BackendsErrors ManagementErrors
+
+testWriter_OBJECTS = TestWriter FitsWriter File SummaryWriter FitsTools
+testWriter_LIBS = IRALibrary 
+	
+testSummary_OBJECTS = TestSummary File SummaryWriter FitsTools
+testSummary_LIBS = IRALibrary 
+	
 
 # Libraries (public and local)
 # ----------------------------
@@ -50,10 +54,10 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 FitsWriterImpl_OBJECTS   = FitsWriterImpl ReceiverCallback DataCollection EngineThread Configuration CommonTools\
-FitsWriter CollectorThread MetaData
+FitsWriter CollectorThread MetaData File SummaryWriter FitsTools
 FitsWriterImpl_LIBS = baci maci FitsWriterStubs DataReceiverStubs ComponentErrors ManagementErrors ReceiversErrors bulkDataReceiverStubs\
                  ManagmentDefinitionsStubs ACSBulkDataError bulkDataStubs IRALibrary\
-                 bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs \
+                 bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs MinorServoDefinitionsStubs \
                  EphemGeneratorStubs BackendsDefinitionsStubs ObservatoryStubs MinorServoBossStubs MinorServoErrors\
                  GenericWeatherStationStubs ReceiversBossStubs ReceiversDefinitionsStubs CommonReceiverInterfaceStubs SchedulerStubs ManagmentDefinitionsStubs
 

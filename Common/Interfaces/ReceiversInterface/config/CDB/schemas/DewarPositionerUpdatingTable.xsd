@@ -16,7 +16,7 @@
 	<xs:complexType name="UpdatingHeader">
  		<xs:sequence>
  			<xs:element name="axisCode" type="xs:string" />
- 			<xs:element name="position" type="xs:string" />
+ 			<xs:element name="initialPosition" type="xs:string" />
  			<xs:element name="functionName" type="xs:string" />
  		</xs:sequence>
  	</xs:complexType>

@@ -45,6 +45,8 @@
 
 #define GETMAX(X,Y) (X>=Y)?X:Y
 
+#define GETMAX3(X,Y,Z) (X>=Y)?GETMAX(X,Z):GETMAX(Y,Z)
+
 #define ABS(X,Y) (X>=Y)?X-Y:Y-X
 
 #define LIGHTSPEED_MS 299792458.0

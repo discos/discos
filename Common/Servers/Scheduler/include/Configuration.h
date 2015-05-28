@@ -30,6 +30,8 @@ public:
 	typedef struct {
 		Management::TScanAxis axis;
 		IRA::CString servoName;
+		Antenna::TsubScanGeometry antennaGeometry;
+		double beamDevitionFactor;
 	} TMinorServoAxis;
 
 	/**
@@ -137,6 +139,11 @@ public:
 	long getTsysGapTime() const { return m_TsysGapTime; }
 	
 	/**
+	 * @return the number of meaningful decimal digits when performing ftrack computation, i represents the precision of the local oscillators
+	 */
+	long getFTrackDigits() const { return m_fTrackDigits; }
+
+	/**
 	 * @return the location, inside the CDB of the procedures files
 	 */ 	
 	const IRA::CString& getProceduresLocation() const { return m_proceduresLocation; }
@@ -166,6 +173,10 @@ public:
 	 */
 	Management::TScanAxis getAxisFromServoName(const IRA::CString& servoName) const;
 
+	double getBDFfromAxis(const Management::TScanAxis& axis) const;
+
+	Antenna::TsubScanGeometry getScanGeometryFromAxis(const Management::TScanAxis& axis) const;
+
 private:
 	IRA::CString m_schedDir;
 	IRA::CString m_dataDir;
@@ -190,6 +201,7 @@ private:
 	IRA::CString m_defaultProjectCode;
 	bool m_checkProjectCode;
 	long m_minorServoMappings;
+	long m_fTrackDigits;
 	
 	TMinorServoAxis* m_axis;
 

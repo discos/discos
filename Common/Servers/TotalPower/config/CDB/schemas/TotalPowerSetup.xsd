@@ -56,12 +56,40 @@
 		</xs:restriction>
 	</xs:simpleType>
 	
+  	<xs:simpleType name="DBType">
+    	<xs:restriction base="xs:integer">
+      		<xs:minInclusive value="0"/>
+      		<xs:maxInclusive value="15"/>
+    	</xs:restriction>
+  	</xs:simpleType>
+	
+	<xs:simpleType name="BWType">
+    	<xs:restriction base="xs:integer">
+      		<xs:enumeration value="300"/>
+      		<xs:enumeration value="730"/>
+      		<xs:enumeration value="1250"/>
+      		<xs:enumeration value="2350"/>
+    	</xs:restriction>
+  	</xs:simpleType>
+	
 	<xs:element name="inputPort">
 		<xs:simpleType>
 			<xs:list itemType="SelectedPortType" />
 		</xs:simpleType>
 	</xs:element>
+
+	<xs:element name="inputPortDB">
+		<xs:simpleType>
+			<xs:list itemType="DBType" />
+		</xs:simpleType>
+	</xs:element>
 	
+	<xs:element name="inputPortBW">
+		<xs:simpleType>
+			<xs:list itemType="BWType" />
+		</xs:simpleType>
+	</xs:element>
+		
 	<xs:complexType name="TTableHeader">
  		<xs:sequence>
  		  <xs:element name="configurationID" type="xs:string">
@@ -85,22 +113,26 @@
  		  		are configured on sinble board basis. The numbero of enties shoudl be less than the numebr of installed boards. The board not directly
  		  		involved in the configuration (i.e stated on the section_boards section) will be configured with 0 attenuation andd full bandwidth
  		  	</xs:documentation></xs:annotation>
- 		  </xs:element> 		  
+ 		  </xs:element> 
+ 		  <xs:element ref="inputPortDB" minOccurs="1" maxOccurs="unbounded">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		selects attenuation level for each of the boards. The multiplicity of this list must macth the inputPort one.
+				This value is of course meaningful only if the multiplicity is greater than one. In this case the applied value is the one
+				provided by the element attenuation
+ 		  	</xs:documentation></xs:annotation> 		  
+ 		  </xs:element>		 
+		  <xs:element ref="inputPortBW" minOccurs="1" maxOccurs="unbounded">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		selects bandwidth (filter) for each of the boards. The multiplicity of this list must match the inputPort one.
+				This value is of course meaningful only if the multiplicity is greater than one. In this case the applied value is the one
+				provided by the element attenuation
+ 		  	</xs:documentation></xs:annotation> 		  
+ 		  </xs:element>		  		   
  		  <xs:element name="beams" type="xs:long">
  		  	<xs:annotation><xs:documentation>
  		  		number of beams of the receiver attached to the backend
  		  	</xs:documentation></xs:annotation>
  		  </xs:element>
- 		  <xs:element name="bandWidth" type="xs:double">
- 		  	<xs:annotation><xs:documentation>
- 		  		this set the default bandwidth of the RF input  
- 		  	</xs:documentation></xs:annotation>
- 		  </xs:element>
- 		  <xs:element name="attenuation" type="xs:double">
- 		  	<xs:annotation><xs:documentation>
- 		  		this sets the default attenuation of all the RF input  
- 		  	</xs:documentation></xs:annotation>
- 		  </xs:element> 		  	   		  
  		  <xs:element name="section_boards" type="xs:string">
  		  	<xs:annotation><xs:documentation>
  		  		blank separated lists of boards implementing the section  

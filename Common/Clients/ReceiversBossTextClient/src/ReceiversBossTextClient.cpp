@@ -63,8 +63,20 @@
 		impl.log(); \
 	}
 
+IRA::CLogGuard guard(GUARDINTERVAL*1000);
+TW::CLabel* extraLabel1;
+TW::CLabel* extraLabel2;
+TW::CLabel* extraLabel3;
+TW::CLabel* extraLabel4;
+TW::CLabel* extraLabel5;
+TW::CLabel* extraLabel6;
+
 #define COMPONENT_INTERFACE COMPONENT_IDL_MODULE::COMPONENT_IDL_INTERFACE
 #define COMPONENT_DECLARATION COMPONENT_IDL_MODULE::COMPONENT_SMARTPOINTER
+#define DEWAR_INTERFACE COMPONENT_IDL_MODULE::DEWAR_IDL_INTERFACE
+#define DEWAR_DECLARATION COMPONENT_IDL_MODULE::DEWAR_SMARTPOINTER
+
+#include "updateDewar.i"
 
 using namespace TW;
 
@@ -195,6 +207,7 @@ int main(int argc, char *argv[]) {
 	CORBA::Object_var obj;
 	// Component declaration 
 	COMPONENT_DECLARATION component;
+	DEWAR_DECLARATION dewar;
 		
 
 	/* Add frame controls declaration */
@@ -297,7 +310,24 @@ int main(int argc, char *argv[]) {
 		goto ErrorLabel;
 	}
 	component=COMPONENT_INTERFACE::_narrow(obj.in());
-	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"OK, reference is: %d",component.ptr()));
+	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"Receivers Boss reference is: %d",component.ptr()));
+	ACE_OS::sleep(1);
+
+	try {
+		info=client.manager()->get_default_component(client.handle(),DEWAR_INTERFACE_TPYE);
+		obj=info->reference;
+		if (CORBA::is_nil(obj.in())) {
+			ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_NOTICE,"Dewar positioner not available"));
+			dewar=DEWAR_INTERFACE::_nil();
+		}
+		else {
+			dewar=DEWAR_INTERFACE::_narrow(obj.in());
+			ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"Dewar reference is: %d",dewar.ptr()));
+		}
+	}
+	catch(...) {
+		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_NOTICE,"Dewar positioner not available"));
+	}
 	ACE_OS::sleep(1);
 	try {
 		/* Add all component properties here */
@@ -325,6 +355,13 @@ int main(int argc, char *argv[]) {
 		LO_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(double)>(LO.in());
 		polarization_text=new CCustomPropertyText<_TW_SEQPROPERTYCOMPONENT_T_RO(long)>(polarization.in());
 		tracking_display=new TW::CLedDisplay(1);
+		extraLabel1=new CLabel("");
+		extraLabel2=new CLabel("");
+		extraLabel3=new CLabel("");
+		extraLabel4=new CLabel("");
+		extraLabel5=new CLabel("");
+		extraLabel6=new CLabel("");
+
 		/* ************************ */
 		#if USE_OUTPUT_FIELD >=1 
 			output_label=new TW::CLabel("");
@@ -370,6 +407,14 @@ int main(int argc, char *argv[]) {
 		tracking_display->setOrientation(TW::CLedDisplay::HORIZONTAL);
 		tracking_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
 
+		// extra labels..........
+		extraLabel1->setWidth(WINDOW_WIDTH-2); extraLabel1->setHeight(1); extraLabel1->setPosition(TW::CPoint(0,10));
+		extraLabel2->setWidth(WINDOW_WIDTH-2); extraLabel2->setHeight(1); extraLabel2->setPosition(TW::CPoint(0,11));
+		extraLabel3->setWidth(WINDOW_WIDTH-2); extraLabel3->setHeight(1); extraLabel3->setPosition(TW::CPoint(0,12));
+		extraLabel4->setWidth(WINDOW_WIDTH-2); extraLabel4->setHeight(1); extraLabel4->setPosition(TW::CPoint(0,13));
+		extraLabel5->setWidth(WINDOW_WIDTH-2); extraLabel5->setHeight(1); extraLabel5->setPosition(TW::CPoint(0,14));
+		extraLabel6->setWidth(WINDOW_WIDTH-2); extraLabel6->setHeight(1); extraLabel6->setPosition(TW::CPoint(0,15));
+
 		/* ****************************************************************** */
 		_TW_SET_COMPONENT(userInput,0,WINDOW_HEIGHT-6,WINDOW_WIDTH-1,1,USER_INPUT_COLOR_PAIR,USER_INPUT_STYLE,NULL);
 		#if USE_OUTPUT_FIELD >=1 
@@ -413,6 +458,8 @@ int main(int argc, char *argv[]) {
 		_TW_ADD_LABEL("Bandwidth       :",0,7,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Polarization    :",0,8,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Dewar          :",31,2,17,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL(" ____________________Dewar Positioner_____________________",0,9,WINDOW_WIDTH-2,1,CColorPair::GREEN_BLACK,CStyle::BOLD,window);
+
 		/* ************************* */
 		
 		/** Add all required association: components/Frame */
@@ -426,6 +473,13 @@ int main(int argc, char *argv[]) {
 		window.addComponent((CFrameComponent*)LO_text);
 		window.addComponent((CFrameComponent*)polarization_text);
 		window.addComponent((CFrameComponent*)tracking_display);
+		window.addComponent((CFrameComponent*)extraLabel1);
+		window.addComponent((CFrameComponent*)extraLabel2);
+		window.addComponent((CFrameComponent*)extraLabel3);
+		window.addComponent((CFrameComponent*)extraLabel4);
+		window.addComponent((CFrameComponent*)extraLabel5);
+		window.addComponent((CFrameComponent*)extraLabel6);
+
 		/* ********************************************** */
 		window.addComponent((CFrameComponent*)userInput);		
 		#if USE_OUTPUT_FIELD >=1 
@@ -486,27 +540,12 @@ int main(int argc, char *argv[]) {
 				output_label->Refresh();
 			}
 		}
+		// automatic update of some controls.
+		updateDewar(dewar.in());
 		//sleep for the required ammount of time
 		tv.set(0,MAINTHREADSLEEPTIME*1000);
 		client.run(tv);
 	}
-
-	/*for(;;)	{
-		if ((fieldCounter=userInput->parseCommand(fields,MAXFIELDNUMBER))>0) {
-			fields[0].MakeUpper();
-			if (fields[0]=="EXIT") break;
-			else {
-				#if USE_OUTPUT_FIELD >=1 
-					IRA::CString Message("Unknown command");
-					output_label->setValue(Message);
-					output_label->Refresh();
-				#endif
-			}
-		}
-		client.run(tv);
-		tv.set(0,MAINTHREADSLEEPTIME*1000);		
-	}*/
-		
 	window.closeFrame();
 	
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::RELEASING"));
@@ -522,6 +561,9 @@ CloseLabel:
 	ACE_OS::sleep(1);	
 	try {
 		client.releaseComponent(COMPONENT_NAME);
+		if (!CORBA::is_nil(dewar)) {
+			client.releaseComponent(dewar->name());
+		}
 	}
 	catch (maciErrType::CannotReleaseComponentExImpl& E) {
 		E.log();

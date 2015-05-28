@@ -110,6 +110,48 @@ MedMinorServoOffset::clearOffset()
 }
 
 MedMinorServoPosition
+MedMinorServoOffset::getSystemOffsetPosition()
+{
+    MedMinorServoPosition position;
+    position.mode = MED_MINOR_SERVO_OFFSET;
+    if(!_initialized)
+        throw MinorServoOffsetError("Offset has not been initialized");
+    boost::recursive_mutex::scoped_lock lock(_offset_guard);
+    if(_primary_focus){
+        position.y = _system_offset[0];
+        position.z = _system_offset[1];
+    }else{
+        position.x = _system_offset[0];
+        position.y = _system_offset[1];
+        position.z = _system_offset[2];
+        position.theta_x = _system_offset[3];
+        position.theta_y = _system_offset[4];
+    }
+    return position;
+}
+
+MedMinorServoPosition
+MedMinorServoOffset::getUserOffsetPosition()
+{
+    MedMinorServoPosition position;
+    position.mode = MED_MINOR_SERVO_OFFSET;
+    if(!_initialized)
+        throw MinorServoOffsetError("Offset has not been initialized");
+    boost::recursive_mutex::scoped_lock lock(_offset_guard);
+    if(_primary_focus){
+        position.y = _user_offset[0];
+        position.z = _user_offset[1];
+    }else{
+        position.x = _user_offset[0];
+        position.y = _user_offset[1];
+        position.z = _user_offset[2];
+        position.theta_x = _user_offset[3];
+        position.theta_y = _user_offset[4];
+    }
+    return position;
+}
+
+MedMinorServoPosition
 MedMinorServoOffset::getOffsetPosition()
 {
     MedMinorServoPosition position;

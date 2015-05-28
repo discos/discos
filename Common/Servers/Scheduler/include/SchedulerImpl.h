@@ -229,15 +229,16 @@ public:
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
 	/**
-	 * Performs a focus scan moving the subreflector or the receiver along the optical axis of the telescope. The operation consists of system temperature measurement (the telescope is sent
+	 * Performs a peaker scan moving the subreflector or the receiver along an axis. The operation consists of system temperature measurement (the telescope is sent
 	 * 3 times the current beam size off) and then a focus scan on the source. The default backend and the default data recorder are used as data source and destination respectively.
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
 	 * @throw CORBA::SystemExcpetion
-	 * @param span this is the overall length of the single scans (mm)
+	 * @param axis name of the axis to scan
+	 * @param span this is the overall length of the single scans (mm or arcsec according to the selected axis)
 	 * @param duration this determine how long the scan has to take.
 	 */
-	virtual void focusScan(CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+	virtual void peakerScan(const char *axis,CORBA::Double span,ACS::TimeInterval duration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
 	/**
 	 * This method performs a skydip with the antenna. The scan is done across the current azimuth between the two elevation limits. A system temperature measurement is
@@ -254,17 +255,23 @@ public:
 
 	/**
 	 * It allows to change the name of the instance of the current default backend
-	 * @throw CORBA::SystemException 
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
 	 * @param bckInstance name of the instance 
 	*/ 
-	virtual void chooseDefaultBackend(const char *bckInstance) throw (CORBA::SystemException);
+	virtual void chooseDefaultBackend(const char *bckInstance) throw (CORBA::SystemException,
+		ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
 	/**
 	 * It allows to change the name of the instance of the current data recorder component
-	 * @throw CORBA::SystemException 
+	 * @throw CORBA::SystemException
+	 * @thorw ComponentErrors::ComponentErrorsEx
+	 * @thorw ManagementErrors::ManagementErrorsEx
 	 * @param rvcInstance name of the instance 
 	 */
-	virtual void chooseDefaultDataRecorder(const char *rcvInstance) throw (CORBA::SystemException);
+	virtual void chooseDefaultDataRecorder(const char *rcvInstance) throw (CORBA::SystemException,
+		ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 	
 	/**
 	 * This method stops the current running schedule, if any. In order to start a new schedule the current one must be stopped.
@@ -309,7 +316,132 @@ public:
 	 */
 	virtual void setRestFrequency(const ACS::doubleSeq& rest) throw (CORBA::SystemException);
 
-	
+	/**
+	 * It allows to centre the observe frequency line in the observed band.
+	 */
+    virtual void fTrack(const char* dev) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+
+	/**
+	 * It allows to immediately start a scan that involves a primary focus axis or a subreflector axis. The scan is performed of the currently
+	 * commanded source. If the axis involves a pointing offsets the telescope will try to correct it by moving the antenna by the adequate
+	 * beam deviation factor.
+	 * @param axis name of the axis to scan
+	 * @param span total length of the scan
+	 * @param duration time required by the scan to complete
+ 	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void peaker(const char *axis,CORBA::Double span,ACS::TimeInterval duration) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It allows to immediately start an OTF scan along the longitude axis of the given frame.
+	 * A visible and observable source must be already commanded in order to take its equatorial J2000 coordinate as
+	 * center of the OTF scan.
+	 * @param scanFrame frame along which doing the scan
+	 * @param span total lenght of the scan (radians)
+	 * @param duration time required by the scan to complete
+ 	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void lonOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It allows to immediately start an OTF scan along the latitude axis of the given frame.
+	 * A visible and observable source must be already commanded in order to take its equatorial J2000 coordinate as
+	 * center of the OTF scan.
+	 * @param scanFrame frame along which doing the scan
+	 * @param span total lenght of the scan (radians)
+	 * @param duration time required by the scan to complete
+ 	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void latOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It allows to move the antenna along the elevation in order to perform a skydip scan. The scan will be set according the
+	 * currently tracked source.
+	 * @param el1 first elevation limit of the scan
+	 * @param el2 second elevation limit of the scan
+	 * @param duration duration of the scan in 10^-7 seconds, the combination of duration and span gives the scan velocity
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+    virtual void skydipOTF(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * This is a wrapper of the <i>startScan()</i> function. It allows to immediately start a sidereal traking over a catalog source.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 * @param targetName name of the source to track, it must be known by the system
+	*/
+	virtual void track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 *  It allows to immediately start a tracking of the moon.
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	*/
+	virtual void moon() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It allows to immediately start a tracking of a sidereal source, given its equatorial coordinates
+	 * @param targetName name or identifier of the source
+	 * @param ra right ascension in radians
+	 * @param dec declination in radians
+	 * @param eq reference equinox of the equatorial coordinates
+	 * @param section preferred section of the azimuth cable wrap
+ 	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+	virtual void sidereal(const char * targetName,CORBA::Double ra,CORBA::Double dec,Antenna::TSystemEquinox eq,Antenna::TSections section) throw (
+			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+    /**
+	 * It allows to immediately go to a fixed horizontal position (beampark).
+	 * @param az azimuth in radians. It could be -1, in that case the current position is taken
+	 * @param el elevation in radians. It could be -1, in that case the current position is taken
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw AntennaErrors::AntennaErrorsEx
+	 */
+    virtual void goTo(CORBA::Double az,CORBA::Double el) throw (ComponentErrors::ComponentErrorsEx,
+    		ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It aborts the long-running operations
+	 */
+	virtual void abort() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+	/**
+	 * It prepares the data recording.
+	 * @param scanId identifier of the scan that is going to be open
+	 */
+    virtual void initRecording(CORBA::Long scanid) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+    /**
+     * It starts the data acquisition, it also take care of stopping the data stream after the required duration.
+     * @param subScanId identifier of the current subscan
+     * @param duration required recording time
+     */
+    virtual void startRecording(CORBA::Long subScanId,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+    /**
+     * It finalized the current scan (initiated by initRecording)
+     */
+    virtual void terminateScan() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
 private:
 
 	baci::SmartPropertyPointer<baci::ROstring> m_pscheduleName;

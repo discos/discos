@@ -27,13 +27,13 @@
 
 <ErrorCode name="NotAllowedDuringSchedule" shortDescription="The operation is not allowed during schedule execution" description=""/>
 
-<ErrorCode name="TargetIsNotVisible" shortDescription="The selected target is not visible" description=""/>
+<ErrorCode name="TargetOrSubscanNotFeasible" shortDescription="The selected target is not visible or sub scan not feasible" description=""/>
 
 <ErrorCode name="BackendNotAvailable" shortDescription="The selected backend is not available" description=""/>
 
 <ErrorCode name="DataRecorderNotAvailable" shortDescription="The selected data recorder is not available" description=""/>
 
-<ErrorCode name="DataTransferSetupError" shortDescription="The data transfer was not properly setup" description=""/>
+<ErrorCode name="DataTransferSetupError" shortDescription="The data transfer was not properly configured or initialized" description=""/>
 
 <ErrorCode name="TsysError" shortDescription="Error during System Temperature computation" description=""/>
 
@@ -41,7 +41,11 @@
 
 <ErrorCode name="MinorServoScanError" shortDescription="Error while commanding a scan to the minor servo system" description=""/>
 
-<ErrorCode name="SubscanError" shortDescription="Error during the execution of a subscan" description="">
+<ErrorCode name="TelescopeSubScanError" shortDescription="Error while commanding a sub scan to the telescope" description="">
+	<Member name="Reason" type="string" description="Describes the cause of the error" />	
+</ErrorCode>
+
+<ErrorCode name="SubscanError" shortDescription="Error during the execution of a subscan in the schedule" description="">
 	<Member name="SubScanID" type="long" description="Identifier of the scan" />
 	<Member name="Reason" type="string" description="Describes the cause of the error" />	
 </ErrorCode>
@@ -89,5 +93,15 @@
 <ErrorCode name="UnkownProjectCodeError" shortDescription="The project code is invalid or not allowed" description=""/>
 
 <ErrorCode name="UnsupportedOperation" shortDescription="The operation is invalid or not supported by this release " description=""/>
+
+<ErrorCode name="AbortedByUser" shortDescription="The operation was aborted by the user" description="">
+	<Member name="Operation" type="string" description="Name of the aborted operation" />
+</ErrorCode>
+
+<ErrorCode name="RecordingAlreadyActive" shortDescription="Recording is already active" description=""/>
+
+<ErrorCode name="CloseTelescopeScanError" shortDescription="Not able command the scan close to the telescope" description=""/>
+
+<ErrorCode name="InvalidRestFrequency" shortDescription="The rest frequency is not provided or does not match the number of backend sections" description=""/>
 
 </Type>

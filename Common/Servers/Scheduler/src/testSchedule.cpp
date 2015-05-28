@@ -2,6 +2,7 @@
 
 #include "Schedule.h"
 #include <slamac.h>
+#include <AntennaModule.h>
 #include <IRA>
 
 // this is a quick test for the class CSchedule, in order to test if it works and no memory leakage are behind the corner
@@ -55,11 +56,13 @@ int main(int argc, char *argv[])
 {
 	//DWORD scan;
 	double minEl,maxEl;
-	IRA::CString pre,post,target,outString;
+	IRA::CString pre,post,target,outString,outString2;
 	std::vector<IRA::CString> procedure;
 	Management::TScanTypes type;
 	void *scanPar;
 	void *secPar;
+	void *servoPar;
+	void *recvPar;
 	CSchedule::TRecord rec;
 	ACS::stringSeq layoutDef;
 	CSchedule sched("../templates/","schedule.tmpl");
@@ -101,7 +104,7 @@ int main(int argc, char *argv[])
 			IRA::CIRATools::intervalToStr(rec.lst,outString);
 			printf("%u %u %u %s %lf %u %s %s %s %s %s %s\n",rec.counter,rec.scanid,rec.subscanid,(const char *)outString,rec.duration,rec.scan,(const char *)rec.preScan,(const char *)rec.postScan,(const char *)rec.backendProc,
 					(const char *)rec.writerInstance,(const char *)rec.suffix,(const char *)rec.layout);
-			if (!sched.getScanList()->getScan(rec.scan,type,scanPar,secPar)) {
+			if (!sched.getScanList()->getScan(rec.scan,type,scanPar,secPar,servoPar,recvPar)) {
 				printf("Scan number %u is not present\n",rec.scan);
 				return -1;
 			}
@@ -153,6 +156,8 @@ int main(int argc, char *argv[])
 				else {
 					printf("No offsets\n");
 				}
+				printf("\n");
+				printf("radial velocity: %lf, %s, %s\n",tmp->RadialVelocity,Antenna::Definitions::map(tmp->VradFrame),Antenna::Definitions::map(tmp->VradDefinition));
 			}
 			printf("\n");
 			if (!sched.getBackendList()->getBackend(rec.backendProc,target,procedure)) {

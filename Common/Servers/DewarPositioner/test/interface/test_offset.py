@@ -24,7 +24,7 @@ class OffsetTest(unittest2.TestCase):
         self.assertAlmostEqual(
                 self.positioner.getPosition(), 
                 old_pos - old_offset,
-                places=1
+                places=0
         )
 
     def test_setOffset(self):

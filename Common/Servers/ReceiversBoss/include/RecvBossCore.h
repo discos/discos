@@ -11,6 +11,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  28/02/2011      For computation is now considered the real band, given by the receiver band and the backend filter */
 /* Andrea Orlati(aorlati@ira.inaf.it)  8/04/2013       changes to fit the new K band, dual feed in Medicina  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  18/06/2013     changes in order to make the length of sequence properties equal to IFs*feeds */
+/* Marco Buttu (mbuttu@oa-cagliari.inaf.it) 25/05/2015 Added external mark control  */
 
 #ifdef COMPILE_TARGET_MED
 
@@ -91,6 +92,14 @@ public:
 	void calOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 			ComponentErrors::UnexpectedExImpl);
 	
+	void externalCalOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::UnexpectedExImpl);
+	
+	void externalCalOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::UnexpectedExImpl);
+	
+
+	
 	void setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 			ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
 	
@@ -101,21 +110,40 @@ public:
 					ComponentErrors::UnexpectedExImpl);
 
 	/**
-	 * Used to read the position of the derotator at a given epoch
-	 * @param epoch reference time
-	 * @return the position of the derotator (degrees)
+	 * It allows to setup the starting position for the derotator
+	 * @param pos initial position in degrees
 	 * @throw ReceiversErrors::NoDewarPositioningExImpl
 	 * @throw ReceiversErrors::NoDerotatorAvailableExImpl
 	 * @throw ComponentErrors::ValidationErrorExImpl
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ReceiversErrors::DewarPositionerCommandErrorExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 * @throw ComponentErrors::UnexpectedExImpl
+	 * @throw ReceiversErrors::DewarPositionerNotConfiguredExImpl
 	 */
-	double getDerotatorPosition (const ACS::Time& epoch) throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-			ComponentErrors::ValidationErrorExImpl);
+	void setDerotatorPosition(const double& pos) throw (ReceiversErrors::NoDewarPositioningExImpl,
+			ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+			ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
+			ReceiversErrors::DewarPositionerNotConfiguredExImpl);
 
 	/**
-	 * This method is a wrap a call to the derotator setup, allowing to activate the derotation. If the derotator is not supported by the current receiver an error is risen.
-	 * @param mode specified the tracking mode of the derotator, if <i>RCV_UNDEF_UPDATE</i> is given the present value is kept
-	 * @param rewind specifies the rewind mode in case the derotator reaches its final limit, if i<i>RCV_UNDEF_REWIND</i> is given, the present value is kept
-	 * @param feeds number of feeds to derotate in case automatic rewind mode is selected, if -1 the present value if not changed
+	 * Used to read the position of the derotator at a given epoch
+	 * @param epoch reference time
+	 * @return the position of the derotator (degrees)
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ReceiversErrors::DewarPositionerCommandErrorExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 * @throw ComponentErrors::UnexpectedExImpl
+	 */
+	double getDerotatorPosition (const ACS::Time& epoch) throw (ComponentErrors::CouldntGetComponentExImpl,
+			ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+
+	/**
+	 * This method is a wrap a call to the derotator setup, allowing to activate the derotation.
+	 * If the derotator is not supported by the current receiver an error is risen.
+	 * @param confe specified the tracking mode of the derotator, if <i>RCV_UNDEF_DERATOCONF</i> is given the present value is kept
+	 * @param rewinding specifies the rewind mode in case the derotator reaches its final limit, if i<i>RCV_UNDEF_REWIND</i> is given, the present value is kept
+	 * @param feeds number of feeds to be rewind in case the automatic rewind is set, if -1 current value is kept, default value is 1;
 	 * @throw ReceiversErrors::NoDewarPositioningExImpl
 	 * @throw ReceiversErrors::NoDerotatorAvailableExImpl
 	 * @throw ComponentErrors::ValidationErrorExImpl
@@ -124,13 +152,64 @@ public:
 	 * @throw ComponentErrors::UnexpectedExImpl
 	 * @throw ReceiversErrors::DewarPositionerSetupErrorExImpl
 	 */
-    void derotatorSetup(const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
+    /*void derotatorMode(const Receivers::TDerotatorConfigurations& mode,const Receivers::TRewindModes& rewinding,const long& feeds) throw (
     		ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,
     		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
-    		ReceiversErrors::DewarPositionerSetupErrorExImpl);
+    		ReceiversErrors::DewarPositionerSetupErrorExImpl);*/
 
     /**
-     * It disable the derotator. It is implicitly called also by the <i>park()</i> method.
+     * This method is a wrap a call to the derotator setup, allowing to prepare the derotation. If the derotator is not supported by
+     * the current receiver an error is risen.
+	 * @param conf specified the tracking mode of the derotator, if <i>RCV_UNDEF_DERATOCONF</i> is given the present value is kept
+	 * @throw ComponentErrors::ValidationErrorExImpl
+	 * @throw ReceiversErrors::NoDewarPositioningExImpl
+	 * @throw ReceiversErrors::NoDerotatorAvailableExImpl
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ReceiversErrors::DewarPositionerSetupErrorExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 * @throw ComponentErrors::UnexpectedExImpl
+	 */
+    void derotatorSetConfiguration(const Receivers::TDerotatorConfigurations& conf) throw (
+		ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+		ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl);
+
+    /**
+     * This method allows to change the configuration of the dewar positioner when a rewinding is needed.
+     * @param rewind new rewinding mode
+	 * @throw ComponentErrors::ValidationErrorExImpl
+	 * @throw ReceiversErrors::NoDewarPositioningExImpl
+	 * @throw ReceiversErrors::NoDerotatorAvailableExImpl
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ReceiversErrors::DewarPositionerSetupErrorExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 * @throw ComponentErrors::UnexpectedExImpl
+	 * @throw ReceiversErrors::DewarPositionerNotConfiguredExImpl
+     */
+    void derotatorSetRewindingMode(const Receivers::TRewindModes& rewind) throw (
+    		ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+    		ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+    		ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl);
+
+    /**
+     * This method specifies how many steps to rewind when the auto rewinding mode is configured (@sa <i>derotatorSetRewindingMode</i>).
+     * @param steps number of steps
+     * @throw ComponentErrors::ValidationErrorExImpl
+	 * @throw ReceiversErrors::NoDewarPositioningExImpl
+	 * @throw ReceiversErrors::NoDerotatorAvailableExImpl
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 * @throw ReceiversErrors::DewarPositionerSetupErrorExImpl
+	 * @throw ComponentErrors::CORBAProblemExImpl
+	 * @throw ComponentErrors::UnexpectedExImpl
+	 * @throw ReceiversErrors::DewarPositionerNotConfiguredExImpl
+     */
+    void derotatorSetAutoRewindingSteps(const long& steps) throw (
+    		ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+    		ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+    		ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl);
+
+    /**
+     * It disables the derotator. It is implicitly called also by the <i>park()</i> method.
      * @throw ReceiversErrors::NoDewarPositioningExImpl
      * @throw ReceiversErrors::NoDerotatorAvailableExImpl
      * @throw ComponentErrors::ValidationErrorExImpl
@@ -140,8 +219,19 @@ public:
      * @throw ComponentErrors::UnexpectedExImpl
      */
      void derotatorPark() throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-    			ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
-    			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+      ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
+      ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+
+     void derotatorRewind(const long& steps) throw (ComponentErrors::ValidationErrorExImpl,
+       ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+       ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl,
+       ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl);
+
+     /**
+      * Return back the present configuration of the dewar positioner
+      */
+     void getDewarParameter(Receivers::TDerotatorConfigurations& mod,double& pos) throw (
+       ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
 
 	/**
 	 * This method will configure the component that controls the receiver actually identified by the given code
@@ -154,7 +244,12 @@ public:
 	
 	void park()  throw (ManagementErrors::ParkingErrorExImpl);
 	
-	void startScan(ACS::Time startUT,const Receivers::TReceiversParameters& param);
+	void startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters& antennaInfo) throw(
+			ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl);
+
+	void closeScan(ACS::Time& timeToStop) throw (ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+			ComponentErrors::UnexpectedExImpl);
 
 	long getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) throw (ComponentErrors::ValidationErrorExImpl,
 			ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
@@ -191,7 +286,7 @@ public:
 	void  updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 
 	void updateDewarPositionerStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-			ComponentErrors::OperationErrorExImpl);
+			ComponentErrors::OperationErrorExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl);
 
 	void publishData() throw (ComponentErrors::NotificationChannelErrorExImpl);
 private:
@@ -270,10 +365,11 @@ private:
 	bool m_dewarTracking;
 	ACS::Time m_dewarStatusEpoch;
 
-
-	Receivers::TUpdateModes m_updateMode;
+	// This also controls if the derotator has been configured
+	Receivers::TDerotatorConfigurations m_updateMode;
 	Receivers::TRewindModes m_rewindMode;
-	long m_rewindFeeds;
+	long m_autoRewindSteps;
+	bool m_dewarIsMoving;
 
 	Receivers::DewarPositioner_var m_dewarPositioner;
 	bool m_dewarPositionerError;

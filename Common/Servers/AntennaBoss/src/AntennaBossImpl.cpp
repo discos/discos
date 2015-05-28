@@ -177,22 +177,14 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("antennaUnstow",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::unstow),0);
 	m_parser->add("antennaSetup",new function1<CBossCore,non_constant,void_type,I<string_type> >(boss,&CBossCore::setup),1);
 	m_parser->add("preset",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >,I<angle_type<rad> > >(boss,&CBossCore::preset),2);
-	m_parser->add("moon",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::moon),0);
-	m_parser->add("sidereal",new function5<CBossCore,non_constant,void_type,I<string_type>,I<rightAscension_type<rad,true> >,
-			I<declination_type<rad,true> >,I<enum_type<AntennaEquinox2String,Antenna::TSystemEquinox > >,I<enum_type<AntennaSection2String,Antenna::TSections> > >(boss,&CBossCore::sidereal),5);
-	m_parser->add("goOff",new function2<CBossCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> > >(boss,&CBossCore::goOff),2);
-	m_parser->add("lonOTF",new function3<CBossCore,non_constant,time_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(boss,&CBossCore::lonOTFScan),3);
-	m_parser->add("latOTF",new function3<CBossCore,non_constant,time_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<angleOffset_type<rad> >, I<interval_type> >(boss,&CBossCore::latOTFScan),3);
 	//m_parser->add("vlsr",new function1<CBossCore,non_constant,void_type,I<double_type> >(boss,&CBossCore::setVlsr),1);
 	m_parser->add("fwhm",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >, I<double_type> >(boss,&CBossCore::setFWHM),2);
-	m_parser->add("track",new function1<CBossCore,non_constant,void_type,I<string_type> >(boss,&CBossCore::track),1);
 	m_parser->add("azelOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setHorizontalOffsets),2);
 	m_parser->add("radecOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setEquatorialOffsets),2);
 	m_parser->add("lonlatOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setGalacticOffsets),2);
-	m_parser->add("skydipOTF",new function3<CBossCore,non_constant,time_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(boss,&CBossCore::skydip),3);
-	m_parser->add("goTo",new function2<CBossCore,non_constant,void_type,I<azimuth_type<rad,false> >,I<elevation_type<rad,false> > >(boss,&CBossCore::goTo),2);
+	//m_parser->add("skydipOTF",new function3<CBossCore,non_constant,time_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(boss,&CBossCore::skydip),3);
 	m_parser->add("antennaReset",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::resetFailures),0);
-
+	m_parser->add("goOff",new function2<CBossCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(boss,&CBossCore::goOff),2);
 	m_parser->add("radialVelocity",new function3<CBossCore,non_constant,void_type,I<  basic_type<double,double_converter,VRad_WildCard> >,
 			I<enum_type<ReferenceFrame_converter,Antenna::TReferenceFrame,ReferenceFrame_WildCard> >,
 			I<enum_type<VradDefinition_converter,Antenna::TVradDefinition,VradDefinition_WildCard> >  >(boss,&CBossCore::radialVelocity),3);
@@ -393,6 +385,15 @@ void AntennaBossImpl::radialVelocity(CORBA::Double vrad, Antenna::TReferenceFram
 	resource->radialVelocity(vrad,vref,vdef);
 }
 
+void AntennaBossImpl::getTopocentricFrequency(const ACS::doubleSeq & restFreq,ACS::doubleSeq_out topo) throw (CORBA::SystemException,
+		AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx)
+{
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	ACS::doubleSeq_var cent=new ACS::doubleSeq;
+	resource->getTopocentricFrequency(restFreq,cent);
+	topo=cent._retn();
+}
+
 void AntennaBossImpl::enable() throw (CORBA::SystemException)
 {
 	AUTO_TRACE("AntennaBossImpl::enable()");
@@ -440,12 +441,13 @@ void AntennaBossImpl::startScan(ACS::Time& startUT,const Antenna::TTrackingParam
 	}		
 }
 
-void AntennaBossImpl::track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
+void AntennaBossImpl::closeScan(ACS::Time& timeToStop) throw (CORBA::SystemException,AntennaErrors::AntennaErrorsEx,
+		ComponentErrors::ComponentErrorsEx)
 {
-	AUTO_TRACE("AntennaBossImpl::track()");
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:track");
+	AUTO_TRACE("AntennaBossImpl::closeScan()");
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:closeScan");
 	try {
-		resource->track(targetName);
+		resource->closeScan(timeToStop);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -454,27 +456,10 @@ void AntennaBossImpl::track(const char *targetName) throw (ComponentErrors::Comp
 	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getAntennaErrorsEx();
-	}	
-}
-		
-void AntennaBossImpl::moon() throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
-{
-	AUTO_TRACE("AntennaBossImpl::moon()");
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
-	try {
-		resource->moon();
 	}
-	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getComponentErrorsEx();
-	}
-	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getAntennaErrorsEx();
-	}		
 }
 
-ACS::Time AntennaBossImpl::skydipScan(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
+/*ACS::Time AntennaBossImpl::skydipScan(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 	try {
@@ -488,30 +473,13 @@ ACS::Time AntennaBossImpl::skydipScan(CORBA::Double el1,CORBA::Double el2,ACS::T
 		ex.log(LM_DEBUG);
 		throw ex.getAntennaErrorsEx();
 	}
-}
+}*/
 
-void AntennaBossImpl::sidereal(const char * targetName,CORBA::Double ra,CORBA::Double dec,Antenna::TSystemEquinox eq,Antenna::TSections section) throw (
-			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
-{
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
-	try {
-		resource->sidereal(targetName,ra,dec,eq,section);
-	}
-	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getComponentErrorsEx();
-	}
-	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getAntennaErrorsEx();
-	}	
-}
-
-void AntennaBossImpl::goOff(Antenna::TCoordinateFrame frame,CORBA::Double skyOffset) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
+void AntennaBossImpl::goOff(Antenna::TCoordinateFrame frame,CORBA::Double beams) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:goOff");
 	try {
-		resource->goOff(frame,skyOffset);
+		resource->goOff(frame,beams);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -523,63 +491,15 @@ void AntennaBossImpl::goOff(Antenna::TCoordinateFrame frame,CORBA::Double skyOff
 	}		
 }
 
-void AntennaBossImpl::goTo(CORBA::Double az,CORBA::Double el) throw (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
-{
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:goTo");
-	try {
-		resource->goTo(az,el);
-	}
-	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getComponentErrorsEx();
-	}
-	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getAntennaErrorsEx();
-	}
-}
-
-ACS::Time AntennaBossImpl::lonOTFScan(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
-			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
-{
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:lonOTFscan");
-	try {
-		return resource->lonOTFScan(scanFrame,span,duration);
-	}
-	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getComponentErrorsEx();
-	}
-	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getAntennaErrorsEx();
-	}		
-}
-
-ACS::Time AntennaBossImpl::latOTFScan(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
-			ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
-{
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:latOTFScan");
-	try {
-		return resource->latOTFScan(scanFrame,span,duration);
-	}
-	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getComponentErrorsEx();
-	}
-	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getAntennaErrorsEx();
-	}			
-}
-
-bool AntennaBossImpl::checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary,ACS::TimeInterval_out slewingTime,CORBA::Double minElLimit,CORBA::Double maxElLimit) throw (
-		ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
+bool AntennaBossImpl::checkScan(ACS::Time startUt,const Antenna::TTrackingParameters& parameters,
+  const Antenna::TTrackingParameters& secondary,
+  CORBA::Double minElLimit,CORBA::Double maxElLimit,Antenna::TRunTimeParameters_out runTime) throw (
+  ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx,CORBA::SystemException)
 {
 	AUTO_TRACE("AntennaBossImpl::checkScan()");
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:checkScan");
 	try {
-		return resource->checkScan(startUt,parameters,secondary,slewingTime,minElLimit,maxElLimit);
+		return resource->checkScan(startUt,parameters,secondary,runTime,minElLimit,maxElLimit);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -596,7 +516,7 @@ char *AntennaBossImpl::getGeneratorCURL(Antenna::TGeneratorType_out type) throw 
 	AUTO_TRACE("AntennaBossImpl::getGeneratorCURL()");
 	//that's another workaround for the same problem described in "getObservedEquatorial". The cause of that (this function called before
 	// m_core is initialized) is a mystery to me.
-	if (!m_core)  {
+	if (!m_core) {
 		type=Antenna::ANT_NONE;
 		return CORBA::string_dup("");
 	}

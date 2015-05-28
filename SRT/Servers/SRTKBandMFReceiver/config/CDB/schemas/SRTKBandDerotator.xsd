@@ -93,6 +93,12 @@
         <!-- ICD attributes -->
         <xs:attribute name="IP" type="xs:string" use="required" />
         <xs:attribute name="Port" type="xs:unsignedShort" use="required" />
+        <!-- Speed in rpm -->
+        <xs:attribute name="Speed" type="xs:unsignedShort" use="required" />
+        <!-- Minimum speed in rpm -->
+        <xs:attribute name="MaxSpeed" type="xs:unsignedShort" use="required" />
+        <!-- Maximum speed in rpm -->
+        <xs:attribute name="MinSpeed" type="xs:unsignedShort" use="required" />
         <!-- timeout (microseconds) applied when trying to connect to the ICD -->
         <xs:attribute name="Timeout" type="xs:unsignedLong" use="required" />
         <!-- Reference position (zero position) of ICD in degrees, related to User's Referece System -->

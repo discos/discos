@@ -4,11 +4,14 @@
        Marco Buttu, mbuttu@oa-cagliari.inaf.it
  
    Created: Tue Oct 13 09:36:00 CEST 2009
-   Last Modified:
+   Last Modified: Fri Jun 7 12:20:32 UTC 2013
+
 -->
 
 <!-- Expire time in seconds -->
-<!-- limits: x, y, z, theta_x, theta_y, theta_z) -->
+<!-- Limits: x(-50,50), y(-110,110), z(-110,110), theta_x(-0.25,0.25), theta_y(-0.25,0.25), theta_z(-0.25,0.25) -->
+<!-- Elongation Limits: Z1(-125,125), Z2(-125,125), Z3(-125,125), Y4(-125,125), Y5(-125,125), X6(-125,125) -->
+<!-- Park position (elongations): Z1(-125), Z2(-125), Z3(-125), Y4(0), Y5(0), X6(0) -->
 <WPServo
     xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -21,20 +24,20 @@
     number_of_slaves="7"
     scale_factor="1"
     scale_offset="0"
-    server_ip="10.0.2.15"
+    server_ip="127.0.0.1"
     server_port="10000"
     timeout="2000000"
     servo_address="1"
     zero="1570.00"
-    park_position="0"
+    park_position="-5,5,-125,0,0,0"
     max_speed="0"
     min_speed="0"
     driver_type = "unknown"
     virtual_rs = "1"
     require_calibration = "0"
     expire_time = "0.05000"
-    tracking_delta = "1"
-    limits="(-45, 45); (-105, 105); (-45, 45); (-0.20, 0.20); (-0.20, 0.20); (-0.20, 0.20)"
+    tracking_delta = "1.0"
+    limits="(-50, 50); (-110, 110); (-110, 110); (-0.25, 0.25); (-0.25, 0.25); (-0.25, 0.25)"
 >
               
     <!-- Actual Position (ROdoubleSeq) -->
@@ -44,6 +47,25 @@
         initialize_devio="0"
         default_value="0"
         description="MinorServo actual position" 
+        units="mm, mm, mm, degree, degree, degree"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+
+    <!-- Plain Actual Position (ROdoubleSeq) -->
+    <plainActPos
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo plain actual position (actPos - user_offset)" 
         units="mm, mm, mm, degree, degree, degree"
         resolution="65535"
         alarm_low_on="0"
@@ -68,8 +90,6 @@
         graph_min="0"
         graph_max="0"
         min_step="0"
-        min_value="-110"
-        max_value="+110"
 	/>
               
     <!-- Position Difference (ROdoubleSeq) -->
@@ -98,7 +118,7 @@
         initialize_devio="0"
         default_value="0"
         description="MinorServo actual elongation" 
-        units="mm"
+        units="mm, mm, mm, mm, mm, mm"
         resolution="65535"
         alarm_low_on="0"
         alarm_high_on="0"
@@ -109,7 +129,26 @@
         min_step="0"
         alarm_timer_trig="0"
 	/>
-             
+ 
+    <!-- Virtual Actual Elongation (ROdoubleSeq) -->
+    <virtualActElongation
+        default_timer_trig="0"
+        min_timer_trig="0"
+        initialize_devio="0"
+        default_value="0"
+        description="MinorServo virtual actual elongation" 
+        units="mm, mm, mm, mm, mm, mm"
+        resolution="65535"
+        alarm_low_on="0"
+        alarm_high_on="0"
+        alarm_low_off="0"
+        alarm_high_off="0"
+        graph_min="0"
+        graph_max="0"
+        min_step="0"
+        alarm_timer_trig="0"
+	/>
+            
     <!-- Engine Temperature (ROdoubleSeq) -->
     <engTemperature
         default_timer_trig="0"

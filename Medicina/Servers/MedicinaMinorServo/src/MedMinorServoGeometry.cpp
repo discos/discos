@@ -187,6 +187,40 @@ MedMinorServoPosition::get_axes_positions()
     return res;
 }
 
+double 
+MedMinorServoPosition::get_axis_position(const char* axis_name)
+throw (MinorServoAxisNameError)
+{
+    if((mode == MED_MINOR_SERVO_PRIMARY)||
+       (mode == MED_MINOR_SERVO_TRANSFER_TO_PRIMARY))
+    {
+        if((strcmp(axis_name, "yp") == 0) ||
+            (strcmp(axis_name, "YP") ==0))
+            return y;
+        if((strcmp(axis_name, "zp") == 0) ||
+            (strcmp(axis_name, "ZP") ==0))
+            return z;
+        throw MinorServoAxisNameError(axis_name);
+    }else{
+        if((strcmp(axis_name, "x") == 0) ||
+            (strcmp(axis_name, "X") ==0))
+            return x;
+        if((strcmp(axis_name, "y") == 0) ||
+            (strcmp(axis_name, "Y") ==0))
+            return y;
+        if((strcmp(axis_name, "z") == 0) ||
+            (strcmp(axis_name, "Z") ==0))
+            return z;
+        if((strcmp(axis_name, "theta_x") == 0) ||
+            (strcmp(axis_name, "THETA_X") ==0))
+            return theta_x;
+        if((strcmp(axis_name, "theta_y") == 0) ||
+            (strcmp(axis_name, "THETA_Y") ==0))
+            return theta_y;
+        throw MinorServoAxisNameError(axis_name);
+    }
+}
+
 MedMinorServoPosition
 MedMinorServoGeometry::interpolate(const MedMinorServoPosition& before_position,
                                    const MedMinorServoPosition& after_position,
@@ -296,6 +330,7 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 0,
                 MED_MINOR_SERVO_PRIMARY,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_TRANSFER_TO_PRIMARY): //PRIMARY FOCUS
             result = MedMinorServoPosition(
@@ -306,6 +341,7 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 0,
                 MED_MINOR_SERVO_TRANSFER_TO_PRIMARY,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_PRIMARY_DISABLED): //PRIMARY FOCUS
             result = MedMinorServoPosition(
@@ -316,6 +352,7 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 0,
                 MED_MINOR_SERVO_PRIMARY_DISABLED,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_PFR_BLOCK): //PRIMARY FOCUS
             result = MedMinorServoPosition(
@@ -326,6 +363,7 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 0,
                 MED_MINOR_SERVO_PFR_BLOCK,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_SECONDARY):
             result = MedMinorServoPosition(
@@ -336,6 +374,7 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 _get_direct_theta_y(status),
                 MED_MINOR_SERVO_SECONDARY,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_TRANSFER_TO_SECONDARY):
             result = MedMinorServoPosition(
@@ -346,6 +385,7 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 _get_direct_theta_y(status),
                 MED_MINOR_SERVO_TRANSFER_TO_SECONDARY,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_SECONDARY_DISABLED):
             result = MedMinorServoPosition(
@@ -356,6 +396,7 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 _get_direct_theta_y(status),
                 MED_MINOR_SERVO_SECONDARY_DISABLED,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_SR_BLOCK):
             result = MedMinorServoPosition(
@@ -366,6 +407,7 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 _get_direct_theta_y(status),
                 MED_MINOR_SERVO_SR_BLOCK,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_SYSTEM_BLOCK):
             result = MedMinorServoPosition(
@@ -376,14 +418,17 @@ MedMinorServoGeometry::positionFromAxes(const MEDMINORSERVOSTATUS& status)
                 _get_direct_theta_y(status),
                 MED_MINOR_SERVO_SYSTEM_BLOCK,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_LOCAL):
             result = MedMinorServoPosition(0,0,0,0,0, MED_MINOR_SERVO_LOCAL,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         case(MED_MINOR_SERVO_STATUS_INTERLOCK):
             result = MedMinorServoPosition(0,0,0,0,0, MED_MINOR_SERVO_INTERLOCK,
                 MedMinorServoTime::servoToACSTime(status.time));
+                //IRA::CIRATools::getACSTime());
             break;
         default:
             throw MinorServoGeometryError("Invalid system status converting status to position");
@@ -407,56 +452,98 @@ double
 MedMinorServoGeometry::min_time(const MedMinorServoPosition& start, 
                                 const MedMinorServoPosition& stop)
 {
-    double max = 0;
+    double min = 0;
     MEDMINORSERVOSETPOS start_axes = positionToAxes(start);
     MEDMINORSERVOSETPOS stop_axes = positionToAxes(stop);
     if(start.mode == MED_MINOR_SERVO_PRIMARY)
     {
-        double t_yp = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_YP.speed_max;
-        if(t_yp > max) max = t_yp;
-        double t_zp = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_ZP.speed_max;
-        if(t_zp > max) max = t_zp;
+        if(start_axes.pos_x_yp != stop_axes.pos_x_yp)
+        {
+            double t_yp = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_YP.speed_max;
+            if(t_yp > min) min = t_yp;
+        }
+        if(start_axes.pos_y_zp != stop_axes.pos_y_zp)
+        {
+            double t_zp = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_ZP.speed_max;
+            if(t_zp > min) min = t_zp;
+        }
     }else{//MED_MINOR_SERVO_SECONDARY
-        double t_x = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_X.speed_max;
-        if(t_x > max) max = t_x;
-        double t_y = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_Y.speed_max;
-        if(t_y > max) max = t_y;
-        double t_z1 = std::abs(start_axes.pos_z1 - stop_axes.pos_z1) / MINOR_SERVO_Z1.speed_max;
-        if(t_z1 > max) max = t_z1;
-        double t_z2 = std::abs(start_axes.pos_z2 - stop_axes.pos_z2) / MINOR_SERVO_Z2.speed_max;
-        if(t_z2 > max) max = t_z2;
-        double t_z3 = std::abs(start_axes.pos_z3 - stop_axes.pos_z3) / MINOR_SERVO_Z3.speed_max;
-        if(t_z3 > max) max = t_z3;
+        if(start_axes.pos_x_yp != stop_axes.pos_x_yp)
+        {
+            double t_x = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_X.speed_max;
+            if(t_x > min) min = t_x;
+        }
+        if(start_axes.pos_y_zp != stop_axes.pos_y_zp)
+        {
+            double t_y = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_Y.speed_max;
+            if(t_y > min) min = t_y;
+        }
+        if(start_axes.pos_z1 != stop_axes.pos_z1)
+        {
+            double t_z1 = std::abs(start_axes.pos_z1 - stop_axes.pos_z1) / MINOR_SERVO_Z1.speed_max;
+            if(t_z1 > min) min = t_z1;
+        }
+        if(start_axes.pos_z2 != stop_axes.pos_z2)
+        {
+            double t_z2 = std::abs(start_axes.pos_z2 - stop_axes.pos_z2) / MINOR_SERVO_Z2.speed_max;
+            if(t_z2 > min) min = t_z2;
+        }
+        if(start_axes.pos_z3 != stop_axes.pos_z3)
+        {
+            double t_z3 = std::abs(start_axes.pos_z3 - stop_axes.pos_z3) / MINOR_SERVO_Z3.speed_max;
+            if(t_z3 > min) min = t_z3;
+        }
     }
-    return max;
+    return min;
 }
 
 double 
 MedMinorServoGeometry::max_time(const MedMinorServoPosition& start, 
                                 const MedMinorServoPosition& stop)
 {
-    double min = 0;
+    double max = std::numeric_limits<double>::infinity();
     MEDMINORSERVOSETPOS start_axes = positionToAxes(start);
     MEDMINORSERVOSETPOS stop_axes = positionToAxes(stop);
     if(start.mode == MED_MINOR_SERVO_PRIMARY)
     {
-        double t_yp = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_YP.speed_min;
-        if(t_yp < min) min = t_yp;
-        double t_zp = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_ZP.speed_min;
-        if(t_zp < min) min = t_zp;
+        if(start_axes.pos_x_yp != stop_axes.pos_x_yp)
+        {
+            double t_yp = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_YP.speed_min;
+            if(t_yp < max) max = t_yp;
+        }
+        if(start_axes.pos_y_zp != stop_axes.pos_y_zp)
+        {
+            double t_zp = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_ZP.speed_min;
+            if(t_zp < max) max = t_zp;
+        }
     }else{//MED_MINOR_SERVO_SECONDARY
-        double t_x = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_X.speed_min;
-        if(t_x < min) min = t_x;
-        double t_y = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_Y.speed_min;
-        if(t_y < min) min = t_y;
-        double t_z1 = std::abs(start_axes.pos_z1 - stop_axes.pos_z1) / MINOR_SERVO_Z1.speed_min;
-        if(t_z1 < min) min = t_z1;
-        double t_z2 = std::abs(start_axes.pos_z2 - stop_axes.pos_z2) / MINOR_SERVO_Z2.speed_min;
-        if(t_z2 < min) min = t_z2;
-        double t_z3 = std::abs(start_axes.pos_z3 - stop_axes.pos_z3) / MINOR_SERVO_Z3.speed_min;
-        if(t_z3 < min) min = t_z3;
+        if(start_axes.pos_x_yp != stop_axes.pos_x_yp)
+        {
+            double t_x = std::abs(start_axes.pos_x_yp - stop_axes.pos_x_yp) / MINOR_SERVO_X.speed_min;
+            if(t_x < max) max = t_x;
+        }
+        if(start_axes.pos_y_zp != stop_axes.pos_y_zp)
+        {
+            double t_y = std::abs(start_axes.pos_y_zp - stop_axes.pos_y_zp) / MINOR_SERVO_Y.speed_min;
+            if(t_y < max) max = t_y;
+        }
+        if(start_axes.pos_z1 != stop_axes.pos_z1)
+        {
+            double t_z1 = std::abs(start_axes.pos_z1 - stop_axes.pos_z1) / MINOR_SERVO_Z1.speed_min;
+            if(t_z1 < max) max = t_z1;
+        }
+        if(start_axes.pos_z2 != stop_axes.pos_z2)
+        {
+            double t_z2 = std::abs(start_axes.pos_z2 - stop_axes.pos_z2) / MINOR_SERVO_Z2.speed_min;
+            if(t_z2 < max) max = t_z2;
+        }
+        if(start_axes.pos_z3 != stop_axes.pos_z3)
+        {
+            double t_z3 = std::abs(start_axes.pos_z3 - stop_axes.pos_z3) / MINOR_SERVO_Z3.speed_min;
+            if(t_z3 < max) max = t_z3;
+        }
     }
-    return min;
+    return max;
 }
 
 MedMinorServoPosition

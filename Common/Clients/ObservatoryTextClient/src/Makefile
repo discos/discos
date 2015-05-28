@@ -67,7 +67,8 @@ EXECUTABLES_L   =
 # <brief description of xxxxx program>
 _tui_ObservatoryTextClient_OBJECTS = ObservatoryTextClient
 _tui_ObservatoryTextClient_LIBS = ObservatoryStubs IRALibrary \
-         TextWindowLibrary ClientErrors ComponentErrors AntennaDefinitionsStubs
+TextWindowLibrary ClientErrors ComponentErrors AntennaDefinitionsStubs ManagmentDefinitionsStubs \
+ManagementErrors
 
 
 SCRIPTS         = observatoryTui

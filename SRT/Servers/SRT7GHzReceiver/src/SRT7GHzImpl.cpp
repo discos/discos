@@ -247,6 +247,57 @@ void SRT7GHzImpl::calOff() throw (CORBA::SystemException,ComponentErrors::Compon
 	}
 }
 
+
+void SRT7GHzImpl::externalCalOn() throw (
+        CORBA::SystemException,
+        ComponentErrors::ComponentErrorsEx,
+        ReceiversErrors::ReceiversErrorsEx
+        )
+{   
+    try {
+        m_core.externalCalOn();
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();        
+    }
+    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getReceiversErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRT7GHzImpl::externalCalOn()");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+}
+
+
+void SRT7GHzImpl::externalCalOff() throw (
+        CORBA::SystemException,
+        ComponentErrors::ComponentErrorsEx,
+        ReceiversErrors::ReceiversErrorsEx
+        )
+{   
+    try {
+        m_core.externalCalOff();
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();        
+    }
+    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getReceiversErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRT7GHzImpl::externalCalOff()");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+}
+
+
 void SRT7GHzImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {

@@ -1,6 +1,7 @@
 #ifndef CORE_RESOURCE_H_
 #define CORE_RESOURCE_H_
 
+// Declaration and management of the resources....
 
 #define RESOURCE_INIT m_antennaBoss=Antenna::AntennaBoss::_nil(); \
 									m_receiversBoss=Receivers::ReceiversBoss::_nil();	\
@@ -12,13 +13,21 @@
 									m_weatherStation=Weather::GenericWeatherStation::_nil(); \
 									m_antennaNC=NULL; \
 									m_minorServoNC=NULL; \
-									m_isAntennaTracking=m_isMinorServoTracking=false; \
+									m_isAntennaTracking=m_isMinorServoTracking=m_isReceiversTracking=false; \
 									m_clearTrackingTime=0; \
 									m_antennaBossError=m_receiversBossError=m_minorServoBossError=m_defaultBackendError=m_defaultDataReceiverError=m_customLoggerError=\
 									m_activeSurfaceBossError=m_weatherStationError=false; \
 									m_currentDevice=0;\
-									m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false; \
-									m_restFrequency.length(0);
+									m_streamStarted=m_streamPrepared=m_streamConnected=m_dataTransferInitialized=false; \
+									m_restFrequency.length(0); \
+									m_scanID=0; m_subScanID=0; \
+									m_abortCurrentOperation=false; \
+									m_subScanEpoch=0; \
+									m_subScanStarted=false; \
+									m_antennaRTime=new Antenna::TRunTimeParameters; m_antennaRTime->targetName=""; \
+									m_antennaRTime->axis=Management::MNG_NO_AXIS; \
+									m_servoRunTime=new MinorServo::TRunTimeParameters; m_servoRunTime->scanAxis="";
+
 									
 #define RESOURCE_EXEC ACS_NEW_SIMPLE_CONSUMER(m_antennaNC,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,antennaNCHandler,static_cast<void*>(this)); \
 					  m_antennaNC->consumerReady(); \
@@ -29,6 +38,9 @@
 		      			  ACS_LOG(LM_FULL_INFO, "Core::execute()", (LM_INFO,"MINOR_SERVO_NC_READY")); \
 					  } \
 					  else { m_isMinorServoTracking=true; } \
+					  ACS_NEW_SIMPLE_CONSUMER(m_receiversNC,Receivers::ReceiversDataBlock,Receivers::RECEIVERS_DATA_CHANNEL,receiversNCHandler,static_cast<void*>(this)); \
+					  m_receiversNC->consumerReady(); \
+					  ACS_LOG(LM_FULL_INFO, "Core::execute()", (LM_INFO,"RECEIVERS_NC_READY")); \
 					  m_defaultBackendInstance=m_config->getDefaultBackendInstance(); \
 					  m_defaultDataReceiverInstance=m_config->getDefaultDataReceiverInstance(); \
 					  try { \
@@ -48,6 +60,8 @@
 						 m_antennaNC=NULL; \
 						 if (m_minorServoNC!=NULL) m_minorServoNC->disconnect(); \
 						 m_minorServoNC=NULL; \
+						 if (m_receiversNC!=NULL) m_receiversNC->disconnect(); \
+						 m_receiversNC=NULL; \
 						 if (m_parser) { \
 						    delete m_parser; \
 						 } \
@@ -145,11 +159,34 @@ bool m_defaultDataReceiverError;
 bool m_streamStarted;
 bool m_streamPrepared;
 bool m_streamConnected;
-bool m_scanStarted;
+bool m_dataTransferInitialized;
+/**
+ * these member keep track if a subscan has been issued to the telescope (antenna..minorServo....)
+ */
+//bool m_antennaSubScanStarted,m_msSubScanStarted,m_recvSubScanStarted;
+/**
+ * @var Last commanded scan identifier
+ */
+long m_scanID;
+/**
+ * @var Last commanded sub scan identifier
+ */
+long m_subScanID;
+
+/**
+ * This is starting epoch of the last subScan, it could be zero denoting the fact the scan was begun as soon as possible
+ */
+ACS::Time m_subScanEpoch;
+
 /**
  * pointer to the antenna notification channel
 */
 nc::SimpleConsumer<Antenna::AntennaDataBlock> *m_antennaNC;
+
+/**
+ * pointer to the receivers notification channel
+*/
+nc::SimpleConsumer<Receivers::ReceiversDataBlock> *m_receiversNC;
 
 /**
  * pointer to the minor servo notification channel
@@ -166,6 +203,11 @@ bool m_isAntennaTracking;
  */
 bool m_isMinorServoTracking;
 
+/**
+ * Tracking status of the receivers subsystem
+ */
+bool m_isReceiversTracking;
+
 /*
  * Marks when the clear tracking has been issue, the tracking will be false for next 500msec
  */
@@ -175,10 +217,31 @@ ACS::Time m_clearTrackingTime;
  * Stores the ID of the section of the current backend selected as current active device.
  */
 long m_currentDevice;
+
 /**
  * Stores the values of the rest frequencies
  */
 ACS::doubleSeq m_restFrequency;
+/**
+ * structure used to pass back and forth runtime parameters from the receivers
+ */
+Receivers::TRunTimeParameters m_receiversRunTime;
+/**
+ * structure used to pass back and forth runtime parameters from the receivers
+ */
+Antenna::TRunTimeParameters_var m_antennaRTime;
+/**
+ * structure used to pass back and forth runtime parameters from the minor servo
+ */
+MinorServo::TRunTimeParameters_var m_servoRunTime;
+/**
+ * This flags force the component to abort all "long-lasting" operations
+ */
+bool m_abortCurrentOperation;
+/**
+ * if true a scan has been commanded to the telescope and the scan is still active (not closed)
+ */
+bool m_subScanStarted;
 /**
  * used to get a reference to the antenna boss component.
  * @param ref the pointer to the antenna boss component
@@ -298,9 +361,10 @@ void loadProceduresFile(Schedule::CProcedureList *loader);
  * @param time time to be scheduled
  * @param parameter pointer to the parameter that will be passed to the event handler
  * @param handler pointer to the handler function
+ * @param cleanup pointer to the cleanup function, if required.
  * @return false if the event could not be scheduled
  */
-bool addTimerEvent(const ACS::Time& time,IRA::CScheduleTimer::TCallBack handler,void *parameter);
+bool addTimerEvent(const ACS::Time& time,IRA::CScheduleTimer::TCallBack handler,void *parameter,CScheduleTimer::TCleanupFunction cleanup=NULL);
 
 /**
  * Allows to delete the timer event associated to a specific time

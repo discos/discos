@@ -79,9 +79,9 @@ void MSBossPublisher::runLoop()
                 if(m_nc != NULL)
                 {
                     m_nc->publishData<MinorServo::MinorServoDataBlock>(data);
-                    CUSTOM_LOG(LM_FULL_INFO, 
-                               "MinorServo::MSBossPublisher::runLoop",
-                               (LM_DEBUG, "Publish minor servo status"));
+                    //CUSTOM_LOG(LM_FULL_INFO, 
+                    //           "MinorServo::MSBossPublisher::runLoop",
+                    //           (LM_DEBUG, "Publish minor servo status"));
                 }else
                 {
                     ACS_SHORT_LOG((LM_ERROR, "Error: cannot get the notification channel reference."));

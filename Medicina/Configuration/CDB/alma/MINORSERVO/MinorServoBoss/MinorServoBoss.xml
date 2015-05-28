@@ -13,6 +13,7 @@
     monitoringThreadStackSize="4096"
     
     server_ip = "192.168.51.30"
+    AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
 >
     <status description="The summary status of MinorServoBoss"/>
     <actualSetup description="Mnemonic code that defines a setup" />

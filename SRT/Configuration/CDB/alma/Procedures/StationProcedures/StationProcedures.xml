@@ -11,6 +11,7 @@
 	initialize=CCB
 	device=0
 	calOff
+	restFrequency=0
 </body>	
 </Procedure>
 
@@ -23,6 +24,7 @@
 	initialize=KKG
 	device=0
 	calOff
+	restFrequency=0
 </body>
 </Procedure>
 
@@ -35,6 +37,7 @@
 	initialize=LLP
 	device=0
 	calOff
+	restFrequency=0
 </body>
 </Procedure>
 
@@ -47,6 +50,7 @@
 	initialize=PPP
 	device=0
 	calOff
+	restFrequency=0
 </body>
 </Procedure>
 
@@ -59,6 +63,7 @@
 	initialize=PLP
 	device=0
 	calOff
+	restFrequency=0
 </body>
 </Procedure>
 
@@ -71,6 +76,12 @@
 	antennaPark
 	asOff
 	asPark
+</body>
+</Procedure>
+
+<Procedure name="focusScan" args="2">
+<body>
+	peakerScan=SRP_TZ,$1,$2
 </body>
 </Procedure>
 

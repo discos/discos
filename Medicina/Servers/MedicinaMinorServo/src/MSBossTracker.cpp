@@ -11,12 +11,14 @@ TrackerThreadParameters::TrackerThreadParameters(MedMinorServoStatus *status,
                                                 MedMinorServoControl_sp control,
                                                 MedMinorServoParameters **params,
                                                 MedMinorServoOffset *offset,
-                                                maci::ContainerServices *services):
+                                                maci::ContainerServices *services,
+                                                std::string antennaBossInterface):
                                                 m_status(status),
                                                 m_control(control),
                                                 m_parameters(params),
                                                 m_offset(offset),
-                                                m_services(services)
+                                                m_services(services),
+                                                m_antennaBossInterface(antennaBossInterface)
 {}
 
 TrackerThreadParameters::~TrackerThreadParameters()
@@ -32,22 +34,13 @@ MSBossTracker::MSBossTracker(
             m_status(params.m_status), 
             m_control(params.m_control),
             m_parameters(params.m_parameters),
-            m_offset(params.m_offset)
+            m_offset(params.m_offset),
+            m_services(params.m_services),
+            m_antennaBossInterface(params.m_antennaBossInterface)
 {
     AUTO_TRACE("MSBossTracker::MSBossTracker()");
-    m_antennaBoss = Antenna::AntennaBoss::_nil();
-    try {
-        m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
-        if(CORBA::is_nil(m_antennaBoss))
-        {
-            ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init():_nil reference of AntennaBoss component"));
-            m_status->elevation_tracking = false;
-        }
-    }catch(maciErrType::CannotGetComponentExImpl& ex)
-    {
-        m_status->elevation_tracking = false;
-        ACS_SHORT_LOG((LM_WARNING, "MSBossConfiguration::init(): cannot get the AntennaBoss component"));
-    }
+    m_antennaBoss.setContainerServices(m_services);
+    m_antennaBoss.setComponentName(m_antennaBossInterface.c_str());
 }
 
 MSBossTracker::~MSBossTracker() { AUTO_TRACE("MSBossTracker::~MSBossTracker()"); }
@@ -66,18 +59,25 @@ void MSBossTracker::runLoop()
     if(m_status->elevation_tracking)
     {
         try {
-            if(!CORBA::is_nil(m_antennaBoss))
-            {
-                m_antennaBoss->getRawCoordinates(IRA::CIRATools::getACSTime(), azimuth, elevation);
+            m_antennaBoss->getRawCoordinates(IRA::CIRATools::getACSTime(), azimuth, elevation);
+        }catch(...){ //CORBA::SystemException
+            CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MSBossTracker::runLoop",
+                      (LM_WARNING, "Cannot get antenna coordinates"));
+            m_antennaBoss.setError();
+        }
+        if(!(m_antennaBoss.isError()))
+        {
+            try{
                 elevation = elevation * DR2D;
                 offset_position = m_offset->getOffsetPosition();
                 correct_position = (*m_parameters)->get_position(elevation);
                 m_control->set_position(correct_position + offset_position);
+                //CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MSBossTracker::runLoop",
+                //          (LM_DEBUG, "Correcting position"));
+            }catch(...){
                 CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MSBossTracker::runLoop",
-                          (LM_DEBUG, "Correcting position"));
+                          (LM_WARNING, "Cannot command offset position"));
             }
-            //TODO: warning? error?
-        }catch(...){
         }
     }
 }

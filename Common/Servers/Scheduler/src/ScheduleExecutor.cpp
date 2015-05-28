@@ -30,20 +30,15 @@ void CScheduleExecutor::onStop()
 void CScheduleExecutor::runLoop()
 {
 	baci::ThreadSyncGuard guard(&m_mutex); // keep the mutex for thread execution
+	Antenna::TTrackingParameters *primary,*secondary;
+	Receivers::TReceiversParameters *recvPar;
+	MinorServo::MinorServoScan *servoPar;
 	if (m_stopMe) {
 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"SCHEDULE_STOPPED_BY_USER"));
 		cleanSchedule(false); //it also sets m_stopMe to false again;
 		return;
 	}
 	if (m_goAhead) {
-		// check that the antenna reference if still good and in case try to take a valid reference
-		try {
-			m_core->loadAntennaBoss(m_antennaBoss,m_antennaBossError);
-		}
-		catch (ComponentErrors::CouldntGetComponentExImpl &ex) {
-			ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_WARNING,"ANTENNA_BOSS_NOT_AVAILABLE"));
-			// we take no action....the problem will be managed during scan execution....
-		}
 		switch (m_stage) {
 			case INIT: { // run once at schedule start, it runs the init procedure, in case of errors..schedule execution is continued
 				IRA::CString procName;
@@ -70,6 +65,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=STARTTIME_WAIT;
 			}
 			case STARTTIME_WAIT: {
+				//printf("START TIME WAIT\n");
 			 	if (m_schedule->getSchedMode()==CSchedule::TIMETAGGED) {
 			 	 	TIMEVALUE currentUT;	
 			 	 	IRA::CDateTime now;
@@ -98,7 +94,8 @@ void CScheduleExecutor::runLoop()
 			 		m_stage=SCAN_SELECTION;
 			 	}				
 			}
-			case SCAN_SELECTION: { //select the next scan to be done.....in case of errors the schedule is stopped.			
+			case SCAN_SELECTION: { //select the next scan to be done.....in case of errors the schedule is stopped.	
+				//printf("SCAN_SELECTION\n");
 				if (m_haltMe) { //asked to close at the end of the scan...so close exactly at the beginning of the next one
 					m_stopMe=true;
 					break;
@@ -124,10 +121,19 @@ void CScheduleExecutor::runLoop()
 			case SCAN_CHECK: {// checks the scan if it feasible to be done in time...if not the previous stage is executed again. In case of error the scan is aborted
 				double minEl,maxEl;
 				bool ok;
+				//printf("SCAN_CHECK\n");
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"CHECKING_THE_SCAN"));
 					m_schedule->getElevationLimits(minEl,maxEl);
-					ok=CCore::checkScan(m_schedule->getSchedMode(),m_currentScan,m_currentScanRec,minEl,maxEl,m_antennaBoss.in(),m_antennaBossError);
+					primary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.primaryParameters);
+					secondary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
+					servoPar=static_cast<MinorServo::MinorServoScan *>(m_currentScanRec.servoParameters);
+					recvPar=static_cast<Receivers::TReceiversParameters *>(m_currentScanRec.receieversParsmeters);
+					//printf("Eseguo checkScan\n");
+					//printf("ut: %llu\n",m_currentScan.ut);
+					ok=m_core->checkScan(m_currentScan.ut,primary,secondary,servoPar,recvPar,minEl,maxEl);
+					//printf("ut: %llu\n",m_currentScan.ut);
+					//printf("Fatto checkScan\n");
 				}
 				catch (ACSErr::ACSbaseExImpl& ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,ex,"CScheduleExecutor::runLoop()");
@@ -178,9 +184,18 @@ void CScheduleExecutor::runLoop()
 				}
 			}
 			case SCAN_PREPARATION: {  // command the scan to the telescope...in case of error the current scan is aborted
+				//printf("SCAN_PREPARATION\n");
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"COMMAND_SCAN_TO_THE_TELESCOPE"));
-					CCore::doScan(m_currentScan,m_currentScanRec,m_antennaBoss.in(),m_antennaBossError);
+					primary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.primaryParameters);
+					secondary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
+					servoPar=static_cast<MinorServo::MinorServoScan *>(m_currentScanRec.servoParameters);
+					recvPar=static_cast<Receivers::TReceiversParameters *>(m_currentScanRec.receieversParsmeters);
+					//printf("Eseguo doScan\n");
+					//printf("ut: %llu\n",m_currentScan.ut);
+					m_core->doScan(m_currentScan.ut,primary,secondary,servoPar,recvPar);
+					//printf("Fatto doScan\n");
+					m_closeScanTimer=0;
 				}
 				catch (ACSErr::ACSbaseExImpl& Ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,Ex,"CScheduleExecutor::runLoop()");
@@ -196,6 +211,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=WRITING_INITIALIZATION;
 			}
 			case WRITING_INITIALIZATION: { //prepare the data transfer, it configures the backend and the writer. In case of error the scan is aborted.
+				//printf("WRITING_INIT\n");
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PREPARE_DATA_ACQUISITION"));
 					prepareFileWriting(m_currentScan);
@@ -212,6 +228,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=PRE_SCAN_PROC;
 			}
 			case PRE_SCAN_PROC: { // It executed the pre scan procedure. In case of error the scheduled is continued	
+				//printf("PRE_SCAN_PROC\n");
 				ACS::stringSeq preProc;
 				//WORD preProcArgs;
 				if (m_currentScan.preScan!=_SCHED_NULLTARGET) {
@@ -251,7 +268,6 @@ void CScheduleExecutor::runLoop()
 							m_core->changeSchedulerStatus(Management::MNG_WARNING);
 						}
 						m_stage=SCAN_START;
-						/*}*/
 					}
 				}
 				else {
@@ -260,6 +276,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=SCAN_START;	 
 			}
 			case SCAN_START: { // It starts the data acquisition......In case of error the current scan is aborted				
+				//printf("SCAN_START\n");
 				bool start=false;
 				if (m_currentScan.ut==0) {
 					if (m_core->isTracking()) {
@@ -289,7 +306,15 @@ void CScheduleExecutor::runLoop()
 							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"NO_LAYOUT_FILE_DEFINED"));
 							layoutProc.length(0);
 						}
-						startRecording(m_currentScan,m_currentScanRec,layoutProc);
+						if ((m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
+							  m_startRecordTime=m_core->startRecording(m_currentScan.ut,m_currentScan.scanid,m_currentScan.subscanid,m_schedule->getScanTag(),
+									  m_config->getDataDirectory(), m_currentScan.suffix,m_schedule->getObserverName(), m_schedule->getProjectName(),
+									  m_schedule->getFileName(),m_currentScan.layout,layoutProc);
+						}
+						else {
+							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_NOTICE,"NO_RECORDING_REQUIRED"));
+						}
+						//startRecording(m_currentScan,m_currentScanRec,layoutProc);
 						m_scanStopError=false;
 					}
 					catch (ACSErr::ACSbaseExImpl& Ex) {
@@ -302,10 +327,11 @@ void CScheduleExecutor::runLoop()
 						break;
 					}					
 				}
-				m_stage=SCHEDULE_STOP;
+				m_stage=STOP_SCHEDULING;
 			}
-			case SCHEDULE_STOP: { // schedule the scan stop..in case of error. the schedule is aborted
-				if (m_streamStarted) {
+			case STOP_SCHEDULING: { // schedule the scan stop..in case of error. the schedule is aborted
+				//printf("STOP_SCHEDULING\n");
+				if (m_core->isStreamStarted()) {
 					m_lastScheduledTime=m_startRecordTime+(unsigned long long)(m_currentScan.duration*10000000); // this is the stop time in 100 ns.
 					IRA::CString out;
 					IRA::CIRATools::timeToStr(m_lastScheduledTime,out);
@@ -325,6 +351,7 @@ void CScheduleExecutor::runLoop()
 				m_stage=SCAN_EXECUTION;
 			}
 			case SCAN_EXECUTION: { //it waits for the scan completion...in case of error the scan is forcibly aborted
+				//printf("SCAN_EXECTION\n");
 				if (!m_subScanDone) {
 					break;
 				}
@@ -340,33 +367,17 @@ void CScheduleExecutor::runLoop()
 						cleanScan();
 						break;
 					}
-					if  (CCore::checkRecording(m_writer.in(),m_writerError)) {
-						break;
-					}
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"SUBSCAN_DONE"));
 				}
 				m_stage=POST_SCAN_PROC;
 			}
 			case POST_SCAN_PROC: { //Executes the post scan procedure..in case of error nothing is done. We try to keep it up.
-				//ACS::stringSeq postProc;
-				//WORD postProcArgs;
+				//printf("POST_SCAN_PROC\n");
 				if (m_currentScan.postScan!=_SCHED_NULLTARGET) {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"POSTSCAN_PROCEDURE_IS_NOT_NULL"));
-					//printf("CERCO LA PROCEDURA: %s \n",(const char *)m_currentScan.postScan);
-					/*if (!m_schedule->getPostScanProcedureList()->getProcedure(m_currentScan.postScan,postProc,postProcArgs)) {
-						_EXCPT(ManagementErrors::ScheduleErrorExImpl,dummy,"CScheduleExecutor::runLoop()");
-						dummy.setReason((const char *)m_schedule->getLastError());
-						m_core->changeSchedulerStatus(Management::MNG_WARNING);
-						dummy.log(LM_WARNING); 
-					}
-					else if (postProc.length()==0) { //if the procedure is empty...no need to execute it.
-						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"POSTSCAN_PROCEDURE_IS_EMPTY"));
-						m_stage=SCAN_SELECTION;
-					}*/
-					/*else {*/
 					if (m_currentScan.postScanBlocking) {
 						m_goAhead=false;
-						m_stage=SCAN_SELECTION;
+						m_stage=SCAN_CLOSEUP;
 						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BLOCKING_POSTSCAN_PROCEDURE"));
 						try {
 							m_core->executeProcedure(m_currentScan.postScan,&procedureCallBack,this);
@@ -388,9 +399,53 @@ void CScheduleExecutor::runLoop()
 							m_core->changeSchedulerStatus(Management::MNG_WARNING);
 						}
 					}
-					/*}*/
 				}
-				m_stage=SCAN_SELECTION;				
+				m_stage=SCAN_CLOSEUP;
+			}
+			case SCAN_CLOSEUP : {
+				//printf("SCAN_CLOSEUP\n");
+				// trying to clean up and close the current scan commanded to the telescope
+				try {
+					m_closeScanTimer=m_core->closeScan(false);
+					IRA::CString outstr;
+					IRA::CIRATools::timeToStr(m_closeScanTimer,outstr);
+					//printf("tempo di chiusura: %s\n",(const char*)outstr);
+				}
+				catch (ACSErr::ACSbaseExImpl& ex) {
+					_ADD_BACKTRACE(ManagementErrors::CloseTelescopeScanErrorExImpl,impl,ex,"CScheduleExecutor::runLoop()");
+					impl.log(LM_ERROR);
+					m_core->changeSchedulerStatus(Management::MNG_FAILURE);
+					cleanScan();
+					break;
+				}
+				m_stage=CLOSEUP_WAIT;
+				break;
+			}
+			case CLOSEUP_WAIT : {
+				//printf("CLOSEUP_WAIT\n");
+				if (m_closeScanTimer!=0) {
+					TIMEVALUE now;
+					IRA::CIRATools::getTime(now);
+					if (m_closeScanTimer>now.value().value) {
+						break;
+					}
+					m_closeScanTimer=0;
+				}
+				m_stage=RECORDING_FINALIZE;
+			}
+			case RECORDING_FINALIZE: {
+				//printf("RECORDING_FINALIZE\n");
+				// wait for the recorder to consume all the data in its cache
+				try {
+					if (m_core->checkRecording()) {
+						break;
+					}
+				}
+				catch (ACSErr::ACSbaseExImpl& ex) {
+					ex.log(LM_WARNING);
+					m_core->changeSchedulerStatus(Management::MNG_WARNING);
+				}
+				m_stage=SCAN_SELECTION;
 				break;
 			}
 			default : {
@@ -415,19 +470,9 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 { 
 	 m_services=services;
 	 m_config=config;
-	 m_currentWriterInstance="";
-	 m_currentBackendInstance="";
 	 m_currentBackendProcedure="";
 	 Management::FitsWriter::_nil();
-	 m_backend=Backends::GenericBackend::_nil();
-	 m_antennaBoss=Antenna::AntennaBoss::_nil();
-	 m_minorServoBoss=MinorServo::MinorServoBoss::_nil();
-	 m_minorServoBossError=false;
-	 m_antennaBossError=false;
-	 m_backendError=false;
-	 m_writerError=false;
-	 m_streamPrepared=m_streamStarted=m_streamConnected=false;
-	 m_scanStarted=false;
+	 //m_scanStarted=false;
 	 m_scheduleRewound=false;
 	 m_site=site;
 	 m_dut1=dut1;
@@ -437,6 +482,7 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 	 m_projectCode=m_core->m_config->getDefaultProjectCode();
 	 m_scheduleCounter=0;
 	 m_lastScanID=0;
+	 m_closeScanTimer=0;
 	 m_goAhead=true;
 	 m_stage=INIT;
 	 m_firstSubScan=0;
@@ -482,6 +528,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
  		throw dummy;
  	}
+ 	m_schedule->setConfiguration(m_config);
  	if (!m_schedule->readAll(true)) {
  		_EXCPT(ManagementErrors::ScheduleErrorExImpl,dummy,"CScheduleExecutor::startSchedule()");
  		dummy.setReason((const char *)m_schedule->getLastError());
@@ -499,16 +546,6 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		throw dummy;		
  	}
  	m_scheduleLoaded=true;
- 	try {
- 		m_core->loadAntennaBoss(m_antennaBoss,m_antennaBossError); 
- 	}
- 	catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
- 		delete m_schedule;
- 		m_schedule=NULL;
- 		m_scheduleLoaded=false;
- 		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
- 		throw ex;
- 	}
  	m_scheduleCounter=m_schedule->getSubScanCounter(subScanidentifier)-1; //need to point before the first scan in the schedule, the first scan has counter==1
         /* Compose log file name as:
          * schedulename + _ + YEAR + DOY + HOUR + MIN + SEC
@@ -538,7 +575,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"PROJECT: %s",(const char *)m_projectCode));
  	}
  	// if the schedule is properly started the status of the scheduler is considered now to be ok.
- 	m_core->resetSchedulerStatus();
+ 	m_core->clearStatus();
  	m_stage=INIT;  // put the executor in the init stage.
  	m_goAhead=true; // make sure the executor is not suspended
  	m_stopMe=false;
@@ -559,51 +596,17 @@ void CScheduleExecutor::stopSchedule(bool force)
 	}
 }
  
-Backends::GenericBackend_ptr CScheduleExecutor::getBackendReference()
-{
-	baci::ThreadSyncGuard guard(&m_mutex);
-	if (CORBA::is_nil(m_backend)) {
-		return Backends::GenericBackend::_nil();
-	}
-	else {
-		Backends::GenericBackend_var tmp;
-		tmp=Backends::GenericBackend::_duplicate(m_backend);
-		return tmp._retn();
-	}
-}
-
-Management::DataReceiver_ptr  CScheduleExecutor::getWriterReference()
-{
-	baci::ThreadSyncGuard guard(&m_mutex);
-	if (CORBA::is_nil(m_writer)) {
-		return Management::DataReceiver::_nil();
-	}
-	else {
-		Management::DataReceiver_var tmp;
-		tmp=Management::DataReceiver::_duplicate(m_writer);
-		return tmp._retn();
-	}
-}
-
-
 //************************PRIVATE*********************************** 
 
 void CScheduleExecutor::stopRecording()
 {
 	baci::ThreadSyncGuard guard(&m_mutex); // not called directly by the thread runLoop, which is synchronized, but called by the timer handler, so an explicit sync is required.
 	m_lastScheduledTime=0;
-	if (!CORBA::is_nil(m_backend)) {
-		try {
-			if (m_streamStarted) {
-				m_backend->sendStop();
-				m_streamStarted=false;
-				ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::stopRecording()",(LM_NOTICE,"RECORDING_STOPPED"));
-			}
-		}
-		catch (...) {
-			m_scanStopError=true;
-			m_backendError=true;
-		}
+	try {
+		m_core->stopDataTransfer();
+	}
+	catch (...) {
+		m_scanStopError=true;
 	}
 	m_subScanDone=true;
 	m_scansCounter++;
@@ -614,21 +617,19 @@ void CScheduleExecutor::cleanScan()
 	m_core->cancelTimerEvent(m_lastScheduledTime);
 	// clean up backend and writer
 	try {
-		CCore::disableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_writerError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
+		m_core->disableDataTransfer();
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
-		m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
+		//m_scanStarted=false;
 		ex.log(LM_WARNING);
 	}
 	try {
-		closeBackend();
-		closeWriter();
+		m_core->closeScan(false);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		ex.log(LM_WARNING);
 	}
-	m_currentWriterInstance="";
-	m_currentBackendInstance="";
+	m_closeScanTimer=0;
 	m_currentBackendProcedure="";
 	m_stage=SCAN_SELECTION;
 	m_subScanDone=false;
@@ -657,22 +658,19 @@ void CScheduleExecutor::cleanSchedule(bool error)
 	m_core->cancelTimerEvent(m_lastScheduledTime); // => m_lastScheduledTime=0;
 	// clean up backend and writer
 	try {
-		//disableFileWriting();
-		CCore::disableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_writerError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
-		closeBackend();
-		closeWriter();
+		m_core->disableDataTransfer();
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
-		m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
+		//m_scanStarted=false;
 		ex.log(LM_WARNING);
 	}
 	try {
-		closeBackend();
-		closeWriter();
+		m_core->closeScan(false);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		ex.log(LM_WARNING);
 	}
+	m_closeScanTimer=0;
 	// get rid of the schedule file......
 	if (m_scheduleLoaded) {
 		if (m_schedule!=NULL) { 
@@ -682,13 +680,10 @@ void CScheduleExecutor::cleanSchedule(bool error)
 		}
 		m_scheduleLoaded=false;
 	}
-	//release the AntennaBoss	
-	m_core->unloadAntennaBoss(m_antennaBoss);
-	m_currentWriterInstance="";
-	m_currentBackendInstance="";
 	m_currentBackendProcedure="";
 	m_scheduleCounter=0;
 	m_lastScanID=0;
+	m_closeScanTimer=0;
 	m_stage=LIMBO;
 	m_firstSubScan=0;
 	m_startSubScan=0;
@@ -699,8 +694,6 @@ void CScheduleExecutor::cleanSchedule(bool error)
 	m_goAhead=false;
 	m_stopMe=false;
 	m_haltMe=false;
-	m_writerError=false;
-	m_backendError=false;
 	if (error) {
 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_NOTICE,"SCHEDULE_HALTED"));
 	}
@@ -754,137 +747,12 @@ void CScheduleExecutor::getNextScan(const DWORD& counter,CSchedule::TRecord& rec
  	}
 }
 
-void CScheduleExecutor::openWriter(const IRA::CString& wrt) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	if (wrt!=m_currentWriterInstance) {
-		closeWriter(); //throw ComponentErrors::CouldntReleaseComponentExImpl and ComponentErrors::UnexpectedExImpl
-		try {	
- 			m_writer=m_services->getComponent<Management::DataReceiver>((const char *)wrt);
- 			m_writer->reset();
- 			m_currentWriterInstance=wrt;
- 			m_writerError=false;
- 		}
-		catch (maciErrType::CannotGetComponentExImpl& ex) {
-			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CScheduleExecutor::openWriter()");
-			Impl.setComponentName((const char*)wrt);
-			throw Impl;
-		}
-	 	catch (...) {
-	 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CScheduleExecutor::openWriter()");
-	 		throw impl;
-	 	}		
-	}
-}
-
-void CScheduleExecutor::closeWriter() throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
-{
- 	try {
- 		if (!CORBA::is_nil(m_writer)) {
- 			m_services->releaseComponent((const char*)m_writer->name());
- 			m_writer=Management::DataReceiver::_nil();	
- 			m_currentWriterInstance="";
- 			m_writerError=false;
- 		}
- 	}
- 	catch (maciErrType::CannotReleaseComponentExImpl& ex) {
- 		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CScheduleExecutor::closeWriter()");				
- 		Impl.setComponentName((const char *)m_currentWriterInstance);
-		m_writer=Management::DataReceiver::_nil();	
-		m_currentWriterInstance="";
-		m_writerError=false;
- 		throw Impl;
- 		
- 	}
- 	catch (...) {
-		m_writer=Management::DataReceiver::_nil();	
-		m_currentWriterInstance="";
-		m_writerError=false;
- 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CScheduleExecutor::closeWriter()");
- 		throw impl;
- 	}
-}
- 
-void CScheduleExecutor::openBackend(const IRA::CString& bck) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	if (bck!=m_currentBackendInstance) {
-		closeBackend(); //throw ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl
-		try {	
- 			m_backend=m_services->getComponent<Backends::GenericBackend>((const char *)bck);
- 			m_currentBackendInstance=bck;
- 			m_backendError=false;
- 		}
-		catch (maciErrType::CannotGetComponentExImpl& ex) {
-			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CScheduleExecutor::openBackend()");
-			Impl.setComponentName((const char*)bck);
-			throw Impl;		
-		}
-	 	catch (...) {
-	 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CScheduleExecutor::openBackend()");
-	 		throw impl;
-	 	}			
-	}
-}
-
-void CScheduleExecutor::closeBackend() throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	try {
-		if (!CORBA::is_nil(m_backend)) {
-			m_services->releaseComponent((const char*)m_backend->name());
-			m_backend=Backends::GenericBackend::_nil();	
- 			m_currentBackendInstance="";
- 			m_backendError=false;
- 		}
- 	}
- 	catch (maciErrType::CannotReleaseComponentExImpl& ex) {
- 		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CScheduleExecutor::closeBackend()");	
- 		Impl.setComponentName((const char *)m_currentBackendInstance);
-		m_backend=Backends::GenericBackend::_nil();	
-		m_currentBackendInstance="";
-		m_backendError=false;
- 		throw Impl;
- 	}
- 	catch (...) {
- 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CScheduleExecutor::closeBackend())");
-		m_backend=Backends::GenericBackend::_nil();	
-		m_currentBackendInstance="";
-		m_backendError=false; 		
- 		throw impl;
- 	}
-}
-
 void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw (
 		ManagementErrors::ScheduleErrorExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::BackendProcedureErrorExImpl)
 {
 	std::vector<IRA::CString> command;
  	IRA::CString bckInstance,outputFileName;
- 	// check if we need to close up previous transfers
- 	//error recovery.....give a try to fix things up, so we try to close in order to restart from the scratch
-	/*if (m_backendError || m_writerError) {
- 		try {
- 			CCore::disableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_writerError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
- 			//disableFileWriting();
- 		}
- 		catch (...) {
- 			m_streamStarted=m_streamPrepared=m_streamConnected=m_scanStarted=false;
- 		}
- 		if (m_backendError) {
- 			try {
- 				closeBackend();
- 			}
- 			catch (...) {
- 			}
- 		}
- 		if (m_writerError) {
- 			try {
- 				closeWriter();
- 			}
- 			catch (...) {
- 			}
- 		}
- 		m_currentBackendProcedure="";
- 	}
-	else*/
  	// we have 4 cases: 1) start of a scan 2) first scan 3) first iteration after an error 4) middle of a scan.
  	// cases 2 and 3 are the same as the scheduler is reset, so the procedure (if not NULL) is retrieved, the components loaded, the backend configured and the transfer enabled
  	// case 1 : the transfer is disabled, the procedure (if not NULL) retrieved, if it is different from the previous one , component are loaded(if necessary), bck configured and transfer enabled again
@@ -893,7 +761,7 @@ void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw 
 		// otherwise if current scanid is different from the previous one, or the current scan is consequence of a schedule rewind (to deal with the case just one scan is present in the schedule and it will be executed continuously)
 		if ((m_lastScanID!=m_currentScan.scanid) || (rec.rewind)) {
 			// stop  // we need to stop previous scan before starting a new one.
- 			CCore::disableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_writerError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
+ 			m_core->disableDataTransfer();
 		}
 	}
  	if (rec.backendProc!=_SCHED_NULLTARGET) { // if the writing has been disabled
@@ -904,122 +772,19 @@ void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw 
  	 			dummy.setReason((const char *)m_schedule->getLastError());
  	 			throw dummy;
  	 		}
- 	 		openBackend(bckInstance); // if the case it also close the current one, otherwise it does nothing
- 	 		openWriter(rec.writerInstance); // if the case it also close the current one, otherwise it does nothing
+ 	 		m_core->_chooseDefaultBackend(bckInstance);  //CouldntGetComponentExImpl
+ 	 		m_core->_chooseDefaultDataRecorder(rec.writerInstance); //CouldntGetComponentExImpl ComponentErrors::UnexpectedExImpl
  	 		//throw ManagementErrors::BackendProcedureErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl
- 	 		CCore::configureBackend(m_backend.in(),m_backendError,rec.backendProc, command);
+ 	 		m_core->configureBackend(rec.backendProc,command);
  	 		m_currentBackendProcedure=rec.backendProc;
  	 	}
- 	 	CCore::enableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_streamConnected,m_streamPrepared);
+ 	 	m_core->enableDataTransfer();
  	}
  	else {
  		m_currentBackendProcedure=_SCHED_NULLTARGET;
  		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BACKEND_PROCEDURE_IS_NULL"));
  		return;
  	}
-
-
- 	/*if (rec.backendProc==_SCHED_NULLTARGET) { // if the writing has been disabled
- 		//disableFileWriting();
- 		CCore::disableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_writerError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
- 		m_currentBackendProcedure=rec.backendProc;
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BACKEND_PROCEDURE_IS_NULL"));
- 		return;
- 	}
- 	else if (rec.backendProc==m_currentBackendProcedure) { // same procedure as before
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"SAME_BACKEND_PROCEDURE"));
- 		if (rec.writerInstance!=m_currentWriterInstance) {
- 			ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"DIFFERENT_DATA_RECORDER"));
- 			ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"DISABLING_DATA_RECORDING"));
- 			CCore::disableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_writerError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
- 			closeWriter();
- 			openWriter(rec.writerInstance);
- 			ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"ENABLING_DATA_RECORDING"));
- 			CCore::enableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_writerError,m_streamPrepared,m_streamConnected); 
- 		}
- 		else {  // same procedure and same writer....let's check if a stopScan is required
- 			if (m_lastScanID!=0) {  //if this is the first scan...nothing to do
- 				// otherwise if current scanid is different from the previous one, or the current scan is consequence of a schedule rewind (to deal with the case just one scan is present in the schedule and it will be executed continuously)
- 				if ((m_lastScanID!=m_currentScan.scanid) || (rec.rewind)) {
- 					// stop  // we need to stop previous scan before starting a new one.
- 					CCore::stopScan(m_writer.in(),m_writerError,m_scanStarted); // ComponentErrors::OperationErrorExImpl
- 				}
- 			}
- 		}
- 	}
- 	else { //different procedure 
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"DIFFERENT_BACKEND_PROCEDURE"));
- 		if (!m_schedule->getBackendList()->getBackend(rec.backendProc,bckInstance,command)) {
- 			_EXCPT(ManagementErrors::ScheduleErrorExImpl,dummy,"CScheduleExecutor::prepareFileWriting()");
- 			dummy.setReason((const char *)m_schedule->getLastError());
- 			throw dummy;
- 		}
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"DISABLING_DATA_RECORDING"));
- 		CCore::disableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_writerError,m_streamStarted,m_streamPrepared,m_streamConnected,m_scanStarted);
- 		//disableFileWriting();
- 		openBackend(bckInstance); // if the case it also close the current one, otherwise it does nothing
- 		CCore::configureBackend(m_backend.in(),m_backendError,command);
- 		if (rec.writerInstance!=m_currentWriterInstance) {
- 			closeWriter();
- 			openWriter(rec.writerInstance);
- 		}
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"ENABLING_DATA_RECORDING"));
- 		CCore::enableDataTransfer(m_backend.in(),m_backendError,m_writer.in(),m_writerError,m_streamPrepared,m_streamConnected);
- 		//enableFileWriting();
- 		m_currentBackendProcedure=rec.backendProc;
- 	}*/
-}
-
-void CScheduleExecutor::startRecording(const CSchedule::TRecord& rec,const Schedule::CScanList::TRecord& scanRec,const ACS::stringSeq& layoutProc) throw (ComponentErrors::OperationErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl,
-		ComponentErrors::ComponentNotActiveExImpl)
-{
-	IRA::CString outputFileName;
-	ACS::TimeInterval startLst;
-	Management::TScanAxis scanAxis;
-	IRA::CString baseName,path,extraPath/*,layoutName*/,targetID;
-	if (rec.ut==0) {
-		TIMEVALUE now;
-		TIMEDIFFERENCE lst;
-		IRA::CDateTime currentUT;
-		IRA::CIRATools::getTime(now);
-		m_startRecordTime=now.value().value;
-		currentUT.setDateTime(now,m_dut1);  // transform the current time in a CDateTime object
-		currentUT.LST(m_site).getDateTime(lst);
-		lst.day(0);
-	 	startLst=lst.value().value;             // current lst as TimeInterval	
-	}
-	else {
-		m_startRecordTime=rec.ut;
-		startLst=rec.lst;
-	}
-	IRA::CString out;
-	IRA::CIRATools::timeToStr(m_startRecordTime,out);
-	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_DEBUG,"RECORDING_START_TIME: %s",(const char *)out));
-
-	/*if (m_projectCode!="") {*/
-		path=m_core->m_config->getDataDirectory()+m_projectCode+"/";
-	/*}
-	else {
-		path=m_core->m_config->getDataDirectory();
-	}*/
-	baseName=CCore::computeOutputFileName(m_startRecordTime,startLst,/*m_schedule->getProjectName()*/m_projectCode,rec.suffix,extraPath);
-
-	Antenna::TTrackingParameters *prim=static_cast<Antenna::TTrackingParameters *>(scanRec.primaryParameters);
-	targetID=(const char *)prim->targetName;
-	// compute the axis or direction along which the scan is performed
-	//scanAxis=CCore::computeScanAxis(scanRec.type,scanRec);
-	scanAxis=CCore::computeScanAxis(m_antennaBoss,m_antennaBossError,m_minorServoBoss,m_minorServoBossError,*m_config); //  throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-	if ((rec.backendProc!=_SCHED_NULLTARGET) && (rec.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
-		CCore::setupDataTransfer(m_scanStarted,m_writer.in(),m_writerError,m_backend.in(),m_backendError,m_schedule->getObserverName(),
-				m_schedule->getProjectName(),baseName,path,extraPath,m_schedule->getFileName(),targetID,rec.layout,layoutProc,m_schedule->getScanTag(),m_core->getCurrentDevice(),
-				rec.scanid,m_startRecordTime ,rec.subscanid,scanAxis,m_config);
-		// throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
-		CCore::startDataTansfer(m_backend.in(),m_backendError,rec.ut,m_streamStarted,m_streamPrepared,m_streamConnected);
-	}
-	else {
-		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_NOTICE,"NO_RECORDING_REQUIRED"));
-	}
 }
 
 //********************************************* STATIC METHODS  **************************************************************************
@@ -1030,13 +795,11 @@ void CScheduleExecutor::procedureCallBack(const void *param,const IRA::CString& 
 	if (!result) me->m_core->changeSchedulerStatus(Management::MNG_WARNING); //logs are done by parser for runtime, by core class for errors during parsing. The status has to be changed here.
 	me->m_goAhead=true;
 }
-
-
 void CScheduleExecutor::stopRecordingEventHandler(const ACS::Time& time,const void *par)
 {
-	CScheduleExecutor *core;
-	core=static_cast<CScheduleExecutor *>(const_cast<void *>(par));
-	core->stopRecording();
+	CScheduleExecutor *me;
+	me=static_cast<CScheduleExecutor *>(const_cast<void *>(par));
+	me->stopRecording();
 }
 
 void CScheduleExecutor::restartEventHandler(const ACS::Time& time,const void *par)

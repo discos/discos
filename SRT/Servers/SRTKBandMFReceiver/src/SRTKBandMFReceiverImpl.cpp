@@ -352,6 +352,56 @@ void SRTKBandMFReceiverImpl::calOff() throw (
 }
 
 
+void SRTKBandMFReceiverImpl::externalCalOn() throw (
+        CORBA::SystemException,
+        ComponentErrors::ComponentErrorsEx,
+        ReceiversErrors::ReceiversErrorsEx
+        )
+{   
+    try {
+        m_core.externalCalOn();
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();        
+    }
+    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getReceiversErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::externalCalOn()");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+}
+
+
+void SRTKBandMFReceiverImpl::externalCalOff() throw (
+        CORBA::SystemException,
+        ComponentErrors::ComponentErrorsEx,
+        ReceiversErrors::ReceiversErrorsEx
+        )
+{   
+    try {
+        m_core.externalCalOff();
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();        
+    }
+    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getReceiversErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::externalCalOff()");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
+}
+
+
 void SRTKBandMFReceiverImpl::setLO(const ACS::doubleSeq& lo) throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,

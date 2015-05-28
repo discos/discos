@@ -64,7 +64,7 @@ EXECUTABLES_L   =
 
 _tui_SchedulerTextClient_OBJECTS= SchedulerTuiClient
 _tui_SchedulerTextClient_LIBS= SchedulerStubs ManagementErrors ComponentErrors ClientErrors ManagmentDefinitionsStubs \
-			IRALibrary TextWindowLibrary
+			IRALibrary TextWindowLibrary AntennaDefinitionsStubs
 
 #
 # <brief description of xxxxx program>

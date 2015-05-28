@@ -12,6 +12,7 @@
 
 #include <acscomponentImpl.h>
 #include <ComponentErrors.h>
+#include <IRA>
 #include <Site.h>
 #include <acsContainerServices.h>
 #include <ObservatoryC.h>

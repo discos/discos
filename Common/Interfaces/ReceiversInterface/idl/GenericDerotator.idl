@@ -45,10 +45,12 @@ module Receivers {
      *     <li>setup(): allow the derotator to be ready to move</li>
      *     <li>powerOff(): switch the power amplifier off </li>
      *     <li>setPosition(): set the derotator position</li>
+     *     <li>setSpeed(): set the derotator speed, in rpm</li>
+     *     <li>getSpeed(): get the derotator speed, in rpm</li>
      *     <li>getActPosition(): return the actPosition value</li>
      *     <li>getCmdPosition(): return the cmdPosition value</li>
-     *     <li>getPositionFromHistory(t): return the position at which
-     *     the derotator was at the time t</li>
+     *     <li>getPositionFromHistory(t): return the the derotator position at
+     *     the time t</li>
      *     <li>getMaxLimit(): return the biggest position allowed,
      *     in the URS</li>
      *     <li>getMinLimit(): return the lowerst position allowed, 
@@ -114,11 +116,11 @@ module Receivers {
         /**
          * Enable the derotator to move
          * @throw CORBA::SystemException
-         * @throw DerotatorErrors::ConfigurationErrorEx
+         * @throw DerotatorErrors::DerotatorErrorsEx
          * @throw ComponentErrors::ComponentErrorsEx
          */
         void setup() raises (
-            DerotatorErrors::ConfigurationErrorEx, 
+            DerotatorErrors::DerotatorErrorsEx, 
             ComponentErrors::ComponentErrorsEx
         );
 
@@ -134,12 +136,12 @@ module Receivers {
         /** 
          * @return the actPosition property value
          *
-         * @throw DerotatorErrors::PositioningErrorEx
-	     * @throw DerotatorErrors::CommunicationErrorEx
+         * @throw ComponentErrors::ComponentErrorsEx,
+	     * @throw DerotatorErrors::DerotatorErrorsEx
          */
         void setPosition(in double position) raises (
-            DerotatorErrors::PositioningErrorEx,
-            DerotatorErrors::CommunicationErrorEx
+            ComponentErrors::ComponentErrorsEx,
+            DerotatorErrors::DerotatorErrorsEx
         );
 
 
@@ -155,19 +157,49 @@ module Receivers {
          * @return the actPosition property value
          *
          * @throw ComponentErrors::ComponentErrorsEx,
-         * @throw DerotatorErrors::CommunicationErrorEx
+         * @throw DerotatorErrors::DerotatorErrorsEx
          */
         double getActPosition() raises (
             ComponentErrors::ComponentErrorsEx,
-            DerotatorErrors::CommunicationErrorEx
+	        DerotatorErrors::DerotatorErrorsEx
         );
 
 
-        /**
-         * Return the position at which the derotator was at the time t
-         * @throw CORBA::SystemException
+        /** Return the derotator position at a given time.
+         *  If the time is lesser the the older one stored in the queue,
+         *  then it returns oldest position.
+         *  If the time is in advance or 0, it returns the latest position.
+         *  @arg time the time related to the position we want to get
+         *  @return the position
+         *  @throw ComponentError::ComponentErrorsEx
          */
-        double getPositionFromHistory(in ACS::Time time);
+         double getPositionFromHistory(in ACS::Time time) raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** 
+         * Set the derotator speed
+         *
+         * @arg speed speed in rpm
+         * @throw ComponentErrors::ComponentErrorsEx,
+         * @throw DerotatorErrors::DerotatorErrorsEx
+         */
+        void setSpeed(in unsigned long speed) raises (
+            ComponentErrors::ComponentErrorsEx,
+            DerotatorErrors::DerotatorErrorsEx
+        );
+
+
+        /** 
+         * Get the derotator speed
+         *
+         * @return the derotator speed in rpm
+         * @throw ComponentErrors::ComponentErrorsEx,
+         * @throw DerotatorErrors::DerotatorErrorsEx
+         */
+        unsigned long getSpeed() raises (
+            ComponentErrors::ComponentErrorsEx,
+            DerotatorErrors::DerotatorErrorsEx
+        );
 
 
         /**

@@ -1,220 +1,197 @@
 #ifndef CORE_COMMON_H_
 #define CORE_COMMON_H_
 
-#define COMMON_INIT 
+#define COMMON_INIT
+
+//some common, general use operations, the changes caused by these methods do not have influence on the status of the component
+// and do not have direct interface to RAL.
+
 
 /**
- * Check the scan against the instrumentation. If it could be executed or not. The result could depend also on schedule mode, scan type, instrument configuration and so on.
- * @param mode schedule mode
- * @param rec structure that stores the selected schedule line
- * @param scanRec structure that contains the scan parameters
+ *
+ */
+
+/**
+ * Check the scan against the telescope whether it could be executed or not. The result could depend also on  scan type, instrument configuration and so on.
+ * @param ut required start time for the scan, it could be zero meaning start as soon as possible. As output argument it returns the true start time
+ * @param prim primary scan configuration for the subscan (antenna)
+ * @param sec primary scan configuration for the subscan (antenna)
+ * @param servoPar structure containing the scan configuration for the minor servo system
+ * @param recvPar structure containing the scan configuration for the receivers subsystem.
  * @param minEl elevation lower limit
  * @param maxEl elevation upper limit
- * @param antBoss reference to the antenna boss
- * @param antBossErr flags the status of the antenna boss reference
  * @throw ComponentErrors::UnexpectedExImpl
  * @throw ComponentErrors::OperationErrorExImpl
  * @throw ComponentErrors::ComponentNotActiveExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
+ * @throw ComponentErrors::CouldntGetComponentExImpl
+ * @throw ManagementErrors::UnsupportedOperationExImpl
  * @return true if the scan has been checked successfully
- */ 	
-static bool checkScan(const CSchedule::TScheduleMode& mode,const CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,const double& minEl,const double& maxEl,Antenna::AntennaBoss_ptr antBoss,bool& antBossError)
-	throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl);
-
+ */
+bool checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
+	const MinorServo::MinorServoScan*const servoPar, const Receivers::TReceiversParameters*const recvPar,const double& minEl=-1.0,
+	const double& maxEl=-1.0) throw (ComponentErrors::UnexpectedExImpl,
+	ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
+	ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::UnsupportedOperationExImpl);
 
 /**
- * Send to the antenna boss the commands required to start scan.
+ * Send to the telescope the commands required to start scan.
  * @throw ComponentErrors::OperationErrorExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
  * @throw ComponentErrors::UnexpectedExImpl
  * @throw ComponentErrors::ComponentNotActiveExImpl
- * @param scan structure that contains the scan to be executed. The ut field can be modified. 
- * @param scanRec structure that contains the scan parameters
- * @param par structure that describes the scan
- * @param antBoss reference to the antenna boss
- * @param antBossErr flags the status of the antenna boss reference
+ * @throw ComponentErrors::CouldntGetComponentExImpl
+ * @param ut required start time for the scan, it could be zero meaning start as soon as possible. As output argument it returns the true start time
+ * @param prim primary scan configuration for the subscan (antenna)
+ * @param sec primary scan configuration for the subscan (antenna)
+ * @param servoPar scan configuration fof the servo subsystem.
+ * @param recvPar structure containing the scan configuration for the receivers subsystem.
 */
-static void doScan(CSchedule::TRecord& scanInfo,const Schedule::CScanList::TRecord& scanData,Antenna::AntennaBoss_ptr antBoss,bool& antBossError) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl);
+void doScan(ACS::Time& ut,const Antenna::TTrackingParameters* const prim,const Antenna::TTrackingParameters* const sec,
+	const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPa)
+	throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl,
+	ComponentErrors::CouldntGetComponentExImpl);
 
+/*
+ * starts data recording at a given time, other arguments are required in order to prepare the acquisition
+ * @param recUt start time in UT
+ * @return the time tag at which the recording effectively took place.
+ */
+ACS::Time startRecording(const ACS::Time& recUt,const long& scanId, const long& subScanId, const long& scanTag,const IRA::CString& basePath,
+		const IRA::CString& suffix,const IRA::CString observerName, const IRA::CString& projectName, const IRA::CString& scheduleFileName,
+		const IRA::CString& layout, const ACS::stringSeq& layoutProc )  throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl, ManagementErrors::DataTransferSetupErrorExImpl,
+		ComponentErrors::ComponentNotActiveExImpl, ComponentErrors::CouldntGetComponentExImpl);
+
+/*
+ * This method is is the wrap of both <i>checkScan()<i> and the <i>doScan()<i> methods, it takes all the actions to start a subscan.
+ * @throw ManagementsErrors::TelescopeSubScanErrorExImpl
+ * @throw ManagementsErrors::TargetOrSubscanNotFeasibleImpl
+ * @thorw ManagementErrors::CloseTelescopeScanErrorExImpl
+ * @param ut required start time for the scan, it could be zero meaning start as soon as possible. As output argument it returns the true start time
+ * @param prim primary scan configuration for the subscan (antenna)
+ * @param sec primary scan configuration for the subscan (antenna)
+ * @param servoPar scan configuration fof the servo subsystem.
+ * @param recvPar structure containing the scan configuration for the receivers subsystem.
+*/
+void startScan(ACS::Time& time,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
+	const MinorServo::MinorServoScan*const servoPar, const Receivers::TReceiversParameters*const recvPar) throw (
+	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+	ManagementErrors::CloseTelescopeScanErrorExImpl);
+
+/*
+ * Sends the Antenna off source for a given number of beams sizes. It calls the corresponding method of the antenna subsystem
+ * @param frame reference frame
+ * @param beams number of beams sizes to be applied as offset
+ */
+void goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
+		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl);
 
 /**
- * This method will close (if necessary) the established connection between a backend and a data receiver.It closes and frees the resources allocated to enable the trasmission. In practice it calls sendStop()
- * terminate(), disconnect() and closeReceiver()
- * @param backend reference to the backend 
- * @param backendError will be returned back true if an error occurred in the communication to backend component
- * @param writer reference to the writer or data recorder or data dealer 
- * @param writerError will be returned back true if an error occurred in the communication to writer component
- * @param streamStarted this argument indicates that the data transfer has been started, on exit it is false if the closeup is succesful
- * @param streamPrepared this argument indicates that the data transfer has been setup, on exit it is false if the closeup is succesful
- * @param streamConnected this argument indicates that connection between the sender and receiver component was enstablished, on exit it is false if the closeup is succesful
- * @param scanStarted this argument indicates that the system has already started a scan,in that case it closes it,  on exit it is false
+ * This method issues a close to the current subscan and in case waits for this operation to complete
+ * @param wait true if the methods has to wait for the operation to complete in all the subsystems
+ * @return the time requested by the telescope to close the scan in all subsystems (not a duration but a precise time)
  */
-static void disableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& writerError,bool& streamStarted,bool& streamPrepared,
-		bool& streamConnected,bool& scanStarted) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+ACS::Time closeScan(bool wait) throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::OperationErrorExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl);
 
 /**
- * Enable the transfer between the backend and the receiver. In practice it connects the backend with the receiver itself
- * @param backend reference to the backend 
- * @param backendError will be returned back true if an error occurred in the communication to backend component
- * @param writer reference to the writer or data recorder or data dealer 
- * @param streamconnected this argument indicates that connection between the sender and receiver component was established, on exit it is false if the closeup is successful
- * @param streamPrepared if false the backend is given command to send headers to the writer, then it is set to true
+ * Computes the scan axis starting from the current configuration of involved sub system bosses.
+ * @throw ComponentErrors::ComponentNotActiveExImpl
+ * @throw ComponentErrors::CORBAProblemExImpl
+ * @throw ComponentErrors::UnexpectedExImpl
+ * @throw ComponentErrors::CouldntGetComponentExImpl
+ * @throw ComponentErrors::OperationErrorExImpl
  */
-static void enableDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,Management::DataReceiver_ptr writer,bool& streamConnected,bool& streamPrepared) throw (
-		ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+Management::TScanAxis computeScanAxis() throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::OperationErrorExImpl);
 
 /**
  * It allows to send a configuration procedure to a backend.
- * @param backend reference to the backend
- * @param backendError will be returned back true if an error occurred in the communication to backend component
  * @param name name of the procedure
  * @param procedure sequence of commands contained by the configuration procedure
  * @throw ManagementErrors::BackendProcedureErrorExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
  * @throw ComponentErrors::UnexpectedExImpl
+ * @throw ComponentErrors::CouldntGetComponentExImpl
  */
-static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendError,const IRA::CString& name, const std::vector<IRA::CString>& procedure) throw (
-		ManagementErrors::BackendProcedureErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
+void configureBackend(const IRA::CString& name,const std::vector<IRA::CString>& procedure) throw (ManagementErrors::BackendProcedureErrorExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
 
 /**
- * This command set up the data receiver with some parameters.
- * @param scanStarted if false the method will setup the start of the scan (a set it to true), otherwise it is ignored
- * @param writer reference to the writer or data recorder or data dealer 
- * @param writerError will be returned back true if an error occurred in the communication to writer component
- * @param backend reference to the backend
- * @param backendError will be returned back true if an error occurred in the communication to backend component
- * @param obsName name of the current observer
- * @param prj name of the project currently running
- * @param baseName name of the file to be created
- * @param path path to the file that has to be created
- * @param extraPath indicates the extra folder that has to be created (from basePath) in order to contain the file
- * @param schedule name of the schedule file
- * @param targetID identifier of the target of the subscan
- * @param layoutName name of the layout configuration
- * @param layout layout of the scan
- * @param scanTag numerical label to be attached to the scan
- * @param device identifier of the device currently in use
- * @param axis indicates which axis is currently used by the telescope.
- * @param config pointer to the configuration object
- */
-static void setupDataTransfer(bool& scanStarted,/*bool& streamPrepared,*/Management::DataReceiver_ptr writer,bool& writerError,Backends::GenericBackend_ptr backend,bool& backendError,
-		const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& targetID,
-		const IRA::CString& layoutName,const ACS::stringSeq& layout,const long& scanTag,const long& device,const DWORD& scanID,const ACS::Time& startTime,const  DWORD& subScanID,
-		const Management::TScanAxis& axis,const CConfiguration* config) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl);
-
-/**
- * This static method starts the data transfer between the backend and the configured data recorder.
- * @param backend reference to the backend 
- * @param backendError will be returned back true if an error occurred in the communication to backend component
- * @param startTime this is the exact time the data transfer should start
- * @param streamStarted this argument indicates that the data transfer has been started, on exit it is false if the closeup is successful
- * @param streamPrepared this argument indicates that the data transfer has been setup, on exit it is false if the closeup is successful
- * @param streamConnected this argument indicates that connection between the sender and receiver component was established, on exit it is false if the closeup is successful
- */
-static void startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendError,const ACS::Time& startTime,bool& streamStarted,bool& streamPrepared,bool& streamConnected) throw (
-		ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl);
-
-/**
- * This static method stops the data transfer between the backend and the configured data recorder.
- * @param backend reference to the backend 
- * @param backendError will be returned back true if an error occurred in the communication to backend component
- * @param streamStarted this argument indicates that the data transfer has been started, on exit it is false if the closeup is successful
- * @param streamPrepared this argument indicates that the data transfer has been setup, on exit it is false if the closeup is succesful
- * @param streamConnected this argument indicates that connection between the sender and receiver component was established, on exit it is false if the closeup is successful
- */ 
- static void stopDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,bool& streamStarted,bool& streamPrepared,bool& streamConnected) throw (ComponentErrors::OperationErrorExImpl,
-		ManagementErrors::BackendNotAvailableExImpl);
-
- /**
-  * This static method will call the <i>stopScan()</i> of the DataReceiver interface in order to inform the current data receiver component that a scan has to be finalized.
-  * @param writer reference to the writer or data recorder or data dealer
-  * @param writerError will be returned back true if an error occurred in the communication to writer component
-  * @param it allows to keep track if the corresponding <i>startScan</i> has been called before.
-  */
- static void stopScan(Management::DataReceiver_ptr writer,bool& writerError,bool& scanStarted) throw (ComponentErrors::OperationErrorExImpl);
-
- /**
-  * This static method inquiries the DataReceiver to check if the data transfer is still active or not.
-  * @param writer reference to the writer or data recorder or data dealer
-  * @param writerError will be returned back true if an error occurred in the communication to writer component
-  * @return true if the recording is still going on
-  */
- static bool checkRecording(Management::DataReceiver_ptr writer,bool& writerError) throw (ComponentErrors::OperationErrorExImpl);
-
-/**
- * Given an UT time, this function returns the next ut at which the provided lst takes place. It takes into
- * account that two different UT instants can correspond to the same lst. 
- * @param currentUT current UT time used for recursion
- * @param checkUT current UT time used for comparison
- * @param lst local sidereal time to be converted in UT time (radians)
- * @param site information about the site
- * @param dut1 difference between UTC and UT1 
- * @return UT corresponding to the input lst
- */ 
-static ACS::Time getUTFromLST(const IRA::CDateTime& currentUT,const IRA::CDateTime& checkUT,const ACS::TimeInterval& lst,const IRA::CSite& site,const double& dut1);
-
-/**
- * Computes the name of the output file, including the lst time
- * @param ut universal time
- * @param lst local sidereal time
- * @param prj name of the project
- * @param suffix string that will be appended to the end of file name
- * @param extra return the extra path
- * @return the name of the file to be created
-*/
-static IRA::CString computeOutputFileName(const ACS::Time& ut,const ACS::TimeInterval& lst,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra);
-
-/**
- * computes the scan axis starting form the scan parameters
- * @param type type of the scan
- * @param scanRec structure that contains all the scan parameters
- * @return the scanning axis according to the definition of the management interface
- */
-/*static Management::TScanAxis computeScanAxis(const Management::TScanTypes& type,const Schedule::CScanList::TRecord& scanRec);*/
-
-/**
- * Computes the scan axis starting from the configuration of involved sub system bosses.
- * @param antBoss reference to the antenna boss
- * @param antBossErr flags the status of the antenna boss reference
- * @param minorServoBoss reference to the minor servo boss
- * @param minorServoError flags the status of the minor servo boss
- * @param config reference to the configuration object
- * @throw ComponentErrors::ComponentNotActiveExImpl
+ * This method will close (if necessary) the established connection between a backend and a data receiver.It closes and frees the resources allocated to enable the trasmission. In practice it calls sendStop()
+ * terminate(), disconnect() and closeReceiver()
+ * @throw ComponentErrors::OperationErrorExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
  * @throw ComponentErrors::UnexpectedExImpl
+ * @throw ComponentErrors::CouldntGetComponentExImpl);
  */
-static Management::TScanAxis computeScanAxis(Antenna::AntennaBoss_ptr antBoss,bool& antBossError,MinorServo::MinorServoBoss_ptr minorServoBoss,bool& minorServoError,
-		const CConfiguration& config) throw (ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
-
-
-/**
- * Computes the name of the output file, lst time is derived from provided ut time
- * @param ut universal time
- * @param site information in order to compute local sidereal time
- * @param dut1 difference UT-UT1 in order to compute local sidereal time
- * @param prj name of the project
- * @param suffix string that will be appended to the end of file name
- * @param extra return the extra path
- * @return the name of the file to be created
-*/	
-static IRA::CString computeOutputFileName(const ACS::Time& ut,const IRA::CSite& site,const double& dut1,const IRA::CString& prj,const IRA::CString& suffix,IRA::CString& extra);
+void disableDataTransfer() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::CouldntGetComponentExImpl);
 
 /**
- * This is the handler of the events coming from the notification channel published by the Antenna subsystem
+ * Enable the transfer between the backend and the receiver. In practice it connects the backend with the receiver itself
+ * @throwComponentErrors::OperationErrorExImpl
+ * @throw ComponentErrors::CORBAProblemExImpl
+ * @throw ComponentErrors::UnexpectedExImpl
+ * @throw ComponentErrors::CouldntGetComponentExImpl
  */
-static void antennaNCHandler(Antenna::AntennaDataBlock antennaData,void *handlerParam);
+void enableDataTransfer() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::CouldntGetComponentExImpl);
 
 /**
- * This is the handler of the events coming from the notification channel published by the Minor Servo subsystem
+ * It stops the data transfer between the backend and the configured data recorder.
+ * @throw ComponentErrors::OperationErrorExImpl
+ * @throw ManagementErrors::BackendNotAvailableExImpl
+ * @throw ComponentErrors::CouldntGetComponentExImpl
  */
-static void minorServoNCHandler(MinorServo::MinorServoDataBlock servoData,void *handlerParam);
+void stopDataTransfer() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl);
 
 /**
- * used as wrapper to function that are in charge of forwarding commands to other packages  
-*/
-bool remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl,ManagementErrors::UnsupportedOperationExImpl);
+ * This static method inquiries the DataReceiver to check if the data transfer is still active or not.
+ * @throw ComponentErrors::OperationErrorExImpl
+ * @throw ComponentErrors::UnexpectedExImpl
+ * @throw ComponentErrors::CouldntGetComponentExImpl
+ * @return true if the recording is still going on
+ */
+bool checkRecording() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
 
+/**
+ * This is not thread safe but we can consider it almost atomic.
+ * It clear the tracking flag, issued when a new scan is commanded in order to prevent the scheduler to consider the tracking when it is not the case
+ */
+inline void clearAntennaTracking() { m_isAntennaTracking=false; }
+
+/**
+ * This is not thread safe but we can consider it almost atomic.
+ * It clear the tracking flag, issued when a new scan is commanded in order to prevent the scheduler to consider the tracking when it is not the case
+ */
+inline void clearReceiversTracking() { m_isReceiversTracking=false; }
+
+/**
+ * This is not thread safe but we can consider it almost atomic.
+ * It clear the tracking flag from minor servo, issued when a new scan is commanded in order to prevent the scheduler to consider the tracking when it is not the case
+ */
+inline void clearMinorServoTracking() { if (MINOR_SERVO_AVAILABLE) m_isMinorServoTracking=false; }
+
+/**
+ * This is not thread safe but we can consider it almost atomic.
+ * This method will cause the tracking flag to be false for a certain amount of time.
+ */
+void clearTracking();
+
+/**
+ * It allows to change the current status of the scheduler.
+ * @param status new status of the scheduler
+ */
+ void changeSchedulerStatus(const Management::TSystemStatus& status);
+
+/**
+ * check is the stream or data recording has already started or not
+ */
+bool isStreamStarted() const;
 
 
 #endif /*CORE_COMMON_H_*/

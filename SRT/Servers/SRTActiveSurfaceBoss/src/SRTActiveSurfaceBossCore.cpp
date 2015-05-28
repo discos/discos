@@ -20,7 +20,7 @@ void CSRTActiveSurfaceBossCore::initialize()
     
     	m_enable = false;
 	m_tracking = false;
-    	m_status = Management::MNG_OK;
+    	m_status = Management::MNG_WARNING;
 	m_profile = ActiveSurface::AS_SHAPED_FIXED;
     	AutoUpdate = false;
     	actuatorcounter = circlecounter = totacts = 1;
@@ -33,6 +33,7 @@ void CSRTActiveSurfaceBossCore::initialize()
 	m_sector7 = false;
 	m_sector8 = false;
 	m_profileSetted = false;
+	m_ASup = false;
 }
 
 void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -1496,7 +1497,7 @@ void CSRTActiveSurfaceBossCore::sector4ActiveSurface() throw (ComponentErrors::C
 		usdTableS4 >> lanIndexS4 >> circleIndexS4 >> usdCircleIndexS4 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS4][usdCircleIndexS4] = ActiveSurface::USD::_nil();
         	try {
-			printf("S4: circleIndex = %d, usdCircleIndex = %d\n", circleIndexS4, usdCircleIndexS4);
+			printf("S4: circleIndexS4 = %d, usdCircleIndexS4 = %d\n", circleIndexS4, usdCircleIndexS4);
             		usd[circleIndexS4][usdCircleIndexS4] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
 			lanradius[circleIndexS4][lanIndexS4] = usd[circleIndexS4][usdCircleIndexS4];
 			usdCounterS4++;
@@ -1722,28 +1723,37 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
 		m_sector7 = false;
 		m_sector8 = false;
 		usdCounter = usdCounterS1 + usdCounterS2 + usdCounterS3 + usdCounterS4 + usdCounterS5 + usdCounterS6 + usdCounterS7 + usdCounterS8;
-		if (usdCounter < (int)lastUSD*WARNINGUSDPERCENT)
+		
+		m_ASup=true;
+        	m_status=Management::MNG_OK;
+
+		if (usdCounter < (int)lastUSD*WARNINGUSDPERCENT) {
         		m_status=Management::MNG_WARNING;
-    		if (usdCounter < (int)lastUSD*ERRORUSDPERCENT)
+		}
+    		if (usdCounter < (int)lastUSD*ERRORUSDPERCENT) {
         		m_status=Management::MNG_FAILURE;
+			m_ASup=false;
+		}
 		//printf("usdCounter = %d\n", usdCounter);
 	}	
 
-        CIRATools::Wait(1000000);
-	_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
-	m_profile = newProfile;
-    	try {
-        	onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
-        }
-        catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-            	ex.log(LM_DEBUG);
-            	throw ex.getComponentErrorsEx();
-        }
+	if (m_ASup == true) {
+		CIRATools::Wait(1000000);
+		_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
+		m_profile = newProfile;
+		try {
+        		onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
+        	}
+        	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+            		ex.log(LM_DEBUG);
+            		throw ex.getComponentErrorsEx();
+        	}
 
-	m_profileSetted = true;
+		m_profileSetted = true;
 
-        CIRATools::Wait(1000000);
-	asOn();
+        	CIRATools::Wait(1000000);
+		asOn();
+	}
 }
 
 void CSRTActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentErrorsEx)

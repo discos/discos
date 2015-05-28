@@ -502,10 +502,10 @@ void CCore::executeProcedure(const IRA::CString& name,_SP_CALLBACK(callBack),con
 	}
 }
 
-bool CCore::addTimerEvent(const ACS::Time& time,IRA::CScheduleTimer::TCallBack handler,void *parameter)
+bool CCore::addTimerEvent(const ACS::Time& time,IRA::CScheduleTimer::TCallBack handler,void *parameter,CScheduleTimer::TCleanupFunction cleanup)
 {
 	baci::ThreadSyncGuard guard(&m_timerMutex); // user specific mutex for timer resource...this is shared between Core and Executor
-	if (!m_timer.schedule(handler,time,0,parameter)) {
+	if (!m_timer.schedule(handler,time,0,parameter,cleanup)) {
 		return false;
 	}
 	return true;

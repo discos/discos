@@ -4,6 +4,9 @@
 #-----------------------------------------
 #*****************************************
 
+PY_PACKAGES = SRTMinorServoTest
+PY_SCRIPTS = mscu-start mscu-stop
+
 # On-Line Database Files
 # ----------------------
 CDB_SCHEMAS = MinorServo
@@ -13,14 +16,20 @@ CDB_SCHEMAS = MinorServo
 # ----------------------------
 LIBRARIES = WPServoImpl MinorServoBossImpl
 
-WPServoImpl_OBJECTS = WPServoImpl WPServoSocket WPServoTalker RequestDispatcher WPStatusUpdater SocketListener utils libCom WPUtils
-WPServoImpl_LIBS = MinorServoStubs IRALibrary ComponentErrors SRTMinorServoLibrary MinorServoErrors
+WPServoImpl_OBJECTS = WPServoImpl WPServoSocket WPServoTalker RequestDispatcher \
+					  WPStatusUpdater SocketListener utils libCom WPUtils
+WPServoImpl_LIBS = MinorServoStubs IRALibrary ComponentErrors \
+				   SRTMinorServoLibrary MinorServoErrors
 
-MinorServoBossImpl_OBJECTS = MinorServoBossImpl utils SetupThread ParkThread TrackingThread ScanThread MSBossPublisher libCom \
+MinorServoBossImpl_OBJECTS = MinorServoBossImpl utils SetupThread ParkThread \
+							 TrackingThread ScanThread MSBossPublisher libCom \
 							 MSBossConfiguration
-MinorServoBossImpl_LIBS = MinorServoStubs MinorServoBossStubs SRTMinorServoLibrary ManagmentDefinitionsStubs ManagementErrors \
-						  IRALibrary ComponentErrors MinorServoErrors acsnc ParserErrors AntennaDefinitionsStubs MountStubs \
-						  AntennaBossStubs AntennaErrors ActiveSurfaceBossStubs SRTActiveSurfaceBossStubs 
+MinorServoBossImpl_LIBS = MinorServoStubs MinorServoBossStubs SRTMinorServoLibrary \
+						  ManagmentDefinitionsStubs ManagementErrors \
+						  IRALibrary ComponentErrors MinorServoErrors acsnc \
+						  ParserErrors AntennaDefinitionsStubs MountStubs \
+						  AntennaBossStubs AntennaErrors ActiveSurfaceBossStubs \
+						  SRTActiveSurfaceBossStubs MinorServoDefinitionsStubs
 # ----------------------------------------------------------------------
 # List of all possible C-sources (used to create automatic dependencies)
 # ----------------------------------------------------------------------
@@ -48,6 +57,9 @@ clean : clean_all
 	$(RM) *~ ../include/*~ ../idl/*~ ../*~ ../../*~ core
 	$(RM) ../doc/html
 	$(RM) tmp.txt acsexmplbeans.jar ../doc/abeans.log
+	$(RM) ../lib/python/site-packages/*
+	$(RM) $(INTROOT)/lib/python/site-packages/SRTMinorServoTest
+	$(RM) $(INTROOT)/bin/mscu-runserver
 	@echo " . . . clean done"
 
 clean_dist : clean clean_dist_all 

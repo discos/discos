@@ -1,21 +1,22 @@
 #ifndef CORE_EXTRA_H_
 #define CORE_EXTRA_H_
 
-#define EXTRA_INIT m_scanID=0;
-
-long m_scanID;
+// Call back and event handlers
 
 /**
- * Make the current thread wait for the given number of seconds. It can be used stop execution.
- * @param seconds number of seconds to wait, expressed as integer number plus fraction of seconds.
-*/
-void wait(const double& seconds) const;
-
-/**
- * make the current thread wait until a given time
- * @param time time to wait for
+ * This is the handler of the events coming from the notification channel published by the Antenna subsystem
  */
-void waitUntil(const ACS::Time& time) throw (ComponentErrors::TimerErrorExImpl);
+static void antennaNCHandler(Antenna::AntennaDataBlock antennaData,void *handlerParam);
+
+/**
+ * This is the handler of the events coming from the notification channel published by the Minor Servo subsystem
+ */
+static void minorServoNCHandler(MinorServo::MinorServoDataBlock servoData,void *handlerParam);
+
+/**
+ * This is the handler of the events coming from the notification channel published by the Receivers subsystem
+ */
+static void receiversNCHandler(Receivers::ReceiversDataBlock receiversData,void *handlerParam);
 
 /**
  * timer event handler user to implement <i>waitUntil()</i> function
@@ -23,52 +24,15 @@ void waitUntil(const ACS::Time& time) throw (ComponentErrors::TimerErrorExImpl);
 static void waitUntilHandler(const ACS::Time& time,const void *par);
 
 /**
- * The implementation of No Operation command. It does nothing
+ * cleanup event handler user to implement <i>waitUntil()</i> function
  */
-void nop() const;
+static void waitUntilHandlerCleanup(const void *par);
 
 /**
- * Make the current thread wait for the tracking flag to be true. It can be used to stop the schedule execution until the telescope is tracking
- */
-void waitOnSource() const;
+ * used as wrapper to function that are in charge of forwarding commands to other packages
+*/
+bool remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl,ManagementErrors::UnsupportedOperationExImpl);
 
-/**
- * 
- */
-int status() const;
-
-/**
- * initialize the writing of the data
- * @param scaid identifier of the scan
- */
-void initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
-
-/**
- * Start the recording at the given time
- * @param startTime epoch when the recording is started
- * @param subScanId identifier of the subscan
- */
-void startRecording(const ACS::Time& startTime,const long& subScanId) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
-		ManagementErrors::DataTransferSetupErrorExImpl);
-
-/**
- * Starts the recording immediately. It is used to be called by RAL
- * @param subScanId identifier of the subscan
- */
-void startRecording(const long& subScanId) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
-		ManagementErrors::DataTransferSetupErrorExImpl);
-
-/**
- * Immediately stops the data recording
- */
-void stopRecording() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl);
-
-/**
- * disable the recording
- */
-void terminateRecording() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl);
 
 #endif
 

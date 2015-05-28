@@ -126,14 +126,14 @@ public:
       * So the caller must ask for another reference to the backend itself. 
       * @return the reference of backend currently used by the schedule, it must be freed
       */
-     Backends::GenericBackend_ptr getBackendReference();
+     //Backends::GenericBackend_ptr getBackendReference();
 
      /**
       * Get a reference to the writer used by the schedule. Attention must be payed to the fact that the currently used writer may change without advice.
       * So the caller must ask for another reference to the writer itself.
       * @return the reference of writer currently used by the schedule, it must be freed
       */
-     Management::DataReceiver_ptr  getWriterReference();
+     //Management::DataReceiver_ptr  getWriterReference();
      
 private:
 	enum TScheduleStages {
@@ -146,9 +146,12 @@ private:
 		WRITING_INITIALIZATION,
 		PRE_SCAN_PROC,
 		SCAN_START,
-		SCHEDULE_STOP,
+		STOP_SCHEDULING,
 		SCAN_EXECUTION,
-		POST_SCAN_PROC
+		POST_SCAN_PROC,
+		SCAN_CLOSEUP,
+		CLOSEUP_WAIT,
+		RECORDING_FINALIZE
 	};
 	/**
 	 * Stores the present stage of the scan
@@ -190,43 +193,43 @@ private:
 	/**
 	 * Instance name of the current writer
 	 */
-	IRA::CString m_currentWriterInstance;
+	//IRA::CString m_currentWriterInstance;
 	/**
 	 * Instance name of the current backend
 	 */
-	IRA::CString m_currentBackendInstance;
+	//IRA::CString m_currentBackendInstance;
 	/**
 	 * true if an error was detected when communicating to the data receiver
 	 */	
-	bool m_writerError;
+	//bool m_writerError;
 	/**
 	 * DataReceiver Reference
 	 */
-	Management::DataReceiver_var m_writer;
+	//Management::DataReceiver_var m_writer;
 	/**
 	 * true if an error was detected when communicating to the backend
 	 */
-	bool m_backendError;
+	//bool m_backendError;
 	/**
 	 * Backend reference
 	 */
-	Backends::GenericBackend_var m_backend;
+	//Backends::GenericBackend_var m_backend;
 	/**
 	 * true if an error was detected when communicating to the antenna boss
 	 */
-	bool m_antennaBossError;
+	//bool m_antennaBossError;
 	/**
 	 * Antenna boss reference
 	 */
-	Antenna::AntennaBoss_var m_antennaBoss;
+	//Antenna::AntennaBoss_var m_antennaBoss;
 	/**
 	 * Minor Servo boss reference
 	 */
-	MinorServo::MinorServoBoss_var m_minorServoBoss;
+	//MinorServo::MinorServoBoss_var m_minorServoBoss;
 	/**
 	 * true if an error was detected when communicating to the minor servo boss
 	 */
-	bool m_minorServoBossError;
+	//bool m_minorServoBossError;
 	/**
 	 * Site information object
 	 */
@@ -246,11 +249,11 @@ private:
 	/**
 	 * This flags are used to free things up when the data transfer is started
 	 */
-	bool m_streamPrepared; bool m_streamStarted; bool m_streamConnected;
+	//bool m_streamPrepared; bool m_streamStarted; bool m_streamConnected;
 	/**
 	 * true if the schedule is already in the middle of a scan
 	 */
-	 bool m_scanStarted;
+	 //bool m_scanStarted;
 	 /**
 	  * true when the schedule has arrived to the end and it is restarted from the beginning, status is persistent through subscans
 	  */
@@ -314,6 +317,11 @@ private:
 	bool m_haltMe;
 	
 	/**
+	 * represent the time stamp at which the current scan is supposed to be closed and a new one can be initialized
+	 */
+	ACS::Time m_closeScanTimer;
+
+	/**
 	 * pointer to the configuration object
 	 */
 	 CConfiguration *m_config;
@@ -328,16 +336,6 @@ private:
 	void getNextScan(const DWORD& currentLine,CSchedule::TRecord& rec,Schedule::CScanList::TRecord& scanRec) throw (ManagementErrors::ScheduleErrorExImpl);
 	
 	/**
-	 * Setup the commands to start data acquisition
-	 * @param rec structure that stores the selected schedule line
-	 * @param scanRec structure that contains the scan parameters
-	 * @param layoutProc configuration procedure for the scan layout, if zero it is ignored
-	 */
-	void startRecording(const CSchedule::TRecord& rec,const Schedule::CScanList::TRecord& scanRec,const ACS::stringSeq& layoutProc) throw (
-			ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,
-			ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::ComponentNotActiveExImpl);
-	
-	/**
 	 * Stops the data recording. It sets the <i>m_scanDone</i> flag to true.
 	 */
 	void stopRecording();
@@ -345,22 +343,22 @@ private:
 	/**
 	 * get the reference to the current writer
 	 */
-	void openWriter(const IRA::CString& wrt) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
+	//void openWriter(const IRA::CString& wrt) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 	
 	/**
 	 * Release the current writer
 	 */
-	void closeWriter() throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
+	//void closeWriter() throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 	
 	/**
 	 * Get the reference to the current backend
 	 */
-	void openBackend(const IRA::CString& bck) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
+	//void openBackend(const IRA::CString& bck) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 
 	/**
 	 * Release the current backend
 	*/
-	void closeBackend() throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
+	//void closeBackend() throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 
 
 	/**

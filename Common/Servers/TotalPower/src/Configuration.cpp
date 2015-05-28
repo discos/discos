@@ -71,6 +71,48 @@ bool CConfiguration::getInputPorts(const IRA::CString& conf,CProtocol::TInputs* 
 	return true;
 }
 
+bool CConfiguration::getInputPortsDB(const IRA::CString& conf,double* inputDB,const WORD& size)
+{
+	int start=0;
+	IRA::CString ret;
+	WORD count=0;
+	while (IRA::CIRATools::getNextToken(conf,start,' ',ret)) {
+		if (count>=MAX_BOARDS_NUMBER) return false;
+		inputDB[count]=ret.ToDouble();
+		count++;
+	}
+	if (count!=size) {
+		return false;
+	}
+	if ((size==1)) {  // if the provided list of input ports is one element, i'll fill everything up to the maximum number of boards
+		for (WORD k=1;k<MAX_BOARDS_NUMBER;k++) {
+			inputDB[k]=inputDB[0];
+		}
+	}
+	return true;
+}
+
+bool CConfiguration::getInputPortsBW(const IRA::CString& conf,double* inputBW,const WORD& size)
+{
+	int start=0;
+	IRA::CString ret;
+	WORD count=0;
+	while (IRA::CIRATools::getNextToken(conf,start,' ',ret)) {
+		if (count>=MAX_BOARDS_NUMBER) return false;
+		inputBW[count]=ret.ToDouble();
+		count++;
+	}
+	if (count!=size) {
+		return false;
+	}
+	if ((size==1)) {  // if the provided list of input ports is one element, i'll fill everything up to the maximum number of boards
+		for (WORD k=1;k<MAX_BOARDS_NUMBER;k++) {
+			inputBW[k]=inputBW[0];
+		}
+	}
+	return true;
+}
+
 bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& setup) throw (ComponentErrors::CDBAccessExImpl)
 {
 	bool done=false;
@@ -102,9 +144,19 @@ bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& se
 			impl.setFieldName("Configuration.inputPort");
 			throw impl;
 		}
+		inputPorts=(*m_configurationTable)["inputPortDB"]->asString();
+		if (!getInputPortsDB(inputPorts,setup.inputPortDB,setup.inputPorts)) {
+			_EXCPT(ComponentErrors::CDBAccessExImpl,impl,"");
+			impl.setFieldName("Configuration.inputPortDB");
+			throw impl;
+		}
+		inputPorts=(*m_configurationTable)["inputPortBW"]->asString();
+		if (!getInputPortsBW(inputPorts,setup.inputPortBW,setup.inputPorts)) {
+			_EXCPT(ComponentErrors::CDBAccessExImpl,impl,"");
+			impl.setFieldName("Configuration.inputPortBW");
+			throw impl;
+		}
 		setup.beams=(*m_configurationTable)["beams"]->asLongLong();
-		setup.bandWidth=(*m_configurationTable)["bandWidth"]->asDouble();
-		setup.attenuation=(*m_configurationTable)["attenuation"]->asDouble();
 		int start_si=0,start_pol=0,start_feed=0,start_ifs=0;
 		IRA::CString section_boards((*m_configurationTable)["section_boards"]->asString());
 		IRA::CString polarizations((*m_configurationTable)["polarizations"]->asString());
@@ -180,14 +232,14 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	else if (!m_configurationTable->addField(error,"inputPort", CDataField::STRING)) {
 		error.setExtra("Error adding field inputPort", 0);
 	}
+	else if (!m_configurationTable->addField(error,"inputPortDB", CDataField::STRING)) {
+		error.setExtra("Error adding field inputPort", 0);
+	}
+	else if (!m_configurationTable->addField(error,"inputPortBW", CDataField::STRING)) {
+		error.setExtra("Error adding field inputPort", 0);
+	}
 	else if (!m_configurationTable->addField(error,"beams", CDataField::LONGLONG))	{
 		error.setExtra("Error adding field beams", 0);
-	}
-	else if (!m_configurationTable->addField(error,"bandWidth",CDataField::DOUBLE)) {
-		error.setExtra("Error adding field bandWidth", 0);
-	}
-	else if (!m_configurationTable->addField(error,"attenuation",CDataField::DOUBLE)) {
-		error.setExtra("Error adding field attenuation", 0);
 	}
 	else if (!m_configurationTable->addField(error,"section_boards", CDataField::STRING)) {
 		error.setExtra("Error adding field sections_inputs", 0);

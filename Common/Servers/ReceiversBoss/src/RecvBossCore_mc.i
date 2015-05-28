@@ -2,7 +2,7 @@
 
 //#define KKC_ADDRESS "192.168.51.13" // this is the PortServer installed directly in the MF
 #define KKC_ADDRESS "192.167.189.102" // this is the server installed in control room PC
-//#define KKC_PORT 2101 // first port...please notice that this works only if the port is configuread as "real Port"
+//#define KKC_PORT 2101 // first port...please notice that this works only if the port is configured as "real Port"
 #define KKC_PORT 10000 // control room server port
 #define RECV_ADDRESS "192.167.189.2"
 #define RECV_PORT 2096
@@ -234,12 +234,15 @@ void CRecvBossCore::AUOff() throw (ComponentErrors::ValidationErrorExImpl,Compon
 void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
+#ifndef RB_DEBUG
 	char buff [10];
+	WORD len;
+	double loAmp[4]={-55.24524,11.41288,-0.79437,0.01894};
+#endif
 	IRA::CError err;
 	IRA::CString msg;
-	WORD len;
 	double trueValue;
-	double loAmp[4]={-55.24524,11.41288,-0.79437,0.01894};
+
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (lo.length()==0) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setLO()");
@@ -325,9 +328,11 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 	IRA::CError err;
 	IRA::CString rec(code);
 	IRA::CString recvIpAddr(RECV_ADDRESS);
+#ifndef RB_DEBUG
 	DWORD recvPort=RECV_PORT;
-	IRA::CString fsIpAddr(FS_ADDRESS);
 	DWORD fsPort=FS_PORT;
+#endif
+	IRA::CString fsIpAddr(FS_ADDRESS);
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!m_fsOpened) {
 #ifndef RB_DEBUG
@@ -671,21 +676,80 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 	return taper;
 }
 
-double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-		ComponentErrors::ValidationErrorExImpl)
+double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (ComponentErrors::CouldntGetComponentExImpl,
+		ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl)
 {
 	// no need to check anything
 	return 0;
 }
 
-void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
+void CRecvBossCore::getDewarParameter(Receivers::TDerotatorConfigurations& mod,double& pos) throw (
+  ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
+{
+	mod=Receivers::RCV_UNDEF_DEROTCONF;
+	pos=0.0;
+}
+
+/*void CRecvBossCore::derotatorMode(const Receivers::TDerotatorConfigurations& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
 		ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
    		ReceiversErrors::DewarPositionerSetupErrorExImpl)
 {
 	// baci::ThreadSyncGuard guard(&m_mutex);
-	// no support in ESCs for that
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetup()");
+	// no support in ESCS for that
+	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorMode()");
+	m_status=Management::MNG_WARNING;
+	throw impl;
+}*/
+
+void CRecvBossCore::derotatorSetConfiguration(const Receivers::TDerotatorConfigurations& conf) throw (
+	ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+	ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+	ComponentErrors::UnexpectedExImpl)
+{
+	// no support in ESCS for that
+	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetConfiguration()");
+	m_status=Management::MNG_WARNING;
+	throw impl;
+}
+
+void CRecvBossCore::derotatorSetRewindingMode(const Receivers::TRewindModes& rewind) throw (
+		ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+		ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
+{
+	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetRewindingMode()");
+	m_status=Management::MNG_WARNING;
+	throw impl;
+}
+
+void CRecvBossCore::derotatorSetAutoRewindingSteps(const long& steps) throw (
+		ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+		ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
+{
+	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetAutoRewindingSteps()");
+	m_status=Management::MNG_WARNING;
+	throw impl;
+}
+
+void CRecvBossCore::setDerotatorPosition(const double& pos) throw (ReceiversErrors::NoDewarPositioningExImpl,
+  ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+  ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+  ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
+{
+	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
+	m_status=Management::MNG_WARNING;
+	throw impl;
+}
+
+void CRecvBossCore::derotatorRewind(const long& steps) throw (ComponentErrors::ValidationErrorExImpl,
+  ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+  ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl,
+  ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
+{
+	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorRewind()");
 	m_status=Management::MNG_WARNING;
 	throw impl;
 }
@@ -780,9 +844,18 @@ void CRecvBossCore::getIFOutput(const ACS::longSeq& feeds,const ACS::longSeq& if
 	}
 }
 
-void CRecvBossCore::CRecvBossCore::startScan(ACS::Time startUT,const Receivers::TReceiversParameters & param)
+void CRecvBossCore::CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,
+  const Antenna::TRunTimeParameters& antennaInfo) throw(
+  ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+  ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl)
 {
 
+}
+
+void CRecvBossCore::closeScan(ACS::Time& timeToStop) throw (ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl)
+{
+	timeToStop=0;
 }
 
 void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
@@ -918,13 +991,14 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 	}
 }
 
-void  CRecvBossCore::updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
+void  CRecvBossCore::updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+		ReceiversErrors::UnavailableReceiverAttributeExImpl)
 {
 	return;
 }
 
 void CRecvBossCore::updateDewarPositionerStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::OperationErrorExImpl)
+		ComponentErrors::OperationErrorExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl)
 {
 	return;
 }

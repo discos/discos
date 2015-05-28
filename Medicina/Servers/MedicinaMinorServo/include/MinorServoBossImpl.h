@@ -17,7 +17,6 @@
 #include <new>
 #include <acsutil.h>
 #include <baciDB.h>
-#include <ManagmentDefinitionsS.h>
 #include <baciCharacteristicComponentImpl.h>
 #include <baciSmartPropertyPointer.h>
 #include <baciROpattern.h>
@@ -25,6 +24,10 @@
 #include <baciROstring.h>
 #include <acsncSimpleSupplier.h>
 #include <enumpropROImpl.h>
+
+#include <MinorServoDefinitionsC.h>
+#include <AntennaDefinitionsC.h>
+#include <ManagmentDefinitionsS.h>
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
 //#include <WPServoImpl.h>
@@ -74,6 +77,7 @@
 
 using namespace baci;
 using namespace std;
+using namespace MinorServo;
 
 struct VerboseStatusFlags {
     bool *is_initialized;
@@ -94,8 +98,7 @@ public:
      * @throw ComponentErrors::CouldntGetComponentExImpl, ManagementErrors::ConfigurationErrorEx
      */
     virtual void initialize() throw (
-            ComponentErrors::CouldntGetComponentExImpl, 
-            ManagementErrors::ConfigurationErrorExImpl
+            ComponentErrors::CouldntGetComponentExImpl
     );
 
     virtual void execute() throw (ComponentErrors::MemoryAllocationExImpl);
@@ -156,7 +159,8 @@ public:
     /** Return true when the system is performing a scan */
     bool isScanning();
 
-    /** Return true if a scan is active. To get the system in tracking, perform a stopScan() */
+    /** Return true if a scan is active. To get the system in tracking, perform
+     * a closeScan() */
     bool isScanActive();
 	
 	/**
@@ -167,19 +171,19 @@ public:
 	 */
 	virtual void setup(const char *config) throw (CORBA::SystemException, MinorServoErrors::SetupErrorEx);
 
-    void setupImpl(const char *config) throw (MinorServoErrors::SetupErrorEx);
+    void setupImpl(const char *config) throw (MinorServoErrors::SetupErrorExImpl);
 
     /**
      * Turn the elevation tracking of minor servos on
      * @throw ManagementErrors::ConfigurationErrorEx
      */
-    void turnTrackingOn() throw (ManagementErrors::ConfigurationErrorEx);
+    void turnTrackingOn() throw (MinorServoErrors::MinorServoErrorsEx);
 
     /**
      * Turn the elevation tracking of minor servos off. After that, the system is not ready
      * @throw ManagementErrors::ConfigurationErrorEx
      */
-    void turnTrackingOff() throw (ManagementErrors::ConfigurationErrorEx);
+    void turnTrackingOff() throw (MinorServoErrors::MinorServoErrorsEx);
 
     /** Return the actual configuration */
     char * getActualSetup();
@@ -236,14 +240,14 @@ public:
 	 * @param axis_code the identification code of the axis
      *
      * @return true if the scan is achievable
-     * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
      bool checkScan(
-             const ACS::Time starting_time, 
-             double range, 
-             const ACS::Time total_time, 
-             const char *axis_code
-     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
+             ACS::Time starting_time, 
+             const MinorServo::MinorServoScan& scan_parameters,
+             const Antenna::TRunTimeParameters& antenna_parameters,
+             TRunTimeParameters_out minor_servo_parameters
+     ) throw (MinorServoErrors::MinorServoErrorsEx,
+         ComponentErrors::ComponentErrorsEx);
 
     /** 
      * Check if the scan is achievable (implementation)
@@ -252,16 +256,19 @@ public:
      * @param range the total axis movement in mm (centered in the actual position)
 	 * @param total_time the duration of axis movement
 	 * @param axis_code the identification code of the axis
+     * @param azimuth the antenna azimuth at scan start
+     * @param elevation the antenna elevation at scan start
      *
      * @return true if the scan is achievable
      * @throw ManagementErrors::ConfigurationErrorEx, ManagementErrors::SubscanErrorEx
      */
      bool checkScanImpl(
-             const ACS::Time starting_time, 
-             double range, 
-             const ACS::Time total_time, 
-             const string axis_code
-     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
+             ACS::Time starting_time, 
+             const MinorServo::MinorServoScan& scan_parameters,
+             const Antenna::TRunTimeParameters& antenna_parameters,
+             TRunTimeParameters_out minor_servo_parameters
+     ) throw (MinorServoErrors::MinorServoErrorsEx,
+              ComponentErrors::ComponentErrorsEx);
 
     /** 
      * Start the scan of one axis of a MinorServo target.
@@ -275,19 +282,19 @@ public:
      */
      void startScan(
              ACS::Time & starting_time, 
-             const double range, 
-             const ACS::Time total_time, 
-             const char *axis_code
-     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
+             const MinorServo::MinorServoScan& scan_parameters,
+             const Antenna::TRunTimeParameters& antenna_parameters
+     ) throw (MinorServoErrors::MinorServoErrorsEx,
+              ComponentErrors::ComponentErrorsEx);
      
-     void stopScan() throw (MinorServoErrors::ScanErrorEx);
+     void closeScan(ACS::Time &timeToStop) throw (MinorServoErrors::MinorServoErrorsEx,
+                             ComponentErrors::ComponentErrorsEx);
      
      void startScanImpl(
-        ACS::Time & starting_time, 
-        const double range, 
-        const ACS::Time total_time, 
-        string axis_code
-     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
+             ACS::Time & starting_time, 
+             const MinorServo::MinorServoScan& scan_parameters,
+             const Antenna::TRunTimeParameters& antenna_parameters
+     ) throw (MinorServoErrors::MinorServoErrorsEx);
     
     /** Return the central position of the axis involved in the scan */
     CORBA::Double getCentralScanPosition() throw (MinorServoErrors::ScanErrorEx);
@@ -408,7 +415,8 @@ public:
       */
      void setElevationTracking(const char * value) throw (ManagementErrors::ConfigurationErrorEx);
      
-     void setElevationTrackingImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl);
+     void setElevationTrackingImpl(const char * value)
+          throw (MinorServoErrors::MinorServoErrorsExImpl);
 
      void setASConfiguration(const char * value) throw (ManagementErrors::ConfigurationErrorEx);
 
@@ -418,12 +426,13 @@ public:
       * MedMinroServoBoss interface specific implementation
       ******************************************************/ 
 
-      /**
-       * Disconnects from the minor servo server and release control lock
-       */
-      void connect() throw (MinorServoErrors::CommunicationErrorExImpl);
-      void disconnect() throw (MinorServoErrors::CommunicationErrorExImpl);
-      void reset() throw (MinorServoErrors::CommunicationErrorExImpl);
+     /**
+      * Disconnects from the minor servo server and release control lock
+      */
+     void connect() throw (MinorServoErrors::CommunicationErrorExImpl);
+     void disconnect() throw (MinorServoErrors::CommunicationErrorExImpl);
+     void reset() throw (MinorServoErrors::CommunicationErrorExImpl);
+     void getServoTime(ACS::Time &servoTime) throw (MinorServoErrors::CommunicationErrorExImpl);
 private:
 	maci::ContainerServices *m_services;
     //Antenna::AntennaBoss_var m_antenna_boss;
@@ -481,12 +490,13 @@ private:
 	/** This is the pointer to the notification channel */
 	nc::SimpleSupplier *m_nchannel;
 
-    //void loadAntennaBoss() throw (ComponentErrors::CouldntGetComponentExImpl);
-    //void unloadAntennaBoss();
     bool isParked() throw (ManagementErrors::ConfigurationErrorEx);
     
-    //void clearOffset(const char *servo, string offset_type) throw (MinorServoErrors::OperationNotPermittedEx);
-
+    /**
+     * If not tracking elevation, sets the corerct position according to the
+     * actual configuration and actual offsets.
+     */
+    void setCorrectPosition();
    /** 
     * Set the offset (Implementation)
     *

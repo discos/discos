@@ -19,9 +19,9 @@
              TsysTransitionGap="4000000"
              AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
              ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
-	     	 ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
-	     	 MinorServoBossInterface="IDL:alma/MinorServo/MinorServoBoss:1.0"
-	     	 ActiveSurfaceBossInterface=""
+	     ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
+	     MinorServoBossInterface="IDL:alma/MinorServo/MinorServoBoss:1.0"
+	     ActiveSurfaceBossInterface=""
 		 	 CustomLoggerInterface="IDL:alma/Management/CustomLogger:1.0"
 	     	 WeatherStationInstance="IDL:alma/Weather/MedWeatherStation:1.0"
 	     	 DefaultBackendInstance="BACKENDS/TotalPower"
@@ -40,14 +40,5 @@
 <currentBackend/>
 <currentRecorder/>
 <restFrequency/>
-
-<MinorServoMapping axis="SUBR_Z" servoName="Z"/>
-<MinorServoMapping axis="SUBR_X" servoName="X"/>
-<MinorServoMapping axis="SUBR_Y" servoName="Y"/>
-<MinorServoMapping axis="SUBR_ROTY" servoName="THETA_Y"/>
-<MinorServoMapping axis="SUBR_ROTX" servoName="THETA_X"/>
-<MinorServoMapping axis="PFP_Z" servoName="ZP"/>
-<MinorServoMapping axis="PFP_Y" servoName="YP"/>
-
 
 </Scheduler>

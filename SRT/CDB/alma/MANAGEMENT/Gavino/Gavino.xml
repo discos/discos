@@ -43,13 +43,4 @@
 <currentRecorder/>
 <restFrequency/>
 
-<MinorServoMapping axis="SUBR_Z" servoName="SRP_TZ"/>
-<MinorServoMapping axis="SUBR_X" servoName="SRP_TX"/>
-<MinorServoMapping axis="SUBR_Y" servoName="SRP_TY"/>
-<MinorServoMapping axis="SUBR_ROTY" servoName="SRP_RY"/>
-<MinorServoMapping axis="SUBR_ROTX" servoName="SRP_RX"/>
-<MinorServoMapping axis="PFP_Z" servoName="PFP_TZ"/>
-<MinorServoMapping axis="PFP_Y" servoName="PFP_RY"/>
-
-
 </Scheduler>

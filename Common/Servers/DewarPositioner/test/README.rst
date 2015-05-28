@@ -1,14 +1,20 @@
+*******************
+Containers to start
+*******************
+- acsStartContainer -py AntennaBossSimulatorContainer
+- acsStartContainer -py DerotatorsContainer
+- acsStartContainer -py DewarPositionerContainer
+
 *****************************
 Content of the test directory
 *****************************
 Contents:
 
-    * ``interface`` directory: contains tests
-    * ``submodules`` directory: contains tests
+    * ``functional`` directory: contains tests
+    * ``pyunit`` directory: contains tests
     * ``dependencies`` directory: third-part dependencies
     * ``DewarPositionrMockers``: user defined mockers
     * ``no_auto``: no automatic tests
-    * ``Makefile``: use it for installing the user defined mockers
 
 
 Dependencies
@@ -29,16 +35,16 @@ a mocker. To install this package::
 
 Run the tests
 =============
-The tests are located in two directories, ``interface`` and ``submodules``, and
-for both is mandatory that ACS is alive. In addition, the ``interface`` tests 
-require that the ``DewarPositioner`` must be active, while the ``submodules``
+The tests are located in two directories, ``functional`` and ``pyunit``, and
+for both is mandatory that ACS is alive. In addition, the ``functional`` tests 
+require the ``DewarPositioner`` to be active, while the ``pyunit``
 tests will use a mocker in case the component is not available.
 
 We can execute a particular test::
 
 .. code-block: bash
 
-    $ cd submodules/positioner/
+    $ cd pyunit/positioner/
     $ ls
     test_offset.py  test_rewind.py  test_startUpdating.py  test_stop.py
     test_init.py  test_park.py    test_setup.py   test_status.py
@@ -54,7 +60,7 @@ or also all the tests inside a directory::
     
     .. code-block: bash
 
-    $ cd submodules/positioner/
+    $ cd pyunit/positioner/
     $ unit2 discover
 
     INFO -> component not available: we will use a mock device
@@ -62,4 +68,3 @@ or also all the tests inside a directory::
 
     OK
 
-.. TODO: run_all from the ``test`` directory

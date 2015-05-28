@@ -28,8 +28,11 @@
 #include <LogFilter.h>
 #include "sensorSocket.h"
 #include "icdSocket.h"
+#include "StatusUpdater.h"
+#include "utils.h"
 
 using namespace baci;
+
 
 class SRTKBandDerotatorImpl: public CharacteristicComponentImpl,  public virtual POA_Receivers::SRTKBandDerotator {
 
@@ -131,12 +134,12 @@ public:
      *
      * @return ICD target position (double) in the user's reference system
      * @throw CORBA::SystemException
-     * @throw DerotatorErrors::ConfigurationErrorEx, 
+     * @throw DerotatorErrors::DerotatorErrorsEx,
      * @throw ComponentErrors::ComponentErrorsEx);
      */
      void setup() throw (
         CORBA::SystemException,
-        DerotatorErrors::ConfigurationErrorEx, 
+        DerotatorErrors::DerotatorErrorsEx, 
         ComponentErrors::ComponentErrorsEx);
 
 
@@ -151,16 +154,14 @@ public:
     /**
      * Set the derotator position (value in the user's reference system)
      *
-     * @ComponentErrors::ComponentErrorsEx, 
-     * @throw DerotatorErrors::PositioningErrorEx,
+     * @throw DerotatorErrors::DerotatorErrorsEx,
 	 * @throw DerotatorErrors::CommunicationErrorEx
      * @throw CORBA::SystemException
      */
      void setPosition(double position) throw (
          CORBA::SystemException, 
          ComponentErrors::ComponentErrorsEx, 
-         DerotatorErrors::PositioningErrorEx,
-	     DerotatorErrors::CommunicationErrorEx
+         DerotatorErrors::DerotatorErrorsEx
      );
 
 
@@ -168,13 +169,13 @@ public:
      * @return the sensor position (double) in the user's reference system
      *
      * @throw ComponentErrors::ComponentErrorsEx
-     * @throw DerotatorErrors::CommunicationErrorEx
+     * @throw DerotatorErrors::DerotatorErrorsEx
      * @throw CORBA::SystemException
      */
      double getActPosition() throw (
             CORBA::SystemException, 
             ComponentErrors::ComponentErrorsEx, 
-            DerotatorErrors::CommunicationErrorEx
+            DerotatorErrors::DerotatorErrorsEx
      );
 
 
@@ -187,8 +188,40 @@ public:
     /**
      * @return the position at which the derotator was at a given time t</li>
      */
-     double getPositionFromHistory(ACS::Time t);
-     
+     double getPositionFromHistory(ACS::Time t) throw (
+         CORBA::SystemException, 
+         ComponentErrors::ComponentErrorsEx
+     );
+ 
+
+    /**
+     * Set the derotator speed (in rpm)
+     *
+	 * @throw DerotatorErrors::CommunicationErrorEx
+     * @throw DerotatorErrors::DerotatorErrorsEx
+     * @throw CORBA::SystemException
+     */
+     void setSpeed(unsigned int speed) throw (
+         CORBA::SystemException, 
+         ComponentErrors::ComponentErrorsEx, 
+         DerotatorErrors::DerotatorErrorsEx
+     );
+
+
+    /**
+     * Get the derotator speed (in rpm)
+     *
+     * @return the derotator speed
+	 * @throw DerotatorErrors::CommunicationErrorEx
+     * @throw DerotatorErrors::DerotatorErrorsEx
+     * @throw CORBA::SystemException
+     */
+     DWORD getSpeed() throw (
+         CORBA::SystemException, 
+         ComponentErrors::ComponentErrorsEx, 
+         DerotatorErrors::DerotatorErrorsEx
+     );
+
 
      /**  
       * @ return the biggest position allowed, in the URS
@@ -231,13 +264,20 @@ public:
       * @return engine position (double) in the user's reference system
       * @throw CORBA::SystemException
       */
-     double getEnginePosition() ;
+     double getEnginePosition() throw (
+            CORBA::SystemException, 
+            ComponentErrors::ComponentErrorsEx, 
+            DerotatorErrors::DerotatorErrorsEx
+     );
 
 
 private:
     // CDB attributes
     CString SensorIP;
     DWORD SensorPort;
+    DWORD Speed;
+    DWORD MaxSpeed;
+    DWORD MinSpeed;
     DWORD SensorTimeout;
     long SensorZeroReference;
     double SensorConversionFactor;
@@ -284,6 +324,14 @@ private:
    //
    // ICD Summary Status 
    SmartPropertyPointer<ROpattern> m_status;
+
+   /** A vectors of <timestamp, position> */
+   static CSecureArea<vector<PositionItem> > *m_actPos_list;
+
+   static ThreadParameters m_thread_params;
+
+   /** @var static pointer to status thread */
+   StatusUpdater *m_status_ptr;
 
    void operator=(const SRTKBandDerotatorImpl&);
 

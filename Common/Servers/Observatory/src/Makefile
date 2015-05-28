@@ -38,7 +38,7 @@ LIBRARIES_L     =
 # <brief description of lllll library>
 ObservatoryImpl_OBJECTS   =  ObservatoryImpl
 ObservatoryImpl_LIBS = ObservatoryStubs IRALibrary \
-                       ComponentErrors AntennaDefinitionsStubs
+					   ComponentErrors AntennaDefinitionsStubs ManagmentDefinitionsStubs ManagementErrors
 
 #
 # Configuration Database Files

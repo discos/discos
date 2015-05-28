@@ -5,6 +5,7 @@ using namespace IRA;
 using namespace std;
 
 static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t position_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services, MinorServoBossImpl * bossImpl_ptr)
 {
@@ -18,6 +19,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services, Mino
     m_isElevationTrackingEn = false;
     m_isTracking = false;
     m_isScanning = false;
+    m_isScanLocked = false;
     m_isScanActive = false;
     m_dynamic_comps.clear();
     m_services = Services;
@@ -199,6 +201,12 @@ InfoAxisCode MSBossConfiguration::getInfoFromAxisCode(string axis_code) throw (M
     short id = 0;
     string comp_name;
     strip(axis_code);
+    if(axis_code.size() == 0) {
+        result.comp_name = "";
+        result.numberOfAxes = 0;
+        result.axis_id = -1;
+    }
+
     try {
         vector<string> items = split(axis_code, string("_"));
         comp_name = items[0];
@@ -277,7 +285,6 @@ void MSBossConfiguration::setScan(
         ACS::doubleSeq actPos,
         ACS::doubleSeq centralPos,
         ACS::doubleSeq plainCentralPos,
-        ACS::doubleSeq virtualCentralElongation,
         bool wasElevationTrackingEn
         )
 {
@@ -290,24 +297,20 @@ void MSBossConfiguration::setScan(
     m_scan.actPos = actPos;
     m_scan.centralPos = centralPos;
     m_scan.plainCentralPos = plainCentralPos;
-    m_scan.virtualCentralElongation = virtualCentralElongation;
     m_scan.wasElevationTrackingEn = wasElevationTrackingEn;
     m_scan.axis_code = axis_code;
 }
 
 
-
 ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time)
     throw (ManagementErrors::ConfigurationErrorExImpl)
 {
-    double elevation = 45.0; 
+    double elevation = 45.0 / DR2D; // From decimal to radians
     double azimuth;
     if(isElevationTrackingEn()) {
         try {
             if(!CORBA::is_nil(m_antennaBoss)) {
                 m_antennaBoss->getRawCoordinates(time, azimuth, elevation);
-                elevation = elevation * DR2D; // From radians to decimal (be sure we want to use decimal...)
-                elevation = (elevation > MIN_ELEVATION) ? elevation : 45.0;
                 m_isElevationTracking = true;
                 m_antennaBossError = false;
             }    
@@ -375,27 +378,46 @@ ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time
             m_isElevationTracking = false;
         }    
     }
+    return getPositionFromElevation(comp_name, elevation);
+}
 
+
+
+ACS::doubleSeq MSBossConfiguration::getPositionFromElevation(string comp_name, double elevation) 
+    throw (ManagementErrors::ConfigurationErrorExImpl)
+{
     ACS::doubleSeq positions;
     if(m_servosCoefficients.count(comp_name)) {
-        vector<vector<double> > vcoeff = m_servosCoefficients[comp_name]; 
-        positions.length(vcoeff.size());
-        size_t position_idx(0);
-        for(size_t j=0; j != vcoeff.size(); j++) {
-            double axis_value(0);
-            // For instance if an axis has the following coefficients: [C0, C1, C2], the axis value will be:
-            // C0 + C1*E + C2*E^2
-            for(size_t idx = 0; idx != (vcoeff[j]).size(); idx++)
-                axis_value += (vcoeff[j])[idx] * pow(elevation, idx);
+        try {
+            pthread_mutex_lock(&position_mutex);
 
-            positions[position_idx] = axis_value;
-            position_idx++;
+            elevation = elevation * DR2D; // From radians to decimal (be sure we want to use decimal...)
+            vector<vector<double> > vcoeff = m_servosCoefficients[comp_name]; 
+            positions.length(vcoeff.size());
+            size_t position_idx(0);
+            for(size_t j=0; j != vcoeff.size(); j++) {
+                double axis_value(0);
+                // For instance if an axis has the following coefficients: [C0, C1, C2], the axis value will be:
+                // C0 + C1*E + C2*E^2
+                for(size_t idx = 0; idx != (vcoeff[j]).size(); idx++)
+                    axis_value += (vcoeff[j])[idx] * pow(elevation, idx);
+
+                positions[position_idx] = axis_value;
+                position_idx++;
+            }
+            pthread_mutex_unlock(&position_mutex);
+        }
+        catch (...) {
+            pthread_mutex_unlock(&position_mutex);
+            THROW_EX(ManagementErrors, 
+                     ConfigurationErrorEx, 
+                     "cannot compute the" + comp_name + "position", 
+                     false);
         }
     }
     else {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, comp_name + " has no coefficients", false);
     }
-
     return positions;
 }
 

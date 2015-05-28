@@ -22,5 +22,6 @@
 <initialFrequency/>
 <bandWidth/>
 <mode/>
+<derotatorPosition/>
 
 </ReceiversBoss>

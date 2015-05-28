@@ -129,6 +129,10 @@ vector<string> split(const string &s, const string &match, bool removeEmpty, boo
     vector<string> result; // return container for tokens
     string::size_type start = 0, skip = 1; // starting position for searches and positions to skip after a match
     find_t pfind = &string::find_first_of; // search algorithm for matches
+    if(s.size() == 0) {
+        result.push_back(string(s));
+        return result;
+    }
 
     if (fullMatch)
     {
@@ -169,6 +173,10 @@ vector<string> split(const string &s, const string &match, bool removeEmpty, boo
 
 void strip(string &s, const string &token) {
     // ridx (lidx) is the index of first occurence starting from right (left)
+
+    if(s.size() == 0)
+        return;
+
     string::size_type ridx, lidx;
     string base_token("\n");
     while(true) {
