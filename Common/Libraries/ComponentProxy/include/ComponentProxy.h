@@ -26,7 +26,7 @@ typedef ComponentProxy<COMPONENT_TYPE,                                 \
  *
  * using namespace Antenna;
  * PROXY_COMPONENT(AntennaBoss);
- * AntennaBoss_proxy m_antennaBoss("MyComponentName", m_services);
+ * AntennaBoss_proxy m_antennaBoss("MyComponentInterfaceName", m_services);
  * m_antennaBoss->yourAntennaBossMethod(methodParameters); 
  * 
  * The Proxy operator '.' permits access to proxy methods:
@@ -57,8 +57,8 @@ class ComponentProxy
         virtual ~ComponentProxy();
         void loadDefault() throw (ComponentErrors::CouldntGetComponentExImpl);
         void unload();
-        ComponentVar getComponentVar(){ return m_component_var;};
-        ComponentVar operator->() throw (ComponentErrors::CouldntGetComponentExImpl);
+        //ComponentVar getComponentVar(){ return m_component_var;};
+        ComponentVar& operator->() throw (ComponentErrors::CouldntGetComponentExImpl);
         void setError(){ m_error = true;};
         void resetError(){ m_error = false;};
         bool isError(){ return m_error;};
@@ -134,7 +134,7 @@ throw (ComponentErrors::CouldntGetComponentExImpl)
             m_services->releaseComponent((const char*)m_component_var->name());
             CUSTOM_LOG(LM_FULL_INFO, 
                        "ComponentLoader::loadDefault",
-                       (LM_DEBUG, ("releasing " + this->m_name).c_str())
+                       (LM_DEBUG, ("released " + this->m_name).c_str())
                        );
         }catch (...) { //dispose silently...if an error...no matter
         }
@@ -146,7 +146,7 @@ throw (ComponentErrors::CouldntGetComponentExImpl)
             m_component_var = m_services->getDefaultComponent<ComponentClass>(m_name.c_str());
             CUSTOM_LOG(LM_FULL_INFO, 
                        "ComponentLoader::loadDefault",
-                       (LM_DEBUG, ("loading " + this->m_name).c_str())
+                       (LM_DEBUG, ("loaded " + this->m_name).c_str())
                        );
             m_error = false;
         } catch (maciErrType::CannotGetComponentExImpl& ex) {
@@ -186,7 +186,7 @@ ComponentProxy<ComponentClass, ComponentVar>::unload()
             _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,
                            Impl,ex,"ComponentLoader::unload()");
             Impl.setComponentName(m_name.c_str());
-            Impl.log(LM_WARNING);
+            CUSTOM_EXCPT_LOG(Impl, LM_WARNING);
         }catch (...) { 
             _EXCPT(ComponentErrors::UnexpectedExImpl, impl,
                    "ComponentLoader::unload()");
@@ -200,10 +200,14 @@ template <typename ComponentClass, typename ComponentVar>
 void
 ComponentProxy<ComponentClass, ComponentVar>::setComponentName(const char* name)
 {
-    if(name == "")
+    if(m_name == "")
         m_name = std::string(name);
     else{
         //TODO: throw exception?
+        CUSTOM_LOG(LM_FULL_INFO, 
+                   "ComponentLoader::setComponentName",
+                   (LM_DEBUG, ("ComponentName already defined: " + this->m_name).c_str())
+                   );
     }
 }
 
@@ -212,20 +216,25 @@ void
 ComponentProxy<ComponentClass, ComponentVar>::setContainerServices(
     maci::ContainerServices* services)
 {
-    if(m_services != NULL)
+    if(m_services == NULL)
         m_services = services;
     else{
         //TODO: throw exception?
+        CUSTOM_LOG(LM_FULL_INFO, 
+                   "ComponentLoader::setContainerServices",
+                   (LM_DEBUG, "ContainerServices already defined")
+                   );
     }
 }
 
 template <typename ComponentClass, typename ComponentVar>
-ComponentVar
+ComponentVar&
 ComponentProxy<ComponentClass, ComponentVar>::operator->()
 throw (ComponentErrors::CouldntGetComponentExImpl)
 {
     loadDefault();
-    return m_component_var.out();
+    //return m_component_var.out();
+    return m_component_var;
 }
 
 

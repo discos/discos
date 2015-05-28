@@ -12,14 +12,58 @@
 
 EXECUTABLES_L   = compilation_test
 compilation_test_OBJECTS    = compilation_test
-compilation_test_LIBS       = IRALibrary ManagmentDefinitionsStubs AntennaDefinitionsStubs \
-                              CustomLoggerStubs AntennaBossStubs \
-                              ManagementErrors ComponentErrors AntennaErrors
+compilation_test_LIBS       = IRALibrary \
+                              ManagmentDefinitionsStubs \
+                              AntennaDefinitionsStubs \
+                              MinorServoDefinitionsStubs \
+                              ReceiversDefinitionsStubs \
+                              CommonReceiverInterfaceStubs \
+                              GenericReceiverStubs \
+                              DewarPositionerDefinitionsStubs \
+                              BackendsDefinitionsStubs \
+                              CustomLoggerStubs \
+                              ExternalClientsStubs \
+                              SchedulerStubs \
+                              FitsWriterStubs \
+                              CalibrationToolStubs \
+                              AntennaBossStubs \
+                              BackendsBossStubs \
+                              DBBCStubs \
+                              HolographyStubs \
+                              NoiseGeneratorStubs \
+                              TotalPowerStubs \
+                              ActiveSurfaceBossStubs \
+                              MinorServoBossStubs \
+                              MinorServoStubs \
+                              ReceiversBossStubs \
+                              DewarPositionerStubs \
+                              LocalOscillatorInterfaceStubs \
+                              GenericWeatherStationStubs \
+                              DataReceiverStubs \
+                              GenericBackendStubs \
+                              CommonReceiverInterfaceStubs \
+                              bulkDataStubs bulkDataReceiverStubs \
+                              bulkDataCallback bulkDataSenderStubs \
+                              ManagementErrors \
+                              ComponentErrors \
+                              AntennaErrors \
+                              MinorServoErrors \
+                              ReceiversErrors \
+                              BackendsErrors 
 
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        = ComponentProxy.h AntennaBossProxy.h CustomLoggerProxy.h
+INCLUDES        = ActiveSurfaceProxy.h  \
+                  BackendsProxy.h   \
+                  ComponentProxy.h \
+                  MinorServoProxy.h  \
+                  WeatherProxy.h \
+                  AntennaProxy.h \
+                  ComponentProxies  \
+                  ManagementProxy.h  \
+                  ReceiversProxy.h
+
 
 #
 #>>>>> END OF standard rules

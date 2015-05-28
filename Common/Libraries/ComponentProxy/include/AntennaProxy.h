@@ -1,5 +1,5 @@
-#ifndef ANTENNABOSSPROXY_H
-#define ANTENNABOSSPROXY_H
+#ifndef ANTENNAPROXY_H
+#define ANTENNAPROXY_H
 
 #include <AntennaBossC.h>
 

@@ -1,5 +1,4 @@
-#include "CustomLoggerProxy.h"
-#include "AntennaBossProxy.h"
+#include "ComponentProxies"
 
 /**
  * As this Library is composed by only an header file
@@ -11,9 +10,23 @@
 int main()
 {
     Management::CustomLogger_proxy m_customLogger;
-    m_customLogger.setComponentName("CustomLogger");
-    m_customLogger->emitLog("Proxy log!", Management::C_INFO);
+    Management::ExternalClients_proxy m_externalClientsProxy;
+    Management::Scheduler_proxy m_schedulerProxy;
+    Management::FitsWriter_proxy m_fitsWriterProxy;
+    Management::CalibrationTool_proxy m_calibrationToolProxy;
     Antenna::AntennaBoss_proxy m_antennaBoss;
+    Backends::BackendsBoss_proxy m_backendBoss;
+    Backends::DBBC_proxy m_dbbcProxy;
+    Backends::Holography_proxy m_holographyProxy;
+    Backends::NoiseGenerator_proxy m_noiseProxy;
+    Backends::TotalPower_proxy m_totalPowerProxy;
+    ActiveSurface::ActiveSurfaceBoss_proxy m_acitveSurfaceBossProxy;
+    MinorServo::MinorServoBoss_proxy m_minorservoBossProxy;
+    MinorServo::WPServo_proxy m_wpServoProxy;
+    Receivers::ReceiversBoss_proxy m_receiversBossProxy;
+    Receivers::DewarPositioner_proxy m_dewarPositionerProxy;
+    Receivers::LocalOscillator_proxy m_localOscillatorProxy;
+    Weather::GenericWeatherStation_proxy m_genericWeatherStationProxy;
     return 0;
 }
 
