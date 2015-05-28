@@ -34,6 +34,7 @@
 #include <MinorServoErrors.h>
 #include <MinorServoS.h>
 #include <MinorServoBossS.h>
+#include <MinorServoBossC.h>
 #include <MedMinorServoBossS.h>
 #include <SP_parser.h>
 #include <cstring>
@@ -169,7 +170,9 @@ public:
 	 * @throw CORBA::SystemException
 	 * @throw ManagementErrors::ConfigurationErrorEx
 	 */
-	virtual void setup(const char *config) throw (CORBA::SystemException, MinorServoErrors::SetupErrorEx);
+	virtual void setup(const char *config) throw (
+        CORBA::SystemException, 
+        MinorServoErrors::SetupErrorEx);
 
     void setupImpl(const char *config) throw (MinorServoErrors::SetupErrorExImpl);
 
@@ -228,7 +231,7 @@ public:
              const ACS::Time starting_time, 
              const double range, 
              const ACS::Time total_time
-     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
+     ) throw (MinorServoErrors::StatusErrorEx, MinorServoErrors::ScanErrorEx);
 
 
     /** 
@@ -297,7 +300,9 @@ public:
      ) throw (MinorServoErrors::MinorServoErrorsEx);
     
     /** Return the central position of the axis involved in the scan */
-    CORBA::Double getCentralScanPosition() throw (MinorServoErrors::ScanErrorEx);
+    CORBA::Double getCentralScanPosition()
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
 
     /** Return the code of the axis involved in the scan */
     char * getScanAxis();
@@ -315,7 +320,8 @@ public:
              ACS::Time & starting_time, 
              const double range, 
              const ACS::Time total_time
-     ) throw (ManagementErrors::ConfigurationErrorEx, MinorServoErrors::ScanErrorEx);
+     ) throw (MinorServoErrors::MinorServoErrorsEx,
+              ComponentErrors::ComponentErrorsEx);
      
      /** 
       * Clear the user offset of a servo (or all servos)
@@ -325,7 +331,9 @@ public:
       *     * "ALL" to clear the user offset of all servos
       * @throw MinorServoErrors::OperationNotPermittedEx
       */
-     void clearUserOffset(const char *servo="ALL") throw (MinorServoErrors::OperationNotPermittedEx);
+     void clearUserOffset(const char *servo="ALL")
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
      
      /** Clear all the offsets. This method is called when the user gives a clearOffsets from the operator input */
      void clearOffsetsFromOI() throw (MinorServoErrors::OperationNotPermittedExImpl);
@@ -339,7 +347,8 @@ public:
       * @throw ManagementErrors::ConfigurationErrorEx
       */
      void setUserOffset(const char * axis_code, const double offset) 
-         throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
 
      /** Set the user offset. This method is called when the user gives a clearOffsets from the operator input */
      void setUserOffsetFromOI(const char * axis_code, const double & offset) 
@@ -352,10 +361,12 @@ public:
       * @throw ManagementErrors::ConfigurationErrorEx
       * @throw MinorServoErrors::OperationNotPermittedEx
       */
-     ACS::doubleSeq * getUserOffset() throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+     ACS::doubleSeq * getUserOffset()
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
 
      vector<double> getOffsetImpl(string offset_type)
-         throw (MinorServoErrors::OperationNotPermittedExImpl, ManagementErrors::ConfigurationErrorExImpl);
+         throw (MinorServoErrors::MinorServoErrorsEx);
 
      /** 
       * Clear the system offset of a servo (or all servos)
@@ -365,7 +376,9 @@ public:
       *     * "ALL" to clear the system offset of all servos
       * @throw MinorServoErrors::OperationNotPermittedEx
       */
-     void clearSystemOffset(const char *servo = "ALL") throw (MinorServoErrors::OperationNotPermittedEx);
+     void clearSystemOffset(const char *servo = "ALL")
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
       
      /** 
       * Set the system offset of the servo
@@ -376,7 +389,8 @@ public:
       * @throw ManagementErrors::ConfigurationErrorEx
       */
      void setSystemOffset(const char * axis_code, const double offset) 
-         throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
 
      /**
       * Return the system offset, in the same order of getAxesInfo()
@@ -385,7 +399,9 @@ public:
       * @throw MinorServoErrors::OperationNotPermittedEx
       * @throw ManagementErrors::ConfigurationErrorEx
       */
-     ACS::doubleSeq * getSystemOffset() throw (MinorServoErrors::OperationNotPermittedEx, ManagementErrors::ConfigurationErrorEx);
+     ACS::doubleSeq * getSystemOffset()
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
     
      /** Return the active axes names and related units
       *
@@ -396,7 +412,8 @@ public:
       * @throw MinorServoErrors::ConfigurationErrorEx
       */
      void getAxesInfo(ACS::stringSeq_out axes, ACS::stringSeq_out units)
-         throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
  
      /** Return the positions of the active axes
       *  
@@ -406,21 +423,26 @@ public:
       * @throw ComponentErrors::UnexpectedEx
       */
      ACS::doubleSeq * getAxesPosition(ACS::Time = 0) 
-         throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx, ComponentErrors::UnexpectedEx);
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
 
      /** Set the elevation tracking flag to "ON" or "OFF"
       * 
       * @param value "ON" or "OFF"
       * @throw ManagementErrors::ConfigurationErrorEx if the input is different from "ON" or "OFF"
       */
-     void setElevationTracking(const char * value) throw (ManagementErrors::ConfigurationErrorEx);
+     void setElevationTracking(const char * value) 
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
      
      void setElevationTrackingImpl(const char * value)
           throw (MinorServoErrors::MinorServoErrorsExImpl);
 
-     void setASConfiguration(const char * value) throw (ManagementErrors::ConfigurationErrorEx);
+     void setASConfiguration(const char * value)
+          throw (MinorServoErrors::MinorServoErrorsEx,
+                 ComponentErrors::ComponentErrorsEx);
 
-     void setASConfigurationImpl(const char * value) throw (ManagementErrors::ConfigurationErrorExImpl);
+     void setASConfigurationImpl(const char * value);
 
      /******************************************************
       * MedMinroServoBoss interface specific implementation
@@ -447,6 +469,7 @@ private:
     boost::recursive_mutex _scan_guard;
 
     IRA::CString m_server_ip;
+    IRA::CString m_antennaBossInterface;
     string m_commanded_conf;
     string m_actual_conf;
     string m_servo_scanned;
@@ -490,7 +513,7 @@ private:
 	/** This is the pointer to the notification channel */
 	nc::SimpleSupplier *m_nchannel;
 
-    bool isParked() throw (ManagementErrors::ConfigurationErrorEx);
+    bool isParked() throw (MinorServoErrors::ConfigurationErrorEx);
     
     /**
      * If not tracking elevation, sets the corerct position according to the
@@ -506,11 +529,14 @@ private:
     * @throw MinorServoErrors::ConfigurationErrorExImpl
     */
     void setOffsetImpl(string comp_name, double offset, string offset_type)
-        throw (MinorServoErrors::OperationNotPermittedExImpl, ManagementErrors::ConfigurationErrorExImpl);
+        throw (MinorServoErrors::MinorServoErrorsEx);
 
     /** Return the minumun starting time **/
-    ACS::Time getMinScanStartingTime(double range, const string axis_code, double & acceleration, double & max_speed)
-        throw (ManagementErrors::ConfigurationErrorExImpl, ManagementErrors::SubscanErrorExImpl);
+    ACS::Time getMinScanStartingTime(double range, 
+                                     const string axis_code, 
+                                     double & acceleration, 
+                                     double & max_speed)
+        throw (MinorServoErrors::ConfigurationErrorExImpl, MinorServoErrors::ScanErrorEx);
 
     void operator=(const MinorServoBossImpl &);
 };

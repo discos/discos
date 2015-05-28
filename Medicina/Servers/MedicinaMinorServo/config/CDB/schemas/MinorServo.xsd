@@ -123,6 +123,7 @@
         </xs:sequence>
 
         <xs:attribute name="server_ip" type="xs:string" use="required" />
+        <xs:attribute name="AntennaBossInterface" type="xs:string" use="required" />
         <!-- Subsystem attributes -->
         <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
         <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
