@@ -17,7 +17,7 @@ COMMON_DOC:=
 COMMON_ERRORS:=ClientErrors ComponentErrors AntennaErrors ParserErrors \
                BackendsErrors ManagementErrors ReceiversErrors \
                MetrologyErrors MinorServoErrors XBackendErrors
-COMMON_INTERFACES:=ManagmentInterface AntennaInterface ReceiversInterface \
+COMMON_INTERFACES:=CommonInterface ManagmentInterface AntennaInterface ReceiversInterface \
                    BackendsInterface MinorServoInterface \
                    WeatherStationInterface ActiveSurfaceInterface \
                    XBackendInterface
