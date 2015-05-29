@@ -45,7 +45,7 @@ MoonImpl_LIBS = EphemGeneratorStubs MoonStubs baci maci IRALibrary SlaLibrary Ob
 
 test_moon_OBJECTS = test_moon
 test_moon_LIBS = baci IRALibrary SlaLibrary EphemGeneratorStubs ComponentErrors AntennaErrors   \
-                     AntennaDefinitionsStubs
+                     AntennaDefinitionsStubs ManagmentDefinitionsStubs ObservatoryStubs ManagementErrors
 #
 # list of all possible C-sources (used to create automatic dependencies)
 # ------------------------------

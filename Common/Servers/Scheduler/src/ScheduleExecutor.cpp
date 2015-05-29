@@ -562,7 +562,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
         logfile_name <<  currentUT.second();
         /* Change log file with the new name 
          * ================================= */
- 	m_core->changeLogFile((const char *)logfile_name.str().c_str()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
+ 	m_core->_changeLogFile((const char *)logfile_name.str().c_str()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
  	// load the procedures associated to the schedule
  	m_core->loadProceduresFile(m_schedule->getPreScanProcedureList());
  	m_active=true;
