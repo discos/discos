@@ -257,6 +257,10 @@ public:
 	 * @return true if the command was executed correctly
 	 */
     virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
+
+    virtual void getConfiguration (CORBA::String_out configuration) throw (CORBA::SystemException);
+
+    virtual void getCommProtVersion (CORBA::String_out version) throw (CORBA::SystemException);
     
     /**
      * Call this function to set the current time (from the local computer) into the backend. 

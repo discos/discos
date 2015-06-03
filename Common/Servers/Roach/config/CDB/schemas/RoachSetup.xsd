@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
-	- $Id: TotalPowerSetup.xsd,v 1.1 2011-03-14 14:15:07 a.orlati Exp $
+	- $Id: RoachSetup.xsd,v 1.1 2011-03-14 14:15:07 a.orlati Exp $
 	- Author: Andrea Orlati
 	-
 	- History:
@@ -8,8 +8,8 @@
 -->
 
 <xs:schema
-  targetNamespace="urn:schemas-cosylab-com:TotalPowerSetup:1.0"
-  xmlns="urn:schemas-cosylab-com:TotalPowerSetup:1.0"
+  targetNamespace="urn:schemas-cosylab-com:RoachSetup:1.0"
+  xmlns="urn:schemas-cosylab-com:RoachSetup:1.0"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
   xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -124,13 +124,13 @@
  		</xs:sequence>
  	</xs:complexType>
   
- 	<xs:complexType name="TTotalPowerSetup">
+ 	<xs:complexType name="TRoachSetup">
 		<xs:sequence>
 			<xs:element name="Configuration" type="TTableHeader" 
 			  minOccurs="1" maxOccurs="unbounded" />
 		</xs:sequence>
  	</xs:complexType>
   
-	<xs:element name="TotalPowerSetup" type="TTotalPowerSetup"/>
+	<xs:element name="RoachSetup" type="TRoachSetup"/>
   	
 </xs:schema>

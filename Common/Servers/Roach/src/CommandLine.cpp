@@ -117,7 +117,7 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 	IRA::CIRATools::Wait(0,200000);
 	try {
 		//stopDataAcquisitionForced();  // this will force the backend to a normal status in case the connection came from an abnormal close
-		setDefaultConfiguration(); //could throw exceptions........
+		//setDefaultConfiguration(conf); //could throw exceptions........
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) { // these are not real error so we do not want to give up
 		
@@ -564,7 +564,7 @@ void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getZeroTPI()");
 	}
 	integration=(long)round(1.0/ (m_commonSampleRate*1000.0));
-	res=getConfiguration(); // refresh the m_currentSampleRate..........
+	//res=getConfiguration(); // refresh the m_currentSampleRate..........
 	if (res>0) { // load OK
 		// do nothing
 	}
@@ -713,7 +713,7 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getSample()");
 	}
-	res=getConfiguration(); // refresh the m_currentSampleRate..........
+	//res=getConfiguration(); // refresh the m_currentSampleRate..........
 	if (res>0) { // load OK
 		// do nothing
 	}
@@ -829,7 +829,7 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 	}
 }
 
-void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
+void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
 		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl)
 {
 	AUTO_TRACE("CCommandLine::setDefaultConfiguration()");
@@ -841,74 +841,18 @@ void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExIm
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
 	}
-	if (m_defaultInputSize==1) {
-		len=CProtocol::setConfiguration_broadcast(sBuff,m_defaultInput[0],m_attenuation[0],m_bandWidth[0]); // get the buffer
-		if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-			res=receiveBuffer(rBuff,RECBUFFERSIZE);
-		}
-		if (res>0) { // operation was ok.
-			if (!CProtocol::isAck(rBuff)) {
-				_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
-			}
-		}
-		else if (res==FAIL) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-			dummy.setCode(m_Error.getErrorCode());
-			dummy.setDescription((const char*)m_Error.getDescription());
-			m_Error.Reset();
-			_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setDefaultConfiguration()");
-		}
-		else if (res==WOULDBLOCK) {
-			_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setDefaultConfiguration()");
-		}
-		else {
-			_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
-		}
-	}
-	else {
-		for (DWORD k=0;k<m_defaultInputSize;k++) {
-			if (m_sections[k]==-1) {
-				//***************************************************************************
-				// This should be changed in order to read the Attenuation on board basis and to apply proper db for each board
-				//****************************************************************************
-				len=CProtocol::setConfiguration(sBuff,(long)k,m_defaultInput[k],13.0,2350.0);
-			}
-			else {
-				len=CProtocol::setConfiguration(sBuff,(long)k,m_defaultInput[k],m_attenuation[m_sections[k]],m_bandWidth[m_sections[k]]);
-			}
-			if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-				res=receiveBuffer(rBuff,RECBUFFERSIZE);
-			}
-			if (res>0) { // operation was ok.
-				if (!CProtocol::isAck(rBuff)) {
-					_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
-				}
-			}
-			else if (res==FAIL) {
-				_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-				dummy.setCode(m_Error.getErrorCode());
-				dummy.setDescription((const char*)m_Error.getDescription());
-				m_Error.Reset();
-				_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setDefaultConfiguration()");
-			}
-			else if (res==WOULDBLOCK) {
-				_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setDefaultConfiguration()");
-			}
-			else {
-				_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
-			}
-		}
-	}
-	IRA::CIRATools::Wait(0,200000);
-	long integration=(long)round(1.0/ (m_commonSampleRate*1000.0));
-	len=CProtocol::setIntegrationTime(sBuff,integration); // get the buffer
+	strcpy (sBuff,"?set-configuration,");
+	strcat (sBuff,(const char*)config);
+	strcat (sBuff,"\r\n");
+	len = strlen (sBuff);
+
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
-				_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
-		} 
+		//if (!CProtocol::isAck(rBuff)) {
+		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
+		//}
 	}
 	else if (res==FAIL) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
@@ -924,8 +868,6 @@ void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExIm
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
 	}
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_INFO,"DEFAULTS_ARE_SET"));
-	m_setTpiIntegration=false;	
-	
 }
 
 void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
@@ -940,8 +882,8 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 		_EXCPT(BackendsErrors::ConfigurationErrorExImpl,impl,"CCommandLine::setup()");
 		throw impl;
 	}
-	setDefaultConfiguration(); //could throw exceptions........
-	ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_INITIALIZED: %s",conf)); 
+	setDefaultConfiguration(conf); //could throw exceptions........
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZED, CONFIGURATION: %s",conf)); 
 }
 
 void CCommandLine::checkTime() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::MalformedAnswerExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
@@ -1105,7 +1047,7 @@ void CCommandLine::getAttenuation(ACS::doubleSeq& att) throw (ComponentErrors::S
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getAttenuation()");
 	}
-	res=getConfiguration();
+	//res=getConfiguration();
 	if (res>0) { // load OK
 		att.length(m_sectionsNumber);
 		for (int i=0;i<m_sectionsNumber;i++) {
@@ -1123,8 +1065,42 @@ void CCommandLine::getFrequency(ACS::doubleSeq& freq) const
 	}
 }
 
-void CCommandLine::getBackendStatus(DWORD& status) const
+void CCommandLine::getBackendStatus(DWORD& status)
 {
+	AUTO_TRACE("CCommandLine::getBackendStatus()");
+	int res;
+	WORD len;
+	char sBuff[SENDBUFFERSIZE];
+	char rBuff[RECBUFFERSIZE];
+	// I do not check for backend busy because this is a call done at the initialization and never repeated
+	if (!checkConnection()) {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getBackendStatus()");
+	}
+	strcpy (sBuff,"?status\r\n");
+	len = strlen (sBuff);
+
+	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
+		res=receiveBuffer(rBuff,RECBUFFERSIZE);
+	}
+	if (res>0) { // operation was ok.
+		//if (!CProtocol::status(rBuff)) {
+		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
+		//}
+	}
+	else if (res==FAIL) {
+		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
+		dummy.setCode(m_Error.getErrorCode());
+		dummy.setDescription((const char*)m_Error.getDescription());
+		m_Error.Reset();
+		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::getBackendStatus()");
+	}
+	else if (res==WOULDBLOCK) {
+		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::getBackendStatus()");
+	}
+	else {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getBackendStatus()");
+	}
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::getBackendStatus()",(LM_INFO,"GETTING BACKEND STATUS"));
 	status=m_backendStatus;
 }
 
@@ -1200,7 +1176,7 @@ void CCommandLine::getBandWidth(ACS::doubleSeq& bw) throw (ComponentErrors::Sock
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getBandWidth()");
 	}
-	res=getConfiguration();
+	//res=getConfiguration();
 	if (res>0) { // load OK
 		bw.length(m_sectionsNumber);
 		for (int i=0;i<m_sectionsNumber;i++) {
@@ -1218,7 +1194,7 @@ void CCommandLine::getTime(ACS::Time& tt) throw (ComponentErrors::SocketErrorExI
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getTime()");
 	}
-	res=getConfiguration();
+	//res=getConfiguration();
 	if (res>0) { // load OK
 		tt=m_backendTime.value().value;
 	}
@@ -1423,37 +1399,85 @@ int CCommandLine::sendCommand(char *inBuff,const WORD& inLen,char *outBuff)
 	}
 }
 
-int CCommandLine::getConfiguration()
+int CCommandLine::getConfiguration(char* configuration)
 {
 	TIMEVALUE Now;
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
 	WORD len;
-	int rBytes;
-	OperationResult Res;
-	CIRATools::getTime(Now);
-	if (CIRATools::timeDifference(m_lastUpdate,Now)>m_configuration->getPropertyRefreshTime()) { //check if we have to go to the backend!
-		// prepare the buffer........
-		len=CProtocol::askBackendConfiguration(sBuff);
-		//send and wait for the answer...........
-		if ((Res=sendBuffer(sBuff,len))==SUCCESS) {
-			rBytes=receiveBuffer(rBuff,RECBUFFERSIZE);
-			if (rBytes>0) {
-				if (CProtocol::decodeBackendConfiguration(rBuff,m_sectionsNumber,m_configuration->getBoardsNumber(),m_attenuation,m_bandWidth,m_input,m_backendTime,m_currentSampleRate,m_boards)) {
-					CIRATools::getTime(m_lastUpdate);
-				}
-				else {
-					return DECODE_ERROR;
-				}
-			}
-			// this could be 0 (communication fell down), FAIL error (m_Error set accordingly) , WOULDBLOCK timeout, >0 ok
-			return rBytes;
-		}
-		else {  // send fails....m_Error already set by sendBuffer
-			return Res;
-		}
+	int res;
+
+	if (!checkConnection()) {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getConfiguration()");
 	}
-	// the last value is still valid..nothing to do so return a value that is grater than zero
+	strcpy (sBuff,"?configuration\r\n");
+	len = strlen (sBuff);
+
+	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
+		res=receiveBuffer(rBuff,RECBUFFERSIZE);
+		strcpy (configuration,rBuff);
+	}
+	if (res>0) { // operation was ok.
+		//if (!CProtocol::status(rBuff)) {
+		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
+		//}
+	}
+	else if (res==FAIL) {
+		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
+		dummy.setCode(m_Error.getErrorCode());
+		dummy.setDescription((const char*)m_Error.getDescription());
+		m_Error.Reset();
+		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::getConfigurationu)");
+	}
+	else if (res==WOULDBLOCK) {
+		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::getConfiguration()");
+	}
+	else {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getConfiguration()");
+	}
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::getConfiguration()",(LM_INFO,"GETTING BACKEND CONFIGURATION"));
+
+	return SENDBUFFERSIZE; 
+}
+
+int CCommandLine::getCommProtVersion(char* version)
+{
+	TIMEVALUE Now;
+	char sBuff[SENDBUFFERSIZE];
+	char rBuff[RECBUFFERSIZE];
+	WORD len;
+	int res;
+
+	if (!checkConnection()) {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getCommProtVersion()");
+	}
+	strcpy (sBuff,"?version\r\n");
+	len = strlen (sBuff);
+
+	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
+		res=receiveBuffer(rBuff,RECBUFFERSIZE);
+		strcpy (version,rBuff);
+	}
+	if (res>0) { // operation was ok.
+		//if (!CProtocol::status(rBuff)) {
+		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
+		//}
+	}
+	else if (res==FAIL) {
+		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
+		dummy.setCode(m_Error.getErrorCode());
+		dummy.setDescription((const char*)m_Error.getDescription());
+		m_Error.Reset();
+		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::getCommProtVersion()");
+	}
+	else if (res==WOULDBLOCK) {
+		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::getCommProtVersion()");
+	}
+	else {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getCommProtVersion()");
+	}
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::getCommProtVersion()",(LM_INFO,"GETTING COMMUNICATION PROTOCOL VERSION"));
+
 	return SENDBUFFERSIZE; 
 }
 

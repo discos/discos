@@ -32,7 +32,7 @@ CControlThread::CControlThread(const ACE_CString& name,CSecureArea<CCommandLine>
  {
 	 IRA::CSecAreaResourceWrapper<CCommandLine> line=m_pData->Get();
 	 try {
-		line->checkTime(); 
+		//line->checkTime(); 
 	 }
 	catch (ACSErr::ACSbaseExImpl& E) {
 		_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,_dummy,E,"CControlThread::runLoop()");

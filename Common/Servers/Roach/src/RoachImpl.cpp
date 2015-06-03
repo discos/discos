@@ -221,7 +221,7 @@ void RoachImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	try {
 		ACS_LOG(LM_FULL_INFO,"RoachImpl::execute()",(LM_INFO,"HARDWARE_INITIALIZATION"));
 		line->Init(&m_configuration);  	// this could throw an ACS exception.....
-		line->setTime(); // this could throw ACS exceptions....
+		//line->setTime(); // this could throw ACS exceptions....
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		deleteAll();
@@ -758,6 +758,50 @@ void RoachImpl::setIntegration(CORBA::Long Integration) throw (CORBA::SystemExce
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
 	}		
+}
+
+void RoachImpl::getConfiguration (CORBA::String_out configuration) throw (CORBA::SystemException)
+{
+	AUTO_TRACE("RoachImpl::setIntegration()");
+	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+	try {
+		line->getConfiguration(configuration);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getBackendsErrorsEx();		
+	}	
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"RoachImpl::getConfiguration()");
+		dummy.log(LM_DEBUG);
+		throw dummy.getComponentErrorsEx();
+	}	
+}
+
+void RoachImpl::getCommProtVersion (CORBA::String_out version) throw (CORBA::SystemException)
+{
+	AUTO_TRACE("RoachImpl::setIntegration()");
+	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+	try {
+		line->getCommProtVersion(version);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getBackendsErrorsEx();		
+	}	
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"RoachImpl::getCommProtVersion()");
+		dummy.log(LM_DEBUG);
+		throw dummy.getComponentErrorsEx();
+	}	
 }
 
 CORBA::Boolean RoachImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)

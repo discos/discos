@@ -14,7 +14,7 @@ CSenderThread::CSenderThread(const ACE_CString& name,TSenderParameter  *par,
 	m_sender=par->sender;
 	m_commandLine=par->command;
 	m_configuration=par->configuration;
-	m_dataLine=par->dataLine;
+	//m_dataLine=par->dataLine;
 	m_isConnected=false;
 	m_inputBuffer=new BYTE[DATABUFFERSIZE];
 	m_tempBuffer=new BYTE[DATABUFFERSIZE*2];
@@ -61,7 +61,7 @@ void CSenderThread::closeSocket()
 void CSenderThread::runLoop()
 {
 	IRA::CError err;
-	int res;
+	//int res;
 	IRA::CSecAreaResourceWrapper<CCommandLine> cmd=m_commandLine->Get();
 	if (cmd->m_reiniting) {
 		cmd->m_reiniting=false;

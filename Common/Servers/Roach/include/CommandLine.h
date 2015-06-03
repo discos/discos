@@ -96,7 +96,7 @@ public:
 	/**
 	 * Call this function in order to get the component status back
 	 */
-	void getBackendStatus(DWORD& status) const;
+	void getBackendStatus(DWORD& status);
 	
 	/**
 	 * Call this function in order to get the feed connected to each section.
@@ -439,6 +439,11 @@ public:
 	 * @return true if the resulting integration has to be rounded to match the two input parameters
 	 */
 	static bool resultingSampleRate(const long& integration,const double& sr,long& result);
+
+	int getConfiguration(char* configuration);
+
+	int getCommProtVersion(char* version);
+
 protected:
 	/**
 	 * Automatically called by the framework as a result of a connection request. See super-class for more details.
@@ -630,7 +635,7 @@ private:
 	 * @throw BackendsErrors::ConnectionExImp
 	 * @throw BackendsErrors::NakExImpl
 	 */
-	void setDefaultConfiguration() throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
+	void setDefaultConfiguration(const IRA::CString & config) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
 			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl);
 	
 	/**
@@ -692,7 +697,7 @@ private:
 	 * @return a number greater than zero if the operation is succesfully, else FAIL in case of error, WOULDBLOCK if the timeout expires, 
 	 *              0 if the remoteside disconnected or -100 is the answer of the backend is malformed
 	*/
-	int getConfiguration();
+	//int getConfiguration(char* configuration);
 	
 	/**
 	 * This function will set the status bit corresponding to the given field 

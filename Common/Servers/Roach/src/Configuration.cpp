@@ -161,10 +161,10 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	// read the configurations
 	IRA::CError error;
 	try {
-		m_configurationTable=(CDBTable *)new CDBTable(Services,"Configuration","DataBlock/TotalPower");
+		m_configurationTable=(CDBTable *)new CDBTable(Services,"Configuration","DataBlock/Roach");
 	}
 	catch (std::bad_alloc& ex) {
-		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"TotalPowerImpl::initialize()");
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"RoachImpl::initialize()");
 		throw dummy;
 	}
 	error.Reset();
