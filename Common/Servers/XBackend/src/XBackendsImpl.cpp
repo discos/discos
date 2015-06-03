@@ -1024,7 +1024,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 	switch (conf) {
 		case (Backends::XArcos_K77): // XK77, ALL FEED
 			setMode8bit(false);
-            setSectionsNumber(7);
+            		setSectionsNumber(7);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(0,145,62.5,0,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
@@ -1054,7 +1054,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			setSection(3,174.296875,3.90625,6,2,7.8125,-1);
 			line->m_XarcosC=false;
 			break;
-		case (Backends::XArcos_K03) // XK03, CENTRAL FEED & FEED 3
+		case (Backends::XArcos_K03): // XK03, CENTRAL FEED & FEED 3
 			setMode8bit(true);
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
@@ -1080,7 +1080,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 			setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
 			IRA::CIRATools::Wait(0,100000);
-            line->m_XarcosC=false;
+            		line->m_XarcosC=false;
 			break;
 		case (Backends::XArcos_C00): // XC00
 			setMode8bit(true);
@@ -1094,9 +1094,9 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 			setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
 			IRA::CIRATools::Wait(0,100000);
-		    line->setFeedC();
-            line->m_XarcosC=true;
-		    //setMode8bit(true);
+		    	line->setFeedC();
+            		line->m_XarcosC=true;
+		    	//setMode8bit(true);
 			break;
 	}
 }
