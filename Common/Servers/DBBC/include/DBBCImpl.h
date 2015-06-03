@@ -82,12 +82,12 @@ virtual ACS::ROlong_ptr sectionsNumber() throw (CORBA::SystemException);
 
 virtual ACS::ROlongSeq_ptr inputSection() throw (CORBA::SystemException);
 
-virtual char * command(const char *configCommand) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx){IRA::CString out;return CORBA::string_dup((const char *)out);};  
+//virtual char * command(const char *configCommand) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx){IRA::CString out;return CORBA::string_dup((const char *)out);};  
 		
 
 virtual void setSection (CORBA::Long input,CORBA::Double freq,CORBA::Double bw, CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx){ };
 
-
+CORBA::Boolean command(const char *configCommand, CORBA::String_out answer) throw (CORBA::SystemException);
 
 virtual ACS::ROuLongLong_ptr time() throw (CORBA::SystemException);
 virtual ACS::ROstring_ptr backendName() throw (CORBA::SystemException);

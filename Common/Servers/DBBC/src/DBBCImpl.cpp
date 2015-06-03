@@ -104,6 +104,36 @@ void DBBCImpl::initialize()
     }
 }
 
+CORBA::Boolean DBBCImpl::command(const char *configCommand, CORBA::String_out answer) 
+	throw (CORBA::SystemException)
+{
+	AUTO_TRACE("DBBCImpl::command()");
+	IRA::CString out;
+	//IRA::CString in("");
+	bool res;
+	//CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+	//in=IRA::CString(configCommand);
+	try {
+		//m_parser->run(configCommand,out);
+		res = true;
+	}
+	catch (ParserErrors::ParserErrorsExImpl &ex) {
+		/*_ADD_BACKTRACE(ManagementErrors::CommandLineErrorExImpl,impl,ex,"XBackendsImpl::command()");
+		impl.setCommand(configCommand);
+		impl.setErrorMessage((const char *)out);
+		impl.log(LM_DEBUG);
+		throw impl.getCommandLineErrorEx();*/
+		res = false;
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_ERROR); // the errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface, while the parser errors are never logged.
+		res=false;
+	}
+	answer=CORBA::string_dup((const char *)out);
+	return res;
+	//return CORBA::string_dup((const char *)out);
+}
+
 // Il codice seguente va messo sempre, sono le properties ereditate dal Generic Backend. E' una macro, definita in Definitions.h (cvs/Common/Libraries/IRALibrary/include) che serve per creare la properties
 _PROPERTY_REFERENCE_CPP(DBBCImpl,ACS::ROuLongLong,m_ptime,time); 
 _PROPERTY_REFERENCE_CPP(DBBCImpl,ACS::ROstring,m_pbackendName,backendName); 
