@@ -33,7 +33,7 @@ CDB_SCHEMAS = GenericBackend
 # 
 # IDL Files and flags
 # 
-IDL_FILES = GenericBackend BackendsBoss TotalPower NoiseGenerator DigitalXCorrelator Holography DBBC DFBInterface
+IDL_FILES = GenericBackend BackendsBoss TotalPower NoiseGenerator DigitalXCorrelator Holography DBBC DFBInterface Roach
 IDL_TAO_FLAGS =
 USER_IDL =
 
