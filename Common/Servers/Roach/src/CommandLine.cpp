@@ -1456,7 +1456,7 @@ int CCommandLine::getCommProtVersion(char* version)
 
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-		strcpy (version,rBuff);
+		strcpy (version,(char*)rBuff);
 	}
 	if (res>0) { // operation was ok.
 		//if (!CProtocol::status(rBuff)) {

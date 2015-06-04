@@ -125,7 +125,12 @@ module Backends {
  		 * @param configuration this string must contain the sequence of character that identifies the configuration that must be loaded. If the sequence is not
  		 *               known an excpetion is thrown
 		 */
+
 		void initialize(in string configuration) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+		void getConfiguration(out string configuration);
+
+		void getCommProtVersion(out string version);
 	};
 	
 };

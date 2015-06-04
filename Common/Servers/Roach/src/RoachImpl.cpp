@@ -784,7 +784,7 @@ void RoachImpl::getConfiguration (CORBA::String_out configuration) throw (CORBA:
 
 void RoachImpl::getCommProtVersion (CORBA::String_out version) throw (CORBA::SystemException)
 {
-	AUTO_TRACE("RoachImpl::setIntegration()");
+	AUTO_TRACE("RoachImpl::getCommProtVersion()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
 		line->getCommProtVersion(version);
