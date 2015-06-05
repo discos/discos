@@ -366,13 +366,17 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 	return taper;
 }
 
-double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-		ComponentErrors::ValidationErrorExImpl)
+/*double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
+		ComponentErrors::ValidationErrorExImpl)*/
+double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (ComponentErrors::CouldntGetComponentExImpl,
+		ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::UnexpectedExImpl)
 {
 	// no need to check anything
 	return 0;
 }
 
+/*
 void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
 		ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
@@ -383,7 +387,7 @@ void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Re
 	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetup()");
 	m_status=Management::MNG_WARNING;
 	throw impl;
-}
+}*/
 
 void CRecvBossCore::derotatorPark() throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
     			ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
@@ -558,8 +562,11 @@ void  CRecvBossCore::updateRecvStatus() throw (ComponentErrors::CouldntGetCompon
 	return;
 }
 
+/*
 void CRecvBossCore::updateDewarPositionerStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::OperationErrorExImpl)
+		ComponentErrors::OperationErrorExImpl)*/
+void CRecvBossCore::updateDewarPositionerStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+		ComponentErrors::OperationErrorExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl)
 {
 	return;
 }
