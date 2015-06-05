@@ -462,7 +462,10 @@ void CRecvBossCore::getIFOutput(const ACS::longSeq& feeds,const ACS::longSeq& if
 	}
 }
 
-void CRecvBossCore::CRecvBossCore::startScan(ACS::Time startUT,const Receivers::TReceiversParameters & param)
+void CRecvBossCore::CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,
+  const Antenna::TRunTimeParameters& antennaInfo) throw(
+  ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+  ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl)
 {
 
 }
