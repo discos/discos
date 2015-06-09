@@ -635,6 +635,22 @@ def wait():
     sets a delay (in seconds) which is applied before the system reads/executes the next command
     """
 
+def winkingMark():
+    """
+    winkingMark=[integer]
+    activates the winking (i.e. fast switching) calibration mark, whose period 
+    in milliseconds is given as an integer parameter. To switch the mark off, 
+    simply command a zero-ms period. This must always be done when the winking
+    mark is not needed anymore. For instance, to activate the mark so that is 
+    alternately stays ON for 40 ms and OFF for 40 ms:
+
+        > winkingMark=40
+
+    To switch the mark off:
+
+        > winkingMark=0
+    """
+
 def wx():
     """
     wx returns the current weather parameters: ground temperature (Centigrade), relative humidity (%), 
