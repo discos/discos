@@ -305,6 +305,20 @@ def device():
     backend configurations relative to section sect
     """
 
+def externalCalOn():
+    """
+    externalCalOn
+    allows an external device to switch the calibration mark (on/off) on the
+    active receiver
+    """
+
+def externalCalOff():
+    """
+    externalCalOff
+    prevents an external device to switch the calibration mark (on/off) on the
+    active receiver
+    """
+
 def flush():
     """
     flush=N deletes the N-th element in the queue of temporized commands
