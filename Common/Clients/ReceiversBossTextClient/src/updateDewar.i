@@ -67,12 +67,12 @@ void updateDewar(Receivers::DewarPositioner_ptr dewar)
 		extraLabel2->Refresh();
 	}
 	format.Format("%05.1lf",position);
-	outString="Derotator Position: "+format;
+	outString="Absolute Position: "+format;
 	extraLabel3->setValue(outString);
 	extraLabel3->setStyle(TW::CStyle(TW::CColorPair::WHITE_BLACK,0));
 	extraLabel3->Refresh();
 	format.Format("%05.1lf / %07.3lf / %07.3lf / %05.1lf",iStaticPos,iParPos,dParPos,rewOff);
-	outString="Dewar Position: "+format;
+	outString="I / P / D / R: "+format;
 	extraLabel4->setValue(outString);
 	extraLabel4->setStyle(TW::CStyle(TW::CColorPair::WHITE_BLACK,0));
 	extraLabel4->Refresh();
