@@ -5,6 +5,8 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     DerotatorName="RECEIVERS/SRTKBandDerotator"
+    ObservatoryName="ANTENNA/Observatory"
+    CoordinateSourceName="ANTENNA/Boss"
     SetupPosition="0.0"
     ParkPosition="0.0"
 />
