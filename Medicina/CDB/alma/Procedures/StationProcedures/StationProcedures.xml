@@ -76,4 +76,11 @@
 </body>
 </Procedure>
 
+<Procedure name="winkingMark" args="1">
+<body>
+	externalCalOn
+	calSwitch=$1
+</body>
+</Procedure>
+
 </ProcedureFile>
