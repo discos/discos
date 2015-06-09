@@ -10,8 +10,11 @@
 	receiversSetup=CCB
 	initialize=CCB
 	device=0
+	setServoElevationTracking=ON
+	setServoASConfiguration=ON
 	calOff
 	restFrequency=0
+	antennaAzEl=0d,0d
 </body>	
 </Procedure>
 
@@ -23,8 +26,11 @@
 	receiversMode=SINGLEDISH
 	initialize=KKG
 	device=0
+	setServoElevationTracking=ON
+	setServoASConfiguration=ON
 	calOff
 	restFrequency=0
+	antennaAzEl=0d,0d
 </body>
 </Procedure>
 
@@ -38,6 +44,7 @@
 	device=0
 	calOff
 	restFrequency=0
+	antennaAzEl=0d,0d
 </body>
 </Procedure>
 
@@ -51,6 +58,7 @@
 	device=0
 	calOff
 	restFrequency=0
+	antennaAzEl=0d,0d
 </body>
 </Procedure>
 
@@ -64,17 +72,17 @@
 	device=0
 	calOff
 	restFrequency=0
+	antennaAzEl=0d,0d
 </body>
 </Procedure>
 
 <Procedure name="telescopePark" args="0">
 <body>
 	goTo=180d,89.8d
-	receiversPark
 	waitOnSource
-	servoPark
 	antennaPark
-	asOff
+	receiversPark
+	servoPark
 	asPark
 </body>
 </Procedure>
