@@ -864,6 +864,14 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 		visible=GETMIN(v1,v2);   // the result of visibility check is the minimum of both checks: NOT_VISIBLE<AVOIDANCE<VISIBLE, i.e. target is visible only if both checks result in VISIBLE
 		//visible=m_slewCheck.checkLimit(elevation)&&m_slewCheck.checkLimit(stopElevation);
 	}
+	else if (generatorType==Antenna::ANT_OTF) {
+		if (par.frame==Antenna::ANT_HORIZONTAL) {
+			visible=CSlewCheck::VISIBLE;
+		}
+		else {
+			visible=m_slewCheck.checkLimit(elevation,minElLimit,maxElLimit);
+		}
+	}
 	else {
 		visible=m_slewCheck.checkLimit(elevation,minElLimit,maxElLimit);
 	}
