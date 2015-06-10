@@ -10,8 +10,6 @@
 	receiversSetup=CCB
 	initialize=CCB
 	device=0
-	setServoElevationTracking=ON
-	setServoASConfiguration=ON
 	calOff
 	restFrequency=0
 	antennaAzEl=0d,0d
@@ -26,8 +24,6 @@
 	receiversMode=SINGLEDISH
 	initialize=KKG
 	device=0
-	setServoElevationTracking=ON
-	setServoASConfiguration=ON
 	calOff
 	restFrequency=0
 	antennaAzEl=0d,0d

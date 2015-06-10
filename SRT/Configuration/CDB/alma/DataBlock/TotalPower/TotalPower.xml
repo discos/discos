@@ -75,4 +75,19 @@
  	<IF>0 1 0 1</IF>
 </Configuration>
 
+<Configuration>
+	<configurationID>XKA</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<inputPort>PRIMARY</inputPort>
+	<inputPortDB>7</inputPortDB>
+ 	<inputPortBW>730</inputPortBW>
+	<beams>7</beams>
+	<section_boards>4 5</section_boards>
+	<polarizations>R R</polarizations>
+	<feed>0 1</feed>
+	<IF>0 0</IF>
+</Configuration>
+
+
 </TotalPowerSetup>
