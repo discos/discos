@@ -22,13 +22,15 @@ class SetupTest(unittest2.TestCase):
 
     telescope = os.getenv('TARGETSYS')
     
-    def setUp(self):
-        self.client = PySimpleClient()
-        self.boss = self.client.getComponent('MINORSERVO/Boss')
+    @classmethod
+    def setUpClass(cls):
+        cls.client = PySimpleClient()
+        cls.boss = cls.client.getComponent('MINORSERVO/Boss')
         
-    def tearDown(self):
-        self.client.releaseComponent('MINORSERVO/Boss')
-        self.client.disconnect()
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.releaseComponent('MINORSERVO/Boss')
+        cls.client.disconnect()
 
     def test_elevation_tracking_ON(self):
         """The setup turns the elevation tracking on"""
@@ -42,7 +44,13 @@ class SetupTest(unittest2.TestCase):
         self.wait_until_ready()
         self.assertEqual(self.boss.getActualSetup(), 'KKG_ASACTIVE')
 
-    def wait_until_ready(self, timeout=20):
+    def test_actual_setup_unknown(self):
+        self.boss.setup('KKG')
+        self.wait_until_ready()
+        self.boss.setup('KKG')
+        self.assertEqual(self.boss.getActualSetup(), 'unknown')
+
+    def wait_until_ready(self, timeout=240):
         t0 = datetime.now()
         while not self.boss.isReady():
             if (datetime.now() - t0).seconds > timeout:

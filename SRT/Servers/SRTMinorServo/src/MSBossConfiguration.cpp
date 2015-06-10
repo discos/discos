@@ -59,6 +59,7 @@ void MSBossConfiguration::init(string setupMode, bool keepSetup) throw (Manageme
 
         // initializing
         m_isConfigured = false;
+        m_actualSetup = "unknown";
         m_servosToPark.clear();
         m_servosToMove.clear();
         m_servosCoefficients.clear();
