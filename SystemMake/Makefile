@@ -49,7 +49,7 @@ MED_DOC:=MEDDox
 MED_ERRORS:=
 MED_INTERFACES:=MedicinaAntennaInterface MedicinaWeatherStationInterface
 MED_LIBRARIES:=
-MED_SERVERS:=
+MED_SERVERS:=MedicinaMount MedWeatherStation MedicinaMinorServo
 MED_CLIENTS:=MedicinaMountTextClient 
 MED_MISC:=MedScripts
 
