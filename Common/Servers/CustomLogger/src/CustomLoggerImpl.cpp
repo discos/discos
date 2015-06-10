@@ -33,13 +33,9 @@ CustomLoggerImpl::CustomLoggerImpl(const ACE_CString& CompName,
                                             CompName + ":isLogging",
                                             getComponent()
                                             );
-    m_parser = new SimpleParser::CParser<CustomLoggerImpl>(this, 10);
 }
 
-CustomLoggerImpl::~CustomLoggerImpl(){
-    if(m_parser != NULL)
-        delete m_parser;
-}
+CustomLoggerImpl::~CustomLoggerImpl(){}
 
 ACS::ROstring_ptr CustomLoggerImpl::filename() throw (CORBA::SystemException)
 {   
@@ -198,14 +194,6 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         CUSTOM_EXCPT_LOG(__dummy, LM_DEBUG);
         throw __dummy.getComponentErrorsEx();
      }
-
-     /* COMMAND PARSER INITIALIZATION
-     =================================*/
-     m_parser->add(
-        "logMessage",·
-        new function1<CustomLoggerImpl, non_constant, void_type, I<string_type> >(this, &CustomLoggerImpl::logMessageImpl),·
-        1
-     );
 
 };
 
