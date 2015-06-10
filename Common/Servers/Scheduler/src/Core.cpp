@@ -106,6 +106,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 			I<interval_type> >(this,&CCore::crossScan),3);
 	m_parser->add("peakerScan",new function3<CCore,non_constant,void_type,I<string_type>,I<double_type >,I<interval_type> >(this,&CCore::peakerScan),3);
 	m_parser->add("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_changeLogFile),1);
+	m_parser->add("logMessage",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_logMessage),1);
 	m_parser->add("wx",new function4<CCore,non_constant,void_type,O<double_type>,O<double_type>,O<double_type>,O<double_type> >(this,&CCore::_getWeatherStationParameters),0);
 	m_parser->add("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_setProjectCode),1);
 	// no range checks because * is allowed

@@ -320,6 +320,12 @@ void CCore::_changeLogFile(const char *fileName) throw (ComponentErrors::Couldnt
 	}
 }
 
+void CCore::_logMessage(const char *message) {
+    CUSTOM_LOG(LM_FULL_INFO, 
+               "CCore::_logMessage",
+               (LM_NOTICE, message));
+}
+
 void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
 {

@@ -202,6 +202,12 @@ void _chooseDefaultDataRecorder(const char *rcvInstance) throw (ComponentErrors:
 void _changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
 
 /**
+ * Log a message to custom log with default level of NOTICE
+ * @param message the log message
+ */
+void _logMessage(const char *message);
+
+/**
  * Allows to read out from weather station.
  * @throw ComponentErrors::CouldntGetComponentExImpl
  * @throw ManagementErrors::WeatherStationErrorExImpl
