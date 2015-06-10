@@ -13,7 +13,7 @@ def run(test_case):
     FNULL = open(os.devnull, 'w')
     try:
         subprocess.Popen(['%s-start' %server_name], stdout=FNULL, stderr=FNULL)
-        time.sleep(0.5) # Give the server the time to start
+        time.sleep(1) # Give the server the time to start
         suite = unittest2.TestSuite()
         tests = unittest2.TestLoader().loadTestsFromTestCase(test_case)
         suite.addTests(tests)
@@ -21,4 +21,4 @@ def run(test_case):
         unittest2.TextTestRunner(verbosity=2).run(suite)
     finally:
         subprocess.Popen(['%s-stop' %server_name], stdout=FNULL, stderr=FNULL)
-        time.sleep(1) # Give the server the time to stop
+        time.sleep(2) # Give the server the time to stop

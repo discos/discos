@@ -341,11 +341,11 @@ void MinorServoBossImpl::setupImpl(const char *config) throw (ManagementErrors::
 {
 
     try {
-        if(m_configuration->isElevationTrackingEn())
-            setElevationTrackingImpl(IRA::CString("OFF"));
+        if(!m_configuration->isElevationTrackingEn())
+            setElevationTrackingImpl(IRA::CString("ON"));
     }
     catch(...) {
-        THROW_EX(ManagementErrors, ConfigurationErrorEx, "cannot turn the tracking off", false);
+        THROW_EX(ManagementErrors, ConfigurationErrorEx, "cannot turn the tracking on", false);
     }
 
     if(m_configuration->isStarting())
@@ -354,6 +354,7 @@ void MinorServoBossImpl::setupImpl(const char *config) throw (ManagementErrors::
     if(m_configuration->isParking())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a park", false);
 
+    m_configuration->setASConfiguration(IRA::CString("ON"));
     m_configuration->init(string(config));  // Throw (ComponentErrors::CDBAccessExImpl);
 
     try {
