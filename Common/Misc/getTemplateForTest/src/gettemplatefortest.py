@@ -19,7 +19,7 @@ def get_introot():
 
 def get_template_dir_name():
     introot = get_introot()
-    return os.path.join(introot, "templates/test")
+    return os.path.join(introot, "templates/tests")
 
 def get_template_dir():
     template_dir = get_template_dir_name()
@@ -40,7 +40,7 @@ def command_line_util(args):
         print usage
         sys.exit(0)
     else:
-        target_dir = 'test' # Default target directory
+        target_dir = 'tests' # Default target directory
 
     if os.path.exists(target_dir):
         msg = "ERROR: %s directory already exists." %target_dir
