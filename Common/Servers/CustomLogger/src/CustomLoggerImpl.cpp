@@ -33,9 +33,13 @@ CustomLoggerImpl::CustomLoggerImpl(const ACE_CString& CompName,
                                             CompName + ":isLogging",
                                             getComponent()
                                             );
+    m_parser = new SimpleParser::CParser<CustomLoggerImpl>(this, 10);
 }
 
-CustomLoggerImpl::~CustomLoggerImpl(){}
+CustomLoggerImpl::~CustomLoggerImpl(){
+    if(m_parser != NULL)
+        delete m_parser;
+}
 
 ACS::ROstring_ptr CustomLoggerImpl::filename() throw (CORBA::SystemException)
 {   
@@ -194,6 +198,15 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         CUSTOM_EXCPT_LOG(__dummy, LM_DEBUG);
         throw __dummy.getComponentErrorsEx();
      }
+
+     /* COMMAND PARSER INITIALIZATION
+     =================================*/
+     m_parser->add(
+        "logMessage",·
+        new function1<CustomLoggerImpl, non_constant, void_type, I<string_type> >(this, &CustomLoggerImpl::logMessageImpl),·
+        1
+     );
+
 };
 
 void 
@@ -245,14 +258,16 @@ CustomLoggerImpl::emitACSLog(const char *msg) throw (CORBA::SystemException)
 };
 
 /*
-Used for debugging purpose, emits a custom log event with the given message and level
+Emits a custom log event with the given message and level
 @param msg: the log message.
 @param level: the CustomLogger::LogLevel level
 */
 void
 CustomLoggerImpl::emitLog(const char *msg, LogLevel level) throw (CORBA::SystemException)
 {
-    CUSTOM_LOG(LM_FULL_INFO, "CustomLoggerImpl::emit_log", (IRA::CustomLoggerUtils::custom2aceLogLevel(level), msg));
+    CUSTOM_LOG(LM_FULL_INFO, 
+               "CustomLoggerImpl::emit_log", 
+               (IRA::CustomLoggerUtils::custom2aceLogLevel(level), msg));
 };
 
 void

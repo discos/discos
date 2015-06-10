@@ -88,7 +88,7 @@ ifeq ($(TARGETSYS),SRT)
 	SRTActiveSurface_MODULES:=SRTActiveSurfaceInterface
 	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss SRTMount
-	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter MBFitsWriter ExternalClients
+	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
 	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
 	WeatherStationImplementation_MODULES:=SRTWeatherStation
@@ -106,7 +106,7 @@ ifeq ($(TARGETSYS),MED)
 		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface\
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel\
-		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter MBFitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
+		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		Metrology TotalPower NoiseGenerator MedicinaMount MedWeatherStation CustomLogger XBackend MedicinaMinorServo\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
 		MedicinaMountTextClient CustomLoggingClient\
@@ -123,7 +123,7 @@ ifeq ($(TARGETSYS),MED)
 	Receivers_MODULES:=ReceiversInterface
 	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss MedicinaMount
-	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter MBFitsWriter ExternalClients
+	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
 	ReceiversImplementation_MODULES:=ReceiversBoss
 	WeatherStationImplementation_MODULES:=MedWeatherStation Metrology
@@ -152,7 +152,7 @@ ifeq ($(TARGETSYS),NT)
 	Receivers_MODULES:=ReceiversInterface
 	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss NotoMount
-	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter MBFitsWriter ExternalClients
+	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower
 	ReceiversImplementation_MODULES:=ReceiversBoss
 	
