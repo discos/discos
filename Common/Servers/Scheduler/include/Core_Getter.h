@@ -62,5 +62,11 @@ void getCurrentBackend(IRA::CString& bck);
  */
 bool isTracking() const;
 
+/**
+ * This is not thread safe but is almost atomic.
+ * @return true if the antenna subsystem is tracking or not
+ */
+bool isOnSource() const;
+
 
 #endif /* CORE_GETTER_H_ */

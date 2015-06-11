@@ -70,7 +70,7 @@ void CCore::_nop() const
 void CCore::_waitOnSource() throw (ManagementErrors::AbortedByUserExImpl)
 {
 	m_abortCurrentOperation=false;
-	while (!m_isAntennaTracking) {
+	while (!isOnSource()) {
 		if (m_abortCurrentOperation) {
 			m_abortCurrentOperation=false;
 			_EXCPT(ManagementErrors::AbortedByUserExImpl,dummy,"CCore::_waitOnSource()");

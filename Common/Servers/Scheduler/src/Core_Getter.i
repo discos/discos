@@ -63,3 +63,13 @@ bool CCore::isTracking() const
 	return (m_isAntennaTracking && m_isMinorServoTracking && m_isReceiversTracking && (diff>5000000));
 }
 
+bool CCore::isOnSource() const
+{
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	ACS::TimeInterval diff=now.value().value-m_clearTrackingTime;
+	return (m_isAntennaTracking && (diff>5000000));
+}
+
+
+
