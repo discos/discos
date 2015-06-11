@@ -1069,7 +1069,7 @@ void CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		m_integratedDec=0.0;
 		m_integratedSamples=0;
 	}
-	if (m_integrationStartTime<m_lastEncoderRead+m_config->getCoordinateIntegrationPeriod()) {
+	if ((m_lastEncoderRead - m_integrationStartTime) > (unsigned) m_config->getCoordinateIntegrationPeriod()) {
 		m_integratedRa+=ra;
 		m_integratedDec+=dec;
 		m_integratedSamples++;
