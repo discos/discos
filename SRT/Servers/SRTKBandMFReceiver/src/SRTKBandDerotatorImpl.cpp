@@ -542,6 +542,7 @@ void SRTKBandDerotatorImpl::powerOff() throw (
 void SRTKBandDerotatorImpl::setPosition(double position) throw (
         CORBA::SystemException, 
         ComponentErrors::ComponentErrorsEx, 
+        DerotatorErrors::OutOfRangeErrorEx, 
         DerotatorErrors::DerotatorErrorsEx
     )
 {
@@ -556,6 +557,10 @@ void SRTKBandDerotatorImpl::setPosition(double position) throw (
     catch (DerotatorErrors::PositioningErrorExImpl& ex) {
         ex.log(LM_DEBUG);
         throw ex.getDerotatorErrorsEx();
+    }
+    catch (DerotatorErrors::OutOfRangeErrorExImpl& ex) {
+        ex.log(LM_WARNING);
+        throw ex.getOutOfRangeErrorEx();
     }
     catch (...) {
         _EXCPT(

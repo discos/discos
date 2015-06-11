@@ -138,10 +138,12 @@ module Receivers {
          *
          * @throw ComponentErrors::ComponentErrorsEx,
 	     * @throw DerotatorErrors::DerotatorErrorsEx
+	     * @throw DerotatorErrors::OutOfRangeErrorEx
          */
         void setPosition(in double position) raises (
             ComponentErrors::ComponentErrorsEx,
-            DerotatorErrors::DerotatorErrorsEx
+            DerotatorErrors::DerotatorErrorsEx,
+            DerotatorErrors::OutOfRangeErrorEx
         );
 
 

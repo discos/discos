@@ -30,6 +30,10 @@
          shortDescription="Cannot set the position" 
          description=""/>
 
+    <ErrorCode name="OutOfRangeError" 
+         shortDescription="Position out of range" 
+         description=""/>
+
     <ErrorCode name="UnexpectedError" 
          shortDescription="Unexpected error" 
          description=""/>

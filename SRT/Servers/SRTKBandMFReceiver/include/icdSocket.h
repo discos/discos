@@ -238,6 +238,7 @@ public:
      */
     void setPosition(double position) throw (
          DerotatorErrors::PositioningErrorExImpl,
+         DerotatorErrors::OutOfRangeErrorExImpl,
 	     DerotatorErrors::CommunicationErrorExImpl
     );
             

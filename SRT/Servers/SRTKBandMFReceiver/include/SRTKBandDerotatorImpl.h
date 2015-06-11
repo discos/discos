@@ -161,6 +161,7 @@ public:
      void setPosition(double position) throw (
          CORBA::SystemException, 
          ComponentErrors::ComponentErrorsEx, 
+         DerotatorErrors::OutOfRangeErrorEx, 
          DerotatorErrors::DerotatorErrorsEx
      );
 

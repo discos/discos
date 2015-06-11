@@ -265,6 +265,7 @@ void icdSocket::setNegativeDir() throw (ComponentErrors::SocketErrorExImpl) {
 
 void icdSocket::setPosition(double position) throw (
          DerotatorErrors::PositioningErrorExImpl,
+         DerotatorErrors::OutOfRangeErrorExImpl,
 	     DerotatorErrors::CommunicationErrorExImpl
     ) 
 {
@@ -290,7 +291,7 @@ void icdSocket::setPosition(double position) throw (
         ACS_SHORT_LOG((LM_ERROR, "# You are trying to set a position out of range (%.2f°, %.2f°)", min_rel, max_rel));
         m_icd_summary_status |=  (1 << W);
         
-        DerotatorErrors::PositioningErrorExImpl ex(__FILE__, __LINE__, "Position out of range");
+        DerotatorErrors::OutOfRangeErrorExImpl ex(__FILE__, __LINE__, "Position out of range");
         throw ex;
     }
     
