@@ -76,10 +76,13 @@
 <body>
 	goTo=180d,89.8d
 	waitOnSource
+	antennaStop
+	wait=1
 	antennaPark
 	receiversPark
 	servoPark
 	asPark
+	logMessage=Telescope is now parked
 </body>
 </Procedure>
 
