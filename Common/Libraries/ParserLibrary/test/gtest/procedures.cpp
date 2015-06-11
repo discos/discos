@@ -95,6 +95,22 @@ TestProcedureParsing::~TestProcedureParsing()
     delete m_parser;
 }
 
+TEST_F(TestProcedureParsing, test_empty_procedure)
+{
+    ACS::stringSeq empty_procedure;
+    IRA::CString procedure = "empty_procedure";
+    IRA::CString output;
+    empty_procedure.length(0);
+    ASSERT_NO_THROW({
+        m_parser->addExtraProcedure("empty_procedure", 
+                                    "testprocedure", 
+                                    empty_procedure, 
+                                    0);
+        m_parser->run(procedure, output); 
+    });
+    RecordProperty("run_output", (const char*) output);
+}
+
 TEST_F(TestProcedureParsing, test_setup)
 {
     ASSERT_TRUE(true);
