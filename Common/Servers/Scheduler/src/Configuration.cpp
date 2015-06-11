@@ -43,8 +43,11 @@ CConfiguration::~CConfiguration()
 	}
 }
 
-void CConfiguration::readProcedures(maci::ContainerServices *services,const IRA::CString& procedureFile,ACS::stringSeq& names,ACS::longSeq& args,ACS::stringSeq *&bodies) throw (
-		ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl)
+void CConfiguration::readProcedures(maci::ContainerServices *services,
+        const IRA::CString& procedureFile, ACS::stringSeq& names,
+        ACS::longSeq& args, ACS::stringSeq *&bodies) throw (
+		ComponentErrors::IRALibraryResourceExImpl,
+        ComponentErrors::CDBAccessExImpl)
 {
 	IRA::CError err;
 	err.Reset();
@@ -244,8 +247,10 @@ void CConfiguration::extractBody(const IRA::CString& body,ACS::stringSeq& comman
 	long len=0;
 	int start=0;
 	IRA::CString token;
-	//this methods is not really efficient...I use a double pass algorithm but since I do not know the length of commands I prefer doing that way instead of
-	// allocating and deallocating the commands size once each iteration....
+	//this methods is not really efficient...I use a double pass algorithm but 
+    //since I do not know the length of commands I prefer doing that way 
+    //instead of  allocating and deallocating the commands size once each 
+    //iteration....
 	//computes the number of commands inside the body.....
 	while (CIRATools::getNextToken(body,start,'\n',token)) {
 		if (token.GetLength()>0) {
