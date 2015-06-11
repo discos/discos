@@ -19,9 +19,12 @@ class StartUpdatingTest(unittest2.TestCase):
         self.positioner = self.client.getComponent('RECEIVERS/DewarPositioner')
         self.positioner.setup('KKG')
         self.positioner.setConfiguration('custom')
+        self.lat = 0.689 # 39.5 degrees
 
     def tearDown(self):
         if self.positioner.isReady():
+            self.positioner.stopUpdating()
+            time.sleep(1)
             self.positioner.park()
         time.sleep(0.5)
         self.client.releaseComponent('RECEIVERS/DewarPositioner')
@@ -44,12 +47,11 @@ class StartUpdatingTest(unittest2.TestCase):
 
             Pis + Pip + Pid
         """
-        latitude = 0.689 # 39.5 degrees
 
         # First step: we choose (az, el) in order to have a parallactic angle
         # out of range. That means the derotator has to rewind
         az, el = 1.2217, 0.6109 # 70 degrees, 35 degrees
-        parallactic = PosGenerator.getParallacticAngle(latitude, az, el) # -63
+        parallactic = PosGenerator.getParallacticAngle(self.lat, az, el) # -63
         min_limit = self.device.getMinLimit() # -85.77 degrees for the K Band
         Pis = -30
         # Final angle -93, lower than the min limit (-85.77)
@@ -60,7 +62,7 @@ class StartUpdatingTest(unittest2.TestCase):
         # We expect a rewind of 180 degrees: -93 + 180 -> 87
         expected = target + 180
         self.positioner.startUpdating(MNG_TRACK, ANT_NORTH, az, el, 0, 0)
-        time.sleep(0.2)
+        time.sleep(0.5)
         self.assertAlmostEqual(expected, self.device.getActPosition(), delta=0.1)
 
         self.positioner.stopUpdating()
@@ -68,17 +70,65 @@ class StartUpdatingTest(unittest2.TestCase):
         # Second step: we do not call stopUpdating(), and we choose (az, el) 
         # in order to have a parallactic angle in range
         az, el = 5, 0.5 # In radians
-        parallactic = PosGenerator.getParallacticAngle(latitude, az, el) # 58.5
+        parallactic = PosGenerator.getParallacticAngle(self.lat, az, el) # 58.5
         self.antenna.setOffsets(az, el, ANT_HORIZONTAL)
         target = Pis + parallactic 
         self.assertGreater(target, min_limit)
         # We do not expect a rewind
         expected = target
         self.positioner.startUpdating(MNG_TRACK, ANT_NORTH, az, el, 0, 0)
-        time.sleep(0.2)
+        time.sleep(0.5)
         self.assertAlmostEqual(expected, self.device.getActPosition(), delta=0.1)
-        
-        self.positioner.stopUpdating()
+
+    def test_keep_updating_after_rewind(self):
+        """Verify the dewar positioner stills updating after the rewind"""
+        Pis = 120
+        self.positioner.setPosition(Pis) 
+
+        # First step: we choose (az, el) in order to have a parallactic angle
+        # of a just one or two degrees, in order to stay in range. i.e. we
+        # can set the following value to start the updating:
+        #
+        #     >>> az = math.radians(181)
+        #     >>> el = math.radians(45)
+        #     >>> PosGenerator.getParallacticAngle(self.lat, az, el)
+        #     0.77546054825239319
+        #
+        # and at this point the following in order to go out of range:
+        # 
+        #    >>> az = math.radians(190)
+        #    >>> PosGenerator.getParallacticAngle(self.lat, az, el)
+        #    7.7330295207687838
+        az = math.radians(181)
+        el = math.radians(45)
+        parallactic = PosGenerator.getParallacticAngle(self.lat, az, el) # 0.77
+
+        max_limit = self.device.getMaxLimit() # 125.23 degrees for the K Band
+        self.antenna.setOffsets(az, el, ANT_HORIZONTAL)
+        target = Pis + parallactic 
+        self.assertLess(target, max_limit)
+        self.positioner.startUpdating(MNG_TRACK, ANT_NORTH, az, el, 0, 0)
+        time.sleep(0.5)
+        self.assertAlmostEqual(target, self.device.getActPosition(), delta=0.1)
+        self.assertTrue(self.positioner.isUpdating())
+        self.assertTrue(self.positioner.isTracking())
+
+        # Second step: we set the az, in order to have a parallactic angle
+        # that causes an out of range
+        # in order to have a parallactic angle in range
+        az = math.radians(190)
+        self.antenna.setOffsets(az, el, ANT_HORIZONTAL)
+        parallactic = PosGenerator.getParallacticAngle(self.lat, az, el) # 7.73
+        target = Pis + parallactic
+        self.assertGreater(target, max_limit)
+        expected = target - 180
+        # We expect a rewind
+        time.sleep(0.5)
+        self.assertAlmostEqual(expected, self.device.getActPosition(), delta=0.1)
+        # Verify it keeps the system updating the position
+        self.assertFalse(self.positioner.isRewinding())
+        self.assertTrue(self.positioner.isUpdating())
+        self.assertTrue(self.positioner.isTracking())
 
 
 if __name__ == '__main__':

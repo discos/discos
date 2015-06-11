@@ -45,16 +45,15 @@ do_unit: all
 
 do_pyunit:
 	@echo "running python unit tests"
-	python -m unittest pyunit
+	unit2 pyunit
 
 do_functional:
 	@echo "running python functional tests"
-	python -m unittest functional
-	python -m unittest functional/commands
+	unit2 discover functional
 
 do_external:
 	@echo "running python external tests"
-	python -m unittest external
+	unit2 discover external
 
 clean_test:
 	rm -f results/*.xml

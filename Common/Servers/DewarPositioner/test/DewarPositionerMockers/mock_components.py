@@ -1,3 +1,5 @@
+from DerotatorErrors import OutOfRangeErrorEx
+
 class MockDevice(object):
     def __init__(self):
         self._setDefault()
@@ -34,6 +36,8 @@ class MockDevice(object):
         self.cmd_position = position
         if self.getMinLimit() < position < self.getMaxLimit():
             self.position = position
+        else:
+            raise OutOfRangeErrorEx('%.2f out of range' %position)
 
     def getActPosition(self):
         return self.position

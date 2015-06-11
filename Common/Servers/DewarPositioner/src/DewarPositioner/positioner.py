@@ -123,21 +123,20 @@ class Positioner(object):
 
 
     def _setPosition(self, position):
-        self.control.target = position + self.control.offset 
-        if self.device.getMinLimit() < self.control.target < self.device.getMaxLimit():
-            try:
-                self.device.setPosition(self.control.target)
-            except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
-                raeson = "cannot set the %s position" %self.device._get_name()
-                logger.logError('%s: %s' %(raeson, ex.message))
-                raise PositionerError(raeson)
-            except Exception, ex:
-                raeson = "unknown exception setting the %s position" %self.device._get_name()
-                logger.logError('%s: %s' %(raeson, ex.message))
-                raise PositionerError(raeson)
-        else:
+        self.control.target = position + self.control.offset
+        try:
+            self.device.setPosition(self.control.target)
+        except DerotatorErrors.OutOfRangeErrorEx:
             raise OutOfRangeError("position %.2f out of range {%.2f, %.2f}" 
-                    %(self.control.target, self.device.getMinLimit(), self.device.getMaxLimit()))
+                %(self.control.target, self.device.getMinLimit(), self.device.getMaxLimit()))
+        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+            raeson = "cannot set the %s position" %self.device._get_name()
+            logger.logError('%s: %s' %(raeson, ex.message))
+            raise PositionerError(raeson)
+        except Exception, ex:
+            raeson = "unknown exception setting the %s position" %self.device._get_name()
+            logger.logError('%s: %s' %(raeson, ex.message))
+            raise PositionerError(raeson)
 
 
     def startUpdating(self, axis, sector, az, el, ra, dec):
@@ -214,6 +213,7 @@ class Positioner(object):
     def _updatePosition(self, posgen, vargs):
         try:
             self.control.isRewindingRequired = False
+            self.control.isRewinding = False
             self.control.isUpdating = True
             self.control.scanInfo.update({'rewindingOffset': 0})
 
@@ -236,8 +236,8 @@ class Positioner(object):
                         Pip = self.control.scanInfo['iParallacticPos']
                         Pdp = 0 if posgen.__name__ == 'goto' else (position - Pip)
                         target = Pis + Pdp if isOptimized else Pis + Pip + Pdp
-                        self._setPosition(target) # _setPosition() will add the offsets
                         self.control.scanInfo.update({'dParallacticPos': Pdp})
+                        self._setPosition(target) # _setPosition() will add the offset
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
                         logger.logWarning(ex.message)
@@ -270,6 +270,7 @@ class Positioner(object):
         except Exception, ex:
             logger.logError('unexcpected exception in Positioner._updatePosition(): %s' %ex)
         finally:
+            self.control.scanInfo.update({'rewindingOffset': 0})
             self.control.stopUpdating()
 
 
@@ -289,9 +290,8 @@ class Positioner(object):
             # getAutoRewindingSteps() returns None in case the user did not specify it
             n = steps if steps != None else self.control.autoRewindingSteps
             targetPos, rewindingOffset = self.getRewindingParameters(n)
-            newPos = targetPos + rewindingOffset
             self.control.updateScanInfo({'rewindingOffset': rewindingOffset})
-            self._setPosition(newPos)
+            self._setPosition(targetPos + rewindingOffset)
             logger.logInfo('rewinding in progress...')
             startingTime = now = datetime.datetime.now()
             while (now - startingTime).seconds < float(self.conf.getAttribute('RewindingTimeout')):
@@ -309,7 +309,6 @@ class Positioner(object):
             raise PositionerError(ex.message)
         finally:
             self.control.isRewinding = False
-            self.control.updateScanInfo({'rewindingOffset': 0})
             Positioner.rewindingLock.release()
 
 

@@ -2,6 +2,8 @@ from __future__ import with_statement
 
 import operator
 import time
+import DerotatorErrorsImpl
+
 from multiprocessing import Process, Value, Lock
 from Receivers__POA import SRTKBandDerotator
 from Acspy.Servants.CharacteristicComponent import CharacteristicComponent as cc
@@ -69,6 +71,10 @@ class DerotatorSimulatorImpl(SRTKBandDerotator, cc, services, lcycle):
         p.start()
         if self.getMinLimit() < position < self.getMaxLimit():
             self.history.insert(position)
+        else:
+            exc = DerotatorErrorsImpl.OutOfRangeErrorExImpl()
+            exc.setData('reason', 'position %2.f out of range' %position)
+            raise exc
 
     def getActPosition(self):
         return self.history.get()

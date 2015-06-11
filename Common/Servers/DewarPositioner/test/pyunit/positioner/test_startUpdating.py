@@ -157,7 +157,7 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
             self.source.setElevation(el)
             self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el, None, None)
 
-            # For the K Band, we expect a rewind of 120 degrees
+            # For the K Band, we expect a rewind of 180 degrees
             # rewind_angle = self.p.getAutoRewindingSteps() * self.device.getStep()
             rewind_angle = 180 # The maximum, in case getAutoRewindingSteps is 0
             expected = target + rewind_angle
