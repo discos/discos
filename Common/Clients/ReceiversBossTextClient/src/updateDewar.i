@@ -76,19 +76,17 @@ void updateDewar(Receivers::DewarPositioner_ptr dewar)
 	extraLabel4->setValue(outString);
 	extraLabel4->setStyle(TW::CStyle(TW::CColorPair::WHITE_BLACK,0));
 	extraLabel4->Refresh();
-	if (isRewRequired) {
-		if (isRewinding) {
-			outString="Rewinding required (rewinding...)";
-			extraLabel5->setValue(outString);
-			extraLabel5->setStyle(TW::CStyle(TW::CColorPair::YELLOW_BLACK,0));
-			extraLabel5->Refresh();
-		}
-		else { 
-			outString="Rewinding required";
-			extraLabel5->setValue(outString);
-			extraLabel5->setStyle(TW::CStyle(TW::CColorPair::RED_BLACK,0));
-			extraLabel5->Refresh();
-		}
+	if (isRewinding) {
+		outString="Rewinding required (rewinding...)";
+		extraLabel5->setValue(outString);
+		extraLabel5->setStyle(TW::CStyle(TW::CColorPair::YELLOW_BLACK,0));
+		extraLabel5->Refresh();
+	}
+	else if (isRewRequired) {
+		outString="Rewinding required";
+		extraLabel5->setValue(outString);
+		extraLabel5->setStyle(TW::CStyle(TW::CColorPair::RED_BLACK,0));
+		extraLabel5->Refresh();
 	}
 	else {
 		outString="Rewinding not required";
