@@ -40,7 +40,8 @@ SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer \
              SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
-             SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver
+             SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver \
+			 DewarPositioner
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
              MinorServoBossTextClient
 SRT_MISC:=SRTScripts
