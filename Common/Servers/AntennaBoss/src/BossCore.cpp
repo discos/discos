@@ -236,12 +236,17 @@ void CBossCore::getObservedHorizontal(TIMEVALUE& time,TIMEDIFFERENCE& duration,d
 
 void CBossCore::getObservedEquatorial(TIMEVALUE& time,TIMEDIFFERENCE& duration,double&ra,double& dec) const
 {
+	//printf("duration, integration %llu, %lu\n",duration.value().value,m_config->getCoordinateIntegrationPeriod());
 	if (duration.value().value>m_config->getCoordinateIntegrationPeriod()) {
+		//printf("Long integration\n");
 		TIMEVALUE stopTime(time.value());
 		stopTime+=duration.value();
+		//printf("time %llu, stop %llu\n",time.value().value,stopTime.value().value);
 		m_integratedObservedEquatorial.averagePoint(time,stopTime,ra,dec);
+		//printf("ra %lf, dec %lf\n",ra,dec);
 	}
 	else {
+		//printf("Short integration\n");
 		TIMEVALUE midTime(time.value().value+duration.value().value/2);
 		m_observedEquatorials.selectPoint(midTime,ra,dec);
 	}
@@ -596,7 +601,7 @@ void CBossCore::getTopocentricFrequency(const ACS::doubleSeq& rest,ACS::doubleSe
 	IRA::CIRATools::getTime(now);
 	CDateTime time(now,m_dut1);
 	for (unsigned i=0;i<rest.length();i++) {
-		printf("ra,dec,rest,vrad: %lf,%lf,%lf,%lf\n",m_targetRA,m_targetDec,rest[i],m_targetVrad);
+		//printf("ra,dec,rest,vrad: %lf,%lf,%lf,%lf\n",m_targetRA,m_targetDec,rest[i],m_targetVrad);
 		IRA::CFrequencyTracking track(m_site,m_targetRA,m_targetDec,mapReferenceFrame(m_vradReferenceFrame),
 				mapVelocityDefinition(m_vradDefinition),rest[i],m_targetVrad);
 		topo[i]=track.getTopocentricFrequency(time);
@@ -788,7 +793,7 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 			IRA::CIRATools::timeToStr(inputTime,out);
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"CHECK_TIME_IS: %s",(const char *)out));
 			generator->getHorizontalCoordinate(inputTime,azimuth,elevation); //use inputTime (=now), in order to get where the source is now)
-			printf("controllo cordinate di riferimento: %lf, %lf\n",azimuth,elevation);
+			//printf("controllo cordinate di riferimento: %lf, %lf\n",azimuth,elevation);
 			antennaInfo->azimuth=azimuth;
 			antennaInfo->elevation=elevation;
 			antennaInfo->rightAscension=ra;
@@ -1068,8 +1073,11 @@ void CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		m_integratedRa=0.0;
 		m_integratedDec=0.0;
 		m_integratedSamples=0;
+		//printf("PARTITA INTEGRAZIONE\n");
 	}
-	if ((m_lastEncoderRead - m_integrationStartTime) > (unsigned) m_config->getCoordinateIntegrationPeriod()) {
+	//printf("INTEGRAZIONE, differenza %llu, integration %ld\n",(m_lastEncoderRead - m_integrationStartTime),m_config->getCoordinateIntegrationPeriod());
+	if ((m_lastEncoderRead - m_integrationStartTime) < (unsigned) m_config->getCoordinateIntegrationPeriod()) {
+		//printf("INTEGRAZIONE....,\n");
 		m_integratedRa+=ra;
 		m_integratedDec+=dec;
 		m_integratedSamples++;
@@ -1077,6 +1085,7 @@ void CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 	else {
 		m_integratedRa/=(double)m_integratedSamples;
 		m_integratedDec/=(double)m_integratedSamples;
+		//printf("INTEGRAZIONE FINITA, tempo %llu, ra %lf, dec %lf\n",m_integrationStartTime,m_integratedRa,m_integratedDec);
 		m_integratedObservedEquatorial.addPoint(m_integratedRa,m_integratedDec,m_integrationStartTime);
 		m_integrationStartTime=0; //terminate the integration....the next iteration will start the new one.
 	}
