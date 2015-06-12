@@ -14,7 +14,8 @@ MAKE_PDF = ON
 CDB_SCHEMAS = Feeds ReceiversModeSetup LocalOscillatorLookUpTable \
 			  NoiseMarkLookUpTable TaperLookUpTable \
 			  DewarPositionerUpdatingTable DewarPositionerMapping \
-			  DewarPositionerActions
+			  DewarPositionerActions \
+			  LocalOscillator
 
 # IDL Files and flags
 IDL_FILES = CommonReceiverInterface ReceiversBoss \
