@@ -37,6 +37,8 @@ class ScanBaseTest(unittest2.TestCase):
             targetName='dummy',
             azimuth=math.pi,
             elevation=math.pi/2 * 1/random.randrange(2, 10),
+            rightAscension=0,
+            declination=0,
             startEpoch=getTimeStamp().value + 100000000,
             onTheFly=False,
             slewingTime=100000000,
