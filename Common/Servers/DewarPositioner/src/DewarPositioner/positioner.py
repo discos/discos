@@ -241,6 +241,7 @@ class Positioner(object):
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
                         logger.logWarning(ex.message)
+                        self.control.isRewindingRequired = True
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
                                 self.rewind() 
@@ -251,11 +252,11 @@ class Positioner(object):
                                 break
                         else:
                             if self.control.modes['rewinding'] == 'MANUAL':
-                                self.control.isRewindingRequired = True
                                 logger.logInfo('a derotator rewinding is required')
+                                while self.control.isRewindingRequired:
+                                    time.sleep(2) # Wait until the user calls a rewind
                             else:
                                 logger.logError('wrong rewinding mode: %s' %self.control.modes['rewinding'])
-                            break
                     except Exception, ex:
                         logger.logError(ex.message)
                         break
@@ -283,6 +284,8 @@ class Positioner(object):
             raise NotAllowedError('positioner not configured: a setup() is required')
         elif self.isRewinding():
             raise NotAllowedError('another rewinding is active')
+        elif not self.isRewindingRequired():
+            raise NotAllowedError('no rewinding is required')
 
         try:
             Positioner.rewindingLock.acquire()
@@ -321,30 +324,51 @@ class Positioner(object):
             raise PositionerError('the number of steps must be positive')
 
         target = self.control.target
-        # space is the distance from the target to the farest limit
-        # To be sure, I add a delta of 0.1...
-        if target - 0.1 <= self.device.getMinLimit():
-            space = abs(self.device.getMaxLimit() - target)
-            sign = +1 # The space must be added to the target position
-        elif self.device.getMaxLimit() <= target + 0.1:
-            space = abs(target - self.device.getMinLimit())
-            sign = -1
+        # The rewinding angle depends of the antenna sector: 
+        #
+        #   * SOUTH: the derotator must go closer to the lower limit
+        #   * NORTH: the derotator must go closer to the higher limit
+        #
+        # The name space is the distance between the target position and the
+        # limit (lower in case of SOUTH, higher in case of NORTH)
+        min_limit = self.device.getMinLimit()
+        max_limit = self.device.getMaxLimit()
+        # To be sure, we add or subtract a delta of 1 to the target
+        delta = 1.0
+        sector = self.control.scanInfo['sector']
+        if sector == Antenna.ANT_SOUTH:
+            space = abs(target - min_limit)
+            if target + delta >= max_limit:
+                sign = -1
+                numberOfSteps = int(space // self.device.getStep())
+            elif target - delta <= min_limit:
+                sign = +1
+                numberOfSteps = int(space // self.device.getStep()) + 1
+            else:
+                raise ValueError('cannot get the rewinding parameters: ' \
+                                 'target %.2f in range' %target)
+        elif sector == Antenna.ANT_NORTH:
+            space = abs(target - max_limit)
+            if target + delta >= max_limit:
+                sign = -1
+                numberOfSteps = int(space // self.device.getStep()) + 1
+            elif target - delta <= min_limit:
+                sign = +1
+                numberOfSteps = int(space // self.device.getStep())
+            else:
+                raise ValueError('cannot get the rewinding parameters: ' \
+                                 'target %.2f in range' %target)
         else:
-            lspace = abs(self.device.getMinLimit() - target) # Space on the left
-            rspace = abs(self.device.getMaxLimit() - target) # Space on the right
-            sign = -1 if lspace >= rspace else 1
-            space = max(lspace, rspace)
-
-
-        maxNumberOfSteps = int(space // self.device.getStep())
+            raise ValueError('sector %s unknown' %sector)
 
         if steps == None:
-            n = maxNumberOfSteps
-        elif steps <= maxNumberOfSteps:
+            n = numberOfSteps
+        elif min_limit < target + sign*steps*self.device.getStep() < max_limit:
             n = steps
         else:
-            raise PositionerError('target pos: {%.1f} -> max number of steps: {%d} (%s given)'
-                    %(target, maxNumberOfSteps, steps))
+            raise PositionerError(
+                    'target pos: {%.1f} -> rewind of {%d} steps not allowed' \
+                    %(target, steps))
 
         rewinding_value = sign * n * self.device.getStep()
         return (target, rewinding_value)
