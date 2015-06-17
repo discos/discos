@@ -5,7 +5,6 @@ GMOCK_HOME=/usr/local/include/gmock
 GTEST_LIBS=gtest gtest_main
 
 USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
-USER_LIBS=C++ pthread
 # END OF CPP UNIT TESTING SETUP
 #---------------------
 
@@ -18,6 +17,7 @@ USER_LIBS=C++ pthread
 EXECUTABLES_L = unittest
 unittest_OBJECTS = unittest
 unittest_LIBS = $(GTEST_LIBS) 
+unittest_LDFLAGS = -lstdc++ -lpthread
 
 # END OF CUSTOMIZATION
 # do not edit below this line
