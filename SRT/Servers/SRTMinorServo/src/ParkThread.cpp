@@ -155,7 +155,7 @@ void ParkThread::run()
                 }
             }
             catch(...) {
-                ACS_SHORT_LOG((LM_ERROR, ("ParkThread: cannot disable "  + comp_name).c_str()));
+                ACS_SHORT_LOG((LM_ERROR, ("ParkThread: unexpected error, cannot disable "  + comp_name).c_str()));
             }
         }
         else {

@@ -339,10 +339,17 @@ void MinorServoBossImpl::setup(const char *config) throw (CORBA::SystemException
 
 void MinorServoBossImpl::setupImpl(const char *config) throw (ManagementErrors::ConfigurationErrorExImpl)
 {
-
     try {
-        if(!m_configuration->isElevationTrackingEn())
-            setElevationTrackingImpl(IRA::CString("ON"));
+        if(!endswith(string(config), "P")) {
+            if(!m_configuration->isElevationTrackingEn()) {
+                setElevationTrackingImpl(IRA::CString("ON"));
+            }
+        }
+        else {
+            if(m_configuration->isElevationTrackingEn()) {
+                turnTrackingOff();
+            }
+        }
     }
     catch(...) {
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "cannot turn the tracking on", false);
@@ -354,7 +361,9 @@ void MinorServoBossImpl::setupImpl(const char *config) throw (ManagementErrors::
     if(m_configuration->isParking())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "The system is executing a park", false);
 
-    m_configuration->setASConfiguration(IRA::CString("ON"));
+    if(!endswith(string(config), "P")) {
+        m_configuration->setASConfiguration(IRA::CString("ON"));
+    }
     m_configuration->init(string(config));  // Throw (ComponentErrors::CDBAccessExImpl);
 
     try {
@@ -1404,7 +1413,7 @@ char * MinorServoBossImpl::getScanAxis() {
 
 
 void MinorServoBossImpl::turnTrackingOn() throw (ManagementErrors::ConfigurationErrorEx) 
-{
+{ 
     if(isStarting())
         THROW_EX(ManagementErrors, ConfigurationErrorEx, "turnTrackingOn: the system is starting.", true);
 
