@@ -50,8 +50,8 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install_templates:
-	cp -r ../templates/test $(INTROOT)/templates
-	find $(INTROOT)/templates/test -type d -name ".svn" | xargs rm -rf
+	cp -r ../templates/tests $(INTROOT)/templates
+	find $(INTROOT)/templates/tests -type d -name ".svn" | xargs rm -rf
 	@echo " . . . templates installed"
 
 install : install_all install_templates
