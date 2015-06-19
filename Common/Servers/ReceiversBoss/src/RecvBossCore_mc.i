@@ -691,7 +691,7 @@ double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (Compo
 		ComponentErrors::UnexpectedExImpl)
 {
 	// no need to check anything
-	return 0;
+	return -9999.99;
 }
 
 void CRecvBossCore::getDewarParameter(Receivers::TDerotatorConfigurations& mod,double& pos) throw (
