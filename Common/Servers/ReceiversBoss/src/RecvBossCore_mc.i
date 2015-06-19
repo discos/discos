@@ -89,6 +89,16 @@ void CRecvBossCore::cleanUp()
 	}
 }
 
+void CRecvBossCore::externalCalOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+				ComponentErrors::UnexpectedExImpl)
+{
+}
+
+void CRecvBossCore::externalCalOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+				ComponentErrors::UnexpectedExImpl)
+{
+}
+
 void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {

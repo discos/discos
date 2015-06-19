@@ -332,25 +332,24 @@ void CRecvBossCore::externalCalOff() throw (ComponentErrors::ValidationErrorExIm
 	}
 }
 
-
 double CRecvBossCore::getDerotatorPosition(const ACS::Time& epoch) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	IRA::CString component;
 	bool derotator;
 	if (m_currentRecvCode=="") {
-		return 0;
+		return nan("1");
 	}
 	if (!m_config->getReceiver(m_currentRecvCode,component,derotator)) {
-		return 0;
+		return nan("1");
 	}
 	if (m_config->dewarPositionerInterface()=="") {
 	}
 	if (!derotator) {
-		return 0;
+		return nan("1");
 	}
 	if (m_updateMode==Receivers::RCV_UNDEF_DEROTCONF) {
-		return 0;
+		return nan("1");;
 	}
 	baci::ThreadSyncGuard guard(&m_mutex);
 	loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
