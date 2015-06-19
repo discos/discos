@@ -1,0 +1,69 @@
+/* **************************************************************** */
+/* IRA Istituto di Radioastronomia                                  */
+/* $Id: FitsWriter.idl,v 1.7 2011-04-15 09:09:59 a.orlati Exp $                                                           */
+/*                                                                  */
+/* This code is under GNU General Public Licence (GPL)              */
+/*                                                                  */
+/* Who                                   when            What        */
+/* Simona Righini(s.righini@ira.inaf.it) 10/11/2008      created     */
+/* Andrea Orlati(a.orlati@ira.inaf.it)	 11/09/2010      Added setScanIdentifer() method    */
+/* Andrea Orlati(a.orlati@ira.inaf.it)	 28/03/2011      Interface inherits from DataReceiver    */
+
+#ifndef FITSWRITER_IDL_
+#define FITSWRITER_IDL_
+
+#include <DataReceiver.idl> 
+
+#pragma prefix "alma"
+
+module Management { 
+	
+	/**
+	 * This is the interface of components that saves the observation data in ad-hoc FITS format.
+	 * the inherited attributes and method are:
+	 * @copybrief DataReceiver::fileName
+	 * It stores the name of the file that is currently written according the FITs format
+	 * @copybrief DataReceiver::projectName
+	 * this string stores the name of the project currently running, it is saved in one keys in the main header of the file
+	 * @copybrief DataReceiver::observer
+	 * This string stores the name of the observer, if not empty it is saved in the main header of the fits file
+	 * @copybrief DataReceiver::scanIdentifier
+	 * identifier of the scan currently running
+	 * @copybrief DataReceiver::deviceID
+	 * this is field is not used in the current interface
+	 * @copybrief DataReceiver::setFileName()
+	 * Sets a new file name and start a new file writing
+	 * @copybrief DataReceiver::setProjectName()
+	 * It sets the name of the project that is currently runnig, this information will be stored in 
+	 * the main header of the created fits file. If this function is not called the entry will not be placed into the
+	 * file. The present projectName will be considered valid until a new string is provided.
+	 * @copybrief DataReceiver::setObserverName()
+	 * It sets the name of the observer, this information will be stored in 
+	 * the main header of the created fits file. If this function is not called the entry will not be placed into the
+	 * file. The present projectName will be considered valid until a new string is provided.
+	 * @copybrief DataReceiver::setScanIdentifier()
+	 * This command will set the scan identifier number. The first output file will have a keyword in the main header reporting this number, the subsequent files
+	 * will be numbered starting from this number. If not set the (or the argument is negative) the keyword will not be stored in the file.
+	 * @copybrief DataReceiver:.setScanAxis()
+	 * This method will be implemented empty
+	 * @copybrief DataReiver::scanAxis
+	 * This attribute is not used by this component
+  	 * @copybrief DataReceiver::dataY
+  	 * @copybrief DataReceiver::dataX
+  	 * @copybrief DataReceiver::arrayDataY
+  	 * @copybrief DataReceiver::arrayDataX
+	 * @author <a href=mailto:righin_si@ira.inaf.it>Simona Righini</a>
+ 	 * Istituto di Radioastronomia, Italia
+	 */ 
+	interface FitsWriter: DataReceiver {
+			
+		/**
+		 * Current status of the component
+		 */
+		readonly attribute Management::ROTSystemStatus status;
+		
+	};
+};
+
+
+#endif /*FITSWRITER_IDL_*/

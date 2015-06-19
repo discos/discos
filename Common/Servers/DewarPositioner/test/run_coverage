@@ -1,0 +1,6 @@
+#!/bin/bash
+
+rm -f .coverage
+coverage run -m unittest2 discover
+coverage report --include $INTROOT"/lib/python/site-packages/DewarPositioner/*"
+    

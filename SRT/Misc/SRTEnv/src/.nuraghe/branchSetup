@@ -1,0 +1,28 @@
+#!/bin/sh
+unset ACS_CDB
+unset INTROOT
+
+# Unlock the trunk
+if [ -f $ACS_TMP/nuraghetrunk.lock ] 
+   then
+   rm $ACS_TMP/nuraghetrunk.lock
+   touch $ACS_TMP/nuraghebranch.lock
+fi
+
+# Unlock the tag
+if [ -f $ACS_TMP/nuraghetag.lock ] 
+   then
+   rm $ACS_TMP/nuraghetag.lock
+   touch $ACS_TMP/nuraghebranch.lock
+fi
+
+export INTROOT=$NURAGHEROOT/introotBranch
+export NURAGHEVERSION=BRANCH
+source $HOME/.acs/.bash_profile.acs
+export ACS_CDB=$NURAGHEROOT/ACS/branches/$NURAGHEBRANCH/SRT/Configuration
+
+# Customize the promt
+source $NURAGHERC/nuraghePrompt
+# Print the actual setup
+# $NURAGHERC/printNuragheSetup.sh
+

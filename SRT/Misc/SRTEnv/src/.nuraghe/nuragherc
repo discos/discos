@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Paths to the external libraries
+export LD_LIBRARY_PATH=/usr/local/Trolltech/Qt-4.5.2/lib:/usr/local/lib:$LD_LIBRARY_PATH
+export PATH=/usr/local/Trolltech/Qt-4.5.2/bin:/usr/local/bin:$PATH:$HOME/Software/fv5.3
+export QTDIR=/usr/local/Trolltech/Qt-4.5.2
+export QTLIB=/usr/local/Trolltech/Qt-4.5.2/lib
+export QTINC=/usr/local/Trolltech/Qt-4.5.2/include
+export qt_prefix=/usr/local/Trolltech/Qt-4.5.2/lib
+
+# Set the root endpoints
+export NURAGHEROOT=$HOME/Nuraghe
+export NURAGHERC=$HOME/.nuraghe
+
+# Set the TAG and BRANCH you want to use
+export NURAGHETAG=0.4
+export NURAGHEBRANCH=DerotatorAndMinorServo
+
+# Set the SVN environment
+export TARGETSYS=SRT
+export SYSLOCATION=$NURAGHEROOT/ACS/trunk/
+export SYSTEM_SVN_TAG=nuraghe-$NURAGHETAG
+export SVNUSER=gavino
+
+# Set the ACS environment
+export ACS_LOG_STDOUT=5
+export ACS_LOG_CENTRAL=5
+source $HOME/.acs/.bash_profile.acs
+
+# Import machine dependent configuration
+MACHINENAME=`echo "$HOSTNAME" | cut -d"." -f1`
+CUSTOMRCFILE="$NURAGHERC/$MACHINENAME"rc
+# Ie.: MACHINEMAME=nuraghe-as -> CUSTOMRCFILE=$NURAGHERC/nuraghe-asrc
+# Ie.: MACHINEMAME=nuraghe-lo -> CUSTOMRCFILE=$NURAGHERC/nuraghe-lorc
+if [ -f $CUSTOMRCFILE ]
+then
+    source $CUSTOMRCFILE
+else
+    echo
+    echo "WARNING: cannot find $CUSTOMRCFILE"
+    touch $CUSTOMRCFILE
+    echo "WARNING: created an empty new one"
+fi
+
+# Nuraghe setup aliases
+alias nuragheTrunk="source $NURAGHERC/trunkSetup"
+alias nuragheTag="source $NURAGHERC/tagSetup"
+alias nuragheBranch="source $NURAGHERC/branchSetup"
+alias nuragheStable=nuragheTag
+
+# Some useful aliases
+alias lo-ssh='ssh gavino@nuraghe-lo'
+alias as-ssh='ssh -X gavino@nuraghe-as'
+alias startnuraghelo='echo "use command: VBoxHeadless -s NURAGHE-LO"'
+alias monitorAcuTemp="watch -n 60 $HOME/bin/showacutemp.sh"
+alias printNuragheSetup='$NURAGHERC/printNuragheSetup.sh'
+
+# If there is not any lock file, create a default one
+if [ ! -f $ACS_TMP/nuraghetrunk.lock ] && \
+   [ ! -f $ACS_TMP/nuraghetag.lock ] && \
+   [ ! -f $ACS_TMP/nuraghebranch.lock ]
+then
+    touch $ACS_TMP/nuraghetrunk.lock
+fi
+
+# Make a trunk setup
+if [ -f $ACS_TMP/nuraghetrunk.lock ]
+then
+    source $NURAGHERC/trunkSetup
+# Make a tag setup
+elif [ -f $ACS_TMP/nuraghetag.lock ]
+then
+    source $NURAGHERC/tagSetup
+# Make a branch setup
+elif [ -f $ACS_TMP/nuraghebranch.lock ]
+then
+    source $NURAGHERC/branchSetup
+fi

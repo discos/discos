@@ -1,0 +1,43 @@
+#ifndef EXTERNALCLIENTS_IDL_
+#define EXTERNALCLIENTS_IDL_
+
+/* ***************************************************************** */
+/* OAC Osservatorio Astronomico di Cagliari                          */
+/* $Id: ExternalClients.idl,v 1.1 2010-01-20 10:51:20 c.migoni Exp $ */
+/*                                                                   */
+/* This code is under GNU General Public Licence (GPL)               */
+/*                                                                   */
+/* Who              when            What                             */
+/* Carlo Migoni     26/11/2009      created                          */
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ManagmentDefinitions.idl>
+#include <ComponentErrors.idl>
+#include <ManagementErrors.idl>
+
+
+#pragma prefix "alma"
+
+module Management { 
+	
+	/**
+	 * This is the interface of the component that is in charge to permits the
+     * access at the system from external clients.
+     * It activates a listening socket for foreign application and sends
+     * commands coming from this external applications to internal components.
+	 * @author <a href=mailto:c.migoni@ca.astro.it>Carlo Migoni</a>,
+ 	 * Osservatorio Astronomico di Cagliari, Italia
+ 	 * <br> 
+ 	 */
+	interface ExternalClients: ACS::CharacteristicComponent, CommandInterpreter {
+
+
+		/**
+		 * This attribute reports on the status of the component
+		 */
+		readonly attribute Management::ROTSystemStatus status;
+	};
+};
+
+#endif /*EXTERNALCLIENTS_IDL_*/

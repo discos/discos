@@ -1,0 +1,93 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+# "@(#) $Id: getTextClientTemplate,v 1.1.1.1 2007-05-04 09:53:29 a.orlati Exp $"
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 10/01/2007      Creation                                  
+#************************************************************************
+#   NAME
+# 
+#   SYNOPSIS
+# 
+#   DESCRIPTION
+#
+#   FILES
+#
+#   ENVIRONMENT
+#
+#   RETURN VALUES
+#
+#   CAUTIONS
+#
+#   EXAMPLES
+#
+#   SEE ALSO
+#
+#   BUGS     
+#
+
+LONGOPTS=header,source,help
+SHORTOPTS=hs
+CL_HEADER=
+CL_HELP=
+CL_SOURCE=
+
+function printUsage {
+   echo "Gets a template code for an ACS text client, linked against the TesxtWindow library"
+   echo ""
+        echo "Usage: `basename $0` [OPTIONS]  "
+        echo "Options: "
+        echo "   -h | -header  gets the header file (*.h)"
+        echo "   -s | -source  gets the sorce code (*.cpp)"
+        echo "   -help         prints this help"
+}
+
+# This simply checks for the correctness of the command line
+export POSIXLY_CORRECT=1
+
+getopt -n `basename $0` -Q -u -a -l $LONGOPTS $SHORTOPTS "$@" || {
+   printUsage
+   exit
+}
+
+# Now let's parse the command line
+set -- `getopt -u -a -l $LONGOPTS $SHORTOPTS "$@"`
+
+for i
+do
+	case "$i" in
+		-h) CL_HEADER=true ;;
+		--header) CL_HEADER=true ;;
+		-s) CL_SOURCE=true ;;
+		--source) CL_SOURCE=true ;;
+		--help) CL_HELP=true ;;
+		--)  break;;
+	esac
+	shift
+done
+
+# restore
+export POSIXLY_CORRECT=
+unset POSIXLY_CORRECT
+
+if [ "$CL_HELP" ] ; then
+   printUsage
+fi
+
+if [ "$CL_HEADER" ] ; then
+   cp $INTROOT/templates/Client.h.template ./Client.h
+   echo "Header template deployed!"
+fi
+
+if [ "$CL_SOURCE" ] ; then
+   cp $INTROOT/templates/Client.cpp.template ./Client.cpp
+   echo "Source template deployed!"
+fi
+
+
+
+#
+# ___oOo___

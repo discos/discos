@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+   - $Id: ASErrors.xml,v 1.1 2011-03-24 09:01:20 c.migoni Exp $
+   - Author: Giuseppe Maccaferri
+   -
+   - History:
+   -   18-01-2005  Created
+   -   14-09-2005  Added error memebers
+   -   12-05-2008 Added TrackingNotStarted error code
+   -   16-07-2008 Modified for ACS7.0.1
+-->
+
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="Alma/ACSError" xsi:noNamespaceSchemaLocation="Alma/ACSError ACSError.xsd"
+ name="ASErrors" type="2003" _prefix="alma">
+
+ <Code name="NoError" shortDescription="No error" Description="No error condition found"/>
+ <ErrorCode name="USDCalibrated" shortDescription="No error" Description="USD succesful calibrated">
+ 	<Member name="CammaLen" type="double" description="Lenght of camma-on window" unit="deg"/>
+ 	<Member name="CammaPos" type="double" description="Distance from top edge of the middle camma-on window" unit="deg"/>
+ </ErrorCode>
+ <ErrorCode name="LibrarySocketError" shortDescription="Socket error. Critical" Description="Error encountered while creating or accessing socket resource" />
+ <ErrorCode name="SocketReconn" shortDescription="Socket reconnected. Warning" Description="Socket was broken. Reconnected succesfully"/>
+ <ErrorCode name="SocketFail" shortDescription="Unrecoverable socket problems. Critical" Description="The socket connection could not be reestablished"/>
+ <ErrorCode name="SocketTOut" shortDescription="time out writing to socket. Critical" Description=""/>
+ <ErrorCode name="SocketNotRdy" shortDescription="unable to allocate socket resource. Error" Description=""/>
+ <ErrorCode name="MemoryAllocation" shortDescription="Buffer can't be allocated. Error" Description=""/>
+ <ErrorCode name="LANConnectionError" shortDescription="LAN/485 converter is not reachable or disconnected" Description="???"/>
+ <ErrorCode name="LAN_Unavailable" shortDescription="The LAN component is unavailable" Description="???"/>
+ <ErrorCode name="sendCmdErr" shortDescription="sendCmd() returned a wrong code. Error" Description=""/>
+ <ErrorCode name="Incomplete" shortDescription="Incomplete reply from USD. Warning" Description=""/>
+ <ErrorCode name="InvalidResponse" shortDescription="USD returned an invalid acknowledge code. Error" Description=""/>
+ <ErrorCode name="Nak" shortDescription="USD does not acknowledge last command.Warning" Description=""/>
+ <ErrorCode name="CDBAccessError" shortDescription="Error while accessing the Configuration Database.Error" Description="">
+ 	<Member name="FieldName" type="string" description="FiledName"/>
+ </ErrorCode>
+ <ErrorCode name="USDConnectionError" shortDescription="USD is not reachable or disconnected.Critical" Description=""/>
+ <ErrorCode name="USDTimeout" shortDescription="Timeout on receive data from USD.Critical" Description="">
+	<Member name="which" type="string" description="the usd location"/>
+ </ErrorCode>
+ <ErrorCode name="USDUnavailable" shortDescription="USD no more available.Warning" Description=""/>
+ <ErrorCode name="USDError" shortDescription="generic USD error executing an action.Error " Description=""/>
+ <ErrorCode name="DevIOError" shortDescription="USD error reading or writing a property.Error" Description="">
+ 	<Member name="property" type="string" description=""/>
+</ErrorCode>
+ <ErrorCode name="corbaError" shortDescription="CORBA system exception executing an action.Error" Description=""/>
+ <ErrorCode name="USDStillRunning" shortDescription="USD still running while shouldn't be!.Error" Description=""/>
+ <ErrorCode name="USDunCalibrated" shortDescription="USD not calibrated.Warning" Description=""/>
+ <ErrorCode name="CannotGetUSD" shortDescription="USD not activated.Warning" Description=""/>
+ </Type>

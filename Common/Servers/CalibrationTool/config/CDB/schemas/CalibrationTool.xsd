@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+   - $Id: CalibrationTool.xsd,v 1.4 2011-02-28 13:09:04 c.migoni Exp $
+   -
+   - Author: Carlo Migoni (c.migoni@oa-cagliari.inaf.it)
+   -
+   - History:
+   -   2011-18-01  Created
+  -->
+<xs:schema 
+  targetNamespace="urn:schemas-cosylab-com:CalibrationTool:1.0"
+  xmlns="urn:schemas-cosylab-com:CalibrationTool:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+  xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+  elementFormDefault="qualified" 
+  attributeFormDefault="unqualified">
+  <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+  <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+  <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+  
+  <xs:complexType name="CalibrationToolType">
+    <xs:sequence>
+		<xs:element name="status" type="mng:SystemStatusType" />
+		<xs:element name="fileName" type="baci:ROstring"/>
+		<xs:element name="projectName" type="baci:ROstring"/>
+		<xs:element name="observer" type="baci:ROstring"/>
+		<xs:element name="scanIdentifier" type="baci:ROlong"/>
+		<xs:element name="deviceID" type="baci:ROlong"/>
+		<xs:element name="scanAxis" type="mng:ScanAxisType" />
+		<xs:element name="dataY" type="baci:ROdouble"/>
+		<xs:element name="dataX" type="baci:ROdouble"/>
+		<xs:element name="arrayDataY" type="baci:ROdoubleSeq"/>
+		<xs:element name="arrayDataX" type="baci:ROdoubleSeq"/>
+		<xs:element name="hpbw" type="baci:ROdouble"/>
+		<xs:element name="amplitude" type="baci:ROdouble"/>
+		<xs:element name="peakOffset" type="baci:ROdouble"/>
+		<xs:element name="slope" type="baci:ROdouble"/>
+		<xs:element name="offset" type="baci:ROdouble"/>
+		<xs:element name="sourceFlux" type="baci:ROdouble"/>
+		<xs:element name="sourceName" type="baci:ROstring"/>
+    </xs:sequence>
+    <xs:attribute name="recv_protocols" type="xs:string" use="optional"/>
+    <!-- sleep time of the working thread (microseconds), this is the thread that saves the data into the file -->
+    <xs:attribute name="WorkingThreadTime" type="xs:unsignedLong" use="required" />
+    <!-- this is the time slice of the thread (microseconds), the thread must complete one iteration within that time -->
+    <xs:attribute name="WorkingThreadTimeSlice" type="xs:unsignedLong" use="required" /> 
+    <!-- sleep time of the collector thread (microseconds), this is the thread that collects the complementary information to be stored in the file  -->
+    <xs:attribute name="CollectorThreadTime" type="xs:unsignedLong" use="required" />     
+    <!-- the cache time (microseconds) for logging repetition filter -->
+    <xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
+    <!-- the expire time (microseconds) for logging repetition filter -->
+    <xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
+    <!-- the gap for tracking flag refresh (microseconds) -->
+    <xs:attribute name="TrackingFlagDutyCycle" type="xs:unsignedLong" use="required" />
+    <!-- the interface of the component that leads the Antenna subsystem -->
+    <xs:attribute name="AntennaBossInterface" type="xs:string" use="required" />
+    <!-- the interface of the component that leads the minor servo subsystem -->
+    <xs:attribute name="MinorServoBossInterface" type="xs:string" use="required" />    
+    <!-- the interface of the component that leads the system and carries on the observation -->
+    <xs:attribute name="SchedulerInterface" type="xs:string" use="required" />
+    <!-- the interface of the component that leads the Observatory system -->
+    <xs:attribute name="ObservatoryInterface" type="xs:string" use="required" />
+    <!-- This allow to control if the component should produce an output file of not -->
+    <xs:attribute name="GenerateFile" type="xs:boolean" use="required" /> 
+    <!-- This value represent the tolerance (percentage) applied when checking for the expected fwhm,  -->
+    <!-- 100 means the measured fwhm is considered valid if between the double and the half value of the expected one  -->
+    <xs:attribute name="FwhmTolerance" type="xs:double" use="required" /> 
+    
+  </xs:complexType>
+  <xs:element name="CalibrationTool" type="CalibrationToolType"/>
+</xs:schema>
+

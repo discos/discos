@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Author: 
+        Marco Buttu, mbuttu@oa-cagliari.inaf.it
+
+    Created: Mon Oct 12 12:08:05 CEST 2009
+    Last Modified: Mon Nov  9 11:20:11 CET 2009
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:MinorServo:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="urn:schemas-cosylab-com:MinorServo:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+
+    <xs:complexType name="WPServoType">
+
+        <!-- ********************* WAVE PATH SERVO PROPERTIES ********************* -->
+
+        <xs:sequence>
+            <!-- MinorServo actual position (ROdoubleSeq) -->
+            <xs:element name="actPos" type="baci:ROdoubleSeq" />
+            <!-- MinorServo plain actual position (ROdoubleSeq) -->
+            <xs:element name="plainActPos" type="baci:ROdoubleSeq" />
+            <!-- MinorServo commanded position (RWdoubleSeq) -->
+            <xs:element name="cmdPos" type="baci:RWdoubleSeq" />
+            <!-- Difference between commanded and actual position (ROdoubleSeq) -->
+            <xs:element name="posDiff" type="baci:ROdoubleSeq" />
+            <!-- MinorServo actual elongation (ROdoubleSeq) -->
+            <xs:element name="actElongation" type="baci:ROdoubleSeq" />
+            <!-- MinorServo virtual actual elongation (ROdoubleSeq) -->
+            <xs:element name="virtualActElongation" type="baci:ROdoubleSeq" />
+            <!-- Temperature of slave engine (ROdoubleSeq) -->
+            <xs:element name="engTemperature" type="baci:ROdoubleSeq" />
+            <!-- Counturing Error of slaves (ROdoubleSeq) -->
+            <xs:element name="counturingErr" type="baci:ROdoubleSeq" />
+            <!-- Torque Percentage of slaves (ROdoubleSeq) -->
+            <xs:element name="torquePerc" type="baci:ROdoubleSeq" />
+            <!-- Engine Current of slaves (ROdoubleSeq) -->
+            <xs:element name="engCurrent" type="baci:ROdoubleSeq" />
+            <!-- Driver Temperature of slaves (ROdoubleSeq) -->
+            <xs:element name="driTemperature" type="baci:ROdoubleSeq" />
+            <!-- Utilization percentage of slaves (ROdoubleSeq) -->
+            <!-- Each item is the utilization percentage of minor servo slave. -->
+            <!-- That percentage is the ratio between actual power and maximum supplying power -->
+            <xs:element name="utilizationPerc" type="baci:ROdoubleSeq" />
+            <!-- Drive Cabinet Temperature(ROdoubleSeq) -->
+            <xs:element name="dcTemperature" type="baci:ROdoubleSeq" />
+            <!-- Engine Voltage (ROdoubleSeq) -->
+            <xs:element name="engVoltage" type="baci:ROdoubleSeq" />
+            <!-- Driver Status (ROdoubleSeq) -->
+            <xs:element name="driverStatus" type="baci:ROdoubleSeq" />
+            <!-- Error Code (ROdoubleSeq) -->
+            <xs:element name="errorCode" type="baci:ROdoubleSeq" />
+            <xs:element name="status">
+                 <xs:complexType>
+                    <xs:complexContent>
+                        <xs:restriction base="baci:ROpattern">
+                            <xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="65535"/>
+                            <xs:attribute name="bitDescription" type="xs:string" use="optional" 
+                                default="Ready, Warning, Failure, Setup, Park, Tracking"/>
+                            <xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                                "3, 3, 3, 3, 3, 3"/>
+                            <xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+                                "0, 0, 0, 0, 0, 0"/>
+                        </xs:restriction>
+                    </xs:complexContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+
+        <!-- ********************* WAVE PATH SERVO ATTRIBUTES ********************* -->
+        <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
+        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
+        <xs:attribute name="number_of_axis" type="xs:unsignedShort" use="required" />
+        <xs:attribute name="number_of_slaves" type="xs:unsignedShort" use="required" />
+        <xs:attribute name="scale_factor" type="xs:double" use="required" />
+        <xs:attribute name="scale_offset" type="xs:double" use="required" />
+        <xs:attribute name="server_ip" type="xs:string" use="required" />
+        <xs:attribute name="server_port" type="xs:unsignedShort" use="required" />
+        <!-- timeout (microseconds) applied when trying to connect to the axis -->
+        <xs:attribute name="timeout" type="xs:unsignedLong" use="optional" />
+        <!-- minor servo address, because there are several minor servos behind the
+             same server address -->
+        <xs:attribute name="servo_address" type="xs:unsignedShort" use="optional" />
+        <!-- zero reference position -->
+        <xs:attribute name="zero" type="xs:double" use="required" />
+        <xs:attribute name="park_position" type="xs:string" use="required" />
+        <xs:attribute name="max_speed" type="xs:unsignedLong" use="optional" />
+        <xs:attribute name="min_speed" type="xs:unsignedLong" use="optional" />
+        <!-- Type of drivers -->
+        <xs:attribute name="driver_type" type="xs:string" use="optional" />
+        <xs:attribute name="virtual_rs" type="xs:boolean" use="optional" default="0" />
+        <xs:attribute name="require_calibration" type="xs:boolean" use="optional" default="0" />
+        <!-- Expire time of data request in seconds. For instance: 0.001 for 1ms-->
+        <xs:attribute name="expire_time" type="xs:double" use="required" />
+        <!-- Maximum value allowed for the difference of two corresponding axis coordinates (mm) -->
+        <!-- if |cmdPos – actPos| < tracking_delta, then the axis is following the commanded position -->
+        <xs:attribute name="tracking_delta" type="xs:double" use="required" />
+        <!-- limits = "(neg1, pos1), (neg2, pos2), ..., (negN, posN)" -->
+        <xs:attribute name="limits" type="xs:string" use="required" />
+
+    </xs:complexType>
+
+    <xs:element name="WPServo" type="WPServoType"/>
+
+    <xs:complexType name="MinorServoBossType">
+        <xs:sequence>
+            <xs:element name="status" type="mng:SystemStatusType" />
+            <xs:element name="actualSetup" type="baci:ROstring" />
+            <xs:element name="ready" type="mng:BooleanType" />
+            <xs:element name="starting" type="mng:BooleanType" />
+            <xs:element name="asConfiguration" type="mng:BooleanType" />
+            <xs:element name="elevationTrack" type="mng:BooleanType" />
+            <xs:element name="scanActive" type="mng:BooleanType" />
+            <xs:element name="scanning" type="mng:BooleanType" />
+        </xs:sequence>
+
+        <!-- Subsystem attributes -->
+        <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
+        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
+        <xs:attribute name="slaves" type="xs:string" use="required" />
+        <xs:attribute name="CCB_ASACTIVE" type="xs:string" use="required" />
+        <xs:attribute name="CCB" type="xs:string" use="required" />
+        <xs:attribute name="KKG_ASACTIVE" type="xs:string" use="required" />
+        <xs:attribute name="KKG" type="xs:string" use="required" />
+        <xs:attribute name="LLP" type="xs:string" use="required" />
+        <xs:attribute name="PPP" type="xs:string" use="required" />
+        <xs:attribute name="PLP" type="xs:string" use="required" />
+        <xs:attribute name="XKP" type="xs:string" use="required" />
+
+    </xs:complexType>
+
+    <xs:element name="MinorServoBoss" type="MinorServoBossType"/>
+
+</xs:schema>

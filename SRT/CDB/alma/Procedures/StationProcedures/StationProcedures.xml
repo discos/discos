@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Procedure name="setupCCG">
+<body>
+	antennaReset
+	antennaSetup=CCB
+    servoSetup=CCB
+	receiversSetup=CCB
+	initialize=CCB
+	device=0
+	calOff
+	restFrequency=0
+</body>	
+</Procedure>
+
+<Procedure name="setupKKG">
+<body>
+	antennaReset
+	antennaSetup=KKG
+    servoSetup=KKG
+	receiversSetup=KKG
+	receiversMode=SINGLEDISH
+	initialize=KKG
+	device=0
+	calOff
+	restFrequency=0
+</body>
+</Procedure>
+
+<Procedure name="telescopePark" args="0">
+<body>
+	antennaReset
+	goTo=180d,89.8d
+	receiversPark
+	waitOnSource
+	servoPark
+	antennaPark
+	asOff
+	asPark
+</body>
+</Procedure>
+
+<Procedure name="focusScan" args="2">
+<body>
+	peakerScan=SRP_TZ,$1,$2
+</body>
+</Procedure>
+
+<Procedure name="winkingMark" args="1">
+<body>
+	externalCalOn
+	calSwitch=$1
+</body>
+</Procedure>
+
+</ProcedureFile>

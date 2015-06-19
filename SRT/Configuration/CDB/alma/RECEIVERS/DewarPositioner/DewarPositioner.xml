@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<DewarPositioner
+    xmlns="urn:schemas-cosylab-com:DewarPositioner:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    UpdatingTime="0.1"
+    RewindingSleepTime="1"
+    RewindingTimeout="200"
+    DefaultConfiguration="FIXED"
+    DefaultRewindingMode="AUTO"
+    Latitude="39.493040"
+>
+
+    <status
+        description="integer that represents the dewar positioner status" 
+    />
+
+</DewarPositioner>
