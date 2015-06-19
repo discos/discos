@@ -338,18 +338,18 @@ double CRecvBossCore::getDerotatorPosition(const ACS::Time& epoch) throw (Compon
 	IRA::CString component;
 	bool derotator;
 	if (m_currentRecvCode=="") {
-		return nan("1");
+		return -9999.99;
 	}
 	if (!m_config->getReceiver(m_currentRecvCode,component,derotator)) {
-		return nan("1");
+		return -9999.99;
 	}
 	if (m_config->dewarPositionerInterface()=="") {
 	}
 	if (!derotator) {
-		return nan("1");
+		return -9999.99;
 	}
 	if (m_updateMode==Receivers::RCV_UNDEF_DEROTCONF) {
-		return nan("1");;
+		return -9999.99;
 	}
 	baci::ThreadSyncGuard guard(&m_mutex);
 	loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
