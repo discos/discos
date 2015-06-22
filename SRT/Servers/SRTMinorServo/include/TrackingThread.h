@@ -51,6 +51,7 @@ public:
 private:
     MSBossConfiguration *m_configuration;
     Antenna::Mount_var m_antennaMount;
+    bool m_ready_error;
      
 };
 
