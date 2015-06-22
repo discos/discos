@@ -133,7 +133,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = LocalOscillator
+CDB_SCHEMAS = 
 
 # 
 # IDL Files and flags
