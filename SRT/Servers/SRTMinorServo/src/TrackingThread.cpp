@@ -66,7 +66,7 @@ TrackingThread::TrackingThread(
                                 component_ref->setPosition(positions, NOW);
                             }
                             else {
-                                if(component_ref->isStarting()) {
+                                if(component_ref->isStarting() || component_ref->isParked() || component_ref->isParking()) {
                                     ; // Do nothing
                                 }
                                 else {
