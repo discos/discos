@@ -25,6 +25,7 @@ TrackingThread::TrackingThread(
             ) : ACS::Thread(name, responseTime, sleepTime, del), m_configuration(configuration)
     {
         AUTO_TRACE("TrackingThread::TrackingThread()");
+        m_ready_error = false;
     }
 
     TrackingThread::~TrackingThread() { AUTO_TRACE("TrackingThread::~TrackingThread()"); }
@@ -61,11 +62,20 @@ TrackingThread::TrackingThread(
                         // Set a minor servo position if the doubleSeq is not empty
                         if(positions.length()) {
                             if(component_ref->isReady()) {
+                                m_ready_error = false;
                                 component_ref->setPosition(positions, NOW);
                             }
                             else {
-                                ACS_SHORT_LOG((LM_WARNING, "TrackingThread: component not ready."));
-                                m_configuration->m_isElevationTracking = false;
+                                if(component_ref->isStarting()) {
+                                    ; // Do nothing
+                                }
+                                else {
+                                    if(!m_ready_error) {
+                                        ACS_SHORT_LOG((LM_WARNING, "TrackingThread: component not ready."));
+                                        m_configuration->m_isElevationTracking = false;
+                                        m_ready_error = true;
+                                    }
+                                }
                             }
                         }
                         else {
