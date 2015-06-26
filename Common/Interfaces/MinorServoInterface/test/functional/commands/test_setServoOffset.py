@@ -1,5 +1,6 @@
 from __future__ import with_statement
 
+import os
 import math
 import time
 import unittest2
@@ -18,9 +19,15 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 class TestSetServoOffsetCmd(unittest2.TestCase):
     """Test the setServoOffset command"""
 
+    telescope = os.getenv('TARGETSYS')
+
     def setUp(self):
-        client = PySimpleClient()
-        self.boss = client.getComponent('MINORSERVO/Boss')
+        self.client = PySimpleClient()
+        self.boss = self.client.getComponent('MINORSERVO/Boss')
+
+    def tearDown(self):
+        self.boss.park()
+        self.client.releaseComponent('MINORSERVO/Boss')
 
     def test_wrong_axis_code(self):
         success, answer = self.boss.command('setServoOffset=FOO_TX,0')

@@ -366,6 +366,26 @@ void MinorServoBossImpl::setupImpl(const char *config) throw (ManagementErrors::
     }
     m_configuration->init(string(config));  // Throw (ComponentErrors::CDBAccessExImpl);
 
+    // Power On the encoders
+    vector<string> slaves = get_slaves();
+    for(vector<string>::iterator iter = slaves.begin(); iter != slaves.end(); iter++) {
+        try {
+            MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+            component_ref = m_services->getComponent<MinorServo::WPServo>(("MINORSERVO/" + *iter).c_str());
+            if(!CORBA::is_nil(component_ref)) {
+                component_ref->powerOnEncoder();
+            }
+            else {
+                ACS_SHORT_LOG((LM_WARNING, ("MinorServoBossImpl::setup(): cannot get the " + *iter + "component").c_str()));
+            }
+        }
+        catch(...) {
+            ACS_SHORT_LOG((LM_WARNING, ("MinorServoBossImpl::setup(): cannot power on the " + *iter + "encoder").c_str()));
+        }
+    }
+    // Wait a bit in order to give the encoder the time to get ready
+    usleep(5000000); // 5 seconds
+
     try {
         if(m_setup_thread_ptr != NULL)
             m_setup_thread_ptr->restart();

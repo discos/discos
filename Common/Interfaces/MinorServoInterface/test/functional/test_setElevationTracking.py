@@ -22,8 +22,6 @@ class TestSetElevationTracking(unittest2.TestCase):
     def tearDownClass(cls):
         cls.client.releaseComponent('MINORSERVO/Boss')
 
-
-
     def test_right_flag(self):
         """Set the elevation tracking properly"""
         self.boss.setElevationTracking('on')

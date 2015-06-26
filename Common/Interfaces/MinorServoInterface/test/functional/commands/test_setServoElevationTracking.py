@@ -19,9 +19,14 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 class TestSetServoElevationTrackingCmd(unittest2.TestCase):
     """Test the setServoElevationTracking command"""
 
+    telescope = os.getenv('TARGETSYS')
+
     def setUp(self):
-        client = PySimpleClient()
-        self.boss = client.getComponent('MINORSERVO/Boss')
+        self.client = PySimpleClient()
+        self.boss = self.client.getComponent('MINORSERVO/Boss')
+
+    def tearDown(self):
+        self.client.releaseComponent('MINORSERVO/Boss')
 
     def test_wrong_flag(self):
         success, answer = self.boss.command('setServoElevationTracking=FOO')

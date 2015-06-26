@@ -63,6 +63,7 @@ void MSBossConfiguration::init(string setupMode, bool keepSetup) throw (Manageme
         m_servosToPark.clear();
         m_servosToMove.clear();
         m_servosCoefficients.clear();
+        m_servosToPowerOffEncoder.clear();
         m_dynamic_comps.clear();
         m_axes.clear();
         m_units.clear();
@@ -105,6 +106,11 @@ void MSBossConfiguration::init(string setupMode, bool keepSetup) throw (Manageme
 
             if(startswith(action, "park") || startswith(action, "PARK")) {
                 m_servosToPark.push_back(comp_name);
+                continue;
+            }
+
+            if(startswith(action, "power_off_encoder") || startswith(action, "POWER_OFF_ENCODER")) {
+                m_servosToPowerOffEncoder.push_back(comp_name);
                 continue;
             }
 

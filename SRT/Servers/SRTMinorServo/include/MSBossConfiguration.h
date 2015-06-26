@@ -184,6 +184,8 @@ public:
 
     std::vector<std::string> m_servosToMove;
 
+    std::vector<std::string> m_servosToPowerOffEncoder;
+
     /** Components with number of coefficients greather than 1 */
     std::vector<std::string> m_dynamic_comps;
 

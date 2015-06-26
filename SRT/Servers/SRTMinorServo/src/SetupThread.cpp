@@ -56,6 +56,7 @@ void SetupThread::run()
     unsigned long counter = 0;
     vector<string> toPark(m_configuration->m_servosToPark);
     vector<string> toMove(m_configuration->m_servosToMove);
+    vector<string> toPowerOffEncoder(m_configuration->m_servosToPowerOffEncoder);
     while(true) {
         for(vector<string>::iterator iter = toPark.begin(); iter != toPark.end(); iter++) {
             string comp_name = *iter;
@@ -348,6 +349,29 @@ void SetupThread::run()
     m_configuration->m_isConfigured = true;
     m_configuration->m_actualSetup = m_configuration->m_commandedSetup;
     ACS_SHORT_LOG((LM_NOTICE, ("MinorServo setup done. Actual setup: " + m_configuration->m_actualSetup).c_str()));
+
+    // Power Off the encoders
+    for(vector<string>::iterator iter = toPowerOffEncoder.begin(); iter != toPowerOffEncoder.end(); iter++) {
+        string comp_name = *iter;
+        MinorServo::WPServo_var component_ref = MinorServo::WPServo::_nil();
+        if((m_configuration->m_component_refs).count(comp_name)) {
+            component_ref = (m_configuration->m_component_refs)[comp_name];
+            try {
+                if(!CORBA::is_nil(component_ref)) {
+                    component_ref->disable(0);
+                    ACS::ThreadBase::sleep(50000000); // 5 seconds
+                    component_ref->powerOffEncoder();
+                }
+            }
+            catch(...) {
+                ACS_SHORT_LOG((LM_WARNING, ("SetupThread: cannot power off the encoder. Servo:  "  + comp_name).c_str()));
+            }
+        }
+        else {
+            ACS_SHORT_LOG((LM_WARNING, ("SetupThread: cannot power off the encoder. Servo unavailable:  "  + comp_name).c_str()));
+        }
+    }
+
 
     try {
         if(m_configuration->isElevationTrackingEn()) {

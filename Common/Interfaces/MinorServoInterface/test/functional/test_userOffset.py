@@ -38,6 +38,9 @@ class TestUserOffset(unittest2.TestCase):
     def tearDown(self):
         # self.boss.clearUserOffset(self.axis_code)
         self.boss.setUserOffset(self.axis_code, 0)  # TODO
+        self.boss.park()
+        time.sleep(0.2)
+        self.wait_parked()
 
     def test_wrong_servo_name(self):
         """Raise a MinorServoErrorsEx in case of wrong servo name"""
@@ -62,6 +65,10 @@ class TestUserOffset(unittest2.TestCase):
         self.boss.setUserOffset(self.axis_code, target_offset)
         offset = self.boss.getUserOffset()[0] # SRP_TX and X both have index 0
         self.assertAlmostEqual(offset, target_offset, delta=0.1)
+
+    def wait_parked(self):
+        while self.boss.isParking():
+            time.sleep(0.1)
 
 
 if __name__ == '__main__':

@@ -22,13 +22,23 @@ class TestGetAxesInfo(unittest2.TestCase):
 
     telescope = os.getenv('TARGETSYS')
 
+    @classmethod
+    def setUpClass(cls):
+        cls.client = PySimpleClient()
+        cls.boss = cls.client.getComponent('MINORSERVO/Boss')
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.releaseComponent('MINORSERVO/Boss')
+        cls.client.disconnect()
+
     def setUp(self):
-        self.client = PySimpleClient()
-        self.boss = self.client.getComponent('MINORSERVO/Boss')
         self.setup_code = "CCB" if self.telescope == "SRT" else "CCC"
 
     def tearDown(self):
-        self.client.releaseComponent('MINORSERVO/Boss')
+        self.boss.park()
+        time.sleep(0.2)
+        self.wait_parked()
 
     def test_not_ready(self):
         """Raise a MinorServoErrorsEx in case the system is not ready"""
@@ -48,6 +58,10 @@ class TestGetAxesInfo(unittest2.TestCase):
         self.assertTrue(any(axes))
         self.assertTrue(any(units))
         self.assertEqual(len(units), len(axes))
+
+    def wait_parked(self):
+        while self.boss.isParking():
+            time.sleep(0.1)
 
 
 if __name__ == '__main__':
