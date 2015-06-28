@@ -283,14 +283,8 @@ void icdSocket::setPosition(double position) throw (
 
     m_icd_summary_status &= ~(1 << W) ;
     setCmdPosition(position);
-    const double max_rel = m_ICD_REFERENCE - m_ICD_MAX_VALUE;
-    const double min_rel = m_ICD_REFERENCE - m_ICD_MIN_VALUE;
-
 
     if(sh_position > m_ICD_MAX_VALUE || sh_position < m_ICD_MIN_VALUE) {
-        ACS_SHORT_LOG((LM_ERROR, "# You are trying to set a position out of range (%.2f°, %.2f°)", min_rel, max_rel));
-        m_icd_summary_status |=  (1 << W);
-        
         DerotatorErrors::OutOfRangeErrorExImpl ex(__FILE__, __LINE__, "Position out of range");
         throw ex;
     }
