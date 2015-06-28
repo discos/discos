@@ -738,19 +738,26 @@ class Status(object):
             >>> Status.dec2bin(16, 6)
             '010000'
             >>> Status.dec2bin(16, 5)
-            '010000'
+            '10000'
             >>> Status.dec2bin(16, 10)
             '0000010000'
             >>> Status.dec2bin(0, 6)
             '000000'
+            >>> Status.dec2bin(32, 6)
+            '100000'
         """
         if n == 0:
-            value = '0'
+            value = '0' 
         else:
             value = Status.dec2bin(n//2) + str(n%2)
 
         if nbits:
-            return value if len(value) >= nbits else '0'*(nbits - len(value)) + value
+            if len(value) > nbits:
+                return value[-nbits:]
+            elif len(value) == nbits:
+                return value
+            else:
+                return '0'*(nbits - len(value)) + value
         else:
             return value
 
