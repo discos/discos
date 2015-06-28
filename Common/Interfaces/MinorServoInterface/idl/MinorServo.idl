@@ -447,8 +447,19 @@ module MinorServo {
        
        /** Is the servo in an emergency stop condition? **/
          boolean isInEmergencyStop();
+ 
+       
+       /** Power on the servo encoder */
+         void powerOnEncoder();
 
 
+       /** Power off the servo encoder (to cut RFIs) */
+         void powerOffEncoder();
+
+
+       /** Is the encoder power on */
+        // boolean isPowerOnEncoder();
+ 
 
         /**
          * Accomplish a WPServo setup at some time.

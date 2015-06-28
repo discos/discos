@@ -30,7 +30,6 @@ class TestSystemOffset(unittest2.TestCase):
     def tearDownClass(cls):
         cls.client.releaseComponent('MINORSERVO/Boss')
 
-
     def setUp(self):
         self.setup_code = "CCB" if self.telescope == "SRT" else "CCC"
         self.axis_code = "SRP_TX" if self.telescope == "SRT" else "X"
@@ -38,6 +37,9 @@ class TestSystemOffset(unittest2.TestCase):
     def tearDown(self):
         #self.boss.clearSystemOffset(self.axis_code)
         self.boss.setSystemOffset(self.axis_code, 0)  # TODO
+        self.boss.park()
+        time.sleep(0.2)
+        self.wait_parked()
 
     def test_wrong_servo_name(self):
         """Raise a MinorServoErrorsEx in case of wrong servo name"""
@@ -62,6 +64,10 @@ class TestSystemOffset(unittest2.TestCase):
         self.boss.setSystemOffset(self.axis_code, target_offset)
         offset = self.boss.getSystemOffset()[0] # SRP_TX and X both have index 0
         self.assertAlmostEqual(offset, target_offset, delta=0.1)
+
+    def wait_parked(self):
+        while self.boss.isParking():
+            time.sleep(0.1)
 
 
 if __name__ == '__main__':

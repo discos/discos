@@ -810,6 +810,26 @@ void WPServoImpl::setup(const ACS::Time exe_time)
 }
 
 
+void WPServoImpl::powerOnEncoder()
+{
+    AUTO_TRACE("WPServoImpl::powerOnEncoder()");
+    if(m_cdb_ptr->SERVO_ADDRESS == 0) { // PFP
+        m_wpServoTalker_ptr->action(12);
+        ACS_SHORT_LOG((LM_INFO, "PFP encoder powered on"));
+    }
+}
+
+
+void WPServoImpl::powerOffEncoder()
+{
+    AUTO_TRACE("WPServoImpl::powerOffEncoder()");
+    if(m_cdb_ptr->SERVO_ADDRESS == 0) { // PFP
+        m_wpServoTalker_ptr->action(11);
+        ACS_SHORT_LOG((LM_INFO, "PFP encoder powered off"));
+    }
+}
+
+
 void WPServoImpl::cleanPositionsQueue(const ACS::Time exe_time) throw (MinorServoErrors::CommunicationErrorEx) 
 {
 

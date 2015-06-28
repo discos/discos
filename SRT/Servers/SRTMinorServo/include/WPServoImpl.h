@@ -333,6 +333,11 @@ public:
      */ 
      virtual void clearEmergency() throw (MinorServoErrors::CommunicationErrorEx);
 
+     
+     virtual void powerOnEncoder();
+
+     virtual void powerOffEncoder();
+
 
     /**
      * Set an user offset to the position.

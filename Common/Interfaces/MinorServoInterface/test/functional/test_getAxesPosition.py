@@ -34,6 +34,11 @@ class TestGetAxesPosition(unittest2.TestCase):
     def setUp(self):
         self.setup_code = "CCB" if self.telescope == "SRT" else "CCC"
 
+    def tearDown(self):
+        self.boss.park()
+        time.sleep(0.2)
+        self.wait_parked()
+
     def test_not_ready(self):
         """Raise a MinorServoErrorsEx in case the system is not ready"""
         with self.assertRaises(MinorServoErrorsEx):
@@ -50,6 +55,10 @@ class TestGetAxesPosition(unittest2.TestCase):
 
         position = self.boss.getAxesPosition(0)
         self.assertTrue(any(position)) 
+
+    def wait_parked(self):
+        while self.boss.isParking():
+            time.sleep(0.1)
 
 
 if __name__ == '__main__':

@@ -146,6 +146,31 @@ string make_request(
             break;
         }
 
+        // disable the PFP encoder (bit number 15)
+        case 11: {
+            // The syntax: "#setsdatbitb16:2=0,0,0,15,1\r\n"
+            request = req_header + "setsdatbitb16" + ":" + cmd_number + "=" + app_number + ",0,0,15,1";
+            request += message_closer;
+            break;
+        }
+
+        // enable the PFP encoder (bit number 15)
+        case 12: {
+            // The syntax: "#setsdatbitb16:2=0,0,0,15,0\r\n"
+            request = req_header + "setsdatbitb16" + ":" + cmd_number + "=" + app_number + ",0,0,15,0";
+            request += message_closer;
+            break;
+        }
+
+        // is the PFP encoder (bit number 15) enabled?
+        case 13: {
+            // The syntax: "#getsdatbitb16:2=0,0,0,15\r\n"
+            request = req_header + "getsdatbitb16" + ":" + cmd_number + "=" + app_number + ",0,0,15";
+            request += message_closer;
+            break;
+        }
+
+
         default:
             request = "";
     }

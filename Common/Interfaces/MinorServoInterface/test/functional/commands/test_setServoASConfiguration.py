@@ -20,9 +20,14 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 class TestSetServoASConfigurationCmd(unittest2.TestCase):
     """Test the setServoASConfiguration command"""
 
+    telescope = os.getenv('TARGETSYS')
+
     def setUp(self):
-        client = PySimpleClient()
-        self.boss = client.getComponent('MINORSERVO/Boss')
+        self.client = PySimpleClient()
+        self.boss = self.client.getComponent('MINORSERVO/Boss')
+
+    def tearDown(self):
+        self.client.releaseComponent('MINORSERVO/Boss')
 
     def test_wrong_axis_code(self):
         success, answer = self.boss.command('setServoASConfiguration=FOO')
@@ -31,7 +36,6 @@ class TestSetServoASConfigurationCmd(unittest2.TestCase):
     def test_right_axis_code(self):
         success, answer = self.boss.command('setServoASConfiguration=on')
         self.assertTrue(success)
-
 
 if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):

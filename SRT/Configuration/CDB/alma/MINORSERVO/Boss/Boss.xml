@@ -83,6 +83,7 @@
     LLP="
         @ SRP: park;
         @ PFP: RY(mm) = (-25.75); TX(mm) = (458); TZ(mm)= (-46.2);
+        @ PFP: power_off_encoder;
         @ GFR: RZ(mm) = (-600);
         @ M3R: RZ(mm) = (860);
     "
@@ -90,6 +91,7 @@
     PPP="
         @ SRP: park;
         @ PFP: RY(mm) = (-25.75); TX(mm) = (458); TZ(mm) = (-45.9);
+        @ PFP: power_off_encoder;
         @ GFR: RZ(mm) = (-600);
         @ M3R: RZ(mm) = (860);
     "
@@ -97,6 +99,7 @@
     PLP="
         @ SRP: park;
         @ PFP: RY(mm) = (-25.75); TX(mm) = (458); TZ(mm) = (-45.9);
+        @ PFP: power_off_encoder;
         @ GFR: RZ(mm) = (-600);
         @ M3R: RZ(mm) = (860);
     "

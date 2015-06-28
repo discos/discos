@@ -142,6 +142,14 @@ class Servo(object):
         answer += closers[0]
         return [answer]
 
+    def setsdatbitb16(self, cmd_num, *params):
+        answer = '@setsdatbitb16' + ':%d=%d' % (cmd_num, self.id)
+        for param in params:
+            answer += ",%s" %param
+        else:
+            answer += closers[0]
+        return [answer]
+
     @staticmethod
     def ctime():
         """Return the current time in OMG format"""
