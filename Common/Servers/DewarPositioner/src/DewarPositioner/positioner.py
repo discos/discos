@@ -240,7 +240,7 @@ class Positioner(object):
                         self._setPosition(target) # _setPosition() will add the offset
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError, ex:
-                        logger.logWarning(ex.message)
+                        logger.logInfo(ex.message)
                         self.control.isRewindingRequired = True
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
