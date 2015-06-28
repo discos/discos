@@ -124,19 +124,20 @@ class Positioner(object):
 
     def _setPosition(self, position):
         self.control.target = position + self.control.offset
-        try:
-            self.device.setPosition(self.control.target)
-        except DerotatorErrors.OutOfRangeErrorEx:
+        if self.device.getMinLimit() < self.control.target < self.device.getMaxLimit():
+            try:
+                self.device.setPosition(self.control.target)
+            except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+                raeson = "cannot set the %s position" %self.device._get_name()
+                logger.logError('%s: %s' %(raeson, ex.message))
+                raise PositionerError(raeson)
+            except Exception, ex:
+                raeson = "unknown exception setting the %s position" %self.device._get_name()
+                logger.logError('%s: %s' %(raeson, ex.message))
+                raise PositionerError(raeson)
+        else:
             raise OutOfRangeError("position %.2f out of range {%.2f, %.2f}" 
                 %(self.control.target, self.device.getMinLimit(), self.device.getMaxLimit()))
-        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
-            raeson = "cannot set the %s position" %self.device._get_name()
-            logger.logError('%s: %s' %(raeson, ex.message))
-            raise PositionerError(raeson)
-        except Exception, ex:
-            raeson = "unknown exception setting the %s position" %self.device._get_name()
-            logger.logError('%s: %s' %(raeson, ex.message))
-            raise PositionerError(raeson)
 
 
     def startUpdating(self, axis, sector, az, el, ra, dec):
@@ -535,7 +536,7 @@ class Positioner(object):
 
     def getCmdPosition(self):
         if self.isSetup():
-            return self.device.getCmdPosition()
+            return self.control.target
         else:
             raise NotAllowedError('positioner not configured: a setup() is required')
 
