@@ -10,20 +10,24 @@
    -   Wed Sep 22 21:45:12 UTC 2010 modified by jDAL
    -   Wed Sep 22 21:46:18 UTC 2010 modified by jDAL
 -->
-<Holography xmlns="urn:schemas-cosylab-com:Holography:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" SamplingTime="100" LogObservedPositions="1">
-	<time />
-	<backendName />
-	<bandWidth />
-	<frequency />
-	<sampleRate />
-	<attenuation />
-	<polarization />
-	<bins />
-	<inputsNumber />
-	<integration />
-	<status />
-	<busy />
-	<feed />
-	<systemTemperature />
-	<sectionsNumber />
+<Holography xmlns="urn:schemas-cosylab-com:Holography:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" SamplingTime="200" LogObservedPositions="0">
+  
+ 
+  
+                                              <time/>
+                                              <backendName/>
+                                              <bandWidth/>
+                                              <frequency/>
+                                              <sampleRate/>
+                                              <attenuation/>
+                                              <polarization/>
+                                              <bins/>
+                                              <feed/>
+                                              <systemTemperature/>
+                                              <inputSection/>
+                                              <inputsNumber/>
+                                              <sectionsNumber/>
+                                              <integration/>
+                                              <status/>
+        <busy/>
 </Holography>
