@@ -128,9 +128,9 @@ void HolographyImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 
 
-ACS_LOG(LM_FULL_INFO,"HolographyImpl::initialize()",(LM_INFO,"PROPERTY_CREATION"));
+        ACS_LOG(LM_FULL_INFO,"HolographyImpl::initialize()",(LM_INFO,"PROPERTY_CREATION"));
 	try {	
-                m_correlator=getContainerServices()->getDefaultComponent<DXC::DigitalXCorrelator>("IDL:alma/DXC/DigitalXCorrelator:1.0");
+           
 
 		m_ptime=new ROuLongLong(getContainerServices()->getName()+":time",getComponent());		
 		m_pbackendName=new ROstring(getContainerServices()->getName()+":backendName",getComponent());
@@ -184,22 +184,36 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 		ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("HolographyImpl::sendHeader()");
+
+            try{
+            m_correlator=getContainerServices()->getDefaultComponent<DXC::DigitalXCorrelator>("IDL:alma/DXC/DigitalXCorrelator:1.0");
+                if (m_LogObservedPositions)
+                {
+                        m_antennaBoss=getContainerServices()->getDefaultComponent<Antenna::AntennaBoss>(ANTENNA_BOSS_INTERFACE);
+                        m_sender_thread_param.antennaBoss=m_antennaBoss;
+                } 
+            } catch (std::bad_alloc& ex) {
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"HolographyImpl::sendHeader()");
+		
+		throw dummy;
+	}catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+                ex.log(LM_DEBUG);
+                throw ex.getComponentErrorsEx();
+        }
+
+
 	try{
+
 
 		DWORD sampling_time;
 		sampling_time=m_configuration.getSamplingTime(); 
- 		
-
+ 		cout << "***********************************************" << endl;
+                cout << "samplingTime:" << sampling_time;
 
 
 		CSenderThread::TSenderParameter *temp;
 
 
-       if (m_LogObservedPositions)
- 		{
- 	 		m_antennaBoss=getContainerServices()->getDefaultComponent<Antenna::AntennaBoss>(ANTENNA_BOSS_INTERFACE);
- 	        	m_sender_thread_param.antennaBoss=m_antennaBoss;
- 		} 
 
 	
 		m_sender_thread_param.sender=this;
@@ -207,8 +221,8 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 		temp=&m_sender_thread_param;    // reference to pass to create thread
 		if (m_senderThread==NULL) {
 			m_senderThread=getContainerServices()->getThreadManager()->create<CSenderThread,CSenderThread::TSenderParameter*>("CORRELATORDATA",temp);
-			m_senderThread->setSleepTime(sampling_time*10000); // the sampling time is read from CDB
-//			m_senderThread->setSleepTime(0); // set to 0
+                        m_senderThread->setSleepTime(sampling_time*10000); // the sampling time is read from CDB
+	//		m_senderThread->setSleepTime(0); // set to 0
 //		        m_senderThread->setResponseTime(50000000);
 
 

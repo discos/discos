@@ -25,8 +25,10 @@ class Correlator:
         self.coeff   = { 'real' : 0.00, 'imm' : 0.00 }
         self.buffer  = ""
         self.ser     = serial.Serial()
+        self.isConnected=False
     
     def connect(self, portname, baudrate):
+        
         conn_byte = 'c'
         ack_byte  = 'A'
 
@@ -43,10 +45,11 @@ class Correlator:
         self.ser.write(conn_byte)
         
         rx_byte = self.ser.read(1)
-
         if len(rx_byte) != 1 or rx_byte != ack_byte:
             sys.stderr.write("Connection Failed. rx_byte = %s, len = %d\n" % (rx_byte,len(rx_byte)))
+            self.isConnected=False
             return -1
+        self.isConnected=True
         
         return 0
 
@@ -58,9 +61,10 @@ class Correlator:
 
     def disconnect(self):
         self.ser.close()
-
+        self.isConnected=False
+        
     def set_samples(self, n_samples):
-        send_sample = 't'
+	send_sample = 't'
         ack_byte  = 'A'
         for i in xrange(4):
             q = n_samples / 256
@@ -68,8 +72,8 @@ class Correlator:
             n_samples = q
             self.ser.write(send_sample)
             self.ser.write(chr(m))
-            
-            rx_byte = self.ser.read(1)
+	    
+	    rx_byte = self.ser.read(1)
             if len(rx_byte) != 1 or rx_byte != ack_byte:
                 sys.stderr.write("Trasmission Failed. rx_byte = %s, len = %d\n" % (rx_byte,len(rx_byte)))
                 return -1
@@ -77,7 +81,7 @@ class Correlator:
     def run(self):
         start_byte = 's'
         buffer_size = 48
-           
+     	   
         self.ser.write(start_byte)
         self.ser.flushInput()
         self.buffer = self.ser.read(buffer_size)
@@ -88,13 +92,13 @@ class Correlator:
             return 0        
 
     def fixed2float(self,data, dim_data, q):
-        
-        if data == 2**(dim_data-1):
+    	
+    	if data == 2**(dim_data-1):
             return -1.00*2**(dim_data-q-1)
     
-        if data & 2**(dim_data-1) == 2**(dim_data-1):
+    	if data & 2**(dim_data-1) == 2**(dim_data-1):
             return -1.00 * ((2**dim_data)-data) / float(2**q)
-        else:
+    	else:
             return float(data/float(2**q))
 
     def getCoeff(self):
@@ -103,7 +107,7 @@ class Correlator:
         sum_xy    = 0
         sum_xy90  = 0
         sum_y90_2 = 0
-        sum_y_y90 = 0
+	sum_y_y90 = 0
         
         for i in xrange(8):
             sum_y_y90 = sum_y_y90 | (ord(self.buffer[i]) << 8*i)
@@ -187,3 +191,9 @@ class Correlator:
     def printCoeff(self, message):
 
          message = ""
+
+    #    if message == "":
+    #       sys.stdout.write("%10.6f\t%10.6f\n" % (self.coeff['real'], self.coeff['imm']))
+    #    else:
+    #        sys.stdout.write("%s\t%10.6f\t%10.6f\n" % (message, self.coeff['real'], self.coeff['imm']))
+		

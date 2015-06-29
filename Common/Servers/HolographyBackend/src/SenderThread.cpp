@@ -61,8 +61,8 @@ void CSenderThread::runLoop()
 	try{
 
 #define PI 3.14159265358979323846
-    az=az/PI*180.0;
-    el=el/PI*180.0;
+        az=az/PI*180.0;
+        el=el/PI*180.0;
 	m_dxc_correlator->save_coeff(az,el); 
 	// AUTO_TRACE("CSenderThread::runLoop()");
 	} catch (ACSErrTypeFPGACommunication::ACSErrTypeFPGACommunicationExImpl &ex)

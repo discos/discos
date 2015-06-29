@@ -192,55 +192,30 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
            cannot get the coefficients.
         """
 
-        #try:
-            #self.corr.disconnect()
-            #err = self.corr.connect(self.port, self.baudrate)
-	    #self.corr.set_samples(self.samples)
+        try:
+            if self.corr.isConnected:
+                 self.corr.disconnect()
+            err = self.corr.connect(self.port, self.baudrate)
+	    self.corr.set_samples(self.samples)
 
-        #except Exception:
-            #self.getLogger().logDebug("Error in save_coeff: cannot connect to FPGA")
-            #self.getLogger().logError("Error... cannot connect to FPGA")
-            #raise ACSErrTypeFPGAConnectionImpl.CannotConnectExImpl()
+        except Exception:
+            self.getLogger().logDebug("Error in save_coeff: cannot connect to FPGA")
+            self.getLogger().logError("Error... cannot connect to FPGA")
+            raise ACSErrTypeFPGAConnectionImpl.CannotConnectExImpl()
 
 #       # Running Correlation
         try:
             err = self.corr.run()
+
         except Exception:
             self.getLogger().logError("Error running correlation.")
             raise ACSErrTypeFPGACommunicationImpl.CannotRunExImpl()
 
-        i = 0
-        while err and i < self.max_attempts:
-            try:
-                self.corr.disconnect()
-                err = self.corr.connect(self.port, self.baudrate)
-            except Exception:
-                self.getLogger().logError("Error... cannot connect to FPGA")
-                raise ACSErrTypeFPGAConnectionImpl.CannotConnectExImpl()
-
-            i += 1
-            self.getLogger().logInfo("Attempt %d failed. Retrying..." %i)
-            self.corr.reset()
-            err = self.corr.connect(self.port, self.baudrate)
-            try:
-                err = self.corr.run()    
-		print "correlation done"
-            except Exception:
-                self.getLogger().logError("Error running correlation.")
-                raise ACSErrTypeFPGACommunicationImpl.CannotRunExImpl()
-
-        if err and i == self.max_attempts:
-            self.getLogger().logError(
-                    "Error... cannot get correlator coefficient in %d attempts" %self.max_attempts
-            )
-            self.corr.disconnect()
-            raise ACSErrTypeFPGACommunicationImpl.CannotRunExImpl()
-
+        
         # Getting coefficient    
         try:
             self.corr.getCoeff()
-	    self.corr.reset()
-	    
+
         except Exception:
             raise ACSErrTypeFPGACommunicationImpl.CannotGetCoefficientsExImpl()
 
@@ -250,8 +225,9 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
 #	phase = (phase_tmp + DPI) % DPI         
         try:
             
-#            full_res = self.corr.coeff.copy()
             full_res = self.corr.results.copy()
+            self.corr.reset()
+
 #            full_res.update({'module': module, 'phase': phase})
 #            print full_res
             # Write values (V. 051)
@@ -264,4 +240,8 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
         except IOError:
             self.getLogger().logError("Error writing out_file")
             raise ComponentErrorsImpl.FileIOErrorExImpl()
-
+        try:	
+            self.corr.disconnect()
+        except Exception:
+            print "disconnect exception"
+            raise ACSErrTypeFPGACommunicationImpl.CannotRunExImpl()
