@@ -18,11 +18,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import sys
-import gettemplatefortest
+import gettemplatefortests
 
 args = sys.argv[1:]
 try:
-    gettemplatefortest.command_line_util(args)
+    gettemplatefortests.command_line_util(args)
 except Exception, e:
     print e.message
     sys.exit(1)

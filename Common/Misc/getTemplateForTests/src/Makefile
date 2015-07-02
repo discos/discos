@@ -12,10 +12,8 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = getTemplateForTest
-PY_MODULES         = gettemplatefortest
-
-SCRIPTS_L          = install_gmock
+PY_SCRIPTS         = getTemplateForTests
+PY_MODULES         = gettemplatefortests
 
 #
 #>>>>> END OF standard rules
@@ -37,7 +35,7 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean_templates:
-	rm -rf $(INTROOT)/templates/test
+	rm -rf $(INTROOT)/templates/tests
 	@echo " . . . templates removed from introot"
 
 clean : clean_all clean_templates
