@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
  Craeted 24-05-2012 by Marco Bartolini
+ causing problems in 2015
 -->
 <xs:schema 
   targetNamespace="urn:schemas-cosylab-com:CustomLogger:1.0"
-  xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns="urn:schemas-cosylab-com:CustomLogger:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
-  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" elementFormDefault="qualified" attributeFormDefault="unqualified"
-  xmlns:mng="urn:schemas-cosylab-com:Managment:1.0">
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+  xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+  elementFormDefault="qualified" 
+  attributeFormDefault="unqualified">
   <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
   <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
   <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
