@@ -7,6 +7,7 @@
 #include <vector>
 #include <queue>
 #include <string.h>
+#include <ctype.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <loggingBaseLog.h>
@@ -80,6 +81,12 @@ ACS::Time parse_timestamp(const char* ts);
 std::string trim_date(const std::string& str);
 std::string log_to_string(const LogRecord& log_record);
 ACS::TimeInterval log_age(const LogRecord& log_record);
+
+/**
+ * Checks if all characters contained in the string are printable characters
+ * and ASCII conformant.
+ **/
+std::string sanitize_xml(const char* input_text, bool brackets=false);
 
 
 /**

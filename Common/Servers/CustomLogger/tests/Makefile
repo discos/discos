@@ -16,7 +16,7 @@ USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 
 EXECUTABLES_L = unittest
 unittest_OBJECTS = unittest
-unittest_LIBS = $(GTEST_LIBS) 
+unittest_LIBS = $(GTEST_LIBS) CustomLoggerImpl
 unittest_LDFLAGS = -lstdc++ -lpthread
 
 # END OF CUSTOMIZATION

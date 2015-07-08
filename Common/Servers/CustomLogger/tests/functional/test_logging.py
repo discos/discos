@@ -4,6 +4,9 @@ from __future__ import with_statement
 from threading import Thread
 import os
 import time
+import subprocess
+import signal
+import sys
 
 import unittest2
 
@@ -65,9 +68,9 @@ class LogFileTests(CustomLoggerTests):
                          Management.MNG_FALSE)
         os.remove(file_path)
 
-    def test_close_file_during_logging(self):
+    def test_close_file_during_logging_thread(self):
         basepath = "/tmp/events"
-        filename = "test_close2.log"
+        filename = "test_close_thread.log"
         file_path = os.path.join(basepath, filename)
         self.custom_logger.setLogfile(basepath, filename)
         #start a thread for continuous messaging
@@ -90,7 +93,7 @@ class LogFileTests(CustomLoggerTests):
                          Management.MNG_FALSE)
         os.remove(file_path)
 
-    def test_set_file_during_logging(self):
+    def test_set_file_during_logging_thread(self):
         basepath_first = "/tmp/events"
         filename_first = "test_set_first.log"
         file_path_first = os.path.join(basepath_first, filename_first)
@@ -113,6 +116,57 @@ class LogFileTests(CustomLoggerTests):
         self.custom_logger.closeLogfile()
         logging_thread.stop()
         logging_thread.join()
+        #grab the index number from log events in separate files
+        with open(file_path_first, "rt") as first_file:
+            first_index = int(first_file.readlines()[-3].strip().split()[-1])
+        with open(file_path_second, "rt") as second_file:
+            second_index = int(second_file.readline().strip().split()[-1])
+        self.assertEqual(first_index + 1, second_index)
+        os.remove(file_path_first)
+        os.remove(file_path_second)
+
+    def test_close_file_during_logging_process(self):
+        basepath = "/tmp/events"
+        filename = "test_close_process.log"
+        file_path = os.path.join(basepath, filename)
+        self.custom_logger.setLogfile(basepath, filename)
+        #start a process for continuous messaging
+        logging_process = subprocess.Popen([sys.executable, "./functional/logging_process.py"])
+        time.sleep(10)
+        self.custom_logger.flush()
+        try:
+            self.custom_logger.closeLogfile()
+        except Exception, e:
+            os.kill(logging_process.pid, signal.SIGKILL)
+            self.fail("Exception raised closing logfile: %s" % (e,))
+        os.kill(logging_process.pid, signal.SIGKILL)
+        self.assertTrue(os.path.exists(file_path))
+        self.assertEqual(self.custom_logger._get_filename().get_sync()[0], 
+                         file_path)
+        self.assertEqual(self.custom_logger._get_isLogging().get_sync()[0],
+                         Management.MNG_FALSE)
+        os.remove(file_path)
+
+    def test_set_file_during_logging_thread(self):
+        basepath_first = "/tmp/events"
+        filename_first = "test_set_first_process.log"
+        file_path_first = os.path.join(basepath_first, filename_first)
+        basepath_second = "/tmp/events"
+        filename_second = "test_set_second_process.log"
+        file_path_second = os.path.join(basepath_second, filename_second)
+        self.custom_logger.setLogfile(basepath_first, filename_first)
+        #start a thread for continuous messaging
+        logging_process = subprocess.Popen([sys.executable, "./functional/logging_process.py"])
+        time.sleep(10)
+        #self.custom_logger.flush()
+        try:
+            self.custom_logger.setLogfile(basepath_second, filename_second)
+        except Exception, e:
+            os.kill(logging_process.pid, signal.SIGKILL)
+            self.fail("Exception raised setting logfile: %s" % (e,))
+        time.sleep(10)
+        self.custom_logger.closeLogfile()
+        os.kill(logging_process.pid, signal.SIGKILL)
         #grab the index number from log events in separate files
         with open(file_path_first, "rt") as first_file:
             first_index = int(first_file.readlines()[-3].strip().split()[-1])
@@ -145,8 +199,19 @@ class LogMethodsTests(CustomLoggerTests):
         self.custom_logger.closeLogfile()
         with open(os.path.join(self.base_path, self.filename), "rt") as logfile:
             last_log = logfile.readlines()[-1].strip()
-            self.assertTrue(last_log.endswith(message), 
+            self.assertTrue(last_log.endswith("??????????????????????????"), 
                             msg = "last log: %s" % (last_log,))
 
-
+    def test_square_brackets_log(self):
+        message = "ciao [Marco]"
+        logger.logNotice(message)
+        time.sleep(2)
+        self.custom_logger.flush()
+        self.assertEqual(self.custom_logger._get_isLogging().get_sync()[0],
+                         Management.MNG_TRUE)
+        self.custom_logger.closeLogfile()
+        with open(os.path.join(self.base_path, self.filename), "rt") as logfile:
+            last_log = logfile.readlines()[-1].strip()
+            self.assertTrue(last_log.endswith("ciao {Marco}"), 
+                            msg = "last log: %s" % (last_log,))
     
