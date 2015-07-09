@@ -722,6 +722,19 @@ CORBA::Boolean MinorServoBossImpl::checkScan(
         MinorServo::TRunTimeParameters_out msParameters
     ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx)
 {
+    MinorServo::TRunTimeParameters_var msParamVar = new MinorServo::TRunTimeParameters;
+
+    msParamVar->onTheFly = false;
+    msParamVar->startEpoch = 0;
+    msParamVar->centerScan = 0;
+    msParamVar->scanAxis = CORBA::string_dup("");
+    msParamVar->timeToStop = 0;
+    msParameters = msParamVar._retn();
+
+    if(msScanInfo.is_empty_scan == true && !isReady()) {
+        return true;
+    }
+
     if(!isReady()) {
         string msg("checkScan(): the system is not ready");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
@@ -735,14 +748,7 @@ CORBA::Boolean MinorServoBossImpl::checkScan(
         impl.log(LM_DEBUG);
         throw impl.getMinorServoErrorsEx();
     }
-    MinorServo::TRunTimeParameters_var msParamVar = new MinorServo::TRunTimeParameters;
 
-    msParamVar->onTheFly = false;
-    msParamVar->startEpoch = 0;
-    msParamVar->centerScan = 0;
-    msParamVar->scanAxis = CORBA::string_dup("");
-    msParamVar->timeToStop = 0;
-    msParameters = msParamVar._retn();
     try {
         return checkScanImpl(startingTime, msScanInfo, antennaInfo, msParameters);
     }
@@ -1137,6 +1143,12 @@ void MinorServoBossImpl::startScan(
         const Antenna::TRunTimeParameters & antennaInfo
     ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx)
 {
+
+    if(msScanInfo.is_empty_scan) {
+        startingTime = getTimeStamp();
+        return ;
+    }
+
     if(!isReady()) {
         string msg("startScan(): the system is not ready");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
@@ -1151,17 +1163,11 @@ void MinorServoBossImpl::startScan(
         throw impl.getMinorServoErrorsEx();
     }
 
-    if(msScanInfo.is_empty_scan) {
-        startingTime = getTimeStamp();
-        return ;
-    }
-    else {
-        startScanImpl(
-                startingTime, 
-                msScanInfo,
-                antennaInfo
-        );
-    }
+    startScanImpl(
+            startingTime, 
+            msScanInfo,
+            antennaInfo
+    );
 }
 
 
