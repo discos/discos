@@ -55,10 +55,15 @@ class ScanBaseTest(unittest2.TestCase):
     def tearDown(self):
         if self.boss.isScanActive():
             t = self.boss.closeScan()
-            self.waitUntil(t)
+            self.waitUntilTime(t)
 
-    def waitUntil(self, targetTime):
+    def waitUntilTime(self, targetTime):
         while getTimeStamp().value < targetTime:
+            time.sleep(0.1)
+
+    def waitUntil(self, action, value):
+        """For instance: waitUntil(isReady, True)"""
+        while action() != value:
             time.sleep(0.1)
         
 
@@ -100,10 +105,20 @@ class ScanTest(ScanBaseTest):
                 math.degrees(self.antennaInfo.elevation))
         self.centerScan = centerScanPosition[self.idx]
 
-    def test_startScan_empty_scan(self):
-        """Do nothing in case of empty scan"""
+    def test_startScan_empty_scan_system_ready(self):
+        """Do nothing in case of empty scan and system ready"""
         self.scan.is_empty_scan = True
         startTime = 0
+        self.boss.startScan(startTime, self.scan, self.antennaInfo)
+        self.assertFalse(self.boss.isScanActive())
+
+    def test_startScan_empty_scan_system_not_ready(self):
+        """Do nothing in case of empty scan and system NOT ready"""
+        self.scan.is_empty_scan = True
+        startTime = 0
+        self.boss.park()
+        self.waitUntil(self.boss.isReady, False)
+        self.assertFalse(self.boss.isReady())
         self.boss.startScan(startTime, self.scan, self.antennaInfo)
         self.assertFalse(self.boss.isScanActive())
 
@@ -154,7 +169,7 @@ class ScanTest(ScanBaseTest):
         """Return the time_to_stop"""
         startTime = 0
         t = self.boss.startScan(startTime, self.scan, self.antennaInfo)
-        self.waitUntil(startTime)
+        self.waitUntilTime(startTime)
         time_to_stop = self.boss.closeScan()
         # The time_to_stop should be greater than now
         self.assertGreater(time_to_stop, getTimeStamp().value) 
@@ -239,7 +254,7 @@ class ScanTest(ScanBaseTest):
         self.assertFalse(self.boss.isScanning())
         self.assertTrue(self.boss.isScanActive())
         # Assertions to verify right after startTime
-        self.waitUntil(startTime)
+        self.waitUntilTime(startTime)
         self.assertTrue(self.boss.isScanning())
         self.assertTrue(self.boss.isScanActive())
         self.assertAlmostEqual(
@@ -248,7 +263,7 @@ class ScanTest(ScanBaseTest):
                 delta=0.1)
         # Wait untill the scan finishes (one second after the scan)
         targetTime = startTime + self.scan.total_time + 1*10**7 
-        self.waitUntil(targetTime)
+        self.waitUntilTime(targetTime)
         startPos = self.boss.getAxesPosition(startTime)[self.idx]
         endPos = self.boss.getAxesPosition(targetTime)[self.idx]
         self.assertTrue(self.boss.isScanActive())
@@ -345,10 +360,17 @@ class ScanTest(ScanBaseTest):
 class ScanInterfaceTest(ScanBaseTest):
     """Test the interface of startScan() and closeScan()"""
 
-    def test_checkScan_system_not_ready(self):
+    def test_checkScan_not_empty_system_not_ready(self):
         """Raise a MinorServoErrorsEx in case the system is not ready"""
         with self.assertRaises(MinorServoErrorsEx):
             t = self.boss.checkScan(0, self.scan, self.antennaInfo) 
+
+    def test_checkScan_empty_scan_system_not_ready(self):
+        """Do nothing in case of empty scan and system NOT ready"""
+        self.scan.is_empty_scan = True
+        self.assertFalse(self.boss.isReady())
+        t = self.boss.checkScan(0, self.scan, self.antennaInfo)
+        self.assertFalse(self.boss.isScanActive())
 
     def test_closeScan_scan_not_active(self):
         """Do nothing in case no scan is active"""
