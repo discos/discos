@@ -43,7 +43,7 @@ SRT_SERVERS:=SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer \
              SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver \
 			 DewarPositioner
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
-             MinorServoBossTextClient
+             MinorServoBossTextClient meteoClient
 SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox
