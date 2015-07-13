@@ -23,7 +23,7 @@ class CustomLogger(Log.Logger):
     def __formatMessage(self, msg):
         return self._Logger__formatMessage(msg)
 
-    def log(self, *args, **kwargs):
+    def log(self, level, msg, *args, **kwargs):
         """Add key-value custom data to the LogRecord structure
         """
         if 'extra' in kwargs:
@@ -33,7 +33,9 @@ class CustomLogger(Log.Logger):
                 kwargs['extra'].update(CUSTOM_DATA)
         else:
             kwargs.update(CUSTOM_EXTRA)
-        Log.Logger.log(self, *args, **kwargs)
+        msg = msg.replace('[', '{')
+        msg = msg.replace(']', '}')
+        Log.Logger.log(self, level, msg, *args, **kwargs)
 
 logging.setLoggerClass(CustomLogger)
 logging.root.setLevel(logging.NOTSET)
