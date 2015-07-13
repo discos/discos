@@ -47,7 +47,10 @@ do_pyunit:
 
 do_functional:
 	@echo "running python functional tests"
+	mkdir -p /tmp/events
+	rm -f /tmp/events/*	
 	nosetests -v functional
+	rm -f /tmp/events/*	
 
 do_external:
 	@echo "running python external tests"
