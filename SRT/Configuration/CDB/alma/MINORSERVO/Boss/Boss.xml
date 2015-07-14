@@ -117,12 +117,14 @@
     <!-- MinorServo Status -->
 	<status description="The summary status of MinorServoBoss"/>
     <actualSetup description="Mnemonic code that defines a setup" />
+    <motionInfo description="Elevation Track, No Elevation Track, Starting, Parking, ..." />
     <ready description="True if the system is ready" />
     <starting description="True if the system is starting" />
     <asConfiguration description="True if the the AS configuration is active" />
     <elevationTrack description="True if the M2 position is tracking the elevation" />
     <scanActive description="True if a scan is active" />
     <scanning description="True if the system is performing a scan" />
+    <tracking description="Is the minor servo system in tracking?" />
               
     <!--
    MinorServoBoss Verbose Status (ROpattern)

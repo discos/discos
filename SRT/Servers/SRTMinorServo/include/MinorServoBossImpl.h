@@ -165,10 +165,8 @@ public:
     /** Return the actual configuration */
     char * getActualSetup();
 
-
     /** Return the commanded configuration */
     char * getCommandedSetup();
-
 
     /** 
      * Return a reference to status property (ROpattern) 
@@ -179,11 +177,13 @@ public:
 	 virtual Management::ROTSystemStatus_ptr status() throw (CORBA::SystemException);
      virtual Management::ROTBoolean_ptr ready() throw (CORBA::SystemException);
      virtual ACS::ROstring_ptr actualSetup() throw (CORBA::SystemException);
+     virtual ACS::ROstring_ptr motionInfo() throw (CORBA::SystemException);
      virtual Management::ROTBoolean_ptr starting() throw (CORBA::SystemException);
      virtual Management::ROTBoolean_ptr asConfiguration() throw (CORBA::SystemException);
      virtual Management::ROTBoolean_ptr elevationTrack() throw (CORBA::SystemException);
      virtual Management::ROTBoolean_ptr scanActive() throw (CORBA::SystemException);
      virtual Management::ROTBoolean_ptr scanning() throw (CORBA::SystemException);
+     virtual Management::ROTBoolean_ptr tracking() throw (CORBA::SystemException);
 
     /** 
      * Return a reference to verbose status property (ROpattern) 
@@ -441,11 +441,13 @@ private:
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_status;
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_ready;
 	baci::SmartPropertyPointer<baci::ROstring> m_actualSetup;
+	baci::SmartPropertyPointer<baci::ROstring> m_motionInfo;
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_starting;
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_asConfiguration;
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_elevationTrack;
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_scanActive;
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_scanning;
+    baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_tracking;
     
     /** Store the value of the property */
     Management::TSystemStatus m_status_value;

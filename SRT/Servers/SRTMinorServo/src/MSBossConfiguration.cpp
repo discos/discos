@@ -28,6 +28,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services, Mino
     m_antennaBoss = Antenna::AntennaBoss::_nil();
     m_bossImpl_ptr = bossImpl_ptr;
     m_antennaBossError = false;
+    m_status = Management::MNG_WARNING;
 }
 
 MSBossConfiguration::~MSBossConfiguration() {}
@@ -201,6 +202,24 @@ void MSBossConfiguration::init(string setupMode, bool keepSetup) throw (Manageme
         throw;
     }
 
+}
+
+std::string MSBossConfiguration::motionInfo(void) {
+    if(isStarting()) {
+        return std::string("Starting...");
+    }
+    else if(isParking()) {
+        return std::string("Parking...");
+    }
+    else if(!isConfigured()) {
+        return std::string("Not Ready to Move");
+    }
+    else if(m_isElevationTrackingEn) {
+        return std::string("Elevation Track Mode");
+    }
+    else {
+        return std::string("No Elevation Track Mode");
+    }
 }
 
 InfoAxisCode MSBossConfiguration::getInfoFromAxisCode(string axis_code) throw (ManagementErrors::ConfigurationErrorExImpl) {

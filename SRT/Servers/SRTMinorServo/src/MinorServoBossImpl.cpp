@@ -17,6 +17,8 @@
 #include "DevIOParking.h"
 #include "DevIOScanActive.h"
 #include "DevIOStarting.h"
+#include "DevIOMotionInfo.h"
+#include "DevIOTracking.h"
 #include "DevIOASConfiguration.h"
 #include "DevIOScanning.h"
 #include "DevIOElevationTrack.h"
@@ -49,11 +51,13 @@ MinorServoBossImpl::MinorServoBossImpl(
     m_status(this),
     m_ready(this),
     m_actualSetup(this),
+    m_motionInfo(this),
     m_starting(this),
     m_asConfiguration(this),
     m_elevationTrack(this),
     m_scanActive(this),
     m_scanning(this),
+    m_tracking(this),
     // m_verbose_status(this),
     m_nchannel(NULL)
 {   
@@ -188,6 +192,9 @@ void MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImp
 		m_actualSetup = new baci::ROstring(getContainerServices()->getName() + ":actualSetup",
                 getComponent(), new DevIOActualSetup(m_configuration), true);
 
+		m_motionInfo = new baci::ROstring(getContainerServices()->getName() + ":motionInfo",
+                getComponent(), new DevIOMotionInfo(m_configuration), true);
+
         m_starting = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
                   (getContainerServices()->getName()+":starting",getComponent(), \
                    new DevIOStarting(m_configuration),true);
@@ -203,6 +210,9 @@ void MinorServoBossImpl::execute() throw (ComponentErrors::MemoryAllocationExImp
         m_scanning = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
                   (getContainerServices()->getName()+":scanning",getComponent(), \
                    new DevIOScanning(m_configuration),true);
+        m_tracking = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
+                  (getContainerServices()->getName()+":tracking",getComponent(), \
+                   new DevIOTracking(m_configuration),true);
 
         // m_verbose_status = new ROpattern(
         //         getContainerServices()->getName() + ":verbose_status", 
@@ -260,7 +270,7 @@ void MinorServoBossImpl::cleanUp()
 
     if (m_park_thread_ptr != NULL) {
         m_park_thread_ptr->suspend();
-        m_setup_thread_ptr->terminate();
+        m_park_thread_ptr->terminate();
     }
 
     map<string, MinorServo::WPServo_var>::reverse_iterator rbegin_iter = m_component_refs.rbegin(); 
@@ -2198,11 +2208,13 @@ ACS::Time get_min_time(double range, double acceleration, double max_speed) {
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTSystemStatus, m_status, status);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_ready, ready);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, ACS::ROstring, m_actualSetup, actualSetup);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, ACS::ROstring, m_motionInfo, motionInfo);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_starting, starting);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_asConfiguration, asConfiguration);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_elevationTrack, elevationTrack);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_scanActive, scanActive);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_scanning, scanning);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_tracking, tracking);
 
 
 /* --------------- [ MACI DLL support functions ] -----------------*/
