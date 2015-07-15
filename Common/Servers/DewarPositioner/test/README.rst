@@ -2,8 +2,8 @@
 Containers to start
 *******************
 - acsStartContainer -py AntennaBossSimulatorContainer
-- acsStartContainer -py DerotatorsContainer
-- acsStartContainer -py DewarPositionerContainer
+- acsStartContainer -py DerotatorContainer
+- acsStartContainer -py DerotatorPositionerContainer
 
 *****************************
 Content of the test directory

@@ -10,7 +10,7 @@
     Name="DewarPositioner"    
     Code="DewarPositioner.DewarPositionerImpl"
     Type="IDL:alma/Receivers/DewarPositioner:1.0"
-    Container="DewarPositionerContainer"
+    Container="DerotatorPositionerContainer"
     ImplLang="py"
 	Default="true"
 />

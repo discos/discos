@@ -12,5 +12,5 @@
     Code="DerotatorSimulator.DerotatorSimulatorImpl"
     Type="IDL:alma/Receivers/SRTKBandDerotator:1.0"
     ImplLang="py"
-    Container="DerotatorsContainer"
+    Container="DerotatorContainer"
 />
