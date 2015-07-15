@@ -32,11 +32,11 @@
             <type>cpp</type>
         </container>
         <container>
-            <name>DerotatorsContainer</name>
+            <name>DerotatorContainer</name>
             <type>cpp</type>
         </container>
         <container>
-            <name>DewarPositionerContainer</name>
+            <name>DerotatorPositionerContainer</name>
             <type>py</type>
         </container>
         <container>
