@@ -21,6 +21,8 @@ MinorServoBossImpl::MinorServoBossImpl(
     m_status(this),
     m_ready(this),
     m_actualSetup(this),
+    m_motionInfo(this),
+    m_tracking(this),
     m_starting(this),
     m_asConfiguration(this),
     m_elevationTrack(this),
@@ -186,6 +188,11 @@ throw (ComponentErrors::MemoryAllocationExImpl)
                    new DevIOReady(&m_servo_status), true);
 		m_actualSetup = new baci::ROstring(getContainerServices()->getName() + ":actualSetup",
                 getComponent(), new DevIOActualSetup(&m_actual_config), true);
+		m_motionInfo = new baci::ROstring(getContainerServices()->getName() + ":motionInfo",
+                getComponent(), new DevIOMotionInfo(&m_servo_status), true);
+        m_tracking = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
+                  (getContainerServices()->getName()+":tracking",getComponent(), \
+                   new DevIOTracking(m_control), true);
         m_starting = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
                   (getContainerServices()->getName()+":starting",getComponent(), \
                    new DevIOStarting(&m_servo_status), true);
@@ -1168,6 +1175,8 @@ ACS::Time get_min_time(double range, double acceleration, double max_speed) {
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTSystemStatus, m_status, status);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_ready, ready);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, ACS::ROstring, m_actualSetup, actualSetup);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, ACS::ROstring, m_motionInfo, motionInfo);
+GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_tracking, tracking);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_starting, starting);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_asConfiguration, asConfiguration);
 GET_PROPERTY_REFERENCE(MinorServoBossImpl, Management::ROTBoolean, m_elevationTrack, elevationTrack);

@@ -19,6 +19,7 @@ class MedMinorServoStatus
         Management::TSystemStatus status;
         void reset();
         MedMinorServoStatus& operator=(const MedMinorServoStatus&);
+        std::string getStatusString();
     private:
         MedMinorServoStatus(const MedMinorServoStatus&);
 };

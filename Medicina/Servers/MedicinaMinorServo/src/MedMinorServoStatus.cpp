@@ -1,3 +1,4 @@
+#include <string>
 #include "MedMinorServoStatus.hpp"
 
 MedMinorServoStatus::MedMinorServoStatus():
@@ -14,6 +15,24 @@ MedMinorServoStatus::MedMinorServoStatus():
 
 MedMinorServoStatus::~MedMinorServoStatus()
 {}
+
+std::string
+MedMinorServoStatus::getStatusString()
+{
+    if(starting)
+        return "STARTING";
+    if(ready)
+        return "READY";
+    if(scan_active)
+        return "SCAN_ACTIVE";
+    if(scanning)
+        return "SCANNING";
+    if(parking)
+        return "PARKING";
+    if(parked)
+        return "PARKED";
+    return "UNDEFINED";
+}
 
 void
 MedMinorServoStatus::reset()

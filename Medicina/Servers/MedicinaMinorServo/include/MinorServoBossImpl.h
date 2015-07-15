@@ -64,6 +64,8 @@
 #include "DevIOElevationTrack.h"
 //#include "DevIOParking.h"
 #include "DevIOReady.h"
+#include "DevIOMotionInfo.h"
+#include "DevIOTracking.h"
 #include "DevIOScanActive.h"
 #include "DevIOScanning.h"
 #include "DevIOStarting.h"
@@ -203,6 +205,8 @@ public:
 	 virtual Management::ROTSystemStatus_ptr status() throw (CORBA::SystemException);
      virtual Management::ROTBoolean_ptr ready() throw (CORBA::SystemException);
      virtual ACS::ROstring_ptr actualSetup() throw (CORBA::SystemException);
+     virtual ACS::ROstring_ptr motionInfo() throw (CORBA::SystemException);
+     virtual Management::ROTBoolean_ptr tracking() throw (CORBA::SystemException);
      virtual Management::ROTBoolean_ptr starting() throw (CORBA::SystemException);
      virtual Management::ROTBoolean_ptr asConfiguration() throw (CORBA::SystemException);
      virtual Management::ROTBoolean_ptr elevationTrack() throw (CORBA::SystemException);
@@ -485,6 +489,8 @@ private:
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_status;
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_ready;
 	baci::SmartPropertyPointer<baci::ROstring> m_actualSetup;
+	baci::SmartPropertyPointer<baci::ROstring> m_motionInfo;
+    baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_tracking;
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_starting;
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_asConfiguration;
     baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_elevationTrack;
