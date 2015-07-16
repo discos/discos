@@ -15,6 +15,7 @@ import Management
 from IRAPy import logger
 
 COMPONENT_NAME = "MANAGEMENT/CustomLogger"
+SLEEP_TIME=1.0
 
 class LoggingThread(Thread):
     def __init__(self, group=None, target=None, name=None, verbose=None):
@@ -68,6 +69,23 @@ class LogFileTests(CustomLoggerTests):
                          Management.MNG_FALSE)
         os.remove(file_path)
 
+    def test_close_log_file_two_times(self):
+        basepath = "/tmp/events"
+        filename = "test_close.log"
+        file_path = os.path.join(basepath, filename)
+        self.custom_logger.setLogfile(basepath, filename)
+        self.custom_logger.closeLogfile()
+        try:
+            time.sleep(SLEEP_TIME)
+            self.custom_logger.closeLogfile()
+            time.sleep(SLEEP_TIME)
+            self.custom_logger.closeLogfile()
+        except Exception, e:
+            os.remove(file_path)
+            self.fail("Exception raised closing logfile: %s" % (e,))
+        finally:
+            os.remove(file_path)
+
     def test_close_file_during_logging_thread(self):
         basepath = "/tmp/events"
         filename = "test_close_thread.log"
@@ -76,7 +94,7 @@ class LogFileTests(CustomLoggerTests):
         #start a thread for continuous messaging
         logging_thread = LoggingThread()
         logging_thread.start()
-        time.sleep(10)
+        time.sleep(SLEEP_TIME)
         self.custom_logger.flush()
         try:
             self.custom_logger.closeLogfile()
@@ -104,7 +122,7 @@ class LogFileTests(CustomLoggerTests):
         #start a thread for continuous messaging
         logging_thread = LoggingThread()
         logging_thread.start()
-        time.sleep(10)
+        time.sleep(SLEEP_TIME)
         #self.custom_logger.flush()
         try:
             self.custom_logger.setLogfile(basepath_second, filename_second)
@@ -112,7 +130,7 @@ class LogFileTests(CustomLoggerTests):
             logging_thread.stop()
             logging_thread.join()
             self.fail("Exception raised setting logfile: %s" % (e,))
-        time.sleep(10)
+        time.sleep(SLEEP_TIME)
         self.custom_logger.closeLogfile()
         logging_thread.stop()
         logging_thread.join()
@@ -132,7 +150,7 @@ class LogFileTests(CustomLoggerTests):
         self.custom_logger.setLogfile(basepath, filename)
         #start a process for continuous messaging
         logging_process = subprocess.Popen([sys.executable, "./functional/logging_process.py"])
-        time.sleep(10)
+        time.sleep(SLEEP_TIME)
         self.custom_logger.flush()
         try:
             self.custom_logger.closeLogfile()
@@ -157,14 +175,14 @@ class LogFileTests(CustomLoggerTests):
         self.custom_logger.setLogfile(basepath_first, filename_first)
         #start a thread for continuous messaging
         logging_process = subprocess.Popen([sys.executable, "./functional/logging_process.py"])
-        time.sleep(10)
+        time.sleep(SLEEP_TIME)
         #self.custom_logger.flush()
         try:
             self.custom_logger.setLogfile(basepath_second, filename_second)
         except Exception, e:
             os.kill(logging_process.pid, signal.SIGKILL)
             self.fail("Exception raised setting logfile: %s" % (e,))
-        time.sleep(10)
+        time.sleep(SLEEP_TIME)
         self.custom_logger.closeLogfile()
         os.kill(logging_process.pid, signal.SIGKILL)
         #grab the index number from log events in separate files
@@ -192,7 +210,7 @@ class LogMethodsTests(CustomLoggerTests):
     def test_non_ascii_log(self):
         message = "#èé§°çç{}ò@à#ùßafdæßðđ»¢æßðæ€¶ł"
         logger.logNotice(message)
-        time.sleep(2)
+        time.sleep(SLEEP_TIME)
         self.custom_logger.flush()
         self.assertEqual(self.custom_logger._get_isLogging().get_sync()[0],
                          Management.MNG_TRUE)
@@ -205,7 +223,7 @@ class LogMethodsTests(CustomLoggerTests):
     def test_square_brackets_log(self):
         message = "ciao [Marco]"
         logger.logNotice(message)
-        time.sleep(2)
+        time.sleep(SLEEP_TIME)
         self.custom_logger.flush()
         self.assertEqual(self.custom_logger._get_isLogging().get_sync()[0],
                          Management.MNG_TRUE)
