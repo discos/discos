@@ -140,30 +140,61 @@ log_age(const LogRecord& log_record)
     return ti;
 };
 
+std::string
+sanitize_xml(const char* input_text, bool brackets)
+{
+    std::stringstream output_text;
+    bool valid_char;
+    for(int i =0; i<std::strlen(input_text); ++i)
+    {
+        valid_char = true;
+        if(std::isprint(input_text[i]) == 0) //bad character!
+        {
+            output_text.put('?');
+            valid_char = false;
+        }
+        if(brackets){
+            if(input_text[i] == '[')
+            {
+                output_text.put('{');
+                valid_char = false;
+            }
+            if(input_text[i] == ']')
+            {
+                output_text.put('}');
+                valid_char = false;
+            }
+        }
+        if(valid_char)
+            output_text << input_text[i];
+    }
+    return output_text.str();
+}
+
 void
 start_parsing_element(void *data, const char *el, const char **attr)
 {
     LogRecord *lr = (LogRecord*) data;
     if(strcmp(el, "root") != 0)
     {
-            lr->_depth++;
-            lr->_element.assign(el);
+        lr->_depth++;
+        lr->_element.assign(el);
 	    if(!lr->_initialized)
 	    {
-		lr->log_level_name.assign(el);
-                lr->log_level = IRA::CustomLoggerUtils::string2customLogLevel(el);
-		for(int i = 0; attr[i]; i += 2)
+            lr->log_level_name.assign(el);
+            lr->log_level = IRA::CustomLoggerUtils::string2customLogLevel(el);
+            for(int i = 0; attr[i]; i += 2)
 	            if (strcmp(attr[i], "TimeStamp") == 0)
-		    {
-			lr->timestamp = parse_timestamp(attr[i+1]);   
-		    }else if(strcmp(attr[i], "Process") == 0){
-                        lr->process_name.assign(attr[i+1]);
-                    }
-		lr->_initialized = true;
-            }else if(strcmp(el, "Data") == 0)
-                for(int i = 0; attr[i]; i += 2)
-                    if (strcmp(attr[i], "Name") == 0)
-                        lr->_data_name.assign(attr[i+1]);
+                {
+                    lr->timestamp = parse_timestamp(attr[i+1]);   
+                }else if(strcmp(attr[i], "Process") == 0){
+                    lr->process_name.assign(attr[i+1]);
+                }
+            lr->_initialized = true;
+        }else if(strcmp(el, "Data") == 0)
+            for(int i = 0; attr[i]; i += 2)
+                if (strcmp(attr[i], "Name") == 0)
+                    lr->_data_name.assign(attr[i+1]);
     }
 };
 
@@ -199,10 +230,13 @@ void
 parsing_character_data(void* data, const char *chars, int len)
 {
     LogRecord *lr = (LogRecord*) data;
+    std::string message = sanitize_xml(std::string(chars, len).c_str(), true);
     if(lr->_parsing_message_cdata){
-        lr->message.assign(chars, len);
+        //lr->message.assign(chars, len);
+        lr->message = message;
     }else if(lr->_parsing_data_cdata){
-        lr->add_data(lr->_data_name, std::string(chars, len));
+        //lr->add_data(lr->_data_name, std::string(chars, len));
+        lr->add_data(lr->_data_name, message);
     }
 };
 
@@ -211,7 +245,8 @@ parsing_character_data(void* data, const char *chars, int len)
 */
 XML_Parser 
 init_log_parsing(){
-    XML_Parser log_parser = XML_ParserCreate(NULL);
+    //XML_Parser log_parser = XML_ParserCreate(NULL);
+    XML_Parser log_parser = XML_ParserCreate("US-ASCII");
     XML_SetElementHandler(log_parser, start_parsing_element, end_parsing_element);
     XML_SetCdataSectionHandler(log_parser, start_parsing_cdata_element, end_parsing_cdata_element);
     XML_SetCharacterDataHandler(log_parser, parsing_character_data);
@@ -234,7 +269,8 @@ get_log_record(XML_Parser log_parser, const char *xml_text)
 {
     LogRecord_sp log_record(new LogRecord);
     XML_SetUserData(log_parser, log_record.get());
-    if(!XML_Parse(log_parser, xml_text, std::strlen(xml_text), false)){
+    std::string xml_string = sanitize_xml(xml_text);
+    if(!XML_Parse(log_parser, xml_string.c_str(), std::strlen(xml_string.c_str()), false)){
         /**
          * We must pay attention here. If we forward malformed XML to the logging
          * system we get alot of errors, but still we don't want to lose the
@@ -243,7 +279,7 @@ get_log_record(XML_Parser log_parser, const char *xml_text)
         std::stringstream msg;
         msg << "CustomLoggerMalformedXMLError: ";
         msg << XML_ErrorString(XML_GetErrorCode(log_parser));
-        msg << " (" << xml_text << ")";
+        msg << " (" << xml_string.c_str() << ")";
         //log_record->xml_text.assign(msg.str().c_str());
         //log_record->xml_text.assign("CustomLoggerMalformedXMLError");
         ACE_ERROR ((LM_ERROR, msg.str().c_str() ));
@@ -251,7 +287,7 @@ get_log_record(XML_Parser log_parser, const char *xml_text)
         throw MalformedXMLError("Malformed XML error");
     }else{
         // XML is good to go
-        log_record->xml_text.assign(xml_text);
+        log_record->xml_text.assign(xml_string.c_str());
     }
     return log_record;
 };
