@@ -111,6 +111,24 @@ class LogFileTests(CustomLoggerTests):
                          Management.MNG_FALSE)
         os.remove(file_path)
 
+    def test_logging_with_closed_logfile(self):
+        basepath = "/tmp/events"
+        filename = "test_logging_with_closed_logfile.log"
+        file_path = os.path.join(basepath, filename)
+        self.custom_logger.setLogfile(basepath, filename)
+        self.custom_logger.closeLogfile()
+        #start a thread for continuous messaging
+        logging_thread = LoggingThread()
+        logging_thread.start()
+        time.sleep(SLEEP_TIME)
+        self.custom_logger.flush()
+        logging_thread.stop()
+        logging_thread.join()
+        self.assertTrue(os.path.exists(file_path))
+        self.assertEqual(self.custom_logger._get_isLogging().get_sync()[0],
+                         Management.MNG_FALSE)
+        os.remove(file_path)
+
     def test_set_file_during_logging_thread(self):
         basepath_first = "/tmp/events"
         filename_first = "test_set_first.log"
