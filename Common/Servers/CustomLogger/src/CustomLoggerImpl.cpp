@@ -278,11 +278,11 @@ CustomLoggerImpl::closeLogfile() throw (CORBA::SystemException, ManagementErrors
     baci::ThreadSyncGuard guard(&_log_queue_mutex);
     if(checkLogging())
     {
-        setLogging(false);
         flush();
         writeLoggingQueue(false); //empty the logging queue
         _custom_log.clear();
         _custom_log.close();
+        setLogging(false);
         if(_custom_log.rdstate() == std::ofstream::failbit)
         {
             _EXCPT(ManagementErrors::CustomLoggerIOErrorExImpl, dummy, "CustomLoggerImpl::closeLogfile"); 
@@ -481,23 +481,24 @@ CustomLoggerImpl::writeLoggingQueue(bool age_check)
     //ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : writeLoggingQueue"));
     baci::ThreadSyncGuard guard(&_log_queue_mutex);
     //ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : writeLoggingQueue mutex acquired"));
-    if(age_check) //write the queue to file up to a certain log age
-        while((!_log_queue.empty()) &&
-             (log_age(*_log_queue.top()) > _log_max_age))
-	     {
-		_log_record = _log_queue.top();
-		_custom_log << log_to_string(*_log_record) << '\n';
-                _custom_log.flush();
-		_log_queue.pop();
-	     }
-    else //write the whole log queue to file
-        while(!_log_queue.empty())
-	     {
-		_log_record = _log_queue.top();
-		_custom_log << log_to_string(*_log_record) << '\n';
-                _custom_log.flush();
-		_log_queue.pop();
-	     };
+    if(checkLogging())
+        if(age_check) //write the queue to file up to a certain log age
+            while((!_log_queue.empty()) &&
+                 (log_age(*_log_queue.top()) > _log_max_age))
+                 {
+                    _log_record = _log_queue.top();
+                    _custom_log << log_to_string(*_log_record) << '\n';
+                    _custom_log.flush();
+                    _log_queue.pop();
+                 }
+        else //write the whole log queue to file
+            while(!_log_queue.empty())
+                 {
+                    _log_record = _log_queue.top();
+                    _custom_log << log_to_string(*_log_record) << '\n';
+                    _custom_log.flush();
+                    _log_queue.pop();
+                 };
 };
 
 CustomStructuredPushConsumer::CustomStructuredPushConsumer(CustomLoggerImpl* logger) : 
