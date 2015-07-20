@@ -1663,18 +1663,23 @@ void CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversPara
 	IRA::CString component;
 	bool derotator;
 	baci::ThreadSyncGuard guard(&m_mutex);
+	//*********************************************************
+	// At the moment no scans are included in for receivers boss. so:
+	// I comment out the controls and the error thrown if the receiver is not configured.
+	// They should be restoored when the check (is_emptyscan=false) could be done.
+	//*********************************************************
 	if (m_currentRecvCode=="") {
-		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::startScan()");
-		impl.setReason("Receiver not configured yet");
-		changeBossStatus(Management::MNG_WARNING);
-		throw impl;
+		//_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::startScan()");
+		//impl.setReason("Receiver not configured yet");
+		//changeBossStatus(Management::MNG_WARNING);
+		//throw impl;
 	}
 	// the receiver code should be validated....
 	if (!m_config->getReceiver(m_currentRecvCode,component,derotator)) {
-		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::startScan()");
-		impl.setReason("Receiver code is not known");
-		changeBossStatus(Management::MNG_WARNING);
-		throw impl;
+		//_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::startScan()");
+		//impl.setReason("Receiver code is not known");
+		//changeBossStatus(Management::MNG_WARNING);
+		//throw impl;
 	}
 	// now check if the start scan have to deal also with the derotator
 	if ((m_config->dewarPositionerInterface()!="") && (derotator) && (m_updateMode!=Receivers::RCV_UNDEF_DEROTCONF))  {
