@@ -297,6 +297,7 @@ void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const 
 		impl.setReason("cannot check sub scan correctness");
 		throw impl;
 	}
+	clearTracking();
 	try {
 		doScan(time,prim,sec,servoPar,recvPar);
 	}
@@ -305,7 +306,6 @@ void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const 
 		impl.setReason("cannot start sub scan");
 		throw impl;
 	}
-	clearTracking();
 }
 
 void CCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
