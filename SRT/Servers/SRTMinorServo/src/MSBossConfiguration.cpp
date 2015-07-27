@@ -18,6 +18,7 @@ MSBossConfiguration::MSBossConfiguration(maci::ContainerServices *Services, Mino
     m_isElevationTracking = false;
     m_isElevationTrackingEn = false;
     m_isTracking = false;
+    m_trackingError = false;
     m_isScanning = false;
     m_isScanLocked = false;
     m_isScanActive = false;
@@ -327,6 +328,10 @@ void MSBossConfiguration::setScan(
     m_scan.axis_code = axis_code;
 }
 
+
+bool MSBossConfiguration::isTracking() { 
+    return m_isTracking && !m_trackingError; 
+}
 
 ACS::doubleSeq MSBossConfiguration::getPosition(string comp_name, ACS::Time time)
     throw (ManagementErrors::ConfigurationErrorExImpl)

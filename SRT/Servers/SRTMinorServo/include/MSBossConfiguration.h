@@ -72,6 +72,8 @@ public:
 
     inline bool isConfigured() { return m_isConfigured; }
 
+    bool isTracking();
+
     inline bool isStarting() { return m_isStarting; }
 
     inline bool isParking() { return m_isParking; }
@@ -79,9 +81,7 @@ public:
     inline bool isElevationTracking() { return m_isElevationTracking; }
 
     inline bool isElevationTrackingEn() { return m_isElevationTrackingEn; }
-
-    inline bool isTracking() { return m_isTracking; }
-
+    
     inline bool isScanning() { return m_isScanning; }
 
     inline bool isScanActive() { return m_isScanActive; }
@@ -178,6 +178,7 @@ public:
     bool m_isElevationTracking; // Is it tracking?
     bool m_isElevationTrackingEn; // Is the tracking enabled?
     bool m_isTracking;
+    bool m_trackingError; // Set from an TrackingThread;
     bool m_isASConfiguration;
 
     Scan m_scan;
