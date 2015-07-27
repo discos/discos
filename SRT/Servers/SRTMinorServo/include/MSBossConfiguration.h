@@ -90,6 +90,8 @@ public:
 
     inline std::string getActualSetup() { return m_actualSetup; }
 
+    std::string motionInfo();
+
     inline std::string getCommandedSetup() { return m_commandedSetup; }
 
     /** Return true when we are using the ASACTIVE cofiguration */

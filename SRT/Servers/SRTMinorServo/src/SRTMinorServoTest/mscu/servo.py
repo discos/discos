@@ -114,7 +114,6 @@ class Servo(object):
         else:
             answer += closers[0]
         self.dc.cab_state.value = DriveCabinet.cab_state['stow']
-        self.history.insert(self.stow_position)
         return [answer.replace('@', '?'), answer]
 
 

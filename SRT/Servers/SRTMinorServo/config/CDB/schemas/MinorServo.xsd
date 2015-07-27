@@ -116,12 +116,14 @@
         <xs:sequence>
             <xs:element name="status" type="mng:SystemStatusType" />
             <xs:element name="actualSetup" type="baci:ROstring" />
+            <xs:element name="motionInfo" type="baci:ROstring" />
             <xs:element name="ready" type="mng:BooleanType" />
             <xs:element name="starting" type="mng:BooleanType" />
             <xs:element name="asConfiguration" type="mng:BooleanType" />
             <xs:element name="elevationTrack" type="mng:BooleanType" />
             <xs:element name="scanActive" type="mng:BooleanType" />
             <xs:element name="scanning" type="mng:BooleanType" />
+            <xs:element name="tracking" type="mng:BooleanType" />
         </xs:sequence>
 
         <!-- Subsystem attributes -->

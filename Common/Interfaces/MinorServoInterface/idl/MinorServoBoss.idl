@@ -34,10 +34,14 @@ module MinorServo {
 	interface MinorServoBoss: ACS::CharacteristicComponent, Management::CommandInterpreter, Management::Subsystem {
 
         readonly attribute ACS::ROstring actualSetup;
+        // motionInfo: Starting, Parking, Not Elevation Tracking, 
+        //             Elevation Tracking, Not Ready to Move, ...
+        readonly attribute ACS::ROstring motionInfo; 
         readonly attribute Management::ROTBoolean ready;
         readonly attribute Management::ROTBoolean starting;
         readonly attribute Management::ROTBoolean asConfiguration;
         readonly attribute Management::ROTBoolean elevationTrack;
+        readonly attribute Management::ROTBoolean tracking;
         readonly attribute Management::ROTBoolean scanActive;
         readonly attribute Management::ROTBoolean scanning;
 	

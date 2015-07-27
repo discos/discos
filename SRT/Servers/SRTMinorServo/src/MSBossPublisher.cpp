@@ -81,7 +81,7 @@ void MSBossPublisher::runLoop()
                         if(!m_configuration->isConfigured() || 
                            !component_ref->isTracking() ||
                            (m_configuration->isScanActive() && !m_configuration->isScanning())) {
-                            vstatus_bset.reset(VS_TRACKING);
+                                vstatus_bset.reset(VS_TRACKING);
                         }
                         // PARKED
                         if(!component_ref->isParked())
@@ -118,6 +118,7 @@ void MSBossPublisher::runLoop()
                 //     break;
             }
         }
+        m_configuration->m_isTracking = vstatus_bset.test(VS_TRACKING) && (!vstatus_bset.test(VS_FAILURE));
 
         /* Begin Notification Channel Logic */
         static MinorServo::MinorServoDataBlock data = {0, false, false, false, false, Management::MNG_OK};
@@ -131,10 +132,22 @@ void MSBossPublisher::runLoop()
         else
             ; // *m_configuration->status = Management::MNG_OK; // TODO: update the Boss status
 
+
+        Management::TSystemStatus current_status;
+        if(vstatus_bset.test(VS_FAILURE)) {
+            current_status = Management::MNG_FAILURE;
+        }
+        else if(vstatus_bset.test(VS_WARNING)) {
+            current_status = Management::MNG_WARNING;
+        }
+        else {
+            current_status = Management::MNG_OK;
+        }
+
         bool publish_data = (CIRATools::timeDifference(m_last_event, now) >= MAX_DTIME) ? true : false;
         if(!publish_data) {
             publish_data = 
-                // data.status != *m_configuration->status || // TODO: update the Boss status
+                data.status != current_status ||
                 data.tracking != vstatus_bset.test(VS_TRACKING) || 
                 data.parking != vstatus_bset.test(VS_PARKING) || 
                 data.starting != vstatus_bset.test(VS_CONFIGURING) || 
@@ -142,10 +155,10 @@ void MSBossPublisher::runLoop()
                 ? true : publish_data;
         }
 
-        m_configuration->m_isTracking = vstatus_bset.test(VS_TRACKING); 
         if(publish_data) {
-            // data.status = *m_configuration->status; // TODO: update the Boss status
-            data.tracking = vstatus_bset.test(VS_TRACKING); 
+            data.status = current_status;
+            // data.tracking = vstatus_bset.test(VS_TRACKING) && (!vstatus_bset.test(VS_FAILURE));
+            data.tracking = vstatus_bset.test(VS_TRACKING);
             data.parked = vstatus_bset.test(VS_PARKED); 
             data.parking = vstatus_bset.test(VS_PARKING); 
             data.starting = vstatus_bset.test(VS_CONFIGURING); 

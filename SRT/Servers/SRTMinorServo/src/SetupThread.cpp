@@ -34,7 +34,7 @@ void SetupThread::onStart() {
     AUTO_TRACE("SetupThread::onStart()"); 
 
     m_positioning.clear();
-    m_configuration->m_status = Management::MNG_OK;
+    m_configuration->m_status = Management::MNG_WARNING;
 }
 
 void SetupThread::onStop() { AUTO_TRACE("SetupThread::onStop()"); }
@@ -151,7 +151,8 @@ void SetupThread::run()
         sleep_ret = ACS::ThreadBase::sleep(ITER_SLEEP_TIME); // 2 seconds
         counter += ITER_SLEEP_TIME / 2;
         if(sleep_ret != SLEEP_OK || counter > MAX_ACTION_TIME) {
-            ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): Parking timeout")));
+            ACS_SHORT_LOG((LM_ERROR, ("SetupThread::run(): Parking timeout")));
+            m_configuration->m_status = Management::MNG_FAILURE;
             m_configuration->m_isStarting = false;
             m_configuration->m_isConfigured = false;
             m_configuration->m_actualSetup = "unknown";
@@ -166,6 +167,7 @@ void SetupThread::run()
         m_configuration->m_isStarting = false;
         m_configuration->m_isConfigured = false;
         m_configuration->m_actualSetup = "unknown";
+        m_configuration->m_status = Management::MNG_FAILURE;
         return;
     }
 
@@ -193,6 +195,7 @@ void SetupThread::run()
 
                             if(act_pos->length() != target_pos.length()) {
                                 ACS_SHORT_LOG((LM_ERROR, ("SetupThread: lenghts of target and act pos do not match")));
+                                m_configuration->m_status = Management::MNG_FAILURE;
                                 m_configuration->m_isStarting = false;
                                 m_configuration->m_isConfigured = false;
                                 m_configuration->m_actualSetup = "unknown";
@@ -270,7 +273,7 @@ void SetupThread::run()
                                 else if(component_ref->isInEmergencyStop()){
                                     string msg(comp_name + " in emergency stop.");
                                     ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                                    m_configuration->m_status = Management::MNG_FAILURE;
+                                    m_configuration->m_status = Management::MNG_WARNING;
                                     m_configuration->m_isStarting = false;
                                     m_configuration->m_isConfigured = false;
                                     m_configuration->m_actualSetup = "unknown";
@@ -296,6 +299,7 @@ void SetupThread::run()
                         }
                         else {
                             ACS_SHORT_LOG((LM_ERROR, (string("SetupThread: cannot get the act_pos of ")  + comp_name).c_str()));
+                            m_configuration->m_status = Management::MNG_FAILURE;
                             m_configuration->m_isStarting = false;
                             m_configuration->m_isConfigured = false;
                             m_configuration->m_actualSetup = "unknown";
@@ -337,6 +341,7 @@ void SetupThread::run()
         counter += ITER_SLEEP_TIME / 2;
         if(sleep_ret != SLEEP_OK || counter > MAX_ACTION_TIME) {
             ACS_SHORT_LOG((LM_WARNING, ("SetupThread::run(): Positioning timeout")));
+            m_configuration->m_status = Management::MNG_FAILURE;
             m_configuration->m_isStarting = false;
             m_configuration->m_isConfigured = false;
             m_configuration->m_actualSetup = "unknown";
@@ -348,6 +353,7 @@ void SetupThread::run()
     m_configuration->m_isStarting = false;
     m_configuration->m_isConfigured = true;
     m_configuration->m_actualSetup = m_configuration->m_commandedSetup;
+    m_configuration->m_status = Management::MNG_OK;
     ACS_SHORT_LOG((LM_NOTICE, ("MinorServo setup done. Actual setup: " + m_configuration->m_actualSetup).c_str()));
 
     // Power Off the encoders

@@ -62,16 +62,20 @@ TrackingThread::TrackingThread(
                         // Set a minor servo position if the doubleSeq is not empty
                         if(positions.length()) {
                             if(component_ref->isReady()) {
-                                m_ready_error = false;
                                 component_ref->setPosition(positions, NOW);
+                                m_ready_error = false;
+                                m_configuration->m_status = Management::MNG_OK;
                             }
                             else {
                                 if(component_ref->isStarting() || component_ref->isParked() || component_ref->isParking()) {
-                                    ; // Do nothing
+                                    m_ready_error = false;
+                                    m_configuration->m_status = Management::MNG_OK;
                                 }
                                 else {
+                                    m_configuration->m_status = Management::MNG_FAILURE;
                                     if(!m_ready_error) {
-                                        ACS_SHORT_LOG((LM_WARNING, "TrackingThread: component not ready."));
+                                        string msg(comp_name + " in failure.");
+                                        ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
                                         m_configuration->m_isElevationTracking = false;
                                         m_ready_error = true;
                                     }
