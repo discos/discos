@@ -46,6 +46,7 @@ void ParkThread::run()
     // Put the servos in the position elevation independent and disable the axes 
     unsigned long counter = 0;
     vector<string> toMove(m_configuration->m_servosToMove);
+    m_configuration->m_actualSetup = "unknown";
 
     // Positioning
     counter = 0;

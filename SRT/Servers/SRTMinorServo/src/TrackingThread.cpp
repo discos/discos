@@ -77,13 +77,13 @@ TrackingThread::TrackingThread(
                                     m_configuration->m_status = Management::MNG_OK;
                                 }
                                 else {
+                                    m_configuration->m_status = Management::MNG_FAILURE;
                                     ACS::ROdoubleSeq_var refActPos = component_ref->actPos();
                                     ACSErr::Completion_var completion;
                                     ACS::doubleSeq * act_pos = refActPos->get_sync(completion.out());
                                     for(size_t i=0; i<act_pos->length(); i++) { 
                                         // TODO: pay attention, this code is incorrect in case of many dynamic components
-                                        if(fabs((*act_pos)[i] - position[i]) > component_ref->getTrackingDelta()) {
-                                            m_configuration->m_status = Management::MNG_FAILURE;
+                                        if(fabs((*act_pos)[i] - positions[i]) > component_ref->getTrackingDelta()) {
                                             m_configuration->m_trackingError=true;
                                             m_configuration->m_isElevationTracking = false;
                                             break;

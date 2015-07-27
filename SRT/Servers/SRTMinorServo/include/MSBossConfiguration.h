@@ -72,6 +72,8 @@ public:
 
     inline bool isConfigured() { return m_isConfigured; }
 
+    bool isTracking();
+
     inline bool isStarting() { return m_isStarting; }
 
     inline bool isParking() { return m_isParking; }
