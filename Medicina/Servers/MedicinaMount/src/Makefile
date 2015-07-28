@@ -62,6 +62,8 @@ USER_IDL =
 #----------------------------
 INSTALL_FILES =
 
+PY_SCRIPTS_L       = stress
+
 #
 # list of all possible C-sources (used to create automatic dependencies)
 # ------------------------------
