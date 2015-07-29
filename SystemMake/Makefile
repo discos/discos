@@ -26,7 +26,7 @@ COMMON_LIBRARIES:=SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
-                XBackend #DBBC 
+                XBackend DewarPositioner #DBBC 
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
@@ -40,8 +40,7 @@ SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer \
              SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
-             SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver \
-			 DewarPositioner
+             SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
              MinorServoBossTextClient meteoClient
 SRT_MISC:=SRTScripts
