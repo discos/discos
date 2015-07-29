@@ -186,6 +186,8 @@ void CScheduleExecutor::runLoop()
 			case SCAN_PREPARATION: {  // command the scan to the telescope...in case of error the current scan is aborted
 				//printf("SCAN_PREPARATION\n");
 				try {
+					// clears all subsystem tracking flags
+					m_core->clearTracking();
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"COMMAND_SCAN_TO_THE_TELESCOPE"));
 					primary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.primaryParameters);
 					secondary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
@@ -206,8 +208,6 @@ void CScheduleExecutor::runLoop()
 					cleanScan();
 					break;
 				}
-				// clears all subsystem tracking flags
-				m_core->clearTracking();
 				m_stage=WRITING_INITIALIZATION;
 			}
 			case WRITING_INITIALIZATION: { //prepare the data transfer, it configures the backend and the writer. In case of error the scan is aborted.

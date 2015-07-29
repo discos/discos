@@ -1666,7 +1666,7 @@ void CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversPara
 	//*********************************************************
 	// At the moment no scans are included in for receivers boss. so:
 	// I comment out the controls and the error thrown if the receiver is not configured.
-	// They should be resotred when the check (is_emptyscan=false) could be done.
+	// They should be restored when the check (is_emptyscan=false) could be done.
 	//*********************************************************
 	if (m_currentRecvCode=="") {
 		//_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::startScan()");

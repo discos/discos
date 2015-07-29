@@ -19,7 +19,16 @@
 	#define MAX_ADC_NUMBER 7 // CDB
 #endif 
 
+#ifdef COMPILE_TARGET_MED
+
+#define DEFAULT_BINS 4096
+
+#else
+
 #define DEFAULT_BINS 2048
+
+#endif
+
 
 #define FLOW_NUMBER 1
 
