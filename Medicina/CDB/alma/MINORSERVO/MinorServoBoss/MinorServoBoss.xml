@@ -16,8 +16,10 @@
     AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
 >
     <status description="The summary status of MinorServoBoss"/>
-    <actualSetup description="Mnemonic code that defines a setup" />
     <ready description="servo is ready to receive commands" />
+    <actualSetup description="Mnemonic code that defines a setup" />
+    <motionInfo description="Textual representation of the minor servo status" />
+    <tracking description="The servo is on the commanded position" />
     <starting description="starting a setup" />
     <asConfiguration description="Active surface configuration always off" />
     <elevationTrack description="servo is tracking current elevation" />

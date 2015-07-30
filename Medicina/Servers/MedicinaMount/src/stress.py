@@ -73,28 +73,34 @@ def main():
     step=span/points    
     gapS=1000000
    
+    x=azimuth
+    y=elevation
     for index in range(cycles):
     	#get current time
     	ctime=getTimeStamp().value
     	ctH=EpochHelper(ctime)
+	ctime=ctime+30000000
     	print "current time: %02d:%02d:%02d.%06d\t" % (ctH.hour(),ctH.minute(),ctH.second(),ctH.microSecond())
     	for p in range(points):
-    		x=azimuth+step*p
-    		y=elevation
-    		ctime=ctime+gapS*p
+		if (index%2==0):
+    			x=x+step
+		else:
+			x=x-step
+    		ctime=ctime+gapS
         	tH=EpochHelper(ctime)
         	print "%02d:%02d:%02d.%06d\t\t%lf\t%lf" % (tH.hour(),tH.minute(),tH.second(),tH.microSecond(),x,y)
         	try:
-            	if (p==0):
-                	component.programTrack(x,y,ctime,1)
-            	else:
-                	component.programTrack(x,y,ctime,0)
+            		if (p==0):
+                		component.programTrack(x,y,ctime,1)
+            		else:
+                		component.programTrack(x,y,ctime,0)
         	except Exception , ex:
-            	newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
-            	newEx.setAction("programTrack")
-            	newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
-            	sys.exit(1)
-      		time.sleep(gap)
+            		newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
+            		newEx.setAction("programTrack")
+            		newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
+            		sys.exit(1)
+	print "wait for %d seconds" % gap
+      	time.sleep(gap)
         
     if not (compName==""):
         simpleClient.releaseComponent(compName)     
