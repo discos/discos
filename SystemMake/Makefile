@@ -31,7 +31,7 @@ COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
                 SchedulerTextClient
-COMMON_MISC:=Plotter KStars Scripts
+COMMON_MISC:=Plotter KStars Scripts getTemplateForTests
 
 SRT_DOC:=SRTDox
 SRT_ERRORS:=SRTActiveSurfaceErrors
