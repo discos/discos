@@ -5,6 +5,7 @@
 #include <IRA>
 
 #include "MedMinorServoParameters.hpp"
+#include "MedMinorServoControl.hpp"
 
 using namespace baci;
 
@@ -17,7 +18,9 @@ class DevIOMotionInfo: public virtual DevIO<ACE_CString>
 {
 public:
 
-	DevIOMotionInfo(MedMinorServoStatus *status): m_status(status) {
+	DevIOMotionInfo(MedMinorServoStatus *status, 
+                    MedMinorServoControl_sp control): m_status(status),
+                                                      m_control(control){
 		AUTO_TRACE("DevIOMotionInfo::DevIOMotionInfo()");
 	}
 
@@ -32,6 +35,8 @@ public:
 	ACE_CString read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
 		AUTO_TRACE("DevIOMotionInfo::read()");
 		timestamp=getTimeStamp();
+        if((!(m_control)) || (!(m_control->is_connected())))
+            return "DISCONNECTED";
         if(m_status){
 		    return (m_status->getStatusString()).c_str();
         }else{
@@ -45,6 +50,7 @@ public:
 
 private:
 	MedMinorServoStatus *m_status;
+    MedMinorServoControl_sp m_control;
 };
 
 

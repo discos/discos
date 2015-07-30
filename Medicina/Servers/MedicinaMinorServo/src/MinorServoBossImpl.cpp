@@ -107,13 +107,19 @@ void MinorServoBossImpl::initialize() throw (
      * INITIALIZE SERVO CONTROL
      */
     try{
-        m_control = get_servo_control(m_server_ip);
+        //m_control = get_servo_control(m_server_ip);
+        m_control.reset(new MedMinorServoControl(m_server_ip));
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
               (LM_DEBUG, "Instantiated new minor servo control"));
     }catch(const ServoConnectionError& sce){
+        /**
         THROW_EX(ComponentErrors, CouldntGetComponentEx, 
                  sce.what(),
                  false);
+        */
+        m_control.reset();
+        CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::initialize",
+              (LM_ERROR, sce.what()));
     }catch(const ServoTimeoutError& ste){
         THROW_EX(ComponentErrors, CouldntGetComponentEx, 
                  ste.what(),
@@ -189,7 +195,7 @@ throw (ComponentErrors::MemoryAllocationExImpl)
 		m_actualSetup = new baci::ROstring(getContainerServices()->getName() + ":actualSetup",
                 getComponent(), new DevIOActualSetup(&m_actual_config), true);
 		m_motionInfo = new baci::ROstring(getContainerServices()->getName() + ":motionInfo",
-                getComponent(), new DevIOMotionInfo(&m_servo_status), true);
+                getComponent(), new DevIOMotionInfo(&m_servo_status, m_control), true);
         m_tracking = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
                   (getContainerServices()->getName()+":tracking",getComponent(), \
                    new DevIOTracking(m_control), true);
@@ -332,6 +338,9 @@ void
 MinorServoBossImpl::setupImpl(const char *config) 
 throw (MinorServoErrors::SetupErrorExImpl)
 {
+    if(!(m_control))
+        THROW_EX(MinorServoErrors, SetupErrorEx, 
+                 "Minor Servo Server is not connected", false);
     if(m_servo_status.starting)
         THROW_EX(MinorServoErrors, SetupErrorEx, 
                  "The system is executing another setup", false);
@@ -474,6 +483,9 @@ MinorServoBossImpl::getAxesPosition(ACS::Time time)
           throw (MinorServoErrors::MinorServoErrorsEx,
                  ComponentErrors::ComponentErrorsEx)
 {
+    if(!(m_control))
+        THROW_MINORSERVO_EX(CommunicationErrorEx, 
+                 "Minor Servo Server is not connected", false);
     if(!isReady())
         THROW_MINORSERVO_EX(StatusErrorEx, 
                  "getAxesInfo(): the system is not ready", 
@@ -696,6 +708,9 @@ MinorServoBossImpl::startScanImpl(
         const Antenna::TRunTimeParameters& antenna_parameters
      ) throw (MinorServoErrors::MinorServoErrorsEx)
 {
+    if(!(m_control))
+        THROW_MINORSERVO_EX(CommunicationErrorEx, 
+                 "Minor Servo Server is not connected", false);
     if(scan_parameters.is_empty_scan)
         return;
     boost::recursive_mutex::scoped_lock lock(_scan_guard);
@@ -742,6 +757,9 @@ MinorServoBossImpl::closeScan(ACS::Time &timeToStop)
 throw (MinorServoErrors::MinorServoErrorsEx,
        ComponentErrors::ComponentErrorsEx)
 {
+    if(!(m_control))
+        THROW_MINORSERVO_EX(CommunicationErrorEx, 
+                 "Minor Servo Server is not connected", false);
     boost::recursive_mutex::scoped_lock lock(_scan_guard);
     if(isScanActive())
     {
@@ -810,6 +828,9 @@ void
 MinorServoBossImpl::turnTrackingOn() 
 throw (MinorServoErrors::MinorServoErrorsEx)
 {
+    if(!(m_control))
+        THROW_MINORSERVO_EX(CommunicationErrorEx, 
+                 "Minor Servo Server is not connected", false);
     if(isStarting())
         THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is starting.", true);
     if(isParking())
@@ -1109,7 +1130,11 @@ MinorServoBossImpl::connect()
 throw (MinorServoErrors::CommunicationErrorExImpl)
 {
     try{
-        m_control->connect();
+        if(m_control)
+            m_control->connect();
+        else
+            //m_control = get_servo_control(m_server_ip);
+            m_control.reset(new MedMinorServoControl(m_server_ip));
     }catch(ServoTimeoutError& ste){
         THROW_EX(MinorServoErrors,CommunicationErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){
@@ -1122,7 +1147,8 @@ MinorServoBossImpl::disconnect()
 throw (MinorServoErrors::CommunicationErrorExImpl)
 {
     try{
-        m_control->disconnect();
+        if(m_control)
+            m_control->disconnect();
     }catch(ServoTimeoutError& ste){
         THROW_EX(MinorServoErrors,CommunicationErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){
@@ -1135,7 +1161,8 @@ MinorServoBossImpl::reset()
 throw (MinorServoErrors::CommunicationErrorExImpl)
 {
     try{
-        m_control->reset();
+        if(m_control)
+            m_control->reset();
     }catch(const ServoTimeoutError& ste){
         THROW_EX(MinorServoErrors, CommunicationErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){

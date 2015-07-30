@@ -25,7 +25,12 @@ void
 PositionMonitoringThread::runLoop()
 {
     try{
-        m_control->update_position();
+        if(m_control)
+            m_control->update_position();
+        else
+            //CUSTOM_LOG(LM_FULL_INFO, "PositionMonitoringThread::runLoop()",
+            //  (LM_WARNING, "Position Monitoring Thread cannot access servo control"));
+            return;
     }catch(...) {
         CUSTOM_LOG(LM_FULL_INFO, "PositionMonitoringThread::runLoop()",
               (LM_WARNING, "Position Monitoring Thread cannot update position"));

@@ -75,6 +75,7 @@ class MedMinorServoPosition
         bool earlier(const ACS::Time& time) const;
         bool later(const MedMinorServoPosition& position);
         bool later(const ACS::Time& time);
+        const char * getStatusString();
         /**
          * check wether the mode is an error code or a success code
          */ 

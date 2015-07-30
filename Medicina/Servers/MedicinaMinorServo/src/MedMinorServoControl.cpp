@@ -57,13 +57,22 @@ MedMinorServoControl::connect()
                 if(!(_commanded_position.is_success_position())){
                     CUSTOM_LOG(LM_FULL_INFO,
                            "MinorServo::MedMinorServoControl::connect",
-                           (LM_DEBUG, "Got a wrong mode, connecting anyway trying to guess"));
+                           (LM_DEBUG, 
+                            "Got a wrong mode %s (%d) connecting anyway trying to guess ...", 
+                            _commanded_position.getStatusString(),
+                            _commanded_position.mode));
                     try{
                         _commanded_position.mode = MED_MINOR_SERVO_SECONDARY;
                         _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
+                        CUSTOM_LOG(LM_FULL_INFO,
+                           "MinorServo::MedMinorServoControl::connect",
+                           (LM_DEBUG, "... guessed it was in secondary focus"));
                     }catch(...){
                         _commanded_position.mode = MED_MINOR_SERVO_PRIMARY;
                         _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
+                        CUSTOM_LOG(LM_FULL_INFO,
+                           "MinorServo::MedMinorServoControl::connect",
+                           (LM_DEBUG, "... guessed it was in primary focus"));
                     }
                 }else{
                     _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);

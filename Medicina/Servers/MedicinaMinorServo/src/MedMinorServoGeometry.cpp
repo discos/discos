@@ -168,6 +168,54 @@ MedMinorServoPosition::later(const MedMinorServoPosition& position)
     return later(position.time);
 }
 
+const char*
+MedMinorServoPosition::getStatusString()
+{
+    switch(mode)
+    {
+        case(MED_MINOR_SERVO_LOCAL):
+            return "LOCAL";
+            break;
+        case(MED_MINOR_SERVO_INTERLOCK):
+            return "INTERLOCK";
+            break;
+        case(MED_MINOR_SERVO_SR_BLOCK):
+            return "SR BLOCK";
+            break;
+        case(MED_MINOR_SERVO_PFR_BLOCK):
+            return "PFR BLOCK";
+            break;
+        case(MED_MINOR_SERVO_SYSTEM_BLOCK):
+            return "SYSTEM BLOCK";
+            break;
+        case(MED_MINOR_SERVO_PRIMARY_DISABLED):
+            return "PRIMARY DISABLED";
+            break;
+        case(MED_MINOR_SERVO_SECONDARY_DISABLED):
+            return "SECONDARY DISABLED";
+            break;
+
+        case(MED_MINOR_SERVO_PRIMARY):
+            return "PRIMARY";
+            break;
+        case(MED_MINOR_SERVO_SECONDARY):
+            return "SECONDARY";
+            break;
+        case(MED_MINOR_SERVO_OFFSET):
+            return "OFFSET";
+            break;
+        case(MED_MINOR_SERVO_TRANSFER_TO_PRIMARY):
+            return "TRANSFER TO PRIMARY";
+            break;
+        case(MED_MINOR_SERVO_TRANSFER_TO_SECONDARY):
+            return "TRANSFER TO SECONDARY";
+            break;
+        default:
+            return "UNDEINED";
+            break;
+    }
+}
+
 std::vector<double>
 MedMinorServoPosition::get_axes_positions()
 {

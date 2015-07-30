@@ -50,6 +50,12 @@ void MSBossPublisher::onStop() { AUTO_TRACE("MSBossPublisher::onStop()"); }
 
 void MSBossPublisher::runLoop()
 {
+    if(!(m_control))
+    {
+            //CUSTOM_LOG(LM_FULL_INFO, "MSBossPublisher::runLoop()",
+            // (LM_WARNING, "Publisher thread cannot access servo control"));
+            return;
+    }
     //AUTO_TRACE("MSBossPublisher::runLoop()");
     static MinorServo::MinorServoDataBlock data = {0, false, false, false, false, Management::MNG_OK};
     TIMEVALUE now(0.0L);

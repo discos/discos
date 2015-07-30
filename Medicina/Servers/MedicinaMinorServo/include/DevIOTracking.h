@@ -26,12 +26,15 @@ public:
 	Management::TBoolean read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
 		AUTO_TRACE("DevIOTracking::read()");
 		timestamp=getTimeStamp();
-		if (m_control->is_tracking()) {
-			m_val=Management::MNG_TRUE;
-		}
-		else {
-			m_val=Management::MNG_FALSE;
-		}
+        if(m_control)
+            if (m_control->is_tracking()) {
+                m_val=Management::MNG_TRUE;
+            }
+            else {
+                m_val=Management::MNG_FALSE;
+            }
+        else
+            m_val = Management::MNG_FALSE;
 		return m_val;
     }
 	

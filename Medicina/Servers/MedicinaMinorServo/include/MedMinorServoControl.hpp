@@ -57,7 +57,7 @@ class MedMinorServoControl
         MedMinorServoControl(const char* server_ip = "192.168.51.30", 
                              const int server_port = MODBUS_TCP_DEFAULT_PORT,
                              double position_buffer_length = 300.0,
-                             double position_refresh_time = 0.1,
+                             double position_refresh_time = 0.01,
                              double elevation_refresh_time = 0.1); //throw ServoConnectionError, ServoTimeoutError
         virtual ~MedMinorServoControl();
         /**

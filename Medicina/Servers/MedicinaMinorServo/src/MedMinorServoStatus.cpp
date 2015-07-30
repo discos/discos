@@ -21,8 +21,6 @@ MedMinorServoStatus::getStatusString()
 {
     if(starting)
         return "STARTING";
-    if(ready)
-        return "READY";
     if(scan_active)
         return "SCAN_ACTIVE";
     if(scanning)
@@ -31,6 +29,8 @@ MedMinorServoStatus::getStatusString()
         return "PARKING";
     if(parked)
         return "PARKED";
+    if(ready)
+        return "READY";
     return "UNDEFINED";
 }
 
