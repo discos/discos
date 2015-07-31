@@ -83,13 +83,16 @@ class PositionTest(unittest2.TestCase):
     def test_get_past_position_with_sleep(self):
         timestamp = getTimeStamp().value
         position = self.get_position()
-        self.boss.setUserOffset(self.axis_code, delta=10)
+        self.boss.setUserOffset(self.axis_code, 10)
         self.wait_tracking()
         time.sleep(10)
         position_past = self.get_position(timestamp)
         self.assertAlmostEqual(position, position_past, delta=0.1)
 
     def wait_tracking(self):
+        time.sleep(1) # Give the time to command the new position
+        # TODO: we need a better solution than this sleep to be sure the tests
+        # procuce always the same results
         while not self.boss.isTracking():
             time.sleep(0.1)
 
