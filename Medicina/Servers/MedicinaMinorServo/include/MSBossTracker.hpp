@@ -17,11 +17,13 @@
 #include <string>
 #include <ManagmentDefinitionsS.h>
 #include <AntennaBossC.h>
+#include <MinorServoErrors.h>
 
 #include "slamac.h" //for DR2D
 
 #include <AntennaProxy.h>
 
+#include "macros.def"
 #include "MedMinorServoStatus.hpp"
 #include "MedMinorServoControl.hpp"
 #include "MedMinorServoOffset.hpp"
@@ -29,6 +31,8 @@
 
 // Sleep Time in 100ns
 #define TRACKER_SLEEP_TIME 1000000 // 100 mseconds
+
+using namespace std;
 
 class TrackerThreadParameters
 {

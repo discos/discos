@@ -21,10 +21,10 @@ MedMinorServoStatus::getStatusString()
 {
     if(starting)
         return "STARTING";
-    if(scan_active)
-        return "SCAN_ACTIVE";
     if(scanning)
         return "SCANNING";
+    if(scan_active)
+        return "SCAN_ACTIVE";
     if(parking)
         return "PARKING";
     if(parked)

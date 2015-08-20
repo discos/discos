@@ -198,7 +198,7 @@ throw (ComponentErrors::MemoryAllocationExImpl)
                 getComponent(), new DevIOMotionInfo(&m_servo_status, m_control), true);
         m_tracking = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
                   (getContainerServices()->getName()+":tracking",getComponent(), \
-                   new DevIOTracking(m_control), true);
+                   new DevIOTracking(&m_servo_status, m_control), true);
         m_starting = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>\
                   (getContainerServices()->getName()+":starting",getComponent(), \
                    new DevIOStarting(&m_servo_status), true);
@@ -716,6 +716,7 @@ MinorServoBossImpl::startScanImpl(
     boost::recursive_mutex::scoped_lock lock(_scan_guard);
     m_servo_status.scan_active = true;
     m_servo_status.scanning = false;
+    bool was_elevation_tracking = isElevationTracking();
     turnTrackingOff();
     MedMinorServoPosition central_position = 
         m_actual_config->get_position(antenna_parameters.elevation);
@@ -724,7 +725,7 @@ MinorServoBossImpl::startScanImpl(
                            scan_parameters.range,
                            scan_parameters.total_time,
                            std::string(scan_parameters.axis_code), 
-                           isElevationTracking());
+                           was_elevation_tracking);
     if(!(scan.check()))
     {
         m_servo_status.scan_active = false;
@@ -974,6 +975,8 @@ MinorServoBossImpl::setCorrectPosition()
         THROW_MINORSERVO_EX(CommunicationErrorEx, ste.what(), true);
     }catch(const ServoConnectionError& sce){
         THROW_MINORSERVO_EX(CommunicationErrorEx, sce.what(), true);
+    }catch(const ServoPositionError& spe){
+        THROW_MINORSERVO_EX(PositioningErrorEx, spe.what(), true);
     }
 }
 
@@ -1133,7 +1136,6 @@ throw (MinorServoErrors::CommunicationErrorExImpl)
         if(m_control)
             m_control->connect();
         else
-            //m_control = get_servo_control(m_server_ip);
             m_control.reset(new MedMinorServoControl(m_server_ip));
     }catch(ServoTimeoutError& ste){
         THROW_EX(MinorServoErrors,CommunicationErrorEx, ste.what(), false);

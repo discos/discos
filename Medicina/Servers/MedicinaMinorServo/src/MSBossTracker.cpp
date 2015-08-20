@@ -74,6 +74,8 @@ void MSBossTracker::runLoop()
                 m_control->set_position(correct_position + offset_position);
                 //CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MSBossTracker::runLoop",
                 //          (LM_DEBUG, "Correcting position"));
+            }catch(const ServoPositionError& spe){
+                THROW_MINORSERVO_EX(PositioningErrorEx, spe.what(), true);
             }catch(...){
                 CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MSBossTracker::runLoop",
                           (LM_WARNING, "Cannot command offset position"));

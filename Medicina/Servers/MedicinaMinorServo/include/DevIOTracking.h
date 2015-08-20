@@ -11,7 +11,10 @@ class DevIOTracking: public virtual DevIO<Management::TBoolean>
 {
 public:
 	
-	DevIOTracking(MedMinorServoControl_sp control): m_control(control) {
+	DevIOTracking(MedMinorServoStatus * status,
+                  MedMinorServoControl_sp control): 
+                  m_status(status),
+                  m_control(control) {
 		AUTO_TRACE("DevIOTracking::DevIOTracking()");
 	}
 	
@@ -26,15 +29,21 @@ public:
 	Management::TBoolean read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
 		AUTO_TRACE("DevIOTracking::read()");
 		timestamp=getTimeStamp();
-        if(m_control)
-            if (m_control->is_tracking()) {
+        if(m_status->scan_active)
+            if(m_status->scanning)
                 m_val=Management::MNG_TRUE;
-            }
-            else {
+            else
                 m_val=Management::MNG_FALSE;
-            }
         else
-            m_val = Management::MNG_FALSE;
+            if(m_control)
+                if (m_control->is_tracking()) {
+                    m_val=Management::MNG_TRUE;
+                }
+                else {
+                    m_val = Management::MNG_FALSE;
+                }
+            else
+                m_val = Management::MNG_FALSE;
 		return m_val;
     }
 	
@@ -43,6 +52,7 @@ public:
 	}
     
 private:
+    MedMinorServoStatus * m_status;
 	MedMinorServoControl_sp m_control;
 	Management::TBoolean m_val;
 };
