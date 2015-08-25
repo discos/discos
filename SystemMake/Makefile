@@ -33,7 +33,7 @@ COMMON_LIBRARIES:=SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
-                XBackend DewarPositioner #DBBC 
+                XBackend PyDewarPositioner #DBBC 
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
@@ -78,7 +78,7 @@ ifeq ($(TARGETSYS),SRT)
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel\
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger XBackend \
-		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver DewarPositioner \
+		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver PyDewarPositioner \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
 		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient \
 		Plotter KStars SRTScripts \
