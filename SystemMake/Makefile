@@ -12,6 +12,13 @@
 # Andrea O. 13/01/13  environment variable SYSTEM_SVN_TAG now required to control which TAG has to be downloaded from svn
 # Bartolini 02/02/15  added .PHONY target tall
 # Bartolini 03/02/15  split away common, inspired by http://lackof.org/taggart/hacking/make-example/
+# Bartolini 25/08/15  Added comments and changed default target for all
+
+#
+# this new Makefile section separates code modules between what is common
+# and what is peculiar of each telescope in a modular way. Result is faster
+# and there is no need to replicate common code modules for all telescopes.
+#
 
 COMMON_DOC:=
 COMMON_ERRORS:=ClientErrors ComponentErrors AntennaErrors ParserErrors \
@@ -270,14 +277,16 @@ endif
 DOCIDL:=$(DOC)/idl
 DOCCPP:=$(DOC)/cpp
 
-all:
+.PHONY: all
+
+all: common-build telescope-build
+
+clean: common-clean telescope-clean
+
+legacy-all:
 	@for i in $(BUILD_DIRS); do \
 		make -C $${i} all install ; \
 	done
-
-.PHONY: tall
-
-tall: common-build telescope-build
 
 .PHONY: common-build $(COMMON_BUILD_TARGETS)
 
@@ -353,7 +362,7 @@ man:
 
 	@echo "documentation done in $(DOC)"
 
-clean:
+legacy-clean:
 	@rm -rf $(INTROOT)/bin/*
 	@rm -rf $(INTROOT)/config/CDB/schemas/*
 	@rm -rf $(INTROOT)/idl/*
