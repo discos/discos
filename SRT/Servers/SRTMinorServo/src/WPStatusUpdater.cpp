@@ -239,7 +239,7 @@ void WPStatusUpdater::runLoop()
 
                                 is_tracking = true;
                                 for(unsigned int i = 0; i < act_pos.length(); i++)
-                                    if(((m_params->expire_time)->posDiff[address])[i] > (m_params->tracking_delta)[address]) {
+                                    if(fabs(((m_params->expire_time)->posDiff[address])[i]) > (m_params->tracking_delta)[address]) {
                                         is_tracking = false;
                                         break;
                                     }
