@@ -106,7 +106,7 @@ public:
 	 * Call this function in order to get the number of bins for each input. 
 	 */	
 	void getFeed(ACS::longSeq& feed) const;	
-    void setFeedC();
+    void setFeedZero();
 	/**
 	 * Call this function in order to get the polarization for each input. 
 	 */	
@@ -611,6 +611,7 @@ public:
     	void setMode8BitParameter(bool mode) {m_mode8bit=mode;}
 
 	bool m_XarcosC;
+	bool m_XarcosK00;
 };
 
 #endif /*_COMMANDLINE_H_*/

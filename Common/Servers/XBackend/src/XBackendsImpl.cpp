@@ -608,8 +608,8 @@ void XBackendsImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Doubl
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
 	}
-	if (line->m_XarcosC == true)
-		line->setFeedC();		
+	if (line->m_XarcosC == true || line->m_XarcosK00 == true)
+		line->setFeedZero();
 }
 
 ACS::doubleSeq *XBackendsImpl::getTpi ()
@@ -1080,7 +1080,9 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 			setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
 			IRA::CIRATools::Wait(0,100000);
-            		line->m_XarcosC=false;
+		   	line->setFeedZero();
+           	line->m_XarcosC=false;
+           	line->m_XarcosK00=true;
 			break;
 		case (Backends::XArcos_C00): // XC00
 			setMode8bit(true);
@@ -1094,8 +1096,9 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 			setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
 			IRA::CIRATools::Wait(0,100000);
-		    	line->setFeedC();
-            		line->m_XarcosC=true;
+		   	line->setFeedZero();
+           	line->m_XarcosC=true;
+           	line->m_XarcosK00=false;
 		    	//setMode8bit(true);
 			break;
 	}

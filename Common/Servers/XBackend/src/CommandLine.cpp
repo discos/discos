@@ -24,6 +24,7 @@ m_GroupSpectrometer(groupS)
 	m_pcontrolLoop=NULL;
     start = true;
 	m_XarcosC = false;
+	m_XarcosK00 = false;
 }
 
 CCommandLine::~CCommandLine()
@@ -754,7 +755,7 @@ void CCommandLine::getFeed(ACS::longSeq& feed) const
 	}
 }
 
-void CCommandLine::setFeedC() {
+void CCommandLine::setFeedZero() {
     m_feedNumber[0]=0;
 	m_feedNumberInput[0]=0;
     m_feedNumber[1]=0;
@@ -763,9 +764,13 @@ void CCommandLine::setFeedC() {
 	m_feedNumberInput[2]=0;
     m_feedNumber[3]=0;
 	m_feedNumberInput[3]=0;
+    m_feedNumber[4]=0;
 	m_feedNumberInput[4]=0;
+    m_feedNumber[5]=0;
 	m_feedNumberInput[5]=0;
+    m_feedNumber[6]=0;
 	m_feedNumberInput[6]=0;
+    m_feedNumber[7]=0;
 	m_feedNumberInput[7]=0;
 }
 
@@ -1340,7 +1345,9 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
 		IRA::CIRATools::Wait(0,100000);
+	    setFeedZero();
         m_XarcosC=false;
+        m_XarcosK00=true;
     }
     else if (config=="XC00") {
         setMode8bit(true);
@@ -1354,8 +1361,9 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
 		IRA::CIRATools::Wait(0,100000);
-	    setFeedC();
+	    setFeedZero();
 		m_XarcosC=true;
+		m_XarcosK00=false;
     }
     else
         return false;
@@ -1375,8 +1383,8 @@ void CCommandLine::setSection(const long& input,const double& freq,const double&
 	setAttenuation(input,-1);
     Init();//Configurazione nell'HW 
 	getConfiguration();
-    if (m_XarcosC == true)
-        setFeedC();
+    if (m_XarcosC == true || m_XarcosK00 == true)
+        setFeedZero();
 }
 
 void CCommandLine::getTsys(ACS::doubleSeq& tsys) const
