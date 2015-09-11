@@ -16,6 +16,7 @@
 #define PROT_TERMINATOR "\n"
 #define PROT_SEPARATOR_CH ' '
 #define PROT_SEPARATOR " "
+#define PROT_SEPARATOR_COMMA ','
 
 #define PROT_GET_CONF "?"
 #define PROT_SET_CONF_BROAD "I"
@@ -182,6 +183,10 @@ public:
 	 * @return true if the answer is correct and could be parsed.
 	 */
 	static bool decodeBackendTime(const char *rBuff,bool& res);
+
+	static bool status(char *rBuff,double &timestamp, char *statusCode, bool &acquiring);
+
+	static bool setConfiguration(const char *rBuff);
 	
 	/**
 	 * Decodes the answer of the backend after it has been commanded a check time operations. 

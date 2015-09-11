@@ -168,13 +168,35 @@ WORD CProtocol::setZeroInput(char *sBuff,bool activate)
 	 return strlen(sBuff);
  }
 
- void CProtocol::swap(DWORD* word)
+void CProtocol::swap(DWORD* word)
  {
 	 DWORD p;
 	 p=((*word)<<16)|((*word)>>16);
 	 *word=p;
  }
- 
+
+bool CProtocol::status(char *rBuff,double &timestamp, char *statusCode, bool &acquiring)
+{
+
+}
+
+bool CProtocol::setConfiguration(const char *rBuff)
+{
+	IRA::CString str(rBuff);
+	IRA::CString ret;
+	int start=0;
+
+	// get !set-configuration string
+	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_COMMA,ret)) {
+		return false;
+	}
+	// get !set-configuration string
+	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_COMMA,ret)) {
+		return false;
+	}
+
+}
+
 bool CProtocol::decodeBackendConfiguration(const char *rBuff,const long& sectionNumber,const DWORD& boardsNumber,double *att,double *bw,TInputs *in,TIMEVALUE& tm,long& currentSR,long * boards)
 {
 	IRA::CString str(rBuff);

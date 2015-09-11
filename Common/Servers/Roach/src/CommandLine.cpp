@@ -140,18 +140,19 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::stopDataAcquisition()");
 	}
+/*	
 	len=CProtocol::stopAcquisition(sBuff); // get the buffer
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::stopDataAcquisition()");
-		} 
+		//if (!CProtocol::isAck(rBuff)) {
+		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::stopDataAcquisition()");
+		//} */
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::stopDataAcquisition()",(LM_INFO,"TRANSFER_JOB_STOPPED"));
 		clearStatusField(CCommandLine::BUSY); // sets the component status to busy
 		clearStatusField(CCommandLine::SUSPEND); // sets the component status to transfer job suspended......
-	}
+/*	}
 	else if (res==FAIL) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
 		dummy.setCode(m_Error.getErrorCode());
@@ -164,7 +165,7 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 	}
 	else {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::stopDataAcquisition()");
-	}
+	} */
 }
 
 void CCommandLine::stopDataAcquisitionForced() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
@@ -215,17 +216,21 @@ void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExIm
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::startDataAcquisition()");
 	}
-	len=CProtocol::startAcquisition(sBuff,m_commonSampleRate,m_calPeriod,m_configuration->getDataPort(),
-			m_hostAddress); // get the buffer
+	//len=CProtocol::startAcquisition(sBuff,m_commonSampleRate,m_calPeriod,m_configuration->getDataPort(),m_hostAddress); // get the buffer
+
+	strcpy (sBuff,"?start,");
+	strcat (sBuff,"\r\n");
+	len = strlen (sBuff);
+
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::startDataAcquisition()");
-		} 
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::startDataAcquisition()",(LM_INFO,"TRANSFER_JOB_STARTED"));
-		m_setTpiIntegration=true; // force the configuration of integration time for the next call to getSample();
+		//if (!CProtocol::isAck(rBuff)) {
+		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::startDataAcquisition()");
+		//} 
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::startDataAcquisition()",(LM_INFO,"ACQUISTION_STARTED"));
+		//m_setTpiIntegration=true; // force the configuration of integration time for the next call to getSample();
 		IRA::CIRATools::getTime(m_acquisitionStartEpoch);
 		setStatusField(CCommandLine::BUSY); // sets the component status to busy
 		setStatusField(CCommandLine::SUSPEND); // sets the component status to transfer job suspended......
@@ -258,11 +263,11 @@ ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Ba
 	DDWORD diff;
 	ACS::Time expectedTime;
 	AUTO_TRACE("CCommandLine::resumeDataAcquisition()");
-	if ( !(m_backendStatus & (1 << SUSPEND)) || !getIsBusy()) {
+	/*if ( !(m_backendStatus & (1 << SUSPEND)) || !getIsBusy()) {
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::resumeDataAcquisition()");
 		impl.setReason("transfer job cannot be resumed in present configuration");
 		throw impl;
-	}
+	}*/
 	// check that the backend latency in preparing the data transfer is respected......
 	if (startT==0) { // immediate start
 		IRA::CIRATools::getTime(epoch); //...so take the present time
@@ -291,14 +296,17 @@ ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Ba
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::resumeDataAcquisition()");
 	}
-	len=CProtocol::resumeAcquisition(sBuff); // get the buffer
+	strcpy (sBuff,"?start");
+	strcat (sBuff,"\r\n");
+	len = strlen (sBuff);
+	//len=CProtocol::resumeAcquisition(sBuff); // get the buffer
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
+		/*if (!CProtocol::isAck(rBuff)) {
 			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::resumeDataAcquisition()");
-		} 
+		} */
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::resumeDataAcquisition()",(LM_INFO,"TRANSFER_JOB_RESUMED"));
 		clearStatusField(SUSPEND);
 	}
@@ -326,22 +334,25 @@ void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExI
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
 	AUTO_TRACE("CCommandLine::suspendDataAcquisition()");
-	if ((m_backendStatus & (1 << SUSPEND)) || !getIsBusy()) { //not suspended....running
-		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::resumeDataAcquisition()");
+	/*if ((m_backendStatus & (1 << SUSPEND)) || !getIsBusy()) { //not suspended....running
+		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::suspendDataAcquisition()");
 		impl.setReason("transfer job cannot be suspended in present configuration");
 		throw impl;
-	}
+	}*/
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::suspendDataAcquisition()");
 	}
-	len=CProtocol::suspendAcquisition(sBuff); // get the buffer
+	strcpy (sBuff,"?stop");
+	strcat (sBuff,"\r\n");
+	len = strlen (sBuff);
+	//len=CProtocol::suspendAcquisition(sBuff); // get the buffer
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::suspendDataAcquisition()");
-		} 
+		//if (!CProtocol::isAck(rBuff)) {
+		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::suspendDataAcquisition()");
+		//} 
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::suspendDataAcquisition()",(LM_INFO,"TRANSFER_JOB_SUSPENDED"));
 		setStatusField(SUSPEND);
 	}
@@ -850,9 +861,9 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		//if (!CProtocol::isAck(rBuff)) {
-		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
-		//}
+		if (!CProtocol::setConfiguration(rBuff)) {
+			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
+		}
 	}
 	else if (res==FAIL) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
@@ -979,9 +990,23 @@ void CCommandLine::setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErro
 void CCommandLine::activateCalSwitching(const long& interleave) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl)
 {
 	AUTO_TRACE("CCommandLine::activateCalSwitching()");
+	int res;
+	WORD len;
+	char sBuff[SENDBUFFERSIZE];
+	char rBuff[RECBUFFERSIZE];
 	if (getIsBusy()) {
-		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::activateCalSwitching()");
+		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setTime()");
 		throw impl;
+	}
+	if (!checkConnection()) {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setTime()");
+	}
+	strcpy (sBuff,"?cal-on,");
+	strcat (sBuff,interleave);
+	strcat (sBuff,"\r\n");
+	len = strlen (sBuff);
+	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
+		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (!m_calSwitchingEnabled) {
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::activateCalSwitching()");
@@ -1072,6 +1097,10 @@ void CCommandLine::getBackendStatus(DWORD& status)
 	WORD len;
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
+	bool acquiring;
+	double timestamp;
+	char *statusCode;
+
 	// I do not check for backend busy because this is a call done at the initialization and never repeated
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getBackendStatus()");
@@ -1083,9 +1112,9 @@ void CCommandLine::getBackendStatus(DWORD& status)
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		//if (!CProtocol::status(rBuff)) {
-		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
-		//}
+		if (!CProtocol::status(rBuff,timestamp,statusCode,acquiring)) {
+			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::getBackendStatus()");
+		}
 	}
 	else if (res==FAIL) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
@@ -1440,7 +1469,7 @@ int CCommandLine::getConfiguration(char* configuration)
 	return SENDBUFFERSIZE; 
 }
 
-int CCommandLine::getCommProtVersion(char* version)
+int CCommandLine::getCommProtVersion(CORBA::String_out version)
 {
 	TIMEVALUE Now;
 	char sBuff[SENDBUFFERSIZE];
@@ -1456,7 +1485,7 @@ int CCommandLine::getCommProtVersion(char* version)
 
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-		strcpy (version,(char*)rBuff);
+		strcpy (version,(const char*)rBuff);
 	}
 	if (res>0) { // operation was ok.
 		//if (!CProtocol::status(rBuff)) {
@@ -1565,6 +1594,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 			m_inputSection[i]=i; // input 0 belongs to section 0 and so on.....
 			m_attenuation[i]=setup.attenuation;
 			m_bandWidth[i]=setup.bandWidth;
+			m_bins[i]=setup.bins;
 		}		
 	}
 	else {
@@ -1579,7 +1609,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 	for (i=0;i<m_sectionsNumber;i++) {
 		m_sampleRate[i]=DEFAULT_SAMPLE_RATE;
 		m_frequency[i]=STARTFREQUENCY;
-		m_bins[i]=BINSNUMBER;
+		//m_bins[i]=BINSNUMBER;
 		m_enabled[i]=true;
 		m_tsys[i]=0.0;
 		m_KCratio[i]=1.0;

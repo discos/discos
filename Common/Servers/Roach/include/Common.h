@@ -17,7 +17,7 @@
 
 // some hard coded, hardware dependant constants
 #define STARTFREQUENCY 50.0 // this is the start frequency of all IF inputs
-#define BINSNUMBER 1
+#define BINSNUMBER 1000
 #define SAMPLETYPE float
 #define SAMPLESIZE sizeof(SAMPLETYPE)  //
 

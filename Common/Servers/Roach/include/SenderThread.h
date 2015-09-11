@@ -66,7 +66,7 @@ public:
      virtual void runLoop();
      
      /**
-      * This method is used to let the thread know the configuration of teh backend in order to perform the proper operations over
+      * This method is used to let the thread know the configuration of the backend in order to perform the proper operations over
       * the coming data.
       * @param mH main header of the data
       * @param mC section header, one header for each enabled section)

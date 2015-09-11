@@ -303,12 +303,12 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 	//Backends::TMainHeader header;
 	//Backends::TChannelHeader chHeader[MAX_INPUT_NUMBER];
 	THeaderRecord buffer;
-	DWORD tpi[MAX_SECTION_NUMBER];
+	//DWORD tpi[MAX_SECTION_NUMBER];
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	line->fillMainHeader(buffer.header);
 	line->fillChannelHeader(buffer.chHeader,MAX_SECTION_NUMBER);
 	try {
-		line->setTime();
+		//line->setTime();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -362,7 +362,7 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 	// measure the zero tpi
 	#ifndef BKD_DEBUG
 	try {
-		line->getZeroTPI(tpi);
+		//line->getZeroTPI(tpi);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -381,9 +381,9 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 	for(int i=0;i<MAX_INPUT_NUMBER;tpi[i]=0,i++);
 	#endif
 	// now comunicate the reading to the sender thread.....
-	m_senderThread->saveZero(tpi);
+	//m_senderThread->saveZero(tpi);
 	// start the job for the backend.....
-	try {
+	/*try {
 		line->startDataAcquisition();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -398,7 +398,7 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"RoachImpl::sendHeader()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}
+	}*/
 }
 
 void RoachImpl::terminate() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
@@ -427,7 +427,9 @@ void RoachImpl::terminate() throw (CORBA::SystemException, BackendsErrors::Backe
 void RoachImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
 		ComponentErrors::ComponentErrorsEx)
 {
+
 	AUTO_TRACE("RoachImpl::sendData()");
+
 	TIMEVALUE now;
 	ACS::Time expectedStartTime;
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -452,13 +454,15 @@ void RoachImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException, Bac
 	//I explicitly release the mutex before accessing the sender thread because it also make use of the command line...just to make sure to avoid deadlock
 	line.Release();
 	m_senderThread->saveStartTime(expectedStartTime);
-	m_senderThread->resumeTransfer();
+	//m_senderThread->resumeTransfer();
 }
 
 void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
 		ComponentErrors::ComponentErrorsEx)
-{	
+{
+	
 	AUTO_TRACE("RoachImpl::sendStop()");
+
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
 		line->suspendDataAcquisition(); 
@@ -478,8 +482,9 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 	}
 	//I explicity release the mutex before accessing the sender thread because it also make use of the command line...just to make sure to avoid deadlock
 	line.Release();
-	m_senderThread->suspendTransfer();
+	//m_senderThread->suspendTransfer();
 	//m_senderThread->setStop(true);
+
 	/*try {
 		getSender()->stopSend(FLOW_NUMBER);
 	}

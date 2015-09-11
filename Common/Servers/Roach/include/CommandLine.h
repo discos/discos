@@ -442,7 +442,7 @@ public:
 
 	int getConfiguration(char* configuration);
 
-	int getCommProtVersion(char* version);
+	int getCommProtVersion(CORBA::String_out version);
 
 protected:
 	/**

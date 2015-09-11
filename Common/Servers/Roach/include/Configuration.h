@@ -41,6 +41,7 @@ public:
 		long ifs[MAX_SECTION_NUMBER];
 		double bandWidth;
 		double attenuation;
+		long bins;
 	} TBackendSetup;
 	
 	/**

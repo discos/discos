@@ -128,6 +128,7 @@ bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& se
 			setup.ifs[i]=ret.ToLong();
 			ACS_LOG(LM_FULL_INFO,"CConfiguration::getSetupFromID()",(LM_DEBUG,"Sections: %d - Board: %d - Polarization: %d - Feed: %d - Ifs: %d",i,setup.section_boards[i],setup.polarizations[i],setup.feed[i],setup.ifs[i]));
 		}
+		setup.bins=(*m_configurationTable)["bins"]->asLongLong();
 		return true;
 	}
 	else {
@@ -200,6 +201,9 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	}
 	else if (!m_configurationTable->addField(error,"IF",CDataField::STRING)) {
 		error.setExtra("Error adding field IF", 0);
+	}
+	else if (!m_configurationTable->addField(error,"bins", CDataField::LONGLONG))	{
+		error.setExtra("Error adding field bins", 0);
 	}
 	if (!error.isNoError()) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,error);
