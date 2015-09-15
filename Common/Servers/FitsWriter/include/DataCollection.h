@@ -229,6 +229,8 @@ public:
 	 */
 	IRA::CString getSummaryFileName() const;
 
+	bool getIsNoData() const { return m_mainH.noData; }
+
 	/**
 	 * Get the name of the project
 	 */
@@ -331,11 +333,18 @@ public:
 	
 	/**
 	 * It will return the data of the next dump in the list. The returned buffer must be freed by the caller.
-	 * @return  it will return a false if the list is empty or the corresponding time of the next dump is 
-	 * greater than the <i>m_stopTime</i>. That means that the dump coming from  
+	 * @return  it will return a false if the list is empty
 	 * 
 	 */
 	bool getDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize);
+
+	/**
+	 * It will create a fake dump. The returned buffer must be freed by the caller.
+	 * @return  it will return a false if the list is empty or the corresponding time of the next dump is
+	 * greater than the <i>m_stopTime</i>.
+	 *
+	 */
+	bool getFakeDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize);
 	
 	/**
 	 * @return the reference to the main header. 
@@ -553,6 +562,18 @@ private:
 	 * determine which is the scan axis
 	 */
 	Management::TScanAxis m_scanAxis;
+	/**
+	 * It marks the expected start UT Time of the subscan
+	 */
+	ACS::Time m_startUTTime;
+	/**
+	 * It marks the stop UT Time of the subscan
+	 */
+	ACS::Time m_stopUTTime;
+	/**
+	 * Iternally used to generate fake data buffers
+	 */
+	ACS::Time m_fakeUTTime;
 	/**
 	 * scan and subscan identifiers
 	 */

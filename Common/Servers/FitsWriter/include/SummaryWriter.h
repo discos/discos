@@ -59,7 +59,6 @@ public:
 	 */
 	FitsWriter_private::CFile* getFilePointer() { return m_file; }
 
-
 	/**
 	 * This method is in charge of writing the data (keyword, tables and whatever) into the FITS file. The data are taken from the
 	 * internal file

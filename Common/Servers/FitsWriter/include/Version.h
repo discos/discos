@@ -17,8 +17,9 @@
 #define FITS_VERSION5 "V.0.92"
 #define FITS_VERSION6 "V.1.0"
 #define FITS_VERSION7 "V.1.01"
+#define FITS_VERSION8 "V.1.1"
 
-#define CURRENT_VERSION FITS_VERSION7
+#define CURRENT_VERSION FITS_VERSION8
 
 #define DEFAULT_COMMENT CURRENT_VERSION" Created by  S. Righini, M. Bartolini  & A. Orlati"
 
@@ -29,6 +30,8 @@
 #define HISTORY5 FITS_VERSION5" SubScanType added as primary header keyword"
 #define HISTORY6 FITS_VERSION6" Added new table to store position of subriflector e primary focus receivers: SERVO TABLE"
 #define HISTORY7 FITS_VERSION7" New keywords in FEED TABLE header to describe derotator configuration"
+#define HISTORY8 FITS_VERSION8" Summary.fits file included in order to describe the scan configuration"
+
 
 
 

@@ -27,7 +27,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  04/09/2012	   added function makeDirectory() and directoryExists() */
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/06/2014	  Function to handle conversions from Reference frame and definition for radial velocity */
 /* Marco Bartolini (bartolini@ira.inaf.it)  18/06/2014	   added function ACS::Time getACSTime() */
-
+/* Andrea Orlati(aorlati@ira.inaf.it)  12/08/2015	  Function to check if a file exists or not */
 
 #include <time.h>
 #include <sys/time.h>
@@ -651,6 +651,12 @@ public:
 	  * @return true if the directory exists, false otherwise
 	  */
 	 static bool directoryExists(const IRA::CString& path);
+
+	 /**
+	  * Check if a file exists on the local file system
+	  * @return true if the file exists, false otherwise
+	  */
+	 static bool fileExists(const IRA::CString& file);
 
 	 /**
 	  * Round a double value to the nearest number with decimals precision

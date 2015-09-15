@@ -6,6 +6,7 @@
 #include <slalib.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <sys/stat.h>
 
 using namespace IRA;
 
@@ -1089,6 +1090,12 @@ bool CIRATools::directoryExists(const IRA::CString& path)
     	closedir(dir);
     }
     return exists;
+}
+
+bool CIRATools::fileExists(const IRA::CString& file)
+{
+	struct stat buffer;
+	return (stat((const char *)file,&buffer)==0);
 }
 
 double CIRATools::roundNearest(const double& val,const long& decimals)

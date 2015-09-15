@@ -104,7 +104,16 @@ bool CEngineThread::processData()
 	ACS::doubleSeq_var servoPositions;
 	long long integrationTime;
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-	if (!m_data->getDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
+
+	if (m_data->getIsNoData()) {
+		IRA::CString outString;
+		if (!m_data->getFakeDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
+		IRA::CIRATools::timeToStr(time,outString);
+		cout << "generated time " << (const char *) outString << endl;
+	}
+	else {
+		if (!m_data->getDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
+	}
 	TIMEVALUE tS;
 	tS.value(time);
 #ifdef FW_DEBUG

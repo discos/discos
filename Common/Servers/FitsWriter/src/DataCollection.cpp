@@ -30,6 +30,9 @@ CDataCollection::CDataCollection()
 	m_scanTag=-1;
 	m_deviceID=0;
 	m_scanAxis=Management::MNG_NO_AXIS;
+	m_startUTTime=0; // initialized to..."no time"
+	m_stopUTTime=0;
+	m_fakeUTTime=0;
 	m_scanID=m_subScanID=0;
 	m_telecopeTacking=m_prevTelescopeTracking=false;
 	m_telescopeTrackingTime=0;
@@ -53,6 +56,7 @@ void CDataCollection::forceReset()
 	m_writeSummary=false;
 	m_reset=true;
 	m_status=Management::MNG_OK;
+	m_stopUTTime=m_startUTTime=m_fakeUTTime=0;
 }
 
 void CDataCollection::saveMainHeaders(Backends::TMainHeader const * h,Backends::TSectionHeader const * ch)
@@ -212,10 +216,55 @@ bool CDataCollection::getDump(ACS::Time& time,bool& calOn,char *& memory,char *&
 	return m_dumpCollection.popDump(time,calOn,memory,buffer,tracking,buffSize);
 }
 
+bool CDataCollection::getFakeDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize)
+{
+	long size=0;
+	TIMEVALUE clock;
+	ACS::Time now;
+	IRA::CIRATools::getTime(clock);
+	now=clock.value().value;
+	if (m_startUTTime==0) { // if the scan is not started yet...nothing to do...there is no data
+		return false;
+	}
+	else if ((m_stopUTTime!=0) && (m_fakeUTTime>=m_stopUTTime)) { // if a stop has been issued and the fake time is greater than it...
+		return false; // now more data available....
+	}
+	else if (m_startUTTime>=now) { // the scan is started....
+		if (m_fakeUTTime==0) { // if the fake time is zero, not yet generated at least once......
+			m_fakeUTTime=m_startUTTime; //initialize and go ahead....
+		}
+		else {
+			m_fakeUTTime+=getIntegrationTime()*10000; //integration time is in millisec...
+		}
+	}
+	else {
+		return false;
+	}
+	//compute the size of the fake buffer
+	for (int i=0;i<getSectionsNumber();i++) {
+		size+=getSectionBins(i)*getSectionStreamsNumber(i); //pol * bins
+	}
+	//compute tsys size
+	buffSize=sizeof(double)*getInputsNumber();
+	//finally add the fake raw data size....
+	buffSize+=getSampleSize()*size;
+	buffer=new char[buffSize];
+	memory=buffer;
+	bzero(buffer,buffSize);
+	time=m_fakeUTTime;
+	calOn=false;
+	if (time>=m_telescopeTrackingTime) tracking=m_telecopeTacking;
+	else tracking=m_prevTelescopeTracking;
+	return true;
+}
+
 void CDataCollection::startStopStage()
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_running) m_stop=true;
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	m_stopUTTime=now.value().value;
 }
 
 void CDataCollection::startRunnigStage()
@@ -231,6 +280,7 @@ void CDataCollection::haltStopStage()
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_running=false;
 	m_stop=false;
+	m_stopUTTime=m_startUTTime=m_fakeUTTime=0;
 }
 
 void CDataCollection::haltResetStage()
@@ -313,6 +363,7 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 			m_fileName=baseName+temp+".fits";
 			m_subScanHeader=true;
 			m_scanAxis=setup.axis;
+			m_startUTTime=setup.startUt;
 			//setup.startUt and setup.targetID are not used
 			return true;
 		}

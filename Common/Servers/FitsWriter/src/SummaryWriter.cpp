@@ -11,7 +11,7 @@ using namespace FitsWriter_private;
 void CSummaryWriter::init()
 {
 	#define _FILE_LOCAL_FILE m_file
-	#include BOOST_PP_LOCAL_ITERATE()
+	#include "FileCreator.h"
 	#undef _FILE_LOCAL_FILE
 	m_file->setKeyword("FITSVER",IRA::CString(CURRENT_VERSION));
 }
@@ -56,8 +56,8 @@ bool CSummaryWriter::close()
 
 bool CSummaryWriter::write()
 {
-	m_file->begin();
-	CEntry *cc;
+	//m_file->begin();
+	//CEntry *cc;
 	IRA::CString fullName=m_basepath+m_filename;
 	try {
 		m_pFits=new CCfits::FITS((const char *)fullName,CCfits::Write);
@@ -75,9 +75,10 @@ bool CSummaryWriter::write()
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY5,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY6,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY7,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY8,m_lastError)) return false;
 
-
-	while ((cc=m_file->getNextEntry())!=NULL) {
+	return m_file->write(m_pFits,m_lastError);
+	/*while ((cc=m_file->getNextEntry())!=NULL) {
 		if (cc->getType()==_FILE_STRING_TYPE_S) {
 			if (cc->isSimple()) {
 				CHeaderEntry<_FILE_STRING_TYPE,false> *p=dynamic_cast<CHeaderEntry<_FILE_STRING_TYPE,false> *>(cc);
@@ -113,7 +114,8 @@ bool CSummaryWriter::write()
 			}
 		}
 	}
-	return true;
+	return true;*/
+
 
 }
 

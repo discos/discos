@@ -45,7 +45,7 @@ module Backends {
 	ACS_ENUM(TPolarization);
 
 	/**
-	 * This stucture reports the information that composes the section header of the data flux. Each section can have one or two inputs. Generally the number of inputs depends on the
+	 * This structure reports the information that composes the section header of the data flux. Each section can have one or two inputs. Generally the number of inputs depends on the
 	 * the polarization type of the section, if simple LEFT or RIGHT the input is one, if FULL_STOKES the inputs are two. The two positions fields <i>attenuation</i> and <i>IF</i> reports
 	 * on the levels of attenuation and on the intermediate frequency chain number of the receiver of each input. If you want to know which the polarization of the second input of a given
 	 * section you have to read the value of Receivers::polarization[IF[1]]. The attenuation level in db of the first input of a given section is attenuation[0]. 
@@ -64,7 +64,7 @@ module Backends {
 	};
 	
 	/**
-	 * This stucture exports all the information that composes the main header of the data flux
+	 * This structure exports all the information that composes the main header of the data flux
 	*/   
 	struct TMainHeader {
 		long sections;           /*!< number of sections that will be transfered by the backend, this record will be followed by "sections"
@@ -72,19 +72,23 @@ module Backends {
 		long beams;               /*!< number of beams of the telescope */
 		long integration;       /*<! integration time in milli seconds, it applies to all sections */
 		long sampleSize;       /*<! number of bytes that a single sample is */
+		boolean noData;  /*<! this flag indicates that the dump is virtual or in other words no raw data will be appended to the dump.
+			//                         If true it will cause the file creator to create a file with just meta-data. */
 	};
 	
 	/**
-	 * This structure is the dump header, a dump is the ammount of data collected during the integration time for all the channels.
-	 * Inside the dump the channels will be transfrered in the order they appear in the <i>TChannelHeader</i> sequence. First of all 
-	 * the tsys information is transferred for each channel. Then for each channel and polarization an array of <i>bins</i> sample is trasmitted;
-	 * in case of a full stokes 4 arrays are transfered (left first then right, then stokes Q and U respectively).
+	 * This structure is the dump header, a dump is the all the data collected during the integration time for all the sections.
+	 * Inside the dump the sections will be transferred in the order they appear in the <i>TChannelHeader</i> sequence. First of all
+	 * the total intensity information(counts or Kelvin) is transferred for each inputs (the inputs appear in the same order of the sections).
+	 * Then for each channel and polarization an array of <i>bins</i> sample is transmitted;
+	 * in case of a full stokes, 4 arrays are transfered (left first then right, then stokes Q and U respectively).
 	*/ 
 	struct TDumpHeader {
 		ACS::Time time;  /*!<! timestamp that marks the dump in time, this have to mark the exact start time of the acquisition. The duration is determined by the <i>TMainHeader::integration</i> */
 		long dumpSize;  /*!<! size of the dump in bytes, it must be a multiple of the <i>sampleSize</i> parameter reported by the 
 											<i>TMainHeader</i>.  */
 		boolean calOn;			/*<! if true the calibration diode is on, false otherwise*/
+		//ACS::Time tsysTime; /*<! if non-zero, the last measure of the system temperature is also appended. */
 	};
 	
 };
