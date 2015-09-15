@@ -223,18 +223,32 @@ bool CDataCollection::getFakeDump(ACS::Time& time,bool& calOn,char *& memory,cha
 	ACS::Time now;
 	IRA::CIRATools::getTime(clock);
 	now=clock.value().value;
+	//IRA::CString outString;
+	//IRA::CIRATools::timeToStr(now,outString);
+	//cout << "current time " << (const char *) outString << endl;
+	//IRA::CIRATools::timeToStr(m_startUTTime,outString);
+	//cout << "start time " << (const char *) outString << endl;
+	//IRA::CIRATools::timeToStr(m_stopUTTime,outString);
+	//cout << "stop time " << (const char *) outString << endl;
 	if (m_startUTTime==0) { // if the scan is not started yet...nothing to do...there is no data
 		return false;
 	}
 	else if ((m_stopUTTime!=0) && (m_fakeUTTime>=m_stopUTTime)) { // if a stop has been issued and the fake time is greater than it...
 		return false; // now more data available....
 	}
-	else if (m_startUTTime>=now) { // the scan is started....
+	else if (m_startUTTime<now) { // the scan is started....
 		if (m_fakeUTTime==0) { // if the fake time is zero, not yet generated at least once......
 			m_fakeUTTime=m_startUTTime; //initialize and go ahead....
 		}
 		else {
-			m_fakeUTTime+=getIntegrationTime()*10000; //integration time is in millisec...
+			if (m_fakeUTTime+getIntegrationTime()*10000<now) {
+				m_fakeUTTime+=getIntegrationTime()*10000; //integration time is in millisec...
+				//IRA::CIRATools::timeToStr(m_fakeUTTime,outString);
+				//cout << "fake time " << (const char *) outString << endl;
+			}
+			else {
+				return false;
+			}
 		}
 	}
 	else {

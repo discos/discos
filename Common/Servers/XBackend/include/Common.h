@@ -21,7 +21,7 @@
 
 #ifdef COMPILE_TARGET_MED
 
-#define DEFAULT_BINS 4096
+#define DEFAULT_BINS 2048
 
 #else
 
