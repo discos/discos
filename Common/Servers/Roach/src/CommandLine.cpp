@@ -296,7 +296,7 @@ ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Ba
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::resumeDataAcquisition()");
 	}
-	strcpy (sBuff,"?start");
+	strcpy (sBuff,"?start,0");
 	strcat (sBuff,"\r\n");
 	len = strlen (sBuff);
 	//len=CProtocol::resumeAcquisition(sBuff); // get the buffer

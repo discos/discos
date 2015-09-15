@@ -327,7 +327,6 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 	try {
 		getSender()->startSend(FLOW_NUMBER,(const char*)&buffer,
 				sizeof(Backends::TMainHeader)+buffer.header.sections*sizeof(Backends::TSectionHeader));
-		//getSender()->startSend(FLOW_NUMBER,(const char*)&header,sizeof(header));
 	}
 	catch (AVStartSendErrorExImpl& ex) {
 		_ADD_BACKTRACE(BackendsErrors::TXErrorExImpl,impl,ex,"RoachImpl::sendHeader()");
@@ -485,7 +484,7 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 	//m_senderThread->suspendTransfer();
 	//m_senderThread->setStop(true);
 
-	/*try {
+	try {
 		getSender()->stopSend(FLOW_NUMBER);
 	}
 	catch (AVStopSendErrorExImpl& ex) {
@@ -496,7 +495,7 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"RoachImpl::sendStop()");
 		throw impl.getComponentErrorsEx();
-	}*/
+	}
 }
 
 /*void RoachImpl::setAllSections(CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,Backends::TPolarization pol,CORBA::Double sr,CORBA::Long bins) throw (
