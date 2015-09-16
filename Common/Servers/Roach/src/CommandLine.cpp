@@ -132,11 +132,11 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
 	AUTO_TRACE("CCommandLine::stopDataAcquisition()");
-	if (!getIsBusy()) {
+/*	if (!getIsBusy()) {
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::stopDataAcquisition()");
 		impl.setReason("transfer job cannot be stopped in this configuration");
 		throw impl;
-	}
+	}*/
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::stopDataAcquisition()");
 	}
