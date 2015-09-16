@@ -1244,6 +1244,7 @@ void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 	bkd.integration=intTime;
 	//bkd.integration=m_integration;
 	bkd.sampleSize=m_sampleSize;
+	bkd.noData=true;
 }
 
 void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& size)

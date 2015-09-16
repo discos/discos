@@ -888,7 +888,8 @@ void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 	bkd.beams=m_beams;
 	//bkd.integration=groupSpec->Xspec.GetTempoIntegrazione();
 	bkd.integration=(groupSpec->Xspec.GetTempoIntegrazione())*1000; //integration time value in msec into the fits header
-	bkd.sampleSize=SAMPLESIZE;	
+	bkd.sampleSize=SAMPLESIZE;
+	bkd.noData=false;
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::fillMainHeader",(LM_INFO,"Main_OK"));
 }
 

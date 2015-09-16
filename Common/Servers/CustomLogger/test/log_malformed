@@ -13,9 +13,9 @@ log_component = client.getComponent(comp_name = "MANAGEMENT/CustomLogger",
                                     comp_idl_type = "IDL:alma/Management/CustomLogger:1.0",
                                     container_name = "LoggerContainer")
 try:
-    log_component.emitLog(MALFORMED_XML_STRING, Management.C_INFO)
+    log_component.emitLog(MALFORMED_XML_STRING, Management.C_NOTICE)
 except KeyboardInterrupt:
-    log_component.emitLog("malformed logging ends", Management.C_INFO)
+    log_component.emitLog("malformed logging ends", Management.C_NOTICE)
 finally:
     client.releaseComponent("MANAGEMENT/CustomLogger")
 
