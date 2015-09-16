@@ -106,9 +106,9 @@ bool CEngineThread::processData()
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 
 	if (m_data->getIsNoData()) {
-		IRA::CString outString;
+		//IRA::CString outString;
 		if (!m_data->getFakeDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
-		IRA::CIRATools::timeToStr(time,outString);
+		//IRA::CIRATools::timeToStr(time,outString);
 	}
 	else {
 		if (!m_data->getDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
