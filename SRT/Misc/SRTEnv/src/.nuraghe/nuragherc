@@ -55,6 +55,9 @@ alias startnuraghelo='echo "use command: VBoxHeadless -s NURAGHE-LO"'
 alias monitorAcuTemp="watch -n 60 $HOME/bin/showacutemp.sh"
 alias printNuragheSetup='$NURAGHERC/printNuragheSetup.sh'
 
+# ACS commands wrappers
+alias killACS='killACS -q -a'
+
 # If there is not any lock file, create a default one
 if [ ! -f $ACS_TMP/nuraghetrunk.lock ] && \
    [ ! -f $ACS_TMP/nuraghetag.lock ] && \
