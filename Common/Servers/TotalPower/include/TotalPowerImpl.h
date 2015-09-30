@@ -355,7 +355,12 @@ public:
      */
     virtual CORBA::Long getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber) throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
-        
+
+    /**
+     * This method is just a place holder for this implementation of the genericBackend interface
+     */
+    virtual void setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
 	/** 
 	 * Returns a reference to the time  property Implementation of IDL interface.
 	 * @return pointer to read-only unsigned long long  property time

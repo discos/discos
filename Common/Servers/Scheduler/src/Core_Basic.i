@@ -345,12 +345,13 @@ void CCore::setupDataTransfer(bool& scanStarted,
 							  const Management::TScanAxis& axis,
 							  const CConfiguration* config
 	) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,
-			ComponentErrors::UnexpectedExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
+			ComponentErrors::UnexpectedExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
 {
 	if (!streamPrepared) {
 		_EXCPT(ManagementErrors::DataTransferSetupErrorExImpl,impl,"CCore::setupDataTansfer()");
 		throw impl;
 	}
+	CORBA::String_var fullFileName;
  	try {
  		if (!CORBA::is_nil(writer)) {
  			Management::TScanSetup setup;
@@ -413,7 +414,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
  			subSetup.extraPath=CORBA::string_dup((const char *)extraPath);
  			subSetup.baseName=CORBA::string_dup((const char *)baseName);
  			subSetup.targetID=CORBA::string_dup((const char *)targetID);
- 			writer->startSubScan(subSetup);
+ 			fullFileName=writer->startSubScan(subSetup);
  		}
 		else {
 			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::setupDataTransfer()");
@@ -437,6 +438,22 @@ void CCore::setupDataTransfer(bool& scanStarted,
  		impl.setMinor(ex.minor());
  		throw impl;
  	}
+ 	// also inform the backend on the currently processed file
+	if (!CORBA::is_nil(backend)) {
+		try {
+			backend->setTargetFileName(fullFileName.in());
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::OperationErrorExImpl,impl,"CCore::setupDataTransfer()");
+			impl.setReason("could not pass the file name to the backend");
+			backendError=true;
+			throw impl;
+		}
+	}
+	else {
+		_EXCPT(ManagementErrors::BackendNotAvailableExImpl,impl,"CCore::setupDataTransfer()");
+		throw impl;
+	}
 }
 
 void CCore::stopScan(Management::DataReceiver_ptr writer,bool& writerError,bool& scanStarted) throw (ComponentErrors::OperationErrorExImpl)

@@ -68,7 +68,8 @@ static void setupDataTransfer(bool& scanStarted,Management::DataReceiver_ptr wri
 		const bool& streamPrepared,const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& targetID,
 		const IRA::CString& layoutName,const ACS::stringSeq& layout,const long& scanTag,const long& device,const DWORD& scanID,const ACS::Time& startTime,const  DWORD& subScanID,
 		const Management::TScanAxis& axis,const CConfiguration* config) throw (ComponentErrors::OperationErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::DataTransferSetupErrorExImpl);
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl,
+		ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::BackendNotAvailableExImpl);
 
 /**
  * This static method starts the data transfer between the backend and the configured data recorder.

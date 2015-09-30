@@ -624,6 +624,13 @@ void TotalPowerImpl::enableChannels(const ACS::longSeq& enable) throw (CORBA::Sy
 	}			
 }
 
+void TotalPowerImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+		BackendsErrors::BackendsErrorsEx)
+{
+	// nothing to do
+}
+
+
 void TotalPowerImpl::setTime() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
 		BackendsErrors::BackendsErrorsEx)
 {

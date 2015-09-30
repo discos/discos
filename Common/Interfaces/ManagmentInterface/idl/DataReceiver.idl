@@ -147,11 +147,12 @@ module Management {
 		/**
 		 * When this method is called the DataReceiver should prepare to start a new subscan.
 		 * @prm extra parameters to allow the subscan preparation
-		 * @thorw ComponentErrors::ComponentErrorsEx
-		 * @thorw ManagementErrors::ManagementErrorsEx
-		 * @thorw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 * @throw CORBA::SystemExcpetion
+		 * @return the name of the file currently processed
 		 */
-		void startSubScan(in TSubScanSetup prm) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		string startSubScan(in TSubScanSetup prm) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
 		 * Called in order to issue the end of the schedule

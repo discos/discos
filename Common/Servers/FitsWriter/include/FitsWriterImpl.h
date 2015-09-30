@@ -166,8 +166,9 @@ class FitsWriterImpl : public virtual BulkDataReceiverImpl<FitsWriter_private::R
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
+	 * @return the name of the file that will be processed by the system
 	 */
-    virtual void startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+    virtual char *startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
     /**
      * Return the recording status of the component.
