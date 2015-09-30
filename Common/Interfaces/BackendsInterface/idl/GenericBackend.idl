@@ -334,6 +334,16 @@ module Backends {
 		long getInputs(out ACS::doubleSeq freq,out ACS::doubleSeq bandwidth,out ACS::longSeq feed,out ACS::longSeq ifNumber) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 		
 		/**
+		 * This method allows to set name of the file that is currently been worked by the system. Depending the backend implementation
+		 * this may o may not be used.
+		 * @param fileName name of the file
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @thorw BackendsErrors::BackendsErrorsEx
+		 * @throw CORBA:SystemException
+		 */
+		void setTargetFileName(in string fileName) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+		/**
 		 * @copybrief Managment::CommandInterpreter::command()
  		 * This method can be used to configure and give to the backend some commands. The commands and configuration is given as strings.   If the component is busy 
 		 * it is not allowed to call this method.  
