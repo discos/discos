@@ -228,8 +228,8 @@ void RoachImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		throw ex;
 	}
 	//resume the threads 
-	m_senderThread->resume();
-	m_controlThread->resume();
+	//m_senderThread->resume();
+	//m_controlThread->resume();
 	try {
 		startPropertiesMonitoring();
 	}
@@ -307,8 +307,8 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	line->fillMainHeader(buffer.header);
 	line->fillChannelHeader(buffer.chHeader,MAX_SECTION_NUMBER);
-	try {
-		//line->setTime();
+	/*try {
+		line->setTime();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -323,6 +323,7 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
 	}
+    */
 	#ifndef BKD_DEBUG
 	try {
 		getSender()->startSend(FLOW_NUMBER,(const char*)&buffer,
@@ -360,7 +361,7 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 	m_senderThread->saveDataHeader(&(buffer.header),(buffer.chHeader));
 	// measure the zero tpi
 	#ifndef BKD_DEBUG
-	try {
+	/*try {
 		//line->getZeroTPI(tpi);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -375,7 +376,7 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"RoachImpl::sendHeader()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}
+	}*/
 	#else
 	for(int i=0;i<MAX_INPUT_NUMBER;tpi[i]=0,i++);
 	#endif
@@ -448,7 +449,6 @@ void RoachImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException, Bac
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
 	}
-	//m_senderThread->setStop(false);
 	// if the resume succeeds....than set the start time accordingly.
 	//I explicitly release the mutex before accessing the sender thread because it also make use of the command line...just to make sure to avoid deadlock
 	line.Release();
@@ -482,7 +482,6 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 	//I explicity release the mutex before accessing the sender thread because it also make use of the command line...just to make sure to avoid deadlock
 	line.Release();
 	//m_senderThread->suspendTransfer();
-	//m_senderThread->setStop(true);
 
 	try {
 		getSender()->stopSend(FLOW_NUMBER);
@@ -496,6 +495,7 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"RoachImpl::sendStop()");
 		throw impl.getComponentErrorsEx();
 	}
+
 }
 
 /*void RoachImpl::setAllSections(CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,Backends::TPolarization pol,CORBA::Double sr,CORBA::Long bins) throw (
@@ -656,7 +656,7 @@ void RoachImpl::setAttenuation(CORBA::Long input,CORBA::Double att) throw (CORBA
 {
 	AUTO_TRACE("RoachImpl::setAttenutation()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	try {
+	/*try {
 		line->setAttenuation(input,att);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -671,7 +671,7 @@ void RoachImpl::setAttenuation(CORBA::Long input,CORBA::Double att) throw (CORBA
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"RoachImpl::setAttenutation()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}		
+	}*/		
 }
 
 CORBA::Long RoachImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber) throw (CORBA::SystemException,
@@ -700,8 +700,8 @@ void RoachImpl::activateNoiseCalibrationSwitching(CORBA::Long interleave) throw 
 {
 	AUTO_TRACE("RoachImpl::activateNoiseCalibrationSwitching()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	try {
-		line->activateCalSwitching(interleave);
+	/*try {
+		line->activateCalSwitching(interleave); // NOT YET AVAILABLE
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -715,7 +715,7 @@ void RoachImpl::activateNoiseCalibrationSwitching(CORBA::Long interleave) throw 
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"RoachImpl::activateNoiseCalibrationSwitching()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}			
+	}*/			
 }
 
 void RoachImpl::initialize(const char * configuration) throw (CORBA::SystemException,
@@ -766,7 +766,7 @@ void RoachImpl::setIntegration(CORBA::Long Integration) throw (CORBA::SystemExce
 
 void RoachImpl::getConfiguration (CORBA::String_out configuration) throw (CORBA::SystemException)
 {
-	AUTO_TRACE("RoachImpl::setIntegration()");
+	AUTO_TRACE("RoachImpl::getIntegration()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
 		line->getConfiguration(configuration);

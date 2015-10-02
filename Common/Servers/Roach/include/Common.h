@@ -16,7 +16,7 @@
 //#define BKD_DEBUG 
 
 // some hard coded, hardware dependant constants
-#define STARTFREQUENCY 50.0 // this is the start frequency of all IF inputs
+#define STARTFREQUENCY 0.0 // this is the start frequency of all IF inputs
 #define BINSNUMBER 1000
 #define SAMPLETYPE float
 #define SAMPLESIZE sizeof(SAMPLETYPE)  //
@@ -32,13 +32,16 @@
 #define DEFAULT_INTEGRATION 0  // no second of integration
 #define DEFAULT_DIODE_SWITCH_PERIOD 0 // the cal diode is not switched
 
-#define MAX_BAND_WIDTH 2350.0
+#define MAX_BAND_WIDTH 2300.0
 #define MIN_BAND_WIDTH 300.0
 
 #define MAX_ATTENUATION 15.0
 #define MIN_ATTENUATION 0.0
 
-#define MAX_SAMPLE_RATE 0.001 // one millisecond
+#define MAX_BINS 16384
+#define MIN_BINS 1024
+
+#define MAX_SAMPLE_RATE 4600.0 // MHz
 
 #define FLOW_NUMBER 1
 #endif /*COMMON_H_*/

@@ -158,7 +158,7 @@ public:
 	 * @param startTime represent the exact time that the acquisition should start. Of course this has effect only if the call
 	 * to that method arrives reasonably before the given time.
 	 */
-	virtual void sendData(ACS::Time startTiime) throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
+	virtual void sendData(ACS::Time startTime) throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
 			ComponentErrors::ComponentErrorsEx);
 	
 	/**

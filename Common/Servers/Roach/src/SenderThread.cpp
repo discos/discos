@@ -61,7 +61,7 @@ void CSenderThread::closeSocket()
 void CSenderThread::runLoop()
 {
 	IRA::CError err;
-	//int res;
+	int res;
 	IRA::CSecAreaResourceWrapper<CCommandLine> cmd=m_commandLine->Get();
 	if (cmd->m_reiniting) {
 		cmd->m_reiniting=false;
@@ -121,6 +121,7 @@ void CSenderThread::runLoop()
 			} 
 		}
 		else { // receive was ok and res is the number of bytes that are read
+        
 			long *boards;
 			long sectionNumber;
 			IRA::CIRATools::getTime(m_lastReceiveEpoch);
@@ -130,9 +131,10 @@ void CSenderThread::runLoop()
 			line->setStatusField(CCommandLine::SAMPLING);
 			line->clearStatusField(CCommandLine::DATALINERROR);
 			line->getKCRatio(m_KCountsRatio); // get the K/C ratio
-			processData((DWORD)res,sectionNumber,boards);
-		}
-	}
+			//processData((DWORD)res,sectionNumber,boards);
+			processData(1,sectionNumber,boards);
+		//}
+	//}
 	if (m_stop) { // we were asked to stop the data transfer.....
 		m_go=false;
 		m_stop=false;
@@ -154,7 +156,7 @@ void CSenderThread::runLoop()
 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 		}
 	}
-	*/
+    */
 }
 
 void CSenderThread::saveDataHeader(Backends::TMainHeader* mH,Backends::TSectionHeader* cH)
@@ -208,11 +210,14 @@ void CSenderThread::processData(DWORD dataSize,const long& sectionNumber,long *b
 	m_tempBufferPointer+=dataSize;
 	currentPointer=m_tempBuffer;
 	while (bufferCounter+m_configuration->getDataBufferSize()<=m_tempBufferPointer) {
+        printf("after while\n");
 		currentPointer=m_tempBuffer+bufferCounter;
 		CProtocol::decodeData(currentPointer,m_dataHeader.sampleRate,m_previousStatus,m_previousCounter,sampleTime,counter,status,data,sectionNumber,boards);
 		bufferCounter+=m_configuration->getDataBufferSize();
 		if (!CProtocol::isNewStream(m_previousStatus,m_previousCounter,counter)) { //the first sample is discarded
+            printf("before if m_startTime\n");
 			if  (m_startTime<=sampleTime.value())/* || (m_immediateStart)) */{ //if the start time is elapsed than start processing
+                printf("after if m_startTime\n");
 				for (int i=0;i<MAX_SECTION_NUMBER;i++) { // subtract the zero level
 					if (data[i]>m_zeroBuffer[i]) {
 						data[i]-=m_zeroBuffer[i];
@@ -224,7 +229,7 @@ void CSenderThread::processData(DWORD dataSize,const long& sectionNumber,long *b
 				if (CProtocol::isCal(m_previousStatus)) { // the sample is a calibration diode on
 					computeSample(m_cal,sampleTime,data,true);
 				}
-				if (CProtocol::isTpi(m_previousStatus)) { // the sample is a normal tpi measure
+				if (CProtocol::isTpi(m_previousStatus)) { // the sample is a normal tpi measure*/
 					computeSample(m_tpi,sampleTime,data,false);
 				}
 			}
@@ -289,12 +294,14 @@ void CSenderThread::computeSample(TSampleRecord& samp,TIMEVALUE& sampleTime,DWOR
 		hd.dumpSize=m_dataHeader.sampleSize*m_dataHeader.channels; // add data size.
 		hd.dumpSize+=sizeof(double)*m_dataHeader.channels; // add data size required for tsys trasmission
 		ACE_Message_Block buffer(hd.dumpSize+sizeof(Backends::TDumpHeader));
+        printf("after ACE\n");
 		//memcpy(buffer,&hd,sizeof(Backends::TDumpHeader));
 		for (long jj=0;jj<MAX_SECTION_NUMBER;jj++) {  //computes the system temperatures for all inputs
 			allTsys[jj]=(double)samp.tpi[jj]*m_KCountsRatio[jj];
 		}
 		for (long i=0;i<m_dataHeader.channels;i++) {
-			sample[i]=samp.tpi[m_dataHeader.id[i]];  // stores the tpi for the enabled sections
+			//sample[i]=samp.tpi[m_dataHeader.id[i]];  // stores the tpi for the enabled sections
+			sample[i]=0.0;//samp.tpi[m_dataHeader.id[i]];  // stores the tpi for the enabled sections
 			tsys[i]=allTsys[m_dataHeader.id[i]]; // stores the tsys for th enable inputs
 			//printf("section %ld, %lf, %lf, %ld\n",i,sample[i],tsys[i],m_dataHeader.id[i]);
 		}
@@ -312,6 +319,7 @@ void CSenderThread::computeSample(TSampleRecord& samp,TIMEVALUE& sampleTime,DWOR
 			//m_sender->getSender()->sendData(FLOW_NUMBER,(const char *)sample,hd.dumpSize);
 			//if (!m_stop) {
 			if (m_go) {
+                printf("m_go\n");
 				m_sender->getSender()->sendData(FLOW_NUMBER,&buffer);
 				m_sending=true;
 			}

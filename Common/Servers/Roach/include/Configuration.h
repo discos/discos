@@ -13,7 +13,7 @@
 #include <IRA>
 #include <maciContainerServices.h>
 #include <ComponentErrors.h>
-#include <TotalPowerS.h>
+#include <RoachS.h>
 #include "Protocol.h"
 #include "Common.h"
 

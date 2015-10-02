@@ -209,10 +209,10 @@ void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExIm
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
 	AUTO_TRACE("CCommandLine::startDataAcquisition()");
-	if (getIsBusy()) {
+/*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::startDataAcquisition()");
 		throw impl;
-	}
+	}*/
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::startDataAcquisition()");
 	}
@@ -380,10 +380,10 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
 	double newAtt,newBW;
-	if (getIsBusy()) {
+/*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setAttenuation()");
 		throw impl;
-	}
+	}*/
 	if (inputId>=0) {
 		if (inputId>=m_sectionsNumber) {
 			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setAttenuation()");
@@ -454,12 +454,18 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	WORD len;
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
-	double newBW,newAtt,newSR;
-	if (getIsBusy()) {
+	double newBW,newAtt,newSR,newFreq;
+    long newBins;
+
+/*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setConfiguration()");
 		throw impl;
-	}
-	if (inputId>=0) {  //check the section id is in valid rages
+	}*/
+    if (pol == 2) { // FULL STOKES
+        m_sectionsNumber = m_sectionsNumber/2;
+        m_polarization[inputId] = Backends::BKND_FULL_STOKES;
+    }
+	if (inputId>=0) {  //check the section id is in valid ranges
 		if (inputId>=m_sectionsNumber) {
 			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setConfiguration()");
 			impl.setReason("the section identifier is out of range");
@@ -502,41 +508,71 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		newSR=m_sampleRate[inputId];
 	}
 	newAtt=m_attenuation[inputId];
+    if (freq != 0.0)
+        newFreq = 0.0;
+    if (bins>=0) { // the user ask for a new value
+        if (bins != MIN_BINS && bins != MAX_BINS) {
+		    _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+		    impl.setValueName("bins");
+            /*if (bins != MIN_BINS)
+		        impl.setValue(MIN_BINS);
+            if (bins != MAX_BINS)
+		        impl.setValue(MAX_BINS);*/
+		    throw impl;						
+        }
+        newBins=bins;
+	}
+    else
+        newBins = m_bins[inputId];
+
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setConfiguration()");
 	}
-	len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW,m_boards); // get the buffer
+	//len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW,m_boards); // get the buffer
+    IRA::CString temp;
+    strcpy (sBuff,"?set-section,");
+    temp.Format("%ld",inputId);
+    strcat (sBuff,(const char *)temp);
+    strcat (sBuff,",");
+    temp.Format("%f",freq);
+    strcat (sBuff,(const char *)temp);
+    strcat (sBuff,",");
+    temp.Format("%f",newBW);
+    strcat (sBuff,(const char *)temp);
+    strcat (sBuff,",");
+    temp.Format("%ld",feed);
+    strcat (sBuff,(const char *)temp);
+    strcat (sBuff,",");
+    temp.Format("%ld",pol);
+    strcat (sBuff,(const char *)temp);
+    strcat (sBuff,",");
+    temp.Format("%f",newSR);
+    strcat (sBuff,(const char *)temp);
+    strcat (sBuff,",");
+    temp.Format("%ld",bins);
+    strcat (sBuff,(const char *)temp);
+	strcat (sBuff,"\r\n");
+	len = strlen (sBuff);
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
+		/*if (!CProtocol::isAck(rBuff)) {
 			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setConfiguration()");
-		} 
+		}*/
 		m_bandWidth[inputId]=newBW;
 		for (int j=0;j<m_sectionsNumber;j++) m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
 		m_commonSampleRate=newSR;
-		m_integration=0;
-		// log warning about configuration that are ignored.
-		if (freq>=0) {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_FREQUENCY"));
-		}
-		if (feed>=0) {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_FEED"));			
-		}		
-		if (bins>=0) {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_BINS_NUMBER"));			
-		}
-		if (pol>=0) {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_POLARIZATION"));
-		}
+        m_frequency[inputId]=newFreq;
+        m_feedNumber[inputId]=feed;
+        m_bins[inputId]=newBins;
 		IRA::CString temp;
-		if (m_polarization[inputId]==Backends::BKND_LCP) {  //FULL STOKE not possible....
+		if (m_polarization[inputId]==Backends::BKND_LCP)
 			temp="LCP";
-		}
-		else {
+        else if (m_polarization[inputId]==Backends::BKND_RCP)
 			temp="RCP";
-		}
+        else
+            temp="FULL_STOKES";
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%d,POL=%s,SR=%lf,BINS=%d",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
 				(const char *)temp,newSR,m_bins[inputId]));		
 	}
@@ -552,7 +588,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	}
 	else {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setConfiguration()");
-	}	
+	}
 }
 
 void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
@@ -885,10 +921,10 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl)
 {
 	AUTO_TRACE("CCommandLine::setup()");
-	if (getIsBusy()) {
+/*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setup()");
 		throw impl;
-	}
+	}*/
 	if (!initializeConfiguration(conf)) {
 		_EXCPT(BackendsErrors::ConfigurationErrorExImpl,impl,"CCommandLine::setup()");
 		throw impl;
@@ -947,10 +983,10 @@ void CCommandLine::setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErro
 	WORD len;
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
-	if (getIsBusy()) {
+/*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setTime()");
 		throw impl;
-	}
+	}*/
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setTime()");
 	}
@@ -1046,21 +1082,49 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
 void CCommandLine::setIntegration(const long& integration)  throw (BackendsErrors::BackendBusyExImpl)
 {
 	AUTO_TRACE("CCommandLine::setIntegration()");
-	if (getIsBusy()) {
+	/*if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setIntegration()");
 		throw impl;
-	}
-	if (integration>=0) {
-		long result;
-		bool out;
-		out=resultingSampleRate(integration,m_commonSampleRate,result);
-		m_integration=result;
-		if (!out) {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_NOTICE,"INTEGRATION is now %ld (millisec)",m_integration));
-		}
-		else {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_WARNING,"INTEGRATION is rounded to %ld (millisec)",m_integration));
-		}
+	}*/
+    m_integration = integration;
+	if (m_integration>=0) {
+        int res;
+	    WORD len;
+	    char sBuff[SENDBUFFERSIZE];
+	    char rBuff[RECBUFFERSIZE];
+	    AUTO_TRACE("CCommandLine::setIntegration()");
+	    if (!checkConnection()) {
+		    _THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setIntegration()");
+	    }
+	    strcpy (sBuff,"?integration,");
+        IRA::CString temp;
+        temp.Format("%ld",m_integration);
+        strcat (sBuff,(const char *)temp);
+	    strcat (sBuff,"\r\n");
+	    len = strlen (sBuff);
+	    if ((res=sendBuffer(sBuff,len))==SUCCESS) {
+		    res=receiveBuffer(rBuff,RECBUFFERSIZE);
+	    }
+	    if (res>0) { // operation was ok.
+		    //if (!CProtocol::isAck(rBuff)) {
+		    //	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::suspendDataAcquisition()");
+		    //} 
+		    ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_INFO,"setIntegration"));
+	    }
+	    else if (res==FAIL) {
+		    _EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
+		    dummy.setCode(m_Error.getErrorCode());
+		    dummy.setDescription((const char*)m_Error.getDescription());
+		    m_Error.Reset();
+		    _THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setIntegration()");
+	    }
+	    else if (res==WOULDBLOCK) {
+		    _THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setIntegration()");
+	    }
+	    else {
+		    _THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setIntegration()");
+	    }
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_NOTICE,"INTEGRATION is now %ld (millisec)",m_integration));
 	}
 }
 

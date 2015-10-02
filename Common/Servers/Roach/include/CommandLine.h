@@ -13,7 +13,7 @@
 #include <IRA>
 #include <ComponentErrors.h>
 #include <BackendsErrors.h>
-#include <TotalPowerS.h>
+#include <RoachS.h>
 #include "Common.h"
 #include "Protocol.h"
 #include "Configuration.h"
@@ -69,8 +69,8 @@ public:
 	/**
 	 * Call this function to get the milliseconds of integration time
 	 */
-	void getIntegration(long &integr) const  {
-		resultingSampleRate(m_integration,m_commonSampleRate,integr);
+	void getIntegration(long &integr) const  { integr=m_integration;
+		/*resultingSampleRate(m_integration,m_commonSampleRate,integr)*/;
 	}
 	
 	/**

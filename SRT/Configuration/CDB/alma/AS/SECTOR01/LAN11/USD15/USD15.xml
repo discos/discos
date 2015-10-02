@@ -205,6 +205,12 @@
    -   Wed Apr 15 14:40:04 UTC 2015 modified by jDAL
    -   Thu Apr 16 07:48:57 UTC 2015 modified by jDAL
    -   Thu Apr 16 09:14:51 UTC 2015 modified by jDAL
+   -   Tue Jun 09 11:10:11 UTC 2015 modified by jDAL
+   -   Tue Jun 09 11:52:09 UTC 2015 modified by jDAL
+   -   Thu Jun 11 07:28:28 UTC 2015 modified by jDAL
+   -   Thu Jun 11 10:48:57 UTC 2015 modified by jDAL
+   -   Thu Jun 11 14:56:12 UTC 2015 modified by jDAL
+   -   Fri Jun 12 07:17:05 UTC 2015 modified by jDAL
 -->
 <usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="1" lan="11" serialAddress="15" cammaLen="4.6346182654920006E228" cammaPos="1.3719957867074347E160" calibrate="0">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />
