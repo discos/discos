@@ -226,7 +226,7 @@ void CalibrationToolImpl::startScan(const Management::TScanSetup & prm) throw (C
 	ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::startScan()",(LM_DEBUG,"START_SCAN_ISSUED"));
 }
 
-void CalibrationToolImpl::startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+char * CalibrationToolImpl::startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_dataWrapper->Get();
 	bool rec,inc,noScan,warn;
@@ -248,6 +248,8 @@ void CalibrationToolImpl::startSubScan(const ::Management::TSubScanSetup & prm) 
 		ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::startSubScan()",(LM_WARNING,"UNEXPECTED_SUBSCAN_SEQUENCE"));
 	}
 	ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::startSubScan()",(LM_DEBUG,"START_SUBSCAN_ISSUED"));
+	IRA::CString file=m_data->getFileName();
+	return CORBA::string_dup((const char *)file);
 }
 
 void CalibrationToolImpl::stopScan() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)

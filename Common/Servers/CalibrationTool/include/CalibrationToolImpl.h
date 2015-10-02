@@ -195,11 +195,12 @@ class CalibrationToolImpl : public virtual BulkDataReceiverImpl<CalibrationTool_
 	/**
 	 * called to inform the component that a new subscan is going to start
 	 * @parm prm subscan parameters structure
+	 * @return the name of currently processed file
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
 	 */
-    virtual void startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+    virtual char * startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
     /**
      * Return the recording status of the component.

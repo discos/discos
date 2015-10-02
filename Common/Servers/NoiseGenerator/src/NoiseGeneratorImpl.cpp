@@ -226,6 +226,13 @@ void NoiseGeneratorImpl::aboutToAbort()
 	deleteAll();
 }
 
+void NoiseGeneratorImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+		BackendsErrors::BackendsErrorsEx)
+{
+	// nothing to do
+}
+
+
 void NoiseGeneratorImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx, ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("NoiseGeneratorImpl::sendHeader()");
