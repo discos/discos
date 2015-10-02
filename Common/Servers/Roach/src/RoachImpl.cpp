@@ -545,6 +545,12 @@ void RoachImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw
 	}		
 }
 
+void RoachImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+		BackendsErrors::BackendsErrorsEx)
+{
+	// nothing to do
+}
+
 ACS::doubleSeq *RoachImpl::getTpi() throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
 {

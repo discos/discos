@@ -261,6 +261,11 @@ public:
     virtual void getConfiguration (CORBA::String_out configuration) throw (CORBA::SystemException);
 
     virtual void getCommProtVersion (CORBA::String_out version) throw (CORBA::SystemException);
+
+    /**
+     * This method is related to the implementation of the genericBackend interface
+     */
+    virtual void setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
     
     /**
      * Call this function to set the current time (from the local computer) into the backend. 

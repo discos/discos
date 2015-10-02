@@ -695,6 +695,12 @@ void XBackendsImpl::enableChannels(const ACS::longSeq& enable)
 	}			
 }
 
+void XBackendsImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+		BackendsErrors::BackendsErrorsEx)
+{
+	// nothing to do
+}
+
 void XBackendsImpl::setTime()
 	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
 {

@@ -268,6 +268,11 @@ public:
      virtual CORBA::Long getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,
     		 ACS::longSeq_out feed,ACS::longSeq_out ifNumber/*Receivers::TPolarizationSeq_out polarization*/) 
      	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+     /**
+     * This method is just a place holder for this implementation of the genericBackend interface
+     */
+    virtual void setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
      
      /**
 	 * This method allows the client to interface the component by sending text commands. The command is parsed and executed according the
