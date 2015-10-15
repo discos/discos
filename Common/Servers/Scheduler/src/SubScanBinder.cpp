@@ -23,11 +23,16 @@ CSubScanBinder::CSubScanBinder(CConfiguration* config,bool dispose): m_primary(N
 CSubScanBinder::~CSubScanBinder()
 {
 	if (m_own) {
-		if (m_primary) delete m_primary;
-		if (m_secondary) delete m_secondary;
-		if (m_servo) delete m_servo;
-		if (m_receivers) delete m_receivers;
+		dispose();
 	}
+}
+
+void CSubScanBinder::dispose()
+{
+	if (m_primary) delete m_primary;
+	if (m_secondary) delete m_secondary;
+	if (m_servo) delete m_servo;
+	if (m_receivers) delete m_receivers;
 }
 
 void CSubScanBinder::addOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame)
@@ -164,6 +169,7 @@ void CSubScanBinder::OTF(const IRA::CString& target,
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
+    m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
 }
 
 void CSubScanBinder::lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration)
@@ -195,7 +201,9 @@ void CSubScanBinder::lonOTF(const Antenna::TCoordinateFrame& scanFrame,const dou
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
+    m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
 	// The other subsystems can stay with defaults
+
 }
 
 void CSubScanBinder::latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration)
@@ -228,6 +236,7 @@ void CSubScanBinder::latOTF(const Antenna::TCoordinateFrame& scanFrame,const dou
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
+    m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
 	// The other subsystems can stay with defaults
 }
 
@@ -250,6 +259,7 @@ void CSubScanBinder::sidereal(const char * targetName,const double& ra,const dou
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
+    m_subScanConf.signal=Management::MNG_SIGNAL_SIGNAL;
 	// The other subsystems can stay with defaults
 }
 
@@ -270,6 +280,7 @@ void CSubScanBinder::moon()
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
+    m_subScanConf.signal=Management::MNG_SIGNAL_SIGNAL;
 	// The other subsystems can stay with defaults
 }
 
@@ -291,6 +302,7 @@ void CSubScanBinder::track(const char *targetName)
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
+    m_subScanConf.signal=Management::MNG_SIGNAL_SIGNAL;
 	// The other subsystems can stay with defaults
 }
 
@@ -313,6 +325,7 @@ void CSubScanBinder::goTo(const double& az,const double& el)
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
+    m_subScanConf.signal=Management::MNG_SIGNAL_SIGNAL;
 }
 
 void CSubScanBinder::init()
@@ -350,6 +363,7 @@ void CSubScanBinder::init()
 		m_servo->axis_code=CORBA::string_dup("");;
 		m_servo->is_empty_scan=true;
 		m_receivers->dummy=0;
+		m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
 }
 
 // **** PRVATE *********

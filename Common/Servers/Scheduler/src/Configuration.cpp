@@ -154,6 +154,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	IRA::CString componentName;
 	IRA::CString strVal;
 	IRA::CString fieldPath;
+	long counter=0;
 
 	componentName="DataBlock/Equipment/MinorServoMapping";
 
@@ -168,7 +169,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 
 	for(;;) {
 		if (m_minorServoMappings==0) fieldPath=componentName;
-		else fieldPath.Format("%s%d",(const char *)componentName,m_minorServoMappings);
+		else fieldPath.Format("%s%d",(const char *)componentName,counter);
 		if (!CIRATools::getDBValue(Services,"axis",strVal,"alma/",fieldPath)) {
 			break;
 		}
@@ -193,15 +194,14 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		ACS_DEBUG_PARAM("CConfiguration::Init()","beamDeviationFactor: %lf",m_axis[m_minorServoMappings].beamDevitionFactor);
 		m_minorServoMappings++;
+		counter++;
 		if (m_minorServoMappings>=MAX_AXIS_NUMBER) break;
 	}
 	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %d",m_minorServoMappings);
-
 	componentName="DataBlock/Equipment/AvailableBackend";
-
 	for(;;) {
 		if (m_availableBackends==0) fieldPath=componentName;
-		else fieldPath.Format("%s%d",(const char *)componentName,m_availableBackends);
+		else fieldPath.Format("%s%d",(const char *)componentName,counter);
 		if (!CIRATools::getDBValue(Services,"alias",strVal,"alma/",fieldPath)) {
 			break;
 		}
@@ -219,8 +219,9 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		ACS_DEBUG_PARAM("CConfiguration::Init()","noData: %s",(const char *)strVal);
 		m_availableBackends++;
 		if (m_availableBackends>=MAX_BCK_NUMBER) break;
+		counter++;
 	}
-	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %d",m_minorServoMappings);
+	ACS_DEBUG_PARAM("CConfiguration::Init()","Total available backends: %d",m_availableBackends);
 	if (!CIRATools::getDBValue(Services,"FTrackPrecisionDigits",m_fTrackDigits,"alma/","DataBlock/Equipment")) {
 		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
 		dummy.setFieldName("FTrackPrecisionDigits");

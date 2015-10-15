@@ -562,6 +562,22 @@ void SchedulerImpl::terminateScan() throw (ComponentErrors::ComponentErrorsEx,Ma
 	}
 }
 
+void SchedulerImpl::getSubScanConfigruation(Management::TSubScanConfiguration_out conf) throw (ComponentErrors::ComponentErrorsEx,
+		ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,Management::ROTSystemStatus,m_pstatus,status);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pscheduleName,scheduleName);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pscanID,scanID);

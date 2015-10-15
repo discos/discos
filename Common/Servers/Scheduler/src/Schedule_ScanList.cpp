@@ -125,6 +125,7 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			CSubScanBinder binder(getConfiguration(),false);
 			DWORD identifier;
 			if (!parsePeaker(line,identifier,errMsg,binder)) {
+				binder.dispose();
 				return false;
 			}
 			TRecord *rec=new TRecord;
@@ -355,7 +356,7 @@ bool CScanList::parseSidereal(const IRA::CString& val,Antenna::TTrackingParamete
 	Antenna::TCoordinateFrame frame;
 	// get the second item.....
 	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // id
-		errMsg="could read scan identifier";
+		errMsg="cannot read scan identifier";
 		return false;
 	}
 	id=token.ToLong();
