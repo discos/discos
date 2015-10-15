@@ -37,14 +37,15 @@ EXECUTABLES_L     =
 # Libraries (public and local)
 # ----------------------------
 LIBRARIES       =
-LIBRARIES_L     = FitsModule
+LIBRARIES_L     = FitsModule NewFitsWriterImpl
 
 FitsModule_OBJECTS = FitsTools File
 FitsModule_LIBS = IRALibrary
 #
 # <brief description of lllll library>
-#NewFitsWriterImpl_OBJECTS   = FitsWriterImpl 
-#NewFitsWriterImpl_LIBS = baci maci FitsWriterStubs DataReceiverStubs ComponentErrors ManagementErrors ReceiversErrors bulkDataReceiverStubs\
+
+NewFitsWriterImpl_OBJECTS   = FitsTools File SubScan Summary FitsWriterImpl
+NewFitsWriterImpl_LIBS = baci maci FitsWriterStubs DataReceiverStubs ComponentErrors ManagementErrors ReceiversErrors bulkDataReceiverStubs\
                  ManagmentDefinitionsStubs ACSBulkDataError bulkDataStubs IRALibrary\
                  bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs MinorServoDefinitionsStubs \
                  EphemGeneratorStubs BackendsDefinitionsStubs ObservatoryStubs MinorServoBossStubs MinorServoErrors\

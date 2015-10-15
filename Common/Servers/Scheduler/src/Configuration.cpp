@@ -28,18 +28,24 @@
 }
 
 #define MAX_AXIS_NUMBER 32
+#define MAX_BCK_NUMBER 12
 
 CConfiguration::CConfiguration()
 {
 	m_procTable=NULL;
 	m_minorServoMappings=0;
+	m_availableBackends=0;
 	m_axis=NULL;
+	m_backend=NULL;
 }
 
 CConfiguration::~CConfiguration()
 {
 	if (m_axis!=NULL) {
 		delete [] m_axis;
+	}
+	if (m_backend!=NULL) {
+		delete [] m_backend;
 	}
 }
 
@@ -130,6 +136,18 @@ Management::TScanAxis CConfiguration::getAxisFromServoName(const IRA::CString& s
 	return Management::MNG_NO_AXIS;
 }
 
+bool CConfiguration::getAvailableBackend(const IRA::CString& name,IRA::CString& backend,bool& noData) const
+{
+	for (long i=0;i<m_availableBackends;i++) {
+		if ((m_backend[i].alias==name) || (m_backend[i].backend==name)) {
+			backend=m_backend[i].backend;
+			noData=m_backend[i].noData;
+			return true;
+		}
+	}
+	return false;
+}
+
 void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl)
 {
 	IRA::CString check;
@@ -141,6 +159,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 
 	try {
 		m_axis=new TMinorServoAxis[MAX_AXIS_NUMBER];
+		m_backend=new TAvailableBackends[MAX_BCK_NUMBER];
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
@@ -178,6 +197,30 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	}
 	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %d",m_minorServoMappings);
 
+	componentName="DataBlock/Equipment/AvailableBackend";
+
+	for(;;) {
+		if (m_availableBackends==0) fieldPath=componentName;
+		else fieldPath.Format("%s%d",(const char *)componentName,m_availableBackends);
+		if (!CIRATools::getDBValue(Services,"alias",strVal,"alma/",fieldPath)) {
+			break;
+		}
+		m_backend[m_availableBackends].alias=strVal;
+		ACS_DEBUG_PARAM("CConfiguration::Init()","backend alias: %s",(const char *)strVal);
+		if (!CIRATools::getDBValue(Services,"backend",strVal,"alma/",fieldPath)) {
+			break;
+		}
+		m_backend[m_availableBackends].backend=strVal;
+		ACS_DEBUG_PARAM("CConfiguration::Init()","backend: %s",(const char *)strVal);
+		if (!CIRATools::getDBValue(Services,"noData",strVal,"alma/",fieldPath)) {
+			break;
+		}
+		m_backend[m_availableBackends].noData=(strVal=="true");
+		ACS_DEBUG_PARAM("CConfiguration::Init()","noData: %s",(const char *)strVal);
+		m_availableBackends++;
+		if (m_availableBackends>=MAX_BCK_NUMBER) break;
+	}
+	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %d",m_minorServoMappings);
 	if (!CIRATools::getDBValue(Services,"FTrackPrecisionDigits",m_fTrackDigits,"alma/","DataBlock/Equipment")) {
 		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
 		dummy.setFieldName("FTrackPrecisionDigits");

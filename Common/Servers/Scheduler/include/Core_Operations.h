@@ -182,9 +182,9 @@ void _startSchedule(const char* scheduleFile,const char * startSubScan) throw (M
 
 /**
  * It allows to change the backend elected as default backend, the default backend is the device used for all operation (for example tsys) when a schedule is not running.
- * @param bckInstance name of the instance of the backend that has to be placed as default backend
+ * @param bckName name of the instance of the backend that has to be placed as default backend. It couls be also an alias assigned to this backend
  */
-void _chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl);
+void _chooseDefaultBackend(const char *bckName) throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::BackendNotAvailableExImpl);
 
 /**
  * It allows to change the component elected as default data receiver.

@@ -34,6 +34,12 @@ public:
 		double beamDevitionFactor;
 	} TMinorServoAxis;
 
+	typedef struct {
+		IRA::CString alias;
+		IRA::CString backend;
+		bool noData;
+	} TAvailableBackends;
+
 	/**
 	 * Constructor 
 	*/
@@ -177,6 +183,16 @@ public:
 
 	Antenna::TsubScanGeometry getScanGeometryFromAxis(const Management::TScanAxis& axis) const;
 
+	/**
+	 * check the availability of a backend from its name or an alias
+	 * @param name name of the backend or an alias
+	 * @param backend it return the name of the backend i.e its component instance
+	 * #param noData true if the backend will sent no raw data through the data transfer channel
+	 * @return true if the backend has been verified to be available in the configuration
+	 */
+	bool getAvailableBackend(const IRA::CString& name,IRA::CString& backend,bool& noData) const;
+
+
 private:
 	IRA::CString m_schedDir;
 	IRA::CString m_dataDir;
@@ -202,8 +218,10 @@ private:
 	bool m_checkProjectCode;
 	long m_minorServoMappings;
 	long m_fTrackDigits;
+	long m_availableBackends;
 	
 	TMinorServoAxis* m_axis;
+	TAvailableBackends* m_backend;
 
 	/**
 	 * Pointer to the DB table used to load the station procedures from the CDB 

@@ -171,7 +171,9 @@ module Management {
 		 * This method allows to change the instance of the backend choosen as default backend. The new backend is not loaded, it will the next time the default backend is required.
 		 * The default backend is used (when no schedule is running) to perform some scheduler operations (@sa <i>setDevice()</i> and <i>systemTemperature</i>).
 		 * @throw CORBA::SystemExcpetion  
-		 * @param bckInstance name of the instance of the new default backend 
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @thorw ManagementErrors::ManagementErrorsEx
+		 * @param bckInstance name of the instance of the new default backend or any other assigned alias that the system knows
 		 */
 		void chooseDefaultBackend(in string bckInstance) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		

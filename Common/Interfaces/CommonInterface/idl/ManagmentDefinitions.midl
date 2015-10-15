@@ -71,6 +71,15 @@ module Management  {
 	};
 	
 	/**
+	 * This enlists all signal values during a subScan
+	 */
+	enum TSubScanSignal {
+		MNG_SIGNAL_SIGNAL,      /*!< The subscan signal is on source  */
+		MNG_SIGNAL_REFERENCE,   /*!< The subscan signal is off source  */
+		MNG_SIGNAL_NONE         /*!< The subscan signal is undetermined, during OTF for example  */
+	};
+
+	/**
 	 * Enlist all the supported coordinate frames
 	 * @note this is derived one-one to the corresponding structure in Antenna module. This definition is present in order to avoid circular inclusion between
 	 * this module and Antenna module.
@@ -115,7 +124,7 @@ module Management  {
 		C_EMERGENCY
 	};
 
-        ACS_ENUM(LogLevel);
+    ACS_ENUM(LogLevel);
 
 	/**
 	 * This enumerates all the possible axis along with the control system is able to perform scans, the axis may involve the primary servo system (Antenna) or the secondary servo system (ServoMinor).
@@ -169,12 +178,19 @@ module Management  {
 		/**
 		 * It allows to shutdown or park or stow the subsystem, any boss should take all the action required to
 		 * put its subsystem in a survival position.
-		 * @thorw ManagementErrors::ParkingErrorEx
+		 * @throw ManagementErrors::ParkingErrorEx
 		 * @throw CORBA::SystemException
 		 */
 		void park() raises (ManagementErrors::ParkingErrorEx);
 	};
 	
+	/**
+	 * This structure contains some information derived from the subscan parameters
+	*/
+	struct TSubScanConfiguration  {
+		TSubScanSignal signal;			/* this indicates the signal of the current subscan */
+	};
+
 };
 
 #endif

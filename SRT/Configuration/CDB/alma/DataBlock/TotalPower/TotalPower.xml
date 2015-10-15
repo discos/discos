@@ -76,7 +76,7 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>XKA</configurationID>
+	<configurationID>XKP</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>PRIMARY</inputPort>

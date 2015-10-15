@@ -264,14 +264,19 @@ void CCore::_peaker(const char* axis,const double& span,const ACS::TimeInterval&
 	}
 }*/
 
-void CCore::_chooseDefaultBackend(const char *bckInstance) throw (ComponentErrors::CouldntGetComponentExImpl)
+void CCore::_chooseDefaultBackend(const char *bckName) throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::BackendNotAvailableExImpl)
 {
 	//************************************************************** /
 	/* It should be forbidden is a schedule is running or recording is active */
-	/* Also the check that the backend is available must be done */
 	/* *****************************************************************/
 	baci::ThreadSyncGuard guard(&m_mutex);
-	IRA::CString instance(bckInstance);
+	bool noData; // not used yet
+	IRA::CString name(bckName);
+	IRA::CString instance;
+	if (!m_config->getAvailableBackend(name,instance,noData)) {
+		_EXCPT(ManagementErrors::BackendNotAvailableExImpl,impl,"CCore::_chooseDefaultBackend");
+		throw impl;
+	}
 	if (m_defaultBackendInstance!=instance) {
 		m_defaultBackendInstance=instance;
 		m_defaultBackendError=true;  // this is tricky...in order to force to unload the preset backend and then reload the new one the next time the default backend is required

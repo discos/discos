@@ -41,10 +41,18 @@
 		<xs:attribute name="beamDeviationFactor" type="xs:double" use="required"/>
 	</xs:complexType>
 	
+	<xs:complexType name="AvailableBackendsType">
+		<xs:attribute name="alias" type="xs:string" use="required"/>
+		<xs:attribute name="backend" type="xs:string" use="required"/>
+		<xs:attribute name="noData" type="xs:boolean" use="required"/>
+	</xs:complexType>
+
 	<xs:complexType name="TelescopeEquipmentType">
 		<xs:sequence>	
 			<xs:element name="MinorServoMapping" type="MinorServoMappingType" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="AvailableBackend" type="AvailableBackendsType" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
+
 		<!-- FTrack resolution, number of decimal positions that are meaningful for the synthetizer, 3 means 100.3456MHz is the same as 100.345MHz  -->
 		<xs:attribute name="FTrackPrecisionDigits" type="xs:long" use="required"/>		
 	</xs:complexType>

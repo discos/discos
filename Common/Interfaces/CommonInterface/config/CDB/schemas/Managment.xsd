@@ -20,6 +20,14 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	
+	<xs:simpleType name="TSubScanSignalBasicType">
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="SIGNAL"/>
+	    	<xs:enumeration value="REFERENCE"/>
+	    	<xs:enumeration value="NONE"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
 	<xs:simpleType name="TScanAxisEnumerationType">
 		<xs:annotation><xs:documentation>
 			Lists all axis managed by the minor servo system, a subset of the TScanAxis enumeration

@@ -6,12 +6,9 @@
 #include "File.h"
 #include "TestSchema.h"
 
-
 #include "FitsTools_test.i"
 
 #include "File_test.i"
-
-
 
 using namespace NewFitsWriterTest;
 
