@@ -331,6 +331,15 @@ module Management {
 		void startRecording(in long subScanId,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
 		/**
+		 * This method is used internally to collect some derived information about the currently running subscan
+		 * @param conf current subscan configuration
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void getSubScanConfigruation(out Management::TSubScanConfiguration conf) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
 		 * This operation will finalize the current scan.
 		 * @throw CORBA::SystemExcpetion
 		 * @throw ComponentErrors::ComponentErrorsEx

@@ -442,6 +442,13 @@ public:
      */
     virtual void terminateScan() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
 
+    /**
+     * Called in order to get current subscan configuration
+     * @param conf current subscan configruation
+     */
+    virtual void getSubScanConfigruation (Management::TSubScanConfiguration_out conf) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+
 private:
 
 	baci::SmartPropertyPointer<baci::ROstring> m_pscheduleName;

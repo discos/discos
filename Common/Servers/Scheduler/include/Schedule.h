@@ -70,6 +70,8 @@ public:
 	Antenna::TTrackingParameters * getSecondary() const { return m_secondary;}
 	MinorServo::MinorServoScan * getServo() const { return m_servo; }
 	Receivers::TReceiversParameters *getReceivers() const { return m_receivers;}
+	void dispose();
+	void getSubScanInfo(Management::TSubScanConfiguration& conf) const { conf=m_subScanConf; }
 
 
 private:
@@ -77,6 +79,7 @@ private:
 	Antenna::TTrackingParameters *m_secondary;
 	MinorServo::MinorServoScan *m_servo;
 	Receivers::TReceiversParameters *m_receivers;
+	Management::TSubScanConfiguration m_subScanConf;
 	bool m_own;
 	CConfiguration* m_config;
 	void init();
