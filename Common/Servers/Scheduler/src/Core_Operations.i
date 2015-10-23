@@ -102,12 +102,13 @@ void CCore::_lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& spa
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
 	Antenna::TTrackingParameters primary,secondary;
+	Management::TSubScanConfiguration subConf;
 	MinorServo::MinorServoScan servo;
 	Receivers::TReceiversParameters receievers;
-	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers,&subConf);
 	binder.lonOTF(scanFrame,span,duration);
 	startTime=0; // it means start as soon as possible
-	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	startScan(startTime,&primary,&secondary,&servo,&receievers,subConf); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;
 }
 
@@ -117,12 +118,13 @@ void CCore::_latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& spa
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
 	Antenna::TTrackingParameters primary,secondary;
+	Management::TSubScanConfiguration subConf;
 	MinorServo::MinorServoScan servo;
 	Receivers::TReceiversParameters receievers;
-	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers,&subConf);
 	binder.latOTF(scanFrame,span,duration);
 	startTime=0; // it means start as soon as possible
-	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	startScan(startTime,&primary,&secondary,&servo,&receievers,subConf); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;
 }
 
@@ -135,10 +137,11 @@ void CCore::_skydipOTF(const double& el1,const double& el2,const ACS::TimeInterv
 	Antenna::TTrackingParameters primary,secondary;
 	MinorServo::MinorServoScan servo;
 	Receivers::TReceiversParameters receievers;
-	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	Management::TSubScanConfiguration subConf;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers,&subConf);
 	binder.skydip(el1,el2,duration,NULL);
 	startTime=0; // it means start as soon as possible
-	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	startScan(startTime,&primary,&secondary,&servo,&receievers,subConf); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;
 }
 
@@ -150,10 +153,11 @@ void CCore::_track(const char *targetName) throw (ManagementErrors::TelescopeSub
 	Antenna::TTrackingParameters primary,secondary;
 	MinorServo::MinorServoScan servo;
 	Receivers::TReceiversParameters receievers;
-	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	Management::TSubScanConfiguration subConf;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers,&subConf);
 	binder.track(targetName);
 	startTime=0; // it means start as soon as possible
-	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	startScan(startTime,&primary,&secondary,&servo,&receievers,subConf); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;
 }
 
@@ -165,10 +169,11 @@ void CCore::_moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,Managem
 	Antenna::TTrackingParameters primary,secondary;
 	MinorServo::MinorServoScan servo;
 	Receivers::TReceiversParameters receievers;
-	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	Management::TSubScanConfiguration subConf;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers,&subConf);
 	binder.moon();
 	startTime=0; // it means start as soon as possible
-	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	startScan(startTime,&primary,&secondary,&servo,&receievers,subConf); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;
 }
 
@@ -180,10 +185,11 @@ void CCore::_sidereal(const char * targetName,const double& ra,const double& dec
 	Antenna::TTrackingParameters primary,secondary;
 	MinorServo::MinorServoScan servo;
 	Receivers::TReceiversParameters receievers;
-	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	Management::TSubScanConfiguration subConf;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers,&subConf);
 	binder.sidereal(targetName,ra,dec,eq,section);
 	startTime=0; // it means start as soon as possible
-	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	startScan(startTime,&primary,&secondary,&servo,&receievers,subConf); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;
 }
 
@@ -195,11 +201,12 @@ void CCore::_goTo(const double& azimuth,const double& elevation) throw (Manageme
 	Antenna::TTrackingParameters primary,secondary;
 	MinorServo::MinorServoScan servo;
 	Receivers::TReceiversParameters receievers;
-	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	Management::TSubScanConfiguration subConf;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers,&subConf);
 	//printf("Parametri del goTo %lf, %lf\n",azimuth,elevation);
 	binder.goTo(azimuth,elevation);
 	startTime=0; // it means start as soon as possible
-	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	startScan(startTime,&primary,&secondary,&servo,&receievers,subConf); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;
 }
 
@@ -213,56 +220,18 @@ void CCore::_peaker(const char* axis,const double& span,const ACS::TimeInterval&
 	Antenna::TTrackingParameters primary,secondary;
 	MinorServo::MinorServoScan servo;
 	Receivers::TReceiversParameters receievers;
+	Management::TSubScanConfiguration subConf;
 	if (m_config->getAxisFromServoName(IRA::CString(axis))==Management::MNG_NO_AXIS) {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_peaker()");
         impl.setReason("Invalid axis");
         throw impl;
 	}
-	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers);
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers,&subConf);
 	binder.peaker(IRA::CString(axis),span,duration,NULL);
 	startTime=0; // it means start as soon as possible
-	startScan(startTime,&primary,&secondary,&servo,&receievers); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	startScan(startTime,&primary,&secondary,&servo,&receievers,subConf); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;
 }
-
-/*void CCore::_goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
-		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl)
-{
-	baci::ThreadSyncGuard guard(&m_mutex);
-	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl
-	try {
-		if (!CORBA::is_nil(m_antennaBoss)) {
-			m_subScanEpoch=0;
-			m_antennaBoss->goOff(frame,beams);
-			clearAntennaTracking();
-		}
-		else {
-			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::goOff()");
-			throw impl;
-		}
-	}
-	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::goOff()");
-		throw impl;
-	}
-	catch (AntennaErrors::AntennaErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::AntennaScanErrorExImpl,impl,ex,"CCore::goOff()");
-		throw impl;
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::goOff()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_antennaBossError=true;
-		throw impl;
-	}
-	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::goOff()");
-		m_antennaBossError=true;
-		throw impl;
-	}
-}*/
 
 void CCore::_chooseDefaultBackend(const char *bckName) throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::BackendNotAvailableExImpl)
 {

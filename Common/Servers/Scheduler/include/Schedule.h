@@ -40,12 +40,12 @@ class CParser;
 class CSubScanBinder {
 public:
 	CSubScanBinder(Antenna::TTrackingParameters * const primary,Antenna::TTrackingParameters * const secondary,
-	  MinorServo::MinorServoScan * const servo,Receivers::TReceiversParameters * const receievers,CConfiguration* config=NULL);
+	  MinorServo::MinorServoScan * const servo,Receivers::TReceiversParameters * const receievers,
+	  Management::TSubScanConfiguration * const subScanConf,CConfiguration* config=NULL);
 	CSubScanBinder(CConfiguration* config=NULL,bool dispose=true);
 	~CSubScanBinder();
 	void lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
 	void latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
-	void addOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame);
 	void OTF(const IRA::CString& target,
 			const double& lon1,const double& lat1,const double& lon2,const double& lat2,
 			const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
@@ -64,22 +64,26 @@ public:
 	void track(const char *targetName);
 	void moon();
 	void sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section);
+	void sidereal(const char * targetName,const Antenna::TCoordinateFrame& frame,double *parameters,const long& paramNumber,
+			const Antenna::TSystemEquinox& eq);
 	void goTo(const double& az,const double& el);
+	void addOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame);
+
+	void addRadialvelocity(const Antenna::TReferenceFrame& VradFrame,const Antenna::TVradDefinition& VradDefinition,const double& RadialVelocity);
 
 	Antenna::TTrackingParameters * getPrimary() const { return m_primary; }
 	Antenna::TTrackingParameters * getSecondary() const { return m_secondary;}
 	MinorServo::MinorServoScan * getServo() const { return m_servo; }
 	Receivers::TReceiversParameters *getReceivers() const { return m_receivers;}
 	void dispose();
-	void getSubScanInfo(Management::TSubScanConfiguration& conf) const { conf=m_subScanConf; }
-
+	Management::TSubScanConfiguration *getSubScanConfiguration() const { return m_subScanConf; }
 
 private:
 	Antenna::TTrackingParameters *m_primary;
 	Antenna::TTrackingParameters *m_secondary;
 	MinorServo::MinorServoScan *m_servo;
 	Receivers::TReceiversParameters *m_receivers;
-	Management::TSubScanConfiguration m_subScanConf;
+	Management::TSubScanConfiguration *m_subScanConf;
 	bool m_own;
 	CConfiguration* m_config;
 	void init();
@@ -426,6 +430,7 @@ public:
 		void *secondaryParameters;
 		void *servoParameters;
 		void *receieversParsmeters;
+		Management::TSubScanConfiguration *subScanConfiguration;
 		//IRA::CString target;
 	};
 	/**
@@ -448,10 +453,12 @@ public:
 	 *                to scan type.
 	 * @param sec pointer to the secondary scan parameters
 	 * @param servo pointer to the servo scan parameters
-	 * @param recv poiner to the receievers scan parameters
+	 * @param recv pointer to the receivers scan parameters
+	 * @param subScanConf pointer to sub scan configuration
 	 * @return false if the scan could not be found. 
 	 */
-	virtual bool getScan(const DWORD&id,Management::TScanTypes& type,void *& prim,void *& sec,void *& servo,void *& recv);
+	virtual bool getScan(const DWORD&id,Management::TScanTypes& type,void *& prim,void *& sec,void *& servo,void *& recv,
+			Management::TSubScanConfiguration *&subScanConf);
 	
 	/**
 	 * This is the wrapper function of the previuos one, used to get scan data using a structure.
@@ -528,6 +535,8 @@ private:
 	 */
 	bool parseSidereal(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
 	
+	bool parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder);
+
 	/**
 	 * Parse the list of parameters for moon tracking
 	 * @param val line to parse

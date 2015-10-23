@@ -44,13 +44,14 @@ bool checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const prim,cons
  * @param ut required start time for the scan, it could be zero meaning start as soon as possible. As output argument it returns the true start time
  * @param prim primary scan configuration for the subscan (antenna)
  * @param sec primary scan configuration for the subscan (antenna)
- * @param servoPar scan configuration fof the servo subsystem.
+ * @param servoPar scan configuration of the servo subsystem.
  * @param recvPar structure containing the scan configuration for the receivers subsystem.
+ * @param subScanConf structure containing the sub scan configuration
 */
 void doScan(ACS::Time& ut,const Antenna::TTrackingParameters* const prim,const Antenna::TTrackingParameters* const sec,
-	const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPa)
-	throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl,
-	ComponentErrors::CouldntGetComponentExImpl);
+	const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPa,
+	const Management::TSubScanConfiguration& subScanConf) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+	ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CouldntGetComponentExImpl);
 
 /*
  * starts data recording at a given time, other arguments are required in order to prepare the acquisition
@@ -71,11 +72,13 @@ ACS::Time startRecording(const ACS::Time& recUt,const long& scanId, const long& 
  * @param ut required start time for the scan, it could be zero meaning start as soon as possible. As output argument it returns the true start time
  * @param prim primary scan configuration for the subscan (antenna)
  * @param sec primary scan configuration for the subscan (antenna)
- * @param servoPar scan configuration fof the servo subsystem.
+ * @param servoPar scan configuration of the servo subsystem.
  * @param recvPar structure containing the scan configuration for the receivers subsystem.
+ * @param subScanConf structure containing the sub scan configuration
 */
 void startScan(ACS::Time& time,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
-	const MinorServo::MinorServoScan*const servoPar, const Receivers::TReceiversParameters*const recvPar) throw (
+	const MinorServo::MinorServoScan*const servoPar, const Receivers::TReceiversParameters*const recvPar,
+	const Management::TSubScanConfiguration& subScanConf) throw (
 	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
 	ManagementErrors::CloseTelescopeScanErrorExImpl);
 

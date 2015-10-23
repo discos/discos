@@ -4,8 +4,9 @@
 using namespace Schedule;
 
 CSubScanBinder::CSubScanBinder(Antenna::TTrackingParameters * const primary,Antenna::TTrackingParameters * const secondary,
- MinorServo::MinorServoScan * const servo,Receivers::TReceiversParameters * const receivers,CConfiguration* config):
- m_primary(primary),m_secondary(secondary),m_servo(servo),m_receivers(receivers),m_own(false),m_config(config)
+		MinorServo::MinorServoScan * const servo,Receivers::TReceiversParameters * const receivers,
+		Management::TSubScanConfiguration * const subScanConf,CConfiguration* config):
+ m_primary(primary),m_secondary(secondary),m_servo(servo),m_receivers(receivers),m_subScanConf(subScanConf),m_own(false),m_config(config)
 {
 	init();
 }
@@ -17,6 +18,7 @@ CSubScanBinder::CSubScanBinder(CConfiguration* config,bool dispose): m_primary(N
 	m_secondary=new Antenna::TTrackingParameters;
 	m_servo=new MinorServo::MinorServoScan;
 	m_receivers=new Receivers::TReceiversParameters;
+	m_subScanConf=new Management::TSubScanConfiguration;
 	init();
 }
 
@@ -33,13 +35,23 @@ void CSubScanBinder::dispose()
 	if (m_secondary) delete m_secondary;
 	if (m_servo) delete m_servo;
 	if (m_receivers) delete m_receivers;
+	if (m_subScanConf) delete m_subScanConf;
 }
 
 void CSubScanBinder::addOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame)
 {
 	m_primary->latitudeOffset=latOff;
 	m_primary->longitudeOffset=lonOff;
-	m_primary->applyOffsets=true;	m_primary->offsetFrame=frame;
+	m_primary->applyOffsets=true;
+	m_primary->offsetFrame=frame;
+	m_subScanConf->signal=Management::MNG_SIGNAL_REFERENCE;
+}
+
+void CSubScanBinder::addRadialvelocity(const Antenna::TReferenceFrame& VradFrame,const Antenna::TVradDefinition& VradDefinition,const double& RadialVelocity)
+{
+	m_primary->VradFrame=VradFrame;
+	m_primary->VradDefinition=VradDefinition;
+	m_primary->RadialVelocity=RadialVelocity;
 }
 
 void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const ACS::TimeInterval& duration,const Antenna::TTrackingParameters * const sec)
@@ -89,6 +101,7 @@ void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const AC
     m_servo->range=span;
     m_servo->total_time=duration;
 	m_receivers->dummy=0;
+	m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 }
 
 void CSubScanBinder::OTFC(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
@@ -121,6 +134,7 @@ void CSubScanBinder::OTFC(const Antenna::TCoordinateFrame& coordFrame,const Ante
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
+	m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 }
 
 void CSubScanBinder::skydip(const double& lat1,const double& lat2,const ACS::TimeInterval& duration,
@@ -169,7 +183,7 @@ void CSubScanBinder::OTF(const IRA::CString& target,
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
-    m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
+    m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 }
 
 void CSubScanBinder::lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration)
@@ -201,9 +215,8 @@ void CSubScanBinder::lonOTF(const Antenna::TCoordinateFrame& scanFrame,const dou
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
-    m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
+    m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 	// The other subsystems can stay with defaults
-
 }
 
 void CSubScanBinder::latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration)
@@ -236,8 +249,35 @@ void CSubScanBinder::latOTF(const Antenna::TCoordinateFrame& scanFrame,const dou
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
-    m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
+    m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 	// The other subsystems can stay with defaults
+}
+
+void CSubScanBinder::sidereal(const char * targetName,const Antenna::TCoordinateFrame& frame,double *parameters,const long& paramNumber,
+		const Antenna::TSystemEquinox& eq)
+{
+	m_secondary->secondary=false; m_secondary->paramNumber=0; m_secondary->applyOffsets=false;
+	m_secondary->type=Antenna::ANT_NONE; m_secondary->enableCorrection=true;
+	m_primary->type=Antenna::ANT_SIDEREAL;
+	m_primary->targetName=CORBA::string_dup(targetName);
+	m_primary->enableCorrection=true;
+	m_primary->paramNumber=paramNumber;
+	m_primary->frame=frame;
+	for (long i=0;i<paramNumber;i++) m_primary->parameters[i]=parameters[i];
+	m_primary->equinox=eq;
+	m_primary->section=Antenna::ACU_NEUTRAL; // no support, yet!
+	m_primary->secondary=false;
+	m_primary->applyOffsets=false;
+	m_primary->latitudeOffset=m_primary->longitudeOffset=0.0;
+	m_primary->offsetFrame=Antenna::ANT_EQUATORIAL; // place holder in this case
+	m_primary->VradFrame=Antenna::ANT_UNDEF_FRAME;
+	m_primary->VradDefinition=Antenna::ANT_UNDEF_DEF;
+	m_primary->RadialVelocity=0.0;
+    m_servo->is_empty_scan=true;
+    m_servo->axis_code=CORBA::string_dup("");
+    m_servo->range=0;
+    m_servo->total_time=0;
+    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
 }
 
 void CSubScanBinder::sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section)
@@ -259,7 +299,7 @@ void CSubScanBinder::sidereal(const char * targetName,const double& ra,const dou
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
-    m_subScanConf.signal=Management::MNG_SIGNAL_SIGNAL;
+    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
 	// The other subsystems can stay with defaults
 }
 
@@ -280,7 +320,7 @@ void CSubScanBinder::moon()
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
-    m_subScanConf.signal=Management::MNG_SIGNAL_SIGNAL;
+    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
 	// The other subsystems can stay with defaults
 }
 
@@ -302,7 +342,7 @@ void CSubScanBinder::track(const char *targetName)
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
-    m_subScanConf.signal=Management::MNG_SIGNAL_SIGNAL;
+    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
 	// The other subsystems can stay with defaults
 }
 
@@ -325,7 +365,7 @@ void CSubScanBinder::goTo(const double& az,const double& el)
     m_servo->axis_code=CORBA::string_dup("");
     m_servo->range=0;
     m_servo->total_time=0;
-    m_subScanConf.signal=Management::MNG_SIGNAL_SIGNAL;
+    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
 }
 
 void CSubScanBinder::init()
@@ -363,7 +403,7 @@ void CSubScanBinder::init()
 		m_servo->axis_code=CORBA::string_dup("");;
 		m_servo->is_empty_scan=true;
 		m_receivers->dummy=0;
-		m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
+		m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 }
 
 // **** PRVATE *********

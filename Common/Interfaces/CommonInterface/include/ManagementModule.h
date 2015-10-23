@@ -89,6 +89,37 @@ public:
 			return "SKYDIP";
 		}
 	}
+
+	static bool map(const char *strScan,TSubScanSignal& mode) {
+		if (strcasecmp(strScan,"SIGNAL")==0) {
+			mode=Management::MNG_SIGNAL_SIGNAL;
+			return true;
+		}
+		else if (strcasecmp(strScan,"REFERENCE")==0) {
+			mode=Management::MNG_SIGNAL_REFERENCE;
+			return true;
+		}
+		else if (strcasecmp(strScan,"NONE")==0) {
+			mode=Management::MNG_SIGNAL_NONE;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	static const char *map(const TSubScanSignal& scan) {
+		if (scan==Management::MNG_SIGNAL_SIGNAL) {
+			return "SIGNAL";
+		}
+		if (scan==Management::MNG_SIGNAL_REFERENCE) {
+			return "REFERENCE";
+		}
+		else { //Management::MNG_SIGNAL_REFERENCE
+			return "NONE";
+		}
+	}
+
 };
 
 };

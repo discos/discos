@@ -162,7 +162,8 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 }
 
 void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim,const Antenna::TTrackingParameters *const sec,
-		const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPa) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPa,
+		const Management::TSubScanConfiguration& subScanConf) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 				ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -264,6 +265,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 		m_receiversBossError=true;
 		throw impl;
 	}
+	m_subScanConf=subScanConf;
 	newUT=GETMAX3(receiversUT,servoUT,antennaUT);
 	if ((ut!=newUT) && (ut!=0)){
 		ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_WARNING,"FAIL_TO_HANDSHAKE_SCAN_START_EPOCH"));
@@ -275,8 +277,9 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 }
 
 void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
-  const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPar) throw (
-  ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
+  const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPar,
+  const Management::TSubScanConfiguration& subScanConf) throw (ManagementErrors::TelescopeSubScanErrorExImpl,
+  ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	try {
@@ -299,7 +302,7 @@ void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const 
 	}
 	clearTracking();
 	try {
-		doScan(time,prim,sec,servoPar,recvPar);
+		doScan(time,prim,sec,servoPar,recvPar,subScanConf);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		_ADD_BACKTRACE(ManagementErrors::TelescopeSubScanErrorExImpl,impl,ex,"CCore::startScan()");
@@ -321,6 +324,15 @@ void CCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams) th
 		else {
 			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::goOff()");
 			throw impl;
+		}
+		//************************************
+		//da ragionare meglio...in base anche in base a cosa sta facendo...se OTF?
+		//************************************
+		if (beams!=0.0) {
+			m_subScanConf.signal=Management::MNG_SIGNAL_REFERENCE;
+		}
+		else {
+			m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
 		}
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {

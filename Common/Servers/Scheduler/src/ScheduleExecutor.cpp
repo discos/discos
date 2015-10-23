@@ -129,11 +129,7 @@ void CScheduleExecutor::runLoop()
 					secondary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
 					servoPar=static_cast<MinorServo::MinorServoScan *>(m_currentScanRec.servoParameters);
 					recvPar=static_cast<Receivers::TReceiversParameters *>(m_currentScanRec.receieversParsmeters);
-					//printf("Eseguo checkScan\n");
-					//printf("ut: %llu\n",m_currentScan.ut);
 					ok=m_core->checkScan(m_currentScan.ut,primary,secondary,servoPar,recvPar,minEl,maxEl);
-					//printf("ut: %llu\n",m_currentScan.ut);
-					//printf("Fatto checkScan\n");
 				}
 				catch (ACSErr::ACSbaseExImpl& ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,ex,"CScheduleExecutor::runLoop()");
@@ -193,10 +189,8 @@ void CScheduleExecutor::runLoop()
 					secondary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
 					servoPar=static_cast<MinorServo::MinorServoScan *>(m_currentScanRec.servoParameters);
 					recvPar=static_cast<Receivers::TReceiversParameters *>(m_currentScanRec.receieversParsmeters);
-					//printf("Eseguo doScan\n");
-					//printf("ut: %llu\n",m_currentScan.ut);
-					m_core->doScan(m_currentScan.ut,primary,secondary,servoPar,recvPar);
-					//printf("Fatto doScan\n");
+					Management::TSubScanConfiguration subConf=*(m_currentScanRec.subScanConfiguration);
+					m_core->doScan(m_currentScan.ut,primary,secondary,servoPar,recvPar,subConf);
 					m_closeScanTimer=0;
 				}
 				catch (ACSErr::ACSbaseExImpl& Ex) {

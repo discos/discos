@@ -26,7 +26,8 @@
 									m_subScanStarted=false; \
 									m_antennaRTime=new Antenna::TRunTimeParameters; m_antennaRTime->targetName=""; \
 									m_antennaRTime->axis=Management::MNG_NO_AXIS; \
-									m_servoRunTime=new MinorServo::TRunTimeParameters; m_servoRunTime->scanAxis="";
+									m_servoRunTime=new MinorServo::TRunTimeParameters; m_servoRunTime->scanAxis=""; \
+									m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
 
 									
 #define RESOURCE_EXEC ACS_NEW_SIMPLE_CONSUMER(m_antennaNC,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,antennaNCHandler,static_cast<void*>(this)); \
@@ -238,6 +239,10 @@ MinorServo::TRunTimeParameters_var m_servoRunTime;
  * This flags force the component to abort all "long-lasting" operations
  */
 bool m_abortCurrentOperation;
+/**
+ * Stores the current subScan configuration
+ */
+Management::TSubScanConfiguration m_subScanConf;
 /**
  * if true a scan has been commanded to the telescope and the scan is still active (not closed)
  */

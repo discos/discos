@@ -210,6 +210,17 @@ public:
 		pos=m_dewarPos;
 	}
 
+	void setSubScanConf(const Management::TSubScanConfiguration& conf) {
+		m_subScanConf=conf;
+	}
+
+	void setSubScanConf() {
+		m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
+	}
+
+	const Management::TSubScanConfiguration& getSubScanConf() {
+		return m_subScanConf;
+	}
 private:
 
 	/**
@@ -291,6 +302,10 @@ private:
 	 * Initial position of the dewar, it depends on the mode.
 	 */
 	double m_dewarPos;
+	/**
+	 * Sub scan configuration
+	 */
+	Management::TSubScanConfiguration m_subScanConf;
 };
 
 };

@@ -565,8 +565,10 @@ void SchedulerImpl::terminateScan() throw (ComponentErrors::ComponentErrorsEx,Ma
 void SchedulerImpl::getSubScanConfigruation(Management::TSubScanConfiguration_out conf) throw (ComponentErrors::ComponentErrorsEx,
 		ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
+	Management::TSubScanConfiguration_var out;
 	try {
-
+		out=m_core->getSubScanConfiguration();
+		conf=out._retn();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

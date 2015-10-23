@@ -68,5 +68,11 @@ bool isTracking() const;
  */
 bool isOnSource() const;
 
+/**
+ * Return the configuration of the current subscan.
+ */
+const Management::TSubScanConfiguration& getSubScanConfiguration() const { return m_subScanConf; }
+
+
 
 #endif /* CORE_GETTER_H_ */

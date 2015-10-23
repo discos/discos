@@ -199,6 +199,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	}
 	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %d",m_minorServoMappings);
 	componentName="DataBlock/Equipment/AvailableBackend";
+	counter--;
 	for(;;) {
 		if (m_availableBackends==0) fieldPath=componentName;
 		else fieldPath.Format("%s%d",(const char *)componentName,counter);

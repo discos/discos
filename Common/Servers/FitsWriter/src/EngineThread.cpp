@@ -7,6 +7,7 @@
 #include <DateTime.h>
 #include <SkySource.h>
 #include <ReceiversModule.h>
+#include <ManagementModule.h>
 #include <AntennaModule.h>
 #include "CommonTools.h"
 
@@ -465,6 +466,11 @@ void CEngineThread::runLoop()
 			//let's create the summary file, it should be created before the first subscan of the scan.......
 			// the the summary will be valid for the duration of all the subscans.....
 			if (!m_summaryOpened) {
+			 	TIMEVALUE currentUT;
+				IRA::CDateTime now;
+				TIMEDIFFERENCE currentLST;
+				IRA::CString lstStr;
+
 				// now let's create the summary file.
 				m_summary=new CSummaryWriter();
 				m_summary->setBasePath("");
@@ -477,6 +483,13 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
+				// compute the LST time for the scan
+			 	IRA::CIRATools::getTime(currentUT); // get the current time
+			 	now.setDateTime(currentUT,m_data->getDut1());  // transform the current time in a CDateTime object
+			 	now.LST(m_data->getSite()).getDateTime(currentLST);  // get the current LST time
+			 	currentLST.day(0);
+			 	IRA::CIRATools::intervalToStr(currentLST.value().value,lstStr);
+			 	m_summary->getFilePointer()->setKeyword("LST",lstStr);
 				m_summaryOpened=true;
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"SUMMARY_OPENED"));
 			}
@@ -739,6 +752,13 @@ void CEngineThread::runLoop()
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("SubScanType",(const char *)m_data->getSubScanType(),"describes the scan type based on telescope movement")) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getFileName());
+					impl.setError(m_file->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					m_data->setStatus(Management::MNG_FAILURE);
+				}
+				else if(!m_file->setPrimaryHeaderKey("Signal",(const char *)Management::Definitions::map(m_info.getSubScanConf().signal),"sub scan is reference or signal")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -1156,6 +1176,36 @@ void CEngineThread::collectSchedulerData(FitsWriter_private::CFile* summaryFile)
 		std::list<double> va;
 		CCommonTools::map(restFreq,va);
 		if (summaryFile) summaryFile->setKeyword("RESTFREQ",va);
+		Management::TSubScanConfiguration_var conf;
+		try {
+			m_scheduler->getSubScanConfigruation(conf.out());
+			m_info.setSubScanConf(conf.in());
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectSchedulerdata()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			minorServoBossError=true;
+			m_info.setSubScanConf();
+		}
+		catch (ManagementErrors::ManagementErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectSchedulerdata()");
+			impl.setOperationName("getSubScanConfigruation()");
+			impl.setComponentName((const char *)m_config->getSchedulerComponent());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			m_info.setSubScanConf();
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectSchedulerdata()");
+			impl.setOperationName("getSubScanConfigruation()");
+			impl.setComponentName((const char *)m_config->getSchedulerComponent());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			m_info.setSubScanConf();
+		}
 	}
 }
 

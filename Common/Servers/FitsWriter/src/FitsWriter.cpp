@@ -222,6 +222,7 @@ bool CFitsWriter::create()
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY6,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY7,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY8,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY9,m_lastError)) return false;
 	return true;
 };
 

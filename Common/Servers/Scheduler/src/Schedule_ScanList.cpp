@@ -42,6 +42,8 @@ CScanList::~CScanList()
 			if (servo) delete servo;
 			Receivers::TReceiversParameters *receivers=static_cast<Receivers::TReceiversParameters *>((*p)->receieversParsmeters);
 			if (receivers) delete receivers;
+			Management::TSubScanConfiguration *subScanConf=(*p)->subScanConfiguration;
+			if (subScanConf) delete subScanConf;
 			delete (*p);
 		}
 	}
@@ -59,7 +61,8 @@ bool CScanList::checkScan(const DWORD& id)
 	return false;
 }
 
-bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,void *& sec,void *& servo,void *& recv/*,IRA::CString& target*/)
+bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,void *& sec,void *& servo,void *& recv,
+		Management::TSubScanConfiguration *&subScanConf)
 {
 	TIterator i;
 	for (i=m_schedule.begin();i<m_schedule.end();i++) {
@@ -70,6 +73,7 @@ bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,
 			sec=(*i)->secondaryParameters;
 			servo=(*i)->servoParameters;
 			recv=(*i)->receieversParsmeters;
+			subScanConf=(*i)->subScanConfiguration;
 			return true;
 		}
 	}
@@ -79,7 +83,8 @@ bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,
 
 bool CScanList::getScan(const DWORD& id,TRecord& rec)
 {
-	return getScan(id,rec.type,rec.primaryParameters,rec.secondaryParameters,rec.servoParameters,rec.receieversParsmeters);
+	return getScan(id,rec.type,rec.primaryParameters,rec.secondaryParameters,rec.servoParameters,rec.receieversParsmeters,
+			rec.subScanConfiguration);
 }
 
  bool CScanList::checkConsistency(DWORD& line,IRA::CString& errMsg)
@@ -135,11 +140,31 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			rec->secondaryParameters=(void *)binder.getSecondary();
 			rec->receieversParsmeters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
+			rec->subScanConfiguration=binder.getSubScanConfiguration();
+			rec->line=lnNumber;
 			m_schedule.push_back(rec);
 			break;
 		}
 		case Management::MNG_SIDEREAL: {
-			DWORD id;
+			CSubScanBinder binder(getConfiguration(),false);
+			DWORD identifier;
+			if (!parseSidereal2(line,identifier,errMsg,binder)) {
+				binder.dispose();
+				return false;
+			}
+			TRecord *rec=new TRecord;
+			rec->id=identifier;
+			rec->type=type;
+			rec->primaryParameters=(void *)binder.getPrimary();
+			rec->secondaryParameters=(void *)binder.getSecondary();
+			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->servoParameters=(void *)binder.getServo();
+			rec->subScanConfiguration=binder.getSubScanConfiguration();
+			rec->line=lnNumber;
+			m_schedule.push_back(rec);
+			break;
+
+			/*DWORD id;
 			IRA::CString sourceName;
 			Antenna::TTrackingParameters *prim=new Antenna::TTrackingParameters;
 			if (!parseSidereal(line,prim,id,errMsg)) {
@@ -147,8 +172,8 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 				return false; // errMsg already set by previous call
 			}
 			Antenna::TTrackingParameters *sec=new Antenna::TTrackingParameters;
-			resetTrackingParameters(sec);
-			TRecord *rec=new TRecord;
+			resetTrackingParameters(sec);*/
+			/*TRecord *rec=new TRecord;
 			rec->id=id;
 			rec->type=type;
 			rec->primaryParameters=(void *)prim;
@@ -162,7 +187,7 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			//rec->target=sourceName;
 			rec->line=lnNumber;
 			m_schedule.push_back(rec);
-			break;
+			break;*/
 		}
 		case Management::MNG_SUN: {
 			break;
@@ -186,6 +211,7 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			CSubScanBinder binder(getConfiguration(),false);
 			rec->receieversParsmeters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
+			rec->subScanConfiguration=binder.getSubScanConfiguration();
 			// **************************************
 
 			//rec->target="";
@@ -212,6 +238,7 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			CSubScanBinder binder(getConfiguration(),false);
 			rec->receieversParsmeters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
+			rec->subScanConfiguration=binder.getSubScanConfiguration();
 			// **************************************
 
 			rec->line=lnNumber;
@@ -237,6 +264,7 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			CSubScanBinder binder(getConfiguration(),false);
 			rec->receieversParsmeters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
+			rec->subScanConfiguration=binder.getSubScanConfiguration();
 			// **************************************
 
 			rec->line=lnNumber;
@@ -268,6 +296,7 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			CSubScanBinder binder(getConfiguration(),false);
 			rec->receieversParsmeters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
+			rec->subScanConfiguration=binder.getSubScanConfiguration();
 			// **************************************
 
 			//rec->target="";
@@ -346,6 +375,326 @@ bool CScanList::parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *
 		scan->longitudeOffset=0.0;
 		scan->applyOffsets=false;
 	}
+	return true;
+}
+
+
+// void CSubScanBinder::sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section)
+bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder)
+{
+	int start=0;
+	IRA::CString token;
+	Antenna::TCoordinateFrame frame;
+	Antenna::TCoordinateFrame scanFrame=Antenna::ANT_EQUATORIAL;
+	Antenna::TCoordinateFrame scanOffsetFrame=Antenna::ANT_EQUATORIAL;
+	bool scanApplyOffsets=false;
+	long scanParamNumber=0;
+	IRA::CString name;
+	double scanRadialVelocity;
+	double scanLongitudeOffset,scanLatitudeOffset;
+	Antenna::TReferenceFrame scanVradFrame;
+	Antenna::TVradDefinition scanVradDefinition;
+	double scanParameters[Antenna::ANTENNA_TRACKING_PARAMETER_NUMBER];
+	Antenna::TSystemEquinox scanEquinox;
+
+	// get the second item.....
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // id
+		errMsg="cannot read scan identifier";
+		return false;
+	}
+	id=token.ToLong();
+	if (id==0) {
+		errMsg="scan identifier cannot be zero";
+		return false;
+	}
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // type
+		errMsg="cannot read scan type";
+		return false;
+	}
+	//scan->type=Antenna::ANT_SIDEREAL;   //already know it is a sidereal
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // name
+		errMsg="cannot read source name";
+		return false;
+	}
+	//scan->targetName=CORBA::string_dup((const char *)token);
+	name=token;
+	bool frameOpen=false;
+	bool offFrameOpen=false;
+	long counter=0;
+	long paramCounter=0;
+	//scan->latitudeOffset=scan->longitudeOffset=0.0;
+	//scan->applyOffsets=false;
+	//scan->paramNumber=0;
+	//scan->enableCorrection=true;
+	//scan->secondary=false;
+	//scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
+	//scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
+	//scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
+	//scan->RadialVelocity=0.0;
+	frame=Antenna::ANT_EQUATORIAL;
+	while (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  //get the next token...it represents the frame in which the coordinates are expressed
+		bool ok=IRA::CIRATools::strToCoordinateFrame(token,frame);
+		if ((frame==Antenna::ANT_EQUATORIAL) && (ok)) {
+			if (frameOpen || offFrameOpen) {
+				errMsg="wrong equatorial format";
+				return false;  // if the frame has already been expressed, raise an error;
+			}
+			scanFrame=Antenna::ANT_EQUATORIAL;
+			//scan->frame=Antenna::ANT_EQUATORIAL;
+			frameOpen=true;
+		}
+		else if ((frame==Antenna::ANT_GALACTIC) && (ok)) {
+			if (frameOpen || offFrameOpen) {
+				errMsg="wrong galactic format";
+				return false;  // if the frame has already been expressed, raise an error;
+			}
+			scanFrame=Antenna::ANT_GALACTIC;
+			//scan->frame=Antenna::ANT_GALACTIC;
+			frameOpen=true;
+		}
+		else if ((frame==Antenna::ANT_HORIZONTAL) && (ok)) {
+			if (frameOpen || offFrameOpen) {
+				errMsg="wrong horizontal format";
+				return false;  // if the frame has already been expressed, raise an error;
+			}
+			scanFrame=Antenna::ANT_HORIZONTAL;
+			//scan->frame=Antenna::ANT_HORIZONTAL;
+			frameOpen=true;
+		}
+		else if (token==OFFFRAMEEQ) {
+			if (frameOpen && (scanFrame==Antenna::ANT_EQUATORIAL)) {
+				if (counter<3) {
+					errMsg="wrong equatorial offsets format";
+					return false;
+				}
+				frameOpen=false;
+				//scan->paramNumber=paramCounter;
+				scanParamNumber=paramCounter;
+				counter=0;
+			}
+			if (offFrameOpen || frameOpen) {
+				errMsg="wrong offsets format";
+				return false; // if the offsets frame has already been expressed, raise an error;
+			}
+			//scan->offsetFrame=Antenna::ANT_EQUATORIAL;
+			scanOffsetFrame=Antenna::ANT_EQUATORIAL;
+			scanApplyOffsets=true;
+			//scan->applyOffsets=true;
+			offFrameOpen=true;
+		}
+		else if (token==OFFFRAMEGAL) {
+			if (frameOpen && (scanFrame==Antenna::ANT_EQUATORIAL)) {
+				if (counter<3) {
+					errMsg="wrong galactic offsets format";
+					return false;
+				}
+				frameOpen=false;
+				//scan->paramNumber=paramCounter;
+				scanParamNumber=paramCounter;
+				counter=0;
+			}
+			if (offFrameOpen || frameOpen) {
+				errMsg="wrong offsets format";
+				return false; // if the offsets frame has already been expressed, raise an error;
+			}
+			//scan->offsetFrame=Antenna::ANT_GALACTIC;
+			//scan->applyOffsets=true;
+			scanOffsetFrame=Antenna::ANT_GALACTIC;
+			scanApplyOffsets=true;
+			offFrameOpen=true;
+		}
+		else if (token==OFFFRAMEHOR) {
+			if (frameOpen && (scanFrame==Antenna::ANT_EQUATORIAL)) {
+				if (counter<3) {
+					errMsg="wrong horizontal offsets format";
+					return false;
+				}
+				frameOpen=false;
+				//scan->paramNumber=paramCounter;
+				scanParamNumber=paramCounter;
+				counter=0;
+			}
+			if (offFrameOpen || frameOpen) {
+				errMsg="wrong offsets format";
+				return false; // if the offsets frame has already been expressed, raise an error;
+			}
+			//scan->offsetFrame=Antenna::ANT_HORIZONTAL;
+			//scan->applyOffsets=true;
+			scanOffsetFrame=Antenna::ANT_HORIZONTAL;
+			scanApplyOffsets=true;
+			offFrameOpen=true;
+		}
+		else if (token==RVEL) {
+			if (frameOpen && (scanFrame==Antenna::ANT_EQUATORIAL)) {
+				if (counter<3) {
+					errMsg="wrong equatorial offsets format";
+					return false;
+				}
+				frameOpen=false;
+				//scan->paramNumber=paramCounter;
+				scanParamNumber=paramCounter;
+				counter=0;
+			}
+			if (offFrameOpen || frameOpen) {
+				errMsg="wrong scan definition";
+				return false; // if the offsets frame has already been expressed, raise an error;
+			}
+			if (!parseVRADSwitch(val,start,scanRadialVelocity,scanVradFrame,scanVradDefinition,errMsg)) {
+				return false;
+			}
+			counter=0;
+		}
+		else {
+			if (frameOpen) {
+				if (counter==0) { //first two parameters are lon and lat
+					if (scanFrame==Antenna::ANT_EQUATORIAL) {
+						if (!IRA::CIRATools::rightAscensionToRad(token,scanParameters[paramCounter],true)) {
+							errMsg="right ascension format error";
+							return false;
+						}
+					}
+					else if (scanFrame==Antenna::ANT_HORIZONTAL) {
+						if (!IRA::CIRATools::azimuthToRad(token,scanParameters[paramCounter],true)) {
+							errMsg="azimuth format error";
+							return false;
+						}
+					}
+					else if (scanFrame==Antenna::ANT_GALACTIC) {
+						if (!IRA::CIRATools::galLongitudeToRad(token,scanParameters[paramCounter],true)) {
+							errMsg="galactic longitude format error";
+							return false;
+						}
+					}
+					paramCounter++;
+					counter++;
+				}
+				else if (counter==1) {
+					if (scanFrame==Antenna::ANT_EQUATORIAL) {
+						if (!IRA::CIRATools::declinationToRad(token,scanParameters[paramCounter],true)) {
+							errMsg="declination format error";
+							return false;
+						}
+					}
+					else if (scanFrame==Antenna::ANT_HORIZONTAL) {
+						if (!IRA::CIRATools::elevationToRad(token,scanParameters[paramCounter],true)) {
+							errMsg="elevation format error";
+							return false;
+						}
+					}
+					else if (scanFrame==Antenna::ANT_GALACTIC) {
+						if (!IRA::CIRATools::galLatitudeToRad(token,scanParameters[paramCounter],true)) {
+							errMsg="galactic latitude format error";
+							return false;
+						}
+					}
+					if ((scanFrame==Antenna::ANT_HORIZONTAL) || (scanFrame==Antenna::ANT_GALACTIC)) {
+						frameOpen=false;
+						scanParamNumber=2;
+						counter=0;
+					}
+					else {
+						counter++;
+						paramCounter++;
+					}
+				}
+				else if ((counter==2) && (scanFrame==Antenna::ANT_EQUATORIAL)) {  // this should be the equinox, but only for equatorial frame
+					if (!IRA::CIRATools::strToEquinox(token,scanEquinox)) {
+						errMsg="invalid equinox";
+						return false;
+					}
+					counter++;
+				}
+				else if ((counter<7) && (scanFrame==Antenna::ANT_EQUATORIAL)) { // if the frame is equatorial, up to 7 parameters are allowed
+					scanParameters[paramCounter]=token.ToDouble();
+					paramCounter++;
+					counter++;
+				}
+				else {
+					errMsg="invalid sidereal scan definition";
+					return false;
+				}
+			}
+			else if (offFrameOpen) {
+				if (counter==0) {
+					if (scanOffsetFrame==Antenna::ANT_EQUATORIAL) {
+						if (!IRA::CIRATools::offsetToRad(token,scanLongitudeOffset)) {
+							errMsg="equatorial longitude offset format error";
+							return false;
+						}
+					}
+					else if (scanOffsetFrame==Antenna::ANT_HORIZONTAL) {
+						if (!IRA::CIRATools::offsetToRad(token,scanLongitudeOffset)) {
+							errMsg="horizontal longitude offset format error";
+							return false;
+						}
+					}
+					else if (scanOffsetFrame==Antenna::ANT_GALACTIC) {
+						if (!IRA::CIRATools::offsetToRad(token,scanLongitudeOffset)) {
+							errMsg="galactic longitude offset format error";
+							return false;
+						}
+					}
+					counter++;
+				}
+				else if (counter==1) {
+					if (scanOffsetFrame==Antenna::ANT_EQUATORIAL) {
+						if (!IRA::CIRATools::offsetToRad(token,scanLatitudeOffset)) {
+							errMsg="equatorial latitude offset format error";
+							return false;
+						}
+					}
+					else if (scanOffsetFrame==Antenna::ANT_HORIZONTAL) {
+						if (!IRA::CIRATools::offsetToRad(token,scanLatitudeOffset)) {
+							errMsg="horizontal latitude offset format error";
+							return false;
+						}
+					}
+					else if (scanOffsetFrame==Antenna::ANT_GALACTIC) {
+						if (!IRA::CIRATools::offsetToRad(token,scanLatitudeOffset)) {
+							errMsg="galactic latitude offset format error";
+							return false;
+						}
+					}
+					offFrameOpen=false;
+					counter=0;
+				}
+				else {
+					errMsg="too many parameters for offsets definition";
+					return false;  // too many parameters in the offset specification
+				}
+			}
+			else {
+				errMsg="frame is missing";
+				return false; // there is a parameter without having specified the frame
+			}
+		}
+	}
+	if (offFrameOpen) {
+		errMsg="invalid sidereal scan definition";
+		return false;
+	}
+	if ((frameOpen) && (counter<2)) {
+		errMsg="invalid offsets definition";
+		return false;
+	}
+	if (frameOpen && (scanFrame==Antenna::ANT_EQUATORIAL)) {
+		if (counter<3) {
+			errMsg="invalid equatorial coordinates definition";
+			return false;
+		}
+		frameOpen=false;
+		scanParamNumber=paramCounter;
+		counter=0;
+	}
+	if (offFrameOpen || frameOpen) {
+		errMsg="invalid sidereal scan definition";
+		return false; // if the frame and frame offsets are not specified completely, raise an error
+	}
+	binder.sidereal(name,scanFrame,scanParameters,scanParamNumber,scanEquinox);
+	if (scanApplyOffsets) {
+		binder.addOffsets(scanLongitudeOffset,scanLatitudeOffset,scanOffsetFrame);
+	}
+	binder.addRadialvelocity(scanVradFrame,scanVradDefinition,scanRadialVelocity);
 	return true;
 }
 
