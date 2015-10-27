@@ -67,7 +67,7 @@ import ComponentErrorsImpl
 import ComponentErrors
 import DerotatorErrors
 
-class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, ContainerServices, ComponentLifecycle):
+class LocalOscillatorSim(Receivers__POA.LocalOscillator, CharacteristicComponent, ContainerServices, ComponentLifecycle):
 
    def __init__(self):
       CharacteristicComponent.__init__(self)
