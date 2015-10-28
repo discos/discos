@@ -84,7 +84,7 @@ PY_SCRIPTS_L       =
 PY_MODULES         = 
 PY_MODULES_L       =
 
-PY_PACKAGES        =LocalOscillatorImpl
+PY_PACKAGES        =LocalOscillatorImpl LocalOscillatorSimImpl
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 
@@ -192,6 +192,9 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
+	$(RM) *~ *Impl/*~ LocalOscillator*/*.pyc
+	$(RM) ../lib/python/site-packages/*
+	$(RM) $(INTROOT)/lib/python/site-packages/LocalOscillator*Impl*
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 

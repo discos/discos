@@ -1,41 +1,15 @@
 from ACSImpl.DevIO import DevIO
 
+
 class GenericDevIO(DevIO):
-    def __init__(self, value=0):
+
+    def __init__(self, lo, property_name, value=0):
         DevIO.__init__(self, value)
+        self.lo = lo
+        self.property_name = property_name
 
     def read(self):
-        return self.value
-
-    def write(self, value):
-        self.value = value
-
-
-class amplitudeDevIO(DevIO):
-    def __init__(self, value=0):
-        DevIO.__init__(self, value)
-
-    def read(self):
-        return self.value
-
-    def write(self, value):
-        self.value = value
-                                    
-class frequencyDevIO(DevIO):
-    def __init__(self, value=0):
-        DevIO.__init__(self, value)
-
-    def read(self):
-        return self.value
-
-    def write(self, value):
-        self.value = value
-class isLockedDevIO(DevIO):
-    def __init__(self, value=0):
-        DevIO.__init__(self, value)
-
-    def read(self):
-        return self.value
+        return getattr(self.lo, property_name)
 
     def write(self, value):
         self.value = value
