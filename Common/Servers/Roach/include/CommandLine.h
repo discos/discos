@@ -231,6 +231,10 @@ public:
 	void setup(const char *conf) throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
 			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl);
 	
+	void setTargetFileName(const char *conf);
+	
+    void sendTargetFileName() throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl, ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl);
+
 	/**
 	 * This function can be used to set up an input of the backend. The input is identified by its numeric value. If a configuration
 	 * parameter is negative the current value is not changed. Since the backend hardware does not support different sample rates
@@ -443,6 +447,8 @@ public:
 	int getConfiguration(char* configuration);
 
 	int getCommProtVersion(CORBA::String_out version);
+
+    IRA::CString m_targetFileName;
 
 protected:
 	/**

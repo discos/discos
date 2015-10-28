@@ -480,7 +480,7 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 		throw dummy.getComponentErrorsEx();
 	}
 	//I explicity release the mutex before accessing the sender thread because it also make use of the command line...just to make sure to avoid deadlock
-	line.Release();
+	//line.Release();
 	//m_senderThread->suspendTransfer();
 
 	try {
@@ -496,6 +496,22 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 		throw impl.getComponentErrorsEx();
 	}
 
+    try {
+		line->sendTargetFileName(); 
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getBackendsErrorsEx();		
+	}	
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"RoachImpl::sendStop()");
+		dummy.log(LM_DEBUG);
+		throw dummy.getComponentErrorsEx();
+	}
 }
 
 /*void RoachImpl::setAllSections(CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,Backends::TPolarization pol,CORBA::Double sr,CORBA::Long bins) throw (
@@ -548,7 +564,27 @@ void RoachImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw
 void RoachImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
 		BackendsErrors::BackendsErrorsEx)
 {
-	// nothing to do
+	AUTO_TRACE("RoachImpl::setTargetFileName()");
+	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+
+	line->setTargetFileName(fileName);
+
+    /*try {
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getBackendsErrorsEx();	
+	}	
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"RoachImpl::setSection()");
+		dummy.log(LM_DEBUG);
+		throw dummy.getComponentErrorsEx();
+	}*/
+
 }
 
 ACS::doubleSeq *RoachImpl::getTpi() throw (CORBA::SystemException,

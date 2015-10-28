@@ -462,7 +462,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		throw impl;
 	}*/
     if (pol == 2) { // FULL STOKES
-        m_sectionsNumber = m_sectionsNumber/2;
+        m_sectionsNumber = 1; // TBC!!!!!!!!!!!!!!!!!!!!!!!!
         m_polarization[inputId] = Backends::BKND_FULL_STOKES;
     }
 	if (inputId>=0) {  //check the section id is in valid ranges
@@ -915,6 +915,51 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
 	}
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_INFO,"DEFAULTS_ARE_SET"));
+}
+
+void CCommandLine::setTargetFileName(const char *conf)
+{
+    m_targetFileName = (const char*)conf;
+}
+
+void CCommandLine::sendTargetFileName() throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl)
+{
+	AUTO_TRACE("CCommandLine::sendTargetFileName()");
+	int res;
+	WORD len;
+	char sBuff[SENDBUFFERSIZE];
+	char rBuff[RECBUFFERSIZE];
+	// I do not check for backend busy because this is a call done at the initialization and never repeated
+	if (!checkConnection()) {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::sendTargetFileName()");
+	}
+	strcpy (sBuff,"?set-filename,");
+	strcat (sBuff,(const char*)m_targetFileName);
+	strcat (sBuff,"\r\n");
+	len = strlen (sBuff);
+
+	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
+		res=receiveBuffer(rBuff,RECBUFFERSIZE);
+	}
+	if (res>0) { // operation was ok.
+		//if (!CProtocol::setConfiguration(rBuff)) {
+		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setTargetFileName()");
+		//}
+	}
+	else if (res==FAIL) {
+		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
+		dummy.setCode(m_Error.getErrorCode());
+		dummy.setDescription((const char*)m_Error.getDescription());
+		m_Error.Reset();
+		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::sendTargetFileName()");
+	}
+	else if (res==WOULDBLOCK) {
+		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::sendTargetFileName()");
+	}
+	else {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::sendTargetFileName()");
+	}
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::sendTargetFileName()",(LM_INFO,"targetFileName SENT"));
 }
 
 void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
