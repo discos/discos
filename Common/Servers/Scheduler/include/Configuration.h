@@ -38,6 +38,7 @@ public:
 		IRA::CString alias;
 		IRA::CString backend;
 		bool noData;
+		IRA::CString dataPath;
 	} TAvailableBackends;
 
 	/**
@@ -121,7 +122,7 @@ public:
 	/**
 	 * @return the path to the directory where to store the data files.
 	 */
-	const IRA::CString& getDataDirectory() const { return m_dataDir; }
+	const IRA::CString& getDataDirectory() const;
 	/**
 	 * @return the path to the directory where to store the system data file or auxiliary data or files not coming from a schedule
 	 */
@@ -140,7 +141,7 @@ public:
 	long getScheduleExecutorSleepTime() const { return m_scheduleExecutorSleepTime; }
 	
 	/**
-	 * @return the time (microsecods) gap between two transition of the calibration diode.
+	 * @return the time (microseconds) gap between two transition of the calibration diode.
 	 */ 
 	long getTsysGapTime() const { return m_TsysGapTime; }
 	
@@ -187,11 +188,15 @@ public:
 	 * check the availability of a backend from its name or an alias
 	 * @param name name of the backend or an alias
 	 * @param backend it return the name of the backend i.e its component instance
-	 * #param noData true if the backend will sent no raw data through the data transfer channel
+	 * @param pos current position - if available - in the internal backend list (index)
 	 * @return true if the backend has been verified to be available in the configuration
 	 */
-	bool getAvailableBackend(const IRA::CString& name,IRA::CString& backend,bool& noData) const;
+	bool getAvailableBackend(const IRA::CString& name,IRA::CString& backend,long &pos) const;
 
+	void setCurrentBackend(const long& pos)
+	{
+		m_currentBackendIndex=pos;
+	}
 
 private:
 	IRA::CString m_schedDir;
@@ -222,6 +227,8 @@ private:
 	
 	TMinorServoAxis* m_axis;
 	TAvailableBackends* m_backend;
+
+	long m_currentBackendIndex;
 
 	/**
 	 * Pointer to the DB table used to load the station procedures from the CDB 

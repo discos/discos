@@ -85,9 +85,9 @@ void CDataCollection::saveMainHeaders(Backends::TMainHeader const * h,Backends::
 		printf("IF: %ld %ld\n",(long)m_sectionH->IF[0],(long)m_sectionH->IF[1]);
 	}*/
 	m_ready=true; // main headers are saved....before that no activity can take place	
-	if (getIsNoData()) { // this is a special behaviour with no data
-		m_start=true;
-	}
+	//if (getIsNoData()) {
+	//	m_start=true;
+	//}
 }
 
 bool CDataCollection::saveDump(char * memory)
@@ -382,6 +382,9 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 			m_scanAxis=setup.axis;
 			m_startUTTime=setup.startUt;
 			//setup.startUt and setup.targetID are not used
+			if (getIsNoData()) { // this is a special behaviour with no data
+            	m_start=true;
+			}
 			return true;
 		}
 		else {

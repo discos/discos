@@ -19,7 +19,7 @@
 	<MinorServoMapping axis="PFP_Z" servoName="ZP" antennaGeometry="LON" beamDeviationFactor="0.0"/>
 	<MinorServoMapping axis="PFP_Y" servoName="YP" antennaGeometry="LON" beamDeviationFactor="0.5"/>
 	
-	<AvailableBackend alias="TotalPower" backend="BACKENDS/TotalPower" noData="false" />
-	<AvailableBackend alias="XArcos" backend="BACKENDS/XBackends" noData="false" />
+	<AvailableBackend alias="TotalPower" backend="BACKENDS/TotalPower" noData="false" dataPath="" />
+	<AvailableBackend alias="XArcos" backend="BACKENDS/XBackends" noData="false" dataPath="" />
 	
 </TelescopeEquipment>

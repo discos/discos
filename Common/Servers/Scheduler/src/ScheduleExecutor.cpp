@@ -743,7 +743,7 @@ void CScheduleExecutor::getNextScan(const DWORD& counter,CSchedule::TRecord& rec
 
 void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw (
 		ManagementErrors::ScheduleErrorExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::BackendProcedureErrorExImpl)
+		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::BackendProcedureErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
 {
 	std::vector<IRA::CString> command;
  	IRA::CString bckInstance,outputFileName;
@@ -766,7 +766,7 @@ void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw 
  	 			dummy.setReason((const char *)m_schedule->getLastError());
  	 			throw dummy;
  	 		}
- 	 		m_core->_chooseDefaultBackend(bckInstance);  //CouldntGetComponentExImpl
+ 	 		m_core->_chooseDefaultBackend(bckInstance);  //CouldntGetComponentExImpl BackendNotAvailableExImpl
  	 		m_core->_chooseDefaultDataRecorder(rec.writerInstance); //CouldntGetComponentExImpl ComponentErrors::UnexpectedExImpl
  	 		//throw ManagementErrors::BackendProcedureErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl
  	 		m_core->configureBackend(rec.backendProc,command);

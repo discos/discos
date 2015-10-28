@@ -239,15 +239,16 @@ void CCore::_chooseDefaultBackend(const char *bckName) throw (ComponentErrors::C
 	/* It should be forbidden is a schedule is running or recording is active */
 	/* *****************************************************************/
 	baci::ThreadSyncGuard guard(&m_mutex);
-	bool noData; // not used yet
 	IRA::CString name(bckName);
 	IRA::CString instance;
-	if (!m_config->getAvailableBackend(name,instance,noData)) {
+	long pos;
+	if (!m_config->getAvailableBackend(name,instance,pos)) {
 		_EXCPT(ManagementErrors::BackendNotAvailableExImpl,impl,"CCore::_chooseDefaultBackend");
 		throw impl;
 	}
 	if (m_defaultBackendInstance!=instance) {
 		m_defaultBackendInstance=instance;
+		m_config->setCurrentBackend(pos);
 		m_defaultBackendError=true;  // this is tricky...in order to force to unload the preset backend and then reload the new one the next time the default backend is required
 		loadDefaultBackend();  //throw (ComponentErrors::CouldntGetComponentExImpl)
 	}

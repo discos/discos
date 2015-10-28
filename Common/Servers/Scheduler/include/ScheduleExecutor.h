@@ -367,7 +367,8 @@ private:
 	 */
 	void prepareFileWriting(const CSchedule::TRecord& rec) throw (ManagementErrors::ScheduleErrorExImpl,
 			ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl,
-			ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::BackendProcedureErrorExImpl);
+			ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::BackendProcedureErrorExImpl,
+			ManagementErrors::BackendNotAvailableExImpl);
 	
 	/**
 	 * This method will abort the current scan and force the executor to start from the next one

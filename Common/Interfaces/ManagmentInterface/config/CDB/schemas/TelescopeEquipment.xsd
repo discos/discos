@@ -45,6 +45,7 @@
 		<xs:attribute name="alias" type="xs:string" use="required"/>
 		<xs:attribute name="backend" type="xs:string" use="required"/>
 		<xs:attribute name="noData" type="xs:boolean" use="required"/>
+		<xs:attribute name="dataPath" type="xs:string" use="required"/>		
 	</xs:complexType>
 
 	<xs:complexType name="TelescopeEquipmentType">

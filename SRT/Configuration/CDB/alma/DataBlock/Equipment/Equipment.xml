@@ -20,8 +20,8 @@
 	<MinorServoMapping axis="PFP_Z" servoName="PFP_TZ" antennaGeometry="LON" beamDeviationFactor="0.0"/>
 	<MinorServoMapping axis="PFP_Y" servoName="PFP_RY" antennaGeometry="LON" beamDeviationFactor="0.0"/>
 	
-	<AvailableBackend alias="TotalPower" backend="BACKENDS/TotalPower" noData="false" />
-	<AvailableBackend alias="XArcos" backend="BACKENDS/XBackends" noData="false" />
-	<AvailableBackend alias="Roach" backend="BACKENDS/Roach" noData="true" />
+	<AvailableBackend alias="TotalPower" backend="BACKENDS/TotalPower" noData="false" dataPath="" />
+	<AvailableBackend alias="XArcos" backend="BACKENDS/XBackends" noData="false" dataPath="" />
+	<AvailableBackend alias="Roach" backend="BACKENDS/Roach" noData="true" dataPath="" />
 	
 </TelescopeEquipment>

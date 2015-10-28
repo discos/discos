@@ -49,6 +49,21 @@ CConfiguration::~CConfiguration()
 	}
 }
 
+const IRA::CString& CConfiguration::getDataDirectory() const
+{
+	if ((m_currentBackendIndex>-1) && (m_currentBackendIndex<MAX_BCK_NUMBER)) {
+		if (m_backend[m_currentBackendIndex].dataPath!="") {
+			return m_backend[m_currentBackendIndex].dataPath;
+		}
+		else {
+			return m_dataDir;
+		}
+	}
+	else {
+		return m_dataDir;
+	}
+}
+
 void CConfiguration::readProcedures(maci::ContainerServices *services,
         const IRA::CString& procedureFile, ACS::stringSeq& names,
         ACS::longSeq& args, ACS::stringSeq *&bodies) throw (
@@ -136,12 +151,12 @@ Management::TScanAxis CConfiguration::getAxisFromServoName(const IRA::CString& s
 	return Management::MNG_NO_AXIS;
 }
 
-bool CConfiguration::getAvailableBackend(const IRA::CString& name,IRA::CString& backend,bool& noData) const
+bool CConfiguration::getAvailableBackend(const IRA::CString& name,IRA::CString& backend,long &pos) const
 {
 	for (long i=0;i<m_availableBackends;i++) {
 		if ((m_backend[i].alias==name) || (m_backend[i].backend==name)) {
 			backend=m_backend[i].backend;
-			noData=m_backend[i].noData;
+			pos=i;
 			return true;
 		}
 	}
@@ -155,6 +170,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	IRA::CString strVal;
 	IRA::CString fieldPath;
 	long counter=0;
+	IRA::CString dummy;
+	m_currentBackendIndex=-1;
 
 	componentName="DataBlock/Equipment/MinorServoMapping";
 
@@ -218,6 +235,12 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		m_backend[m_availableBackends].noData=(strVal=="true");
 		ACS_DEBUG_PARAM("CConfiguration::Init()","noData: %s",(const char *)strVal);
+		if (!CIRATools::getDBValue(Services,"dataPath",strVal,"alma/",fieldPath)) {
+			break;
+		}
+		//cout << "Data path:" << (const char *)strVal << endl;
+		m_backend[m_availableBackends].dataPath=strVal;
+		ACS_DEBUG_PARAM("CConfiguration::Init()","dataPath: %s",(const char *)strVal);
 		m_availableBackends++;
 		if (m_availableBackends>=MAX_BCK_NUMBER) break;
 		counter++;
@@ -259,6 +282,10 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	}
 	else {
 		m_checkProjectCode=false;
+	}
+	if (!getAvailableBackend(m_defaultBackendInst,dummy,m_currentBackendIndex)) {
+		ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_WARNING,"Default backend does not exist"));
+		m_currentBackendIndex=-1;
 	}
 }
 
