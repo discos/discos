@@ -61,6 +61,27 @@ public:
     virtual void cleanup();
 
 
+    /*
+     * It sets the local oscillator. Only the first value is considered in this case, 
+     * since the receiver has just one synthesizer. Before commanding the new value 
+     * some check are done. The the correspnding signal amplitude is computed.
+     * @param lo lists of values for the local oscillator (MHz), one for each IF. 
+     * In that case just the first one is significant. In a -1 is passed the present value is kept.
+     * @throw  ComponentErrors::ValidationErrorExImpl
+     * @throw ComponentErrors::ValueOutofRangeExImpl
+     * @throw ComponentErrors::CouldntGetComponentExImpl
+     * @throw ComponentErrors::CORBAProblemExImpl
+     * @thorw ReceiversErrors::LocalOscillatorErrorExImpl
+     */
+    void setLO(const ACS::doubleSeq& lo) throw (
+            ComponentErrors::ValidationErrorExImpl,
+            ComponentErrors::ValueOutofRangeExImpl,
+            ComponentErrors::CouldntGetComponentExImpl,
+            ComponentErrors::CORBAProblemExImpl,
+            ReceiversErrors::LocalOscillatorErrorExImpl
+    );
+
+
     /**
      * It activate the receiver, in other words it allows to setup the default configuration 
      * and to make sure the LNA are turned on.
@@ -440,6 +461,11 @@ public:
     const IRA::CString getSetupMode() { return m_setupMode; }
 
 
+    double getRFMax();
+
+    double getRFMin();
+
+
     /**
      * It returns the final mode, based on the setup mode 
      * @return output value
@@ -485,6 +511,13 @@ public:
 
 
 protected:
+
+    /** Obtain a valid reference to the local oscillator device */
+    void loadLocalOscillator()  throw (ComponentErrors::CouldntGetComponentExImpl);
+
+
+    /** Used to free the reference to the local oscillator device */
+    void unloadLocalOscillator();
 
 
     /************************ CONVERSION FUNCTIONS **************************/
@@ -557,6 +590,9 @@ protected:
 private:
 
     maci::ContainerServices* m_services;
+    Receivers::LocalOscillator_var m_localOscillatorDevice;
+    bool m_localOscillatorFault;
+    double m_localOscillatorValue;
     double m_vacuum;
     double m_cryoCoolHead;
     double m_cryoCoolHeadWin;

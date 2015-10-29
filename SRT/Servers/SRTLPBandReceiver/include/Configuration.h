@@ -143,6 +143,12 @@ public:
 	 */
 	inline const IRA::CString& getLocalOscillatorInstance() const { return m_localOscillatorInstance; }
 
+	/**
+	 * @param freq vector with the synthesizer frequencies. It must be freed by caller.
+	 * @param power corresponding powers for the frequencies vector. It must be freed by caller.
+	 * @return the size of the output vectors
+	 */
+	DWORD getSynthesizerTable(double *& freq,double *& power) const;
 
 	/**
 	 * @param freq vector with the frequencies. It must be freed by caller.
@@ -282,6 +288,30 @@ public:
 
 
 	/**
+	 * @return the default frequency for the synthesizer  (MHz)
+	 */
+	inline double const * const  getDefaultLO()  const { return m_DefaultLO; }
+
+
+	/**
+	 * @return the value of the fixed synthesizer used for the second conversion (MHz)
+	 */
+	inline double const * const  getFixedLO2() const { return m_FixedLO2; }
+
+
+	/**
+	 * @return lower limit for the synthesizer tuning (MHz)
+	 */
+	inline double const * const  getLOMin() const { return  m_LOMin; }
+
+
+	/**
+	 * @return upper limit for  the  synthesizer tuning (MHz)
+	 */
+	inline double const * const  getLOMax() const { return  m_LOMax; }
+
+
+	/**
      * This member function is used to configure component by reading the configuration parameter from the CDB.
 	 * This must be the first call before using any other function of this class.
 	 * @throw ComponentErrors::CDBAccess
@@ -318,6 +348,10 @@ private:
 	double *m_PBandIFMin;
 	double *m_LBandIFBandwidth;
 	double *m_PBandIFBandwidth;
+    double *m_DefaultLO;
+    double *m_FixedLO2;
+    double *m_LOMin;
+    double *m_LOMax;
 	DWORD m_IFs;
 	DWORD m_LBandFilterID;
 	DWORD m_PBandFilterID;
@@ -330,10 +364,13 @@ private:
 	double *m_PBandLO;
 
 	IRA::CDBTable *m_markTable;
+	IRA::CDBTable *m_loTable;
 	IRA::CDBTable *m_taperTable;
 	IRA::CDBTable *m_feedsTable;
 
 	TMarkValue *m_markVector;
+	TLOValue * m_loVector;
+	DWORD m_loVectorLen;
 	DWORD m_markVectorLen;
 	TTaperValue * m_taperVector;
 	DWORD m_taperVectorLen;

@@ -404,16 +404,30 @@ void SRTLPBandReceiverImpl::externalCalOff() throw (
 }
 
 
-
-
 void SRTLPBandReceiverImpl::setLO(const ACS::doubleSeq& lo) throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
-        ReceiversErrors::ReceiversErrorsEx)
+        ReceiversErrors::ReceiversErrorsEx
+        )
 {
-    _EXCPT(ComponentErrors::NotAllowedExImpl, impl, "SRTLPBandReceiverImpl::setLO(): operation not allowed.");
-    throw impl.getComponentErrorsEx();
+    try {
+        m_core.setLO(lo);
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();        
+    }
+    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+        ex.log(LM_DEBUG);
+        throw ex.getReceiversErrorsEx();
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTLPBandReceiverImpl::setLO()");
+        impl.log(LM_DEBUG);
+        throw impl.getComponentErrorsEx();
+    }
 }
+
 
 
 void SRTLPBandReceiverImpl::setMode(const char * mode) throw (

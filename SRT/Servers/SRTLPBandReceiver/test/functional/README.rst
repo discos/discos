@@ -1,0 +1,16 @@
+Set the ACS_CDB to the testing CDB::
+
+    $ export ACS_CDB=$HOME/Nuraghe/ACS/trunk/SRT/
+
+Start the local oscillator and SRTLPBand containers::
+
+    $ acsStartContainer -py PyLOContainer
+    $ acsStartContainer -cpp SRTLPBandContainer
+
+Run the receiver board server::
+
+    $ recserver-start
+
+When terminated, stop the server::
+
+    $ recserver-stop

@@ -138,6 +138,8 @@
         <xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
         <!-- Instance of the associated device that will set the local oscillator -->
         <xs:attribute name="DefaultMode" type="xs:string" use="required"/>
+        <!-- Name of the LocalOscillator component -->
+        <xs:attribute name="LocalOscillatorInstance" type="xs:string" use="required"/>
 
     </xs:complexType>
   

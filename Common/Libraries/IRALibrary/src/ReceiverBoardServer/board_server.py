@@ -20,11 +20,17 @@ How To Use This Module
 An alternative way is to execute directly this module from a shell::
 
        ./board_server.py
+
+To stop the server::
+
+       rs.stop()
 """
 
 import socket, traceback, os, sys
 import binhex
 from random import randrange
+from multiprocessing import Value
+
 
 # Index of the byte that stores che command code
 CMD_IDX = 3
@@ -70,6 +76,8 @@ CMD_STX = chr(0x02)
 CMD_ETX = chr(0x03)
 CMD_EOT = chr(0x04)
 
+stop_server = Value('i', False)
+
 class BoardServer:
     """A simulator of Franco Fiocchi (Medicina) board."""
 
@@ -99,6 +107,8 @@ class BoardServer:
         # Number of connections counter
         counter = 0
         while True:
+            if stop_server.value:
+                sys.exit(0)
             try:
                 connection, clientaddr = self.s.accept()
                 counter += 1 
@@ -110,7 +120,7 @@ class BoardServer:
                 continue
 
             # Clean up old children
-            reap()
+            BoardServer.reap()
 
             # Fork a process for this connection
             pid = os.fork()
@@ -128,7 +138,11 @@ class BoardServer:
                 counter = 0
                 try:
                     while True:
-                        data = connection.recv(2048)
+                        data = connection.recv(1024)
+                        if '#stop' in data:
+                            stop_server.value = True
+                            connection.close()
+                            break
                         # Is the command short?
                         is_short = False
                         cmd = chr(0x00)
@@ -207,20 +221,26 @@ class BoardServer:
                 # and not go back to the top of the loop
                 sys.exit(0)
 
-def reap():
-    """Collect any child processes that may be outstanding."""
-    while True:
-        try:
-            result = os.waitpid(-1, os.WNOHANG)
-            if not result[0]: 
+    @staticmethod
+    def stop(server=('127.0.0.1', 5002)):
+            sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sockobj.settimeout(2)
+            sockobj.connect(server) 
+            sockobj.sendall('#stop\r\n')
+
+    @staticmethod
+    def reap():
+        """Collect any child processes that may be outstanding."""
+        while True:
+            try:
+                result = os.waitpid(-1, os.WNOHANG)
+                if not result[0]: 
+                    break
+            except:
                 break
-        except:
-            break
-        print "Reaped process %d" % result[0]
+            print "Reaped process %d" % result[0]
 
 
 if __name__ == "__main__":
     bs = BoardServer()
     bs.run()
-
-

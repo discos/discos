@@ -44,6 +44,14 @@
     <!-- blank separated list of the polarization relative to the IF of the P band receiver-->
     <!-- the first entry is relative to IF 0. Accepted character are L or R  -->
     <xs:attribute name="PBandPolarization" type="xs:string" use="required"/>
+    <!-- Default LO value (MHZ) -->
+    <xs:attribute name="DefaultLO" type="xs:string" use="required"/>
+    <!-- Fixed LO value (MHZ) -->
+    <xs:attribute name="FixedLO2" type="xs:string" use="required"/>
+    <!-- Minimum LO value (MHZ) -->
+    <xs:attribute name="LOMin" type="xs:string" use="required"/>
+    <!-- Maximum LO value (MHZ) -->
+    <xs:attribute name="LOMax" type="xs:string" use="required"/>
 </xs:complexType>
 
 <xs:element name="SRTLPBandReceiverModeSetup" type="SRTLPBandReceiverModeType"/>

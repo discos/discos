@@ -45,6 +45,7 @@ using namespace IRA;
 }
 
 #define CONFIG_PATH "DataBlock/SRTLPBandReceiver"
+#define LOTABLE_PATH CONFIG_PATH"/Synthesizer"
 #define MARKTABLE_PATH CONFIG_PATH"/NoiseMark"
 #define FEEDTABLE_PATH CONFIG_PATH"/Feeds"
 #define TAPERTABLE_PATH CONFIG_PATH"/Taper"
@@ -54,6 +55,9 @@ CConfiguration::CConfiguration()
 {
     m_markVector = NULL;
     m_markVectorLen = 0;
+    m_loTable=NULL;
+    m_loVector=NULL;
+    m_loVectorLen=0;
     m_LBandPolarizations = NULL;
     m_PBandPolarizations = NULL;
     m_feedsTable = NULL;
@@ -66,12 +70,16 @@ CConfiguration::CConfiguration()
     m_LBandIFMin = m_PBandIFMin = NULL;
     m_LBandLO = m_PBandLO = NULL;
     m_LBandIFBandwidth = m_PBandIFBandwidth = NULL;
+    m_DefaultLO = m_FixedLO2= m_LOMin = m_LOMax=NULL;
 }
 
 CConfiguration::~CConfiguration()
 {
     if (m_markTable) {
         delete m_markTable;
+    }
+    if (m_loTable) {
+        delete m_loTable;
     }
     if (m_feedsTable) {
         delete m_feedsTable;
@@ -81,6 +89,9 @@ CConfiguration::~CConfiguration()
     }
     if (m_markVector) {
         delete [] m_markVector;
+    }
+    if (m_loVector) {
+        delete [] m_loVector;
     }
     if (m_taperVector) {
         delete [] m_taperVector;
@@ -117,6 +128,18 @@ CConfiguration::~CConfiguration()
     }
     if (m_PBandIFBandwidth) {
         delete [] m_PBandIFBandwidth;
+    }
+    if (m_DefaultLO) {
+        delete [] m_DefaultLO;
+    }
+    if (m_FixedLO2) {
+        delete [] m_FixedLO2;
+    }
+    if (m_LOMin) {
+        delete [] m_LOMin;
+    }
+    if (m_LOMax) {
+        delete [] m_LOMax;
     }
 }
 
@@ -171,6 +194,11 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
 
         m_LBandIFBandwidth = new double[m_IFs];
         m_PBandIFBandwidth = new double[m_IFs];
+
+        m_DefaultLO = new double[m_IFs];
+        m_FixedLO2 = new double[m_IFs];
+        m_LOMin = new double[m_IFs];
+        m_LOMax = new double[m_IFs];
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl, dummy, "CConfiguration::init()");
@@ -236,6 +264,52 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
     delete m_markTable;
     m_markTable = NULL;
     
+    // The synthesizer
+    try {
+        m_loTable=new IRA::CDBTable(Services,"SynthesizerEntry",LOTABLE_PATH);
+    }
+    catch (std::bad_alloc& ex) {
+        _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
+        throw dummy;
+    }
+    error.Reset();
+    if (!m_loTable->addField(error,"Frequency",IRA::CDataField::DOUBLE)) {
+        field="Frequency";
+    }
+    else if (!m_loTable->addField(error,"OutputPower",IRA::CDataField::DOUBLE)) {
+        field="OutputPower";
+    }
+    if (!error.isNoError()) {
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
+        dummy.setFieldName((const char *)field);
+        throw dummy;
+    }
+    if (!m_loTable->openTable(error))   {
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+        throw dummy;
+    }
+    m_loTable->First();
+    len=m_loTable->recordCount();
+    try {
+        m_loVector=new TLOValue[len];
+    }
+    catch (std::bad_alloc& ex) {
+        _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
+        throw dummy;
+    }
+    ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"SYNTH_VALUE_ENTRY_NUMBER: %d",len));
+    for (WORD i=0;i<len;i++) {
+        m_loVector[i].frequency=(*m_loTable)["Frequency"]->asDouble();
+        m_loVector[i].outputPower=(*m_loTable)["OutputPower"]->asDouble();
+        ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"SYNTH_VALUE_ENTRY: %lf %lf",m_loVector[i].frequency,m_loVector[i].outputPower));
+        m_loTable->Next();
+    }
+    m_loVectorLen=len;
+    m_loTable->closeTable();
+    delete m_loTable;
+    m_loTable=NULL;
+
+
     // The feeds
 	try {
 		m_feedsTable=new IRA::CDBTable(Services,"Feed", FEEDTABLE_PATH);
@@ -516,11 +590,60 @@ void CConfiguration::setMode(const char * mode) throw (
         m_PBandIFMin[k] = token.ToDouble();
     }
 
-    for (WORD k=0; k<m_IFs; k++)
-        m_LBandLO[k] = m_LBandRFMin[k] - m_LBandIFMin[k];
+    _GET_STRING_ATTRIBUTE("DefaultLO", "Default LO Value (MHz):", value, MODE_PATH);
+    start = 0;
+    for (WORD k=0; k<m_IFs; k++) {
+        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+            dummy.setFieldName("DefaultLO");
+            throw dummy;
+        }
+        m_DefaultLO[k] = token.ToDouble();
+    }
 
-    for (WORD k=0; k<m_IFs; k++)
-        m_PBandLO[k] = m_PBandRFMin[k] - m_PBandIFMin[k];
+
+    _GET_STRING_ATTRIBUTE("FixedLO2", "LO2 Value (MHz):", value, MODE_PATH);
+    start = 0;
+    for (WORD k=0; k<m_IFs; k++) {
+        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+            dummy.setFieldName("FixedLO2");
+            throw dummy;
+        }
+        m_FixedLO2[k] = token.ToDouble();
+    }
+
+
+    _GET_STRING_ATTRIBUTE("LOMin", "Minumum LO Value (MHz):", value, MODE_PATH);
+    start = 0;
+    for (WORD k=0; k<m_IFs; k++) {
+        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+            dummy.setFieldName("LOMin");
+            throw dummy;
+        }
+        m_LOMin[k] = token.ToDouble();
+    }
+
+
+    _GET_STRING_ATTRIBUTE("LOMax", "Maximum LO Value (MHz):", value, MODE_PATH);
+    start = 0;
+    for (WORD k=0; k<m_IFs; k++) {
+        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+            dummy.setFieldName("LOMax");
+            throw dummy;
+        }
+        m_LOMax[k] = token.ToDouble();
+    }
+
+
+    // TODO: commented during the LO integration (27 oct 2015)
+    // for (WORD k=0; k<m_IFs; k++)
+    //     m_LBandLO[k] = m_LBandRFMin[k] - m_LBandIFMin[k];
+
+    // for (WORD k=0; k<m_IFs; k++)
+    //     m_PBandLO[k] = m_PBandRFMin[k] - m_PBandIFMin[k];
 
 
     _GET_DWORD_ATTRIBUTE("LBandFilterID", "L band filter ID:", m_LBandFilterID, MODE_PATH);
@@ -529,6 +652,18 @@ void CConfiguration::setMode(const char * mode) throw (
     // for (WORD k=0; k<cmdMode.GetLength(); k++)
     //     m_mode.SetAt(k, cmdMode[k]); 
     m_mode = cmdMode;
+}
+
+
+DWORD CConfiguration::getSynthesizerTable(double * &freq,double *&power) const
+{
+    freq= new double [m_loVectorLen];
+    power=new double [m_loVectorLen];
+    for (DWORD j=0;j<m_loVectorLen;j++) {
+        freq[j]=m_loVector[j].frequency;
+        power[j]=m_loVector[j].outputPower;
+    }
+    return m_loVectorLen;
 }
 
 
@@ -598,4 +733,3 @@ DWORD CConfiguration::getFeedInfo(
     }
     return m_feeds;
 }
-

@@ -18,5 +18,9 @@ LBandIFMin="1320.0 1320.0"
 Feeds="2" 
 PBandPolarization="L R"
 LBandPolarization="L R"
+DefaultLO="2300.0 2300.0"
+FixedLO2="0.0 0.0"
+LOMin="100.0 100.0"
+LOMax="100.0 100.0"
 />
 

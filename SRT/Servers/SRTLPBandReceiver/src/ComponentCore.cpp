@@ -64,7 +64,8 @@ CConfiguration const * const  CComponentCore::execute() throw (
         _EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CComponentCore::execute()");
         throw dummy;
     }
-
+    
+    m_localOscillatorValue=0.0;
     m_actualMode="";
     return &m_configuration;
 }
@@ -86,7 +87,7 @@ void CComponentCore::getLBandLO(ACS::doubleSeq& lo)
     baci::ThreadSyncGuard guard(&m_mutex);
     lo.length(m_configuration.getIFs());
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        lo[i] = 0;
+        lo[i] = m_localOscillatorValue;
     }
 }
 
@@ -462,6 +463,91 @@ void CComponentCore::lnaOn() throw (
 }
 
 
+void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (
+        ComponentErrors::ValidationErrorExImpl,
+        ComponentErrors::ValueOutofRangeExImpl,
+        ComponentErrors::CouldntGetComponentExImpl,
+        ComponentErrors::CORBAProblemExImpl,
+        ReceiversErrors::LocalOscillatorErrorExImpl
+        )
+{
+    double trueValue,amp;
+    double *freq=NULL;
+    double *power=NULL;
+    DWORD size;
+    baci::ThreadSyncGuard guard(&m_mutex);
+    if (lo.length()==0) {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::setLO");
+        impl.setReason("at least one value must be provided");
+        throw impl;
+    }
+    // In case -1 is given we keep the current value...so nothing to do
+    if (lo[0]==-1) {
+        ACS_LOG(
+           LM_FULL_INFO,
+           "CComponentCore::setLO()",
+           (LM_NOTICE, "KEEP_CURRENT_LOCAL_OSCILLATOR %lf", m_localOscillatorValue)
+        );
+        return;
+    }
+    // Now check if the requested value match the limits
+    if (lo[0] < m_configuration.getLOMin()[0]) {
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
+        impl.setValueName("local oscillator lower limit");
+        impl.setValueLimit(m_configuration.getLOMin()[0]);
+        throw impl;
+    }
+    else if (lo[0]>m_configuration.getLOMax()[0]) {
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
+        impl.setValueName("local oscillator upper limit");
+        impl.setValueLimit(m_configuration.getLOMax()[0]);
+        throw impl;
+    }
+    else if (lo[0] >= getRFMin() && lo[0] <= getRFMax()) {
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
+        impl.setValueName("LO frequency value not allowed. It is within the band and "\
+                          "might generate strong aliasing.\nSet LO to a different value.");
+        impl.setValueLimit(m_configuration.getLOMax()[0]);
+        throw impl;
+    }
+    
+    // Computes the synthesizer settings
+    trueValue=lo[0]+m_configuration.getFixedLO2()[0];
+    size=m_configuration.getSynthesizerTable(freq,power);
+    amp=round(linearFit(freq,power,size,trueValue));
+    if (power) delete [] power;
+    if (freq) delete [] freq;
+    ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_DEBUG,"SYNTHESIZER_VALUES %lf %lf",trueValue,amp));
+    /***************************************************************************/
+    /****   COMMENT OUT when the local oscillator component will be available  */
+    /***************************************************************************/
+    // make sure the synthesizer component is available
+    loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
+    try {
+        m_localOscillatorDevice->set(amp,trueValue);
+    }
+    catch (CORBA::SystemException& ex) {
+        m_localOscillatorFault=true;
+        _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CComponentCore::setLO()");
+        impl.setName(ex._name());
+        impl.setMinor(ex.minor());
+        throw impl;
+    }
+    catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+    	_ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"CComponentCore::setLO()");
+	throw impl;
+    }
+    // now that the local oscillator has been properly set...let's do some easy computations
+    m_localOscillatorValue=lo[0];
+    // for (WORD i=0;i<m_configuration.getIFs();i++) {
+    //     m_bandwidth[i]=m_configuration.getRFMax()[i]-(m_startFreq[i]+m_localOscillatorValue);
+    //     // the if bandwidth could never be larger than the max IF bandwidth:
+    //     if (m_bandwidth[i]>m_configuration.getIFBandwidth()[i]) m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
+    // }
+    ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",m_localOscillatorValue));
+}
+
+
 void CComponentCore::getCalibrationMark(
         ACS::doubleSeq& result,
         ACS::doubleSeq& resFreq,
@@ -517,15 +603,20 @@ void CComponentCore::getCalibrationMark(
 
     IRA::CString actualMode(getActualMode());
     ACS::longSeq feeds_idx; // Backend indexes
+    ACS::doubleSeq lbandValue, pbandValue;
     result.length(stdLen);
     resFreq.length(stdLen);
     resBw.length(stdLen);
     feeds_idx.length(stdLen);
+    lbandValue.length(getIFs());
+    pbandValue.length(getIFs());
+    getLBandBandwidth(lbandValue);
+    getPBandBandwidth(pbandValue);
 
     double startFreq, bandwidth = 1.0;
     for (unsigned i=0;i<stdLen;i++) {
         if(actualMode.Right() == "X") { // P band conf
-            startFreq = m_configuration.getPBandIFMin()[ifs[i]];
+            startFreq = m_configuration.getPBandRFMin()[ifs[i]];
             bandwidth = m_configuration.getPBandIFBandwidth()[ifs[i]];
             polarization = m_configuration.getPBandPolarizations()[ifs[i]];
             getPBandLO(lo);
@@ -533,7 +624,7 @@ void CComponentCore::getCalibrationMark(
                 feeds_idx[j] = 0; 
         }
         else if(actualMode.Left() == "X") { // L band conf
-            startFreq = m_configuration.getLBandIFMin()[ifs[i]];
+            startFreq = m_configuration.getLBandRFMin()[ifs[i]];
             bandwidth = m_configuration.getLBandIFBandwidth()[ifs[i]];
             polarization = m_configuration.getLBandPolarizations()[ifs[i]];
             getLBandLO(lo);
@@ -541,8 +632,8 @@ void CComponentCore::getCalibrationMark(
                 feeds_idx[j] = 1; 
         }
         else { // Dual band conf: backend indexes
-            startFreq = (feeds[i] == 0) ? m_configuration.getPBandIFMin()[ifs[i]] : 
-                m_configuration.getLBandIFMin()[ifs[i]];
+            startFreq = (feeds[i] == 0) ? m_configuration.getPBandRFMin()[ifs[i]] : 
+                m_configuration.getLBandRFMin()[ifs[i]];
             bandwidth = (feeds[i] == 0) ? m_configuration.getPBandIFBandwidth()[ifs[i]] : 
                 m_configuration.getLBandIFBandwidth()[ifs[i]];
             polarization = (feeds[i] == 0) ? m_configuration.getPBandPolarizations()[ifs[i]] \
@@ -1080,6 +1171,105 @@ void CComponentCore::updateVertexTemperature() throw (ReceiversErrors::ReceiverC
         throw impl;
     }
     clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
+}
+
+
+void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetComponentExImpl)
+{
+    // If reference was already taken, but an error was found....dispose the reference
+    if ((!CORBA::is_nil(m_localOscillatorDevice)) && (m_localOscillatorFault)) { 
+        try {
+            m_services->releaseComponent((const char*)m_localOscillatorDevice->name());
+        }
+        catch (...) { // Dispose silently...if an error...no matter
+        }
+        m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+    }
+    if (CORBA::is_nil(m_localOscillatorDevice)) {  // Only if it has not been retrieved yet
+        try {
+            m_localOscillatorDevice=m_services->getComponent<Receivers::LocalOscillator>(
+                    (const char*)m_configuration.getLocalOscillatorInstance()
+            );
+            ACS_LOG(LM_FULL_INFO,"CCore::loadAntennaBoss()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"))
+            m_localOscillatorFault=false;
+        }
+        catch (maciErrType::CannotGetComponentExImpl& ex) {
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
+            Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
+            m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+            throw Impl;
+        }
+        catch (maciErrType::NoPermissionExImpl& ex) {
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
+            Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
+            m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+            throw Impl;
+        }
+        catch (maciErrType::NoDefaultComponentExImpl& ex) {
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
+            Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
+            m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+            throw Impl;
+        }
+    }
+}
+
+
+void CComponentCore::unloadLocalOscillator()
+{
+    if (!CORBA::is_nil(m_localOscillatorDevice)) {
+        try {
+            m_services->releaseComponent((const char*)m_localOscillatorDevice->name());
+        }
+        catch (maciErrType::CannotReleaseComponentExImpl& ex) {
+            _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CComponentCore::unloadLocalOscillator()");
+            Impl.setComponentName((const char *)m_configuration.getLocalOscillatorInstance());
+            Impl.log(LM_WARNING);
+        }
+        catch (...) {
+            _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CComponentCore::unloadLocalOscillator()");
+            impl.log(LM_WARNING);
+        }
+        m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+    }
+}
+
+
+double CComponentCore::getRFMax() {
+    baci::ThreadSyncGuard guard(&m_mutex);
+    double rfmax = 0.0;
+
+    IRA::CString actualMode(getActualMode());
+    if(actualMode.Right() == "X") { // P band
+        rfmax = m_configuration.getPBandRFMax()[0];
+    }
+    else if(actualMode.Left() == "X") { // L band
+        rfmax = m_configuration.getLBandRFMax()[0];
+    }
+    else { // Dual feed
+        rfmax = m_configuration.getLBandRFMax()[0];
+    }
+
+    return rfmax;
+}
+
+
+double CComponentCore::getRFMin() {
+    baci::ThreadSyncGuard guard(&m_mutex);
+    double rfmin = 0.0;
+
+    IRA::CString actualMode(getActualMode());
+    if(actualMode.Right() == "X") { // P band
+        rfmin = m_configuration.getPBandRFMin()[0];
+    }
+    else if(actualMode.Left() == "X") { // L band
+        rfmin = m_configuration.getLBandRFMin()[0];
+    }
+    else { // Dual feed
+        rfmin = m_configuration.getLBandRFMin()[0];
+    }
+
+    return rfmin;
 }
 
 

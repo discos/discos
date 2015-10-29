@@ -53,7 +53,13 @@ lband_filters = {
         5: (1625.0, 1715.0)  # 1625-1715 MHz (VLBI)
 }
 
-formatter = {}
+formatter = {
+    'default_lo': 2300.0,
+    'fixed_lo': 0.0,
+    'lo_min': 100.0,
+    'lo_max': 100.0
+}
+
 
 for pband_pol in 'LC':
     for lband_pol in 'LC':
@@ -92,6 +98,10 @@ for pband_pol in 'LC':
                     Feeds="2" 
                     PBandPolarization="{pband_pol}"
                     LBandPolarization="{lband_pol}"
+                    DefaultLO="{default_lo:.1f} {default_lo:.1f}"
+                    FixedLO2="{fixed_lo:.1f} {fixed_lo:.1f}"
+                    LOMin="{lo_min:.1f} {lo_min:.1f}"
+                    LOMax="{lo_max:.1f} {lo_max:.1f}"
                 />
                 """.format_map(formatter)
                 lines = [line.lstrip() + '\n' for line in text.split('\n')]
@@ -134,6 +144,10 @@ for lband_pol in 'LC':
             Feeds="1" 
             LBandPolarization="{lband_pol}"
             PBandPolarization="{pband_pol}"
+            DefaultLO="{default_lo:.1f} {default_lo:.1f}"
+            FixedLO2="{fixed_lo:.1f} {fixed_lo:.1f}"
+            LOMin="{lo_min:.1f} {lo_min:.1f}"
+            LOMax="{lo_max:.1f} {lo_max:.1f}"
         />
         """.format_map(formatter)
         lines = [line.lstrip() + '\n' for line in text.split('\n')]
@@ -176,6 +190,10 @@ for pband_pol in 'LC':
             Feeds="1" 
             LBandPolarization="{lband_pol}"
             PBandPolarization="{pband_pol}"
+            DefaultLO="{default_lo:.1f} {default_lo:.1f}"
+            FixedLO2="{fixed_lo:.1f} {fixed_lo:.1f}"
+            LOMin="{lo_min:.1f} {lo_min:.1f}"
+            LOMax="{lo_max:.1f} {lo_max:.1f}"
         />
         """.format_map(formatter)
         lines = [line.lstrip() + '\n' for line in text.split('\n')]
