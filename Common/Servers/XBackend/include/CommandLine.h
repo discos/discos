@@ -612,6 +612,7 @@ public:
 
 	bool m_XarcosC;
 	bool m_XarcosK00;
+	bool m_XarcosK77;
 };
 
 #endif /*_COMMANDLINE_H_*/

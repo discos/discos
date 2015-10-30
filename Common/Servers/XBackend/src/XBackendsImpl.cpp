@@ -695,12 +695,6 @@ void XBackendsImpl::enableChannels(const ACS::longSeq& enable)
 	}			
 }
 
-void XBackendsImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
-		BackendsErrors::BackendsErrorsEx)
-{
-	// nothing to do
-}
-
 void XBackendsImpl::setTime()
 	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
 {
@@ -1046,6 +1040,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 			setSection(6,145,62.5,6,2,125,-1);
 			line->m_XarcosC=false;
+            line->m_XarcosK77=true;
 			break;		
 		case (Backends::XArcos_K06): // XK06, CENTRAL FEED & FEED 6
 			setMode8bit(true);
@@ -1059,6 +1054,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 			setSection(3,174.296875,3.90625,6,2,7.8125,-1);
 			line->m_XarcosC=false;
+            line->m_XarcosK77=false;
 			break;
 		case (Backends::XArcos_K03): // XK03, CENTRAL FEED & FEED 3
 			setMode8bit(true);
@@ -1073,6 +1069,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			setSection(3,174.296875,2.90625,2,2,7.8125,-1);
 			IRA::CIRATools::Wait(0,100000);
 			line->m_XarcosC=false;
+            line->m_XarcosK77=false;
 			break;
 		case (Backends::XArcos_K00): // XK00, CENTRAL FEED
 			setMode8bit(true);
@@ -1089,6 +1086,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 		   	line->setFeedZero();
            	line->m_XarcosC=false;
            	line->m_XarcosK00=true;
+            line->m_XarcosK77=false;
 			break;
 		case (Backends::XArcos_C00): // XC00
 			setMode8bit(true);
@@ -1105,6 +1103,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 		   	line->setFeedZero();
            	line->m_XarcosC=true;
            	line->m_XarcosK00=false;
+            line->m_XarcosK77=false;
 		    	//setMode8bit(true);
 			break;
 	}

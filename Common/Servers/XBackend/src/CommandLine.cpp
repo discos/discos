@@ -25,6 +25,7 @@ m_GroupSpectrometer(groupS)
     start = true;
 	m_XarcosC = false;
 	m_XarcosK00 = false;
+	m_XarcosK77 = false;
 }
 
 CCommandLine::~CCommandLine()
@@ -425,17 +426,27 @@ void CCommandLine::setConfiguration(const long& secId,const double& freq,const d
 		temp.Setindex(secId);	
 		groupS->Xspec.specificaSezione[secId]=temp;
 		m_bandWidth[secId]=newBW;
-		m_bandWidthInput[secId]=newBW;
-		m_bandWidthInput[secId+1]=newBW;
 		m_sampleRate[secId]=newSR;
 		m_frequency[secId]=newFreq;
-		m_frequencyInput[secId]=newFreq;
-		m_frequencyInput[secId+1]=newFreq;
 		m_bins[secId]=newBins;
 		m_feedNumber[secId]=newFd;
-		m_feedNumberInput[secId]=newFd;
-		m_feedNumberInput[secId+1]=newFd;
 		m_polarization[secId]=(Backends::TPolarization)newPol;
+        if (m_XarcosK77 == true) {
+            m_bandWidthInput[secId]=newBW;
+		    m_bandWidthInput[secId+1]=newBW;
+		    m_frequencyInput[secId]=newFreq;
+		    m_frequencyInput[secId+1]=newFreq;
+		    m_feedNumberInput[secId]=newFd;
+		    m_feedNumberInput[secId+1]=newFd;
+        }
+        else {
+            m_bandWidthInput[2*secId]=newBW;
+		    m_bandWidthInput[2*secId+1]=newBW;
+		    m_frequencyInput[2*secId]=newFreq;
+		    m_frequencyInput[2*secId+1]=newFreq;
+		    m_feedNumberInput[2*secId]=newFd;
+		    m_feedNumberInput[2*secId+1]=newFd;
+        }
 	}
 	else {
 		double oldFreq=-1;
@@ -888,8 +899,7 @@ void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 	bkd.beams=m_beams;
 	//bkd.integration=groupSpec->Xspec.GetTempoIntegrazione();
 	bkd.integration=(groupSpec->Xspec.GetTempoIntegrazione())*1000; //integration time value in msec into the fits header
-	bkd.sampleSize=SAMPLESIZE;
-	bkd.noData=false;
+	bkd.sampleSize=SAMPLESIZE;	
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::fillMainHeader",(LM_INFO,"Main_OK"));
 }
 
@@ -1307,6 +1317,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		IRA::CIRATools::Wait(0,100000);
 		setSection(6,145,62.5,6,2,125,-1);
 		m_XarcosC=false;
+        m_XarcosK77=true;
     }
     else if (config=="XK06") {
         setMode8bit(true);
@@ -1320,6 +1331,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,174.296875,3.90625,6,2,7.8125,-1);
 		m_XarcosC=false;
+        m_XarcosK77=false;
     }
     else if (config=="XK03") {
         setMode8bit(true);
@@ -1333,6 +1345,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,174.296875,3.90625,2,2,7.8125,-1);
 		m_XarcosC=false;
+        m_XarcosK77=false;
     }
     else if(config=="XK00") {
 		setMode8bit(true);
@@ -1349,6 +1362,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 	    setFeedZero();
         m_XarcosC=false;
         m_XarcosK00=true;
+        m_XarcosK77=false;
     }
     else if (config=="XC00") {
         setMode8bit(true);
@@ -1365,6 +1379,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 	    setFeedZero();
 		m_XarcosC=true;
 		m_XarcosK00=false;
+        m_XarcosK77=false;
     }
     else
         return false;
