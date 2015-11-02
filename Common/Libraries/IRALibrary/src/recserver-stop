@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+"""Start the receiver board server"""
+
+from ReceiverBoardServer.board_server import BoardServer
+
+if __name__ == "__main__":
+    BoardServer.stop()
