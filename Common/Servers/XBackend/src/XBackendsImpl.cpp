@@ -1109,6 +1109,12 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 	}
 }
 
+void XBackendsImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+		BackendsErrors::BackendsErrorsEx)
+{
+	// nothing to do
+}
+
 _PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROuLongLong,m_ptime,time);
 _PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROstring,m_pbackendName,backendName);
 _PROPERTY_REFERENCE_CPP(XBackendsImpl,ACS::ROdoubleSeq,m_pbandWidth,bandWidth);
