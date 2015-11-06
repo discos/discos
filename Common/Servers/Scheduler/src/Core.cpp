@@ -128,7 +128,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("initRecording",new function1<CCore,non_constant,void_type,I<long_type> >(this,&CCore::_initRecording),1);
 	m_parser->add("startRecording",new function2<CCore,non_constant,void_type,I<long_type>,I<interval_type> >(this,&CCore::_startRecording),2);
 	m_parser->add("terminateScan",new function0<CCore,non_constant,void_type >(this,&CCore::_terminateScan),0);
-	//m_parser->add("goOff",new function2<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(this),&CCore::goOff),2);
+	m_parser->add("goOff",new function2<CCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(this,&CCore::goOff),2);
 
 	//add remote commands ************  should be loaded from a CDB table............................**********/
 	// antenna subsystem
