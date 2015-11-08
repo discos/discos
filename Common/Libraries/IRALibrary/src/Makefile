@@ -33,7 +33,7 @@ USER_CFLAGS =
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES = Definitions.h String.h IRATools.h Error.h SecureArea.h SerialPort.h Lecom.h \
+INCLUDES = Definitions.h String.h IRATools.h Error.h SecureArea.h SerialPort.h Lecom.h FastQueue.h\
  Socket.h DataField.h DBTable.h LogFilter.h Site.h DateTime.h Timer.h SkySource.h TimeTaggedCircularArray.h \
  ScheduleTimer.h TimeoutSync.h MicroControllerBoard.h ReceiverControl.h MicroControllerBoardDef.h \
  SourceFlux.h CustomLoggerUtils.h LogDike.h FrequencyTracking.h IRA
