@@ -23,7 +23,7 @@ public:
 	 * It construct the buffer with the specified number of elements. The array cannot be resized.
 	 * @param positions the size of the buffer.
 	*/
-	CFastQueue(const unsigned& positions) : m_positions(positions), m_head(0), m_end(0), m_array(NULL)
+	CFastQueue(const unsigned& positions) : m_positions(positions+1), m_head(0), m_end(0), m_array(NULL)
 	{
 		m_array=new T[m_positions] ;
 	}
@@ -39,18 +39,18 @@ public:
 	 * @return true is the queue is full
 	 */
 	inline bool isFull() const {
-		return (m_head==((m_end+m_positions-1)%m_positions));
+		return (size()==m_positions-1);
 	}
 
 	/**
 	 * @return true is the queue is empty
 	 */
 	inline bool isEmpty() const {
-		return (m_head==m_end);
+		return (size()==0);
 	}
 
 	inline unsigned size() const {
-		return (m_head-m_end)%m_positions;
+		return (m_head-m_end+m_positions)%m_positions;
 	}
 
 	/**
