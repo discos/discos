@@ -1066,7 +1066,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 			setSection(2,145,62.5,2,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
-			setSection(3,174.296875,2.90625,2,2,7.8125,-1);
+			setSection(3,174.296875,3.90625,2,2,7.8125,-1);
 			IRA::CIRATools::Wait(0,100000);
 			line->m_XarcosC=false;
             line->m_XarcosK77=false;
