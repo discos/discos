@@ -12,14 +12,14 @@ public:
 		IRA::CFastQueue<unsigned> queue(FASTQUEUE_SIZE);
 		if (!queue.isEmpty()) ::testing::AssertionFailure() << " the container should be empty";
 		for (unsigned i=0;i<FASTQUEUE_SIZE;i++) {
-			if (!queue.pushFront(i)) {
+			if (!queue.pushBack(i)) {
 				return ::testing::AssertionFailure() << " element " << i << " cannot be inserted";
 			}
 			if (queue.size()!=i+1) {
 				return ::testing::AssertionFailure() << " the size of the container is not expected";
 			}
 		}
-		if (queue.pushFront(1)) return ::testing::AssertionFailure() << " insertion should have failed because of container limits";
+		if (queue.pushBack(1)) return ::testing::AssertionFailure() << " insertion should have failed because of container limits";
 		if (!queue.isFull()) return ::testing::AssertionFailure() << " ithe container should be full";
 		return ::testing::AssertionSuccess();
 	}
@@ -30,12 +30,12 @@ public:
 		unsigned elem;
 		// assign some elements
 		for (unsigned i=0;i<1000;i++) {
-			if (!queue.pushFront(i)) {
+			if (!queue.pushBack(i)) {
 				return ::testing::AssertionFailure() << " element " << i << " cannot be inserted";
 			}
 		}
 		for (unsigned i=0;i<500;i++) {
-			if (!queue.popBack(elem)) {
+			if (!queue.popFront(elem)) {
 				return ::testing::AssertionFailure() << " element " << i << " cannot be extracted";
 			}
 			if (elem!=i) {
@@ -43,12 +43,12 @@ public:
 			}
 		}
 		for (unsigned i=1000;i<2000;i++) {
-			if (!queue.pushFront(i)) {
+			if (!queue.pushBack(i)) {
 				return ::testing::AssertionFailure() << " element " << i << " cannot be inserted";
 			}
 		}
 		for (unsigned i=500;i<2000;i++) {
-			if (!queue.popBack(elem)) {
+			if (!queue.popFront(elem)) {
 				return ::testing::AssertionFailure() << " element " << i << " cannot be extracted";
 			}
 			if (elem!=i) {

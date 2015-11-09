@@ -54,11 +54,11 @@ public:
 	}
 
 	/**
-	 * puts an element in the head of the queue.
+	 * puts an element in the tail of the queue.
 	 * @param element new element to be added
 	 * @return false if the container is full and no other elements could be added
 	 */
-	bool pushFront(const T& element) {
+	bool pushBack(const T& element) {
 		if (isFull()) return false;
 		m_array[m_head] = element;
 		m_head = (m_head+ 1)%m_positions; // if full an element is overwritten
@@ -66,20 +66,27 @@ public:
 	}
 
 	/**
-	 * pop back an element from the tail of the queue
+	 * pop  an element from the front of the queue
 	 * @element the next element is the queue
 	 * @return false if the queue is empty and the element could not be pop
 	 */
-	bool  popBack(T& element) {
+	bool  popFront(T& element) {
 	    if (isEmpty()) return false;
 	    element=m_array[m_end];
 	    m_end=(m_end+1)%m_positions; // if it is not empty
 	    return true;
 	}
 	
+	/**
+	 * @return the reference to the element that is going to come out of the queue
+	 */
+	const T& front() const {
+		return m_array[m_end];
+	}
+
 protected:
 	unsigned m_positions;
-	/** beggining of the array */
+	/** beginning of the array */
 	unsigned m_head;
 	/** end of the array */
 	unsigned m_end;
