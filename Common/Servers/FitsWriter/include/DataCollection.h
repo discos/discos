@@ -22,6 +22,7 @@
 #include <list>
 #include <Definitions.h>
 #include <Site.h>
+#include <FastQueue.h>
 #include <acsContainerServices.h>
 //#include "FitsWriter.h"
 #include "Configuration.h"
@@ -76,7 +77,7 @@ void getTsysFromBuffer(char *& buffer,const DWORD& channels ,double *tsys);
  */
 class CDumpCollection {
 public:
-	CDumpCollection() { };
+	CDumpCollection(): m_collection(DUMP_CACHE_SIZE) { };
 	/**
 	 * Destructor. It clears all the dumps that eventually are still there.
 	 */
@@ -84,20 +85,37 @@ public:
 		flushAll();
 	};
 	void flushAll() {
-		std::list<TRecord *>::iterator i;
+		TRecord *rec;
+		while (m_collection.popFront(rec)) {
+			delete [] rec->memory;
+			delete rec;
+		}
+		/*std::list<TRecord *>::iterator i;
 		for (i=m_collection.begin();i!=m_collection.end();i++) {
 			TRecord *rec=*i;
 			delete [] (rec->memory);
 			delete rec;
 		}
-		m_collection.clear();
+		m_collection.clear();*/
 	}
 	/**
 	 * Adds a new dump in the back of the stack (FIFO). If the stack reached its maximum size a false
 	 * is returned and the dump is discarded
 	 */
 	bool pushDump(const ACS::Time& time,bool calOn,char *memory,char * buffer,bool tracking,const long& buffSize) {
-		if (m_collection.size()>DUMP_CACHE_SIZE) return false;
+		TRecord *rec=new TRecord;
+		rec->calOn=calOn;
+		rec->time=time;
+		rec->buffer=buffer;
+		rec->memory=memory;
+		rec->tracking=tracking;
+		rec->buffSize=buffSize;
+		if (!m_collection.pushBack(rec)) {
+			delete rec;
+			return false;
+		}
+		return true;
+		/*if (m_collection.size()>DUMP_CACHE_SIZE) return false;
 		TRecord *rec=new TRecord;
 		rec->calOn=calOn;
 		rec->time=time;
@@ -107,14 +125,25 @@ public:
 		//memcpy(rec->buffer,buffer,buffSize);		
 		rec->buffSize=buffSize;
 		m_collection.push_back(rec);
-		return true;
+		return true;*/
 	}
 	/**
 	 * Pops the first dump of the stack. (FIFO). The returned buffer must be freed by the caller.
 	 * @return true if the dump could be returned, otherwise if the stack is empty it returns false
 	 */
 	bool popDump(ACS::Time& time,bool& calOn,char *&memory,char *& buffer,bool& tracking,long& buffSize) {
-		if (m_collection.empty()) return false;
+		TRecord *rec;
+		if (!m_collection.popFront(rec)) return false;
+		time=rec->time;
+		calOn=rec->calOn;
+		buffer=rec->buffer;
+		memory=rec->memory;
+		buffSize=rec->buffSize;
+		tracking=rec->tracking;
+		delete rec;
+		return true;
+
+		/*if (m_collection.empty()) return false;
 		TRecord *rec=m_collection.front(); //get the first element
 		time=rec->time;
 		calOn=rec->calOn;
@@ -124,14 +153,14 @@ public:
 		tracking=rec->tracking;
 		delete rec;
 		m_collection.pop_front(); // deletes the first element
-		return true;
+		return true;*/
 	}
 	/**
 	 * @return the time of the first element (first to come out) of the list. If the list is empty
 	 * it returns a 0;
 	 */
 	ACS::Time getFirstTime() {
-		if (m_collection.empty()) {
+		if (m_collection.isEmpty()) {
 			return 0;
 		}
 		else {
@@ -142,19 +171,23 @@ public:
 	/**
 	 * @return the time of the last element (last to come out) of the list. if the list is empty it returns 0
 	 */
-	ACS::Time getLastTime() {
-		if (m_collection.empty()) {
+	//ACS::Time getLastTime() {
+		/*if (m_collection.empty()) {
 			return 0;
 		}
 		else {
 			TRecord *rec=m_collection.back();
 			return rec->time;
-		}		
-	}
+		}	*/
+	//}
 	/**
 	 * @return true if the stack is empty
 	 */
-	bool isEmpty() { return m_collection.empty(); }
+	bool isEmpty() const { return m_collection.isEmpty(); }
+	/**
+	 * return the size of the the dump collection
+	 */
+	long getCollectionSize() const { return m_collection.size(); }
 private:
 	typedef struct {
 		ACS::Time time;
@@ -164,7 +197,8 @@ private:
 		long buffSize;
 		bool tracking;
 	} TRecord;
-	std::list<TRecord *>m_collection;
+	//std::list<TRecord *>m_collection;
+	IRA::CFastQueue<TRecord *>m_collection;
 	CDumpCollection(const CDumpCollection& src);
 	void  operator=(const CDumpCollection&src);
 };
@@ -346,6 +380,11 @@ public:
 	 */
 	bool getFakeDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize);
 	
+	/**
+	 * return the size of the dump buffer
+	 */
+	long getDumpCollectionSize();
+
 	/**
 	 * @return the reference to the main header. 
 	 */

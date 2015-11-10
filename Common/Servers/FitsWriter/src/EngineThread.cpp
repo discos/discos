@@ -114,6 +114,7 @@ bool CEngineThread::processData()
 	else {
 		if (!m_data->getDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
 	}
+
 	TIMEVALUE tS;
 	tS.value(time);
 #ifdef FW_DEBUG
@@ -360,7 +361,7 @@ bool CEngineThread::processData()
 					impl.setError(m_file->getLastError());
 					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 					m_data->setStatus(Management::MNG_FAILURE);
-				}			
+				}
 #endif
 				break;	
 			}
@@ -384,7 +385,7 @@ bool CEngineThread::processData()
 					impl.setError(m_file->getLastError());
 					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 					m_data->setStatus(Management::MNG_FAILURE);						
-				}		
+				}
 #endif
 			}
 		}
@@ -398,10 +399,11 @@ bool CEngineThread::processData()
 
 void CEngineThread::runLoop()
 {
-	TIMEVALUE now;
+	TIMEVALUE nowEpoch;
 	IRA::CString filePath,fileName;
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
-	IRA::CIRATools::getTime(now); // it marks the start of the activity job
+	IRA::CIRATools::getTime(nowEpoch); // it marks the start of the activity job
+	//cout << "inizio : " << nowEpoch.value().value << endl;
 	if (m_summaryOpened && m_data->isWriteSummary()) {
 		if ((!m_summary->write()) || (!m_summary->close())) {
 			_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
@@ -860,7 +862,9 @@ void CEngineThread::runLoop()
 		ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"STOPPING" ));
 		//save all the data in the buffer an then finalize the file
 		if (m_fileOpened) {
+			//cout << "Stopping, cached  dumps: " << m_data->getDumpCollectionSize() << endl;
 			while (processData());
+
 #ifdef FW_DEBUG
 		m_file.close();
 #else
@@ -890,7 +894,11 @@ void CEngineThread::runLoop()
 		 // until there is something to process and
 		// there is still time available.......
 		if (m_fileOpened) {
-			while (checkTime(now.value().value) && checkTimeSlot(now.value().value) && processData());
+			//cout << "cached before dumps: " << m_data->getDumpCollectionSize() << endl;
+			while (checkTime(nowEpoch.value().value) && checkTimeSlot(nowEpoch.value().value) && processData());
+			//cout << "cached after  dumps: " << m_data->getDumpCollectionSize() << endl;
+			//IRA::CIRATools::getTime(nowEpoch);
+			//cout << "fine :" << nowEpoch.value().value << endl;
 		}
 	}
 }

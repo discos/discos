@@ -219,6 +219,11 @@ bool CDataCollection::getDump(ACS::Time& time,bool& calOn,char *& memory,char *&
 	return m_dumpCollection.popDump(time,calOn,memory,buffer,tracking,buffSize);
 }
 
+long CDataCollection::getDumpCollectionSize()
+{
+	return m_dumpCollection.getCollectionSize();
+}
+
 bool CDataCollection::getFakeDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize)
 {
 	long size=0;
