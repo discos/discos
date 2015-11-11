@@ -54,10 +54,12 @@ lband_filters = {
 }
 
 formatter = {
-    'default_lo': 2300.0,
+    'default_lo': 0.0,
     'fixed_lo': 0.0,
-    'lo_min': 100.0,
-    'lo_max': 100.0
+    'lo_min': 0.0,
+    'lo_max': 3000.0,
+    'lpfilter_min': 0.0,
+    'lpfilter_max': 1000.0,
 }
 
 
@@ -102,6 +104,8 @@ for pband_pol in 'LC':
                     FixedLO2="{fixed_lo:.1f} {fixed_lo:.1f}"
                     LOMin="{lo_min:.1f} {lo_min:.1f}"
                     LOMax="{lo_max:.1f} {lo_max:.1f}"
+                    LowpassFilterMin="{lpfilter_min:.1f} {lpfilter_min:.1f}"
+                    LowpassFilterMax="{lpfilter_max:.1f} {lpfilter_max:.1f}"
                 />
                 """.format_map(formatter)
                 lines = [line.lstrip() + '\n' for line in text.split('\n')]
@@ -148,6 +152,8 @@ for lband_pol in 'LC':
             FixedLO2="{fixed_lo:.1f} {fixed_lo:.1f}"
             LOMin="{lo_min:.1f} {lo_min:.1f}"
             LOMax="{lo_max:.1f} {lo_max:.1f}"
+            LowpassFilterMin="{lpfilter_min:.1f} {lpfilter_min:.1f}"
+            LowpassFilterMax="{lpfilter_max:.1f} {lpfilter_max:.1f}"
         />
         """.format_map(formatter)
         lines = [line.lstrip() + '\n' for line in text.split('\n')]
@@ -194,6 +200,8 @@ for pband_pol in 'LC':
             FixedLO2="{fixed_lo:.1f} {fixed_lo:.1f}"
             LOMin="{lo_min:.1f} {lo_min:.1f}"
             LOMax="{lo_max:.1f} {lo_max:.1f}"
+            LowpassFilterMin="{lpfilter_min:.1f} {lpfilter_min:.1f}"
+            LowpassFilterMax="{lpfilter_max:.1f} {lpfilter_max:.1f}"
         />
         """.format_map(formatter)
         lines = [line.lstrip() + '\n' for line in text.split('\n')]

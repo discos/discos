@@ -52,6 +52,10 @@
     <xs:attribute name="LOMin" type="xs:string" use="required"/>
     <!-- Maximum LO value (MHZ) -->
     <xs:attribute name="LOMax" type="xs:string" use="required"/>
+    <!-- Minimum value of the IF lowpass filter (MHZ) -->
+    <xs:attribute name="LowpassFilterMin" type="xs:string" use="required"/>
+    <!-- Maximum value of the IF lowpass filter (MHZ) -->
+    <xs:attribute name="LowpassFilterMax" type="xs:string" use="required"/>
 </xs:complexType>
 
 <xs:element name="SRTLPBandReceiverModeSetup" type="SRTLPBandReceiverModeType"/>

@@ -352,6 +352,8 @@ private:
     double *m_FixedLO2;
     double *m_LOMin;
     double *m_LOMax;
+    double *m_LowpassFilterMin;
+    double *m_LowpassFilterMax;
 	DWORD m_IFs;
 	DWORD m_LBandFilterID;
 	DWORD m_PBandFilterID;

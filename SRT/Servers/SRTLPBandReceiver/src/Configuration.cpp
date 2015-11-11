@@ -70,7 +70,7 @@ CConfiguration::CConfiguration()
     m_LBandIFMin = m_PBandIFMin = NULL;
     m_LBandLO = m_PBandLO = NULL;
     m_LBandIFBandwidth = m_PBandIFBandwidth = NULL;
-    m_DefaultLO = m_FixedLO2= m_LOMin = m_LOMax=NULL;
+    m_DefaultLO = m_FixedLO2= m_LOMin = m_LOMax = m_LowpassFilterMin = m_LowpassFilterMax = NULL; 
 }
 
 CConfiguration::~CConfiguration()
@@ -141,6 +141,12 @@ CConfiguration::~CConfiguration()
     if (m_LOMax) {
         delete [] m_LOMax;
     }
+    if (m_LowpassFilterMin) {
+        delete [] m_LowpassFilterMin;
+    }
+    if (m_LowpassFilterMax) {
+        delete [] m_LowpassFilterMax;
+    }
 }
 
 void CConfiguration::init(maci::ContainerServices *Services) throw (
@@ -199,6 +205,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
         m_FixedLO2 = new double[m_IFs];
         m_LOMin = new double[m_IFs];
         m_LOMax = new double[m_IFs];
+        m_LowpassFilterMin = new double[m_IFs];
+        m_LowpassFilterMax = new double[m_IFs];
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl, dummy, "CConfiguration::init()");
@@ -635,6 +643,28 @@ void CConfiguration::setMode(const char * mode) throw (
             throw dummy;
         }
         m_LOMax[k] = token.ToDouble();
+    }
+
+    _GET_STRING_ATTRIBUTE("LowpassFilterMin", "Minimum lowpass filter value (MHz):", value, MODE_PATH);
+    start = 0;
+    for (WORD k=0; k<m_IFs; k++) {
+        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+            dummy.setFieldName("LowpassFilterMin");
+            throw dummy;
+        }
+        m_LowpassFilterMin[k] = token.ToDouble();
+    }
+
+    _GET_STRING_ATTRIBUTE("LowpassFilterMax", "Maximum lowpass filter value (MHz):", value, MODE_PATH);
+    start = 0;
+    for (WORD k=0; k<m_IFs; k++) {
+        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+            dummy.setFieldName("LowpassFilterMax");
+            throw dummy;
+        }
+        m_LowpassFilterMax[k] = token.ToDouble();
     }
 
 
