@@ -130,6 +130,8 @@ public:
 	CColumnEntry(const IRA::CString& name,const IRA::CString& unit,const long& multiplicity,const long& table,const long& rowref):
 		CEntry(name,unit,T::format,multiplicity,table,MULTI,T::typeSpec), m_row(rowref)
 	{
+		m_cache.reserve(_FILE_ENTRY_CACHE_SIZE+1);
+		m_outBuffer.reserve(_FILE_ENTRY_CACHE_SIZE+1);
 		m_cache.resize(_FILE_ENTRY_CACHE_SIZE);
 		initCache();
 	};
@@ -476,7 +478,9 @@ public:
 
 	void addDataColumn(const long& tableId,const IRA::CString& baseName,const IRA::CString& desc) {
 		IRA::CString err;
+		//cout << "nome : " << (const char *)baseName << endl;
 		CTable *tab=getTable(tableId,err);
+		//cout << "tabella : " << tab << endl;
 		if (tab) {
 			tab->allocateDataColumn(baseName,desc);
 		}

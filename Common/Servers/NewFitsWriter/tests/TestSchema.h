@@ -4,16 +4,16 @@
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
 /* Who                                    when            What                                                   */
-/* Andrea Orlati (a.orlati@ira.inaf.it)   13/08/2015
+/* Andrea Orlati (a.orlati@ira.inaf.it)   10/08/2015
 */
 
-#ifndef SUMMARYSCHEMA_H_
-#define SUMMARYSCHEMA_H_
+#ifndef TESTSCHEMA_H_
+#define TESTSCHEMA_H_
 
 #define SCHEMA_HEADER_ENTRY_NUMBER 5
-#define SCHEMA_TABLE_NUMBER 2
-#define SCHEMA_COLUMN_NUMBER 7
-#define SCHEMA_DATA_COLUMN_NUMBER 1
+#define SCHEMA_TABLE_NUMBER 3
+#define SCHEMA_COLUMN_NUMBER 8
+#define SCHEMA_DATA_COLUMN_NUMBER 2
 
 #define SCHEMA_HEADER_ENTRY1 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"TELESCOP","Telescope name" )
 #define SCHEMA_HEADER_ENTRY2 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"ReceiverCode","Receiver name" )
@@ -32,8 +32,12 @@
 #define SCHEMA_COLUMN7 ( 2, _FILE_DOUBLE_TYPE, 2, "Y", "kelvin" )
 #define SCHEMA_DATA_COLUMN1 ( 2, "Ch", "section raw data")
 
+#define SCHEMA_TABLE3 ( "RawTable", 3 )
+#define SCHEMA_COLUMN8 ( 3, _FILE_LONG_TYPE, 1, "X","sample number" )
+#define SCHEMA_DATA_COLUMN2 ( 3, "data", "raw data")
+
 
 #define SCHEMA_HEADER_ENTRY5 ( 1, _FILE_DOUBLE_TYPE,_FILE_MULTI_ENTRY,"test","test keyword" )
 
 
-#endif /* SUMMARYSCHEMA_H_ */
+#endif /* TESTSCHEMA_H_ */

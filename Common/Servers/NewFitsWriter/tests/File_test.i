@@ -8,10 +8,26 @@ public:
 		std::vector<long> dim;
 		RecordProperty("description","check if a fits file can be opened correctly (file + binary tables)");
 		FitsWriter_private::CTable *tab=file->getTable(2,errorMsg);
+		FitsWriter_private::CTable *tab1=file->getTable(3,errorMsg);
+		if (!tab) {
+			return ::testing::AssertionFailure() << "table 2 could not be collected";
+		}
+		if (!tab1) {
+			return ::testing::AssertionFailure() << "table 3 could not be collected";
+		}
+		if (!tab->defineDataColumn("Ch",dim,errorMsg)) {
+			return ::testing::AssertionFailure() << "data column dimensioning failed with message: " << (const char *)errorMsg;
+		}
 		dim.push_back(4096);
 		dim.push_back(1);
 		dim.push_back(8192);
 		if (!tab->defineDataColumn("Ch",dim,errorMsg)) {
+			return ::testing::AssertionFailure() << "data column dimensioning failed with message: " << (const char *)errorMsg;
+		}
+		dim.clear();
+		dim.push_back(1);
+		dim.push_back(1);
+		if (!tab1->defineDataColumn("data",dim,errorMsg)) {
 			return ::testing::AssertionFailure() << "data column dimensioning failed with message: " << (const char *)errorMsg;
 		}
 		if (!file->open(errorMsg)) {
@@ -158,6 +174,43 @@ public:
 		}
 		return ::testing::AssertionSuccess();
 	}
+
+	::testing::AssertionResult File_writeTableSpeed() {
+		IRA::CString errorMsg;
+		long xdata=1;
+
+		double data0,data1;
+		data0=1.23;
+		data1=565.11;
+		TIMEVALUE startTime,stopTime;
+		RecordProperty("description","check execution time for large amount of data");
+		FitsWriter_private::CTable *tab=file->getTable("RawTable",errorMsg);
+		if (!tab) {
+			return ::testing::AssertionFailure() << "table " << "RawTable" << " cannot be found, " << (const char *)errorMsg;
+		}
+		IRA::CIRATools::getTime(startTime);
+		for (unsigned k=0;k<220000;k++) {
+			if (!tab->setColumn<_FILE_LONG_TYPE>("X",xdata,errorMsg)) {
+				return ::testing::AssertionFailure() << "column " << "X" << " cannot be written, message is " << (const char *)errorMsg;
+			}
+			if (!tab->setDataColumn("data0",data0,errorMsg)) {
+				return ::testing::AssertionFailure() << "column " << "data0" << " cannot be written, message is " << (const char *)errorMsg;
+			}
+			if (!tab->setDataColumn("data1",data1,errorMsg)) {
+				return ::testing::AssertionFailure() << "column " << "data1" << " cannot be written, message is " << (const char *)errorMsg;
+			}
+			xdata++;
+			//this will add a blank row at the end of the table when table is flushed at the end....but no issue for this test
+			if (!tab->nextRow(errorMsg)) {
+				return ::testing::AssertionFailure() << "cannot add row " << k << " in table, message is " << (const char *)errorMsg;
+			}
+		}
+		IRA::CIRATools::getTime(stopTime);
+		//double sec=(stopTime.value().value-startTime.value().value)/10000000.0;
+		//cout << "tempo impiegato " << sec << "secondi" << endl;
+		return ::testing::AssertionSuccess();
+	}
+
 
 protected:
 	static FitsWriter_private::CFile *file;

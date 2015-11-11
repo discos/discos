@@ -20,7 +20,7 @@ public:
 			}
 		}
 		if (queue.pushBack(1)) return ::testing::AssertionFailure() << " insertion should have failed because of container limits";
-		if (!queue.isFull()) return ::testing::AssertionFailure() << " ithe container should be full";
+		if (!queue.isFull()) return ::testing::AssertionFailure() << " the container should be full";
 		return ::testing::AssertionSuccess();
 	}
 

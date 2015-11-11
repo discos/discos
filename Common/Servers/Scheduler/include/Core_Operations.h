@@ -175,10 +175,11 @@ void _haltSchedule();
  * @throw ComponentErrors::CouldntGetComponentExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
  * @throw ManagementErrors::LogFileErrorExImpl
+ * @thorw ManagementErrors::ScheduleNotExistExImpl
 */
 void _startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,ManagementErrors::AlreadyRunningExImpl,
 		ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-		ManagementErrors::LogFileErrorExImpl);
+		ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl);
 
 /**
  * It allows to change the backend elected as default backend, the default backend is the device used for all operation (for example tsys) when a schedule is not running.

@@ -104,4 +104,6 @@
 
 <ErrorCode name="InvalidRestFrequency" shortDescription="The rest frequency is not provided or does not match the number of backend sections" description=""/>
 
+<ErrorCode name="ScheduleNotExist" shortDescription="Schedule could not be found" description=""/>
+
 </Type>

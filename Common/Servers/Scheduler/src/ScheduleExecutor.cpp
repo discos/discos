@@ -492,7 +492,7 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
  
 void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (
  		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
- 		ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
+ 		ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl)
 {
  	baci::ThreadSyncGuard guard(&m_mutex);
  	if (m_active) {
@@ -513,6 +513,10 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	}
  	else {
  		fullPath=m_core->m_config->getScheduleDirectory()+projectCode+"/";
+ 	}
+ 	if (!IRA::CIRATools::fileExists(fullPath+schedule)) {
+ 		_EXCPT(ManagementErrors::ScheduleNotExistExImpl,dummy,"CScheduleExecutor::startSchedule()");
+ 		throw dummy;
  	}
  	try {
  		m_schedule=new CSchedule(fullPath,schedule);

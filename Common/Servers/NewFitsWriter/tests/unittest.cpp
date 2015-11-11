@@ -37,4 +37,10 @@ TEST_F(NewFitsWriter_File, File_writeTableColumnsFast){
 	EXPECT_TRUE(File_writeTableColumnsFast());
 }
 
+TEST_F(NewFitsWriter_File, File_writeTableSpeed){
+	EXPECT_TRUE(File_writeTableSpeed());
+}
+
+
+
 

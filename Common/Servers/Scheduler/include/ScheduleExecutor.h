@@ -72,7 +72,8 @@ public:
  	 * @throw ManagementErrors::LogFileErrorExImpl
  	*/
      void startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (ManagementErrors::ScheduleErrorExImpl,
-    		 ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
+    		 ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+    		 ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl);
      
      /**
       * initialize the schedule executor.
