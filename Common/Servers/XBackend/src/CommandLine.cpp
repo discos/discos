@@ -744,6 +744,18 @@ void CCommandLine::getFrequency(ACS::doubleSeq& freq) const
 	}
 }
 
+void CCommandLine::getFrequencyAttr(ACS::doubleSeq& freq) const
+{	
+	AUTO_TRACE("CCommandLine::getFrequency()");
+	CSecAreaResourceWrapper<GroupSpectrometer> line=m_pLink->Get();
+
+	freq.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
+		freq[i]=ANALOG_FREQUENCY+m_frequencyInput[2*i];
+	}
+}
+
+
 void CCommandLine::getBins(ACS::longSeq& bins) const
 {
 	AUTO_TRACE("CCommandLine::getBins()");
@@ -766,6 +778,16 @@ void CCommandLine::getFeed(ACS::longSeq& feed) const
 	}
 }
 
+void CCommandLine::getFeedAttr(ACS::longSeq& feed) const
+{
+	AUTO_TRACE("CCommandLine::getFeed()");
+
+	feed.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
+		feed[i]=m_feedNumberInput[2*i];
+	}
+}
+
 void CCommandLine::setFeedZero() {
     m_feedNumber[0]=0;
 	m_feedNumberInput[0]=0;
@@ -783,6 +805,25 @@ void CCommandLine::setFeedZero() {
 	m_feedNumberInput[6]=0;
     m_feedNumber[7]=0;
 	m_feedNumberInput[7]=0;
+}
+
+void CCommandLine::setFeedZeroUno() {
+    m_feedNumber[0]=0;
+	m_feedNumberInput[0]=0;
+    m_feedNumber[1]=0;
+	m_feedNumberInput[1]=0;
+    m_feedNumber[2]=0;
+	m_feedNumberInput[2]=0;
+    m_feedNumber[3]=0;
+	m_feedNumberInput[3]=0;
+    m_feedNumber[4]=1;
+	m_feedNumberInput[4]=1;
+    m_feedNumber[5]=1;
+	m_feedNumberInput[5]=1;
+    m_feedNumber[6]=1;
+	m_feedNumberInput[6]=1;
+    m_feedNumber[7]=1;
+	m_feedNumberInput[7]=1;
 }
 
 void CCommandLine::getPolarization(ACS::longSeq& pol) const
@@ -803,6 +844,16 @@ void CCommandLine::getBandWidth(ACS::doubleSeq& bw) const
 	bw.length(m_inputsNumber);
 	for (int i=0;i<m_inputsNumber;i++) {
 		bw[i]=m_bandWidthInput[i];
+	}
+}
+
+void CCommandLine::getBandWidthAttr(ACS::doubleSeq& bw) const
+{
+	AUTO_TRACE("CCommandLine::getBandWidth()");
+
+	bw.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
+		bw[i]=m_bandWidthInput[2*i];
 	}
 }
 
@@ -1177,7 +1228,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
         
 
 
-	//if (DEFAULT_MODE8BIT){
+	//if (DEFAULT_MODE8BIT)
 	//	m_mode8bit=true;
 	if (m_mode8bit==true){
 #ifdef DOPPIO 
@@ -1299,7 +1350,15 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
     start=false;
     }
     else {
+	    m_XarcosK00 = false;
+	    m_XarcosK77 = false;
+        start = true;
+        IRA::CIRATools::Wait(1,0);
+		setup("NNNN");
+        start = false;
+        IRA::CIRATools::Wait(1,0);
     //printf("initialize configuration end\n");
+	//IRA::CIRATools::Wait(2,0);
     if (config=="XK77") { //in order to add a new configuration add an other if
         setMode8bit(false);
         setSectionsNumber(7);
@@ -1331,6 +1390,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		setSection(2,145,62.5,6,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,174.296875,3.90625,6,2,7.8125,-1);
+	    setFeedZeroUno();
 		m_XarcosC=false;
         m_XarcosK77=false;
     }
@@ -1345,6 +1405,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		setSection(2,145,62.5,2,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,174.296875,3.90625,2,2,7.8125,-1);
+	    setFeedZeroUno();
 		m_XarcosC=false;
         m_XarcosK77=false;
     }

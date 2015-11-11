@@ -84,6 +84,11 @@ public:
 	void getFrequency(ACS::doubleSeq& freq) const;
 	
 	/**
+	 * Call this function in order to get the start frequency value for each input. 
+	 */
+	void getFrequencyAttr(ACS::doubleSeq& freq) const;
+	
+	/**
 	 * Call this function in order to get the sample rate for each input. 
 	 */	
 	void getSampleRate(ACS::doubleSeq& sr) const;
@@ -102,11 +107,20 @@ public:
 	 * Call this function in order to get the number of bins for each input. 
 	 */	
 	void getBins(ACS::longSeq& bins) const;
+
 	/**
-	 * Call this function in order to get the number of bins for each input. 
+	 * Call this function in order to get the feed number for each input. 
 	 */	
 	void getFeed(ACS::longSeq& feed) const;	
+
+	/**
+	 * Call this function in order to get the feed number attribute for each input. 
+	 */	
+	void getFeedAttr(ACS::longSeq& feed) const;	
+    
     void setFeedZero();
+    void setFeedZeroUno();
+
 	/**
 	 * Call this function in order to get the polarization for each input. 
 	 */	
@@ -162,6 +176,12 @@ public:
 	 * @param bw this is a sequence of double values that correspond to the bandwidth of each analog input.
 	 */
 	void getBandWidth(ACS::doubleSeq& bw) const;
+	
+	/**
+	 * Call this function in order to get the current band width of each input.
+	 * @param bw this is a sequence of double values that correspond to the bandwidth of each analog input.
+	 */
+	void getBandWidthAttr(ACS::doubleSeq& bw) const;
 	
 	/**
 	 * Call this function in order to get the time clock reported by the backend. 
@@ -579,7 +599,6 @@ private:
 	*/
 	void setStatus(TLineStatus sta);
 
-    bool start;
 
 	/**
 	 * @return the current line status
@@ -613,6 +632,7 @@ public:
 	bool m_XarcosC;
 	bool m_XarcosK00;
 	bool m_XarcosK77;
+    bool start;
 };
 
 #endif /*_COMMANDLINE_H_*/

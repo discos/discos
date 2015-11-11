@@ -725,7 +725,17 @@ void XBackendsImpl::initialize(const char * configuration)
 	AUTO_TRACE("XBackendsImpl::initialize()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
+        line->m_XarcosC = false;
+	    line->m_XarcosK00 = false;
+	    line->m_XarcosK77 = false;
+        line->start = true;
+        IRA::CIRATools::Wait(1,0);
+		line->setup("NNNN");
+        line->start = false;
+        IRA::CIRATools::Wait(1,0);
 		line->setup(configuration);
+        IRA::CIRATools::Wait(1,0);
+		line->setDefaultConfiguration();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -1021,10 +1031,20 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 	IRA::CIRATools::Wait(0,100000);
 	*/
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+    line->m_XarcosC = false;
+	    line->m_XarcosK00 = false;
+	    line->m_XarcosK77 = false;
+        line->start = true;
+        IRA::CIRATools::Wait(1,0);
+		line->setup("NNNN");
+        line->start = false;
+        IRA::CIRATools::Wait(1,0);
+		//line->setup(configuration);
+        //IRA::CIRATools::Wait(1,0);
 	switch (conf) {
 		case (Backends::XArcos_K77): // XK77, ALL FEED
 			setMode8bit(false);
-            		setSectionsNumber(7);
+            setSectionsNumber(7);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(0,145,62.5,0,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
@@ -1053,6 +1073,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			setSection(2,145,62.5,6,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(3,174.296875,3.90625,6,2,7.8125,-1);
+            line->setFeedZeroUno();
 			line->m_XarcosC=false;
             line->m_XarcosK77=false;
 			break;
@@ -1068,6 +1089,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 			setSection(3,174.296875,3.90625,2,2,7.8125,-1);
 			IRA::CIRATools::Wait(0,100000);
+            line->setFeedZeroUno();
 			line->m_XarcosC=false;
             line->m_XarcosK77=false;
 			break;
@@ -1107,6 +1129,7 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 		    	//setMode8bit(true);
 			break;
 	}
+		line->setDefaultConfiguration();
 }
 
 void XBackendsImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
