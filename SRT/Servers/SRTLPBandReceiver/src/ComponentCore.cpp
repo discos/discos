@@ -1052,7 +1052,9 @@ void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoa
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
-    if (!answer) setStatusBit(LOCAL);
+    if (!answer) {
+        setStatusBit(LOCAL);
+    }
     else clearStatusBit(LOCAL);
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }

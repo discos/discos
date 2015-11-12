@@ -162,6 +162,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
     // read component configuration
     _GET_STRING_ATTRIBUTE("DewarIPAddress", "Dewar IP address:", m_dewarIPAddress,"");
     _GET_STRING_ATTRIBUTE("LNAIPAddress", "LNA IP address:", m_LNAIPAddress,"");
+	_GET_STRING_ATTRIBUTE("LocalOscillatorInstance","Local oscillator instance:",m_localOscillatorInstance,"");
     _GET_STRING_ATTRIBUTE("SwitchIPAddress", "Switch board IP address:", m_switchIPAddress,"");
     _GET_DWORD_ATTRIBUTE("DewarPort", "Dewar port:", m_dewarPort,"");
     _GET_DWORD_ATTRIBUTE("LNAPort", "LNA port:", m_LNAPort,"");

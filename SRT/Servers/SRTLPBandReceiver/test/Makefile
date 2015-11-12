@@ -1,11 +1,13 @@
+PY_PACKAGES = PyLPBandTest
+
 # CPP UNIT TESTING SETUP
 #--------------
-GTEST_HOME=/usr/local/include/gtest
-GMOCK_HOME=/usr/local/include/gmock
-GTEST_LIBS=gtest gtest_main
-
-USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
-USER_LIBS=C++ pthread
+# GTEST_HOME=/usr/local/include/gtest
+# GMOCK_HOME=/usr/local/include/gmock
+# GTEST_LIBS=gtest gtest_main
+# 
+# USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
+# USER_LIBS=C++ pthread
 # END OF CPP UNIT TESTING SETUP
 #---------------------
 
@@ -15,9 +17,9 @@ USER_LIBS=C++ pthread
 # unittest_OBJECTS = unittest
 # unittest_LIBS = $(GTEST_LIBS) <ComponentNameImpl>
 
-EXECUTABLES_L = unittest
-unittest_OBJECTS = unittest
-unittest_LIBS = $(GTEST_LIBS) 
+# EXECUTABLES_L = unittest
+# unittest_OBJECTS = unittest
+# unittest_LIBS = $(GTEST_LIBS) 
 
 # END OF CUSTOMIZATION
 # do not edit below this line
@@ -58,6 +60,8 @@ clean_test:
 	rm -f functional/*.pyc
 	rm -f pyunit/*.pyc
 	rm -f external/*.pyc
+	rm -rf ../lib/python/site-packages/*
+	rm -rf $(INTROOT)/lib/python/site-packages/PyMinorServoTest*
 
 unit: do_unit
 	@echo " . . . 'unit' done"

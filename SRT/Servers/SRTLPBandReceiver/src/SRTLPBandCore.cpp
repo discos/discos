@@ -102,6 +102,7 @@ void SRTLPBandCore::setMode(const char * mode) throw (
         m_configuration.setMode(cmdMode);
             
         setLBandFilter(m_configuration.getLBandFilterID());
+            
         setPBandFilter(m_configuration.getPBandFilterID());
         setLBandPolarization(m_configuration.getLBandPolarization());
         setPBandPolarization(m_configuration.getPBandPolarization());

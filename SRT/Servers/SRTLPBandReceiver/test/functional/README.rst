@@ -7,7 +7,7 @@ Start the local oscillator and SRTLPBand containers::
     $ acsStartContainer -py PyLOContainer
     $ acsStartContainer -cpp SRTLPBandContainer
 
-Run the receiver board server::
+Run the receiver board server (the test will do it automatically)::
 
     $ recserver-start
 

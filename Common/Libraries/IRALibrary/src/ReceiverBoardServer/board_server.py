@@ -147,7 +147,7 @@ class BoardServer:
                         is_short = False
                         cmd = chr(0x00)
                         if(data):
-                            if len(data) > 10:
+                            if len(data) > 1:
                                 for c in data:
                                     print hex(ord(c)),
                                 print
@@ -160,7 +160,7 @@ class BoardServer:
                             if CMD_TYPE_MIN_EXT > data[CMD_IDX] or data[CMD_IDX] > CMD_TYPE_MAX_ABB:
                                 # The last byte, 0x01, is the execution result of an "unknow command"
                                 answer = "".join([CMD_STX, data[2], data[1], data[3], data[4], chr(0x01)])
-                                # print "Sending message: %r" %binhex.binascii.hexlify(answer)
+                                print "Sending message: %r" %binhex.binascii.hexlify(answer)
                                 connection.send(answer)
                                 continue
                             elif data[CMD_IDX] >= CMD_TYPE_MIN_ABB:
@@ -186,7 +186,7 @@ class BoardServer:
 
                             if cmd in answers_with_data:
                                 if data_type == MCB_CMD_DATA_TYPE_B01:
-                                    data_list += [randrange(0, 2)]
+                                    data_list += [1] # Always remote ON
                                 elif data_type == MCB_CMD_DATA_TYPE_F32:
                                     data_list += [156, 157, 158, 159] * AD24_LEN # Add four bytes
                                     pass
@@ -204,7 +204,7 @@ class BoardServer:
                                 answer += chr(checksum)
                                 answer += CMD_ETX
                             
-                            # print "Sending message: %r" %binhex.binascii.hexlify(answer)
+                            print "Sending message: %r" %binhex.binascii.hexlify(answer)
                             connection.send(answer)
                 except:
                     raise
