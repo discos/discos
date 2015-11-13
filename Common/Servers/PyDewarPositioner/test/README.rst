@@ -1,7 +1,7 @@
 *******************
 Containers to start
 *******************
-- acsStartContainer -py AntennaBossSimulatorContainer
+- acsStartContainer -py AntennaBossSimContainer
 - acsStartContainer -py DerotatorContainer
 - acsStartContainer -py DerotatorPositionerContainer
 

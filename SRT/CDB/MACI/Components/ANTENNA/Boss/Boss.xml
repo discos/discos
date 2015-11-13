@@ -5,9 +5,9 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
 	Name="Boss"
-	Code="AntennaSimulator.AntennaSimulatorImpl"
+	Code="AntennaBossSimImpl.AntennaBossSimImpl"
 	Type="IDL:alma/Antenna/AntennaBoss:1.0"
-	Container="AntennaBossSimulatorContainer"
+	Container="AntennaBossSimContainer"
 	Default="true"
 	KeepAliveTime="-1"
     ImplLang="py"
