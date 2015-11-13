@@ -48,8 +48,8 @@ IRALibrary_OBJECTS = String IRATools Error SerialPort Lecom Socket DataField DBT
  ReceiverControl SourceFlux CustomLoggerUtils LogDike FrequencyTracking
 IRALibrary_LIBS = acstime SlaLibrary maciClient
 
-PY_PACKAGES  = IRAPy ReceiverBoardServer
-PY_SCRIPTS = recserver-start recserver-stop
+PY_PACKAGES  = IRAPy
+PY_SCRIPTS =
 
 EXECUTABLES     = FTrack STrack
 EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike TestTimeTaggedCircularArray  \
