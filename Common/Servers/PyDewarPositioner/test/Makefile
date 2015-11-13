@@ -1,4 +1,4 @@
-PY_PACKAGES = DewarPositionerMockers DerotatorSimulator
+PY_PACKAGES = DewarPositionerMockers
 
 # CPP UNIT TESTING SETUP
 #--------------
