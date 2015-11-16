@@ -44,7 +44,7 @@ class TestLO(unittest2.TestCase):
 
 
     def test_set_below_minimum_value(self):
-        """LO below the minimum allowed value: operation not allowed"""
+        """LO below the minimum allowed value: not allowed"""
         min_values = get_cdb_values('LOMin')
         values_not_allowed = [(value - 0.5) for value in min_values]
         with self.assertRaises(ComponentErrorsEx):
@@ -52,10 +52,29 @@ class TestLO(unittest2.TestCase):
 
 
     def test_set_above_minimum_value(self):
-        """LO above the minimum allowed value: operation not allowed"""
+        """LO above the minimum allowed value: not allowed"""
         max_values = get_cdb_values('LOMax')
         values_not_allowed = [(value + 0.5) for value in max_values]
         with self.assertRaises(ComponentErrorsEx):
+            self.lp.setLO(values_not_allowed)
+
+
+    def test_lo_inside_default_sky_band(self):
+        """LO inside the default (L3L4) observed sky band: not allowed"""
+        # Check the bandwith is 1300:1800 MHz
+        assert [1300.0] * 2 == get_cdb_values('LBandRFMin')
+        assert [1800.0] * 2 == get_cdb_values('LBandRFMax')
+        values_not_allowed = [1500.00, 1500.00]
+        with self.assertRaisesRegexp(ComponentErrorsEx, 'within the band'):
+            self.lp.setLO(values_not_allowed)
+
+
+    def test_lo_inside_no_default_sky_band(self):
+        """LO inside the (no-default) observed sky band"""
+        self.lp.setMode('XXL5') # Bandwidth 1625:1715
+        self.lp.setLO([1500.0, 1500.0]) # OK, it is outside the RF band
+        values_not_allowed = [1650.00, 1650.00]
+        with self.assertRaisesRegexp(ComponentErrorsEx, 'within the band'):
             self.lp.setLO(values_not_allowed)
 
 

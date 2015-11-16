@@ -61,7 +61,7 @@ clean_test:
 	rm -f pyunit/*.pyc
 	rm -f external/*.pyc
 	rm -rf ../lib/python/site-packages/*
-	rm -rf $(INTROOT)/lib/python/site-packages/PyMinorServoTest*
+	rm -rf $(INTROOT)/lib/python/site-packages/PyLPBandTest*
 
 unit: do_unit
 	@echo " . . . 'unit' done"
