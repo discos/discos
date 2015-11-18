@@ -686,6 +686,58 @@ void CConfiguration::setMode(const char * mode) throw (
 }
 
 
+std::vector<double> CConfiguration::getLBandRFMinFromMode(IRA::CString cmdMode) throw (
+        ComponentErrors::CDBAccessExImpl,
+        ComponentErrors::MemoryAllocationExImpl, 
+        ReceiversErrors::ModeErrorExImpl)
+{
+    CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
+
+    std::vector<double> rfMin;
+    IRA::CString value, token;
+
+    maci::ContainerServices *Services = m_services;
+    _GET_STRING_ATTRIBUTE("LBandRFMin", "L band RF lower limit (MHz):", value, MODE_PATH);
+    int start = 0;
+    IRA::CError error;
+    for (WORD k=0; k<m_IFs; k++) {
+        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+            dummy.setFieldName("LBandRFMin");
+            throw dummy;
+        }
+        rfMin.push_back(token.ToDouble());
+    }
+    return rfMin;
+}
+
+
+std::vector<double> CConfiguration::getLBandRFMaxFromMode(IRA::CString cmdMode) throw (
+        ComponentErrors::CDBAccessExImpl,
+        ComponentErrors::MemoryAllocationExImpl, 
+        ReceiversErrors::ModeErrorExImpl)
+{
+    CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
+
+    std::vector<double> rfMax;
+    IRA::CString value, token;
+
+    maci::ContainerServices *Services = m_services;
+    _GET_STRING_ATTRIBUTE("LBandRFMax", "L band RF upper limit (MHz):", value, MODE_PATH);
+    int start = 0;
+    IRA::CError error;
+    for (WORD k=0; k<m_IFs; k++) {
+        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+            dummy.setFieldName("LBandRFMax");
+            throw dummy;
+        }
+        rfMax.push_back(token.ToDouble());
+    }
+    return rfMax;
+}
+
+
 DWORD CConfiguration::getSynthesizerTable(double * &freq,double *&power) const
 {
     freq= new double [m_loVectorLen];

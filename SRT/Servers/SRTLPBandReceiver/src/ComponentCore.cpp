@@ -65,7 +65,8 @@ CConfiguration const * const  CComponentCore::execute() throw (
         throw dummy;
     }
     
-    m_localOscillatorValue=0.0;
+    
+    m_localOscillatorValue = m_configuration.getDefaultLO()[0];
     m_actualMode="";
     return &m_configuration;
 }
@@ -203,6 +204,14 @@ void CComponentCore::activate(const char * setup_mode) throw (
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     setSetupMode(setup_mode); // It calls the setMode()
+
+    ACS::doubleSeq_var lo = new ACS::doubleSeq;
+    lo->length(m_configuration.getIFs());
+    for (WORD k=0; k<m_configuration.getIFs(); k++) {
+        lo[k] = m_configuration.getDefaultLO()[k];
+    }
+    setLO(lo);
+
     guard.release();
     lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
     externalCalOff();
@@ -291,6 +300,7 @@ void CComponentCore::externalCalOff() throw (
 void CComponentCore::deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
     // no guard needed.
+    m_localOscillatorValue = m_configuration.getDefaultLO()[0];
     lnaOff(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 }
 

@@ -238,6 +238,7 @@ void SRTLPBandReceiverImpl::cleanUp()
     stopPropertiesMonitoring();
     if (m_monitor != NULL) {
         m_monitor->suspend();
+        m_monitor->terminate();
         getContainerServices()->getThreadManager()->destroy(m_monitor);
         m_monitor = NULL;
     }
@@ -253,7 +254,10 @@ void SRTLPBandReceiverImpl::aboutToAbort()
     AUTO_TRACE("SRTLPBandReceiverImpl::aboutToAbort()");
     stopPropertiesMonitoring();
     if (m_monitor != NULL) {
+        m_monitor->suspend();
+        m_monitor->terminate();
         getContainerServices()->getThreadManager()->destroy(m_monitor);
+        m_monitor = NULL;
     }
     m_core.cleanup();
     CharacteristicComponentImpl::aboutToAbort(); 

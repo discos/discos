@@ -35,7 +35,7 @@ the band and might generate strong aliasing."
 
 Test 4: LO inside the (no-default) observed sky band
 ====================================================
-> receiversMode=L1L5 (1625:1715)
+> receiversMode=XXL5 (1625:1715)
 > setLO=1500
 > setLO=1650 # Target command
 
@@ -46,9 +46,9 @@ the band and might generate strong aliasing."
 
 Test 5: receiversMode after setLO: LO within the band
 =====================================================
-> receiversMode=L1L5 (1625:1715)
+> receiversMode=XXL5 (1625:1715)
 > setLO=1500 
-> receiversMode=L3L4 (1300:1800) # Target command
+> receiversMode=XXL4 (1300:1800) # Target command
 
 Expected: raises ComponentErrors::ComponentErrorsEx
 Expected Message: "Mode not allowed. The LO value is within 
@@ -95,6 +95,12 @@ Test 10: low pass IF filter (NO-default)
 Expected: raises ComponentErrors::ComponentErrorsEx
 Expected Message: "LO frequency value not allowed. The IF bandwidth
 is outside the low pass filter (0-1000MHz)".
+
+
+Test 11: default LO value after setup
+=====================================
+Expected: LO == DefaultLO
+
 
 .. note:: Maybe we should raise a more specific exception type. For
    instance, a ReceiverErrors::ValidationError. In that case, we have

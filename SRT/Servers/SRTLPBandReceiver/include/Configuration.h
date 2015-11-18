@@ -324,6 +324,18 @@ public:
     );
 	
 
+    std::vector<double> getLBandRFMaxFromMode(IRA::CString cmdMode) throw (
+            ComponentErrors::CDBAccessExImpl,
+            ComponentErrors::MemoryAllocationExImpl, 
+            ReceiversErrors::ModeErrorExImpl);
+ 
+
+    std::vector<double> getLBandRFMinFromMode(IRA::CString cmdMode) throw (
+            ComponentErrors::CDBAccessExImpl,
+            ComponentErrors::MemoryAllocationExImpl, 
+            ReceiversErrors::ModeErrorExImpl);
+
+    
 private:
 	IRA::CString m_dewarIPAddress;
 	WORD m_dewarPort;

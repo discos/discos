@@ -77,43 +77,71 @@ void SRTLPBandCore::setMode(const char * mode) throw (
         ReceiversErrors::LocalOscillatorErrorExImpl
     )
 {
+    baci::ThreadSyncGuard guard(&m_mutex);
+    IRA::CString cmdMode(mode);
+    cmdMode.MakeUpper();
+    IRA::CString setupMode = getSetupMode();
+
+    if(setupMode.IsEmpty()) {
+        _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): setup mode not set");
+    }
+
+    IRA::CString feed0, feed1;
     try {
-        baci::ThreadSyncGuard guard(&m_mutex);
-        IRA::CString cmdMode(mode);
-        cmdMode.MakeUpper();
+        feed0 = setupMode[0];
+        feed1 = setupMode[1];
+    }
+    catch (...) {
+        _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode()");
+    }
 
-        IRA::CString setupMode = getSetupMode();
-        if(setupMode.IsEmpty()) {
-            _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): setup mode not set");
+
+    if(feed0 == feed1) { // Single feed
+        if((feed0 == "L" && cmdMode.Left() != "X") || (feed0 == "P" && cmdMode.Right() != "X"))
+            _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): mismatch with the setup mode");
+    }
+    else { // Dual Feed
+        if(cmdMode.Find('X') != -1)
+            _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): mismatch with the setup mode");
+    }
+
+    // In case of L band, verify the LO value does not fall inside the mode band
+    if(feed0 == "L" || feed1 == "L") {
+        std::vector<double> rfMin = m_configuration.getLBandRFMinFromMode(cmdMode);
+        std::vector<double> rfMax = m_configuration.getLBandRFMaxFromMode(cmdMode);
+        ACS::doubleSeq lo;
+        getLBandLO(lo);
+        for(size_t i=0; i<getIFs(); i++) {
+            if(lo[i] >= rfMin[i] && lo[i] <= rfMax[i]) {
+                _EXCPT(ReceiversErrors::ModeErrorExImpl, 
+                       impl, 
+                       "SRTLPBandCore:setMode(): " \
+                        "mode not allowed. The LO frequency value is within the band and "\
+                        "might generate strong aliasing.");
+                throw impl;
+            }
         }
+    }
 
-        IRA::CString feed0 = setupMode[0];
-        IRA::CString feed1 = setupMode[1];
-
-        if(feed0 == feed1) { // Single feed
-            if((feed0 == "L" && cmdMode.Left() != "X") || (feed0 == "P" && cmdMode.Right() != "X"))
-                _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): mismatch with the setup mode");
-        }
-        else { // Dual Feed
-            if(cmdMode.Find('X') != -1)
-                _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): mismatch with the setup mode");
-        }
-
+    try {
         m_configuration.setMode(cmdMode);
-            
+    }
+    catch (...) {
+        _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): cannot set the conf mode");
+    }
+
+    try {
         setLBandFilter(m_configuration.getLBandFilterID());
-            
         setPBandFilter(m_configuration.getPBandFilterID());
         setLBandPolarization(m_configuration.getLBandPolarization());
         setPBandPolarization(m_configuration.getPBandPolarization());
-            
-        m_actualMode = m_configuration.getActualMode();
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s", string(m_actualMode).c_str()));
     }
-    catch (...) {
-        m_actualMode = ""; // If we don't reach the end of the method then the mode will be unknown
-        _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode()");
+    catch(...) {
+        _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): cannot set the filter");
     }
+        
+    m_actualMode = m_configuration.getActualMode();
+    ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s", string(m_actualMode).c_str()));
 }
 
 

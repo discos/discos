@@ -6,6 +6,7 @@ from xml.etree import ElementTree
 import unittest2
 from Acspy.Clients.SimpleClient import PySimpleClient
 from ComponentErrors import ComponentErrorsEx
+from ReceiversErrors import ReceiversErrorsEx
 from Acspy.Util import ACSCorba
 
 
@@ -76,6 +77,14 @@ class TestLO(unittest2.TestCase):
         values_not_allowed = [1650.00, 1650.00]
         with self.assertRaisesRegexp(ComponentErrorsEx, 'within the band'):
             self.lp.setLO(values_not_allowed)
+
+
+    def test_setMode_sets_lo_within_sky_band(self):
+        """setMode() after setLO, having LO within the band: not allowed"""
+        self.lp.setMode('XXL5') # Bandwidth 1625:1715
+        self.lp.setLO([1500.0, 1500.0]) # OK, it is outside the RF band
+        with self.assertRaisesRegexp(ReceiversErrorsEx, 'within the band'):
+            self.lp.setMode('XXL4') # Bandwidth 1300:1800
 
 
 def get_cdb_values(attr_name, type_=float):
