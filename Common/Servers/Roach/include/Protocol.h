@@ -16,9 +16,10 @@
 #define PROT_TERMINATOR "\n"
 #define PROT_SEPARATOR_CH ' '
 #define PROT_SEPARATOR " "
-#define PROT_SEPARATOR_COMMA ','
-
+#define PROT_SEPARATOR_COMMA ","
 #define PROT_GET_CONF "?"
+#define PROT_GET_TPI "!"
+#define PROT_GET_TPI_STR "!get-tpi"
 #define PROT_SET_CONF_BROAD "I"
 #define PROT_SET_CONF "A"
 #define PROT_SET_TIME "T"
@@ -33,6 +34,7 @@
 #define PROT_GET_SAMPLE "R"
 
 #define PROT_ACK "ack"
+#define PROT_OK "ok"
 
 //#define PROT_PACKET_LENGTH 64
 //#define PROT_TOTAL_DEVICES 14

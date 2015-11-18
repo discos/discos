@@ -62,7 +62,7 @@ LIBRARIES       = RoachImpl
 LIBRARIES_L     =
 
 RoachImpl_OBJECTS = RoachImpl Configuration CommandLine Protocol SenderThread ControlThread
-RoachImpl_LIBS = IRALibrary GenericBackendStubs RoachStubs ManagmentDefinitionsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
+RoachImpl_LIBS = IRALibrary GenericBackendStubs RoachStubs TotalPowerStubs ManagmentDefinitionsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
   bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors
 
 #

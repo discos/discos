@@ -77,7 +77,7 @@ void RoachImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	ACS_LOG(LM_FULL_INFO,"RoachImpl::initialize()",(LM_INFO,"INITIALIIZING_COMMUNICATION_LINES"));
 	_IRA_LOGFILTER_ACTIVATE(m_configuration.getRepetitionCacheTime(),m_configuration.getRepetitionExpireTime());
 	try {
-		line=new CCommandLine();
+		line=new CCommandLine(getContainerServices());
 		m_commandLine=new CSecureArea<CCommandLine>(line);
 	}
 	catch (std::bad_alloc& ex) {
@@ -463,7 +463,7 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 	AUTO_TRACE("RoachImpl::sendStop()");
 
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	try {
+	/*try {
 		line->suspendDataAcquisition(); 
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -478,7 +478,7 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"RoachImpl::sendStop()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}
+	}*/
 	//I explicity release the mutex before accessing the sender thread because it also make use of the command line...just to make sure to avoid deadlock
 	//line.Release();
 	//m_senderThread->suspendTransfer();
@@ -619,7 +619,9 @@ ACS::doubleSeq * RoachImpl::getZero () throw (CORBA::SystemException,
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	ACS::doubleSeq_var tpi=new ACS::doubleSeq;
 	try {
-		line->getSample(tpi,true);
+		//line->getSample(tpi,true);
+        tpi[0]=0.0;
+        tpi[1]=0.0;
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

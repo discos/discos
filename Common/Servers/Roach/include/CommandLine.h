@@ -14,9 +14,12 @@
 #include <ComponentErrors.h>
 #include <BackendsErrors.h>
 #include <RoachS.h>
+#include <TotalPowerS.h>
 #include "Common.h"
 #include "Protocol.h"
 #include "Configuration.h"
+
+using namespace maci;
 
 /**
  * This class is inherited from the IRA::CSocket class. It takes charge of setting the configuration to the backend.
@@ -37,7 +40,7 @@ public:
 	/**
 	 * Constructor.
 	*/
-	CCommandLine();
+	CCommandLine(ContainerServices *service);
 	/**
 	 * Destructor
 	*/
@@ -461,7 +464,12 @@ protected:
 	 * @param  EventMask event that timeouted.
 	*/
 	void onTimeout(WORD EventMask);
+
 private:
+
+    ContainerServices* m_services;
+    Backends::TotalPower_var m_totalPower;
+
 	/**
 	 * List the fields of the backend status 
 	 */

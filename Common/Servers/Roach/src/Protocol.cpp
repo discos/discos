@@ -369,31 +369,44 @@ bool CProtocol::decodeData(const char *rBuff,DWORD *data,const DWORD& boardsNumb
 	IRA::CString ret;
 	int start=0;
 	DWORD boardOutput[MAX_BOARDS_NUMBER];
+
+    printf("outtpi = %s\n",rBuff);
+
 	// get fox cpu time (seconds)...not used yet
-	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
+	if (!CIRATools::getNextToken(str,start,PROT_GET_TPI_STR,ret)) {
+        printf("uno\n");
 		return false;
 	}
 	// get sample counter....it should be always zero
-	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
-		return false;
-	}
+	//if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_COMMA,ret)) {
+    //    printf("due\n");
+	//	return false;
+	//}
 	// get sample flag.....not used for this purpose
-	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
-		return false;
-	}
-	for (DWORD  j=0;j<boardsNumber;j++) {
-		if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
+	//if (!CIRATools::getNextToken(str,start,PROT_OK,ret)) {
+    //    printf("tre\n");
+	//	return false;
+	//}
+	//if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_COMMA,ret)) {
+	//	return false;
+	//}
+	//for (DWORD  j=0;j<boardsNumber;j++) {
+	for (DWORD  j=0;j<2;j++) {
+		if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_COMMA,ret)) {
+            printf("quattro\n");
 			return false;
 		}
 		boardOutput[j]=ret.ToLong();
+        printf("tpi = %d\n",boardOutput[j]);
 	}
-	for (long  k=0;k<sectionNumber;k++) {
-		if (boards==NULL) {
+	//for (long  k=0;k<sectionNumber;k++) {
+	for (long  k=0;k<2;k++) {
+		//if (boards==NULL) {
 			data[k]=boardOutput[k];
-		}
-		else {
-			data[k]=boardOutput[boards[k]];
-		}
+		//}
+		//else {
+		//	data[k]=boardOutput[boards[k]];
+		//}
 	}
 	return true;
 }
