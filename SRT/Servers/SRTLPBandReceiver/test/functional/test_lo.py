@@ -127,6 +127,22 @@ class TestLO(unittest2.TestCase):
         self.assertEqual(initialFrequency, ifmin)
 
 
+    def test_lowpassfilter_setMode_before_setLo(self):
+        """The lowpass filter cuts the IF band: setMode before setLO"""
+        self.lp.setMode('XXL4')  # RF band -> 1300:1800
+        self.lp.setLO([600.0, 600.0])  # IF band -> 700:1200
+        bandWidth = self.get_property('bandWidth') 
+        self.assertEqual(bandWidth, [300.0, 300])
+
+
+    def test_lowpassfilter_setMode_after_setLo(self):
+        """The lowpass filter cuts the IF band: setMode after setLO"""
+        self.lp.setLO([700.0, 700.0])  
+        self.lp.setMode('XXL5') # band 1625:1715 -> IF band -> 925:1015
+        bandWidth = self.get_property('bandWidth') 
+        self.assertEqual(bandWidth, [75.0, 75])
+
+
     def get_ifs(self):
         """Return the current IFs, taking in account the low pass filter"""
         rfmin = self.get_cdb_values('LBandRFMin')

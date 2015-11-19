@@ -92,8 +92,8 @@ Expected: Bandwidth==75 (925:1000)
 Expected: start frequency==925
 
 
-Test 11: low pass IF filter (NO-default)
-========================================
+Test 11: low pass IF filter (NO-default): NOT IMPLMENTED
+========================================================
 > receiversMode=L1L5 (1625-1715)
 > setL0=500 (IF band: 1125-1215) # Target command
 
