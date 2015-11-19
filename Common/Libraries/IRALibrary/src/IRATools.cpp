@@ -524,7 +524,12 @@ bool CIRATools::strToInterval(const IRA::CString& durationString,ACS::TimeInterv
 bool CIRATools::intervalToStr(const ACS::TimeInterval& interval,IRA::CString& outString,char dateDelimiter,char timeDelimiter)
 {
 	TIMEDIFFERENCE timeD(interval);
-	outString.Format("%03ld%c%02ld%c%02ld%c%02ld.%03lu",(long)timeD.day(),dateDelimiter,(long)timeD.hour(),timeDelimiter,(long)timeD.minute(),timeDelimiter,(long)timeD.second(),(unsigned long)timeD.microSecond()/1000);
+	if (timeD.day()>0) {
+		outString.Format("%03ld%c%02ld%c%02ld%c%02ld.%03lu",(long)timeD.day(),dateDelimiter,(long)timeD.hour(),timeDelimiter,(long)timeD.minute(),timeDelimiter,(long)timeD.second(),(unsigned long)timeD.microSecond()/1000);
+	}
+	else {
+		outString.Format("%02ld%c%02ld%c%02ld.%03lu",(long)timeD.hour(),timeDelimiter,(long)timeD.minute(),timeDelimiter,(long)timeD.second(),(unsigned long)timeD.microSecond()/1000);
+	}
 	return true;
 }
 
@@ -604,6 +609,20 @@ bool CIRATools::timeToStr(const ACS::Time& time,IRA::CString& outString,char dat
 	outString.Format("%04lu%c%03ld%c%02ld%c%02ld%c%02ld.%03ld",(unsigned long)timeE.year(),dateDelimiter,(long)timeE.dayOfYear(),dateDelimiter,(long)timeE.hour(),
 			timeDelimiter,(long)timeE.minute(),timeDelimiter,(long)timeE.second(),(long)timeE.microSecond()/1000);
 	return true;	
+}
+
+bool CIRATools::timeToStrExtended(const ACS::Time& time,IRA::CString& outString,char dateDelimiter,char timeDelimiter)
+{
+	TIMEVALUE timeE(time);
+	outString.Format("%04lu%c%02ld%c%02ldT%02ld%c%02ld%c%02ld.%03ld",
+			(unsigned long)timeE.year(),dateDelimiter,
+			(long)timeE.month(),dateDelimiter,
+			(long)timeE.day(),
+			(long)timeE.hour(),timeDelimiter,
+			(long)timeE.minute(),timeDelimiter,
+			(long)timeE.second(),
+			(long)timeE.microSecond()/1000);
+	return true;
 }
 
 bool CIRATools::doubleSeqToStr(const ACS::doubleSeq& val,IRA::CString& outString,char delimiter)

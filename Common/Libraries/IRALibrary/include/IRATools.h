@@ -28,6 +28,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/06/2014	  Function to handle conversions from Reference frame and definition for radial velocity */
 /* Marco Bartolini (bartolini@ira.inaf.it)  18/06/2014	   added function ACS::Time getACSTime() */
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/08/2015	  Function to check if a file exists or not */
+/* Andrea Orlati(aorlati@ira.inaf.it)  19/11/2015	  Function timeToStrExtended was added */
 
 #include <time.h>
 #include <sys/time.h>
@@ -400,6 +401,17 @@ public:
 	 * @return the result of the conversion, true if the conversion could be done
 	 */
 	static bool timeToStr(const ACS::Time& time,IRA::CString& outString,char dateDelimiter='-',char timeDelimiter=':');
+
+	/**
+	 * Use this function to convert an ACS time epoch to a string with extended notation(YYYY-MM-DDThh:mm:ss.ss).
+	 * @param time the representation in 100ns units of the time epoch to be converted
+	 * @param outString string that contains the time as it is converted
+	 * @param dateDelimiter the char that has to be considered as the field separator for the date part of the time epoch
+	 * @param timeDelimiter the char that has to be considered as the field separator for the time part of the time epoch
+	 * @return the result of the conversion, true if the conversion could be done
+	 */
+	static bool timeToStrExtended(const ACS::Time& time,IRA::CString& outString,char dateDelimiter='-',char timeDelimiter=':');
+
 
 	/**
 	 * Use this function to convert from a double sequence to a string
