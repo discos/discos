@@ -55,13 +55,18 @@ Expected Message: "Mode not allowed. The LO value is within
 the band and might generate strong aliasing."
 
 
-Test 6: bandwidth and start freq (default)
+Test 6: default LO value after
+==============================
+Expected: LO == DefaultLO
+
+
+Test 7: bandwidth and start freq (default)
 ==========================================
 Expected: bandwidth==500
 Expected: start frequency==1300 (1300-0)
 
 
-Test 7: bandwidth and start freq (NO-default)
+Test 8: bandwidth and start freq (NO-default)
 =============================================
 > receiversMode=L1L5 (1625:1715)
 > setLO=2300
@@ -70,7 +75,7 @@ Expected: bandwidth==90
 Expected: start frequency==-675 (1625-2300)
 
 
-Test 8: low pass IF filter (default)
+Test 9: low pass IF filter (default)
 ====================================
 > setL0=600 (IF band: 700-1200)
 
@@ -78,7 +83,7 @@ Expected: Bandwidth==300 (700:1000)
 Expected: start frequency==700
 
 
-Test 9: low pass IF filter (NO-default)
+Test 10: low pass IF filter (NO-default)
 =======================================
 > receiversMode=L1L5 (1625-1715)
 > setL0=700 (IF band: 925-1015)
@@ -87,7 +92,7 @@ Expected: Bandwidth==75 (925:1000)
 Expected: start frequency==925
 
 
-Test 10: low pass IF filter (NO-default)
+Test 11: low pass IF filter (NO-default)
 ========================================
 > receiversMode=L1L5 (1625-1715)
 > setL0=500 (IF band: 1125-1215) # Target command
@@ -95,11 +100,6 @@ Test 10: low pass IF filter (NO-default)
 Expected: raises ComponentErrors::ComponentErrorsEx
 Expected Message: "LO frequency value not allowed. The IF bandwidth
 is outside the low pass filter (0-1000MHz)".
-
-
-Test 11: default LO value after setup
-=====================================
-Expected: LO == DefaultLO
 
 
 .. note:: Maybe we should raise a more specific exception type. For

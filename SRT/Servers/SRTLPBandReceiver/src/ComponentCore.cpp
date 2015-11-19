@@ -107,8 +107,13 @@ void CComponentCore::getLBandBandwidth(ACS::doubleSeq& bw)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     bw.length(m_configuration.getIFs());
+    double ifmax, ifmin, filter;
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        bw[i] = m_configuration.getLBandRFMax()[i] - m_configuration.getLBandRFMin()[i];
+        ifmin = m_configuration.getLBandRFMin()[i] - m_localOscillatorValue;
+        ifmax = m_configuration.getLBandRFMax()[i] - m_localOscillatorValue;
+        filter = m_configuration.getLowpassFilterMin()[0];
+        ifmax = (ifmax < filter) ? ifmax : filter;
+        bw[i] = (ifmax - ifmin) > 0 ? (ifmax - ifmin) : 0;
     }
 }
 
@@ -128,7 +133,7 @@ void CComponentCore::getLBandStartFrequency(ACS::doubleSeq& sf)
     baci::ThreadSyncGuard guard(&m_mutex);
     sf.length(m_configuration.getIFs());
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        sf[i] = m_configuration.getLBandIFMin()[i];
+        sf[i] = m_configuration.getLBandIFMin()[i] - m_localOscillatorValue;
     }
 }
 

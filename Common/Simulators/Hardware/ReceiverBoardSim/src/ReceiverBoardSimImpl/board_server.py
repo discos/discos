@@ -28,7 +28,6 @@ To stop the server::
 
 import socket, traceback, os, sys
 import binhex
-from random import randrange
 from multiprocessing import Value
 
 
@@ -191,7 +190,8 @@ class BoardServer:
                                     data_list += [156, 157, 158, 159] * AD24_LEN # Add four bytes
                                     pass
                                 else:
-                                    data_list += [item + 1 for item in range(randrange(1, 7))]
+                                    # data_list += [item + 1 for item in range(randrange(1, 7))]
+                                    data_list += [1]
                                 answer += chr(len(data_list))
                                 for item in data_list:
                                     answer += chr(item)

@@ -36,17 +36,17 @@ class TestLO(unittest2.TestCase):
 
     def test_keep_the_current_value(self):
         """In case of setLO([-1, -1]), keep the current value"""
-        min_values = get_cdb_values('LOMin')
+        min_values = self.get_cdb_values('LOMin')
         target = [(min_value + 1) for min_value in min_values]
         self.lp.setLO(target)
         self.lp.setLO([-1, -1])
-        current_value = get_property(self.lp, 'LO') 
+        current_value = self.get_property('LO') 
         self.assertEqual(current_value, target)
 
 
     def test_set_below_minimum_value(self):
         """LO below the minimum allowed value: not allowed"""
-        min_values = get_cdb_values('LOMin')
+        min_values = self.get_cdb_values('LOMin')
         values_not_allowed = [(value - 0.5) for value in min_values]
         with self.assertRaises(ComponentErrorsEx):
             self.lp.setLO(values_not_allowed)
@@ -54,18 +54,16 @@ class TestLO(unittest2.TestCase):
 
     def test_set_above_minimum_value(self):
         """LO above the minimum allowed value: not allowed"""
-        max_values = get_cdb_values('LOMax')
+        max_values = self.get_cdb_values('LOMax')
         values_not_allowed = [(value + 0.5) for value in max_values]
         with self.assertRaises(ComponentErrorsEx):
             self.lp.setLO(values_not_allowed)
 
 
     def test_lo_inside_default_sky_band(self):
-        """LO inside the default (L3L4) observed sky band: not allowed"""
-        # Check the bandwith is 1300:1800 MHz
-        assert [1300.0] * 2 == get_cdb_values('LBandRFMin')
-        assert [1800.0] * 2 == get_cdb_values('LBandRFMax')
-        values_not_allowed = [1500.00, 1500.00]
+        """LO inside the default observed sky band: not allowed"""
+        rfmin = self.get_cdb_values('LBandRFMin')
+        values_not_allowed = [(value + 0.5) for value in rfmin]
         with self.assertRaisesRegexp(ComponentErrorsEx, 'within the band'):
             self.lp.setLO(values_not_allowed)
 
@@ -87,18 +85,79 @@ class TestLO(unittest2.TestCase):
             self.lp.setMode('XXL4') # Bandwidth 1300:1800
 
 
-def get_cdb_values(attr_name, type_=float):
-    dal = ACSCorba.cdb()
-    dao = dal.get_DAO('alma/DataBlock/SRTLPBandReceiver/Modes/L3L4')
-    body = ElementTree.fromstring(dao)
-    str_values = body.attrib[attr_name].split()
-    return [type_(item) for item in str_values]
+    def test_default_LO(self):
+        """The LO value after setup must be the default one"""
+        default = self.get_cdb_values('DefaultLO')
+        current_value = self.get_property('LO') 
+        self.assertEqual(default, current_value)
 
 
-def get_property(component_ref, property_name):
-    property_obj = getattr(component_ref, '_get_%s' % property_name)
-    value, comp = property_obj().get_sync()
-    return value
+    def test_default_bandWidth(self):
+        # I.e. LO=0; rf=1300:1800; filter=1000 -> expected=0
+        bandWidth = self.get_property('bandWidth') 
+        ifmin, ifmax = self.get_ifs()
+        # expected = (ifmax - ifmin) if (ifmax - ifmin) > 0 else 0.0, so:
+        expected = [max(((mx - mn), 0.0)) for mn, mx in zip(ifmin, ifmax)]
+        self.assertEqual(bandWidth, expected)
+
+
+    def test_NO_default_bandWidth(self):
+        # I.e. LO=2300; rf=1625:1715; filter=1000 -> expected=90
+        self.lp.setMode('XXL5') # band 1625:1715
+        self.lp.setLO([2300.0, 2300.0])
+        bandWidth = self.get_property('bandWidth') 
+        ifmin, ifmax = self.get_ifs()
+        expected = [max(((mx - mn), 0.0)) for mn, mx in zip(ifmin, ifmax)]
+        self.assertEqual(bandWidth, expected)
+
+
+    def test_default_initialFrequency(self):
+        # I.e. LO=0; rfmin=1300 -> ifmin=1300
+        initialFrequency = self.get_property('initialFrequency') 
+        ifmin, ifmax = self.get_ifs()
+        self.assertEqual(initialFrequency, ifmin)
+
+
+    def test_NO_default_initialFrequency(self):
+        # I.e. LO=2300; rfmin=1625 -> ifmin=-625
+        self.lp.setMode('XXL5') # band 1625:1715
+        self.lp.setLO([2300.0, 2300.0])
+        initialFrequency = self.get_property('initialFrequency') 
+        ifmin, ifmax = self.get_ifs()
+        self.assertEqual(initialFrequency, ifmin)
+
+
+    def get_ifs(self):
+        """Return the current IFs, taking in account the low pass filter"""
+        rfmin = self.get_cdb_values('LBandRFMin')
+        rfmax = self.get_cdb_values('LBandRFMax')
+        lo = self.get_property('LO') 
+        get_plain_ifs = lambda rf, lo: rf - lo
+        # I.e. rfmin = [1300, 1300], rfmax = [1800, 1800], lo = [1000, 1000]
+        ifmin = map(get_plain_ifs, rfmin, lo)  # -> [300, 300]
+        ifmax = map(get_plain_ifs, rfmax, lo)  # -> [800, 800]
+        filter = self.get_cdb_values('LowpassFilterMax')
+        for i, value in enumerate(filter):
+            if ifmax[i] < value: 
+                continue
+            else:
+                ifmax[i] = value 
+        return ifmin, ifmax # A tuple of tuples
+
+        
+    def get_cdb_values(self, attr_name, type_=float):
+        mode = self.get_property('mode')
+        dal = ACSCorba.cdb()
+        dao = dal.get_DAO('alma/DataBlock/SRTLPBandReceiver/Modes/%s' % mode)
+        body = ElementTree.fromstring(dao)
+        str_values = body.attrib[attr_name].split()
+        return [type_(item) for item in str_values]
+
+
+    def get_property(self, property_name):
+        property_obj = getattr(self.lp, '_get_%s' % property_name)
+        value, comp = property_obj().get_sync()
+        return value
 
 
 if __name__ == '__main__':

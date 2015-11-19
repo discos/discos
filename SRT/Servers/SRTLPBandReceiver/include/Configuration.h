@@ -311,6 +311,12 @@ public:
 	inline double const * const  getLOMax() const { return  m_LOMax; }
 
 
+	inline double const * const  getLowpassFilterMin() const { return  m_LowpassFilterMin; }
+
+
+	inline double const * const  getLowpassFilterMax() const { return  m_LowpassFilterMax; }
+
+
 	/**
      * This member function is used to configure component by reading the configuration parameter from the CDB.
 	 * This must be the first call before using any other function of this class.
