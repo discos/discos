@@ -492,6 +492,9 @@ void CEngineThread::runLoop()
 			 	currentLST.day(0);
 			 	IRA::CIRATools::intervalToStr(currentLST.value().value,lstStr);
 			 	m_summary->getFilePointer()->setKeyword("LST",lstStr);
+			 	IRA::CIRATools::timeToStrExtended(currentUT.value().value,lstStr);
+			 	m_summary->getFilePointer()->setKeyword("DATE-OBS",lstStr);
+
 				m_summaryOpened=true;
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"SUMMARY_OPENED"));
 			}
