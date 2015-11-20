@@ -29,11 +29,12 @@ COMMON_INTERFACES:=CommonInterface ManagmentInterface AntennaInterface Receivers
                    WeatherStationInterface ActiveSurfaceInterface \
                    XBackendInterface
 COMMON_LIBRARIES:=SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
-                  XarcosLibrary ModbusChannel ComponentProxy
+                  XarcosLibrary ModbusChannel ComponentProxy \
+				  DiscosBackendProtocol
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
-                XBackend PyDewarPositioner #DBBC 
+                XBackend PyDewarPositioner #Roach #DBBC 
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
