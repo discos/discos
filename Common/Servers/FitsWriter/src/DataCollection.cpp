@@ -313,13 +313,24 @@ void CDataCollection::haltResetStage()
 
 void CDataCollection::getFileName(IRA::CString& fileName,IRA::CString& fullPath) const
 {
-	fileName=m_fileName;
-	fullPath=m_fullPath;
+	if (getIsNoData()) {
+		fullPath=m_fullPath+"tmp/";
+		fileName=m_fileName;
+	}
+	else {
+		fileName=m_fileName;
+		fullPath=m_fullPath;
+	}
 }
 
 IRA::CString CDataCollection::getFileName() const 
 {
-	return m_fullPath+m_fileName;
+	if (getIsNoData()) {
+		return m_fullPath+"tmp/"+m_fileName;
+	}
+	else {
+		return m_fullPath+m_fileName;
+	}
 }
 
 IRA::CString CDataCollection::getSummaryFileName() const
