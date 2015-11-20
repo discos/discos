@@ -26,7 +26,7 @@ MAKE_PDF = ON
 #
 # additional include and library search paths
 #USER_INC = 
-#USER_LIB = 
+USER_LIB = -lstdc++
 
 #
 # MODULE CODE DESCRIPTION:
@@ -63,7 +63,8 @@ LIBRARIES_L     =
 
 RoachImpl_OBJECTS = RoachImpl Configuration CommandLine Protocol SenderThread ControlThread
 RoachImpl_LIBS = IRALibrary GenericBackendStubs RoachStubs TotalPowerStubs ManagmentDefinitionsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
-  bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors
+  bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors \
+  DiscosBackendProtocolLib
 
 #
 # <brief description of lllll library>

@@ -618,6 +618,8 @@ ACS::doubleSeq * RoachImpl::getZero () throw (CORBA::SystemException,
 	AUTO_TRACE("RoachImpl::getZero()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	ACS::doubleSeq_var tpi=new ACS::doubleSeq;
+    //TODO: how many sections????
+    tpi->length(2);
 	try {
 		//line->getSample(tpi,true);
         tpi[0]=0.0;

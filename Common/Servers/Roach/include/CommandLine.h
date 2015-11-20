@@ -15,11 +15,16 @@
 #include <BackendsErrors.h>
 #include <RoachS.h>
 #include <TotalPowerS.h>
+#include <string>
+#include <sstream>
+#include <DiscosBackendProtocol>
 #include "Common.h"
 #include "Protocol.h"
 #include "Configuration.h"
 
 using namespace maci;
+using namespace DiscosBackend;
+using namespace std;
 
 /**
  * This class is inherited from the IRA::CSocket class. It takes charge of setting the configuration to the backend.
@@ -447,7 +452,8 @@ public:
 	 */
 	static bool resultingSampleRate(const long& integration,const double& sr,long& result);
 
-	int getConfiguration(char* configuration);
+	//int getConfiguration(char* configuration);
+	void getConfiguration(char* configuration);
 
 	int getCommProtVersion(CORBA::String_out version);
 
@@ -704,6 +710,12 @@ private:
 	 * @return a positive number if the command was correctly received by the other side, else -1 in case of error, -2 if the timeout expires
 	*/
 	int sendCommand(char *inBuff,const WORD& inLen,char *outBuff);
+
+    /**
+     * Sends a message to the backend and return the message reply.
+     * @throws BackendProtocolError
+    */
+    Message sendBackendCommand(Message request);
 	
 	/**
 	 * This function is used to keep update the properties. At every request it checks if the last update is enough recent (update time not expired), 
