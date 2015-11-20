@@ -522,7 +522,12 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (
         _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
         impl.setValueName("LO frequency value not allowed. It is within the band and "\
                           "might generate strong aliasing.\nSet LO to a different value.");
-        impl.setValueLimit(m_configuration.getLOMax()[0]);
+        throw impl;
+    }
+    else if ((getRFMin() - lo[0]) >= m_configuration.getLowpassFilterMax()[0]) {
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
+        impl.setValueName("LO frequency value not allowed. The IF bandwidth" \
+                          "is outside the low pass filter.");
         throw impl;
     }
     

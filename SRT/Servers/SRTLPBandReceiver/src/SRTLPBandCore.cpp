@@ -105,19 +105,30 @@ void SRTLPBandCore::setMode(const char * mode) throw (
             _THROW_EXCPT(ReceiversErrors::ModeErrorExImpl, "SRTLPBandCore::setMode(): mismatch with the setup mode");
     }
 
-    // In case of L band, verify the LO value does not fall inside the mode band
+    // In case of L band
     if(feed0 == "L" || feed1 == "L") {
         std::vector<double> rfMin = m_configuration.getLBandRFMinFromMode(cmdMode);
         std::vector<double> rfMax = m_configuration.getLBandRFMaxFromMode(cmdMode);
         ACS::doubleSeq lo;
         getLBandLO(lo);
+        // Verify the LO value does not fall inside the mode band
         for(size_t i=0; i<getIFs(); i++) {
             if(lo[i] >= rfMin[i] && lo[i] <= rfMax[i]) {
                 _EXCPT(ReceiversErrors::ModeErrorExImpl, 
                        impl, 
                        "SRTLPBandCore:setMode(): " \
-                        "mode not allowed. The LO frequency value is within the band and "\
-                        "might generate strong aliasing.");
+                       "mode not allowed. The LO frequency value is within the band and "\
+                       "might generate strong aliasing.");
+                throw impl;
+            }
+        }
+        // Verify the Mode does not move the IF over the filter
+        for(size_t i=0; i<getIFs(); i++) {
+            if((rfMin[i] - lo[i]) >= m_configuration.getLowpassFilterMax()[0]) {
+                _EXCPT(ReceiversErrors::ModeErrorExImpl, 
+                       impl, 
+                       "SRTLPBandCore:setMode(): " \
+                       "mode not allowed. The IF bandwidth is outside the low pass filter.");
                 throw impl;
             }
         }

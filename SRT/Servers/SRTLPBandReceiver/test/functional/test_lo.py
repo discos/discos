@@ -36,12 +36,10 @@ class TestLO(unittest2.TestCase):
 
     def test_keep_the_current_value(self):
         """In case of setLO([-1, -1]), keep the current value"""
-        min_values = self.get_cdb_values('LOMin')
-        target = [(min_value + 1) for min_value in min_values]
-        self.lp.setLO(target)
+        default = self.get_cdb_values('DefaultLO')
         self.lp.setLO([-1, -1])
         current_value = self.get_property('LO') 
-        self.assertEqual(current_value, target)
+        self.assertEqual(current_value, default)
 
 
     def test_set_below_minimum_value(self):
@@ -62,8 +60,8 @@ class TestLO(unittest2.TestCase):
 
     def test_lo_inside_default_sky_band(self):
         """LO inside the default observed sky band: not allowed"""
-        rfmin = self.get_cdb_values('LBandRFMin')
-        values_not_allowed = [(value + 0.5) for value in rfmin]
+        rf_min = self.get_cdb_values('LBandRFMin')
+        values_not_allowed = [(value + 0.5) for value in rf_min]
         with self.assertRaisesRegexp(ComponentErrorsEx, 'within the band'):
             self.lp.setLO(values_not_allowed)
 
@@ -93,11 +91,11 @@ class TestLO(unittest2.TestCase):
 
 
     def test_default_bandWidth(self):
-        # I.e. LO=0; rf=1300:1800; filter=1000 -> expected=0
+        # I.e. LO=2324; rf=1300:1800; filter=1000 -> expected=0
         bandWidth = self.get_property('bandWidth') 
-        ifmin, ifmax = self.get_ifs()
-        # expected = (ifmax - ifmin) if (ifmax - ifmin) > 0 else 0.0, so:
-        expected = [max(((mx - mn), 0.0)) for mn, mx in zip(ifmin, ifmax)]
+        if_min, if_max = self.get_ifs()
+        # expected = (if_max - if_min) if (if_max - if_min) > 0 else 0.0, so:
+        expected = [max(((mx - mn), 0.0)) for mn, mx in zip(if_min, if_max)]
         self.assertEqual(bandWidth, expected)
 
 
@@ -106,25 +104,25 @@ class TestLO(unittest2.TestCase):
         self.lp.setMode('XXL5') # band 1625:1715
         self.lp.setLO([2300.0, 2300.0])
         bandWidth = self.get_property('bandWidth') 
-        ifmin, ifmax = self.get_ifs()
-        expected = [max(((mx - mn), 0.0)) for mn, mx in zip(ifmin, ifmax)]
+        if_min, if_max = self.get_ifs()
+        expected = [max(((mx - mn), 0.0)) for mn, mx in zip(if_min, if_max)]
         self.assertEqual(bandWidth, expected)
 
 
     def test_default_initialFrequency(self):
-        # I.e. LO=0; rfmin=1300 -> ifmin=1300
+        # I.e. LO=0; rf_min=1300 -> if_min=1300
         initialFrequency = self.get_property('initialFrequency') 
-        ifmin, ifmax = self.get_ifs()
-        self.assertEqual(initialFrequency, ifmin)
+        if_min, if_max = self.get_ifs()
+        self.assertEqual(initialFrequency, if_min)
 
 
     def test_NO_default_initialFrequency(self):
-        # I.e. LO=2300; rfmin=1625 -> ifmin=-625
+        # I.e. LO=2300; rf_min=1625 -> if_min=-625
         self.lp.setMode('XXL5') # band 1625:1715
         self.lp.setLO([2300.0, 2300.0])
         initialFrequency = self.get_property('initialFrequency') 
-        ifmin, ifmax = self.get_ifs()
-        self.assertEqual(initialFrequency, ifmin)
+        if_min, if_max = self.get_ifs()
+        self.assertEqual(initialFrequency, if_min)
 
 
     def test_lowpassfilter_setMode_before_setLo(self):
@@ -143,22 +141,47 @@ class TestLO(unittest2.TestCase):
         self.assertEqual(bandWidth, [75.0, 75])
 
 
+    def test_setLO_moves_IF_over_lowpassfilter(self):
+        """setLO can not move the IF over the low pass IF filter"""
+        self.lp.setMode('XXL4')
+        filter_max = self.get_cdb_values('LowpassFilterMax')
+        rf_min = self.get_cdb_values('LBandRFMin')
+        lo = [(rf - filter - 1.0) for (rf, filter) in zip(rf_min, filter_max)]
+        with self.assertRaisesRegexp(ComponentErrorsEx, 'outside the low pass'):
+            self.lp.setLO(lo) 
+
+
+    def test_setMode_moves_band_over_lowpassfilter(self):
+        """setMode can not move the IF band over the low pass IF filter"""
+        # Example: Filter=1000; XXL4 (1300:1800); LO=400; IF=900:1000
+        # setMode('XXL5') -> IF 1225:1315 over lowpass filter
+        self.lp.setMode('XXL4') # Band 1300:1800
+        filter_max = self.get_cdb_values('LowpassFilterMax')
+        rf_min = self.get_cdb_values('LBandRFMin')
+        filter_max = self.get_cdb_values('LowpassFilterMax')
+        rf_min = self.get_cdb_values('LBandRFMin')
+        lo = [(rf - filter + 100.0) for (rf, filter) in zip(rf_min, filter_max)]
+        self.lp.setLO(lo) # IF (filter_max-100):filter_max -> bandwidth 100MHz
+        with self.assertRaisesRegexp(ReceiversErrorsEx, 'outside the low pass'):
+            self.lp.setMode('XXL5') # RF band 1625:1715
+
+
     def get_ifs(self):
         """Return the current IFs, taking in account the low pass filter"""
-        rfmin = self.get_cdb_values('LBandRFMin')
-        rfmax = self.get_cdb_values('LBandRFMax')
+        rf_min = self.get_cdb_values('LBandRFMin')
+        rf_max = self.get_cdb_values('LBandRFMax')
         lo = self.get_property('LO') 
         get_plain_ifs = lambda rf, lo: rf - lo
-        # I.e. rfmin = [1300, 1300], rfmax = [1800, 1800], lo = [1000, 1000]
-        ifmin = map(get_plain_ifs, rfmin, lo)  # -> [300, 300]
-        ifmax = map(get_plain_ifs, rfmax, lo)  # -> [800, 800]
+        # I.e. rf_min = [1300, 1300], rf_max = [1800, 1800], lo = [1000, 1000]
+        if_min = map(get_plain_ifs, rf_min, lo)  # -> [300, 300]
+        if_max = map(get_plain_ifs, rf_max, lo)  # -> [800, 800]
         filter = self.get_cdb_values('LowpassFilterMax')
         for i, value in enumerate(filter):
-            if ifmax[i] < value: 
+            if if_max[i] < value: 
                 continue
             else:
-                ifmax[i] = value 
-        return ifmin, ifmax # A tuple of tuples
+                if_max[i] = value 
+        return if_min, if_max # A tuple of tuples
 
         
     def get_cdb_values(self, attr_name, type_=float):

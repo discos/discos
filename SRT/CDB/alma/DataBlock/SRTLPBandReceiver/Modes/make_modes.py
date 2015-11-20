@@ -54,7 +54,7 @@ lband_filters = {
 }
 
 formatter = {
-    'default_lo': 0.0,
+    'default_lo': 2324.0,
     'fixed_lo': 0.0,
     'lo_min': 0.0,
     'lo_max': 3000.0,
