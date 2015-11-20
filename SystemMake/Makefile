@@ -50,7 +50,7 @@ SRT_SERVERS:=SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer \
              SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
              SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
-             MinorServoBossTextClient meteoClient
+             MinorServoBossTextClient MeteoClient
 SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox
