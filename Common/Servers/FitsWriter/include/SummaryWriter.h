@@ -81,6 +81,8 @@ private:
 	IRA::CString m_basepath;
 	CCfits::FITS *m_pFits;
 	FitsWriter_private::CFile *m_file;
+	bool m_fitsWritten;
+
 	void init();
 };
 

@@ -18,10 +18,13 @@ void CSummaryWriter::init()
 
 CSummaryWriter::CSummaryWriter() : m_lastError(""),m_filename("summary.fits"),m_basepath("~/"),m_pFits(NULL), m_file(NULL)
 {
+	m_file=new FitsWriter_private::CFile();
+	init();
 }
 
 CSummaryWriter::~CSummaryWriter()
 {
+	if (!m_fitsWritten) write();
 	close();
 }
 
@@ -37,27 +40,6 @@ void CSummaryWriter::setBasePath(const char* path)
 
 bool CSummaryWriter::create()
 {
-	m_file=new FitsWriter_private::CFile();
-	init();
-	return true;
-};
-
-bool CSummaryWriter::close()
-{
-	if (m_pFits!=NULL) {
-		if (!CFitsTools::flush(m_pFits,m_lastError)) return false;
-		delete m_pFits;
-	}
-	m_pFits=NULL;
-	if (m_file!=NULL) delete m_file;
-	m_file=NULL;
-	return true;
-}
-
-bool CSummaryWriter::write()
-{
-	//m_file->begin();
-	//CEntry *cc;
 	IRA::CString fullName=m_basepath+m_filename;
 	try {
 		m_pFits=new CCfits::FITS((const char *)fullName,CCfits::Write);
@@ -76,47 +58,32 @@ bool CSummaryWriter::write()
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY6,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY7,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY8,m_lastError)) return false;
+	m_fitsWritten=false;
+	return true;
+};
 
-	return m_file->write(m_pFits,m_lastError);
-	/*while ((cc=m_file->getNextEntry())!=NULL) {
-		if (cc->getType()==_FILE_STRING_TYPE_S) {
-			if (cc->isSimple()) {
-				CHeaderEntry<_FILE_STRING_TYPE,false> *p=dynamic_cast<CHeaderEntry<_FILE_STRING_TYPE,false> *>(cc);
-				_FILE_STRING_TYPE::TEntryReference val=p->getValue();
-				if (!CFitsTools::setPrimaryHeaderKey(m_pFits,p->getKeyword(),val,p->getDescription(),m_lastError)) return false;
-			}
-			else {
-				CHeaderEntry<_FILE_STRING_TYPE,true> *p=dynamic_cast<CHeaderEntry<_FILE_STRING_TYPE,true> *>(cc);
-				std::list<_FILE_STRING_TYPE::TEntryReference> val=p->getValue();
-				if (!CFitsTools::setPrimaryHeaderKey(m_pFits,p->getKeyword(),val,p->getDescription(),m_lastError)) return false;
-			}
-		} else if (cc->getType()==_FILE_DOUBLE_TYPE_S) {
-			if (cc->isSimple()) {
-				CHeaderEntry<_FILE_DOUBLE_TYPE,false> *p=dynamic_cast<CHeaderEntry<_FILE_DOUBLE_TYPE,false> *>(cc);
-				_FILE_DOUBLE_TYPE::TEntryReference val=p->getValue();
-				if (!CFitsTools::setPrimaryHeaderKey(m_pFits,p->getKeyword(),val,p->getDescription(),m_lastError)) return false;
-			}
-			else {
-				CHeaderEntry<_FILE_DOUBLE_TYPE,true> *p=dynamic_cast<CHeaderEntry<_FILE_DOUBLE_TYPE,true> *>(cc);
-				std::list<_FILE_DOUBLE_TYPE::TEntryReference> val=p->getValue();
-				if (!CFitsTools::setPrimaryHeaderKey(m_pFits,p->getKeyword(),val,p->getDescription(),m_lastError)) return false;
-			}
-		} else {  // _FILE_LONG_TYPE_S
-			if (cc->isSimple()) {
-				CHeaderEntry<_FILE_LONG_TYPE,false> *p=dynamic_cast<CHeaderEntry<_FILE_LONG_TYPE,false> *>(cc);
-				_FILE_LONG_TYPE::TEntryReference val=p->getValue();
-				if (!CFitsTools::setPrimaryHeaderKey(m_pFits,p->getKeyword(),val,p->getDescription(),m_lastError)) return false;
-			}
-			else {
-				CHeaderEntry<_FILE_LONG_TYPE,true> *p=dynamic_cast<CHeaderEntry<_FILE_LONG_TYPE,true> *>(cc);
-				std::list<_FILE_LONG_TYPE::TEntryReference> val=p->getValue();
-				if (!CFitsTools::setPrimaryHeaderKey(m_pFits,p->getKeyword(),val,p->getDescription(),m_lastError)) return false;
-			}
-		}
+bool CSummaryWriter::close()
+{
+	if (m_pFits!=NULL) {
+		if (!CFitsTools::flush(m_pFits,m_lastError)) return false;
+		delete m_pFits;
 	}
-	return true;*/
+	m_pFits=NULL;
+	if (m_file!=NULL) delete m_file;
+	m_file=NULL;
+	return true;
+}
 
-
+bool CSummaryWriter::write()
+{
+	if (m_file && m_pFits) {
+		m_fitsWritten=true;
+		return m_file->write(m_pFits,m_lastError);
+	}
+	else {
+		m_lastError="file not properly initialized";
+		return false;
+	}
 }
 
 
