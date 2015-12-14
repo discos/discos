@@ -65,8 +65,7 @@ from LocalOscillatorImpl.devios import amplitudeDevIO,frequencyDevIO,isLockedDev
 import Receivers
 import ComponentErrorsImpl
 import ComponentErrors
-import DerotatorErrors
-
+ 
 class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, ContainerServices, ComponentLifecycle):
 
    def __init__(self):
