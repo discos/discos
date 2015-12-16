@@ -66,6 +66,10 @@ import Receivers
 import ComponentErrorsImpl
 import ComponentErrors
  
+ 
+from IRAPy import logger
+
+ 
 class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, ContainerServices, ComponentLifecycle):
 
    def __init__(self):
@@ -76,22 +80,26 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
    def cleanUp(self):
   
      
-       pass
    
    def initialize(self):
        addProperty(self, 'frequency', devio_ref=frequencyDevIO())
        addProperty(self, 'amplitude', devio_ref=amplitudeDevIO())
        addProperty(self, 'isLocked', devio_ref=isLockedDevIO())
-
-       pass
+       self.cl=CommandLine() 
+        
    
    def set(self,rf_power,rf_freq):
-       pass
-   
+       self.cl.setPower(rf_power)
+       self.cl.setFrequency(rf_freq)
+       
+
    
    def get(self,rf_power,rf_freq):
      
-      pass
+       msg,power=self.cl.getPower()
+       msg,freq= self.cl.getFrequency()
+
+      return (power,freq)
   
    def rfon(self):
     
