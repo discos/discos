@@ -611,7 +611,7 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 		throw impl;
 	}	
 	//setDefaultConfiguration(); //could throw exceptions........
-	ACS_LOG(LM_FULL_INFO,"CCommandLine::initializeConfiguration()",(LM_NOTICE,"BACKEND_INITIALIZED: %s",conf)); 
+	//ACS_LOG(LM_FULL_INFO,"CCommandLine::initializeConfiguration()",(LM_NOTICE,"BACKEND_INITIALIZED: %s",conf)); 
 }
 
 
@@ -774,7 +774,17 @@ void CCommandLine::getFeed(ACS::longSeq& feed) const
 	//for (int i=0;i<m_sectionsNumber;i++) {
 	feed.length(m_inputsNumber);
 	for (int i=0;i<m_inputsNumber;i++) {
-		feed[i]=m_feedNumberInput[i];
+        if (m_XarcosK00 == true || m_XarcosC == true)
+		    feed[i]=0;
+        else if (m_XarcosK03 == true || m_XarcosK06 == true) {
+            if (i <= 3)
+                feed[i] = 0;
+            else
+                feed[i] = 1;
+        }
+        else
+            //feed[i]=m_feedNumberInput[i];
+            feed[i]=i;
 	}
 }
 
@@ -784,7 +794,23 @@ void CCommandLine::getFeedAttr(ACS::longSeq& feed) const
 
 	feed.length(m_sectionsNumber);
 	for (int i=0;i<m_sectionsNumber;i++) {
-		feed[i]=m_feedNumberInput[2*i];
+        if (m_XarcosK77 == false) {
+            if (m_XarcosK00 == true || m_XarcosC == true)
+                feed[i]=0;
+            else if (m_XarcosK03 == true || m_XarcosK06 == true) {
+                if (i <= 1)
+                    feed[i] = 0;
+                else {
+                    if (m_XarcosK03 == true)
+                        feed[i] = 3;
+                    if (m_XarcosK06 == true)
+                        feed[i] = 6;
+                }
+            }
+                //feed[i]=m_feedNumberInput[2*i];
+        }
+        else
+            feed[i]=m_feedNumberInput[i];
 	}
 }
 
@@ -805,25 +831,6 @@ void CCommandLine::setFeedZero() {
 	m_feedNumberInput[6]=0;
     m_feedNumber[7]=0;
 	m_feedNumberInput[7]=0;
-}
-
-void CCommandLine::setFeedZeroUno() {
-    m_feedNumber[0]=0;
-	m_feedNumberInput[0]=0;
-    m_feedNumber[1]=0;
-	m_feedNumberInput[1]=0;
-    m_feedNumber[2]=0;
-	m_feedNumberInput[2]=0;
-    m_feedNumber[3]=0;
-	m_feedNumberInput[3]=0;
-    m_feedNumber[4]=1;
-	m_feedNumberInput[4]=1;
-    m_feedNumber[5]=1;
-	m_feedNumberInput[5]=1;
-    m_feedNumber[6]=1;
-	m_feedNumberInput[6]=1;
-    m_feedNumber[7]=1;
-	m_feedNumberInput[7]=1;
 }
 
 void CCommandLine::getPolarization(ACS::longSeq& pol) const
@@ -1350,16 +1357,24 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
     start=false;
     }
     else {
+		m_XarcosC=false;
 	    m_XarcosK00 = false;
 	    m_XarcosK77 = false;
+	    m_XarcosK03 = false;
+	    m_XarcosK06 = false;
         start = true;
         IRA::CIRATools::Wait(1,0);
 		setup("NNNN");
         start = false;
-        IRA::CIRATools::Wait(1,0);
+        IRA::CIRATools::Wait(2,0);
     //printf("initialize configuration end\n");
 	//IRA::CIRATools::Wait(2,0);
     if (config=="XK77") { //in order to add a new configuration add an other if
+		m_XarcosC=false;
+        m_XarcosK77=true;
+        m_XarcosK00=false;
+	    m_XarcosK03 = false;
+	    m_XarcosK06 = false;
         setMode8bit(false);
         setSectionsNumber(7);
 		IRA::CIRATools::Wait(0,100000);
@@ -1376,10 +1391,13 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		setSection(5,145,62.5,5,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
 		setSection(6,145,62.5,6,2,125,-1);
-		m_XarcosC=false;
-        m_XarcosK77=true;
     }
     else if (config=="XK06") {
+		m_XarcosC=false;
+        m_XarcosK77=false;
+        m_XarcosK00=false;
+	    m_XarcosK03 = false;
+	    m_XarcosK06 = true;
         setMode8bit(true);
 		setSectionsNumber(4);
 		IRA::CIRATools::Wait(0,100000);
@@ -1390,11 +1408,13 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		setSection(2,145,62.5,6,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,174.296875,3.90625,6,2,7.8125,-1);
-	    setFeedZeroUno();
-		m_XarcosC=false;
-        m_XarcosK77=false;
     }
     else if (config=="XK03") {
+		m_XarcosC=false;
+        m_XarcosK77=false;
+        m_XarcosK00=false;
+	    m_XarcosK03 = true;
+	    m_XarcosK06 = false;
         setMode8bit(true);
         setSectionsNumber(4);
 		IRA::CIRATools::Wait(0,100000);
@@ -1405,11 +1425,13 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		setSection(2,145,62.5,2,2,125,-1);
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,174.296875,3.90625,2,2,7.8125,-1);
-	    setFeedZeroUno();
-		m_XarcosC=false;
-        m_XarcosK77=false;
     }
     else if(config=="XK00") {
+        m_XarcosC=false;
+        m_XarcosK00=true;
+        m_XarcosK77=false;
+	    m_XarcosK03 = false;
+	    m_XarcosK06 = false;
 		setMode8bit(true);
 		setSectionsNumber(4);
 		IRA::CIRATools::Wait(0,100000);
@@ -1421,12 +1443,14 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
 		IRA::CIRATools::Wait(0,100000);
-	    setFeedZero();
-        m_XarcosC=false;
-        m_XarcosK00=true;
-        m_XarcosK77=false;
+	    //setFeedZero();
     }
     else if (config=="XC00") {
+		m_XarcosC=true;
+		m_XarcosK00=false;
+		m_XarcosK77=false;
+	    m_XarcosK03 = false;
+	    m_XarcosK06 = false;
         setMode8bit(true);
         setSectionsNumber(4);
 		IRA::CIRATools::Wait(0,100000);
@@ -1439,13 +1463,11 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
 		IRA::CIRATools::Wait(0,100000);
 	    setFeedZero();
-		m_XarcosC=true;
-		m_XarcosK00=false;
-        m_XarcosK77=false;
     }
     else
         return false;
     }
+	//ACS_LOG(LM_FULL_INFO,"CCommandLine::initializeConfiguration()",(LM_NOTICE,"BACKEND_INITIALIZED: %s",config)); 
 	return true;
 }
 
@@ -1461,8 +1483,8 @@ void CCommandLine::setSection(const long& input,const double& freq,const double&
 	setAttenuation(input,-1);
     Init();//Configurazione nell'HW 
 	getConfiguration();
-    if (m_XarcosC == true || m_XarcosK00 == true)
-        setFeedZero();
+    //if (m_XarcosC == true || m_XarcosK00 == true)
+    //    setFeedZero();
 }
 
 void CCommandLine::getTsys(ACS::doubleSeq& tsys) const

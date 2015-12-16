@@ -119,7 +119,6 @@ public:
 	void getFeedAttr(ACS::longSeq& feed) const;	
     
     void setFeedZero();
-    void setFeedZeroUno();
 
 	/**
 	 * Call this function in order to get the polarization for each input. 
@@ -632,6 +631,8 @@ public:
 	bool m_XarcosC;
 	bool m_XarcosK00;
 	bool m_XarcosK77;
+	bool m_XarcosK03;
+	bool m_XarcosK06;
     bool start;
 };
 

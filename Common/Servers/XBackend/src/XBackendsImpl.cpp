@@ -567,15 +567,20 @@ void XBackendsImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Doubl
 		CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins)
 	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
 {
-	AUTO_TRACE("XBackendsImpl::setSection()");
+	long fd;
+    AUTO_TRACE("XBackendsImpl::setSection()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {		
 		if (line->m_XarcosC == true)
-            feed = 1;
-   		line->setConfiguration(input,freq-ANALOG_FREQUENCY,bw,feed,pol,sr,bins);//Ricezione Specificha Nuova
+            fd = 1;
+        else
+            fd=feed;
+   		line->setConfiguration(input,freq-ANALOG_FREQUENCY,bw,fd,pol,sr,bins);//Ricezione Specificha Nuova
 		line->setAttenuation(input,-1);
 		line->Init();//Configurazione nell'HW 
 		line->getConfiguration();
+        //if (line->m_XarcosC == true/* || line->m_XarcosK00 == true*/)
+        //    line->setFeedZero();
 	}	
 	catch (XBackendsErrors::DisableChInExImpl& ex) {
 		_ADD_BACKTRACE(BackendsErrors::TXErrorExImpl,impl,ex,"XBackendsImpl::setSection()");
@@ -608,8 +613,8 @@ void XBackendsImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Doubl
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
 	}
-	if (line->m_XarcosC == true || line->m_XarcosK00 == true)
-		line->setFeedZero();
+	//if (line->m_XarcosC == true || line->m_XarcosK00 == true)
+	//	line->setFeedZero();
 }
 
 ACS::doubleSeq *XBackendsImpl::getTpi ()
@@ -1032,17 +1037,23 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 	*/
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
     line->m_XarcosC = false;
-	    line->m_XarcosK00 = false;
-	    line->m_XarcosK77 = false;
-        line->start = true;
-        IRA::CIRATools::Wait(1,0);
-		line->setup("NNNN");
-        line->start = false;
-        IRA::CIRATools::Wait(1,0);
-		//line->setup(configuration);
-        //IRA::CIRATools::Wait(1,0);
+	line->m_XarcosK00 = false;
+	line->m_XarcosK77 = false;
+	line->m_XarcosK03 = false;
+	line->m_XarcosK06 = false;
+    line->start = true;
+    IRA::CIRATools::Wait(1,0);
+	line->setup("NNNN");
+	line->setDefaultConfiguration();
+    line->start = false;
+    IRA::CIRATools::Wait(2,0);
 	switch (conf) {
 		case (Backends::XArcos_K77): // XK77, ALL FEED
+			line->m_XarcosC=false;
+            line->m_XarcosK77=true;
+	        line->m_XarcosK00 = false;
+	        line->m_XarcosK03 = false;
+	        line->m_XarcosK06 = false;
 			setMode8bit(false);
             setSectionsNumber(7);
 			IRA::CIRATools::Wait(0,100000);
@@ -1059,10 +1070,13 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			setSection(5,145,62.5,5,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(6,145,62.5,6,2,125,-1);
-			line->m_XarcosC=false;
-            line->m_XarcosK77=true;
 			break;		
 		case (Backends::XArcos_K06): // XK06, CENTRAL FEED & FEED 6
+			line->m_XarcosC=false;
+            line->m_XarcosK77=false;
+	        line->m_XarcosK00=false;
+	        line->m_XarcosK03 = false;
+	        line->m_XarcosK06 = true;
 			setMode8bit(true);
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
@@ -1073,11 +1087,13 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			setSection(2,145,62.5,6,2,125,-1);
 			IRA::CIRATools::Wait(0,100000);
 			setSection(3,174.296875,3.90625,6,2,7.8125,-1);
-            line->setFeedZeroUno();
-			line->m_XarcosC=false;
-            line->m_XarcosK77=false;
 			break;
 		case (Backends::XArcos_K03): // XK03, CENTRAL FEED & FEED 3
+			line->m_XarcosC=false;
+            line->m_XarcosK77=false;
+	        line->m_XarcosK00=false;
+	        line->m_XarcosK03 = true;
+	        line->m_XarcosK06 = false;
 			setMode8bit(true);
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
@@ -1089,28 +1105,32 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			IRA::CIRATools::Wait(0,100000);
 			setSection(3,174.296875,3.90625,2,2,7.8125,-1);
 			IRA::CIRATools::Wait(0,100000);
-            line->setFeedZeroUno();
-			line->m_XarcosC=false;
-            line->m_XarcosK77=false;
 			break;
 		case (Backends::XArcos_K00): // XK00, CENTRAL FEED
-			setMode8bit(true);
-			setSectionsNumber(4);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(0,145,62.5,1,2,125,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(1,172.34375,7.8125,1,2,15.625,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(2,175.2734375,1.953125,1,2,3.90625,-1);
-			IRA::CIRATools::Wait(0,100000);
-			setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
-			IRA::CIRATools::Wait(0,100000);
-		   	line->setFeedZero();
            	line->m_XarcosC=false;
            	line->m_XarcosK00=true;
             line->m_XarcosK77=false;
+	        line->m_XarcosK03 = false;
+	        line->m_XarcosK06 = false;
+			setMode8bit(true);
+			setSectionsNumber(4);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(0,145,62.5,1,2,125,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(1,172.34375,7.8125,1,2,15.625,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(2,175.2734375,1.953125,1,2,3.90625,-1);
+			IRA::CIRATools::Wait(0,100000);
+			setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
+			IRA::CIRATools::Wait(0,100000);
+		   	//line->setFeedZero();
 			break;
 		case (Backends::XArcos_C00): // XC00
+           	line->m_XarcosC=true;
+           	line->m_XarcosK00=false;
+            line->m_XarcosK77=false;
+	        line->m_XarcosK03 = false;
+	        line->m_XarcosK06 = false;
 			setMode8bit(true);
 			setSectionsNumber(4);
 			IRA::CIRATools::Wait(0,100000);
@@ -1123,13 +1143,9 @@ void XBackendsImpl::setXarcosConf(Backends::TXArcosConf conf) throw (CORBA::Syst
 			setSection(3,176.005859375,0.48828125,1,2,0.9765625,-1);
 			IRA::CIRATools::Wait(0,100000);
 		   	line->setFeedZero();
-           	line->m_XarcosC=true;
-           	line->m_XarcosK00=false;
-            line->m_XarcosK77=false;
-		    	//setMode8bit(true);
 			break;
 	}
-		line->setDefaultConfiguration();
+		//line->setDefaultConfiguration();
 }
 
 void XBackendsImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
