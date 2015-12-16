@@ -34,7 +34,7 @@ void SetupThread::onStart() {
     AUTO_TRACE("SetupThread::onStart()"); 
 
     m_positioning.clear();
-    m_configuration->m_status = Management::MNG_WARNING;
+    m_configuration->m_status = Management::MNG_OK;
 }
 
 void SetupThread::onStop() { AUTO_TRACE("SetupThread::onStop()"); }
@@ -51,6 +51,7 @@ void SetupThread::run()
     }
 
     vector<string> park_check; 
+    vector<string> failure_check;
 
     // Park the components
     unsigned long counter = 0;
@@ -92,10 +93,19 @@ void SetupThread::run()
                             continue;
                         }
                         else if(status_bset.test(STATUS_FAILURE)) {
-                            string msg(comp_name + " in failure.");
-                            ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                            if(find(park_check.begin(), park_check.end(), comp_name) == park_check.end())
-                                park_check.push_back(comp_name);
+                            if(find(failure_check.begin(), failure_check.end(), comp_name) != failure_check.end()) {
+                                string msg(comp_name + " in failure.");
+                                ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
+                                if(find(park_check.begin(), park_check.end(), comp_name) == park_check.end())
+                                    park_check.push_back(comp_name);
+                            }
+                            else {
+                                // Try a setup, just once
+                                if(!component_ref->isStarting()) {
+                                    component_ref->setup(0);
+                                }
+                                failure_check.push_back(comp_name);
+                            }
                             continue;
                         }
                         else if(component_ref->isInEmergencyStop()){
@@ -273,7 +283,7 @@ void SetupThread::run()
                                 else if(component_ref->isInEmergencyStop()){
                                     string msg(comp_name + " in emergency stop.");
                                     ACS_SHORT_LOG((LM_ERROR, msg.c_str()));
-                                    m_configuration->m_status = Management::MNG_WARNING;
+                                    m_configuration->m_status = Management::MNG_FAILURE;
                                     m_configuration->m_isStarting = false;
                                     m_configuration->m_isConfigured = false;
                                     m_configuration->m_actualSetup = "unknown";

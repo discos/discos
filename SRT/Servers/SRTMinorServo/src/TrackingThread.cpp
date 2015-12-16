@@ -76,7 +76,8 @@ TrackingThread::TrackingThread(
                                     m_configuration->m_isElevationTracking = true;
                                     m_configuration->m_status = Management::MNG_OK;
                                 }
-                                else {
+                                // Maybe now it is not starting, parked or parking, because it is ready...
+                                else if(!component_ref->isReady()) {
                                     m_configuration->m_status = Management::MNG_FAILURE;
                                     ACS::ROdoubleSeq_var refActPos = component_ref->actPos();
                                     ACSErr::Completion_var completion;
