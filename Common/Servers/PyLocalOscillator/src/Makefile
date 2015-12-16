@@ -84,7 +84,7 @@ PY_SCRIPTS_L       =
 PY_MODULES         = 
 PY_MODULES_L       =
 
-PY_PACKAGES        =LocalOscillatorImpl LocalOscillatorSimImpl
+PY_PACKAGES        =LocalOscillatorImpl LocalOscillatorSimImpl 
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 
