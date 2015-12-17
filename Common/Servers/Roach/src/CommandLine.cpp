@@ -41,6 +41,10 @@ CCommandLine::CCommandLine(ContainerServices *service): CSocket(),
 	m_backendStatus=0;
 	setStatus(NOTCNTD);
 	m_setTpiIntegration=true;
+    m_RK00=false;
+    m_RC00=false;
+    m_RL00=false;
+    m_RP00=false;
 }
 
 CCommandLine::~CCommandLine()
@@ -128,8 +132,8 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 			m_totalPower = m_services->getComponent<Backends::TotalPower>("BACKENDS/TotalPower");
 		}
 		catch (maciErrType::CannotGetComponentExImpl& ex) {
-			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCommadLine::setAttenuation()");
-			Impl.setComponentName("ANTENNA/Boss");
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCommadLine::Init()");
+			Impl.setComponentName("BACKENDS/TotalPower");
 			throw Impl;
 		}
 
@@ -547,7 +551,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
 	double newBW,newAtt,newSR,newFreq;
-    long newBins;
+    long newBins, newFeed, newPol;
 
 /*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setConfiguration()");
@@ -557,6 +561,9 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
         m_sectionsNumber = 1; // TBC!!!!!!!!!!!!!!!!!!!!!!!!
         m_polarization[inputId] = Backends::BKND_FULL_STOKES;
     }
+    if (pol == -1)
+        newPol = 2; //TBC!!!!!!!!!!!!!!
+
 	if (inputId>=0) {  //check the section id is in valid ranges
 		if (inputId>=m_sectionsNumber) {
 			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setConfiguration()");
@@ -600,8 +607,14 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		newSR=m_sampleRate[inputId];
 	}
 	newAtt=m_attenuation[inputId];
-    if (freq != 0.0)
-        newFreq = 0.0;
+    if (freq >= 0.0)
+        newFreq = freq;
+    else
+        newFreq = m_frequency[inputId];
+    if (feed == -1)
+        newFeed = m_feedNumber[inputId];
+    else
+        newFeed = feed;
     if (bins>=0) { // the user ask for a new value
         if (bins != MIN_BINS && bins != MAX_BINS) {
 		    _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
@@ -620,8 +633,10 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setConfiguration()");
 	}
+
+
 	//len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW,m_boards); // get the buffer
-    Message request = Command::setSection(inputId, freq, newBW, feed, pol, newSR, bins);
+    Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);
     /*IRA::CString temp;
     strcpy (sBuff,"?set-section,");
     temp.Format("%ld",inputId);
@@ -652,10 +667,6 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	}*/
     Message reply = sendBackendCommand(request);
     if(reply.is_success_reply()){
-	//if (res>0) { // operation was ok.
-		/*if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setConfiguration()");
-		}*/
 		m_bandWidth[inputId]=newBW;
 		for (int j=0;j<m_sectionsNumber;j++) m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
 		m_commonSampleRate=newSR;
@@ -671,6 +682,24 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
             temp="FULL_STOKES";
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%d,POL=%s,SR=%lf,BINS=%d",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
 				(const char *)temp,newSR,m_bins[inputId]));		
+        if (m_RK00==true || m_RC00==true) {
+            if (newBW==300.00)
+                newBW=300.00;
+            else if (newBW==1500.00)
+                newBW=1250.00;
+            else if (newBW==2300.00)
+                newBW=2350.00;
+            else
+                newBW=1250.00;
+        try {
+            m_totalPower->setSection(0,-1, newBW, -1, -1, -1, -1);
+            m_totalPower->setSection(1,-1, newBW, -1, -1, -1, -1);
+        }
+        catch (...) {
+            _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setDefaultConfiguration()");
+            impl.log(LM_ERROR);
+        }
+        }
 	}
     /*
 	else if (res==FAIL) {
@@ -1001,10 +1030,8 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
 		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl)
 {
 	AUTO_TRACE("CCommandLine::setDefaultConfiguration()");
-	int res;
-	WORD len;
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
+    double filter;
+
 	// I do not check for backend busy because this is a call done at the initialization and never repeated
     Message reply = sendBackendCommand(Command::setConfiguration(string((const char*)config)));
     /*
@@ -1020,9 +1047,9 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
     */
 	//if (res>0) { // operation was ok.
     if(reply.is_success_reply()){
-		if (!CProtocol::setConfiguration((const char*)config)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
-		}
+		//if (!CProtocol::setConfiguration((const char*)config)) {
+		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
+		//}
 	}
     /*
 	else if (res==FAIL) {
@@ -1040,6 +1067,34 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
 	}
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_INFO,"DEFAULTS_ARE_SET"));
     */
+    if (config.Compare("RK00")==0) {
+        filter=1250.0;
+        m_RK00=true;
+        m_RC00=m_RL00=m_RP00=false;
+    }
+    if (config.Compare("RC00")==0) {
+        filter=1250.0;
+        m_RC00=true;
+        m_RK00=m_RL00=m_RP00=false;
+    }
+    if (config.Compare("RL00")==0) {
+        filter = 2300.0;
+        m_RL00=true;
+        m_RK00=m_RC00=m_RP00=false;
+    }
+    if (config.Compare("RP00")==0) {
+        filter = 730.0;
+        m_RP00=true;
+        m_RK00=m_RC00=m_RL00=false;
+    }
+    try {
+        m_totalPower->setSection(0,-1, filter, -1, -1, -1, -1);
+        m_totalPower->setSection(1,-1, filter, -1, -1, -1, -1);
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setDefaultConfiguration()");
+        impl.log(LM_ERROR);
+    }
 }
 
 void CCommandLine::setTargetFileName(const char *conf)
@@ -1918,10 +1973,6 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 		m_KCratio[i]=1.0;
 		m_tpiZero[i]=0.0;
 	}
-    /*switch (conf) {
-        case ("RK00"):
-            setConfiguration(m_input[0],const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins);
-    }*/
 	return true;
 }
 

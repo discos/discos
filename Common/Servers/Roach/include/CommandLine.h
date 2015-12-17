@@ -734,6 +734,11 @@ private:
 	 * This function will unset (cleared) the status bit corresponding to the given field 
 	 */
 	inline void clearStatusField(TstatusFields field) { m_backendStatus &= ~(1 << field); }
+
+    bool m_RK00;
+    bool m_RC00;
+    bool m_RL00;
+    bool m_RP00;
 	
 };
 
