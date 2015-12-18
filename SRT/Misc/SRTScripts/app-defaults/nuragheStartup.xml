@@ -72,6 +72,10 @@
             <type>cpp</type>
         </container>
         <container>
+        <container>
+            <name>RoachContainer</name>
+            <type>cpp</type>
+        </container>
             <name>SRT7GHzContainer</name>
             <type>cpp</type>
         </container>
