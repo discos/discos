@@ -22,10 +22,11 @@ class amplitudeDevIO(DevIO):
         self.value = value
                                     
 class frequencyDevIO(DevIO):
-    def __init__(self, value=0):
-        DevIO.__init__(self, value)
-
+    def __init__(self, cl):
+        DevIO.__init__(self, cl)
+        self.cl=cl
     def read(self):
+        self.cl.getFrequency()
         return self.value
 
     def write(self, value):

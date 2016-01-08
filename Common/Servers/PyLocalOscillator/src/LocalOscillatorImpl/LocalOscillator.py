@@ -95,7 +95,10 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
    def set(self,rf_power,rf_freq):
        self.cl.setPower(rf_power)
        self.cl.setFrequency(rf_freq)
-       
+       return 1
+   
+   
+   
 
    
    def get(self,rf_power,rf_freq):
