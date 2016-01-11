@@ -158,8 +158,6 @@ class TestLO(unittest2.TestCase):
         self.lp.setMode('XXL4') # Band 1300:1800
         filter_max = self.get_cdb_values('LowpassFilterMax')
         rf_min = self.get_cdb_values('LBandRFMin')
-        filter_max = self.get_cdb_values('LowpassFilterMax')
-        rf_min = self.get_cdb_values('LBandRFMin')
         lo = [(rf - filter + 100.0) for (rf, filter) in zip(rf_min, filter_max)]
         self.lp.setLO(lo) # IF (filter_max-100):filter_max -> bandwidth 100MHz
         with self.assertRaisesRegexp(ReceiversErrorsEx, 'outside the low pass'):

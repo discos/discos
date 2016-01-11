@@ -65,7 +65,6 @@ CConfiguration const * const  CComponentCore::execute() throw (
         throw dummy;
     }
     
-    
     m_localOscillatorValue = m_configuration.getDefaultLO()[0];
     m_actualMode="";
     return &m_configuration;
