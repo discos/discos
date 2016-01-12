@@ -9,7 +9,7 @@
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	FTrackPrecisionDigits="3">
+	FTrackPrecisionDigits="5">
 		
 	<MinorServoMapping axis="SUBR_Z" servoName="SRP_TZ" antennaGeometry="LON" beamDeviationFactor="0.0"/>
 	<MinorServoMapping axis="SUBR_X" servoName="SRP_TX" antennaGeometry="LON" beamDeviationFactor="0.0"/>
