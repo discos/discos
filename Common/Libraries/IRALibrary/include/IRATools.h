@@ -29,6 +29,7 @@
 /* Marco Bartolini (bartolini@ira.inaf.it)  18/06/2014	   added function ACS::Time getACSTime() */
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/08/2015	  Function to check if a file exists or not */
 /* Andrea Orlati(aorlati@ira.inaf.it)  19/11/2015	  Function timeToStrExtended was added */
+/* Andrea Orlati(aorlati@ira.inaf.it)  12/01/2016	  reviewed the function skyFrequency in order to address also lower side band during down conversion */
 
 #include <time.h>
 #include <sys/time.h>
@@ -305,6 +306,12 @@ public:
 	/**
 	 * This function computes the intersection between two bands. Its use, for example, could be to compute the resulting band from the intersection between
 	 * an IF coming from a receiver and a filter applied before a backend.
+	 * The band are defined by giving the start frequency and the bandwidth. If the start frequency is negative the method consider the corresponding band
+	 * to be inverted. In that case the results of the method is affected accordingly.
+	 * If we consider an RF band 1600-1800 MHz: a down conversion with an LO=1500 will produce a band f=100, bw=200
+	 * a down conversion with an LO=1900 will produce a band f=-300, bw=200. The same convention could be then adopted for backends Nyquist zones.
+	 * The rsulting band is extpressed in the form startFrequency(f) and bandwidth (bw). Up converting to RF band is always done by the following
+	 * formulas: f1=f+LO, f2=Lo+f+bw;
 	 * @param bf backend start frequency.
 	 * @param bbw backend bandwidth
 	 * @param rf receiver start frequency
@@ -706,6 +713,37 @@ public:
 	  * @return the maximum
 	  */
 	 static double getMaximumValue(const ACS::doubleSeq& array,long& pos);
+
+private:
+
+
+	 /**
+	  * Used to convert from two different notation used to identify a band limits. The source notation is start frequency (f) and
+	  * bandwidth (w). In that case a negative f denotes a lower side band. The destination notation is first frequency (f1), last frequency (f2) and
+	  * band side (upper).
+	  * @param f start frequency
+	  * @param w bandwidth
+	  * @param f1 first frequency (output)
+	  * @param f1 last frequency (output)
+	  * param upper side band (output). True means upper side band, false lower side band.
+	  * @return true if the parameters are coherent and the conversion could be done
+	  */
+	 static bool bandLimits(const double&f,const double& w,double& f1,double& f2,bool& upper);
+
+	 /**
+	  * This function merges two bands. The resulting sub-band is provided in the form: start frequency (f) and bandwidth (w).
+  	  * @param rf1 first frequency of first band
+	  * @param rf2 last frequency of first band
+	  * @param rside side band of the first one. True is upper side band.
+  	  * @param bf1 first frequency of second band
+	  * @param bf2 last frequency of second band
+	  * @param bside side band of the second one. True is upper side band.
+	  * @param f start frequency (output)
+	  * @param w bandwidth (output)
+	  * @return true if the parameters are coherent and the merging produces a not empty sub-band.
+	  */
+	 static bool mergeBands(const double& rf1,const double& rf2,const bool& rside,const double& bf1,
+			 const double& bf2,const bool& bside,double&f,double& w);
 
 };
 	

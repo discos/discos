@@ -22,6 +22,14 @@ TEST_F(IRALibrary_IRATools, fileExists_checkNoExistance){
 	EXPECT_TRUE(fileExists_checkNoExistance());
 }
 
+TEST_F(IRALibrary_IRATools, skyFrequency_noIntersection){
+	EXPECT_TRUE(skyFrequency_noIntersection());
+}
+
+TEST_F(IRALibrary_IRATools,skyFrequency_intersection){
+	EXPECT_TRUE(skyFrequency_intersection());
+}
+
 TEST_F(IRALibrary_FastQueue,FastQueue_checkLimits){
 	EXPECT_TRUE(FastQueue_checkLimits());
 }

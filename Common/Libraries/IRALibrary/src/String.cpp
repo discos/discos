@@ -493,7 +493,6 @@ long long CString::ToLongLong() const
 	return atoll(m_cpString);
 }
 
-
 float CString::ToFloat() const
 {
 	if (IsEmpty()) return 0.0;
@@ -510,6 +509,86 @@ long double CString::ToLongDouble() const
 {
 	if (IsEmpty()) return 0.0;
 	return (long double)atof(m_cpString);
+}
+
+bool CString::CheckIsValidLong() const
+{
+    char *endptr;
+    long val;
+	if (IsEmpty()) return false;
+    errno=0;
+    val = strtol(m_cpString,&endptr,10);
+    if ((errno==ERANGE && (val==LONG_MAX || val==LONG_MIN)) || (errno != 0 && val == 0)) {
+    	return false;
+    }
+    if (endptr==m_cpString) {
+    	return false;
+    }
+    return true;
+}
+
+bool CString::CheckIsValidLongLong() const
+{
+    char *endptr;
+    long long val;
+	if (IsEmpty()) return false;
+    errno=0;
+    val = strtoll(m_cpString,&endptr,10);
+    if ((errno==ERANGE && (val==LLONG_MAX || val==LLONG_MIN)) || (errno != 0 && val == 0)) {
+    	return false;
+    }
+    if (endptr==m_cpString) {
+    	return false;
+    }
+    return true;
+}
+
+bool CString::CheckIsValidFloat() const
+{
+    char *endptr;
+    float val;
+	if (IsEmpty()) return false;
+    errno=0;
+    val = strtof(m_cpString,&endptr);
+    if (errno==ERANGE) {
+    	return false;
+    }
+    if (endptr==m_cpString) {
+    	return false;
+    }
+    return true;
+}
+
+bool CString::CheckIsValidDouble() const
+{
+    char *endptr;
+    double val;
+	if (IsEmpty()) return false;
+    errno=0;
+    val = strtod(m_cpString,&endptr);
+    if (errno==ERANGE) {
+    	return false;
+    }
+    if (endptr==m_cpString) {
+    	return false;
+    }
+    return true;
+}
+
+bool CString::CheckIsValidLongDouble() const
+{
+    char *endptr;
+    long double val;
+	if (IsEmpty()) return false;
+    errno=0;
+    val = strtold(m_cpString,&endptr);
+    if (errno==ERANGE) {
+    	return false;
+    }
+    if (endptr==m_cpString) {
+    	return false;
+    }
+    return true;
 }
 
 //************** OPERATORS DEFINITIONS *****************

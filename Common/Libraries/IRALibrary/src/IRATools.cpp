@@ -359,7 +359,13 @@ double CIRATools::getHWAzimuth(const double& current,const double& dest,const do
 
 bool CIRATools::skyFrequency(const double& bf,const double& bbw,const double& rf,const double& rbw,double& f,double& bw)
 {
-	double bs=bf+bbw;
+	bool bside,rside;
+	double rf1,rf2,bf1,bf2;
+	if (!bandLimits(bf,bbw,bf1,bf2,bside)) return false;
+	if (!bandLimits(rf,rbw,rf1,rf2,rside)) return false;
+	if (!mergeBands(rf1,rf2,rside,bf1,bf2,bside,f,bw)) return false;
+	return true;
+	/*double bs=bf+bbw;
 	double rs=rf+rbw;
 	f=MAX(bf,rf);
 	double s=MIN(bs,rs);
@@ -371,7 +377,7 @@ bool CIRATools::skyFrequency(const double& bf,const double& bbw,const double& rf
 	}
 	else {
 		return true;
-	}
+	}*/
 }
 
 bool CIRATools::getNextToken(const IRA::CString& str,int &start,char delimiter,IRA::CString &ret)
@@ -1172,3 +1178,63 @@ double CIRATools::getMaximumValue(const ACS::doubleSeq& array,long& pos)
 		return 0.0;
 	}
 }
+
+// *******************************//
+// private:
+
+bool CIRATools::bandLimits(const double&f,const double& w,double& f1,double& f2,bool& upper)
+{
+	if (w<0) {
+		return false;
+	}
+	if (f>=0) {
+		f1=f;
+		f2=f+w;
+		upper=true;
+	}
+	else {
+		if (w>-f) {
+			return false;
+		}
+		f1=-f-w;
+		f2=-f;
+		upper=false;
+	}
+	return true;
+}
+
+bool CIRATools::mergeBands(const double& rf1,const double& rf2,const bool& rside,const double& bf1,
+		 const double& bf2,const bool& bside,double&f,double& w)
+{
+	double startF,stopF,bw;
+
+	if ((rf1>rf2) || (bf1>bf2)) {
+		return false;
+	}
+	startF=MAX(rf1,bf1);
+	stopF=MIN(rf2,bf2);
+	bw=stopF-startF;
+	if (bw<=0) {
+		f=rf1;
+		w=0;
+		return false;
+	}
+	if (rside && bside) { //UU
+		f=startF;
+		w=stopF-startF;
+	}
+	else if (rside && !bside) {  //UL
+		f=stopF;
+		w=startF-stopF;
+	}
+	else if (!rside && bside) {  //LU
+		f=-startF;
+		w=startF-stopF;
+	}
+	else if (!rside && !bside) { //LL
+		f=-stopF;
+		w=stopF-startF;
+	}
+	return true;
+}
+

@@ -64,6 +64,191 @@ public:
 		}
 	}
 
+	::testing::AssertionResult skyFrequency_noIntersection() {
+		double f,bw;
+		double rf=100;
+		double rbw=500;
+		double bf=600;
+		double bbw=300;
+		::testing::Test::RecordProperty("description","check if the resulting sky frequency is actually empty");
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			return ::testing::AssertionFailure() << "resulting band should be empty but bandwidth is " << bw;
+		}
+		rf=100;
+		rbw=500;
+		bf=-800;
+		bbw=100;
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			return ::testing::AssertionFailure() << "resulting band should be empty but bandwidth is " << bw;
+		}
+		else {
+			return ::testing::AssertionSuccess();
+		}
+	}
+
+	::testing::AssertionResult skyFrequency_intersection() {
+		double f,bw;
+		double rf=100;
+		double rbw=200;
+		double bf=200;
+		double bbw=200;
+		::testing::Test::RecordProperty("description","check (various data set) if the resulting sky frequency is not empty and band limits are correct");
+
+		// R=100,200(100:300)U B=200,200(200:400)U => 200,100(200:300)
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			if (f!=200) {
+				return ::testing::AssertionFailure() << "1) straight receiver, straight backend, start frequency should be 200 but is " << f << " instead";
+			}
+			else if (bw!=100) {
+				return ::testing::AssertionFailure() << "1) straight receiver, straight backend, start bandwidth should be 100 but is " << bw << " instead";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure() << "1) straight receiver, straight backend, resulting band should not be empty" ;
+		}
+		// R=100,200(100:300)U B=150,50(150:200)U => 150,50(150:200)
+		rf=100;
+		rbw=200;
+		bf=150;
+		bbw=50;
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			if (f!=bf) {
+				return ::testing::AssertionFailure() << "2) straight receiver, straight backend, backend included, start frequency should be "
+						<< bf << " but is " << f << " instead";
+			}
+			else if (bw!=bbw) {
+				return ::testing::AssertionFailure() << "2) straight receiver, straight backend, backend included, start bandwidth should be "
+						<< bbw << " but is " << bw << " instead";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure() << "2) straight receiver, straight backend, backend included, resulting band should not be empty" ;
+		}
+		// R=100,200(100:300)U B=50,500(50:550)U => 100,200(100:300)
+		rf=100;
+		rbw=200;
+		bf=50;
+		bbw=500;
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			if (f!=rf) {
+				return ::testing::AssertionFailure() << "3) straight receiver, straight backend, receiver included, start frequency should be "
+						<< rf << " but is " << f << " instead";
+			}
+			else if (bw!=rbw) {
+				return ::testing::AssertionFailure() << "3) straight receiver, straight backend, receiver included, start bandwidth should be "
+						<< rbw << " but is " << bw << " instead";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure() << "3) straight receiver, straight backend, receiver included, resulting band should not be empty" ;
+		}
+		// R=-300,200(100:300)L B=200,100(200:300)U => -200,-100
+		rf=-300;
+		rbw=200;
+		bf=200;
+		bbw=100;
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			if (f!=-200) {
+				return ::testing::AssertionFailure() << "4) inverted receiver, straight backend, start frequency should be -200 but is " << f << " instead";
+			}
+			else if (bw!=-100) {
+				return ::testing::AssertionFailure() << "4) inverted receiver, straight backend, start bandwidth should be -100 but is " << bw << " instead";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure() << "4) inverted receiver, straight backend, resulting band should not be empty" ;
+		}
+		// R=-300,200(100:300)L B=100,100(100:300)U => -100,-100
+		rf=-300;
+		rbw=200;
+		bf=100;
+		bbw=100;
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			if (f!=-100) {
+				return ::testing::AssertionFailure() << "5) inverted receiver, straight backend, start frequency should be -200 but is " << f << " instead";
+			}
+			else if (bw!=-100) {
+				return ::testing::AssertionFailure() << "5) inverted receiver, straight backend, start bandwidth should be -100 but is " << bw << " instead";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure() << "5) inverted receiver, straight backend, resulting band should not be empty" ;
+		}
+		// R=-300,200(300:100)L B=150,50(150:200)U => -150,-50
+		rf=-300;
+		rbw=200;
+		bf=150;
+		bbw=50;
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			if (f!=-bf) {
+				return ::testing::AssertionFailure() << "6) inverted receiver, straight backend, backend included, start frequency should be "
+						<< -bf << " but is " << f << " instead";
+			}
+			else if (bw!=-bbw) {
+				return ::testing::AssertionFailure() << "6) inverted receiver, straight backend, backend included, start bandwidth should be "
+						<< -bbw << " but is " << bw << " instead";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure() << "6) inverted receiver, straight backend, backend included, resulting band should not be empty" ;
+		}
+		// R=-300,200(300:100)L B=50,500(50:550)U => -100,-200
+		rf=-300;
+		rbw=200;
+		bf=50;
+		bbw=500;
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			if (f!=-100) {
+				return ::testing::AssertionFailure() << "7) inverted receiver, straight backend, receiver included, start frequency should be -100"
+						<< " but is " << f << " instead";
+			}
+			else if (bw!=-200) {
+				return ::testing::AssertionFailure() << "7) inverted receiver, straight backend, receiver included, start bandwidth should be -200"
+						<< " but is " << bw << " instead";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure() << "7) inverted receiver, straight backend, receiver included, resulting band should not be empty" ;
+		}
+		// R=100,200(100:300)U B=-150,100(50:150)L => 150,-50
+		rf=100;
+		rbw=200;
+		bf=-150;
+		bbw=100;
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			if (f!=150) {
+				return ::testing::AssertionFailure() << "8) straight receiver, inverted backend, start frequency should be 150"
+						<< " but is " << f << " instead";
+			}
+			else if (bw!=-50) {
+				return ::testing::AssertionFailure() << "8) straight receiver, inverted backend, start bandwidth should be -50"
+						<< " but is " << bw << " instead";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure() << "8) straight receiver, inverted backend, resulting band should not be empty" ;
+		}
+		// R=-300,200(100:300)L B=-200,100(100:200)L => -200,100
+		rf=-300;
+		rbw=200;
+		bf=-200;
+		bbw=100;
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			if (f!=-200) {
+				return ::testing::AssertionFailure() << "9) inverted receiver, inverted backend, start frequency should be -200"
+						<< " but is " << f << " instead";
+			}
+			else if (bw!=100) {
+				return ::testing::AssertionFailure() << "9) inverted receiver, inverted backend, start bandwidth should be 100"
+						<< " but is " << bw << " instead";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure() << "9) inverted receiver, inverted backend, resulting band should not be empty" ;
+		}
+		return ::testing::AssertionSuccess();
+	}
+
 
 protected:
 	static IRA::CString simpleDirPath;

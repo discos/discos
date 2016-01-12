@@ -314,7 +314,7 @@ public: // Operations
 	/**
 	 * Tries to convert the string to an long long integer.
 	 * @return the converted integer
-	*/	
+	*/
 	long long ToLongLong() const;
 	/**
 	 * Tries to convert the string to a floating point number.
@@ -331,7 +331,33 @@ public: // Operations
 	 * @return the converted long double
 	*/		
 	long double ToLongDouble() const;
-	// operators
+
+	/**
+	 * Check if the string contains a valid long value before converting it.
+	 * @return true if the string caould be converted to an integer
+	 */
+	bool CheckIsValidLong() const;
+	/**
+	 * Check if the string contains a valid long long value before converting it.
+	 * @return true if the string caould be converted to an integer
+	 */
+	bool CheckIsValidLongLong() const;
+	/**
+	 * Check if the string contains a valid float value before converting it.
+	 * @return true if the string caould be converted to an integer
+	 */
+	bool CheckIsValidFloat() const;
+	/**
+	 * Check if the string contains a valid double value before converting it.
+	 * @return true if the string caould be converted to an integer
+	 */
+	bool CheckIsValidDouble() const;
+	/**
+	 * Check if the string contains a valid long double value before converting it.
+	 * @return true if the string caould be converted to an integer
+	 */
+	bool CheckIsValidLongDouble() const;
+
 	char operator [] (int index) const;
 	// cast
 	operator const char *() const;
