@@ -13,25 +13,25 @@ int main(int argv, char** argc)
 	double freq;
 
 	try{
-		cl->configure(0,19,0,T10s,1,0);
+		cl->configure(1,20,0,T10s,1,0);
 //		cout <<"configured" <<endl;
 		cl->query("*IDN?",reply);
 		cout << "sent *IDN?" << endl;
 
 		cl->query("SYST:ERR?",reply);
                 cout <<reply.c_str() << endl;
-                cout << "sent UNIT:FREQ Mhz" << endl;
+//                cout << "sent UNIT:FREQ Mhz" << endl;
 //                cl->sendCMD("UNIT:FREQ khz ");
 //                cout << "sent UNIT:FREQ?" << endl;
-                cl->query("UNIT:FREQ?",reply);
-                cout <<reply.c_str() << endl;
+//                cl->query("UNIT:FREQ?",reply);
+//                cout <<reply.c_str() << endl;
 
 
 
 //		cl->sendCMD("*RST");
 //		cl->query("SYST:ERR?",reply);
 
-//		cl->setFreq(10000);// set 10000 MHz.
+////		cl->setFreq(10000);// set 10000 MHz.
 //		cl->query("SYST:ERR?",reply);
 //		cout <<reply.c_str() << endl;
 

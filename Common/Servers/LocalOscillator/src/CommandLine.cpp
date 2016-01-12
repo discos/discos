@@ -153,7 +153,7 @@ int CommandLine::configure(int bid,int pad,int sat,int tmo, int eot, int eos) th
 						   throw GPIBException("ibdev:"+GPIB_errors[ThreadIberr()]);
 		}
 
-	string unitcmd="UNIT:FREQ"+FREQUNIT;
+	string unitcmd="UNIT:FREQ "+FREQUNIT;
 
 	sendCMD(unitcmd); // set uniti to FREQUNIT
 

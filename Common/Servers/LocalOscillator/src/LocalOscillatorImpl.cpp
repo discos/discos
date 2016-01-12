@@ -181,9 +181,9 @@ void LocalOscillatorImpl::set(CORBA::Double rf_ampl, CORBA::Double rf_freq) thro
          CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::set()",(LM_NOTICE,"SYNTHESIZER SET to freq: %f power:%f ",rf_freq,rf_ampl));
 
 
- 		 m_freq=rf_freq;
+ 		 m_freq=rf_freq*MULTIPLY;
  		 m_ampl=rf_ampl;
-
+			 cout <<"AAA:"<< m_ampl<< endl;
  		 } catch (GPIBException& ex)
  		 {
  			CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::set()",(LM_DEBUG,"LocalOscillatorImpl::set() %s",ex.what()));
@@ -206,6 +206,7 @@ void LocalOscillatorImpl::get(CORBA::Double& rf_ampl, CORBA::Double& rf_freq) th
  	{
      		CSecAreaResourceWrapper<CommandLine> line=m_commandLine->Get();
  	 		line->getFreq(rf_freq); // get frequency
+//                        rf_freq=rf_freq/MULTIPLY;
  	 		line->getPower(rf_ampl); // get  amplitude
  	        CUSTOM_LOG(LM_FULL_INFO,"LocalOscillatorImpl::get()",(LM_NOTICE,"SYNTHESIZER READ freq: %f power:%f ",rf_freq,rf_ampl));
 
