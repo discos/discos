@@ -199,7 +199,6 @@ void CCommandLine::stopDataAcquisitionForced() throw (BackendsErrors::Connection
 	}
 }
 
-
 void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConnectionExImpl,
 		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
 {
@@ -431,6 +430,52 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 	else {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setAttenuation()");
 	}		
+}
+
+void CCommandLine::externalCalibrationSwitching(const long& on) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
+		BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
+		BackendsErrors::ConnectionExImpl)
+{
+	if (getIsBusy()) {
+		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::externalCalibrationSwitching()");
+		throw impl;
+	}
+	if (!m_calSwitchingEnabled) {
+		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::externalCalibrationSwitching()");
+		throw impl;
+	}
+	char sBuff[SENDBUFFERSIZE];
+	char rBuff[RECBUFFERSIZE];
+	int res;
+	WORD len;
+	len=CProtocol::externalNoiseMark(sBuff,on);
+	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
+		res=receiveBuffer(rBuff,RECBUFFERSIZE);
+	}
+	if (res>0) { // operation was ok.
+		if (!CProtocol::isAck(rBuff)) {
+			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::externalCalibrationSwitching()");
+		}
+	}
+	else if (res==FAIL) {
+		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
+		dummy.setCode(m_Error.getErrorCode());
+		dummy.setDescription((const char*)m_Error.getDescription());
+		m_Error.Reset();
+		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::externalCalibrationSwitching()");
+	}
+	else if (res==WOULDBLOCK) {
+		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::externalCalibrationSwitching()");
+	}
+	else {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::externalCalibrationSwitching()");
+	}
+	if (on>0) {
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::externalCalibrationSwitching()",(LM_INFO,"External mark switching is enabled"));
+	}
+	else {
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::externalCalibrationSwitching()",(LM_INFO,"External mark switching is disabled"));
+	}
 }
 
 void CCommandLine::setConfiguration(const long& inputId,const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins) throw (
@@ -1034,7 +1079,9 @@ void CCommandLine::setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErro
 	}
 }
 
-void CCommandLine::activateCalSwitching(const long& interleave) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl)
+void CCommandLine::activateCalSwitching(const char * argument) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
+		BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
+		BackendsErrors::ConnectionExImpl,ComponentErrors::ValidationErrorExImpl)
 {
 	AUTO_TRACE("CCommandLine::activateCalSwitching()");
 	if (getIsBusy()) {
@@ -1045,13 +1092,35 @@ void CCommandLine::activateCalSwitching(const long& interleave) throw (BackendsE
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::activateCalSwitching()");
 		throw impl;
 	}
-	if (interleave>=0) {
-		m_calPeriod=interleave;
-		if (m_calPeriod>0) {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"CALIBRATION_DIODE_SWITCHING_ON"));
+	IRA::CString arg(argument);
+	arg.MakeUpper();
+	if (arg=="EXT") {
+		externalCalibrationSwitching(1);
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"EXTERNAL_CALIBRATION_DIODE_SWITCHING"));
+	}
+	else if (arg=="OFF") {
+		externalCalibrationSwitching(0);
+		m_calPeriod=0;
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"CALIBRATION_DIODE_SWITCHING_OFF"));
+	}
+	else {
+		long interleave;
+		if (arg.CheckIsValidLong()) {
+			interleave=arg.ToLong();
 		}
 		else {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"CALIBRATION_DIODE_SWITCHING_OFF"));			
+			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::activateCalSwitching()");
+			impl.setReason("the argument is not legal");
+			throw impl;
+		}
+		if (interleave>=0) {
+			m_calPeriod=interleave;
+			if (m_calPeriod>0) {
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"INTERNAL_CALIBRATION_DIODE_SWITCHING_ON"));
+			}
+			else {
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"INTERNAL_CALIBRATION_DIODE_SWITCHING_OFF"));
+			}
 		}
 	}
 }
@@ -1440,7 +1509,33 @@ int CCommandLine::getConfiguration()
 		if ((Res=sendBuffer(sBuff,len))==SUCCESS) {
 			rBytes=receiveBuffer(rBuff,RECBUFFERSIZE);
 			if (rBytes>0) {
-				if (CProtocol::decodeBackendConfiguration(rBuff,m_sectionsNumber,m_configuration->getBoardsNumber(),m_attenuation,m_bandWidth,m_input,m_backendTime,m_currentSampleRate,m_boards)) {
+				CProtocol::TStatusWord status;
+				if (CProtocol::decodeBackendConfiguration(rBuff,m_sectionsNumber,m_configuration->getBoardsNumber(),m_attenuation,
+						m_bandWidth,m_input,m_backendTime,m_currentSampleRate,m_boards,status)) {
+					if (status.calon) {
+						setStatusField(CALON);
+					}
+					else {
+						clearStatusField(CALON);
+					}
+					if (status.zero) {
+						setStatusField(ZERO);
+					}
+					else {
+						clearStatusField(ZERO);
+					}
+					if (status.externalNoise) {
+						setStatusField(EXTERNALCAL);
+					}
+					else {
+						clearStatusField(EXTERNALCAL);
+					}
+					if (status.fastSwitch) {
+						setStatusField(FAST_SWITCHING);
+					}
+					else {
+						clearStatusField(FAST_SWITCHING);
+					}
 					CIRATools::getTime(m_lastUpdate);
 				}
 				else {

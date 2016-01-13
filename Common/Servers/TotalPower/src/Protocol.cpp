@@ -121,13 +121,41 @@ WORD CProtocol::setBackendTime(char *sBuff)
  
 WORD CProtocol::AutoGainControl(char *sBuff,const WORD& channels,const WORD& level)
 {
-	 char tempBuff[200];
-	 strcpy(sBuff,PROT_AUTO_GAIN);
-	 strcat(sBuff,PROT_SEPARATOR);
-	 sprintf(tempBuff,"%d%c%d%c",channels,PROT_SEPARATOR_CH,level,PROT_SEPARATOR_CH);
-	 strcat(sBuff,tempBuff);
-	 strcat(sBuff,PROT_TERMINATOR);
-	 return strlen(sBuff);
+	char tempBuff[200];
+	strcpy(sBuff,PROT_AUTO_GAIN);
+	strcat(sBuff,PROT_SEPARATOR);
+	sprintf(tempBuff,"%d%c%d%c",channels,PROT_SEPARATOR_CH,level,PROT_SEPARATOR_CH);
+	strcat(sBuff,tempBuff);
+	strcat(sBuff,PROT_TERMINATOR);
+	return strlen(sBuff);
+}
+
+WORD CProtocol::externalNoiseMark(char *sBuff,bool on)
+{
+	strcpy(sBuff,PROT_SET_EXT_CAL_SWITCH);
+	strcat(sBuff,PROT_SEPARATOR);
+	if (on) {
+		strcat(sBuff,"1");
+	}
+	else {
+		strcat(sBuff,"0");
+	}
+	strcat(sBuff,PROT_TERMINATOR);
+	return strlen(sBuff);
+}
+
+WORD CProtocol::noiseMark(char *sBuff,bool on)
+{
+	strcpy(sBuff,PROT_SET_CAL_ON);
+	strcat(sBuff,PROT_SEPARATOR);
+	if (on) {
+		strcat(sBuff,"1");
+	}
+	else {
+		strcat(sBuff,"0");
+	}
+	strcat(sBuff,PROT_TERMINATOR);
+	return strlen(sBuff);
 }
  
 WORD CProtocol::getSample(char *sBuff)
@@ -175,7 +203,8 @@ WORD CProtocol::setZeroInput(char *sBuff,bool activate)
 	 *word=p;
  }
  
-bool CProtocol::decodeBackendConfiguration(const char *rBuff,const long& sectionNumber,const DWORD& boardsNumber,double *att,double *bw,TInputs *in,TIMEVALUE& tm,long& currentSR,long * boards)
+bool CProtocol::decodeBackendConfiguration(const char *rBuff,const long& sectionNumber,const DWORD& boardsNumber,double *att,
+		double *bw,TInputs *in,TIMEVALUE& tm,long& currentSR,long * boards,TStatusWord& status)
 {
 	IRA::CString str(rBuff);
 	IRA::CString ret;
@@ -198,6 +227,21 @@ bool CProtocol::decodeBackendConfiguration(const char *rBuff,const long& section
 		if (!decodeFPGATime(ret,tm)) {
 			return false;
 		}
+	}
+	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
+		return false;
+		cout << "errore nella decodifica della status word" << endl;
+	}
+	else {
+		BYTE word8=ret.ToLong();
+		cout << "word 8 bit :" << word8 << endl;
+		if (!decodeStatusWord(word8,status.zero,status.calon,status.fastSwitch,status.externalNoise)) {
+			return false;
+		}
+		cout << "word.zero :" << status.zero << endl;
+		cout << "word.calon :" << status.calon << endl;
+		cout << "word.fastSwitch :" << status.fastSwitch << endl;
+		cout << "word,externalNoise :" << status.externalNoise << endl;
 	}
 	// get the sample rate in millisecs.......
 	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
@@ -309,6 +353,16 @@ bool CProtocol::checkBackendTime(const char * rBuff,const long threshold,bool& r
 			}
 		}
 	}
+	return true;
+}
+
+bool CProtocol::decodeStatusWord(const BYTE& word,bool& zero,bool& calon,bool& fastSwitch,bool& externalNoise)
+{
+
+	zero=(((word & 0x02) >> 1)==1);
+	calon=(((word & 0x04) >> 2)==1);
+	fastSwitch=(((word & 0x01))==1);
+	externalNoise=(((word & 0x08) >> 3)==1);
 	return true;
 }
 

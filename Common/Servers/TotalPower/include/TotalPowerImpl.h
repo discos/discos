@@ -276,12 +276,16 @@ public:
      * @thorw CORBA::SystemException
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw BackendsErrors::BackendsErrorsEx
-	 * @param interleave this parmater controls the switching frequency of the calibration diode. If it is zero (default) the diode is not 
-	 *               switched (always turned off). if a one is given the backend will produce one sample (using the <i>sampleRate</i>)
-	 *               with the mark switecehd off and one with the mark switched on. A two means two sample with the mark switched off and
-	 * 	              one with the mark switched on.....and so on. A negative will not change the value of the parameter.    
+     * @param argument the parameter controls how the backend reacts to the command. The backend could be configured so that the switching is
+     * 		   performed by the backend itself. in that case th argument is an integer value that is considered to be the interleave argument.
+ 	 * 		   Interleave controls the switching frequency of the calibration diode. If it is zero (default) the diode is not
+	 *         switched (always turned off). if a one is given the backend will produce one sample (using the <i>sampleRate</i>)
+	 *         with the mark switched off and one with the mark switched on. A two means two sample with the mark switched off and
+	 * 	       one with the mark switched on.....and so on. A negative will not change the value of the parameter.
+	 * 	       The other legal values are "EXT" meaning the switching is enabled but the trigger is issued by external sources and "OFF" meaning
+	 * 	       the switching is turned off.
 	*/
-    virtual void activateNoiseCalibrationSwitching(CORBA::Long interleave) throw (CORBA::SystemException,
+    virtual void activateNoiseCalibrationSwitching(const char * argument) throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
     
     /**
@@ -355,6 +359,16 @@ public:
      */
     virtual CORBA::Long getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber) throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+    /**
+     * It enables the control of the fast switching of the noise mark from an external source.
+     * @param on the integer values turns on (1) and off (0) the external source
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw BackendsErrors::BackendsErrorsEx
+     */
+    /*virtual void externalCalibrationSwitching(CORBA::Long on) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+    		BackendsErrors::BackendsErrorsEx);*/
 
     /**
      * This method is just a place holder for this implementation of the genericBackend interface

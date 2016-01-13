@@ -161,7 +161,7 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	}
 	// command parser configuration
 	m_parser->add("integration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(line,&CCommandLine::setIntegration),1);
-	m_parser->add("calSwitch",new function1<CCommandLine,non_constant,void_type,I<long_type> >(line,&CCommandLine::activateCalSwitching),1 );
+	m_parser->add("calSwitch",new function1<CCommandLine,non_constant,void_type,I<string_type> >(line,&CCommandLine::activateCalSwitching),1 );
 	m_parser->add("setSection",
 			new function7<CCommandLine,non_constant,void_type,I<long_type>,I<double_type>,I<double_type>,I<long_type>,I<enum_type<PolarizationToString> >,I<double_type>,I<long_type> >
 			(line,&CCommandLine::setConfiguration),7 );
@@ -630,6 +630,27 @@ void TotalPowerImpl::setTargetFileName (const char * fileName) throw (CORBA::Sys
 	// nothing to do
 }
 
+/*void TotalPowerImpl::externalCalibrationSwitching(CORBA::Long on) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+		BackendsErrors::BackendsErrorsEx)
+{
+	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+	try {
+		line->externalCalibrationSwitching(on);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getBackendsErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::externalCalibrationSwitching()");
+		dummy.log(LM_DEBUG);
+		throw dummy.getComponentErrorsEx();
+	}
+}*/
 
 void TotalPowerImpl::setTime() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
 		BackendsErrors::BackendsErrorsEx)
@@ -697,13 +718,13 @@ CORBA::Long TotalPowerImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out
 }
 
 
-void TotalPowerImpl::activateNoiseCalibrationSwitching(CORBA::Long interleave) throw (CORBA::SystemException,
+void TotalPowerImpl::activateNoiseCalibrationSwitching(const char *argument) throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
 {
 	AUTO_TRACE("TotalPowerImpl::activateNoiseCalibrationSwitching()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
-		line->activateCalSwitching(interleave);
+		line->activateCalSwitching(argument);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

@@ -107,21 +107,25 @@ module Backends {
 	interface TotalPower : GenericBackend {
 				
 		/**
-		 * This method can be called to activate or disactivate the switching of the calibration noise diode. The mode the switching is done is controlled
+		 * This method can be called to activate or deactivate the switching of the calibration noise diode. The mode the switching is done is controlled
 		 * by the parameter and by the <i>sampleRate</i> attribute. If the component is busy it is not allowed to call this method. This method is
 		 * only available if the connected receiver support it. 
 		 * @throw ComponentErrors::ComponentErrorsEx
  		 * @throw BackendsErrors::BackendsErrorsEx  
-		 * @param interleave this parmater controls the switching frequency of the calibration diode. If it is zero (default) the diode is not 
-		 *               switched (always turned off). if a one is given the backend will produce one sample (using the <i>sampleRate</i>)
-		 *               with the mark switecehd off and one with the mark switched on. A two means two sample with the mark switched off and
-		 * 	          one with the mark switched on.....and so on. A negative will not change the value of the parameter.
+ 		 * @param argument the parameter controls how the backend reacts to the command. The backend could be configured so that the switching is
+ 		 * 		   performed by the backend itself. in that case th argument is an integer value that is considered to be the interleave argument.
+ 		 * 		   Interleave controls the switching frequency of the calibration diode. If it is zero (default) the diode is not
+		 *         switched (always turned off). if a one is given the backend will produce one sample (using the <i>sampleRate</i>)
+		 *         with the mark switched off and one with the mark switched on. A two means two sample with the mark switched off and
+		 * 	       one with the mark switched on.....and so on. A negative will not change the value of the parameter.
+		 * 	       The other legal values are "EXT" meaning the switching is enabled but the trigger is issued by external sources and "OFF" meaning
+		 * 	       the switching is turned off.
 		*/
-		void activateNoiseCalibrationSwitching(in long interleave) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		void activateNoiseCalibrationSwitching(in string argument) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 				
 		/**
 		 * This method can be used to initialize the backend. Since this hardware can be connected to various receiver some parameter must be set before
-		 * any further use. This parameter will stay fixed until a new initilization is issued. At start up a default initialization is commanded but can be 
+		 * any further use. This parameter will stay fixed until a new initialization is issued. At start up a default initialization is commanded but can be
 		 * changed at any time.  If the component is busy it is not allowed to call this method.
  		 * @throw ComponentErrors::ComponentErrorsEx 
  		 * @throw BackendsErrors::BackendsErrorsEx
@@ -129,6 +133,15 @@ module Backends {
  		 *               known an excpetion is thrown
 		 */
 		void initialize(in string configuration) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+		/**
+		 * This method enables the fast switching of the calibration mark from external sources.
+		 * @param on this argument defines if the external source can or cannot control the fast switching. 1 enabled, 0 disables.
+		 * Other values are not legal.
+ 		 * @throw ComponentErrors::ComponentErrorsEx
+ 		 * @throw BackendsErrors::BackendsErrorsEx
+		*/
+		//void externalCalibrationSwitching(in long on) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 	};
 	
 };

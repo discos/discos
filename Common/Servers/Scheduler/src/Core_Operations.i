@@ -720,6 +720,27 @@ void CCore::_setProjectCode(const char* code) throw (ManagementErrors::UnkownPro
 	}
 }
 
+/*void CCore::_winkingMark(const char *arg) throw (ComponentErrors::ValidationErrorExImpl);
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	IRA::CString par(arg);
+	par.MakeUpper();
+	long interleave;
+	if (par=="EXT") {
+
+	}
+	else if (par=="OFF") {
+		// get the receiver boss.....
+		loadReceiversBoss(m_receiversBoss,m_receiversBossError); // throw ComponentErrors::CouldntGetComponentExImpl)
+	}
+	else { // assign an interleave value
+
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::setDevice()");
+		impl.setReason("device identifier does not exist in the current backend");
+		throw impl;
+	}
+}*/
+
 void CCore::_setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,
 		ComponentErrors::OperationErrorExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
 {

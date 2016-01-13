@@ -30,6 +30,8 @@
 #define PROT_SET_ZERO "Z"
 #define PROT_SET_SAMPLE_RATE "S"
 #define PROT_GET_SAMPLE "R"
+#define PROT_SET_EXT_CAL_SWITCH "M"
+#define PROT_SET_CAL_ON "N"
 
 #define PROT_ACK "ack"
 
@@ -41,8 +43,9 @@ using namespace IRA;
 class CProtocol {
 public:
 	/**
-	 * This enum enlists the pssoble configurations that can be done to set the source of  the backend input signal.
+	 * This enum enlists the possible configurations that can be done to set the source of the backend input signal.
 	 */
+
 	enum TInputs {
 		PRIMARY,
 		BWG,
@@ -50,6 +53,13 @@ public:
 		OHM50
 	};
 	
+	typedef struct StatusWord {
+		bool zero;
+		bool calon;
+		bool fastSwitch;
+		bool externalNoise;
+	} TStatusWord;
+
 	/** 
 	 * Prepare a buffer to be sent to the backend in order to request the backend configuration
 	 * @param sBuff pointer to the buffer that contains the message. the buffer must be allocated by the caller.
@@ -140,8 +150,28 @@ public:
 	 * @param sBuff pointer to the buffer that contains the message. the buffer must be allocated by the caller.
 	 * @param channels number of channels that will be passed through the functionality
 	 * @param level given in counts, is the point where the channels level is brought to.
+ 	 * @return the length of the message
 	 */
 	static WORD AutoGainControl(char *sBuff,const WORD& channels,const WORD& level);
+
+	/**
+	 * Prepare a buffer to be sent to the backend in order to enable/disable the fast switching of noise diode from external sources.
+	 * @param sBuff pointer to the buffer that contains the message. the buffer must be allocated by the caller.
+	 * @param on true enables, false disables
+	 * @return the length of the message
+	 *
+	*/
+	static WORD externalNoiseMark(char *sBuff,bool on);
+
+	/**
+	 * Prepare a buffer to be sent to the backend in order to turn on and off the noise diode of the front end.
+	 * The hardware configuration must allow this.
+	 * @param sBuff pointer to the buffer that contains the message. the buffer must be allocated by the caller.
+	 * @param on true turns on, false turns off
+	 * @return the length of the message
+	 *
+	*/
+	static WORD noiseMark(char *sBuff,bool on);
 	
 	/**
 	 * Prepare a buffer to be sent to the backend in order to set the sample rate that is used for the slow mode. The slow mode
@@ -154,7 +184,7 @@ public:
 	static WORD setIntegrationTime(char *sBuff,const long& integrationTime);
 	
 	/**
-	 * Prepare a buffer ti be sent to the backend in order to get from the backend a tpi measure using the slow mode. The sample
+	 * Prepare a buffer to be sent to the backend in order to get from the backend a tpi measure using the slow mode. The sample
 	 * rate used is set by the call to <i>setSampleRate</i>.
 	 * @param sBuff pointer to the buffer that contains the message. the buffer must be allocated by the caller.
 	 */
@@ -171,9 +201,11 @@ public:
 	 * @param tm reports the current time of the backend FPGA.
 	 * @param currentSR reports the sample rate currently used in the backend (milliseconds)
 	  *@param boards gives the mapping of section over boards, if null the mapping is flat: section 0 on board 0 and so on....
+	  *@param status status word extracted from backend configuration
 	 * @return true if the answer is correct and could be parsed 
 	 */
-	static bool decodeBackendConfiguration(const char *rBuff,const long& sectionNumber,const DWORD& boardsNumber,double *att,double *bw,TInputs *in,TIMEVALUE& tm,long& currentSR,long * boards);
+	static bool decodeBackendConfiguration(const char *rBuff,const long& sectionNumber,const DWORD& boardsNumber,double *att,
+			double *bw,TInputs *in,TIMEVALUE& tm,long& currentSR,long * boards,TStatusWord& status);
 	
 	/**
 	 * Decodes the answer of the backend after it has been commanded a new time. 
@@ -278,6 +310,17 @@ private:
 	*/  	
 	static bool decodeFPGATime(const DWORD& clock,const double& sampleRate,const WORD& counter,TIMEVALUE& tm);
 	
+	/**
+	 * This method is used to decode the status word coming from the backend configuration readout. Only few values are returned.
+	 * @param word status word (8 bits for now)
+	 * @param zero return if the inputs are connected to 50 Ohm
+	 * @param calon true if the receiver noise diode is switched on
+	 * @param fastSwitch true if the fast cal switching is enabled
+	 * @param extrenalNoise true if the calibration mark switching is under control of external sources.
+	 *
+	 */
+	static bool decodeStatusWord(const BYTE& word,bool& zero,bool& calon,bool& fastSwitch,bool& externalNoise);
+
 	/**
 	 * This method can be used to translate the backend answer regarding the attenuation level to its corresponding
 	 * double value (db)

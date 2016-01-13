@@ -180,7 +180,7 @@ public:
 			BackendsErrors::BackendBusyExImpl);
 	
 	/**
-	 * This function is called by the control thread in order to check the beackend clock matches with the host computer clock. In the two times do not
+	 * This function is called by the control thread in order to check the backend clock matches with the host computer clock. In the two times do not
 	 * match a log file in sent and the TIME_SYNC flag is set.
 	 * @throw ComponentErrors::SocketErrorExImpl
 	 *		 @arg \c ComponentErrors::IRALibraryResource
@@ -193,13 +193,11 @@ public:
 	
 	/**
 	 * This method starts the calibration diode switching.
-	 * @throw BackendsErrors::BackendBusyExImpl
-	 * @thorw ,ComponentErrors::NotAllowedExImpl
-	 * @param interleave this will control the switcing mode. An integer positive(N) will command the backend to produce N samples
-	 *               when the calibration diode is turned off and then one with the calibration diode turned on. A zero disable the switching
-	 *               (default), whilst a negative will not change the current configuration   
+	 * @param argument this will control the switching mode.
 	 */
-	void activateCalSwitching(const long& interleave) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl);
+	void activateCalSwitching(const char *argument) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
+			BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
+			BackendsErrors::ConnectionExImpl,ComponentErrors::ValidationErrorExImpl);
 	
 	/**
 	 * This function must be called in order to change the integration time
@@ -209,7 +207,15 @@ public:
 	void setIntegration(const long& integration) throw (BackendsErrors::BackendBusyExImpl);
 	
 	/**
-	 * This methos will changes the current value of the <i>m_enabled</i> array.
+	 * This method allows to turn on and off the noise mark switching from external sources.
+	 * @param on 0 turns off, 1 turns on
+	 */
+	void externalCalibrationSwitching(const long& on) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
+			BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
+			BackendsErrors::ConnectionExImpl);
+
+	/**
+	 * This method will change the current value of the <i>m_enabled</i> array.
 	 * @throw BackendsErrors::BackendBusyExImpl
 	 * @param en new values sequence for the <i>m_enabled</i> elements. A value grater than zero correspond to a true,
 	 *                a zero match to a false, while a negative will keep the things unchanged.
@@ -218,7 +224,7 @@ public:
 	
 	/**
 	 * This function can be called in order to load an initial setup for the backend. Some parameter are fixed and cannot be changed during normal
-	 * operation. In order for this call to suceed the backend must be ready and not busy with other operation. This operation will also reset all configuration
+	 * operation. In order for this call to succeed the backend must be ready and not busy with other operation. This operation will also reset all configuration
 	 * to the defaults.
 	 * @throw BackendsErrors::BackendBusyExImpl
 	 * @throw BackendsErrors::ConfigurationErrorExImpl
@@ -259,7 +265,7 @@ public:
 	
 	/**
 	 * This function will start an acquisition job. The job will be created suspended and requires an explicit
-	 * resum in order to begin the data flow. The backend will just connect to a specific socket.
+	 * resume in order to begin the data flow. The backend will just connect to a specific socket.
 	 * @throw ComponentErrors::SocketErrorExImpl
 	 *		 @arg \c ComponentErrors::IRALibraryResource
 	 * @throw ComponentErrors::TimeoutExImpl
@@ -460,7 +466,11 @@ private:
 		SUSPEND=2,				  /*!< backend data flow is suspended */
 		SAMPLING=3,              /*!< backend is recording */
 		CMDLINERROR=4,      /*!< error in the command line */ 
-		DATALINERROR=5     /*!< error in the data line */
+		DATALINERROR=5,     /*!< error in the data line */
+		EXTERNALCAL=6,      /*!< the switching of the calibration mark is external */
+		FAST_SWITCHING=7,   /*!< the fast switching is ongoing.... */
+		CALON=8,            /*!< the backend issued a calon on the receiver */
+		ZERO=9				/*!< inputs are set to 50 Ohm */
 	};
 	/** Connection status */
 	TLineStatus m_status;
