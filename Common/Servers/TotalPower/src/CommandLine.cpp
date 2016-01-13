@@ -1094,14 +1094,16 @@ void CCommandLine::activateCalSwitching(const char * argument) throw (BackendsEr
 	}
 	IRA::CString arg(argument);
 	arg.MakeUpper();
+	cout << arg << endl;
+	cout << (const char *)argument << endl;
 	if (arg=="EXT") {
 		externalCalibrationSwitching(1);
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"EXTERNAL_CALIBRATION_DIODE_SWITCHING"));
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"EXTERNAL_CALIBRATION_DIODE_SWITCHING_ENABLED"));
 	}
 	else if (arg=="OFF") {
 		externalCalibrationSwitching(0);
 		m_calPeriod=0;
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"CALIBRATION_DIODE_SWITCHING_OFF"));
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"CALIBRATION_DIODE_SWITCHING_TURNED_OFF"));
 	}
 	else {
 		long interleave;
@@ -1115,11 +1117,12 @@ void CCommandLine::activateCalSwitching(const char * argument) throw (BackendsEr
 		}
 		if (interleave>=0) {
 			m_calPeriod=interleave;
+			externalCalibrationSwitching(0);
 			if (m_calPeriod>0) {
-				ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"INTERNAL_CALIBRATION_DIODE_SWITCHING_ON"));
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"INTERNAL_CALIBRATION_DIODE_SWITCHING_TURNED_ON"));
 			}
 			else {
-				ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"INTERNAL_CALIBRATION_DIODE_SWITCHING_OFF"));
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"INTERNAL_CALIBRATION_DIODE_SWITCHING_TURNED_OFF"));
 			}
 		}
 	}

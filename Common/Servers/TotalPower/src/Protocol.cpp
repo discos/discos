@@ -230,18 +230,20 @@ bool CProtocol::decodeBackendConfiguration(const char *rBuff,const long& section
 	}
 	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
 		return false;
-		cout << "errore nella decodifica della status word" << endl;
+		//cout << "errore nella decodifica della status word" << endl;
 	}
 	else {
+		//cout << "token: " << (const char *) ret << endl;
+		
 		BYTE word8=ret.ToLong();
-		cout << "word 8 bit :" << word8 << endl;
+		//cout << "word 8 bit :" << word8 << endl;
 		if (!decodeStatusWord(word8,status.zero,status.calon,status.fastSwitch,status.externalNoise)) {
 			return false;
 		}
-		cout << "word.zero :" << status.zero << endl;
-		cout << "word.calon :" << status.calon << endl;
-		cout << "word.fastSwitch :" << status.fastSwitch << endl;
-		cout << "word,externalNoise :" << status.externalNoise << endl;
+		//cout << "word.zero :" << status.zero << endl;
+		//cout << "word.calon :" << status.calon << endl;
+		//cout << "word.fastSwitch :" << status.fastSwitch << endl;
+		//cout << "word,externalNoise :" << status.externalNoise << endl;
 	}
 	// get the sample rate in millisecs.......
 	if (!CIRATools::getNextToken(str,start,PROT_SEPARATOR_CH,ret)) {
@@ -359,10 +361,10 @@ bool CProtocol::checkBackendTime(const char * rBuff,const long threshold,bool& r
 bool CProtocol::decodeStatusWord(const BYTE& word,bool& zero,bool& calon,bool& fastSwitch,bool& externalNoise)
 {
 
-	zero=(((word & 0x02) >> 1)==1);
+	zero=(((word & 0x08) >> 3)==1);
 	calon=(((word & 0x04) >> 2)==1);
 	fastSwitch=(((word & 0x01))==1);
-	externalNoise=(((word & 0x08) >> 3)==1);
+	externalNoise=(((word & 0x10) >> 4)==1);
 	return true;
 }
 
