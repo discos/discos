@@ -199,6 +199,7 @@ void CSenderThread::saveZero(DWORD *zeros)
 
 void CSenderThread::processData(DWORD dataSize,const long& sectionNumber,long *boards)
 {
+    /*
 	BYTE *currentPointer;
 	//DWORD *data;
 	DWORD data[MAX_SECTION_NUMBER];
@@ -216,7 +217,7 @@ void CSenderThread::processData(DWORD dataSize,const long& sectionNumber,long *b
 		bufferCounter+=m_configuration->getDataBufferSize();
 		if (!CProtocol::isNewStream(m_previousStatus,m_previousCounter,counter)) { //the first sample is discarded
             printf("before if m_startTime\n");
-			if  (m_startTime<=sampleTime.value())/* || (m_immediateStart)) */{ //if the start time is elapsed than start processing
+			if  (m_startTime<=sampleTime.value()) || (m_immediateStart)) { //if the start time is elapsed than start processing
                 printf("after if m_startTime\n");
 				for (int i=0;i<MAX_SECTION_NUMBER;i++) { // subtract the zero level
 					if (data[i]>m_zeroBuffer[i]) {
@@ -229,7 +230,7 @@ void CSenderThread::processData(DWORD dataSize,const long& sectionNumber,long *b
 				if (CProtocol::isCal(m_previousStatus)) { // the sample is a calibration diode on
 					computeSample(m_cal,sampleTime,data,true);
 				}
-				if (CProtocol::isTpi(m_previousStatus)) { // the sample is a normal tpi measure*/
+				if (CProtocol::isTpi(m_previousStatus)) { // the sample is a normal tpi measure
 					computeSample(m_tpi,sampleTime,data,false);
 				}
 			}
@@ -246,6 +247,7 @@ void CSenderThread::processData(DWORD dataSize,const long& sectionNumber,long *b
 		m_tempBufferPointer-=bufferCounter;
 		memcpy(m_tempBuffer,m_tempBuffer+bufferCounter,m_tempBufferPointer);
 	}
+    */
 }
 
 void CSenderThread::initTransfer()

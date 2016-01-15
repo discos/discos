@@ -61,7 +61,7 @@ INCLUDES        =
 LIBRARIES       = RoachImpl
 LIBRARIES_L     =
 
-RoachImpl_OBJECTS = RoachImpl Configuration CommandLine Protocol SenderThread ControlThread
+RoachImpl_OBJECTS = RoachImpl Configuration CommandLine SenderThread ControlThread
 RoachImpl_LIBS = IRALibrary GenericBackendStubs RoachStubs TotalPowerStubs ManagmentDefinitionsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
   bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors \
   DiscosBackendProtocolLib

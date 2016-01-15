@@ -19,7 +19,7 @@
 #include <sstream>
 #include <DiscosBackendProtocol>
 #include "Common.h"
-#include "Protocol.h"
+//#include "Protocol.h"
 #include "Configuration.h"
 
 using namespace maci;
@@ -214,7 +214,7 @@ public:
 	 * @throw  (BackendsErrors::BackendBusyExImpl
 	 * @param integration new integration time in milliseconds. A negative value has no effect.
 	 */
-	void setIntegration(const long& integration) throw (BackendsErrors::BackendBusyExImpl);
+	void setIntegration(const long& integration) throw (BackendsErrors::BackendBusyExImpl, ComponentErrors::ValueOutofRangeExImpl);
 	
 	/**
 	 * This methos will changes the current value of the <i>m_enabled</i> array.
@@ -547,7 +547,7 @@ private:
 	/**
 	 * input type for each backend section
 	 */
-	CProtocol::TInputs m_input[MAX_SECTION_NUMBER];
+	//CProtocol::TInputs m_input[MAX_SECTION_NUMBER];
 	/**
 	 * Indicates if the input is enabled or not. A disabled input will not produce output data
 	 */
@@ -567,7 +567,7 @@ private:
 	/**
 	 * input type for the initial configuration
 	 */
-	CProtocol::TInputs m_defaultInput[MAX_BOARDS_NUMBER];
+	//CProtocol::TInputs m_defaultInput[MAX_BOARDS_NUMBER];
 	WORD m_defaultInputSize;
 	/**
 	 * That's the clock of the backend. Is has the precision of one second

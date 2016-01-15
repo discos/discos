@@ -52,12 +52,12 @@ CCommandLine::~CCommandLine()
 	AUTO_TRACE("CMedicinaMountSocket::~CMedicinaMountSocket()");
 	m_Error.Reset();
 	// if the backend is transferring data...make a try to inform the backend before closing the connection
-	if (getIsBusy()) {
+	/*if (getIsBusy()) {
 		WORD len;
 		char sBuff[SENDBUFFERSIZE];
 		len=CProtocol::stopAcquisition(sBuff); // get the buffer
 		sendBuffer(sBuff,len);
-	}
+	}*/
 	Close(m_Error);
 }
 
@@ -65,8 +65,8 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 		ComponentErrors::ValidationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl)
 {
     int res;
-	WORD len;
-	char sBuff[SENDBUFFERSIZE];
+	//WORD len;
+	//char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
 
 	AUTO_TRACE("CCommandLine::Init()");
@@ -125,7 +125,7 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 	} */	
 
     res=receiveBuffer(rBuff,RECBUFFERSIZE);
-    printf("connect = %s\n", rBuff);
+    //printf("connect = %s\n", rBuff);
 
     m_totalPower = Backends::TotalPower::_nil();
 	    try {
@@ -239,6 +239,7 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 void CCommandLine::stopDataAcquisitionForced() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
 		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl)
 {
+    /*
 	int res;
 	WORD len;
 	char sBuff[SENDBUFFERSIZE];
@@ -266,6 +267,7 @@ void CCommandLine::stopDataAcquisitionForced() throw (BackendsErrors::Connection
 	else {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::stopDataAcquisition()");
 	}
+    */
 }
 
 
@@ -324,11 +326,11 @@ void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExIm
 ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
 		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
 {
-	int res;
-	WORD len;
+	//int res;
+	//WORD len;
 	TIMEVALUE now;
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
+	//char sBuff[SENDBUFFERSIZE];
+	//char rBuff[RECBUFFERSIZE];
 	TIMEVALUE epoch;
 	long waitSec,waitMicro;
 	DDWORD diff;
@@ -408,10 +410,10 @@ ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Ba
 void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
 			BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
 {
-	int res;
-	WORD len;
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
+	//int res;
+	//WORD len;
+	//char sBuff[SENDBUFFERSIZE];
+	//char rBuff[RECBUFFERSIZE];
 	AUTO_TRACE("CCommandLine::suspendDataAcquisition()");
 	/*if ((m_backendStatus & (1 << SUSPEND)) || !getIsBusy()) { //not suspended....running
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::suspendDataAcquisition()");
@@ -461,11 +463,11 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl)
 {
 	AUTO_TRACE("CCommandLine::setAttenuation()");
-	int res;
-	WORD len;
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
-	double newAtt,newBW;
+	//int res;
+	//WORD len;
+	//char sBuff[SENDBUFFERSIZE];
+	//char rBuff[RECBUFFERSIZE];
+	double newAtt;
 
     try {
         m_totalPower->setAttenuation(inputId, attenuation);
@@ -546,19 +548,20 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		BackendsErrors::BackendBusyExImpl)
 {
 	AUTO_TRACE("CCommandLine::setConfiguration()");
-	int res;
-	WORD len;
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
+	//int res;
+	//WORD len;
+	//char sBuff[SENDBUFFERSIZE];
+	//char rBuff[RECBUFFERSIZE];
 	double newBW,newAtt,newSR,newFreq;
     long newBins, newFeed, newPol;
+    double filter;
 
 /*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setConfiguration()");
 		throw impl;
 	}*/
     if (pol == 2) { // FULL STOKES
-        m_sectionsNumber = 1; // TBC!!!!!!!!!!!!!!!!!!!!!!!!
+        //m_sectionsNumber = 1; // TBC!!!!!!!!!!!!!!!!!!!!!!!!
         m_polarization[inputId] = Backends::BKND_FULL_STOKES;
     }
     if (pol == -1)
@@ -595,11 +598,11 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		newBW=m_bandWidth[inputId];
 	}
 	if (sr>=0) {// the user ask for a new value
-		if (sr>MAX_SAMPLE_RATE) {
+		if ((sr > MAX_SAMPLE_RATE) || (sr != 2*newBW)) {
 			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
 			impl.setValueName("sampleRate");
 			impl.setValueLimit(MAX_SAMPLE_RATE);
-			throw impl;			
+			throw impl;
 		}
 		newSR=sr;
 	}
@@ -607,14 +610,31 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		newSR=m_sampleRate[inputId];
 	}
 	newAtt=m_attenuation[inputId];
-    if (freq >= 0.0)
-        newFreq = freq;
+
+    if (freq >= 0) { // the user ask for a new value
+        if (freq >= MIN_FREQUENCY && freq <= MAX_FREQUENCY) {
+            newFreq = freq;
+        }
+        else {
+            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+		    impl.setValueName("freq");
+		    throw impl;
+        }
+    }
     else
         newFreq = m_frequency[inputId];
-    if (feed == -1)
-        newFeed = m_feedNumber[inputId];
-    else
+
+    if (feed >= 0) { // the user ask for a new value
+        if (feed != 0) { // BUT for the moment is it possible to use ONLY feed 0
+            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+		    impl.setValueName("feed");
+		    throw impl;
+        }
         newFeed = feed;
+    }
+    else
+        newFeed = m_feedNumber[inputId];
+
     if (bins>=0) { // the user ask for a new value
         if (bins != MIN_BINS && bins != MAX_BINS) {
 		    _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
@@ -684,21 +704,21 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 				(const char *)temp,newSR,m_bins[inputId]));		
         if (m_RK00==true || m_RC00==true) {
             if (newBW==300.00)
-                newBW=300.00;
-            else if (newBW==1500.00)
-                newBW=1250.00;
-            else if (newBW==2300.00)
-                newBW=2350.00;
-            else
-                newBW=1250.00;
-        try {
-            m_totalPower->setSection(0,-1, newBW, -1, -1, -1, -1);
-            m_totalPower->setSection(1,-1, newBW, -1, -1, -1, -1);
-        }
-        catch (...) {
-            _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setDefaultConfiguration()");
-            impl.log(LM_ERROR);
-        }
+                filter=300.00;
+            if (newBW==1500.00)
+                filter=1250.00;
+            if (newBW==2300.00)
+                filter=2350.00;
+            if (newBW == 300.00 || newBW == 1500.00 || newBW == 2300.00) {
+                try {
+                    m_totalPower->setSection(0,-1, filter, -1, -1, -1, -1);
+                    m_totalPower->setSection(1,-1, filter, -1, -1, -1, -1);
+                }
+                catch (...) {
+                    _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setDefaultConfiguration()");
+                    impl.log(LM_ERROR);
+                }
+            }
         }
 	}
     /*
@@ -859,7 +879,7 @@ void CCommandLine::getZero(ACS::doubleSeq& tpi) throw (ComponentErrors::TimeoutE
 {
 	//getSample(tpi,true);
     tpi.length(m_sectionsNumber);
-    for (unsigned int j=0;j<m_sectionsNumber;j++) {
+    for (int j=0;j<m_sectionsNumber;j++) {
         //tpi[j]=(double)data[j]/(double)integration;
         tpi[j]=(double)0;
         m_tpiZero[j]=tpi[j]; // in case of tpiZero we store it......
@@ -871,13 +891,13 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 		BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl)
 {
 	AUTO_TRACE("CCommandLine::getSample()");
-	int res;
-	WORD len;
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
-	long integration;
-	bool busy=getIsBusy();
-	long waitTime=0;
+	//int res;
+	//WORD len;
+	//char sBuff[SENDBUFFERSIZE];
+	//char rBuff[RECBUFFERSIZE];
+	//long integration;
+	//bool busy=getIsBusy();
+	//long waitTime=0;
     /*	
     strcpy (sBuff,request.toString(true).c_str());
     // la risposta e' del tipo !get-Tpi,ok,Left,Right
@@ -977,7 +997,7 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 			_THROW_EXCPT(BackendsErrors::MalformedAnswerExImpl,"CCommandLine::getSample()");
 		}*/
 		tpi.length(m_sectionsNumber);
-		for (unsigned int j=0;j<m_sectionsNumber;j++) {
+		for (int j=0;j<m_sectionsNumber;j++) {
 			//tpi[j]=(double)data[j]/(double)integration;
 			tpi[j]=(double)reply.get_argument<double>(j);
 			if (zero) m_tpiZero[j]=tpi[j]; // in case of tpiZero we store it......
@@ -1120,7 +1140,7 @@ void CCommandLine::sendTargetFileName() throw (BackendsErrors::BackendBusyExImpl
 
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-        printf("set-filename = %s\n",rBuff);
+        //printf("set-filename = %s\n",rBuff);
 	}
 	if (res>0) { // operation was ok.
 		//if (!CProtocol::setConfiguration(rBuff)) {
@@ -1161,7 +1181,17 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 
 void CCommandLine::checkTime() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::MalformedAnswerExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
 {
-	char sBuff[SENDBUFFERSIZE];
+	if (!checkConnection()) {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::checkTime()");
+	}
+	/*Message request = Command::time();
+    Message reply = sendBackendCommand(request);
+    string _time = reply.get_argument<string>(0);
+    if(reply.is_success_reply())
+        strcpy(time, _time.c_str());
+    return _time.length();*/
+    
+    /*char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
 	WORD len;
 	int res;
@@ -1197,7 +1227,7 @@ void CCommandLine::checkTime() throw (BackendsErrors::ConnectionExImpl,BackendsE
 	}
 	else {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::checkTime()");
-	}
+	}*/
 }
 
 void CCommandLine::setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
@@ -1205,10 +1235,10 @@ void CCommandLine::setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErro
 		BackendsErrors::BackendBusyExImpl)
 {
 	AUTO_TRACE("CCommandLine::setTime()");
-	int res;
-	WORD len;
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
+	//int res;
+	//WORD len;
+	//char sBuff[SENDBUFFERSIZE];
+	//char rBuff[RECBUFFERSIZE];
 /*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setTime()");
 		throw impl;
@@ -1216,7 +1246,7 @@ void CCommandLine::setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErro
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setTime()");
 	}
-	len=CProtocol::setBackendTime(sBuff); // get the buffer
+	/*len=CProtocol::setBackendTime(sBuff); // get the buffer
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
@@ -1247,15 +1277,16 @@ void CCommandLine::setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErro
 	else {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setTime()");
 	}
+    */
 }
 
 void CCommandLine::activateCalSwitching(const long& interleave) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl)
 {
 	AUTO_TRACE("CCommandLine::activateCalSwitching()");
-	int res;
+	/*int res;
 	WORD len;
 	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
+	char rBuff[RECBUFFERSIZE];*/
 	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setTime()");
 		throw impl;
@@ -1263,13 +1294,11 @@ void CCommandLine::activateCalSwitching(const long& interleave) throw (BackendsE
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setTime()");
 	}
-	strcpy (sBuff,"?cal-on,");
-	strcat (sBuff,interleave);
-	strcat (sBuff,"\r\n");
-	len = strlen (sBuff);
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-	}
+    Message request = Command::calOn(interleave);
+    Message reply = sendBackendCommand(request);
+    if(reply.is_success_reply()){
+        // TBD
+    }
 	if (!m_calSwitchingEnabled) {
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::activateCalSwitching()");
 		throw impl;
@@ -1305,7 +1334,7 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"CHANGED_ENABLED_CHANNEL"));
 }
 
-void CCommandLine::setIntegration(const long& integration)  throw (BackendsErrors::BackendBusyExImpl)
+void CCommandLine::setIntegration(const long& integration)  throw (BackendsErrors::BackendBusyExImpl, ComponentErrors::ValueOutofRangeExImpl)
 {
 	AUTO_TRACE("CCommandLine::setIntegration()");
 	/*if (getIsBusy()) {
@@ -1313,15 +1342,21 @@ void CCommandLine::setIntegration(const long& integration)  throw (BackendsError
 		throw impl;
 	}*/
     m_integration = integration;
-	if (m_integration>=0) {
-        int res;
+	if (m_integration>=MIN_INTEGRATION && m_integration <= MAX_INTEGRATION) {
+        /*int res;
 	    WORD len;
 	    char sBuff[SENDBUFFERSIZE];
-	    char rBuff[RECBUFFERSIZE];
+	    char rBuff[RECBUFFERSIZE];*/
 	    AUTO_TRACE("CCommandLine::setIntegration()");
 	    if (!checkConnection()) {
 		    _THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setIntegration()");
 	    }
+        Message request = Command::setIntegration(integration);
+        Message reply = sendBackendCommand(request);
+        if(reply.is_success_reply()){
+            // TBD
+        }
+        /*
 	    strcpy (sBuff,"?set-integration,");
         IRA::CString temp;
         temp.Format("%ld",m_integration);
@@ -1350,27 +1385,32 @@ void CCommandLine::setIntegration(const long& integration)  throw (BackendsError
 	    }
 	    else {
 		    _THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setIntegration()");
-	    }
+	    }*/
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_NOTICE,"INTEGRATION is now %ld (millisec)",m_integration));
 	}
+    else {
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setIntegration()");
+		impl.setValueName("integration");
+		throw impl;
+    }
 }
 
 void CCommandLine::getAttenuation(ACS::doubleSeq& att) throw (ComponentErrors::SocketErrorExImpl,
 		ComponentErrors::TimeoutExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
 {
 	AUTO_TRACE("CCommandLine::getAttenuation()");
-	int res;
+	//int res;
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getAttenuation()");
 	}
 	//res=getConfiguration();
-	if (res>0) { // load OK
+	/*if (res>0) { // load OK
 		att.length(m_sectionsNumber);
 		for (int i=0;i<m_sectionsNumber;i++) {
 			att[i]=m_attenuation[i];
 		}
-	}
-	_CHECK_ERRORS("CommandLine::getAttenuation()");
+	}*/
+	//_CHECK_ERRORS("CommandLine::getAttenuation()");
 }
 
 void CCommandLine::getFrequency(ACS::doubleSeq& freq) const
@@ -1384,19 +1424,26 @@ void CCommandLine::getFrequency(ACS::doubleSeq& freq) const
 void CCommandLine::getBackendStatus(DWORD& status)
 {
 	AUTO_TRACE("CCommandLine::getBackendStatus()");
-	int res;
+	/*int res;
 	WORD len;
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
-	bool acquiring;
-	double timestamp;
-	char *statusCode;
+	//bool acquiring;
+	//double timestamp;
+	//char *statusCode;*/
 
 	// I do not check for backend busy because this is a call done at the initialization and never repeated
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getBackendStatus()");
 	}
-	strcpy (sBuff,"?status\r\n");
+    Message request = Command::status();
+    Message reply = sendBackendCommand(request);
+    string _status = reply.get_argument<string>(0);
+    if(reply.is_success_reply())
+        strcpy(status, _status.c_str());
+    return _status.length(); 
+
+	/*strcpy (sBuff,"?status\r\n");
 	len = strlen (sBuff);
 
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
@@ -1421,7 +1468,7 @@ void CCommandLine::getBackendStatus(DWORD& status)
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getBackendStatus()");
 	}
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::getBackendStatus()",(LM_INFO,"GETTING BACKEND STATUS"));
-	status=m_backendStatus;
+	status=m_backendStatus; */
 }
 
 void CCommandLine::getSampleRate(ACS::doubleSeq& sr) const
@@ -1510,15 +1557,15 @@ void CCommandLine::getTime(ACS::Time& tt) throw (ComponentErrors::SocketErrorExI
 		BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
 {
 	AUTO_TRACE("CCommandLine::getTime()");
-	int res;
+	//int res;
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getTime()");
 	}
 	//res=getConfiguration();
-	if (res>0) { // load OK
+	/*if (res>0) { // load OK
 		tt=m_backendTime.value().value;
-	}
-	_CHECK_ERRORS("CommandLine::getTime()");
+	}*/
+	//_CHECK_ERRORS("CommandLine::getTime()");
 }
 
 void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
@@ -1603,7 +1650,7 @@ void CCommandLine::onConnect(int ErrorCode)
 				setStatus(CNTD);
 				CSocket::setStatus(IRA::CSocket::READY); // force the socket status to be ready.....
 				try {
-					stopDataAcquisitionForced(); // ask the backend to exit the data transfering mode......
+					//stopDataAcquisitionForced(); // ask the backend to exit the data transfering mode......
 				}
 				catch (ACSErr::ACSbaseExImpl& ex) {
 					
@@ -1913,7 +1960,7 @@ bool CCommandLine::checkConnection()
 				else if (Res==SUCCESS) {
 					setStatus(CNTD);
 					try {
-						stopDataAcquisitionForced(); // ask the backend to exit the data transfering mode......
+						//stopDataAcquisitionForced(); // ask the backend to exit the data transfering mode......
 					}
 					catch (ACSErr::ACSbaseExImpl& ex) {
 						
@@ -1936,7 +1983,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 	if (m_configuration->getSetupFromID(config,setup)) { // throw (ComponentErrors::CDBAccessExImpl)
 		m_sectionsNumber=setup.sections;
 		for (WORD k=0;k<MAX_BOARDS_NUMBER;k++) {
-			m_defaultInput[k]=setup.inputPort[k];
+			//m_defaultInput[k]=setup.inputPort[k];
 			m_sections[k]=-1;
 		}
 		m_defaultInputSize=setup.inputPorts; // this should be 1 or the number of installed boards
@@ -1945,7 +1992,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 		for (i=0;i<m_sectionsNumber;i++) {
 			m_boards[i]=setup.section_boards[i];
 			m_sections[m_boards[i]]=i;
-			m_input[i]=m_defaultInput[m_boards[i]];
+			//m_input[i]=m_defaultInput[m_boards[i]];
 			m_polarization[i]=setup.polarizations[i];
 			m_ifNumber[i]=setup.ifs[i];
 			m_feedNumber[i]=setup.feed[i];
