@@ -12,7 +12,7 @@ class GenericDevIO(DevIO):
 
 
 class amplitudeDevIO(DevIO):
-    def __init__(self, value=0):
+    def __init__(self, cl,value=0):
         DevIO.__init__(self, value)
 
     def read(self):
@@ -22,8 +22,8 @@ class amplitudeDevIO(DevIO):
         self.value = value
                                     
 class frequencyDevIO(DevIO):
-    def __init__(self, cl):
-        DevIO.__init__(self, cl)
+    def __init__(self, cl,value=0):
+        DevIO.__init__(self,value)
         self.cl=cl
     def read(self):
         self.cl.getFrequency()
@@ -32,7 +32,7 @@ class frequencyDevIO(DevIO):
     def write(self, value):
         self.value = value
 class isLockedDevIO(DevIO):
-    def __init__(self, value=0):
+    def __init__(self, cl,value=0):
         DevIO.__init__(self, value)
 
     def read(self):

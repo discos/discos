@@ -87,9 +87,11 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
    
    
    def initialize(self):
-       addProperty(self, 'frequency', devio_ref=frequencyDevIO())
-       addProperty(self, 'amplitude', devio_ref=amplitudeDevIO())
-       addProperty(self, 'isLocked', devio_ref=isLockedDevIO())
+       self.cl.configure(IP,PORT)
+
+       addProperty(self, 'frequency', devio_ref=frequencyDevIO(self.cl))
+       addProperty(self, 'amplitude', devio_ref=amplitudeDevIO(self.cl))
+       addProperty(self, 'isLocked', devio_ref=isLockedDevIO(self.cl))
        self.cl.configure(IP,PORT)
    
    def set(self,rf_power,rf_freq):
