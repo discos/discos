@@ -44,7 +44,7 @@ class TestCommandLine(unittest2.TestCase):
          msg,err=self.cl.setPower(13)
          self.assertEqual('0,\"No error\"\n',msg)
          
-      @unittest2.skip("demonstrating skipping")      
+ #     @unittest2.skip("demonstrating skipping")      
       def test_4_sendPower(self):
          msg,err=self.cl.setPower(13)
          self.assertEqual('0,\"No error\"\n',msg)

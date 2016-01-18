@@ -26,8 +26,8 @@ class frequencyDevIO(DevIO):
         DevIO.__init__(self,value)
         self.cl=cl
     def read(self):
-        self.cl.getFrequency()
-        return self.value
+        value=self.cl.getFrequency()
+        return value
 
     def write(self, value):
         self.value = value

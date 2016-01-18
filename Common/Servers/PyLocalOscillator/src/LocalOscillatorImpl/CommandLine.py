@@ -63,15 +63,18 @@ class CommandLine:
        cmd= POWERCMD + str(power) + POWERUNIT
  
        try:
-           status_send=self.sendCmd(cmd)
-           if error_msg != '0,\"No error\"\n': 
-                print "exception",error_msg
-                raise CommandLineError(error_msg) 
-           return statusSend 
 
+           err=self.sendCmd(cmd)
+             
+           msg=self.query(QUERYERROR)
+            
+           return msg,err
+           
        except socket.error , msg:
           print "connect error: " ,msg
           return msg,False
+          self.sock=None
+   
    def getPower(self):
        QUERYPOWER="POWER?;SYST:ERR?\n"
        cmd=QUERYPOWER

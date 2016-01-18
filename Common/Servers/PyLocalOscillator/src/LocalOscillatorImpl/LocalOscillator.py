@@ -78,7 +78,8 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
       CharacteristicComponent.__init__(self)
       ContainerServices.__init__(self)
       self.cl=CommandLine.CommandLine() 
-
+      self.freq=0.
+      self.power=0.
 #
 # ___oOo___
    def cleanUp(self):
@@ -95,19 +96,29 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
        self.cl.configure(IP,PORT)
    
    def set(self,rf_power,rf_freq):
-       self.cl.setPower(rf_power)
-       self.cl.setFrequency(rf_freq)
-       return 1
+     try:
+        self.cl.setPower(rf_power)
+        self.cl.setFrequency(rf_freq)
+        self.freq=rf_freq
+        self.power=rf_power
+     except CommandLine.CommandLineError,ex :
+          
+        logger.logError(ex)
+
+       
+   
+   
    
    
    
 
    
-   def get(self,rf_power,rf_freq):
+   def get(self):
      
        msg,power=self.cl.getPower()
        msg,freq= self.cl.getFrequency()
-
+       print power
+       print freq
        return (power,freq)
   
    def rfon(self):
