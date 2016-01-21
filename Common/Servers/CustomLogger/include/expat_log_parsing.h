@@ -135,7 +135,7 @@ public:
      * Get a string representation of the extra data of this log record.
      * @return the string representation as "[key1=value1, key2=value2 .... ]"
      */
-    std::string get_extra_data_string();
+    std::string get_extra_data_string() const;
 };
 
 /**

@@ -19,6 +19,11 @@ unittest_OBJECTS = unittest
 unittest_LIBS = $(GTEST_LIBS) CustomLoggerImpl
 unittest_LDFLAGS = -lstdc++ -lpthread
 
+EXECUTABLES_L = log_exceptions
+log_exceptions_OBJECTS = log_exceptions
+log_exceptions_LIBS = maci maciClient IRALibrary ManagementErrors
+log_exceptions_LDFLAGS = -lstdc++ -lpthread
+
 # END OF CUSTOMIZATION
 # do not edit below this line
 #----------------------------

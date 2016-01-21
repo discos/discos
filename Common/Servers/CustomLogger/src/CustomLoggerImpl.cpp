@@ -294,8 +294,8 @@ CustomLoggerImpl::emitExceptionLog()
 void
 CustomLoggerImpl::flush() throw (CORBA::SystemException)
 {
-    maci::ContainerImpl::getLoggerProxy()->flush();
     writeLoggingQueue();
+    maci::ContainerImpl::getLoggerProxy()->flush();
 };
 
 void 
@@ -409,8 +409,14 @@ CustomLoggerImpl::filter(LogRecord& log_record)
     bool filtered=false;
     if((log_record._finished) && //check if we are logging
        // check if the log level is accepted by our logger
-       (m_min_level_sp->getDevIO()->read(ts) <= log_record.log_level) && 
-       (m_max_level_sp->getDevIO()->read(ts) >= log_record.log_level))
+       (IRA::CustomLoggerUtils::custom2aceLogLevel(
+            m_min_level_sp->getDevIO()->read(ts)) <=
+       (IRA::CustomLoggerUtils::custom2aceLogLevel(
+            log_record.log_level))) && 
+       (IRA::CustomLoggerUtils::custom2aceLogLevel(
+            m_max_level_sp->getDevIO()->read(ts)) >= 
+       (IRA::CustomLoggerUtils::custom2aceLogLevel(
+            log_record.log_level))))
     {
         if(log_record.process_name == CUSTOM_PYTHON_LOGGING_PROCESS){ //if the log record has been produced by IRAPy logger
             filtered = true; 
