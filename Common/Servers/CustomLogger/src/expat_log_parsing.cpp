@@ -279,7 +279,8 @@ get_log_record(XML_Parser log_parser, const char *xml_text)
         std::stringstream msg;
         msg << "CustomLoggerMalformedXMLError: ";
         msg << XML_ErrorString(XML_GetErrorCode(log_parser));
-        msg << " (" << xml_string.c_str() << ")";
+        // Commenting the following line we loose the error message
+        //msg << " (" << xml_string.c_str() << ")";
         //log_record->xml_text.assign(msg.str().c_str());
         //log_record->xml_text.assign("CustomLoggerMalformedXMLError");
         ACE_ERROR ((LM_ERROR, msg.str().c_str() ));

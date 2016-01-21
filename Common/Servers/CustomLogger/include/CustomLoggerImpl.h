@@ -91,6 +91,7 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         virtual void emitExceptionLog();
         virtual void flush() throw (CORBA::SystemException);
         void writeLoggingQueue(bool age_check=true); //invoked by writer thread
+        void handle_xml_error();
     private:
         void _open_log_file(bool custom, const char* base_path, const char* filename)
                                 throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx);

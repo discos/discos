@@ -295,6 +295,7 @@ void
 CustomLoggerImpl::flush() throw (CORBA::SystemException)
 {
     maci::ContainerImpl::getLoggerProxy()->flush();
+    writeLoggingQueue();
 };
 
 void 
@@ -522,6 +523,25 @@ CustomLoggerImpl::writeLoggingQueue(bool age_check)
             };
 };
 
+void
+CustomLoggerImpl::handle_xml_error()
+{
+    baci::ThreadSyncGuard guard(&_log_queue_mutex);
+    //suspend logging thread
+    _writer->suspend();
+    //empty ACS log queue
+    maci::ContainerImpl::getLoggerProxy()->flush();
+    //empty CUSTOM log queue
+    while(!_log_queue.empty()){
+        _log_queue.pop();
+    }
+    //reinitialize EXPAT parser
+    free_log_parsing(log_parser);
+    log_parser = init_log_parsing();
+    //resume writer thread
+    _writer->resume();
+};
+
 CustomStructuredPushConsumer::CustomStructuredPushConsumer(CustomLoggerImpl* logger) : 
     logger_(logger)
 {
@@ -593,8 +613,7 @@ void CustomStructuredPushConsumer::push_structured_event (const CosNotification:
                 logger_->handle(lr);
             }
     }catch(const MalformedXMLError& mxe){
-        free_log_parsing(logger_->log_parser);
-        logger_->log_parser = init_log_parsing();
+        logger_->handle_xml_error();
     }
 };
 
