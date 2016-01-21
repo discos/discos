@@ -30,9 +30,9 @@ LogRecord::get_data(std::string key)
 };
 
 std::string
-LogRecord::get_extra_data_string()
+LogRecord::get_extra_data_string() const
 {
-    KVMap::iterator iter;
+    KVMap::const_iterator iter;
     std::stringstream res;
     int _extra_data = 0;
     // ADD EXTRA DATA TO THE LOG MESSAGE AS "{k1=v1, k2=v2 ... }"
@@ -145,7 +145,7 @@ sanitize_xml(const char* input_text, bool brackets)
 {
     std::stringstream output_text;
     bool valid_char;
-    for(int i =0; i<std::strlen(input_text); ++i)
+    for(unsigned int i =0; i<std::strlen(input_text); ++i)
     {
         valid_char = true;
         if(std::isprint(input_text[i]) == 0) //bad character!
