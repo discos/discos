@@ -136,7 +136,8 @@ void CScheduleExecutor::runLoop()
 					impl.setSubScanID(m_scheduleCounter);
 					impl.setReason("cannot check scan against telescope");
 					m_core->changeSchedulerStatus(Management::MNG_FAILURE);
-					impl.log(LM_ERROR);
+					//impl.log(LM_ERROR);
+					CUSTOM_EXCPT_LOG(impl,LM_ERROR);
 					cleanScan();
 					break;
 				}
@@ -280,7 +281,18 @@ void CScheduleExecutor::runLoop()
 						break;
 					}
 				}
-				else {
+				else { //m_currentScan.ut>0
+					TIMEVALUE currentUTime;
+					IRA::CIRATools::getTime(currentUTime); // get the current time
+					// This check permits to skip (not recording) current subscan in case the scheduled start time is already elapsed.
+					// This happens, for example, when the previous backend configuration is too slow and the scan could not start on time
+					if (m_currentScan.ut<currentUTime.value().value) {  // if the forseen time for the start recording is already elapsed....we give up the current recording
+						m_stage=STOP_SCHEDULING; // this will skip the start recording command, the next stage (STOPSCHEDULING) does nothing if the start was not done
+						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_WARNING,"SUBSCAN_PREPARATION_IS_LATE"));
+						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_WARNING,"SUBSCAN_SKIPPED: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
+						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"WAITING_FOR_THE_NEXT_ONE"));
+						break;
+					}
 					start=true;
 				}
 				if (start) {
@@ -306,7 +318,7 @@ void CScheduleExecutor::runLoop()
 									  m_schedule->getFileName(),m_currentScan.layout,layoutProc);
 						}
 						else {
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startRecording()",(LM_NOTICE,"NO_RECORDING_REQUIRED"));
+							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"NO_RECORDING_REQUIRED"));
 						}
 						//startRecording(m_currentScan,m_currentScanRec,layoutProc);
 						m_scanStopError=false;
@@ -612,6 +624,7 @@ void CScheduleExecutor::stopRecording()
 
 void CScheduleExecutor::cleanScan()
 {
+	ACS::Time waitForStop=0;
 	m_core->cancelTimerEvent(m_lastScheduledTime);
 	// clean up backend and writer
 	try {
@@ -622,7 +635,7 @@ void CScheduleExecutor::cleanScan()
 		ex.log(LM_WARNING);
 	}
 	try {
-		m_core->closeScan(false);
+		waitForStop=m_core->closeScan(false); // close the current scan in all subsystems
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		ex.log(LM_WARNING);
@@ -633,6 +646,7 @@ void CScheduleExecutor::cleanScan()
 	m_subScanDone=false;
 	m_scanStopError=false;
 	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanScan()",(LM_NOTICE,"SCAN_ABORTED: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
+
 	//now setup the timer to wake the thread up in order to try to start the next scan
 	if (m_schedule->getSchedMode()==CSchedule::LST) {
 		// in case of LST based schedule...we can proceed directly to next scan selection because the next scan will never start before its time stamp
@@ -642,7 +656,18 @@ void CScheduleExecutor::cleanScan()
 		// error...so we wait from now to the duration of the present scan
 		TIMEVALUE now;
 		IRA::CIRATools::getTime(now);
-		m_lastScheduledTime=now.value().value+(unsigned long long)(m_currentScan.duration*10000000); // this is the stop time in 100 ns.
+		if (waitForStop>0) {
+			ACS::Time temp=now.value().value+(unsigned long long)(m_currentScan.duration*10000000);
+			if (waitForStop>temp) {
+				m_lastScheduledTime=waitForStop;
+			}
+			else {
+				m_lastScheduledTime=temp;
+			}
+		}
+		else {
+			m_lastScheduledTime=now.value().value+(unsigned long long)(m_currentScan.duration*10000000); // this is the stop time in 100 ns.
+		}
 		m_goAhead=false;
 		if (!m_core->addTimerEvent(m_lastScheduledTime,&restartEventHandler,static_cast<void *>(this))) {
 			cleanSchedule(true);

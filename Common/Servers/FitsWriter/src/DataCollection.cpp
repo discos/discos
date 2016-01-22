@@ -57,6 +57,7 @@ void CDataCollection::forceReset()
 	m_reset=true;
 	m_status=Management::MNG_OK;
 	m_stopUTTime=m_startUTTime=m_fakeUTTime=0;
+	IRA::CIRATools::Wait(200000); // 200 milliseconds...give some time to the Engine Thread to settle down
 }
 
 void CDataCollection::saveMainHeaders(Backends::TMainHeader const * h,Backends::TSectionHeader const * ch)
