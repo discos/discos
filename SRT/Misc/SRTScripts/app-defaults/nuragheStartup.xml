@@ -68,6 +68,10 @@
             <type>cpp</type>
         </container>
         <container>
+            <name>PyLOContainer</name>
+            <type>py</type>
+        </container>
+        <container>
             <name>ReceiversContainer</name>
             <type>cpp</type>
         </container>
