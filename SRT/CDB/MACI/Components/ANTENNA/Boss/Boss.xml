@@ -5,7 +5,7 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
 	Name="Boss"
-	Code="AntennaBossSimImpl.AntennaBossSimImpl"
+	Code="AntennaBossSim.AntennaBossSimImpl"
 	Type="IDL:alma/Antenna/AntennaBoss:1.0"
 	Container="AntennaBossSimContainer"
 	Default="true"

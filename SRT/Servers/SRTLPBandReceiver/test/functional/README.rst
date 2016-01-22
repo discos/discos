@@ -9,8 +9,8 @@ Start the local oscillator and SRTLPBand containers::
 
 Run the receiver board server (the test will do it automatically)::
 
-    $ recserver-start
+    $ receiverboard-sim start
 
 When terminated, stop the server::
 
-    $ recserver-stop
+    $ receiverboard-sim stop

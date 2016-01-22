@@ -4,7 +4,7 @@
 #-----------------------------------------
 #*****************************************
 
-PY_PACKAGES = AntennaBossSimImpl
+PY_PACKAGES = SRTDerotatorSim
 PY_SCRIPTS = 
 
 # -----------------
@@ -23,10 +23,10 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
-	$(RM) *.pyc AntennaBossSimImpl/*.pyc
+	$(RM) *.pyc SRTDerotatorSim/*.pyc
 	$(RM) ../lib ../bin ../config ../doc ../idl ../include \
 		  ../object ../rtai ../test
-	$(RM) $(INTROOT)/lib/python/site-packages/AntennaBossSim*
+	$(RM) $(INTROOT)/lib/python/site-packages/SRTDerotatorSim*
 	@echo " . . . clean done"
 
 install : install_all

@@ -9,7 +9,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
     Name="SRTKBandDerotator"    
-    Code="SRTDerotatorSimImpl.SRTDerotatorSimImpl"
+    Code="SRTDerotatorSim.SRTDerotatorSimImpl"
     Type="IDL:alma/Receivers/SRTKBandDerotator:1.0"
     ImplLang="py"
     Container="DerotatorContainer"

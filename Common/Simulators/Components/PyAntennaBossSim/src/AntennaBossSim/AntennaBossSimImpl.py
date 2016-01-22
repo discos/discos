@@ -13,13 +13,13 @@ from Acspy.Servants.ContainerServices import ContainerServices as Services
 from Acspy.Servants.ComponentLifecycle import ComponentLifecycle as Lcycle
 from Acspy.Common.TimeHelper import getTimeStamp
 from Acspy.Util.BaciHelper import addProperty
-from AntennaSimulator.devios import GenericDevIO
+from AntennaBossSim.devios import GenericDevIO
 
 
 __copyright__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 
-class AntennaSimulatorImpl(AntennaBoss, CI, Subsystem, CC, Services, Lcycle):
+class AntennaBossSimImpl(AntennaBoss, CI, Subsystem, CC, Services, Lcycle):
  
     def __init__(self):
         CC.__init__(self)
@@ -62,7 +62,7 @@ class AntennaSimulatorImpl(AntennaBoss, CI, Subsystem, CC, Services, Lcycle):
         
     def getApparentCoordinates(self, t):
         """Return (az, el, ra, dec) + (jepoch, lon, lat)"""
-        coordinates = self.history.get(t) + [0, 0, 0]
+        coordinates = self.history.get(t) + (0, 0, 0)
         return tuple(coordinates)
 
     def getRawCoordinates(self, t):
