@@ -15,7 +15,7 @@ class StartUpdatingTest(unittest2.TestCase):
     def setUp(self):
         self.client = PySimpleClient()
         self.device = self.client.getComponent('RECEIVERS/SRTKBandDerotator')
-        self.antenna = self.client.getComponent('ANTENNA/BossSimulator')
+        self.antenna = self.client.getComponent('ANTENNA/Boss')
         self.positioner = self.client.getComponent('RECEIVERS/DewarPositioner')
         self.positioner.setup('KKG')
         self.positioner.setConfiguration('custom')
@@ -28,7 +28,7 @@ class StartUpdatingTest(unittest2.TestCase):
             self.positioner.park()
         time.sleep(0.5)
         self.client.releaseComponent('RECEIVERS/DewarPositioner')
-        self.client.releaseComponent('ANTENNA/BossSimulator')
+        self.client.releaseComponent('ANTENNA/Boss')
         self.device = self.client.releaseComponent('RECEIVERS/SRTKBandDerotator')
 
 
@@ -64,6 +64,17 @@ class StartUpdatingTest(unittest2.TestCase):
         self.assertEqual(self.positioner.isRewindingRequired(), True)
         self.assertEqual(self.positioner.isRewinding(), False)
         self.assertEqual(self.positioner.isTracking(), False)
+
+    def test_stopUpdating_when_rewinding_required(self):
+        """Verify stopUpdating() works properly when a rewinding is required"""
+        self.positioner.setRewindingMode('MANUAL')
+        az, el, target = self.prepare_negative_oor()
+        # after prepare_negative_oor(), startUpdating() will cause oor
+        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+        time.sleep(0.5)
+        self.positioner.stopUpdating()
+        time.sleep(1)
+        self.assertFalse(self.positioner.isUpdating())
 
     def test_updating_and_position_after_manual_rewind(self):
         """Verify position and that it stills updating after a manual rewind"""

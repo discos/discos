@@ -14,6 +14,7 @@ from IRAPy import logger
 
 __docformat__ = 'restructuredtext'
 
+
 class Positioner(object):
     generalLock = threading.Lock()
     rewindingLock = threading.Lock()
@@ -255,7 +256,9 @@ class Positioner(object):
                             if self.control.modes['rewinding'] == 'MANUAL':
                                 logger.logInfo('a derotator rewinding is required')
                                 while self.control.isRewindingRequired:
-                                    time.sleep(2) # Wait until the user calls a rewind
+                                    if self.control.stop:
+                                        break
+                                    time.sleep(0.1) # Wait until the user calls a rewind
                             else:
                                 logger.logError('wrong rewinding mode: %s' %self.control.modes['rewinding'])
                     except Exception, ex:
@@ -299,7 +302,9 @@ class Positioner(object):
             logger.logInfo('rewinding in progress...')
             startingTime = now = datetime.datetime.now()
             while (now - startingTime).seconds < float(self.conf.getAttribute('RewindingTimeout')):
-                if self.device.isTracking():
+                if self.control.stop:
+                    break
+                elif self.device.isTracking():
                     break
                 else:
                     time.sleep(float(self.conf.getAttribute('RewindingSleepTime')))
@@ -394,7 +399,7 @@ class Positioner(object):
         """Stop the updating thread"""
         try:
             self.control.stop = True
-            self.t.join(timeout=10)
+            self.t.join(timeout=2)
             if self.t.isAlive():
                 logger.logWarning('thread %s is alive' %self.t.getName())
         except AttributeError:
@@ -406,8 +411,9 @@ class Positioner(object):
 
     def park(self, parkPosition=0):
         self._clearOffset()
-        if self.isSetup():
+        if self.isSetup() and self.isUpdating():
             self.stopUpdating()
+        elif self.isSetup():
             try:
                 Positioner.generalLock.acquire()
                 self.control.updateScanInfo({'iStaticPos': parkPosition})

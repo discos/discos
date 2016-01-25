@@ -5,7 +5,7 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     UpdatingTime="0.1"
-    RewindingSleepTime="1"
+    RewindingSleepTime="0.1"
     RewindingTimeout="200"
     DefaultConfiguration="FIXED"
     DefaultRewindingMode="AUTO"
