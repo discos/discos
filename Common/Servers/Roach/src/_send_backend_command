@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#initialize default values
+COMMAND=convert-data #this is for convenience 
+SERVER=192.168.200.216 #should be roach backend at SRT
+PORT=10000
+
+#parsing command line arguments
+while getopts "c:s:p:h" opt; do
+    case "$opt" in 
+        s)
+            SERVER=$OPTARG
+            ;;
+        p)
+            PORT=$OPTARG
+            ;;
+        c)
+            COMMAND=$OPTARG
+            ;;
+        h)
+            echo "Usage: 
+    _send_backend_command [-c command] [-s SERVER.IP] [-p PORT] [-h]
+
+    defaults: COMMAND convert-data
+              SERVER  192.168.200.216
+              PORT    10000
+              
+    A list of protocol commands and a description of the protocol can be found at:
+    http://discos.readthedocs.org/en/latest/developer/protocols/backends.html"
+            exit 0
+            ;;
+    esac
+done
+
+#executing
+{ echo "?$COMMAND"; sleep 1; echo ""; echo "quit"; } | telnet $SERVER $PORT >/dev/null
+

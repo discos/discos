@@ -73,7 +73,7 @@ lllll_OBJECTS   =
 #
 # Scripts (public and local)
 # ----------------------------
-SCRIPTS         =
+SCRIPTS         = _send_backend_command
 SCRIPTS_L       =
 
 #
