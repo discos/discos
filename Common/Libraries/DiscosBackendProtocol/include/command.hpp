@@ -25,6 +25,7 @@ namespace DiscosBackend{
             static Message setSection(long, double, double, long, long, double, long);
             static Message calOn(long interleave = 0);
             static Message setFilename(string filename);
+            static Message doConversion(){return Message(REQUEST, "do-conversion");};
     }; //class Command
 }; //namespace DiscosBackend
 
