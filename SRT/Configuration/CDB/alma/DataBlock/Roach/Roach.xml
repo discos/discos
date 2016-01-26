@@ -14,7 +14,7 @@
  	<bandWidth>1500.0</bandWidth>
  	<attenuation>7.0</attenuation>		
 	<section_boards>0 1</section_boards>
-	<polarizations>L R</polarizations>
+	<polarizations>S S</polarizations>
 	<feed>0 0</feed>
 	<IF>0 1</IF>
 	<bins>1024</bins>
@@ -29,7 +29,7 @@
  	<bandWidth>1500.0</bandWidth>
  	<attenuation>7.0</attenuation>		
 	<section_boards>0 1 2 3 4 5 6 7 8 9 10 11 12 13</section_boards>
-	<polarizations>L R L R L R L R L R L R L R</polarizations>
+	<polarizations>S S S S S S S S S S S S S S</polarizations>
 	<feed>0 0 1 1 2 2 3 3 4 4 5 5 6 6</feed>
 	<IF>0 1 0 1 0 1 0 1 0 1 0 1 0 1</IF>
 	<bins>1024</bins>
@@ -44,7 +44,7 @@
  	<bandWidth>1500.0</bandWidth>
  	<attenuation>9.0</attenuation>	 	
  	<section_boards>0 1</section_boards>
- 	<polarizations>L R</polarizations>
+ 	<polarizations>S S</polarizations>
  	<feed>0 0</feed>
  	<IF>0 1</IF>
 	<bins>1024</bins>
@@ -59,7 +59,7 @@
  	<bandWidth>1500.0</bandWidth>
  	<attenuation>10.0</attenuation>	 	
  	<section_boards>2 3</section_boards>
- 	<polarizations>L R</polarizations>
+ 	<polarizations>S S</polarizations>
  	<feed>0 0</feed>
  	<IF>0 1</IF>
 	<bins>1024</bins>
@@ -74,7 +74,7 @@
  	<bandWidth>500.0</bandWidth>
  	<attenuation>10.0</attenuation>	 	
  	<section_boards>0 1</section_boards>
- 	<polarizations>L R</polarizations>
+ 	<polarizations>S S</polarizations>
  	<feed>0 0</feed>
  	<IF>0 1</IF>
 	<bins>1024</bins>
