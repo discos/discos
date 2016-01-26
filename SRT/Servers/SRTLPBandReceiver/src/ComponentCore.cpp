@@ -525,7 +525,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (
     }
     else if ((getRFMin() - lo[0]) >= m_configuration.getLowpassFilterMax()[0]) {
         _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
-        impl.setValueName("LO frequency value not allowed. The IF bandwidth" \
+        impl.setValueName("LO frequency value not allowed. The IF bandwidth " \
                           "is outside the low pass filter.");
         throw impl;
     }
@@ -633,9 +633,11 @@ void CComponentCore::getCalibrationMark(
     getPBandBandwidth(pbandValue);
 
     double startFreq, bandwidth = 1.0;
+    ACS::doubleSeq ifMin;
     for (unsigned i=0;i<stdLen;i++) {
         if(actualMode.Right() == "X") { // P band conf
-            startFreq = m_configuration.getPBandRFMin()[ifs[i]];
+            getPBandStartFrequency(ifMin);
+            startFreq = ifMin[i];
             bandwidth = m_configuration.getPBandIFBandwidth()[ifs[i]];
             polarization = m_configuration.getPBandPolarizations()[ifs[i]];
             getPBandLO(lo);
@@ -643,7 +645,8 @@ void CComponentCore::getCalibrationMark(
                 feeds_idx[j] = 0; 
         }
         else if(actualMode.Left() == "X") { // L band conf
-            startFreq = m_configuration.getLBandRFMin()[ifs[i]];
+            getLBandStartFrequency(ifMin);
+            startFreq = ifMin[i];
             bandwidth = m_configuration.getLBandIFBandwidth()[ifs[i]];
             polarization = m_configuration.getLBandPolarizations()[ifs[i]];
             getLBandLO(lo);
@@ -651,8 +654,8 @@ void CComponentCore::getCalibrationMark(
                 feeds_idx[j] = 1; 
         }
         else { // Dual band conf: backend indexes
-            startFreq = (feeds[i] == 0) ? m_configuration.getPBandRFMin()[ifs[i]] : 
-                m_configuration.getLBandRFMin()[ifs[i]];
+            (feeds[i] == 0) ? getPBandStartFrequency(ifMin) : getLBandStartFrequency(ifMin);
+            startFreq = ifMin[i];
             bandwidth = (feeds[i] == 0) ? m_configuration.getPBandIFBandwidth()[ifs[i]] : 
                 m_configuration.getLBandIFBandwidth()[ifs[i]];
             polarization = (feeds[i] == 0) ? m_configuration.getPBandPolarizations()[ifs[i]] \
