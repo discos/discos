@@ -407,7 +407,7 @@ void RoachImpl::terminate() throw (CORBA::SystemException, BackendsErrors::Backe
 	AUTO_TRACE("RoachImpl::terminate()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
-		//line->stopDataAcquisition();
+		line->stopDataAcquisition();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
