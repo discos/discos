@@ -28,7 +28,7 @@ MAKE_PDF = ON
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = GenericBackend
+CDB_SCHEMAS = GenericBackend DigitalXCorrelator Holography
 
 # 
 # IDL Files and flags
