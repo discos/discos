@@ -246,6 +246,26 @@ public:
 		else {
 			return ::testing::AssertionFailure() << "9) inverted receiver, inverted backend, resulting band should not be empty" ;
 		}
+		// R=-300,200(100:300)L B=-200,100(100:200)L => -200,100
+		rf=-1000;
+		rbw=500;
+		bf=50;
+		bbw=2000;
+		if (IRA::CIRATools::skyFrequency(bf,bbw,rf,rbw,f,bw)) {
+			if (f!=-500) {
+				return ::testing::AssertionFailure() << "10) inverted receiver, straight backend, start frequency should be -500"
+						<< " but is " << f << " instead";
+			}
+			else if (bw!=-500) {
+				return ::testing::AssertionFailure() << "10) inverted receiver, straight backend, start bandwidth should be -500"
+						<< " but is " << bw << " instead";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure() << "9) inverted receiver, inverted backend, resulting band should not be empty" ;
+		}
+
+
 		return ::testing::AssertionSuccess();
 	}
 
