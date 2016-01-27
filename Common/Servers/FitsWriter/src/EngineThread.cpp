@@ -763,7 +763,7 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if(!m_file->setPrimaryHeaderKey("Signal",(const char *)Management::Definitions::map(m_info.getSubScanConf().signal),"sub scan is reference or signal")) {
+				else if(!m_file->setPrimaryHeaderKey("Signal",(const char *)Management::Definitions::map(m_info.getSubScanConf().signal),"Flag for position switching phase")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
