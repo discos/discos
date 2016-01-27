@@ -15,7 +15,7 @@ CDB_SCHEMAS = Feeds ReceiversModeSetup LocalOscillatorLookUpTable \
 			  NoiseMarkLookUpTable TaperLookUpTable \
 			  DewarPositionerUpdatingTable DewarPositionerMapping \
 			  DewarPositionerActions \
-			  LocalOscillator
+			  LocalOscillator LocalOscillatorEthernet
 
 # IDL Files and flags
 IDL_FILES = CommonReceiverInterface ReceiversBoss \
