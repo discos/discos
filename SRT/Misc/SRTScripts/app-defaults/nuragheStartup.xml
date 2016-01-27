@@ -44,6 +44,10 @@
             <type>cpp</type>
         </container>
         <container>
+            <name>LocalOscillatorLPContainer</name>
+            <type>py</type>
+        </container>
+        <container>
             <name>LoggerContainer</name>
             <type>cpp</type>
         </container>
@@ -66,10 +70,6 @@
         <container>
             <name>PointContainer</name>
             <type>cpp</type>
-        </container>
-        <container>
-            <name>PyLOContainer</name>
-            <type>py</type>
         </container>
         <container>
             <name>ReceiversContainer</name>
