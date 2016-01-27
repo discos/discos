@@ -11,7 +11,7 @@
 	Name="LO_LP"
 	Code="LocalOscillatorImpl.LocalOscillator"
 	Type="IDL:alma/Receivers/LocalOscillator:1.0"
-	Container="PyLOContainer"
+	Container="LocalOscillatorLPContainer"
 	KeepAliveTime="10"
 	Default="false"
     ImplLang="py"
