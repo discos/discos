@@ -61,6 +61,7 @@ from Acspy.Common.TimeHelper import getTimeStamp
 from maciErrType import CannotGetComponentEx
 from ACSErrTypeCommonImpl import CORBAProblemExImpl
 from LocalOscillatorImpl.devios import amplitudeDevIO,frequencyDevIO,isLockedDevIO
+import Acspy.Util.ACSCorba
 
 import Receivers
 import ComponentErrorsImpl
@@ -69,7 +70,7 @@ import ComponentErrors
 from LocalOscillatorImpl import CommandLine
 from IRAPy import logger
 
-IP, PORT = "192.168.200.149", 5025 #real hw
+#IP, PORT = "192.168.201.149", 5025 #real hw
 
  
 class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, ContainerServices, ComponentLifecycle):
@@ -78,21 +79,34 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
       CharacteristicComponent.__init__(self)
       ContainerServices.__init__(self)
       self.cl=CommandLine.CommandLine() 
-      self.freq=0.
+      self.freq=0.  
       self.power=0.
-#
+      
 # ___oOo___
    def cleanUp(self):
-  
-      pass
+      
+      self.cl.close()
    
    
    def initialize(self):
-       self.cl.configure(IP,PORT)
+       name= self.getName()
+       dal = Acspy.Util.ACSCorba.cdb()
+       dao=dal.get_DAO_Servant("alma/"+name)
+       IP=  dao.get_string("IP")
+       PORT = int(dao.get_double("PORT"))
+       
+       msg = self.cl.configure(IP,PORT)
+       if msg != 'OK' :
+              reason = "cannot get Synthetizer IP %s component: %s" %(IP,msg)
+              logger.logError(reason)
+              exc = ComponentErrorsImpl.SocketErrorExImpl()
+              exc.setData('reason',msg)
+              raise exc.getComponentErrorsEx()
+       
 
        addProperty(self, 'frequency', devio_ref=frequencyDevIO(self.cl))
        addProperty(self, 'amplitude', devio_ref=amplitudeDevIO(self.cl))
-       addProperty(self, 'isLocked', devio_ref=isLockedDevIO(self.cl))
+       addProperty(self, 'isLocked', devio_ref=isLockedDevIO(self,self.cl))
        self.cl.configure(IP,PORT)
    
    def set(self,rf_power,rf_freq):
@@ -101,9 +115,12 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
         self.cl.setFrequency(rf_freq)
         self.freq=rf_freq
         self.power=rf_power
+        logger.logNotice('SYNT FREQ  set to %f ' %self.freq)
+        logger.logNotice('SYNT POWER set to %f ' %self.power)
+
      except CommandLine.CommandLineError,ex :
           
-        logger.logError(ex)
+        logger.logError(ex,message)
 
        
    
@@ -128,3 +145,7 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
    def rfoff(self):
     
        pass    
+   
+   def getInternalFrequency(self):
+       return self.freq
+   

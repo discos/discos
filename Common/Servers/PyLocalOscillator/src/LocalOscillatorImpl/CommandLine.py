@@ -31,7 +31,6 @@ class CommandLine:
        except socket.error , msg:
           print msg
           self.sock=None
-          
 
    def __del__(self):
        pass
@@ -180,7 +179,7 @@ class CommandLine:
    
    def close(self):
      
-       self.sock.disconnect()
+       self.sock.close()
 
    def query(self,cmd):
        try:
