@@ -2,7 +2,7 @@
 
 #initialize default values
 COMMAND=convert-data #this is for convenience 
-SERVER=192.168.200.216 #should be roach backend at SRT
+SERVER=192.168.200.216 #roach backend at SRT
 PORT=10000
 
 #parsing command line arguments
