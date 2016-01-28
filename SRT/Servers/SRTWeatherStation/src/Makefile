@@ -73,7 +73,11 @@ SRTWeatherStationImpl_LIBS      =ComponentErrors \
 			expat\
 			GenericWeatherStationStubs\
 			ManagmentDefinitionsStubs\
-			ParserErrors
+			ParserErrors\
+			AntennaBossStubs\
+			SchedulerStubs \
+			AntennaDefinitionsStubs\
+			AntennaErrors
 
 
 #

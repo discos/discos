@@ -35,6 +35,11 @@
 #include "WeatherStationData.h"
 // #include "WindCheckerThread.h"
 #include <acsThread.h>
+#include <AntennaBossC.h>
+#include <SchedulerC.h>
+
+#include "ComponentProxies" 
+
 
 /*
 const CString ADDRESS="192.167.8.13"; //DEBUG
@@ -88,7 +93,6 @@ class CWindCheckerThread : public ACS::Thread
  private:
 		int loopCounter_m;
 		SRTWeatherStationImpl  * m_srtweatherstation_p;
-
 
 };
 
@@ -149,6 +153,8 @@ public:
 	virtual void	 cleanUp()throw (ACSErr::ACSbaseExImpl);
 	virtual void aboutToAbort() throw (ACSErr::ACSbaseExImpl);
 	
+        void parkAntenna(void);
+
 
 	/** 
 	 * Returns a reference to the air temperature  property Implementation of IDL interface.
@@ -194,10 +200,11 @@ public:
 
  
 private:
+                maci::ContainerServices * m_containerServices;
 	
  	
- 
-	void deleteAll();
+        Management::Scheduler_proxy m_scheduler;
+        Antenna::AntennaBoss_proxy m_antennaBoss;	void deleteAll();
 	CSecureArea<SRTWeatherSocket> *m_socket;
 	CWindCheckerThread *m_controlThread_p;
 	WeatherStationData m_wsdata;
@@ -211,6 +218,9 @@ private:
 	SmartPropertyPointer<RWdouble> m_humidity;
 	SmartPropertyPointer<RWdouble> m_pressure;
 	SimpleParser::CParser<SRTWeatherSocket> * m_parser;
+        
+        
+        
     void operator=(const SRTWeatherStationImpl&);
 		
 };

@@ -14,6 +14,16 @@ SRTWeatherStationImpl::SRTWeatherStationImpl(
 		       m_humidity(this),
 		       m_pressure(this)
 {	
+
+      
+        m_containerServices = containerServices;       
+        m_scheduler.setComponentName("IDL:alma/Management/Scheduler:1.0");
+        m_scheduler.setContainerServices(m_containerServices);
+        m_antennaBoss.setComponentName("IDL:alma/Antenna/AntennaBoss:1.0");
+        m_antennaBoss.setContainerServices(m_containerServices);
+        
+
+        
         AUTO_TRACE("SRTWeatherStationImpl::SRTWeatherStationImpl");
 }
 
@@ -426,6 +436,22 @@ SRTWeatherStationImpl::pressure ()
     ACS::RWdouble_var prop = ACS::RWdouble::_narrow(m_pressure->getCORBAReference());
     return prop._retn();
 }
+
+
+void SRTWeatherStationImpl::parkAntenna()
+{
+
+   m_scheduler->stopSchedule();
+   m_antennaBoss->park();
+   ACS_LOG(LM_FULL_INFO,"SRTWeatherStationImpl::parkAntenna()",(LM_WARNING,"AUTOSTOWING!!!!!!"));
+   
+
+
+}
+
+
+
+
 
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>

@@ -178,11 +178,12 @@ int SRTWeatherSocket::parse(CString meteo_string)
        fprintf(stderr, "Parse error at line %d:\n%s\n",
  	      XML_GetCurrentLineNumber(p),
  	      XML_ErrorString(XML_GetErrorCode(p)));
+              XML_ParserFree(p);
        return -1;
 
 	}
 
-
+        XML_ParserFree(p);
 	return 0;
 
 }
