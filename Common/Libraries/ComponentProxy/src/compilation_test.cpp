@@ -25,8 +25,9 @@ int main()
     MinorServo::WPServo_proxy m_wpServoProxy;
     Receivers::ReceiversBoss_proxy m_receiversBossProxy;
     Receivers::DewarPositioner_proxy m_dewarPositionerProxy;
-    Receivers::LocalOscillator_proxy m_localOscillatorProxy;
+    Receivers::LocalOscillator_proxy m_local_OscillatorProxy;
     Weather::GenericWeatherStation_proxy m_genericWeatherStationProxy;
+    Antenna::Mount_proxy m_mount;
     return 0;
 }
 

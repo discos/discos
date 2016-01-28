@@ -44,6 +44,7 @@ compilation_test_LIBS       = IRALibrary \
                               CommonReceiverInterfaceStubs \
                               bulkDataStubs bulkDataReceiverStubs \
                               bulkDataCallback bulkDataSenderStubs \
+			      MountStubs \
                               ManagementErrors \
                               ComponentErrors \
                               AntennaErrors \
@@ -62,7 +63,9 @@ INCLUDES        = ActiveSurfaceProxy.h  \
                   AntennaProxy.h \
                   ComponentProxies  \
                   ManagementProxy.h  \
-                  ReceiversProxy.h
+                  ReceiversProxy.h \
+		  MountProxy.h
+		  
 
 
 #
