@@ -691,7 +691,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		for (int j=0;j<m_sectionsNumber;j++) m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
 		m_commonSampleRate=newSR;
         m_frequency[inputId]=newFreq;
-        m_feedNumber[inputId]=feed;
+        m_feedNumber[inputId]=newFeed;
         m_bins[inputId]=newBins;
 		IRA::CString temp;
 		if (m_polarization[inputId]==Backends::BKND_LCP)
