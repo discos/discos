@@ -28,7 +28,7 @@ CWindCheckerThread::runLoop()
     wdata = m_srtweatherstation_p->getData();
     wind=wdata.wind; // converts wind speed from m/s to km/h
      AUTO_TRACE("WindCheckerThread::runLoop()");
-     if (wind > 40.0){
+     if (wind > 41){
      
          m_srtweatherstation_p->parkAntenna();
          

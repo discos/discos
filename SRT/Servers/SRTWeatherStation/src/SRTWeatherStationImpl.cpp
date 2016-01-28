@@ -297,7 +297,7 @@ void SRTWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		
 		SRTWeatherStationImpl* self_p =this;
 		m_controlThread_p = getContainerServices()->getThreadManager()->create<CWindCheckerThread, SRTWeatherStationImpl*>("MeteoStation",self_p );
-	 	m_controlThread_p->setSleepTime  (60*10000000);
+	 	m_controlThread_p->setSleepTime  (1*10000000);
 //		m_controlThread_p->setResponseTime(60*1000000);
 		m_controlThread_p->resume();
 		m_parser=new CParser<SRTWeatherSocket>(sock,10); 
