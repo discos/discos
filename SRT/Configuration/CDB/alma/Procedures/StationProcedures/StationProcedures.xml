@@ -8,6 +8,7 @@
 	antennaSetup=CCB
     servoSetup=CCB
 	receiversSetup=CCB
+	chooseBackend=TotalPower
 	initialize=CCB
 	device=0
 	calOff
@@ -22,6 +23,7 @@
     servoSetup=KKG
 	receiversSetup=KKG
 	receiversMode=SINGLEDISH
+	chooseBackend=TotalPower
 	initialize=KKG
 	device=0
 	calOff
@@ -36,6 +38,7 @@
     servoSetup=LLP
 	receiversSetup=LLP
 	receiversMode=XXC4
+	chooseBackend=TotalPower
 	initialize=LLP
 	device=0
 	calOff
@@ -50,6 +53,7 @@
     servoSetup=PPP
 	receiversSetup=PPP
 	receiversMode=C3XX
+	chooseBackend=TotalPower
 	initialize=PPP
 	device=0
 	calOff
@@ -64,6 +68,7 @@
     servoSetup=PLP
 	receiversSetup=PLP
 	receiversMode=C3C4
+	chooseBackend=TotalPower
 	initialize=PLP
 	device=0
 	calOff
