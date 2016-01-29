@@ -448,10 +448,10 @@ void CExternalClientsSocketServer::cmdToScheduler()
             			ret_val = "Unexpected Error";
                 		out = IRA::CString(ret_val);
 	    		}
-			if (ans == false) {
-				ret_val = "Nuraghe Error"; // TBD!!
-                		out = IRA::CString(ret_val);
-			}
+			    if (ans == false) {
+				    //ret_val = "Nuraghe Error"; // TBD!!
+                	out = IRA::CString(ret_val);
+			    }
         	}
         	Len = out.GetLength();
         	int i;

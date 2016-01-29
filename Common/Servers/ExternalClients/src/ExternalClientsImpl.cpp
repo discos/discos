@@ -118,8 +118,8 @@ void ExternalClientsImpl::execute() throw (ACSErr::ACSbaseExImpl)
 
 void ExternalClientsImpl::cleanUp()
 {
-    system("$INTROOT/bin/closeServer &");
-    ACE_OS::sleep(3);
+    //system("$INTROOT/bin/closeServer &");
+    //ACE_OS::sleep(3);
     //system("killall $INTROOT/bin/closeServer");
 	AUTO_TRACE("ExternalClientsImpl::cleanUp()");
     CSecAreaResourceWrapper<CExternalClientsSocketServer> SocketServer = m_ExternalClientsSocketServer->Get();

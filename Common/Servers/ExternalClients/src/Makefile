@@ -108,7 +108,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = ExternalClients 
+CDB_SCHEMAS = ExternalClients RFIMonitoring
 
 # 
 # IDL Files and flags
@@ -202,9 +202,6 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
-	#chmod gu+xw ../test/LinuxSocket/simple_client
-	#cp ../test/LinuxSocket/simple_client $(INTROOT)/bin/closeServer
 	@echo " . . . installation done"
-
 
 #___oOo___
