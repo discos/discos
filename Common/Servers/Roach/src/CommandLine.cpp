@@ -1571,16 +1571,16 @@ void CCommandLine::getTime(ACS::Time& tt) throw (ComponentErrors::SocketErrorExI
 void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 {
 	long chs=0;
-	long intTime;
+	//long intTime;
 	// count the available channels.......
 	for(int i=0;i<m_sectionsNumber;i++) {
 		if (m_enabled[i]) chs++;
 	}
 	bkd.sections=chs;
 	bkd.beams=m_beams;
-	resultingSampleRate(m_integration,m_commonSampleRate,intTime);
-	bkd.integration=intTime;
-	//bkd.integration=m_integration;
+	//resultingSampleRate(m_integration,m_commonSampleRate,intTime);
+	//bkd.integration=intTime;
+	bkd.integration=m_integration;
 	bkd.sampleSize=m_sampleSize;
 	bkd.noData=true;
 }
