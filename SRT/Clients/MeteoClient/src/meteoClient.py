@@ -160,10 +160,10 @@ class SpeedoMeter(Qwt.QwtDial):
         
         painter.setPen(Qt.QPen(Qt.Qt.red,8))
         
-        painter.drawArc(rect,-800,1150)
+        painter.drawArc(rect,-500,1300)
         painter.setPen(Qt.QPen(Qt.Qt.green,8))
         
-        painter.drawArc(rect,400,3220)
+        painter.drawArc(rect,1000,2500)
         
         
         
@@ -214,8 +214,8 @@ class Background(Qwt.QwtPlotItem):
         yellow=Qt.QColor(Qt.Qt.yellow)
   
  
-        r.setBottom(yMap.transform(61))
-        r.setTop(yMap.transform(61))
+        r.setBottom(yMap.transform(50))
+        r.setTop(yMap.transform(50))
         painter.fillRect(r,red)
 
         
