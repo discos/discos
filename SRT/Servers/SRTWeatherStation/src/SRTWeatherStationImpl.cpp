@@ -21,7 +21,8 @@ SRTWeatherStationImpl::SRTWeatherStationImpl(
         m_scheduler.setContainerServices(m_containerServices);
         m_antennaBoss.setComponentName("IDL:alma/Antenna/AntennaBoss:1.0");
         m_antennaBoss.setContainerServices(m_containerServices);
-        
+        m_mount.setComponentName("IDL:alma/Antenna/SRTMount:1.0");
+        m_mount.setContainerServices(m_containerServices);
 
         
         AUTO_TRACE("SRTWeatherStationImpl::SRTWeatherStationImpl");
@@ -104,7 +105,6 @@ Weather::parameters SRTWeatherStationImpl::getData()throw (ACSErr::ACSbaseExImpl
 {
 	Weather::parameters mp;
         AUTO_TRACE("SRTWeatherStationImpl::getData");
-     	ACS::Time timestamp;
 
 	double temperature;
 	double winddir;
@@ -275,7 +275,9 @@ void SRTWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 	SRTWeatherSocket *sock;
 	try {
-		  if 			(CIRATools::getDBValue(getContainerServices(),"IPAddress",ADDRESS) && CIRATools::getDBValue(getContainerServices(),"port",PORT))
+		  if 			(CIRATools::getDBValue(getContainerServices(),"IPAddress",ADDRESS) && CIRATools::getDBValue(getContainerServices(),"port",PORT)) &&
+                  CIRATools::getDBValue(getContainerServices(),"windthreshold",m_threshold)) &&
+                  
 		  	  {
 			  	  ACS_LOG(LM_FULL_INFO,"SRTWeatherStationImpl::initialize()",(LM_INFO,"IP address %s, Port %d ",(const char *) ADDRESS,PORT));
 
@@ -341,7 +343,6 @@ void SRTWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		throw x.getComponentErrorsEx();		
 	}
 
-	SRTWeatherStationImpl* self_p =this;
         AUTO_TRACE("SRTWeatherStationImpl::initialize");
 
 
@@ -441,8 +442,23 @@ SRTWeatherStationImpl::pressure ()
 void SRTWeatherStationImpl::parkAntenna()
 {
 
-   m_scheduler->stopSchedule();
-   m_antennaBoss->park();
+    ACSErr::Completion_var completion;
+//     ACS::ROpattern_var property;
+    
+    Antenna::ROTCommonModes_ptr property;
+    
+    property=m_mount->elevationMode();
+
+   double status;
+   status=property->get_sync(completion);
+   if (status !=Antenna::ACU_STOW) 
+     {
+                  m_scheduler->stopSchedule();
+                  m_antennaBoss->park();
+     
+     }
+     
+     
    ACS_LOG(LM_FULL_INFO,"SRTWeatherStationImpl::parkAntenna()",(LM_WARNING,"AUTOSTOWING!!!!!!"));
    
 

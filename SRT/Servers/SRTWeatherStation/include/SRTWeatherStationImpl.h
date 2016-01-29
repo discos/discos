@@ -40,6 +40,10 @@
 
 #include "ComponentProxies" 
 
+#include <ComponentProxy.h>
+#include "AntennaDefinitionsC.h"
+
+
 
 /*
 const CString ADDRESS="192.167.8.13"; //DEBUG
@@ -72,6 +76,15 @@ The class implements the Srt Meteo Station.
 Not all the paramters from the station have been implemented.
 
 */
+#include <SRTMountC.h>
+#include "ComponentProxy.h"
+
+namespace Antenna
+{
+    PROXY_COMPONENT(SRTMount);
+};
+
+
 
 using ACS::ThreadBase;
 class SRTWeatherStationImpl;
@@ -204,7 +217,9 @@ private:
 	
  	
         Management::Scheduler_proxy m_scheduler;
-        Antenna::AntennaBoss_proxy m_antennaBoss;	void deleteAll();
+        Antenna::AntennaBoss_proxy m_antennaBoss;
+         Antenna::SRTMount_proxy m_mount;        	
+        void deleteAll();
 	CSecureArea<SRTWeatherSocket> *m_socket;
 	CWindCheckerThread *m_controlThread_p;
 	WeatherStationData m_wsdata;
@@ -218,6 +233,7 @@ private:
 	SmartPropertyPointer<RWdouble> m_humidity;
 	SmartPropertyPointer<RWdouble> m_pressure;
 	SimpleParser::CParser<SRTWeatherSocket> * m_parser;
+        unsigned int m_threshold;
         
         
         
