@@ -779,11 +779,14 @@ void CCommandLine::getFeed(ACS::longSeq& feed) const
         else if (m_XarcosK03 == true || m_XarcosK06 == true) {
             if (i <= 3)
                 feed[i] = 0;
-            else
-                feed[i] = 1;
+            else {
+                if (m_XarcosK03 == true)
+                    feed[i] = 3;
+                if (m_XarcosK06 == true)
+                    feed[i] = 6;
+            }
         }
         else
-            //feed[i]=m_feedNumberInput[i];
             feed[i]=i;
 	}
 }
@@ -1010,7 +1013,22 @@ void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& 
 //				if(indice<4) S=0;//DA VEDERE SE FUNZIONA !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111
 //				else S=4;
 //				chHr[index].feed=searchFeed(head.GetAdc());
-				chHr[index].feed=m_feedNumber[index];
+				if (m_XarcosK00 == true)
+				    chHr[index].feed=0;
+                else if (m_XarcosK03 == true) {
+                    if (index <=1)
+				        chHr[index].feed=0;
+                    else
+				        chHr[index].feed=3;
+                }
+                else if (m_XarcosK06 == true) {
+                    if (index <=1)
+				        chHr[index].feed=0;
+                    else
+				        chHr[index].feed=6;
+                }
+                else
+                    chHr[index].feed=m_feedNumber[index];
 				chHr[index].sampleRate=m_sampleRate[index];
 				//chHr[index].IF[0]=m_ifNumber[index];
 				chHr[index].IF[0]=0;
@@ -1045,7 +1063,22 @@ void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& 
 //						else S=4;
 //						chHr[index].feed=(head.GetAdc()*0.5+S);
 						chHr[index].sampleRate=m_sampleRate[index];
-						chHr[index].feed=m_feedNumber[index];
+				        if (m_XarcosK00 == true)
+				            chHr[index].feed=0;
+                        else if (m_XarcosK03 == true) {
+                            if (index <=1)
+				                chHr[index].feed=0;
+                            else
+				                chHr[index].feed=3;
+                        }
+                        else if (m_XarcosK06 == true) {
+                            if (index <=1)
+				                chHr[index].feed=0;
+                            else
+				                chHr[index].feed=6;
+                        }
+                        else
+						    chHr[index].feed=m_feedNumber[index];
 						chHr[index].IF[0]=m_ifNumber[index];
 //						std::cout << "chHr[index].IF[0]" << chHr[index].IF[0] << std::endl;
 						chHr[index].IF[1]=0;
