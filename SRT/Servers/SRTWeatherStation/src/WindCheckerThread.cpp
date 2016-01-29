@@ -10,6 +10,7 @@ CWindCheckerThread::CWindCheckerThread (const ACE_CString& name,
 			ACS_TRACE("CWindCheckerThread::CWindCheckerThread");
 			loopCounter_m = 0;
 			m_srtweatherstation_p = (SRTWeatherStationImpl  *) weatherStation;
+                        m_threshold=m_srtweatherstation_p->m_threshold;
 
 
 		}
@@ -24,15 +25,15 @@ CWindCheckerThread::runLoop()
 
  	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
-
-    wdata = m_srtweatherstation_p->getData();
-    wind=wdata.wind; // converts wind speed from m/s to km/h
+  
+     wdata = m_srtweatherstation_p->getData();
+    wind=wdata.wind; 
      AUTO_TRACE("WindCheckerThread::runLoop()");
-     if (wind > 0){
+     if (wind >m_threshold){
      
          m_srtweatherstation_p->parkAntenna();
-         
          ACS_LOG(LM_FULL_INFO,"SRTWeatherStationImpl::initialize()",(LM_WARNING,"WINDSPEED=%f ", wdata.wind));
+
      }
 
 }

@@ -274,9 +274,15 @@ void SRTWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
 
 	SRTWeatherSocket *sock;
+        ACSErr::Completion_var completion;
+        m_property=m_mount->elevationMode();
+        m_elevationStatus=m_property->get_sync(completion);
+
+        
+    
 	try {
-		  if 			(CIRATools::getDBValue(getContainerServices(),"IPAddress",ADDRESS) && CIRATools::getDBValue(getContainerServices(),"port",PORT)) &&
-                  CIRATools::getDBValue(getContainerServices(),"windthreshold",m_threshold)) &&
+		  if  (CIRATools::getDBValue(getContainerServices(),"IPAddress",ADDRESS) && CIRATools::getDBValue(getContainerServices(),"port",PORT) &&
+                  CIRATools::getDBValue(getContainerServices(),"windthreshold",m_threshold))
                   
 		  	  {
 			  	  ACS_LOG(LM_FULL_INFO,"SRTWeatherStationImpl::initialize()",(LM_INFO,"IP address %s, Port %d ",(const char *) ADDRESS,PORT));
@@ -447,19 +453,17 @@ void SRTWeatherStationImpl::parkAntenna()
     
     Antenna::ROTCommonModes_ptr property;
     
-    property=m_mount->elevationMode();
 
-   double status;
-   status=property->get_sync(completion);
-   if (status !=Antenna::ACU_STOW) 
+   m_elevationStatus=m_property->get_sync(completion);
+   if (m_elevationStatus !=Antenna::ACU_STOW) 
      {
                   m_scheduler->stopSchedule();
                   m_antennaBoss->park();
-     
+        ACS_LOG(LM_FULL_INFO,"SRTWeatherStationImpl::parkAntenna()",(LM_WARNING,"Wind above limit:"));
+
      }
      
      
-   ACS_LOG(LM_FULL_INFO,"SRTWeatherStationImpl::parkAntenna()",(LM_WARNING,"AUTOSTOWING!!!!!!"));
    
 
 
