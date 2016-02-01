@@ -1,11 +1,11 @@
-<LocalOscillator xmlns="urn:schemas-cosylab-com:LocalOscillator:1.0" 
+<LocalOscillatorEthernet xmlns="urn:schemas-cosylab-com:LocalOscillatorEthernet:1.0" 
           xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
                xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               GPIBBoard="0" PrimaryAddress="19" SecondaryAddress="0" Timeout="10">
+               IP="192.168.200.149" PORT="5025"  >
                 
    
 	<frequency units="MHz"/>
 	<amplitude units="dBm"/>
 	<isLocked/>
-</LocalOscillator>
+      </LocalOscillatorEthernet>
