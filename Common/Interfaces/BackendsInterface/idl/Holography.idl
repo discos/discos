@@ -1,0 +1,60 @@
+/*************************************************************************************************************** */
+/* Osservatorio Astronomico di Cagliari - INAF                                                                     	        */
+/* $Id: Holography.idl,v 1.1 2011-04-15 14:28:26 spoppi Exp $										                    */
+/*                                                                                                      	        */
+/* This code is under GNU General Public Licence (GPL).                                                 	        */
+/*                                                                                                      	        */
+/* Who                                 when            What                                              	        */
+/* Sergio Poppi			 	02/12/2009	Creation                                          	        */
+
+#ifndef _HOLOGRAPHY_IDL
+#define _HOLOGRAPHY_IDL
+
+
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include "GenericBackend.idl"
+
+#pragma prefix "alma"
+
+module Backends  {
+
+	/**
+		The holography   is a backend connected to a board which perform a correlation between for holography
+
+
+		The board has only doesn't need configuration, only the filename for saving the file.
+	*/
+
+
+	interface Holography: GenericBackend
+		{
+			
+			
+			void	initialize (in string configuration) 	 raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+
+
+		};
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif

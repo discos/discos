@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+   -   Wed Apr 13 15:18:03 UTC 2005 modified by Carlo Migoni
+-->
+<ExternalClients xmlns="urn:schemas-cosylab-com:ExternalClients:1.0" 
+                 xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+                 xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 IPAddress="192.168.200.200"
+                 Port="30000"
+		 ReceiveTimeout="10000000"
+                 ControlThreadPeriod="10000000"
+                 SuperVisor="Gavino">
+               
+	<status description="The status of the external client component" />
+</ExternalClients>

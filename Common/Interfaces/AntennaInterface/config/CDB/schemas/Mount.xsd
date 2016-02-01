@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: Mount.xsd,v 1.4 2010-08-31 12:22:31 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   27-05-2008  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:Mount:1.0"
+	xmlns="urn:schemas-cosylab-com:Mount:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"	
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+
+<xs:complexType name="MountType">
+	<!-- The upper limit of the azimuth range (in degrees) -->
+	<xs:attribute name="maxAzimuth" type="xs:double" use="required"/>
+	<!-- The lower limit of the azimuth range (in degrees) -->
+	<xs:attribute name="minAzimuth" type="xs:double" use="required"/>
+	<!-- The upper limit of the elevation range (in degrees) -->
+	<xs:attribute name="maxElevation" type="xs:double" use="required"/>
+	<!-- The lower limit of the elevation range (in degrees) -->	
+	<xs:attribute name="minElevation" type="xs:double" use="required"/>
+	<!-- The diameter of the dish of the telescope (meters)-->	
+	<xs:attribute name="diameter" type="xs:double" use="required"/>
+	<!-- The absolute value of the azimuth speed limit(in degrees/sec), -->	
+	<xs:attribute name="maxAzimuthRate" type="xs:double" use="required"/>
+	<!-- The absolute value of the elevation speed limit  (in degrees/sec) -->	
+	<xs:attribute name="maxElevationRate" type="xs:double" use="required"/>
+	<!-- Absolute value of the max reliable azimuth speed  (in degrees/sec) -->	
+	<xs:attribute name="maxReliableAzimuthRate" type="xs:double" use="required"/>
+	<!-- Absolute value of the max reliable elevation speed  (in degrees/sec) -->	
+	<xs:attribute name="maxReliableElevationRate" type="xs:double" use="required"/>
+	<!-- The max acceleration of the azimuth axis (aboslute value)  (in degrees/sec^2) -->	
+	<xs:attribute name="maxAzimuthAcceleration" type="xs:double" use="required"/>
+	<!-- The max acceleration of the elevation axis (aboslute value)  (in degrees/sec^2) -->	
+	<xs:attribute name="maxElevationAcceleration" type="xs:double" use="required"/>
+	<!-- Scaling factor to be applied to the acceleration max values -->	
+	<xs:attribute name="accScaleFactor" type="xs:double" use="required"/>
+	<!-- This number is the separation between clockwise an counterclockwise section in the azimuth travel range.
+	         Clockwise starts when the azimuth is greater than that number (degrees) -->
+	<xs:attribute name="cw_ccw_limit" type="xs:double" use="required" />
+	<!-- This is the elevation lower limit below which the system will not observe a source, it is could be overridden by the user-->
+	<xs:attribute name="MinElevationAvoidance" type="xs:double" use="required" />
+	<!-- This is the elevation upper limit beyond which the system will not observe a source, it is could be overridden by the user-->
+	<xs:attribute name="MaxElevationAvoidance" type="xs:double" use="required" />		
+</xs:complexType>
+
+<xs:element name="Mount" type="MountType"/>
+
+</xs:schema>

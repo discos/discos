@@ -1,0 +1,13 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+# "@(#) $Id: observatoryTui,v 1.2 2010-08-19 08:57:43 a.orlati Exp $"
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 03/04/2009      Creation                                  
+#************************************************************************
+
+
+xterm -geometry 69x16+0+0 +sb -title Observatory -e /bin/bash --login -c _tui_ObservatoryTextClient &

@@ -1,0 +1,11 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                when            What                                             
+# Andrea Orlati(aorlati@ira.inaf.it) 19/09/2011      Creation                                  
+#************************************************************************
+
+xterm -geometry 60x22+200+200 +sb -title Receivers -e /bin/bash --login -c "_tui_ReceiversBossTextClient $1" &

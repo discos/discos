@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+import argparse
+from ReceiverBoardSimImpl.board_server import BoardServer
+
+parser = argparse.ArgumentParser(description="Start/Stop the receiver board")
+parser.add_argument('action', choices=['start', 'stop'])
+args = parser.parse_args()
+
+
+if __name__ == "__main__":
+    if args.action == 'start':
+        server = BoardServer()
+        server.run()
+    elif args.action == 'stop':
+        BoardServer.stop()
+
+

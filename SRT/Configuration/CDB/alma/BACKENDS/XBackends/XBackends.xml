@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+   -   Thue Apr 16 May 09:30:08 UTC 2013 modified by Andrea Melis
+-->
+<XBackends xmlns="urn:schemas-cosylab-com:XBackends:1.0" 
+               xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+               xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               IPAddress="192.168.200.214"
+               Port="1234"
+               Configuration="NNNN"
+               Mode8Bit="0">
+	<time/>
+	<backendName/>
+	<bandWidth/>
+	<frequency/>
+	<sampleRate/>
+	<attenuation/>
+	<polarization/>
+	<bins/>
+	<feed/>
+    <systemTemperature/>
+	<inputSection/>
+	<inputsNumber/>
+	<sectionsNumber/>
+	<integration/>
+	<status/>
+    <busy/>
+    <mode8bit/>
+	<fileName/>
+</XBackends>

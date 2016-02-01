@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+import argparse
+from SRTMSCUSimImpl import mscu
+
+parser = argparse.ArgumentParser(description="Start/Stop the MSCU simulator")
+parser.add_argument('action', choices=['start', 'stop'])
+args = parser.parse_args()
+
+
+if __name__ == "__main__":
+    if args.action == 'start':
+        server = mscu.MSCU()
+        server.run()
+    elif args.action == 'stop':
+        mscu.MSCU.stop()
+
+

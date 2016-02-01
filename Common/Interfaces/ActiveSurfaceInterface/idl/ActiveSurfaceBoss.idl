@@ -1,0 +1,44 @@
+/* *******************************************************************/
+/* OAC Osservatorio Astronomico di Cagliari                          */
+/*                                                                   */
+/* This code is under GNU General Public Licence (GPL).              */
+/*                                                                   */
+/* Who                                when        what               */
+/* Carlo Migoni (migoni@oa-cagliari.inaf.it)  10/07/2013  Creation   */
+/*********************************************************************/
+
+#ifndef _ACTIVESURFACEBOSS_IDL_
+
+#define _ACTIVESURFACEBOSS_IDL_
+
+#include <baci.idl>
+#include <ManagmentDefinitions.idl>
+
+#pragma prefix "alma"
+
+module ActiveSurface {
+
+	/**
+	* This component is the supervisor of the Active Surface subsystem.
+     	* It will be used to control the entire active surface during an observation.
+	* @author <a href=mailto:migoni@oa-cagliari.inf.it>Carlo Migoni</a>,
+ 	* Osservatorio Astronomico di Cagliari, Italia
+ 	* <br> 
+	*/ 
+	interface ActiveSurfaceBoss: ACS::CharacteristicComponent, Management::CommandInterpreter, Management::Subsystem {
+
+        	/**
+		* This method can be called in order to disable the activesurface refresh.
+		* @throw CORBA::SystemException 
+		*/
+		void asOff();
+		
+		/**
+		* This method can be called in order to enable the active surface refresh.
+		* @throw CORBA::SystemException 
+		*/		
+		void asOn();
+	};
+};
+
+#endif

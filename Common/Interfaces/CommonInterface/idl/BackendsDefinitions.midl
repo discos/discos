@@ -1,0 +1,96 @@
+#ifndef _BACKENDSDEFINITIONS_IDL_
+#define _BACKENDSDEFINITIONS_IDL_
+
+/* *********************************************************************** */
+/* IRA Istituto di Radioastronomia                                         */
+/* $Id: BackendsDefinitions.midl,v 1.9 2010-09-14 08:04:43 a.orlati Exp $										                           */
+/*                                                                         */
+/* This code is under GNU General Public Licence (GPL).                    */
+/*                                                                         */
+/* Who                                             when             what                */
+/* Andrea Orlati(aorlati@ira.inaf.it)  05/09/2008      Creation            */
+/* Andrea Orlati(aorlati@ira.inaf.it)  17/10/2008      added structure  TBulkDataHeader       */
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+
+#pragma prefix "alma"
+
+/** 
+ * @mainpage IDL Interface documentation of the backends subsystem
+ * @date 12/12/2008
+ * @version 0.4.0
+ * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>, 
+ * @remarks Last compiled under ACS 7.0.2
+*/
+
+/**  
+ * This module contains the whole backends subsystem. 
+ * @htmlonly <a href="$(INTROOT)/bitmaps/Backends.png" target="_self"> The UML diagram </a> @endhtmlonly
+ * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ * Istituto di Radioastronomia, Italia
+ * <br> 
+*/ 
+module Backends {
+	
+	/**
+	 * polarization of the input channel 
+	*/
+	enum TPolarization {
+		BKND_LCP,       /*!< the input is left polarization only  */     
+		BKND_RCP,        /*!< the input is right polarization only  */
+		BKND_FULL_STOKES    /*!< the input can deal with all four stokes parameters  */
+	};
+	
+	ACS_ENUM(TPolarization);
+
+	/**
+	 * This structure reports the information that composes the section header of the data flux. Each section can have one or two inputs. Generally the number of inputs depends on the
+	 * the polarization type of the section, if simple LEFT or RIGHT the input is one, if FULL_STOKES the inputs are two. The two positions fields <i>attenuation</i> and <i>IF</i> reports
+	 * on the levels of attenuation and on the intermediate frequency chain number of the receiver of each input. If you want to know which the polarization of the second input of a given
+	 * section you have to read the value of Receivers::polarization[IF[1]]. The attenuation level in db of the first input of a given section is attenuation[0]. 
+	*/   
+	struct TSectionHeader {
+		long id;                               /*!< section  identifier, generally 0..sections-1  */  
+		long bins;							  /*!< number of bins that are provided by the backend for the section */
+		TPolarization polarization;			 /*!< specify the type of the section  */  
+		double bandWidth;					/*!< bandwidth in MHz of the section */
+		double frequency;                  /*!< start frequency of the section in MHz  */
+		double attenuation[2];			  /*!< attenuation level of the input in db. */
+		double sampleRate;               /*!< sample rate in MHz */
+		long feed;                      /*!< beam identifier from which the section comes from */
+		long inputs;                   /*!< number of inputs virtually connected to the section, it can be one or two depending on the polarization. */
+		long IF[2];					  /*!< if identifier for each of the inputs */	
+	};
+	
+	/**
+	 * This structure exports all the information that composes the main header of the data flux
+	*/   
+	struct TMainHeader {
+		long sections;           /*!< number of sections that will be transfered by the backend, this record will be followed by "sections"
+		 										records of type TSectionHeader */
+		long beams;               /*!< number of beams of the telescope */
+		long integration;       /*<! integration time in milli seconds, it applies to all sections */
+		long sampleSize;       /*<! number of bytes that a single sample is */
+		boolean noData;  /*<! this flag indicates that the dump is virtual or in other words no raw data will be appended to the dump.
+			//                         If true it will cause the file creator to create a file with just meta-data. */
+	};
+	
+	/**
+	 * This structure is the dump header, a dump is the all the data collected during the integration time for all the sections.
+	 * Inside the dump the sections will be transferred in the order they appear in the <i>TChannelHeader</i> sequence. First of all
+	 * the total intensity information(counts or Kelvin) is transferred for each inputs (the inputs appear in the same order of the sections).
+	 * Then for each channel and polarization an array of <i>bins</i> sample is transmitted;
+	 * in case of a full stokes, 4 arrays are transfered (left first then right, then stokes Q and U respectively).
+	*/ 
+	struct TDumpHeader {
+		ACS::Time time;  /*!<! timestamp that marks the dump in time, this have to mark the exact start time of the acquisition. The duration is determined by the <i>TMainHeader::integration</i> */
+		long dumpSize;  /*!<! size of the dump in bytes, it must be a multiple of the <i>sampleSize</i> parameter reported by the 
+											<i>TMainHeader</i>.  */
+		boolean calOn;			/*<! if true the calibration diode is on, false otherwise*/
+		//ACS::Time tsysTime; /*<! if non-zero, the last measure of the system temperature is also appended. */
+	};
+	
+};
+
+#endif

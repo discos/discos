@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns="Alma/ACSError" 
+    xsi:schemaLocation="Alma/ACSError ACSError.xsd" 
+    name="ACSErrTypeFPGAConnection" 
+    type="7700" 
+    _prefix="alma">
+
+	<Code name="Connecting" 
+         shortDescription="Connecting" 
+         description="Connection to FPGA in progress"/>
+
+	<ErrorCode name="CannotConnect" 
+         shortDescription="Error Connecting to FPGA" 
+         description="Cannot Connect to FPGA"/>
+
+</Type>
+
+

@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Andrea Orlati
+   - History:
+ 	- 25-03-15 Created
+-->
+
+<TelescopeEquipment xmlns="urn:schemas-cosylab-com:TelescopeEquipment:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	FTrackPrecisionDigits="5">
+		
+	<MinorServoMapping axis="SUBR_Z" servoName="SRP_TZ" antennaGeometry="LON" beamDeviationFactor="0.0"/>
+	<MinorServoMapping axis="SUBR_X" servoName="SRP_TX" antennaGeometry="LON" beamDeviationFactor="0.0"/>
+    <!-- TY, BDF = 8.87 arcseconds/mm -->
+	<MinorServoMapping axis="SUBR_Y" servoName="SRP_TY" antennaGeometry="LAT" beamDeviationFactor="8.87"/>
+	<MinorServoMapping axis="SUBR_ROTY" servoName="SRP_RY" antennaGeometry="LON" beamDeviationFactor="0.0"/>
+	<MinorServoMapping axis="SUBR_ROTX" servoName="SRP_RX" antennaGeometry="LON" beamDeviationFactor="0.0"/>
+	<MinorServoMapping axis="PFP_Z" servoName="PFP_TZ" antennaGeometry="LON" beamDeviationFactor="0.0"/>
+	<MinorServoMapping axis="PFP_Y" servoName="PFP_RY" antennaGeometry="LON" beamDeviationFactor="0.0"/>
+	
+	<AvailableBackend alias="TotalPower" backend="BACKENDS/TotalPower" noData="false" dataPath="" />
+	<AvailableBackend alias="XArcos" backend="BACKENDS/XBackends" noData="false" dataPath="" />
+	<AvailableBackend alias="Roach" backend="BACKENDS/Roach" noData="true" dataPath="/roach2_nuraghe/data/" />
+	
+</TelescopeEquipment>

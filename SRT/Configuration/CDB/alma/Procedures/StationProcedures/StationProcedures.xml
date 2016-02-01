@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Procedure name="setupCCB" args="0">
+<body>
+	antennaSetup=CCB
+    servoSetup=CCB
+	receiversSetup=CCB
+	chooseBackend=TotalPower
+	initialize=CCB
+	device=0
+	calOff
+	restFrequency=0
+	antennaAzEl=0d,0d
+</body>	
+</Procedure>
+
+<Procedure name="setupKKG" args="0">
+<body>
+	antennaSetup=KKG
+    servoSetup=KKG
+	receiversSetup=KKG
+	receiversMode=SINGLEDISH
+	chooseBackend=TotalPower
+	initialize=KKG
+	device=0
+	calOff
+	restFrequency=0
+	antennaAzEl=0d,0d
+</body>
+</Procedure>
+
+<Procedure name="setupLLP" args="0">
+<body>
+	antennaSetup=LP
+    servoSetup=LLP
+	receiversSetup=LLP
+	receiversMode=XXC4
+	chooseBackend=TotalPower
+	initialize=LLP
+	device=0
+	calOff
+	restFrequency=0
+	antennaAzEl=0d,0d
+</body>
+</Procedure>
+
+<Procedure name="setupPPP" args="0">
+<body>
+	antennaSetup=LP
+    servoSetup=PPP
+	receiversSetup=PPP
+	receiversMode=C3XX
+	chooseBackend=TotalPower
+	initialize=PPP
+	device=0
+	calOff
+	restFrequency=0
+	antennaAzEl=0d,0d
+</body>
+</Procedure>
+
+<Procedure name="setupPLP" args="0">
+<body>
+	antennaSetup=LP
+    servoSetup=PLP
+	receiversSetup=PLP
+	receiversMode=C3C4
+	chooseBackend=TotalPower
+	initialize=PLP
+	device=0
+	calOff
+	restFrequency=0
+	antennaAzEl=0d,0d
+</body>
+</Procedure>
+
+<Procedure name="telescopePark" args="0">
+<body>
+	goTo=180d,89.8d
+	waitOnSource
+	antennaStop
+	wait=1
+	antennaPark
+	receiversPark
+	servoPark
+	asPark
+	logMessage=Telescope is now parked
+</body>
+</Procedure>
+
+<Procedure name="focusScan" args="2">
+<body>
+	peakerScan=SRP_TZ,$1,$2
+</body>
+</Procedure>
+
+<Procedure name="winkingMark" args="1">
+<body>
+	externalCalOn
+	calSwitch=$1
+</body>
+</Procedure>
+
+</ProcedureFile>

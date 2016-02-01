@@ -1,0 +1,7 @@
+#ifndef DISCOS_BACKEND_PROTOCOL
+#define DISCOS_BACKEND_PROTOCOL
+
+#include "protocol.hpp"
+#include "command.hpp"
+
+#endif

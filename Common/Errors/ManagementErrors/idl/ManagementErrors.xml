@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+   - $Id: ManagementErrors.xml,v 1.12 2011-06-05 14:42:00 a.orlati Exp $
+   - Author: Andrea Orlati
+   -
+   - History:
+   -  22-12-2008  Created
+   -  24-11-2009  Added the entry Procedure Error
+   -  31-03-2010  Added ConfigurationError and ParkingError
+   -  09-05-2010  Added member reason to SubscanError
+   -  11-08-2010  Added ProcedureFileLoadingError
+   -  29-05-2012  Added CustomLoggerIOError and LogFileError
+-->
+
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="Alma/ACSError" xsi:schemaLocation="Alma/ACSError ACSError.xsd"
+ name="ManagementErrors" type="2006" _prefix="alma">
+
+<Code name="NoError" shortDescription="No error" description="No error condition found"/>
+
+<ErrorCode name="ScheduleError" shortDescription="The schedule contains errors" description="">
+	<Member name="Reason" type="string" description="Explanation of the cause of the problem" />
+	<Member name="LineNumber" type="long" description="Line number at which the problem has been found" />	
+</ErrorCode>
+
+<ErrorCode name="AlreadyRunning" shortDescription="A schedule is already running" description=""/>
+
+<ErrorCode name="NotAllowedDuringSchedule" shortDescription="The operation is not allowed during schedule execution" description=""/>
+
+<ErrorCode name="TargetOrSubscanNotFeasible" shortDescription="The selected target is not visible or sub scan not feasible" description=""/>
+
+<ErrorCode name="BackendNotAvailable" shortDescription="The selected backend is not available" description=""/>
+
+<ErrorCode name="DataRecorderNotAvailable" shortDescription="The selected data recorder is not available" description=""/>
+
+<ErrorCode name="DataTransferSetupError" shortDescription="The data transfer was not properly configured or initialized" description=""/>
+
+<ErrorCode name="TsysError" shortDescription="Error during System Temperature computation" description=""/>
+
+<ErrorCode name="AntennaScanError" shortDescription="Error while commanding a scan to the antenna" description=""/>
+
+<ErrorCode name="MinorServoScanError" shortDescription="Error while commanding a scan to the minor servo system" description=""/>
+
+<ErrorCode name="TelescopeSubScanError" shortDescription="Error while commanding a sub scan to the telescope" description="">
+	<Member name="Reason" type="string" description="Describes the cause of the error" />	
+</ErrorCode>
+
+<ErrorCode name="SubscanError" shortDescription="Error during the execution of a subscan in the schedule" description="">
+	<Member name="SubScanID" type="long" description="Identifier of the scan" />
+	<Member name="Reason" type="string" description="Describes the cause of the error" />	
+</ErrorCode>
+
+<ErrorCode name="FitsCreationError" shortDescription="Fits file creation impossible" description="">
+	<Member name="Error" type="string" description="Explanation of the problem" />
+	<Member name="FileName" type="string" description="Name of the aborted file" />
+</ErrorCode>
+
+<ErrorCode name="ScheduleProcedureError" shortDescription="A procedure could not be completed" description="">
+	<Member name="Procedure" type="string" description="Reports the name of the procedure that fails to execute" />
+</ErrorCode>
+
+<ErrorCode name="BackendProcedureError" shortDescription="A backend configuration procedure could not be completed" description="">
+	<Member name="Procedure" type="string" description="Reports the name of the procedure that fails to execute" />
+	<Member name="Message" type="string" description="The associated error message" />
+</ErrorCode>
+
+<ErrorCode name="ConfigurationError" shortDescription="Error during subsystem configuration" description="">
+	<Member name="Subsystem" type="string" description="Reports the name of the subsystem that fails to configure" />
+	<Member name="Reason" type="string" description="Describes the cause of the error" />
+</ErrorCode>
+
+<ErrorCode name="ParkingError" shortDescription="The subsystem fails to park" description="">
+	<Member name="Subsystem" type="string" description="Reports the name of the subsystem that fails to park" />
+	<Member name="Reason" type="string" description="Describes the cause of the error" />
+</ErrorCode>
+
+<ErrorCode name="ProcedureFileLoadingError" shortDescription="Error occurred while loading a procedure file" description="">
+	<Member name="FileName" type="string" description="report the name of the file" />
+	<Member name="Reason" type="string" description="report the reason of the error" />
+</ErrorCode>
+
+<ErrorCode name="CustomLoggerIOError" shortDescription="Error on logging I/O" description="">
+	<Member name="Reason" type="string" description="Describes the cause of the error" />
+	<Member name="Path" type="string" description="report the path element involved (file or dir)" />
+</ErrorCode>
+
+<ErrorCode name="LogFileError" shortDescription="Cannot open the log file" description="">
+	<Member name="FileName" type="string" description="Name of the log file" />
+</ErrorCode>
+
+<ErrorCode name="WeatherStationError" shortDescription="Cannot read parameters from weather station" description=""/>
+
+<ErrorCode name="UnkownProjectCodeError" shortDescription="The project code is invalid or not allowed" description=""/>
+
+<ErrorCode name="UnsupportedOperation" shortDescription="The operation is invalid or not supported by this release " description=""/>
+
+<ErrorCode name="AbortedByUser" shortDescription="The operation was aborted by the user" description="">
+	<Member name="Operation" type="string" description="Name of the aborted operation" />
+</ErrorCode>
+
+<ErrorCode name="RecordingAlreadyActive" shortDescription="Recording is already active" description=""/>
+
+<ErrorCode name="CloseTelescopeScanError" shortDescription="Not able command the scan close to the telescope" description=""/>
+
+<ErrorCode name="InvalidRestFrequency" shortDescription="The rest frequency is not provided or does not match the number of backend sections" description=""/>
+
+<ErrorCode name="ScheduleNotExist" shortDescription="Schedule could not be found" description=""/>
+
+</Type>

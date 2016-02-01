@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: SourceCatalog.xsd,v 1.1.1.1 2007-11-07 14:43:08 a.orlati Exp $
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   17-10-2007  Created 
+-->
+
+<xs:schema
+  targetNamespace="urn:schemas-cosylab-com:SourceCatalog:1.0"
+  xmlns="urn:schemas-cosylab-com:SourceCatalog:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	
+	<xs:simpleType name="THourAngle">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\p{Nd}{1,2}\:\p{Nd}{1,2}\:\p{Nd}{1,2}\.{0,1}\p{N}*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="TAngle">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[\+\-]{0,1}\p{Nd}{1,2}\:\p{Nd}{1,2}\:\p{Nd}{1,2}\.{0,1}\p{N}*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="TEquinoxType">
+		<xs:annotation><xs:documentation>
+			Enlist all the equinox the equatorial coordinates can refer to
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="J2000">
+				<xs:annotation><xs:documentation>
+					the coordinates are at Julian 2000
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="B1950">
+	    		<xs:annotation><xs:documentation>
+	    			the coordinates are at Besselian 1950
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="TSourceModelType">
+		<xs:annotation><xs:documentation>
+			lists all the supported source models used to compute fluxes
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+	    	<xs:enumeration value="GAUSS">
+				<xs:annotation><xs:documentation>
+					the source has a gaussian brightness distrubution
+				</xs:documentation></xs:annotation>	
+	      	</xs:enumeration>
+	    	<xs:enumeration value="2PTS">
+	    		<xs:annotation><xs:documentation>
+	    			the source is a 2 points source
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>
+	    	<xs:enumeration value="DISK">
+	    		<xs:annotation><xs:documentation>
+	    			the source has a disk-like brightness distrubution
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>
+	       	<xs:enumeration value="NO_MODEL">
+	    		<xs:annotation><xs:documentation>
+	    			no model the provided flux is used as is, no convolution with beam shape performed
+	    		</xs:documentation></xs:annotation>
+	    	</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	
+	<xs:complexType name="TTableHeader">
+ 		<xs:sequence>
+ 		  <xs:element name="sourceName" type="xs:string"/>
+ 		  <xs:element name="rightAscension" type="THourAngle">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		The right ascension of the source, the format is [h]h:[m]m:[s]s[.sss]
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="declination" type="TAngle">
+ 		  	<xs:annotation><xs:documentation>
+ 		  		The declination of the source, the format is [+/-][d]d:[m]m:[s]s[.sss]
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="epoch" type="TEquinoxType" default="J2000" />
+ 		  <xs:element name="pmRA" type="xs:double" default="0.0" >
+ 		  	<xs:annotation><xs:documentation>
+ 		  		centennial proper motion in right ascension, mas per year,
+ 		  		cos(DEC)*dRA/dt is assumed
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="pmDec" type="xs:double" default="0.0" >
+ 		  	<xs:annotation><xs:documentation>
+ 		  		centennial proper motion in declination, mas per year
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element>
+ 		  <xs:element name="parallax" type="xs:double" default="0.0" >
+ 		  	<xs:annotation><xs:documentation>
+ 		  		parallax, milli seconds of arc
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+ 		  <xs:element name="radialVelocity" type="xs:double" default="0.0" >
+ 		  	<xs:annotation><xs:documentation>
+ 		  		radial velocity in Km/sec, a positive value means the source is moving away,
+ 		  		reference frame is barycentre and velocidi definition is optical
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 		  
+          <xs:element name="type" type="xs:string">
+            <xs:annotation><xs:documentation>
+ 		  		type of the source
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="nFreqRange" type="xs:int" default="1">
+            <xs:annotation><xs:documentation>
+ 		  		number of frequency range (1,2,3,...)
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="freqRange" type="xs:string">
+            <xs:annotation><xs:documentation>
+ 		  		frequency range (i.e. 500.0-2520.0,500.0-23480.0)
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="fluxCoeff1" type="xs:string">
+            <xs:annotation><xs:documentation>
+ 		  		value of first flux coefficient (from Ott. et all)
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="fluxCoeff2" type="xs:string">
+            <xs:annotation><xs:documentation>
+ 		  		value of second flux coefficient (from Ott. et all)
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="fluxCoeff3" type="xs:string">
+            <xs:annotation><xs:documentation>
+ 		  		value of third flux coefficient (from Ott. et all)
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="size" type="xs:double" default="0.0">
+             <xs:annotation><xs:documentation>
+ 		  		source size, radians
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="model" type="TSourceModelType" default="NO_MODEL">
+            <xs:annotation><xs:documentation>
+ 		  		source model (gauss, disk, 2pts, no_model)
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="modelCoeff1" type="xs:double" default="0.0">
+            <xs:annotation><xs:documentation>
+ 		  		percent of flux in the first component divided by 100.0
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="modelCoeff2" type="xs:double" default="0.0">
+            <xs:annotation><xs:documentation>
+ 		  		each component is divide in two angles (radians): first angle
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="modelCoeff3" type="xs:double" default="0.0">
+            <xs:annotation><xs:documentation>
+ 		  		each component is divide in two angles (radians): second angle
+                if the second angle is not present this modelCoeff3 value must be equal to modelCoeff2
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="modelCoeff4" type="xs:double" default="0.0">
+            <xs:annotation><xs:documentation>
+ 		  		percent of flux in the second component divided by 100.0
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="modelCoeff5" type="xs:double" default="0.0">
+            <xs:annotation><xs:documentation>
+ 		  		each component is divide in two angles (radians): first angle
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+          <xs:element name="modelCoeff6" type="xs:double" default="0.0">
+            <xs:annotation><xs:documentation>
+ 		  		each component is divide in two angles (radians): second angle
+                if the second angle is not present this modelCoeff6 value must be equal to modelCoeff5
+ 		  	</xs:documentation></xs:annotation>
+ 		  </xs:element> 	
+ 		</xs:sequence>
+ 	</xs:complexType>
+  
+ 	<xs:complexType name="TSourceCatalog">
+		<xs:sequence>
+			<xs:element name="Source" type="TTableHeader" 
+			  minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+ 	</xs:complexType>
+  
+	<xs:element name="SourceCatalog" type="TSourceCatalog"/>
+  	
+</xs:schema>

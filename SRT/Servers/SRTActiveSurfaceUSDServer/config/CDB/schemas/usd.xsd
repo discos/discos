@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   - USD Configuration Database Schema
+   -
+   - Author:
+   -
+   - History:
+   -   2005-04-13  GM  Created
+   -   2005-11-16  GM  added some entry
+   -   2013-01-11  CM  step_giro corrected to 200
+   -   2013-01-11  CM  cammaLen and cammaPos converted to double
+  -->
+<xs:schema
+  targetNamespace="urn:schemas-cosylab-com:usd:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns="urn:schemas-cosylab-com:usd:1.0"
+  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+  <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+  <xs:complexType name="typeusd">
+    <xs:sequence>
+      <xs:element name="delay"	type="baci:RWlong"/>
+      <xs:element name="cmdPos" type="baci:RWlong"/>
+      <xs:element name="Fmin" 	type="baci:RWlong"/>
+      <xs:element name="Fmax" 	type="baci:RWlong"/>
+      <xs:element name="acc " 	type="baci:RWlong"/>
+      <xs:element name="uBits" 	type="baci:RWlong"/>
+      <xs:element name="lmCorr" type="baci:RWdouble"/>
+      <xs:element name="gravCorr"   		type="baci:RWdouble"/>
+      <xs:element name="userOffset"   	type="baci:RWdouble"/>
+			<xs:element name="actPos" type="baci:ROlong"/>
+      <xs:element name="status" >
+				<xs:complexType>
+				 <xs:complexContent>
+					<xs:restriction base="baci:ROpattern">
+						 <xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="65535"/>
+							 <xs:attribute name="bitDescription" type="xs:string" use="optional"
+							default="cal,D2,D1,D0,auto,DFLT,DPWR,CAMMA,RUN,DIFF,RDY,STNBY,AUTO,RS2,RS1,RS0"/>
+						 <xs:attribute name="whenSet" type="xs:string" use="optional" 
+							default="1,4,4,4,1,1,1,2,2,2,1,1,2,2,2,2"/>
+						 <xs:attribute name="whenCleared" type="xs:string" use="optional" 
+							default="3,4,4,4,3,3,2,4,1,0,0,2,0,1,1,1"/>
+					</xs:restriction>
+				 </xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+      <xs:element name="softVer" 				type="baci:ROlong"/>
+      <xs:element name="type"   				type="baci:ROlong"/>
+    </xs:sequence>
+	
+    <xs:attribute name="sector" 	type="xs:unsignedByte" 	use="required" />
+    <xs:attribute name="lan"		type="xs:unsignedByte" 	use="required" />
+    <xs:attribute name="serialAddress"	type="xs:unsignedByte" 	use="required" />
+    <xs:attribute name="cammaLen" 	type="xs:double"	use="required" />
+    <xs:attribute name="cammaPos" 	type="xs:double"	use="required" />
+    <xs:attribute name="calibrate" 	type="xs:unsignedByte" 	use="required" />
+    <xs:attribute name="fullRange"	type="xs:int"		use="optional" default="-42000"/>
+    <xs:attribute name="zeroRef" 	type="xs:int"		use="optional" default="-21000"/>
+    <xs:attribute name="step_giro" 	type="xs:int"		use="optional" default="200"/>
+    <xs:attribute name="step_res" 	type="xs:unsignedByte" 	use="optional" default="1"/>
+
+  </xs:complexType>
+  
+  <xs:element name="usd" type="typeusd"/>
+</xs:schema>

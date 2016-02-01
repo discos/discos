@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+-->
+<CustomLogger xmlns="urn:schemas-cosylab-com:CustomLogger:1.0" 
+              xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+              xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              DefaultACSLogDir="/archive/events"
+              DefaultACSLogFile="acs.xml"
+              DefaultCustomLogDir="/archive/logs"
+              DefaultCustomLogFile="station.log"
+              LogMaxAgeMillis="60000"
+              >
+        <filename description="the log file base name"/>
+        <nevents description="number of logged events"/>
+        <isLogging description="whether logging functionalities are active"/>
+        <minLevel description="minimum log level" />
+        <maxLevel description="minimum log level" />
+</CustomLogger>
+

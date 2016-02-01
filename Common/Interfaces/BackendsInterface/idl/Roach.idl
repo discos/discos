@@ -1,0 +1,138 @@
+/* ******************************************************************************************* */
+/* OAC Osservatorio Astronomico di Cagliari                                                    */
+/* $Id: Roach.idl,v 1.1 2011-03-14 14:54:11 c.migoni Exp $				       */
+/*                                                                                             */
+/* This code is under GNU General Public Licence (GPL).                                        */
+/*                                                                                             */
+/* Who                                 		When		What                           */
+/* Carlo Migoni (migoni@oa-cagliari.inaf.it)	12/05/2015      Creation                       */
+
+
+#ifndef _ROACH_IDL_
+#define _ROACH_IDL_
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include "GenericBackend.idl"
+
+#pragma prefix "alma"
+
+module Backends {
+	
+	/**
+	 * The Roach2 is a digital backend. bla bla bla
+	 * <br>
+	 * <table border=2>
+	 *	<tr><th>Feed</th><th>Carier board</th><th>Backend channel</th></tr>
+	 * <tr><td>2L</td><td>1</td><td>Ch0</td></tr>
+	 * <tr><td>2R</td><td>2</td><td>Ch1</td></tr>
+	 * <tr><td>3L</td><td>3</td><td>Ch2</td></tr>
+	 * <tr><td>3R</td><td>4</td><td>Ch3</td></tr>
+	 * <tr><td>4L</td><td>5</td><td>Ch4</td></tr>
+	 * <tr><td>4R</td><td>6</td><td>Ch5</td></tr>
+	 * <tr><td>5L</td><td>7</td><td>Ch6</td></tr>
+	 * <tr><td>5R</td><td>8</td><td>Ch7</td></tr>
+	 * <tr><td>6L</td><td>9</td><td>Ch8</td></tr>
+	 * <tr><td>6R</td><td>10</td><td>Ch9</td></tr>
+	 * <tr><td>0L</td><td>11</td><td>Ch10</td></tr>
+	 * <tr><td>0R</td><td>12</td><td>Ch11</td></tr>
+	 * <tr><td>1L</td><td>13</td><td>Ch12</td></tr>
+	 * <tr><td>1R</td><td>14</td><td>Ch13</td></tr>
+	 * </table>
+	 * With such a cabling in order to configure the input coming from the multi  feed central beam the inputs 10 and 11 must be configured. 
+	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+	 * Istituto di Radioastronomia, Italia
+	 * <br>
+	 * @copybrief GenericBackend::time
+	 * Since the multi feed total power backend is based on a FPGA that raturns the time with the precision of the second, the reported
+	 * time has the same precision.
+	 * @copybrief GenericBackend::frequency
+	 * The backend has a fixed IF start frequecy which is 100 MHz, up to the bandwidth. The correct sky frequency can be set by changing
+	 * the receivers local oscillator.
+	 *  @copybrief GenericBackend::bandWidth
+	 * The backend provides 4 bandwidths: 2000MHz,1330MHz,825MHz,330MHz. The retunerd sequence is 14 position long,
+	 * one for each if section. A zero means that the value if not configured yet.
+	 *  @copybrief GenericBackend::attenuation
+	 * The values reported here correspond to the analog inputs. The attenuation range goes from 0 to 15.
+	 * @copybrief GenericBackend::inputsNumber
+	 * This value is hard coded and corresponds to the number of inputs of the backend. 
+	 * @copybrief GenericBackend::sampleRate
+	 * This value is times in a second that the total power is acquired by the backend. The maximum value is 0.001 Mhz corresponding
+	 * to a period of 1 millisecond. 
+	 * @copybrief GenericBackend::bins
+	 * This value is fixed to 1 and cannot be changed.
+	 * @copybrief GenericBackend::integration
+	 * In this implementation the integration time is realized by the component using a very simple operation. Since the sample rate
+	 * for this backend is somehow an integration time ( a sample rate of 4 Hz for example means that the total power counts are
+	 * summed for 0.25 second) every sample is devided by the integration (seconds) and by the sample rate (Hz). Let's give a simple
+	 *  example, let's suppose 4Hz of sample rate(K) and 3 seconds of integration(M). That means that the backend will produce an output
+	 * every 3 seconds, that output is the average of 12 samples (4 for each of the 3 seconds): 
+	 * \f$ U=\sum_{j=1}^M \sum_{i=1}^K \frac{s_{ij}}{MK} \f$.
+	 * For better results this value should be a multiple of the sample period.
+	 *  @copybrief GenericBackend::polarization
+	 * This values cannot be changed since they are fixed by hardware. The even inputs are connected to left polarization, the odd are
+	 * right polarization.
+	 * @copybrief GenericBackend::status
+	 * The bits have the following meaning:
+	 * @arg \c 0 if set the backend time is not properly synchronized (error)
+	 * @arg \c 1 if set the backend is busy and cannot accept any command
+	 * @arg \c 2 if set the backend is in tranfer mode but the transfer is suspended
+	 * @arg \c 3 if set the backend is sampling
+	 * @arg \c 4 set if the command line is not properly working (error)
+	 * @arg \c 5 set if the data lineis not properly working (error)
+	 *  @copybrief GenericBackend::setTime()
+	 *  In this implementation only the fpga clock is set. The resolution is of one second.
+	 * @copybrief GenericBackend::setSection()
+	 * Frequency, polarization, feed and bins parameters are ignored since they could not be changed. So the user should provide a negative value
+	 * for them, otherwise the component will post a warning log message. Since the backend is not capable of different sample rates, 
+	 * the given sampleRate is set for all the inputs.
+	 * @copybrief GenericBackend::sendHeader()
+	 * In this implementation the preparation for the data transfer takes some seconds. 
+	 * @copybrief GenericBackend::sendData()
+	 * The call to this method must respect the backend latency time, if not the execution i suspended util that time is matched. 
+	 * The component must be suspended (transfer job started but data are not sent) in order for this function to complete succesfully.
+	 * @copybrief GenericBackend::sendStop()
+	 * The component must be active (not suspended) in order for this function to complete succefully.
+	 * @copybrief GenericBackend::getTpi() 
+	 * Since the backend is an integrator the user has to take into account that any change will affect the integration after the change. So for example if the cal diode is fired it is wise to
+	 * wait twice the integration time in order for  the diode contribution to be fully measured. 
+	 * In case a negative is provided as argument the integration set for the 'fast' mode (<i>setIntegration()</i>) is  used.
+	 * @copybrief GenericBackend::getZero() 
+	 * Since this measure requires an input signal switching the backend is forced to wait two times the integration to allow the
+	 * new signal level to stabilize.
+	*/
+	interface Roach : GenericBackend {
+				
+		/**
+		 * This method can be called to activate or disactivate the switching of the calibration noise diode. The mode the switching is done is controlled
+		 * by the parameter and by the <i>sampleRate</i> attribute. If the component is busy it is not allowed to call this method. This method is
+		 * only available if the connected receiver support it. 
+		 * @throw ComponentErrors::ComponentErrorsEx
+ 		 * @throw BackendsErrors::BackendsErrorsEx  
+		 * @param interleave this parmater controls the switching frequency of the calibration diode. If it is zero (default) the diode is not 
+		 *               switched (always turned off). if a one is given the backend will produce one sample (using the <i>sampleRate</i>)
+		 *               with the mark switecehd off and one with the mark switched on. A two means two sample with the mark switched off and
+		 * 	          one with the mark switched on.....and so on. A negative will not change the value of the parameter.
+		*/
+		// void activateNoiseCalibrationSwitching(in long interleave) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+				
+		/**
+		 * This method can be used to initialize the backend. Since this hardware can be connected to various receiver some parameter must be set before
+		 * any further use. This parameter will stay fixed until a new initilization is issued. At start up a default initialization is commanded but can be 
+		 * changed at any time.  If the component is busy it is not allowed to call this method.
+ 		 * @throw ComponentErrors::ComponentErrorsEx 
+ 		 * @throw BackendsErrors::BackendsErrorsEx
+ 		 * @param configuration this string must contain the sequence of character that identifies the configuration that must be loaded. If the sequence is not
+ 		 *               known an excpetion is thrown
+		 */
+
+		void initialize(in string configuration) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+		void getConfiguration(out string configuration);
+
+		void getCommProtVersion(out string version);
+	};
+	
+};
+
+#endif

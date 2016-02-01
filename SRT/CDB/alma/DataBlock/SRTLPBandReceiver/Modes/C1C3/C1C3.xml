@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<SRTLPBandReceiverModeSetup xmlns="urn:schemas-cosylab-com:SRTLPBandReceiverModeSetup:1.0"
+xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+Mode="C1C3"
+PBandRFMin="305.0 305.0"
+PBandRFMax="410.0 410.0"
+LBandRFMin="1350.0 1350.0"
+LBandRFMax="1450.0 1450.0"
+PBandFilterID="1"
+LBandFilterID="3"
+IFs="2"
+PBandIFMin="305.0 305.0"
+LBandIFMin="1350.0 1350.0"
+Feeds="2" 
+PBandPolarization="L R"
+LBandPolarization="L R"
+DefaultLO="2324.0 2324.0"
+FixedLO2="0.0 0.0"
+LOMin="0.0 0.0"
+LOMax="3000.0 3000.0"
+LowpassFilterMin="0.0 0.0"
+LowpassFilterMax="1000.0 1000.0"
+/>
+

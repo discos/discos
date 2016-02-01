@@ -1,0 +1,29 @@
+Emulator for xarcos
+
+Emulates a spectrometer with two ALMA boards of 8 single spectrometers
+each. It waits for connections on the 1234 port, and uses the cpld2
+protocol as described in the XARCOS software document. The personality
+download command (not used except during initialization in the embedded
+computer) is not supported.
+
+Input section (ADC) is not emulated at all (at least for now). 
+Each ADC provides thus exactly the same signal.
+The signal is a roughly realistic (polynomial) passband, 
+that is the same for the four channels (XX, YY, re(Xy), im(XY)),
+with only a different scale factor.
+Scale factor with respect to the XX channel are:
+1.0, 0.8, 0.25, -0.1 respectively. 
+
+A gaussian line, with nominal frequency of 18.75 MHz, 
+FWHM $\approx0.12$ MHz and amplitude $\approx19$\% of the 
+continuum is also added. 
+
+The overall amplitude, band, center frequency depends on 
+the dbbc gain setting. The dbbc band is not considered 
+(for now) in the passband shape computation. 
+
+Integration time is realisticly emulated, i.e. the end 
+integration flags for both the FFT spectrometer and the 
+TP detector comes true after the correct time. 
+Overflow flag, random pattern generator, and ADC total power
+detectors are not emulated at all. 

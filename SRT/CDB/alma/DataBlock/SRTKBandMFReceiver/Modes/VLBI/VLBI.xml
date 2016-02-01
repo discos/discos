@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<ReceiversModeSetup xmlns="urn:schemas-cosylab-com:ReceiversModeSetup:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	
+	Mode="VLBI"
+    RFMin="5700.0 5700.0" 
+	RFMax="7700.0 7700.0"
+	IFMin="100.0 100.0"
+	IFBandwidth="2000.0 2000.0"
+	Feeds="7"
+	IFs="2"
+	Polarization="L R"
+	DefaultLO="5600.0 5600.0"
+	FixedLO2="4100.0 4100.0"
+	LOMin="5600.0 5600.0"
+	LOMax="7500.0 7500.0"
+/>

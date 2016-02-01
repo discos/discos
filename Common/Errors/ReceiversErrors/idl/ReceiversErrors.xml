@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns="Alma/ACSError" 
+    xsi:schemaLocation="Alma/ACSError ACSError.xsd" 
+    name="ReceiversErrors" 
+    type="2008" 
+    _prefix="alma">
+
+	<Code name="Communicating" 
+         shortDescription="No Error" 
+         description="No error condition found"/>
+
+	<ErrorCode name="Configuration" 
+         shortDescription="Error configuring the receiver" 
+         description="Cannot perform the receiver configuration"/>
+         
+    <ErrorCode name="ModeError" shortDescription="The mode is not supported or unknown" description="">
+		<Member name="Details" type="string" description="more details about the mode usage" />   
+	</ErrorCode>
+         
+	<ErrorCode name="LocalOscillatorError" shortDescription="Cannot set the local oscillator" description=""/>
+	
+	<ErrorCode name="UnavailableReceiverOperation" shortDescription="Could not execute receiver operation" description="">
+		<Member name="ReceiverCode" type="string" description="mnemonic code of the receiver" />   
+	</ErrorCode>
+
+	<ErrorCode name="UnavailableReceiverAttribute" shortDescription="Could not read receiver attribute" description="">
+		<Member name="ReceiverCode" type="string" description="mnemonic code of the receiver" />   
+	</ErrorCode>
+	
+	<ErrorCode name="ReceiverControlBoardError" shortDescription="Input/Output error while communicating to control board" description="">
+		<Member name="Details" type="string" description="more details from the board" />   
+	</ErrorCode>
+	
+	<ErrorCode name="NoRemoteControlError" shortDescription="The receiver is not remotely controllable" description=""/>
+	
+	<ErrorCode name="NoDewarPositioning" shortDescription="Dewar positioning and derotation is not supported by this release" description=""/>
+    
+    <ErrorCode name="NoDerotatorAvailable" shortDescription="The current receiver is not equipped with a derotator" description=""/>
+    
+    <ErrorCode name="DewarPositionerSetupError" shortDescription="Error encountered during the setup of the dewar positioner" description="">
+		<Member name="Details" type="string" description="More details on the error" />   
+	</ErrorCode>
+
+	<ErrorCode name="DewarPositionerParkingError" shortDescription="Error detected during derotator parking" description=""/>
+	
+	<ErrorCode name="DewarPositionerCommandError" shortDescription="Error detected while issueing a command to the dewar positioner" description="">
+		<Member name="Command" type="string" description="It specifies which command has failed" />   
+	</ErrorCode>
+	
+	<ErrorCode name="DewarPositionerNotConfigured" shortDescription="Dewar positioner not configured" description=""/>
+	  
+</Type>
+
+

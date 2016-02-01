@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<SRTLPBandTaperLookUpTable xmlns="urn:schemas-cosylab-com:SRTLPBandTaperLookUpTable:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<TaperEntry><Feed>0</Feed><Frequency>300</Frequency><Taper>-13.0</Taper></TaperEntry>
+<TaperEntry><Feed>0</Feed><Frequency>350</Frequency><Taper>-15.0</Taper></TaperEntry>
+<TaperEntry><Feed>0</Feed><Frequency>410</Frequency><Taper>-17.0</Taper></TaperEntry>
+
+<TaperEntry><Feed>1</Feed><Frequency>1300</Frequency><Taper>-15.0</Taper></TaperEntry>
+<TaperEntry><Feed>1</Feed><Frequency>1550</Frequency><Taper>-14.0</Taper></TaperEntry>
+<TaperEntry><Feed>1</Feed><Frequency>1800</Frequency><Taper>-17.0</Taper></TaperEntry>
+
+</SRTLPBandTaperLookUpTable>
