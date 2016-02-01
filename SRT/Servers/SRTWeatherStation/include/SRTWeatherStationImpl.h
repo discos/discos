@@ -105,6 +105,7 @@ class CWindCheckerThread : public ACS::Thread
 
  private:
 		int loopCounter_m;
+                int m_threshold; // wind threshold in km/h
 		SRTWeatherStationImpl  * m_srtweatherstation_p;
 
 };
@@ -210,6 +211,7 @@ public:
   	 virtual ACS::RWdouble_ptr  pressure ()
 	throw (CORBA::SystemException);
 	double getWind();
+        unsigned int m_threshold;
 
  
 private:
@@ -233,9 +235,9 @@ private:
 	SmartPropertyPointer<RWdouble> m_humidity;
 	SmartPropertyPointer<RWdouble> m_pressure;
 	SimpleParser::CParser<SRTWeatherSocket> * m_parser;
-        unsigned int m_threshold;
-        
-        
+        unsigned int m_elevationStatus;
+        Antenna::ROTCommonModes_ptr m_property;
+
         
     void operator=(const SRTWeatherStationImpl&);
 		
