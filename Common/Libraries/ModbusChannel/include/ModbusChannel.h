@@ -15,7 +15,6 @@
 class ModbusChannel; //fwd declaration
 typedef boost::shared_ptr<ModbusChannel> ModbusChannel_sp;
 
-
 ModbusChannel_sp 
 get_modbus_channel(const char* server_ip, 
                    int server_port=MODBUS_DEFAULT_PORT);
