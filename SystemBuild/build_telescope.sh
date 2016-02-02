@@ -11,6 +11,10 @@ while getopts "p" opt; do
 done
 
 source ~/.bashrc
+if [ -d "$DISCOS_CDB"]; then
+    echo "replacing $ACS_CDB with $DISCOS_CDB"
+    ACS_CDB=$DISCOS_CDB
+fi
 if [ ! -d "$INTROOT" ]; then
     echo "cannot find INTROOT in $INTROOT"
     exit 1

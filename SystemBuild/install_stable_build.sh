@@ -1,5 +1,9 @@
 #!/bin/bash -ex
 source ~/.bashrc
+if [ -d "$DISCOS_CDB"]; then
+    echo "replacing $ACS_CDB with $DISCOS_CDB"
+    ACS_CDB=$DISCOS_CDB
+fi
 NEW_INTROOT=${INTROOT_PREFIX}/${TARGETSYS}/${REPO_VERSION}/STABLE
 NEW_CDB=${CDB_PREFIX}/${TARGETSYS}/${REPO_VERSION}/STABLE
 rm -rf $NEW_INTROOT
