@@ -4,7 +4,7 @@ BASEDIR=discos/${TARGETSYS}/${BASENAME}
 BUILDINFO=${BASEDIR}/buildinfo.txt
 BASHRC=${BASEDIR}/bashrc
 source ~/.bashrc
-if [ -d "$DISCOS_CDB"]; then
+if [ -d "$DISCOS_CDB" ]; then
     echo "replacing $ACS_CDB with $DISCOS_CDB"
     ACS_CDB=$DISCOS_CDB
 fi
