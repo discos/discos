@@ -15,8 +15,6 @@
 PY_SCRIPTS         = getTemplateForTest
 PY_MODULES         = gettemplatefortest
 
-SCRIPTS_L          = install_gmock
-
 #
 #>>>>> END OF standard rules
 
@@ -37,7 +35,7 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean_templates:
-	rm -rf $(INTROOT)/templates/test
+	rm -rf $(INTROOT)/templates/discos-test
 	@echo " . . . templates removed from introot"
 
 clean : clean_all clean_templates
@@ -50,8 +48,8 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install_templates:
-	cp -r ../templates/test $(INTROOT)/templates
-	find $(INTROOT)/templates/test -type d -name ".svn" | xargs rm -rf
+	cp -r ../templates/discos-test $(INTROOT)/templates
+	find $(INTROOT)/templates/discos-test -type d -name ".svn" | xargs rm -rf
 	@echo " . . . templates installed"
 
 install : install_all install_templates

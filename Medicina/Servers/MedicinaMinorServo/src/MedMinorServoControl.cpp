@@ -281,6 +281,7 @@ MedMinorServoControl::reset()
     _commanded_status.enable = 0;
     _commanded_status.acknowledge = 0;
     _send_commanded_status(true);
+    //TODO: add a little wait time
     CUSTOM_LOG(LM_FULL_INFO,
            "MinorServo::MedMinorServoControl::reset",
            (LM_DEBUG, "enable = 0"));

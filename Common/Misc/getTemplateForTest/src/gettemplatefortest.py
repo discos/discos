@@ -6,7 +6,7 @@ usage = """
 getTmplateForTest - create a test directory containing the necessary code templates
                     used for component automated testing.
                     This command should be run from within a Component directory at
-                    the first level of depth, creating a 'test' directory at the same level 
+                    the first level of depth, creating a 'discos-test' directory at the same level 
                     of 'src, objects' ecc...
 """                    
 
@@ -19,7 +19,7 @@ def get_introot():
 
 def get_template_dir_name():
     introot = get_introot()
-    return os.path.join(introot, "templates/test")
+    return os.path.join(introot, "templates/discos-test")
 
 def get_template_dir():
     template_dir = get_template_dir_name()
@@ -40,7 +40,7 @@ def command_line_util(args):
         print usage
         sys.exit(0)
     else:
-        target_dir = 'test' # Default target directory
+        target_dir = 'discos-test' # Default target directory
 
     if os.path.exists(target_dir):
         msg = "ERROR: %s directory already exists." %target_dir
