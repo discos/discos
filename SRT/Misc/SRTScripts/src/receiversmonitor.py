@@ -11,7 +11,13 @@ logging.basicConfig(
     format='%(asctime)s\t%(message)s')
 
 receivers = ['SRTLPBandReceiver', 'SRTKBandMFReceiver', 'SRT7GHzReceiver']
+sensors = ["cryoTemperatureCoolHead", 
+           "cryoTemperatureCoolHeadWindow", 
+           "cryoTemperatureLNA", 
+           "cryoTemperatureLNAWindow", 
+           "environmentTemperature"]
 
+timing = 180 #seconds
 
 while True:
     if getManager():
@@ -26,10 +32,13 @@ while True:
                     pass
 
             for component in components:
-                temp_obj = component._get_cryoTemperatureLNA()
-                value, comp = temp_obj.get_sync()
-                name = component._get_name().split('/')[-1]
-                logging.info('  %s%.2f' % (name.ljust(22), value))
+                for sensor in sensors:
+                    temp_obj = eval("component._get_%s()" % sensor)
+                    value, comp = temp_obj.get_sync()
+                    name = component._get_name().split('/')[-1]
+                    name += "." + sensor
+                    logging.info('  %s%.2f' % (name.ljust(52), value))
+
         except KeyboardInterrupt:
             logging.info('program closed by the user')
             raise
@@ -42,4 +51,4 @@ while True:
             except:
                 logging.error('can not disconnect the client')
 
-    time.sleep(180)
+    time.sleep(timing)
