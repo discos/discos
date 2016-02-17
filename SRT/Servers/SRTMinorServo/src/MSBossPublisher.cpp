@@ -101,8 +101,14 @@ void MSBossPublisher::runLoop()
                             // if(status_bset.test(STATUS_WARNING) || (position == "park" && !component_ref->isParked()))
                             //     vstatus_bset.set(VS_WARNING);
                             // // If the minor servo is in failure and it is not parked 
-                            // if(status_bset.test(STATUS_FAILURE) && position != "park")
-                            //     vstatus_bset.set(VS_FAILURE);
+                            if(status_bset.test(STATUS_FAILURE)) {
+                                vstatus_bset.set(VS_FAILURE);
+                            }
+                        }
+
+                        // If the tracking thread set the status as FAILURE
+                        if(m_configuration->m_status == Management::MNG_FAILURE){
+                            vstatus_bset.set(VS_FAILURE);
                         }
                     }
                 }
@@ -128,7 +134,7 @@ void MSBossPublisher::runLoop()
         if(m_configuration->isStarting() || m_configuration->isParking() || vstatus_bset.test(VS_WARNING))
             ; // *m_configuration->status = Management::MNG_WARNING; // TODO: update the Boss status
         else if (vstatus_bset.test(VS_FAILURE))
-            ; // *m_configuration->status = Management::MNG_FAILURE; // TODO: update the Boss status
+            m_configuration->m_status = Management::MNG_FAILURE;
         else
             ; // *m_configuration->status = Management::MNG_OK; // TODO: update the Boss status
 

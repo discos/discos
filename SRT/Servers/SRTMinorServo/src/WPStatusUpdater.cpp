@@ -204,6 +204,13 @@ void WPStatusUpdater::runLoop()
                 else
                     status_bset.reset(STATUS_FAILURE);
 
+                if((*m_params->positioning_error)[address]) {
+                    status_bset.set(STATUS_FAILURE);
+                }
+                else {
+                    status_bset.reset(STATUS_FAILURE);
+                }
+
                 if(diff > MAX_TIME_DIFF) {
                     ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: abs(actual_time - actual_pos_time) = %llu", diff));
                 }

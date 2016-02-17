@@ -25,6 +25,7 @@ struct ThreadParameters {
     CSecureArea< map<int, vector<PositionItem> > > *cmd_pos_list;
     CSecureArea< map<int, vector<PositionItem> > > *act_pos_list;
     map<int, bool> *status_thread_en;
+    map<int, bool> *positioning_error;
     map<int, double> tracking_delta;
     map<int, bool> *stow_state;
     map<int, vector<double> > *park_positions;

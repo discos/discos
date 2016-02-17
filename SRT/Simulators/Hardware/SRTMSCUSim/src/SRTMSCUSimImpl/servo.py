@@ -39,6 +39,7 @@ class Servo(object):
         self.history = History(self.axes)
         self.dc = DriveCabinet()
         self.stow(0)
+        self.setpos_NAK = False
 
     def getpos(self, cmd_num):
         data = self.history.get();
@@ -74,7 +75,12 @@ class Servo(object):
     def setpos(self, cmd_num, *params):
         timestamp, position = params[0], list(params[-self.axes:])
         self.history.insert(position, timestamp)
-        answer = '@setpos' + ':%d=%d' %(cmd_num, self.id)
+        if self.setpos_NAK:
+            answer = '!NAK_setpos' + ':%d=%d' %(cmd_num, self.id)
+            params = ['cannot set the position']
+        else:
+            answer = '@setpos' + ':%d=%d' %(cmd_num, self.id)
+
         for param in params:
             answer += ",%s" %param
         else:
