@@ -29,7 +29,7 @@ TrackingThread::TrackingThread(
         AUTO_TRACE("TrackingThread::TrackingThread()");
         m_ready_error = false;
         m_configuration->m_trackingError = false;
-        bool m_failure = false;
+        m_failure = false;
     }
 
     TrackingThread::~TrackingThread() { AUTO_TRACE("TrackingThread::~TrackingThread()"); }
