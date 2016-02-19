@@ -102,7 +102,7 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	else {
 		ACS_DEBUG_PARAM("TotalPowerImpl::initialize()","Address of the host: %s",(const char *)hostAddress);
 	}
-	if (m_dataLine.Create(Err,IRA::CSocket::STREAM,m_configuration.getDataPort(),&hostAddress)!=IRA::CSocket::SUCCESS) {
+	if (m_dataLine.Create(Err,IRA::CSocket::STREAM,m_configuration.getDataPort(),&hostAddress,true)!=IRA::CSocket::SUCCESS) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,Err);
 		dummy.setCode(Err.getErrorCode());
 		dummy.setDescription((const char*)Err.getDescription());

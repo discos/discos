@@ -69,7 +69,7 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 		throw impl;
 	}
 	// this will create the socket in blocking mode.....
-	if (Create(m_Error,STREAM)==FAIL) {
+	if (Create(m_Error,STREAM,0,NULL,true)==FAIL) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
 		dummy.setCode(m_Error.getErrorCode());
 		dummy.setDescription((const char*)m_Error.getDescription());

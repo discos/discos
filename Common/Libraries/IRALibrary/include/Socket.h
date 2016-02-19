@@ -130,9 +130,11 @@ public:
 	 *        significant only for the server and receiving side. 
 	 * @param IPAddr a string containing the network address used for binding the socket, such as "192.168.0.1". If the default
 	 *        value of NULL is given, the socket is binded with any address (0.0.0.0)
+	 * @param froceBind this will force the operating system kernel to reuse a local address avoiding the "address already in use" error
+	 *        during binding.
 	 * @return SUCCESS if the operation succeeds, FAIL in case of a problem.
 	*/
-	OperationResult Create(CError& Err,SocketType Type=STREAM,WORD SocketPort=0,CString *IPAddr=NULL);
+	OperationResult Create(CError& Err,SocketType Type=STREAM,WORD SocketPort=0,CString *IPAddr=NULL,bool forceBind=false);
 	/**
 	 * Before <i>Accept</i>ing connection this function expresses the willingness to accept for incoming connection requests.
 	 * <i>Listen</i> specifies also the queue limit for incoming connections. This function applies only to STREAM sockets.

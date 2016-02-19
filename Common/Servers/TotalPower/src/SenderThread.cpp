@@ -86,7 +86,7 @@ void CSenderThread::runLoop()
 			_IRA_LOGFILTER_LOG_EXCEPTION(dummy,LM_WARNING); //log as warn because this is the thread and no client is aware of that
 		}
 		else {
-			m_isConnected=true;  // the conneciton has been enstablished
+			m_isConnected=true;  // the connection has been established
 			IRA::CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 			line->clearStatusField(CCommandLine::DATALINERROR);
 			ACS_LOG(LM_FULL_INFO,"CCSenderThread::runLoop()",(LM_INFO,"BACKEND_CONNECTED_TO_DATA_LINE"));
@@ -95,7 +95,7 @@ void CSenderThread::runLoop()
 	}
 	else { //already connected...then try a new data reception
 		res=m_backendSock.Receive(err,m_inputBuffer,DATABUFFERSIZE);
-		if (res==0) { // backend disconnected...propably as a consequence of a terminate data transmission command.
+		if (res==0) { // backend disconnected...probably as a consequence of a terminate data transmission command.
 			// gets the access to the 
 			IRA::CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 			line->clearStatusField(CCommandLine::DATALINERROR);

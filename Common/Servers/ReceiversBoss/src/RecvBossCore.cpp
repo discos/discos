@@ -1096,7 +1096,12 @@ void CRecvBossCore::park() throw (ManagementErrors::ParkingErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!CORBA::is_nil(m_currentRecv)) {
-		m_currentRecv->deactivate();
+		try {
+			m_currentRecv->deactivate();
+		}
+		catch (...) {
+			ACS_LOG(LM_FULL_INFO,"CRecvBossCore::park()",(LM_WARNING,"COULD_NOT_DEACTIVATE_CURRENT_RECEIVER"));
+		}
 	}
 	unloadReceiver();
 	m_currentRecvCode="";
@@ -1935,7 +1940,12 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::CORBAProble
 	}
 	//deactivate current receiver.....
 	if (!CORBA::is_nil(m_currentRecv)) {
-		m_currentRecv->deactivate();
+		try {
+			m_currentRecv->deactivate();
+		}
+		catch (...) {
+			ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_WARNING,"COULD_NOT_DEACTIVATE_CURRENT_RECEIVER"));
+		}
 	}
 	unloadReceiver();
 	try {
@@ -2019,6 +2029,13 @@ void CRecvBossCore::loadReceiver() throw (ComponentErrors::CouldntGetComponentEx
 		}
 		catch (maciErrType::NoDefaultComponentExImpl& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CRecvBossCore::loadReceiver()");
+			Impl.setComponentName((const char*)m_currentRecvInstance);
+			m_currentRecv=Receivers::Receiver::_nil();
+			changeBossStatus(Management::MNG_FAILURE);
+			throw Impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"CRecvBossCore::loadReceiver()");
 			Impl.setComponentName((const char*)m_currentRecvInstance);
 			m_currentRecv=Receivers::Receiver::_nil();
 			changeBossStatus(Management::MNG_FAILURE);

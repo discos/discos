@@ -24,7 +24,7 @@ CSocket::~CSocket()
 	Close(Tmp);
 }
 
-CSocket::OperationResult CSocket::Create(CError& Err,SocketType Type,WORD SocketPort,CString *IPAddr)
+CSocket::OperationResult CSocket::Create(CError& Err,SocketType Type,WORD SocketPort,CString *IPAddr,bool forceBind)
 {
 	struct sockaddr_in addr;
 	if (!Err.isNoError()) return FAIL;
@@ -53,6 +53,13 @@ CSocket::OperationResult CSocket::Create(CError& Err,SocketType Type,WORD Socket
 	if (m_iSocket<0) {
 		_SET_SYSTEM_ERROR(Err,CError::SocketType,CError::SockCreationError,"CSocket::Create()",errno);
 		return FAIL;
+	}
+	if (forceBind) {
+		int optval=1;
+		if (setsockopt(m_iSocket,SOL_SOCKET,SO_REUSEADDR,(const void *)&optval,sizeof(int))<0) {
+			_SET_SYSTEM_ERROR(Err,CError::SocketType,CError::SockConfiguration,"CSocket::Create()",errno);
+			return FAIL;
+		}
 	}
 	// this associates a local address to the socket
 	if ((SocketPort!=0) || (IPAddr!=NULL)) {
