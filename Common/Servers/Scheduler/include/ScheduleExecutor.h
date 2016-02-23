@@ -366,7 +366,7 @@ private:
 	 * This will start the data transfer from the backend to the receiver. It will takes all the required operation or nothing if the schedule does not
 	 * requires changes from the previous scan
 	 */
-	void prepareFileWriting(const CSchedule::TRecord& rec) throw (ManagementErrors::ScheduleErrorExImpl,
+	void prepareFileWriting(/*const CSchedule::TRecord& rec*/) throw (ManagementErrors::ScheduleErrorExImpl,
 			ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl,
 			ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::BackendProcedureErrorExImpl,
 			ManagementErrors::BackendNotAvailableExImpl);
