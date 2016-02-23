@@ -209,7 +209,7 @@ void CScheduleExecutor::runLoop()
 				//printf("WRITING_INIT\n");
 				try {
 					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PREPARE_DATA_ACQUISITION"));
-					prepareFileWriting(m_currentScan);
+					prepareFileWriting(/*m_currentScan*/);
 				}
 				catch (ACSErr::ACSbaseExImpl& Ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,Ex,"CScheduleExecutor::runLoop()");
@@ -770,42 +770,43 @@ void CScheduleExecutor::getNextScan(const DWORD& counter,CSchedule::TRecord& rec
  	}
 }
 
-void CScheduleExecutor::prepareFileWriting(const CSchedule::TRecord& rec) throw (
+void CScheduleExecutor::prepareFileWriting(/*const CSchedule::TRecord& rec*/) throw (
 		ManagementErrors::ScheduleErrorExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ManagementErrors::BackendProcedureErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
 {
 	std::vector<IRA::CString> command;
  	IRA::CString bckInstance,outputFileName;
  	// we have 4 cases: 1) start of a scan 2) first scan 3) first iteration after an error 4) middle of a scan.
- 	// cases 2 and 3 are the same as the scheduler is reset, so the procedure (if not NULL) is retrieved, the components loaded, the backend configured and the transfer enabled
+ 	// cases 2 and 3 are the same as the scheduler is reset, so the procedure (if not NULL) is retrieved, the components loaded,
+ 	//         the backend configured and the transfer enabled
  	// case 1 : the transfer is disabled, the procedure (if not NULL) retrieved, if it is different from the previous one , component are loaded(if necessary), bck configured and transfer enabled again
  	// case 4: we are in this case if the currentBackendProcedure is the same of the current subscan...so nothing to do
  	if (m_lastScanID!=0) {  //if this is the first scan...nothing to do
 		// otherwise if current scanid is different from the previous one, or the current scan is consequence of a schedule rewind (to deal with the case just one scan is present in the schedule and it will be executed continuously)
-		if ((m_lastScanID!=m_currentScan.scanid) || (rec.rewind)) {
+		if ((m_lastScanID!=m_currentScan.scanid) || (m_currentScan.rewind)) {
 			// stop  // we need to stop previous scan before starting a new one.
  			m_core->disableDataTransfer();
 		}
 	}
- 	if (rec.backendProc!=_SCHED_NULLTARGET) { // if the writing has been disabled
- 	 	if (rec.backendProc!=m_currentBackendProcedure) {
+ 	if (m_currentScan.backendProc!=_SCHED_NULLTARGET) { // if the writing has been disabled
+ 	 	if (m_currentScan.backendProc!=m_currentBackendProcedure) {
  	 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::prepareFileWriting()",(LM_DEBUG,"NEW_BACKEND_PROCEDURE"));
- 	 		if (!m_schedule->getBackendList()->getBackend(rec.backendProc,bckInstance,command)) {
+ 	 		if (!m_schedule->getBackendList()->getBackend(m_currentScan.backendProc,bckInstance,command)) {
  	 			_EXCPT(ManagementErrors::ScheduleErrorExImpl,dummy,"CScheduleExecutor::prepareFileWriting()");
  	 			dummy.setReason((const char *)m_schedule->getLastError());
  	 			throw dummy;
  	 		}
  	 		m_core->_chooseDefaultBackend(bckInstance);  //CouldntGetComponentExImpl BackendNotAvailableExImpl
- 	 		m_core->_chooseDefaultDataRecorder(rec.writerInstance); //CouldntGetComponentExImpl ComponentErrors::UnexpectedExImpl
  	 		//throw ManagementErrors::BackendProcedureErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl
- 	 		m_core->configureBackend(rec.backendProc,command);
- 	 		m_currentBackendProcedure=rec.backendProc;
+ 	 		m_core->configureBackend(m_currentScan.backendProc,command);
+ 	 		m_currentBackendProcedure=m_currentScan.backendProc;
  	 	}
+	 	m_core->_chooseDefaultDataRecorder(m_currentScan.writerInstance); //CouldntGetComponentExImpl ComponentErrors::UnexpectedExImpl
  	 	m_core->enableDataTransfer();
  	}
  	else {
  		m_currentBackendProcedure=_SCHED_NULLTARGET;
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"BACKEND_PROCEDURE_IS_NULL"));
+ 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::prepareFileWriting()",(LM_DEBUG,"BACKEND_PROCEDURE_IS_NULL"));
  		return;
  	}
 }
