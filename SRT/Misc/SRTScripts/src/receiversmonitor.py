@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import datetime
 import logging
 import time
 
@@ -41,11 +42,13 @@ while True:
                     pass
 
                 for component, property_names in components:
-                    for property_name in property_names:
-                        property_obj = getattr(component, '_get_%s()' % property_name)
+                    for pname in property_names:
+                        get_property_obj = getattr(component, '_get_%s()' % pname)
+                        property_obj = get_property_obj()
                         value, completion = property_obj.get_sync()
-                        plain_component_name = component._get_name().split('/')[-1]
-                        final_name = '%s.%s' % (plain_component_name, property_name)
+                        cname = component._get_name().split('/')[-1]
+                        t = datetime.datetime.now()
+                        line = '%s -> %s.%s' % (t, cname, pname)
                         logging.info('  %s%.2f' % (final_name.ljust(52), value))
 
         except KeyboardInterrupt:
