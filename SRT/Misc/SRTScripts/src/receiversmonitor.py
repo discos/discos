@@ -32,8 +32,8 @@ timing = 180 #seconds
 while True:
     if getManager():
         try:
+            components = []
             for component_name, property_names in mapping:
-                components = []
                 client = PySimpleClient()
                 try:
                     component = client.getComponent(component_name)
@@ -41,20 +41,20 @@ while True:
                 except:
                     pass
 
-                for component, property_names in components:
-                    for pname in property_names:
-                        get_property_obj = getattr(component, '_get_%s()' % pname)
-                        property_obj = get_property_obj()
-                        value, completion = property_obj.get_sync()
-                        cname = component._get_name().split('/')[-1]
-                        t = datetime.datetime.now()
-                        line = '%s -> %s.%s' % (t, cname, pname)
-                        logging.info('  %s%.2f' % (final_name.ljust(52), value))
+            for component, property_names in components:
+                for pname in property_names:
+                    get_property_obj = getattr(component, '_get_%s' % pname)
+                    property_obj = get_property_obj()
+                    value, completion = property_obj.get_sync()
+                    cname = component._get_name()
+                    t = datetime.datetime.now()
+                    line = '%s.%s' % (cname, pname)
+                    logging.info('  %s%e' % (line.ljust(65), value))
 
         except KeyboardInterrupt:
             logging.info('program closed by the user')
             raise
-        except:
+        except Exception, ex:
             pass
         finally:
             try:
