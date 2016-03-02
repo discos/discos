@@ -27,6 +27,7 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_fetValues.IDR = 0.0;
     m_fetValues.VGR = 0.0;
     m_statusWord = 0;
+    m_ioMarkError = false;
     m_setupMode = "";
 }
 
@@ -320,7 +321,7 @@ void CComponentCore::calOn() throw (
         impl.setReason("receiver not configured yet");
         throw impl;
     }
-    guard.release();
+    // guard.release();
     if (checkStatusBit(LOCAL)) {
         _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOn()");
         throw impl;
@@ -360,7 +361,7 @@ void CComponentCore::calOff() throw (
         impl.setReason("receiver not configured yet");
         throw impl;
     }
-    guard.release();
+    // guard.release();
     if (checkStatusBit(LOCAL)) {
         _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOff()");
         throw impl;
@@ -1014,6 +1015,7 @@ void CComponentCore::updateVacuumPump() throw (ReceiversErrors::ReceiverControlB
 void CComponentCore::updateNoiseMark() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
     bool answer;
+    baci::ThreadSyncGuard guard(&m_mutex);
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
         answer=m_control->isCalibrationOn();
@@ -1024,20 +1026,21 @@ void CComponentCore::updateNoiseMark() throw (ReceiversErrors::ReceiverControlBo
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
-    if (answer!=checkStatusBit(NOISEMARK)) 
-        setStatusBit(NOISEMARKERROR);
-    else 
-        clearStatusBit(NOISEMARKERROR);
-    try {
-        m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
-        m_control->isExtCalibrationOn() ? setStatusBit(EXTNOISEMARK) : clearStatusBit(EXTNOISEMARK);
-    }   
-    catch (IRA::ReceiverControlEx& ex) {
-        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateNoiseMark()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
+    if(answer!=checkStatusBit(NOISEMARK)) {
+        if(m_ioMarkError) {
+            setStatusBit(NOISEMARKERROR);
+        }
+        else {
+            m_ioMarkError = true;
+        }
     }
+    else {
+        clearStatusBit(NOISEMARKERROR);
+        m_ioMarkError = false;
+    }
+    //*********************************************************************************************/
+    // EXTNOISEMARK is missing
+    /**********************************************************************************************/
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 

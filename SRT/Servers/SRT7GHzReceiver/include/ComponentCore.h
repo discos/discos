@@ -412,6 +412,9 @@ private:
     double m_environmentTemperature;
     IRA::ReceiverControl::FetValues m_fetValues;
     DWORD m_statusWord;
+    // m_ioMarkError is a flag used to know if we already got an IO
+    // error. See mantis issue n.0000236
+    bool m_ioMarkError;
     Management::TSystemStatus m_componentStatus;
 
     void setComponentStatus(const Management::TSystemStatus& status) { if (status>m_componentStatus) m_componentStatus=status;  }
