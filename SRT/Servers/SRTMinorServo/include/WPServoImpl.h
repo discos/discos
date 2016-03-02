@@ -499,6 +499,9 @@ private:
      */
     static map<int, bool> m_stow_state;
 
+    /** Flag to use for indicating a positioning error */
+    static map<int, bool> m_positioning_error;
+
     /** Map of park positions vector **/
     static map<int, vector<double> > m_park_positions;
 

@@ -118,6 +118,15 @@ void SocketListener::runLoop() throw (ComponentErrors::SocketErrorExImpl)
                     return;
                 }
 
+                // If the answer is a NAK_setpos, alert for a failure
+                if(startswith(rec_answer, "NAK_setpos")) {
+                    (*m_params->positioning_error)[saddress] = true;
+                }
+
+                if(startswith(rec_answer, "setpos")) {
+                    (*m_params->positioning_error)[saddress] = false;
+                }
+
 
                 // If the answer is the second setup turn the setup-bit off and delete the item from the map
                 if(startswith(rec_answer, "setup")) {

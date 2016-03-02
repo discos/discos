@@ -14,6 +14,7 @@ from multiprocessing import Value
 from parameters import headers, closers, filtered, app_nr
 
 stop_server = Value('i', False)
+setpos_NAK = [Value('i', False)] * len(app_nr)
 
 class MSCU(object):
 
@@ -78,6 +79,12 @@ class MSCU(object):
                                 stop_server.value = True
                                 connection.close()
                                 break
+                            elif data.startswith('#setpos_NAK'):
+                                setpos_NAK[1].value = True  # The SRP address
+                                continue
+                            elif data.startswith('#setpos_ACK'):
+                                setpos_NAK[1].value = False  # The SRP address
+                                continue
                             # Retrieve the message header
                             header, body = data[0], data[1:].rstrip()
                             whole_cmd, params_str = body.split('=')
@@ -95,6 +102,10 @@ class MSCU(object):
                             continue
 
                         servo = self.servos[address]
+                        if setpos_NAK[address].value:
+                            servo.setpos_NAK = True
+                        else:
+                            servo.setpos_NAK = False
                         # Print a general error message if we received an invalid command
                         if header not in headers or not hasattr(servo, cmd):
                             print MSCU.error_message(data)
@@ -161,9 +172,21 @@ class MSCU(object):
         sockobj.connect(server) 
         sockobj.sendall('#stop\r\n')
 
+    @staticmethod
+    def setpos_NAK(server=('127.0.0.1', 10000)):
+        sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sockobj.settimeout(2)
+        sockobj.connect(server) 
+        sockobj.sendall('#setpos_NAK\r\n')
+
+    @staticmethod
+    def setpos_ACK(server=('127.0.0.1', 10000)):
+        sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sockobj.settimeout(2)
+        sockobj.connect(server) 
+        sockobj.sendall('#setpos_ACK\r\n')
+
 
 if __name__ == "__main__":
     mscu = MSCU()
     mscu.run()
-
-

@@ -3,7 +3,7 @@ import argparse
 from SRTMSCUSimImpl import mscu
 
 parser = argparse.ArgumentParser(description="Start/Stop the MSCU simulator")
-parser.add_argument('action', choices=['start', 'stop'])
+parser.add_argument('action', choices=['start', 'stop', 'setpos_NAK', 'setpos_ACK'])
 args = parser.parse_args()
 
 
@@ -13,5 +13,7 @@ if __name__ == "__main__":
         server.run()
     elif args.action == 'stop':
         mscu.MSCU.stop()
-
-
+    elif args.action == 'setpos_NAK':
+        mscu.MSCU.setpos_NAK()  # To default, the SRP
+    elif args.action == 'setpos_ACK':  # To default, the SRP
+        mscu.MSCU.setpos_ACK()

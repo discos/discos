@@ -26,6 +26,7 @@ map<int, WPServoTalker *> WPServoImpl::m_talkers;
 map<int, unsigned long *> WPServoImpl::m_status_map;
 map<int, bool> WPServoImpl::m_status_thread_en;
 map<int, bool> WPServoImpl::m_stow_state;
+map<int, bool> WPServoImpl::m_positioning_error;
 map<int, vector<double> > WPServoImpl::m_park_positions;
 CSecureArea<unsigned short> *WPServoImpl::m_instance_counter = NULL;
 CSecureArea< map<int, vector<PositionItem> > >* WPServoImpl::m_cmdPos_list = \
@@ -300,7 +301,7 @@ void WPServoImpl::initialize() throw (
             THROW_EX(ComponentErrors, ThreadErrorEx, "Attempting to set an existing key in m_talkers", false)
         else
             m_talkers[m_cdb_ptr->SERVO_ADDRESS] = m_wpServoTalker_ptr;
-
+    
         m_thread_params.socket_ptr = m_wpServoLink_ptr;
         m_thread_params.map_of_talkers_ptr = &m_talkers;
         m_thread_params.listener_mutex = &listener_mutex;
@@ -312,6 +313,11 @@ void WPServoImpl::initialize() throw (
         m_thread_params.status_thread_en = &m_status_thread_en;
         (m_thread_params.tracking_delta)[m_cdb_ptr->SERVO_ADDRESS] = m_cdb_ptr->TRACKING_DELTA;
         m_thread_params.stow_state = &m_stow_state;
+        m_thread_params.positioning_error = &m_positioning_error;
+
+        for(size_t i=0; i<m_cdb_ptr->SERVO_ADDRESS; i++) {
+            m_positioning_error[i] = false;
+        }
 
         setParkPosition(m_cdb_ptr->PARK_POSITION);
         // set m_park_positions

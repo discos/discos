@@ -3,6 +3,7 @@ from __future__ import with_statement
 import os
 import time
 import datetime
+import subprocess
 
 import unittest2
 
@@ -12,6 +13,8 @@ import MinorServo
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
+
+FNULL = open(os.devnull, 'w')
 
 
 class TestFailure(unittest2.TestCase):
@@ -52,6 +55,24 @@ class TestFailure(unittest2.TestCase):
         status_obj = self.boss._get_status()
         status_value, comp = status_obj.get_sync()
         self.assertEqual(status_value, Management.MNG_FAILURE)
+
+    def test_failure_during_positioning(self):
+        """Make sure a failure during SRP positioning gets notified"""
+        counter = 0 # Seconds
+        now = time_ref = datetime.datetime.now()
+        while not self.boss.isReady() or (time_ref - now).seconds < 20:
+            time.sleep(1)
+            now = datetime.datetime.now()
+        time.sleep(4)
+        try:
+            subprocess.Popen(['srt-mscu-sim', 'setpos_NAK'], stdout=FNULL, stderr=FNULL)
+            time.sleep(5)
+            status_obj = self.boss._get_status()
+            status_value, comp = status_obj.get_sync()
+            self.assertEqual(status_value, Management.MNG_FAILURE)
+        finally:
+            subprocess.Popen(['srt-mscu-sim', 'setpos_ACK'], stdout=FNULL, stderr=FNULL)
+            time.sleep(2)
 
     def wait_parked(self):
         while self.boss.isParking():

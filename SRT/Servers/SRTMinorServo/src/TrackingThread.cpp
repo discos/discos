@@ -11,7 +11,9 @@
 #include "TrackingThread.h"
 #include <pthread.h>
 #include <time.h>
+#include <bitset>
 #include "MSParameters.h"
+#include "MSBossPublisher.h"
 #include "MinorServoBossImpl.h"
 #include "utils.h"
 #include "slamac.h"
@@ -27,6 +29,7 @@ TrackingThread::TrackingThread(
         AUTO_TRACE("TrackingThread::TrackingThread()");
         m_ready_error = false;
         m_configuration->m_trackingError = false;
+        m_failure = false;
     }
 
     TrackingThread::~TrackingThread() { AUTO_TRACE("TrackingThread::~TrackingThread()"); }
@@ -57,6 +60,28 @@ TrackingThread::TrackingThread(
                     if((m_configuration->m_component_refs).count(comp_name)) {
                         component_ref = (m_configuration->m_component_refs)[comp_name];
                         if(!CORBA::is_nil(component_ref)) {
+                            // Check if the status is not FAILURE
+                            // For instance, it could be possibile to have the component ready
+                            // but its status in failure (maybe there is a wrong limit switch
+                            // active)
+                            ACS::ROpattern_var refStatus = component_ref->status();
+                            if(refStatus.ptr() != ACS::ROpattern::_nil()) {
+                                ACSErr::Completion_var completion;
+                                //Just synchronously reading the value of refStatus
+                                CORBA::Long status_val = refStatus->get_sync(completion.out());
+                                bitset<STATUS_WIDTH> status_bset(status_val);
+                                if(status_bset.test(STATUS_FAILURE)) {
+                                    m_configuration->m_status = Management::MNG_FAILURE;
+                                    if(!m_failure) {
+                                        ACS_SHORT_LOG((LM_ERROR, "Cannot move the SRP"));
+                                    }
+                                    m_failure = true;
+                                }
+                                else {
+                                    m_failure = false;
+                                }
+                            }
+
                             // Set a doubleSeq from a string of positions
                             ACS::Time t = getTimeStamp() + ELEVATION_FUTURE_TIME;
                             ACS::doubleSeq positions = m_configuration->getPosition(comp_name, t);
@@ -64,6 +89,9 @@ TrackingThread::TrackingThread(
                         if(positions.length()) {
                             if(component_ref->isReady()) {
                                 component_ref->setPosition(positions, NOW);
+                                if(m_failure) {
+                                    continue;
+                                }
                                 m_ready_error = false;
                                 m_configuration->m_trackingError=false;
                                 m_configuration->m_isElevationTracking = true;
