@@ -3,6 +3,7 @@
 import datetime
 import logging
 import time
+from math import degrees
 
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Util.ACSCorba import getManager
@@ -45,7 +46,8 @@ while True:
                 for pname in property_names:
                     get_property_obj = getattr(component, '_get_%s' % pname)
                     property_obj = get_property_obj()
-                    value, completion = property_obj.get_sync()
+                    raw_value, completion = property_obj.get_sync()
+                    value = degrees(raw_value) if pname.startswith('raw') else raw_value
                     cname = component._get_name()
                     t = datetime.datetime.now()
                     line = '%s.%s' % (cname, pname)
