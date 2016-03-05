@@ -1398,6 +1398,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
         start = true;
         IRA::CIRATools::Wait(1,0);
 		setup("NNNN");
+        setDefaultConfiguration();
         start = false;
         IRA::CIRATools::Wait(2,0);
     //printf("initialize configuration end\n");
