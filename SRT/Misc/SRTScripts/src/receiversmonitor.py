@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-import datetime
 import logging
 import time
 from math import degrees
@@ -28,14 +27,14 @@ mapping = (
 )
 
 
-timing = 180 #seconds
+timing = 120  # seconds
 
 while True:
     if getManager():
         try:
             components = []
+            client = PySimpleClient()
             for component_name, property_names in mapping:
-                client = PySimpleClient()
                 try:
                     component = client.getComponent(component_name)
                     components.append((component, property_names))
@@ -49,9 +48,12 @@ while True:
                     raw_value, completion = property_obj.get_sync()
                     value = degrees(raw_value) if pname.startswith('raw') else raw_value
                     cname = component._get_name()
-                    t = datetime.datetime.now()
                     line = '%s.%s' % (cname, pname)
                     logging.info('  %s%e' % (line.ljust(65), value))
+                try:
+                    component._release()
+                except:
+                    pass
 
         except KeyboardInterrupt:
             logging.info('program closed by the user')
@@ -63,6 +65,6 @@ while True:
                 if getManager():
                     client.disconnect()
             except:
-                logging.error('can not disconnect the client')
+                pass
 
     time.sleep(timing)
