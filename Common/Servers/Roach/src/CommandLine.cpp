@@ -560,15 +560,9 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setConfiguration()");
 		throw impl;
 	}*/
-    if (pol == 2) { // FULL STOKES
-        //m_sectionsNumber = 1; // TBC!!!!!!!!!!!!!!!!!!!!!!!!
-        m_polarization[inputId] = Backends::BKND_FULL_STOKES;
-    }
-    if (pol == -1)
-        newPol = 2; //TBC!!!!!!!!!!!!!!
-
 	if (inputId>=0) {  //check the section id is in valid ranges
-		if (inputId>=m_sectionsNumber) {
+		//if (inputId>=m_sectionsNumber) {
+		if (inputId>m_sectionsNumber) {
 			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setConfiguration()");
 			impl.setReason("the section identifier is out of range");
 			throw impl;
@@ -634,6 +628,25 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
     }
     else
         newFeed = m_feedNumber[inputId];
+    
+	if (pol >= 0) { // the user ask for a new value
+		if ((pol == 0) || (pol == 1)) { // LCP or RCP
+			newPol = pol;
+        		m_sectionsNumber = 2;
+		}
+		if (pol == 2) { // FULL STOKES
+			newPol = pol;
+        		m_sectionsNumber = 1;
+		}
+		if (pol >= 3) {
+			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+		    	impl.setValueName("pol");
+		    	throw impl;
+		}
+	}
+	else
+		newPol = m_polarization[inputId];
+
 
     if (bins>=0) { // the user ask for a new value
         if (bins != MIN_BINS && bins != MAX_BINS) {
@@ -690,16 +703,17 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		m_bandWidth[inputId]=newBW;
 		for (int j=0;j<m_sectionsNumber;j++) m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
 		m_commonSampleRate=newSR;
-        m_frequency[inputId]=newFreq;
-        m_feedNumber[inputId]=newFeed;
-        m_bins[inputId]=newBins;
+        	m_frequency[inputId]=newFreq;
+        	m_feedNumber[inputId]=newFeed;
+        	m_bins[inputId]=newBins;
+		m_polarization[inputId]=newPol;
 		IRA::CString temp;
 		if (m_polarization[inputId]==Backends::BKND_LCP)
 			temp="LCP";
-        else if (m_polarization[inputId]==Backends::BKND_RCP)
+        	else if (m_polarization[inputId]==Backends::BKND_RCP)
 			temp="RCP";
-        else
-            temp="FULL_STOKES";
+        	else
+            		temp="FULL_STOKES";
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%d,POL=%s,SR=%lf,BINS=%d",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
 				(const char *)temp,newSR,m_bins[inputId]));		
         if (m_RK00==true || m_RC00==true) {
