@@ -1190,7 +1190,14 @@ void CEngineThread::collectSchedulerData(FitsWriter_private::CFile* summaryFile)
 		restFreq=restFreqRef->get_sync(comp.out());
 		std::list<double> va;
 		va.clear();
+		for (unsigned ii=0;ii<restFreq->length();ii++) {
+			printf("valore precedente %lf\n",restFreq[ii]);
+		}
 		CCommonTools::map(restFreq,va);
+		std::list<double>::const_iterator it;
+		for (it=va.begin();it!=va.end();it++) {
+			printf("valore convertito %lf\n",*it);
+		}
 		if (summaryFile) summaryFile->setKeyword("RESTFREQ",va);
 		Management::TSubScanConfiguration_var conf;
 		try {
