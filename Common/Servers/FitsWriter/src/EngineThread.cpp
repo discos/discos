@@ -313,83 +313,87 @@ bool CEngineThread::processData()
 		}
 #endif
 	}  // m_config->getMinorServoBossComponent()!=""
-	for (int i=0;i<m_data->getSectionsNumber();i++) {
-		bins=m_data->getSectionBins(i);
-		pol=m_data->getSectionStreamsNumber(i);
-		switch (m_data->getSampleSize()) {
-			case sizeof(BYTE2_TYPE): {
-#ifdef FW_DEBUG
-				BYTE2_TYPE channel[bins*pol];
-				FitsWriter_private::getChannelFromBuffer<BYTE2_TYPE>(i,pol,bins,buffer,channel);
-				out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,m_data->getSampleSize());
-				m_file << (const char *)out;				
-				for (long j=0;j<pol*bins;j++) {
-					out.Format("%d ",channel[j]);
-					m_file << (const char *) out;
+	if (!m_data->getIsNoData()) {
+		for (int i=0;i<m_data->getSectionsNumber();i++) {
+			bins=m_data->getSectionBins(i);
+			pol=m_data->getSectionStreamsNumber(i);
+			switch (m_data->getSampleSize()) {
+				case sizeof(BYTE2_TYPE): {
+	#ifdef FW_DEBUG
+					BYTE2_TYPE channel[bins*pol];
+					FitsWriter_private::getChannelFromBuffer<BYTE2_TYPE>(i,pol,bins,buffer,channel);
+					out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,m_data->getSampleSize());
+					m_file << (const char *)out;
+					for (long j=0;j<pol*bins;j++) {
+						out.Format("%d ",channel[j]);
+						m_file << (const char *) out;
+					}
+					m_file << '\n';
+	#else
+					BYTE2_TYPE channel[bins*pol];
+					FitsWriter_private::getChannelFromBuffer<BYTE2_TYPE>(i,pol,bins,buffer,channel);
+					if (!m_file->storeData(channel,bins*pol,i)) {
+						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
+						impl.setFileName((const char *)m_data->getFileName());
+						impl.setError(m_file->getLastError());
+						_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+						m_data->setStatus(Management::MNG_FAILURE);
+					}
+	#endif
+					break;
 				}
-				m_file << '\n';
-#else
-				BYTE2_TYPE channel[bins*pol];
-				FitsWriter_private::getChannelFromBuffer<BYTE2_TYPE>(i,pol,bins,buffer,channel);
-				if (!m_file->storeData(channel,bins*pol,i)) {
-					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
-					impl.setFileName((const char *)m_data->getFileName());
-					impl.setError(m_file->getLastError());
-					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-					m_data->setStatus(Management::MNG_FAILURE);				
+				case sizeof(BYTE4_TYPE): {
+	#ifdef FW_DEBUG
+					BYTE4_TYPE channel[bins*pol];
+					FitsWriter_private::getChannelFromBuffer<BYTE4_TYPE>(i,pol,bins,buffer,channel);
+					out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,m_data->getSampleSize());
+					m_file << (const char *)out;
+					for (long j=0;j<bins*pol;j++) {
+						out.Format("%10.5f, %d ",channel[j],channel[j]);
+						m_file << (const char *) out;
+					}
+					m_file << '\n';
+	#else
+					BYTE4_TYPE channel[bins*pol];
+					FitsWriter_private::getChannelFromBuffer<BYTE4_TYPE>(i,pol,bins,buffer,channel);
+					if (!m_file->storeData(channel,bins*pol,i)) {
+						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
+						impl.setFileName((const char *)m_data->getFileName());
+						impl.setError(m_file->getLastError());
+						_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+						m_data->setStatus(Management::MNG_FAILURE);
+					}
+	#endif
+					break;
 				}
-#endif
-				break;
+				default : { // it should be BYTE8_TYPE
+	#ifdef FW_DEBUG
+					BYTE8_TYPE channel[bins*pol];
+					FitsWriter_private::getChannelFromBuffer<BYTE8_TYPE>(i,pol,bins,buffer,channel);
+					out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,m_data->getSampleSize());
+					m_file << (const char *)out;
+					for (long j=0;j<pol*bins;j++) {
+						out.Format("%10.5lf ",channel[j]);
+						m_file << (const char *) out;
+					}
+					m_file << '\n';
+	#else
+					BYTE8_TYPE channel[bins*pol];
+					FitsWriter_private::getChannelFromBuffer<BYTE8_TYPE>(i,pol,bins,buffer,channel);
+					if (!m_file->storeData(channel,bins*pol,i)) {
+						_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
+						impl.setFileName((const char *)m_data->getFileName());
+						impl.setError(m_file->getLastError());
+						_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+						m_data->setStatus(Management::MNG_FAILURE);
+					}
+	#endif
+				}
 			}
-			case sizeof(BYTE4_TYPE): {
-#ifdef FW_DEBUG
-				BYTE4_TYPE channel[bins*pol];
-				FitsWriter_private::getChannelFromBuffer<BYTE4_TYPE>(i,pol,bins,buffer,channel);
-				out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,m_data->getSampleSize());
-				m_file << (const char *)out;				
-				for (long j=0;j<bins*pol;j++) {
-					out.Format("%10.5f, %d ",channel[j],channel[j]);
-					m_file << (const char *) out;
-				}
-				m_file << '\n';
-#else
-				BYTE4_TYPE channel[bins*pol];
-				FitsWriter_private::getChannelFromBuffer<BYTE4_TYPE>(i,pol,bins,buffer,channel);
-				if (!m_file->storeData(channel,bins*pol,i)) {
-					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
-					impl.setFileName((const char *)m_data->getFileName());
-					impl.setError(m_file->getLastError());
-					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-					m_data->setStatus(Management::MNG_FAILURE);
-				}
-#endif
-				break;	
-			}
-			default : { // it should be BYTE8_TYPE
-#ifdef FW_DEBUG
-				BYTE8_TYPE channel[bins*pol];
-				FitsWriter_private::getChannelFromBuffer<BYTE8_TYPE>(i,pol,bins,buffer,channel);
-				out.Format("sect %d, pols: %d , bins: %d, sampleSize: %d - ",i,pol,bins,m_data->getSampleSize());
-				m_file << (const char *)out;				
-				for (long j=0;j<pol*bins;j++) {
-					out.Format("%10.5lf ",channel[j]);
-					m_file << (const char *) out;
-				}
-				m_file << '\n';
-#else
-				BYTE8_TYPE channel[bins*pol];
-				FitsWriter_private::getChannelFromBuffer<BYTE8_TYPE>(i,pol,bins,buffer,channel);
-				if (!m_file->storeData(channel,bins*pol,i)) {
-					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
-					impl.setFileName((const char *)m_data->getFileName());
-					impl.setError(m_file->getLastError());
-					_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-					m_data->setStatus(Management::MNG_FAILURE);						
-				}
-#endif
-			}
-		}
+		} //end for
 	}
+
+
 #ifndef FW_DEBUG
 	m_file->add_row();
 #endif
@@ -637,7 +641,7 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if (!m_file->setPrimaryHeaderKey("Beams",mH.beams,"Number of beams")) {
+				else if (!m_file->setPrimaryHeaderKey("Beams",/*mH.beams*/m_info.getFeedNumber(),"Number of beams")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -786,7 +790,7 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				if (!m_file->addSectionTable(sectionsID,feedsID,ifsID,polarizations,LocalOscillator,skyFreq,skyBw,calib,fluxes,atts)) {
+				if (!m_file->addSectionTable(sectionsID,feedsID,ifsID,polarizations,LocalOscillator,skyFreq,skyBw,calib,fluxes,atts,m_data->getIsNoData())) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -1185,7 +1189,15 @@ void CEngineThread::collectSchedulerData(FitsWriter_private::CFile* summaryFile)
 		}
 		restFreq=restFreqRef->get_sync(comp.out());
 		std::list<double> va;
+		va.clear();
+		for (unsigned ii=0;ii<restFreq->length();ii++) {
+			printf("valore precedente %lf\n",restFreq[ii]);
+		}
 		CCommonTools::map(restFreq,va);
+		std::list<double>::const_iterator it;
+		for (it=va.begin();it!=va.end();it++) {
+			printf("valore convertito %lf\n",*it);
+		}
 		if (summaryFile) summaryFile->setKeyword("RESTFREQ",va);
 		Management::TSubScanConfiguration_var conf;
 		try {

@@ -143,12 +143,13 @@ public:
 	 * @param sourceFlux for each backend section it reports the estimated source flux computed with section parameters
 	 * @param atts attenuation, one for each input of the backend
 	 * @param name name of the sections table
+	 * @param noData if true the data columns will not be added to the DATATable
 	 * @param rfName name of the RF inputs table
 	 * @return false if the operation is not successful
 	 */
 	bool addSectionTable(const ACS::longSeq &sectionID, const ACS::longSeq& feedsID, const ACS::longSeq& ifsID,const ACS::longSeq& pols,const ACS::doubleSeq& los,
 			const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,
-			const ACS::doubleSeq& sourceFlux,const ACS::doubleSeq& atts,const IRA::CString& name="SECTION TABLE",const IRA::CString& rfName="RF INPUTS");
+			const ACS::doubleSeq& sourceFlux,const ACS::doubleSeq& atts,bool noData,const IRA::CString& name="SECTION TABLE",const IRA::CString& rfName="RF INPUTS");
 
 	/**
 	 * It allows to add the servo table to the file

@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 		printf("FITS Error: %s\n",(const char *)file->getLastError());
 		exit(-1);
 	}
-	if (!file->addSectionTable(sectionsID,feedsID,ifsID,pols,los,skyFreq,skyBw,calib,flux,atts)) {
+	if (!file->addSectionTable(sectionsID,feedsID,ifsID,pols,los,skyFreq,skyBw,calib,flux,atts,false)) {
 		printf("FITS Error: %s\n",(const char *)file->getLastError());
 		exit(-1);
 	}
