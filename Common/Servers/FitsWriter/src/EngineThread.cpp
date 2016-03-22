@@ -790,7 +790,7 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				if (!m_file->addSectionTable(sectionsID,feedsID,ifsID,polarizations,LocalOscillator,skyFreq,skyBw,calib,fluxes,atts)) {
+				if (!m_file->addSectionTable(sectionsID,feedsID,ifsID,polarizations,LocalOscillator,skyFreq,skyBw,calib,fluxes,atts,m_data->getIsNoData())) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());

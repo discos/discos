@@ -482,7 +482,7 @@ bool CFitsWriter::addFeedTable(const IRA::CString& name)
 
 bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::longSeq& feedsID, const ACS::longSeq& ifsID,const ACS::longSeq& pols,const ACS::doubleSeq& los,
 		const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,const ACS::doubleSeq& sourceFlux,const ACS::doubleSeq& atts,
-		const IRA::CString& name,const IRA::CString& rfName)
+		bool noData,const IRA::CString& name,const IRA::CString& rfName)
 {
 	std::vector<long> id;
 	std::vector<long> bins;
@@ -521,7 +521,6 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 		fluxIterator+=m_channels[i].inputs;
 		// creation of the channels columns for the data table......
 		colName << "Ch" << m_channels[i].id;
-	    DataColName.push_back(colName.str());		
 		if (m_channels[i].polarization==Backends::BKND_FULL_STOKES) {
 			sect_type.push_back("stokes");
 			type << (4 * bins[i]) << data_type; //full stokes
@@ -530,8 +529,11 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 			sect_type.push_back("simple");
 			type <<  (1 * bins[i]) << data_type;
 		}
-		DataColForm.push_back(type.str());
-		DataColUnit.push_back("");
+		if (!noData) {
+		    DataColName.push_back(colName.str());
+			DataColForm.push_back(type.str());
+			DataColUnit.push_back("");
+		}
 
 		if (m_channels[i].inputs>1) {
 			tsysType << (m_channels[i].inputs) << "D";;
