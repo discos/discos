@@ -529,6 +529,9 @@ void CEngineThread::runLoop()
 					m_file<< (const char *) out;
 				}
 #else
+				//*****************************************************************************************
+				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"OUTPUT_FILE_CREATED_NOW"));
+				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 				//get data from receivers boss
 				if (m_summaryOpened) {
 					collectReceiversData(m_summary->getFilePointer());
@@ -551,6 +554,11 @@ void CEngineThread::runLoop()
 				}
 				//get the data from the minor servo boss...if subsystem is enabled
 				collectMinorServoData();
+
+				//*****************************************************************************************
+				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"DATA_COLLECTION_COMPLETED"));
+				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
+
 				// now creates the file, the tables and the headers
 				Backends::TMainHeader mH=m_data->getMainHeader();
 				Backends::TSectionHeader const *cH=m_data->getSectionHeader();
