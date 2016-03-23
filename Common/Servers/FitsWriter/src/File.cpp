@@ -35,8 +35,8 @@ bool CFile::write(CCfits::FITS * const fits,IRA::CString& lastError)
 	begin();
 	while ((tt=getNextTEntry())!=NULL) {
 		std::vector<string> name,form,unit;
-		name.push_back("gino");
-		name.push_back("pino");
+		//name.push_back("gino");
+		//name.push_back("pino");
 		form.push_back("D");
 		form.push_back("D");
 		unit.push_back("Jy");

@@ -136,19 +136,19 @@ public:
 	typedef typename std::list<_ref> TRefSequence;
 	typedef typename TRefSequence::iterator TRefScroll;
 	CHeaderEntry(const IRA::CString& key,const IRA::CString& desc,const long& table) : CEntry(key,desc,T::typeSpec,true,table) {
-		vocabulary.empty();
+		vocabulary.clear();
 		vocabulary.push_back(T::defaultValue);
 	}
 	CHeaderEntry(const IRA::CString& key,const IRA::CString& desc,const long& table,const TSequence& val) : CEntry(key,desc,T::typeSpec,true,table) {
 		vocabulary=val;
 	}
 	~CHeaderEntry() {
-		vocabulary.empty();
+		vocabulary.clear();
 	}
 	CHeaderEntry& operator=(const TSequence& val) {
 		TScroll it;
 		vocabulary=val;
-		ret.empty();
+		ret.clear();
 		for (it=vocabulary.begin();it!=vocabulary.end();it++) {  // this is done to cope with the (const char *) conversion in the CString case
 			ret.push_back((_ref)*it);
 		}
