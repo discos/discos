@@ -1,0 +1,10 @@
+#Code		Name
+2001		ComponentErrors
+2002		AntennaErrors
+2003		ASErrors
+2004		ParserErrors
+2005		BackendsErrors
+2006		ManagementErrors
+2007		MinorServoErrors
+2101		ClientErrors
+

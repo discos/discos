@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xs:schema
+  targetNamespace="urn:schemas-cosylab-com:PointingParameters:1.0"
+  xmlns="urn:schemas-cosylab-com:PointingParameters:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+
+	<xs:complexType name="TPointingCoefficients">
+ 		<xs:sequence>
+			<xs:element name="ia"		 type="xs:double" default="0.0" />
+			<xs:element name="ie"		 type="xs:double" default="0.0" />
+			<xs:element name="hasa"  type="xs:double" default="0.0" />
+			<xs:element name="haca"  type="xs:double" default="0.0" />
+			<xs:element name="hese"  type="xs:double" default="0.0" />
+			<xs:element name="hece"  type="xs:double" default="0.0" />
+			<xs:element name="hesa"	 type="xs:double" default="0.0" />
+			<xs:element name="hasa2" type="xs:double" default="0.0" />
+			<xs:element name="haca2" type="xs:double" default="0.0" />
+			<xs:element name="hesa2" type="xs:double" default="0.0" />
+			<xs:element name="heca2" type="xs:double" default="0.0" />
+			<xs:element name="haca3" type="xs:double" default="0.0" />
+			<xs:element name="heca3" type="xs:double" default="0.0" />
+			<xs:element name="hesa3" type="xs:double" default="0.0" />
+			<xs:element name="npae"	 type="xs:double" default="0.0" />
+			<xs:element name="ca"		 type="xs:double" default="0.0" />
+			<xs:element name="an"		 type="xs:double" default="0.0" />
+			<xs:element name="aw"		 type="xs:double" default="0.0" />
+			<xs:element name="hece2" type="xs:double" default="0.0" />
+			<xs:element name="hece6" type="xs:double" default="0.0" />
+			<xs:element name="hesa4" type="xs:double" default="0.0" />
+			<xs:element name="hesa5" type="xs:double" default="0.0" />
+			<xs:element name="hsca"	 type="xs:double" default="0.0" />
+			<xs:element name="hsca2" type="xs:double" default="0.0" />
+			<xs:element name="hssa3" type="xs:double" default="0.0" />
+			<xs:element name="hsca5" type="xs:double" default="0.0" />
+			<xs:element name="nrx"	 type="xs:double" default="0.0" />
+			<xs:element name="nry"	 type="xs:double" default="0.0" />
+			<xs:element name="hysa"			type="xs:double" default="0.0" />
+			<xs:element name="hyse"			type="xs:double" default="0.0" />
+			<xs:element name="setLinX"	type="xs:double" default="0.0" />
+			<xs:element name="setLinY"	type="xs:double" default="0.0" />
+			<xs:element name="setLinZ"	type="xs:double" default="0.0" />
+			<xs:element name="setRotX"	type="xs:double" default="0.0" />
+			<xs:element name="setRotY"	type="xs:double" default="0.0" />
+			<xs:element name="setRotZ"	type="xs:double" default="0.0" />
+			<xs:element name="moveFoc"	type="xs:double" default="0.0" />
+			<xs:element name="focAmp"		type="xs:double" default="0.0" />
+			<xs:element name="focFreq"	type="xs:double" default="0.0" />
+			<xs:element name="focPhase"	type="xs:double" default="0.0" />
+
+			<xs:element name="iarx"		 type="xs:double" default="0.0" />
+			<xs:element name="ierx"		 type="xs:double" default="0.0" />
+			<xs:element name="hasarx"  type="xs:double" default="0.0" />
+			<xs:element name="hacarx"  type="xs:double" default="0.0" />
+			<xs:element name="heserx"  type="xs:double" default="0.0" />
+			<xs:element name="hecerx"  type="xs:double" default="0.0" />
+			<xs:element name="hesarx"	 type="xs:double" default="0.0" />
+			<xs:element name="hasa2rx" type="xs:double" default="0.0" />
+			<xs:element name="haca2rx" type="xs:double" default="0.0" />
+			<xs:element name="hesa2rx" type="xs:double" default="0.0" />
+			<xs:element name="heca2rx" type="xs:double" default="0.0" />
+			<xs:element name="haca3rx" type="xs:double" default="0.0" />
+			<xs:element name="heca3rx" type="xs:double" default="0.0" />
+			<xs:element name="hesa3rx" type="xs:double" default="0.0" />
+			<xs:element name="npaerx"	 type="xs:double" default="0.0" />
+			<xs:element name="carx"		 type="xs:double" default="0.0" />
+			<xs:element name="anrx"		 type="xs:double" default="0.0" />
+			<xs:element name="awrx"		 type="xs:double" default="0.0" />
+			<xs:element name="hece2rx" type="xs:double" default="0.0" />
+			<xs:element name="hece6rx" type="xs:double" default="0.0" />
+			<xs:element name="hesa4rx" type="xs:double" default="0.0" />
+			<xs:element name="hesa5rx" type="xs:double" default="0.0" />
+			<xs:element name="hscarx"	 type="xs:double" default="0.0" />
+			<xs:element name="hsca2rx" type="xs:double" default="0.0" />
+			<xs:element name="hssa3rx" type="xs:double" default="0.0" />
+			<xs:element name="hsca5rx" type="xs:double" default="0.0" />
+			<xs:element name="nrxrx"	 type="xs:double" default="0.0" />
+			<xs:element name="nryrx"	 type="xs:double" default="0.0" />
+ 		</xs:sequence>
+	</xs:complexType>
+
+ 	<xs:complexType name="TPointingParameters">
+		<xs:sequence>
+			<xs:element name="PointingCoefficients" type="TPointingCoefficients" />
+		</xs:sequence>
+ 	</xs:complexType>
+
+	<xs:element name="PointingParameters" type="TPointingParameters"/>
+</xs:schema>

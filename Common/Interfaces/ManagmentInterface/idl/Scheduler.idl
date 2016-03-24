@@ -1,0 +1,410 @@
+#ifndef SCHEDULER_IDL_
+#define SCHEDULER_IDL_
+
+/* **************************************************************** */
+/* IRA Istituto di Radioastronomia                                  */
+/*                                                                  */
+/* This code is under GNU General Public Licence (GPL)              */
+/*                                                                  */
+/* Who                                  	when            What        */
+/* Andrea Orlati(aorlati@ira.inaf.it)		18/12/2008      created     */
+/* Andrea Orlati(aorlati@ira.inaf.it)		03/09/2010      Added haltSchedule(), setDevice() and tracking attribute    */
+/* Andrea Orlati(aorlati@ira.inaf.it)		24/10/2011      modified the signature of startSchedule()  */
+/* Andrea Orlati(aorlati@ira.inaf.it)     29/05/2012      method  changeLogFile */
+/* Andrea Orlati(aorlati@ira.inaf.it)     08/04/2013      added method skydip */
+
+#include <baci.idl>
+#include <ManagmentDefinitions.idl>
+#include <ComponentErrors.idl>
+#include <ManagementErrors.idl>
+#include <AntennaDefinitions.idl>
+
+
+#pragma prefix "alma"
+
+module Management { 
+	
+	/**
+	 * This is the interface of the component that is in charge of controlling an observation.
+	 * The observation typically consists of a schedule and some configuration files. This component
+	 * accept one schedule file at a time and will execute it, pointing the telescope, configuring the
+	 * devices and the backends. The final result of this is a sequence of files (as many as teh scans reported 
+	 * in the schedule) that records the measurment. 
+	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ 	 * Istituto di Radioastronomia, Italia
+ 	 * <br> 
+ 	 */
+	interface Scheduler: ACS::CharacteristicComponent, CommandInterpreter  {
+	
+		/**
+		 * This command allows to start a schedule by giving the name of the file and a line number to start from.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * 	   @arg \c ComponentErrors::MemoryAllocationEx
+		 * 	   @arg \c ComponentErrors::OperationErrorEx
+		 *     @arg \c ComponentErrors::UnexpectedEx
+		 *     @arg \c ComponentErrors::TimerErrorExImpl
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 * 	   @arg \c ManagementErrors::ScheduleErrorEx
+		 *     @arg \c ManagementErrors::AlreadyRunningEx
+		 * @param fileName name of the schedule file
+		 * @param startSubScan allows to give the subscan from which schedule should be started, format composed by two non negative integers separeted by an underscore: scanid_subscanid. 
+		 *                                             The second number could me optional.
+		 */
+		void startSchedule(in string fileName,in string startSubScan) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * This command stops immediately the execution of current schedule. If no schedule is runnig this has no effect.
+		 * In order to open a new schedule the user must stop the current one.
+		 * @throw CORBA::SystemExcpetion
+		 */
+		void stopSchedule();
+
+		/**
+		 * This command stops the execution of current schedule, only after the current scan is done. If no schedule is runnig this has no effect.
+		 * @throw CORBA::SystemExcpetion
+		 */
+		void haltSchedule();
+		
+		/**
+		 * @copyBrief CommandInterpreter::command
+		 * This method can be used to execute a command or to setup a configuration The commands and configurations are given as strings.
+		 * @attention the implmentation of this method must take care of logging the errors deriving from the execution of the command.
+		 * @throw CORBA::SystemException 
+		 * @param command this string contains the instruction to be executed, the command and the syntax may vary from implementation to implementation
+		 * @param answer this string contains the answer of the system to the incoming command. It must frred by the caller
+		 * @return  the result of the command, true after a succesful command invokation. false otherwise.
+		 */
+		
+		/**
+		 * This command will allow a client to acknwledge an error by resetting the <i>status</i> property. If <i>status</i> is already MNG_OK, then it does not do
+		 * anything. 
+		 * @throw CORBA::SystemExcpetion
+		*/
+		void clearStatus();
+		
+		/**
+		 * Chages the current log file name
+		 * @param fileName name of the file without extension, the directory path is decided by configuration DB. 
+		 * @throw CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void changeLogFile(in string fileName) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * Return the fundamental weather parameters
+		 * @param temperature external temperature in °C
+		 * @param humidity relative humidity (0..100)
+		 * @param pressure atmospheric pressure (mbar)
+		 * @param wind wind speed (Km/s) 
+		 * @throw CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */		
+		void weatherParamenters(out double temperature, out double humidity,out double pressure,out double wind)  raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * Performs the computation of the system temperature. The operation is executed by using the currently in use backend and the currently configured frontend. It could also be the default one.
+		 * The measure is done for each of the sections of the backend. Each result is the returned as a sequence of doubles. The results are also published in the log file.
+		 * This operation will also computes the ratio kelvin over counts for each backend section, this ratio is then set in the backend. This ratio can be used by the backend to convert the current TPI measure into a Tsys.
+		 * @throw CORBA::SystemException
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 * @return the tsys for each backend section.
+		 */
+		ACS::doubleSeq systemTemperature() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+					
+		/**
+		 * Performs a cross scan using the main drives of the telescope. The operation consists of system temperature measurement (the telescope is sent 3 times the current beam size off)
+		 * and then a longitude and a latitude On-The-Fly scans. 
+		 * The frame, the span and the duration of both the On-The-Fly scans is determined by the arguments. A prerequisite is that a target has to be commanded to the telescope; this target is
+		 * taken as the center of the On-the-Fly scans. The default backend and the default data recorder are used as data source and destination respectively.
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx 
+		 * @throw CORBA::SystemExcpetion 
+		 * @param coordFrame it gives the frame in which the cross scan is performed.
+		 * @param span this is the overall length of the single scans (radians)
+		 * @param duration this determine how long the single scan has to take.
+		 */ 
+		void crossScan(in TCoordinateFrame coordFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * Performs a skydip using the main drives of the telescope. The scan is done at the current azimuth position and consists of moving the antenna between two elevation  positions. A system temperature measurment
+		 * is perfomed at the higher specified elevation. The movement is done from the greater elevation toword the lower. 
+		 * The default backend and the default data recorder are used as data source and destination respectively.
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx 
+		 * @throw CORBA::SystemExcpetion 
+		 * @param coordFrame it gives the frame in which the cross cran is performed. 
+		 * @param span this is the overall length of the single scans (radians)
+		 * @param duration this determine how long the single scan has to take.
+		 */ 		
+		void skydip(in double elevation1,in double elevation2,in ACS::TimeInterval duration);
+		
+		/**
+		 * The operation consists of system temperature measurement (the telescope is sent
+		 * 3 times the current beam size off) and then a focus peaker scan on the source.
+		 * The default backend and the default data recorder are used as data source and destination respectively.
+		 * @param axis name of the involved axis
+		 * @param span range to be traveled
+		 * @param duration scan time
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void peakerScan(in string axis,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * Given the default backend. This methods allows to configure the default device. This device is used for calibration purposes and for the computation of the beamwidth, so calling
+		 * this method will cause the beam width to be recomputed (usign the configuration of the section and the configuration of the receiver). If the device id is not existent inside the 
+		 * current backend, an error is thrown. The set value can be read back from the <i>currentDevice</i> attribute. If not set the default value is 0 but if this method is not called there 
+		 * is no guarantee that the backend configuration, the beamsize, the receiver configuration, and the current device are coherent.
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx 
+		 * @throw CORBA::SystemExcpetion 
+		 * @param deviceID identifier of the device (section) inside the current default backend. If negative the current value is preserved.
+		 */
+		void setDevice(in long deviceID) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * This method allows to change the instance of the backend choosen as default backend. The new backend is not loaded, it will the next time the default backend is required.
+		 * The default backend is used (when no schedule is running) to perform some scheduler operations (@sa <i>setDevice()</i> and <i>systemTemperature</i>).
+		 * @throw CORBA::SystemExcpetion  
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @thorw ManagementErrors::ManagementErrorsEx
+		 * @param bckInstance name of the instance of the new default backend or any other assigned alias that the system knows
+		 */
+		void chooseDefaultBackend(in string bckInstance) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * This method allows to change the instance of the  data recorder choosen as default. The new component is not loaded, it will the next time the default data recorder is required. 
+		 * @param rcvInstance name of the instance of the new default component
+		 * @throw CORBA::SystemExcpetion  
+		 */ 
+		void chooseDefaultDataRecorder(in string rcvInstance) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * This method allows to change the value of the attribute <i>restFrequency</i>.
+		 * @param rest frequencies in MHz. In principle a value of rest frequency has to be provided for each os sections of the current backend.
+		 * In case a single value is gives it will be considered to be valid for all sections.
+		 */
+		void setRestFrequency(in ACS::doubleSeq rest);
+		
+		/**
+		 * Moves the frequency configuration in order to have all the sections of the currently active backend ready for spectroscopy.
+		 * The method tries to put the given rest frequency (@sa <i>setRestFrequency</i>) in the center of the corresponding sections.
+		 * In order to obtain this results it acts on the local oscillator of the front end and on the settings of the sections.
+		 * @param dev this string value is expected to be on of the three following code: LO, BCK, ALL.
+		 *        LO the backend sections are centered on the line only moving the local oscillator of the frontend
+		 *        BCK the backend sections are centered on the line only moving the synthetizer of the backend
+		 *        ALL the backend frequency tuning is done with both the above methods
+		 */
+		void fTrack(in string dev) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * This method sets the current project code. If the project does not exists an error is thrown.
+		 * @param code code of the project, if blank the selected code will be default one 
+		 * @throw ManagementErrors::ManagementErrorsEx 
+		 * @throw CORBA::SystemExcpetion 
+		 */
+		void setProjectCode(in string code) raises (ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It allows to immediately start a scan that involves a primary focus axis or a subreflector axis. The scan is performed of the currently
+		 * commanded source. If the axis involves a pointing offsets the telescope will try to correct it by moving the antenna by the adequate
+		 * beam deviation factor.
+		 * @param axis name of the involved axis
+		 * @param span range to be traveled
+		 * @param duration scan time
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void peaker(in string axis,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It allows to immediately start a longitude On The Fly to Antenna. The will be scan over the currently commanded target.
+		 * If no target is commanded yet an error is thrown. The current target is used as the central point of the scan (taken from the J2000 equatorial).
+		 * If the target is not above the horizon an error is risen.
+		 * @param scanFrame this indicates the frame along which the scan is done
+		 * @param span distance or length of the scan (radians)
+		 * @param duration duration of the scan in 10^-7 seconds, the combination of duration and span gives the scan velocity
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void lonOTF(in Antenna::TCoordinateFrame scanFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It allows to immediately start a latitude On The Fly to Antenna. The scan will be over the currently commanded target.
+		 * If no target is commanded yet an error is thrown. The current target is used as the central point of the scan (taken from the J2000 equatorial).
+		 * If the target is not above the horizon an error is risen.
+		 * @param scanFrame this indicates the frame along which the scan is done
+		 * @param span distance or length of the scan (radians)
+		 * @param duration duration of the scan in 10^-7 seconds, the combination of duration and span gives the scan velocity
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void latOTF(in Antenna::TCoordinateFrame scanFrame,in double span,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It allows to move the antenna along the elevation in order to perform a skydip scan. The scan will be set according the
+		 * currently tracked source.
+		 * @param el1 first elevation limit of the scan
+		 * @param el2 second elevation limit of the scan
+		 * @param duration duration of the scan in 10^-7 seconds, the combination of duration and span gives the scan velocity
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void skydipOTF(in double el1,in double el2,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It allows to immediately start tracking a given sidereal target given its equatorial coordinates.
+		 * @param targetName name or identifier of the source
+		 * @param ra right ascension (radians)
+		 * @param dec declination (radians)
+		 * @param eq reference equinox of the equtorial coordinates
+		 * @param section It allows to force the preferred section of the azimuth axis.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void sidereal(in string targetName,in double ra,in double dec,in Antenna::TSystemEquinox eq,in Antenna::TSections section) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It allows to immediately start a sidereal tracking over a catalog source.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 * @param targetName name of the source to track, it must be known by the system
+		 */
+		void track(in string targetName) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 *  It allows to immediately start a tracking of the moon.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void moon() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		 /**
+		  * It allows to immediately go to a fixed horizontal position (beampark).
+		  * @param az azimuth in radians. It could be -1, in that case the current position is taken
+		  * @param el elevation in radians. It could be -1, in that case the current position is taken
+		  * @throw CORBA::SystemExcpetion
+		  * @throw ComponentErrors::ComponentErrorsEx
+		  * @throw AntennaErrors::AntennaErrorsEx
+		  */
+		 void goTo(in double az,in double el) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It allows to abort all the long-run jobs which are presently ongoing, a skydip or a waitUntil operation
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void abort() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * Allows to prepare the system in order to start a data recording, the recording will involve the currently selected data recorder
+		 * and backend
+		 * @param scanid scan identifier
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void initRecording(in long scanid) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * It will start the data recording. The start time may vary according to the subscan commanded to the telescope.
+		 * In any case it will never start before the telescope tracking flag is true. When the duration is expired a stop
+		 * recording is issued automatically
+		 * @param subScanId sub scan identifier
+		 * @param duration required duration of the data acquisition
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void startRecording(in long subScanId,in ACS::TimeInterval duration) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * This method is used internally to collect some derived information about the currently running subscan
+		 * @param conf current subscan configuration
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void getSubScanConfigruation(out Management::TSubScanConfiguration conf) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+		/**
+		 * This operation will finalize the current scan.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		void terminateScan() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+			
+		/**
+		 * This attribute reports the scan identifier currently played by the scheduler.
+		*/ 
+		readonly attribute ACS::ROlong scanID;
+		
+		/**
+		 * This attribute reports the subscan identifier currently played by the scheduler
+		 */
+		readonly attribute ACS::ROlong subScanID;
+		
+		/** 
+		 * This attribute reports the current schedule file name that the scheduler is executing.
+		 */
+		readonly attribute ACS::ROstring scheduleName;
+		
+		/**
+		 * This attribute reports on the status of the component
+		 */
+		readonly attribute Management::ROTSystemStatus status;
+		
+		/**
+		 * This attributes summerizes the tracking and the status of the while telescope, in order to declare the telescope is tracking correctly all
+		 * the subsystem must be ready and tracking
+		 */ 
+		readonly attribute Management::ROTBoolean tracking;
+		
+		/**
+		 * This attribute reports the device id currently in use. This value can be changed by calling <i>setDevice()</i>
+		 */
+		readonly attribute ACS::ROlong currentDevice;
+		
+		/**
+		 * This attribute reports the currently running project code, this code will be used for foutput files name, paths and to collect schedules 
+		 */
+		readonly attribute ACS::ROstring projectCode;
+		
+		/**
+		 * This attribute reports the name of the instance of the currently used backend
+		 */
+		readonly attribute ACS::ROstring currentBackend;
+		
+		/**
+		 * This attribute reports the name of the instance of the currently used data receiver
+		 */
+		readonly attribute ACS::ROstring currentRecorder;
+		
+		/**
+		 * This attribute reports the rest frequency currently configured for each section of the backend (Mhz).  
+		 * It can be changed using  the method <i>setRestFrequency</i>.
+		*/		
+		readonly attribute ACS::ROdoubleSeq restFrequency;
+		
+		
+	};
+};
+
+
+
+
+
+#endif /*SCHEDULER_IDL_*/

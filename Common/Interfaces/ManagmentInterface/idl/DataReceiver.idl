@@ -1,0 +1,186 @@
+/* **************************************************************** */
+/* IRA Istituto di Radioastronomia                                  */
+/*                                                                  */
+/* This code is under GNU General Public Licence (GPL)              */
+/*                                                                  */
+/* Who                                   when            What        */
+/* Andrea Orlati(a.orlati@ira.inaf.it)	 03/11/2010      Created	 */
+/* Andrea Orlati(a.orlati@ira.inaf.it)	 24/10/2011      Added methods and declarations required to support scans and subscans	 */
+
+#ifndef DATARECEIVER_IDL_
+#define DATARECEIVER_IDL_
+
+#include <baci.idl>
+#include <ManagmentDefinitions.idl>
+#include <ComponentErrors.idl>
+#include <bulkDataReceiver.idl>
+
+
+#pragma prefix "alma"
+
+module Management { 
+	
+	/**
+	 * This structure  all the parameters required to initialize a scan before recording. 
+    */
+	typedef struct ScanSetupStructure {
+		long scanTag;
+		long scanId;
+		string projectName;
+		string observerName;
+		string path;              // directory path 
+		string extraPath;     //extra path 
+		string baseName; // name of the file
+		string scanLayout;
+		string schedule;   // name of the schedule
+		long device;
+	} TScanSetup;
+	
+	/**
+	 * This structure  all the parameters required to initialize a subscan before recording. 
+    */
+	typedef struct SubScanSetupStructure {
+		ACS::Time startUt;
+		long subScanId;
+		TScanAxis axis;
+		string minorServoNameForAxis; // the name of the minor servo mapping the axis
+		string targetID;
+		string extraPath;
+		string baseName;  //name of the file
+	} TSubScanSetup;
+
+	/**
+	 * This is common interface of components that are able to receive and process data from a data sender through the ACS bulk data transfer protocol. 
+	 * Generally speaking a data sender is a backend whilest a receiver is a specific component that does something with data. The components that implement this interface
+	 * can saves the data into a file or could perform any sort run-time analisys. 
+	 * The <i>Scheduler</i> deals with data receivers component through this interface, any other specialization is not considered by the scheduler.
+	 * I'm giving the lists of steps (calls) performed by the scheduler in order to setup a data transfer between a backend (bck) and a DataReceiver (wrt) during a scan (sequence of subscans) executions.
+	 * @arg \c 1	bck->connect(wrt)
+	 * @arg \c 2 wrt->startScan()
+	 * @arg \c 3 bck->sendHeader()
+	 * @arg \c 4 wrt->startSubScan()
+	 * @arg \c 5 bck->sendData()
+	 * @arg \c 6 bck->sendStop()
+	 * @arg \c 7 wait !wrt->isRecording()
+	 * @arg \c 8 if there is another subscan goto 4
+	 * @arg \c 9 wrt->stopScan()
+	 * @arg \c10 bck->terminate()
+     * @arg \c 11 bck->disconnect();
+	 * #arg \c 12 wrt->closeReceiver();
+	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ 	 * Istituto di Radioastronomia, Italia
+	 */ 
+	interface DataReceiver : bulkdata::BulkDataReceiver {
+		
+		/*
+		 *  Definition of file name that is currently written
+		 */
+		readonly attribute ACS::ROstring fileName;
+		
+		/**
+		 * Name of the project currently running
+		 */
+		readonly attribute ACS::ROstring projectName;
+		
+		/**
+		 * Name of the observer, it could be any string of characters
+		 */
+		readonly attribute ACS::ROstring observer;
+		
+		/**
+		 * Identifer of the device currently used as primary
+		 */
+		readonly attribute ACS::ROlong deviceID;
+		
+		/**
+		 * Stores the information about the axix along with the scan is taking place, since one axis at the time is allowed the antenna movment has the precedence over the 
+		 * ServoMinor. It may be that the telescope is not scanning or the telescope is simpy tracking, in that case <i>MNG_NO_AXIS</i> is reported. 
+		 */
+		readonly attribute Management::ROTScanAxis scanAxis;
+		
+		/**
+		 * Istantaneous Y data
+		 */
+		readonly attribute ACS::ROdouble dataY;
+		
+		/**
+		 * Istantaneous X data. This makes sense only if the scanAxis is not <i>MNG_NO_AXIS</i>
+		 */
+		readonly attribute ACS::ROdouble dataX;
+		
+		/**
+		 * all Y data from the beggining of the data acquisition
+		 */
+		readonly attribute ACS::ROdoubleSeq arrayDataY;
+		
+		/**
+		 * all X data from the beggining of the data acquisition. This makes sense only if the scanAxis is not <i>MNG_NO_AXIS</i>
+		 */ 
+		readonly attribute ACS::ROdoubleSeq arrayDataX;
+		
+		/**
+		 * When this method is called the DataReceiver should prepare to start a new scan.
+		 * @prm extra parameters to allow the scan preparation
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 * @thorw ManagementErrors::ManagementErrorsEx
+		 * @thorw CORBA::SystemExcpetion
+		 */
+		void startScan(in TScanSetup prm) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * When required it can be used to pass extra configuration to the data receiver.
+		 * @param layout  sequence of strings that contains the extra configuration
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 * @thorw ManagementErrors::ManagementErrorsEx
+		 * @thorw CORBA::SystemExcpetion
+		 */
+		void setScanLayout(in ACS::stringSeq layout) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * When this method is called the DataReceiver should prepare to close the current scan.
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 * @thorw ManagementErrors::ManagementErrorsEx
+		 * @thorw CORBA::SystemExcpetion
+		 */
+		void stopScan() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * When this method is called the DataReceiver should prepare to start a new subscan.
+		 * @prm extra parameters to allow the subscan preparation
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 * @throw CORBA::SystemExcpetion
+		 * @return the name of the file currently processed
+		 */
+		string startSubScan(in TSubScanSetup prm) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * Called in order to issue the end of the schedule
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 * @thorw ManagementErrors::ManagementErrorsEx
+		 * @thorw CORBA::SystemExcpetion
+		 */		
+		//void endSchedule()  raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * This method can be called to check if the component is receiving data or not.
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 * @thorw ManagementErrors::ManagementErrorsEx
+		 * @thorw CORBA::SystemExcpetion
+		 * @return true is data are coming, false otherwise
+		 */
+		boolean isRecording() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+		/**
+		 * This method can be called to make sure the componet is reset an reay to start recroding data.
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 * @thorw ManagementErrors::ManagementErrorsEx
+		 * @thorw CORBA::SystemExcpetion
+		 */
+		void reset() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		
+	};
+};
+
+
+#endif /*DATARECEIVER_IDL_*/

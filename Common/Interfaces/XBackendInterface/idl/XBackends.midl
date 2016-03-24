@@ -1,0 +1,49 @@
+/* **************************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      	        */
+/* $Id:XarcosBackends.midl																							*/
+/*                                                                                                      	        */
+/* This code is under GNU General Public Licence (GPL).                                                 	        */
+/*                                                                                                      	        */
+/* Who                                 when            What                                              	        */
+/* Liliana Branciforti(bliliana@arcetri.astro.it)  30/07/2008      Creation                                          	        						*/
+
+
+
+#ifndef _XBACKENDS_IDL_
+#define _XBACKENDS_IDL_
+
+#include <baci.idl>
+#include <enumpropMACRO.idl> 
+#include "GenericBackend.idl"
+
+#pragma prefix "alma"
+
+module Backends {
+
+	enum TXArcosConf {
+		XArcos_K77,
+		XArcos_K06,
+		XArcos_K03,
+        	XArcos_K00,
+		XArcos_C00
+	};
+	ACS_ENUM(TXArcosConf);
+
+	interface XBackends : GenericBackend {
+		/**
+		 * This attribute reports if the HW is setting on Mode8Bit.
+		 */
+		readonly attribute Management::ROTBoolean mode8bit;
+	
+		void setInputsNumber(in long inputsNumber) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		void setSectionsNumber(in long SectionsNumber) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		void visualSpecific()raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);		
+		void visualData()raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);		
+		void visualACS()raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);	
+		void setMode8bit(in boolean mode)raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);	
+		void setXarcosConf(in Backends::TXArcosConf conf) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);	
+	};
+	
+};
+
+#endif

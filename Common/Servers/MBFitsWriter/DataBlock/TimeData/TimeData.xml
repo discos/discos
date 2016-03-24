@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<TimeData xmlns="urn:schemas-cosylab-com:TimeData:1.0"
+									 xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+									 xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+									 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<TimeParameters>
+		<timeSys>UTC</timeSys>
+		<tai2utc>0.0</tai2utc>
+		<et2utc>32.184</et2utc>
+		<gps2tai>-19.0</gps2tai>
+	</TimeParameters>
+
+</TimeData>

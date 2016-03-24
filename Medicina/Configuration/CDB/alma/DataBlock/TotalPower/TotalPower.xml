@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<TotalPowerSetup xmlns="urn:schemas-cosylab-com:TotalPowerSetup:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Configuration>
+	<configurationID>KKC</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>7</inputPortDB>
+	<inputPortBW>2350</inputPortBW>	
+	<beams>7</beams>
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>L R L R</polarizations>
+	<feed>0 0 1 1</feed>
+	<IF>0 1 0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>CCC</configurationID>
+ 	<sections>2</sections>
+ 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>10</inputPortDB>
+	<inputPortBW>300</inputPortBW> 	
+ 	<beams>1</beams>
+ 	<section_boards>0 1</section_boards>
+ 	<polarizations>L R</polarizations>
+ 	<feed>0 0</feed>
+ 	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>CCCL</configurationID>
+ 	<sections>2</sections>
+ 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<inputPort>GREGORIAN GREGORIAN PRIMARY PRIMARY</inputPort>
+ 	<inputPortDB>13 13 7 7</inputPortDB>
+ 	<inputPortBW>2350 2350 2350 2350</inputPortBW> 	
+ 	<beams>1</beams>
+ 	<section_boards>2 3</section_boards>
+ 	<polarizations>L R</polarizations>
+ 	<feed>0 0</feed>
+ 	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>XXP</configurationID>
+ 	<sections>2</sections>
+ 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>8</inputPortDB>
+ 	<inputPortBW>1250</inputPortBW>
+ 	<beams>1</beams>
+ 	<section_boards>0 1</section_boards>
+ 	<polarizations>R L</polarizations>
+ 	<feed>0 0</feed>
+ 	<IF>0 1</IF>
+</Configuration>
+
+</TotalPowerSetup>

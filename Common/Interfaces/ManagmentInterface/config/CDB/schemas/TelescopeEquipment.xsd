@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   25-03-2015  Created
+-->
+
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:TelescopeEquipment:1.0"
+	xmlns="urn:schemas-cosylab-com:TelescopeEquipment:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:antenna="urn:schemas-cosylab-com:Antenna:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd" />
+	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Antenna.xsd" />
+	
+	<xs:simpleType name="MinorServoScanAxisEnumerationType">
+		<xs:restriction base="mng:TScanAxisEnumerationType">
+			<xs:enumeration value="SUBR_Z"/>
+	    	<xs:enumeration value="SUBR_X"/>
+	    	<xs:enumeration value="SUBR_Y"/>
+	    	<xs:enumeration value="SUBR_ROTY"/>
+	      	<xs:enumeration value="SUBR_ROTX"/>
+	    	<xs:enumeration value="PFP_Z"/>
+	    	<xs:enumeration value="PFP_Y"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="MinorServoMappingType">
+		<xs:attribute name="axis" type="MinorServoScanAxisEnumerationType" use="required"/>
+		<xs:attribute name="servoName" type="xs:string" use="required"/>
+		<xs:attribute name="antennaGeometry" type="antenna:TsubScanGeometryBasicType" use="required"/>
+		<xs:attribute name="beamDeviationFactor" type="xs:double" use="required"/>
+	</xs:complexType>
+	
+	<xs:complexType name="AvailableBackendsType">
+		<xs:attribute name="alias" type="xs:string" use="required"/>
+		<xs:attribute name="backend" type="xs:string" use="required"/>
+		<xs:attribute name="noData" type="xs:boolean" use="required"/>
+		<xs:attribute name="dataPath" type="xs:string" use="required"/>		
+	</xs:complexType>
+
+	<xs:complexType name="TelescopeEquipmentType">
+		<xs:sequence>	
+			<xs:element name="MinorServoMapping" type="MinorServoMappingType" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="AvailableBackend" type="AvailableBackendsType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+
+		<!-- FTrack resolution, number of decimal positions that are meaningful for the synthetizer, 3 means 100.3456MHz is the same as 100.345MHz  -->
+		<xs:attribute name="FTrackPrecisionDigits" type="xs:long" use="required"/>		
+	</xs:complexType>
+
+	<xs:element name="TelescopeEquipment" type="TelescopeEquipmentType"/>
+
+</xs:schema>

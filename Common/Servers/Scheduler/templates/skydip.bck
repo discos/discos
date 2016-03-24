@@ -1,0 +1,4 @@
+
+STD:BACKENDS/TotalPower {
+	getTpi
+}

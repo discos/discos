@@ -1,0 +1,8 @@
+/archive/events/acs.xml {
+    daily
+    copytruncate
+    dateext
+    compress
+    delaycompress
+    rotate 365
+}

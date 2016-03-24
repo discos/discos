@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+from __future__ import with_statement
+
+"""
+This sript is conceived to convert a text file by substituting tabs to spaces
+"""
+
+import os 
+import re
+import sys
+import logging
+import optparse #will become argparse in Python2.6
+import shutil
+import tempfile
+
+# Using this PATTERN leaves original tab characters in place
+#WHITESPACES_PATTERN = re.compile("[ \r\n\f\v]+")
+# Using this PATTERN also tab characters are replaced with new ones
+WHITESPACES_PATTERN = re.compile("\s+")
+
+def console_app():
+    usage = """
+   The scripts operates on a file by substituting each occurrence
+   of one or more consecutive whitespace character with a tab character.
+
+   $ tabbify path_to_data
+   
+   Examples:
+    
+   $ tabbify /data/schedules/Maintenance/mia_schedula.lis
+
+    """
+    op = optparse.OptionParser()
+    op.set_usage(usage)
+    op.add_option("-d", action="store_true", default=False, dest="debug", help="set debug output")
+    opts, args = op.parse_args(sys.argv[1:])
+    if opts.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+    if not args:
+        print usage
+        sys.exit(0)
+    else:
+        filenames = [os.path.abspath(filename) for filename in args]
+        logging.debug("filenames list: %s" % (str(filenames),))
+
+    for filename in filenames:
+        logging.info("tabbifying: %s" % (filename,))
+        if not os.path.exists(filename):
+            logging.error("Invalid file name: %s" % (filename,))
+        else:
+            with open(filename, "rt") as input_file:
+                lines = input_file.readlines()
+            (tmp_fd, tmp_filename) = tempfile.mkstemp(text=True)
+            logging.debug("created tmp file: %s" % (tmp_filename,))
+            substitutions_count = 0
+            with os.fdopen(tmp_fd, "wt") as tmp_file:
+                for line in lines:
+                    # removing trailing whitespaces
+                    # we keep starting whitespaces as there could be indentation
+                    line = line.rstrip()
+                    if not line.startswith('#'):
+                        # Here happens the actual substitution
+                        matches = re.subn(WHITESPACES_PATTERN, '\t', line)
+                        logging.debug("[orig] %s" % (line,))
+                        logging.debug("[dest] %s" % (matches[0],))
+                        logging.debug("[subs] %d" % (matches[1],))
+                        substitutions_count += matches[1]
+                        writeline = matches[0]
+                    else:
+                        logging.debug("[comm] %s" % (line,))
+                        writeline = line
+                    tmp_file.write(writeline + '\n')
+            logging.debug("closed tmp file: %s" % (tmp_filename,))
+            logging.debug("substitutes %d occurencies" % (substitutions_count,))
+            try:
+                shutil.copyfile(tmp_filename, filename)
+                logging.debug("copied %s to %s" % (tmp_filename, filename))
+            except:
+                logging.error("cannot copy %s to %s" % (tmp_filename, filename))
+                sys.exit(1)
+            try:
+                os.remove(tmp_filename)
+                logging.debug("removed file %s" % (tmp_filename,))
+            except:
+                logging.error("cannot remove file %s" % (tmp_filename,))
+                sys.exit(1)
+
+if __name__ == "__main__":
+    console_app()
