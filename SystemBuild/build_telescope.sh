@@ -5,7 +5,7 @@ while getopts "p" opt; do
     case $opt in
       p)
         echo "compiling in production mode"
-        PRODUCTION="DEBUG=''"
+        PRODUCTION="OPTIMIZE=0"
         ;;
     esac
 done
