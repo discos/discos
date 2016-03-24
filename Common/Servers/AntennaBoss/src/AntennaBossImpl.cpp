@@ -390,7 +390,17 @@ void AntennaBossImpl::getTopocentricFrequency(const ACS::doubleSeq & restFreq,AC
 {
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 	ACS::doubleSeq_var cent=new ACS::doubleSeq;
-	resource->getTopocentricFrequency(restFreq,cent);
+	try {
+		resource->getTopocentricFrequency(restFreq,cent);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getAntennaErrorsEx();
+	}
 	topo=cent._retn();
 }
 

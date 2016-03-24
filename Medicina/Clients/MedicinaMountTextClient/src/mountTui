@@ -9,4 +9,4 @@
 # Andrea Orlati(aorlati@ira.inaf.it) 07/05/2009      Creation                                  
 #************************************************************************
 
-xterm -geometry 72x30+0+0 +sb -title Mount -e /bin/bash --login -c _tui_MedicinaMountTextClient &
+xterm -geometry 72x30+1+241 +sb -title Mount -e /bin/bash --login -c _tui_MedicinaMountTextClient &

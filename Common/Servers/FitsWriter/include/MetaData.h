@@ -221,6 +221,15 @@ public:
 	const Management::TSubScanConfiguration& getSubScanConf() {
 		return m_subScanConf;
 	}
+
+	void setRestFreq(const ACS::doubleSeq& rf) {
+		m_restFreq=rf;
+	}
+	void setRestFreq() {
+		m_restFreq.length(0);
+	}
+	void getRestFreq(ACS::doubleSeq& rf) const { rf=m_restFreq; }
+
 private:
 
 	/**
@@ -236,7 +245,6 @@ private:
 	 * Number of feed inside the table
 	 */
 	WORD m_feedNumber;
-
 	/**
 	 * stores the identifiers of the receiver IFs (one for each input defined by the backend)
 	 */
@@ -261,6 +269,10 @@ private:
 	 * stores the value of the calibration marks, for each inputs from the backend
 	 */
 	ACS::doubleSeq m_calibrationMarks;
+	/**
+	 * stored the values of the restFrequency, one for each section
+	 */
+	ACS::doubleSeq m_restFreq;
 	/**
 	 * stores the identifier of the receiver feeds ((one for each input defined by the backend)
 	 */

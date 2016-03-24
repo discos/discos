@@ -10,4 +10,4 @@
 #************************************************************************
 
 
-xterm -geometry 82x32+0+0 +sb -title AntennaBoss -e /bin/bash --login -c _tui_AntennaBossTextClient &
+xterm -geometry 82x32+334+0 +sb -title AntennaBoss -e /bin/bash --login -c _tui_AntennaBossTextClient &

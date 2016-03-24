@@ -7,6 +7,7 @@
 <body>
 	antennaSetup=CCC
 	receiversSetup=CCC
+	chooseBackend=TotalPower
 	initialize=CCC
 	setSection=0,*,730.0,*,*,*,*
 	setSection=1,*,730.0,*,*,*,*
@@ -20,6 +21,7 @@
 <body>
 	antennaSetup=KKC
 	receiversSetup=KKC
+	chooseBackend=TotalPower
 	initialize=KKC
 	device=0
 	setAttenuation=0,9
@@ -35,6 +37,7 @@
 <body>
 	antennaSetup=XXP
 	receiversSetup=XXP
+	chooseBackend=TotalPower
 	initialize=XXP
 	setSection=0,*,730.0,*,*,*,*
 	setSection=1,*,730.0,*,*,*,*
@@ -49,6 +52,7 @@
 	antennaSetup=CCC
 	receiversSetup=CCC
 	receiversMode=NARROWBANDWIDTH
+	chooseBackend=TotalPower
 	initialize=CCCL
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*

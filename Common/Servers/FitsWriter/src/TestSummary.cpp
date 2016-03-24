@@ -25,6 +25,8 @@ int main(int argc, char *argv[])
 	sumWriter.getFile().setKeyword("EXPTIME",10.34); //double single
 	sumWriter.getFile().setKeyword("NUSEBANDS",10L); //long single
 	sumWriter.getFile().setKeyword("RESTFREQ",restFreq); //double multi
+	sumWriter.getFile().setKeyword("TOPOFREQ",restFreq); //double multi
+
 	//
 	//sumWriter.getFile().setKeyword("test",2341.2213); //double single, table header keyword
 

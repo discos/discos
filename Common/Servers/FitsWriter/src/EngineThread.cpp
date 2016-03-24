@@ -409,6 +409,12 @@ void CEngineThread::runLoop()
 	IRA::CIRATools::getTime(nowEpoch); // it marks the start of the activity job
 	//cout << "inizio : " << nowEpoch.value().value << endl;
 	if (m_summaryOpened && m_data->isWriteSummary()) {
+		std::list<double> va;
+		ACS::doubleSeq rf;
+		m_info.getRestFreq(rf);
+		va.clear();
+		CCommonTools::map(rf,va);
+		m_summary->getFilePointer()->setKeyword("RESTFREQ",va);
 		if ((!m_summary->write()) || (!m_summary->close())) {
 			_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 			impl.setFileName((const char *)m_data->getSummaryFileName());
@@ -539,6 +545,12 @@ void CEngineThread::runLoop()
 				else {
 					collectReceiversData(NULL);
 				}
+				if (m_summaryOpened) { //this must be called before the collectAntennaData
+					collectSchedulerData(m_summary->getFilePointer());
+				}
+				else {
+					collectSchedulerData(NULL);
+				}
 				//get the data from the antenna boss
 				if (m_summaryOpened) {
 					collectAntennaData(m_summary->getFilePointer());
@@ -546,12 +558,7 @@ void CEngineThread::runLoop()
 				else {
 					collectAntennaData(NULL);
 				}
-				if (m_summaryOpened) {
-					collectSchedulerData(m_summary->getFilePointer());
-				}
-				else {
-					collectSchedulerData(NULL);
-				}
+
 				//get the data from the minor servo boss...if subsystem is enabled
 				collectMinorServoData();
 
@@ -975,8 +982,8 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 		CORBA::Double ra=0.0,dec=0.0,vrad=0.0;
 		CORBA::Double raOff=0.0,decOff=0.0,azOff=0.0,elOff=0.0,lonOff=0.0,latOff=0.0;
 		IRA::CString sourceName="";
-		Antenna::TReferenceFrame VFrame;
-		Antenna::TVradDefinition VDefinition;
+		Antenna::TReferenceFrame VFrame=Antenna::ANT_UNDEF_FRAME;
+		Antenna::TVradDefinition VDefinition=Antenna::ANT_UNDEF_DEF;
 
 		try { //get the target name and parameters
 			ACS::ROstring_var targetRef;
@@ -1193,20 +1200,15 @@ void CEngineThread::collectSchedulerData(FitsWriter_private::CFile* summaryFile)
 			impl.setMinor(ex.minor());
 			impl.log(LM_ERROR);
 			m_data->setStatus(Management::MNG_WARNING);
+			m_info.setRestFreq();
 			m_schedulerError=true;
 		}
 		restFreq=restFreqRef->get_sync(comp.out());
-		std::list<double> va;
-		va.clear();
-		for (unsigned ii=0;ii<restFreq->length();ii++) {
-			printf("valore precedente %lf\n",restFreq[ii]);
-		}
-		CCommonTools::map(restFreq,va);
-		std::list<double>::const_iterator it;
-		for (it=va.begin();it!=va.end();it++) {
-			printf("valore convertito %lf\n",*it);
-		}
-		if (summaryFile) summaryFile->setKeyword("RESTFREQ",va);
+		//std::list<double> va;
+		//va.clear();
+		//CCommonTools::map(restFreq,va);
+		//if (summaryFile) summaryFile->setKeyword("RESTFREQ",va);
+		m_info.setRestFreq(restFreq);
 		Management::TSubScanConfiguration_var conf;
 		try {
 			m_scheduler->getSubScanConfigruation(conf.out());
@@ -1237,6 +1239,10 @@ void CEngineThread::collectSchedulerData(FitsWriter_private::CFile* summaryFile)
 			m_data->setStatus(Management::MNG_WARNING);
 			m_info.setSubScanConf();
 		}
+	}
+	else {
+		m_info.setSubScanConf();
+		m_info.setRestFreq();
 	}
 }
 

@@ -23,6 +23,7 @@ CMetaData::CMetaData()
 	m_dewarPos=0.0;
 	m_servoAxisNames.length(0);
 	m_servoAxisNames.length(0);
+	m_restFreq.length(0);
 	m_azOff=m_elOff=m_raOff=m_decOff=m_lonOff=m_latOff=0.0;
 	m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
 }
