@@ -11,7 +11,7 @@ while getopts "p" opt; do
 done
 
 source ~/.bashrc
-if [ -d "$DISCOS_CDB"]; then
+if [ -d "$DISCOS_CDB" ]; then
     echo "replacing $ACS_CDB with $DISCOS_CDB"
     ACS_CDB=$DISCOS_CDB
 fi
