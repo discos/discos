@@ -451,6 +451,9 @@ void CEngineThread::runLoop()
 		return;
 	}
 	if (m_data->isStart() && m_data->isReady() &&  m_data->isScanHeaderReady() && m_data->isSubScanHeaderReady()) { // //main headers are already saved and file has to be opened
+		//*****************************************************************************************
+		ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"LET S BEGIN!"));
+		//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 		if (!m_fileOpened) {
 			m_data->setStatus(Management::MNG_OK);
 			// create the file and save main headers
@@ -537,6 +540,8 @@ void CEngineThread::runLoop()
 #else
 				//*****************************************************************************************
 				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"OUTPUT_FILE_CREATED_NOW"));
+				m_fileOpened=true;
+				m_data->startRunnigStage();
 				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 				//get data from receivers boss
 				if (m_summaryOpened) {
@@ -873,8 +878,8 @@ void CEngineThread::runLoop()
 					}
 				}				
 #endif
-				m_fileOpened=true;
-				m_data->startRunnigStage();
+				//m_fileOpened=true;
+				//m_data->startRunnigStage();
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"RUNNING_FROM_NOW" ));
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"FILE_OPENED %s",(const char *)m_data->getFileName()));
 			}
