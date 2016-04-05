@@ -2,10 +2,23 @@
 
 import logging
 import time
+import sys
+import os
 from math import degrees
 
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Util.ACSCorba import getManager
+
+process = os.path.basename(__file__)
+running_processes = os.popen("ps aux").read()
+counter = 0
+for line in running_processes.split('\n'):
+    if 'ACSSW/bin/python' in line and process in line:
+        counter += 1
+    if counter > 1:
+        print '%s already running, everything is OK' % process
+        sys.exit(0)
+time.sleep(180)
 
 logging.basicConfig(
     filename='/home/gavino/logs/receivers.log',
