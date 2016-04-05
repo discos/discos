@@ -18,7 +18,6 @@ for line in running_processes.split('\n'):
     if counter > 1:
         print '%s already running, everything is OK' % process
         sys.exit(0)
-time.sleep(180)
 
 logging.basicConfig(
     filename='/home/gavino/logs/receivers.log',
