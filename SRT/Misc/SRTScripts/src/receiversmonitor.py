@@ -9,12 +9,16 @@ from math import degrees
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Util.ACSCorba import getManager
 
+# Exit in case the process is already running
 process = os.path.basename(__file__)
 running_processes = os.popen("ps aux").read()
 counter = 0
 for line in running_processes.split('\n'):
-    if 'ACSSW/bin/python' in line and process in line:
-        counter += 1
+    if 'python' in line and process in line:
+        if str(os.getpid()) in line.split():
+            continue
+        else:
+            counter += 1
     if counter > 1:
         print '%s already running, everything is OK' % process
         sys.exit(0)
