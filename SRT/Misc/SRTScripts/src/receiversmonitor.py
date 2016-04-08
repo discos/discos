@@ -23,8 +23,10 @@ for line in running_processes.split('\n'):
         print '%s already running, everything is OK' % process
         sys.exit(0)
 
+LOGDIR = os.path.join(os.getenv('HOME'), 'logs', 'receivers')
+FILENAME = os.path.join(LOGDIR, 'receivers.log')
 logging.basicConfig(
-    filename='/home/gavino/logs/receivers.log',
+    filename=FILENAME,
     format='%(asctime)s\t%(message)s')
 
 common_receiver_properties = (
