@@ -9,8 +9,14 @@ from math import degrees
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Util.ACSCorba import getManager
 
-# Exit in case the process is already running
 process = os.path.basename(__file__)
+# Exit in case the user try to run the script on nuraghe-mng
+if 'nuraghe-mng' in os.getenv('HOST'):
+    print 'ERROR: you can not execute %s on this machine.' % process
+    print 'Please, read the SD manual!'
+    sys.exit(0)
+
+# Exit in case the process is already running
 running_processes = os.popen("ps aux").read()
 counter = 0
 for line in running_processes.split('\n'):
