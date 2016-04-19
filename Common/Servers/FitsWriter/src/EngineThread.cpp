@@ -511,7 +511,9 @@ void CEngineThread::runLoop()
 				m_summaryOpened=true;
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"SUMMARY_OPENED"));
 			}
-
+			///**********************************************************************************
+			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"CREO IL FILE"));
+			///******************* DEBUG ********************************
 			m_file = new CFitsWriter();
 			m_file->setBasePath("");
 			m_file->setFileName((const char *)m_data->getFileName());
@@ -522,6 +524,10 @@ void CEngineThread::runLoop()
 				impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 				m_data->setStatus(Management::MNG_FAILURE);
 			}
+			///**********************************************************************************
+			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"CREATO"));
+			///******************* DEBUG ********************************
+
 #endif
 			else {
 #ifdef FW_DEBUG
@@ -540,9 +546,9 @@ void CEngineThread::runLoop()
 #else
 				//*****************************************************************************************
 				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"OUTPUT_FILE_CREATED_NOW"));
+				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 				m_fileOpened=true;
 				m_data->startRunnigStage();
-				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 				//get data from receivers boss
 				if (m_summaryOpened) {
 					collectReceiversData(m_summary->getFilePointer());
