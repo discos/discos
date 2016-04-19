@@ -787,7 +787,7 @@ void CCommandLine::getFeed(ACS::longSeq& feed) const
             }
         }
         else
-            feed[i]=i;
+            feed[i]=i/2; // ONLY for XARCOS !!
 	}
 }
 
