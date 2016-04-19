@@ -33,7 +33,7 @@ using namespace FitsWriter_private;
 #define _FITSW_RFCOL_BW "bandWidth"
 #define _FITSW_RFCOL_LO "localOscillator"
 #define _FITSW_RFCOL_ATT "attenuation"
-#define _FITSW_RFCOL_CAL "calibratonMark"
+#define _FITSW_RFCOL_CAL "calibrationMark"
 #define _FTISW_RFCOL_SECT "section"
 
 
