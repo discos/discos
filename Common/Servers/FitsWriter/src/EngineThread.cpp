@@ -452,7 +452,7 @@ void CEngineThread::runLoop()
 	}
 	if (m_data->isStart() && m_data->isReady() &&  m_data->isScanHeaderReady() && m_data->isSubScanHeaderReady()) { // //main headers are already saved and file has to be opened
 		//*****************************************************************************************
-		ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"LET S BEGIN!"));
+		ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"LETS BEGIN SUBSCAN %ld!",m_data->getSubScanID()));
 		//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 		if (!m_fileOpened) {
 			m_data->setStatus(Management::MNG_OK);

@@ -373,7 +373,7 @@ bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& rec
 		}
 		else {
 			recording=false;
-			inconsistent =true;
+			inconsistent=true;
 			return false;
 		}
 	}
@@ -382,12 +382,17 @@ bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& rec
 bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,bool& recording,bool& inconsistent)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
+	////*******************************************************
+	IRA::CString outstr;
+	IRA::CIRATools::timeToStr(setup.startUt,outstr);
+	ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_NOTICE,"SUBSCAN IS %ld",setup.subScanId));
+	ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_NOTICE,"REQUESTED_START_TIME WAS %s",(const char *)outstr));
+	///////////// DEBUGGING ***************************************
 	if (m_start && m_running) {
 		recording=true;
 		inconsistent=false;
 		/////*****************************************
 		ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_WARNING,"RECORD_WHILE_RECORDING_REQUEST %d %d",m_start,m_running));
-		ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_WARNING,"REQUESTED_START_TIME WAS %lld",setup.startUt));
 		///**************************** DEBUGGING, Inserted to track the Problem with roach and nodata
 		return false;
 	}
@@ -413,7 +418,6 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 			inconsistent=true;
 			/////*****************************************
 			ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_WARNING,"INCONSISTENT_REQUEST %d %d %d %d",m_start,m_running,m_scanHeader,m_subScanHeader));
-			ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_WARNING,"REQUESTED_START_TIME WAS %lld",setup.startUt));
 			///**************************** DEBUGGING, Inserted to track the Problem with roach and nodata
 			return false;
 		}
