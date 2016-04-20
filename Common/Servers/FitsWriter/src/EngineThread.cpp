@@ -469,18 +469,12 @@ void CEngineThread::runLoop()
 					ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"NEW_SCAN_FOLDER_CREATED: %s",(const char *)filePath));
 				}
 			}
-#ifdef FW_DEBUG
-			m_file.open((const char *)m_data->getFileName(),ios_base::out|ios_base::trunc);
-			if (!m_file.is_open()) {
-				_EXCPT(ComponentErrors::FileIOErrorExImpl,impl,"CEngineThread::runLoop()");
-				impl.setFileName((const char *)m_data->getFileName());
-				impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
-				m_data->setStatus(Management::MNG_FAILURE);
-			}
-#else
 			//let's create the summary file, it should be created before the first subscan of the scan.......
 			// the the summary will be valid for the duration of all the subscans.....
 			if (!m_summaryOpened) {
+				///**********************************************************************************
+				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"CREO SUMMARY"));
+				///******************* DEBUG ********************************************************
 			 	TIMEVALUE currentUT;
 				IRA::CDateTime now;
 				TIMEDIFFERENCE currentLST;
@@ -509,10 +503,10 @@ void CEngineThread::runLoop()
 			 	m_summary->getFilePointer()->setKeyword("DATE-OBS",lstStr);
 
 				m_summaryOpened=true;
-				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"SUMMARY_OPENED"));
+				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"SUMMARY_OPENED"));
 			}
 			///**********************************************************************************
-			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"CREO IL FILE"));
+			ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"CREO IL FILE"));
 			///******************* DEBUG ********************************
 			m_file = new CFitsWriter();
 			m_file->setBasePath("");
@@ -524,26 +518,7 @@ void CEngineThread::runLoop()
 				impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 				m_data->setStatus(Management::MNG_FAILURE);
 			}
-			///**********************************************************************************
-			ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"CREATO"));
-			///******************* DEBUG ********************************
-
-#endif
 			else {
-#ifdef FW_DEBUG
-				IRA::CString out;
-				Backends::TMainHeader mH=m_data->getMainHeader();
-				out.Format("Main - ch: %d , beams: %d, sampleSize: %d, integration: %d \n ",
-					mH.sections,mH.beams,mH.sampleSize,mH.integration);
-				m_file<< (const char *) out;
-				Backends::TSectionHeader const *cH=m_data->getSectionHeader();
-				for (int j=0;j<m_data->getSections();j++) {
-					out.Format("channel id: %d, bins: %d , pol: %d, bandWidth: %lf, frequency: %lf, attenuationL: %lf, attenuationR: %lf"
-						 "sampleRate: %lf, feed: %d \n",cH[j].id,cH[j].bins,cH[j].polarization,cH[j].bandWidth,
-						 cH[j].frequency,cH[j].attenuation[0],cH[j].attenuation[1],cH[j].sampleRate,cH[j].feed);
-					m_file<< (const char *) out;
-				}
-#else
 				//*****************************************************************************************
 				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"OUTPUT_FILE_CREATED_NOW"));
 				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
@@ -883,7 +858,6 @@ void CEngineThread::runLoop()
 						m_data->setStatus(Management::MNG_FAILURE);
 					}
 				}				
-#endif
 				//m_fileOpened=true;
 				//m_data->startRunnigStage();
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_DEBUG,"RUNNING_FROM_NOW" ));
