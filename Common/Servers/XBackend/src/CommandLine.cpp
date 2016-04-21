@@ -776,10 +776,12 @@ void CCommandLine::getFeed(ACS::longSeq& feed) const
 	for (int i=0;i<m_inputsNumber;i++) {
         if (m_XarcosK00 == true || m_XarcosC == true)
 		    feed[i]=0;
-        else if (m_XarcosK03 == true || m_XarcosK06 == true) {
+        else if (m_XarcosK03 == true || m_XarcosK06 == true || m_XarcosK01 == true) {
             if (i <= 3)
                 feed[i] = 0;
             else {
+                if (m_XarcosK01 == true)
+                    feed[i] = 1;
                 if (m_XarcosK03 == true)
                     feed[i] = 3;
                 if (m_XarcosK06 == true)
@@ -793,17 +795,19 @@ void CCommandLine::getFeed(ACS::longSeq& feed) const
 
 void CCommandLine::getFeedAttr(ACS::longSeq& feed) const
 {
-	AUTO_TRACE("CCommandLine::getFeed()");
+	AUTO_TRACE("CCommandLine::getFeedAttr()");
 
 	feed.length(m_sectionsNumber);
 	for (int i=0;i<m_sectionsNumber;i++) {
         if (m_XarcosK77 == false) {
             if (m_XarcosK00 == true || m_XarcosC == true)
                 feed[i]=0;
-            else if (m_XarcosK03 == true || m_XarcosK06 == true) {
+            else if (m_XarcosK03 == true || m_XarcosK06 == true || m_XarcosK01 == true) {
                 if (i <= 1)
                     feed[i] = 0;
                 else {
+                    if (m_XarcosK01 == true)
+                        feed[i] = 1;
                     if (m_XarcosK03 == true)
                         feed[i] = 3;
                     if (m_XarcosK06 == true)
@@ -1395,6 +1399,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 	    m_XarcosK77 = false;
 	    m_XarcosK03 = false;
 	    m_XarcosK06 = false;
+	    m_XarcosK01 = false;
         start = true;
         IRA::CIRATools::Wait(1,0);
 		setup("NNNN");
@@ -1409,6 +1414,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
         m_XarcosK00=false;
 	    m_XarcosK03 = false;
 	    m_XarcosK06 = false;
+	    m_XarcosK01 = false;
         setMode8bit(false);
         setSectionsNumber(7);
 		IRA::CIRATools::Wait(0,100000);
@@ -1431,6 +1437,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
         m_XarcosK77=false;
         m_XarcosK00=false;
 	    m_XarcosK03 = false;
+	    m_XarcosK01 = false;
 	    m_XarcosK06 = true;
         setMode8bit(true);
 		setSectionsNumber(4);
@@ -1448,6 +1455,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
         m_XarcosK77=false;
         m_XarcosK00=false;
 	    m_XarcosK03 = true;
+	    m_XarcosK01 = false;
 	    m_XarcosK06 = false;
         setMode8bit(true);
         setSectionsNumber(4);
@@ -1460,11 +1468,31 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		IRA::CIRATools::Wait(0,100000);
 		setSection(3,174.296875,3.90625,2,2,7.8125,-1);
     }
+    else if (config=="XK01") {
+		m_XarcosC=false;
+        m_XarcosK77=false;
+        m_XarcosK00=false;
+	    m_XarcosK03 = false;
+	    m_XarcosK01 = true;
+	    m_XarcosK06 = false;
+        setMode8bit(true);
+        setSectionsNumber(4);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(0,145,62.5,1,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(1,174.296875,3.90625,1,2,7.8125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(2,145,62.5,2,2,125,-1);
+		IRA::CIRATools::Wait(0,100000);
+		setSection(3,174.296875,3.90625,2,2,7.8125,-1);
+	    setFeedZero();
+    }
     else if(config=="XK00") {
         m_XarcosC=false;
         m_XarcosK00=true;
         m_XarcosK77=false;
 	    m_XarcosK03 = false;
+	    m_XarcosK01 = false;
 	    m_XarcosK06 = false;
 		setMode8bit(true);
 		setSectionsNumber(4);

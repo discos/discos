@@ -633,6 +633,7 @@ public:
 	bool m_XarcosK77;
 	bool m_XarcosK03;
 	bool m_XarcosK06;
+	bool m_XarcosK01;
     bool start;
 };
 
