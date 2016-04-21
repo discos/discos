@@ -31,6 +31,7 @@ class ScanBaseTest(unittest2.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.client.releaseComponent('MINORSERVO/Boss')
+        cls.client.disconnect()
 
     def setUp(self):
         self.antennaInfo = Antenna.TRunTimeParameters(
@@ -173,6 +174,26 @@ class ScanTest(ScanBaseTest):
         time_to_stop = self.boss.closeScan()
         # The time_to_stop should be greater than now
         self.assertGreater(time_to_stop, getTimeStamp().value) 
+
+    def test_checkScan_with_scanActive(self):
+        """checkScan() raises an exception in case there is an active scan."""
+        startTime = getTimeStamp().value + 15*10**7 # Start in 15 seconds
+        self.boss.startScan(startTime, self.scan, self.antennaInfo)
+        # Wait untill the scan finishes (one second after the scan)
+        targetTime = startTime + self.scan.total_time + 1*10**7 
+        self.waitUntilTime(targetTime)
+        with self.assertRaises(MinorServoErrorsEx):
+            self.boss.checkScan(startTime, self.scan, self.antennaInfo)
+
+    def test_checkScan_with_scan_in_execution(self):
+        """checkScan() raises an exception in case there is a scan in execution."""
+        startTime = getTimeStamp().value + 15*10**7 # Start in 15 seconds
+        self.boss.startScan(startTime, self.scan, self.antennaInfo)
+        # Wait untill the scan starts
+        targetTime = startTime + 2*10**7  # 2 seconds after the starting time
+        self.waitUntilTime(targetTime)
+        with self.assertRaises(MinorServoErrorsEx):
+            self.boss.checkScan(startTime, self.scan, self.antennaInfo)
 
     def test_checkScan_empty_scan_start_ASAP(self):
         """Starting time unknown: the scan must start ASAP"""
