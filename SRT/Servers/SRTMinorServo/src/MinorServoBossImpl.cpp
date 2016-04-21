@@ -749,6 +749,7 @@ CORBA::Boolean MinorServoBossImpl::checkScan(
         string msg("checkScan(): the system is not ready");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
+        ACS_SHORT_LOG((LM_DEBUG, msg.c_str()));
         throw impl.getMinorServoErrorsEx();
     }
 
@@ -756,6 +757,7 @@ CORBA::Boolean MinorServoBossImpl::checkScan(
         string msg("checkScan(): the system is executing another scan");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
+        ACS_SHORT_LOG((LM_DEBUG, msg.c_str()));
         throw impl.getMinorServoErrorsEx();
     }
 
@@ -766,6 +768,7 @@ CORBA::Boolean MinorServoBossImpl::checkScan(
         string msg("checkScan(): unexpected exception calling checkScanImpl()");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
+        ACS_SHORT_LOG((LM_DEBUG, msg.c_str()));
         throw impl.getMinorServoErrorsEx();
     }
 }
