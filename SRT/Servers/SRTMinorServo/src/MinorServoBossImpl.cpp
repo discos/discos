@@ -638,6 +638,7 @@ void MinorServoBossImpl::closeScan(ACS::Time& timeToStop) throw (
              MinorServoErrors::MinorServoErrorsEx, 
              ComponentErrors::ComponentErrorsEx)
 {
+    ACS_SHORT_LOG((LM_INFO, "closeScan() in execution."));
 	timeToStop=0;
     if(m_configuration->m_isScanActive) {
         string comp_name((m_configuration->m_scan).comp_name);
@@ -781,6 +782,7 @@ bool MinorServoBossImpl::checkScanImpl(
         MinorServo::TRunTimeParameters_out msParameters
     ) throw (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx)
 {
+    ACS_SHORT_LOG((LM_INFO, "checkScanImpl() started."));
     MinorServo::TRunTimeParameters_var msParamVar = new MinorServo::TRunTimeParameters;
     msParamVar->onTheFly = (msScanInfo.is_empty_scan == false) ? true : false;
     msParamVar->startEpoch = 0;
@@ -1166,6 +1168,7 @@ void MinorServoBossImpl::startScan(
         string msg("startScan(): the system is not ready");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
+        ACS_SHORT_LOG((LM_DEBUG, msg.c_str()));
         throw impl.getMinorServoErrorsEx();
     }
 
@@ -1173,6 +1176,7 @@ void MinorServoBossImpl::startScan(
         string msg("startScan(): the system is executing another scan");
         _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, msg.c_str());
         impl.log(LM_DEBUG);
+        ACS_SHORT_LOG((LM_DEBUG, msg.c_str()));
         throw impl.getMinorServoErrorsEx();
     }
 
@@ -1192,6 +1196,7 @@ void MinorServoBossImpl::startScanImpl(
              MinorServoErrors::MinorServoErrorsEx,
              ComponentErrors::ComponentErrorsEx)
 {
+    ACS_SHORT_LOG((LM_INFO, "startScanImpl() started."));
     m_configuration->m_isScanLocked = true;
     m_configuration->m_isScanning = false;
     size_t axis;
@@ -1389,6 +1394,7 @@ void MinorServoBossImpl::startScanImpl(
         m_configuration->m_isScanning = false;
         throw;
     }
+    ACS_SHORT_LOG((LM_INFO, "startScanImpl() done."));
 }
 
 
