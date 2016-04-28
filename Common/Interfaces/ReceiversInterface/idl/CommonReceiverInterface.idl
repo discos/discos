@@ -25,7 +25,7 @@ module Receivers {
      */
     interface CommonReceiverInterface {
  
-        /** This attribute reports the current value of the local oscillator of the current receiver. Generally one LO for each IFs. */ 
+        /** This attribute reports the current value of the local oscillator of the current receiver. Generally one LO for each IFs for each feed (14 in case of the MF SRT receiver). */ 
         readonly attribute ACS::ROdoubleSeq LO;
         
         /** This attribute reports the number of feeds of the current receiver */
@@ -100,7 +100,7 @@ module Receivers {
          * It allows to set the local oscillators of the current recevier. Generally this function allows to give one value for each 
          * supported IF, but in many cases the receiver does not support different LOs, so the asnwer of the system may vary from 
          * receiver to receiver according the implementation. A -1 will be interpreted as "keep present value".
-         * @param list of local oscillators values to be applied (MHz).
+         * @param list of local oscillators values to be applied (MHz), one for each IF (typically 0,1)
          * @throw ComponentErrors::ComponentErrorsEx
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw CORBA::SystemExcpetion  

@@ -505,7 +505,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		throw impl;
 	}
 	try {
-		inputs=backend->getInputs(bckinputFreq,bckinputBW,bckinputFeed,bckinputIF);
+		inputs=backend->getInputs(bckinputFreq.out(),bckinputBW.out(),bckinputFeed.out(),bckinputIF.out());
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
@@ -526,6 +526,11 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		impl.setComponentName(backend->name());
 		throw impl;
 	}
+	for (unsigned t=0;t<bckinputFreq->length();t++) {
+		printf("bck freq :%lf\n",bckinputFreq[t]);
+		printf("bck bw:%lf\n",bckinputBW[t]);
+
+	}
 	if (inputSection->length()!=(unsigned)inputs) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_fTrack()");
 		impl.setReason("inconsistent data from the backend inputs number");
@@ -533,6 +538,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 	}
 	//---------------------------------------------------------------------------------------------------
 	//4) info from antenna--------------------------------------------------------------------------------
+	printf("RestFrequency : %lf\n",m_restFrequency[0]);
 	try {
 		m_antennaBoss->getTopocentricFrequency(m_restFrequency,topocentricFreq.out());
 	}
@@ -560,7 +566,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
 		throw impl;
 	}
-	//for (unsigned t=0;t<topocentricFreq->length();t++) //printf("topocentric Freq :%lf\n",topocentricFreq[t]);
+	for (unsigned t=0;t<topocentricFreq->length();t++) printf("topocentric Freq :%lf\n",topocentricFreq[t]);
 	// just to make sure the topocentric sequence has the right dimension!
 	if (topocentricFreq->length()!=m_restFrequency.length()) {
 		topocentricFreq->length(m_restFrequency.length());
@@ -577,7 +583,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		throw impl;
 	}
 	IFNumber=IFNumberRO->get_sync(comp.out()); // number of output IFs of the receeever
-	//printf("if number :%ld\n",IFNumber);
+	printf("if number :%ld\n",IFNumber);
 	try {
 		m_receiversBoss->getIFOutput(bckinputFeed,bckinputIF,fndoutputFreq.out(),fndoutputBw.out(),fndoutputPol.out(),fndoutputLO.out());
 	}
@@ -604,6 +610,10 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		impl.setReason("inconsistent data from the receivers if outputs");
 		throw impl;
 	}
+	for (unsigned t=0;t<fndoutputFreq->length();t++) {
+		printf("Frequency :%lf\n",fndoutputFreq[t]);
+		printf("BandWidth :%lf\n",fndoutputBw[t]);
+	}
 	//---------------------------------------------------------------------------------------------------
 	//5) let's start with some computations  -----------------------------------------------------------------------------
 	sectionFreq.length(sections);
@@ -611,33 +621,58 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 	lo.length(IFNumber);
 	long currentSection;
 	for (long j=0;j<inputs;j++) {
+		inputLO[j]=fndoutputLO[j]; //if (device=="BCK")
 		if ((device=="ALL") || (device=="LO")) {
 			currentSection=inputSection[j];
-			//printf("currentSection :%ld\n",currentSection);
+			printf("currentSection :%ld\n",currentSection);
 			if (topocentricFreq->length()==1) {
-				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[0]-bckinputFreq[currentSection]-
-						(bckinputBW[currentSection]/2.0),digits);
-				//printf("inputLO[j] :%lf\n",inputLO[j]);
+				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[0]-bckinputFreq[j]-
+						(bckinputBW[j]/2.0),digits);
+				printf("inputLO[j] :%lf\n",inputLO[j]);
 			}
 			else {
-				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[currentSection]-bckinputFreq[currentSection]-
-						(bckinputBW[currentSection]/2.0),digits);
-				//printf("inputLO[j] :%lf\n",inputLO[j]);
+				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[currentSection]-bckinputFreq[j]-
+						(bckinputBW[j]/2.0),digits);
+				printf("inputLO[j] :%lf\n",inputLO[j]);
 			}
-			lo[bckinputIF[j]]=inputLO[j]; // local oscillator per IFs
+			//lo[bckinputIF[j]]=inputLO[j]; // local oscillator per IFs
 		}
-		else {
-			inputLO[j]=fndoutputLO[j];
+		//else {
+		//	inputLO[j]=fndoutputLO[j];
+		//}
+	}
+	for(long j=0;j<IFNumber;j++) {
+		lo[j] = -1.0;  // keep the default value if no inputs is associated to the current IF.
+		for (long i=0;i<inputs;i++) {
+			if (bckinputIF[i]==j) {
+				if((lo[j] < 0.0 ) || (inputLO[i] < lo[j])) { // change the local oscillator value if ......
+					lo[j] = inputLO[i];
+					printf("lo changed: #if: %ld, value: %lf  \n",j,lo[j]);
+				}
+			}
 		}
 	}
-	for (long j=0;j<inputs;j++) {
-		if ((device=="ALL") || (device=="BCK")) {
+	if (device=="ALL") {
+		for (long j=0;j<inputs;j++) {
 			currentSection=inputSection[j];
 			if (topocentricFreq->length()==1) {
-				sectionFreq[currentSection]=topocentricFreq[0]-inputLO[j]-(bckinputBW[currentSection]/2.0);
+				//sectionFreq[currentSection]=topocentricFreq[0]-inputLO[j]-(bckinputBW[currentSection]/2.0);
+				sectionFreq[currentSection]=topocentricFreq[0]-lo[bckinputIF[j]]-(bckinputBW[j]/2.0);
 			}
 			else {
-				sectionFreq[currentSection]=topocentricFreq[currentSection]-inputLO[j]-(bckinputBW[currentSection]/2.0);
+				sectionFreq[currentSection]=topocentricFreq[currentSection]-lo[bckinputIF[j]]-(bckinputBW[j]/2.0);
+			}
+		}
+	}
+	else if (device=="BCK") {
+		for (long j=0;j<inputs;j++) {
+			currentSection=inputSection[j];
+			if (topocentricFreq->length()==1) {
+				//sectionFreq[currentSection]=topocentricFreq[0]-inputLO[j]-(bckinputBW[currentSection]/2.0);
+				sectionFreq[currentSection]=topocentricFreq[0]-fndoutputLO[j]-(bckinputBW[j]/2.0);
+			}
+			else {
+				sectionFreq[currentSection]=topocentricFreq[currentSection]-fndoutputLO[j]-(bckinputBW[j]/2.0);
 			}
 		}
 	}
