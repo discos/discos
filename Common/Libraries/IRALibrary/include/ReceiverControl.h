@@ -1010,6 +1010,7 @@ private:
     pthread_mutex_t m_lna_mutex;
     pthread_mutex_t m_dewar_mutex;
     pthread_mutex_t m_switch_mutex;
+    pthread_mutex_t m_request_mutex;
 };
 
 }
