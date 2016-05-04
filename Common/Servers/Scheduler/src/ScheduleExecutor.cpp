@@ -41,6 +41,7 @@ void CScheduleExecutor::runLoop()
 	if (m_goAhead) {
 		switch (m_stage) {
 			case INIT: { // run once at schedule start, it runs the init procedure, in case of errors..schedule execution is continued
+				//CannotClosePendingTask
 				IRA::CString procName;
 				if (!m_schedule->getInitProc(procName)) { //get the procedure
 					//if init proc fails...warn but go ahead
@@ -504,7 +505,8 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
  
 void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (
  		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
- 		ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl)
+ 		ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,
+ 		ManagementErrors::CannotClosePendingTaskExImpl)
 {
  	baci::ThreadSyncGuard guard(&m_mutex);
  	if (m_active) {
@@ -529,6 +531,15 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	if (!IRA::CIRATools::fileExists(fullPath+schedule)) {
  		_EXCPT(ManagementErrors::ScheduleNotExistExImpl,dummy,"CScheduleExecutor::startSchedule()");
  		throw dummy;
+ 	}
+ 	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"Stopping all pending tasks"));
+ 	try {
+ 		m_core->closeScan(true);
+ 	}
+ 	catch (ACSErr::ACSbaseExImpl& ex) {
+ 		_ADD_BACKTRACE(ManagementErrors::CannotClosePendingTaskExImpl,impl,ex,"CScheduleExecutor::startSchedule()");
+ 		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
+ 		throw impl;
  	}
  	try {
  		m_schedule=new CSchedule(fullPath,schedule);
