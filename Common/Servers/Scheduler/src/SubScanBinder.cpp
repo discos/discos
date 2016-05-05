@@ -44,7 +44,9 @@ void CSubScanBinder::addOffsets(const double& lonOff,const double& latOff,const 
 	m_primary->longitudeOffset=lonOff;
 	m_primary->applyOffsets=true;
 	m_primary->offsetFrame=frame;
-	m_subScanConf->signal=Management::MNG_SIGNAL_REFERENCE;
+	if ((fabs(lonOff)>0.0000001) || (fabs(latOff)>0.0000001)) {
+		m_subScanConf->signal=Management::MNG_SIGNAL_REFERENCE;
+	}
 }
 
 void CSubScanBinder::addRadialvelocity(const Antenna::TReferenceFrame& VradFrame,const Antenna::TVradDefinition& VradDefinition,const double& RadialVelocity)
