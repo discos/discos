@@ -48,6 +48,7 @@ ReceiverControl::ReceiverControl(
     m_lna_board_ptr(NULL),
     m_switch_board_ptr(NULL)
 {
+    pthread_mutex_init(&m_request_mutex, NULL);
     openConnection();
 }
 
@@ -63,6 +64,10 @@ ReceiverControl::~ReceiverControl()
     if(m_switch_board_ptr != NULL)
         delete m_switch_board_ptr;
 
+    pthread_mutex_destroy(&m_request_mutex);
+    pthread_mutex_destroy(&m_lna_mutex);
+    pthread_mutex_destroy(&m_dewar_mutex);
+    pthread_mutex_destroy(&m_switch_mutex);
 }
 
 
@@ -1097,15 +1102,16 @@ void ReceiverControl::openConnection(void) throw (ReceiverControlEx)
 
 void ReceiverControl::closeConnection(void)
 {
-        m_dewar_board_ptr->closeConnection();
-        pthread_mutex_destroy(&m_dewar_mutex);
+        if(m_dewar_board_ptr != NULL) {
+            m_dewar_board_ptr->closeConnection();
+        }
 
-        m_lna_board_ptr->closeConnection();
-        pthread_mutex_destroy(&m_lna_mutex);
+        if(m_lna_board_ptr != NULL) {
+            m_lna_board_ptr->closeConnection();
+        }
 
         if(m_switch_board_ptr != NULL) {
             m_switch_board_ptr->closeConnection();
-            pthread_mutex_destroy(&m_switch_mutex);
         }
 }
 
@@ -1799,6 +1805,7 @@ void ReceiverControl::setSkyPath(
 std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, BYTE command, size_t len, ...) 
     throw (MicroControllerBoardEx)
 {
+    pthread_mutex_lock(&m_request_mutex); 
     va_list parameters; // A place to store the list of arguments
     va_start(parameters, static_cast<BYTE>(len)); // Initializing arguments to store all values after len
     std::vector<BYTE> vparams;
@@ -1807,11 +1814,17 @@ std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, 
         vparams.push_back(static_cast<BYTE>(va_arg(parameters, int))); 
     va_end(parameters);  // Clean up the list
 
-    m_reliable_comm ? board_ptr->send(command, vparams) \
-                    : board_ptr->send(command | MCB_CMD_TYPE_NOCHECKSUM, vparams);
-
-    vparams.clear();
-    vparams = board_ptr->receive();
+    try {
+        m_reliable_comm ? board_ptr->send(command, vparams) \
+                        : board_ptr->send(command | MCB_CMD_TYPE_NOCHECKSUM, vparams);
+        vparams.clear();
+        vparams = board_ptr->receive();
+    }
+    catch(MicroControllerBoardEx& ex) {
+        pthread_mutex_unlock(&m_request_mutex); 
+        throw;
+    }
+    pthread_mutex_unlock(&m_request_mutex); 
 
     return vparams; // Return the vector of parameters
 }
