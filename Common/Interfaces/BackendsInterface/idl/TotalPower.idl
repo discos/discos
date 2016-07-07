@@ -123,6 +123,16 @@ module Backends {
 		*/
 		void activateNoiseCalibrationSwitching(in string argument) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 				
+                /**
+                 * These methods are used to command the noise diode on or off exploiting the 
+                 * TotalPower backend connection to the calibration mark control. This method is
+                 * available only if the TotalPower backend is properly configured to support
+                 * noise mark activation.
+                 */
+                void calOn() raises (ComponentErrors::ComponentErrorsEx,
+                                     BackendsErrors::BackendsErrorsEx);
+                void calOff() raises (ComponentErrors::ComponentErrorsEx,
+                                     BackendsErrors::BackendsErrorsEx);
 		/**
 		 * This method can be used to initialize the backend. Since this hardware can be connected to various receiver some parameter must be set before
 		 * any further use. This parameter will stay fixed until a new initialization is issued. At start up a default initialization is commanded but can be

@@ -198,6 +198,24 @@ public:
 	void activateCalSwitching(const char *argument) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
 			BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
 			BackendsErrors::ConnectionExImpl,ComponentErrors::ValidationErrorExImpl);
+
+	void calOn() throw (BackendsErrors::BackendBusyExImpl,
+                            ComponentErrors::NotAllowedExImpl,
+			    BackendsErrors::NakExImpl,
+                            ComponentErrors::IRALibraryResourceExImpl,
+                            ComponentErrors::SocketErrorExImpl,
+                            ComponentErrors::TimeoutExImpl,
+			    BackendsErrors::ConnectionExImpl,
+                            ComponentErrors::ValidationErrorExImpl);
+
+	void calOff() throw (BackendsErrors::BackendBusyExImpl,
+                            ComponentErrors::NotAllowedExImpl,
+			    BackendsErrors::NakExImpl,
+                            ComponentErrors::IRALibraryResourceExImpl,
+                            ComponentErrors::SocketErrorExImpl,
+                            ComponentErrors::TimeoutExImpl,
+			    BackendsErrors::ConnectionExImpl,
+                            ComponentErrors::ValidationErrorExImpl);
 	
 	/**
 	 * This function must be called in order to change the integration time

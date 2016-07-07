@@ -162,6 +162,8 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	// command parser configuration
 	m_parser->add("integration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(line,&CCommandLine::setIntegration),1);
 	m_parser->add("calSwitch",new function1<CCommandLine,non_constant,void_type,I<string_type> >(line,&CCommandLine::activateCalSwitching),1 );
+	//m_parser->add("calOn",new function0<CCommandLine,non_constant,void_type>(line,&CCommandLine::calOn),0 );
+	//m_parser->add("calOff",new function0<CCommandLine,non_constant,void_type>(line,&CCommandLine::calOff),0 );
 	m_parser->add("setSection",
 			new function7<CCommandLine,non_constant,void_type,I<long_type>,I<double_type>,I<double_type>,I<long_type>,I<enum_type<PolarizationToString> >,I<double_type>,I<long_type> >
 			(line,&CCommandLine::setConfiguration),7 );
@@ -736,6 +738,52 @@ void TotalPowerImpl::activateNoiseCalibrationSwitching(const char *argument) thr
 	}	
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::activateNoiseCalibrationSwitching()");
+		dummy.log(LM_DEBUG);
+		throw dummy.getComponentErrorsEx();
+	}			
+}
+
+void TotalPowerImpl::calOn() throw (CORBA::SystemException,
+		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+{
+	AUTO_TRACE("TotalPowerImpl::calOn()");
+	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+	try {
+		line->calOn();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getBackendsErrorsEx();		
+	}	
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::calOn()");
+		dummy.log(LM_DEBUG);
+		throw dummy.getComponentErrorsEx();
+	}			
+}
+
+void TotalPowerImpl::calOff() throw (CORBA::SystemException,
+		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+{
+	AUTO_TRACE("TotalPowerImpl::calOff()");
+	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+	try {
+		line->calOff();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getBackendsErrorsEx();		
+	}	
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"TotalPowerImpl::calOff()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
 	}			

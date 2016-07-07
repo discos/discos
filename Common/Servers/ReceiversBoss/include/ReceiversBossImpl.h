@@ -438,7 +438,8 @@ public:
 	virtual ACS::ROdouble_ptr derotatorPosition() throw (CORBA::SystemException);
 
 private:
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plocalOscillator;
+        maci::ContainerServices *m_services;
+        baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plocalOscillator;
 	baci::SmartPropertyPointer<baci::ROstring> m_pactualSetup;
 	baci::SmartPropertyPointer<baci::ROlong> m_pfeeds;
 	baci::SmartPropertyPointer<baci::ROlong> m_pIFs;

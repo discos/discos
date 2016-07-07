@@ -70,6 +70,7 @@ _IRA_LOGFILTER_DECLARE;
 
 ReceiversBossImpl::ReceiversBossImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) : 
 	CharacteristicComponentImpl(CompName,containerServices),
+        m_services(containerServices),
 	m_plocalOscillator(this),
 	m_pactualSetup(this),
 	m_pfeeds(this),

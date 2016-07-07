@@ -287,6 +287,16 @@ public:
 	*/
     virtual void activateNoiseCalibrationSwitching(const char * argument) throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    /**
+     * Methods used to activate and deactivate the noise calibration diode. This is intended to be used
+     * for non periodic switching where a complete acquisition is performed keeping the noise mark active.
+     */
+    virtual void calOn() throw (CORBA::SystemException, 
+                                ComponentErrors::ComponentErrorsEx,
+                                BackendsErrors::BackendsErrorsEx);
+    virtual void calOff() throw (CORBA::SystemException, 
+                                ComponentErrors::ComponentErrorsEx,
+                                BackendsErrors::BackendsErrorsEx);
     
     /**
      * This function will initialized the parameters that must be fixed before any other operation can be carried on. Some possible configuration

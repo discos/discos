@@ -1079,6 +1079,48 @@ void CCommandLine::setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErro
 	}
 }
 
+void CCommandLine::calOn() throw (BackendsErrors::BackendBusyExImpl,
+                            ComponentErrors::NotAllowedExImpl,
+			    BackendsErrors::NakExImpl,
+                            ComponentErrors::IRALibraryResourceExImpl,
+                            ComponentErrors::SocketErrorExImpl,
+                            ComponentErrors::TimeoutExImpl,
+			    BackendsErrors::ConnectionExImpl,
+                            ComponentErrors::ValidationErrorExImpl)
+{
+	AUTO_TRACE("CCommandLine::calOn()");
+	if (getIsBusy()) {
+		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::calOn()");
+		throw impl;
+	}
+	if (!m_calSwitchingEnabled) {
+		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::calOn()");
+		throw impl;
+	}
+}
+
+void CCommandLine::calOff() throw (BackendsErrors::BackendBusyExImpl,
+                            ComponentErrors::NotAllowedExImpl,
+			    BackendsErrors::NakExImpl,
+                            ComponentErrors::IRALibraryResourceExImpl,
+                            ComponentErrors::SocketErrorExImpl,
+                            ComponentErrors::TimeoutExImpl,
+			    BackendsErrors::ConnectionExImpl,
+                            ComponentErrors::ValidationErrorExImpl)
+{
+	AUTO_TRACE("CCommandLine::calOn()");
+	if (getIsBusy()) {
+		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::calOn()");
+		throw impl;
+	}
+	if (!m_calSwitchingEnabled) {
+		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::calOn()");
+		throw impl;
+	}
+}
+
+
+
 void CCommandLine::activateCalSwitching(const char * argument) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
 		BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
 		BackendsErrors::ConnectionExImpl,ComponentErrors::ValidationErrorExImpl)

@@ -16,7 +16,7 @@ using namespace IRA;
 #include <DewarPositionerDefinitionsC.h>
 #include "slamac.h"
 
-CRecvBossCore::CRecvBossCore()
+CRecvBossCore::CRecvBossCore() 
 {
 }
 

@@ -28,6 +28,9 @@ int main()
     Receivers::LocalOscillator_proxy m_local_OscillatorProxy;
     Weather::GenericWeatherStation_proxy m_genericWeatherStationProxy;
     Antenna::Mount_proxy m_mount;
+
+    m_totalPowerProxy.setComponentName("Backends/TotalPower");
+    m_totalPowerProxy->calOn();
     return 0;
 }
 

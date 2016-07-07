@@ -35,6 +35,9 @@
 #include <ReceiversBossS.h>
 #include <ReceiversDefinitionsS.h>
 #include <IRA>
+//only noto implementation needs a reference to the TotalPower backend component
+//that is used for calibration mark control
+#include <BackendsProxy.h>
 #include <acsncSimpleSupplier.h>
 #include "Configuration.h"
 #define _RECVBOSSCORE_MAX_IFS 4
@@ -291,9 +294,8 @@ public:
 	void publishData() throw (ComponentErrors::NotificationChannelErrorExImpl);
 private:
 
-
 	Management::TSystemStatus m_status;
-	maci::ContainerServices* m_services;
+        maci::ContainerServices *m_services;
 	CConfiguration *m_config;
 	BACIMutex m_mutex;
 	long m_feeds; // numebr of feeds;
@@ -301,6 +303,7 @@ private:
 	IRA::CString m_currentOperativeMode;
 
 #ifdef COMPILE_TARGET_MED
+        #warning "Compiling RecvBossCore with Medicina target"
 	/**
 	 * Socket to the KBand Recevier
 	 */
@@ -323,6 +326,7 @@ private:
 
 #elif COMPILE_TARGET_NT
 
+        #warning "Compiling RecvBossCore with Noto target"
 	void reinit() throw (ComponentErrors::IRALibraryResourceExImpl);
 	void reinitCal() throw (ComponentErrors::IRALibraryResourceExImpl);
 
@@ -338,9 +342,10 @@ private:
 	double m_bandWidth[_RECVBOSSCORE_MAX_IFS];
 	IRA::CString m_currentReceiver;
 	long m_totalOutputs;
-
+        Backends::TotalPower_proxy m_totalPower_proxy;
 	
 #else
+        #warning "Compiling RecvBossCore with default target"
 	Receivers::Receiver_var m_currentRecv;
 	bool m_currentRecvError;
 	IRA::CString m_currentRecvInstance;
