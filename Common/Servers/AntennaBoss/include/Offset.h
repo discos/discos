@@ -34,12 +34,12 @@ public:
 	~COffset();
 	void reset();
 
-	void setUserOffset(const double& lon,const double& lat,const Antenna::TCoordinateFrame& frame);
+	/*void setUserOffset(const double& lon,const double& lat,const Antenna::TCoordinateFrame& frame);
 	void setUserOffset(const TOffset& off);
 	void resetUser();
 	bool isUserSet() const { return userOffset.isSet; }
 	const TOffset& getUserOffset() const;
-	TOffset& getUserOffset();
+	TOffset& getUserOffset();*/
 
 	void setScanOffset(const double& lon,const double& lat,const Antenna::TCoordinateFrame& frame);
 	void setScanOffset(const TOffset& off);
@@ -53,6 +53,12 @@ public:
 	bool isSystemSet() const { return systemOffset.isSet; }
 	double getSystemAzimuth() const;
 	double getSystemElevation() const;
+	
+	void setFeedOffset(const double& lon,const double& lat);
+	void resetFeed();
+	bool isFeedSet() const { return feedOffset.isSet; }
+	double getFeedAzimuth() const;
+	double getFeedElevation() const;
 
 	/**
 	 * This function returns the offsets setup for the ephemeris generator components. The offset returned are the
@@ -61,10 +67,21 @@ public:
 	 * @return the offset structure containing the resulting offset
 	 * @param true if the scan user offset has been masked by the scan offset
 	 */
-	TOffset ephemGeneratorOffsets(bool &override) const;
+	//TOffset ephemGeneratorOffsets(bool &override) const;
+	
+	/**
+	 * This list of methods is required to manage the correction to be applied and to be compensated when commanding and reading the coordinate to/from the telescope. 
+	 * Essentially the latter set of methods differs from the former for the feed offset. This offset has to be applied when forming the commanded coordinate, but 
+	 * not compensated when the reading out the observed coordinate (the reference coordinated are always referred to the central beam, per convenction).  
+	*/
+	double getAzimuthCorrection() const;
+	double getElevationCorrection() const;
+	double getAzimuthCompensation() const;
+	double getElevationCompensation() const;
+	
+	COffset& operator= (const COffset & obj);
 
 private:
-	TOffset userOffset;
 	TOffset scanOffset;
 	TOffset systemOffset;
 	TOffset feedOffset;

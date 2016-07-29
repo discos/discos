@@ -35,12 +35,11 @@
 <vradReferenceFrame/>
 <vradDefinition/>
 <targetFlux/>
-<azimuthOffset/>
-<elevationOffset/>
-<rightAscensionOffset/>
-<declinationOffset/>
-<longitudeOffset/>
-<latitudeOffset/>
+<subScanLonOffset/>
+<subScanLatOffset/>	
+<subScanOffsetFrame/>
+<systemAzimuthOffset/>	
+<systemElevationOffset/>	
 <rawAzimuth/>
 <rawElevation/>
 <observedAzimuth/>

@@ -81,10 +81,11 @@ void CBossCore::initialize() throw (ComponentErrors::UnexpectedExImpl)
 	m_vradDefinition=Antenna::ANT_UNDEF_DEF;
 	m_vradReferenceFrame=Antenna::ANT_UNDEF_FRAME;
 	m_pointingAzOffset=m_pointingElOffset=m_refractionOffset=0.0;
-	m_longitudeOffset=m_latitudeOffset=0.0;
-	m_offsetFrame=Antenna::ANT_HORIZONTAL;
-	m_userOffset.lon=m_userOffset.lat=0.0; m_userOffset.frame=Antenna::ANT_HORIZONTAL;
-	m_scanOffset.lon=m_scanOffset.lat=0.0; m_scanOffset.frame=Antenna::ANT_HORIZONTAL;
+	//m_longitudeOffset=m_latitudeOffset=0.0;
+	//m_offsetFrame=Antenna::ANT_HORIZONTAL;
+	//m_userOffset.lon=m_userOffset.lat=0.0; m_userOffset.frame=Antenna::ANT_HORIZONTAL;
+	//m_scanOffset.lon=m_scanOffset.lat=0.0; m_scanOffset.frame=Antenna::ANT_HORIZONTAL;
+	m_offsets.reset();
 	m_lastScanParameters.type=Antenna::ANT_NONE;
 	m_lastScanParameters.applyOffsets=false;
 	m_lastScanParameters.secondary=false;
@@ -339,9 +340,10 @@ void CBossCore::stow() throw (ManagementErrors::ParkingErrorExImpl)
 	m_vradDefinition=Antenna::ANT_UNDEF_DEF;
 	m_vradReferenceFrame=Antenna::ANT_UNDEF_FRAME;
 	// clear all user and scan offsets
-	m_userOffset=TOffset(0.0,0.0,Antenna::ANT_HORIZONTAL);
+	/*m_userOffset=TOffset(0.0,0.0,Antenna::ANT_HORIZONTAL);
 	m_scanOffset=TOffset(0.0,0.0,Antenna::ANT_HORIZONTAL);
-	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);
+	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);*/
+	m_offsets.reset();
 	m_lastScanParameters.type=Antenna::ANT_NONE;
 	m_lastScanParameters.applyOffsets=false;
 	m_lastScanParameters.secondary=false;
@@ -477,14 +479,15 @@ void CBossCore::setup(const char *config) throw (ManagementErrors::Configuration
 		manImpl.setReason("Could not unstow the antenna");
 		throw manImpl;		
 	}
-	m_userOffset.lon=m_userOffset.lat=0.0; m_userOffset.frame=Antenna::ANT_HORIZONTAL;
-	m_scanOffset.lon=m_scanOffset.lat=0.0; m_scanOffset.frame=Antenna::ANT_HORIZONTAL;
+	//m_userOffset.lon=m_userOffset.lat=0.0; m_userOffset.frame=Antenna::ANT_HORIZONTAL;
+	//m_scanOffset.lon=m_scanOffset.lat=0.0; m_scanOffset.frame=Antenna::ANT_HORIZONTAL;
+	m_offsets.reset();
 	m_lastScanParameters.type=Antenna::ANT_NONE;
 	m_lastScanParameters.applyOffsets=false;
 	m_lastScanParameters.secondary=false;
 	m_lastScanParameters.paramNumber=0;
-	m_longitudeOffset=m_latitudeOffset=0.0;  //reset offsets
-	m_offsetFrame=Antenna::ANT_HORIZONTAL;
+	//m_longitudeOffset=m_latitudeOffset=0.0;  //reset offsets
+	//m_offsetFrame=Antenna::ANT_HORIZONTAL;
 	m_FWHM=0.0;
 	m_waveLength=0.0;
 	m_currentObservingFrequency=0.0;
@@ -510,7 +513,7 @@ void CBossCore::enableCorrection()
 {
 	if (!m_correctionEnable) {
 		m_correctionEnable=true;
-		ACS_LOG(LM_FULL_INFO,"CBossCore::enableCorrection()",(LM_NOTICE,"AntennaBoss::CORRECTIONS_ENABLED"));
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::enableCorrection()",(LM_NOTICE,"Pointing corrections enabled"));
 	}
 }
 
@@ -518,7 +521,7 @@ void CBossCore::disableCorrection()
 {
 	if (m_correctionEnable) {
 		m_correctionEnable=false;
-		ACS_LOG(LM_FULL_INFO,"CBossCore::disableCorrection()",(LM_NOTICE,"AntennaBoss::CORRECTIONS_DISABLED"));
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::disableCorrection()",(LM_NOTICE,"Pointing corrections disabled"));
 	}
 }
 
@@ -610,21 +613,19 @@ void CBossCore::getTopocentricFrequency(const ACS::doubleSeq& rest,ACS::doubleSe
 
 void CBossCore::setOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)
 {
+	m_offsets.setScanOffset(lonOff,latOff,frame);
+	if (frame==Antenna::ANT_HORIZONTAL) {
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",(LM_NOTICE,"New horizontal user offsets %lf rad, %lf rad",lonOff,latOff));
+	}
+	else if (frame==Antenna::ANT_EQUATORIAL) {
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",(LM_NOTICE,"New equatorial user offsets %lf rad, %lf rad",lonOff,latOff));
+	}
+	else if (frame==Antenna::ANT_GALACTIC) {
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",(LM_NOTICE,"New galactic user offsets %lfrad, %lf rad",lonOff,latOff));					
+	}
 	if ((!CORBA::is_nil(m_generator)) && (m_generatorType!=Antenna::ANT_NONE)) {
 		try {
 			m_generator->setOffsets(lonOff,latOff,frame);
-			if (frame==Antenna::ANT_HORIZONTAL) {
-				ACS_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",
-					(LM_NOTICE,"NEW_HORIZONTAL_OFFSETS %lf %lf",lonOff,latOff));
-			}
-			else if (frame==Antenna::ANT_EQUATORIAL) {
-				ACS_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",
-					(LM_NOTICE,"NEW_EQUATORIAL_OFFSETS %lf %lf",lonOff,latOff));
-			}
-			else if (frame==Antenna::ANT_GALACTIC) {
-				ACS_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",
-					(LM_NOTICE,"NEW_GALACTIC_OFFSETS %lf %lf",lonOff,latOff));					
-			}
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::setOffsets()");
@@ -645,14 +646,17 @@ void CBossCore::setOffsets(const double& lonOff,const double& latOff,const Anten
 			throw ex;
 		}
 	}
-	m_userOffset=TOffset(lonOff,latOff,frame);
+	/*m_userOffset=TOffset(lonOff,latOff,frame);
 	m_scanOffset=TOffset(0.0,0.0,frame);
-	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);
+	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);*/
 }
 
 void CBossCore::getAllOffsets(double& azOff,double& elOff,double& raOff,double& decOff,double& lonOff,double& latOff) const
 {
-	if (m_offsetFrame==Antenna::ANT_HORIZONTAL) {
+	/*****************************************************************************************************************************************/
+	/** TO BE FIXED */
+	/*****************************************************************************************************************************************/
+	/*if (m_offsetFrame==Antenna::ANT_HORIZONTAL) {
 		azOff=m_longitudeOffset;
 		elOff=m_latitudeOffset;
 		raOff=0.0;
@@ -675,7 +679,7 @@ void CBossCore::getAllOffsets(double& azOff,double& elOff,double& raOff,double& 
 		decOff=0.0;
 		lonOff=m_longitudeOffset;
 		latOff=m_latitudeOffset;		
-	}
+	}*/
 }
 
 void CBossCore::stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,
@@ -692,9 +696,10 @@ void CBossCore::stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors:
 	m_vradDefinition=Antenna::ANT_UNDEF_DEF;
 	m_vradReferenceFrame=Antenna::ANT_UNDEF_FRAME;
 	// clear all user and scan offsets
-	m_userOffset=TOffset(0.0,0.0,Antenna::ANT_HORIZONTAL);
+	/*m_userOffset=TOffset(0.0,0.0,Antenna::ANT_HORIZONTAL);
 	m_scanOffset=TOffset(0.0,0.0,Antenna::ANT_HORIZONTAL);
-	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);
+	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);*/
+	m_offsets.reset();
 	m_lastScanParameters.type=Antenna::ANT_NONE;
 	m_lastScanParameters.applyOffsets=false;
 	m_lastScanParameters.secondary=false;
@@ -756,13 +761,15 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 		Antenna::TReferenceFrame velFrame;
 		Antenna::TVradDefinition velDef;
 		//Management::TScanAxis axis;
-		TOffset scanOff;
+		//TOffset scanOff;
+		COffset tempOffset;
+		tempOffset=m_offsets;
 		Antenna::TTrackingParameters lastScan;
 		IRA::CString name;
 		copyTrack(lastScan,m_lastScanParameters);
 		// startUt is changed by preparescan just in case of an OTF scan
-		generator=prepareScan(true,startTime,par,secondary,m_userOffset,generatorType,lastScan,section,ra,dec,lon,lat,vrad,velFrame,
-				velDef,antennaInfo->timeToStop,name,scanOff,antennaInfo->axis,generatorFlux.out());
+		generator=prepareScan(true,startTime,par,secondary/*,m_userOffset*/,generatorType,lastScan,section,ra,dec,lon,lat,vrad,tempOffset,velFrame,
+				velDef,antennaInfo->timeToStop,name/*,scanOff*/,antennaInfo->axis,generatorFlux.out());
 		antennaInfo->targetName=CORBA::string_dup((const char *)name);
 		if (generatorType==Antenna::ANT_OTF) {
 			double pangle;
@@ -1030,6 +1037,8 @@ void CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 			throw impl;
 		}
 		el-=m_refractionOffset;
+		el-=m_offsets.getElevationCompensation();
+		az-=m_offsets.getAzimuthCompensation();
 		try {
 			m_pointingModel->getAzElOffsets(az,el,m_pointingAzOffset,m_pointingElOffset);
 		}
@@ -1228,6 +1237,9 @@ void CBossCore::loadTrackingPoint(const TIMEVALUE& time,bool restart) throw (Com
 		}
 		az+=azOff;
 		el+=elOff;
+		// now apply other corrections
+		az+=m_offsets.getAzimuthCorrection();  // that should include system offsets (pointing) and feed offsets (if necessary)
+		el+=m_offsets.getElevationCorrection();
 		refOff=0.0;
 		try {
 			if (el>0.0) {
@@ -1670,7 +1682,7 @@ void CBossCore::freeGenerator(Antenna::EphemGenerator_ptr& generator) throw (Com
 	}
 }
 
-void CBossCore::addOffsets(double &lon,double& lat,Antenna::TCoordinateFrame& frame,const TOffset& userOffset,const TOffset& scanOffset) const
+/*void CBossCore::addOffsets(double &lon,double& lat,Antenna::TCoordinateFrame& frame,const TOffset& userOffset,const TOffset& scanOffset) const
 {
 	if (userOffset.frame==scanOffset.frame) { // if the frames differ the scanOffset prevails  
 		lon=userOffset.lon+scanOffset.lon;
@@ -1681,7 +1693,7 @@ void CBossCore::addOffsets(double &lon,double& lat,Antenna::TCoordinateFrame& fr
 		lat=scanOffset.lat;
 	}
 	frame=scanOffset.frame;
-}
+}*/
 
 void CBossCore::computeFlux()
 {

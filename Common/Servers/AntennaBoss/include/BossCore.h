@@ -34,6 +34,7 @@
 #include "Callback.h"
 #include "SlewCheck.h"
 #include <FrequencyTracking.h>
+#include "Offset.h"
 
 using namespace IRA;
 using namespace maci;
@@ -475,40 +476,70 @@ public:
 	inline double getRefractionOffset() const { return m_refractionOffset; }
 	
 	/**
+	 * This function returns the value of the current lon offset for next sub scan 
+	 * @return the requested offset in radians
+	*/ 
+	inline double getSubScanLonOff() const { return (m_offsets.isScanSet())?m_offsets.getScanOffset().lon:0.0; }
+
+	/**
+	 * This function returns the value of the current lat offset for next sub scan 
+	 * @return the requested offset in radians
+	*/ 
+	inline double getSubScanLatOff() const { return (m_offsets.isScanSet())?m_offsets.getScanOffset().lat:0.0; }
+	
+	/**
+	 * This function returns the value of the current sub scan offset frame 
+	 * @return the requested offset in radians
+	*/ 
+	inline Antenna::TCoordinateFrame getSubScanOffFrame() const { return (m_offsets.isScanSet())?m_offsets.getScanOffset().frame:Antenna::ANT_HORIZONTAL; }
+	
+	/**
+	 * This function returns the value of the current system azimuth offset. 
+	 * @return the requested offset in radians
+	*/ 
+	inline double getSystemAzOff() const { return (m_offsets.isSystemSet())?m_offsets.getSystemAzimuth():0.0; }
+	
+	/**
+	 * This function returns the value of the current system elevation offset.
+	 * @return the requested offset in radians
+	*/ 
+	inline double getSystemElOff() const { return (m_offsets.isScanSet())?m_offsets.getSystemElevation():0.0; }
+		
+	/**
 	 * This function returns the value of the current azimuth offset, 
 	 * @return the azimuth offset in radians
 	*/ 
-	inline double getAzimuthOffset() const { return (m_offsetFrame==Antenna::ANT_HORIZONTAL)?m_longitudeOffset:0.0; }
+	//inline double getAzimuthOffset() const { return (m_offsetFrame==Antenna::ANT_HORIZONTAL)?m_longitudeOffset:0.0; }
 
 	/**
 	 * This function returns the value of the current elevation offset, 
 	 * @return the elevation offset in radians
 	*/ 
-	inline double getElevationOffset() const { return (m_offsetFrame==Antenna::ANT_HORIZONTAL)?m_latitudeOffset:0.0; }
+	//inline double getElevationOffset() const { return (m_offsetFrame==Antenna::ANT_HORIZONTAL)?m_latitudeOffset:0.0; }
 	
 	/**
 	 * This function returns the value of the current rightAscension offset, 
 	 * @return the rightAscension offset in radians
 	*/ 
-	inline double getRightAscensionOffset() const { return (m_offsetFrame==Antenna::ANT_EQUATORIAL)?m_longitudeOffset:0.0; }
+	//inline double getRightAscensionOffset() const { return (m_offsetFrame==Antenna::ANT_EQUATORIAL)?m_longitudeOffset:0.0; }
 	
 	/**
 	 * This function returns the value of the current declination offset, 
 	 * @return the declination offset in radians
 	*/ 
-	inline double getDeclinationOffset() const { return (m_offsetFrame==Antenna::ANT_EQUATORIAL)?m_latitudeOffset:0.0; }
+	//inline double getDeclinationOffset() const { return (m_offsetFrame==Antenna::ANT_EQUATORIAL)?m_latitudeOffset:0.0; }
 	
 	/**
 	 * This function returns the value of the current longitude offset, 
 	 * @return the longitude offset in radians
 	*/ 
-	inline double getLongitudeOffset() const { return (m_offsetFrame==Antenna::ANT_GALACTIC)?m_longitudeOffset:0.0; }
+	//inline double getLongitudeOffset() const { return (m_offsetFrame==Antenna::ANT_GALACTIC)?m_longitudeOffset:0.0; }
 
 	/**
 	 * This function returns the value of the current latitude offset, 
 	 * @return the latitude offset in radians
 	*/ 
-	inline double getLatitudeOffset() const { return (m_offsetFrame==Antenna::ANT_GALACTIC)?m_latitudeOffset:0.0; }
+	//inline double getLatitudeOffset() const { return (m_offsetFrame==Antenna::ANT_GALACTIC)?m_latitudeOffset:0.0; }
 	
 	/**
 	 * This functions returns the name of the current target, if it exists.
@@ -580,7 +611,7 @@ public:
 
 
 private:
-	class TOffset {
+	/*class TOffset {
 	public:
 		TOffset() : lon(0.0), lat(0.0), frame(Antenna::ANT_HORIZONTAL) { };
 		TOffset(const double& ln,const double& lt,const Antenna::TCoordinateFrame& fr): lon(ln), lat(lt), frame(fr) { };
@@ -589,7 +620,7 @@ private:
 		double lon;
 		double lat;
 		Antenna::TCoordinateFrame frame;
-	} ;
+	};*/
 	
 	/**
 	 * Stores the sequence of observed horizontal,equatorial and galactic coorddintes, sorted by the time of observation
@@ -660,13 +691,17 @@ private:
 	double m_refractionOffset;
 	
 	/** The resulting offset*/
-	double m_longitudeOffset;
-	double m_latitudeOffset;
-	Antenna::TCoordinateFrame m_offsetFrame;
+	//double m_longitudeOffset;
+	//double m_latitudeOffset;
+	//Antenna::TCoordinateFrame m_offsetFrame;
 	/** The offset coming from the current scan */
-	TOffset m_scanOffset;
+	//TOffset m_scanOffset;
 	/** The offset coming from the user input */
-	TOffset m_userOffset;
+	//TOffset m_userOffset;
+	
+	/**
+	 * This object stores and manage all the offset supported by the component */
+	COffset m_offsets;
 	
 	/**
 	 * This field  reports the type of the current generator
@@ -1023,6 +1058,7 @@ private:
 	 * @param lon output parameter galactic longitude,radians 
 	 * @param lat output parameter galactic latitude, radians
 	 * @param vrad output radial velocity of the target, in Km/s
+	 * @param offset handling object
 	 * @param velFrame reference frame of the radial velocity
 	 * @param velDef definition of the radial velocity
 	 * @param timeToStop expected time the scan is expected to be completed, zero means no need to wait
@@ -1033,8 +1069,8 @@ private:
 	 * @return the reference of the current generator, the caller must free it
 	 */
 	Antenna::EphemGenerator_ptr prepareScan(bool useInternals,ACS::Time& startUT,const Antenna::TTrackingParameters& _prim,const Antenna::TTrackingParameters& _sec,
-			const TOffset& userOffset,Antenna::TGeneratorType& generatorType,Antenna::TTrackingParameters& lastPar,Antenna::TSections& section,double& ra,double& dec,double& lon,
-			double& lat,double& vrad,Antenna::TReferenceFrame& velFrame,Antenna::TVradDefinition& velDef,ACS::Time& timeToStop,IRA::CString& sourceName,TOffset& scanOffset,
+			/*const TOffset& userOffset,*/Antenna::TGeneratorType& generatorType,Antenna::TTrackingParameters& lastPar,Antenna::TSections& section,double& ra,double& dec,double& lon,
+			double& lat,double& vrad,COffset& offset,Antenna::TReferenceFrame& velFrame,Antenna::TVradDefinition& velDef,ACS::Time& timeToStop,IRA::CString& sourceName,/*TOffset& scanOffset,*/
 			Management::TScanAxis& axis,Antenna::EphemGenerator_out generatorFlux) throw (ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::UnexpectedExImpl,
 					ComponentErrors::CORBAProblemExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
 	
@@ -1062,7 +1098,7 @@ private:
 	 */
 	void computeFlux();
 
-	void addOffsets(double &lon,double& lat,Antenna::TCoordinateFrame& frame,const TOffset& userOffset,const TOffset& scanOffset) const;
+	/*void addOffsets(double &lon,double& lat,Antenna::TCoordinateFrame& frame,const TOffset& userOffset,const TOffset& scanOffset) const;*/
 	
 	void copyTrack(Antenna::TTrackingParameters& dest,const Antenna::TTrackingParameters& source,bool copyOffs=true) const;
 

@@ -48,7 +48,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		ACS::Time& startUT,
 		const Antenna::TTrackingParameters& _prim,
 		const Antenna::TTrackingParameters& _sec,
-		const TOffset& userOffset,
+		/*const TOffset& userOffset*/
 		Antenna::TGeneratorType& generatorType,
 		Antenna::TTrackingParameters& lastPar,
 		Antenna::TSections& section,
@@ -57,19 +57,20 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		double& lon,
 		double& lat,
 		double& vrad,
+		COffset& offset,
 		Antenna::TReferenceFrame& velFrame,
 		Antenna::TVradDefinition& velDef,
 		ACS::Time& timeToStop,
 		IRA::CString& sourceName,
-		TOffset& scanOffset,
+		/*TOffset& scanOffset,*/
 		Management::TScanAxis& axis,
 		Antenna::EphemGenerator_out generatorFlux)
 		throw (ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,
 			   AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
 {
-	double latOffTmp,lonOffTmp;
+	/*double latOffTmp,lonOffTmp;
 	TOffset scanOffTmp(0.0,0.0,Antenna::ANT_HORIZONTAL);
-	Antenna::TCoordinateFrame offFrameTmp;
+	Antenna::TCoordinateFrame offFrameTmp;*/
 	Antenna::TTrackingParameters primary,secondary,prim,sec;
 	double secRa,secDec,secLon,secLat,secVrad;
 	Antenna::TReferenceFrame secVelFrame;
@@ -253,22 +254,24 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		throw impl;
 	}
 	if (primary.applyOffsets) { //offsets are newer overloaded by the secondary track offsets...because the secondary offsets are always ignored!
-		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"APPLYING_OFFSETS: %lf %lf",primary.longitudeOffset,primary.latitudeOffset));
-		scanOffTmp=TOffset(primary.longitudeOffset,primary.latitudeOffset,primary.offsetFrame);
+		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"APPLYING_SCAN_OFFSETS: %lf %lf",primary.longitudeOffset,primary.latitudeOffset));
+		offset.setScanOffset(primary.longitudeOffset,primary.latitudeOffset,primary.offsetFrame);
+		/*scanOffTmp=TOffset(primary.longitudeOffset,primary.latitudeOffset,primary.offsetFrame);
 		addOffsets(lonOffTmp,latOffTmp,offFrameTmp,userOffset,scanOffTmp);
-		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"TOTAL_OFFSETS: %lf %lf",lonOffTmp,latOffTmp));
+		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"TOTAL_OFFSETS: %lf %lf",lonOffTmp,latOffTmp));*/
 	}
-	else { //keep the originals
+	else { 
 		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"KEEP_ORIGINAL_OFFSETS"));
-		latOffTmp=userOffset.lat;
+		/*latOffTmp=userOffset.lat;
 		lonOffTmp=userOffset.lon;
 		offFrameTmp=userOffset.frame;
 		// the addOffsets is the frame of user and scan offset are different uses the scan offset, in that case the scan offset are null so I want to make sure that
 		// the composition of user and scan offset is equal to user offsets in that case.
-		scanOffTmp.frame=userOffset.frame; 
+		scanOffTmp.frame=userOffset.frame;*/ 
 	}
 	try {
-		currentGenerator->setOffsets(lonOffTmp,latOffTmp,offFrameTmp); //could throw an AntennaErrorsEx exception
+		TOffset off=offset.getScanOffset();
+		currentGenerator->setOffsets(off.lon,off.lat,off.frame); //could throw an AntennaErrorsEx exception
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::prepareScan()");
@@ -481,7 +484,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 	/*
 	lonOff=lonOffTmp;
 	offFrame=offFrameTmp;*/
-	scanOffset=scanOffTmp;
+	//scanOffset=scanOffTmp;
 	generatorFlux=currentGeneratorFlux._retn();
 	return currentGenerator._retn();
 }
@@ -491,7 +494,8 @@ Antenna::EphemGenerator_ptr CBossCore::prepareOTFSecondary(const bool& useIntern
 {
 	ACS::Time inputTime;
 	TIMEVALUE now;
-	TOffset scanOff;
+	//TOffset scanOff;
+	COffset off;
 	IRA::CString name;
 	Antenna::TSections section;
 	Antenna::TTrackingParameters nullScan,lastScan;
@@ -523,8 +527,8 @@ Antenna::EphemGenerator_ptr CBossCore::prepareOTFSecondary(const bool& useIntern
 
 	try {
 		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareOTFSecondary()",(LM_DEBUG,"PREPARE_SECONDARY_FOR OTF"));
-		tmp=prepareScan(useInternal,inputTime,sec,nullScan,m_userOffset,genType,lastScan,section,ra,dec,lon,lat,vrad,velFrame,velDef,timeToStop,
-				sourceName,scanOff,axis,tmpFlux.out());
+		tmp=prepareScan(useInternal,inputTime,sec,nullScan/*,m_userOffset*/,genType,lastScan,section,ra,dec,lon,lat,vrad,off,velFrame,velDef,timeToStop,
+				sourceName/*,scanOff*/,axis,tmpFlux.out());
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		ex.log(LM_DEBUG);

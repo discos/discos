@@ -209,30 +209,57 @@ module Antenna {
 		 */
 		 readonly attribute Antenna::ROTVradDefinition vradDefinition;
 		/**
+		 * This attribute stores the frame of the current offset for the ongoing sub scan
+		 */  
+		 readonly attribute Antenna::ROTCoordinateFrame subScanOffsetFrame;
+		/**
+		 * This attribute stores the offset (along then longitude) for the ongoing sub scan. It can be changed by an explicit call to 
+		 * <i>setSubScanOffsets()</i> or under the control of the schedule. Both methods override the previous commanded value.  
+		 */  		 
+		 readonly attribute ACS::ROdouble subScanLonOffset;
+		/**
+		 * This attribute stores the offset (along then latitude) for the ongoing sub scan. It can be changed by an explicit call to 
+		 * <i>setSubScanOffsets()</i> or under the control of the schedule. Both methods override the previous commanded value.  
+		 */  		 
+		 readonly attribute ACS::ROdouble subScanLatOffset;
+		 
+		/**
+		 * This attribute stores the azimuth system offset.This value is controlled by the method <i>setSystemOffset()</i>
+		 */  		 
+		 readonly attribute ACS::ROdouble systemAzimuthOffset;
+
+		/**
+		 * This attribute stores the elevation system offset.This value is controlled by the method <i>setSystemOffset()</i>
+		 */  		 
+		 readonly attribute ACS::ROdouble systemElevationOffset; 
+			 
+		/**
 		 * This attribute reports the present user sky offset(radians) commanded for the azimuth. Offset can be reset by calling <i>setup</i> or esplicitly by calling the
 		 * <i>setHorizontalOffsets()</i> method. The offset can be laso changed by the <i>startScan()</i> method.
 		 */
-		readonly attribute ACS::ROdouble azimuthOffset;
+		//readonly attribute ACS::ROdouble azimuthOffset;
 		/**
 		 * This attribute reports the present user offset(radians) commanded for the elevation.
 		 */		
-		readonly attribute ACS::ROdouble elevationOffset;
+		//readonly attribute ACS::ROdouble elevationOffset;
 		/**
 		 * This attribute reports the present user sky offset(radians) commanded for the rightAscension.
 		 */		
-		readonly attribute ACS::ROdouble rightAscensionOffset;
+		//readonly attribute ACS::ROdouble rightAscensionOffset;
 		/**
 		 * This attribute reports the present user offset(radians) commanded for the declination.
 		 */		
-		readonly attribute ACS::ROdouble declinationOffset;
+		//readonly attribute ACS::ROdouble declinationOffset;
 		/**
 		 * This attribute reports the present user sky offset(radians) commanded for the galactic longitude.
 		 */		
-		readonly attribute ACS::ROdouble longitudeOffset;
+		//readonly attribute ACS::ROdouble longitudeOffset;
 		/**
 		 * This attribute reports the present user offset(radians) commanded for the galactic latitude.
 		 */
-		readonly attribute ACS::ROdouble latitudeOffset;
+		//readonly attribute ACS::ROdouble latitudeOffset;
+		
+		
 		/**
 		 * This attribute reports the raw azimuth in radians. Raw coordinates are coordinates with all the correction required as
 		 * the pointing model or refraction. The coordinate reported here refers to the current time.
@@ -554,22 +581,30 @@ module Antenna {
 		
 		/**
 		 * This method is used to add user offset to the current pointing of the antenna. The offset will be added in the given frame. 
-		 * A call to <i>startScan</i> could overwrite the offset given by this command. In case a new tracking is started (either changing the generator or not) the offsets are not reset.
-		 * An offset given for a frame will also cause the offsets relatve to other frames to be cleared.
-		 * Depending on the particular generator the offsets could be ignored. In taht case ar error is thrown. The longitude is sky offset so it will be corrected for the cosine of latitude.
-		 * The values can be read back from the <i>azimuthOffset</i> , <i>elevationOffset</i>, <i>rightAscensionOffset</i>, <i>declinationOffset</i>, <i>longitudeOffset</i> and <i>latitudeOffset</i> 
-		 * attributes accordingly.
+		 * A call to <i>startScan</i> could override the offset given by this command (under the control of the schedule). 
+		 * In case a new tracking is started (either changing the generator or not) the offsets are not reset.
+		 * The longitude is sky offset so it will be corrected for the cosine of latitude.
 		 * @throw CORBA::SystemException
 		 * @throw AntennaErrors::AntennaErrorsEx 
 		 * @throw ComponentErrors::ComponentErrorsEx  
 	     *    @arg \c ComponentErrors::UnexpectedEx
 	     *    @arg \c ComponentErrors::CORBAProblemEx 
-		 * @param lonOff new offset to be added to the azimuth (radians)
-		 * @param latOff new offset to be added to the elevation (radians)
+		 * @param lonOff new offset to be added to the longitude (radians)
+		 * @param latOff new offset to be added to the latitude (radians)
 		 * @param frame frame the offesets refer to
 		 */
-		void setOffsets(in double lonOff,in double latOff,in TCoordinateFrame frame) raises (ComponentErrors::ComponentErrorsEx,
+		void setSubScanOffsets(in TCoordinateFrame frame,in double lonOff,in double latOff) raises (ComponentErrors::ComponentErrorsEx,
 				AntennaErrors::AntennaErrorsEx);
+				
+		/**
+		 * This method allows to set the "fine-tuning" pointing offsets.
+		 * @throw CORBA::SystemException
+		 * @throw AntennaErrors::AntennaErrorsEx 
+		 * @throw ComponentErrors::ComponentErrorsEx  
+		 * @param azimuth azimuth correction (radians)
+		 * @param elevation elevation correction (radians)
+		*/		
+		void setSystemOffsets(in double azimuth,in double elevation) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);		
 		
 		/**
 		 * This method can be used by clients in order to get a reference to the generator currently in use within the boss.

@@ -10,47 +10,22 @@ COffset::~COffset()
 
 }
 
+COffset& COffset::operator= (const COffset & obj)
+{
+	scanOffset=obj.scanOffset;
+	systemOffset=obj.systemOffset;
+	feedOffset=obj.feedOffset;
+	return *this;
+}
+
 void COffset::reset()
 {
-	userOffset.lon=userOffset.lat=0.0;
 	scanOffset.lon=scanOffset.lat=0.0;
 	systemOffset.lon=systemOffset.lat=0.0;
 	systemOffset.frame=Antenna::ANT_HORIZONTAL;
 	feedOffset.lon=feedOffset.lat=0.0;
 	feedOffset.frame=Antenna::ANT_HORIZONTAL;
-	userOffset.isSet=scanOffset.isSet=systemOffset.isSet=feedOffset.isSet=false;
-}
-
-//USER
-void COffset::setUserOffset(const double& lon,const double& lat,const Antenna::TCoordinateFrame& frame)
-{
-	userOffset.lon=lon;
-	userOffset.lat=lat;
-	userOffset.frame=frame;
-	userOffset.isSet=true;
-}
-void COffset::setUserOffset(const TOffset& off)
-{
-	userOffset.lon=off.lon;
-	userOffset.lat=off.lat;
-	userOffset.frame=off.frame;
-	userOffset.isSet=true;
-}
-void COffset::resetUser()
-{
-	userOffset.isSet=false;
-	userOffset.lon=userOffset.lat=0.0;
-	userOffset.frame=Antenna::ANT_HORIZONTAL;
-}
-
-const TOffset& COffset::getUserOffset() const
-{
-	return userOffset;
-}
-
-TOffset& COffset::getUserOffset()
-{
-	return userOffset;
+	scanOffset.isSet=systemOffset.isSet=feedOffset.isSet=false;
 }
 
 //SCAN
@@ -61,6 +36,7 @@ void COffset::setScanOffset(const double& lon,const double& lat,const Antenna::T
 	scanOffset.frame=frame;
 	scanOffset.isSet=true;
 }
+
 void COffset::setScanOffset(const TOffset& off)
 {
 	scanOffset.lon=off.lon;
@@ -68,20 +44,24 @@ void COffset::setScanOffset(const TOffset& off)
 	scanOffset.frame=off.frame;
 	scanOffset.isSet=true;
 }
+
 void COffset::resetScan()
 {
 	scanOffset.isSet=false;
 	scanOffset.lon=scanOffset.lat=0.0;
 	scanOffset.frame=Antenna::ANT_HORIZONTAL;
 }
+
 const TOffset& COffset::getScanOffset() const
 {
 	return scanOffset;
 }
+
 TOffset& COffset::getScanOffset()
 {
 	return scanOffset;
 }
+
 //SYSTEM
 void COffset::setSystemOffset(const double& lon,const double& lat)
 {
@@ -89,23 +69,70 @@ void COffset::setSystemOffset(const double& lon,const double& lat)
 	systemOffset.lat=lat;
 	systemOffset.isSet=true;
 }
+
 void COffset::resetSystem()
 {
 	systemOffset.isSet=false;
 	systemOffset.lon=systemOffset.lat=0.0;
-	scanOffset.frame=Antenna::ANT_HORIZONTAL;
+	systemOffset.frame=Antenna::ANT_HORIZONTAL;
 }
 
 double COffset::getSystemAzimuth() const
 {
 	return systemOffset.lon;
 }
+
 double COffset::getSystemElevation() const
 {
 	return systemOffset.lat;
 }
 
-TOffset COffset::ephemGeneratorOffsets(bool &override) const
+//FEED
+void COffset::setFeedOffset(const double& lon,const double& lat)
+{
+	feedOffset.lon=lon;
+	feedOffset.lat=lat;
+	feedOffset.isSet=true;
+}
+
+void COffset::resetFeed()
+{
+	feedOffset.isSet=false;
+	feedOffset.lon=systemOffset.lat=0.0;
+	feedOffset.frame=Antenna::ANT_HORIZONTAL;
+}
+
+double COffset::getFeedAzimuth() const
+{
+	return feedOffset.lon;
+}
+
+double COffset::getFeedElevation() const
+{
+	return feedOffset.lat;
+}
+
+double COffset::getAzimuthCorrection() const
+{
+	return getSystemAzimuth()+getFeedAzimuth();
+}
+
+double COffset::getElevationCorrection() const
+{
+	return getSystemElevation()+getFeedElevation();
+}
+	
+double COffset::getAzimuthCompensation() const
+{
+	return getSystemAzimuth();
+}
+
+double COffset::getElevationCompensation() const
+{
+	return getSystemElevation();
+}
+
+/*TOffset COffset::ephemGeneratorOffsets(bool &override) const
 {
 	TOffset out;
 	if (userOffset.isSet && scanOffset.isSet) { // is both user and scan offset are set
@@ -146,4 +173,4 @@ TOffset COffset::ephemGeneratorOffsets(bool &override) const
 		override=false;
 	}
 	return out;
-}
+}*/

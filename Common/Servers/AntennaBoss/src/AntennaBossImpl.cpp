@@ -18,6 +18,7 @@
 #include "DevIOLambda.h"
 #include "DevIOVradDefinition.h"
 #include "DevIOVradReferenceFrame.h"
+#include "DevIOOffFrame.h"
 
 /*static char *rcsId="@(#) $Id: AntennaBossImpl.cpp,v 1.29 2011-06-05 14:44:40 a.orlati Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);*/
@@ -50,12 +51,18 @@ AntennaBossImpl::AntennaBossImpl(const ACE_CString &CompName,maci::ContainerServ
 	m_ptargetVrad(this),
 	m_pvradReferenceFrame(this),
     m_pvradDefinition(this),
-	m_pazimuthOffset(this),
+    m_psubScanOffsetFrame(this),
+    m_psubScanLonOffset(this),
+    m_psubScanLatOffset(this),	
+    m_psystemAzimuthOffset(this),
+    m_psystemElevationOffset(this),
+    
+	/*m_pazimuthOffset(this),
 	m_pelevationOffset(this),
 	m_prightAscensionOffset(this),
 	m_pdeclinationOffset(this),
 	m_plongitudeOffset(this),
-	m_platitudeOffset(this),
+	m_platitudeOffset(this),*/
 	m_core(NULL)
 {	
 	AUTO_TRACE("AntennaBossImpl::AntennaBossImpl()");
@@ -129,7 +136,19 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				getContainerServices()->getName()+":vradDefinition",getComponent(),new DevIOVradDefinition(m_core),true) ;
 		m_ptargetFlux=new ROdouble(getContainerServices()->getName()+":targetFlux",getComponent(),
 				new DevIOTargetCoordinate(m_core,DevIOTargetCoordinate::FLUX),true);
-		m_pazimuthOffset=new ROdouble(getContainerServices()->getName()+":azimuthOffset",getComponent(),
+				
+    	m_psubScanOffsetFrame=new ROEnumImpl<ACS_ENUM_T(Antenna::TCoordinateFrame), POA_Antenna::ROTCoordinateFrame>(
+				getContainerServices()->getName()+":subScanOffsetFrame",getComponent(),new DevIOOffFrame(m_core),true);
+    	m_psubScanLonOffset=new ROdouble(getContainerServices()->getName()+":subScanLonOffset",getComponent(),
+				new DevIOOffsets(m_core,DevIOOffsets::SSLONOFF),true);
+    	m_psubScanLatOffset=new ROdouble(getContainerServices()->getName()+":subScanLatOffset",getComponent(),
+				new DevIOOffsets(m_core,DevIOOffsets::SSLATOFF),true);
+    	m_psystemAzimuthOffset=new ROdouble(getContainerServices()->getName()+":systemAzimuthOffset",getComponent(),
+				new DevIOOffsets(m_core,DevIOOffsets::SAZOFF),true);
+    	m_psystemElevationOffset=new ROdouble(getContainerServices()->getName()+":systemElevationOffset",getComponent(),
+				new DevIOOffsets(m_core,DevIOOffsets::SELOFF),true);				
+				
+		/*m_pazimuthOffset=new ROdouble(getContainerServices()->getName()+":azimuthOffset",getComponent(),
 				new DevIOOffsets(m_core,DevIOOffsets::AZIMUTHOFF),true);
 		m_pelevationOffset=new ROdouble(getContainerServices()->getName()+":elevationOffset",getComponent(),
 				new DevIOOffsets(m_core,DevIOOffsets::ELEVATIONOFF),true);
@@ -140,7 +159,7 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_plongitudeOffset=new ROdouble(getContainerServices()->getName()+":longitudeOffset",getComponent(),
 				new DevIOOffsets(m_core,DevIOOffsets::LONGITUDEOFF),true);
 		m_platitudeOffset=new ROdouble(getContainerServices()->getName()+":latitudeOffset",getComponent(),
-				new DevIOOffsets(m_core,DevIOOffsets::LATITUDEOFF),true);
+				new DevIOOffsets(m_core,DevIOOffsets::LATITUDEOFF),true);*/
 		
 		// create the parser for command line execution
 		m_parser =  new SimpleParser::CParser<CBossCore>(boss,10);
@@ -304,13 +323,30 @@ CORBA::Boolean AntennaBossImpl::command(const char *cmd,CORBA::String_out answer
 	return res;
 }
 
-void AntennaBossImpl::setOffsets(CORBA::Double lonOff,CORBA::Double latOff,Antenna::TCoordinateFrame frame) throw (
+void AntennaBossImpl::setSubScanOffsets(Antenna::TCoordinateFrame frame,CORBA::Double lonOff,CORBA::Double latOff) throw (
 		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx)
 {	
-	AUTO_TRACE("AntennaBossImpl::setOffsets()");
+	AUTO_TRACE("AntennaBossImpl::setSubScanOffsets()");
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 	try {
 		resource->setOffsets(lonOff,latOff,frame);
+	}
+	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getAntennaErrorsEx();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+}
+
+void AntennaBossImpl::setSystemOffsets(CORBA::Double az,CORBA::Double el) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx)
+{	
+	AUTO_TRACE("AntennaBossImpl::setSystemOffset()");
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
+	try {
+		//resource->setOffsets(lonOff,latOff,frame);
 	}
 	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -650,12 +686,20 @@ _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetVrad,targetVrad);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,Antenna::ROTReferenceFrame,m_pvradReferenceFrame,vradReferenceFrame);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,Antenna::ROTVradDefinition,m_pvradDefinition,vradDefinition);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_ptargetFlux,targetFlux);
-_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pazimuthOffset,azimuthOffset);
+
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,Antenna::ROTCoordinateFrame,m_psubScanOffsetFrame,subScanOffsetFrame);
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_psubScanLonOffset,subScanLonOffset);
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_psubScanLatOffset,subScanLatOffset);
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_psystemAzimuthOffset,systemAzimuthOffset);
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_psystemElevationOffset,systemElevationOffset);
+
+	
+/*_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pazimuthOffset,azimuthOffset);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pelevationOffset,elevationOffset);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_prightAscensionOffset,rightAscensionOffset);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_pdeclinationOffset,declinationOffset);
 _PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_plongitudeOffset,longitudeOffset);
-_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_platitudeOffset,latitudeOffset);
+_PROPERTY_REFERENCE_CPP(AntennaBossImpl,ACS::ROdouble,m_platitudeOffset,latitudeOffset);*/
 
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>

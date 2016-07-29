@@ -30,13 +30,12 @@
 			<xs:element name="targetVrad" type="baci:ROdouble"/>
 			<xs:element name="vradReferenceFrame" type="ant:ReferenceFrameType"/>
 			<xs:element name="vradDefinition" type="ant:VradDefinitionType"/>
-			<xs:element name="targetFlux" type="baci:ROdouble"/>			
-			<xs:element name="azimuthOffset" type="baci:ROdouble"/>
-			<xs:element name="elevationOffset" type="baci:ROdouble"/>
-			<xs:element name="rightAscensionOffset" type="baci:ROdouble"/>
-			<xs:element name="declinationOffset" type="baci:ROdouble"/>
-			<xs:element name="longitudeOffset" type="baci:ROdouble"/>
-			<xs:element name="latitudeOffset" type="baci:ROdouble"/>
+			<xs:element name="targetFlux" type="baci:ROdouble"/>	
+			<xs:element name="subScanLonOffset" type="baci:ROdouble"/>
+			<xs:element name="subScanLatOffset" type="baci:ROdouble"/>	
+			<xs:element name="subScanOffsetFrame" type="ant:CoordinateFrameType"/>
+			<xs:element name="systemAzimuthOffset" type="baci:ROdouble"/>	
+			<xs:element name="systemElevationOffset" type="baci:ROdouble"/>	
 			<xs:element name="rawAzimuth" type="baci:ROdouble"/>
 			<xs:element name="rawElevation" type="baci:ROdouble"/>
 			<xs:element name="observedAzimuth" type="baci:ROdouble"/>

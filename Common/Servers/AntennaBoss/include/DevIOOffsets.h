@@ -26,12 +26,10 @@ class DevIOOffsets: public virtual DevIO<CORBA::Double>
 public:
 	
 	enum TOffsets {
-		AZIMUTHOFF,
-		ELEVATIONOFF,
-		RIGHTASCENSIONOFF,
-		DECLINATIONOFF,
-		LONGITUDEOFF,
-		LATITUDEOFF
+		SSLONOFF,
+		SSLATOFF,
+		SAZOFF,
+		SELOFF
 	};
 	
 	DevIOOffsets(IRA::CSecureArea<CBossCore>* core,const TOffsets& e): m_core(core), m_corr(e) { 
@@ -50,24 +48,24 @@ public:
 		CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 		AUTO_TRACE("DevIOOffsets::read()");
 		double val=0.0;
-		if (m_corr==AZIMUTHOFF) {
-			val=resource->getAzimuthOffset();
+		if (m_corr==SSLONOFF) {
+			val=resource->getSubScanLonOff();
 		}
-		else if (m_corr==ELEVATIONOFF) {
-			val=resource->getElevationOffset();
+		else if (m_corr==SSLATOFF) {
+			val=resource->getSubScanLatOff();
 		}
-		else if (m_corr==RIGHTASCENSIONOFF) {
-			val=resource->getRightAscensionOffset();
+		else if (m_corr==SAZOFF) {
+			val=resource->getSystemAzOff();
 		}
-		else if (m_corr==DECLINATIONOFF) {
-			val=resource->getDeclinationOffset();
+		else if (m_corr==SELOFF) {
+			val=resource->getSystemElOff();
 		}
-		else if (m_corr==LONGITUDEOFF) {
+		/*else if (m_corr==LONGITUDEOFF) {
 			val=resource->getLongitudeOffset();
 		}
 		else if (m_corr==LATITUDEOFF) {
 			val=resource->getLatitudeOffset();
-		}
+		}*/
 		timestamp=getTimeStamp();
 		return (CORBA::Double)val;
     }

@@ -16,17 +16,18 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 	//Temporarily stop the working thread
 	m_workingThread->suspend();
 	//make sure that scan offset are reset
-	m_scanOffset=TOffset(0.0,0.0,m_userOffset.frame);
-	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);
+	/*m_scanOffset=TOffset(0.0,0.0,m_userOffset.frame);
+	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);*/
+	m_offsets.resetScan();
 	try {
 		m_generatorType=Antenna::ANT_NONE;
 		m_generator=Antenna::EphemGenerator::_nil(); // it also releases the previous reference.
 		m_generatorFlux=Antenna::EphemGenerator::_nil(); // it also releases the previous reference.
-		m_generator=prepareScan(false,startUt,parameters,secondary,m_userOffset,m_generatorType,m_lastScanParameters,section,ra,dec,lon,lat,vrad,velFrame,velDef,m_timeToStop,
-				name,m_scanOffset,axis,m_generatorFlux.out());
+		m_generator=prepareScan(false,startUt,parameters,secondary/*,m_userOffset*/,m_generatorType,m_lastScanParameters,section,ra,dec,lon,lat,vrad,m_offsets,
+		velFrame,velDef,m_timeToStop,name,/*m_scanOffset,*/axis,m_generatorFlux.out());
 		//computes the resulting offset, coming from the user and the scan
-		addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);
-		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"TOTAL_OFFSETS: %lf %lf",m_longitudeOffset,m_latitudeOffset));
+		/*addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);*/
+		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"TOTAL_OFFSETS: %lf %lf",m_offsets.getScanOffset().lon,m_offsets.getScanOffset().lat));
 	}
 	catch (ComponentErrors::CouldntCallOperationExImpl& ex) { //catch just to update the component status and to unload the generator!
 		m_generatorType=Antenna::ANT_NONE;		
@@ -86,7 +87,7 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 	}
 	m_correctionEnable_scan=parameters.enableCorrection;
 	if (!m_correctionEnable_scan) {
-		ACS_LOG(LM_FULL_INFO,"CBossCore::startScan()",(LM_NOTICE,"POINTING_CORRECTIONS_DISABLED_FOR_CURRENT_SCAN"));
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::startScan()",(LM_NOTICE,"Pointing corrections are disabled for next sub scan"));
 	}
 	/*try {
 		ACS_LOG(LM_FULL_INFO,"CBossCore::startScan()",(LM_DEBUG,"LOADING_TRACKING_CURVE"));
@@ -99,10 +100,10 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 	if (startUt!=0) {
 		IRA::CString out;
 		IRA::CIRATools::timeToStr(startUt,out);
-		ACS_LOG(LM_FULL_INFO,"CBossCore::startScan()",(LM_NOTICE,"NEW_SCAN_WILL_START_AT: %s",(const char *)out));
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::startScan()",(LM_NOTICE,"Next antenna sub scan starts at: %s",(const char *)out));
 	}
 	else {
-		ACS_LOG(LM_FULL_INFO,"CBossCore::startScan()",(LM_NOTICE,"NEW_SCAN_IMMEDIATELY_STARTED"));
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::startScan()",(LM_NOTICE,"Next antenna sub scan starts now"));
 	}
 	m_targetName=name;
 	m_targetRA=ra;

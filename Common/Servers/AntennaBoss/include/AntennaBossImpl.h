@@ -273,49 +273,67 @@ public:
      * Returns a reference to the pointingElevationCorrection property implementation of IDL interface.
 	 * @return pointer to read-only double property pointingElevationCorrection
 	*/
-	virtual ACS::ROdouble_ptr pointingElevationCorrection () throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr pointingElevationCorrection() throw (CORBA::SystemException);
 	
 	/**
      * Returns a reference to the refractionCorrection property implementation of IDL interface.
 	 * @return pointer to read-only double property refractionCorrection
 	*/	
 	virtual ACS::ROdouble_ptr refractionCorrection() throw (CORBA::SystemException);
-
-	/**
-     * Returns a reference to the azimuthOffset property implementation of IDL interface.
-	 * @return pointer to read-only double property azimuthOffset
-	*/	
-	virtual ACS::ROdouble_ptr azimuthOffset() throw (CORBA::SystemException);
 	
 	/**
-     * Returns a reference to the elevationOffset property implementation of IDL interface.
-	 * @return pointer to read-only double property elevationOffset
+     * Returns a reference to the subScanOffsetFrame property implementation of IDL interface.
+	 * @return pointer to read-only TCoordinateFrame property subScanOffsetFrame
 	*/	
-	virtual ACS::ROdouble_ptr elevationOffset() throw (CORBA::SystemException);
+	virtual Antenna::ROTCoordinateFrame_ptr subScanOffsetFrame() throw (CORBA::SystemException);
 
+	/**
+     * Returns a reference to the systemAzimuthOffset property implementation of IDL interface.
+	 * @return pointer to read-only double property systemAzimuthOffset
+	*/	
+	virtual ACS::ROdouble_ptr systemAzimuthOffset() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the systemElevationOffset property implementation of IDL interface.
+	 * @return pointer to read-only double property systemElevationOffset
+	*/	
+	virtual ACS::ROdouble_ptr systemElevationOffset() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the subScanLonOffset property implementation of IDL interface.
+	 * @return pointer to read-only double property subScanLonOffset
+	*/	
+	virtual ACS::ROdouble_ptr subScanLonOffset() throw (CORBA::SystemException);
+	
+	/**
+     * Returns a reference to the subScanLatOffset property implementation of IDL interface.
+	 * @return pointer to read-only double property subScanLatOffset
+	*/	
+	virtual ACS::ROdouble_ptr subScanLatOffset() throw (CORBA::SystemException);
+	
 	/**
      * Returns a reference to the rightAscensionOffset property implementation of IDL interface.
 	 * @return pointer to read-only double property rightAscensionOffset
 	*/	
-	virtual ACS::ROdouble_ptr rightAscensionOffset() throw (CORBA::SystemException);
+	//virtual ACS::ROdouble_ptr rightAscensionOffset() throw (CORBA::SystemException);
 
 	/**
      * Returns a reference to the declinationOffset property implementation of IDL interface.
 	 * @return pointer to read-only double property declinationOffset
 	*/	
-	virtual ACS::ROdouble_ptr declinationOffset() throw (CORBA::SystemException);
+	//virtual ACS::ROdouble_ptr declinationOffset() throw (CORBA::SystemException);
 
 	/**
      * Returns a reference to the longitudeOffset property implementation of IDL interface.
 	 * @return pointer to read-only double property longitudeOffset
 	*/	
-	virtual ACS::ROdouble_ptr longitudeOffset() throw (CORBA::SystemException);
+	//virtual ACS::ROdouble_ptr longitudeOffset() throw (CORBA::SystemException);
 
 	/**
      * Returns a reference to the latitudeOffset property implementation of IDL interface.
 	 * @return pointer to read-only double property latitudeOffset
 	*/	
-	virtual ACS::ROdouble_ptr latitudeOffset() throw (CORBA::SystemException);
+	//virtual ACS::ROdouble_ptr latitudeOffset() throw (CORBA::SystemException);
 
 	/**
      * Returns a reference to the FWHM property implementation of IDL interface.
@@ -543,7 +561,7 @@ public:
 	//virtual char * command(const char *cmd) throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx);
 	
 	/**
-	 * This method allows the user to set the offsets for the given frame. The offset are considered only if a tracking has already
+	 * This method allows the user to set the sub scan offsets for the given frame. The offset are considered only if a tracking has already
 	 * been started, otherwise they are stored for next scan.  
 	 * The longitude offset will be corrected for the cosine of latitude.
 	 * @param lonOff new offsets for azimuth (radians)
@@ -555,8 +573,22 @@ public:
 	 *    @arg  \c ComponentErrors::UnexpectedExImp
 	 *    @arg  \c ComponentErrors::CORBAProblemExImpl 
 	*/
-	virtual void setOffsets(CORBA::Double lonOff,CORBA::Double latOff,Antenna::TCoordinateFrame frame) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
-
+	virtual void setSubScanOffsets(Antenna::TCoordinateFrame frame,CORBA::Double lonOff,CORBA::Double latOff) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+	
+	/**
+	 * This method allows to set system offsets for the horizontal frame. 
+	 * The azimuth offset will be corrected for the cosine of latitude.
+	 * @param lonOff new offsets for azimuth (radians)
+	 * @param latOff new offsets for elevation (radians)
+	 * @param frame reference frame
+	 * @throw CORBA::SystemException
+	 * @throw AntennaErrors::AntennaErrorsEx 
+     * @throw ComponentErrors::ComponentErrorsEx
+	 *    @arg  \c ComponentErrors::UnexpectedExImp
+	 *    @arg  \c ComponentErrors::CORBAProblemExImpl 
+	*/
+	virtual void setSystemOffsets(CORBA::Double az, CORBA::Double el) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+	
 	/**
 	 * This function is used internally. It permits to access the generator currently used by the boss in order to produce new coordinates.
 	 * A client can read the computed (apparent) coordinates by getting the componet which has the returned CURL..
@@ -667,12 +699,19 @@ private:
 	SmartPropertyPointer<ROdouble> m_ptargetVrad;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Antenna::TReferenceFrame), POA_Antenna::ROTReferenceFrame> > m_pvradReferenceFrame;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Antenna::TVradDefinition), POA_Antenna::ROTVradDefinition> > m_pvradDefinition;
-	SmartPropertyPointer<ROdouble> m_pazimuthOffset;
+	/*SmartPropertyPointer<ROdouble> m_pazimuthOffset;
 	SmartPropertyPointer<ROdouble> m_pelevationOffset;
 	SmartPropertyPointer<ROdouble> m_prightAscensionOffset;
 	SmartPropertyPointer<ROdouble> m_pdeclinationOffset;
 	SmartPropertyPointer<ROdouble> m_plongitudeOffset;
-	SmartPropertyPointer<ROdouble> m_platitudeOffset;
+	SmartPropertyPointer<ROdouble> m_platitudeOffset;*/
+
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Antenna::TCoordinateFrame), POA_Antenna::ROTCoordinateFrame> > m_psubScanOffsetFrame;
+	SmartPropertyPointer<ROdouble> m_psubScanLonOffset;
+	SmartPropertyPointer<ROdouble> m_psubScanLatOffset;	
+	SmartPropertyPointer<ROdouble> m_psystemAzimuthOffset;
+	SmartPropertyPointer<ROdouble> m_psystemElevationOffset;
+	
 	IRA::CSecureArea<CBossCore> *m_core;
 	CWorkingThread *m_workingThread;
 	CWatchingThread *m_watchingThread;
