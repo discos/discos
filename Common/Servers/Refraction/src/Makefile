@@ -58,7 +58,7 @@ USER_LIB =	-lACE \
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     = 
-EXECUTABLES_L   = TestClient TestRefro
+EXECUTABLES_L   = TestClient TestRefro TestRefroIter
 
 #
 # <brief description of xxxxx program>
@@ -67,6 +67,9 @@ TestClient_LIBS      = RefractionImpl
 
 TestRefro_OBJECTS   = TestRefro
 TestRefro_LIBS      = SlaLibrary
+
+TestRefroIter_OBJECTS = TestIter
+TestRefroIter_LIBS = SlaLibrary
 
 
 #
