@@ -542,6 +542,14 @@ void HolographyImpl::setIntegration(CORBA::Long Integration) throw (CORBA::Syste
 	 	
 }
 
+void HolographyImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+		BackendsErrors::BackendsErrorsEx)
+{
+	// nothing to do
+}
+
+
+
  _PROPERTY_REFERENCE_CPP(HolographyImpl,ACS::ROuLongLong,m_ptime,time);
  _PROPERTY_REFERENCE_CPP(HolographyImpl,ACS::ROstring,m_pbackendName,backendName);
  _PROPERTY_REFERENCE_CPP(HolographyImpl,ACS::ROdoubleSeq,m_pbandWidth,bandWidth);
