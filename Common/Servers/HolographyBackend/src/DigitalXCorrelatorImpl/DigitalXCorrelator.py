@@ -85,18 +85,20 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
         ACSComponent.__init__(self)
         ContainerServices.__init__(self)
         self.corr = corr2serial.Correlator()
-	self.name=ContainerServices.getName(self)
+#	self.name=ContainerServices.getName(self)
 
     def initialize(self):
         """Retrieve the CDB parameters."""
 #        dal=Acspy.Util.ACSCorba.cdb()
-         
+        name=self.getName()
+        dal=Acspy.Util.ACSCorba.cdb()
+
 	try:
-#	    dao=dal.get_DAO_Servant("alma/%s" %self.name)
+	    dao=dal.get_DAO_Servant("alma/"+name)
             print self.name
-#	    self.port = int(dao.get_double("PORT"))
-#            self.baudrate = int(dao.get_double("BAUDRATE"))
-#            self.out_file_name = dao.get_string("OUT_FILE_FP")
+	    self.port = int(dao.get_double("PORT"))
+#           self.baudrate = int(dao.get_double("BAUDRATE"))
+            self.out_file_name = dao.get_string("OUT_FILE_FP")
 #            self.max_attempts =int(dao.get_double("MAX_ATTEMPTS"))
             self.max_attempts =1
 
@@ -111,7 +113,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
 	except Exception, ex:
             self.getLogger().logError("Error... cannot get attributes from CDB. " + str(e))
             raise ComponentErrorsImpl.CouldntGetAttributeExImpl()
-        
+ 
         # Connecting to FPGA module
         try:
             err = self.corr.connect(self.port, self.baudrate)
@@ -122,30 +124,14 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
             self.getLogger().logDebug("Error in initialize: cannot connect to FPGA")
             self.getLogger().logError("Error... cannot connect to FPGA")
             raise ACSErrTypeFPGAConnectionImpl.CannotConnectExImpl()
-        try:
-            # Version 051:
-	    print self.out_file_name
-            dt = datetime.datetime.now()
-            file_id = "_%04d%02d%02d_%02d%02d" %(dt.year, dt.month, dt.day, dt.hour, dt.minute)
-            self.out_file = open(self.out_file_name + file_id, 'a', 0)
-            self.out_file.write("Azimuth".ljust(15) + "Elevation".ljust(15))
-            for item in ordered_key_list:
-                self.out_file.write(item.ljust(15))
-            self.out_file.write("Timestamp".ljust(30))
-            # End 051
-
-            # self.out_file = open(out_file, 'w', 0) # V.05
-        except IOError:
-            self.getLogger().logDebug("Error in initialize: cannot create out_file")
-            self.getLogger().logError("Error creating out_file")
-            raise ComponentErrorsImpl.FileIOErrorExImpl()
+      
 	
     def cleanUp(self):
         self.corr.disconnect()
         self.getLogger().logDebug("CleanUp")
 
         self.out_file.close()
-        ComponentLifecycle.cleanUp()
+        #ComponentLifecycle.cleanUp()
         
     def aboutToAbort(self):
         self.getLogger().logDebug("About to Abort")
@@ -245,3 +231,35 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
         except Exception:
             print "disconnect exception"
             raise ACSErrTypeFPGACommunicationImpl.CannotRunExImpl()
+        
+    def openFile(self,name):
+           
+       try:
+            self.out_file_name=name
+
+            print self.out_file_name
+            dt = datetime.datetime.now()
+            file_id = "_%04d%02d%02d_%02d%02d" %(dt.year, dt.month, dt.day, dt.hour, dt.minute)
+            self.out_file = open(self.out_file_name + file_id, 'a', 0)
+            self.out_file.write("Azimuth".ljust(15) + "Elevation".ljust(15))
+            for item in ordered_key_list:
+                self.out_file.write(item.ljust(15))
+            self.out_file.write("Timestamp".ljust(30))
+            # End 051
+
+            # self.out_file = open(out_file, 'w', 0) # V.05
+       except IOError:
+            self.getLogger().logDebug("Error in initialize: cannot create out_file")
+            self.getLogger().logError("Error creating out_file")
+            raise ComponentErrorsImpl.FileIOErrorExImpl()
+    def closeFile(self):
+      
+        self.out_file.close()
+
+    def reset(self):
+        try:
+          self.corr.reset()
+        except Exception:
+            print "reset exception"
+            raise ACSErrTypeFPGACommunicationImpl.CannotRunExImpl()
+        

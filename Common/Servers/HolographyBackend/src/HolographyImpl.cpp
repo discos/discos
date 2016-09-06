@@ -168,15 +168,25 @@ void HolographyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	AUTO_TRACE("HolographyImpl::execute()");
 	ACS_LOG(LM_FULL_INFO,"HolographyImpl::execute()",(LM_INFO,"BACKEND_INITIAL_CONFIGURATION"));
 	ACS::Time time;
-	try {
-		//sets the property defaults....some of them cannot be changed any more (hardware dependent) 
-		m_pbackendName->getDevIO()->write(getComponent()->getName(),time);
-	}
-	catch (ACSErr::ACSbaseExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,impl,ex,"TotalPowerImpl::execute()");
-		throw impl;
-	}
+        try{		
+              m_pbackendName->getDevIO()->write(getComponent()->getName(),time);
+              m_correlator=getContainerServices()->getDefaultComponent<DXC::DigitalXCorrelator>("IDL:alma/DXC/DigitalXCorrelator:1.0");
+                if (m_LogObservedPositions)
+                {
+                        m_antennaBoss=getContainerServices()->getDefaultComponent<Antenna::AntennaBoss>(ANTENNA_BOSS_INTERFACE);
+                        m_sender_thread_param.antennaBoss=m_antennaBoss;
+                } 
+        } catch (std::bad_alloc& ex) {
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"HolographyImpl::sendHeader()");
+		
+		throw dummy;
+        }catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+                ex.log(LM_DEBUG);
+                throw ex.getComponentErrorsEx();
+        }
 
+
+ 
 }
 
 
@@ -185,8 +195,8 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 {
 	AUTO_TRACE("HolographyImpl::sendHeader()");
 
-            try{
-            m_correlator=getContainerServices()->getDefaultComponent<DXC::DigitalXCorrelator>("IDL:alma/DXC/DigitalXCorrelator:1.0");
+   /*         try{
+              m_correlator=getContainerServices()->getDefaultComponent<DXC::DigitalXCorrelator>("IDL:alma/DXC/DigitalXCorrelator:1.0");
                 if (m_LogObservedPositions)
                 {
                         m_antennaBoss=getContainerServices()->getDefaultComponent<Antenna::AntennaBoss>(ANTENNA_BOSS_INTERFACE);
@@ -201,11 +211,12 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
                 throw ex.getComponentErrorsEx();
         }
 
-
+*/
 	try{
 
 
 		DWORD sampling_time;
+                m_correlator->reset();
 		sampling_time=m_configuration.getSamplingTime(); 
  		cout << "***********************************************" << endl;
                 cout << "samplingTime:" << sampling_time;
