@@ -12,6 +12,7 @@
 #include <ACSErrTypeFPGAConnection.idl>
 #include <ACSErrTypeFPGACommunication.idl>
 #include <ComponentErrors.idl>
+#include <BackendsErrors.idl>
 
 #pragma prefix "alma"
 
@@ -65,6 +66,20 @@ module DXC {
                 ACSErrTypeFPGACommunication::CannotRunEx,
                 ACSErrTypeFPGAConnection::CannotConnectEx
             );
+            
+        /**
+        Set the file name
+        
+        @arg filename
+        
+        */
+        
+        void openFile(in string fileName) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+        void reset ()        raises (ACSErrTypeFPGACommunication::CannotRunEx);
+        void closeFile()raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+        
+
+        
     };
 };
 #endif
