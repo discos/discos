@@ -70,7 +70,7 @@
 
 
 //#define NOANTENNABOSS
-
+#define  MAX_SECTION_NUMBER 14
 
 using namespace baci;
 using namespace ACSBulkDataError;
@@ -444,7 +444,10 @@ protected:
 	
 private:
 
-
+struct THeaderRecord {
+                Backends::TMainHeader header;
+                Backends::TSectionHeader chHeader[MAX_SECTION_NUMBER];
+        };
  
 //	struct THeaderRecord {
 //		Backends::TMainHeader header;

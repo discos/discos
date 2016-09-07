@@ -79,7 +79,7 @@
  *Local functions  
  */
 
-
+#define FLOW_NUMBER 1 
 
 //using namespace SimpleParser;
 //_IRA_LOGFILTER_DECLARE;
@@ -287,13 +287,55 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
         
         }
         
-	 
+	THeaderRecord bkd; //header for fitswriter
+        bkd.header.sections=2;  
+        bkd.header.beams=1;
+        //resultingSampleRate(m_integration,m_commonSampleRate,intTime);
+        //bkd.integration=intTime;
+        bkd.header.integration=25;
+        bkd.header.sampleSize=50;
+        bkd.header.noData=true;
   
-          
-          
-          
-          
+        
+        long index=0;
+        for (int i=0;i<bkd.header.sections;i++) {
+                 
+                        if (index<MAX_SECTION_NUMBER) {
+                                bkd.chHeader[index].id=i;
+                                bkd.chHeader[index].bins=0.;
+                                bkd.chHeader[index].polarization=Backends::BKND_LCP;
+                                bkd.chHeader[index].bandWidth=0;
+                                bkd.chHeader[index].frequency=11533;
+                                bkd.chHeader[index].attenuation[0]=0.; // we have always one inputs....so just the first position is significant
+                                bkd.chHeader[index].attenuation[1]=0.0;  // not significant....placeholder                              
+                                bkd.chHeader[index].IF[0]=0;
+                                bkd.chHeader[index].IF[1]=0;  // not significant
+                                bkd.chHeader[index].sampleRate=5000000;
+                                bkd.chHeader[index].feed=i;
+                                bkd.chHeader[index].inputs=1;                           
+                                index++;
+                        }
+                }
+     try {
+                getSender()->startSend(FLOW_NUMBER,(const char*)&bkd,
+                                sizeof(Backends::TMainHeader)+bkd.header.sections*sizeof(Backends::TSectionHeader));
+        }
+        catch (AVStartSendErrorExImpl& ex) {
+                _ADD_BACKTRACE(BackendsErrors::TXErrorExImpl,impl,ex,"HolographyImpl::sendHeader()");
+                impl.setDetails("main header could not be sent");
+                impl.log(LM_DEBUG);
+                throw impl.getBackendsErrorsEx();
+        }
+        catch (...) {
+                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"HolographyImpl::sendHeader()");
+                impl.log(LM_DEBUG);
+                throw impl.getComponentErrorsEx();
+        }   
+        
 }
+                    
+          
+ 
                
 
 
@@ -304,7 +346,7 @@ void HolographyImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException
 	double az,el;
 	TIMEVALUE now;
 	AUTO_TRACE("HolographyImpl::sendData()");
-        
+
         try{
         
                 cout << "**Correlator OpenFile**"<< endl;
