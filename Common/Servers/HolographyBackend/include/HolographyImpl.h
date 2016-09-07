@@ -50,6 +50,7 @@
 #include <AntennaBossC.h>
 #include "Configuration.h"
 
+#include <string>
 
 
 //#include "CommandLine.h"
@@ -474,7 +475,8 @@ private:
 
  	bool m_initialized;
 //	SimpleParser::CParser<CCommandLine> * m_parser;
-
+        std::string m_filename;
+        
 	CConfiguration m_configuration;
 	CSenderThread *m_senderThread;
 	CSenderThread::TSenderParameter m_sender_thread_param;

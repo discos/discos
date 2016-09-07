@@ -83,7 +83,7 @@ void CSenderThread::runLoop()
 
 	 catch(...)
 	{
-	   ACS_LOG(LM_FULL_INFO,"CSenderThread::runLoop()",(LM_ERROR,"SenderThread runLopp DXC unknown except"));
+	   ACS_LOG(LM_FULL_INFO,"CSenderThread::runLoop()",(LM_ERROR,"SenderThread runloop DXC unknown except"));
 	
 	}
 

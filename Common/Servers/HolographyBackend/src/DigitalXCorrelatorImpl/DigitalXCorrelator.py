@@ -42,6 +42,7 @@ import ACSErrTypeFPGAConnectionImpl
 import ACSErrTypeFPGACommunicationImpl
 import ComponentErrorsImpl
 import Acspy.Util.ACSCorba
+import BackendsErrorsImpl
 
 
 
@@ -187,7 +188,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
         except Exception:
             self.getLogger().logDebug("Error in save_coeff: cannot connect to FPGA")
             self.getLogger().logError("Error... cannot connect to FPGA")
-            raise ACSErrTypeFPGAConnectionImpl.CannotConnectExImpl()
+            raise BackendErrorsImpl.NakExImpl()
 
 #       # Running Correlation
         try:
@@ -195,7 +196,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
 
         except Exception:
             self.getLogger().logError("Error running correlation.")
-            raise ACSErrTypeFPGACommunicationImpl.CannotRunExImpl()
+            raise BackendErrorsImpl.BackendBusyImpl()
 
         
         # Getting coefficient    
@@ -203,7 +204,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
             self.corr.getCoeff()
 
         except Exception:
-            raise ACSErrTypeFPGACommunicationImpl.CannotGetCoefficientsExImpl()
+            raise BackendErrorsImpl.BackendBusyImpl()
 
 #        module = sqrt(self.corr.get_real()**2 + self.corr.get_imm()**2) 
 #        phase_tmp = atan2(self.corr.get_imm() ,  self.corr.get_real())
@@ -230,7 +231,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
             self.corr.disconnect()
         except Exception:
             print "disconnect exception"
-            raise ACSErrTypeFPGACommunicationImpl.CannotRunExImpl()
+            raise BackendErrorsImpl.BackendBusyImpl()
         
     def openFile(self,name):
            
@@ -253,13 +254,16 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
             self.getLogger().logError("Error creating out_file")
             raise ComponentErrorsImpl.FileIOErrorExImpl()
     def closeFile(self):
-      
-        self.out_file.close()
-
+        try:
+           self.out_file.close()
+        except IOError:
+            self.getLogger().logDebug("Error in initialize: cannot close out_file")
+            self.getLogger().logError("Error closing out_file")
+            raise ComponentErrorsImpl.FileIOErrorExImpl()
     def reset(self):
         try:
           self.corr.reset()
         except Exception:
             print "reset exception"
-            raise ACSErrTypeFPGACommunicationImpl.CannotRunExImpl()
+            raise BackendErrorsImpl.BackendBusyImpl()
         

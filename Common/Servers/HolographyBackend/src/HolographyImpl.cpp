@@ -161,6 +161,11 @@ void HolographyImpl::initialize() throw (ACSErr::ACSbaseExImpl)
                 throw ex.getComponentErrorsEx();
         }
 
+ 
+  
+          
+          
+        
 }
 
 void HolographyImpl::execute() throw (ACSErr::ACSbaseExImpl)
@@ -185,6 +190,85 @@ void HolographyImpl::execute() throw (ACSErr::ACSbaseExImpl)
                 throw ex.getComponentErrorsEx();
         }
 
+               DWORD sampling_time;
+               sampling_time=m_configuration.getSamplingTime(); 
+                cout << "***********************************************" << endl;
+                cout << "samplingTime:" << sampling_time;
+
+
+                CSenderThread::TSenderParameter *temp;
+
+
+
+        try {
+                m_sender_thread_param.sender=this;
+                m_sender_thread_param.dxc_correlator=m_correlator;
+                temp=&m_sender_thread_param;    // reference to pass to create thread
+                if (m_senderThread==NULL) {
+                        m_senderThread=getContainerServices()->getThreadManager()->create<CSenderThread,CSenderThread::TSenderParameter*>("CORRELATORDATA",temp);
+                        m_senderThread->setSleepTime(sampling_time*10000); // the sampling time is read from CDB
+        //              m_senderThread->setSleepTime(0); // set to 0
+//                      m_senderThread->setResponseTime(50000000);
+                }
+
+
+
+
+
+        }   
+         catch(acsthreadErrType::acsthreadErrTypeExImpl& ex) {
+                _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"HolographyImpl::initialize()");
+                throw _dummy;
+        }
+        catch(maciErrType::NoDefaultComponentExImpl &ex)
+        {
+           _ADD_BACKTRACE(maciErrType::NoDefaultComponentExImpl,Impl,ex,""); throw Impl;
+
+        }
+
+        catch(maciErrType::CannotGetComponentExImpl &ex)
+        {
+                _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"HolographyImpl::sendHeader()");
+                throw _dummy;   }
+
+        
+          catch(maciErrType::NoPermissionExImpl &ex)
+        {
+                _ADD_BACKTRACE(maciErrType::NoPermissionExImpl,Impl,ex,"");
+        }
+        
+                catch (maciErrType::maciErrTypeExImpl &ex)
+        {
+
+                ACS_LOG(LM_FULL_INFO,"HolographyImpl::sendHeader()",(LM_ERROR
+                ,"CannotGetComponentExImpl"));
+                ex.log(LM_DEBUG);
+
+                _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"HolographyImpl::initialize()");
+                throw _dummy;   
+        
+        }
+
+         catch(...)
+        {
+                cout<< "unknown except" <<endl;
+        } 
+        
+        try{
+                          cout << "**Correlator reset**"<< endl;
+
+          m_correlator->reset();
+          }catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+                ex.log(LM_DEBUG);
+                throw ex.getComponentErrorsEx();
+        } 
+          catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+                ex.log(LM_DEBUG);
+                throw ex.getBackendsErrorsEx();   
+          }
+         
+
+
 
  
 }
@@ -195,110 +279,22 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 {
 	AUTO_TRACE("HolographyImpl::sendHeader()");
 
-   /*         try{
-              m_correlator=getContainerServices()->getDefaultComponent<DXC::DigitalXCorrelator>("IDL:alma/DXC/DigitalXCorrelator:1.0");
-                if (m_LogObservedPositions)
-                {
-                        m_antennaBoss=getContainerServices()->getDefaultComponent<Antenna::AntennaBoss>(ANTENNA_BOSS_INTERFACE);
-                        m_sender_thread_param.antennaBoss=m_antennaBoss;
-                } 
-            } catch (std::bad_alloc& ex) {
-		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"HolographyImpl::sendHeader()");
-		
-		throw dummy;
-	}catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-                ex.log(LM_DEBUG);
-                throw ex.getComponentErrorsEx();
+        if (m_filename.empty())
+        {
+        
+         m_filename="/archive/data/holography/holo";
+         
+        
         }
-
-*/
-	try{
-
-
-		DWORD sampling_time;
-                m_correlator->reset();
-		sampling_time=m_configuration.getSamplingTime(); 
- 		cout << "***********************************************" << endl;
-                cout << "samplingTime:" << sampling_time;
-
-
-		CSenderThread::TSenderParameter *temp;
-
-
-
-	
-		m_sender_thread_param.sender=this;
-		m_sender_thread_param.dxc_correlator=m_correlator;
-		temp=&m_sender_thread_param;    // reference to pass to create thread
-		if (m_senderThread==NULL) {
-			m_senderThread=getContainerServices()->getThreadManager()->create<CSenderThread,CSenderThread::TSenderParameter*>("CORRELATORDATA",temp);
-                        m_senderThread->setSleepTime(sampling_time*10000); // the sampling time is read from CDB
-	//		m_senderThread->setSleepTime(0); // set to 0
-//		        m_senderThread->setResponseTime(50000000);
-
-
-
-		}
-
-	
-// 	if (CORBA::is_nil(m_antennaBoss))
-// 	{
-// 		cout <<"ABOSS NOT REFERENCED " << endl;
-// 	
-// 	} else
-// 	{
-// 	  	cout <<"ABOSS REFERENCED " << endl;
-// 	
-// 	}
-// 	
-
-
-
-
-	}   
-	 catch(acsthreadErrType::acsthreadErrTypeExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"HolographyImpl::initialize()");
-		throw _dummy;
-	}
-	catch(maciErrType::NoDefaultComponentExImpl &ex)
-	{
-	   _ADD_BACKTRACE(maciErrType::NoDefaultComponentExImpl,Impl,ex,""); throw Impl;
-
-	}
-
-	catch(maciErrType::CannotGetComponentExImpl &ex)
-	{
-		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"HolographyImpl::sendHeader()");
-		throw _dummy;	}
-
-	
-	  catch(maciErrType::NoPermissionExImpl &ex)
-	{
-	   	_ADD_BACKTRACE(maciErrType::NoPermissionExImpl,Impl,ex,"");
-	}
- 	
-		catch (maciErrType::maciErrTypeExImpl &ex)
-	{
-
-		ACS_LOG(LM_FULL_INFO,"HolographyImpl::sendHeader()",(LM_ERROR
-		,"CannotGetComponentExImpl"));
-		ex.log(LM_DEBUG);
-
-		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"HolographyImpl::initialize()");
-		throw _dummy;	
-	
-	}
-
-	 catch(...)
-	{
-		cout<< "unknown except" <<endl;
-	} 
-	
-	
-
-
-
+        
+	 
+  
+          
+          
+          
+          
 }
+               
 
 
 
@@ -308,7 +304,13 @@ void HolographyImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException
 	double az,el;
 	TIMEVALUE now;
 	AUTO_TRACE("HolographyImpl::sendData()");
-	try {
+        
+        try{
+        
+                cout << "**Correlator OpenFile**"<< endl;
+                m_correlator->openFile(m_filename.c_str());
+                
+         
      //           m_correlator->save_coeff(az,el);
 	   IRA::CIRATools::getTime(now);
 
@@ -373,26 +375,27 @@ void HolographyImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::B
 		 	az=-0.69; 
 			el=0.55;
 		}
-//	m_correlator->save_coord(az,el);
+             try{
+                
+                   m_correlator->closeFile();
+                } catch (ComponentErrors::ComponentErrorsExImpl& ex) 
+                {
+                     ex.log(LM_DEBUG);
+                     throw ex.getComponentErrorsEx();
+                }   catch (BackendsErrors::BackendsErrorsExImpl& ex)
+                {
+                    ex.log(LM_DEBUG);
+                    throw ex.getBackendsErrorsEx(); 
+                }     
 }
 
 void HolographyImpl::terminate() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
 			ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("HolographyImpl::terminate()");
-
-	try {
-
-		getContainerServices()->releaseComponent(m_correlator->name());
-	} catch(maciErrType::CannotReleaseComponentExImpl &ex)
+        
+       
 	
-	{
-		ACS_LOG(LM_FULL_INFO,"HolographyImpl::terminate()",(LM_ERROR
-		,"CannotReleaseComponentExImpl"));
-		ex.log(LM_DEBUG);
-
-
-	}
 	 
 	
 	
@@ -404,7 +407,16 @@ void HolographyImpl::terminate() throw (CORBA::SystemException, BackendsErrors::
 
 void HolographyImpl::initialize(const char * configuration) throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
-{
+{     try{
+                
+                m_correlator->closeFile();
+        } catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+                ex.log(LM_DEBUG);
+                throw ex.getComponentErrorsEx();
+        }   catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+                ex.log(LM_DEBUG);
+                throw ex.getBackendsErrorsEx(); 
+          }
 	AUTO_TRACE("HolographyImpl::initialize()");
 
 
@@ -444,7 +456,18 @@ void HolographyImpl::deleteAll()
 	  	
 	
 	}
+        try {
 
+                getContainerServices()->releaseComponent(m_correlator->name());
+        } catch(maciErrType::CannotReleaseComponentExImpl &ex)
+        
+        {
+                ACS_LOG(LM_FULL_INFO,"HolographyImpl::terminate()",(LM_ERROR
+                ,"CannotReleaseComponentExImpl"));
+                ex.log(LM_DEBUG);
+
+
+        }
 
 
 }
@@ -529,15 +552,6 @@ void HolographyImpl::activateNoiseCalibrationSwitching(CORBA::Long interleave) t
   	
 }
 
-//char * HolographyImpl::command(const char *configCommand)  throw (CORBA::SystemException,ManagementErrors::CommandLineErrorEx)
-//{
-//	AUTO_TRACE("HolographyImpl::command()");
-//	IRA::CString out;
-//	IRA::CString in;
-//	bool error;
-	
-//	return CORBA::string_dup((const char *)out);
-//}
 
 void HolographyImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins) throw (
 				CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
