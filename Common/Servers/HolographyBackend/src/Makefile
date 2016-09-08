@@ -132,7 +132,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = Holography DigitalXCorrelator
+# CDB_SCHEMAS = Holography DigitalXCorrelator
 
 # 
 # IDL Files and flags

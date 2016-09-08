@@ -50,6 +50,7 @@
 #include <AntennaBossC.h>
 #include "Configuration.h"
 
+#include <string>
 
 
 //#include "CommandLine.h"
@@ -66,10 +67,12 @@
 
 #define DXC_INTERFACE "IDL:alma/DXC/DigitalXCorrelator:1.0"
 #define ANTENNA_BOSS_INTERFACE "IDL:alma/Antenna/AntennaBoss:1.0"
+#define SCHEDULER_INTERFACE "IDL:alma/Management/Scheduler:1.0"
+
 
 
 //#define NOANTENNABOSS
-
+#define  MAX_SECTION_NUMBER 14
 
 using namespace baci;
 using namespace ACSBulkDataError;
@@ -271,6 +274,10 @@ public:
      */
     virtual ACS::doubleSeq * getZero () throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+/**
+     * This method is just a place holder for this implementation of the genericBackend interface
+     */
+    virtual void setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 
     /**
      * Call this function to set the current time (from the local computer) into the backend. 
@@ -439,7 +446,10 @@ protected:
 	
 private:
 
-
+struct THeaderRecord {
+                Backends::TMainHeader header;
+                Backends::TSectionHeader chHeader[MAX_SECTION_NUMBER];
+        };
  
 //	struct THeaderRecord {
 //		Backends::TMainHeader header;
@@ -470,13 +480,16 @@ private:
 
  	bool m_initialized;
 //	SimpleParser::CParser<CCommandLine> * m_parser;
-
+        std::string m_filename;
+        
 	CConfiguration m_configuration;
 	CSenderThread *m_senderThread;
 	CSenderThread::TSenderParameter m_sender_thread_param;
 	DXC::DigitalXCorrelator_var m_correlator; // reference 
  	Antenna::AntennaBoss_var  m_antennaBoss;
  	bool m_LogObservedPositions;
+//         Management::Scheduler_var m_scheduler;
+
 
 	void deleteAll();
 };
