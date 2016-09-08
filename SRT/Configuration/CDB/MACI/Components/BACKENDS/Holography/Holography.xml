@@ -11,6 +11,6 @@
 	Name="Holography"
 	Code="HolographyImpl"
 	Type="IDL:alma/Backends/Holography:1.0"
-	Container="BackendsContainer"
+	Container="HolographyContainer"
     ImplLang="cpp"
 />

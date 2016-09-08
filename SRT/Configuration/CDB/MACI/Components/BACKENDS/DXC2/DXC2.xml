@@ -8,7 +8,7 @@
 	  Code="DigitalXCorrelatorImpl.DigitalXCorrelator"
 	  Type="IDL:alma/DXC/DigitalXCorrelator:1.0" 
       Default="true"
-      Container="MetrologyContainer"
+      Container="HolographyDXCContainer"
       ImplLang="py"
 />
 
