@@ -53,7 +53,7 @@ import corr2serial # The Giovanni's module defines an high level API to communic
 __docformat__ = 'restructuredtext'
 
 # A list of ordered keys of full_res dictionary in save_coeff method
-ordered_key_list = ['x_2', 'y_2', 'y90_2', 'xy', 'xy90']#, 'real', 'imm', 'module', 'phase']
+ordered_key_list = ['x_2', 'y_2', 'y90_2', 'xy', 'xy90','modNrm','PwrInX2','PwrInY2']#, 'real', 'imm', 'module', 'phase']
 
 class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerServices, ComponentLifecycle):
     """The DigitalXCorrelator ACS component uses the serial port to communicate with
@@ -240,7 +240,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
 
             print self.out_file_name
             dt = datetime.datetime.now()
-            file_id = "_%04d%02d%02d_%02d%02d%02d" %(dt.year, dt.month, dt.day, dt.hour, dt.seconds)
+            file_id = "_%04d%02d%02d_%02d%02d%02d" %(dt.year, dt.month, dt.day, dt.hour, dt.minute,dt.second)
             self.out_file = open(self.out_file_name + file_id, 'a', 0)
             self.out_file.write("Azimuth".ljust(15) + "Elevation".ljust(15))
             for item in ordered_key_list:

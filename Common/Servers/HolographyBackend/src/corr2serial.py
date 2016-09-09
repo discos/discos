@@ -18,10 +18,9 @@ from math import log10
 ####################
 # CORRELATOR CLASS #
 ####################
-
 class Correlator:
     def __init__(self):
-        self.results = { 'x_2' : 0, 'y_2' : 0, 'xy' : 0, 'xy90' : 0, 'y90_2' : 0, 'y_y90' : 0 }
+        self.results = { 'x_2' : 0, 'y_2' : 0, 'xy' : 0, 'xy90' : 0, 'y90_2' : 0, 'y_y90' : 0,'modNrm':0.,'PwrInX2':0.,'PwrInY2':0.}
         self.coeff   = { 'real' : 0.00, 'imm' : 0.00 }
         self.buffer  = ""
         self.ser     = serial.Serial()
@@ -123,6 +122,7 @@ class Correlator:
         self.results['xy90'] = self.fixed2float(sum_xy90, 64, 30)
         self.results['y90_2'] = self.fixed2float(sum_y90_2, 64, 30)
         self.results['y_y90'] = self.fixed2float(sum_y_y90, 64, 30)
+
         self.results['t'] = datetime.datetime.now()
             
         self.coeff['real'] = self.results['xy'] / sqrt(self.results['y_2'])
@@ -142,8 +142,9 @@ class Correlator:
 
         self.coeff['modNrm'] = sqrt(self.coeff['realNrm']**2 + self.coeff['immNrm']**2) 
 
-        self.coeff['PwrInX2'] = 10 * log10 ( (1000/100) * ( sqrt ( self.results['x_2'] * (2**30) / (5000000) ) * (39.0625/1000000))**2)
-        self.coeff['PwrInY2'] = 10 * log10 ( (1000/100) * ( sqrt ( self.results['y_2'] * (2**30) / (5000000) ) * (39.0625/1000000))**2)
+        self.results['PwrInX2'] = 10 * log10 ( (1000/100) * ( sqrt ( self.results['x_2'] * (2**30) / (5000000) ) * (39.0625/1000000))**2)
+        self.results['PwrInY2'] = 10 * log10 ( (1000/100) * ( sqrt ( self.results['y_2'] * (2**30) / (5000000) ) * (39.0625/1000000))**2)
+	self.results['modNrm'] = sqrt(self.coeff['realNrm']**2 + self.coeff['immNrm']**2) 
 
     def get_real(self):
         return self.coeff['real']
