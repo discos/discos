@@ -41,10 +41,10 @@ EXECUTABLES	= coordinateGrabber
 EXECUTABLES_L = slewTimeCheck
 
 coordinateGrabber_OBJECTS = coordinateGrabber
-coordinateGrabber_LIBS = AntennaDefinitionsStubs AntennaBossStubs EphemGeneratorStubs \
-	ObservatoryStubs ManagmentDefinitionsStubs \
-	IRALibrary ComponentErrors ClientErrors AntennaErrors ManagementErrors\
-	baci maci maciClient acserr loki ACSErrTypeCommon
+coordinateGrabber_LIBS = AntennaDefinitionsStubs AntennaBossStubs MountStubs ObservatoryStubs \
+   EphemGeneratorStubs ManagmentDefinitionsStubs IRALibrary ComponentErrors ManagementErrors ClientErrors\
+   AntennaErrors ParserErrors PointingModelStubs RefractionStubs SkySourceStubs OTFStubs MoonStubs acsnc \
+   baci maci maciClient acserr loki ACSErrTypeCommon
 
 slewTimeCheck_OBJECTS   =	TestClient SlewCheck
 slewTimeCheck_LIBS      = IRALibrary 

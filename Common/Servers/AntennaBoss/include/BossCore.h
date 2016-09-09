@@ -201,7 +201,15 @@ public:
 	 * @throw ComponentErrors::CORBAProblemExImpl
 	 * @thorw ComponentErrors::OperationErrorExImpl
      */
-	void setOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl);
+	void setOffsets(const Antenna::TCoordinateFrame& frame,const double& lonOff,const double& latOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl);
+
+	/**
+	 * This sets new system offsets 
+	 * @param azOff new azimuth offset in radians
+	 * @param elOff new elevation offset in radians
+     */
+	void setSystemOffsets(const double& lonOff,const double& latOff);
+
 
 	/**
 	 * Sets the <i>m_enable</i> flag to false, i.e. the component will not send command to the mount any more. To enable the component again a call
@@ -318,9 +326,9 @@ public:
 	const double& getTargetRightAscension() const { return m_targetRA; }
 	
 	/**
-	 * Get all the user offset (refferred to all supported frames) with a single call.
+	 * Get all the offsets with a single call.
 	 */
-	void getAllOffsets(double& azOff,double& elOff,double& raOff,double& decOff,double& lonOff,double& latOff) const;
+	void getAllOffsets(double& sysAzOff,double& sysElOff,double& lonOff,double& latOff,Antenna::TCoordinateFrame& offFrame) const;
 	
 	/**
 	 * @return the J2000 right ascension of the target
@@ -572,21 +580,21 @@ public:
 	 * @param azOff azimuth offset (rad)
 	 * @param elOff elevation offset (rad)
 	 */
-	void setHorizontalOffsets(const double& azOff,const double& elOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl);
+	//void setHorizontalOffsets(const double& azOff,const double& elOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl);
 	
 	/**
 	 * This is a wrapper function for the <i>setOffsets()</i> function when the equatorial frame is implicit.
 	 * @param raOff right ascension offset (rad)
 	 * @param decOff declination offset (rad)
 	 */
-	void setEquatorialOffsets(const double& raOff,const double& decOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl);
+	//void setEquatorialOffsets(const double& raOff,const double& decOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl);
 	
 	/**
 	 * This is a wrapper function for the <i>setOffsets()</i> function when the galactic frame is implicit.
 	 * @param lonOff galactic longitude offset (rad)
 	 * @param latOff galactic latitude offset (rad)
 	 */
-	void setGalacticOffsets(const double& lonOff,const double& latOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl);
+	//void setGalacticOffsets(const double& lonOff,const double& latOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl);
 	
 	/**
 	 *  @return can be called to retrieve the axis of the current scan

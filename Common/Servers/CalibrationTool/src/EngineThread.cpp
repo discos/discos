@@ -874,7 +874,8 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    	m_file << (const char *) out;
 	    	m_file << m_errPar[1] * DR2D << " " << m_errPar[2] * DR2D<< " " << m_errPar[0] << " " << m_errPar[3] << " " << m_errPar[4] << " " << m_reducedCHI << std::endl;
 	    }
-	    ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "LATFIT  %lf %lf %lf %lf %lf %d",m_Par[1] * DR2D, m_Par[2] * DR2D, m_Par[0] , m_Par[3], m_Par[4], m_ierr));
+	    ACS_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()",(LM_NOTICE,"Gauss fitting parameters(lat):  peak=%lf (deg), fwhm=%lf (deg), amp=%lf, offset=%lf, slope=%lf, iter=%d",
+	    	m_Par[1]*DR2D,m_Par[2]*DR2D, m_Par[0],m_Par[3],m_Par[4],m_ierr));
 	    m_latResult=0;
 	    offMin=GETMIN(m_off[0],m_off[m_dataSeqCounter-1]);
 	    offMax=GETMAX(m_off[0],m_off[m_dataSeqCounter-1]);
@@ -886,19 +887,19 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 						m_latResult = 1;
 					}
 					else {
-						ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "INVALID_FWHM_IN_LATFIT"));
+						CUSTOM_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()",(LM_NOTICE,"FWHM outside valid ranges"));
 					}
 				}
 				else {
-					ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "INVALID_OFFSET_IN_LATFIT"));
+					CUSTOM_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE,"Peak offset outside valid ranges"));
 				}
 			}
 			else {
-				ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "LATFIT_DID_NOT_CONVERGE"));
+				CUSTOM_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE,"fitting did not converge"));
 			}
 	    }
 	    else {
-			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "ERROR_DETECTED_DURING_LAT_SCAN"));
+			CUSTOM_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE,"Error detected during latitude scan"));
 	    }
 	    m_data->setAmplitude (m_Par[0]);
 	    m_data->setPeakOffset (m_Par[1]);
@@ -947,7 +948,8 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    	m_file << (const char *) out;
 	    	m_file << m_errPar[1] * DR2D << " " << m_errPar[2] * DR2D << " " << m_errPar[0] << " " << m_errPar[3] << " " << m_errPar[4] << " " << m_reducedCHI << std::endl;
 	    }
-		ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "LONFIT  %lf %lf %lf %lf %lf %d",m_Par[1] * DR2D, m_Par[2] * DR2D, m_Par[0] , m_Par[3], m_Par[4], m_ierr));
+	   	ACS_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()",(LM_NOTICE,"Gauss fitting parameters(lon):  peak=%lf (deg), fwhm=%lf (deg), amp=%lf, offset=%lf, slope=%lf, iter=%d",
+	    	m_Par[1] * DR2D, m_Par[2] * DR2D, m_Par[0] , m_Par[3], m_Par[4], m_ierr));
 	    m_lonResult=0;
 	    offMin=GETMIN(m_off[0],m_off[m_dataSeqCounter-1]);
 	    offMax=GETMAX(m_off[0],m_off[m_dataSeqCounter-1]);
@@ -959,19 +961,19 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 						m_lonResult = 1;
 					}
 					else {
-						ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "INVALID_FWHM_IN_LONFIT"));
+						CUSTOM_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE,"FWHM outside valid ranges"));
 					}
 				}
 				else {
-					ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "INVALID_OFFSET_IN_LONFIT"));
+					CUSTOM_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE,"Peak offset outside valid ranges"));
 				}
 			}
 			else {
-				ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "LONFIT_DID_NOT_CONVERGE"));
+				CUSTOM_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "Fitting did not converge"));
 			}
 	    }
 	    else {
-			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "ERROR_DETECTED_DURING_LON_SCAN"));
+			CUSTOM_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE,"Error detected during longitude scan"));
 	    }
 	    m_data->setAmplitude (m_Par[0]);
 		m_data->setPeakOffset (m_Par[1]);
@@ -997,8 +999,6 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    //m_cosLat=cos(tempLat);
 	    //m_Par[2] = m_fwhm / m_cosLat;
 	    m_Par[2] = m_lambda*1000;
-	
-		
 	    fit2_ (m_off, m_ptsys2, m_secsFromMidnight, m_Par, m_errPar, (integer *)&m_dataSeqCounter, &par, &tol, &ftry, (E_fp) fgaus_, &m_reducedCHI, &m_ierr);
 	    //m_Par[2] *=m_cosLat;
 	    //m_errPar[2] *=m_cosLat;
@@ -1018,7 +1018,10 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    	m_file << (const char *) out;
 	    	m_file << m_errPar[1] << " " << m_errPar[2] << " " << m_errPar[0] << " " << m_errPar[3] << " " << m_errPar[4] << " " << m_reducedCHI << std::endl;
 	    }
-		ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FOCUSFIT zP  %lf %lf %lf %lf %lf %d",m_Par[1], m_Par[2], m_Par[0] , m_Par[3], m_Par[4], m_ierr));
+	    ACS_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()",(LM_NOTICE,"Gauss fitting parameters(zP):  peak=%lf, fwhm=%lf, amp=%lf, offset=%lf, slope=%lf, iter=%d",
+	    	m_Par[1],m_Par[2],m_Par[0],m_Par[3],m_Par[4],m_ierr));
+	    
+		//ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FOCUSFIT zP  %lf %lf %lf %lf %lf %d",m_Par[1], m_Par[2], m_Par[0] , m_Par[3], m_Par[4], m_ierr));
 	    m_focusResult=0;
 	    offMin=GETMIN(m_off[0],m_off[m_dataSeqCounter-1]);
 	    offMax=GETMAX(m_off[0],m_off[m_dataSeqCounter-1]);
@@ -1029,15 +1032,15 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 						m_focusResult=1;
 				}
 				else {
-					ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "INVALID_IN_FOCUS_FIT"));
+					CUSTOM_LOG(LM_FULL_INFO,"CEngineThread::gaussFit()",(LM_NOTICE,"Peak offset ouside valid ranges"));
 				}
 			}
 			else {
-				ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FOCUSFIT_DID_NOT_CONVERGE"));
+				CUSTOM_LOG(LM_FULL_INFO,"CEngineThread::gaussFit()",(LM_NOTICE,"Fitting did not converge"));
 			}
 	    }
 	    else {
-			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "ERROR_DETECTED_DURING_FOCUS_SCAN"));
+			CUSTOM_LOG(LM_FULL_INFO,"CEngineThread::gaussFit()",(LM_NOTICE,"Error detected during focus scan"));
 	    }
 	    m_focusOffset=m_Par[1];
 	    m_data->setAmplitude (m_Par[0]);
@@ -1083,7 +1086,9 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	    	m_file << (const char *) out;
 	    	m_file << m_errPar[1] << " " << m_errPar[2] << " " << m_errPar[0] << " " << m_errPar[3] << " " << m_errPar[4] << " " << m_reducedCHI << std::endl;
 	    }
-		ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FOCUSFIT  zS %lf %lf %lf %lf %lf %d",m_Par[1], m_Par[2], m_Par[0] , m_Par[3], m_Par[4], m_ierr));
+	    ACS_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()",(LM_NOTICE,"Gauss fitting parameters(zS):  peak=%lf, fwhm=%lf, amp=%lf, offset=%lf, slope=%lf, iter=%d",
+	    	m_Par[1],m_Par[2],m_Par[0],m_Par[3],m_Par[4],m_ierr));
+		//ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FOCUSFIT  zS %lf %lf %lf %lf %lf %d",m_Par[1], m_Par[2], m_Par[0] , m_Par[3], m_Par[4], m_ierr));
 	    m_focusResult=0;
 	    offMin=GETMIN(m_off[0],m_off[m_dataSeqCounter-1]);
 	    offMax=GETMAX(m_off[0],m_off[m_dataSeqCounter-1]);
@@ -1094,15 +1099,15 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 						m_focusResult=1;
 				}
 				else {
-					ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "INVALID_IN_FOCUS_FIT"));
+					CUSTOM_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE,"Peak offset ouside valid ranges"));
 				}
 			}
 			else {
-				ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "FOCUSFIT_DID_NOT_CONVERGE"));
+				CUSTOM_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE,"Fitting did not converge"));
 			}
 	    }
 	    else {
-			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "ERROR_DETECTED_DURING_FOCUS_SCAN"));
+			CUSTOM_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE,"Error detected during focus scan"));
 	    }
 	    m_focusOffset=m_Par[1];
 	    m_data->setAmplitude (m_Par[0]);
@@ -1120,6 +1125,7 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 	   m_data->setFocusDone();
 	} // m_CoordIndex == 3
     if (m_data->isPointingScan()) {
+    	IRA::CString latOk,lonOk;
 		if (m_data->isPointingScanDone()) {
 			if (m_fileOpened) {
 				// offset m_LonPos, m_LatPos, m_lonOff, m_latOff, m_lonResult, m_latResult
@@ -1138,16 +1144,20 @@ void CEngineThread::gaussFit(const ACS::Time& now)
 				m_file << m_LonPos * DR2D << " " <<  m_LatPos * DR2D << " " << m_lonAmp << " " << m_lonAmpErr << " " << m_latAmp << " " << m_latAmpErr << " " << m_lonFwhm * DR2D << " " << m_lonFwhmErr * DR2D << " " \
 						<< m_latFwhm * DR2D << " " << m_latFwhmErr * DR2D 	<< " " << m_lonTsys << " " << m_latTsys << " " << m_data->getSourceFlux() << " " << m_lonResult << " " << m_latResult << std::endl;
 			}
-			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %lf %d %d",
-				m_LonPos * DR2D, m_LatPos * DR2D, m_LonOff * DR2D, m_LatOff * DR2D, m_lonResult, m_latResult));
-			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XOFFSETS = %lf %lf %lf %lf %lf %lf %d %d",
-				m_LonPos * DR2D, m_LatPos * DR2D, m_cosLat * m_LonOff * DR2D, m_LatOff * DR2D, m_cosLat * m_LonErr * DR2D, m_LatErr * DR2D, m_lonResult, m_latResult));
-
-			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XGAIN =%s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d",(const char *)m_data->getSourceName(),
+			if (m_lonResult) lonOk="ok";
+			else lonOk="nok";
+			if (m_latResult) latOk="ok";
+			else latOk="nok";			
+			CUSTOM_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "Measured positions: lon=%lf (deg), lat=%lf (rad), lonOff=%lf (deg), latOff=%lf (deg), lonRes=%s, latRes=%s",
+				m_LonPos * DR2D, m_LatPos * DR2D, m_LonOff * DR2D, m_LatOff * DR2D,(const char *) lonOk,(const char *) latOk));
+			CUSTOM_LOG(LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "Measured poistions errors: lon=%lf, lat=%lf, lonOff=%lf, latOff=%lf",
+				m_LonPos * DR2D, m_LatPos * DR2D, m_cosLat * m_LonOff * DR2D, m_LatOff * DR2D, m_cosLat * m_LonErr * DR2D, m_LatErr * DR2D));
+			ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "XGain: %s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d",(const char *)m_data->getSourceName(),
 				m_LonPos * DR2D, m_LatPos * DR2D, m_lonAmp, m_lonAmpErr, m_latAmp, m_latAmpErr, m_lonFwhm * DR2D, m_lonFwhmErr * DR2D, m_latFwhm * DR2D, m_latFwhmErr * DR2D, m_lonTsys, m_latTsys, m_data->getSourceFlux(), m_lonResult, m_latResult));
 		}
     }
     else if (m_data->isFocusScan()) {
+    	IRA::CString result;
     	if (m_data->isFocusScanDone()) {
     		if (m_fileOpened) {
     			tS.value (now);
@@ -1160,7 +1170,10 @@ void CEngineThread::gaussFit(const ACS::Time& now)
     			m_file << (const char *) out;
     			m_file << m_Par[1] << " " <<  m_focusScanCenter << " " <<  m_focusScanCenter+m_Par[1] << m_focusResult << std::endl;
     		}
-		ACS_LOG (LM_FULL_INFO, "CEngineThread::gaussFit()", (LM_NOTICE, "OFFSETS = %lf %lf %lf %lf %d",m_LatPos * DR2D, m_Par[1], m_focusScanCenter, m_focusScanCenter+m_Par[1], m_focusResult));
+    		if (m_focusResult) result="ok";
+    		else result="nok";
+			CUSTOM_LOG(LM_FULL_INFO,"CEngineThread::gaussFit()",(LM_NOTICE,"Measured positions: lat=%lf (deg), offset=%lf, focus=%lf, newfocus=%lf res=%s",m_LatPos*DR2D,m_Par[1],
+				m_focusScanCenter,m_focusScanCenter+m_Par[1],(const char *)result));
     	}
     }
 }
@@ -1177,15 +1190,18 @@ void CEngineThread::setAxisOffsets()
 		m_antennaBoss=Antenna::AntennaBoss::_nil();
 		return;
 	}
-    switch (m_data->getScanAxis ()) {
+    switch (m_data->getScanAxis()) {
 	   	case Management::MNG_NO_AXIS:
 	   		break;
 	   	case Management::MNG_HOR_LON:
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
 	   				if ((m_data->isLonDone()) && (m_lonResult)) {
-	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
-	   					m_antennaBoss->setOffsets (m_cosLat * m_LonOff , m_elUserOff, Antenna::ANT_HORIZONTAL);
+	   					//m_antennaBoss->getAllOffsets(m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
+	   					m_antennaBoss->getAllOffsets(m_sysAzOff,m_sysElOff,m_scanLonOff,m_scanLatOff,m_scanOffsetFrame);
+	   					m_antennaBoss->setSystemOffsets(m_cosLat*m_LonOff,m_sysElOff);
+	   					CUSTOM_LOG(LM_FULL_INFO,"CEngineThread::setAxisOffsets()",(LM_NOTICE,"New system longitude offset in use: lonOff=%lf (rad)",m_cosLat*m_LonOff));
+		   				//m_antennaBoss->setOffsets (m_cosLat * m_LonOff , m_elUserOff, Antenna::ANT_HORIZONTAL);			
 	   				}
 	   			}
 	   		}
@@ -1216,8 +1232,11 @@ void CEngineThread::setAxisOffsets()
 	   		try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
 	   				if ((m_data->isLatDone()) && (m_latResult)) {
-	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
-	   					m_antennaBoss->setOffsets (m_azUserOff, /*m_elUserOff + */m_LatOff, Antenna::ANT_HORIZONTAL);
+	   					m_antennaBoss->getAllOffsets(m_sysAzOff,m_sysElOff,m_scanLonOff,m_scanLatOff,m_scanOffsetFrame);
+	   					m_antennaBoss->setSystemOffsets(m_sysAzOff,m_LatOff);
+	   					CUSTOM_LOG(LM_FULL_INFO,"CEngineThread::setAxisOffsets()",(LM_NOTICE,"New system latitude offset in use: latOff=%lf (rad)",m_LatOff));
+	   					//m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
+	   					//m_antennaBoss->setOffsets (m_azUserOff,m_LatOff, Antenna::ANT_HORIZONTAL);
 	   				}
 	   			}
 	   		}
@@ -1245,7 +1264,7 @@ void CEngineThread::setAxisOffsets()
 			}
 	   		break;
 	   	case Management::MNG_EQ_LON:
-	   		try {
+	   		/*try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
 	   				if ((m_data->isLonDone()) && (m_lonResult)) {
 	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
@@ -1274,14 +1293,14 @@ void CEngineThread::setAxisOffsets()
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
 				m_data->setStatus(Management::MNG_WARNING);
-			}
+			}*/
 	   		break;
 	   	case Management::MNG_EQ_LAT:
-	   		try {
+	   		/*try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
 	   				if ((m_data->isLatDone()) && (m_latResult)) {
 	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
-	   					m_antennaBoss->setOffsets (m_raUserOff, /*m_decUserOff + */m_LatOff , Antenna::ANT_EQUATORIAL);
+	   					m_antennaBoss->setOffsets (m_raUserOff,m_LatOff , Antenna::ANT_EQUATORIAL);
 	   				}
 	   			}
 	   		}
@@ -1306,10 +1325,10 @@ void CEngineThread::setAxisOffsets()
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
 				m_data->setStatus(Management::MNG_WARNING);
-			}
+			}*/
 	   		break;
 	   	case Management::MNG_GAL_LON:
-	   		try {
+	   		/*try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
 	   				if ((m_data->isLonDone()) && (m_lonResult)) {
 	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
@@ -1338,14 +1357,14 @@ void CEngineThread::setAxisOffsets()
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
 				m_data->setStatus(Management::MNG_WARNING);
-			}
+			}*/
 	   		break;
 	   	case Management::MNG_GAL_LAT:
-	   		try {
+	   		/*try {
 	   			if (!CORBA::is_nil(m_antennaBoss)) {
 	   				if ((m_data->isLatDone()) && (m_latResult)) {
 	   					m_antennaBoss->getAllOffsets (m_azUserOff, m_elUserOff, m_raUserOff, m_decUserOff, m_lonUserOff, m_latUserOff);
-	   					m_antennaBoss->setOffsets (m_lonUserOff, /*m_latUserOff + */m_LatOff, Antenna::ANT_GALACTIC);
+	   					m_antennaBoss->setOffsets (m_lonUserOff,m_LatOff, Antenna::ANT_GALACTIC);
 	   				}
 	   			}
 	   		}
@@ -1370,7 +1389,7 @@ void CEngineThread::setAxisOffsets()
 				impl.setComponentName((const char *)m_config->getAntennaBossComponent());
 				impl.log(LM_ERROR);
 				m_data->setStatus(Management::MNG_WARNING);
-			}
+			}*/
 	   		break;
 	   	case Management::MNG_SUBR_Z:
 	   		try {
@@ -1386,6 +1405,7 @@ void CEngineThread::setAxisOffsets()
 							oldOffset=0.0;		
 						}
 	   					m_minorServoBoss->setUserOffset((const char*)m_data->getMinorServoNameForAxis(),m_focusOffset+oldOffset);
+	   					CUSTOM_LOG(LM_FULL_INFO,"CEngineThread::setAxisOffsets()",(LM_NOTICE,"New focus offset in use: offset=%lf (rad)",m_focusOffset+oldOffset));
 	   				}
 	   			}
 	   		}
@@ -1430,6 +1450,7 @@ void CEngineThread::setAxisOffsets()
 							oldOffset=0.0;		
 						}
 	   					m_minorServoBoss->setUserOffset((const char*)m_data->getMinorServoNameForAxis(),m_focusOffset+oldOffset);
+	   					CUSTOM_LOG(LM_FULL_INFO,"CEngineThread::setAxisOffsets()",(LM_NOTICE,"New focus offset in use: offset=%lf (rad)",m_focusOffset+oldOffset));
 	   				}
 	   			}
 	   		}
@@ -1491,7 +1512,7 @@ void CEngineThread::prepareFile(const ACS::Time& now)
     m_file << (const char *) out;
     m_file << (const char *) observerName << std::endl;
     // Source Name
-    ACS_LOG (LM_FULL_INFO, "CEngineThread::prepareFile()", (LM_NOTICE, "FILE_OPENED %s", (const char *) m_data->getFileName ()));
+    ACS_LOG(LM_FULL_INFO, "CEngineThread::prepareFile()",(LM_NOTICE, "FILE_OPENED %s", (const char *) m_data->getFileName ()));
 }
 
 void CEngineThread::writeFocusFileHeaders(const ACS::Time& now)

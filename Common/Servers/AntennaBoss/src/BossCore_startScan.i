@@ -18,7 +18,7 @@ void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters&
 	//make sure that scan offset are reset
 	/*m_scanOffset=TOffset(0.0,0.0,m_userOffset.frame);
 	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);*/
-	m_offsets.resetScan();
+	//m_offsets.resetScan();
 	try {
 		m_generatorType=Antenna::ANT_NONE;
 		m_generator=Antenna::EphemGenerator::_nil(); // it also releases the previous reference.

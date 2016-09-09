@@ -52,6 +52,8 @@ using namespace baci;
 _SP_WILDCARD_CLASS(ReferenceFrame_WildCard,"UNDEF");
 _SP_WILDCARD_CLASS(VradDefinition_WildCard,"UNDEF");
 _SP_WILDCARD_CLASS(VRad_WildCard,"nan");
+_SP_WILDCARD_CLASS(Offset_WildCard,"nan");
+
 
 class ReferenceFrame_converter
 {
@@ -655,14 +657,14 @@ public:
 	/**
 	 * It is used internally to returns the user offsets in all supported frames
 	 * @throw CORBA::SystemException
-	 * @param raOff the returned offset azimuth in radians
-	 * @param elOff the returned offset elevation in radians
-	 * @param raOff the returned offset right ascension in radians
-	 * @param decOff the returned offset declination in radians
-	 * @param lonOff the returned offset longitude in radians
-	 * @param latOff the returned offset latitude in radians  
+	 * @param sysAzOff current azimuth system offset in radians
+	 * @param sysEllOff current elevation system offset in radians
+	 * @param lonOff current longitude frame in radians
+	 * @param latOff current latitude offset in radians
+	 * @param offFrame current offset frame
 	*/
-	void getAllOffsets(CORBA::Double_out azOff,CORBA::Double_out elOff,CORBA::Double_out raOff,CORBA::Double_out decOff,CORBA::Double_out lonOff,CORBA::Double_out latOff) throw (CORBA::SystemException);
+	virtual void getAllOffsets(CORBA::Double_out sysAzOff,CORBA::Double_out sysElOff,CORBA::Double_out lonOff,CORBA::Double_out latOff,
+		Antenna::TCoordinateFrame_out offFrame) throw (CORBA::SystemException); 
 	
 	/**
 	 * It can be called to know which is the axis the antenna is currently performing the scan

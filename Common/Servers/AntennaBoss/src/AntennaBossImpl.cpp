@@ -198,15 +198,23 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("preset",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >,I<angle_type<rad> > >(boss,&CBossCore::preset),2);
 	//m_parser->add("vlsr",new function1<CBossCore,non_constant,void_type,I<double_type> >(boss,&CBossCore::setVlsr),1);
 	m_parser->add("fwhm",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >, I<double_type> >(boss,&CBossCore::setFWHM),2);
-	m_parser->add("azelOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setHorizontalOffsets),2);
-	m_parser->add("radecOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setEquatorialOffsets),2);
-	m_parser->add("lonlatOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setGalacticOffsets),2);
+	//m_parser->add("azelOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setHorizontalOffsets),2);
+	//m_parser->add("radecOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setEquatorialOffsets),2);
+	//m_parser->add("lonlatOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setGalacticOffsets),2);
 	//m_parser->add("skydipOTF",new function3<CBossCore,non_constant,time_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(boss,&CBossCore::skydip),3);
 	m_parser->add("antennaReset",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::resetFailures),0);
 	//m_parser->add("goOff",new function2<CBossCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(boss,&CBossCore::goOff),2);
 	m_parser->add("radialVelocity",new function3<CBossCore,non_constant,void_type,I<  basic_type<double,double_converter,VRad_WildCard> >,
 			I<enum_type<ReferenceFrame_converter,Antenna::TReferenceFrame,ReferenceFrame_WildCard> >,
 			I<enum_type<VradDefinition_converter,Antenna::TVradDefinition,VradDefinition_WildCard> >  >(boss,&CBossCore::radialVelocity),3);
+			
+	m_parser->add("setOffsets",new function3<CBossCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,
+		I<angleOffset_type<rad,Offset_WildCard> >,I<angleOffset_type<rad,Offset_WildCard> > >(boss,&CBossCore::setOffsets),3);
+		
+	m_parser->add("setSysOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad,Offset_WildCard> >,I<angleOffset_type<rad,Offset_WildCard> > >
+		(boss,&CBossCore::setSystemOffsets),2);
+	
+	
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
@@ -329,7 +337,7 @@ void AntennaBossImpl::setSubScanOffsets(Antenna::TCoordinateFrame frame,CORBA::D
 	AUTO_TRACE("AntennaBossImpl::setSubScanOffsets()");
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 	try {
-		resource->setOffsets(lonOff,latOff,frame);
+		resource->setOffsets(frame,lonOff,latOff);
 	}
 	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -346,7 +354,7 @@ void AntennaBossImpl::setSystemOffsets(CORBA::Double az,CORBA::Double el) throw 
 	AUTO_TRACE("AntennaBossImpl::setSystemOffset()");
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get();
 	try {
-		//resource->setOffsets(lonOff,latOff,frame);
+		resource->setSystemOffsets(az,el);
 	}
 	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -639,17 +647,19 @@ void AntennaBossImpl::getObservedHorizontal(ACS::Time time,ACS::TimeInterval dur
 	el=(CORBA::Double)El;
 }
 
-void AntennaBossImpl::getAllOffsets(CORBA::Double_out azOff,CORBA::Double_out elOff,CORBA::Double_out raOff,CORBA::Double_out decOff,CORBA::Double_out lonOff,CORBA::Double_out latOff) throw (
-		CORBA::SystemException)
+void AntennaBossImpl::getAllOffsets(CORBA::Double_out sysAzOff,CORBA::Double_out sysElOff,CORBA::Double_out lonOff,CORBA::Double_out latOff,
+		Antenna::TCoordinateFrame_out offFrame) throw (CORBA::SystemException)
+
 {
-	double az,el,ra,dec,lon,lat;
+	double az,el,lon,lat;
+	offFrame=Antenna::ANT_HORIZONTAL;
 	if (!m_core) {
-		azOff=elOff=raOff=decOff=lonOff=latOff=0.0;
+		az=el=lon=lat=0.0;
 		return;
 	}
 	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getAllOffsets");
-	resource->getAllOffsets(az,el,ra,dec,lon,lat);
-	azOff=(CORBA::Double)az; elOff=(CORBA::Double)el; raOff=(CORBA::Double)ra; decOff=(CORBA::Double)dec; lonOff=(CORBA::Double)lon; latOff=(CORBA::Double)lat;
+	resource->getAllOffsets(az,el,lon,lat,offFrame);
+	sysAzOff=(CORBA::Double)az; sysElOff=(CORBA::Double)el; lonOff=(CORBA::Double)lon; latOff=(CORBA::Double)lat;
 }
 
 void AntennaBossImpl::getScanAxis (Management::TScanAxis_out axis) throw (CORBA::SystemException)

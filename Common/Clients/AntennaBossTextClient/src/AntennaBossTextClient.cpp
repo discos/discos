@@ -70,7 +70,8 @@
 #define TEMPLATE_4_ROTSYSTEMSTATUS  Management::ROTSystemStatus_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
 
 #define TEMPLATE_4_ROTREFERENCEFRAME Antenna::ROTReferenceFrame_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
-#define TEMPLATE_4_ROTVRADDEFINITION  Antenna::ROTVradDefinition_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
+#define TEMPLATE_4_ROTVRADDEFINITION Antenna::ROTVradDefinition_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
+#define TEMPLATE_4_ROTCOORDINATEFRAME Antenna::ROTCoordinateFrame_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
 
 
 using namespace TW;
@@ -130,12 +131,18 @@ int main(int argc, char *argv[]) {
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *targetRA_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *targetDec_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *targetVrad_field;
-	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *azOff_field;
+	/*TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *azOff_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *elOff_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *raOff_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *decOff_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *lonOff_field;
-	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *latOff_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *latOff_field;*/
+	
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *scanLonOff_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *scanLatOff_field;
+	TW::CPropertyStatusBox<TEMPLATE_4_ROTCOORDINATEFRAME,Antenna::TCoordinateFrame> *scanFrameOff_box;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *sysAzOff_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *sysElOff_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *rawAzimuth_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *rawElevation_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *observedAzimuth_field;
@@ -259,12 +266,17 @@ int main(int argc, char *argv[]) {
 		_GET_ACS_PROPERTY(ACS::ROdouble,targetVrad);
 		_GET_ACS_PROPERTY(Antenna::ROTReferenceFrame,vradReferenceFrame);
 		_GET_ACS_PROPERTY(Antenna::ROTVradDefinition,vradDefinition);
-		_GET_ACS_PROPERTY(ACS::ROdouble,azimuthOffset);
+		/*_GET_ACS_PROPERTY(ACS::ROdouble,azimuthOffset);
 		_GET_ACS_PROPERTY(ACS::ROdouble,elevationOffset);
 		_GET_ACS_PROPERTY(ACS::ROdouble,rightAscensionOffset);
 		_GET_ACS_PROPERTY(ACS::ROdouble,declinationOffset);
 		_GET_ACS_PROPERTY(ACS::ROdouble,longitudeOffset);
-		_GET_ACS_PROPERTY(ACS::ROdouble,latitudeOffset);		
+		_GET_ACS_PROPERTY(ACS::ROdouble,latitudeOffset);*/
+		_GET_ACS_PROPERTY(ACS::ROdouble,subScanLonOffset);
+		_GET_ACS_PROPERTY(ACS::ROdouble,subScanLatOffset);
+		_GET_ACS_PROPERTY(Antenna::ROTCoordinateFrame,subScanOffsetFrame);
+		_GET_ACS_PROPERTY(ACS::ROdouble,systemAzimuthOffset);
+		_GET_ACS_PROPERTY(ACS::ROdouble,systemElevationOffset);
 		_GET_ACS_PROPERTY(ACS::ROdouble,rawAzimuth);
 		_GET_ACS_PROPERTY(ACS::ROdouble,rawElevation);		
 		_GET_ACS_PROPERTY(ACS::ROdouble,observedAzimuth);
@@ -291,12 +303,19 @@ int main(int argc, char *argv[]) {
 		targetRA_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(targetRightAscension.in());
 		targetDec_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(targetDeclination.in());
 		targetVrad_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(targetVrad.in());
-		azOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(azimuthOffset.in());
+		/*azOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(azimuthOffset.in());
 		elOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(elevationOffset.in());
 		raOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(rightAscensionOffset.in());
 		decOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(declinationOffset.in());
 		lonOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(longitudeOffset.in());
-		latOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(latitudeOffset.in());
+		latOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(latitudeOffset.in());*/
+		
+		scanLonOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(subScanLonOffset.in());
+		scanLatOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(subScanLatOffset.in());
+		scanFrameOff_box=new TW::CPropertyStatusBox<TEMPLATE_4_ROTCOORDINATEFRAME,Antenna::TCoordinateFrame>(subScanOffsetFrame.in(),Antenna::ANT_HORIZONTAL);
+		sysAzOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(systemAzimuthOffset.in());
+		sysElOff_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(systemElevationOffset.in());		
+		
 		rawAzimuth_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(rawAzimuth.in());	
 		rawElevation_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(rawElevation.in());			
 		observedAzimuth_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(observedAzimuth.in());	
@@ -338,18 +357,23 @@ int main(int argc, char *argv[]) {
 		_TW_SET_COMPONENT(targetDec_field,37,1,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(targetFlux_field,52,1,11,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(target_field,0,1,17,1,CColorPair::GREEN_BLACK,CStyle::UNDERLINE,output_label);
-
 		_TW_SET_COMPONENT(targetVrad_field,22,2,11,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-
 		_TW_SET_COMPONENT(refFrame_box,34,2,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(velDef_box,47,2,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 
-		_TW_SET_COMPONENT(azOff_field,22,3,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(elOff_field,37,3,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(raOff_field,22,4,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(scanLonOff_field,22,3,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(scanLatOff_field,37,3,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(scanFrameOff_box,52,3,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		scanFrameOff_box->setStatusLook(Antenna::ANT_HORIZONTAL);
+		scanFrameOff_box->setStatusLook(Antenna::ANT_EQUATORIAL);
+		scanFrameOff_box->setStatusLook(Antenna::ANT_GALACTIC);
+		_TW_SET_COMPONENT(sysAzOff_field,22,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(sysElOff_field,37,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		
+		/*_TW_SET_COMPONENT(raOff_field,22,4,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(decOff_field,37,4,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(lonOff_field,22,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(latOff_field,37,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(latOff_field,37,5,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);*/
 		_TW_SET_COMPONENT(rawAzimuth_field,22,6,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(rawElevation_field,37,6,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		_TW_SET_COMPONENT(observedAzimuth_field,22,7,14,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
@@ -386,12 +410,17 @@ int main(int argc, char *argv[]) {
 		targetVrad_field->setFormatFunction(CFormatFunctions::floatingPointFormat,NULL);
 		strcpy(fluxFormat,"(%05.1lf Jy)");
 		targetFlux_field->setFormatFunction(CFormatFunctions::floatingPointFormat,static_cast<void *>(fluxFormat));
-		azOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
+		/*azOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		elOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		raOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL); //format as hh.mm.ss.ss
 		decOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		lonOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
-		latOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
+		latOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);*/
+		
+		scanLonOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL); //format as hh.mm.ss.ss
+		scanLatOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
+		sysAzOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
+		sysElOff_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
 		observedGalLongitude_field->setFormatFunction(CFormatFunctions::angleFormat,NULL);
 		observedGalLatitude_field->setFormatFunction(CFormatFunctions::angleFormat,NULL);
 		pointingAzimuthCorrection_field->setFormatFunction(CFormatFunctions::coordinateFormat,NULL);
@@ -450,12 +479,20 @@ int main(int argc, char *argv[]) {
 		_INSTALL_MONITOR(refFrame_box,2000);
 		_INSTALL_MONITOR(velDef_box,2000);
 		_INSTALL_MONITOR(targetFlux_field,2000);
-		_INSTALL_MONITOR(azOff_field,500);
+		/*_INSTALL_MONITOR(azOff_field,500);
 		_INSTALL_MONITOR(elOff_field,500);
 		_INSTALL_MONITOR(raOff_field,500);
 		_INSTALL_MONITOR(decOff_field,500);
 		_INSTALL_MONITOR(lonOff_field,500);
-		_INSTALL_MONITOR(latOff_field,500);
+		_INSTALL_MONITOR(latOff_field,500);*/
+
+		_INSTALL_MONITOR(scanLonOff_field,500);
+		_INSTALL_MONITOR(scanLatOff_field,500);
+		_INSTALL_MONITOR(scanFrameOff_box,500);
+		_INSTALL_MONITOR(sysAzOff_field,500);
+		_INSTALL_MONITOR(sysElOff_field,500);
+		
+		
 		_INSTALL_MONITOR(rawAzimuth_field,300);
 		_INSTALL_MONITOR(rawElevation_field,300);
 		_INSTALL_MONITOR(observedAzimuth_field,300);

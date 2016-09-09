@@ -135,9 +135,12 @@ private:
     float m_reducedCHI;
     integer m_ierr;
     double m_cosLat;
-    double m_raUserOff, m_decUserOff;
+    /*double m_raUserOff, m_decUserOff;
 	double m_azUserOff, m_elUserOff;
-	double m_lonUserOff, m_latUserOff;
+	double m_lonUserOff, m_latUserOff;*/
+	Antenna::TCoordinateFrame m_scanOffsetFrame;
+	double m_scanLonOff,m_scanLatOff;
+	double m_sysAzOff,m_sysElOff;
 	double m_focusOffset;
 	int m_latResult, m_lonResult;
 	int m_focusResult;

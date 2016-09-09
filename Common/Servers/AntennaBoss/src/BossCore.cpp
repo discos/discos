@@ -611,17 +611,23 @@ void CBossCore::getTopocentricFrequency(const ACS::doubleSeq& rest,ACS::doubleSe
 	}
 }
 
-void CBossCore::setOffsets(const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& frame) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)
+void CBossCore::setSystemOffsets(const double& azOff,const double& elOff)
+{
+	m_offsets.setSystemOffset(azOff,elOff);
+	CUSTOM_LOG(LM_FULL_INFO,"CBossCore::setSystemOffsets()",(LM_NOTICE,"System offsets: az=%lf (rad), el=%lf (rad)",azOff,elOff));
+}
+
+void CBossCore::setOffsets(const Antenna::TCoordinateFrame& frame,const double& lonOff,const double& latOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)
 {
 	m_offsets.setScanOffset(lonOff,latOff,frame);
 	if (frame==Antenna::ANT_HORIZONTAL) {
-		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",(LM_NOTICE,"New horizontal user offsets %lf rad, %lf rad",lonOff,latOff));
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",(LM_NOTICE,"New horizontal offsets: az=%lf (rad), el=%lf (rad)",lonOff,latOff));
 	}
 	else if (frame==Antenna::ANT_EQUATORIAL) {
-		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",(LM_NOTICE,"New equatorial user offsets %lf rad, %lf rad",lonOff,latOff));
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",(LM_NOTICE,"New equatorial offsets: ra=%lf (rad), dec=%lf (rad)",lonOff,latOff));
 	}
 	else if (frame==Antenna::ANT_GALACTIC) {
-		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",(LM_NOTICE,"New galactic user offsets %lfrad, %lf rad",lonOff,latOff));					
+		CUSTOM_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",(LM_NOTICE,"New galactic offsets: lon=%lf (rad), lat=%lf (rad)",lonOff,latOff));					
 	}
 	if ((!CORBA::is_nil(m_generator)) && (m_generatorType!=Antenna::ANT_NONE)) {
 		try {
@@ -651,35 +657,24 @@ void CBossCore::setOffsets(const double& lonOff,const double& latOff,const Anten
 	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);*/
 }
 
-void CBossCore::getAllOffsets(double& azOff,double& elOff,double& raOff,double& decOff,double& lonOff,double& latOff) const
+void CBossCore::getAllOffsets(double& sysAzOff,double& sysElOff,double& lonOff,double& latOff,Antenna::TCoordinateFrame& offFrame) const
 {
-	/*****************************************************************************************************************************************/
-	/** TO BE FIXED */
-	/*****************************************************************************************************************************************/
-	/*if (m_offsetFrame==Antenna::ANT_HORIZONTAL) {
-		azOff=m_longitudeOffset;
-		elOff=m_latitudeOffset;
-		raOff=0.0;
-		decOff=0.0;
-		lonOff=0.0;
-		latOff=0.0;
+	TOffset off;
+	if (m_offsets.isSystemSet()) {
+		sysAzOff=m_offsets.getSystemAzimuth();
+		sysElOff=m_offsets.getSystemElevation();		
 	}
-	else if (m_offsetFrame==Antenna::ANT_EQUATORIAL) {
-		azOff=0.0;
-		elOff=0.0;
-		raOff=m_longitudeOffset;
-		decOff=m_latitudeOffset;
-		lonOff=0.0;
-		latOff=0.0;		
+	else {
+		sysAzOff=sysElOff=0.0;
 	}
-	else if (m_offsetFrame==Antenna::ANT_GALACTIC) {
-		azOff=0.0;
-		elOff=0.0;
-		raOff=0.0;
-		decOff=0.0;
-		lonOff=m_longitudeOffset;
-		latOff=m_latitudeOffset;		
-	}*/
+	if (m_offsets.isScanSet()) {
+		off=m_offsets.getScanOffset();
+		lonOff=off.lon; latOff=off.lat; offFrame=off.frame;
+	}
+	else {
+		lonOff=latOff=0.0;
+		offFrame=Antenna::ANT_HORIZONTAL;
+	}
 }
 
 void CBossCore::stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,
@@ -1156,7 +1151,7 @@ void CBossCore::publishData() throw (ComponentErrors::NotificationChannelErrorEx
 	}
 }
 
-void CBossCore::setHorizontalOffsets(const double& azOff,const double& elOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)
+/*void CBossCore::setHorizontalOffsets(const double& azOff,const double& elOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)
 {
 	setOffsets(azOff,elOff,Antenna::ANT_HORIZONTAL); // could throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)
 }
@@ -1169,7 +1164,7 @@ void CBossCore::setEquatorialOffsets(const double& raOff,const double& decOff) t
 void CBossCore::setGalacticOffsets(const double& lonOff,const double& latOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)
 {
 	setOffsets(lonOff,latOff,Antenna::ANT_GALACTIC); // could throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)	
-}
+}*/
 
 #include "BossCore_startScan.i"
 

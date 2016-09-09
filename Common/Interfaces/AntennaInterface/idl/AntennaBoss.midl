@@ -684,14 +684,13 @@ module Antenna {
 		/**
 		 * This method should only be used internally to know the user offsets currently commanded
 		 * @throw CORBA::SystemExcpetion
-		 * @param azOff user offset for the azimuth (radians)
-		 * @param elOff user offset for the elevation (radians)
-		 * @param raOff user offset for the right ascension (radians)
-		 * @param decOff user offset for the declination (radians)
-		 * @param lonOff user offset for the longitude (radians)
-		 * @param latOff user offset for the latitude (radians)
+		 * @param sysAzOff system offset for the azimuth (radians)
+		 * @param sysElOff system offset for the elevation (radians)
+		 * @param lonOff current offset along longitude (radians)
+		 * @param lonOff current offset along latitude (radians)		 
+		 * @param frame current offset frame
 		 */
-		void getAllOffsets(out double azOff,out double elOff,out double raOff,out double decOff,out double lonOff,out double latOff);
+		void getAllOffsets(out double sysAzOff,out double sysElOff,out double lonOff,out double latOff,out TCoordinateFrame offFrame);
 		
 		/**
 		 * This method is used internally to know the scan axis/direction os the presently commanded scan
