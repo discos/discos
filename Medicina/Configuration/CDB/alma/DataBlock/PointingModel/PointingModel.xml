@@ -112,6 +112,9 @@
         <coefficientNum29> 0 </coefficientNum29> <coefficientVal29> 0 </coefficientVal29>
 </Receiver>
 
+<!--
+Model XXP conf, id: 25
+-->
 <Receiver>
 	<receiverCode>XXP</receiverCode>
         <phi>90.0</phi>
