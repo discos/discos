@@ -122,9 +122,9 @@ with open(abs_outfile_name, 'w') as outfile:
     for point in points:
         position[address] = point
         print("Going to position (%s)" % fmt_position(position))
-        pfp.set_sync(position)
+        pfp.setPosition(position, 0)
         wait_until_reached(property, position, increment)
-        tpi = tp.getTpi()
+        tpi = total_power.getTpi()
         outfile.write('\n%.2f  %.2f  %.2f' % (point, tpi[0], tpi[1]))
 
-pfp.set_sync(current_pos)  # Go to the original position
+pfp.setPosition(current_pos, 0)  # Go to the original position
