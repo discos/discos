@@ -104,9 +104,17 @@
         @ M3R: RZ(mm) = (860);
     "
 
+    HHP="
+        @ SRP: park;
+        @ PFP: RY(mm) = (-25.72); TX(mm) = (1312.0); TZ(mm) = (-40.0);
+        @ PFP: power_off_encoder;
+        @ GFR: RZ(mm) = (-600);
+        @ M3R: RZ(mm) = (860);
+    "
+
     XKP="
         @ SRP: park;
-        @ PFP: RY(mm) = (-25.75); TX(mm) = (-841.15); TZ(mm) = (-45.9);
+        @ PFP: RY(mm) = (-25.75); TX(mm) = (-1060); TZ(mm) = (-45.9);
         @ GFR: RZ(mm) = (-600);
         @ M3R: RZ(mm) = (860);
     "
