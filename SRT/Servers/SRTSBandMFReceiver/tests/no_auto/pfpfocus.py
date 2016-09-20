@@ -1,14 +1,12 @@
-"""Docstring
-* Write the limits and the documentation.
-* ...
-"""
 #!/usr/bin/env python
 # Author: Marco Buttu <m.buttu@oa-cagliari.inaf.it>
+from __future__ import with_statement
 
 import datetime
 import argparse
 import time
 import sys
+import os
 from Acspy.Clients.SimpleClient import PySimpleClient
 from argparse import ArgumentParser
 
@@ -113,20 +111,20 @@ while point <= rvalue:
     points.append(point)
     point += increment
 
-position = current_pos
-for point in points:
-    position[address] = point
-    print("Going to position (%s)" % fmt_position(position))
-    pfp.set_sync(position)
-    wait_until_reached(property, position, increment)
-    tpi = tp.getTpi()
-    # TODO: write to file: position, TPI
+abs_file_name = os.path.abspath(__file__)
+dirname = os.path.dirname(abs_file_name)
+current_time = datetime.datetime.now()
+out_file_name = current_time.strftime('pfpfocus_%Y_%m_%d_h%H_%M.txt')
+abs_outfile_name = os.path.join(dirname, out_file_name)
+with open(abs_outfile_name, 'w') as outfile:
+    outfile.write('%s POSITION  TPI_CH0  TPI_CH1' % args.axis)
+    position = current_pos
+    for point in points:
+        position[address] = point
+        print("Going to position (%s)" % fmt_position(position))
+        pfp.set_sync(position)
+        wait_until_reached(property, position, increment)
+        tpi = tp.getTpi()
+        outfile.write('\n%.2f  %.2f  %.2f' % (point, tpi[0], tpi[1]))
 
-# TODO: creare directory con data come nome, dove salvare file
-# TODO: salvare posizione e TPI su file
-# TODO: creare un plot positione/TPI e salvarlo
-# TODO: mostare a video il plot
-
-
-# pfp.set_sync(current_pos)  # Go to the original position
-# wait_until_reached(property, current_pos, increment)
+pfp.set_sync(current_pos)  # Go to the original position
