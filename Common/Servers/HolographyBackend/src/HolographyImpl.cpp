@@ -317,6 +317,9 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
                         }
                 }
      try {
+     
+                cout << "**Correlator OpenFile**"<< endl;
+                m_correlator->openFile(m_filename.c_str());
                 getSender()->startSend(FLOW_NUMBER,(const char*)&bkd,
                                 sizeof(Backends::TMainHeader)+bkd.header.sections*sizeof(Backends::TSectionHeader));
         }
@@ -325,6 +328,10 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
                 impl.setDetails("main header could not be sent");
                 impl.log(LM_DEBUG);
                 throw impl.getBackendsErrorsEx();
+        }
+        catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+                ex.log(LM_DEBUG);
+                throw ex.getBackendsErrorsEx();         
         }
         catch (...) {
                 _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"HolographyImpl::sendHeader()");
@@ -349,8 +356,8 @@ void HolographyImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException
 
         try{
         
-                cout << "**Correlator OpenFile**"<< endl;
-                m_correlator->openFile(m_filename.c_str());
+//                 cout << "**Correlator OpenFile**"<< endl;
+//                 m_correlator->openFile(m_filename.c_str());
                 
          
      //           m_correlator->save_coeff(az,el);

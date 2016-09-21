@@ -38,6 +38,9 @@ void CSenderThread::onStop()
  
 void CSenderThread::runLoop()
 {
+
+        double azeloff,eloff,raoff,decoff,lonoff,latoff;
+
 	TIMEVALUE now;
 	   double az,el;
 	az=-99.;  // DUMMY values 
@@ -52,6 +55,11 @@ void CSenderThread::runLoop()
 	{
 	  	cout <<"ABOSS REFERENCED " << endl;
 	IRA::CIRATools::getTime(now);
+        
+          
+          
+          
+        m_antenna_boss->getAllOffsets(azeloff,eloff,raoff,decoff,lonoff,latoff); //   
 	m_antenna_boss->getObservedHorizontal(now.value().value,0,az,el); // get az and el from bos
 
 	}
@@ -63,7 +71,7 @@ void CSenderThread::runLoop()
 #define PI 3.14159265358979323846
         az=az/PI*180.0;
         el=el/PI*180.0;
-	m_dxc_correlator->save_coeff(az,el); 
+	m_dxc_correlator->save_coeff(azeloff,eloff); 
 	// AUTO_TRACE("CSenderThread::runLoop()");
 	} catch (ACSErrTypeFPGACommunication::ACSErrTypeFPGACommunicationExImpl &ex)
 	{
@@ -87,7 +95,7 @@ void CSenderThread::runLoop()
 	
 	}
 
-	ACS_LOG(LM_FULL_INFO,"CSenderThread::runLoop()",(LM_INFO,"SenderThread runloop"));
+	ACS_LOG(LM_FULL_INFO,"CSenderThread::runLoop()",(LM_DEBUG,"SenderThread runloop"));
 	
 	
 }

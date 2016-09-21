@@ -130,8 +130,10 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
     def cleanUp(self):
         self.corr.disconnect()
         self.getLogger().logDebug("CleanUp")
-
-        self.out_file.close()
+        if not self.out_file.closed:
+          
+            self.closeFile()
+            
         #ComponentLifecycle.cleanUp()
         
     def aboutToAbort(self):
@@ -255,7 +257,9 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
             raise ComponentErrorsImpl.FileIOErrorExImpl()
     def closeFile(self):
         try:
-           self.out_file.close()
+          if not self.out_file.closed:
+            
+                 self.out_file.close()
         except IOError:
             self.getLogger().logDebug("Error in initialize: cannot close out_file")
             self.getLogger().logError("Error closing out_file")
