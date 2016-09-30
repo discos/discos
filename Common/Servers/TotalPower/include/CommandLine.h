@@ -253,7 +253,8 @@ public:
 	 * @param conf identifier of the configuration to be loaded
 	 */ 
 	void setup(const char *conf) throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl);
+			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl,ComponentErrors::NotAllowedExImpl,ComponentErrors::IRALibraryResourceExImpl,
+			ComponentErrors::TimeoutExImpl);
 	
 	/**
 	 * This function can be used to set up an input of the backend. The input is identified by its numeric value. If a configuration
@@ -661,7 +662,8 @@ private:
 	 * @throw BackendsErrors::NakExImpl
 	 */
 	void setDefaultConfiguration() throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl);
+		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
+		ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::TimeoutExImpl);
 	
 	/**
 	 * This method is called to set up the component in order to get the desired configuration. Defaults  and
