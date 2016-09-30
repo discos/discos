@@ -538,7 +538,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 	}
 	//---------------------------------------------------------------------------------------------------
 	//4) info from antenna--------------------------------------------------------------------------------
-	printf("RestFrequency : %lf\n",m_restFrequency[0]);
+	//printf("RestFrequency : %lf\n",m_restFrequency[0]);
 	try {
 		m_antennaBoss->getTopocentricFrequency(m_restFrequency,topocentricFreq.out());
 	}
@@ -566,7 +566,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
 		throw impl;
 	}
-	for (unsigned t=0;t<topocentricFreq->length();t++) printf("topocentric Freq :%lf\n",topocentricFreq[t]);
+	//for (unsigned t=0;t<topocentricFreq->length();t++) printf("topocentric Freq :%lf\n",topocentricFreq[t]);
 	// just to make sure the topocentric sequence has the right dimension!
 	if (topocentricFreq->length()!=m_restFrequency.length()) {
 		topocentricFreq->length(m_restFrequency.length());
@@ -628,12 +628,12 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 			if (topocentricFreq->length()==1) {
 				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[0]-bckinputFreq[j]-
 						(bckinputBW[j]/2.0),digits);
-				printf("inputLO[j] :%lf\n",inputLO[j]);
+				//printf("inputLO[j] :%lf\n",inputLO[j]);
 			}
 			else {
 				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[currentSection]-bckinputFreq[j]-
 						(bckinputBW[j]/2.0),digits);
-				printf("inputLO[j] :%lf\n",inputLO[j]);
+				//printf("inputLO[j] :%lf\n",inputLO[j]);
 			}
 			//lo[bckinputIF[j]]=inputLO[j]; // local oscillator per IFs
 		}

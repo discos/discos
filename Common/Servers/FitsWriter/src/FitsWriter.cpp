@@ -25,6 +25,7 @@ using namespace FitsWriter_private;
 #define _FITSW_SECTCOL_SR "sampleRate"
 #define _FITSW_SECTCOL_BINS "bins"
 #define _FITSW_SECTCOL_FLUX "flux"
+#define _FITSW_SECTCOL_REST "restfreq"
 
 #define _FITSW_RFCOL_FEED "feed"
 #define _FITSW_RFCOL_IF "ifChain"
@@ -35,6 +36,7 @@ using namespace FitsWriter_private;
 #define _FITSW_RFCOL_ATT "attenuation"
 #define _FITSW_RFCOL_CAL "calibrationMark"
 #define _FTISW_RFCOL_SECT "section"
+
 
 
 
@@ -57,11 +59,13 @@ CFitsWriter::CFitsWriter()
 	SectColName.push_back(_FITSW_SECTCOL_SR);
 	SectColName.push_back(_FITSW_SECTCOL_BINS);
 	SectColName.push_back(_FITSW_SECTCOL_FLUX);
+	SectColName.push_back(_FITSW_SECTCOL_REST);
 
 	SectColForm.push_back("J");
 	SectColForm.push_back("6A");
 	SectColForm.push_back("D");
 	SectColForm.push_back("J");
+	SectColForm.push_back("D");
 	SectColForm.push_back("D");
 
 	SectColUnit.push_back("");
@@ -69,6 +73,7 @@ CFitsWriter::CFitsWriter()
 	SectColUnit.push_back("MHz");
 	SectColUnit.push_back("");
 	SectColForm.push_back("Jy");
+	SectColForm.push_back("MHz");
 	
 	rfColName.push_back(_FITSW_RFCOL_FEED);
 	rfColName.push_back(_FITSW_RFCOL_IF);
@@ -223,6 +228,7 @@ bool CFitsWriter::create()
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY7,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY8,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY9,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY10,m_lastError)) return false;	
 	return true;
 };
 
@@ -481,8 +487,8 @@ bool CFitsWriter::addFeedTable(const IRA::CString& name)
 };
 
 bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::longSeq& feedsID, const ACS::longSeq& ifsID,const ACS::longSeq& pols,const ACS::doubleSeq& los,
-		const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,const ACS::doubleSeq& sourceFlux,const ACS::doubleSeq& atts,
-		bool noData,const IRA::CString& name,const IRA::CString& rfName)
+		const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,const ACS::doubleSeq& sourceFlux,const ACS::doubleSeq& rest,
+		const ACS::doubleSeq& atts,bool noData,const IRA::CString& name,const IRA::CString& rfName)
 {
 	std::vector<long> id;
 	std::vector<long> bins;
@@ -497,6 +503,7 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 	std::vector<double> localOscillator;
 	std::vector<double> attenuation;
 	std::vector<double> calib;
+	std::vector<double> restFreq;
 	std::vector<long> section;
 	long inputsNumber=0;
 	long fluxIterator=0;
@@ -534,9 +541,8 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 			DataColForm.push_back(type.str());
 			DataColUnit.push_back("");
 		}
-
 		if (m_channels[i].inputs>1) {
-			tsysType << (m_channels[i].inputs) << "D";;
+			tsysType << (m_channels[i].inputs) << "D";
 			tsysColForm.push_back(tsysType.str());
 		}
 		else {
@@ -544,6 +550,15 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 		}
 		tsysColName.push_back(colName.str());
 		tsysColUnit.push_back("K");
+		if (rest.length()==1) {
+			restFreq.push_back(rest[0]);
+		}
+		else if (rest.length()==sectionID.length()) {
+			restFreq.push_back(rest[i]);
+		}
+		else {
+			restFreq.push_back(DOUBLENULLVALUE);
+		}		
 	}
 	inputsNumber=sectionID.length();
 	for (unsigned j=0;j<sectionID.length();j++) {
@@ -666,6 +681,7 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 		section_table->column(_FITSW_SECTCOL_SR).write(sampleRate,1);		
 		section_table->column(_FITSW_SECTCOL_BINS).write(bins,1);
 		section_table->column(_FITSW_SECTCOL_FLUX).write(flux,1);
+		section_table->column(_FITSW_SECTCOL_REST).write(restFreq,1);
 	}
 	catch(FitsException& fe){
 		m_lastError = fe.message().c_str();

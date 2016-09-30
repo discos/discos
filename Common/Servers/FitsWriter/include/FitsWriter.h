@@ -141,6 +141,9 @@ public:
 	 * @param skyBandWidth for each backend section it gives the value of the band width (MHz)
 	 * @param marks for each RF input gives the value of the noise calibration mark. (°K) 
 	 * @param sourceFlux for each backend section it reports the estimated source flux computed with section parameters
+	 * @param rest represents the rest frequencies associated with each sections. If the length is 1, any section is linked with the provided value.
+	 *        Otherwise if the number of sections and the multiplicity of this sequence do not match as well, the corresponding rest of the section is adjustested 
+	 * 		  to be doublenulls. 
 	 * @param atts attenuation, one for each input of the backend
 	 * @param name name of the sections table
 	 * @param noData if true the data columns will not be added to the DATATable
@@ -148,8 +151,8 @@ public:
 	 * @return false if the operation is not successful
 	 */
 	bool addSectionTable(const ACS::longSeq &sectionID, const ACS::longSeq& feedsID, const ACS::longSeq& ifsID,const ACS::longSeq& pols,const ACS::doubleSeq& los,
-			const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,
-			const ACS::doubleSeq& sourceFlux,const ACS::doubleSeq& atts,bool noData,const IRA::CString& name="SECTION TABLE",const IRA::CString& rfName="RF INPUTS");
+			const ACS::doubleSeq& skyFreq,const ACS::doubleSeq& skyBandWidth,const ACS::doubleSeq& marks,const ACS::doubleSeq& sourceFlux,const ACS::doubleSeq& rest,
+			const ACS::doubleSeq& atts,bool noData,const IRA::CString& name="SECTION TABLE",const IRA::CString& rfName="RF INPUTS");
 
 	/**
 	 * It allows to add the servo table to the file

@@ -451,9 +451,6 @@ void CEngineThread::runLoop()
 		return;
 	}
 	if (m_data->isStart() && m_data->isReady() &&  m_data->isScanHeaderReady() && m_data->isSubScanHeaderReady()) { // //main headers are already saved and file has to be opened
-		//*****************************************************************************************
-		ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"LETS BEGIN SUBSCAN %ld!",m_data->getSubScanID()));
-		//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 		if (!m_fileOpened) {
 			m_data->setStatus(Management::MNG_OK);
 			// create the file and save main headers
@@ -472,9 +469,6 @@ void CEngineThread::runLoop()
 			//let's create the summary file, it should be created before the first subscan of the scan.......
 			// the the summary will be valid for the duration of all the subscans.....
 			if (!m_summaryOpened) {
-				///**********************************************************************************
-				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"CREO SUMMARY"));
-				///******************* DEBUG ********************************************************
 			 	TIMEVALUE currentUT;
 				IRA::CDateTime now;
 				TIMEDIFFERENCE currentLST;
@@ -505,9 +499,6 @@ void CEngineThread::runLoop()
 				m_summaryOpened=true;
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"SUMMARY_OPENED"));
 			}
-			///**********************************************************************************
-			ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"CREO IL FILE"));
-			///******************* DEBUG ********************************
 			m_file = new CFitsWriter();
 			m_file->setBasePath("");
 			m_file->setFileName((const char *)m_data->getFileName());
@@ -519,9 +510,6 @@ void CEngineThread::runLoop()
 				m_data->setStatus(Management::MNG_FAILURE);
 			}
 			else {
-				//*****************************************************************************************
-				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"OUTPUT_FILE_CREATED_NOW"));
-				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 				m_fileOpened=true;
 				m_data->startRunnigStage();
 				//get data from receivers boss
@@ -548,17 +536,16 @@ void CEngineThread::runLoop()
 				//get the data from the minor servo boss...if subsystem is enabled
 				collectMinorServoData();
 
-				//*****************************************************************************************
-				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"DATA_COLLECTION_COMPLETED"));
-				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
-
 				// now creates the file, the tables and the headers
 				Backends::TMainHeader mH=m_data->getMainHeader();
 				Backends::TSectionHeader const *cH=m_data->getSectionHeader();
 				IRA::CString siteName;
 				IRA::CString sourceName;
 				double sourceRa,sourceDec,sourceVlsr;
-				double azOff,elOff,raOff,decOff,lonOff,latOff;
+				//double azOff,elOff,raOff,decOff,lonOff,latOff;
+				double sysAzOff,sysElOff,lonOff,latOff;
+				Antenna::TCoordinateFrame offFrame;
+				IRA::CString offFrameStr;
 				double dut1;
 				long scanTag;
 				long scanID,subScanID;
@@ -574,6 +561,7 @@ void CEngineThread::runLoop()
 				ACS::doubleSeq atts;
 				ACS::longSeq sectionsID;
 				ACS::stringSeq axisName,axisUnit;
+				ACS::doubleSeq restFrequency;
 
 				m_data->getSite(site,dut1,siteName);
 				m_info.getLocalOscillator(LocalOscillator);
@@ -587,7 +575,9 @@ void CEngineThread::runLoop()
 				m_info.getSourceFlux(fluxes);
 				m_info.getReceiverPolarization(polarizations);
 				m_info.getSource(sourceName,sourceRa,sourceDec,sourceVlsr);
-				m_info.getAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
+				m_info.getAntennaOffsets(sysAzOff,sysElOff,lonOff,latOff,offFrame);
+				m_info.getRestFreq(restFrequency);
+				IRA::CIRATools::coordinateFrameToStr(offFrame,offFrameStr);
 				scanTag=m_data->getScanTag();
 				scanID=m_data->getScanID();
 				subScanID=m_data->getSubScanID();
@@ -698,7 +688,28 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if(!m_file->setPrimaryHeaderKey("Azimuth Offset",azOff,"Longitude offset in horizontal frame")) {
+				else if(!m_file->setPrimaryHeaderKey("SScanLonOff",lonOff,"Longitude offset in sub scan")) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getFileName());
+					impl.setError(m_file->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					m_data->setStatus(Management::MNG_FAILURE);
+				}
+				else if(!m_file->setPrimaryHeaderKey("SScanLatOff",latOff,"Latitude offset in sub scan")) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getFileName());
+					impl.setError(m_file->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					m_data->setStatus(Management::MNG_FAILURE);
+				}
+				else if(!m_file->setPrimaryHeaderKey("SScanOffFrame",(const char *)offFrameStr,"Offset frame in sub scan")) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getFileName());
+					impl.setError(m_file->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					m_data->setStatus(Management::MNG_FAILURE);
+				}
+				/*else if(!m_file->setPrimaryHeaderKey("Azimuth Offset",azOff,"Longitude offset in horizontal frame")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -739,7 +750,7 @@ void CEngineThread::runLoop()
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
-				}
+				}*/
 				else if(!m_file->setPrimaryHeaderKey("ScanID",scanID,"Scan Identifier")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
@@ -791,7 +802,10 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				if (!m_file->addSectionTable(sectionsID,feedsID,ifsID,polarizations,LocalOscillator,skyFreq,skyBw,calib,fluxes,atts,m_data->getIsNoData())) {
+				if ((restFrequency.length()>=1) && (restFrequency.length()!=sectionsID.length())) {
+					CUSTOM_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_WARNING,"Provided rest frequencies do not match the number of sections"));
+				}
+				if (!m_file->addSectionTable(sectionsID,feedsID,ifsID,polarizations,LocalOscillator,skyFreq,skyBw,calib,fluxes,restFrequency,atts,m_data->getIsNoData())) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -965,16 +979,31 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 	if (!CORBA::is_nil(m_antennaBoss)) {
 		ACSErr::Completion_var comp;
 		CORBA::Double ra=0.0,dec=0.0,vrad=0.0;
-		CORBA::Double raOff=0.0,decOff=0.0,azOff=0.0,elOff=0.0,lonOff=0.0,latOff=0.0;
+		//CORBA::Double raOff=0.0,decOff=0.0,azOff=0.0,elOff=0.0,lonOff=0.0,latOff=0.0;
+		CORBA::Double sysAzOff=0.0,sysElOff=0.0,lonOff=0.0,latOff=0.0;
+        Antenna::TCoordinateFrame offFrame=Antenna::ANT_HORIZONTAL;
 		IRA::CString sourceName="";
 		Antenna::TReferenceFrame VFrame=Antenna::ANT_UNDEF_FRAME;
 		Antenna::TVradDefinition VDefinition=Antenna::ANT_UNDEF_DEF;
-
+		
+					// get the current offsets 
+		try {
+			m_antennaBoss->getAllOffsets(sysAzOff,sysElOff,lonOff,latOff,offFrame);
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectAntennaData()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			antennaBossError=true;
+		}
+		
 		try { //get the target name and parameters
 			ACS::ROstring_var targetRef;
 			CORBA::String_var target;
 			ACS::ROdouble_var raRef,decRef,vradRef;
-			ACS::ROdouble_var raOffRef,decOffRef,azOffRef,elOffRef,lonOffRef,latOffRef;
+			//ACS::ROdouble_var raOffRef,decOffRef,azOffRef,elOffRef,lonOffRef,latOffRef;
 			Antenna::ROTReferenceFrame_var VFrameRef;
 			Antenna::ROTVradDefinition_var VDefinitionRef;
 
@@ -983,15 +1012,14 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 			raRef=m_antennaBoss->targetRightAscension();
 			decRef=m_antennaBoss->targetDeclination();
 			vradRef=m_antennaBoss->targetVrad();
-			azOffRef=m_antennaBoss->azimuthOffset();
+			/*azOffRef=m_antennaBoss->azimuthOffset();
 			elOffRef=m_antennaBoss->elevationOffset();
 			raOffRef=m_antennaBoss->rightAscensionOffset();
 			decOffRef=m_antennaBoss->declinationOffset();
 			lonOffRef=m_antennaBoss->longitudeOffset();
-			latOffRef=m_antennaBoss->latitudeOffset();
+			latOffRef=m_antennaBoss->latitudeOffset();*/
 			VFrameRef=m_antennaBoss->vradReferenceFrame();
 			VDefinitionRef=m_antennaBoss->vradDefinition();
-
 			VDefinition=VDefinitionRef->get_sync(comp.out());
 			ACSErr::CompletionImpl VDefinitionRefCompl(comp);
 			if (!VDefinitionRefCompl.isErrorFree()) {
@@ -1059,7 +1087,7 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 				m_data->setStatus(Management::MNG_WARNING);
 				vrad=0.0;
 			}
-			azOff=azOffRef->get_sync(comp.out());
+			/*azOff=azOffRef->get_sync(comp.out());
 			ACSErr::CompletionImpl azOffCompl(comp);
 			if (!azOffCompl.isErrorFree()) {
 				_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,azOffCompl,"CEngineThread::collectAntennaData()");
@@ -1118,7 +1146,7 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 				impl.log(LM_ERROR);
 				m_data->setStatus(Management::MNG_WARNING);
 				latOff=0.0;
-			}
+			}*/
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectAntennaData()");
@@ -1131,7 +1159,7 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 			ra=dec=vrad=0.0;
 		}
 		m_info.setSource(sourceName,ra,dec,vrad);
-		m_info.setAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
+		m_info.setAntennaOffsets(sysAzOff,sysElOff,lonOff,latOff,offFrame);
 		if (summaryFile) {
 			summaryFile->setKeyword("OBJECT",sourceName);
 			summaryFile->setKeyword("RightAscension",ra);
@@ -1194,6 +1222,7 @@ void CEngineThread::collectSchedulerData(FitsWriter_private::CFile* summaryFile)
 		//CCommonTools::map(restFreq,va);
 		//if (summaryFile) summaryFile->setKeyword("RESTFREQ",va);
 		m_info.setRestFreq(restFreq);
+		
 		Management::TSubScanConfiguration_var conf;
 		try {
 			m_scheduler->getSubScanConfigruation(conf.out());

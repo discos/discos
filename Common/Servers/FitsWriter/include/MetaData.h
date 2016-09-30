@@ -157,15 +157,15 @@ public:
 	/**
 	 * It allows to set the antenna position offsets as directly returned by the Antenna subsystem
 	*/
-	void setAntennaOffsets(const double& azOff,const double& elOff,const double& raOff,const double& decOff,const double& lonOff,const double& latOff) {
-		m_azOff=azOff; m_elOff=elOff; m_raOff=raOff; m_decOff=decOff; m_lonOff=lonOff; m_latOff=latOff;
+	void setAntennaOffsets(const double& sysAzOff,const double& sysElOff,const double& lonOff,const double& latOff,const Antenna::TCoordinateFrame& offFrame) {
+		m_sysAzOff=sysAzOff; m_sysElOff=sysElOff; m_lonOff=lonOff; m_latOff=latOff; m_offFrame=offFrame;
 	}
-
+	
 	/**
 	 * @return the antenna position offsets
 	 */
-	void getAntennaOffsets(double& azOff,double& elOff,double& raOff,double& decOff,double& lonOff,double& latOff) const {
-		azOff=m_azOff; elOff=m_elOff; raOff=m_raOff; decOff=m_decOff; lonOff=m_lonOff; latOff=m_latOff;
+	void getAntennaOffsets(double& sysAzOff,double& sysElOff,double& lonOff,double& latOff,Antenna::TCoordinateFrame& offFrame) const {
+		sysAzOff=m_sysAzOff; sysElOff=m_sysElOff; lonOff=m_lonOff; latOff=m_latOff; offFrame=m_offFrame;
 	}
 
 	/**
@@ -200,6 +200,7 @@ public:
 		m_dewarMode=mod;
 		m_dewarPos=pos;
 	}
+	
 	void setDewarConfiguration() {
 		m_dewarMode=Receivers::RCV_UNDEF_DEROTCONF;
 		m_dewarPos=0.0;
@@ -226,7 +227,8 @@ public:
 		m_restFreq=rf;
 	}
 	void setRestFreq() {
-		m_restFreq.length(0);
+		m_restFreq.length(1);
+		m_restFreq[0]=0.0;
 	}
 	void getRestFreq(ACS::doubleSeq& rf) const { rf=m_restFreq; }
 
@@ -293,7 +295,9 @@ private:
 	/**
 	 * antenna position offsets
 	 */
-	double m_azOff,m_elOff,m_raOff,m_decOff,m_lonOff,m_latOff;
+	double m_sysAzOff,m_sysElOff,m_lonOff,m_latOff;
+	Antenna::TCoordinateFrame m_offFrame;
+	
 	/**
 	 * stores the  estimated source fluxes, one for each section.
 	 */

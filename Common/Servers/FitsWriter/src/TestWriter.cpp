@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 	ACS::longSeq sectionsID;
 	ACS::longSeq feedsID;
 	ACS::longSeq ifsID;
+	ACS::doubleSeq rest;
 	CFitsWriter *file;
 	IRA::CString fileName;
 	TIMEVALUE now;
@@ -59,6 +60,8 @@ int main(int argc, char *argv[])
 	feedsID.length(inputsNumber);
 	sectionsID.length(inputsNumber);
 	ifsID.length(inputsNumber);
+	rest.length(1);
+	rest[0]=22434.54332;
 	tsys=new double[inputsNumber];
 	for (int i=0;i<SECTIONS;i++) {
 		cH[i].id=i;  
@@ -120,7 +123,7 @@ int main(int argc, char *argv[])
 		printf("FITS Error: %s\n",(const char *)file->getLastError());
 		exit(-1);
 	}
-	if (!file->addSectionTable(sectionsID,feedsID,ifsID,pols,los,skyFreq,skyBw,calib,flux,atts,false)) {
+	if (!file->addSectionTable(sectionsID,feedsID,ifsID,pols,los,skyFreq,skyBw,calib,flux,rest,atts,false)) {
 		printf("FITS Error: %s\n",(const char *)file->getLastError());
 		exit(-1);
 	}
