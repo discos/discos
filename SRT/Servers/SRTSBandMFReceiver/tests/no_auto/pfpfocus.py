@@ -106,7 +106,7 @@ if lvalue < min_value or rvalue > max_value:
 
 points = []
 point = lvalue
-increment = 1  # 1mm
+increment = 2  # 2mm
 while point <= rvalue:
     points.append(point)
     point += increment
@@ -117,14 +117,18 @@ current_time = datetime.datetime.now()
 out_file_name = current_time.strftime('pfpfocus_%Y_%m_%d_h%H_%M.txt')
 abs_outfile_name = os.path.join(dirname, out_file_name)
 with open(abs_outfile_name, 'w') as outfile:
-    outfile.write('%s POSITION  TPI_CH0  TPI_CH1' % args.axis)
+    outfile.write('%s POSITION  TPIA_CH0  TPIA_CH1  TPIB_CH0 TPIB_CH1'
+                   % args.axis)
     position = current_pos
     for point in points:
         position[address] = point
         print("Going to position (%s)" % fmt_position(position))
         pfp.setPosition(position, 0)
         wait_until_reached(property, position, increment)
-        tpi = total_power.getTpi()
-        outfile.write('\n%.2f  %.2f  %.2f' % (point, tpi[0], tpi[1]))
+        tpi_a = total_power.getTpi()
+        time.sleep(0.5)
+        tpi_b = total_power.getTpi()
+        outfile.write('\n%.2f  %.2f  %.2f  %.2f  %.2f' % 
+                     (point, tpi_a[0], tpi_a[1], tpi_b[0], tpi_b[1]))
 
 pfp.setPosition(current_pos, 0)  # Go to the original position
