@@ -67,6 +67,13 @@ axis = {
         'address': 2,
     }
 }
+axis_description = """
+x (%d, %d);
+y (%d, %d);
+z (%d, %d);
+""" % (axis['x']['min_value'], axis['x']['max_value'], 
+       axis['y']['min_value'], axis['y']['max_value'], 
+       axis['z']['min_value'], axis['z']['max_value'])
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -74,12 +81,11 @@ parser.add_argument(
     type=str,
     choices=axis,
     required=True,
-    help='The axis')
+    help=axis_description)
 parser.add_argument(
     '-r', '--radius',
     type=check_radius,
-    required=True,
-    help='The radius...')
+    required=True)
 args = parser.parse_args()
 
 min_value = axis[args.axis]['min_value']
