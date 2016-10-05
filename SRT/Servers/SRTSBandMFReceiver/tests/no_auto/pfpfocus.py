@@ -123,9 +123,9 @@ current_time = datetime.datetime.now()
 out_file_name = current_time.strftime('pfpfocus_%Y_%m_%d_h%H_%M.txt')
 abs_outfile_name = os.path.join(dirname, out_file_name)
 with open(abs_outfile_name, 'w') as outfile:
-    outfile.write('%s POSITION  TPIA_CH0  TPIA_CH1  TPIB_CH0 TPIB_CH1'
+    outfile.write('# %s POS  TPIA_CH0  TPIA_CH1  TPIB_CH0  TPIB_CH1'
                    % args.axis)
-    position = current_pos
+    position = current_pos[:]
     for point in points:
         position[address] = point
         print("Going to position (%s)" % fmt_position(position))
