@@ -123,7 +123,7 @@ current_time = datetime.datetime.now()
 out_file_name = current_time.strftime('pfpfocus_%Y_%m_%d_h%H_%M.txt')
 abs_outfile_name = os.path.join(dirname, out_file_name)
 with open(abs_outfile_name, 'w') as outfile:
-    outfile.write('# %s POS  TPIA_CH0  TPIA_CH1  TPIB_CH0  TPIB_CH1'
+    outfile.write('# %s POS TPIA_CH0 TPIA_CH1 TPIB_CH0 TPIB_CH1 TPIC_CH0 TPIC_CH1'
                    % args.axis)
     position = current_pos[:]
     for point in points:
@@ -134,7 +134,10 @@ with open(abs_outfile_name, 'w') as outfile:
         tpi_a = total_power.getTpi()
         time.sleep(0.5)
         tpi_b = total_power.getTpi()
-        outfile.write('\n%.2f  %.2f  %.2f  %.2f  %.2f' % 
-                     (point, tpi_a[0], tpi_a[1], tpi_b[0], tpi_b[1]))
+        time.sleep(0.5)
+        tpi_c = total_power.getTpi()
+        outfile.write('\n%.2f  %.2f  %.2f  %.2f  %.2f  %.2f  %.2f' % 
+                     (point, tpi_a[0], tpi_a[1], tpi_b[0], tpi_b[1],
+                      tpi_c[0], tpi_c[1]))
 
 pfp.setPosition(current_pos, 0)  # Go to the original position
