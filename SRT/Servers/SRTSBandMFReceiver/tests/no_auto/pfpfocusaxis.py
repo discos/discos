@@ -14,7 +14,7 @@ from argparse import ArgumentParser
 def wait_until_reached(property, target_pos, increment):
     """Wait in order for the PFP to reach the position."""
     t0 = datetime.datetime.now()
-    TIMEOUT = increment * 5  # Seconds
+    TIMEOUT = increment * 30  # Seconds
     while (datetime.datetime.now() - t0).seconds < TIMEOUT:
         current_pos, comp = property.get_sync()
         reached = True
@@ -44,7 +44,7 @@ def fmt_position(position):
 
 
 def check_radius(value):
-    radius = int(value)
+    radius = float(value)
     if radius <= 0:
          raise argparse.ArgumentTypeError(
              "%s not allowed: the radius must be a positive integer" % value)
@@ -71,8 +71,8 @@ axis_description = """
 x (%d, %d);
 y (%d, %d);
 z (%d, %d);
-""" % (axis['x']['min_value'], axis['x']['max_value'], 
-       axis['y']['min_value'], axis['y']['max_value'], 
+""" % (axis['x']['min_value'], axis['x']['max_value'],
+       axis['y']['min_value'], axis['y']['max_value'],
        axis['z']['min_value'], axis['z']['max_value'])
 
 parser = argparse.ArgumentParser()
@@ -112,7 +112,7 @@ if lvalue < min_value or rvalue > max_value:
 
 points = []
 point = lvalue
-increment = 2  # 2mm
+increment = 1  # mm
 while point <= rvalue:
     points.append(point)
     point += increment
@@ -136,7 +136,7 @@ with open(abs_outfile_name, 'w') as outfile:
         tpi_b = total_power.getTpi()
         time.sleep(0.5)
         tpi_c = total_power.getTpi()
-        outfile.write('\n%.2f  %.2f  %.2f  %.2f  %.2f  %.2f  %.2f' % 
+        outfile.write('\n%.2f  %.2f  %.2f  %.2f  %.2f  %.2f  %.2f' %
                      (point, tpi_a[0], tpi_a[1], tpi_b[0], tpi_b[1],
                       tpi_c[0], tpi_c[1]))
 
