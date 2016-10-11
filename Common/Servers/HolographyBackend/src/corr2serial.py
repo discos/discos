@@ -20,7 +20,7 @@ from math import log10
 ####################
 class Correlator:
     def __init__(self):
-        self.results = { 'x_2' : 0, 'y_2' : 0, 'xy' : 0, 'xy90' : 0, 'y90_2' : 0, 'y_y90' : 0,'modNrm':0.,'PwrInX2':0.,'PwrInY2':0.}
+        self.results = { 'x_2' : 0, 'y_2' : 0, 'xy' : 0, 'xy90' : 0, 'y90_2' : 0, 'y_y90' : 0,'modNrm':0.,'PwrInX2':0.,'PwrInY2':0.,'phase_deg':0.}
         self.coeff   = { 'real' : 0.00, 'imm' : 0.00 }
         self.buffer  = ""
         self.ser     = serial.Serial()
@@ -145,6 +145,7 @@ class Correlator:
         self.results['PwrInX2'] = 10 * log10 ( (1000/100) * ( sqrt ( self.results['x_2'] * (2**30) / (5000000) ) * (39.0625/1000000))**2)
         self.results['PwrInY2'] = 10 * log10 ( (1000/100) * ( sqrt ( self.results['y_2'] * (2**30) / (5000000) ) * (39.0625/1000000))**2)
 	self.results['modNrm'] = sqrt(self.coeff['realNrm']**2 + self.coeff['immNrm']**2) 
+        self.results['phase_deg']= self.coeff['phase_deg']
 
     def get_real(self):
         return self.coeff['real']

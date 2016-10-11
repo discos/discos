@@ -49,18 +49,14 @@ void CSenderThread::runLoop()
 	if (CORBA::is_nil(m_antenna_boss))
 	{
 	
-	cout <<"ABOSS NOT REFERENCED " << endl;
+	        cout <<"ABOSS NOT REFERENCED " << endl;
 	
 	} else
 	{
 	  	cout <<"ABOSS REFERENCED " << endl;
-	IRA::CIRATools::getTime(now);
-        
-          
-          
-          
-        m_antenna_boss->getAllOffsets(azeloff,eloff,raoff,decoff,lonoff,latoff); //   
-	m_antenna_boss->getObservedHorizontal(now.value().value,0,az,el); // get az and el from bos
+         	IRA::CIRATools::getTime(now);
+                m_antenna_boss->getAllOffsets(azeloff,eloff,raoff,decoff,lonoff,latoff); //   
+	        m_antenna_boss->getObservedHorizontal(now.value().value,0,az,el); // get az and el from bos
 
 	}
     // removed 	
@@ -69,8 +65,9 @@ void CSenderThread::runLoop()
 	try{
 
 #define PI 3.14159265358979323846
-        az=az/PI*180.0;
-        el=el/PI*180.0;
+     //   az=az/PI*180.0;   // conversion to degrees made inside the correlator component
+     //   
+     //   el=el/PI*180.0;  
 	m_dxc_correlator->save_coeff(azeloff,eloff); 
 	// AUTO_TRACE("CSenderThread::runLoop()");
 	} catch (ACSErrTypeFPGACommunication::ACSErrTypeFPGACommunicationExImpl &ex)

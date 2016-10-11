@@ -80,7 +80,7 @@
  */
 
 #define FLOW_NUMBER 1 
-
+#define HOLO_DEBUG
 //using namespace SimpleParser;
 //_IRA_LOGFILTER_DECLARE;
  
@@ -286,7 +286,7 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
          
         
         }
-        
+        #ifndef HOLO_DEBUG
 	THeaderRecord bkd; //header for fitswriter
         bkd.header.sections=2;  
         bkd.header.beams=1;
@@ -314,14 +314,21 @@ void HolographyImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
                                 bkd.chHeader[index].feed=i;
                                 bkd.chHeader[index].inputs=1;                           
                                 index++;
+                
                         }
                 }
+        #endif
+               
      try {
      
                 cout << "**Correlator OpenFile**"<< endl;
                 m_correlator->openFile(m_filename.c_str());
+                #ifndef HOLO_DEBUG
+
                 getSender()->startSend(FLOW_NUMBER,(const char*)&bkd,
                                 sizeof(Backends::TMainHeader)+bkd.header.sections*sizeof(Backends::TSectionHeader));
+               #endif
+         
         }
         catch (AVStartSendErrorExImpl& ex) {
                 _ADD_BACKTRACE(BackendsErrors::TXErrorExImpl,impl,ex,"HolographyImpl::sendHeader()");
@@ -424,21 +431,14 @@ void HolographyImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::B
 		 	az=-0.69; 
 			el=0.55;
 		}
-             try{
-                
-                   m_correlator->closeFile();
-                } catch (ComponentErrors::ComponentErrorsExImpl& ex) 
-                {
-                     ex.log(LM_DEBUG);
-                     throw ex.getComponentErrorsEx();
-                }   catch (BackendsErrors::BackendsErrorsExImpl& ex)
-                {
-                    ex.log(LM_DEBUG);
-                    throw ex.getBackendsErrorsEx(); 
-                }     
+             
 
 	try {
+             #ifndef HOLO_DEBUG
+
 		getSender()->stopSend(FLOW_NUMBER);
+             #endif
+             
 	}
 	catch (AVStopSendErrorExImpl& ex) {
 		_ADD_BACKTRACE(BackendsErrors::TXErrorExImpl,impl,ex,"HolographyImpl::sendStop()");
@@ -459,7 +459,18 @@ void HolographyImpl::terminate() throw (CORBA::SystemException, BackendsErrors::
 			ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("HolographyImpl::terminate()");
-        
+        try{
+                
+                   m_correlator->closeFile();
+                } catch (ComponentErrors::ComponentErrorsExImpl& ex) 
+                {
+                     ex.log(LM_DEBUG);
+                     throw ex.getComponentErrorsEx();
+                }   catch (BackendsErrors::BackendsErrorsExImpl& ex)
+                {
+                    ex.log(LM_DEBUG);
+                    throw ex.getBackendsErrorsEx(); 
+                }     
        
 	
 	 
