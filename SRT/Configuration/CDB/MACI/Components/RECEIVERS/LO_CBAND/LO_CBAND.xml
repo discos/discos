@@ -9,10 +9,10 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
 	Name="LO_CBAND"
-	Code="LocalOscillatorImpl"
+	Code="LocalOscillatorImpl.LocalOscillator"
 	Type="IDL:alma/Receivers/LocalOscillator:1.0"
-	Container="LocalOscillatorsContainer"
+	Container="LocalOscillatorLPContainer"
 	KeepAliveTime="10"
 	Default="false"
-    ImplLang="cpp"
+    ImplLang="py"
 />
