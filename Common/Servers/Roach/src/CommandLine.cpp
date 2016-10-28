@@ -45,6 +45,10 @@ CCommandLine::CCommandLine(ContainerServices *service): CSocket(),
     m_RC00=false;
     m_RL00=false;
     m_RP00=false;
+    m_RK00S=false;
+    m_RC00S=false;
+    m_RL00S=false;
+    m_RP00S=false;
 }
 
 CCommandLine::~CCommandLine()
@@ -483,7 +487,8 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 	}
 */
 	if (inputId>=0) {
-		if (inputId>=m_sectionsNumber) {
+		//if (inputId>=m_sectionsNumber) {
+		if (inputId>m_sectionsNumber) { // TBC !!!
 			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setAttenuation()");
 			impl.setReason("the input identifier is out of range");
 			throw impl;
@@ -643,6 +648,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		    	impl.setValueName("pol");
 		    	throw impl;
 		}
+        newPol = pol;
 	}
 	else
 		newPol = m_polarization[inputId];
@@ -716,7 +722,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
             		temp="FULL_STOKES";
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%d,POL=%s,SR=%lf,BINS=%d",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
 				(const char *)temp,newSR,m_bins[inputId]));		
-        if (m_RK00==true || m_RC00==true) {
+        if (m_RK00==true || m_RC00==true || m_RK00S==true || m_RC00S==true) {
             if (newBW==300.00)
                 filter=300.00;
             if (newBW==1500.00)
@@ -1104,22 +1110,42 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
     if (config.Compare("RK00")==0) {
         filter=1250.0;
         m_RK00=true;
-        m_RC00=m_RL00=m_RP00=false;
+        m_RC00=m_RL00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
     }
     if (config.Compare("RC00")==0) {
         filter=1250.0;
         m_RC00=true;
-        m_RK00=m_RL00=m_RP00=false;
+        m_RK00=m_RL00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
     }
     if (config.Compare("RL00")==0) {
         filter = 2300.0;
         m_RL00=true;
-        m_RK00=m_RC00=m_RP00=false;
+        m_RK00=m_RC00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
     }
     if (config.Compare("RP00")==0) {
         filter = 730.0;
         m_RP00=true;
-        m_RK00=m_RC00=m_RL00=false;
+        m_RK00=m_RC00=m_RL00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+    }
+    if (config.Compare("RK00S")==0) {
+        filter=1250.0;
+        m_RK00S=true;
+        m_RC00=m_RL00=m_RP00=m_RK00=m_RC00S=m_RL00S=m_RP00S=false;
+    }
+    if (config.Compare("RC00S")==0) {
+        filter=1250.0;
+        m_RC00S=true;
+        m_RK00=m_RL00=m_RP00=m_RK00S=m_RC00=m_RL00S=m_RP00S=false;
+    }
+    if (config.Compare("RL00S")==0) {
+        filter = 2300.0;
+        m_RL00S=true;
+        m_RK00=m_RC00=m_RP00=m_RK00S=m_RC00S=m_RL00=m_RP00S=false;
+    }
+    if (config.Compare("RP00S")==0) {
+        filter = 730.0;
+        m_RP00S=true;
+        m_RK00=m_RC00=m_RL00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
     }
     try {
         m_totalPower->setSection(0,-1, filter, -1, -1, -1, -1);
@@ -2008,6 +2034,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 			m_sections[m_boards[i]]=i;
 			//m_input[i]=m_defaultInput[m_boards[i]];
 			m_polarization[i]=setup.polarizations[i];
+            printf ("m_polarization = %d\n", m_polarization[i]);
 			m_ifNumber[i]=setup.ifs[i];
 			m_feedNumber[i]=setup.feed[i];
 			m_inputSection[i]=i; // input 0 belongs to section 0 and so on.....

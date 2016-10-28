@@ -119,11 +119,13 @@ bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& se
 			if (ret=="L") {
 				setup.polarizations[i]=Backends::BKND_LCP;
 			}
-			else if (ret="R") {
+            else if (ret=="R") {
 				setup.polarizations[i]=Backends::BKND_RCP;
 			}
-            else
-				setup.polarizations[i]=Backends::BKND_FULL_STOKES;
+            else {
+                setup.polarizations[i]=Backends::BKND_FULL_STOKES;
+            }
+            printf("setup.pol = %d\n", setup.polarizations[i]);
 			if (!IRA::CIRATools::getNextToken(feed,start_feed,' ',ret)) return false;
 			setup.feed[i]=ret.ToLong();
 			if (!IRA::CIRATools::getNextToken(ifs,start_ifs,' ',ret)) return false;

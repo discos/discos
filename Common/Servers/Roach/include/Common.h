@@ -29,14 +29,14 @@
 #define MAX_SECTION_NUMBER 14
 #define MAX_BOARDS_NUMBER 14
 
-#define DEFAULT_SAMPLE_RATE 0.000025   //one sample every 40 milliseconds
+#define DEFAULT_SAMPLE_RATE 3000.0   //one sample every 40 milliseconds
 //#define DEFAULT_SAMPLE_RATE 0.001   //one sample every 1 milliseconds
-#define DEFAULT_INTEGRATION 0  // no second of integration
-#define MIN_INTEGRATION 5  // millisecond of integration
-#define MAX_INTEGRATION 1000  // millisecond of integration
+#define DEFAULT_INTEGRATION 40  // milliseconds of integration
+#define MIN_INTEGRATION 5  // milliseconds of integration
+#define MAX_INTEGRATION 1000  // milliseconds of integration
 #define DEFAULT_DIODE_SWITCH_PERIOD 0 // the cal diode is not switched
 
-#define MAX_BAND_WIDTH 1500.0
+#define MAX_BAND_WIDTH 2300.0
 #define MIN_BAND_WIDTH 0.0
 
 #define MAX_ATTENUATION 15.0
@@ -45,7 +45,7 @@
 #define MAX_BINS 16384
 #define MIN_BINS 1024
 
-#define MAX_SAMPLE_RATE 3000.0 // MHz
+#define MAX_SAMPLE_RATE 4600.0 // MHz
 
 #define FLOW_NUMBER 1
 #endif /*COMMON_H_*/

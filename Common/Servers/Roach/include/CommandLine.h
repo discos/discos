@@ -739,6 +739,10 @@ private:
     bool m_RC00;
     bool m_RL00;
     bool m_RP00;
+    bool m_RK00S;
+    bool m_RC00S;
+    bool m_RL00S;
+    bool m_RP00S;
 	
 };
 
