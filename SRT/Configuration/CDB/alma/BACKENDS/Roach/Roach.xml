@@ -10,7 +10,7 @@
                sender_protocols="TCP=${HOST}:14000"
                IPAddress="192.168.200.216"
                Port="10000"
-               CommandLineTimeout="5000000"
+               CommandLineTimeout="10000000"
                ConnectTimeout="3000000"
                PropertyRefreshTime="1000000"
                Configuration="RC00"
