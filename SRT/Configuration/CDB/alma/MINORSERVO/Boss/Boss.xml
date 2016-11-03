@@ -119,6 +119,12 @@
         @ M3R: RZ(mm) = (860);
     "
 
+    SSP="
+        @ SRP: park;
+        @ PFP: RY(mm) = (-25.95); TX(mm) = (-223); TZ(mm) = (-67);
+        @ GFR: RZ(mm) = (-600);
+        @ M3R: RZ(mm) = (860);
+    "
 
     slaves="GFR, M3R, PFP, SRP"
 >
