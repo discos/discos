@@ -40,6 +40,7 @@ COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
                 SchedulerTextClient
 COMMON_MISC:=Plotter KStars Scripts getTemplateForTests
+COMMON_SIMULATORS:= TCPGenericProtocolSim ReceiverBoardSim
 
 SRT_DOC:=SRTDox
 SRT_ERRORS:=SRTActiveSurfaceErrors
@@ -47,7 +48,7 @@ SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
                 SRTWeatherStationInterface SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer \
-             SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTSBandMFReceiver \
+             SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
              SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
              MinorServoBossTextClient MeteoClient
@@ -63,9 +64,9 @@ MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
 NT_ERRORS:=
-NT_INTERFACES:=NotoAntennaInterface
+NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface
 NT_LIBRARIES:=
-NT_SERVERS:=
+NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation
 NT_CLIENTS:=NotoMountTextClient 
 NT_MISC:=
 
@@ -79,10 +80,10 @@ ifeq ($(TARGETSYS),SRT)
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel\
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger XBackend \
-		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTSBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver PyDewarPositioner \
+		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver PyDewarPositioner \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
 		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient \
-		Plotter KStars SRTScripts \
+		Plotter KStars SRTScripts 
 
 	IDL_DOC:=Managment Antenna Backends SRTActiveSurface WeatherStation
 	CPP_DOC:=Libraries AntennaImplementation SRTActiveSurfaceImplementation BackendsImplementation ReceiversImplementation WeatherStationImplementation MinorServoImplementation
@@ -98,7 +99,7 @@ ifeq ($(TARGETSYS),SRT)
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss SRTMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
-	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRTSBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
+	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
 	WeatherStationImplementation_MODULES:=SRTWeatherStation
 	SRTActiveSurfaceImplementation_MODULES:=SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss 
 	MinorServoImplementation_MODULES:=SRTMinorServo
@@ -118,8 +119,7 @@ ifeq ($(TARGETSYS),MED)
 		Metrology TotalPower NoiseGenerator MedicinaMount MedWeatherStation CustomLogger XBackend MedicinaMinorServo\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
 		MedicinaMountTextClient CustomLoggingClient\
-		Plotter KStars Scripts \
-		MedScripts
+		Plotter KStars Scripts MedScripts
 
 	IDL_DOC:=Managment Antenna Backends WeatherStation Receivers
 	CPP_DOC:=Libraries AntennaImplementation ManagementImplementation BackendsImplementation WeatherStationImplementation
@@ -180,7 +180,8 @@ COMMON_MODULES:=$(COMMON_ERRORS) \
                 $(COMMON_LIBRARIES) \
                 $(COMMON_SERVERS) \
                 $(COMMON_CLIENTS) \
-                $(COMMON_MISC)
+                $(COMMON_MISC) \
+                $(COMMON_SIMULATORS)
 
 SRT_MODULES:=$(SRT_ERRORS) \
              $(SRT_INTERFACES) \

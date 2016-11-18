@@ -10,13 +10,27 @@
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>7</inputPortDB>
+	<inputPortBW>730</inputPortBW>	 	
 	<beams>1</beams>
- 	<bandWidth>730.0</bandWidth>
- 	<attenuation>7.0</attenuation>		
-	<section_boards>0 1</section_boards>
+	<section_boards>0 1</section_boards>	
 	<polarizations>L R</polarizations>
 	<feed>0 0</feed>
 	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>KKC</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>7</inputPortDB>
+	<inputPortBW>2350</inputPortBW>	
+	<beams>7</beams>
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>L R L R</polarizations>
+	<feed>0 0 1 1</feed>
+	<IF>0 1 0 1</IF>
 </Configuration>
 
 <Configuration>
@@ -24,9 +38,9 @@
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>7</inputPortDB>	
+	<inputPortBW>730</inputPortBW>	
 	<beams>1</beams>
- 	<bandWidth>730.0</bandWidth>
- 	<attenuation>7.0</attenuation>		
 	<section_boards>0 1</section_boards>
 	<polarizations>L R</polarizations>
 	<feed>0 0</feed>
@@ -38,9 +52,9 @@
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>7</inputPortDB>
+	<inputPortBW>730</inputPortBW>
 	<beams>1</beams>
- 	<bandWidth>730.0</bandWidth>
- 	<attenuation>7.0</attenuation>		
 	<section_boards>0 1</section_boards>
 	<polarizations>L R</polarizations>
 	<feed>0 0</feed>

@@ -3,68 +3,43 @@
 <ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<Procedure name="setupCCC" args="0">
+<Procedure name="bandaC" args="0">
 <body>
-	antennaSetup=CCC
-	receiversSetup=CCC
-	initialize=CCC
-	setSection=0,*,730.0,*,*,*,*
-	setSection=1,*,730.0,*,*,*,*
+	antennaSetup=SEC
+	initialize=bandaC
+	receiversSetup=bandaC
 	device=0
 	calOff
 </body>	
 </Procedure>
 
-<Procedure name="setupKKC" args="0">
+<Procedure name="bandaK" args="0">
 <body>
-	antennaSetup=KKC
-	receiversSetup=KKC
-	initialize=KKC
-	device=0
-	setAttenuation=0,9
-	setAttenuation=1,9
-	setAttenuation=2,9
-	setAttenuation=3,9
-	calOff
-</body>
-</Procedure>
-
-<Procedure name="setupXXP" args="0">
-<body>
-	antennaSetup=XXP
-	receiversSetup=XXP
-	initialize=XXP
-	setSection=0,*,730.0,*,*,*,*
-	setSection=1,*,730.0,*,*,*,*
+	antennaSetup=SEC
+	initialize=bandaK
+	receiversSetup=bandaK
 	device=0
 	calOff
 </body>
 </Procedure>
 
-<Procedure name="setupCCCL" args="0">
+<Procedure name="setupQ" args="0">
 <body>
-	antennaSetup=CCC
-	receiversSetup=CCC
-	receiversMode=NARROWBANDWIDTH
-	initialize=CCCL
-	setSection=0,*,300.0,*,*,*,*
-	setSection=1,*,300.0,*,*,*,*
-	setAttenuation=0,8
-	setAttenuation=1,8
+	antennaSetup=SEC
+	initialize=bandaQ
+	receiversSetup=bandaQ
 	device=0
 	calOff
 </body>
+</Procedure>
 
 <Procedure name="telescopePark" args="0">
 <body>
-	goTo=180d,89.8d
+	goTo=180d,90d
+	antennaStop
 	receiversPark
-	waitOnSource
-	antennaPark
 </body>
 </Procedure>
 
-
-</Procedure>
 
 </ProcedureFile>

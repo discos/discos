@@ -7,9 +7,11 @@ from TCPGenericProtocolSimImpl.TCPServer import TCPServer
 
 parser = argparse.ArgumentParser(description="Start/Stop the TCP server")
 parser.add_argument('action', choices=['start', 'stop'])
-parser.add_argument('--cmd', action='append',dest='commands',default=[],help='Add repeated commands')
-parser.add_argument('--ans', action='append',dest='answers',default=[],help='Add repeated answers')
-parser.add_argument('--def', dest='defVal',default='',help='default answer')
+parser.add_argument('--command', action='append',dest='commands',default=[],help='Add repeated commands')
+parser.add_argument('--answer', action='append',dest='answers',default=[],help='Add repeated answers')
+parser.add_argument('--default', dest='defVal',default='',help='default answer')
+parser.add_argument('--port', dest='port',default='15000',help='simulator IP port')
+parser.add_argument('--terminator',dest='terminator',default=32,help='protocol terminator, use ascii code')
 
 
 args = parser.parse_args()
@@ -23,7 +25,7 @@ if __name__ == "__main__":
 	if args.action == 'start':
 		signal.signal(signal.SIGINT,handle_signal)     
 		signal.signal(signal.SIGUSR1,handle_signal) 
-		server = TCPServer(args.commands,args.answers,args.defVal)
+		server = TCPServer(args.commands,args.answers,args.defVal,int(args.terminator),int(args.port))
 		server.run()
         
 	elif args.action == 'stop':

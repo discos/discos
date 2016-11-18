@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+   - 17 - 11 -2016 created Andrea Orlati (a.orlati@ira.inaf.it)
+-->
+
+<NotoReceivers xmlns="urn:schemas-cosylab-com:NotoReceivers:1.0" 
+				xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
+				HPIBIPAddress="192.167.187.201"
+				HPIBPort="1234"
+				RepetitionCacheTime="7000000"
+				RepetitionExpireTime="10000000"
+				LocalOscillatorInstance="RECEIVERS/LO_CBAND"
+>
+			<LO description="Sequence of local oscillator values for each IF chain"/>
+			<feeds description="Number of feeds of the receiver"/>
+			<IFs description="Number of Intermediate Frequencies chains coming from each feed" />
+			<polarization description="Sequence of values that identifies the polarization of each IF chains" />	
+			<initialFrequency description="Sequence of the start frequencies for each IF chain (MHz)" 
+			                  units="MHz"
+			                  format="%6.2f"
+			/>	
+			<bandWidth description="Sequence of the band width values for each IF chain (MHz)" 
+			           units="MHz"
+			           format="%6.2f"
+			/>
+			<mod description="Mnemonic code that defines a special working mode of the receiver (MHz)" />
+			<vacuum description="measure of the vacuum"
+			        units="mBar"
+			        format="%e"
+			/>
+			<status description="Bit fields that provide the status word of the receiver and component"
+			        alarm_mask="777"
+			        alarm_trigger="1"
+			        alarm_timer_trig="10"
+			        default_timer_trig="10"
+			        min_timer_trig="1"
+			/>	
+			<receiverStatus description="Overall status of the receiver"/>
+</NotoReceivers>

@@ -42,7 +42,7 @@ stop_server = Value('i', False)
 
 class TCPServer:
    
-	def __init__(self, cmd, answ, defAnsw):
+	def __init__(self, cmd, answ, defAnsw, term, port):
 		"""
 		Initialize
 
@@ -55,19 +55,20 @@ class TCPServer:
 		"""
 
 		self.host = socket.gethostbyname(socket.gethostname())
-		self.port = 15001
 		self.command=cmd
 		self.answer=answ
 		self.defaultAnswer=defAnsw
+		self.simPort=port
+		self.terminator=term
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 	def run(self):
-		self.s.bind((self.host, self.port))
+		self.s.bind((self.host, self.simPort))
 		self.s.listen(1)
 		
 		print "*"*40
-		print "TCPServer - Waiting for connections from %s port %d..." % (self.host,self.port)
+		print "TCPServer - Waiting for connections from %s port %d..." % (self.host,self.simPort)
 		print "Valid commands are: %s" % (self.command)
 		print "*"*40
 		error=False
@@ -93,15 +94,19 @@ class TCPServer:
 					stop_server.value = True
 					connection.close()
 					break
+				answer=self.defaultAnswer
 				if(data):
-					answer=self.defaultAnswer
-					if len(data)> 1:
-						strcmp=data.strip()
-						print "Received: %s" % (strcmp)
-						if strcmp in self.command:
-							index=self.command.index(strcmp)
-							answer=self.answer[index]
-					print "Sending message: %s" % (answer)
+					#print "Received: %s" % data
+					if self.terminator!=32:
+						termPos=data.find(chr(self.terminator))
+						if termPos>0:
+							strcmp=data[:termPos]
+							if strcmp in self.command:
+								index=self.command.index(strcmp)
+								answer=self.answer[index]
+						else:
+							pass
+					#print "Sending message: %s" % (answer)
 					connection.send(answer)			
 		except KeyboardInterrupt:
 			raise
