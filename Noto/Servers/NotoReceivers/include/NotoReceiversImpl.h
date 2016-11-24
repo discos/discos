@@ -234,6 +234,23 @@ public:
     virtual void turnLNAsOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
+	 * This method is used to enable the external control of the calibration mark
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
+	 */
+	void externalCalOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 * This method is used to disable the external control of the calibration mark
+	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @thorw ReceiversErrors::ReceiversErrorsEx
+	 */
+	void externalCalOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+
+	/**
 	 * It allows to turn the antenna unit on
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx

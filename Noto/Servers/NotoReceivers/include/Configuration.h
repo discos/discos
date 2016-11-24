@@ -69,19 +69,14 @@ public:
 	inline const WORD& getHPIBPort() const { return m_HPIBPort; }
 
 	/**
-	 * @return the time the repetition log guard will cache new log messages before sending to the central logger (microseconds)
-	 */
-	inline const DDWORD& getRepetitionCacheTime() const { return m_repetitionCacheTime; }
-
-	/**
-	 * @return the time of expiration of a log sent to the repetition log guard (microseconds)
-	 */
-	inline const DDWORD& getRepetitionExpireTime() const { return m_repetitionExpireTime; }
-
-	/**
 	 * @return the instance of the local oscillator component  that the receiver will use to drive the set its LO
 	 */
 	inline const IRA::CString& getLocalOscillatorInstance() const { return m_localOscillatorInstance; }
+
+	/**
+	 * @return the interface of the focus selector component that the receiver will use to drive the set its LO
+	 */
+	inline const IRA::CString& getFocusSelctorInterface() const { return m_fsInterface; }
 
 	/**
 	 * Allows to get the table of mark values relative to left polarization
@@ -190,16 +185,24 @@ public:
 	 * @throw ComponentErrors::CDBAccess
 	 * @param Services pointer to the container services object
 	*/
-	void init(maci::ContainerServices *Services)  throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);
+	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);
+
+	/**
+    * This member function is used to configure the current receiver, the static information is red from the CDB.
+	 * @throw ComponentErrors::CDBAccess
+	 * @param Services pointer to the container services object
+	 * @param conf configuration to be loaded
+	*/
+	void loadConf(maci::ContainerServices *Services,const IRA::CString& conf) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);
+
 	
 private:
 	IRA::CString m_HPIBIPAddress;
 	WORD m_HPIBPort;
 	DDWORD m_watchDogResponseTime;
 	DDWORD m_watchDogSleepTime;
-	DDWORD m_repetitionCacheTime;
-	DDWORD m_repetitionExpireTime;
 	IRA::CString m_localOscillatorInstance;
+	IRA::CString m_fsInterface;
 
 	IRA::CString m_mode;
 	double *m_RFMin;
@@ -226,6 +229,7 @@ private:
 	TTaperValue * m_taperVector;
 	DWORD m_taperVectorLen;
 	TFeedValue * m_feedVector; // length given by m_feeds
+	void freeAll();
 };
 
 

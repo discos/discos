@@ -1,5 +1,8 @@
 #include "ComponentCore.h"
 #include <LogFilter.h>
+#include "Tone.h"
+
+#define IS_LO_AVAIL m_configuration.getLocalOscillatorInstance()!=""
 
 //_IRA_LOGFILTER_IMPORT;
 
@@ -8,36 +11,32 @@
 
 CComponentCore::CComponentCore()
 {
-
 }
 
 CComponentCore::~CComponentCore()
 {
 }
 
-void CComponentCore::initialize(maci::ContainerServices* services)
+void CComponentCore::initialize(maci::ContainerServices* services) throw (ComponentErrors::CDBAccessExImpl)
 {
+	m_configuration.init(services);  //throw (ComponentErrors::CDBAccessExImpl);
     m_services=services;
     m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
     m_localOscillatorFault=false;
     m_statusWord=0;
-}
-
-CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
-{
-    m_configuration.init(m_services);  //throw (ComponentErrors::CDBAccessExImpl);
-    //members initialization
-    m_startFreq.length(m_configuration.getIFs());
-    m_bandwidth.length(m_configuration.getIFs());
-    m_polarization.length(m_configuration.getIFs());
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        m_startFreq[i]=m_configuration.getIFMin()[i];
-        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
-        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
-        m_localOscillatorValue=m_configuration.getDefaultLO()[i];
+    m_startFreq.length(2);
+    m_bandwidth.length(2);
+    m_polarization.length(2);
+    for (WORD i=0;i<2;i++) {
+        m_startFreq[i]=50.0;
+        m_bandwidth[i]=100.0;
+        m_polarization[i]=(long)Receivers::RCV_LCP;
+        m_localOscillatorValue=0.0;
     }
     m_setupMode="";
-    return &m_configuration;
+    m_setup="";
+    m_totalPower_proxy.setContainerServices(m_services);
+    m_totalPower_proxy.setComponentName((const char *)m_configuration.getFocusSelctorInterface());
 }
 
 void CComponentCore::cleanup()
@@ -104,36 +103,39 @@ const DWORD& CComponentCore::getFeeds()
     return m_configuration.getFeeds();
 }
 
-void CComponentCore::activate() throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+void CComponentCore::activate(const char *setup) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
         ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
-        ReceiversErrors::ReceiverControlBoardErrorExImpl)
+        ReceiversErrors::ReceiverControlBoardErrorExImpl,ReceiversErrors::ConfigurationExImpl,ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
-    setMode((const char *)m_configuration.getSetupMode()); // Throw ......
+    if (setup!=m_setup) { //change receiver only if required
+    	loadConf(setup); //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
+        m_setup=setup;
+        CUSTOM_LOG(LM_FULL_INFO,"CComponentCore::activate()",(LM_NOTICE,"New receiver is now active: %s",setup));
+        //set the default mode
+        setMode((const char *)m_configuration.getSetupMode()); // Throw ......
+    }
 }
 
 void CComponentCore::deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
-	/// unset the current receiver and mode
 }
 
 void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-        ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
+        ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,
+        ReceiversErrors::ConfigurationExImpl)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     IRA::CString cmdMode(mode);
     cmdMode.MakeUpper();
+    if (m_setup=="") {
+        _EXCPT(ReceiversErrors::ConfigurationExImpl,impl,"CComponentErrors::setMode()");
+        throw impl;
+    }
     if (cmdMode!=m_configuration.getSetupMode()) { // in this case i have just one allowed mode...so no need to do many checks and settings
         _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
         throw impl;
     }
-    //
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        m_startFreq[i]=m_configuration.getIFMin()[i];
-        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
-        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
-    }
-    // the set the default LO for the default LO for the selected mode.....
     ACS::doubleSeq lo;
     lo.length(m_configuration.getIFs());
     for (WORD i=0;i<m_configuration.getIFs();i++) {
@@ -141,59 +143,113 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
     }
     setLO(lo); // throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
     m_setupMode=mode;
-    ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
+    CUSTOM_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"New receiver mode: %s",mode));
 }
 
-void CComponentCore::calOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+void CComponentCore::calOn() throw (ReceiversErrors::FocusSelectorErrorExImpl,ComponentErrors::UnexpectedExImpl)
 {
-    /*baci::ThreadSyncGuard guard(&m_mutex);
-    if (m_setupMode=="") {
-        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::calOn()");
-        impl.setReason("receiver not configured yet");
-        throw impl;
+	baci::ThreadSyncGuard guard(&m_mutex);
+    try{
+    	m_totalPower_proxy->calOn();
     }
-    // guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOn()");
-        throw impl;
+    catch (ComponentErrors::ComponentErrorsEx& ex) {
+    	_ADD_BACKTRACE(ReceiversErrors::FocusSelectorErrorExImpl,impl,ex,"CComponentCore::calOn()");
+    	setStatusBit(NOISEMARKERROR);
+    	throw impl;
     }
-    try {
-        m_control->setCalibrationOn();
+    catch (BackendsErrors::BackendsErrorsEx& ex) {
+    	_ADD_BACKTRACE(ReceiversErrors::FocusSelectorErrorExImpl,impl,ex,"CComponentCore::calOn()");
+    	setStatusBit(NOISEMARKERROR);
+    	throw impl;
     }
-    catch (IRA::ReceiverControlEx& ex) {
-        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOn()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
+    catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
+    	_ADD_BACKTRACE(ReceiversErrors::FocusSelectorErrorExImpl,impl,ex,"CComponentCore::calOn()");
+    	setStatusBit(NOISEMARKERROR);
+    	throw impl;
     }
+    catch(...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CComponentCore::calOn()");
+    	setStatusBit(NOISEMARKERROR);
+    }
+	CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::calOn()",(LM_NOTICE,"Noise diode turned on"));
+    clearStatusBit(NOISEMARKERROR);
     setStatusBit(NOISEMARK);
-    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit*/
 }
 
-void CComponentCore::calOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+void CComponentCore::calOff() throw (ReceiversErrors::FocusSelectorErrorExImpl,ComponentErrors::UnexpectedExImpl)
 {
-    /*baci::ThreadSyncGuard guard(&m_mutex);
-    if (m_setupMode=="") {
-        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::calOff()");
-        impl.setReason("receiver not configured yet");
-        throw impl;
+	baci::ThreadSyncGuard guard(&m_mutex);
+    try{
+    	m_totalPower_proxy->calOff();
     }
-    // guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOff()");
-        throw impl;
+    catch (ComponentErrors::ComponentErrorsEx& ex) {
+    	_ADD_BACKTRACE(ReceiversErrors::FocusSelectorErrorExImpl,impl,ex,"CComponentCore::calOff()");
+    	setStatusBit(NOISEMARKERROR);
+    	throw impl;
     }
-    try {
-        m_control->setCalibrationOff();
+    catch (BackendsErrors::BackendsErrorsEx& ex) {
+    	_ADD_BACKTRACE(ReceiversErrors::FocusSelectorErrorExImpl,impl,ex,"CComponentCore::calOff()");
+    	setStatusBit(NOISEMARKERROR);
+    	throw impl;
     }
-    catch (IRA::ReceiverControlEx& ex) {
-        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOff()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
+    catch (ComponentErrors::CouldntGetComponentExImpl& ex) {
+    	_ADD_BACKTRACE(ReceiversErrors::FocusSelectorErrorExImpl,impl,ex,"CComponentCore::calOff()");
+    	setStatusBit(NOISEMARKERROR);
+    	throw impl;
     }
+    catch(...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CComponentCore::calOff()");
+    	setStatusBit(NOISEMARKERROR);
+    }
+	CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::calOff()",(LM_NOTICE,"Noise diode turned off"));
+    clearStatusBit(NOISEMARKERROR);
     clearStatusBit(NOISEMARK);
-    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit*/
+}
+
+void CComponentCore::antennaUnitOff() throw (ReceiversErrors::AntennaUnitErrorExImpl)
+{
+	CTone tone(m_configuration.getHPIBIPAddress(),m_configuration.getHPIBPort(),2000000);
+	try {
+		tone.init();
+	}
+	catch (ComponentErrors::IRALibraryResourceExImpl& ex) {
+		_ADD_BACKTRACE(ReceiversErrors::AntennaUnitErrorExImpl,impl,ex,"CComponentCore::antennaUnitOff()");
+		setStatusBit(AUERROR);
+		throw impl;
+	}
+	try {
+		tone.turnOff();
+	}
+	catch (ComponentErrors::IRALibraryResourceExImpl& ex) {
+		_ADD_BACKTRACE(ReceiversErrors::AntennaUnitErrorExImpl,impl,ex,"CComponentCore::antennaUnitOff()");
+		setStatusBit(AUERROR);
+		throw impl;
+	}
+	clearStatusBit(AUERROR);
+	clearStatusBit(ANTENNAUNIT);
+}
+
+void CComponentCore::antennaUnitOn() throw (ReceiversErrors::AntennaUnitErrorExImpl)
+{
+	CTone tone(m_configuration.getHPIBIPAddress(),m_configuration.getHPIBPort(),2000000);
+	try {
+		tone.init();
+	}
+	catch (ComponentErrors::IRALibraryResourceExImpl& ex) {
+		_ADD_BACKTRACE(ReceiversErrors::AntennaUnitErrorExImpl,impl,ex,"CComponentCore::antennaUnitOn()");
+		setStatusBit(AUERROR);
+		throw impl;
+	}
+	try {
+		tone.turnOff();
+	}
+	catch (ComponentErrors::IRALibraryResourceExImpl& ex) {
+		_ADD_BACKTRACE(ReceiversErrors::AntennaUnitErrorExImpl,impl,ex,"CComponentCore::antennaUnitOn()");
+		setStatusBit(AUERROR);
+		throw impl;
+	}
+	clearStatusBit(AUERROR);
+	clearStatusBit(ANTENNAUNIT);
 }
 
 void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
@@ -237,7 +293,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Val
     // make sure the synthesizer component is available
     loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
     try {
-        m_localOscillatorDevice->set(amp,trueValue);
+    	if (IS_LO_AVAIL) m_localOscillatorDevice->set(amp,trueValue);
     }
     catch (CORBA::SystemException& ex) {
         m_localOscillatorFault=true;
@@ -445,7 +501,7 @@ long CComponentCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq
     return size;
 }
 
-void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl)
+void CComponentCore::checkLocalOscillator()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     if (m_setupMode=="") { // if the receiver is not configured the check makes no sense
@@ -457,32 +513,35 @@ void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblem
     ACS::ROlong_var isLockedRef;
     CORBA::Long isLocked;
     try {
-        isLockedRef=m_localOscillatorDevice->isLocked();
+        if (IS_LO_AVAIL) isLockedRef=m_localOscillatorDevice->isLocked();
     }
     catch (CORBA::SystemException& ex) {
         m_localOscillatorFault=true;
-        _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CComponentCore::checkLocalOscillator()");
-        impl.setName(ex._name());
-        impl.setMinor(ex.minor());
-        throw impl;
+        setStatusBit(LOERROR);
+        return;
     }
-    isLocked=isLockedRef->get_sync(comp.out());
-    ACSErr::CompletionImpl complImpl(comp);
-    if (!complImpl.isErrorFree()) {
-        _ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,complImpl,"CComponentCore::checkLocalOscillator()");
-        impl.setAttributeName("isLocked");
-        impl.setComponentName((const char *)m_configuration.getLocalOscillatorInstance());
-        throw impl;
+    if (IS_LO_AVAIL) {
+    	isLocked=isLockedRef->get_sync(comp.out());
+    	ACSErr::CompletionImpl complImpl(comp);
+    	if (!complImpl.isErrorFree()) {
+    		setStatusBit(LOERROR);
+    	    return;
+    	}
     }
+    else {
+    	isLocked=true;
+    }
+    clearStatusBit(LOERROR);
     if (!isLocked) setStatusBit(UNLOCKED);
     else clearStatusBit(UNLOCKED);
 }
 
 void CComponentCore::updateComponent()
 {
+	// @TODO: implement the logging filter and start raise the warnings related to the checks below
     baci::ThreadSyncGuard guard(&m_mutex);
     m_componentStatus=Management::MNG_OK;
-    if (checkStatusBit(LOCAL)) {
+    if (checkStatusBit(UNLOCKED)) {
         setComponentStatus(Management::MNG_FAILURE);
         //_IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","RECEVER_NOT_REMOTELY_CONTROLLABLE");
     }
@@ -490,51 +549,35 @@ void CComponentCore::updateComponent()
         setComponentStatus(Management::MNG_FAILURE);
         //_IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","NOISE_MARK_ERROR");
     }
-    if (checkStatusBit(CONNECTIONERROR)) {
+    if (checkStatusBit(AUERROR)) {
         setComponentStatus(Management::MNG_FAILURE);
         //_IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","RECEIVER_CONNECTION_ERROR");
     }
-    if (checkStatusBit(UNLOCKED)) {
+    if (checkStatusBit(LOERROR)) {
         setComponentStatus(Management::MNG_FAILURE);
         //_IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","LOCAL_OSCILLATOR_NOT_LOCKED");
     }
 }
 
-void CComponentCore::updateNoiseMark() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+void CComponentCore::loadConf(const IRA::CString& conf) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
 {
-    /*bool answer;
-    baci::ThreadSyncGuard guard(&m_mutex);
-    // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
-    try {
-        answer=m_control->isCalibrationOn();
+	m_configuration.loadConf(m_services,conf); // throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl)
+    //members initialization
+    m_startFreq.length(m_configuration.getIFs());
+    m_bandwidth.length(m_configuration.getIFs());
+    m_polarization.length(m_configuration.getIFs());
+    for (WORD i=0;i<m_configuration.getIFs();i++) {
+        m_startFreq[i]=m_configuration.getIFMin()[i];
+        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
+        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
+        //m_localOscillatorValue=m_configuration.getDefaultLO()[i];
     }
-    catch (IRA::ReceiverControlEx& ex) {
-        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateNoiseMark()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
-    }
-    if(answer!=checkStatusBit(NOISEMARK)) {
-        if(m_ioMarkError) {
-            setStatusBit(NOISEMARKERROR);
-        }
-        else {
-            m_ioMarkError = true;
-        }
-    }
-    else {
-        clearStatusBit(NOISEMARKERROR);
-        m_ioMarkError = false;
-    }
-    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit*/
-}
-
-void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
-{
+    m_setupMode="";
 }
 
 void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetComponentExImpl)
 {
+	if (!(IS_LO_AVAIL)) return;
     if ((!CORBA::is_nil(m_localOscillatorDevice)) && (m_localOscillatorFault)) { // if reference was already taken, but an error was found....dispose the reference
         try {
             m_services->releaseComponent((const char*)m_localOscillatorDevice->name());
@@ -572,6 +615,7 @@ void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetCom
 
 void CComponentCore::unloadLocalOscillator()
 {
+	if (!(IS_LO_AVAIL)) return;
     if (!CORBA::is_nil(m_localOscillatorDevice)) {
         try {
             m_services->releaseComponent((const char*)m_localOscillatorDevice->name());

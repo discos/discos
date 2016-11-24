@@ -43,7 +43,7 @@ void NotoReceiversImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("NotoReceiversImpl::initialize()");
 	ACS_LOG(LM_FULL_INFO,"NotoReceiversImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZING"));
-	m_core.initialize(getContainerServices());
+	m_core.initialize(getContainerServices()); //throw (ComponentErrors::CDBAccessExImpl);
 	m_monitor=NULL;
 	ACS_LOG(LM_FULL_INFO,"NotoReceiversImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
@@ -134,7 +134,7 @@ void NotoReceiversImpl::aboutToAbort()
 void NotoReceiversImpl::activate(const char * setup_mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
-		m_core.activate();
+		m_core.activate(setup_mode);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -212,28 +212,12 @@ void NotoReceiversImpl::calOff() throw (CORBA::SystemException,ComponentErrors::
 }
 
 
-/*void NotoReceiversImpl::externalCalOn() throw (
+void NotoReceiversImpl::externalCalOn() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
         )
 {   
-    try {
-        m_core.externalCalOn();
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();        
-    }
-    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getReceiversErrorsEx();
-    }
-    catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "NotoReceiversImpl::externalCalOn()");
-        impl.log(LM_DEBUG);
-        throw impl.getComponentErrorsEx();
-    }
 }
 
 
@@ -243,24 +227,7 @@ void NotoReceiversImpl::externalCalOff() throw (
         ReceiversErrors::ReceiversErrorsEx
         )
 {   
-    try {
-        m_core.externalCalOff();
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();        
-    }
-    catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
-        ex.log(LM_DEBUG);
-        throw ex.getReceiversErrorsEx();
-    }
-    catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "NotoReceiversImpl::externalCalOff()");
-        impl.log(LM_DEBUG);
-        throw impl.getComponentErrorsEx();
-    }
-}*/
-
+}
 
 void NotoReceiversImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
@@ -431,14 +398,42 @@ void NotoReceiversImpl::turnLNAsOff() throw (CORBA::SystemException,ComponentErr
 
 void NotoReceiversImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	//has it to be implemented?
-	ACS_LOG(LM_FULL_INFO,"NotoReceiversImpl::turnAntennaUnitOn()",(LM_NOTICE,"CBAND_ANTENNA_UNIT_ON"));
+	try {
+		m_core.antennaUnitOn();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"NotoReceiversImpl::turnAntennaUnitOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
 }
 
 void NotoReceiversImpl::turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	//has it to be implemented?
-	ACS_LOG(LM_FULL_INFO,"NotoReceiversImpl::turnAntennaUnitOff()",(LM_NOTICE,"CBAND_ANTENNA_UNIT_OFF"));
+	try {
+		m_core.antennaUnitOff();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"NotoReceiversImpl::turnAntennaUnitOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
 }
 
 _PROPERTY_REFERENCE_CPP(NotoReceiversImpl,ACS::ROdoubleSeq,m_plocalOscillator,LO);

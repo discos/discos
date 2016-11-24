@@ -63,7 +63,8 @@ LIBRARIES_L     =
 # <brief description of lllll library>
 NotoReceiversImpl_OBJECTS   =  Configuration NotoReceiversImpl ComponentCore MonitorThread Tone
 NotoReceiversImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs GenericReceiverStubs  \
-                   NotoAllReceiversStubs LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
+                   NotoAllReceiversStubs LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs TotalPowerStubs \
+                   BackendsErrors GenericBackendStubs bulkDataStubs bulkDataSenderStubs bulkDataReceiverStubs ACSBulkDataError
 
 #
 # Scripts (public and local)

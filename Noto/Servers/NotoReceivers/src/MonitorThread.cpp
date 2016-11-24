@@ -31,40 +31,12 @@ void CMonitorThread::runLoop()
 	 m_core->updateComponent();
 	 switch( m_currentStage) {
 	 	case STATUS: {
-	 		m_currentStage=REMOTE;
-	 		 break;
-	 	}
-	 	case REMOTE: {
-	 		m_currentStage=NOISEMARK;
-	 		try {
-	 			m_core->updateIsRemote();
-	 		}
-	 		 catch (ACSErr::ACSbaseExImpl& ex) {
-	 			 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CMonitorThread::runLoop");
-	 			 //_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-	 		}
-	 		break;
-	 	}
-	 	case NOISEMARK: {
 	 		m_currentStage=UNLOCKED;
-	 		try {
-	 			m_core->updateNoiseMark();
-	 		}
-	 		 catch (ACSErr::ACSbaseExImpl& ex) {
-	 			 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CMonitorThread::runLoop");
-	 			 //_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-	 		}
-	 		break;
+	 		 break;
 	 	}
 	 	case UNLOCKED: {
 	 		m_currentStage=STATUS;
-	 		try {
-	 			m_core->checkLocalOscillator();
-	 		}
-	 		 catch (ACSErr::ACSbaseExImpl& ex) {
-	 			 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CMonitorThread::runLoop");
-	 			 //_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-	 		}
+	 		m_core->checkLocalOscillator();
 	 		break;
 	 	}
 	 }

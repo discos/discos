@@ -12,11 +12,4 @@
 	<relativePower>1.0</relativePower>
 </Feed>
 
-<Feed>
-	<feedCode>1</feedCode>
-	<xOffset>-0.001693095</xOffset>
-	<yOffset>-0.000701302</yOffset>
-	<relativePower>0.97</relativePower>
-</Feed>
-
 </Feeds>

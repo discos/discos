@@ -12,7 +12,7 @@
 	Code="TotalPowerImpl"
 	Type="IDL:alma/Backends/TotalPower:1.0"
 	Container="TotalPowerContainer"
-	Default="false"
+	Default="true"
 	KeepAliveTime="-1"
     ImplLang="cpp"
 />

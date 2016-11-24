@@ -7,14 +7,14 @@
 /* This code is under GNU General Public License (GPL).                                                 */
 /*                                                                                                      */
 /* Who                                when            What                                              */
-/* Andrea Orlati(aorlati@ira.inaf.it) 03/08/2011     Creation                                         */
+/* Andrea Orlati(aorlati@ira.inaf.it) 03/08/2011     Creation                                           */
 
 #include "Configuration.h"
 #include <ReceiverControl.h>
 #include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
 #include <ManagmentDefinitionsC.h>
-
+#include <BackendsProxy.h>
 /**
  * This class contains the code of almost all the features  of the component
  * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,
@@ -37,13 +37,7 @@ public:
      * This method initializes the object
      * @param service pointer to container services object provided by the container
      */
-    virtual void initialize(maci::ContainerServices* services);
-
-    /**
-     * This method prepares the object for execution.
-     * @return the pointer to the configuration class
-     */
-    virtual CConfiguration const * const execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl);
+    virtual void initialize(maci::ContainerServices* services) throw (ComponentErrors::CDBAccessExImpl);
 
     /**
      * This function is responsible to free all allocated resources
@@ -68,14 +62,15 @@ public:
      * @param  mode mode code as a string
      */
     void setMode(const char * mode) throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
+            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,
+            ReceiversErrors::ConfigurationExImpl);
 
     /**
-     * It activate the receiver, in other words it allows to setup the default configuration and to make sure the LNA are turned on.
+     * It activate the selected receiver. All required operation are performed.
      */
-    void activate() throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+    void activate(const char *setup) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
             ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
-            ReceiversErrors::ReceiverControlBoardErrorExImpl);
+            ReceiversErrors::ReceiverControlBoardErrorExImpl,ReceiversErrors::ConfigurationExImpl,ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);
 
     /**
      * It deactivates the receiver.
@@ -132,24 +127,34 @@ public:
     /**
      * It turns the calibration diode on.
      */
-    void calOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void calOn() throw (ReceiversErrors::FocusSelectorErrorExImpl,ComponentErrors::UnexpectedExImpl);
 
     /**
      * It turns the calibration diode off
      */
-    void calOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void calOff() throw (ReceiversErrors::FocusSelectorErrorExImpl,ComponentErrors::UnexpectedExImpl);
+
+    /**
+     * It turns the AntennaUnit on
+    */
+    void antennaUnitOn() throw (ReceiversErrors::AntennaUnitErrorExImpl);
+
+    /**
+     * It turns the AntennaUnit off
+    */
+    void antennaUnitOff() throw (ReceiversErrors::AntennaUnitErrorExImpl);
 
     /**
      * It checks if the Dewar power box is in remote or not
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateIsRemote() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    //void updateIsRemote() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
     /**
      * It checks is the status of the noise mark correspond to the commanded status, otherwise it sets the <i>NOISEMARKERROR</i> bit. It also check if the
      * external control of the noise mark has been enabled or not
      */
-    void updateNoiseMark() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    //void updateNoiseMark() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
     /**
      * This method resumes the whole status of the component. It set the <i>componentStatus</i> member variable.
@@ -157,9 +162,9 @@ public:
     void updateComponent();
 
     /**
-     * I checks if the local oscillator is locked properly
+     * It checks if the local oscillator is locked properly
      */
-    void checkLocalOscillator() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl);
+    void checkLocalOscillator();
 
     /**
      * This is getter method. No need to make it thread safe......
@@ -171,7 +176,7 @@ public:
      * This is getter method. No need to make it thread safe......
      * @return the current status word
      */
-    DWORD getStatusWord() const  { return  m_statusWord; }
+    DWORD getStatusWord() const  { return m_statusWord; }
 
     /**
      * It returns the feed geometry of the receiver with respect to the central one. For this implementation it is just a placeholder since there is just one feed.
@@ -238,11 +243,12 @@ protected:
 private:
 
     enum TStatusBit {
-        LOCAL=0,
-        NOISEMARK=1,
+        NOISEMARK=0,
         NOISEMARKERROR=1,
-        CONNECTIONERROR=3,
-        UNLOCKED=4
+        UNLOCKED=2,
+        LOERROR=3,
+        ANTENNAUNIT=4,
+        AUERROR=5
     };
 
     CConfiguration m_configuration;
@@ -255,11 +261,20 @@ private:
     ACS::doubleSeq m_bandwidth;
     ACS::longSeq m_polarization;
     IRA::CString m_setupMode;
+    IRA::CString m_setup;
     /*double m_vacuum;
     double m_vacuumDefault;*/
     DWORD m_statusWord;
+    Backends::TotalPower_proxy m_totalPower_proxy;
 
     Management::TSystemStatus m_componentStatus;
+
+    /**
+     * This method prepares the object for execution.
+     * @param configuration to be loaded
+     */
+    virtual void loadConf(const IRA::CString& conf) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl);
+
 
     void setComponentStatus(const Management::TSystemStatus& status) { if (status>m_componentStatus) m_componentStatus=status;  }
 

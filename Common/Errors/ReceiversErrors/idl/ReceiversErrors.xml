@@ -20,6 +20,10 @@
          
 	<ErrorCode name="LocalOscillatorError" shortDescription="Cannot set the local oscillator" description=""/>
 	
+	<ErrorCode name="FocusSelectorError" shortDescription="Cannot access focus selector" description=""/>
+	
+	<ErrorCode name="AntennaUnitError" shortDescription="Cannot command antenna unit" description=""/>
+	
 	<ErrorCode name="UnavailableReceiverOperation" shortDescription="Could not execute receiver operation" description="">
 		<Member name="ReceiverCode" type="string" description="mnemonic code of the receiver" />   
 	</ErrorCode>

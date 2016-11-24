@@ -24,4 +24,8 @@
 <mode/>
 <derotatorPosition/>
 
+<AvailableReceiver Code="BandaC" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
+<AvailableReceiver Code="BandaK" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
+<AvailableReceiver Code="BandaQ" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
+
 </ReceiversBoss>

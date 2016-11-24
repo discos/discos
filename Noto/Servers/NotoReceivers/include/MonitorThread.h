@@ -51,9 +51,7 @@ public:
 private:
      enum TStage {
     	 STATUS,
-    	 REMOTE,
-    	 NOISEMARK,
-    	 UNLOCKED,
+    	 UNLOCKED
      };
      CComponentCore *m_core;
      TStage m_currentStage;
