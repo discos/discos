@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: NotoActiveSurfaceBoss.xsd,v 1.1 2009-05-21 15:32:47 c.migoni Exp $
+	- Author: Carlo Migoni
+	-
+	- History:
+	- 04-03-2009  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:NotoActiveSurfaceBoss:1.0"
+	xmlns="urn:schemas-cosylab-com:NotoActiveSurfaceBoss:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:as="urn:schemas-cosylab-com:ActiveSurface:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:ActiveSurface:1.0" schemaLocation="ActiveSurface.xsd"/>
+
+	<xs:complexType name="NotoActiveSurfaceBossType">
+		<xs:sequence>
+			<xs:element name="status" type="mng:SystemStatusType" />	
+			<xs:element name="enabled" type="mng:BooleanType" />
+			<xs:element name="pprofile" type="as:ActiveSurfaceProfileType" />	
+			<xs:element name="tracking" type="mng:BooleanType" />
+		</xs:sequence>
+		<xs:attribute name="IPAddress" type="xs:string" use="required" />
+		<xs:attribute name="Port" type="xs:unsignedShort" use="required" />
+		<!-- sleep time of the watching thread (microseconds), this is the thread that keeps data up to date -->
+		<xs:attribute name="WatchingThreadTime" type="xs:unsignedLong" use="required" />
+		<!-- sleep time of the working thread (microseconds), this is the thread that keeps data up to date -->
+		<xs:attribute name="WorkingThreadTime" type="xs:unsignedLong" use="required" />
+        	<xs:attribute name="profile" type="xs:unsignedByte" use="required" />
+	</xs:complexType>
+
+	<xs:element name="NotoActiveSurfaceBoss" type="NotoActiveSurfaceBossType"/>
+	
+</xs:schema>
