@@ -47,7 +47,7 @@ void CTone::turnOn() throw (ComponentErrors::IRALibraryResourceExImpl)
 		throw dummy;
 	}
 	strcpy(buffer,TURN_ON_CMD);
-	total=strlen(buffer)+1;
+	total=strlen(buffer);
 	if (m_socket.Send(err,(const void *)buffer,total)<total) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
 		dummy.setCode(err.getErrorCode());
@@ -72,8 +72,9 @@ void CTone::turnOff() throw (ComponentErrors::IRALibraryResourceExImpl)
 		throw dummy;
 	}
 	strcpy(buffer,TURN_OFF_CMD);
-	total=strlen(buffer)+1;
-	if (m_socket.Send(err,(const void *)buffer,total)<total) {
+	total=strlen(buffer);
+	int res=m_socket.Send(err,buffer,total);
+	if (res<total) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
 		dummy.setCode(err.getErrorCode());
 		dummy.setDescription((const char*)err.getDescription());

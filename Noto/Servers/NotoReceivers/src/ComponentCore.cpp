@@ -208,7 +208,7 @@ void CComponentCore::calOff() throw (ReceiversErrors::FocusSelectorErrorExImpl,C
 
 void CComponentCore::antennaUnitOff() throw (ReceiversErrors::AntennaUnitErrorExImpl)
 {
-	CTone tone(m_configuration.getHPIBIPAddress(),m_configuration.getHPIBPort(),2000000);
+	CTone tone(m_configuration.getHPIBIPAddress(),m_configuration.getHPIBPort(),20000000);
 	try {
 		tone.init();
 	}
@@ -241,7 +241,7 @@ void CComponentCore::antennaUnitOn() throw (ReceiversErrors::AntennaUnitErrorExI
 		throw impl;
 	}
 	try {
-		tone.turnOff();
+		tone.turnOn();
 	}
 	catch (ComponentErrors::IRALibraryResourceExImpl& ex) {
 		_ADD_BACKTRACE(ReceiversErrors::AntennaUnitErrorExImpl,impl,ex,"CComponentCore::antennaUnitOn()");
