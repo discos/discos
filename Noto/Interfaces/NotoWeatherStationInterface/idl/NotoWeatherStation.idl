@@ -50,8 +50,12 @@ module Weather{
 		*	
 		*/
 		double getWindspeed();
-
 		double getPressure();
+                double getWindSpeedAverage();
+                double getWindspeedPeak();
+                double getWindDir();
+
+                readonly attribute ACS::RWdouble windspeedpeak;
 
 	 };
 
