@@ -1,0 +1,112 @@
+/******************************************************************************** $Id: JacPrep,v 1.12 2005/04/05 13:29:24 mzampare Exp $
+* DO NOT EDIT
+* Automatically generated from ../idl/NotoActiveSurfaceBoss.midl
+* on Wed Nov 16 10:15:56 2016
+*******************************************************************************/
+#ifndef _NotoActiveSurfaceBoss_midl_
+#define _NotoActiveSurfaceBoss_midl_
+#ifndef _ACS_PREPROCESSED_
+#define _ACS_PREPROCESSED_
+#endif
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ComponentErrors.idl>
+#include <ASErrors.idl>
+#include <ManagmentDefinitions.idl>
+#include <ActiveSurfaceBoss.idl>
+
+
+#pragma prefix "alma"
+
+module ActiveSurface {
+
+    enum TASOneWayAction {
+        AS_STOP,
+        AS_SETUP,
+        AS_STOW,
+        AS_REFPOS,
+        AS_UP,
+        AS_DOWN,
+        AS_BOTTOM,
+        AS_TOP,
+        AS_UPDATE,
+        AS_CORRECTION,
+        AS_MOVE,
+ AS_PROFILE
+    };
+
+    typedef sequence<TASOneWayAction> TASOneWayActionSeq; interface CBTASOneWayAction : ACS::Callback { oneway void working(in TASOneWayAction value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TASOneWayAction value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTASOneWayAction TASOneWayActionCB; interface AlarmTASOneWayAction : ACS::Callback { oneway void alarm_raised(in TASOneWayAction value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TASOneWayAction value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTASOneWayAction TASOneWayActionAlarm; interface PTASOneWayAction: ACS::TypelessProperty { TASOneWayAction get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TASOneWayActionSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TASOneWayAction default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TASOneWayActionSeq allStates; };
+ interface ROTASOneWayAction: PTASOneWayAction{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TASOneWayActionSeq alarm_on; readonly attribute TASOneWayActionSeq alarm_off; };
+ interface RWTASOneWayAction: PTASOneWayAction { ACSErr::Completion set_sync(in TASOneWayAction value); void set_async(in TASOneWayAction value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TASOneWayAction value);};
+
+
+    enum TASProfile {
+        AS_SHAPED,
+ AS_SHAPED_FIXED,
+        AS_PARABOLIC,
+ AS_PARABOLIC_FIXED
+    };
+
+    typedef sequence<TASProfile> TASProfileSeq; interface CBTASProfile : ACS::Callback { oneway void working(in TASProfile value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void done(in TASProfile value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+typedef CBTASProfile TASProfileCB; interface AlarmTASProfile : ACS::Callback { oneway void alarm_raised(in TASProfile value, in ACSErr::Completion c, in ACS::CBDescOut desc); oneway void alarm_cleared(in TASProfile value, in ACSErr::Completion c, in ACS::CBDescOut desc); };
+ typedef AlarmTASProfile TASProfileAlarm; interface PTASProfile: ACS::TypelessProperty { TASProfile get_sync(out ACSErr::Completion c); void get_async(in ACS::CBpattern cb, in ACS::CBDescIn desc); long get_history(in long n_last_values, out TASProfileSeq vs, out ACS::TimeSeq ts); ACS::Monitorpattern create_monitor(in ACS::CBpattern cb, in ACS::CBDescIn desc); ACS::Monitor create_postponed_monitor (in ACS::Time start_time, in ACS::CBpattern cb, in ACS::CBDescIn desc); readonly attribute ACS::TimeInterval default_timer_trigger; readonly attribute ACS::TimeInterval min_timer_trigger; readonly attribute TASProfile default_value; readonly attribute ACS::stringSeq statesDescription; readonly attribute ACS::ConditionSeq condition; readonly attribute TASProfileSeq allStates; };
+ interface ROTASProfile: PTASProfile{ ACS::Subscription new_subscription_AlarmEnum(in ACS::Alarmpattern cb, in ACS::CBDescIn desc); readonly attribute TASProfileSeq alarm_on; readonly attribute TASProfileSeq alarm_off; };
+ interface RWTASProfile: PTASProfile { ACSErr::Completion set_sync(in TASProfile value); void set_async(in TASProfile value, in ACS::CBvoid cb, in ACS::CBDescIn desc); void set_nonblocking(in TASProfile value);};
+
+ interface NotoActiveSurfaceBoss: ActiveSurface::ActiveSurfaceBoss {
+  readonly attribute Management::ROTBoolean enabled;
+
+
+
+
+  readonly attribute ActiveSurface::ROTASProfile pprofile;
+
+
+
+
+  readonly attribute Management::ROTBoolean tracking;
+        void stop (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+
+
+        void stow (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void refPos (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void update (in double elevation) raises (ComponentErrors::ComponentErrorsEx);
+
+        void move (in long circle, in long actuator, in long radius, in long incr) raises (ComponentErrors::ComponentErrorsEx);
+
+        void correction (in long circle, in long actuator, in long radius, in double correction) raises (ComponentErrors::ComponentErrorsEx);
+
+        void setProfile (in ActiveSurface::TASProfile profile) raises (ComponentErrors::ComponentErrorsEx);
+
+        void usdStatus4GUIClient (in long circle, in long actuator, out long status) raises (ComponentErrors::ComponentErrorsEx);
+
+        void setActuator (in long circle, in long actuator, out long actPos, out long cmdPos, out long Fmin, out long Fmax, out long acc, out long delay) raises (ComponentErrors::ComponentErrorsEx);
+
+
+
+
+        void up (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void down (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void bottom (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void top (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void reset (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void recoverUSD(in long circle, in long actuator) raises (ComponentErrors::ComponentErrorsEx);
+
+        oneway void calibrate (in long circle, in long actuator, in long radius);
+
+        void calVer (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+ };
+
+};
+
+#endif

@@ -1,0 +1,165 @@
+/* *******************************************************************/
+/* OAC Osservatorio Astronomico di Cagliari                          */
+/*                                                                   */
+/* This code is under GNU General Public Licence (GPL).              */
+/*                                                                   */
+/* Who                                when        what               */
+/* Carlo Migoni (migoni.ca.astro.it)  24/02/2009  Creation           */
+/*********************************************************************/
+
+#ifndef _NOTOACTIVESURFACEBOSS_IDL_
+
+#define _NOTOACTIVESURFACEBOSS_IDL_
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ComponentErrors.idl>
+#include <ASErrors.idl>
+#include <ManagmentDefinitions.idl>
+#include <ActiveSurfaceBoss.idl>
+
+#pragma prefix "alma"
+
+module ActiveSurface {
+
+    enum TASOneWayAction {
+        AS_STOP,
+        AS_SETUP,
+        AS_STOW,
+        AS_REFPOS,
+        AS_UP,
+        AS_DOWN,
+        AS_BOTTOM,
+        AS_TOP,
+        AS_UPDATE,
+        AS_CORRECTION,
+        AS_MOVE,
+	AS_PROFILE
+    };
+    ACS_ENUM(TASOneWayAction);
+
+    enum TASProfile {
+        AS_SHAPED,
+	AS_SHAPED_FIXED,
+        AS_PARABOLIC,
+	AS_PARABOLIC_FIXED
+    };
+    ACS_ENUM(TASProfile);
+	
+	/**
+	 * This component is the supervisor of the Noto Active Surface subsystem.
+     * It will be used to control the entire active surface, i. e. during an
+     * observation or a maintenance situation.
+	 * @author <a href=mailto:migoni@ca.astro.it>Carlo Migoni</a>,
+ 	 * Osservatorio Astronomico di Cagliari, Italia
+ 	 * <br> 
+	*/ 
+	interface NotoActiveSurfaceBoss: ActiveSurface::ActiveSurfaceBoss {
+
+        /**
+		* This attribute is a general flag that shows if the subsytem led by this component is ok or some problems 
+		* happened. It reports the internal staus of the boss. The boss status can be
+		* altered by many situation, for example if an exception is found the <i>MNG_WARNING</i> is adopted. The internal
+		* status will be valid for 3 seconds then, if not renewed,  it will be considered cleared. The boss status is not changed
+		* to a lower level if the present status is not cleared.  If the the attribute <i>enabled</i> is false or the attribute <i>HPBW</i>
+		*  is not set,  the status is always  <i>MNG_WARNING</i>. 
+		* The meaning of the variuos status is the following:
+		* @arg \c <i>MNG_OK</i> no errors everything is ok.
+		* @arg \c <i>MNG_WARNING</i> a possible problem has been found, the obervation can continue but it would be better
+		*               to investigate the problem.
+		* @arg \c <i>MNG_FAILURE</i> a hard problem encoutered, the observation cannot be carried on. 
+		*/
+		/**readonly attribute Management::ROTSystemStatus status;*/
+
+        /**
+		 * This attribute shows if the NotoActiveSurfaceBoss component is enabled or not. Since this component is the subsystem leader and entry point,
+		 * enabling or disabling this component corresponds to enabling or
+         * disabling the functionality of the Active Surface subsystem.
+		 * For example if not enable the component will not forwards any
+         * commands to the Active Surface.
+		*/
+		readonly attribute Management::ROTBoolean enabled;
+		
+		/*
+		 * This attribute shows the M1 profile
+		*/
+		readonly attribute ActiveSurface::ROTASProfile pprofile;
+
+		/*
+		 * This attribute shows if the ActiveSurfaceBoss is tracking or not, i.e., if M1 is refreshed when the elevation changes
+		*/
+		readonly attribute Management::ROTBoolean tracking;
+
+        /**
+		 *  This method can be called in order to disable the component. That
+         *  means that the activesurface subsystem cannot be commanded any more via the
+		 *  boss. The functionality of single component is not affected at all. By default the boss component comes up enabled. If the component is enabled
+		 *  or not, is reported by the property <i>enable</i>.
+		 * @throw CORBA::SystemException 
+		*/
+		//void disableAutoUpdate();
+		
+		/**
+		 *  This method can be called in order to enable the component. That means restore all the functionalities of the  subsystem.
+		 *  By default the boss component comes up enabled.
+         *  If the component is enabled or not, is reported by the property <i>enabled</i>.
+		 * @throw CORBA::SystemException 
+		*/		
+		//void enableAutoUpdate();
+
+        /**
+		 * This is the command line interpreter for the sub-system. All the attributes and all the methods exposed by the boss can be
+		 * called. That means a full set of operation for standard observation, but not full control of the system.
+		 * @param the string that contains the command line to be parsed
+		 * @return the string that contains the answer to the command issued by the input parameter. The caller is resposible to
+		 * free the returned string (@sa CORBA::string_free).
+		 * @todo provide e full description of the syntax and protocol (to be decided yet)
+		*/
+		//boolean command (in string command,out string answer);
+		//string command(in string cmd) raises (ComponentErrors::ComponentErrorsEx);
+
+        /**
+        * All this function are used in observation and maintenance situation
+        */
+        void stop (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        //void setup (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void stow (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void refPos (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void update (in double elevation) raises (ComponentErrors::ComponentErrorsEx);
+
+        void move (in long circle, in long actuator, in long radius, in long incr) raises (ComponentErrors::ComponentErrorsEx);
+
+        void correction (in long circle, in long actuator, in long radius, in double correction) raises (ComponentErrors::ComponentErrorsEx);
+
+        void setProfile (in ActiveSurface::TASProfile profile) raises (ComponentErrors::ComponentErrorsEx);
+
+        void usdStatus4GUIClient (in long circle, in long actuator, out long status) raises (ComponentErrors::ComponentErrorsEx);
+
+        void setActuator (in long circle, in long actuator, out long actPos, out long cmdPos, out long Fmin, out long Fmax, out long acc, out long delay) raises (ComponentErrors::ComponentErrorsEx);
+
+        /**
+        * All this function are used in maintenance situation
+        */
+        void up (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void down (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void bottom (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void top (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void reset (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+
+        void recoverUSD(in long circle, in long actuator) raises (ComponentErrors::ComponentErrorsEx);
+
+        oneway void calibrate (in long circle, in long actuator, in long radius);
+
+        void calVer (in long circle, in long actuator, in long radius) raises (ComponentErrors::ComponentErrorsEx);
+	};
+};
+
+#endif

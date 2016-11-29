@@ -1,0 +1,191 @@
+#ifndef _USD_IDL_
+#define _USD_IDL_
+
+/*******************************************************************************
+* "@(#) $Id: usd.idl,v 1.2 2010-07-26 12:34:49 c.migoni Exp $"
+*
+* who       when      what
+* --------  --------  ----------------------------------------------
+* GMM       sept 2005   creation	
+* CM	    jan 2013  ACS 8.0.1 adaptions
+* CM	    jan 2013  All code revised and adapted to be used from SRTActiveSurfaceBoss component
+* CM	    jan 2013  calibrate and calVer routines transformed to oneway
+*/
+
+#include <baci.idl>
+#include <ASErrors.idl>
+
+#pragma prefix "alma"
+
+module ActiveSurface
+{
+
+   /** @interface USD
+     *  This interface rappresents a single AS actuator device.
+     *  It provides property rapresenting all the actuators variable and methods
+		 *  implementing the most usefull action that an actuator (USD) can do.
+     */
+     interface USD : ACS::CharacteristicComponent
+	{
+	
+    	/**
+    	*	the on-reply delay.
+    	* 	Usd has a timer for the delay between the last received byte and the transmitter activation. The default is often not enaugh. 
+    	*/
+    	readonly attribute ACS::RWlong delay;
+    	
+    	/**
+    	*	the last commanded absolute position (ustep)
+    	*/
+    	readonly attribute ACS::RWlong cmdPos;
+    	
+    	
+    	/**
+    	*	the starting velocity (Hz, means step/sec)
+    	*/
+    	readonly attribute ACS::RWlong Fmin;
+    	
+    	/**
+    	*	the duty velocity (Hz, means step/sec)
+    	*	the max speed is 10KHZ
+    	*/
+    	readonly attribute ACS::RWlong Fmax;
+    	
+    	/**
+    	*	the acceleration factor.
+    	* 	Usd has a minimal internal acceleration ramp of ~100KHz/sec.  
+    	*  This number relax the base ramp  of factor+1 times,
+    	*  i.e. 99 means an acceleration of 1KHz/sec
+    	*/
+    	readonly attribute ACS::RWlong acc;
+    	
+    	/**
+    	*	configure the USD users bits
+    	*/
+    	readonly attribute ACS::RWlong uBits;
+    	
+      /**
+    	*	last minute correction
+    	*/
+    	readonly attribute ACS::RWdouble lmCorr;
+    	
+			/**
+    	*	the actual absolute position (ustep)
+    	*/
+    	readonly attribute ACS::ROlong actPos;
+    	
+    	/**
+    	*	the status of USD.
+    	*	byte 2: unused.\n
+    	*	byte 1: n.u.(MSB),DIO2,DIO1,DIO0,n.u.,fault,driv_on,zero. \n
+    	*	byte 0: run(MSB),differ_exec,ready,stnby,auto,RS2,RS1,RS0. \n
+    	*/
+    	readonly attribute ACS::ROpattern status;
+    	
+    	/**
+    	*	the USD software version (must be 1.3).
+    	*	this command is often use to check the USD availability
+    	*/
+    	readonly attribute ACS::ROlong softVer;
+    	
+    	/**
+    	*	the USD type (must be 0x21 USD60xxx)
+    	*/
+    	readonly attribute ACS::ROlong type;
+    	
+		/**
+    	*	gravity correction
+    	*/
+    	readonly attribute ACS::RWdouble gravCorr;
+    	
+    	/**
+    	*	user offset
+    	*/
+    	readonly attribute ACS::RWdouble userOffset;
+    	
+    	/**
+    	*	stop immediate with ramp
+    	*/
+    	oneway void stop();
+    	
+    	/**
+    	*	soft reset of USD. 
+    	*	The position counter will be resetted and the link will restart at 9600bps
+    	*/
+    	void reset();
+    	
+    	/**
+    	*	move up(out) and down(in) the actuator untill a stop.
+    	*	the  command must be sent only when motor is stopped
+    	*/
+    	oneway void up();
+    	oneway void down();
+    	
+    	/**
+    	*	move relative to actual position of an amount of ustep. 
+    	*	@param incr the amount to move in ustep. negative number means move down(in).
+    	*/
+    	oneway void move(in long incr);
+    	
+		/**
+    	*	makes the scale calibration. USD must be against the upper edge. 
+    	*	@return 
+    	*/
+    	//ACSErr::Completion calibrate() raises (ASErrors::ASErrorsEx);
+    	oneway void calibrate();
+
+		/**
+    	*	makes the scale verification. 
+    	*	@return a completion with the result of verification
+			*	@throw  ASErrors::USDUnavailableEx or ASErrors::USDunCalibratedEx if the USD is not available or calibrated.
+    	*/
+	//ACSErr::Completion calVer() raises (ASErrors::ASErrorsEx);
+	oneway void calVer();
+
+	/**
+	* writes calibration results into CDB
+	*/
+	void writeCalibration(out double cammaLenD, out double cammaPosD, out boolean calibrate) raises (ASErrors::ASErrorsEx);
+
+	/**
+	* sets actuators corrections table
+	*/
+	void posTable (in ACS::doubleSeq actuatorsCorrections, in long parPositions, in double deltaEL, in long threshold);
+
+		/**
+    	*	go to reference position. 
+    	*	@return 
+    	*/
+    	oneway void refPos();
+
+		/**
+    	*	set the profile, 0 shaped, 1 parabolic, 2 parabolic fixed. 
+    	*/
+    	void setProfile(in long prof) raises (ASErrors::ASErrorsEx);
+
+		/**
+    	*	set the last minute corrections. 
+    	*/
+    	oneway void correction(in double corr);
+
+		/**
+    	*	recalculates the gravity and user corrections based on antenna elevation. 
+    	*/
+    	oneway void update(in double elev);
+    	/* oneway void update(in long position); */
+		
+		/**
+    	*	stow and setup  
+    	*/
+    	oneway void stow();
+    	oneway void setup();
+
+		/**
+    	*	move to most top or bottom positions. These are reached in subsequent movements of maxRun lenght  
+    	*/
+    	oneway void top();
+    	oneway void bottom();
+	};
+
+};
+#endif /* _USD_ */
