@@ -43,6 +43,7 @@ private:
 	bool m_isConnected;
 static int Depth;
 	char Buff[BUFFSIZE];
+        char *m_received_data;
 	MeteoData *m_meteodata;
 	map<string,double> m_map;
 	vector<string> split (string message, string delimiter=",");

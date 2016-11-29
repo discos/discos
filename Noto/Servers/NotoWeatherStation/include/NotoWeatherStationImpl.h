@@ -22,6 +22,7 @@
 #include "DevIOpressure.h"
 #include "DevIOwindspeed.h"
 #include "DevIOhumidity.h"
+#include "DevIOwindspeedPeak.h"
 
 #include <SP_parser.h>
 ///Include the smart pointer for properties
@@ -95,7 +96,9 @@ public:
 	virtual	CORBA::Double getPressure() throw (CORBA::SystemException);
 	virtual	CORBA::Double getHumidity() throw (CORBA::SystemException);
 	virtual	CORBA::Double getWindspeed() throw (CORBA::SystemException);
-
+        virtual CORBA::Double getWindspeedPeak() throw (CORBA::SystemException);
+        virtual CORBA::Double getWindSpeedAverage() throw (CORBA::SystemException);
+        virtual CORBA::Double getWindDir() throw (CORBA::SystemException);
 
 	virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
 
@@ -125,6 +128,9 @@ public:
 
  	 virtual ACS::RWdouble_ptr  windspeed ()
 	throw (CORBA::SystemException);
+         virtual ACS::RWdouble_ptr  windspeedpeak ()
+        throw (CORBA::SystemException);
+
 	 /** 
 	 * Returns a reference to the relative humidity  property Implementation of IDL interface.
 	 * @return pointer to read-write double wind speed
@@ -161,6 +167,8 @@ private:
 	SmartPropertyPointer<RWdouble> m_windspeed;
 	SmartPropertyPointer<RWdouble> m_humidity;
 	SmartPropertyPointer<RWdouble> m_pressure;
+        SmartPropertyPointer<RWdouble> m_windspeedPeak;
+        
 	SimpleParser::CParser<MeteoSocket> * m_parser;
 
     void operator=(const NotoWeatherStationImpl&);

@@ -12,7 +12,8 @@ NotoWeatherStationImpl::NotoWeatherStationImpl(
 		       m_winddir(this),
 		       m_windspeed(this),
 		       m_humidity(this),
-		       m_pressure(this)
+		       m_pressure(this),
+                       m_windspeedPeak(this)
 {	
         AUTO_TRACE("NotoWeatherStationImpl::NotoWeatherStationImpl");
 }
@@ -57,6 +58,8 @@ void NotoWeatherStationImpl::deleteAll()
 {
         AUTO_TRACE("NotoWeatherStationImpl::deleteAll");
    	CError err;
+                #if 0
+
  	try{
  	CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
  		if (sock->isConnected())
@@ -64,13 +67,13 @@ void NotoWeatherStationImpl::deleteAll()
 			sock->disconnect();
  			delete m_socket;
  		}
-
  	} catch (...)
  	{
  		cout << "unknown exception in closing component " << endl;
 
 
  	}
+        #endif
 
 	ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::deleteAll()",(LM_DEBUG,"Disconnecting from socket @%s  ",(const char *)err.getFullDescription()));
 	//	delete m_socket;
@@ -117,6 +120,49 @@ CORBA::Double NotoWeatherStationImpl::getWindspeed() throw (CORBA::SystemExcepti
 	return windspeed;
 
 }
+          
+CORBA::Double NotoWeatherStationImpl::getWindDir() throw (CORBA::SystemException)
+{
+        AUTO_TRACE("NotoWeatherStationImpl::getTemperature");
+
+        double winddir;
+        ACSErr::Completion_var completion;
+        winddir = m_winddir->get_sync(completion.out());
+        return winddir;
+        
+}
+          
+          
+          
+          
+CORBA::Double NotoWeatherStationImpl::getWindSpeedAverage() throw (CORBA::SystemException)
+{
+        AUTO_TRACE("NotoWeatherStationImpl::getTemperature");
+
+        double windspeed;
+        ACSErr::Completion_var completion;
+        windspeed = m_windspeed->get_sync(completion.out());
+
+        return windspeed;
+
+}
+          
+          
+          
+CORBA::Double NotoWeatherStationImpl::getWindspeedPeak() throw (CORBA::SystemException)
+{
+        AUTO_TRACE("NotoWeatherStationImpl::getWindspeedPeak");
+        double windspeed;
+        ACSErr::Completion_var completion;
+        windspeed = m_windspeed->get_sync(completion.out());
+
+        return windspeed;
+
+}
+          
+          
+          
+          
 CORBA::Double NotoWeatherStationImpl::getPressure() throw (CORBA::SystemException)
 {
         AUTO_TRACE("NotoWeatherStationImpl::getpressure()");
@@ -233,7 +279,8 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_windspeed=new RWdouble(getContainerServices()->getName()+":windspeed", getComponent(), new DevIOWindspeed(m_socket),true);
 		m_humidity=new RWdouble(getContainerServices()->getName()+":humidity", getComponent(), new DevIOHumidity(m_socket),true);
 		m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(m_socket),true);
-
+                m_windspeedPeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedPeak(m_socket),true);
+                
 
 
 		m_parser=new CParser<MeteoSocket>(sock,10);
@@ -256,6 +303,7 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 
 
+#if 0                
 
 	try {
 		CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
@@ -277,6 +325,7 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_THROW_EXCPT(ComponentErrors::SocketErrorExImpl,"NotoWeatherStationImpl::initialize()");
  
 	}
+#endif
 
 
         AUTO_TRACE("NotoWeatherStationImpl::initialize");
@@ -360,6 +409,21 @@ NotoWeatherStationImpl::pressure ()
     ACS::RWdouble_var prop = ACS::RWdouble::_narrow(m_pressure->getCORBAReference());
     return prop._retn();
 }
+
+ACS::RWdouble_ptr
+NotoWeatherStationImpl::windspeedpeak ()
+    throw (CORBA::SystemException)
+{
+    if (m_windspeedPeak == 0)
+        {
+        return ACS::RWdouble::_nil();
+        }
+    
+    ACS::RWdouble_var prop = ACS::RWdouble::_narrow(m_windspeedPeak->getCORBAReference());
+    return prop._retn();
+}
+
+
 
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>

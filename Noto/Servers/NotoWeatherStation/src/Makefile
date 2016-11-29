@@ -138,7 +138,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files - same schema as Medicina
 # ----------------------------
-CDB_SCHEMAS = MedWeatherStation
+CDB_SCHEMAS = NotoWeatherStation
 
 # 
 # IDL Files and flags
