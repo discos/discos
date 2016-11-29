@@ -5,7 +5,8 @@
 
 int actuatorsInCircle[] = {0,24,24,48,48,48,48,96,96,96,96,96,96,96,96,96,8,4};
 
-CNotoActiveSurfaceBossCore::CNotoActiveSurfaceBossCore(ContainerServices *service) : CSocket()
+CNotoActiveSurfaceBossCore::CNotoActiveSurfaceBossCore(ContainerServices *service) : CSocket(),
+m_services(service)
 {
 }
 
@@ -33,6 +34,7 @@ void CNotoActiveSurfaceBossCore::initialize()
 	m_sector8 = false;
 	m_profileSetted = false;
 	m_ASup = false;
+	m_elevation = 0.0;
 }
 
 void CNotoActiveSurfaceBossCore::execute(CConfiguration *config) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::SocketErrorExImpl,
@@ -82,19 +84,20 @@ void CNotoActiveSurfaceBossCore::execute(CConfiguration *config) throw (Componen
     	m_enable = true;
     	ACS_LOG(LM_FULL_INFO, "CNotoActiveSurfaceBossCore::execute()", (LM_INFO,"CNotoActiveSurfaceBossCore::NotoActiveSurfaceBoss_LOCATED"));
 }
-
+	
 void CNotoActiveSurfaceBossCore::cleanUp()
 {
 	ACS_LOG(LM_FULL_INFO, "CNotoActiveSurfaceBossCore::cleanUp()", (LM_INFO,"CNotoActiveSurfaceBossCore::cleanUp"));
 
     	try {
-		m_services->releaseComponent((const char*)m_antennaBoss->name());
-	}
-	catch (maciErrType::CannotReleaseComponentExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CNotoActiveSurfaceBossCore::cleanUp()");
-		Impl.setComponentName((const char *)m_antennaBoss->name());
-		Impl.log(LM_DEBUG);
-	}
+			m_services->releaseComponent((const char*)m_antennaBoss->name());
+		}
+		catch (maciErrType::CannotReleaseComponentExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CNotoActiveSurfaceBossCore::cleanUp()");
+			Impl.setComponentName((const char *)m_antennaBoss->name());
+			Impl.log(LM_DEBUG);
+		}
+		Close (m_Error);
 }
 
 void CNotoActiveSurfaceBossCore::reset (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl)
@@ -1285,10 +1288,14 @@ void CNotoActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::
 
 void CNotoActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
+		char buff[SENDBUFFERSIZE];
+		int res;
+
     	if (AutoUpdate) {
 		TIMEVALUE now;
-        	double azimuth=0.0;
-        	double elevation=0.0;
+		double azimuth=0.0;
+     	double elevation=0.0;
+		double diff=0.0;
 
 		IRA::CIRATools::getTime(now);
 
@@ -1299,14 +1306,23 @@ void CNotoActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::
         		catch (CORBA::SystemException& ex) {
             			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CNotoActiveSurfaceBossCore::workingActiveSurface()");
             			impl.setName(ex._name());
-		    		impl.setMinor(ex.minor());
+				    		impl.setMinor(ex.minor());
             			m_status=Management::MNG_WARNING;
-				//asPark(); TBC!!!
+							//asPark(); TBC!!!
             			throw impl;
 	    		}
         		azimuth = 0.0;
+				diff = fabs(m_elevation - elevation*DR2D);
+				m_elevation=elevation*DR2D;
         		try {
             			//onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
+							if ((elevation*DR2D > 5.0) && (elevation*DR2D < 90.0) && (diff > 0.5)) {
+								sprintf(buff,"@-%02.0lf\n", elevation*DR2D);
+								res = sendBuffer(buff,strlen(buff));
+								printf("diff = %f, elevation = %s", diff, buff);
+							}
+							else
+								printf("bad elevation = %lf\n", elevation*DR2D);
         		}
         		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
             			ex.log(LM_DEBUG);
@@ -1401,7 +1417,7 @@ void CNotoActiveSurfaceBossCore::asOn()
 {
 	//if (m_profileSetted == true ) {
 	//	if ((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_SHAPED_FIXED)) {
-			enableAutoUpdate();
+			enableAutoUpdate(); // as=enable nel FS di Noto
 			m_tracking = true;
 	//	}
 	//	else {
@@ -1422,17 +1438,21 @@ void CNotoActiveSurfaceBossCore::asOn()
 
 void CNotoActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
 {
+	char buff[SENDBUFFERSIZE];
+	int res;
+
 	//if (m_profileSetted == true ) {
-		asOff();
-	//	setProfile (ActiveSurface::AS_SHAPED_FIXED);
-	//	try {
-	//		onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
-	//	}
-	//	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-	//		ex.log(LM_DEBUG);
-	//		throw ex.getComponentErrorsEx();
-	//	}
-		m_tracking = false;
+		try {
+	//		onewayAction(ActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
+			//send @-45 string to the server
+			sprintf(buff,"@-1\n"); // as=stow nel FS di Noto
+			res = sendBuffer(buff,4);
+		}
+		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+			ex.log(LM_DEBUG);
+			throw ex.getComponentErrorsEx();
+		}
+		disableAutoUpdate();
 	//}
 	//else {
 	//	printf("you must set the profile first\n");
@@ -1448,7 +1468,7 @@ void CNotoActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrors
 		try {
 	//		onewayAction(ActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
 			//send @-45 string to the server
-			sprintf(buff,"@-45\n");
+			sprintf(buff,"@-45\n"); // as=disable nel FS di Noto
 			res = sendBuffer(buff,5);
 		}
 		catch (ComponentErrors::ComponentErrorsExImpl& ex) {

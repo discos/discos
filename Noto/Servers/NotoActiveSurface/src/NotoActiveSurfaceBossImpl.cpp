@@ -164,18 +164,18 @@ void NotoActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 
 void NotoActiveSurfaceBossImpl::cleanUp()
 {
-	AUTO_TRACE("NotoActiveSurfaceBossImpl::cleanUp()");
+		AUTO_TRACE("NotoActiveSurfaceBossImpl::cleanUp()");
     	CSecAreaResourceWrapper<CNotoActiveSurfaceBossCore>  core=m_core->Get();
    	if (m_workingThread!=NULL) m_workingThread->suspend();
    	if (m_watchingThread!=NULL) m_watchingThread->suspend();
     	getContainerServices()->getThreadManager()->destroy(m_workingThread);
     	getContainerServices()->getThreadManager()->destroy(m_watchingThread);
     	ACS_LOG(LM_FULL_INFO,"NotoActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"NotoActiveSurfaceBossImpl::THREADS_TERMINATED"));
-	core->cleanUp();
-	ACS_LOG(LM_FULL_INFO,"NotoActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"NotoActiveSurfaceBossImpl::BOSS_CORE_FREED"));
+		core->cleanUp();
+		ACS_LOG(LM_FULL_INFO,"NotoActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"NotoActiveSurfaceBossImpl::BOSS_CORE_FREED"));
     	if (m_parser!=NULL) delete m_parser;
-	ACS_LOG(LM_FULL_INFO,"NotoActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"NotoActiveSurfaceBossImpl::PARSER_FREED"));
-	CharacteristicComponentImpl::cleanUp();
+		ACS_LOG(LM_FULL_INFO,"NotoActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"NotoActiveSurfaceBossImpl::PARSER_FREED"));
+		CharacteristicComponentImpl::cleanUp();
 }
 
 void NotoActiveSurfaceBossImpl::aboutToAbort()

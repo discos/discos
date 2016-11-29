@@ -269,6 +269,8 @@ private:
 	
 	bool m_ASup;
 
+	double m_elevation;
+
 	/**
 	 * Check if the connection is still up and ready. If a previuos call timed out it will check the status of the connection.
 	 * Insted if the connection is off it will try a reconnect. In both case the return value is false.

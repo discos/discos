@@ -35,7 +35,7 @@
 #include <SP_parser.h>
 
 #define LOOPSTATUSTIME 10000000 // 1.0 second
-#define LOOPWORKINGTIME 5000000 // 0.5 seconds
+#define LOOPWORKINGTIME 10000000 // 1.0 seconds
 
 #define _SET_CDB(PROP,LVAL,ROUTINE) {	\
 	maci::ContainerServices* cs=getContainerServices();\

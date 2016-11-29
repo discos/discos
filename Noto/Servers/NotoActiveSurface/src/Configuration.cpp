@@ -40,7 +40,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 {
 	_GET_STRING_ATTRIBUTE("IPAddress","TCP/IP address is: ",m_sAddress);
 	_GET_DWORD_ATTRIBUTE("Port","Port is: ",m_wPort);
-	_GET_DWORD_ATTRIBUTE("CommandLineTimeout","Time out of the command line is (uSec): ",m_dwCommandLineTimeout);
+	/*_GET_DWORD_ATTRIBUTE("CommandLineTimeout","Time out of the command line is (uSec): ",m_dwCommandLineTimeout);
 	_GET_DWORD_ATTRIBUTE("ConnectTimeout","Time out of the command line connection  is (uSec): ",m_dwConnectTimeout);
 	_GET_DWORD_ATTRIBUTE("PropertyRefreshTime","The property refresh time is (microseconds): ",m_dwPropertyRefreshTime);
 	_GET_STRING_ATTRIBUTE("Configuration","Backend configuration is: ",m_sConfig);
@@ -55,6 +55,6 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("ControlSleepTime","The control thread sleep time is (uSec)",m_dwControlSleepTime);
 	_GET_DWORD_ATTRIBUTE("ControlResponseTime","The control thread response time is (uSec)",m_dwControlResponseTime);
 	_GET_DWORD_ATTRIBUTE("BoardsNumber","The number of installed boards is ",m_dwBoardsNumber);
-	_GET_DWORD_ATTRIBUTE("DataBufferSize","Size of data packet is (bytes)",m_dwDataBufferSize);
+	_GET_DWORD_ATTRIBUTE("DataBufferSize","Size of data packet is (bytes)",m_dwDataBufferSize);*/
 }
 
