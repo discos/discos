@@ -63,10 +63,10 @@ MED_CLIENTS:=MedicinaMountTextClient
 MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
-NT_ERRORS:=
-NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface
+NT_ERRORS:=NotoActiveSurfaceErrors
+NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceErrors
 NT_LIBRARIES:=
-NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation
+NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface
 NT_CLIENTS:=NotoMountTextClient 
 NT_MISC:=
 
