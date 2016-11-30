@@ -58,13 +58,12 @@ void NotoWeatherStationImpl::deleteAll()
 {
         AUTO_TRACE("NotoWeatherStationImpl::deleteAll");
    	CError err;
-                #if 0
-
+               
  	try{
  	CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
  		if (sock->isConnected())
  		{
-			sock->disconnect();
+			sock->disconnection();
  			delete m_socket;
  		}
  	} catch (...)
@@ -73,8 +72,7 @@ void NotoWeatherStationImpl::deleteAll()
 
 
  	}
-        #endif
-
+ 
 	ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::deleteAll()",(LM_DEBUG,"Disconnecting from socket @%s  ",(const char *)err.getFullDescription()));
 	//	delete m_socket;
 
@@ -249,6 +247,12 @@ Weather::parameters NotoWeatherStationImpl::getData()throw (CORBA::SystemExcepti
 	return mp;
 }
  
+void NotoWeatherStationImpl::execute() throw (ACSErr::ACSbaseExImpl)
+{
+                        
+                        
+
+}
  
  
 void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
@@ -272,7 +276,7 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 		
 		sock=new MeteoSocket(ADDRESS,PORT);
-		m_socket =new CSecureArea<MeteoSocket>(sock);
+ 		m_socket =new CSecureArea<MeteoSocket>(sock);
 		m_temperature=new RWdouble(getContainerServices()->getName()+":temperature", getComponent(), new DevIOTemperature(m_socket),true);
 		
 		m_winddir=new RWdouble(getContainerServices()->getName()+":winddir", getComponent(), new DevIOWinddir(m_socket),true);
@@ -288,7 +292,7 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_parser->add("getTemperature",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getTemperature),0 );
 		m_parser->add("getHumidity",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getHumidity),0 );
 		m_parser->add("getPressure",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getPressure),0 );
-
+                    
 
 
 
@@ -303,13 +307,12 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 
 
-#if 0                
 
 	try {
 		CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
 		if (!sock->isConnected())
 		{
-		sock->connect();
+		sock->connection();
 // 		cout << "Connected  to Meteo Station @"<<ADDRESS<<":"<<PORT <<endl;
 		ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::Disconnect()",(LM_DEBUG,"Connected  to Meteo Station @%s:%d  ",(const char *) ADDRESS,PORT));
 
@@ -325,7 +328,6 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_THROW_EXCPT(ComponentErrors::SocketErrorExImpl,"NotoWeatherStationImpl::initialize()");
  
 	}
-#endif
 
 
         AUTO_TRACE("NotoWeatherStationImpl::initialize");

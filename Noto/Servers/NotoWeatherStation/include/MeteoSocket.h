@@ -22,8 +22,10 @@ public:
 	virtual ~MeteoSocket();
 	int sendCMD(CError&,CString);
 	int receiveData(CError&,CString&);
-	CError  connect() throw (ACSErr::ACSbaseExImpl);
-	CError  disconnect() throw (ACSErr::ACSbaseExImpl);;
+	CError  connection() throw (ACSErr::ACSbaseExImpl);
+        CError  init() ;
+        
+	CError  disconnection() throw (ACSErr::ACSbaseExImpl);;
 	inline bool isConnected(){return m_isConnected;};
 	void initParser(MeteoData *md);
 // 	void releaseParser(){ 	XML_ParserFree(p);};;

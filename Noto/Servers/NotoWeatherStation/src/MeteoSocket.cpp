@@ -1,5 +1,5 @@
 #include  "MeteoSocket.h"
-#define MAXSIZE 100
+#define MAXSIZE 255
 int MeteoSocket::Depth=0;
 
 // #define SIMULATOR
@@ -16,7 +16,6 @@ MeteoSocket::MeteoSocket(CString addr, unsigned int port )
 	m_isConnected=false;
 	ADDRESS=addr;
 	PORT=port;
-        
 
 }
 // 
@@ -65,7 +64,7 @@ int MeteoSocket:: updateParam(){
             int n_sent=0;
 	    CError err;
 	    CString rdata="";
-            connect();
+/*            connect();*/
             n_sent=Send(err,WEATHERCMD,CString(WEATHERCMD).GetLength());
             
             cout <<"Manda manda:" << WEATHERCMD << endl;
@@ -109,7 +108,7 @@ int MeteoSocket:: updateParam(){
                 cout << endl;
 
 
-		ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","received:  %s", (const char *) rdata);
+		ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","received:  %s", (const char *) rdata)     
                 
 //             sendCMD(err,CString("noresp\n"));
 	                
@@ -124,7 +123,7 @@ int MeteoSocket:: updateParam(){
                     return -1;
                 }
             
-            disconnect();
+/*            disconnect();*/
             }catch (ComponentErrors::SocketErrorExImpl &x)
         
         {
@@ -197,24 +196,30 @@ int  MeteoSocket::receiveData(CError& err, CString& rdata)
 
 }
 
-CError MeteoSocket::connect() throw (ACSErr::ACSbaseExImpl)
+CError MeteoSocket::init() 
+{
+                  
+          
+}
+          
+          
+          
+          
+CError MeteoSocket::connection() throw (ACSErr::ACSbaseExImpl)
 
 {
+       OperationResult err ;
+        
 	
      try{     
-        OperationResult err ;
-	err=Create(m_error,STREAM);  
-       
-	if (err==FAIL)
-	{
-		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"MeteoSocket::connect()- Create Socket");
-		ex.log(LM_DEBUG);
-		throw ex;
-		m_isConnected=false;
-		return m_error;
-	} 
+        err=Create(m_error,STREAM);  
+        if (err==FAIL)
+          {
+                m_isConnected=false;
+           } 
         setSockMode(m_error,BLOCKING); 
-	err=Connect(m_error,ADDRESS,PORT);
+	
+        err=Connect(m_error,ADDRESS,PORT);
 	if (err==FAIL)
 	{
 
@@ -239,7 +244,7 @@ CError MeteoSocket::connect() throw (ACSErr::ACSbaseExImpl)
 
 }
 
-CError MeteoSocket::disconnect()throw (ACSErr::ACSbaseExImpl)
+CError MeteoSocket::disconnection()throw (ACSErr::ACSbaseExImpl)
 {
 
 	 ACS_LOG(LM_FULL_INFO,"MeteoSocket::Disconnect()",(LM_INFO,"  disconnecting Socket"));

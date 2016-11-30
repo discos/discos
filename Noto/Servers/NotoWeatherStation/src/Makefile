@@ -23,30 +23,30 @@
 #
 # additional include and library search paths
 #USER_INC = 
-USER_LIB = -lACE \
-			-lbaci \
-			-lmaci \
-			-lmaciClient \
-		 	-lTAO \
-			-lTAO_DsLogAdmin \
-			-lTAO_CosNaming \
-			-lTAO_IORTable \
-			-lTAO_PortableServer \
-			-lTAO_Svc_Utils \
-			-lTAO_CosTrading \
-			-lTAO_CosNotification \
-			-lTAO_DynamicAny \
-			-lTAO_IFR_Client \
-			-lTAO_CosProperty \
-			-lacsutil \
-			-lcdb \
-			-llogging \
-			-lacscomponent \
-			-lacserr \
-			-lm \
-			-lloki \
-			-lACSErrTypeCommon \
-			-lncurses
+#USER_LIB = -lACE \
+#			-lbaci \
+#			-lmaci \
+#			-lmaciClient \
+#		 	-lTAO \
+#			-lTAO_DsLogAdmin \
+#			-lTAO_CosNaming \
+#			-lTAO_IORTable \
+#			-lTAO_PortableServer \
+#			-lTAO_Svc_Utils \
+#			-lTAO_CosTrading \
+#			-lTAO_CosNotification \
+#			-lTAO_DynamicAny \
+#			-lTAO_IFR_Client \
+#			-lTAO_CosProperty \
+#			-lacsutil \
+#			-lcdb \
+#			-llogging \
+#			-lacscomponent \
+#			-lacserr \
+#			-lm \
+#			-lloki \
+#			-lACSErrTypeCommon \
+#			-lncurses
 
 
 #
@@ -63,7 +63,7 @@ EXECUTABLES_L   =
 
 # Linked with Medicina stubs because has the same interface as Noto
 # <brief description of xxxxx program>
-NotoWeatherStationImpl_OBJECTS   =	 NotoWeatherStationImpl    MeteoSocket
+NotoWeatherStationImpl_OBJECTS   =	MeteoSocket NotoWeatherStationImpl    
 #xxxxx_LDFLAGS   =
 NotoWeatherStationImpl_LIBS      =ComponentErrors \
 			NotoWeatherStationStubs\

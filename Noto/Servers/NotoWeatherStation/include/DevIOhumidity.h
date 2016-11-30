@@ -67,7 +67,8 @@ public:
 			CString rdata="";
 			CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
 			m_val=sock->getHumidity();
-			return m_val;
+                        timestamp=getTimeStamp();  //complition time
+                        return m_val;
 
 
 		}
@@ -76,9 +77,17 @@ public:
 			dummy.setPropertyName("systemTemperature");
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
+                  
 			throw dummy;
-		} 				
-		timestamp=getTimeStamp();  //complition time
+                        return m_val;
+
+		} catch (...)
+                {
+                  cout << "Devio humididy unexpected exc"  << endl;
+                  			
+                  }
+       return m_val;
+                  
 	}
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
@@ -91,7 +100,6 @@ public:
 	
 private:
 	CSecureArea<MeteoSocket>* m_socket;
-
 	CORBA::Double m_val;
 	bool m_initparser;
  };

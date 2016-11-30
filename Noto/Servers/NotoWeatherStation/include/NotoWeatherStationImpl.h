@@ -106,7 +106,7 @@ public:
 	virtual void initialize() throw (ACSErr::ACSbaseExImpl);
 	virtual void	 cleanUp()throw (ACSErr::ACSbaseExImpl);
 	virtual void aboutToAbort() throw (ACSErr::ACSbaseExImpl);
-	
+        virtual void execute() 	throw (ACSErr::ACSbaseExImpl);
 
 	/** 
 	 * Returns a reference to the air temperature  property Implementation of IDL interface.

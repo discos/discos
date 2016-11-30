@@ -83,8 +83,17 @@ public:
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
-		} 				
+                        return m_val;
+		
+                  } 	catch (...)
+                  {
+                  
+                  cout << "unexpected exc windspeed " << endl;
+                  
+                  }
+                  			
 
+                                          return m_val;
 
 	}
 	/**
