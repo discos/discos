@@ -2,7 +2,7 @@
 #define MAXSIZE 255
 int MeteoSocket::Depth=0;
 
-// #define SIMULATOR
+#define SIMULATOR
 
 
 
@@ -57,7 +57,7 @@ int MeteoSocket::sendCMD(CError& err, CString cmd)
 int MeteoSocket:: updateParam(){
 //
 //
-            
+    #ifndef SIMULATOR        
             
       try{
             
@@ -134,6 +134,9 @@ int MeteoSocket:: updateParam(){
                 _THROW_EXCPT(ComponentErrors::SocketErrorExImpl,"MeteoSocket:: updateParam");
  
         }           
+#endif 
+return 0;
+
 }
 
 
@@ -310,7 +313,7 @@ double MeteoSocket::getTemperature()
 		}
 #ifdef SIMULATOR
 
-	m_temperature=20;
+	m_temperature=7;
 
 #endif
 
@@ -325,7 +328,7 @@ double MeteoSocket::getHumidity()	{
 
 #ifdef SIMULATOR
 
-	m_humidity=70;
+	m_humidity=72;
 
 #endif
 	return m_humidity;
@@ -337,7 +340,7 @@ double MeteoSocket::getPressure()	{
 	}
 #ifdef SIMULATOR
 
-	m_pressure=1010;
+	m_pressure=1024;
 
 #endif
 	return m_pressure;

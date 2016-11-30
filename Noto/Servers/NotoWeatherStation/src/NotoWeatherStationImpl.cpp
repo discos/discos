@@ -331,7 +331,6 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 
         AUTO_TRACE("NotoWeatherStationImpl::initialize");
-        ;
         
   
 
