@@ -8,7 +8,7 @@
 <Configuration>
 	<configurationID>BandaK</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>	 	
@@ -22,7 +22,7 @@
 <Configuration>
 	<configurationID>BandaQ</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>	
 	<inputPortBW>730</inputPortBW>	
@@ -36,7 +36,7 @@
 <Configuration>
 	<configurationID>BandaC</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>
@@ -50,7 +50,7 @@
 <Configuration>
 	<configurationID>BandaM</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>
@@ -64,7 +64,7 @@
 <Configuration>
 	<configurationID>BandaSX</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>
