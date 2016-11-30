@@ -6,9 +6,9 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <Configuration>
-	<configurationID>bandaK</configurationID>
+	<configurationID>BandaK</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>2350</inputPortBW>	 	
@@ -20,9 +20,9 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>bandaQ</configurationID>
+	<configurationID>BandaQ</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>
@@ -36,7 +36,7 @@
 <Configuration>
 	<configurationID>bandaC</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>

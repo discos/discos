@@ -6,9 +6,9 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <Configuration>
-	<configurationID>bandaK</configurationID>
+	<configurationID>BandaK</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>	 	
@@ -20,23 +20,9 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>KKC</configurationID>
-	<sections>4</sections>
-	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
-	<inputPort>GREGORIAN</inputPort>
-	<inputPortDB>7</inputPortDB>
-	<inputPortBW>2350</inputPortBW>	
-	<beams>7</beams>
-	<section_boards>0 1 2 3</section_boards>
-	<polarizations>L R L R</polarizations>
-	<feed>0 0 1 1</feed>
-	<IF>0 1 0 1</IF>
-</Configuration>
-
-<Configuration>
-	<configurationID>bandaQ</configurationID>
+	<configurationID>BandaQ</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>	
 	<inputPortBW>730</inputPortBW>	
@@ -48,9 +34,9 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>bandaC</configurationID>
+	<configurationID>BandaC</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>
@@ -59,6 +45,34 @@
 	<polarizations>L R</polarizations>
 	<feed>0 0</feed>
 	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>BandaM</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>7</inputPortDB>
+	<inputPortBW>730</inputPortBW>
+	<beams>1</beams>
+	<section_boards>0 1</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>BandaSX</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>7</inputPortDB>
+	<inputPortBW>730</inputPortBW>
+	<beams>1</beams>
+	<section_boards>0 1</section_boards>
+	<polarizations>R R</polarizations>
+	<feed>0 1</feed>
+	<IF>0 0</IF>
 </Configuration>
 
 </TotalPowerSetup>

@@ -190,8 +190,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	// active surface
 	m_parser->add("asSetup","activesurface",5,&CCore::remoteCall);
 	m_parser->add("asPark","activesurface",5,&CCore::remoteCall);
-	//m_parser->add("asOn","activesurface",5,&CCore::remoteCall);
-	//m_parser->add("asOff","activesurface",5,&CCore::remoteCall);
+	m_parser->add("asOn","activesurface",5,&CCore::remoteCall);
+	m_parser->add("asOff","activesurface",5,&CCore::remoteCall);
 
 	// procedures
 	loadProcedures(m_config->getDefaultProceduresFile()); // throws ManagementErrors::ProcedureFileLoadingErrorExImpl

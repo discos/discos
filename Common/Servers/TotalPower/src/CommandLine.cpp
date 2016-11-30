@@ -875,8 +875,7 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 }
 
 void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
-		ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::TimeoutExImpl)
+		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl)
 {
 	AUTO_TRACE("CCommandLine::setDefaultConfiguration()");
 	int res;
@@ -969,17 +968,13 @@ void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExIm
 	else {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
 	}
-	externalCalibrationSwitching(0); // disable the fast cal diode switching bot fro intern and external source 
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_INFO,"DEFAULTS_ARE_SET"));
 	m_setTpiIntegration=false;	
 	
 }
 
 void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl,ComponentErrors::NotAllowedExImpl,ComponentErrors::IRALibraryResourceExImpl,
-		ComponentErrors::TimeoutExImpl)
-		
-		
+		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl)
 {
 	AUTO_TRACE("CCommandLine::setup()");
 	if (getIsBusy()) {
@@ -991,7 +986,7 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 		throw impl;
 	}
 	setDefaultConfiguration(); //could throw exceptions........
-	CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"Total Power configured: %s",conf)); 
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_INITIALIZED: %s",conf)); 
 }
 
 void CCommandLine::checkTime() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::MalformedAnswerExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
@@ -1094,87 +1089,34 @@ void CCommandLine::calOn() throw (BackendsErrors::BackendBusyExImpl,
                             ComponentErrors::ValidationErrorExImpl)
 {
 	AUTO_TRACE("CCommandLine::calOn()");
-	// no need to check the backend is busy: this command just turns the calibration mark off the receiver, non change in the backend configuration
-	/*if (getIsBusy()) {
+	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::calOn()");
 		throw impl;
-	}*/
-	// the check of "calSwitchingEnabled" is not correct in this case. This command is just to turn off the calibration diode in the classical way (slow)
-	/*if (!m_calSwitchingEnabled) {
+	}
+	if (!m_calSwitchingEnabled) {
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::calOn()");
 		throw impl;
-	}*/
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
-	int res;
-	WORD len;
-	len=CProtocol::noiseMark(sBuff,true);
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
-	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::calOn()");
-		}
-	}
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::calOn()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::calOn()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::calOn()");
-	}
-	ACS_LOG(LM_FULL_INFO,"CCommandLine::calOn()",(LM_INFO,"Receiver mark switched on"));
 }
 
-void CCommandLine::calOff() throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::NakExImpl,
-                            ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
-                            BackendsErrors::ConnectionExImpl,ComponentErrors::ValidationErrorExImpl)
+void CCommandLine::calOff() throw (BackendsErrors::BackendBusyExImpl,
+                            ComponentErrors::NotAllowedExImpl,
+			    BackendsErrors::NakExImpl,
+                            ComponentErrors::IRALibraryResourceExImpl,
+                            ComponentErrors::SocketErrorExImpl,
+                            ComponentErrors::TimeoutExImpl,
+			    BackendsErrors::ConnectionExImpl,
+                            ComponentErrors::ValidationErrorExImpl)
 {
 	AUTO_TRACE("CCommandLine::calOn()");
-	// no need to check the backend is busy: this command just turns the calibration mark on the receiver, non change in the backend configuration
-	/*if (getIsBusy()) {
+	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::calOn()");
 		throw impl;
-	}*/
-	// the check of "calSwitchingEnabled" is not correct in this case. This command is just to turn on the calibration diode in the classical way (slow)
-	/*if (!m_calSwitchingEnabled) {
+	}
+	if (!m_calSwitchingEnabled) {
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::calOn()");
 		throw impl;
-	}*/
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
-	int res;
-	WORD len;
-	len=CProtocol::noiseMark(sBuff,false);
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
-	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::calOff()");
-		}
-	}
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::calOff()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::calOff()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::calOff()");
-	}
-	ACS_LOG(LM_FULL_INFO,"CCommandLine::calOff()",(LM_INFO,"Receiver mark switched off"));
 }
 
 
@@ -1198,12 +1140,12 @@ void CCommandLine::activateCalSwitching(const char * argument) throw (BackendsEr
 	cout << (const char *)argument << endl;
 	if (arg=="EXT") {
 		externalCalibrationSwitching(1);
-		CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"External control of calibration diode is now enabled"));
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"EXTERNAL_CALIBRATION_DIODE_SWITCHING_ENABLED"));
 	}
 	else if (arg=="OFF") {
 		externalCalibrationSwitching(0);
 		m_calPeriod=0;
-		CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"External control of calibration diode is now disabled"));
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"CALIBRATION_DIODE_SWITCHING_TURNED_OFF"));
 	}
 	else {
 		long interleave;
@@ -1219,10 +1161,10 @@ void CCommandLine::activateCalSwitching(const char * argument) throw (BackendsEr
 			m_calPeriod=interleave;
 			externalCalibrationSwitching(0);
 			if (m_calPeriod>0) {
-				CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"Fast control of calibration diode is now turned on"));
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"INTERNAL_CALIBRATION_DIODE_SWITCHING_TURNED_ON"));
 			}
 			else {
-				CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"Fast control of calibration diode is now turned off"));
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::activateCalSwitching()",(LM_NOTICE,"INTERNAL_CALIBRATION_DIODE_SWITCHING_TURNED_OFF"));
 			}
 		}
 	}
