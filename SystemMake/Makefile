@@ -68,7 +68,7 @@ NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInt
 NT_LIBRARIES:=
 NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface
 NT_CLIENTS:=NotoMountTextClient 
-NT_MISC:=
+NT_MISC:=NotoScripts
 
 ifeq ($(TARGETSYS),SRT)
 	#Add all modules included in the SRT system  in this sequence
