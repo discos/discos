@@ -460,7 +460,7 @@ int MeteoSocket::fs_parse(const char* recv)
                 m_humidity=hum;
                 m_windspeed=wind_speed;
                 m_winddir=wind_dir;
-                m_windspeedPeak=wind_speed
+                m_windspeedPeak=wind_speed;
                  ACS_LOG(LM_FULL_INFO,"MeteoSocket::parse()",(LM_DEBUG," Meteoparms  %f %f %f",temp,pres,hum ));
                   
                 cout << temp << ","<<pres<<","<<hum<<endl;

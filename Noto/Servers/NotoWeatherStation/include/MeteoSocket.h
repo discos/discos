@@ -52,6 +52,7 @@ static int Depth;
 	double m_temperature;
 	double m_pressure;
 	double m_humidity;
+        double m_windspeedPeak;
         int parse( const char* buff);   // weather data from station
         int fs_parse(const char* buff); // weather data from the field system
 
