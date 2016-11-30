@@ -64,7 +64,7 @@ MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
 NT_ERRORS:=NotoActiveSurfaceErrors
-NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceErrors
+NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface
 NT_LIBRARIES:=
 NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface
 NT_CLIENTS:=NotoMountTextClient 
