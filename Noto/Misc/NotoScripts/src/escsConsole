@@ -103,8 +103,8 @@ sleep 0.5s
 operatorInput
 sleep 0.5s
 receiversBossTui
-#sleep 0.5s
-#loggingDisplay
+sleep 0.5s
+loggingDisplay
 
 #
 # ___oOo___

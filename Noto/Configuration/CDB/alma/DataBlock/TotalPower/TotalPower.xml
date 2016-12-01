@@ -6,7 +6,7 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <Configuration>
-	<configurationID>BandaK</configurationID>
+	<configurationID>KKC</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
@@ -20,7 +20,7 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>BandaQ</configurationID>
+	<configurationID>QQC</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
@@ -34,7 +34,7 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>BandaC</configurationID>
+	<configurationID>CCC</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
@@ -48,7 +48,7 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>BandaM</configurationID>
+	<configurationID>MMC</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
@@ -62,7 +62,7 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>BandaSX</configurationID>
+	<configurationID>SXP</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
