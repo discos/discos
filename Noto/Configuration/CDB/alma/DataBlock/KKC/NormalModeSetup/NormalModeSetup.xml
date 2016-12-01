@@ -2,7 +2,7 @@
 <!--
    - Author: Andrea Orlati
    - History:
- 	- 23-11-16 Created
+ 	- 29-05-08 Created
 -->
 
 <ReceiversModeSetup xmlns="urn:schemas-cosylab-com:ReceiversModeSetup:1.0" 
@@ -11,15 +11,16 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	
 	Mode="NORMAL"
-	RFMin="4620.0 4620.0"
-	RFMax="5020.0 5020.0"
+	RFMin="21500.0 21500.0"
+	RFMax="23000.0 23000.0"
 	IFMin="100.0 100.0"
 	IFBandwidth="400.0 400.0"
 	Feeds="1"
 	IFs="2"
 	Polarization="L R"
-	DefaultLO="4600.0 4600.0"
-	FixedLO2="0.0 0.0"
-	LOMin="4600.0 4600.0"
-	LOMax="4600.0 4600.0"
+	DefaultLO="21869.0 21869.0"
+	LOMultiplier="19 19"
+	FixedLO2="0 0"
+	LOMin="21400.0 21400.0"
+	LOMax="22900.0 22900.0"
 />
