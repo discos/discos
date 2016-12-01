@@ -34,6 +34,8 @@
 	<xs:attribute name="Polarization" type="xs:string" use="required"/>
 	<!-- value in MHz of the local oscillator for this configuration (0..IFs)-->
 	<xs:attribute name="DefaultLO" type="xs:string" use="required"/>
+	<!-- multiplier to the primary sunthetizer, integer value, optional, default 1-->
+	<xs:attribute name="LOMultiplier" type="xs:string" use="optional"/>	
 	<!-- Local Oscillator fixed conversion (MHz), used to convert to the generator frequency (0..IFs)-->
 	<xs:attribute name="FixedLO2" type="xs:string" use="required"/>
 	<!-- represent the lower limit of validity range of the local oscillator (MHZ) (0..IFs)-->

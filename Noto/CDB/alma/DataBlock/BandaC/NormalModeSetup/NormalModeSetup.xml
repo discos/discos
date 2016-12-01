@@ -19,6 +19,7 @@
 	IFs="2"
 	Polarization="L R"
 	DefaultLO="4600.0 4600.0"
+	LOMultiplier="1 1"
 	FixedLO2="0.0 0.0"
 	LOMin="4600.0 4600.0"
 	LOMax="4600.0 4600.0"

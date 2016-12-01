@@ -57,6 +57,7 @@ CConfiguration::CConfiguration()
 	m_taperTable=NULL;
 	m_taperVector=NULL;
 	m_taperVectorLen=0;
+	m_loMultiplier=NULL;
 	m_RFMin=m_RFMax=m_IFMin=m_IFBandwidth=m_defaultLO=m_fixedLO2=m_LOMin=m_LOMax=NULL;
 }
 
@@ -108,6 +109,7 @@ void CConfiguration::loadConf(maci::ContainerServices *Services,const IRA::CStri
 		m_IFMin=new double[m_IFs];
 		m_IFBandwidth=new double[m_IFs];
 		m_defaultLO=new double[m_IFs];
+		m_loMultiplier=new long[m_IFs];
 		m_fixedLO2=new double[m_IFs];
 		m_LOMin=new double[m_IFs];
 		m_LOMax=new double[m_IFs];
@@ -186,6 +188,16 @@ void CConfiguration::loadConf(maci::ContainerServices *Services,const IRA::CStri
 			throw dummy;
 		}
 		m_defaultLO[k]=token.ToDouble();
+	}
+	_GET_STRING_ATTRIBUTE("LOMultiplier","Local oscillator multiplier:",value,normalMode_Path);
+	start=0;
+	for (WORD k=0;k<m_IFs;k++) {
+		if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
+			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+			dummy.setFieldName("LOMultiplier");
+			throw dummy;
+		}
+		m_loMultiplier[k]=token.ToLong();
 	}
 	_GET_STRING_ATTRIBUTE("FixedLO2","Second fixed local oscillator value (MHz):",value,normalMode_Path);
 	start=0;
@@ -535,6 +547,10 @@ void CConfiguration::freeAll()
 	if (m_defaultLO) {
 		delete [] m_defaultLO;
 		m_defaultLO=NULL;
+	}
+	if (m_loMultiplier) {
+		delete [] m_loMultiplier;
+		m_loMultiplier=NULL;
 	}
 	if (m_fixedLO2) {
 		delete [] m_fixedLO2;

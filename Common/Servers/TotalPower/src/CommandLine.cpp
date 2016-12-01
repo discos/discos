@@ -969,7 +969,13 @@ void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExIm
 	else {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
 	}
-	externalCalibrationSwitching(0); // disable the fast cal diode switching bot fro intern and external source 
+	try {
+		 // disable the fast cal diode switching both from intern and external source
+		externalCalibrationSwitching(0);
+	}
+	catch (...) {
+		//
+	}
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_INFO,"DEFAULTS_ARE_SET"));
 	m_setTpiIntegration=false;	
 	

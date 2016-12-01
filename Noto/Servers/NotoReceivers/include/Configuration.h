@@ -165,6 +165,11 @@ public:
 	inline double const * const  getDefaultLO()  const { return m_defaultLO; }
 
 	/**
+	 * @return the multiplier to be applied to the synthesizer.
+	 */
+	inline long const * const getLOMultiplier() const { return m_loMultiplier; }
+
+	/**
 	 * @return the value of the fixed synthesizer used for the second conversion (MHz)
 	 */
 	inline double const * const  getFixedLO2() const { return m_fixedLO2; }
@@ -214,6 +219,7 @@ private:
 	DWORD m_feeds;
 	double *m_defaultLO;
 	double *m_fixedLO2;
+	long *m_loMultiplier;
 	double *m_LOMin;
 	double *m_LOMax;
 
