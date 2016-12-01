@@ -22,10 +22,10 @@ public:
 	virtual ~MeteoSocket();
 	int sendCMD(CError&,CString);
 	int receiveData(CError&,CString&);
-	CError  connection() throw (ACSErr::ACSbaseExImpl);
+        void connection() throw (ACSErr::ACSbaseExImpl);
         CError  init() ;
         
-	CError  disconnection() throw (ACSErr::ACSbaseExImpl);;
+	void disconnection() throw (ACSErr::ACSbaseExImpl);;
 	inline bool isConnected(){return m_isConnected;};
 	void initParser(MeteoData *md);
 // 	void releaseParser(){ 	XML_ParserFree(p);};;
@@ -33,8 +33,11 @@ public:
      double getWindSpeed();  // Get Wind Speed
      double getWindDir();    // Get Wind Direction (disabled)
      double getTemperature();
-	 double getHumidity();
+     double getHumidity();
      double getPressure();
+     double getWindspeedPeak();
+     int updateParam();
+     
 
 private:
 	
@@ -59,7 +62,6 @@ static int Depth;
         int fs_parse(const char* buff); // weather data from the field system
 
 //	MeteoData *m_sensorData;
-	 int updateParam();
 
 	
 	

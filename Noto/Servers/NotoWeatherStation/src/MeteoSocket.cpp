@@ -2,7 +2,7 @@
 #define MAXSIZE 255
 int MeteoSocket::Depth=0;
 
-#define SIMULATOR
+// #define SIMULATOR
 
 
 
@@ -57,6 +57,7 @@ int MeteoSocket::sendCMD(CError& err, CString cmd)
 int MeteoSocket:: updateParam(){
 //
 //
+    cout << "update param" <<endl;
     #ifndef SIMULATOR        
             
       try{
@@ -64,72 +65,94 @@ int MeteoSocket:: updateParam(){
             int n_sent=0;
 	    CError err;
 	    CString rdata="";
-/*            connect();*/
+            connection();
             n_sent=Send(err,WEATHERCMD,CString(WEATHERCMD).GetLength());
+            
+            
+            if ((n_sent==FAIL) || (err.isNoError()==false) )
+            {
+
+                _EXCPT(ComponentErrors::SocketErrorExImpl,ex,"MeteoSocket::update Param()- sending cmd to Socket");
+                ex.log(LM_DEBUG);
+                throw ex;
+            
+            }
             
             cout <<"Manda manda:" << WEATHERCMD << endl;
             cout << "sent:"<<n_sent << endl;
              
             ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","sent:  %s", (const char *) WEATHERCMD);
 
-/* 		receiveData(err,rdata);*/
-        int n_received,n_received_total=0;
-        char buff[MAXSIZE];
-        char receivedChar=0;
-        int i=0;
-  
-        while (n_received_total !=100)
+           int n_received,n_received_total=0;
+           char buff[MAXSIZE];
+           char receivedChar=0;
+           int i=0;
+           CTimer timer;
+
+
+        while (n_received_total !=100 && timer.elapsed() < 5* 10000000 )
  
         {
         
         
                 n_received=Receive(err,&receivedChar,1);
-        //      receivedChar=buff[0];
-                if (i >= MAXSIZE ) // avoid pointer overflow
+                if ((n_received==FAIL)  || (err.isNoError()==false) )
+            {
+
+                _EXCPT(ComponentErrors::SocketErrorExImpl,ex,"MeteoSocket::update Param()- receiving param from Socket");
+                ex.log(LM_DEBUG);
+                throw ex;
+            
+            }
+            
+/*                if (i >= MAXSIZE ) // avoid pointer overflow
                 {
                         buff[i]=0;
-                        rdata=CString(buff);
+                       rdata=CString(buff);
                         return n_received_total;
                                         
-                }
+                }*/
                 
                 
                 buff[i++]=receivedChar;
                 n_received_total = i;
                 
-           }
-                buff[n_received_total]=0;
-
+        }
+           buff[n_received_total]=0;
+                
+           if (n_received_total !=100)
+                {
+                   ACS_LOG(LM_FULL_INFO,"MeteoSocket::updateParm()",(LM_WARNING,"Weather Parameters Not updated "));
+                   return 0;
+                
+                }
+                
           
 
 
-                cout << "hex:";
-                for (int j=0; j<100;j++)  cout<<hex <<  (int)buff[j]<<" ";
-                cout << endl;
+          cout << "hex:";
+          for (int j=0; j<100;j++)  cout<<hex <<  (int)buff[j]<<" ";
+          cout << endl;
 
 
-		ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","received:  %s", (const char *) rdata)     
+          ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","received:  %s", (const char *) rdata)     
                 
-//             sendCMD(err,CString("noresp\n"));
 	                
  		parse(buff);
                 IRA::CIRATools::Wait(0,50000);
-
- 		if (err.isNoError()) return 0;
- 		else
-                { 
-                    cout <<"err:"<< err.getFullDescription()<<endl;
-
-                    return -1;
-                }
-            
-/*            disconnect();*/
+                disconnection();
             }catch (ComponentErrors::SocketErrorExImpl &x)
         
         {
                  ACS_LOG(LM_FULL_INFO,"MeteoSocket:: updateParam",
                        (LM_ERROR,"Can not connect  to WeatherStation @%s:%d  ",
                        (const char *) ADDRESS,PORT));
+                 CError error; // CError object only for Closing the Socket)            
+                if (m_isConnected==true)
+                {
+                   Close (error);
+                   m_isConnected=false;
+                }
 
                 _THROW_EXCPT(ComponentErrors::SocketErrorExImpl,"MeteoSocket:: updateParam");
  
@@ -208,46 +231,42 @@ CError MeteoSocket::init()
           
           
           
-CError MeteoSocket::connection() throw (ACSErr::ACSbaseExImpl)
+void MeteoSocket::connection() throw (ACSErr::ACSbaseExImpl)
 
 {
-       OperationResult err ;
-        
-	
-     try{     
+        OperationResult err ;
         err=Create(m_error,STREAM);  
         if (err==FAIL)
-          {
+        
+        {
                 m_isConnected=false;
-           } 
-        setSockMode(m_error,BLOCKING); 
-	
-        err=Connect(m_error,ADDRESS,PORT);
-	if (err==FAIL)
-	{
+                _EXCPT(ComponentErrors::SocketErrorExImpl,ex,"MeteoSocket::connection()- Cannot create Socket");
+                ex.log(LM_DEBUG);
+                throw ex;
+                
+        } else
+        { 
+              setSockMode(m_error,BLOCKINGTIMEO,2000000,2000000); 
+              err=Connect(m_error,ADDRESS,PORT);
+	      if (err==FAIL)
+	      {
+                 CError error; // CError object only for Closing the Socket)            
+                
+                Close (error);
+                m_isConnected=false;
 
-		CError error; // CError object only for Closing the Socket)		
 		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"MeteoSocket::connect()- Connect to Socket");
 		ex.log(LM_DEBUG);
 		throw ex;
-		Close (error);
-		m_isConnected=false;
-		return m_error;
-	} 
-	m_isConnected=true;
-// 
-	return m_error;
-        } catch(...)
-       {
-        cout <<"Connect Error" << endl;
-        return m_error;
-       
-       }
+/*		return m_error;*/
+	      }  
+	      m_isConnected=true;
+           }
        
 
 }
 
-CError MeteoSocket::disconnection()throw (ACSErr::ACSbaseExImpl)
+void MeteoSocket::disconnection()throw (ACSErr::ACSbaseExImpl)
 {
 
 	 ACS_LOG(LM_FULL_INFO,"MeteoSocket::Disconnect()",(LM_INFO,"  disconnecting Socket"));
@@ -272,14 +291,14 @@ CError MeteoSocket::disconnection()throw (ACSErr::ACSbaseExImpl)
 
 	} 
 		
-	return m_error;
+/*	return m_error;*/
 	
 }
 
 double MeteoSocket::getWindSpeed()
 {
 //	if((updateParam()==-1)) cout <<"Error Reading Param"<< endl;
-	updateParam();
+	//updateParam();
 
 //	m_windspeed=-99; // windspeed disabled
 	ACS_LOG(LM_FULL_INFO,"MeteoSocket::getWindSpeed()",(LM_TRACE,"Not yet implemented"));
@@ -292,7 +311,6 @@ double MeteoSocket::getWindSpeed()
 double MeteoSocket::getWindDir()
 {
 //	if((updateParam()==-1)) cout <<"Error Reading Param"<< endl;
-	updateParam();
 	ACS_LOG(LM_FULL_INFO,"MeteoSocket::getWindDir()",(LM_TRACE,"Not yet implemented"));
 
 #ifdef SIMULATOR
@@ -307,10 +325,10 @@ double MeteoSocket::getWindDir()
 }
 double MeteoSocket::getTemperature()
 	{
-
+/*
 		if((updateParam()==-1)){
 			ACS_LOG(LM_FULL_INFO,"MeteoSocket::getTemperature()",(LM_ERROR,"Reading Temperature"));
-		}
+		}*/
 #ifdef SIMULATOR
 
 	m_temperature=7;
@@ -322,9 +340,9 @@ double MeteoSocket::getTemperature()
 	}
 double MeteoSocket::getHumidity()	{
 		//to be impemented
-	if((updateParam()==-1)){
-		ACS_LOG(LM_FULL_INFO,"MeteoSocket::getHumidity()",(LM_ERROR,"Reading Humidity"));
-	}
+// 	if((updateParam()==-1)){
+// 		ACS_LOG(LM_FULL_INFO,"MeteoSocket::getHumidity()",(LM_ERROR,"Reading Humidity"));
+// 	}
 
 #ifdef SIMULATOR
 
@@ -335,9 +353,9 @@ double MeteoSocket::getHumidity()	{
 	}
 double MeteoSocket::getPressure()	{
 		//to be impemented
-	if((updateParam()==-1)){
+/*	if((updateParam()==-1)){
 		ACS_LOG(LM_FULL_INFO,"MeteoSocket::getPressure()",(LM_ERROR,"Reading Pressure"));
-	}
+	}*/
 #ifdef SIMULATOR
 
 	m_pressure=1024;
@@ -347,12 +365,12 @@ double MeteoSocket::getPressure()	{
 
 	}
 
-//double MeteoSocket::getWinDir()	{
-//		// to be implemented
-//		return -99;
-//
-//
-//}
+double MeteoSocket::getWindspeedPeak()	{
+
+   return m_windspeedPeak;
+      
+
+}
 
 
 

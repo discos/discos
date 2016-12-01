@@ -35,6 +35,9 @@
 #include "MeteoData.h"
 #include <ManagementErrors.h>
 
+#include <acsThread.h>
+
+
 /*
 const CString ADDRESS="192.167.8.13"; //DEBUG
 const int THREADSLEEPSECONDS=10000; // 1 s in unit of 100ns, from thread sleep time*/
@@ -64,6 +67,33 @@ Not all the paramters from the station have been implemented.
 
 @todo add all the info returned by the HW
 */
+
+using ACS::ThreadBase;
+
+class MeteoSocket;
+
+
+class CMeteoParamUpdaterThread : public ACS::Thread
+{
+
+ public:
+         CMeteoParamUpdaterThread (const ACE_CString& name,
+                        MeteoSocket*   socket,
+                        const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
+                        const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime) ;
+
+         ~CMeteoParamUpdaterThread() { ACS_TRACE("CMeteoParamUpdaterThread::~CMeteoParamUpdaterThread"); }
+         virtual void onStop();
+         virtual void onStart();
+         virtual void runLoop();
+
+ private:
+                int loopCounter_m;
+                int m_threshold; // wind threshold in km/h
+                MeteoSocket  * m_socket;
+
+};
+
 
 
 
@@ -168,6 +198,7 @@ private:
 	SmartPropertyPointer<RWdouble> m_humidity;
 	SmartPropertyPointer<RWdouble> m_pressure;
         SmartPropertyPointer<RWdouble> m_windspeedPeak;
+        CMeteoParamUpdaterThread *m_controlThread_p;
         
 	SimpleParser::CParser<MeteoSocket> * m_parser;
 

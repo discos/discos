@@ -63,7 +63,7 @@ EXECUTABLES_L   =
 
 # Linked with Medicina stubs because has the same interface as Noto
 # <brief description of xxxxx program>
-NotoWeatherStationImpl_OBJECTS   =	MeteoSocket NotoWeatherStationImpl    
+NotoWeatherStationImpl_OBJECTS   =	MeteoSocket CMeteoParamUpdaterThread NotoWeatherStationImpl    
 #xxxxx_LDFLAGS   =
 NotoWeatherStationImpl_LIBS      =ComponentErrors \
 			NotoWeatherStationStubs\

@@ -5,6 +5,7 @@ using namespace baci;
 using namespace SimpleParser;
 
 
+
 NotoWeatherStationImpl::NotoWeatherStationImpl(
 				const ACE_CString &name,
 			     maci::ContainerServices * containerServices) :
@@ -21,6 +22,9 @@ NotoWeatherStationImpl::NotoWeatherStationImpl(
 NotoWeatherStationImpl::~NotoWeatherStationImpl()
 {
 
+        if(m_controlThread_p!=0)
+        getContainerServices()->getThreadManager()->destroy(m_controlThread_p);
+
         AUTO_TRACE("NotoWeatherStationImpl::~NotoWeatherStationImpl");
 //	deleteAll();
 }
@@ -29,6 +33,8 @@ NotoWeatherStationImpl::~NotoWeatherStationImpl()
 void NotoWeatherStationImpl::cleanUp() throw (ACSErr::ACSbaseExImpl)
 {
 	    CharacteristicComponentImpl::cleanUp();
+                m_controlThread_p->suspend();
+        getContainerServices()->getThreadManager()->stopAll();
         AUTO_TRACE("NotoWeatherStationImpl::cleanUp()");
 }
 
@@ -61,7 +67,8 @@ void NotoWeatherStationImpl::deleteAll()
                
  	try{
  	CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
- 		if (sock->isConnected())
+                
+                if (sock->isConnected())
  		{
 			sock->disconnection();
  			delete m_socket;
@@ -193,7 +200,6 @@ Weather::parameters NotoWeatherStationImpl::getData()throw (CORBA::SystemExcepti
 	CError err;
 	CString rdata;
 	CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
-
 	double temperature;
 	double winddir;
 	double windspeed;
@@ -285,7 +291,14 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(m_socket),true);
                 m_windspeedPeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedPeak(m_socket),true);
                 
-
+                m_controlThread_p = getContainerServices()->getThreadManager()->create<CMeteoParamUpdaterThread, MeteoSocket*>("MeteoParam Updater",sock );
+                m_controlThread_p->setSleepTime  (5*10000000);
+//              m_controlThread_p->setResponseTime(60*1000000);
+                m_controlThread_p->resume();
+                
+                    
+                    
+                    
 
 		m_parser=new CParser<MeteoSocket>(sock,10);
 		m_parser->add("getWindSpeed",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getWindSpeed),0 );
@@ -305,7 +318,7 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		throw E.getComponentErrorsEx();
 	}
 
-
+#if 0
 
 
 	try {
@@ -328,6 +341,7 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_THROW_EXCPT(ComponentErrors::SocketErrorExImpl,"NotoWeatherStationImpl::initialize()");
  
 	}
+#endif 
 
 
         AUTO_TRACE("NotoWeatherStationImpl::initialize");
