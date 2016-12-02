@@ -10,8 +10,6 @@ CMeteoParamUpdaterThread::CMeteoParamUpdaterThread (const ACE_CString& name,
                         ACS_TRACE("CMeteoParamUpdaterThread::CMeteoParamUpdaterThread");
                         loopCounter_m = 0;
                         m_socket = (MeteoSocket  *) socketConnectionWeatherStation;
-
-
                 }
 
 
@@ -21,14 +19,14 @@ CMeteoParamUpdaterThread::runLoop()
 {
         Weather::parameters wdata;
         double wind;
-
         TIMEVALUE now;
         IRA::CIRATools::getTime(now);
-  
-          m_socket->updateParam();
-       
-
-
+        try{
+            m_socket->updateParam();
+        }catch(ComponentErrors::SocketErrorExImpl &ex){
+            CUSTOM_LOG(LM_FULL_INFO, "CMeteoParamUpdaterThread::runLoop()", 
+                       (LM_WARNING, "Could not update meteo parameters"));
+        }
 }
 
 void
