@@ -18,6 +18,8 @@ import string
 import math
 import time
 import socket
+import struct
+from math import *
 
 
 def usage():
@@ -25,6 +27,11 @@ def usage():
 	print ""
 	print "[-h|--help]      displays this help"
 	print "[-c|--code=]     select the setup code"
+
+def sendData(socket,msg):
+	length=len(msg)	
+	socket.sendall(struct.pack('=i',length))
+	socket.sendall(msg)
 
 def main():
     
@@ -36,8 +43,12 @@ def main():
 		sys.exit(1)
         
 	code=""
-	pol=[0.0,0.0,0.0]
-    
+	polX=[0.0,0.0,0.0]
+	polY=[0.0,0.0,0.0]
+	polZ1=[0.0,0.0,0.0]
+	polZ2=[0.0,0.0,0.0]
+	polZ3=[0.0,0.0,0.0]    
+
 	for o, a in opts:
 		if o in ("-h", "--help"):
 			usage()
@@ -48,9 +59,26 @@ def main():
 	print "The code is %s" % code
 
 	if code=="QQC":
-		pol[0]=1.0
-		pol[1]=0.0
-		pol[2]=0.0
+		polX[0]=0.0
+		polX[1]=0.0
+		polX[2]=0.89
+
+		polY[0]=8.3689e-4
+		polY[1]=0.152495
+		polY[2]=20.91
+
+		polZ1[0]=0.00168640  
+		polZ1[1]=-0.271430
+		polZ1[2]=67.55
+
+		polZ2[0]=0.00168640  
+		polZ2[1]=-0.271430
+		polZ2[2]=84.37
+
+		polZ3[0]=0.00168640  
+		polZ3[1]=-0.271430
+		polZ3[2]=-57.40
+
 	else:
 		print "Unknown code"
 		sys.exit(1);
@@ -60,9 +88,8 @@ def main():
 	compName=""
 	compType = "IDL:alma/Antenna/AntennaBoss:1.0"
 	try:
-		pass
-		#component=simpleClient.getDefaultComponent(compType)
-		#compName=component._get_name()
+		component=simpleClient.getDefaultComponent(compType)
+		compName=component._get_name()
 	except Exception , ex:
 		newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
 		newEx.setComponentName(compType)
@@ -75,13 +102,33 @@ def main():
 	client_socket.connect(('192.167.187.92', 5003))
 
 	print "socket connected"
-
-	while 1:
-		buffer="1\n"
-		client_socket.send(buffer)
-		time.sleep(1)
-		data=client_socket.recv(512)
-		print data	
+	time.sleep(2)
+	try:
+		while 1:
+			ctime=getTimeStamp().value
+			try:
+				az,el=component.getRawCoordinates(ctime)
+			except Exception , ex:
+				print "Errore nella lettura della posizione"
+			delev=degrees(el)
+			print el,delev
+			posX=polX[0]*delev*delev+polX[1]*delev+polX[2]
+			posY=polY[0]*delev*delev+polY[1]*delev+polY[2]
+			posZ1=polZ1[0]*delev*delev+polZ1[1]*delev+polZ1[2]
+			posZ2=polZ2[0]*delev*delev+polZ2[1]*delev+polZ2[2]
+			posZ3=polZ3[0]*delev*delev+polZ3[1]*delev+polZ3[2]
+			print "comando %6.2lf %6.2lf %6.2lf %6.2lf %6.2lf" % (posX,posY,posZ1,posZ2,posZ3)	
+			buffer="0,1,7,%6.2lf,%6.2lf,%6.2lf,%6.2lf,%6.2lf" % (posX,posY,posZ1,posZ2,posZ3)
+			#print buffer
+			sendData(client_socket,buffer)
+			time.sleep(1)
+			data=client_socket.recv(128)
+			print "risposta ", data
+			time.sleep(10)
+	finally:
+		if not (compName==""):
+        		simpleClient.releaseComponent(compName)     
+    		simpleClient.disconnect()
 
 
 if __name__=="__main__":
