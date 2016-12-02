@@ -284,7 +284,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Val
         throw impl;
     }
     //computes the synthesizer settings
-    trueValue=(lo[0]/(double)m_configuration.getLOMultiplier()[0])+m_configuration.getFixedLO2()[0];
+    trueValue=(lo[0]+m_configuration.getFixedLO2()[0])/(double)m_configuration.getLOMultiplier()[0];
     size=m_configuration.getSynthesizerTable(freq,power);
     amp=round(linearFit(freq,power,size,trueValue));
     if (power) delete [] power;
