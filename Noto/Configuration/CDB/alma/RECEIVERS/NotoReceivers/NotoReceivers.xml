@@ -10,7 +10,7 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
 				HPIBIPAddress="192.167.187.201"
 				HPIBPort="1234"
-				LocalOscillatorInstance=""
+				LocalOscillatorInstance="RECEIVERS/LocalOscillator"
 				FocusSelectorInterface="IDL:alma/Backends/TotalPower:1.0"
 >
 			<LO description="Sequence of local oscillator values for each IF chain"/>
