@@ -86,7 +86,7 @@ if [ "$CL_STOP" ] ; then
    #close the operator input
    pkill -SIGINT -f -n -u $USER _tui_SysTerm
    #close the logging display client 
-   #pkill -SIGUSR1 -f -n -u $USER _gui_customLoggingClient
+   pkill -SIGUSR1 -f -n -u $USER _gui_customLoggingClient
    exit
 fi
 
