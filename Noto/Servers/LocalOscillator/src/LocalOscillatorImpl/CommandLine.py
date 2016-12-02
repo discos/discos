@@ -30,7 +30,7 @@ class CommandLine:
           self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
        except socket.error , msg:
           print msg
-          self.sock=None
+          
 
    def __del__(self):
        pass
@@ -44,6 +44,9 @@ class CommandLine:
         
    
       try:
+         self.ip=ip
+         self.port=port
+         
          self.sock.connect((ip,port))
          msg_ok ='OK' 
          self.sock.sendall('*CLS\n;SYST:ERR?\n++read\n')
@@ -60,42 +63,36 @@ class CommandLine:
      pass
    
    def setPower(self,power):
-       cmd= "POW " + str(power) + "DBM"
+       cmd= "POW " + str(power) + "DBM;SYST:ERR?\n"
  
        try:
-           self.sock.sendall(cmd + '\n')
-           self.sock.sendall("SYST:ERR?" + "\n++read\n")
-           msg = self.sock.recv(1024)
+           msg=self.query(cmd)   
 
            return  msg
            
        except socket.error , msg:
           print "connect error: " ,msg
-          return msg,False
-          self.sock=None
+          return msg
    
    def getPower(self):
        QUERYPOWER="POW?;SYST:ERR?\n"
        cmd=QUERYPOWER
        try:
-          self.sock.sendall(QUERYPOWER + "\n++read\n")
-    
-          msg=self.sock.recv(1024)
+          msg=self.query(cmd)
           commands=msg.split(';')
+          
           if len(commands)>1:
              val=int(decimal.Decimal(commands[0]))# unit is MHZ,
              err_msg=commands[1]
           else:
              val=-1
              err_msg='Communication Error with synth'
-          print "query err",msg
-          
+           
           return err_msg,val
    
        except socket.error , msg:
           print "connect error: " ,msg
           return msg,-1
-          self.sock=None
        except CommandLineError,msg:
           raise
        except ValueError,msg:
@@ -104,28 +101,23 @@ class CommandLine:
      
    def setFrequency(self,freq):
 
-       cmd=  'FREQ '+str(freq)+ 'MHZ'
+       cmd=  'FREQ '+str(freq)+ 'MHZ;SYST:ERR?'
 
  
        try:
-
-           self.sock.sendall(cmd +'\n') 
-           self.sock.sendall("SYST:ERR?" + "\n++read\n")
-           msg=self.sock.recv(1024)
+           msg=self.query(cmd)
            return msg
            
        except socket.error , msg:
           print "connect error: " ,msg
           return msg
-          self.sock=None
    
    def getFrequency(self):
          
-        cmd= 'FREQ?;SYST:ERR?\n'
+        cmd= 'FREQ?;SYST:ERR?'
         try:
            
-          self.sock.sendall(cmd + '\n++read\n')
-          msg=self.sock.recv(1024)
+          msg=self.query(cmd)
           commands=msg.split(';')
           if len(commands)>1:
               val=int(decimal.Decimal(commands[0]))/1e6 # unit is MHZ,
@@ -133,7 +125,7 @@ class CommandLine:
           else:
               val=-1
               err_msg='Communication Error with synth'
-          print "query err",msg
+          print "Error Messager from Synt:",msg
           #if err_msg != '0,\"No error\"\n': 
                 #print "exception",err_msg
                 #raise CommandLineError(err_msg)   
@@ -142,7 +134,7 @@ class CommandLine:
         except socket.error , msg:
           print "connect error: " ,msg
           return msg,-1
-          self.sock=None
+          
         except CommandLineError,msg:
           raise
         except ValueError,msg:
@@ -172,19 +164,7 @@ class CommandLine:
       
       
       pass
-   
-   def sendCmd(self,msg):
-       
-       try:
-           self.sock.sendall(msg+'\n++read eoi\n')
-           return True
-       
-       except socket.error , msg:
-          print "connect error: " ,msg
-          raise msg
-          self.sock=None
-          return False
-   
+      
    def close(self):
      
        self.sock.close()
@@ -193,12 +173,24 @@ class CommandLine:
        try:
            self.sock.sendall(cmd+'\n++read\n') 
            msg = self.sock.recv(1024) 
-           print 'query:received:',msg
+           if len(msg)==0:
+             
+                 self.sock.close()
+                 
+                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+                 self.configure(self.ip,self.port)
+                 
            return msg
        
        except socket.error , msg:
           print "connect error: " ,msg
-          raise
+          print 'len msg received',len(msg)
+          
+          self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          self.configure(self.ip,self.port)
+  
+          
           return msg
    
        

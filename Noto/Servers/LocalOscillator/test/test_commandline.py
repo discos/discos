@@ -28,9 +28,13 @@ class TestCommandLine(unittest2.TestCase):
          #self.assertEqual('+0,\"No error\"\n',msg)
       def test_2_getPower(self):
          msg=self.cl.setPower(16)
+         print msg
          msg,val=self.cl.getPower()
+         print msg,val
          msg=self.cl.setFrequency(4600)
+         print msg
          msg,val=self.cl.getFrequency()
+         print msg,val
          self.assertEqual(4600,val)
       
       def test_3_getfrequency(self):

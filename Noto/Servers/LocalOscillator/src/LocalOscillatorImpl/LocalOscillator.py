@@ -70,6 +70,7 @@ import ComponentErrors
 from LocalOscillatorImpl import CommandLine
 from IRAPy import logger
 
+import socket
 #IP, PORT = "192.168.201.149", 5025 #real hw
 
  
@@ -122,8 +123,9 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
           
         logger.logError(ex,message)
 
-       
+     except socket.error,ex:
    
+        logger.logError(ex,"LocaOscillator:set Socket Error")
    
    
    
@@ -141,7 +143,8 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
      
      except CommandLine.CommandLineError,ex :
        logger.logError(ex,message)
-
+     except socket.error,ex:   
+        logger.logError(ex,"LocaOscillator:get Socket Error")
 
    def rfon(self):
     
