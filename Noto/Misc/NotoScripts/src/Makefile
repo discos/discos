@@ -66,7 +66,7 @@ lllll_OBJECTS   =
 #
 # Scripts (public and local)
 # ----------------------------
-SCRIPTS         = escs escsConsole
+SCRIPTS         = escsnoto escsConsole
 SCRIPTS_L       =
 
 #
@@ -162,9 +162,8 @@ ASCII_TO_MIF =
 #
 # other files to be installed
 #----------------------------
-INSTALL_FILES =
+INSTALL_FILES      = ../app-defaults/escs_command_center
 
-#
 # list of all possible C-sources (used to create automatic dependencies)
 # ------------------------------
 CSOURCENAMES = \
