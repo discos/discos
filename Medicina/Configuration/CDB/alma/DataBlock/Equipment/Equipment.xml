@@ -21,5 +21,6 @@
 	
 	<AvailableBackend alias="TotalPower" backend="BACKENDS/TotalPower" noData="false" dataPath="" />
 	<AvailableBackend alias="XArcos" backend="BACKENDS/XBackends" noData="false" dataPath="" />
+	<AvailableBackend alias="Roach" backend="BACKENDS/Roach" noData="true" dataPath="" />
 	
 </TelescopeEquipment>
