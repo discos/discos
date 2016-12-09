@@ -125,7 +125,7 @@ bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& se
             else {
                 setup.polarizations[i]=Backends::BKND_FULL_STOKES;
             }
-            printf("setup.pol = %d\n", setup.polarizations[i]);
+            //printf("setup.pol = %d\n", setup.polarizations[i]);
 			if (!IRA::CIRATools::getNextToken(feed,start_feed,' ',ret)) return false;
 			setup.feed[i]=ret.ToLong();
 			if (!IRA::CIRATools::getNextToken(ifs,start_ifs,' ',ret)) return false;

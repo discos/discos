@@ -156,122 +156,15 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl)
 {
 	AUTO_TRACE("CCommandLine::stopDataAcquisition()");
-    Message reply = sendBackendCommand(Command::stop());
-    //int res;
-	//WORD len;
-	//char sBuff[SENDBUFFERSIZE];
-	//char rBuff[RECBUFFERSIZE];
-	/*if ((m_backendStatus & (1 << SUSPEND)) || !getIsBusy()) { //not suspended....running
-		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::suspendDataAcquisition()");
-		impl.setReason("transfer job cannot be suspended in present configuration");
-		throw impl;
-	}*/
-    /*
-	if (!checkConnection()) {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::suspendDataAcquisition()");
-	}
-	strcpy (sBuff,"?stop");
-	strcat (sBuff,"\r\n");
-	len = strlen (sBuff);
-	//len=CProtocol::suspendAcquisition(sBuff); // get the buffer
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-	}
-	if (res>0) { // operation was ok.
-		//if (!CProtocol::isAck(rBuff)) {
-		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::suspendDataAcquisition()");
-		//} 
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::stopDataAcquisition()",(LM_INFO,"TRANSFER_JOB_SUSPENDED"));
-        clearStatusField(CCommandLine::BUSY);
-		setStatusField(SUSPEND);
-	}
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::stopDataAcquisition()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::stopDataAcquisition()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::stopDataAcquisition()");
-	}*/
-    /*
-	int res;
-	WORD len;
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
-	AUTO_TRACE("CCommandLine::stopDataAcquisition()");
-	if (!getIsBusy()) {
-		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::stopDataAcquisition()");
-		impl.setReason("transfer job cannot be stopped in this configuration");
-		throw impl;
-	}
-	if (!checkConnection()) {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::stopDataAcquisition()");
-	}
-	len=CProtocol::stopAcquisition(sBuff); // get the buffer
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-	}
-	if (res>0) { // operation was ok.
-		//if (!CProtocol::isAck(rBuff)) {
-		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::stopDataAcquisition()");
-		//}
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::stopDataAcquisition()",(LM_INFO,"TRANSFER_JOB_STOPPED"));
-		clearStatusField(CCommandLine::BUSY); // sets the component status to busy
-		clearStatusField(CCommandLine::SUSPEND); // sets the component status to transfer job suspended......
-	}
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::stopDataAcquisition()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::stopDataAcquisition()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::stopDataAcquisition()");
-	} 
-    */
+	Message reply = sendBackendCommand(Command::stop());
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::stopDataAcquisition()",(LM_INFO,"TRANSFER_JOB_STOPPED"));
+	clearStatusField(CCommandLine::BUSY); // sets the component status to busy
+	clearStatusField(CCommandLine::SUSPEND); // sets the component status to transfer job suspended......
 }
 
 void CCommandLine::stopDataAcquisitionForced() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
 		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl)
 {
-    /*
-	int res;
-	WORD len;
-	char sBuff[SENDBUFFERSIZE];
-	char rBuff[RECBUFFERSIZE];
-	AUTO_TRACE("CCommandLine::stopDataAcquisitionForced()");
-	len=CProtocol::stopAcquisition(sBuff); // get the buffer
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-	}
-	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::stopDataAcquisitionForced()");
-		} 
-	}
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::stopDataAcquisition()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::stopDataAcquisition()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::stopDataAcquisition()");
-	}
-    */
 }
 
 
@@ -279,62 +172,20 @@ void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExIm
 		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
 {
 	AUTO_TRACE("CCommandLine::startDataAcquisition()");
-    Message reply = sendBackendCommand(Command::start());
-	//int res;
-	//WORD len;
-	//char sBuff[SENDBUFFERSIZE];
-	//char rBuff[RECBUFFERSIZE];
-/*	if (getIsBusy()) {
+	/* if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::startDataAcquisition()");
 		throw impl;
 	}*/
-    /*
-	if (!checkConnection()) {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::startDataAcquisition()");
-	}
-	//len=CProtocol::startAcquisition(sBuff,m_commonSampleRate,m_calPeriod,m_configuration->getDataPort(),m_hostAddress); // get the buffer
-
-	strcpy (sBuff,"?start,");
-	strcat (sBuff,"\r\n");
-	len = strlen (sBuff);
-
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-        printf("start = %s\n",rBuff);
-	}
-	if (res>0) { // operation was ok.
-		//if (!CProtocol::isAck(rBuff)) {
-		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::startDataAcquisition()");
-		//} 
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::startDataAcquisition()",(LM_INFO,"ACQUISTION_STARTED"));
-		//m_setTpiIntegration=true; // force the configuration of integration time for the next call to getSample();
-		IRA::CIRATools::getTime(m_acquisitionStartEpoch);
-		setStatusField(CCommandLine::BUSY); // sets the component status to busy
-		setStatusField(CCommandLine::SUSPEND); // sets the component status to transfer job suspended......
-	}
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::startDataAcquisition()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::startDataAcquisition()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::startDataAcquisition()");
-	}*/
+	Message reply = sendBackendCommand(Command::start());
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::startDataAcquisition()",(LM_INFO,"ACQUISTION_STARTED"));
+	setStatusField(CCommandLine::BUSY); // sets the component status to busy
+	setStatusField(CCommandLine::SUSPEND); // sets the component status to transfer job suspended......
 }
 
 ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
 		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
 {
-	//int res;
-	//WORD len;
 	TIMEVALUE now;
-	//char sBuff[SENDBUFFERSIZE];
-	//char rBuff[RECBUFFERSIZE];
 	TIMEVALUE epoch;
 	long waitSec,waitMicro;
 	DDWORD diff;
@@ -373,94 +224,29 @@ ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Ba
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::resumeDataAcquisition()");
 	}
-    Message request = Command::start();
-    Message reply = sendBackendCommand(request);
-	/*
-    strcpy (sBuff,"?start,0");
-	strcat (sBuff,"\r\n");
-	len = strlen (sBuff);
-	//len=CProtocol::resumeAcquisition(sBuff); // get the buffer
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-        printf("start = %s\n",rBuff);
-	}
-    */
-	//if (res>0) { // operation was ok.
-    if(reply.is_success_reply()) {
-		/*if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::resumeDataAcquisition()");
-		} */
+    	Message request = Command::start();
+    	Message reply = sendBackendCommand(request);
+    	if(reply.is_success_reply()) {
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::resumeDataAcquisition()",(LM_INFO,"TRANSFER_JOB_RESUMED"));
 		clearStatusField(SUSPEND);
 	}
-    /*
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::resumeDataAcquisition()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::resumeDataAcquisition()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::resumeDataAcquisition()");
-	}
-    */
 	return expectedTime;
 }
 
 void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
 			BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
 {
-	//int res;
-	//WORD len;
-	//char sBuff[SENDBUFFERSIZE];
-	//char rBuff[RECBUFFERSIZE];
 	AUTO_TRACE("CCommandLine::suspendDataAcquisition()");
 	/*if ((m_backendStatus & (1 << SUSPEND)) || !getIsBusy()) { //not suspended....running
 		_EXCPT(ComponentErrors::NotAllowedExImpl,impl,"CCommandLine::suspendDataAcquisition()");
 		impl.setReason("transfer job cannot be suspended in present configuration");
 		throw impl;
 	}*/
-	if (!checkConnection()) {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::suspendDataAcquisition()");
-	}
-    Message reply = sendBackendCommand(Command::stop());
-    /*
-	strcpy (sBuff,"?stop");
-	strcat (sBuff,"\r\n");
-	len = strlen (sBuff);
-	//len=CProtocol::suspendAcquisition(sBuff); // get the buffer
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-        printf("stop = %s\n",rBuff);
-	}
-    */
-	//if (res>0) { // operation was ok.
-    if(reply.is_success_reply()){
-		//if (!CProtocol::isAck(rBuff)) {
-		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::suspendDataAcquisition()");
-		//} 
+    	Message reply = sendBackendCommand(Command::stop());
+    	if(reply.is_success_reply()){
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::suspendDataAcquisition()",(LM_INFO,"TRANSFER_JOB_SUSPENDED"));
 		setStatusField(SUSPEND);
 	}
-    /*
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::suspendDataAcquisition()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::suspendDataAcquisition()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::suspendDataAcquisition()");
-	}
-    */
 }
 
 void CCommandLine::setAttenuation(const long&inputId, const double& attenuation) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
@@ -1067,7 +853,7 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 }
 
 void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl)
+		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ReplyNotValidExImpl,BackendsErrors::BackendFailExImpl)
 {
 	AUTO_TRACE("CCommandLine::setDefaultConfiguration()");
     double filter;
@@ -1204,7 +990,7 @@ void CCommandLine::sendTargetFileName() throw (BackendsErrors::BackendBusyExImpl
 }
 
 void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl)
+		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ReplyNotValidExImpl,BackendsErrors::BackendFailExImpl)
 {
 	AUTO_TRACE("CCommandLine::setup()");
 /*	if (getIsBusy()) {
@@ -1215,8 +1001,20 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 		_EXCPT(BackendsErrors::ConfigurationErrorExImpl,impl,"CCommandLine::setup()");
 		throw impl;
 	}
-	setDefaultConfiguration(conf); //could throw exceptions........
-	ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZED, CONFIGURATION: %s",conf)); 
+    	Message reply = sendBackendCommand(Command::setConfiguration(string((const char*)conf)));
+    	if(reply.is_success_reply()){
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZED, CONFIGURATION: %s",conf)); 
+	}
+	else {
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZATION ERROR, CONFIGURATION: %s",conf)); 
+	}
+	/*try {
+		setDefaultConfiguration(conf);
+	}
+	catch (...) {
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZATION ERROR, CONFIGURATION: %s",conf)); 
+
+	}*/
 }
 
 void CCommandLine::checkTime() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::MalformedAnswerExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
@@ -1381,58 +1179,20 @@ void CCommandLine::setIntegration(const long& integration)  throw (BackendsError
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setIntegration()");
 		throw impl;
 	}*/
-    m_integration = integration;
+    	m_integration = integration;
 	if (m_integration>=MIN_INTEGRATION && m_integration <= MAX_INTEGRATION) {
-        /*int res;
-	    WORD len;
-	    char sBuff[SENDBUFFERSIZE];
-	    char rBuff[RECBUFFERSIZE];*/
-	    AUTO_TRACE("CCommandLine::setIntegration()");
-	    if (!checkConnection()) {
-		    _THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setIntegration()");
-	    }
-        Message request = Command::setIntegration(integration);
-        Message reply = sendBackendCommand(request);
-        if(reply.is_success_reply()){
-            // TBD
-        }
-        /*
-	    strcpy (sBuff,"?set-integration,");
-        IRA::CString temp;
-        temp.Format("%ld",m_integration);
-        strcat (sBuff,(const char *)temp);
-	    strcat (sBuff,"\r\n");
-	    len = strlen (sBuff);
-	    if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		    res=receiveBuffer(rBuff,RECBUFFERSIZE);
-            printf("set-integration = %s\n",rBuff);
-	    }
-	    if (res>0) { // operation was ok.
-		    //if (!CProtocol::isAck(rBuff)) {
-		    //	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::suspendDataAcquisition()");
-		    //} 
-		    ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_INFO,"setIntegration"));
-	    }
-	    else if (res==FAIL) {
-		    _EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		    dummy.setCode(m_Error.getErrorCode());
-		    dummy.setDescription((const char*)m_Error.getDescription());
-		    m_Error.Reset();
-		    _THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setIntegration()");
-	    }
-	    else if (res==WOULDBLOCK) {
-		    _THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setIntegration()");
-	    }
-	    else {
-		    _THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setIntegration()");
-	    }*/
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_NOTICE,"INTEGRATION is now %ld (millisec)",m_integration));
+        	Message request = Command::setIntegration(integration);
+		Message reply = sendBackendCommand(request);
+        	if (reply.is_success_reply()) {
+            		// TBD
+			ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_NOTICE,"INTEGRATION is now %ld (millisec)",m_integration));
+		}
 	}
-    else {
-        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setIntegration()");
+    	else {
+        	_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setIntegration()");
 		impl.setValueName("integration");
 		throw impl;
-    }
+    	}
 }
 
 void CCommandLine::getAttenuation(ACS::doubleSeq& att) throw (ComponentErrors::SocketErrorExImpl,
@@ -1561,8 +1321,12 @@ void CCommandLine::getFeed(ACS::longSeq& feed) const
 
 void CCommandLine::getIFs(ACS::longSeq& ifs) const
 {
-	ifs.length(m_sectionsNumber);
-	for (int i=0;i<m_sectionsNumber;i++) {
+	// temporary solution
+	long ifNumber;
+	ifNumber = 2;
+
+	ifs.length(ifNumber);
+	for (int i=0;i<ifNumber;i++) {
 		ifs[i]=m_ifNumber[i];
 	}	
 }
@@ -1815,15 +1579,15 @@ CCommandLine::sendBackendCommand(Message request)
 	}
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
-    strcpy (sBuff,request.toString(true).c_str());
+    	strcpy (sBuff,request.toString(true).c_str());
 	int len = strlen (sBuff);
-    int res = 0;
+    	int res = 0;
 	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
 		res=receiveBuffer(rBuff,RECBUFFERSIZE);
 	}
 	if (res>0) { // operation was ok.
-        clearStatusField(CCommandLine::BUSY);
-		setStatusField(SUSPEND);
+        	clearStatusField(CCommandLine::BUSY);
+		//setStatusField(SUSPEND);
 	}
 	else if (res==FAIL) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
@@ -1838,23 +1602,30 @@ CCommandLine::sendBackendCommand(Message request)
 	else {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::sendBackendCommand()");
 	}
-    Message reply(string(rBuff, res), true);
-    try{
-        reply.validate();
-    }catch(BackendProtocolError& bpe){
-        //TODO: somehow the reply is not valid
-        //we cannot proceed we need to throw an exception
-    }
-    if(!(reply.is_valid_reply_for(request)))
-    {
-        //TODO: this answer is not valid for this request, throw exception
-    }
-    if(!(reply.is_success_reply()))
-    {
-        //TODO: the reply has a FAIL o INVALID code, this must be 
-        //managed
-    }
-    return reply;
+    	Message reply(string(rBuff, res), true);
+    	try {
+        	reply.validate();
+    	}
+	catch (BackendProtocolError& bpe) {
+		//TODO: somehow the reply is not valid
+        	//we cannot proceed we need to throw an exception
+		_THROW_EXCPT(BackendsErrors::MalformedAnswerExImpl,"sendBackendCommand()");
+    	}
+    	if(!(reply.is_valid_reply_for(request)))
+    	{
+        	//TODO: this answer is not valid for this request, throw exception
+		_THROW_EXCPT(BackendsErrors::ReplyNotValidExImpl,"sendBackendCommand()");
+    	}
+    	if(!(reply.is_success_reply()))
+    	{
+        	//TODO: the reply has a FAIL o INVALID code, this must be 
+        	//managed
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"sendBackendCommand()");
+		//impl.setReason("transfer job cannot be resumed in present configuration");
+		impl.setReason(reply.get_argument<string>(0).c_str());
+		throw impl;
+    	}
+	return reply;
 }
 
 //int CCommandLine::getConfiguration(char* configuration)
@@ -2034,7 +1805,7 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 			m_sections[m_boards[i]]=i;
 			//m_input[i]=m_defaultInput[m_boards[i]];
 			m_polarization[i]=setup.polarizations[i];
-            printf ("m_polarization = %d\n", m_polarization[i]);
+            //printf ("m_polarization = %d\n", m_polarization[i]);
 			m_ifNumber[i]=setup.ifs[i];
 			m_feedNumber[i]=setup.feed[i];
 			m_inputSection[i]=i; // input 0 belongs to section 0 and so on.....
