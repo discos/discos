@@ -1421,6 +1421,9 @@ void CNotoMinorServoBossCore::msSetup(const char *conf) throw (ComponentErrors::
 
 void CNotoMinorServoBossCore::setDefaultAxesValues(const IRA::CString & conf)
 {
+	char buff[SENDBUFFERSIZE];
+	char str[80];
+	int n, res;	
 	int axis;
 	float xValues[POLY_COEFF];
 	float yValues[POLY_COEFF];
@@ -1474,13 +1477,19 @@ void CNotoMinorServoBossCore::setDefaultAxesValues(const IRA::CString & conf)
 	if (conf.Compare("QQC")==0) {
      m_config = 6; mode = 1; axis = 5;
 	}
+	sprintf (buff, "0,%d,%d", mode, m_config);
+	for (n = 0; n < ((mode) ? 5 : 2); n++) {
+		sprintf (str, ",%6.2f", scupos[45][n]); // initial setup at 45°
+      strcat (buff, str);
+	}
+	res = sendBuffer(buff,strlen(buff));
 }
 
 void CNotoMinorServoBossCore::PolyEvaluation (int Axis, float *Coeff, int Dim)
 /* computes scu axis position table */
 {
   int i, j;
-  float Xi, l=0.0;
+  float Xi;
   for (i = 0; i <= 90; i++) {   /* make 1 point every deg from 0 to 90 */
     scupos[i][Axis] = 0;
     for (j = 0; j < Dim; j++) {
