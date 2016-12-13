@@ -29,4 +29,10 @@
 
 <ErrorCode name="ConfigurationError" shortDescription="The configuration is unknown or cannot be loaded" description=""/>
 
+<ErrorCode name="ReplyNotValid" shortDescription="The answer is not valid for the request" description=""/>
+
+<ErrorCode name="BackendFail" shortDescription="The backend fails during an application or setting" description="">
+	<Member name="Reason" type="string" description="Reason" />
+</ErrorCode>
+
 </Type>
