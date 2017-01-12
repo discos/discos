@@ -1,0 +1,4 @@
+#!/bin/bash
+source /home/manager/.bashrc
+/alma/ACS-8.2/ACSSW/bin/acsdataClean
+/alma/ACS-8.2/ACSSW/bin/acscommandcenter -r $INTROOT/app-defaults/escs_command_center &
