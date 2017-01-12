@@ -93,31 +93,31 @@ def main():
 	elif code=="KKC":
 		polX[0]=0.0
 		polX[1]=0.0
-		polX[2]=-1
+		polX[2]=-0.5
 		maxX=85
 		minX=-85
 
 		polY[0]=8.3689e-4
 		polY[1]=0.152495
-		polY[2]=-10.4
+		polY[2]=-11.7
 		maxY=85
 		minY=-85
 
-		polZ1[0]=0.00128  
-		polZ1[1]=-0.13644
-		polZ1[2]=9.4
+		polZ1[0]=0.00168640  
+		polZ1[1]=-0.271430
+		polZ1[2]=17.3
 		maxZ1=85
 		minZ1=-85
 
-		polZ2[0]=0.00128  
-		polZ2[1]=-0.23394
-		polZ2[2]=10.6
+		polZ2[0]=0.00168640  
+		polZ2[1]=-0.271430
+		polZ2[2]=9.8
 		maxZ2=85
 		minZ2=-85
 
-		polZ3[0]=0.00128  
-		polZ3[1]=-0.23394
-		polZ3[2]=13.4
+		polZ3[0]=0.00168640  
+		polZ3[1]=-0.271430
+		polZ3[2]=12.6
 		maxZ3=85
 		minZ3=-85
 
