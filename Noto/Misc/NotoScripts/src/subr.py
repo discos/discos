@@ -62,22 +62,64 @@ def main():
 		polX[0]=0.0
 		polX[1]=0.0
 		polX[2]=0.89
+		maxX=100
+		minX=-100
 
 		polY[0]=8.3689e-4
 		polY[1]=0.152495
 		polY[2]=20.91
+		maxY=100
+		minY=-100
 
 		polZ1[0]=0.00168640  
 		polZ1[1]=-0.271430
 		polZ1[2]=67.55
+		maxZ1=100
+		minZ1=-100
 
 		polZ2[0]=0.00168640  
 		polZ2[1]=-0.271430
 		polZ2[2]=84.37
+		maxZ2=100
+		minZ2=-100
+
 
 		polZ3[0]=0.00168640  
 		polZ3[1]=-0.271430
 		polZ3[2]=-57.40
+		maxZ3=100
+		minZ3=-100
+
+	elif code=="KKC":
+		polX[0]=0.0
+		polX[1]=0.0
+		polX[2]=-1
+		maxX=85
+		minX=-85
+
+		polY[0]=8.3689e-4
+		polY[1]=0.152495
+		polY[2]=-10.4
+		maxY=85
+		minY=-85
+
+		polZ1[0]=0.00128  
+		polZ1[1]=-0.13644
+		polZ1[2]=9.4
+		maxZ1=85
+		minZ1=-85
+
+		polZ2[0]=0.00128  
+		polZ2[1]=-0.23394
+		polZ2[2]=10.6
+		maxZ2=85
+		minZ2=-85
+
+		polZ3[0]=0.00128  
+		polZ3[1]=-0.23394
+		polZ3[2]=13.4
+		maxZ3=85
+		minZ3=-85
 
 	else:
 		print "Unknown code"
@@ -117,6 +159,27 @@ def main():
 			posZ1=polZ1[0]*delev*delev+polZ1[1]*delev+polZ1[2]
 			posZ2=polZ2[0]*delev*delev+polZ2[1]*delev+polZ2[2]
 			posZ3=polZ3[0]*delev*delev+polZ3[1]*delev+polZ3[2]
+			if posX>maxX:
+				posX=maxX
+			if posX<minX:
+				posX=minX
+			if posY>maxY:
+				posY=maxY
+			if posY<minY:
+				posY=minY
+			if posZ1>maxZ1:
+				posZ1=maxZ1
+			if posZ1<minZ1:
+				posZ1=minZ1
+			if posZ2>maxZ2:
+				posZ2=maxZ2
+			if posZ2<minZ2:
+				posZ2=minZ2
+			if posZ3>maxZ3:
+				posZ3=maxZ3
+			if posZ3<minZ3:
+				posZ3=minZ3
+
 			print "comando %6.2lf %6.2lf %6.2lf %6.2lf %6.2lf" % (posX,posY,posZ1,posZ2,posZ3)	
 			buffer="0,1,7,%6.2lf,%6.2lf,%6.2lf,%6.2lf,%6.2lf" % (posX,posY,posZ1,posZ2,posZ3)
 			#print buffer
