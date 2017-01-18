@@ -22,6 +22,26 @@ TEST_F(IRALibrary_IRATools, fileExists_checkNoExistance){
 	EXPECT_TRUE(fileExists_checkNoExistance());
 }
 
+TEST_F(IRALibrary_IRATools, createEmptyFile_checkSuccess){
+	EXPECT_TRUE(createEmptyFile_checkSuccess());
+}
+
+TEST_F(IRALibrary_IRATools, createEmptyFile_checkFail){
+	EXPECT_TRUE(createEmptyFile_checkFail());
+}
+
+TEST_F(IRALibrary_IRATools, deleteFile_checkSuccess){
+	EXPECT_TRUE(deleteFile_checkSuccess());
+}
+
+TEST_F(IRALibrary_IRATools,extractFileName_checkSimpleDirectoryPath){
+	EXPECT_TRUE(extractFileName_checkSimpleDirectoryPath());
+}
+
+TEST_F(IRALibrary_IRATools,extractFileName_checkSimpleFilePath){
+	EXPECT_TRUE(extractFileName_checkSimpleFilePath());
+}
+
 TEST_F(IRALibrary_IRATools, skyFrequency_noIntersection){
 	EXPECT_TRUE(skyFrequency_noIntersection());
 }
@@ -37,3 +57,7 @@ TEST_F(IRALibrary_FastQueue,FastQueue_checkLimits){
 TEST_F(IRALibrary_FastQueue,FastQueue_checkConsistency){
 	EXPECT_TRUE(FastQueue_checkConsistency());
 }
+
+
+
+

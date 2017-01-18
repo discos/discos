@@ -678,6 +678,40 @@ public:
 	 static bool fileExists(const IRA::CString& file);
 
 	 /**
+	  * Creates an empty file in the local filessystem
+	  * @return true if the file could be successfully created
+	  */
+	 static bool createEmptyFile(const IRA::CString& file);
+
+	 /**
+	  * Deletes a file from the local filessystem
+	  * @return true if the operation has been executed correctly
+	  */
+	 static bool deleteFile(const IRA::CString& file);
+
+	 /**
+	  * copy a file in an other location on local filessystem
+	  * @src full path and name of the file to be copied
+	  * @dst full path and name of the destination file
+	  */
+	 static bool copyFile(const IRA::CString& src,const IRA::CString& dst);
+
+	 /**
+	  *
+	  */
+	 //static bool batchCopyFile(const IRA::CString& srcPattern,const IRA::CString& dest);
+
+	 /**
+	  * Given a fully qualified file name (path+name+extension) it decompose it.
+	  * @param fullPath fully qualified name of the file. Example (/system/archive/foo.boo)
+	  * @param baseDir full path name. Example (/system/archive)
+	  * @param baseName pure file name. Example (foo)
+	  * @param extension extension of the file, if it exists. Example (boo)
+	  */
+	 static bool extractFileName(const IRA::CString& fullPath,IRA::CString& baseDir,IRA::CString& baseName,
+			 IRA::CString& extension);
+
+	 /**
 	  * Round a double value to the nearest number with decimals precision
 	  * @param val number to be rounded
 	  * @param decimals number of decimal positions to be considered (val=30.77779, decimals=2, res=30.78)

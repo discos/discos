@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <libgen.h>
 
 using namespace IRA;
 
@@ -1121,6 +1122,61 @@ bool CIRATools::fileExists(const IRA::CString& file)
 {
 	struct stat buffer;
 	return (stat((const char *)file,&buffer)==0);
+}
+
+bool CIRATools::createEmptyFile(const IRA::CString& file)
+{
+	bool ret;
+	std::fstream fs;
+	fs.open((const char *)file,ios::out);
+	if (fs.fail()) ret=false;
+	else ret=true;
+	fs.close();
+	return ret;
+}
+
+bool CIRATools::deleteFile(const IRA::CString& file)
+{
+	if(remove((const char *)file)==0) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool CIRATools::copyFile(const IRA::CString& src,const IRA::CString& dst)
+{
+    std::ifstream in ((const char *)src);
+    if (in.fail()) return false;
+    std::ofstream out ((const char *)dst);
+    if (out.fail()) return false;
+    out << in.rdbuf();
+    out.close();
+    in.close();
+    return true;
+}
+
+bool CIRATools::extractFileName(const IRA::CString& fullPath,IRA::CString& baseDir,IRA::CString& baseName,
+		 IRA::CString& extension)
+{
+    char *dirc, *basec;
+    dirc=strdup((const char *)fullPath); // the APIs called below might change the content of the input string
+    basec=strdup((const char *)fullPath);
+    baseDir=IRA::CString(dirname(dirc));
+    baseName=IRA::CString(basename(basec));
+    if ((baseDir.GetLength()==0) || (baseName.GetLength()==0)) {
+    	return false;
+    }
+	int pos=baseName.Find('.');
+	if (pos<0) { // not found
+		extension="";
+	}
+	else {
+		extension=baseName.Right(baseName.GetLength()-(pos+1));
+		baseName=baseName.Mid(0,pos);
+	}
+	return true;
 }
 
 double CIRATools::roundNearest(const double& val,const long& decimals)

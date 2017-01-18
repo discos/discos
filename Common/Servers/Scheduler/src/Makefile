@@ -64,7 +64,7 @@ INCLUDES        =
 LIBRARIES       = SchedulerImpl
 #LIBRARIES_L     =
 
-SchedulerImpl_OBJECTS = Schedule SchedulerImpl Configuration Core ScheduleExecutor SubScanBinder Schedule_ScanList
+SchedulerImpl_OBJECTS = Schedule SchedulerImpl Configuration Core ScheduleExecutor SubScanBinder Schedule_ScanList ScheduleReport
 SchedulerImpl_LIBS = IRALibrary AntennaDefinitionsStubs ManagmentDefinitionsStubs SchedulerStubs acsnc \
 EphemGeneratorStubs AntennaBossStubs ObservatoryStubs FitsWriterStubs DataReceiverStubs CustomLoggerStubs GenericWeatherStationStubs\
 GenericBackendStubs ComponentErrors ManagementErrors AntennaErrors BackendsErrors ParserErrors ReceiversErrors MinorServoErrors\
