@@ -43,6 +43,8 @@ import ACSErrTypeFPGACommunicationImpl
 import ComponentErrorsImpl
 import Acspy.Util.ACSCorba
 import BackendsErrorsImpl
+from Acspy.Common.TimeHelper import getTimeStamp
+from Acspy.Clients.SimpleClient import PySimpleClient
 
 
 
@@ -87,7 +89,8 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
         ContainerServices.__init__(self)
         self.corr = corr2serial.Correlator()
 #	self.name=ContainerServices.getName(self)
-
+#        sc=PySimpleClient()
+#        self.antennaBoss=sc.getComponent("ANTENNA/Boss")
     def initialize(self):
         """Retrieve the CDB parameters."""
 #        dal=Acspy.Util.ACSCorba.cdb()
@@ -104,7 +107,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
             self.max_attempts =1
 
 #	    self.samples==int(dao.get_double("SAMPLES"))
-	    self.port='/dev/ttyr00'
+	    self.port='/dev/ttyS0'
 	    self.baudrate=115200
 	    self.samples=5000000 
 	    self.out_file_name="/home/spoppi/Holography/outfile"
@@ -182,6 +185,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
         """
 
         try:
+            
             if self.corr.isConnected:
                  self.corr.disconnect()
             err = self.corr.connect(self.port, self.baudrate)
@@ -190,7 +194,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
         except Exception:
             self.getLogger().logDebug("Error in save_coeff: cannot connect to FPGA")
             self.getLogger().logError("Error... cannot connect to FPGA")
-            raise BackendErrorsImpl.NakExImpl()
+            raise BackendsErrorsImpl.NakExImpl()
 
 #       # Running Correlation
         try:
@@ -198,7 +202,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
 
         except Exception:
             self.getLogger().logError("Error running correlation.")
-            raise BackendErrorsImpl.BackendBusyImpl()
+            raise BackendsErrorsImpl.BackendBusyImpl()
 
         
         # Getting coefficient    
@@ -206,7 +210,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
             self.corr.getCoeff()
 
         except Exception:
-            raise BackendErrorsImpl.BackendBusyImpl()
+            raise BackendsErrorsImpl.BackendBusyImpl()
 
 #        module = sqrt(self.corr.get_real()**2 + self.corr.get_imm()**2) 
 #        phase_tmp = atan2(self.corr.get_imm() ,  self.corr.get_real())
@@ -215,7 +219,8 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
         try:
             
             full_res = self.corr.results.copy()
-            self.corr.reset()
+ #           az,el=self.antennaBoss.getObservedHorizontal(getTimeStamp().value,0)
+  #          self.corr.reset()
 
 #            full_res.update({'module': module, 'phase': phase})
 #            print full_res
@@ -233,7 +238,7 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
             self.corr.disconnect()
         except Exception:
             print "disconnect exception"
-            raise BackendErrorsImpl.BackendBusyImpl()
+            raise BackendsErrorsImpl.BackendBusyImpl()
         
     def openFile(self,name):
            
@@ -269,5 +274,5 @@ class DigitalXCorrelator(DXC__POA.DigitalXCorrelator, ACSComponent, ContainerSer
           self.corr.reset()
         except Exception:
             print "reset exception"
-            raise BackendErrorsImpl.BackendBusyImpl()
+            raise BackendsErrorsImpl.BackendBusyImpl()
         

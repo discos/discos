@@ -45,7 +45,8 @@ void CSenderThread::runLoop()
 	   double az,el;
 	az=-99.;  // DUMMY values 
 	el=-99.;
-
+        double azimuth,elevation;
+        
 	if (CORBA::is_nil(m_antenna_boss))
 	{
 	
@@ -53,22 +54,25 @@ void CSenderThread::runLoop()
 	
 	} else
 	{
-	  	cout <<"ABOSS REFERENCED " << endl;
-         	IRA::CIRATools::getTime(now);
-                m_antenna_boss->getAllOffsets(azeloff,eloff,raoff,decoff,lonoff,latoff); //   
-	        m_antenna_boss->getObservedHorizontal(now.value().value,0,az,el); // get az and el from bos
-
+        	IRA::CIRATools::getTime(now);
+      //          m_antenna_boss->getAllOffsets(azeloff,eloff,raoff,decoff,lonoff,latoff); //   
+	        m_antenna_boss->getObservedHorizontal(now.value().value,200*10000,az,el);
+           // get az and el from bos
+      #define PI 3.14159265358979323846
+    
+                cout <<"Azimuth and El:" << az/PI*180. <<" " <<el/PI*180. << endl;
+                azimuth=az;
+                elevation=el;
 	}
     // removed 	
 	
 	IRA::CError err;
 	try{
 
-#define PI 3.14159265358979323846
      //   az=az/PI*180.0;   // conversion to degrees made inside the correlator component
      //   
      //   el=el/PI*180.0;  
-	m_dxc_correlator->save_coeff(azeloff,eloff); 
+	m_dxc_correlator->save_coeff(azimuth,elevation); 
 	// AUTO_TRACE("CSenderThread::runLoop()");
 	} catch (ACSErrTypeFPGACommunication::ACSErrTypeFPGACommunicationExImpl &ex)
 	{

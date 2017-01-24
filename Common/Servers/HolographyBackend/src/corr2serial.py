@@ -88,6 +88,8 @@ class Correlator:
         if len(self.buffer) != buffer_size:
             return -1
         else:
+            self.ser.flushInput()
+
             return 0        
 
     def fixed2float(self,data, dim_data, q):
