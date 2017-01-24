@@ -202,10 +202,10 @@ def main():
 			posZ2=polZ2[0]*delev*delev+polZ2[1]*delev+polZ2[2]
 			posZ3=polZ3[0]*delev*delev+polZ3[1]*delev+polZ3[2]
 			posX=posX+offsets[0]
-			posY=posX+offsets[1]
-			posZ1=posX+offsets[2]
-			posZ2=posX+offsets[3]
-			posZ3=posX+offsets[4]
+			posY=posY+offsets[1]
+			posZ1=posZ1+offsets[2]
+			posZ2=posZ2+offsets[3]
+			posZ3=posZ3+offsets[4]
 			if posX>maxX:
 				posX=maxX
 			if posX<minX:
