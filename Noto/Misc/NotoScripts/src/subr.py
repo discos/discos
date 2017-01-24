@@ -20,8 +20,35 @@ import time
 import socket
 import struct
 from math import *
+import os
+import thread
 
+offsets=[0.0,0.0,0.0,0.0,0.0]
+exitFlag=False
 
+def readPipe(pipeName):
+	print "Opening pipe......"
+	pipeIn=os.open(pipeName,os.O_RDONLY|os.O_NONBLOCK)
+	print "Pipe openened for reading......"
+	while not exitFlag:
+		try:
+			pipeString=os.read(pipeIn,64)
+			if len(pipeString)>0:
+				print "receieved offsets %s"%pipeString
+				info=pipeString.split(',')
+				print info
+				offsets[0]=float(info[0])
+				offsets[1]=float(info[1])
+				offsets[2]=float(info[2])
+				offsets[3]=float(info[2])
+				offsets[4]=float(info[2])
+				print offsets
+		except Exception, ex:
+			print ex
+		finally:
+			time.sleep(1)
+	os.close(pipeIn)
+        
 def usage():
 	print "subr [-h|--help] [-c|--code=]"
 	print ""
@@ -47,7 +74,8 @@ def main():
 	polY=[0.0,0.0,0.0]
 	polZ1=[0.0,0.0,0.0]
 	polZ2=[0.0,0.0,0.0]
-	polZ3=[0.0,0.0,0.0]    
+	polZ3=[0.0,0.0,0.0]
+	pipeName="/tmp/subrPipe"
 
 	for o, a in opts:
 		if o in ("-h", "--help"):
@@ -83,7 +111,6 @@ def main():
 		maxZ2=100
 		minZ2=-100
 
-
 		polZ3[0]=0.00168640  
 		polZ3[1]=-0.271430
 		polZ3[2]=-57.40
@@ -109,13 +136,13 @@ def main():
 		maxZ1=85
 		minZ1=-85
 
-		polZ2[0]=0.00168640  
+		polZ2[0]=0.00168640
 		polZ2[1]=-0.271430
 		polZ2[2]=9.8
 		maxZ2=85
 		minZ2=-85
 
-		polZ3[0]=0.00168640  
+		polZ3[0]=0.00168640
 		polZ3[1]=-0.271430
 		polZ3[2]=12.6
 		maxZ3=85
@@ -124,6 +151,20 @@ def main():
 	else:
 		print "Unknown code"
 		sys.exit(1);
+
+	print "Preparing pipe....."
+	if not os.path.exists(pipeName):
+		print "Creating pipe"
+		os.mkfifo(pipeName,0777)
+		print "Created"
+	else:
+		print "pipe already exists"
+
+	try:
+		pipeThread=thread.start_new_thread(readPipe,(pipeName, ) )
+	except Exception,ex:
+		print ex
+		sys.exit(1)
 
 	#get the link to the SRTmountcomponent
 	simpleClient = PySimpleClient()
@@ -145,6 +186,7 @@ def main():
 
 	print "socket connected"
 	time.sleep(2)
+
 	try:
 		while 1:
 			ctime=getTimeStamp().value
@@ -159,6 +201,11 @@ def main():
 			posZ1=polZ1[0]*delev*delev+polZ1[1]*delev+polZ1[2]
 			posZ2=polZ2[0]*delev*delev+polZ2[1]*delev+polZ2[2]
 			posZ3=polZ3[0]*delev*delev+polZ3[1]*delev+polZ3[2]
+			posX=posX+offsets[0]
+			posY=posX+offsets[1]
+			posZ1=posX+offsets[2]
+			posZ2=posX+offsets[3]
+			posZ3=posX+offsets[4]
 			if posX>maxX:
 				posX=maxX
 			if posX<minX:
@@ -187,11 +234,14 @@ def main():
 			time.sleep(1)
 			data=client_socket.recv(128)
 			print "risposta ", data
-			time.sleep(10)
+			time.sleep(2)
 	finally:
+		exitFlag=True
+		pipeThread.join(timeout=5)
 		if not (compName==""):
-        		simpleClient.releaseComponent(compName)     
-    		simpleClient.disconnect()
+			simpleClient.releaseComponent(compName)
+			simpleClient.disconnect()
+		
 
 
 if __name__=="__main__":

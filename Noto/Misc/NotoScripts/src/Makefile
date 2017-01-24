@@ -78,7 +78,7 @@ TCL_SCRIPTS_L   =
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = subr
+PY_SCRIPTS         = subr subrOff
 PY_SCRIPTS_L       =
 
 PY_MODULES         =
