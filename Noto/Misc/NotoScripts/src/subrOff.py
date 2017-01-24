@@ -65,6 +65,7 @@ def main():
 		pipeString="%lf,%lf,%lf"%(X,Y,Z)
 		pipeOut.write(pipeString)
 		print "command sent!"
+		pipeOut.close()
 	except Exception, ex:
 		print ex
 
