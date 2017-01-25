@@ -102,4 +102,8 @@
 
 <ErrorCode name="ComponentNotActive" shortDescription="Component not active" description="" />
 
+<ErrorCode name="CanNotStartThread" shortDescription="An internal thread could not be started" description="">
+	<Member name="ThreadName" type="string" description="Name of the thread" />
+</ErrorCode>
+
 </Type>

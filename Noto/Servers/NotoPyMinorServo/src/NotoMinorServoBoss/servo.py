@@ -57,6 +57,7 @@ class Servo(object):
 	def connect(self):
 		try:
 			self.client_socket= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			#It should be red from CDB
 			self.client_socket.connect(('192.167.187.92',5003))
 			self.connected=True
 		except socket.error, ex:

@@ -22,9 +22,8 @@ import ManagementErrorsImpl
 import ManagementErrors
 import socket
 
-
-from MinorServo.servo import Servo
-from MinorServo.devios import stringDevIO
+from NotoMinorServoBoss.servo import Servo
+from NotoMinorServoBoss.devios import stringDevIO
 
 from IRAPy import logger
 
@@ -69,15 +68,8 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 		services.__init__(self)
 		self.minorServo = Servo(services())
 		self.control = Control()
-		
-		"""
-		************************************************************
-		comment in in order to perform connection to SCU
 		self.minorServo.connect()
-		"""
-
-
-		#self._setDefaultSetup() 
+ 
 		try:
 			self.workingThread=services().getThread(name='Worker',target=MinorServoImpl.worker,args=(self.minorServo,self.control))
 			self.workingThread.start()
@@ -85,37 +77,25 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 			newEx=ComponentErrorsImpl.CanNotStartThreadExImpl( exception=ex, create=1 )
 			newEx.log(services().getLogger(),ACSLog.ACS_LOG_DEBUG)
 			raise newEx
-		
-		
-		"""
-        #self.control = Control()
-        #try:
-        #    self.supplier = Supplier(Receivers.DEWAR_POSITIONER_DATA_CHANNEL)
-        #except CORBAProblemExImpl, ex:
-        #    logger.logError('cannot create the dewar positioner data channel')
-        #    logger.logDebug('cannot create the data channel: %s' %ex.message)
-        #except Exception, ex:
-        #    reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
-        #    logger.logError(reason)
 
-        #try:
-        #    self.statusThread = services().getThread(
-        #            name='Publisher',
-        #            target=DewarPositionerImpl.publisher,
-        #            args=(self.positioner, self.supplier, self.control)
-        #    )
-        #    self.statusThread.start()
-        #except AttributeError, ex:
-        #    logger.logWarning('supplier not available')
-        #    logger.logDebug('supplier not available: %s' %ex.message)
-        #except Exception, ex:
-        #    logger.logError('cannot create the status thread: %s' %ex.message)
-		"""
+		try:
+			self.supplier=Supplier(MinorServo.MINORSERVO_DATA_CHANNEL)
+        	except CORBAProblemExImpl, ex:
+			newEx=ComponentErrorsImpl.NotificationChannelErrorExImpl(exception=ex, create=1 )
+			newEx.log(services().getLogger(),ACSLog.ACS_LOG_DEBUG)
+			raise newEx
+		try:
+			self.publisherThread=services().getThread(name='Publisher',target=MinorServoImpl.publisher,args=(self.minorServo, self.supplier, self.control))
+			self.publisherThread.start()
+		except Exception, ex:
+			newEx=ComponentErrorsImpl.CanNotStartThreadExImpl( exception=ex, create=1 )
+			newEx.log(services().getLogger(),ACSLog.ACS_LOG_DEBUG)
+			raise newEx
 
 	def initialize(self):		
 		addProperty(self,'actualSetup',devio_ref=stringDevIO(self.minorServo),prop_type="ROstring")
 		#motionInfo: Starting, Parking, Not Elevation Tracking, 
-      #             Elevation Tracking, Not Ready to Move, ...
+      		#Elevation Tracking, Not Ready to Move, ...
 		addProperty(self,'motionInfo',devio_ref=stringDevIO(self.minorServo),prop_type="ROstring")
 		"""
 		The property below are not implemented as it seems current python component does not support enum properties
@@ -136,15 +116,17 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 			self.workingThread.join(timeout=5)
 			if self.statusThread.isAlive():
 				services().getLogger().logWarnig('working thread still alive and properly closed')
+			self.supplier.disconnect()
 		except Exception,ex:
 			pass
 		finally:
 			self.control.stop=False
 
+
 	"""
-   Set the elevation tracking flag to "ON" or "OFF"
-   :param value "ON" or "OFF"
-   :throw MinorServoErrors::MinorServoErrorsEx if the input is different from "ON" or "OFF"
+	Set the elevation tracking flag to "ON" or "OFF"
+	:param value "ON" or "OFF"
+	:throw MinorServoErrors::MinorServoErrorsEx if the input is different from "ON" or "OFF"
 	:throw MinorServoErrors::StatusErrorEx if the servo is differrently configured
 	"""
 	def setElevationTracking(self,value):
@@ -302,9 +284,9 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
  
 	"""
 	Set the user offset of the servo
-   :param axis_code the axis code (SRP_TZ, GFR_RZ, ecc.)
-   :param double offset 
-   :raises (ManagementError::ConfigurationErrorEx,MinorServoErrors::OperationNotPermittedEx)	
+	:param axis_code the axis code (SRP_TZ, GFR_RZ, ecc.)
+	:param double offset 
+	:raises (ManagementError::ConfigurationErrorEx,MinorServoErrors::OperationNotPermittedEx)	
 	"""
 	def setUserOffset(self,axis_code,offset):
 		#to be implemented
@@ -381,6 +363,7 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 	def setup(self, code):
 		try:
 			self.minorServo.setup(code)
+			logger.logNotice('minor servo being configured: %s' %code)
 		except ManagementErrorsImpl.ConfigurationErrorExImpl,ex:
 			raise ex
 
@@ -1023,16 +1006,39 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 	def worker(servo, control, sleep_time=1):
 		while True:
 			try:
-				print 'working'
 				servo.updatePosition()
 			except Exception, ex:
 				newEx=ComponentErrorsImpl.OperationErrorExImpl(exception=ex,create=1)
 				newEx.log(services().getLogger(),ACSLog.ACS_LOG_ERROR)
 			finally:
 				time.sleep(sleep_time)
+	"""
+	The contenet of the event structure is:
+	ACS::Time timeMark;
+	boolean tracking;
+	boolean starting;
+	boolean parking;
+	boolean parked;
+	Management::TSystemStatus status;
+	Presently I have to apply static values, i.e. tracking=TRUE, starting=TRUE, parking=False, Parked=False, status=Management.MNG_OK	
+	"""
+	@staticmethod
+	def publisher(servo, supplier, control, sleep_time=1):
+		while True:
+			if control.stop:
+				break
+			else:
+				try:	
+					event=MinorServo.MinorServoDataBlock(getTimeStamp().value,True,True,False,False,Management.MNG_OK)	
+					supplier.publishEvent(simple_data=event)
+				except Exception, ex:
+					newEx=ComponentErrorsImpl.NotificationChannelErrorExImpl(exception=ex, create=1 )
+					newEx.log(services().getLogger(),ACSLog.ACS_LOG_WARNING)
+		                finally:
+					time.sleep(sleep_time)
+
 
 class Control(object):
     def __init__(self):
         self.stop = False
-        self.mngStatus = Management.MNG_WARNING
 
