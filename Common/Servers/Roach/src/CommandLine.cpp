@@ -128,6 +128,7 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 		}
 	} */	
 
+    /* After the first connection, the server send the protocol version string */
     res=receiveBuffer(rBuff,RECBUFFERSIZE);
     //printf("connect = %s\n", rBuff);
 
@@ -153,7 +154,7 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 }
 
 void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl)
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl)
 {
 	AUTO_TRACE("CCommandLine::stopDataAcquisition()");
 	Message reply = sendBackendCommand(Command::stop());
@@ -183,7 +184,7 @@ void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExIm
 }
 
 ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
-		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
+		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::BackendFailExImpl)
 {
 	TIMEVALUE now;
 	TIMEVALUE epoch;
@@ -221,12 +222,12 @@ ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Ba
 	else {
 		expectedTime=epoch.value().value;
 	}
-	if (!checkConnection()) {
+	/*if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::resumeDataAcquisition()");
-	}
-    	Message request = Command::start();
-    	Message reply = sendBackendCommand(request);
-    	if(reply.is_success_reply()) {
+	}*/
+    Message request = Command::start();
+    Message reply = sendBackendCommand(request);
+    if(reply.is_success_reply()) {
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::resumeDataAcquisition()",(LM_INFO,"TRANSFER_JOB_RESUMED"));
 		clearStatusField(SUSPEND);
 	}
@@ -234,7 +235,7 @@ ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Ba
 }
 
 void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
-			BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
+			BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::BackendFailExImpl)
 {
 	AUTO_TRACE("CCommandLine::suspendDataAcquisition()");
 	/*if ((m_backendStatus & (1 << SUSPEND)) || !getIsBusy()) { //not suspended....running
@@ -242,9 +243,13 @@ void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExI
 		impl.setReason("transfer job cannot be suspended in present configuration");
 		throw impl;
 	}*/
-    	Message reply = sendBackendCommand(Command::stop());
-    	if(reply.is_success_reply()){
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::suspendDataAcquisition()",(LM_INFO,"TRANSFER_JOB_SUSPENDED"));
+    /*if (!checkConnection()) {
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::suspendDataAcquisition()");
+	}*/
+    Message request = Command::stop();
+    Message reply = sendBackendCommand(request);
+    if(reply.is_success_reply()) {
+        ACS_LOG(LM_FULL_INFO,"CCommandLine::suspendDataAcquisition()",(LM_INFO,"TRANSFER_JOB_SUSPENDED"));
 		setStatusField(SUSPEND);
 	}
 }
@@ -454,10 +459,11 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	}
     else
         newBins = m_bins[inputId];
-
+    
+    /*
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setConfiguration()");
-	}
+	}*/
 
 
 	//len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW,m_boards); // get the buffer
@@ -894,45 +900,53 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_INFO,"DEFAULTS_ARE_SET"));
     */
     if (config.Compare("RK00")==0) {
-        filter=1250.0;
+        m_filter=1250.0;
+        m_rfInputs=2;
         m_RK00=true;
         m_RC00=m_RL00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
     }
     if (config.Compare("RC00")==0) {
-        filter=1250.0;
+        m_filter=1250.0;
+        m_rfInputs=2;
         m_RC00=true;
         m_RK00=m_RL00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
     }
     if (config.Compare("RL00")==0) {
-        filter = 2300.0;
+        m_filter = 2300.0;
+        m_rfInputs=2;
         m_RL00=true;
         m_RK00=m_RC00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
     }
     if (config.Compare("RP00")==0) {
-        filter = 730.0;
+        m_filter = 730.0;
+        m_rfInputs=2;
         m_RP00=true;
         m_RK00=m_RC00=m_RL00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
     }
     if (config.Compare("RK00S")==0) {
-        filter=1250.0;
+        m_filter=1250.0;
+        m_rfInputs=2;
         m_RK00S=true;
         m_RC00=m_RL00=m_RP00=m_RK00=m_RC00S=m_RL00S=m_RP00S=false;
     }
     if (config.Compare("RC00S")==0) {
-        filter=1250.0;
+        m_filter=1250.0;
+        m_rfInputs=2;
         m_RC00S=true;
         m_RK00=m_RL00=m_RP00=m_RK00S=m_RC00=m_RL00S=m_RP00S=false;
     }
     if (config.Compare("RL00S")==0) {
-        filter = 2300.0;
+        m_filter = 2300.0;
+        m_rfInputs=2;
         m_RL00S=true;
         m_RK00=m_RC00=m_RP00=m_RK00S=m_RC00S=m_RL00=m_RP00S=false;
     }
     if (config.Compare("RP00S")==0) {
-        filter = 730.0;
+        m_filter = 730.0;
+        m_rfInputs=2;
         m_RP00S=true;
         m_RK00=m_RC00=m_RL00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
-    }
+    }/*
     try {
         m_totalPower->setSection(0,-1, filter, -1, -1, -1, -1);
         m_totalPower->setSection(1,-1, filter, -1, -1, -1, -1);
@@ -940,7 +954,7 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
     catch (...) {
         _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setDefaultConfiguration()");
         impl.log(LM_ERROR);
-    }
+    }*/
 }
 
 void CCommandLine::setTargetFileName(const char *conf)
@@ -993,6 +1007,8 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ReplyNotValidExImpl,BackendsErrors::BackendFailExImpl)
 {
 	AUTO_TRACE("CCommandLine::setup()");
+    double filter;
+
 /*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setup()");
 		throw impl;
@@ -1008,6 +1024,59 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 	else {
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZATION ERROR, CONFIGURATION: %s",conf)); 
 	}
+
+    setDefaultConfiguration(conf);
+
+    /*
+    if (strcpy(conf,"RK00")) {
+        filter=1250.0;
+        m_RK00=true;
+        m_RC00=m_RL00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+    }
+    if (strcpy(conf,"RC00")) {
+        filter=1250.0;
+        m_RC00=true;
+        m_RK00=m_RL00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+    }
+    if (strcpy(conf,"RL00")) {
+        filter = 2300.0;
+        m_RL00=true;
+        m_RK00=m_RC00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+    }
+    if (strcpy(conf,"RP00")) {
+        filter = 730.0;
+        m_RP00=true;
+        m_RK00=m_RC00=m_RL00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+    }
+    if (strcpy(conf,"RK00S")) {
+        filter=1250.0;
+        m_RK00S=true;
+        m_RC00=m_RL00=m_RP00=m_RK00=m_RC00S=m_RL00S=m_RP00S=false;
+    }
+    if (strcpy(conf,"RC00S")) {
+        filter=1250.0;
+        m_RC00S=true;
+        m_RK00=m_RL00=m_RP00=m_RK00S=m_RC00=m_RL00S=m_RP00S=false;
+    }
+    if (strcpy(conf,"RL00S")) {
+        filter = 2300.0;
+        m_RL00S=true;
+        m_RK00=m_RC00=m_RP00=m_RK00S=m_RC00S=m_RL00=m_RP00S=false;
+    }
+    if (strcpy(conf,"RP00S")) {
+        filter = 730.0;
+        m_RP00S=true;
+        m_RK00=m_RC00=m_RL00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+    }*/
+
+    try {
+        m_totalPower->setSection(0,-1, m_filter, -1, -1, -1, -1);
+        m_totalPower->setSection(1,-1, m_filter, -1, -1, -1, -1);
+    }
+    catch (...) {
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setDefaultConfiguration()");
+        impl.log(LM_ERROR);
+    }
 	/*try {
 		setDefaultConfiguration(conf);
 	}
@@ -1392,21 +1461,26 @@ void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& size)
 {
 	long index=0;
-	for (int i=0;i<m_sectionsNumber;i++) {
+	//for (int i=0;i<m_sectionsNumber;i++) {
+	for (int i=0;i<m_rfInputs;i++) {
+                printf("i = %d\n", i);
 		if (m_enabled[i]) {
 			if (index<size) {
 				chHr[index].id=i;
 				chHr[index].bins=m_bins[i];
 				chHr[index].polarization=m_polarization[i];
+                printf("pol = %d\n", m_polarization[i]);
 				chHr[index].bandWidth=m_bandWidth[i];
 				chHr[index].frequency=m_frequency[i];
 				chHr[index].attenuation[0]=m_attenuation[i]; // we have always one inputs....so just the first position is significant
 				chHr[index].attenuation[1]=0.0;  // not significant....placeholder				
 				chHr[index].IF[0]=m_ifNumber[i];
-				chHr[index].IF[1]=0;  // not significant
+				//chHr[index].IF[0]=0;
+				chHr[index].IF[1]=1;  // not significant
+				//chHr[index].IF[1]=0;  // not significant
 				chHr[index].sampleRate=/*m_sampleRate[i];*/m_commonSampleRate;
 				chHr[index].feed=m_feedNumber[i];
-				chHr[index].inputs=1;				
+				chHr[index].inputs=1;	
 				index++;
 			}
 		}
@@ -1575,7 +1649,7 @@ Message
 CCommandLine::sendBackendCommand(Message request)
 {
 	if (!checkConnection()) {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::startDataAcquisition()");
+		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::sendBackendCommand()");
 	}
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
@@ -1817,6 +1891,9 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 	else {
 		return false;
 	}
+    //if (config.Compare("RC00")==0)
+    //    m_rfInputs=2;
+
 	// Common configurations.......
 	m_integration=DEFAULT_INTEGRATION;  // integration if by default zero...that means the 1/samplerate is the real integration time
 	m_currentSampleRate=m_integration;  // this is given in milliseconds as sample period

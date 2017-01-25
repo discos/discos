@@ -72,7 +72,8 @@ public:
 	 * Call this function to get the number of inputs
 	 * In this implementation the inputs number is the same of the number of section (SIMPLE_SECTION)
 	 */
-	inline void getInputsNumber(long &in) const { in=m_sectionsNumber; }
+	//inline void getInputsNumber(long &in) const { in=m_sectionsNumber; }
+	inline void getInputsNumber(long &in) const { in=m_rfInputs; }
 		
 	/**
 	 * Call this function to get the milliseconds of integration time
@@ -291,7 +292,7 @@ public:
 	 * @throw ComponentErrors::NotAllowedExImpl
 	 */	
 	void stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl);
+			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl);
 	
 	/**
 	 * This function will stop the current acquisition job without caring about the component or the backend status
@@ -319,7 +320,7 @@ public:
 	 * @return the epoch of the real expected start time.
 	 */
 	ACS::Time resumeDataAcquisition(const ACS::Time& startT) throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
-		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl);
+		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::BackendFailExImpl);
 	
 	/**
 	 * This function will suspend the data acquisition job.
@@ -331,7 +332,7 @@ public:
 	 * @throw ComponentErrors::NotAllowedExImpl
 	 */
 	void suspendDataAcquisition() throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
-			BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl);
+			BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::BackendFailExImpl);
 	
 	/**
 	 * Called to get a single measure of the total power for each in channel. The measure is done by the slow mode of the backend
@@ -638,6 +639,10 @@ private:
 	 * It stores the last measure of zero TPI
 	 */
 	double m_tpiZero[MAX_SECTION_NUMBER];
+
+    long m_rfInputs;
+
+    double m_filter;
 	
 	/**
 	 * Pointer to the configuration table, every record of the table stores a possible backend setup.

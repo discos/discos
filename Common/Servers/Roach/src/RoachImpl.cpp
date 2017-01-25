@@ -463,7 +463,7 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 	AUTO_TRACE("RoachImpl::sendStop()");
 
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	/*try {
+	try {
 		line->suspendDataAcquisition(); 
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -478,7 +478,7 @@ void RoachImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::Backen
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"RoachImpl::sendStop()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}*/
+	}
 	//I explicity release the mutex before accessing the sender thread because it also make use of the command line...just to make sure to avoid deadlock
 	//line.Release();
 	//m_senderThread->suspendTransfer();
