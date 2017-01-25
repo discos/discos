@@ -42,11 +42,10 @@ def readPipe(pipeName):
 				offsets[2]=float(info[2])
 				offsets[3]=float(info[2])
 				offsets[4]=float(info[2])
-				print offsets
+				time.sleep(1)
 		except Exception, ex:
-			print ex
-		finally:
-			time.sleep(1)
+			pass
+			#print ex
 	os.close(pipeIn)
         
 def usage():
@@ -231,10 +230,10 @@ def main():
 			buffer="0,1,7,%6.2lf,%6.2lf,%6.2lf,%6.2lf,%6.2lf" % (posX,posY,posZ1,posZ2,posZ3)
 			#print buffer
 			sendData(client_socket,buffer)
-			time.sleep(1)
+			time.sleep(5)
 			data=client_socket.recv(128)
-			print "risposta ", data
-			time.sleep(2)
+			#print "risposta ", data
+			time.sleep(1)
 	finally:
 		exitFlag=True
 		pipeThread.join(timeout=5)

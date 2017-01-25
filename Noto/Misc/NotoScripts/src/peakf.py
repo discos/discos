@@ -39,7 +39,7 @@ def usage():
 def main():
     
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"hy:z:c:s:p:",["help"])
+		opts, args = getopt.getopt(sys.argv[1:],"ha:y:z:c:s:p:",["help"])
 	except getopt.GetoptError, err:
 		print str(err)
 		usage()
@@ -109,41 +109,46 @@ def main():
 	pipeOut=open(pipeName,'w', 0)
 	print "Pipe openened for writing......"
 
-	if axis=="Y":
-		bdf=-0.0036
-	else:
-		bdf=0.0
+	bdf=-0.0036
 	
 	axisPos=0.0
 	startPoint=points/2
 	millis=span/float(points)
 	try:
 		for i in range(-startPoint,startPoint):
-			axisPos=center+i*millis
 			try:
+				pipeString=""
 				if axis=="Y":
-					pipeString="0.0,%lf,%lf,"%(X,axisPos,centerZ)
+					axisPos=centerY+i*millis
+					pipeString="0.0,%lf,%lf"%(axisPos,centerZ)
 				else:
-					pipeString="0.0,%lf,%lf,"%(X,centerY,axisPos)
+					axisPos=centerZ+i*millis
+					pipeString="0.0,%lf,%lf"%(centerY,axisPos)
 				pipeOut.write(pipeString)
 			except Exception, ex:
 				print "Error in sending commant to scu"
 				print ex
 				sys.exit(1)
 			try:
-				antennaComponent.setOffsets(math.radians(0.0),math.radians(axisPos*bdf),Antenna.ANT_HORIZONTAL)
+				if axis=="Y":
+					antennaComponent.setOffsets(math.radians(0.0),math.radians(axisPos*bdf),Antenna.ANT_HORIZONTAL)
+				else:
+					pass
+					#antennaComponent.setOffsets(math.radians(0.0),math.radians(centerY*bdf),Antenna.ANT_HORIZONTAL)						
 			except Excpetion,ex:
 				print "Error  while sending offset to the telescope"
 				print ex
 				sys.exit(1)
-			time.sleep(5)
+			time.sleep(8)
 			try:
-				samples=tpComponent.getTpi()
+				samples1=tpComponent.getTpi()
+				samples2=tpComponent.getTpi()				
 			except:
 				print "error reading total power measurement"
 				print ex
 				sys.exit(1)
-			print "Lettura %lf,%lf"%(axisPos,samples[1])
+			sample=(samples1[1]+samples2[1])/2.0
+			print "Lettura %lf,%lf"%(axisPos,sample)
 			
 	finally:
 		if not (antennaCompName==""):
