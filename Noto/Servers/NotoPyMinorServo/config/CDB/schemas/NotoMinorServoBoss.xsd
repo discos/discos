@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Author: 
+        Andrea Orlati, a.orlati@ira.inaf.it
+
+
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:NotoMinorServoBoss:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="urn:schemas-cosylab-com:NotoMinorServoBoss:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+
+    <xs:complexType name="MinorServoBossType">
+        <xs:sequence>
+            <xs:element name="status" type="mng:SystemStatusType" />
+            <xs:element name="ready" type="mng:BooleanType" />
+            <xs:element name="actualSetup" type="baci:ROstring" />
+            <xs:element name="motionInfo" type="baci:ROstring" />
+            <xs:element name="tracking" type="mng:BooleanType" />
+            <xs:element name="starting" type="mng:BooleanType" />
+            <xs:element name="asConfiguration" type="mng:BooleanType" />
+            <xs:element name="elevationTrack" type="mng:BooleanType" />
+            <xs:element name="scanActive" type="mng:BooleanType" />
+            <xs:element name="scanning" type="mng:BooleanType" />
+        </xs:sequence>
+
+        <xs:attribute name="ipAddress" type="xs:string" use="required" />
+        <xs:attribute name="ipPort" type="xs:string" use="required" />	
+        <xs:attribute name="AntennaBossInterface" type="xs:string" use="required" />
+        <!-- Subsystem attributes -->
+        <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
+        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
+    </xs:complexType>
+
+    <xs:element name="MinorServoBoss" type="MinorServoBossType"/>
+
+</xs:schema>
