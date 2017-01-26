@@ -32,36 +32,15 @@ __copyright__ = "Andrea Orlati <a.orlati@ira.inaf.it>"
 
 
 class MinorServoImpl(POA, charcomponent, services, lcycle):
-	"""
+
 	commands = {
    	# command_name: (method_name, (type_of_arg1, ..., type_of_argN))
-        'derotatorSetup': ('setup', (str,)), 
-        'derotatorGetActualSetup': ('getActualSetup', ()),
-        'derotatorIsReady': ('isReady', ()), 
-        'derotatorSetConfiguration': ('setConfiguration', (str,)),
-        'derotatorGetConfiguration': ('getConfiguration', ()), 
-        'derotatorPark': ('park', ()),
-        'derotatorSetOffset': ('setOffset', (float,)),
-        'derotatorGetOffset': ('getOffset', ()),
-        'derotatorClearOffset': ('clearOffset', ()),
-        'derotatorSetRewindingMode': ('setRewindingMode', (str,)),
-        'derotatorGetRewindingMode': ('getRewindingMode', ()),
-        'derotatorSetAutoRewindingSteps': ('setAutoRewindingSteps', (int,)),
-        'derotatorGetAutoRewindingSteps': ('getAutoRewindingSteps', ()),
-        'derotatorClearAutoRewindingSteps': ('clearAutoRewindingSteps', ()),
-        'derotatorIsUpdating': ('isUpdating', ()),
-        'derotatorIsRewinding': ('isRewinding', ()), 
-        'derotatorIsRewindingRequired': ('isRewindingRequired', ()), 
-        'derotatorRewind': ('rewind', (int,)),
-        'derotatorSetPosition': ('_setPositionCmd', (str,)),
-        'derotatorGetPosition': ('_getPositionCmd', ()), 
-        'derotatorGetCmdPosition': ('_getCmdPositionCmd', ()), 
-        'derotatorGetRewindingStep': ('_getRewindingStepCmd', ()),
-        'derotatorGetScanInfo': ('_getScanInfoCmd', ()),
-        'derotatorGetMaxLimit': ('_getMaxLimitCmd', ()),
-        'derotatorGetMinLimit': ('_getMinLimitCmd', ()),
-    }
-	"""
+        'servoSetup': ('setup', (str,)),  
+        'setServoElevationTracking': ('setElevationTracking', (str,)),
+	'setServoASConfiguration': ('setASConfiguration', (str,)),
+        'servoPark': ('park', ()),
+        'setServoOffset': ('setUserOffset', (str,float,)),
+        'clearServoOffsets': ('clearUserOffset', (str,)),}
 
 	def __init__(self):
 		charcomponent.__init__(self)
@@ -132,9 +111,9 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 	def setElevationTracking(self,value):
 		cmd=value.upper()
 		if cmd=="ON":
-			pass
+			self.minorServo.trackingEnabled=True
 		elif cmd=="OFF":
-			pass
+			self.minorServo.trackingEnabled=False
 		else:
 			exc=MinorServoErrors.ConfigurationError()
 			raise exc.getMinorServoErrorsEx()
@@ -145,20 +124,19 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 	def setASConfiguration(self,value):
 		pass
 
-
 	"""
 	Should the minor servo position change with the antenna elevation?
 	:return true if the elevation tracking is enabled
-   """
+	"""
 	def isElevationTrackingEn(self):
-		pass
+		return self.trackingEnabled
 	
 	"""
 	Is the minor servo position following the antenna elevation?
 	:return true if the minor servo position is following the antenna elevation
 	"""
 	def isElevationTracking():
-		pass
+		return self.minorServo.trackingEnabled
 	
 	"""
 	Is the system on focus?
@@ -178,15 +156,15 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 
 	"""
 	Is the system using the active surface configuration (polynomial to use when te AS is active)?
-   :return true if we are using the configuration with the AS active.
+	:return true if we are using the configuration with the AS active.
 	"""
 	def isASConfiguration(self):
 		#this is not implmented in Noto servo system, in principle it is always used
 		return True
 
 	"""
-   Is the system parking?
-   :return true if the system is parking
+	Is the system parking?
+	:return true if the system is parking
 	"""
 	def isParking(self):
 		#to be implemented
@@ -204,8 +182,8 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 		pass
 		
 	"""
-   Is the system performing a scan?
-   :return true if the system is performing a scan
+	Is the system performing a scan?
+	:return true if the system is performing a scan
 	"""
 	def isScanning(self):
 		#This is not presently implemented, always false
@@ -242,15 +220,16 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 		return 0.0
 
 	"""
-   Start the scan of one axis of the MinorServo target.
-   :param starting_time the time the scan will start or 0 if the scan is required to start immediately (ACS::Time)
+	Start the scan of one axis of the MinorServo target.
+	:param starting_time the time the scan will start or 0 if the scan is required to start immediately (ACS::Time)
 	:param scan structure containing the description of the scan to be executed (MinorServoScan)
 	:param antennaInfo auxiliary information from the antenna (Antenna::TRunTimeParameters)
 	:raises (MinorServoErrors::MinorServoErrorsEx,ComponentErrors::ComponentErrorsEx);
  	"""
 	def startScan(self,starting_time,scan,antennaInfo):
-		#TO be implemented
-		pass
+		#nothing to do here, scans are not supported....
+		if not starting_time==0:
+			starting_time=getTimeStamp().value
 
 	"""
 	Closes the current scan and force the minor servo system to its normal behaviour
@@ -258,24 +237,27 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 	:raises (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
 	"""
 	def closeScan(timeToStop):
-		#To be implemented
-		pass
+		#nothing to do here, scans are not supported....
+		timeToStop=0
 
 	"""
-   Check if it is possible to execute a scan along a given axis
-   :param starting_time the time the scan will start or 0 if the scan is required to start immediately (ACS::Time)
-   :param scan structure containing the description of the scan to be executed (MinorServoScan)
-   :param antennaInfo auxiliary information from the antenna (Antenna::TRunTimeParameters)
-   :param runTime auxiliary information computed at run time by the subsystem (TRunTimeParameters)
-	: raises ((MinorServoErrors::MinorServoErrorsEx,ComponentErrors::ComponentErrorsEx)
+	Check if it is possible to execute a scan along a given axis
+	:param starting_time the time the scan will start or 0 if the scan is required to start immediately (ACS::Time)
+	:param scan structure containing the description of the scan to be executed (MinorServoScan)
+	:param antennaInfo auxiliary information from the antenna (Antenna::TRunTimeParameters)
+	:param runTime auxiliary information computed at run time by the subsystem (TRunTimeParameters)
+	:raises ((MinorServoErrors::MinorServoErrorsEx,ComponentErrors::ComponentErrorsEx)
 	"""
 	def checkScan(self,starting_time,scan,antennaInfo,runtime):
-		#to be implemented
-		return False
+		#scan not supported, we just fill in some salinet parameters required by the scheduler
+		runtime.startEpoch=0
+		runtime.onTheFly=False
+		runtime.scanAxis=""
+		return True
 
 	"""
-   Clear the user offset of a servo (or all servos)
-   :param servo a string: the servo name or "ALL" to clear the user offset of all servos
+	Clear the user offset of a servo (or all servos)
+	:param servo a string: the servo name or "ALL" to clear the user offset of all servos
 	raises (MinorServoErrors::MinorServoErrorsEx,ComponentErrors::ComponentErrorsEx)
 	"""
 	def clearUserOffset(self,servo):
@@ -294,7 +276,7 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 
 	"""
 	Return the user offset of the system, by following the order axes of getAxesInfo()
-   :return offset the user offset of the system (ACS::doyubleSeq)
+	:return offset the user offset of the system (ACS::doyubleSeq)
 	:raises (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx)
 	"""
 	def getUserOffset(self):
@@ -347,8 +329,8 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
 	Return the code of the axis involved in the scan (string)
 	"""
 	def getScanAxis(self):
-		#to be implemented
-		pass
+		#scan not supported yet so return empty string
+		return ""
  
 	"""
 	Return the positions of the active axes (ACS::doubleSeq)
@@ -1002,6 +984,79 @@ class MinorServoImpl(POA, charcomponent, services, lcycle):
         logger.logInfo('command %s executed' %cmd)
         return (success, answer)
 """
+
+	"""
+        This method returns a tuple (success, answer), where success is a boolean
+        that indicates the command is executed correctly (success = True) or not
+        (success = False). The argument answer is a string that represents the
+        error message in case of error, the value returned from the method in
+        case it returns a non Null object, an empty string in case it returns None.
+	"""
+	def command(self, cmd):
+        
+	        try:
+			command, args_str = cmd.split('=') if '=' in cmd else (cmd, '')
+            		command = command.strip()
+            		args = [item.strip() for item in args_str.split(',')]
+        	except ValueError:
+            		success = False 
+            		answer = 'Error - invalid command: maybe there are too many symbols of ='
+	        except Exception, ex:
+            		success = False 
+            		answer = ex.message
+        	else:
+            		success = True
+
+        	if not success:
+			logger.logError(answer)
+			return (success, answer)
+		if command not in MinorServoImpl.commands:
+			success = False
+            		answer = 'Error - command %s does not exist' %command
+            		ger.logError(answer)
+            		return (success, answer)
+        	else:
+            		method_name, types = MinorServoImpl.commands[command]
+            		# If we expect some arguments but there is not
+            		if types and not any(args):
+                		success = False
+                		answer = 'Error - missing arguments, type help(%s) for details' %command
+                		logger.logError(answer)
+                		return (success, answer)
+
+            		try:
+               			method = getattr(self, method_name)
+			except AttributeError, ex:
+				success = False
+				answer = "Error - %s has no attribute %s" %(self, method_name)
+				logger.logError(answer)
+				return (success, answer)
+			try:
+				result = method(*[type_(arg) for (arg, type_) in zip(args, types)])
+				answer = '' if result is None else str(result)
+				success = True
+			except (ValueError, TypeError), ex:
+				success = False
+				answer = 'Error - wrong parameter usage.\nType help(%s) for details' %command
+				logger.logError('%s\n%s' %(ex.message, answer))
+				return (success, answer)
+			except ComponentErrors.ComponentErrorsEx, ex:
+				success = False
+				data_list = ex.errorTrace.data # A list
+				reason = data_list[0].value if data_list else 'component error'
+				answer = 'Error - %s' %reason
+				logger.logError(answer)
+				return (success, answer)
+			except Exception, ex:
+				success = False
+				msg = ex.message if ex.message else 'unexpected exception'
+				answer = 'Error - %s' %(ex.getReason() if hasattr(ex, 'getReason') else msg)
+				logger.logError(answer)
+                		return (success, answer)
+
+		logger.logInfo('command %s executed' %cmd)
+	        return (success, answer)
+
 	@staticmethod
 	def worker(servo, control, sleep_time=1):
 		while True:

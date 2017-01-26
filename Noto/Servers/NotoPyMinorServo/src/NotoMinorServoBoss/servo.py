@@ -14,6 +14,7 @@ import ACSLog
 from Acspy.Servants import ContainerServices
 from Acspy.Common.TimeHelper import getTimeStamp
 from IRAPy import logger
+from maciErrType import CannotGetComponentEx
 from math import *
 
 
@@ -50,6 +51,7 @@ class Servo(object):
 		""" Bussiness logic parameters """
 		self.configured=False
 		self.connected=False;
+		self.trackingEnabled=False
 
 	def __del__(self):
 		self.disconnect()
@@ -91,7 +93,7 @@ class Servo(object):
 		
 	def updatePosition(self):
 		print "Updating position......."
-		if (self.configured) and (self.currentConf!="") and (self.antennaBoss!=None):
+		if (self.configured) and (self.currentConf!="") and (self.antennaBoss!=None) and (self.trackingEnabled):
 			ctime=getTimeStamp().value
 			try:
 				az,el=self.antennaBoss.getRawCoordinates(ctime)
@@ -183,6 +185,7 @@ class Servo(object):
 			it should be set when the migration /primary/secondary is completed
 			"""
 			self.configured=True
+			self.trackingEnabled=True
 		finally:
 			Servo.classLock.release()
 		

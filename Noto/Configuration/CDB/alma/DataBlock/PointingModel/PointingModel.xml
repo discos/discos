@@ -10,15 +10,15 @@
 <Receiver>
 	<receiverCode>SEC</receiverCode>
         <phi>90.0</phi>
-        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0.0049250331 </coefficientVal00>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0.0219204295 </coefficientVal00>
         <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
-        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> -0.0139756389 </coefficientVal02>
-        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> 0.0083448673 </coefficientVal03>
-        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0047017052 </coefficientVal04>
-        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> 0.0030396502 </coefficientVal05>
-        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> -0.0707245991 </coefficientVal06>
-        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> 0.0138153592 </coefficientVal07>
-        <coefficientNum08> 0 </coefficientNum08> <coefficientVal08> 0 </coefficientVal08>
+        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> -0.0001390366 </coefficientVal02>
+        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> 0.0267782640 </coefficientVal03>
+        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0027674760 </coefficientVal04>
+        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> 0.0045442590 </coefficientVal05>
+        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> -0.1957215369 </coefficientVal06>
+        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> 0.1461050361 </coefficientVal07>
+        <coefficientNum08> 1 </coefficientNum08> <coefficientVal08> 0.0735574737 </coefficientVal08>
         <coefficientNum09> 0 </coefficientNum09> <coefficientVal09> 0 </coefficientVal09>
         <coefficientNum10> 0 </coefficientNum10> <coefficientVal10> 0 </coefficientVal10>
         <coefficientNum11> 0 </coefficientNum11> <coefficientVal11> 0 </coefficientVal11>
