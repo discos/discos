@@ -311,6 +311,30 @@ void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const 
 	}
 }
 
+void CCore::logFile(const IRA::CString& path,const IRA::CString& fileName) throw (ComponentErrors::CouldntGetComponentExImpl,
+		ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
+	ACS_LOG(LM_FULL_INFO,"CCore::logFile()",(LM_NOTICE,"NEW_LOG_FILE: %s",(const char *)fileName));
+	try {
+		m_customLogger->flush();
+		m_customLogger->setLogfile((const char *)path,(const char *)fileName);
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::logFile()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_customLoggerError=true;
+		throw impl;
+	}
+	catch (ManagementErrors::ManagementErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::LogFileErrorExImpl,impl,ex,"CCore::logFile()");
+		impl.setFileName((const char *)fileName);
+		throw impl;
+	}
+}
+
 void CCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl)
@@ -498,7 +522,9 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 								const IRA::CString& projectName,
 								const IRA::CString& scheduleFileName,
 								const IRA::CString& layout,
-								const ACS::stringSeq& layoutProc
+								const ACS::stringSeq& layoutProc,
+								IRA::CString &fullSubscanFileName,
+								IRA::CString &fullScanFolder
 							   )  throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 								         ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,
 										 ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,
@@ -546,7 +572,7 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 	loadDefaultDataReceiver();
 	CCore::setupDataTransfer(m_dataTransferInitialized,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
 			m_streamPrepared,observerName,projectName,baseName,path,extraPath,scheduleFileName,targetID,layout,layoutProc,scanTag,getCurrentDevice(),scanId,startUTTime ,subScanId,scanAxis,
-			m_config); // throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
+			m_config,fullSubscanFileName,fullScanFolder); // throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
 	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,recUt,m_streamStarted,m_streamPrepared,m_streamConnected);
 	return startUTTime;
 }

@@ -298,6 +298,8 @@ void CScheduleExecutor::runLoop()
 				}
 				if (start) {
 					ACS::stringSeq layoutProc;
+					IRA::CString fullSubscanFileName;
+					IRA::CString fullScanFolder;
 					try {
 						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"STARTING_DATA_RECORDING"));
 						if (m_schedule->getLayoutList()) {
@@ -315,8 +317,11 @@ void CScheduleExecutor::runLoop()
 						}
 						if ((m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
 							  m_startRecordTime=m_core->startRecording(m_currentScan.ut,m_currentScan.scanid,m_currentScan.subscanid,m_schedule->getScanTag(),
-									  m_config->getDataDirectory(), m_currentScan.suffix,m_schedule->getObserverName(), m_schedule->getProjectName(),
-									  m_schedule->getFileName(),m_currentScan.layout,layoutProc);
+							  m_config->getDataDirectory(), m_currentScan.suffix,m_schedule->getObserverName(), m_schedule->getProjectName(),
+							  m_schedule->getFileName(),m_currentScan.layout,layoutProc,fullSubscanFileName,fullScanFolder);
+							  if (fullScanFolder!="") {
+								  m_schedReport.addScanPath(fullScanFolder);
+							  }
 						}
 						else {
 							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"NO_RECORDING_REQUIRED"));
@@ -465,7 +470,7 @@ void CScheduleExecutor::runLoop()
 void CScheduleExecutor::getCurrentScanIdentifers(DWORD& scanID,DWORD& subScanID)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if (m_active) {
+	if (isScheduleActive()) {
 		m_schedule->getIdentifiers(m_scheduleCounter,scanID,subScanID);
 	}
 	else {
@@ -483,7 +488,7 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 	 m_scheduleRewound=false;
 	 m_site=site;
 	 m_dut1=dut1;
-	 m_active=false;
+	 //m_active=false;
 	 m_scheduleLoaded=false;
 	 m_scheduleName="";
 	 m_projectCode=m_core->m_config->getDefaultProjectCode();
@@ -501,6 +506,8 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 	 m_scanStopError=false;
 	 m_stopMe=false;
 	 m_haltMe=false;
+	 m_schedReport=CScheduleReport(m_config->getLogDirectory(),m_config->getScheduleReportPath(),
+			 m_config->getScheduleBackuptPath(),m_config->getRecordingLockFile());
 }
  
 void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (
@@ -509,7 +516,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		ManagementErrors::CannotClosePendingTaskExImpl)
 {
  	baci::ThreadSyncGuard guard(&m_mutex);
- 	if (m_active) {
+ 	if (isScheduleActive()) {
  		_EXCPT(ManagementErrors::AlreadyRunningExImpl,dummy,"CScheduleExecutor::startSchedule()");
  		throw dummy;
  	}
@@ -568,25 +575,26 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	}
  	m_scheduleLoaded=true;
  	m_scheduleCounter=m_schedule->getSubScanCounter(subScanidentifier)-1; //need to point before the first scan in the schedule, the first scan has counter==1
-        /* Compose log file name as:
-         * schedulename + _ + YEAR + DOY + HOUR + MIN + SEC
-         * ================================================ */
- 	TIMEVALUE currentUT;
- 	IRA::CIRATools::getTime(currentUT); // get the current time
-        std::stringstream logfile_name;
-        logfile_name << (const char *)m_schedule->getBaseName();
-        logfile_name <<  "_";
-        logfile_name <<  currentUT.year();
-        logfile_name <<  currentUT.dayOfYear();
-        logfile_name <<  currentUT.hour();
-        logfile_name <<  currentUT.minute();
-        logfile_name <<  currentUT.second();
-        /* Change log file with the new name 
-         * ================================= */
- 	m_core->_changeLogFile((const char *)logfile_name.str().c_str()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
+ 	m_schedReport.addScheduleName(m_schedule->getFileName());
+ 	if (m_schedule->getScanList()) {
+ 		m_schedReport.addAuxScheduleFile(m_schedule->getScanList()->getFileName());
+ 	}
+ 	if (m_schedule->getPreScanProcedureList()) {
+ 		// Pre or Post proc are the same....they mirror....the file is exactly the same
+ 		m_schedReport.addAuxScheduleFile(m_schedule->getPreScanProcedureList()->getFileName());
+ 	}
+ 	if (m_schedule->getBackendList()) {
+ 		m_schedReport.addAuxScheduleFile(m_schedule->getBackendList()->getFileName());
+ 	}
+ 	if (m_schedule->getLayoutList()) {
+ 		m_schedReport.addAuxScheduleFile(m_schedule->getLayoutList()->getFileName());
+ 	}
+
+ 	//m_core->_changeLogFile((const char *)logfile_name.str().c_str()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
+    m_core->_changeLogFile((const char *)m_schedReport.getLogFileName()); //  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
  	// load the procedures associated to the schedule
  	m_core->loadProceduresFile(m_schedule->getPreScanProcedureList());
- 	m_active=true;
+ 	//m_active=true;
 	//save the scan number selected by user as start scan
  	m_startSubScan=m_scheduleCounter+1;
 	m_scansCounter=-1;
@@ -602,6 +610,13 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	m_stopMe=false;
  	m_haltMe=false;
  	m_scheduleRewound=false;
+
+	if (!m_schedReport.activate()) {
+		IRA::CString msg;
+		msg.Format("Error in schedule reporting: %s",(const char *)m_schedReport.getLastError());
+		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_WARNING,"%s",(const char *)msg));
+	}
+
  	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"SCHEDULE_STARTED_FROM_SCAN: %s %u",(const char *)schedule,m_startSubScan));
  	ACS::Thread::resume();  // resume the thread execution.... 	
 }
@@ -732,11 +747,16 @@ void CScheduleExecutor::cleanSchedule(bool error)
 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_NOTICE,"SCHEDULE_HALTED"));
 	}
 	else {
-		if (m_active) {
+		if (isScheduleActive()) {
 			ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_NOTICE,"END_OF_SCHEDULE"));
 		}
 	}
-	m_active=false;
+	if (m_schedReport.deactivate()) {
+		IRA::CString msg;
+		msg.Format("Error in schedule reporting: %s",(const char *)m_schedReport.getLastError());
+		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_WARNING,"%s",(const char *)msg));
+	}
+	//m_active=false;
 	// suspend me
 	ACS::Thread::suspend();
 }

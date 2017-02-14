@@ -173,7 +173,7 @@ class CalibrationToolImpl : public virtual BulkDataReceiverImpl<CalibrationTool_
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
 	 */
-	virtual void startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+	virtual char *startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
     /**
 	 * called to give extra information about scan layout. Not used by this component.

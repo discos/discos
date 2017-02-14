@@ -341,17 +341,21 @@ void CCore::setupDataTransfer(bool& scanStarted,
 							  const long& device,
 							  const DWORD& scanID,
 							  const ACS::Time& startTime,
-							  const  DWORD& subScanID,
+							  const DWORD& subScanID,
 							  const Management::TScanAxis& axis,
-							  const CConfiguration* config
+							  const CConfiguration* config,
+							  IRA::CString &fullSubscanFileName,
+							  IRA::CString &fullScanFolder
 	) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,
 			ComponentErrors::UnexpectedExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
 {
+	fullScanFolder=fullSubscanFileName="";
 	if (!streamPrepared) {
 		_EXCPT(ManagementErrors::DataTransferSetupErrorExImpl,impl,"CCore::setupDataTansfer()");
 		throw impl;
 	}
 	CORBA::String_var fullFileName;
+	CORBA::String_var fullPath;
  	try {
  		if (!CORBA::is_nil(writer)) {
  			Management::TScanSetup setup;
@@ -371,7 +375,8 @@ void CCore::setupDataTransfer(bool& scanStarted,
  					setup.scanLayout=CORBA::string_dup((const char *)"");
  				}
  				setup.device=device;
- 				writer->startScan(setup);
+ 				fullPath=writer->startScan(setup);
+ 				fullScanFolder=(const char *)fullPath;
  				scanStarted=true;
  				if (layout.length()>0) {
  					writer->setScanLayout(layout);
@@ -415,6 +420,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
  			subSetup.baseName=CORBA::string_dup((const char *)baseName);
  			subSetup.targetID=CORBA::string_dup((const char *)targetID);
  			fullFileName=writer->startSubScan(subSetup);
+ 			fullSubscanFileName=(const char *)fullFileName;
  		}
 		else {
 			_EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CCore::setupDataTransfer()");

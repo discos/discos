@@ -120,33 +120,34 @@ module Management {
 		
 		/**
 		 * When this method is called the DataReceiver should prepare to start a new scan.
-		 * @prm extra parameters to allow the scan preparation
-		 * @thorw ComponentErrors::ComponentErrorsEx
-		 * @thorw ManagementErrors::ManagementErrorsEx
-		 * @thorw CORBA::SystemExcpetion
+		 * @param extra parameters to allow the scan preparation
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 * @throw CORBA::SystemExcpetion
+		 * @return the name of the folder containing the currently processed scan
 		 */
-		void startScan(in TScanSetup prm) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		string startScan(in TScanSetup prm) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
 		 * When required it can be used to pass extra configuration to the data receiver.
 		 * @param layout  sequence of strings that contains the extra configuration
-		 * @thorw ComponentErrors::ComponentErrorsEx
-		 * @thorw ManagementErrors::ManagementErrorsEx
-		 * @thorw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 * @throw CORBA::SystemExcpetion
 		 */
 		void setScanLayout(in ACS::stringSeq layout) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
 		 * When this method is called the DataReceiver should prepare to close the current scan.
-		 * @thorw ComponentErrors::ComponentErrorsEx
-		 * @thorw ManagementErrors::ManagementErrorsEx
-		 * @thorw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 * @throw CORBA::SystemExcpetion
 		 */
 		void stopScan() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
 		 * When this method is called the DataReceiver should prepare to start a new subscan.
-		 * @prm extra parameters to allow the subscan preparation
+		 * @param extra parameters to allow the subscan preparation
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw ManagementErrors::ManagementErrorsEx
 		 * @throw CORBA::SystemExcpetion

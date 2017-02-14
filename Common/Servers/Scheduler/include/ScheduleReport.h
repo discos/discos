@@ -37,6 +37,7 @@ public:
 	 */
 	CScheduleReport(const IRA::CString logPath,const IRA::CString& reportPath,const IRA::CString& backupPath,
 			const IRA::CString& lock);
+	CScheduleReport();
 	~CScheduleReport();
 	const IRA::CString& getLastError() const { return m_lastError; }
 	void addScheduleName(const IRA::CString& fullName);
@@ -45,6 +46,10 @@ public:
 	IRA::CString getReportFileName() const;
 	IRA::CString getBackupFolder() const;
 	IRA::CString getPostFix() const { return m_currentPostfix; }
+	bool isActive() const { return m_active; }
+	/*
+	 * Duplicate paths are excluded
+	 */
 	void addScanPath(const IRA::CString scan);
 	bool activate();
 	bool deactivate();

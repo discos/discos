@@ -267,6 +267,9 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_STRING_ATTRIBUTE("DataDir","Data files path is ",m_dataDir);
 	_GET_STRING_ATTRIBUTE("SystemDataDir","System data files path is ",m_systemDataDir);
 	_GET_STRING_ATTRIBUTE("LogDir","Log files path is ",m_logDir);
+	_GET_STRING_ATTRIBUTE("ScheduleReportPath","Schedule reports path is ",m_scheduleReportPath);
+	_GET_STRING_ATTRIBUTE("ScheduleBackuptPath","Schedule will be backup in ",m_scheduleBackuptPath);
+	_GET_STRING_ATTRIBUTE("RecordingLockFile","Lock file for recording is ",m_recordingLockFile);
 	//_GET_STRING_ATTRIBUTE("SystemLogDir","System log files path is ",m_systemLogDir);
 	_GET_DWORD_ATTRIBUTE("TsysTransitionGap","Gap time between mark switch on/off (uSec) ",m_TsysGapTime);
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter cache time (uSec) ",m_repetitionCacheTime);

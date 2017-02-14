@@ -12,7 +12,8 @@ public:
 		IRA::CString empty("");
 		IRA::CString post;
 		RecordProperty("description","check the report class when all empty arguments are provided");
-		CScheduleReport reportNone(empty,empty,empty,empty);
+		CScheduleReport reportNone;
+		reportNone=CScheduleReport(empty,empty,empty,empty);
 
 		// None
 		if (reportNone.getPostFix()!="") {
@@ -70,11 +71,15 @@ public:
 
 		reportFull.addScheduleName(Scheduler_ScheduleReport::sampleSchedule);
 		reportFull.addAuxScheduleFile(Scheduler_ScheduleReport::sampleScheduleAux);
-		reportFull.addScanPath("scan1Path");
-		reportFull.addScanPath("scan2Path");
-		reportFull.addScanPath("scan3Path");
-		reportFull.addScanPath("scan4Path");
-		reportFull.addScanPath("scan5Path");
+		reportFull.addScanPath("scan1Path/");
+		reportFull.addScanPath("scan1Path/");
+		reportFull.addScanPath("scan1Path/");
+		reportFull.addScanPath("scan2Path/");
+		reportFull.addScanPath("scan3Path/");
+		reportFull.addScanPath("scan4Path/");
+		reportFull.addScanPath("scan5Path/");
+		reportFull.addScanPath("scan5Path/");
+		reportFull.addScanPath("scan5Path/");
 
 		if (!reportFull.activate()) {
 			return ::testing::AssertionFailure() << " error activating the report, error message is: " <<
@@ -84,6 +89,8 @@ public:
 		if (!CIRATools::fileExists(Scheduler_ScheduleReport::lockFile)) {
 			return ::testing::AssertionFailure() << " lock file is not correctly created";
 		}
+		// let's add another scan
+		reportFull.addScanPath("scan6Path");
 		if (!reportFull.deactivate()) {
 			return ::testing::AssertionFailure() << " error deactivating the report, error message is: " <<
 					(const char *)reportFull.getLastError();
@@ -102,6 +109,7 @@ public:
 	}
 
 protected:
+	static IRA::CString basePath;
 	static IRA::CString logPath;
 	static IRA::CString reportPath;
 	static IRA::CString backupPath;
@@ -116,6 +124,8 @@ protected:
 		command="rm -rf "+Scheduler_ScheduleReport::reportPath;
 		i=system((const char *)command);
 		command="rm -rf "+Scheduler_ScheduleReport::backupPath;
+		i=system((const char *)command);
+		command="rm -rf "+Scheduler_ScheduleReport::basePath;
 		i=system((const char *)command);
 	}
 
@@ -137,9 +147,11 @@ protected:
 	}
 };
 
-IRA::CString Scheduler_ScheduleReport::logPath = IRA::CString("./TestBench/Logs/");
-IRA::CString Scheduler_ScheduleReport::reportPath = IRA::CString("./TestBench/Reports/");
-IRA::CString Scheduler_ScheduleReport::backupPath = IRA::CString("./TestBench/Backup/");
+
+IRA::CString Scheduler_ScheduleReport::basePath = IRA::CString("./TestBench/");
+IRA::CString Scheduler_ScheduleReport::logPath = Scheduler_ScheduleReport::basePath+IRA::CString("Logs/");
+IRA::CString Scheduler_ScheduleReport::reportPath = Scheduler_ScheduleReport::basePath+IRA::CString("Reports/");
+IRA::CString Scheduler_ScheduleReport::backupPath = Scheduler_ScheduleReport::basePath+IRA::CString("Backup/");
 IRA::CString Scheduler_ScheduleReport::lockFile = IRA::CString("./file.lck");
 IRA::CString Scheduler_ScheduleReport::sampleSchedule = IRA::CString("./artefacts/schedule_text.scd");
 IRA::CString Scheduler_ScheduleReport::sampleScheduleAux = IRA::CString("./artefacts/schedule_text.aux");

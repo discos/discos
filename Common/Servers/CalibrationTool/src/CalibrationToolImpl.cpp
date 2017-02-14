@@ -208,7 +208,7 @@ void CalibrationToolImpl::aboutToAbort()
 	delete m_data;
 }
 
-void CalibrationToolImpl::startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+char *CalibrationToolImpl::startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	//CSecAreaResourceWrapper<CalibrationTool_private::CDataCollection> data=m_dataWrapper->Get();
 	bool rec,inc;
@@ -224,6 +224,10 @@ void CalibrationToolImpl::startScan(const Management::TScanSetup & prm) throw (C
 		throw impl.getComponentErrorsEx();
 	}
 	ACS_LOG(LM_FULL_INFO,"CalibrationToolImpl::startScan()",(LM_DEBUG,"START_SCAN_ISSUED"));
+	IRA::CString file;
+	IRA::CString path;
+	m_data->getFileName(file,path);
+	return CORBA::string_dup((const char *)path);
 }
 
 char * CalibrationToolImpl::startSubScan(const ::Management::TSubScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)

@@ -60,7 +60,8 @@ void doScan(ACS::Time& ut,const Antenna::TTrackingParameters* const prim,const A
  */
 ACS::Time startRecording(const ACS::Time& recUt,const long& scanId, const long& subScanId, const long& scanTag,const IRA::CString& basePath,
 		const IRA::CString& suffix,const IRA::CString observerName, const IRA::CString& projectName, const IRA::CString& scheduleFileName,
-		const IRA::CString& layout, const ACS::stringSeq& layoutProc )  throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		const IRA::CString& layout, const ACS::stringSeq& layoutProc,IRA::CString &fullSubscanFileName,
+		IRA::CString &fullScanFolder)  throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl, ManagementErrors::DataTransferSetupErrorExImpl,
 		ComponentErrors::ComponentNotActiveExImpl, ComponentErrors::CouldntGetComponentExImpl);
 
@@ -81,6 +82,14 @@ void startScan(ACS::Time& time,const Antenna::TTrackingParameters *const prim,co
 	const Management::TSubScanConfiguration& subScanConf) throw (
 	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
 	ManagementErrors::CloseTelescopeScanErrorExImpl);
+
+/*
+ * This changes the current log file
+ * @param path base path of the log file name (directory)
+ * @param fileName Name of the file, extension should be included here
+ */
+void logFile(const IRA::CString& path,const IRA::CString& fileName) throw (ComponentErrors::CouldntGetComponentExImpl,
+		ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
 
 /*
  * Sends the Antenna off source for a given number of beams sizes. It calls the corresponding method of the antenna subsystem

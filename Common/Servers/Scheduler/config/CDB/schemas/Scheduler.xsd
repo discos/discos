@@ -44,6 +44,12 @@
 		<xs:attribute name="ProceduresLocation" type="xs:string" use="required" />
 		<!-- user log files directory -->
 		<xs:attribute name="LogDir" type="xs:string" use="required" />
+		<!-- Location of the report file of the schedule, it could be empty in that case no report is created -->
+		<xs:attribute name="ScheduleReportPath" type="xs:string" use="required" />
+		<!-- Location where the scheduler will store the schedule after it has been launched, it could be empty to disable the copy -->
+		<xs:attribute name="ScheduleBackuptPath" type="xs:string" use="required" />
+		<!-- This is the (lock) file that is created (absolute path) when the system is executing a schedule and recording -->
+		<xs:attribute name="RecordingLockFile" type="xs:string" use="required" />	
 		<!-- Name of the procedure file table (inside the CDB) that will be loaded at startup -->
 		<xs:attribute name="DefaultProceduresFile" type="xs:string" use="required" />		
 		<!-- the cache time (microseconds) for logging repetition filter -->
@@ -77,7 +83,6 @@
 		<xs:attribute name="DefaultProjectCode" type="xs:string" use="required" />
 		<!-- This flag is "true" or "false" to control if the system should check the project code for its existance or not -->
 		<xs:attribute name="CheckProjectCode" type="xs:boolean" use="required" />
-				
 	</xs:complexType>
 
 	<xs:element name="Scheduler" type="SchedulerType"/>

@@ -63,11 +63,14 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
  * @param device identifier of the device currently in use
  * @param axis indicates which axis is currently used by the telescope.
  * @param config pointer to the configuration object
+ * @param fullSubscanfileName name of the file that will save the current subscan
+ * @param fullScanfolder name of the folder containing the data related to current scan
  */
 static void setupDataTransfer(bool& scanStarted,Management::DataReceiver_ptr writer,bool& writerError,Backends::GenericBackend_ptr backend,bool& backendError,
 		const bool& streamPrepared,const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& targetID,
 		const IRA::CString& layoutName,const ACS::stringSeq& layout,const long& scanTag,const long& device,const DWORD& scanID,const ACS::Time& startTime,const  DWORD& subScanID,
-		const Management::TScanAxis& axis,const CConfiguration* config) throw (ComponentErrors::OperationErrorExImpl,
+		const Management::TScanAxis& axis,const CConfiguration* config,IRA::CString &fullSubscanFileName,
+		IRA::CString &fullScanFolder) throw (ComponentErrors::OperationErrorExImpl,
 		ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl,
 		ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::BackendNotAvailableExImpl);
 

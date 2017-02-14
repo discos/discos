@@ -451,9 +451,6 @@ void CEngineThread::runLoop()
 		return;
 	}
 	if (m_data->isStart() && m_data->isReady() &&  m_data->isScanHeaderReady() && m_data->isSubScanHeaderReady()) { // //main headers are already saved and file has to be opened
-		//*****************************************************************************************
-		ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"LETS BEGIN SUBSCAN %ld!",m_data->getSubScanID()));
-		//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 		if (!m_fileOpened) {
 			m_data->setStatus(Management::MNG_OK);
 			// create the file and save main headers
@@ -472,9 +469,6 @@ void CEngineThread::runLoop()
 			//let's create the summary file, it should be created before the first subscan of the scan.......
 			// the the summary will be valid for the duration of all the subscans.....
 			if (!m_summaryOpened) {
-				///**********************************************************************************
-				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"CREO SUMMARY"));
-				///******************* DEBUG ********************************************************
 			 	TIMEVALUE currentUT;
 				IRA::CDateTime now;
 				TIMEDIFFERENCE currentLST;
@@ -505,9 +499,6 @@ void CEngineThread::runLoop()
 				m_summaryOpened=true;
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"SUMMARY_OPENED"));
 			}
-			///**********************************************************************************
-			ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"CREO IL FILE"));
-			///******************* DEBUG ********************************
 			m_file = new CFitsWriter();
 			m_file->setBasePath("");
 			m_file->setFileName((const char *)m_data->getFileName());
@@ -519,9 +510,6 @@ void CEngineThread::runLoop()
 				m_data->setStatus(Management::MNG_FAILURE);
 			}
 			else {
-				//*****************************************************************************************
-				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"OUTPUT_FILE_CREATED_NOW"));
-				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 				m_fileOpened=true;
 				m_data->startRunnigStage();
 				//get data from receivers boss

@@ -14,9 +14,23 @@ CScheduleReport::CScheduleReport(const IRA::CString logPath,const IRA::CString& 
 	m_scanPaths.clear();
 }
 
+CScheduleReport::CScheduleReport() :m_lastError(""),m_logFilePath(""),m_reportPath(""),
+		m_backupPath(""), m_lockFile(""),m_scheduleBaseName(""),m_scheduleBasePath(""),
+		m_scheduleExtension(""), m_currentPostfix(""),m_active(false),m_reportEnabled(false),
+		m_lockFileEnabled(false), m_scheduleProvided(false)
+{
+	m_auxFiles.clear();
+	m_scanPaths.clear();
+}
+
 CScheduleReport::~CScheduleReport()
 {
-	if (m_active) deactivate();
+	m_active=false;
+	m_scheduleProvided=false;
+	m_lockFileEnabled=false;
+	m_reportEnabled=false;
+	m_auxFiles.clear();
+	m_scanPaths.clear();
 }
 
 void CScheduleReport::addScheduleName(const IRA::CString& fullName)
@@ -55,7 +69,7 @@ bool CScheduleReport::activate()
 			ret=backupSchedule();
 		}
 	}
-	m_active=true;
+	m_active=true; // this is always set because I want to keep going even if the report fails.
 	return ret;
 }
 
@@ -76,8 +90,12 @@ IRA::CString CScheduleReport::getBackupFolder() const
 
 void CScheduleReport::addScanPath(const IRA::CString scan)
 {
+	CScheduleReport::TInternalListIter it;
 	if (m_reportEnabled) {
-		m_scanPaths.push_back(scan);
+		for (it=m_scanPaths.begin();it!=m_scanPaths.end();++it) {
+			if (scan==(*it)) return;
+		}
+		m_scanPaths.push_front(scan);
 	}
 }
 
@@ -197,6 +215,7 @@ bool CScheduleReport::writeReport()
     for (it=m_scanPaths.begin();it!=m_scanPaths.end();++it) {
     	out <<  (const char *) (*it) << endl;
    	}
+    out.flush();
     out.close();
     return true;
 }

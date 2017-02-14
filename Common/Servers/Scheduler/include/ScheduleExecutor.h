@@ -20,6 +20,7 @@
 #include "Configuration.h"
 
 #include "Core.h"
+#include "ScheduleReport.h"
 
 /**
  * This class implements a watching thread. This thread is in charge of update all the obseved coordinates. It is started when the component
@@ -122,7 +123,7 @@ public:
       * Method is almost atomic, no sync required
       * @return true if a schedule is currently running
       */
-     const bool& isScheduleActive() { /*baci::ThreadSyncGuard guard(&m_mutex);*/ return m_active; }
+     bool isScheduleActive() { return m_schedReport.isActive(); }
      
      /**
       * Get a reference to the backend used by the schedule. Attention must be payed to the fact that the currently used backend may change without advice.
@@ -244,7 +245,7 @@ private:
 	/**
 	 * true is there is a schedule running at present
 	 */
-	bool m_active;	
+	//bool m_active;
 	/**
 	 * schedule pointer
 	 */
@@ -328,6 +329,11 @@ private:
 	 * pointer to the configuration object
 	 */
 	 CConfiguration *m_config;
+
+	/**
+	 * Schedule reporting object.
+	 */
+	CScheduleReport m_schedReport;
 
 	/**
 	 * Extract the next scan from a schedule.

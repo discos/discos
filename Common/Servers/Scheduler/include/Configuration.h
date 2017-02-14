@@ -198,6 +198,21 @@ public:
 		m_currentBackendIndex=pos;
 	}
 
+	/**
+	 * @return the string that describes the path (with trailing '/') where the schedule reports must be saved
+	 */
+	const IRA::CString& getScheduleReportPath() const { return m_scheduleReportPath; }
+
+	/**
+	 * @return the string that describes the path (with trailing '/') where the schedule are copied for backup
+	 */
+	const IRA::CString& getScheduleBackuptPath() const { return m_scheduleBackuptPath; }
+
+	/**
+	 * @return the string that is the full name of the recording lock file
+	 */
+	const IRA::CString& getRecordingLockFile() const { return m_recordingLockFile;}
+
 private:
 	IRA::CString m_schedDir;
 	IRA::CString m_dataDir;
@@ -238,6 +253,10 @@ private:
 	void extractBody(const IRA::CString& body,ACS::stringSeq& commands);
 
 	Management::TScanAxis str2Axis(const IRA::CString& axis) const;
+
+	IRA::CString m_scheduleReportPath;
+	IRA::CString m_scheduleBackuptPath;
+	IRA::CString m_recordingLockFile;
 
 };
 

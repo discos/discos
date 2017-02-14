@@ -271,34 +271,14 @@ void CCore::_chooseDefaultDataRecorder(const char *rcvInstance) throw (Component
 
 void CCore::_changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
 {
-	baci::ThreadSyncGuard guard(&m_mutex);
-	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
-	IRA::CString fullName;
-	IRA::CString logName(fileName);
-	fullName=logName+".log";
-	ACS_LOG(LM_FULL_INFO,"CCore::changeLogFile()",(LM_NOTICE,"NEW_LOG_FILE: %s",(const char *)fullName));
-	try {
-		m_customLogger->flush();
-		m_customLogger->setLogfile((const char *)m_config->getLogDirectory(),(const char *)fullName);
-	}
-	catch (CORBA::SystemException& ex) {
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::changeLogFile()");
-		impl.setName(ex._name());
-		impl.setMinor(ex.minor());
-		m_customLoggerError=true;
-		throw impl;
-	}
-	catch (ManagementErrors::ManagementErrorsEx& ex) {
-		_ADD_BACKTRACE(ManagementErrors::LogFileErrorExImpl,impl,ex,"CCore::changeLogFile()");
-		impl.setFileName((const char *)fullName);
-		throw impl;
-	}
+	baci::ThreadSyncGuard guard(&m_mutex); // redundant....it is already in method logFile, but it does not afflict us
+	logFile((const char *)m_config->getLogDirectory(),fileName);
+	// throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+	// ManagementErrors::LogFileErrorExImpl)
 }
 
 void CCore::_logMessage(const char *message) {
-    CUSTOM_LOG(LM_FULL_INFO, 
-               "CCore::_logMessage",
-               (LM_NOTICE, message));
+    CUSTOM_LOG(LM_FULL_INFO,"CCore::_logMessage",(LM_NOTICE, message));
 }
 
 void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind) throw (ComponentErrors::CouldntGetComponentExImpl,
@@ -365,6 +345,8 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 		ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
+	IRA::CString fullSubscanFileName;
+	IRA::CString fullScanFolder;
 	if (m_schedExecuter) {
 		if (m_schedExecuter->isScheduleActive()) {
 			_EXCPT(ManagementErrors::NotAllowedDuringScheduleExImpl,dummy,"CCore::_initRecording()");
@@ -397,7 +379,8 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 	layout.length(0); layoutName=_SCHED_NULLTARGET;
 	guard.acquire();
 	m_subScanID=subScanId;
-	realStart=startRecording(m_subScanEpoch,m_scanID,m_subScanID,scanTag,m_config->getSystemDataDirectory(),suffix,obsName,prj,schedule,layoutName,layout);
+	realStart=startRecording(m_subScanEpoch,m_scanID,m_subScanID,scanTag,m_config->getSystemDataDirectory(),
+			suffix,obsName,prj,schedule,layoutName,layout,fullSubscanFileName,fullScanFolder);
 	waitFor=realStart+duration; // this is the time at which the stop should be issued
 	guard.release();
 	//This is to implement a finally clause, if the user abort when the recording has already started I'd like, at least to stop it

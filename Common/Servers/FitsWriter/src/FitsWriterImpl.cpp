@@ -226,7 +226,7 @@ void FitsWriterImpl::aboutToAbort()
 	delete m_data;
 }
 
-void FitsWriterImpl::startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
+char *FitsWriterImpl::startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	//CSecAreaResourceWrapper<FitsWriter_private::CDataCollection> data=m_dataWrapper->Get();
 	bool rec,inc;
@@ -242,6 +242,10 @@ void FitsWriterImpl::startScan(const Management::TScanSetup & prm) throw (CORBA:
 		throw impl.getComponentErrorsEx();
 	}
 	ACS_LOG(LM_FULL_INFO,"FitsWriterImpl::startScan()",(LM_DEBUG,"START_SCAN_ISSUED"));
+	IRA::CString file;
+	IRA::CString path;
+	m_data->getFileName(file,path);
+	return CORBA::string_dup((const char *)path);
 }
 
 void FitsWriterImpl::setScanLayout (const ACS::stringSeq & layout) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)

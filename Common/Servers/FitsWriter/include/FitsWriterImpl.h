@@ -140,8 +140,9 @@ class FitsWriterImpl : public virtual BulkDataReceiverImpl<FitsWriter_private::R
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
+	 * @return the path that will contain the files of the current scan
 	 */
-	virtual void startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+	virtual char *startScan(const Management::TScanSetup & prm) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
 	/**
 	 * called to give extra information about scan layout. Not used by this component.
