@@ -111,6 +111,15 @@
             <remoteAccount></remoteAccount>
         </container>
         <container>
+            <name>ExternalClientsContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>192.168.51.98</remoteHost>
+            <remoteAccount></remoteAccount>
+        </container>
+        <container>
             <name>XContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
