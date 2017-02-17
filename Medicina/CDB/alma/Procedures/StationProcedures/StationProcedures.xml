@@ -16,6 +16,20 @@
 </body>	
 </Procedure>
 
+<Procedure name="setupCHC" args="0">
+<body>
+	antennaSetup=CHC
+	receiversSetup=CHC
+	chooseBackend=TotalPower
+	initialize=CHC
+	setSection=0,*,300.0,*,*,*,*
+	setSection=1,*,300.0,*,*,*,*
+	device=0
+	calOff
+	restFrequency=0
+</body>	
+</Procedure>
+
 <Procedure name="setupKKC" args="0">
 <body>
 	antennaSetup=KKC

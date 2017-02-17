@@ -1,7 +1,7 @@
 //#define RB_DEBUG
 
 //#define KKC_ADDRESS "192.168.51.13" // this is the PortServer installed directly in the MF
-#define KKC_ADDRESS "192.167.189.2" // this is the server installed in control room PC
+#define KKC_ADDRESS "192.167.189.102" // this is the server installed in control room PC
 //#define KKC_PORT 2101 // first port...please notice that this works only if the port is configured as "real Port"
 #define KKC_PORT 10000 // control room server port
 #define RECV_ADDRESS "192.167.189.2"
@@ -119,7 +119,7 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 		m_kBandSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
 #endif
 	}
-	else if (m_currentReceiver=="CCC") {
+	else if ((m_currentReceiver=="CCC") || (m_currentReceiver="CHC")){
 #ifndef RB_DEBUG
 		char buffer [13] = {'s','e','t',' ','m','a','r','c','a',' ','o','n','\n' };
 		if (m_recvSocket.Send(err,(const void *)buffer,13)!=13) {
@@ -136,7 +136,7 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 	}
 	else if (m_currentReceiver=="XXP") {
 #ifndef RB_DEBUG
-		// turn the marca on through thr FS
+		// turn the marca on through the FS
 		IRA::CString fsBuffer("sxkl=*,on\n");
 		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
@@ -178,7 +178,7 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 		m_kBandSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
 #endif
 	}
-	else if (m_currentReceiver=="CCC") {
+	else if ((m_currentReceiver=="CCC") || (m_currentReceiver="CHC")) {
 #ifndef RB_DEBUG
 		char buffer [14] = {'s','e','t',' ','m','a','r','c','a',' ','o','f','f','\n' };
 		if (m_recvSocket.Send(err,(const void *)buffer,14)!=14) {
@@ -280,6 +280,12 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 		//printf("trueValue, amp: %lf %lf\n",trueValue,amplitude);
 	}
 	else if (m_currentReceiver=="CCC") {
+		//no difference between IFs so take just the first value
+		trueValue=lo[0]+2300.0;
+		m_LO[0]=m_LO[1]=lo[0];
+		ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR: %lf",m_LO[0]));
+	}
+	else if (m_currentReceiver=="CHC") {
 		//no difference between IFs so take just the first value
 		trueValue=lo[0]+2300.0;
 		m_LO[0]=m_LO[1]=lo[0];
@@ -507,9 +513,48 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_pols[1]=Receivers::RCV_RCP;
 		m_startFreq[0]=100.0;
 		m_startFreq[1]=100.0;
-		m_bandWidth[0]=800.0;
-		m_bandWidth[1]=800.0;
+		m_bandWidth[0]=400.0;
+		m_bandWidth[1]=400.0;
 		m_currentReceiver="CCC";
+		m_currentOperativeMode="NORMAL";
+	}
+	else if (rec=="CHC") {
+#ifndef RB_DEBUG
+		char buffer [9] = {'p','r','o','c',' ','c','h','c','\n' };
+		if (m_recvSocket.Send(err,(const void *)buffer,9)!=9) {
+			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
+			dummy.setCode(err.getErrorCode());
+			dummy.setDescription((const char*)err.getDescription());
+			err.Reset();
+			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
+			m_status=Management::MNG_FAILURE;
+			throw impl;
+		}
+		m_recvSocket.Receive(err,(void *)buffer,9); // read the answer but for the moment I don't care. I hope everything worked properly
+		// now set the subreflector configuration through the FS
+		IRA::CString fsBuffer("scu=chc\n");
+		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
+			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
+			dummy.setCode(err.getErrorCode());
+			dummy.setDescription((const char*)err.getDescription());
+			err.Reset();
+			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
+			m_status=Management::MNG_FAILURE;
+			throw impl;
+		}
+#endif
+		m_LO[0]=6400.0;
+		m_LO[1]=6400.0;
+		m_IFs=2;
+		m_feeds=1;
+		m_totalOutputs=m_IFs*m_feeds;
+		m_pols[0]=Receivers::RCV_LCP;
+		m_pols[1]=Receivers::RCV_RCP;
+		m_startFreq[0]=100.0;
+		m_startFreq[1]=100.0;
+		m_bandWidth[0]=400.0;
+		m_bandWidth[1]=400.0;
+		m_currentReceiver="CHC";
 		m_currentOperativeMode="NORMAL";
 	}
 	else if (rec=="XXP") {
@@ -580,8 +625,8 @@ void CRecvBossCore::setMode(const char * mode) throw (ComponentErrors::Validatio
 	if (m_currentReceiver=="CCC") {
 		if (newMode=="NORMAL") {
 			m_currentOperativeMode=newMode;
-			m_bandWidth[0]=800.0;
-			m_bandWidth[1]=800.0;
+			m_bandWidth[0]=400.0;
+			m_bandWidth[1]=400.0;
 		}
 		else if (newMode=="NARROWBANDWIDTH") {
 			m_currentOperativeMode=newMode;
@@ -645,7 +690,7 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 	}
 	centralFreq=m_LO[index]+realFreq+realBw/2;
 	centralFreq/=1000.0; //central frequency in GHz
-	if ((m_currentReceiver=="KKC") || (m_currentReceiver=="CCC")) {
+	if ((m_currentReceiver=="KKC") || (m_currentReceiver=="CCC") || (m_currentReceiver=="CHC")) {
 		ff=secondaryFreq;
 		tt=secondaryTaper;
 		max=7;
@@ -796,7 +841,7 @@ long CRecvBossCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq&
 		}
 		return m_KKCFeedTable->recordCount();
 	}
-	else if ((m_currentReceiver=="CCC") || (m_currentReceiver=="XXP")) {
+	else if ((m_currentReceiver=="CCC") || (m_currentReceiver=="XXP") || (m_currentReceiver=="CHC")) {
 		X.length(1);
 		Y.length(1);
 		power.length(1);
@@ -949,6 +994,44 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 				f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
 				integral=(RightMarkCoeff[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(RightMarkCoeff[feeds[i]][1]/3)*(f2*f2*f2-f1*f1*f1)+(RightMarkCoeff[feeds[i]][2]/2)*(f2*f2-f1*f1)+RightMarkCoeff[feeds[i]][3]*(f2-f1);
 				mark=integral/(f2-f1);
+			}
+			result[i]=mark;
+			resFreq[i]=realFreq;
+			resBw[i]=realBw;
+		}
+	}
+	else if (m_currentReceiver=="CHC") {
+		double LeftM[2] = { -0.0023, 31.593  };
+		double RightM[2] = { -0.0023, 32.764 };
+		double Freq;
+		double mark=0;
+		double realFreq,realBw;
+		double f1,f2;
+		for (unsigned i=0;i<stdLen;i++) {
+			long index=(feeds[i]*m_IFs)+ifs[i];
+			if (m_pols[index]==Receivers::RCV_LCP) {
+				// take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
+				if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[index],m_bandWidth[index],realFreq,realBw)) {
+					realFreq=m_startFreq[index];
+					realBw=0.0;
+				}
+				realFreq+=m_LO[index];
+				f1=realFreq;
+				f2=f1+realBw;
+				Freq=(f1+f2)/2.0;
+				mark=(LeftM[0]*Freq)+LeftM[1];
+			}
+			else if (m_pols[index]==Receivers::RCV_RCP) {
+				// take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
+				if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[index],m_bandWidth[index],realFreq,realBw)) {
+					realFreq=m_startFreq[index];
+					realBw=0.0;
+				}
+				realFreq+=m_LO[index];
+				f1=realFreq;
+				f2=f1+realBw;
+				Freq=(f1+f2)/2.0;
+				mark=(RightM[0]*Freq)+RightM[1];
 			}
 			result[i]=mark;
 			resFreq[i]=realFreq;

@@ -7,6 +7,40 @@
                xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
+<Receiver>
+	<receiverCode>LLP</receiverCode>
+        <phi>90.0</phi>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> -0.1128641143 </coefficientVal00>
+        <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
+        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> -0.0150759434 </coefficientVal02>
+        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> -0.1147078052 </coefficientVal03>
+        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0047140056 </coefficientVal04>
+        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> -0.0008176960 </coefficientVal05>
+        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.1942442656  </coefficientVal06>
+        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> -0.1103398576 </coefficientVal07>
+        <coefficientNum08> 0 </coefficientNum08> <coefficientVal08> 0 </coefficientVal08>
+        <coefficientNum09> 0 </coefficientNum09> <coefficientVal09> 0 </coefficientVal09>
+        <coefficientNum10> 0 </coefficientNum10> <coefficientVal10> 0 </coefficientVal10>
+        <coefficientNum11> 0 </coefficientNum11> <coefficientVal11> 0 </coefficientVal11>
+        <coefficientNum12> 0 </coefficientNum12> <coefficientVal12> 0 </coefficientVal12>
+        <coefficientNum13> 0 </coefficientNum13> <coefficientVal13> 0 </coefficientVal13>
+        <coefficientNum14> 0 </coefficientNum14> <coefficientVal14> 0 </coefficientVal14>
+        <coefficientNum15> 0 </coefficientNum15> <coefficientVal15> 0 </coefficientVal15>
+        <coefficientNum16> 0 </coefficientNum16> <coefficientVal16> 0 </coefficientVal16>
+        <coefficientNum17> 0 </coefficientNum17> <coefficientVal17> 0 </coefficientVal17>
+        <coefficientNum18> 0 </coefficientNum18> <coefficientVal18> 0 </coefficientVal18>
+        <coefficientNum19> 0 </coefficientNum19> <coefficientVal19> 0 </coefficientVal19>
+        <coefficientNum20> 0 </coefficientNum20> <coefficientVal20> 0 </coefficientVal20>
+        <coefficientNum21> 0 </coefficientNum21> <coefficientVal21> 0 </coefficientVal21>
+        <coefficientNum22> 0 </coefficientNum22> <coefficientVal22> 0 </coefficientVal22>
+        <coefficientNum23> 0 </coefficientNum23> <coefficientVal23> 0 </coefficientVal23>
+        <coefficientNum24> 0 </coefficientNum24> <coefficientVal24> 0 </coefficientVal24>
+        <coefficientNum25> 0 </coefficientNum25> <coefficientVal25> 0 </coefficientVal25>
+        <coefficientNum26> 0 </coefficientNum26> <coefficientVal26> 0 </coefficientVal26>
+        <coefficientNum27> 0 </coefficientNum27> <coefficientVal27> 0 </coefficientVal27>
+        <coefficientNum28> 0 </coefficientNum28> <coefficientVal28> 0 </coefficientVal28>
+        <coefficientNum29> 0 </coefficientNum29> <coefficientVal29> 0 </coefficientVal29>
+</Receiver>
 
 <Receiver>
 	<receiverCode>CCC</receiverCode>
@@ -46,15 +80,53 @@
 <Receiver>
 	<receiverCode>KKC</receiverCode>	
         <phi>90.0</phi>
-        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0.1474033296 </coefficientVal00>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0.1480138302 </coefficientVal00>
         <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
-        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> 0.2105944008 </coefficientVal02>
-        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> -0.0222407039 </coefficientVal03>
-        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0058210301 </coefficientVal04>     
-        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> 0.0000713150 </coefficientVal05>
-        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.0709655380 </coefficientVal06>
-        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> 0.0376306847 </coefficientVal07>
-        <coefficientNum08> 1 </coefficientNum08> <coefficientVal08> 0.0312607661 </coefficientVal08>
+        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> 0.2130497247 </coefficientVal02>
+        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> -0.0194589850 </coefficientVal03>
+        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0056039123 </coefficientVal04>     
+        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> -0.0000484679 </coefficientVal05>
+        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.0850518122 </coefficientVal06>
+        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> 0.0324320570 </coefficientVal07>
+        <coefficientNum08> 1 </coefficientNum08> <coefficientVal08> 0.0265751500 </coefficientVal08>
+        <coefficientNum09> 0 </coefficientNum09> <coefficientVal09> 0 </coefficientVal09>
+        <coefficientNum10> 0 </coefficientNum10> <coefficientVal10> 0 </coefficientVal10>
+        <coefficientNum11> 0 </coefficientNum11> <coefficientVal11> 0 </coefficientVal11>
+        <coefficientNum12> 0 </coefficientNum12> <coefficientVal12> 0 </coefficientVal12>
+        <coefficientNum13> 0 </coefficientNum13> <coefficientVal13> 0 </coefficientVal13>
+        <coefficientNum14> 0 </coefficientNum14> <coefficientVal14> 0 </coefficientVal14>
+        <coefficientNum15> 0 </coefficientNum15> <coefficientVal15> 0 </coefficientVal15>
+        <coefficientNum16> 0 </coefficientNum16> <coefficientVal16> 0 </coefficientVal16>
+        <coefficientNum17> 0 </coefficientNum17> <coefficientVal17> 0 </coefficientVal17>
+        <coefficientNum18> 0 </coefficientNum18> <coefficientVal18> 0 </coefficientVal18>
+        <coefficientNum19> 0 </coefficientNum19> <coefficientVal19> 0 </coefficientVal19>
+        <coefficientNum20> 0 </coefficientNum20> <coefficientVal20> 0 </coefficientVal20>
+        <coefficientNum21> 0 </coefficientNum21> <coefficientVal21> 0 </coefficientVal21>
+        <coefficientNum22> 0 </coefficientNum22> <coefficientVal22> 0 </coefficientVal22>
+        <coefficientNum23> 0 </coefficientNum23> <coefficientVal23> 0 </coefficientVal23>
+        <coefficientNum24> 0 </coefficientNum24> <coefficientVal24> 0 </coefficientVal24>
+        <coefficientNum25> 0 </coefficientNum25> <coefficientVal25> 0 </coefficientVal25>
+        <coefficientNum26> 0 </coefficientNum26> <coefficientVal26> 0 </coefficientVal26>
+        <coefficientNum27> 0 </coefficientNum27> <coefficientVal27> 0 </coefficientVal27>
+        <coefficientNum28> 0 </coefficientNum28> <coefficientVal28> 0 </coefficientVal28>
+        <coefficientNum29> 0 </coefficientNum29> <coefficientVal29> 0 </coefficientVal29>
+</Receiver>
+
+<!--
+Model XXP conf, id: 25
+-->
+<Receiver>
+	<receiverCode>XXP</receiverCode>
+        <phi>90.0</phi>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> -0.1089199781 </coefficientVal00>
+	<coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
+        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> -0.0047620139 </coefficientVal02>
+        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> -0.0220953003 </coefficientVal03>
+        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0062009227 </coefficientVal04>
+        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> -0.0022671977 </coefficientVal05>
+        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.1425688490 </coefficientVal06>
+        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> -0.1203563809 </coefficientVal07>
+        <coefficientNum08> 0 </coefficientNum08> <coefficientVal08> 0 </coefficientVal08>
         <coefficientNum09> 0 </coefficientNum09> <coefficientVal09> 0 </coefficientVal09>
         <coefficientNum10> 0 </coefficientNum10> <coefficientVal10> 0 </coefficientVal10>
         <coefficientNum11> 0 </coefficientNum11> <coefficientVal11> 0 </coefficientVal11>
@@ -79,16 +151,16 @@
 </Receiver>
 
 <Receiver>
-        <receiverCode>XXP</receiverCode>
+        <receiverCode>CHC</receiverCode>
         <phi>90.0</phi>
-        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> -0.1032897457 </coefficientVal00>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> -0.1115463972 </coefficientVal00>
         <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
-        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> 0.0019722166 </coefficientVal02>
-        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> -0.0143666491 </coefficientVal03>
-        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0058184844 </coefficientVal04>
-        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> -0.0018018833 </coefficientVal05>
-        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.1187149733  </coefficientVal06>
-        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> -0.1153409481 </coefficientVal07>
+        <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> -0.0019724572 </coefficientVal02>
+        <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> 0.0094164684 </coefficientVal03>
+        <coefficientNum04> 1 </coefficientNum04> <coefficientVal04> -0.0060918964 </coefficientVal04>
+        <coefficientNum05> 1 </coefficientNum05> <coefficientVal05> -0.0016364682 </coefficientVal05>
+        <coefficientNum06> 1 </coefficientNum06> <coefficientVal06> 0.0940798447  </coefficientVal06>
+        <coefficientNum07> 1 </coefficientNum07> <coefficientVal07> -0.0872315466 </coefficientVal07>
         <coefficientNum08> 0 </coefficientNum08> <coefficientVal08> 0 </coefficientVal08>
         <coefficientNum09> 0 </coefficientNum09> <coefficientVal09> 0 </coefficientVal09>
         <coefficientNum10> 0 </coefficientNum10> <coefficientVal10> 0 </coefficientVal10>
