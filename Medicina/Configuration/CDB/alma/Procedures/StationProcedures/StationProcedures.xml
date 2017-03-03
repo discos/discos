@@ -25,6 +25,8 @@
 	initialize=CHC
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
+	setAttenuation=0,8
+	setAttenuation=1,12
 	device=0
 	calOff
 	restFrequency=0

@@ -90,7 +90,7 @@ public:
 			return ::testing::AssertionFailure() << " lock file is not correctly created";
 		}
 		// let's add another scan
-		reportFull.addScanPath("scan6Path");
+		reportFull.addScanPath("scan6Path/");
 		if (!reportFull.deactivate()) {
 			return ::testing::AssertionFailure() << " error deactivating the report, error message is: " <<
 					(const char *)reportFull.getLastError();

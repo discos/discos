@@ -88,14 +88,17 @@ IRA::CString CScheduleReport::getBackupFolder() const
 	return m_backupPath+m_scheduleBaseName+"_"+m_currentPostfix;
 }
 
-void CScheduleReport::addScanPath(const IRA::CString scan)
+void CScheduleReport::addScanPath(const IRA::CString& scan)
 {
 	CScheduleReport::TInternalListIter it;
+	IRA::CString copyStr;	
+	copyStr=scan;
+	removeTrailingSlash(copyStr);
 	if (m_reportEnabled) {
 		for (it=m_scanPaths.begin();it!=m_scanPaths.end();++it) {
-			if (scan==(*it)) return;
+			if (copyStr==(*it)) return;
 		}
-		m_scanPaths.push_front(scan);
+		m_scanPaths.push_front(copyStr);
 	}
 }
 
@@ -198,6 +201,7 @@ bool CScheduleReport::writeReport()
 	schedFolder=m_backupPath+m_scheduleBaseName+"_"+m_currentPostfix;
 	logFile=m_logFilePath+getLogFileName();
 	if (!m_reportEnabled) return true; // if the reporting is not enables, just exit.
+	if (!m_scheduleProvided) return true;
 	dst=getReportFileName();
     std::ofstream out ((const char *)dst);
     if (out.fail()) {
@@ -206,12 +210,12 @@ bool CScheduleReport::writeReport()
     	return false;
     }
     if (m_scheduleProvided) {  // check if the schedule section has to be added
-    	out << "[Schedule]" << endl;
+    	//out << "[Schedule]" << endl;
     	out <<  (const char *) schedFolder << endl;
     }
-    out << "[Log]" << endl;
+    //out << "[Log]" << endl;
     out <<  (const char *) logFile << endl;
-    out << "[Scans]" << endl;
+    //out << "[Scans]" << endl;
     for (it=m_scanPaths.begin();it!=m_scanPaths.end();++it) {
     	out <<  (const char *) (*it) << endl;
    	}
@@ -220,4 +224,9 @@ bool CScheduleReport::writeReport()
     return true;
 }
 
-
+void CScheduleReport::removeTrailingSlash(IRA::CString& path)
+{
+	if (path[path.GetLength()-1]=='/') {
+		path=path.Left(path.GetLength()-1);
+	}		 
+}

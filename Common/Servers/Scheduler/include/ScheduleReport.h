@@ -50,7 +50,7 @@ public:
 	/*
 	 * Duplicate paths are excluded
 	 */
-	void addScanPath(const IRA::CString scan);
+	void addScanPath(const IRA::CString& scan);
 	bool activate();
 	bool deactivate();
 private:
@@ -61,6 +61,10 @@ private:
 	bool removeLock();
 	bool backupSchedule();
 	bool writeReport();
+	/**
+	 * removes the trailing '/', if present
+	 */
+	void removeTrailingSlash(IRA::CString& path);
 	IRA::CString m_lastError;
 	IRA::CString m_logFilePath;
 	IRA::CString m_reportPath;

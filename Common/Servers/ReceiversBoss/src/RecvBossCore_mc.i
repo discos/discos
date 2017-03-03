@@ -121,8 +121,8 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 	}
 	else if ((m_currentReceiver=="CCC") || (m_currentReceiver="CHC")){
 #ifndef RB_DEBUG
-		char buffer [13] = {'s','e','t',' ','m','a','r','c','a',' ','o','n','\n' };
-		if (m_recvSocket.Send(err,(const void *)buffer,13)!=13) {
+		char buffer [14] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','n','\n' };
+		if (m_recvSocket.Send(err,(const void *)buffer,14)!=14) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
 			dummy.setCode(err.getErrorCode());
 			dummy.setDescription((const char*)err.getDescription());
@@ -180,8 +180,8 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 	}
 	else if ((m_currentReceiver=="CCC") || (m_currentReceiver="CHC")) {
 #ifndef RB_DEBUG
-		char buffer [14] = {'s','e','t',' ','m','a','r','c','a',' ','o','f','f','\n' };
-		if (m_recvSocket.Send(err,(const void *)buffer,14)!=14) {
+		char buffer [15] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','f','f','\n' };
+		if (m_recvSocket.Send(err,(const void *)buffer,15)!=15) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
 			dummy.setCode(err.getErrorCode());
 			dummy.setDescription((const char*)err.getDescription());
@@ -1036,6 +1036,7 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 			result[i]=mark;
 			resFreq[i]=realFreq;
 			resBw[i]=realBw;
+			scale=1.0;
 		}
 	}
 	else if (m_currentReceiver=="CCC") {

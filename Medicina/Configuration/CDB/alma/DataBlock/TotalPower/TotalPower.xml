@@ -38,7 +38,7 @@
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
  	<inputPort>GREGORIAN</inputPort>
-	<inputPortDB>10</inputPortDB>
+	<inputPortDB>15</inputPortDB>
 	<inputPortBW>300</inputPortBW> 	
  	<beams>1</beams>
  	<section_boards>0 1</section_boards>
