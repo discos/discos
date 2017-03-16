@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>11</select>
+        <select>13</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -116,7 +116,7 @@
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.51.98</remoteHost>
+            <remoteHost>192.168.1.98</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
@@ -125,6 +125,15 @@
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
+            <remoteHost>192.168.1.104</remoteHost>
+            <remoteAccount></remoteAccount>
+        </container>
+        <container>
+            <name>RoachContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase></scriptBase>
             <remoteHost>192.168.1.104</remoteHost>
             <remoteAccount></remoteAccount>
         </container>

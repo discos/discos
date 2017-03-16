@@ -157,7 +157,18 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl)
 {
 	AUTO_TRACE("CCommandLine::stopDataAcquisition()");
-	Message reply = sendBackendCommand(Command::stop());
+	/*****************************************************************/
+	// since both suspend and stop data acquisition are mapped into Command::stop message to the backend
+	// It happens (@ the end of a scan) that the backend receives two Command::stop messages. Even if this is not
+	// an issue for the backend, this leads to an unwanted behviour of the control software. The thrown exception, infact,
+	// leads to skip the first subscan of the next scan. Temporarly workround if to catch the exception here. A debug messages is sent. 
+	/*****************************************************************/
+	try {
+		Message reply = sendBackendCommand(Command::stop());
+	}
+	catch (...) {
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::stopDataAcquisition()",(LM_DEBUG,"backend error while issuing a stop ascquisition"));		
+	}
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::stopDataAcquisition()",(LM_INFO,"TRANSFER_JOB_STOPPED"));
 	clearStatusField(CCommandLine::BUSY); // sets the component status to busy
 	clearStatusField(CCommandLine::SUSPEND); // sets the component status to transfer job suspended......
