@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   04-08-2011  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:ReceiversModeSetup:1.0"
+	xmlns="urn:schemas-cosylab-com:ReceiversModeSetup:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"	
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+
+<xs:complexType name="ReceiverModeType">
+	<!-- Mode name or mode mnemonic code -->
+	<xs:attribute name="Mode" type="xs:string" use="required"/>
+	<!-- represent the lower value (MHZ) of the sky radio frequency band of the receiver (0..IFs) -->
+	<xs:attribute name="RFMin" type="xs:string" use="required"/>
+	<!-- represent the upper value (MHZ) of the sky radio frequency band of the receiver (0..IFs)-->
+	<xs:attribute name="RFMax" type="xs:string" use="required"/>
+	<!-- represent the lower value (MHZ) of the Intermediate Frequency band of the receiver (0..IFs)-->
+	<xs:attribute name="IFMin" type="xs:string" use="required"/>
+	<!-- represent the bandwidth (MHZ) of the Intermediate Frequency of the receiver (0..IFs)-->
+	<xs:attribute name="IFBandwidth" type="xs:string" use="required"/>
+	<!-- number of feeds -->
+	<xs:attribute name="Feeds" type="xs:unsignedLong" use="required"/>
+	<!-- number of IF -->
+	<xs:attribute name="IFs" type="xs:unsignedLong" use="required"/>
+	<!-- blank separated list of the polarization relative to the IF, the first entry is relative to IF 0. Accepted character are L or R  -->
+	<xs:attribute name="Polarization" type="xs:string" use="required"/>
+	<!-- value in MHz of the local oscillator for this configuration (0..IFs)-->
+	<xs:attribute name="DefaultLO" type="xs:string" use="required"/>
+	<!-- multiplier to the primary sunthetizer, integer value, optional, default 1-->
+	<xs:attribute name="LOMultiplier" type="xs:string" use="optional"/>	
+	<!-- Local Oscillator fixed conversion (MHz), used to convert to the generator frequency (0..IFs)-->
+	<xs:attribute name="FixedLO2" type="xs:string" use="required"/>
+	<!-- represent the lower limit of validity range of the local oscillator (MHZ) (0..IFs)-->
+	<xs:attribute name="LOMin" type="xs:string" use="required"/>
+	<!-- represent the upper limit of validity range of the local oscillator (MHZ) (0..IFs)-->
+	<xs:attribute name="LOMax" type="xs:string" use="required"/>	
+</xs:complexType>
+
+<xs:element name="ReceiversModeSetup" type="ReceiverModeType"/>
+
+</xs:schema>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+   - $Id: BackendsErrors.xml,v 1.6 2009-04-28 12:27:25 a.orlati Exp $
+   - Author: Andrea Orlati
+   -
+   - History:
+   -   02-10-2008  Created
+   -   17-10-2008 added the error MalformedAnswer
+   -   28-04-2009 added the error ConfigurationError
+-->
+
+<Type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="Alma/ACSError" xsi:schemaLocation="Alma/ACSError ACSError.xsd"
+ name="BackendsErrors" type="2005" _prefix="alma">
+
+<Code name="NoError" shortDescription="No error" description="No error condition found"/>
+
+<ErrorCode name="Connection" shortDescription="Device not reachable or disconnected" description=""/>
+
+<ErrorCode name="TXError" shortDescription="Error during data transmission" description="">
+	<Member name="Details" type="string" description="more information about the transmission kind that generates the error" />
+</ErrorCode>
+
+<ErrorCode name="MalformedAnswer" shortDescription="The answer is not correct or complete" description="" />
+
+<ErrorCode name="Nak" shortDescription="The backend does not acknowledge" description="" />
+
+<ErrorCode name="BackendBusy" shortDescription="Backend is busy" description=""/>
+
+<ErrorCode name="ConfigurationError" shortDescription="The configuration is unknown or cannot be loaded" description=""/>
+
+<ErrorCode name="ReplyNotValid" shortDescription="The answer is not valid for the request" description=""/>
+
+<ErrorCode name="BackendFail" shortDescription="The backend fails during an application or setting" description="">
+	<Member name="Reason" type="string" description="Reason" />
+</ErrorCode>
+
+</Type>

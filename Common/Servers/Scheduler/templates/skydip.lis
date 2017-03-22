@@ -1,0 +1,6 @@
+1	SIDEREAL	w3oh	-HOROFFS	-1.0d	0.0d
+#skydip near the target w3oh
+2	SKYDIP	1	20.0d	90.0d	300.0	-HOROFFS	-1.0d	0.0d
+
+3	SIDEREAL	3c123	-HOROFFS	-1.0d	0.0d
+4	SKYDIP	3	20d	87.0d	300.0	-HOROFFS	-1.0d	0.0d

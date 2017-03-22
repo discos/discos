@@ -1,0 +1,13 @@
+#ifndef COMPONENTPROXIES
+#define COMPONENTPROXIES
+
+#include "ActiveSurfaceProxy.h"  
+#include "BackendsProxy.h"   
+#include "MinorServoProxy.h"
+#include "WeatherProxy.h"
+#include "AntennaProxy.h"        
+#include "ManagementProxy.h"  
+#include "ReceiversProxy.h"
+#include "MountProxy.h"        
+
+#endif

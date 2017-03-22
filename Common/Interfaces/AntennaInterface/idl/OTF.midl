@@ -1,0 +1,117 @@
+/* **************************************************************** */
+/* IRA Istituto di Radioastronomia                                  */
+/* $Id: OTF.midl,v 1.8 2011-05-10 15:15:33 a.orlati Exp $                                                           */
+/*                                                                  */
+/* This code is under GNU General Public Licence (GPL)              */
+/*                                                                  */
+/* Who                                  when            What        */
+/* Simona Righini						19/03/2008      created     */
+/* Simona Righini						15/09/2008      revised     */
+
+#ifndef _OTF_IDL
+#define _OTF_IDL
+
+#include <baci.idl>
+#include "EphemGenerator.idl"
+#include <AntennaErrors.idl>
+#include <ComponentErrors.idl>
+#include "AntennaDefinitions.idl"
+
+#pragma prefix "alma"
+
+module Antenna {
+
+	/**
+		 * @struct OTFAttributes defines a structure that contains all the properties of the component 
+		 * (inlcuded the inherited form the interface EpehemGenerator).
+		 * This interface will be mapped into an ACS dynamic component so it can not expose properties in their classic definition. So the 
+		 * component attributes are read via their accesor method (<i>getAttributes()</i>).  
+	     */
+		DEFATTRIBUTES(OTFAttributes)
+		double startLon;                 /** longitude of the subscan starting point (radians),  if RA it must be J2000, offset included*/
+		double startLat;		         /** latitude of the subscan starting point (radians), if Dec it must be J2000, offset included*/
+		double stopLon;		             /** longitude of the subscan ending point (radians),  if RA it must be J2000, offset included*/
+		double stopLat;	                 /** latitude of the subscan ending point (radians),  if Dec it must be J2000, offset included*/
+		double centerLon;                /** longitude of the subscan central point (radians), if RA it must be J2000, offset included*/
+		double centerLat;                /** latitude of the subscan central point (radians),  if Dec it must be J2000, offset included*/
+		double centerGLon;				 /** longitude relative to glactic frame of the central point (radians), offsets are not included */
+		double centerGLat;               /** latitude relative to glactic frame of the central point (radians), offsets are not included */
+		double centerRA;                 /** RAJ2000 of the subscan central point (radians), offsets are not included*/
+		double centerDec;                /** DecJ2000 of the subscan central point (radians), offsets are not included*/
+		double centerAz;                 /** azimuth of the subscan central point (radians), offsets are not included */
+		double centerEl;                 /** elevation of the subscan central point (radians), offsets are not included */
+		double lonSpan;                  /** total length of the subscan along longitude axis (radians)*/
+		double latSpan;                  /** total length of the subscan along latitude axis (radians)*/
+		double skySpan;					 /** absolute amplitude of subscan (radians)*/
+		double lonRate;                  /** longitude rate (radians/s) */
+		double latRate;                  /** latitude rate (radians/s) */
+		double skyRate;					 /** sky rate (radians/s) */
+		double subScanSpan;              /** amplitude of the great circle arc connecting start and stop points */
+		double phiRate;                  /** scan rate in case of great circle scan (radians/s) */
+		ACS::TimeInterval rampDuration;  /** duration of one acceleration or deceleration ramp */
+ 		TCoordinateFrame coordFrame;     /** reference frame of the input start-stop or center coordinates */ 
+		TsubScanGeometry geometry;       /** geometry of the subscan path: along the great circle or along one of the frame axes */
+		TCoordinateFrame subScanFrame;   /** reference frame for scan motion: equatorial, galactic or horizontal */
+
+		TsubScanDescription description; /** subscan mode description: start+stop or center+span (the latter does not apply to great circle geometry)*/
+		TsubScanDirection direction;     /** subscan direction: states if coordinate increases or decreases during scan 
+		                                     Does not apply to great circle geometry */
+		ACS::Time startUT;               /** Subscan starting UT time (absolute: 100ns since 1582-10-15 00:00:00) */  
+		ACS::TimeInterval subScanDuration;   /** subscan duration (100ns) */
+		
+		ENDDEFATTRIBUTES;
+	
+	/**
+	 * Component in charge of computing the on-the-fly subscan path along
+	 * equatorial, galactic, horizontal user frames or along an arbitrarily
+	 * rotated spherical frame (e.g. to scan a wide source along its axes) 
+	 * @author <a href=mailto:righin_s@ira.inaf.it>Simona Righini</a>,
+	 * Istituto di radioastronomia, Italia
+	 * <br>
+	 **/	
+	interface OTF: EphemGenerator {
+		
+		/**
+		 * This method is the attributes accessor. The only way to read the properties externally
+		 * @throw CORBA::SystemException
+		 * @param att this parameter is used to return the structure that contains all the values for each attribute of this class.
+		 *        Caller must take care of freeing the parameter. 
+		 */
+		void getAttributes(out OTFAttributes att);
+		
+		/** 
+		 * Sets all the subscan parameters. 
+		 * @param targetName allows to give a target name, it could be a real source name or just a place holder
+		 * @param initAz Azimuth position of antenna at subscan setup time 
+		 * @param initSector Azimuth section (CW or CCW) of init point 
+		 * @param initEl Elevation position of antenna at subscan setup time
+		 * @param initTime UT instant of subscan setup call
+		 * @param lon1 Longitude of subscan starting point or of central point. 
+		 * @param lat1 Latitude of subscan starting point or of central point.
+		 * @param lon2 Longitude of subscan stopping point or subscan longitude span.
+		 * @param lat2 Latitude of subscan stopping point or subscan latitude span.
+		 * @param coordFrame input coordinates reference frame: equatorial (J2000), galactic or
+		 *              horizontal.
+		 * @param geometry Subscan geometry: along great circle, along longitude
+		 *                 or along latitude.
+		 * @param subScanFrame Subscan reference frame: equatorial (J2000), galactic or
+		 *              horizontal.
+		 * @param description Subscan mode description: start+stop or center+span
+		 *                    Center+span does not apply to great circle geometry.
+		 * @param direction Subscan direction: along increasing or decreasing 
+		 *                  coordinates. Does not apply to great circle geometry.
+		 * @param startUT Subscan starting UT time (absolute). If zero, the component will answer back with the computed/expected start time.
+		 * @param subScanDuration subscan duration (100ns).
+		 * @return Azimuth sector (CW or CCW) of the subscan start position
+		 * @throw CORBA::SystemException
+		 * @throw AntennaErrors::AntennaErrorsEx
+	     * @throw ComponentErrors::ComponentErrorsEx
+		 */
+		Antenna::TSections setSubScan(in string TargetName, in double initAz, in TSections initSector, in double initEl, in ACS::Time initTime, in double lon1, in double lat1, 
+				        in double lon2, in double lat2,  in TCoordinateFrame coordFrame, 
+				        in TsubScanGeometry geometry, in TCoordinateFrame subScanFrame, in TsubScanDescription description, 
+				        in TsubScanDirection direction, in ACS::Time startUT, in ACS::TimeInterval subScanDuration) raises (AntennaErrors::AntennaErrorsEx,ComponentErrors::ComponentErrorsEx);
+		
+	};
+};
+#endif

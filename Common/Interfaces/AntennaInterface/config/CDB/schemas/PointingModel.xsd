@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:PointingModel:1.0"
+	xmlns="urn:schemas-cosylab-com:PointingModel:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	
+	<xs:complexType name="TTableHeader">
+ 		<xs:sequence>
+ 			<xs:element name="receiverCode" type="xs:string" />
+ 			<xs:element name="phi" type="xs:double" />
+ 			<xs:element name="coefficientNum00" type="xs:int" />
+ 			<xs:element name="coefficientVal00" type="xs:double" />
+ 			<xs:element name="coefficientNum01" type="xs:int" />
+ 			<xs:element name="coefficientVal01" type="xs:double" />
+ 			<xs:element name="coefficientNum02" type="xs:int" />
+ 			<xs:element name="coefficientVal02" type="xs:double" />
+ 			<xs:element name="coefficientNum03" type="xs:int" />
+ 			<xs:element name="coefficientVal03" type="xs:double" />
+ 			<xs:element name="coefficientNum04" type="xs:int" />
+ 			<xs:element name="coefficientVal04" type="xs:double" />
+ 			<xs:element name="coefficientNum05" type="xs:int" />
+ 			<xs:element name="coefficientVal05" type="xs:double" />
+ 			<xs:element name="coefficientNum06" type="xs:int" />
+ 			<xs:element name="coefficientVal06" type="xs:double" />
+ 			<xs:element name="coefficientNum07" type="xs:int" />
+ 			<xs:element name="coefficientVal07" type="xs:double" />
+ 			<xs:element name="coefficientNum08" type="xs:int" />
+ 			<xs:element name="coefficientVal08" type="xs:double" />
+ 			<xs:element name="coefficientNum09" type="xs:int" />
+ 			<xs:element name="coefficientVal09" type="xs:double" />
+ 			<xs:element name="coefficientNum10" type="xs:int" />
+ 			<xs:element name="coefficientVal10" type="xs:double" />
+ 			<xs:element name="coefficientNum11" type="xs:int" />
+ 			<xs:element name="coefficientVal11" type="xs:double" />
+ 			<xs:element name="coefficientNum12" type="xs:int" />
+ 			<xs:element name="coefficientVal12" type="xs:double" />
+ 			<xs:element name="coefficientNum13" type="xs:int" />
+ 			<xs:element name="coefficientVal13" type="xs:double" />
+ 			<xs:element name="coefficientNum14" type="xs:int" />
+ 			<xs:element name="coefficientVal14" type="xs:double" />
+ 			<xs:element name="coefficientNum15" type="xs:int" />
+ 			<xs:element name="coefficientVal15" type="xs:double" />
+ 			<xs:element name="coefficientNum16" type="xs:int" />
+ 			<xs:element name="coefficientVal16" type="xs:double" />
+ 			<xs:element name="coefficientNum17" type="xs:int" />
+ 			<xs:element name="coefficientVal17" type="xs:double" />
+ 			<xs:element name="coefficientNum18" type="xs:int" />
+ 			<xs:element name="coefficientVal18" type="xs:double" />
+ 			<xs:element name="coefficientNum19" type="xs:int" />
+ 			<xs:element name="coefficientVal19" type="xs:double" />
+ 			<xs:element name="coefficientNum20" type="xs:int" />
+ 			<xs:element name="coefficientVal20" type="xs:double" />
+ 			<xs:element name="coefficientNum21" type="xs:int" />
+ 			<xs:element name="coefficientVal21" type="xs:double" />
+ 			<xs:element name="coefficientNum22" type="xs:int" />
+ 			<xs:element name="coefficientVal22" type="xs:double" />
+ 			<xs:element name="coefficientNum23" type="xs:int" />
+ 			<xs:element name="coefficientVal23" type="xs:double" />
+ 			<xs:element name="coefficientNum24" type="xs:int" />
+ 			<xs:element name="coefficientVal24" type="xs:double" />
+ 			<xs:element name="coefficientNum25" type="xs:int" />
+ 			<xs:element name="coefficientVal25" type="xs:double" />
+ 			<xs:element name="coefficientNum26" type="xs:int" />
+ 			<xs:element name="coefficientVal26" type="xs:double" />
+ 			<xs:element name="coefficientNum27" type="xs:int" />
+ 			<xs:element name="coefficientVal27" type="xs:double" />
+ 			<xs:element name="coefficientNum28" type="xs:int" />
+ 			<xs:element name="coefficientVal28" type="xs:double" />
+ 			<xs:element name="coefficientNum29" type="xs:int" />
+ 			<xs:element name="coefficientVal29" type="xs:double" />
+ 		</xs:sequence>
+ 	</xs:complexType>
+ 	
+	<xs:complexType name="TTableReceiver">
+		<xs:sequence>
+		 	<xs:element name="Receiver" type="TTableHeader" minOccurs="1" maxOccurs="unbounded" />
+ 		</xs:sequence>
+ 	</xs:complexType>
+ 		
+	<xs:element name="PointingModel" type="TTableReceiver"/>
+	
+</xs:schema>
