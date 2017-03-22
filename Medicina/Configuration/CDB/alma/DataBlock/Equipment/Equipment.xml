@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Andrea Orlati
+   - History:
+ 	- 25-03-15 Created
+-->
+
+<TelescopeEquipment xmlns="urn:schemas-cosylab-com:TelescopeEquipment:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	FTrackPrecisionDigits="3">
+	
+	<MinorServoMapping axis="SUBR_Z" servoName="Z" antennaGeometry="LON" beamDeviationFactor="0.0" />
+	<MinorServoMapping axis="SUBR_X" servoName="X" antennaGeometry="LAT" beamDeviationFactor="0.5"/>
+	<MinorServoMapping axis="SUBR_Y" servoName="Y" antennaGeometry="LON" beamDeviationFactor="0.5"/>
+	<MinorServoMapping axis="SUBR_ROTY" servoName="THETA_Y" antennaGeometry="LAT" beamDeviationFactor="0.05"/>
+	<MinorServoMapping axis="SUBR_ROTX" servoName="THETA_X" antennaGeometry="LON" beamDeviationFactor="0.05"/>
+	<MinorServoMapping axis="PFP_Z" servoName="ZP" antennaGeometry="LON" beamDeviationFactor="0.0"/>
+	<MinorServoMapping axis="PFP_Y" servoName="YP" antennaGeometry="LON" beamDeviationFactor="0.5"/>
+	
+	<AvailableBackend alias="TotalPower" backend="BACKENDS/TotalPower" noData="false" dataPath="" />
+	<AvailableBackend alias="XArcos" backend="BACKENDS/XBackends" noData="false" dataPath="" />
+	<AvailableBackend alias="Roach" backend="BACKENDS/Roach" noData="true" dataPath="/locallustre/roachdata/" />
+	
+</TelescopeEquipment>

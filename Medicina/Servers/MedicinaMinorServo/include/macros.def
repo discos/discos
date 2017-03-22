@@ -1,0 +1,34 @@
+// Throw the exception NAME of type TYPE with message MESSAGE
+// If THROUGH_GET is true get the exception by an exImpl method
+#define THROW_EX(TYPE, NAME, MESSAGE, THROUGH_GET) \
+{ \
+    string msg(MESSAGE); \
+    ACS_SHORT_LOG((LM_ERROR, msg.c_str())); \
+    TYPE::NAME##Impl exImpl(__FILE__, __LINE__, msg.c_str()); \
+    if(THROUGH_GET) \
+        throw exImpl.get##NAME(); \
+    else \
+        throw exImpl; \
+}
+
+#define THROW_MINORSERVO_EX(NAME, MESSAGE, THROUGH_GET) \
+{ \
+    string msg(MESSAGE); \
+    ACS_SHORT_LOG((LM_ERROR, msg.c_str())); \
+    MinorServoErrors::NAME##Impl exImpl(__FILE__, __LINE__, msg.c_str()); \
+    if(THROUGH_GET) \
+        throw exImpl.getMinorServoErrorsEx(); \
+    else \
+        throw exImpl; \
+}
+
+#define GET_PROPERTY_REFERENCE(IMPLNAME, TYPE, PROPERTY, PROPERTYNAME) \
+    TYPE##_ptr IMPLNAME::PROPERTYNAME() \
+    throw (CORBA::SystemException) \
+{ \
+    if (PROPERTY==0) return TYPE::_nil(); \
+    TYPE##_var tmp=TYPE::_narrow(PROPERTY->getCORBAReference()); \
+    return tmp._retn(); \
+}
+
+

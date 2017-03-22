@@ -1,0 +1,108 @@
+/* **************************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      	        */
+/* $Id: MedicinaMount.idl,v 1.2 2010-12-06 11:24:24 a.orlati Exp $										                    */
+/*                                                                                                      	        */
+/* This code is under GNU General Public Licence (GPL).                                                 	        */
+/*                                                                                                      	        */
+/* Who                                 when            What                                              	        */
+/* Andrea Orlati(aorlati@ira.inaf.it)  12/04/2007      Creation                                          	        */
+
+
+#ifndef _MEDICINAMOUNT_IDL_
+
+#define _MEDICINAMOUNT_IDL_
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include "Mount.idl"
+
+#pragma prefix "alma"
+
+module Antenna {
+	
+   /**
+ 	* This IDL interface describes the CORBA interface of a the mount of the VLBI antenna of Medicina. This specilaized interface includes all
+ 	* the peculiar feature that are present in the Atenna Control Unit (ACU) installed at Medicina that are not forseen by the parent interface. 
+ 	* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
+ 	* Istituto di Radioastronomia, Italia
+ 	* <br> 
+	*/
+	interface MedicinaMount:Mount {
+		
+		/** This property reports the current status of component with respect to the ACU system */
+		readonly attribute ROTStatus status;
+		
+		/**
+		 *	This property reports the current status of the azimuth servo. The returned pattern is a 16 bits field with the following meaning:
+		 * 	@arg \c 0 Emergency Limit		 
+		 * 	@arg \c 1 Operating limit ccw/down
+		 * 	@arg \c 2 Operating limit cw/up
+		 * 	@arg \c 3 Prelimit ccw/down
+		 * 	@arg \c 4 Prelimit cw/up
+		 * 	@arg \c 5 Stow position
+		 * 	@arg \c 6 Stow pin inserted
+		 * 	@arg \c 7 Stow pin retracted
+		 * 	@arg \c 8 Servo failure
+		 * 	@arg \c 9 Brake failure
+		 * 	@arg \c 10 Encoder failure
+		 * 	@arg \c 11 Motion failure
+		 * 	@arg \c 12 Motor overspeed
+		 * 	@arg \c 13 Auxiliary mode
+		 * 	@arg \c 14 Axis disabled
+		 * 	@arg \c 15 Computer disabled
+		*/
+		readonly attribute ACS::ROpattern azimuthServoStatus;
+		
+		/**
+		 *  This property reports the current status of the elevation servo, The returned pattern is a 16 bits field with the following meaning:
+		 * 	@arg \c 0 Emergency Limit		 
+		 * 	@arg \c 1 Operating limit ccw/down
+		 * 	@arg \c 2 Operating limit cw/up
+		 * 	@arg \c 3 Prelimit ccw/down
+		 * 	@arg \c 4 Prelimit cw/up
+		 * 	@arg \c 5 Stow position
+		 * 	@arg \c 6 Stow pin inserted
+		 * 	@arg \c 7 Stow pin retracted
+		 * 	@arg \c 8 Servo failure
+		 * 	@arg \c 9 Brake failure
+		 * 	@arg \c 10 Encoder failure
+		 * 	@arg \c 11 Motion failure
+		 * 	@arg \c 12 Motor overspeed
+		 * 	@arg \c 13 Auxiliary mode
+		 * 	@arg \c 14 Axis disabled
+		 * 	@arg \c 15 Computer disabled
+		*/
+		readonly attribute ACS::ROpattern elevationServoStatus;
+
+		/** 
+		 * This property reports the current servo system status. The returned pattern is a 16 bits (7 meaningful) field with the followin meaning:
+		 * 	@arg \c 0 Door interlock
+		 * 	@arg \c 1 Safe (The safe switch has been activated in order to protect maintenance people)
+		 * 	@arg \c 2 Emergency (at least one emergency pushbuttons has been hit)		 
+		 * 	@arg \c 3 Transfer error (this bit is set if the checksum of one data has not been identical with the end bytes, automatically cleared)
+		 * 	@arg \c 4 Time error (This bit is set if the time pulse is not received by the ACU, cleared when the pulse arrives. )
+		 * 	@arg \c 5 RF Inhibit 
+		 * 	@arg \c 6 Remote (The servo system can be controlled remotely)
+		*/
+		readonly attribute ACS::ROpattern servoSystemStatus;
+		
+		/** 
+		 * This property indicates the number of stack slots that is available to store time tagged program track positions
+	    */
+		readonly attribute ACS::ROlong freeProgramTrackPosition;
+		
+		/*
+		 * This methods is used to aknowledge pending hardware errors of the servo system. If the error is still there, it has no
+		 * effect.
+		 * @throw ComponentCommonErrors::ComponentCommonErrorsEx 		 
+		 * @throw CORBA::SystemException 
+		*/ 
+		//void resetFailures() raises (ComponentErrors::ComponentErrorsEx);	
+		
+	};
+	
+};
+
+
+
+#endif

@@ -1,0 +1,10 @@
+Log for qt3to4 on Wed Jul 22 14:23:09 2009. Number of log entries: 1
+In file /home/almamgr/Medicina/Clients/MedicinaGeneralControlSystemGUIClient/src/MedicinaGeneralControlSystemGUIClient.cpp at line 4 column 12: qmainwindow.h -> q3mainwindow.h
+
+Log for qt3to4 on Wed Jul 22 14:25:42 2009. Number of log entries: 1
+No changes made to file /home/almamgr/Medicina/Clients/MedicinaGeneralControlSystemGUIClient/src/MedicinaGeneralControlSystem.cpp
+
+Log for qt3to4 on Wed Jul 22 14:26:12 2009. Number of log entries: 1
+In file /home/almamgr/Medicina/Clients/MedicinaGeneralControlSystemGUIClient/include/MedicinaGeneralControlSystem.h: Added the following include directives:
+	#include <QLabel> 
+

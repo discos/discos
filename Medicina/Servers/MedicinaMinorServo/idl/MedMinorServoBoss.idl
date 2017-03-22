@@ -1,0 +1,28 @@
+
+/***************************************************************\
+ *  Authors: 
+ *      Marco Bartolini <bartolini@ira.inaf.it>
+ *
+ *  Created: Fri Gen 09 10:45:07 CEST 2015
+\***************************************************************/
+#ifndef __MEDMINORSERVOBOSS_IDL__
+#define __MEDMINORSERVOBOSS_IDL__
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include <ManagmentDefinitions.idl>
+#include <MinorServoBoss.idl>
+#include <MinorServoErrors.idl>
+
+#pragma prefix "alma"
+
+module MinorServo{
+    interface MedMinorServoBoss: MinorServoBoss {
+        void connect() raises (MinorServoErrors::CommunicationErrorEx);
+        void disconnect() raises (MinorServoErrors::CommunicationErrorEx);
+        void reset() raises (MinorServoErrors::CommunicationErrorEx);
+        void getServoTime(out ACS::Time servoTime) raises (MinorServoErrors::CommunicationErrorEx);
+    };
+};
+
+#endif
