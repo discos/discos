@@ -119,7 +119,7 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 		m_kBandSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
 #endif
 	}
-	else if ((m_currentReceiver=="CCC") || (m_currentReceiver="CHC")){
+	else if ((m_currentReceiver=="CCC") || (m_currentReceiver=="CHC")){
 #ifndef RB_DEBUG
 		char buffer [14] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','n','\n' };
 		if (m_recvSocket.Send(err,(const void *)buffer,14)!=14) {
@@ -178,7 +178,7 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 		m_kBandSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
 #endif
 	}
-	else if ((m_currentReceiver=="CCC") || (m_currentReceiver="CHC")) {
+	else if ((m_currentReceiver=="CCC") || (m_currentReceiver=="CHC")) {
 #ifndef RB_DEBUG
 		char buffer [15] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','f','f','\n' };
 		if (m_recvSocket.Send(err,(const void *)buffer,15)!=15) {
