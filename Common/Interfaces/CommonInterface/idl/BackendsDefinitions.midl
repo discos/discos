@@ -44,6 +44,9 @@ module Backends {
 	
 	ACS_ENUM(TPolarization);
 
+    typedef sequence<double> AttenuationArray;
+    typedef sequence<long> PolarizationArray;
+
 	/**
 	 * This structure reports the information that composes the section header of the data flux. Each section can have one or two inputs. Generally the number of inputs depends on the
 	 * the polarization type of the section, if simple LEFT or RIGHT the input is one, if FULL_STOKES the inputs are two. The two positions fields <i>attenuation</i> and <i>IF</i> reports
@@ -56,11 +59,11 @@ module Backends {
 		TPolarization polarization;			 /*!< specify the type of the section  */  
 		double bandWidth;					/*!< bandwidth in MHz of the section */
 		double frequency;                  /*!< start frequency of the section in MHz  */
-		double attenuation[2];			  /*!< attenuation level of the input in db. */
+		AttenuationArray attenuation;			  /*!< attenuation level of the input in db. */
 		double sampleRate;               /*!< sample rate in MHz */
 		long feed;                      /*!< beam identifier from which the section comes from */
 		long inputs;                   /*!< number of inputs virtually connected to the section, it can be one or two depending on the polarization. */
-		long IF[2];					  /*!< if identifier for each of the inputs */	
+		PolarizationArray IF;					  /*!< if identifier for each of the inputs */	
 	};
 	
 	/**
