@@ -44,8 +44,8 @@ module Backends {
 	
 	ACS_ENUM(TPolarization);
 
-    typedef sequence<double> AttenuationArray;
-    typedef sequence<long> PolarizationArray;
+    typedef double AttenuationArray[2];
+    typedef long PolarizationArray[2];
 
 	/**
 	 * This structure reports the information that composes the section header of the data flux. Each section can have one or two inputs. Generally the number of inputs depends on the
