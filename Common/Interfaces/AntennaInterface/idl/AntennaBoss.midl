@@ -584,17 +584,17 @@ module Antenna {
 		 * This method should only be used internally to know the raw coordinates commanded to the mount. You must provide the timemark
 		 * your coordinates have to refer to.
 		 * @throw CORBA::SyStemException
-		 * @param time this indicates to the routine the time to which the coordinates refer
+		 * @param timemark this indicates to the routine the time to which the coordinates refer
 		 * @param az the raw azimuth in radians
 		 * @param el the raw elevation in radians 
 		*/
-		void getRawCoordinates(in ACS::Time time,out double az,out double el);
+		void getRawCoordinates(in ACS::Time timemark,out double az,out double el);
 		
 		/**
 		 * This method should only be used internally to know the apparent coordinates commanded. You must provide the timemark
 		 * your coordinates have to refer to. Apparent coordinates are included with user offsets and come directly fro ephemeris generator. They should differ from observed coordinate just for pointing errors.
 		 * @throw CORBA::SyStemException
-		 * @param time this indicates the time the coordinates refer to
+		 * @param timemark this indicates the time the coordinates refer to
 		 * @param az the apparent  azimuth in radians
 		 * @param el the apparent elevation in radians
 		 * @param ra apparent right ascension in radinas
@@ -603,48 +603,48 @@ module Antenna {
 		 * @param lon galactic longitude corresponding to the apparent equatorial
 		 * @param lat galactic latitude corresponding to the apparent equatorial
 		*/
-		void getApparentCoordinates(in ACS::Time time,out double az,out double el, out double ra,out double dec,out double jepoch,out double lon,out double lat);
+		void getApparentCoordinates(in ACS::Time timemark,out double az,out double el, out double ra,out double dec,out double jepoch,out double lon,out double lat);
 
 		/** 
 		 * This method should only be used internally to know the observed equatorial coordinates. A timestamp to which the coordinates
 		 * referes to must be provided. It is highly probable that these cordinates are not "real" (directly read from the antenna) but they are the result of 
 		 * an interpolation. The equinox is J2000. They directly come from the observed in the horizontal frame.
 		 * In case duration is greter than the configured coordinate integration time, the returned coordinates are the result of the average over the duration interval that starts
-		 * from <i>time</i>.
+		 * from <i>timestamp</i>.
 		 * @throw CORBA::SystemExcpetion
-		 * @param time the input timestamp
+		 * @param timestamp the input timestamp
 		 * @param duration duration of the integration, if greater than coordinate integration time the returned values are not instantaneous but are averaged 
 		 *        over the provided interval.
 		 * @param ra the returned observed right ascension in radians 
 		 * @param dec the returned observed declination in radians
 		*/
-		void getObservedEquatorial(in ACS::Time time,in ACS::TimeInterval duration,out double ra,out double dec);
+		void getObservedEquatorial(in ACS::Time timestamp,in ACS::TimeInterval duration,out double ra,out double dec);
 		
 		/** 
 		 * This method should only be used internally to know the observed galactic coordinates. A timestamp to which the coordinates
 		 * referes to must be provided. It is highly probable that these cordinates are not "real" (directly read from the antenna) but they are the result of 
 		 * an interpolation. They are obtained by converting the corresponding J2000 observed equatorial coordinates.
 		 * @throw CORBA::SystemExcpetion
-		 * @param time the input timestamp
+		 * @param timestamp the input timestamp
 		 * @param duration duration of the integration, if greater than coordinate integration time the returned values are not instantaneous but are averaged 
 		 *        over the provided interval.
 		 * @param ra the returned observed galactic longitude in radians 
 		 * @param dec the returned observed galactic latitude in radians
 		*/
-		void getObservedGalactic(in ACS::Time time,in ACS::TimeInterval duration, out double longitude,out double latitude);
+		void getObservedGalactic(in ACS::Time timestamp,in ACS::TimeInterval duration, out double longitude,out double latitude);
 		
 		/** 
 		 * This method should only be used internally to know the observed horizontal coordinates. A timestamp to which the coordinates
 		 * referes to must be provided. It is highly probable that these cordinates are not "real" (directly read from the antenna) but they are the result of 
 		 * an interpolation. They are obtained by the encoders coordinates depurated by instrumental effects..
 		 * @throw CORBA::SystemExcpetion
-		 * @param time the input timestamp
+		 * @param timestamp the input timestamp
 		 * @param duration duration of the integration, if greater than coordinate integration time the returned values are not instantaneous but are averaged 
 		 *        over the provided interval. 
 		 * @param ra the returned observed azimuth in radians 
 		 * @param dec the returned observed elevation in radians
 		*/		
-		void getObservedHorizontal(in ACS::Time time,in ACS::TimeInterval duration,out double az,out double el);
+		void getObservedHorizontal(in ACS::Time timestamp,in ACS::TimeInterval duration,out double az,out double el);
 		
 		/**
 		 * This method should only be used internally to know the user offsets currently commanded
