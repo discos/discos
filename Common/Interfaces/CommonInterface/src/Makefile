@@ -45,15 +45,6 @@ TestReceivers_LIBS= baci maci
 TestManagement_OBJECTS = ManagementModule
 TestManagement_LIBS= ManagementErrors baci maci
 
-Antenna_OBJECTS= AntennaModule
-Antenna_LIBS = AntennaDefinitions AntennaErrors TestManagement_LIBS AntennaDefinitionsStubs_LIBS 
-
-Backend_OBJECTS= BackendModule
-Backend_LIBS = BackendsDefinitions BackendsErrors BackendsDefinitionsStubs_LIBS
-
-MinorServo_OBJECTS= MinorServoModule
-MinorServo_LIBS = MinorServoDefinitions MinorServoErrors MinorServoDefinitionsStubs_LIBS
-
 #
 # <brief description of xxxxx program>
 xxxxx_OBJECTS   =	
