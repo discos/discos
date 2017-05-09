@@ -9,7 +9,7 @@
 # --------  --------  ----------------------------------------------
 # Andrea    06/04/07  created
 # Andrea    24/04/07  Added PointingModule by Carlo Migoni
-#
+# S.Poppi   09/05/2017
 
 #*******************************************************************************
 # This Makefile follows VLT Standards (see Makefile(5) for more).
@@ -30,7 +30,7 @@ CDB_SCHEMAS = Mount Station PointingModel
 # IDL Files and flags
 # 
 IDL_FILES = Observatory Mount PointingModel EphemGeneratorMACRO_include \
-EphemGenerator SkySource OTF Refraction AntennaBoss Moon
+EphemGenerator SkySource OTF Refraction AntennaBoss Moon SolarSystemBody
 IDL_TAO_FLAGS =
 USER_IDL =
 
