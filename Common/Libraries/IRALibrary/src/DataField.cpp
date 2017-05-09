@@ -97,12 +97,11 @@ void CDataField::setValue(const CString& value)
 		switch (m_type) {
 			case LONGLONG : {
 				m_valueList.back()->setType(baci::BACIValue::type_longLong);
-				m_valueList.back()->setValue((long long)atoll((const char*)value));				
-				break;
+				m_valueList.back()->setValue((const BACIlongLong)atoll((const char*)value));
 			}
 			case DOUBLEDOUBLEWORD : {
 				m_valueList.back()->setType(baci::BACIValue::type_uLongLong);
-				m_valueList.back()->setValue((DDWORD)atoll((const char*)value));
+				m_valueList.back()->setValue((const BACIuLongLong)atoll((const char*)value));
 				break;
 			}	
 			case DOUBLE : {
