@@ -45,6 +45,11 @@
 IDL_FILES = GenericWeatherStation MeteoData
 IDL_TAO_FLAGS =
 USER_IDL =
+
+GenericWeatherStationStubs_LIBS = baciStubs ManagmentDefinitionsStubs
+MeteoDataStubs_LIBS = acscomponentStubs ACSErrTypeCommonStubs
+
+
 #
 # Jarfiles and their directories
 #
