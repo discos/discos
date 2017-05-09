@@ -183,9 +183,9 @@ module Backends {
 		 * @throw CORBA::SystemException
 		 * @throw BackendsErrors::BackendsErrorsEx 
 		 * @thorw ComponentErrors::ComponentErrorsEx
-		 * @param time start time of the acquisition. If the time is elapsed the acquisition is started anyway, If a zero is passed the acquisition will be started as soon as possible.
+		 * @param stime start time of the acquisition. If the time is elapsed the acquisition is started anyway, If a zero is passed the acquisition will be started as soon as possible.
 		*/
-		void sendData(in ACS::Time time) raises (BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx);
+		void sendData(in ACS::Time stime) raises (BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx);
 
 		/**
 		  * Immediately stops the data flows. This is asort of suspend, that means that the data are not sent but the transfer job i still
