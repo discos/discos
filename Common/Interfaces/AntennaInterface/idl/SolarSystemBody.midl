@@ -27,9 +27,9 @@ module Antenna {
 	DEFATTRIBUTES (SolarSystemBodyAttributes)
            double angularSize; /** apparent angular diameter of the body degrees**/
            double distance; /**body distance AU **/
-           double inputRadialVelocity; /**body radial velocity km/s**/
-           Antenna::TReferenceFrame inputVradFrame; /** reference frame of the radial velocity */
-           Antenna::TVradDefinition inputVradDefinition; /** definition of the radial velocity */
+           double radialVelocity; /**body radial velocity km/s**/
+           Antenna::TReferenceFrame vradFrame; /** reference frame of the radial velocity */
+           Antenna::TVradDefinition vradDefinition; /** definition of the radial velocity */
 
 	ENDDEFATTRIBUTES;
 	
