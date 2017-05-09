@@ -22,6 +22,22 @@ IDL_FILES = CommonReceiverInterface ReceiversBoss \
 			GenericReceiver LocalOscillatorInterface \
 			DewarPositionerDefinitions GenericDerotator DewarPositioner
 
+
+CommonReceiverInterfaceStubs_LIBS = baciStubs ComponentErrorsStubs ManagementErrorsStubs \
+    ReceiversErrorsStubs
+ReceiversBossStubs_LIBS = baciStubs ComponentErrorsStubs ReceiversErrorsStubs \
+    ManagmentDefinitionsStubs CommonReceiverInterfaceStubs ReceiversDefinitionsStubs \
+    AntennaDefinitionsStubs
+GenericReceiverStubs_LIBS = baciStubs ComponentErrorsStubs ReceiversErrorsStubs \
+    ReceiversDefinitionsStubs ManagmentDefinitionsStubs CommonReceiverInterfaceStubs
+LocalOscillatorInterfaceStubs_LIBS = baciStubs ComponentErrorsStubs ReceiversErrorsStubs
+DewarPositionerDefinitionsStubs_LIBS = baciStubs AntennaDefinitionsStubs
+GenericDerotatorStubs_LIBS = baciStubs DerotatorErrorsStubs ComponentErrorsStubs \
+    ManagmentDefinitionsStubs
+DewarPositionerStubs_LIBS =  baciStubs maciErrTypeStubs ComponentErrorsStubs \
+    ManagmentDefinitionsStubs AntennaDefinitionsStubs DewarPositionerDefinitionsStubs
+
+
 # list of all possible C-sources (used to create automatic dependencies)
 CSOURCENAMES = \
 	$(foreach exe, $(EXECUTABLES) $(EXECUTABLES_L), $($(exe)_OBJECTS)) \
