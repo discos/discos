@@ -14,6 +14,7 @@
 
 #include <ace/Timer_Heap_T.h>
 #include <ace/Timer_Queue_Adapters.h>
+#include <Event_Handler_Handle_Timeout_Upcall.h>
 #include <acstimeTimeUtil.h>
 #include <vector>
 
@@ -146,7 +147,7 @@ private:
 	} TRecord;
 	typedef std::vector<TRecord *> TEvents;
 	typedef TEvents::iterator TEventsIterator;
-	typedef ACE_Event_Handler_Handle_Timeout_Upcall<ACE_Null_Mutex> TUpcall;
+	typedef ACE_Event_Handler_Handle_Timeout_Upcall TUpcall;
 	typedef ACE_Timer_Heap_T<ACE_Event_Handler*,TUpcall,ACE_Null_Mutex> TTimer_Heap;
 	typedef ACE_Thread_Timer_Queue_Adapter<TTimer_Heap> TThread_Timer_Queue;
 	
