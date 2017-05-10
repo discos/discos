@@ -241,7 +241,7 @@ Antenna::TSiteInformation ObservatoryImpl::getSiteSummary() throw (CORBA::System
 
 void ObservatoryImpl::setDUT1(CORBA::Double val,CORBA::Boolean save) throw (CORBA::SystemException,ComponentErrorsEx)
 {
-	unsigned long long timestamp;
+    ACS::Time timestamp;
 	AUTO_TRACE("ObservatoryImpl::setDUT1()");
 	try {
 		m_pDUT1->getDevIO()->write(val,timestamp);
@@ -267,7 +267,7 @@ void ObservatoryImpl::setDUT1(CORBA::Double val,CORBA::Boolean save) throw (CORB
 
 void ObservatoryImpl::setGeodeticModel(Antenna::TGeodeticModel model,CORBA::Boolean save) throw (CORBA::SystemException,ComponentErrorsEx)
 {
-	unsigned long long timestamp;
+    ACS::Time timestamp;
 	AUTO_TRACE("ObservatoryImpl::setGeodeticModel()");
 	try {
 		m_pgeodeticModel->getDevIO()->write(model,timestamp);
@@ -294,7 +294,7 @@ void ObservatoryImpl::setGeodeticModel(Antenna::TGeodeticModel model,CORBA::Bool
 void ObservatoryImpl::setPoleMotion(CORBA::Double xP,CORBA::Double yP,CORBA::Boolean save) 
   throw (CORBA::SystemException,ComponentErrorsEx)
 {
-	unsigned long long timestamp;
+    ACS::Time timestamp;
 	AUTO_TRACE("ObservatoryImpl::setPoleMotion()");
 	try {
 		m_pxPolarMotion->getDevIO()->write(xP,timestamp);
