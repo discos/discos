@@ -8,8 +8,7 @@
 #include <baci.h>
 #include <math.h>
 #include <acstimeEpochHelper.h>
-#include <Site.h>
-#include <DateTime.h>
+ #include <DateTime.h>
 #include <SkySource.h>
 
 
@@ -39,7 +38,7 @@ MoonImpl::~MoonImpl()
 // initialization 
 void MoonImpl::initialize() throw(ACSErr::ACSbaseExImpl)
 {
-	AUTO_TRACE("moonImpl::initilize()");
+	AUTO_TRACE("moonImpl::initialize()");
 	ra_off = dec_off = 0.0;
 	az_off = el_off = 0.0;
 	m_offsetFrame=Antenna::ANT_HORIZONTAL;
