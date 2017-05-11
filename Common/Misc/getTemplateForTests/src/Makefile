@@ -12,7 +12,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = getTemplateForTests
+SCRIPTS         = getTemplateForTests
 PY_MODULES         = gettemplatefortests
 
 #
