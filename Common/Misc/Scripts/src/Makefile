@@ -31,7 +31,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = data_stats tabbify
+PY_SCRIPTS         =
 PY_SCRIPTS_L       = 
 
 PY_MODULES         =
@@ -41,7 +41,7 @@ PY_PACKAGES        =
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 
-SCRIPTS         = 
+SCRIPTS         = data_stats tabbify
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
