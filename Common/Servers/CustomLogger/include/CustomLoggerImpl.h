@@ -37,6 +37,10 @@
 #include <expat_log_parsing.h>
 
 #define WRITER_THREAD_NAME "logwriter"
+/* We used acscommon::LOGGING_CHANNEL_KIND in ACS-8.2, but
+ * it is no more available.  That is why we are defining it.
+ */ 
+const char *const LOGGING_CHANNEL_KIND = "";
 
 /**
  * Event Type used in the ACS Notification Channel.

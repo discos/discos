@@ -119,7 +119,7 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     CosNaming::Name name(1);
     name.length(1);
     name[0].id = CORBA::string_dup(CUSTOM_LOGGING_CHANNEL);
-    name[0].kind = acscommon::LOGGING_CHANNEL_KIND;
+    name[0].kind = LOGGING_CHANNEL_KIND;
     ifgop_ = CosNotifyChannelAdmin::OR_OP;
     m_nevents_sp->getDevIO()->write((long)0, _timestamp);
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : resolving name service"));
