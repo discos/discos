@@ -5,7 +5,7 @@
 #*****************************************
 
 PY_PACKAGES = ReceiverBoardSimImpl
-PY_SCRIPTS = receiverboard-sim
+SCRIPTS = receiverboard-sim
 
 # -----------------
 # Include Standards
