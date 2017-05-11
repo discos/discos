@@ -96,11 +96,11 @@ void NotificationHandler(Receivers::ReceiversDataBlock data,void *handlerParam)
 	}
 }
 
-static bool terminate;
+static bool terminate_;
 
 void quintHandler(int sig)
 {
-	terminate=true;
+	terminate_=true;
 }
 
 #define TEMPLATE_4_ROTSYSTEMSTATUS  Management::ROTSystemStatus_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
 	TW::CLabel *output_label;
 	TW::CInputCommand *userInput;
 
-	terminate=false;
+	terminate_=false;
 
 	// mainframe 
 	TW::CFrame window(CPoint(0,0),CPoint(WINDOW_WIDTH,WINDOW_HEIGHT),'|','|','-','-'); 
@@ -503,9 +503,9 @@ int main(int argc, char *argv[]) {
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::START"));
 	window.showFrame();
 
-	while(!terminate) {
+	while(!terminate_) {
 		if (userInput->readCommand(inputCommand)) {
-			if (inputCommand=="exit")  terminate=true;
+			if (inputCommand=="exit")  terminate_=true;
 			else if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
 				try {
 					char * outputAnswer;
