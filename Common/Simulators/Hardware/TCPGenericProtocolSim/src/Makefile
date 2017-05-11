@@ -13,7 +13,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = tcpProt-sim
+SCRIPTS         = tcpProt-sim
 PY_PACKAGES        = TCPGenericProtocolSimImpl
 
 
