@@ -188,12 +188,15 @@ endif
 #
 # TARGETS
 # -------
+
+.DEFAULT_GOAL := all
+
 all:	gui do_all 
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
 	@echo " . . . clean done"
-	@rm calibrationtool_ui.py
+	@rm calibrationtool_ui.py*
 
 clean_dist : clean_all clean_dist_all 
 	@echo " . . . clean_dist done"
