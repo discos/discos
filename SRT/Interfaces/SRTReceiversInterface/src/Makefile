@@ -13,6 +13,12 @@ CDB_SCHEMAS = SRTLPBandNoiseMarkLookUpTable SRTLPBandReceiverModeSetup \
 
 # IDL Files and flags
 IDL_FILES = SRTKBandMF SRTSBandMF SRT7GHz SRTLPBand SRTKBandDerotator
+SRTKBandMFStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
+SRTSBandMFStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
+SRT7GHzStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
+SRTLPBandStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs ManagmentDefinitionsStubs
+SRTKBandDerotatorStubs_LIBS = baciStubs ComponentErrorsStubs GenericDerotatorStubs
+
 
 # list of all possible C-sources (used to create automatic dependencies)
 CSOURCENAMES = \
