@@ -26,6 +26,8 @@
 #USER_INC = 
 #USER_LIB = 
 
+RESTRICT_PERMS=_tp_agc
+
 #
 # MODULE CODE DESCRIPTION:
 # ------------------------
@@ -213,6 +215,9 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@echo $(RESTRICT_PERMS)" has been restcicted to system manager"
+	@chmod g-x $(INTROOT)/bin/$(RESTRICT_PERMS)
+	@chmod o-x $(INTROOT)/bin/$(RESTRICT_PERMS)
 	@echo " . . . installation done"
 
 

@@ -10,9 +10,16 @@ import maciErrType
 import maciErrTypeImpl
 import ClientErrorsImpl
 import sys
+from Acspy.Util.ACSCorba import getManager
 
 def main():
-	simpleClient = PySimpleClient()
+
+	if	getManager():
+		simpleClient = PySimpleClient()
+	else:
+		print "Control software is off line"
+		sys.exit(1)
+
 	command=""
 	
 	try:

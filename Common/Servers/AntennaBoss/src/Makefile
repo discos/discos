@@ -37,8 +37,8 @@
 # special compilation flags for single c sources
 #yyyyy_CFLAGS   = 
 
-EXECUTABLES	= coordinateGrabber
-EXECUTABLES_L = slewTimeCheck
+EXECUTABLES	= 
+EXECUTABLES_L = slewTimeCheck coordinateGrabber
 
 coordinateGrabber_OBJECTS = coordinateGrabber
 coordinateGrabber_LIBS = AntennaDefinitionsStubs AntennaBossStubs EphemGeneratorStubs \
