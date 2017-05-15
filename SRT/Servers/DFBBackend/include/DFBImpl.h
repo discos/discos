@@ -241,7 +241,7 @@ class DFBImpl : public virtual BulkDataSenderDefaultImpl,public virtual POA_Back
          
          
      
-    virtual CORBA::Boolean command(const char *ddd,CORBA::String_out ddd) throw (CORBA::SystemException);    
+    virtual CORBA::Boolean command(const char *ddd, CORBA::String_out answer) throw (CORBA::SystemException);    
           
          
   /**
