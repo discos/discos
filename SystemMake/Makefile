@@ -70,7 +70,7 @@ NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface
 NT_CLIENTS:=NotoMountTextClient 
 NT_MISC:=NotoScripts
 
-ifeq ($(TARGETSYS),SRT)
+ifeq ($(STATION),SRT)
 	#Add all modules included in the SRT system  in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=SRTDox \
@@ -107,7 +107,7 @@ ifeq ($(TARGETSYS),SRT)
 	CDB_SVN_LOCATION="SRT/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common SRT
 else 
-ifeq ($(TARGETSYS),MED)
+ifeq ($(STATION),Medicina)
 	#Add all modules included in the Medicina system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=MEDDox \
@@ -139,7 +139,7 @@ ifeq ($(TARGETSYS),MED)
 	CDB_SVN_LOCATION="Medicina/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina
 else
-ifeq ($(TARGETSYS),NT)
+ifeq ($(STATION),Noto)
 	#Add all modules included in the Noto system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:= ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
@@ -168,7 +168,7 @@ ifeq ($(TARGETSYS),NT)
 	SYSTEM_SVN_MODULES=Common Medicina Noto
 
 else
-	RESULT:=$(error TARGETSYS variable is not set correctly!)	
+	RESULT:=$(error STATION variable is not set correctly!)	
 endif
 endif
 endif
@@ -204,16 +204,16 @@ NT_MODULES:=$(NT_ERRORS) \
             $(NT_CLIENTS) \
             $(NT_MISC)
 
-ifeq ($(TARGETSYS), SRT)
+ifeq ($(STATION), SRT)
 	TELESCOPE_MODULES:=$(SRT_MODULES)
 else 
-ifeq ($(TARGETSYS), MED)
+ifeq ($(STATION), Medicina)
 	TELESCOPE_MODULES:=$(MED_MODULES)
 else 
-ifeq ($(TARGETSYS), NT)
+ifeq ($(STATION), Noto)
 	TELESCOPE_MODULES:=$(NT_MODULES)
 else
-	RESULT:=$(error TARGETSYS variable is not set correctly!)	
+	RESULT:=$(error STATION variable is not set correctly!)	
 endif
 endif
 endif
