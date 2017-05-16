@@ -196,7 +196,7 @@ all:	gui do_all
 
 clean : clean_all 
 	@echo " . . . clean done"
-	@rm calibrationtool_ui.py*
+	@rm -f calibrationtool_ui.py*
 
 clean_dist : clean_all clean_dist_all 
 	@echo " . . . clean_dist done"
