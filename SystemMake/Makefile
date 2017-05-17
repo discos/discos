@@ -221,7 +221,7 @@ endif
 CURRENT_DIR:=$(shell pwd)/..
 
 define PathFinder
-	$(shell for MOD in $(1); do find ${CURRENT_DIR} -name $${MOD} -not -path *CDB* -not -path *site-packages* \( -type d -o -type l \) -print; done)
+	$(shell for MOD in $(1); do find ${CURRENT_DIR} -name $${MOD} -not -path *ntroot* -not -path *CDB* -not -path *site-packages* \( -type d -o -type l \) -print; done)
 endef
 
 #if the INTROOT varaible is not defined the make is stopped
