@@ -234,20 +234,20 @@ ifndef ACS_CDB
 	RESULT:=$(error ACS_CDB variable is not set!)
 endif
 
-#if the SYSLOCATION variable is not set the make process is stopped
-ifndef SYSLOCATION
-	RESULT:=$(error SYSLOCATION variable is not set!)
-endif
+# #if the SYSLOCATION variable is not set the make process is stopped
+# ifndef SYSLOCATION
+# 	RESULT:=$(error SYSLOCATION variable is not set!)
+# endif
 
-#if the SVNUSER variable is not set the make process is stopped
-ifndef SVNUSER
-	RESULT:=$(error SVNUSER variable is not set!)
-endif
+# #if the SVNUSER variable is not set the make process is stopped
+# ifndef SVNUSER
+# 	RESULT:=$(error SVNUSER variable is not set!)
+# endif
 
-#if the SYSTEM_SVN_TAG variable is not set the make process is stopped
-ifndef SYSTEM_SVN_TAG
-	RESULT:=$(error SYSTEM_SVN_TAG variable is not set!)
-endif
+# #if the SYSTEM_SVN_TAG variable is not set the make process is stopped
+# ifndef SYSTEM_SVN_TAG
+# 	RESULT:=$(error SYSTEM_SVN_TAG variable is not set!)
+# endif
 
 #set up the Modules file for each IDL and CPP documentation
 $(foreach i, $(IDL_DOC), $(eval $(i)_MODULES_PATH:=$(call PathFinder,$($(i)_MODULES))))
@@ -328,12 +328,12 @@ install:
 		make -C $${i} install ; \
 	done
 
-cdb:
-	@cd $(ACS_CDB); ln -s $(SYSLOCATION)/$(SYSTEM_SVN_TAG)/$(CDB_SVN_LOCATION) CDB
-
-sources:
-	@cd $(SYSLOCATION) ; svn checkout svn+ssh://$(SVNUSER)@nuraghe-devel.oa-cagliari.inaf.it/ACS/tags/$(SYSTEM_SVN_TAG)/$${i}
-
+# cdb:
+# 	@cd $(ACS_CDB); ln -s $(SYSLOCATION)/$(SYSTEM_SVN_TAG)/$(CDB_SVN_LOCATION) CDB
+# 
+# sources:
+# 	@cd $(SYSLOCATION) ; svn checkout svn+ssh://$(SVNUSER)@nuraghe-devel.oa-cagliari.inaf.it/ACS/tags/$(SYSTEM_SVN_TAG)/$${i}
+  
 man:
 	@echo "creating documentation tree....."
 	@if [ ! -d $(DOC) ]; then mkdir $(DOC) ; fi
