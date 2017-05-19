@@ -415,6 +415,15 @@ void CEngineThread::runLoop()
 		va.clear();
 		CCommonTools::map(rf,va);
 		m_summary->getFilePointer()->setKeyword("RESTFREQ",va);
+		if (m_data->getBackendName()!="") {
+			m_summary->getFilePointer()->setKeyword("BackendName",m_data->getBackendName());
+		}
+		if (m_data->getProjectName()!="") {
+			m_summary->getFilePointer()->setKeyword("PROJID",m_data->getProjectName());
+		}
+		if (m_data->getObserverName()!="") {
+			m_summary->getFilePointer()->setKeyword("OBSID",m_data->getObserverName());
+		}
 		if ((!m_summary->write()) || (!m_summary->close())) {
 			_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 			impl.setFileName((const char *)m_data->getSummaryFileName());

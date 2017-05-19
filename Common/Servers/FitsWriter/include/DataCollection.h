@@ -295,6 +295,11 @@ public:
 	 * Get the name of the observer
 	 */
 	const IRA::CString& getObserverName() const { return m_observer; }
+
+	/** 
+	 * Get the name of the backend currently in use
+	*/
+	const IRA::CString& getBackendName() const { return m_backendName; }
 	
 	/**
 	 * Get the name of the schedule file
@@ -527,6 +532,7 @@ private:
 	IRA::CString m_fullPath;
 	IRA::CString m_project;
 	IRA::CString m_observer;
+	IRA::CString m_backendName;
 	/** the data block coming from the antenna */
 	//Antenna::AntennaDataBlock m_antennaData;
 	/** the data block coming from the antenna the previous one */

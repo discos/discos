@@ -23,6 +23,7 @@ CDataCollection::CDataCollection()
 	m_fileName=m_fullPath="";
 	m_project="";
 	m_observer="";
+	m_backendName="";
 	m_scheduleName="";
 	m_status=Management::MNG_OK;
 	m_siteName="";
@@ -357,6 +358,7 @@ bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& rec
 			m_deviceID=setup.device;
 			m_scanID=setup.scanId;
 			m_observer=setup.observerName;
+			m_backendName=setup.backendName;
 			m_scheduleName=setup.schedule;
 			basePath=setup.path;
 			extraPath=setup.extraPath;

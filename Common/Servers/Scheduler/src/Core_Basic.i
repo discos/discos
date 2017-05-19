@@ -345,7 +345,8 @@ void CCore::setupDataTransfer(bool& scanStarted,
 							  const Management::TScanAxis& axis,
 							  const CConfiguration* config,
 							  IRA::CString &fullSubscanFileName,
-							  IRA::CString &fullScanFolder
+							  IRA::CString &fullScanFolder,
+							  const IRA::CString &backendName
 	) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,
 			ComponentErrors::UnexpectedExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
 {
@@ -368,6 +369,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
  				setup.path=CORBA::string_dup((const char *)path);
  				setup.extraPath=CORBA::string_dup((const char *)extraPath);
  				setup.schedule=CORBA::string_dup((const char *)schedule);
+				setup.backendName=CORBA::string_dup((const char *)backendName);
  				if (layoutName!=_SCHED_NULLTARGET) {
  					setup.scanLayout=CORBA::string_dup((const char *)layoutName);
  				}

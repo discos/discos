@@ -572,7 +572,7 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 	loadDefaultDataReceiver();
 	CCore::setupDataTransfer(m_dataTransferInitialized,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
 			m_streamPrepared,observerName,projectName,baseName,path,extraPath,scheduleFileName,targetID,layout,layoutProc,scanTag,getCurrentDevice(),scanId,startUTTime ,subScanId,scanAxis,
-			m_config,fullSubscanFileName,fullScanFolder); // throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
+			m_config,fullSubscanFileName,fullScanFolder,m_config->getBackendAlias()); // throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
 	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,recUt,m_streamStarted,m_streamPrepared,m_streamConnected);
 	return startUTTime;
 }
