@@ -55,7 +55,6 @@ USER_LIB = 	-lACE \
 		-lQtDesigner \
 		-lQtGui \
 		-lQtNetwork \
-		-lQtOpenGL \
 		-lQtSql \
 		-lQtSvg \
 		-lQtTest \
