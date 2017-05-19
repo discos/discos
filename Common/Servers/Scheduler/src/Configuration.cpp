@@ -64,6 +64,16 @@ const IRA::CString& CConfiguration::getDataDirectory() const
 	}
 }
 
+const IRA::CString CConfiguration::getBackendAlias() const
+{
+	if ((m_currentBackendIndex>-1) && (m_currentBackendIndex<MAX_BCK_NUMBER)) {
+		return m_backend[m_currentBackendIndex].alias;
+	}
+	else {
+		return "";
+	}
+}
+
 void CConfiguration::readProcedures(maci::ContainerServices *services,
         const IRA::CString& procedureFile, ACS::stringSeq& names,
         ACS::longSeq& args, ACS::stringSeq *&bodies) throw (
