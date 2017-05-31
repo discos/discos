@@ -347,7 +347,7 @@ void icdSocket::setSpeed(DWORD speed) throw (
 
 
     if(speed < m_ICD_MIN_SPEED || speed > m_ICD_MAX_SPEED) {
-        ACS_SHORT_LOG((LM_ERROR, "# Error - max speed out of range [%.2f, %.2f] rpm", 
+        ACS_SHORT_LOG((LM_ERROR, "# Error - max speed out of range [%u, %u] rpm", 
                     m_ICD_MIN_SPEED, m_ICD_MAX_SPEED));
         m_icd_summary_status |=  (1 << W);
         
@@ -882,10 +882,10 @@ void icdSocket::responseCheck(BYTE *buff, bool check=true) throw (ComponentError
                     m_icd_verbose_status &= ~(1 << WRONG_RFLAG) ;
                     m_icd_verbose_status &= ~(1 << WRONG_RCODE) ;
                     ACS_SHORT_LOG((LM_ERROR, "# CMDERR - ERROR CODE: (%c%c%c%ch)", 
-                                (const char*)buff[ICD_BUFF_LEN-5], 
-                                (const char*)buff[ICD_BUFF_LEN-4],
-                                (const char*)buff[ICD_BUFF_LEN-3], 
-                                (const char*)buff[ICD_BUFF_LEN-2] 
+                                (unsigned char)buff[ICD_BUFF_LEN-5], 
+                                (unsigned char)buff[ICD_BUFF_LEN-4],
+                                (unsigned char)buff[ICD_BUFF_LEN-3], 
+                                (unsigned char)buff[ICD_BUFF_LEN-2] 
                                 ));
                     break ;
 
@@ -895,10 +895,10 @@ void icdSocket::responseCheck(BYTE *buff, bool check=true) throw (ComponentError
                     m_icd_verbose_status &= ~(1 << WRONG_RCODE) ;
                     ACS_SHORT_LOG((LM_ERROR, "# WRONG RESPONSE FLAG. First byte:  %X", buff[0]));
                     ACS_SHORT_LOG((LM_ERROR, "# CMDERR - ERROR CODE: (%c%c%c%ch)", 
-                                (const char*)buff[ICD_BUFF_LEN-5], 
-                                (const char*)buff[ICD_BUFF_LEN-4],
-                                (const char*)buff[ICD_BUFF_LEN-3], 
-                                (const char*)buff[ICD_BUFF_LEN-2] 
+                                (unsigned char)buff[ICD_BUFF_LEN-5], 
+                                (unsigned char)buff[ICD_BUFF_LEN-4],
+                                (unsigned char)buff[ICD_BUFF_LEN-3], 
+                                (unsigned char)buff[ICD_BUFF_LEN-2] 
                                 ));
                     break ;
 
@@ -928,10 +928,10 @@ void icdSocket::responseCheck(BYTE *buff, bool check=true) throw (ComponentError
                     m_icd_verbose_status &= ~(1 << WRONG_RCODE) ;
                     ACS_SHORT_LOG((LM_ERROR, "# WRONG RESPONSE FLAG. First byte:  %X", buff[0]));
                     ACS_SHORT_LOG((LM_ERROR, "# CMDERR - ERROR CODE: (%c%c%c%ch)", 
-                                (const char*)buff[ICD_BUFF_LEN-5], 
-                                (const char*)buff[ICD_BUFF_LEN-4],
-                                (const char*)buff[ICD_BUFF_LEN-3], 
-                                (const char*)buff[ICD_BUFF_LEN-2] 
+                                (unsigned char)buff[ICD_BUFF_LEN-5], 
+                                (unsigned char)buff[ICD_BUFF_LEN-4],
+                                (unsigned char)buff[ICD_BUFF_LEN-3], 
+                                (unsigned char)buff[ICD_BUFF_LEN-2] 
                                 ));
                     break ;
 
@@ -940,10 +940,10 @@ void icdSocket::responseCheck(BYTE *buff, bool check=true) throw (ComponentError
                     m_icd_verbose_status &= ~(1 << WRONG_RFLAG) ;
                     m_icd_verbose_status &= ~(1 << WRONG_RCODE) ;
                     ACS_SHORT_LOG((LM_ERROR, "# CMDERR - ERROR CODE: (%c%c%c%ch)", 
-                                (const char*)buff[ICD_BUFF_LEN-5], 
-                                (const char*)buff[ICD_BUFF_LEN-4],
-                                (const char*)buff[ICD_BUFF_LEN-3], 
-                                (const char*)buff[ICD_BUFF_LEN-2] 
+                                (unsigned char)buff[ICD_BUFF_LEN-5], 
+                                (unsigned char)buff[ICD_BUFF_LEN-4],
+                                (unsigned char)buff[ICD_BUFF_LEN-3], 
+                                (unsigned char)buff[ICD_BUFF_LEN-2] 
                                 ));
                     break ;
 
