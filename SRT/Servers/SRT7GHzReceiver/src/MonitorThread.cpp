@@ -32,7 +32,15 @@ void CMonitorThread::onStart()
 	 m_currentSampling=time*10; // uSec to 100 nanoSec
 	 if (m_currentResponseTime<m_currentSampling+m_currentSampling/10) {
 		 m_currentResponseTime=m_currentSampling+m_currentSampling/10; // force the response time to be at least 10% more than sampling time
-		 ACS_LOG(LM_FULL_INFO,"SRT7GHzImpl::execute()",(LM_WARNING,"WATCH_DOG_RESPONSE_TIME_ADJUSTED_TO_FIT_SAMPLING_TIME: %llu uSec",m_currentResponseTime/10));
+		 ACS_LOG(
+            LM_FULL_INFO,
+            "SRT7GHzImpl::execute()",
+            (
+                 LM_WARNING,
+                 "WATCH_DOG_RESPONSE_TIME_ADJUSTED_TO_FIT_SAMPLING_TIME: %llu uSec",
+                 static_cast<long long unsigned int>(m_currentResponseTime)/10
+            )
+        );
 		 setResponseTime(m_currentResponseTime);
 	 }
 }
