@@ -979,7 +979,7 @@ ACS::Time MinorServoBossImpl::getMinScanStartingTime(
 
         if((m_configuration->m_component_refs).count(comp_name)) {
             component_ref = (m_configuration->m_component_refs)[comp_name];
-            if(!CORBA::is_nil(component_ref)) 
+            if(!CORBA::is_nil(component_ref)) {
                 if(!component_ref->isReady()) {
                     THROW_EX(ManagementErrors, 
                             ConfigurationErrorEx, 
@@ -1115,6 +1115,7 @@ ACS::Time MinorServoBossImpl::getMinScanStartingTime(
                         );
                     }
                 }
+            }
         }
         else {
             THROW_EX(
@@ -1602,7 +1603,7 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
             if(m_component_refs.count(*iter)) {
                 component_ref = MinorServo::WPServo::_nil();
                 component_ref = m_component_refs[*iter];
-                if(!CORBA::is_nil(component_ref))
+                if(!CORBA::is_nil(component_ref)) {
                     if(offset_type == "user") {
                         if(component_ref->isReady()) {
                             try {
@@ -1620,7 +1621,7 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
                             ACS_SHORT_LOG((LM_WARNING, msg.c_str()));
                         }
                     }
-                    else
+                    else {
                         if(offset_type == "system") {
                             if(component_ref->isReady()) {
                                 try {
@@ -1644,6 +1645,8 @@ void MinorServoBossImpl::clearOffset(const char *servo, string offset_type) thro
                             impl.log(LM_DEBUG);
                             throw impl.getMinorServoErrorsEx();
                         }
+                    }
+                }
             }
         }
     }
