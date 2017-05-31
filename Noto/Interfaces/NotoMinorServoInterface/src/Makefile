@@ -115,6 +115,9 @@ CDB_SCHEMAS =
 IDL_FILES = NotoMinorServoBoss
 TAO_IDLFLAGS =
 USER_IDL =
+
+NotoMinorServoBossStubs_LIBS =  baciStubs ManagmentDefinitionsStubs
+
 #
 # Jarfiles and their directories
 #

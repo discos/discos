@@ -45,6 +45,9 @@
 IDL_FILES = NotoWeatherStation 
 IDL_TAO_FLAGS =
 USER_IDL =
+
+NotoWeatherStationStubs_LIBS = baciStubs GenericWeatherStationStubs
+
 #
 # Jarfiles and their directories
 #
