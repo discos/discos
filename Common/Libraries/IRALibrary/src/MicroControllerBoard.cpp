@@ -192,9 +192,10 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
                 throw MicroControllerBoardEx("Mismatch between command id of request and answer.");
 
             // Check if the request parameters are the same as those at the beginning of the answer parameters
-            if(!data.empty())
-                if(data.size() < m_parameters.size())
+            if(!data.empty()) {
+                if(data.size() < m_parameters.size()) {
                     throw MicroControllerBoardEx("Mismatch between parameters size of answer and request.");
+                }
                 else {
                     for(std::vector<BYTE>::size_type idx=0; idx != m_parameters.size(); idx++)
                         if(data[idx] != m_parameters[idx])
@@ -207,6 +208,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
                     for(std::vector<BYTE>::size_type idx=m_parameters.size(); idx != data.size(); idx++)
                         clean_data.push_back(data[idx]);
                 }
+            }
                         
             // Compute and verify the checksum
             std::vector<BYTE> base_checksum;
