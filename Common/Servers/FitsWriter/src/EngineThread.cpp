@@ -10,6 +10,7 @@
 #include <ManagementModule.h>
 #include <AntennaModule.h>
 #include "CommonTools.h"
+#include <DiscosVersion.h>
 
 using namespace IRA;
 using namespace FitsWriter_private;
@@ -424,6 +425,16 @@ void CEngineThread::runLoop()
 		if (m_data->getObserverName()!="") {
 			m_summary->getFilePointer()->setKeyword("OBSID",m_data->getObserverName());
 		}
+		m_summary->getFilePointer()->setKeyword("CREATOR",DiscosVersion::CurrentVersion::getVersion());
+		m_summary->getFilePointer()->setKeyword("TELESCOP",DiscosVersion::CurrentVersion::station);
+
+		m_summary->getFilePointer()->setKeyword("NUSEBANDS",m_data->getSectionsNumber());
+
+
+		m_summary->getFilePointer()->setKeyword("ScheduleName",m_data->getScheduleName());
+		m_summary->getFilePointer()->setKeyword("LogFileName",m_data->getLogName());
+	
+
 		if ((!m_summary->write()) || (!m_summary->close())) {
 			_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 			impl.setFileName((const char *)m_data->getSummaryFileName());
@@ -544,10 +555,6 @@ void CEngineThread::runLoop()
 
 				//get the data from the minor servo boss...if subsystem is enabled
 				collectMinorServoData();
-
-				//*****************************************************************************************
-				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"DATA_COLLECTION_COMPLETED"));
-				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 
 				// now creates the file, the tables and the headers
 				Backends::TMainHeader mH=m_data->getMainHeader();

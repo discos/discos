@@ -46,7 +46,9 @@ public:
 	IRA::CString getReportFileName() const;
 	IRA::CString getBackupFolder() const;
 	IRA::CString getPostFix() const { return m_currentPostfix; }
+	IRA::CString getSchedule() const;
 	bool isActive() const { return m_active; }
+	
 	/*
 	 * Duplicate paths are excluded
 	 */

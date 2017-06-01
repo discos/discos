@@ -362,7 +362,7 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 		throw dummy;
 	}
 	ACS::Time realStart,waitFor;
-	IRA::CString prj,path,suffix,obsName,schedule,layoutName;
+	IRA::CString prj,path,suffix,obsName,schedule,layoutName,log;
 	long scanTag;
 	ACS::stringSeq layout;
 	// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
@@ -376,11 +376,12 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 		_waitOnSource();
 	}*/
 	scanTag=0; suffix=""; obsName=IRA::CString("system"); getProjectCode(prj); schedule="none";
+	log=m_currentLogFile;
 	layout.length(0); layoutName=_SCHED_NULLTARGET;
 	guard.acquire();
 	m_subScanID=subScanId;
 	realStart=startRecording(m_subScanEpoch,m_scanID,m_subScanID,scanTag,m_config->getSystemDataDirectory(),
-			suffix,obsName,prj,schedule,layoutName,layout,fullSubscanFileName,fullScanFolder);
+			suffix,obsName,prj,schedule,log,layoutName,layout,fullSubscanFileName,fullScanFolder);
 	waitFor=realStart+duration; // this is the time at which the stop should be issued
 	guard.release();
 	//This is to implement a finally clause, if the user abort when the recording has already started I'd like, at least to stop it

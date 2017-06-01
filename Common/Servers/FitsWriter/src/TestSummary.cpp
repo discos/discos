@@ -1,5 +1,6 @@
 #include "SummaryWriter.h"
 #include "File.h"
+#include <DiscosVersion.h>
 
 using namespace FitsWriter_private;
 
@@ -36,7 +37,8 @@ int main(int argc, char *argv[])
  	IRA::CIRATools::timeToStrExtended(currentUT.value().value,timeStr);
  	sumWriter.getFile().setKeyword("DATE-OBS",timeStr);
 
-	sumWriter.getFile().setKeyword("TELESCOP","MED");  //string single
+	sumWriter.getFile().setKeyword("TELESCOP",DiscosVersion::CurrentVersion::station);  //string single
+	sumWriter.getFile().setKeyword("CREATOR",DiscosVersion::CurrentVersion::getVersion());  //string single
 	sumWriter.getFile().setKeyword("EXPTIME",10.34); //double single
 	sumWriter.getFile().setKeyword("NUSEBANDS",10L); //long single
 	sumWriter.getFile().setKeyword("RESTFREQ",restFreq); //double multi
