@@ -307,6 +307,11 @@ public:
 	const IRA::CString& getScheduleName() const { return m_scheduleName; }
 
 	/**
+	 * Get the name of the log file
+	*/
+	const IRA::CString& getLogName() const { return m_logName; }
+
+	/**
 	 * Get the identifier of the current scan
 	 */
 	const long& getScanID() const { return m_scanID; }
@@ -595,6 +600,11 @@ private:
 	 * Stores the name of the schedule file, currently running
 	 */
 	IRA::CString m_scheduleName;
+
+	/**
+	 * Stores the name of the log file, currenlty running 
+	*/
+	IRA::CString m_logName;
 	/**
 	 * Scan tag
 	 */

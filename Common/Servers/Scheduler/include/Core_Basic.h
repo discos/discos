@@ -56,6 +56,7 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
  * @param path path to the file that has to be created
  * @param extraPath indicates the extra folder that has to be created (from basePath) in order to contain the file
  * @param schedule name of the schedule file
+ * @param log name os the current log file
  * @param targetID identifier of the target of the subscan
  * @param layoutName name of the layout configuration
  * @param layout layout of the scan
@@ -68,7 +69,7 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
  * @param backendName name or alias name of the backend currently configured
  */
 static void setupDataTransfer(bool& scanStarted,Management::DataReceiver_ptr writer,bool& writerError,Backends::GenericBackend_ptr backend,bool& backendError,
-		const bool& streamPrepared,const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& targetID,
+		const bool& streamPrepared,const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& log,const IRA::CString& targetID,
 		const IRA::CString& layoutName,const ACS::stringSeq& layout,const long& scanTag,const long& device,const DWORD& scanID,const ACS::Time& startTime,const  DWORD& subScanID,
 		const Management::TScanAxis& axis,const CConfiguration* config,IRA::CString &fullSubscanFileName,
 		IRA::CString &fullScanFolder,const IRA::CString &backendName) throw (ComponentErrors::OperationErrorExImpl,

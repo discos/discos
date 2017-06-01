@@ -59,7 +59,7 @@ void doScan(ACS::Time& ut,const Antenna::TTrackingParameters* const prim,const A
  * @return the time tag at which the recording effectively took place.
  */
 ACS::Time startRecording(const ACS::Time& recUt,const long& scanId, const long& subScanId, const long& scanTag,const IRA::CString& basePath,
-		const IRA::CString& suffix,const IRA::CString observerName, const IRA::CString& projectName, const IRA::CString& scheduleFileName,
+		const IRA::CString& suffix,const IRA::CString observerName, const IRA::CString& projectName, const IRA::CString& scheduleFileName,const IRA::CString& logFileName,
 		const IRA::CString& layout, const ACS::stringSeq& layoutProc,IRA::CString &fullSubscanFileName,
 		IRA::CString &fullScanFolder)  throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl, ManagementErrors::DataTransferSetupErrorExImpl,

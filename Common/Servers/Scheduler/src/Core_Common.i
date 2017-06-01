@@ -320,6 +320,7 @@ void CCore::logFile(const IRA::CString& path,const IRA::CString& fileName) throw
 	try {
 		m_customLogger->flush();
 		m_customLogger->setLogfile((const char *)path,(const char *)fileName);
+		m_currentLogFile=fileName;
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::logFile()");
@@ -521,6 +522,7 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 								const IRA::CString observerName,
 								const IRA::CString& projectName,
 								const IRA::CString& scheduleFileName,
+								const IRA::CString& logFileName,
 								const IRA::CString& layout,
 								const ACS::stringSeq& layoutProc,
 								IRA::CString &fullSubscanFileName,
@@ -571,7 +573,7 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::OperationErrorExImpl);
 	loadDefaultDataReceiver();
 	CCore::setupDataTransfer(m_dataTransferInitialized,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
-			m_streamPrepared,observerName,projectName,baseName,path,extraPath,scheduleFileName,targetID,layout,layoutProc,scanTag,getCurrentDevice(),scanId,startUTTime ,subScanId,scanAxis,
+			m_streamPrepared,observerName,projectName,baseName,path,extraPath,scheduleFileName,logFileName,targetID,layout,layoutProc,scanTag,getCurrentDevice(),scanId,startUTTime ,subScanId,scanAxis,
 			m_config,fullSubscanFileName,fullScanFolder,m_config->getBackendAlias()); // throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
 	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,recUt,m_streamStarted,m_streamPrepared,m_streamConnected);
 	return startUTTime;
