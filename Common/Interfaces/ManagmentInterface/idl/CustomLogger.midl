@@ -62,6 +62,12 @@ module Management{
                 void setLogfile(in string base_path,
                                 in string filename) raises (ManagementErrors::ManagementErrorsEx);
                 /**
+                 * Close the actual log files and open a new one for logging.
+                 * This call will automatically open the default log file as set in the CDB
+                 * Tries to create the necessary directory.
+                 */
+                void setDefaultLogfile() raises (ManagementErrors::ManagementErrorsEx);
+                /**
                  * Emits a classical ACS logging message. Used mainly for debugging and testing purposes.
                  * @param msg: the logging message
                  */
