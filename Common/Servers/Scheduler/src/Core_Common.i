@@ -320,7 +320,6 @@ void CCore::logFile(const IRA::CString& path,const IRA::CString& fileName) throw
 	try {
 		m_customLogger->flush();
 		m_customLogger->setLogfile((const char *)path,(const char *)fileName);
-		m_currentLogFile=fileName;
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::logFile()");
@@ -335,6 +334,29 @@ void CCore::logFile(const IRA::CString& path,const IRA::CString& fileName) throw
 		throw impl;
 	}
 }
+
+void CCore::defaultlogFile() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
+	ACS_LOG(LM_FULL_INFO,"CCore::defaultlogFile()",(LM_NOTICE,"Switched to default log file"));
+	try {
+		m_customLogger->flush();
+		m_customLogger->setDefaultLogfile();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::logFile()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_customLoggerError=true;
+		throw impl;
+	}
+	catch (ManagementErrors::ManagementErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::LogFileErrorExImpl,impl,ex,"CCore::logFile()");
+		throw impl;
+	}
+}
+
 
 void CCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,

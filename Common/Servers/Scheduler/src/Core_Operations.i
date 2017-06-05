@@ -376,7 +376,13 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 		_waitOnSource();
 	}*/
 	scanTag=0; suffix=""; obsName=IRA::CString("system"); getProjectCode(prj); schedule="none";
-	log=m_currentLogFile;
+	try { // this is aleast importan error so I do not want to block this operation... the case the reference is returned Null is handled by the next call
+		loadCustomLogger(m_customLogger,m_customLoggerError); // const throw (ComponentErrors::CouldntGetComponentExImpl);
+	}
+	catch (...) {
+	}
+	log=getCurrentLogFile(m_customLogger,m_customLoggerError);
+
 	layout.length(0); layoutName=_SCHED_NULLTARGET;
 	guard.acquire();
 	m_subScanID=subScanId;

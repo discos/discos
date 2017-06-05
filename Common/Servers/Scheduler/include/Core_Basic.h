@@ -128,6 +128,14 @@ static void startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendE
 static ACS::Time getUTFromLST(const IRA::CDateTime& currentUT,const IRA::CDateTime& checkUT,const ACS::TimeInterval& lst,const IRA::CSite& site,const double& dut1);
 
 /**
+ * Return the current file name cointaing the log information. The returned string is basename plus extension (no path included)
+ * @param logger reference to the logger component
+ * @param loggerError will be returned back true if an error occurred in the communication to logger component
+ * @return the nema eof the current log file
+ */
+static IRA::CString getCurrentLogFile(Management::CustomLogger_ptr logger,bool& loggerError);
+
+/**
  * Computes the name of the output file, including the lst time
  * @param ut universal time
  * @param lst local sidereal time

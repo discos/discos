@@ -27,8 +27,8 @@
 									m_antennaRTime=new Antenna::TRunTimeParameters; m_antennaRTime->targetName=""; \
 									m_antennaRTime->axis=Management::MNG_NO_AXIS; \
 									m_servoRunTime=new MinorServo::TRunTimeParameters; m_servoRunTime->scanAxis=""; \
-									m_subScanConf.signal=Management::MNG_SIGNAL_NONE; \
-									m_currentLogFile="";
+									m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
+
 
 									
 #define RESOURCE_EXEC ACS_NEW_SIMPLE_CONSUMER(m_antennaNC,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,antennaNCHandler,static_cast<void*>(this)); \
@@ -179,11 +179,6 @@ long m_subScanID;
  * This is starting epoch of the last subScan, it could be zero denoting the fact the scan was begun as soon as possible
  */
 ACS::Time m_subScanEpoch;
-
-/**
- * name of the current log file (base.ext)
-*/
-IRA::CString m_currentLogFile;
 
 /**
  * pointer to the antenna notification channel
