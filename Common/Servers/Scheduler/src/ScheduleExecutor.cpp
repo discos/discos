@@ -719,6 +719,12 @@ void CScheduleExecutor::cleanSchedule(bool error)
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		ex.log(LM_WARNING);
 	}
+	try {
+		m_core->defaultlogFile();
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_WARNING);
+	}
 	m_closeScanTimer=0;
 	// get rid of the schedule file......
 	if (m_scheduleLoaded) {

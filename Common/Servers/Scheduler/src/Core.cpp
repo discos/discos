@@ -75,38 +75,6 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	RESOURCE_EXEC;
 	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
 
-
-	try { //get the defualt log file name
-		ACS::ROstring_var filenameRef;
-		CORBA::String_var fileName;
-		ACSErr::Completion_var comp;
-		filenameRef=m_customLogger->filename();
-		fileName=filenameRef->get_sync(comp.out());
-		ACSErr::CompletionImpl compImpl(comp);
-		if (compImpl.isErrorFree()) {
-			IRA::CString origFileName((const char *)fileName);
-			IRA::CString baseDir,baseName,ext;
-			if (!IRA::CIRATools::extractFileName(origFileName,baseDir,baseName,ext)) {
-				m_currentLogFile="station.log";
-				ACS_LOG(LM_FULL_INFO,"CCore::execute()",(LM_WARNING,"Not able to get current log file name, assuming station.log"));
-			}	
-			else {
-				m_currentLogFile=baseName+"."+ext;
-				ACS_LOG(LM_FULL_INFO,"CCore::execute()",(LM_INFO,"Current log is %s ",(const char *)m_currentLogFile));
-			}	
-		}
-		else {
-			ACS_LOG(LM_FULL_INFO,"CCore::execute()",(LM_WARNING,"Not able to get current log file name, assuming station.log"));
-			m_currentLogFile="station.log";
-		}
-	}
-	catch (CORBA::SystemException& ex) {
-		m_currentLogFile="station.log";
-		ACS_LOG(LM_FULL_INFO,"CCore::execute()",(LM_WARNING,"Not able to get current log file name, assuming station.log"));
-	}
-
-
-
 	// spawn schedule executor thread........
 	try {
 		CCore *tmp=this;

@@ -92,6 +92,11 @@ void logFile(const IRA::CString& path,const IRA::CString& fileName) throw (Compo
 		ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
 
 /*
+ * This restores the default log file
+ */
+void defaultlogFile() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl);
+
+/*
  * Sends the Antenna off source for a given number of beams sizes. It calls the corresponding method of the antenna subsystem
  * @param frame reference frame
  * @param beams number of beams sizes to be applied as offset
