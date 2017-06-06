@@ -12,7 +12,7 @@ from Acspy.Util import ACSCorba
 
 class TestLO(unittest2.TestCase):
 
-    telescope = os.getenv('TARGETSYS')
+    telescope = os.getenv('STATION')
 
     @classmethod
     def setUpClass(cls):
