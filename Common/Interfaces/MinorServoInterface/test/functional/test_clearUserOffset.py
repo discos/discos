@@ -19,7 +19,7 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 class TestClearUserOffset(unittest2.TestCase):
 
-    telescope = os.getenv('TARGETSYS')
+    telescope = os.getenv('STATION')
 
     @classmethod
     def setUpClass(cls):

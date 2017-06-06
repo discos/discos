@@ -19,7 +19,7 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 class TestServoSetupCmd(unittest2.TestCase):
     """Test the servoSetup command"""
 
-    telescope = os.getenv('TARGETSYS')
+    telescope = os.getenv('STATION')
 
     def setUp(self):
         self.client = PySimpleClient()
