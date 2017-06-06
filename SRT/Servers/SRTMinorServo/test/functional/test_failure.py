@@ -19,7 +19,7 @@ FNULL = open(os.devnull, 'w')
 
 class TestFailure(unittest2.TestCase):
 
-    telescope = os.getenv('TARGETSYS')
+    telescope = os.getenv('STATION')
 
     @classmethod
     def setUpClass(cls):
