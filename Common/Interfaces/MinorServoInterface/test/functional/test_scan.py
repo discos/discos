@@ -5,7 +5,7 @@ import time
 import os
 from datetime import datetime
 
-import unittest # https://pypi.python.org/pypi/unittest
+import unittest
 import Management
 import MinorServo
 import Antenna
