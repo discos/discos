@@ -1,8 +1,8 @@
-import unittest2
+import unittest
 from xml.etree import ElementTree
 from Acspy.Util import ACSCorba
 
-class TestProcedures(unittest2.TestCase):
+class TestProcedures(unittest.TestCase):
 
     def setUp(self):
         dal = ACSCorba.cdb()
@@ -18,4 +18,4 @@ class TestProcedures(unittest2.TestCase):
                 self.assertNotIn('antennaReset', commands)
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

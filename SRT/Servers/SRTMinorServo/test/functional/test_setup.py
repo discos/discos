@@ -5,7 +5,7 @@ import time
 import os
 from datetime import datetime
 
-import unittest2 # https://pypi.python.org/pypi/unittest2
+import unittest # https://pypi.python.org/pypi/unittest
 import Management
 import MinorServo
 import Antenna
@@ -18,7 +18,7 @@ from Acspy.Util import ACSCorba
 
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
-class SetupTest(unittest2.TestCase):
+class SetupTest(unittest.TestCase):
 
     telescope = os.getenv('STATION')
     
@@ -90,7 +90,7 @@ class SetupTest(unittest2.TestCase):
 
 if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
-        unittest2.main(verbosity=2, failfast=True) # Real test using the antenna CDB
+        unittest.main(verbosity=2, failfast=True) # Real test using the antenna CDB
     else:
         from PyMinorServoTest import simunittest
         simunittest.run(SetupTest)

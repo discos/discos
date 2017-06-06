@@ -1,9 +1,9 @@
-import unittest2
+import unittest
 from ComponentErrors import ComponentErrorsEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class ModeTest(unittest2.TestCase):
+class ModeTest(unittest.TestCase):
     """Test the DewarPositioner.*Mode() methods"""
 
     def setUp(self):
@@ -22,4 +22,4 @@ class ModeTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

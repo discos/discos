@@ -5,7 +5,7 @@ import time
 import datetime
 import subprocess
 
-import unittest2
+import unittest
 
 import Management
 import MinorServo
@@ -17,7 +17,7 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 FNULL = open(os.devnull, 'w')
 
 
-class TestFailure(unittest2.TestCase):
+class TestFailure(unittest.TestCase):
 
     telescope = os.getenv('STATION')
 
@@ -81,7 +81,7 @@ class TestFailure(unittest2.TestCase):
 
 if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
-        unittest2.main() # Real test using the antenna CDB
+        unittest.main() # Real test using the antenna CDB
     else:
         from PyMinorServoTest import simunittest
         simunittest.run(TestFailure)

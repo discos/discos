@@ -5,7 +5,7 @@ import math
 import time
 import datetime
 
-import unittest2
+import unittest
 
 import MinorServo
 import Management
@@ -18,7 +18,7 @@ from Acspy.Common.TimeHelper import getTimeStamp
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 
-class TestGetAxesPosition(unittest2.TestCase):
+class TestGetAxesPosition(unittest.TestCase):
 
     telescope = os.getenv('STATION')
 
@@ -63,7 +63,7 @@ class TestGetAxesPosition(unittest2.TestCase):
 
 if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
-        unittest2.main() # Real test using the antenna CDB
+        unittest.main() # Real test using the antenna CDB
     else:
         from PyMinorServoTest import simunittest
         simunittest.run(TestGetAxesPosition)

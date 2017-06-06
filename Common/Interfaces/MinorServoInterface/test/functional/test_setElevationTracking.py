@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 import os
-import unittest2
+import unittest
 
 from PyMinorServoTest import simunittest
 from Acspy.Clients.SimpleClient import PySimpleClient
@@ -9,7 +9,7 @@ from MinorServoErrors import MinorServoErrorsEx
 
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
-class TestSetElevationTracking(unittest2.TestCase):
+class TestSetElevationTracking(unittest.TestCase):
 
     telescope = os.getenv('STATION')
 
@@ -35,6 +35,6 @@ class TestSetElevationTracking(unittest2.TestCase):
 
 if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
-        unittest2.main() # Real test using the antenna CDB
+        unittest.main() # Real test using the antenna CDB
     else:
         simunittest.run(TestSetElevationTracking)

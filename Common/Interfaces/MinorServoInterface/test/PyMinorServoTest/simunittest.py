@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-import unittest2
+import unittest
 import subprocess
 
 def run(test_case):
@@ -14,11 +14,11 @@ def run(test_case):
     try:
         subprocess.Popen(['%s-sim' % server_name, 'start'], stdout=FNULL, stderr=FNULL)
         time.sleep(1) # Give the server the time to start
-        suite = unittest2.TestSuite()
-        tests = unittest2.TestLoader().loadTestsFromTestCase(test_case)
+        suite = unittest.TestSuite()
+        tests = unittest.TestLoader().loadTestsFromTestCase(test_case)
         suite.addTests(tests)
         print 'Running the tests using the antenna simulators...'
-        unittest2.TextTestRunner(verbosity=2).run(suite)
+        unittest.TextTestRunner(verbosity=2).run(suite)
     finally:
         subprocess.Popen(['%s-sim' % server_name, 'stop'], stdout=FNULL, stderr=FNULL)
         time.sleep(2) # Give the server the time to stop

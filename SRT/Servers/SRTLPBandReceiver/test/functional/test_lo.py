@@ -3,14 +3,14 @@ from __future__ import with_statement
 import os
 from xml.etree import ElementTree
 
-import unittest2
+import unittest
 from Acspy.Clients.SimpleClient import PySimpleClient
 from ComponentErrors import ComponentErrorsEx
 from ReceiversErrors import ReceiversErrorsEx
 from Acspy.Util import ACSCorba
 
 
-class TestLO(unittest2.TestCase):
+class TestLO(unittest.TestCase):
 
     telescope = os.getenv('STATION')
 
@@ -199,7 +199,7 @@ class TestLO(unittest2.TestCase):
 
 if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
-        unittest2.main(verbosity=2, failfast=True) # Real test using the antenna CDB
+        unittest.main(verbosity=2, failfast=True) # Real test using the antenna CDB
     else:
         from PyLPBandTest import simunittest
         simunittest.run(TestLO)

@@ -1,6 +1,6 @@
 import threading
 import time
-import unittest2
+import unittest
 import mocker
 import Receivers
 from Management import MNG_WARNING, MNG_FAILURE, MNG_OK
@@ -9,7 +9,7 @@ from Acspy.Nc.Supplier import Supplier
 from DewarPositioner import DewarPositionerImpl
 
 
-class PublisherTest(unittest2.TestCase):
+class PublisherTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -233,4 +233,4 @@ class PublisherTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()
