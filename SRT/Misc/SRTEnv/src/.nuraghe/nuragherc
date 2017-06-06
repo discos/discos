@@ -17,7 +17,7 @@ export NURAGHETAG=0.4
 export NURAGHEBRANCH=DerotatorAndMinorServo
 
 # Set the SVN environment
-export TARGETSYS=SRT
+export STATION=SRT
 export SYSLOCATION=$NURAGHEROOT/ACS/trunk/
 export SYSTEM_SVN_TAG=nuraghe-$NURAGHETAG
 export SVNUSER=gavino
