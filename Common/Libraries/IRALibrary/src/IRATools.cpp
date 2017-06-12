@@ -798,7 +798,8 @@ bool CIRATools::radToAngle(const double& rad,IRA::CString& outString)
 
 bool CIRATools::longitudeToRad(const IRA::CString& lon,double& rad,bool complete,char delimiter)
 {
-	long len=lon.GetLength();
+	//long len=lon.GetLength();
+	int len=lon.GetLength();
 	bool res;
 	if (len==0) return false;
 	if (lon[len-1]=='d') {
@@ -818,7 +819,8 @@ bool CIRATools::longitudeToRad(const IRA::CString& lon,double& rad,bool complete
 
 bool CIRATools::latitudeToRad(const IRA::CString& lat,double& rad,bool complete,char delimiter)
 {
-	long len=lat.GetLength();
+	//long len=lat.GetLength();
+	int len=lat.GetLength();
 	bool res;
 	if (len==0) return false;
 	if (lat[len-1]=='d') {
@@ -837,7 +839,8 @@ bool CIRATools::latitudeToRad(const IRA::CString& lat,double& rad,bool complete,
 
 bool CIRATools::rightAscensionToRad(const IRA::CString& ra,double& rad,bool complete,char delimiter)
 {
-	long len=ra.GetLength();
+	//long len=ra.GetLength();
+	int len=ra.GetLength();	
 	bool res;
 	if (len==0) return false;
 	if (ra[len-1]=='d') {
@@ -865,7 +868,8 @@ bool CIRATools::declinationToRad(const IRA::CString& dec,double& rad,bool comple
 
 bool CIRATools::galLongitudeToRad(const IRA::CString& lon,double& rad,bool complete,char delimiter)
 {
-	long len=lon.GetLength();
+	//long len=lon.GetLength();
+	int len=lon.GetLength();
 	bool res;
 	if (len==0) return false;
 	if (lon[len-1]=='d') {
@@ -909,7 +913,8 @@ bool CIRATools::elevationToRad(const IRA::CString& el,double& rad,bool complete)
 
 bool CIRATools::offsetToRad(const IRA::CString& offset,double& rad,char delimiter)
 {
-	long len=offset.GetLength();
+	//long len=offset.GetLength();
+	int len=offset.GetLength();
 	bool res;
 	if (len==0) return false;
 	if (offset[len-1]=='d') {
