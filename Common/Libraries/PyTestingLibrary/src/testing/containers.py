@@ -17,14 +17,16 @@ class Container(object):
         self.lang = lang
 
     def start(self):
-        with open(logfile, 'a') as outfile:
-            Popen(
-                ['acsStartContainer', '-%s' % self.lang, self.name],
-                stdout=outfile)
+        if not self.is_running():
+            with open(logfile, 'a') as outfile:
+                Popen(
+                    ['acsStartContainer', '-%s' % self.lang, self.name],
+                    stdout=outfile, stderr=outfile)
 
     def stop(self):
         with open(logfile, 'a') as outfile:
-            p = Popen(['acsStopContainer', self.name], stdout=outfile)
+            p = Popen(['acsStopContainer', self.name],
+                      stdout=outfile, stderr=outfile)
             p.wait()  # Block until acsStopContainer exits
 
     def wait_until_running(self, timeout=10):
@@ -39,3 +41,20 @@ class Container(object):
         pipes = Popen(['acsContainersStatus'], stdout=PIPE, stderr=PIPE)
         out, err = pipes.communicate()
         return ('%s container is running' % self.name) in out
+
+
+class ContainerError(RuntimeError):
+    pass
+
+
+def start_containers(containers):
+    for container in containers:
+        container.start()
+        container.wait_until_running()
+        if not container.is_running():
+            raise RuntimeError('cannot run %s' % container.name)
+
+
+def stop_containers(containers):
+    for container in containers:
+        container.stop()
