@@ -56,8 +56,7 @@ class MSCU(object):
                 connection.close()
                 continue
             else:
-                # From here on, this is the child. 
-                self.socket.close() # Close the parent's socket
+                # From now on, this is the child. 
                 try:
                     buff = ''
                     while True:
@@ -77,7 +76,6 @@ class MSCU(object):
                         try:
                             if data.startswith('#stop'):
                                 stop_server.value = True
-                                connection.close()
                                 break
                             elif data.startswith('#setpos_NAK'):
                                 setpos_NAK[1].value = True  # The SRP address
@@ -132,7 +130,6 @@ class MSCU(object):
                 except:
                     raise
 
-                # Close the connection
                 try:
                      connection.close()
                 except KeyboardInterrupt:
@@ -140,9 +137,7 @@ class MSCU(object):
                 except:
                     traceback.print_exc()
 
-                # Done handling the connection. Child process *must* terminate
-                # and not go back to the top of the loop
-                sys.exit(0)
+                sys.exit(0) # The child process *must* terminate
 
     def _welcome(self):
         print "*"*43
@@ -167,10 +162,12 @@ class MSCU(object):
 
     @staticmethod
     def stop(server=('127.0.0.1', 10000)):
-        sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sockobj.settimeout(2)
-        sockobj.connect(server) 
-        sockobj.sendall('#stop\r\n')
+        # The second stop is mandatory
+        for i in range(2):
+            sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sockobj.settimeout(2)
+            sockobj.connect(server) 
+            sockobj.sendall('#stop\r\n')
 
     @staticmethod
     def setpos_NAK(server=('127.0.0.1', 10000)):
