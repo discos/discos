@@ -1,8 +1,10 @@
 import os
 import sys
 import time
+import signal
 import unittest
 import subprocess
+
 
 def run(test_case):
     # Use the simulators and the testing CDB
@@ -10,9 +12,11 @@ def run(test_case):
     if not server_name:
         sys.exit(0) 
 
-    FNULL = open(os.devnull, 'w')
     try:
-        subprocess.Popen(['%s-sim' % server_name, 'start'], stdout=FNULL, stderr=FNULL)
+        FNULL = open(os.devnull, 'w')
+        process = subprocess.Popen(
+            '%s-sim start' % server_name, stdout=FNULL, stderr=FNULL,
+            shell=True, preexec_fn=os.setsid)
         time.sleep(1) # Give the server the time to start
         suite = unittest.TestSuite()
         tests = unittest.TestLoader().loadTestsFromTestCase(test_case)
@@ -20,5 +24,6 @@ def run(test_case):
         print 'Running the tests using the antenna simulators...'
         unittest.TextTestRunner(verbosity=2).run(suite)
     finally:
-        subprocess.Popen(['%s-sim' % server_name, 'stop'], stdout=FNULL, stderr=FNULL)
+        os.killpg(os.getpgid(process.pid), signal.SIGTERM) 
         time.sleep(2) # Give the server the time to stop
+        FNULL.close()
