@@ -29,7 +29,7 @@
 
 SUBSYSTEM = Libraries 
 
-MODULES =  SlaLibrary IRALibrary TextWindowLibrary ParserLibrary
+MODULES =  SlaLibrary IRALibrary TextWindowLibrary ParserLibrary PyACSWrapper
 
 
 MAKE_FLAGS = "-k"

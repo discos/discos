@@ -4,7 +4,7 @@
 #-----------------------------------------
 #*****************************************
 
-PY_PACKAGES = testing
+PY_PACKAGES = acswrapper
 
 # -----------------
 # Include Standards
@@ -22,10 +22,10 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
-	$(RM) *.pyc testing/*.pyc
+	$(RM) *.pyc acswrapper/*.pyc
 	$(RM) ../lib ../bin ../config ../doc ../idl ../include \
 		  ../object ../rtai ../test
-	$(RM) $(INTROOT)/lib/python/site-packages/testing*
+	$(RM) $(INTROOT)/lib/python/site-packages/acswrapper*
 	@echo " . . . clean done"
 
 install : install_all
