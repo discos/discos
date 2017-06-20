@@ -11,8 +11,14 @@ import Management
 import MinorServo
 
 from Acspy.Clients.SimpleClient import PySimpleClient
+from acswrapper.system import acs
+from acswrapper.containers import (
+    Container, ContainerError, start_containers_and_wait,
+    stop_containers_and_wait
+)
 
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
+
 
 FNULL = open(os.devnull, 'w')
 
@@ -23,6 +29,17 @@ class TestFailure(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        if not acs.is_running():
+            acs.start()
+        cls.containers = [
+            Container('MinorServoContainer', 'cpp'),
+            Container('MinorServoBossContainer', 'cpp'),
+        ]
+        try:
+            start_containers_and_wait(cls.containers)
+        except ContainerError, ex:
+            cls.fail(ex.message)
+
         cls.client = PySimpleClient()
         cls.boss = cls.client.getComponent('MINORSERVO/Boss')
         cls.srp = cls.client.getComponent('MINORSERVO/SRP')
@@ -31,6 +48,7 @@ class TestFailure(unittest.TestCase):
     def tearDownClass(cls):
         cls.client.releaseComponent('MINORSERVO/Boss')
         cls.client.releaseComponent('MINORSERVO/SRP')
+        stop_containers_and_wait(cls.containers)
 
     def setUp(self):
         self.setup_code = "CCB" if self.telescope == "SRT" else "CCC"
