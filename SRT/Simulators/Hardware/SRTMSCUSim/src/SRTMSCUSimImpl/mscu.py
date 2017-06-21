@@ -21,6 +21,7 @@ class MSCU(object):
     def __init__(self, host='', port=10000):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.settimeout(0.2)
         self.socket.bind((host, port))
         self.servos = {}
         for address in app_nr:
@@ -33,19 +34,20 @@ class MSCU(object):
         counter = 0
         while True:
             if stop_server.value:
+                MSCU.reap()  # Clean up old children
+                self.socket.close()
                 sys.exit(0)
             try:
                 connection, clientaddr = self.socket.accept()
                 counter += 1 
                 print "\n%d. Got connection from %s" %(counter, connection.getpeername())
+            except socket.timeout:
+                continue
             except KeyboardInterrupt:
                 raise
             except:
                 traceback.print_exc()
                 continue
-
-            # Clean up old children
-            MSCU.reap()
 
             # Fork a process for this connection
             pid = os.fork()
@@ -126,16 +128,16 @@ class MSCU(object):
                             connection.send('%s' %answer)
                             time.sleep(0.05)
                 except (KeyboardInterrupt, SystemExit):
-                    raise
-                except:
-                    raise
+                    stop_server.value = True
+                    connection.close()
+                    sys.exit(0) # The child process *must* terminate
 
                 try:
                      connection.close()
                 except KeyboardInterrupt:
-                    raise
-                except:
-                    traceback.print_exc()
+                    stop_server.value = True
+                    connection.close()
+                    sys.exit(0) # The child process *must* terminate
 
                 sys.exit(0) # The child process *must* terminate
 
@@ -162,12 +164,10 @@ class MSCU(object):
 
     @staticmethod
     def stop(server=('127.0.0.1', 10000)):
-        # The second stop is mandatory
-        for i in range(2):
-            sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sockobj.settimeout(2)
-            sockobj.connect(server) 
-            sockobj.sendall('#stop\r\n')
+        sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sockobj.settimeout(2)
+        sockobj.connect(server) 
+        sockobj.sendall('#stop\r\n')
 
     @staticmethod
     def setpos_NAK(server=('127.0.0.1', 10000)):

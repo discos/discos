@@ -27,8 +27,6 @@ __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 class CannotSetupTest(unittest.TestCase):
 
-    telescope = os.getenv('STATION')
-    
     @classmethod
     def setUpClass(cls):
         if not acs.is_running():
@@ -102,5 +100,5 @@ if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
         unittest.main(verbosity=2, failfast=True) # Real test using the antenna CDB
     else:
-        from PyMinorServoTest import simunittest
-        simunittest.run(CannotSetupTest)
+        from testing import simulator
+        simulator.run(CannotSetupTest, 'srt-mscu-sim')

@@ -101,6 +101,5 @@ if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
         unittest.main() # Real test using the antenna CDB
     else:
-        from PyMinorServoTest import simunittest
-        simunittest.run(TestFailure)
-
+        from testing import simulator
+        simulator.run(TestFailure, 'srt-mscu-sim')
