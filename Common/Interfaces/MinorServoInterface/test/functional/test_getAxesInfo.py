@@ -15,6 +15,13 @@ from Acspy.Clients.SimpleClient import PySimpleClient
 from MinorServoErrors import MinorServoErrorsEx
 from Acspy.Common.TimeHelper import getTimeStamp
 
+
+from acswrapper.system import acs
+from acswrapper.containers import (
+    Container, ContainerError, start_containers_and_wait,
+    stop_containers_and_wait
+)
+
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 
@@ -24,6 +31,17 @@ class TestGetAxesInfo(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        if not acs.is_running():
+            acs.start()
+        cls.containers = [
+            Container('MinorServoContainer', 'cpp'),
+            Container('MinorServoBossContainer', 'cpp'),
+        ]
+        try:
+            start_containers_and_wait(cls.containers)
+        except ContainerError, ex:
+            cls.fail(ex.message)
+
         cls.client = PySimpleClient()
         cls.boss = cls.client.getComponent('MINORSERVO/Boss')
 
@@ -31,6 +49,7 @@ class TestGetAxesInfo(unittest.TestCase):
     def tearDownClass(cls):
         cls.client.releaseComponent('MINORSERVO/Boss')
         cls.client.disconnect()
+        stop_containers_and_wait(cls.containers)
 
     def setUp(self):
         self.setup_code = "CCB" if self.telescope == "SRT" else "CCC"
@@ -68,6 +87,6 @@ if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
         unittest.main() # Real test using the antenna CDB
     else:
-        from PyMinorServoTest import simunittest
-        simunittest.run(TestGetAxesInfo)
+        from testing import simulator
+        simulator.run(TestGetAxesInfo, 'srt-mscu-sim')
 
