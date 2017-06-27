@@ -39,6 +39,7 @@ class ACS(object):
             self.wait_until_not_running()
             if self.is_running():
                 outfile.write('acsStop is not able to stop ACS')
+            call('rm $ACSDATA/tmp/*.lock')
             call('killACS', stdout=outfile, stderr=outfile, shell=True)
             if self.is_running():
                 outfile.write('killACS is not able to stop ACS')
