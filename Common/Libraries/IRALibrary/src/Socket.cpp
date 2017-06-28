@@ -339,7 +339,7 @@ int CSocket::Send(CError& Err,const void *Buff,WORD BuffLen,WORD Port,CString *A
 		return FAIL;
 	}
 	if (getType()==STREAM) {   // stream sockets
-		Res=send(m_iSocket,Buff,BuffLen,0);
+		Res=send(m_iSocket,Buff,BuffLen,MSG_NOSIGNAL);
 	}
 	else { // datagram sockets
 		if ((Addr==NULL) || (Port==0)) {

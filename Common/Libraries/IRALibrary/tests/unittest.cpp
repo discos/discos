@@ -2,6 +2,7 @@
 
 #include "IRATools_test.i"
 #include "FastQueue_test.i"
+#include "Socket_test.i"
 
 
 using namespace IRALibraryTest;
@@ -58,6 +59,6 @@ TEST_F(IRALibrary_FastQueue,FastQueue_checkConsistency){
 	EXPECT_TRUE(FastQueue_checkConsistency());
 }
 
-
-
-
+TEST_F(IRALibrary_Socket, sendWithoutConnection){
+	EXPECT_TRUE(sendWithoutConnection());
+}
