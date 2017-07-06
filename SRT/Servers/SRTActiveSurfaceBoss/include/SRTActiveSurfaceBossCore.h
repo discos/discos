@@ -160,7 +160,7 @@ public:
 	*/	
 	void enableAutoUpdate();
 
-    	void checkASerrors(char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex);
+    	void checkASerrors(const char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex);
 
 	void checkAScompletionerrors (char *str, int circle, int actuator, CompletionImpl comp);
 

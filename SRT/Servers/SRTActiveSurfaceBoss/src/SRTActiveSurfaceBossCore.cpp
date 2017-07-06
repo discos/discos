@@ -1379,7 +1379,7 @@ void CSRTActiveSurfaceBossCore::sector1ActiveSurface() throw (ComponentErrors::C
 	printf("sector1 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	const char * value;
 	int i;
 
 	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S1.txt\0";
@@ -1413,7 +1413,7 @@ void CSRTActiveSurfaceBossCore::sector2ActiveSurface() throw (ComponentErrors::C
 	printf("sector2 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	const char * value;
 	int i;
 
 	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S2.txt\0";
@@ -1448,7 +1448,7 @@ void CSRTActiveSurfaceBossCore::sector3ActiveSurface() throw (ComponentErrors::C
 	printf("sector3 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	const char * value;
 	int i;
 
 	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S3.txt\0";
@@ -1483,7 +1483,7 @@ void CSRTActiveSurfaceBossCore::sector4ActiveSurface() throw (ComponentErrors::C
 	printf("sector4 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	const char * value;
 	int i;
 
 	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S4.txt\0";
@@ -1518,7 +1518,7 @@ void CSRTActiveSurfaceBossCore::sector5ActiveSurface() throw (ComponentErrors::C
 	printf("sector5 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	const char * value;
 	int i;
 
 	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S5.txt\0";
@@ -1553,7 +1553,7 @@ void CSRTActiveSurfaceBossCore::sector6ActiveSurface() throw (ComponentErrors::C
 	printf("sector6 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	const char * value;
 	int i;
 
 	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S6.txt\0";
@@ -1588,7 +1588,7 @@ void CSRTActiveSurfaceBossCore::sector7ActiveSurface() throw (ComponentErrors::C
 	printf("sector7 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	const char * value;
 	int i;
 
 	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S7.txt\0";
@@ -1623,7 +1623,7 @@ void CSRTActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::C
 	printf("sector8 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	const char * value;
 	int i;
 
 	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S8.txt\0";
@@ -1689,7 +1689,7 @@ void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::C
 void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
 {
 	int s, i, l;
-	char * value;
+	const char * value;
 
 	if ((m_sector1 == true)&&(m_sector2 == true)&&(m_sector3 == true)&&(m_sector4 == true)&&(m_sector5 == true)&&(m_sector6 == true)&&(m_sector7 == true)&&(m_sector8 == true)) {
 		//printf("setProfile corrections\n");
@@ -2092,7 +2092,7 @@ void CSRTActiveSurfaceBossCore::disableAutoUpdate()
 	}
 }
 
-void CSRTActiveSurfaceBossCore::checkASerrors(char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex)
+void CSRTActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex)
 {
 	ASErrors::ASErrorsExImpl exImpl(Ex);
 

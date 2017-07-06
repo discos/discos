@@ -346,7 +346,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		}
 		
 		_GET_PROP(actPos,cammaBegin,"usdImpl::calibrate()")
-		ACS_DEBUG_PARAM("::usdImpl::calibrate","Camma begin at:%d",cammaBegin);
+		ACS_DEBUG_PARAM("::usdImpl::calibrate","Camma begin at:%ld",cammaBegin);
 		//printf("cammaBegin = %ld\n", cammaBegin);
 
 		action(HSTOP,0,1); // disable HW stop 
@@ -372,7 +372,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		}
 
 		_GET_PROP(actPos,cammaEnd,"usdImpl::calibrate()")
-		ACS_DEBUG_PARAM("::usdImpl::calibrate","Camma end at:%d",cammaEnd);
+		ACS_DEBUG_PARAM("::usdImpl::calibrate","Camma end at:%ld",cammaEnd);
 		//printf("cammaEnd = %ld\n", cammaEnd);
  
 		//m_cammaEnd = cammaEnd;
