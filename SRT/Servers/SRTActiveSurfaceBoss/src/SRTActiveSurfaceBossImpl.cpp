@@ -7,7 +7,7 @@
 #include "DevIOProfile.h"
 #include "DevIOTracking.h"
 
-static char *rcsId="@(#) $Id: SRTActiveSurfaceBossImpl.cpp,v 1.2 2010-07-26 12:37:07 c.migoni Exp $";
+static char const *rcsId="@(#) $Id: SRTActiveSurfaceBossImpl.cpp,v 1.2 2010-07-26 12:37:07 c.migoni Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 using namespace SimpleParser;
