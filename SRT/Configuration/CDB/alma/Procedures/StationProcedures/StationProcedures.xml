@@ -14,7 +14,7 @@
 	calOff
 	restFrequency=0
 	antennaAzEl=0d,0d
-</body>	
+</body>
 </Procedure>
 
 <Procedure name="setupKKG" args="0">
@@ -88,7 +88,21 @@
 	restFrequency=0
     setLO=7500
 	antennaAzEl=0d,0d
-</body>	
+</body>
+</Procedure>
+
+<Procedure name="setupSSP" args="0">
+<body>
+    antennaSetup=LP
+    servoSetup=SSP
+    receiversSetup=CCB
+    chooseBackend=TotalPower
+    initialize=PPP
+    device=0
+    calOff
+    restFrequency=0
+    antennaAzEl=0d,0d
+</body>
 </Procedure>
 
 <Procedure name="telescopePark" args="0">
