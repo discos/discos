@@ -335,8 +335,14 @@
    -   Mon Oct 06 08:31:15 UTC 2008 modified by jDAL
    -   Mon Oct 06 09:28:21 UTC 2008 modified by jDAL
    -   Thu Oct 09 11:27:39 UTC 2008 modified by jDAL
+   -   Mon Aug 28 12:21:16 UTC 2017 modified by jDAL
+   -   Mon Aug 28 12:21:21 UTC 2017 modified by jDAL
+   -   Tue Aug 29 09:08:04 UTC 2017 modified by jDAL
+   -   Tue Aug 29 09:29:42 UTC 2017 modified by jDAL
+   -   Tue Aug 29 10:19:40 UTC 2017 modified by jDAL
+   -   Tue Aug 29 12:18:07 UTC 2017 modified by jDAL
 -->
-<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="1" lan="1" serialAddress="5" cammaLen="33" cammaPos="104" calibrate="0">
+<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="1" lan="1" serialAddress="5" cammaLen="33" cammaPos="104" calibrate="1">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />
 	<cmdPos min_value="-21000" max_value="21000" units="step" description="commanded position" />
 	<Fmin min_value="20" max_value="10000" units="step" default_value="100" description="min freq" />
