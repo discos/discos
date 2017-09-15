@@ -32,8 +32,9 @@
 #define firstUSD 1
 #define lastUSD 1116
 #define LOOPTIME 100000 // 0,10 sec
-#define USDTABLE "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD.txt\0"
-#define USDTABLECORRECTIONS "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/act_rev02.txt\0"
+#define CDBPATH (std::string(getenv("ACS_CDB")) + "/CDB/").c_str()
+#define USDTABLE (std::string(CDBPATH) + "alma/AS/tab_convUSD.txt\0").c_str()
+#define USDTABLECORRECTIONS (std::string(CDBPATH) + "alma/AS/act_rev02.txt\0").c_str()
 #define MM2HSTEP	350 //(10500 HSTEP / 30 MM)
 #define MM2STEP	1400 //(42000 STEP / 30 MM)
 #define WARNINGUSDPERCENT 0.95
@@ -42,7 +43,7 @@
 #define NPOSITIONS 7
 #define DELTAEL 15.0
 
-// mask pattern for status 
+// mask pattern for status
 #define MRUN	0x000080
 #define CAMM	0x000100
 #define ENBL	0x002000
@@ -67,10 +68,10 @@ class CSRTActiveSurfaceBossWatchingThread;
 class CSRTActiveSurfaceBossWorkingThread;
 
 /**
- * This class models the SRTActiveSurfaceBoss datasets and functionalities. 
+ * This class models the SRTActiveSurfaceBoss datasets and functionalities.
  * @author <a href=mailto:migoni@ca.astro.it>Migoni Carlo</a>
  * Osservatorio Astronomico di Cagliari, Italia
- * <br> 
+ * <br>
  */
 class CSRTActiveSurfaceBossCore {
 	friend class SRTActiveSurfaceBossImpl;
@@ -84,11 +85,11 @@ public:
 	*/
 	CSRTActiveSurfaceBossCore(ContainerServices *service,acscomponent::ACSComponentImpl *me);
 
-	/** 
+	/**
 	 * Destructor.
-	*/ 
+	*/
 	virtual ~CSRTActiveSurfaceBossCore();
-	
+
 	/**
 	 * This function initializes the boss core, all preliminary operation are performed here.
 	*/
@@ -100,7 +101,7 @@ public:
 	 * @throw ComponentErrors::CORBAProblemExImpl
 	*/
 	virtual void execute() throw (ComponentErrors::CouldntGetComponentExImpl);
-	
+
 	/**
 	 * This function performs all the clean up operation required to free al the resources allocated by the class
 	*/
@@ -135,7 +136,7 @@ public:
 
     /**
 	 * This function returns the status of the Active Surface subsystem; this indicates if the system is working correctly or there are some
-	 * possible problems or a failure has been encoutered. This flag takes also into consideration the status of the Boss. 
+	 * possible problems or a failure has been encoutered. This flag takes also into consideration the status of the Boss.
 	 */
 	inline const Management::TSystemStatus& getStatus() const { return m_status; };
 
@@ -151,13 +152,13 @@ public:
 	inline bool getTracking() const { return m_tracking; }
 
 	/**
-	 * Sets the <i>AutoUpdate</i> flag to false, i.e. the component will not update automatically the surface. 
+	 * Sets the <i>AutoUpdate</i> flag to false, i.e. the component will not update automatically the surface.
 	*/
 	void disableAutoUpdate();
-	
+
 	/**
-	 * Sets the <i>AutoUpdate</i> flag to true, i.e. the component will update automatically the surface. 
-	*/	
+	 * Sets the <i>AutoUpdate</i> flag to true, i.e. the component will update automatically the surface.
+	*/
 	void enableAutoUpdate();
 
     	void checkASerrors(const char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex);
@@ -202,14 +203,14 @@ private:
 	acscomponent::ACSComponentImpl *m_thisIsMe;
 
     /**
-	 * This represents the status of the whole Active Surface subsystem, it also includes and sammerizes the status of the boss component  
+	 * This represents the status of the whole Active Surface subsystem, it also includes and sammerizes the status of the boss component
 	 */
 	Management::TSystemStatus m_status;
 
     /**
 	 * if this flag is false the active surface isn't active during
      * observations
-	*/ 
+	*/
 	bool m_enable;
 
     bool AutoUpdate;
@@ -231,7 +232,7 @@ private:
 	bool m_sector1, m_sector2, m_sector3, m_sector4, m_sector5, m_sector6, m_sector7, m_sector8;
 
 	bool m_profileSetted;
-	
+
 	bool m_ASup;
 };
 
