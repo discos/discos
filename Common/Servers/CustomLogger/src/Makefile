@@ -30,6 +30,10 @@ IDL_FILES =
 TAO_IDLFLAGS =
 USER_IDL =
 
+SCRIPTS_L         = emitErrorLogTest
+
+PY_SCRIPTS_L = emitLogMessage
+
 #
 # list of all possible C-sources (used to create automatic dependencies)
 # ------------------------------

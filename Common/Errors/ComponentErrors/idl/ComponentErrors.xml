@@ -104,6 +104,10 @@
 
 <ErrorCode name="CanNotStartThread" shortDescription="An internal thread could not be started" description="">
 	<Member name="ThreadName" type="string" description="Name of the thread" />
+</ErrorCode>  
+
+<ErrorCode name="ACSService" shortDescription="ACS service is not available" description="">
+	<Member name="ServiceName" type="string" description="Name of the Service" />
 </ErrorCode>
 
 </Type>

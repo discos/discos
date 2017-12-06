@@ -114,42 +114,56 @@ CustomLoggerImpl::setMaxLevel(LogLevel level) throw (CORBA::SystemException)
 void 
 CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
-    ACS::Time _timestamp;
-    setLogging(false);
-    CosNaming::Name name(1);
-    name.length(1);
-    name[0].id = CORBA::string_dup(CUSTOM_LOGGING_CHANNEL);
-    name[0].kind = LOGGING_CHANNEL_KIND;
-    ifgop_ = CosNotifyChannelAdmin::OR_OP;
-    m_nevents_sp->getDevIO()->write((long)0, _timestamp);
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : resolving name service"));
-    namingContext_m = maci::ContainerImpl::getContainer()->getService<CosNaming::NamingContext>(acscommon::NAMING_SERVICE_NAME, 0, true); 
-    if(CORBA::is_nil(namingContext_m))
-    {
-            _EXCPT(ComponentErrors::CORBAProblemExImpl, _dummy, "CustomLoggerImpl::initialize");
-            //CUSTOM_EXCPT_LOG(_dummy);
-            throw _dummy;
-    }
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : resolving logging channel name"));
-    CORBA::Object_var obj = namingContext_m -> resolve(name);  
-    ec_ = CosNotifyChannelAdmin::EventChannel::_narrow(obj.in());
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : subscribing to the logging channel"));
-    CosNotifyChannelAdmin::AdminID adminid;
-    consumer_admin_ = ec_->new_for_consumers(ifgop_, adminid);
-    ACE_ASSERT(!CORBA::is_nil(consumer_admin_.in()));
-    consumer_ = new CustomStructuredPushConsumer (this);
-    consumer_->connect (consumer_admin_.in());
-    CosNotification::EventTypeSeq added(1);
-    CosNotification::EventTypeSeq removed (0);
-    added.length (1);
-    removed.length (0);
-    added[0].domain_name =  CORBA::string_dup ("*");
-    added[0].type_name = CORBA::string_dup ("*");
-    consumer_admin_->subscription_change (added, removed);
+	ACS::Time _timestamp;
+	setLogging(false);
+    //CosNaming::Name name(1);
+    //name.length(1);
+    //name[0].id = CORBA::string_dup(CUSTOM_LOGGING_CHANNEL);
+    //name[0].kind = LOGGING_CHANNEL_KIND;
+    //ifgop_ = CosNotifyChannelAdmin::OR_OP;
+	m_nevents_sp->getDevIO()->write((long)0, _timestamp);
+	ACS_SHORT_LOG((LM_DEBUG,"Resolving the name service"));
+	try {
+		namingContext_m = maci::ContainerImpl::getContainer()->getService<CosNaming::NamingContext>(acscommon::NAMING_SERVICE_NAME, 0, true);
+	}
+	catch (maciErrType::CannotGetServiceExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::ACSServiceExImpl,impl,ex,"CustomLoggerImpl::initialize");
+		impl.setServiceName(acscommon::NAMING_SERVICE_NAME);
+		throw impl;
+	}
+	if(CORBA::is_nil(namingContext_m))
+   {
+   	_EXCPT(ComponentErrors::CORBAProblemExImpl, _dummy,"CustomLoggerImpl::initialize");
+     //CUSTOM_EXCPT_LOG(_dummy);
+     throw _dummy;
+   }
+   ACS_SHORT_LOG((LM_DEBUG,"Resolving logging channel name"));
+   // this should be the name of the logging channel as it should be registered in the name service
+	std::string channelName=BaseHelper::combineChannelAndDomainName(acscommon::LOGGING_CHANNEL_XML_NAME,acscommon::ACS_NC_DOMAIN_LOGGING);    
+    //CORBA::Object_var obj = namingContext_m -> resolve(name);  
+    //ec_ = CosNotifyChannelAdmin::EventChannel::_narrow(obj.in());
+	resolveNotifyChannel(channelName.c_str());  // throw (ComponentErrors::CORBAProblemExImpl)    
+   // now subscribe to the channel...... 
+   ACS_SHORT_LOG((LM_DEBUG,"Subscribing to the logging channel"));
+    //CosNotifyChannelAdmin::AdminID adminid;
+    //consumer_admin_ = ec_->new_for_consumers(ifgop_, adminid);
+    //ACE_ASSERT(!CORBA::is_nil(consumer_admin_.in()));
+	createConsumerAdmin();
+	// creating a new consumer.....
+	consumer_=new CustomStructuredPushConsumer (this);
+	consumer_->connect(consumer_admin_.in());
+ 	// Setup the CA to receive event_type
+	CosNotification::EventTypeSeq added(1);
+	CosNotification::EventTypeSeq removed (0);
+	added.length(1);
+	removed.length(0);
+	added[0].domain_name=CORBA::string_dup ("*");
+	added[0].type_name=CORBA::string_dup ("*");
+	consumer_admin_->subscription_change(added,removed);
 
     /* LOGGING INITIALIZATION
      ========================*/
-    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : Initializing EXPAT for xml parsing"));
+    ACS_SHORT_LOG((LM_DEBUG, "Initializing EXPAT for xml parsing"));
     log_parser = init_log_parsing();
      long _a_age;
      if(IRA::CIRATools::getDBValue(getContainerServices(), "LogMaxAgeMillis", _a_age))
@@ -547,6 +561,32 @@ CustomLoggerImpl::handle_xml_error()
     //resume writer thread
     _writer->resume();
 };
+
+void CustomLoggerImpl::createConsumerAdmin()
+{
+	CosNotifyChannelAdmin::AdminID adminid;
+	CosNotifyChannelAdmin::InterFilterGroupOperator ifgop=CosNotifyChannelAdmin::OR_OP;
+	consumer_admin_=ec_->new_for_consumers(ifgop,adminid);
+	ACE_ASSERT(!CORBA::is_nil(consumer_admin_.in()));  
+}
+
+void CustomLoggerImpl::resolveNotifyChannel(const char *channel_binding_name) throw (ComponentErrors::CORBAProblemExImpl)
+{
+	CORBA::Object_var obj;
+	CosNaming::Name name(1);
+	name.length(1);
+	name[0].id=CORBA::string_dup(channel_binding_name);
+	name[0].kind=acscommon::NC_KIND;
+	try {
+		obj=namingContext_m->resolve(name);
+		ec_=CosNotifyChannelAdmin::EventChannel::_narrow(obj.in());
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl, _dummy,"CustomLoggerImpl::resolveNotifyChannel");
+      throw _dummy;
+	}
+	
+}
 
 CustomStructuredPushConsumer::CustomStructuredPushConsumer(CustomLoggerImpl* logger) : 
     logger_(logger)

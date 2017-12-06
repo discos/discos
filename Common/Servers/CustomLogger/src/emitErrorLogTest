@@ -1,0 +1,6 @@
+#! /bin/bash
+. acsstartupLogging.sh
+
+
+ACS_LOG_ERROR "emitErrorLog" "Test Error log......."
+

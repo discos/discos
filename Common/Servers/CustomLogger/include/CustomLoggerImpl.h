@@ -108,8 +108,8 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         nc::SimpleSupplier *m_loggingSupplier;
         CosNaming::NamingContext_var namingContext_m;
         CosNotifyChannelAdmin::EventChannel_var ec_;
-        CosNotifyChannelAdmin::InterFilterGroupOperator ifgop_;
-        CosNotifyChannelAdmin::ConsumerAdmin_var consumer_admin_;
+        //CosNotifyChannelAdmin::InterFilterGroupOperator ifgop_;
+        CosNotifyChannelAdmin::ConsumerAdmin_var consumer_admin_; //*
         CustomStructuredPushConsumer* consumer_;
 	/**
 	* Filter the log records.
@@ -151,6 +151,15 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
          */
         void addToLoggingQueue(LogRecord_sp log_record);
         /**@}*/
+        /**
+         *
+        */
+        void createConsumerAdmin();
+        /**
+         * get the reference to notification channel
+         * @throw ComponentErrors::CORBAProblemExImpl
+        */
+        void resolveNotifyChannel(const char *channel_binding_name) throw (ComponentErrors::CORBAProblemExImpl);
 };
 
 /**
