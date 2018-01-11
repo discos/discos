@@ -13,32 +13,32 @@
 
 <Code name="NoError" shortDescription="No error" description="No error condition found"/>
 
-<ErrorCode name="CouldntPerformAction" shortDescription="Action couldn't be performed" description="">
+<ErrorCode name="CouldntPerformAction" description="Action couldn't be performed" shortDescription=" ">
 	<Member name="Action" type="string" description="Action" />
 	<Member name="Reason" type="string" description="Reason" />
 </ErrorCode>	
 
-<ErrorCode name="CouldntLogManager" shortDescription="Manager couldn't be accessed" description=""/>
+<ErrorCode name="CouldntLogManager" description="Manager couldn't be accessed" shortDescription=" "/>
 
-<ErrorCode name="CouldntInit" shortDescription="Client could not be initialized" description=""/>
+<ErrorCode name="CouldntInit" description="Client could not be initialized" shortDescription=" "/>
 
-<ErrorCode name="CouldntLogin" shortDescription="Client could not be logged" description=""/>
+<ErrorCode name="CouldntLogin" description="Client could not be logged" shortDescription=" "/>
 
-<ErrorCode name="CouldntAccessProperty" shortDescription="Property couldn't be accessed" description="">
+<ErrorCode name="CouldntAccessProperty" description="Property couldn't be accessed" shortDescription=" ">
 	<Member name="PropertyName" type="string" description="PropertyName" />
 </ErrorCode>	
 
-<ErrorCode name="CouldntAccessComponent" shortDescription="Component couldn't be accessed" description="">
+<ErrorCode name="CouldntAccessComponent" description="Component couldn't be accessed" shortDescription=" ">
 	<Member name="ComponentName" type="string" description="ComponentName" />
 </ErrorCode>	
 
-<ErrorCode name="CORBAProblem" shortDescription="Caught CORBA system exception" description="">
+<ErrorCode name="CORBAProblem" description="Caught CORBA system exception" shortDescription=" ">
 	<Member name="Name" type="string" description="Name" />
 	<Member name="Minor" type="long" description="Minor" />
 </ErrorCode>	
 
-<ErrorCode name="Unknown" shortDescription="Caught an unknown exception" description=""/>
+<ErrorCode name="Unknown" description="Caught an unknown exception" shortDescription=" "/>
 
-<ErrorCode name="InvalidArgument" shortDescription="An invalid argument was given" description=""/>
+<ErrorCode name="InvalidArgument" description="An invalid argument was given" shortDescription=" "/>
 
 </Type>

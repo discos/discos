@@ -16,47 +16,47 @@
 
 <Code name="NoError" shortDescription="No error" description="No error condition found"/>
 
-<ErrorCode name="Nak" shortDescription="ACU does not acknowledge" description="">
+<ErrorCode name="Nak" description="ACU does not acknowledge" shortDescription=" ">
 	<Member name="Code" type="long" description="Code" />
 	<Member name="Message" type="string" description="Message" />
 </ErrorCode>
 
-<ErrorCode name="Connection" shortDescription="ACU is not reachable or disconnected" description=""/>
+<ErrorCode name="Connection" description="ACU is not reachable or disconnected" shortDescription=" "/>
 
-<ErrorCode name="OperationNotPermitted" shortDescription="Operation is not allowed or not permitted under this configuration" description="">
+<ErrorCode name="OperationNotPermitted" description="Operation is not allowed or not permitted under this configuration" shortDescription=" ">
 	<Member name="Reason" type="string" description="Reason" />
 </ErrorCode>
 
-<ErrorCode name="ReceiverNotFound" shortDescription="Requested configuration is not existent" description=""/>
+<ErrorCode name="ReceiverNotFound" description="Requested configuration is not existent" shortDescription=" "/>
 
-<ErrorCode name="AntennaBusy" shortDescription="Antenna is busy with other activities" description=""/>
+<ErrorCode name="AntennaBusy" description="Antenna is busy with other activities" shortDescription=" "/>
 
-<ErrorCode name="StoppedByUser" shortDescription="A stop command was issued by a client" description=""/>
+<ErrorCode name="StoppedByUser" description="A stop command was issued by a client" shortDescription=" "/>
 
-<ErrorCode name="SourceNotFound" shortDescription="The requested source or coordinate is not found in the catalog" description="">
+<ErrorCode name="SourceNotFound" description="The requested source or coordinate is not found in the catalog" shortDescription=" ">
 	<Member name="SourceName" type="string" description="Name of the source"/>
 </ErrorCode>
 
-<ErrorCode name="RateTooHigh" shortDescription="The resulting rate is too high" description="">
+<ErrorCode name="RateTooHigh" description="The resulting rate is too high" shortDescription=" ">
 	<Member name="Axis" type="string" description="Frame axis which the rate is relative to"/>
 </ErrorCode>
 
-<ErrorCode name="ExceedingSlewingTime" shortDescription="Cannot reach destination in scheduled time" description=""/>
+<ErrorCode name="ExceedingSlewingTime" description="Cannot reach destination in scheduled time" shortDescription=" "/>
 
-<ErrorCode name="TrackingNotStarted" shortDescription="The tracking has not been started yet" description="" />
+<ErrorCode name="TrackingNotStarted" description="The tracking has not been started yet" shortDescription=" " />
 
-<ErrorCode name="ScanError" shortDescription="Illegal scan parameter or configuration" description="">
+<ErrorCode name="ScanError" description="Illegal scan parameter or configuration" shortDescription=" ">
 	<Member name="Reason" type="string" description="Description of the reason that generates the error"/>
 </ErrorCode>
 
-<ErrorCode name="SecondaryScanError" shortDescription="Illegal secondary scan parameter or configuration" description=""/>
+<ErrorCode name="SecondaryScanError" description="Illegal secondary scan parameter or configuration" shortDescription=" "/>
 
-<ErrorCode name="LoadGeneratorError" shortDescription="Could not load the requested ephem generator" description=""/>
+<ErrorCode name="LoadGeneratorError" description="Could not load the requested ephem generator" shortDescription=" "/>
 
-<ErrorCode name="MissingTarget" shortDescription="A target must be commanded before doing the scan" description=""/>
+<ErrorCode name="MissingTarget" description="A target must be commanded before doing the scan" shortDescription=" "/>
 
-<ErrorCode name="OffsetFrameNotSupported" shortDescription="It is not allowed to set offset in the requested frame" description=""/>
+<ErrorCode name="OffsetFrameNotSupported" description="It is not allowed to set offset in the requested frame" shortDescription=" "/>
 
-<ErrorCode name="NoTargetCommandedYet" shortDescription="No target commanded" description=""/>
+<ErrorCode name="NoTargetCommandedYet" description="No target commanded" shortDescription=" "/>
 
 </Type>
