@@ -10,7 +10,7 @@
 
 module Receivers {
 
-    interface SRTKBandDerotator : ACS::CharacteristicComponent, GenericDerotator {
+    interface SRTKBandDerotator : GenericDerotator {
  
         /** Computation of the sensor lenght
          *
