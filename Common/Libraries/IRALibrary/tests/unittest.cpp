@@ -4,6 +4,7 @@
 #include "FastQueue_test.i"
 #include "Socket_test.i"
 
+#include "CError_regression.i"
 
 using namespace IRALibraryTest;
 
@@ -61,4 +62,8 @@ TEST_F(IRALibrary_FastQueue,FastQueue_checkConsistency){
 
 TEST_F(IRALibrary_Socket, sendWithoutConnection){
 	EXPECT_TRUE(sendWithoutConnection());
+}
+
+TEST_F(IRALibrary_CError, copyConstructor_segfault){
+	EXPECT_TRUE(copyConstructor_segfault());
 }
