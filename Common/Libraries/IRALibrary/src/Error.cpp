@@ -52,7 +52,7 @@ CError::CError(const CError& rSrc)
 	m_sFile=rSrc.m_sFile;
 	m_sRoutine=rSrc.m_sRoutine;
 	m_dwLine=rSrc.m_dwLine;
-	for(int i=0;i<m_wDataPointer;i++) {
+	for(WORD i=0;i<rSrc.m_wDataPointer;i++) {
 		m_pData[i].Name=rSrc.m_pData[i].Name;
 		m_pData[i].Value=rSrc.m_pData[i].Value;
 	}
@@ -83,7 +83,7 @@ void CError::operator=(const CError& rSrc)
 	m_sFile=rSrc.m_sFile;
 	m_sRoutine=rSrc.m_sRoutine;
 	m_dwLine=rSrc.m_dwLine;
-	for(int i=0;i<m_wDataPointer;i++) {
+	for(WORD i=0;i<rSrc.m_wDataPointer;i++) {
 		m_pData[i].Name=rSrc.m_pData[i].Name;
 		m_pData[i].Value=rSrc.m_pData[i].Value;
 	}
