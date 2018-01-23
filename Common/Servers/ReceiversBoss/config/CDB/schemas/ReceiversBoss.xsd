@@ -26,7 +26,9 @@
 		<xs:attribute name="Component" type="xs:string" use="required"/>
 	</xs:complexType>
 		
-	<xs:complexType name="ReceiversBossType">
+    <xs:complexType name="ReceiversBossType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
 		<xs:sequence>
 			<!-- Local Oscillator (ROdoubleSeq) -->
 			<xs:element name="LO" type="baci:ROdoubleSeq"/>
@@ -59,7 +61,9 @@
 		<xs:attribute name="PropertiesUpdateTime" type="xs:unsignedLong" use="required" />
 		<!-- the interface of component that is in charge of driving the derotator  -->
 		<xs:attribute name="DewarPositionerInterface" type="xs:string" use="required" />		
-		
+
+      </xs:extension>
+     </xs:complexContent>
 	</xs:complexType>
 
 	<xs:element name="ReceiversBoss" type="ReceiversBossType"/>
