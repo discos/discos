@@ -23,7 +23,7 @@
 	<Member name="LineNumber" type="long" description="Line number at which the problem has been found" />	
 </ErrorCode>
 
-<ErrorCode name="AlreadyRunning" description="A schedule is already running" shortDescription=""/>
+<ErrorCode name="AlreadyRunning" description="A schedule is already running" shortDescription=" "/>
 
 <ErrorCode name="NotAllowedDuringSchedule" description="The operation is not allowed during schedule execution" shortDescription=" "/>
 
@@ -31,7 +31,7 @@
 
 <ErrorCode name="BackendNotAvailable" description="The selected backend is not available" shortDescription=" "/>
 
-<ErrorCode name="DataRecorderNotAvailable" description="The selected data recorder is not available" shortDescription=""/>
+<ErrorCode name="DataRecorderNotAvailable" description="The selected data recorder is not available" shortDescription=" "/>
 
 <ErrorCode name="DataTransferSetupError" description="The data transfer was not properly configured or initialized" shortDescription=" "/>
 
@@ -84,7 +84,7 @@
 	<Member name="Path" type="string" description="report the path element involved (file or dir)" />
 </ErrorCode>
 
-<ErrorCode name="LogFileError" description="Cannot open the log file" shortDescription="">
+<ErrorCode name="LogFileError" description="Cannot open the log file" shortDescription=" ">
 	<Member name="FileName" type="string" description="Name of the log file" />
 </ErrorCode>
 
@@ -94,7 +94,7 @@
 
 <ErrorCode name="UnsupportedOperation" description="The operation is invalid or not supported by this release" shortDescription=" "/>
 
-<ErrorCode name="AbortedByUser" shortDescription="The operation was aborted by the user" shortDescription=" ">
+<ErrorCode name="AbortedByUser" description="The operation was aborted by the user" shortDescription=" ">
 	<Member name="Operation" type="string" description="Name of the aborted operation" />
 </ErrorCode>
 
@@ -102,7 +102,7 @@
 
 <ErrorCode name="CloseTelescopeScanError" description="Not able command the scan close to the telescope" shortDescription=" "/>
 
-<ErrorCode name="InvalidRestFrequency" shortDescription="The rest frequency is not provided or does not match the number of backend sections" shortDescription=" "/>
+<ErrorCode name="InvalidRestFrequency" description="The rest frequency is not provided or does not match the number of backend sections" shortDescription=" "/>
 
 <ErrorCode name="ScheduleNotExist" description="Schedule could not be found" shortDescription=" "/>
 
