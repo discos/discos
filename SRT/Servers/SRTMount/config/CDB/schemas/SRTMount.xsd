@@ -86,7 +86,9 @@
 		</xs:complexContent>
 	</xs:complexType>
 	 
-	<xs:complexType name="SRTMountType">
+    <xs:complexType name="SRTMountType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
 		<xs:sequence>
 			<xs:element name="azimuth" type="baci:ROdouble"/>
 			<xs:element name="elevation" type="baci:ROdouble"/>
@@ -100,7 +102,7 @@
 			<xs:element name="controlLineStatus" type="ant:StatusType" />
 			<xs:element name="statusLineStatus" type="ant:StatusType" />
 			<xs:element name="programTrackPositions" type="baci:ROlong" />
-			<xs:element name="section" type="ant:SectionType" />	
+            <xs:element name="section" type="ant:SectionType" />	
 			<xs:element name="azimuthRate" type="baci:ROdouble"/>
 			<xs:element name="elevationRate" type="baci:ROdouble"/>
 			<xs:element name="azimuthOffset" type="baci:ROdouble" />
@@ -147,7 +149,9 @@
 		<!-- duty cycle or time resolution of the control socket (microseconds)-->
 		<xs:attribute name="ControlSocketDutyCycle" type="xs:unsignedLong" use="required" />
 		<!-- gives the time source has to be used for time synchronization of the servo-->
-		<xs:attribute name="TimeSource" type="TTimeSource" use="required" />
+        <xs:attribute name="TimeSource" type="TTimeSource" use="required" />
+      </xs:extension>
+     </xs:complexContent>
 	</xs:complexType>
   
 	<xs:element name="SRTMount" type="SRTMountType"/>
