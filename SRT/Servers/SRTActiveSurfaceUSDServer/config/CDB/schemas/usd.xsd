@@ -19,7 +19,9 @@
   <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
   <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
   <xs:complexType name="typeusd">
-    <xs:sequence>
+   <xs:complexContent>
+    <xs:extension base="baci:CharacteristicComponent">
+     <xs:sequence>
       <xs:element name="delay"	type="baci:RWlong"/>
       <xs:element name="cmdPos" type="baci:RWlong"/>
       <xs:element name="Fmin" 	type="baci:RWlong"/>
@@ -47,19 +49,20 @@
 			</xs:element>
       <xs:element name="softVer" 				type="baci:ROlong"/>
       <xs:element name="type"   				type="baci:ROlong"/>
-    </xs:sequence>
+     </xs:sequence>
 	
-    <xs:attribute name="sector" 	type="xs:unsignedByte" 	use="required" />
-    <xs:attribute name="lan"		type="xs:unsignedByte" 	use="required" />
-    <xs:attribute name="serialAddress"	type="xs:unsignedByte" 	use="required" />
-    <xs:attribute name="cammaLen" 	type="xs:double"	use="required" />
-    <xs:attribute name="cammaPos" 	type="xs:double"	use="required" />
-    <xs:attribute name="calibrate" 	type="xs:unsignedByte" 	use="required" />
-    <xs:attribute name="fullRange"	type="xs:int"		use="optional" default="-42000"/>
-    <xs:attribute name="zeroRef" 	type="xs:int"		use="optional" default="-21000"/>
-    <xs:attribute name="step_giro" 	type="xs:int"		use="optional" default="200"/>
-    <xs:attribute name="step_res" 	type="xs:unsignedByte" 	use="optional" default="1"/>
-
+     <xs:attribute name="sector" 	type="xs:unsignedByte" 	use="required" />
+     <xs:attribute name="lan"		type="xs:unsignedByte" 	use="required" />
+     <xs:attribute name="serialAddress"	type="xs:unsignedByte" 	use="required" />
+     <xs:attribute name="cammaLen" 	type="xs:double"	use="required" />
+     <xs:attribute name="cammaPos" 	type="xs:double"	use="required" />
+     <xs:attribute name="calibrate" 	type="xs:unsignedByte" 	use="required" />
+     <xs:attribute name="fullRange"	type="xs:int"		use="optional" default="-42000"/>
+     <xs:attribute name="zeroRef" 	type="xs:int"		use="optional" default="-21000"/>
+     <xs:attribute name="step_giro" 	type="xs:int"		use="optional" default="200"/>
+     <xs:attribute name="step_res" 	type="xs:unsignedByte" 	use="optional" default="1"/>
+    </xs:extension>
+   </xs:complexContent>
   </xs:complexType>
   
   <xs:element name="usd" type="typeusd"/>

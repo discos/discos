@@ -19,7 +19,9 @@
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Antenna.xsd"/>
 	
-	<xs:complexType name="ObservatoryType">
+    <xs:complexType name="ObservatoryType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
 		<xs:sequence>
 			<!-- name of the Observatory -->			
 			<xs:element name="observatoryName" type="baci:ROstring" />			
@@ -45,7 +47,9 @@
 			<xs:element name="yGeod" type="baci:ROdouble" />
 			<xs:element name="zGeod" type="baci:ROdouble" />
 			<xs:element name="geodeticModel" type="ant:GeodeticModelType" />
-		</xs:sequence>
+        </xs:sequence>
+      </xs:extension>
+     </xs:complexContent>
 	</xs:complexType>
   
 	<xs:element name="Observatory" type="ObservatoryType"/>
