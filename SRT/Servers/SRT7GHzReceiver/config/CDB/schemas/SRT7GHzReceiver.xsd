@@ -19,7 +19,7 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
-  	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Receivers.xsd"/>
+  	<xs:import namespace="urn:schemas-cosylab-com:Receivers:1.0" schemaLocation="Receivers.xsd"/>
   	  	
   	<xs:complexType name="SRT7GHzStatusType">
 		<xs:complexContent>
