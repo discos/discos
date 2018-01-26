@@ -5,6 +5,7 @@
 #include "Socket_test.i"
 
 #include "CError_regression.i"
+#include "CDBTable_regression.i"
 
 using namespace IRALibraryTest;
 
@@ -60,10 +61,14 @@ TEST_F(IRALibrary_FastQueue,FastQueue_checkConsistency){
 	EXPECT_TRUE(FastQueue_checkConsistency());
 }
 
-TEST_F(IRALibrary_Socket, sendWithoutConnection){
+TEST_F(IRALibrary_Socket,sendWithoutConnection){
 	EXPECT_TRUE(sendWithoutConnection());
 }
 
-TEST_F(IRALibrary_CError, copyConstructor_segfault){
+TEST_F(IRALibrary_CError,copyConstructor_segfault){
 	EXPECT_TRUE(copyConstructor_segfault());
+}
+
+TEST_F(IRALibrary_CDataField,typeConversion_fail){
+	EXPECT_TRUE(typeConversion_fail());
 }
