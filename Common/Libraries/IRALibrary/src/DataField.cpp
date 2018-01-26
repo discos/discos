@@ -13,17 +13,17 @@ CDataField::CDataField(const CString& name,const TFieldType& type) : m_title(nam
 CDataField::~CDataField()
 {
 	for(unsigned i=0;i<m_valueList.size();i++) {
-		delete m_valueList[i];
+		if (m_valueList[i]) delete m_valueList[i];
 	}
 	m_valueList.clear();
 }
 
 bool CDataField::isNull() const
 {
-	baci::BACIValue *tmp;
 	if (m_listPointer>=0) {
-		tmp=m_valueList[m_listPointer];
-		return tmp->isNull();
+		IRA::CString *tmp=m_valueList[m_listPointer];
+		if ((*tmp)!="") return true;
+		else return false;
 	}
 	else {
 		return true;
@@ -37,12 +37,11 @@ IRA::CString CDataField::getColumnName() const
 
 IRA::CString CDataField::asString() const
 {
-	baci::BACIValue *tmp;
+	IRA::CString *tmp;
 	if (m_listPointer>=0) {
 		tmp=m_valueList[m_listPointer];
-		const char *p=tmp->stringValue();
-		if (p==NULL) return IRA::CString("");
-		else return IRA::CString(p);
+		if (tmp==NULL) return IRA::CString("");
+		else return *tmp;
 	}
 	else {
 		return IRA::CString("");
@@ -51,10 +50,12 @@ IRA::CString CDataField::asString() const
 
 long long CDataField::asLongLong() const
 {
-	baci::BACIValue *tmp;
+	IRA::CString *tmp;
+	char *pend;
 	if (m_listPointer>=0) {
 		tmp=m_valueList[m_listPointer];
-		return tmp->longLongValue();
+		if (tmp==NULL) return 0;
+		return (strtoll((const char *)(*tmp),&pend,10));
 	}
 	else {
 		return 0;
@@ -63,10 +64,12 @@ long long CDataField::asLongLong() const
 
 DDWORD CDataField::asDoubleDoubleWord() const
 {
-	baci::BACIValue *tmp;
+	IRA::CString *tmp;
+	char *pend;
 	if (m_listPointer>=0) {
 		tmp=m_valueList[m_listPointer];
-		return (DWORD)tmp->uLongLongValue();
+		if (tmp==NULL) return 0;
+		return (strtoul((const char *)(*tmp),&pend,10));
 	}
 	else {
 		return 0;
@@ -75,29 +78,34 @@ DDWORD CDataField::asDoubleDoubleWord() const
 
 double CDataField::asDouble() const
 {
-	baci::BACIValue *tmp;
+	IRA::CString *tmp;
+	char *pend;
 	if (m_listPointer>=0) {
 		tmp=m_valueList[m_listPointer];
-		return tmp->doubleValue();
+		if (tmp==NULL) return 0.0;
+		return (strtod((const char *)(*tmp),&pend));
 	}
 	else {
 		return 0.0;
-	}		
+	}	
 }
 
 void CDataField::addValue()
 {
-	m_valueList.push_back(new baci::BACIValue());
+//	m_valueList.push_back(new baci::BACIValue());
+	m_valueList.push_back(new IRA::CString(""));
 }
 
 void CDataField::setValue(const CString& value)
 {
-	if (value!="") {
+	IRA::CString *tmp=m_valueList.back();
+	(*tmp)=value;
+	/*if (value!="") {
 		m_valueList.back()->setValue((const char*)value);
 		switch (m_type) {
 			case LONGLONG : {
 				m_valueList.back()->setType(baci::BACIValue::type_longLong);
-				m_valueList.back()->setValue((const BACIlongLong)atoll((const char*)value));
+				//m_valueList.back()->setValue((const BACIlongLong)atoll((const char*)value));
 			}
 			case DOUBLEDOUBLEWORD : {
 				m_valueList.back()->setType(baci::BACIValue::type_uLongLong);
@@ -114,7 +122,7 @@ void CDataField::setValue(const CString& value)
 				m_valueList.back()->setValue((const char*)value);
 			}	
 		}
-	}
+	}*/
 }
 
 void CDataField::setPointer(const WORD& pos)
