@@ -9,6 +9,7 @@
 /*                                                                                                      */
 /* Who                                when            What                                              */
 /* Andrea Orlati(aorlati@ira.inaf.it) 07/06/2006      Creation                                          */
+/* Andrea Orlati(aorlati@ira.inaf.it) 26/01/2018      Rewritten in order to bypass an issue with 64bit ACS2017 */
 
 #include <vector>
 #include <baciValue.h>
@@ -115,12 +116,12 @@ protected:
 	void Last();
 
 	/**
-	 * Sets the current field pointer to the next avilable position. If the pointer already points the last one, nothing happens.
+	 * Sets the current field pointer to the next available position. If the pointer already points the last one, nothing happens.
 	*/
 	void Next();
 
 	/**
-	 * Sets the current field pointer to the previuos avilable position. If the pointer already points the first one, nothing happens.
+	 * Sets the current field pointer to the previous available position. If the pointer already points the first one, nothing happens.
 	*/
 	void Prev();
 	
@@ -134,7 +135,8 @@ private:
 	CString m_title;
 	TFieldType m_type;
 	int m_listPointer;
-	std::vector<baci::BACIValue *> m_valueList;	
+	//std::vector<baci::BACIValue *> m_valueList;	
+	std::vector<IRA::CString *> m_valueList;
 
   	CDataField(const CDataField& rSrc);    // no implementation given
    void operator=(const CDataField& rSrc);  // no implementation given
