@@ -4,11 +4,12 @@
        Marco Buttu, mbuttu@oa-cagliari.inaf.it
  
    Created: Tue Oct 13 09:36:00 CEST 2009
-   Last Modified: 23/05/2013: limits
+   modified: 23/05/2013: limits
+   modified: 29/01/2018: changed the limits of PFP theta
 -->
 
 <!-- Expire time in seconds -->
-<!-- Limits in mm: theta_y(-26,2740), x(-1400,1400), z(-199,40) -->
+<!-- Limits in mm: theta_y(-28.51,2740), x(-1400,1400), z(-199,40) -->
 <!-- Park position: theta_y(2730.15), x(0), z(-195) -->
 <WPServo
     xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
@@ -35,7 +36,7 @@
     require_calibration = "0"
     expire_time = "0.05000"
     tracking_delta = "1.0"
-    limits="(-26, 2740); (-1480, 1480); (-199, 40)"
+    limits="(-28.51, 2740); (-1480, 1480); (-199, 40)"
 >
               
     <!-- Actual Position (ROdoubleSeq) -->
