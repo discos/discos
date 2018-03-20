@@ -289,12 +289,12 @@ void CSenderThread::computeSample(TSampleRecord& samp,TIMEVALUE& sampleTime,DWOR
 		hd.dumpSize+=sizeof(double)*m_dataHeader.channels; // add data size required for tsys trasmission
 		ACE_Message_Block buffer(hd.dumpSize+sizeof(Backends::TDumpHeader));
 		//memcpy(buffer,&hd,sizeof(Backends::TDumpHeader));
-		for (long jj=0;jj<MAX_SECTION_NUMBER;jj++) {  //computes the system temperatures for all inputs
+		for (long jj=0;jj<m_dataHeader.channels;jj++) {  //computes the system temperatures for all inputs
 			allTsys[jj]=(double)samp.tpi[jj]*m_KCountsRatio[jj];
 		}
 		for (long i=0;i<m_dataHeader.channels;i++) {
 			sample[i]=samp.tpi[m_dataHeader.id[i]];  // stores the tpi for the enabled sections
-			tsys[i]=allTsys[m_dataHeader.id[i]]; // stores the tsys for th enable inputs
+			tsys[i]=allTsys[m_dataHeader.id[i]]; // stores the tsys for the enable inputs
 			//printf("section %ld, %lf, %lf, %ld\n",i,sample[i],tsys[i],m_dataHeader.id[i]);
 		}
 		//if (buffer.copy((const char *)&hd,sizeof(Backends::TDumpHeader))==0) printf("COPIA FATTA CON SUCCESSO!!\n");
@@ -341,7 +341,7 @@ void CSenderThread::computeSample(TSampleRecord& samp,TIMEVALUE& sampleTime,DWOR
 		}
 		#endif
 		buffer.reset();
-		//finally clear the integration...in order to stat a new one the next step
+		//finally clear the integration...in order to start a new one the next step
 		clearIntegration(samp);
 	}
 }
