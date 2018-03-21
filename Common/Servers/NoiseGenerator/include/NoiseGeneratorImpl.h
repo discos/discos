@@ -401,10 +401,6 @@ protected:
     virtual void stopSend()  throw (CORBA::SystemException, AVStopSendErrorEx) { };
 	
 private:
-	struct THeaderRecord {
-		Backends::TMainHeader header;
-		Backends::TSectionHeader chHeader[MAX_SECTION_NUMBER];
-	};
 	SmartPropertyPointer<ROuLongLong> m_ptime;
 	SmartPropertyPointer<ROstring> m_pbackendName;
 	SmartPropertyPointer<ROdoubleSeq> m_pbandWidth;

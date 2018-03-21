@@ -323,7 +323,6 @@ void XBackendsImpl::sendHeader()
 	AUTO_TRACE("XBackendsImpl::sendHeader()");
 	Backends::TMainHeader header;
 	Backends::TSectionHeader chHeader[MAX_INPUT_NUMBER];
-	//THeaderRecord buffer;
 	DWORD tpi[MAX_INPUT_NUMBER];
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
     /*
