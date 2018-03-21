@@ -300,13 +300,12 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 		ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("RoachImpl::sendHeader()");
-	//Backends::TMainHeader header;
-	//Backends::TChannelHeader chHeader[MAX_INPUT_NUMBER];
-	THeaderRecord buffer;
+	Backends::TMainHeader header;
+	Backends::TSectionHeader chHeader[MAX_SECTION_NUMBER];
 	//DWORD tpi[MAX_SECTION_NUMBER];
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	line->fillMainHeader(buffer.header);
-	line->fillChannelHeader(buffer.chHeader,MAX_SECTION_NUMBER);
+	line->fillMainHeader(header);
+	line->fillChannelHeader(chHeader,MAX_SECTION_NUMBER);
 	/*try {
 		line->setTime();
 	}
@@ -324,10 +323,16 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 		throw dummy.getComponentErrorsEx();
 	}
     */
+
+    char buffer[sizeof(Backends::TMainHeader)+header.sections*sizeof(Backends::TSectionHeader)];
+
+    memcpy(buffer,(void *)&header,sizeof(Backends::TMainHeader));
+    memcpy(buffer+sizeof(Backends::TMainHeader),(void *)chHeader,header.sections*sizeof(Backends::TSectionHeader));
+
 	#ifndef BKD_DEBUG
 	try {
-		getSender()->startSend(FLOW_NUMBER,(const char*)&buffer,
-				sizeof(Backends::TMainHeader)+buffer.header.sections*sizeof(Backends::TSectionHeader));
+		getSender()->startSend(FLOW_NUMBER,(const char*)buffer,
+				sizeof(Backends::TMainHeader)+header.sections*sizeof(Backends::TSectionHeader));
 	}
 	catch (AVStartSendErrorExImpl& ex) {
 		_ADD_BACKTRACE(BackendsErrors::TXErrorExImpl,impl,ex,"RoachImpl::sendHeader()");
@@ -341,24 +346,24 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 		throw impl.getComponentErrorsEx();
 	}
 	#else
-	printf("Sects: %d beams: %d integration: %d sampleSize: %d\n",buffer.header.sections,buffer.header.beams,
-			buffer.header.integration,buffer.header.sampleSize);
-	for(int h=0;h<buffer.header.sections;h++) {
+	/*printf("Sects: %d beams: %d integration: %d sampleSize: %d\n",header.sections,header.beams,
+			header.integration,header.sampleSize);
+	for(int h=0;h<header.sections;h++) {
 		printf("id: %d bins: %d pol: %d bw: %lf freq: %lf att L: %lf att R: %lf sr: %lf feed: %d\n",
-				buffer.chHeader[h].id,
-				buffer.chHeader[h].bins,
-				buffer.chHeader[h].polarization,
-				buffer.chHeader[h].bandWidth,
-				buffer.chHeader[h].frequency,
-				buffer.chHeader[h].attenuation[0],
-				buffer.chHeader[h].attenuation[1],
-				buffer.chHeader[h].sampleRate,
-				buffer.chHeader[h].feed);
-	}
+				chHeader[h].id,
+				chHeader[h].bins,
+				chHeader[h].polarization,
+				chHeader[h].bandWidth,
+				chHeader[h].frequency,
+				chHeader[h].attenuation[0],
+				chHeader[h].attenuation[1],
+				chHeader[h].sampleRate,
+				chHeader[h].feed);
+	}*/
 	#endif
 	ACS_LOG(LM_FULL_INFO,"RoachImpl::sendHeader()",(LM_INFO,"HEADERS_SENT"));
 	// inform the sender thread about the configuration......
-	m_senderThread->saveDataHeader(&(buffer.header),(buffer.chHeader));
+	m_senderThread->saveDataHeader(&header,chHeader);
 	// measure the zero tpi
 	#ifndef BKD_DEBUG
 	/*try {
@@ -378,7 +383,7 @@ void RoachImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Back
 		throw dummy.getComponentErrorsEx();
 	}*/
 	#else
-	for(int i=0;i<MAX_INPUT_NUMBER;tpi[i]=0,i++);
+	//for(int i=0;i<MAX_INPUT_NUMBER;tpi[i]=0,i++);
 	#endif
 	// now comunicate the reading to the sender thread.....
 	//m_senderThread->saveZero(tpi);
