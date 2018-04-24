@@ -321,9 +321,8 @@ void XBackendsImpl::sendHeader()
 	throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("XBackendsImpl::sendHeader()");
-//	Backends::TMainHeader header;
-//	Backends::TSectionHeader chHeader[MAX_INPUT_NUMBER];
-	THeaderRecord buffer;
+	Backends::TMainHeader header;
+	Backends::TSectionHeader chHeader[MAX_INPUT_NUMBER];
 	DWORD tpi[MAX_INPUT_NUMBER];
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
     /*
@@ -351,13 +350,19 @@ void XBackendsImpl::sendHeader()
 	}
     */
 	ACS_DEBUG("XBackendsImpl::sendHeader()","Initialization");
-	line->fillMainHeader(buffer.header);
-	line->fillChannelHeader(buffer.chHeader,MAX_INPUT_NUMBER);
+	line->fillMainHeader(header);
+	line->fillChannelHeader(chHeader,MAX_INPUT_NUMBER);
+
+	char buffer[sizeof(Backends::TMainHeader)+header.sections*sizeof(Backends::TSectionHeader)];
+
+	memcpy(buffer,(void *)&header,sizeof(Backends::TMainHeader));
+	memcpy(buffer+sizeof(Backends::TMainHeader),(void *)chHeader,header.sections*sizeof(Backends::TSectionHeader));	
+	
 #ifndef BKD_DEBUG
 	try {
 		ACS_LOG(LM_FULL_INFO,"XBackendsImpl::sendHeader()",(LM_INFO,"HEADERS_SENT_OK"));
-		getSender()->startSend(FLOW_NUMBER,(const char*)&buffer,
-				sizeof(Backends::TMainHeader)+buffer.header.sections*sizeof(Backends::TSectionHeader));
+		getSender()->startSend(FLOW_NUMBER,(const char*)buffer,
+				sizeof(Backends::TMainHeader)+header.sections*sizeof(Backends::TSectionHeader));
 	}
 	catch (AVStartSendErrorExImpl& ex) {
 		_ADD_BACKTRACE(BackendsErrors::TXErrorExImpl,impl,ex,"XBackendsImpl::sendHeader()");
@@ -371,26 +376,26 @@ void XBackendsImpl::sendHeader()
 		throw impl.getComponentErrorsEx();
 	}
 #else
-	printf("Chnls: %d beams: %d integration: %d sampleSize: %d\n",buffer.header.sections,buffer.header.beams,
-			buffer.header.integration,buffer.header.sampleSize);
-	for(int h=0;h<buffer.header.sections;h++) {
+	/*printf("Chnls: %d beams: %d integration: %d sampleSize: %d\n",header.sections,header.beams,
+			header.integration,header.sampleSize);
+	for(int h=0;h<header.sections;h++) {
 		printf("id: %d bins: %d pol: %d bw: %lf freq: %lf att L: %lf att R: %lf sr: %lf ifd: %d feed: %d\n",
-				buffer.chHeader[h].id,
-				buffer.chHeader[h].bins,
-				buffer.chHeader[h].polarization,
-				buffer.chHeader[h].bandWidth,
-				buffer.chHeader[h].frequency,
-				buffer.chHeader[h].attenuation[0],
-				buffer.chHeader[h].attenuation[1],
-				buffer.chHeader[h].sampleRate,
-				buffer.chHeader[h].IF[0],
-				buffer.chHeader[h].feed);
-	}
+				chHeader[h].id,
+				chHeader[h].bins,
+				chHeader[h].polarization,
+				chHeader[h].bandWidth,
+				chHeader[h].frequency,
+				chHeader[h].attenuation[0],
+				chHeader[h].attenuation[1],
+				chHeader[h].sampleRate,
+				chHeader[h].IF[0],
+				chHeader[h].feed);
+	}*/
 #endif
 	ACS_LOG(LM_FULL_INFO,"XBackendsImpl::sendHeader()",(LM_INFO,"HEADERS_SENT"));
 	// inform the sender thread about the configuration......
-	ACS_DEBUG_PARAM("XBackendsImpl::sendHeader()"," buffer.chHeader %lf ",buffer.chHeader);
-	m_pcontrolLoop->saveDataHeader(&(buffer.header),(buffer.chHeader));	
+	ACS_DEBUG_PARAM("XBackendsImpl::sendHeader()"," chHeader %lf ", chHeader);
+	m_pcontrolLoop->saveDataHeader(&header,chHeader);	
 #ifndef BKD_DEBUG
 	// measure the zero tpi
 	try {
