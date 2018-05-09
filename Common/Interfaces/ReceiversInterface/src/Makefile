@@ -20,7 +20,8 @@ CDB_SCHEMAS = Feeds ReceiversModeSetup LocalOscillatorLookUpTable \
 # IDL Files and flags
 IDL_FILES = CommonReceiverInterface ReceiversBoss \
 			GenericReceiver LocalOscillatorInterface \
-			DewarPositionerDefinitions GenericDerotator DewarPositioner
+			DewarPositionerDefinitions GenericDerotator \
+			DewarPositioner GenericIFDistributor
 
 
 CommonReceiverInterfaceStubs_LIBS = baciStubs ComponentErrorsStubs ManagementErrorsStubs \
@@ -36,6 +37,7 @@ GenericDerotatorStubs_LIBS = baciStubs DerotatorErrorsStubs ComponentErrorsStubs
     ManagmentDefinitionsStubs
 DewarPositionerStubs_LIBS =  baciStubs maciErrTypeStubs ComponentErrorsStubs \
     ManagmentDefinitionsStubs AntennaDefinitionsStubs DewarPositionerDefinitionsStubs
+GenericIFDistributorStubs_LIBS = baciStubs maciErrTypeStubs ComponentErrorsStubs
 
 
 # list of all possible C-sources (used to create automatic dependencies)
@@ -60,6 +62,8 @@ all:	do_all
 clean : clean_all 
 	$(RM) $(INTROOT)/lib/python/site-packages/DewarPositioner*_idl*.py*
 	$(RM) $(INTROOT)/lib/python/site-packages/libDewarPositionerStubs.*
+	$(RM) $(INTROOT)/lib/python/site-packages/GenericIFDistributor*_idl*.py*
+	$(RM) $(INTROOT)/lib/python/site-packages/libGenericIFDistributorStubs.*
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 
