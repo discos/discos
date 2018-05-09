@@ -9,15 +9,16 @@ MAKE_PDF = ON
 
 CDB_SCHEMAS = SRTLPBandNoiseMarkLookUpTable SRTLPBandReceiverModeSetup \
 			  SRTLPBandTaperLookUpTable MarkCoefficientsKBandLookUpTable \
-			  MarkCoefficientsSBandLookUpTable
+			  MarkCoefficientsSBandLookUpTable SRTIFDistributorTable
 
 # IDL Files and flags
-IDL_FILES = SRTKBandMF SRTSBandMF SRT7GHz SRTLPBand SRTKBandDerotator
+IDL_FILES = SRTKBandMF SRTSBandMF SRT7GHz SRTLPBand SRTKBandDerotator SRTIFDistributor
 SRTKBandMFStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
 SRTSBandMFStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
 SRT7GHzStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
 SRTLPBandStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs ManagmentDefinitionsStubs
 SRTKBandDerotatorStubs_LIBS = baciStubs ComponentErrorsStubs GenericDerotatorStubs
+SRTIFDistributorStubs_LIBS = GenericIFDistributorStubs
 
 
 # list of all possible C-sources (used to create automatic dependencies)
