@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<!-- Authors: Marco Buttu, Giuseppe Carboni -->
+<!-- Author: Giuseppe Carboni -->
 
 <xs:schema
 	targetNamespace="urn:schemas-cosylab-com:SRTIFDistributorTable:1.0"
@@ -12,21 +12,36 @@
 	attributeFormDefault="unqualified">
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
-	
-	<xs:complexType name="BackendTableHeader">
+
+    <xs:complexType name="LOConfigurationHeader">
+        <xs:sequence>
+            <xs:element name="Board" type="xs:unsignedInt" />
+            <xs:element name="REFfreq" type="xs:unsignedInt" />
+            <xs:element name="LOfreq" type="xs:unsignedInt" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="BWConfigurationHeader">
+        <xs:sequence>
+            <xs:element name="Board" type="xs:unsignedInt" />
+            <xs:element name="BandWidth" type="xs:unsignedInt" />
+        </xs:sequence>
+    </xs:complexType>
+
+	<xs:complexType name="SRTIFDConfigurationHeader">
  		<xs:sequence>
- 			<xs:element name="Backend" type="xs:string" />
- 			<xs:element name="Channel" type="xs:unsignedInt" />
- 			<xs:element name="Address" type="xs:unsignedInt" />
+ 			<xs:element name="ConfigurationName" type="xs:string" />
+            <xs:element name="LO" type="LOConfigurationHeader" maxOccurs="1" />
+            <xs:element name="BW" type="BWConfigurationHeader" maxOccurs="2" />
  		</xs:sequence>
  	</xs:complexType>
  	
- 	<xs:complexType name="BackendTable">
+ 	<xs:complexType name="SRTIFDConfigurationTable">
 		<xs:sequence>
-			<xs:element name="BackendEntry" type="BackendTableHeader"  minOccurs="1" maxOccurs="unbounded" />
+			<xs:element name="ConfigurationEntry" type="SRTIFDConfigurationHeader" minOccurs="1" maxOccurs="unbounded" />
 		</xs:sequence>
  	</xs:complexType>
  	
- 	<xs:element name="SRTIFDistributorTable" type="BackendTable" />	
+ 	<xs:element name="SRTIFDistributorTable" type="SRTIFDConfigurationTable" />
 	
 </xs:schema>

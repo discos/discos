@@ -1,13 +1,14 @@
 #-------------------------------------------------
+# Marco Buttu 		  <mbuttu@oa-cagliari.inaf.it>
 # Giuseppe Carboni  <gcarboni@oa-cagliari.inaf.it>
 #-------------------------------------------------
 
 
-CDB_SCHEMAS = SRTIFDistributor
+CDB_SCHEMAS = SRTIFDistributor14
 
 PY_SCRIPTS = 
 PY_MODULES =
-PY_PACKAGES = IFDistributor
+PY_PACKAGES = IFDistributor14
 
 
 # INCLUDE STANDARDS
@@ -24,9 +25,9 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all
-	$(RM) *~ *Impl/*~ IFDistributor/*.pyc
+	$(RM) *~ *Impl/*~ IFDistributor14/*.pyc
 	$(RM) ../lib/python/site-packages/*
-	$(RM) $(INTROOT)/lib/python/site-packages/IFDistributor
+	$(RM) $(INTROOT)/lib/python/site-packages/IFDistributor14
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 
