@@ -1,4 +1,4 @@
-PY_PACKAGES = SRTIFDistributorMockers
+PY_PACKAGES = SRTIFDistributor14Mockers
 
 # CPP UNIT TESTING SETUP
 #--------------
@@ -61,7 +61,7 @@ clean_test:
 	rm -f pyunit/*.pyc
 	rm -f external/*.pyc
 	rm -rf ../lib/python/site-packages/*
-	rm -rf $(INTROOT)/lib/python/site-packages/SRTIFDistributorMockers*
+	rm -rf $(INTROOT)/lib/python/site-packages/SRTIFDistributor14Mockers*
 
 unit: do_unit
 	@echo " . . . 'unit' done"
@@ -91,3 +91,4 @@ man   : do_man
 
 install : install_all
 	@echo " . . . installation done"
+

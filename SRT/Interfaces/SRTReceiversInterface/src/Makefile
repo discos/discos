@@ -1,24 +1,27 @@
 #*****************************************************************
 # Makefile of Receivers
 # =====================
-# Marco Buttu <mbuttu@oa-cagliari.inaf.it>
-# Andrea Orlati <a.orlati@ira.inaf.it>
+# Marco Buttu		<mbuttu@oa-cagliari.inaf.it>
+# Andrea Orlati		<a.orlati@ira.inaf.it>
+# Giuseppe Carboni	<gcarboni@oa-cagliari.inaf.it
 #*****************************************************************
 
 MAKE_PDF = ON
 
 CDB_SCHEMAS = SRTLPBandNoiseMarkLookUpTable SRTLPBandReceiverModeSetup \
 			  SRTLPBandTaperLookUpTable MarkCoefficientsKBandLookUpTable \
-			  MarkCoefficientsSBandLookUpTable SRTIFDistributorTable
+			  MarkCoefficientsSBandLookUpTable SRTIFDistributorTable SRTIFDistributor14Table
 
 # IDL Files and flags
-IDL_FILES = SRTKBandMF SRTSBandMF SRT7GHz SRTLPBand SRTKBandDerotator SRTIFDistributor
+IDL_FILES = SRTKBandMF SRTSBandMF SRT7GHz SRTLPBand \
+			SRTKBandDerotator SRTIFDistributor SRTIFDistributor14
 SRTKBandMFStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
 SRTSBandMFStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
 SRT7GHzStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
 SRTLPBandStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs ManagmentDefinitionsStubs
 SRTKBandDerotatorStubs_LIBS = baciStubs ComponentErrorsStubs GenericDerotatorStubs
-SRTIFDistributorStubs_LIBS = GenericIFDistributorStubs
+SRTIFDistributorStubs_LIBS = GenericIFDistributorStubs LocalOscillatorInterfaceStubs
+SRTIFDistributor14Stubs_LIBS = GenericIFDistributorStubs
 
 
 # list of all possible C-sources (used to create automatic dependencies)

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rm -f .coverage
+coverage run -m unittest discover
+coverage report --include $INTROOT"/lib/python/site-packages/SRTIFDistributor14/*"
