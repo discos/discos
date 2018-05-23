@@ -5,4 +5,8 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     IP="127.0.0.1"
-    PORT="13000"/>
+    PORT="12000" >
+    <frequency units="MHz" />
+    <amplitude units="dBm" />
+    <isLocked />
+</SRTIFDistributor>

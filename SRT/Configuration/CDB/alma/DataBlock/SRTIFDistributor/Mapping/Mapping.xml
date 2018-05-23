@@ -6,19 +6,19 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <ConfigurationEntry>
-        <ConfigurationName>PULSAR</ConfigurationName>
+        <ConfigurationName>DEFAULT</ConfigurationName>
         <LO>
             <Board>0</Board>
-            <REFfreq>10</REFfreq>
-            <LOfreq>2300</LOfreq>
+            <Enable>1</Enable>
+            <Frequency>2300</Frequency>
         </LO>
         <BW>
             <Board>1</Board>
-            <BandWidth>3</BandWidth>
+            <Bandwidth>3</Bandwidth>
         </BW>
         <BW>
             <Board>2</Board>
-            <BandWidth>3</BandWidth>
+            <Bandwidth>3</Bandwidth>
         </BW>
     </ConfigurationEntry>
 </SRTIFDistributorTable>
