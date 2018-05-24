@@ -26,19 +26,20 @@ import IFDParser
 
 class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
  
-    ampl = 0
     attenuation_step = 0.125
 
     def __init__(self):
         cc.__init__(self)
         services.__init__(self)
         self.configuration_name = ''
+        self.configuration = {}
         self.attributes = {}
         self.mapping = {}
 
         self.LO_board = None
         self.freq = 0
         self.lock = 0
+        self.ampl = 0.0
 
     def initialize(self):
         self._set_cdb_attributes('alma/RECEIVERS/SRTIFDistributor')
@@ -56,14 +57,19 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
             raise LookupError('Unknown configuration: %s' % configuration_name)
 
         self.configuration_name = configuration_name
-
-        configuration = self.mapping[configuration_name]
+        self.configuration = self.mapping[configuration_name]
 
         # LO
-        LO_conf = configuration.get('LO')
+        LO_conf = self.configuration.get('LO')
+        if not LO_conf:
+            raise Exception(
+                'Local oscillator configuration not present. Aborting setup.'
+            )
+
         if int(LO_conf['Board']) != self._LO_board():
             raise IndexError(
-                'Wrong LO board selected. Please, fix the CDB.'
+                'Wrong LO board selected. '
+                + 'Please, fix the LO board index in CDB.'
             )
         if LO_conf['Enable'] == '0':
             self.rfoff()
@@ -71,14 +77,14 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
             self._set_LO(int(LO_conf['Frequency']), 1)
 
         # BW
-        for line in self.mapping[self.configuration_name].get('BW'):
+        for line in (self.configuration.get('BW') or []):
             self._set_filter(
                 int(line['Board']),
                 int(line['Bandwidth'])
             )
 
         # ATT
-        for line in self.mapping[self.configuration_name].get('ATT'):
+        for line in (self.configuration.get('ATT') or []):
             for channel_conf in line['ChannelConfiguration']:
                 self._set_att(
                     int(line['Board']),
@@ -87,7 +93,7 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
                 )
 
         # INPUT
-        for line in self.mapping[self.configuration_name].get('INPUT'):
+        for line in (self.configuration.get('INPUT') or []):
             self._set_input(
                 int(line['Board']),
                 int(line['Conversion'])
@@ -111,10 +117,12 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
     def rfoff(self):
         self._LO_board()
         self._set_LO(self.freq, 0)
+        self._update_devios()
 
     def rfon(self):
         self._LO_board()
         self._set_LO(self.freq, 1)
+        self._update_devios()
 
     def _set_LO(self, lo_freq, lo_on):
         command = (
@@ -126,6 +134,11 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
                 lo_on
             )
         )
+
+        if self.configuration:
+            self.configuration['LO']['Frequency'] = str(lo_freq)
+            self.configuration['LO']['Enable'] = str(lo_on)
+
         return self._send_command(command)[0]
 
     def _set_filter(self, board, bandwidth):
@@ -166,12 +179,13 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
 
     def _LO_board(self):
         if self.LO_board is None:
-            for board in range(21):
+            for board in range(int(self.attributes['N_BOARDS'])):
                 status = self._get_board_status(board)
                 if status['TYPE'] == 2:
                     self.LO_board = board
                     self.freq = status['FREQ']
                     self.lock = status['LOCK']
+                    self.ampl = float(self.lock)
                     break
 
         if self.LO_board is not None:
@@ -180,9 +194,7 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
             raise ValueError('No LO boards detected.')
 
     def _get_board_status(self, board):
-        self._check_configuration()
-
-        if board not in range(21):
+        if board not in range(int(self.attributes['N_BOARDS'])):
             raise IndexError("Choose a board index between 0 and 20.")
 
         command = '? %d\n' % board
@@ -213,13 +225,21 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
         response = response.strip().split('\n')
         return response
 
+    def _update_devios(self):
+        LO_status = self._get_board_status(self._LO_board())
+        self.freq = LO_status['FREQ']
+        self.lock = LO_status['LOCK']
+        self.ampl = float(self.lock)
+
     def _is_configured(self):
         t = Timer(int(self.attributes['CYCLE_TIME']), self._is_configured)
         t.daemon = True
         t.start()
 
+        configuration = self.configuration
+
+        LO_conf = configuration.get('LO')
         LO_status = self._get_board_status(self._LO_board())
-        LO_conf = self.mapping[self.configuration_name].get('LO')
 
         if LO_status['ENABLED'] != int(LO_conf['Enable']):
             raise Exception(
@@ -240,8 +260,9 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
             if LO_status['ERR'] != 0:
                 raise Exception('Local oscillator error.')
             self.lock = LO_status['LOCK']
+            self.ampl = float(self.lock)
 
-        for line in self.mapping[self.configuration_name].get('BW'):
+        for line in (configuration.get('BW') or []):
             BW_status = self._get_board_status(int(line['Board']))
             if BW_status['BANDWIDTH'] != int(line['Bandwidth']):
                 raise Exception(
@@ -253,23 +274,23 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
                     )
                 )
 
-        for line in self.mapping[self.configuration_name].get('ATT'):
+        for line in (configuration.get('ATT') or []):
             board = int(line['Board'])
             ATT_status = self._get_board_status(board)['ATT']
-            for configuration in line['ChannelConfiguration']:
-                channel = int(configuration['Channel'])
-                conf_att = float(configuration['Attenuation'])
+            for channel_config in line['ChannelConfiguration']:
+                channel = int(channel_config['Channel'])
+                config_att = float(channel_config['Attenuation'])
                 status_att = float(ATT_status[channel]) * self.attenuation_step
-                if conf_att != status_att:
+                if config_att != status_att:
                     raise Exception(
                         (
                             'Board %d, channel %d attenuation is %.3f, '
                             + 'configuration is %.3f.'
                         )
-                        % (board, channel, status_att, conf_att)
+                        % (board, channel, status_att, config_att)
                     )
 
-        for line in self.mapping[self.configuration_name].get('INPUT'):
+        for line in (configuration.get('INPUT') or []):
             INPUT_status = self._get_board_status(int(line['Board']))
             if INPUT_status['INPUT_CONV'] != int(line['Conversion']):
                 raise Exception(
@@ -292,7 +313,16 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
             exc.setReason(reason)
             raise exc
         
-        for name in ('IP', 'PORT', 'REF_FREQ', 'DEFAULT_CONFIG', 'CYCLE_TIME'):
+        attributes = [
+            'IP',
+            'PORT',
+            'REF_FREQ',
+            'DEFAULT_CONFIG',
+            'CYCLE_TIME',
+            'N_BOARDS'
+        ]
+
+        for name in attributes:
             try:
                 self.attributes[name] = dao.get_field_data(name).strip()
             except cdbErrType.CDBFieldDoesNotExistEx:
