@@ -73,7 +73,7 @@ public:
 	 * In this implementation the inputs number is the same of the number of section (SIMPLE_SECTION)
 	 */
 	//inline void getInputsNumber(long &in) const { in=m_sectionsNumber; }
-	inline void getInputsNumber(long &in) const { in=m_rfInputs; }
+	inline void getInputsNumber(long &in) const { in=m_inputsNumber; }
 		
 	/**
 	 * Call this function to get the milliseconds of integration time
@@ -86,6 +86,7 @@ public:
 	 * Call this function in order to get the start frequency value for each section. 
 	 */
 	void getFrequency(ACS::doubleSeq& freq) const;
+	void getFrequencyAttr(ACS::doubleSeq& freq) const;
 	
 	/**
 	 * Call this function in order to get the sample rate for each section. 
@@ -111,6 +112,7 @@ public:
 	 * Call this function in order to get the feed connected to each section.
 	 */
 	void getFeed(ACS::longSeq& feed) const;
+	void getFeedAttr(ACS::longSeq& feed) const;
 
 	/**
 	 * Call this function in order to get the IF connected to each input.
@@ -160,6 +162,7 @@ public:
 	 */
 	void getBandWidth(ACS::doubleSeq& bw) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
 			BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl);
+	void getBandWidthAttr(ACS::doubleSeq& bw) const;
 	
 	/**
 	 * Call this function in order to get the time clock reported by the backend. 
@@ -640,7 +643,7 @@ private:
 	 */
 	double m_tpiZero[MAX_SECTION_NUMBER];
 
-    long m_rfInputs;
+    long m_inputsNumber;
 
     double m_filter;
 	
