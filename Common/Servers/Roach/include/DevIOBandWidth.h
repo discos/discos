@@ -63,7 +63,7 @@ public:
 		// get the CommandLine .......
 		CSecAreaResourceWrapper<CCommandLine> line=m_pLink->Get();
 		try {
-			line->getBandWidth(m_val);
+			line->getBandWidthAttr(m_val);
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOBandWidth::read()");

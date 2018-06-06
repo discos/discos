@@ -41,16 +41,20 @@ CCommandLine::CCommandLine(ContainerServices *service): CSocket(),
 	m_backendStatus=0;
 	setStatus(NOTCNTD);
 	m_setTpiIntegration=true;
-    m_RK77=false;
-    m_RK00=false;
-    m_RC00=false;
-    m_RL00=false;
-    m_RP00=false;
-    m_RK77S=false;
-    m_RK00S=false;
-    m_RC00S=false;
-    m_RL00S=false;
-    m_RP00S=false;
+    m_SK77=false;
+    m_SK03=false;
+    m_SK06=false;
+    m_SK00=false;
+    m_SC00=false;
+    m_SL00=false;
+    m_SP00=false;
+    m_SK77S=false;
+    m_SK03S=false;
+    m_SK06S=false;
+    m_SK00S=false;
+    m_SC00S=false;
+    m_SL00S=false;
+    m_SP00S=false;
 }
 
 CCommandLine::~CCommandLine()
@@ -271,28 +275,11 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl)
 {
 	AUTO_TRACE("CCommandLine::setAttenuation()");
-	//int res;
-	//WORD len;
-	//char sBuff[SENDBUFFERSIZE];
-	//char rBuff[RECBUFFERSIZE];
 	double newAtt;
 
-    try {
-        m_totalPower->setAttenuation(inputId, attenuation);
-    }
-    catch (...) {
-	    _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
-		impl.log(LM_ERROR);
-	}
-
-/*	if (getIsBusy()) {
-		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setAttenuation()");
-		throw impl;
-	}
-*/
 	if (inputId>=0) {
 		//if (inputId>=m_sectionsNumber) {
-		if (inputId>m_sectionsNumber) { // TBC !!!
+		if (inputId>m_inputsNumber) { // TBC !!!
 			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setAttenuation()");
 			impl.setReason("the input identifier is out of range");
 			throw impl;
@@ -316,39 +303,19 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 			impl.setValueLimit(MAX_ATTENUATION);
 			throw impl;									
 		}
-		newAtt=attenuation;
+		m_attenuation[inputId]=attenuation;
+        try {
+            m_totalPower->setAttenuation(inputId, attenuation);
+        }
+        catch (...) {
+	        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CExternalClientsSocketServer::cmdToScheduler()");
+		    impl.log(LM_ERROR);
+	    }
 	}
 	else {
 		newAtt=m_attenuation[inputId];
 	}
-    /*
-	newBW=m_bandWidth[inputId];
-	len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW,m_boards); // get the buffer
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-	}
-	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setAttenuation()");
-		} 
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::setAttenuation()",(LM_NOTICE,"INPUT_CONFIGURED %ld,ATT=%lf",inputId,newAtt));
-		//CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setAttenuation()",(LM_NOTICE,"INPUT_CONFIGURED %ld,ATT=%lf",inputId,newAtt));
-		m_attenuation[inputId]=newAtt;
-	}
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setAttenuation()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setAttenuation()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setAttenuation()");
-	}
-    */
+
 }
 
 void CCommandLine::setConfiguration(const long& inputId,const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins) throw (
@@ -412,7 +379,6 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	else {
 		newSR=m_sampleRate[inputId];
 	}
-	newAtt=m_attenuation[inputId];
 
     if (freq >= 0) { // the user ask for a new value
         if (freq >= MIN_FREQUENCY && freq <= MAX_FREQUENCY) {
@@ -441,15 +407,9 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	if (pol >= 0) { // the user ask for a new value
 		if ((pol == 0) || (pol == 1)) { // LCP or RCP
 			newPol = pol;
-        	m_sectionsNumber = 2;
-            if (m_RK77 == true)
-                m_sectionsNumber = 14;
 		}
 		if (pol == 2) { // FULL STOKES
 			newPol = pol;
-        	m_sectionsNumber = 1;
-            if (m_RK77S == true)
-                m_sectionsNumber = 7;
 		}
 		if (pol >= 3) {
 			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
@@ -483,87 +443,42 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	}*/
 
 
-	//len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW,m_boards); // get the buffer
-    Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);
-    /*IRA::CString temp;
-    strcpy (sBuff,"?set-section,");
-    temp.Format("%ld",inputId);
-    strcat (sBuff,(const char *)temp);
-    strcat (sBuff,",");
-    temp.Format("%f",freq);
-    strcat (sBuff,(const char *)temp);
-    strcat (sBuff,",");
-    temp.Format("%f",newBW);
-    strcat (sBuff,(const char *)temp);
-    strcat (sBuff,",");
-    temp.Format("%ld",feed);
-    strcat (sBuff,(const char *)temp);
-    strcat (sBuff,",");
-    temp.Format("%ld",pol);
-    strcat (sBuff,(const char *)temp);
-    strcat (sBuff,",");
-    temp.Format("%f",newSR);
-    strcat (sBuff,(const char *)temp);
-    strcat (sBuff,",");
-    temp.Format("%ld",bins);
-    strcat (sBuff,(const char *)temp);
-	strcat (sBuff,"\r\n");
-	len = strlen (sBuff);
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-        printf("set-section = %s\n",rBuff);
-	}*/
-    Message reply = sendBackendCommand(request);
-    if(reply.is_success_reply()){
-		m_bandWidth[inputId]=newBW;
-		for (int j=0;j<m_sectionsNumber;j++) m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
-		m_commonSampleRate=newSR;
-        	m_frequency[inputId]=newFreq;
-        	m_feedNumber[inputId]=newFeed;
-        	m_bins[inputId]=newBins;
-		m_polarization[inputId]=newPol;
-		IRA::CString temp;
-		if (m_polarization[inputId]==Backends::BKND_LCP)
-			temp="LCP";
-        	else if (m_polarization[inputId]==Backends::BKND_RCP)
-			temp="RCP";
-        	else
-            		temp="FULL_STOKES";
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%d,POL=%s,SR=%lf,BINS=%d",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
+	try {
+        Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);
+        Message reply = sendBackendCommand(request);
+        if (reply.is_success_reply()) {
+            m_bandWidth[inputId]=newBW;
+		    for (int j=0;j<m_sectionsNumber;j++)
+                m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
+		    m_commonSampleRate=newSR;
+            m_frequency[inputId]=newFreq;
+            m_feedNumber[inputId]=newFeed;
+            m_bins[inputId]=newBins;
+		    m_polarization[inputId]=newPol;
+		    IRA::CString temp;
+		    if (m_polarization[inputId]==Backends::BKND_LCP)
+			    temp="LCP";
+            else if (m_polarization[inputId]==Backends::BKND_RCP)
+			    temp="RCP";
+            else
+        	    temp="FULL_STOKES";
+		    ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%d,POL=%s,SR=%lf,BINS=%d",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
 				(const char *)temp,newSR,m_bins[inputId]));		
-        if (m_RK00==true || m_RC00==true || m_RK00S==true || m_RC00S==true || m_RK77==true || m_RK77S==true) {
-            if (newBW==300.00)
-                filter=300.00;
-            if (newBW==1500.00)
-                filter=1250.00;
-            if (newBW==2300.00)
-                filter=2350.00;
-            if (newBW == 300.00 || newBW == 1500.00 || newBW == 2300.00) {
-                try {
-                    m_totalPower->setSection(0,-1, filter, -1, -1, -1, -1);
-                    m_totalPower->setSection(1,-1, filter, -1, -1, -1, -1);
-                }
-                catch (...) {
-                    _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setDefaultConfiguration()");
-                    impl.log(LM_ERROR);
+            if (m_SK00==true || m_SC00==true || m_SK00S==true || m_SC00S==true || m_SK77==true || m_SK77S==true || m_SK03==true || m_SK03S==true || m_SK06==true || m_SK06S==true) {
+                if (newBW==420.00)
+                    filter=300.00;
+                if (newBW==1500.00)
+                    filter=1250.00;
+                if (newBW==2300.00)
+                    filter=2350.00;
+                if (newBW == 420.00 || newBW == 1500.00 || newBW == 2300.00) {
+                    for (int i=0;i<m_inputsNumber;i++)
+                        m_totalPower->setSection(i,-1, filter, -1, -1, -1, -1);
                 }
             }
         }
 	}
-    /*
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setConfiguration()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setConfiguration()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setConfiguration()");
-	}*/
+    catch (...) {}
 }
 
 void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
@@ -708,9 +623,9 @@ void CCommandLine::getZero(ACS::doubleSeq& tpi) throw (ComponentErrors::TimeoutE
 {
 	//getSample(tpi,true);
     // tpi.length(m_sectionsNumber);
-    tpi.length(m_rfInputs);
+    tpi.length(m_inputsNumber);
     //for (int j=0;j<m_sectionsNumber;j++) {
-    for (int j=0;j<m_rfInputs;j++) {
+    for (int j=0;j<m_inputsNumber;j++) {
         //tpi[j]=(double)data[j]/(double)integration;
         tpi[j]=(double)0;
         m_tpiZero[j]=tpi[j]; // in case of tpiZero we store it......
@@ -827,8 +742,8 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 		if (!CProtocol::decodeData(rBuff,data,m_configuration->getBoardsNumber(),m_sectionsNumber,m_boards)) {
 			_THROW_EXCPT(BackendsErrors::MalformedAnswerExImpl,"CCommandLine::getSample()");
 		}*/
-		tpi.length(m_rfInputs/*m_sectionsNumber*/);
-		for (int j=0;j<m_rfInputs/*m_sectionsNumber*/;j++) {
+		tpi.length(m_inputsNumber/*m_sectionsNumber*/);
+		for (int j=0;j<m_inputsNumber/*m_sectionsNumber*/;j++) {
 			//tpi[j]=(double)data[j]/(double)integration;
 			tpi[j]=(double)reply.get_argument<double>(j);
 			if (zero) m_tpiZero[j]=tpi[j]; // in case of tpiZero we store it......
@@ -881,114 +796,97 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
 		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ReplyNotValidExImpl,BackendsErrors::BackendFailExImpl)
 {
 	AUTO_TRACE("CCommandLine::setDefaultConfiguration()");
-    //double filter;
-
-	// I do not check for backend busy because this is a call done at the initialization and never repeated
-    //Message reply = sendBackendCommand(Command::setConfiguration(string((const char*)config)));
-    /*
-	strcpy (sBuff,"?set-configuration,");
-	strcat (sBuff,(const char*)config);
-	strcat (sBuff,"\r\n");
-	len = strlen (sBuff);
-
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-        printf("set-configuration = %s\n",rBuff);
-	}
-    */
-	//if (res>0) { // operation was ok.
-    //if(reply.is_success_reply()){
-		//if (!CProtocol::setConfiguration((const char*)config)) {
-		//	_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setDefaultConfiguration()");
-		//}
-	//}
-    /*
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setDefaultConfiguration()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setDefaultConfiguration()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setDefaultConfiguration()");
-	}
-	ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_INFO,"DEFAULTS_ARE_SET"));
-    */
-    if (config.Compare("RK77")==0) {
+    if (config.Compare("SK77")==0) {
         m_filter=1250.0;
-        m_rfInputs=2;
-        m_RK77=true;
-        m_RK00=m_RC00=m_RL00=m_RP00=m_RK77S=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK77=true;
+        m_SK00=m_SK03=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
     }
-    if (config.Compare("RK00")==0) {
+    if (config.Compare("SK03")==0) {
         m_filter=1250.0;
-        m_rfInputs=2;
-        m_RK00=true;
-        m_RK77=m_RC00=m_RL00=m_RP00=m_RK77S=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK03=true;
+        m_SK77=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
     }
-    if (config.Compare("RC00")==0) {
+    if (config.Compare("SK06")==0) {
         m_filter=1250.0;
-        m_rfInputs=2;
-        m_RC00=true;
-        m_RK77=m_RK00=m_RL00=m_RP00=m_RK77S=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK06=true;
+        m_SK77=m_SK03=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
     }
-    if (config.Compare("RL00")==0) {
+    if (config.Compare("SK00")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK00=true;
+        m_SK77=m_SK03=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SC00")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SC00=true;
+        m_SK77=m_SK03=m_SK06=m_SK00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SL00")==0) {
         m_filter = 2300.0;
-        m_rfInputs=2;
-        m_RL00=true;
-        m_RK77=m_RK00=m_RC00=m_RP00=m_RK77S=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+        m_inputsNumber=m_sectionsNumber;
+        m_SL00=true;
+        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
     }
-    if (config.Compare("RP00")==0) {
+    if (config.Compare("SP00")==0) {
         m_filter = 730.0;
-        m_rfInputs=2;
-        m_RP00=true;
-        m_RK77=m_RK00=m_RC00=m_RL00=m_RK77S=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+        m_inputsNumber=m_sectionsNumber;
+        m_SP00=true;
+        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
     }
-    if (config.Compare("RK77S")==0) {
+    if (config.Compare("SK77S")==0) {
         m_filter=1250.0;
-        m_rfInputs=2;
-        m_RK77S=true;
-        m_RK77=m_RK00=m_RC00=m_RL00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK77S=true;
+        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
     }
-    if (config.Compare("RK00S")==0) {
+    if (config.Compare("SK03S")==0) {
         m_filter=1250.0;
-        m_rfInputs=2;
-        m_RK00S=true;
-        m_RK77=m_RK00=m_RC00=m_RL00=m_RP00=m_RK77S=m_RC00S=m_RL00S=m_RP00S=false;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK03S=true;
+        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
     }
-    if (config.Compare("RC00S")==0) {
+    if (config.Compare("SK06S")==0) {
         m_filter=1250.0;
-        m_rfInputs=2;
-        m_sectionsNumber=1;
-        m_RC00S=true;
-        m_RK77=m_RK00=m_RC00=m_RL00=m_RP00=m_RK77S=m_RK00S=m_RL00S=m_RP00S=false;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK06S=true;
+        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
     }
-    if (config.Compare("RL00S")==0) {
+    if (config.Compare("SK00S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK00S=true;
+        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SC00S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SC00S=true;
+        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SL00S")==0) {
         m_filter = 2300.0;
-        m_rfInputs=2;
-        m_sectionsNumber=1;
-        m_RL00S=true;
-        m_RK77=m_RK00=m_RC00=m_RL00=m_RP00=m_RK77S=m_RK00S=m_RC00S=m_RP00S=false;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SL00S=true;
+        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SP00S=false;
     }
-    if (config.Compare("RP00S")==0) {
+    if (config.Compare("SP00S")==0) {
         m_filter = 730.0;
-        m_rfInputs=2;
-        m_sectionsNumber=1;
-        m_RP00S=true;
-        m_RK77=m_RK00=m_RC00=m_RL00=m_RP00=m_RK77S=m_RK00S=m_RC00S=m_RL00S=false;
-    }/*
-    try {
-        m_totalPower->setSection(0,-1, filter, -1, -1, -1, -1);
-        m_totalPower->setSection(1,-1, filter, -1, -1, -1, -1);
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SP00S=true;
+        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=false;
     }
-    catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setDefaultConfiguration()");
-        impl.log(LM_ERROR);
-    }*/
 }
 
 void CCommandLine::setTargetFileName(const char *conf)
@@ -1041,83 +939,36 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ReplyNotValidExImpl,BackendsErrors::BackendFailExImpl)
 {
 	AUTO_TRACE("CCommandLine::setup()");
-    //double filter;
 
-/*	if (getIsBusy()) {
+    /*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setup()");
 		throw impl;
 	}*/
+    
 	if (!initializeConfiguration(conf)) {
 		_EXCPT(BackendsErrors::ConfigurationErrorExImpl,impl,"CCommandLine::setup()");
 		throw impl;
 	}
-    	Message reply = sendBackendCommand(Command::setConfiguration(string((const char*)conf)));
-    	if(reply.is_success_reply()){
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZED, CONFIGURATION: %s",conf)); 
-	}
-	else {
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZATION ERROR, CONFIGURATION: %s",conf)); 
+    try {
+        Message request = Command::setConfiguration(string((const char*)conf));
+    	Message reply = sendBackendCommand(request);
+    	if(reply.is_success_reply())
+            ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZED, CONFIGURATION: %s",conf)); 
+    }
+	catch (...) {
+        ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZATION ERROR, CONFIGURATION: %s",conf)); 
 	}
 
     setDefaultConfiguration(conf);
 
-    /*
-    if (strcpy(conf,"RK00")) {
-        filter=1250.0;
-        m_RK00=true;
-        m_RC00=m_RL00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
-    }
-    if (strcpy(conf,"RC00")) {
-        filter=1250.0;
-        m_RC00=true;
-        m_RK00=m_RL00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
-    }
-    if (strcpy(conf,"RL00")) {
-        filter = 2300.0;
-        m_RL00=true;
-        m_RK00=m_RC00=m_RP00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
-    }
-    if (strcpy(conf,"RP00")) {
-        filter = 730.0;
-        m_RP00=true;
-        m_RK00=m_RC00=m_RL00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
-    }
-    if (strcpy(conf,"RK00S")) {
-        filter=1250.0;
-        m_RK00S=true;
-        m_RC00=m_RL00=m_RP00=m_RK00=m_RC00S=m_RL00S=m_RP00S=false;
-    }
-    if (strcpy(conf,"RC00S")) {
-        filter=1250.0;
-        m_RC00S=true;
-        m_RK00=m_RL00=m_RP00=m_RK00S=m_RC00=m_RL00S=m_RP00S=false;
-    }
-    if (strcpy(conf,"RL00S")) {
-        filter = 2300.0;
-        m_RL00S=true;
-        m_RK00=m_RC00=m_RP00=m_RK00S=m_RC00S=m_RL00=m_RP00S=false;
-    }
-    if (strcpy(conf,"RP00S")) {
-        filter = 730.0;
-        m_RP00S=true;
-        m_RK00=m_RC00=m_RL00=m_RK00S=m_RC00S=m_RL00S=m_RP00S=false;
-    }*/
-
     try {
-        m_totalPower->setSection(0,-1, m_filter, -1, -1, -1, -1);
-        m_totalPower->setSection(1,-1, m_filter, -1, -1, -1, -1);
+        for (int i=0;i<m_inputsNumber;i++)
+            m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
     }
     catch (...) {
         _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setDefaultConfiguration()");
         impl.log(LM_ERROR);
     }
-	/*try {
-		setDefaultConfiguration(conf);
-	}
-	catch (...) {
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_ROACH2_INITIALIZATION ERROR, CONFIGURATION: %s",conf)); 
-
-	}*/
 }
 
 void CCommandLine::checkTime() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::MalformedAnswerExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
@@ -1283,43 +1134,44 @@ void CCommandLine::setIntegration(const long& integration)  throw (BackendsError
 		throw impl;
 	}*/
     	m_integration = integration;
-	if (m_integration>=MIN_INTEGRATION && m_integration <= MAX_INTEGRATION) {
-        	Message request = Command::setIntegration(integration);
-		Message reply = sendBackendCommand(request);
-        	if (reply.is_success_reply()) {
-            		// TBD
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_NOTICE,"INTEGRATION is now %ld (millisec)",m_integration));
-		}
-	}
-    	else {
-        	_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setIntegration()");
-		impl.setValueName("integration");
+    if (m_integration>=MIN_INTEGRATION && m_integration <= MAX_INTEGRATION) {
+        Message request = Command::setIntegration(integration);
+        Message reply = sendBackendCommand(request);
+        if (reply.is_success_reply()) {
+            // TBD
+            ACS_LOG(LM_FULL_INFO,"CCommandLine::setIntegration()",(LM_NOTICE,"INTEGRATION is now %ld (millisec)",m_integration));
+        }
+    }
+    else {
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setIntegration()");
+        impl.setValueName("integration");
 		throw impl;
-    	}
+    }
 }
 
 void CCommandLine::getAttenuation(ACS::doubleSeq& att) throw (ComponentErrors::SocketErrorExImpl,
 		ComponentErrors::TimeoutExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
 {
 	AUTO_TRACE("CCommandLine::getAttenuation()");
-	//int res;
-	if (!checkConnection()) {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getAttenuation()");
+    ACS::doubleSeq attenuation;
+    att.length(m_inputsNumber);
+	for (int i=0;i<m_inputsNumber;i++) {
+		att[i]=attenuation[i];
 	}
-	//res=getConfiguration();
-	/*if (res>0) { // load OK
-		att.length(m_sectionsNumber);
-		for (int i=0;i<m_sectionsNumber;i++) {
-			att[i]=m_attenuation[i];
-		}
-	}*/
-	//_CHECK_ERRORS("CommandLine::getAttenuation()");
 }
 
 void CCommandLine::getFrequency(ACS::doubleSeq& freq) const
 {
-	freq.length(m_rfInputs/*sectionsNumber*/);
-	for (int i=0;i<m_rfInputs/*sectionsNumber*/;i++) {
+	freq.length(m_inputsNumber);
+	for (int i=0;i<m_inputsNumber;i++) {
+		freq[i]=m_frequency[i];
+	}
+}
+
+void CCommandLine::getFrequencyAttr(ACS::doubleSeq& freq) const
+{
+	freq.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		freq[i]=m_frequency[i];
 	}
 }
@@ -1410,7 +1262,7 @@ void CCommandLine::getPolarization(ACS::longSeq& pol) const
 {
 	pol.length(m_sectionsNumber);
 	for (int i=0;i<m_sectionsNumber;i++) {
-        if (m_RK77S==true || m_RC00S==true || m_RK00S==true || m_RL00S==true || m_RP00S==true)
+        if (m_SK77S==true || m_SC00S==true || m_SK00S==true || m_SL00S==true || m_SP00S==true)
             pol[i]=2;
         else
             pol[i]=(long)m_polarization[i];
@@ -1419,20 +1271,24 @@ void CCommandLine::getPolarization(ACS::longSeq& pol) const
 
 void CCommandLine::getFeed(ACS::longSeq& feed) const 
 {
-	//feed.length(m_sectionsNumber);
-	feed.length(m_rfInputs);
-	//for (int i=0;i<m_sectionsNumber;i++) {
-	for (int i=0;i<m_rfInputs;i++) {
+	feed.length(m_inputsNumber);
+	for (int i=0;i<m_inputsNumber;i++) {
+		feed[i]=m_feedNumber[i];
+	}
+}
+
+void CCommandLine::getFeedAttr(ACS::longSeq& feed) const 
+{
+	feed.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
 		feed[i]=m_feedNumber[i];
 	}
 }
 
 void CCommandLine::getIFs(ACS::longSeq& ifs) const
 {
-	//ifs.length(ifNumber);
-	ifs.length(m_rfInputs);
-	//for (int i=0;i<ifNumber;i++) {
-	for (int i=0;i<m_rfInputs;i++) {
+	ifs.length(m_inputsNumber);
+	for (int i=0;i<m_inputsNumber;i++) {
 		ifs[i]=m_ifNumber[i];
 	}	
 }
@@ -1449,20 +1305,21 @@ void CCommandLine::getBandWidth(ACS::doubleSeq& bw) throw (ComponentErrors::Sock
 		ComponentErrors::TimeoutExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
 {
 	AUTO_TRACE("CCommandLine::getBandWidth()");
-	//int res;
-	//if (!checkConnection()) {
-	//	_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::getBandWidth()");
-	//}
-	//res=getConfiguration();
-	//if (res>0) { // load OK
-    bw.length(m_rfInputs/*sectionsNumber*/);
-    for (int i=0;i<m_rfInputs/*sectionsNumber*/;i++) {
+    bw.length(m_inputsNumber);
+    for (int i=0;i<m_inputsNumber;i++) {
         bw[i]=m_bandWidth[i];
     }
-	//}
-	//_CHECK_ERRORS("CommandLine::getBandWidth()");
 }
 
+void CCommandLine::getBandWidthAttr(ACS::doubleSeq& bw) const
+{
+	AUTO_TRACE("CCommandLine::getBandWidthAttr()");
+
+	bw.length(m_sectionsNumber);
+	for (int i=0;i<m_sectionsNumber;i++) {
+		bw[i]=m_bandWidth[i];
+	}
+}
 void CCommandLine::getTime(ACS::Time& tt) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
 		BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
 {
@@ -1483,10 +1340,10 @@ void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 	long chs=0;
 	//long intTime;
 	// count the available channels.......
-	for(int i=0;i<m_sectionsNumber;i++) {
-		if (m_enabled[i]) chs++;
-	}
-	bkd.sections=chs;
+	//for(int i=0;i<m_sectionsNumber;i++) {
+	//	if (m_enabled[i]) chs++;
+	//}
+	bkd.sections=m_sectionsNumber;
 	bkd.beams=m_beams;
 	//resultingSampleRate(m_integration,m_commonSampleRate,intTime);
 	//bkd.integration=intTime;
@@ -1498,31 +1355,35 @@ void CCommandLine::fillMainHeader(Backends::TMainHeader& bkd)
 void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& size)
 {
 	long index=0;
-	//for (int i=0;i<m_sectionsNumber;i++) {
-	for (int i=0;i<m_rfInputs;i++) {
+	for (int i=0;i<m_sectionsNumber;i++) {
+	//for (int i=0;i<m_inputsNumber;i++) {
                 printf("i = %d\n", i);
 		//if (m_enabled[i]) {
-			if (index<size) {
+		//	if (index<size) {
 				chHr[index].id=i;
 				chHr[index].bins=m_bins[i];
-				chHr[index].polarization=m_polarization[i];
-                printf("pol = %d\n", m_polarization[i]);
 				chHr[index].bandWidth=m_bandWidth[i];
 				chHr[index].frequency=m_frequency[i];
-				chHr[index].attenuation[0]=m_attenuation[i]; // we have always one inputs....so just the first position is significant
-				chHr[index].attenuation[1]=0.0;  // not significant....placeholder				
-				chHr[index].IF[0]=m_ifNumber[i];
-				//chHr[index].IF[0]=0;
-				chHr[index].IF[1]=1;  // not significant
-				//chHr[index].IF[1]=0;  // not significant
+				chHr[index].attenuation[0]=m_attenuation[i];
+				chHr[index].attenuation[1]=m_attenuation[i];
 				chHr[index].sampleRate=/*m_sampleRate[i];*/m_commonSampleRate;
-				chHr[index].feed=m_feedNumber[i];
-                if (m_RK77S==true || m_RC00S==true || m_RK00S==true || m_RL00S==true || m_RP00S==true)
+                if (m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SC00S==true || m_SK00S==true || m_SL00S==true || m_SP00S==true) {
                     chHr[index].inputs=2;
-                else
+				    chHr[index].feed=m_feedNumber[2*i];
+				    chHr[index].polarization=m_polarization[2*i];
+				    chHr[index].IF[0]=0;
+				    chHr[index].IF[1]=1;
+                }
+                else {
                     chHr[index].inputs=1;
+				    chHr[index].feed=m_feedNumber[i];
+				    chHr[index].polarization=m_polarization[i];
+				    chHr[index].IF[0]=m_ifNumber[i];
+                }
+                printf("feed = %d\n", chHr[index].feed);
+                printf("pol = %d\n", m_polarization[i]);
 				index++;
-			}
+		//	}
 		//}
 	}
 }
@@ -1746,10 +1607,15 @@ CCommandLine::sendBackendCommand(Message request)
 void CCommandLine::getConfiguration(char* configuration)
 {
     Message request = Command::getConfiguration();
-    Message reply = sendBackendCommand(request);
-    if(reply.is_success_reply())
-    {
-		strcpy(configuration, reply.get_argument<string>(0).c_str());
+    try {
+        Message reply = sendBackendCommand(request);
+        if(reply.is_success_reply())
+        {
+		    strcpy(configuration, reply.get_argument<string>(0).c_str());
+        }
+    }
+    catch (...) {
+    
     }
     /*
 	TIMEVALUE Now;
@@ -1931,8 +1797,6 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
 	else {
 		return false;
 	}
-    //if (config.Compare("RC00")==0)
-    //    m_rfInputs=2;
 
 	// Common configurations.......
 	m_integration=DEFAULT_INTEGRATION;  // integration if by default zero...that means the 1/samplerate is the real integration time

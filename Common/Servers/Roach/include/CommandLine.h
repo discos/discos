@@ -73,7 +73,7 @@ public:
 	 * In this implementation the inputs number is the same of the number of section (SIMPLE_SECTION)
 	 */
 	//inline void getInputsNumber(long &in) const { in=m_sectionsNumber; }
-	inline void getInputsNumber(long &in) const { in=m_rfInputs; }
+	inline void getInputsNumber(long &in) const { in=m_inputsNumber; }
 		
 	/**
 	 * Call this function to get the milliseconds of integration time
@@ -86,6 +86,7 @@ public:
 	 * Call this function in order to get the start frequency value for each section. 
 	 */
 	void getFrequency(ACS::doubleSeq& freq) const;
+	void getFrequencyAttr(ACS::doubleSeq& freq) const;
 	
 	/**
 	 * Call this function in order to get the sample rate for each section. 
@@ -111,6 +112,7 @@ public:
 	 * Call this function in order to get the feed connected to each section.
 	 */
 	void getFeed(ACS::longSeq& feed) const;
+	void getFeedAttr(ACS::longSeq& feed) const;
 
 	/**
 	 * Call this function in order to get the IF connected to each input.
@@ -160,6 +162,7 @@ public:
 	 */
 	void getBandWidth(ACS::doubleSeq& bw) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
 			BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl);
+	void getBandWidthAttr(ACS::doubleSeq& bw) const;
 	
 	/**
 	 * Call this function in order to get the time clock reported by the backend. 
@@ -640,7 +643,7 @@ private:
 	 */
 	double m_tpiZero[MAX_SECTION_NUMBER];
 
-    long m_rfInputs;
+    long m_inputsNumber;
 
     double m_filter;
 	
@@ -739,16 +742,20 @@ private:
 	 */
 	inline void clearStatusField(TstatusFields field) { m_backendStatus &= ~(1 << field); }
 
-    bool m_RK77;
-    bool m_RK00;
-    bool m_RC00;
-    bool m_RL00;
-    bool m_RP00;
-    bool m_RK77S;
-    bool m_RK00S;
-    bool m_RC00S;
-    bool m_RL00S;
-    bool m_RP00S;
+    bool m_SK77;
+    bool m_SK03;
+    bool m_SK06;
+    bool m_SK00;
+    bool m_SC00;
+    bool m_SL00;
+    bool m_SP00;
+    bool m_SK77S;
+    bool m_SK03S;
+    bool m_SK06S;
+    bool m_SK00S;
+    bool m_SC00S;
+    bool m_SL00S;
+    bool m_SP00S;
 	
 };
 
