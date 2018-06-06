@@ -742,16 +742,20 @@ private:
 	 */
 	inline void clearStatusField(TstatusFields field) { m_backendStatus &= ~(1 << field); }
 
-    bool m_RK77;
-    bool m_RK00;
-    bool m_RC00;
-    bool m_RL00;
-    bool m_RP00;
-    bool m_RK77S;
-    bool m_RK00S;
-    bool m_RC00S;
-    bool m_RL00S;
-    bool m_RP00S;
+    bool m_SK77;
+    bool m_SK03;
+    bool m_SK06;
+    bool m_SK00;
+    bool m_SC00;
+    bool m_SL00;
+    bool m_SP00;
+    bool m_SK77S;
+    bool m_SK03S;
+    bool m_SK06S;
+    bool m_SK00S;
+    bool m_SC00S;
+    bool m_SL00S;
+    bool m_SP00S;
 	
 };
 
