@@ -5,6 +5,8 @@ from the ACS system log.
 """
 from Acspy.Common import Log
 import logging
+import ACSLog
+
 
 """
 Key-Value pair distinguishing our custom logging.
@@ -18,6 +20,7 @@ class CustomLogger(Log.Logger):
     Each log event now will have additional custom key-value data pairs.
     """
     def __init__(self, name):
+        self.isUserLogger=False
         Log.Logger.__init__(self, name)
 
     def __formatMessage(self, msg):
@@ -26,17 +29,25 @@ class CustomLogger(Log.Logger):
     def log(self, level, msg, *args, **kwargs):
         """Add key-value custom data to the LogRecord structure
         """
-        if 'extra' in kwargs:
-            if 'data' in kwargs['extra']:
-                kwargs['extra']['data'].update(CUSTOM_ENV)
-            else:
-                kwargs['extra'].update(CUSTOM_DATA)
-        else:
-            kwargs.update(CUSTOM_EXTRA)
+        #if 'extra' in kwargs:
+        #    if 'data' in kwargs['extra']:
+        #        kwargs['extra']['data'].update(CUSTOM_ENV)
+        #    else:
+        #        kwargs['extra'].update(CUSTOM_DATA)
+        #else:
+        #    kwargs.update(CUSTOM_EXTRA)
         msg = msg.replace('[', '{')
         msg = msg.replace(']', '}')
         Log.Logger.log(self, level, msg, *args, **kwargs)
-
+        
+    #This is another workaround to match c++ with buggy python behaviour.
+    #It results into having a double entry in acs log
+    #The LOG_CRITICAL level correspond in the ERROR level...other ACS bug!
+    def logException(self,ex):
+        if self.isUserLogger:
+            self.logError(ex.shortDescription)
+        ex.log(self,ACSLog.ACS_LOG_CRITICAL)
+        
 logging.setLoggerClass(CustomLogger)
 logging.root.setLevel(logging.NOTSET)
 
