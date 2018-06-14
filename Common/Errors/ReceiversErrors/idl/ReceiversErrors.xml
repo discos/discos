@@ -14,45 +14,45 @@
          shortDescription="Error configuring the receiver" 
          description="Cannot perform the receiver configuration"/>
          
-    <ErrorCode name="ModeError" description="The mode is not supported or unknown" shortDescription=" ">
+    <ErrorCode name="ModeError" shortDescription="The mode is not supported or unknown" description=" ">
 		<Member name="Details" type="string" description="more details about the mode usage" />   
 	</ErrorCode>
          
-	<ErrorCode name="LocalOscillatorError" description="Cannot set the local oscillator" shortDescription=" "/>
+	<ErrorCode name="LocalOscillatorError" shortDescription="Cannot set the local oscillator" description=" "/>
 	
-	<ErrorCode name="FocusSelectorError" description="Cannot access focus selector" shortDescription=" "/>
+	<ErrorCode name="FocusSelectorError" shortDescription="Cannot access focus selector" description=" "/>
 	
-	<ErrorCode name="AntennaUnitError" description="Cannot command antenna unit" shortDescription=" "/>
+	<ErrorCode name="AntennaUnitError" shortDescription="Cannot command antenna unit" description=" "/>
 	
-	<ErrorCode name="UnavailableReceiverOperation" description="Could not execute receiver operation" shortDescription=" ">
+	<ErrorCode name="UnavailableReceiverOperation" shortDescription="Could not execute receiver operation" description=" ">
 		<Member name="ReceiverCode" type="string" description="mnemonic code of the receiver" />   
 	</ErrorCode>
 
-	<ErrorCode name="UnavailableReceiverAttribute" description="Could not read receiver attribute" shortDescription=" ">
+	<ErrorCode name="UnavailableReceiverAttribute" shortDescription="Could not read receiver attribute" description=" ">
 		<Member name="ReceiverCode" type="string" description="mnemonic code of the receiver" />   
 	</ErrorCode>
 	
-	<ErrorCode name="ReceiverControlBoardError" description="Input/Output error while communicating to control board" shortDescription=" ">
+	<ErrorCode name="ReceiverControlBoardError" shortDescription="Input/Output error while communicating to control board" description=" ">
 		<Member name="Details" type="string" description="more details from the board" />   
 	</ErrorCode>
 	
-	<ErrorCode name="NoRemoteControlError" description="The receiver is not remotely controllable" shortDescription=" "/>
+	<ErrorCode name="NoRemoteControlError" shortDescription="The receiver is not remotely controllable" description=" "/>
 	
-	<ErrorCode name="NoDewarPositioning" description="Dewar positioning and derotation is not supported by this release" shortDescription=" "/>
+	<ErrorCode name="NoDewarPositioning" shortDescription="Dewar positioning and derotation is not supported by this release" description=" "/>
     
-    <ErrorCode name="NoDerotatorAvailable" description="The current receiver is not equipped with a derotator" shortDescription=" "/>
+    <ErrorCode name="NoDerotatorAvailable" shortDescription="The current receiver is not equipped with a derotator" description=" "/>
     
-    <ErrorCode name="DewarPositionerSetupError" description="Error encountered during the setup of the dewar positioner" shortDescription=" ">
+    <ErrorCode name="DewarPositionerSetupError" shortDescription="Error encountered during the setup of the dewar positioner" description=" ">
 		<Member name="Details" type="string" description="More details on the error" />   
 	</ErrorCode>
 
-	<ErrorCode name="DewarPositionerParkingError" description="Error detected during derotator parking" shortDescription=" "/>
+	<ErrorCode name="DewarPositionerParkingError" shortDescription="Error detected during derotator parking" description=" "/>
 	
-	<ErrorCode name="DewarPositionerCommandError" description="Error detected while issuing a command to the dewar positioner" shortDescription=" ">
+	<ErrorCode name="DewarPositionerCommandError" shortDescription="Error detected while issuing a command to the dewar positioner" description=" ">
 		<Member name="Command" type="string" description="It specifies which command has failed" />   
 	</ErrorCode>
 	
-	<ErrorCode name="DewarPositionerNotConfigured" description="Dewar positioner not configured" shortDescription=" "/>
+	<ErrorCode name="DewarPositionerNotConfigured" shortDescription="Dewar positioner not configured" description=" "/>
 	  
 </Type>
 
