@@ -30,20 +30,23 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
         self.configuration_name = ''
         self.configuration = {}
         self.attributes = {}
-        self.mapping = {}
+        self.configurations = {}
 
         self.LO_board = None
         self.freq = 0
         self.lock = 0
         self.ampl = 0.0
+        self.t = None
 
     def initialize(self):
         self._set_cdb_attributes('alma/RECEIVERS/SRTIFDistributor')
-        self._set_cdb_mapping('alma/DataBlock/SRTIFDistributor/Mapping')
+        self._set_cdb_configuration('alma/DataBlock/SRTIFDistributor/Configuration')
 
         addProperty(self, 'frequency', devio_ref=GenericDevIO(self, 'freq'))
         addProperty(self, 'amplitude', devio_ref=GenericDevIO(self, 'ampl'))
         addProperty(self, 'isLocked', devio_ref=GenericDevIO(self, 'lock'))
+
+        self.setDefault()
 
     def cleanUp(self):
         pass
@@ -55,7 +58,7 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
         logs an exception.
 
         :param configuration_name: the desired device configuration."""
-        if configuration_name not in self.mapping:
+        if configuration_name not in self.configurations:
             reason = (
                 'Unknown IFDistributor configuration: %s'
                 % configuration_name
@@ -66,7 +69,7 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
             raise exc.getComponentErrorsEx()
 
         self.configuration_name = configuration_name
-        self.configuration = self.mapping[configuration_name]
+        self.configuration = self.configurations[configuration_name]
 
         # LO
         LO_conf = self.configuration.get('LO')
@@ -113,7 +116,8 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
                 int(line['Conversion'])
             )
 
-        self._is_configured()
+        if not self.t:  # Check if a control timer has already been created
+            self._is_configured()
 
     def setDefault(self):
         """Sets the IFDistributor to its default values."""
@@ -127,7 +131,6 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
     def get(self):
         """Returns the current amplitude and frequency
         of the local oscillator."""
-        self._update_devios()
         return self.ampl, self.freq
 
     def set(self, _, frequency):
@@ -145,13 +148,11 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
         """Turns off the local oscillator."""
         self._LO_board()
         self._set_LO(self.freq, 0)
-        self._update_devios()
 
     def rfon(self):
         """Turns on the local oscillator."""
         self._LO_board()
         self._set_LO(self.freq, 1)
-        self._update_devios()
 
     def _set_LO(self, lo_freq, lo_on):
         """This method is used to issue commands to the local oscillator
@@ -336,29 +337,24 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
         response = response.strip().split('\n')
         return response
 
-    def _update_devios(self):
-        """This method is called each time a DEV IO request is issued.
-        It retrieves the status of the local oscillator and updates the values
-        of frequency, amplitude and lock accordingly."""
-        LO_status = self._get_board_status(self._LO_board())
-        self.freq = LO_status['FREQ']
-        self.lock = LO_status['LOCK']
-        self.ampl = float(self.lock)
-
     def _is_configured(self):
         """This method checks if the device is configured accordingly to the
         configuration issued in the setup process. It is meant to be called
         only once after the setup procedure, it will then spawn a timer that
         will call again this method with a period defined in the component
         configuration attributes (CYCLE_TIME)."""
-        t = Timer(int(self.attributes['CYCLE_TIME']), self._is_configured)
-        t.daemon = True
-        t.start()
+        self.t = Timer(int(self.attributes['CYCLE_TIME']), self._is_configured)
+        self.t.daemon = True
+        self.t.start()
 
         configuration = self.configuration
 
         LO_conf = configuration.get('LO')
         LO_status = self._get_board_status(self._LO_board())
+
+        self.freq = LO_status['FREQ']
+        self.lock = LO_status['LOCK']
+        self.ampl = float(self.lock)
 
         if LO_status['ENABLED'] != int(LO_conf['Enable']):
             logger.logWarning(
@@ -437,7 +433,7 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
                 logger.logError(reason)
                 raise ComponentErrorsImpl.CouldntGetAttributeExImpl(reason)
 
-    def _set_cdb_mapping(self, path):
+    def _set_cdb_configuration(self, path):
         """This method reads the possible device configurations from the CDB
         and conveniently stores them in a dictionary for further use and
         comparison.
@@ -455,7 +451,7 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
         children = ElementTree.fromstring(dao)
         for child in children:
             conf_name, conf_data = _dictify(child)
-            self.mapping[conf_name] = conf_data
+            self.configurations[conf_name] = conf_data
 
 
 def _dictify(node, root=True):
