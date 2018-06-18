@@ -10,7 +10,6 @@ class GenericDevIO(DevIO):
         DevIO.__init__(self, self.read())
 
     def read(self):
-        self.comp._update_devios()
         return getattr(self.comp, self.what)
 
     def write(self, value):
