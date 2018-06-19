@@ -1,0 +1,21 @@
+/***************************************************************\
+ *  Authors: 
+ *      Giuseppe Carboni <gcarboni@oa-cagliari.inaf.it>
+\***************************************************************/
+
+#ifndef __SRT_IFDISTRIBUTOR__IDL__ 
+#define __SRT_IFDISTRIBUTOR__IDL__ 
+
+#include "GenericIFDistributor.idl"
+#include "LocalOscillatorInterface.idl"
+
+#pragma prefix "alma"
+
+module Receivers {
+ 
+    interface SRTIFDistributor: GenericIFDistributor, LocalOscillator
+    {
+    };
+};
+
+#endif

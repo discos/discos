@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<SRTIFDistributorTable xmlns="urn:schemas-cosylab-com:SRTIFDistributorTable:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <ConfigurationEntry>
+        <ConfigurationName>DEFAULT</ConfigurationName>
+        <LO>
+            <Board>0</Board>
+            <Enable>1</Enable>
+            <Frequency>2300</Frequency>
+        </LO>
+        <BW>
+            <Board>1</Board>
+            <Bandwidth>3</Bandwidth>
+        </BW>
+        <BW>
+            <Board>2</Board>
+            <Bandwidth>3</Bandwidth>
+        </BW>
+    </ConfigurationEntry>
+</SRTIFDistributorTable>

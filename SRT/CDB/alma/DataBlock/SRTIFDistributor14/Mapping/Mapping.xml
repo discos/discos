@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<SRTIFDistributor14Table xmlns="urn:schemas-cosylab-com:SRTIFDistributor14Table:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<BackendEntry><Backend>SARDARA</Backend><Channel>0</Channel><Address>1</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>1</Channel><Address>2</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>2</Channel><Address>3</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>3</Channel><Address>4</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>4</Channel><Address>5</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>5</Channel><Address>6</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>6</Channel><Address>7</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>7</Channel><Address>8</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>8</Channel><Address>9</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>9</Channel><Address>10</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>10</Channel><Address>11</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>11</Channel><Address>12</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>12</Channel><Address>13</Address></BackendEntry>
+<BackendEntry><Backend>SARDARA</Backend><Channel>13</Channel><Address>14</Address></BackendEntry>
+
+<BackendEntry><Backend>XARCOS</Backend><Channel>0</Channel><Address>15</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>1</Channel><Address>16</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>2</Channel><Address>17</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>3</Channel><Address>18</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>4</Channel><Address>19</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>5</Channel><Address>20</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>6</Channel><Address>21</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>7</Channel><Address>22</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>8</Channel><Address>23</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>9</Channel><Address>24</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>10</Channel><Address>25</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>11</Channel><Address>26</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>12</Channel><Address>27</Address></BackendEntry>
+<BackendEntry><Backend>XARCOS</Backend><Channel>13</Channel><Address>28</Address></BackendEntry>
+
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>0</Channel><Address>29</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>1</Channel><Address>30</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>2</Channel><Address>31</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>3</Channel><Address>32</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>4</Channel><Address>33</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>5</Channel><Address>34</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>6</Channel><Address>35</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>7</Channel><Address>36</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>8</Channel><Address>37</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>9</Channel><Address>38</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>10</Channel><Address>39</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>11</Channel><Address>40</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>12</Channel><Address>41</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>13</Channel><Address>42</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>14</Channel><Address>43</Address></BackendEntry>
+<BackendEntry><Backend>M-B SPARE</Backend><Channel>15</Channel><Address>44</Address></BackendEntry>
+
+<BackendEntry><Backend>DFB</Backend><Channel>0</Channel><Address>45</Address></BackendEntry>
+<BackendEntry><Backend>DFB</Backend><Channel>1</Channel><Address>46</Address></BackendEntry>
+<BackendEntry><Backend>DFB</Backend><Channel>2</Channel><Address>47</Address></BackendEntry>
+<BackendEntry><Backend>DFB</Backend><Channel>3</Channel><Address>48</Address></BackendEntry>
+
+<BackendEntry><Backend>DBBC1</Backend><Channel>0</Channel><Address>49</Address></BackendEntry>
+<BackendEntry><Backend>DBBC1</Backend><Channel>1</Channel><Address>50</Address></BackendEntry>
+<BackendEntry><Backend>DBBC1</Backend><Channel>2</Channel><Address>51</Address></BackendEntry>
+<BackendEntry><Backend>DBBC1</Backend><Channel>3</Channel><Address>52</Address></BackendEntry>
+
+<BackendEntry><Backend>ROACH</Backend><Channel>0</Channel><Address>53</Address></BackendEntry>
+<BackendEntry><Backend>ROACH</Backend><Channel>1</Channel><Address>54</Address></BackendEntry>
+<BackendEntry><Backend>ROACH</Backend><Channel>2</Channel><Address>55</Address></BackendEntry>
+<BackendEntry><Backend>ROACH</Backend><Channel>3</Channel><Address>56</Address></BackendEntry>
+
+<BackendEntry><Backend>SETI</Backend><Channel>0</Channel><Address>57</Address></BackendEntry>
+<BackendEntry><Backend>SETI</Backend><Channel>1</Channel><Address>58</Address></BackendEntry>
+
+<BackendEntry><Backend>RFI</Backend><Channel>0</Channel><Address>59</Address></BackendEntry>
+
+<BackendEntry><Backend>SPACE-DEBRIS</Backend><Channel>0</Channel><Address>60</Address></BackendEntry>
+<BackendEntry><Backend>SPACE-DEBRIS</Backend><Channel>1</Channel><Address>61</Address></BackendEntry>
+
+<BackendEntry><Backend>HOLOGRAPHY</Backend><Channel>0</Channel><Address>62</Address></BackendEntry>
+<BackendEntry><Backend>HOLOGRAPHY</Backend><Channel>1</Channel><Address>63</Address></BackendEntry>
+
+<BackendEntry><Backend>SB-SPARE</Backend><Channel>0</Channel><Address>64</Address></BackendEntry>
+<BackendEntry><Backend>SB-SPARE</Backend><Channel>1</Channel><Address>65</Address></BackendEntry>
+
+<BackendEntry><Backend>SB-SPARE</Backend><Channel>2</Channel><Address>66</Address></BackendEntry>
+<BackendEntry><Backend>SB-SPARE</Backend><Channel>3</Channel><Address>67</Address></BackendEntry>
+
+</SRTIFDistributor14Table>

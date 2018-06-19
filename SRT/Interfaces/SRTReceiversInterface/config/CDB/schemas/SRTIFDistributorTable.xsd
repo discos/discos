@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- Author: Giuseppe Carboni -->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:SRTIFDistributorTable:1.0"
+	xmlns="urn:schemas-cosylab-com:SRTIFDistributorTable:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+
+    <xs:complexType name="LOConfigurationHeader">
+        <xs:sequence>
+            <xs:element name="Board" type="xs:unsignedInt" />
+            <xs:element name="Enable" type="xs:boolean" default="0" />
+            <xs:element name="Frequency" type="xs:unsignedInt" minOccurs="0" default="2300" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="BWConfigurationHeader">
+        <xs:sequence>
+            <xs:element name="Board" type="xs:unsignedInt" />
+            <xs:element name="Bandwidth" default="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:unsignedInt">
+                        <xs:minInclusive value="0" />
+                        <xs:maxInclusive value="3" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ATTChannelConfigurationHeader">
+        <xs:sequence>
+            <xs:element name="Channel">
+                <xs:simpleType>
+                    <xs:restriction base="xs:unsignedInt">
+                        <xs:minInclusive value="0" />
+                        <xs:maxInclusive value="3" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="Attenuation" default="31.5">
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:minInclusive value="0" />
+                        <xs:maxInclusive value="31.5" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ATTConfigurationHeader">
+        <xs:sequence>
+            <xs:element name="Board" type="xs:unsignedInt" />
+            <xs:element name="ChannelConfiguration" type="ATTChannelConfigurationHeader" maxOccurs="4" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="INPUTConfigurationHeader">
+        <xs:sequence>
+            <xs:element name="Board" type="xs:unsignedInt" />
+            <xs:element name="Conversion" type="xs:boolean" default="0" />
+        </xs:sequence>
+    </xs:complexType>
+
+	<xs:complexType name="SRTIFDConfigurationHeader">
+ 		<xs:sequence>
+ 			<xs:element name="ConfigurationName" type="xs:string" />
+            <xs:element name="LO" type="LOConfigurationHeader" />
+            <xs:element name="BW" type="BWConfigurationHeader" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="ATT" type="ATTConfigurationHeader" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="INPUT" type="INPUTConfigurationHeader" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+ 	</xs:complexType>
+
+ 	<xs:complexType name="SRTIFDConfigurationTable">
+		<xs:sequence>
+			<xs:element name="ConfigurationEntry" type="SRTIFDConfigurationHeader" maxOccurs="unbounded" />
+		</xs:sequence>
+ 	</xs:complexType>
+ 	
+ 	<xs:element name="SRTIFDistributorTable" type="SRTIFDConfigurationTable" />
+</xs:schema>
