@@ -526,7 +526,12 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 			type << (4 * bins[i]) << data_type; //full stokes
 		}
 		else {
-			sect_type.push_back("simple");
+			if (bins[i]==1) {
+				sect_type.push_back("simple");
+			}
+			else {
+				sect_type.push_back("spectra");
+			}
 			type <<  (1 * bins[i]) << data_type;
 		}
 		if (!noData) {

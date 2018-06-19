@@ -63,14 +63,22 @@ int main(int argc, char *argv[])
 	for (int i=0;i<SECTIONS;i++) {
 		cH[i].id=i;  
 		cH[i].bins=BINS;
-		cH[i].polarization=Backends::BKND_FULL_STOKES;  
-		cH[i].inputs=2;
+		/*if (i==0) {
+			cH[i].polarization=Backends::BKND_LCP;  
+			cH[i].inputs=1;
+			cH[i].IF[0]=0;
+		}
+		else {*/
+			cH[i].polarization=Backends::BKND_FULL_STOKES;  
+			cH[i].inputs=2;
+			cH[i].IF[0]=0;
+			cH[i].IF[1]=1;
+		//}
 		cH[i].bandWidth=2000.0;				
 		cH[i].frequency=110.0;                
 		cH[i].attenuation[0]=9.0;
 		cH[i].attenuation[1]=14.0;
-		cH[i].IF[0]=0;
-		cH[i].IF[1]=1;
+
 		cH[i].sampleRate=0.000025;              
 		cH[i].feed=i;
 		los[i*2]=los[i*2+1]=8080;
