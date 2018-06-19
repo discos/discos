@@ -386,7 +386,7 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 	////*******************************************************
 	IRA::CString outstr;
 	IRA::CIRATools::timeToStr(setup.startUt,outstr);
-	ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_NOTICE,"SUBSCAN IS %ld",setup.subScanId));
+	ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_NOTICE,"SUBSCAN IS %ld",(long)setup.subScanId));
 	ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_NOTICE,"REQUESTED_START_TIME WAS %s",(const char *)outstr));
 	///////////// DEBUGGING ***************************************
 	if (m_start && m_running) {
