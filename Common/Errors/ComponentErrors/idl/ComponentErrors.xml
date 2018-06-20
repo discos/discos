@@ -16,97 +16,97 @@
 
 <Code name="NoError" shortDescription="No error" description="No error condition found"/>
 
-<ErrorCode name="MemoryAllocation" description="Buffer can't be allocated" shortDescription=" "/>
+<ErrorCode name="MemoryAllocation" shortDescription="Buffer can't be allocated" description=" "/>
 
-<ErrorCode name="CDBAccess" description="Error while accessing the Configuration Database" shortDescription=" ">
+<ErrorCode name="CDBAccess" shortDescription="Error while accessing the Configuration Database" description=" ">
 	<Member name="FieldName" type="string" description="The name of the field" />
 </ErrorCode>
 
-<ErrorCode name="CDBFieldFormat" description="A Configuration Database field is malformed" shortDescription=" ">
+<ErrorCode name="CDBFieldFormat" shortDescription="A Configuration Database field is malformed" description=" ">
 	<Member name="FieldName" type="string" description="The name of the field" />
 </ErrorCode>
 
-<ErrorCode name="ThreadError" description="Error while creating or starting a thread" shortDescription=" "/>
+<ErrorCode name="ThreadError" shortDescription="Error while creating or starting a thread" description=" "/>
 
-<ErrorCode name="SocketError" description="Error encountered while accessing socket resource" shortDescription=" "/>
+<ErrorCode name="SocketError" shortDescription="Error encountered while accessing socket resource" description=" "/>
 
-<ErrorCode name="PropertyError" description="Error while accessing a property" shortDescription=" ">
+<ErrorCode name="PropertyError" shortDescription="Error while accessing a property" description=" ">
 	<Member name="PropertyName" type="string" description="PropertyName" />
 	<Member name="Reason" type="string" description="Reason" />
 </ErrorCode>
 
-<ErrorCode name="OperationError" description="Error while calling a method" shortDescription=" ">
+<ErrorCode name="OperationError" shortDescription="Error while calling a method" description=" ">
 	<Member name="Reason" type="string" description="Reason" />
 </ErrorCode>
 
-<ErrorCode name="WatchDogError" description="The watch dog thread encountered an error" shortDescription=" ">
+<ErrorCode name="WatchDogError" shortDescription="The watch dog thread encountered an error" description=" ">
 	<Member name="Reason" type="string" description="Reason" />   
 </ErrorCode>
 
-<ErrorCode name="Unexpected" description="An unexpected exception was encountered" shortDescription=" "/>
+<ErrorCode name="Unexpected" shortDescription="An unexpected exception was encountered" description=" "/>
 
-<ErrorCode name="IRALibraryResource" description="Error encountered while accessing an IRAlibrary resource" shortDescription=" ">
+<ErrorCode name="IRALibraryResource" shortDescription="Error encountered while accessing an IRAlibrary resource" description=" ">
 	<Member name="Code" type="long" description="Code" />
 	<Member name="Description" type="string" description="Description" />
 </ErrorCode>
 
-<ErrorCode name="ValidationError" description="Error while validating data" shortDescription=" ">
+<ErrorCode name="ValidationError" shortDescription="Error while validating data" description=" ">
 	<Member name="Reason" type="string" description="Reason" />
 </ErrorCode>
 
-<ErrorCode name="ValueOutofRange" description="Value out of legal ranges" shortDescription=" ">
+<ErrorCode name="ValueOutofRange" shortDescription="Value out of legal ranges" description=" ">
 	<Member name="ValueName" type="string" description="ValueName" />
 	<Member name="ValueLimit" type="double" description="ValueLimit" />
 </ErrorCode>
 
-<ErrorCode name="Timeout" description="Timeout expires before operation completes" shortDescription=" "/>
+<ErrorCode name="Timeout" shortDescription="Timeout expires before operation completes" description=" "/>
 
-<ErrorCode name="CouldntGetComponent" description="Component couldn't be retrieved" shortDescription=" ">
+<ErrorCode name="CouldntGetComponent" shortDescription="Component couldn't be retrieved" description=" ">
 	<Member name="ComponentName" type="string" description="ComponentName" />
 </ErrorCode>	
 
-<ErrorCode name="CouldntReleaseComponent" description="Component couldn't be released" shortDescription=" ">
+<ErrorCode name="CouldntReleaseComponent" shortDescription="Component couldn't be released" description=" ">
 	<Member name="ComponentName" type="string" description="ComponentName" />
 </ErrorCode>
 
-<ErrorCode name="CouldntGetAttribute" description="Couldn't get an attribute from a component" shortDescription=" ">
+<ErrorCode name="CouldntGetAttribute" shortDescription="Couldn't get an attribute from a component" description=" ">
 	<Member name="ComponentName" type="string" description="ComponentName" />
 	<Member name="AttributeName" type="string" description="AttributeName" />	
 </ErrorCode>
 
-<ErrorCode name="CouldntCallOperation" description="Couldn't call a component operation " shortDescription=" ">
+<ErrorCode name="CouldntCallOperation" shortDescription="Couldn't call a component operation " description=" ">
 	<Member name="ComponentName" type="string" description="ComponentName" />
 	<Member name="OperationName" type="string" description="OperationName" />	
 </ErrorCode>
 
-<ErrorCode name="CORBAProblem" description="Caught CORBA system exception" shortDescription=" ">
+<ErrorCode name="CORBAProblem" shortDescription="Caught CORBA system exception" description=" ">
 	<Member name="Name" type="string" description="Name" />
 	<Member name="Minor" type="long" description="Minor" />
 </ErrorCode>
 
-<ErrorCode name="InitializationProblem" description="The component could not be initialized" shortDescription=" " />
+<ErrorCode name="InitializationProblem" shortDescription="The component could not be initialized" description=" " />
 
-<ErrorCode name="NotificationChannelError" description="Error while publishing data to notification channel" shortDescription=" " />
+<ErrorCode name="NotificationChannelError" shortDescription="Error while publishing data to notification channel" description=" " />
 
-<ErrorCode name="TimerError" description="Event timer error" shortDescription=" ">
+<ErrorCode name="TimerError" shortDescription="Event timer error" description=" ">
 	<Member name="Reason" type="string" description="Reason of the problem" />
 </ErrorCode>
 
-<ErrorCode name="NotAllowed" description="Operation not allowed" shortDescription=" ">
+<ErrorCode name="NotAllowed" shortDescription="Operation not allowed" description=" ">
 	<Member name="Reason" type="string" description="Reason" />
 </ErrorCode>
 
-<ErrorCode name="FileIOError" description="Error during file operations" shortDescription=" ">
+<ErrorCode name="FileIOError" shortDescription="Error during file operations" description=" ">
 	<Member name="FileName" type="string" description="Reason" />
 </ErrorCode>
 
-<ErrorCode name="ComponentNotActive" description="Component not active" shortDescription=" " />
+<ErrorCode name="ComponentNotActive" shortDescription="Component not active" description=" " />
 
-<ErrorCode name="CanNotStartThread" description="An internal thread could not be started" shortDescription=" ">
+<ErrorCode name="CanNotStartThread" shortDescription="An internal thread could not be started" description=" ">
 	<Member name="ThreadName" type="string" description="Name of the thread" />
 </ErrorCode>  
 
-<ErrorCode name="ACSService" description="ACS service is not available" shortDescription=" ">
+<ErrorCode name="ACSService" shortDescription="ACS service is not available" description=" ">
 	<Member name="ServiceName" type="string" description="Name of the Service" />
 </ErrorCode>
 

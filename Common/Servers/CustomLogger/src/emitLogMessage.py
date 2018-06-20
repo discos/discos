@@ -6,20 +6,21 @@
 
 import getopt, sys
 from Acspy.Clients.SimpleClient import PySimpleClient
-from IRAPy import logger
+from IRAPy import logger,userLogger
 
 def usage():
-	print "emitLogMessage [-h|--help] [-m|--message=] [-e] [-n]"
+	print "emitLogMessage [-h|--help] [-t|--text=] [-u] [-e]"
 	print
 	print "Emits two logs, one classic ACS log and one custom"
 	print
 	print "[-h|--help]     displays this help"
 	print "[-t|--text=]    allows to give the test message of the log"
-	print "[-e]				  log an error message, if not provided a notice is logged"
+	print "[-u]            the log will be visible to the user otherwise it will be send to acs log"
+	print "[-e]			   log an error message, if not provided a notice is logged"
     
 def main():
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"hent:",["help","text="])
+		opts, args = getopt.getopt(sys.argv[1:],"heut:",["help","text="])
 	except getopt.GetoptError, err:
 		print str(err)
 		usage()
@@ -27,6 +28,7 @@ def main():
                     
 	message=""
 	error=False
+	user=False
 	for o, a in opts:
 		if o in ("-h", "--help"):
 			usage()
@@ -35,6 +37,8 @@ def main():
 			message=a
 		elif o in ("-e"):
 			error=True
+		elif o in ("-u"):
+			user=True
 			 
 	if message=="":
 		print "text message is mandatory"
@@ -44,22 +48,16 @@ def main():
 
 	simpleClient=PySimpleClient()
 	
-	print "emitting custom log...."
-	
-	if error:
-		logger.logError(message)
+	if user:
+		if error:
+			userLogger.logError(message)
+		else:
+			userLogger.logNotice(message)
 	else:
-		logger.logNotice(message)
-	
-	print "emitting ACS log...."
-	
-	if error:
-		simpleClient.getLogger().logError(message)
-	else:
-		simpleClient.getLogger().logNotice(message)
-		
-	
-	print "all done...."
+		if error:
+			logger.logError(message)
+		else:
+			logger.logNotice(message)	
 	
 	simpleClient.disconnect()
     

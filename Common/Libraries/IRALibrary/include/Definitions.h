@@ -13,6 +13,11 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
+// if this value is changed the modfication should be reflected also in python implementation in module customlogging.py
+#ifndef USER_MESSAGE_FIELDNAME 
+#define USER_MESSAGE_FIELDNAME "Message-to-User"
+#endif
+
 #ifndef NULL
 #define NULL 0
 #endif
@@ -74,6 +79,14 @@
  * @param VALUE parameter value
 */
 #define _ADD_EXTRA(OBJ,NAME,VALUE) OBJ.addData(NAME,VALUE)
+
+/**
+ * Appends the message to be returned to the user for a completion or an exception.
+ * The message i shown in the operatro input by cansequence of a user command
+ * @param OBJ object (completion or exception) to which extra data must be appended
+ * @param VALUE message to the user
+*/
+#define _ADD_USER_MESSAGE(OBJ,VALUE) _ADD_EXTRA(OBJ,USER_MESSAGE_FIELDNAME,VALUE)
 
 /**
  * Used to read extra information from a completion or exception

@@ -2,6 +2,41 @@
 #define TIMERIDENTIFIER '!'
 #define PROCEDUREPARAMETER '$'
 
+template<class EX>
+void CFormatter<EX>::exceptionToUser(EX& exObj,IRA::CString& output)
+{
+	IRA::CString tmp;
+	exObj.top(); 
+	tmp.Format("(type:%ld code:%ld): %s",exObj.getErrorType(),exObj.getErrorCode(),
+		(const char *)getMessage(exObj));
+	output=tmp;
+	while (exObj.getNext()!=NULL) {
+		tmp.Format("(type:%ld code:%ld): %s",exObj.getErrorType(),exObj.getErrorCode(),
+			(const char *)getMessage(exObj));
+		output+="\n";
+		output+=tmp;
+	}
+	exObj.top();
+}
+
+template<class EX>
+IRA::CString CFormatter<EX>::getMessage(EX& exObj)
+{
+	char *descr;
+	ACE_CString msg=exObj.getData(USER_MESSAGE_FIELDNAME);
+	if (msg.length()==0) {
+		descr=exObj.getDescription();
+		IRA::CString ret(descr);
+		CORBA::string_free(descr);
+		return ret;
+	}
+	else {
+		IRA::CString ret(msg);
+		return ret;
+	}
+}
+
+
 template <class OBJ>
 void  CParser<OBJ>::run(const IRA::CString& command,IRA::CString& out) throw (ParserErrors::ParserErrorsExImpl,ACSErr::ACSbaseExImpl)
 {
@@ -19,13 +54,15 @@ void  CParser<OBJ>::run(const IRA::CString& command,IRA::CString& out) throw (Pa
 	}
 	catch (ParserErrors::ParserErrorsExImpl& ex) {
 		IRA::CString msg;
-		_EXCPT_TO_CSTRING(msg,ex);
+		SimpleParser::CFormatter<ParserErrors::ParserErrorsExImpl>::exceptionToUser(ex,msg);
+		//_EXCPT_TO_CSTRING(msg,ex);
 		out=instr+m_errorDelimiter+msg;
 		throw ex;
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		IRA::CString msg;
-		_EXCPT_TO_CSTRING(msg,ex);
+		//_EXCPT_TO_CSTRING(msg,ex);
+		SimpleParser::CFormatter<ACSErr::ACSbaseExImpl>::exceptionToUser(ex,msg);
 		out=instr+m_errorDelimiter+msg;
 		throw ex;
 	}
