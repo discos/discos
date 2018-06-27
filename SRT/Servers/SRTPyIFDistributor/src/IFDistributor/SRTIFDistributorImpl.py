@@ -21,6 +21,7 @@ import ComponentErrorsImpl
 import cdbErrType
 import re
 import IFDParser
+import time
 
 class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
  
@@ -186,6 +187,11 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
         if self.configuration:
             self.configuration['LO']['Frequency'] = str(lo_freq)
             self.configuration['LO']['Enable'] = str(lo_on)
+            
+        LO_status = self._get_board_status(self._LO_board())
+        self.freq = LO_status['FREQ']
+        self.lock = LO_status['LOCK']
+        self.ampl = float(self.lock)
 
     def _set_filter(self, board, bandwidth):
         """This method is used to issue commands to the set the filter
@@ -332,6 +338,8 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
 
         s.sendall(command)
 
+        time.sleep(0.1)
+
         response = s.recv(1024)
         s.close()
         response = response.strip().split('\n')
@@ -369,7 +377,7 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
                 logger.logWarning(
                     'Wrong reference frequency of local oscillator.'
                 )
-            if LO_status['FREQ'] != int(LO_conf['Frequency']):
+            if LO_status['FREQ'] != float(LO_conf['Frequency']):
                 logger.logWarning('Wrong frequency of local oscillator.')
             if LO_status['ERR'] != 0:
                 logger.logWarning('Local oscillator error.')

@@ -6,9 +6,10 @@
 
 import getopt, sys
 from Acspy.Clients.SimpleClient import PySimpleClient
-from IRAPy import logger,userLogger,_add_user_message
+from IRAPy import logger,userLogger
 from AntennaErrorsImpl import ConnectionExImpl
 from AntennaErrorsImpl import AntennaBusyExImpl
+from SimpleParserPy import add_user_message
 
 
 def usage():
@@ -54,7 +55,7 @@ def main():
 		ex1=AntennaBusyExImpl()
 		
 	if message!="":
-		_add_user_message(ex1,message)
+		add_user_message(ex1,message,False)
 	
 	if user==True:
 		userLogger.logException(ex1)

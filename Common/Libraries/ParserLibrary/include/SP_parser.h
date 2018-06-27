@@ -84,11 +84,13 @@
 #include "SP_function5.h"
 #include "SP_function6.h"
 #include "SP_function7.h"
+#include "ParserConnector.h"
 #include <vector>
 #include <list>
 #include <acsThreadBase.h>
 #include <ScheduleTimer.h>
 #include <stdlib.h>
+#include "pstream.h"
 
 
 /**
@@ -115,12 +117,7 @@ namespace SimpleParser {
 #define _SP_TIMETAGGEDQUEUECLEARALL "flushAll"
 #define _SP_TIMETAGGEDQUEUECLEARALL_PARAMS 0
 
-template<class EX> class CFormatter {
-public:
-	static void exceptionToUser(EX& exObj,IRA::CString& output);
-private:
-   static IRA::CString getMessage(EX& exObj);
-};
+
 
 /**
  * This is the parser main class. It allows to add execution rules, to parse command line according to the supported grammar to execute 
