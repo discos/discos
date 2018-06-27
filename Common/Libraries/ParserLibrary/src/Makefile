@@ -38,6 +38,9 @@
 EXECUTABLES     =
 EXECUTABLES_L   = TestFunctions TestParser TestTypes
 
+PY_PACKAGES  = SimpleParserPy
+PY_SCRIPTS =
+
 
 #
 # <brief description of xxxxx program>
@@ -55,7 +58,7 @@ TestTypes_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors
 # Includes (.h) files (public only)
 # ---------------------------------
 INCLUDES        = SP_typeConversion.h SP_types.h SP_functor.h SP_function0.h SP_function1.h SP_function2.h SP_function3.h SP_function4.h SP_function5.h\
-  SP_function6.h SP_function7.h SP_parser.h SP_parser.i
+  SP_function6.h SP_function7.h SP_parser.h SP_parser.i pstream.h ParserConnector.h ParserConnector.i
 
 #
 # list of all possible C-sources (used to create automatic dependencies)

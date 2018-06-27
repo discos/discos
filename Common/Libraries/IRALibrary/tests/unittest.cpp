@@ -7,6 +7,8 @@
 #include "CError_regression.i"
 #include "CDBTable_regression.i"
 
+#include "CString_test.i"
+
 using namespace IRALibraryTest;
 
 TEST_F(IRALibrary_IRATools, makeDirectory_createSimpleDirectory){
@@ -71,4 +73,12 @@ TEST_F(IRALibrary_CError,copyConstructor_segfault){
 
 TEST_F(IRALibrary_CDataField,typeConversion_fail){
 	EXPECT_TRUE(typeConversion_fail());
+}
+
+TEST_F(IRALibrary_String,string_checkLeft){
+	EXPECT_TRUE(string_checkLeft());
+}
+
+TEST_F(IRALibrary_String,string_checkSplit) {
+	EXPECT_TRUE(string_checkSplit());
 }

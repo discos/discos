@@ -26,7 +26,7 @@ def _LO(response):
     LO_status = {}
 
     LO_status['REF_FREQ'] = int(response[3])
-    LO_status['FREQ'] = int(response[4])
+    LO_status['FREQ'] = float(response[4])
     LO_status['ENABLED'] = int(bin(response[9])[2:].zfill(8)[4], 2)
     LO_status['ERR'] = int(response[10])
     LO_status['LOCK'] = int(response[11])
