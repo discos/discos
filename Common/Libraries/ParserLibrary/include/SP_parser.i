@@ -415,6 +415,17 @@ bool CParser<OBJ>::popCommand(TExecutionUnit *& cmd)
 }
 
 template <class OBJ>
+bool CParser<OBJ>::checkStation(const IRA::CString& st)
+{
+	if (st=="ALL") {
+		return true;
+	}
+	IRA::CString env(std::getenv("STATION"));
+	if (env==st) return true;
+	else return false;
+}
+
+template <class OBJ>
 IRA::CString CParser<OBJ>::showTimeBasedCommands()
 {
 	unsigned iterator=0;
