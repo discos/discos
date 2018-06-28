@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!-- 
-     Giuseppe Carboni, gcarboni@oa-cagliari.inaf.it
+     Giuseppe Carboni, giuseppe.carboni@inaf.it
 -->
 
 <xs:schema
@@ -30,7 +30,7 @@
                 <xs:attribute name="N_BOARDS" type="xs:unsignedInt" use="required" />
                 <xs:attribute name="REF_FREQ" type="xs:unsignedInt" use="optional" default="10" />
                 <xs:attribute name="CYCLE_TIME" type="xs:unsignedInt" use="optional" default="60" />
-                <xs:attribute name="DEFAULT_CONFIG" type="xs:string" use="optional" default="DEFAULT" />
+                <xs:attribute name="DEFAULT_CONFIGS" type="xs:string" use="optional" default="LO-DEFAULT, BW-UNFILTERED" />
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

@@ -6,12 +6,48 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <ConfigurationEntry>
-        <ConfigurationName>DEFAULT</ConfigurationName>
+        <ConfigurationName>LO-DEFAULT</ConfigurationName>
         <LO>
             <Board>0</Board>
             <Enable>1</Enable>
-            <Frequency>2300</Frequency>
+            <Frequency>2300.0</Frequency>
         </LO>
+    </ConfigurationEntry>
+    <ConfigurationEntry>
+        <ConfigurationName>BW-NARROW</ConfigurationName>
+        <BW>
+            <Board>1</Board>
+            <Bandwidth>0</Bandwidth>
+        </BW>
+        <BW>
+            <Board>2</Board>
+            <Bandwidth>0</Bandwidth>
+        </BW>
+    </ConfigurationEntry>
+    <ConfigurationEntry>
+        <ConfigurationName>BW-MEDIUM</ConfigurationName>
+        <BW>
+            <Board>1</Board>
+            <Bandwidth>1</Bandwidth>
+        </BW>
+        <BW>
+            <Board>2</Board>
+            <Bandwidth>1</Bandwidth>
+        </BW>
+    </ConfigurationEntry>
+    <ConfigurationEntry>
+        <ConfigurationName>BW-WIDE</ConfigurationName>
+        <BW>
+            <Board>1</Board>
+            <Bandwidth>2</Bandwidth>
+        </BW>
+        <BW>
+            <Board>2</Board>
+            <Bandwidth>2</Bandwidth>
+        </BW>
+    </ConfigurationEntry>
+    <ConfigurationEntry>
+        <ConfigurationName>BW-UNFILTERED</ConfigurationName>
         <BW>
             <Board>1</Board>
             <Bandwidth>3</Bandwidth>
@@ -21,4 +57,5 @@
             <Bandwidth>3</Bandwidth>
         </BW>
     </ConfigurationEntry>
+
 </SRTIFDistributorTable>

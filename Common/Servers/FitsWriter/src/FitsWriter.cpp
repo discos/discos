@@ -59,7 +59,7 @@ CFitsWriter::CFitsWriter()
 	SectColName.push_back(_FITSW_SECTCOL_FLUX);
 
 	SectColForm.push_back("J");
-	SectColForm.push_back("6A");
+	SectColForm.push_back("8A");
 	SectColForm.push_back("D");
 	SectColForm.push_back("J");
 	SectColForm.push_back("D");

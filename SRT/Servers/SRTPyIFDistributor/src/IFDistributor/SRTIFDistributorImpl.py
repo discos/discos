@@ -21,14 +21,14 @@ import ComponentErrorsImpl
 import cdbErrType
 import re
 import IFDParser
+import time
+import copy
 
 class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
- 
+
     def __init__(self):
         cc.__init__(self)
         services.__init__(self)
-        self.configuration_name = ''
-        self.configuration = {}
         self.attributes = {}
         self.configurations = {}
 
@@ -37,6 +37,8 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
         self.lock = 0
         self.ampl = 0.0
         self.t = None
+
+        self._reset_configuration()
 
     def initialize(self):
         self._set_cdb_attributes('alma/RECEIVERS/SRTIFDistributor')
@@ -51,47 +53,52 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
     def cleanUp(self):
         pass
 
-    def setup(self, configuration_name):
+    def setup(self, config_string):
         """This method performs a complete setup of the device by receiving the
-        desired configuration name as a string and using the corresponding CDB
-        configuration. If the desired configuration is unknown it raises and
-        logs an exception.
+        desired configurations as a string and using the corresponding CDB
+        configurations. If one of the desired configuration is unknown it
+        raises and logs an exception.
 
-        :param configuration_name: the desired device configuration."""
-        if configuration_name not in self.configurations:
-            reason = (
-                'Unknown IFDistributor configuration: %s'
-                % configuration_name
+        :param config_string: the desired device configuration(s)."""
+
+        configurations = [c.strip() for c in config_string.split(',')]
+
+        for configuration_name in configurations:
+            if configuration_name not in self.configurations:
+                reason = (
+                    'Unknown IFDistributor configuration: %s'
+                    % configuration_name
+                )
+                logger.logError(reason)
+                exc = ComponentErrorsImpl.CouldntGetAttributeExImpl()
+                exc.setData('reason', reason)
+                raise exc.getComponentErrorsEx()
+
+        for configuration_name in configurations:
+            for conf in self.current_configurations:
+                if configuration_name[:configuration_name.find('-') + 1] in conf:
+                    self.current_configurations.remove(conf)
+
+            self.current_configurations.append(configuration_name)
+            self.configuration.update(
+                copy.deepcopy(self.configurations[configuration_name])
             )
-            logger.logError(reason)
-            exc = ComponentErrorsImpl.CouldntGetAttributeExImpl()
-            exc.setData('reason', reason)
-            raise exc.getComponentErrorsEx()
-
-        self.configuration_name = configuration_name
-        self.configuration = self.configurations[configuration_name]
 
         # LO
         LO_conf = self.configuration.get('LO')
-        if not LO_conf:
-            reason = (
-                'Local oscillator configuration not present. Aborting setup.'
-            )
-            logger.logError(reason)
-            raise ComponentErrorsImpl.ValidationErrorExImpl(reason)
+        if LO_conf:
+            if int(LO_conf['Board']) != self._LO_board():
+                reason = (
+                    'Wrong board selected for local oscillator. '
+                    + 'Please, fix the board index in CDB.'
+                )
+                logger.logError(reason)
+                raise ComponentErrorsImpl.ValueOutofRangeExImpl(reason)
 
-        if int(LO_conf['Board']) != self._LO_board():
-            reason = (
-                'Wrong board selected for local oscillator. '
-                + 'Please, fix the board index in CDB.'
-            )
-            logger.logError(reason)
-            raise ComponentErrorsImpl.ValueOutofRangeExImpl(reason)
-
-        if LO_conf['Enable'] == '0':
-            self.rfoff()
-        else:
-            self._set_LO(int(LO_conf['Frequency']), 1)
+            if LO_conf['Enable'] == '0':
+                self.rfoff()
+            else:
+                self._set_LO(float(LO_conf['Frequency']), 1)
 
         # BW
         for line in (self.configuration.get('BW') or []):
@@ -116,17 +123,20 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
                 int(line['Conversion'])
             )
 
-        if not self.t:  # Check if a control timer has already been created
-            self._is_configured()
+        if self.t:
+            self.t.cancel()
+            self.t = None
+        self._is_configured()
 
     def setDefault(self):
         """Sets the IFDistributor to its default values."""
-        self.setup(self.attributes['DEFAULT_CONFIG'])
+        self._reset_configuration()
+        self.setup(self.attributes['DEFAULT_CONFIGS'])
 
     def getSetup(self):
         """If present, returns the current configuration name, otherwise it
         returns an empty string."""
-        return self.configuration_name
+        return ', '.join(self.current_configurations)
 
     def get(self):
         """Returns the current amplitude and frequency
@@ -135,6 +145,7 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
 
     def set(self, _, frequency):
         """Sets the frequency and turn on the local oscillator.
+
         :param _: placeholder for amplitude. Since the amplitude of the local
             oscillator cannot be set (it's 1 when the local oscillator is
             enabled or 0 when the local oscillator is disabled), it is simply
@@ -143,6 +154,10 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
             set.
         """
         self._set_LO(frequency, 1)
+
+        for index in range(len(self.current_configurations)):
+            if 'LO-' in self.current_configurations[index]:
+                self.current_configurations[index] = 'LO-CUSTOM'
 
     def rfoff(self):
         """Turns off the local oscillator."""
@@ -153,6 +168,10 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
         """Turns on the local oscillator."""
         self._LO_board()
         self._set_LO(self.freq, 1)
+
+    def _reset_configuration(self):
+        self.configuration = {}
+        self.current_configurations = []
 
     def _set_LO(self, lo_freq, lo_on):
         """This method is used to issue commands to the local oscillator
@@ -186,6 +205,11 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
         if self.configuration:
             self.configuration['LO']['Frequency'] = str(lo_freq)
             self.configuration['LO']['Enable'] = str(lo_on)
+
+        LO_status = self._get_board_status(self._LO_board())
+        self.freq = LO_status['FREQ']
+        self.lock = LO_status['LOCK']
+        self.ampl = float(self.lock)
 
     def _set_filter(self, board, bandwidth):
         """This method is used to issue commands to the set the filter
@@ -332,6 +356,8 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
 
         s.sendall(command)
 
+        time.sleep(0.1)
+
         response = s.recv(1024)
         s.close()
         response = response.strip().split('\n')
@@ -369,7 +395,7 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
                 logger.logWarning(
                     'Wrong reference frequency of local oscillator.'
                 )
-            if LO_status['FREQ'] != int(LO_conf['Frequency']):
+            if LO_status['FREQ'] != float(LO_conf['Frequency']):
                 logger.logWarning('Wrong frequency of local oscillator.')
             if LO_status['ERR'] != 0:
                 logger.logWarning('Local oscillator error.')
@@ -420,7 +446,7 @@ class SRTIFDistributorImpl(SRTIFDistributor, cc, services, lcycle):
             'IP',
             'PORT',
             'REF_FREQ',
-            'DEFAULT_CONFIG',
+            'DEFAULT_CONFIGS',
             'CYCLE_TIME',
             'N_BOARDS'
         ]

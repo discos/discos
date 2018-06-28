@@ -2,41 +2,6 @@
 #define TIMERIDENTIFIER '!'
 #define PROCEDUREPARAMETER '$'
 
-template<class EX>
-void CFormatter<EX>::exceptionToUser(EX& exObj,IRA::CString& output)
-{
-	IRA::CString tmp;
-	exObj.top(); 
-	tmp.Format("(type:%ld code:%ld): %s",exObj.getErrorType(),exObj.getErrorCode(),
-		(const char *)getMessage(exObj));
-	output=tmp;
-	while (exObj.getNext()!=NULL) {
-		tmp.Format("(type:%ld code:%ld): %s",exObj.getErrorType(),exObj.getErrorCode(),
-			(const char *)getMessage(exObj));
-		output+="\n";
-		output+=tmp;
-	}
-	exObj.top();
-}
-
-template<class EX>
-IRA::CString CFormatter<EX>::getMessage(EX& exObj)
-{
-	char *descr;
-	ACE_CString msg=exObj.getData(USER_MESSAGE_FIELDNAME);
-	if (msg.length()==0) {
-		descr=exObj.getDescription();
-		IRA::CString ret(descr);
-		CORBA::string_free(descr);
-		return ret;
-	}
-	else {
-		IRA::CString ret(msg);
-		return ret;
-	}
-}
-
-
 template <class OBJ>
 void  CParser<OBJ>::run(const IRA::CString& command,IRA::CString& out) throw (ParserErrors::ParserErrorsExImpl,ACSErr::ACSbaseExImpl)
 {
@@ -130,18 +95,30 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 		}
 		else if (elem->m_type==SYSTEMCALL) {
 			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Command issued {%s}",(const char *)command));
-			IRA::CString composeCall;
-			composeCall=elem->m_syscall;
+			//work around in order to avoid message proliferation on stderr stdout
+			IRA::CString composeCall("export ACS_LOG_STDOUT=11; "); 
+			IRA::CString answer("");
+			composeCall+=elem->m_syscall;
 			for (WORD k=0;k<parNum;k++) {
 				composeCall+=" ";
 				composeCall+=inParams[k];
 			}
-			if (system((const char *)composeCall)<0) {
+			/*if (system((const char *)composeCall)<0) {
 				_EXCPT(ParserErrors::SystemCommandErrorExImpl,err,"CParser::executeCommand()");
 				err.setSystemCommand((const char *)composeCall);
 				throw err;
-			}
-			return instr+m_answerDelimiter;
+			}*/
+			redi::ipstream proc((const char *)composeCall,redi::pstreams::pstdout|redi::pstreams::pstderr);
+  			std::string line;
+  			while (std::getline(proc.err(),line)) answer+=line.c_str();
+  			if (answer.Left(6)=="error ") {
+  				int len=answer.GetLength();
+  				answer=answer.Right(len-6);
+  				return instr+m_errorDelimiter+answer;
+  			}
+  			else {
+  				return instr+m_answerDelimiter+answer;
+  			}
 		}
 		else if (elem->m_type==KEYCOMMAND) {
 			if (instr==_SP_TIMETAGGEDQUEUE) {
@@ -435,6 +412,17 @@ bool CParser<OBJ>::popCommand(TExecutionUnit *& cmd)
 		m_executionList.pop_front();
 		return true;
 	}	
+}
+
+template <class OBJ>
+bool CParser<OBJ>::checkStation(const IRA::CString& st)
+{
+	if (st=="ALL") {
+		return true;
+	}
+	IRA::CString env(std::getenv("STATION"));
+	if (env==st) return true;
+	else return false;
 }
 
 template <class OBJ>

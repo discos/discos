@@ -84,11 +84,14 @@
 #include "SP_function5.h"
 #include "SP_function6.h"
 #include "SP_function7.h"
+#include "ParserConnector.h"
 #include <vector>
 #include <list>
 #include <acsThreadBase.h>
 #include <ScheduleTimer.h>
 #include <stdlib.h>
+#include <cstdlib>
+#include "pstream.h"
 
 
 /**
@@ -115,12 +118,7 @@ namespace SimpleParser {
 #define _SP_TIMETAGGEDQUEUECLEARALL "flushAll"
 #define _SP_TIMETAGGEDQUEUECLEARALL_PARAMS 0
 
-template<class EX> class CFormatter {
-public:
-	static void exceptionToUser(EX& exObj,IRA::CString& output);
-private:
-   static IRA::CString getMessage(EX& exObj);
-};
+
 
 /**
  * This is the parser main class. It allows to add execution rules, to parse command line according to the supported grammar to execute 
@@ -238,10 +236,14 @@ public:
 	 * @param fName name of the command, identifies the command that will be recognized by the parser.
 	 * @param function function associated to the command, the number of input parameters must correspond to the number specified by the
 	 *               template parameter.
+	 * @param station specify for which product line the command is available, default is ALL
 	 */
-	void add(const IRA::CString& fName,CBaseFunction *function,int N) {
-		TRule *elem=new TRule(function,fName,N);
-		m_ruleSet.push_back(elem);
+	void add(const IRA::CString& fName,CBaseFunction *function,int N,
+	  const IRA::CString& station="ALL") {
+	  	if (checkStation(station)) {
+			TRule *elem=new TRule(function,fName,N);
+			m_ruleSet.push_back(elem);
+		}
 	}
 
 	/**
@@ -252,10 +254,14 @@ public:
 	 * @param package extra string that can be used to compose the answer by the remote function, it can be the name of a collection or a library that the function belongs to.
 	 * @param prm extra parameter passed to the called remote function.
 	 * @remoteFunc pointer to the function to be called in case the command name is recognized
+	 * @param station specify for which product line the command is available, default is ALL
 	 * */
-	void add(const IRA::CString& name,const IRA::CString& package,const long& prm,_SP_REMOTECALL(remoteFunc)) {
-		TRule *elem=new TRule(remoteFunc,name,package,prm);
-		m_ruleSet.push_back(elem);
+	void add(const IRA::CString& name,const IRA::CString& package,const long& prm,_SP_REMOTECALL(remoteFunc),
+	  const IRA::CString& station="ALL") {
+	  	if (checkStation(station)) {
+			TRule *elem=new TRule(remoteFunc,name,package,prm);
+			m_ruleSet.push_back(elem);
+		}
 	}
 
 	/**
@@ -263,10 +269,14 @@ public:
 	 * @param name name of the command associated to the procedure
 	 * @param package extra string that can be used to compose the answer, it can be the name of a collection that the function belongs to.
 	 * @param procedure list of commands that compose the procedure
+	 * @param station specify for which product line the command is available, default is ALL
 	 * */	
-	void add(const IRA::CString& name,const IRA::CString& package,const ACS::stringSeq& procedure,int N) {
-		TRule *elem=new TRule(procedure,name,package,N);
-		m_ruleSet.push_back(elem);
+	void add(const IRA::CString& name,const IRA::CString& package,const ACS::stringSeq& procedure,
+	  int N,const IRA::CString& station="ALL") {
+	  	if (checkStation(station)) {
+			TRule *elem=new TRule(procedure,name,package,N);
+			m_ruleSet.push_back(elem);
+		}
 	}
 	
 	/**
@@ -275,10 +285,13 @@ public:
 	 * @param name name of the command, identifies the command that will be recognized by the parser.
 	 * @param syscall function associated to the command, the number of input parameters must correspond to the number specified by the
 	 *               template parameter.
+	 * @param station specify for which product line the command is available, default is ALL
 	 */
-	void add(const IRA::CString& name,IRA::CString syscall,int N) {
-		TRule *elem=new TRule(syscall,name,N);
-		m_ruleSet.push_back(elem);
+	void add(const IRA::CString& name,IRA::CString syscall,int N,const IRA::CString& station="ALL") {
+		if (checkStation(station)) {
+			TRule *elem=new TRule(syscall,name,N);
+			m_ruleSet.push_back(elem);
+		}
 	}
 
 	/**
@@ -574,6 +587,8 @@ private:
 	 * Pop a command form the begging of the command list
 	 */
 	bool popCommand(TExecutionUnit *& cmd);
+	
+	bool checkStation(const IRA::CString& st); 
 	
 	//Copies are disabled
 	CParser(const CParser<OBJ>& src);
