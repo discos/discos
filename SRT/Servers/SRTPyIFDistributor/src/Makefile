@@ -5,7 +5,7 @@
 
 CDB_SCHEMAS = SRTIFDistributor
 
-PY_SCRIPTS = 
+PY_SCRIPTS = _ifd
 PY_MODULES =
 PY_PACKAGES = IFDistributor
 
