@@ -1,2 +1,5 @@
 .branchenv
 introot*
+bin/
+lib/
+object/
