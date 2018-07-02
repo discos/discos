@@ -616,7 +616,11 @@ void USDImpl::update (CORBA::Double elevation) throw (CORBA::SystemException,ASE
 			// }
 		}
 		updatePos = (CORBA::Long)(updatePosMM*MM2STEP);
-		//printf("upPosStep = %ld\n",updatePos);
+        if (updatePos > 21000)
+            updatePos = 21000;
+        if (updatePos < -21000)
+            updatePos = -21000;
+		printf("upPosStep = %ld\n",updatePos);
 		_GET_PROP(status,m_status,"usdImpl::update()")
 		running = m_status&MRUN;
 		if (running == false)
