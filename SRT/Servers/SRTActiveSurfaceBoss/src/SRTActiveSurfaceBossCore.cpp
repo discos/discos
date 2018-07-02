@@ -18,12 +18,12 @@ void CSRTActiveSurfaceBossCore::initialize()
 {
 	ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::initialize()",(LM_INFO,"CSRTActiveSurfaceBossCore::initialize"));
 
-    	m_enable = false;
+    m_enable = false;
 	m_tracking = false;
-    	m_status = Management::MNG_WARNING;
+    m_status = Management::MNG_WARNING;
 	m_profile = ActiveSurface::AS_SHAPED_FIXED;
-    	AutoUpdate = false;
-    	actuatorcounter = circlecounter = totacts = 1;
+    AutoUpdate = false;
+    actuatorcounter = circlecounter = totacts = 1;
 	m_sector1 = false;
 	m_sector2 = false;
 	m_sector3 = false;
@@ -1389,7 +1389,8 @@ void CSRTActiveSurfaceBossCore::sector1ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	for (i = 1; i <= 139; i++) {
+	//for (i = 1; i <= 139; i++) {
+	for (i = 1; i <= 1; i++) {
 		usdTableS1 >> lanIndexS1 >> circleIndexS1 >> usdCircleIndexS1 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS1][usdCircleIndexS1] = ActiveSurface::USD::_nil();
         	try {
@@ -1423,7 +1424,8 @@ void CSRTActiveSurfaceBossCore::sector2ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	for (i = 1; i <= 140; i++) {
+	//for (i = 1; i <= 140; i++) {
+	for (i = 1; i <= 1; i++) {
 		usdTableS2 >> lanIndexS2 >> circleIndexS2 >> usdCircleIndexS2 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS2][usdCircleIndexS2] = ActiveSurface::USD::_nil();
         	try {
@@ -1458,7 +1460,8 @@ void CSRTActiveSurfaceBossCore::sector3ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	for (i = 1; i <= 139; i++) {
+	//for (i = 1; i <= 139; i++) {
+	for (i = 1; i <= 1; i++) {
 		usdTableS3 >> lanIndexS3 >> circleIndexS3 >> usdCircleIndexS3 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS3][usdCircleIndexS3] = ActiveSurface::USD::_nil();
         	try {
@@ -1493,7 +1496,8 @@ void CSRTActiveSurfaceBossCore::sector4ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	for (i = 1; i <= 140; i++) {
+	//for (i = 1; i <= 140; i++) {
+	for (i = 1; i <= 1; i++) {
 		usdTableS4 >> lanIndexS4 >> circleIndexS4 >> usdCircleIndexS4 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS4][usdCircleIndexS4] = ActiveSurface::USD::_nil();
         	try {
@@ -1528,7 +1532,8 @@ void CSRTActiveSurfaceBossCore::sector5ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	for (i = 1; i <= 139; i++) {
+	//for (i = 1; i <= 139; i++) {
+	for (i = 1; i <= 1; i++) {
 		usdTableS5 >> lanIndexS5 >> circleIndexS5 >> usdCircleIndexS5 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS5][usdCircleIndexS5] = ActiveSurface::USD::_nil();
         	try {
@@ -1563,7 +1568,8 @@ void CSRTActiveSurfaceBossCore::sector6ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	for (i = 1; i <= 140; i++) {
+	//for (i = 1; i <= 140; i++) {
+	for (i = 1; i <= 1; i++) {
 		usdTableS6 >> lanIndexS6 >> circleIndexS6 >> usdCircleIndexS6 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS6][usdCircleIndexS6] = ActiveSurface::USD::_nil();
         	try {
@@ -1598,7 +1604,8 @@ void CSRTActiveSurfaceBossCore::sector7ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	for (i = 1; i <= 139; i++) {
+	//for (i = 1; i <= 139; i++) {
+	for (i = 1; i <= 1; i++) {
 		usdTableS7 >> lanIndexS7 >> circleIndexS7 >> usdCircleIndexS7 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS7][usdCircleIndexS7] = ActiveSurface::USD::_nil();
         	try {
@@ -1633,7 +1640,8 @@ void CSRTActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	for (i = 1; i <= 140; i++) {
+	//for (i = 1; i <= 140; i++) {
+	for (i = 1; i <= 1; i++) {
 		usdTableS8 >> lanIndexS8 >> circleIndexS8 >> usdCircleIndexS8 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS8][usdCircleIndexS8] = ActiveSurface::USD::_nil();
         	try {
@@ -1655,35 +1663,35 @@ void CSRTActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::C
 
 void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
-    	if (AutoUpdate) {
-		TIMEVALUE now;
-        	double azimuth=0.0;
-        	double elevation=0.0;
+    if (AutoUpdate) {
+        TIMEVALUE now;
+        double azimuth=0.0;
+        double elevation=0.0;
 
 		IRA::CIRATools::getTime(now);
 
 		if (!CORBA::is_nil(m_antennaBoss)) {
-			try {
-	            		m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
-        		}
-        		catch (CORBA::SystemException& ex) {
-            			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
-            			impl.setName(ex._name());
-		    		impl.setMinor(ex.minor());
-            			m_status=Management::MNG_WARNING;
-				asPark();
-            			throw impl;
-	    		}
-        		azimuth = 0.0;
-        		try {
-            			onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
-        		}
-        		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-            			ex.log(LM_DEBUG);
-            			throw ex.getComponentErrorsEx();
-        		}
+            try {
+	            m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
+        	}
+        	catch (CORBA::SystemException& ex) {
+            	_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
+            	impl.setName(ex._name());
+		        impl.setMinor(ex.minor());
+            	m_status=Management::MNG_WARNING;
+				//asPark();
+            	throw impl;
+	    	}
+        	azimuth = 0.0;
+        	try {
+            	onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
+        	}
+        	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+                ex.log(LM_DEBUG);
+            	throw ex.getComponentErrorsEx();
+        	}
 		}
-    	}
+    }
 }
 
 void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
@@ -1724,32 +1732,30 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
 
 		m_ASup=true;
         	m_status=Management::MNG_OK;
-
+/*
 		if (usdCounter < (int)lastUSD*WARNINGUSDPERCENT) {
         		m_status=Management::MNG_WARNING;
 		}
-    		if (usdCounter < (int)lastUSD*ERRORUSDPERCENT) {
-        		m_status=Management::MNG_FAILURE;
+    	if (usdCounter < (int)lastUSD*ERRORUSDPERCENT) {
+        	m_status=Management::MNG_FAILURE;
 			m_ASup=false;
 		}
-		//printf("usdCounter = %d\n", usdCounter);
+*/
 	}
 
 	if (m_ASup == true) {
+        asOff();
 		CIRATools::Wait(1000000);
 		_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
 		m_profile = newProfile;
 		try {
         		onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
-        	}
-        	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-            		ex.log(LM_DEBUG);
-            		throw ex.getComponentErrorsEx();
-        	}
-
+        }
+        catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        	ex.log(LM_DEBUG);
+        	throw ex.getComponentErrorsEx();
+        }
 		m_profileSetted = true;
-
-        	CIRATools::Wait(1000000);
 		asOn();
 	}
 }
@@ -1768,11 +1774,14 @@ void CSRTActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentError
 void CSRTActiveSurfaceBossCore::asOn()
 {
 	if (m_profileSetted == true ) {
-		if ((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_SHAPED_FIXED)) {
+		if ((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_SHAPED_FIXED) && (m_profile != ActiveSurface::AS_PARK)) {
 			enableAutoUpdate();
 			m_tracking = true;
 		}
 		else {
+		    asOff();
+		    CIRATools::Wait(1000000);
+            //disableAutoUpdate();
 			m_tracking = false;
 			try {
 				onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
@@ -1792,15 +1801,17 @@ void CSRTActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrors
 {
 	if (m_profileSetted == true ) {
 		asOff();
-		setProfile (ActiveSurface::AS_SHAPED_FIXED);
+		m_tracking = false;
+        CIRATools::Wait(1000000);
+		_SET_CDB_CORE(profile, ActiveSurface::AS_PARK,"SRTActiveSurfaceBossCore::asPark()")
+		m_profile = ActiveSurface::AS_PARK;
 		try {
-			onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
+			onewayAction(ActiveSurface::AS_REFPOS, 0, 0, 0, 0.0, 0, 0, m_profile);
 		}
 		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 			ex.log(LM_DEBUG);
 			throw ex.getComponentErrorsEx();
 		}
-		m_tracking = false;
 	}
 	else {
 		printf("you must set the profile first\n");
@@ -1810,6 +1821,7 @@ void CSRTActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrors
 void CSRTActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsEx)
 {
 	if (m_profileSetted == true ) {
+		disableAutoUpdate();
 		try {
 			onewayAction(ActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
 		}
@@ -1817,7 +1829,6 @@ void CSRTActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsE
 			ex.log(LM_DEBUG);
 			throw ex.getComponentErrorsEx();
 		}
-		disableAutoUpdate();
 	}
 	else {
 		printf("you must set the profile first\n");

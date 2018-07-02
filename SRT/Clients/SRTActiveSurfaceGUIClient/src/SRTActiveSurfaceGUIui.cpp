@@ -10260,6 +10260,9 @@ void SRTActiveSurfaceGUI::changeGUIasProfileCode()
         case (3):
             ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "PARABOLIC FIXED", 0, QApplication::UnicodeUTF8));
             break;
+        case (4):
+            ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "PARK", 0, QApplication::UnicodeUTF8));
+            break;
     }
 }
 
