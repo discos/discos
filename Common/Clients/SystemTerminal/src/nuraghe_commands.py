@@ -354,6 +354,12 @@ def getTpi():
     and lists them according to increasing section number
     """
 
+def getRms():
+    """
+    getRms reads rms value of the signal for the active sections, 
+    and lists them according to increasing section number
+    """
+
 def goOff():
     """
     goOff=frame,offset 

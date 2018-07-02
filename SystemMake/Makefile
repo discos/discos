@@ -34,7 +34,7 @@ COMMON_LIBRARIES:=SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
-                XBackend PyDewarPositioner Roach #DBBC 
+                XBackend PyDewarPositioner Sardara #DBBC 
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
