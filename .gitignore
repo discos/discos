@@ -3,3 +3,5 @@ introot*
 bin/
 lib/
 object/
+*~
+*.swp
