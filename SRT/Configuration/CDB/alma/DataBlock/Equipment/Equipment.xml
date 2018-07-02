@@ -22,7 +22,7 @@
 	
 	<AvailableBackend alias="TotalPower" backend="BACKENDS/TotalPower" noData="false" dataPath="" />
 	<AvailableBackend alias="XArcos" backend="BACKENDS/XBackends" noData="false" dataPath="" />
-	<AvailableBackend alias="Roach" backend="BACKENDS/Roach" noData="true" dataPath="/roach2_nuraghe/data/" />
+	<AvailableBackend alias="Sardara" backend="BACKENDS/Sardara" noData="true" dataPath="/roach2_nuraghe/data/" />
 	<AvailableBackend alias="Holograpy" backend="BACKENDS/Holography" noData="true" dataPath="" />
 	
 </TelescopeEquipment>

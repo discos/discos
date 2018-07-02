@@ -300,6 +300,8 @@ module Backends {
 		 * @return a sequence of double that reports the total power of each input (@sa <i>inputsNumber</i>). The caller must take care of freeing it.
 		 */
 		ACS::doubleSeq getTpi() raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+		ACS::doubleSeq getRms() raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 		
 		/**
 		 * Call this method in order to read the total power from each input when the input are connected directly to the 50 Ohm. 

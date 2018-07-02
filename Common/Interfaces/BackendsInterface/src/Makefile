@@ -33,7 +33,7 @@ CDB_SCHEMAS = GenericBackend DigitalXCorrelator Holography
 # 
 # IDL Files and flags
 # 
-IDL_FILES = GenericBackend BackendsBoss TotalPower NoiseGenerator DigitalXCorrelator Holography DBBC DFBInterface Roach
+IDL_FILES = GenericBackend BackendsBoss TotalPower NoiseGenerator DigitalXCorrelator Holography DBBC DFBInterface Sardara
 IDL_TAO_FLAGS =
 USER_IDL =
 
@@ -48,7 +48,7 @@ DigitalXCorrelatorStubs_LIBS = acscomponentStubs ACSErrTypeFPGAConnectionStubs \
 HolographyStubs_LIBS = baciStubs GenericBackendStubs
 DBBCStubs_LIBS = baciStubs GenericBackendStubs
 DFBInterfaceStubs_LIBS = baciStubs GenericBackendStubs
-RoachStubs_LIBS = baciStubs GenericBackendStubs
+SardaraStubs_LIBS = baciStubs GenericBackendStubs
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
