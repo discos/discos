@@ -1,14 +1,16 @@
-#ifndef  _NoiseGeneratorImpl_H_
-#define _NoiseGeneratorImpl_H_
+#ifndef _SARDARAIMPL_H_
+#define _SARDARAIMPL_H_
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: NoiseGeneratorImpl.h,v 1.2 2011-04-19 06:56:36 c.migoni Exp $										         */
+/* $Id: SardaraImpl.h,v 1.1 2011-03-14 14:15:07 a.orlati Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
 /* Who                                when            What                                                       */
-/* Andrea Orlati(a.orlati@ira.inaf.it)  11/06/2010      Creation                                                  */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  11/09/2008      Creation                                                  */
+/* Andrea Orlati(a.orlati@ira.inaf.it)  1101/2013       changed command method according new CommandInterpreter interface                  */
+
 
 #ifndef __cplusplus
 #error This is a C++ include file and cannot be used from plain C
@@ -25,22 +27,19 @@
 #include <baciROlongSeq.h>
 #include <baciROpattern.h>
 #include <bulkDataSenderImpl.h>
-#include <NoiseGeneratorS.h>
+#include <SardaraS.h>
 #include <ComponentErrors.h>
 #include <BackendsErrors.h>
 #include <SP_parser.h>
 #include <ManagementErrors.h>
-#include <ManagmentDefinitionsC.h>
 #include "CommandLine.h"
+#include "ControlThread.h"
 
-using namespace ACSBulkDataError;
-using namespace baci;
-using namespace maci;
 
 namespace SimpleParser {
 class PolarizationToString {
 public:
-	static char *valToStr(const long& val) {
+	char *valToStr(const long& val) {
 		char *c=new char[16];
 		if (val==Backends::BKND_LCP) {
 			strcpy(c,"LEFT");
@@ -54,7 +53,7 @@ public:
 		return c;
 	}
 	
-	static long strToVal(const char* str) {
+	long strToVal(const char* str) {
 		IRA::CString strVal(str);
 		strVal.MakeUpper();
 		if (strVal=="LEFT") {
@@ -74,27 +73,31 @@ public:
 
 };
 
+using namespace ACSBulkDataError;
+using namespace baci;
 
 /** 
- * @mainpage Noise generator component documentation
- * @date 10/06/2010
- * @version 0.1.0
+ * @mainpage Sardara backend component documentation
+ * @date 12/02/2013
+ * @version 1.61.0
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
- * @remarks Last compiled under ACS 7.0.2
+ * @remarks Last compiled under ACS 8.0.2
  * @remarks compiler version is 3.4.6 
 */
 
 class CSenderThread;
 
 /**
- * This class implements the Backends::GenericBackend CORBA interface.  
+ * This class implements the Backends::Sardara CORBA interface.  
  * All exceptions that comes from the run-time interation with clients are at logged with LM_DEBUG priority.
+ * @todo an implementation of <i>configure()</i> must be done yet.
  * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
+ * @todo I could be necessary to plan a stopTime in sendStop in order to be more precise on stop time. The backend hardware never
+ *            stops to send data and the data flux control (toward bulk data receviver) handled by the component itself.
  * <br> 
  */
-class NoiseGeneratorImpl: public virtual BulkDataSenderDefaultImpl,
-				   		  public virtual POA_Backends::NoiseGenerator
+class SardaraImpl: public virtual BulkDataSenderDefaultImpl, public virtual POA_Backends::Sardara
 {
 public: 
 	/** 
@@ -102,12 +105,12 @@ public:
 	* @param CompName component's name. This is also the name that will be used to find the configuration data for the component in the Configuration Database.
 	* @param containerServices pointer to the class that exposes all services offered by container
 	*/
-	NoiseGeneratorImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices);
+	SardaraImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices);
 	
 	/**
 	 * Destructor.
 	*/
-	virtual ~NoiseGeneratorImpl(); 
+	virtual ~SardaraImpl(); 
 	
 	/** 
 	 * Called to give the component time to initialize itself. The component reads in configuration files/parameters, builds up connection. 
@@ -145,18 +148,21 @@ public:
 	virtual void sendHeader() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx, ComponentErrors::ComponentErrorsEx);
 	
 	/**
-	 * Starts effectively to send the bulk of data to the receiver. 
+	 * Starts effectively to send the bulk of data to the receiver. The invocation of this method is forced to be far enough to the invocation
+	 * of <i>sendHeader</i> (in order to respect the backend data channel latency). In order for this call to succeed, the component must be
+	 * in <i>CCommandLine::TstatusFields::SUSPEND</i> mode.  
 	 * @throw CORBA::SystemException
 	 * @throw BackendsErrors::BackendsErrorsEx
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * 	   @arg \c ComponentErrors::UnexpectedEx
-	 * @param startTime represent the exact time that the acquisition should start. 
+	 * @param startTime represent the exact time that the acquisition should start. Of course this has effect only if the call
+	 * to that method arrives reasonably before the given time.
 	 */
-	virtual void sendData(ACS::Time startTiime) throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
+	virtual void sendData(ACS::Time startTime) throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
 			ComponentErrors::ComponentErrorsEx);
 	
 	/**
-	 *  It suspend the data transfer. The backend must not be in suspend mode.
+	 *  It suspend the data transfer. If the backend must not be in suspend mode.
 	 * @throw CORBA::SystemException
 	 * @throw BackendsErrors::BackendsErrorsEx
 	 * @throw ComponentErrors::ComponentErrorsEx
@@ -181,18 +187,45 @@ public:
 	 * @throw BackendsErrors::BackendsErrorsEx
 	 * @param input identifier of the input to be configured. it must be in the correct range (from 0 to <i>inputsNumber</i>)
 	 *               otherwise an exception is raisen.
-	 * @param freq new freqency value for the input. This value represents the start frequency of the input filter(Mhz). 
+	 * @param freq new freqency value for the input. This value represents the start frequency of the input filter(Mhz). In this 
+	 * 				  implementation it is ignored, so a negative should be given.
 	 * @param bw new bandWidth value in MHz. if a value of the sequence is negative the bandwidth of the corresponding 
 	 *                input is unchanged. If the value is not legal an exception is thrown.
-	 * @param feed identifier of the feed, unchanged if negative
+	 * @param feed identifier of the feed
 	 * @param pol this value ask the input to send data for one polarization or for all Stokes parameters. Possible values are
-	 *               BKND_LCP, BKND_RCP or BKND_FULL_STOKE or a negative to keep the current value. 
-	 * @param sr new sample rate value (Mhz). A negative keeps the previous value unchanged. 
-	 * @param bins number of bins produced for each input. 
+	 *               BKND_LCP, BKND_RCP or BKND_FULL_STOKE or a negative to keep the current value. In this implementation the component expects only a negative
+	 *              because is not possble to change this parameter. On the contrary a warning log message is posted.
+	 * @param sr new sample rate value (Mhz). In this implementation represents the frequency of the sampling of the total power
+	 *                A negative keeps the previous value unchanged. Since the backend does not support different sample rates,
+	 *               the current one is used also for all other inputs.
+	 * @param bins number of bins produced for each input. This value is significant for spectrometers. For that implementation
+	 *               this value is ignored since it must be always 1. If this is not the case a warning messagge is logged.
 	 */
     virtual void setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins) throw (CORBA::SystemException,
     				ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 
+	/**
+	 * @deprecated This method will configure all the  input channels of the backend in one shot.
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw BackendsErrors::BackendsErrorsEx
+	 * @param freq new freqency value for the input. This value represents the start frequency of the input filter(Mhz). In this 
+	 * 				  implementation it is ignored, so a negative should be given.
+	 * @param bw new bandWidth value in MHz. if a value of the sequence is negative the bandwidth of the corresponding 
+	 *                input is unchanged. If the value is not legal an exception is thrown.
+	 * @param feed identifier of the feed
+	 * @param pol this value ask the input to send data for one polarization or for all Stokes parameters. Possible values are
+	 *               BKND_LCP, BKND_RCP or BKND_FULL_STOKE. In this implementation this parameter is ignored because this backend is a
+	 *               simple total power.
+	 * @param sr new sample rate value (Mhz). In this implementation represents the frequency of the sampling of the total power
+	 *                A negative keeps the previous value unchanged. Since the backend does not support different sample rates,
+	 *               the current one is used also for all other inputs.
+	 * @param bins number of bins produced for each input. This value is significant for spectrometers. For that implementation
+	 *               this value is ignored since it must be always 1. 
+	 */
+    //virtual void setAllSections(CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,Backends::TPolarization pol,CORBA::Double sr,CORBA::Long bins) throw (CORBA::SystemException,
+    //				ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+   
     /**
      * This method enables or disables the data streaming of the inputs. if a input is disable the input is not sampled and the
      * data are not sent to the network.
@@ -219,16 +252,25 @@ public:
 	 * This method allows the client to interface the component by sending text commands. The command is parsed and executed according the
 	 * defined command syntax and grammar. This method is required to implement the <i>Management::CommandInterpreter</i> interface.
      * @throw CORBA::SystemException
-	 * @param cmd this string contains the string that will be executed
-	 * @param  answer  the string that reports the command execution results or in case, errors
-	 * @return true if the command was executed correctly, false otherwise
+	 * @param cmd string contains the string that will be executed
+	 * @param answer  the string that reports the command execution results or in case, errors messages
+	 * @return true if the command was executed correctly
 	 */
     virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
+
+    virtual void getConfiguration (CORBA::String_out configuration) throw (CORBA::SystemException);
+
+    virtual void getCommProtVersion (CORBA::String_out version) throw (CORBA::SystemException);
+
+    /**
+     * This method is related to the implementation of the genericBackend interface
+     */
+    virtual void setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
     
     /**
      * Call this function to set the current time (from the local computer) into the backend. 
      * @thorw CORBA::SystemException
-     * @throw ComponentErrors::ComponentErrorsEx
+     * 	@throw ComponentErrors::ComponentErrorsEx
      * @throw BackendsErrors::BackendsErrorsEx
 	 *       @arg \c ComponentErrors::Timeout
 	 *       @arg \c BackendsErrors::Connection
@@ -236,17 +278,45 @@ public:
      */
     virtual void setTime() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
     		BackendsErrors::BackendsErrorsEx);
-            
+    
+    /**
+     * This function will control the calibration diode switching.
+     * @thorw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw BackendsErrors::BackendsErrorsEx
+	 * @param interleave this parmater controls the switching frequency of the calibration diode. If it is zero (default) the diode is not 
+	 *               switched (always turned off). if a one is given the backend will produce one sample (using the <i>sampleRate</i>)
+	 *               with the mark switecehd off and one with the mark switched on. A two means two sample with the mark switched off and
+	 * 	              one with the mark switched on.....and so on. A negative will not change the value of the parameter.    
+	*/
+    virtual void activateNoiseCalibrationSwitching(CORBA::Long interleave) throw (CORBA::SystemException,
+    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    
+    /**
+     * This function will initialized the parameters that must be fixed before any other operation can be carried on. Some possible configuration
+     * are available according the given receiver connected to the backend.
+     * @thorw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw BackendsErrors::BackendsErrorsEx
+     * @param configuration identifier of the required initialization
+     */
+    virtual void initialize(const char * configuration) throw (CORBA::SystemException,
+    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    
     /**
      * Call this function in order to get a total power measure for each input channel.
      * @thorw CORBA::SystemException
      * 	@throw ComponentErrors::ComponentErrorsEx
      * @throw BackendsErrors::BackendsErrorsEx
-     * @return a sequence of double values that reports for each input the total power measured.
+     * @param integration it represents the integration time (milliseconds) the backend will use to do  the measure. 
+     *                If zero the default value of 1 second is used. A negative will forse the backend to adopt the value set by a call
+     *                 to (<i>setIntegration()</i>).
+     * @return a sequence of double values that reports for each backend the total power measured during the integration time.
      * 			  The caller must take care of freeing it.
      */
     virtual ACS::doubleSeq * getTpi () throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    
     virtual ACS::doubleSeq * getRms () throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 
@@ -256,7 +326,10 @@ public:
      * @thorw CORBA::SystemException
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw BackendsErrors::BackendsErrorsEx
-     * @return a sequence of double values that reports for each input the total power measured. 
+     * @param integration it represents the integration time (milliseconds) the backend will use to do  the measure. 
+     *                If zero the default value of 1 second is used. A negative will forse the backend to adopt the value set by a call
+     *                 to (<i>setIntegration()</i>).
+     * @return a sequence of double values that reports for each backend the total power measured during the integration time.
      * 				  The caller must take care of freeing it.
      */
     virtual ACS::doubleSeq * getZero (/*CORBA::Long integration*/) throw (CORBA::SystemException,
@@ -288,16 +361,11 @@ public:
      * @param freq given in MHz is the initial frequency of input band
      * @param bandwidth given in MHz is the band width of the input
      * @param feed dives the feed number the input belongs to
-     * @param ifNumber given the feed it selects IF number to which the input is connected to. Please notice this parameter has nothing to do with the polarization of the section.
+     * @param ifNumber given the feed it select the feed channel to which the input is connected to. Plaese notice this parameter has nothing to do with the polarization of the section.
      * @return the number of inputs, in other words is the lenght of the returned sequences
      */
     virtual CORBA::Long getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber) throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
-
-    /**
-     * This method is just a place holder for this implementation of the genericBackend interface
-    */
-    virtual void setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
         
 	/** 
 	 * Returns a reference to the time  property Implementation of IDL interface.
@@ -383,6 +451,7 @@ public:
 	*/
 	virtual ACS::ROlongSeq_ptr inputSection() throw (CORBA::SystemException);	
 
+	
 	/** 
 	 * Returns a reference to the status implementation of IDL interface.
 	 * @return pointer to read-only pattern property status
@@ -414,19 +483,21 @@ private:
 	SmartPropertyPointer<ROlong> m_pinputsNumber;
 	SmartPropertyPointer<ROlong> m_pintegration;
 	SmartPropertyPointer<ROpattern> m_pstatus;
-	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),
-		  POA_Management::ROTBoolean>  > m_pbusy;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>  > m_pbusy;
 	SmartPropertyPointer<ROlongSeq> m_pfeed;
 	SmartPropertyPointer<ROdoubleSeq> m_ptsys;
 	SmartPropertyPointer<ROlong> m_psectionsNumber;
 	SmartPropertyPointer<ROlongSeq> m_pinputSection;
 	/** This is the socket that allows to send requests to the backends throught its command line*/
-	CCommandLine *m_commandLine;
+	CSecureArea<CCommandLine> *m_commandLine;
 	CConfiguration m_configuration;
 	CSenderThread *m_senderThread;
+	CControlThread *m_controlThread;
+	//IRA::CSocket m_dataLine;
 	bool m_initialized;
-	SimpleParser::CParser<CCommandLine> * m_parser;	
+	SimpleParser::CParser<CCommandLine> * m_parser;
+	
 	void deleteAll();
 };
 
-#endif 
+#endif /*SardaraImpl_H_*/

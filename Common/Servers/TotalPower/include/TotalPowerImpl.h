@@ -322,6 +322,8 @@ public:
      */
     virtual ACS::doubleSeq * getTpi () throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual ACS::doubleSeq * getRms () throw (CORBA::SystemException,
+    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx) {return 0;};
 
     /**
      * Call this function in order to get a total power measure for each input channel. The measure is done when the inputs are directly
