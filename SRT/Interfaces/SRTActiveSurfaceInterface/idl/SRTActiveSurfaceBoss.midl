@@ -40,9 +40,10 @@ module ActiveSurface {
 
     enum TASProfile {
         AS_SHAPED,
-	AS_SHAPED_FIXED,
+	    AS_SHAPED_FIXED,
         AS_PARABOLIC,
-	AS_PARABOLIC_FIXED
+	    AS_PARABOLIC_FIXED,
+        AS_PARK
     };
     ACS_ENUM(TASProfile);
 	
