@@ -7,9 +7,9 @@
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
-# andrea  24/01/09  created
-# andrea  24/01/09  scripts startschedule stopschedule configureBackend, deprecated and movved to local scripts
-#
+# andrea    24/01/09  created
+# andrea    24/01/09  scripts startschedule stopschedule configureBackend, deprecated and movved to local scripts
+# Andrea O. 28/06/18  Added and public installed the scripts discos  
 
 
 #*******************************************************************************
@@ -41,7 +41,7 @@ PY_PACKAGES        =
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 
-SCRIPTS         = data_stats tabbify
+SCRIPTS         = data_stats tabbify discos
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
