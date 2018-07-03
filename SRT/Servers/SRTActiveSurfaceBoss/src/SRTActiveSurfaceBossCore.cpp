@@ -1389,8 +1389,7 @@ void CSRTActiveSurfaceBossCore::sector1ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	//for (i = 1; i <= 139; i++) {
-	for (i = 1; i <= 1; i++) {
+	for (i = 1; i <= 139; i++) {
 		usdTableS1 >> lanIndexS1 >> circleIndexS1 >> usdCircleIndexS1 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS1][usdCircleIndexS1] = ActiveSurface::USD::_nil();
         	try {
@@ -1424,8 +1423,7 @@ void CSRTActiveSurfaceBossCore::sector2ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	//for (i = 1; i <= 140; i++) {
-	for (i = 1; i <= 1; i++) {
+	for (i = 1; i <= 140; i++) {
 		usdTableS2 >> lanIndexS2 >> circleIndexS2 >> usdCircleIndexS2 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS2][usdCircleIndexS2] = ActiveSurface::USD::_nil();
         	try {
@@ -1460,8 +1458,7 @@ void CSRTActiveSurfaceBossCore::sector3ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	//for (i = 1; i <= 139; i++) {
-	for (i = 1; i <= 1; i++) {
+	for (i = 1; i <= 139; i++) {
 		usdTableS3 >> lanIndexS3 >> circleIndexS3 >> usdCircleIndexS3 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS3][usdCircleIndexS3] = ActiveSurface::USD::_nil();
         	try {
@@ -1496,8 +1493,7 @@ void CSRTActiveSurfaceBossCore::sector4ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	//for (i = 1; i <= 140; i++) {
-	for (i = 1; i <= 1; i++) {
+	for (i = 1; i <= 140; i++) {
 		usdTableS4 >> lanIndexS4 >> circleIndexS4 >> usdCircleIndexS4 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS4][usdCircleIndexS4] = ActiveSurface::USD::_nil();
         	try {
@@ -1532,8 +1528,7 @@ void CSRTActiveSurfaceBossCore::sector5ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	//for (i = 1; i <= 139; i++) {
-	for (i = 1; i <= 1; i++) {
+	for (i = 1; i <= 139; i++) {
 		usdTableS5 >> lanIndexS5 >> circleIndexS5 >> usdCircleIndexS5 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS5][usdCircleIndexS5] = ActiveSurface::USD::_nil();
         	try {
@@ -1568,8 +1563,7 @@ void CSRTActiveSurfaceBossCore::sector6ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	//for (i = 1; i <= 140; i++) {
-	for (i = 1; i <= 1; i++) {
+	for (i = 1; i <= 140; i++) {
 		usdTableS6 >> lanIndexS6 >> circleIndexS6 >> usdCircleIndexS6 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS6][usdCircleIndexS6] = ActiveSurface::USD::_nil();
         	try {
@@ -1604,8 +1598,7 @@ void CSRTActiveSurfaceBossCore::sector7ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	//for (i = 1; i <= 139; i++) {
-	for (i = 1; i <= 1; i++) {
+	for (i = 1; i <= 139; i++) {
 		usdTableS7 >> lanIndexS7 >> circleIndexS7 >> usdCircleIndexS7 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS7][usdCircleIndexS7] = ActiveSurface::USD::_nil();
         	try {
@@ -1640,8 +1633,7 @@ void CSRTActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::C
 		exit(-1);
 	}
 	// Get reference to usd components
-	//for (i = 1; i <= 140; i++) {
-	for (i = 1; i <= 1; i++) {
+	for (i = 1; i <= 140; i++) {
 		usdTableS8 >> lanIndexS8 >> circleIndexS8 >> usdCircleIndexS8 >> serial_usd >> graf >> mecc;
         	usd[circleIndexS8][usdCircleIndexS8] = ActiveSurface::USD::_nil();
         	try {
@@ -1732,7 +1724,7 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
 
 		m_ASup=true;
         	m_status=Management::MNG_OK;
-/*
+
 		if (usdCounter < (int)lastUSD*WARNINGUSDPERCENT) {
         		m_status=Management::MNG_WARNING;
 		}
@@ -1740,7 +1732,6 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
         	m_status=Management::MNG_FAILURE;
 			m_ASup=false;
 		}
-*/
 	}
 
 	if (m_ASup == true) {
