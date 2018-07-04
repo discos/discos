@@ -9,7 +9,7 @@
 -->
 
 <!-- Expire time in seconds -->
-<!-- Limits in mm: theta_y(-28.51,2740), x(-1400,1400), z(-199,40) -->
+<!-- Limits in mm: theta_y(-34.00,2740), x(-1400,1400), z(-199,40) -->
 <!-- Park position: theta_y(2730.15), x(0), z(-195) -->
 <WPServo
     xmlns="urn:schemas-cosylab-com:MinorServo:1.0" 
@@ -36,7 +36,7 @@
     require_calibration = "0"
     expire_time = "0.05000"
     tracking_delta = "1.0"
-    limits="(-28.51, 2740); (-1480, 1480); (-199, 40)"
+    limits="(-34.0, 2740); (-1480, 1480); (-199, 40)"
 >
               
     <!-- Actual Position (ROdoubleSeq) -->
