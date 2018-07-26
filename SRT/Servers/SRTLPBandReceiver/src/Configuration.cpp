@@ -762,7 +762,7 @@ DWORD CConfiguration::getTaperTable(double * &freq,double *&taper, short feed) c
 			count++;
         }
     }
-    return m_taperVectorLen;
+    return count;
 }
 
 DWORD CConfiguration::getLeftMarkTable(double *& freq, double *& markValue, short feed) const
