@@ -42,8 +42,8 @@
 /* *************************************************************************** */
 
 /* define the main frame dimension */
-#define WINDOW_WIDTH 69      /*columns */
-#define WINDOW_HEIGHT 16     /* rows */  
+#define WINDOW_WIDTH 73      /*columns */
+#define WINDOW_HEIGHT 17     /* rows */  
 /* ******************************* */
 
 /* define the routine name here, to be used for logging */
