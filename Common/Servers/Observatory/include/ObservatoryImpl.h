@@ -117,6 +117,12 @@ public:
 	 * @return pointer to read-only double property julianDay
 	*/
 	virtual ACS::ROdouble_ptr julianDay() throw (CORBA::SystemException);
+
+	/**
+     * Returns a reference to the implementation of the MJD property of the IDL interface.
+	 * @return pointer to read-only double property MJD
+	*/
+	virtual ACS::ROdouble_ptr MJD() throw (CORBA::SystemException);
 	
 	/**
      * Returns a reference to the implementation of the GAST property of the IDL interface.
@@ -242,6 +248,8 @@ private:
 	SmartPropertyPointer<ROuLongLong> m_puniversalTime;
 	/** julianDay property */
 	SmartPropertyPointer<ROdouble> m_pjulianDay;
+	/** MJD property */
+	SmartPropertyPointer<ROdouble> m_pMJD;
 	/** apparentGST property */
 	SmartPropertyPointer<ROuLongLong> m_pGAST;
 	/** LST property */
