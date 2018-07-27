@@ -174,7 +174,7 @@ public:
 				TIMEVALUE now;
 				IRA::CIRATools::getTime(now);
 				IRA::CDateTime clock(now);
-				m_Value=(T)(clock.getJD() - 2400000.5);
+				m_Value=(T)clock.getMJD();
 				break;				
 			}
 			case GAST : {
