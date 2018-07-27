@@ -10,4 +10,4 @@
 #************************************************************************
 
 
-xterm -geometry 69x16+0+0 +sb -title Observatory -e /bin/bash --login -c _tui_ObservatoryTextClient &
+xterm -geometry 73x17+0+0 +sb -title Observatory -e /bin/bash --login -c _tui_ObservatoryTextClient &
