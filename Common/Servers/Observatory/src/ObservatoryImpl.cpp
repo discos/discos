@@ -60,6 +60,7 @@ ObservatoryImpl::ObservatoryImpl(const ACE_CString &CompName,maci::ContainerServ
 	m_observatoryName(this),
   	m_puniversalTime(this),
 	m_pjulianDay(this),
+	m_pMJD(this),
 	m_pGAST(this),
 	m_pLST(this),
 	m_pDUT1(this),
@@ -103,6 +104,9 @@ void ObservatoryImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		  
 		m_pjulianDay=new ROdouble(getContainerServices()->getName()+":julianDay",getComponent(),
 		  new ObsDevIO<CORBA::Double>(ObsDevIO<CORBA::Double>::JULIANDAY,static_cast<void *>(m_data)),true);
+
+        m_pMJD=new ROdouble(getContainerServices()->getName()+":MJD",getComponent(),
+		  new ObsDevIO<CORBA::Double>(ObsDevIO<CORBA::Double>::MODIFIEDJULIANDAY,static_cast<void *>(m_data)),true);
 		  
 		m_pGAST=new ROuLongLong(getContainerServices()->getName()+":GAST",getComponent(),
 		  new ObsDevIO<CORBA::ULongLong>(ObsDevIO<CORBA::ULongLong>::GAST,static_cast<void *>(m_data)),true);
@@ -205,6 +209,8 @@ GET_PROPERTY_REFERENCE(ACS::ROstring,m_observatoryName,observatoryName);
 GET_PROPERTY_REFERENCE(ACS::ROuLongLong,m_puniversalTime,universalTime);
 
 GET_PROPERTY_REFERENCE(ACS::ROdouble,m_pjulianDay,julianDay);
+
+GET_PROPERTY_REFERENCE(ACS::ROdouble,m_pMJD,MJD);
 
 GET_PROPERTY_REFERENCE(ACS::ROuLongLong,m_pGAST,GAST);
 

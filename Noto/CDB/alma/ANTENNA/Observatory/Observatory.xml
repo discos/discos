@@ -13,6 +13,7 @@
 	<observatoryName description="reports the station name or code" />
 	<universalTime description="current UTC time" />
 	<julianDay description="current UTC expressed as a julian day" />
+	<MJD description="current UTC expressed as a modified julian day" />
 	<GAST description="Greenwich Apparent Sidereal Time" />
 	<LST description="Local Apparent Sidereal Time" />
 	<DUT1 description="difference between UTC and UT1, in milli seconds" />

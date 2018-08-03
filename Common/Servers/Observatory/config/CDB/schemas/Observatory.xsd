@@ -27,6 +27,7 @@
 			<xs:element name="observatoryName" type="baci:ROstring" />			
 			<xs:element name="universalTime" type="baci:ROuLongLong" />
 			<xs:element name="julianDay" type="baci:ROdouble" />
+			<xs:element name="MJD" type="baci:ROdouble" />
 			<!-- Apparent Sideral Time, measured at Greenwich -->			
 			<xs:element name="GAST" type="baci:ROuLongLong" />	
 			<!-- Local Apparent Sideral Time -->						
