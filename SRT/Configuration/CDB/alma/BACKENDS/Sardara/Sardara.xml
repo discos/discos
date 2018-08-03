@@ -20,10 +20,10 @@
                DataPort="6001"
                DataIPAddress="192.168.200.200"            	   
                DataLatency="3000000"
-               SenderSleepTime="300000"
-               SenderResponseTime="1000000"
-               ControlSleepTime="900000"
-               ControlResponseTime="1000000"
+               SenderSleepTime="30000000"
+               SenderResponseTime="10000000"
+               ControlSleepTime="90000000"
+               ControlResponseTime="100000000"
                BoardsNumber="14"
                DataBufferSize="64">
 	<time/>

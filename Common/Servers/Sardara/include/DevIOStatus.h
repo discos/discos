@@ -65,7 +65,7 @@ public:
 		try {
 			DWORD ptrn;
 			line->getBackendStatus(ptrn);
-			m_val=(ACS::pattern)ptrn;
+			//m_val=(ACS::pattern)ptrn;
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOStatus::read()");
