@@ -62,7 +62,7 @@ public:
 		// get the CommandLine .......
 		CSecAreaResourceWrapper<CCommandLine> line=m_pLink->Get();
 		try {
-			line->getInputSection(m_val);
+			line->getInputSectionAttr(m_val);
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOInputSection::read()");
