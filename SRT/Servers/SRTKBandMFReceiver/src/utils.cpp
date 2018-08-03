@@ -39,9 +39,9 @@ int hex2dec(BYTE *buff, int idx, int len) throw (ComponentErrors::SocketErrorExI
 }
 
 
-void dec2hexStr(unsigned long dec, unsigned char hex[], int len) {
+void dec2hexStr(int dec, unsigned char hex[], int len) {
 
-    unsigned long quotient = dec;
+    int quotient;
     char rev_hex[len];
     int remainder;
     int i = 0;
@@ -51,8 +51,9 @@ void dec2hexStr(unsigned long dec, unsigned char hex[], int len) {
         remainder = quotient % 16;
         quotient = quotient / 16;
         if(remainder > 9)
-        rev_hex[i] = (char)remainder + 55;
-        else rev_hex[i] = (char)remainder + 48;
+        	rev_hex[i] = (char)remainder + 55;
+        else 
+        	rev_hex[i] = (char)remainder + 48;
         i++;
     }
     // Reverse String

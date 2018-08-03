@@ -161,8 +161,7 @@ CString & CString::Concat(const char *add)
 
 CString & CString::Concat(char add)
 {
-	Concat(&add);
-    return *this;
+    return Concat(&add);
 }
 
 CString & CString::Concat(int nValue)
@@ -443,7 +442,7 @@ int CString::Replace(char ch1,char ch2,int start)
 	return -1;
 }
 
-bool  CString::Replace(const char *str1,const char *str2)
+bool CString::Replace(const char *str1,const char *str2)
 {
 	char *p;
 	char *buffer;
@@ -680,8 +679,7 @@ const CString & CString::operator +=(const CString & src)
 
 const CString & CString::operator +=(char ch)
 {
-	Concat(ch);
-	return *this;
+	return Concat(ch);
 }
 
 const CString & CString::operator +=(const char *str)

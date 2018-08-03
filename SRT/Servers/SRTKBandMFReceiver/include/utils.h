@@ -38,7 +38,7 @@ typedef string::size_type (string::*find_t)(const string &delim, string::size_ty
 int hex2dec(BYTE *buff, int idx, int len) throw (ComponentErrors::SocketErrorExImpl);
 
 
-void dec2hexStr(unsigned long dec, unsigned char hex[], int len);
+void dec2hexStr(int dec, unsigned char hex[], int len);
 
 
 /**
