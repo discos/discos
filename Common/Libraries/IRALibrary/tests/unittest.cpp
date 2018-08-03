@@ -9,6 +9,8 @@
 
 #include "CString_test.i"
 
+#include "BaseConverter_test.i"
+
 using namespace IRALibraryTest;
 
 TEST_F(IRALibrary_IRATools, makeDirectory_createSimpleDirectory){
@@ -81,4 +83,12 @@ TEST_F(IRALibrary_String,string_checkLeft){
 
 TEST_F(IRALibrary_String,string_checkSplit) {
 	EXPECT_TRUE(string_checkSplit());
+}
+
+TEST_F(IRALibrary_BaseConverter,decToBin_checkConversion) {
+	EXPECT_TRUE(decToBin_checkConversion());
+}
+
+TEST_F(IRALibrary_BaseConverter,decToHex_checkConversion) {
+	EXPECT_TRUE(decToHex_checkConversion());
 }
