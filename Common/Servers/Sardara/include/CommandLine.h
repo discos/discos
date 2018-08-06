@@ -15,6 +15,7 @@
 #include <BackendsErrors.h>
 #include <SardaraS.h>
 #include <TotalPowerS.h>
+#include <SRTIFDistributorS.h>
 #include <string>
 #include <sstream>
 #include <DiscosBackendProtocol>
@@ -123,6 +124,7 @@ public:
 	 * Call this function in order to know which section an input is attached to.
 	 */
 	void getInputSection(ACS::longSeq& inpSection) const;
+	void getInputSectionAttr(ACS::longSeq& inpSection) const;
 	
 	/**
 	 * Call this function in order to get the last measure of the system temperature.
@@ -151,6 +153,8 @@ public:
 	void getAttenuation(ACS::doubleSeq& att) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
 			BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl);
 	
+	void getAttenuationAttr(ACS::doubleSeq& att) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
+			BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl);
 	/**
 	 * Call this function in order to get the current band width of each input.
 	 * @param bw this is a sequence of double values that correspond to the bandwidth of each analog input.
@@ -481,6 +485,7 @@ private:
 
     ContainerServices* m_services;
     Backends::TotalPower_var m_totalPower;
+    Receivers::GenericIFDistributor_var m_ifDistributor;
 
 	/**
 	 * List the fields of the backend status 
@@ -759,6 +764,8 @@ private:
     bool m_SC00S;
     bool m_SL00S;
     bool m_SP00S;
+
+    bool m_stationSRT;
 	
 };
 

@@ -347,7 +347,7 @@ void SardaraImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Ba
 	// now comunicate the reading to the sender thread.....
 	//m_senderThread->saveZero(tpi);
 	// start the job for the backend.....
-	/*try {
+	try {
 		line->startDataAcquisition();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -362,7 +362,7 @@ void SardaraImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::Ba
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SardaraImpl::sendHeader()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}*/
+	}
 }
 
 void SardaraImpl::terminate() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
@@ -567,11 +567,11 @@ ACS::doubleSeq * SardaraImpl::getZero () throw (CORBA::SystemException,
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	ACS::doubleSeq_var tpi=new ACS::doubleSeq;
     //TODO: how many sections????
-    tpi->length(2);
+    //tpi->length(2);
 	try {
-		//line->getSample(tpi,true);
-        tpi[0]=0.0;
-        tpi[1]=0.0;
+		line->getSample(tpi,true);
+        //tpi[0]=0.0;
+        //tpi[1]=0.0;
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -650,7 +650,7 @@ void SardaraImpl::setAttenuation(CORBA::Long input,CORBA::Double att) throw (COR
 {
 	AUTO_TRACE("SardaraImpl::setAttenutation()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	/*try {
+	try {
 		line->setAttenuation(input,att);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -665,7 +665,7 @@ void SardaraImpl::setAttenuation(CORBA::Long input,CORBA::Double att) throw (COR
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SardaraImpl::setAttenutation()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}*/		
+	}
 }
 
 CORBA::Long SardaraImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber) throw (CORBA::SystemException,
@@ -694,7 +694,7 @@ void SardaraImpl::activateNoiseCalibrationSwitching(CORBA::Long interleave) thro
 {
 	AUTO_TRACE("SardaraImpl::activateNoiseCalibrationSwitching()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
-	/*try {
+	try {
 		line->activateCalSwitching(interleave); // NOT YET AVAILABLE
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -709,7 +709,7 @@ void SardaraImpl::activateNoiseCalibrationSwitching(CORBA::Long interleave) thro
 		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SardaraImpl::activateNoiseCalibrationSwitching()");
 		dummy.log(LM_DEBUG);
 		throw dummy.getComponentErrorsEx();
-	}*/			
+	}
 }
 
 void SardaraImpl::initialize(const char * configuration) throw (CORBA::SystemException,
