@@ -11,6 +11,7 @@
 #include <string>
 #include <bitset>
 #include "../test/icd_response_test.h"
+#include <BaseConverter.h>
 
 
 // The master device flags a new command for the compact drive by changing the
@@ -281,37 +282,53 @@ void icdSocket::setPosition(double position) throw (
     double sh_position;
     sh_position = m_ICD_REFERENCE - position;
 
-    m_icd_summary_status &= ~(1 << W) ;
-    setCmdPosition(position);
+    //printf("sh_position,ICD_REFERENCE,position: %lf, %lf, %lf\n",sh_position,m_ICD_REFERENCE,position);
 
+    m_icd_summary_status &= ~(1 << W) ;
+    
     if(sh_position > m_ICD_MAX_VALUE || sh_position < m_ICD_MIN_VALUE) {
         DerotatorErrors::OutOfRangeErrorExImpl ex(__FILE__, __LINE__, "Position out of range");
         throw ex;
     }
     
+	setCmdPosition(position);    
+    
+	//This code as been change during 64 bits porting as the communication with the derotator was messed up when the absolute position
+	// to be commended is negative. The negative number are now stored in 64 bits integer that overflow the buffer to be sent to the
+	// motor. 
+	// Should I apply the same patch also in all other piece of code?    
+    
     // Revert the rotation way
-    if(sh_position < 0)
-        setNegativeDir();
+    //if(sh_position < 0) {
+    //    setNegativeDir();
+	//sh_position=-sh_position;
+    //}
 
-    if(sh_position >= 0)
-        setPositiveDir();
+    //if(sh_position >= 0)
+    //setPositiveDir();
 
-    unsigned long dec_steps = static_cast<unsigned long>(sh_position/m_ICD_CF + 0.5); // No shifted, rounded
+    //printf("sh_position,m_ICD_CF, ratio: %lf, %lf, %lf\n",sh_position,m_ICD_CF,sh_position/m_ICD_CF+0.5);
 
-    unsigned char hex_steps[ICD_CMDDATA_LEN + 1];
-    dec2hexStr(dec_steps, hex_steps, ICD_CMDDATA_LEN + 1);
-    int i = 0;
+    //unsigned long dec_steps = static_cast<unsigned long>(sh_position/m_ICD_CF + 0.5); // No shifted, rounded
+
+	//this should be 4 bytes long in64bit platforms
+	int dec_steps = static_cast<int>(sh_position/m_ICD_CF + 0.5); // No shifted, rounded
+    //unsigned char hex_steps[ICD_CMDDATA_LEN + 1];
+    //dec2hexStr(dec_steps, hex_steps, ICD_CMDDATA_LEN + 1);
+    IRA::CString hexstr=IRA::CBaseConverter::decToHex(dec_steps);
+    /*int i = 0;
     while(1) {
         if(hex_steps[i] == '\0') break;
         i++;
-    }
-
-    int k=0;
-    for(int j=i-1; j>=0; j--) {
+    }*/
+    //int k=0;
+    /*for(int j=i-1; j>=0; j--) {
         buff[15-j] = hex_steps[k];
         k++;
+    }*/
+    for(int j=8;j<16;j++) {
+        buff[j]=hexstr[j-8];
     }
-    
     try {
         // Make a conversation to and from icd. The response is stored in buff
         make_talk(buff, true) ;
@@ -347,7 +364,7 @@ void icdSocket::setSpeed(DWORD speed) throw (
 
 
     if(speed < m_ICD_MIN_SPEED || speed > m_ICD_MAX_SPEED) {
-        ACS_SHORT_LOG((LM_ERROR, "# Error - max speed out of range [%u, %u] rpm", 
+        ACS_SHORT_LOG((LM_ERROR, "# Error - max speed out of range [%.2f, %.2f] rpm", 
                     m_ICD_MIN_SPEED, m_ICD_MAX_SPEED));
         m_icd_summary_status |=  (1 << W);
         
@@ -882,10 +899,10 @@ void icdSocket::responseCheck(BYTE *buff, bool check=true) throw (ComponentError
                     m_icd_verbose_status &= ~(1 << WRONG_RFLAG) ;
                     m_icd_verbose_status &= ~(1 << WRONG_RCODE) ;
                     ACS_SHORT_LOG((LM_ERROR, "# CMDERR - ERROR CODE: (%c%c%c%ch)", 
-                                (unsigned char)buff[ICD_BUFF_LEN-5], 
-                                (unsigned char)buff[ICD_BUFF_LEN-4],
-                                (unsigned char)buff[ICD_BUFF_LEN-3], 
-                                (unsigned char)buff[ICD_BUFF_LEN-2] 
+                                (const char*)buff[ICD_BUFF_LEN-5], 
+                                (const char*)buff[ICD_BUFF_LEN-4],
+                                (const char*)buff[ICD_BUFF_LEN-3], 
+                                (const char*)buff[ICD_BUFF_LEN-2] 
                                 ));
                     break ;
 
@@ -895,10 +912,10 @@ void icdSocket::responseCheck(BYTE *buff, bool check=true) throw (ComponentError
                     m_icd_verbose_status &= ~(1 << WRONG_RCODE) ;
                     ACS_SHORT_LOG((LM_ERROR, "# WRONG RESPONSE FLAG. First byte:  %X", buff[0]));
                     ACS_SHORT_LOG((LM_ERROR, "# CMDERR - ERROR CODE: (%c%c%c%ch)", 
-                                (unsigned char)buff[ICD_BUFF_LEN-5], 
-                                (unsigned char)buff[ICD_BUFF_LEN-4],
-                                (unsigned char)buff[ICD_BUFF_LEN-3], 
-                                (unsigned char)buff[ICD_BUFF_LEN-2] 
+                                (const char*)buff[ICD_BUFF_LEN-5], 
+                                (const char*)buff[ICD_BUFF_LEN-4],
+                                (const char*)buff[ICD_BUFF_LEN-3], 
+                                (const char*)buff[ICD_BUFF_LEN-2] 
                                 ));
                     break ;
 
@@ -928,10 +945,10 @@ void icdSocket::responseCheck(BYTE *buff, bool check=true) throw (ComponentError
                     m_icd_verbose_status &= ~(1 << WRONG_RCODE) ;
                     ACS_SHORT_LOG((LM_ERROR, "# WRONG RESPONSE FLAG. First byte:  %X", buff[0]));
                     ACS_SHORT_LOG((LM_ERROR, "# CMDERR - ERROR CODE: (%c%c%c%ch)", 
-                                (unsigned char)buff[ICD_BUFF_LEN-5], 
-                                (unsigned char)buff[ICD_BUFF_LEN-4],
-                                (unsigned char)buff[ICD_BUFF_LEN-3], 
-                                (unsigned char)buff[ICD_BUFF_LEN-2] 
+                                (const char*)buff[ICD_BUFF_LEN-5], 
+                                (const char*)buff[ICD_BUFF_LEN-4],
+                                (const char*)buff[ICD_BUFF_LEN-3], 
+                                (const char*)buff[ICD_BUFF_LEN-2] 
                                 ));
                     break ;
 
@@ -940,10 +957,10 @@ void icdSocket::responseCheck(BYTE *buff, bool check=true) throw (ComponentError
                     m_icd_verbose_status &= ~(1 << WRONG_RFLAG) ;
                     m_icd_verbose_status &= ~(1 << WRONG_RCODE) ;
                     ACS_SHORT_LOG((LM_ERROR, "# CMDERR - ERROR CODE: (%c%c%c%ch)", 
-                                (unsigned char)buff[ICD_BUFF_LEN-5], 
-                                (unsigned char)buff[ICD_BUFF_LEN-4],
-                                (unsigned char)buff[ICD_BUFF_LEN-3], 
-                                (unsigned char)buff[ICD_BUFF_LEN-2] 
+                                (const char*)buff[ICD_BUFF_LEN-5], 
+                                (const char*)buff[ICD_BUFF_LEN-4],
+                                (const char*)buff[ICD_BUFF_LEN-3], 
+                                (const char*)buff[ICD_BUFF_LEN-2] 
                                 ));
                     break ;
 
