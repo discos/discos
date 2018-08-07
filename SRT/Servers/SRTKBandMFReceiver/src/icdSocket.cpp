@@ -282,7 +282,7 @@ void icdSocket::setPosition(double position) throw (
     double sh_position;
     sh_position = m_ICD_REFERENCE - position;
 
-    printf("sh_position,ICD_REFERENCE,position: %lf, %lf, %lf\n",sh_position,m_ICD_REFERENCE,position);
+    //printf("sh_position,ICD_REFERENCE,position: %lf, %lf, %lf\n",sh_position,m_ICD_REFERENCE,position);
 
     m_icd_summary_status &= ~(1 << W) ;
     
@@ -307,7 +307,7 @@ void icdSocket::setPosition(double position) throw (
     //if(sh_position >= 0)
     //setPositiveDir();
 
-    printf("sh_position,m_ICD_CF, ratio: %lf, %lf, %lf\n",sh_position,m_ICD_CF,sh_position/m_ICD_CF+0.5);
+    //printf("sh_position,m_ICD_CF, ratio: %lf, %lf, %lf\n",sh_position,m_ICD_CF,sh_position/m_ICD_CF+0.5);
 
     //unsigned long dec_steps = static_cast<unsigned long>(sh_position/m_ICD_CF + 0.5); // No shifted, rounded
 
