@@ -141,13 +141,13 @@
         <xs:attribute name="XB_ASACTIVE" type="xs:string" use="required" />
         <xs:attribute name="XB" type="xs:string" use="required" />
         <xs:attribute name="KKG_ASACTIVE" type="xs:string" use="required" />
+        <xs:attribute name="KKG_TEST_ASACTIVE" type="xs:string" use="required" />
         <xs:attribute name="KKG" type="xs:string" use="required" />
         <xs:attribute name="LLP" type="xs:string" use="required" />
         <xs:attribute name="PPP" type="xs:string" use="required" />
         <xs:attribute name="PLP" type="xs:string" use="required" />
         <xs:attribute name="XKP" type="xs:string" use="required" />
         <xs:attribute name="HHP" type="xs:string" use="required" />
-        <xs:attribute name="SSP" type="xs:string" use="required" />
 
       </xs:extension>
      </xs:complexContent>
