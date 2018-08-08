@@ -15,7 +15,7 @@
 #include <BackendsErrors.h>
 #include <SardaraS.h>
 #include <TotalPowerS.h>
-#include <SRTIFDistributorS.h>
+#include <GenericIFDistributorS.h>
 #include <string>
 #include <sstream>
 #include <DiscosBackendProtocol>
