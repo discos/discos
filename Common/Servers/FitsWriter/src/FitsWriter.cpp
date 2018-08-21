@@ -24,6 +24,8 @@ using namespace FitsWriter_private;
 #define _FITSW_SECTCOL_TYPE "type"
 #define _FITSW_SECTCOL_SR "sampleRate"
 #define _FITSW_SECTCOL_BINS "bins"
+#define _FITSW_SECTCOL_FREQ "frequency"
+#define _FITSW_SECTCOL_BW "bandWidth"
 #define _FITSW_SECTCOL_FLUX "flux"
 
 #define _FITSW_RFCOL_FEED "feed"
@@ -56,6 +58,8 @@ CFitsWriter::CFitsWriter()
 	SectColName.push_back(_FITSW_SECTCOL_TYPE);
 	SectColName.push_back(_FITSW_SECTCOL_SR);
 	SectColName.push_back(_FITSW_SECTCOL_BINS);
+	SectColName.push_back(_FITSW_SECTCOL_FREQ);
+	SectColName.push_back(_FITSW_SECTCOL_BW);
 	SectColName.push_back(_FITSW_SECTCOL_FLUX);
 
 	SectColForm.push_back("J");
@@ -63,11 +67,15 @@ CFitsWriter::CFitsWriter()
 	SectColForm.push_back("D");
 	SectColForm.push_back("J");
 	SectColForm.push_back("D");
+	SectColForm.push_back("D");	
+	SectColForm.push_back("D");
 
 	SectColUnit.push_back("");
 	SectColUnit.push_back("");
 	SectColUnit.push_back("MHz");
 	SectColUnit.push_back("");
+	SectColUnit.push_back("MHz");
+	SectColUnit.push_back("MHz");
 	SectColForm.push_back("Jy");
 	
 	rfColName.push_back(_FITSW_RFCOL_FEED);
@@ -486,7 +494,7 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 {
 	std::vector<long> id;
 	std::vector<long> bins;
-	std::vector<double> sampleRate;
+	std::vector<double> sampleRate,bckFreq,bckBw;
 	std::vector<double> flux;
 	std::vector<string> sect_type;	
 	std::vector<long> feed;
@@ -514,6 +522,8 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 		std::stringstream colName, type, tsysType;
 		id.push_back(m_channels[i].id);  // Section ID
 		bins.push_back(m_channels[i].bins); //Section Bins
+		bckFreq.push_back(m_channels[i].frequency); //Section frequency configuration
+		bckBw.push_back(m_channels[i].bandWidth); //Section bandWidth configuration		
 		sampleRate.push_back(m_channels[i].sampleRate); // section S.R.
 		if (fluxIterator<(long)sourceFlux.length()) {
 			flux.push_back(sourceFlux[fluxIterator]);// estimated source flux associated to the section parameters
@@ -606,60 +616,6 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 		}
 		section.push_back(sectionID[j]);
 	}
-
-		/*for (long j=0;((j<m_channels[i].inputs) && (j<2));j++) {
-			inputsNumber++;
-			unsigned ifNumber;
-			ifNumber=(unsigned) m_channels[i].IF[j];
-			ifChain.push_back(ifNumber);
-			feed.push_back(m_channels[i].feed);
-			if (ifNumber<pols.length()) { // in this case the polarizations are given one for each receiver IF
-				if (pols[ifNumber]==Receivers::RCV_LCP) polarization.push_back("LCP");
-				else if (pols[ifNumber]==Receivers::RCV_RCP) polarization.push_back("RCP");
-				else if (pols[ifNumber]==Receivers::RCV_VLP) polarization.push_back("VLP");
-				else if (pols[ifNumber]==Receivers::RCV_HLP) polarization.push_back("HLP");
-				else polarization.push_back("");
-			}
-			else {
-				polarization.push_back("");
-			}
-			if (i<(long)skyFreq.length()) {
-				frequency.push_back(skyFreq[i]);
-			}
-			else {
-				frequency.push_back(DOUBLENULLVALUE);
-			}
-			if (i<(long)skyBandWidth.length()) {
-				bandWidth.push_back(skyBandWidth[i]);
-			}
-			else {
-				bandWidth.push_back(DOUBLENULLVALUE);
-			}
-			if (ifNumber<los.length()) {
-				localOscillator.push_back(los[ifNumber]);
-			}
-			else {
-				localOscillator.push_back(DOUBLENULLVALUE);
-			}
-			if ((unsigned long)inputsNumber<=marks.length()) { // in this case the noise cal values are given one for each backend input
-				calib.push_back(marks[inputsNumber-1]);
-			}
-			else {
-				calib.push_back(DOUBLENULLVALUE);
-			}
-			attenuation.push_back(m_channels[i].attenuation[j]);
-			section.push_back(m_channels[i].id);
-		}*/
-		/*if (m_channels[i].inputs>1) {
-			tsysType << (m_channels[i].inputs) << "D";;
-			tsysColForm.push_back(tsysType.str());
-		}
-		else {
-			tsysColForm.push_back("D");
-		}
-		tsysColName.push_back(colName.str());
-		tsysColUnit.push_back("K");*/
-	/*}*/
 	try {
 		section_table = pFits->addTable((const char *)name,m_mainHeader.sections, SectColName, SectColForm, SectColUnit);
 		if (!section_table) {
@@ -670,6 +626,8 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 		section_table->column(_FITSW_SECTCOL_TYPE).write(sect_type,1);
 		section_table->column(_FITSW_SECTCOL_SR).write(sampleRate,1);		
 		section_table->column(_FITSW_SECTCOL_BINS).write(bins,1);
+		section_table->column(_FITSW_SECTCOL_FREQ).write(bckFreq,1);
+		section_table->column(_FITSW_SECTCOL_BW).write(bckBw,1);		
 		section_table->column(_FITSW_SECTCOL_FLUX).write(flux,1);
 	}
 	catch(FitsException& fe){
