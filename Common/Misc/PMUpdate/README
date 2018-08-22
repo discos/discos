@@ -1,0 +1,12 @@
+
+Lo script può essere seguito da riga di comando con i parametri illustrati sotto. Il parametro -g avvia l’interfaccia grafica
+
+PMUpdate -e <errorfile> -p <pointingxmlfile> -r <receiver> -g
+
+-e: file con i paramenti di puntamento ottento tramite il programma pdplt
+-p: file xml con i modelli di puntamento di nuraghe
+-r: nome del ricevitore per il quale si stanno aggiornando i dati di puntamento
+
+
+
+Credits Andrea Saba (Andrea.Saba@inaf.it)
