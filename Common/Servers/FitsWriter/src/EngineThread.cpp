@@ -188,14 +188,14 @@ bool CEngineThread::processData()
 		receiverBossError=true;
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::processData()");
 		impl.setOperationName("getDerotatorPositionFromHistory()");
 		impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 		m_data->setStatus(Management::MNG_FAILURE);
 	}
 	catch (ReceiversErrors::ReceiversErrorsEx & ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::collectReceiversData()");
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CEngineThread::processData()");
 		impl.setOperationName("getDerotatorPositionFromHistory()");
 		impl.setComponentName((const char *)m_config->getReceiversBossComponent());
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
@@ -563,7 +563,8 @@ void CEngineThread::runLoop()
 				ACS::longSeq sectionsID;
 				ACS::stringSeq axisName,axisUnit;
 
-				m_data->getSite(site,dut1,siteName);
+				m_data->getSite(site,dut1,siteName);			
+				
 				m_info.getLocalOscillator(LocalOscillator);
 				m_info.getSectionsID(sectionsID);
 				m_info.getBackendAttenuations(atts);
