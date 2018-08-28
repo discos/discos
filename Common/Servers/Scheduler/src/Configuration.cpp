@@ -10,7 +10,7 @@
 	} \
 	else { \
 		FIELD=tmpw; \
-		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %lu",tmpw); \
+		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %u",tmpw); \
 	} \
 }
 
@@ -214,7 +214,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		counter++;
 		if (m_minorServoMappings>=MAX_AXIS_NUMBER) break;
 	}
-	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %d",m_minorServoMappings);
+	ACS_DEBUG_PARAM("CConfiguration::Init()","Total minor servo axis: %ld",m_minorServoMappings);
 	componentName="DataBlock/Equipment/AvailableBackend";
 	counter--;
 	for(;;) {
@@ -245,7 +245,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		if (m_availableBackends>=MAX_BCK_NUMBER) break;
 		counter++;
 	}
-	ACS_DEBUG_PARAM("CConfiguration::Init()","Total available backends: %d",m_availableBackends);
+	ACS_DEBUG_PARAM("CConfiguration::Init()","Total available backends: %ld",m_availableBackends);
 	if (!CIRATools::getDBValue(Services,"FTrackPrecisionDigits",m_fTrackDigits,"alma/","DataBlock/Equipment")) {
 		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
 		dummy.setFieldName("FTrackPrecisionDigits");
