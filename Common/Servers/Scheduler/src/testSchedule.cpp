@@ -116,21 +116,21 @@ int main(int argc, char *argv[])
 							tmp->otf.lat2*DR2D,(const char *)toFrame(tmp->otf.coordFrame),
 							(const char *)toFrame(tmp->otf.subScanFrame),(const char *)toGeometry(tmp->otf.geometry),
 							(const char *)toDescription(tmp->otf.description),
-							(const char *)toDirection(tmp->otf.direction),tmp->otf.subScanDuration);
+							(const char *)toDirection(tmp->otf.direction),(long long)tmp->otf.subScanDuration);
 				}
 				else if (type==Management::MNG_OTFC) {
 					printf("%u OTFC %lf %lf %lf %lf %s %s %s %s %s %lld\n",rec.scan,tmp->otf.lon1*DR2D,tmp->otf.lat1*DR2D,tmp->otf.lon2*DR2D,
 							tmp->otf.lat2*DR2D,(const char *)toFrame(tmp->otf.coordFrame),
 							(const char *)toFrame(tmp->otf.subScanFrame),(const char *)toGeometry(tmp->otf.geometry),
 							(const char *)toDescription(tmp->otf.description),
-							(const char *)toDirection(tmp->otf.direction),tmp->otf.subScanDuration);
+							(const char *)toDirection(tmp->otf.direction),(long long)tmp->otf.subScanDuration);
 				}
 				else if (type==Management::MNG_SKYDIP) {
 					printf("%u SKYDIP %lf %lf %lf %lf %s %s %s %s %s %lld\n",rec.scan,tmp->otf.lon1*DR2D,tmp->otf.lat1*DR2D,tmp->otf.lon2*DR2D,
 							tmp->otf.lat2*DR2D,(const char *)toFrame(tmp->otf.coordFrame),
 							(const char *)toFrame(tmp->otf.subScanFrame),(const char *)toGeometry(tmp->otf.geometry),
 							(const char *)toDescription(tmp->otf.description),
-							(const char *)toDirection(tmp->otf.direction),tmp->otf.subScanDuration);
+							(const char *)toDirection(tmp->otf.direction),(long long)tmp->otf.subScanDuration);
 				}
 				else {
 					if (tmp->paramNumber==0) {

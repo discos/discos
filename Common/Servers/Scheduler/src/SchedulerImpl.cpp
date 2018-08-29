@@ -12,9 +12,6 @@
 #include "DevIORestFrequency.h"
 #include <LogFilter.h>
 
-static char *rcsId="@(#) schedulerImpl";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
-
 _IRA_LOGFILTER_DECLARE;
 
 SchedulerImpl::SchedulerImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) : 
