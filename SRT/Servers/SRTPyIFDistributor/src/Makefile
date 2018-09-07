@@ -36,6 +36,7 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@chmod 700 $(INTROOT)/bin/_ifd
 	@echo " . . . installation done"
 
 #___oOo___

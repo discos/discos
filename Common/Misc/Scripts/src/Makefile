@@ -41,7 +41,8 @@ PY_PACKAGES        =
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 
-SCRIPTS         = data_stats tabbify discos
+SCRIPTS         = data_stats discos
+SCRIPTS_L		 = tabbify
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
@@ -80,6 +81,8 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@chmod 700 $(INTROOT)/bin/data_stats
+	@chmod 700 $(INTROOT)/bin/discos	
 	@echo " . . . installation done"
 
 
