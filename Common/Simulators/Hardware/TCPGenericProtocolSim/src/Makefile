@@ -54,6 +54,7 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@chmod 700 $(INTROOT)/bin/tcpProt-sim
 	@echo " . . . installation done"
 
 

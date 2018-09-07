@@ -53,6 +53,7 @@ install_templates:
 	@echo " . . . templates installed"
 
 install : install_all install_templates
+	@chmod 700 $(INTROOT)/bin/getTemplateForTests
 	@echo " . . . installation done"
 
 
