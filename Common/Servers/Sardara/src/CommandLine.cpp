@@ -506,7 +506,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
             }
             if ((m_SL00==true || m_SL00S==true) && m_stationSRT == true) {
                 try {
-                    if (newBW==230.00) {
+                    if (newBW==128.00) {
                         m_ifDistributor->setup("BW-NARROW");
                         ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_FILTER_BW-NARROW"));
                     }
