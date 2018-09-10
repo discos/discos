@@ -222,9 +222,10 @@ install : install_all
 #	@chmod 764 $(INTROOT)/bin/nuraghe
 #	@chmod 764 $(INTROOT)/app-defaults/nuragheStartup.xml
 	@sed -i 's/MASTERHOST/$(MASTER)/g' $(INTROOT)/app-defaults/discosStartup.xml
-	@chmod 764 $(INTROOT)/app-defaults/discosStartup.xml 
-	
-	
+	@chmod 700 $(INTROOT)/app-defaults/discosStartup.xml 
+	@chmod 700 $(INTROOT)/bin/discosdown 
+	@chmod 700 $(INTROOT)/bin/discosup 
+	@chmod 700 $(INTROOT)/bin/receiversmonitor.py
 	@echo " . . . installation done"
 
 
