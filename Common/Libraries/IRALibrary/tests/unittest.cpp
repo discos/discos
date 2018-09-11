@@ -6,6 +6,7 @@
 
 #include "CError_regression.i"
 #include "CDBTable_regression.i"
+#include "CIRATools_regression.i"
 
 #include "CString_test.i"
 
@@ -92,3 +93,12 @@ TEST_F(IRALibrary_BaseConverter,decToBin_checkConversion) {
 TEST_F(IRALibrary_BaseConverter,decToHex_checkConversion) {
 	EXPECT_TRUE(decToHex_checkConversion());
 }
+
+TEST_F(IRALibrary_CIRATools_regression,radToSexagesimalAngle_badconversion) {
+	EXPECT_TRUE(radToSexagesimalAngle_badconversion());
+}
+
+TEST_F(IRALibrary_CIRATools_regression,radToHourAngle_badconversion) {
+	EXPECT_TRUE(radToHourAngle_badconversion());
+}
+
