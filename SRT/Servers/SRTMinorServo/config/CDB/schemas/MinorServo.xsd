@@ -22,6 +22,8 @@
     <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
 
     <xs:complexType name="WPServoType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
 
         <!-- ********************* WAVE PATH SERVO PROPERTIES ********************* -->
 
@@ -78,8 +80,8 @@
         </xs:sequence>
 
         <!-- ********************* WAVE PATH SERVO ATTRIBUTES ********************* -->
-        <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
-        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
+        <!--xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
+        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" /-->
         <xs:attribute name="number_of_axis" type="xs:unsignedShort" use="required" />
         <xs:attribute name="number_of_slaves" type="xs:unsignedShort" use="required" />
         <xs:attribute name="scale_factor" type="xs:double" use="required" />
@@ -103,16 +105,20 @@
         <!-- Expire time of data request in seconds. For instance: 0.001 for 1ms-->
         <xs:attribute name="expire_time" type="xs:double" use="required" />
         <!-- Maximum value allowed for the difference of two corresponding axis coordinates (mm) -->
-        <!-- if |cmdPos – actPos| < tracking_delta, then the axis is following the commanded position -->
+        <!-- if |cmdPos - actPos| < tracking_delta, then the axis is following the commanded position -->
         <xs:attribute name="tracking_delta" type="xs:double" use="required" />
         <!-- limits = "(neg1, pos1), (neg2, pos2), ..., (negN, posN)" -->
         <xs:attribute name="limits" type="xs:string" use="required" />
 
+      </xs:extension>
+     </xs:complexContent>
     </xs:complexType>
 
     <xs:element name="WPServo" type="WPServoType"/>
 
     <xs:complexType name="MinorServoBossType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
         <xs:sequence>
             <xs:element name="status" type="mng:SystemStatusType" />
             <xs:element name="actualSetup" type="baci:ROstring" />
@@ -127,20 +133,24 @@
         </xs:sequence>
 
         <!-- Subsystem attributes -->
-        <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
-        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
+        <!--xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
+        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" /-->
         <xs:attribute name="slaves" type="xs:string" use="required" />
         <xs:attribute name="CCB_ASACTIVE" type="xs:string" use="required" />
         <xs:attribute name="CCB" type="xs:string" use="required" />
+        <xs:attribute name="XB_ASACTIVE" type="xs:string" use="required" />
+        <xs:attribute name="XB" type="xs:string" use="required" />
         <xs:attribute name="KKG_ASACTIVE" type="xs:string" use="required" />
+        <xs:attribute name="KKG_TEST_ASACTIVE" type="xs:string" use="required" />
         <xs:attribute name="KKG" type="xs:string" use="required" />
         <xs:attribute name="LLP" type="xs:string" use="required" />
         <xs:attribute name="PPP" type="xs:string" use="required" />
         <xs:attribute name="PLP" type="xs:string" use="required" />
         <xs:attribute name="XKP" type="xs:string" use="required" />
-        <xs:attribute name="SSP" type="xs:string" use="required" />
         <xs:attribute name="HHP" type="xs:string" use="required" />
 
+      </xs:extension>
+     </xs:complexContent>
     </xs:complexType>
 
     <xs:element name="MinorServoBoss" type="MinorServoBossType"/>

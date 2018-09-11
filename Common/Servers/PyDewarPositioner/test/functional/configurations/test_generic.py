@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import time
 from ComponentErrors import ComponentErrorsEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class GenericTest(unittest2.TestCase):
+class GenericTest(unittest.TestCase):
     """Test the generic configuration behavior"""
 
     def setUp(self):
@@ -26,4 +26,4 @@ class GenericTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

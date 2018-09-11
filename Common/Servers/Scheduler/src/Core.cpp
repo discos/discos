@@ -111,7 +111,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_setProjectCode),1);
 	// no range checks because * is allowed
 	m_parser->add("skydip",new function3<CCore,non_constant,void_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(this,&CCore::skydip),3);
-	m_parser->add("agc","_tp_agc",2);
+	m_parser->add("agc","_tp_agc",2,"NONE");
+	m_parser->add("ifd","_ifd",1,"SRT");
 	m_parser->add("restFrequency",new function1<CCore,non_constant,void_type,I<doubleSeq_type> >(this,&CCore::_setRestFrequency),1);
 	m_parser->add("fTrack",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_fTrack),1);
 	m_parser->add("peaker",new function3<CCore,non_constant,void_type,I<string_type>,I<double_type>,I<interval_type> >(this,&CCore::_peaker),3);
@@ -178,6 +179,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("getZero","backend",3,&CCore::remoteCall);
 	m_parser->add("initialize","backend",3,&CCore::remoteCall);
 	m_parser->add("calSwitch","backend",3,&CCore::remoteCall);
+	m_parser->add("getRms","backend",3,&CCore::remoteCall);
 
 	// minor servo
 	m_parser->add("servoSetup","minorservo",4,&CCore::remoteCall);

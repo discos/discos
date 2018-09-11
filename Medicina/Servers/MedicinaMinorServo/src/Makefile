@@ -3,7 +3,9 @@ USER_LIB    =   -lbaci \
                 -lTAO_CosNotification \
         -lTAO_CosNotification_MC_Ext \
                 -lRepeatGuard \
-        -lacstime 
+        -lacstime
+
+USER_CFLAGS = -D 'BOOST_SYSTEM_NO_DEPRECATED'
 
 #
 # Libraries (public and local)
@@ -20,7 +22,7 @@ MedMinorServoControl_OBJECTS   = MedMinorServoControl MedMinorServoGeometry \
 
 MedMinorServoControl_LIBS   = baci acsnc IRALibrary ModbusChannel ManagmentDefinitionsStubs \
                               ManagementErrors \
-                              ComponentErrors boost_thread
+                              ComponentErrors boost_thread-mt boost_system
 
 MinorServoBossImpl_OBJECTS = MedMinorServoControl MedMinorServoGeometry \
                              MedMinorServoStatus MedMinorServoParameters \
@@ -36,7 +38,7 @@ MinorServoBossImpl_LIBS = MedMinorServoBossStubs MinorServoBossStubs \
                           IRALibrary ModbusChannel ComponentErrors MinorServoErrors \
                           acsnc ParserErrors AntennaDefinitionsStubs \
                           MountStubs AntennaBossStubs AntennaErrors \
-                          ActiveSurfaceBossStubs boost_thread acstime \
+                          ActiveSurfaceBossStubs boost_thread-mt boost_system acstime \
                           baci
 
 EXECUTABLES_L     = real_to_virtual# testclient testgeometry testprimary testsecondary testpassive real_to_virtual
@@ -55,7 +57,7 @@ real_to_virtual_LIBS = IRALibrary
 
 EXECUTABLES = scudisconnect
 scudisconnect_OBJECTS = scudisconnect MedMinorServoModbus MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
-scudisconnect_LIBS = IRALibrary ModbusChannel boost_thread
+scudisconnect_LIBS = IRALibrary ModbusChannel boost_thread-mt boost_system
 
 #
 # Configuration Database Files
@@ -70,6 +72,9 @@ SHELL = /bin/bash
 IDL_FILES = MedMinorServoBoss
 TAO_IDLFLAGS =
 USER_IDL =
+
+MedMinorServoBossStubs_LIBS = baciStubs ComponentErrorsStubs \
+    ManagmentDefinitionsStubs MinorServoBossStubs MinorServoErrorsStubs
 
 #
 # list of all possible C-sources (used to create automatic dependencies)

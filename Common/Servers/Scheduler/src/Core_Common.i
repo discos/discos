@@ -36,7 +36,7 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 	try {
 		//antennaUT will stores the estimated start time from the antenna for all kind of subscans
 		antennaAnswer=m_antennaBoss->checkScan(ut,*prim,*sec,minEl,maxEl,m_antennaRTime.out());
-		ACS_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %lld :",m_antennaRTime->slewingTime));
+		ACS_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %llu :",(unsigned long long)m_antennaRTime->slewingTime));
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::checkScan()");
@@ -177,7 +177,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 	try {
 		antennaUT=ut;
 		m_antennaBoss->startScan(antennaUT,*prim,*sec); // the ut could be modified by the call
-		ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"ANTENNA_SCAN_EPOCH %lld",antennaUT));
+		ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"ANTENNA_SCAN_EPOCH %llu",(unsigned long long)antennaUT));
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::doScan()");
@@ -210,7 +210,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 		try {
 			servoUT=ut;
 			m_minorServoBoss->startScan(servoUT,*servoPar,m_antennaRTime.in());
-			ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"MINOR_SERVO_SCAN_EPOCH %lld",servoUT));
+			ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"MINOR_SERVO_SCAN_EPOCH %llu",(unsigned long long)servoUT));
 		}
 		catch (MinorServoErrors::MinorServoErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::doScan()");
@@ -241,7 +241,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 	try {
 		receiversUT=ut;
 		m_receiversBoss->startScan(receiversUT,*recvPa,m_antennaRTime.in());
-		ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"RECEIEVERS_SCAN_EPOCH %lld",receiversUT));
+		ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"RECEIEVERS_SCAN_EPOCH %llu",(unsigned long long)receiversUT));
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
 		_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::doScan()");
@@ -395,7 +395,7 @@ ACS::Time CCore::closeScan(bool wait) throw (ComponentErrors::ComponentNotActive
 	try {
 		if (!CORBA::is_nil(m_antennaBoss)) {
 			m_antennaBoss->closeScan(antennaUT); // the ut could be modified by the call
-			ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"ANTENNA_CLOSE_SCAN_EPOCH %lld",antennaUT));
+			ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"ANTENNA_CLOSE_SCAN_EPOCH %llu",(unsigned long long)antennaUT));
 			IRA::CString outstr;
 			IRA::CIRATools::timeToStr(antennaUT,outstr);
 			//printf("tempo di chiusura (Antenna): %s\n",(const char*)outstr);
@@ -432,7 +432,7 @@ ACS::Time CCore::closeScan(bool wait) throw (ComponentErrors::ComponentNotActive
 		try {
 			if (!CORBA::is_nil(m_minorServoBoss)) {
 				m_minorServoBoss->closeScan(servoUT);
-				ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"MINOR_SERVO_CLOSE_SCAN_EPOCH %lld",servoUT));
+				ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"MINOR_SERVO_CLOSE_SCAN_EPOCH %llu",(unsigned long long)servoUT));
 				IRA::CString outstr;
 				IRA::CIRATools::timeToStr(servoUT,outstr);
 				//printf("tempo di chiusura (Servo): %s\n",(const char*)outstr);
@@ -467,7 +467,7 @@ ACS::Time CCore::closeScan(bool wait) throw (ComponentErrors::ComponentNotActive
 	try {
 		if (!CORBA::is_nil(m_receiversBoss)) {
 			m_receiversBoss->closeScan(receiversUT);
-			ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"RECEIEVERS_STOP_SCAN_EPOCH %lld",receiversUT));
+			ACS_LOG(LM_FULL_INFO,"CCore::closeScan()",(LM_DEBUG,"RECEIEVERS_STOP_SCAN_EPOCH %llu",(unsigned long long)receiversUT));
 			IRA::CString outstr;
 			IRA::CIRATools::timeToStr(receiversUT,outstr);
 			//printf("tempo di chiusura (receievers): %s\n",(const char*)outstr);

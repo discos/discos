@@ -2,10 +2,10 @@ import os
 import shutil
 import subprocess
 
-import unittest2
+import unittest
 
 
-class TestGetTemplateForTest(unittest2.TestCase):
+class TestGetTemplateForTest(unittest.TestCase):
     """Test the getTemplateForTest command"""
     
     def setUp(self):
@@ -25,4 +25,4 @@ class TestGetTemplateForTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

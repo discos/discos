@@ -322,6 +322,8 @@ public:
      */
     virtual ACS::doubleSeq * getTpi () throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual ACS::doubleSeq * getRms () throw (CORBA::SystemException,
+    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx) {return 0;};
 
     /**
      * Call this function in order to get a total power measure for each input channel. The measure is done when the inputs are directly
@@ -490,10 +492,6 @@ protected:
     virtual void stopSend()  throw (CORBA::SystemException, AVStopSendErrorEx) { };
 	
 private:
-	struct THeaderRecord {
-		Backends::TMainHeader header;
-		Backends::TSectionHeader chHeader[MAX_SECTION_NUMBER];
-	};
 	SmartPropertyPointer<ROuLongLong> m_ptime;
 	SmartPropertyPointer<ROstring> m_pbackendName;
 	SmartPropertyPointer<ROdoubleSeq> m_pbandWidth;

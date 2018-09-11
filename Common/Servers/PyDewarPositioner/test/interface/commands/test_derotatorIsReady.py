@@ -1,9 +1,9 @@
-import unittest2
+import unittest
 import mocker
 from DewarPositioner.DewarPositionerImpl import DewarPositionerImpl
 
 
-class DerotatorIsReadyTest(unittest2.TestCase):
+class DerotatorIsReadyTest(unittest.TestCase):
     """Test the derotatorIsReady command"""
 
     def test_IsReady(self):
@@ -15,4 +15,4 @@ class DerotatorIsReadyTest(unittest2.TestCase):
         self.assertEqual((success, answer), (True, 'True'))
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

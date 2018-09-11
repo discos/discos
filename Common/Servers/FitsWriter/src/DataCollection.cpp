@@ -74,17 +74,18 @@ void CDataCollection::saveMainHeaders(Backends::TMainHeader const * h,Backends::
 	printf("sampleSize: %ld\n",(long)m_mainH.sampleSize);
 
 	for (long j=0;j<m_mainH.sections;j++) {
-		printf("id: %ld\n",(long)m_sectionH->id);
-		printf("bins: %ld\n",(long)m_sectionH->bins);
-		printf("polarization: %ld\n",(long)m_sectionH->polarization);
-		printf("bandWidth: %lf\n",(double)m_sectionH->bandWidth);
-		printf("frequency: %lf\n",(double)m_sectionH->frequency);
-		printf("attenuation: %lf, %lf\n",(double)m_sectionH->attenuation[0],(double)m_sectionH->attenuation[1]);
-		printf("sampleRate: %lf\n",(double)m_sectionH->sampleRate);
-		printf("feed: %ld\n",(long)m_sectionH->feed);
-		printf("inputs: %ld\n",(long)m_sectionH->inputs);
-		printf("IF: %ld %ld\n",(long)m_sectionH->IF[0],(long)m_sectionH->IF[1]);
+		printf("id: %ld\n",(long)m_sectionH[j].id);
+		printf("bins: %ld\n",(long)m_sectionH[j].bins);
+		printf("polarization: %d\n",m_sectionH[j].polarization);
+		printf("bandWidth: %lf\n",m_sectionH[j].bandWidth);
+		printf("frequency: %lf\n",m_sectionH[j].frequency);
+		printf("attenuation: %lf, %lf\n",m_sectionH[j].attenuation[0],m_sectionH[j].attenuation[1]);
+		printf("sampleRate: %lf\n",m_sectionH[j].sampleRate);
+		printf("feed: %ld\n",(long)m_sectionH[j].feed);
+		printf("inputs: %ld\n",(long)m_sectionH[j].inputs);
+		printf("IF: %ld %ld\n",(long)m_sectionH[j].IF[0],(long)m_sectionH[j].IF[1]);
 	}*/
+
 	m_ready=true; // main headers are saved....before that no activity can take place	
 	//if (getIsNoData()) {
 	//	m_start=true;
@@ -385,7 +386,7 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 	////*******************************************************
 	IRA::CString outstr;
 	IRA::CIRATools::timeToStr(setup.startUt,outstr);
-	ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_NOTICE,"SUBSCAN IS %ld",setup.subScanId));
+	ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_NOTICE,"SUBSCAN IS %ld",(long)setup.subScanId));
 	ACS_LOG(LM_FULL_INFO,"CDataCollection::setSubScanSetup()",(LM_NOTICE,"REQUESTED_START_TIME WAS %s",(const char *)outstr));
 	///////////// DEBUGGING ***************************************
 	if (m_start && m_running) {

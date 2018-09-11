@@ -75,6 +75,7 @@
 */
 #define _ADD_EXTRA(OBJ,NAME,VALUE) OBJ.addData(NAME,VALUE)
 
+
 /**
  * Used to read extra information from a completion or exception
  * @param OBJ object (completion or exception) to which extra data is appended

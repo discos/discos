@@ -150,6 +150,8 @@ public:
      */
     virtual ACS::doubleSeq * getTpi () 
     	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual ACS::doubleSeq * getRms () 
+    	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx) {return 0;};
     /**
 	     * This method is used to inform the component about the proper conversion factor between Kelvin and counts. This value is used for the tsys computation during
 	     * the sampling. If this method is never issued the default value of 1 will be used for all the channels.
@@ -494,11 +496,6 @@ protected:
 
 
 private:
-	struct THeaderRecord {
-		Backends::TMainHeader header;
-		Backends::TSectionHeader chHeader[MAX_INPUT_NUMBER];
-	};
-	
 	SmartPropertyPointer<ROuLongLong> m_ptime;
 	SmartPropertyPointer<ROstring> m_pbackendName;
 	SmartPropertyPointer<ROdoubleSeq> m_pbandWidth;

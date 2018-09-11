@@ -125,14 +125,14 @@ int main(int argc, char *argv[]) {
 
 	time_type tt;
 	tt="2014-110-14:20:23.56";
-	printf("valore di tt: %s, %lld\n",(const char *)tt,(ACS::Time)tt);
+	printf("valore di tt: %s, %lu\n",(const char *)tt,(ACS::Time)tt);
 
 	time_type tt1;
 	tt1=12233434334522300ll;
-	printf("valore di tt1: %s, %lld\n",(const char *)tt1,(ACS::Time)tt1);
+	printf("valore di tt1: %s, %lu\n",(const char *)tt1,(ACS::Time)tt1);
 
 	interval_type itt(864010000000ll);
-	printf("valore di itt: %s, %lld\n",(const char *)itt,(ACS::Time)itt);
+	printf("valore di itt: %s, %lu\n",(const char *)itt,(ACS::Time)itt);
 
 	longSeq_type lseq;
 	lseq="10;12;14;13;22";

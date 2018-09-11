@@ -1,4 +1,4 @@
-import unittest2
+import unittest
 import random
 import time
 from maciErrType import CannotGetComponentEx
@@ -7,7 +7,7 @@ from DewarPositioner.positioner import Positioner, NotAllowedError
 from DewarPositioner.cdbconf import CDBConf
 
 
-class PositionerParkTest(unittest2.TestCase):
+class PositionerParkTest(unittest.TestCase):
 
     def setUp(self):
         self.cdbconf = CDBConf()
@@ -39,4 +39,4 @@ class PositionerParkTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

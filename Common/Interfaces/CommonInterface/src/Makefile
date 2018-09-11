@@ -38,14 +38,12 @@ MAKE_PDF = ON
 # -----------------------------
 EXECUTABLES     =
 EXECUTABLES_L   = TestReceivers TestManagement #TestAntenna
+
 TestReceivers_OBJECTS = ReceiversModule
-TestReceivers_LIBS= ReceiversDefinitionsStubs baci maci
+TestReceivers_LIBS= baci maci
 
 TestManagement_OBJECTS = ManagementModule
-TestManagement_LIBS= ManagmentDefinitionsStubs ManagementErrors baci maci
-
-#TestAntenna_OBJECTS= AntennaModule
-#TestAntenna_LIBS = AntennaDefinitionsStubs AntennaErrors ManagmentDefinitionsStubs ManagementErrors baci maci
+TestManagement_LIBS= ManagementErrors baci maci
 
 #
 # <brief description of xxxxx program>
@@ -60,7 +58,7 @@ xxxxx_LIBS      =
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        = ReceiversModule.h ManagementModule.h AntennaModule.h
+INCLUDES        = ReceiversModule.h ManagementModule.h AntennaModule.h 
 
 #
 # Configuration Database Files
@@ -73,6 +71,15 @@ CDB_SCHEMAS = Managment Antenna Receivers
 IDL_FILES = ManagmentDefinitions AntennaDefinitions ReceiversDefinitions BackendsDefinitions MinorServoDefinitions
 TAO_IDLFLAGS =
 USER_IDL =
+ReceiversDefinitionsStubs_LIBS = baciStubs maciStubs
+ManagmentDefinitionsStubs_LIBS = baciStubs maciStubs ManagementErrorsStubs
+AntennaDefinitionsStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+							   AntennaErrorsStubs
+BackendsDefinitionsStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+							   BackendsErrorsStubs
+
+MinorServoDefinitionsStubs_LIBS = baciStubs maciStubs
+
 #
 # Jarfiles and their directories
 #

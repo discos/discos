@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"GOT_COMPONENENT: %s",(const char *)backend));
-	ACS_LOG(LM_FULL_INFO,"::main()",(LM_DEBUG,"Reference is: %d",sender.ptr()));
+	ACS_LOG(LM_FULL_INFO,"::main()",(LM_DEBUG,"Reference is: %ld",(long)sender.ptr()));
 	
 	try {
 		recv=client.getComponent<Management::DataReceiver>((const char *)writer,0,true);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}	
 	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"GOT_COMPONENENT: %s",(const char *)writer));
-	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"Reference is: %d",recv.ptr()));
+	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"Reference is: %ld",(long)recv.ptr()));
 	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"ALL_COMPONENTS_RETRIEVED"));
 	try {
 		recv->reset();

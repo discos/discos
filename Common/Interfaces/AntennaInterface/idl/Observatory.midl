@@ -51,6 +51,12 @@ module Antenna {
 		 * This machine should be synchronized via NTP at the UTC time.
 		*/
 		readonly attribute ACS::ROdouble julianDay;
+
+		/**
+		 * This property is the current observatory time as a Modified Julian day. In practical this is the time reported by the local machine that runs the component.
+		 * This machine should be synchronized via NTP at the UTC time.
+		*/
+		readonly attribute ACS::ROdouble MJD;
 		
 		/**
 		 * This property is the Greenwich Apparent Sidereal Time for the current date.

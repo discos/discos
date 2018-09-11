@@ -1,0 +1,68 @@
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Giuseppe Carboni <gcarboni@oa-cagliari.inaf.it>
+\***************************************************************/
+
+#ifndef __SRT_IFDISTRIBUTOR14__IDL__ 
+#define __SRT_IFDISTRIBUTOR14__IDL__ 
+
+#include <baci.idl>
+#include "GenericIFDistributor.idl"
+
+#pragma prefix "alma"
+
+
+module Receivers {
+ 
+    interface SRTIFDistributor14: GenericIFDistributor, ACS::CharacteristicComponent
+    {
+        /** Take the channel id and set its attenuator value
+         *  
+         * The id parameter is an integer starting from 0. For instance,
+         * if the backend has 6 channels, id will be in (0, 5).  This id
+         * value does not match the attenuator address, so we have to
+         * read a table and get the address associated to this id.
+         *
+         * @param id the channel ID
+         * @param value the attenuation
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void setAttenuation(in long id, in double value) raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Take the channel id and returns its attenuation value
+         *
+         * The id parameter is an integer starting from 0. For instance,
+         * if the backend has 6 channels, id will be in (0, 5).  This id
+         * value does not match the attenuator address, so we have to
+         * read a table and get the address associated to this id.
+         *
+         * @return the current attenuation value for the given channel id
+         */
+        double getAttenuation(in long id) raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Set the switch
+         * 
+         * The first 4 channels of each backend have in input some switches.
+         * This switches allow to swap the signal.  I.e. the signal of the
+         * first channel will be swapped with the fourth channel, and so on.
+         * When the enable argument is False, the swapping does not occour,
+         * and this is the normal and default configuration.
+         * 
+         * @param enable if False, nothing will be swapped
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void setSwitch(in boolean enable) raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Get the switch status
+         *
+         * @return a boolean which tells if the backend switch is enabled.
+         */
+        boolean getSwitch() raises (ComponentErrors::ComponentErrorsEx);
+    };
+};
+
+#endif

@@ -90,6 +90,8 @@ WPServoImpl::WPServoImpl(
 WPServoImpl::~WPServoImpl() {
     AUTO_TRACE("WPServoImpl::~WPServoImpl()"); 
 
+    bool remove_instance_counter = false;
+
     try {
         pthread_mutex_lock(&destr_mutex); 
         if(m_instance_counter != NULL) {
@@ -117,11 +119,13 @@ WPServoImpl::~WPServoImpl() {
                 if(m_cmdPos_list != NULL) {
                     delete m_cmdPos_list;
                 }
-                if(m_instance_counter != NULL) {
-                    delete m_instance_counter;
-                }
+                remove_instance_counter = true;
             }
             secure_ptr.Release();
+
+            if(remove_instance_counter) {
+                delete m_instance_counter;
+            }
         }
 
         if (m_cdb_ptr) {

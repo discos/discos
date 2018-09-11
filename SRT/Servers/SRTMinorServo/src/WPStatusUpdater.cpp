@@ -212,7 +212,11 @@ void WPStatusUpdater::runLoop()
                 }
 
                 if(diff > MAX_TIME_DIFF) {
-                    ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: abs(actual_time - actual_pos_time) = %llu", diff));
+                    ACS_SHORT_LOG((
+                        LM_WARNING, 
+                        "In WPStatusUpdater: abs(actual_time - actual_pos_time) = %llu",
+                        static_cast<unsigned long long>(diff)
+                    ));
                 }
                 else {
                     CSecAreaResourceWrapper<map<int, vector< PositionItem> > > lst_secure_requests = (m_params->cmd_pos_list)->Get();
@@ -225,7 +229,11 @@ void WPStatusUpdater::runLoop()
                             (m_params->expire_time)->cmdPos[address] = (((*lst_secure_requests)[address])[idx]).position;
 
                             if(act_pos.length() != ((m_params->expire_time)->cmdPos[address]).length()) {
-                                ACS_SHORT_LOG((LM_ERROR, "@%d: Wrong number of axes in the actual position.", getTimeStamp()));
+                                ACS_SHORT_LOG((
+                                    LM_ERROR,
+                                    "@%llu: Wrong number of axes in the actual position.",
+                                    static_cast<unsigned long long>(getTimeStamp())
+                                ));
                             } 
                             else { 
                                 // Updating of actual position property
@@ -255,7 +263,11 @@ void WPStatusUpdater::runLoop()
                         }
                         catch(PosNotFoundEx) {
                             if(m_clean_counter[address]) {
-                                ACS_SHORT_LOG((LM_WARNING, "In WPStatusUpdater: cmd position at @%llu not found!", act_pos_time));
+                                ACS_SHORT_LOG((
+                                    LM_WARNING,
+                                    "In WPStatusUpdater: cmd position at @%llu not found!",
+                                    static_cast<unsigned long long>(act_pos_time)
+                                ));
                                 m_clean_counter[address] = false;
                             }
                             else
@@ -285,12 +297,20 @@ void WPStatusUpdater::runLoop()
     }
     catch (const std::exception &e) {
         pthread_mutex_unlock(m_params->status_mutex); 
-        ACS_SHORT_LOG((LM_ERROR, "@%ll: unexpected error updating the status.", timestamp));
+        ACS_SHORT_LOG((
+            LM_ERROR,
+            "@%llu: unexpected error updating the status.",
+            static_cast<unsigned long long>(timestamp)
+        ));
         ACS_SHORT_LOG((LM_ERROR, e.what()));
     }
     catch (...) {
         pthread_mutex_unlock(m_params->status_mutex); 
-        ACS_SHORT_LOG((LM_ERROR, "@%ll: unexpected error updating the status.", timestamp));
+        ACS_SHORT_LOG((
+            LM_ERROR,
+            "@%llu: unexpected error updating the status.",
+            static_cast<unsigned long long>(timestamp)
+        ));
     }
 }
  

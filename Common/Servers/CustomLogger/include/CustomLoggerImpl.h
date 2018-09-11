@@ -37,6 +37,10 @@
 #include <expat_log_parsing.h>
 
 #define WRITER_THREAD_NAME "logwriter"
+/* We used acscommon::LOGGING_CHANNEL_KIND in ACS-8.2, but
+ * it is no more available.  That is why we are defining it.
+ */ 
+const char *const LOGGING_CHANNEL_KIND = "";
 
 /**
  * Event Type used in the ACS Notification Channel.
@@ -104,8 +108,8 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
         nc::SimpleSupplier *m_loggingSupplier;
         CosNaming::NamingContext_var namingContext_m;
         CosNotifyChannelAdmin::EventChannel_var ec_;
-        CosNotifyChannelAdmin::InterFilterGroupOperator ifgop_;
-        CosNotifyChannelAdmin::ConsumerAdmin_var consumer_admin_;
+        //CosNotifyChannelAdmin::InterFilterGroupOperator ifgop_;
+        CosNotifyChannelAdmin::ConsumerAdmin_var consumer_admin_; //*
         CustomStructuredPushConsumer* consumer_;
 	/**
 	* Filter the log records.
@@ -147,6 +151,15 @@ class CustomLoggerImpl: public virtual baci::CharacteristicComponentImpl,
          */
         void addToLoggingQueue(LogRecord_sp log_record);
         /**@}*/
+        /**
+         *
+        */
+        void createConsumerAdmin();
+        /**
+         * get the reference to notification channel
+         * @throw ComponentErrors::CORBAProblemExImpl
+        */
+        void resolveNotifyChannel(const char *channel_binding_name) throw (ComponentErrors::CORBAProblemExImpl);
 };
 
 /**

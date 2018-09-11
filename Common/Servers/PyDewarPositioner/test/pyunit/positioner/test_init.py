@@ -1,11 +1,11 @@
-import unittest2
+import unittest
 import random
 import time
 from DewarPositioner.positioner import Positioner, NotAllowedError
 from DewarPositioner.cdbconf import CDBConf
 
 
-class PositionerInitTest(unittest2.TestCase):
+class PositionerInitTest(unittest.TestCase):
 
     def test___init__(self):
         """Verify the right behavior of the initializer"""
@@ -19,4 +19,4 @@ class PositionerInitTest(unittest2.TestCase):
         self.assertRaises(NotAllowedError, p.startUpdating, 'axis', 'sector', 1, 1, None, None)
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

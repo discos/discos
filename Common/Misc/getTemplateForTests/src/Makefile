@@ -12,7 +12,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = getTemplateForTests
+SCRIPTS         = getTemplateForTests
 PY_MODULES         = gettemplatefortests
 
 #
@@ -53,6 +53,7 @@ install_templates:
 	@echo " . . . templates installed"
 
 install : install_all install_templates
+	@chmod 700 $(INTROOT)/bin/getTemplateForTests
 	@echo " . . . installation done"
 
 

@@ -5,7 +5,7 @@
 #*****************************************
 
 PY_PACKAGES = SRTMSCUSimImpl
-PY_SCRIPTS = srt-mscu-sim
+SCRIPTS = srt-mscu-sim
 
 # -----------------
 # Include Standards

@@ -13,12 +13,12 @@
 
 <Code name="NoError" shortDescription="No error" description="No error condition found"/>
 
-<ErrorCode name="NoSetting" shortDescription="Device is not set" description=""/>
+<ErrorCode name="NoSetting" shortDescription="Device is not set" description=" "/>
 
-<ErrorCode name="ErrorConfiguration" shortDescription="Specifiche is not correct" description=""/>
+<ErrorCode name="ErrorConfiguration" shortDescription="Specifiche is not correct" description=" "/>
 
-<ErrorCode name="DisableChIn" shortDescription="Hardware Channels is disable" description=""/>
+<ErrorCode name="DisableChIn" shortDescription="Hardware Channels is disable" description=" "/>
 
-<ErrorCode name="NoImplemented" shortDescription="Command is not implemented" description=""/>
+<ErrorCode name="NoImplemented" shortDescription="Command is not implemented" description=" "/>
 
 </Type>

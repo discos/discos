@@ -1,4 +1,4 @@
-import unittest2
+import unittest
 import threading
 import random
 import time
@@ -8,7 +8,7 @@ from DewarPositioner.positioner import Positioner, PositionerError
 from DewarPositioner.cdbconf import CDBConf
 
 
-class PositionerStopTest(unittest2.TestCase):
+class PositionerStopTest(unittest.TestCase):
 
     def test_stopped(self):
         try:
@@ -42,4 +42,4 @@ class PositionerStopTest(unittest2.TestCase):
         self.assertEqual(p.isTerminated(), True)
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

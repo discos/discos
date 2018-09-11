@@ -1,9 +1,9 @@
-import unittest2
+import unittest
 import time
 from DewarPositioner.DewarPositionerImpl import DewarPositionerImpl
 
 
-class DerotatorParkTest(unittest2.TestCase):
+class DerotatorParkTest(unittest.TestCase):
     """Test the derotatorPark command"""
 
     def test_park(self):
@@ -21,4 +21,4 @@ class DerotatorParkTest(unittest2.TestCase):
         self.assertEqual((success, answer), (True, 'False'))
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()
