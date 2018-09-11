@@ -714,7 +714,12 @@ bool CIRATools::radToHourAngle(const double& rad,IRA::CString& outString,char de
 	int hmsf[4];
 	double ranged=dmod(rad,D2PI); // put the angle in the range -2PI..2PI
 	slaDr2tf(3,ranged,&sign,hmsf); // convert it into hour minute second and fraction
-	outString.Format("%c%02ld%c%02ld%c%02ld.%03ld",sign,hmsf[0],delimiter,hmsf[1],delimiter,hmsf[2],hmsf[3]);
+	if (sign=='+') {
+		outString.Format("%02d%c%02d%c%02d.%03d",hmsf[0],delimiter,hmsf[1],delimiter,hmsf[2],hmsf[3]);
+	}
+	else {
+		outString.Format("%c%02d%c%02d%c%02d.%03d",sign,hmsf[0],delimiter,hmsf[1],delimiter,hmsf[2],hmsf[3]);
+	}
 	return true;
 }
 
@@ -775,7 +780,12 @@ bool CIRATools::radToSexagesimalAngle(const double& rad,IRA::CString& outString,
 	double ranged=dmod(rad,D2PI); // put the angle in the range -2PI..2PI
 	// convert it into hour minute second anf fraction..keeping track of the sign
 	slaDr2af(3,ranged,&sign,dmsf); 
-	outString.Format("%c%02ld%c%02ld%c%02ld.%03ld",sign,dmsf[0],delimiter,dmsf[1],delimiter,dmsf[2],dmsf[3]);
+	if (sign=='+') {
+		outString.Format("%02d%c%02d%c%02d.%03d",dmsf[0],delimiter,dmsf[1],delimiter,dmsf[2],dmsf[3]);
+	}
+	else {
+		outString.Format("%c%02d%c%02d%c%02d.%03d",sign,dmsf[0],delimiter,dmsf[1],delimiter,dmsf[2],dmsf[3]);
+	}
 	return true;
 }
 

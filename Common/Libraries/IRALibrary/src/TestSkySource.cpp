@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
 	IRA::CIRATools::radToHourAngle(ra,outra);
 	IRA::CIRATools::radToSexagesimalAngle(dec,outdec);
-
+	
 	_CP_ printf("SOURCE:\t\t\tname %s, ra2000 %.8lf° (%s), dec2000 %.8lf° (%s)\n",(const char *)sourceName,ra*DR2D,(const char *)outra,dec*DR2D,(const char *)outdec);
 
 	if (siteArg=="") {
