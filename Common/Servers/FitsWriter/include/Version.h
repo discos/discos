@@ -19,8 +19,9 @@
 #define FITS_VERSION7 "V.1.01"
 #define FITS_VERSION8 "V.1.1"
 #define FITS_VERSION9 "V.1.11"
+#define FITS_VERSION10 "V.1.12"
 
-#define CURRENT_VERSION FITS_VERSION9
+#define CURRENT_VERSION FITS_VERSION10
 
 #define DEFAULT_COMMENT CURRENT_VERSION" Created by  S. Righini, M. Bartolini  & A. Orlati"
 
@@ -33,7 +34,7 @@
 #define HISTORY7 FITS_VERSION7" New keywords in FEED TABLE header to describe derotator configuration"
 #define HISTORY8 FITS_VERSION8" Summary.fits file included in order to describe the scan configuration"
 #define HISTORY9 FITS_VERSION9" added the keyword SIGNAL in main header of each sub scan fits"
-
+#define HISTORY10 FITS_VERSION10" frequency and bandwidth columns added to Section table reporting backend sampled band"
 
 
 #endif /* VERSION_H_ */
