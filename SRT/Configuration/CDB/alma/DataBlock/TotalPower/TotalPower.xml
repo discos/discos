@@ -34,6 +34,20 @@
 </Configuration>
 
 <Configuration>
+	<configurationID>XB</configurationID>
+ 	<sections>1</sections>
+ 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<inputPort>BWG</inputPort>
+	<inputPortDB>5</inputPortDB>
+ 	<inputPortBW>2350</inputPortBW>
+ 	<beams>1</beams>
+ 	<section_boards>13</section_boards>
+ 	<polarizations>R</polarizations>
+ 	<feed>0</feed>
+ 	<IF>0</IF>
+</Configuration>
+
+<Configuration>
 	<configurationID>LLP</configurationID>
  	<sections>2</sections>
  	<calSwitchingEnabled>TRUE</calSwitchingEnabled>

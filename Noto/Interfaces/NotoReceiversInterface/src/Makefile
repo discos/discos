@@ -11,6 +11,8 @@ CDB_SCHEMAS =
 # IDL Files and flags
 IDL_FILES = NotoAllReceivers
 
+NotoAllReceiversStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
+
 # list of all possible C-sources (used to create automatic dependencies)
 CSOURCENAMES = \
 	$(foreach exe, $(EXECUTABLES) $(EXECUTABLES_L), $($(exe)_OBJECTS)) \

@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 		throw Impl;
 	}
 	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"GOT_COMPONENENT_ANTENNABOSS"));
-	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_DEBUG,"Reference is: %d",boss.ptr()));
+	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_DEBUG,"Reference is: %ld",(long int)boss.ptr()));
 	try {
 		info=client.manager()->get_default_component(client.handle(),"IDL:alma/Antenna/Observatory:1.0");
 		observatory=Antenna::Observatory::_narrow(info->reference);
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 		throw Impl;
 	}
 	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"GOT_COMPONENENT_OBSERVATORY"));
-	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_DEBUG,"Reference is: %d",observatory.ptr()));
+	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_DEBUG,"Reference is: %ld",(long int)observatory.ptr()));
 	ACS_LOG(LM_FULL_INFO,"coordinateGrabber::main()",(LM_INFO,"ALL_COMPONENTS_RETRIEVED"));
 	ACE_OS::sleep(1);	
 	try	{	

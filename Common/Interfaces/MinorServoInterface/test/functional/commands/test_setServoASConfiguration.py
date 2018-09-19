@@ -3,7 +3,7 @@ from __future__ import with_statement
 import os
 import math
 import time
-import unittest2
+import unittest
 
 import MinorServo
 import Management
@@ -17,10 +17,10 @@ from Acspy.Common.TimeHelper import getTimeStamp
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 
-class TestSetServoASConfigurationCmd(unittest2.TestCase):
+class TestSetServoASConfigurationCmd(unittest.TestCase):
     """Test the setServoASConfiguration command"""
 
-    telescope = os.getenv('TARGETSYS')
+    telescope = os.getenv('STATION')
 
     def setUp(self):
         self.client = PySimpleClient()
@@ -39,6 +39,6 @@ class TestSetServoASConfigurationCmd(unittest2.TestCase):
 
 if __name__ == '__main__':
     if 'Configuration' in os.getenv('ACS_CDB'):
-        unittest2.main() # Real test using the antenna CDB
+        unittest.main() # Real test using the antenna CDB
     else:
         simunittest.run(TestSetServoASConfigurationCmd)

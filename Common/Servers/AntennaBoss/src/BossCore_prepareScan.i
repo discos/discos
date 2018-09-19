@@ -156,7 +156,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 				bool result;
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_ON_SECONDARY_TRACK"));
 				currentGeneratorFlux=prepareOTFSecondary(useInternals,secondary,secSourceName,secRa,secDec,secLon,secLat,secVrad,secVelFrame,secVelDef,result);
-				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"GENERATORE %u",currentGeneratorFlux.in()));
+				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"GENERATORE %lu",(unsigned long)currentGeneratorFlux.in()));
 				if (!result) {
 					_EXCPT(AntennaErrors::SecondaryScanErrorExImpl,ex,"CBossCore::prepareScan()");
 					throw ex;
@@ -194,7 +194,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 				bool result;
 				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"OTF_ON_LAST_COMMANDED_TRACK"));
 				currentGeneratorFlux=prepareOTFSecondary(useInternals,lastPar,secSourceName,secRa,secDec,secLon,secLat,secVrad,secVelFrame,secVelDef,result);
-				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"GENERATORE %u",currentGeneratorFlux.in()));
+				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"GENERATORE %lu",(unsigned long)currentGeneratorFlux.in()));
 				if (!result) {
 					_EXCPT(AntennaErrors::SecondaryScanErrorExImpl,ex,"CBossCore::prepareScan()");
 					throw ex;
@@ -240,12 +240,12 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		if (!useInternals) {
 			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"LOADING_REQUIRED_PRIMARY_GENERATOR"));
 			currentGenerator=loadPrimaryGenerator(generatorType);
-			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"PRIMARY_GENERATOR_IS: %x",currentGenerator.in()));
+			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"PRIMARY_GENERATOR_IS: %lx",(unsigned long)currentGenerator.in()));
 		}
 		else {
 			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"LOADING_REQUIRED_INTERNAL_GENERATOR"));
 			currentGenerator=loadInternalGenerator(generatorType);
-			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"INTERNAL_GENERATOR_IS: %x",currentGenerator.in()));
+			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"INTERNAL_GENERATOR_IS: %lx",(unsigned long)currentGenerator.in()));
 		}
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
@@ -407,7 +407,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			double roundAz=slaDranrm(m_lastEncoderAzimuth);
 			section=tracker->setSubScan(primary.targetName,roundAz,m_lastAzimuthSection,m_lastEncoderElevation,m_lastEncoderRead,primary.otf.lon1,primary.otf.lat1,primary.otf.lon2,primary.otf.lat2,primary.otf.coordFrame,
 					primary.otf.geometry,primary.otf.subScanFrame,primary.otf.description,primary.otf.direction,startUT,primary.otf.subScanDuration);
-			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"SECTION_IS: %ld",section));
+			ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"SECTION_IS: %d",section));
 			if (secondaryActive) {
 				copyTrack(lastPar,secondary);
 			}

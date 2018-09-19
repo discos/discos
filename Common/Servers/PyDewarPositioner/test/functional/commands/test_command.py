@@ -1,9 +1,9 @@
-import unittest2
+import unittest
 import mocker
 from DewarPositioner.DewarPositionerImpl import DewarPositionerImpl
 
 
-class CommandTest(unittest2.TestCase):
+class CommandTest(unittest.TestCase):
     """Test the DewarPositioner.command() method"""
 
     def setUp(self):
@@ -45,4 +45,4 @@ class CommandTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

@@ -5,6 +5,7 @@
 #include <slalib.h>
 #include <slamac.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 

@@ -169,7 +169,14 @@ CSocket::OperationResult CSocket::Connect(CError& Err,CString IPAddr,WORD Port)
 		if (!connect(m_iSocket,(struct sockaddr *)&addr,sizeof(struct sockaddr))) {
 			return SUCCESS;
 		}
-		else if ((errno==EINPROGRESS) || (errno==EALREADY) && (getMode()==NONBLOCKING)) {
+		/*
+			migration to 64 bits. the older If statement was warned by the compiler. The suggestion was to add a parenthesis.
+			"else if ((errno==EINPROGRESS) || (errno==EALREADY) && (getMode()==NONBLOCKING)) {"
+			The general rule of operator precedence is && before !!. Tha new code cahnges this an so changes radically what this code is doing.
+			The new code reflects what I think it should do (evaluate || before &&).
+			
+		*/
+		else if (((errno==EINPROGRESS) || (errno==EALREADY)) && (getMode()==NONBLOCKING)) {
 			if ((m_wAsyncFlag&E_CONNECT)==E_CONNECT) setStatus(CONNECTING);
 			return WOULDBLOCK;
 		}
@@ -332,7 +339,7 @@ int CSocket::Send(CError& Err,const void *Buff,WORD BuffLen,WORD Port,CString *A
 		return FAIL;
 	}
 	if (getType()==STREAM) {   // stream sockets
-		Res=send(m_iSocket,Buff,BuffLen,0);
+		Res=send(m_iSocket,Buff,BuffLen,MSG_NOSIGNAL);
 	}
 	else { // datagram sockets
 		if ((Addr==NULL) || (Port==0)) {

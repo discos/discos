@@ -55,7 +55,6 @@ USER_LIB = 	-lACE \
 		-lQtDesigner \
 		-lQtGui \
 		-lQtNetwork \
-		-lQtOpenGL \
 		-lQtSql \
 		-lQtSvg \
 		-lQtTest \
@@ -301,6 +300,8 @@ $(QT_UI_FILES_EXTERN_MOC_H): moc_%.cpp: ../include/%.h $(QT_UI_FILES_EXTERN_H)
 
 $(QT_UI_FILES_EXTERN_MOC_CPP): moc_%.cpp: %.cpp $(QT_UI_FILES_EXTERN_CPP)
 	$(QTDIR)/bin/moc -o $@ $<
+
+.DEFAULT_GOAL := all
 
 #qt:     $(QT_UI_FILES_H) $(QT_UI_FILES_CPP) $(QT_UI_FILES_MOC) $(QT_UI_FILES_EXTERN_MOC_H) $(QT_UI_FILES_EXTERN_MOC_CPP)
 qt:     $(QT_UI_FILES_H) $(QT_UI_FILES_MOC) $(QT_UI_FILES_EXTERN_MOC_H) $(QT_UI_FILES_EXTERN_MOC_CPP)

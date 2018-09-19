@@ -29,6 +29,20 @@ IDL_FILES = DataReceiver FitsWriter MBFitsWriter Scheduler ExternalClients Calib
 IDL_TAO_FLAGS =
 USER_IDL =
 
+DataReceiverStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+						 bulkDataReceiverStubs ComponentErrorsStubs
+FitsWriterStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+					   DataReceiverStubs
+MBFitsWriterStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+						 DataReceiverStubs
+SchedulerStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+					  AntennaDefinitionsStubs ComponentErrorsStubs DataReceiverStubs
+ExternalClientsStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+							ComponentErrorsStubs
+CalibrationToolStubs_LIBS = baciStubs maciStubs DataReceiverStubs
+CustomLoggerStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+						 ComponentErrorsStubs
+
 #
 # other files to be installed
 #----------------------------

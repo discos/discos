@@ -1,13 +1,13 @@
 import random
 import time
-import unittest2
+import unittest
 from maciErrType import CannotGetComponentEx
 from DewarPositioner.positioner import Positioner, NotAllowedError
 from DewarPositioner.cdbconf import CDBConf
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class GoTo(unittest2.TestCase):
+class GoTo(unittest.TestCase):
 
     def setUp(self):
         self.cdbconf = CDBConf()
@@ -39,4 +39,4 @@ class GoTo(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

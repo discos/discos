@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import time
 from ComponentErrors import ValidationErrorEx, NotAllowedEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class CustomTest(unittest2.TestCase):
+class CustomTest(unittest.TestCase):
     """Test the CUSTOM Configuration"""
 
     def setUp(self):
@@ -27,4 +27,4 @@ class CustomTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

@@ -240,10 +240,18 @@ if(doppio){//#ifdef DOPPIO
     // inserito un ulteriore controllo (i < Xspec.GetNSezioni())
     // per evitare un segmentation fault della GetModoPol
 	//while((spec[i].GetModoPol()) && (i < 7))	{
-	while((spec[i].GetModoPol()) && (i < Xspec.GetNSezioni()))	{
+	/*while((spec[i].GetModoPol()) && (i < Xspec.GetNSezioni()))	{
         //printf("7 modoPol = %d\n", spec[i].GetModoPol());
         i++;
-    }
+        // inserito un ulteriore controllo (i==Xspec.GetNSezioni())
+        // per evitare un segmentation fault della GetModoPol
+        printf("nsez = %d\n", Xspec.GetNSezioni());
+        if (i==Xspec.GetNSezioni()) {
+            printf("break\n");
+            break;
+        }
+    }*/
+        i=Xspec.GetNSezioni()-1;
 	while((!(spec[i].GetModoPol()))&&(i<Xspec.GetNSezioni())){
 		j=i;
 		temp=spec[i];

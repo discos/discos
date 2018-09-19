@@ -1,4 +1,4 @@
-import unittest2
+import unittest
 import random
 import time
 from maciErrType import CannotGetComponentEx
@@ -8,7 +8,7 @@ from DewarPositionerMockers.mock_components import MockDevice, Property, Complet
 
 import mocker
 
-class PositionerStartUpdatingTest(unittest2.TestCase):
+class PositionerStartUpdatingTest(unittest.TestCase):
 
     def setUp(self):
         self.m = mocker.Mocker()
@@ -152,4 +152,4 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

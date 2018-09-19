@@ -23,7 +23,8 @@
         schemaLocation="Managment.xsd"/>
 
     <xs:complexType name="SRTKBandDerotatorType">
-
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
         <xs:sequence>
             <!-- Engine position (degree) -->
             <xs:element name="enginePosition" type="baci:ROdouble"/>
@@ -113,6 +114,9 @@
         <xs:attribute name="TrackingDelta" type="xs:double" use="required" />
         <!-- Expire time of ICD position request in seconds. For instance: 0.001 for 1ms-->
         <xs:attribute name="PositionExpireTime" type="xs:double" use="required" />
+
+      </xs:extension>
+     </xs:complexContent>
     </xs:complexType>
     <xs:element name="SRTKBandDerotator" type="SRTKBandDerotatorType"/>
 

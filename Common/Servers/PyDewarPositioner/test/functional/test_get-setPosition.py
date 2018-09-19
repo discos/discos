@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import unittest2
+import unittest
 import time
 from ComponentErrors import ComponentErrorsEx
 from maciErrType import CannotGetComponentEx
@@ -8,7 +8,7 @@ from Antenna import ANT_NORTH
 from Management import  MNG_TRACK
 
 
-class GetSetPositionTest(unittest2.TestCase):
+class GetSetPositionTest(unittest.TestCase):
     """Test the DewarPositioner.getPosition() method"""
     def setUp(self):
         client = PySimpleClient()
@@ -44,4 +44,4 @@ class GetSetPositionTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

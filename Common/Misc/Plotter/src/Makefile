@@ -68,6 +68,7 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@chmod 700 $(INTROOT)/bin/plotter
 	@echo " . . . installation done"
 
 

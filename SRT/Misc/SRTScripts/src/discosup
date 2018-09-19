@@ -1,0 +1,108 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# Istituto Nazionale di Astrofisica                                                                     
+# 
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                  when            What                                             
+# Andrea Orlati(andrea.orlati@inaf.it) 30/06/2018      Creation                                  
+#************************************************************************
+#   NAME
+# 
+#   SYNOPSIS
+# 
+#   DESCRIPTION
+#
+#   Starts the containers required by discos, SRT flavour
+#
+#   FILES
+#
+#   ENVIRONMENT
+#
+#   RETURN VALUES
+#
+#   CAUTIONS
+#
+#   EXAMPLES
+#
+#   SEE ALSO
+#
+#   BUGS
+
+#MASTERHOST will be replaced by make file @installation time with proper server address
+
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStart && touch $ACS_TMP/acsDone.lock'"
+while ! [ -f $ACS_TMP/acsDone.lock ];
+do
+	echo #
+    sleep 1
+done
+rm -f $ACS_TMP/acsDone.lock
+echo "...ACS is up and running!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp AntennaBossContainer > /dev/null 2>&1 &'"
+echo "...AntennaBossContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp AntennaContainer > /dev/null 2>&1 &'"
+echo "...AntennaContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp CalibrationToolContainer > /dev/null 2>&1 &'"
+echo "...CalibrationToolContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp DerotatorContainer > /dev/null 2>&1 &'"
+echo "...DerotatorContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -py DerotatorPositionerContainer > /dev/null 2>&1 &'"
+echo "...DerotatorPositionerContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp FitsZillaContainer > /dev/null 2>&1 &'"
+echo "...FitsZillaContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -py LocalOscillatorLPContainer > /dev/null 2>&1 &'"
+echo "...LocalOscillatorLPContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp LoggerContainer > /dev/null 2>&1 &'"
+echo "...LoggerContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp MinorServoBossContainer > /dev/null 2>&1 &'"
+echo "...MinorServoBossContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp MinorServoContainer > /dev/null 2>&1 &'"
+echo "...MinorServoContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp MountContainer > /dev/null 2>&1 &'"
+echo "...MountContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp PointContainer > /dev/null 2>&1 &'"
+echo "...PointContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -py PyIFDistributorContainer > /dev/null 2>&1 &'"
+echo "...PyIFDistributorContainer!"  
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp ReceiversContainer > /dev/null 2>&1 &'"
+echo "...ReceiversContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SardaraContainer > /dev/null 2>&1 &'"
+echo "...RoachContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRT7GHzContainer > /dev/null 2>&1 &'"
+echo "...SRT7GHzContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTKBandContainer > /dev/null 2>&1 &'"
+echo "...SRTKBandContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTLPBandContainer > /dev/null 2>&1 &'"
+echo "...SRTLPBandContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp TotalPowerContainer > /dev/null 2>&1 &'"
+echo "...TotalPowerContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp WeatherStationContainer > /dev/null 2>&1 &'"
+echo "...WeatherStationContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp XContainer > /dev/null 2>&1 &'"
+echo "...XContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp ExternalClientsContainer > /dev/null 2>&1 &'"
+echo "...ExternalClientsContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp RFIMonitoringContainer > /dev/null 2>&1 &'"
+echo "...RFIMonitoringContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTActiveSurfaceContainer > /dev/null 2>&1 &'"
+echo "...SRTActiveSurfaceContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTActiveSurfaceContainer01 > /dev/null 2>&1 &'"
+echo "...SRTActiveSurfaceContainer01!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTActiveSurfaceContainer02 > /dev/null 2>&1 &'"
+echo "...SRTActiveSurfaceContainer02!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTActiveSurfaceContainer03 > /dev/null 2>&1 &'"
+echo "...SRTActiveSurfaceContainer03!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTActiveSurfaceContainer04 > /dev/null 2>&1 &'"
+echo "...SRTActiveSurfaceContainer04!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTActiveSurfaceContainer05 > /dev/null 2>&1 &'"
+echo "...SRTActiveSurfaceContainer05!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTActiveSurfaceContainer06 > /dev/null 2>&1 &'"
+echo "...SRTActiveSurfaceContainer06!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTActiveSurfaceContainer07 > /dev/null 2>&1 &'"
+echo "...SRTActiveSurfaceContainer07!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp SRTActiveSurfaceContainer08 > /dev/null 2>&1 &'"
+echo "...SRTActiveSurfaceContainer08!"
+
+     

@@ -413,11 +413,11 @@ module MinorServo {
         /** Return the servo position at a given time.
          *  If the time is too old, it returns the older position.
          *  If the time is in advance or 0, it returns the latest position.
-         *  @arg time the position time
+         *  @arg t the position time
          *  @return the position
          *  @throw ComponentError::UnexpectedEx
          */
-         ACS::doubleSeq getPositionFromHistory(in ACS::Time time) raises (ComponentErrors::UnexpectedEx);
+         ACS::doubleSeq getPositionFromHistory(in ACS::Time t) raises (ComponentErrors::UnexpectedEx);
 
         /** Clear the position system offset
          * @arg boolean set_positions if true, it also sets the actual and the future positions

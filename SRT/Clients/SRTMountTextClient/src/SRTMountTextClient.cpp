@@ -1,6 +1,7 @@
 // $Id: SRTMountTextClient.cpp,v 1.5 2011-06-01 18:25:35 a.orlati Exp $
 
 #include "SRTMountTextClient.h"
+#include <Tokenizer_T.h>
 
 #define _GET_ACS_PROPERTY(TYPE,NAME) TYPE##_var NAME; \
 {	\

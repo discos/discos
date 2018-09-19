@@ -1,0 +1,51 @@
+/***************************************************************\
+ *  Authors: 
+ *      Marco Buttu <mbuttu@oa-cagliari.inaf.it>
+ *      Giuseppe Carboni <gcarboni@oa-cagliari.inaf.it>
+\***************************************************************/
+
+#ifndef __GENERIC_IFDISTRIBUTOR__IDL__ 
+#define __GENERIC_IFDISTRIBUTOR__IDL__ 
+
+#include <maciErrType.idl>
+#include <ComponentErrors.idl>
+
+#pragma prefix "alma"
+
+
+module Receivers {
+ 
+    interface GenericIFDistributor
+    {
+   
+        /** Take the backend name and configurate the component
+         * 
+         * @param backend_name the full name, i.e. BACKENDS/TotalPower
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void setup(in string backend_name) raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Get the IFDistributor infos, like name, hardware and firmware versions.
+         *
+         * @return the string of infos.
+         */
+        string getInfo() raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Sets the IFDistributor to its default values **/
+        void setDefault() raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Return the actual setup
+         *
+         * Return an empty string if the component is not yet
+         * configured, otherwise the setup value (BACKENDS/TotalPower, ...)
+         */
+        string getSetup();
+
+    };
+};
+
+#endif
+

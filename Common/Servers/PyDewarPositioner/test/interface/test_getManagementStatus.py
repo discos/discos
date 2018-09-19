@@ -1,5 +1,5 @@
 import time
-import unittest2
+import unittest
 from ComponentErrors import ComponentErrorsEx, ComponentErrorsEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
@@ -7,7 +7,7 @@ from DewarPositioner.cdbconf import CDBConf
 from Management import MNG_WARNING, MNG_FAILURE, MNG_OK
 
 
-class MngStatusTest(unittest2.TestCase):
+class MngStatusTest(unittest.TestCase):
 
     def setUp(self):
         client = PySimpleClient()
@@ -25,4 +25,4 @@ class MngStatusTest(unittest2.TestCase):
         self.assertEqual(self.positioner.getManagementStatus(), MNG_OK)
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

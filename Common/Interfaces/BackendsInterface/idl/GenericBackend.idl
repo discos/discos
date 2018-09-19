@@ -183,9 +183,9 @@ module Backends {
 		 * @throw CORBA::SystemException
 		 * @throw BackendsErrors::BackendsErrorsEx 
 		 * @thorw ComponentErrors::ComponentErrorsEx
-		 * @param time start time of the acquisition. If the time is elapsed the acquisition is started anyway, If a zero is passed the acquisition will be started as soon as possible.
+		 * @param stime start time of the acquisition. If the time is elapsed the acquisition is started anyway, If a zero is passed the acquisition will be started as soon as possible.
 		*/
-		void sendData(in ACS::Time time) raises (BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx);
+		void sendData(in ACS::Time stime) raises (BackendsErrors::BackendsErrorsEx,ComponentErrors::ComponentErrorsEx);
 
 		/**
 		  * Immediately stops the data flows. This is asort of suspend, that means that the data are not sent but the transfer job i still
@@ -300,6 +300,8 @@ module Backends {
 		 * @return a sequence of double that reports the total power of each input (@sa <i>inputsNumber</i>). The caller must take care of freeing it.
 		 */
 		ACS::doubleSeq getTpi() raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+		ACS::doubleSeq getRms() raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 		
 		/**
 		 * Call this method in order to read the total power from each input when the input are connected directly to the 50 Ohm. 

@@ -1,11 +1,11 @@
-import unittest2
+import unittest
 from ComponentErrors import ComponentErrorsEx
 from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 import time
 
 
-class ParkTest(unittest2.TestCase):
+class ParkTest(unittest.TestCase):
     """Test the DewarPositioner.park() method"""
     def setUp(self):
         client = PySimpleClient()
@@ -29,4 +29,4 @@ class ParkTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

@@ -7,9 +7,9 @@
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
-# andrea  24/01/09  created
-# andrea  24/01/09  scripts startschedule stopschedule configureBackend, deprecated and movved to local scripts
-#
+# andrea    24/01/09  created
+# andrea    24/01/09  scripts startschedule stopschedule configureBackend, deprecated and movved to local scripts
+# Andrea O. 28/06/18  Added and public installed the scripts discos  
 
 
 #*******************************************************************************
@@ -31,7 +31,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = data_stats tabbify
+PY_SCRIPTS         =
 PY_SCRIPTS_L       = 
 
 PY_MODULES         =
@@ -41,7 +41,8 @@ PY_PACKAGES        =
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 
-SCRIPTS         = 
+SCRIPTS         = data_stats discos
+SCRIPTS_L		 = tabbify
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
@@ -80,6 +81,8 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@chmod 700 $(INTROOT)/bin/data_stats
+	@chmod 700 $(INTROOT)/bin/discos	
 	@echo " . . . installation done"
 
 

@@ -714,7 +714,12 @@ bool CIRATools::radToHourAngle(const double& rad,IRA::CString& outString,char de
 	int hmsf[4];
 	double ranged=dmod(rad,D2PI); // put the angle in the range -2PI..2PI
 	slaDr2tf(3,ranged,&sign,hmsf); // convert it into hour minute second and fraction
-	outString.Format("%c%02ld%c%02ld%c%02ld.%03ld",sign,hmsf[0],delimiter,hmsf[1],delimiter,hmsf[2],hmsf[3]);
+	if (sign=='+') {
+		outString.Format("%02d%c%02d%c%02d.%03d",hmsf[0],delimiter,hmsf[1],delimiter,hmsf[2],hmsf[3]);
+	}
+	else {
+		outString.Format("%c%02d%c%02d%c%02d.%03d",sign,hmsf[0],delimiter,hmsf[1],delimiter,hmsf[2],hmsf[3]);
+	}
 	return true;
 }
 
@@ -775,7 +780,12 @@ bool CIRATools::radToSexagesimalAngle(const double& rad,IRA::CString& outString,
 	double ranged=dmod(rad,D2PI); // put the angle in the range -2PI..2PI
 	// convert it into hour minute second anf fraction..keeping track of the sign
 	slaDr2af(3,ranged,&sign,dmsf); 
-	outString.Format("%c%02ld%c%02ld%c%02ld.%03ld",sign,dmsf[0],delimiter,dmsf[1],delimiter,dmsf[2],dmsf[3]);
+	if (sign=='+') {
+		outString.Format("%02d%c%02d%c%02d.%03d",dmsf[0],delimiter,dmsf[1],delimiter,dmsf[2],dmsf[3]);
+	}
+	else {
+		outString.Format("%c%02d%c%02d%c%02d.%03d",sign,dmsf[0],delimiter,dmsf[1],delimiter,dmsf[2],dmsf[3]);
+	}
 	return true;
 }
 
@@ -798,7 +808,8 @@ bool CIRATools::radToAngle(const double& rad,IRA::CString& outString)
 
 bool CIRATools::longitudeToRad(const IRA::CString& lon,double& rad,bool complete,char delimiter)
 {
-	long len=lon.GetLength();
+	//long len=lon.GetLength();
+	int len=lon.GetLength();
 	bool res;
 	if (len==0) return false;
 	if (lon[len-1]=='d') {
@@ -818,7 +829,8 @@ bool CIRATools::longitudeToRad(const IRA::CString& lon,double& rad,bool complete
 
 bool CIRATools::latitudeToRad(const IRA::CString& lat,double& rad,bool complete,char delimiter)
 {
-	long len=lat.GetLength();
+	//long len=lat.GetLength();
+	int len=lat.GetLength();
 	bool res;
 	if (len==0) return false;
 	if (lat[len-1]=='d') {
@@ -837,7 +849,8 @@ bool CIRATools::latitudeToRad(const IRA::CString& lat,double& rad,bool complete,
 
 bool CIRATools::rightAscensionToRad(const IRA::CString& ra,double& rad,bool complete,char delimiter)
 {
-	long len=ra.GetLength();
+	//long len=ra.GetLength();
+	int len=ra.GetLength();	
 	bool res;
 	if (len==0) return false;
 	if (ra[len-1]=='d') {
@@ -865,7 +878,8 @@ bool CIRATools::declinationToRad(const IRA::CString& dec,double& rad,bool comple
 
 bool CIRATools::galLongitudeToRad(const IRA::CString& lon,double& rad,bool complete,char delimiter)
 {
-	long len=lon.GetLength();
+	//long len=lon.GetLength();
+	int len=lon.GetLength();
 	bool res;
 	if (len==0) return false;
 	if (lon[len-1]=='d') {
@@ -909,7 +923,8 @@ bool CIRATools::elevationToRad(const IRA::CString& el,double& rad,bool complete)
 
 bool CIRATools::offsetToRad(const IRA::CString& offset,double& rad,char delimiter)
 {
-	long len=offset.GetLength();
+	//long len=offset.GetLength();
+	int len=offset.GetLength();
 	bool res;
 	if (len==0) return false;
 	if (offset[len-1]=='d') {

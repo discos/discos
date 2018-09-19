@@ -1,6 +1,6 @@
 import threading
 import time
-import unittest2
+import unittest
 import mocker
 
 import Receivers
@@ -10,7 +10,7 @@ from Acspy.Nc.Consumer import Consumer
 from DewarPositioner import DewarPositionerImpl
 
 
-class NotificationChannelTest(unittest2.TestCase):
+class NotificationChannelTest(unittest.TestCase):
 
     def setUp(self):
         client = PySimpleClient()
@@ -79,4 +79,4 @@ class NotificationChannelTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

@@ -20,6 +20,8 @@
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
   
 	<xs:complexType name="ExternalClientsType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
 		<xs:sequence>
 			<xs:element name="status" type="mng:SystemStatusType" />	
 		</xs:sequence>
@@ -27,7 +29,9 @@
 		<xs:attribute name="Port" type="xs:unsignedShort" use="required" />
 		<xs:attribute name="ReceiveTimeout" type="xs:unsignedLong" use="required" />
 		<xs:attribute name="ControlThreadPeriod" type="xs:unsignedLong" use="required" />
-		<xs:attribute name="SuperVisor" type="xs:string" use="required" />
+        <xs:attribute name="SuperVisor" type="xs:string" use="required" />
+      </xs:extension>
+     </xs:complexContent>
 	</xs:complexType>
   
 	<xs:element name="ExternalClients" type="ExternalClientsType"/>

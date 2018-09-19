@@ -1,11 +1,11 @@
-import unittest2
+import unittest
 import socket
 
 from LocalOscillatorImpl import CommandLine
 #ip,port  ='192.168.200.143',5025 #simulator
 ip, port = "192.167.187.200", 1234 #real hw
 
-class TestCommandLine(unittest2.TestCase):
+class TestCommandLine(unittest.TestCase):
   
   
       def setUp(self):
@@ -46,5 +46,5 @@ class TestCommandLine(unittest2.TestCase):
             
          
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()
     

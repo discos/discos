@@ -1,11 +1,11 @@
-import unittest2
+import unittest
 import socket
 
 from LocalOscillatorImpl import CommandLine
 #ip,port  ='192.168.200.143',5025 #simulator
 ip, port = "192.168.200.149", 5025 #real hw
 
-class TestCommandLine(unittest2.TestCase):
+class TestCommandLine(unittest.TestCase):
   
   
       def setUp(self):
@@ -36,7 +36,7 @@ class TestCommandLine(unittest2.TestCase):
          val=0.
          msg,val=self.cl.getFrequency()
          self.assertEqual(2000,val)
-      @unittest2.skip("demonstrating skipping")      
+      @unittest.skip("demonstrating skipping")      
       def test_3_getFrequency_err(self):
          self.assertRaises(CommandLine.CommandLineError, self.cl.getFrequency)
 
@@ -44,7 +44,7 @@ class TestCommandLine(unittest2.TestCase):
          msg,err=self.cl.setPower(13)
          self.assertEqual('0,\"No error\"\n',msg)
          
- #     @unittest2.skip("demonstrating skipping")      
+ #     @unittest.skip("demonstrating skipping")      
       def test_4_sendPower(self):
          msg,err=self.cl.setPower(13)
          self.assertEqual('0,\"No error\"\n',msg)
@@ -63,7 +63,7 @@ class TestCommandLine(unittest2.TestCase):
          msg=self.cl.readStatus()
          self.assertEqual('0,\"No error\"\n',msg)
       
-      @unittest2.skip("demonstrating skipping")      
+      @unittest.skip("demonstrating skipping")      
       def test_7_sendWrongCMD(self):
       #    try: 
              self.cl.sendCmd('WOWOW \n')  #wrong msg
@@ -73,5 +73,5 @@ class TestCommandLine(unittest2.TestCase):
             
          
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()
     

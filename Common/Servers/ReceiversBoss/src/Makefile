@@ -21,9 +21,9 @@
 # user definable C-compilation flags
 # a quick comment on this: in order to control receivers a t med the boss is in charge of doing much more things that it has to. So
 # different code is required until new specific component to control the receivers for Medicina are written
-ifeq ($(TARGETSYS),MED)
+ifeq ($(STATION),Medicina)
 	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_MED'
-else ifeq ($(TARGETSYS),NT)
+else ifeq ($(STATION),Noto)
 	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_STANDARD'
 else
 	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_STANDARD'
@@ -50,7 +50,7 @@ EXECUTABLES_L   =
 # <brief description of xxxxx program>
 ReceiversBossImpl_OBJECTS   = ReceiversBossImpl	RecvBossCore Configuration WatchingThread
 ReceiversBossImpl_LDFLAGS   =
-ifeq ($(TARGETSYS),NT)
+ifeq ($(STATION),Noto)
 	ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs AntennaDefinitionsStubs GenericReceiverStubs \
 				      DewarPositionerStubs ManagmentDefinitionsStubs DewarPositionerDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc \
 				      BackendsDefinitionsStubs TotalPowerStubs GenericBackendStubs BackendsErrors bulkDataStubs bulkDataReceiverStubs \

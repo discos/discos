@@ -4,7 +4,7 @@
 
 int actuatorsInCircle[] = {0,24,24,48,48,48,48,96,96,96,96,96,96,96,96,96,8,4};
 
-CSRTActiveSurfaceBossCore::CSRTActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) : 
+CSRTActiveSurfaceBossCore::CSRTActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) :
 	m_services(service),
     m_thisIsMe(me)
 {
@@ -17,13 +17,13 @@ CSRTActiveSurfaceBossCore::~CSRTActiveSurfaceBossCore()
 void CSRTActiveSurfaceBossCore::initialize()
 {
 	ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::initialize()",(LM_INFO,"CSRTActiveSurfaceBossCore::initialize"));
-    
-    	m_enable = false;
+
+    m_enable = false;
 	m_tracking = false;
-    	m_status = Management::MNG_WARNING;
+    m_status = Management::MNG_WARNING;
 	m_profile = ActiveSurface::AS_SHAPED_FIXED;
-    	AutoUpdate = false;
-    	actuatorcounter = circlecounter = totacts = 1;
+    AutoUpdate = false;
+    actuatorcounter = circlecounter = totacts = 1;
 	m_sector1 = false;
 	m_sector2 = false;
 	m_sector3 = false;
@@ -86,7 +86,7 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
 		}
     	}
 	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::execute()", (LM_INFO,"CSRTActiveSurfaceBossCore::LAN_LOCATED"));
-*/			
+*/
     	// Get reference to usd components
 /*	for (i = firstUSD; i <= lastUSD; i++) {
 		usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
@@ -219,12 +219,12 @@ void CSRTActiveSurfaceBossCore::cleanUp()
 
 void CSRTActiveSurfaceBossCore::reset (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
-    if (circle == 0 && actuator == 0 &&radius == 0) // ALL 
+    if (circle == 0 && actuator == 0 &&radius == 0) // ALL
 	{
         	int i, l;
 		for (i = 1; i <= CIRCLES; i++)
     		{
-		    for (l = 1; l <= actuatorsInCircle[i]; l++) 
+		    for (l = 1; l <= actuatorsInCircle[i]; l++)
 			{
                 if (!CORBA::is_nil(usd[i][l]))
 				{
@@ -249,7 +249,7 @@ void CSRTActiveSurfaceBossCore::reset (int circle, int actuator, int radius) thr
                         impl.log();
                     }
 				}
-				else { 
+				else {
                     _EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CSRTActiveSurfaceBossCore::reset()");
                     impl.log();
                 }
@@ -528,7 +528,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 			}
 		}
 		ACE_OS::sleep (1);*/
-					
+
 		printf("calibration.....\n");
 		for (l = 1; l <= actuatorsInCircle[circle]; l++) {
             		if (!CORBA::is_nil(usd[circle][l])) {
@@ -653,7 +653,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 			}
 		}
 		ACE_OS::sleep (1);*/
-					
+
 		printf("calibration.....\n");
 		for (l = 1; l <= actuatorsradius; l++) {
             		if ((radius == 13 || radius == 37 || radius == 61 || radius == 85) && l == 14)
@@ -802,7 +802,7 @@ void CSRTActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius)
 			ACE_OS::sleep (1);
 		}
 	}
-/*   
+/*
     if (circle == 0 && actuator == 0 && radius == 0) { // ALL
         int i, l;
         for (i = 1; i <= CIRCLES; i++) {
@@ -993,7 +993,7 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
         	int i, l;
         	int counter = 0;
         	ACSErr::Completion_var completion;
-	    	ACS::ROlong_var actPos_var; 
+	    	ACS::ROlong_var actPos_var;
 	    	ACS::RWlong_var cmdPos_var;
 		time_t start;
 		time_t stop;
@@ -1001,7 +1001,7 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
 		time(&start);
 		for (i = 1; i <= CIRCLES; i++)
     		{
-			for (l = 1; l <= actuatorsInCircle[i]; l++) 
+			for (l = 1; l <= actuatorsInCircle[i]; l++)
 			{
 				if (!CORBA::is_nil(usd[i][l]))
 				{
@@ -1345,9 +1345,9 @@ void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentEr
                 m_status=Management::MNG_FAILURE;
 		}
     }
-    else 
+    else
 	    notActivEx = true;
-        
+
     //printf("component %d_%d: ",i,l);
 
     totalactuators++;
@@ -1379,10 +1379,10 @@ void CSRTActiveSurfaceBossCore::sector1ActiveSurface() throw (ComponentErrors::C
 	printf("sector1 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	char* value = (char*)CDBPATH;
+	strcat(value, "alma/AS/tab_convUSD_S1.txt\0");
 	int i;
 
-	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S1.txt\0";
 	ifstream usdTableS1(value);
 	if (!usdTableS1) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1413,10 +1413,10 @@ void CSRTActiveSurfaceBossCore::sector2ActiveSurface() throw (ComponentErrors::C
 	printf("sector2 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	char* value = (char*)CDBPATH;
+	strcat(value, "alma/AS/tab_convUSD_S2.txt\0");
 	int i;
 
-	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S2.txt\0";
 	ifstream usdTableS2(value);
 	if (!usdTableS2) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1448,10 +1448,10 @@ void CSRTActiveSurfaceBossCore::sector3ActiveSurface() throw (ComponentErrors::C
 	printf("sector3 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	char* value = (char*)CDBPATH;
+ 	strcat(value, "alma/AS/tab_convUSD_S3.txt\0");
 	int i;
 
-	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S3.txt\0";
 	ifstream usdTableS3(value);
 	if (!usdTableS3) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1483,10 +1483,10 @@ void CSRTActiveSurfaceBossCore::sector4ActiveSurface() throw (ComponentErrors::C
 	printf("sector4 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	char* value = (char*)CDBPATH;
+ 	strcat(value, "alma/AS/tab_convUSD_S4.txt\0");
 	int i;
 
-	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S4.txt\0";
 	ifstream usdTableS4(value);
 	if (!usdTableS4) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1518,10 +1518,10 @@ void CSRTActiveSurfaceBossCore::sector5ActiveSurface() throw (ComponentErrors::C
 	printf("sector5 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	char* value = (char*)CDBPATH;
+ 	strcat(value, "alma/AS/tab_convUSD_S5.txt\0");
 	int i;
 
-	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S5.txt\0";
 	ifstream usdTableS5(value);
 	if (!usdTableS5) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1553,10 +1553,10 @@ void CSRTActiveSurfaceBossCore::sector6ActiveSurface() throw (ComponentErrors::C
 	printf("sector6 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	char* value = (char*)CDBPATH;
+ 	strcat(value, "alma/AS/tab_convUSD_S6.txt\0");
 	int i;
 
-	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S6.txt\0";
 	ifstream usdTableS6(value);
 	if (!usdTableS6) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1588,10 +1588,10 @@ void CSRTActiveSurfaceBossCore::sector7ActiveSurface() throw (ComponentErrors::C
 	printf("sector7 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	char* value = (char*)CDBPATH;
+ 	strcat(value, "alma/AS/tab_convUSD_S7.txt\0");
 	int i;
 
-	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S7.txt\0";
 	ifstream usdTableS7(value);
 	if (!usdTableS7) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1623,10 +1623,10 @@ void CSRTActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::C
 	printf("sector8 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char * value;
+	char* value = (char*)CDBPATH;
+ 	strcat(value, "alma/AS/tab_convUSD_S8.txt\0");
 	int i;
 
-	value = "/home/gavino/Nuraghe/ACS/trunk/SRT/Configuration/CDB/alma/AS/tab_convUSD_S8.txt\0";
 	ifstream usdTableS8(value);
 	if (!usdTableS8) {
 		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
@@ -1655,48 +1655,46 @@ void CSRTActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::C
 
 void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
-    	if (AutoUpdate) {
-		TIMEVALUE now;
-        	double azimuth=0.0;
-        	double elevation=0.0;
+    if (AutoUpdate) {
+        TIMEVALUE now;
+        double azimuth=0.0;
+        double elevation=0.0;
 
 		IRA::CIRATools::getTime(now);
 
 		if (!CORBA::is_nil(m_antennaBoss)) {
-			try {
-	            		m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
-        		}	
-        		catch (CORBA::SystemException& ex) {
-            			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
-            			impl.setName(ex._name());
-		    		impl.setMinor(ex.minor());
-            			m_status=Management::MNG_WARNING;
-				asPark();
-            			throw impl;
-	    		}
-        		azimuth = 0.0;
-        		try {
-            			onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
-        		}
-        		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-            			ex.log(LM_DEBUG);
-            			throw ex.getComponentErrorsEx();
-        		}
+            try {
+	            m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
+        	}
+        	catch (CORBA::SystemException& ex) {
+            	_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
+            	impl.setName(ex._name());
+		        impl.setMinor(ex.minor());
+            	m_status=Management::MNG_WARNING;
+				//asPark();
+            	throw impl;
+	    	}
+        	azimuth = 0.0;
+        	try {
+            	onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
+        	}
+        	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+                ex.log(LM_DEBUG);
+            	throw ex.getComponentErrorsEx();
+        	}
 		}
-    	}
+    }
 }
 
 void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
 {
 	int s, i, l;
-	char * value;
 
 	if ((m_sector1 == true)&&(m_sector2 == true)&&(m_sector3 == true)&&(m_sector4 == true)&&(m_sector5 == true)&&(m_sector6 == true)&&(m_sector7 == true)&&(m_sector8 == true)) {
 		//printf("setProfile corrections\n");
-		value = USDTABLECORRECTIONS;
-    		ifstream usdCorrections (value);
+    		ifstream usdCorrections (USDTABLECORRECTIONS);
     		if (!usdCorrections) {
-        		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+        		ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
 			exit(-1);
 		}
 		actuatorsCorrections.length(NPOSITIONS);
@@ -1723,35 +1721,32 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
 		m_sector7 = false;
 		m_sector8 = false;
 		usdCounter = usdCounterS1 + usdCounterS2 + usdCounterS3 + usdCounterS4 + usdCounterS5 + usdCounterS6 + usdCounterS7 + usdCounterS8;
-		
+
 		m_ASup=true;
         	m_status=Management::MNG_OK;
 
 		if (usdCounter < (int)lastUSD*WARNINGUSDPERCENT) {
         		m_status=Management::MNG_WARNING;
 		}
-    		if (usdCounter < (int)lastUSD*ERRORUSDPERCENT) {
-        		m_status=Management::MNG_FAILURE;
+    	if (usdCounter < (int)lastUSD*ERRORUSDPERCENT) {
+        	m_status=Management::MNG_FAILURE;
 			m_ASup=false;
 		}
-		//printf("usdCounter = %d\n", usdCounter);
-	}	
+	}
 
 	if (m_ASup == true) {
+        asOff();
 		CIRATools::Wait(1000000);
 		_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
 		m_profile = newProfile;
 		try {
         		onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
-        	}
-        	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-            		ex.log(LM_DEBUG);
-            		throw ex.getComponentErrorsEx();
-        	}
-
+        }
+        catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+        	ex.log(LM_DEBUG);
+        	throw ex.getComponentErrorsEx();
+        }
 		m_profileSetted = true;
-
-        	CIRATools::Wait(1000000);
 		asOn();
 	}
 }
@@ -1770,11 +1765,14 @@ void CSRTActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentError
 void CSRTActiveSurfaceBossCore::asOn()
 {
 	if (m_profileSetted == true ) {
-		if ((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_SHAPED_FIXED)) {
+		if ((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_SHAPED_FIXED) && (m_profile != ActiveSurface::AS_PARK)) {
 			enableAutoUpdate();
 			m_tracking = true;
 		}
 		else {
+		    asOff();
+		    CIRATools::Wait(1000000);
+            //disableAutoUpdate();
 			m_tracking = false;
 			try {
 				onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
@@ -1794,15 +1792,17 @@ void CSRTActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrors
 {
 	if (m_profileSetted == true ) {
 		asOff();
-		setProfile (ActiveSurface::AS_SHAPED_FIXED);
+		m_tracking = false;
+        CIRATools::Wait(1000000);
+		_SET_CDB_CORE(profile, ActiveSurface::AS_PARK,"SRTActiveSurfaceBossCore::asPark()")
+		m_profile = ActiveSurface::AS_PARK;
 		try {
-			onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
+			onewayAction(ActiveSurface::AS_REFPOS, 0, 0, 0, 0.0, 0, 0, m_profile);
 		}
 		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 			ex.log(LM_DEBUG);
 			throw ex.getComponentErrorsEx();
 		}
-		m_tracking = false;
 	}
 	else {
 		printf("you must set the profile first\n");
@@ -1812,6 +1812,7 @@ void CSRTActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrors
 void CSRTActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsEx)
 {
 	if (m_profileSetted == true ) {
+		disableAutoUpdate();
 		try {
 			onewayAction(ActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
 		}
@@ -1819,7 +1820,6 @@ void CSRTActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsE
 			ex.log(LM_DEBUG);
 			throw ex.getComponentErrorsEx();
 		}
-		disableAutoUpdate();
 	}
 	else {
 		printf("you must set the profile first\n");
@@ -1830,7 +1830,7 @@ void CSRTActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& 
 {
     if (!CORBA::is_nil(usd[circle][actuator])) {
         ACSErr::Completion_var completion;
-	    ACS::ROlong_var actPos_var; 
+	    ACS::ROlong_var actPos_var;
 	    ACS::RWlong_var cmdPos_var;
 	    ACS::RWlong_var Fmin_var;
 	    ACS::RWlong_var Fmax_var;
@@ -1916,7 +1916,7 @@ void CSRTActiveSurfaceBossCore::usdStatus4GUIClient(int circle, int actuator, CO
         /*CompletionImpl local(completion);
         if (!local.isErrorFree()) {
             _ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,local,"CSRTActiveSurfaceBossCore::usdStatus4GUIClient()");
-			impl.setComponentName((const char*)usd[circle][actuator]->name()); 
+			impl.setComponentName((const char*)usd[circle][actuator]->name());
 			impl.setAttributeName("usd status");
 			throw impl;
 		}*/
@@ -2080,7 +2080,7 @@ void CSRTActiveSurfaceBossCore::enableAutoUpdate()
 {
 	if (!AutoUpdate) {
 		AutoUpdate=true;
-		ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::enableAutoUpdate()",(LM_NOTICE,"SRTActiveSurfaceBoss::AUTOMATIC_UPDATE_ENABLED"));		
+		ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::enableAutoUpdate()",(LM_NOTICE,"SRTActiveSurfaceBoss::AUTOMATIC_UPDATE_ENABLED"));
 	}
 }
 
@@ -2088,11 +2088,11 @@ void CSRTActiveSurfaceBossCore::disableAutoUpdate()
 {
 	if (AutoUpdate) {
 		AutoUpdate=false;
-		ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::disableAutoUpdate()",(LM_NOTICE,"SRTActiveSurfaceBoss::AUTOMATIC_UPDATE_DISABLED"));		
+		ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::disableAutoUpdate()",(LM_NOTICE,"SRTActiveSurfaceBoss::AUTOMATIC_UPDATE_DISABLED"));
 	}
 }
 
-void CSRTActiveSurfaceBossCore::checkASerrors(char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex)
+void CSRTActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex)
 {
 	ASErrors::ASErrorsExImpl exImpl(Ex);
 

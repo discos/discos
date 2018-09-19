@@ -30,16 +30,18 @@ COMMON_INTERFACES:=CommonInterface ManagmentInterface AntennaInterface Receivers
                    XBackendInterface
 COMMON_LIBRARIES:=SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
                   XarcosLibrary ModbusChannel ComponentProxy \
-				  DiscosBackendProtocol
+				  DiscosBackendProtocol PyTestingLibrary \
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
-                XBackend PyDewarPositioner Roach #DBBC 
+                XBackend PyDewarPositioner Sardara PyLocalOscillator #DBBC
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
                 SchedulerTextClient
-COMMON_MISC:=Plotter KStars Scripts getTemplateForTests InjectCommand
+
+COMMON_MISC:=Plotter KStars Scripts getTemplateForTests PMUpdate InjectCommand 
+
 COMMON_SIMULATORS:= TCPGenericProtocolSim ReceiverBoardSim
 
 SRT_DOC:=SRTDox
@@ -49,7 +51,7 @@ SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer \
              SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
-             SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver
+             SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver SRTPyIFDistributor
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
              MinorServoBossTextClient MeteoClient
 SRT_MISC:=SRTScripts
@@ -70,7 +72,7 @@ NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface
 NT_CLIENTS:=NotoMountTextClient 
 NT_MISC:=NotoScripts
 
-ifeq ($(TARGETSYS),SRT)
+ifeq ($(STATION),SRT)
 	#Add all modules included in the SRT system  in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=SRTDox \
@@ -78,10 +80,10 @@ ifeq ($(TARGETSYS),SRT)
 		SRTActiveSurfaceErrors \
 		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface \
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
-		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel\
+		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger XBackend \
 		SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver PyDewarPositioner \
-		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
+		SRTPyIFDistributor AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
 		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient \
 		Plotter KStars SRTScripts 
 
@@ -95,7 +97,7 @@ ifeq ($(TARGETSYS),SRT)
 	Receivers_MODULES:=ReceiversInterface
 	MinorServo_MODULES:=MinorServoInterface
 	SRTActiveSurface_MODULES:=SRTActiveSurfaceInterface
-	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary
+	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary PyTestingLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss SRTMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
@@ -107,14 +109,15 @@ ifeq ($(TARGETSYS),SRT)
 	CDB_SVN_LOCATION="SRT/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common SRT
 else 
-ifeq ($(TARGETSYS),MED)
+ifeq ($(STATION),Medicina)
 	#Add all modules included in the Medicina system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=MEDDox \
 		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors XBackendErrors\
 		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface\
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
-		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel XarcosLibrary\
+		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel XarcosLibrary \
+	    PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		Metrology TotalPower NoiseGenerator MedicinaMount MedWeatherStation CustomLogger XBackend MedicinaMinorServo\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
@@ -129,7 +132,7 @@ ifeq ($(TARGETSYS),MED)
 	Backends_MODULES:=BackendsInterface XBackendInterface
 	WeatherStation_MODULES:=WeatherStationInterface MedicinaWeatherStationInterface
 	Receivers_MODULES:=ReceiversInterface
-	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary
+	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary PyTestingLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss MedicinaMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
@@ -139,13 +142,13 @@ ifeq ($(TARGETSYS),MED)
 	CDB_SVN_LOCATION="Medicina/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina
 else
-ifeq ($(TARGETSYS),NT)
+ifeq ($(STATION),Noto)
 	#Add all modules included in the Noto system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:= ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
 		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface \
 		NotoAntennaInterface \
-		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary \
+		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower NotoMount CustomLogger \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal SchedulerTextClient \
@@ -158,7 +161,7 @@ ifeq ($(TARGETSYS),NT)
 	Antenna_MODULES:=AntennaInterface NotoAntennaInterface
 	Backends_MODULES:=BackendsInterface
 	Receivers_MODULES:=ReceiversInterface
-	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary
+	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary PyTestingLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss NotoMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower
@@ -168,7 +171,7 @@ ifeq ($(TARGETSYS),NT)
 	SYSTEM_SVN_MODULES=Common Medicina Noto
 
 else
-	RESULT:=$(error TARGETSYS variable is not set correctly!)	
+	RESULT:=$(error STATION variable is not set correctly!)	
 endif
 endif
 endif
@@ -204,16 +207,16 @@ NT_MODULES:=$(NT_ERRORS) \
             $(NT_CLIENTS) \
             $(NT_MISC)
 
-ifeq ($(TARGETSYS), SRT)
+ifeq ($(STATION), SRT)
 	TELESCOPE_MODULES:=$(SRT_MODULES)
 else 
-ifeq ($(TARGETSYS), MED)
+ifeq ($(STATION), Medicina)
 	TELESCOPE_MODULES:=$(MED_MODULES)
 else 
-ifeq ($(TARGETSYS), NT)
+ifeq ($(STATION), Noto)
 	TELESCOPE_MODULES:=$(NT_MODULES)
 else
-	RESULT:=$(error TARGETSYS variable is not set correctly!)	
+	RESULT:=$(error STATION variable is not set correctly!)	
 endif
 endif
 endif
@@ -221,7 +224,7 @@ endif
 CURRENT_DIR:=$(shell pwd)/..
 
 define PathFinder
-	$(shell for MOD in $(1); do find ${CURRENT_DIR} -name $${MOD} -not -path *CDB* -not -path *site-packages* \( -type d -o -type l \) -print; done)
+	$(shell for MOD in $(1); do find ${CURRENT_DIR} -name $${MOD} -not -path *ntroot* -not -path *CDB* -not -path *site-packages* \( -type d -o -type l \) -print; done)
 endef
 
 #if the INTROOT varaible is not defined the make is stopped
@@ -234,20 +237,20 @@ ifndef ACS_CDB
 	RESULT:=$(error ACS_CDB variable is not set!)
 endif
 
-#if the SYSLOCATION variable is not set the make process is stopped
-ifndef SYSLOCATION
-	RESULT:=$(error SYSLOCATION variable is not set!)
-endif
+# #if the SYSLOCATION variable is not set the make process is stopped
+# ifndef SYSLOCATION
+# 	RESULT:=$(error SYSLOCATION variable is not set!)
+# endif
 
-#if the SVNUSER variable is not set the make process is stopped
-ifndef SVNUSER
-	RESULT:=$(error SVNUSER variable is not set!)
-endif
+# #if the SVNUSER variable is not set the make process is stopped
+# ifndef SVNUSER
+# 	RESULT:=$(error SVNUSER variable is not set!)
+# endif
 
-#if the SYSTEM_SVN_TAG variable is not set the make process is stopped
-ifndef SYSTEM_SVN_TAG
-	RESULT:=$(error SYSTEM_SVN_TAG variable is not set!)
-endif
+# #if the SYSTEM_SVN_TAG variable is not set the make process is stopped
+# ifndef SYSTEM_SVN_TAG
+# 	RESULT:=$(error SYSTEM_SVN_TAG variable is not set!)
+# endif
 
 #set up the Modules file for each IDL and CPP documentation
 $(foreach i, $(IDL_DOC), $(eval $(i)_MODULES_PATH:=$(call PathFinder,$($(i)_MODULES))))
@@ -328,12 +331,12 @@ install:
 		make -C $${i} install ; \
 	done
 
-cdb:
-	@cd $(ACS_CDB); ln -s $(SYSLOCATION)/$(SYSTEM_SVN_TAG)/$(CDB_SVN_LOCATION) CDB
-
-sources:
-	@cd $(SYSLOCATION) ; svn checkout svn+ssh://$(SVNUSER)@nuraghe-devel.oa-cagliari.inaf.it/ACS/tags/$(SYSTEM_SVN_TAG)/$${i}
-
+# cdb:
+# 	@cd $(ACS_CDB); ln -s $(SYSLOCATION)/$(SYSTEM_SVN_TAG)/$(CDB_SVN_LOCATION) CDB
+# 
+# sources:
+# 	@cd $(SYSLOCATION) ; svn checkout svn+ssh://$(SVNUSER)@nuraghe-devel.oa-cagliari.inaf.it/ACS/tags/$(SYSTEM_SVN_TAG)/$${i}
+  
 man:
 	@echo "creating documentation tree....."
 	@if [ ! -d $(DOC) ]; then mkdir $(DOC) ; fi

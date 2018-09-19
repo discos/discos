@@ -17,14 +17,18 @@
   <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 
   <xs:complexType name="typeLan">
-    <xs:sequence> 
-	  <xs:element name="delay" type="baci:RWdouble"/>
+   <xs:complexContent>
+    <xs:extension base="baci:CharacteristicComponent">
+     <xs:sequence> 
+ 	  <xs:element name="delay" type="baci:RWdouble"/>
       <xs:element name="status" type="baci:ROlong"/>
-    </xs:sequence>
+     </xs:sequence>
 	
-	<xs:attribute name="IPAddress" type="xs:string" use="required" />
-	<xs:attribute name="port" type="xs:unsignedInt" use="required" />
+     <xs:attribute name="IPAddress" type="xs:string" use="required" />
+     <xs:attribute name="port" type="xs:unsignedInt" use="required" />
 
+    </xs:extension>
+   </xs:complexContent>
   </xs:complexType>
   
   <xs:element name="lan" type="typeLan"/>

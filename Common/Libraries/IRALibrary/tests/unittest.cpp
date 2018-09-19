@@ -2,7 +2,15 @@
 
 #include "IRATools_test.i"
 #include "FastQueue_test.i"
+#include "Socket_test.i"
 
+#include "CError_regression.i"
+#include "CDBTable_regression.i"
+#include "CIRATools_regression.i"
+
+#include "CString_test.i"
+
+#include "BaseConverter_test.i"
 
 using namespace IRALibraryTest;
 
@@ -58,6 +66,39 @@ TEST_F(IRALibrary_FastQueue,FastQueue_checkConsistency){
 	EXPECT_TRUE(FastQueue_checkConsistency());
 }
 
+TEST_F(IRALibrary_Socket,sendWithoutConnection){
+	EXPECT_TRUE(sendWithoutConnection());
+}
 
+TEST_F(IRALibrary_CError,copyConstructor_segfault){
+	EXPECT_TRUE(copyConstructor_segfault());
+}
 
+TEST_F(IRALibrary_CDataField,typeConversion_fail){
+	EXPECT_TRUE(typeConversion_fail());
+}
+
+TEST_F(IRALibrary_String,string_checkLeft){
+	EXPECT_TRUE(string_checkLeft());
+}
+
+TEST_F(IRALibrary_String,string_checkSplit) {
+	EXPECT_TRUE(string_checkSplit());
+}
+
+TEST_F(IRALibrary_BaseConverter,decToBin_checkConversion) {
+	EXPECT_TRUE(decToBin_checkConversion());
+}
+
+TEST_F(IRALibrary_BaseConverter,decToHex_checkConversion) {
+	EXPECT_TRUE(decToHex_checkConversion());
+}
+
+TEST_F(IRALibrary_CIRATools_regression,radToSexagesimalAngle_badconversion) {
+	EXPECT_TRUE(radToSexagesimalAngle_badconversion());
+}
+
+TEST_F(IRALibrary_CIRATools_regression,radToHourAngle_badconversion) {
+	EXPECT_TRUE(radToHourAngle_badconversion());
+}
 

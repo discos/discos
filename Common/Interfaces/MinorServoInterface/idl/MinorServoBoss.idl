@@ -270,11 +270,11 @@ module MinorServo {
  
         /** Return the positions of the active axes
          *  
-         * @param time the time related to the position we want to retrieve
+         * @param t the time related to the position we want to retrieve
          * @return a sequence of positions, in the same order of the axes parameter of getAxesInfo()
          * @throw MinorServoErrors::ConfigurationErrorEx if the system is not configured
          */
-        ACS::doubleSeq getAxesPosition(in ACS::Time time) 
+        ACS::doubleSeq getAxesPosition(in ACS::Time t) 
         raises (MinorServoErrors::MinorServoErrorsEx, 
                 ComponentErrors::ComponentErrorsEx);
             

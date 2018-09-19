@@ -34,6 +34,8 @@ IDL_FILES  = MedicinaMount
 IDL_TAO_FLAGS =
 USER_IDL =
 
+MedicinaMountStubs_LIBS = baciStubs MountStubs
+
 #
 # list of all possible C-sources (used to create automatic dependencies)
 # ------------------------------

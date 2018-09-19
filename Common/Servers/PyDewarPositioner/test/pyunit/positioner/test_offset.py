@@ -1,6 +1,6 @@
 import random
 import time
-import unittest2
+import unittest
 from math import radians
 from maciErrType import CannotGetComponentEx
 from DewarPositioner.positioner import Positioner, NotAllowedError
@@ -9,7 +9,7 @@ from Acspy.Clients.SimpleClient import PySimpleClient
 from DewarPositionerMockers.mock_components import MockDevice, MockSource
 
 
-class PositionerOffsetTest(unittest2.TestCase):
+class PositionerOffsetTest(unittest.TestCase):
 
     def setUp(self):
         self.cdbconf = CDBConf()
@@ -86,4 +86,4 @@ class PositionerOffsetTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()
