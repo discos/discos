@@ -1,10 +1,6 @@
-<?xml version='1.0' encoding='ISO-8859-1'?>
-<!--
-   - History:
-   -   Thu Jun 07 09:52:55 UTC 2007 modified by jDAL
-   -   Thu Jun 07 15:40:02 UTC 2007 modified by jDAL
--->
-<lan xmlns="urn:schemas-cosylab-com:lan:1.0" IPAddress="192.168.20.90" port="5002">
-	<delay units="mSec" description="ritardo alla risposta" />
-	<status description="converter status" />
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<lan xmlns="urn:schemas-cosylab-com:lan:1.0" IPAddress="127.0.0.1" port="11041">
+    <delay units="mSec" description="response delay"/>
+    <status description="converter status"/>
 </lan>

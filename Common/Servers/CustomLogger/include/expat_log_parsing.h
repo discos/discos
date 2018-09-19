@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <queue>
+#include <cstring>
 #include <string.h>
 #include <ctype.h>
 #include <boost/shared_ptr.hpp>

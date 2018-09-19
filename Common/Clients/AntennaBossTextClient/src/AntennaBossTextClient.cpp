@@ -75,11 +75,11 @@
 
 using namespace TW;
 
-static bool terminate;
+static bool terminate_;
 
 void quintHandler(int sig)
 {
-	terminate=true;
+	terminate_=true;
 }
 
 IRA::CLogGuard guard(GUARDINTERVAL*1000);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
 	TW::CLabel *output_label;
 	TW::CInputCommand *userInput;
 
-	terminate=false;
+	terminate_=false;
 
 	// mainframe 
 	TW::CFrame window(CPoint(0,0),CPoint(WINDOW_WIDTH,WINDOW_HEIGHT),'|','|','-','-'); 
@@ -569,10 +569,10 @@ int main(int argc, char *argv[]) {
 	
 	window.showFrame();
 	 
-	while(!terminate) {
+	while(!terminate_) {
 		//if ((fieldCounter=userInput->parseCommand(fields,MAXFIELDNUMBER))>0) {  // there is something input
 		if (userInput->readCommand(inputCommand)) {
-			if (inputCommand=="exit") terminate=true;
+			if (inputCommand=="exit") terminate_=true;
 			else if (component->_is_a("IDL:alma/Management/CommandInterpreter:1.0")) {
 				try {
 					char * outputAnswer;

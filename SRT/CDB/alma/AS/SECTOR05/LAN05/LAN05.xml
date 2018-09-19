@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<lan xmlns="urn:schemas-cosylab-com:lan:1.0" IPAddress="192.168.20.65" port="5002">
-	<delay units="mSec" description="ritardo alla risposta"/>
-	<status description="converter status"/>
+
+<lan xmlns="urn:schemas-cosylab-com:lan:1.0" IPAddress="127.0.0.1" port="11052">
+    <delay units="mSec" description="response delay"/>
+    <status description="converter status"/>
 </lan>

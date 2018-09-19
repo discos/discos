@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import mocker
 import time
 from DewarPositioner.DewarPositionerImpl import DewarPositionerImpl
 
 
-class DerotatorRewindTest(unittest2.TestCase):
+class DerotatorRewindTest(unittest.TestCase):
     """Test the derotatorRewind command"""
 
 
@@ -19,4 +19,4 @@ class DerotatorRewindTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

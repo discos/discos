@@ -129,6 +129,7 @@ int main(int argc, char *argv[]) {
 	/* Add frame controls declaration */
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(uLongLong)> *universalTime_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *julianDay_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *mjd_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(uLongLong)> *GAST_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(uLongLong)> *LocalST_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(string)> *name_field;
@@ -243,6 +244,7 @@ int main(int argc, char *argv[]) {
 		/* Add all component properties here */
 		_GET_ACS_PROPERTY(ACS::ROuLongLong,universalTime);
 		_GET_ACS_PROPERTY(ACS::ROdouble,julianDay);
+		_GET_ACS_PROPERTY(ACS::ROdouble,MJD);
 		_GET_ACS_PROPERTY(ACS::ROuLongLong,GAST);
 		_GET_ACS_PROPERTY(ACS::ROdouble,xPolarMotion);
 		_GET_ACS_PROPERTY(ACS::ROdouble,yPolarMotion);
@@ -263,6 +265,7 @@ int main(int argc, char *argv[]) {
 		universalTime_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(uLongLong)>(universalTime.in());	
 		GAST_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(uLongLong)>(GAST.in());	
 		julianDay_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(julianDay.in());
+		mjd_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(MJD.in());
 		LocalST_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(uLongLong)>(LST.in());
 		name_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(string)>(observatoryName.in());
 		longitude_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(longitude.in());
@@ -285,30 +288,32 @@ int main(int argc, char *argv[]) {
 		
 		/** setting up the properties of the components of the frame controls */
 		
-		_TW_SET_COMPONENT(name_field,22,0,22,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(universalTime_field,22,1,22,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(name_field,26,0,22,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(universalTime_field,26,1,22,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		universalTime_field->setFormatFunction(CFormatFunctions::dateTimeClockFormat,NULL);
-		_TW_SET_COMPONENT(julianDay_field,22,2,20,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(julianDay_field,26,2,20,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		julianDay_field->setFormatFunction(CFormatFunctions::floatingPointFormat,NULL);
-		_TW_SET_COMPONENT(GAST_field,22,3,26,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(mjd_field,26,3,20,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		mjd_field->setFormatFunction(CFormatFunctions::floatingPointFormat,NULL);
+		_TW_SET_COMPONENT(GAST_field,26,4,26,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		GAST_field->setFormatFunction(CFormatFunctions::clockFormat,NULL);
-		_TW_SET_COMPONENT(LocalST_field,22,4,26,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(LocalST_field,26,5,26,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		LocalST_field->setFormatFunction(CFormatFunctions::clockFormat,NULL);		
-		_TW_SET_COMPONENT(DUT1_field,22,5,15,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(xPolarMotion_field,22,6,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(yPolarMotion_field,35,6,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(DUT1_field,26,6,15,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(xPolarMotion_field,26,7,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(yPolarMotion_field,39,7,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		
-		_TW_SET_COMPONENT(latitude_field,22,7,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(longitude_field,35,7,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(height_field,48,7,6,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(latitude_field,26,8,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(longitude_field,39,8,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(height_field,52,8,6,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		strcpy(formatString,"%.3lf");
-		_TW_SET_COMPONENT(xGeoid_field,22,8,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(xGeoid_field,26,9,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		xGeoid_field->setFormatFunction(CFormatFunctions::floatingPointFormat,static_cast<const char*>(formatString));
-		_TW_SET_COMPONENT(yGeoid_field,35,8,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(yGeoid_field,39,9,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		yGeoid_field->setFormatFunction(CFormatFunctions::floatingPointFormat,static_cast<const char*>(formatString));
-		_TW_SET_COMPONENT(zGeoid_field,48,8,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(zGeoid_field,52,9,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		zGeoid_field->setFormatFunction(CFormatFunctions::floatingPointFormat,static_cast<const char*>(formatString));	
-		_TW_SET_COMPONENT(geodeticModel_box,55,7,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(geodeticModel_box,59,8,10,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		geodeticModel_box->setStatusLook(Antenna::GEOID_WGS84);
 		geodeticModel_box->setStatusLook(Antenna::GEOID_GRS80);
 		geodeticModel_box->setStatusLook(Antenna::GEOID_MERIT83);
@@ -330,6 +335,7 @@ int main(int argc, char *argv[]) {
 		/** Add all required monitor installation here */
 		_INSTALL_MONITOR(universalTime_field,200);
 		_INSTALL_MONITOR(julianDay_field,200);
+		_INSTALL_MONITOR(mjd_field,200);
 		_INSTALL_MONITOR(GAST_field,200);
 		_INSTALL_MONITOR(LocalST_field,200);		
 		_INSTALL_MONITOR(xGeoid_field,5000);
@@ -350,15 +356,16 @@ int main(int argc, char *argv[]) {
 		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::DONE"));
 		
 		/* Add all the static labels */
-		_TW_ADD_LABEL("Observatory Name :",0,0,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Universal Time   :",0,1,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Julian Day       :",0,2,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Apparent GST     :",0,3,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("LST              :",0,4,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);				
-		_TW_ADD_LABEL("DUT1             :",0,5,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Pole motion (x,y):",0,6,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);		
-		_TW_ADD_LABEL("Geodetic Coords  :",0,7,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Geocentric Coords:",0,8,18,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Observatory Name     :",0,0,22,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Universal Time       :",0,1,22,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Julian Day           :",0,2,22,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Modified Julian Day  :",0,3,22,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Apparent GST         :",0,4,22,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("LST                  :",0,5,22,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);				
+		_TW_ADD_LABEL("DUT1                 :",0,6,22,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Pole motion (x,y):   :",0,7,22,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);		
+		_TW_ADD_LABEL("Geodetic Coords      :",0,8,22,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Geocentric Coords    :",0,9,22,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		/* ************************* */
 		
 		/** Add all required association: components/Frame */
@@ -366,6 +373,7 @@ int main(int argc, char *argv[]) {
 		window.addComponent((CFrameComponent*)GAST_field);
 		window.addComponent((CFrameComponent*)LocalST_field);		
 		window.addComponent((CFrameComponent*)julianDay_field);
+		window.addComponent((CFrameComponent*)mjd_field);
 		window.addComponent((CFrameComponent*)latitude_field);
 		window.addComponent((CFrameComponent*)name_field);		
 		window.addComponent((CFrameComponent*)longitude_field);

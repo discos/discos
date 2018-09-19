@@ -21,6 +21,7 @@ class MSCU(object):
     def __init__(self, host='', port=10000):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.settimeout(0.2)
         self.socket.bind((host, port))
         self.servos = {}
         for address in app_nr:
@@ -33,19 +34,20 @@ class MSCU(object):
         counter = 0
         while True:
             if stop_server.value:
+                MSCU.reap()  # Clean up old children
+                self.socket.close()
                 sys.exit(0)
             try:
                 connection, clientaddr = self.socket.accept()
                 counter += 1 
                 print "\n%d. Got connection from %s" %(counter, connection.getpeername())
+            except socket.timeout:
+                continue
             except KeyboardInterrupt:
                 raise
             except:
                 traceback.print_exc()
                 continue
-
-            # Clean up old children
-            MSCU.reap()
 
             # Fork a process for this connection
             pid = os.fork()
@@ -56,8 +58,7 @@ class MSCU(object):
                 connection.close()
                 continue
             else:
-                # From here on, this is the child. 
-                self.socket.close() # Close the parent's socket
+                # From now on, this is the child. 
                 try:
                     buff = ''
                     while True:
@@ -77,7 +78,6 @@ class MSCU(object):
                         try:
                             if data.startswith('#stop'):
                                 stop_server.value = True
-                                connection.close()
                                 break
                             elif data.startswith('#setpos_NAK'):
                                 setpos_NAK[1].value = True  # The SRP address
@@ -128,21 +128,18 @@ class MSCU(object):
                             connection.send('%s' %answer)
                             time.sleep(0.05)
                 except (KeyboardInterrupt, SystemExit):
-                    raise
-                except:
-                    raise
+                    stop_server.value = True
+                    connection.close()
+                    sys.exit(0) # The child process *must* terminate
 
-                # Close the connection
                 try:
                      connection.close()
                 except KeyboardInterrupt:
-                    raise
-                except:
-                    traceback.print_exc()
+                    stop_server.value = True
+                    connection.close()
+                    sys.exit(0) # The child process *must* terminate
 
-                # Done handling the connection. Child process *must* terminate
-                # and not go back to the top of the loop
-                sys.exit(0)
+                sys.exit(0) # The child process *must* terminate
 
     def _welcome(self):
         print "*"*43

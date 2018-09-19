@@ -43,6 +43,7 @@ CScheduleTimer::~CScheduleTimer()
 		delete m_timerQueue;
 	}
 	for(i=m_events.begin();i<m_events.end();i++) {
+		if ((*i)->cleanupFunction) (*i)->cleanupFunction((*i)->parameter);
 		delete (*i)->handler;
 		delete (*i);
 	}
@@ -71,6 +72,7 @@ bool CScheduleTimer::cancel(const ACS::Time& time)
 	for(i=m_events.begin();i<m_events.end();i++) {
 		if ((*i)->time==time) { 
 			if (m_timerQueue->cancel((*i)->id)!=0) { //remove the event from the queue
+				if ((*i)->cleanupFunction) (*i)->cleanupFunction((*i)->parameter);
 				delete (*i)->handler;
 				delete (*i);
 				m_events.erase(i);
@@ -92,6 +94,8 @@ bool CScheduleTimer::cancel(const unsigned& pos)
 	}
 	id=m_events[pos]->id;
 	if (m_timerQueue->cancel(id)!=0) { //remove the event from the queue
+		if ((m_events[pos])->cleanupFunction) (m_events[pos])->cleanupFunction(
+		  (m_events[pos])->parameter);
 		delete m_events[pos]->handler;
 		delete m_events[pos];
 		m_events.erase(m_events.begin()+pos);
@@ -112,8 +116,10 @@ bool CScheduleTimer::cancelAll()
 		else {
 			ok=false;
 		}
+		if ((*i)->cleanupFunction) (*i)->cleanupFunction((*i)->parameter); 
 		delete (*i)->handler;
 		delete (*i);
+		
 	}
 	m_events.clear();
 	return ok;	
@@ -131,7 +137,8 @@ bool CScheduleTimer::getNextEvent(unsigned &index,ACS::Time& time,ACS::TimeInter
 	return true;
 }
 
-bool CScheduleTimer::schedule(TCallBack callBack,const ACS::Time& timeMark,const ACS::TimeInterval& interval,const void* param,TCleanupFunction cleanup)
+bool CScheduleTimer::schedule(TCallBack callBack,const ACS::Time& timeMark,const ACS::TimeInterval& interval,
+  const void* param,TCleanupFunction cleanup)
 {
 	long id;
 	ACS::Time time=timeMark;

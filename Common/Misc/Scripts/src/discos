@@ -1,0 +1,102 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# IRA Istituto di Radioastronomia                                                                      
+# 
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                  when            What                                             
+# Andrea Orlati(andrea.orlati@inaf.it) 28/06/2018      Creation                                  
+#************************************************************************
+#   NAME
+# 
+#   SYNOPSIS
+# 
+#   DESCRIPTION
+#
+#   FILES
+#
+#   ENVIRONMENT
+#
+#   RETURN VALUES
+#
+#   CAUTIONS
+#
+#   EXAMPLES
+#
+#   SEE ALSO
+#
+#   BUGS     
+#
+
+LONGOPTS=start,view,help
+SHORTOPTS=svh
+CL_START=
+CL_VIEW=
+CL_HELP=
+
+function printUsage {
+   echo "Gets the ESCS system started, management priviledges are needed"
+   echo ""
+        echo "Usage: `basename $0` [OPTIONS]  "
+        echo "Options: "
+        echo "   -s | --start   load the Command Center for starting the system"
+        echo "   -v | --view    load the Command Center for monitoring purposes"
+        echo "   -h | --help    prints this help"
+}
+
+# This simply checks for the correctness of the command line
+export POSIXLY_CORRECT=1
+
+getopt -n `basename $0` -Q -u -a -l $LONGOPTS $SHORTOPTS "$@" || {
+   printUsage
+   exit
+}
+
+# Now let's parse the command line
+set -- `getopt -u -a -l $LONGOPTS $SHORTOPTS "$@"`
+
+for i
+do
+	case "$i" in
+		-h) CL_HELP=true ;;
+		--help) CL_HELP=true ;;
+		--view) CL_VIEW=true ;;
+		-v) CL_VIEW=true ;;
+		--start) CL_START=true ;;
+		-s) CL_START=true ;;
+		--)  break;;
+	esac
+	shift
+done
+
+# restore
+export POSIXLY_CORRECT=
+unset POSIXLY_CORRECT
+
+export MANAGER=
+
+if [ -z "$MANAGER_REFERENCE" ] ; then
+	export MANAGER="corbaloc::"$HOST":3000/Manager"
+else
+	export MANAGER=$MANAGER_REFERENCE
+fi
+
+if [ "$CL_HELP" ] ; then
+   printUsage
+   exit
+fi
+
+if [ "$CL_START" ] ; then
+   acscommandcenter -r $INTROOT/app-defaults/discosStartup.xml &
+   exit
+fi
+
+if [ "$CL_VIEW" ] ; then
+   acscommandcenter -r $INTROOT/app-defaults/discosStartup.xml $MANAGER &
+fi
+
+
+
+#
+# ___oOo___

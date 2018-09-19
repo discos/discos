@@ -16,8 +16,8 @@
 
 	<LoggingConfig
 		centralizedLogger="Log"
-		minLogLevel="5"
-		minLogLevelLocal="5"
+		minLogLevel="10"
+		minLogLevelLocal="99"
 		dispatchPacketSize="10"
 		immediateDispatchLevel="10"
 		flushPeriodSeconds="1"

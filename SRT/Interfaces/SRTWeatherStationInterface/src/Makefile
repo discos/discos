@@ -45,6 +45,9 @@
 IDL_FILES = SRTWeatherStation
 IDL_TAO_FLAGS =
 USER_IDL =
+SRTWeatherStationStubs_LIBS = baciStubs GenericWeatherStationStubs
+
+
 #
 # Jarfiles and their directories
 #

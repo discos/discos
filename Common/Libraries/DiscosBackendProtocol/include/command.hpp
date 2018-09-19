@@ -26,6 +26,7 @@ namespace DiscosBackend{
             static Message calOn(long interleave = 0);
             static Message setFilename(string filename);
             static Message convertData(){return Message(REQUEST, "convert-data");};
+            static Message getRms(){return Message(REQUEST, "get-rms");};
     }; //class Command
 }; //namespace DiscosBackend
 

@@ -3,19 +3,19 @@
        xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
        xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       Name="LAN01"    Code="lanImpl"  Type="IDL:alma/SRTActiveSurface/lan:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp">
-      <_ Name="USD03"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD04"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD05"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD06"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD07"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD08"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD09"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD10"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD11"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD12"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD13"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD14"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
-      <_ Name="USD15"  Code="usdImpl"  Type="IDL:alma/SRTActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+       Name="LAN01"    Code="lanImpl"  Type="IDL:alma/ActiveSurface/lan:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp">
+      <_ Name="USD03"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD04"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD05"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD06"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD07"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD08"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD09"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD10"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD11"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD12"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD13"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD14"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
+      <_ Name="USD15"  Code="usdImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer05" ImplLang="cpp"/>
 
 </HierarchicalComponent>

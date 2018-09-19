@@ -19,9 +19,9 @@
 
 # a quick comment on this: in order to control the Medicina version of the backend a small change of the code is required so I force the
 # definition of a symbol that can be used by the c++ precompiler.
-ifeq ($(TARGETSYS),MED)
+ifeq ($(STATION),Medicina)
 	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_MED'
-else ifeq ($(TARGETSYS),NT)
+else ifeq ($(STATION),Noto)
 	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -U 'COMPILE_TARGET_MED' -D 'COMPILE_TARGET_NT'
 else
 	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_STANDARD'

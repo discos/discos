@@ -1,10 +1,10 @@
 import time
-import unittest2
+import unittest
 from ComponentErrors import ComponentErrorsEx, ComponentErrorsEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 from LocalOscillatorImpl import CommandLine
 
-class TestCommandLine(unittest2.TestCase):
+class TestCommandLine(unittest.TestCase):
 
 
       def setUp(self):
@@ -22,4 +22,4 @@ class TestCommandLine(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

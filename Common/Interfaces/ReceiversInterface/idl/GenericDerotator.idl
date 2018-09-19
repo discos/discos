@@ -171,11 +171,11 @@ module Receivers {
          *  If the time is lesser the the older one stored in the queue,
          *  then it returns oldest position.
          *  If the time is in advance or 0, it returns the latest position.
-         *  @arg time the time related to the position we want to get
+         *  @arg t the time related to the position we want to get
          *  @return the position
          *  @throw ComponentError::ComponentErrorsEx
          */
-         double getPositionFromHistory(in ACS::Time time) raises (ComponentErrors::ComponentErrorsEx);
+         double getPositionFromHistory(in ACS::Time t) raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** 

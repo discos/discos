@@ -13,7 +13,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = tcpProt-sim
+SCRIPTS         = tcpProt-sim
 PY_PACKAGES        = TCPGenericProtocolSimImpl
 
 
@@ -54,6 +54,7 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@chmod 700 $(INTROOT)/bin/tcpProt-sim
 	@echo " . . . installation done"
 
 

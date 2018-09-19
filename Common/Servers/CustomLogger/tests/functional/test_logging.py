@@ -8,7 +8,7 @@ import subprocess
 import signal
 import sys
 
-import unittest2
+import unittest
 
 from Acspy.Clients.SimpleClient import PySimpleClient
 import Management
@@ -32,7 +32,7 @@ class LoggingThread(Thread):
         self._stop_now = True
 
 
-class CustomLoggerTests(unittest2.TestCase):
+class CustomLoggerTests(unittest.TestCase):
     def setUp(self):
         self.client = PySimpleClient()
         self.custom_logger = self.client.getComponent(COMPONENT_NAME)

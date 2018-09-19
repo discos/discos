@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import time
 from Acspy.Clients.SimpleClient import PySimpleClient
 from ComponentErrors import NotAllowedEx
 
 
-class StatusPropertyTest(unittest2.TestCase):
+class StatusPropertyTest(unittest.TestCase):
     """..."""
     def setUp(self):
         client = PySimpleClient()
@@ -29,4 +29,4 @@ class StatusPropertyTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

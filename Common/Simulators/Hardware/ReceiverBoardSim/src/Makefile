@@ -5,7 +5,7 @@
 #*****************************************
 
 PY_PACKAGES = ReceiverBoardSimImpl
-PY_SCRIPTS = receiverboard-sim
+SCRIPTS = receiverboard-sim
 
 # -----------------
 # Include Standards
@@ -31,6 +31,7 @@ clean : clean_all
 	@echo " . . . clean done"
 
 install : install_all
+	@chmod 700 $(INTROOT)/bin/receiverboard-sim
 	@echo " . . . installation done"
 
 #___oOo___

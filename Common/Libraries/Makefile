@@ -16,6 +16,7 @@
 #    None
 #------------------------------------------------------------------------
 
+
 #
 # Modules in the various ACS sub-packages.
 #
@@ -29,7 +30,7 @@
 
 SUBSYSTEM = Libraries 
 
-MODULES =  SlaLibrary IRALibrary TextWindowLibrary ParserLibrary
+MODULES =  PyACSWrapper PyTesting
 
 
 MAKE_FLAGS = "-k"

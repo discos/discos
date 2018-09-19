@@ -14,7 +14,7 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
-  	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Receivers.xsd"/>
+  	<xs:import namespace="urn:schemas-cosylab-com:Receivers:1.0" schemaLocation="Receivers.xsd"/>
   	
   	<xs:complexType name="SRTKBandMFStatusType">
 		<xs:complexContent>
@@ -33,7 +33,9 @@
 	
 	
 	<xs:complexType name="SRTKBandMFReceiverType">
-		<xs:sequence>
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
+        <xs:sequence>
 			<!-- Local Oscillator (ROdoubleSeq) -->
 			<xs:element name="LO" type="baci:ROdoubleSeq"/>
 			<!-- Number of receiver feeds -->
@@ -131,8 +133,8 @@
 			<xs:element name="receiverName" type="baci:ROstring"/>
 		</xs:sequence>
 
-        <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
-        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
+        <!--xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
+        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" /-->
 		<xs:attribute name="ReceiverName" type="xs:string" use="required"/>
 		<xs:attribute name="DewarIPAddress" type="xs:string" use="required"/>
 		<xs:attribute name="DewarPort" type="xs:unsignedShort" use="required" />
@@ -151,6 +153,8 @@
 		<!-- Instance of the associated device that will set the local oscillator -->
 		<xs:attribute name="LocalOscillatorInstance" type="xs:string" use="required" />
 
+      </xs:extension>
+     </xs:complexContent>
 	</xs:complexType>
   
 	<xs:element name="SRTKBandMFReceiver" type="SRTKBandMFReceiverType"/>

@@ -1,26 +1,29 @@
 void CCore::_wait(const double& seconds) throw (ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
 {
-	long *done;
-	done=new long;
-	*done=0;
-	TIMEVALUE now;
+	long done=0;
+	TIMEVALUE now,check;
 	IRA::CIRATools::getTime(now);
 	ACS::Time time;
 	time=now.value().value+(ACS::Time)(seconds*10000000);
 	m_abortCurrentOperation=false;
-	if (!addTimerEvent(time,waitUntilHandler,static_cast<void *>(done),waitUntilHandlerCleanup)) {
+	long *pdone=&done;
+	if (!addTimerEvent(time,waitUntilHandler,static_cast<void *>(pdone))) {
 		//errore
-		_EXCPT(ComponentErrors::TimerErrorExImpl,dummy,"CCore::wait()");
+		_EXCPT(ComponentErrors::TimerErrorExImpl,dummy,"CCore::_wait()");
 		dummy.setReason("timer event could not be scheduled");
-		delete done;
 		throw dummy;
 	}
-	while ((*done)==0) {
+	while (done==0) {
 		if (m_abortCurrentOperation) {
 			m_abortCurrentOperation=false;
-			_EXCPT(ManagementErrors::AbortedByUserExImpl,dummy,"CCore::wait()");
+			_EXCPT(ManagementErrors::AbortedByUserExImpl,dummy,"CCore::_wait()");
 			dummy.setOperation("wait for an amount of time");
 			throw dummy;
+		}
+		IRA::CIRATools::getTime(check);
+		if (check.value().value>time) {
+			done=1;
+			ACS_LOG(LM_FULL_INFO,"CCore::_wait()",(LM_WARNING,"Timer precision outside threshold"));
 		}
 		IRA::CIRATools::Wait(25000); // 25 milliseconds
 	}
@@ -28,23 +31,27 @@ void CCore::_wait(const double& seconds) throw (ComponentErrors::TimerErrorExImp
 
 void CCore::_waitUntil(const ACS::Time& time) throw (ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
 {
-	long *done;
-	done=new long;
-	*done=0;
+	long done=0;
+	long *pdone=&done;
+	TIMEVALUE check;
 	m_abortCurrentOperation=false;
-	if (!addTimerEvent(time,waitUntilHandler,static_cast<void *>(done),waitUntilHandlerCleanup)) {
+	if (!addTimerEvent(time,waitUntilHandler,static_cast<void *>(pdone))) {
 		//errore
-		_EXCPT(ComponentErrors::TimerErrorExImpl,dummy,"CCore::waitUntil()");
+		_EXCPT(ComponentErrors::TimerErrorExImpl,dummy,"CCore::_waitUntil()");
 		dummy.setReason("timer event could not be scheduled");
-		delete done;
 		throw dummy;
 	}
-	while ((*done)==0) {
+	while (done==0) {
 		if (m_abortCurrentOperation) {
 			m_abortCurrentOperation=false;
-			_EXCPT(ManagementErrors::AbortedByUserExImpl,dummy,"CCore::waitUntil()");
+			_EXCPT(ManagementErrors::AbortedByUserExImpl,dummy,"CCore::_waitUntil()");
 			dummy.setOperation("wait until an epoch");
 			throw dummy;
+		}
+		IRA::CIRATools::getTime(check);
+		if (check.value().value>time) {
+			done=1;
+			ACS_LOG(LM_FULL_INFO,"CCore::_waitUntil()",(LM_WARNING,"Timer precision outside threshold"));
 		}
 		IRA::CIRATools::Wait(25000); // 25 milliseconds
 	}

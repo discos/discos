@@ -1,4 +1,4 @@
-import unittest2
+import unittest
 import random
 import time
 from maciErrType import CannotGetComponentEx
@@ -7,7 +7,7 @@ from DewarPositioner.cdbconf import CDBConf
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class PositionerSetupTest(unittest2.TestCase):
+class PositionerSetupTest(unittest.TestCase):
 
     def setUp(self):
         self.cdbconf = CDBConf()
@@ -52,4 +52,4 @@ class PositionerSetupTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

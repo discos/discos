@@ -1,0 +1,36 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# Istituto Nazionale di Astrofisica                                                                     
+# 
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                  when            What                                             
+# Andrea Orlati(andrea.orlati@inaf.it) 30/06/2018      Creation                                  
+#************************************************************************
+#   NAME
+# 
+#   SYNOPSIS
+# 
+#   DESCRIPTION
+#   Stops the discos system and shuts down ACS, SRT flavour
+#
+#   FILES
+#
+#   ENVIRONMENT
+#
+#   RETURN VALUES
+#
+#   CAUTIONS
+#   This script should also include the console shut down, in that case it is needed to know the console server address....
+#
+#   EXAMPLES
+#
+#   SEE ALSO
+#
+#   BUGS
+
+#MASTERHOST will be replaced by make file @installation time with proper server address
+
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'echo Shutting down.... && killACS && echo ....it is all over'"
+

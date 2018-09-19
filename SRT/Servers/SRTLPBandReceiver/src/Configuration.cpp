@@ -27,7 +27,7 @@ using namespace IRA;
     } \
     else { \
         FIELD=tmpw; \
-        ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %lu",tmpw); \
+        ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %u",tmpw); \
     } \
 }
 
@@ -415,7 +415,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (
                 "CConfiguration::init()",
                 (
                      LM_DEBUG,
-                     "SYNTH_VALUE_ENTRY: %lf %lf %ld",
+                     "SYNTH_VALUE_ENTRY: %lld %lf %lf",
                      m_taperVector[i].feed,
                      m_taperVector[i].frequency,
                      m_taperVector[i].taper
@@ -762,7 +762,7 @@ DWORD CConfiguration::getTaperTable(double * &freq,double *&taper, short feed) c
 			count++;
         }
     }
-    return m_taperVectorLen;
+    return count;
 }
 
 DWORD CConfiguration::getLeftMarkTable(double *& freq, double *& markValue, short feed) const

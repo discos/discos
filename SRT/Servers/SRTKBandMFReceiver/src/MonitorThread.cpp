@@ -37,8 +37,15 @@ void CMonitorThread::onStart()
      if(m_currentResponseTime < m_currentSampling+m_currentSampling/10) {
          // Force the response time to be at least 10% more than sampling time
          m_currentResponseTime = m_currentSampling + m_currentSampling / 10; 
-         ACS_LOG(LM_FULL_INFO, "SRTKBandMFReceiverImpl::execute()", (LM_WARNING, \
-                     "WATCH_DOG_RESPONSE_TIME_ADJUSTED_TO_FIT_SAMPLING_TIME: %llu uSec", m_currentResponseTime/10));
+         ACS_LOG(
+             LM_FULL_INFO,
+             "SRTKBandMFReceiverImpl::execute()",
+             (
+                  LM_WARNING,
+                  "WATCH_DOG_RESPONSE_TIME_ADJUSTED_TO_FIT_SAMPLING_TIME: %llu uSec",
+                  static_cast<long long unsigned int>(m_currentResponseTime/10)
+             )
+         );
          setResponseTime(m_currentResponseTime);
      }
 }

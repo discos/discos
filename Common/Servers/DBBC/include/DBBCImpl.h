@@ -67,6 +67,8 @@ virtual void setTime () throw (CORBA::SystemException,ComponentErrors::Component
 
 virtual ACS::doubleSeq * getTpi () throw(CORBA::SystemException, ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx){return 0;};
 
+virtual ACS::doubleSeq * getRms () throw(CORBA::SystemException, ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx){return 0;};
+
 virtual ACS::doubleSeq * getZero () throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx){return 0;};
 
 virtual void setKelvinCountsRatio (const ACS::doubleSeq & ratio,

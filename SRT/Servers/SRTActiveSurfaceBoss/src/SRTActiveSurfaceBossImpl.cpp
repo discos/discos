@@ -7,7 +7,7 @@
 #include "DevIOProfile.h"
 #include "DevIOTracking.h"
 
-static char *rcsId="@(#) $Id: SRTActiveSurfaceBossImpl.cpp,v 1.2 2010-07-26 12:37:07 c.migoni Exp $";
+static char const *rcsId="@(#) $Id: SRTActiveSurfaceBossImpl.cpp,v 1.2 2010-07-26 12:37:07 c.migoni Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 using namespace SimpleParser;
@@ -342,47 +342,22 @@ void SRTActiveSurfaceBossImpl::setup (const char *config) throw (CORBA::SystemEx
 		_EXCPT(ManagementErrors::ConfigurationErrorExImpl,ex,"SRTActiveSurfaceBossImpl::setup()");
 		throw ex.getConfigurationErrorEx();
 	}
-/*	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-	try { 
-		//resource->setProfile(config);	
-	}
-	catch (ManagementErrors::ConfigurationErrorExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getConfigurationErrorEx();
-	}
-*/
 }
 
 void SRTActiveSurfaceBossImpl::park () throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx)
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::park()");
-	asOff();
-	setProfile (ActiveSurface::AS_SHAPED_FIXED);
-    	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-    	try {
-        	resource->onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
-    	}
-    	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+    CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
+    try {
+       	resource->asPark();
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		_EXCPT(ManagementErrors::ParkingErrorExImpl,ex,"SRTActiveSurfaceBossImpl::park()");
 		throw ex.getParkingErrorEx();
 	}
 	resource->m_tracking = false;
 }
-/*
-void SRTActiveSurfaceBossImpl::setup (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-	AUTO_TRACE("SRTActiveSurfaceBossImpl::setup()");
 
-    CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-    try {
-        resource->onewayAction(ActiveSurface::AS_SETUP, circle, actuator, radius, 0, 0, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getComponentErrorsEx();
-	}
-}
-*/
 void SRTActiveSurfaceBossImpl::stow (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::stow()");
@@ -530,11 +505,8 @@ void SRTActiveSurfaceBossImpl::setProfile (ActiveSurface::TASProfile newProfile)
 
 	m_profile = newProfile;
 
-	//_SET_CDB(profile, m_profile,"SRTActiveSurfaceBossImpl::setProfile")
-
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
 	try {
-		//resource->onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, m_profile);
 		resource->setProfile(m_profile);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -634,13 +606,6 @@ void SRTActiveSurfaceBossImpl::asOn() throw (CORBA::SystemException)
 		ex.log(LM_DEBUG);
 		throw ex.getComponentErrorsEx();
 	}
-/*	if ((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) || (m_profile != ActiveSurface::AS_SHAPED_FIXED)) {
-		CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-		resource->enableAutoUpdate();
-	}
-	else
-		update(45.0);
-*/
 }
 
 void SRTActiveSurfaceBossImpl::asOff() throw (CORBA::SystemException)
@@ -648,7 +613,6 @@ void SRTActiveSurfaceBossImpl::asOff() throw (CORBA::SystemException)
     AUTO_TRACE("SRTActiveSurfaceBossImpl::asOff()");
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
 	try {
-		//resource->disableAutoUpdate();
 		resource->asOff();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {

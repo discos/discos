@@ -1,9 +1,9 @@
-import unittest2
+import unittest
 import mocker
 from DewarPositioner.DewarPositionerImpl import DewarPositionerImpl
 
 
-class DerotatorSetupCmdTest(unittest2.TestCase):
+class DerotatorSetupCmdTest(unittest.TestCase):
     """Test the derotatorSetup and derotatorGetActualSetup commands"""
 
     def test_setupcmd(self):
@@ -15,4 +15,4 @@ class DerotatorSetupCmdTest(unittest2.TestCase):
         self.assertRegexpMatches(answer, 'KKG')
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

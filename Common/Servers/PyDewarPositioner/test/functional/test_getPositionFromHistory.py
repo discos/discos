@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 import time
-import unittest2
+import unittest
 from ComponentErrors import ComponentErrorsEx, ComponentErrorsEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Common.TimeHelper import getTimeStamp
@@ -10,7 +10,7 @@ from ComponentErrors import ComponentErrorsEx
 from DewarPositioner.cdbconf import CDBConf
 
 
-class GetPositionFromHistoryTest(unittest2.TestCase):
+class GetPositionFromHistoryTest(unittest.TestCase):
 
     def setUp(self):
         client = PySimpleClient()
@@ -71,4 +71,4 @@ class GetPositionFromHistoryTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

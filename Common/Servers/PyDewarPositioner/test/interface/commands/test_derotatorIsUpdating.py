@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import mocker
 import time
 from DewarPositioner.DewarPositionerImpl import DewarPositionerImpl
 
 
-class DerotatorIsUpdatingTest(unittest2.TestCase):
+class DerotatorIsUpdatingTest(unittest.TestCase):
     """Test the derotatorIsUpdating command"""
 
     def test_isUpdating(self):
@@ -14,4 +14,4 @@ class DerotatorIsUpdatingTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

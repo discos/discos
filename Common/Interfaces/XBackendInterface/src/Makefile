@@ -35,6 +35,9 @@ IDL_FILES = XBackends
 TAO_IDLFLAGS =
 USER_IDL =
 
+XBackendsStubs_LIBS = baciStubs GenericBackendStubs
+
+
 #
 # list of all possible C-sources (used to create automatic dependencies)
 # ------------------------------

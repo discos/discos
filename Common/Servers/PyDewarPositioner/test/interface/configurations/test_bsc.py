@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import time
 from ComponentErrors import ComponentErrorsEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class BSCTest(unittest2.TestCase):
+class BSCTest(unittest.TestCase):
     """Test the BSC Configuration"""
 
     def setUp(self):
@@ -27,4 +27,4 @@ class BSCTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

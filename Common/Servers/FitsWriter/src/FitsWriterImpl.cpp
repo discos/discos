@@ -13,8 +13,8 @@
 #include "DevIODeviceID.h"
 #include "DevIOScanAxis.h"
 
-static char *rcsId="@(#) $Id: FitsWriterImpl.cpp,v 1.12 2011-06-21 16:38:41 a.orlati Exp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
+//static char *rcsId="@(#) $Id: FitsWriterImpl.cpp,v 1.12 2011-06-21 16:38:41 a.orlati Exp $";
+//static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 #define WORKTHREADNAME "FITSENGINE"
 #define COLLECTORTHREADNAME "COLLECTORTHREAD"

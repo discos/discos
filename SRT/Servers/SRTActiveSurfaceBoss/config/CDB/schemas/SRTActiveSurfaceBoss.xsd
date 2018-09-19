@@ -23,6 +23,8 @@
 	<xs:import namespace="urn:schemas-cosylab-com:ActiveSurface:1.0" schemaLocation="ActiveSurface.xsd"/>
 
 	<xs:complexType name="SRTActiveSurfaceBossType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
 		<xs:sequence>
 			<xs:element name="status" type="mng:SystemStatusType" />	
 			<xs:element name="enabled" type="mng:BooleanType" />
@@ -36,6 +38,8 @@
 		<!-- the expire time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
         <xs:attribute name="profile" 			type="xs:unsignedByte" 	use="required" />
+      </xs:extension>
+     </xs:complexContent>
 	</xs:complexType>
 
 	<xs:element name="SRTActiveSurfaceBoss" type="SRTActiveSurfaceBossType"/>

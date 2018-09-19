@@ -1,4 +1,4 @@
-import unittest2
+import unittest
 import time
 
 from ComponentErrors import ComponentErrorsEx, ComponentErrorsEx
@@ -7,7 +7,7 @@ from Acspy.Clients.SimpleClient import PySimpleClient
 from DewarPositioner.cdbconf import CDBConf
 
 
-class SetupTest(unittest2.TestCase):
+class SetupTest(unittest.TestCase):
     def setUp(self):
         client = PySimpleClient()
         self.positioner = client.getComponent('RECEIVERS/DewarPositioner')
@@ -39,4 +39,4 @@ class SetupTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

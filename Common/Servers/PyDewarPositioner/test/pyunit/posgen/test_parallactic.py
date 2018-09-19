@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import mocker
 from math import sin, cos, tan, atan, radians, degrees, pi, atan2
 from DewarPositioner.posgenerator import PosGenerator, PosGeneratorError
 
 
-class PosGeneratorParallacticTest(unittest2.TestCase):
+class PosGeneratorParallacticTest(unittest.TestCase):
 
     def setUp(self):
         self.m = mocker.Mocker()
@@ -61,4 +61,4 @@ class PosGeneratorParallacticTest(unittest2.TestCase):
         self.assertGreater(abs(parallactic), 90)
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

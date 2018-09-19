@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- Authors: Marco Buttu, Giuseppe Carboni -->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:SRTIFDistributor14Table:1.0"
+	xmlns="urn:schemas-cosylab-com:SRTIFDistributor14Table:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	
+	<xs:complexType name="BackendTableHeader">
+ 		<xs:sequence>
+ 			<xs:element name="Backend" type="xs:string" />
+ 			<xs:element name="Channel" type="xs:unsignedInt" />
+ 			<xs:element name="Address" type="xs:unsignedInt" />
+ 		</xs:sequence>
+ 	</xs:complexType>
+ 	
+ 	<xs:complexType name="BackendTable">
+		<xs:sequence>
+			<xs:element name="BackendEntry" type="BackendTableHeader"  minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+ 	</xs:complexType>
+ 	
+ 	<xs:element name="SRTIFDistributor14Table" type="BackendTable" />	
+	
+</xs:schema>

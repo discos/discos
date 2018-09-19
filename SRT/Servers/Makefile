@@ -36,7 +36,8 @@ MODULES =	SRTActiveSurfaceLanServer \
 		SRTMount \
 		SRTKBandMFReceiver \
 		SRTWeatherStation \
-		SRT7GHzReceiver
+		SRT7GHzReceiver \
+		SRTLPBandReceiver
 
 MAKE_FLAGS = "-k"
 PLATFORM := $(shell uname)

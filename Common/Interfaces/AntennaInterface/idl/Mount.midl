@@ -148,10 +148,10 @@ module Antenna {
 		 * @throw CORBA::SystemException		 
 		 * @param az azimuth of the data point that will be transfered (degrees)
 		 * @param el elevation of the data point that will be transfered (degrees)
-		 * @param time time stamp of the data point, the mount will try to reach that point at the given time
+		 * @param timestamp time stamp of the data point, the mount will try to reach that point at the given time
 		 * @param restart if true the data point stack will be cleared and all previuos loaded point will be lost.  
 		*/		
-		void programTrack(in double az,in double el,in ACS::Time time,in boolean restart) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		void programTrack(in double az,in double el,in ACS::Time timestamp,in boolean restart) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 			
 		/**
 		 * This method can be used to stop all running operation (jobs that requires long time to complete) or in a more simple way to 
@@ -246,29 +246,29 @@ module Antenna {
 		 * This method is used internally by client component. It is used to read the azimuth, elevation, azimuthOffset and elevationOffset in one shot.
 		 * All these information are marked with a timestamp. The returned values are in degrees. At any time if you want to know the obseverd sky point 
 		 *  you have to subtract to each coordinate the respective offset.
-		 * @param time this timestamp marks the other values returned by this method
+		 * @param timestamp this timestamp marks the other values returned by this method
 		 * @param azimuth returns the azimuth read directly from the mount encoders
 		 * @param elevation  returns the elevation read directly from the mount encoders, it is exactly the same value of the property <i>elevation</i>
 		 * @param azOff returns the value of the instant offset for the azimuth axe. This value is the last commanded by the method <i>setOffsets</i>.
 		 * @param elOff returns the value of the instant offset for the elevation axe. This value is the last commanded by the method <i>setOffsets</i>.
-		 * @param section this parameter brings the information of the section in which the mount is at the epoch given by parameter <i>time</i>.
+		 * @param section this parameter brings the information of the section in which the mount is at the epoch given by parameter <i>timestamp</i>.
 		 * @throw  CORBA::SystemException
 		 * @throw ComponentErrors::ComponentErrorsEx 
 		 * @thorw AntennaErrors::AntennaErrorsEx
 		*/
-		void getEncoderCoordinates(out ACS::Time time,out double azimuth,out double elevation,out double azOff,
+		void getEncoderCoordinates(out ACS::Time timestamp,out double azimuth,out double elevation,out double azOff,
 				out double elOff,out TSections section) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 		
 		/**
 		 * This method is internally used to retrieve antenna errors in one time.
-		 * @param time this is the timestamp that marks the other values returned by this method
+		 * @param timestamp this is the timestamp that marks the other values returned by this method
 		 * @param azError error in azimuth in degrees
 		 * @param elError error in elevation in degrees
 		 * @throw  CORBA::SystemException
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @thorw AntennaErrors::AntennaErrorsEx
 		 */
-		void getAntennaErrors(out ACS::Time time,out double azError,out double elError) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
+		void getAntennaErrors(out ACS::Time timestamp,out double azError,out double elError) raises (ComponentErrors::ComponentErrorsEx,AntennaErrors::AntennaErrorsEx);
 		
 		/**
 		 * This method is used internally by client components. It can be used to force the azimuth range the mount will travel in order to reach the

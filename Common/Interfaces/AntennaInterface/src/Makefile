@@ -33,6 +33,22 @@ IDL_FILES = Observatory Mount PointingModel EphemGeneratorMACRO_include \
 EphemGenerator SkySource OTF Refraction AntennaBoss Moon
 IDL_TAO_FLAGS =
 USER_IDL =
+ObservatoryStubs_LIBS = baciStubs maciStubs AntennaDefinitionsStubs ComponentErrorsStubs
+MountStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+                  AntennaErrorsStubs AntennaDefinitionsStubs ComponentErrorsStubs
+PointingModelStubs_LIBS = baciStubs maciStubs AntennaErrorsStubs acscomponentStubs
+EphemGeneratorStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+                           AntennaErrorsStubs AntennaDefinitionsStubs
+SkySourceStubs_LIBS = baciStubs maciStubs EphemGeneratorStubs ComponentErrorsStubs \
+                      AntennaErrorsStubs AntennaDefinitionsStubs
+OTFStubs_LIBS = baciStubs maciStubs EphemGeneratorStubs ComponentErrorsStubs \
+                AntennaErrorsStubs AntennaDefinitionsStubs
+RefractionStubs_LIBS = baciStubs maciStubs acscomponentStubs AntennaErrorsStubs
+AntennaBossStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
+                        EphemGeneratorStubs ComponentErrorsStubs AntennaErrorsStubs \
+                        AntennaDefinitionsStubs
+MoonStubs_LIBS = baciStubs maciStubs EphemGeneratorStubs
+
 
 #
 # list of all possible C-sources (used to create automatic dependencies)

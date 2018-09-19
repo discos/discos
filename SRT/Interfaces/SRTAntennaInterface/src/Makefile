@@ -35,6 +35,8 @@ IDL_FILES = SRTMount
 TAO_IDLFLAGS =
 USER_IDL =
 
+SRTMountStubs_LIBS = baciStubs MountStubs
+
 #
 # list of all possible C-sources (used to create automatic dependencies)
 # ------------------------------

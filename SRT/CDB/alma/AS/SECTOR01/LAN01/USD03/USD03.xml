@@ -2,8 +2,22 @@
 <!--
    - History:
    -   Thu Oct 09 11:27:38 UTC 2008 modified by jDAL
+   -   Fri Aug 25 08:20:25 UTC 2017 modified by jDAL
+   -   Fri Aug 25 09:29:03 UTC 2017 modified by jDAL
+   -   Fri Aug 25 09:29:17 UTC 2017 modified by jDAL
+   -   Mon Aug 28 09:08:25 UTC 2017 modified by jDAL
+   -   Mon Aug 28 12:20:31 UTC 2017 modified by jDAL
+   -   Mon Aug 28 12:25:08 UTC 2017 modified by jDAL
+   -   Mon Aug 28 12:55:10 UTC 2017 modified by jDAL
+   -   Mon Aug 28 12:55:26 UTC 2017 modified by jDAL
+   -   Tue Aug 29 08:00:13 UTC 2017 modified by jDAL
+   -   Tue Aug 29 08:21:27 UTC 2017 modified by jDAL
+   -   Tue Aug 29 08:24:55 UTC 2017 modified by jDAL
+   -   Tue Aug 29 08:49:54 UTC 2017 modified by jDAL
+   -   Tue Aug 29 09:07:28 UTC 2017 modified by jDAL
+   -   Tue Aug 29 12:18:04 UTC 2017 modified by jDAL
 -->
-<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="1" lan="1" serialAddress="3" cammaLen="16" cammaPos="192" calibrate="0">
+<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="1" lan="1" serialAddress="3" cammaLen="16" cammaPos="192" calibrate="1">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />
 	<cmdPos min_value="-21000" max_value="21000" units="step" description="commanded position" />
 	<Fmin min_value="20" max_value="10000" units="step" default_value="100" description="min freq" />

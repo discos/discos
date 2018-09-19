@@ -12,7 +12,7 @@
 	} \
 	else { \
 		FIELD=tmpw; \
-		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %lu",tmpw); \
+		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %u",tmpw); \
 	} \
 }
 

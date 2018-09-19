@@ -6,26 +6,26 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <Configuration>
-	<configurationID>KKC</configurationID>
+	<configurationID>KKG</configurationID>
 	<sections>14</sections>
 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
-	<inputPortDB>10</inputPortDB>
- 	<inputPortBW>2350</inputPortBW>	
+	<inputPortDB>7</inputPortDB>
+ 	<inputPortBW>2350</inputPortBW>
 	<beams>7</beams>
 	<section_boards>0 1 2 3 4 5 6 7 8 9 10 11 12 13</section_boards>
 	<polarizations>L R L R L R L R L R L R L R</polarizations>
-	<feed>2 2 3 3 4 4 5 5 6 6 0 0 1 1</feed>
+	<feed>0 0 1 1 2 2 3 3 4 4 5 5 6 6</feed>
 	<IF>0 1 0 1 0 1 0 1 0 1 0 1 0 1</IF>
 </Configuration>
 
 <Configuration>
-	<configurationID>CCC</configurationID>
+	<configurationID>CCB</configurationID>
  	<sections>2</sections>
  	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
- 	<inputPort>GREGORIAN</inputPort>
-	<inputPortDB>10</inputPortDB>
- 	<inputPortBW>1250</inputPortBW> 	
+ 	<inputPort>BWG</inputPort>
+	<inputPortDB>9</inputPortDB>
+ 	<inputPortBW>2350</inputPortBW>
  	<beams>1</beams>
  	<section_boards>0 1</section_boards>
  	<polarizations>L R</polarizations>
@@ -34,14 +34,28 @@
 </Configuration>
 
 <Configuration>
+	<configurationID>XB</configurationID>
+ 	<sections>1</sections>
+ 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<inputPort>BWG</inputPort>
+	<inputPortDB>5</inputPortDB>
+ 	<inputPortBW>2350</inputPortBW>
+ 	<beams>1</beams>
+ 	<section_boards>13</section_boards>
+ 	<polarizations>R</polarizations>
+ 	<feed>0</feed>
+ 	<IF>0</IF>
+</Configuration>
+
+<Configuration>
 	<configurationID>LLP</configurationID>
  	<sections>2</sections>
  	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>PRIMARY</inputPort>
 	<inputPortDB>10</inputPortDB>
- 	<inputPortBW>2350</inputPortBW> 	
+ 	<inputPortBW>2350</inputPortBW>
  	<beams>1</beams>
- 	<section_boards>0 1</section_boards>
+ 	<section_boards>2 3</section_boards>
  	<polarizations>L R</polarizations>
  	<feed>0 0</feed>
  	<IF>0 1</IF>
@@ -52,13 +66,27 @@
  	<sections>2</sections>
  	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>PRIMARY</inputPort>
- 	<inputPortDB>10</inputPortDB>
- 	<inputPortBW>2350</inputPortBW>
+	<inputPortDB>10</inputPortDB>
+ 	<inputPortBW>730</inputPortBW> 	
  	<beams>1</beams>
- 	<section_boards>2 3</section_boards>
+ 	<section_boards>0 1</section_boards>
  	<polarizations>L R</polarizations>
  	<feed>0 0</feed>
  	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>PLP</configurationID>
+ 	<sections>4</sections>
+ 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+ 	<inputPort>PRIMARY</inputPort>
+	<inputPortDB>10</inputPortDB>
+ 	<inputPortBW>2350</inputPortBW> 	
+ 	<beams>2</beams>
+ 	<section_boards>0 1 2 3</section_boards>
+ 	<polarizations>L R L R</polarizations>
+ 	<feed>0 0 1 1</feed>
+ 	<IF>0 1 0 1</IF>
 </Configuration>
 
 <Configuration>

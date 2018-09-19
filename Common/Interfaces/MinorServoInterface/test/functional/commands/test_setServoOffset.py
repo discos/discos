@@ -3,7 +3,7 @@ from __future__ import with_statement
 import os
 import math
 import time
-import unittest2
+import unittest
 
 import MinorServo
 import Management
@@ -16,10 +16,10 @@ from Acspy.Common.TimeHelper import getTimeStamp
 __author__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
 
 
-class TestSetServoOffsetCmd(unittest2.TestCase):
+class TestSetServoOffsetCmd(unittest.TestCase):
     """Test the setServoOffset command"""
 
-    telescope = os.getenv('TARGETSYS')
+    telescope = os.getenv('STATION')
 
     def setUp(self):
         self.client = PySimpleClient()
@@ -35,4 +35,4 @@ class TestSetServoOffsetCmd(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

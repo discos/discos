@@ -1,7 +1,7 @@
-import unittest2
+import unittest
 from DewarPositioner.positioner import Status
 
-class Dec2BinTest(unittest2.TestCase):
+class Dec2BinTest(unittest.TestCase):
 
     def test_return_the_required_length(self):
         """The lenght of the string must be as specified"""
@@ -12,4 +12,4 @@ class Dec2BinTest(unittest2.TestCase):
         self.assertEqual(Status.dec2bin(0, 7), '0'*7)
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

@@ -212,7 +212,7 @@
    -   Thu Jun 11 14:56:12 UTC 2015 modified by jDAL
    -   Fri Jun 12 07:17:05 UTC 2015 modified by jDAL
 -->
-<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="1" lan="11" serialAddress="15" cammaLen="4.6346182654920006E228" cammaPos="1.3719957867074347E160" calibrate="0">
+<usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="1" lan="11" serialAddress="15" cammaLen="4.6346182654920006E228" cammaPos="1.3719957867074347E160" calibrate="1">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />
 	<cmdPos min_value="-21000" max_value="21000" units="step" description="commanded position" />
 	<Fmin min_value="20" max_value="10000" units="step" default_value="100" description="min freq" />

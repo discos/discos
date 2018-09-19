@@ -98,16 +98,16 @@ module Antenna {
 		 * This method is only for control software internal use. It used, given a timestamp, to retrive the apparent
 		 * horizontal coordinates in one shot.
 		 * @throw CORBA::SystemException
-		 * @param time this parameter is used to pass the excat time the caller wants to know the topocentric coordinates.
+		 * @param timestamp this parameter is used to pass the exact time the caller wants to know the topocentric coordinates.
 		 * @param az that's the returned value in radians of the azimuth for the requested time.
 		 * @param el that's the returned value in radians of the elevation for the requested time.
 		*/
-		void getHorizontalCoordinate(in ACS::Time time, out double az,out double el);
+		void getHorizontalCoordinate(in ACS::Time timestamp, out double az,out double el);
 		
 		/**
 		 * This method should only be used internally to know the apparent coordinates in all frames.
 		 * @throw CORBA::SyStemException
-		 * @param time this indicates the time the coordinates refer to
+		 * @param timestamp this indicates the time the coordinates refer to
 		 * @param az the apparent  azimuth in radians
 		 * @param el the apparent elevation in radians
 		 * @param ra apparent right ascension in radinas
@@ -116,7 +116,7 @@ module Antenna {
 		 * @param lon galactic longitude corresponding to the apparent equatorial
 		 * @param lat galactic latitude corresponding to the apparent equatorial
 		*/
-		void getAllCoordinates(in ACS::Time time,out double az,out double el, out double ra,out double dec,out double jepoch,out double lon,out double lat);
+		void getAllCoordinates(in ACS::Time timestamp,out double az,out double el, out double ra,out double dec,out double jepoch,out double lon,out double lat);
 		
 		/**
      	 * This method is called internally to know if the telescope is tracking the right position or not. The generator will subtract the
@@ -127,7 +127,7 @@ module Antenna {
      	 * into account the fact that during acceleration ramps the antenna is not,stritcly speaking, tracking. 
      	 * The coordinates passed here must be observed (depurated by all the instrumental effects and correction that are used
      	 * to point correctly the telescope)
-     	 * @param time represent the time that the provided azimuth and elevation referes to. The component will compute its azimuth
+     	 * @param timestamp represent the time that the provided azimuth and elevation referes to. The component will compute its azimuth
      	 *                 and elevation in order to compare them.
      	 * @param az the azimuth (radians) of the coordinate where the telescope is, if it is nearby (inside HPBW) the  computed (by this
      	 *                 component) one, the antenna is tracking.
@@ -136,7 +136,7 @@ module Antenna {
      	 * @param HPBW the beam width at half power(radians), used to decide if the pointing errors 
      	 * @return true if the antenna is tracking, false in all other cases. 
 		*/
-		boolean checkTracking (in ACS::Time time,in double az,in double el,in double HPBW);
+		boolean checkTracking (in ACS::Time timestamp,in double az,in double el,in double HPBW);
 
         /**
         * This method is used to calculate the flux of a source who's parameter

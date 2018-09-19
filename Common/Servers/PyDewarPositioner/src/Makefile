@@ -5,7 +5,7 @@
 
 CDB_SCHEMAS = DewarPositioner
 
-PY_SCRIPTS = derotatorPosition
+PY_SCRIPTS_L = derotatorPosition
 PY_MODULES =
 PY_PACKAGES = DewarPositioner
 
@@ -24,9 +24,9 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all
-	$(RM) *~ *Impl/*~ DewarPositioner/*.pyc
-	$(RM) ../lib/python/site-packages/*
-	$(RM) $(INTROOT)/lib/python/site-packages/DewarPositioner
+	@$(RM) *~ *Impl/*~ DewarPositioner/*.pyc
+	@$(RM) ../lib/python/site-packages/*
+	@$(RM) $(INTROOT)/lib/python/site-packages/DewarPositioner
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 

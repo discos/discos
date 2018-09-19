@@ -18,12 +18,16 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	
-	<xs:complexType name="GenericBackendType">
+    <xs:complexType name="GenericBackendType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">   
 		<xs:sequence>
 		</xs:sequence>
 		<!-- this allows to specifiy the number of flows, the protocols, host and port number  -->
 		<xs:attribute name="sender_protocols" type="xs:string" use="optional" 
-			default="TCP=${HOST}:14000"/>
+            default="TCP=${HOST}:14000"/>
+      </xs:extension>
+     </xs:complexContent>   
 	</xs:complexType>
 	
 </xs:schema>

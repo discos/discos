@@ -36,7 +36,7 @@ USER_CFLAGS =
 INCLUDES = Definitions.h String.h IRATools.h Error.h SecureArea.h SerialPort.h Lecom.h FastQueue.h\
  Socket.h DataField.h DBTable.h LogFilter.h Site.h DateTime.h Timer.h SkySource.h TimeTaggedCircularArray.h \
  ScheduleTimer.h TimeoutSync.h MicroControllerBoard.h ReceiverControl.h MicroControllerBoardDef.h \
- SourceFlux.h CustomLoggerUtils.h LogDike.h FrequencyTracking.h IRA
+ SourceFlux.h CustomLoggerUtils.h LogDike.h FrequencyTracking.h BaseConverter.h IRA
 
 #
 # Libraries (public and local)
@@ -45,7 +45,7 @@ LIBRARIES       = IRALibrary
 LIBRARIES_L     =
 IRALibrary_OBJECTS = String IRATools Error SerialPort Lecom Socket DataField DBTable LogFilter \
  Site DateTime Timer SkySource TimeTaggedCircularArray ScheduleTimer TimeoutSync MicroControllerBoard \
- ReceiverControl SourceFlux CustomLoggerUtils LogDike FrequencyTracking
+ ReceiverControl SourceFlux CustomLoggerUtils LogDike FrequencyTracking BaseConverter
 IRALibrary_LIBS = acstime SlaLibrary maciClient
 
 PY_PACKAGES  = IRAPy

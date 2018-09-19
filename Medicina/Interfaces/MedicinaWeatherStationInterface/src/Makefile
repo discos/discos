@@ -45,6 +45,9 @@
 IDL_FILES = MedWeatherStation 
 IDL_TAO_FLAGS =
 USER_IDL =
+
+MedWeatherStationStubs_LIBS = baciStubs GenericWeatherStationStubs
+
 #
 # Jarfiles and their directories
 #

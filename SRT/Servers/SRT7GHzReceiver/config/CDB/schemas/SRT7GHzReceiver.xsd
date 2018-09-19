@@ -19,7 +19,7 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
-  	<xs:import namespace="urn:schemas-cosylab-com:Antenna:1.0" schemaLocation="Receivers.xsd"/>
+  	<xs:import namespace="urn:schemas-cosylab-com:Receivers:1.0" schemaLocation="Receivers.xsd"/>
   	  	
   	<xs:complexType name="SRT7GHzStatusType">
 		<xs:complexContent>
@@ -37,7 +37,9 @@
 	</xs:complexType>
 	
 	<xs:complexType name="SRT7GHzReceiverType">
-		<xs:sequence>
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
+        <xs:sequence>
 			<!-- Local Oscillator (ROdoubleSeq) -->
 			<xs:element name="LO" type="baci:ROdoubleSeq"/>
 			<!-- Number of receiver feeds -->
@@ -95,7 +97,9 @@
 		<!-- the expire time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
 		<!-- Instance of the associated device that will set the local oscillator -->
-		<xs:attribute name="LocalOscillatorInstance" type="xs:string" use="required" />
+        <xs:attribute name="LocalOscillatorInstance" type="xs:string" use="required" />
+      </xs:extension>
+     </xs:complexContent>
 	</xs:complexType>
   
 	<xs:element name="SRT7GHzReceiver" type="SRT7GHzReceiverType"/>

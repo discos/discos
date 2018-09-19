@@ -133,6 +133,11 @@ CDB_SCHEMAS =
 IDL_FILES = lan usd SRTActiveSurfaceBoss
 IDL_TAO_FLAGS =
 USER_IDL =
+lanStubs_LIBS = baciStubs ASErrorsStubs
+usdStubs_LIBS = baciStubs ASErrorsStubs
+SRTActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs \
+    ManagmentDefinitionsStubs ActiveSurfaceBossStubs
+
 #
 # Jarfiles and their directories
 #

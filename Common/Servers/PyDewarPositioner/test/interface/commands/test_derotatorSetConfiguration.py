@@ -1,9 +1,9 @@
-import unittest2
+import unittest
 import mocker
 from DewarPositioner.DewarPositionerImpl import DewarPositionerImpl
 
 
-class DerotatorSetConfigurationTest(unittest2.TestCase):
+class DerotatorSetConfigurationTest(unittest.TestCase):
     """Test the derotatorSet[Get]Configuration commands"""
 
     def test_SetConfiguration(self):
@@ -21,4 +21,4 @@ class DerotatorSetConfigurationTest(unittest2.TestCase):
         self.assertEqual((success, answer), (True, 'FIXED'))
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

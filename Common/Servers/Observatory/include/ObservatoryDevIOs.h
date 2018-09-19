@@ -33,6 +33,7 @@ public:
 	enum TLinkedProperty {
 		UNIVERSALTIME,		/*!< the devio will be used to read the current time */
 		JULIANDAY,			/*!< the devio will be used to read the current time as a julian day */
+		MODIFIEDJULIANDAY,  /*!< the devio will be used to read the current time as a modified julian day */
 		GAST,	    		/*!< the devio will be used to read the current GST */
 		LST,				/*!< the devio will be used to read the current Local Sidereal Time */
 		GEOMODEL,			/*!< the devio will be used to read the current model of the geoid */
@@ -61,6 +62,10 @@ public:
 			}
 			case JULIANDAY : {
 				m_PropertyName=IRA::CString("Julian Day");
+				break;
+			}
+			case MODIFIEDJULIANDAY : {
+				m_PropertyName=IRA::CString("Modified Julian Day");
 				break;
 			}
 			case GAST : {
@@ -163,6 +168,13 @@ public:
 				IRA::CIRATools::getTime(now);
 				IRA::CDateTime clock(now);
 				m_Value=(T)clock.getJD();
+				break;				
+			}
+			case MODIFIEDJULIANDAY : {
+				TIMEVALUE now;
+				IRA::CIRATools::getTime(now);
+				IRA::CDateTime clock(now);
+				m_Value=(T)clock.getMJD();
 				break;				
 			}
 			case GAST : {

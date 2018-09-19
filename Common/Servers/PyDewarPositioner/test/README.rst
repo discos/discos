@@ -22,7 +22,7 @@ Dependencies
 The directory ``dependencies`` contains all the dependencies needed for
 the tests executions. These dependencies are:
 
-  * unittest2
+  * unittest
   * mocker
 
 Other requirements

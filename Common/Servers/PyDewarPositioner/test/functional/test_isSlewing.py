@@ -1,11 +1,11 @@
-import unittest2
+import unittest
 import time
 from ComponentErrors import ValidationErrorEx
 from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class IsSlewingTest(unittest2.TestCase):
+class IsSlewingTest(unittest.TestCase):
     """Test all DewarPositioner.isSomething() methods"""
     def setUp(self):
         client = PySimpleClient()
@@ -27,4 +27,4 @@ class IsSlewingTest(unittest2.TestCase):
         self.assertEqual(self.positioner.isSlewing(), self.derotator.isSlewing())
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

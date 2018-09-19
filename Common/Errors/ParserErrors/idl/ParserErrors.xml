@@ -16,41 +16,41 @@
 
 <Code name="NoError" shortDescription="No error" description="No error condition found"/>
 
-<ErrorCode name="BadTypeFormat" shortDescription="Type format does not match with the expected" description="">
+<ErrorCode name="BadTypeFormat" shortDescription="Type format does not match with the expected" description=" ">
 	<Member name="ExpectedType" type="string" description="ExpectedType" />
 </ErrorCode>
 
-<ErrorCode name="ConversionError" shortDescription="Error reported during conversion of one or more arguments" description=""/>
+<ErrorCode name="ConversionError" shortDescription="Error reported during conversion of one or more arguments" description=" "/>
 
-<ErrorCode name="SyntaxError" shortDescription="Command does not reflect the expected grammar" description=""/>
+<ErrorCode name="SyntaxError" shortDescription="Command does not reflect the expected grammar" description=" "/>
 
-<ErrorCode name="CommandNotFound" shortDescription="Command is not known" description=""/>
+<ErrorCode name="CommandNotFound" shortDescription="Command is not known" description=" "/>
 
-<ErrorCode name="NotEnoughParameters" shortDescription="Insufficient number of arguments" description=""/>
+<ErrorCode name="NotEnoughParameters" shortDescription="Insufficient number of arguments" description=" "/>
 
-<ErrorCode name="TooManyParameters" shortDescription="The function does not requires so many parameters" description=""/>
+<ErrorCode name="TooManyParameters" shortDescription="The function does not requires so many parameters" description=" "/>
 
-<ErrorCode name="SystemCommandError" shortDescription="System command could not be executed" description="">
+<ErrorCode name="SystemCommandError" shortDescription="System command could not be executed" description=" ">
 	<Member name="SystemCommand" type="string" description="The command that caused the error" />
 </ErrorCode>
 
-<ErrorCode name="RemoteCommandError" shortDescription="Remote command could not be completed" description="">
+<ErrorCode name="RemoteCommandError" shortDescription="Remote command could not be completed" description=" ">
 	<Member name="RemoteCommandMessage" type="string" description="The error message associated to the error" />
 </ErrorCode>
 
-<ErrorCode name="ProcedureError" shortDescription="Error during procedure execution" description="">
+<ErrorCode name="ProcedureError" shortDescription="Error during procedure execution" description=" ">
 	<Member name="ProcedureName" type="string" description="The name of the procedure" />
 	<Member name="Command" type="string" description="The command that caused the error" />
 </ErrorCode>
 
-<ErrorCode name="PackageError" shortDescription="No route to package entry point" description="">
+<ErrorCode name="PackageError" shortDescription="No route to package entry point" description=" ">
 	<Member name="PackageName" type="string" description="The name of the package" />
 </ErrorCode>
 
-<ErrorCode name="NotSupportedError" shortDescription="The requested feature is not supported" description=""/>
+<ErrorCode name="NotSupportedError" shortDescription="The requested feature is not supported" description=" "/>
 
-<ErrorCode name="TimeFormatError" shortDescription="Cannot recognized the format of the timestamp" description=""/>
+<ErrorCode name="TimeFormatError" shortDescription="Cannot recognized the format of the timestamp" description=" "/>
 
-<ErrorCode name="ParserTimerError" shortDescription="Impossible to setup the timer with given timestamp" description=""/>
+<ErrorCode name="ParserTimerError" shortDescription="Impossible to setup the timer with given timestamp" description=" "/>
 
 </Type>

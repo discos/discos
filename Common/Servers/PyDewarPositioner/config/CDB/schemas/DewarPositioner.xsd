@@ -16,13 +16,14 @@
     <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
 
     <xs:complexType name="DewarPositionerType">
-
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
         <xs:sequence>
             <xs:element name="status" type="baci:ROpattern" />
         </xs:sequence>
 
-        <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
-        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
+        <!--xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
+        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" /-->
         <xs:attribute name="UpdatingTime" type="xs:double" use="required" />
         <xs:attribute name="RewindingSleepTime" type="xs:double" use="required" />
         <xs:attribute name="RewindingTimeout" type="xs:double" use="required" />
@@ -30,6 +31,8 @@
         <xs:attribute name="DefaultRewindingMode" type="xs:string" use="required" />
         <xs:attribute name="Latitude" type="xs:double" use="required" />
 
+      </xs:extension>
+     </xs:complexContent>
     </xs:complexType>
     <xs:element name="DewarPositioner" type="DewarPositionerType"/>
 

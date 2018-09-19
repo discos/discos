@@ -1,11 +1,11 @@
-import unittest2
+import unittest
 from DewarPositioner.cdbconf import CDBConf
 from ComponentErrors import ValidationErrorEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Util import ACSCorba
 
 
-class CDBConfTest(unittest2.TestCase):
+class CDBConfTest(unittest.TestCase):
     def setUp(self):
         self.conf = CDBConf()
         self.dal = ACSCorba.cdb()
@@ -98,4 +98,4 @@ class CDBConfTest(unittest2.TestCase):
             self.assertEqual(value, self.conf.getAttribute(name))
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

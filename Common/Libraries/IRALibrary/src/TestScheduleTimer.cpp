@@ -27,10 +27,16 @@ void oneShotCallBack(const ACS::Time& time,const void *par)
 	Runit=false;
 }
 
+void contCleanUp(const void * par)
+{
+	long *val=(long *)(par);
+	printf("continuous event clean-up called, got %ld\n",*val);
+}
+
 
 void cleanUp(const void * par)
 {
-	printf("event cleanup called\n");
+	printf("one shot event clean-up called\n");
 }
 
 int main(int argc, char *argv[]) 
@@ -48,20 +54,20 @@ int main(int argc, char *argv[])
 		printf("Error initializing the timer\n");
 		return -1;
 	}
-	// setup a continuos event...every 2.5 seconds
+	// setup a continuous event...every 2.5 seconds
 	par1=1;
 	period.second(2);
 	period.microSecond(500000);
-	if (!timer.schedule(&contCallBack,now.value().value,period.value().value,&par1)) {
-		printf("Error scheduling the continuos event\n");
+	if (!timer.schedule(&contCallBack,now.value().value,period.value().value,&par1,contCleanUp)) {
+		printf("Error scheduling the continuous event\n");
 		return -1;
 	}
-	// setup a continuos event...every 0.7 seconds
+	// setup a continuous event...every 0.5 seconds
 	par2=2;
 	period.reset();
-	period.microSecond(700000);
-	if (!timer.schedule(&contCallBack,now.value().value,period.value().value,&par2)) {
-		printf("Error scheduling the continuos event\n");
+	period.microSecond(500000);
+	if (!timer.schedule(&contCallBack,now.value().value,period.value().value,&par2,contCleanUp)) {
+		printf("Error scheduling the continuous event\n");
 		return -1;
 	}
 	// saves the current time
@@ -77,12 +83,12 @@ int main(int argc, char *argv[])
 	while (Runit) {
 		CIRATools::Wait(500000);
 	}
-	printf("removing the first continuos event\n");
+	printf("removing the first continuous event\n");
 	if (!timer.cancel(copy.value().value)) {
-		printf("Error canceling an event\n");
+		printf("Error cancelling an event\n");
 		return -1;		
 	}
 	CIRATools::Wait(5,0);
-	printf("closing up\n");
+	printf("closing up everything\n");
 }
 

@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import mocker
 import time
 from DewarPositioner.DewarPositionerImpl import DewarPositionerImpl
 
 
-class DerotatorXetRewindingModeTest(unittest2.TestCase):
+class DerotatorXetRewindingModeTest(unittest.TestCase):
     """Test the derotoatr[Set/Get]RewindingMode commands"""
 
     def test_xetRewindingMode(self):
@@ -21,4 +21,4 @@ class DerotatorXetRewindingModeTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

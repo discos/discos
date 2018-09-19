@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import unittest2
+import unittest
 import random
 import time
 from maciErrType import CannotGetComponentEx

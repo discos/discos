@@ -1,11 +1,11 @@
 from __future__ import with_statement
-import unittest2
+import unittest
 import time
 from Acspy.Clients.SimpleClient import PySimpleClient
 from ComponentErrors import ComponentErrorsEx
 
 
-class RewindTest(unittest2.TestCase):
+class RewindTest(unittest.TestCase):
     """Test the DewarPositioner.rewind() method"""
     def setUp(self):
         client = PySimpleClient()
@@ -29,4 +29,4 @@ class RewindTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

@@ -19,13 +19,15 @@ void  CParser<OBJ>::run(const IRA::CString& command,IRA::CString& out) throw (Pa
 	}
 	catch (ParserErrors::ParserErrorsExImpl& ex) {
 		IRA::CString msg;
-		_EXCPT_TO_CSTRING(msg,ex);
+		SimpleParser::CFormatter<ParserErrors::ParserErrorsExImpl>::exceptionToUser(ex,msg);
+		//_EXCPT_TO_CSTRING(msg,ex);
 		out=instr+m_errorDelimiter+msg;
 		throw ex;
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		IRA::CString msg;
-		_EXCPT_TO_CSTRING(msg,ex);
+		//_EXCPT_TO_CSTRING(msg,ex);
+		SimpleParser::CFormatter<ACSErr::ACSbaseExImpl>::exceptionToUser(ex,msg);
 		out=instr+m_errorDelimiter+msg;
 		throw ex;
 	}
@@ -93,18 +95,30 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 		}
 		else if (elem->m_type==SYSTEMCALL) {
 			CUSTOM_LOG(LM_FULL_INFO,"CParser::executeCommand()",(LM_NOTICE,"Command issued {%s}",(const char *)command));
-			IRA::CString composeCall;
-			composeCall=elem->m_syscall;
+			//work around in order to avoid message proliferation on stderr stdout
+			IRA::CString composeCall("export ACS_LOG_STDOUT=11; "); 
+			IRA::CString answer("");
+			composeCall+=elem->m_syscall;
 			for (WORD k=0;k<parNum;k++) {
 				composeCall+=" ";
 				composeCall+=inParams[k];
 			}
-			if (system((const char *)composeCall)<0) {
+			/*if (system((const char *)composeCall)<0) {
 				_EXCPT(ParserErrors::SystemCommandErrorExImpl,err,"CParser::executeCommand()");
 				err.setSystemCommand((const char *)composeCall);
 				throw err;
-			}
-			return instr+m_answerDelimiter;
+			}*/
+			redi::ipstream proc((const char *)composeCall,redi::pstreams::pstdout|redi::pstreams::pstderr);
+  			std::string line;
+  			while (std::getline(proc.err(),line)) answer+=line.c_str();
+  			if (answer.Left(6)=="error ") {
+  				int len=answer.GetLength();
+  				answer=answer.Right(len-6);
+  				return instr+m_errorDelimiter+answer;
+  			}
+  			else {
+  				return instr+m_answerDelimiter+answer;
+  			}
 		}
 		else if (elem->m_type==KEYCOMMAND) {
 			if (instr==_SP_TIMETAGGEDQUEUE) {
@@ -398,6 +412,17 @@ bool CParser<OBJ>::popCommand(TExecutionUnit *& cmd)
 		m_executionList.pop_front();
 		return true;
 	}	
+}
+
+template <class OBJ>
+bool CParser<OBJ>::checkStation(const IRA::CString& st)
+{
+	if (st=="ALL") {
+		return true;
+	}
+	IRA::CString env(std::getenv("STATION"));
+	if (env==st) return true;
+	else return false;
 }
 
 template <class OBJ>

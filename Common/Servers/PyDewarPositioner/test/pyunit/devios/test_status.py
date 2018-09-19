@@ -1,9 +1,9 @@
-import unittest2
+import unittest
 import mocker
 from DewarPositioner.devios import StatusDevIO
 
 
-class StatusDevIOTest(unittest2.TestCase):
+class StatusDevIOTest(unittest.TestCase):
 
     def setUp(self):
         self.m = mocker.Mocker()
@@ -31,4 +31,4 @@ class StatusDevIOTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

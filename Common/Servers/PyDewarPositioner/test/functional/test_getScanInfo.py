@@ -1,11 +1,11 @@
-import unittest2
+import unittest
 import Management
 from ComponentErrors import ValidationErrorEx
 from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class TestGetScanInfo(unittest2.TestCase):
+class TestGetScanInfo(unittest.TestCase):
     def setUp(self):
         client = PySimpleClient()
         self.positioner = client.getComponent('RECEIVERS/DewarPositioner')
@@ -17,4 +17,4 @@ class TestGetScanInfo(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

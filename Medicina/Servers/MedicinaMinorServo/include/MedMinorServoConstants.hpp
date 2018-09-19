@@ -4,7 +4,7 @@
 typedef 
 struct MedMinorServoAxis_tag
 {
-    char *name;
+    const char *name;
     double position_min;
     double position_max;
     double position_zero;

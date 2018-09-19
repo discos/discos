@@ -85,6 +85,10 @@ man   : do_man
 install : install_all
 	@chmod 744 $(INTROOT)/bin/escs
 	@chmod 744 $(INTROOT)/app-defaults/escsStartup.xml
+
+	@chmod 700 $(INTROOT)/bin/discosdown 
+	@chmod 700 $(INTROOT)/bin/discosup 	
+	
 	@echo " . . . installation done"
 
 

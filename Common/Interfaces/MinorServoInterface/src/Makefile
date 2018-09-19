@@ -28,6 +28,10 @@ CSOURCENAMES = \
 #
 IDL_FILES = MinorServo MinorServoBoss
 
+MinorServoStubs_LIBS = baciStubs MinorServoErrorsStubs ComponentErrorsStubs
+MinorServoBossStubs_LIBS = baciStubs ComponentErrorsStubs ManagmentDefinitionsStubs \
+    MinorServoErrorsStubs AntennaDefinitionsStubs MinorServoDefinitionsStubs
+
 #
 # INCLUDE STANDARDS
 # -----------------

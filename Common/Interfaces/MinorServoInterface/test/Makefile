@@ -1,5 +1,3 @@
-PY_PACKAGES = PyMinorServoTest
-
 # CPP UNIT TESTING SETUP
 #--------------
 # GTEST_HOME=/usr/local/include/gtest
@@ -62,7 +60,6 @@ clean_test:
 	rm -f pyunit/*.pyc
 	rm -f external/*.pyc
 	rm -rf ../lib/python/site-packages/*
-	rm -rf $(INTROOT)/lib/python/site-packages/PyMinorServoTest*
 
 unit: do_unit
 	@echo " . . . 'unit' done"

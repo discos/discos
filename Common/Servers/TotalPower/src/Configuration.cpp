@@ -11,7 +11,7 @@
 	} \
 	else { \
 		FIELD=tmpw; \
-		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %lu",tmpw); \
+		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %u",tmpw); \
 	} \
 }
 
@@ -178,7 +178,7 @@ bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& se
 			setup.feed[i]=ret.ToLong();
 			if (!IRA::CIRATools::getNextToken(ifs,start_ifs,' ',ret)) return false;
 			setup.ifs[i]=ret.ToLong();
-			ACS_LOG(LM_FULL_INFO,"CConfiguration::getSetupFromID()",(LM_DEBUG,"Sections: %d - Board: %d - Polarization: %d - Feed: %d - Ifs: %d",i,setup.section_boards[i],setup.polarizations[i],setup.feed[i],setup.ifs[i]));
+			ACS_LOG(LM_FULL_INFO,"CConfiguration::getSetupFromID()",(LM_DEBUG,"Sections: %d - Board: %ld - Polarization: %d - Feed: %ld - Ifs: %ld",i,setup.section_boards[i],setup.polarizations[i],setup.feed[i],setup.ifs[i]));
 		}
 		return true;
 	}

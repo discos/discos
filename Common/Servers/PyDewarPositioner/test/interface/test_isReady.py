@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 from ComponentErrors import ValidationErrorEx
 from maciErrType import CannotGetComponentEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class IsReadyTest(unittest2.TestCase):
+class IsReadyTest(unittest.TestCase):
     """Test all DewarPositioner.isSomething() methods"""
     def setUp(self):
         client = PySimpleClient()
@@ -23,4 +23,4 @@ class IsReadyTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

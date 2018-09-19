@@ -53,7 +53,7 @@ ModbusChannel::~ModbusChannel()
 void
 ModbusChannel::connect()
 {
-    boost::mutex::scoped_lock lock(_connection_guard);
+    baci::ThreadSyncGuard lock(&_connection_guard);
     int rc;
     if(!(this->_is_connected))
     {
@@ -66,7 +66,7 @@ ModbusChannel::connect()
 void
 ModbusChannel::disconnect()
 {
-    boost::mutex::scoped_lock lock(_connection_guard);
+    baci::ThreadSyncGuard lock(&_connection_guard);
     if(this->_is_connected){
         modbus_close(this->_modbus_context);
         this->_is_connected = false;

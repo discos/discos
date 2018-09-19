@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import unittest2
+import unittest
 import mocker
 import random
 import time
@@ -12,7 +12,7 @@ from DewarPositionerMockers.mock_components import MockDevice, MockSource
 from DewarPositioner.cdbconf import CDBConf
 from DewarPositioner.posgenerator import PosGenerator
 
-class PositionerStartUpdatingTest(unittest2.TestCase):
+class PositionerStartUpdatingTest(unittest.TestCase):
 
     def setUp(self):
         self.device = MockDevice()
@@ -303,4 +303,4 @@ class PositionerStartUpdatingTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

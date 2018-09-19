@@ -115,6 +115,10 @@ CDB_SCHEMAS = ActiveSurface
 IDL_FILES = ActiveSurfaceBoss
 TAO_IDLFLAGS =
 USER_IDL =
+
+ActiveSurfaceBossStubs_LIBS = baciStubs ManagmentDefinitionsStubs
+
+
 #
 # Jarfiles and their directories
 #

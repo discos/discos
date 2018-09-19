@@ -236,9 +236,9 @@ void NoiseGeneratorImpl::setTargetFileName (const char * fileName) throw (CORBA:
 void NoiseGeneratorImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx, ComponentErrors::ComponentErrorsEx)
 {
 	AUTO_TRACE("NoiseGeneratorImpl::sendHeader()");
-	//Backends::TMainHeader header;
-	//Backends::TChannelHeader chHeader[MAX_INPUT_NUMBER];
-	THeaderRecord buffer;
+	Backends::TMainHeader header;
+	Backends::TSectionHeader chHeader[MAX_SECTION_NUMBER];
+
 	ACS::doubleSeq tpi;
 	try {
 		m_commandLine->startDataAcquisition();
@@ -247,12 +247,17 @@ void NoiseGeneratorImpl::sendHeader() throw (CORBA::SystemException, BackendsErr
 		ex.log(LM_DEBUG);
 		throw ex.getBackendsErrorsEx();		
 	}
-	m_commandLine->fillMainHeader(buffer.header);
-	m_commandLine->fillChannelHeader(buffer.chHeader,MAX_SECTION_NUMBER);
+	m_commandLine->fillMainHeader(header);
+	m_commandLine->fillChannelHeader(chHeader,MAX_SECTION_NUMBER);
 	m_commandLine->setTime();
+
+    char buffer[sizeof(Backends::TMainHeader)+header.sections*sizeof(Backends::TSectionHeader)];
+    memcpy(buffer,(void *)&header,sizeof(Backends::TMainHeader));
+    memcpy(buffer+sizeof(Backends::TMainHeader),(void *)chHeader,header.sections*sizeof(Backends::TSectionHeader));
+
 	try {
-		getSender()->startSend(FLOW_NUMBER,(const char*)&buffer,
-				sizeof(Backends::TMainHeader)+buffer.header.sections*sizeof(Backends::TSectionHeader));
+		getSender()->startSend(FLOW_NUMBER,(const char*)buffer,
+				sizeof(Backends::TMainHeader)+header.sections*sizeof(Backends::TSectionHeader));
 		//getSender()->startSend(FLOW_NUMBER,(const char*)&header,sizeof(header));
 	}
 	catch (AVStartSendErrorExImpl& ex) {
@@ -268,7 +273,7 @@ void NoiseGeneratorImpl::sendHeader() throw (CORBA::SystemException, BackendsErr
 	}
 	ACS_LOG(LM_FULL_INFO,"NoiseGeneratorImpl::sendHeader()",(LM_INFO,"HEADERS_SENT"));
 	// inform the sender thread about the configuration......
-	m_senderThread->saveDataHeader(&(buffer.header),(buffer.chHeader));
+	m_senderThread->saveDataHeader(&header,chHeader);
 }
 
 void NoiseGeneratorImpl::terminate() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,

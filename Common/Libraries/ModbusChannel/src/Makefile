@@ -23,7 +23,7 @@
 
 #
 # additional include and library search paths
-#USER_INC = 
+#USER_INC =
 #USER_LIB = 
 
 #
@@ -62,7 +62,7 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 ModbusChannel_OBJECTS   = ModbusChannel
-ModbusChannel_LIBS      = modbus boost_thread
+ModbusChannel_LIBS      = modbus acsnc
 
 #
 # Scripts (public and local)

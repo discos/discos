@@ -1,13 +1,14 @@
 #ifndef MODBUSCHANNEL_HPP
 #define MODBUSCHANNEL_HPP
 
+#include <acsThread.h>
+#include <IRA>
 #include <modbus/modbus.h>
 #include <sys/time.h>
 #include <string>
 #include <cerrno>
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
-#include <boost/thread.hpp>
 
 #define MODBUS_DEFAULT_PORT MODBUS_TCP_DEFAULT_PORT
 #define MODBUS_TIMEOUT 2
@@ -89,7 +90,7 @@ class ModbusChannel
         T get(int address); //throw ModbusError
     private:
         /* class members */
-        boost::mutex _connection_guard;
+        BACIMutex  _connection_guard;
         std::string _server_ip;
         int _server_port;
         bool _is_connected;

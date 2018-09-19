@@ -177,13 +177,13 @@ int main(int argc, char *argv[]) {
 	printf("\nTesting time.....1\n");	
 	time_type tm1("201-18:04:32.1");
 	printf("time is %s\n",(const char *)tm1);
-	printf("100 nanoseconds are %llu\n",(ACS::Time)tm1);
+	printf("100 nanoseconds are %lu\n",(ACS::Time)tm1);
 	printf("\nTesting time.....2\n");
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
 	time_type tm2(now.value().value);
 	printf("time is %s\n",(const char *)tm2);
-	printf("100 nanoseconds are %llu\n",(ACS::Time)tm2);
+	printf("100 nanoseconds are %lu\n",(ACS::Time)tm2);
 
 	
 	// Test error handling

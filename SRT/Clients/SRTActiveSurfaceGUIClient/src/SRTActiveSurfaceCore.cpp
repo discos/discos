@@ -104,6 +104,9 @@ void SRTActiveSurfaceCore::run(void)
             case (ActiveSurface::AS_PARABOLIC_FIXED):
                 asProfileCode = 3;
                 break;
+            case (ActiveSurface::AS_PARK):
+                asProfileCode = 4;
+                break;
         }
         emit setGUIasProfileCode();
 

@@ -17,23 +17,23 @@
   <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
 
   <xs:complexType name="CustomLoggerType">
-    <!-- <xs:complexContent>
-    <xs:extension base="baci:CharacteristicComponent"> -->
-    <xs:sequence>
-      <xs:element name="filename" type="baci:ROstring"/>
-      <xs:element name="nevents" type="baci:ROlong"/>
-      <xs:element name="isLogging" type="mng:BooleanType"/>
-      <xs:element name="minLevel" type="mng:LogLevelType"/>
-      <xs:element name="maxLevel" type="mng:LogLevelType"/>
-    </xs:sequence>
-    <xs:attribute name="DefaultACSLogDir" type="xs:string" use="required" />
-    <xs:attribute name="DefaultACSLogFile" type="xs:string" use="required" />
-    <xs:attribute name="DefaultCustomLogDir" type="xs:string" use="required" />
-    <xs:attribute name="DefaultCustomLogFile" type="xs:string" use="required" />
-    <xs:attribute name="LogMaxAgeMillis" type="xs:long" use="required" />
-    <!--</xs:extension>
-  </xs:complexContent>-->
-  </xs:complexType>
+   <xs:complexContent>
+    <xs:extension base="baci:CharacteristicComponent">
+     <xs:sequence>
+       <xs:element name="filename" type="baci:ROstring"/>
+       <xs:element name="nevents" type="baci:ROlong"/>
+       <xs:element name="isLogging" type="mng:BooleanType"/>
+       <xs:element name="minLevel" type="mng:LogLevelType"/>
+       <xs:element name="maxLevel" type="mng:LogLevelType"/>
+     </xs:sequence>
+     <xs:attribute name="DefaultACSLogDir" type="xs:string" use="required" />
+     <xs:attribute name="DefaultACSLogFile" type="xs:string" use="required" />
+     <xs:attribute name="DefaultCustomLogDir" type="xs:string" use="required" />
+     <xs:attribute name="DefaultCustomLogFile" type="xs:string" use="required" />
+     <xs:attribute name="LogMaxAgeMillis" type="xs:long" use="required" />
+     </xs:extension>
+    </xs:complexContent>
+   </xs:complexType>
   <xs:element name="CustomLogger" type="CustomLoggerType"/>
 </xs:schema>
 

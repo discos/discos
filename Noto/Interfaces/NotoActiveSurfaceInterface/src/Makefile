@@ -134,6 +134,10 @@ CDB_SCHEMAS =
 IDL_FILES = NotoActiveSurfaceBoss
 IDL_TAO_FLAGS =
 USER_IDL =
+
+NotoActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs \
+    ManagmentDefinitionsStubs ActiveSurfaceBossStubs
+
 #
 # Jarfiles and their directories
 #

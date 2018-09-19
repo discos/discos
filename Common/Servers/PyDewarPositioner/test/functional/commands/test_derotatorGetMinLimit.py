@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import mocker
 import time
 from DewarPositioner.DewarPositionerImpl import DewarPositionerImpl
 
 
-class DerotatorGetMinLimitTest(unittest2.TestCase):
+class DerotatorGetMinLimitTest(unittest.TestCase):
     """Test the derotatorGetMinLimit command"""
 
     def test_get_min_limit(self):
@@ -15,4 +15,4 @@ class DerotatorGetMinLimitTest(unittest2.TestCase):
         self.assertTrue(answer.endswith('d'))
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

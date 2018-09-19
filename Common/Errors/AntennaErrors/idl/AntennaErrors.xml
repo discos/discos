@@ -16,47 +16,47 @@
 
 <Code name="NoError" shortDescription="No error" description="No error condition found"/>
 
-<ErrorCode name="Nak" shortDescription="ACU does not acknowledge" description="">
+<ErrorCode name="Nak" shortDescription="ACU does not acknowledge" description=" ">
 	<Member name="Code" type="long" description="Code" />
 	<Member name="Message" type="string" description="Message" />
 </ErrorCode>
 
-<ErrorCode name="Connection" shortDescription="ACU is not reachable or disconnected" description=""/>
+<ErrorCode name="Connection" shortDescription="ACU is not reachable or disconnected" description=" "/>
 
-<ErrorCode name="OperationNotPermitted" shortDescription="Operation is not allowed or not permitted under this configuration" description="">
+<ErrorCode name="OperationNotPermitted" shortDescription="Operation is not allowed or not permitted" description=" ">
 	<Member name="Reason" type="string" description="Reason" />
 </ErrorCode>
 
-<ErrorCode name="ReceiverNotFound" shortDescription="Requested configuration is not existent" description=""/>
+<ErrorCode name="ReceiverNotFound" shortDescription="Requested configuration is not existent" description=" "/>
 
-<ErrorCode name="AntennaBusy" shortDescription="Antenna is busy with other activities" description=""/>
+<ErrorCode name="AntennaBusy" shortDescription="Antenna is busy with other activities" description=" "/>
 
-<ErrorCode name="StoppedByUser" shortDescription="A stop command was issued by a client" description=""/>
+<ErrorCode name="StoppedByUser" shortDescription="A stop command was issued by a client" description=" "/>
 
-<ErrorCode name="SourceNotFound" shortDescription="The requested source or coordinate is not found in the catalog" description="">
+<ErrorCode name="SourceNotFound" shortDescription="The target is not found in the catalog" description=" ">
 	<Member name="SourceName" type="string" description="Name of the source"/>
 </ErrorCode>
 
-<ErrorCode name="RateTooHigh" shortDescription="The resulting rate is too high" description="">
+<ErrorCode name="RateTooHigh" shortDescription="The resulting rate is too high" description=" ">
 	<Member name="Axis" type="string" description="Frame axis which the rate is relative to"/>
 </ErrorCode>
 
-<ErrorCode name="ExceedingSlewingTime" shortDescription="Cannot reach destination in scheduled time" description=""/>
+<ErrorCode name="ExceedingSlewingTime" shortDescription="Cannot reach destination in scheduled time" description=" "/>
 
-<ErrorCode name="TrackingNotStarted" shortDescription="The tracking has not been started yet" description="" />
+<ErrorCode name="TrackingNotStarted" shortDescription="The tracking has not been started yet" description=" " />
 
-<ErrorCode name="ScanError" shortDescription="Illegal scan parameter or configuration" description="">
+<ErrorCode name="ScanError" shortDescription="Illegal scan parameter or configuration" description=" ">
 	<Member name="Reason" type="string" description="Description of the reason that generates the error"/>
 </ErrorCode>
 
-<ErrorCode name="SecondaryScanError" shortDescription="Illegal secondary scan parameter or configuration" description=""/>
+<ErrorCode name="SecondaryScanError" shortDescription="Illegal secondary scan parameter or configuration" description=" "/>
 
-<ErrorCode name="LoadGeneratorError" shortDescription="Could not load the requested ephem generator" description=""/>
+<ErrorCode name="LoadGeneratorError" shortDescription="Could not load the requested ephem generator" description=" "/>
 
-<ErrorCode name="MissingTarget" shortDescription="A target must be commanded before doing the scan" description=""/>
+<ErrorCode name="MissingTarget" shortDescription="A target must be commanded before doing the scan" description=" "/>
 
-<ErrorCode name="OffsetFrameNotSupported" shortDescription="It is not allowed to set offset in the requested frame" description=""/>
+<ErrorCode name="OffsetFrameNotSupported" shortDescription="It is not allowed to set offset in the requested frame" description=" "/>
 
-<ErrorCode name="NoTargetCommandedYet" shortDescription="No target commanded" description=""/>
+<ErrorCode name="NoTargetCommandedYet" shortDescription="No target commanded" description=" "/>
 
 </Type>

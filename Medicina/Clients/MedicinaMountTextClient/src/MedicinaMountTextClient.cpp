@@ -25,11 +25,11 @@
 
 using namespace TW;
 
-static bool terminate;
+static bool terminate_;
 
 void quintHandler(int sig)
 {
-	terminate=true;
+	terminate_=true;
 }
 	
 #define TEMPLATE_4_ROTMODES Antenna::ROTCommonModes_ptr,ACS::Monitorpattern,ACS::Monitorpattern_var,_TW_CBpattern,ACS::CBpattern_var
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 	
 	//_IRA_LOGFILTER_DECLARE;
 
-	terminate=false;
+	terminate_=false;
 
 	/* Main frame */
 	TW::CFrame window(CPoint(0,0),CPoint(WINDOW_WIDTH,WINDOW_HEIGHT),'|','|','-','-'); 
@@ -509,10 +509,10 @@ int main(int argc, char *argv[]) {
 	/** now it is possible to show the frame */
 	ACS_LOG(LM_FULL_INFO,"mountTui::Main()",(LM_INFO,"START"));
 	window.showFrame();
-	while(!terminate) {
+	while(!terminate_) {
 		if ((fieldCounter=usrInput->parseCommand(fields,MAXFIELDNUMBER))>0) {
 			fields[0].MakeUpper();
-			if (fields[0]=="EXIT") terminate=true;
+			if (fields[0]=="EXIT") terminate_=true;
 		}
 		client.run(tv);
 		tv.set(0,MAINTHREADSLEEPTIME*1000);

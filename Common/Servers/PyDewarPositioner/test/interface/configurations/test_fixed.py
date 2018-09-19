@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import time
 from ComponentErrors import ValidationErrorEx
 from Acspy.Clients.SimpleClient import PySimpleClient
 
 
-class FixedTest(unittest2.TestCase):
+class FixedTest(unittest.TestCase):
     """Test the FIXED Configuration"""
 
     def setUp(self):
@@ -27,4 +27,4 @@ class FixedTest(unittest2.TestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()
