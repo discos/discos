@@ -36,7 +36,7 @@
 #define HISTORY8 FITS_VERSION8" Summary.fits file included in order to describe the scan configuration"
 #define HISTORY9 FITS_VERSION9" Added the keyword SIGNAL in main header of each sub scan fits"
 #define HISTORY10 FITS_VERSION10" Summary.fits has now a number of meaningful keywords"
-#define HISTORY10 FITS_VERSION11" Frequency and bandwidth columns added to Section table reporting backend sampled band"
+#define HISTORY11 FITS_VERSION11" Frequency and bandwidth columns added to Section table reporting backend sampled band"
 
 
 #endif /* VERSION_H_ */
