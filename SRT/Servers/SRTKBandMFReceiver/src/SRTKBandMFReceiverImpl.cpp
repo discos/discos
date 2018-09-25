@@ -459,6 +459,7 @@ ACS::doubleSeq * SRTKBandMFReceiverImpl::getCalibrationMark(
         const ACS::longSeq& ifs,
         ACS::doubleSeq_out skyFreq,
         ACS::doubleSeq_out skyBw,
+        CORBA::Boolean_out onoff,
         CORBA::Double_out scaleFactor
         ) throw (
             CORBA::SystemException,
@@ -470,7 +471,7 @@ ACS::doubleSeq * SRTKBandMFReceiverImpl::getCalibrationMark(
     ACS::doubleSeq_var resFreq = new ACS::doubleSeq;
     ACS::doubleSeq_var resBw = new ACS::doubleSeq;
     try {
-        m_core.getCalibrationMark(result.inout(), resFreq.inout(), resBw.inout(), freqs, bandwidths, feeds,ifs,scaleFactor);
+        m_core.getCalibrationMark(result.inout(), resFreq.inout(), resBw.inout(), freqs, bandwidths, feeds,ifs,onoff,scaleFactor);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
         ex.log(LM_DEBUG);

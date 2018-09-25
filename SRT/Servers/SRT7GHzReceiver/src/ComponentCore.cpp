@@ -22,6 +22,7 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
     m_localOscillatorFault=false;
     m_cryoCoolHead=m_cryoCoolHeadWin= m_cryoLNA=m_cryoLNAWin=m_vacuum=0.0;
+    m_calDiode=false;
     m_fetValues.VDL=m_fetValues.IDL=m_fetValues.VGL=m_fetValues.VDR=m_fetValues.IDR=m_fetValues.VGR=0.0;
     m_statusWord=0;
     m_ioMarkError = false;
@@ -255,6 +256,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
     }
     setLO(lo); // throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
     m_setupMode=mode;
+    m_calDiode=false;
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
 }
 
@@ -281,6 +283,7 @@ void CComponentCore::calOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,
         throw impl;
     }
     setStatusBit(NOISEMARK);
+    m_calDiode=true;
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
@@ -307,6 +310,7 @@ void CComponentCore::calOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl
         throw impl;
     }
     clearStatusBit(NOISEMARK);
+    m_calDiode=false;
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
@@ -449,7 +453,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Val
 }
 
 void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-            const ACS::longSeq& ifs,double &scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
+            const ACS::longSeq& ifs,bool& onoff,double &scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
 {
     double realFreq,realBw;
     double *tableLeftFreq=NULL;
@@ -513,6 +517,7 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& r
         }
     }
     scaleFactor=1.0;
+    onoff=m_calDiode;
     if (tableLeftFreq) delete [] tableLeftFreq;
     if (tableLeftMark) delete [] tableLeftMark;
     if (tableRightFreq) delete [] tableRightFreq;
