@@ -91,9 +91,10 @@ public:
      * @param bandwidth list of the band widths (MHz)
      * @param feeds list of feed identifier, it allows to specifies form which feed the sub band comes from. In that case it is neglected since the receiver is a single feed
      * @param ifs list of IF identifier, it allows to specifies from which receiver IF the sub band comes from.
+     * @param true if the calibration diode is turned on.
      */
     void getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-            const ACS::longSeq& ifs,double& scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
+            const ACS::longSeq& ifs,bool& onoff,double& scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
 
     /**
      * It is called to get the all the receiver output information in one call.
@@ -410,6 +411,7 @@ private:
     double m_cryoLNAWin;
     double m_vacuumDefault;
     double m_environmentTemperature;
+    bool m_calDiode;
     IRA::ReceiverControl::FetValues m_fetValues;
     DWORD m_statusWord;
     // m_ioMarkError is a flag used to know if we already got an IO

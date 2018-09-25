@@ -14,9 +14,6 @@
 #include "DevIODerotatorPosition.h"
 #include <ReceiversModule.h>
 
-static char *rcsId="@(#) $Id: ReceiversBossImpl.cpp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
-
 using namespace SimpleParser;
 using namespace baci;
 
@@ -359,13 +356,13 @@ void ReceiversBossImpl::park() throw (CORBA::SystemException,ManagementErrors::P
 }
 
 ACS::doubleSeq *ReceiversBossImpl::getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds,const ACS::longSeq& ifs,
-		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,	ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Boolean_out onoff,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,	ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	ACS::doubleSeq_var result=new ACS::doubleSeq;
 	ACS::doubleSeq_var resFreq=new ACS::doubleSeq;
 	ACS::doubleSeq_var resBw=new ACS::doubleSeq;
 	try {
-		m_core->getCalibrationMark(result,resFreq,resBw,freqs,bandwidths,feeds,ifs,scaleFactor);
+		m_core->getCalibrationMark(result,resFreq,resBw,freqs,bandwidths,feeds,ifs,onoff,scaleFactor);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

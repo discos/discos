@@ -103,6 +103,14 @@ public:
 			mode=Management::MNG_SIGNAL_NONE;
 			return true;
 		}
+		else if (strcasecmp(strScan,"REFCAL")==0) {
+			mode=Management::MNG_SIGNAL_REFCAL;
+			return true;
+		}
+		else if (strcasecmp(strScan,"REFSIG")==0) {
+			mode=Management::MNG_SIGNAL_REFSIG;
+			return true;
+		}		
 		else {
 			return false;
 		}
@@ -115,6 +123,12 @@ public:
 		if (scan==Management::MNG_SIGNAL_REFERENCE) {
 			return "REFERENCE";
 		}
+		if (scan==Management::MNG_SIGNAL_REFCAL) {
+			return "REFCAL";
+		}
+		if (scan==Management::MNG_SIGNAL_REFSIG) {
+			return "REFSIG";
+		}
 		else { //Management::MNG_SIGNAL_REFERENCE
 			return "NONE";
 		}
@@ -123,8 +137,6 @@ public:
 };
 
 };
-
-
 
 
 #endif /* MANAGEMENTMODULE_H_ */
