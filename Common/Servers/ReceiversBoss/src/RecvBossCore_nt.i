@@ -95,6 +95,7 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
         //try{
             m_totalPower_proxy->calOn();
         //}catch(...)
+   m_cal=true;
 	CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::calOn()",(LM_NOTICE,"NOISE_CAL_TURNED_ON"));
 }
 
@@ -106,6 +107,7 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
         //try{
             m_totalPower_proxy->calOff();
         //}catch(...)
+   m_cal=false;
 	CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::calOn()",(LM_NOTICE,"NOISE_CAL_TURNED_OFF"));
 }
 
@@ -255,6 +257,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 	/*m_fsSocket.Close(err);
 	m_fsOpened=false;*/
 	m_status=Management::MNG_OK;
+	m_cal=false;
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_NOTICE,"NEW_RECEIVER_CONFIGURED %s",(const char *)m_currentReceiver));
 }
 
@@ -427,7 +430,7 @@ void CRecvBossCore::CRecvBossCore::startScan(ACS::Time& startUT,const Receivers:
 }
 
 void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-		const ACS::longSeq& ifs,double& scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+		const ACS::longSeq& ifs,bool& onoff,double& scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -459,6 +462,7 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 	result.length(stdLen);
 	resFreq.length(stdLen);
 	resBw.length(stdLen);
+	onoff=m_cal;
 	if (m_currentReceiver==BANDAK) {
 		LeftMarkCoeff[0][0]=0.000001; LeftMarkCoeff[0][1]=0.823680; LeftMarkCoeff[0][2]=1825.749665; LeftMarkCoeff[0][3]=-13489491.21593;
 		RightMarkCoeff[0][0]=0.000001; RightMarkCoeff[0][1]=-0.066772; RightMarkCoeff[0][2]=1472.736500; RightMarkCoeff[0][3]=-10827302.569501;

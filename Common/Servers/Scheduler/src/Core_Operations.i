@@ -908,6 +908,7 @@ void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCo
 	ACS::doubleSeq_var mark,tpi,zero,tpiCal;
 	ACS::longSeq_var IFs;
 	double scaleFactor;
+	bool onoff;
 	long inputs;
 	IRA::CString outLog;
 	IRA::CString backendName;
@@ -940,7 +941,7 @@ void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCo
 	}
 	// call the receivers boss in order to get the calibration diode values......
 	try {
-		mark=m_receiversBoss->getCalibrationMark(freq,bandWidth,feed,IFs,skyFreq.out(),skyBw.out(),scaleFactor);
+		mark=m_receiversBoss->getCalibrationMark(freq,bandWidth,feed,IFs,skyFreq.out(),skyBw.out(),onoff,scaleFactor);
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
@@ -959,7 +960,32 @@ void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCo
 		impl.setReason("Unable to get calibration diode values");
 		throw impl;
 	}
-	//wait for the calibration diode to settle......
+	if (onoff) {
+		try {
+			m_receiversBoss->calOff();
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			m_receiversBossError=true;
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+			impl.setReason("Could not turn the calibration mark on");
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+			impl.setReason("Could not turn the calibration mark on");
+			throw impl;
+		}
+		//wait for the calibration diode to switch off completely
+		guard.release();
+		IRA::CIRATools::Wait(m_config->getTsysGapTime());
+		guard.acquire();	
+	}
 	//Now contact the backend to get the TotalPower when the calibration diode is switched off
 	try {
 		tpi=backend->getTpi();

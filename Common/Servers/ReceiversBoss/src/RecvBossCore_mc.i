@@ -155,6 +155,7 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 		m_status=Management::MNG_WARNING;
 		throw impl;
 	}
+	m_cal=true;
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::calOn()",(LM_NOTICE,"NOISE_CAL_TURNED_ON"));
 }
 
@@ -214,6 +215,7 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 		m_status=Management::MNG_WARNING;
 		throw impl;
 	}
+	m_cal=false;
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::calOff()",(LM_NOTICE,"NOISE_CAL_TURNED_OFF"));
 }
 
@@ -614,6 +616,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		throw impl;
 	}
 	m_status=Management::MNG_OK;
+	m_cal=false;
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_NOTICE,"NEW_RECEIVER_CONFIGURED %s",(const char *)m_currentReceiver));
 }
 
@@ -914,7 +917,7 @@ void CRecvBossCore::closeScan(ACS::Time& timeToStop) throw (ReceiversErrors::Dew
 }
 
 void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-		const ACS::longSeq& ifs,double& scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+		const ACS::longSeq& ifs,bool& onoff,double& scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 		ComponentErrors::UnexpectedExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -944,6 +947,7 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 	result.length(stdLen);
 	resFreq.length(stdLen);
 	resBw.length(stdLen);
+	onoff=m_cal;
 	if (m_currentReceiver=="KKC") {
 		scale=1.0;
 		/*double LeftMarkCoeff[7][4] = { {0.2912,-21.21,506.97,-3955.5}, {0.558,-40.436,961.81,-7472.1}, {0.8963,-63.274,1469.2,-11170.0},

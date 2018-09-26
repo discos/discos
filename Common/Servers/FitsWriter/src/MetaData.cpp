@@ -1,4 +1,5 @@
 #include "MetaData.h"
+#include <ManagementModule.h>
 
 using namespace FitsWriter_private;
 
@@ -26,6 +27,7 @@ CMetaData::CMetaData()
 	m_restFreq.length(0);
 	m_azOff=m_elOff=m_raOff=m_decOff=m_lonOff=m_latOff=0.0;
 	m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
+	m_calDiode=false;
 }
 	
 CMetaData::~CMetaData()
@@ -44,6 +46,17 @@ void CMetaData::saveFeedHeader(CFitsWriter::TFeedHeader * fH,const WORD& number)
 	}
 	m_feeds=fH;
 	m_feedNumber=number;
+}
+
+IRA::CString CMetaData::subScanSignal() {
+	Management::TSubScanSignal sg=m_subScanConf.signal;		
+	if ((m_subScanConf.signal==Management::MNG_SIGNAL_REFERENCE) && (m_calDiode)) {
+		sg=Management::MNG_SIGNAL_REFCAL;
+	}
+	else if ((m_subScanConf.signal==Management::MNG_SIGNAL_SIGNAL) && (m_calDiode)) {
+		sg=Management::MNG_SIGNAL_REFSIG;
+	}
+	return Management::Definitions::map(sg);
 }
 
 /*************** Private ***********************************************************/
