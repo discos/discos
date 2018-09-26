@@ -88,7 +88,7 @@ public:
      * @param ifs list of IF identifier, it allows to specifies from which receiver IF the sub band comes from.
      */
     void getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-            const ACS::longSeq& ifs,double& scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
+            const ACS::longSeq& ifs,bool& onoff,double& scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
 
     /**
      * It is called to get the all the receiver output information in one call.
@@ -266,8 +266,9 @@ private:
     double m_vacuumDefault;*/
     DWORD m_statusWord;
     Backends::TotalPower_proxy m_totalPower_proxy;
-
+	 bool m_calDiode;
     Management::TSystemStatus m_componentStatus;
+    
 
     /**
      * This method prepares the object for execution.

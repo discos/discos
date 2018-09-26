@@ -1288,7 +1288,7 @@ void CRecvBossCore::getIFOutput(const ACS::longSeq& feeds,const ACS::longSeq& if
 }
 
 void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,
-		const ACS::longSeq& feeds,const ACS::longSeq& ifs,double &scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,
+		const ACS::longSeq& feeds,const ACS::longSeq& ifs,bool& onoff,double &scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,
 				ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -1303,10 +1303,12 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 		ACS::doubleSeq_var tempRes=new ACS::doubleSeq;
 		ACS::doubleSeq_var tempFreq=new ACS::doubleSeq;
 		ACS::doubleSeq_var tempBw=new ACS::doubleSeq;
-		tempRes=m_currentRecv->getCalibrationMark(freqs,bandwidths,feeds,ifs,tempFreq.out(),tempBw.out(),scale);
+		CORBA::Boolean onoff_out;
+		tempRes=m_currentRecv->getCalibrationMark(freqs,bandwidths,feeds,ifs,tempFreq.out(),tempBw.out(),onoff_out,scale);
 		result.length(tempRes->length());
 		resFreq.length(tempRes->length());
 		resBw.length(tempRes->length());
+		onoff=onoff_out;
 		for (unsigned i=0;i<result.length();i++) {
 			result[i]=tempRes[i];
 			resFreq[i]=tempFreq[i];

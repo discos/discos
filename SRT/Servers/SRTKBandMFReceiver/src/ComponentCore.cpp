@@ -26,6 +26,7 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_fetValues.VDL=m_fetValues. IDL=m_fetValues.VGL=m_fetValues.VDR=m_fetValues.IDR=m_fetValues.VGR=0.0;
     m_statusWord=0;
     m_ioMarkError = false;
+    m_calDiode=false;
 }
 
 CConfiguration const * const  CComponentCore::execute() throw (
@@ -160,7 +161,8 @@ void CComponentCore::activate() throw (
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     // Call the f of the derived class (setMode is pure virtual in ComponentCore).
-    setMode((const char *)m_configuration.getSetupMode()); 
+    setMode((const char *)m_configuration.getSetupMode());
+    m_calDiode=false; 
     guard.release();
     lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
     externalCalOff();
@@ -271,6 +273,7 @@ void CComponentCore::calOn() throw (
     }
     try {
         m_control->setCalibrationOn();
+        m_calDiode=true;
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOn()");
@@ -288,7 +291,6 @@ void CComponentCore::calOn() throw (
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
-
 }
 
 
@@ -311,6 +313,7 @@ void CComponentCore::calOff() throw (
     }
     try {
         m_control->setCalibrationOff();
+        m_calDiode=false;
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOff()");
@@ -502,6 +505,7 @@ void CComponentCore::getCalibrationMark(
         const ACS::doubleSeq& bandwidths,
         const ACS::longSeq& feeds, 
         const ACS::longSeq& ifs,
+        bool &onoff,
         double& scale
         ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
 {
@@ -627,6 +631,7 @@ void CComponentCore::getCalibrationMark(
         resBw[i]=realBw;
     }
     scale=1.0;
+    onoff=m_calDiode;
     if (tableLeftFreq) delete [] tableLeftFreq;
     if (tableLeftMark) delete [] tableLeftMark;
     if (tableRightFreq) delete [] tableRightFreq;

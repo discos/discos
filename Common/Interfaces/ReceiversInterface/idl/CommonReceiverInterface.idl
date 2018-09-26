@@ -121,6 +121,7 @@ module Receivers {
          * @param ifs is a list that identfies which IFs of the feed we are interested in, usually 0..<i>IFs</i>-1
          * @param skyFreq used to return the resulting frequency whan comparing the detector subband and the receiver IF band, the band is the real observed frequency in fact the oscillator is also added (MHz)
          * @param skyBw used to return the total observed bandwidth. (Mhz)
+         * @param onoff true if the calibration diode is turned on.
          * @param scaleFactor this value is used as a weight during system temperature computation in order to scale to a real tsys value. 
          * @return for each subband the list of the noise calibration values in Kelvin degrees. It must be freed by the caller.
          * @throw ComponentErrors::ComponentErrorsEx
@@ -128,7 +129,7 @@ module Receivers {
          * @throw CORBA::SystemException  
          */
         ACS::doubleSeq getCalibrationMark(in ACS::doubleSeq freqs,in ACS::doubleSeq bandwidths,in ACS::longSeq feeds,in ACS::longSeq ifs,out ACS::doubleSeq skyFreq,out ACS::doubleSeq skyBw,
-        		out double scaleFactor)    raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        		out boolean onoff,out double scaleFactor) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
         
         /**

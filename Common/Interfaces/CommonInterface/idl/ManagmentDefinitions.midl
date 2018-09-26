@@ -76,6 +76,8 @@ module Management  {
 	enum TSubScanSignal {
 		MNG_SIGNAL_SIGNAL,      /*!< The subscan signal is on source  */
 		MNG_SIGNAL_REFERENCE,   /*!< The subscan signal is off source  */
+		MNG_SIGNAL_REFCAL,      /*!< The subscan signal is off source and calibration diode is fired  */
+		MNG_SIGNAL_REFSIG,      /*!< The subscan signal is on source and the calibration diode is fired */
 		MNG_SIGNAL_NONE         /*!< The subscan signal is undetermined, during OTF for example  */
 	};
 

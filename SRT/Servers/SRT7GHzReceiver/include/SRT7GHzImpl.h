@@ -197,11 +197,12 @@ public:
 	 * @param ifs for each sub band this indicates the proper IF
 	 * @param skyFreq for each sub band it returns the real observed frequency(MHz), included detector, receiver IF  and Local Oscillator.
 	 * @param skyBw for each sub band it returns the real observed bandwidth(MHz), included detector bandwidth , receiver IF bandwidth
+	 * @param onoff true if the calibration diode is turned on.
 	 * @param scaleFactor this is a value to be applied as scale factor during system temperature computation
 	 * @return the list of the noise calibration value in Kelvin degrees.
 	 */
-    virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs,
-    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual ACS::doubleSeq * getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs,
+    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Boolean_out onoff,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is called in order to know the geometry of the receiver. The geometry is given along the X and Y axis where the central feed is the origin

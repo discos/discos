@@ -173,11 +173,12 @@ public:
 	 * @param ifs for each subband this indicates the proper IF, given the feed
 	 * @param skyFreq for each subband this indicates the corresponding frequency observed (MHz).
 	 * @param skyBw for each subband this indicates the resulting bandwidth (MHz)
+	 * @param onoff reports the status of the cal noise diode. true if it is turned on. 
 	 * @param slaceFactor scaling value to be used when computing system temperature
 	 * @return the list of the noise calibration value in Kelvin degrees.
 	 */
     virtual ACS::doubleSeq * getCalibrationMark (const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs,
-    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Boolean_out onoff,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
     /**
      * this method is  called to get the all the receiver output information in one call.  An output is identified by providing the feed and the IF identifier. It can process any number of requests at a time.

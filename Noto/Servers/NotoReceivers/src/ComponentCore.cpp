@@ -143,6 +143,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
     }
     setLO(lo); // throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
     m_setupMode=mode;
+    m_calDiode=false;
     CUSTOM_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"New receiver mode: %s",mode));
 }
 
@@ -171,6 +172,7 @@ void CComponentCore::calOn() throw (ReceiversErrors::FocusSelectorErrorExImpl,Co
         _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CComponentCore::calOn()");
     	setStatusBit(NOISEMARKERROR);
     }
+   m_calDiode=true;
 	CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::calOn()",(LM_NOTICE,"Noise diode turned on"));
     clearStatusBit(NOISEMARKERROR);
     setStatusBit(NOISEMARK);
@@ -201,6 +203,7 @@ void CComponentCore::calOff() throw (ReceiversErrors::FocusSelectorErrorExImpl,C
         _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CComponentCore::calOff()");
     	setStatusBit(NOISEMARKERROR);
     }
+   m_calDiode=false;
 	CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::calOff()",(LM_NOTICE,"Noise diode turned off"));
     clearStatusBit(NOISEMARKERROR);
     clearStatusBit(NOISEMARK);
@@ -317,7 +320,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Val
 }
 
 void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-            const ACS::longSeq& ifs,double &scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
+            const ACS::longSeq& ifs,bool& onoff,double &scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
 {
     double realFreq,realBw;
     double *tableLeftFreq=NULL;
@@ -381,6 +384,7 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& r
         }
     }
     scaleFactor=1.0;
+    onoff=m_calDiode;
     if (tableLeftFreq) delete [] tableLeftFreq;
     if (tableLeftMark) delete [] tableLeftMark;
     if (tableRightFreq) delete [] tableRightFreq;

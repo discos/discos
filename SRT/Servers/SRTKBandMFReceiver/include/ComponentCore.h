@@ -128,6 +128,7 @@ public:
             const ACS::doubleSeq& bandwidths,
             const ACS::longSeq& feeds,
             const ACS::longSeq& ifs,
+            bool& onoff,
             double &scale
      ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl);
 
@@ -563,6 +564,7 @@ private:
     double m_cryoLNAWin;
     double m_vacuumDefault;
     double m_envTemperature;
+    bool m_calDiode;
     IRA::ReceiverControl::FetValues m_fetValues;
     DWORD m_statusWord;
     // m_ioMarkError is a flag used to know if we already got an IO

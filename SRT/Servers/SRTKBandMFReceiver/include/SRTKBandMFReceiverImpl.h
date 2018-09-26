@@ -269,6 +269,7 @@ public:
             const ACS::longSeq& ifs,
             ACS::doubleSeq_out skyFreq,
             ACS::doubleSeq_out skyBw,
+            CORBA::Boolean_out onoff,
             CORBA::Double_out scaleFactor
     ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 

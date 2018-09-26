@@ -773,7 +773,7 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if(!m_file->setPrimaryHeaderKey("Signal",(const char *)Management::Definitions::map(m_info.getSubScanConf().signal),"Flag for position switching phase")) {
+				else if(!m_file->setPrimaryHeaderKey("Signal",(const char *)m_info.subScanSignal(),"Flag for position switching phase")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -1332,8 +1332,9 @@ void CEngineThread::collectReceiversData(FitsWriter_private::CFile* summaryFile)
 			ACS::doubleSeq_var IFFreq;
 			ACS::doubleSeq_var IFBw;
 			double scale;
+			bool onoff;
 			m_data->getInputsConfiguration(sectionsID,feeds,ifs,freqs,bws,atts);
-			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),scale);
+			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),onoff,scale);
 			m_receiversBoss->getIFOutput(feeds,ifs,IFFreq.out(),IFBw.out(),rcvPol.out(),LO.out());
 			m_info.setInputsTable(sectionsID,feeds,ifs,rcvPol.in(),skyFreq.in(),skyBw.in(),LO.in(),atts,calMarks.in());
 		}

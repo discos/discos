@@ -126,7 +126,13 @@ public:
 		m_sectionsID=sectionID;
 		m_localOscillator=los;
 	}
-
+	
+	void setCalDiode(const bool& onoff) {
+		m_calDiode=onoff;
+	};
+	
+	IRA::CString subScanSignal();
+	
 	void setInputsTable()
 	{
 		m_receiverPolarization.length(0);
@@ -254,7 +260,7 @@ private:
 	 */
 	ACS::doubleSeq m_localOscillator;
 	/**
-	 * Stores the identifier od the baclend section (one for each input)
+	 * Stores the identifier of the backend section (one for each input)
 	 */
 	ACS::longSeq m_sectionsID;
 	/**
@@ -318,6 +324,10 @@ private:
 	 * Sub scan configuration
 	 */
 	Management::TSubScanConfiguration m_subScanConf;
+	/**
+	 * It reports if the calibration diode has been fired on subscan basis
+	*/
+	bool m_calDiode;
 };
 
 };
