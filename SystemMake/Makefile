@@ -40,7 +40,7 @@ COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
                 SchedulerTextClient
 
-COMMON_MISC:=Plotter KStars Scripts getTemplateForTests PMUpdate InjectCommand 
+COMMON_MISC:=Plotter KStars Scripts getTemplateForTests PMUpdate InjectCommand UserTools
 
 COMMON_SIMULATORS:= TCPGenericProtocolSim ReceiverBoardSim
 
