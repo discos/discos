@@ -51,7 +51,7 @@ IRALibrary_LIBS = acstime SlaLibrary maciClient
 PY_PACKAGES  = IRAPy
 PY_SCRIPTS =
 
-EXECUTABLES     = FTrack STrack
+EXECUTABLES     = 
 EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike TestTimeTaggedCircularArray  \
 				  TestFlux TestTimer TestRounding
 
@@ -87,11 +87,11 @@ TestFlux_LIBS = IRALibrary
 TestTimer_OBJECTS = TestTimer
 TestTimer_LIBS = IRALibrary
 
-FTrack_OBJECTS = TestFrequency FrequencyTracking 
-FTrack_LIBS = SlaLibrary IRALibrary
+#FTrack_OBJECTS = TestFrequency FrequencyTracking 
+#FTrack_LIBS = SlaLibrary IRALibrary
 
-STrack_OBJECTS = TestSkySource SkySource DateTime String
-STrack_LIBS = IRALibrary
+#STrack_OBJECTS = TestSkySource SkySource DateTime String
+#STrack_LIBS = IRALibrary
 
 TestRounding_OBJECTS = TestFloatRounding IRATools
 TestRounding_LIBS = IRALibrary

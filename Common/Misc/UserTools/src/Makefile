@@ -1,17 +1,38 @@
+
 #*******************************************************************************
 # PPPPPPPP
 #
-# "@(#) $Id: Makefile,v 1.13 2011-06-21 16:39:52 a.orlati Exp $"
+# "@(#) $Id$"
 #
 # Makefile of ........
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
-# andrea  12/12/08  created
+# discos  01/10/18  created
 #
 
+# ALMA - Atacama Large Millimeter Array
+# Copyright (c) ESO - European Southern Observatory, 2014
+# (in the framework of the ALMA collaboration).
+# All rights reserved.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 #*******************************************************************************
-# This Makefile follows VLT Standards (see Makefile(5) for more).
+
+#*******************************************************************************
+# This Makefile follows ALMA/ACS Standards (see Makefile(5) for more).
 #*******************************************************************************
 # REMARKS
 #    None
@@ -25,9 +46,6 @@
 # additional include and library search paths
 #USER_INC = 
 #USER_LIB = 
-
-RESTRICT_PERMS=_tp_agc
-
 #
 # MODULE CODE DESCRIPTION:
 # ------------------------
@@ -37,19 +55,23 @@ RESTRICT_PERMS=_tp_agc
 #
 # C programs (public and local)
 # -----------------------------
-EXECUTABLES     = scheduleChecker
-EXECUTABLES_L   = testSched testLSTtoUT
+EXECUTABLES     = FTrack STrack
+EXECUTABLES_L   = 
+
+FTrack_OBJECTS = FrequencyTrack  
+#FTrack_LDFLAGS = 
+FTrack_LIBS = IRALibrary SlaLibrary
+
+STrack_OBJECTS = SourceTrack  
+#FTrack_LDFLAGS = 
+STrack_LIBS = IRALibrary SlaLibrary
+
 
 #
 # <brief description of xxxxx program>
-testSched_OBJECTS   = testSchedule Schedule SubScanBinder Schedule_ScanList Configuration
-testSched_LIBS      = IRALibrary ComponentErrors
-
-testLSTtoUT_OBJECTS = testLST2UT
-testLSTtoUT_LIBS = IRALibrary ComponentErrors
-
-scheduleChecker_OBJECTS   = ScheduleChecker Schedule SubScanBinder Schedule_ScanList Configuration
-scheduleChecker_LIBS      = IRALibrary ComponentErrors
+xxxxx_OBJECTS   =	
+xxxxx_LDFLAGS   =
+xxxxx_LIBS      =
 
 #
 # special compilation flags for single c sources
@@ -63,15 +85,8 @@ INCLUDES        =
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SchedulerImpl
-#LIBRARIES_L     =
-
-SchedulerImpl_OBJECTS = Schedule SchedulerImpl Configuration Core ScheduleExecutor SubScanBinder Schedule_ScanList ScheduleReport
-SchedulerImpl_LIBS = IRALibrary AntennaDefinitionsStubs ManagmentDefinitionsStubs SchedulerStubs acsnc \
-EphemGeneratorStubs AntennaBossStubs ObservatoryStubs FitsWriterStubs DataReceiverStubs CustomLoggerStubs GenericWeatherStationStubs\
-GenericBackendStubs ComponentErrors ManagementErrors AntennaErrors BackendsErrors ParserErrors ReceiversErrors MinorServoErrors\
-bulkDataStubs bulkDataReceiverStubs bulkDataCallback bulkDataSenderStubs CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs \
-MinorServoStubs MinorServoBossStubs MinorServoDefinitionsStubs ActiveSurfaceBossStubs
+LIBRARIES       =
+LIBRARIES_L     =
 
 #
 # <brief description of lllll library>
@@ -92,7 +107,7 @@ TCL_SCRIPTS_L   =
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         = _tp_agc
+PY_SCRIPTS         =
 PY_SCRIPTS_L       =
 
 PY_MODULES         =
@@ -121,7 +136,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = Scheduler
+CDB_SCHEMAS = 
 
 # 
 # IDL Files and flags
@@ -134,7 +149,9 @@ USER_IDL =
 #
 JARFILES= 
 jjj_DIRS=
-jjj_EXTRAS= 
+jjj_EXTRAS=
+# For expressing dependencies between jarfiles (parallel builds)
+jjj_JLIBS= 
 #
 # java sources in Jarfile on/off
 DEBUG= 
@@ -215,11 +232,9 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
-	@echo $(RESTRICT_PERMS)" has been restcicted to system manager"
-	@chmod g-x $(INTROOT)/bin/$(RESTRICT_PERMS)
-	@chmod o-x $(INTROOT)/bin/$(RESTRICT_PERMS)
-	@echo "scheduleChecker made available to users...."
-	@if [ -d $(INTROOT)/user/bin ]; then cp -p $(INTROOT)/bin/scheduleChecker $(INTROOT)/user/bin/; fi;
+	@echo "FTrack and STrack made available to users...."
+	@if [ -d $(INTROOT)/user/bin ]; then cp -p $(INTROOT)/bin/STrack $(INTROOT)/user/bin/; fi;
+	@if [ -d $(INTROOT)/user/bin ]; then cp -p $(INTROOT)/bin/FTrack $(INTROOT)/user/bin/; fi;
 	@echo " . . . installation done"
 
 
