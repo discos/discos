@@ -1337,6 +1337,7 @@ void CEngineThread::collectReceiversData(FitsWriter_private::CFile* summaryFile)
 			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),onoff,scale);
 			m_receiversBoss->getIFOutput(feeds,ifs,IFFreq.out(),IFBw.out(),rcvPol.out(),LO.out());
 			m_info.setInputsTable(sectionsID,feeds,ifs,rcvPol.in(),skyFreq.in(),skyBw.in(),LO.in(),atts,calMarks.in());
+			m_info.setCalDiode(onoff);
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");
