@@ -77,6 +77,46 @@ ACS::Time CCore::getUTFromLST(const IRA::CDateTime& currentUT,const IRA::CDateTi
 	}
 }
 
+IRA::CString CCore::getCurrentLogFile(Management::CustomLogger_ptr logger,bool& loggerError)
+{
+	IRA::CString currentName;
+	if (CORBA::is_nil(logger)) {
+		currentName="station.log";
+		return currentName;
+	}
+	try { //get the current log file name
+		ACS::ROstring_var filenameRef;
+		CORBA::String_var fileName;
+		ACSErr::Completion_var comp;
+		filenameRef=logger->filename();
+		fileName=filenameRef->get_sync(comp.out());
+		ACSErr::CompletionImpl compImpl(comp);
+		if (compImpl.isErrorFree()) {
+			IRA::CString origFileName((const char *)fileName);
+			IRA::CString baseDir,baseName,ext;
+			if (!IRA::CIRATools::extractFileName(origFileName,baseDir,baseName,ext)) {
+				currentName="station.log";
+				ACS_LOG(LM_FULL_INFO,"CCore::getCurrentLogFile()",(LM_WARNING,"Not able to get current log file name, assuming station.log"));
+			}	
+			else {
+				currentName=baseName+"."+ext;
+				ACS_LOG(LM_FULL_INFO,"CCore::execute()",(LM_INFO,"Current log is %s ",(const char *)currentName));
+			}	
+		}
+		else {
+			ACS_LOG(LM_FULL_INFO,"CCore::execute()",(LM_WARNING,"Not able to get current log file name, assuming station.log"));
+			currentName="station.log";
+			loggerError=true;
+		}
+	}
+	catch (CORBA::SystemException& ex) {
+		currentName="station.log";
+		ACS_LOG(LM_FULL_INFO,"CCore::execute()",(LM_WARNING,"Not able to get current log file name, assuming station.log"));
+		loggerError=true;
+	}
+	return currentName;
+}
+
 void CCore::configureBackend(Backends::GenericBackend_ptr backend,bool& backendError,const IRA::CString& name, const std::vector<IRA::CString>& procedure) throw (
 		ManagementErrors::BackendProcedureErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
@@ -334,6 +374,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
 							  const IRA::CString& path,
 							  const IRA::CString& extraPath,
 							  const IRA::CString& schedule,
+							  const IRA::CString& log,
 							  const IRA::CString& targetID,
 							  const IRA::CString& layoutName,
 							  const ACS::stringSeq& layout,
@@ -345,7 +386,8 @@ void CCore::setupDataTransfer(bool& scanStarted,
 							  const Management::TScanAxis& axis,
 							  const CConfiguration* config,
 							  IRA::CString &fullSubscanFileName,
-							  IRA::CString &fullScanFolder
+							  IRA::CString &fullScanFolder,
+							  const IRA::CString &backendName
 	) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,
 			ComponentErrors::UnexpectedExImpl,ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
 {
@@ -368,6 +410,8 @@ void CCore::setupDataTransfer(bool& scanStarted,
  				setup.path=CORBA::string_dup((const char *)path);
  				setup.extraPath=CORBA::string_dup((const char *)extraPath);
  				setup.schedule=CORBA::string_dup((const char *)schedule);
+				setup.schedule=CORBA::string_dup((const char *)log);
+				setup.backendName=CORBA::string_dup((const char *)backendName);
  				if (layoutName!=_SCHED_NULLTARGET) {
  					setup.scanLayout=CORBA::string_dup((const char *)layoutName);
  				}

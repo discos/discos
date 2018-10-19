@@ -78,6 +78,11 @@ IRA::CString CScheduleReport::getLogFileName() const
 	return m_scheduleBaseName+"_"+m_currentPostfix+".log";
 }
 
+IRA::CString CScheduleReport::getSchedule() const
+{
+		return m_scheduleBaseName+"_"+m_currentPostfix;
+}
+
 IRA::CString CScheduleReport::getReportFileName() const
 {
 	return m_reportPath+m_scheduleBaseName+"_"+m_currentPostfix+".rep";

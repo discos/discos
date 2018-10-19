@@ -335,6 +335,29 @@ void CCore::logFile(const IRA::CString& path,const IRA::CString& fileName) throw
 	}
 }
 
+void CCore::defaultlogFile() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
+	ACS_LOG(LM_FULL_INFO,"CCore::defaultlogFile()",(LM_NOTICE,"Switched to default log file"));
+	try {
+		m_customLogger->flush();
+		m_customLogger->setDefaultLogfile();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::logFile()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_customLoggerError=true;
+		throw impl;
+	}
+	catch (ManagementErrors::ManagementErrorsEx& ex) {
+		_ADD_BACKTRACE(ManagementErrors::LogFileErrorExImpl,impl,ex,"CCore::logFile()");
+		throw impl;
+	}
+}
+
+
 void CCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ComponentErrors::ComponentNotActiveExImpl,ManagementErrors::AntennaScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl)
@@ -521,6 +544,7 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 								const IRA::CString observerName,
 								const IRA::CString& projectName,
 								const IRA::CString& scheduleFileName,
+								const IRA::CString& logFileName,
 								const IRA::CString& layout,
 								const ACS::stringSeq& layoutProc,
 								IRA::CString &fullSubscanFileName,
@@ -571,8 +595,8 @@ ACS::Time CCore::startRecording(const ACS::Time& recUt,
 	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::OperationErrorExImpl);
 	loadDefaultDataReceiver();
 	CCore::setupDataTransfer(m_dataTransferInitialized,m_defaultDataReceiver.in(),m_defaultDataReceiverError,m_defaultBackend.in(),m_defaultBackendError,
-			m_streamPrepared,observerName,projectName,baseName,path,extraPath,scheduleFileName,targetID,layout,layoutProc,scanTag,getCurrentDevice(),scanId,startUTTime ,subScanId,scanAxis,
-			m_config,fullSubscanFileName,fullScanFolder); // throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
+			m_streamPrepared,observerName,projectName,baseName,path,extraPath,scheduleFileName,logFileName,targetID,layout,layoutProc,scanTag,getCurrentDevice(),scanId,startUTTime ,subScanId,scanAxis,
+			m_config,fullSubscanFileName,fullScanFolder,m_config->getBackendAlias()); // throws  ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl
 	CCore::startDataTansfer(m_defaultBackend.in(),m_defaultBackendError,recUt,m_streamStarted,m_streamPrepared,m_streamConnected);
 	return startUTTime;
 }

@@ -23,7 +23,9 @@ CDataCollection::CDataCollection()
 	m_fileName=m_fullPath="";
 	m_project="";
 	m_observer="";
+	m_backendName="";
 	m_scheduleName="";
+	m_logName="";
 	m_status=Management::MNG_OK;
 	m_siteName="";
 	m_pressure=m_temperature=m_humidity=0.0;
@@ -358,7 +360,9 @@ bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& rec
 			m_deviceID=setup.device;
 			m_scanID=setup.scanId;
 			m_observer=setup.observerName;
+			m_backendName=setup.backendName;
 			m_scheduleName=setup.schedule;
+			m_logName=setup.log;
 			basePath=setup.path;
 			extraPath=setup.extraPath;
 			baseName=setup.baseName;

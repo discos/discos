@@ -261,7 +261,7 @@ public:
 			ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
 	
 	void getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq&resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-			const ACS::longSeq& ifs,double& scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,
+			const ACS::longSeq& ifs,bool& onoff,double& scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,
 					ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
 	
 	void getIFOutput(const ACS::longSeq& feeds,const ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq&  bw,ACS::longSeq& pols,ACS::doubleSeq& LO)  throw (
@@ -316,6 +316,7 @@ private:
 	IRA::CSocket m_fsSocket;
 	bool m_recvOpened;
 	bool m_fsOpened;
+	bool m_cal;
 	IRA::CDBTable *m_KKCFeedTable;
 	double m_LO[_RECVBOSSCORE_MAX_IFS];
 	Receivers::TPolarization m_pols[_RECVBOSSCORE_MAX_IFS];
@@ -342,7 +343,8 @@ private:
 	double m_bandWidth[_RECVBOSSCORE_MAX_IFS];
 	IRA::CString m_currentReceiver;
 	long m_totalOutputs;
-        Backends::TotalPower_proxy m_totalPower_proxy;
+	bool m_cal;
+   Backends::TotalPower_proxy m_totalPower_proxy;
 	
 #else
         #warning "Compiling RecvBossCore with default target"

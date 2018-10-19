@@ -56,6 +56,7 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
  * @param path path to the file that has to be created
  * @param extraPath indicates the extra folder that has to be created (from basePath) in order to contain the file
  * @param schedule name of the schedule file
+ * @param log name os the current log file
  * @param targetID identifier of the target of the subscan
  * @param layoutName name of the layout configuration
  * @param layout layout of the scan
@@ -65,12 +66,13 @@ static void configureBackend(Backends::GenericBackend_ptr backend,bool& backendE
  * @param config pointer to the configuration object
  * @param fullSubscanfileName name of the file that will save the current subscan
  * @param fullScanfolder name of the folder containing the data related to current scan
+ * @param backendName name or alias name of the backend currently configured
  */
 static void setupDataTransfer(bool& scanStarted,Management::DataReceiver_ptr writer,bool& writerError,Backends::GenericBackend_ptr backend,bool& backendError,
-		const bool& streamPrepared,const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& targetID,
+		const bool& streamPrepared,const IRA::CString& obsName,const IRA::CString& prj,const IRA::CString& baseName,const IRA::CString& path,const IRA::CString& extraPath,const IRA::CString& schedule,const IRA::CString& log,const IRA::CString& targetID,
 		const IRA::CString& layoutName,const ACS::stringSeq& layout,const long& scanTag,const long& device,const DWORD& scanID,const ACS::Time& startTime,const  DWORD& subScanID,
 		const Management::TScanAxis& axis,const CConfiguration* config,IRA::CString &fullSubscanFileName,
-		IRA::CString &fullScanFolder) throw (ComponentErrors::OperationErrorExImpl,
+		IRA::CString &fullScanFolder,const IRA::CString &backendName) throw (ComponentErrors::OperationErrorExImpl,
 		ComponentErrors::CORBAProblemExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::UnexpectedExImpl,
 		ManagementErrors::DataTransferSetupErrorExImpl,ManagementErrors::BackendNotAvailableExImpl);
 
@@ -124,6 +126,14 @@ static void startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendE
  * @return UT corresponding to the input lst
  */
 static ACS::Time getUTFromLST(const IRA::CDateTime& currentUT,const IRA::CDateTime& checkUT,const ACS::TimeInterval& lst,const IRA::CSite& site,const double& dut1);
+
+/**
+ * Return the current file name cointaing the log information. The returned string is basename plus extension (no path included)
+ * @param logger reference to the logger component
+ * @param loggerError will be returned back true if an error occurred in the communication to logger component
+ * @return the nema eof the current log file
+ */
+static IRA::CString getCurrentLogFile(Management::CustomLogger_ptr logger,bool& loggerError);
 
 /**
  * Computes the name of the output file, including the lst time

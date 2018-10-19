@@ -29,6 +29,7 @@
 									m_servoRunTime=new MinorServo::TRunTimeParameters; m_servoRunTime->scanAxis=""; \
 									m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
 
+
 									
 #define RESOURCE_EXEC ACS_NEW_SIMPLE_CONSUMER(m_antennaNC,Antenna::AntennaDataBlock,Antenna::ANTENNA_DATA_CHANNEL,antennaNCHandler,static_cast<void*>(this)); \
 					  m_antennaNC->consumerReady(); \
@@ -66,7 +67,7 @@
 						 if (m_parser) { \
 						    delete m_parser; \
 						 } \
-						 ACS_LOG(LM_FULL_INFO,"CCore::cleanUp()",(LM_INFO,"PARSER_DESTROYED")); \
+						 ACS_LOG(LM_FULL_INFO,"CCore::cleanUp()",(LM_INFO,"PARSER_DESTROYED"));
 
 
 
