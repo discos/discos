@@ -38,5 +38,4 @@
 #define HISTORY10 FITS_VERSION10" Summary.fits has now a number of meaningful keywords"
 #define HISTORY11 FITS_VERSION11" Frequency and bandwidth columns added to Section table reporting backend sampled band"
 
-
 #endif /* VERSION_H_ */
