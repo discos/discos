@@ -21,9 +21,6 @@
 </Configuration>
 
 <Configuration>
-<<<<<<< HEAD:Medicina/Configuration/CDB/alma/DataBlock/Roach/Roach.xml
-	<configurationID>RC00</configurationID>
-=======
 	<configurationID>SK03</configurationID>
 	<sections>4</sections>
 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
@@ -70,7 +67,6 @@
 
 <Configuration>
 	<configurationID>SC00</configurationID>
->>>>>>> latest64:SRT/Configuration/CDB/alma/DataBlock/Sardara/Sardara.xml
  	<sections>2</sections>
  	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
  	<inputPort>BWG</inputPort>
