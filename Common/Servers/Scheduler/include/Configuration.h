@@ -123,6 +123,12 @@ public:
 	 * @return the path to the directory where to store the data files.
 	 */
 	const IRA::CString& getDataDirectory() const;
+	
+	/**
+	 * @return the alias of the currently selected backend. If a backend is not selected an empty string is returned.
+	*/
+	const IRA::CString getBackendAlias() const;
+
 	/**
 	 * @return the path to the directory where to store the system data file or auxiliary data or files not coming from a schedule
 	 */

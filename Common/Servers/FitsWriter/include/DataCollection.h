@@ -295,11 +295,21 @@ public:
 	 * Get the name of the observer
 	 */
 	const IRA::CString& getObserverName() const { return m_observer; }
+
+	/** 
+	 * Get the name of the backend currently in use
+	*/
+	const IRA::CString& getBackendName() const { return m_backendName; }
 	
 	/**
 	 * Get the name of the schedule file
 	 */
 	const IRA::CString& getScheduleName() const { return m_scheduleName; }
+
+	/**
+	 * Get the name of the log file
+	*/
+	const IRA::CString& getLogName() const { return m_logName; }
 
 	/**
 	 * Get the identifier of the current scan
@@ -527,6 +537,7 @@ private:
 	IRA::CString m_fullPath;
 	IRA::CString m_project;
 	IRA::CString m_observer;
+	IRA::CString m_backendName;
 	/** the data block coming from the antenna */
 	//Antenna::AntennaDataBlock m_antennaData;
 	/** the data block coming from the antenna the previous one */
@@ -589,6 +600,11 @@ private:
 	 * Stores the name of the schedule file, currently running
 	 */
 	IRA::CString m_scheduleName;
+
+	/**
+	 * Stores the name of the log file, currenlty running 
+	*/
+	IRA::CString m_logName;
 	/**
 	 * Scan tag
 	 */

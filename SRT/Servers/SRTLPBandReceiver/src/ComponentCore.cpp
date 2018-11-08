@@ -28,6 +28,7 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_fetValues.VGR = 0.0;
     m_statusWord = 0;
     m_ioMarkError = false;
+    m_calDiode=false;
     m_setupMode = "";
 }
 
@@ -328,6 +329,7 @@ void CComponentCore::calOn() throw (
     }
     try {
         m_control->setCalibrationOn();
+		  m_calDiode=true;    
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOn()");
@@ -345,7 +347,6 @@ void CComponentCore::calOn() throw (
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
-
 }
 
 
@@ -368,6 +369,7 @@ void CComponentCore::calOff() throw (
     }
     try {
         m_control->setCalibrationOff();
+        m_calDiode=false;
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOff()");
@@ -576,6 +578,7 @@ void CComponentCore::getCalibrationMark(
         const ACS::doubleSeq& bandwidths,
         const ACS::longSeq& feeds, 
         const ACS::longSeq& ifs,
+        bool& onoff,
         double& scale
         ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
 {
@@ -711,7 +714,7 @@ void CComponentCore::getCalibrationMark(
     if (tableRightFreq) delete [] tableRightFreq;
     if (tableRightMark) delete [] tableRightMark;
     scale = 1.0;
-
+	 onoff=m_calDiode;
 }
 
 
@@ -878,6 +881,7 @@ void CComponentCore::setSetupMode(const char * setup_mode) throw (ReceiversError
 
     // Call the derived class method (setMode is pure virtual in ComponentCore).
     setMode((const char *)getTargetMode()); 
+    m_calDiode=false;
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setSetupMode()",(LM_NOTICE,"SETUP_MODE %s", (const char *)getTargetMode()));
 }
 

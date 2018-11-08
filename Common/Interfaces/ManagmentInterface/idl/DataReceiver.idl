@@ -33,7 +33,9 @@ module Management {
 		string baseName; // name of the file
 		string scanLayout;
 		string schedule;   // name of the schedule
+		string log; //name of the log
 		long device;
+		string backendName;
 	} TScanSetup;
 	
 	/**

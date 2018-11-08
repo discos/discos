@@ -43,7 +43,7 @@ testWriter_OBJECTS = TestWriter FitsWriter File SummaryWriter FitsTools
 testWriter_LIBS = IRALibrary 
 	
 testSummary_OBJECTS = TestSummary File SummaryWriter FitsTools
-testSummary_LIBS = IRALibrary 
+testSummary_LIBS = IRALibrary DiscosVersion
 	
 
 # Libraries (public and local)
@@ -59,10 +59,7 @@ FitsWriterImpl_LIBS = baci maci FitsWriterStubs DataReceiverStubs ComponentError
                  ManagmentDefinitionsStubs ACSBulkDataError bulkDataStubs IRALibrary\
                  bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs MinorServoDefinitionsStubs \
                  EphemGeneratorStubs BackendsDefinitionsStubs ObservatoryStubs MinorServoBossStubs MinorServoErrors\
-                 GenericWeatherStationStubs ReceiversBossStubs ReceiversDefinitionsStubs CommonReceiverInterfaceStubs SchedulerStubs ManagmentDefinitionsStubs
-
-
-
+                 GenericWeatherStationStubs ReceiversBossStubs ReceiversDefinitionsStubs CommonReceiverInterfaceStubs SchedulerStubs ManagmentDefinitionsStubs DiscosVersion
 
 #
 # Configuration Database Files

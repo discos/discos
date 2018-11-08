@@ -192,17 +192,17 @@ CustomLoggerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
      /* OPEN DEFAULT LOG FILES AND BEGINS LOGGING
      ============================================*/
-    IRA::CString _c_path, _c_file, _a_path, _a_file;
+    //IRA::CString _c_path, _c_file, _a_path, _a_file;
      if(
-	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogDir", _a_path) &&
-	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogFile", _a_file) &&
-	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogDir", _c_path) &&
-	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogFile", _c_file)
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogDir", _acs_log_path) &&
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultACSLogFile", _acs_log_file) &&
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogDir", _custom_log_path) &&
+	IRA::CIRATools::getDBValue(getContainerServices(), "DefaultCustomLogFile", _custom_log_file)
      ){
-        _open_log_file(false, (const char *)_a_path, (const char *)_a_file);
-        ACS_SHORT_LOG((LM_DEBUG, "open default full log file - %s/%s", (const char *)_a_path, (const char *)_a_file));
-        setLogfile((const char *)_c_path, (const char *)_c_file);
-        ACS_SHORT_LOG((LM_DEBUG, "open default custom log file - %s/%s", (const char *)_c_path, (const char *)_c_file));
+        _open_log_file(false, (const char *)_acs_log_path, (const char *)_acs_log_file);
+        ACS_SHORT_LOG((LM_DEBUG, "open default full log file - %s/%s", (const char *)_acs_log_path, (const char *)_acs_log_file));
+        setLogfile((const char *)_custom_log_path, (const char *)_custom_log_file);
+        ACS_SHORT_LOG((LM_DEBUG, "open default custom log file - %s/%s", (const char *)_custom_log_path, (const char *)_custom_log_file));
      }else{
         _EXCPT(ComponentErrors::CDBAccessExImpl, __dummy, "CustomLoggerImpl::initialize");
         CUSTOM_EXCPT_LOG(__dummy, LM_DEBUG);
@@ -411,6 +411,27 @@ CustomLoggerImpl::setLogfile(const char *base_path,
     closeLogfile();
     //_custom_log.clear();
     _open_log_file(true, base_path, filename); //throws
+    setLogging(true);
+    ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : logging"));
+};
+
+/*
+ * Close the currently open log files if exist and tries to open the default one.
+ * @throw ManagementErrors::CustomLoggerIOErrorEx: if cannot create directory or open the files
+ */
+void 
+CustomLoggerImpl::setDefaultLogfile() 
+                             throw (CORBA::SystemException, ManagementErrors::CustomLoggerIOErrorEx)
+{
+    //Acquire log mutex
+    baci::ThreadSyncGuard guard(&_log_queue_mutex);
+    //Writing last message on last opened log files
+    //if not logging does nothing
+    handle(get_log_record((std::string("Custom log dir changing to default")).c_str(), C_NOTICE)); 
+    handle(get_log_record((std::string("Custom log file changing to default")).c_str(), C_NOTICE)); 
+    closeLogfile();
+    //_custom_log.clear();
+    _open_log_file(true, (const char *)_custom_log_path, (const char *)_custom_log_file); //throws
     setLogging(true);
     ACS_SHORT_LOG((LM_DEBUG, "CutomLoggerImpl : logging"));
 };

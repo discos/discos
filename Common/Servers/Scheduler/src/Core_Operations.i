@@ -369,7 +369,7 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 		throw dummy;
 	}
 	ACS::Time realStart,waitFor;
-	IRA::CString prj,path,suffix,obsName,schedule,layoutName;
+	IRA::CString prj,path,suffix,obsName,schedule,layoutName,log;
 	long scanTag;
 	ACS::stringSeq layout;
 	// throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl)
@@ -383,11 +383,18 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 		_waitOnSource();
 	}*/
 	scanTag=0; suffix=""; obsName=IRA::CString("system"); getProjectCode(prj); schedule="none";
+	try { // this is aleast importan error so I do not want to block this operation... the case the reference is returned Null is handled by the next call
+		loadCustomLogger(m_customLogger,m_customLoggerError); // const throw (ComponentErrors::CouldntGetComponentExImpl);
+	}
+	catch (...) {
+	}
+	log=getCurrentLogFile(m_customLogger,m_customLoggerError);
+
 	layout.length(0); layoutName=_SCHED_NULLTARGET;
 	guard.acquire();
 	m_subScanID=subScanId;
 	realStart=startRecording(m_subScanEpoch,m_scanID,m_subScanID,scanTag,m_config->getSystemDataDirectory(),
-			suffix,obsName,prj,schedule,layoutName,layout,fullSubscanFileName,fullScanFolder);
+			suffix,obsName,prj,schedule,log,layoutName,layout,fullSubscanFileName,fullScanFolder);
 	waitFor=realStart+duration; // this is the time at which the stop should be issued
 	guard.release();
 	//This is to implement a finally clause, if the user abort when the recording has already started I'd like, at least to stop it
@@ -901,6 +908,7 @@ void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCo
 	ACS::doubleSeq_var mark,tpi,zero,tpiCal;
 	ACS::longSeq_var IFs;
 	double scaleFactor;
+	bool onoff;
 	long inputs;
 	IRA::CString outLog;
 	IRA::CString backendName;
@@ -933,7 +941,7 @@ void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCo
 	}
 	// call the receivers boss in order to get the calibration diode values......
 	try {
-		mark=m_receiversBoss->getCalibrationMark(freq,bandWidth,feed,IFs,skyFreq.out(),skyBw.out(),scaleFactor);
+		mark=m_receiversBoss->getCalibrationMark(freq,bandWidth,feed,IFs,skyFreq.out(),skyBw.out(),onoff,scaleFactor);
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
@@ -952,7 +960,32 @@ void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCo
 		impl.setReason("Unable to get calibration diode values");
 		throw impl;
 	}
-	//wait for the calibration diode to settle......
+	if (onoff) {
+		try {
+			m_receiversBoss->calOff();
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::callTSys()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			m_receiversBossError=true;
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+			impl.setReason("Could not turn the calibration mark on");
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::callTSys()");
+			impl.setReason("Could not turn the calibration mark on");
+			throw impl;
+		}
+		//wait for the calibration diode to switch off completely
+		guard.release();
+		IRA::CIRATools::Wait(m_config->getTsysGapTime());
+		guard.acquire();	
+	}
 	//Now contact the backend to get the TotalPower when the calibration diode is switched off
 	try {
 		tpi=backend->getTpi();

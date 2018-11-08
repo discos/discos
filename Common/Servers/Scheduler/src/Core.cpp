@@ -73,6 +73,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 		throw Impl;
 	}
 	RESOURCE_EXEC;
+	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
+
 	// spawn schedule executor thread........
 	try {
 		CCore *tmp=this;

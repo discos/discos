@@ -10,6 +10,7 @@
 #include <ManagementModule.h>
 #include <AntennaModule.h>
 #include "CommonTools.h"
+#include <DiscosVersion.h>
 
 using namespace IRA;
 using namespace FitsWriter_private;
@@ -392,8 +393,6 @@ bool CEngineThread::processData()
 			}
 		} //end for
 	}
-
-
 #ifndef FW_DEBUG
 	m_file->add_row();
 #endif
@@ -405,16 +404,37 @@ void CEngineThread::runLoop()
 {
 	TIMEVALUE nowEpoch;
 	IRA::CString filePath,fileName;
+	unsigned totalDumps=0;
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	IRA::CIRATools::getTime(nowEpoch); // it marks the start of the activity job
 	//cout << "inizio : " << nowEpoch.value().value << endl;
 	if (m_summaryOpened && m_data->isWriteSummary()) {
+		double exptime=0.0;
 		std::list<double> va;
 		ACS::doubleSeq rf;
 		m_info.getRestFreq(rf);
 		va.clear();
 		CCommonTools::map(rf,va);
 		m_summary->getFilePointer()->setKeyword("RESTFREQ",va);
+		if (m_data->getBackendName()!="") {
+			m_summary->getFilePointer()->setKeyword("BackendName",m_data->getBackendName());
+		}
+		if (m_data->getProjectName()!="") {
+			m_summary->getFilePointer()->setKeyword("PROJID",m_data->getProjectName());
+		}
+		if (m_data->getObserverName()!="") {
+			m_summary->getFilePointer()->setKeyword("OBSID",m_data->getObserverName());
+		}
+		m_summary->getFilePointer()->setKeyword("CREATOR",DiscosVersion::CurrentVersion::getVersion());
+		m_summary->getFilePointer()->setKeyword("TELESCOP",DiscosVersion::CurrentVersion::station);
+		m_summary->getFilePointer()->setKeyword("NUSEBANDS",m_data->getSectionsNumber());
+		m_summary->getFilePointer()->setKeyword("ScheduleName",m_data->getScheduleName());
+		m_summary->getFilePointer()->setKeyword("LogFileName",m_data->getLogName());
+
+		exptime=(totalDumps*m_data->getIntegrationTime())/1000.0;
+		m_summary->getFilePointer()->setKeyword("EXPTIME",exptime);
+	
+
 		if ((!m_summary->write()) || (!m_summary->close())) {
 			_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 			impl.setFileName((const char *)m_data->getSummaryFileName());
@@ -495,8 +515,8 @@ void CEngineThread::runLoop()
 			 	m_summary->getFilePointer()->setKeyword("LST",lstStr);
 			 	IRA::CIRATools::timeToStrExtended(currentUT.value().value,lstStr);
 			 	m_summary->getFilePointer()->setKeyword("DATE-OBS",lstStr);
-
 				m_summaryOpened=true;
+				totalDumps=0;
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"SUMMARY_OPENED"));
 			}
 			m_file = new CFitsWriter();
@@ -535,10 +555,6 @@ void CEngineThread::runLoop()
 
 				//get the data from the minor servo boss...if subsystem is enabled
 				collectMinorServoData();
-
-				//*****************************************************************************************
-				ACS_LOG(LM_FULL_INFO,"CEngineThread::runLoop()",(LM_NOTICE,"DATA_COLLECTION_COMPLETED"));
-				//************************* ADDDED FOR DEBUGGING NoData/Roach Could be deleted ****************
 
 				// now creates the file, the tables and the headers
 				Backends::TMainHeader mH=m_data->getMainHeader();
@@ -757,7 +773,7 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if(!m_file->setPrimaryHeaderKey("Signal",(const char *)Management::Definitions::map(m_info.getSubScanConf().signal),"Flag for position switching phase")) {
+				else if(!m_file->setPrimaryHeaderKey("Signal",(const char *)m_info.subScanSignal(),"Flag for position switching phase")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -859,7 +875,9 @@ void CEngineThread::runLoop()
 		//save all the data in the buffer an then finalize the file
 		if (m_fileOpened) {
 			//cout << "Stopping, cached  dumps: " << m_data->getDumpCollectionSize() << endl;
-			while (processData());
+			while (processData()) {
+				totalDumps++;
+			};
 
 #ifdef FW_DEBUG
 		m_file.close();
@@ -891,7 +909,9 @@ void CEngineThread::runLoop()
 		// there is still time available.......
 		if (m_fileOpened) {
 			//cout << "cached before dumps: " << m_data->getDumpCollectionSize() << endl;
-			while (checkTime(nowEpoch.value().value) && checkTimeSlot(nowEpoch.value().value) && processData());
+			while (checkTime(nowEpoch.value().value) && checkTimeSlot(nowEpoch.value().value) && processData()) {
+				totalDumps++;
+			}
 			//cout << "cached after  dumps: " << m_data->getDumpCollectionSize() << endl;
 			//IRA::CIRATools::getTime(nowEpoch);
 			//cout << "fine :" << nowEpoch.value().value << endl;
@@ -1312,10 +1332,12 @@ void CEngineThread::collectReceiversData(FitsWriter_private::CFile* summaryFile)
 			ACS::doubleSeq_var IFFreq;
 			ACS::doubleSeq_var IFBw;
 			double scale;
+			bool onoff;
 			m_data->getInputsConfiguration(sectionsID,feeds,ifs,freqs,bws,atts);
-			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),scale);
+			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),onoff,scale);
 			m_receiversBoss->getIFOutput(feeds,ifs,IFFreq.out(),IFBw.out(),rcvPol.out(),LO.out());
 			m_info.setInputsTable(sectionsID,feeds,ifs,rcvPol.in(),skyFreq.in(),skyBw.in(),LO.in(),atts,calMarks.in());
+			m_info.setCalDiode(onoff);
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectReceiversData()");

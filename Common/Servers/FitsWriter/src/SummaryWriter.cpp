@@ -58,6 +58,8 @@ bool CSummaryWriter::create()
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY6,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY7,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY8,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY9,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY10,m_lastError)) return false;
 	m_fitsWritten=false;
 	return true;
 };

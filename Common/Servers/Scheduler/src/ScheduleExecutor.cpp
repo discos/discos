@@ -318,7 +318,7 @@ void CScheduleExecutor::runLoop()
 						if ((m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
 							  m_startRecordTime=m_core->startRecording(m_currentScan.ut,m_currentScan.scanid,m_currentScan.subscanid,m_schedule->getScanTag(),
 							  m_config->getDataDirectory(), m_currentScan.suffix,m_schedule->getObserverName(), m_schedule->getProjectName(),
-							  m_schedule->getFileName(),m_currentScan.layout,layoutProc,fullSubscanFileName,fullScanFolder);
+							  m_schedReport.getSchedule(),m_schedReport.getLogFileName(),m_currentScan.layout,layoutProc,fullSubscanFileName,fullScanFolder);
 							  if (fullScanFolder!="") {
 								  m_schedReport.addScanPath(fullScanFolder);
 							  }
@@ -715,6 +715,12 @@ void CScheduleExecutor::cleanSchedule(bool error)
 	}
 	try {
 		m_core->closeScan(false);
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_WARNING);
+	}
+	try {
+		m_core->defaultlogFile();
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		ex.log(LM_WARNING);
