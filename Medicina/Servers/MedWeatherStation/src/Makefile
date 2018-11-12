@@ -72,7 +72,7 @@ MedWeatherStationImpl_LIBS      =ComponentErrors \
 			expat \
 			GenericWeatherStationStubs \
 			ManagmentDefinitionsStubs\
-			ParserErrors
+			ParserErrors DiscosVersion
 
 
 #

@@ -129,12 +129,14 @@ def main():
         try:
             #sys.stdout.write("<%d> "%cmdCounter)
             cmd=''
-            try:
-                #cmd=sys.stdin.readline()
-                cmd=raw_input("<%d> "%cmdCounter)
-            except IOError:
-                cmd='exit'
-                pass
+            if cmdCounter>0:
+            	try:
+						cmd=raw_input("<%d> "%cmdCounter)
+					except IOError:
+						cmd='exit'
+						pass
+				else:
+					cmd="version"
             cmdCounter=cmdCounter+1
             cmd=cmd.strip()
             if cmd=="exit":

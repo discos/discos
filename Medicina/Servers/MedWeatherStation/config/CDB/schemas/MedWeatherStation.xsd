@@ -17,6 +17,8 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 	<xs:complexType name="MedWeatherStationType">
+	 <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
         <xs:sequence>
       			<xs:element name="temperature" type="baci:RWdouble"/>
 		  			<xs:element name="winddir" type="baci:RWdouble"/>
@@ -27,7 +29,8 @@
 		    </xs:sequence>
         <xs:attribute name="IPAddress" type="xs:string" use="required"/>
 	       <xs:attribute name="port" type="xs:unsignedInt" use="required"/>
-  
+          </xs:extension>
+     </xs:complexContent>
   	</xs:complexType>
   
   	<xs:element name="MedWeatherStation" type="MedWeatherStationType"/>
