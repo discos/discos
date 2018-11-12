@@ -66,7 +66,8 @@ AntennaBossImpl_OBJECTS   = AntennaBossImpl BossCore Configuration \
 	WorkingThread WatchingThread Callback SlewCheck Offset
 AntennaBossImpl_LIBS = AntennaDefinitionsStubs AntennaBossStubs MountStubs ObservatoryStubs \
    EphemGeneratorStubs ManagmentDefinitionsStubs IRALibrary ComponentErrors ManagementErrors \
-   AntennaErrors ParserErrors PointingModelStubs RefractionStubs SkySourceStubs OTFStubs MoonStubs acsnc
+   AntennaErrors ParserErrors PointingModelStubs RefractionStubs SkySourceStubs OTFStubs MoonStubs acsnc \
+   DiscosVersion
 
 #
 # Configuration Database Files

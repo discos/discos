@@ -92,6 +92,7 @@
 #include <stdlib.h>
 #include <cstdlib>
 #include "pstream.h"
+#include <DiscosVersion.h>
 
 
 /**
@@ -117,6 +118,9 @@ namespace SimpleParser {
 #define _SP_TIMETAGGEDQUEUECLEAR_PARAMS 1
 #define _SP_TIMETAGGEDQUEUECLEARALL "flushAll"
 #define _SP_TIMETAGGEDQUEUECLEARALL_PARAMS 0
+
+#define _SP_GETVERSION "version"
+#define _SP_GETVERSION_PARAMS 0
 
 
 
@@ -190,6 +194,7 @@ public:
 			elem=new TRule(_SP_TIMETAGGEDQUEUECLEARALL,_SP_TIMETAGGEDQUEUECLEARALL_PARAMS);
 			m_ruleSet.push_back(elem);
 		}
+		m_ruleSet.push_back(new TRule(_SP_GETVERSION,_SP_GETVERSION_PARAMS));
 		m_object=obj;
 		m_levelTwoSupport=levelTwoSupport;
 		if (m_levelTwoSupport) {

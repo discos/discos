@@ -79,7 +79,7 @@ XBackendsImpl_LIBS =Xarcos maci baci IRALibrary GenericBackendStubs \
 XBackendsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs \
 ManagmentDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
 bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors \
-ParserErrors ManagementErrors XBackendsErrors
+ParserErrors ManagementErrors XBackendsErrors DiscosVersion
 #
 # <brief description of lllll library>
 lllll_OBJECTS   =

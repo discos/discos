@@ -121,6 +121,9 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
   			}
 		}
 		else if (elem->m_type==KEYCOMMAND) {
+			if (instr==_SP_GETVERSION) {
+				return instr+m_answerDelimiter+DiscosVersion::CurrentVersion::getVersion();
+			}
 			if (instr==_SP_TIMETAGGEDQUEUE) {
 				return instr+m_answerDelimiter+showTimeBasedCommands();
 			}

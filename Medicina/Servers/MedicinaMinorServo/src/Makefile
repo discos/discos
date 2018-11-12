@@ -39,7 +39,7 @@ MinorServoBossImpl_LIBS = MedMinorServoBossStubs MinorServoBossStubs \
                           acsnc ParserErrors AntennaDefinitionsStubs \
                           MountStubs AntennaBossStubs AntennaErrors \
                           ActiveSurfaceBossStubs boost_thread-mt boost_system acstime \
-                          baci
+                          baci DiscosVersion
 
 EXECUTABLES_L     = real_to_virtual# testclient testgeometry testprimary testsecondary testpassive real_to_virtual
 real_to_virtual_OBJECTS = real_to_virtual testutils MedMinorServoGeometry MedMinorServoTime
