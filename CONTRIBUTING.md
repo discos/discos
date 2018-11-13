@@ -38,9 +38,9 @@ The stable branch will be used for software releses according our [policy](https
 
 ### Hot-Fixes workflow
 
-1.Checked out into master branch
+> 1. Checked out into master branch
 git checkout master
-2.Fetched all remote updates
+Fetched all remote updates
 git remote update
 3.Update local master branch with remote copy
 git pull origin master
@@ -77,13 +77,13 @@ git push origin :fix-issue-xxx
 
 ### feature workflow
 
-Checked out into master branch
+> 1. Checked out into master branch
 git checkout master
-Fetched all remote updates
+> 2. Fetched all remote updates
 git remote update
-Update local master branch with remote copy
+> 3. Update local master branch with remote copy
 git pull origin master
-Created a branch related to the issue xxx that tracks origin/master
+> 4. Created a branch related to the issue xxx that tracks origin/master
 git checkout -b fix-issue-xxx origin/master
 Did some coding and committed to it
 git commit -m "fix #xxx:…"
