@@ -38,42 +38,42 @@ The stable branch will be used for software releses according our [policy](https
 
 ### Hot-Fixes workflow
 
-> 1. Checked out into master branch
-git checkout master
-Fetched all remote updates
-git remote update
-3.Update local master branch with remote copy
-git pull origin master
-Checked out into stable branch
-git checkout stable
-Update local stable branch with remote copy
-git pull origin stable
-Created a hotfix branch related to the issue xxx that tracks origin/master
-git checkout -b fix-issue-xxx origin/master
-Did some fixes and committed to it
-Pushed hotfix branch to remote repository
-git push origin fix-issue-xxx
-Opened a "pull request" in GitHub for team to verify the hotfix
-Checkout into stable branch
-git checkout stable
-Merged hotfix branch into stable branch
-git merge fix-issue-xxx
-Tagged the hotfix point by creating a new tag
-git tag -a 0.1.1 -m 'Create hotfix tag 0.1.1'
-Pushed stable branch to remote repository
-git push origin stable
-Pushed the tags to remote repository
-git push origin --tags
-Checkout into master branch
-git checkout master
-Merged hotfix branch into master branch
-git merge fix-issue-xxx
-Pushed develop branch to remote repository
-git push origin master
-Removed hotfix branch from the local repository
-git branch -D fix-issue-xxx
-Removed hotfix branch from the remote repository
-git push origin :fix-issue-xxx
+-Checked out into master branch
+`git checkout master`
+-Fetched all remote updates
+`git remote update`
+-Update local master branch with remote copy
+`git pull origin master`
+-Checked out into stable branch
+`git checkout stable`
+-Update local stable branch with remote copy
+`git pull origin stable`
+-Created a hotfix branch related to the issue xxx that tracks origin/master
+`git checkout -b fix-issue-xxx origin/master`
+-Did some fixes and committed to it
+-Pushed hotfix branch to remote repository
+`git push origin fix-issue-xxx`
+-Opened a "pull request" in GitHub for team to verify the hotfix
+-Checkout into stable branch
+`git checkout stable`
+-Merged hotfix branch into stable branch
+`git merge fix-issue-xxx`
+-Tagged the hotfix point by creating a new tag
+`git tag -a 0.1.1 -m 'Create hotfix tag 0.1.1'`
+-Pushed stable branch to remote repository
+`git push origin stable`
+-Pushed the tags to remote repository
+`git push origin --tags`
+-Checkout into master branch
+`git checkout master`
+-Merged hotfix branch into master branch
+`git merge fix-issue-xxx`
+-Pushed develop branch to remote repository
+`git push origin master`
+-Removed hotfix branch from the local repository
+`git branch -D fix-issue-xxx`
+-Removed hotfix branch from the remote repository
+`git push origin :fix-issue-xxx`
 
 ### feature workflow
 
@@ -85,20 +85,20 @@ git push origin :fix-issue-xxx
 `git pull origin master`
 -Created a branch related to the issue xxx that tracks origin/master
 `git checkout -b fix-issue-xxx origin/master`
-Did some coding and committed to it
-git commit -m "fix #xxx:…"
-Pushed feature branch to remote repository
-git push origin fix-issue-xxx
-Opened a "pull request" in GitHub for team to verify the feature
-Checkout into stable master
-git checkout master
-Merged branch into master branch
-git merge fix-issue-xxx
-Pushed master branch to remote repository
-git push origin master
-Removed issue branch from the local repository
-git branch -D fix-issue-xxx
-Removed isue branch from the remote repository
-git push origin :fix-issue-xxx
+- Did some coding and committed to it
+`git commit -m "fix #xxx:…"`
+-Pushed feature branch to remote repository
+`git push origin fix-issue-xxx`
+-Opened a "pull request" in GitHub for team to verify the feature
+-Checkout into stable master
+`git checkout master`
+-Merged branch into master branch
+`git merge fix-issue-xxx`
+-Pushed master branch to remote repository
+`git push origin master`
+-Removed issue branch from the local repository
+`git branch -D fix-issue-xxx`
+-Removed isue branch from the remote repository
+`git push origin :fix-issue-xxx`
 
 
