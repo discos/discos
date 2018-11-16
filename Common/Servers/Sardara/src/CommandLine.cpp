@@ -82,13 +82,13 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 
 	AUTO_TRACE("CCommandLine::Init()");
 	m_configuration=config;
-	if (!initializeConfiguration(m_configuration->getConfiguration())) { // throw (ComponentErrors::CDBAccessExImpl)
+	/*if (!initializeConfiguration(m_configuration->getConfiguration())) { // throw (ComponentErrors::CDBAccessExImpl)
 		IRA::CString msg;
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::Init()");
 		msg.Format("the requested configuration %s is not known",(const char *)m_configuration->getConfiguration());
 		impl.setReason((const char *)msg);
 		throw impl;
-	}
+	}*/
 	// this will create the socket in blocking mode.....
 	if (Create(m_Error,STREAM)==FAIL) {
 		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
@@ -156,6 +156,13 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
     cStation = IRA::CString (Station);
     if((cStation.Compare("SRT")==0))
         m_stationSRT = true;
+
+    try {
+        setup (m_configuration->getConfiguration());
+    }
+    catch (...) {
+        ACS_LOG(LM_FULL_INFO,"CCommandLine::Init()",(LM_NOTICE,"BACKEND_SARDARA_INITIALIZATION ERROR"));
+    }
 
 	//Waits a bit so that everything can settle down
 	IRA::CIRATools::Wait(0,200000);
@@ -434,11 +441,19 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
         Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);
         Message reply = sendBackendCommand(request);
         if (reply.is_success_reply()) {
-            m_bandWidth[inputId]=newBW;
 		    for (int j=0;j<m_sectionsNumber;j++)
                 m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
 		    m_commonSampleRate=newSR;
-            m_frequency[inputId]=newFreq;
+            if (m_SK00S==true || m_SC00S==true || m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SL00S==true || m_SP00S==true) {
+                m_frequency[2*inputId]=newFreq;
+                m_frequency[2*inputId+1]=newFreq;
+                m_bandWidth[2*inputId]=newBW;
+                m_bandWidth[2*inputId+1]=newBW;
+            }
+            else {
+                m_frequency[inputId]=newFreq;
+                m_bandWidth[inputId]=newBW;
+            }
             m_feedNumber[inputId]=newFeed;
             m_bins[inputId]=newBins;
 		    m_polarization[inputId]=newPol;
@@ -1163,8 +1178,12 @@ void CCommandLine::getSampleRate(ACS::doubleSeq& sr) const
 
 void CCommandLine::getTsys(ACS::doubleSeq& tsys) const
 {
-	tsys.length(m_sectionsNumber);
+	/*tsys.length(m_sectionsNumber);
 	for (int i=0;i<m_sectionsNumber;i++) {
+		tsys[i]=m_tsys[i];
+	}*/
+	tsys.length(m_inputsNumber);
+	for (int i=0;i<m_inputsNumber;i++) {
 		tsys[i]=m_tsys[i];
 	}	
 }
@@ -1243,8 +1262,15 @@ void CCommandLine::getInputSection(ACS::longSeq& inpSection) const
 
 void CCommandLine::getInputSectionAttr(ACS::longSeq& inpSection) const
 {
-	inpSection.length(m_sectionsNumber);
-	for (int i=0;i<m_sectionsNumber;i++) {
+    long index=0;
+
+	if (m_SK00==true || m_SC00==true || m_SK77==true || m_SK03==true || m_SK06==true || m_SL00==true || m_SP00==true)
+        index = m_inputsNumber;
+	if (m_SK00S==true || m_SC00S==true || m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SL00S==true || m_SP00S==true)
+        index = m_sectionsNumber;
+
+    inpSection.length(index);
+	for (int i=0;i<index;i++) {
 		inpSection[i]=m_inputSection[i];
 	}
 }
@@ -1354,13 +1380,25 @@ void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& 
 
 void CCommandLine::saveTsys(const ACS::doubleSeq& tsys,const ACS::doubleSeq& ratio)
 {
-	if (tsys.length()==(unsigned)m_sectionsNumber) {
+	/*if (tsys.length()==(unsigned)m_sectionsNumber) {
 		for (int i=0;i<m_sectionsNumber;i++) {
 			m_tsys[i]=tsys[i];
 		}
 	}
 	if (ratio.length()==(unsigned)m_sectionsNumber) {
 		for (int i=0;i<m_sectionsNumber;i++) {
+			m_KCratio[i]=ratio[i];
+		}
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::saveTsys()",(LM_NOTICE,"KELVIN_COUNTS_CONVERSION_FACTOR_SET"));
+	}*/
+	if (tsys.length()==(unsigned)m_inputsNumber) {
+		for (int i=0;i<m_inputsNumber;i++) {
+			m_tsys[i]=tsys[i];
+		}
+		ACS_LOG(LM_FULL_INFO,"CCommandLine::saveTsys()",(LM_NOTICE,"TSYS_SET"));
+	}
+	if (ratio.length()==(unsigned)m_inputsNumber) {
+		for (int i=0;i<m_inputsNumber;i++) {
 			m_KCratio[i]=ratio[i];
 		}
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::saveTsys()",(LM_NOTICE,"KELVIN_COUNTS_CONVERSION_FACTOR_SET"));
