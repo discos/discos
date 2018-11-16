@@ -63,7 +63,8 @@ public:
 		// get the CommandLine .......
 		CSecAreaResourceWrapper<CCommandLine> line=m_pLink->Get();
 		try {
-			line->getAttenuationAttr(m_val);
+			//line->getAttenuationAttr(m_val);
+			line->getAttenuation(m_val);
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOAttenuation::read()");
