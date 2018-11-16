@@ -62,6 +62,8 @@
 	</xs:complexType>
 			
 	<xs:complexType name="MedicinaMountType">
+	   <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
 		<xs:sequence>
 			<xs:element name="azimuth" type="baci:ROdouble"/>
 			<xs:element name="elevation" type="baci:ROdouble"/>
@@ -107,6 +109,8 @@
 		<xs:attribute name="OscillationNumberThreshold" type="xs:unsignedLong" use="required" />	
 		<!-- Time to wait, after a detection, before commanding again the previuos operating mode in the ACU.(microseconds) -->
 		<xs:attribute name="OscillationRecoverWaitTime" type="xs:unsignedLong" use="required" />		
+      </xs:extension>
+     </xs:complexContent>		
 	</xs:complexType>
   
 	<xs:element name="MedicinaMount" type="MedicinaMountType"/>

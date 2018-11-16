@@ -103,7 +103,7 @@
         <!-- Expire time of data request in seconds. For instance: 0.001 for 1ms-->
         <xs:attribute name="expire_time" type="xs:double" use="required" />
         <!-- Maximum value allowed for the difference of two corresponding axis coordinates (mm) -->
-        <!-- if |cmdPos – actPos| < tracking_delta, then the axis is following the commanded position -->
+        <!-- if |cmdPos  actPos| < tracking_delta, then the axis is following the commanded position -->
         <xs:attribute name="tracking_delta" type="xs:double" use="required" />
         <!-- limits = "(neg1, pos1), (neg2, pos2), ..., (negN, posN)" -->
         <xs:attribute name="limits" type="xs:string" use="required" />
@@ -111,6 +111,8 @@
     </xs:complexType>
 
     <xs:complexType name="MinorServoBossType">
+  	   <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
         <xs:sequence>
             <xs:element name="status" type="mng:SystemStatusType" />
             <xs:element name="ready" type="mng:BooleanType" />
@@ -127,8 +129,10 @@
         <xs:attribute name="server_ip" type="xs:string" use="required" />
         <xs:attribute name="AntennaBossInterface" type="xs:string" use="required" />
         <!-- Subsystem attributes -->
-        <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
-        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" />
+        <!-- <xs:attribute name="actionThreadStackSize" type="xs:unsignedLong" use="optional" default="1024" />
+        <xs:attribute name="monitoringThreadStackSize" type="xs:unsignedLong" use="optional" default="2048" /> -->
+        </xs:extension>
+     </xs:complexContent>
     </xs:complexType>
 
     <xs:element name="MinorServoBoss" type="MinorServoBossType"/>

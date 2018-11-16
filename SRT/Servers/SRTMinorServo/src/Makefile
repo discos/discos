@@ -27,7 +27,7 @@ MinorServoBossImpl_OBJECTS = MinorServoBossImpl utils SetupThread ParkThread \
 MinorServoBossImpl_LIBS = MinorServoStubs MinorServoBossStubs SRTMinorServoLibrary \
 						  ManagmentDefinitionsStubs ManagementErrors \
 						  IRALibrary ComponentErrors MinorServoErrors acsnc \
-						  ParserErrors AntennaDefinitionsStubs MountStubs \
+						  ParserErrors DiscosVersion AntennaDefinitionsStubs MountStubs \
 						  AntennaBossStubs AntennaErrors ActiveSurfaceBossStubs \
 						  SRTActiveSurfaceBossStubs MinorServoDefinitionsStubs
 # ----------------------------------------------------------------------

@@ -63,7 +63,7 @@ LIBRARIES_L     =
 
 TotalPowerImpl_OBJECTS = TotalPowerImpl Configuration CommandLine Protocol SenderThread ControlThread
 TotalPowerImpl_LIBS = IRALibrary GenericBackendStubs TotalPowerStubs ManagmentDefinitionsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
-  bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors
+  bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors DiscosVersion
 
 #
 # <brief description of lllll library>

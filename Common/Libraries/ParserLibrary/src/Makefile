@@ -45,13 +45,13 @@ PY_SCRIPTS =
 #
 # <brief description of xxxxx program>
 TestFunctions_OBJECTS   = TestFunctions	
-TestFunctions_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors
+TestFunctions_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors DiscosVersion
 
 TestParser_OBJECTS   = TestParser	
-TestParser_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors
+TestParser_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors DiscosVersion
 
 TestTypes_OBJECTS   = TestTypes	
-TestTypes_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors
+TestTypes_LIBS      = IRALibrary SlaLibrary ParserErrors ComponentErrors DiscosVersion
 
 
 #

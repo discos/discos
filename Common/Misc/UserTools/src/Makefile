@@ -55,7 +55,7 @@
 #
 # C programs (public and local)
 # -----------------------------
-EXECUTABLES     = FTrack STrack
+EXECUTABLES     = FTrack STrack LstToUT
 EXECUTABLES_L   = 
 
 FTrack_OBJECTS = FrequencyTrack  
@@ -66,6 +66,8 @@ STrack_OBJECTS = SourceTrack
 #FTrack_LDFLAGS = 
 STrack_LIBS = IRALibrary SlaLibrary
 
+LstToUT_OBJECTS = lst2UT
+LstToUT_LIBS = IRALibrary SlaLibrary
 
 #
 # <brief description of xxxxx program>
@@ -232,9 +234,10 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
-	@echo "FTrack and STrack made available to users...."
+	@echo "FTrack, STrack, LSTToUT made available to users...."
 	@if [ -d $(INTROOT)/user/bin ]; then cp -p $(INTROOT)/bin/STrack $(INTROOT)/user/bin/; fi;
 	@if [ -d $(INTROOT)/user/bin ]; then cp -p $(INTROOT)/bin/FTrack $(INTROOT)/user/bin/; fi;
+	@if [ -d $(INTROOT)/user/bin ]; then cp -p $(INTROOT)/bin/LstToUT $(INTROOT)/user/bin/; fi;	
 	@echo " . . . installation done"
 
 
