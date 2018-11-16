@@ -228,10 +228,10 @@ typename CParser<OBJ>::TRule *CParser<OBJ>::checkCommand(const IRA::CString& lin
 		_EXCPT(ParserErrors::CommandNotFoundExImpl,err,"CParser::checkCommand()");
 		throw err;
 	}
-	if ((elem->m_type==KEYCOMMAND) && (!m_levelTwoSupport)) {
+	/*if ((elem->m_type==KEYCOMMAND) && (!m_levelTwoSupport)) {
 		_EXCPT(ParserErrors::NotSupportedErrorExImpl,err,"CParser::checkCommand()");
 		throw err;
-	}
+	}*/
 	if (timeTagged) {
 		if (!parseTime(timeMark,execTime,execInterval)) {
 			_EXCPT(ParserErrors::TimeFormatErrorExImpl,err,"CParser::checkCommand()");

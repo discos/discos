@@ -19,10 +19,9 @@
 
 #
 # user definable C-compilation flags
-# this is deprecated, TARGETSYS will now be transformed into STATION in 64 bit version.....and legal values will be SRT, Medicina, Noto
-ifeq ($(TARGETSYS),MED)
+ifeq ($(STATION),Medicina)
 	USER_CFLAGS = -U 'COMPILE_TARGET_SRT' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_MED'
-else ifeq ($(TARGETSYS),NT)
+else ifeq ($(STATION),Noto)
 	USER_CFLAGS = -U 'COMPILE_TARGET_SRT' -U 'COMPILE_TARGET_MED' -D 'COMPILE_TARGET_NT'
 else
 	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_SRT'
