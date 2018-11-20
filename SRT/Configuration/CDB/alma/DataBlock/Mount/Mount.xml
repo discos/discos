@@ -23,5 +23,5 @@
 	accScaleFactor="10.0"
 	cw_ccw_limit="180.0"
 	MinElevationAvoidance="6"
-	MaxElevationAvoidance="82"
+	MaxElevationAvoidance="87"
 />
