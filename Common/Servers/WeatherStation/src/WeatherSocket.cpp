@@ -1,14 +1,41 @@
-#include  "SRTWeatherSocket.h"
+#include "WeatherSocket.h"
+#include "WeatherStationData.h"
 #define MAXSIZE 255
-int SRTWeatherSocket::Depth=0;
+int WeatherSocket::Depth=0;
+
+const char *COMMANDS[NSENSORS]={ 
+
+ "th01",
+ "vh01",
+ "vs01",
+ "vr01",
+ "dn01", 
+ "dm01", 
+ "dx01", 
+ "sn01", 
+ "sm01", 
+ "sx01", 
+ "ta01", 
+ "ua01", 
+ "pa01", 
+ "rc01", 
+ "rd01", 
+ "ri01", 
+ "rp01", 
+ "hc01", 
+"hd01", 
+"hi01", 
+"hp01"};  
 
 
-SRTWeatherSocket::SRTWeatherSocket(CString addr, unsigned int port )
+
+
+WeatherSocket::WeatherSocket(CString addr, unsigned int port )
 {
 
 
 
-	ACS_TRACE("SRTWeatherSocket::SRTWeatherSocket");
+	ACS_TRACE("WeatherSocket::WeatherSocket");
 	m_isConnected=false;
 	ADDRESS=addr;
 	PORT=port;
@@ -19,9 +46,9 @@ SRTWeatherSocket::SRTWeatherSocket(CString addr, unsigned int port )
 }
 // 
 
-SRTWeatherSocket::SRTWeatherSocket(CString addr, unsigned int port,WeatherStationData *md)
+WeatherSocket::WeatherSocket(CString addr, unsigned int port,WeatherStationData *md)
 {
-	ACS_TRACE("SRTWeatherSocket::SRTWeatherSocket");
+	ACS_TRACE("WeatherSocket::WeatherSocket");
 
 	m_meteodata=md;
 	m_isConnected=false;
@@ -30,7 +57,7 @@ SRTWeatherSocket::SRTWeatherSocket(CString addr, unsigned int port,WeatherStatio
         p= XML_ParserCreate(NULL);
          XML_SetElementHandler(p, start_hndl, end_hndl);
     	 XML_SetCharacterDataHandler(p,char_hndl);
-	ACS_LOG(LM_FULL_INFO,"SRTWeatherSocket::SRTWeatherSocket()",(LM_INFO,"Creating xlm parser and handlers"));
+	ACS_LOG(LM_FULL_INFO,"WeatherSocket::WeatherSocket()",(LM_INFO,"Creating xlm parser and handlers"));
 	 m_sensorData=md;
    	 XML_SetUserData(p,md);
 
@@ -39,21 +66,21 @@ SRTWeatherSocket::SRTWeatherSocket(CString addr, unsigned int port,WeatherStatio
 
 
 
-SRTWeatherSocket::~SRTWeatherSocket()
+WeatherSocket::~WeatherSocket()
 {
 	
-	ACS_TRACE("SRTWeatherSocket::~SRTWeatherSocket");
+	ACS_TRACE("WeatherSocket::~WeatherSocket");
 
 
 }
-int SRTWeatherSocket::sendCMD(CError& err, CString cmd)
+int WeatherSocket::sendCMD(CError& err, CString cmd)
 {
 //	CError err;
-	ACS_TRACE("SRTWeatherSocket::sendCMD");
+	ACS_TRACE("WeatherSocket::sendCMD");
     	Send(err,(const char *)cmd,cmd.GetLength());
 	if (!err.isNoError())
 	{
-		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"SRTWeatherSocket::sendCMD()- Create Socket");
+		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"WeatherSocket::sendCMD()- Create Socket");
 		ex.log(LM_DEBUG);
 		throw ex;
 		m_isConnected=false;
@@ -61,7 +88,7 @@ int SRTWeatherSocket::sendCMD(CError& err, CString cmd)
 	} 
 	
 
-	ACS_DEBUG_PARAM("SRTWeatherSocket::sendCMD(CError& err, CString cmd)","sent:  %s", (const char *) cmd);
+	ACS_DEBUG_PARAM("WeatherSocket::sendCMD(CError& err, CString cmd)","sent:  %s", (const char *) cmd);
 
 	return 0;
 
@@ -70,19 +97,19 @@ int SRTWeatherSocket::sendCMD(CError& err, CString cmd)
 }
 
 
-int  SRTWeatherSocket::receiveData(CError& err, CString& rdata)
+int  WeatherSocket::receiveData(CError& err, CString& rdata)
 {
 
-	ACS_TRACE("SRTWeatherSocket::receiveData");
+	ACS_TRACE("WeatherSocket::receiveData");
 	int n_received;
-	bool done=false;
+	//bool done=false;
 	char buff[MAXSIZE];
 	n_received=Receive(err,buff,MAXSIZE);
 //	do {n_received=Receive(err,buff,MAXSIZE);} 
 //	while (n_received==-2);
 	if (!err.isNoError())
 	{
-		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"SRTWeatherSocket::sendCMD()- Create Socket");
+		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"WeatherSocket::sendCMD()- Create Socket");
 		ex.log(LM_DEBUG);
 		throw ex;
 		m_isConnected=false;
@@ -90,12 +117,12 @@ int  SRTWeatherSocket::receiveData(CError& err, CString& rdata)
 	} 
 	buff[n_received]=0;
     	rdata =CString(buff);  
-	ACS_DEBUG_PARAM("SRTWeatherSocket::sendCMD(CError& err, CString cmd)","received:  %s", (const char *) rdata);
+	ACS_DEBUG_PARAM("WeatherSocket::sendCMD(CError& err, CString cmd)","received:  %s", (const char *) rdata);
  	return 0;
 
 }
 
-CError SRTWeatherSocket::connect() throw (ACSErr::ACSbaseExImpl)
+CError WeatherSocket::connect() throw (ACSErr::ACSbaseExImpl)
 
 {
 	OperationResult err ;
@@ -104,7 +131,7 @@ CError SRTWeatherSocket::connect() throw (ACSErr::ACSbaseExImpl)
 	err=Create(m_error,DGRAM);  
 	if (err==FAIL)
 	{
-		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"SRTWeatherSocket::connect()- Create Socket");
+		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"WeatherSocket::connect()- Create Socket");
 		ex.log(LM_DEBUG);
 		throw ex;
 		m_isConnected=false;
@@ -122,7 +149,7 @@ CError SRTWeatherSocket::connect() throw (ACSErr::ACSbaseExImpl)
 	{
 
 		CError error; // CError object only for Closing the Socket)		
-		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"SRTWeatherSocket::connect()- Connect to Socket");
+		_EXCPT(ComponentErrors::SocketErrorExImpl,ex,"WeatherSocket::connect()- Connect to Socket");
 		ex.log(LM_DEBUG);
 		throw ex;
 		Close (error);
@@ -136,20 +163,20 @@ CError SRTWeatherSocket::connect() throw (ACSErr::ACSbaseExImpl)
 
 }
 
-CError SRTWeatherSocket::disconnect()throw (ACSErr::ACSbaseExImpl)
+CError WeatherSocket::disconnect()throw (ACSErr::ACSbaseExImpl)
 {
 
-	 ACS_LOG(LM_FULL_INFO,"SRTWeatherSocket::Disconnect()",(LM_INFO,"  disconnecting Socked"));
+	 ACS_LOG(LM_FULL_INFO,"WeatherSocket::Disconnect()",(LM_INFO,"  disconnecting Socked"));
 	try {
 		if (m_isConnected)
   		{	Close(m_error);
 			if (m_error.isNoError())
 			{
 	
-			 ACS_LOG(LM_FULL_INFO,"SRTWeatherSocket::Disconnect()",(LM_DEBUG,"Disconnecting Socket  ",(const char *) ADDRESS,PORT));
+			 ACS_LOG(LM_FULL_INFO,"WeatherSocket::Disconnect()",(LM_DEBUG,"Disconnecting Socket  "));
  			} else
 			{
-		  	ACS_LOG(LM_FULL_INFO,"SRTWeatherSocket::Disconnect()",(LM_ERROR,"%s",(const char *) m_error.getDescription()));
+		  	ACS_LOG(LM_FULL_INFO,"WeatherSocket::Disconnect()",(LM_ERROR,"%s",(const char *) m_error.getDescription()));
 	     		_THROW_EXCPT(ComponentErrors::SocketErrorExImpl,"MeteoStation::disconnect()");	
 
 			}
@@ -157,25 +184,24 @@ CError SRTWeatherSocket::disconnect()throw (ACSErr::ACSbaseExImpl)
 	} catch (...)
 	{
 // 	cout << "unknown exception" << endl; 
-		ACS_LOG(LM_FULL_INFO,"SRTWeatherSocket::Disconnect()",(LM_ERROR,"%s",(const char *) m_error.getDescription()));
+		ACS_LOG(LM_FULL_INFO,"WeatherSocket::Disconnect()",(LM_ERROR,"%s",(const char *) m_error.getDescription()));
 
 	}
 		
 	return m_error;
 	
 }
-int SRTWeatherSocket::parse(CString meteo_string)
+int WeatherSocket::parse(CString meteo_string)
 {
-	int i;
+	//int i;
 
 	int len;
 	int done=true;
 	len=strlen((const char*) meteo_string);
-// 	cout << "LEN:" <<len <<endl;
 
  
  	if (! XML_Parse(p, (const char*) meteo_string, len, done)) {
-       fprintf(stderr, "Parse error at line %d:\n%s\n",
+       fprintf(stderr, "Parse error at line %ld:\n%s\n",
  	      XML_GetCurrentLineNumber(p),
  	      XML_ErrorString(XML_GetErrorCode(p)));
               XML_ParserFree(p);
@@ -188,7 +214,7 @@ int SRTWeatherSocket::parse(CString meteo_string)
 
 }
 
-void SRTWeatherSocket::initParser(WeatherStationData *md)
+void WeatherSocket::initParser(WeatherStationData *md)
 {
 
 	 m_meteodata=md;
@@ -200,7 +226,7 @@ void SRTWeatherSocket::initParser(WeatherStationData *md)
 
 }
 
-void SRTWeatherSocket::start_hndl(void* data, const XML_Char* el, const XML_Char** attr)
+void WeatherSocket::start_hndl(void* data, const XML_Char* el, const XML_Char** attr)
 {
 int i;
     WeatherStationData* md=(WeatherStationData*) data;
@@ -209,14 +235,14 @@ int i;
    md->setTag(string(el));
 //   cout <<"TagName=" <<string(el)<<endl;
 
-  ACS_DEBUG_PARAM("SRTWeatherSocket::char_hndl()","TagName: %s",(const char *)el);
+  ACS_DEBUG_PARAM("WeatherSocket::char_hndl()","TagName: %s",(const char *)el);
 
   //printf("\n");
   Depth++;
 
 
 }
-void SRTWeatherSocket::end_hndl(void *data, const XML_Char* el)
+void WeatherSocket::end_hndl(void *data, const XML_Char* el)
 {
     WeatherStationData* md=(WeatherStationData*) data;
 //    cout << "END handlers" << endl;
@@ -227,7 +253,7 @@ void SRTWeatherSocket::end_hndl(void *data, const XML_Char* el)
 //   if (Depth==0)  cout << "Fine" <<endl;  
  }
 
-void  SRTWeatherSocket::char_hndl(void *data, const XML_Char *s, int len)
+void  WeatherSocket::char_hndl(void *data, const XML_Char *s, int len)
 
 {
 
@@ -241,7 +267,7 @@ void  SRTWeatherSocket::char_hndl(void *data, const XML_Char *s, int len)
     strncpy(temp,s,len);
     temp[len]=0;
     xmlvalue=string(temp);  //
-	ACS_DEBUG_PARAM("SRTWeatherSocket::char_hndl()","xmltag: %s",(const char *)xmlvalue.c_str());
+	ACS_DEBUG_PARAM("WeatherSocket::char_hndl()","xmltag: %s",(const char *)xmlvalue.c_str());
 
     for (int i=0; i < NSENSORS;i++) 
 	{ checkSensor(md,xmlvalue,COMMANDS[i]);
@@ -250,7 +276,7 @@ void  SRTWeatherSocket::char_hndl(void *data, const XML_Char *s, int len)
 
 }
 
-void SRTWeatherSocket::checkSensor(WeatherStationData *md,string xmlvalue,const string sensorlabel)
+void WeatherSocket::checkSensor(WeatherStationData *md,string xmlvalue,const string sensorlabel)
 {
 /**
  * To do ...
@@ -281,7 +307,7 @@ void SRTWeatherSocket::checkSensor(WeatherStationData *md,string xmlvalue,const 
     }
     if ((md->getTag()=="Date") && (md->getSensorName()==sensorlabel))
     {
-	double value;
+	//double value;
 	string name;
 	name=md->getSensorName();
 //	value=atof(xmlvalue.c_str());
@@ -294,7 +320,7 @@ void SRTWeatherSocket::checkSensor(WeatherStationData *md,string xmlvalue,const 
 
 }
 
-int SRTWeatherSocket::Parse( char* buff)
+int WeatherSocket::Parse( char* buff)
 {
 int len;
 int done=true;
@@ -303,7 +329,7 @@ len=strlen(buff);
 
  
  if (! XML_Parse(p, buff, len, done)) {
-       fprintf(stderr, "Parse error at line %d:\n%s\n",
+       fprintf(stderr, "Parse error at line %ld:\n%s\n",
  	      XML_GetCurrentLineNumber(p),
  	      XML_ErrorString(XML_GetErrorCode(p)));
        return -1;
@@ -313,7 +339,7 @@ len=strlen(buff);
 
  
 }
-double SRTWeatherSocket::getWind()
+double WeatherSocket::getWind()
 {
 
 	CError err;
@@ -328,7 +354,7 @@ double SRTWeatherSocket::getWind()
 //         IRA::CIRATools::Wait(0,500000);
        	IRA::CIRATools::Wait(100000);
 
-	ACS_DEBUG_PARAM("SRTWeatherSocket::getWind()","sendCMD: %s",(const char *)command);
+	ACS_DEBUG_PARAM("WeatherSocket::getWind()","sendCMD: %s",(const char *)command);
 	receiveData(err,rdata);
 
 
@@ -340,7 +366,7 @@ double SRTWeatherSocket::getWind()
 }
 
 
-double SRTWeatherSocket::getTemperature()
+double WeatherSocket::getTemperature()
 {
  
  	CError err;
@@ -363,7 +389,7 @@ double SRTWeatherSocket::getTemperature()
 
 }
 
-double SRTWeatherSocket::getHumidity()
+double WeatherSocket::getHumidity()
 {
 
 	CError err;
@@ -381,7 +407,7 @@ double SRTWeatherSocket::getHumidity()
 
 }
 
-double SRTWeatherSocket::getPressure()
+double WeatherSocket::getPressure()
 {
 
 	CError err;
@@ -400,7 +426,7 @@ double SRTWeatherSocket::getPressure()
 
 }
 
-double SRTWeatherSocket::getWinDir()
+double WeatherSocket::getWinDir()
 {
 
 	CError err;
@@ -418,7 +444,7 @@ double SRTWeatherSocket::getWinDir()
 	return m_val;
 
 }
-double SRTWeatherSocket::getWindSpeedPeak()
+double WeatherSocket::getWindSpeedPeak()
 {
 
 	CError err;

@@ -1,5 +1,5 @@
-#ifndef DevIOPressure_H_
-#define DevIOPressure_H_
+#ifndef DevIOHumidity_H_
+#define DevIOHumidity_H_
 
 /* **************************************************************************************************** */
 /*INAF - OACA                                                                      */
@@ -14,7 +14,7 @@
 #include <baciDevIO.h>
 #include <IRA>
 #include <map>
-#include "SRTWeatherSocket.h"
+#include "WeatherSocket.h"
 #include "WeatherStationData.h"
 using namespace IRA;
 
@@ -23,7 +23,7 @@ using namespace IRA;
  * @author <a href=mailto:spoppi@oa-cagliari.inaf.it>Sergio Poppi</a>,
  * Istituto di Radioastronomia, Italia<br> 
 */
-class DevIOPressure : public DevIO<CORBA::Double>
+class DevIOHumidity : public DevIO<CORBA::Double>
 {
 public:
 	
@@ -31,18 +31,18 @@ public:
 	 * Constructor
 	 * @param Socket pointer to a SecureArea that proctects a the  socket. This object must be already initialized and configured.
 	*/
-	DevIOPressure(CSecureArea<SRTWeatherSocket>* socket):m_socket(socket)
+	DevIOHumidity(CSecureArea<WeatherSocket>* socket):m_socket(socket) 
 	{		
  		m_initparser=false;
-		AUTO_TRACE("DevIOPressure::DevIOPressure()");		
+		AUTO_TRACE("DevIOHumidity::DevIOHumidity()");		
 	}
 
 	/**
 	 * Destructor
 	*/ 
-	~DevIOPressure()
+	~DevIOHumidity()
 	{
-		ACS_TRACE("DevIOPressure::~DevIOPressure()");		
+		ACS_TRACE("DevIOHumidity::~DevIOHumidity()");		
 	}
 
 	/** 
@@ -50,7 +50,7 @@ public:
 	*/
 	bool initializeValue()
 	{		
-		AUTO_TRACE("DevIOPressure::initializeValue()");		
+		AUTO_TRACE("DevIOHumidity::initializeValue()");		
 		return false;
 	}
 	
@@ -65,18 +65,19 @@ public:
 		try {
 			CError err;
 			CString rdata="";
-			CSecAreaResourceWrapper<SRTWeatherSocket> sock=m_socket->Get();
-  			m_val=sock->getPressure();
+			CSecAreaResourceWrapper<WeatherSocket> sock=m_socket->Get();
+			m_val=sock->getHumidity();
+			timestamp=getTimeStamp();  //complition time
+			return m_val;
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
-			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOPressure::read()");
-			dummy.setPropertyName("systemTemperature");
+			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOHumidity::read()");
+			dummy.setPropertyName("humidity");
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
 		} 				
-		timestamp=getTimeStamp();  //complition time
-		return m_val;
+		
 	}
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
@@ -88,13 +89,13 @@ public:
 	}
 	
 private:
-	CSecureArea<SRTWeatherSocket>* m_socket;
-	CORBA::Double m_val;
+	CSecureArea<WeatherSocket>* m_socket;
 	WeatherStationData m_wsdata; 
 
+	CORBA::Double m_val;
 	bool m_initparser;
  };
 
 
 
-#endif /*DevIOPressure_H_*/
+#endif /*DevIOHumidity_H_*/

@@ -64,9 +64,6 @@ public:
 		try {
 			CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
  			m_val=sock->getTemperature();
-                        timestamp=getTimeStamp();  //complition time
-                        return m_val;
-
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOTemperature::read()");
@@ -74,20 +71,14 @@ public:
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
-                        return m_val;
-		
-                  } catch (...)
-                  		
-                  {
+                       // return m_val;
+		} catch (...) {
                   
                      cout << "Devio temp unexpected except" << endl;
-                  
-                  
-                  }
-
-                                          return m_val;
-	
-        }
+      }
+		timestamp=getTimeStamp();  //complition time
+		return m_val;
+	}
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
 	*/ 

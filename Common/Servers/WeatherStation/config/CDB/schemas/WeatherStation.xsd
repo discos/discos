@@ -16,7 +16,8 @@
 		  			
 		    </xs:sequence>
         <xs:attribute name="IPAddress" type="xs:string" use="required"/>
-	       <xs:attribute name="port" type="xs:unsignedInt" use="required"/>
+	     <xs:attribute name="port" type="xs:unsignedInt" use="required"/>
+	     <xs:attribute name="MountInterface" type="xs:string" use="required" />
         <xs:attribute name="windthreshold" type="xs:unsignedInt" use="optional"/>
 
       </xs:extension>

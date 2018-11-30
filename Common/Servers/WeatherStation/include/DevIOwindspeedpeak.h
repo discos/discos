@@ -1,5 +1,5 @@
-#ifndef DEVIOTEMPERATURE_H_
-#define DEVIOTEMPERATURE_H_
+#ifndef DevIOWindspeedpeak_H_
+#define DevIOWindspeedpeak_H_
 
 /* **************************************************************************************************** */
 /*INAF - OACA                                                                      */
@@ -14,35 +14,36 @@
 #include <baciDevIO.h>
 #include <IRA>
 #include <map>
-#include "SRTWeatherSocket.h"
+#include "WeatherSocket.h"
 #include "WeatherStationData.h"
 using namespace IRA;
+
 
 /**
  * This class is derived from template DevIO and it is used by the temperature  property  of the MeteoStation component
  * @author <a href=mailto:spoppi@oa-cagliari.inaf.it>Sergio Poppi</a>,
  * Istituto di Radioastronomia, Italia<br> 
 */
-class DevIOTemperature : public DevIO<CORBA::Double>
+class DevIOWindspeedpeak : public DevIO<CORBA::Double>
 {
 public:
 	
- 	/** 
+ 	/** mp
 	 * Constructor
 	 * @param Socket pointer to a SecureArea that proctects a the  socket. This object must be already initialized and configured.
 	*/
-	DevIOTemperature(CSecureArea<SRTWeatherSocket>* socket ):m_socket(socket) 
+	DevIOWindspeedpeak(CSecureArea<WeatherSocket>* socket ):m_socket(socket) 
 	{		
  		m_initparser=false;
-		AUTO_TRACE("DevIOTemperature::DevIOTemperature()");		
+		AUTO_TRACE("DevIOWindspeed::DevIOWindspeed()");		
 	}
 
 	/**
 	 * Destructor
 	*/ 
-	~DevIOTemperature()
+	~DevIOWindspeedpeak()
 	{
-		ACS_TRACE("DevIOTemperature::~DevIOTemperature()");		
+		ACS_TRACE("DevIOWindspeed::~DevIOWindspeed()");		
 	}
 
 	/** 
@@ -50,7 +51,7 @@ public:
 	*/
 	bool initializeValue()
 	{		
-		AUTO_TRACE("DevIOTemperature::initializeValue()");		
+		AUTO_TRACE("DevIOWindspeed::initializeValue()");		
 		return false;
 	}
 	
@@ -65,14 +66,12 @@ public:
 		try {
 			CError err;
 			CString rdata="";
-			CSecAreaResourceWrapper<SRTWeatherSocket> sock=m_socket->Get();
- 			m_val=sock->getTemperature();
-		        return m_val;
-
+			CSecAreaResourceWrapper<WeatherSocket> sock=m_socket->Get();
+ 			m_val=sock->getWindSpeedPeak();
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
-			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOTemperature::read()");
-			dummy.setPropertyName("systemTemperature");
+			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOWindspeedPeak::read()");
+			dummy.setPropertyName("DevIOWindspeedPeak");
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
@@ -90,13 +89,12 @@ public:
 	}
 	
 private:
-	CSecureArea<SRTWeatherSocket>* m_socket;
+	CSecureArea<WeatherSocket>* m_socket;
 	WeatherStationData m_wsdata; 
-
 	CORBA::Double m_val;
 	bool m_initparser;
  };
 
 
 
-#endif /*DEVIOTEMPERATURE_H_*/
+#endif /*DevIOWindspeed_H_*/

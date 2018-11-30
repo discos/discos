@@ -33,12 +33,12 @@ COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLi
 				  DiscosBackendProtocol PyTestingLibrary \
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
-                CalibrationTool TotalPower NoiseGenerator CustomLogger \
+                CalibrationTool TotalPower NoiseGenerator CustomLogger  \
                 XBackend PyDewarPositioner Sardara PyLocalOscillator #DBBC
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
-                SchedulerTextClient
+                SchedulerTextClient 
 
 COMMON_MISC:=Plotter KStars Scripts getTemplateForTests PMUpdate InjectCommand UserTools
 
@@ -47,21 +47,21 @@ COMMON_SIMULATORS:= TCPGenericProtocolSim ReceiverBoardSim
 SRT_DOC:=SRTDox
 SRT_ERRORS:=SRTActiveSurfaceErrors
 SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
-                SRTWeatherStationInterface SRTReceiversInterface
+                SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer \
              SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
-             SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver SRTPyIFDistributor
+             SRT7GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
              MinorServoBossTextClient MeteoClient
 SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox
 MED_ERRORS:=
-MED_INTERFACES:=MedicinaAntennaInterface MedicinaWeatherStationInterface
+MED_INTERFACES:=MedicinaAntennaInterface
 MED_LIBRARIES:=
-MED_SERVERS:=MedicinaMount MedWeatherStation MedicinaMinorServo
-MED_CLIENTS:=MedicinaMountTextClient 
+MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation
+MED_CLIENTS:=MedicinaMountTextClient MeteoClient
 MED_MISC:=MedScripts
 
 NT_DOC:=NTDox

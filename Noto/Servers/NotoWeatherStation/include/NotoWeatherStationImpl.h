@@ -120,15 +120,15 @@ public:
 	virtual ~NotoWeatherStationImpl(); 
 
 
-	virtual Weather::parameters getData() throw (CORBA::SystemException);
+	virtual Weather::parameters getData() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
 
-	virtual CORBA::Double getTemperature() throw (CORBA::SystemException);
-	virtual	CORBA::Double getPressure() throw (CORBA::SystemException);
-	virtual	CORBA::Double getHumidity() throw (CORBA::SystemException);
-	virtual	CORBA::Double getWindspeed() throw (CORBA::SystemException);
-        virtual CORBA::Double getWindspeedPeak() throw (CORBA::SystemException);
-        virtual CORBA::Double getWindSpeedAverage() throw (CORBA::SystemException);
-        virtual CORBA::Double getWindDir() throw (CORBA::SystemException);
+	virtual CORBA::Double getTemperature() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
+	virtual	CORBA::Double getPressure() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
+	virtual	CORBA::Double getHumidity() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
+	virtual	CORBA::Double getWindspeed() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
+        virtual CORBA::Double getWindspeedPeak() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
+        virtual CORBA::Double getWindSpeedAverage() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
+        virtual CORBA::Double getWindDir() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
 
 	virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
 

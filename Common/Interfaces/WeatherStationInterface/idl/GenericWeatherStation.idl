@@ -1,13 +1,14 @@
 /* ***************************************************************************/
 /* INAF - Istituto Nazionale di AstroFisica                                  */
-/* IRA - Istituto di Radioastronomia                                         */
 /* OAC - Osservatorio Astronomico di Cagliari                                */
 /*                                                                           */
 /*                                                                           */
 /* This code is under GNU General Public Licence (GPL).                      */
 /*                                                                           */
-/* Who					When		What                 */
-/* Sergio Poppi				18/02/2010      Creation             */
+/* Who					When		       What                                    */
+/* Sergio Poppi		18/02/2010      Creation                                */
+/* Andrea Orlati     28/11/2018      Extended the generic interface in order */
+/*                                   to fit SRT and Medicina common devices  */ 
 /*                                                                           */
 /* ***************************************************************************/
 
@@ -23,21 +24,14 @@
 
 
 /**
-	 * This IDL module describes the CORBA interface of the Meteo Station.
-	 * @author <a href=mailto:spoppi@ca.astro.it> Sergio Poppi</a>
-	 * INAF - Istituto Nazionale di AstroFisica
-	 * OAC - Osservatorio Astronomico di Cagliari
-	 * <br> 
-	*/
+* This IDL module describes the CORBA interface of the Meteo Station.
+* @author <a href=mailto:sergio.poppi@inaf.it> Sergio Poppi</a>
+* INAF - Istituto Nazionale di AstroFisica
+* OAC - Osservatorio Astronomico di Cagliari
+* <br> 
+*/
 
 module Weather {
-	
-	/**
-	
-
-	*/
-
-
 
 	struct parameters {
 		double temperature;
@@ -51,50 +45,73 @@ module Weather {
 		short ss;*/
 	};
 
-
-	
-     
-
 	interface GenericWeatherStation : Management::CommandInterpreter, ACS::CharacteristicComponent {
-		/**
-		 
-		*/
 		
-		
-
 		/**
-		Get Parameters Weather STATION, for compatibility with the component 
-		working at the Medicina telescope
-
-		@return parameters
-
-		
+		 Get Parameters Weather STATION, for compatibility reasons
+		 @return parameters
 		*/
-		parameters getData();
+		parameters getData() raises (ACSErr::ACSbaseEx);
+		
 		/**
-		Air Temperature
+		 Get  the average wind speed
+		*/		
+		double getWindSpeedAverage() raises (ACSErr::ACSbaseEx);
+		
+		/**
+		 Get the peak wind speed
 		*/
-
-
-		readonly attribute ACS::RWdouble temperature;	
+		double getWindspeedPeak() raises (ACSErr::ACSbaseEx);
+		
 		/**
-		Wind Direction
+		 Gets  the   wind dir max
+		*/
+		double getWindDir() raises (ACSErr::ACSbaseEx);
+	 
+		/**
+		 Gets  the relative humidity
+		*/
+		double getHumidity() raises (ACSErr::ACSbaseEx);
+		
+		/**
+		 Gets the air temperature
+		*/
+		double getTemperature() raises (ACSErr::ACSbaseEx);
+		
+		/**
+		 Gets the air pressure
+		*/
+		double getPressure() raises (ACSErr::ACSbaseEx);
+						
+		/**
+		 Air Temperature
+		*/
+		readonly attribute ACS::RWdouble temperature;
+			
+		/**
+		 Wind Direction
 		*/
 		readonly attribute ACS::RWdouble winddir;
+		
 		/**
-		Pressure
+		 Pressure
 		*/
-
 		readonly attribute ACS::RWdouble pressure;
+		
 		/**
-		Wind Speed
+		 Wind Speed
 		*/
-
 		readonly attribute ACS::RWdouble windspeed;
+		
 		/**
-		Relative Humidity
+		 Relative Humidity
 		*/
 		readonly attribute ACS::RWdouble humidity;
+				
+		/*
+		 Wind Peak	
+		*/
+		readonly attribute ACS::RWdouble windspeedpeak;
 
 						
 	};

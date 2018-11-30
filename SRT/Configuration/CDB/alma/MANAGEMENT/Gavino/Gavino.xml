@@ -26,7 +26,7 @@
              MinorServoBossInterface="IDL:alma/MinorServo/MinorServoBoss:1.0"
              ActiveSurfaceBossInterface="IDL:alma/ActiveSurface/SRTActiveSurfaceBoss:1.0"
 	         CustomLoggerInterface="IDL:alma/Management/CustomLogger:1.0"
-	     	 WeatherStationInstance="IDL:alma/Weather/SRTStation:1.0"
+	     	 WeatherStationInstance="IDL:alma/Weather/GenericWeatherStation:1.0"
              DefaultBackendInstance="BACKENDS/TotalPower"             
              DefaultDataReceiverInstance="MANAGEMENT/FitsZilla"
              DefaultProjectCode="Maintenance"
