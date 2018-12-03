@@ -1379,13 +1379,12 @@ void CSRTActiveSurfaceBossCore::sector1ActiveSurface() throw (ComponentErrors::C
 	printf("sector1 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char* value = (char*)CDBPATH;
-	strcat(value, "alma/AS/tab_convUSD_S1.txt\0");
+	std::string value = CDBPATH + "alma/AS/tab_convUSD_S1.txt";
 	int i;
 
-	ifstream usdTableS1(value);
+	ifstream usdTableS1(value.c_str());
 	if (!usdTableS1) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
 		exit(-1);
 	}
 	// Get reference to usd components
@@ -1413,13 +1412,12 @@ void CSRTActiveSurfaceBossCore::sector2ActiveSurface() throw (ComponentErrors::C
 	printf("sector2 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char* value = (char*)CDBPATH;
-	strcat(value, "alma/AS/tab_convUSD_S2.txt\0");
+	std::string value = CDBPATH + "alma/AS/tab_convUSD_S2.txt";
 	int i;
 
-	ifstream usdTableS2(value);
+	ifstream usdTableS2(value.c_str());
 	if (!usdTableS2) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
 		exit(-1);
 	}
 	// Get reference to usd components
@@ -1448,13 +1446,12 @@ void CSRTActiveSurfaceBossCore::sector3ActiveSurface() throw (ComponentErrors::C
 	printf("sector3 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char* value = (char*)CDBPATH;
- 	strcat(value, "alma/AS/tab_convUSD_S3.txt\0");
+	std::string value = CDBPATH + "alma/AS/tab_convUSD_S3.txt";
 	int i;
 
-	ifstream usdTableS3(value);
+	ifstream usdTableS3(value.c_str());
 	if (!usdTableS3) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
 		exit(-1);
 	}
 	// Get reference to usd components
@@ -1483,13 +1480,12 @@ void CSRTActiveSurfaceBossCore::sector4ActiveSurface() throw (ComponentErrors::C
 	printf("sector4 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char* value = (char*)CDBPATH;
- 	strcat(value, "alma/AS/tab_convUSD_S4.txt\0");
+	std::string value = CDBPATH + "alma/AS/tab_convUSD_S4.txt";
 	int i;
 
-	ifstream usdTableS4(value);
+	ifstream usdTableS4(value.c_str());
 	if (!usdTableS4) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
 		exit(-1);
 	}
 	// Get reference to usd components
@@ -1518,13 +1514,12 @@ void CSRTActiveSurfaceBossCore::sector5ActiveSurface() throw (ComponentErrors::C
 	printf("sector5 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char* value = (char*)CDBPATH;
- 	strcat(value, "alma/AS/tab_convUSD_S5.txt\0");
+	std::string value = CDBPATH + "alma/AS/tab_convUSD_S5.txt";
 	int i;
 
-	ifstream usdTableS5(value);
+	ifstream usdTableS5(value.c_str());
 	if (!usdTableS5) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
 		exit(-1);
 	}
 	// Get reference to usd components
@@ -1553,13 +1548,12 @@ void CSRTActiveSurfaceBossCore::sector6ActiveSurface() throw (ComponentErrors::C
 	printf("sector6 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char* value = (char*)CDBPATH;
- 	strcat(value, "alma/AS/tab_convUSD_S6.txt\0");
+	std::string value = CDBPATH + "alma/AS/tab_convUSD_S6.txt";
 	int i;
 
-	ifstream usdTableS6(value);
+	ifstream usdTableS6(value.c_str());
 	if (!usdTableS6) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
 		exit(-1);
 	}
 	// Get reference to usd components
@@ -1588,13 +1582,12 @@ void CSRTActiveSurfaceBossCore::sector7ActiveSurface() throw (ComponentErrors::C
 	printf("sector7 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char* value = (char*)CDBPATH;
- 	strcat(value, "alma/AS/tab_convUSD_S7.txt\0");
+	std::string value = CDBPATH + "alma/AS/tab_convUSD_S7.txt";
 	int i;
 
-	ifstream usdTableS7(value);
+	ifstream usdTableS7(value.c_str());
 	if (!usdTableS7) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
 		exit(-1);
 	}
 	// Get reference to usd components
@@ -1623,13 +1616,12 @@ void CSRTActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::C
 	printf("sector8 start\n");
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	char* value = (char*)CDBPATH;
- 	strcat(value, "alma/AS/tab_convUSD_S8.txt\0");
+	std::string value = CDBPATH + "alma/AS/tab_convUSD_S8.txt";
 	int i;
 
-	ifstream usdTableS8(value);
+	ifstream usdTableS8(value.c_str());
 	if (!usdTableS8) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
 		exit(-1);
 	}
 	// Get reference to usd components
