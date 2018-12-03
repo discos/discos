@@ -34,7 +34,7 @@
 	ACS_SHORT_LOG((LM_INFO,"Trying to get property "#NAME"...")); \
 	NAME=COMPONENT->NAME(); \
 	if (NAME.ptr()!=TYPE::_nil()) { \
-		ACS_LOG(LM_SOURCE_INFO,"mountTui::Main()",(LM_DEBUG,"OK, reference is: %x",NAME.ptr())); \
+		ACS_LOG(LM_SOURCE_INFO,"mountTui::Main()",(LM_DEBUG,"OK, reference is: %lx",(unsigned long)NAME.ptr())); \
 	} \
 	else { \
 		_EXCPT(ClientErrors::CouldntAccessPropertyExImpl,impl,"mountTui::Main()"); \
