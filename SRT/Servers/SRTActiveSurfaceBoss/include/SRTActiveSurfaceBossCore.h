@@ -32,9 +32,9 @@
 #define firstUSD 1
 #define lastUSD 1116
 #define LOOPTIME 100000 // 0,10 sec
-#define CDBPATH (std::string(getenv("ACS_CDB")) + "/CDB/").c_str()
-#define USDTABLE (std::string(CDBPATH) + "alma/AS/tab_convUSD.txt\0").c_str()
-#define USDTABLECORRECTIONS (std::string(CDBPATH) + "alma/AS/act_rev02.txt\0").c_str()
+#define CDBPATH std::string(getenv("ACS_CDB")) + "/CDB/"
+#define USDTABLE (CDBPATH + "alma/AS/tab_convUSD.txt").c_str()
+#define USDTABLECORRECTIONS (CDBPATH + "alma/AS/act_rev02.txt").c_str()
 #define MM2HSTEP	350 //(10500 HSTEP / 30 MM)
 #define MM2STEP	1400 //(42000 STEP / 30 MM)
 #define WARNINGUSDPERCENT 0.95
