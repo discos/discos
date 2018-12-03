@@ -28,14 +28,14 @@ void CACUData::setMonitorBuffer(BYTE* buffer,WORD size)
 
 double CACUData::azimuth() const
 {
-	long Value;
+	int Value;
 	memcpy(&Value,(m_MonitorData+10),4);
 	return ((double)Value)/1000000.0;
 }
 
 double CACUData::elevation() const
 {
-	long Value;
+	int Value;
 	memcpy(&Value,(m_MonitorData+14),4);
 	return ((double)Value)/1000000.0;	
 }
@@ -68,14 +68,14 @@ double CACUData::elevationRate()
 
 double CACUData::elevationError() const
 {
-	long Value;
+	int Value;
 	memcpy(&Value,(m_MonitorData+22),4);
 	return ((double)Value)/1000000.0;
 }
 
 double CACUData::azimuthError() const
 {
-	long Value;
+	int Value;
 	memcpy(&Value,(m_MonitorData+18),4);
 	return ((double)Value)/1000000.0;
 }
@@ -202,7 +202,8 @@ void CACUData::absTime(TIMEVALUE& tm) const
 
 void CACUData::time(TIMEDIFFERENCE& tm) const
 {
-	long timeofday,hour,minute,second,micro;
+	int timeofday;
+	long hour,minute,second,micro;
 	short dayofyear;
 	memcpy(&timeofday,(m_MonitorData+4),4);
 	memcpy(&dayofyear,(m_MonitorData+8),2);
