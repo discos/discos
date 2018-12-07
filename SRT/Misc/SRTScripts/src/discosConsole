@@ -36,7 +36,7 @@ CL_HELP=
 CL_STOP=
 
 function printUsage {
-   echo "Start interactive console for the ESCS system"
+   echo "Start interactive console for the DISCOS system"
    echo ""
         echo "Usage: `basename $0` [OPTIONS]  "
         echo "Options: "
@@ -102,6 +102,8 @@ sleep 0.5s
 antennaBossTui
 sleep 0.5s
 genericBackendTui BACKENDS/TotalPower
+sleep 0.5s
+genericBackendTui BACKENDS/XBackends
 sleep 0.5s
 operatorInput
 sleep 0.5s

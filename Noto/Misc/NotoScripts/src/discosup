@@ -14,7 +14,7 @@
 # 
 #   DESCRIPTION
 #
-#   Starts the containers required by discos, Medicina flavour
+#   Starts the containers required by discos, Noto flavour
 #
 #   FILES
 #
@@ -46,8 +46,12 @@ ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp Weathe
 echo "...WeatherStationContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp MountContainer > /dev/null 2>&1 &'"
 echo "...MountContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp FrontEndsContainer > /dev/null 2>&1 &'"
+echo "...FrontEndsContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp AntennaContainer > /dev/null 2>&1 &'"
 echo "...AntennaContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp LocalOscillatorContainer > /dev/null 2>&1 &'"
+echo "...LocalOscillatorContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp ReceiversContainer > /dev/null 2>&1 &'"
 echo "...ReceiversContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp TotalPowerContainer > /dev/null 2>&1 &'"
@@ -60,7 +64,10 @@ ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp Calibr
 echo "...CalibrationToolContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp PointContainer > /dev/null 2>&1 &'"
 echo "...PointContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp NotoActiveSurfaceContainer > /dev/null 2>&1 &'"
+echo "...NotoActiveSurfaceContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp NotoMinorServoContainer > /dev/null 2>&1 &'"
+echo "...NotoMinorServoContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp ExternalClientsContainer > /dev/null 2>&1 &'"
 echo "...ExternalClientsContainer!"
-ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp XContainer > /dev/null 2>&1 &'"
-echo "...XContainer!"
+
