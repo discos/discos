@@ -8,7 +8,8 @@
 # who       when      what
 # --------  --------  ----------------------------------------------
 # andrea  24/01/09  created
-#
+# orlati  07/12/18  added installation of discosStartup.xml file for acscommandcenter
+# orlati  07/12/18  changed in order to comply with new discos bootup procedure
 
 #*******************************************************************************
 # This Makefile follows VLT Standards (see Makefile(5) for more).
@@ -16,6 +17,12 @@
 # REMARKS
 #    None
 #------------------------------------------------------------------------
+
+ifndef MANAGER_REFERENCE
+	MASTER:=$(HOST)
+else
+	MASTER:=$(shell echo $(MANAGER_REFERENCE) | cut -d: -f 3)
+endif
 
 #
 # user definable C-compilation flags
@@ -41,10 +48,16 @@ PY_PACKAGES_L      =
 pppppp_MODULES	   =
 
 #scripts addObserver and removeObserver removed from repository control as the are strictly related to the server machines configuration
-SCRIPTS         = escs escsConsole
-SCRIPTS_L       = addObserver removeObserver
+#SCRIPTS         = escs escsConsole
+#SCRIPTS_L       = addObserver removeObserver
 
-INSTALL_FILES      = ../app-defaults/escsStartup.xml
+# new bootup scripts (discos):
+SCRIPTS=discosup discosdown discosConsole
+SCRIPTS_L         = escs escsConsole
+
+
+#INSTALL_FILES      = ../app-defaults/escsStartup.xml
+INSTALL_FILES = ../app-defaults/discosStartup.xml
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
@@ -67,13 +80,19 @@ ifneq ($(MAKEDIRTMP),\#error\#)
    include $(MAKEDIR)/acsMakefile
 endif
 
+.PHONY: all
+.DEFAULT_GOAL:=all
+
 #
 # TARGETS
 # -------
 all:	do_all
+	@sed -i 's/MASTERHOST/$(MASTER)/g' ../bin/discosup
+	@sed -i 's/MASTERHOST/$(MASTER)/g' ../bin/discosdown
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
+	@rm -f $(INTROOT)/app-defaults/discosStartup.xml
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 
@@ -83,13 +102,12 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
-	@chmod 744 $(INTROOT)/bin/escs
-	@chmod 744 $(INTROOT)/app-defaults/escsStartup.xml
-
+#	@chmod 744 $(INTROOT)/bin/escs
+#	@chmod 744 $(INTROOT)/app-defaults/escsStartup.xml
+	@sed -i 's/MASTERHOST/$(MASTER)/g' $(INTROOT)/app-defaults/discosStartup.xml
+	@chmod 700 $(INTROOT)/app-defaults/discosStartup.xml 
 	@chmod 700 $(INTROOT)/bin/discosdown 
-	@chmod 700 $(INTROOT)/bin/discosup 	
-	
-	@echo " . . . installation done"
-
+	@chmod 700 $(INTROOT)/bin/discosup 
+	@echo " . . . installation done"	
 
 #___oOo___
