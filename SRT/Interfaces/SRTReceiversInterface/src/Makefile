@@ -9,7 +9,7 @@
 MAKE_PDF = ON
 
 CDB_SCHEMAS = SRTLPBandNoiseMarkLookUpTable SRTLPBandReceiverModeSetup \
-			  SRTLPBandTaperLookUpTable MarkCoefficientsKBandLookUpTable \
+			  SRTLPBandTaperLookUpTable  \
 			  MarkCoefficientsSBandLookUpTable SRTIFDistributorTable #SRTIFDistributor14Table
 
 # IDL Files and flags

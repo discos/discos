@@ -5,8 +5,8 @@
  *  Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 \*******************************************************************************/
 
-#ifndef _SRTKBANDMFCORE_H_
-#define _SRTKBANDMFCORE_H_
+#ifndef _MEDICINAKBANDMFCORE_H_
+#define _MEDICINAKBANDMFCORE_H_
 
 #include "MFKBandBaseCore.h"
 
@@ -78,12 +78,12 @@
  *      <li>inline void setVacuumDefault(...)</li>
  * </ul>
  */
-class SRTKBandMFCore : public CComponentCore {
+class MedicinaKBandDualFCore : public CComponentCore {
 
 public:
 
-    SRTKBandMFCore();
-    virtual ~SRTKBandMFCore();
+    MedicinaKBandDualFCore();
+    virtual ~MedicinaKBandDualFCore();
 
 
     /**

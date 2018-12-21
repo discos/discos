@@ -1,4 +1,4 @@
-#include "SRTKBandMFReceiverImpl.h"
+#include "MedicinaKBandDualFReceiverImpl.h"
 #include "DevIOBandWidth.h"
 #include "DevIOInitialFrequency.h"
 #include "DevIOLocalOscillator.h"
@@ -19,7 +19,7 @@
 
 _IRA_LOGFILTER_IMPORT;
 
-SRTKBandMFReceiverImpl::SRTKBandMFReceiverImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) :
+MedicinaKBandDualFReceiverImpl::MedicinaKBandDualFReceiverImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) :
     CharacteristicComponentImpl(CompName,containerServices),
     m_plocalOscillator(this),
     m_pfeeds(this),
@@ -68,33 +68,33 @@ SRTKBandMFReceiverImpl::SRTKBandMFReceiverImpl(const ACE_CString &CompName,maci:
     m_preceiverStatus(this),
     m_preceiverName(this)
 {   
-    AUTO_TRACE("SRTKBandMFReceiverImpl::SRTKBandMFReceiverImpl()");
+    AUTO_TRACE("MedicinaKBandDualFReceiverImpl::MedicinaKBandDualFReceiverImpl()");
 }
 
 
-SRTKBandMFReceiverImpl::~SRTKBandMFReceiverImpl()
+MedicinaKBandDualFReceiverImpl::~MedicinaKBandDualFReceiverImpl()
 {
-    AUTO_TRACE("SRTKBandMFReceiverImpl::~SRTKBandMFReceiverImpl()");
+    AUTO_TRACE("MedicinaKBandDualFReceiverImpl::~MedicinaKBandDualFReceiverImpl()");
 }
 
 
-void SRTKBandMFReceiverImpl::initialize() throw (ACSErr::ACSbaseExImpl)
+void MedicinaKBandDualFReceiverImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
-    AUTO_TRACE("SRTKBandMFReceiverImpl::initialize()");
-    ACS_LOG(LM_FULL_INFO, "SRTKBandMFReceiverImpl::initialize()", (LM_INFO, "SRTKBandMFReceiverImpl::COMPSTATE_INITIALIZING"));
+    AUTO_TRACE("MedicinaKBandDualFReceiverImpl::initialize()");
+    ACS_LOG(LM_FULL_INFO, "MedicinaKBandDualFReceiverImpl::initialize()", (LM_INFO, "MedicinaKBandDualFReceiverImpl::COMPSTATE_INITIALIZING"));
     m_core.initialize(getContainerServices());
     m_monitor = NULL;
-    ACS_LOG(LM_FULL_INFO, "SRTKBandMFReceiverImpl::initialize()", (LM_INFO, "COMPSTATE_INITIALIZED"));
+    ACS_LOG(LM_FULL_INFO, "MedicinaKBandDualFReceiverImpl::initialize()", (LM_INFO, "COMPSTATE_INITIALIZED"));
 }
 
 
-void SRTKBandMFReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentErrors::MemoryAllocationExImpl)
+void MedicinaKBandDualFReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentErrors::MemoryAllocationExImpl)
 {
-    AUTO_TRACE("SRTKBandMFReceiverImpl::execute()");
+    AUTO_TRACE("MedicinaKBandDualFReceiverImpl::execute()");
     ACS::Time timestamp;
     const CConfiguration *config = m_core.execute(); 
 
-    ACS_LOG(LM_FULL_INFO, "SRTKBandMFReceiverImpl::execute()",(LM_INFO, "ACTIVATING_LOG_REPETITION_FILTER"));
+    ACS_LOG(LM_FULL_INFO, "MedicinaKBandDualFReceiverImpl::execute()",(LM_INFO, "ACTIVATING_LOG_REPETITION_FILTER"));
     _IRA_LOGFILTER_ACTIVATE(config->getRepetitionCacheTime(), config->getRepetitionExpireTime());
 
     try {
@@ -194,49 +194,50 @@ void SRTKBandMFReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentEr
                  (getContainerServices()->getName() + ":receiverStatus", getComponent(), new DevIOComponentStatus(&m_core), true);
     }
     catch (std::bad_alloc& ex) {
-        _EXCPT(ComponentErrors::MemoryAllocationExImpl, dummy, "SRTKBandMFReceiverImpl::initialize()");
+        _EXCPT(ComponentErrors::MemoryAllocationExImpl, dummy, "MedicinaKBandDualFReceiverImpl::initialize()");
         throw dummy;
     }
-
     // Write some fixed values
     m_preceiverName->getDevIO()->write(getComponent()->getName(), timestamp);
     m_pfeeds->getDevIO()->write(m_core.getFeeds(), timestamp);
     m_pIFs->getDevIO()->write(m_core.getIFs(), timestamp);
     m_core.setVacuumDefault(m_pvacuum->default_value());
 
-    SRTKBandMFCore *temp = &m_core;
+    MedicinaKBandDualFCore *temp = &m_core;
     try {
-         m_monitor = getContainerServices()->getThreadManager()->create<CMonitorThread, SRTKBandMFCore*> (
+         m_monitor = getContainerServices()->getThreadManager()->create<CMonitorThread, MedicinaKBandDualFCore*> (
                  "WHATCHDOKBANDMF", temp, config->getWarchDogResponseTime(), config->getWatchDogSleepTime());
     }
     catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
-        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl, _dummy, ex, "SRTKBandMFReceiverImpl::execute()");
+        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl, _dummy, ex, "MedicinaKBandDualFReceiverImpl::execute()");
         throw _dummy;
     }
     catch (...) {
-        _THROW_EXCPT(ComponentErrors::UnexpectedExImpl, "SRTKBandMFReceiverImpl::execute()");
+        _THROW_EXCPT(ComponentErrors::UnexpectedExImpl, "MedicinaKBandDualFReceiverImpl::execute()");
     }
     m_monitor->setLNASamplingTime(config->getLNASamplingTime());
     m_monitor->resume();
-    ACS_LOG(LM_FULL_INFO, "SRTKBandMFReceiverImpl::execute()", (LM_INFO, "WATCH_DOG_SPAWNED"));
+    ACS_LOG(LM_FULL_INFO, "MedicinaKBandDualFReceiverImpl::execute()", (LM_INFO, "WATCH_DOG_SPAWNED"));
     try {
-        startPropertiesMonitoring();
+    /**************************************************************************************/	
+        //startPropertiesMonitoring();
+   /**************************************************************************************/     
     }
     catch (acsthreadErrType::CanNotStartThreadExImpl& E) {
-        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl, __dummy, E, "SRTKBandMFReceiverImpl::execute()");
+        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl, __dummy, E, "MedicinaKBandDualFReceiverImpl::execute()");
         throw __dummy;
     }
     catch (ACSErrTypeCommon::NullPointerExImpl& E) {
-        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl, __dummy, E, "SRTKBandMFReceiverImpl::execute()");
+        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl, __dummy, E, "MedicinaKBandDualFReceiverImpl::execute()");
         throw __dummy;      
     }
-    ACS_LOG(LM_FULL_INFO, "SRTKBandMFReceiverImpl::execute()", (LM_INFO, "COMPSTATE_OPERATIONAL"));
+    ACS_LOG(LM_FULL_INFO, "MedicinaKBandDualFReceiverImpl::execute()", (LM_INFO, "COMPSTATE_OPERATIONAL"));
 }
 
 
-void SRTKBandMFReceiverImpl::cleanUp()
+void MedicinaKBandDualFReceiverImpl::cleanUp()
 {
-    AUTO_TRACE("SRTKBandMFReceiverImpl::cleanUp()");
+    AUTO_TRACE("MedicinaKBandDualFReceiverImpl::cleanUp()");
     stopPropertiesMonitoring();
     if (m_monitor != NULL) {
         m_monitor->suspend();
@@ -250,9 +251,9 @@ void SRTKBandMFReceiverImpl::cleanUp()
 }
 
 
-void SRTKBandMFReceiverImpl::aboutToAbort()
+void MedicinaKBandDualFReceiverImpl::aboutToAbort()
 {
-    AUTO_TRACE("SRTKBandMFReceiverImpl::aboutToAbort()");
+    AUTO_TRACE("MedicinaKBandDualFReceiverImpl::aboutToAbort()");
     stopPropertiesMonitoring();
     if (m_monitor != NULL) {
         getContainerServices()->getThreadManager()->destroy(m_monitor);
@@ -262,7 +263,7 @@ void SRTKBandMFReceiverImpl::aboutToAbort()
 }
 
 
-void SRTKBandMFReceiverImpl::activate(const char * setup_mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
+void MedicinaKBandDualFReceiverImpl::activate(const char * setup_mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
 {
     try {
         m_core.activate();
@@ -276,13 +277,13 @@ void SRTKBandMFReceiverImpl::activate(const char * setup_mode) throw (CORBA::Sys
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::activate()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::activate()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
-void SRTKBandMFReceiverImpl::deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaKBandDualFReceiverImpl::deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
     try {
         m_core.deactivate();
@@ -296,13 +297,13 @@ void SRTKBandMFReceiverImpl::deactivate() throw (CORBA::SystemException,Componen
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"SRTKBandMFReceiverImpl::deactivate()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaKBandDualFReceiverImpl::deactivate()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
-void SRTKBandMFReceiverImpl::calOn() throw (
+void MedicinaKBandDualFReceiverImpl::calOn() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
@@ -320,14 +321,14 @@ void SRTKBandMFReceiverImpl::calOn() throw (
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::calOn()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::calOn()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
 
-void SRTKBandMFReceiverImpl::calOff() throw (
+void MedicinaKBandDualFReceiverImpl::calOff() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
@@ -345,14 +346,14 @@ void SRTKBandMFReceiverImpl::calOff() throw (
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::calOff()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::calOff()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
 
-void SRTKBandMFReceiverImpl::externalCalOn() throw (
+void MedicinaKBandDualFReceiverImpl::externalCalOn() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
@@ -370,14 +371,14 @@ void SRTKBandMFReceiverImpl::externalCalOn() throw (
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::externalCalOn()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::externalCalOn()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
 
-void SRTKBandMFReceiverImpl::externalCalOff() throw (
+void MedicinaKBandDualFReceiverImpl::externalCalOff() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
@@ -395,14 +396,14 @@ void SRTKBandMFReceiverImpl::externalCalOff() throw (
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::externalCalOff()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::externalCalOff()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
 
-void SRTKBandMFReceiverImpl::setLO(const ACS::doubleSeq& lo) throw (
+void MedicinaKBandDualFReceiverImpl::setLO(const ACS::doubleSeq& lo) throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
@@ -420,14 +421,14 @@ void SRTKBandMFReceiverImpl::setLO(const ACS::doubleSeq& lo) throw (
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::setLO()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::setLO()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
 
-void SRTKBandMFReceiverImpl::setMode(const char * mode) throw (
+void MedicinaKBandDualFReceiverImpl::setMode(const char * mode) throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
@@ -445,14 +446,14 @@ void SRTKBandMFReceiverImpl::setMode(const char * mode) throw (
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::setMode()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::setMode()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
 
-ACS::doubleSeq * SRTKBandMFReceiverImpl::getCalibrationMark(
+ACS::doubleSeq * MedicinaKBandDualFReceiverImpl::getCalibrationMark(
         const ACS::doubleSeq& freqs, 
         const ACS::doubleSeq& bandwidths, 
         const ACS::longSeq& feeds,
@@ -492,7 +493,7 @@ ACS::doubleSeq * SRTKBandMFReceiverImpl::getCalibrationMark(
 }
 
 
-void SRTKBandMFReceiverImpl::getIFOutput(
+void MedicinaKBandDualFReceiverImpl::getIFOutput(
             const ACS::longSeq& feeds,
             const ACS::longSeq& ifs,
             ACS::doubleSeq_out freqs,
@@ -501,7 +502,7 @@ void SRTKBandMFReceiverImpl::getIFOutput(
             ACS::doubleSeq_out LO
     ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
 {
-    ACS_SHORT_LOG((LM_INFO, "SRTKBandMFReceiverImpl::getIFOutput()"));
+    ACS_SHORT_LOG((LM_INFO, "MedicinaKBandDualFReceiverImpl::getIFOutput()"));
     ACS::doubleSeq_var freqs_res = new ACS::doubleSeq;
     ACS::doubleSeq_var bw_res = new ACS::doubleSeq;
     ACS::longSeq_var pols_res = new ACS::longSeq;
@@ -533,7 +534,7 @@ void SRTKBandMFReceiverImpl::getIFOutput(
 
 
 
-CORBA::Long SRTKBandMFReceiverImpl::getFeeds(
+CORBA::Long MedicinaKBandDualFReceiverImpl::getFeeds(
         ACS::doubleSeq_out X,
         ACS::doubleSeq_out Y,
         ACS::doubleSeq_out power
@@ -559,7 +560,7 @@ CORBA::Long SRTKBandMFReceiverImpl::getFeeds(
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::getFeeds()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::getFeeds()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
@@ -570,7 +571,7 @@ CORBA::Long SRTKBandMFReceiverImpl::getFeeds(
 }
 
 
-CORBA::Double SRTKBandMFReceiverImpl::getTaper(
+CORBA::Double MedicinaKBandDualFReceiverImpl::getTaper(
         CORBA::Double freq,
         CORBA::Double bandWidth,
         CORBA::Long feed,
@@ -598,14 +599,14 @@ CORBA::Double SRTKBandMFReceiverImpl::getTaper(
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::getTaper()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::getTaper()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }   
 }
 
 
-void SRTKBandMFReceiverImpl::turnLNAsOn() throw (
+void MedicinaKBandDualFReceiverImpl::turnLNAsOn() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
@@ -623,14 +624,14 @@ void SRTKBandMFReceiverImpl::turnLNAsOn() throw (
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::turnLNAsOn()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::turnLNAsOn()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
 
-void SRTKBandMFReceiverImpl::turnLNAsOff() throw (
+void MedicinaKBandDualFReceiverImpl::turnLNAsOff() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
@@ -648,13 +649,13 @@ void SRTKBandMFReceiverImpl::turnLNAsOff() throw (
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::turnLNAsOff()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::turnLNAsOff()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
-void SRTKBandMFReceiverImpl::turnVacuumSensorOn() throw (
+void MedicinaKBandDualFReceiverImpl::turnVacuumSensorOn() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
@@ -672,14 +673,14 @@ void SRTKBandMFReceiverImpl::turnVacuumSensorOn() throw (
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::turnVacuumSensorOn()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::turnVacuumSensorOn()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
 
-void SRTKBandMFReceiverImpl::turnVacuumSensorOff() throw (
+void MedicinaKBandDualFReceiverImpl::turnVacuumSensorOff() throw (
         CORBA::SystemException,
         ComponentErrors::ComponentErrorsEx,
         ReceiversErrors::ReceiversErrorsEx
@@ -697,72 +698,72 @@ void SRTKBandMFReceiverImpl::turnVacuumSensorOff() throw (
         throw ex.getReceiversErrorsEx();
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTKBandMFReceiverImpl::turnVacuumSensorOff()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "MedicinaKBandDualFReceiverImpl::turnVacuumSensorOff()");
         impl.log(LM_DEBUG);
         throw impl.getComponentErrorsEx();
     }
 }
 
-void SRTKBandMFReceiverImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaKBandDualFReceiverImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
     //has it to be implemented?
-    ACS_LOG(LM_FULL_INFO,"SRTKBandMFReceiverImpl::turnAntennaUnitOn()",(LM_NOTICE,"KBAND_ANTENNA_UNIT_ON"));
+    ACS_LOG(LM_FULL_INFO,"MedicinaKBandDualFReceiverImpl::turnAntennaUnitOn()",(LM_NOTICE,"KBAND_ANTENNA_UNIT_ON"));
 }
 
-void SRTKBandMFReceiverImpl::turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaKBandDualFReceiverImpl::turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
     //has it to be implemented?
-    ACS_LOG(LM_FULL_INFO,"SRTKBandMFReceiverImpl::turnAntennaUnitOff()",(LM_NOTICE,"KBAND_ANTENNA_UNIT_OFF"));
+    ACS_LOG(LM_FULL_INFO,"MedicinaKBandDualFReceiverImpl::turnAntennaUnitOff()",(LM_NOTICE,"KBAND_ANTENNA_UNIT_OFF"));
 }
 
 
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_plocalOscillator, LO);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROpattern, m_pstatus, status);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROlongSeq, m_ppolarization, polarization);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROlong, m_pfeeds, feeds);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROlong, m_pIFs, IFs);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pbandWidth, bandWidth);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pinitialFrequency, initialFrequency);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdouble, m_pvacuum, vacuum);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvdL1, vdL1);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvdR1, vdR1);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvdL2, vdL2);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvdR2, vdR2);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvdL3, vdL3);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvdR3, vdR3);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvdL4, vdL4);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvdR4, vdR4);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvdL5, vdL5);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvdR5, vdR5);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pidL1, idL1);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pidR1, idR1);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pidL2, idL2);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pidR2, idR2);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pidL3, idL3);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pidR3, idR3);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pidL4, idL4);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pidR4, idR4);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pidL5, idL5);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pidR5, idR5);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvgL1, vgL1);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvgR1, vgR1);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvgL2, vgL2);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvgR2, vgR2);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvgL3, vgL3);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvgR3, vgR3);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvgL4, vgL4);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvgR4, vgR4);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvgL5, vgL5);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdoubleSeq, m_pvgR5, vgR5);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureCoolHead, cryoTemperatureCoolHead);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureCoolHeadWindow, cryoTemperatureCoolHeadWindow);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureLNA, cryoTemperatureLNA);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureLNAWindow, cryoTemperatureLNAWindow);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROdouble, m_penvironmentTemperature, environmentTemperature);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROstring, m_pmode, mode);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, Management::ROTSystemStatus, m_preceiverStatus, receiverStatus);
-_PROPERTY_REFERENCE_CPP(SRTKBandMFReceiverImpl, ACS::ROstring, m_preceiverName, receiverName);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_plocalOscillator, LO);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROpattern, m_pstatus, status);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROlongSeq, m_ppolarization, polarization);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROlong, m_pfeeds, feeds);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROlong, m_pIFs, IFs);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pbandWidth, bandWidth);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pinitialFrequency, initialFrequency);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdouble, m_pvacuum, vacuum);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdL1, vdL1);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdR1, vdR1);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdL2, vdL2);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdR2, vdR2);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdL3, vdL3);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdR3, vdR3);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdL4, vdL4);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdR4, vdR4);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdL5, vdL5);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdR5, vdR5);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidL1, idL1);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidR1, idR1);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidL2, idL2);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidR2, idR2);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidL3, idL3);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidR3, idR3);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidL4, idL4);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidR4, idR4);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidL5, idL5);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidR5, idR5);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgL1, vgL1);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgR1, vgR1);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgL2, vgL2);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgR2, vgR2);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgL3, vgL3);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgR3, vgR3);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgL4, vgL4);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgR4, vgR4);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgL5, vgL5);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgR5, vgR5);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureCoolHead, cryoTemperatureCoolHead);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureCoolHeadWindow, cryoTemperatureCoolHeadWindow);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureLNA, cryoTemperatureLNA);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureLNAWindow, cryoTemperatureLNAWindow);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdouble, m_penvironmentTemperature, environmentTemperature);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROstring, m_pmode, mode);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, Management::ROTSystemStatus, m_preceiverStatus, receiverStatus);
+_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROstring, m_preceiverName, receiverName);
 
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>
-MACI_DLL_SUPPORT_FUNCTIONS(SRTKBandMFReceiverImpl)
+MACI_DLL_SUPPORT_FUNCTIONS(MedicinaKBandDualFReceiverImpl)

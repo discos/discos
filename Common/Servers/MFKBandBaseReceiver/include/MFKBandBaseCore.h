@@ -1,5 +1,5 @@
-#ifndef _BASECOMPONENTCORE_H_
-#define _BASECOMPONENTCORE_H_
+#ifndef _MFBASECOMPONENTCORE_H_
+#define _MFBASECOMPONENTCORE_H_
 
 /***********************************************************************\
  IRA Istituto di Radioastronomia                                 
@@ -15,15 +15,16 @@
      private to protected in order to use them in the derived class.
 \***********************************************************************/
 
-#include "Configuration.h"
+#include "MFKBandBaseConf.h"
 #include <ReceiverControl.h>
 #include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
 #include <ManagmentDefinitionsC.h>
-#include "utils.h"
+#include "MFKBandBaseUtils.h"
+
 
 /**
- * This class contains the code of almost all the features  of the component
+ * This class contains the code of almost all the features  of the component that controls a MFKBand
  * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
  * <br>

@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<LocalOscillatorLookUpTable xmlns="urn:schemas-cosylab-com:LocalOscillatorLookUpTable:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<SynthesizerEntry><Frequency>12000.0</Frequency><OutputPower>-7.7</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>13000.0</Frequency><OutputPower>-6.8</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>14000.0</Frequency><OutputPower>-6</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>15000.0</Frequency><OutputPower>-6.5</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>16000.0</Frequency><OutputPower>-3.8</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>17000.0</Frequency><OutputPower>-1.5</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>18000.0</Frequency><OutputPower>-0.7</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>19000.0</Frequency><OutputPower>2.5</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>20000.0</Frequency><OutputPower>1.8</OutputPower></SynthesizerEntry>
+
+</LocalOscillatorLookUpTable>

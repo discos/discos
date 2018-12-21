@@ -151,11 +151,11 @@ public:
      * @param number_of_feeds number of feeds (default 1)
 	 * @param switch_ip the IP address of the switches control board
 	 * @param switch_port the port of the switches control board
-     * @params dewar_maddr the dewar board master address (default 0x7D)
+     * @params dewar_maddr the dewar board master address (default 0x7C)
      * @params dewar_saddr the dewar board slave address (default 0x7F)
-     * @params lna_maddr the LNA board master address (default 0x7D)
+     * @params lna_maddr the LNA board master address (default 0x7C)
      * @params lna_saddr the LNA board slave address (default 0x7F)
-     * @params switch_maddr the switches board master address (default 0x7D)
+     * @params switch_maddr the switches board master address (default 0x7C)
      * @params switch_saddr the switches board slave address (default 0x7F)
      * @param reliable_comm when it is true then the communication
      * to the board is reliable because there is a checksum field in
@@ -173,11 +173,11 @@ public:
             const std::string switch_ip="", 
             const unsigned short switch_port=0, 
             const BYTE dewar_madd=0x7C, // Dewar board master address
-            const BYTE dewar_sadd=0x7D, // Dewar board slave address
+            const BYTE dewar_sadd=0x7F, // Dewar board slave address - We use broadcast address
             const BYTE lna_madd=0x7C,   // LNA board master address
-            const BYTE lna_sadd=0x7D,   // LNA board slave address
+            const BYTE lna_sadd=0x7F,   // LNA board slave address - We use broadcast address
             const BYTE switch_madd=0x7C,   // Switch board master address
-            const BYTE switch_sadd=0x7D,   // Switch board slave address
+            const BYTE switch_sadd=0x7F,   // Switch board slave address - We use broadcast address
             bool reliable_comm=false
     ) throw (ReceiverControlEx);
 

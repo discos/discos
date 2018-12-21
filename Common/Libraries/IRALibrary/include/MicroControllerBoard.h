@@ -50,7 +50,7 @@ public:
      * @throw MicroControllerBoardEx
 	*/
     MicroControllerBoard(std::string IP, unsigned short port=8000,
-            BYTE master_address=0x7C, BYTE slave_address=0x7D, 
+            BYTE master_address=0x7C, BYTE slave_address=0x7F, 
             DWORD timeout=MCB_TOUT
     ) throw (MicroControllerBoardEx);
      

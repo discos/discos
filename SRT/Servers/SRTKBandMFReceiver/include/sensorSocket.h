@@ -11,7 +11,7 @@
 
 #include <IRA>
 #include "acstime.h" 
-#include "utils.h"
+#include <MFKBandBaseUtils.h>
 #include <ComponentErrors.h>
 
 #define BUFF_LEN 5         // Buffer length: request and answer have the same length

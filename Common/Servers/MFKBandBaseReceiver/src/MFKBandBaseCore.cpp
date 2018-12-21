@@ -1,8 +1,8 @@
-#include "ComponentCore.h"
+#include "MFKBandBaseCore.h"
 #include <LogFilter.h>
-#include "utils.h"
+#include "MFKBandBaseUtils.h"
 
-_IRA_LOGFILTER_IMPORT;
+_IRA_LOGFILTER_DECLARE;
 
 // speed of light in meters per second
 #define LIGHTSPEED 299792458.0
@@ -164,8 +164,10 @@ void CComponentCore::activate() throw (
     setMode((const char *)m_configuration.getSetupMode());
     m_calDiode=false; 
     guard.release();
-    lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+    
+	 lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
     externalCalOff();
+    
 }
 
 
@@ -251,7 +253,11 @@ void CComponentCore::externalCalOff() throw (
 void CComponentCore::deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
 	// no guard needed.
-	lnaOff(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+	
+	/*************************************************************************************/
+	/**************************************************************************************/	
+	//lnaOff(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+	/**************************************************************************************/
 }
 
 void CComponentCore::calOn() throw (
@@ -366,6 +372,7 @@ void CComponentCore::vacuumSensorOn() throw (
         throw impl;
     }
     try {
+    	  printf("Component(Base)Core\n");	
         m_control->setVacuumSensorOn();
     }
     catch (IRA::ReceiverControlEx& ex) {
