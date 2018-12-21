@@ -1,5 +1,5 @@
-#ifndef _BASECCONFIGURATION_H_
-#define _BASECCONFIGURATION_H_
+#ifndef _BASECONFIGURATION_H_
+#define _BASECONFIGURATION_H_
 
 /*******************************************************************************\
  IRA Istituto di Radioastronomia                                 
@@ -20,7 +20,7 @@
 #include <ComponentErrors.h>
 #include <ReceiversErrors.h>
 #include <ReceiversDefinitionsC.h>
-#include "utils.h"
+#include "MFKBandBaseUtils.h"
 
 /**
  * This class implements the component configuration. The data inside this class are initialized at the startup from the

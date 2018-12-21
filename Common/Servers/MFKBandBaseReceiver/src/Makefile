@@ -1,3 +1,4 @@
+
 #*******************************************************************************
 # PPPPPPPP
 #
@@ -7,15 +8,46 @@
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
-# andrea  01/08/11  created
+# discos  11/12/18  created
 #
 
+# ALMA - Atacama Large Millimeter Array
+# Copyright (c) ESO - European Southern Observatory, 2014
+# (in the framework of the ALMA collaboration).
+# All rights reserved.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 #*******************************************************************************
-# This Makefile follows VLT Standards (see Makefile(5) for more).
+
+#*******************************************************************************
+# This Makefile follows ALMA/ACS Standards (see Makefile(5) for more).
 #*******************************************************************************
 # REMARKS
 #    None
 #------------------------------------------------------------------------
+
+#
+# user definable C-compilation flags
+ifeq ($(STATION),Medicina)
+	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_MED'
+else ifeq ($(STATION),Noto)
+	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_STANDARD'
+else
+	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_STANDARD'
+endif
+
 
 #
 # user definable C-compilation flags
@@ -51,24 +83,18 @@ xxxxx_LIBS      =
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        =
+INCLUDES        = MFKBandBaseCore.h MFKBandBaseUtils.h MFKBandBaseConf.h
 
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SRTKBandMFReceiverImpl SRTKBandDerotatorImpl
-LIBRARIES_L     = 
+LIBRARIES       = MFKBandCore 
+LIBRARIES_L     =
 
 #
 # <brief description of lllll library>
-SRTKBandMFReceiverImpl_OBJECTS   =  SRTKBandMFReceiverImpl SRTKBandMFCore MonitorThread 
-SRTKBandMFReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs \
-							  GenericReceiverStubs SRTKBandMFStubs MFKBandCore\
-                   LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
-
-SRTKBandDerotatorImpl_OBJECTS = SRTKBandDerotatorImpl sensorSocket icdSocket StatusUpdater
-SRTKBandDerotatorImpl_LIBS = GenericDerotatorStubs SRTKBandDerotatorStubs IRALibrary ComponentErrors DerotatorErrors \
-                   ManagmentDefinitionsStubs ManagementErrors MFKBandCore
+MFKBandCore_OBJECTS   = MFKBandBaseCore MFKBandBaseUtils MFKBandBaseConf
+MFKBandCore_LIBS   = IRALibrary ComponentErrors ReceiversErrors LocalOscillatorInterfaceStubs
 
 #
 # Scripts (public and local)
@@ -114,7 +140,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = SRTKBandMFReceiver SRTKBandDerotator
+CDB_SCHEMAS = MarkCoefficientsKBandLookUpTable
 
 # 
 # IDL Files and flags
@@ -127,7 +153,9 @@ USER_IDL =
 #
 JARFILES= 
 jjj_DIRS=
-jjj_EXTRAS= 
+jjj_EXTRAS=
+# For expressing dependencies between jarfiles (parallel builds)
+jjj_JLIBS= 
 #
 # java sources in Jarfile on/off
 DEBUG= 

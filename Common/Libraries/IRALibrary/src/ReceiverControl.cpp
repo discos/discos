@@ -523,6 +523,7 @@ void ReceiverControl::setVacuumPumpOn(
             ) throw (ReceiverControlEx) 
 {
     try {
+    	  printf("ReceiverControl\n");	
         makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
                 MCB_CMD_SET_DATA,      // Command to send
@@ -1813,7 +1814,7 @@ std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, 
         // Adds the next value in argument list to sum.
         vparams.push_back(static_cast<BYTE>(va_arg(parameters, int))); 
     va_end(parameters);  // Clean up the list
-
+	  printf("MakeRequest\n");
     try {
         m_reliable_comm ? board_ptr->send(command, vparams) \
                         : board_ptr->send(command | MCB_CMD_TYPE_NOCHECKSUM, vparams);

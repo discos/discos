@@ -50,6 +50,8 @@ ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp Antenn
 echo "...AntennaContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp ReceiversContainer > /dev/null 2>&1 &'"
 echo "...ReceiversContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp KBandContainer > /dev/null 2>&1 &'"
+echo "...KBandContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp TotalPowerContainer > /dev/null 2>&1 &'"
 echo "...TotalPowerContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp ManagementContainer > /dev/null 2>&1 &'"

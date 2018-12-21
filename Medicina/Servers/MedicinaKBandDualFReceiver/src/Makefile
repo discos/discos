@@ -56,20 +56,17 @@ INCLUDES        =
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SRTKBandMFReceiverImpl SRTKBandDerotatorImpl
+LIBRARIES       = MedicinaKBandDualFReceiverImpl
 LIBRARIES_L     = 
 
 #
 # <brief description of lllll library>
-SRTKBandMFReceiverImpl_OBJECTS   =  SRTKBandMFReceiverImpl SRTKBandMFCore MonitorThread 
-SRTKBandMFReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs \
-							  GenericReceiverStubs SRTKBandMFStubs MFKBandCore\
-                   LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
-
-SRTKBandDerotatorImpl_OBJECTS = SRTKBandDerotatorImpl sensorSocket icdSocket StatusUpdater
-SRTKBandDerotatorImpl_LIBS = GenericDerotatorStubs SRTKBandDerotatorStubs IRALibrary ComponentErrors DerotatorErrors \
-                   ManagmentDefinitionsStubs ManagementErrors MFKBandCore
-
+MedicinaKBandDualFReceiverImpl_OBJECTS = MedicinaKBandDualFReceiverImpl MedicinaKBandDualFCore MonitorThread
+ 
+MedicinaKBandDualFReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors \
+	CommonReceiverInterfaceStubs GenericReceiverStubs MedicinaKBandDualFStubs MFKBandCore \
+	LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
+	
 #
 # Scripts (public and local)
 # ----------------------------
@@ -114,7 +111,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = SRTKBandMFReceiver SRTKBandDerotator
+CDB_SCHEMAS = MedicinaKBandDualFReceiver
 
 # 
 # IDL Files and flags
