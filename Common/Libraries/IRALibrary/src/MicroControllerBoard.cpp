@@ -67,15 +67,10 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
     std::vector<BYTE> data, clean_data;
     
     std::ostringstream msg_stream;
-    
-	printf("Ricevo!\n");
-	printf("Valore couter %d\n",MCB_HT_COUNTER);
-    
     // Receive the response one byte at once 
     try {
         for(size_t j = 0; j < MCB_HT_COUNTER; j++) {
             if(m_socket->Receive(m_Error, (void *)(&msg[0]), 1) == 1) {
-            	printf("sync: %x\n",msg[0]);
                 if(msg[0] == MCB_CMD_STX) // MCB_CMD_STX is the answer header
                     break;
                 else
@@ -90,10 +85,8 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
             // Receive the response one byte at once 
             // starting from the second byte (the first is the header already stored)
             // The first 6 bytes are the same for wide and short commands
-            printf ("ans len %d\n",MCB_BASE_ANSWER_LENGTH);
             for(size_t i=1; i<MCB_BASE_ANSWER_LENGTH; i++) {
                 if(m_socket->Receive(m_Error, (void *)(&msg[i]), 1) == 1) {
-                	  printf("r: %x\n",msg[i]);
                     msg_stream.clear();
                     msg_stream.str("");
                     msg_stream << msg[i];
@@ -240,7 +233,6 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
 void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters) throw (MicroControllerBoardEx) {
     pthread_mutex_lock(&m_socket_mutex); 
     try {
-    	  printf("Board::send()\n");
         if(command >= MCB_CMD_TYPE_MIN_EXT && command <= MCB_CMD_TYPE_MAX_ABB) {
             m_request.clear();
             m_command_type = command;
@@ -257,7 +249,6 @@ void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters
                     m_parameters.push_back(*iter);
                 }
             }
-				printf("Board::send_1()\n");
             // If the command is extended, put the checksum in the request
             if(m_command_type <= MCB_CMD_TYPE_MAX_EXT) {
                 m_request.push_back(computeChecksum(m_request));
@@ -269,12 +260,9 @@ void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters
 
         size_t num_bytes=0, sent_bytes=0, i=0;  
         size_t len = m_request.size();
-        printf("lunghezza request %ld\n",len);
-		  printf("size BYTE %ld\n",sizeof(BYTE));
         BYTE msg[len];
         for(std::vector<BYTE>::iterator iter = m_request.begin(); iter != m_request.end(); iter++) {
             msg[i] = *iter;
-            printf("s: %x\n",msg[i]);
             i++;
         }
 
