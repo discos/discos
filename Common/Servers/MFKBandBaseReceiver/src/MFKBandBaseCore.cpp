@@ -9,7 +9,7 @@ _IRA_LOGFILTER_DECLARE;
 
 CComponentCore::CComponentCore()
 {
-
+	voltage2mbar=voltage2Kelvin=voltage2Celsius=currentConverter=voltageConverter=NULL;
 }
 
 CComponentCore::~CComponentCore()
@@ -23,7 +23,7 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
     m_localOscillatorFault=false;
     m_cryoCoolHead=m_cryoCoolHeadWin= m_cryoLNA=m_cryoLNAWin=m_vacuum=0.0;
-    m_fetValues.VDL=m_fetValues. IDL=m_fetValues.VGL=m_fetValues.VDR=m_fetValues.IDR=m_fetValues.VGR=0.0;
+    m_fetValues.VDL=m_fetValues.IDL=m_fetValues.VGL=m_fetValues.VDR=m_fetValues.IDR=m_fetValues.VGR=0.0;
     m_statusWord=0;
     m_ioMarkError = false;
     m_calDiode=false;
@@ -60,9 +60,9 @@ CConfiguration const * const  CComponentCore::execute() throw (
     m_bandwidth.length(m_configuration.getIFs());
     m_polarization.length(m_configuration.getIFs());
     for (WORD i=0;i<m_configuration.getIFs();i++) {
-        m_startFreq[i]=0.0;
-        m_bandwidth[i]=0.0;
-        m_polarization[i]=0;
+        m_startFreq[i]=m_configuration.getIFMin()[i];
+        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
+        m_polarization[i]=m_configuration.getPolarizations()[i];
     }
     m_localOscillatorValue=0.0;
     m_setupMode="";
@@ -208,7 +208,6 @@ void CComponentCore::externalCalOn() throw (
     }
 
 }
-
 
 void CComponentCore::externalCalOff() throw (
         ReceiversErrors::NoRemoteControlErrorExImpl,
@@ -372,7 +371,6 @@ void CComponentCore::vacuumSensorOn() throw (
         throw impl;
     }
     try {
-    	  printf("Component(Base)Core\n");	
         m_control->setVacuumSensorOn();
     }
     catch (IRA::ReceiverControlEx& ex) {
@@ -467,6 +465,10 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (
         impl.setValueLimit(m_configuration.getLOMax()[0]);
         throw impl;
     }
+    loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
+    if (CORBA::is_nil(m_localOscillatorDevice)) {
+	 	ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_ERROR,"Local Oscillator not available"));    	
+    }
     // Computes the synthesizer settings
     trueValue=lo[0]+m_configuration.getFixedLO2()[0];
     size=m_configuration.getSynthesizerTable(freq,power);
@@ -474,13 +476,11 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (
     if (power) delete [] power;
     if (freq) delete [] freq;
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_DEBUG,"SYNTHESIZER_VALUES %lf %lf",trueValue,amp));
-    /***************************************************************************/
-    /****   COMMENT OUT when the local oscillator component will be available  */
-    /***************************************************************************/
-    // make sure the synthesizer component is available
-    loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
+   
     try {
-        m_localOscillatorDevice->set(amp,trueValue);
+	 	if (!CORBA::is_nil(m_localOscillatorDevice)) {
+      	m_localOscillatorDevice->set(amp,trueValue);
+     	}
     }
     catch (CORBA::SystemException& ex) {
         m_localOscillatorFault=true;
@@ -491,7 +491,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (
     }
     catch (ReceiversErrors::ReceiversErrorsEx& ex) {
     	_ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"CComponentCore::setLO()");
-	throw impl;
+		throw impl;
     }
     // now that the local oscillator has been properly set...let's do some easy computations
     m_localOscillatorValue=lo[0];
@@ -794,12 +794,11 @@ void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblem
     if (m_setupMode=="") { // if the receiver is not configured the check makes no sense
         return;
     }
-
-    /***********************************************************************/
-    /****   COMMENT OUT when the local oscillator component will be available                 */
-    /***********************************************************************/
     // make sure the synthesizer component is available
     loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
+    if (CORBA::is_nil(m_localOscillatorDevice)) {
+    	return;
+    }
     ACSErr::Completion_var comp;
     ACS::ROlong_var isLockedRef;
     CORBA::Long isLocked;
@@ -867,7 +866,8 @@ void CComponentCore::updateVacuum() throw (ReceiversErrors::ReceiverControlBoard
     }
     if (vacuumSensor) {
         try {
-            m_vacuum=m_control->vacuum(CComponentCore::voltage2mbar);
+            m_vacuum=m_control->vacuum(voltage2mbar);
+            //m_vacuum=voltage2mbar(m_control->vacuum(NULL));
         }
         catch (IRA::ReceiverControlEx& ex) {
             _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVacuum()");
@@ -1026,7 +1026,7 @@ void CComponentCore::updateCryoCoolHead() throw (ReceiversErrors::ReceiverContro
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoCoolHead=m_control->cryoTemperature(0,CComponentCore::voltage2Kelvin);
+        m_cryoCoolHead=m_control->cryoTemperature(0,voltage2Kelvin);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHead()");
@@ -1042,7 +1042,7 @@ void CComponentCore::updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverCon
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoCoolHeadWin=m_control->cryoTemperature(1,CComponentCore::voltage2Kelvin);
+        m_cryoCoolHeadWin=m_control->cryoTemperature(1,voltage2Kelvin);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHeadWin()");
@@ -1058,7 +1058,7 @@ void CComponentCore::updateCryoLNA() throw (ReceiversErrors::ReceiverControlBoar
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoLNA=m_control->cryoTemperature(3,CComponentCore::voltage2Kelvin);
+        m_cryoLNA=m_control->cryoTemperature(3,voltage2Kelvin);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNA()");
@@ -1074,7 +1074,7 @@ void CComponentCore::updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlB
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoLNAWin=m_control->cryoTemperature(4,CComponentCore::voltage2Kelvin);
+        m_cryoLNAWin=m_control->cryoTemperature(4,voltage2Kelvin);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNAWin()");
@@ -1090,7 +1090,7 @@ void CComponentCore::updateVertexTemperature() throw (ReceiversErrors::ReceiverC
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_envTemperature = m_control->vertexTemperature(CComponentCore::voltage2Celsius);
+        m_envTemperature =m_control->vertexTemperature(voltage2Celsius);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVertexTemperature()");
@@ -1103,7 +1103,10 @@ void CComponentCore::updateVertexTemperature() throw (ReceiversErrors::ReceiverC
 
 
 void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetComponentExImpl)
-{
+{    
+    if (m_configuration.getLocalOscillatorInstance()=="") {
+    	return;
+    }
     // If reference was already taken, but an error was found....dispose the reference
     if ((!CORBA::is_nil(m_localOscillatorDevice)) && (m_localOscillatorFault)) { 
         try {
@@ -1115,11 +1118,12 @@ void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetCom
     }
     if (CORBA::is_nil(m_localOscillatorDevice)) {  // Only if it has not been retrieved yet
         try {
-            m_localOscillatorDevice=m_services->getComponent<Receivers::LocalOscillator>(
-                    (const char*)m_configuration.getLocalOscillatorInstance()
-            );
-            ACS_LOG(LM_FULL_INFO,"CCore::loadAntennaBoss()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"))
-            m_localOscillatorFault=false;
+        		if (m_configuration.getLocalOscillatorInstance()!="") {
+            	m_localOscillatorDevice=m_services->getComponent<Receivers::LocalOscillator>(
+                    (const char*)m_configuration.getLocalOscillatorInstance());
+            	ACS_LOG(LM_FULL_INFO,"CCore::loadAntennaBoss()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"))
+            	m_localOscillatorFault=false;
+            }
         }
         catch (maciErrType::CannotGetComponentExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");

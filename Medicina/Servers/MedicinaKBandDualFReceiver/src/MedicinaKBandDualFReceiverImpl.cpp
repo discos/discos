@@ -219,9 +219,7 @@ void MedicinaKBandDualFReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, Com
     m_monitor->resume();
     ACS_LOG(LM_FULL_INFO, "MedicinaKBandDualFReceiverImpl::execute()", (LM_INFO, "WATCH_DOG_SPAWNED"));
     try {
-    /**************************************************************************************/	
-        //startPropertiesMonitoring();
-   /**************************************************************************************/     
+        startPropertiesMonitoring();
     }
     catch (acsthreadErrType::CanNotStartThreadExImpl& E) {
         _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl, __dummy, E, "MedicinaKBandDualFReceiverImpl::execute()");
