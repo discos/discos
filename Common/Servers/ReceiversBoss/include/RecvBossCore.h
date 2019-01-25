@@ -12,6 +12,9 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  8/04/2013       changes to fit the new K band, dual feed in Medicina  */
 /* Andrea Orlati(aorlati@ira.inaf.it)  18/06/2013     changes in order to make the length of sequence properties equal to IFs*feeds */
 /* Marco Buttu (mbuttu@oa-cagliari.inaf.it) 25/05/2015 Added external mark control  */
+/* Andrea Orlati(andrea.orlati@inaf.it) 25/01/2019     Medicina K band is now controlled through a component */ 
+
+#include <GenericReceiverS.h>
 
 #ifdef COMPILE_TARGET_MED
 
@@ -45,7 +48,6 @@
 #else
 
 #include <ManagmentDefinitionsC.h>
-#include <GenericReceiverS.h>
 #include <DewarPositionerC.h>
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
@@ -90,10 +92,10 @@ public:
 	virtual void cleanUp();
 	
 	void calOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-			ComponentErrors::UnexpectedExImpl);
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
 	
 	void calOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-			ComponentErrors::UnexpectedExImpl);
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
 	
 	void externalCalOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 			ComponentErrors::UnexpectedExImpl);
@@ -103,8 +105,10 @@ public:
 	
 
 	
-	void setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-			ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
+	void setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::CouldntGetComponentExImpl);
 	
 	void AUOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 					ComponentErrors::UnexpectedExImpl);
@@ -243,7 +247,8 @@ public:
 	void setupReceiver(const char * code) throw (ManagementErrors::ConfigurationErrorExImpl);
 
 	void setMode(const char * mode) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::ModeErrorExImpl,
-			ComponentErrors::UnexpectedExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::CORBAProblemExImpl);
+			ComponentErrors::UnexpectedExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl);
 	
 	void park()  throw (ManagementErrors::ParkingErrorExImpl);
 	
@@ -255,18 +260,21 @@ public:
 			ComponentErrors::UnexpectedExImpl);
 
 	long getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) throw (ComponentErrors::ValidationErrorExImpl,
-			ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
+			ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
 	
 	double getTaper(const double& freq,const double& bw,const long& feed,const long& ifNumber,double& waveLen) throw (ComponentErrors::ValidationErrorExImpl,
-			ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
+			ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
 	
 	void getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq&resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
 			const ACS::longSeq& ifs,bool& onoff,double& scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,
-					ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl);
+					ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl,
+					ComponentErrors::CouldntGetComponentExImpl);
 	
 	void getIFOutput(const ACS::longSeq& feeds,const ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq&  bw,ACS::longSeq& pols,ACS::doubleSeq& LO)  throw (
 			ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-			ComponentErrors::UnexpectedExImpl);
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
 
 	void getLO(ACS::doubleSeq& lo) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl);
 	
@@ -295,12 +303,18 @@ public:
 private:
 
 	Management::TSystemStatus m_status;
-        maci::ContainerServices *m_services;
+	maci::ContainerServices *m_services;
 	CConfiguration *m_config;
 	BACIMutex m_mutex;
 	long m_feeds; // numebr of feeds;
 	long m_IFs;  //number of IFs per feed
 	IRA::CString m_currentOperativeMode;
+	ACS::Time  m_lastStatusChange;
+	Management::TSystemStatus m_bossStatus;
+	Receivers::Receiver_var m_currentRecv;
+	bool m_currentRecvError;
+	IRA::CString m_currentRecvInstance;
+	IRA::CString m_currentRecvCode;
 
 #ifdef COMPILE_TARGET_MED
         #warning "Compiling RecvBossCore with Medicina target"
@@ -324,6 +338,17 @@ private:
 	double m_bandWidth[_RECVBOSSCORE_MAX_IFS];
 	IRA::CString m_currentReceiver;
 	long m_totalOutputs;
+	ACS::doubleSeq m_lo;
+	ACS::Time m_loEpoch;
+	ACS::doubleSeq m_startFreq_;
+	ACS::Time m_starFreqEpoch;
+	ACS::doubleSeq m_bandWidth_;
+	ACS::Time m_bandWidthEpoch;
+	ACS::longSeq m_pol;
+	ACS::Time m_polEpoch;
+	ACS::Time m_feedsEpoch;
+	ACS::Time m_IFsEpoch;
+	ACS::Time m_modeEpoch;
 
 #elif COMPILE_TARGET_NT
 
@@ -341,19 +366,13 @@ private:
 	Receivers::TPolarization m_pols[_RECVBOSSCORE_MAX_IFS];
 	double m_startFreq[_RECVBOSSCORE_MAX_IFS];
 	double m_bandWidth[_RECVBOSSCORE_MAX_IFS];
-	IRA::CString m_currentReceiver;
 	long m_totalOutputs;
 	bool m_cal;
    Backends::TotalPower_proxy m_totalPower_proxy;
 	
 #else
         #warning "Compiling RecvBossCore with default target"
-	Receivers::Receiver_var m_currentRecv;
-	bool m_currentRecvError;
-	IRA::CString m_currentRecvInstance;
-	IRA::CString m_currentRecvCode;
-	Management::TSystemStatus m_bossStatus;
-	ACS::Time  m_lastStatusChange;
+		
 	ACS::doubleSeq m_lo;
 	ACS::Time m_loEpoch;
 	ACS::doubleSeq m_startFreq;
@@ -381,20 +400,18 @@ private:
 	Receivers::DewarPositioner_var m_dewarPositioner;
 	bool m_dewarPositionerError;
 
-
-
-	void loadReceiver() throw (ComponentErrors::CouldntGetComponentExImpl);
-	void unloadReceiver();
 	void loadDewarPositioner()  throw (ComponentErrors::CouldntGetComponentExImpl);
 	void unloadDewarPositioner();
 
-
-	void changeBossStatus(const Management::TSystemStatus& status);
 
 #endif
 
 	/** This is the pointer to the notification channel */
 	nc::SimpleSupplier *m_notificationChannel;
+	
+	void changeBossStatus(const Management::TSystemStatus& status);
+	void loadReceiver() throw (ComponentErrors::CouldntGetComponentExImpl);
+	void unloadReceiver();
 
 #ifdef COMPILE_TARGET_MED
 	void setup(const char * code) throw(ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);

@@ -5,10 +5,10 @@
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<TaperEntry><Frequency>18000</Frequency><Taper>-5.2</Taper></TaperEntry>
+<TaperEntry><Frequency>18000</Frequency><Taper>-7.1</Taper></TaperEntry>
 
-<TaperEntry><Frequency>22000</Frequency><Taper>-8.9</Taper></TaperEntry>
+<TaperEntry><Frequency>22000</Frequency><Taper>-12.6</Taper></TaperEntry>
 
-<TaperEntry><Frequency>26000</Frequency><Taper>-12.7</Taper></TaperEntry>
+<TaperEntry><Frequency>26000</Frequency><Taper>-18.6</Taper></TaperEntry>
 
 </TaperLookUpTable>
