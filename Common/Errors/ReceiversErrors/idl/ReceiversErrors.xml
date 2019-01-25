@@ -36,6 +36,10 @@
 		<Member name="Details" type="string" description="more details from the board" />   
 	</ErrorCode>
 	
+	<ErrorCode name="SynthetiserError" shortDescription="Error while communicating with sythetiser" description=" ">
+		<Member name="Details" type="string" description="more details about the error" />   
+	</ErrorCode>
+	
 	<ErrorCode name="NoRemoteControlError" shortDescription="The receiver is not remotely controllable" description=" "/>
 	
 	<ErrorCode name="NoDewarPositioning" shortDescription="Dewar positioning and derotation is not supported by this release" description=" "/>
