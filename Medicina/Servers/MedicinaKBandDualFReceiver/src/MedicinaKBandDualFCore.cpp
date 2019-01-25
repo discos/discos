@@ -94,74 +94,46 @@ void MedicinaKBandDualFCore::setMode(const char * mode) throw (
         ReceiversErrors::LocalOscillatorErrorExImpl
         )
 {
-    baci::ThreadSyncGuard guard(&m_mutex);
-    m_setupMode = ""; // If we don't reach the end of the method then the mode will be unknown
-    IRA::CString cmdMode(mode);
-	 cmdMode.MakeUpper();
-
-    _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CConfiguration::setMode()");
+	baci::ThreadSyncGuard guard(&m_mutex);
+	m_setupMode = ""; // If we don't reach the end of the method then the mode will be unknown
+	IRA::CString cmdMode(mode);
+	cmdMode.MakeUpper();
     
-    // Set the operating mode to the board
-    try {
-        if(cmdMode == "SINGLEDISH")
-                m_control->setSingleDishMode();
-        else
-            if(cmdMode == "VLBI")
-                m_control->setVLBIMode();
-            else 
-                throw impl; // If the mode is not supported, raise an exception
-    }
-    catch (IRA::ReceiverControlEx& ex) {
-        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl, "MedicinaKBandDualFCore::setMode()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
-    }
+	if(cmdMode == "SINGLEDISH") {
+		//Correct mode
+	}
+   else {
+   	_EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"MedicinaKBandDualFCore::setMode()"); 
+   	throw impl; // If the mode is not supported, raise an exception
+   }
 
-    m_configuration.setMode(cmdMode);
+	m_configuration.setMode(cmdMode);
 
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        m_startFreq[i]=m_configuration.getIFMin()[i];
-        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
-        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
-    }
-    // The set the default LO for the default LO for the selected mode.....
-    ACS::doubleSeq lo;
-    lo.length(m_configuration.getIFs());
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        lo[i]=m_configuration.getDefaultLO()[i];
-    }
-    // setLO throws:
-    //     ComponentErrors::ValidationErrorExImpl,
-    //     ComponentErrors::ValueOutofRangeExImpl,
-    //     ComponentErrors::CouldntGetComponentExImpl,
-    //     ComponentErrors::CORBAProblemExImpl,
-    //     ReceiversErrors::LocalOscillatorErrorExImpl
-    setLO(lo); 
-
-    // Verify the m_setupMode is the same mode active on the board
-    bool isSingleDishModeOn, isVLBIModeOn;
-    try {
-        isSingleDishModeOn = m_control->isSingleDishModeOn();
-        isVLBIModeOn = m_control->isVLBIModeOn();
-    }
-    catch (IRA::ReceiverControlEx& ex) {
-        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl, "MedicinaKBandDualFCore::setMode()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
-    }
-    if((cmdMode == "SINGLEDISH" && !isSingleDishModeOn) || (cmdMode == "VLBI" && !isVLBIModeOn)) {
-        m_setupMode = ""; // If m_setupMode doesn't match the mode active on the board, then set un unknown mode
-        throw impl;
-    }
-
-    m_setupMode = cmdMode;
-    //Here an error is raised when mode variable is inserted into the log string
-    //the string is somehow malformed resulting in impossible XML log message parsing
-    //ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
-    //Maybe the following line fixes the bug by passing the c_string contained in the IRA::CString
-    ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",(const char*)cmdMode));
+	for (WORD i=0;i<m_configuration.getIFs();i++) {
+		m_startFreq[i]=m_configuration.getIFMin()[i];
+		m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
+ 		m_polarization[i]=(long)m_configuration.getPolarizations()[i];
+	}
+	// The set the default LO for the default LO for the selected mode.....
+	ACS::doubleSeq lo;
+	lo.length(m_configuration.getIFs());
+	for (WORD i=0;i<m_configuration.getIFs();i++) {
+		lo[i]=m_configuration.getDefaultLO()[i];
+	}
+	// setLO throws:
+	//     ComponentErrors::ValidationErrorExImpl,
+	//     ComponentErrors::ValueOutofRangeExImpl,
+	//     ComponentErrors::CouldntGetComponentExImpl,
+	//     ComponentErrors::CORBAProblemExImpl,
+	//     ReceiversErrors::LocalOscillatorErrorExImpl
+	setLO(lo); 
+	
+	m_setupMode = cmdMode;
+   //Here an error is raised when mode variable is inserted into the log string
+   //the string is somehow malformed resulting in impossible XML log message parsing
+   //ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
+   //Maybe the following line fixes the bug by passing the c_string contained in the IRA::CString
+   ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",(const char*)cmdMode));
 }
 
 
