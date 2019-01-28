@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 
 ### Changed
 
+	issue #316 - several related commits. The operation releated to the Medicina K band receivers now relys on a
+	new componet which is derived directly form the SRT one. larg part of the code is shared between the two
+	servants.
+
 ### Fixed 
 
 ## 

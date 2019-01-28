@@ -170,6 +170,8 @@ void CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time,double& azimuth
 	// now compute the result......
 	slope=(m2.azimuth-m1.azimuth)/(double)dx1;
 	azimuth=slope*dx2+m1.azimuth;
+	//printf("%lf\n",azimuth);
+	//printf("%lf\n",slope*(double)dx2+m1.azimuth);
 	if (m_isRad) {
 		azimuth=slaDranrm(azimuth);
 	}

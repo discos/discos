@@ -45,7 +45,7 @@
 
 <ErrorCode name="Unexpected" shortDescription="An unexpected exception was encountered" description=" "/>
 
-<ErrorCode name="IRALibraryResource" shortDescription="Error encountered while accessing an IRAlibrary resource" description=" ">
+<ErrorCode name="IRALibraryResource" shortDescription="Error encountered while accessing a resource or remote device" description=" ">
 	<Member name="Code" type="long" description="Code" />
 	<Member name="Description" type="string" description="Description" />
 </ErrorCode>

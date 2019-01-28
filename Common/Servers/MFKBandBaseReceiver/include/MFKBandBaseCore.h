@@ -1,5 +1,5 @@
-#ifndef _BASECOMPONENTCORE_H_
-#define _BASECOMPONENTCORE_H_
+#ifndef _MFBASECOMPONENTCORE_H_
+#define _MFBASECOMPONENTCORE_H_
 
 /***********************************************************************\
  IRA Istituto di Radioastronomia                                 
@@ -15,15 +15,15 @@
      private to protected in order to use them in the derived class.
 \***********************************************************************/
 
-#include "Configuration.h"
+#include "MFKBandBaseConf.h"
 #include <ReceiverControl.h>
 #include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
 #include <ManagmentDefinitionsC.h>
-#include "utils.h"
+#include "MFKBandBaseUtils.h"
 
 /**
- * This class contains the code of almost all the features  of the component
+ * This class contains the code of almost all the features  of the component that controls a MFKBand
  * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
  * <br>
@@ -234,70 +234,70 @@ public:
      * It reads and updates from the control board the current value of the vacuum
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateVacuum() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateVacuum() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
      * It check if the vacuum pump is on and check is the status is fault or not (<i>VACUUMPUMPFAULT</i>)
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateVacuumPump() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateVacuumPump() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
      * It checks if the vacuum valve is opened or not
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateVacuumValve() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateVacuumValve() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
      * It reads and updates from the control board the current cryo temperature measured near the cool head
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCryoCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateCryoCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
      * It reads and updates from the control board the current cryo temperature measured near the cool head window
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
      * It reads and updates from the control board the current cryo temperature measured near the LNA
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCryoLNA() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateCryoLNA() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
      * It reads and updates from the control board the current cryo temperature measured near the LNA window
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
      * It reads and updates from the control board the current vertex temperature
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateVertexTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateVertexTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
      * It checks if the Dewar power box is in remote or not
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateIsRemote() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateIsRemote() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
      * It checks if the cool head is turned on or not
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
@@ -305,7 +305,7 @@ public:
      * otherwise it sets the <i>NOISEMARKERROR</i> bit. It also check if the
      * external control of the noise mark has been enabled or not
      */
-    void updateNoiseMark() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    virtual void updateNoiseMark() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 
     /**
@@ -473,6 +473,8 @@ public:
 
 protected:
 
+	typedef double (*TConverter)(double voltage);
+
     /** Obtain a valid reference to the local oscillator device */
     void loadLocalOscillator()  throw (ComponentErrors::CouldntGetComponentExImpl);
 
@@ -483,35 +485,31 @@ protected:
 
     /************************ CONVERSION FUNCTIONS **************************/
     // Convert the voltage value of the vacuum to mbar
-    static double voltage2mbar(double voltage) { return(pow(10, 1.5 * voltage - 12)); }
+ 	/*virtual double voltage2mbar(double voltage) { return voltage; }
 
 
     // Convert the voltage value of the temperatures to Kelvin
-    static double voltage2Kelvin(double voltage) {
-        return voltage < 1.12 ? \
-                  (660.549422889947 * pow(voltage, 6)) - (2552.334255456860 * \
-                  pow(voltage, 5)) + (3742.529989384570 * pow(voltage, 4)) - \
-                  (2672.656926956470 * pow(voltage, 3)) + (947.905578508975 * \
-                  pow(voltage, 2)) - 558.351002849576 * voltage + 519.607622398508 \
-                :
-                  (865.747519105672 * pow(voltage, 6)) - (7271.931957100480 * \
-                  pow(voltage, 5)) + (24930.666241800500 * pow(voltage, 4)) - \
-                  (44623.988512320400 * pow(voltage, 3)) + (43962.922216886600 * \
-                  pow(voltage, 2)) - 22642.245121997700 * voltage + 4808.631312836750;
-    }
-
-
+	virtual  double voltage2Kelvin(double voltage) {
+   	return voltage;
+   }
     // Convert the voltage value of the temperatures to Celsius (Sensor B57703-10K)
-    static double voltage2Celsius(double voltage) 
-    { return -5.9931 * pow(voltage, 5) + 40.392 * pow(voltage, 4) - 115.41 * pow(voltage, 3) + 174.67 * pow(voltage, 2) - 174.23 * voltage + 112.79; }
+	virtual double voltage2Celsius(double voltage) { return voltage; } */
+    /*{ return -5.9931 * pow(voltage, 5) + 40.392 * pow(voltage, 4) - 115.41 * pow(voltage, 3) + 174.67 * pow(voltage, 2) - 174.23 * voltage + 112.79; }*/
 
     // Convert the ID voltage value to the mA value
-    static double currentConverter(double voltage) { return(10 * voltage); }
+	/*virtual double currentConverter(double voltage) { return voltage; }
 
 
     // Convert the VD and VG voltage values using a right scale factor
-    static double voltageConverter(double voltage) { return(voltage); }
-    /********************** END CONVERSION FUNCTIONS ***********************/
+	virtual double voltageConverter(double voltage) { return voltage; }*/
+   /********************** END CONVERSION FUNCTIONS ***********************/
+
+	
+	TConverter voltage2mbar;
+	TConverter voltage2Kelvin;
+	TConverter voltage2Celsius;
+	TConverter currentConverter;
+	TConverter voltageConverter;
 
     enum TStatusBit {
         LOCAL=0,
@@ -549,6 +547,14 @@ protected:
     ACS::doubleSeq m_startFreq;
     ACS::doubleSeq m_bandwidth;
     IRA::CString m_setupMode;
+    double m_envTemperature;
+    double m_vacuum;
+    double m_cryoCoolHead;
+    double m_cryoCoolHeadWin;
+    double m_cryoLNA;
+    double m_cryoLNAWin;
+    double m_vacuumDefault;
+    bool m_calDiode;
 
 
 private:
@@ -557,19 +563,12 @@ private:
     Receivers::LocalOscillator_var m_localOscillatorDevice;
     bool m_localOscillatorFault;
     double m_localOscillatorValue;
-    double m_vacuum;
-    double m_cryoCoolHead;
-    double m_cryoCoolHeadWin;
-    double m_cryoLNA;
-    double m_cryoLNAWin;
-    double m_vacuumDefault;
-    double m_envTemperature;
-    bool m_calDiode;
     IRA::ReceiverControl::FetValues m_fetValues;
     DWORD m_statusWord;
     // m_ioMarkError is a flag used to know if we already got an IO
     // error. See mantis issue n.0000236
-    bool m_ioMarkError;
+    bool m_ioMarkError;    
+    
     Management::TSystemStatus m_componentStatus;
 
     void setComponentStatus(const Management::TSystemStatus& status) { if (status>m_componentStatus) m_componentStatus=status;  }

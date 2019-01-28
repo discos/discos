@@ -8,11 +8,11 @@
            xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-	Name="NoiseGenerator"
-	Code="NoiseGeneratorImpl"
-	Type="IDL:alma/Backends/NoiseGenerator:1.0"
-	Container="NoiseGeneratorContainer"	
-	Default="false"
-	KeepAliveTime="-1"
-    ImplLang="cpp"
+	Name="LO"
+	Code="MedicinaLocalOscillatorImpl.MedicinaLocalOscillator"
+	Type="IDL:alma/Receivers/LocalOscillator:1.0"
+	Container="LocalOscillatorContainer"
+	KeepAliveTime="10"
+	Default="true"
+   ImplLang="py"
 />

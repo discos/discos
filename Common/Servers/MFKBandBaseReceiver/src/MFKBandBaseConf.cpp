@@ -1,6 +1,6 @@
 // $Id: Configuration.cpp,v 1.5 2011-06-01 18:24:44 a.orlati Exp $
 
-#include "Configuration.h"
+#include "MFKBandBaseConf.h"
 #include <string>
 
 using namespace IRA;
@@ -44,7 +44,13 @@ using namespace IRA;
     } \
 }
 
+
+#ifdef COMPILE_TARGET_MED
+#define CONFIG_PATH "DataBlock/KBandDualFReceiver"
+#else
 #define CONFIG_PATH "DataBlock/SRTKBandMFReceiver"
+#endif 
+
 #define LOTABLE_PATH CONFIG_PATH"/Synthesizer"
 #define MARKTABLE_PATH CONFIG_PATH"/MarkCoefficients"
 #define FEEDTABLE_PATH CONFIG_PATH"/Feeds"

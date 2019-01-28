@@ -1,9 +1,5 @@
 //#define RB_DEBUG
 
-//#define KKC_ADDRESS "192.168.51.13" // this is the PortServer installed directly in the MF
-#define KKC_ADDRESS "192.167.189.102" // this is the server installed in control room PC
-//#define KKC_PORT 2101 // first port...please notice that this works only if the port is configured as "real Port"
-#define KKC_PORT 10000 // control room server port
 #define RECV_ADDRESS "192.167.189.2"
 #define RECV_PORT 2096
 #define FS_ADDRESS "192.167.189.62"
@@ -12,18 +8,13 @@
 // speed of light in meters per second
 #define LIGHTSPEED 299792458.0
 
-CRecvBossCore::CRecvBossCore()
-{
-}
-
-CRecvBossCore::~CRecvBossCore()
-{
-}
-
 void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration *config,acscomponent::ACSComponentImpl *me)
 	throw (ComponentErrors::UnexpectedExImpl)
 {
-	m_currentReceiver="";
+	m_currentRecvCode="";
+	m_currentRecvInstance="";
+	m_currentRecvError=false;
+	m_currentRecv=Receivers::Receiver::_nil();
 	m_currentOperativeMode="";
 	m_recvOpened=false;
 	m_fsOpened=false;
@@ -31,6 +22,8 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	m_services=services;
 	m_feeds=0;
 	m_IFs=0;
+	m_lastStatusChange=0;
+	m_bossStatus=Management::MNG_OK;
 	for (unsigned i=0;i<_RECVBOSSCORE_MAX_IFS;i++) {
 		m_startFreq[i]=0.0;
 		m_bandWidth[0]=0.0;
@@ -39,6 +32,7 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	m_config=config;
 	m_totalOutputs=0;
 	m_notificationChannel=NULL;
+	m_loEpoch=m_starFreqEpoch=m_bandWidthEpoch=m_polEpoch=m_feedsEpoch=m_IFsEpoch=m_modeEpoch=0;
 
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::initialize()",(LM_INFO,"OPENING_RECEIVERS_BOSS_NOTIFICATION_CHANNEL"));
 	try {
@@ -51,76 +45,56 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 
 void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl)
 {
-    IRA::CError error;
-	m_KKCFeedTable=new IRA::CDBTable(m_services,"Feed","DataBlock/KKCReceiver/Feeds");
-	error.Reset();
-	if (!m_KKCFeedTable->addField(error,"feedCode",IRA::CDataField::LONGLONG)) {
-		error.setExtra("feedCode field not found",0);
- 	}
-	else if (!m_KKCFeedTable->addField(error,"xOffset",IRA::CDataField::DOUBLE)) {
-		error.setExtra("xOffset field not found",0);
- 	}
-	else if (!m_KKCFeedTable->addField(error,"yOffset",IRA::CDataField::DOUBLE)) {
-		error.setExtra("yOffset field not found",0);
- 	}
-	else if (!m_KKCFeedTable->addField(error,"relativePower",IRA::CDataField::DOUBLE)) {
-		error.setExtra("relativePower field not found",0);
- 	}
-	if (!error.isNoError()) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,error);
-		dummy.setCode(error.getErrorCode());
-		dummy.setDescription((const char*)error.getDescription());
-		dummy.log(LM_DEBUG);
-		throw dummy;
-	}
-	if (!m_KKCFeedTable->openTable(error))	{
-		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-		dummy.log(LM_DEBUG);
-		throw dummy;
-	}
 }
 
 void CRecvBossCore::cleanUp()
 {
-	if (m_KKCFeedTable) delete m_KKCFeedTable;
+	//if (m_KKCFeedTable) delete m_KKCFeedTable;
 	if (m_notificationChannel!=NULL) {
 		m_notificationChannel->disconnect();
 		m_notificationChannel=NULL;
 	}
-}
-
-void CRecvBossCore::externalCalOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-				ComponentErrors::UnexpectedExImpl)
-{
-}
-
-void CRecvBossCore::externalCalOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-				ComponentErrors::UnexpectedExImpl)
-{
+	unloadReceiver();
 }
 
 void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	IRA::CError err;
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if (m_currentReceiver=="KKC") {
-#ifndef RB_DEBUG
-		char buff [10] = {0x01,0x7F,0x7D,0x6F,0x00,0x04,0x03,0x04,0x0B,0x01 };
-		if (m_kBandSocket.Send(err,(const void *)buff,10)!=10) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::calOn()");
-			m_status=Management::MNG_FAILURE;
+	if (m_currentRecvCode=="KKC") {
+		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+		try {
+			m_currentRecv->calOn();
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::calOn()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
 			throw impl;
 		}
-		m_kBandSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
-#endif
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::calOn()");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::calOn()");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::calOn()");
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
 	}
-	else if ((m_currentReceiver=="CCC") || (m_currentReceiver=="CHC")){
-#ifndef RB_DEBUG
+	else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")){
 		char buffer [14] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','n','\n' };
 		if (m_recvSocket.Send(err,(const void *)buffer,14)!=14) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
@@ -132,10 +106,8 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 			throw impl;
 		}
 		m_recvSocket.Receive(err,(void *)buffer,13); // read the answer but for the moment I don't care. I hope everything worked properly
-#endif
 	}
-	else if (m_currentReceiver=="XXP") {
-#ifndef RB_DEBUG
+	else if (m_currentRecvCode=="XXP") {
 		// turn the marca on through the FS
 		IRA::CString fsBuffer("sxkl=*,on\n");
 		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
@@ -147,7 +119,6 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-#endif
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::calOn()");
@@ -160,27 +131,43 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 }
 
 void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	IRA::CError err;
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if (m_currentReceiver=="KKC") {
-#ifndef RB_DEBUG
-		char buff [10] = {0x01,0x7F,0x7D,0x6F,0x00,0x04,0x03,0x04,0x0B,0x00 };
-		if (m_kBandSocket.Send(err,(const void *)buff,10)!=10) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::calOff()");
-			m_status=Management::MNG_FAILURE;
+	if (m_currentRecvCode=="KKC") {
+		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+		try {
+			m_currentRecv->calOff();
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::calOff()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
 			throw impl;
 		}
-		m_kBandSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
-#endif
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::calOff()");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::calOff()");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::calOff()");
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
 	}
-	else if ((m_currentReceiver=="CCC") || (m_currentReceiver=="CHC")) {
-#ifndef RB_DEBUG
+	else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")) {
 		char buffer [15] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','f','f','\n' };
 		if (m_recvSocket.Send(err,(const void *)buffer,15)!=15) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
@@ -192,10 +179,8 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 			throw impl;
 		}
 		m_recvSocket.Receive(err,(void *)buffer,14); // read the answer but for the moment I don't care. I hope everything worked properly
-#endif
 	}
-	else if (m_currentReceiver=="XXP") {
-#ifndef RB_DEBUG
+	else if (m_currentRecvCode=="XXP") {
 		// turn the marca on through thr FS
 		IRA::CString fsBuffer("sxkl=*,off\n");
 		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
@@ -207,7 +192,6 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-#endif
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::calOff()");
@@ -219,38 +203,15 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::calOff()",(LM_NOTICE,"NOISE_CAL_TURNED_OFF"));
 }
 
-void CRecvBossCore::setupReceiver(const char * code) throw (ManagementErrors::ConfigurationErrorExImpl)
+void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,
+	ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+	ReceiversErrors::UnavailableReceiverOperationExImpl,
+	ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
-	try {
-		setup(code);
-	}
-	catch(ACSErr::ACSbaseExImpl& ex) {
-		_ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl,impl,ex,"CRecvBossCore::setupReceiver()");
-		impl.setSubsystem("Receivers");
-		throw impl;
-	}
-}
 
-void CRecvBossCore::AUOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-				ComponentErrors::UnexpectedExImpl)
-{
-	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::AUOn()",(LM_NOTICE,"ANTENNA_UNIT_ON_OPERATION_NOT_SUPPORTED"));
-}
-
-void CRecvBossCore::AUOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-				ComponentErrors::UnexpectedExImpl)
-{
-	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::AUOff()",(LM_NOTICE,"ANTENNA_UNIT_OFF_OPERATION_NOT_SUPPORTED"));
-}
-
-void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
-{
-#ifndef RB_DEBUG
 	char buff [10];
 	WORD len;
-	double loAmp[4]={-55.24524,11.41288,-0.79437,0.01894};
-#endif
+	//double loAmp[4]={-55.24524,11.41288,-0.79437,0.01894};
 	IRA::CError err;
 	IRA::CString msg;
 	double trueValue;
@@ -269,31 +230,52 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 	//***********************************************************************/
 	// range checks must be performed, Also the resulting bandwidth, according the lo value and the RF ranges must be recomputed
 	//**********************************************************************/
-	if (m_currentReceiver=="KKC") {
-		//no difference between IFs so take just the first value
-		trueValue=lo[0]-5900.0;
-		for (long i=0;i<m_totalOutputs;i++) {
-			m_LO[i]=lo[0];
+	if (m_currentRecvCode=="KKC") {
+		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+		try {
+			m_currentRecv->setLO(lo);
 		}
-		//m_LO[0]=m_LO[1]=lo[0];
-		ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR: %lf",m_LO[0]));
-		//trueValue/=1000;
-		//double amplitude=loAmp[0]+loAmp[1]*trueValue+loAmp[2]*trueValue*trueValue+loAmp[3]*trueValue*trueValue*trueValue;
-		//printf("trueValue, amp: %lf %lf\n",trueValue,amplitude);
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::setLO()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::setLO()");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::setLO()");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::setLO()");
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
+		return;	
 	}
-	else if (m_currentReceiver=="CCC") {
+	else if (m_currentRecvCode=="CCC") {
 		//no difference between IFs so take just the first value
 		trueValue=lo[0]+2300.0;
 		m_LO[0]=m_LO[1]=lo[0];
 		ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR: %lf",m_LO[0]));
 	}
-	else if (m_currentReceiver=="CHC") {
+	else if (m_currentRecvCode=="CHC") {
 		//no difference between IFs so take just the first value
 		trueValue=lo[0]+2300.0;
 		m_LO[0]=m_LO[1]=lo[0];
 		ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR: %lf",m_LO[0]));
 	}
-	else if (m_currentReceiver=="XXP") {
+	else if (m_currentRecvCode=="XXP") {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setLO()");
 		impl.setReason("Local oscillator could not be changed for this receiver");
 		m_status=Management::MNG_WARNING;
@@ -305,7 +287,6 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 		m_status=Management::MNG_WARNING;
 		throw impl;
 	}
-#ifndef RB_DEBUG
 	// at the moment the settable LO is unique...so no difference from recevier to receiver
 	msg.Format("set lofreq %lf\n",(double)trueValue);
 	len=msg.GetLength();
@@ -320,25 +301,6 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 	}
 	m_recvSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
 	IRA::CIRATools::Wait(0,500000);  //wait half a second to settle things down
-	if (m_currentReceiver=="KKC") {
-		trueValue/=1000;
-		double amplitude=loAmp[0]+loAmp[1]*trueValue+loAmp[2]*trueValue*trueValue+loAmp[3]*trueValue*trueValue*trueValue;
-		msg.Format("set loamp %lf\n",(double)amplitude);
-		//printf("MANDO: %s\n",(const char *)msg);
-		len=msg.GetLength();
-		if (m_recvSocket.Send(err,(const void *)msg,len)!=len) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setLO()");
-			m_status=Management::MNG_FAILURE;
-			throw impl;
-		}
-		m_recvSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
-		//printf("RICEVO: %s\n",buff);
-	}
-#endif
 }
 
 void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl)
@@ -346,14 +308,11 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 	IRA::CError err;
 	IRA::CString rec(code);
 	IRA::CString recvIpAddr(RECV_ADDRESS);
-#ifndef RB_DEBUG
 	DWORD recvPort=RECV_PORT;
 	DWORD fsPort=FS_PORT;
-#endif
 	IRA::CString fsIpAddr(FS_ADDRESS);
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!m_fsOpened) {
-#ifndef RB_DEBUG
 		if (m_fsSocket.Create(err,IRA::CSocket::STREAM)!=IRA::CSocket::SUCCESS) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
 			dummy.setCode(err.getErrorCode());
@@ -372,13 +331,11 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-#endif
 		IRA::CIRATools::Wait(0,500000);  //wait half a second to settle things down
 		m_fsOpened=true;
 	}
 	// Configure the communication for the receiver configuration
 	if (!m_recvOpened) {
-#ifndef RB_DEBUG
 		if (m_recvSocket.Create(err,IRA::CSocket::STREAM)!=IRA::CSocket::SUCCESS) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
 			dummy.setCode(err.getErrorCode());
@@ -406,83 +363,60 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-#endif
 		IRA::CIRATools::Wait(0,500000);  //wait half a second to settle things down
 		m_recvOpened=true;
 	}
 	if (rec=="KKC") {
-		// close in case it was opened.......
-#ifndef RB_DEBUG
-		err.Reset();
-		m_kBandSocket.Close(err);
-		err.Reset();
-		if (m_kBandSocket.Create(err,IRA::CSocket::STREAM)!=IRA::CSocket::SUCCESS) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
-			m_status=Management::MNG_FAILURE;
+		IRA::CString component;
+		bool derotator;
+		if (!m_config->getReceiver(code,component,derotator)) {
+			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setup()");
+			impl.setReason("Receiver code is not known");
 			throw impl;
 		}
-		if (m_kBandSocket.setSockMode(err,IRA::CSocket::NONBLOCKING)==IRA::CSocket::FAIL) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription( (const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
-			m_status=Management::MNG_FAILURE;
+		//deactivate current receiver.....
+		if (!CORBA::is_nil(m_currentRecv)) {
+			try {
+				m_currentRecv->deactivate();
+			}
+			catch (...) {
+				ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_WARNING,"Current Receiver could not be deactivated"));
+			}
+		}
+		unloadReceiver();
+		m_currentRecvCode=code;
+		m_currentRecvInstance=component;
+		loadReceiver(); // throw ComponentErrors::CouldntGetComponentExImpl
+		try {
+			m_currentRecv->activate(code);
+		}
+		catch (ACSErr::ACSbaseExImpl& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CRecvBossCore::setup()");
+			impl.setReason("Unable to activate receiver");
+			changeBossStatus(Management::MNG_FAILURE);
 			throw impl;
 		}
-		IRA::CString ipAddr(KKC_ADDRESS);
-		DWORD port=KKC_PORT;
-		if (m_kBandSocket.Connect(err,ipAddr,port)==IRA::CSocket::FAIL) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription( (const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
-			m_status=Management::MNG_FAILURE;
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::setup()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
 			throw impl;
 		}
-		char buffer [9] = {'p','r','o','c',' ','k','k','c','\n' };
-		if (m_recvSocket.Send(err,(const void *)buffer,9)!=9) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
-			m_status=Management::MNG_FAILURE;
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::setup()");
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
 			throw impl;
 		}
-		m_recvSocket.Receive(err,(void *)buffer,9); // read the answer but for the moment I don't care. I hope everything worked properly
-		// now set the subreflector configuration through the FS
-		IRA::CString fsBuffer("scu=kkc\n");
-		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
-			m_status=Management::MNG_FAILURE;
-			throw impl;
-		}
-#endif
-		m_IFs=2;
-		m_feeds=2;
-		m_totalOutputs=m_IFs*m_feeds;
-		for (long i=0;i<m_totalOutputs;i++) {
-			m_LO[i]=21964.0;
-			m_startFreq[i]=100.0;
-			m_bandWidth[i]=2000.0;
-			if ((i % 2)==0) m_pols[i]=Receivers::RCV_LCP;
-			else m_pols[i]=Receivers::RCV_RCP;
-		}
-		m_currentReceiver="KKC";
+		changeBossStatus(Management::MNG_OK);
+		ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_NOTICE,"NEW_RECEIVER_CONFIGURED %s",code));		
+
+		m_currentRecvCode="KKC";
 		m_currentOperativeMode="NORMAL";
 	}
 	else if (rec=="CCC") {
-#ifndef RB_DEBUG
 		char buffer [9] = {'p','r','o','c',' ','c','c','c','\n' };
 		if (m_recvSocket.Send(err,(const void *)buffer,9)!=9) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
@@ -505,7 +439,6 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-#endif
 		m_LO[0]=4600.0;
 		m_LO[1]=4600.0;
 		m_IFs=2;
@@ -517,11 +450,10 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_startFreq[1]=100.0;
 		m_bandWidth[0]=400.0;
 		m_bandWidth[1]=400.0;
-		m_currentReceiver="CCC";
+		m_currentRecvCode="CCC";
 		m_currentOperativeMode="NORMAL";
 	}
 	else if (rec=="CHC") {
-#ifndef RB_DEBUG
 		char buffer [9] = {'p','r','o','c',' ','c','h','c','\n' };
 		if (m_recvSocket.Send(err,(const void *)buffer,9)!=9) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
@@ -544,7 +476,6 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-#endif
 		m_LO[0]=6400.0;
 		m_LO[1]=6400.0;
 		m_IFs=2;
@@ -556,11 +487,10 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_startFreq[1]=100.0;
 		m_bandWidth[0]=400.0;
 		m_bandWidth[1]=400.0;
-		m_currentReceiver="CHC";
+		m_currentRecvCode="CHC";
 		m_currentOperativeMode="NORMAL";
 	}
 	else if (rec=="XXP") {
-#ifndef RB_DEBUG
 		char buffer [9] = {'p','r','o','c',' ','x','x','p','\n' };
 		if (m_recvSocket.Send(err,(const void *)buffer,9)!=9) {
 			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
@@ -594,7 +524,6 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-#endif
 		m_LO[0]=8080.0;
 		m_LO[1]=8080.0;
 		m_IFs=2;
@@ -606,7 +535,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_startFreq[1]=100.0;
 		m_bandWidth[0]=800.0;
 		m_bandWidth[1]=800.0;
-		m_currentReceiver="XXP";
+		m_currentRecvCode="XXP";
 		m_currentOperativeMode="NORMAL";
 	}
 	else {
@@ -617,15 +546,20 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 	}
 	m_status=Management::MNG_OK;
 	m_cal=false;
-	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_NOTICE,"NEW_RECEIVER_CONFIGURED %s",(const char *)m_currentReceiver));
+	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_NOTICE,"NEW_RECEIVER_CONFIGURED %s",(const char *)m_currentRecvCode));
 }
 
 void CRecvBossCore::setMode(const char * mode) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::ModeErrorExImpl,
-		ComponentErrors::UnexpectedExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::CORBAProblemExImpl)
+		ComponentErrors::UnexpectedExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
+	//*********************************************
+	//The KKC receiver does not support for modes, in principle I should have added the code
+	// to call the KKC component setMode method.
+	//***********************************************
 	IRA::CString newMode(mode);
-	if (m_currentReceiver=="CCC") {
+	if (m_currentRecvCode=="CCC") {
 		if (newMode=="NORMAL") {
 			m_currentOperativeMode=newMode;
 			m_bandWidth[0]=400.0;
@@ -652,15 +586,26 @@ void CRecvBossCore::setMode(const char * mode) throw (ComponentErrors::Validatio
 void CRecvBossCore::park() throw (ManagementErrors::ParkingErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	m_currentReceiver="";
+	m_currentRecvCode="";
 	m_currentOperativeMode="";
 	m_IFs=0;
 	m_feeds=0;
 	m_totalOutputs=0;
+	if (!CORBA::is_nil(m_currentRecv)) {
+		try {
+			m_currentRecv->deactivate();
+		}
+		catch (...) {
+			ACS_LOG(LM_FULL_INFO,"CRecvBossCore::park()",(LM_WARNING,"COULD_NOT_DEACTIVATE_CURRENT_RECEIVER"));
+		}
+	}	
+	unloadReceiver();
 }
 
 double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& feed,const long& ifNumber,double& waveLen) throw (ComponentErrors::ValidationErrorExImpl,
-		ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,
+		ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl,
+		ComponentErrors::CouldntGetComponentExImpl)
 {
 	double centralFreq;
 	double taper;
@@ -673,6 +618,45 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 	double realFreq,realBw;
 
 	baci::ThreadSyncGuard guard(&m_mutex);
+	
+	if (m_currentRecvCode=="KKC") {
+		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+		try {
+			CORBA::Double fq,ww,wl,taper;
+			CORBA::Long fe,ifn;
+			fq=(CORBA::Double)freq; ww=(CORBA::Double)bw; fe=(CORBA::Long)feed; ifn=(CORBA::Long)ifNumber;
+			taper=m_currentRecv->getTaper(fq,ww,fe,ifn,wl);
+			waveLen=(double)wl;
+			return (double)taper;
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::getTaper()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::getTaper");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::getTaper");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::getTaper()");
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
+	}		
+	
 	if ((ifNumber>=m_IFs) || (ifNumber<0)) {
 		_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CRecvBossCore::getTaper()");
 		impl.setValueName("IF identifier");
@@ -693,16 +677,16 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 	}
 	centralFreq=m_LO[index]+realFreq+realBw/2;
 	centralFreq/=1000.0; //central frequency in GHz
-	if ((m_currentReceiver=="KKC") || (m_currentReceiver=="CCC") || (m_currentReceiver=="CHC")) {
+	if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")) {
 		ff=secondaryFreq;
 		tt=secondaryTaper;
 		max=7;
 	}
-	else if (m_currentReceiver=="XXP") {
+	else if (m_currentRecvCode=="XXP") {
 		ff=primaryFreq;
 		tt=primaryTaper;
 		max=5;
-	}
+	}	
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::getTaper()");
 		impl.setReason("Receiver code is not known");
@@ -734,117 +718,53 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 	return taper;
 }
 
-double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (ComponentErrors::CouldntGetComponentExImpl,
-		ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl)
-{
-	// no need to check anything
-	return -9999.99;
-}
-
-void CRecvBossCore::getDewarParameter(Receivers::TDerotatorConfigurations& mod,double& pos) throw (
-  ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	mod=Receivers::RCV_UNDEF_DEROTCONF;
-	pos=0.0;
-}
-
-/*void CRecvBossCore::derotatorMode(const Receivers::TDerotatorConfigurations& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
-		ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
-   		ReceiversErrors::DewarPositionerSetupErrorExImpl)
-{
-	// baci::ThreadSyncGuard guard(&m_mutex);
-	// no support in ESCS for that
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorMode()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}*/
-
-void CRecvBossCore::derotatorSetConfiguration(const Receivers::TDerotatorConfigurations& conf) throw (
-	ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-	ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-	ComponentErrors::UnexpectedExImpl)
-{
-	// no support in ESCS for that
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetConfiguration()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
-void CRecvBossCore::derotatorSetRewindingMode(const Receivers::TRewindModes& rewind) throw (
-		ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
-{
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetRewindingMode()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
-void CRecvBossCore::derotatorSetAutoRewindingSteps(const long& steps) throw (
-		ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
-{
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetAutoRewindingSteps()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
-void CRecvBossCore::setDerotatorPosition(const double& pos) throw (ReceiversErrors::NoDewarPositioningExImpl,
-  ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
-  ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-  ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
-{
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
-void CRecvBossCore::derotatorRewind(const long& steps) throw (ComponentErrors::ValidationErrorExImpl,
-  ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-  ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl,
-  ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
-{
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorRewind()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
-void CRecvBossCore::derotatorPark() throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-    			ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
-    			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	// baci::ThreadSyncGuard guard(&m_mutex);
-	// no support in ESCs for that
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorPark()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
 long CRecvBossCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) throw (ComponentErrors::ValidationErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if (m_currentReceiver=="KKC") {
-		long id;
-		unsigned len;
-		m_KKCFeedTable->First();
-		len=m_KKCFeedTable->recordCount();
-		X.length(len);
-		Y.length(len);
-		power.length(len);
-		for (unsigned i=0;i<len;i++) {
-			id=(*m_KKCFeedTable)["feedCode"]->asLongLong();
-			X[i]=(*m_KKCFeedTable)["xOffset"]->asDouble();
-			Y[i]=(*m_KKCFeedTable)["yOffset"]->asDouble();
-			power[i]=(*m_KKCFeedTable)["relativePower"]->asDouble();
-			m_KKCFeedTable->Next();
+	if (m_currentRecvCode=="KKC") {
+		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+		try {
+			CORBA::Long len;
+			ACS::doubleSeq_var tempX=new ACS::doubleSeq;
+			ACS::doubleSeq_var tempY=new ACS::doubleSeq;
+			ACS::doubleSeq_var tempPower=new ACS::doubleSeq;
+			len=m_currentRecv->getFeeds(tempX,tempY,tempPower);
+			X.length(tempX->length()); Y.length(tempY->length()); power.length(tempPower->length());
+			for (long i=0;i<len;i++) {
+				Y[i]=tempY[i]; X[i]=tempX[i]; power[i]=tempPower[i];
+			}
+			return (long)len;
 		}
-		return m_KKCFeedTable->recordCount();
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::getFeeds()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::getFeeds");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::getFeeds");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::getFeeds()");
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
 	}
-	else if ((m_currentReceiver=="CCC") || (m_currentReceiver=="XXP") || (m_currentReceiver=="CHC")) {
+	else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="XXP") || (m_currentRecvCode=="CHC")) {
 		X.length(1);
 		Y.length(1);
 		power.length(1);
@@ -863,9 +783,58 @@ long CRecvBossCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq&
 
 void CRecvBossCore::getIFOutput(const ACS::longSeq& feeds,const ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq&  bw,ACS::longSeq& pols,ACS::doubleSeq& LO)  throw (
 		ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
+	if (m_currentRecvCode=="KKC") {
+		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+		try {
+			ACS::doubleSeq_var tempFreqs=new ACS::doubleSeq;
+			ACS::doubleSeq_var tempBw=new ACS::doubleSeq;
+			ACS::longSeq_var tempPols=new ACS::longSeq;
+			ACS::doubleSeq_var tempLO=new ACS::doubleSeq;
+			unsigned len;
+			m_currentRecv->getIFOutput(feeds,ifs,tempFreqs.out(),tempBw.out(),tempPols.out(),tempLO.out());
+			len=tempFreqs->length();
+			freqs.length(len);
+			bw.length(len);
+			pols.length(len);
+			LO.length(len);
+			for (unsigned i=0;i<len;i++) {
+				freqs[i]=tempFreqs[i];
+				bw[i]=tempBw[i];
+				pols[i]=tempPols[i];
+				LO[i]=tempLO[i];
+			}
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::getIFOutput()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::getIFOutput");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::getIFOutput");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}	
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::getIFOutput()");
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
+		return;
+	}	
 	unsigned stdLen=feeds.length();
 	if (stdLen!=ifs.length()) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::getIFOutput()");
@@ -918,9 +887,55 @@ void CRecvBossCore::closeScan(ACS::Time& timeToStop) throw (ReceiversErrors::Dew
 
 void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
 		const ACS::longSeq& ifs,bool& onoff,double& scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
+	if (m_currentRecvCode=="KKC") {
+		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+		try {
+			ACS::doubleSeq_var tempRes=new ACS::doubleSeq;
+			ACS::doubleSeq_var tempFreq=new ACS::doubleSeq;
+			ACS::doubleSeq_var tempBw=new ACS::doubleSeq;
+			CORBA::Boolean onoff_out;
+			tempRes=m_currentRecv->getCalibrationMark(freqs,bandwidths,feeds,ifs,tempFreq.out(),tempBw.out(),onoff_out,scale);
+			result.length(tempRes->length());
+			resFreq.length(tempRes->length());
+			resBw.length(tempRes->length());
+			onoff=onoff_out;
+			for (unsigned i=0;i<result.length();i++) {
+				result[i]=tempRes[i];
+				resFreq[i]=tempFreq[i];
+				resBw[i]=tempBw[i];
+			}
+			return;
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::getCalibrationMark()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::getCalibrationMark");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::getCalibrationMark");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::getCalibrationMark()");
+			changeBossStatus(Management::MNG_FAILURE);
+			m_currentRecvError=true;
+			throw impl;
+		}		
+	}	
 	unsigned stdLen=freqs.length();
 	if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::getCalibrationMark()");
@@ -948,63 +963,8 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 	resFreq.length(stdLen);
 	resBw.length(stdLen);
 	onoff=m_cal;
-	if (m_currentReceiver=="KKC") {
-		scale=1.0;
-		/*double LeftMarkCoeff[7][4] = { {0.2912,-21.21,506.97,-3955.5}, {0.558,-40.436,961.81,-7472.1}, {0.8963,-63.274,1469.2,-11170.0},
-									 {0.5176,-37.47,889.81,-6895.8}, {0.662,-47.86,1136.2,-8809.9}, {0.3535,-25.63,609.53,-4727.4}, {0.2725,-19.926,478.05,-3737.9}  };
-		double RightMarkCoeff[7][4] = { {0.2141,-15.771,379.96,-2976.8}, {0.523,-37.88,899.74,-6974.4}, {0.8572,-60.324,1396.3,-10581.0},
-									 {0.5173,-37.339,884.31,-6838.1}, {0.7267,-52.213,1231.4,-9486.9}, {0.3955,-28.468,672.77,-5192.0}, {0.201,-15.761,398.52,-3237.7} };*/
 
-		double LeftMarkCoeff[2][4] = { {0.35539,-25.57141,603.90321,-4656.81229}, {0.18548,-14.13379,349.77806,-2795.54717} };
-		double RightMarkCoeff[2][4] = { {0.36656,-26.16018,613.14727,-4697.37959}, {0.32624,-23.20331,	542.14083,-4141.29465} };
-
-		double f1,f2;
-		double integral;
-		double mark=0;
-		double realFreq,realBw;
-		for (unsigned i=0;i<stdLen;i++) {
-			long index=(feeds[i]*m_IFs)+ifs[i];
-			if (m_pols[index]==Receivers::RCV_LCP) {
-				// take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
-				if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[index],m_bandWidth[index],realFreq,realBw)) {
-					realFreq=m_startFreq[index];
-					realBw=0.0;
-				}
-				realFreq+=m_LO[index];
-				f1=realFreq;
-				//f1+=realBw/2.0;
-				//f1/=1000; //f in GHz
-				//mark=LeftMarkCoeff[ feeds[i] ][0]*f1*f1*f1+LeftMarkCoeff[ feeds[i] ][1]*f1*f1+LeftMarkCoeff[ feeds[i] ][2]*f1+LeftMarkCoeff[ feeds[i] ][3];
-				//printf("LEFT realFreq %lf, bw: %lf, f1:%lf",realFreq,realBw,f1);
-				f2=f1+realBw;
-				f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
-				integral=(LeftMarkCoeff[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(LeftMarkCoeff[feeds[i]][1]/3)*(f2*f2*f2-f1*f1*f1)+(LeftMarkCoeff[feeds[i]][2]/2)*(f2*f2-f1*f1)+LeftMarkCoeff[feeds[i]][3]*(f2-f1);
-				mark=integral/(f2-f1);
-				//printf("f1,f2,mark,realFreq: %lf %lf %lf %lf\n",f1,f2,mark,realFreq);
-			}
-			else if (m_pols[index]==Receivers::RCV_RCP) {
-				// take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
-				if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[index],m_bandWidth[index],realFreq,realBw)) {
-					realFreq=m_startFreq[index];
-					realBw=0.0;
-				}
-				realFreq+=m_LO[index];
-				f1= realFreq;
-				//f1+=realBw/2.0;
-				//f1/=1000; //f in GHz
-				//mark=RightMarkCoeff[ feeds[i] ][0]*f1*f1*f1+RightMarkCoeff[ feeds[i] ][1]*f1*f1+RightMarkCoeff[ feeds[i] ][2]*f1+RightMarkCoeff[ feeds[i] ][3];
-				//printf("RIGHT realFreq %lf, bw: %lf, f1:%lf",realFreq,realBw,f1);
-				f2=f1+realBw;
-				f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
-				integral=(RightMarkCoeff[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(RightMarkCoeff[feeds[i]][1]/3)*(f2*f2*f2-f1*f1*f1)+(RightMarkCoeff[feeds[i]][2]/2)*(f2*f2-f1*f1)+RightMarkCoeff[feeds[i]][3]*(f2-f1);
-				mark=integral/(f2-f1);
-			}
-			result[i]=mark;
-			resFreq[i]=realFreq;
-			resBw[i]=realBw;
-		}
-	}
-	else if (m_currentReceiver=="CHC") {
+	if (m_currentRecvCode=="CHC") {
 		double LeftM[2] = { -0.0023, 31.593  };
 		double RightM[2] = { -0.0023, 32.764 };
 		double Freq;
@@ -1043,7 +1003,7 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 			scale=1.0;
 		}
 	}
-	else if (m_currentReceiver=="CCC") {
+	else if (m_currentRecvCode=="CCC") {
 		scale=1.0;
 		for (unsigned i=0;i<stdLen;i++) {
 			long index=(feeds[i]*m_IFs)+ifs[i];
@@ -1062,7 +1022,7 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 			}
 		}
 	}
-	else if (m_currentReceiver=="XXP") {
+	else if (m_currentRecvCode=="XXP") {
 		scale=1.0;
 		for (unsigned i=0;i<stdLen;i++) {
 			long index=(feeds[i]*m_IFs)+ifs[i];
@@ -1089,7 +1049,7 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 	}
 }
 
-void  CRecvBossCore::updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+void CRecvBossCore::updateRecvStatus() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 		ReceiversErrors::UnavailableReceiverAttributeExImpl)
 {
 	return;
@@ -1102,52 +1062,326 @@ void CRecvBossCore::updateDewarPositionerStatus() throw (ComponentErrors::Couldn
 }
 
 void CRecvBossCore::getPolarization(ACS::longSeq& pol) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
-{
+{	
 	baci::ThreadSyncGuard guard(&m_mutex);
-	pol.length(m_totalOutputs);
-	for (long i=0;i<m_totalOutputs;i++) pol[i]=m_pols[i];
+	TIMEVALUE now;
+	pol.length(0);
+	if (m_currentRecvCode=="") {
+		return;
+	}
+	if (m_currentRecvCode=="KKC") {
+		IRA::CIRATools::getTime(now);
+		if (now.value().value>m_polEpoch+m_config->propertyUpdateTime()*10) {
+			ACS::ROlongSeq_var polRef;
+			ACSErr::Completion_var comp;
+			ACS::longSeq_var val;
+			loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+			try {
+				polRef=m_currentRecv->polarization();
+				val=polRef->get_sync(comp.out());
+			}
+			catch (CORBA::SystemException& ex) {
+					_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::getPolarization()");
+					impl.setName(ex._name());
+					impl.setMinor(ex.minor());
+					changeBossStatus(Management::MNG_FAILURE);
+					m_currentRecvError=true;
+					throw impl;
+			}
+			ACSErr::CompletionImpl compImpl(comp);
+			if (compImpl.isErrorFree()) {
+				pol.length(val->length());
+				m_pol.length(val->length());
+				for (unsigned i=0;i<pol.length();i++) {
+					pol[i]=val[i];
+					m_pol[i]=val[i];
+				}
+				m_polEpoch=now.value().value;
+			}
+			else {
+				ReceiversErrors::UnavailableReceiverAttributeExImpl ex(compImpl,__FILE__,__LINE__,"CRecvBossCore::getPolarization()");
+				ex.setReceiverCode((const char *)m_currentRecvCode);
+				throw ex;
+			}
+		}
+		else {
+			pol.length(m_pol.length());
+			for (unsigned i=0;i<m_pol.length();i++) pol[i]=m_pol[i];
+		}	
+	}
+	else {
+		pol.length(m_totalOutputs);
+		for (long i=0;i<m_totalOutputs;i++) pol[i]=m_pols[i];
+	}
 }
 
 void CRecvBossCore::getLO(ACS::doubleSeq& lo) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	lo.length(m_totalOutputs);
-	for (long i=0;i<m_totalOutputs;i++) lo[i]=m_LO[i];
+	TIMEVALUE now;
+	lo.length(0);
+	if (m_currentRecvCode=="") {
+		return;
+	}
+	if (m_currentRecvCode=="KKC") {
+		IRA::CIRATools::getTime(now);
+		if (now.value().value>m_loEpoch+m_config->propertyUpdateTime()*10) {
+			ACS::ROdoubleSeq_var loRef;
+			ACSErr::Completion_var comp;
+			ACS::doubleSeq_var val;
+			loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+			try {
+				loRef=m_currentRecv->LO();
+				val=loRef->get_sync(comp.out());
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::getLO()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				changeBossStatus(Management::MNG_FAILURE);
+				m_currentRecvError=true;
+				throw impl;
+			}
+			ACSErr::CompletionImpl compImpl(comp);
+			if (compImpl.isErrorFree()) {
+				lo.length(val->length());
+				m_lo.length(val->length());
+				for (unsigned i=0;i<lo.length();i++) {
+					lo[i]=val[i];
+					m_lo[i]=val[i];
+				}
+				m_loEpoch=now.value().value;
+			}
+			else {
+				ReceiversErrors::UnavailableReceiverAttributeExImpl ex(compImpl,__FILE__,__LINE__,"CRecvBossCore::getLO()");
+				ex.setReceiverCode((const char *)m_currentRecvCode);
+				throw ex;
+			}
+		}
+		else {
+			lo.length(m_lo.length());
+			for (unsigned i=0;i<m_lo.length();i++) lo[i]=m_lo[i];
+		}	
+	}
+	else {
+		lo.length(m_totalOutputs);
+		for (long i=0;i<m_totalOutputs;i++) lo[i]=m_LO[i];
+	}
 }
 
 void CRecvBossCore::getBandWidth(ACS::doubleSeq& bw)  throw  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	bw.length(m_totalOutputs);
-	for (long i=0;i<m_totalOutputs;i++) bw[i]=m_bandWidth[i];
+	TIMEVALUE now;
+	bw.length(0);
+	if (m_currentRecvCode=="") {
+		return;
+	}
+	if (m_currentRecvCode=="KKC") {
+		IRA::CIRATools::getTime(now);
+		if (now.value().value>m_bandWidthEpoch+m_config->propertyUpdateTime()*10) {
+			ACS::ROdoubleSeq_var bwRef;
+			ACSErr::Completion_var comp;
+			ACS::doubleSeq_var val;
+			loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+			try {
+				bwRef=m_currentRecv->bandWidth();
+				val=bwRef->get_sync(comp.out());
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::getBandWidth()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				changeBossStatus(Management::MNG_FAILURE);
+				m_currentRecvError=true;
+				throw impl;
+			}
+			ACSErr::CompletionImpl compImpl(comp);
+			if (compImpl.isErrorFree()) {
+				bw.length(val->length());
+				m_bandWidth_.length(val->length());
+				for (unsigned i=0;i<bw.length();i++) {
+					bw[i]=val[i];
+					m_bandWidth_[i]=val[i];
+				}
+				m_bandWidthEpoch=now.value().value;
+			}
+			else {
+				ReceiversErrors::UnavailableReceiverAttributeExImpl ex(compImpl,__FILE__,__LINE__,"CRecvBossCore::getBandWidth()");
+				ex.setReceiverCode((const char *)m_currentRecvCode);
+				throw ex;
+			}
+		}
+		else {
+			bw.length(m_bandWidth_.length());
+			for (unsigned i=0;i<m_bandWidth_.length();i++) bw[i]=m_bandWidth[i];
+		}
+	}	
+	else {
+		bw.length(m_totalOutputs);
+		for (long i=0;i<m_totalOutputs;i++) bw[i]=m_bandWidth[i];
+	}
 }
 
 void CRecvBossCore::getInitialFrequency(ACS::doubleSeq& iFreq)  throw  (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	iFreq.length(m_totalOutputs);
-	for (long i=0;i<m_totalOutputs;i++) iFreq[i]=m_startFreq[i];
+	TIMEVALUE now;
+	iFreq.length(0);
+	if (m_currentRecvCode=="") {
+		return;
+	}
+	if (m_currentRecvCode=="KKC") {
+		IRA::CIRATools::getTime(now);
+		if (now.value().value>m_starFreqEpoch+m_config->propertyUpdateTime()*10) {
+			ACS::ROdoubleSeq_var ifreqRef;
+			ACSErr::Completion_var comp;
+			ACS::doubleSeq_var val;
+			loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+			try {
+				ifreqRef=m_currentRecv->initialFrequency();
+				val=ifreqRef->get_sync(comp.out());
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::getInitialFrequency()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				changeBossStatus(Management::MNG_FAILURE);
+				m_currentRecvError=true;
+				throw impl;
+			}
+			ACSErr::CompletionImpl compImpl(comp);
+			if (compImpl.isErrorFree()) {
+				iFreq.length(val->length());
+				m_startFreq_.length(val->length());
+				for (unsigned i=0;i<iFreq.length();i++) {
+					iFreq[i]=val[i];
+					m_startFreq_[i]=val[i];
+				}	
+				m_starFreqEpoch=now.value().value;
+			}
+			else {
+				ReceiversErrors::UnavailableReceiverAttributeExImpl ex(compImpl,__FILE__,__LINE__,"CRecvBossCore::getInitialFrequency()");
+				ex.setReceiverCode((const char *)m_currentRecvCode);
+				throw ex;
+			}
+		}	
+		else {
+			iFreq.length(m_startFreq_.length());
+			for (unsigned i=0;i<m_startFreq_.length();i++) iFreq[i]=m_startFreq[i];
+		}	
+	}
+	else {	
+		iFreq.length(m_totalOutputs);
+		for (long i=0;i<m_totalOutputs;i++) iFreq[i]=m_startFreq[i];
+	}
 }
 
 void CRecvBossCore::getFeeds(long& feeds) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	feeds=m_feeds;
+	TIMEVALUE now;
+	feeds=0;
+	if (m_currentRecvCode=="") {
+		return;
+	}
+	if (m_currentRecvCode=="KKC") {
+		IRA::CIRATools::getTime(now);
+		if (now.value().value>m_feedsEpoch+m_config->propertyUpdateTime()*10) {
+			ACS::ROlong_var feedsRef;
+			ACSErr::Completion_var comp;
+			CORBA::Long val;
+			loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+			try {
+				feedsRef=m_currentRecv->feeds();
+				val=feedsRef->get_sync(comp.out());
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::getFeeds()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				changeBossStatus(Management::MNG_FAILURE);
+				m_currentRecvError=true;
+				throw impl;
+			}
+			ACSErr::CompletionImpl compImpl(comp);
+			if (compImpl.isErrorFree()) {
+				feeds=val;
+				m_feeds=val;
+				m_feedsEpoch=now.value().value;
+			}
+			else {
+				ReceiversErrors::UnavailableReceiverAttributeExImpl ex(compImpl,__FILE__,__LINE__,"CRecvBossCore::getFeeds()");
+				ex.setReceiverCode((const char *)m_currentRecvCode);
+				throw ex;
+			}
+		}
+		else {
+			feeds=m_feeds;
+		}	
+	}
+	else {
+		feeds=m_feeds;
+	}
 }
 
 void CRecvBossCore::getIFs(long& ifs) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	ifs=m_IFs;
+	
+	TIMEVALUE now;
+	ifs=0;
+	if (m_currentRecvCode=="") {
+		return;
+	}
+	if (m_currentRecvCode=="KKC") {
+		IRA::CIRATools::getTime(now);
+		if (now.value().value>m_IFsEpoch+m_config->propertyUpdateTime()*10) {
+			ACS::ROlong_var ifsRef;
+			ACSErr::Completion_var comp;
+			CORBA::Long val;
+			loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
+			try {
+				ifsRef=m_currentRecv->IFs();
+				val=ifsRef->get_sync(comp.out());
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::getIFs()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				changeBossStatus(Management::MNG_FAILURE);
+				m_currentRecvError=true;
+				throw impl;
+			}
+			ACSErr::CompletionImpl compImpl(comp);
+			if (compImpl.isErrorFree()) {
+				ifs=val;
+				m_IFs=val;
+				m_IFsEpoch=now.value().value;
+			}
+			else {
+				ReceiversErrors::UnavailableReceiverAttributeExImpl ex(compImpl,__FILE__,__LINE__,"CRecvBossCore::getIFs()");
+				ex.setReceiverCode((const char *)m_currentRecvCode);
+				throw ex;
+			}
+		}
+		else {
+			ifs=m_IFs;
+		}	
+	}
+	else {
+		ifs=m_IFs;
+	}
 }
 
 const IRA::CString& CRecvBossCore::getRecvCode()
 {
-	return m_currentReceiver;
+	return m_currentRecvCode;
 }
 
 const IRA::CString& CRecvBossCore::getOperativeMode() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
 {
+	// to be adjust for the KKCband component
 	return m_currentOperativeMode;
 }
 
@@ -1164,7 +1398,7 @@ void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErr
 	baci::ThreadSyncGuard guard(&m_mutex);
 	IRA::CIRATools::getTime(now);
 	if (CIRATools::timeDifference(lastEvent,now)>=1000000) {  //one second from last event
-		data.tracking=(m_currentReceiver!="");
+		data.tracking=(m_currentRecvCode!="");
 		data.timeMark=now.value().value;
 		data.status=m_status;
 		try {
