@@ -23,7 +23,7 @@
     LNAPort="10001"      
     WatchDogResponseTime="10000000"
     WatchDogSleepTime="10000000"
-    LNASamplingTime="1000000"
+    LNASamplingTime="250000"
     RepetitionCacheTime="7000000"
     RepetitionExpireTime="10000000"
     LocalOscillatorInstance="RECEIVERS/LO"
