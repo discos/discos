@@ -26,7 +26,7 @@
 
 <AvailableReceiver Code="CCC" Derotator="false" Component=""/>
 
-<AvailableReceiver Code="KKC" Derotator="true" Component="RECEIVERS/KBandDualFReceiver"/>
+<AvailableReceiver Code="KKC" Derotator="false" Component="RECEIVERS/KBandDualFReceiver"/>
 
 <AvailableReceiver Code="XXP" Derotator="false" Component=""/>
 

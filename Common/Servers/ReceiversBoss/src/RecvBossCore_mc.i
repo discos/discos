@@ -411,7 +411,6 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			throw impl;
 		}
 		changeBossStatus(Management::MNG_OK);
-		ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_NOTICE,"NEW_RECEIVER_CONFIGURED %s",code));		
 
 		m_currentRecvCode="KKC";
 		m_currentOperativeMode="NORMAL";
@@ -1214,7 +1213,7 @@ void CRecvBossCore::getBandWidth(ACS::doubleSeq& bw)  throw  (ComponentErrors::C
 		}
 		else {
 			bw.length(m_bandWidth_.length());
-			for (unsigned i=0;i<m_bandWidth_.length();i++) bw[i]=m_bandWidth[i];
+			for (unsigned i=0;i<m_bandWidth_.length();i++) bw[i]=m_bandWidth_[i];
 		}
 	}	
 	else {
@@ -1268,7 +1267,7 @@ void CRecvBossCore::getInitialFrequency(ACS::doubleSeq& iFreq)  throw  (Componen
 		}	
 		else {
 			iFreq.length(m_startFreq_.length());
-			for (unsigned i=0;i<m_startFreq_.length();i++) iFreq[i]=m_startFreq[i];
+			for (unsigned i=0;i<m_startFreq_.length();i++) iFreq[i]=m_startFreq_[i];
 		}	
 	}
 	else {	
