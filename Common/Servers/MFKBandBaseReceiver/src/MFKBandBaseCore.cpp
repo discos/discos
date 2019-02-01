@@ -23,6 +23,7 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
     m_localOscillatorFault=false;
     m_cryoCoolHead=m_cryoCoolHeadWin= m_cryoLNA=m_cryoLNAWin=m_vacuum=0.0;
+    m_envTemperature=20.0;
     m_fetValues.VDL=m_fetValues.IDL=m_fetValues.VGL=m_fetValues.VDR=m_fetValues.IDR=m_fetValues.VGR=0.0;
     m_statusWord=0;
     m_ioMarkError = false;
@@ -252,7 +253,7 @@ void CComponentCore::externalCalOff() throw (
 void CComponentCore::deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
 	// no guard needed.
-	
+	m_setupMode="";
 	/*************************************************************************************/
 	/**************************************************************************************/	
 	//lnaOff(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
