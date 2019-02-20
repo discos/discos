@@ -110,4 +110,6 @@
 	<Member name="ServiceName" type="string" description="Name of the Service" />
 </ErrorCode>
 
+<ErrorCode name="Nak" shortDescription="Device does not acknowledge" description=" " />
+
 </Type>

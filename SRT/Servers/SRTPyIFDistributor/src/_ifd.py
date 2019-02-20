@@ -34,8 +34,8 @@ def main():
     
     try:
         component=simpleClient.getComponent(compName)
-    except Exception , ex:
-        newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
+    except Exception as ex:
+    	newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
         newEx.setComponentName(compName)
         add_user_message(newEx,"IFD device not ready or not properly configured")
         userLogger.logException(newEx)
@@ -44,7 +44,7 @@ def main():
     
     try:
         inputs=component.setup(sys.argv[1])
-    except Exception, ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
         newEx.setReason("IF distributor configuration")
         add_user_message(newEx,"Unable to configure the IFD device")
