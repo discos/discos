@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 	issue #261 - Added startup procedure scripts also for Noto and Medicina. The startup command is 
 	'discos --start'. Also command line scripts are now avialble 'discosup' and 'discosdown'. The console
 	can be start with 'discosConsole --start'. 
+	
+	issue #325 - added command 'dmed=config' to control the Medicina DMed (IF distributor). The device just 
+	allows to setup a set of programmable attenuators in order to control the singal levels. config select
+	which configuration to apply between a set of predefined one.
 
 ### Changed
 

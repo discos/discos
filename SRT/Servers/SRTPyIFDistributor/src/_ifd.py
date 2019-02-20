@@ -19,39 +19,39 @@ from SimpleParserPy import add_user_message
 def main():
 
 
-    compName = "RECEIVERS/SRTIFDistributor"
+	compName = "RECEIVERS/SRTIFDistributor"
         
-    simpleClient = PySimpleClient()
-    #check we are at the SRT
-    station=os.environ['STATION']
+	simpleClient = PySimpleClient()
+	#check we are at the SRT
+	station=os.environ['STATION']
     
-    if station!="SRT":
+	if station!="SRT":
 		newEx = ManagementErrorsImpl.UnsupportedOperationExImpl()
 		add_user_message(newEx,"The command is not available or it is not supported")
 		userLogger.logExcpetion(newEx)
 		simpleClient.disconnect()
 		sys.exit(1)
     
-    try:
-        component=simpleClient.getComponent(compName)
-    except Exception , ex:
-        newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
-        newEx.setComponentName(compName)
-        add_user_message(newEx,"IFD device not ready or not properly configured")
-        userLogger.logException(newEx)
-        simpleClient.disconnect()
-        sys.exit(1)
+	try:
+		component=simpleClient.getComponent(compName)
+	except Exception as ex:
+		newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
+		newEx.setComponentName(compName)
+		add_user_message(newEx,"IFD device not ready or not properly configured")
+		userLogger.logException(newEx)
+		simpleClient.disconnect()
+		sys.exit(1)
     
-    try:
-        inputs=component.setup(sys.argv[1])
-    except Exception, ex:
-        newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
-        newEx.setReason("IF distributor configuration")
-        add_user_message(newEx,"Unable to configure the IFD device")
-        userLogger.logException(newEx)
-        simpleClient.disconnect()
-        sys.exit(1)
+	try:
+		inputs=component.setup(sys.argv[1])
+	except Exception as ex:
+		newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
+		newEx.setReason("IF distributor configuration")
+		add_user_message(newEx,"Unable to configure the IFD device")
+		userLogger.logException(newEx)
+		simpleClient.disconnect()
+		sys.exit(1)
         
     
 if __name__=="__main__":
-   main()    
+	main()    

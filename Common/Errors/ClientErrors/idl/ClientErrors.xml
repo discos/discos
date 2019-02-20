@@ -41,4 +41,8 @@
 
 <ErrorCode name="InvalidArgument" shortDescription="An invalid argument was given" description=" "/>
 
+<ErrorCode name="ConfigurationDataBaseError" shortDescription="Configuration database error" description=" "/>
+
+<ErrorCode name="InvalidConfiguration" shortDescription="The configuration is unknown or not supported" description=" "/>
+
 </Type>
