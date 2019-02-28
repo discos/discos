@@ -397,7 +397,7 @@ private:
 	 * @arg the ACU did not responded yet (in that case a timeout policy is implemented)
 	 * @arg the ACU responded but the operation was not completed correctly.
 	 * @param commandTime marks the epoch the command message was sent to the ACU, used to apply the timeout mechanism.
-	 * @throw NakExImpl if an error was repoerted by the ACU
+	 * @throw AntennaErrors::NakExImpl if an error was repoerted by the ACU
 	 * @throw TimeoutExImpl if the ACU does not report back the answer within the expected time
 	 */
 	void waitAck(const ACS::Time& commandTime) throw (AntennaErrors::NakExImpl,ComponentErrors::TimeoutExImpl);
