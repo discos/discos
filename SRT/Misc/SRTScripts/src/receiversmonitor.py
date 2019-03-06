@@ -21,15 +21,16 @@ running_processes = os.popen("ps aux").read()
 counter = 0
 for line in running_processes.split('\n'):
     if 'python' in line and process in line:
-        if str(os.getpid()) in line.split():
-            continue
-        else:
-            counter += 1
+#        if str(os.getpid()) in line.split():
+#            continue
+#        else:
+        counter += 1
     if counter > 1:
         print '%s already running, everything is OK' % process
         sys.exit(0)
 
-LOGDIR = os.path.join('service','receivers')
+#LOGDIR = os.path.join('service','receivers')
+LOGDIR ='/service/receivers'
 FILENAME = os.path.join(LOGDIR,'receivers.log')
 dirname=os.path.dirname(LOGDIR)
 if not os.path.exists(dirname):
