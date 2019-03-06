@@ -11,10 +11,10 @@ from Acspy.Util.ACSCorba import getManager
 
 process = os.path.basename(__file__)
 # Exit in case the user try to run the script on nuraghe-mng
-if 'nuraghe-mng' in os.getenv('HOST'):
-    print 'ERROR: you can not execute %s on this machine.' % process
-    print 'Please, read the SD manual!'
-    sys.exit(0)
+#if 'nuraghe-mng' in os.getenv('HOST'):
+#    print 'ERROR: you can not execute %s on this machine.' % process
+#    print 'Please, read the SD manual!'
+#    sys.exit(0)
 
 # Exit in case the process is already running
 running_processes = os.popen("ps aux").read()
@@ -29,8 +29,13 @@ for line in running_processes.split('\n'):
         print '%s already running, everything is OK' % process
         sys.exit(0)
 
-LOGDIR = os.path.join(os.getenv('HOME'), 'logs', 'receivers')
-FILENAME = os.path.join(LOGDIR, 'receivers.log')
+LOGDIR = os.path.join('service','receivers')
+FILENAME = os.path.join(LOGDIR,'receivers.log')
+dirname=os.path.dirname(LOGDIR)
+if not os.path.exists(dirname):
+	print 'ERROR: target folder does not exists, check %s' % LOGDIR
+	sys.exit(-1)
+	
 logging.basicConfig(
     filename=FILENAME,
     format='%(asctime)s\t%(message)s')
