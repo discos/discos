@@ -12,7 +12,7 @@
 	Res=launchCommand(BUFFER,LENGTH); \
 	if (Res>0) { \
 		if (!CACUInterface::isAck(BUFFER,Err)) { \
-			_EXCPT(NakExImpl,dummy,ROUTINE); \
+			_EXCPT(AntennaErrors::NakExImpl,dummy,ROUTINE); \
 			dummy.setCode(Err); \
 			dummy.setMessage((const char *)CACUInterface::messageFromError(Err)); \
 			throw dummy; \
@@ -419,7 +419,7 @@ Management::TSystemStatus CMedicinaMountSocket::getMountStatus() throw (Connecti
 	_CHECK_ERRORS("CMedicinaMountSocket::getMountStatus()");	
 }
 
-void CMedicinaMountSocket::setPositionOffsets(const double& azOff,const double& elOff) throw (TimeoutExImpl,NakExImpl,ConnectionExImpl,
+void CMedicinaMountSocket::setPositionOffsets(const double& azOff,const double& elOff) throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,
   SocketErrorExImpl,ValueOutofRangeExImpl,AntennaBusyExImpl,PropertyErrorExImpl,ValidationErrorExImpl)
 {
 	BYTE sBuffer[ACU_BUFFERSIZE];
@@ -531,7 +531,7 @@ double CMedicinaMountSocket::getCommandedElevation(bool ptEnabled)
 	}			
 }
 
-void CMedicinaMountSocket::timeTransfer(TIMEVALUE& now) throw (ConnectionExImpl,NakExImpl,SocketErrorExImpl,TimeoutExImpl)
+void CMedicinaMountSocket::timeTransfer(TIMEVALUE& now) throw (ConnectionExImpl,AntennaErrors::NakExImpl,SocketErrorExImpl,TimeoutExImpl)
 {
 	WORD Len;
 	BYTE sBuffer[ACU_BUFFERSIZE];
@@ -558,14 +558,14 @@ void CMedicinaMountSocket::timeTransfer(TIMEVALUE& now) throw (ConnectionExImpl,
 	_LAUNCH_BUFFER(sBuffer,Len,"CMedicinaMountSocket::timeTransfer");	
 }
 
-void CMedicinaMountSocket::Stop() throw (TimeoutExImpl,NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
+void CMedicinaMountSocket::Stop() throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
 {
 	if (isBusy()) setStopped(true);
 	Mode(CACUInterface::STOP,CACUInterface::STOP,true);	
 }
 
 void CMedicinaMountSocket::Mode(CACUInterface::TAxeModes azMode,CACUInterface::TAxeModes elMode,bool force) 
-  throw (TimeoutExImpl,NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
+  throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
 {
 	WORD Len;
 	BYTE sBuffer[ACU_BUFFERSIZE];
@@ -587,7 +587,7 @@ void CMedicinaMountSocket::Mode(CACUInterface::TAxeModes azMode,CACUInterface::T
 	m_lastScanEpoch=now.value().value;
 }
 
-void CMedicinaMountSocket::failureReset() throw (TimeoutExImpl,NakExImpl,ConnectionExImpl,SocketErrorExImpl)
+void CMedicinaMountSocket::failureReset() throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl)
 {
 	WORD Len;
 	BYTE sBuffer[ACU_BUFFERSIZE];	
@@ -595,7 +595,7 @@ void CMedicinaMountSocket::failureReset() throw (TimeoutExImpl,NakExImpl,Connect
 	_LAUNCH_BUFFER(sBuffer,Len,"CMedicinaMountSocket::failureReset()");
 }
 
-void CMedicinaMountSocket::programTrack(double az,double el,TIMEVALUE& time,bool clear) throw (TimeoutExImpl,ValueOutofRangeExImpl,NakExImpl,ConnectionExImpl,
+void CMedicinaMountSocket::programTrack(double az,double el,TIMEVALUE& time,bool clear) throw (TimeoutExImpl,ValueOutofRangeExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,
   SocketErrorExImpl,AntennaBusyExImpl,OperationNotPermittedExImpl,PropertyErrorExImpl)
 {
 	long azimuth=0;
@@ -693,7 +693,7 @@ void CMedicinaMountSocket::programTrack(double az,double el,TIMEVALUE& time,bool
 	}
 }
 
-void CMedicinaMountSocket::Preset(double Azim,double Elev) throw (TimeoutExImpl,ValueOutofRangeExImpl,NakExImpl,ConnectionExImpl,
+void CMedicinaMountSocket::Preset(double Azim,double Elev) throw (TimeoutExImpl,ValueOutofRangeExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,
   SocketErrorExImpl,AntennaBusyExImpl,PropertyErrorExImpl,OperationNotPermittedExImpl)
 {
 	WORD Len;
@@ -775,7 +775,7 @@ void CMedicinaMountSocket::Preset(double Azim,double Elev) throw (TimeoutExImpl,
 	_LAUNCH_BUFFER(sBuffer,Len,"CMedicinaMountSocket::Preset()");
 }
 
-void CMedicinaMountSocket::Rate(double azRate,double elRate) throw (TimeoutExImpl,ValueOutofRangeExImpl,NakExImpl,ConnectionExImpl,
+void CMedicinaMountSocket::Rate(double azRate,double elRate) throw (TimeoutExImpl,ValueOutofRangeExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,
   SocketErrorExImpl,AntennaBusyExImpl,PropertyErrorExImpl,OperationNotPermittedExImpl)
 {
 	WORD Len;
@@ -839,7 +839,7 @@ double CMedicinaMountSocket::getHWAzimuth(double destination,const CACUInterface
 	return CIRATools::getHWAzimuth(pos,dest,m_configuration->azimuthLowerLimit(),m_configuration->azimuthUpperLimit(),section,m_configuration->cwLimit());
 }
 
-void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl,NakExImpl,AntennaBusyExImpl)
+void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl,AntennaErrors::NakExImpl,AntennaBusyExImpl)
 {
 	TIMEVALUE now;
 	double azError=getAzimuthError(); // throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl)
@@ -848,7 +848,7 @@ void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErr
 	if (m_oscStop) { // if the oscillation has been detected.....during previuos iteration
 		if (now.value().value>=m_oscStopTime+m_configuration->oscillationRecoveryTime()) { // the time to wait for trying to recover has elapsed.....
 			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::detectOscillation()",(LM_NOTICE,"OSCILLATION_RECOVERY"));
-			Mode(m_oscMode,m_oscMode); // throw (TimeoutExImpl,NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
+			Mode(m_oscMode,m_oscMode); // throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
 			m_oscStop=false;
 			m_oscAlarm=false; // clear the oscillation detection.....
 		}
@@ -914,7 +914,7 @@ void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErr
 		CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::detectOscillation()",(LM_CRITICAL,"OSCILLATION_DETECTED"));
 		m_oscMode=mode; ///store the current mode, in order to recommand it for ascillation recovery;
 		m_oscStopTime=now.value().value;
-		Stop(); //throw (TimeoutExImpl,NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
+		Stop(); //throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
 	}
 }
 

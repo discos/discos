@@ -29,7 +29,7 @@
 #include "sensorSocket.h"
 #include "icdSocket.h"
 #include "StatusUpdater.h"
-#include "utils.h"
+#include <MFKBandBaseUtils.h>
 
 using namespace baci;
 

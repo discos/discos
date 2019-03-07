@@ -41,7 +41,7 @@
 	<inputPortDB>5</inputPortDB>
  	<inputPortBW>2350</inputPortBW>
  	<beams>1</beams>
- 	<section_boards>13</section_boards>
+ 	<section_boards>10</section_boards>
  	<polarizations>R</polarizations>
  	<feed>0</feed>
  	<IF>0</IF>

@@ -1365,7 +1365,7 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
         double (*converter)(double voltage)
         ) throw (ReceiverControlEx)
 {
-
+	IRA::CString quant;
     // Each item is a EN03 value: the signal that addresses the column multiplexing of AD24
     std::vector<std::string> column_selectors;  
     std::string vd_selector;               // A03: it allows to select the value requested for a given stadium
@@ -1390,7 +1390,7 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
         column_selectors.push_back("0011");
         column_selectors.push_back("0100");
     }
-
+	
     switch(stage_number) {
         case 1:
             vd_selector = "0000"; 
@@ -1424,11 +1424,14 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
     switch(quantity) {
         case DRAIN_VOLTAGE:
             quantity_selector = vd_selector;
+            quant="VD";
             break;
         case DRAIN_CURRENT:
             quantity_selector = id_selector;
+            quant="ID";
             break;
         case GATE_VOLTAGE:
+        		quant="VG";
             quantity_selector = vg_selector;
             break;
         default:
@@ -1528,7 +1531,7 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
     try {
         for(size_t idx=0; idx<m_number_of_feeds; idx++) {
             (values.left_channel).push_back(converter != NULL ? converter(lvalues[idx]) : lvalues[idx]);
-            (values.right_channel).push_back(converter != NULL ? converter(rvalues[idx]) : rvalues[idx]);
+            (values.right_channel).push_back(converter != NULL ? converter(rvalues[idx]) : rvalues[idx]);                   
         }
     }
     catch(...) {
@@ -1813,7 +1816,6 @@ std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, 
         // Adds the next value in argument list to sum.
         vparams.push_back(static_cast<BYTE>(va_arg(parameters, int))); 
     va_end(parameters);  // Clean up the list
-
     try {
         m_reliable_comm ? board_ptr->send(command, vparams) \
                         : board_ptr->send(command | MCB_CMD_TYPE_NOCHECKSUM, vparams);

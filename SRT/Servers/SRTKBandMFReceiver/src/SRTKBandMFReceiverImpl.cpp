@@ -17,7 +17,7 @@
 
 #include <iostream>
 
-_IRA_LOGFILTER_DECLARE;
+_IRA_LOGFILTER_IMPORT;
 
 SRTKBandMFReceiverImpl::SRTKBandMFReceiverImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) :
     CharacteristicComponentImpl(CompName,containerServices),

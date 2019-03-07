@@ -33,8 +33,8 @@ COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLi
 				  DiscosBackendProtocol PyTestingLibrary \
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
-                CalibrationTool TotalPower NoiseGenerator CustomLogger  \
-                XBackend PyDewarPositioner Sardara PyLocalOscillator #DBBC
+                CalibrationTool TotalPower NoiseGenerator CustomLogger \
+                XBackend PyDewarPositioner Sardara PyLocalOscillator MFKBandBaseReceiver
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \

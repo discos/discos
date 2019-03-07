@@ -2,11 +2,11 @@
 <AcsCommandCenterProject xmlns="Alma/Acs/AcsCommandCenterProject"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     creator="acc-v7.0" xsi:type="AcsCommandCenterProject">
-    <mode>remote_daemon</mode>
-    <servicesLocalJavaRoot>/alma/ACS-7.0/acsdata/config/defaultCDB</servicesLocalJavaRoot>
+    <mode>remote_native</mode>
+    <servicesLocalJavaRoot></servicesLocalJavaRoot>
     <scriptBase>0</scriptBase>
-    <remoteHost>192.168.1.98</remoteHost>
-    <remoteAccount></remoteAccount>
+    <remoteHost>MASTERHOST</remoteHost>
+    <remoteAccount>discos</remoteAccount>
     <remotePassword></remotePassword>
     <toolRunAgainstDedicatedSettings>false</toolRunAgainstDedicatedSettings>
     <toolAgainstManagerHost></toolAgainstManagerHost>
@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>11</select>
+        <select>5</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -25,71 +25,79 @@
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.98</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
             <name>WeatherStationContainer</name>
             <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
             <name>MountContainer</name>
             <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
             <name>AntennaContainer</name>
             <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
             <name>ReceiversContainer</name>
             <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount></remoteAccount>
+        </container>
+        <container>
+            <name>KBandContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
             <name>TotalPowerContainer</name>
             <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
-            <remoteAccount></remoteAccount>
-        </container>
-        <container>
-            <name>NoiseGeneratorContainer</name>
-            <type>cpp</type>
-            <useDedicatedSettings>true</useDedicatedSettings>
-            <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
             <name>ManagementContainer</name>
             <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
             <name>FitsZillaContainer</name>
             <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
@@ -98,7 +106,7 @@
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
@@ -107,7 +115,7 @@
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
@@ -116,7 +124,7 @@
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.51.98</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
         <container>
@@ -125,7 +133,7 @@
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
-            <remoteHost>192.168.1.104</remoteHost>
+            <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount></remoteAccount>
         </container>
     </containers>
