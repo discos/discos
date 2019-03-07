@@ -14,18 +14,14 @@
 #define BANDAQ "bandaQ"
 #define BANDAC "bandaC"
 
-CRecvBossCore::CRecvBossCore()
-{
-}
-
-CRecvBossCore::~CRecvBossCore()
-{
-}
 
 void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration *config,acscomponent::ACSComponentImpl *me)
 	throw (ComponentErrors::UnexpectedExImpl)
 {
-	m_currentReceiver="";
+	m_currentRecvCode="";
+	m_currentRecvInstance="";
+	m_currentRecvError=false;
+	m_currentRecv=Receivers::Receiver::_nil();
 	m_currentOperativeMode="";
 	//m_fsOpened=false;
 	//m_fsCalOpened=false;
@@ -34,6 +30,8 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	m_services=services;
 	m_feeds=0;
 	m_IFs=0;
+	m_lastStatusChange=0;
+	m_bossStatus=Management::MNG_OK;
 	for (unsigned i=0;i<_RECVBOSSCORE_MAX_IFS;i++) {
 		m_startFreq[i]=0.0;
 		m_bandWidth[0]=0.0;
@@ -74,21 +72,11 @@ void CRecvBossCore::cleanUp()
 	m_fsSocket.Close(err);
 	err.Reset();
 	m_fsSocketCal.Close(err);
+	unloadReceiver();
 }
-
-void CRecvBossCore::externalCalOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-				ComponentErrors::UnexpectedExImpl)
-{
-}
-
-void CRecvBossCore::externalCalOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-				ComponentErrors::UnexpectedExImpl)
-{
-}
-
 
 void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
         //TODO: add error management
@@ -100,7 +88,7 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 }
 
 void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
         //TODO: add error management
@@ -111,32 +99,9 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 	CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::calOn()",(LM_NOTICE,"NOISE_CAL_TURNED_OFF"));
 }
 
-void CRecvBossCore::setupReceiver(const char * code) throw (ManagementErrors::ConfigurationErrorExImpl)
-{
-	try {
-		setup(code);
-	}
-	catch(ACSErr::ACSbaseExImpl& ex) {
-		_ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl,impl,ex,"CRecvBossCore::setupReceiver()");
-		impl.setSubsystem("Receivers");
-		throw impl;
-	}
-}
-
-void CRecvBossCore::AUOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-				ComponentErrors::UnexpectedExImpl)
-{
-	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::AUOn()",(LM_NOTICE,"ANTENNA_UNIT_ON_OPERATION_NOT_SUPPORTED"));
-}
-
-void CRecvBossCore::AUOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-				ComponentErrors::UnexpectedExImpl)
-{
-	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::AUOff()",(LM_NOTICE,"ANTENNA_UNIT_OFF_OPERATION_NOT_SUPPORTED"));
-}
-
-void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
+void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,
+	ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+	ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR_NOT_SUPPORTED_YET"));
@@ -201,7 +166,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			if ((i % 2)==0) m_pols[i]=Receivers::RCV_LCP;
 			else m_pols[i]=Receivers::RCV_RCP;
 		}
-		m_currentReceiver=BANDAK;
+		m_currentRecvCode=BANDAK;
 		m_currentOperativeMode="NORMAL";
 	}
 	else if (rec==BANDAQ) {
@@ -226,7 +191,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			if ((i % 2)==0) m_pols[i]=Receivers::RCV_LCP;
 			else m_pols[i]=Receivers::RCV_RCP;
 		}
-		m_currentReceiver=BANDAQ;
+		m_currentRecvCode=BANDAQ;
 		m_currentOperativeMode="NORMAL";
 	}
 	else if (rec==BANDAC) {
@@ -251,18 +216,19 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			if ((i % 2)==0) m_pols[i]=Receivers::RCV_LCP;
 			else m_pols[i]=Receivers::RCV_RCP;
 		}
-		m_currentReceiver=BANDAC;
+		m_currentRecvCode=BANDAC;
 		m_currentOperativeMode="NORMAL";
 	}
 	/*m_fsSocket.Close(err);
 	m_fsOpened=false;*/
 	m_status=Management::MNG_OK;
 	m_cal=false;
-	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_NOTICE,"NEW_RECEIVER_CONFIGURED %s",(const char *)m_currentReceiver));
+	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_NOTICE,"NEW_RECEIVER_CONFIGURED %s",(const char *)m_currentRecvCode));
 }
 
 void CRecvBossCore::setMode(const char * mode) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::ModeErrorExImpl,
-		ComponentErrors::UnexpectedExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::CORBAProblemExImpl)
+		ComponentErrors::UnexpectedExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+		ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setMode()",(LM_NOTICE,"MODE_NOT_SUPPORTED_YET"));
@@ -271,15 +237,18 @@ void CRecvBossCore::setMode(const char * mode) throw (ComponentErrors::Validatio
 void CRecvBossCore::park() throw (ManagementErrors::ParkingErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	m_currentReceiver="";
+	m_currentRecvCode="";
 	m_currentOperativeMode="";
 	m_IFs=0;
 	m_feeds=0;
 	m_totalOutputs=0;
+	unloadReceiver();
 }
 
 double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& feed,const long& ifNumber,double& waveLen) throw (ComponentErrors::ValidationErrorExImpl,
-		ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,
+		ReceiversErrors::UnavailableReceiverOperationExImpl,
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	double centralFreq;
 	double taper;
@@ -305,13 +274,13 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 	}
 	centralFreq=m_LO[index]+realFreq+realBw/2;
 	centralFreq/=1000.0; //central frequency in GHz
-	if (m_currentReceiver==BANDAK) {  // this values are pure guesses!!!!
+	if (m_currentRecvCode==BANDAK) {  // this values are pure guesses!!!!
 		taper=-12.6;
 	}
-	else if (m_currentReceiver==BANDAQ) {
+	else if (m_currentRecvCode==BANDAQ) {
 		taper=-26.0;
 	}
-	else if (m_currentReceiver==BANDAC) {
+	else if (m_currentRecvCode==BANDAC) {
 		taper=-12.0;
 	}
 	else {
@@ -324,46 +293,12 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 	return taper;
 }
 
-/*double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-		ComponentErrors::ValidationErrorExImpl)
-double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (ComponentErrors::CouldntGetComponentExImpl,
-		ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl)
-{
-	// no need to check anything
-	return 0;
-}*/
-
-/*
-void CRecvBossCore::derotatorSetup (const Receivers::TUpdateModes& mode,const Receivers::TRewindModes& rewind,const long& feeds) throw (
-		ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
-   		ReceiversErrors::DewarPositionerSetupErrorExImpl)
-{
-	// baci::ThreadSyncGuard guard(&m_mutex);
-	// no support in ESCs for that
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetup()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}*/
-
-/*
-void CRecvBossCore::derotatorPark() throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-    			ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
-    			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	// baci::ThreadSyncGuard guard(&m_mutex);
-	// no support in ESCs for that
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorPark()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}*/
-
 long CRecvBossCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) throw (ComponentErrors::ValidationErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if ((m_currentReceiver!="")) { // if a receiver has been configured!
+	if ((m_currentRecvCode!="")) { // if a receiver has been configured!
 		X.length(1);
 		Y.length(1);
 		power.length(1);
@@ -382,7 +317,7 @@ long CRecvBossCore::getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq&
 
 void CRecvBossCore::getIFOutput(const ACS::longSeq& feeds,const ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq&  bw,ACS::longSeq& pols,ACS::doubleSeq& LO)  throw (
 		ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	unsigned stdLen=feeds.length();
@@ -431,7 +366,7 @@ void CRecvBossCore::CRecvBossCore::startScan(ACS::Time& startUT,const Receivers:
 
 void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
 		const ACS::longSeq& ifs,bool& onoff,double& scale) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
-		ComponentErrors::UnexpectedExImpl)
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	double LeftMarkCoeff[1][4];
@@ -463,15 +398,15 @@ void CRecvBossCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& re
 	resFreq.length(stdLen);
 	resBw.length(stdLen);
 	onoff=m_cal;
-	if (m_currentReceiver==BANDAK) {
+	if (m_currentRecvCode==BANDAK) {
 		LeftMarkCoeff[0][0]=0.000001; LeftMarkCoeff[0][1]=0.823680; LeftMarkCoeff[0][2]=1825.749665; LeftMarkCoeff[0][3]=-13489491.21593;
 		RightMarkCoeff[0][0]=0.000001; RightMarkCoeff[0][1]=-0.066772; RightMarkCoeff[0][2]=1472.736500; RightMarkCoeff[0][3]=-10827302.569501;
 	}
-	else if (m_currentReceiver==BANDAQ) {
+	else if (m_currentRecvCode==BANDAQ) {
 		LeftMarkCoeff[0][0]=0.0;LeftMarkCoeff[0][1]=0.0000538;LeftMarkCoeff[0][2]=2.41322118;LeftMarkCoeff[0][3]=35949.0897503;
 		RightMarkCoeff[0][0]=0.0;RightMarkCoeff[0][1]=0.0;RightMarkCoeff[0][2]=0.0;RightMarkCoeff[0][3]=16.5;
 	}
-	else if (m_currentReceiver==BANDAC) {	
+	else if (m_currentRecvCode==BANDAC) {	
 		LeftMarkCoeff[0][0]=0.00000;LeftMarkCoeff[0][1]=-0.00116;LeftMarkCoeff[0][2]=5.81764;LeftMarkCoeff[0][3]=-9714.90615;
 		RightMarkCoeff[0][0]=0.00000;RightMarkCoeff[0][1]=-0.00631;RightMarkCoeff[0][2]=30.81321;RightMarkCoeff[0][3]=-50717.24085;
 	}
@@ -576,7 +511,7 @@ void CRecvBossCore::getIFs(long& ifs) throw (ComponentErrors::CouldntGetComponen
 
 const IRA::CString& CRecvBossCore::getRecvCode()
 {
-	return m_currentReceiver;
+	return m_currentRecvCode;
 }
 
 const IRA::CString& CRecvBossCore::getOperativeMode() throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverAttributeExImpl)
@@ -597,7 +532,7 @@ void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErr
 	baci::ThreadSyncGuard guard(&m_mutex);
 	IRA::CIRATools::getTime(now);
 	if (CIRATools::timeDifference(lastEvent,now)>=1000000) {  //one second from last event
-		data.tracking=(m_currentReceiver!="");
+		data.tracking=(m_currentRecvCode!="");
 		data.timeMark=now.value().value;
 		data.status=m_status;
 		try {
@@ -677,80 +612,4 @@ void CRecvBossCore::closeScan(ACS::Time& timeToStop) throw (ReceiversErrors::Dew
 	timeToStop=0;
 }
 
-void CRecvBossCore::getDewarParameter(Receivers::TDerotatorConfigurations& mod,double& pos) throw (
-  ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	mod=Receivers::RCV_UNDEF_DEROTCONF;
-	pos=0.0;
-}
-
-void CRecvBossCore::derotatorSetConfiguration(const Receivers::TDerotatorConfigurations& conf) throw (
-	ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-	ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-	ComponentErrors::UnexpectedExImpl)
-{
-	// no support in ESCS for that
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetConfiguration()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
-void CRecvBossCore::derotatorSetRewindingMode(const Receivers::TRewindModes& rewind) throw (
-		ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
-{
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetRewindingMode()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
-void CRecvBossCore::derotatorSetAutoRewindingSteps(const long& steps) throw (
-		ComponentErrors::ValidationErrorExImpl,ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-		ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerSetupErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
-{
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorSetAutoRewindingSteps()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
-void CRecvBossCore::setDerotatorPosition(const double& pos) throw (ReceiversErrors::NoDewarPositioningExImpl,
-  ReceiversErrors::NoDerotatorAvailableExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
-  ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-  ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
-{
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::setDerotatorPosition()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
-void CRecvBossCore::derotatorRewind(const long& steps) throw (ComponentErrors::ValidationErrorExImpl,
-  ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-  ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl,
-  ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ReceiversErrors::DewarPositionerNotConfiguredExImpl)
-{
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorRewind()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
-
-double CRecvBossCore::getDerotatorPosition (const ACS::Time& epoch) throw (ComponentErrors::CouldntGetComponentExImpl,
-		ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
-		ComponentErrors::UnexpectedExImpl)
-{
-	// no need to check anything
-	return -9999.99;
-}
-
-void CRecvBossCore::derotatorPark() throw (ReceiversErrors::NoDewarPositioningExImpl,ReceiversErrors::NoDerotatorAvailableExImpl,
-    			ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::DewarPositionerParkingErrorExImpl,
-    			ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
-{
-	// baci::ThreadSyncGuard guard(&m_mutex);
-	// no support in ESCs for that
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::derotatorPark()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
-}
 

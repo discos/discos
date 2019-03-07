@@ -56,6 +56,8 @@ ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -py LocalOs
 echo "...LocalOscillatorLPContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp LoggerContainer > /dev/null 2>&1 &'"
 echo "...LoggerContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp ManagementContainer > /dev/null 2>&1 &'"
+echo "...ManagementContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp MinorServoBossContainer > /dev/null 2>&1 &'"
 echo "...MinorServoBossContainer!"
 ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp MinorServoContainer > /dev/null 2>&1 &'"

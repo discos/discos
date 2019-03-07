@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
 	componentName=info->name;
 	acu=Antenna::MedicinaMount::_narrow(obj.in());
 	
-	ACS_LOG(LM_SOURCE_INFO,"mountTui::Main()",(LM_DEBUG,"OK, reference is: %d",acu.ptr()));
+	ACS_LOG(LM_SOURCE_INFO,"mountTui::Main()",(LM_DEBUG,"OK, reference is: %ld",(long)acu.ptr()));
 	ACE_OS::sleep(1);
 	try {	
 		/* Get ACS properties */
@@ -314,7 +314,7 @@ int main(int argc, char *argv[]) {
 		_TW_SET_COMPONENT(section_box,42,18,16,1,BLACK_WHITE,CStyle::BOLD,outputField);
 		_TW_SET_COMPONENT(mountStatus_box,42,19,16,1,BLACK_WHITE,CStyle::BOLD,outputField);
 		
-		strcpy(formatString,"% 010.5lf");
+		strcpy(formatString,"%010.5f");
 		azimuth_field->setFormatFunction(CFormatFunctions::floatingPointFormat,static_cast<const char*>(formatString));	
 		elevation_field->setFormatFunction(CFormatFunctions::floatingPointFormat,static_cast<const char*>(formatString));	
 		azimuthError_field->setFormatFunction(CFormatFunctions::floatingPointFormat,static_cast<const char*>(formatString));		
