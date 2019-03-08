@@ -4,6 +4,11 @@
 #define RECV_PORT 2096
 #define FS_ADDRESS "192.167.189.62"
 #define FS_PORT 5002
+#define SXKL_ADDRESS "192.167.189.2"
+#define SXKL_PORT 9876
+
+
+#include "sxklLine.i"
 
 // speed of light in meters per second
 #define LIGHTSPEED 299792458.0
@@ -16,8 +21,8 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	m_currentRecvError=false;
 	m_currentRecv=Receivers::Receiver::_nil();
 	m_currentOperativeMode="";
-	m_recvOpened=false;
-	m_fsOpened=false;
+	//m_recvOpened=false;
+	//m_fsOpened=false;
 	m_status=Management::MNG_WARNING;
 	m_services=services;
 	m_feeds=0;
@@ -34,13 +39,13 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	m_notificationChannel=NULL;
 	m_loEpoch=m_starFreqEpoch=m_bandWidthEpoch=m_polEpoch=m_feedsEpoch=m_IFsEpoch=m_modeEpoch=0;
 
-	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::initialize()",(LM_INFO,"OPENING_RECEIVERS_BOSS_NOTIFICATION_CHANNEL"));
 	try {
 		m_notificationChannel=new nc::SimpleSupplier(Receivers::RECEIVERS_DATA_CHANNEL,me);
 	}
 	catch (...) {
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CRecvBossCore::initialize()");
 	}
+	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::initialize()",(LM_INFO,"ReceiversBoss notification channel open"));
 }
 
 void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl)
@@ -60,7 +65,7 @@ void CRecvBossCore::cleanUp()
 void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
-	IRA::CError err;
+	//IRA::CError err;
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_currentRecvCode=="KKC") {
 		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
@@ -96,26 +101,17 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 	}
 	else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")){
 		char buffer [14] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','n','\n' };
-		if (m_recvSocket.Send(err,(const void *)buffer,14)!=14) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::calOn()");
+		if (!sendToRecvControl((const void *)buffer,14)) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOn()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-		m_recvSocket.Receive(err,(void *)buffer,13); // read the answer but for the moment I don't care. I hope everything worked properly
 	}
 	else if (m_currentRecvCode=="XXP") {
 		// turn the marca on through the FS
 		IRA::CString fsBuffer("sxkl=*,on\n");
-		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::calOn()");
+		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOn()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
@@ -127,13 +123,13 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 		throw impl;
 	}
 	m_cal=true;
-	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::calOn()",(LM_NOTICE,"NOISE_CAL_TURNED_ON"));
+	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::calOn()",(LM_NOTICE,"Noise mark is turned on"));
 }
 
 void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::UnavailableReceiverOperationExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
-	IRA::CError err;
+	//IRA::CError err;
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_currentRecvCode=="KKC") {
 		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
@@ -169,29 +165,20 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 	}
 	else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")) {
 		char buffer [15] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','f','f','\n' };
-		if (m_recvSocket.Send(err,(const void *)buffer,15)!=15) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::calOff()");
+		if (!sendToRecvControl((const void *)buffer,15)) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOff()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-		m_recvSocket.Receive(err,(void *)buffer,14); // read the answer but for the moment I don't care. I hope everything worked properly
 	}
 	else if (m_currentRecvCode=="XXP") {
 		// turn the marca on through thr FS
 		IRA::CString fsBuffer("sxkl=*,off\n");
-		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::calOff()");
+		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOff()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}
+		}				
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::calOff()");
@@ -200,7 +187,7 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 		throw impl;
 	}
 	m_cal=false;
-	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::calOff()",(LM_NOTICE,"NOISE_CAL_TURNED_OFF"));
+	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::calOff()",(LM_NOTICE,"Noise mark is turned off"));
 }
 
 void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,
@@ -208,8 +195,6 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 	ReceiversErrors::UnavailableReceiverOperationExImpl,
 	ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
-
-	char buff [10];
 	WORD len;
 	//double loAmp[4]={-55.24524,11.41288,-0.79437,0.01894};
 	IRA::CError err;
@@ -224,7 +209,7 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 		throw impl;
 	}
 	if (lo[0]==-1) {
-		ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"KEEP_CURRENT_LOCAL_OSCILLATOR %lf",m_LO[0]));
+		CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"Keeping local oscillator value: %lf",m_LO[0]));
 		return;
 	}
 	//***********************************************************************/
@@ -267,13 +252,13 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 		//no difference between IFs so take just the first value
 		trueValue=lo[0]+2300.0;
 		m_LO[0]=m_LO[1]=lo[0];
-		ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR: %lf",m_LO[0]));
+		CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"New local oscillator value: %lf",m_LO[0]));
 	}
 	else if (m_currentRecvCode=="CHC") {
 		//no difference between IFs so take just the first value
 		trueValue=lo[0]+2300.0;
 		m_LO[0]=m_LO[1]=lo[0];
-		ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR: %lf",m_LO[0]));
+		CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::setLO()",(LM_NOTICE,"New local oscillator value: %lf",m_LO[0]));
 	}
 	else if (m_currentRecvCode=="XXP") {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setLO()");
@@ -287,19 +272,14 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 		m_status=Management::MNG_WARNING;
 		throw impl;
 	}
-	// at the moment the settable LO is unique...so no difference from recevier to receiver
+	// at the moment the settable LO is unique...so no difference from receiver to receiver
 	msg.Format("set lofreq %lf\n",(double)trueValue);
 	len=msg.GetLength();
-	if (m_recvSocket.Send(err,(const void *)msg,len)!=len) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-		dummy.setCode(err.getErrorCode());
-		dummy.setDescription((const char*)err.getDescription());
-		err.Reset();
-		_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setLO()");
+	if (!sendToRecvControl((const void *)msg,len)) {
+		_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::setLO()");
 		m_status=Management::MNG_FAILURE;
 		throw impl;
-	}
-	m_recvSocket.Receive(err,(void *)buff,10); // read the answer but for the moment I don't care. I hope everything worked properly
+	}	
 	IRA::CIRATools::Wait(0,500000);  //wait half a second to settle things down
 }
 
@@ -308,64 +288,8 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 	IRA::CError err;
 	IRA::CString rec(code);
 	IRA::CString recvIpAddr(RECV_ADDRESS);
-	DWORD recvPort=RECV_PORT;
-	DWORD fsPort=FS_PORT;
 	IRA::CString fsIpAddr(FS_ADDRESS);
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if (!m_fsOpened) {
-		if (m_fsSocket.Create(err,IRA::CSocket::STREAM)!=IRA::CSocket::SUCCESS) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
-			m_status=Management::MNG_FAILURE;
-			throw impl;
-		}
-		if (m_fsSocket.Connect(err,fsIpAddr,fsPort)==IRA::CSocket::FAIL) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription( (const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
-			m_status=Management::MNG_FAILURE;
-			throw impl;
-		}
-		IRA::CIRATools::Wait(0,500000);  //wait half a second to settle things down
-		m_fsOpened=true;
-	}
-	// Configure the communication for the receiver configuration
-	if (!m_recvOpened) {
-		if (m_recvSocket.Create(err,IRA::CSocket::STREAM)!=IRA::CSocket::SUCCESS) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
-			m_status=Management::MNG_FAILURE;
-			throw impl;
-		}
-		if (m_recvSocket.setSockMode(err,IRA::CSocket::NONBLOCKING)==IRA::CSocket::FAIL) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription( (const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
-			m_status=Management::MNG_FAILURE;
-			throw impl;
-		}
-		if (m_recvSocket.Connect(err,recvIpAddr,recvPort)==IRA::CSocket::FAIL) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription( (const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
-			m_status=Management::MNG_FAILURE;
-			throw impl;
-		}
-		IRA::CIRATools::Wait(0,500000);  //wait half a second to settle things down
-		m_recvOpened=true;
-	}
 	if (rec=="KKC") {
 		IRA::CString component;
 		bool derotator;
@@ -417,27 +341,18 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 	}
 	else if (rec=="CCC") {
 		char buffer [9] = {'p','r','o','c',' ','c','c','c','\n' };
-		if (m_recvSocket.Send(err,(const void *)buffer,9)!=9) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
+		if (!sendToRecvControl((const void *)buffer,9)) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::setup()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-		m_recvSocket.Receive(err,(void *)buffer,9); // read the answer but for the moment I don't care. I hope everything worked properly
 		// now set the subreflector configuration through the FS
 		IRA::CString fsBuffer("scu=ccc\n");
-		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
+		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::setup()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}
+		}	
 		m_LO[0]=4600.0;
 		m_LO[1]=4600.0;
 		m_IFs=2;
@@ -454,27 +369,18 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 	}
 	else if (rec=="CHC") {
 		char buffer [9] = {'p','r','o','c',' ','c','h','c','\n' };
-		if (m_recvSocket.Send(err,(const void *)buffer,9)!=9) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
+		if (!sendToRecvControl((const void *)buffer,9)) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::setup()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}
-		m_recvSocket.Receive(err,(void *)buffer,9); // read the answer but for the moment I don't care. I hope everything worked properly
+		}		
 		// now set the subreflector configuration through the FS
 		IRA::CString fsBuffer("scu=chc\n");
-		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
+		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::setup()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}
+		}		
 		m_LO[0]=6400.0;
 		m_LO[1]=6400.0;
 		m_IFs=2;
@@ -491,38 +397,26 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 	}
 	else if (rec=="XXP") {
 		char buffer [9] = {'p','r','o','c',' ','x','x','p','\n' };
-		if (m_recvSocket.Send(err,(const void *)buffer,9)!=9) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
+		if (!sendToRecvControl((const void *)buffer,9)) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::setup()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}
-		m_recvSocket.Receive(err,(void *)buffer,9); // read the answer but for the moment I don't care. I hope everything worked properly
+		}		
 		// now set the subreflector configuration through the FS
 		IRA::CString fsBuffer("scu=xxp\n");
-		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
+		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::setup()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}
+		}			
 		 //fsBuffer=IRA::CString("sxkl=send%0068033f\n");
 		fsBuffer=IRA::CString("xxpmode\n");
-		if (m_fsSocket.Send(err,(const void *)fsBuffer,fsBuffer.GetLength())!=fsBuffer.GetLength()) {
-			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,err);
-			dummy.setCode(err.getErrorCode());
-			dummy.setDescription((const char*)err.getDescription());
-			err.Reset();
-			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,impl,dummy,"CRecvBossCore::setup()");
+		// now set the subreflector configuration through the FS
+		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::setup()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}
+		}					
 		m_LO[0]=8080.0;
 		m_LO[1]=8080.0;
 		m_IFs=2;
@@ -545,7 +439,7 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 	}
 	m_status=Management::MNG_OK;
 	m_cal=false;
-	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_NOTICE,"NEW_RECEIVER_CONFIGURED %s",(const char *)m_currentRecvCode));
+	CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::setup()",(LM_NOTICE,"New receiver configured %s",(const char *)m_currentRecvCode));
 }
 
 void CRecvBossCore::setMode(const char * mode) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ReceiversErrors::ModeErrorExImpl,
@@ -560,12 +454,10 @@ void CRecvBossCore::setMode(const char * mode) throw (ComponentErrors::Validatio
 	IRA::CString newMode(mode);
 	if (m_currentRecvCode=="CCC") {
 		if (newMode=="NORMAL") {
-			m_currentOperativeMode=newMode;
 			m_bandWidth[0]=400.0;
 			m_bandWidth[1]=400.0;
 		}
 		else if (newMode=="NARROWBANDWIDTH") {
-			m_currentOperativeMode=newMode;
 			m_bandWidth[0]=150.0;
 			m_bandWidth[1]=150.0;
 		}
@@ -573,10 +465,29 @@ void CRecvBossCore::setMode(const char * mode) throw (ComponentErrors::Validatio
 			_EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CRecvBossCore::setMode()");
 			throw impl;
 		}
+		m_currentOperativeMode=newMode;
+		CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::setMode()",(LM_NOTICE,"New receiver mode %s",(const char *)m_currentOperativeMode));
+	}
+	else if (m_currentRecvCode=="CHC") {
+		if (newMode=="NORMAL") {
+			m_bandWidth[0]=400.0;
+			m_bandWidth[1]=400.0;
+		}
+		else if (newMode=="NARROWBANDWIDTH") {
+			m_bandWidth[0]=150.0;
+			m_bandWidth[1]=150.0;
+		}
+		else {
+			_EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CRecvBossCore::setMode()");
+			throw impl;
+		}
+		m_currentOperativeMode=newMode;
+		CUSTOM_LOG(LM_FULL_INFO,"CRecvBossCore::setMode()",(LM_NOTICE,"New receiver mode %s",(const char *)m_currentOperativeMode));
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::setMode()");
-		impl.setReason("current receiver does not have operative modes");
+		impl.setReason("current receiver does not support operative modes");
+		_ADD_USER_MESSAGE(impl,"The configured receiver does not support operative modes");
 		m_status=Management::MNG_WARNING;
 		throw impl;
 	}
@@ -595,7 +506,7 @@ void CRecvBossCore::park() throw (ManagementErrors::ParkingErrorExImpl)
 			m_currentRecv->deactivate();
 		}
 		catch (...) {
-			ACS_LOG(LM_FULL_INFO,"CRecvBossCore::park()",(LM_WARNING,"COULD_NOT_DEACTIVATE_CURRENT_RECEIVER"));
+			ACS_LOG(LM_FULL_INFO,"CRecvBossCore::park()",(LM_WARNING,"Current receiver could not be deactivated"));
 		}
 	}	
 	unloadReceiver();
@@ -655,7 +566,6 @@ double CRecvBossCore::getTaper(const double& freq,const double& bw,const long& f
 			throw impl;
 		}
 	}		
-	
 	if ((ifNumber>=m_IFs) || (ifNumber<0)) {
 		_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CRecvBossCore::getTaper()");
 		impl.setValueName("IF identifier");
@@ -1410,6 +1320,64 @@ void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErr
 		}
 		IRA::CIRATools::timeCopy(lastEvent,now);
 	}
+}
+
+bool CRecvBossCore::sendToRecvControl(const void *buffer,unsigned size)
+{
+	IRA::CSocket sock;
+	IRA::CError err;
+	char readout[128];
+	IRA::CString recvIpAddr(RECV_ADDRESS);
+	DWORD recvPort=RECV_PORT;
+	try {
+		if (sock.Create(err,IRA::CSocket::STREAM)!=IRA::CSocket::SUCCESS) {
+			return false;
+		}
+		if (sock.setSockMode(err,IRA::CSocket::NONBLOCKING)==IRA::CSocket::FAIL) {
+			return false;
+		}
+		if (sock.Connect(err,recvIpAddr,recvPort)==IRA::CSocket::FAIL) {
+			return false;
+		}
+		if (sock.Send(err,buffer,size)!=(int)size) {
+			return false;
+		}
+		if (sock.Receive(err,(void *)readout,128)==IRA::CSocket::FAIL) {
+			return false;
+		}
+		if (strcmp(readout,"ACK\n")!=0) {
+			return false;
+		} 		
+		sock.Close(err);
+	}
+	catch (...) {
+		return false;		
+	}
+	return true;
+}
+
+bool CRecvBossCore::sendToFS(const void *buffer,unsigned size)
+{
+	IRA::CSocket sock;
+	IRA::CError err;
+	IRA::CString fsAddr(FS_ADDRESS);
+	DWORD fsPort=FS_PORT;
+	try {
+		if (sock.Create(err,IRA::CSocket::STREAM)!=IRA::CSocket::SUCCESS) {
+			return false;
+		}
+		if (sock.Connect(err,fsAddr,fsPort)==IRA::CSocket::FAIL) {
+			return false;
+		}
+		if (sock.Send(err,buffer,size)!=(int)size) {
+			return false;
+		}	
+		sock.Close(err);
+	}
+	catch (...) {
+		return false;		
+	}
+	return true;
 }
 
 

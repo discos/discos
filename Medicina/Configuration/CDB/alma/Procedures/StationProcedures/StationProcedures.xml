@@ -80,6 +80,23 @@
 </body>
 </Procedure>
 
+<Procedure name="setupCHCL" args="0">
+<body>
+	antennaSetup=CHC
+	receiversSetup=CHC
+	receiversMode=NARROWBANDWIDTH
+	chooseBackend=TotalPower
+	initialize=CHCL
+	setSection=0,*,300.0,*,*,*,*
+	setSection=1,*,300.0,*,*,*,*
+	setAttenuation=0,8
+	setAttenuation=1,8
+	device=0
+	calOff
+	restFrequency=0
+</body>	
+</Procedure>
+
 <Procedure name="telescopePark" args="0">
 <body>
 	goTo=180d,89.8d
