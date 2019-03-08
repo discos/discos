@@ -44,7 +44,11 @@ endif
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     =
-EXECUTABLES_L   = 
+EXECUTABLES_L   = TestMedicinaSXKL
+
+TestMedicinaSXKL_OBJECTS = TestMedicinaSXKL
+TestMedicinaSXKL_LIBS = IRALibrary
+
 
 #
 # <brief description of xxxxx program>

@@ -26,6 +26,7 @@
 #include <ReceiversDefinitionsS.h>
 #include <IRA>
 #include <acsncSimpleSupplier.h>
+#include <ParserConnector.h>
 #include "Configuration.h"
 #define _RECVBOSSCORE_MAX_IFS 4
 
@@ -321,15 +322,15 @@ private:
 	/**
 	 * Socket to the KBand Recevier
 	 */
-	IRA::CSocket m_kBandSocket;
+	//IRA::CSocket m_kBandSocket;
 	
 	/**
 	 * Socket for the Receviers configuration
 	 */
-	IRA::CSocket m_recvSocket;
-	IRA::CSocket m_fsSocket;
-	bool m_recvOpened;
-	bool m_fsOpened;
+	//IRA::CSocket m_recvSocket;
+	//IRA::CSocket m_fsSocket;
+	//bool m_recvOpened;
+	//bool m_fsOpened;
 	bool m_cal;
 	IRA::CDBTable *m_KKCFeedTable;
 	double m_LO[_RECVBOSSCORE_MAX_IFS];
@@ -415,6 +416,8 @@ private:
 
 #ifdef COMPILE_TARGET_MED
 	void setup(const char * code) throw(ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+	bool sendToRecvControl(const void *buffer,unsigned size);
+	bool sendToFS(const void *buffer,unsigned size);
 
 #elif COMPILE_TARGET_NT
 	void setup(const char * code) throw(ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);

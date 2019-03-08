@@ -62,6 +62,20 @@
 </Configuration>
 
 <Configuration>
+	<configurationID>CHCL</configurationID>
+ 	<sections>2</sections>
+ 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+ 	<inputPort>GREGORIAN GREGORIAN PRIMARY PRIMARY</inputPort>
+ 	<inputPortDB>13 13 7 7</inputPortDB>
+ 	<inputPortBW>2350 2350 2350 2350</inputPortBW> 	
+ 	<beams>1</beams>
+ 	<section_boards>2 3</section_boards>
+ 	<polarizations>L R</polarizations>
+ 	<feed>0 0</feed>
+ 	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
 	<configurationID>XXP</configurationID>
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
