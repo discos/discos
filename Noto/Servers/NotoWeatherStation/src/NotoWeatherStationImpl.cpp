@@ -14,16 +14,16 @@ NotoWeatherStationImpl::NotoWeatherStationImpl(
 		       m_windspeed(this),
 		       m_humidity(this),
 		       m_pressure(this),
-                       m_windspeedPeak(this)
+             m_windspeedPeak(this)
 {	
-        AUTO_TRACE("NotoWeatherStationImpl::NotoWeatherStationImpl");
+	AUTO_TRACE("NotoWeatherStationImpl::NotoWeatherStationImpl");
 }
 
 NotoWeatherStationImpl::~NotoWeatherStationImpl()
 {
 
-        if(m_controlThread_p!=0)
-        getContainerServices()->getThreadManager()->destroy(m_controlThread_p);
+        /*if(m_controlThread_p!=0)
+        getContainerServices()->getThreadManager()->destroy(m_controlThread_p);*/
 
         AUTO_TRACE("NotoWeatherStationImpl::~NotoWeatherStationImpl");
 //	deleteAll();
@@ -32,11 +32,105 @@ NotoWeatherStationImpl::~NotoWeatherStationImpl()
 
 void NotoWeatherStationImpl::cleanUp() throw (ACSErr::ACSbaseExImpl)
 {
-	    CharacteristicComponentImpl::cleanUp();
-                m_controlThread_p->suspend();
-        getContainerServices()->getThreadManager()->stopAll();
-        AUTO_TRACE("NotoWeatherStationImpl::cleanUp()");
+	if (m_controlThread_p!=NULL) {
+		m_controlThread_p->suspend();
+		getContainerServices()->getThreadManager()->destroy(m_controlThread_p);
+	}
+	CharacteristicComponentImpl::cleanUp();	
+   AUTO_TRACE("NotoWeatherStationImpl::cleanUp()");
 }
+
+void NotoWeatherStationImpl::aboutToAbort() throw (ACSErr::ACSbaseExImpl)
+{
+	if (m_controlThread_p!=NULL) {
+		m_controlThread_p->suspend();
+		getContainerServices()->getThreadManager()->destroy(m_controlThread_p);
+	}	
+	AUTO_TRACE("NotoWeatherStationImpl::aboutToAbort()");
+}
+
+void NotoWeatherStationImpl::execute() throw (ACSErr::ACSbaseExImpl)
+{
+	ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::execute()",(LM_INFO,"COMPSTATE_OPERATIONAL"));
+}
+
+void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
+{
+
+	MeteoSocket *sock;
+	try {
+		  if 			(CIRATools::getDBValue(getContainerServices(),"IPAddress",ADDRESS) && CIRATools::getDBValue(getContainerServices(),"port",PORT))
+		{
+			ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::initialize()",(LM_INFO,"IP address %s, Port %d ",(const char *) ADDRESS,PORT));
+
+
+		} else
+		{
+			 ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::initialize()",(LM_ERROR,"Error getting IP address from CDB" ));
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"NotoWeatherStationImpl::initialize()");
+		throw dummy;
+		}    
+
+
+		
+		sock=new MeteoSocket(ADDRESS,PORT);
+ 		m_socket =new CSecureArea<MeteoSocket>(sock);
+		m_temperature=new RWdouble(getContainerServices()->getName()+":temperature", getComponent(), new DevIOTemperature(m_socket),true);
+		
+		m_winddir=new RWdouble(getContainerServices()->getName()+":winddir", getComponent(), new DevIOWinddir(m_socket),true);
+		m_windspeed=new RWdouble(getContainerServices()->getName()+":windspeed", getComponent(), new DevIOWindspeed(m_socket),true);
+		m_humidity=new RWdouble(getContainerServices()->getName()+":humidity", getComponent(), new DevIOHumidity(m_socket),true);
+		m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(m_socket),true);
+                m_windspeedPeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedPeak(m_socket),true);
+                
+                m_controlThread_p = getContainerServices()->getThreadManager()->create<CMeteoParamUpdaterThread, MeteoSocket*>("MeteoParam Updater",sock );
+                m_controlThread_p->setSleepTime  (5*10000000);
+//              m_controlThread_p->setResponseTime(60*1000000);
+                m_controlThread_p->resume();
+                
+		m_parser=new CParser<MeteoSocket>(sock,10);
+		m_parser->add("getWindSpeed",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getWindSpeed),0 );
+		m_parser->add("getTemperature",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getTemperature),0 );
+		m_parser->add("getHumidity",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getHumidity),0 );
+		m_parser->add("getPressure",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getPressure),0 );
+	}
+	catch (std::bad_alloc& ex) {
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"NotoWeatherStationImpl::NotoWeatherStationImpl()");
+		throw dummy;
+	}catch (ComponentErrors::ComponentErrorsExImpl& E) {
+		E.log(LM_DEBUG);
+		throw E;
+	}
+
+#if 0
+
+
+	try {
+		CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
+		if (!sock->isConnected())
+		{
+		sock->connection();
+// 		cout << "Connected  to Meteo Station @"<<ADDRESS<<":"<<PORT <<endl;
+		ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::Disconnect()",(LM_DEBUG,"Connected  to Meteo Station @%s:%d  ",(const char *) ADDRESS,PORT));
+
+		}
+
+	} catch (ComponentErrors::SocketErrorExImpl &x)
+	
+        {
+                 ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::initialize()",
+                       (LM_ERROR,"Can not connect  to WeatherStation @%s:%d  ",
+                       (const char *) ADDRESS,PORT));
+
+		_THROW_EXCPT(ComponentErrors::SocketErrorExImpl,"NotoWeatherStationImpl::initialize()");
+ 
+	}
+#endif 
+
+
+        AUTO_TRACE("NotoWeatherStationImpl::initialize");
+}
+
 
 
 CORBA::Boolean NotoWeatherStationImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
@@ -82,26 +176,10 @@ void NotoWeatherStationImpl::deleteAll()
  
 	ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::deleteAll()",(LM_DEBUG,"Disconnecting from socket @%s  ",(const char *)err.getFullDescription()));
 	//	delete m_socket;
-
-
-
-
  }
 
 
-
-
- void NotoWeatherStationImpl::aboutToAbort() throw (ACSErr::ACSbaseExImpl)
-
-{
-        AUTO_TRACE("NotoWeatherStationImpl::aboutToAbort()");
-
-	cleanUp();
-
-}
-
-
-CORBA::Double NotoWeatherStationImpl::getTemperature() throw (CORBA::SystemException)
+CORBA::Double NotoWeatherStationImpl::getTemperature() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
         AUTO_TRACE("NotoWeatherStationImpl::getTemperature");
 
@@ -110,11 +188,9 @@ CORBA::Double NotoWeatherStationImpl::getTemperature() throw (CORBA::SystemExcep
 	temperature = m_temperature->get_sync(completion.out());
 
 	return temperature;
-
-
-
 }
-CORBA::Double NotoWeatherStationImpl::getWindspeed() throw (CORBA::SystemException)
+
+CORBA::Double NotoWeatherStationImpl::getWindspeed() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
         AUTO_TRACE("NotoWeatherStationImpl::getTemperature");
 
@@ -126,7 +202,7 @@ CORBA::Double NotoWeatherStationImpl::getWindspeed() throw (CORBA::SystemExcepti
 
 }
           
-CORBA::Double NotoWeatherStationImpl::getWindDir() throw (CORBA::SystemException)
+CORBA::Double NotoWeatherStationImpl::getWindDir() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
         AUTO_TRACE("NotoWeatherStationImpl::getTemperature");
 
@@ -136,11 +212,9 @@ CORBA::Double NotoWeatherStationImpl::getWindDir() throw (CORBA::SystemException
         return winddir;
         
 }
+             
           
-          
-          
-          
-CORBA::Double NotoWeatherStationImpl::getWindSpeedAverage() throw (CORBA::SystemException)
+CORBA::Double NotoWeatherStationImpl::getWindSpeedAverage() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
         AUTO_TRACE("NotoWeatherStationImpl::getTemperature");
 
@@ -154,7 +228,7 @@ CORBA::Double NotoWeatherStationImpl::getWindSpeedAverage() throw (CORBA::System
           
           
           
-CORBA::Double NotoWeatherStationImpl::getWindspeedPeak() throw (CORBA::SystemException)
+CORBA::Double NotoWeatherStationImpl::getWindspeedPeak() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
         AUTO_TRACE("NotoWeatherStationImpl::getWindspeedPeak");
         double windspeed;
@@ -168,7 +242,7 @@ CORBA::Double NotoWeatherStationImpl::getWindspeedPeak() throw (CORBA::SystemExc
           
           
           
-CORBA::Double NotoWeatherStationImpl::getPressure() throw (CORBA::SystemException)
+CORBA::Double NotoWeatherStationImpl::getPressure() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
         AUTO_TRACE("NotoWeatherStationImpl::getpressure()");
 
@@ -180,7 +254,7 @@ CORBA::Double NotoWeatherStationImpl::getPressure() throw (CORBA::SystemExceptio
 
 
 }
-CORBA::Double NotoWeatherStationImpl::getHumidity() throw (CORBA::SystemException)
+CORBA::Double NotoWeatherStationImpl::getHumidity() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
         AUTO_TRACE("NotoWeatherStationImpl::getHumidity()");
 
@@ -193,7 +267,7 @@ CORBA::Double NotoWeatherStationImpl::getHumidity() throw (CORBA::SystemExceptio
 
 }
 
-Weather::parameters NotoWeatherStationImpl::getData()throw (CORBA::SystemException)
+Weather::parameters NotoWeatherStationImpl::getData() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
 	Weather::parameters mp;
         AUTO_TRACE("NotoWeatherStationImpl::getData");
@@ -253,107 +327,6 @@ Weather::parameters NotoWeatherStationImpl::getData()throw (CORBA::SystemExcepti
 	return mp;
 }
  
-void NotoWeatherStationImpl::execute() throw (ACSErr::ACSbaseExImpl)
-{
-                        
-                        
-
-}
- 
- 
-void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
-
-{
-
-	MeteoSocket *sock;
-	try {
-		  if 			(CIRATools::getDBValue(getContainerServices(),"IPAddress",ADDRESS) && CIRATools::getDBValue(getContainerServices(),"port",PORT))
-		{
-			ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::initialize()",(LM_INFO,"IP address %s, Port %d ",(const char *) ADDRESS,PORT));
-
-
-		} else
-		{
-			 ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::initialize()",(LM_ERROR,"Error getting IP address from CDB" ));
-		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"NotoWeatherStationImpl::initialize()");
-		throw dummy;
-		}    
-
-
-		
-		sock=new MeteoSocket(ADDRESS,PORT);
- 		m_socket =new CSecureArea<MeteoSocket>(sock);
-		m_temperature=new RWdouble(getContainerServices()->getName()+":temperature", getComponent(), new DevIOTemperature(m_socket),true);
-		
-		m_winddir=new RWdouble(getContainerServices()->getName()+":winddir", getComponent(), new DevIOWinddir(m_socket),true);
-		m_windspeed=new RWdouble(getContainerServices()->getName()+":windspeed", getComponent(), new DevIOWindspeed(m_socket),true);
-		m_humidity=new RWdouble(getContainerServices()->getName()+":humidity", getComponent(), new DevIOHumidity(m_socket),true);
-		m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(m_socket),true);
-                m_windspeedPeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedPeak(m_socket),true);
-                
-                m_controlThread_p = getContainerServices()->getThreadManager()->create<CMeteoParamUpdaterThread, MeteoSocket*>("MeteoParam Updater",sock );
-                m_controlThread_p->setSleepTime  (5*10000000);
-//              m_controlThread_p->setResponseTime(60*1000000);
-                m_controlThread_p->resume();
-                
-                    
-                    
-                    
-
-		m_parser=new CParser<MeteoSocket>(sock,10);
-		m_parser->add("getWindSpeed",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getWindSpeed),0 );
-		m_parser->add("getTemperature",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getTemperature),0 );
-		m_parser->add("getHumidity",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getHumidity),0 );
-		m_parser->add("getPressure",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getPressure),0 );
-                    
-
-
-
-	}
-	catch (std::bad_alloc& ex) {
-		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"NotoWeatherStationImpl::NotoWeatherStationImpl()");
-		throw dummy;
-	}catch (ComponentErrors::ComponentErrorsExImpl& E) {
-		E.log(LM_DEBUG);
-		throw E.getComponentErrorsEx();
-	}
-
-#if 0
-
-
-	try {
-		CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
-		if (!sock->isConnected())
-		{
-		sock->connection();
-// 		cout << "Connected  to Meteo Station @"<<ADDRESS<<":"<<PORT <<endl;
-		ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::Disconnect()",(LM_DEBUG,"Connected  to Meteo Station @%s:%d  ",(const char *) ADDRESS,PORT));
-
-		}
-
-	} catch (ComponentErrors::SocketErrorExImpl &x)
-	
-        {
-                 ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::initialize()",
-                       (LM_ERROR,"Can not connect  to WeatherStation @%s:%d  ",
-                       (const char *) ADDRESS,PORT));
-
-		_THROW_EXCPT(ComponentErrors::SocketErrorExImpl,"NotoWeatherStationImpl::initialize()");
- 
-	}
-#endif 
-
-
-        AUTO_TRACE("NotoWeatherStationImpl::initialize");
-        
-  
-
-}
- 
-
- 
-
-
 
 //pdate();
 

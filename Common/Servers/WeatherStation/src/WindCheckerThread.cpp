@@ -1,7 +1,7 @@
-#include "SRTWeatherStationImpl.h"
+#include "WeatherStationImpl.h"
 
 CWindCheckerThread::CWindCheckerThread (const ACE_CString& name,
-			SRTWeatherStationImpl  *  weatherStation,
+			WeatherStationImpl  *  weatherStation,
 			const ACS::TimeInterval& responseTime,
 			const ACS::TimeInterval& sleepTime) :
 			ACS::Thread(name)
@@ -9,7 +9,7 @@ CWindCheckerThread::CWindCheckerThread (const ACE_CString& name,
 		{
 			ACS_TRACE("CWindCheckerThread::CWindCheckerThread");
 			loopCounter_m = 0;
-			m_srtweatherstation_p = (SRTWeatherStationImpl  *) weatherStation;
+			m_srtweatherstation_p = (WeatherStationImpl  *) weatherStation;
                         m_threshold=m_srtweatherstation_p->m_threshold;
 
 
@@ -32,7 +32,7 @@ CWindCheckerThread::runLoop()
      if (wind >m_threshold){
      
          m_srtweatherstation_p->parkAntenna();
-         ACS_LOG(LM_FULL_INFO,"SRTWeatherStationImpl::initialize()",(LM_WARNING,"WINDSPEED=%f ", wdata.wind));
+         ACS_LOG(LM_FULL_INFO,"CWindCheckerThread::initialize()",(LM_WARNING,"WINDSPEED=%f ", wdata.wind));
 
      }
 

@@ -14,7 +14,7 @@
 #include <baciDevIO.h>
 #include <IRA>
 #include <map>
-#include "SRTWeatherSocket.h"
+#include "WeatherSocket.h"
 #include "WeatherStationData.h"
 using namespace IRA;
 
@@ -31,7 +31,7 @@ public:
 	 * Constructor
 	 * @param Socket pointer to a SecureArea that proctects a the  socket. This object must be already initialized and configured.
 	*/
-	DevIOWinddir(CSecureArea<SRTWeatherSocket>* socket ):m_socket(socket) 
+	DevIOWinddir(CSecureArea<WeatherSocket>* socket ):m_socket(socket) 
 	{		
  		m_initparser=false;
 		AUTO_TRACE("DevIOWinddir::DevIOWinddir()");		
@@ -65,14 +65,14 @@ public:
 		try {
 			CError err;
 			CString rdata="";
-			CSecAreaResourceWrapper<SRTWeatherSocket> sock=m_socket->Get();
+			CSecAreaResourceWrapper<WeatherSocket> sock=m_socket->Get();
  			m_val=sock->getWinDir();
 
 		
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOWinddir::read()");
-			dummy.setPropertyName("systemTemperature");
+			dummy.setPropertyName("windDirection");
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
@@ -90,7 +90,7 @@ public:
 	}
 	
 private:
-	CSecureArea<SRTWeatherSocket>* m_socket;
+	CSecureArea<WeatherSocket>* m_socket;
 	CORBA::Double m_val;
 	WeatherStationData m_wsdata; 
 

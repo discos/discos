@@ -41,29 +41,7 @@ enum { HEATINGTEMP, HEATINGVOLTAGE,SUPPLYVOLTAGE,RIFVOLTAGE,
 	HAILACC,HAILDURATION,HAILINTENSITY,HAILPEAK};
 
 
-static const char *COMMANDS[NSENSORS]={ 
-
- "th01",
- "vh01",
- "vs01",
- "vr01",
- "dn01", 
- "dm01", 
- "dx01", 
- "sn01", 
- "sm01", 
- "sx01", 
- "ta01", 
- "ua01", 
- "pa01", 
- "rc01", 
- "rd01", 
- "ri01", 
- "rp01", 
- "hc01", 
-"hd01", 
-"hi01", 
-"hp01"};  
+extern const char *COMMANDS[NSENSORS];
 
      
 class WeatherStationData

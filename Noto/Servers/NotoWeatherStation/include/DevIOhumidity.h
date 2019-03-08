@@ -67,9 +67,6 @@ public:
 			CString rdata="";
 			CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
 			m_val=sock->getHumidity();
-                        timestamp=getTimeStamp();  //complition time
-                        return m_val;
-
 
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
@@ -86,8 +83,8 @@ public:
                   cout << "Devio humididy unexpected exc"  << endl;
                   			
                   }
-       return m_val;
-                  
+		timestamp=getTimeStamp();  //complition time
+		return m_val;                  
 	}
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.

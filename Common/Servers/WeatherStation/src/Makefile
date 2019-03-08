@@ -1,13 +1,13 @@
 #*******************************************************************************
 # PPPPPPPP
 #
-# "@(#) $Id: Makefile,v 1.1 2011-04-06 14:00:06 spoppi Exp $"
+# "@(#) $Id: Makefile,v 1.3 2011-04-04 13:12:33 spoppi Exp $"
 #
 # Makefile of ........
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
-# almamgr  19/02/08  created
+# spoppi  28/09/10  created
 #
 
 #*******************************************************************************
@@ -24,7 +24,31 @@
 #
 # additional include and library search paths
 #USER_INC = 
-#USER_LIB = 
+USER_LIB = -lACE \
+			-lbaci \
+			-lmaci \
+			-lmaciClient \
+		 	-lTAO \
+			-lTAO_DsLogAdmin \
+			-lTAO_CosNaming \
+			-lTAO_IORTable \
+			-lTAO_PortableServer \
+			-lTAO_Svc_Utils \
+			-lTAO_CosTrading \
+			-lTAO_CosNotification \
+			-lTAO_DynamicAny \
+			-lTAO_IFR_Client \
+			-lTAO_CosProperty \
+			-lacsutil \
+			-lcdb \
+			-llogging \
+			-lacscomponent \
+			-lacserr \
+			-lm \
+			-lloki \
+			-lACSErrTypeCommon \
+			-lncurses
+
 
 #
 # MODULE CODE DESCRIPTION:
@@ -35,19 +59,101 @@
 #
 # C programs (public and local)
 # -----------------------------
-#EXECUTABLES     =
-#EXECUTABLES_L   = 
+EXECUTABLES     =
+EXECUTABLES_L   = 
 
 #
+# <brief description of xxxxx program>
+WeatherStationImpl_OBJECTS   =	 WeatherStationImpl    WeatherSocket WindCheckerThread 
+#xxxxx_LDFLAGS   =
+WeatherStationImpl_LIBS      =ComponentErrors \
+			IRALibrary\
+			ManagementErrors \
+			expat\
+			GenericWeatherStationStubs\
+			ManagmentDefinitionsStubs\
+			ParserErrors\
+			AntennaBossStubs\
+			MountStubs\
+			SchedulerStubs \
+			AntennaDefinitionsStubs\
+			AntennaErrors \
+			DiscosVersion
+			
+			
+
+
+#
+# special compilation flags for single c sources
+#yyyyy_CFLAGS   = 
+
+#
+# Includes (.h) files (public only)
+# ---------------------------------
+INCLUDES        =
+
+#
+# Libraries (public and local)
+# ----------------------------
+LIBRARIES       = WeatherStationImpl
+LIBRARIES_L     =
+
+#
+# <brief description of lllll library>
+lllll_OBJECTS   =
+
+#
+# Scripts (public and local)
+# ----------------------------
+SCRIPTS         =
+SCRIPTS_L       =
+
+#
+# TCL scripts (public and local)
+# ------------------------------
+TCL_SCRIPTS     =
+TCL_SCRIPTS_L   =
+
+#
+# Python stuff (public and local)
+# ----------------------------
+PY_SCRIPTS         =
+PY_SCRIPTS_L       =
+
+PY_MODULES         =
+PY_MODULES_L       =
+
+PY_PACKAGES        =
+PY_PACKAGES_L      =
+pppppp_MODULES	   =
+
+#
+# <brief description of tttttt tcl-script>
+tttttt_OBJECTS  =
+tttttt_TCLSH    = 
+tttttt_LIBS     = 
+
+#
+# TCL libraries (public and local)
+# ------------------------------
+TCL_LIBRARIES   =
+TCL_LIBRARIES_L =
+
+#
+# <brief description of tttlll library>
+tttlll_OBJECTS  = 
+
+#
+# Configuration Database Files
+# ----------------------------
+CDB_SCHEMAS = WeatherStation
+
 # 
 # IDL Files and flags
 # 
-IDL_FILES = SRTWeatherStation
-IDL_TAO_FLAGS =
-USER_IDL =
-SRTWeatherStationStubs_LIBS = baciStubs GenericWeatherStationStubs
-
-
+IDL_FILES = 
+TAO_IDLFLAGS =
+USER_IDL = 
 #
 # Jarfiles and their directories
 #

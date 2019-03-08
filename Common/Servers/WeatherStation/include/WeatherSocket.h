@@ -11,14 +11,14 @@ using namespace IRA;
 
 
 
-class SRTWeatherSocket : public CSocket{
+class WeatherSocket : public CSocket{
 
 
 public:
 
-	SRTWeatherSocket(CString, unsigned int);
-	SRTWeatherSocket(CString, unsigned int,WeatherStationData*);
-	virtual ~SRTWeatherSocket();
+	WeatherSocket(CString, unsigned int);
+	WeatherSocket(CString, unsigned int,WeatherStationData*);
+	virtual ~WeatherSocket();
 	CError  connect() throw (ACSErr::ACSbaseExImpl);
 	CError  disconnect() throw (ACSErr::ACSbaseExImpl);;
 	inline bool isConnected(){return m_isConnected;};

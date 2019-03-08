@@ -17,14 +17,14 @@ CMeteoParamUpdaterThread::CMeteoParamUpdaterThread (const ACE_CString& name,
 void
 CMeteoParamUpdaterThread::runLoop()
 {
-        Weather::parameters wdata;
-        double wind;
+        /*Weather::parameters wdata;
+        double wind;*/
         TIMEVALUE now;
         IRA::CIRATools::getTime(now);
         try{
             m_socket->updateParam();
         }catch(ComponentErrors::SocketErrorExImpl &ex){
-            CUSTOM_LOG(LM_FULL_INFO, "CMeteoParamUpdaterThread::runLoop()", 
+            ACS_LOG(LM_FULL_INFO, "CMeteoParamUpdaterThread::runLoop()", 
                        (LM_WARNING, "Could not update meteo parameters"));
         }
 }
