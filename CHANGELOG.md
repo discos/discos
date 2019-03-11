@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 	issue #325 - added command 'dmed=config' to control the Medicina DMed (IF distributor). The device just 
 	allows to setup a set of programmable attenuators in order to control the singal levels. config select
 	which configuration to apply between a set of predefined one.
+	
+	issue #324 - full support for CHC receiver at Medicina telescope now added.The receiver will be avaiable 
+	under two diffent configurations: 1.2 GHz and 150MHz bandwidth. The respective setup are achived by issueing
+	the following procedures "SETUPCHC" and "SETUPCHCL".  
 
 ### Changed
 
