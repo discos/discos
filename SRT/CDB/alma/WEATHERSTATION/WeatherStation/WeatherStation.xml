@@ -18,14 +18,15 @@ xmlns="urn:schemas-cosylab-com:WeatherStation:1.0"
 	<windspeed 
 		     description="average wind speed"
 		     units = "m/s"
-		     max_value="5"	/>
+		     max_value="55"	/>
 	<windspeedpeak 
 		     description="spike wind direction"
 		     units = "m/s" 
-                     max_value="10"
+                     max_value="60"
 			
 		
 		 />
 	<humidity  description="Humidity" />	
 	<pressure description="pressure" />
+	<autoparkThreshold description="Threshold for wind auto park" />
 </WeatherStation>

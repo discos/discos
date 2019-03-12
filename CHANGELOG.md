@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 	issue #325 - added command 'dmed=config' to control the Medicina DMed (IF distributor). The device just 
 	allows to setup a set of programmable attenuators in order to control the singal levels. config select
 	which configuration to apply between a set of predefined one.
+	
+	issue #323 - The metClient moved to common part as it is now the general cleint for weather stations. 
+	Also the autopark wind threshld is now read from confiugration and not hardcoded.
 
 ### Changed
 
