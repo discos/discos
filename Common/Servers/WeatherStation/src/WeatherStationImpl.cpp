@@ -12,7 +12,8 @@ WeatherStationImpl::WeatherStationImpl(
 		       m_windspeed(this),
 		       m_windspeedpeak(this),
 		       m_humidity(this),
-		       m_pressure(this)
+		       m_pressure(this),
+		       m_autoParkThreshold(this)
 {	
 
       
@@ -316,7 +317,7 @@ void WeatherStationImpl::execute() throw (ACSErr::ACSbaseExImpl)
  
 void WeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
-
+	ACS::Time timestamp;
 	WeatherSocket *sock;
 	ACSErr::Completion_var completion;
 	IRA::CString mountInterface;
@@ -345,6 +346,9 @@ void WeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_windspeedpeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedpeak(m_socket),true);
 		m_humidity=new RWdouble(getContainerServices()->getName()+":humidity", getComponent(), new DevIOHumidity(m_socket),true);
 		m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(m_socket),true);
+		m_autoParkThreshold=new ROdouble(getContainerServices()->getName()+":autoparkThreshold", getComponent());		
+		
+		m_autoParkThreshold->getDevIO()->write(m_threshold,timestamp);
 		
 		WeatherStationImpl* self_p =this;
 		m_controlThread_p = getContainerServices()->getThreadManager()->create<CWindCheckerThread, WeatherStationImpl*>("MeteoStation",self_p );
@@ -465,6 +469,14 @@ WeatherStationImpl::pressure ()
     return prop._retn();
 }
 
+ACS::ROdouble_ptr WeatherStationImpl::autoparkThreshold() throw (CORBA::SystemException)
+{
+	if (m_autoParkThreshold == 0) {
+		return ACS::ROdouble::_nil();
+	}
+	ACS::ROdouble_var prop = ACS::ROdouble::_narrow(m_autoParkThreshold->getCORBAReference());
+	return prop._retn();
+}
 
 void WeatherStationImpl::parkAntenna()
 {

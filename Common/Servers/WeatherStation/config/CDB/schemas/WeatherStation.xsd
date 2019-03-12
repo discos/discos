@@ -13,6 +13,8 @@
 					<xs:element name="windspeedpeak" type="baci:RWdouble"/>
 		  			<xs:element name="humidity" type="baci:RWdouble"/>
 		  			<xs:element name="pressure" type="baci:RWdouble"/>
+		  			<xs:element name="autoparkThreshold" type="baci:ROdouble"/>		  			
+		  			
 		  			
 		    </xs:sequence>
         <xs:attribute name="IPAddress" type="xs:string" use="required"/>

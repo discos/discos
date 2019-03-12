@@ -113,6 +113,10 @@ module Weather {
 		*/
 		readonly attribute ACS::RWdouble windspeedpeak;
 
+		/**
+		 * This is the wind speed threshold used by the autopark system in order to force an antenna stow
+		*/
+		readonly attribute ACS::ROdouble autoparkThreshold;
 						
 	};
 };

@@ -14,4 +14,5 @@ xmlns="urn:schemas-cosylab-com:MedWeatherStation:1.0"
 	<windspeed description="instantaneous wind direction" />
 	<humidity  description="Humidity" />	
 	<pressure description="pressure" />
+	<autoparkThreshold description="Threshold for wind auto park" />
 </MedWeatherStation>
