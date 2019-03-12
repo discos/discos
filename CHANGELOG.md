@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 	issue #323 - The metClient moved to common part as it is now the general cleint for weather stations. 
 	Also the autopark wind threshld is now read from confiugration and not hardcoded.
 
+  issue #324 - full support for CHC receiver at Medicina telescope now added.The receiver will be avaiable 
+	under two diffent configurations: 1.2 GHz and 150MHz bandwidth. The respective setup are achived by issueing
+	the following procedures "SETUPCHC" and "SETUPCHCL".  
+
 ### Changed
 
 	issue #316 - several related commits. The operation releated to the Medicina K band receivers now relys on a

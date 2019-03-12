@@ -1,3 +1,6 @@
+#ifndef _SP_PARSERCONNECTOR_H_
+#define _SP_PARSERCONNECTOR_H_
+
 #include <Definitions.h>
 #include <iostream>
 
@@ -37,9 +40,12 @@ private:
 	static IRA::CString getMessage(EX& exObj);
 };
 
+
 #include "ParserConnector.i"
+
 
 }
 
+#endif
 
 
