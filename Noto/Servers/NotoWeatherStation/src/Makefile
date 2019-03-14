@@ -66,7 +66,7 @@ EXECUTABLES_L   =
 NotoWeatherStationImpl_OBJECTS   =	MeteoSocket CMeteoParamUpdaterThread NotoWeatherStationImpl    
 #xxxxx_LDFLAGS   =
 NotoWeatherStationImpl_LIBS      =ComponentErrors \
-			NotoWeatherStationStubs\
+			GenericWeatherStationStubs\
 			IRALibrary\
 			ManagementErrors \
 			expat \

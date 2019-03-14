@@ -14,7 +14,8 @@ NotoWeatherStationImpl::NotoWeatherStationImpl(
 		       m_windspeed(this),
 		       m_humidity(this),
 		       m_pressure(this),
-             m_windspeedPeak(this)
+             m_windspeedPeak(this),
+             m_autoparkThreshold(this)
 {	
 	AUTO_TRACE("NotoWeatherStationImpl::NotoWeatherStationImpl");
 }
@@ -58,6 +59,7 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
 
 	MeteoSocket *sock;
+	ACS::Time timestamp;
 	try {
 		  if 			(CIRATools::getDBValue(getContainerServices(),"IPAddress",ADDRESS) && CIRATools::getDBValue(getContainerServices(),"port",PORT))
 		{
@@ -81,12 +83,15 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		m_windspeed=new RWdouble(getContainerServices()->getName()+":windspeed", getComponent(), new DevIOWindspeed(m_socket),true);
 		m_humidity=new RWdouble(getContainerServices()->getName()+":humidity", getComponent(), new DevIOHumidity(m_socket),true);
 		m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(m_socket),true);
-                m_windspeedPeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedPeak(m_socket),true);
-                
-                m_controlThread_p = getContainerServices()->getThreadManager()->create<CMeteoParamUpdaterThread, MeteoSocket*>("MeteoParam Updater",sock );
-                m_controlThread_p->setSleepTime  (5*10000000);
+	   m_windspeedPeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedPeak(m_socket),true);
+   	m_autoparkThreshold=new ROdouble(getContainerServices()->getName()+":autoparkThreshold",getComponent());            
+      
+      
+      m_autoparkThreshold->getDevIO()->write(60.0,timestamp);           
+		m_controlThread_p = getContainerServices()->getThreadManager()->create<CMeteoParamUpdaterThread, MeteoSocket*>("MeteoParam Updater",sock );
+      m_controlThread_p->setSleepTime(5*10000000);
 //              m_controlThread_p->setResponseTime(60*1000000);
-                m_controlThread_p->resume();
+      m_controlThread_p->resume();
                 
 		m_parser=new CParser<MeteoSocket>(sock,10);
 		m_parser->add("getWindSpeed",new function0<MeteoSocket,non_constant,double_type >(sock,&MeteoSocket::getWindSpeed),0 );
@@ -190,17 +195,15 @@ CORBA::Double NotoWeatherStationImpl::getTemperature() throw (ACSErr::ACSbaseEx,
 	return temperature;
 }
 
-CORBA::Double NotoWeatherStationImpl::getWindspeed() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
+/*CORBA::Double NotoWeatherStationImpl::getWindspeed() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
         AUTO_TRACE("NotoWeatherStationImpl::getTemperature");
-
 	double windspeed;
 	ACSErr::Completion_var completion;
 	windspeed = m_windspeed->get_sync(completion.out());
-
 	return windspeed;
 
-}
+}*/
           
 CORBA::Double NotoWeatherStationImpl::getWindDir() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
@@ -256,15 +259,11 @@ CORBA::Double NotoWeatherStationImpl::getPressure() throw (ACSErr::ACSbaseEx, CO
 }
 CORBA::Double NotoWeatherStationImpl::getHumidity() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
-        AUTO_TRACE("NotoWeatherStationImpl::getHumidity()");
-
+	AUTO_TRACE("NotoWeatherStationImpl::getHumidity()");
 	double humidity;
 	ACSErr::Completion_var completion;
 	humidity = m_humidity->get_sync(completion.out());
 	return humidity;
-
-
-
 }
 
 Weather::parameters NotoWeatherStationImpl::getData() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
@@ -411,7 +410,15 @@ NotoWeatherStationImpl::windspeedpeak ()
     return prop._retn();
 }
 
-
+ACS::ROdouble_ptr
+NotoWeatherStationImpl::autoparkThreshold () throw (CORBA::SystemException)
+{
+	if (m_autoparkThreshold == 0) {
+		return ACS::ROdouble::_nil();
+	}
+	ACS::ROdouble_var prop = ACS::ROdouble::_narrow(m_autoparkThreshold->getCORBAReference());
+	return prop._retn();
+}
 
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>
