@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 	issue #316 - several related commits. The operation releated to the Medicina K band receivers now relys on a
 	new componet which is derived directly form the SRT one. larg part of the code is shared between the two
 	servants.
+	
+	issue #301 - Noto Weather station has now Generic interface. in this way the MeteoClient can be used in Noto
+	as wll as Medicina and SRT
 
 ### Fixed 
 
