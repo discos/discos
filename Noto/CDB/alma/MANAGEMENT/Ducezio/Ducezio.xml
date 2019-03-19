@@ -13,7 +13,7 @@
 	     	 LogDir="/archive/logs/"
 	     	 ScheduleReportPath=""
 	     	 ScheduleBackuptPath=""
-	     	 RecordingLockFile=""	     	             
+	     	 RecordingLockFile=""	     	 	              
              ProceduresLocation="Procedures"
              DefaultProceduresFile="StationProcedures"
              RepetitionCacheTime="4000000"
@@ -24,12 +24,12 @@
              ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
 	         ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
 	         MinorServoBossInterface=""
-	         ActiveSurfaceBossInterface=""
+	         ActiveSurfaceBossInterface="IDL:alma/ActiveSurface/NotoActiveSurfaceBoss:1.0"
 		 	 CustomLoggerInterface="IDL:alma/Management/CustomLogger:1.0"
 	     	 WeatherStationInstance="IDL:alma/Weather/NotoWeatherStation:1.0"	         
 	         DefaultBackendInstance="BACKENDS/TotalPower"
 	         DefaultDataReceiverInstance="MANAGEMENT/FitsZilla"
-	         DefaultProjectCode="maintenance"
+	         DefaultProjectCode="euser"
 	         CheckProjectCode="true"
 >
 
