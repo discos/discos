@@ -8,7 +8,7 @@
 
 
 ///CORBA generated servant stub
-#include <NotoWeatherStationS.h>
+#include <GenericWeatherStationS.h>
 
 
 
@@ -98,8 +98,8 @@ class CMeteoParamUpdaterThread : public ACS::Thread
 
 
 
-class  NotoWeatherStationImpl:     public virtual CharacteristicComponentImpl,     //Standard component superclass
-			 public virtual POA_Weather::NotoWeatherStation //CORBA servant  
+class  NotoWeatherStationImpl:     public virtual CharacteristicComponentImpl,     //Standard component superclass  
+			 public virtual POA_Weather::GenericWeatherStation
 {
 public:
 	/**
@@ -125,7 +125,7 @@ public:
 	virtual CORBA::Double getTemperature() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
 	virtual	CORBA::Double getPressure() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
 	virtual	CORBA::Double getHumidity() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
-	virtual	CORBA::Double getWindspeed() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
+	//virtual	CORBA::Double getWindspeed() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
         virtual CORBA::Double getWindspeedPeak() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
         virtual CORBA::Double getWindSpeedAverage() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
         virtual CORBA::Double getWindDir() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
@@ -175,7 +175,13 @@ public:
   	 virtual ACS::RWdouble_ptr  pressure ()
 	throw (CORBA::SystemException);
 
-   
+	 /** 
+	 * Returns a reference to the autoparkThreshold  property Implementation of IDL interface.
+	 * @return pointer to read-only double relative humidity
+	*/
+  	 virtual ACS::ROdouble_ptr  autoparkThreshold()
+	throw (CORBA::SystemException);
+
 	/**
 	*return  the all the data parameters formatted into a 
 	*meteoparameters structure
@@ -197,8 +203,9 @@ private:
 	SmartPropertyPointer<RWdouble> m_windspeed;
 	SmartPropertyPointer<RWdouble> m_humidity;
 	SmartPropertyPointer<RWdouble> m_pressure;
-        SmartPropertyPointer<RWdouble> m_windspeedPeak;
-        CMeteoParamUpdaterThread *m_controlThread_p;
+   SmartPropertyPointer<RWdouble> m_windspeedPeak;
+   SmartPropertyPointer<ROdouble> m_autoparkThreshold;
+   CMeteoParamUpdaterThread *m_controlThread_p;
         
 	SimpleParser::CParser<MeteoSocket> * m_parser;
 
