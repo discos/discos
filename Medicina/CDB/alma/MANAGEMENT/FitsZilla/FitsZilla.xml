@@ -15,7 +15,7 @@
                RepetitionExpireTime="8000000"
                MeteoParameterDutyCycle="15000000"
                TrackingFlagDutyCycle="100000"
-               MinorServoEnquireMinGap="8000"        
+               MinorServoEnquireMinGap="8000"      
 			   AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
   	           ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
 			   ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
@@ -32,5 +32,6 @@
 	<dataX/>
 	<dataY/>
 	<arrayDataX/>
-	<arrayDataY/>		
+	<arrayDataY/>	
+	
 </FitsWriter>

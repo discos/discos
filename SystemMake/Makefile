@@ -58,17 +58,18 @@ SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox
 MED_ERRORS:=
-MED_INTERFACES:=MedicinaAntennaInterface
+MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface
 MED_LIBRARIES:=
-MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation
+MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver
 MED_CLIENTS:=MedicinaMountTextClient
 MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
 NT_ERRORS:=NotoActiveSurfaceErrors
-NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface
+NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface \
+                NotoMinorServoInterface
 NT_LIBRARIES:=
-NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface
+NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface NotoMinorServo
 NT_CLIENTS:=NotoMountTextClient 
 NT_MISC:=NotoScripts
 

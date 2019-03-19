@@ -7,6 +7,7 @@
 <body>
 	antennaSetup=CCC
 	receiversSetup=CCC
+	chooseBackend=TotalPower
 	initialize=CCC
 	setSection=0,*,730.0,*,*,*,*
 	setSection=1,*,730.0,*,*,*,*
@@ -24,6 +25,8 @@
 	initialize=CHC
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
+	setAttenuation=0,8
+	setAttenuation=1,12
 	device=0
 	calOff
 	restFrequency=0
@@ -34,6 +37,7 @@
 <body>
 	antennaSetup=KKC
 	receiversSetup=KKC
+	chooseBackend=TotalPower
 	initialize=KKC
 	device=0
 	setAttenuation=0,9
@@ -49,6 +53,7 @@
 <body>
 	antennaSetup=XXP
 	receiversSetup=XXP
+	chooseBackend=TotalPower
 	initialize=XXP
 	setSection=0,*,730.0,*,*,*,*
 	setSection=1,*,730.0,*,*,*,*
@@ -63,6 +68,7 @@
 	antennaSetup=CCC
 	receiversSetup=CCC
 	receiversMode=NARROWBANDWIDTH
+	chooseBackend=TotalPower
 	initialize=CCCL
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
@@ -72,6 +78,23 @@
 	calOff
 	restFrequency=0
 </body>
+</Procedure>
+
+<Procedure name="setupCHCL" args="0">
+<body>
+	antennaSetup=CHC
+	receiversSetup=CHC
+	receiversMode=NARROWBANDWIDTH
+	chooseBackend=TotalPower
+	initialize=CHCL
+	setSection=0,*,300.0,*,*,*,*
+	setSection=1,*,300.0,*,*,*,*
+	setAttenuation=0,8
+	setAttenuation=1,8
+	device=0
+	calOff
+	restFrequency=0
+</body>	
 </Procedure>
 
 <Procedure name="telescopePark" args="0">

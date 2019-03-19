@@ -14,6 +14,6 @@
 	Type="IDL:alma/Antenna/Refraction:1.0"
 	Container="AntennaContainer"
 	Default="false"
-    KeepAliveTime="30"
-    ImplLang="cpp"
+	KeepAliveTime="30"
+	ImplLang="cpp"
 />

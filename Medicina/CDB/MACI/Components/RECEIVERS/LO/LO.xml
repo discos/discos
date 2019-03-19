@@ -8,9 +8,11 @@
            xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-	Name="Holography"
-	Code="HolographyImpl"
-	Type="IDL:alma/Backends/Holography:1.0"
-	Container="BackendsContainer"
-    ImplLang="cpp"
+	Name="LO"
+	Code="MedicinaLocalOscillatorImpl.MedicinaLocalOscillator"
+	Type="IDL:alma/Receivers/LocalOscillator:1.0"
+	Container="LocalOscillatorContainer"
+	KeepAliveTime="10"
+	Default="true"
+   ImplLang="py"
 />
