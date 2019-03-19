@@ -85,7 +85,7 @@ int MeteoSocket:: updateParam(){  // throw CompoenentErrors::SocketErrorExImpl
            }
 
            //cout << "hex:";
-           for (int j=0; j<100;j++)  cout<<hex <<  (int)buff[j]<<" ";
+           //for (int j=0; j<100;j++)  cout<<hex <<  (int)buff[j]<<" ";
            //cout << endl;
 
            ACS_DEBUG_PARAM("MeteoSocket::updateParam(CError& err, CString cmd)","received:  %s", (const char *) rdata)     
@@ -315,7 +315,7 @@ vector<string> MeteoSocket::split (string message, string delimiter)
    std::string token;
    while ((pos = message.find(delimiter)) != std::string::npos) {
        token = message.substr(0, pos);
-       std::cout << token << std::endl;
+       //std::cout << token << std::endl;
        v.push_back(token);
        message.erase(0, pos + delimiter.length());
    }
@@ -406,7 +406,7 @@ int MeteoSocket::fs_parse(const char* recv)
                 m_windspeedPeak=wind_speed;
                  ACS_LOG(LM_FULL_INFO,"MeteoSocket::parse()",(LM_DEBUG," Meteoparms  %f %f %f",temp,pres,hum ));
                   
-                cout << temp << ","<<pres<<","<<hum<<endl;
+                //cout << temp << ","<<pres<<","<<hum<<endl;
 
         return 0;
 
