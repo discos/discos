@@ -6,12 +6,12 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <Configuration>
-	<configurationID>BandaK</configurationID>
+	<configurationID>KKC</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
-	<inputPortBW>2350</inputPortBW>	 	
+	<inputPortBW>730</inputPortBW>	 	
 	<beams>1</beams>
 	<section_boards>0 1</section_boards>	
 	<polarizations>L R</polarizations>
@@ -20,9 +20,23 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>BandaQ</configurationID>
+	<configurationID>QQC</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>7</inputPortDB>	
+	<inputPortBW>730</inputPortBW>	
+	<beams>1</beams>
+	<section_boards>0 1</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>CCC</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>
@@ -34,9 +48,9 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>bandaC</configurationID>
+	<configurationID>MMC</configurationID>
 	<sections>2</sections>
-	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>
@@ -45,6 +59,20 @@
 	<polarizations>L R</polarizations>
 	<feed>0 0</feed>
 	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>SXP</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<inputPortDB>7</inputPortDB>
+	<inputPortBW>730</inputPortBW>
+	<beams>1</beams>
+	<section_boards>0 1</section_boards>
+	<polarizations>R R</polarizations>
+	<feed>0 1</feed>
+	<IF>0 0</IF>
 </Configuration>
 
 </TotalPowerSetup>

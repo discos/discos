@@ -24,8 +24,10 @@
 <mode/>
 <derotatorPosition/>
 
-<AvailableReceiver Code="BandaC" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
-<AvailableReceiver Code="BandaK" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
-<AvailableReceiver Code="BandaQ" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
+<AvailableReceiver Code="CCC" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
+<AvailableReceiver Code="KKC" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
+<AvailableReceiver Code="QQC" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
+<AvailableReceiver Code="MMC" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
+<AvailableReceiver Code="SXP" Derotator="false" Component="RECEIVERS/NotoReceivers"/>
 
 </ReceiversBoss>
