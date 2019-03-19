@@ -1,7 +1,6 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 <!--
    - History:
-     MinorServoBossInterface="IDL:alma/MinorServo/MinorServoBoss:1.0"
 -->
 
 <Scheduler xmlns="urn:schemas-cosylab-com:Scheduler:1.0" 
@@ -14,7 +13,7 @@
 	     	 LogDir="/archive/logs/"
 	     	 ScheduleReportPath="/archive/report/"
 	     	 ScheduleBackuptPath="/archive/backup/"
-	     	 RecordingLockFile="/archive/locks/ScheduleRecording.lck"	     	 
+	     	 RecordingLockFile="/archive/locks/ScheduleRecording.lck"
              ProceduresLocation="Procedures"
              DefaultProceduresFile="StationProcedures"
              RepetitionCacheTime="2000000"
@@ -23,11 +22,11 @@
              TsysTransitionGap="4000000"
              AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
              ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
-	     	 ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
-	     	 MinorServoBossInterface=""
-	     	 ActiveSurfaceBossInterface=""
+	     ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
+	     MinorServoBossInterface=""
+	     ActiveSurfaceBossInterface=""
 		 	 CustomLoggerInterface="IDL:alma/Management/CustomLogger:1.0"
-	     	 WeatherStationInstance="IDL:alma/Weather/MedWeatherStation:1.0"
+	     	 WeatherStationInstance="IDL:alma/Weather/GenericWeatherStation:1.0"
 	     	 DefaultBackendInstance="BACKENDS/TotalPower"
 	     	 DefaultDataReceiverInstance="MANAGEMENT/FitsZilla"
 	     	 DefaultProjectCode="maintenance"

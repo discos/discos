@@ -8,11 +8,10 @@
            xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-	Name="NoiseGenerator"
-	Code="NoiseGeneratorImpl"
-	Type="IDL:alma/Backends/NoiseGenerator:1.0"
-	Container="NoiseGeneratorContainer"	
-	Default="false"
+	Name="Sardara"
+	Code="SardaraImpl"
+	Type="IDL:alma/Backends/Sardara:1.0"
+	Container="SardaraContainer"
 	KeepAliveTime="-1"
-    ImplLang="cpp"
+	ImplLang="cpp"
 />

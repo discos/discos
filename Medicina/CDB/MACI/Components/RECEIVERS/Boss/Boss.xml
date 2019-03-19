@@ -14,5 +14,5 @@
 	Container="ReceiversContainer"
 	Default="true"
 	KeepAliveTime="-1"
-    ImplLang="cpp"
+	ImplLang="cpp"
 />

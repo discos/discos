@@ -4,7 +4,6 @@
    - History:
  	- 18-03-09 Created
    -   Fri Mar 20 11:23:17 UTC 2009 modified by jDAL
-   -   Fri Mar 20 15:23:59 UTC 2009 modified by jDAL
 -->
 <Station xmlns="urn:schemas-cosylab-com:Station:1.0" 
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 

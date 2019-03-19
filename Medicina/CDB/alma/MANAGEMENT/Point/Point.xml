@@ -19,7 +19,7 @@
                SchedulerInterface="IDL:alma/Management/Scheduler:1.0"
                ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
                GenerateFile="0"
-               FwhmTolerance="100.0">
+               FwhmTolerance="60.0">
 	<status/>
 	<fileName/>
 	<projectName/>

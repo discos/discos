@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<MarkCoefficientsKBandLookUpTable xmlns="urn:schemas-cosylab-com:MarkCoefficientsKBandLookUpTable:1.0"
+                xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+                xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+                <MarkEntry><Feed>0</Feed><Polarization>LEFT</Polarization><Coefficients>0.35539,-25.57141,603.90321,-4656.81229</Coefficients></MarkEntry>
+                <MarkEntry><Feed>0</Feed><Polarization>RIGHT</Polarization><Coefficients>0.36656,-26.16018,613.14727,-4697.37959</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>LEFT</Polarization><Coefficients>0.18548,-14.13379,349.77806,-2795.54717</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>RIGHT</Polarization><Coefficients>0.32624,-23.20331,542.14083,-4141.29465</Coefficients></MarkEntry>
+
+</MarkCoefficientsKBandLookUpTable>

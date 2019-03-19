@@ -12,14 +12,14 @@
                WorkingThreadTimeSlice="200000"
                CollectorThreadTime="50000"
                RepetitionCacheTime="4000000"
-               RepetitionExpireTime="8000000"
+               RepetitionExpireTime="10000000"
                TrackingFlagDutyCycle="100000"
                AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
                MinorServoBossInterface=""
                SchedulerInterface="IDL:alma/Management/Scheduler:1.0"
                ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
                GenerateFile="1"
-               FwhmTolerance="100.0">
+               FwhmTolerance="60.0">
 	<status/>
 	<fileName/>
 	<projectName/>
@@ -39,3 +39,4 @@
     <sourceFlux/>
     <sourceName/>
 </CalibrationTool>
+

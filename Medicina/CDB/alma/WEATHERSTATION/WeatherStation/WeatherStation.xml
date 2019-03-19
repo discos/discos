@@ -1,18 +1,16 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 <!--
     - History:
-    -->
-<MedWeatherStation
-xmlns="urn:schemas-cosylab-com:MedWeatherStation:1.0"
-	      xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
-	      xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
-	      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	      IPAddress="192.167.189.62" port="5002">
-	
-	<temperature description="current temperature" />
-	<winddir description="instantaneous wind direction" />
-	<windspeed description="instantaneous wind direction" />
-	<humidity  description="Humidity" />	
+       -   Tue Jul 10 13:47:38 UTC 2012 modified by jDAL
+-->
+<WeatherStation xmlns="urn:schemas-cosylab-com:WeatherStation:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  IPAddress="192.168.51.101" port="5001" MountInterface="IDL:alma/Antenna/MedicinaMount:1.0" 
+  windthreshold="60" >
+	<temperature description="current temperature" units="deg Celsius" />
+	<winddir description="instantaneous wind direction" units="deg" />
+	<windspeed description="average wind speed" units="km/s" max_value="55" />
+	<windspeedpeak description="spike wind direction" units="km/h" max_value="60" />
+	<humidity description="Humidity" />
 	<pressure description="pressure" />
 	<autoparkThreshold description="Threshold for wind auto park" />
-</MedWeatherStation>
+</WeatherStation>

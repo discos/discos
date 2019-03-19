@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+ *  Author Infos
+ *  ============
+ *  Name:         Marco Buttu
+ *  E-mail:       mbuttu@oa-cagliari.inaf.it
+ *  Personal Web: http://www.pypeople.com/
+-->
+<Component 
+    xmlns="urn:schemas-cosylab-com:Component:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              
+    Name="KBandDualFReceiver"    
+    Code="MedicinaKBandDualFReceiverImpl"
+    Type="IDL:alma/Receivers/MedicinaKBandDualF:1.0"
+    Container="KBandContainer"
+	KeepAliveTime="-1"
+	Default="false"
+    ImplLang="cpp"
+/>
