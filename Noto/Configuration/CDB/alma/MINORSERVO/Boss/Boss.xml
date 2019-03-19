@@ -2,25 +2,14 @@
 <!--
    - History:
 -->
-<MinorServoBoss 
+<NotoMinorServoBoss 
 	xmlns="urn:schemas-cosylab-com:NotoMinorServoBoss:1.0" 
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-
 	ipAddress="192.167.187.92"
-	ipPort="5003"
-	AntennaBossInterface="">
+	ipPort="5003">
+	
+	<status/>
 
-   <status/>
-   <ready/>
-   <actualSetup/>
-   <motionInfo/>
-   <tracking/>
-   <starting/>
-   <asConfiguration/>
-   <elevationTrack/>
-   <scanActive/>
-   <scanning/>
-
-</MinorServoBoss>
+</NotoMinorServoBoss>
