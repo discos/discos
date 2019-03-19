@@ -10,8 +10,12 @@
     ServerThreads="15">
 
   <Startup>
+  	<cdb:_ string="ANTENNA/Mount" />
+  	<cdb:_ string="WEATHERSTATION/WeatherStation"/>  	
+  	<cdb:_ string="ANTENNA/Boss"/>
+  	<cdb:_ string="RECEIVERS/Boss"/>
+  	<cdb:_ string="MANAGEMENT/Palmiro"/>
   	<cdb:_ string="MANAGEMENT/CustomLogger"/>
-  	<cdb:_ string="MINORSERVO/MinorServoBoss"/>
   </Startup>
 
   <ServiceComponents>
@@ -24,18 +28,14 @@
 	<cdb:_ string="CDB"/>
 	<cdb:_ string="ACSLogSvc"/>
 	<cdb:_ string="PDB"/>
-	<cdb:_ string="AcsAlarmService"/>
   </ServiceComponents>
-
-  <ServiceDaemons>
-  </ServiceDaemons>
 
   <LoggingConfig
   	minLogLevel="5"
   	minLogLevelLocal="5"
   	dispatchPacketSize="0"
   	immediateDispatchLevel="8"
-   >
+  >
 	<log:_ Name="jacorb@Manager" minLogLevel="5" minLogLevelLocal="5" />
   </LoggingConfig>
 
