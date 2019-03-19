@@ -3,31 +3,56 @@
 <ProcedureFile xmlns="urn:schemas-cosylab-com:ProcedureFile:1.0"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<Procedure name="bandaC" args="0">
+<Procedure name="setupCCC" args="0">
 <body>
 	antennaSetup=SEC
-	initialize=bandaC
-	receiversSetup=bandaC
+	initialize=CCC
+	receiversSetup=CCC
+	asOn
 	device=0
 	calOff
+	setAttenuation=0,15
+	setAttenuation=1,5
 </body>	
 </Procedure>
 
-<Procedure name="bandaK" args="0">
+<Procedure name="setupMMC" args="0">
 <body>
 	antennaSetup=SEC
-	initialize=bandaK
-	receiversSetup=bandaK
+	initialize=MMC
+	receiversSetup=MMC
+	device=0
+	calOff
+	setAttenuation=0,0
+	setAttenuation=1,4	
+</body>
+</Procedure>
+
+<Procedure name="setupKKC" args="0">
+<body>
+	antennaSetup=SEC
+	initialize=KKC
+	receiversSetup=KKC
 	device=0
 	calOff
 </body>
 </Procedure>
 
-<Procedure name="setupQ" args="0">
+<Procedure name="setupQQC" args="0">
 <body>
 	antennaSetup=SEC
-	initialize=bandaQ
-	receiversSetup=bandaQ
+	initialize=QQC
+	receiversSetup=QQC
+	device=0
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupSXP" args="0">
+<body>
+	antennaSetup=PRIM
+	initialize=SXP
+	receiversSetup=SXP
 	device=0
 	calOff
 </body>
@@ -36,8 +61,8 @@
 <Procedure name="telescopePark" args="0">
 <body>
 	goTo=180d,90d
-	antennaStop
 	receiversPark
+	asPark
 </body>
 </Procedure>
 

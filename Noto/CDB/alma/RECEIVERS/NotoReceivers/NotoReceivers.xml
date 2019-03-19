@@ -8,10 +8,10 @@
 				xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
-				HPIBIPAddress="10.0.2.15"
-				HPIBPort="15000"
-				LocalOscillatorInstance=""
-				FocusSelectorInterface="IDL:alma/1.0Backends/TotalPower:1.0"
+				HPIBIPAddress="192.167.187.201"
+				HPIBPort="1234"
+				LocalOscillatorInstance="RECEIVERS/LocalOscillator"
+				FocusSelectorInterface="IDL:alma/Backends/TotalPower:1.0"
 >
 			<LO description="Sequence of local oscillator values for each IF chain"/>
 			<feeds description="Number of feeds of the receiver"/>
