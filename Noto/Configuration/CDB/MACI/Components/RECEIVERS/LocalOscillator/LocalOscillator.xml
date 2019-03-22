@@ -9,7 +9,7 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
 	Name="LocalOscillator"
-	Code="LocalOscillatorImpl.LocalOscillator"
+	Code="NotoLocalOscillatorImpl.NotoLocalOscillator"
 	Type="IDL:alma/Receivers/LocalOscillator:1.0"
 	Container="LocalOscillatorContainer"
 	KeepAliveTime="10"
