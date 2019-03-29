@@ -9,6 +9,7 @@
 #include "DateTime.h"
 #include "IRATools.h"
 #include "TimeTaggedCircularArray.h"
+#include <assert.h>
 
 #define GAP 100000
 #define SIZE 50
@@ -54,4 +55,14 @@ int main(int argc, char *argv[])
 	array.selectPoint(early.value().value,az,el);
 	CIRATools::timeToStr(early.value().value,out);
 	printf("earlier Time : time, az, el: %s, %lf, %lf\n",(const char *)out,az,el);
+	// point between first and second entry
+	TIMEVALUE b1a2(now.value().value + GAP/2);
+	array.selectPoint(b1a2.value().value,az,el);
+	printf("Checking if the interpolation algorithm works correctly in the first time interval...");
+	double az1, el1, az2, el2;
+	array.getPoint(0, az1, el1, current);
+	array.getPoint(1, az2, el2, current);
+	assert(az > az1 && az < az2);
+	assert(el > el1 && el < el2);
+	printf("done, everything works fine.\n");
 }
