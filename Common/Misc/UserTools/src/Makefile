@@ -55,7 +55,7 @@
 #
 # C programs (public and local)
 # -----------------------------
-EXECUTABLES     = FTrack STrack LstToUT
+EXECUTABLES     = FTrack STrack LstToUT Refraction
 EXECUTABLES_L   = 
 
 FTrack_OBJECTS = FrequencyTrack  
@@ -68,6 +68,9 @@ STrack_LIBS = IRALibrary SlaLibrary
 
 LstToUT_OBJECTS = lst2UT
 LstToUT_LIBS = IRALibrary SlaLibrary
+
+Refraction_OBJECTS = Refraction
+Refraction_LIBS = IRALibrary SlaLibrary
 
 #
 # <brief description of xxxxx program>
