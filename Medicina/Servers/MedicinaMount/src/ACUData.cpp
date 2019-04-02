@@ -180,7 +180,13 @@ int CACUData::getError() const
 
 void CACUData::absTime(TIMEVALUE& tm) const
 {
-	long timeofday,hour,minute,second,micro;
+	//*************************************////
+	//* This is a fix for an identified issue related to to readout of ACU time.
+	// The issue was originated by the 64bit platform when memcpying into a long (8bytes)
+	// instead of int (4 bytes)
+	//long timeofday,hour,minute,second,micro;
+	int timeofday;
+	long hour,minute,second,micro;
 	short dayofyear;
 	memcpy(&timeofday,(m_MonitorData+4),4);
 	memcpy(&dayofyear,(m_MonitorData+8),2);
