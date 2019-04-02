@@ -24,7 +24,6 @@
                 <xs:attribute name="PORT" type="xs:unsignedShort" use="required" />
                 <xs:attribute name="MAX_CHANNELS" type="xs:unsignedInt" use="optional" default="17"/>
                 <xs:attribute name="INTERNAL_CHANNEL" type="xs:unsignedInt" use="optional" default="16"/>
-                <xs:attribute name="CYCLE_TIME" type="xs:unsignedInt" use="optional" default="60" />
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
