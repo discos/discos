@@ -80,7 +80,7 @@ public:
 	 * @throw ComponentErrors::IRALibraryResourceExImpl
 	 * @throw ComponentErrors::CDBAccessExImpl
 	*/
-	virtual void execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl);
+	virtual void execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl,ComponentErrors::SocketErrorExImpl);
 	
 	/**
 	 * This function initializes the boss core, all preliminary operation are performed here.
@@ -354,8 +354,8 @@ private:
 #elif COMPILE_TARGET_NT
 
         #warning "Compiling RecvBossCore with Noto target"
-	void reinit() throw (ComponentErrors::IRALibraryResourceExImpl);
-	void reinitCal() throw (ComponentErrors::IRALibraryResourceExImpl);
+	void reinit() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl);
+	void reinitCal() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl);
 
 	IRA::CSocket m_fsSocket;
 	//bool m_fsOpened;

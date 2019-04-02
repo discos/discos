@@ -48,7 +48,7 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::initialize()",(LM_INFO,"ReceiversBoss notification channel open"));
 }
 
-void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl)
+void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl,ComponentErrors::SocketErrorExImpl)
 {
 }
 
