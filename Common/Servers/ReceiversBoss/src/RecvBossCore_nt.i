@@ -52,7 +52,7 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
         //m_totalPower_proxy.setContainerServices(m_services);
 }
 
-void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl)
+void CRecvBossCore::execute() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::CDBAccessExImpl,ComponentErrors::SocketErrorExImpl)
 {
 	m_fsCalSocketError=true;
 	m_fsSocketError=true;
@@ -547,7 +547,7 @@ void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErr
 	}
 }
 
-void CRecvBossCore::reinitCal() throw (ComponentErrors::IRALibraryResourceExImpl)
+void CRecvBossCore::reinitCal() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl)
 {
 	IRA::CError err;
 	IRA::CString fsIpAddr(FSCAL_ADDRESS);
@@ -577,7 +577,7 @@ void CRecvBossCore::reinitCal() throw (ComponentErrors::IRALibraryResourceExImpl
 	m_fsCalSocketError=false;	
 }
 
-void CRecvBossCore::reinit() throw (ComponentErrors::IRALibraryResourceExImpl)
+void CRecvBossCore::reinit() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl)
 {
 	IRA::CError err;
 	IRA::CString fsIpAddr(FS_ADDRESS);

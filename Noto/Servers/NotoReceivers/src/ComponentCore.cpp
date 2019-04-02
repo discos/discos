@@ -114,6 +114,7 @@ void CComponentCore::activate(const char *setup) throw (ReceiversErrors::ModeErr
         CUSTOM_LOG(LM_FULL_INFO,"CComponentCore::activate()",(LM_NOTICE,"New receiver is now active: %s",setup));
         //set the default mode
         setMode((const char *)m_configuration.getSetupMode()); // Throw ......
+       m_componentStatus=Management::MNG_OK;
     }
 }
 
