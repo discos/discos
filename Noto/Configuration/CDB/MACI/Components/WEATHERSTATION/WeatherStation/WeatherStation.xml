@@ -10,7 +10,7 @@
 
     Name="WeatherStation"
     Code="NotoWeatherStationImpl"
-    Type="IDL:alma/Weather/WeatherStation:1.0"
+    Type="IDL:alma/Weather/GenericWeatherStation:1.0"
     Container="WeatherStationContainer"
 	Default="true"
 	KeepAliveTime="-1"
