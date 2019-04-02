@@ -65,8 +65,8 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
-            <name>LocalOscillator</name>
-            <type>cpp</type>
+            <name>LocalOscillatorContainer</name>
+            <type>py</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
