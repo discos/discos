@@ -23,8 +23,6 @@
 # different code is required until new specific component to control the receivers for Medicina are written
 ifeq ($(STATION),Medicina)
 	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_MED'
-else ifeq ($(STATION),Noto)
-	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_STANDARD' -D 'COMPILE_TARGET_NT'
 else
 	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_STANDARD'
 endif
