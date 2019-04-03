@@ -136,7 +136,7 @@
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
         </container>
-        <container>
+        <!--container>
             <name>NotoMinorServoContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
@@ -144,9 +144,9 @@
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
-        </container>
+        </container-->
         <container>
-            <name>ExternalClientsContainer</name>
+            <name>ExternalClientContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
