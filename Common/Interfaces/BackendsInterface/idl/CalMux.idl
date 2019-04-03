@@ -1,0 +1,53 @@
+/***************************************************************\
+ *  Authors: 
+ *      Giuseppe Carboni <giuseppe.carboni@inaf.it>
+\***************************************************************/
+
+#ifndef __CAL_MUX_IDL__ 
+#define __CAL_MUX_IDL__ 
+
+#include <ComponentErrors.idl>
+#include "CalDiodeController.idl"
+
+#pragma prefix "alma"
+
+
+module Backends {
+ 
+    interface CalMux : CalDiodeController
+    {
+        /** Take the backend name and configurate the component
+         *
+         * @param backend_name the name of the backend that will handle the calibration diode
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void setup(in string backend_name) raises (ComponentErrors::ComponentErrorsEx);
+
+        /** Returns the current setup
+         *
+         * @return an empty string if no backend is controlling the calibration diode,
+         * otherwise the name of the backend that controls the calibration diode
+         */
+        string getSetup();
+
+        /** Return the current selected channel
+         *
+         * @return an integer representing the current channel
+         */
+        long getChannel() raises (ComponentErrors::ComponentErrorsEx);
+
+        /** Return the current channel polarity
+         *
+         * @return an integer representing the current channel polarity
+         */
+        long getPolarity() raises (ComponentErrors::ComponentErrorsEx);
+
+        /** Return the current calibration noise status
+         *
+         * @return the status of the calibration noise
+         */
+        long getCalStatus() raises (ComponentErrors::ComponentErrorsEx);
+    };
+};
+
+#endif

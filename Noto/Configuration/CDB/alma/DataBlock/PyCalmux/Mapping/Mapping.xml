@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 
-<CalDiodeControllerTable xmlns="urn:schemas-cosylab-com:CalDiodeControllerTable:1.0"
+<CalMuxTable xmlns="urn:schemas-cosylab-com:CalMuxTable:1.0"
              	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -8,4 +8,4 @@
 <BackendEntry><Backend>TotalPower</Backend><Channel>2</Channel><Polarity>1</Polarity></BackendEntry>
 <BackendEntry><Backend>DBBC</Backend><Channel>6</Channel><Polarity>0</Polarity></BackendEntry>
 
-</CalDiodeControllerTable>
+</CalMuxTable>
