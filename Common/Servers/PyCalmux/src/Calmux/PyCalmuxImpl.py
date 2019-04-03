@@ -1,7 +1,7 @@
 # Author:
 #    Giuseppe Carboni, <giuseppe.carboni@inaf.it>
 
-from Backends__POA import CalDiodeController
+from Backends__POA import CalMux
 from Acspy.Servants.CharacteristicComponent import CharacteristicComponent as cc
 from Acspy.Servants.ContainerServices import ContainerServices as services
 from Acspy.Servants.ComponentLifecycle import ComponentLifecycle as lcycle
@@ -15,7 +15,7 @@ import ComponentErrorsImpl
 import cdbErrType
 import time
 
-class PyCalmuxImpl(CalDiodeController, cc, services, lcycle):
+class PyCalmuxImpl(CalMux, cc, services, lcycle):
 
     def __init__(self):
         cc.__init__(self)

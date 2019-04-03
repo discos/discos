@@ -15,38 +15,6 @@ module Backends {
  
     interface CalDiodeController
     {
-        /** Take the backend name and configurate the component
-         *
-         * @param backend_name the name of the backend that will handle the calibration diode
-         * @throw ComponentErrors::ComponentErrorsEx
-         */
-        void setup(in string backend_name) raises (ComponentErrors::ComponentErrorsEx);
-
-        /** Returns the current setup
-         *
-         * @return an empty string if no backend is controlling the calibration diode,
-         * otherwise the name of the backend that controls the calibration diode
-         */
-        string getSetup();
-
-        /** Return the current selected channel
-         *
-         * @return an integer representing the current channel
-         */
-        long getChannel() raises (ComponentErrors::ComponentErrorsEx);
-
-        /** Return the current channel polarity
-         *
-         * @return an integer representing the current channel polarity
-         */
-        long getPolarity() raises (ComponentErrors::ComponentErrorsEx);
-
-        /** Return the current calibration noise status
-         *
-         * @return the status of the calibration noise
-         */
-        long getCalStatus() raises (ComponentErrors::ComponentErrorsEx);
-
         /** Turns on the calibration noise
          *
          * @throw ComponentErrors::ComponentErrorsEx

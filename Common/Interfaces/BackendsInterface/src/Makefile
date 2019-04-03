@@ -28,12 +28,12 @@ MAKE_PDF = ON
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = GenericBackend DigitalXCorrelator Holography CalDiodeControllerTable
+CDB_SCHEMAS = GenericBackend DigitalXCorrelator Holography CalMuxTable
 
 # 
 # IDL Files and flags
 # 
-IDL_FILES = GenericBackend BackendsBoss TotalPower NoiseGenerator DigitalXCorrelator Holography DBBC DFBInterface Sardara CalDiodeController
+IDL_FILES = GenericBackend BackendsBoss TotalPower NoiseGenerator DigitalXCorrelator Holography DBBC DFBInterface Sardara CalDiodeController CalMux
 IDL_TAO_FLAGS =
 USER_IDL =
 
@@ -50,6 +50,7 @@ DBBCStubs_LIBS = baciStubs GenericBackendStubs
 DFBInterfaceStubs_LIBS = baciStubs GenericBackendStubs
 SardaraStubs_LIBS = baciStubs GenericBackendStubs
 CalDiodeControllerStubs_LIBS = baciStubs ComponentErrorsStubs
+CalMuxStubs_LIBS = baciStubs ComponentErrorsStubs CalDiodeControllerStubs
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
