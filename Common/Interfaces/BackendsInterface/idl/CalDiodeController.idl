@@ -1,0 +1,32 @@
+/***************************************************************\
+ *  Authors: 
+ *      Giuseppe Carboni <giuseppe.carboni@inaf.it>
+\***************************************************************/
+
+#ifndef __CAL_DIODE_CONTROLLER_IDL__ 
+#define __CAL_DIODE_CONTROLLER_IDL__ 
+
+#include <ComponentErrors.idl>
+
+#pragma prefix "alma"
+
+
+module Backends {
+ 
+    interface CalDiodeController
+    {
+        /** Turns on the calibration noise
+         *
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void calOn() raises (ComponentErrors::ComponentErrorsEx);
+
+        /** Turns off the calibration noise
+         *
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void calOff() raises (ComponentErrors::ComponentErrorsEx);
+    };
+};
+
+#endif
