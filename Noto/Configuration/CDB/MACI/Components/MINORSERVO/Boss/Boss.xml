@@ -9,9 +9,9 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
 	Name="Boss"
-	Code="NotoMinorServoBoss.MinorServoImpl"
-	Type="IDL:alma/MinorServo/MinorServoBoss:1.0"
+	Code="NotoMinorServoBossImpl"
+	Type="IDL:alma/MinorServo/NotoMinorServoBoss:1.0"
 	Container="NotoMinorServoContainer"
-    ImplLang="py"
-    Default="true"
+	ImplLang="cpp"
+	Default="true"
 />
