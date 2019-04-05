@@ -14,5 +14,6 @@
     Type="IDL:alma/Backends/CalMux:1.0"
     Container="PyCalmuxContainer"
     ImplLang="py"
+    KeepAliveTime="-1"
     Default="false"
 />

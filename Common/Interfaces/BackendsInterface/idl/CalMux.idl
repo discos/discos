@@ -6,6 +6,7 @@
 #ifndef __CAL_MUX_IDL__ 
 #define __CAL_MUX_IDL__ 
 
+#include <baci.idl>
 #include <ComponentErrors.idl>
 #include "CalDiodeController.idl"
 
@@ -14,7 +15,7 @@
 
 module Backends {
  
-    interface CalMux : CalDiodeController
+    interface CalMux : CalDiodeController, ACS::CharacteristicComponent
     {
         /** Take the backend name and configurate the component
          *
