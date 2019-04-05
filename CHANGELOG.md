@@ -22,8 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 	under two diffent configurations: 1.2 GHz and 150MHz bandwidth. The respective setup are achived by issueing
 	the following procedures "SETUPCHC" and "SETUPCHCL".  
 
-    issue #361 - written the PyCalMux component and integrated into the Noto line. Station procedures now execute
-    the `calmux=<configuration>` script in order to commute to the TotalPower noise calibration channel.
+	issue #361 - written the PyCalMux component and integrated into the Noto line. Station procedures now execute
+	the `calmux=<configuration>` script in order to commute to the TotalPower noise calibration channel.
 
 	issue #368 - added a `calmux` command to the OperatorInput commands list. Internally it calls the `setup`
 	method of the PyCalmux component.
