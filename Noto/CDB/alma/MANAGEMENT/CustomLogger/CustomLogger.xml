@@ -7,7 +7,7 @@
               xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               DefaultACSLogDir="/archive/events"
-              DefaultACSLogFile="acs.log"
+              DefaultACSLogFile="acs.xml"
               DefaultCustomLogDir="/archive/logs"
               DefaultCustomLogFile="station.log"
               LogMaxAgeMillis="60000"
