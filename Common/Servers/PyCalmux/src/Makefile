@@ -5,7 +5,7 @@
 
 CDB_SCHEMAS = PyCalmux
 
-PY_SCRIPTS =
+PY_SCRIPTS = _calmux
 PY_MODULES =
 PY_PACKAGES = Calmux
 
@@ -36,6 +36,7 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@chmod 700 $(INTROOT)/bin/_calmux
 	@echo " . . . installation done"
 
 #___oOo___
