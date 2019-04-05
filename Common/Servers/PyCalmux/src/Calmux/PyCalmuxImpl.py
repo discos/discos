@@ -33,13 +33,14 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
 
         try:
             self.calOff()
-        except ComponentErrorsImpl.SocketErrorExImpl, ex:
+        except Exception:
             pass
 
     def cleanUp(self):
         pass
 
     def setup(self, backend_name):
+        backend_name = backend_name.lower()
         try:
             channel, polarity = self.mapping[backend_name]
         except KeyError:
@@ -129,9 +130,14 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
         :param command: the command to be sent to the device.
         """
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.connect((self.attributes['IP'], self.attributes['PORT']))
-        except socket.error:
+        connected = 1
+        t0 = time.time()
+        while time.time() - t0 < 2:
+            connected = s.connect_ex((self.attributes['IP'], self.attributes['PORT']))
+            if connected == 0:
+                break
+            time.sleep(0.01)
+        if connected:
             reason = 'Could not reach the device!'
             logger.logError(reason)
             exc = ComponentErrorsImpl.SocketErrorExImpl()
@@ -204,6 +210,7 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
             children = ElementTree.fromstring(dao).getchildren()
             for child in children:
                 backend, channel, polarity = [c.text.strip() for c in child]
+                backend = backend.lower()
                 value = (int(channel), int(polarity))
                 if backend in self.mapping:
                     self.mapping[backend].update(value)
