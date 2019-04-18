@@ -9,7 +9,8 @@
                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
                IPAddress="127.0.0.1"
                Port="1234"
-	       	   Configuration="22GHzMultiFeed">
+               Configuration="NNNN"
+               Mode8Bit="0">
 	<time/>
 	<backendName/>
 	<bandWidth/>
