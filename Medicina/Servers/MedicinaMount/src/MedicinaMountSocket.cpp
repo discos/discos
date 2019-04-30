@@ -509,7 +509,8 @@ double CMedicinaMountSocket::getCommandedAzimuth(bool ptEnabled)
 		TIMEVALUE now;
 		double azimuth,elevation;
 		CIRATools::getTime(now);
-		m_trackStack->selectPoint(now,azimuth,elevation);
+		if(!m_trackStack->selectPoint(now,azimuth,elevation))
+			ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::getCommandedAzimuth()", (LM_WARNING, "ACU COORDINATES UNCERTAINTY!"));
 		return azimuth;
 	}
 	else { 
@@ -523,7 +524,8 @@ double CMedicinaMountSocket::getCommandedElevation(bool ptEnabled)
 		TIMEVALUE now;
 		double azimuth,elevation;
 		CIRATools::getTime(now);
-		m_trackStack->selectPoint(now,azimuth,elevation);
+		if(!m_trackStack->selectPoint(now,azimuth,elevation))
+			ACS_LOG(LM_FULL_INFO,"CMedicinaMountSocket::getCommandedAzimuth()", (LM_WARNING, "ACU COORDINATES UNCERTAINTY!"));
 		return elevation;
 	}
 	else { 
